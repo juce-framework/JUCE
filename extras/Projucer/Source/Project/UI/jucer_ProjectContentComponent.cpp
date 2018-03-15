@@ -478,7 +478,9 @@ void ProjectContentComponent::saveDocument()
             showSaveWarning (currentDocument);
     }
     else
+    {
         saveProject();
+    }
 }
 
 void ProjectContentComponent::saveAs()
@@ -521,11 +523,13 @@ bool ProjectContentComponent::goToCounterpart()
     return false;
 }
 
-bool ProjectContentComponent::saveProject (bool shouldWait)
+bool ProjectContentComponent::saveProject (bool shouldWait, bool openInIDE)
 {
     if (project != nullptr)
     {
         const ScopedValueSetter<bool> valueSetter (project->shouldWaitAfterSaving, shouldWait, false);
+        project->setOpenInIDEAfterSaving (openInIDE);
+
         return (project->save (true, true) == FileBasedDocument::savedOk);
     }
 
@@ -637,11 +641,16 @@ void ProjectContentComponent::openInSelectedIDE (bool saveFirst)
             {
                 if (exporter->canLaunchProject() && exporter->getName() == selectedIDE)
                 {
-                    if (saveFirst && ! saveProject (exporter->isXcode()))
+                    auto tempProject = project->isTemporaryProject(); // store this before saving as it will always be false after
+
+                    if (saveFirst && ! saveProject (exporter->isXcode(), true))
+                        return;
+
+                    if (tempProject)
                         return;
 
                     exporter->launchProject();
-                    break;
+                    return;
                 }
             }
         }
@@ -1155,9 +1164,6 @@ void ProjectContentComponent::setBuildEnabled (bool isEnabled, bool displayError
         LiveBuildProjectSettings::setBuildDisabled (*project, ! isEnabled);
         killChildProcess();
         refreshTabsIfBuildStatusChanged();
-
-        if (auto* h = dynamic_cast<HeaderComponent*> (header.get()))
-            h->updateBuildButtons (isEnabled, isContinuousRebuildEnabled());
     }
 }
 
@@ -1300,11 +1306,7 @@ void ProjectContentComponent::setContinuousRebuildEnabled (bool b)
     {
         childProcess->setContinuousRebuild (b);
 
-        if (auto* h = dynamic_cast<HeaderComponent*> (header.get()))
-            h->updateBuildButtons (isBuildEnabled(), b);
-
         getAppSettings().getGlobalProperties().setValue ("continuousRebuild", b);
-
         ProjucerApplication::getCommandManager().commandStatusChanged();
     }
 }

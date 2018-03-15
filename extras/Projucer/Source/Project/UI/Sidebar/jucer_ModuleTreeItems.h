@@ -192,8 +192,8 @@ private:
 
             globalPathValue.referTo (modules.getShouldUseGlobalPathValue (moduleID));
 
-            auto menuItemString = (TargetOS::getThisOS() == TargetOS::osx ? "\"Projucer->Global Search Paths...\""
-                                                                          : "\"File->Global Search Paths...\"");
+            auto menuItemString = (TargetOS::getThisOS() == TargetOS::osx ? "\"Projucer->Global Paths...\""
+                                                                          : "\"File->Global Paths...\"");
 
             props.add (new BooleanPropertyComponent (globalPathValue,
                                                      "Use global path", "Use global path for this module"),

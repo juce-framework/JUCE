@@ -226,6 +226,7 @@
     <ClCompile Include="..\..\Source\LiveBuildEngine\jucer_CompileEngineClient.cpp"/>
     <ClCompile Include="..\..\Source\LiveBuildEngine\jucer_CompileEngineServer.cpp"/>
     <ClCompile Include="..\..\Source\LiveBuildEngine\jucer_DownloadCompileEngineThread.cpp"/>
+    <ClCompile Include="..\..\Source\Project\UI\jucer_HeaderComponent.cpp"/>
     <ClCompile Include="..\..\Source\Project\UI\jucer_ProjectContentComponent.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>

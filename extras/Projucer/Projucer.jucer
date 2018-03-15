@@ -542,6 +542,8 @@
               resource="0" file="Source/Project/UI/jucer_ContentViewComponents.h"/>
         <FILE id="wFypDd" name="jucer_FileGroupInformationComponent.h" compile="0"
               resource="0" file="Source/Project/UI/jucer_FileGroupInformationComponent.h"/>
+        <FILE id="P6wdlv" name="jucer_HeaderComponent.cpp" compile="1" resource="0"
+              file="Source/Project/UI/jucer_HeaderComponent.cpp"/>
         <FILE id="QVjJdU" name="jucer_HeaderComponent.h" compile="0" resource="0"
               file="Source/Project/UI/jucer_HeaderComponent.h"/>
         <FILE id="dN0Xzo" name="jucer_ModulesInformationComponent.h" compile="0"

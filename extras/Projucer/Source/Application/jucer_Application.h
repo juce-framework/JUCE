@@ -88,6 +88,7 @@ public:
 
     //==============================================================================
     void createNewProject();
+    void createNewProjectFromClipboard();
     void updateNewlyOpenedProject (Project&);
     void askUserToOpenFile();
     bool openFile (const File&);
@@ -165,6 +166,26 @@ private:
 
     void handleAsyncUpdate() override;
     void initCommandManager();
+
+    void deleteTemporaryFiles() const noexcept;
+
+    void createExamplesPopupMenu (PopupMenu&) noexcept;
+    Array<File> getSortedExampleDirectories() const noexcept;
+    Array<File> getSortedExampleFilesInDirectory (const File&) const noexcept;
+
+    bool findWindowAndOpenPIP (const File&);
+
+    void findAndLaunchExample (int);
+    File findDemoRunnerExecutable() const noexcept;
+    File findDemoRunnerProject() const noexcept;
+    void launchDemoRunner();
+
+    int numExamples = 0;
+    ScopedPointer<AlertWindow> demoRunnerAlert;
+
+   #if JUCE_LINUX
+    ChildProcess makeProcess;
+   #endif
 
     //==============================================================================
     void setColourScheme (int index, bool saveSetting);

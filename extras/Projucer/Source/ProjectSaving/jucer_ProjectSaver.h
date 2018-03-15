@@ -138,6 +138,32 @@ public:
         return Result::ok();
     }
 
+    Result saveContentNeededForLiveBuild()
+    {
+        OwnedArray<LibraryModule> modules;
+        project.getModules().createRequiredModules (modules);
+
+        checkModuleValidity (modules);
+
+        if (errors.size() == 0)
+        {
+            writeAppConfigFile (modules, loadUserContentFromAppConfig());
+            writeBinaryDataFiles();
+            writeAppHeader (modules);
+            writeModuleCppWrappers (modules);
+
+            if (project.getProjectType().isAudioPlugin())
+            {
+                writePluginCharacteristicsFile();
+                writeAppConfigFile (modules, loadUserContentFromAppConfig());
+            }
+
+            return Result::ok();
+        }
+
+        return Result::fail (errors[0]);
+    }
+
     Project::Item saveGeneratedFile (const String& filePath, const MemoryOutputStream& newData)
     {
         if (! generatedCodeFolder.createDirectory())

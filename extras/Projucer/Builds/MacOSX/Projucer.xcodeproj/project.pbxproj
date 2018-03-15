@@ -57,6 +57,7 @@
 		D25EBE02B55DB244BE0D5635 = {isa = PBXBuildFile; fileRef = DE3E6B2614229FAD56D50770; };
 		85E7FCB0516EFF853FA7B380 = {isa = PBXBuildFile; fileRef = D2FE76E4CF003856278343CC; };
 		CC6C4D351BA9B473E5F95791 = {isa = PBXBuildFile; fileRef = ADA538034910F52FDD2DC88D; };
+		05A08E366EBF8D650974E695 = {isa = PBXBuildFile; fileRef = 516D6D7C564DD5DF5C15CB06; };
 		3FCA61C401007B243E2E9035 = {isa = PBXBuildFile; fileRef = F797071D88542C813CF7222A; };
 		30B921C38DCEE787B294B746 = {isa = PBXBuildFile; fileRef = BAC43B20E14A340CCF14119C; };
 		244567D3AE2E417A8CB2B95E = {isa = PBXBuildFile; fileRef = C3BB9F92B02B06D04A73794C; };
@@ -180,6 +181,7 @@
 		50498FF6EA3901CBD58223B3 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_ObjectTypes.h"; path = "../../Source/ComponentEditor/jucer_ObjectTypes.h"; sourceTree = "SOURCE_ROOT"; };
 		512D80BE12634967A085A1DC = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "jucer_PaintElement.cpp"; path = "../../Source/ComponentEditor/PaintElements/jucer_PaintElement.cpp"; sourceTree = "SOURCE_ROOT"; };
 		514F2FAFDBF535AC03FA2E6C = {isa = PBXFileReference; lastKnownFileType = file.svg; name = "background_logo.svg"; path = "../../Source/BinaryData/Icons/background_logo.svg"; sourceTree = "SOURCE_ROOT"; };
+		516D6D7C564DD5DF5C15CB06 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "jucer_HeaderComponent.cpp"; path = "../../Source/Project/UI/jucer_HeaderComponent.cpp"; sourceTree = "SOURCE_ROOT"; };
 		51BC758EF5D33197CF543E67 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_DocumentEditorComponent.h"; path = "../../Source/CodeEditor/jucer_DocumentEditorComponent.h"; sourceTree = "SOURCE_ROOT"; };
 		51CBE59779A36D1B80B26974 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "jucer_LicenseController.cpp"; path = "../../Source/Licenses/jucer_LicenseController.cpp"; sourceTree = "SOURCE_ROOT"; };
 		5432B7B9B2CF2EAEC8B66D5C = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_UtilityFunctions.h"; path = "../../Source/ComponentEditor/jucer_UtilityFunctions.h"; sourceTree = "SOURCE_ROOT"; };
@@ -633,6 +635,7 @@
 					236D186F5A6536C59D6E751C,
 					32ECBC08D903418CA0825870,
 					A509BC22854D50E4C786EB32,
+					516D6D7C564DD5DF5C15CB06,
 					16751E04B0F3737BDF52CEB4,
 					B3528C08B84CBC950252EA69,
 					1B0F18E1D96F727C062B05FA,
@@ -964,6 +967,7 @@
 					D25EBE02B55DB244BE0D5635,
 					85E7FCB0516EFF853FA7B380,
 					CC6C4D351BA9B473E5F95791,
+					05A08E366EBF8D650974E695,
 					3FCA61C401007B243E2E9035,
 					30B921C38DCEE787B294B746,
 					244567D3AE2E417A8CB2B95E,

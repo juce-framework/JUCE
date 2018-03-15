@@ -29,7 +29,7 @@
 #include "jucer_MainWindow.h"
 #include "../Wizards/jucer_NewProjectWizardClasses.h"
 #include "../Utility/UI/jucer_JucerTreeViewBase.h"
-
+#include "../ProjectSaving/jucer_ProjectSaver.h"
 
 //==============================================================================
 MainWindow::MainWindow()
@@ -140,7 +140,7 @@ void MainWindow::closeButtonPressed()
     ProjucerApplication::getApp().mainWindowList.closeWindow (this);
 }
 
-bool MainWindow::closeProject (Project* project)
+bool MainWindow::closeProject (Project* project, bool askUserToSave)
 {
     jassert (project == currentProject && project != nullptr);
 
@@ -156,12 +156,10 @@ bool MainWindow::closeProject (Project* project)
         pcc->hideEditor();
     }
 
-    if (! ProjucerApplication::getApp().openDocumentManager.closeAllDocumentsUsingProject (*project, true))
+    if (! ProjucerApplication::getApp().openDocumentManager.closeAllDocumentsUsingProject (*project, askUserToSave))
         return false;
 
-    auto r = project->saveIfNeededAndUserAgrees();
-
-    if (r == FileBasedDocument::savedOk)
+    if (! askUserToSave || (project->saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk))
     {
         setProject (nullptr);
         return true;
@@ -175,6 +173,21 @@ bool MainWindow::closeCurrentProject()
     return currentProject == nullptr || closeProject (currentProject.get());
 }
 
+void MainWindow::moveProject (File newProjectFileToOpen)
+{
+    auto openInIDE = currentProject->shouldOpenInIDEAfterSaving();
+
+    closeProject (currentProject, false);
+    openFile (newProjectFileToOpen);
+
+    if (currentProject != nullptr)
+    {
+        ProjucerApplication::getApp().getCommandManager().invokeDirectly (openInIDE ? CommandIDs::saveAndOpenInIDE
+                                                                                    : CommandIDs::saveProject,
+                                                                          false);
+    }
+}
+
 void MainWindow::setProject (Project* newProject)
 {
     createProjectContentCompIfNeeded();
@@ -185,6 +198,12 @@ void MainWindow::setProject (Project* newProject)
         projectNameValue.referTo (currentProject->getProjectValue (Ids::name));
     else
         projectNameValue.referTo (Value());
+
+    if (newProject != nullptr)
+    {
+        if (auto* peer = getPeer())
+            peer->setRepresentedFile (newProject->getFile());
+    }
 
     ProjucerApplication::getCommandManager().commandStatusChanged();
 }
@@ -241,6 +260,142 @@ bool MainWindow::openFile (const File& file)
     return false;
 }
 
+bool MainWindow::tryToOpenPIP (const File& pipFile)
+{
+    PIPGenerator generator (pipFile);
+
+    if (! generator.hasValidPIP())
+        return false;
+
+    auto generatorResult = generator.createJucerFile();
+
+    if (generatorResult != Result::ok())
+    {
+        AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                          "PIP Error.",
+                                          generatorResult.getErrorMessage());
+
+        return false;
+    }
+
+
+    if (! generator.createMainCpp())
+    {
+        AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                          "PIP Error.",
+                                          "Failed to create Main.cpp.");
+
+        return false;
+    }
+
+    if (! ProjucerApplication::getApp().mainWindowList.openFile (generator.getJucerFile()))
+        return false;
+
+    openPIP (generator, pipFile.getFileName());
+    return true;
+}
+
+static bool isDivider (const String& line)
+{
+    auto afterIndent = line.trim();
+
+    if (afterIndent.startsWith ("//") && afterIndent.length() > 20)
+    {
+        afterIndent = afterIndent.substring (2);
+
+        if (afterIndent.containsOnly ("=")
+            || afterIndent.containsOnly ("/")
+            || afterIndent.containsOnly ("-"))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static bool isEndOfCommentBlock (const String& line)
+{
+    if (line.contains ("*/"))
+        return true;
+
+    return false;
+}
+
+static int getIndexOfCommentBlockStart (const StringArray& lines, int blockEndIndex)
+{
+    for (int i = blockEndIndex; i >= 0; --i)
+    {
+        if (lines[i].contains ("/*"))
+            return i;
+    }
+
+    return  0;
+}
+
+static int findBestLineToScrollTo (StringArray lines, StringRef className)
+{
+    for (auto line : lines)
+    {
+        if (line.contains ("struct " + className) || line.contains ("class " + className))
+        {
+            auto index = lines.indexOf (line);
+
+            if (isDivider (lines[index - 1]))
+                return index - 1;
+
+            if (isEndOfCommentBlock (lines[index - 1]))
+            {
+                auto blockStartIndex = getIndexOfCommentBlockStart (lines, index - 1);
+
+                if (blockStartIndex > 0 && isDivider (lines [blockStartIndex - 1]))
+                    return blockStartIndex - 1;
+
+                return blockStartIndex;
+            }
+
+            return lines.indexOf (line);
+        }
+    }
+
+    return 0;
+}
+
+void MainWindow::openPIP (PIPGenerator& generator, StringRef fileName)
+{
+    if (auto* window = ProjucerApplication::getApp().mainWindowList.getMainWindowForFile (generator.getJucerFile()))
+    {
+        if (auto* project = window->getProject())
+        {
+            project->setTemporaryDirectory (generator.getOutputDirectory());
+
+            ProjectSaver liveBuildSaver (*project, project->getFile());
+            liveBuildSaver.saveContentNeededForLiveBuild();
+
+            if (auto* pcc = window->getProjectContentComponent())
+            {
+                pcc->invokeDirectly (CommandIDs::toggleBuildEnabled, true);
+                pcc->invokeDirectly (CommandIDs::buildNow, true);
+                pcc->invokeDirectly (CommandIDs::toggleContinuousBuild, true);
+
+                auto fileToDisplay = project->getSourceFilesFolder().getChildFile (fileName);
+
+                if (fileToDisplay != File())
+                {
+                    pcc->showEditorForFile (fileToDisplay, true);
+
+                    if (auto* sourceCodeEditor = dynamic_cast <SourceCodeEditor*> (pcc->getEditorComponent()))
+                    {
+                        sourceCodeEditor->editor->scrollToLine (findBestLineToScrollTo (StringArray::fromLines (fileToDisplay.loadFileAsString()),
+                                                                                        generator.getMainClassName()));
+                    }
+                }
+
+            }
+        }
+    }
+}
+
 bool MainWindow::isInterestedInFileDrag (const StringArray& filenames)
 {
     for (auto& filename : filenames)
@@ -256,7 +411,10 @@ void MainWindow::filesDropped (const StringArray& filenames, int /*mouseX*/, int
     {
         const File f (filename);
 
-        if (canOpenFile (f) && openFile (f))
+        if (tryToOpenPIP (f))
+            continue;
+
+        if (! isPIPFile (f) && (canOpenFile (f) && openFile (f)))
             break;
     }
 }
@@ -326,9 +484,15 @@ void MainWindow::activeWindowStatusChanged()
                 {
                     if (auto* project = getProject())
                     {
+                        auto oldTemporaryDirectory = project->getTemporaryDirectory();
+
                         auto projectFile = project->getFile();
                         setProject (nullptr);
                         openFile (projectFile);
+
+                        if (oldTemporaryDirectory != File())
+                            if (auto* newProject = getProject())
+                                newProject->setTemporaryDirectory (oldTemporaryDirectory);
                     }
                 }
                 else
@@ -340,13 +504,16 @@ void MainWindow::activeWindowStatusChanged()
     }
 }
 
-void MainWindow::showNewProjectWizard()
+void MainWindow::showStartPage()
 {
     jassert (currentProject == nullptr);
+
     setContentOwned (createNewProjectWizardComponent(), true);
+
     centreWithSize (900, 630);
     setVisible (true);
     addToDesktop();
+
     getContentComponent()->grabKeyboardFocus();
 }
 
@@ -453,7 +620,7 @@ bool MainWindowList::askAllWindowsToClose()
 void MainWindowList::createWindowIfNoneAreOpen()
 {
     if (windows.size() == 0)
-        createNewMainWindow()->showNewProjectWizard();
+        createNewMainWindow()->showStartPage();
 }
 
 void MainWindowList::closeWindow (MainWindow* w)
@@ -542,7 +709,10 @@ bool MainWindowList::openFile (const File& file, bool openInBackground)
         return ok;
     }
 
-    if (file.exists())
+    if (getFrontmostWindow()->tryToOpenPIP (file))
+        return true;
+
+    if (! isPIPFile (file) && file.exists())
         return getFrontmostWindow()->openFile (file);
 
     return false;
@@ -599,6 +769,23 @@ MainWindow* MainWindowList::getOrCreateEmptyWindow()
     return createNewMainWindow();
 }
 
+MainWindow* MainWindowList::getMainWindowForFile (const File& file)
+{
+    if (windows.size() > 0)
+    {
+        for (auto* window : windows)
+        {
+            if (auto* project = window->getProject())
+            {
+                if (project->getFile() == file)
+                    return window;
+            }
+        }
+    }
+
+    return nullptr;
+}
+
 void MainWindowList::avoidSuperimposedWindows (MainWindow* const mw)
 {
     for (int i = windows.size(); --i >= 0;)
@@ -633,7 +820,8 @@ void MainWindowList::saveCurrentlyOpenProjectList()
     {
         if (auto* mw = dynamic_cast<MainWindow*> (desktop.getComponent(i)))
             if (auto* p = mw->getProject())
-                projects.add (p->getFile());
+                if (! p->isTemporaryProject())
+                    projects.add (p->getFile());
     }
 
     getAppSettings().setLastProjects (projects);

@@ -684,6 +684,11 @@ void CompileEngineChildProcess::handleAppQuit()
     runningAppProcess.reset();
 }
 
+bool CompileEngineChildProcess::isAppRunning() const noexcept
+{
+    return runningAppProcess != nullptr && runningAppProcess->isRunningApp;
+}
+
 //==============================================================================
 struct CompileEngineChildProcess::Editor  : private CodeDocument::Listener,
                                             private Timer

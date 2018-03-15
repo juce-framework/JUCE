@@ -27,6 +27,7 @@
 #include "jucer_Headers.h"
 #include "../Project/jucer_Module.h"
 #include "../Utility/Helpers/jucer_TranslationHelpers.h"
+#include "../Utility/PIPs/jucer_PIPGenerator.h"
 
 #include "jucer_CommandLine.h"
 
@@ -34,8 +35,6 @@
 //==============================================================================
 namespace
 {
-    static const char* getLineEnding()  { return "\r\n"; }
-
     struct CommandLineError
     {
         CommandLineError (const String& s) : message (s) {}
@@ -749,6 +748,31 @@ namespace
         settingsFile.replaceWithText (settingsTree.toXmlString());
     }
 
+    static void createProjectFromPIP (const StringArray& args)
+    {
+        if (args.size() < 3)
+            throw CommandLineError ("Not enough arguments. Usage: --create-project-from-pip path/to/PIP path/to/output.");
+
+        auto pipFile = File::getCurrentWorkingDirectory().getChildFile (args[1].unquoted());
+        if (! pipFile.existsAsFile())
+            throw CommandLineError ("PIP file doesn't exist.");
+
+        auto outputDir = File::getCurrentWorkingDirectory().getChildFile (args[2].unquoted());
+        if (! outputDir.exists())
+        {
+            auto res = outputDir.createDirectory();
+            std::cout << "Creating directory " << outputDir.getFullPathName() << std::endl;
+        }
+
+        PIPGenerator generator (pipFile, outputDir);
+
+        if (! generator.createJucerFile())
+            throw CommandLineError ("Failed to create .jucer file in " + outputDir.getFullPathName()+ ".");
+
+        if (! generator.createMainCpp())
+            throw CommandLineError ("Failed to create Main.cpp.");
+    }
+
     //==============================================================================
     static void showHelp()
     {
@@ -812,8 +836,11 @@ namespace
                   << "    Creates a completed translations mapping file, that can be used to initialise a LocalisedStrings object. This allows you to localise the strings in your project" << std::endl
                   << std::endl
                   << " " << appName << " --set-global-search-path os identifier_to_set new_path" << std::endl
-                  << "    Sets the global search path for a specified os and identifier. The os should be either osx, windows or linux and the identifiers can be any of the following: "
+                  << "    Sets the global path for a specified os and identifier. The os should be either osx, windows or linux and the identifiers can be any of the following: "
                   << "defaultJuceModulePath, defaultUserModulePath, vst3path, aaxPath (not valid on linux), rtasPath (not valid on linux), androidSDKPath or androidNDKPath." << std::endl
+                  << std::endl
+                  << " " << appName << " --create-project-from-pip path/to/PIP path/to/output" << std::endl
+                  << "    Generates a JUCE project from a PIP file." << std::endl
                   << std::endl;
     }
 }
@@ -849,6 +876,7 @@ int performCommandLine (const String& commandLine)
         if (matchArgument (command, "trans"))                    { scanFoldersForTranslationFiles (args); return 0; }
         if (matchArgument (command, "trans-finish"))             { createFinishedTranslationFile (args);  return 0; }
         if (matchArgument (command, "set-global-search-path"))   { setGlobalPath (args);                  return 0; }
+        if (matchArgument (command, "create-project-from-pip"))  { createProjectFromPIP (args);           return 0; }
     }
     catch (const CommandLineError& error)
     {

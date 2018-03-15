@@ -26,6 +26,8 @@
 
 #pragma once
 
+#include "../../Licenses/jucer_LicenseController.h"
+#include "../../Application/jucer_Application.h"
 
 //==============================================================================
 class UserSettingsPopup    : public Component

@@ -72,16 +72,10 @@ class Icons
 public:
     Icons();
 
-    Path folder, document, imageDoc,
-         config, /*exporter,*/ juceLogo,
-         graph, jigsaw, info, warning,
-         bug, /*play,*/ code, box,
-         mainJuceLogo;
-
-    Path user, closedFolder, exporter, fileExplorer, file,
-         buildTab, modules, openFolder, play, settings, singleModule,
-         buildNow, continuousBuildStart, continuousBuildStop, edit, plus,
-         android, codeBlocks, linux, xcode, visualStudio, clion;
+    Path folder, document, imageDoc, config, juceLogo, graph, jigsaw, info, warning, bug,
+         code, box, mainJuceLogo, user, closedFolder, exporter, fileExplorer, file, buildTab,
+         modules, openFolder, play, settings, singleModule, edit, plus, android, codeBlocks,
+         linux, xcode, visualStudio, clion;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Icons)

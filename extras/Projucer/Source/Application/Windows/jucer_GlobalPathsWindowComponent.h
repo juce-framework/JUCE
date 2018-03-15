@@ -28,25 +28,12 @@
 
 
 //==============================================================================
-class GlobalSearchPathsWindowComponent    : public Component
+class GlobalPathsWindowComponent    : public Component
 {
 public:
-    GlobalSearchPathsWindowComponent()
-        : modulesLabel ("modulesLabel", "Modules"),
-          sdksLabel ("sdksLabel", "SDKs"),
-          cLionLabel ("cLionLabel", "CLion")
+    GlobalPathsWindowComponent()
     {
-        addAndMakeVisible (modulesLabel);
-        addAndMakeVisible (sdksLabel);
-        addAndMakeVisible (cLionLabel);
-
-        modulesLabel.setFont (Font (18.0f, Font::FontStyleFlags::bold));
-        sdksLabel   .setFont (Font (18.0f, Font::FontStyleFlags::bold));
-        cLionLabel  .setFont (Font (18.0f, Font::FontStyleFlags::bold));
-
-        modulesLabel.setJustificationType (Justification::centredLeft);
-        sdksLabel   .setJustificationType (Justification::centredLeft);
-        cLionLabel  .setJustificationType (Justification::centredLeft);
+        addLabelsAndSetProperties();
 
         addAndMakeVisible (info);
         info.setInfoToDisplay ("Use this dropdown to set the global paths for different OSes. "
@@ -59,7 +46,11 @@ public:
         osSelector.addItem ("Windows", 2);
         osSelector.addItem ("Linux", 3);
 
-        osSelector.onChange = [this] { updateFilePathPropertyComponents(); };
+        osSelector.onChange = [this]
+        {
+            addLabelsAndSetProperties();
+            updateFilePathPropertyComponents();
+        };
 
         auto os = TargetOS::getThisOS();
 
@@ -85,39 +76,32 @@ public:
 
         info.setBounds (osSelector.getBounds().withWidth (osSelector.getHeight()).translated ((osSelector.getWidth() + 5), 0).reduced (2));
 
-        modulesLabel.setBounds (b.removeFromTop (20));
-        b.removeFromTop (20);
-
-        auto thisOS = TargetOS::getThisOS();
-        auto selectedOS = getSelectedOS();
-        const int numComps = pathPropertyComponents.size();
-
-        for (int i = 0; i < numComps; ++i)
+        int labelIndex = 0;
+        for (auto* pathComp : pathPropertyComponents)
         {
-            pathPropertyComponents[i]->setBounds (b.removeFromTop (pathPropertyComponents[i]->getPreferredHeight()));
-            b.removeFromTop (5);
-
-            if (i == 1)
+            if (pathComp == nullptr)
             {
                 b.removeFromTop (15);
-                sdksLabel.setBounds (b.removeFromTop (20));
+                pathPropertyLabels.getUnchecked (labelIndex++)->setBounds (b.removeFromTop (20));
                 b.removeFromTop (20);
             }
-
-            if (selectedOS == thisOS && i == numComps - 2)
+            else
             {
-                b.removeFromTop (15);
-                cLionLabel.setBounds (b.removeFromTop (20));
-                b.removeFromTop (20);
+                pathComp->setBounds (b.removeFromTop (pathComp->getPreferredHeight()));
+                b.removeFromTop (5);
             }
         }
     }
 
 private:
-    Label modulesLabel, sdksLabel, cLionLabel;
+    OwnedArray<Label> pathPropertyLabels;
     OwnedArray<PropertyComponent> pathPropertyComponents;
+
     ComboBox osSelector;
     InfoButton info;
+
+    //==============================================================================
+    bool isSelectedOSThisOS()    { return TargetOS::getThisOS() == getSelectedOS(); }
 
     TargetOS::OS getSelectedOS() const
     {
@@ -138,27 +122,28 @@ private:
     {
         pathPropertyComponents.clear();
 
-        const auto thisOS = TargetOS::getThisOS();
-        const auto selectedOS = getSelectedOS();
-
         auto& settings = getAppSettings();
 
-        if (selectedOS == thisOS)
+        if (isSelectedOSThisOS())
         {
+            pathPropertyComponents.add (nullptr);
+
             addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (settings.getStoredPath (Ids::defaultJuceModulePath),
                                                                                           "JUCE Modules", true)));
             addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (settings.getStoredPath (Ids::defaultUserModulePath),
                                                                                           "User Modules", true, {}, {}, true)));
 
+            pathPropertyComponents.add (nullptr);
+
             addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (settings.getStoredPath (Ids::vst3Path),
                                                                                           "VST3 SDK", true)));
 
-            if (selectedOS == TargetOS::linux)
+            if (getSelectedOS() == TargetOS::linux)
             {
-                addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (Value(), "RTAS SDK", true)));
+                addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent ({}, "RTAS SDK", true)));
                 pathPropertyComponents.getLast()->setEnabled (false);
 
-                addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (Value(), "AAX SDK", true)));
+                addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent ({}, "AAX SDK", true)));
                 pathPropertyComponents.getLast()->setEnabled (false);
             }
             else
@@ -174,6 +159,8 @@ private:
             addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (settings.getStoredPath (Ids::androidNDKPath),
                                                                                           "Android NDK", true)));
 
+            pathPropertyComponents.add (nullptr);
+
            #if JUCE_MAC
             String exeLabel ("app");
            #elif JUCE_WINDOWS
@@ -186,12 +173,17 @@ private:
         }
         else
         {
+            auto selectedOS = getSelectedOS();
             auto maxChars = 1024;
+
+            pathPropertyComponents.add (nullptr);
 
             addAndMakeVisible (pathPropertyComponents.add (new TextPropertyComponent (settings.getFallbackPathForOS (Ids::defaultJuceModulePath, selectedOS),
                                                                                       "JUCE Modules", maxChars, false)));
             addAndMakeVisible (pathPropertyComponents.add (new TextPropertyComponent (settings.getFallbackPathForOS (Ids::defaultUserModulePath, selectedOS),
                                                                                       "User Modules", maxChars, false)));
+
+            pathPropertyComponents.add (nullptr);
 
             addAndMakeVisible (pathPropertyComponents.add (new TextPropertyComponent (settings.getFallbackPathForOS (Ids::vst3Path, selectedOS),
                                                                                       "VST3 SDK", maxChars, false)));
@@ -207,19 +199,35 @@ private:
             else
             {
                 addAndMakeVisible (pathPropertyComponents.add (new TextPropertyComponent (settings.getFallbackPathForOS (Ids::rtasPath, selectedOS),
-                                                                                              "RTAS SDK", maxChars, false)));
+                                                                                          "RTAS SDK", maxChars, false)));
                 addAndMakeVisible (pathPropertyComponents.add (new TextPropertyComponent (settings.getFallbackPathForOS (Ids::aaxPath, selectedOS),
-                                                                                              "AAX SDK", maxChars, false)));
+                                                                                          "AAX SDK", maxChars, false)));
             }
 
             addAndMakeVisible (pathPropertyComponents.add (new TextPropertyComponent (settings.getFallbackPathForOS (Ids::androidSDKPath, selectedOS),
-                                                                                          "Android SDK", maxChars, false)));
+                                                                                      "Android SDK", maxChars, false)));
             addAndMakeVisible (pathPropertyComponents.add (new TextPropertyComponent (settings.getFallbackPathForOS (Ids::androidNDKPath, selectedOS),
-                                                                                          "Android NDK", maxChars, false)));
+                                                                                      "Android NDK", maxChars, false)));
         }
 
         resized();
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GlobalSearchPathsWindowComponent)
+    void addLabelsAndSetProperties()
+    {
+        pathPropertyLabels.clear();
+
+        pathPropertyLabels.add (new Label ("modulesLabel", "Modules"));
+        pathPropertyLabels.add (new Label ("sdksLabel", "SDKs"));
+        pathPropertyLabels.add (new Label ("otherLabel", "Other"));
+
+        for (auto* l : pathPropertyLabels)
+        {
+            addAndMakeVisible (l);
+            l->setFont (Font (18.0f, Font::FontStyleFlags::bold));
+            l->setJustificationType (Justification::centredLeft);
+        }
+    }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GlobalPathsWindowComponent)
 };

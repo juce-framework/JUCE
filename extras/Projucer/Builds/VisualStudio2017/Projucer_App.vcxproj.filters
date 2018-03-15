@@ -442,6 +442,9 @@
     <ClCompile Include="..\..\Source\LiveBuildEngine\jucer_DownloadCompileEngineThread.cpp">
       <Filter>Projucer\LiveBuildEngine</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Project\UI\jucer_HeaderComponent.cpp">
+      <Filter>Projucer\Project\UI</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Project\UI\jucer_ProjectContentComponent.cpp">
       <Filter>Projucer\Project\UI</Filter>
     </ClCompile>
