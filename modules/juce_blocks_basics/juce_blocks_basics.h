@@ -50,6 +50,12 @@
 #include <juce_events/juce_events.h>
 #include <juce_audio_devices/juce_audio_devices.h>
 
+#if (! defined (JUCE_STDLIB_HAS_STD_FUNCTION_SUPPORT)) || (! defined (JUCE_HAS_CONSTEXPR))
+ #ifndef JUCE_DEMO_RUNNER
+  #error "juce_blocks_basics module requires your compiler to have a newer version of the standard library"
+ #endif
+#else
+
 namespace juce
 {
     class TouchSurface;
@@ -80,3 +86,5 @@ namespace juce
  #include "littlefoot/juce_LittleFootCompiler.h"
  #include "littlefoot/juce_LittleFootRemoteHeap.h"
 }
+
+#endif
