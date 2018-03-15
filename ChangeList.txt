@@ -4,6 +4,19 @@
 This file just lists the more notable headline features. For more detailed info
 about minor changes and bugfixes, please see the git log!
 
+Version 5.3.0
+  - Added support for Android OBOE (developer preview)
+  - Updated JUCE's MPE classes to comply with the new MMA-adopted specification
+  - Multiple documentation updates
+  - Restructed the examples and extras directories and updated all JUCE examples
+  - Multiple hosted parameter improvements
+  - Overhauled the GenericAudioProcessorEditor
+  - Added support for a subset of the Cockos VST extensions
+  - Added support for loading VST3 preset files
+  - Added boolean AudioProcessorParameters
+  - Added thread safe methods for getting and setting the AudioProcessorValueTreeState state
+  - Added customisable MacOS icons
+
 Version 5.2.1
   - Added native content sharing support for iOS and Android
   - Added iOS and Android native file chooser support

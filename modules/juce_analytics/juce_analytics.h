@@ -35,7 +35,7 @@
 
   ID:               juce_analytics
   vendor:           juce
-  version:          5.2.1
+  version:          5.3.0
   name:             JUCE analytics classes
   description:      Classes to collect analytics and send to destinations
   website:          http://www.juce.com/juce
