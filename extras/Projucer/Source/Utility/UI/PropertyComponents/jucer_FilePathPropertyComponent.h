@@ -68,7 +68,6 @@ private:
             textbox.getTextValue().referTo (value);
             textbox.onReturnKey  = [this] { updateEditorColour (textbox); };
             textbox.onFocusLost  = [this] { updateEditorColour (textbox); };
-            textbox.onTextChange = [this] { updateEditorColour (textbox); };
 
             addAndMakeVisible (button);
             button.onClick = [this] { browse(); };
