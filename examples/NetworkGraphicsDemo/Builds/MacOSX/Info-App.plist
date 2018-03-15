@@ -10,9 +10,9 @@
     <key>CFBundleIdentifier</key>
     <string>com.juce.NetworkGraphicsDemo</string>
     <key>CFBundleName</key>
-    <string>JUCE Network Graphics Demo</string>
+    <string>NetworkGraphicsDemo</string>
     <key>CFBundleDisplayName</key>
-    <string>JUCE Network Graphics Demo</string>
+    <string>NetworkGraphicsDemo</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleSignature</key>

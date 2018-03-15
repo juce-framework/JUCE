@@ -76,7 +76,7 @@ import java.util.concurrent.atomic.*;
 
 
 //==============================================================================
-public class JUCENetworkGraphicsDemo   extends Activity
+public class JUCENetworkGraphicsDemo   extends $$JUCENetworkGraphicsDemoBaseClass$$
 {
     //==============================================================================
     static

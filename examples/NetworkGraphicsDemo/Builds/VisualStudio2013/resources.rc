@@ -15,9 +15,9 @@ BEGIN
     BEGIN
       VALUE "CompanyName",  "ROLI Ltd.\0"
       VALUE "LegalCopyright",  "ROLI Ltd.\0"
-      VALUE "FileDescription",  "JUCE Network Graphics Demo\0"
+      VALUE "FileDescription",  "NetworkGraphicsDemo\0"
       VALUE "FileVersion",  "1.0.0\0"
-      VALUE "ProductName",  "JUCE Network Graphics Demo\0"
+      VALUE "ProductName",  "NetworkGraphicsDemo\0"
       VALUE "ProductVersion",  "1.0.0\0"
     END
   END
