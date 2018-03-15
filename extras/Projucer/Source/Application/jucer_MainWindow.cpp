@@ -291,7 +291,7 @@ bool MainWindow::tryToOpenPIP (const File& pipFile)
     if (! ProjucerApplication::getApp().mainWindowList.openFile (generator.getJucerFile()))
         return false;
 
-    openPIP (generator, pipFile.getFileName());
+    openPIP (generator);
     return true;
 }
 
@@ -361,7 +361,7 @@ static int findBestLineToScrollTo (StringArray lines, StringRef className)
     return 0;
 }
 
-void MainWindow::openPIP (PIPGenerator& generator, StringRef fileName)
+void MainWindow::openPIP (PIPGenerator& generator)
 {
     if (auto* window = ProjucerApplication::getApp().mainWindowList.getMainWindowForFile (generator.getJucerFile()))
     {
@@ -378,7 +378,7 @@ void MainWindow::openPIP (PIPGenerator& generator, StringRef fileName)
                 pcc->invokeDirectly (CommandIDs::buildNow, true);
                 pcc->invokeDirectly (CommandIDs::toggleContinuousBuild, true);
 
-                auto fileToDisplay = project->getSourceFilesFolder().getChildFile (fileName);
+                auto fileToDisplay = generator.getPIPFile();
 
                 if (fileToDisplay != File())
                 {
