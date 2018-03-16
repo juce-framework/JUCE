@@ -51,7 +51,7 @@ JUCEDemos::DemoCategory& JUCEDemos::getCategory (const String& name)
 
 void JUCEDemos::registerDemo (std::function<Component*()> constructorCallback, const String& filePath, const String& category, bool isHeavyweight)
 {
-    auto f = findExamplesDirectoryFromExecutable (File::getSpecialLocation (File::SpecialLocationType::currentExecutableFile));
+    auto f = findExamplesDirectoryFromExecutable (File::getSpecialLocation (File::SpecialLocationType::currentApplicationFile));
 
     #if ! (JUCE_ANDROID || JUCE_IOS)
     if (f == File())
