@@ -426,6 +426,7 @@ Result PIPGenerator::setProjectSettings (ValueTree& jucerTree)
     else if (type == "AudioProcessor")
     {
         jucerTree.setProperty (Ids::projectType, "audioplug", nullptr);
+        jucerTree.setProperty (Ids::pluginManufacturer, metadata[Ids::vendor], nullptr);
 
         jucerTree.setProperty (Ids::buildVST,        true, nullptr);
         jucerTree.setProperty (Ids::buildVST3,       false, nullptr);
