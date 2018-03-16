@@ -427,9 +427,9 @@ Result PIPGenerator::setProjectSettings (ValueTree& jucerTree)
     {
         jucerTree.setProperty (Ids::projectType, "audioplug", nullptr);
 
-        jucerTree.setProperty (Ids::buildVST,        false, nullptr);
+        jucerTree.setProperty (Ids::buildVST,        true, nullptr);
         jucerTree.setProperty (Ids::buildVST3,       false, nullptr);
-        jucerTree.setProperty (Ids::buildAU,         false, nullptr);
+        jucerTree.setProperty (Ids::buildAU,         true, nullptr);
         jucerTree.setProperty (Ids::buildAUv3,       false, nullptr);
         jucerTree.setProperty (Ids::buildRTAS,       false, nullptr);
         jucerTree.setProperty (Ids::buildAAX,        false, nullptr);
