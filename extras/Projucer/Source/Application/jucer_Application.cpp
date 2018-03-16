@@ -619,7 +619,8 @@ Array<File> ProjucerApplication::getSortedExampleDirectories() const noexcept
     {
         auto exampleDirectory = iter.getFile();
 
-        if (exampleDirectory.getFileName() != "DemoRunner" && exampleDirectory.getFileName() != "Assets")
+        if (exampleDirectory.getNumberOfChildFiles (File::findFiles | File::ignoreHiddenFiles) > 0
+            && exampleDirectory.getFileName() != "DemoRunner" && exampleDirectory.getFileName() != "Assets")
             exampleDirectories.add (exampleDirectory);
     }
 
