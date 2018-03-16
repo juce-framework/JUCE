@@ -32,24 +32,31 @@ void Analytics::addDestination (AnalyticsDestination* destination)
     destinations.add (destination);
 }
 
-void Analytics::setUserId (const String& newUserId)
+OwnedArray<AnalyticsDestination>& Analytics::getDestinations()
+{
+    return destinations;
+}
+
+void Analytics::setUserId (String newUserId)
 {
     userId = newUserId;
 }
 
-void Analytics::setUserProperties (const StringPairArray& properties)
+void Analytics::setUserProperties (StringPairArray properties)
 {
     userProperties = properties;
 }
 
 void Analytics::logEvent (const String& eventName,
-                          const StringPairArray& parameters)
+                          const StringPairArray& parameters,
+                          int eventType)
 {
     if (! isSuspended)
     {
         AnalyticsDestination::AnalyticsEvent event
         {
             eventName,
+            eventType,
             Time::getMillisecondCounter(),
             parameters,
             userId,
@@ -66,6 +73,6 @@ void Analytics::setSuspended (bool shouldBeSuspended)
     isSuspended = shouldBeSuspended;
 }
 
-juce_ImplementSingleton (Analytics)
+JUCE_IMPLEMENT_SINGLETON (Analytics)
 
 }

@@ -31,6 +31,8 @@ namespace dsp
 
 /**
     Applies waveshaping to audio samples as single samples or AudioBlocks.
+
+    @tags{DSP}
 */
 template <typename FloatType, typename Function = FloatType (*) (FloatType)>
 struct WaveShaper
@@ -53,12 +55,17 @@ struct WaveShaper
     template <typename ProcessContext>
     void process (const ProcessContext& context) const noexcept
     {
-        jassert (context.getInputBlock().getNumChannels() == context.getOutputBlock().getNumChannels());
-        jassert (context.getInputBlock().getNumSamples()  == context.getOutputBlock().getNumSamples());
-
-        AudioBlock<FloatType>::process (context.getInputBlock(),
-                                        context.getOutputBlock(),
-                                        functionToUse);
+        if (context.isBypassed)
+        {
+            if (context.usesSeparateInputAndOutputBlocks())
+                context.getOutputBlock().copy (context.getInputBlock());
+        }
+        else
+        {
+            AudioBlock<FloatType>::process (context.getInputBlock(),
+                                            context.getOutputBlock(),
+                                            functionToUse);
+        }
     }
 
     void reset() noexcept {}

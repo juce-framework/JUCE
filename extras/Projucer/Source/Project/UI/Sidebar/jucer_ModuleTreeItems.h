@@ -28,8 +28,7 @@
 
 
 //==============================================================================
-class ModuleItem   : public ProjectTreeItemBase,
-                     private Value::Listener
+class ModuleItem   : public ProjectTreeItemBase
 {
 public:
     ModuleItem (Project& p, const String& modID)
@@ -37,9 +36,6 @@ public:
     {
         missingDependencies = project.getModules().getExtraDependenciesNeeded (moduleID).size() > 0;
         cppStandardHigherThanProject = project.getModules().doesModuleHaveHigherCppStandardThanProject (moduleID);
-
-        projectCppStandardValue.referTo (project.getCppStandardValue());
-        projectCppStandardValue.addListener (this);
 
         moduleInfo = project.getModules().getModuleInfo (moduleID);
     }
@@ -83,6 +79,12 @@ public:
         return Icon (getIcons().singleModule, iconColour);
     }
 
+    void showAddMenu() override
+    {
+        if (auto* parent = dynamic_cast<EnabledModulesItem*> (getParentItem()))
+            parent->showPopupMenu();
+    }
+
     void showPopupMenu() override
     {
         PopupMenu menu;
@@ -96,6 +98,31 @@ public:
             deleteItem();
     }
 
+    bool checkCppStandard()
+    {
+        auto oldVal = cppStandardHigherThanProject;
+        cppStandardHigherThanProject = project.getModules().doesModuleHaveHigherCppStandardThanProject (moduleID);
+
+        if (oldVal != cppStandardHigherThanProject)
+            return true;
+
+        return false;
+    }
+
+    void refreshModuleInfoIfCurrentlyShowing (bool juceModulePathChanged)
+    {
+        auto isJuceModule = isJUCEModule (moduleID);
+        auto shouldRefresh = (juceModulePathChanged && isJuceModule) || (! juceModulePathChanged && ! isJuceModule);
+
+        if (! shouldRefresh)
+            return;
+
+        if (auto* pcc = getProjectContentComponent())
+            if (auto* settingsPanel = dynamic_cast<ModuleSettingsPanel*> (pcc->getEditorComponentContent()))
+                if (settingsPanel->getModuleID() == moduleID)
+                    showDocument();
+    }
+
     Project& project;
     String moduleID;
 
@@ -103,26 +130,6 @@ private:
     ModuleDescription moduleInfo;
     bool missingDependencies = false;
     bool cppStandardHigherThanProject = false;
-    Value projectCppStandardValue;
-
-    //==============================================================================
-    void valueChanged (Value& v) override
-    {
-        if (v == projectCppStandardValue)
-        {
-            auto oldVal = cppStandardHigherThanProject;
-            cppStandardHigherThanProject = project.getModules().doesModuleHaveHigherCppStandardThanProject (moduleID);
-
-            if (oldVal != cppStandardHigherThanProject)
-            {
-                if (auto* parent = dynamic_cast<EnabledModulesItem*> (getParentItem()))
-                {
-                    parent->refreshSubItems();
-                    return;
-                }
-            }
-        }
-    }
 
     //==============================================================================
     class ModuleSettingsPanel  : public Component,
@@ -136,12 +143,6 @@ private:
               modulesTree (tree),
               moduleID (modID)
         {
-            defaultJuceModulePathValue.referTo (getAppSettings().getStoredPath (Ids::defaultJuceModulePath));
-            defaultUserModulePathValue.referTo (getAppSettings().getStoredPath (Ids::defaultUserModulePath));
-
-            defaultJuceModulePathValue.addListener (this);
-            defaultUserModulePathValue.addListener (this);
-
             addAndMakeVisible (group);
             refresh();
         }
@@ -169,8 +170,8 @@ private:
                 if (exporter->isCLion())
                     continue;
 
-                auto key = modules.isJuceModule (moduleID) ? Ids::defaultJuceModulePath
-                                                           : Ids::defaultUserModulePath;
+                auto key = isJUCEModule (moduleID) ? Ids::defaultJuceModulePath
+                                                   : Ids::defaultUserModulePath;
 
                 Value src (modulePathValueSources.add (new DependencyPathValueSource (exporter->getPathForModuleValue (moduleID),
                                                                                       key, exporter->getTargetOSForExporter())));
@@ -191,8 +192,8 @@ private:
 
             globalPathValue.referTo (modules.getShouldUseGlobalPathValue (moduleID));
 
-            auto menuItemString = (TargetOS::getThisOS() == TargetOS::osx ? "\"Projucer->Global Search Paths...\""
-                                                                          : "\"File->Global Search Paths...\"");
+            auto menuItemString = (TargetOS::getThisOS() == TargetOS::osx ? "\"Projucer->Global Paths...\""
+                                                                          : "\"File->Global Paths...\"");
 
             props.add (new BooleanPropertyComponent (globalPathValue,
                                                      "Use global path", "Use global path for this module"),
@@ -213,29 +214,17 @@ private:
                        "making it easy to browse/edit the module's classes. If disabled, then only the minimum number of files "
                        "required to compile it will appear inside your project.");
 
-            StringArray possibleValues;
-            possibleValues.add ("(Use Default)");
-            possibleValues.add ("Enabled");
-            possibleValues.add ("Disabled");
-
-            Array<var> mappings;
-            mappings.add (Project::configFlagDefault);
-            mappings.add (Project::configFlagEnabled);
-            mappings.add (Project::configFlagDisabled);
-
-            ModuleDescription info (modules.getModuleInfo (moduleID));
+            auto info = modules.getModuleInfo (moduleID);
 
             if (info.isValid())
             {
                 OwnedArray <Project::ConfigFlag> configFlags;
                 LibraryModule (info).getConfigFlags (project, configFlags);
 
-                for (int i = 0; i < configFlags.size(); ++i)
+                for (auto* flag : configFlags)
                 {
-                    ChoicePropertyComponent* c = new ChoicePropertyComponent (configFlags[i]->value,
-                                                                              configFlags[i]->symbol,
-                                                                              possibleValues, mappings);
-                    c->setTooltip (configFlags[i]->description);
+                    auto* c = new ChoicePropertyComponent (flag->value, flag->symbol);
+                    c->setTooltip (flag->description);
                     props.add (c);
                 }
             }
@@ -244,9 +233,10 @@ private:
             parentSizeChanged();
         }
 
-        void parentSizeChanged() override  { updateSize (*this, group); }
+        void parentSizeChanged() override      { updateSize (*this, group); }
+        void resized() override                { group.setBounds (getLocalBounds().withTrimmedLeft (12)); }
 
-        void resized() override { group.setBounds (getLocalBounds().withTrimmedLeft (12)); }
+        String getModuleID() const noexcept    { return moduleID; }
 
     private:
         PropertyGroupComponent group;
@@ -340,20 +330,18 @@ private:
         };
 
         //==============================================================================
-        class MissingDependenciesComponent  : public PropertyComponent,
-                                              public Button::Listener
+        class MissingDependenciesComponent  : public PropertyComponent
         {
         public:
             MissingDependenciesComponent (Project& p, const String& modID)
                 : PropertyComponent ("Dependencies", 100),
                   project (p), moduleID (modID),
-                  missingDependencies (project.getModules().getExtraDependenciesNeeded (modID)),
-                  fixButton ("Add Required Modules")
+                  missingDependencies (project.getModules().getExtraDependenciesNeeded (modID))
             {
                 addAndMakeVisible (fixButton);
                 fixButton.setColour (TextButton::buttonColourId, Colours::red);
                 fixButton.setColour (TextButton::textColourOffId, Colours::white);
-                fixButton.addListener (this);
+                fixButton.onClick = [this] { fixDependencies(); };
             }
 
             void refresh() override {}
@@ -368,7 +356,7 @@ private:
                 g.drawFittedText (text, getLocalBounds().reduced (10), Justification::topLeft, 3);
             }
 
-            void buttonClicked (Button*) override
+            void fixDependencies()
             {
                 ModuleList list;
 
@@ -406,7 +394,7 @@ private:
             Project& project;
             String moduleID;
             StringArray missingDependencies;
-            TextButton fixButton;
+            TextButton fixButton { "Add Required Modules" };
 
             bool tryToFix (ModuleList& list)
             {
@@ -440,7 +428,7 @@ private:
                     if (rootItem == nullptr)
                         return;
 
-                    for (auto i = 0; i < rootItem->getNumSubItems(); ++i)
+                    for (int i = 0; i < rootItem->getNumSubItems(); ++i)
                     {
                         if (auto* subItem = dynamic_cast<ProjectTreeItemBase*> (rootItem->getSubItem (i)))
                         {
@@ -486,7 +474,8 @@ private:
 };
 
 //==============================================================================
-class EnabledModulesItem   : public ProjectTreeItemBase
+class EnabledModulesItem   : public ProjectTreeItemBase,
+                             private Value::Listener
 {
 public:
     EnabledModulesItem (Project& p)
@@ -494,6 +483,14 @@ public:
           moduleListTree (p.getModules().state)
     {
         moduleListTree.addListener (this);
+
+        projectCppStandardValue.referTo (project.getProjectValue (Ids::cppLanguageStandard));
+        defaultJuceModulePathValue.referTo (getAppSettings().getStoredPath (Ids::defaultJuceModulePath));
+        defaultUserModulePathValue.referTo (getAppSettings().getStoredPath (Ids::defaultUserModulePath));
+
+        projectCppStandardValue.addListener (this);
+        defaultJuceModulePathValue.addListener (this);
+        defaultUserModulePathValue.addListener (this);
     }
 
     int getItemHeight() const override      { return 22; }
@@ -509,7 +506,7 @@ public:
 
     void showDocument() override
     {
-        if (ProjectContentComponent* pcc = getProjectContentComponent())
+        if (auto* pcc = getProjectContentComponent())
             pcc->setEditorComponent (new ModulesInformationComponent (project), nullptr);
     }
 
@@ -523,7 +520,7 @@ public:
 
     bool isInterestedInFileDrag (const StringArray& files) override
     {
-        for (int i = files.size(); --i >= 0;)
+        for (auto i = files.size(); --i >= 0;)
             if (ModuleDescription (getModuleFolder (files[i])).isValid())
                 return true;
 
@@ -534,9 +531,9 @@ public:
     {
         Array<ModuleDescription> modules;
 
-        for (int i = files.size(); --i >= 0;)
+        for (auto f : files)
         {
-            ModuleDescription m (getModuleFolder (files[i]));
+            ModuleDescription m (getModuleFolder (f));
 
             if (m.isValid())
                 modules.add (m);
@@ -559,7 +556,7 @@ public:
         auto& modules = project.getModules();
         PopupMenu knownModules, jucePathModules, userPathModules, exporterPathsModules;
 
-        auto index = 100;
+        int index = 100;
         for (auto m : getAvailableModulesInGlobalJucePath())
             jucePathModules.addItem (index++, m, ! modules.isModuleEnabled (m));
 
@@ -588,6 +585,7 @@ public:
     void handlePopupMenuResult (int resultCode) override
     {
         auto& modules = project.getModules();
+        auto numModulesBefore = modules.getNumModules();
 
         if (resultCode == 1001)
         {
@@ -601,6 +599,14 @@ public:
                 modules.addModuleInteractive (getAvailableModulesInGlobalUserPath() [resultCode - 200]);
             else if (resultCode < 400)
                 modules.addModuleInteractive (getAvailableModulesInExporterPaths() [resultCode - 300]);
+        }
+
+        if (modules.getNumModules() == numModulesBefore + 1)
+        {
+            StringPairArray data;
+            data.set ("label",  modules.getModuleID (modules.getNumModules() - 1));
+
+            Analytics::getInstance()->logEvent ("Module Added", data, ProjucerAnalyticsEvent::projectEvent);
         }
     }
 
@@ -662,6 +668,36 @@ public:
 private:
     Project& project;
     ValueTree moduleListTree;
+    Value projectCppStandardValue, defaultJuceModulePathValue, defaultUserModulePathValue;
+
+    //==============================================================================
+    void valueChanged (Value& v) override
+    {
+        if (v == projectCppStandardValue)
+        {
+            for (int i = 0; i < getNumSubItems(); ++i)
+            {
+                if (auto* moduleItem = dynamic_cast<ModuleItem*> (getSubItem (i)))
+                {
+                    if (moduleItem->checkCppStandard())
+                    {
+                        refreshSubItems();
+                        return;
+                    }
+                }
+            }
+        }
+        else if (v == defaultJuceModulePathValue || v == defaultUserModulePathValue)
+        {
+            auto juceModulePathChanged = (v == defaultJuceModulePathValue);
+
+            for (int i = 0; i < getNumSubItems(); ++i)
+                if (auto* moduleItem = dynamic_cast<ModuleItem*> (getSubItem (i)))
+                    moduleItem->refreshModuleInfoIfCurrentlyShowing (juceModulePathChanged);
+
+            refreshSubItems();
+        }
+    }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EnabledModulesItem)
 };

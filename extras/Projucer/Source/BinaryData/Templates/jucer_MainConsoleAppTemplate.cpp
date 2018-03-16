@@ -3,13 +3,12 @@
 
     This file was auto-generated!
 
-    It contains the basic startup code for a Juce application.
+    It contains the basic startup code for a JUCE application.
 
   ==============================================================================
 */
 
-APPHEADERS
-
+%%app_headers%%
 
 //==============================================================================
 int main (int argc, char* argv[])

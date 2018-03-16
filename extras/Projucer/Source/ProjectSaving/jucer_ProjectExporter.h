@@ -28,7 +28,7 @@
 
 #include "../Project/jucer_Project.h"
 #include "../Utility/UI/PropertyComponents/jucer_DependencyPathPropertyComponent.h"
-#include "../Utility/UI/PropertyComponents/jucer_TextWithDefaultPropertyComponent.h"
+#include "../Utility/UI/PropertyComponents/jucer_PropertyComponentsWithEnablement.h"
 
 class ProjectSaver;
 
@@ -50,7 +50,7 @@ public:
             Image image (Image::ARGB, 200, 200, true);
             Graphics g (image);
 
-            ScopedPointer<Drawable> svgDrawable = Drawable::createFromImageData (iconData, (size_t) iconDataSize);
+            ScopedPointer<Drawable> svgDrawable (Drawable::createFromImageData (iconData, (size_t) iconDataSize));
 
             svgDrawable->drawWithin (g, image.getBounds().toFloat(), RectanglePlacement::fillDestination, 1.0f);
 
@@ -134,32 +134,27 @@ public:
     String getName() const;
     File getTargetFolder() const;
 
-    Project& getProject() noexcept              { return project; }
-    const Project& getProject() const noexcept  { return project; }
+    Project& getProject() noexcept                        { return project; }
+    const Project& getProject() const noexcept            { return project; }
 
-    Value getSetting (const Identifier& nm)     { return settings.getPropertyAsValue (nm, project.getUndoManagerFor (settings)); }
+    UndoManager* getUndoManager() const                   { return project.getUndoManagerFor (settings); }
+
+    Value getSetting (const Identifier& nm)               { return settings.getPropertyAsValue (nm, project.getUndoManagerFor (settings)); }
     String getSettingString (const Identifier& nm) const  { return settings [nm]; }
 
-    Value getTargetLocationValue()              { return getSetting (Ids::targetFolder); }
-    String getTargetLocationString() const      { return getSettingString (Ids::targetFolder); }
+    Value getTargetLocationValue()                        { return targetLocationValue.getPropertyAsValue(); }
+    String getTargetLocationString() const                { return targetLocationValue.get(); }
 
-    Value getExtraCompilerFlags()               { return getSetting (Ids::extraCompilerFlags); }
-    String getExtraCompilerFlagsString() const  { return getSettingString (Ids::extraCompilerFlags).replaceCharacters ("\r\n", "  "); }
+    String getExtraCompilerFlagsString() const            { return extraCompilerFlagsValue.get().toString().replaceCharacters ("\r\n", "  "); }
+    String getExtraLinkerFlagsString() const              { return extraLinkerFlagsValue.get().toString().replaceCharacters ("\r\n", "  "); }
 
-    Value getExtraLinkerFlags()                 { return getSetting (Ids::extraLinkerFlags); }
-    String getExtraLinkerFlagsString() const    { return getSettingString (Ids::extraLinkerFlags).replaceCharacters ("\r\n", "  "); }
+    String getExternalLibrariesString() const             { return getSearchPathsFromString (externalLibrariesValue.get().toString()).joinIntoString (";"); }
 
-    Value getExternalLibraries()                { return getSetting (Ids::externalLibraries); }
-    String getExternalLibrariesString() const   { return getSearchPathsFromString (getSettingString (Ids::externalLibraries)).joinIntoString (";"); }
+    bool shouldUseGNUExtensions() const                   { return gnuExtensionsValue.get();}
 
-    Value getUserNotes()                        { return getSetting (Ids::userNotes); }
-
-    Value getVST3PathValue() const              { return vst3Path; }
-    Value getRTASPathValue() const              { return rtasPath; }
-    Value getAAXPathValue() const               { return aaxPath; }
-
-    Value getShouldUseGNUExtensionsValue()      { return getSetting (Ids::enableGNUExtensions); }
-    bool shouldUseGNUExtensions() const         { return (getSettingString (Ids::enableGNUExtensions) == "1");}
+    Value getVST3PathValue() const                        { return vst3Path; }
+    Value getRTASPathValue() const                        { return rtasPath; }
+    Value getAAXPathValue() const                         { return aaxPath; }
 
     // NB: this is the path to the parent "modules" folder that contains the named module, not the
     // module folder itself.
@@ -182,8 +177,6 @@ public:
 
     void addProjectPathToBuildPathList (StringArray&, const RelativePath&, int index = -1) const;
 
-    Value getBigIconImageItemID()               { return getSetting (Ids::bigIcon); }
-    Value getSmallIconImageItemID()             { return getSetting (Ids::smallIcon); }
     Drawable* getBigIcon() const;
     Drawable* getSmallIcon() const;
     Image getBestIconForSize (int size, bool returnNullIfNothingBigEnough) const;
@@ -191,7 +184,7 @@ public:
     String getExporterIdentifierMacro() const
     {
         return "JUCER_" + settings.getType().toString() + "_"
-                + String::toHexString (getSettingString (Ids::targetFolder).hashCode()).toUpperCase();
+                + String::toHexString (getTargetLocationString().hashCode()).toUpperCase();
     }
 
     // An exception that can be thrown by the create() method.
@@ -243,49 +236,35 @@ public:
 
         //==============================================================================
         virtual void createConfigProperties (PropertyListBuilder&) = 0;
-        virtual var getDefaultOptimisationLevel() const = 0;
         virtual String getModuleLibraryArchName() const = 0;
 
         //==============================================================================
-        Value getNameValue()                                { return getValue (Ids::name); }
-        String getName() const                              { return config [Ids::name]; }
+        String getName() const                                 { return configNameValue.get(); }
+        bool isDebug() const                                   { return isDebugValue.get(); }
 
-        Value isDebugValue()                                { return getValue (Ids::isDebug); }
-        bool isDebug() const                                { return config [Ids::isDebug]; }
+        String getTargetBinaryNameString() const               { return targetNameValue.get(); }
+        String getTargetBinaryRelativePathString() const       { return targetBinaryPathValue.get(); }
 
-        Value getTargetBinaryName()                         { return getValue (Ids::targetName); }
-        String getTargetBinaryNameString() const            { return config [Ids::targetName]; }
-
-        // the path relative to the build folder in which the binary should go
-        Value getTargetBinaryRelativePath()                 { return getValue (Ids::binaryPath); }
-        String getTargetBinaryRelativePathString() const    { return config [Ids::binaryPath]; }
-
-        Value getOptimisationLevel()                        { return getValue (Ids::optimisation); }
-        int getOptimisationLevelInt() const                 { return config [Ids::optimisation]; }
+        int getOptimisationLevelInt() const                    { return optimisationLevelValue.get(); }
         String getGCCOptimisationFlag() const;
+        bool isLinkTimeOptimisationEnabled() const             { return linkTimeOptimisationValue.get(); }
 
-        Value getLinkTimeOptimisationEnabledValue()         { return getValue (Ids::linkTimeOptimisation); }
-        bool isLinkTimeOptimisationEnabled() const          { return config [Ids::linkTimeOptimisation]; }
+        String getBuildConfigPreprocessorDefsString() const    { return ppDefinesValue.get(); }
+        StringPairArray getAllPreprocessorDefs() const;        // includes inherited definitions
+        StringPairArray getUniquePreprocessorDefs() const;     // returns pre-processor definitions that are not already in the project pre-processor defs
 
-        Value getBuildConfigPreprocessorDefs()              { return getValue (Ids::defines); }
-        String getBuildConfigPreprocessorDefsString() const { return config [Ids::defines]; }
-        StringPairArray getAllPreprocessorDefs() const;    // includes inherited definitions
-        StringPairArray getUniquePreprocessorDefs() const; // returns pre-processor definitions that are not already in the project pre-processor defs
-
-        Value getHeaderSearchPathValue()                    { return getValue (Ids::headerPath); }
-        String getHeaderSearchPathString() const            { return config [Ids::headerPath]; }
+        String getHeaderSearchPathString() const               { return headerSearchPathValue.get(); }
         StringArray getHeaderSearchPaths() const;
 
-        Value getLibrarySearchPathValue()                   { return getValue (Ids::libraryPath); }
-        String getLibrarySearchPathString() const           { return config [Ids::libraryPath]; }
+        String getLibrarySearchPathString() const              { return librarySearchPathValue.get(); }
         StringArray getLibrarySearchPaths() const;
         String getGCCLibraryPathFlags() const;
 
-        Value getUserNotes()                                { return getValue (Ids::userNotes); }
+        //==============================================================================
+        Value getValue (const Identifier& nm)                  { return config.getPropertyAsValue (nm, getUndoManager()); }
+        UndoManager* getUndoManager() const                    { return project.getUndoManagerFor (config); }
 
-        Value getValue (const Identifier& nm)               { return config.getPropertyAsValue (nm, getUndoManager()); }
-        UndoManager* getUndoManager() const                 { return project.getUndoManagerFor (config); }
-
+        //==============================================================================
         void createPropertyEditors (PropertyListBuilder&);
         void addGCCOptimisationProperty (PropertyListBuilder&);
         void removeFromExporter();
@@ -295,11 +274,16 @@ public:
         Project& project;
         const ProjectExporter& exporter;
 
+    protected:
+        ValueWithDefault isDebugValue, configNameValue, targetNameValue, targetBinaryPathValue, optimisationLevelValue,
+                         linkTimeOptimisationValue, ppDefinesValue, headerSearchPathValue, librarySearchPathValue, userNotesValue;
+
     private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BuildConfiguration)
     };
 
-    void addNewConfiguration (const BuildConfiguration* configToCopy);
+    void addNewConfigurationFromExisting (const BuildConfiguration& configToCopy);
+    void addNewConfiguration (bool isDebugConfig);
     bool hasConfigurationNamed (const String& name) const;
     String getUniqueConfigName (String name) const;
 
@@ -348,8 +332,8 @@ public:
     void createDefaultModulePaths();
 
     //==============================================================================
-    Value getExporterPreprocessorDefs()                 { return getSetting (Ids::extraDefs); }
-    String getExporterPreprocessorDefsString() const    { return getSettingString (Ids::extraDefs); }
+    Value getExporterPreprocessorDefsValue()            { return extraPPDefsValue.getPropertyAsValue(); }
+    String getExporterPreprocessorDefsString() const    { return extraPPDefsValue.get(); }
 
     // includes exporter, project + config defs
     StringPairArray getAllPreprocessorDefs (const BuildConfiguration& config, const ProjectType::Target::Type targetType) const;
@@ -381,6 +365,9 @@ protected:
     const File projectFolder;
     Value vst3Path, rtasPath, aaxPath; // these must be initialised in the specific exporter c'tors!
 
+    ValueWithDefault targetLocationValue, extraCompilerFlagsValue, extraLinkerFlagsValue, externalLibrariesValue,
+                     userNotesValue, gnuExtensionsValue, bigIconValue, smallIconValue, extraPPDefsValue;
+
     mutable Array<Project::Item> itemGroups;
     void initItemGroups() const;
     Project::Item* modulesGroup = nullptr;
@@ -391,15 +378,8 @@ protected:
 
     static String getDefaultBuildsRootFolder()            { return "Builds/"; }
 
-    static String getStaticLibbedFilename (String name)
-    {
-        return addSuffix (addLibPrefix (name), ".a");
-    }
-
-    static String getDynamicLibbedFilename (String name)
-    {
-        return addSuffix (addLibPrefix (name), ".so");
-    }
+    static String getStaticLibbedFilename (String name)   { return addSuffix (addLibPrefix (name), ".a"); }
+    static String getDynamicLibbedFilename (String name)  { return addSuffix (addLibPrefix (name), ".so"); }
 
     virtual void addPlatformSpecificSettingsForProjectType (const ProjectType&) = 0;
 

@@ -59,27 +59,18 @@ namespace ProjectProperties
                                        .getOrCreateChildWithName (liveSettingsSubtype, nullptr);
     }
 
-    static const ValueTree getLiveSettingsConst (Project& project)
+    static ValueWithDefault getLiveSetting (Project& p, const Identifier& i, var defaultValue = var())
     {
-        return project.getProjectRoot().getChildWithName (liveSettingsType)
-                                       .getChildWithName (liveSettingsSubtype);
+        auto tree = getLiveSettings (p);
+        return { tree, i, p.getUndoManagerFor (tree), defaultValue };
     }
 
-    static Value getLiveSetting    (Project& p, const Identifier& i)  { return getLiveSettings (p).getPropertyAsValue (i, p.getUndoManagerFor (getLiveSettings (p))); }
-    static var   getLiveSettingVar (Project& p, const Identifier& i)  { return getLiveSettingsConst (p) [i]; }
-
-    static Value  getUserHeaderPathValue (Project& p)                { return getLiveSetting    (p, Ids::headerPath); }
-    static String getUserHeaderPathString (Project& p)               { return getLiveSettingVar (p, Ids::headerPath); }
-    static Value  getSystemHeaderPathValue (Project& p)              { return getLiveSetting    (p, Ids::systemHeaderPath); }
-    static String getSystemHeaderPathString (Project& p)             { return getLiveSettingVar (p, Ids::systemHeaderPath); }
-    static Value  getExtraDLLsValue (Project& p)                     { return getLiveSetting    (p, Ids::extraDLLs); }
-    static String getExtraDLLsString (Project& p)                    { return getLiveSettingVar (p, Ids::extraDLLs); }
-    static Value  getExtraCompilerFlagsValue (Project& p)            { return getLiveSetting    (p, Ids::extraCompilerFlags); }
-    static String getExtraCompilerFlagsString (Project& p)           { return getLiveSettingVar (p, Ids::extraCompilerFlags); }
-    static Value  getExtraPreprocessorDefsValue (Project& p)         { return getLiveSetting    (p, Ids::defines); }
-    static String getExtraPreprocessorDefsString (Project& p)        { return getLiveSettingVar (p, Ids::defines); }
-    static Value  getWindowsTargetPlatformVersionValue (Project& p)  { return getLiveSetting    (p, Ids::liveWindowsTargetPlatformVersion); }
-    static String getWindowsTargetPlatformVersionString (Project& p) { return getLiveSettingVar (p, Ids::liveWindowsTargetPlatformVersion); }
+    static ValueWithDefault  getUserHeaderPathValue (Project& p)                { return getLiveSetting    (p, Ids::headerPath); }
+    static ValueWithDefault  getSystemHeaderPathValue (Project& p)              { return getLiveSetting    (p, Ids::systemHeaderPath); }
+    static ValueWithDefault  getExtraDLLsValue (Project& p)                     { return getLiveSetting    (p, Ids::extraDLLs); }
+    static ValueWithDefault  getExtraCompilerFlagsValue (Project& p)            { return getLiveSetting    (p, Ids::extraCompilerFlags); }
+    static ValueWithDefault  getExtraPreprocessorDefsValue (Project& p)         { return getLiveSetting    (p, Ids::defines); }
+    static ValueWithDefault  getWindowsTargetPlatformVersionValue (Project& p)  { return getLiveSetting    (p, Ids::liveWindowsTargetPlatformVersion, "10.0.16299.0"); }
 
     static File getProjucerTempFolder()
     {
@@ -92,7 +83,7 @@ namespace ProjectProperties
 
     static File getCacheLocation (Project& project)
     {
-        String cacheFolderName = project.getProjectFilenameRoot() + "_" + project.getProjectUID();
+        auto cacheFolderName = project.getProjectFilenameRootString() + "_" + project.getProjectUIDString();
 
        #if JUCE_DEBUG
         cacheFolderName += "_debug";
@@ -109,26 +100,22 @@ void LiveBuildProjectSettings::getLiveSettings (Project& project, PropertyListBu
 {
     using namespace ProjectProperties;
 
-    props.addSearchPathProperty (getUserHeaderPathValue (project), "User header paths", "User header search paths.");
+    props.addSearchPathProperty (getUserHeaderPathValue (project), "User Header Paths", "User header search paths.");
     props.addSearchPathProperty (getSystemHeaderPathValue (project), "System header paths", "System header search paths.");
 
     props.add (new TextPropertyComponent (getExtraPreprocessorDefsValue (project), "Preprocessor Definitions", 32768, true),
                "Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace or commas "
                "to separate the items - to include a space or comma in a definition, precede it with a backslash.");
 
-    props.add (new TextPropertyComponent (getExtraCompilerFlagsValue (project), "Extra compiler flags", 2048, true),
+    props.add (new TextPropertyComponent (getExtraCompilerFlagsValue (project), "Extra Compiler Flags", 2048, true),
                "Extra command-line flags to be passed to the compiler. This string can contain references to preprocessor"
                " definitions in the form ${NAME_OF_DEFINITION}, which will be replaced with their values.");
 
-    props.add (new TextPropertyComponent (getExtraDLLsValue (project), "Extra dynamic libraries", 2048, true),
-               "Extra dynamic libs that the running code may require. Use new-lines or commas to separate the items");
+    props.add (new TextPropertyComponent (getExtraDLLsValue (project), "Extra Dynamic Libraries", 2048, true),
+               "Extra dynamic libs that the running code may require. Use new-lines or commas to separate the items.");
 
-    static const char* targetPlatformNames[] = { "(default)", "8.1", "10.0.10240.0", "10.0.10586.0", "10.0.14393.0", "10.0.16299.0", nullptr };
-    const var targetPlatforms[]              = { var(),       "8.1", "10.0.10240.0", "10.0.10586.0", "10.0.14393.0", "10.0.16299.0" };
-
-    props.add (new ChoicePropertyComponent (getWindowsTargetPlatformVersionValue (project), "Windows Target Platform",
-                                            StringArray (targetPlatformNames), Array<var> (targetPlatforms, numElementsInArray (targetPlatforms))),
-                                            "The Windows target platform to use");
+    props.add (new TextPropertyComponent (getWindowsTargetPlatformVersionValue (project), "Windows Target Platform", 256, false),
+                                         "The Windows target platform to use.");
 }
 
 void LiveBuildProjectSettings::updateNewlyOpenedProject (Project&) { /* placeholder */ }
@@ -177,7 +164,7 @@ public:
         const String pipeName ("ipc_" + String::toHexString (Random().nextInt64()));
 
         const String command (createCommandLineForLaunchingServer (pipeName,
-                                                                   owner.project.getProjectUID(),
+                                                                   owner.project.getProjectUIDString(),
                                                                    ProjectProperties::getCacheLocation (owner.project)));
 
        #if RUN_CLANG_IN_CHILD_PROCESS
@@ -293,12 +280,12 @@ public:
         if (isRunningApp && server != nullptr)
             server->killServerWithoutMercy();
 
-        server = nullptr;
+        server.reset();
     }
 
     void restartServer()
     {
-        server = nullptr;
+        server.reset();
         server = new ClientIPC (owner);
         sendRebuild();
     }
@@ -331,13 +318,13 @@ public:
         build.setUserIncludes (getUserIncludes());
 
         build.setGlobalDefs (getGlobalDefs (project));
-        build.setCompileFlags (ProjectProperties::getExtraCompilerFlagsString (project).trim());
+        build.setCompileFlags (ProjectProperties::getExtraCompilerFlagsValue (project).get().toString().trim());
         build.setExtraDLLs (getExtraDLLs());
         build.setJuceModulesFolder (EnabledModuleList::findDefaultModulesFolder (project).getFullPathName());
 
         build.setUtilsCppInclude (project.getAppIncludeFile().getFullPathName());
 
-        build.setWindowsTargetPlatformVersion (ProjectProperties::getWindowsTargetPlatformVersionString (project));
+        build.setWindowsTargetPlatformVersion (ProjectProperties::getWindowsTargetPlatformVersionValue (project).get().toString());
 
         scanForProjectFiles (project, build);
 
@@ -391,17 +378,36 @@ private:
 
     static String getGlobalDefs (Project& proj)
     {
-        String defs (ProjectProperties::getExtraPreprocessorDefsString (proj));
+        StringArray defs;
+
+        defs.add (ProjectProperties::getExtraPreprocessorDefsValue (proj).get().toString());
+
+        {
+            auto projectDefines = proj.getPreprocessorDefs();
+            StringArray result;
+
+            for (int i = 0; i < projectDefines.size(); ++i)
+            {
+                auto def = projectDefines.getAllKeys()[i];
+                auto value = projectDefines.getAllValues()[i];
+
+                if (value.isNotEmpty())
+                    def << "=" << value;
+
+                 defs.add (def);
+            }
+        }
 
         for (Project::ExporterIterator exporter (proj); exporter.next();)
             if (exporter->canLaunchProject())
-                defs << " " << exporter->getExporterIdentifierMacro() << "=1";
+                defs.add (exporter->getExporterIdentifierMacro() + "=1");
 
         // Use the JUCE implementation of std::function until the live build
         // engine can compile the one from the standard library
-        defs << " _LIBCPP_FUNCTIONAL=1";
+        defs.add (" _LIBCPP_FUNCTIONAL=1");
+        defs.removeEmptyStrings();
 
-        return defs;
+        return defs.joinIntoString (" ");
     }
 
     static void scanProjectItem (const Project::Item& projectItem, Array<File>& compileUnits, Array<File>& userFiles)
@@ -515,14 +521,14 @@ private:
     {
         StringArray paths;
         paths.add (project.getGeneratedCodeFolder().getFullPathName());
-        paths.addArray (getSearchPathsFromString (ProjectProperties::getUserHeaderPathString (project)));
+        paths.addArray (getSearchPathsFromString (ProjectProperties::getUserHeaderPathValue (project).get().toString()));
         return convertSearchPathsToAbsolute (paths);
     }
 
     StringArray getSystemIncludePaths()
     {
         StringArray paths;
-        paths.addArray (getSearchPathsFromString (ProjectProperties::getSystemHeaderPathString (project)));
+        paths.addArray (getSearchPathsFromString (ProjectProperties::getSystemHeaderPathValue (project).get().toString()));
 
         auto isVST3Host = project.getModules().isModuleEnabled ("juce_audio_processors")
                        && project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3");
@@ -553,7 +559,7 @@ private:
     StringArray getExtraDLLs()
     {
         StringArray dlls;
-        dlls.addTokens (ProjectProperties::getExtraDLLsString (project), "\n\r,", StringRef());
+        dlls.addTokens (ProjectProperties::getExtraDLLsValue (project).get().toString(), "\n\r,", StringRef());
         dlls.trim();
         dlls.removeEmptyStrings();
         return dlls;
@@ -578,7 +584,7 @@ CompileEngineChildProcess::~CompileEngineChildProcess()
 {
     ProjucerApplication::getApp().openDocumentManager.removeListener (this);
 
-    process = nullptr;
+    process.reset();
     lastComponentList.clear();
 }
 
@@ -588,7 +594,7 @@ void CompileEngineChildProcess::createProcess()
     process = new ChildProcess (*this, project);
 
     if (! process->openedOk)
-        process = nullptr;
+        process.reset();
 
     updateAllEditors();
 }
@@ -662,7 +668,7 @@ bool CompileEngineChildProcess::canKillApp() const
 
 void CompileEngineChildProcess::killApp()
 {
-    runningAppProcess = nullptr;
+    runningAppProcess.reset();
 }
 
 void CompileEngineChildProcess::handleAppLaunched()
@@ -675,7 +681,12 @@ void CompileEngineChildProcess::handleAppLaunched()
 void CompileEngineChildProcess::handleAppQuit()
 {
     DBG ("handleAppQuit");
-    runningAppProcess = nullptr;
+    runningAppProcess.reset();
+}
+
+bool CompileEngineChildProcess::isAppRunning() const noexcept
+{
+    return runningAppProcess != nullptr && runningAppProcess->isRunningApp;
 }
 
 //==============================================================================
@@ -874,15 +885,6 @@ void CompileEngineChildProcess::handleClassListChanged (const ValueTree& newList
 
 void CompileEngineChildProcess::handleBuildFailed()
 {
-    auto* mcm = ModalComponentManager::getInstance();
-    auto* pcc = findProjectContentComponent();
-
-    if (mcm->getNumModalComponents() > 0 || pcc == nullptr || pcc->getCurrentTabIndex() == 1)
-        return;
-
-    if (errorList.getNumErrors() > 0)
-        ProjucerApplication::getCommandManager().invokeDirectly (CommandIDs::showBuildTab, true);
-
     ProjucerApplication::getCommandManager().commandStatusChanged();
 }
 

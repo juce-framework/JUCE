@@ -27,13 +27,11 @@
 namespace juce
 {
 
-class ModalComponentManager::ModalItem  : public ComponentMovementWatcher
+struct ModalComponentManager::ModalItem  : public ComponentMovementWatcher
 {
-public:
-    ModalItem (Component* const comp, const bool autoDelete_)
+    ModalItem (Component* comp, bool shouldAutoDelete)
         : ComponentMovementWatcher (comp),
-          component (comp), returnValue (0),
-          isActive (true), autoDelete (autoDelete_)
+          component (comp), autoDelete (shouldAutoDelete)
     {
         jassert (comp != nullptr);
     }
@@ -42,8 +40,7 @@ public:
 
     void componentPeerChanged() override
     {
-        if (! component->isShowing())
-            cancel();
+        componentVisibilityChanged();
     }
 
     void componentVisibilityChanged() override
@@ -69,17 +66,16 @@ public:
         {
             isActive = false;
 
-            if (ModalComponentManager* mcm = ModalComponentManager::getInstanceWithoutCreating())
+            if (auto* mcm = ModalComponentManager::getInstanceWithoutCreating())
                 mcm->triggerAsyncUpdate();
         }
     }
 
     Component* component;
     OwnedArray<Callback> callbacks;
-    int returnValue;
-    bool isActive, autoDelete;
+    int returnValue = 0;
+    bool isActive = true, autoDelete;
 
-private:
     JUCE_DECLARE_NON_COPYABLE (ModalItem)
 };
 
@@ -94,7 +90,7 @@ ModalComponentManager::~ModalComponentManager()
     clearSingletonInstance();
 }
 
-juce_ImplementSingleton_SingleThreaded (ModalComponentManager)
+JUCE_IMPLEMENT_SINGLETON (ModalComponentManager)
 
 
 //==============================================================================
@@ -112,7 +108,7 @@ void ModalComponentManager::attachCallback (Component* component, Callback* call
 
         for (int i = stack.size(); --i >= 0;)
         {
-            ModalItem* const item = stack.getUnchecked(i);
+            auto* item = stack.getUnchecked(i);
 
             if (item->component == component)
             {
@@ -128,7 +124,7 @@ void ModalComponentManager::endModal (Component* component)
 {
     for (int i = stack.size(); --i >= 0;)
     {
-        ModalItem* const item = stack.getUnchecked(i);
+        auto* item = stack.getUnchecked(i);
 
         if (item->component == component)
             item->cancel();
@@ -139,7 +135,7 @@ void ModalComponentManager::endModal (Component* component, int returnValue)
 {
     for (int i = stack.size(); --i >= 0;)
     {
-        ModalItem* const item = stack.getUnchecked(i);
+        auto* item = stack.getUnchecked(i);
 
         if (item->component == component)
         {
@@ -152,19 +148,22 @@ void ModalComponentManager::endModal (Component* component, int returnValue)
 int ModalComponentManager::getNumModalComponents() const
 {
     int n = 0;
-    for (int i = 0; i < stack.size(); ++i)
-        if (stack.getUnchecked(i)->isActive)
+
+    for (auto* item : stack)
+        if (item->isActive)
             ++n;
 
     return n;
 }
 
-Component* ModalComponentManager::getModalComponent (const int index) const
+Component* ModalComponentManager::getModalComponent (int index) const
 {
     int n = 0;
+
     for (int i = stack.size(); --i >= 0;)
     {
-        const ModalItem* const item = stack.getUnchecked(i);
+        auto* item = stack.getUnchecked(i);
+
         if (item->isActive)
             if (n++ == index)
                 return item->component;
@@ -173,19 +172,16 @@ Component* ModalComponentManager::getModalComponent (const int index) const
     return nullptr;
 }
 
-bool ModalComponentManager::isModal (Component* const comp) const
+bool ModalComponentManager::isModal (const Component* comp) const
 {
-    for (int i = stack.size(); --i >= 0;)
-    {
-        const ModalItem* const item = stack.getUnchecked(i);
+    for (auto* item : stack)
         if (item->isActive && item->component == comp)
             return true;
-    }
 
     return false;
 }
 
-bool ModalComponentManager::isFrontModalComponent (Component* const comp) const
+bool ModalComponentManager::isFrontModalComponent (const Component* comp) const
 {
     return comp == getModalComponent (0);
 }
@@ -194,7 +190,7 @@ void ModalComponentManager::handleAsyncUpdate()
 {
     for (int i = stack.size(); --i >= 0;)
     {
-        const ModalItem* const item = stack.getUnchecked(i);
+        auto* item = stack.getUnchecked(i);
 
         if (! item->isActive)
         {
@@ -215,36 +211,39 @@ void ModalComponentManager::bringModalComponentsToFront (bool topOneShouldGrabFo
 
     for (int i = 0; i < getNumModalComponents(); ++i)
     {
-        Component* const c = getModalComponent (i);
+        auto* c = getModalComponent (i);
 
         if (c == nullptr)
             break;
 
-        ComponentPeer* peer = c->getPeer();
-
-        if (peer != nullptr && peer != lastOne)
+        if (auto* peer = c->getPeer())
         {
-            if (lastOne == nullptr)
+            if (peer != lastOne)
             {
-                peer->toFront (topOneShouldGrabFocus);
+                if (lastOne == nullptr)
+                {
+                    peer->toFront (topOneShouldGrabFocus);
 
-                if (topOneShouldGrabFocus)
-                    peer->grabFocus();
+                    if (topOneShouldGrabFocus)
+                        peer->grabFocus();
+                }
+                else
+                {
+                    peer->toBehind (lastOne);
+                }
+
+                lastOne = peer;
             }
-            else
-                peer->toBehind (lastOne);
-
-            lastOne = peer;
         }
     }
 }
 
 bool ModalComponentManager::cancelAllModalComponents()
 {
-    const int numModal = getNumModalComponents();
+    auto numModal = getNumModalComponents();
 
     for (int i = numModal; --i >= 0;)
-        if (Component* const c = getModalComponent(i))
+        if (auto* c = getModalComponent(i))
             c->exitModalState (0);
 
     return numModal > 0;
@@ -252,24 +251,6 @@ bool ModalComponentManager::cancelAllModalComponents()
 
 //==============================================================================
 #if JUCE_MODAL_LOOPS_PERMITTED
-class ModalComponentManager::ReturnValueRetriever     : public ModalComponentManager::Callback
-{
-public:
-    ReturnValueRetriever (int& v, bool& done) : value (v), finished (done) {}
-
-    void modalStateFinished (int returnValue) override
-    {
-        finished = true;
-        value = returnValue;
-    }
-
-private:
-    int& value;
-    bool& finished;
-
-    JUCE_DECLARE_NON_COPYABLE (ReturnValueRetriever)
-};
-
 int ModalComponentManager::runEventLoopForCurrentComponent()
 {
     // This can only be run from the message thread!
@@ -277,12 +258,12 @@ int ModalComponentManager::runEventLoopForCurrentComponent()
 
     int returnValue = 0;
 
-    if (Component* currentlyModal = getModalComponent (0))
+    if (auto* currentlyModal = getModalComponent (0))
     {
         FocusRestorer focusRestorer;
-
         bool finished = false;
-        attachCallback (currentlyModal, new ReturnValueRetriever (returnValue, finished));
+
+        attachCallback (currentlyModal, ModalCallbackFunction::create ([&] (int r) { returnValue = r; finished = true; }));
 
         JUCE_TRY
         {

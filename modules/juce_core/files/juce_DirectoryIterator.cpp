@@ -24,16 +24,13 @@ namespace juce
 {
 
 DirectoryIterator::DirectoryIterator (const File& directory, bool recursive,
-                                      const String& pattern, const int type)
+                                      const String& pattern, int type)
   : wildCards (parseWildcards (pattern)),
     fileFinder (directory, (recursive || wildCards.size() > 1) ? "*" : pattern),
     wildCard (pattern),
     path (File::addTrailingSeparator (directory.getFullPathName())),
-    index (-1),
-    totalNumFiles (-1),
     whatToLookFor (type),
-    isRecursive (recursive),
-    hasBeenAdvanced (false)
+    isRecursive (recursive)
 {
     // you have to specify the type of files you're looking for!
     jassert ((type & (File::findFiles | File::findDirectories)) != 0);
@@ -53,10 +50,10 @@ StringArray DirectoryIterator::parseWildcards (const String& pattern)
     return s;
 }
 
-bool DirectoryIterator::fileMatches (const StringArray& wildCards, const String& filename)
+bool DirectoryIterator::fileMatches (const StringArray& wildcards, const String& filename)
 {
-    for (int i = 0; i < wildCards.size(); ++i)
-        if (filename.matchesWildcard (wildCards[i], ! File::areFileNamesCaseSensitive()))
+    for (auto& w : wildcards)
+        if (filename.matchesWildcard (w, ! File::areFileNamesCaseSensitive()))
             return true;
 
     return false;
@@ -67,8 +64,8 @@ bool DirectoryIterator::next()
     return next (nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
 }
 
-bool DirectoryIterator::next (bool* const isDirResult, bool* const isHiddenResult, int64* const fileSize,
-                              Time* const modTime, Time* const creationTime, bool* const isReadOnly)
+bool DirectoryIterator::next (bool* isDirResult, bool* isHiddenResult, int64* fileSize,
+                              Time* modTime, Time* creationTime, bool* isReadOnly)
 {
     for (;;)
     {
@@ -79,7 +76,7 @@ bool DirectoryIterator::next (bool* const isDirResult, bool* const isHiddenResul
             if (subIterator->next (isDirResult, isHiddenResult, fileSize, modTime, creationTime, isReadOnly))
                 return true;
 
-            subIterator = nullptr;
+            subIterator.reset();
         }
 
         String filename;
@@ -98,8 +95,8 @@ bool DirectoryIterator::next (bool* const isDirResult, bool* const isHiddenResul
                 if (isDirectory)
                 {
                     if (isRecursive && ((whatToLookFor & File::ignoreHiddenFiles) == 0 || ! isHidden))
-                        subIterator = new DirectoryIterator (File::createFileWithoutCheckingPath (path + filename),
-                                                             true, wildCard, whatToLookFor);
+                        subIterator.reset (new DirectoryIterator (File::createFileWithoutCheckingPath (path + filename),
+                                                                  true, wildCard, whatToLookFor));
 
                     matches = (whatToLookFor & File::findDirectories) != 0;
                 }
@@ -156,8 +153,8 @@ float DirectoryIterator::getEstimatedProgress() const
     if (totalNumFiles <= 0)
         return 0.0f;
 
-    const float detailedIndex = (subIterator != nullptr) ? index + subIterator->getEstimatedProgress()
-                                                         : (float) index;
+    auto detailedIndex = (subIterator != nullptr) ? index + subIterator->getEstimatedProgress()
+                                                  : (float) index;
 
     return jlimit (0.0f, 1.0f, detailedIndex / totalNumFiles);
 }

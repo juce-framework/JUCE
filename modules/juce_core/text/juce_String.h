@@ -32,6 +32,8 @@ namespace juce
     dream of.
 
     @see StringArray, StringPairArray
+
+    @tags{Core}
 */
 class JUCE_API  String  final
 {
@@ -137,17 +139,6 @@ public:
 
     /** Destructor. */
     ~String() noexcept;
-
-    //==============================================================================
-   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
-    /** This is a static empty string object that can be used if you need a reference to one.
-        The value of String::empty is exactly the same as String(), and in almost all cases
-        it's better to avoid String::empty and just use String() or {} instead, so that the compiler
-        only has to reason about locally-constructed objects, rather than taking into account
-        the fact that you're referencing a global shared static memory address.
-    */
-    static const String empty;
-   #endif
 
     /** This is the character encoding type used internally to store the string.
 
@@ -1247,6 +1238,19 @@ public:
     */
     int getReferenceCount() const noexcept;
 
+    //==============================================================================
+   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
+    /** This was a static empty string object, but is now deprecated as it's too easy to accidentally
+        use it indirectly during a static constructor, leading to hard-to-find order-of-initialisation
+        problems.
+        @deprecated If you need an empty String object, just use String() or {}.
+        The only time you might miss having String::empty available might be if you need to return an
+        empty string from a function by reference, but if you need to do that, it's easy enough to use
+        a function-local static String object and return that, avoiding any order-of-initialisation issues.
+    */
+    static const String empty;
+   #endif
+
 private:
     //==============================================================================
     CharPointerType text;
@@ -1413,7 +1417,7 @@ JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, StringRef
 
 } // namespace juce
 
-#if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS // just used to avoid compiling this under compilers that lack libc++
+#if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS && ! DOXYGEN // just used to avoid compiling this under compilers that lack libc++
 namespace std
 {
     template <> struct hash<juce::String>

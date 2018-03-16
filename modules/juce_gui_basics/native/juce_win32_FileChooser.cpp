@@ -27,74 +27,103 @@
 namespace juce
 {
 
-namespace FileChooserHelpers
+// Win32NativeFileChooser needs to be a reference counted object as there
+// is no way for the parent to know when the dialog HWND has actually been
+// created without pumping the message thread (which is forbidden when modal
+// loops are disabled). However, the HWND pointer is the only way to cancel
+// the dialog box. This means that the actual native FileChooser HWND may
+// not have been created yet when the user deletes JUCE's FileChooser class. If this
+// occurs the Win32NativeFileChooser will still have a reference count of 1 and will
+// simply delete itself immedietely once the HWND will have been created a while later.
+class Win32NativeFileChooser  : public ReferenceCountedObject,
+                                private Thread
 {
-    struct FileChooserCallbackInfo
+public:
+    typedef ReferenceCountedObjectPtr<Win32NativeFileChooser> Ptr;
+
+    enum { charsAvailableForResult = 32768 };
+
+    Win32NativeFileChooser (Component* parent, int flags, FilePreviewComponent* previewComp,
+                            const File& startingFile, const String& titleToUse,
+                            const String& filtersToUse)
+        : Thread ("Native Win32 FileChooser"),
+          owner (parent), title (titleToUse), filtersString (filtersToUse),
+          selectsDirectories ((flags & FileBrowserComponent::canSelectDirectories)   != 0),
+          selectsFiles       ((flags & FileBrowserComponent::canSelectFiles)         != 0),
+          isSave             ((flags & FileBrowserComponent::saveMode)               != 0),
+          warnAboutOverwrite ((flags & FileBrowserComponent::warnAboutOverwriting)   != 0),
+          selectMultiple     ((flags & FileBrowserComponent::canSelectMultipleItems) != 0),
+          nativeDialogRef (nullptr), shouldCancel (0)
     {
-        String initialPath;
-        String returnedString; // need this to get non-existent pathnames from the directory chooser
-        ScopedPointer<Component> customComponent;
-    };
+        auto parentDirectory = startingFile.getParentDirectory();
 
-    static int CALLBACK browseCallbackProc (HWND hWnd, UINT msg, LPARAM lParam, LPARAM lpData)
-    {
-        FileChooserCallbackInfo* info = (FileChooserCallbackInfo*) lpData;
+        // Handle nonexistent root directories in the same way as existing ones
+        files.calloc (static_cast<size_t> (charsAvailableForResult) + 1);
 
-        if (msg == BFFM_INITIALIZED)
-            SendMessage (hWnd, BFFM_SETSELECTIONW, TRUE, (LPARAM) info->initialPath.toWideCharPointer());
-        else if (msg == BFFM_VALIDATEFAILEDW)
-            info->returnedString = (LPCWSTR) lParam;
-        else if (msg == BFFM_VALIDATEFAILEDA)
-            info->returnedString = (const char*) lParam;
-
-        return 0;
-    }
-
-    static UINT_PTR CALLBACK openCallback (HWND hdlg, UINT uiMsg, WPARAM /*wParam*/, LPARAM lParam)
-    {
-        if (uiMsg == WM_INITDIALOG)
+        if (startingFile.isDirectory() ||startingFile.isRoot())
         {
-            Component* customComp = ((FileChooserCallbackInfo*) (((OPENFILENAMEW*) lParam)->lCustData))->customComponent;
-
-            HWND dialogH = GetParent (hdlg);
-            jassert (dialogH != 0);
-            if (dialogH == 0)
-                dialogH = hdlg;
-
-            RECT r, cr;
-            GetWindowRect (dialogH, &r);
-            GetClientRect (dialogH, &cr);
-
-            SetWindowPos (dialogH, 0,
-                          r.left, r.top,
-                          customComp->getWidth() + jmax (150, (int) (r.right - r.left)),
-                          jmax (150, (int) (r.bottom - r.top)),
-                          SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER);
-
-            customComp->setBounds (cr.right, cr.top, customComp->getWidth(), cr.bottom - cr.top);
-            customComp->addToDesktop (0, dialogH);
+            initialPath = startingFile.getFullPathName();
         }
-        else if (uiMsg == WM_NOTIFY)
+        else
         {
-            LPOFNOTIFY ofn = (LPOFNOTIFY) lParam;
-
-            if (ofn->hdr.code == CDN_SELCHANGE)
-            {
-                FileChooserCallbackInfo* info = (FileChooserCallbackInfo*) ofn->lpOFN->lCustData;
-
-                if (FilePreviewComponent* comp = dynamic_cast<FilePreviewComponent*> (info->customComponent->getChildComponent(0)))
-                {
-                    WCHAR path [MAX_PATH * 2] = { 0 };
-                    CommDlg_OpenSave_GetFilePath (GetParent (hdlg), (LPARAM) &path, MAX_PATH);
-
-                    comp->selectedFileChanged (File (path));
-                }
-            }
+            startingFile.getFileName().copyToUTF16 (files,
+                                                    static_cast<size_t> (charsAvailableForResult) * sizeof (WCHAR));
+            initialPath = parentDirectory.getFullPathName();
         }
 
-        return 0;
+        if (! selectsDirectories)
+        {
+            if (previewComp != nullptr)
+                customComponent = new CustomComponentHolder (previewComp);
+
+            setupFilters();
+        }
     }
 
+    ~Win32NativeFileChooser()
+    {
+        signalThreadShouldExit();
+        waitForThreadToExit (-1);
+    }
+
+    void open (bool async)
+    {
+        results.clear();
+
+        // the thread should not be running
+        nativeDialogRef.set (nullptr);
+
+        if (async)
+        {
+            jassert (! isThreadRunning());
+
+            threadHasReference.reset();
+            startThread();
+
+            threadHasReference.wait (-1);
+        }
+        else
+        {
+            results = openDialog (false);
+            owner->exitModalState (results.size() > 0 ? 1 : 0);
+        }
+    }
+
+    void cancel()
+    {
+        ScopedLock lock (deletingDialog);
+
+        customComponent = nullptr;
+        shouldCancel.set (1);
+
+        if (auto hwnd = nativeDialogRef.get())
+            EndDialog (hwnd, 0);
+    }
+
+    Array<URL> results;
+
+private:
+    //==============================================================================
     class CustomComponentHolder  : public Component
     {
     public:
@@ -120,7 +149,414 @@ namespace FileChooserHelpers
     private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CustomComponentHolder)
     };
-}
+
+    //==============================================================================
+    Component::SafePointer<Component> owner;
+    String title, filtersString;
+    ScopedPointer<CustomComponentHolder> customComponent;
+    String initialPath, returnedString, defaultExtension;
+
+    WaitableEvent threadHasReference;
+    CriticalSection deletingDialog;
+
+    bool selectsDirectories, selectsFiles, isSave, warnAboutOverwrite, selectMultiple;
+
+    HeapBlock<WCHAR> files;
+    HeapBlock<WCHAR> filters;
+
+    Atomic<HWND> nativeDialogRef;
+    Atomic<int>  shouldCancel;
+
+    //==============================================================================
+    Array<URL> openDialog (bool async)
+    {
+        Array<URL> selections;
+
+        if (selectsDirectories)
+        {
+            BROWSEINFO bi = { 0 };
+            bi.hwndOwner = (HWND) (async ? nullptr : owner->getWindowHandle());
+            bi.pszDisplayName = files;
+            bi.lpszTitle = title.toWideCharPointer();
+            bi.lParam = (LPARAM) this;
+            bi.lpfn = browseCallbackProc;
+           #ifdef BIF_USENEWUI
+            bi.ulFlags = BIF_USENEWUI | BIF_VALIDATE;
+           #else
+            bi.ulFlags = 0x50;
+           #endif
+
+            LPITEMIDLIST list = SHBrowseForFolder (&bi);
+
+            if (! SHGetPathFromIDListW (list, files))
+            {
+                files[0] = 0;
+                returnedString.clear();
+            }
+
+            LPMALLOC al;
+
+            if (list != nullptr && SUCCEEDED (SHGetMalloc (&al)))
+                al->Free (list);
+
+            if (files[0] != 0)
+            {
+                File result (String (files.get()));
+
+                if (returnedString.isNotEmpty())
+                    result = result.getSiblingFile (returnedString);
+
+                selections.add (URL (result));
+            }
+        }
+        else
+        {
+            OPENFILENAMEW of = { 0 };
+
+            #ifdef OPENFILENAME_SIZE_VERSION_400W
+            of.lStructSize = OPENFILENAME_SIZE_VERSION_400W;
+           #else
+            of.lStructSize = sizeof (of);
+           #endif
+            of.hwndOwner = (HWND) (async ? nullptr : owner->getWindowHandle());
+            of.lpstrFilter = filters.getData();
+            of.nFilterIndex = 1;
+            of.lpstrFile = files;
+            of.nMaxFile = (DWORD) charsAvailableForResult;
+            of.lpstrInitialDir = initialPath.toWideCharPointer();
+            of.lpstrTitle = title.toWideCharPointer();
+            of.Flags = getOpenFilenameFlags (async);
+            of.lCustData = (LPARAM) this;
+            of.lpfnHook = &openCallback;
+
+            if (isSave)
+            {
+                StringArray tokens;
+                tokens.addTokens (filtersString, ";,", "\"'");
+                tokens.trim();
+                tokens.removeEmptyStrings();
+
+                if (tokens.size() == 1 && tokens[0].removeCharacters ("*.").isNotEmpty())
+                {
+                    defaultExtension = tokens[0].fromFirstOccurrenceOf (".", false, false);
+                    of.lpstrDefExt = defaultExtension.toWideCharPointer();
+                }
+
+                if (! GetSaveFileName (&of))
+                    return {};
+            }
+            else
+            {
+                if (! GetOpenFileName (&of))
+                    return {};
+            }
+
+            if (selectMultiple && of.nFileOffset > 0 && files [of.nFileOffset - 1] == 0)
+            {
+                const WCHAR* filename = files + of.nFileOffset;
+
+                while (*filename != 0)
+                {
+                    selections.add (URL (File (String (files.get())).getChildFile (String (filename))));
+                    filename += wcslen (filename) + 1;
+                }
+            }
+            else if (files[0] != 0)
+            {
+                selections.add (URL (File (String (files.get()))));
+            }
+        }
+
+        getNativeDialogList().removeValue (this);
+
+        return selections;
+    }
+
+    void run() override
+    {
+        // as long as the thread is running, don't delete this class
+        Ptr safeThis (this);
+        threadHasReference.signal();
+
+        Array<URL> r = openDialog (true);
+        MessageManager::callAsync ([safeThis, r]
+        {
+            safeThis->results = r;
+
+            if (safeThis->owner != nullptr)
+                safeThis->owner->exitModalState (r.size() > 0 ? 1 : 0);
+        });
+    }
+
+    static HashMap<HWND, Win32NativeFileChooser*>& getNativeDialogList()
+    {
+        static HashMap<HWND, Win32NativeFileChooser*> dialogs;
+        return dialogs;
+    }
+
+    static Win32NativeFileChooser* getNativePointerForDialog (HWND hWnd)
+    {
+        return getNativeDialogList()[hWnd];
+    }
+
+    //==============================================================================
+    void setupFilters()
+    {
+        const size_t filterSpaceNumChars = 2048;
+        filters.calloc (filterSpaceNumChars);
+
+        const size_t bytesWritten = filtersString.copyToUTF16 (filters.getData(), filterSpaceNumChars * sizeof (WCHAR));
+        filtersString.copyToUTF16 (filters + (bytesWritten / sizeof (WCHAR)),
+                                   ((filterSpaceNumChars - 1) * sizeof (WCHAR) - bytesWritten));
+
+        for (size_t i = 0; i < filterSpaceNumChars; ++i)
+            if (filters[i] == '|')
+                filters[i] = 0;
+    }
+
+    DWORD getOpenFilenameFlags (bool async)
+    {
+        DWORD ofFlags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR | OFN_HIDEREADONLY | OFN_ENABLESIZING;
+
+        if (warnAboutOverwrite)
+            ofFlags |= OFN_OVERWRITEPROMPT;
+
+        if (selectMultiple)
+            ofFlags |= OFN_ALLOWMULTISELECT;
+
+        if (async || customComponent != nullptr)
+            ofFlags |= OFN_ENABLEHOOK;
+
+        return ofFlags;
+    }
+
+    //==============================================================================
+    void initialised (HWND hWnd)
+    {
+        SendMessage (hWnd, BFFM_SETSELECTIONW, TRUE, (LPARAM) initialPath.toWideCharPointer());
+        initDialog (hWnd);
+    }
+
+    void validateFailed (const String& path)
+    {
+        returnedString = path;
+    }
+
+    void initDialog (HWND hdlg)
+    {
+        ScopedLock lock (deletingDialog);
+        getNativeDialogList().set (hdlg, this);
+
+        if (shouldCancel.get() != 0)
+        {
+            EndDialog (hdlg, 0);
+        }
+        else
+        {
+            nativeDialogRef.set (hdlg);
+
+            if (customComponent)
+            {
+                Component::SafePointer<Component> custom (customComponent);
+
+                RECT r, cr;
+                GetWindowRect (hdlg, &r);
+                GetClientRect (hdlg, &cr);
+
+                auto componentWidth = custom->getWidth();
+
+                SetWindowPos (hdlg, 0,
+                                r.left, r.top,
+                                componentWidth + jmax (150, (int) (r.right - r.left)),
+                                jmax (150, (int) (r.bottom - r.top)),
+                                SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER);
+
+                if (MessageManager::getInstance()->isThisTheMessageThread())
+                {
+                    custom->setBounds (cr.right, cr.top, componentWidth, cr.bottom - cr.top);
+                    custom->addToDesktop (0, hdlg);
+                }
+                else
+                {
+                    MessageManager::callAsync ([custom, cr, componentWidth, hdlg]() mutable
+                    {
+                        if (custom != nullptr)
+                        {
+                            custom->setBounds (cr.right, cr.top, componentWidth, cr.bottom - cr.top);
+                            custom->addToDesktop (0, hdlg);
+                        }
+                    });
+                }
+            }
+        }
+    }
+
+    void destroyDialog (HWND hdlg)
+    {
+        ScopedLock exiting (deletingDialog);
+
+        getNativeDialogList().remove (hdlg);
+        nativeDialogRef.set (nullptr);
+    }
+
+    void selectionChanged (HWND hdlg)
+    {
+        ScopedLock lock (deletingDialog);
+
+        if (customComponent != nullptr && shouldCancel.get() == 0)
+        {
+            if (FilePreviewComponent* comp = dynamic_cast<FilePreviewComponent*> (customComponent->getChildComponent(0)))
+            {
+                WCHAR path [MAX_PATH * 2] = { 0 };
+                CommDlg_OpenSave_GetFilePath (hdlg, (LPARAM) &path, MAX_PATH);
+
+                if (MessageManager::getInstance()->isThisTheMessageThread())
+                {
+                    comp->selectedFileChanged (File (path));
+                }
+                else
+                {
+                    Component::SafePointer<FilePreviewComponent> safeComp (comp);
+
+                    File selectedFile (path);
+                    MessageManager::callAsync ([safeComp, selectedFile]() mutable
+                                               {
+                                                    safeComp->selectedFileChanged (selectedFile);
+                                               });
+                }
+            }
+        }
+    }
+
+    //==============================================================================
+    static int CALLBACK browseCallbackProc (HWND hWnd, UINT msg, LPARAM lParam, LPARAM lpData)
+    {
+        auto* self = reinterpret_cast<Win32NativeFileChooser*> (lpData);
+
+        switch (msg)
+        {
+            case BFFM_INITIALIZED:       self->initialised (hWnd);                             break;
+            case BFFM_VALIDATEFAILEDW:   self->validateFailed (String ((LPCWSTR)     lParam)); break;
+            case BFFM_VALIDATEFAILEDA:   self->validateFailed (String ((const char*) lParam)); break;
+            default: break;
+        }
+
+        return 0;
+    }
+
+    static UINT_PTR CALLBACK openCallback (HWND hwnd, UINT uiMsg, WPARAM /*wParam*/, LPARAM lParam)
+    {
+        auto hdlg = getDialogFromHWND (hwnd);
+
+        switch (uiMsg)
+        {
+            case WM_INITDIALOG:
+            {
+                if (auto* self = reinterpret_cast<Win32NativeFileChooser*> (((OPENFILENAMEW*) lParam)->lCustData))
+                    self->initDialog (hdlg);
+
+                break;
+            }
+
+            case WM_DESTROY:
+            {
+                if (auto* self = getNativeDialogList()[hdlg])
+                    self->destroyDialog (hdlg);
+
+                break;
+            }
+
+            case WM_NOTIFY:
+            {
+                auto ofn = reinterpret_cast<LPOFNOTIFY> (lParam);
+
+                if (ofn->hdr.code == CDN_SELCHANGE)
+                    if (auto* self = reinterpret_cast<Win32NativeFileChooser*> (ofn->lpOFN->lCustData))
+                        self->selectionChanged (hdlg);
+
+                break;
+            }
+
+            default:
+                break;
+        }
+
+        return 0;
+    }
+
+    static HWND getDialogFromHWND (HWND hwnd)
+    {
+        if (hwnd == nullptr)
+            return nullptr;
+
+        HWND dialogH = GetParent (hwnd);
+
+        if (dialogH == 0)
+            dialogH = hwnd;
+
+        return dialogH;
+    }
+
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Win32NativeFileChooser)
+};
+
+class FileChooser::Native     : public Component,
+                                public FileChooser::Pimpl
+{
+public:
+
+    Native (FileChooser& fileChooser, int flags, FilePreviewComponent* previewComp)
+        : owner (fileChooser),
+          nativeFileChooser (new Win32NativeFileChooser (this, flags, previewComp, fileChooser.startingFile,
+                                                         fileChooser.title, fileChooser.filters))
+    {
+        auto mainMon = Desktop::getInstance().getDisplays().getMainDisplay().userArea;
+
+        setBounds (mainMon.getX() + mainMon.getWidth() / 4,
+                   mainMon.getY() + mainMon.getHeight() / 4,
+                   0, 0);
+
+        setOpaque (true);
+        setAlwaysOnTop (juce_areThereAnyAlwaysOnTopWindows());
+        addToDesktop (0);
+    }
+
+    ~Native()
+    {
+        exitModalState (0);
+        nativeFileChooser->cancel();
+        nativeFileChooser = nullptr;
+    }
+
+    void launch() override
+    {
+        SafePointer<Native> safeThis (this);
+
+        enterModalState (true, ModalCallbackFunction::create (
+                         [safeThis] (int)
+                         {
+                             if (safeThis != nullptr)
+                                 safeThis->owner.finished (safeThis->nativeFileChooser->results);
+                         }));
+
+        nativeFileChooser->open (true);
+    }
+
+    void runModally() override
+    {
+        enterModalState (true);
+        nativeFileChooser->open (false);
+        exitModalState (nativeFileChooser->results.size() > 0 ? 1 : 0);
+        nativeFileChooser->cancel();
+
+        owner.finished (nativeFileChooser->results);
+    }
+
+private:
+    FileChooser& owner;
+    Win32NativeFileChooser::Ptr nativeFileChooser;
+};
 
 //==============================================================================
 bool FileChooser::isPlatformDialogAvailable()
@@ -132,172 +568,10 @@ bool FileChooser::isPlatformDialogAvailable()
    #endif
 }
 
-void FileChooser::showPlatformDialog (Array<File>& results, const String& title_, const File& currentFileOrDirectory,
-                                      const String& filter, bool selectsDirectory, bool /*selectsFiles*/,
-                                      bool isSaveDialogue, bool warnAboutOverwritingExistingFiles,
-                                      bool selectMultipleFiles, bool /*treatFilePackagesAsDirs*/,
-                                      FilePreviewComponent* extraInfoComponent)
+FileChooser::Pimpl* FileChooser::showPlatformDialog (FileChooser& owner, int flags,
+                                                     FilePreviewComponent* preview)
 {
-    using namespace FileChooserHelpers;
-
-    const String title (title_);
-    String defaultExtension; // scope of these strings must extend beyond dialog's lifetime.
-
-    HeapBlock<WCHAR> files;
-    const size_t charsAvailableForResult = 32768;
-    files.calloc (charsAvailableForResult + 1);
-    int filenameOffset = 0;
-
-    FileChooserCallbackInfo info;
-
-    // use a modal window as the parent for this dialog box
-    // to block input from other app windows
-    Component parentWindow;
-    const Rectangle<int> mainMon (Desktop::getInstance().getDisplays().getMainDisplay().userArea);
-    parentWindow.setBounds (mainMon.getX() + mainMon.getWidth() / 4,
-                            mainMon.getY() + mainMon.getHeight() / 4,
-                            0, 0);
-    parentWindow.setOpaque (true);
-    parentWindow.setAlwaysOnTop (juce_areThereAnyAlwaysOnTopWindows());
-    parentWindow.addToDesktop (0);
-
-    if (extraInfoComponent == nullptr)
-        parentWindow.enterModalState();
-
-    auto parentDirectory = currentFileOrDirectory.getParentDirectory();
-
-    // Handle nonexistent root directories in the same way as existing ones
-    if (currentFileOrDirectory.isDirectory() || currentFileOrDirectory.isRoot())
-    {
-        info.initialPath = currentFileOrDirectory.getFullPathName();
-    }
-    else
-    {
-        currentFileOrDirectory.getFileName().copyToUTF16 (files, charsAvailableForResult * sizeof (WCHAR));
-        info.initialPath = parentDirectory.getFullPathName();
-    }
-
-    if (selectsDirectory)
-    {
-        BROWSEINFO bi = { 0 };
-        bi.hwndOwner = (HWND) parentWindow.getWindowHandle();
-        bi.pszDisplayName = files;
-        bi.lpszTitle = title.toWideCharPointer();
-        bi.lParam = (LPARAM) &info;
-        bi.lpfn = browseCallbackProc;
-       #ifdef BIF_USENEWUI
-        bi.ulFlags = BIF_USENEWUI | BIF_VALIDATE;
-       #else
-        bi.ulFlags = 0x50;
-       #endif
-
-        LPITEMIDLIST list = SHBrowseForFolder (&bi);
-
-        if (! SHGetPathFromIDListW (list, files))
-        {
-            files[0] = 0;
-            info.returnedString.clear();
-        }
-
-        LPMALLOC al;
-        if (list != nullptr && SUCCEEDED (SHGetMalloc (&al)))
-            al->Free (list);
-
-        if (info.returnedString.isNotEmpty())
-        {
-            results.add (File (String (files.get())).getSiblingFile (info.returnedString));
-            return;
-        }
-    }
-    else
-    {
-        DWORD flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR | OFN_HIDEREADONLY | OFN_ENABLESIZING;
-
-        if (warnAboutOverwritingExistingFiles)
-            flags |= OFN_OVERWRITEPROMPT;
-
-        if (selectMultipleFiles)
-            flags |= OFN_ALLOWMULTISELECT;
-
-        if (extraInfoComponent != nullptr)
-        {
-            flags |= OFN_ENABLEHOOK;
-
-            info.customComponent = new CustomComponentHolder (extraInfoComponent);
-            info.customComponent->enterModalState (false);
-        }
-
-        const size_t filterSpaceNumChars = 2048;
-        HeapBlock<WCHAR> filters;
-        filters.calloc (filterSpaceNumChars);
-        const size_t bytesWritten = filter.copyToUTF16 (filters.getData(), filterSpaceNumChars * sizeof (WCHAR));
-        filter.copyToUTF16 (filters + (bytesWritten / sizeof (WCHAR)),
-                            ((filterSpaceNumChars - 1) * sizeof (WCHAR) - bytesWritten));
-
-        for (size_t i = 0; i < filterSpaceNumChars; ++i)
-            if (filters[i] == '|')
-                filters[i] = 0;
-
-        OPENFILENAMEW of = { 0 };
-        String localPath (info.initialPath);
-
-       #ifdef OPENFILENAME_SIZE_VERSION_400W
-        of.lStructSize = OPENFILENAME_SIZE_VERSION_400W;
-       #else
-        of.lStructSize = sizeof (of);
-       #endif
-        of.hwndOwner = (HWND) parentWindow.getWindowHandle();
-        of.lpstrFilter = filters.getData();
-        of.nFilterIndex = 1;
-        of.lpstrFile = files;
-        of.nMaxFile = (DWORD) charsAvailableForResult;
-        of.lpstrInitialDir = localPath.toWideCharPointer();
-        of.lpstrTitle = title.toWideCharPointer();
-        of.Flags = flags;
-        of.lCustData = (LPARAM) &info;
-
-        if (extraInfoComponent != nullptr)
-            of.lpfnHook = &openCallback;
-
-        if (isSaveDialogue)
-        {
-            StringArray tokens;
-            tokens.addTokens (filter, ";,", "\"'");
-            tokens.trim();
-            tokens.removeEmptyStrings();
-
-            if (tokens.size() == 1 && tokens[0].removeCharacters ("*.").isNotEmpty())
-            {
-                defaultExtension = tokens[0].fromFirstOccurrenceOf (".", false, false);
-                of.lpstrDefExt = defaultExtension.toWideCharPointer();
-            }
-
-            if (! GetSaveFileName (&of))
-                return;
-        }
-        else
-        {
-            if (! GetOpenFileName (&of))
-                return;
-        }
-
-        filenameOffset = of.nFileOffset;
-    }
-
-    if (selectMultipleFiles && filenameOffset > 0 && files [filenameOffset - 1] == 0)
-    {
-        const WCHAR* filename = files + filenameOffset;
-
-        while (*filename != 0)
-        {
-            results.add (File (String (files.get())).getChildFile (String (filename)));
-            filename += wcslen (filename) + 1;
-        }
-    }
-    else if (files[0] != 0)
-    {
-        results.add (File (String (files.get())));
-    }
+    return new FileChooser::Native (owner, flags, preview);
 }
 
 } // namespace juce

@@ -31,6 +31,8 @@ namespace juce
 
 /**
     Implements a plugin format for VST3s.
+
+    @tags{Audio}
 */
 class JUCE_API VST3PluginFormat   : public AudioPluginFormat
 {
@@ -40,6 +42,13 @@ public:
 
     /** Destructor */
     ~VST3PluginFormat();
+
+    //==============================================================================
+    /** Attempts to reload a VST3 plugin's state from some preset file data.
+
+        @see VSTPluginFormat::loadFromFXBFile
+    */
+    static bool setStateFromVSTPresetFile (AudioPluginInstance*, const MemoryBlock&);
 
     //==============================================================================
     String getName() const override             { return "VST3"; }

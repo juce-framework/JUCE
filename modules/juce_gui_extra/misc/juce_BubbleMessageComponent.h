@@ -35,6 +35,8 @@ namespace juce
     pointing to a particular component or location on the screen.
 
     @see BubbleComponent
+
+    @tags{GUI}
 */
 class JUCE_API  BubbleMessageComponent  : public BubbleComponent,
                                           private Timer

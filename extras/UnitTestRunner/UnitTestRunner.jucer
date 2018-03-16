@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="Z2Xzcp" name="UnitTestRunner" projectType="consoleapp" version="1.0.0"
-              bundleIdentifier="com.roli.UnitTestRunner" includeBinaryInAppConfig="1"
-              jucerVersion="5.2.0" defines="JUCE_UNIT_TESTS=1" displaySplashScreen="0"
-              reportAppUsage="0" splashScreenColour="Dark" companyName="ROLI Ltd."
-              cppLanguageStandard="14" companyCopyright="ROLI Ltd.">
+<JUCERPROJECT id="Z2Xzcp" name="UnitTestRunner" projectType="consoleapp" bundleIdentifier="com.roli.UnitTestRunner"
+              jucerVersion="5.3.0" defines="JUCE_UNIT_TESTS=1" displaySplashScreen="0"
+              reportAppUsage="0" companyName="ROLI Ltd." companyCopyright="ROLI Ltd.">
   <MAINGROUP id="GZdWCU" name="UnitTestRunner">
     <GROUP id="{22894462-E1A9-036F-ED94-B51A50C87552}" name="Source">
       <FILE id="ynaYaM" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
@@ -14,10 +12,9 @@
     <XCODE_MAC targetFolder="Builds/MacOSX" extraCompilerFlags="-Wall -Wshadow -Wstrict-aliasing -Wconversion -Wsign-compare -Woverloaded-virtual -Wextra-semi"
                extraDefs="">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" osxSDK="default" osxCompatibility="10.10 SDK" osxArchitecture="default"
-                       isDebug="1" optimisation="1" targetName="UnitTestRunner" cppLanguageStandard="gnu++14"/>
-        <CONFIGURATION name="Release" osxSDK="default" osxCompatibility="10.10 SDK"
-                       osxArchitecture="default" isDebug="0" optimisation="3" targetName="UnitTestRunner"
+        <CONFIGURATION name="Debug" osxCompatibility="10.10 SDK" isDebug="1" targetName="UnitTestRunner"
+                       cppLanguageStandard="gnu++14"/>
+        <CONFIGURATION name="Release" osxCompatibility="10.10 SDK" isDebug="0" targetName="UnitTestRunner"
                        cppLanguageStandard="gnu++14"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
@@ -44,10 +41,8 @@
     </XCODE_MAC>
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" libraryPath="/usr/X11R6/lib/" isDebug="1" optimisation="1"
-                       targetName="UnitTestRunner"/>
-        <CONFIGURATION name="Release" libraryPath="/usr/X11R6/lib/" isDebug="0" optimisation="3"
-                       targetName="UnitTestRunner"/>
+        <CONFIGURATION name="Debug" libraryPath="/usr/X11R6/lib/" isDebug="1" targetName="UnitTestRunner"/>
+        <CONFIGURATION name="Release" libraryPath="/usr/X11R6/lib/" isDebug="0" targetName="UnitTestRunner"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../modules"/>
@@ -73,11 +68,8 @@
     </LINUX_MAKE>
     <VS2017 targetFolder="Builds/VisualStudio2017">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="1" optimisation="1" targetName="UnitTestRunner" debugInformationFormat="ProgramDatabase"
-                       warningsAreErrors="1"/>
-        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="0" optimisation="3" targetName="UnitTestRunner" debugInformationFormat="None"
+        <CONFIGURATION name="Debug" isDebug="1" targetName="UnitTestRunner" warningsAreErrors="1"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="UnitTestRunner" debugInformationFormat="None"
                        warningsAreErrors="1"/>
       </CONFIGURATIONS>
       <MODULEPATHS>

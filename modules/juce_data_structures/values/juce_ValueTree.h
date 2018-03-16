@@ -48,7 +48,7 @@ namespace juce
 
     All the methods that change data take an optional UndoManager, which will be used
     to track any changes to the object. For this to work, you have to be careful to
-    consistently always use the same UndoManager for all operations to any node inside
+    consistently always use the same UndoManager for all operations to any sub-tree inside
     the tree.
 
     A ValueTree can only be a child of one parent at a time, so if you're moving one from
@@ -63,9 +63,11 @@ namespace juce
     constant when other properties are added or removed.
 
     Listeners can be added to a ValueTree to be told when properies change and when
-    nodes are added or removed.
+    sub-trees are added or removed.
 
     @see var, XmlElement
+
+    @tags{DataStructures}
 */
 class JUCE_API  ValueTree  final
 {
@@ -80,15 +82,61 @@ public:
     ValueTree() noexcept;
 
     /** Creates an empty ValueTree with the given type name.
-        Like an XmlElement, each ValueTree node has a type, which you can access with
+
+        Like an XmlElement, each ValueTree has a type, which you can access with
         getType() and hasType().
     */
     explicit ValueTree (const Identifier& type);
 
+   #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
+    /** Creates a value tree from nested lists of properties and ValueTrees.
+
+        This code,
+
+        @code
+        ValueTree groups
+        { "ParameterGroups", {},
+          {
+            { "Group", {{ "name", "Tone Controls" }},
+              {
+                { "Parameter", {{ "id", "distortion" }, { "value", 0.5 }}},
+                { "Parameter", {{ "id", "reverb" },     { "value", 0.5 }}}
+              }
+            },
+            { "Group", {{ "name", "Other Controls" }},
+              {
+                { "Parameter", {{ "id", "drywet" }, { "value", 0.5 }}},
+                { "Parameter", {{ "id", "gain" },   { "value", 0.5 }}}
+              }
+            }
+          }
+        };
+        @endcode
+
+        produces this tree:
+
+        @verbatim
+        <ParameterGroups>
+          <Group name="Tone Controls">
+            <Parameter id="distortion" value="0.5"/>
+            <Parameter id="reverb" value="0.5"/>
+          </Group>
+          <Group name="Other Controls">
+            <Parameter id="drywet" value="0.5"/>
+            <Parameter id="gain" value="0.5"/>
+          </Group>
+        </ParameterGroups>
+        @endverbatim
+    */
+    ValueTree (const Identifier& type,
+               std::initializer_list<std::pair<Identifier, var>> properties,
+               std::initializer_list<ValueTree> subTrees = {});
+   #endif
+
     /** Creates a reference to another ValueTree. */
     ValueTree (const ValueTree&) noexcept;
 
-    /** Makes this object reference another node. */
+    /** Changes this object to be a reference to the given tree. */
     ValueTree& operator= (const ValueTree&);
 
     /** Move constructor */
@@ -97,13 +145,13 @@ public:
     /** Destructor. */
     ~ValueTree();
 
-    /** Returns true if both this and the other tree node refer to the same underlying structure.
+    /** Returns true if both this and the other tree refer to the same underlying structure.
         Note that this isn't a value comparison - two independently-created trees which
-        contain identical data are not considered equal.
+        contain identical data are NOT considered equal.
     */
     bool operator== (const ValueTree&) const noexcept;
 
-    /** Returns true if this and the other node refer to different underlying structures.
+    /** Returns true if this and the other tree refer to different underlying structures.
         Note that this isn't a value comparison - two independently-created trees which
         contain identical data are not considered equal.
     */
@@ -118,24 +166,24 @@ public:
     bool isEquivalentTo (const ValueTree&) const;
 
     //==============================================================================
-    /** Returns true if this node refers to some valid data.
-        It's hard to create an invalid node, but you might get one returned, e.g. by an out-of-range
-        call to getChild().
+    /** Returns true if this tree refers to some valid data.
+        An invalid tree is one that was created with the default constructor.
     */
     bool isValid() const noexcept                           { return object != nullptr; }
 
-    /** Returns a deep copy of this tree and all its sub-nodes. */
+    /** Returns a deep copy of this tree and all its sub-trees. */
     ValueTree createCopy() const;
 
     //==============================================================================
-    /** Returns the type of this node.
+    /** Returns the type of this tree.
         The type is specified when the ValueTree is created.
         @see hasType
     */
     Identifier getType() const noexcept;
 
-    /** Returns true if the node has this type.
+    /** Returns true if the tree has this type.
         The comparison is case-sensitive.
+        @see getType
     */
     bool hasType (const Identifier& typeName) const noexcept;
 
@@ -167,31 +215,31 @@ public:
     */
     const var& operator[] (const Identifier& name) const noexcept;
 
-    /** Changes a named property of the node.
+    /** Changes a named property of the tree.
         The name identifier must not be an empty string.
-        If the undoManager parameter is non-null, its UndoManager::perform() method will be used,
-        so that this change can be undone.
+        If the undoManager parameter is not nullptr, its UndoManager::perform() method will be used,
+        so that this change can be undone. Be very careful not to mix undoable and non-undoable changes!
         @see var, getProperty, removeProperty
         @returns a reference to the value tree, so that you can daisy-chain calls to this method.
     */
     ValueTree& setProperty (const Identifier& name, const var& newValue, UndoManager* undoManager);
 
-    /** Returns true if the node contains a named property. */
+    /** Returns true if the tree contains a named property. */
     bool hasProperty (const Identifier& name) const noexcept;
 
-    /** Removes a property from the node.
-        If the undoManager parameter is non-null, its UndoManager::perform() method will be used,
-        so that this change can be undone.
+    /** Removes a property from the tree.
+        If the undoManager parameter is not nullptr, its UndoManager::perform() method will be used,
+        so that this change can be undone. Be very careful not to mix undoable and non-undoable changes!
     */
     void removeProperty (const Identifier& name, UndoManager* undoManager);
 
-    /** Removes all properties from the node.
-        If the undoManager parameter is non-null, its UndoManager::perform() method will be used,
-        so that this change can be undone.
+    /** Removes all properties from the tree.
+        If the undoManager parameter is not nullptr, its UndoManager::perform() method will be used,
+        so that this change can be undone. Be very careful not to mix undoable and non-undoable changes!
     */
     void removeAllProperties (UndoManager* undoManager);
 
-    /** Returns the total number of properties that the node contains.
+    /** Returns the total number of properties that the tree contains.
         @see getProperty.
     */
     int getNumProperties() const noexcept;
@@ -209,8 +257,11 @@ public:
         The Value object will maintain a reference to this tree, and will use the undo manager when
         it needs to change the value. Attaching a Value::Listener to the value object will provide
         callbacks whenever the property changes.
+        If shouldUpdateSynchronously is true the Value::Listener will be updated synchronously.
+        @see ValueSource::sendChangeMessage (bool)
     */
-    Value getPropertyAsValue (const Identifier& name, UndoManager* undoManager);
+    Value getPropertyAsValue (const Identifier& name, UndoManager* undoManager,
+                              bool shouldUpdateSynchronously = false);
 
     /** Overwrites all the properties in this tree with the properties of the source tree.
         Any properties that already exist will be updated; and new ones will be added, and
@@ -219,76 +270,77 @@ public:
     void copyPropertiesFrom (const ValueTree& source, UndoManager* undoManager);
 
     //==============================================================================
-    /** Returns the number of child nodes belonging to this one.
+    /** Returns the number of child trees inside this one.
         @see getChild
     */
     int getNumChildren() const noexcept;
 
-    /** Returns one of this node's child nodes.
-        If the index is out of range, it'll return an invalid node. (See isValid() to find out
-        whether a node is valid).
+    /** Returns one of this tree's sub-trees.
+        If the index is out of range, it'll return an invalid tree. (You can use isValid() to
+        check whether a tree is valid)
     */
     ValueTree getChild (int index) const;
 
-    /** Returns the first child node with the specified type name.
-        If no such node is found, it'll return an invalid node. (See isValid() to find out
-        whether a node is valid).
+    /** Returns the first sub-tree with the specified type name.
+        If no such child tree exists, it'll return an invalid tree. (You can use isValid() to
+        check whether a tree is valid)
         @see getOrCreateChildWithName
     */
     ValueTree getChildWithName (const Identifier& type) const;
 
-    /** Returns the first child node with the specified type name, creating and adding
+    /** Returns the first sub-tree with the specified type name, creating and adding
         a child with this name if there wasn't already one there.
-
         The only time this will return an invalid object is when the object that you're calling
         the method on is itself invalid.
         @see getChildWithName
     */
     ValueTree getOrCreateChildWithName (const Identifier& type, UndoManager* undoManager);
 
-    /** Looks for the first child node that has the specified property value.
-
-        This will scan the child nodes in order, until it finds one that has property that matches
+    /** Looks for the first sub-tree that has the specified property value.
+        This will scan the child trees in order, until it finds one that has property that matches
         the specified value.
-
-        If no such node is found, it'll return an invalid node. (See isValid() to find out
-        whether a node is valid).
+        If no such tree is found, it'll return an invalid object. (You can use isValid() to
+        check whether a tree is valid)
     */
     ValueTree getChildWithProperty (const Identifier& propertyName, const var& propertyValue) const;
 
-    /** Adds a child to this node.
-
-        Make sure that the child is removed from any former parent node before calling this, or
-        you'll hit an assertion.
-
-        If the index is < 0 or greater than the current number of child nodes, the new node will
-        be added at the end of the list.
-
-        If the undoManager parameter is non-null, its UndoManager::perform() method will be used,
-        so that this change can be undone.
+    /** Adds a child to this tree.
+        Make sure that the child being added has first been removed from any former parent before
+        calling this, or else you'll hit an assertion.
+        If the index is < 0 or greater than the current number of sub-trees, the new one will be
+        added at the end of the list.
+        If the undoManager parameter is not nullptr, its UndoManager::perform() method will be used,
+        so that this change can be undone. Be very careful not to mix undoable and non-undoable changes!
+        @see appendChild, removeChild
     */
     void addChild (const ValueTree& child, int index, UndoManager* undoManager);
 
-    /** Removes the specified child from this node's child-list.
-        If the undoManager parameter is non-null, its UndoManager::perform() method will be used,
-        so that this change can be undone.
+    /** Appends a new child sub-tree to this tree.
+        This is equivalent to calling addChild() with an index of -1. See addChild() for more details.
+        @see addChild, removeChild
+    */
+    void appendChild (const ValueTree& child, UndoManager* undoManager);
+
+    /** Removes the specified child from this tree's child-list.
+        If the undoManager parameter is not nullptr, its UndoManager::perform() method will be used,
+        so that this change can be undone. Be very careful not to mix undoable and non-undoable changes!
     */
     void removeChild (const ValueTree& child, UndoManager* undoManager);
 
-    /** Removes a child from this node's child-list.
-        If the undoManager parameter is non-null, its UndoManager::perform() method will be used,
-        so that this change can be undone.
+    /** Removes a sub-tree from this tree.
+        If the index is out-of-range, nothing will be changed.
+        If the undoManager parameter is not nullptr, its UndoManager::perform() method will be used,
+        so that this change can be undone. Be very careful not to mix undoable and non-undoable changes!
     */
     void removeChild (int childIndex, UndoManager* undoManager);
 
-    /** Removes all child-nodes from this node.
-        If the undoManager parameter is non-null, its UndoManager::perform() method will be used,
-        so that this change can be undone.
+    /** Removes all child-trees.
+        If the undoManager parameter is not nullptr, its UndoManager::perform() method will be used,
+        so that this change can be undone. Be very careful not to mix undoable and non-undoable changes!
     */
     void removeAllChildren (UndoManager* undoManager);
 
-    /** Moves one of the children to a different index.
-
+    /** Moves one of the sub-trees to a different index.
         This will move the child to a specified index, shuffling along any intervening
         items as required. So for example, if you have a list of { 0, 1, 2, 3, 4, 5 }, then
         calling move (2, 4) would result in { 0, 1, 3, 4, 2, 5 }.
@@ -302,8 +354,8 @@ public:
     */
     void moveChild (int currentIndex, int newIndex, UndoManager* undoManager);
 
-    /** Returns true if this node is anywhere below the specified parent node.
-        This returns true if the node is a child-of-a-child, as well as a direct child.
+    /** Returns true if this tree is a sub-tree (at any depth) of the given parent.
+        This searches recursively, so returns true if it's a sub-tree at any level below the parent.
     */
     bool isAChildOf (const ValueTree& possibleParent) const noexcept;
 
@@ -312,26 +364,30 @@ public:
     */
     int indexOf (const ValueTree& child) const noexcept;
 
-    /** Returns the parent node that contains this one.
-        If the node has no parent, this will return an invalid node. (See isValid() to find out
-        whether a node is valid).
+    /** Returns the parent tree that contains this one.
+        If the tree has no parent, this will return an invalid object. (You can use isValid() to
+        check whether a tree is valid)
     */
     ValueTree getParent() const noexcept;
 
-    /** Recusrively finds the highest-level parent node that contains this one.
-        If the node has no parent, this will return itself.
+    /** Recursively finds the highest-level parent tree that contains this one.
+        If the tree has no parent, this will return itself.
     */
     ValueTree getRoot() const noexcept;
 
-    /** Returns one of this node's siblings in its parent's child list.
-
-        The delta specifies how far to move through the list, so a value of 1 would return the node
-        that follows this one, -1 would return the node before it, 0 will return this node itself, etc.
-        If the requested position is beyond the range of available nodes, this will return an empty ValueTree().
+    /** Returns one of this tree's siblings in its parent's child list.
+        The delta specifies how far to move through the list, so a value of 1 would return the tree
+        that follows this one, -1 would return the tree before it, 0 will return this one, etc.
+        If the requested position is beyond the start or end of the child list, this will return an
+        invalid object.
     */
     ValueTree getSibling (int delta) const noexcept;
 
     //==============================================================================
+    /** Iterator for a ValueTree.
+        You shouldn't ever need to use this class directly - it's used internally by ValueTree::begin()
+        and ValueTree::end() to allow range-based-for loops on a ValueTree.
+    */
     struct Iterator
     {
         Iterator (const ValueTree&, bool isEnd) noexcept;
@@ -339,6 +395,12 @@ public:
 
         bool operator!= (const Iterator&) const noexcept;
         ValueTree operator*() const;
+
+        using difference_type    = std::ptrdiff_t;
+        using value_type         = ValueTree;
+        using reference          = ValueTree&;
+        using pointer            = ValueTree*;
+        using iterator_category  = std::forward_iterator_tag;
 
     private:
         void* internal;
@@ -351,26 +413,23 @@ public:
     Iterator end() const noexcept;
 
     //==============================================================================
-    /** Creates an XmlElement that holds a complete image of this node and all its children.
-
-        If this node is invalid, this may return nullptr. Otherwise, the XML that is produced can
-        be used to recreate a similar node by calling fromXml().
-
+    /** Creates an XmlElement that holds a complete image of this tree and all its children.
+        If this tree is invalid, this may return nullptr. Otherwise, the XML that is produced can
+        be used to recreate a similar tree by calling ValueTree::fromXml().
         The caller must delete the object that is returned.
-
-        @see fromXml
+        @see fromXml, toXmlString
     */
     XmlElement* createXml() const;
 
-    /** Tries to recreate a node from its XML representation.
-
-        This isn't designed to cope with random XML data - for a sensible result, it should only
-        be fed XML that was created by the createXml() method.
+    /** Tries to recreate a tree from its XML representation.
+        This isn't designed to cope with random XML data - it should only be fed XML that was created
+        by the createXml() method.
     */
     static ValueTree fromXml (const XmlElement& xml);
 
     /** This returns a string containing an XML representation of the tree.
         This is quite handy for debugging purposes, as it provides a quick way to view a tree.
+        @see createXml()
     */
     String toXmlString() const;
 
@@ -407,12 +466,7 @@ public:
         /** Destructor. */
         virtual ~Listener() {}
 
-        /** This method is called when a property of this node (or of one of its sub-nodes) has
-            changed.
-
-            The tree parameter indicates which tree has had its property changed, and the property
-            parameter indicates the property.
-
+        /** This method is called when a property of this tree (or of one of its sub-trees) is changed.
             Note that when you register a listener to a tree, it will receive this callback for
             property changes in that tree, and also for any of its children, (recursively, at any depth).
             If your tree has sub-trees but you only want to know about changes to the top level tree,
@@ -422,7 +476,6 @@ public:
                                                const Identifier& property) = 0;
 
         /** This method is called when a child sub-tree is added.
-
             Note that when you register a listener to a tree, it will receive this callback for
             child changes in both that tree and any of its children, (recursively, at any depth).
             If your tree has sub-trees but you only want to know about changes to the top level tree,
@@ -452,7 +505,7 @@ public:
         virtual void valueTreeChildOrderChanged (ValueTree& parentTreeWhoseChildrenHaveMoved,
                                                  int oldIndex, int newIndex) = 0;
 
-        /** This method is called when a tree has been added or removed from a parent node.
+        /** This method is called when a tree has been added or removed from a parent.
 
             This callback happens when the tree to which the listener was registered is added or
             removed from a parent. Unlike the other callbacks, it applies only to the tree to which
@@ -467,7 +520,7 @@ public:
         virtual void valueTreeRedirected (ValueTree& treeWhichHasBeenChanged);
     };
 
-    /** Adds a listener to receive callbacks when this node is changed.
+    /** Adds a listener to receive callbacks when this tree is changed in some way.
 
         The listener is added to this specific ValueTree object, and not to the shared
         object that it refers to. When this object is deleted, all the listeners will
@@ -486,7 +539,7 @@ public:
     /** Removes a listener that was previously added with addListener(). */
     void removeListener (Listener* listener);
 
-    /** Changes a named property of the node, but will not notify a specified listener of the change.
+    /** Changes a named property of the tree, but will not notify a specified listener of the change.
         @see setProperty
     */
     ValueTree& setPropertyExcludingListener (Listener* listenerToExclude,
@@ -533,18 +586,17 @@ public:
         }
     }
 
-   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
-    /** An invalid ValueTree that can be used if you need to return one as an error condition, etc.
-        This invalid object is equivalent to ValueTree created with its default constructor, but
-        you should always prefer to avoid it and use ValueTree() or {} instead.
-    */
-    static const ValueTree invalid;
-   #endif
-
     /** Returns the total number of references to the shared underlying data structure that this
         ValueTree is using.
     */
     int getReferenceCount() const noexcept;
+
+   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
+    /** An invalid ValueTree that can be used if you need to return one as an error condition, etc.
+        @deprecated If you need an empty ValueTree object, just use ValueTree() or {}.
+    */
+    static const ValueTree invalid;
+   #endif
 
 private:
     //==============================================================================

@@ -33,6 +33,8 @@ namespace juce
 
     This class is used to store sets of X and Y marker points in components.
     @see Component::getMarkers().
+
+    @tags{GUI}
 */
 class JUCE_API  MarkerList
 {
@@ -145,6 +147,16 @@ public:
 
     /** Synchronously calls markersChanged() on all the registered listeners. */
     void markersHaveChanged();
+
+    //==============================================================================
+    /** A base class for objects that want to provide a MarkerList. */
+    struct MarkerListHolder
+    {
+        virtual ~MarkerListHolder() {}
+
+        /** Objects can implement this method to provide a MarkerList. */
+        virtual MarkerList* getMarkers (bool xAxis) = 0;
+    };
 
     //==============================================================================
     /** Forms a wrapper around a ValueTree that can be used for storing a MarkerList. */

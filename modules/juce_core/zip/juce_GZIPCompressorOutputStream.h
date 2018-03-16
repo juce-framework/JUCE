@@ -32,21 +32,36 @@ namespace juce
     it, and any subsequent attempts to call write() will cause an assertion.
 
     @see GZIPDecompressorInputStream
+
+    @tags{Core}
 */
 class JUCE_API  GZIPCompressorOutputStream  : public OutputStream
 {
 public:
     //==============================================================================
     /** Creates a compression stream.
-
-        @param destStream                       the stream into which the compressed data should
-                                                be written
+        @param destStream                       the stream into which the compressed data will be written
         @param compressionLevel                 how much to compress the data, between 0 and 9, where
                                                 0 is non-compressed storage, 1 is the fastest/lowest compression,
                                                 and 9 is the slowest/highest compression. Any value outside this range
                                                 indicates that a default compression level should be used.
-        @param deleteDestStreamWhenDestroyed    whether or not to delete the destStream object when
-                                                this stream is destroyed
+        @param windowBits                       this is used internally to change the window size used
+                                                by zlib - leave it as 0 unless you specifically need to set
+                                                its value for some reason
+    */
+    GZIPCompressorOutputStream (OutputStream& destStream,
+                                int compressionLevel = -1,
+                                int windowBits = 0);
+
+    /** Creates a compression stream.
+        @param destStream                       the stream into which the compressed data will be written.
+                                                Ownership of this object depends on the value of deleteDestStreamWhenDestroyed
+        @param compressionLevel                 how much to compress the data, between 0 and 9, where
+                                                0 is non-compressed storage, 1 is the fastest/lowest compression,
+                                                and 9 is the slowest/highest compression. Any value outside this range
+                                                indicates that a default compression level should be used.
+        @param deleteDestStreamWhenDestroyed    whether or not the GZIPCompressorOutputStream will delete the
+                                                destStream object when it is destroyed
         @param windowBits                       this is used internally to change the window size used
                                                 by zlib - leave it as 0 unless you specifically need to set
                                                 its value for some reason

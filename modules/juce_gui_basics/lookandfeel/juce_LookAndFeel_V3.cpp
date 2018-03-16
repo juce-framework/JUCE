@@ -35,6 +35,7 @@ LookAndFeel_V3::LookAndFeel_V3()
     setColour (TextButton::buttonColourId, textButtonColour);
     setColour (TextButton::buttonOnColourId, Colour (0xff888888));
     setColour (ComboBox::buttonColourId, textButtonColour);
+    setColour (ComboBox::focusedOutlineColourId, textButtonColour);
     setColour (TextEditor::outlineColourId, Colours::transparentBlack);
     setColour (TabbedButtonBar::tabOutlineColourId, Colour (0x66000000));
     setColour (TabbedComponent::outlineColourId, Colour (0x66000000));
@@ -93,8 +94,8 @@ void LookAndFeel_V3::drawConcertinaPanelHeader (Graphics& g, const Rectangle<int
 {
     const Colour bkg (Colours::grey);
 
-    g.setGradientFill (ColourGradient (Colours::white.withAlpha (isMouseOver ? 0.4f : 0.2f), 0, (float) area.getY(),
-                                       Colours::darkgrey.withAlpha (0.1f), 0, (float) area.getBottom(), false));
+    g.setGradientFill (ColourGradient::vertical (Colours::white.withAlpha (isMouseOver ? 0.4f : 0.2f), (float) area.getY(),
+                                                 Colours::darkgrey.withAlpha (0.1f), (float) area.getBottom()));
     g.fillAll();
 
     g.setColour (bkg.contrasting().withAlpha (0.1f));
@@ -111,8 +112,8 @@ static void drawButtonShape (Graphics& g, const Path& outline, Colour baseColour
     const float mainBrightness = baseColour.getBrightness();
     const float mainAlpha = baseColour.getFloatAlpha();
 
-    g.setGradientFill (ColourGradient (baseColour.brighter (0.2f), 0.0f, 0.0f,
-                                       baseColour.darker (0.25f), 0.0f, height, false));
+    g.setGradientFill (ColourGradient::vertical (baseColour.brighter (0.2f), 0.0f,
+                                                 baseColour.darker (0.25f), height));
     g.fillPath (outline);
 
     g.setColour (Colours::white.withAlpha (0.4f * mainAlpha * mainBrightness * mainBrightness));
@@ -213,8 +214,8 @@ void LookAndFeel_V3::drawTabButton (TabBarButton& button, Graphics& g, bool isMo
             default:                              jassertfalse; break;
         }
 
-        g.setGradientFill (ColourGradient (bkg.brighter (0.2f), (float) p1.x, (float) p1.y,
-                                           bkg.darker (0.1f),   (float) p2.x, (float) p2.y, false));
+        g.setGradientFill (ColourGradient (bkg.brighter (0.2f), p1.toFloat(),
+                                           bkg.darker (0.1f),   p2.toFloat(), false));
     }
 
     g.fillRect (activeArea);
@@ -258,8 +259,8 @@ void LookAndFeel_V3::drawTabButton (TabBarButton& button, Graphics& g, bool isMo
 
     switch (o)
     {
-        case TabbedButtonBar::TabsAtLeft:   t = t.rotated (float_Pi * -0.5f).translated (area.getX(), area.getBottom()); break;
-        case TabbedButtonBar::TabsAtRight:  t = t.rotated (float_Pi *  0.5f).translated (area.getRight(), area.getY()); break;
+        case TabbedButtonBar::TabsAtLeft:   t = t.rotated (MathConstants<float>::pi * -0.5f).translated (area.getX(), area.getBottom()); break;
+        case TabbedButtonBar::TabsAtRight:  t = t.rotated (MathConstants<float>::pi *  0.5f).translated (area.getRight(), area.getY()); break;
         case TabbedButtonBar::TabsAtTop:
         case TabbedButtonBar::TabsAtBottom: t = t.translated (area.getX(), area.getY()); break;
         default:                            jassertfalse; break;
@@ -357,11 +358,9 @@ void LookAndFeel_V3::drawComboBox (Graphics& g, int width, int height, const boo
 {
     g.fillAll (box.findColour (ComboBox::backgroundColourId));
 
-    const Colour buttonColour (box.findColour (ComboBox::buttonColourId));
-
     if (box.isEnabled() && box.hasKeyboardFocus (false))
     {
-        g.setColour (buttonColour);
+        g.setColour (box.findColour (ComboBox::focusedOutlineColourId));
         g.drawRect (0, 0, width, height, 2);
     }
     else
@@ -403,12 +402,12 @@ void LookAndFeel_V3::drawLinearSlider (Graphics& g, int x, int y, int width, int
         else
             p.addRectangle (fx, fy, sliderPos - fx, fh);
 
-        Colour baseColour (slider.findColour (Slider::thumbColourId)
+        auto baseColour = slider.findColour (Slider::thumbColourId)
                                 .withMultipliedSaturation (slider.isEnabled() ? 1.0f : 0.5f)
-                                .withMultipliedAlpha (0.8f));
+                                .withMultipliedAlpha (0.8f);
 
-        g.setGradientFill (ColourGradient (baseColour.brighter (0.08f), 0.0f, 0.0f,
-                                           baseColour.darker (0.08f), 0.0f, (float) height, false));
+        g.setGradientFill (ColourGradient::vertical (baseColour.brighter (0.08f), 0.0f,
+                                                     baseColour.darker (0.08f), (float) height));
         g.fillPath (p);
 
         g.setColour (baseColour.darker (0.2f));
@@ -440,19 +439,17 @@ void LookAndFeel_V3::drawLinearSliderBackground (Graphics& g, int x, int y, int 
 
     if (slider.isHorizontal())
     {
-        const float iy = y + height * 0.5f - sliderRadius * 0.5f;
+        auto iy = y + height * 0.5f - sliderRadius * 0.5f;
 
-        g.setGradientFill (ColourGradient (gradCol1, 0.0f, iy,
-                                           gradCol2, 0.0f, iy + sliderRadius, false));
+        g.setGradientFill (ColourGradient::vertical (gradCol1, iy, gradCol2, iy + sliderRadius));
 
         indent.addRoundedRectangle (x - sliderRadius * 0.5f, iy, width + sliderRadius, sliderRadius, 5.0f);
     }
     else
     {
-        const float ix = x + width * 0.5f - sliderRadius * 0.5f;
+        auto ix = x + width * 0.5f - sliderRadius * 0.5f;
 
-        g.setGradientFill (ColourGradient (gradCol1, ix, 0.0f,
-                                           gradCol2, ix + sliderRadius, 0.0f, false));
+        g.setGradientFill (ColourGradient::horizontal (gradCol1, ix, gradCol2, ix + sliderRadius));
 
         indent.addRoundedRectangle (ix, y - sliderRadius * 0.5f, sliderRadius, height + sliderRadius, 5.0f);
     }
@@ -477,7 +474,7 @@ void LookAndFeel_V3::drawPopupMenuBackground (Graphics& g, int width, int height
 void LookAndFeel_V3::drawMenuBarBackground (Graphics& g, int width, int height,
                                             bool, MenuBarComponent& menuBar)
 {
-    const Colour colour (menuBar.findColour (PopupMenu::backgroundColourId));
+    auto colour = menuBar.findColour (PopupMenu::backgroundColourId);
 
     Rectangle<int> r (width, height);
 
@@ -485,7 +482,7 @@ void LookAndFeel_V3::drawMenuBarBackground (Graphics& g, int width, int height,
     g.fillRect (r.removeFromTop (1));
     g.fillRect (r.removeFromBottom (1));
 
-    g.setGradientFill (ColourGradient (colour, 0, 0, colour.darker (0.08f), 0, (float) height, false));
+    g.setGradientFill (ColourGradient::vertical (colour, 0, colour.darker (0.08f), (float) height));
     g.fillRect (r);
 }
 

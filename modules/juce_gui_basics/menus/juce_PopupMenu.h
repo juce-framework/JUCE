@@ -74,6 +74,8 @@ namespace juce
         ...etc
     }
     @endcode
+
+    @tags{GUI}
 */
 class JUCE_API  PopupMenu
 {
@@ -390,6 +392,12 @@ public:
         Options (const Options&) = default;
         Options& operator= (const Options&) = default;
 
+        enum class PopupDirection
+        {
+            upwards,
+            downwards
+        };
+
         //==============================================================================
         Options withTargetComponent (Component* targetComponent) const noexcept;
         Options withTargetScreenArea (Rectangle<int> targetArea) const noexcept;
@@ -399,16 +407,18 @@ public:
         Options withStandardItemHeight (int standardHeight) const noexcept;
         Options withItemThatMustBeVisible (int idOfItemToBeVisible) const noexcept;
         Options withParentComponent (Component* parentComponent) const noexcept;
+        Options withPreferredPopupDirection (PopupDirection direction) const noexcept;
 
         //==============================================================================
-        Component* getParentComponent() const noexcept          { return parentComponent; }
-        Component* getTargetComponent() const noexcept          { return targetComponent; }
-        Rectangle<int> getTargetScreenArea() const noexcept     { return targetArea; }
-        int getMinimumWidth() const noexcept                    { return minWidth; }
-        int getMaximumNumColumns() const noexcept               { return maxColumns; }
-        int getMinimumNumColumns() const noexcept               { return minColumns; }
-        int getStandardItemHeight() const noexcept              { return standardHeight; }
-        int getItemThatMustBeVisible() const noexcept           { return visibleItemID; }
+        Component* getParentComponent() const noexcept               { return parentComponent; }
+        Component* getTargetComponent() const noexcept               { return targetComponent; }
+        Rectangle<int> getTargetScreenArea() const noexcept          { return targetArea; }
+        int getMinimumWidth() const noexcept                         { return minWidth; }
+        int getMaximumNumColumns() const noexcept                    { return maxColumns; }
+        int getMinimumNumColumns() const noexcept                    { return minColumns; }
+        int getStandardItemHeight() const noexcept                   { return standardHeight; }
+        int getItemThatMustBeVisible() const noexcept                { return visibleItemID; }
+        PopupDirection getPreferredPopupDirection() const noexcept   { return preferredPopupDirection; }
 
     private:
         //==============================================================================
@@ -416,6 +426,7 @@ public:
         Component* targetComponent = nullptr;
         Component* parentComponent = nullptr;
         int visibleItemID = 0, minWidth = 0, minColumns = 1, maxColumns = 0, standardHeight = 0;
+        PopupDirection preferredPopupDirection = PopupDirection::downwards;
     };
 
     //==============================================================================
@@ -501,6 +512,10 @@ public:
     /** Runs the menu asynchronously, with a user-provided callback that will receive the result. */
     void showMenuAsync (const Options& options,
                         ModalComponentManager::Callback* callback);
+
+    /** Runs the menu asynchronously, with a user-provided callback that will receive the result. */
+    void showMenuAsync (const Options& options,
+                        std::function<void(int)> callback);
 
     //==============================================================================
     /** Closes any menus that are currently open.

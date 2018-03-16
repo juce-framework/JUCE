@@ -96,6 +96,8 @@ namespace juce
 
 /** This class contains a generated list of OpenGL extension functions, which are either dynamically loaded
     for a specific GL context, or simply call-through to the appropriate OS function where available.
+
+    @tags{OpenGL}
 */
 struct OpenGLExtensionFunctions
 {

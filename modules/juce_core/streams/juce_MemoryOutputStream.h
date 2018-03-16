@@ -29,6 +29,8 @@ namespace juce
 
     The data that was written into the stream can then be accessed later as
     a contiguous block of memory.
+
+    @tags{Core}
 */
 class JUCE_API  MemoryOutputStream  : public OutputStream
 {

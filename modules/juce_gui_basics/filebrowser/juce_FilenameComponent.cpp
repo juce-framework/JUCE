@@ -29,25 +29,23 @@ namespace juce
 
 FilenameComponent::FilenameComponent (const String& name,
                                       const File& currentFile,
-                                      const bool canEditFilename,
-                                      const bool isDirectory,
-                                      const bool isForSaving,
+                                      bool canEditFilename,
+                                      bool isDirectory,
+                                      bool isForSaving,
                                       const String& fileBrowserWildcard,
                                       const String& suffix,
                                       const String& textWhenNothingSelected)
     : Component (name),
-      maxRecentFiles (30),
       isDir (isDirectory),
       isSaving (isForSaving),
-      isFileDragOver (false),
       wildcard (fileBrowserWildcard),
       enforcedSuffix (suffix)
 {
     addAndMakeVisible (filenameBox);
     filenameBox.setEditableText (canEditFilename);
-    filenameBox.addListener (this);
     filenameBox.setTextWhenNothingSelected (textWhenNothingSelected);
     filenameBox.setTextWhenNoChoicesAvailable (TRANS ("(no recently selected files)"));
+    filenameBox.onChange = [this] { setCurrentFile (getCurrentFile(), true); };
 
     setBrowseButtonText ("...");
 
@@ -70,7 +68,7 @@ void FilenameComponent::paintOverChildren (Graphics& g)
 
 void FilenameComponent::resized()
 {
-    getLookAndFeel().layoutFilenameComponent (*this, &filenameBox, browseButton);
+    getLookAndFeel().layoutFilenameComponent (*this, &filenameBox, browseButton.get());
 }
 
 KeyboardFocusTraverser* FilenameComponent::createFocusTraverser()
@@ -88,13 +86,12 @@ void FilenameComponent::setBrowseButtonText (const String& newBrowseButtonText)
 
 void FilenameComponent::lookAndFeelChanged()
 {
-    browseButton = nullptr;
-
-    addAndMakeVisible (browseButton = getLookAndFeel().createFilenameComponentBrowseButton (browseButtonText));
+    browseButton.reset();
+    browseButton.reset (getLookAndFeel().createFilenameComponentBrowseButton (browseButtonText));
+    addAndMakeVisible (browseButton.get());
     browseButton->setConnectedEdges (Button::ConnectedOnLeft);
+    browseButton->onClick = [this] { showChooser(); };
     resized();
-
-    browseButton->addListener (this);
 }
 
 void FilenameComponent::setTooltip (const String& newTooltip)
@@ -114,7 +111,7 @@ File FilenameComponent::getLocationToBrowse()
                                       : getCurrentFile();
 }
 
-void FilenameComponent::buttonClicked (Button*)
+void FilenameComponent::showChooser()
 {
    #if JUCE_MODAL_LOOPS_PERMITTED
     FileChooser fc (isDir ? TRANS ("Choose a new directory")
@@ -132,11 +129,6 @@ void FilenameComponent::buttonClicked (Button*)
     ignoreUnused (isSaving);
     jassertfalse; // needs rewriting to deal with non-modal environments
    #endif
-}
-
-void FilenameComponent::comboBoxChanged (ComboBox*)
-{
-    setCurrentFile (getCurrentFile(), true);
 }
 
 bool FilenameComponent::isInterestedInFileDrag (const StringArray&)
@@ -175,7 +167,7 @@ String FilenameComponent::getCurrentFileText() const
 
 File FilenameComponent::getCurrentFile() const
 {
-    File f (File::getCurrentWorkingDirectory().getChildFile (getCurrentFileText()));
+    auto f = File::getCurrentWorkingDirectory().getChildFile (getCurrentFileText());
 
     if (enforcedSuffix.isNotEmpty())
         f = f.withFileExtension (enforcedSuffix);
@@ -244,7 +236,7 @@ void FilenameComponent::setMaxNumberOfRecentFiles (const int newMaximum)
 
 void FilenameComponent::addRecentlyUsedFile (const File& file)
 {
-    StringArray files (getRecentlyUsedFilenames());
+    auto files = getRecentlyUsedFilenames();
 
     if (file.getFullPathName().isNotEmpty())
     {
@@ -269,7 +261,7 @@ void FilenameComponent::removeListener (FilenameComponentListener* const listene
 void FilenameComponent::handleAsyncUpdate()
 {
     Component::BailOutChecker checker (this);
-    listeners.callChecked (checker, &FilenameComponentListener::filenameComponentChanged, this);
+    listeners.callChecked (checker, [this] (FilenameComponentListener& l) { l.filenameComponentChanged (this); });
 }
 
 } // namespace juce

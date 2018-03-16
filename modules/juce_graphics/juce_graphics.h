@@ -35,7 +35,7 @@
 
   ID:               juce_graphics
   vendor:           juce
-  version:          5.2.0
+  version:          5.3.0
   name:             JUCE graphics classes
   description:      Classes for 2D vector graphics, image loading/saving, font handling, etc.
   website:          http://www.juce.com/juce
@@ -105,6 +105,7 @@ namespace juce
 #include "geometry/juce_Point.h"
 #include "geometry/juce_Line.h"
 #include "geometry/juce_Rectangle.h"
+#include "geometry/juce_Parallelogram.h"
 #include "placement/juce_Justification.h"
 #include "geometry/juce_Path.h"
 #include "geometry/juce_RectangleList.h"

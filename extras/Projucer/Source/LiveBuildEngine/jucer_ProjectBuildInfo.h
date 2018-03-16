@@ -63,14 +63,14 @@ struct ProjectBuildInfo
         {
             ValueTree file (MessageTypes::COMPILEUNIT);
             file.setProperty (Ids::file, f.getFullPathName(), nullptr);
-            tree.addChild (file, -1, nullptr);
+            tree.appendChild (file, nullptr);
         }
 
         for (const File& f : allUserFiles)
         {
             ValueTree file (MessageTypes::USERFILE);
             file.setProperty (Ids::file, f.getFullPathName(), nullptr);
-            tree.addChild (file, -1, nullptr);
+            tree.appendChild (file, nullptr);
         }
     }
 

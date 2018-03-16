@@ -45,6 +45,8 @@ namespace juce
     be loaded and saved to avoid having to scan the file again.
 
     @see AudioThumbnailCache, AudioThumbnailBase
+
+    @tags{Audio}
 */
 class JUCE_API  AudioThumbnail    : public AudioThumbnailBase
 {
@@ -107,7 +109,7 @@ public:
     /** Adds a block of level data to the thumbnail.
         Call reset() before using this, to tell the thumbnail about the data format.
     */
-    void addBlock (int64 sampleNumberInSource, const AudioSampleBuffer& newData,
+    void addBlock (int64 sampleNumberInSource, const AudioBuffer<float>& newData,
                    int startOffsetInBuffer, int numSamples) override;
 
     //==============================================================================

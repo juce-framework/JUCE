@@ -125,7 +125,7 @@
 
      The package you need to install to get ASLA support is "libasound2-dev".
 
-     If you don't have the ALSA library and don't want to build Juce with audio support,
+     If you don't have the ALSA library and don't want to build JUCE with audio support,
      just set the JUCE_ALSA flag to 0.
   */
   #include <alsa/asoundlib.h>
@@ -138,7 +138,7 @@
      The package you need to install to get JACK support is "libjack-dev".
 
      If you don't have the jack-audio-connection-kit library and don't want to build
-     Juce with low latency audio support, just set the JUCE_JACK flag to 0.
+     JUCE with low latency audio support, just set the JUCE_JACK flag to 0.
   */
   #include <jack/jack.h>
  #endif
@@ -151,6 +151,10 @@
   #include <SLES/OpenSLES.h>
   #include <SLES/OpenSLES_Android.h>
   #include <SLES/OpenSLES_AndroidConfiguration.h>
+ #endif
+
+ #if JUCE_USE_ANDROID_OBOE
+  #include <oboe/Oboe.h>
  #endif
 
 #endif
@@ -210,6 +214,10 @@
 
  #if JUCE_USE_ANDROID_OPENSLES
   #include "native/juce_android_OpenSL.cpp"
+ #endif
+
+ #if JUCE_USE_ANDROID_OBOE
+  #include "native/juce_android_Oboe.cpp"
  #endif
 #endif
 

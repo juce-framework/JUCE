@@ -440,7 +440,7 @@ TreeView::TreeView (const String& name)
     : Component (name),
       viewport (new TreeViewport())
 {
-    addAndMakeVisible (viewport);
+    addAndMakeVisible (viewport.get());
     viewport->setViewedComponent (new ContentComponent (*this));
     setWantsKeyboardFocus (true);
 }
@@ -547,7 +547,7 @@ void TreeView::setOpenCloseButtonsVisible (const bool shouldBeVisible)
 
 Viewport* TreeView::getViewport() const noexcept
 {
-    return viewport;
+    return viewport.get();
 }
 
 //==============================================================================
@@ -1008,8 +1008,11 @@ void TreeView::showDragHighlight (const InsertPoint& insertPos) noexcept
 
     if (dragInsertPointHighlight == nullptr)
     {
-        addAndMakeVisible (dragInsertPointHighlight = new InsertPointHighlight());
-        addAndMakeVisible (dragTargetGroupHighlight = new TargetGroupHighlight());
+        dragInsertPointHighlight.reset (new InsertPointHighlight());
+        dragTargetGroupHighlight.reset (new TargetGroupHighlight());
+
+        addAndMakeVisible (dragInsertPointHighlight.get());
+        addAndMakeVisible (dragTargetGroupHighlight.get());
     }
 
     dragInsertPointHighlight->setTargetPosition (insertPos, viewport->getViewWidth());
@@ -1018,8 +1021,8 @@ void TreeView::showDragHighlight (const InsertPoint& insertPos) noexcept
 
 void TreeView::hideDragHighlight() noexcept
 {
-    dragInsertPointHighlight = nullptr;
-    dragTargetGroupHighlight = nullptr;
+    dragInsertPointHighlight.reset();
+    dragTargetGroupHighlight.reset();
 }
 
 void TreeView::handleDrag (const StringArray& files, const SourceDetails& dragSourceDetails)

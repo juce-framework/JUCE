@@ -45,6 +45,14 @@
 
 #include "juce_box2d.h"
 
+typedef juce::int8   int8;
+typedef juce::int16  int16;
+typedef juce::int32  int32;
+typedef juce::uint8  uint8;
+typedef juce::uint16 uint16;
+typedef juce::uint32 uint32;
+
+
 #include "box2d/Collision/b2BroadPhase.cpp"
 #include "box2d/Collision/b2CollideCircle.cpp"
 #include "box2d/Collision/b2CollideEdge.cpp"

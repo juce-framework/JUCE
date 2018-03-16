@@ -27,6 +27,7 @@
 #pragma once
 
 #include "../Project/UI/jucer_ProjectContentComponent.h"
+#include "../Utility/PIPs/jucer_PIPGenerator.h"
 
 //==============================================================================
 /**
@@ -50,14 +51,16 @@ public:
     bool canOpenFile (const File& file) const;
     bool openFile (const File& file);
     void setProject (Project* newProject);
-    Project* getProject() const                 { return currentProject; }
+    Project* getProject() const                 { return currentProject.get(); }
+    bool tryToOpenPIP (const File& f);
 
     void makeVisible();
     void restoreWindowPosition();
-    bool closeProject (Project* project);
+    bool closeProject (Project* project, bool askToSave = true);
     bool closeCurrentProject();
+    void moveProject (File newProjectFile);
 
-    void showNewProjectWizard();
+    void showStartPage();
 
     bool isInterestedInFileDrag (const StringArray& files) override;
     void filesDropped (const StringArray& filenames, int mouseX, int mouseY) override;
@@ -80,6 +83,9 @@ private:
 
     static const char* getProjectWindowPosName()   { return "projectWindowPos"; }
     void createProjectContentCompIfNeeded();
+    void setTitleBarIcon();
+
+    void openPIP (PIPGenerator&, StringRef fileName);
 
     void valueChanged (Value&) override;
 
@@ -96,13 +102,16 @@ public:
     bool askAllWindowsToClose();
     void closeWindow (MainWindow*);
 
+    void goToSiblingWindow (MainWindow*, int delta);
+
     void createWindowIfNoneAreOpen();
     void openDocument (OpenDocumentManager::Document*, bool grabFocus);
-    bool openFile (const File& file);
+    bool openFile (const File& file, bool openInBackground = false);
 
     MainWindow* createNewMainWindow();
     MainWindow* getFrontmostWindow (bool createIfNotFound = true);
     MainWindow* getOrCreateEmptyWindow();
+    MainWindow* getMainWindowForFile (const File&);
 
     Project* getFrontmostProject();
 

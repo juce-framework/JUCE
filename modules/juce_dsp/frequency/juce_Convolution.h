@@ -44,6 +44,8 @@ namespace dsp
     the impulse response is higher than 64 samples.
 
     @see FIRFilter, FIRFilter::Coefficients, FFT
+
+    @tags{DSP}
 */
 class JUCE_API  Convolution
 {
@@ -90,24 +92,30 @@ public:
 
         @param sourceData               the block of data to use as the stream's source
         @param sourceDataSize           the number of bytes in the source data block
-        @param wantsStereo              requests to load both stereo channels or only one mono channel
+        @param wantsStereo              requests to process both stereo channels or only one mono channel
         @param wantsTrimming            requests to trim the start and the end of the impulse response
-        @param size                     the expected size for the impulse response after loading
+        @param size                     the expected size for the impulse response after loading, can be
+                                        set to 0 for requesting maximum original impulse response size
+        @param wantsNormalization       requests to normalize the impulse response amplitude
     */
     void loadImpulseResponse (const void* sourceData, size_t sourceDataSize,
-                              bool wantsStereo, bool wantsTrimming, size_t size);
+                              bool wantsStereo, bool wantsTrimming, size_t size,
+                              bool wantsNormalization = true);
 
     /** This function loads an impulse response from an audio file on any drive. It
         can load any of the audio formats registered in JUCE, and performs some
         resampling and pre-processing as well if needed.
 
         @param fileImpulseResponse      the location of the audio file
-        @param wantsStereo              requests to load both stereo channels or only one mono channel
+        @param wantsStereo              requests to process both stereo channels or only one mono channel
         @param wantsTrimming            requests to trim the start and the end of the impulse response
-        @param size                     the expected size for the impulse response after loading
+        @param size                     the expected size for the impulse response after loading, can be
+                                        set to 0 for requesting maximum original impulse response size
+        @param wantsNormalization       requests to normalize the impulse response amplitude
     */
     void loadImpulseResponse (const File& fileImpulseResponse,
-                              bool wantsStereo, bool wantsTrimming, size_t size);
+                              bool wantsStereo, bool wantsTrimming, size_t size,
+                              bool wantsNormalization = true);
 
     /** This function loads an impulse response from an audio buffer, which is
         copied before doing anything else. Performs some resampling and
@@ -115,12 +123,32 @@ public:
 
         @param buffer                   the AudioBuffer to use
         @param bufferSampleRate         the sampleRate of the data in the AudioBuffer
-        @param wantsStereo              requests to load both stereo channels or only one mono channel
+        @param wantsStereo              requests to process both stereo channels or only one mono channel
         @param wantsTrimming            requests to trim the start and the end of the impulse response
-        @param size                     the expected size for the impulse response after loading
+        @param wantsNormalization       requests to normalize the impulse response amplitude
+        @param size                     the expected size for the impulse response after loading, can be
+                                        set to 0 for requesting maximum original impulse response size
     */
-    void copyAndLoadImpulseResponseFromBuffer (const AudioBuffer<float>& buffer, double bufferSampleRate,
-                                               bool wantsStereo, bool wantsTrimming, size_t size);
+    void copyAndLoadImpulseResponseFromBuffer (AudioBuffer<float>& buffer, double bufferSampleRate,
+                                               bool wantsStereo, bool wantsTrimming, bool wantsNormalization,
+                                               size_t size);
+
+    /** This function loads an impulse response from an audio block, which is
+        copied before doing anything else. Performs some resampling and
+        pre-processing as well if needed.
+
+        @param block                    the AudioBlock to use
+        @param bufferSampleRate         the sampleRate of the data in the AudioBuffer
+        @param wantsStereo              requests to process both stereo channels or only one channel
+        @param wantsTrimming            requests to trim the start and the end of the impulse response
+        @param wantsNormalization       requests to normalize the impulse response amplitude
+        @param size                     the expected size for the impulse response after loading,
+                                        -1 for maximum length
+    */
+    void copyAndLoadImpulseResponseFromBlock (AudioBlock<float> block, double bufferSampleRate,
+                                              bool wantsStereo, bool wantsTrimming, bool wantsNormalization,
+                                              size_t size);
+
 
 private:
     //==============================================================================
@@ -133,6 +161,7 @@ private:
     //==============================================================================
     double sampleRate;
     bool currentIsBypassed = false;
+    bool isActive = false;
     LinearSmoothedValue<float> volumeDry[2], volumeWet[2];
     AudioBlock<float> dryBuffer;
     HeapBlock<char> dryBufferStorage;

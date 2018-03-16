@@ -38,13 +38,13 @@ namespace juce
     either be read-only text, or editable.
 
     To find out when the user selects a different item or edits the text, you
-    can register a ComboBox::Listener to receive callbacks.
+    can assign a lambda to the onChange member, or register a ComboBox::Listener
+    to receive callbacks.
 
-    @see ComboBox::Listener
+    @tags{GUI}
 */
 class JUCE_API  ComboBox  : public Component,
                             public SettableTooltipClient,
-                            public Label::Listener,
                             public Value::Listener,
                             private AsyncUpdater
 {
@@ -301,6 +301,10 @@ public:
     void removeListener (Listener* listener);
 
     //==============================================================================
+    /** You can assign a lambda to this callback object to have it called when the selected ID is changed. */
+    std::function<void()> onChange;
+
+    //==============================================================================
     /** Sets a message to display when there is no item currently selected.
         @see getTextWhenNothingSelected
     */
@@ -347,11 +351,12 @@ public:
     */
     enum ColourIds
     {
-        backgroundColourId  = 0x1000b00,    /**< The background colour to fill the box with. */
-        textColourId        = 0x1000a00,    /**< The colour for the text in the box. */
-        outlineColourId     = 0x1000c00,    /**< The colour for an outline around the box. */
-        buttonColourId      = 0x1000d00,    /**< The base colour for the button (a LookAndFeel class will probably use variations on this). */
-        arrowColourId       = 0x1000e00,    /**< The colour for the arrow shape that pops up the menu */
+        backgroundColourId     = 0x1000b00,   /**< The background colour to fill the box with. */
+        textColourId           = 0x1000a00,   /**< The colour for the text in the box. */
+        outlineColourId        = 0x1000c00,   /**< The colour for an outline around the box. */
+        buttonColourId         = 0x1000d00,   /**< The base colour for the button (a LookAndFeel class will probably use variations on this). */
+        arrowColourId          = 0x1000e00,   /**< The colour for the arrow shape that pops up the menu */
+        focusedOutlineColourId = 0x1000f00    /**< The colour that will be used to draw a box around the edge of the component when it has focus. */
     };
 
     //==============================================================================
@@ -374,8 +379,6 @@ public:
     };
 
     //==============================================================================
-    /** @internal */
-    void labelTextChanged (Label*) override;
     /** @internal */
     void enablementChanged() override;
     /** @internal */
@@ -446,7 +449,5 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComboBox)
 };
 
-/** This typedef is just for compatibility with old code - newer code should use the ComboBox::Listener class directly. */
-typedef ComboBox::Listener ComboBoxListener;
 
 } // namespace juce

@@ -184,7 +184,9 @@ public:
         {
             StringPairArray responseHeaders;
 
-            in = url.createInputStream (false, nullptr, nullptr, headers, 10000, &responseHeaders, &statusCode, 0);
+            in.reset (url.createInputStream (false, nullptr, nullptr, headers,
+                                             10000, &responseHeaders, &statusCode, 0));
+
             if (in == nullptr || statusCode != 302)
                 break;
 
@@ -232,8 +234,7 @@ public:
 };
 
 //==============================================================================
-class UpdateUserDialog   : public Component,
-                           public Button::Listener
+class UpdateUserDialog   : public Component
 {
 public:
     UpdateUserDialog (const LatestVersionChecker::JuceVersionTriple& version,
@@ -259,11 +260,11 @@ public:
 
         addAndMakeVisible (okButton = new TextButton ("OK Button"));
         okButton->setButtonText (TRANS(hasOverwriteButton ? "Choose Another Folder..." : "OK"));
-        okButton->addListener (this);
+        okButton->onClick = [this] { exitParentDialog (2); };
 
         addAndMakeVisible (cancelButton = new TextButton ("Cancel Button"));
         cancelButton->setButtonText (TRANS("Cancel"));
-        cancelButton->addListener (this);
+        cancelButton->onClick = [this] { exitParentDialog (-1); };
 
         addAndMakeVisible (changeLogLabel = new Label ("Change Log Label",
                                                        TRANS("Release Notes:")));
@@ -295,29 +296,29 @@ public:
 
             addAndMakeVisible (overwriteButton = new TextButton ("Overwrite Button"));
             overwriteButton->setButtonText (TRANS("Overwrite"));
-            overwriteButton->addListener (this);
+            overwriteButton->onClick = [this] { exitParentDialog (1); };
         }
 
         juceIcon = Drawable::createFromImageData (BinaryData::juce_icon_png,
                                                   BinaryData::juce_icon_pngSize);
 
-        setSize (518, overwritePath ? 345 : 269);
+        setSize (518, overwritePath != nullptr ? 345 : 269);
 
         lookAndFeelChanged();
     }
 
     ~UpdateUserDialog()
     {
-        titleLabel = nullptr;
-        contentLabel = nullptr;
-        okButton = nullptr;
-        cancelButton = nullptr;
-        changeLogLabel = nullptr;
-        changeLog = nullptr;
-        overwriteLabel = nullptr;
-        overwritePath = nullptr;
-        overwriteButton = nullptr;
-        juceIcon = nullptr;
+        titleLabel.reset();
+        contentLabel.reset();
+        okButton.reset();
+        cancelButton.reset();
+        changeLogLabel.reset();
+        changeLog.reset();
+        overwriteLabel.reset();
+        overwritePath.reset();
+        overwriteButton.reset();
+        juceIcon.reset();
     }
 
     void paint (Graphics& g) override
@@ -353,14 +354,10 @@ public:
         }
     }
 
-    void buttonClicked (Button* clickedButton) override
+    void exitParentDialog (int returnVal)
     {
-        if (DialogWindow* parentDialog = findParentComponentOfClass<DialogWindow>())
-        {
-            if      (clickedButton == overwriteButton) parentDialog->exitModalState (1);
-            else if (clickedButton == okButton)        parentDialog->exitModalState (2);
-            else if (clickedButton == cancelButton)    parentDialog->exitModalState (-1);
-        }
+        if (auto* parentDialog = findParentComponentOfClass<DialogWindow>())
+            parentDialog->exitModalState (returnVal);
         else
             jassertfalse;
     }
@@ -747,7 +744,7 @@ void LatestVersionChecker::askUserForLocationToDownload (URL& newVersionToDownlo
 {
     File targetFolder (EnabledModuleList::findGlobalModulesFolder());
 
-    if (isJuceModulesFolder (targetFolder))
+    if (isJUCEModulesFolder (targetFolder))
         targetFolder = targetFolder.getParentDirectory();
 
     FileChooser chooser (TRANS("Please select the location into which you'd like to install the new version"),
@@ -757,7 +754,7 @@ void LatestVersionChecker::askUserForLocationToDownload (URL& newVersionToDownlo
     {
         targetFolder = chooser.getResult();
 
-        if (isJuceModulesFolder (targetFolder))
+        if (isJUCEModulesFolder (targetFolder))
             targetFolder = targetFolder.getParentDirectory();
 
         if (targetFolder.getChildFile ("JUCE").isDirectory())
@@ -775,7 +772,7 @@ void LatestVersionChecker::askUserForLocationToDownload (URL& newVersionToDownlo
             return;
         }
 
-        if (isJuceFolder (targetFolder))
+        if (isJUCEFolder (targetFolder))
         {
             if (! AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
                                                 TRANS("Overwrite existing JUCE folder?"),

@@ -49,6 +49,8 @@ namespace juce
     method.
 
     @see ResizableWindow, DialogWindow
+
+    @tags{GUI}
 */
 class JUCE_API  DocumentWindow   : public ResizableWindow
 {

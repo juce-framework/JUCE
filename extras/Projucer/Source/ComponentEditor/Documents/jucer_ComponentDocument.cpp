@@ -32,10 +32,10 @@
 ComponentDocument::ComponentDocument (SourceCodeDocument* c)
     : JucerDocument (c)
 {
-    components = new ComponentLayout();
+    components.reset (new ComponentLayout());
     components->setDocument (this);
 
-    backgroundGraphics = new PaintRoutine();
+    backgroundGraphics.reset (new PaintRoutine());
     backgroundGraphics->setDocument (this);
 }
 

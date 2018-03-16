@@ -94,7 +94,7 @@ public:
 
     private:
         //==============================================================================
-        Target& operator= (const Target&) JUCE_DELETED_FUNCTION;
+        Target& operator= (const Target&) = delete;
     };
 
     virtual bool supportsTargetType (Target::Type /*targetType*/) const     { return false; }
@@ -110,7 +110,7 @@ private:
 
 //==============================================================================
 inline ProjectType::ProjectType (const String& t, const String& d)
-  : type (t), desc (d)
+    : type (t), desc (d)
 {
 }
 
@@ -121,9 +121,9 @@ inline ProjectType::~ProjectType()
 
 inline const ProjectType* ProjectType::findType (const String& typeCode)
 {
-    const Array<ProjectType*>& types = getAllTypes();
+    const auto& types = getAllTypes();
 
-    for (int i = types.size(); --i >= 0;)
+    for (auto i = types.size(); --i >= 0;)
         if (types.getUnchecked(i)->getType() == typeCode)
             return types.getUnchecked(i);
 
@@ -206,5 +206,5 @@ inline Array<ProjectType*> ProjectType::getAllTypes()
     static ProjectType_DLL dll;
     static ProjectType_AudioPlugin plugin;
 
-    return { &guiApp, &consoleApp, &staticLib, &dll, &plugin };
+    return Array<ProjectType*>(&guiApp, &consoleApp, &staticLib, &dll, &plugin);
 }

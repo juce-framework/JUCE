@@ -85,7 +85,7 @@
 					81017699F857F5BBFCA6E055,
 					C8EE61FDD1F06817A014B881,
 					50FEDCEF881CC99174035167,
-					AD134CACB71BED6A22743C18, ); name = "Juce Modules"; sourceTree = "<group>"; };
+					AD134CACB71BED6A22743C18, ); name = "JUCE Modules"; sourceTree = "<group>"; };
 		0B8996A5E2671A4628476CFB = {isa = PBXGroup; children = (
 					A65BB8D452A2A4859FA41F8B,
 					89B3243200BAA6BD72905DBB,
@@ -99,7 +99,7 @@
 					7E951216B6138C76653B1460,
 					0BC3C6A4F4FC1DD30DD8E17C,
 					B06AE97C86D27E7FEBCB4631,
-					26FE7BE182FBB9E7228A082D, ); name = "Juce Library Code"; sourceTree = "<group>"; };
+					26FE7BE182FBB9E7228A082D, ); name = "JUCE Library Code"; sourceTree = "<group>"; };
 		ED3C55ACC14D6DE2BC3B8A1D = {isa = PBXGroup; children = (
 					9516A19EE58DED8326DD0306,
 					FAAB4EAE4A57B642D3B9EC23, ); name = Resources; sourceTree = "<group>"; };
@@ -124,7 +124,7 @@
 					02A7F817D49F2BC1D70F4242,
 					1DFEAF972822E305E013CC06, ); name = Source; sourceTree = "<group>"; };
 		19B7C16D592FB25D09022191 = {isa = XCBuildConfiguration; buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -155,7 +155,7 @@
 				SDKROOT_ppc = macosx10.5;
 				USE_HEADERMAP = NO; }; name = Debug; };
 		B7A6988E30C0A68B01EDC53B = {isa = XCBuildConfiguration; buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -181,6 +181,7 @@
 				INFOPLIST_FILE = Info-App.plist;
 				INFOPLIST_PREPROCESS = NO;
 				INSTALL_PATH = "$(HOME)/Applications";
+				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.juce.AudioPerformanceTest;
@@ -297,7 +298,7 @@
 					C86DD529EC94922C2AB61742,
 					6C2BE2DE2ECC96615ED827AB,
 					409D569C572B6EF7F4F1702D, ); buildRules = ( ); dependencies = (  ); name = "AudioPerformanceTest - App"; productName = AudioPerformanceTest; productReference = 614F2084407B35D62101F69F; productType = "com.apple.product-type.application"; };
-		9CE2A44801B5B4BE7A9667DA = {isa = PBXProject; buildConfigurationList = 7097CF6AC086DAC346ACCCD9; attributes = { LastUpgradeCheck = 0830; TargetAttributes = { E9FD2656EC625C9C8DE30219 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 3BA1BA0CAFE969E99950C06B; projectDirPath = ""; projectRoot = ""; targets = (E9FD2656EC625C9C8DE30219); };
+		9CE2A44801B5B4BE7A9667DA = {isa = PBXProject; buildConfigurationList = 7097CF6AC086DAC346ACCCD9; attributes = { LastUpgradeCheck = 0830; ORGANIZATIONNAME = "ROLI Ltd."; TargetAttributes = { E9FD2656EC625C9C8DE30219 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 3BA1BA0CAFE969E99950C06B; projectDirPath = ""; projectRoot = ""; targets = (E9FD2656EC625C9C8DE30219); };
 	};
 	rootObject = 9CE2A44801B5B4BE7A9667DA;
 }

@@ -411,8 +411,8 @@ public:
     */
     bool isPositionAbsolute() const noexcept
     {
-        return xMode == absoluteFromParentTopLeft
-            && yMode == absoluteFromParentTopLeft
+        return (xMode & ~anchorAtLeftOrTop) == absoluteFromParentTopLeft
+            && (yMode & ~anchorAtLeftOrTop) == absoluteFromParentTopLeft
             && wMode == absoluteSize
             && hMode == absoluteSize;
     }

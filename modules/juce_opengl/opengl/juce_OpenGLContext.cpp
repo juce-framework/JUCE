@@ -76,13 +76,13 @@ public:
         : ThreadPoolJob ("OpenGL Rendering"),
           context (c), component (comp)
     {
-        nativeContext = new NativeContext (component, pixFormat, contextToShare,
-                                           c.useMultisampling, c.versionRequired);
+        nativeContext.reset (new NativeContext (component, pixFormat, contextToShare,
+                                                c.useMultisampling, c.versionRequired));
 
         if (nativeContext->createdOk())
-            context.nativeContext = nativeContext;
+            context.nativeContext = nativeContext.get();
         else
-            nativeContext = nullptr;
+            nativeContext.reset();
     }
 
     ~CachedImage()
@@ -95,7 +95,7 @@ public:
     {
         if (nativeContext != nullptr)
         {
-            renderThread = new ThreadPool (1);
+            renderThread.reset (new ThreadPool (1));
             resume();
         }
     }
@@ -117,7 +117,7 @@ public:
             }
 
             pause();
-            renderThread = nullptr;
+            renderThread.reset();
         }
 
         hasInitialised = false;
@@ -143,7 +143,10 @@ public:
     }
 
     //==============================================================================
-    void paint (Graphics&) override {}
+    void paint (Graphics&) override
+    {
+        updateViewportSize (false);
+    }
 
     bool invalidateAll() override
     {
@@ -154,7 +157,7 @@ public:
 
     bool invalidate (const Rectangle<int>& area) override
     {
-        validArea.subtract (area * scale);
+        validArea.subtract (area.toFloat().transformedBy (transform).getSmallestIntegerContainer());
         triggerRepaint();
         return false;
     }
@@ -223,14 +226,12 @@ public:
             {
                 doWorkWhileWaitingForLock (false);
 
-                if (mmLock.retryLock ())
+                if (mmLock.retryLock())
                     break;
             }
 
             if (shouldExit())
                 return false;
-
-            updateViewportSize (false);
         }
 
         if (! context.makeActive())
@@ -284,7 +285,9 @@ public:
             auto newScale = Desktop::getInstance().getDisplays()
                               .getDisplayContaining (lastScreenBounds.getCentre()).scale;
 
-            auto newArea = peer->getComponent().getLocalArea (&component, component.getLocalBounds())
+            auto localBounds = component.getLocalBounds();
+
+            auto newArea = peer->getComponent().getLocalArea (&component, localBounds)
                                                .withZeroOrigin()
                              * newScale;
 
@@ -292,6 +295,8 @@ public:
             {
                 scale = newScale;
                 viewportArea = newArea;
+                transform = AffineTransform::scale ((float) newArea.getRight()  / (float) localBounds.getRight(),
+                                                    (float) newArea.getBottom() / (float) localBounds.getBottom());
 
                 if (canTriggerUpdate)
                     invalidateAll();
@@ -334,7 +339,7 @@ public:
             {
                 ScopedPointer<LowLevelGraphicsContext> g (createOpenGLGraphicsContext (context, cachedImageFrameBuffer));
                 g->clipToRectangleList (invalid);
-                g->addTransform (AffineTransform::scale ((float) scale));
+                g->addTransform (transform);
 
                 paintOwner (*g);
                 JUCE_CHECK_OPENGL_ERROR
@@ -434,10 +439,16 @@ public:
                 if (shouldExit())
                     return ThreadPoolJob::jobHasFinished;
 
-            } while (! mmLock.retryLock ());
+            } while (! mmLock.retryLock());
         }
 
-        initialiseOnThread();
+        if (! initialiseOnThread())
+        {
+            hasInitialised = false;
+
+            return ThreadPoolJob::jobHasFinished;
+        }
+
         hasInitialised = true;
 
         while (! shouldExit())
@@ -467,7 +478,7 @@ public:
         return ThreadPoolJob::jobHasFinished;
     }
 
-    void initialiseOnThread()
+    bool initialiseOnThread()
     {
         // On android, this can get called twice, so drop any previous state..
         associatedObjectNames.clear();
@@ -475,7 +486,9 @@ public:
         cachedImageFrameBuffer.release();
 
         context.makeActive();
-        nativeContext->initialiseOnRenderThread (context);
+
+        if (! nativeContext->initialiseOnRenderThread (context))
+            return false;
 
        #if JUCE_ANDROID
         // On android the context may be created in initialiseOnRenderThread
@@ -505,6 +518,8 @@ public:
 
         if (context.renderer != nullptr)
             context.renderer->newOpenGLContextCreated();
+
+        return true;
     }
 
     void shutdownOnThread()
@@ -608,6 +623,7 @@ public:
     RectangleList<int> validArea;
     Rectangle<int> viewportArea, lastScreenBounds;
     double scale = 1.0;
+    AffineTransform transform;
    #if JUCE_OPENGL3
     GLuint vertexArrayObject = 0;
    #endif
@@ -871,7 +887,7 @@ void OpenGLContext::attachTo (Component& component)
     if (getTargetComponent() != &component)
     {
         detach();
-        attachment = new Attachment (*this, component);
+        attachment.reset (new Attachment (*this, component));
     }
 }
 
@@ -880,7 +896,7 @@ void OpenGLContext::detach()
     if (auto* a = attachment.get())
     {
         a->detach(); // must detach before nulling our pointer
-        attachment = nullptr;
+        attachment.reset();
     }
 
     nativeContext = nullptr;

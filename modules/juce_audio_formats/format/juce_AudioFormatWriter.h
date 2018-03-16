@@ -38,6 +38,8 @@ namespace juce
     you can call its write() method to store the samples, and then delete it.
 
     @see AudioFormat, AudioFormatReader
+
+    @tags{Audio}
 */
 class JUCE_API  AudioFormatWriter
 {
@@ -96,7 +98,7 @@ public:
     //==============================================================================
     /** Writes a set of samples to the audio stream.
 
-        Note that if you're trying to write the contents of an AudioSampleBuffer, you
+        Note that if you're trying to write the contents of an AudioBuffer, you
         can use writeFromAudioSampleBuffer().
 
         @param samplesToWrite   an array of arrays containing the sample data for
@@ -154,8 +156,8 @@ public:
                                int samplesPerBlock = 2048);
 
 
-    /** Writes some samples from an AudioSampleBuffer. */
-    bool writeFromAudioSampleBuffer (const AudioSampleBuffer& source,
+    /** Writes some samples from an AudioBuffer. */
+    bool writeFromAudioSampleBuffer (const AudioBuffer<float>& source,
                                      int startSample, int numSamples);
 
     /** Writes some samples from a set of float data channels. */
@@ -210,6 +212,7 @@ public:
         */
         bool write (const float* const* data, int numSamples);
 
+        /** Receiver for incoming data. */
         class JUCE_API  IncomingDataReceiver
         {
         public:
@@ -217,14 +220,14 @@ public:
             virtual ~IncomingDataReceiver() {}
 
             virtual void reset (int numChannels, double sampleRate, int64 totalSamplesInSource) = 0;
-            virtual void addBlock (int64 sampleNumberInSource, const AudioSampleBuffer& newData,
+            virtual void addBlock (int64 sampleNumberInSource, const AudioBuffer<float>& newData,
                                    int startOffsetInBuffer, int numSamples) = 0;
         };
 
         /** Allows you to specify a callback that this writer should update with the
             incoming data.
-            The receiver will be cleared and will the writer will begin adding data to
-            it as the data arrives. Pass a null pointer to remove the current receiver.
+            The receiver will be cleared and the writer will begin adding data to it
+            as the data arrives. Pass a null pointer to remove the current receiver.
 
             The object passed-in must not be deleted while this writer is still using it.
         */

@@ -27,11 +27,6 @@
 namespace juce
 {
 
-namespace MouseCursorHelpers
-{
-    extern NSImage* createNSImage (const Image&, float scaleFactor = 1.f);
-}
-
 extern NSMenu* createNSMenu (const PopupMenu&, const String& name, int topLevelMenuId,
                              int topLevelIndex, bool addDelegate);
 
@@ -39,7 +34,7 @@ class SystemTrayIconComponent::Pimpl  : private Timer
 {
 public:
     Pimpl (SystemTrayIconComponent& iconComp, const Image& im)
-        : owner (iconComp), statusIcon (MouseCursorHelpers::createNSImage (im))
+        : owner (iconComp), statusIcon (imageToNSImage (im))
     {
         static SystemTrayViewClass cls;
         view = [cls.createInstance() init];
@@ -73,7 +68,7 @@ public:
     void updateIcon (const Image& newImage)
     {
         [statusIcon release];
-        statusIcon = MouseCursorHelpers::createNSImage (newImage);
+        statusIcon = imageToNSImage (newImage);
         setIconSize();
         SystemTrayViewClass::setImage (view, statusIcon);
         [statusItem setView: view];
@@ -236,13 +231,13 @@ void SystemTrayIconComponent::setIconImage (const Image& newImage)
     if (newImage.isValid())
     {
         if (pimpl == nullptr)
-            pimpl = new Pimpl (*this, newImage);
+            pimpl.reset (new Pimpl (*this, newImage));
         else
             pimpl->updateIcon (newImage);
     }
     else
     {
-        pimpl = nullptr;
+        pimpl.reset();
     }
 }
 

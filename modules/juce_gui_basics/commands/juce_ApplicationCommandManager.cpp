@@ -28,16 +28,15 @@ namespace juce
 {
 
 ApplicationCommandManager::ApplicationCommandManager()
-    : firstTarget (nullptr)
 {
-    keyMappings = new KeyPressMappingSet (*this);
+    keyMappings.reset (new KeyPressMappingSet (*this));
     Desktop::getInstance().addFocusChangeListener (this);
 }
 
 ApplicationCommandManager::~ApplicationCommandManager()
 {
     Desktop::getInstance().removeFocusChangeListener (this);
-    keyMappings = nullptr;
+    keyMappings.reset();
 }
 
 //==============================================================================
@@ -71,7 +70,7 @@ void ApplicationCommandManager::registerCommand (const ApplicationCommandInfo& n
     }
     else
     {
-        ApplicationCommandInfo* const newInfo = new ApplicationCommandInfo (newCommand);
+        auto* newInfo = new ApplicationCommandInfo (newCommand);
         newInfo->flags &= ~ApplicationCommandInfo::isTicked;
         commands.add (newInfo);
 
@@ -130,12 +129,12 @@ ApplicationCommandInfo* ApplicationCommandManager::getMutableCommandForID (Comma
     return nullptr;
 }
 
-const ApplicationCommandInfo* ApplicationCommandManager::getCommandForID (const CommandID commandID) const noexcept
+const ApplicationCommandInfo* ApplicationCommandManager::getCommandForID (CommandID commandID) const noexcept
 {
     return getMutableCommandForID (commandID);
 }
 
-String ApplicationCommandManager::getNameOfCommand (const CommandID commandID) const noexcept
+String ApplicationCommandManager::getNameOfCommand (CommandID commandID) const noexcept
 {
     if (auto* ci = getCommandForID (commandID))
         return ci->shortName;
@@ -143,7 +142,7 @@ String ApplicationCommandManager::getNameOfCommand (const CommandID commandID) c
     return {};
 }
 
-String ApplicationCommandManager::getDescriptionOfCommand (const CommandID commandID) const noexcept
+String ApplicationCommandManager::getDescriptionOfCommand (CommandID commandID) const noexcept
 {
     if (auto* ci = getCommandForID (commandID))
         return ci->description.isNotEmpty() ? ci->description
@@ -174,7 +173,7 @@ Array<CommandID> ApplicationCommandManager::getCommandsInCategory (const String&
 }
 
 //==============================================================================
-bool ApplicationCommandManager::invokeDirectly (const CommandID commandID, const bool asynchronously)
+bool ApplicationCommandManager::invokeDirectly (CommandID commandID, bool asynchronously)
 {
     ApplicationCommandTarget::InvocationInfo info (commandID);
     info.invocationMethod = ApplicationCommandTarget::InvocationInfo::direct;
@@ -182,7 +181,7 @@ bool ApplicationCommandManager::invokeDirectly (const CommandID commandID, const
     return invoke (info, asynchronously);
 }
 
-bool ApplicationCommandManager::invoke (const ApplicationCommandTarget::InvocationInfo& inf, const bool asynchronously)
+bool ApplicationCommandManager::invoke (const ApplicationCommandTarget::InvocationInfo& inf, bool asynchronously)
 {
     // This call isn't thread-safe for use from a non-UI thread without locking the message
     // manager first..
@@ -205,21 +204,21 @@ bool ApplicationCommandManager::invoke (const ApplicationCommandTarget::Invocati
 }
 
 //==============================================================================
-ApplicationCommandTarget* ApplicationCommandManager::getFirstCommandTarget (const CommandID)
+ApplicationCommandTarget* ApplicationCommandManager::getFirstCommandTarget (CommandID)
 {
     return firstTarget != nullptr ? firstTarget
                                   : findDefaultComponentTarget();
 }
 
-void ApplicationCommandManager::setFirstCommandTarget (ApplicationCommandTarget* const newTarget) noexcept
+void ApplicationCommandManager::setFirstCommandTarget (ApplicationCommandTarget* newTarget) noexcept
 {
     firstTarget = newTarget;
 }
 
-ApplicationCommandTarget* ApplicationCommandManager::getTargetForCommand (const CommandID commandID,
+ApplicationCommandTarget* ApplicationCommandManager::getTargetForCommand (CommandID commandID,
                                                                           ApplicationCommandInfo& upToDateInfo)
 {
-    ApplicationCommandTarget* target = getFirstCommandTarget (commandID);
+    auto* target = getFirstCommandTarget (commandID);
 
     if (target == nullptr)
         target = JUCEApplication::getInstance();
@@ -239,7 +238,7 @@ ApplicationCommandTarget* ApplicationCommandManager::getTargetForCommand (const 
 //==============================================================================
 ApplicationCommandTarget* ApplicationCommandManager::findTargetForComponent (Component* c)
 {
-    ApplicationCommandTarget* target = dynamic_cast<ApplicationCommandTarget*> (c);
+    auto* target = dynamic_cast<ApplicationCommandTarget*> (c);
 
     if (target == nullptr && c != nullptr)
         target = c->findParentComponentOfClass<ApplicationCommandTarget>();
@@ -249,7 +248,7 @@ ApplicationCommandTarget* ApplicationCommandManager::findTargetForComponent (Com
 
 ApplicationCommandTarget* ApplicationCommandManager::findDefaultComponentTarget()
 {
-    Component* c = Component::getCurrentlyFocusedComponent();
+    auto* c = Component::getCurrentlyFocusedComponent();
 
     if (c == nullptr)
     {
@@ -291,24 +290,24 @@ ApplicationCommandTarget* ApplicationCommandManager::findDefaultComponentTarget(
 }
 
 //==============================================================================
-void ApplicationCommandManager::addListener (ApplicationCommandManagerListener* const listener)
+void ApplicationCommandManager::addListener (ApplicationCommandManagerListener* listener)
 {
     listeners.add (listener);
 }
 
-void ApplicationCommandManager::removeListener (ApplicationCommandManagerListener* const listener)
+void ApplicationCommandManager::removeListener (ApplicationCommandManagerListener* listener)
 {
     listeners.remove (listener);
 }
 
 void ApplicationCommandManager::sendListenerInvokeCallback (const ApplicationCommandTarget::InvocationInfo& info)
 {
-    listeners.call (&ApplicationCommandManagerListener::applicationCommandInvoked, info);
+    listeners.call ([&] (ApplicationCommandManagerListener& l) { l.applicationCommandInvoked (info); });
 }
 
 void ApplicationCommandManager::handleAsyncUpdate()
 {
-    listeners.call (&ApplicationCommandManagerListener::applicationCommandListChanged);
+    listeners.call ([] (ApplicationCommandManagerListener& l) { l.applicationCommandListChanged(); });
 }
 
 void ApplicationCommandManager::globalFocusChanged (Component*)

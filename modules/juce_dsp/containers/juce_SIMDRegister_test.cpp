@@ -95,7 +95,7 @@ namespace SIMDRegister_test_internal
 class SIMDRegisterUnitTests   : public UnitTest
 {
 public:
-    SIMDRegisterUnitTests()  : UnitTest ("SIMDRegister UnitTests") {}
+    SIMDRegisterUnitTests()  : UnitTest ("SIMDRegister UnitTests", "DSP") {}
 
     //==============================================================================
     // Some helper classes
@@ -113,7 +113,10 @@ public:
     template <typename type>
     static bool vecEqualToArray (const SIMDRegister<type>& vec, const type* array)
     {
-        const type* ptr = reinterpret_cast<const type*> (&vec);
+        HeapBlock<type> vecElementsStorage (SIMDRegister<type>::SIMDNumElements * 2);
+        auto* ptr = SIMDRegister<type>::getNextSIMDAlignedPtr (vecElementsStorage.getData());
+        vec.copyToRawArray (ptr);
+
         for (size_t i = 0; i < SIMDRegister<type>::SIMDNumElements; ++i)
         {
             double delta = SIMDRegister_test_internal::difference (ptr[i], array[i]);
@@ -130,8 +133,15 @@ public:
     template <typename type>
     static void copy (SIMDRegister<type>& vec, const type* ptr)
     {
-        for (size_t i = 0; i < SIMDRegister<type>::SIMDNumElements; ++i)
-            vec[i] = ptr[i];
+        if (SIMDRegister<type>::isSIMDAligned (ptr))
+        {
+            vec = SIMDRegister<type>::fromRawArray (ptr);
+        }
+        else
+        {
+            for (size_t i = 0; i < SIMDRegister<type>::SIMDNumElements; ++i)
+                vec[i] = ptr[i];
+        }
     }
 
     //==============================================================================
@@ -360,8 +370,10 @@ public:
                 {
                     type array_a [SIMDRegister<type>::SIMDNumElements];
 
-                    union
+                    union ConversionUnion
                     {
+                        inline ConversionUnion() {}
+                        inline ~ConversionUnion() {}
                         SIMDRegister<type> floatVersion;
                         vMaskType intVersion;
                     } a, b;
@@ -502,6 +514,39 @@ public:
                 u.expect (vecEqualToArray (le,  array_le ));
                 u.expect (vecEqualToArray (gt,  array_gt ));
                 u.expect (vecEqualToArray (ge,  array_ge ));
+
+                do
+                {
+                    SIMDRegister_test_internal::fillRandom (array_a, SIMDRegister<type>::SIMDNumElements, random);
+                    SIMDRegister_test_internal::fillRandom (array_b, SIMDRegister<type>::SIMDNumElements, random);
+                } while (std::equal (array_a, array_a + SIMDRegister<type>::SIMDNumElements, array_b));
+
+                copy (a, array_a);
+                copy (b, array_b);
+                u.expect (a != b);
+                u.expect (b != a);
+                u.expect (! (a == b));
+                u.expect (! (b == a));
+
+                SIMDRegister_test_internal::fillRandom (array_a, SIMDRegister<type>::SIMDNumElements, random);
+                copy (a, array_a);
+                copy (b, array_a);
+
+                u.expect (a == b);
+                u.expect (b == a);
+                u.expect (! (a != b));
+                u.expect (! (b != a));
+
+                auto scalar = a[0];
+                a = SIMDRegister<type>::expand (scalar);
+
+                u.expect (a == scalar);
+                u.expect (! (a != scalar));
+
+                scalar--;
+
+                u.expect (a != scalar);
+                u.expect (! (a == scalar));
             }
         }
     };

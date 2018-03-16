@@ -50,6 +50,7 @@ class FIRFilterTest : public UnitTest
         }
     };
 
+   #if JUCE_USE_SIMD
     template <typename Type>
     struct Helpers<SIMDRegister<Type>>
     {
@@ -65,6 +66,7 @@ class FIRFilterTest : public UnitTest
                                                        n * SIMDRegister<Type>::size());
         }
     };
+   #endif
 
     template <typename Type>
     static void fillRandom (Random& random, Type* buffer, size_t n) { Helpers<Type>::fillRandom (random, buffer, n); }
@@ -85,8 +87,15 @@ class FIRFilterTest : public UnitTest
         }
 
         HeapBlock<SampleType> scratchBuffer (numCoefficients
-                                             + (SIMDRegister<NumericType>::SIMDRegisterSize / sizeof (SampleType)));
+                                            #if JUCE_USE_SIMD
+                                             + (SIMDRegister<NumericType>::SIMDRegisterSize / sizeof (SampleType))
+                                            #endif
+                                             );
+       #if JUCE_USE_SIMD
         SampleType* buffer = reinterpret_cast<SampleType*> (SIMDRegister<NumericType>::getNextSIMDAlignedPtr (reinterpret_cast<NumericType*> (scratchBuffer.getData())));
+       #else
+        SampleType* buffer = scratchBuffer.getData();
+       #endif
 
         zeromem (buffer, sizeof (SampleType) * numCoefficients);
 
@@ -97,7 +106,7 @@ class FIRFilterTest : public UnitTest
 
             buffer[0] = input[i];
 
-            SampleType sum{};
+            SampleType sum (0);
 
             for (size_t j = 0; j < numCoefficients; ++j)
                 sum += buffer[j] * firCoefficients[j];
@@ -153,7 +162,7 @@ class FIRFilterTest : public UnitTest
 
     //==============================================================================
     template <typename TheTest, typename SampleType, typename NumericType>
-    void runTestForType ()
+    void runTestForType()
     {
         Random random (8392829);
 
@@ -186,15 +195,17 @@ class FIRFilterTest : public UnitTest
     {
         beginTest (unitTestName);
 
-        runTestForType<TheTest, float, float> ();
+        runTestForType<TheTest, float, float>();
         runTestForType<TheTest, double, double>();
-        runTestForType<TheTest, SIMDRegister<float>, float> ();
+       #if JUCE_USE_SIMD
+        runTestForType<TheTest, SIMDRegister<float>, float>();
         runTestForType<TheTest, SIMDRegister<double>, double>();
+       #endif
     }
 
 
 public:
-    FIRFilterTest() : UnitTest ("FIR Filter") {}
+    FIRFilterTest() : UnitTest ("FIR Filter", "DSP") {}
 
     void runTest() override
     {

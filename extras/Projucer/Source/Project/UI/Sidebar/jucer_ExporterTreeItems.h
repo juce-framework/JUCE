@@ -69,12 +69,12 @@ public:
 
     Icon getIcon() const override
     {
-        return getIconForExporter (exporter).withColour (getContentColour (true));
+        return getIconForExporter (exporter.get()).withColour (getContentColour (true));
     }
 
     void showDocument() override
     {
-        showSettingsPage (new SettingsComp (exporter));
+        showSettingsPage (new SettingsComp (exporter.get()));
     }
 
     void deleteItem() override
@@ -117,7 +117,7 @@ public:
     {
         if (resultCode == 1)
         {
-            exporter->addNewConfiguration (nullptr);
+            exporter->addNewConfiguration (false);
         }
         else if (resultCode == 2)
         {
@@ -142,7 +142,7 @@ public:
 
     void itemDropped (const DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex) override
     {
-        const int oldIndex = indexOfConfig (dragSourceDetails.description.toString().fromLastOccurrenceOf ("||", false, false));
+        auto oldIndex = indexOfConfig (dragSourceDetails.description.toString().fromLastOccurrenceOf ("||", false, false));
 
         if (oldIndex >= 0)
             configListTree.moveChild (oldIndex, insertIndex, project.getUndoManagerFor (configListTree));
@@ -262,7 +262,7 @@ public:
     void handlePopupMenuResult (int resultCode) override
     {
         if (resultCode == 1)
-            exporter.addNewConfiguration (config);
+            exporter.addNewConfigurationFromExisting (*config);
         else if (resultCode == 2)
             deleteAllSelectedItems();
     }
@@ -308,8 +308,7 @@ private:
 };
 
 //==============================================================================
-class ExportersTreeRoot    : public JucerTreeViewBase,
-                             private ValueTree::Listener
+class ExportersTreeRoot    : public ProjectTreeItemBase
 {
 public:
     ExportersTreeRoot (Project& p)

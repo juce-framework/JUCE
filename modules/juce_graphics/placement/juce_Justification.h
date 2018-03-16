@@ -35,6 +35,8 @@ namespace juce
     centred, etc.
 
     It is used in various places wherever this kind of information is needed.
+
+    @tags{Graphics}
 */
 class Justification
 {

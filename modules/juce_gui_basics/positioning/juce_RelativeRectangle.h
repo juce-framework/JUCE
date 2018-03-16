@@ -34,6 +34,8 @@ namespace juce
     The rectangle's top, left, bottom and right edge positions are each stored as a RelativeCoordinate.
 
     @see RelativeCoordinate, RelativePoint
+
+    @tags{GUI}
 */
 class JUCE_API  RelativeRectangle
 {

@@ -32,6 +32,8 @@ namespace juce
 
 //==============================================================================
 /**
+
+    @tags{Audio}
 */
 class AudioCDBurner     : public ChangeBroadcaster
 {

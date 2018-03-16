@@ -27,9 +27,9 @@ namespace juce
 /**
     Utility class for linearly smoothed values like volume etc. that should
     not change abruptly but as a linear ramp, to avoid audio glitches.
-*/
 
-//==============================================================================
+    @tags{Audio}
+*/
 template <typename FloatType>
 class LinearSmoothedValue
 {
@@ -60,10 +60,19 @@ public:
 
     //==============================================================================
     /** Set a new target value.
-        @param newValue New target value
+
+        @param newValue     The new target value
+        @param force        If true, the value will be set immediately, bypassing the ramp
     */
-    void setValue (FloatType newValue) noexcept
+    void setValue (FloatType newValue, bool force = false) noexcept
     {
+        if (force)
+        {
+            target = currentValue = newValue;
+            countdown = 0;
+            return;
+        }
+
         if (target != newValue)
         {
             target = newValue;
@@ -174,6 +183,26 @@ public:
         else
         {
             buffer.applyGain (0, numSamples, target);
+        }
+    }
+
+    //==============================================================================
+    /** Skip the next numSamples samples.
+
+        This is identical to calling getNextValue numSamples times.
+        @see getNextValue
+    */
+    void skip (int numSamples) noexcept
+    {
+        if (numSamples >= countdown)
+        {
+            currentValue = target;
+            countdown = 0;
+        }
+        else
+        {
+            currentValue += (step * static_cast<FloatType> (numSamples));
+            countdown -= numSamples;
         }
     }
 

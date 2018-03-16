@@ -31,7 +31,9 @@ namespace juce
     voices so that it can play polyphonically.
 
     @see MPESynthesiser, MPENote
- */
+
+    @tags{Audio}
+*/
 class JUCE_API  MPESynthesiserVoice
 {
 public:
@@ -174,13 +176,13 @@ protected:
     void clearCurrentNote() noexcept;
 
     //==============================================================================
-    double currentSampleRate;
+    double currentSampleRate = 0.0;
     MPENote currentlyPlayingNote;
 
 private:
     //==============================================================================
     friend class MPESynthesiser;
-    uint32 noteStartTime;
+    uint32 noteStartTime = 0;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MPESynthesiserVoice)
 };

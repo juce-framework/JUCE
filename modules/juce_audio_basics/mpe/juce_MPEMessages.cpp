@@ -23,46 +23,85 @@
 namespace juce
 {
 
-MidiBuffer MPEMessages::addZone (MPEZone zone)
+MidiBuffer MPEMessages::setLowerZone (int numMemberChannels, int perNotePitchbendRange, int masterPitchbendRange)
 {
-    MidiBuffer buffer (MidiRPNGenerator::generate (zone.getFirstNoteChannel(),
-                                                   zoneLayoutMessagesRpnNumber,
-                                                   zone.getNumNoteChannels(),
-                                                   false, false));
+    auto buffer = MidiRPNGenerator::generate (1, zoneLayoutMessagesRpnNumber, numMemberChannels, false, false);
 
-    buffer.addEvents (perNotePitchbendRange (zone), 0, -1, 0);
-    buffer.addEvents (masterPitchbendRange (zone), 0, -1, 0);
+    buffer.addEvents (setLowerZonePerNotePitchbendRange (perNotePitchbendRange), 0, -1, 0);
+    buffer.addEvents (setLowerZoneMasterPitchbendRange (masterPitchbendRange), 0, -1, 0);
 
     return buffer;
 }
 
-MidiBuffer MPEMessages::perNotePitchbendRange (MPEZone zone)
+MidiBuffer MPEMessages::setUpperZone (int numMemberChannels, int perNotePitchbendRange, int masterPitchbendRange)
 {
-    return MidiRPNGenerator::generate (zone.getFirstNoteChannel(), 0,
-                                       zone.getPerNotePitchbendRange(),
-                                       false, false);
+    auto buffer = MidiRPNGenerator::generate (16, zoneLayoutMessagesRpnNumber, numMemberChannels, false, false);
+
+    buffer.addEvents (setUpperZonePerNotePitchbendRange (perNotePitchbendRange), 0, -1, 0);
+    buffer.addEvents (setUpperZoneMasterPitchbendRange (masterPitchbendRange), 0, -1, 0);
+
+    return buffer;
 }
 
-MidiBuffer MPEMessages::masterPitchbendRange (MPEZone zone)
+MidiBuffer MPEMessages::setLowerZonePerNotePitchbendRange (int perNotePitchbendRange)
 {
-    return MidiRPNGenerator::generate (zone.getMasterChannel(), 0,
-                                       zone.getMasterPitchbendRange(),
-                                       false, false);
+    return MidiRPNGenerator::generate (2, 0, perNotePitchbendRange, false, false);
+}
+
+MidiBuffer MPEMessages::setUpperZonePerNotePitchbendRange (int perNotePitchbendRange)
+{
+    return MidiRPNGenerator::generate (15, 0, perNotePitchbendRange, false, false);
+}
+
+MidiBuffer MPEMessages::setLowerZoneMasterPitchbendRange (int masterPitchbendRange)
+{
+    return MidiRPNGenerator::generate (1, 0, masterPitchbendRange, false, false);
+}
+
+MidiBuffer MPEMessages::setUpperZoneMasterPitchbendRange (int masterPitchbendRange)
+{
+    return MidiRPNGenerator::generate (16, 0, masterPitchbendRange, false, false);
+}
+
+MidiBuffer MPEMessages::clearLowerZone()
+{
+    return MidiRPNGenerator::generate (1, zoneLayoutMessagesRpnNumber, 0, false, false);
+}
+
+MidiBuffer MPEMessages::clearUpperZone()
+{
+    return MidiRPNGenerator::generate (16, zoneLayoutMessagesRpnNumber, 0, false, false);
 }
 
 MidiBuffer MPEMessages::clearAllZones()
 {
-    return MidiRPNGenerator::generate (1, zoneLayoutMessagesRpnNumber, 16, false, false);
+    MidiBuffer buffer;
+
+    buffer.addEvents (clearLowerZone(), 0, -1, 0);
+    buffer.addEvents (clearUpperZone(), 0, -1, 0);
+
+    return buffer;
 }
 
-MidiBuffer MPEMessages::setZoneLayout (const MPEZoneLayout& layout)
+MidiBuffer MPEMessages::setZoneLayout (MPEZoneLayout layout)
 {
     MidiBuffer buffer;
 
     buffer.addEvents (clearAllZones(), 0, -1, 0);
 
-    for (int i = 0; i < layout.getNumZones(); ++i)
-        buffer.addEvents (addZone (*layout.getZoneByIndex (i)), 0, -1, 0);
+    auto lowerZone = layout.getLowerZone();
+    if (lowerZone.isActive())
+        buffer.addEvents (setLowerZone (lowerZone.numMemberChannels,
+                                        lowerZone.perNotePitchbendRange,
+                                        lowerZone.masterPitchbendRange),
+                          0, -1, 0);
+
+    auto upperZone = layout.getUpperZone();
+    if (upperZone.isActive())
+        buffer.addEvents (setUpperZone (upperZone.numMemberChannels,
+                                        upperZone.perNotePitchbendRange,
+                                        upperZone.masterPitchbendRange),
+                          0, -1, 0);
 
     return buffer;
 }
@@ -81,11 +120,11 @@ public:
         beginTest ("add zone");
         {
             {
-                MidiBuffer buffer = MPEMessages::addZone (MPEZone (1, 7));
+                MidiBuffer buffer = MPEMessages::setLowerZone (7);
 
                 const uint8 expectedBytes[] =
                 {
-                    0xb1, 0x64, 0x06, 0xb1, 0x65, 0x00, 0xb1, 0x06, 0x07, // set up zone
+                    0xb0, 0x64, 0x06, 0xb0, 0x65, 0x00, 0xb0, 0x06, 0x07, // set up zone
                     0xb1, 0x64, 0x00, 0xb1, 0x65, 0x00, 0xb1, 0x06, 0x30, // per-note pbrange (default = 48)
                     0xb0, 0x64, 0x00, 0xb0, 0x65, 0x00, 0xb0, 0x06, 0x02  // master pbrange (default = 2)
                 };
@@ -93,13 +132,13 @@ public:
                 testMidiBuffer (buffer, expectedBytes, sizeof (expectedBytes));
             }
             {
-                MidiBuffer buffer = MPEMessages::addZone (MPEZone (11, 5, 96, 0));
+                MidiBuffer buffer = MPEMessages::setUpperZone (5, 96, 0);
 
                 const uint8 expectedBytes[] =
                 {
-                    0xbb, 0x64, 0x06, 0xbb, 0x65, 0x00, 0xbb, 0x06, 0x05, // set up zone
-                    0xbb, 0x64, 0x00, 0xbb, 0x65, 0x00, 0xbb, 0x06, 0x60, // per-note pbrange (custom)
-                    0xba, 0x64, 0x00, 0xba, 0x65, 0x00, 0xba, 0x06, 0x00  // master pbrange (custom)
+                    0xbf, 0x64, 0x06, 0xbf, 0x65, 0x00, 0xbf, 0x06, 0x05, // set up zone
+                    0xbe, 0x64, 0x00, 0xbe, 0x65, 0x00, 0xbe, 0x06, 0x60, // per-note pbrange (custom)
+                    0xbf, 0x64, 0x00, 0xbf, 0x65, 0x00, 0xbf, 0x06, 0x00  // master pbrange (custom)
                 };
 
                 testMidiBuffer (buffer, expectedBytes, sizeof (expectedBytes));
@@ -108,10 +147,9 @@ public:
 
         beginTest ("set per-note pitchbend range");
         {
-            MPEZone zone (3, 7, 96);
-            MidiBuffer buffer = MPEMessages::perNotePitchbendRange (zone);
+            MidiBuffer buffer = MPEMessages::setLowerZonePerNotePitchbendRange (96);
 
-            const uint8 expectedBytes[] = { 0xb3, 0x64, 0x00, 0xb3, 0x65, 0x00, 0xb3, 0x06, 0x60 };
+            const uint8 expectedBytes[] = { 0xb1, 0x64, 0x00, 0xb1, 0x65, 0x00, 0xb1, 0x06, 0x60 };
 
             testMidiBuffer (buffer, expectedBytes, sizeof (expectedBytes));
         }
@@ -119,10 +157,9 @@ public:
 
         beginTest ("set master pitchbend range");
         {
-            MPEZone zone (3, 7, 48, 60);
-            MidiBuffer buffer = MPEMessages::masterPitchbendRange (zone);
+            MidiBuffer buffer = MPEMessages::setUpperZoneMasterPitchbendRange (60);
 
-            const uint8 expectedBytes[] = { 0xb2, 0x64, 0x00, 0xb2, 0x65, 0x00, 0xb2, 0x06, 0x3c };
+            const uint8 expectedBytes[] = { 0xbf, 0x64, 0x00, 0xbf, 0x65, 0x00, 0xbf, 0x06, 0x3c };
 
             testMidiBuffer (buffer, expectedBytes, sizeof (expectedBytes));
         }
@@ -131,7 +168,9 @@ public:
         {
             MidiBuffer buffer = MPEMessages::clearAllZones();
 
-            const uint8 expectedBytes[] = { 0xb0, 0x64, 0x06, 0xb0, 0x65, 0x00, 0xb0, 0x06, 0x10 };
+            const uint8 expectedBytes[] = { 0xb0, 0x64, 0x06, 0xb0, 0x65, 0x00, 0xb0, 0x06, 0x00, // clear lower zone
+                                            0xbf, 0x64, 0x06, 0xbf, 0x65, 0x00, 0xbf, 0x06, 0x00  // clear upper zone
+                                          };
 
             testMidiBuffer (buffer, expectedBytes, sizeof (expectedBytes));
         }
@@ -139,22 +178,21 @@ public:
         beginTest ("set complete state");
         {
             MPEZoneLayout layout;
-            layout.addZone (MPEZone (1, 7, 96, 0));
-            layout.addZone (MPEZone (9, 7));
-            layout.addZone (MPEZone (5, 3));
-            layout.addZone (MPEZone (5, 4));
-            layout.addZone (MPEZone (6, 4));
+
+            layout.setLowerZone (7, 96, 0);
+            layout.setUpperZone (7);
 
             MidiBuffer buffer = MPEMessages::setZoneLayout (layout);
 
             const uint8 expectedBytes[] = {
-                0xb0, 0x64, 0x06, 0xb0, 0x65, 0x00, 0xb0, 0x06, 0x10,  // clear all zones
-                0xb1, 0x64, 0x06, 0xb1, 0x65, 0x00, 0xb1, 0x06, 0x03,  // set zone 1 (1, 3)
+                0xb0, 0x64, 0x06, 0xb0, 0x65, 0x00, 0xb0, 0x06, 0x00,  // clear lower zone
+                0xbf, 0x64, 0x06, 0xbf, 0x65, 0x00, 0xbf, 0x06, 0x00,  // clear upper zone
+                0xb0, 0x64, 0x06, 0xb0, 0x65, 0x00, 0xb0, 0x06, 0x07,  // set lower zone
                 0xb1, 0x64, 0x00, 0xb1, 0x65, 0x00, 0xb1, 0x06, 0x60,  // per-note pbrange (custom)
                 0xb0, 0x64, 0x00, 0xb0, 0x65, 0x00, 0xb0, 0x06, 0x00,  // master pbrange (custom)
-                0xb6, 0x64, 0x06, 0xb6, 0x65, 0x00, 0xb6, 0x06, 0x04,  // set zone 2 (6, 4)
-                0xb6, 0x64, 0x00, 0xb6, 0x65, 0x00, 0xb6, 0x06, 0x30,  // per-note pbrange (default = 48)
-                0xb5, 0x64, 0x00, 0xb5, 0x65, 0x00, 0xb5, 0x06, 0x02   // master pbrange (default = 2)
+                0xbf, 0x64, 0x06, 0xbf, 0x65, 0x00, 0xbf, 0x06, 0x07,  // set upper zone
+                0xbe, 0x64, 0x00, 0xbe, 0x65, 0x00, 0xbe, 0x06, 0x30,  // per-note pbrange (default = 48)
+                0xbf, 0x64, 0x00, 0xbf, 0x65, 0x00, 0xbf, 0x06, 0x02   // master pbrange (default = 2)
             };
 
             testMidiBuffer (buffer, expectedBytes, sizeof (expectedBytes));

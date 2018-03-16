@@ -6,65 +6,51 @@
   ==============================================================================
 */
 
-INCLUDE_JUCE
+%%include_corresponding_header%%
 
 //==============================================================================
-/*
-    This component lives inside our window, and this is where you should put all
-    your controls and content.
-*/
-class MainContentComponent   : public OpenGLAppComponent
+%%content_component_class%%::%%content_component_class%%()
 {
-public:
-    //==============================================================================
-    MainContentComponent()
-    {
-        setSize (800, 600);
-    }
+    // Make sure you set the size of the component after
+    // you add any child components.
+    setSize (800, 600);
+}
 
-    ~MainContentComponent()
-    {
-        shutdownOpenGL();
-    }
+%%content_component_class%%::~%%content_component_class%%()
+{
+    // This shuts down the GL system and stops the rendering calls.
+    shutdownOpenGL();
+}
 
-    void initialise() override
-    {
-    }
+//==============================================================================
+void %%content_component_class%%::initialise()
+{
+    // Initialise GL objects for rendering here.
+}
 
-    void shutdown() override
-    {
-    }
+void %%content_component_class%%::shutdown()
+{
+    // Free any GL objects created for rendering here.
+}
 
-    void render() override
-    {
-        OpenGLHelpers::clear (Colours::black);
+void %%content_component_class%%::render()
+{
+    // This clears the context with a black background.
+    OpenGLHelpers::clear (Colours::black);
 
-    }
+    // Add your rendering code here...
+}
 
-    void paint (Graphics& g) override
-    {
-        // You can add your component specific drawing code here!
-        // This will draw over the top of the openGL background.
-    }
+//==============================================================================
+void %%content_component_class%%::paint (Graphics& g)
+{
+    // You can add your component specific drawing code here!
+    // This will draw over the top of the openGL background.
+}
 
-    void resized() override
-    {
-        // This is called when the MainContentComponent is resized.
-        // If you add any child components, this is where you should
-        // update their positions.
-    }
-
-
-private:
-    //==============================================================================
-
-    // private member variables
-
-
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainContentComponent)
-};
-
-
-// (This function is called by the app startup code to create our main component)
-Component* createMainContentComponent()    { return new MainContentComponent(); }
+void %%content_component_class%%::resized()
+{
+    // This is called when the %%content_component_class%% is resized.
+    // If you add any child components, this is where you should
+    // update their positions.
+}

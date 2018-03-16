@@ -130,8 +130,8 @@ int MouseEvent::getMouseDownScreenX() const                     { return getMous
 int MouseEvent::getMouseDownScreenY() const                     { return getMouseDownScreenPosition().y; }
 
 bool MouseEvent::isPressureValid() const noexcept               { return pressure > 0.0f && pressure < 1.0f; }
-bool MouseEvent::isOrientationValid() const noexcept            { return orientation >= 0.0f && orientation <= 2.0f * float_Pi; }
-bool MouseEvent::isRotationValid() const noexcept               { return rotation >= 0 && rotation <= 2.0f * float_Pi; }
+bool MouseEvent::isOrientationValid() const noexcept            { return orientation >= 0.0f && orientation <= MathConstants<float>::twoPi; }
+bool MouseEvent::isRotationValid() const noexcept               { return rotation >= 0 && rotation <= MathConstants<float>::twoPi; }
 bool MouseEvent::isTiltValid (bool isX) const noexcept          { return isX ? (tiltX >= -1.0f && tiltX <= 1.0f) : (tiltY >= -1.0f && tiltY <= 1.0f); }
 
 //==============================================================================

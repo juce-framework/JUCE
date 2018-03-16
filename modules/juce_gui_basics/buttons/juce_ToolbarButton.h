@@ -36,6 +36,8 @@ namespace juce
     toggle button.
 
     @see Toolbar, ToolbarItemFactory, ToolbarItemComponent, Drawable, Button
+
+    @tags{GUI}
 */
 class JUCE_API  ToolbarButton   : public ToolbarItemComponent
 {

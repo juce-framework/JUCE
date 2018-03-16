@@ -33,7 +33,7 @@ struct ProjectSettingsComponent  : public Component,
 {
     ProjectSettingsComponent (Project& p)
         : project (p),
-          group (project.getProjectFilenameRoot(),
+          group (project.getProjectFilenameRootString(),
                  Icon (getIcons().settings, Colours::transparentBlack))
     {
         addAndMakeVisible (group);
@@ -60,19 +60,19 @@ struct ProjectSettingsComponent  : public Component,
         group.setProperties (props);
         group.setName ("Project Settings");
 
-        lastProjectType = project.getProjectTypeValue().getValue();
+        lastProjectType = project.getProjectTypeString();
         parentSizeChanged();
     }
 
     void changeListenerCallback (ChangeBroadcaster*) override
     {
-        if (lastProjectType != project.getProjectTypeValue().getValue())
+        if (lastProjectType != project.getProjectTypeString())
             updatePropertyList();
     }
 
     void parentSizeChanged() override
     {
-        const auto width = jmax (550, getParentWidth());
+        auto width = jmax (550, getParentWidth());
         auto y = group.updateSize (12, 0, width - 12);
 
         y = jmax (getParentHeight(), y);
@@ -125,14 +125,6 @@ struct ExportersTreePanel    : public TreePanelBase
         setRoot (new TreeItemTypes::ExportersTreeRoot (p));
         tree.setRootItemVisible (false);
     }
-
-    void deleteSelectedItems() override
-    {
-        for (int i = rootItem->getNumSubItems() - 1; i >= 0; --i)
-            if (rootItem->getSubItem (i)->isSelected())
-                if (auto* root = dynamic_cast<TreeItemTypes::ExportersTreeRoot*> (rootItem.get()))
-                    root->removeExporter (i);
-    }
 };
 
 //==============================================================================
@@ -161,12 +153,12 @@ public:
 
     void resized() override
     {
-        concertinaPanel.setBounds (getLocalBounds());
+        concertinaPanel.setBounds (getLocalBounds().withTrimmedBottom (3));
     }
 
     TreePanelBase* getTreeWithSelectedItems()
     {
-        for (int i = concertinaPanel.getNumPanels() - 1; i >= 0; --i)
+        for (auto i = concertinaPanel.getNumPanels() - 1; i >= 0; --i)
         {
             if (auto* treeComponent = dynamic_cast<ConcertinaTreeComponent*> (concertinaPanel.getPanel (i)))
             {
@@ -242,7 +234,7 @@ private:
 
     void buildConcertina()
     {
-        for (int i = concertinaPanel.getNumPanels() - 1; i >= 0 ; --i)
+        for (auto i = concertinaPanel.getNumPanels() - 1; i >= 0 ; --i)
             concertinaPanel.removePanel (concertinaPanel.getPanel (i));
 
         headers.clear();
@@ -274,7 +266,7 @@ private:
 
     void mouseDown (const MouseEvent& e) override
     {
-        for (int i = concertinaPanel.getNumPanels() - 1; i >= 0; --i)
+        for (auto i = concertinaPanel.getNumPanels() - 1; i >= 0; --i)
         {
             auto* p = concertinaPanel.getPanel (i);
 

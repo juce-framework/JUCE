@@ -39,7 +39,9 @@ namespace juce
     will then be moved and resized to follow the movements of this component.
 
     Of course, since the control is a heavyweight window, it'll obliterate any
-    juce components that may overlap this component, but that's life.
+    JUCE components that may overlap this component, but that's life.
+
+    @tags{GUI}
 */
 class JUCE_API  ActiveXControlComponent   : public Component
 {
@@ -54,7 +56,7 @@ public:
     /** Tries to create an ActiveX control and embed it in this peer.
 
         The peer controlIID is a pointer to an IID structure - it's treated
-        as a void* because when including the Juce headers, you might not always
+        as a void* because when including the JUCE headers, you might not always
         have included windows.h first, in which case IID wouldn't be defined.
 
         e.g. @code
@@ -76,7 +78,7 @@ public:
         This allows you to cast the control to whatever type of COM object you need.
 
         The iid parameter is a pointer to an IID structure - it's treated
-        as a void* because when including the Juce headers, you might not always
+        as a void* because when including the JUCE headers, you might not always
         have included windows.h first, in which case IID wouldn't be defined, but
         you should just pass a pointer to an IID.
 

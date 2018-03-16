@@ -38,6 +38,8 @@ class TabbedButtonBar;
     method to create it instead of the default one.
 
     @see TabbedButtonBar
+
+    @tags{GUI}
 */
 class JUCE_API  TabBarButton  : public Button
 {
@@ -72,7 +74,7 @@ public:
                             ExtraComponentPlacement extraComponentPlacement);
 
     /** Returns the custom component, if there is one. */
-    Component* getExtraComponent() const noexcept                           { return extraComponent; }
+    Component* getExtraComponent() const noexcept                           { return extraComponent.get(); }
 
     /** Returns the placement of the custom component, if there is one. */
     ExtraComponentPlacement getExtraComponentPlacement() const noexcept     { return extraCompPlacement; }
@@ -145,6 +147,8 @@ private:
     and other housekeeping.
 
     @see TabbedComponent
+
+    @tags{GUI}
 */
 class JUCE_API  TabbedButtonBar  : public Component,
                                    public ChangeBroadcaster

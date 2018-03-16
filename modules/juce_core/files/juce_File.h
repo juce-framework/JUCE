@@ -34,6 +34,8 @@ namespace juce
     output stream.
 
     @see FileInputStream, FileOutputStream
+
+    @tags{Core}
 */
 class JUCE_API  File final
 {
@@ -86,15 +88,6 @@ public:
 
     /** Move assignment operator */
     File& operator= (File&&) noexcept;
-
-    //==============================================================================
-   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
-    /** This static constant is used for referring to an 'invalid' file.
-        Bear in mind that you should avoid this kind of static variable, and always prefer
-        to use File() or {} if you need a default-constructed File object.
-    */
-    static const File nonexistent;
-   #endif
 
     //==============================================================================
     /** Checks whether the file actually exists.
@@ -553,28 +546,33 @@ public:
         ignoreHiddenFiles           = 4     /**< Add this flag to avoid returning any hidden files in the results. */
     };
 
-    /** Searches inside a directory for files matching a wildcard pattern.
+    /** Searches this directory for files matching a wildcard pattern.
 
         Assuming that this file is a directory, this method will search it
         for either files or subdirectories whose names match a filename pattern.
         Note that the order in which files are returned is completely undefined!
 
-        @param results                  an array to which File objects will be added for the
-                                        files that the search comes up with
         @param whatToLookFor            a value from the TypesOfFileToFind enum, specifying whether to
                                         return files, directories, or both. If the ignoreHiddenFiles flag
                                         is also added to this value, hidden files won't be returned
         @param searchRecursively        if true, all subdirectories will be recursed into to do
                                         an exhaustive search
         @param wildCardPattern          the filename pattern to search for, e.g. "*.txt"
-        @returns                        the number of results that have been found
+        @returns                        the set of files that were found
 
         @see getNumberOfChildFiles, DirectoryIterator
     */
-    int findChildFiles (Array<File>& results,
-                        int whatToLookFor,
-                        bool searchRecursively,
-                        const String& wildCardPattern = "*") const;
+    Array<File> findChildFiles (int whatToLookFor,
+                                bool searchRecursively,
+                                const String& wildCardPattern = "*") const;
+
+    /** Searches inside a directory for files matching a wildcard pattern.
+        Note that there's a newer, better version of this method which returns the results
+        array, and in almost all cases, you should use that one instead! This one is kept around
+        mainly for legacy code to use.
+    */
+    int findChildFiles (Array<File>& results, int whatToLookFor,
+                        bool searchRecursively, const String& wildCardPattern = "*") const;
 
     /** Searches inside a directory and counts how many files match a wildcard pattern.
 
@@ -875,7 +873,7 @@ public:
         /** In a plugin, this will return the path of the host executable. */
         hostApplicationPath,
 
-       #if JUCE_WINDOWS
+       #if JUCE_WINDOWS || DOXYGEN
         /** On a Windows machine, returns the location of the Windows/System32 folder. */
         windowsSystemDirectory,
        #endif
@@ -886,7 +884,7 @@ public:
         */
         globalApplicationsDirectory,
 
-       #if JUCE_WINDOWS
+       #if JUCE_WINDOWS || DOXYGEN
         /** On a Windows machine, returns the directory in which 32 bit applications
             normally get installed. On a 64 bit machine this would be something like
             "C:\Program Files (x86)", whereas for 32 bit machines this would match
@@ -989,7 +987,7 @@ public:
     */
     File getLinkedTarget() const;
 
-   #if JUCE_WINDOWS
+   #if JUCE_WINDOWS || DOXYGEN
     /** Windows ONLY - Creates a win32 .LNK shortcut file that links to this file. */
     bool createShortcut (const String& description, const File& linkFileToCreate) const;
 
@@ -1012,6 +1010,7 @@ public:
    #endif
 
     //==============================================================================
+    /** Comparator for files */
     struct NaturalFileComparator
     {
         NaturalFileComparator (bool shouldPutFoldersFirst) noexcept : foldersFirst (shouldPutFoldersFirst) {}
@@ -1035,6 +1034,16 @@ public:
     // Deprecated: use File::getSeparatorChar() and File::getSeparatorString() instead!
     JUCE_DEPRECATED (static const juce_wchar separator);
     JUCE_DEPRECATED (static const StringRef separatorString);
+   #endif
+
+    //==============================================================================
+   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
+    /** This was a static empty File object, but is now deprecated as it's too easy to accidentally
+        use it indirectly during a static constructor, leading to hard-to-find order-of-initialisation
+        problems.
+        @deprecated If you need a default-constructed File object, just use File() or {}.
+    */
+    static const File nonexistent;
    #endif
 
 private:

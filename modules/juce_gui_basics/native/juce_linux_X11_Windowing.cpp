@@ -1303,45 +1303,23 @@ private:
     }
 
     //==============================================================================
-    struct SortByCoordinate
-    {
-        bool sortByYCoordinate;
-
-        SortByCoordinate (bool byYCoordinate)  : sortByYCoordinate (byYCoordinate)
-        {
-        }
-
-        int compareElements (const ExtendedInfo* a, const ExtendedInfo* b)
-        {
-            int coordinateA, coordinateB;
-
-            if (sortByYCoordinate)
-            {
-                coordinateA = a->totalBounds.getY();
-                coordinateB = b->totalBounds.getY();
-            }
-            else
-            {
-                coordinateA = a->totalBounds.getX();
-                coordinateB = b->totalBounds.getX();
-            }
-
-            return coordinateA - coordinateB;
-        }
-    };
-
-    //==============================================================================
     void updateScaledDisplayCoordinate (bool updateYCoordinates)
     {
         if (infos.size() < 2)
             return;
 
         Array<ExtendedInfo*> copy;
+
+        for (auto& i : infos)
+            copy.add (&i);
+
+        std::sort (copy.begin(), copy.end(), [updateYCoordinates] (const ExtendedInfo* a, const ExtendedInfo* b)
         {
-            SortByCoordinate sorter (updateYCoordinates);
-            for (int i = 0; i < infos.size(); ++i)
-                copy.addSorted (sorter, &infos.getReference (i));
-        }
+            if (updateYCoordinates)
+                return a->totalBounds.getY() < b->totalBounds.getY();
+
+            return a->totalBounds.getX() < b->totalBounds.getX();
+        });
 
         for (int i = 1; i < copy.size(); ++i)
         {
@@ -1351,13 +1329,14 @@ private:
             for (int j = i - 1; j >= 0; --j)
             {
                 auto& other = *copy[j];
-                int prevCoordinate = updateYCoordinates ? other.totalBounds.getBottom() : other.totalBounds.getRight();
-                int curCoordinate = updateYCoordinates ? current.totalBounds.getY() : current.totalBounds.getX();
+                auto prevCoordinate = updateYCoordinates ? other.totalBounds.getBottom() : other.totalBounds.getRight();
+                auto curCoordinate  = updateYCoordinates ? current.totalBounds.getY() : current.totalBounds.getX();
+
                 if (prevCoordinate == curCoordinate)
                 {
                     // both displays are aligned! As "other" comes before "current" in the array, it must already
                     // have a valid topLeftScaled which we can use
-                    Point<int> topLeftScaled = other.topLeftScaled;
+                    auto topLeftScaled = other.topLeftScaled;
                     topLeftScaled += Point<int> (other.totalBounds.getWidth(), other.totalBounds.getHeight()) / other.scale;
 
                     if (updateYCoordinates)
@@ -1468,7 +1447,7 @@ static void* createDraggingHandCursor()
       132,117,151,116,132,146,248,60,209,138,98,22,203,114,34,236,37,52,77,217, 247,154,191,119,110,240,193,128,193,95,163,56,60,234,98,135,2,0,59 };
     const int dragHandDataSize = 99;
 
-    return CustomMouseCursorInfo (ImageFileFormat::loadFrom (dragHandData, dragHandDataSize), 8, 7).create();
+    return CustomMouseCursorInfo (ImageFileFormat::loadFrom (dragHandData, dragHandDataSize), { 8, 7 }).create();
 }
 
 //==============================================================================
@@ -2468,7 +2447,7 @@ public:
                     {
                         if (atts.map_state == IsViewable)
                             XSetInputFocus (display,
-                                            (clientMsg.window == windowH ? getFocusWindow ()
+                                            (clientMsg.window == windowH ? getFocusWindow()
                                                                          : clientMsg.window),
                                             RevertToParent,
                                             (::Time) clientMsg.data.l[1]);
@@ -4269,7 +4248,7 @@ void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType ty
     {
         case NormalCursor:
         case ParentCursor:                  return None; // Use parent cursor
-        case NoCursor:                      return CustomMouseCursorInfo (Image (Image::ARGB, 16, 16, true), 0, 0).create();
+        case NoCursor:                      return CustomMouseCursorInfo (Image (Image::ARGB, 16, 16, true), {}).create();
 
         case WaitCursor:                    shape = XC_watch; break;
         case IBeamCursor:                   shape = XC_xterm; break;
@@ -4296,7 +4275,7 @@ void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType ty
               252,114,147,74,83,5,50,68,147,208,217,16,71,149,252,124,5,0,59,0,0 };
             const int copyCursorSize = 119;
 
-            return CustomMouseCursorInfo (ImageFileFormat::loadFrom (copyCursorData, copyCursorSize), 1, 3).create();
+            return CustomMouseCursorInfo (ImageFileFormat::loadFrom (copyCursorData, copyCursorSize), { 1, 3 }).create();
         }
 
         default:

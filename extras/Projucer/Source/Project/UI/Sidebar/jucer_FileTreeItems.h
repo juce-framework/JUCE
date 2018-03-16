@@ -56,41 +56,52 @@ public:
 
     void deleteItem() override                          { item.removeItemFromProject(); }
 
-    virtual void deleteAllSelectedItems() override
+    void deleteAllSelectedItems() override
     {
-        TreeView* tree = getOwnerView();
-        const int numSelected = tree->getNumSelectedItems();
-        OwnedArray<File> filesToTrash;
-        OwnedArray<Project::Item> itemsToRemove;
+        auto* tree = getOwnerView();
+        Array<File> filesToTrash;
+        Array<Project::Item> itemsToRemove;
 
-        for (int i = 0; i < numSelected; ++i)
+        for (int i = 0; i < tree->getNumSelectedItems(); ++i)
         {
             if (auto* p = dynamic_cast<FileTreeItemBase*> (tree->getSelectedItem (i)))
             {
-                itemsToRemove.add (new Project::Item (p->item));
+                itemsToRemove.add (p->item);
 
-                if (p->getFile().existsAsFile())
-                    filesToTrash.add (new File (p->getFile()));
+                if (p->item.isGroup())
+                {
+                    for (int j = 0; j < p->item.getNumChildren(); ++j)
+                    {
+                        auto associatedFile = p->item.getChild (j).getFile();
+
+                        if (associatedFile.existsAsFile())
+                            filesToTrash.addIfNotAlreadyThere (associatedFile);
+                    }
+                }
+                else if (p->getFile().existsAsFile())
+                {
+                    filesToTrash.addIfNotAlreadyThere (p->getFile());
+                }
             }
         }
 
         if (filesToTrash.size() > 0)
         {
             String fileList;
-            const int maxFilesToList = 10;
-            for (int i = jmin (maxFilesToList, filesToTrash.size()); --i >= 0;)
-                fileList << filesToTrash.getUnchecked(i)->getFullPathName() << "\n";
+            auto maxFilesToList = 10;
+            for (auto i = jmin (maxFilesToList, filesToTrash.size()); --i >= 0;)
+                fileList << filesToTrash.getUnchecked(i).getFullPathName() << "\n";
 
             if (filesToTrash.size() > maxFilesToList)
                 fileList << "\n...plus " << (filesToTrash.size() - maxFilesToList) << " more files...";
 
-            int r = AlertWindow::showYesNoCancelBox (AlertWindow::NoIcon, "Delete Project Items",
-                                                     "As well as removing the selected item(s) from the project, do you also want to move their files to the trash:\n\n"
-                                                       + fileList,
-                                                     "Just remove references",
-                                                     "Also move files to Trash",
-                                                     "Cancel",
-                                                     tree->getTopLevelComponent());
+            auto r = AlertWindow::showYesNoCancelBox (AlertWindow::NoIcon, "Delete Project Items",
+                                                      "As well as removing the selected item(s) from the project, do you also want to move their files to the trash:\n\n"
+                                                           + fileList,
+                                                      "Just remove references",
+                                                      "Also move files to Trash",
+                                                      "Cancel",
+                                                      tree->getTopLevelComponent());
 
             if (r == 0)
                 return;
@@ -101,11 +112,11 @@ public:
 
         if (auto* treeRootItem = dynamic_cast<FileTreeItemBase*> (tree->getRootItem()))
         {
-            OpenDocumentManager& om = ProjucerApplication::getApp().openDocumentManager;
+            auto& om = ProjucerApplication::getApp().openDocumentManager;
 
-            for (int i = filesToTrash.size(); --i >= 0;)
+            for (auto i = filesToTrash.size(); --i >= 0;)
             {
-                const File f (*filesToTrash.getUnchecked(i));
+                auto f = filesToTrash.getUnchecked(i);
 
                 om.closeFile (f, false);
 
@@ -115,10 +126,17 @@ public:
                 }
             }
 
-            for (int i = itemsToRemove.size(); --i >= 0;)
+            for (auto i = itemsToRemove.size(); --i >= 0;)
             {
-                if (auto* itemToRemove = treeRootItem->findTreeViewItem (*itemsToRemove.getUnchecked(i)))
+                if (auto itemToRemove = treeRootItem->findTreeViewItem (itemsToRemove.getUnchecked (i)))
                 {
+                    if (auto* pcc = treeRootItem->getProjectContentComponent())
+                    {
+                        if (auto* fileInfoComp = dynamic_cast<FileGroupInformationComponent*> (pcc->getEditorComponentContent()))
+                            if (fileInfoComp->getGroupPath() == itemToRemove->getFile().getFullPathName())
+                                pcc->hideEditor();
+                    }
+
                     om.closeFile (itemToRemove->getFile(), false);
                     itemToRemove->deleteItem();
                 }
@@ -137,8 +155,8 @@ public:
 
     virtual void browseToAddExistingFiles()
     {
-        const File location (item.isGroup() ? item.determineGroupFolder() : getFile());
-        FileChooser fc ("Add Files to Jucer Project", location, String());
+        auto location = item.isGroup() ? item.determineGroupFolder() : getFile();
+        FileChooser fc ("Add Files to Jucer Project", location, {});
 
         if (fc.browseForMultipleFilesOrDirectories())
         {
@@ -153,8 +171,8 @@ public:
 
     virtual void checkFileStatus()  // (recursive)
     {
-        const File file (getFile());
-        const bool nowMissing = file != File() && ! file.exists();
+        auto file = getFile();
+        auto nowMissing = (file != File() && ! file.exists());
 
         if (nowMissing != isFileMissing)
         {
@@ -203,10 +221,10 @@ public:
         if (item == itemToFind)
             return this;
 
-        const bool wasOpen = isOpen();
+        auto wasOpen = isOpen();
         setOpen (true);
 
-        for (int i = getNumSubItems(); --i >= 0;)
+        for (auto i = getNumSubItems(); --i >= 0;)
         {
             if (auto* pg = dynamic_cast<FileTreeItemBase*> (getSubItem(i)))
                 if (auto* found = pg->findTreeViewItem (itemToFind))
@@ -284,7 +302,7 @@ public:
 
         if (selectedNodes.size() > 0)
         {
-            TreeView* tree = getOwnerView();
+            auto* tree = getOwnerView();
             ScopedPointer<XmlElement> oldOpenness (tree->getOpennessState (false));
 
             moveSelectedItemsTo (selectedNodes, insertIndex);
@@ -306,14 +324,14 @@ public:
     {
         if (dragSourceDetails.description == projectItemDragType)
         {
-            TreeView* tree = dynamic_cast<TreeView*> (dragSourceDetails.sourceComponent.get());
+            auto* tree = dynamic_cast<TreeView*> (dragSourceDetails.sourceComponent.get());
 
             if (tree == nullptr)
                 tree = dragSourceDetails.sourceComponent->findParentComponentOfClass<TreeView>();
 
             if (tree != nullptr)
             {
-                const int numSelected = tree->getNumSelectedItems();
+                auto numSelected = tree->getNumSelectedItems();
 
                 for (int i = 0; i < numSelected; ++i)
                     if (auto* p = dynamic_cast<FileTreeItemBase*> (tree->getSelectedItem (i)))
@@ -380,9 +398,9 @@ protected:
 
     static void moveItems (OwnedArray<Project::Item>& selectedNodes, Project::Item destNode, int insertIndex)
     {
-        for (int i = selectedNodes.size(); --i >= 0;)
+        for (auto i = selectedNodes.size(); --i >= 0;)
         {
-            Project::Item* const n = selectedNodes.getUnchecked(i);
+            auto* n = selectedNodes.getUnchecked(i);
 
             if (destNode == *n || destNode.state.isAChildOf (n->state)) // Check for recursion.
                 return;
@@ -392,11 +410,11 @@ protected:
         }
 
         // Don't include any nodes that are children of other selected nodes..
-        for (int i = selectedNodes.size(); --i >= 0;)
+        for (auto i = selectedNodes.size(); --i >= 0;)
         {
-            Project::Item* const n = selectedNodes.getUnchecked(i);
+            auto* n = selectedNodes.getUnchecked(i);
 
-            for (int j = selectedNodes.size(); --j >= 0;)
+            for (auto j = selectedNodes.size(); --j >= 0;)
             {
                 if (j != i && n->state.isAChildOf (selectedNodes.getUnchecked(j)->state))
                 {
@@ -409,7 +427,7 @@ protected:
         // Remove and re-insert them one at a time..
         for (int i = 0; i < selectedNodes.size(); ++i)
         {
-            Project::Item* selectedNode = selectedNodes.getUnchecked(i);
+            auto* selectedNode = selectedNodes.getUnchecked(i);
 
             if (selectedNode->state.getParent() == destNode.state
                   && indexOfNode (destNode.state, selectedNode->state) < insertIndex)
@@ -422,7 +440,7 @@ protected:
 
     static int indexOfNode (const ValueTree& parent, const ValueTree& child)
     {
-        for (int i = parent.getNumChildren(); --i >= 0;)
+        for (auto i = parent.getNumChildren(); --i >= 0;)
             if (parent.getChild (i) == child)
                 return i;
 
@@ -465,13 +483,13 @@ public:
             return;
         }
 
-        File oldFile (getFile());
-        File newFile (oldFile.getSiblingFile (newName));
-        File correspondingFile (findCorrespondingHeaderOrCpp (oldFile));
+        auto oldFile = getFile();
+        auto newFile = oldFile.getSiblingFile (newName);
+        auto correspondingFile = findCorrespondingHeaderOrCpp (oldFile);
 
         if (correspondingFile.exists() && newFile.hasFileExtension (oldFile.getFileExtension()))
         {
-            Project::Item correspondingItem (item.project.getMainGroup().findItemForFile (correspondingFile));
+            auto correspondingItem = item.project.getMainGroup().findItemForFile (correspondingFile);
 
             if (correspondingItem.isValid())
             {
@@ -510,10 +528,10 @@ public:
 
     void showDocument() override
     {
-        const File f (getFile());
+        auto f = getFile();
 
         if (f.exists())
-            if (ProjectContentComponent* pcc = getProjectContentComponent())
+            if (auto* pcc = getProjectContentComponent())
                 pcc->showEditorForFile (f, false);
     }
 
@@ -567,7 +585,7 @@ public:
             case 7:     item.getShouldCompileValue().setValue (! item.shouldBeCompiled()); break;
 
             default:
-                if (GroupItem* parentGroup = dynamic_cast<GroupItem*> (getParentProjectItem()))
+                if (auto* parentGroup = dynamic_cast<GroupItem*> (getParentProjectItem()))
                     parentGroup->processCreateFileMenuItem (resultCode);
 
                 break;
@@ -579,7 +597,7 @@ public:
 class GroupItem   : public FileTreeItemBase
 {
 public:
-    GroupItem (const Project::Item& projectItem, const String& filter = String())
+    GroupItem (const Project::Item& projectItem, const String& filter = {})
         : FileTreeItemBase (projectItem),
           searchFilter (filter)
     {
@@ -590,13 +608,13 @@ public:
 
     void addNewGroup()
     {
-        Project::Item newGroup (item.addNewSubGroup ("New Group", 0));
+        auto newGroup = item.addNewSubGroup ("New Group", 0);
         triggerAsyncRename (newGroup);
     }
 
     bool acceptsDragItems (const OwnedArray<Project::Item>& selectedNodes) override
     {
-        for (int i = selectedNodes.size(); --i >= 0;)
+        for (auto i = selectedNodes.size(); --i >= 0;)
             if (item.canContain (*selectedNodes.getUnchecked(i)))
                 return true;
 
@@ -605,18 +623,16 @@ public:
 
     void addFilesAtIndex (const StringArray& files, int insertIndex) override
     {
-        for (int i = 0; i < files.size(); ++i)
+        for (auto f : files)
         {
-            const File file (files[i]);
-
-            if (item.addFileAtIndex (file, insertIndex, true))
+            if (item.addFileAtIndex (f, insertIndex, true))
                 ++insertIndex;
         }
     }
 
     void addFilesRetainingSortOrder (const StringArray& files) override
     {
-        for (int i = files.size(); --i >= 0;)
+        for (auto i = files.size(); --i >= 0;)
             item.addFileRetainingSortOrder (files[i], true);
     }
 
@@ -634,7 +650,7 @@ public:
 
     bool isGroupEmpty (const Project::Item& group) // recursive
     {
-        for (auto i = 0; i < group.getNumChildren(); ++i)
+        for (int i = 0; i < group.getNumChildren(); ++i)
         {
             auto child = group.getChild (i);
 
@@ -670,20 +686,20 @@ public:
 
     void showDocument() override
     {
-        if (ProjectContentComponent* pcc = getProjectContentComponent())
+        if (auto* pcc = getProjectContentComponent())
             pcc->setEditorComponent (new FileGroupInformationComponent (item), nullptr);
     }
 
     static void openAllGroups (TreeViewItem* root)
     {
-        for (auto i = 0; i < root->getNumSubItems(); ++i)
+        for (int i = 0; i < root->getNumSubItems(); ++i)
             if (auto* sub = root->getSubItem (i))
                 openOrCloseAllSubGroups (*sub, true);
     }
 
     static void closeAllGroups (TreeViewItem* root)
     {
-        for (auto i = 0; i < root->getNumSubItems(); ++i)
+        for (int i = 0; i < root->getNumSubItems(); ++i)
             if (auto* sub = root->getSubItem (i))
                 openOrCloseAllSubGroups (*sub, false);
     }
@@ -692,7 +708,7 @@ public:
     {
         item.setOpen (shouldOpen);
 
-        for (int i = item.getNumSubItems(); --i >= 0;)
+        for (auto i = item.getNumSubItems(); --i >= 0;)
             if (auto* sub = item.getSubItem (i))
                 openOrCloseAllSubGroups (*sub, shouldOpen);
     }
@@ -702,7 +718,7 @@ public:
         if (item.isFile())
             item.getShouldCompileValue() = shouldCompile;
 
-        for (int i = item.getNumChildren(); --i >= 0;)
+        for (auto i = item.getNumChildren(); --i >= 0;)
             setFilesToCompile (item.getChild (i), shouldCompile);
     }
 
@@ -793,8 +809,8 @@ public:
 
     Project* getProject()
     {
-        if (TreeView* tv = getOwnerView())
-            if (ProjectContentComponent* pcc = tv->findParentComponentOfClass<ProjectContentComponent>())
+        if (auto* tv = getOwnerView())
+            if (auto* pcc = tv->findParentComponentOfClass<ProjectContentComponent>())
                 return pcc->getProject();
 
         return nullptr;

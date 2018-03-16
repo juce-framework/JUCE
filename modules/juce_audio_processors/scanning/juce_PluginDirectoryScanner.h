@@ -33,6 +33,8 @@ namespace juce
 
     To use one of these, create it and call scanNextFile() repeatedly, until
     it returns false.
+
+    @tags{Audio}
 */
 class JUCE_API  PluginDirectoryScanner
 {
@@ -72,6 +74,12 @@ public:
     ~PluginDirectoryScanner();
 
     //==============================================================================
+    /** Sets a specific list of filesOrIdentifiersToScan to scan.
+        N.B. This list must match the format passed to the constructor.
+        @see AudioPluginFormat::searchPathsForPlugins
+    */
+    void setFilesOrIdentifiersToScan (const StringArray& filesOrIdentifiersToScan);
+
     /** Tries the next likely-looking file.
 
         If dontRescanIfAlreadyInList is true, then the file will only be loaded and

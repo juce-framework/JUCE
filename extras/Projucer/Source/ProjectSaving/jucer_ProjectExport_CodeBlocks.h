@@ -93,8 +93,10 @@ public:
     {
         name = getName (os);
 
-        if (getTargetLocationString().isEmpty())
-            getTargetLocationValue() = getDefaultBuildsRootFolder() + getTargetFolderName (os);
+        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderName (os));
+
+        if (isWindows())
+            targetPlatformValue.referTo (settings, Ids::codeBlocksWindowsTarget, getUndoManager());
     }
 
     //==============================================================================
@@ -137,15 +139,24 @@ public:
         return false;
     }
 
-    void createExporterProperties (PropertyListBuilder&) override
+    void createExporterProperties (PropertyListBuilder& props) override
     {
+        if (isWindows())
+        {
+            props.add (new ChoicePropertyComponent (targetPlatformValue, "Target platform",
+                                                    { "Windows NT 4.0", "Windows 2000", "Windows XP", "Windows Server 2003", "Windows Vista", "Windows Server 2008",
+                                                      "Windows 7", "Windows 8", "Windows 8.1", "Windows 10" },
+                                                    { "0x0400", "0x0500", "0x0501", "0x0502", "0x0600", "0x0600",
+                                                      "0x0601", "0x0602", "0x0603", "0x0A00" }),
+                       "This sets the preprocessor macro WINVER to an appropriate value for the corresponding platform.");
+        }
     }
 
     //==============================================================================
     void create (const OwnedArray<LibraryModule>&) const override
     {
-        const File cbpFile (getTargetFolder().getChildFile (project.getProjectFilenameRoot())
-                                             .withFileExtension (".cbp"));
+        auto cbpFile = getTargetFolder().getChildFile (project.getProjectFilenameRootString())
+                                        .withFileExtension (".cbp");
 
         XmlElement xml ("CodeBlocks_project_file");
         addVersion (xml);
@@ -183,8 +194,8 @@ public:
     //==============================================================================
     void initialiseDependencyPathValues() override
     {
-        DependencyPathOS pathOS = isLinux() ? TargetOS::linux
-                                            : TargetOS::windows;
+        auto pathOS = isLinux() ? TargetOS::linux
+                                : TargetOS::windows;
 
         vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder), Ids::vst3Path, pathOS)));
 
@@ -196,60 +207,53 @@ public:
     }
 
 private:
+    ValueWithDefault targetPlatformValue;
+
+    String getTargetPlatformString() const    { return targetPlatformValue.get(); }
+
     //==============================================================================
     class CodeBlocksBuildConfiguration  : public BuildConfiguration
     {
     public:
         CodeBlocksBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
-            : BuildConfiguration (p, settings, e)
+            : BuildConfiguration (p, settings, e),
+              architectureTypeValue (config, exporter.isWindows() ? Ids::windowsCodeBlocksArchitecture
+                                                                  : Ids::linuxCodeBlocksArchitecture, getUndoManager(), "-m64")
         {
-            if (getArchitectureType().toString().isEmpty())
-                getArchitectureType() = static_cast<const char* const> ("-m64");
+            linkTimeOptimisationValue.setDefault (false);
+            optimisationLevelValue.setDefault (isDebug() ? gccO0 : gccO3);
         }
-
-        Value getArchitectureType()
-        {
-            const auto archID = exporter.isWindows() ? Ids::windowsCodeBlocksArchitecture
-                                                     : Ids::linuxCodeBlocksArchitecture;
-            return getValue (archID);
-        }
-
-        var getArchitectureTypeVar() const
-        {
-            const auto archID = exporter.isWindows() ? Ids::windowsCodeBlocksArchitecture
-                                                     : Ids::linuxCodeBlocksArchitecture;
-            return config [archID];
-        }
-
-        var getDefaultOptimisationLevel() const override    { return var ((int) (isDebug() ? gccO0 : gccO3)); }
 
         void createConfigProperties (PropertyListBuilder& props) override
         {
             addGCCOptimisationProperty (props);
 
-            static const char* const archNames[] = { "32-bit (-m32)", "64-bit (-m64)", "ARM v6",       "ARM v7" };
-            const var archFlags[]                = { "-m32",          "-m64",          "-march=armv6", "-march=armv7" };
-
-            props.add (new ChoicePropertyComponent (getArchitectureType(), "Architecture",
-                                                    StringArray (archNames, numElementsInArray (archNames)),
-                                                    Array<var> (archFlags, numElementsInArray (archFlags))));
+            props.add (new ChoicePropertyComponent (architectureTypeValue, "Architecture",
+                                                    { "32-bit (-m32)", "64-bit (-m64)", "ARM v6",       "ARM v7" },
+                                                    { "-m32",          "-m64",          "-march=armv6", "-march=armv7" }),
+                       "Specifies the 32/64-bit architecture to use.");
         }
 
         String getModuleLibraryArchName() const override
         {
-            const String archFlag = getArchitectureTypeVar();
+            auto archFlag = getArchitectureTypeString();
+            String prefix ("-march=");
 
-            const auto prefix = String ("-march=");
             if (archFlag.startsWith (prefix))
-                return String ("/") + archFlag.substring (prefix.length());
+                return archFlag.substring (prefix.length());
             else if (archFlag == "-m64")
-                return "/x86_64";
+                return "x86_64";
             else if (archFlag == "-m32")
-                return "/i386";
+                return "i386";
 
             jassertfalse;
             return {};
         }
+
+        String getArchitectureTypeString() const    { return architectureTypeValue.get(); }
+
+        //==============================================================================
+        ValueWithDefault architectureTypeValue;
     };
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& tree) const override
@@ -329,7 +333,7 @@ private:
 
     StringArray getPackages() const
     {
-        StringArray result (linuxPackages);
+        auto result = linuxPackages;
 
         static String guiExtrasModule ("juce_gui_extra");
 
@@ -347,14 +351,14 @@ private:
 
     void addVersion (XmlElement& xml) const
     {
-        XmlElement* fileVersion = xml.createNewChildElement ("FileVersion");
+        auto* fileVersion = xml.createNewChildElement ("FileVersion");
         fileVersion->setAttribute ("major", 1);
         fileVersion->setAttribute ("minor", 6);
     }
 
     void addOptions (XmlElement& xml) const
     {
-        xml.createNewChildElement ("Option")->setAttribute ("title", project.getTitle());
+        xml.createNewChildElement ("Option")->setAttribute ("title", project.getProjectNameString());
         xml.createNewChildElement ("Option")->setAttribute ("pch_mode", 2);
         xml.createNewChildElement ("Option")->setAttribute ("compiler", "gcc");
     }
@@ -366,7 +370,12 @@ private:
         if (isWindows())
         {
             defines.set ("__MINGW__", "1");
-            defines.set ("__MINGW_EXTENSION", String());
+            defines.set ("__MINGW_EXTENSION", {});
+
+            auto targetPlatform = getTargetPlatformString();
+
+            if (targetPlatform.isNotEmpty())
+                defines.set ("WINVER", targetPlatform);
         }
         else
         {
@@ -386,8 +395,18 @@ private:
         defines = mergePreprocessorDefs (defines, getAllPreprocessorDefs (config, target.type));
 
         StringArray defs;
+        auto keys = defines.getAllKeys();
+        auto values = defines.getAllValues();
+
         for (int i = 0; i < defines.size(); ++i)
-            defs.add (defines.getAllKeys()[i] + "=" + defines.getAllValues()[i]);
+        {
+            auto result = keys[i];
+
+            if (values[i].isNotEmpty())
+                result += "=" + values[i];
+
+            defs.add (result);
+        }
 
         return getCleanedStringArray (defs);
     }
@@ -395,8 +414,8 @@ private:
     StringArray getCompilerFlags (const BuildConfiguration& config, CodeBlocksTarget& target) const
     {
         StringArray flags;
-        if (const auto codeBlocksConfig = dynamic_cast<const CodeBlocksBuildConfiguration*> (&config))
-            flags.add (codeBlocksConfig->getArchitectureTypeVar());
+        if (auto* codeBlocksConfig = dynamic_cast<const CodeBlocksBuildConfiguration*> (&config))
+            flags.add (codeBlocksConfig->getArchitectureTypeString());
 
         flags.add ("-O" + config.getGCCOptimisationFlag());
 
@@ -404,10 +423,10 @@ private:
             flags.add ("-flto");
 
         {
-            auto cppStandard = config.project.getCppStandardValue().toString();
+            auto cppStandard = config.project.getCppStandardString();
 
             if (cppStandard == "latest")
-                cppStandard = "1z";
+                cppStandard = "17";
 
             cppStandard = "-std=" + String (shouldUseGNUExtensions() ? "gnu++" : "c++") + cppStandard;
 
@@ -427,7 +446,7 @@ private:
             if (target.isDynamicLibrary() || getProject().getProjectType().isAudioPlugin())
                 flags.add ("-fPIC");
 
-            const auto packages = getPackages();
+            auto packages = getPackages();
 
             if (packages.size() > 0)
             {
@@ -448,33 +467,49 @@ private:
 
     StringArray getLinkerFlags (const BuildConfiguration& config, CodeBlocksTarget& target) const
     {
-        StringArray flags (makefileExtraLinkerFlags);
+        auto flags = makefileExtraLinkerFlags;
 
-        if (const auto codeBlocksConfig = dynamic_cast<const CodeBlocksBuildConfiguration*> (&config))
-            flags.add (codeBlocksConfig->getArchitectureTypeVar());
+        if (auto* codeBlocksConfig = dynamic_cast<const CodeBlocksBuildConfiguration*> (&config))
+            flags.add (codeBlocksConfig->getArchitectureTypeString());
 
         if (! config.isDebug())
             flags.add ("-s");
 
-        flags.addTokens (replacePreprocessorTokens (config, getExtraLinkerFlagsString()).trim(),
-                         " \n", "\"'");
+        if (config.isLinkTimeOptimisationEnabled())
+            flags.add ("-flto");
 
-        const auto packages = getPackages();
+        flags.addTokens (replacePreprocessorTokens (config, getExtraLinkerFlagsString()).trim(), " \n", "\"'");
 
-        if (config.exporter.isLinux() && packages.size() > 0)
+        auto packages = getPackages();
+
+        if (config.exporter.isLinux())
         {
             if (target.isDynamicLibrary())
                 flags.add ("-shared");
 
-            auto pkgconfigLibs = String ("`pkg-config --libs");
-            for (auto p : packages)
-                pkgconfigLibs << " " << p;
+            if (packages.size() > 0)
+            {
+                String pkgconfigLibs ("`pkg-config --libs");
 
-            pkgconfigLibs << "`";
-            flags.add (pkgconfigLibs);
+                for (auto& p : packages)
+                    pkgconfigLibs << " " << p;
+
+                pkgconfigLibs << "`";
+                flags.add (pkgconfigLibs);
+            }
         }
 
         return getCleanedStringArray (flags);
+    }
+
+    StringArray getLinkerSearchPaths (const BuildConfiguration& config, CodeBlocksTarget& target) const
+    {
+        auto librarySearchPaths = config.getLibrarySearchPaths();
+
+        if (getProject().getProjectType().isAudioPlugin() && target.type != ProjectType::Target::SharedCodeTarget)
+            librarySearchPaths.add (RelativePath (getSharedCodePath (config), RelativePath::buildTargetFolder).getParentDirectory().toUnixStyle());
+
+        return librarySearchPaths;
     }
 
     StringArray getIncludePaths (const BuildConfiguration& config) const
@@ -539,7 +574,7 @@ private:
 
     String getSharedCodePath (const BuildConfiguration& config) const
     {
-        const String outputPath = getOutputPathForTarget (getTargetWithType (ProjectType::Target::SharedCodeTarget), config);
+        auto outputPath = getOutputPathForTarget (getTargetWithType (ProjectType::Target::SharedCodeTarget), config);
         RelativePath path (outputPath, RelativePath::buildTargetFolder);
         auto filename = path.getFileName();
 
@@ -554,14 +589,14 @@ private:
         xml.setAttribute ("title", target.getTargetNameForConfiguration (config));
 
         {
-            XmlElement* output = xml.createNewChildElement ("Option");
+            auto* output = xml.createNewChildElement ("Option");
 
             output->setAttribute ("output", getOutputPathForTarget (target, config));
 
             if (isLinux())
             {
-                const bool keepPrefix = (target.type == ProjectType::Target::VSTPlugIn || target.type == ProjectType::Target::VST3PlugIn
-                                      || target.type == ProjectType::Target::AAXPlugIn || target.type == ProjectType::Target::RTASPlugIn);
+                bool keepPrefix = (target.type == ProjectType::Target::VSTPlugIn || target.type == ProjectType::Target::VST3PlugIn
+                                || target.type == ProjectType::Target::AAXPlugIn || target.type == ProjectType::Target::RTASPlugIn);
 
                 output->setAttribute ("prefix_auto", keepPrefix ? 0 : 1);
             }
@@ -583,7 +618,7 @@ private:
             xml.createNewChildElement ("Option")->setAttribute ("external_deps", getSharedCodePath (config));
 
         {
-            XmlElement* const compiler = xml.createNewChildElement ("Compiler");
+            auto* compiler = xml.createNewChildElement ("Compiler");
 
             {
                 StringArray flags;
@@ -603,7 +638,7 @@ private:
             }
 
             {
-                const StringArray includePaths (getIncludePaths (config));
+                auto includePaths = getIncludePaths (config);
 
                 for (auto path : includePaths)
                     setAddOption (*compiler, "directory", path);
@@ -611,14 +646,12 @@ private:
         }
 
         {
-            XmlElement* const linker = xml.createNewChildElement ("Linker");
+            auto* linker = xml.createNewChildElement ("Linker");
 
             if (getProject().getProjectType().isAudioPlugin() && target.type != ProjectType::Target::SharedCodeTarget)
                 setAddOption (*linker, "option", getSharedCodePath (config));
 
-            const StringArray linkerFlags (getLinkerFlags (config, target));
-
-            for (auto flag : linkerFlags)
+            for (auto& flag : getLinkerFlags (config, target))
                 setAddOption (*linker, "option", flag);
 
             const StringArray& libs = isWindows() ? mingwLibs : linuxLibs;
@@ -626,19 +659,14 @@ private:
             for (auto lib : libs)
                 setAddOption (*linker, "library", lib);
 
-            StringArray librarySearchPaths (config.getLibrarySearchPaths());
-
-            if (getProject().getProjectType().isAudioPlugin() && target.type != ProjectType::Target::SharedCodeTarget)
-                librarySearchPaths.add (RelativePath (getSharedCodePath (config), RelativePath::buildTargetFolder).getParentDirectory().toUnixStyle());
-
-            for (auto path : librarySearchPaths)
+            for (auto& path : getLinkerSearchPaths (config, target))
                 setAddOption (*linker, "directory", replacePreprocessorDefs (getAllPreprocessorDefs(), path));
         }
     }
 
     void addBuild (XmlElement& xml) const
     {
-        XmlElement* const build = xml.createNewChildElement ("Build");
+        auto* build = xml.createNewChildElement ("Build");
 
         for (ConstConfigIterator config (*this); config.next();)
             for (auto target : targets)
@@ -648,7 +676,7 @@ private:
 
     void addVirtualTargets (XmlElement& xml) const
     {
-        XmlElement* const virtualTargets = xml.createNewChildElement ("VirtualTargets");
+        auto* virtualTargets = xml.createNewChildElement ("VirtualTargets");
 
         for (ConstConfigIterator config (*this); config.next();)
         {
@@ -678,7 +706,7 @@ private:
 
     void addProjectCompilerOptions (XmlElement& xml) const
     {
-        XmlElement* const compiler = xml.createNewChildElement ("Compiler");
+        auto* compiler = xml.createNewChildElement ("Compiler");
 
         for (auto& option : getProjectCompilerOptions())
             setAddOption (*compiler, "option", option);
@@ -703,7 +731,7 @@ private:
 
     void addProjectLinkerOptions (XmlElement& xml) const
     {
-        XmlElement* const linker = xml.createNewChildElement ("Linker");
+        auto* linker = xml.createNewChildElement ("Linker");
 
         for (auto& lib : getProjectLinkerLibs())
             setAddOption (*linker, "library", lib);
@@ -766,14 +794,14 @@ private:
         }
         else if (projectItem.shouldBeAddedToTargetProject())
         {
-            const RelativePath file (projectItem.getFile(), getTargetFolder(), RelativePath::buildTargetFolder);
+            RelativePath file (projectItem.getFile(), getTargetFolder(), RelativePath::buildTargetFolder);
 
-            XmlElement* unit = xml.createNewChildElement ("Unit");
+            auto* unit = xml.createNewChildElement ("Unit");
             unit->setAttribute ("filename", file.toUnixStyle());
 
             for (ConstConfigIterator config (*this); config.next();)
             {
-                const String& targetName = getTargetForProjectItem (projectItem).getTargetNameForConfiguration (*config);
+                auto targetName = getTargetForProjectItem (projectItem).getTargetNameForConfiguration (*config);
                 unit->createNewChildElement ("Option")->setAttribute ("target", targetName);
             }
 

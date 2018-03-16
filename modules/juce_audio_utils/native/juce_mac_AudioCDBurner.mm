@@ -129,7 +129,7 @@ private:
 
             if (numSamples > 0)
             {
-                AudioSampleBuffer tempBuffer (2, numSamples);
+                AudioBuffer<float> tempBuffer (2, numSamples);
                 AudioSourceChannelInfo info (tempBuffer);
 
                 source->source->getNextAudioBlock (info);
@@ -371,7 +371,7 @@ private:
 //==============================================================================
 AudioCDBurner::AudioCDBurner (const int deviceIndex)
 {
-    pimpl = new Pimpl (*this, deviceIndex);
+    pimpl.reset (new Pimpl (*this, deviceIndex));
 }
 
 AudioCDBurner::~AudioCDBurner()

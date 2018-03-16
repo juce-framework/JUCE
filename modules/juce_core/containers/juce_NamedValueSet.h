@@ -28,6 +28,8 @@ namespace juce
 
     This can be used as a basic structure to hold a set of var object, which can
     be retrieved by using their identifier.
+
+    @tags{Core}
 */
 class JUCE_API  NamedValueSet
 {
@@ -35,62 +37,46 @@ public:
     /** Creates an empty set. */
     NamedValueSet() noexcept;
 
-    /** Creates a copy of another set. */
     NamedValueSet (const NamedValueSet&);
-
-    /** Replaces this set with a copy of another set. */
-    NamedValueSet& operator= (const NamedValueSet&);
-
-    /** Move constructor */
     NamedValueSet (NamedValueSet&&) noexcept;
-
-    /** Move assignment operator */
+    NamedValueSet& operator= (const NamedValueSet&);
     NamedValueSet& operator= (NamedValueSet&&) noexcept;
 
     /** Destructor. */
     ~NamedValueSet() noexcept;
 
-    bool operator== (const NamedValueSet&) const;
-    bool operator!= (const NamedValueSet&) const;
+    /** Two NamedValueSets are considered equal if they contain all the same key/value
+        pairs, regardless of the order.
+    */
+    bool operator== (const NamedValueSet&) const noexcept;
+    bool operator!= (const NamedValueSet&) const noexcept;
 
     //==============================================================================
-    struct NamedValue
+    /** Structure for a named var object */
+    struct JUCE_API  NamedValue
     {
-        NamedValue() noexcept {}
-        NamedValue (const Identifier& n, const var& v)  : name (n), value (v) {}
-        NamedValue (const NamedValue& other) : name (other.name), value (other.value) {}
+        NamedValue() noexcept;
+        ~NamedValue() noexcept;
 
-        NamedValue (NamedValue&& other) noexcept
-        : name (static_cast<Identifier&&> (other.name)),
-          value (static_cast<var&&> (other.value))
-        {
-        }
+        NamedValue (const Identifier& name, const var& value);
+        NamedValue (const Identifier& name, var&& value) noexcept;
+        NamedValue (Identifier&& name, var&& value) noexcept;
 
-        NamedValue (Identifier&& n, var&& v) noexcept
-        : name (static_cast<Identifier&&> (n)),
-          value (static_cast<var&&> (v))
-        {
-        }
+        NamedValue (const NamedValue&);
+        NamedValue (NamedValue&&) noexcept;
+        NamedValue& operator= (NamedValue&&) noexcept;
 
-        NamedValue& operator= (NamedValue&& other) noexcept
-        {
-            name = static_cast<Identifier&&> (other.name);
-            value = static_cast<var&&> (other.value);
-            return *this;
-        }
-
-        bool operator== (const NamedValue& other) const noexcept   { return name == other.name && value == other.value; }
-        bool operator!= (const NamedValue& other) const noexcept   { return ! operator== (other); }
+        bool operator== (const NamedValue&) const noexcept;
+        bool operator!= (const NamedValue&) const noexcept;
 
         Identifier name;
         var value;
     };
 
-    NamedValueSet::NamedValue* begin() { return values.begin(); }
-    NamedValueSet::NamedValue* end()   { return values.end();   }
+    const NamedValueSet::NamedValue* begin() const noexcept     { return values.begin(); }
+    const NamedValueSet::NamedValue* end() const noexcept       { return values.end();   }
 
     //==============================================================================
-
     /** Returns the total number of values that the set contains. */
     int size() const noexcept;
 

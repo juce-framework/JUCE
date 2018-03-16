@@ -26,6 +26,8 @@ namespace juce
 //==============================================================================
 /** Contains static methods for converting the byte order between different
     endiannesses.
+
+    @tags{Core}
 */
 class JUCE_API  ByteOrder
 {
@@ -129,7 +131,7 @@ public:
     JUCE_CONSTEXPR static bool isBigEndian() noexcept;
 
 private:
-    ByteOrder() JUCE_DELETED_FUNCTION;
+    ByteOrder() = delete;
 
     JUCE_DECLARE_NON_COPYABLE (ByteOrder)
 };

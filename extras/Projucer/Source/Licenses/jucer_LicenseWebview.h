@@ -78,18 +78,17 @@ private:
         };
 
         //==============================================================================
-        struct Header : public Component, private LicenseController::StateChangedCallback,
-                        private Button::Listener
+        struct Header  : public Component,
+                         private LicenseController::StateChangedCallback
         {
-            Header ()
-                : avatarButton ("User Settings", &getIcons().user)
+            Header()  : avatarButton ("User Settings", &getIcons().user)
             {
                 setOpaque (true);
                 addChildComponent (avatarButton);
 
-                avatarButton.addListener (this);
+                avatarButton.onClick = [this] { showAvatarWindow(); };
 
-                if (LicenseController* licenseController = ProjucerApplication::getApp().licenseController)
+                if (auto* licenseController = ProjucerApplication::getApp().licenseController.get())
                 {
                     licenseController->addLicenseStatusChangedCallback (this);
                     licenseStateChanged (licenseController->getState());
@@ -98,9 +97,7 @@ private:
 
             virtual ~Header()
             {
-                avatarButton.removeListener (this);
-
-                if (LicenseController* licenseController = ProjucerApplication::getApp().licenseController)
+                if (auto* licenseController = ProjucerApplication::getApp().licenseController.get())
                     licenseController->removeLicenseStatusChangedCallback (this);
             }
 
@@ -126,11 +123,11 @@ private:
                 avatarButton.repaint();
             }
 
-            void buttonClicked (Button*) override
+            void showAvatarWindow()
             {
-                if (LicenseController* licenseController = ProjucerApplication::getApp().licenseController)
+                if (auto* licenseController = ProjucerApplication::getApp().licenseController.get())
                 {
-                    const LicenseState::Type type = licenseController->getState().type;
+                    auto type = licenseController->getState().type;
 
                     auto* content = new UserSettingsPopup (true);
                     content->setSize (200, (type == LicenseState::Type::noLicenseChosenYet ? 100 : 150));
@@ -148,7 +145,6 @@ private:
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Header)
         };
 
-        //==============================================================================
         //==============================================================================
     public:
         LicenseWebviewContent (LicenseWebview& parentWindowToUse, ModalComponentManager::Callback* callbackToUse)
@@ -196,6 +192,7 @@ private:
                 HashMap<String, String> params;
 
                 auto n = url.getParameterNames().size();
+
                 for (int i = 0; i < n; ++i)
                     params.set (url.getParameterNames()[i], url.getParameterValues()[i]);
 

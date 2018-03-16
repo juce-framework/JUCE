@@ -32,6 +32,7 @@ class ProjucerLookAndFeel   : public LookAndFeel_V4
 {
 public:
     ProjucerLookAndFeel();
+    ~ProjucerLookAndFeel();
 
     void drawTabButton (TabBarButton& button, Graphics&, bool isMouseOver, bool isMouseDown) override;
     int getTabButtonBestWidth (TabBarButton&, int tabDepth) override;
@@ -45,7 +46,6 @@ public:
                                bool isMouseOverButton, bool isButtonDown) override;
     void drawButtonText (Graphics&, TextButton&, bool isMouseOverButton, bool isButtonDown) override;
     void drawToggleButton (Graphics&, ToggleButton&, bool isMouseOverButton, bool isButtonDown) override;
-    Font getTextButtonFont (TextButton&, int buttonHeight) override;
 
     void drawTextEditorOutline (Graphics&, int, int, TextEditor&) override {}
     void fillTextEditorBackground (Graphics&, int width, int height, TextEditor&) override;

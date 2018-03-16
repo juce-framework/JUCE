@@ -50,10 +50,20 @@ LookAndFeel::LookAndFeel()
 
 LookAndFeel::~LookAndFeel()
 {
-    /* This assertion is triggered if you try to delete a LookAndFeel object while it's
-         - still being used as the default LookAndFeel; or
-         - is set as a Component's current lookandfeel; or
-         - pointed to by a WeakReference somewhere else in the code
+    /* This assertion is triggered if you try to delete a LookAndFeel object while something
+       is still using it!
+
+       Reasons may be:
+         - it's still being used as the default LookAndFeel; or
+         - it's set as a Component's current lookandfeel; or
+         - there's a WeakReference to it somewhere else in your code
+
+       Generally the fix for this will be to make sure you call
+       Component::setLookandFeel (nullptr) on any components that were still using
+       it before you delete it, or call LookAndFeel::setDefaultLookAndFeel (nullptr)
+       if you had set it up to be the default one. This assertion can also be avoided by
+       declaring your LookAndFeel object before any of the Components that use it as
+       the Components will be destroyed before the LookAndFeel.
 
        Deleting a LookAndFeel is unlikely to cause a crash since most things will use a
        safe WeakReference to it, but it could cause some unexpected graphical behaviour,
@@ -108,20 +118,36 @@ void LookAndFeel::setDefaultLookAndFeel (LookAndFeel* newDefaultLookAndFeel) noe
 //==============================================================================
 Typeface::Ptr LookAndFeel::getTypefaceForFont (const Font& font)
 {
-    if (defaultSans.isNotEmpty() && font.getTypefaceName() == Font::getDefaultSansSerifFontName())
+    if (font.getTypefaceName() == Font::getDefaultSansSerifFontName())
     {
-        Font f (font);
-        f.setTypefaceName (defaultSans);
-        return Typeface::createSystemTypefaceFor (f);
+        if (defaultTypeface != nullptr)
+            return defaultTypeface;
+
+        if (defaultSans.isNotEmpty())
+        {
+            Font f (font);
+            f.setTypefaceName (defaultSans);
+            return Typeface::createSystemTypefaceFor (f);
+        }
     }
 
     return Font::getDefaultTypefaceForFont (font);
+}
+
+void LookAndFeel::setDefaultSansSerifTypeface (Typeface::Ptr newDefaultTypeface)
+{
+    if (defaultTypeface != newDefaultTypeface)
+    {
+        defaultTypeface = newDefaultTypeface;
+        Typeface::clearTypefaceCache();
+    }
 }
 
 void LookAndFeel::setDefaultSansSerifTypefaceName (const String& newName)
 {
     if (defaultSans != newName)
     {
+        defaultTypeface = {};
         Typeface::clearTypefaceCache();
         defaultSans = newName;
     }

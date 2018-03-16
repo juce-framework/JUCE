@@ -35,7 +35,7 @@
 
   ID:               juce_gui_extra
   vendor:           juce
-  version:          5.2.0
+  version:          5.3.0
   name:             JUCE extended GUI classes
   description:      Miscellaneous GUI classes for specialised tasks.
   website:          http://www.juce.com/juce
@@ -83,6 +83,7 @@
 #include "code_editor/juce_XMLCodeTokeniser.h"
 #include "code_editor/juce_LuaCodeTokeniser.h"
 #include "embedding/juce_ActiveXControlComponent.h"
+#include "embedding/juce_AndroidViewComponent.h"
 #include "embedding/juce_NSViewComponent.h"
 #include "embedding/juce_UIViewComponent.h"
 #include "embedding/juce_XEmbedComponent.h"

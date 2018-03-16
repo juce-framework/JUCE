@@ -26,6 +26,8 @@ namespace juce
 //==============================================================================
 /**
     Contains methods for finding out about the current hardware and OS configuration.
+
+    @tags{Core}
 */
 class JUCE_API  SystemStats  final
 {
@@ -128,6 +130,11 @@ public:
         want to use this for things like determining the type of phone/iPad, etc.
     */
     static String getDeviceDescription();
+
+    /** This will attempt to return the manufacturer of the device.
+        If no description is available, it'll just return an empty string.
+    */
+    static String getDeviceManufacturer();
 
     /** This method calculates some IDs to uniquely identify the device.
 

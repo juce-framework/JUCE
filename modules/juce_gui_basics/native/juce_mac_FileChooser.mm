@@ -27,56 +27,226 @@
 namespace juce
 {
 
-#if JUCE_MAC
-
-struct FileChooserDelegateClass  : public ObjCClass <NSObject>
+//==============================================================================
+static NSMutableArray* createAllowedTypesArray (const StringArray& filters)
 {
-    FileChooserDelegateClass()  : ObjCClass <NSObject> ("JUCEFileChooser_")
+    if (filters.size() == 0)
+        return nil;
+
+    NSMutableArray* filterArray = [[[NSMutableArray alloc] init] autorelease];
+
+    for (int i = 0; i < filters.size(); ++i)
     {
-        addIvar<StringArray*> ("filters");
-        addIvar<FilePreviewComponent*> ("filePreviewComponent");
-
-        addMethod (@selector (dealloc),                   dealloc,                 "v@:");
-        addMethod (@selector (panel:shouldShowFilename:), shouldShowFilename,      "c@:@@");
-        addMethod (@selector (panelSelectionDidChange:),  panelSelectionDidChange, "c@");
-
-       #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
-        addProtocol (@protocol (NSOpenSavePanelDelegate));
+       #if defined (MAC_OS_X_VERSION_10_6) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6)
+        // From OS X 10.6 you can only specify allowed extensions, so any filters containing wildcards
+        // must be of the form "*.extension"
+        jassert (filters[i] == "*"
+                 || (filters[i].startsWith ("*.") && filters[i].lastIndexOfChar ('*') == 0));
        #endif
 
-        registerClass();
+        const String f (filters[i].replace ("*.", ""));
+
+        if (f == "*")
+            return nil;
+
+        [filterArray addObject: juceStringToNS (f)];
     }
 
-    static void setFilters (id self, StringArray* filters)                      { object_setInstanceVariable (self, "filters", filters); }
-    static void setFilePreviewComponent (id self, FilePreviewComponent* comp)   { object_setInstanceVariable (self, "filePreviewComponent", comp); }
-    static StringArray* getFilters (id self)                                    { return getIvar<StringArray*> (self, "filters"); }
-    static FilePreviewComponent* getFilePreviewComponent (id self)              { return getIvar<FilePreviewComponent*> (self, "filePreviewComponent"); }
+    return filterArray;
+}
+
+//==============================================================================
+template <> struct ContainerDeletePolicy<NSSavePanel>    { static void destroy (NSObject* o) { [o release]; } };
+
+class FileChooser::Native     : public Component,
+                                public FileChooser::Pimpl
+{
+public:
+    Native (FileChooser& fileChooser, int flags, FilePreviewComponent* previewComponent)
+        : owner (fileChooser), preview (previewComponent),
+          selectsDirectories ((flags & FileBrowserComponent::canSelectDirectories)   != 0),
+          selectsFiles       ((flags & FileBrowserComponent::canSelectFiles)         != 0),
+          isSave             ((flags & FileBrowserComponent::saveMode)               != 0),
+          selectMultiple     ((flags & FileBrowserComponent::canSelectMultipleItems) != 0),
+          panel (isSave ? [[NSSavePanel alloc] init] : [[NSOpenPanel alloc] init])
+    {
+        setBounds (0, 0, 0, 0);
+        setOpaque (true);
+
+        static DelegateClass cls;
+
+        delegate = [cls.createInstance() init];
+        object_setInstanceVariable (delegate, "cppObject", this);
+
+        [panel setDelegate: delegate];
+
+        filters.addTokens (owner.filters.replaceCharacters (",:", ";;"), ";", String());
+        filters.trim();
+        filters.removeEmptyStrings();
+
+        [panel setTitle: juceStringToNS (owner.title)];
+        [panel setAllowedFileTypes: createAllowedTypesArray (filters)];
+
+        if (! isSave)
+        {
+            NSOpenPanel* openPanel = (NSOpenPanel*) panel;
+
+            [openPanel setCanChooseDirectories: selectsDirectories];
+            [openPanel setCanChooseFiles: selectsFiles];
+            [openPanel setAllowsMultipleSelection: selectMultiple];
+            [openPanel setResolvesAliases: YES];
+
+            if (owner.treatFilePackagesAsDirs)
+                [openPanel setTreatsFilePackagesAsDirectories: YES];
+        }
+
+        if (preview != nullptr)
+        {
+            nsViewPreview = [[NSView alloc] initWithFrame: makeNSRect (preview->getLocalBounds())];
+            preview->addToDesktop (0, (void*) nsViewPreview);
+            preview->setVisible (true);
+
+            [panel setAccessoryView: nsViewPreview];
+        }
+
+        if (isSave || selectsDirectories)
+            [panel setCanCreateDirectories: YES];
+
+        [panel setLevel:NSModalPanelWindowLevel];
+
+        if (owner.startingFile.isDirectory())
+        {
+            startingDirectory = owner.startingFile.getFullPathName();
+        }
+        else
+        {
+            startingDirectory = owner.startingFile.getParentDirectory().getFullPathName();
+            filename = owner.startingFile.getFileName();
+        }
+
+       #if defined (MAC_OS_X_VERSION_10_6) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6)
+        [panel setDirectoryURL: createNSURLFromFile (startingDirectory)];
+        [panel setNameFieldStringValue: juceStringToNS (filename)];
+       #endif
+    }
+
+    ~Native()
+    {
+        exitModalState (0);
+        removeFromDesktop();
+
+        if (panel != nil)
+        {
+            [panel setDelegate: nil];
+
+            if (nsViewPreview != nil)
+            {
+                [panel setAccessoryView: nil];
+
+                [nsViewPreview release];
+
+                nsViewPreview = nil;
+                preview = nullptr;
+            }
+
+            [panel close];
+            [panel release];
+        }
+
+        if (delegate != nil)
+        {
+            [delegate release];
+            delegate = nil;
+        }
+    }
+
+    void launch() override
+    {
+        if (panel != nil)
+        {
+            setAlwaysOnTop (juce_areThereAnyAlwaysOnTopWindows());
+            addToDesktop (0);
+
+            enterModalState (true);
+            [panel beginWithCompletionHandler:CreateObjCBlock (this, &Native::finished)];
+        }
+    }
+
+    void runModally() override
+    {
+        ScopedPointer<TemporaryMainMenuWithStandardCommands> tempMenu;
+
+        if (JUCEApplicationBase::isStandaloneApp())
+            tempMenu.reset (new TemporaryMainMenuWithStandardCommands());
+
+        jassert (panel != nil);
+       #if defined (MAC_OS_X_VERSION_10_6) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6)
+        auto result = [panel runModal];
+       #else
+        auto result = [panel runModalForDirectory: juceStringToNS (startingDirectory)
+                                              file: juceStringToNS (filename)];
+       #endif
+
+        finished (result);
+    }
 
 private:
-    static void dealloc (id self, SEL)
+    //==============================================================================
+   #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+    typedef NSObject<NSOpenSavePanelDelegate> DelegateType;
+   #else
+    typedef NSObject DelegateType;
+   #endif
+
+    void finished (NSInteger result)
     {
-        delete getFilters (self);
-        sendSuperclassMessage (self, @selector (dealloc));
+        Array<URL> chooserResults;
+
+        exitModalState (0);
+
+        if (panel != nil && result == NSFileHandlingPanelOKButton)
+        {
+            auto addURLResult = [&chooserResults] (NSURL* urlToAdd)
+            {
+                auto scheme = nsStringToJuce ([urlToAdd scheme]);
+                auto path = nsStringToJuce ([urlToAdd path]);
+                chooserResults.add (URL (scheme + "://" + path));
+            };
+
+            if (isSave)
+            {
+                addURLResult ([panel URL]);
+            }
+            else
+            {
+                auto* openPanel = (NSOpenPanel*) panel;
+                auto* urls = [openPanel URLs];
+
+                for (unsigned int i = 0; i < [urls count]; ++i)
+                    addURLResult ([urls objectAtIndex: i]);
+            }
+        }
+
+        owner.finished (chooserResults);
     }
 
-    static BOOL shouldShowFilename (id self, SEL, id /*sender*/, NSString* filename)
+    bool shouldShowFilename (const String& filenameToTest)
     {
-        StringArray* const filters = getFilters (self);
+        const File f (filenameToTest);
+        auto nsFilename = juceStringToNS (filenameToTest);
 
-        const File f (nsStringToJuce (filename));
-
-        for (int i = filters->size(); --i >= 0;)
-            if (f.getFileName().matchesWildcard ((*filters)[i], true))
+        for (int i = filters.size(); --i >= 0;)
+            if (f.getFileName().matchesWildcard (filters[i], true))
                 return true;
 
        #if (! defined (MAC_OS_X_VERSION_10_7)) || MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_7
         NSError* error;
-        NSString* name = [[NSWorkspace sharedWorkspace] typeOfFile: filename error: &error];
+        NSString* name = [[NSWorkspace sharedWorkspace] typeOfFile: nsFilename error: &error];
 
         if ([name isEqualToString: nsStringLiteral ("com.apple.alias-file")])
         {
             FSRef ref;
-            FSPathMakeRef ((const UInt8*) [filename fileSystemRepresentation], &ref, nullptr);
+            FSPathMakeRef ((const UInt8*) [nsFilename fileSystemRepresentation], &ref, nullptr);
 
             Boolean targetIsFolder = false, wasAliased = false;
             FSResolveAliasFileWithMountFlags (&ref, true, &targetIsFolder, &wasAliased, 0);
@@ -86,7 +256,14 @@ private:
        #endif
 
         return f.isDirectory()
-                 && ! [[NSWorkspace sharedWorkspace] isFilePackageAtPath: filename];
+                 && ! [[NSWorkspace sharedWorkspace] isFilePackageAtPath: nsFilename];
+    }
+
+    void panelSelectionDidChange (id sender)
+    {
+        // NB: would need to extend FilePreviewComponent to handle the full list rather than just the first one
+        if (preview != nullptr)
+            preview->selectedFileChanged (File (getSelectedPaths (sender)[0]));
     }
 
     static StringArray getSelectedPaths (id sender)
@@ -108,139 +285,58 @@ private:
         return paths;
     }
 
-    static void panelSelectionDidChange (id self, SEL, id sender)
+    //==============================================================================
+    FileChooser& owner;
+    FilePreviewComponent* preview;
+    NSView* nsViewPreview = nullptr;
+    bool selectsDirectories, selectsFiles, isSave, selectMultiple;
+
+    NSSavePanel* panel;
+    DelegateType* delegate;
+
+    StringArray filters;
+    String startingDirectory, filename;
+
+    //==============================================================================
+    struct DelegateClass : ObjCClass<DelegateType>
     {
-        // NB: would need to extend FilePreviewComponent to handle the full list rather than just the first one
-        if (FilePreviewComponent* const previewComp = getFilePreviewComponent (self))
-            previewComp->selectedFileChanged (File (getSelectedPaths (sender)[0]));
-    }
+        DelegateClass()  : ObjCClass <DelegateType> ("JUCEFileChooser_")
+        {
+            addIvar<Native*> ("cppObject");
+
+            addMethod (@selector (panel:shouldShowFilename:), shouldShowFilename,      "c@:@@");
+            addMethod (@selector (panelSelectionDidChange:),  panelSelectionDidChange, "c@");
+
+           #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+            addProtocol (@protocol (NSOpenSavePanelDelegate));
+           #endif
+
+            registerClass();
+        }
+
+    private:
+        static BOOL shouldShowFilename (id self, SEL, id /*sender*/, NSString* filename)
+        {
+            auto* _this = getIvar<Native*> (self, "cppObject");
+
+            return _this->shouldShowFilename (nsStringToJuce (filename)) ? YES : NO;
+        }
+
+        static void panelSelectionDidChange (id self, SEL, id sender)
+        {
+            auto* _this = getIvar<Native*> (self, "cppObject");
+
+            _this->panelSelectionDidChange (sender);
+        }
+    };
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Native)
 };
 
-static NSMutableArray* createAllowedTypesArray (const StringArray& filters)
+FileChooser::Pimpl* FileChooser::showPlatformDialog (FileChooser& owner, int flags,
+                                        FilePreviewComponent* preview)
 {
-    if (filters.size() == 0)
-        return nil;
-
-    NSMutableArray* filterArray = [[[NSMutableArray alloc] init] autorelease];
-
-    for (int i = 0; i < filters.size(); ++i)
-    {
-        const String f (filters[i].replace ("*.", ""));
-
-        if (f == "*")
-            return nil;
-
-        [filterArray addObject: juceStringToNS (f)];
-    }
-
-    return filterArray;
-}
-
-//==============================================================================
-void FileChooser::showPlatformDialog (Array<File>& results,
-                                      const String& title,
-                                      const File& currentFileOrDirectory,
-                                      const String& filter,
-                                      bool selectsDirectory,
-                                      bool selectsFiles,
-                                      bool isSaveDialogue,
-                                      bool /*warnAboutOverwritingExistingFiles*/,
-                                      bool selectMultipleFiles,
-                                      bool treatFilePackagesAsDirs,
-                                      FilePreviewComponent* extraInfoComponent)
-{
-    JUCE_AUTORELEASEPOOL
-    {
-        ScopedPointer<TemporaryMainMenuWithStandardCommands> tempMenu;
-        if (JUCEApplicationBase::isStandaloneApp())
-            tempMenu = new TemporaryMainMenuWithStandardCommands();
-
-        StringArray* filters = new StringArray();
-        filters->addTokens (filter.replaceCharacters (",:", ";;"), ";", String());
-        filters->trim();
-        filters->removeEmptyStrings();
-
-       #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
-        typedef NSObject<NSOpenSavePanelDelegate> DelegateType;
-       #else
-        typedef NSObject DelegateType;
-       #endif
-
-        static FileChooserDelegateClass cls;
-        DelegateType* delegate = (DelegateType*) [[cls.createInstance() init] autorelease];
-        FileChooserDelegateClass::setFilters (delegate, filters);
-
-        NSSavePanel* panel = isSaveDialogue ? [NSSavePanel savePanel]
-                                            : [NSOpenPanel openPanel];
-
-        [panel setTitle: juceStringToNS (title)];
-        [panel setAllowedFileTypes: createAllowedTypesArray (*filters)];
-
-        if (! isSaveDialogue)
-        {
-            NSOpenPanel* openPanel = (NSOpenPanel*) panel;
-            [openPanel setCanChooseDirectories: selectsDirectory];
-            [openPanel setCanChooseFiles: selectsFiles];
-            [openPanel setAllowsMultipleSelection: selectMultipleFiles];
-            [openPanel setResolvesAliases: YES];
-
-            if (treatFilePackagesAsDirs)
-                [openPanel setTreatsFilePackagesAsDirectories: YES];
-        }
-
-        if (extraInfoComponent != nullptr)
-        {
-            NSView* view = [[[NSView alloc] initWithFrame: makeNSRect (extraInfoComponent->getLocalBounds())] autorelease];
-            extraInfoComponent->addToDesktop (0, (void*) view);
-            extraInfoComponent->setVisible (true);
-            FileChooserDelegateClass::setFilePreviewComponent (delegate, extraInfoComponent);
-
-            [panel setAccessoryView: view];
-        }
-
-        [panel setDelegate: delegate];
-
-        if (isSaveDialogue || selectsDirectory)
-            [panel setCanCreateDirectories: YES];
-
-        String directory, filename;
-
-        if (currentFileOrDirectory.isDirectory())
-        {
-            directory = currentFileOrDirectory.getFullPathName();
-        }
-        else
-        {
-            directory = currentFileOrDirectory.getParentDirectory().getFullPathName();
-            filename = currentFileOrDirectory.getFileName();
-        }
-
-       #if defined (MAC_OS_X_VERSION_10_6) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6)
-        [panel setDirectoryURL: createNSURLFromFile (directory)];
-        [panel setNameFieldStringValue: juceStringToNS (filename)];
-
-        if ([panel runModal] == 1 /*NSModalResponseOK*/)
-       #else
-        if ([panel runModalForDirectory: juceStringToNS (directory)
-                                   file: juceStringToNS (filename)] == 1 /*NSModalResponseOK*/)
-       #endif
-        {
-            if (isSaveDialogue)
-            {
-                results.add (File (nsStringToJuce ([[panel URL] path])));
-            }
-            else
-            {
-                NSOpenPanel* openPanel = (NSOpenPanel*) panel;
-                NSArray* urls = [openPanel URLs];
-
-                for (unsigned int i = 0; i < [urls count]; ++i)
-                    results.add (File (nsStringToJuce ([[urls objectAtIndex: i] path])));
-            }
-        }
-
-        [panel setDelegate: nil];
-    }
+    return new FileChooser::Native (owner, flags, preview);
 }
 
 bool FileChooser::isPlatformDialogAvailable()
@@ -252,29 +348,4 @@ bool FileChooser::isPlatformDialogAvailable()
    #endif
 }
 
-#else
-
-//==============================================================================
-bool FileChooser::isPlatformDialogAvailable()
-{
-    return false;
 }
-
-void FileChooser::showPlatformDialog (Array<File>&,
-                                      const String& /*title*/,
-                                      const File& /*currentFileOrDirectory*/,
-                                      const String& /*filter*/,
-                                      bool /*selectsDirectory*/,
-                                      bool /*selectsFiles*/,
-                                      bool /*isSaveDialogue*/,
-                                      bool /*warnAboutOverwritingExistingFiles*/,
-                                      bool /*selectMultipleFiles*/,
-                                      bool /*treatFilePackagesAsDirs*/,
-                                      FilePreviewComponent*)
-{
-    jassertfalse; //there's no such thing in iOS
-}
-
-#endif
-
-} // namespace juce

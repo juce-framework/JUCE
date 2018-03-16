@@ -25,6 +25,8 @@ namespace juce
 
 /**
     A simple ARGB colour class for setting LEDs.
+
+    @tags{Blocks}
 */
 struct LEDColour
 {
@@ -51,6 +53,8 @@ struct LEDColour
 //==============================================================================
 /**
     Represents a 2D grid of LEDs on a block device.
+
+    @tags{Blocks}
 */
 class LEDGrid
 {
@@ -68,6 +72,7 @@ public:
     virtual int getNumRows() const = 0;
 
     //==============================================================================
+    /** An interface to use for LEDGrid rendering. */
     struct Renderer     : public juce::ReferenceCountedObject
     {
         virtual ~Renderer();

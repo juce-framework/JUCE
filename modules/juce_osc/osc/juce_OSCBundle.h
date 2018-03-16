@@ -38,6 +38,8 @@ namespace juce
     This is an advanced OSC structure useful to bundle OSC messages together
     whose effects must occur simultaneously at some given time. For most
     use cases it is probably enough to send and receive plain OSC messages.
+
+    @tags{OSC}
 */
 class JUCE_API  OSCBundle
 {
@@ -111,7 +113,12 @@ public:
         This method does not check the range and results in undefined behaviour
         in case i < 0 or i >= size().
     */
-    OSCBundle::Element& operator[] (const int i) const noexcept
+    OSCBundle::Element& operator[] (const int i) noexcept
+    {
+        return elements.getReference (i);
+    }
+
+    const OSCBundle::Element& operator[] (const int i) const noexcept
     {
         return elements.getReference (i);
     }

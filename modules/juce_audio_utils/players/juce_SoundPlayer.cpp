@@ -49,7 +49,8 @@ private:
 //==============================================================================
 // An AudioSourcePlayer which will remove itself from the AudioDeviceManager's
 // callback list once it finishes playing its source
-struct AutoRemovingTransportSource : public AudioTransportSource, private Timer
+struct AutoRemovingTransportSource  : public AudioTransportSource,
+                                      private Timer
 {
     AutoRemovingTransportSource (MixerAudioSource& mixerToUse, AudioTransportSource* ts, bool ownSource,
                                  int samplesPerBlock, double requiredSampleRate)
@@ -85,12 +86,11 @@ private:
 };
 
 // An AudioSource which simply outputs a buffer
-class AudioSampleBufferSource  : public PositionableAudioSource
+class AudioBufferSource  : public PositionableAudioSource
 {
 public:
-    AudioSampleBufferSource (AudioSampleBuffer* audioBuffer, bool ownBuffer, bool playOnAllChannels)
+    AudioBufferSource (AudioBuffer<float>* audioBuffer, bool ownBuffer, bool playOnAllChannels)
         : buffer (audioBuffer, ownBuffer),
-          position (0), looping (false),
           playAcrossAllChannels (playOnAllChannels)
     {}
 
@@ -144,11 +144,11 @@ public:
 
 private:
     //==============================================================================
-    OptionalScopedPointer<AudioSampleBuffer> buffer;
-    int position;
-    bool looping, playAcrossAllChannels;
+    OptionalScopedPointer<AudioBuffer<float>> buffer;
+    int position = 0;
+    bool looping = false, playAcrossAllChannels;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioSampleBufferSource)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioBufferSource)
 };
 
 SoundPlayer::SoundPlayer()
@@ -185,10 +185,10 @@ void SoundPlayer::play (AudioFormatReader* reader, bool deleteWhenFinished)
         play (new AudioFormatReaderSource (reader, deleteWhenFinished), true, reader->sampleRate);
 }
 
-void SoundPlayer::play (AudioSampleBuffer* buffer, bool deleteWhenFinished, bool playOnAllOutputChannels)
+void SoundPlayer::play (AudioBuffer<float>* buffer, bool deleteWhenFinished, bool playOnAllOutputChannels)
 {
     if (buffer != nullptr)
-        play (new AudioSampleBufferSource (buffer, deleteWhenFinished, playOnAllOutputChannels), true);
+        play (new AudioBufferSource (buffer, deleteWhenFinished, playOnAllOutputChannels), true);
 }
 
 void SoundPlayer::play (PositionableAudioSource* audioSource, bool deleteWhenFinished, double fileSampleRate)
@@ -225,14 +225,13 @@ void SoundPlayer::play (PositionableAudioSource* audioSource, bool deleteWhenFin
 
 void SoundPlayer::playTestSound()
 {
-    const int soundLength = (int) sampleRate;
+    auto soundLength = (int) sampleRate;
+    double frequency = 440.0;
+    float amplitude = 0.5f;
 
-    const double frequency = 440.0;
-    const float amplitude = 0.5f;
+    auto phasePerSample = MathConstants<double>::twoPi / (sampleRate / frequency);
 
-    const double phasePerSample = double_Pi * 2.0 / (sampleRate / frequency);
-
-    AudioSampleBuffer* newSound = new AudioSampleBuffer (1, soundLength);
+    auto* newSound = new AudioBuffer<float> (1, soundLength);
 
     for (int i = 0; i < soundLength; ++i)
         newSound->setSample (0, i, amplitude * (float) std::sin (i * phasePerSample));

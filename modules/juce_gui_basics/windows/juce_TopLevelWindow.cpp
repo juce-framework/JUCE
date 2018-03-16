@@ -35,7 +35,7 @@ public:
     TopLevelWindowManager()     {}
     ~TopLevelWindowManager()    { clearSingletonInstance(); }
 
-    juce_DeclareSingleton_SingleThreaded_Minimal (TopLevelWindowManager)
+    JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (TopLevelWindowManager)
 
     void checkFocusAsync()
     {
@@ -122,7 +122,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE (TopLevelWindowManager)
 };
 
-juce_ImplementSingleton_SingleThreaded (TopLevelWindowManager)
+JUCE_IMPLEMENT_SINGLETON (TopLevelWindowManager)
 
 void juce_checkCurrentlyFocusedTopLevelWindow();
 void juce_checkCurrentlyFocusedTopLevelWindow()
@@ -149,7 +149,7 @@ TopLevelWindow::TopLevelWindow (const String& name, const bool shouldAddToDeskto
 
 TopLevelWindow::~TopLevelWindow()
 {
-    shadower = nullptr;
+    shadower.reset();
     TopLevelWindowManager::getInstance()->removeWindow (this);
 }
 
@@ -212,7 +212,7 @@ void TopLevelWindow::setDropShadowEnabled (const bool useShadow)
 
     if (isOnDesktop())
     {
-        shadower = nullptr;
+        shadower.reset();
         Component::addToDesktop (getDesktopWindowStyleFlags());
     }
     else
@@ -221,7 +221,7 @@ void TopLevelWindow::setDropShadowEnabled (const bool useShadow)
         {
             if (shadower == nullptr)
             {
-                shadower = getLookAndFeel().createDropShadowerForComponent (this);
+                shadower.reset (getLookAndFeel().createDropShadowerForComponent (this));
 
                 if (shadower != nullptr)
                     shadower->setOwner (this);
@@ -229,7 +229,7 @@ void TopLevelWindow::setDropShadowEnabled (const bool useShadow)
         }
         else
         {
-            shadower = nullptr;
+            shadower.reset();
         }
     }
 }
@@ -256,7 +256,7 @@ void TopLevelWindow::recreateDesktopWindow()
 
 void TopLevelWindow::addToDesktop()
 {
-    shadower = nullptr;
+    shadower.reset();
     Component::addToDesktop (getDesktopWindowStyleFlags());
     setDropShadowEnabled (isDropShadowEnabled()); // force an update to clear away any fake shadows if necessary.
 }

@@ -11,8 +11,8 @@
 
   ------------------------------------------------------------------------------
 
-  The Projucer is part of the JUCE library - "Jules' Utility Class Extensions"
-  Copyright (c) 2015 - ROLI Ltd.
+  The Projucer is part of the JUCE library.
+  Copyright (c) 2017 - ROLI Ltd.
 
   ==============================================================================
 */
@@ -20,13 +20,13 @@
 //[Headers] You can add your own extra header files here...
 //[/Headers]
 
-%%includeFilesCPP%%
+%%include_files_cpp%%
 
 //[MiscUserDefs] You can add your own user definitions and misc code here...
 //[/MiscUserDefs]
 
 //==============================================================================
-%%className%%::%%className%% (%%constructorParams%%)
+%%class_name%%::%%class_name%% (%%constructor_params%%)
 %%initialisers%%{
     //[Constructor_pre] You can add your own custom stuff here..
     //[/Constructor_pre]
@@ -37,7 +37,7 @@
     //[/Constructor]
 }
 
-%%className%%::~%%className%%()
+%%class_name%%::~%%class_name%%()
 {
     //[Destructor_pre]. You can add your own custom destruction code here..
     //[/Destructor_pre]
@@ -49,7 +49,7 @@
 }
 
 //==============================================================================
-%%methodDefinitions%%
+%%method_definitions%%
 
 //[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
 //[/MiscUserCode]
@@ -69,6 +69,6 @@ END_JUCER_METADATA
 */
 #endif
 
-%%staticMemberDefinitions%%
+%%static_member_definitions%%
 //[EndFile] You can add extra defines here...
 //[/EndFile]

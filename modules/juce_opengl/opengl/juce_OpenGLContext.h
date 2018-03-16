@@ -44,6 +44,8 @@ class OpenGLTexture;
     stop and the native resources to be freed safely.
 
     @see OpenGLRenderer
+
+    @tags{OpenGL}
 */
 class JUCE_API  OpenGLContext
 {

@@ -25,6 +25,8 @@ namespace juce
 
 /**
     Represents a status LED on a device.
+
+    @tags{Blocks}
 */
 class StatusLight
 {

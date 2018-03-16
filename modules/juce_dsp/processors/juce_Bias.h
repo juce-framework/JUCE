@@ -37,6 +37,8 @@ namespace dsp
 
     This is an extremely simple bias implementation that simply adds a value to a signal.
     More complicated bias behaviours exist in real circuits - for your homework ;).
+
+    @tags{DSP}
 */
 template <typename FloatType>
 class Bias
@@ -106,6 +108,16 @@ public:
 
         auto len         = inBlock.getNumSamples();
         auto numChannels = inBlock.getNumChannels();
+
+        if (context.isBypassed)
+        {
+            bias.skip (static_cast<int> (len));
+
+            if (context.usesSeparateInputAndOutputBlocks())
+                outBlock.copy (inBlock);
+
+            return;
+        }
 
         if (numChannels == 1)
         {

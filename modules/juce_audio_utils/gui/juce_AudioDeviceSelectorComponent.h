@@ -35,11 +35,11 @@ namespace juce
     Very easy to use - just create one of these and show it to the user.
 
     @see AudioDeviceManager
+
+    @tags{Audio}
 */
 class JUCE_API  AudioDeviceSelectorComponent  : public Component,
                                                 private ChangeListener,
-                                                private ComboBox::Listener,
-                                                private Button::Listener,
                                                 private Timer
 {
 public:
@@ -95,9 +95,6 @@ public:
 
 private:
     //==============================================================================
-    void buttonClicked (Button*) override;
-
-    //==============================================================================
     ScopedPointer<ComboBox> deviceTypeDropDown;
     ScopedPointer<Label> deviceTypeDropDownLabel;
     ScopedPointer<Component> audioDeviceSettingsComp;
@@ -114,7 +111,9 @@ private:
     ScopedPointer<Label> midiInputsLabel, midiOutputLabel;
     ScopedPointer<TextButton> bluetoothButton;
 
-    void comboBoxChanged (ComboBox*) override;
+    void handleBluetoothButton();
+    void updateDeviceType();
+    void updateMidiOutput();
     void changeListenerCallback (ChangeBroadcaster*) override;
     void updateAllControls();
 

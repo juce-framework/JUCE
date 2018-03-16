@@ -33,4 +33,3 @@ The %TouchSurface::Touch class contains member variables describing the postion,
 
 You will find multiple examples of using TouchSurfaces in the @ref example_applications pages.
 */
-

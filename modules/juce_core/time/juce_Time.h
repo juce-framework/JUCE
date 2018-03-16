@@ -30,6 +30,8 @@ namespace juce
     Internally, the time is stored at millisecond precision.
 
     @see RelativeTime
+
+    @tags{Core}
 */
 class JUCE_API  Time
 {
@@ -228,7 +230,7 @@ public:
         - %m  is replaced by the month as a decimal number [01,12].
         - %M  is replaced by the minute as a decimal number [00,59].
         - %p  is replaced by the locale's equivalent of either a.m. or p.m.
-        - %S  is replaced by the second as a decimal number [00,61].
+        - %S  is replaced by the second as a decimal number [00,60].
         - %U  is replaced by the week number of the year (Sunday as the first day of the week) as a decimal number [00,53].
         - %w  is replaced by the weekday as a decimal number [0,6], with 0 representing Sunday.
         - %W  is replaced by the week number of the year (Monday as the first day of the week) as a decimal number [00,53]. All days in a new year preceding the first Monday are considered to be in week 0.

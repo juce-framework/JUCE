@@ -58,38 +58,33 @@ struct AudioPluginAppWizard   : public NewProjectWizard
         File editorCppFile = getSourceFilesFolder().getChildFile ("PluginEditor.cpp");
         File editorHFile   = editorCppFile.withFileExtension (".h");
 
-        project.getProjectTypeValue() = ProjectType_AudioPlugin::getTypeName();
-        project.getShouldBuildStandalonePluginAsValue().setValue (true);
-
-        Project::Item sourceGroup (createSourceGroup (project));
-        project.getConfigFlag ("JUCE_QUICKTIME") = Project::configFlagDisabled; // disabled because it interferes with RTAS build on PC
+        project.setProjectType (ProjectType_AudioPlugin::getTypeName());
+        project.getProjectValue (Ids::buildStandalone) = true;
 
         setExecutableNameForAllTargets (project, File::createLegalFileName (appTitle));
 
         String appHeaders (CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), filterCppFile));
 
         String filterCpp = project.getFileTemplate ("jucer_AudioPluginFilterTemplate_cpp")
-                            .replace ("FILTERHEADERS", CodeHelpers::createIncludeStatement (filterHFile, filterCppFile)
+                            .replace ("%%filter_headers%%", CodeHelpers::createIncludeStatement (filterHFile, filterCppFile)
                                                             + newLine + CodeHelpers::createIncludeStatement (editorHFile, filterCppFile), false)
-                            .replace ("FILTERCLASSNAME", filterClassName, false)
-                            .replace ("EDITORCLASSNAME", editorClassName, false);
+                            .replace ("%%filter_class_name%%", filterClassName, false)
+                            .replace ("%%editor_class_name%%", editorClassName, false);
 
         String filterH = project.getFileTemplate ("jucer_AudioPluginFilterTemplate_h")
-                            .replace ("APPHEADERS", appHeaders, false)
-                            .replace ("FILTERCLASSNAME", filterClassName, false)
-                            .replace ("HEADERGUARD", CodeHelpers::makeHeaderGuardName (filterHFile), false);
+                            .replace ("%%app_headers%%", appHeaders, false)
+                            .replace ("%%filter_class_name%%", filterClassName, false);
 
         String editorCpp = project.getFileTemplate ("jucer_AudioPluginEditorTemplate_cpp")
-                            .replace ("EDITORCPPHEADERS", CodeHelpers::createIncludeStatement (filterHFile, filterCppFile)
+                            .replace ("%%editor_cpp_headers%%", CodeHelpers::createIncludeStatement (filterHFile, filterCppFile)
                                                                + newLine + CodeHelpers::createIncludeStatement (editorHFile, filterCppFile), false)
-                            .replace ("FILTERCLASSNAME", filterClassName, false)
-                            .replace ("EDITORCLASSNAME", editorClassName, false);
+                            .replace ("%%filter_class_name%%", filterClassName, false)
+                            .replace ("%%editor_class_name%%", editorClassName, false);
 
         String editorH = project.getFileTemplate ("jucer_AudioPluginEditorTemplate_h")
-                            .replace ("EDITORHEADERS", appHeaders + newLine + CodeHelpers::createIncludeStatement (filterHFile, filterCppFile), false)
-                            .replace ("FILTERCLASSNAME", filterClassName, false)
-                            .replace ("EDITORCLASSNAME", editorClassName, false)
-                            .replace ("HEADERGUARD", CodeHelpers::makeHeaderGuardName (editorHFile), false);
+                            .replace ("%%editor_headers%%", appHeaders + newLine + CodeHelpers::createIncludeStatement (filterHFile, filterCppFile), false)
+                            .replace ("%%filter_class_name%%", filterClassName, false)
+                            .replace ("%%editor_class_name%%", editorClassName, false);
 
         if (! FileHelpers::overwriteFileWithNewDataIfDifferent (filterCppFile, filterCpp))
             failedFiles.add (filterCppFile.getFullPathName());
@@ -102,6 +97,8 @@ struct AudioPluginAppWizard   : public NewProjectWizard
 
         if (! FileHelpers::overwriteFileWithNewDataIfDifferent (editorHFile, editorH))
             failedFiles.add (editorHFile.getFullPathName());
+
+        Project::Item sourceGroup (createSourceGroup (project));
 
         sourceGroup.addFileAtIndex (filterCppFile, -1, true);
         sourceGroup.addFileAtIndex (filterHFile,   -1, false);

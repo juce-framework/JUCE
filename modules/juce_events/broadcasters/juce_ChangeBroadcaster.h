@@ -28,6 +28,8 @@ namespace juce
     Holds a list of ChangeListeners, and sends messages to them when instructed.
 
     @see ChangeListener
+
+    @tags{Events}
 */
 class JUCE_API  ChangeBroadcaster
 {

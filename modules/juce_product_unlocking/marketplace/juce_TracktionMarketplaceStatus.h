@@ -36,6 +36,8 @@ namespace juce
     implement all the pure virtual methods to tell it about your product.
 
     @see OnlineUnlockStatus, OnlineUnlockForm, KeyGeneration
+
+    @tags{ProductUnlocking}
 */
 class JUCE_API  TracktionMarketplaceStatus   : public OnlineUnlockStatus
 {
@@ -50,8 +52,13 @@ public:
     String getWebsiteName() override;
     /** @internal */
     String readReplyFromWebserver (const String& email, const String& password) override;
+    /** @internal */
+    void userCancelled() override;
 
 private:
+    CriticalSection streamCreationLock;
+    ScopedPointer<WebInputStream> stream;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TracktionMarketplaceStatus)
 };
 

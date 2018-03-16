@@ -28,6 +28,8 @@ namespace juce
     An output stream that writes into a local file.
 
     @see OutputStream, FileInputStream, File::createOutputStream
+
+    @tags{Core}
 */
 class JUCE_API  FileOutputStream  : public OutputStream
 {
@@ -94,10 +96,10 @@ public:
 private:
     //==============================================================================
     File file;
-    void* fileHandle;
-    Result status;
-    int64 currentPosition;
-    size_t bufferSize, bytesInBuffer;
+    void* fileHandle = nullptr;
+    Result status { Result::ok() };
+    int64 currentPosition = 0;
+    size_t bufferSize, bytesInBuffer = 0;
     HeapBlock<char> buffer;
 
     void openHandle();

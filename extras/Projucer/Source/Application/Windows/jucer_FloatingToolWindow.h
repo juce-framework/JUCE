@@ -57,7 +57,7 @@ struct FloatingToolWindow  : public DialogWindow
             centreAroundComponent (Component::getCurrentlyFocusedComponent(), defaultW, defaultH);
 
         setVisible (true);
-        owner = this;
+        owner.reset (this);
     }
 
     ~FloatingToolWindow()
@@ -68,7 +68,7 @@ struct FloatingToolWindow  : public DialogWindow
 
     void closeButtonPressed() override
     {
-        owner = nullptr;
+        owner.reset();
     }
 
     bool escapeKeyPressed() override

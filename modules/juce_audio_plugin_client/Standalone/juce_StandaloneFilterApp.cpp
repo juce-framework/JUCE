@@ -87,6 +87,11 @@ public:
                                            false, {}, nullptr
                                           #ifdef JucePlugin_PreferredChannelConfigurations
                                            , juce::Array<StandalonePluginHolder::PluginInOuts> (channels, juce::numElementsInArray (channels))
+                                          #else
+                                           , {}
+                                          #endif
+                                          #if JUCE_DONT_AUTO_OPEN_MIDI_DEVICES_ON_MOBILE
+                                           , false
                                           #endif
                                            );
     }
@@ -96,7 +101,7 @@ public:
     {
         mainWindow = createWindow();
 
-       #if JUCE_IOS || JUCE_ANDROID
+       #if JUCE_STANDALONE_FILTER_WINDOW_USE_KIOSK_MODE
         Desktop::getInstance().setKioskModeComponent (mainWindow, false);
        #endif
 
@@ -121,7 +126,9 @@ public:
             });
         }
         else
+        {
             quit();
+        }
     }
 
 protected:

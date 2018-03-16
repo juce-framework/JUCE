@@ -35,6 +35,8 @@ namespace juce
     This class allows different types of text editor component to provide a uniform
     interface, which can be used by things like OS-specific input methods, on-screen
     keyboards, etc.
+
+    @tags{GUI}
 */
 class JUCE_API  TextInputTarget
 {

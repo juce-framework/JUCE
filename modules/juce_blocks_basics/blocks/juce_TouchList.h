@@ -30,6 +30,8 @@ namespace juce
 
     The Type template is a user-defined type of object that will be stored for
     each touch element. The type must be default-constructable and copyable.
+
+    @tags{Blocks}
 */
 template <typename Type>
 class TouchList
@@ -106,7 +108,7 @@ public:
     /** If a touch is in the list, returns a pointer to the TouchEntry.
         Otherwise, returns nullptr.
     */
-    TouchEntry* find (const TouchSurface::Touch& touch) const noexcept
+    const TouchEntry* find (const TouchSurface::Touch& touch) const noexcept
     {
         for (auto& t : touches)
             if (matches (t.touch, touch))
@@ -115,17 +117,24 @@ public:
         return nullptr;
     }
 
-    /** Allows iterator access to the list of touch entries. */
-    TouchEntry* begin() const noexcept      { return touches.begin(); }
+    TouchEntry* find (const TouchSurface::Touch& touch) noexcept
+    {
+        return const_cast<TouchEntry*> (static_cast<const TouchList&> (*this).find (touch));
+    }
 
     /** Allows iterator access to the list of touch entries. */
-    TouchEntry* end() const noexcept        { return touches.end(); }
+    TouchEntry* begin() noexcept               { return touches.begin(); }
+    const TouchEntry* begin() const noexcept   { return touches.begin(); }
+
+    /** Allows iterator access to the list of touch entries. */
+    TouchEntry* end() noexcept                 { return touches.end(); }
+    const TouchEntry* end() const noexcept     { return touches.end(); }
 
     /** Retrieve a reference to particular item in the list of touch entires. */
-    TouchEntry& operator[] (const int index) { return touches.getReference (index); }
+    TouchEntry& operator[] (const int index)   { return touches.getReference (index); }
 
     /** Resets all contents, doest not generate any call-backs. */
-    void clear() noexcept                   { touches.clear(); }
+    void clear() noexcept                      { touches.clear(); }
 
 private:
     //==========================================================================

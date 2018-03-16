@@ -87,19 +87,19 @@ void Thread::launchThread()
 
 void Thread::closeThreadHandle()
 {
-    CloseHandle ((HANDLE) threadHandle);
+    CloseHandle ((HANDLE) threadHandle.get());
     threadId = 0;
     threadHandle = 0;
 }
 
 void Thread::killThread()
 {
-    if (threadHandle != 0)
+    if (threadHandle.get() != 0)
     {
        #if JUCE_DEBUG
         OutputDebugStringA ("** Warning - Forced thread termination **\n");
        #endif
-        TerminateThread (threadHandle, 0);
+        TerminateThread (threadHandle.get(), 0);
     }
 }
 
@@ -380,10 +380,10 @@ bool InterProcessLock::enter (const int timeOutMillisecs)
 
     if (pimpl == nullptr)
     {
-        pimpl = new Pimpl (name, timeOutMillisecs);
+        pimpl.reset (new Pimpl (name, timeOutMillisecs));
 
         if (pimpl->handle == 0)
-            pimpl = nullptr;
+            pimpl.reset();
     }
     else
     {
@@ -401,7 +401,7 @@ void InterProcessLock::exit()
     jassert (pimpl != nullptr);
 
     if (pimpl != nullptr && --(pimpl->refCount) == 0)
-        pimpl = nullptr;
+        pimpl.reset();
 }
 
 //==============================================================================

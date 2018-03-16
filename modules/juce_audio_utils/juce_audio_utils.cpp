@@ -39,10 +39,7 @@
 #define JUCE_CORE_INCLUDE_COM_SMART_PTR 1
 
 #include "juce_audio_utils.h"
-
-#if JUCE_MODULE_AVAILABLE_juce_gui_extra
- #include <juce_gui_extra/juce_gui_extra.h>
-#endif
+#include <juce_gui_extra/juce_gui_extra.h>
 
 #if JUCE_MAC
   #import <DiscRecording/DiscRecording.h>

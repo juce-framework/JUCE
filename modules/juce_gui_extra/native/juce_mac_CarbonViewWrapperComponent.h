@@ -33,6 +33,8 @@ namespace juce
 
     This is a handy class that's designed to be inlined where needed, e.g.
     in the audio plugin hosting code.
+
+    @tags{GUI}
 */
 class CarbonViewWrapperComponent  : public Component,
                                     public ComponentMovementWatcher,

@@ -47,7 +47,7 @@ Array<JNIClassBase*>& JNIClassBase::getClasses()
 
 void JNIClassBase::initialise (JNIEnv* env)
 {
-    classRef = (jclass) env->NewGlobalRef (env->FindClass (classPath));
+    classRef = (jclass) env->NewGlobalRef (LocalRef<jobject> (env->FindClass (classPath)));
     jassert (classRef != 0);
 
     initialiseFields (env);
@@ -133,9 +133,14 @@ LocalRef<jobject> CreateJavaInterface (AndroidInterfaceImplementer* implementer,
         }
     }
 
-    auto invocationHandler = LocalRef<jobject> (env->CallStaticObjectMethod (JuceAppActivity,
-                                                                             JuceAppActivity.createInvocationHandler,
-                                                                             reinterpret_cast<jlong> (implementer)));
+    auto invocationHandler = LocalRef<jobject> (env->CallObjectMethod (android.activity,
+                                                                       JuceAppActivity.createInvocationHandler,
+                                                                       reinterpret_cast<jlong> (implementer)));
+
+    // CreateJavaInterface() is expected to be called just once for a given implementer
+    jassert (implementer->invocationHandler == nullptr);
+
+    implementer->invocationHandler = GlobalRef (invocationHandler);
 
     return LocalRef<jobject> (env->CallStaticObjectMethod (JavaProxy, JavaProxy.newProxyInstance,
                                                            classLoader.get(), classArray.get(),
@@ -156,10 +161,19 @@ LocalRef<jobject> CreateJavaInterface (AndroidInterfaceImplementer* implementer,
     return CreateJavaInterface (implementer, StringArray (interfaceName));
 }
 
+AndroidInterfaceImplementer::~AndroidInterfaceImplementer()
+
+{
+    if (invocationHandler != nullptr)
+        getEnv()->CallVoidMethod (android.activity,
+                                  JuceAppActivity.invocationHandlerContextDeleted,
+                                  invocationHandler.get());
+}
+
 jobject AndroidInterfaceImplementer::invoke (jobject /*proxy*/, jobject method, jobjectArray args)
 {
     auto* env = getEnv();
-    return env->CallObjectMethod (method, Method.invoke, javaSubClass.get(), args);
+    return env->CallObjectMethod (method, JavaMethod.invoke, javaSubClass.get(), args);
 }
 
 jobject juce_invokeImplementer (JNIEnv* env, jlong thisPtr, jobject proxy, jobject method, jobjectArray args)
@@ -364,6 +378,11 @@ String SystemStats::getDeviceDescription()
 {
     return AndroidStatsHelpers::getAndroidOsBuildValue ("MODEL")
             + "-" + AndroidStatsHelpers::getAndroidOsBuildValue ("SERIAL");
+}
+
+String SystemStats::getDeviceManufacturer()
+{
+    return AndroidStatsHelpers::getAndroidOsBuildValue ("MANUFACTURER");
 }
 
 bool SystemStats::isOperatingSystem64Bit()

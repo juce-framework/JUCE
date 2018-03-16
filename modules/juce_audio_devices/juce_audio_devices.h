@@ -31,7 +31,7 @@
 
   ID:               juce_audio_devices
   vendor:           juce
-  version:          5.2.0
+  version:          5.3.0
   name:             JUCE audio and MIDI I/O device classes
   description:      Classes to play and record from audio and MIDI I/O devices
   website:          http://www.juce.com/juce
@@ -108,11 +108,31 @@
  #define JUCE_JACK 0
 #endif
 
+/** Config: JUCE_USE_ANDROID_OBOE
+    ***
+    DEVELOPER PREVIEW - Oboe is currently in developer preview and
+    is in active development. This preview allows for early access
+    and evaluation for developers targeting Android platform.
+    ***
+
+    Enables Oboe devices (Android only, API 16 or above). Requires
+    Oboe repository path to be specified in Android exporter.
+*/
+
+#ifndef JUCE_USE_ANDROID_OBOE
+ #define JUCE_USE_ANDROID_OBOE 0
+#endif
+
+#if JUCE_USE_ANDROID_OBOE && JUCE_ANDROID_API_VERSION < 16
+ #undef JUCE_USE_ANDROID_OBOE
+ #define JUCE_USE_ANDROID_OBOE 0
+#endif
+
 /** Config: JUCE_USE_ANDROID_OPENSLES
     Enables OpenSLES devices (Android only).
 */
 #ifndef JUCE_USE_ANDROID_OPENSLES
- #if JUCE_ANDROID_API_VERSION > 8
+ #if ! JUCE_USE_ANDROID_OBOE && JUCE_ANDROID_API_VERSION >= 9
   #define JUCE_USE_ANDROID_OPENSLES 1
  #else
   #define JUCE_USE_ANDROID_OPENSLES 0
@@ -138,6 +158,13 @@
  #define JUCE_USE_WINRT_MIDI 0
 #endif
 
+/** Config: JUCE_DISABLE_AUDIO_MIXING_WITH_OTHER_APPS
+    Turning this on gives your app exclusive access to the system's audio
+    on platforms which support it (currently iOS only).
+*/
+#ifndef JUCE_DISABLE_AUDIO_MIXING_WITH_OTHER_APPS
+ #define JUCE_DISABLE_AUDIO_MIXING_WITH_OTHER_APPS 0
+#endif
 
 //==============================================================================
 #include "midi_io/juce_MidiInput.h"

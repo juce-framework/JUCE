@@ -35,6 +35,8 @@ namespace juce
     a brush type. It can either be a solid colour, a gradient, or a tiled image.
 
     @see Graphics::setFillType, DrawablePath::setFill
+
+    @tags{Graphics}
 */
 class JUCE_API  FillType  final
 {
@@ -52,6 +54,11 @@ public:
         @see setGradient
     */
     FillType (const ColourGradient& gradient);
+
+    /** Creates a gradient fill type.
+        @see setGradient
+    */
+    FillType (ColourGradient&& gradient);
 
     /** Creates a tiled image fill type. The transform allows you to set the scaling, offset
         and rotation of the pattern.

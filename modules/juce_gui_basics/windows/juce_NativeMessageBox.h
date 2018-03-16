@@ -30,6 +30,8 @@ namespace juce
 //==============================================================================
 /**
     This class contains some static methods for showing native alert windows.
+
+    @tags{GUI}
 */
 class NativeMessageBox
 {
@@ -213,7 +215,7 @@ public:
                                           #endif
 
 private:
-    NativeMessageBox() JUCE_DELETED_FUNCTION;
+    NativeMessageBox() = delete;
     JUCE_DECLARE_NON_COPYABLE (NativeMessageBox)
 };
 

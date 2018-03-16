@@ -196,7 +196,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
     {
         if (! [SKPaymentQueue canMakePayments])
         {
-            owner.listeners.call (&Listener::productPurchaseFinished, {}, false, NEEDS_TRANS ("Payments not allowed"));
+            owner.listeners.call ([&] (Listener& l) { l.productPurchaseFinished ({}, false, NEEDS_TRANS ("Payments not allowed")); });
             return;
         }
 
@@ -299,8 +299,8 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
 
                 if (pendingRequest.request == receiptRefreshRequest)
                 {
-                    auto errorDetails = error != nil ? (", " + nsStringToJuce ([error localizedDescription])) : String ("");
-                    owner.listeners.call (&Listener::purchasesListRestored, {}, false, NEEDS_TRANS ("Receipt fetch failed") + errorDetails);
+                    auto errorDetails = error != nil ? (", " + nsStringToJuce ([error localizedDescription])) : String();
+                    owner.listeners.call ([&] (Listener& l) { l.purchasesListRestored ({}, false, NEEDS_TRANS ("Receipt fetch failed") + errorDetails); });
                     pendingReceiptRefreshRequests.remove (i);
                     return;
                 }
@@ -326,12 +326,12 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
 
     void restoreCompletedTransactionsFailedWithError (SKPaymentQueue*, NSError* error) override
     {
-        owner.listeners.call (&Listener::purchasesListRestored, {}, false, nsStringToJuce (error.localizedDescription));
+        owner.listeners.call ([&] (Listener& l) { l.purchasesListRestored ({}, false, nsStringToJuce (error.localizedDescription)); });
     }
 
     void restoreCompletedTransactionsFinished (SKPaymentQueue*) override
     {
-        owner.listeners.call (&Listener::purchasesListRestored, restoredPurchases, true, NEEDS_TRANS ("Success"));
+        owner.listeners.call ([this] (Listener& l) { l.purchasesListRestored (restoredPurchases, true, NEEDS_TRANS ("Success")); });
         restoredPurchases.clear();
     }
 
@@ -348,9 +348,10 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
               #endif
                 {
                     case SKDownloadStateWaiting: break;
-                    case SKDownloadStatePaused:  owner.listeners.call (&Listener::productDownloadPaused, *pendingDownload); break;
-                    case SKDownloadStateActive:  owner.listeners.call (&Listener::productDownloadProgressUpdate, *pendingDownload,
-                                                                       download.progress, RelativeTime (download.timeRemaining)); break;
+                    case SKDownloadStatePaused:  owner.listeners.call ([&] (Listener& l) { l.productDownloadPaused (*pendingDownload); }); break;
+                    case SKDownloadStateActive:  owner.listeners.call ([&] (Listener& l) { l.productDownloadProgressUpdate (*pendingDownload,
+                                                                                                                            download.progress,
+                                                                                                                            RelativeTime (download.timeRemaining)); }); break;
                     case SKDownloadStateFinished:
                     case SKDownloadStateFailed:
                     case SKDownloadStateCancelled: processDownloadFinish (pendingDownload, download); break;
@@ -369,7 +370,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
         for (SKProduct* skProduct in products)
             productsToReturn.add (SKProductToIAPProduct (skProduct));
 
-        owner.listeners.call (&Listener::productsInfoReturned, productsToReturn);
+        owner.listeners.call ([&] (Listener& l) { l.productsInfoReturned (productsToReturn); });
     }
 
     void startPurchase (NSArray<SKProduct*>* products)
@@ -385,8 +386,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
         }
         else
         {
-            owner.listeners.call (&Listener::productPurchaseFinished, {}, false,
-                                  NEEDS_TRANS ("Your app is not setup for payments"));
+            owner.listeners.call ([] (Listener& l) { l.productPurchaseFinished ({}, false, NEEDS_TRANS ("Your app is not setup for payments")); });
         }
     }
 
@@ -464,8 +464,8 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
         if (transaction.transactionState == SKPaymentTransactionStateRestored)
             restoredPurchases.add ({ purchase, downloads });
         else
-            owner.listeners.call (&Listener::productPurchaseFinished, { purchase, downloads }, success,
-                                  SKPaymentTransactionStateToString (transaction.transactionState));
+            owner.listeners.call ([&] (Listener& l) { l.productPurchaseFinished ({ purchase, downloads }, success,
+                                                                                 SKPaymentTransactionStateToString (transaction.transactionState)); });
     }
 
     PendingDownloadsTransaction* getPendingDownloadsTransactionForSKTransaction (SKPaymentTransaction* transaction)
@@ -514,7 +514,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
                                 ? URL (nsStringToJuce (download.contentURL.absoluteString))
                                 : URL();
 
-            owner.listeners.call (&Listener::productDownloadFinished, *pendingDownload, contentURL);
+            owner.listeners.call ([&] (Listener& l) { l.productDownloadFinished (*pendingDownload, contentURL); });
 
             if (pdt->canBeMarkedAsFinished())
             {
@@ -534,7 +534,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
         if (auto* receiptData = [NSData dataWithContentsOfURL: receiptURL])
             fetchReceiptDetailsFromAppStore (receiptData, secret);
         else
-            owner.listeners.call (&Listener::purchasesListRestored, {}, false, NEEDS_TRANS ("Receipt fetch failed"));
+            owner.listeners.call ([&] (Listener& l) { l.purchasesListRestored ({}, false, NEEDS_TRANS ("Receipt fetch failed")); });
     }
 
     void fetchReceiptDetailsFromAppStore (NSData* receiptData, const String& secret)
@@ -551,7 +551,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
                                                               error: &error];
         if (requestData == nil)
         {
-            owner.listeners.call (&Listener::purchasesListRestored, {}, false, NEEDS_TRANS ("Receipt fetch failed"));
+            sendReceiptFetchFail();
             return;
         }
 
@@ -572,7 +572,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
                                                         {
                                                             if (connectionError != nil)
                                                             {
-                                                                owner.listeners.call (&Listener::purchasesListRestored, {}, false, NEEDS_TRANS ("Receipt fetch failed"));
+                                                                sendReceiptFetchFail();
                                                             }
                                                             else
                                                             {
@@ -581,7 +581,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
                                                                 if (NSDictionary* receiptDetails = [NSJSONSerialization JSONObjectWithData: data options: 0 error: &err])
                                                                     processReceiptDetails (receiptDetails);
                                                                 else
-                                                                    owner.listeners.call (&Listener::purchasesListRestored, {}, false, NEEDS_TRANS ("Receipt fetch failed"));
+                                                                    sendReceiptFetchFail();
                                                             }
                                                         }];
 
@@ -622,31 +622,34 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
                                     }
                                     else
                                     {
-                                        return sendReceiptFetchFail();
+                                        return sendReceiptFetchFailAsync();
                                     }
                                 }
                             }
                         }
                         else
                         {
-                            return sendReceiptFetchFail();
+                            return sendReceiptFetchFailAsync();
                         }
                     }
 
-                    MessageManager::callAsync ([this, purchases]() { owner.listeners.call (&Listener::purchasesListRestored,
-                                                                                           purchases, true, NEEDS_TRANS ("Success")); });
+                    MessageManager::callAsync ([this, purchases] { owner.listeners.call ([&] (Listener& l) { l.purchasesListRestored (purchases, true, NEEDS_TRANS ("Success")); }); });
                     return;
                 }
             }
         }
 
-        sendReceiptFetchFail();
+        sendReceiptFetchFailAsync();
     }
 
     void sendReceiptFetchFail()
     {
-        MessageManager::callAsync ([this]() { owner.listeners.call (&Listener::purchasesListRestored,
-                                                                    {}, false, NEEDS_TRANS ("Receipt fetch failed")); });
+        owner.listeners.call ([] (Listener& l) { l.purchasesListRestored ({}, false, NEEDS_TRANS ("Receipt fetch failed")); });
+    }
+
+    void sendReceiptFetchFailAsync()
+    {
+        MessageManager::callAsync ([this] { sendReceiptFetchFail(); });
     }
 
     static int64 getPurchaseDateMs (id date)

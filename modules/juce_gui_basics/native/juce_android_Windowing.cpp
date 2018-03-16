@@ -44,6 +44,12 @@ namespace juce
  extern void juce_inAppPurchaseCompleted (void*);
 #endif
 
+#if ! JUCE_DISABLE_NATIVE_FILECHOOSERS
+ extern void juce_fileChooserCompleted (int, void*);
+#endif
+
+extern void juce_contentSharingCompleted (int);
+
 //==============================================================================
 JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, launchApp, void, (JNIEnv* env, jobject activity,
                                                                       jstring appFile, jstring appDataDir))
@@ -75,7 +81,7 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, suspendApp, void, (JNIEnv* e
 {
     setEnv (env);
 
-    if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
+    if (auto* app = JUCEApplicationBase::getInstance())
         app->suspended();
 }
 
@@ -83,7 +89,7 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, resumeApp, void, (JNIEnv* en
 {
     setEnv (env);
 
-    if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
+    if (auto* app = JUCEApplicationBase::getInstance())
         app->resumed();
 }
 
@@ -94,18 +100,30 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, quitApp, void, (JNIEnv* env,
     JUCEApplicationBase::appWillTerminateByForce();
 
     android.shutdown (env);
+
+    jclass systemClass = (jclass) env->FindClass ("java/lang/System");
+    jmethodID exitMethod = env->GetStaticMethodID (systemClass, "exit", "(I)V");
+    env->CallStaticVoidMethod (systemClass, exitMethod, 0);
 }
 
-JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, appActivityResult, void, (JNIEnv* env, jobject, jint requestCode, jint /*resultCode*/, jobject intentData))
+JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, appActivityResult, void, (JNIEnv* env, jobject, jint requestCode, jint resultCode, jobject intentData))
 {
     setEnv (env);
 
    #if JUCE_IN_APP_PURCHASES && JUCE_MODULE_AVAILABLE_juce_product_unlocking
     if (requestCode == 1001)
         juce_inAppPurchaseCompleted (intentData);
-   #else
-    ignoreUnused (intentData, requestCode);
    #endif
+
+   #if ! JUCE_DISABLE_NATIVE_FILECHOOSERS
+    if (requestCode == /*READ_REQUEST_CODE*/42)
+        juce_fileChooserCompleted (resultCode, intentData);
+   #endif
+
+    if (requestCode == 1003)
+        juce_contentSharingCompleted (resultCode);
+
+    ignoreUnused (intentData, requestCode);
 }
 
 JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, appNewIntent, void, (JNIEnv* env, jobject, jobject intentData))
@@ -187,22 +205,12 @@ DECLARE_JNI_CLASS (CanvasMinimal, "android/graphics/Canvas");
 
 //==============================================================================
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
- METHOD (setViewName,   "setViewName",      "(Ljava/lang/String;)V") \
- METHOD (layout,        "layout",           "(IIII)V") \
- METHOD (getLeft,       "getLeft",          "()I") \
- METHOD (getTop,        "getTop",           "()I") \
- METHOD (getWidth,      "getWidth",         "()I") \
- METHOD (getHeight,     "getHeight",        "()I") \
- METHOD (getLocationOnScreen, "getLocationOnScreen", "([I)V") \
- METHOD (bringToFront,  "bringToFront",     "()V") \
- METHOD (requestFocus,  "requestFocus",     "()Z") \
- METHOD (setVisible,    "setVisible",       "(Z)V") \
- METHOD (isVisible,     "isVisible",        "()Z") \
- METHOD (hasFocus,      "hasFocus",         "()Z") \
- METHOD (invalidate,    "invalidate",       "(IIII)V") \
- METHOD (containsPoint, "containsPoint",    "(II)Z") \
- METHOD (showKeyboard,  "showKeyboard",     "(Ljava/lang/String;)V") \
- METHOD (setSystemUiVisibility, "setSystemUiVisibilityCompat", "(I)V") \
+ METHOD (setViewName,                 "setViewName",                 "(Ljava/lang/String;)V") \
+ METHOD (setVisible,                  "setVisible",                  "(Z)V") \
+ METHOD (isVisible,                   "isVisible",                   "()Z") \
+ METHOD (containsPoint,               "containsPoint",               "(II)Z") \
+ METHOD (showKeyboard,                "showKeyboard",                "(Ljava/lang/String;)V") \
+ METHOD (setSystemUiVisibilityCompat, "setSystemUiVisibilityCompat", "(I)V") \
 
 DECLARE_JNI_CLASS (ComponentPeerView, JUCE_ANDROID_ACTIVITY_CLASSPATH "$ComponentPeerView");
 #undef JNI_CLASS_MEMBERS
@@ -302,7 +310,7 @@ public:
         if (MessageManager::getInstance()->isThisTheMessageThread())
         {
             fullScreen = isNowFullScreen;
-            view.callVoidMethod (ComponentPeerView.layout,
+            view.callVoidMethod (AndroidView.layout,
                                  r.getX(), r.getY(), r.getRight(), r.getBottom());
         }
         else
@@ -314,7 +322,7 @@ public:
 
                 void messageCallback() override
                 {
-                    view.callVoidMethod (ComponentPeerView.layout,
+                    view.callVoidMethod (AndroidView.layout,
                                          bounds.getX(), bounds.getY(), bounds.getRight(), bounds.getBottom());
                 }
 
@@ -329,10 +337,10 @@ public:
 
     Rectangle<int> getBounds() const override
     {
-        return (Rectangle<float> (view.callIntMethod (ComponentPeerView.getLeft),
-                                  view.callIntMethod (ComponentPeerView.getTop),
-                                  view.callIntMethod (ComponentPeerView.getWidth),
-                                  view.callIntMethod (ComponentPeerView.getHeight)) / scale).toNearestInt();
+        return (Rectangle<float> (view.callIntMethod (AndroidView.getLeft),
+                                  view.callIntMethod (AndroidView.getTop),
+                                  view.callIntMethod (AndroidView.getWidth),
+                                  view.callIntMethod (AndroidView.getHeight)) / scale).toNearestInt();
     }
 
     void handleScreenSizeChange() override
@@ -345,8 +353,8 @@ public:
 
     Point<float> getScreenPosition() const
     {
-        return Point<float> (view.callIntMethod (ComponentPeerView.getLeft),
-                             view.callIntMethod (ComponentPeerView.getTop)) / scale;
+        return Point<float> (view.callIntMethod (AndroidView.getLeft),
+                             view.callIntMethod (AndroidView.getTop)) / scale;
     }
 
     Point<float> localToGlobal (Point<float> relativePosition) override
@@ -393,7 +401,7 @@ public:
             SYSTEM_UI_FLAG_IMMERSIVE_STICKY         = 4096
         };
 
-        view.callVoidMethod (ComponentPeerView.setSystemUiVisibility,
+        view.callVoidMethod (ComponentPeerView.setSystemUiVisibilityCompat,
                              hidden ? (jint) (SYSTEM_UI_FLAG_HIDE_NAVIGATION | SYSTEM_UI_FLAG_FULLSCREEN | SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
                                     : (jint) (SYSTEM_UI_FLAG_VISIBLE));
 
@@ -471,7 +479,7 @@ public:
         // Avoid calling bringToFront excessively: it's very slow
         if (frontWindow != this)
         {
-            view.callVoidMethod (ComponentPeerView.bringToFront);
+            view.callVoidMethod (AndroidView.bringToFront);
 
             frontWindow = this;
         }
@@ -539,15 +547,31 @@ public:
 
     void handleBackButtonCallback()
     {
-        if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
+        if (auto* app = JUCEApplicationBase::getInstance())
             app->backButtonPressed();
+
+        if (Component* kiosk = Desktop::getInstance().getKioskModeComponent())
+            if (kiosk->getPeer() == this)
+                setNavBarsHidden (navBarsHidden);
+    }
+
+    void handleKeyboardHiddenCallback()
+    {
+        Component::unfocusAllComponents();
+    }
+
+    void handleAppResumedCallback()
+    {
+        if (Component* kiosk = Desktop::getInstance().getKioskModeComponent())
+            if (kiosk->getPeer() == this)
+                setNavBarsHidden (navBarsHidden);
     }
 
     //==============================================================================
     bool isFocused() const override
     {
         if (view != nullptr)
-            return view.callBooleanMethod (ComponentPeerView.hasFocus);
+            return view.callBooleanMethod (AndroidView.hasFocus);
 
         return false;
     }
@@ -555,7 +579,7 @@ public:
     void grabFocus() override
     {
         if (view != nullptr)
-            view.callBooleanMethod (ComponentPeerView.requestFocus);
+            view.callBooleanMethod (AndroidView.requestFocus);
     }
 
     void handleFocusChangeCallback (bool hasFocus)
@@ -591,16 +615,25 @@ public:
     void dismissPendingTextInput() override
     {
         view.callVoidMethod (ComponentPeerView.showKeyboard, javaString ("").get());
+
+        // updating the nav bar visibility is a bit odd on Android - need to wait for
+        if (! isTimerRunning())
+            hideNavBarDelayed();
      }
+
+    void hideNavBarDelayed()
+    {
+        startTimer (500);
+    }
 
     //==============================================================================
     void handlePaintCallback (JNIEnv* env, jobject canvas, jobject paint)
     {
         jobject rect = env->CallObjectMethod (canvas, CanvasMinimal.getClipBounds);
-        const int left   = env->GetIntField (rect, RectClass.left);
-        const int top    = env->GetIntField (rect, RectClass.top);
-        const int right  = env->GetIntField (rect, RectClass.right);
-        const int bottom = env->GetIntField (rect, RectClass.bottom);
+        const int left   = env->GetIntField (rect, AndroidRectClass.left);
+        const int top    = env->GetIntField (rect, AndroidRectClass.top);
+        const int right  = env->GetIntField (rect, AndroidRectClass.right);
+        const int bottom = env->GetIntField (rect, AndroidRectClass.bottom);
         env->DeleteLocalRef (rect);
 
         const Rectangle<int> clip (left, top, right - left, bottom - top);
@@ -645,7 +678,7 @@ public:
 
         if (MessageManager::getInstance()->isThisTheMessageThread())
         {
-            view.callVoidMethod (ComponentPeerView.invalidate, area.getX(), area.getY(), area.getRight(), area.getBottom());
+            view.callVoidMethod (AndroidView.invalidate, area.getX(), area.getY(), area.getRight(), area.getBottom());
         }
         else
         {
@@ -656,7 +689,7 @@ public:
 
                 void messageCallback() override
                 {
-                    view.callVoidMethod (ComponentPeerView.invalidate, area.getX(), area.getY(),
+                    view.callVoidMethod (AndroidView.invalidate, area.getX(), area.getY(),
                                          area.getRight(), area.getBottom());
                 }
 
@@ -767,15 +800,17 @@ AndroidComponentPeer* AndroidComponentPeer::frontWindow = nullptr;
           peer->juceMethodInvocation; \
   }
 
-JUCE_VIEW_CALLBACK (void, handlePaint,      (JNIEnv* env, jobject /*view*/, jlong host, jobject canvas, jobject paint),                          handlePaintCallback (env, canvas, paint))
-JUCE_VIEW_CALLBACK (void, handleMouseDown,  (JNIEnv* env, jobject /*view*/, jlong host, jint i, jfloat x, jfloat y, jlong time),  handleMouseDownCallback (i, Point<float> ((float) x, (float) y), (int64) time))
-JUCE_VIEW_CALLBACK (void, handleMouseDrag,  (JNIEnv* env, jobject /*view*/, jlong host, jint i, jfloat x, jfloat y, jlong time),  handleMouseDragCallback (i, Point<float> ((float) x, (float) y), (int64) time))
-JUCE_VIEW_CALLBACK (void, handleMouseUp,    (JNIEnv* env, jobject /*view*/, jlong host, jint i, jfloat x, jfloat y, jlong time),  handleMouseUpCallback   (i, Point<float> ((float) x, (float) y), (int64) time))
-JUCE_VIEW_CALLBACK (void, viewSizeChanged,  (JNIEnv* env, jobject /*view*/, jlong host),                                          handleMovedOrResized())
-JUCE_VIEW_CALLBACK (void, focusChanged,     (JNIEnv* env, jobject /*view*/, jlong host, jboolean hasFocus),                       handleFocusChangeCallback (hasFocus))
-JUCE_VIEW_CALLBACK (void, handleKeyDown,    (JNIEnv* env, jobject /*view*/, jlong host, jint k, jint kc),                         handleKeyDownCallback ((int) k, (int) kc))
-JUCE_VIEW_CALLBACK (void, handleKeyUp,      (JNIEnv* env, jobject /*view*/, jlong host, jint k, jint kc),                         handleKeyUpCallback ((int) k, (int) kc))
-JUCE_VIEW_CALLBACK (void, handleBackButton, (JNIEnv* env, jobject /*view*/, jlong host),                                          handleBackButtonCallback())
+JUCE_VIEW_CALLBACK (void, handlePaint,          (JNIEnv* env, jobject /*view*/, jlong host, jobject canvas, jobject paint),                          handlePaintCallback (env, canvas, paint))
+JUCE_VIEW_CALLBACK (void, handleMouseDown,      (JNIEnv* env, jobject /*view*/, jlong host, jint i, jfloat x, jfloat y, jlong time),  handleMouseDownCallback (i, Point<float> ((float) x, (float) y), (int64) time))
+JUCE_VIEW_CALLBACK (void, handleMouseDrag,      (JNIEnv* env, jobject /*view*/, jlong host, jint i, jfloat x, jfloat y, jlong time),  handleMouseDragCallback (i, Point<float> ((float) x, (float) y), (int64) time))
+JUCE_VIEW_CALLBACK (void, handleMouseUp,        (JNIEnv* env, jobject /*view*/, jlong host, jint i, jfloat x, jfloat y, jlong time),  handleMouseUpCallback   (i, Point<float> ((float) x, (float) y), (int64) time))
+JUCE_VIEW_CALLBACK (void, viewSizeChanged,      (JNIEnv* env, jobject /*view*/, jlong host),                                          handleMovedOrResized())
+JUCE_VIEW_CALLBACK (void, focusChanged,         (JNIEnv* env, jobject /*view*/, jlong host, jboolean hasFocus),                       handleFocusChangeCallback (hasFocus))
+JUCE_VIEW_CALLBACK (void, handleKeyDown,        (JNIEnv* env, jobject /*view*/, jlong host, jint k, jint kc),                         handleKeyDownCallback ((int) k, (int) kc))
+JUCE_VIEW_CALLBACK (void, handleKeyUp,          (JNIEnv* env, jobject /*view*/, jlong host, jint k, jint kc),                         handleKeyUpCallback ((int) k, (int) kc))
+JUCE_VIEW_CALLBACK (void, handleBackButton,     (JNIEnv* env, jobject /*view*/, jlong host),                                          handleBackButtonCallback())
+JUCE_VIEW_CALLBACK (void, handleKeyboardHidden, (JNIEnv* env, jobject /*view*/, jlong host),                                          handleKeyboardHiddenCallback())
+JUCE_VIEW_CALLBACK (void, handleAppResumed,     (JNIEnv* env, jobject /*view*/, jlong host),                                          handleAppResumedCallback())
 
 //==============================================================================
 ComponentPeer* Component::createNewPeer (int styleFlags, void*)
@@ -886,9 +921,9 @@ JUCE_API void JUCE_CALLTYPE Process::hide()
     {
         auto* env = getEnv();
 
-        GlobalRef intent (env->NewObject (Intent, Intent.constructor));
-        env->CallObjectMethod (intent, Intent.setAction,   javaString ("android.intent.action.MAIN")  .get());
-        env->CallObjectMethod (intent, Intent.addCategory, javaString ("android.intent.category.HOME").get());
+        GlobalRef intent (env->NewObject (AndroidIntent, AndroidIntent.constructor));
+        env->CallObjectMethod (intent, AndroidIntent.setAction,   javaString ("android.intent.action.MAIN")  .get());
+        env->CallObjectMethod (intent, AndroidIntent.addCategory, javaString ("android.intent.category.HOME").get());
 
         android.activity.callVoidMethod (JuceAppActivity.startActivity, intent.get());
     }

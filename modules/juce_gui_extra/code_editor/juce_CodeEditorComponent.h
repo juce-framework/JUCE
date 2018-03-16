@@ -36,6 +36,8 @@ class CodeTokeniser;
 
     This is designed to handle syntax highlighting and fast editing of very large
     files.
+
+    @tags{GUI}
 */
 class JUCE_API  CodeEditorComponent   : public Component,
                                         public ApplicationCommandTarget,
@@ -219,8 +221,10 @@ public:
     bool isReadOnly() const noexcept                    { return readOnly; }
 
     //==============================================================================
+    /** Defines a syntax highlighting colour scheme */
     struct JUCE_API  ColourScheme
     {
+        /** Defines a colour for a token type */
         struct TokenType
         {
             String name;

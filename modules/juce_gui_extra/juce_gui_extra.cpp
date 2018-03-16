@@ -55,6 +55,12 @@
  #import <IOKit/hid/IOHIDKeys.h>
  #import <IOKit/pwr_mgt/IOPMLib.h>
 
+ #if JUCE_PUSH_NOTIFICATIONS
+  #import <Foundation/NSUserNotification.h>
+
+  #include "native/juce_mac_PushNotifications.cpp"
+ #endif
+
 //==============================================================================
 #elif JUCE_IOS
  #if JUCE_PUSH_NOTIFICATIONS
@@ -163,6 +169,8 @@
 
 //==============================================================================
 #elif JUCE_ANDROID
+ #include "native/juce_AndroidViewComponent.cpp"
+
  #if JUCE_WEB_BROWSER
   #include "native/juce_android_WebBrowserComponent.cpp"
  #endif

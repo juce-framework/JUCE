@@ -28,6 +28,8 @@ namespace juce
     An input stream that reads from a local file.
 
     @see InputStream, FileOutputStream, File::createInputStream
+
+    @tags{Core}
 */
 class JUCE_API  FileInputStream  : public InputStream
 {
@@ -75,9 +77,9 @@ public:
 private:
     //==============================================================================
     const File file;
-    void* fileHandle;
-    int64 currentPosition;
-    Result status;
+    void* fileHandle = nullptr;
+    int64 currentPosition = 0;
+    Result status { Result::ok() };
 
     void openHandle();
     size_t readInternal (void*, size_t);

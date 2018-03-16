@@ -28,6 +28,8 @@ namespace juce
     A simple implementation of a Logger that writes to a file.
 
     @see Logger
+
+    @tags{Core}
 */
 class JUCE_API  FileLogger  : public Logger
 {

@@ -25,6 +25,8 @@ namespace juce
 
 /**
     Represents a button on a block device.
+
+    @tags{Blocks}
 */
 class ControlButton
 {
@@ -40,49 +42,49 @@ public:
     */
     enum ButtonFunction
     {
-        mode,   // The button on the side of a lightpad block and the first button on a live/loop block
+        mode,   /**< The side button on a lightpad block and the first button on a live/loop block. */
 
-        volume, // on live + loop blocks
+        volume, /**< The volume button on a live/loop block. */
 
         // common to all types of block
-        up,
-        down,
+        up,     /**< The up button on a control block.   */
+        down,   /**< The down button on a control block. */
 
         // live block buttons
-        scale,
-        chord,
-        arp,
-        sustain,
-        octave,
-        love,
+        scale,   /**< The scale button on a live block.   */
+        chord,   /**< The chord button on a live block.   */
+        arp,     /**< The arp button on a live block.     */
+        sustain, /**< The sustain button on a live block. */
+        octave,  /**< The octave button on a live block.  */
+        love,    /**< The love button on a live block.    */
 
         // loop block buttons
-        click,
-        snap,
-        back,
-        playOrPause,
-        record,
-        learn,
+        click,       /**< The click button on a loop block.         */
+        snap,        /**< The snap button on a loop block.          */
+        back,        /**< The back button on a loop block.          */
+        playOrPause, /**< The play or pause button on a loop block. */
+        record,      /**< The record button on a loop block.        */
+        learn,       /**< The learn button on a loop block.         */
 
         // developer block buttons
-        button0,
-        button1,
-        button2,
-        button3,
-        button4,
-        button5,
-        button6,
-        button7,
+        button0, /**< Button 0 on a developer block. */
+        button1, /**< Button 1 on a developer block. */
+        button2, /**< Button 2 on a developer block. */
+        button3, /**< Button 3 on a developer block. */
+        button4, /**< Button 4 on a developer block. */
+        button5, /**< Button 5 on a developer block. */
+        button6, /**< Button 6 on a developer block. */
+        button7, /**< Button 7 on a developer block. */
 
         // touch block buttons
-        velocitySensitivity,
-        glideSensitivity,
-        slideSensitivity,
-        pressSensitivity,
-        liftSensitivity,
-        fixedVelocity,
-        glideLock,
-        pianoMode
+        velocitySensitivity, /**< The velocity sensitivity button on a touch block. */
+        glideSensitivity,    /**< The glide sensitivity button on a touch block.    */
+        slideSensitivity,    /**< The slide sensitivity button on a touch block.    */
+        pressSensitivity,    /**< The press sensitivity button on a touch block.    */
+        liftSensitivity,     /**< The lift sensitivity button on a touch block.     */
+        fixedVelocity,       /**< The fixed velocity button on a touch block.       */
+        glideLock,           /**< The glide lock button on a touch block.           */
+        pianoMode            /**< The piano mode button on a touch block.           */
     };
 
     /** Returns the button's type. */
@@ -116,17 +118,18 @@ public:
     {
         virtual ~Listener();
 
-        /** */
+        /** Called when the button is pressed. */
         virtual void buttonPressed (ControlButton&, Block::Timestamp) = 0;
+        /** Called when the button is released. */
         virtual void buttonReleased (ControlButton&, Block::Timestamp) = 0;
     };
 
-    /** */
+    /** Adds a listener to the control button. */
     void addListener (Listener*);
-    /** */
+    /** Removes a listener from the control button. */
     void removeListener (Listener*);
 
-    /** */
+    /** The control block that this button belongs to. */
     Block& block;
 
 protected:

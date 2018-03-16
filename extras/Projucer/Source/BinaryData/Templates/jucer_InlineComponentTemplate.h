@@ -1,15 +1,15 @@
 //==============================================================================
-class COMPONENTCLASS    : public Component
+class %%component_class%%    : public Component
 {
 public:
-    COMPONENTCLASS()
+    %%component_class%%()
     {
         // In your constructor, you should add any child components, and
         // initialise any special settings that your component needs.
 
     }
 
-    ~COMPONENTCLASS()
+    ~%%component_class%%()
     {
     }
 
@@ -24,7 +24,7 @@ public:
 
         g.setColour (Colours::white);
         g.setFont (14.0f);
-        g.drawText ("COMPONENTCLASS", getLocalBounds(),
+        g.drawText ("%%component_class%%", getLocalBounds(),
                     Justification::centred, true);   // draw some placeholder text
     }
 
@@ -36,5 +36,5 @@ public:
     }
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (COMPONENTCLASS)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%component_class%%)
 };

@@ -53,15 +53,16 @@ void DrawableButton::setImages (const Drawable* normal,
 {
     jassert (normal != nullptr); // you really need to give it at least a normal image..
 
-    normalImage     = copyDrawableIfNotNull (normal);
-    overImage       = copyDrawableIfNotNull (over);
-    downImage       = copyDrawableIfNotNull (down);
-    disabledImage   = copyDrawableIfNotNull (disabled);
-    normalImageOn   = copyDrawableIfNotNull (normalOn);
-    overImageOn     = copyDrawableIfNotNull (overOn);
-    downImageOn     = copyDrawableIfNotNull (downOn);
-    disabledImageOn = copyDrawableIfNotNull (disabledOn);
-    currentImage    = nullptr;
+    normalImage     .reset (copyDrawableIfNotNull (normal));
+    overImage       .reset (copyDrawableIfNotNull (over));
+    downImage       .reset (copyDrawableIfNotNull (down));
+    disabledImage   .reset (copyDrawableIfNotNull (disabled));
+    normalImageOn   .reset (copyDrawableIfNotNull (normalOn));
+    overImageOn     .reset (copyDrawableIfNotNull (overOn));
+    downImageOn     .reset (copyDrawableIfNotNull (downOn));
+    disabledImageOn .reset (copyDrawableIfNotNull (disabledOn));
+
+    currentImage = nullptr;
 
     buttonStateChanged();
 }
@@ -136,8 +137,8 @@ void DrawableButton::buttonStateChanged()
     }
     else
     {
-        imageToDraw = getToggleState() ? disabledImageOn
-                                       : disabledImage;
+        imageToDraw = getToggleState() ? disabledImageOn.get()
+                                       : disabledImage.get();
 
         if (imageToDraw == nullptr)
         {
@@ -200,19 +201,19 @@ Drawable* DrawableButton::getCurrentImage() const noexcept
 
 Drawable* DrawableButton::getNormalImage() const noexcept
 {
-    return (getToggleState() && normalImageOn != nullptr) ? normalImageOn
-                                                          : normalImage;
+    return (getToggleState() && normalImageOn != nullptr) ? normalImageOn.get()
+                                                          : normalImage.get();
 }
 
 Drawable* DrawableButton::getOverImage() const noexcept
 {
     if (getToggleState())
     {
-        if (overImageOn   != nullptr)   return overImageOn;
-        if (normalImageOn != nullptr)   return normalImageOn;
+        if (overImageOn   != nullptr)   return overImageOn.get();
+        if (normalImageOn != nullptr)   return normalImageOn.get();
     }
 
-    return overImage != nullptr ? overImage : normalImage;
+    return overImage != nullptr ? overImage.get() : normalImage.get();
 }
 
 Drawable* DrawableButton::getDownImage() const noexcept

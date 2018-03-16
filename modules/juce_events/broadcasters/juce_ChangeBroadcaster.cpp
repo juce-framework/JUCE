@@ -81,7 +81,7 @@ void ChangeBroadcaster::dispatchPendingMessages()
 
 void ChangeBroadcaster::callListeners()
 {
-    changeListeners.call (&ChangeListener::changeListenerCallback, this);
+    changeListeners.call ([this] (ChangeListener& l) { l.changeListenerCallback (this); });
 }
 
 //==============================================================================

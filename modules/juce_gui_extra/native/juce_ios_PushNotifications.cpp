@@ -34,84 +34,6 @@ template <> struct ContainerDeletePolicy<NSObject<UIApplicationDelegate, UNUserN
 namespace PushNotificationsDelegateDetails
 {
     //==============================================================================
-    NSArray* varArrayToNSArray (const var& varToParse);
-
-    NSDictionary* varObjectToNSDictionary (const var& varToParse)
-    {
-        NSMutableDictionary* dictionary = [NSMutableDictionary dictionary];
-
-        if (varToParse.isObject())
-        {
-            auto* dynamicObject = varToParse.getDynamicObject();
-
-            auto& properties = dynamicObject->getProperties();
-
-            for (int i = 0; i < properties.size(); ++i)
-            {
-                NSString* keyString = juceStringToNS (properties.getName (i).toString());
-
-                const var& valueVar = properties.getValueAt (i);
-
-                if (valueVar.isObject())
-                {
-                    NSDictionary* valueDictionary = varObjectToNSDictionary (valueVar);
-
-                    [dictionary setObject: valueDictionary forKey: keyString];
-                }
-                else if (valueVar.isArray())
-                {
-                    NSArray* valueArray = varArrayToNSArray (valueVar);
-
-                    [dictionary setObject: valueArray forKey: keyString];
-                }
-                else
-                {
-                    NSString* valueString = juceStringToNS (valueVar.toString());
-
-                    [dictionary setObject: valueString forKey: keyString];
-                }
-            }
-        }
-
-        return dictionary;
-    }
-
-    NSArray* varArrayToNSArray (const var& varToParse)
-    {
-        jassert (varToParse.isArray());
-
-        if (! varToParse.isArray())
-            return nil;
-
-        const auto* varArray = varToParse.getArray();
-
-        NSMutableArray* array = [NSMutableArray arrayWithCapacity: (NSUInteger) varArray->size()];
-
-        for (const auto& aVar : *varArray)
-        {
-            if (aVar.isObject())
-            {
-                NSDictionary* valueDictionary = varObjectToNSDictionary (aVar);
-
-                [array addObject: valueDictionary];
-            }
-            else if (aVar.isArray())
-            {
-                NSArray* valueArray = varArrayToNSArray (aVar);
-
-                [array addObject: valueArray];
-            }
-            else
-            {
-                NSString* valueString = juceStringToNS (aVar.toString());
-
-                [array addObject: valueString];
-            }
-        }
-
-        return array;
-    }
-
     using Action   = PushNotifications::Settings::Action;
     using Category = PushNotifications::Settings::Category;
 
@@ -119,7 +41,7 @@ namespace PushNotificationsDelegateDetails
     {
         if (iOSEarlierThan10)
         {
-            UIMutableUserNotificationAction* action = [[UIMutableUserNotificationAction alloc] init];
+            auto* action = [[UIMutableUserNotificationAction alloc] init];
 
             action.identifier     = juceStringToNS (a.identifier);
             action.title          = juceStringToNS (a.title);
@@ -159,14 +81,14 @@ namespace PushNotificationsDelegateDetails
     {
         if (iOSEarlierThan10)
         {
-            UIMutableUserNotificationCategory* category = [[UIMutableUserNotificationCategory alloc] init];
+            auto* category = [[UIMutableUserNotificationCategory alloc] init];
             category.identifier = juceStringToNS (c.identifier);
 
-            NSMutableArray* actions = [NSMutableArray arrayWithCapacity: (NSUInteger) c.actions.size()];
+            auto* actions = [NSMutableArray arrayWithCapacity: (NSUInteger) c.actions.size()];
 
             for (const auto& a : c.actions)
             {
-                UIUserNotificationAction* action = (UIUserNotificationAction*) actionToNSAction (a, iOSEarlierThan10);
+                auto* action = (UIUserNotificationAction*) actionToNSAction (a, iOSEarlierThan10);
                 [actions addObject: action];
             }
 
@@ -180,11 +102,11 @@ namespace PushNotificationsDelegateDetails
         else
         {
           #if defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
-            NSMutableArray* actions = [NSMutableArray arrayWithCapacity: (NSUInteger) c.actions.size()];
+            auto* actions = [NSMutableArray arrayWithCapacity: (NSUInteger) c.actions.size()];
 
             for (const auto& a : c.actions)
             {
-                UNNotificationAction* action = (UNNotificationAction*) actionToNSAction (a, iOSEarlierThan10);
+                auto* action = (UNNotificationAction*) actionToNSAction (a, iOSEarlierThan10);
                 [actions addObject: action];
             }
 
@@ -201,7 +123,7 @@ namespace PushNotificationsDelegateDetails
     //==============================================================================
     UILocalNotification* juceNotificationToUILocalNotification (const PushNotifications::Notification& n)
     {
-        UILocalNotification* notification = [[UILocalNotification alloc] init];
+        auto* notification = [[UILocalNotification alloc] init];
 
         notification.alertTitle = juceStringToNS (n.title);
         notification.alertBody  = juceStringToNS (n.body);
@@ -210,7 +132,7 @@ namespace PushNotificationsDelegateDetails
 
         auto triggerTime = Time::getCurrentTime() + RelativeTime (n.triggerIntervalSec);
         notification.fireDate   = [NSDate dateWithTimeIntervalSince1970: triggerTime.toMilliseconds() / 1000.];
-        notification.userInfo   = PushNotificationsDelegateDetails::varObjectToNSDictionary (n.properties);
+        notification.userInfo   = varObjectToNSDictionary (n.properties);
 
         auto soundToPlayString = n.soundToPlay.toString (true);
 
@@ -226,7 +148,7 @@ namespace PushNotificationsDelegateDetails
     UNNotificationRequest* juceNotificationToUNNotificationRequest (const PushNotifications::Notification& n)
     {
         // content
-        UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
+        auto* content = [[UNMutableNotificationContent alloc] init];
 
         content.title              = juceStringToNS (n.title);
         content.subtitle           = juceStringToNS (n.subtitle);
@@ -242,7 +164,7 @@ namespace PushNotificationsDelegateDetails
         else if (soundToPlayString.isNotEmpty())
             content.sound = [UNNotificationSound soundNamed: juceStringToNS (soundToPlayString)];
 
-        NSMutableDictionary* propsDict = (NSMutableDictionary*) PushNotificationsDelegateDetails::varObjectToNSDictionary (n.properties);
+        auto* propsDict = (NSMutableDictionary*) varObjectToNSDictionary (n.properties);
         [propsDict setObject: juceStringToNS (soundToPlayString) forKey: nsStringLiteral ("com.juce.soundName")];
         content.userInfo = propsDict;
 
@@ -267,54 +189,6 @@ namespace PushNotificationsDelegateDetails
         return request;
     }
   #endif
-
-    var nsArrayToVar (NSArray* array);
-
-    var nsDictionaryToVar (NSDictionary* dictionary)
-    {
-        DynamicObject::Ptr dynamicObject = new DynamicObject();
-
-        for (NSString* key in dictionary)
-        {
-            const auto keyString = nsStringToJuce (key);
-
-            id value = dictionary[key];
-
-            if ([value isKindOfClass: [NSString class]])
-                dynamicObject->setProperty (keyString, nsStringToJuce ((NSString*) value));
-            else if ([value isKindOfClass: [NSNumber class]])
-                dynamicObject->setProperty (keyString, nsStringToJuce ([(NSNumber*) value stringValue]));
-            else if ([value isKindOfClass: [NSDictionary class]])
-                dynamicObject->setProperty (keyString, nsDictionaryToVar ((NSDictionary*) value));
-            else if ([value isKindOfClass: [NSArray class]])
-                dynamicObject->setProperty (keyString, nsArrayToVar ((NSArray*) value));
-            else
-                jassertfalse; // Unsupported yet, add here!
-        }
-
-        return var (dynamicObject);
-    }
-
-    var nsArrayToVar (NSArray* array)
-    {
-        Array<var> resultArray;
-
-        for (id value in array)
-        {
-            if ([value isKindOfClass: [NSString class]])
-                resultArray.add (var (nsStringToJuce ((NSString*) value)));
-            else if ([value isKindOfClass: [NSNumber class]])
-                resultArray.add (var (nsStringToJuce ([(NSNumber*) value stringValue])));
-            else if ([value isKindOfClass: [NSDictionary class]])
-                resultArray.add (nsDictionaryToVar ((NSDictionary*) value));
-            else if ([value isKindOfClass: [NSArray class]])
-                resultArray.add (nsArrayToVar ((NSArray*) value));
-            else
-                jassertfalse; // Unsupported yet, add here!
-        }
-
-        return var (resultArray);
-    }
 
     String getUserResponseFromNSDictionary (NSDictionary* dictionary)
     {
@@ -370,12 +244,12 @@ namespace PushNotificationsDelegateDetails
         {
             if ([t isKindOfClass: [UNTimeIntervalNotificationTrigger class]])
             {
-                UNTimeIntervalNotificationTrigger* trigger = (UNTimeIntervalNotificationTrigger*) t;
+                auto* trigger = (UNTimeIntervalNotificationTrigger*) t;
                 return trigger.timeInterval;
             }
             else if ([t isKindOfClass: [UNCalendarNotificationTrigger class]])
             {
-                UNCalendarNotificationTrigger* trigger = (UNCalendarNotificationTrigger*) t;
+                auto* trigger = (UNCalendarNotificationTrigger*) t;
                 NSDate* date    = [trigger.dateComponents date];
                 NSDate* dateNow = [NSDate date];
                 return [dateNow timeIntervalSinceDate: date];
@@ -397,7 +271,7 @@ namespace PushNotificationsDelegateDetails
         n.category   = nsStringToJuce (r.content.categoryIdentifier);
         n.badgeNumber = r.content.badge.intValue;
 
-        auto userInfoVar = PushNotificationsDelegateDetails::nsDictionaryToVar (r.content.userInfo);
+        auto userInfoVar = nsDictionaryToVar (r.content.userInfo);
 
         if (auto* object = userInfoVar.getDynamicObject())
         {
@@ -481,7 +355,7 @@ namespace PushNotificationsDelegateDetails
 
         if ([a isKindOfClass: [UNTextInputNotificationAction class]])
         {
-            UNTextInputNotificationAction* textAction = (UNTextInputNotificationAction*)a;
+            auto* textAction = (UNTextInputNotificationAction*)a;
 
             action.style = Action::text;
             action.textInputButtonText  = nsStringToJuce (textAction.textInputButtonTitle);
@@ -715,13 +589,13 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
     {
         settings = settingsToUse;
 
-        NSMutableSet* categories = [NSMutableSet setWithCapacity: (NSUInteger) settings.categories.size()];
+        auto* categories = [NSMutableSet setWithCapacity: (NSUInteger) settings.categories.size()];
 
         if (iOSEarlierThan10)
         {
             for (const auto& c : settings.categories)
             {
-                UIUserNotificationCategory* category = (UIUserNotificationCategory*) PushNotificationsDelegateDetails::categoryToNSCategory (c, iOSEarlierThan10);
+                auto* category = (UIUserNotificationCategory*) PushNotificationsDelegateDetails::categoryToNSCategory (c, iOSEarlierThan10);
                 [categories addObject: category];
             }
 
@@ -737,7 +611,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
         {
             for (const auto& c : settings.categories)
             {
-                UNNotificationCategory* category = (UNNotificationCategory*) PushNotificationsDelegateDetails::categoryToNSCategory (c, iOSEarlierThan10);
+                auto* category = (UNNotificationCategory*) PushNotificationsDelegateDetails::categoryToNSCategory (c, iOSEarlierThan10);
                 [categories addObject: category];
             }
 
@@ -755,8 +629,6 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
        #endif
 
         [[UIApplication sharedApplication] registerForRemoteNotifications];
-
-        initialised = true;
     }
 
     void requestSettingsUsed()
@@ -772,7 +644,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
             for (UIUserNotificationCategory *c in s.categories)
                 settings.categories.add (PushNotificationsDelegateDetails::uiUserNotificationCategoryToCategory (c));
 
-            owner.listeners.call (&PushNotifications::Listener::notificationSettingsReceived, settings);
+            owner.listeners.call ([&] (Listener& l) { l.notificationSettingsReceived (settings); });
         }
        #if defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
         else
@@ -791,7 +663,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
                       for (UNNotificationCategory* c in categories)
                           settings.categories.add (PushNotificationsDelegateDetails::unNotificationCategoryToCategory (c));
 
-                      owner.listeners.call (&PushNotifications::Listener::notificationSettingsReceived, settings);
+                      owner.listeners.call ([&] (Listener& l) { l.notificationSettingsReceived (settings); });
                   }
                  ];
 
@@ -835,7 +707,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
         {
             // Not supported on this platform
             jassertfalse;
-            owner.listeners.call (&Listener::deliveredNotificationsListReceived, {});
+            owner.listeners.call ([] (Listener& l) { l.deliveredNotificationsListReceived ({}); });
         }
        #if defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
         else
@@ -848,7 +720,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
                 for (UNNotification* n in notifications)
                     notifs.add (PushNotificationsDelegateDetails::unNotificationToJuceNotification (n));
 
-                owner.listeners.call (&Listener::deliveredNotificationsListReceived, notifs);
+                owner.listeners.call ([&] (Listener& l) { l.deliveredNotificationsListReceived (notifs); });
              }];
         }
        #endif
@@ -903,7 +775,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
             for (UILocalNotification* n in [UIApplication sharedApplication].scheduledLocalNotifications)
                 notifs.add (PushNotificationsDelegateDetails::uiLocalNotificationToJuceNotification (n));
 
-            owner.listeners.call (&PushNotifications::Listener::pendingLocalNotificationsListReceived, notifs);
+            owner.listeners.call ([&] (Listener& l) { l.pendingLocalNotificationsListReceived (notifs); });
         }
        #if defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
         else
@@ -917,7 +789,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
                  for (UNNotificationRequest* r : requests)
                      notifs.add (PushNotificationsDelegateDetails::unNotificationRequestToJuceNotification (r));
 
-                 owner.listeners.call (&PushNotifications::Listener::pendingLocalNotificationsListReceived, notifs);
+                 owner.listeners.call ([&] (Listener& l) { l.pendingLocalNotificationsListReceived (notifs); });
              }
             ];
         }
@@ -980,7 +852,9 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
 
         deviceToken = nsStringToJuce (deviceTokenString);
 
-        owner.listeners.call (&PushNotifications::Listener::deviceTokenRefreshed, deviceToken);
+        initialised = true;
+
+        owner.listeners.call ([&] (Listener& l) { l.deviceTokenRefreshed (deviceToken); });
     }
 
     void failedToRegisterForRemoteNotifications (NSError* error) override
@@ -994,16 +868,13 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
     {
         auto n = PushNotificationsDelegateDetails::nsDictionaryToJuceNotification (userInfo);
 
-        owner.listeners.call (&PushNotifications::Listener::handleNotification, false, n);
+        owner.listeners.call ([&] (Listener& l) { l.handleNotification (false, n); });
     }
 
     void didReceiveRemoteNotificationFetchCompletionHandler (NSDictionary* userInfo,
                                                              void (^completionHandler)(UIBackgroundFetchResult result)) override
     {
-        auto n = PushNotificationsDelegateDetails::nsDictionaryToJuceNotification (userInfo);
-
-        owner.listeners.call (&PushNotifications::Listener::handleNotification, false, n);
-
+        didReceiveRemoteNotification (userInfo);
         completionHandler (UIBackgroundFetchResultNewData);
     }
 
@@ -1016,7 +887,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
         auto actionString = nsStringToJuce (actionIdentifier);
         auto response = PushNotificationsDelegateDetails::getUserResponseFromNSDictionary (responseInfo);
 
-        owner.listeners.call (&PushNotifications::Listener::handleNotificationAction, false, n, actionString, response);
+        owner.listeners.call ([&] (Listener& l) { l.handleNotificationAction (false, n, actionString, response); });
 
         completionHandler();
     }
@@ -1025,7 +896,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
     {
         auto n = PushNotificationsDelegateDetails::uiLocalNotificationToJuceNotification (notification);
 
-        owner.listeners.call (&PushNotifications::Listener::handleNotification, true, n);
+        owner.listeners.call ([&] (Listener& l) { l.handleNotification (true, n); });
     }
 
     void handleActionForLocalNotificationCompletionHandler (NSString* actionIdentifier,
@@ -1047,7 +918,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
         auto actionString = nsStringToJuce (actionIdentifier);
         auto response = PushNotificationsDelegateDetails::getUserResponseFromNSDictionary (responseInfo);
 
-        owner.listeners.call (&PushNotifications::Listener::handleNotificationAction, true, n, actionString, response);
+        owner.listeners.call ([&] (Listener& l) { l.handleNotificationAction (true, n, actionString, response); });
 
         completionHandler();
     }
@@ -1087,8 +958,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
             responseString = nsStringToJuce (textResponse.userText);
         }
 
-        owner.listeners.call (&PushNotifications::Listener::handleNotificationAction, ! remote, n, actionString, responseString);
-
+        owner.listeners.call ([&] (Listener& l) { l.handleNotificationAction (! remote, n, actionString, responseString); });
         completionHandler();
     }
   #endif

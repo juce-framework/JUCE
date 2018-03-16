@@ -67,6 +67,132 @@ static inline NSArray* createNSArrayFromStringArray (const StringArray& strings)
     return [array autorelease];
 }
 
+static NSArray* varArrayToNSArray (const var& varToParse);
+
+static NSDictionary* varObjectToNSDictionary (const var& varToParse)
+{
+    auto* dictionary = [NSMutableDictionary dictionary];
+
+    if (varToParse.isObject())
+    {
+        auto* dynamicObject = varToParse.getDynamicObject();
+
+        auto& properties = dynamicObject->getProperties();
+
+        for (int i = 0; i < properties.size(); ++i)
+        {
+            auto* keyString = juceStringToNS (properties.getName (i).toString());
+
+            const var& valueVar = properties.getValueAt (i);
+
+            if (valueVar.isObject())
+            {
+                auto* valueDictionary = varObjectToNSDictionary (valueVar);
+
+                [dictionary setObject: valueDictionary forKey: keyString];
+            }
+            else if (valueVar.isArray())
+            {
+                auto* valueArray = varArrayToNSArray (valueVar);
+
+                [dictionary setObject: valueArray forKey: keyString];
+            }
+            else
+            {
+                auto* valueString = juceStringToNS (valueVar.toString());
+
+                [dictionary setObject: valueString forKey: keyString];
+            }
+        }
+    }
+
+    return dictionary;
+}
+
+static NSArray* varArrayToNSArray (const var& varToParse)
+{
+    jassert (varToParse.isArray());
+
+    if (! varToParse.isArray())
+        return nil;
+
+    const auto* varArray = varToParse.getArray();
+
+    auto* array = [NSMutableArray arrayWithCapacity: (NSUInteger) varArray->size()];
+
+    for (const auto& aVar : *varArray)
+    {
+        if (aVar.isObject())
+        {
+            auto* valueDictionary = varObjectToNSDictionary (aVar);
+
+            [array addObject: valueDictionary];
+        }
+        else if (aVar.isArray())
+        {
+            auto* valueArray = varArrayToNSArray (aVar);
+
+            [array addObject: valueArray];
+        }
+        else
+        {
+            auto* valueString = juceStringToNS (aVar.toString());
+
+            [array addObject: valueString];
+        }
+    }
+
+    return array;
+}
+
+static var nsArrayToVar (NSArray* array);
+
+static var nsDictionaryToVar (NSDictionary* dictionary)
+{
+    DynamicObject::Ptr dynamicObject = new DynamicObject();
+
+    for (NSString* key in dictionary)
+    {
+        const auto keyString = nsStringToJuce (key);
+
+        id value = dictionary[key];
+
+        if ([value isKindOfClass: [NSString class]])
+            dynamicObject->setProperty (keyString, nsStringToJuce ((NSString*) value));
+        else if ([value isKindOfClass: [NSNumber class]])
+            dynamicObject->setProperty (keyString, nsStringToJuce ([(NSNumber*) value stringValue]));
+        else if ([value isKindOfClass: [NSDictionary class]])
+            dynamicObject->setProperty (keyString, nsDictionaryToVar ((NSDictionary*) value));
+        else if ([value isKindOfClass: [NSArray class]])
+            dynamicObject->setProperty (keyString, nsArrayToVar ((NSArray*) value));
+        else
+            jassertfalse; // Unsupported yet, add here!
+    }
+
+    return var (dynamicObject.get());
+}
+
+static var nsArrayToVar (NSArray* array)
+{
+    Array<var> resultArray;
+
+    for (id value in array)
+    {
+        if ([value isKindOfClass: [NSString class]])
+            resultArray.add (var (nsStringToJuce ((NSString*) value)));
+        else if ([value isKindOfClass: [NSNumber class]])
+            resultArray.add (var (nsStringToJuce ([(NSNumber*) value stringValue])));
+        else if ([value isKindOfClass: [NSDictionary class]])
+            resultArray.add (nsDictionaryToVar ((NSDictionary*) value));
+        else if ([value isKindOfClass: [NSArray class]])
+            resultArray.add (nsArrayToVar ((NSArray*) value));
+        else
+            jassertfalse; // Unsupported yet, add here!
+    }
+
+    return var (resultArray);
+}
+
 #if JUCE_MAC
 template <typename RectangleType>
 static NSRect makeNSRect (const RectangleType& r) noexcept
@@ -78,7 +204,6 @@ static NSRect makeNSRect (const RectangleType& r) noexcept
 }
 #endif
 #if JUCE_MAC || JUCE_IOS
-#if JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES
 
 // This is necessary as on iOS builds, some arguments may be passed on registers
 // depending on the argument type. The re-cast objc_msgSendSuper to a function
@@ -90,8 +215,6 @@ static inline ReturnValue ObjCMsgSendSuper (struct objc_super* s, SEL sel, Param
     SuperFn fn = reinterpret_cast<SuperFn> (objc_msgSendSuper);
     return fn (s, sel, params...);
 }
-
-#endif
 
 // These hacks are a workaround for newer Xcode builds which by default prevent calls to these objc functions..
 typedef id (*MsgSendSuperFn) (struct objc_super*, SEL, ...);
@@ -273,8 +396,6 @@ Class* getJuceClassFromNSObject (NSObject* obj)
     return obj != nullptr ? ObjCLifetimeManagedClass<Class>:: template getIvar<Class*> (obj, "cppObject") : nullptr;
 }
 
-#if JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES
-
 template <typename ReturnT, class Class, typename... Params>
 ReturnT (^CreateObjCBlock(Class* object, ReturnT (Class::*fn)(Params...))) (Params...)
 {
@@ -303,6 +424,5 @@ private:
     BlockType block;
 };
 
-#endif
 
 } // namespace juce

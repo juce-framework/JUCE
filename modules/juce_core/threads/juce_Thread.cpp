@@ -86,7 +86,7 @@ void Thread::threadEntryPoint()
 
     if (startSuspensionEvent.wait (10000))
     {
-        jassert (getCurrentThreadId() == threadId);
+        jassert (getCurrentThreadId() == threadId.get());
 
         if (affinityMask != 0)
             setCurrentThreadAffinityMask (affinityMask);
@@ -102,9 +102,13 @@ void Thread::threadEntryPoint()
     }
 
     currentThreadHolder->value.releaseCurrentThreadStorage();
+
+    // Once closeThreadHandle is called this class may be deleted by a different
+    // thread, so we need to store deleteOnThreadEnd in a local variable.
+    auto shouldDeleteThis = deleteOnThreadEnd;
     closeThreadHandle();
 
-    if (deleteOnThreadEnd)
+    if (shouldDeleteThis)
         delete this;
 }
 
@@ -119,12 +123,12 @@ void Thread::startThread()
 {
     const ScopedLock sl (startStopLock);
 
-    shouldExit = false;
+    shouldExit = 0;
 
-    if (threadHandle == nullptr)
+    if (threadHandle.get() == nullptr)
     {
         launchThread();
-        setThreadPriority (threadHandle, threadPriority);
+        setThreadPriority (threadHandle.get(), threadPriority);
         startSuspensionEvent.signal();
     }
 }
@@ -133,7 +137,7 @@ void Thread::startThread (int priority)
 {
     const ScopedLock sl (startStopLock);
 
-    if (threadHandle == nullptr)
+    if (threadHandle.get() == nullptr)
     {
         auto isRealtime = (priority == realtimeAudioPriority);
 
@@ -155,7 +159,7 @@ void Thread::startThread (int priority)
 
 bool Thread::isThreadRunning() const
 {
-    return threadHandle != nullptr;
+    return threadHandle.get() != nullptr;
 }
 
 Thread* JUCE_CALLTYPE Thread::getCurrentThread()
@@ -163,11 +167,21 @@ Thread* JUCE_CALLTYPE Thread::getCurrentThread()
     return getCurrentThreadHolder()->value.get();
 }
 
+Thread::ThreadID Thread::getThreadId() const noexcept
+{
+    return threadId.get();
+}
+
 //==============================================================================
 void Thread::signalThreadShouldExit()
 {
-    shouldExit = true;
-    listeners.call (&Listener::exitSignalSent);
+    shouldExit = 1;
+    listeners.call ([] (Listener& l) { l.exitSignalSent(); });
+}
+
+bool Thread::threadShouldExit() const
+{
+    return shouldExit.get() != 0;
 }
 
 bool Thread::currentThreadShouldExit()
@@ -183,7 +197,7 @@ bool Thread::waitForThreadToExit (const int timeOutMilliseconds) const
     // Doh! So how exactly do you expect this thread to wait for itself to stop??
     jassert (getThreadId() != getCurrentThreadId() || getCurrentThreadId() == 0);
 
-    const uint32 timeoutEnd = Time::getMillisecondCounter() + (uint32) timeOutMilliseconds;
+    auto timeoutEnd = Time::getMillisecondCounter() + (uint32) timeOutMilliseconds;
 
     while (isThreadRunning())
     {
@@ -263,7 +277,7 @@ bool Thread::setPriority (int newPriority)
     isAndroidRealtimeThread = isRealtime;
    #endif
 
-    if ((! isThreadRunning()) || setThreadPriority (threadHandle, newPriority))
+    if ((! isThreadRunning()) || setThreadPriority (threadHandle.get(), newPriority))
     {
         threadPriority = newPriority;
         return true;
@@ -461,7 +475,8 @@ public:
 static AtomicTests atomicUnitTests;
 
 //==============================================================================
-class ThreadLocalValueUnitTest : public UnitTest, private Thread
+class ThreadLocalValueUnitTest  : public UnitTest,
+                                  private Thread
 {
 public:
     ThreadLocalValueUnitTest()

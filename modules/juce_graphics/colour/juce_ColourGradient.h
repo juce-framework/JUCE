@@ -32,10 +32,24 @@ namespace juce
     Describes the layout and colours that should be used to paint a colour gradient.
 
     @see Graphics::setGradientFill
+
+    @tags{Graphics}
 */
 class JUCE_API  ColourGradient  final
 {
 public:
+    /** Creates an uninitialised gradient.
+
+        If you use this constructor instead of the other one, be sure to set all the
+        object's public member variables before using it!
+    */
+    ColourGradient() noexcept;
+
+    ColourGradient (const ColourGradient&);
+    ColourGradient (ColourGradient&&) noexcept;
+    ColourGradient& operator= (const ColourGradient&);
+    ColourGradient& operator= (ColourGradient&&) noexcept;
+
     //==============================================================================
     /** Creates a gradient object.
 
@@ -79,12 +93,28 @@ public:
                     Colour colour2, Point<float> point2,
                     bool isRadial);
 
-    /** Creates an uninitialised gradient.
+    //==============================================================================
+    /** Creates a vertical linear gradient between two Y coordinates */
+    static ColourGradient vertical (Colour colour1, float y1,
+                                    Colour colour2, float y2);
 
-        If you use this constructor instead of the other one, be sure to set all the
-        object's public member variables before using it!
-    */
-    ColourGradient() noexcept;
+    /** Creates a horizontal linear gradient between two X coordinates */
+    static ColourGradient horizontal (Colour colour1, float x1,
+                                      Colour colour2, float x2);
+
+    /** Creates a vertical linear gradient from top to bottom in a rectangle */
+    template <typename Type>
+    static ColourGradient vertical (Colour colourTop, Colour colourBottom, Rectangle<Type> area)
+    {
+        return vertical (colourTop, (float) area.getY(), colourBottom, (float) area.getBottom());
+    }
+
+    /** Creates a horizontal linear gradient from right to left in a rectangle */
+    template <typename Type>
+    static ColourGradient horizontal (Colour colourLeft, Colour colourRight, Rectangle<Type> area)
+    {
+        return horizontal (colourLeft, (float) area.getX(), colourRight, (float) area.getRight());
+    }
 
     /** Destructor */
     ~ColourGradient();
@@ -108,8 +138,7 @@ public:
         @param colour                       the colour that should be used at this point
         @returns the index at which the new point was added
     */
-    int addColour (double proportionAlongGradient,
-                   Colour colour);
+    int addColour (double proportionAlongGradient, Colour colour);
 
     /** Removes one of the colours from the gradient. */
     void removeColour (int index);
@@ -181,14 +210,8 @@ private:
     //==============================================================================
     struct ColourPoint
     {
-        ColourPoint() noexcept {}
-
-        ColourPoint (const double pos, Colour col) noexcept
-            : position (pos), colour (col)
-        {}
-
-        bool operator== (const ColourPoint&) const noexcept;
-        bool operator!= (const ColourPoint&) const noexcept;
+        bool operator== (ColourPoint) const noexcept;
+        bool operator!= (ColourPoint) const noexcept;
 
         double position;
         Colour colour;

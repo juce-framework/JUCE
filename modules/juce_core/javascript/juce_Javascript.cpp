@@ -389,7 +389,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
     struct DotOperator  : public Expression
     {
-        DotOperator (const CodeLocation& l, ExpPtr& p, const Identifier& c) noexcept : Expression (l), parent (p), child (c) {}
+        DotOperator (const CodeLocation& l, ExpPtr& p, const Identifier& c) noexcept : Expression (l), parent (p.release()), child (c) {}
 
         var getResult (const Scope& s) const override
         {
@@ -478,7 +478,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
     struct BinaryOperatorBase  : public Expression
     {
         BinaryOperatorBase (const CodeLocation& l, ExpPtr& a, ExpPtr& b, TokenType op) noexcept
-            : Expression (l), lhs (a), rhs (b), operation (op) {}
+            : Expression (l), lhs (a.release()), rhs (b.release()), operation (op) {}
 
         ExpPtr lhs, rhs;
         TokenType operation;
@@ -674,7 +674,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
     struct Assignment  : public Expression
     {
-        Assignment (const CodeLocation& l, ExpPtr& dest, ExpPtr& source) noexcept : Expression (l), target (dest), newValue (source) {}
+        Assignment (const CodeLocation& l, ExpPtr& dest, ExpPtr& source) noexcept : Expression (l), target (dest.release()), newValue (source.release()) {}
 
         var getResult (const Scope& s) const override
         {
@@ -887,8 +887,8 @@ struct JavascriptEngine::RootObject   : public DynamicObject
     private:
         String::CharPointerType p;
 
-        static bool isIdentifierStart (const juce_wchar c) noexcept   { return CharacterFunctions::isLetter (c)        || c == '_'; }
-        static bool isIdentifierBody  (const juce_wchar c) noexcept   { return CharacterFunctions::isLetterOrDigit (c) || c == '_'; }
+        static bool isIdentifierStart (juce_wchar c) noexcept   { return CharacterFunctions::isLetter (c)        || c == '_'; }
+        static bool isIdentifierBody  (juce_wchar c) noexcept   { return CharacterFunctions::isLetterOrDigit (c) || c == '_'; }
 
         TokenType matchNextToken()
         {
@@ -925,7 +925,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             return TokenTypes::eof;
         }
 
-        bool matchToken (TokenType name, const size_t len) noexcept
+        bool matchToken (TokenType name, size_t len) noexcept
         {
             if (p.compareUpTo (CharPointer_ASCII (name), (int) len) != 0) return false;
             p += (int) len;  return true;
@@ -1071,15 +1071,16 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
             while (currentType != TokenTypes::closeParen)
             {
-                fo.parameters.add (currentValue.toString());
+                auto paramName = currentValue.toString();
                 match (TokenTypes::identifier);
+                fo.parameters.add (paramName);
 
                 if (currentType != TokenTypes::closeParen)
                     match (TokenTypes::comma);
             }
 
             match (TokenTypes::closeParen);
-            fo.body = parseBlock();
+            fo.body.reset (parseBlock());
         }
 
         Expression* parseExpression()
@@ -1103,7 +1104,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         Expression* parseInPlaceOpExpression (ExpPtr& lhs)
         {
             ExpPtr rhs (parseExpression());
-            Expression* bareLHS = lhs; // careful - bare pointer is deliberately alised
+            Expression* bareLHS = lhs.get(); // careful - bare pointer is deliberately alised
             return new SelfAssignment (location, bareLHS, new OpType (location, lhs, rhs));
         }
 
@@ -1148,10 +1149,10 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         {
             ScopedPointer<IfStatement> s (new IfStatement (location));
             match (TokenTypes::openParen);
-            s->condition = parseExpression();
+            s->condition.reset (parseExpression());
             match (TokenTypes::closeParen);
-            s->trueBranch = parseStatement();
-            s->falseBranch = matchIf (TokenTypes::else_) ? parseStatement() : new Statement (location);
+            s->trueBranch.reset (parseStatement());
+            s->falseBranch.reset (matchIf (TokenTypes::else_) ? parseStatement() : new Statement (location));
             return s.release();
         }
 
@@ -1169,7 +1170,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         {
             ScopedPointer<VarStatement> s (new VarStatement (location));
             s->name = parseIdentifier();
-            s->initialiser = matchIf (TokenTypes::assign) ? parseExpression() : new Expression (location);
+            s->initialiser.reset (matchIf (TokenTypes::assign) ? parseExpression() : new Expression (location));
 
             if (matchIf (TokenTypes::comma))
             {
@@ -1199,46 +1200,46 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         {
             ScopedPointer<LoopStatement> s (new LoopStatement (location, false));
             match (TokenTypes::openParen);
-            s->initialiser = parseStatement();
+            s->initialiser.reset (parseStatement());
 
             if (matchIf (TokenTypes::semicolon))
-                s->condition = new LiteralValue (location, true);
+                s->condition.reset (new LiteralValue (location, true));
             else
             {
-                s->condition = parseExpression();
+                s->condition.reset (parseExpression());
                 match (TokenTypes::semicolon);
             }
 
             if (matchIf (TokenTypes::closeParen))
-                s->iterator = new Statement (location);
+                s->iterator.reset (new Statement (location));
             else
             {
-                s->iterator = parseExpression();
+                s->iterator.reset (parseExpression());
                 match (TokenTypes::closeParen);
             }
 
-            s->body = parseStatement();
+            s->body.reset (parseStatement());
             return s.release();
         }
 
         Statement* parseDoOrWhileLoop (bool isDoLoop)
         {
             ScopedPointer<LoopStatement> s (new LoopStatement (location, isDoLoop));
-            s->initialiser = new Statement (location);
-            s->iterator = new Statement (location);
+            s->initialiser.reset (new Statement (location));
+            s->iterator.reset (new Statement (location));
 
             if (isDoLoop)
             {
-                s->body = parseBlock();
+                s->body.reset (parseBlock());
                 match (TokenTypes::while_);
             }
 
             match (TokenTypes::openParen);
-            s->condition = parseExpression();
+            s->condition.reset (parseExpression());
             match (TokenTypes::closeParen);
 
             if (! isDoLoop)
-                s->body = parseStatement();
+                s->body.reset (parseStatement());
 
             return s.release();
         }
@@ -1269,7 +1270,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         Expression* parseFunctionCall (FunctionCall* call, ExpPtr& function)
         {
             ScopedPointer<FunctionCall> s (call);
-            s->object = function;
+            s->object.reset (function.release());
             match (TokenTypes::openParen);
 
             while (currentType != TokenTypes::closeParen)
@@ -1295,8 +1296,8 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             if (matchIf (TokenTypes::openBracket))
             {
                 ScopedPointer<ArraySubscript> s (new ArraySubscript (location));
-                s->object = input;
-                s->index = parseExpression();
+                s->object.reset (input.release());
+                s->index.reset (parseExpression());
                 match (TokenTypes::closeBracket);
                 return parseSuffixes (s.release());
             }
@@ -1376,7 +1377,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
                 ExpPtr name (new UnqualifiedName (location, parseIdentifier()));
 
                 while (matchIf (TokenTypes::dot))
-                    name = new DotOperator (location, name, parseIdentifier());
+                    name.reset (new DotOperator (location, name, parseIdentifier()));
 
                 return parseFunctionCall (new NewOperator (location), name);
             }
@@ -1404,7 +1405,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         Expression* parseTypeof()
         {
             ScopedPointer<FunctionCall> f (new FunctionCall (location));
-            f->object = new UnqualifiedName (location, "typeof");
+            f->object.reset (new UnqualifiedName (location, "typeof"));
             f->arguments.add (parseUnary());
             return f.release();
         }
@@ -1426,9 +1427,9 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
             for (;;)
             {
-                if (matchIf (TokenTypes::times))        { ExpPtr b (parseUnary()); a = new MultiplyOp (location, a, b); }
-                else if (matchIf (TokenTypes::divide))  { ExpPtr b (parseUnary()); a = new DivideOp   (location, a, b); }
-                else if (matchIf (TokenTypes::modulo))  { ExpPtr b (parseUnary()); a = new ModuloOp   (location, a, b); }
+                if (matchIf (TokenTypes::times))        { ExpPtr b (parseUnary()); a.reset (new MultiplyOp (location, a, b)); }
+                else if (matchIf (TokenTypes::divide))  { ExpPtr b (parseUnary()); a.reset (new DivideOp   (location, a, b)); }
+                else if (matchIf (TokenTypes::modulo))  { ExpPtr b (parseUnary()); a.reset (new ModuloOp   (location, a, b)); }
                 else break;
             }
 
@@ -1441,8 +1442,8 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
             for (;;)
             {
-                if (matchIf (TokenTypes::plus))            { ExpPtr b (parseMultiplyDivide()); a = new AdditionOp    (location, a, b); }
-                else if (matchIf (TokenTypes::minus))      { ExpPtr b (parseMultiplyDivide()); a = new SubtractionOp (location, a, b); }
+                if (matchIf (TokenTypes::plus))            { ExpPtr b (parseMultiplyDivide()); a.reset (new AdditionOp    (location, a, b)); }
+                else if (matchIf (TokenTypes::minus))      { ExpPtr b (parseMultiplyDivide()); a.reset (new SubtractionOp (location, a, b)); }
                 else break;
             }
 
@@ -1455,9 +1456,9 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
             for (;;)
             {
-                if (matchIf (TokenTypes::leftShift))                { ExpPtr b (parseExpression()); a = new LeftShiftOp          (location, a, b); }
-                else if (matchIf (TokenTypes::rightShift))          { ExpPtr b (parseExpression()); a = new RightShiftOp         (location, a, b); }
-                else if (matchIf (TokenTypes::rightShiftUnsigned))  { ExpPtr b (parseExpression()); a = new RightShiftUnsignedOp (location, a, b); }
+                if (matchIf (TokenTypes::leftShift))                { ExpPtr b (parseExpression()); a.reset (new LeftShiftOp          (location, a, b)); }
+                else if (matchIf (TokenTypes::rightShift))          { ExpPtr b (parseExpression()); a.reset (new RightShiftOp         (location, a, b)); }
+                else if (matchIf (TokenTypes::rightShiftUnsigned))  { ExpPtr b (parseExpression()); a.reset (new RightShiftUnsignedOp (location, a, b)); }
                 else break;
             }
 
@@ -1470,14 +1471,14 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
             for (;;)
             {
-                if (matchIf (TokenTypes::equals))                  { ExpPtr b (parseShiftOperator()); a = new EqualsOp             (location, a, b); }
-                else if (matchIf (TokenTypes::notEquals))          { ExpPtr b (parseShiftOperator()); a = new NotEqualsOp          (location, a, b); }
-                else if (matchIf (TokenTypes::typeEquals))         { ExpPtr b (parseShiftOperator()); a = new TypeEqualsOp         (location, a, b); }
-                else if (matchIf (TokenTypes::typeNotEquals))      { ExpPtr b (parseShiftOperator()); a = new TypeNotEqualsOp      (location, a, b); }
-                else if (matchIf (TokenTypes::lessThan))           { ExpPtr b (parseShiftOperator()); a = new LessThanOp           (location, a, b); }
-                else if (matchIf (TokenTypes::lessThanOrEqual))    { ExpPtr b (parseShiftOperator()); a = new LessThanOrEqualOp    (location, a, b); }
-                else if (matchIf (TokenTypes::greaterThan))        { ExpPtr b (parseShiftOperator()); a = new GreaterThanOp        (location, a, b); }
-                else if (matchIf (TokenTypes::greaterThanOrEqual)) { ExpPtr b (parseShiftOperator()); a = new GreaterThanOrEqualOp (location, a, b); }
+                if (matchIf (TokenTypes::equals))                  { ExpPtr b (parseShiftOperator()); a.reset (new EqualsOp             (location, a, b)); }
+                else if (matchIf (TokenTypes::notEquals))          { ExpPtr b (parseShiftOperator()); a.reset (new NotEqualsOp          (location, a, b)); }
+                else if (matchIf (TokenTypes::typeEquals))         { ExpPtr b (parseShiftOperator()); a.reset (new TypeEqualsOp         (location, a, b)); }
+                else if (matchIf (TokenTypes::typeNotEquals))      { ExpPtr b (parseShiftOperator()); a.reset (new TypeNotEqualsOp      (location, a, b)); }
+                else if (matchIf (TokenTypes::lessThan))           { ExpPtr b (parseShiftOperator()); a.reset (new LessThanOp           (location, a, b)); }
+                else if (matchIf (TokenTypes::lessThanOrEqual))    { ExpPtr b (parseShiftOperator()); a.reset (new LessThanOrEqualOp    (location, a, b)); }
+                else if (matchIf (TokenTypes::greaterThan))        { ExpPtr b (parseShiftOperator()); a.reset (new GreaterThanOp        (location, a, b)); }
+                else if (matchIf (TokenTypes::greaterThanOrEqual)) { ExpPtr b (parseShiftOperator()); a.reset (new GreaterThanOrEqualOp (location, a, b)); }
                 else break;
             }
 
@@ -1490,11 +1491,11 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
             for (;;)
             {
-                if (matchIf (TokenTypes::logicalAnd))       { ExpPtr b (parseComparator()); a = new LogicalAndOp (location, a, b); }
-                else if (matchIf (TokenTypes::logicalOr))   { ExpPtr b (parseComparator()); a = new LogicalOrOp  (location, a, b); }
-                else if (matchIf (TokenTypes::bitwiseAnd))  { ExpPtr b (parseComparator()); a = new BitwiseAndOp (location, a, b); }
-                else if (matchIf (TokenTypes::bitwiseOr))   { ExpPtr b (parseComparator()); a = new BitwiseOrOp  (location, a, b); }
-                else if (matchIf (TokenTypes::bitwiseXor))  { ExpPtr b (parseComparator()); a = new BitwiseXorOp (location, a, b); }
+                if (matchIf (TokenTypes::logicalAnd))       { ExpPtr b (parseComparator()); a.reset (new LogicalAndOp (location, a, b)); }
+                else if (matchIf (TokenTypes::logicalOr))   { ExpPtr b (parseComparator()); a.reset (new LogicalOrOp  (location, a, b)); }
+                else if (matchIf (TokenTypes::bitwiseAnd))  { ExpPtr b (parseComparator()); a.reset (new BitwiseAndOp (location, a, b)); }
+                else if (matchIf (TokenTypes::bitwiseOr))   { ExpPtr b (parseComparator()); a.reset (new BitwiseOrOp  (location, a, b)); }
+                else if (matchIf (TokenTypes::bitwiseXor))  { ExpPtr b (parseComparator()); a.reset (new BitwiseXorOp (location, a, b)); }
                 else break;
             }
 
@@ -1504,10 +1505,10 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         Expression* parseTernaryOperator (ExpPtr& condition)
         {
             ScopedPointer<ConditionalOp> e (new ConditionalOp (location));
-            e->condition = condition;
-            e->trueBranch = parseExpression();
+            e->condition.reset (condition.release());
+            e->trueBranch.reset (parseExpression());
             match (TokenTypes::colon);
-            e->falseBranch = parseExpression();
+            e->falseBranch.reset (parseExpression());
             return e.release();
         }
 
@@ -1700,8 +1701,14 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             setMethod ("sqr",       Math_sqr);              setMethod ("sqrt",      Math_sqrt);
             setMethod ("ceil",      Math_ceil);             setMethod ("floor",     Math_floor);
 
-            setProperty ("PI", double_Pi);
-            setProperty ("E", exp (1.0));
+            setProperty ("PI",      MathConstants<double>::pi);
+            setProperty ("E",       MathConstants<double>::euler);
+            setProperty ("SQRT2",   MathConstants<double>::sqrt2);
+            setProperty ("SQRT1_2", std::sqrt (0.5));
+            setProperty ("LN2",     std::log (2.0));
+            setProperty ("LN10",    std::log (10.0));
+            setProperty ("LOG2E",   std::log (MathConstants<double>::euler) / std::log (2.0));
+            setProperty ("LOG10E",  std::log (MathConstants<double>::euler) / std::log (10.0));
         }
 
         static var Math_random    (Args)   { return Random::getSystemRandom().nextDouble(); }

@@ -27,6 +27,8 @@ namespace juce
 /**
     A class that measures various statistics about a series of floating point
     values that it is given.
+
+    @tags{Core}
 */
 template <typename FloatType>
 class StatisticsAccumulator

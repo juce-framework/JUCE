@@ -35,10 +35,16 @@ namespace juce
     any previously pending transactions will be resumed.
 
     Once an InAppPurchases object is created, call addListener() to attach listeners.
+
+    @tags{ProductUnlocking}
 */
-class JUCE_API  InAppPurchases
+class JUCE_API  InAppPurchases  : private DeletedAtShutdown
 {
 public:
+    #ifndef DOXYGEN
+     JUCE_DECLARE_SINGLETON (InAppPurchases, false)
+    #endif
+
     //==============================================================================
     /** Represents a product available in the store. */
     struct Product
@@ -122,6 +128,7 @@ public:
         /** Called whenever a product info is returned after a call to InAppPurchases::getProductsInformation(). */
         virtual void productsInfoReturned (const Array<Product>& /*products*/) {}
 
+        /** Structure holding purchase information */
         struct PurchaseInfo
         {
             Purchase purchase;
@@ -253,13 +260,13 @@ public:
     /** iOS only: Cancels downloads of hosted content from the store. */
     void cancelDownloads (const Array<Download*>& downloads);
 
+private:
     //==============================================================================
    #ifndef DOXYGEN
     InAppPurchases();
     ~InAppPurchases();
    #endif
 
-private:
     //==============================================================================
     ListenerList<Listener> listeners;
 

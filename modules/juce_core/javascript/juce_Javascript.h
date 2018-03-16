@@ -41,6 +41,8 @@ namespace juce
     and var objects, they use reference-counting rather than garbage-collection, so if your
     script creates complex connections between objects, you run the risk of creating cyclic
     dependencies and hence leaking.
+
+    @tags{Core}
 */
 class JUCE_API  JavascriptEngine  final
 {

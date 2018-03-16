@@ -88,13 +88,13 @@ File PropertiesFile::Options::getDefaultFile() const
         dir = dir.getChildFile (folderName);
 
    #elif JUCE_LINUX || JUCE_ANDROID
-    const File dir (File (commonToAllUsers ? "/var" : "~")
-                     .getChildFile (folderName.isNotEmpty() ? folderName
-                                                            : ("." + applicationName)));
+    auto dir = File (commonToAllUsers ? "/var" : "~")
+                      .getChildFile (folderName.isNotEmpty() ? folderName
+                                                             : ("." + applicationName));
 
    #elif JUCE_WINDOWS
-    File dir (File::getSpecialLocation (commonToAllUsers ? File::commonApplicationDataDirectory
-                                                         : File::userApplicationDataDirectory));
+    auto dir = File::getSpecialLocation (commonToAllUsers ? File::commonApplicationDataDirectory
+                                                          : File::userApplicationDataDirectory);
 
     if (dir == File())
         return {};
@@ -112,16 +112,14 @@ File PropertiesFile::Options::getDefaultFile() const
 //==============================================================================
 PropertiesFile::PropertiesFile (const File& f, const Options& o)
     : PropertySet (o.ignoreCaseOfKeyNames),
-      file (f), options (o),
-      loadedOk (false), needsWriting (false)
+      file (f), options (o)
 {
     reload();
 }
 
 PropertiesFile::PropertiesFile (const Options& o)
     : PropertySet (o.ignoreCaseOfKeyNames),
-      file (o.getDefaultFile()), options (o),
-      loadedOk (false), needsWriting (false)
+      file (o.getDefaultFile()), options (o)
 {
     reload();
 }
@@ -190,21 +188,19 @@ bool PropertiesFile::loadAsXml()
 
     if (doc != nullptr && doc->hasTagName (PropertyFileConstants::fileTag))
     {
-        doc = parser.getDocumentElement();
+        doc.reset (parser.getDocumentElement());
 
         if (doc != nullptr)
         {
             forEachXmlChildElementWithTagName (*doc, e, PropertyFileConstants::valueTag)
             {
-                const String name (e->getStringAttribute (PropertyFileConstants::nameAttribute));
+                auto name = e->getStringAttribute (PropertyFileConstants::nameAttribute);
 
                 if (name.isNotEmpty())
-                {
                     getAllProperties().set (name,
                                             e->getFirstChildElement() != nullptr
                                                 ? e->getFirstChildElement()->createDocument ("", true)
                                                 : e->getStringAttribute (PropertyFileConstants::valueAttribute));
-                }
             }
 
             return true;
@@ -222,15 +218,15 @@ bool PropertiesFile::loadAsXml()
 bool PropertiesFile::saveAsXml()
 {
     XmlElement doc (PropertyFileConstants::fileTag);
-    const StringPairArray& props = getAllProperties();
+    auto& props = getAllProperties();
 
     for (int i = 0; i < props.size(); ++i)
     {
-        XmlElement* const e = doc.createNewChildElement (PropertyFileConstants::valueTag);
+        auto* e = doc.createNewChildElement (PropertyFileConstants::valueTag);
         e->setAttribute (PropertyFileConstants::nameAttribute, props.getAllKeys() [i]);
 
         // if the value seems to contain xml, store it as such..
-        if (XmlElement* const childElement = XmlDocument::parse (props.getAllValues() [i]))
+        if (auto* childElement = XmlDocument::parse (props.getAllValues() [i]))
             e->addChildElement (childElement);
         else
             e->setAttribute (PropertyFileConstants::valueAttribute, props.getAllValues() [i]);
@@ -241,7 +237,7 @@ bool PropertiesFile::saveAsXml()
     if (pl != nullptr && ! pl->isLocked())
         return false; // locking failure..
 
-    if (doc.writeToFile (file, String()))
+    if (doc.writeToFile (file, {}))
     {
         needsWriting = false;
         return true;
@@ -256,7 +252,7 @@ bool PropertiesFile::loadAsBinary()
 
     if (fileStream.openedOk())
     {
-        const int magicNumber = fileStream.readInt();
+        auto magicNumber = fileStream.readInt();
 
         if (magicNumber == PropertyFileConstants::magicNumberCompressed)
         {
@@ -280,10 +276,10 @@ bool PropertiesFile::loadAsBinary (InputStream& input)
 
     while (--numValues >= 0 && ! in.isExhausted())
     {
-        const String key (in.readString());
-        const String value (in.readString());
-
+        auto key = in.readString();
+        auto value = in.readString();
         jassert (key.isNotEmpty());
+
         if (key.isNotEmpty())
             getAllProperties().set (key, value);
     }
@@ -299,48 +295,59 @@ bool PropertiesFile::saveAsBinary()
         return false; // locking failure..
 
     TemporaryFile tempFile (file);
-    ScopedPointer<OutputStream> out (tempFile.getFile().createOutputStream());
 
-    if (out != nullptr)
     {
+        FileOutputStream out (tempFile.getFile());
+
+        if (! out.openedOk())
+            return false;
+
         if (options.storageFormat == storeAsCompressedBinary)
         {
-            out->writeInt (PropertyFileConstants::magicNumberCompressed);
-            out->flush();
+            out.writeInt (PropertyFileConstants::magicNumberCompressed);
+            out.flush();
 
-            out = new GZIPCompressorOutputStream (out.release(), 9, true);
+            GZIPCompressorOutputStream zipped (out, 9);
+
+            if (! writeToStream (zipped))
+                return false;
         }
         else
         {
             // have you set up the storage option flags correctly?
             jassert (options.storageFormat == storeAsBinary);
 
-            out->writeInt (PropertyFileConstants::magicNumber);
-        }
+            out.writeInt (PropertyFileConstants::magicNumber);
 
-        const StringPairArray& props = getAllProperties();
-        const int numProperties   = props.size();
-        const StringArray& keys   = props.getAllKeys();
-        const StringArray& values = props.getAllValues();
-
-        out->writeInt (numProperties);
-
-        for (int i = 0; i < numProperties; ++i)
-        {
-            out->writeString (keys[i]);
-            out->writeString (values[i]);
-        }
-
-        out = nullptr;
-
-        if (tempFile.overwriteTargetFileWithTemporary())
-        {
-            needsWriting = false;
-            return true;
+            if (! writeToStream (out))
+                return false;
         }
     }
 
-    return false;
+    if (! tempFile.overwriteTargetFileWithTemporary())
+        return false;
+
+    needsWriting = false;
+    return true;
+}
+
+bool PropertiesFile::writeToStream (OutputStream& out)
+{
+    auto& props  = getAllProperties();
+    auto& keys   = props.getAllKeys();
+    auto& values = props.getAllValues();
+    auto numProperties = props.size();
+
+    if (! out.writeInt (numProperties))
+        return false;
+
+    for (int i = 0; i < numProperties; ++i)
+    {
+        if (! out.writeString (keys[i]))   return false;
+        if (! out.writeString (values[i])) return false;
+    }
+
+    return true;
 }
 
 void PropertiesFile::timerCallback()
@@ -351,7 +358,6 @@ void PropertiesFile::timerCallback()
 void PropertiesFile::propertyChanged()
 {
     sendChangeMessage();
-
     needsWriting = true;
 
     if (options.millisecondsBeforeSaving > 0)

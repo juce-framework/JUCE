@@ -1682,7 +1682,7 @@ AudioFormatReader* WavAudioFormat::createReaderFor (InputStream* sourceStream, b
     }
    #endif
 
-    if (r->sampleRate > 0 && r->numChannels > 0 && r->bytesPerFrame > 0)
+    if (r->sampleRate > 0 && r->numChannels > 0 && r->bytesPerFrame > 0 && r->bitsPerSample <= 32)
         return r.release();
 
     if (! deleteStreamIfOpeningFails)
@@ -1738,19 +1738,25 @@ namespace WavFileHelpers
         TemporaryFile tempFile (file);
         WavAudioFormat wav;
 
-        if (ScopedPointer<AudioFormatReader> reader = wav.createReaderFor (file.createInputStream(), true))
+        ScopedPointer<AudioFormatReader> reader (wav.createReaderFor (file.createInputStream(), true));
+
+        if (reader != nullptr)
         {
-            if (ScopedPointer<OutputStream> outStream = tempFile.getFile().createOutputStream())
+            ScopedPointer<OutputStream> outStream (tempFile.getFile().createOutputStream());
+
+            if (outStream != nullptr)
             {
-                if (ScopedPointer<AudioFormatWriter> writer = wav.createWriterFor (outStream, reader->sampleRate,
-                                                                                   reader->numChannels, (int) reader->bitsPerSample,
-                                                                                   metadata, 0))
+                ScopedPointer<AudioFormatWriter> writer (wav.createWriterFor (outStream.get(), reader->sampleRate,
+                                                                              reader->numChannels, (int) reader->bitsPerSample,
+                                                                              metadata, 0));
+
+                if (writer != nullptr)
                 {
                     outStream.release();
 
                     bool ok = writer->writeFromAudioReader (*reader, 0, -1);
-                    writer = nullptr;
-                    reader = nullptr;
+                    writer.reset();
+                    reader.reset();
 
                     return ok && tempFile.overwriteTargetFileWithTemporary();
                 }
@@ -1765,11 +1771,13 @@ bool WavAudioFormat::replaceMetadataInFile (const File& wavFile, const StringPai
 {
     using namespace WavFileHelpers;
 
-    if (ScopedPointer<WavAudioFormatReader> reader = static_cast<WavAudioFormatReader*> (createReaderFor (wavFile.createInputStream(), true)))
+    ScopedPointer<WavAudioFormatReader> reader (static_cast<WavAudioFormatReader*> (createReaderFor (wavFile.createInputStream(), true)));
+
+    if (reader != nullptr)
     {
         auto bwavPos  = reader->bwavChunkStart;
         auto bwavSize = reader->bwavSize;
-        reader = nullptr;
+        reader.reset();
 
         if (bwavSize > 0)
         {
@@ -1838,7 +1846,7 @@ struct WaveAudioFormatTests : public UnitTest
                                                                              32, metadataValues, 0));
             expect (writer != nullptr);
 
-            AudioSampleBuffer buffer (numTestAudioBufferChannels, numTestAudioBufferSamples);
+            AudioBuffer<float> buffer (numTestAudioBufferChannels, numTestAudioBufferSamples);
             buffer.clear();
 
             beginTest ("Writing audio data to the basic wave writer");

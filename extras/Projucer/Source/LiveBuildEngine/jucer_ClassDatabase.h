@@ -291,13 +291,18 @@ struct ClassDatabase
             return classDeclaration;
         }
 
-        MemberInfo* findMember (const String& memberName) const
+        const MemberInfo* findMember (const String& memberName) const
         {
-            for (MemberInfo& m : members)
+            for (auto& m : members)
                 if (m.getName() == memberName)
                     return &m;
 
             return nullptr;
+        }
+
+        MemberInfo* findMember (const String& memberName)
+        {
+            return const_cast<MemberInfo*> (static_cast<const Class&>(*this).findMember (memberName));
         }
 
         const MethodInfo* getDefaultConstructor() const
@@ -340,15 +345,15 @@ struct ClassDatabase
                 if (m->definition.isValid())
                     return m->definition.file;
 
-            for (MethodInfo& m : methods)
+            for (auto& m : methods)
                 if (m.definition.isValid() && File (m.definition.file).hasFileExtension ("cpp;mm"))
                     return m.definition.file;
 
-            for (MethodInfo& m : methods)
+            for (auto& m : methods)
                 if ((m.flags & MethodInfo::isConstructor) != 0 && m.definition.isValid())
                     return m.definition.file;
 
-            for (MethodInfo& m : methods)
+            for (auto& m : methods)
                 if (m.definition.isValid() && File (m.definition.file).exists())
                     return m.definition.file;
 
@@ -380,9 +385,9 @@ struct ClassDatabase
             if (other.classDeclaration.isValid())
                 classDeclaration = other.classDeclaration;
 
-            for (const MemberInfo& m : other.members)
+            for (auto& m : other.members)
             {
-                if (MemberInfo* existing = findMember (m.getName()))
+                if (auto* existing = findMember (m.getName()))
                     existing->mergeWith (m);
                 else
                     members.add (m);
@@ -428,7 +433,7 @@ struct ClassDatabase
             classDeclaration.writeToValueTree (v, Ids::classDecl);
 
             for (const MemberInfo& m : members)
-                v.addChild (m.toValueTree(), -1, nullptr);
+                v.appendChild (m.toValueTree(), nullptr);
 
             return v;
         }
@@ -496,14 +501,14 @@ struct ClassDatabase
             return false;
         }
 
-        Class* findClass (const String& className) const
+        const Class* findClass (const String& className) const
         {
-            for (Class& c : components)
+            for (auto& c : components)
                 if (c.getName() == className)
                     return &c;
 
-            for (const auto& n : namespaces)
-                if (Class* c = n.findClass (className))
+            for (auto& n : namespaces)
+                if (auto* c = n.findClass (className))
                     return c;
 
             return nullptr;
@@ -511,19 +516,19 @@ struct ClassDatabase
 
         const MemberInfo* findClassMemberInfo (const String& className, const String& memberName) const
         {
-            if (const Class* classInfo = findClass (className))
+            if (auto* classInfo = findClass (className))
                 return classInfo->findMember (memberName);
 
             return nullptr;
         }
 
-        void findClassesDeclaredInFile (Array<Class*>& results, const File& file) const
+        void findClassesDeclaredInFile (Array<Class*>& results, const File& file)
         {
-            for (Class& c : components)
+            for (auto& c : components)
                 if (c.isDeclaredInFile (file))
                     results.add (&c);
 
-            for (const auto& n : namespaces)
+            for (auto& n : namespaces)
                 n.findClassesDeclaredInFile (results, file);
         }
 
@@ -553,7 +558,7 @@ struct ClassDatabase
                 components.getReference (existing).mergeWith (c);
         }
 
-        Namespace* findNamespace (const String& targetName) const
+        Namespace* findNamespace (const String& targetName)
         {
             for (auto& n : namespaces)
                 if (n.name == targetName)
@@ -593,13 +598,13 @@ struct ClassDatabase
             namespaces.swapWith (other.namespaces);
         }
 
-        void nudgeAllCodeRanges (const String& file, int index, int delta) const
+        void nudgeAllCodeRanges (const String& file, int index, int delta)
         {
             for (auto& c : components)  c.nudgeAllCodeRanges (file, index, delta);
             for (auto& n : namespaces)  n.nudgeAllCodeRanges (file, index, delta);
         }
 
-        void fileContentChanged (const String& file) const
+        void fileContentChanged (const String& file)
         {
             for (auto& c : components)  c.fileContentChanged (file);
             for (auto& n : namespaces)  n.fileContentChanged (file);
@@ -637,8 +642,8 @@ struct ClassDatabase
 
             v.setProperty (Ids::name, name, nullptr);
 
-            for (const auto& c : components)    v.addChild (c.toValueTree(), -1, nullptr);
-            for (const auto& n : namespaces)    v.addChild (n.toValueTree(), -1, nullptr);
+            for (const auto& c : components)    v.appendChild (c.toValueTree(), nullptr);
+            for (const auto& n : namespaces)    v.appendChild (n.toValueTree(), nullptr);
 
             return v;
         }

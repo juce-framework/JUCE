@@ -53,6 +53,8 @@ namespace juce
     register, see the OnlineUnlockForm class.
 
     @see OnlineUnlockForm, KeyGeneration
+
+    @tags{ProductUnlocking}
 */
 class JUCE_API  OnlineUnlockStatus
 {
@@ -116,6 +118,14 @@ public:
         version of this functionality.
     */
     virtual StringArray getLocalMachineIDs();
+
+    /** This method will be called if the user cancels the connection to the webserver
+        by clicking the cancel button in OnlineUnlockForm::OverlayComp.
+
+        The default implementation of this method does nothing but you should use it to
+        cancel any WebInputStreams that may be connecting.
+    */
+    virtual void userCancelled();
 
     //==============================================================================
     // The following methods can be called by your app:

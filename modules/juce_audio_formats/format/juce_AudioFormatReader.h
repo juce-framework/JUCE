@@ -38,6 +38,8 @@ class AudioFormat;
     an AudioFormat object.
 
     @see AudioFormat, AudioFormatWriter
+
+    @tags{Audio}
 */
 class JUCE_API  AudioFormatReader
 {
@@ -111,14 +113,14 @@ public:
                int numSamplesToRead,
                bool fillLeftoverChannelsWithCopies);
 
-    /** Fills a section of an AudioSampleBuffer from this reader.
+    /** Fills a section of an AudioBuffer from this reader.
 
         This will convert the reader's fixed- or floating-point data to
         the buffer's floating-point format, and will try to intelligently
         cope with mismatches between the number of channels in the reader
         and the buffer.
     */
-    void read (AudioSampleBuffer* buffer,
+    void read (AudioBuffer<float>* buffer,
                int startSampleInDestBuffer,
                int numSamples,
                int64 readerStartSample,

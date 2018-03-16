@@ -106,16 +106,12 @@ namespace LiveConstantEditor
     };
 
     //==============================================================================
-    struct JUCE_API  LivePropertyEditorBase  : public Component,
-                                               private TextEditor::Listener,
-                                               private Button::Listener
+    struct JUCE_API  LivePropertyEditorBase  : public Component
     {
         LivePropertyEditorBase (LiveValueBase&, CodeDocument&);
 
         void paint (Graphics&) override;
         void resized() override;
-        void textEditorTextChanged (TextEditor&) override;
-        void buttonClicked (Button*) override;
 
         void applyNewValue (const String&);
         void selectOriginalValue();
@@ -161,7 +157,8 @@ namespace LiveConstantEditor
         template <typename ValueType>
         LivePropertyEditor (ValueType& v, CodeDocument& d)  : LivePropertyEditorBase (v, d)
         {
-            addAndMakeVisible (customComp = CustomEditor<Type>::create (*this));
+            customComp.reset (CustomEditor<Type>::create (*this));
+            addAndMakeVisible (customComp.get());
         }
     };
 
@@ -174,6 +171,7 @@ namespace LiveConstantEditor
         {}
 
         operator Type() const noexcept   { return value; }
+        Type get() const noexcept        { return value; }
         operator const char*() const     { return castToCharPointer (value); }
 
         LivePropertyEditorBase* createPropertyComponent (CodeDocument& doc) override
@@ -200,7 +198,7 @@ namespace LiveConstantEditor
         ValueList();
         ~ValueList();
 
-        juce_DeclareSingleton (ValueList, false)
+        JUCE_DECLARE_SINGLETON (ValueList, false)
 
         template <typename Type>
         LiveValue<Type>& getValue (const char* file, int line, const Type& initialValue)
@@ -305,7 +303,7 @@ namespace LiveConstantEditor
     @endcode
  */
  #define JUCE_LIVE_CONSTANT(initialValue) \
-    (juce::LiveConstantEditor::getValue (__FILE__, __LINE__ - 1, initialValue))
+    (juce::LiveConstantEditor::getValue (__FILE__, __LINE__ - 1, initialValue).get())
 #else
  #define JUCE_LIVE_CONSTANT(initialValue) \
     (initialValue)

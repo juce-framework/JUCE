@@ -36,6 +36,8 @@ namespace juce
 
     @see CriticalSection, WaitableEvent, Process, ThreadWithProgressWindow,
          MessageManagerLock
+
+    @tags{Core}
 */
 class JUCE_API  Thread
 {
@@ -153,7 +155,7 @@ public:
 
         @see signalThreadShouldExit, currentThreadShouldExit
     */
-    bool threadShouldExit() const                { return shouldExit; }
+    bool threadShouldExit() const;
 
     /** Checks whether the current thread has been told to stop running.
         On the message thread, this will always return false, otherwise
@@ -173,6 +175,7 @@ public:
     bool waitForThreadToExit (int timeOutMilliseconds) const;
 
     //==============================================================================
+    /** Used to receive callbacks for thread exit calls */
     class Listener
     {
     public:
@@ -200,9 +203,9 @@ public:
         for realtime audio processing.
 
         Currently, this priority is identical to priority 9, except when building
-        for Android with OpenSL support.
+        for Android with OpenSL/Oboe support.
 
-        In this case, JUCE will ask OpenSL to consturct a super high priority thread
+        In this case, JUCE will ask OpenSL/Oboe to construct a super high priority thread
         specifically for realtime audio processing.
 
         Note that this priority can only be set **before** the thread has
@@ -210,7 +213,7 @@ public:
         priority, is not supported under Android and will assert.
 
         For best performance this thread should yield at regular intervals
-        and not call any blocking APIS.
+        and not call any blocking APIs.
 
         @see startThread, setPriority, sleep, WaitableEvent
      */
@@ -298,7 +301,7 @@ public:
 
     /** Finds the thread object that is currently running.
 
-        Note that the main UI thread (or other non-Juce threads) don't have a Thread
+        Note that the main UI thread (or other non-JUCE threads) don't have a Thread
         object associated with them, so this will return nullptr.
     */
     static Thread* JUCE_CALLTYPE getCurrentThread();
@@ -309,7 +312,7 @@ public:
         thread's not actually running.
         @see getCurrentThreadId
     */
-    ThreadID getThreadId() const noexcept                           { return threadId; }
+    ThreadID getThreadId() const noexcept;
 
     /** Returns the name of the thread.
         This is the name that gets set in the constructor.
@@ -325,15 +328,15 @@ public:
 private:
     //==============================================================================
     const String threadName;
-    void* volatile threadHandle = nullptr;
-    ThreadID threadId = {};
+    Atomic<void*> threadHandle { nullptr };
+    Atomic<ThreadID> threadId = {};
     CriticalSection startStopLock;
     WaitableEvent startSuspensionEvent, defaultEvent;
     int threadPriority = 5;
     size_t threadStackSize;
     uint32 affinityMask = 0;
     bool deleteOnThreadEnd = false;
-    bool volatile shouldExit = false;
+    Atomic<int32> shouldExit { 0 };
     ListenerList<Listener, Array<Listener*, CriticalSection>> listeners;
 
    #if JUCE_ANDROID

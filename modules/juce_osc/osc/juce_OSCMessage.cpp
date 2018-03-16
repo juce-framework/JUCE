@@ -53,7 +53,12 @@ bool OSCMessage::isEmpty() const noexcept
     return arguments.isEmpty();
 }
 
-OSCArgument& OSCMessage::operator[] (const int i) const noexcept
+OSCArgument& OSCMessage::operator[] (const int i) noexcept
+{
+    return arguments.getReference (i);
+}
+
+const OSCArgument& OSCMessage::operator[] (const int i) const noexcept
 {
     return arguments.getReference (i);
 }
@@ -147,7 +152,6 @@ public:
         }
 
 
-       #if JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES
         beginTest ("Initialisation with argument list (C++11 only)");
         {
             int testInt = 42;
@@ -192,7 +196,6 @@ public:
                 expectEquals (msg[4].getInt32(), testInt);
             }
         }
-       #endif
     }
 };
 

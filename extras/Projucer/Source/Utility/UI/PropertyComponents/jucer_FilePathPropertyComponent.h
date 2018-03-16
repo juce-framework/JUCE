@@ -53,9 +53,7 @@ public:
 
 private:
     struct InnerComponent   : public Component,
-                              public FileDragAndDropTarget,
-                              private Button::Listener,
-                              private TextEditor::Listener
+                              public FileDragAndDropTarget
     {
         InnerComponent (Value v, bool isDir, const String& wc, const File& rt, const bool multiplePaths)
             : value (v),
@@ -68,10 +66,11 @@ private:
         {
             addAndMakeVisible (textbox);
             textbox.getTextValue().referTo (value);
-            textbox.addListener (this);
+            textbox.onReturnKey  = [this] { updateEditorColour (textbox); };
+            textbox.onFocusLost  = [this] { updateEditorColour (textbox); };
 
             addAndMakeVisible (button);
-            button.addListener (this);
+            button.onClick = [this] { browse(); };
 
             lookAndFeelChanged();
         }
@@ -111,9 +110,9 @@ private:
             repaint();
         }
 
-        void buttonClicked (Button*) override
+        void browse()
         {
-            const File currentFile (root.getChildFile (value.toString()));
+            auto currentFile = root.getChildFile (value.toString());
 
             if (isDirectory)
             {
@@ -130,9 +129,6 @@ private:
                     setTo (chooser.getResult());
             }
         }
-
-        void textEditorReturnKeyPressed (TextEditor& editor) override   { updateEditorColour (editor); }
-        void textEditorFocusLost (TextEditor& editor) override          { updateEditorColour (editor); }
 
         void updateEditorColour (TextEditor& editor)
         {
@@ -167,10 +163,10 @@ private:
                 if (pathToCheck.contains ("${user.home}"))
                     pathToCheck = pathToCheck.replace ("${user.home}", File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
 
-              #if JUCE_WINDOWS
+               #if JUCE_WINDOWS
                 if (pathToCheck.startsWith ("~"))
                     pathToCheck = pathToCheck.replace ("~", File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
-              #endif
+               #endif
 
                 const auto currentFile = root.getChildFile (pathToCheck);
 

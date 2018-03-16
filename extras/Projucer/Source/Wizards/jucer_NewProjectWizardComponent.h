@@ -28,9 +28,7 @@
 
 
 //==============================================================================
-class ModulesFolderPathBox  : public Component,
-                              private Button::Listener,
-                              private ComboBox::Listener
+class ModulesFolderPathBox  : public Component
 {
 public:
     ModulesFolderPathBox (File initialFileOrDirectory)
@@ -46,18 +44,26 @@ public:
 
         addAndMakeVisible (currentPathBox);
         currentPathBox.setEditableText (true);
-        currentPathBox.addListener (this);
+        currentPathBox.onChange = [this] { setModulesFolder (File::getCurrentWorkingDirectory()
+                                                                  .getChildFile (currentPathBox.getText())); };
 
         addAndMakeVisible (openFolderButton);
-        openFolderButton.addListener (this);
         openFolderButton.setTooltip (TRANS ("Select JUCE modules folder"));
+        openFolderButton.onClick = [this] { selectJuceFolder(); };
 
         addAndMakeVisible (modulesLabel);
         modulesLabel.attachToComponent (&currentPathBox, true);
 
         addAndMakeVisible (useGlobalPathsToggle);
-        useGlobalPathsToggle.addListener (this);
         useGlobalPathsToggle.setToggleState (true, sendNotification);
+        useGlobalPathsToggle.onClick = [this]
+        {
+            isUsingGlobalPaths = useGlobalPathsToggle.getToggleState();
+
+            currentPathBox.setEnabled   (! isUsingGlobalPaths);
+            openFolderButton.setEnabled (! isUsingGlobalPaths);
+            modulesLabel.setEnabled     (! isUsingGlobalPaths);
+        };
     }
 
     void resized() override
@@ -85,7 +91,7 @@ public:
             if (! fc.browseForDirectory())
                 return false;
 
-            if (isJuceModulesFolder (fc.getResult()))
+            if (isJUCEModulesFolder (fc.getResult()))
             {
                 result = fc.getResult();
                 return true;
@@ -113,28 +119,6 @@ public:
             modulesFolder = newFolder;
             currentPathBox.setText (modulesFolder.getFullPathName(), dontSendNotification);
         }
-    }
-
-    void buttonClicked (Button* b) override
-    {
-        if (b == &openFolderButton)
-        {
-            selectJuceFolder();
-        }
-        else if (b == &useGlobalPathsToggle)
-        {
-            isUsingGlobalPaths = useGlobalPathsToggle.getToggleState();
-
-            currentPathBox.setEnabled   (! isUsingGlobalPaths);
-            openFolderButton.setEnabled (! isUsingGlobalPaths);
-            modulesLabel.setEnabled     (! isUsingGlobalPaths);
-        }
-
-    }
-
-    void comboBoxChanged (ComboBox*) override
-    {
-        setModulesFolder (File::getCurrentWorkingDirectory().getChildFile (currentPathBox.getText()));
     }
 
     File modulesFolder;
@@ -296,9 +280,6 @@ private:
     a list box of platform targets to generate.
 */
 class WizardComp  : public Component,
-                    private Button::Listener,
-                    private ComboBox::Listener,
-                    private TextEditor::Listener,
                     private FileBrowserListener
 {
 public:
@@ -312,13 +293,17 @@ public:
         addChildAndSetID (&projectName, "projectName");
         projectName.setText ("NewProject");
         nameLabel.attachToComponent (&projectName, true);
-        projectName.addListener (this);
+        projectName.onTextChange = [this]
+        {
+            updateCreateButton();
+            fileBrowser.setFileName (File::createLegalFileName (projectName.getText()));
+        };
 
         addChildAndSetID (&projectType, "projectType");
         projectType.addItemList (getWizardNames(), 1);
         projectType.setSelectedId (1, dontSendNotification);
         typeLabel.attachToComponent (&projectType, true);
-        projectType.addListener (this);
+        projectType.onChange = [this] { updateFileCreationTypes(); };
 
         addChildAndSetID (&fileOutline, "fileOutline");
         fileOutline.setColour (GroupComponent::outlineColourId, Colours::black.withAlpha (0.2f));
@@ -336,11 +321,11 @@ public:
         fileBrowser.addListener (this);
 
         addChildAndSetID (&createButton, "createButton");
-        createButton.addListener (this);
+        createButton.onClick = [this] { createProject(); };
 
         addChildAndSetID (&cancelButton, "cancelButton");
         cancelButton.addShortcut (KeyPress (KeyPress::escapeKey));
-        cancelButton.addListener (this);
+        cancelButton.onClick = [this] { returnToTemplatesPage(); };
 
         addChildAndSetID (&modulesPathBox, "modulesPathBox");
 
@@ -387,18 +372,6 @@ public:
         platformTargets.setBounds (right.reduced (25));
     }
 
-    void buttonClicked (Button* b) override
-    {
-        if (b == &createButton)
-        {
-            createProject();
-        }
-        else if (b == &cancelButton)
-        {
-            returnToTemplatesPage();
-        }
-    }
-
     void returnToTemplatesPage()
     {
         if (auto* parent = findParentComponentOfClass<SlidingPanelComponent>())
@@ -433,7 +406,7 @@ public:
             wizard->modulesFolder = modulesPathBox.isUsingGlobalPaths ? File (getAppSettings().getStoredPath (Ids::defaultJuceModulePath).toString())
                                                                       : modulesPathBox.modulesFolder;
 
-            if (! isJuceModulesFolder (wizard->modulesFolder))
+            if (! isJUCEModulesFolder (wizard->modulesFolder))
             {
                 if (modulesPathBox.isUsingGlobalPaths)
                     AlertWindow::showMessageBox (AlertWindow::AlertIconType::WarningIcon, "Invalid Global Path",
@@ -469,17 +442,6 @@ public:
         filesToCreate.clear();
         filesToCreate.addItemList (items, 1);
         filesToCreate.setSelectedId (1, dontSendNotification);
-    }
-
-    void comboBoxChanged (ComboBox*) override
-    {
-        updateFileCreationTypes();
-    }
-
-    void textEditorTextChanged (TextEditor&) override
-    {
-        updateCreateButton();
-        fileBrowser.setFileName (File::createLegalFileName (projectName.getText()));
     }
 
     void selectionChanged() override {}
@@ -519,7 +481,7 @@ private:
     TextButton cancelButton { TRANS("Cancel") };
     ModulesFolderPathBox modulesPathBox;
 
-    NewProjectWizardClasses::NewProjectWizard* createWizard()
+    ScopedPointer<NewProjectWizardClasses::NewProjectWizard> createWizard()
     {
         return createWizardType (projectType.getSelectedItemIndex());
     }

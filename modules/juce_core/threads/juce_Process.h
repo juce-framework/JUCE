@@ -30,6 +30,8 @@ namespace juce
     process-level.
 
     @see Thread, JUCEApplicationBase
+
+    @tags{Core}
 */
 class JUCE_API  Process
 {

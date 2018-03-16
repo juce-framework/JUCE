@@ -35,7 +35,7 @@ class FileGroupInformationComponent  : public Component,
 public:
     FileGroupInformationComponent (const Project::Item& group)
         : item (group),
-          header (item.getName(), Icon (getIcons().openFolder, Colours::transparentBlack))
+          header (item.getName(), { getIcons().openFolder, Colours::transparentBlack })
     {
         list.setHeaderComponent (new ListBoxHeader ( { "File", "Binary Resource", "Xcode Resource", "Compile" },
                                                      { 0.4f, 0.2f, 0.2f, 0.2f } ));
@@ -93,18 +93,20 @@ public:
 
         if (rowNumber < getNumRows())
         {
-            Project::Item child (item.getChild (rowNumber));
+            auto child = item.getChild (rowNumber);
 
             if (existingComponentToUpdate == nullptr
                  || dynamic_cast<FileOptionComponent*> (existing.get())->item != child)
             {
-                existing = nullptr;
-                existing = new FileOptionComponent (child, dynamic_cast<ListBoxHeader*> (list.getHeaderComponent()));
+                existing.reset();
+                existing.reset (new FileOptionComponent (child, dynamic_cast<ListBoxHeader*> (list.getHeaderComponent())));
             }
         }
 
         return existing.release();
     }
+
+    String getGroupPath() const    { return item.getFile().getFullPathName(); }
 
     //==============================================================================
     void valueTreePropertyChanged (ValueTree&, const Identifier&) override    { itemChanged(); }

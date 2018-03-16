@@ -525,8 +525,9 @@ void PaintRoutine::fillWithBackground (Graphics& g, const bool drawOpaqueBackgro
 {
     if ((! backgroundColour.isOpaque()) && drawOpaqueBackground)
     {
-        g.fillCheckerBoard (Rectangle<int> (0, 0, g.getClipBounds().getRight(), g.getClipBounds().getBottom()),
-                            50, 50,
+        g.fillCheckerBoard (Rectangle<float> ((float) g.getClipBounds().getRight(),
+                                              (float) g.getClipBounds().getBottom()),
+                            50.0f, 50.0f,
                             Colour (0xffdddddd).overlaidWith (backgroundColour),
                             Colour (0xffffffff).overlaidWith (backgroundColour));
     }
@@ -553,7 +554,7 @@ void PaintRoutine::dropImageAt (const File& f, int x, int y)
     if (d != nullptr)
     {
         auto bounds = d->getDrawableBounds();
-        d = nullptr;
+        d.reset();
 
         auto* newElement = addNewElement (ObjectTypes::createNewImageElement (this), -1, true);
 

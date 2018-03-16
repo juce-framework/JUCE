@@ -110,8 +110,8 @@ protected:
 	b2Vec3 m_impulse;
 
 	// Solver temp
-	int32 m_indexA;
-	int32 m_indexB;
+	juce::int32 m_indexA;
+	juce::int32 m_indexB;
 	b2Vec2 m_rA;
 	b2Vec2 m_rB;
 	b2Vec2 m_localCenterA;

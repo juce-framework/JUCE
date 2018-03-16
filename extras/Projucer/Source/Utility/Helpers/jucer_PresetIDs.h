@@ -65,6 +65,7 @@ namespace Ids
     DECLARE_ID (osxFallback);
     DECLARE_ID (windowsFallback);
     DECLARE_ID (linuxFallback);
+    DECLARE_ID (jucePath);
     DECLARE_ID (defaultJuceModulePath);
     DECLARE_ID (defaultUserModulePath);
     DECLARE_ID (vst3Folder);
@@ -97,6 +98,15 @@ namespace Ids
     DECLARE_ID (customXcassetsFolder);
     DECLARE_ID (customXcodeResourceFolders);
     DECLARE_ID (plistPreprocessorDefinitions);
+    DECLARE_ID (customPList);
+    DECLARE_ID (pListPrefixHeader);
+    DECLARE_ID (pListPreprocess);
+    DECLARE_ID (UIFileSharingEnabled);
+    DECLARE_ID (UISupportsDocumentBrowser);
+    DECLARE_ID (UIStatusBarHidden);
+    DECLARE_ID (documentExtensions);
+    DECLARE_ID (keepCustomXcodeSchemes);
+    DECLARE_ID (useHeaderMap);
     DECLARE_ID (cppLanguageStandard);
     DECLARE_ID (enableGNUExtensions);
     DECLARE_ID (cppLibType);
@@ -123,6 +133,7 @@ namespace Ids
     DECLARE_ID (linuxArchitecture);
     DECLARE_ID (linuxCodeBlocksArchitecture);
     DECLARE_ID (windowsCodeBlocksArchitecture);
+    DECLARE_ID (codeBlocksWindowsTarget);
     DECLARE_ID (toolset);
     DECLARE_ID (windowsTargetPlatformVersion);
     DECLARE_ID (debugInformationFormat);
@@ -136,7 +147,6 @@ namespace Ids
     DECLARE_ID (generateManifest);
     DECLARE_ID (useRuntimeLibDLL);
     DECLARE_ID (enableIncrementalLinking);
-    DECLARE_ID (buildVST);
     DECLARE_ID (bundleIdentifier);
     DECLARE_ID (aaxIdentifier);
     DECLARE_ID (aaxCategory);
@@ -168,15 +178,21 @@ namespace Ids
     DECLARE_ID (useLocalCopy);
     DECLARE_ID (overwriteOnSave);
     DECLARE_ID (microphonePermissionNeeded);
+    DECLARE_ID (microphonePermissionsText);
+    DECLARE_ID (androidJavaLibs);
     DECLARE_ID (androidRepositories);
     DECLARE_ID (androidDependencies);
+    DECLARE_ID (androidBuildConfigRemoteNotifsConfigFile);
     DECLARE_ID (androidAdditionalXmlValueResources);
+    DECLARE_ID (androidAdditionalDrawableResources);
     DECLARE_ID (androidAdditionalRawValueResources);
     DECLARE_ID (androidActivityClass);
     DECLARE_ID (androidActivitySubClassName);
+    DECLARE_ID (androidActivityBaseClassName);
     DECLARE_ID (androidVersionCode);
     DECLARE_ID (androidSDKPath);
     DECLARE_ID (androidNDKPath);
+    DECLARE_ID (androidOboeRepositoryPath);
     DECLARE_ID (androidInternetNeeded);
     DECLARE_ID (androidArchitectures);
     DECLARE_ID (androidManifestCustomXmlElements);
@@ -188,6 +204,7 @@ namespace Ids
     DECLARE_ID (androidVibratePermissionNeeded);
     DECLARE_ID (androidEnableRemoteNotifications);
     DECLARE_ID (androidRemoteNotificationsConfigFile);
+    DECLARE_ID (androidEnableContentSharing);
     DECLARE_ID (androidMinimumSDK);
     DECLARE_ID (androidOtherPermissions);
     DECLARE_ID (androidKeyStore);
@@ -208,6 +225,7 @@ namespace Ids
     DECLARE_ID (iosBackgroundBle);
     DECLARE_ID (iosPushNotifications);
     DECLARE_ID (iosAppGroups);
+    DECLARE_ID (iCloudPermissions);
     DECLARE_ID (iosDevelopmentTeamID);
     DECLARE_ID (iosAppGroupsId);
     DECLARE_ID (iosAppExtensionDuplicateResourcesFolder);
@@ -220,6 +238,7 @@ namespace Ids
     DECLARE_ID (clionMakefileEnabled);
     DECLARE_ID (clionXcodeEnabled);
     DECLARE_ID (clionCodeBlocksEnabled);
+    DECLARE_ID (clionExePath);
     DECLARE_ID (font);
     DECLARE_ID (colour);
     DECLARE_ID (userNotes);
@@ -270,10 +289,43 @@ namespace Ids
     DECLARE_ID (classDecl);
     DECLARE_ID (initialisers);
     DECLARE_ID (destructors);
+    DECLARE_ID (buildVST);
+    DECLARE_ID (buildVST3);
+    DECLARE_ID (buildAU);
+    DECLARE_ID (buildAUv3);
+    DECLARE_ID (buildRTAS);
+    DECLARE_ID (buildAAX);
+    DECLARE_ID (buildStandalone);
+    DECLARE_ID (enableIAA);
+    DECLARE_ID (pluginName);
+    DECLARE_ID (pluginDesc);
+    DECLARE_ID (pluginManufacturer);
+    DECLARE_ID (pluginManufacturerCode);
+    DECLARE_ID (pluginCode);
+    DECLARE_ID (pluginChannelConfigs);
+    DECLARE_ID (pluginIsSynth);
+    DECLARE_ID (pluginWantsMidiIn);
+    DECLARE_ID (pluginProducesMidiOut);
+    DECLARE_ID (pluginIsMidiEffectPlugin);
+    DECLARE_ID (pluginEditorRequiresKeys);
+    DECLARE_ID (pluginVSTCategory);
+    DECLARE_ID (pluginAUExportPrefix);
+    DECLARE_ID (pluginAUMainType);
+    DECLARE_ID (pluginRTASCategory);
+    DECLARE_ID (pluginRTASDisableBypass);
+    DECLARE_ID (pluginRTASDisableMultiMono);
+    DECLARE_ID (pluginAAXCategory);
+    DECLARE_ID (pluginAAXDisableBypass);
+    DECLARE_ID (pluginAAXDisableMultiMono);
+    DECLARE_ID (exporters);
+    DECLARE_ID (website);
+    DECLARE_ID (mainClass);
+    DECLARE_ID (moduleFlags);
 
     const Identifier ID ("id");
     const Identifier ID_uppercase ("ID");
     const Identifier class_ ("class");
+    const Identifier dependencies_ ("dependencies");
 
     #undef DECLARE_ID
 }

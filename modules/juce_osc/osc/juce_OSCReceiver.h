@@ -35,6 +35,8 @@ namespace juce
     It can connect to a network port, receive incoming OSC packets from the
     network via UDP, parse them, and forward the included OSCMessage and OSCBundle
     objects to its listeners.
+
+    @tags{OSC}
 */
 class JUCE_API  OSCReceiver
 {
@@ -53,6 +55,14 @@ public:
         @returns true if the connection was successful; false otherwise.
     */
     bool connect (int portNumber);
+
+    /** Connects to a UDP datagram socket that is already set up,
+        and starts listening to OSC packets arriving on this port.
+        Make sure that the object you give it doesn't get deleted while this
+        object is still using it!
+        @returns true if the connection was successful; false otherwise.
+    */
+    bool connectToSocket (DatagramSocket& socketToUse);
 
     //==============================================================================
     /** Disconnects from the currently used UDP port.

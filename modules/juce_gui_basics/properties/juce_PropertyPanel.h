@@ -38,6 +38,8 @@ namespace juce
     or addSection().
 
     @see PropertyComponent
+
+    @tags{GUI}
 */
 class JUCE_API  PropertyPanel  : public Component
 {

@@ -36,6 +36,8 @@ namespace juce
     from files, streams or from memory.
 
     @see Image, ImageCache
+
+    @tags{Graphics}
 */
 class JUCE_API  ImageFileFormat
 {
@@ -143,6 +145,8 @@ public:
     A subclass of ImageFileFormat for reading and writing PNG files.
 
     @see ImageFileFormat, JPEGImageFormat
+
+    @tags{Graphics}
 */
 class JUCE_API  PNGImageFormat  : public ImageFileFormat
 {
@@ -165,6 +169,8 @@ public:
     A subclass of ImageFileFormat for reading and writing JPEG files.
 
     @see ImageFileFormat, PNGImageFormat
+
+    @tags{Graphics}
 */
 class JUCE_API  JPEGImageFormat  : public ImageFileFormat
 {
@@ -197,6 +203,8 @@ private:
     A subclass of ImageFileFormat for reading GIF files.
 
     @see ImageFileFormat, PNGImageFormat, JPEGImageFormat
+
+    @tags{Graphics}
 */
 class JUCE_API  GIFImageFormat  : public ImageFileFormat
 {

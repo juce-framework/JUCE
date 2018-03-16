@@ -190,7 +190,7 @@ void Graphics::setColour (Colour newColour)
     context.setFill (newColour);
 }
 
-void Graphics::setOpacity (const float newOpacity)
+void Graphics::setOpacity (float newOpacity)
 {
     saveStateIfPending();
     context.setOpacity (newOpacity);
@@ -199,6 +199,11 @@ void Graphics::setOpacity (const float newOpacity)
 void Graphics::setGradientFill (const ColourGradient& gradient)
 {
     setFillType (gradient);
+}
+
+void Graphics::setGradientFill (ColourGradient&& gradient)
+{
+    setFillType (static_cast<ColourGradient&&> (gradient));
 }
 
 void Graphics::setTiledImageFill (const Image& imageToUse, const int anchorX, const int anchorY, const float opacity)
@@ -507,8 +512,7 @@ void Graphics::drawArrow (Line<float> line, float lineThickness, float arrowhead
     fillPath (p);
 }
 
-void Graphics::fillCheckerBoard (Rectangle<int> area,
-                                 const int checkWidth, const int checkHeight,
+void Graphics::fillCheckerBoard (Rectangle<float> area, float checkWidth, float checkHeight,
                                  Colour colour1, Colour colour2) const
 {
     jassert (checkWidth > 0 && checkHeight > 0); // can't be zero or less!
@@ -520,31 +524,33 @@ void Graphics::fillCheckerBoard (Rectangle<int> area,
         if (colour1 == colour2)
         {
             context.setFill (colour1);
-            context.fillRect (area, false);
+            context.fillRect (area);
         }
         else
         {
-            auto clipped = context.getClipBounds().getIntersection (area);
+            auto clipped = context.getClipBounds().getIntersection (area.getSmallestIntegerContainer());
 
             if (! clipped.isEmpty())
             {
-                context.clipToRectangle (clipped);
-
-                const int checkNumX = (clipped.getX() - area.getX()) / checkWidth;
-                const int checkNumY = (clipped.getY() - area.getY()) / checkHeight;
-                const int startX = area.getX() + checkNumX * checkWidth;
-                const int startY = area.getY() + checkNumY * checkHeight;
-                const int right  = clipped.getRight();
-                const int bottom = clipped.getBottom();
+                const int checkNumX = (int) ((clipped.getX() - area.getX()) / checkWidth);
+                const int checkNumY = (int) ((clipped.getY() - area.getY()) / checkHeight);
+                const float startX = area.getX() + checkNumX * checkWidth;
+                const float startY = area.getY() + checkNumY * checkHeight;
+                const float right  = (float) clipped.getRight();
+                const float bottom = (float) clipped.getBottom();
 
                 for (int i = 0; i < 2; ++i)
                 {
-                    context.setFill (i == ((checkNumX ^ checkNumY) & 1) ? colour1 : colour2);
-
                     int cy = i;
-                    for (int y = startY; y < bottom; y += checkHeight)
-                        for (int x = startX + (cy++ & 1) * checkWidth; x < right; x += checkWidth * 2)
-                            context.fillRect (Rectangle<int> (x, y, checkWidth, checkHeight), false);
+                    RectangleList<float> checks;
+
+                    for (float y = startY; y < bottom; y += checkHeight)
+                        for (float x = startX + (cy++ & 1) * checkWidth; x < right; x += checkWidth * 2.0f)
+                            checks.addWithoutMerging ({ x, y, checkWidth, checkHeight });
+
+                    checks.clipTo (area);
+                    context.setFill (i == ((checkNumX ^ checkNumY) & 1) ? colour1 : colour2);
+                    context.fillRectList (checks);
                 }
             }
         }

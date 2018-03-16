@@ -62,7 +62,7 @@ static const EmptyString emptyString = { 0x3fffffff, sizeof (String::CharPointer
 class StringHolder
 {
 public:
-    StringHolder() JUCE_DELETED_FUNCTION;
+    StringHolder() = delete;
 
     typedef String::CharPointerType CharPointerType;
     typedef String::CharPointerType::CharType CharType;
@@ -463,7 +463,10 @@ namespace NumberToStringConverters
                 std::ostream o (this);
 
                 if (numDecPlaces > 0)
+                {
+                    o.setf (std::ios_base::fixed);
                     o.precision ((std::streamsize) numDecPlaces);
+                }
 
                 o << n;
             }
@@ -678,7 +681,12 @@ static int naturalStringCompare (String::CharPointerType s1, String::CharPointer
         const bool hasSpace2 = s2.isWhitespace();
 
         if ((! firstLoop) && (hasSpace1 ^ hasSpace2))
+        {
+            if (s1.isEmpty())  return -1;
+            if (s2.isEmpty())  return 1;
+
             return hasSpace2 ? 1 : -1;
+        }
 
         firstLoop = false;
 
@@ -687,8 +695,8 @@ static int naturalStringCompare (String::CharPointerType s1, String::CharPointer
 
         if (s1.isDigit() && s2.isDigit())
         {
-            const int result = (*s1 == '0' || *s2 == '0') ? stringCompareLeft  (s1, s2)
-                                                          : stringCompareRight (s1, s2);
+            auto result = (*s1 == '0' || *s2 == '0') ? stringCompareLeft  (s1, s2)
+                                                     : stringCompareRight (s1, s2);
 
             if (result != 0)
                 return result;
@@ -745,8 +753,8 @@ void String::appendCharPointer (const CharPointerType startOfTextToAppend,
 {
     jassert (startOfTextToAppend.getAddress() != nullptr && endOfTextToAppend.getAddress() != nullptr);
 
-    const int extraBytesNeeded = getAddressDifference (endOfTextToAppend.getAddress(),
-                                                       startOfTextToAppend.getAddress());
+    auto extraBytesNeeded = getAddressDifference (endOfTextToAppend.getAddress(),
+                                                  startOfTextToAppend.getAddress());
     jassert (extraBytesNeeded >= 0);
 
     if (extraBytesNeeded > 0)
@@ -2481,6 +2489,8 @@ public:
             expect (String::toHexString (data, 8, 0).equalsIgnoreCase ("010203040a0b0c0d"));
             expect (String::toHexString (data, 8, 1).equalsIgnoreCase ("01 02 03 04 0a 0b 0c 0d"));
             expect (String::toHexString (data, 8, 2).equalsIgnoreCase ("0102 0304 0a0b 0c0d"));
+
+            expectEquals (String (2589410.5894, 7), String ("2589410.5894000"));
 
             beginTest ("Subsections");
             String s3;

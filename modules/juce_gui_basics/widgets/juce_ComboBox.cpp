@@ -40,7 +40,7 @@ ComboBox::~ComboBox()
 {
     currentId.removeListener (this);
     hidePopup();
-    label = nullptr;
+    label.reset();
 }
 
 //==============================================================================
@@ -93,10 +93,10 @@ void ComboBox::addItem (const String& newItemText, int newItemId)
         currentMenu.addItem (newItemId, newItemText, true, false);
 }
 
-void ComboBox::addItemList (const StringArray& itemsToAdd, int firstItemIdOffset)
+void ComboBox::addItemList (const StringArray& itemsToAdd, int firstItemID)
 {
-    for (int i = 0; i < itemsToAdd.size(); ++i)
-        currentMenu.addItem (i + firstItemIdOffset, itemsToAdd[i]);
+    for (auto& i : itemsToAdd)
+        currentMenu.addItem (firstItemID++, i);
 }
 
 void ComboBox::addSeparator()
@@ -418,10 +418,10 @@ void ComboBox::lookAndFeelChanged()
             newLabel->setText (label->getText(), dontSendNotification);
         }
 
-        label = newLabel;
+        std::swap (label, newLabel);
     }
 
-    addAndMakeVisible (label);
+    addAndMakeVisible (label.get());
 
     EditableState newEditableState = (label->isEditable() ? labelIsEditable : labelIsNotEditable);
 
@@ -431,7 +431,7 @@ void ComboBox::lookAndFeelChanged()
         setWantsKeyboardFocus (labelEditableState == labelIsNotEditable);
     }
 
-    label->addListener (this);
+    label->onTextChange = [this] { triggerAsyncUpdate(); };
     label->addMouseListener (this, false);
 
     label->setColour (Label::backgroundColourId, Colours::transparentBlack);
@@ -483,12 +483,6 @@ bool ComboBox::keyStateChanged (const bool isKeyDown)
 void ComboBox::focusGained (FocusChangeType)    { repaint(); }
 void ComboBox::focusLost (FocusChangeType)      { repaint(); }
 
-void ComboBox::labelTextChanged (Label*)
-{
-    triggerAsyncUpdate();
-}
-
-
 //==============================================================================
 void ComboBox::showPopupIfNotActive()
 {
@@ -502,7 +496,7 @@ void ComboBox::showPopupIfNotActive()
         // exited the modal state of other popups currently on the screen. By calling
         // showPopup asynchronously, we are giving the other popups a chance to properly
         // close themselves
-        MessageManager::callAsync([safePointer] () mutable { if (safePointer != nullptr) safePointer->showPopup(); });
+        MessageManager::callAsync ([safePointer]() mutable { if (safePointer != nullptr) safePointer->showPopup(); });
     }
 }
 
@@ -529,14 +523,13 @@ static void comboBoxPopupMenuFinishedCallback (int result, ComboBox* combo)
 
 void ComboBox::showPopup()
 {
-    PopupMenu noChoicesMenu;
-    const bool hasItems = (currentMenu.getNumItems() > 0);
+    auto menu = currentMenu;
 
-    if (hasItems)
+    if (menu.getNumItems() > 0)
     {
         auto selectedId = getSelectedId();
 
-        for (PopupMenu::MenuItemIterator iterator (currentMenu, true); iterator.next();)
+        for (PopupMenu::MenuItemIterator iterator (menu, true); iterator.next();)
         {
             auto& item = iterator.getItem();
 
@@ -546,17 +539,16 @@ void ComboBox::showPopup()
     }
     else
     {
-        noChoicesMenu.addItem (1, noChoicesMessage, false, false);
+        menu.addItem (1, noChoicesMessage, false, false);
     }
 
-    auto& menuToShow = (hasItems ? currentMenu : noChoicesMenu);
-    menuToShow.setLookAndFeel (&getLookAndFeel());
-    menuToShow.showMenuAsync (PopupMenu::Options().withTargetComponent (this)
-                                                  .withItemThatMustBeVisible (getSelectedId())
-                                                  .withMinimumWidth (getWidth())
-                                                  .withMaximumNumColumns (1)
-                                                  .withStandardItemHeight (label->getHeight()),
-                              ModalCallbackFunction::forComponent (comboBoxPopupMenuFinishedCallback, this));
+    menu.setLookAndFeel (&getLookAndFeel());
+    menu.showMenuAsync (PopupMenu::Options().withTargetComponent (this)
+                                            .withItemThatMustBeVisible (getSelectedId())
+                                            .withMinimumWidth (getWidth())
+                                            .withMaximumNumColumns (1)
+                                            .withStandardItemHeight (label->getHeight()),
+                        ModalCallbackFunction::forComponent (comboBoxPopupMenuFinishedCallback, this));
 }
 
 //==============================================================================
@@ -599,11 +591,19 @@ void ComboBox::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& whe
 {
     if (! menuActive && scrollWheelEnabled && e.eventComponent == this && wheel.deltaY != 0.0f)
     {
-        auto oldPos = (int) mouseWheelAccumulator;
         mouseWheelAccumulator += wheel.deltaY * 5.0f;
 
-        if (auto delta = oldPos - (int) mouseWheelAccumulator)
-            nudgeSelectedItem (delta);
+        while (mouseWheelAccumulator > 1.0f)
+        {
+            mouseWheelAccumulator -= 1.0f;
+            nudgeSelectedItem (-1);
+        }
+
+        while (mouseWheelAccumulator < -1.0f)
+        {
+            mouseWheelAccumulator += 1.0f;
+            nudgeSelectedItem (1);
+        }
     }
     else
     {
@@ -617,13 +617,19 @@ void ComboBox::setScrollWheelEnabled (bool enabled) noexcept
 }
 
 //==============================================================================
-void ComboBox::addListener (ComboBoxListener* listener)       { listeners.add (listener); }
-void ComboBox::removeListener (ComboBoxListener* listener)    { listeners.remove (listener); }
+void ComboBox::addListener    (ComboBox::Listener* l)    { listeners.add (l); }
+void ComboBox::removeListener (ComboBox::Listener* l)    { listeners.remove (l); }
 
 void ComboBox::handleAsyncUpdate()
 {
     Component::BailOutChecker checker (this);
-    listeners.callChecked (checker, &ComboBox::Listener::comboBoxChanged, this);
+    listeners.callChecked (checker, [this] (Listener& l) { l.comboBoxChanged (this); });
+
+    if (checker.shouldBailOut())
+        return;
+
+    if (onChange != nullptr)
+        onChange();
 }
 
 void ComboBox::sendChange (const NotificationType notification)

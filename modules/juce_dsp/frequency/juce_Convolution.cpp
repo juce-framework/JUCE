@@ -50,16 +50,22 @@ struct ConvolutionEngine
         SourceType sourceType = SourceType::sourceNone;
 
         const void* sourceData;
-        size_t sourceDataSize;
+        int sourceDataSize;
         File fileImpulseResponse;
-        double bufferSampleRate;
+
+        double originalSampleRate;
+        int originalSize = 0;
+        int originalNumChannels = 1;
 
         AudioBuffer<float>* buffer;
 
+        bool wantsStereo = true;
+        bool wantsTrimming = true;
+        bool wantsNormalization = true;
+        int64 wantedSize = 0;
+        int finalSize = 0;
+
         double sampleRate = 0;
-        bool wantsStereo;
-        bool wantsTrimming;
-        size_t impulseResponseSize;
         size_t maximumBufferSize = 0;
     };
 
@@ -85,11 +91,11 @@ struct ConvolutionEngine
         FFTSize = blockSize > 128 ? 2 * blockSize
                                   : 4 * blockSize;
 
-        numSegments = ((size_t) info.buffer->getNumSamples()) / (FFTSize - blockSize) + 1;
+        numSegments = ((size_t) info.finalSize) / (FFTSize - blockSize) + 1u;
 
         numInputSegments = (blockSize > 128 ? numSegments : 3 * numSegments);
 
-        FFTobject = new FFT (roundDoubleToInt (log2 (FFTSize)));
+        FFTobject.reset (new FFT (roundToInt (std::log2 (FFTSize))));
 
         bufferInput.setSize      (1, static_cast<int> (FFTSize));
         bufferOutput.setSize     (1, static_cast<int> (FFTSize * 2));
@@ -113,29 +119,25 @@ struct ConvolutionEngine
             buffersImpulseSegments.add (newImpulseSegment);
         }
 
-        ScopedPointer<FFT> FFTTempObject = new FFT (roundDoubleToInt (log2 (FFTSize)));
-        auto numChannels = (info.wantsStereo && info.buffer->getNumChannels() >= 2 ? 2 : 1);
+        ScopedPointer<FFT> FFTTempObject = new FFT (roundToInt (std::log2 (FFTSize)));
 
-        if (channel < numChannels)
+        auto* channelData = info.buffer->getWritePointer (channel);
+
+        for (size_t n = 0; n < numSegments; ++n)
         {
-            auto* channelData = info.buffer->getWritePointer (channel);
+            buffersImpulseSegments.getReference (static_cast<int> (n)).clear();
 
-            for (size_t n = 0; n < numSegments; ++n)
-            {
-                buffersImpulseSegments.getReference (static_cast<int> (n)).clear();
+            auto* impulseResponse = buffersImpulseSegments.getReference (static_cast<int> (n)).getWritePointer (0);
 
-                auto* impulseResponse = buffersImpulseSegments.getReference (static_cast<int> (n)).getWritePointer (0);
+            if (n == 0)
+                impulseResponse[0] = 1.0f;
 
-                if (n == 0)
-                    impulseResponse[0] = 1.0f;
+            for (size_t i = 0; i < FFTSize - blockSize; ++i)
+                if (i + n * (FFTSize - blockSize) < (size_t) info.finalSize)
+                    impulseResponse[i] = channelData[i + n * (FFTSize - blockSize)];
 
-                for (size_t i = 0; i < FFTSize - blockSize; ++i)
-                    if (i + n * (FFTSize - blockSize) < (size_t) info.buffer->getNumSamples())
-                        impulseResponse[i] = channelData[i + n * (FFTSize - blockSize)];
-
-                FFTTempObject->performRealOnlyForwardTransform (impulseResponse);
-                prepareForConvolution (impulseResponse);
-            }
+            FFTTempObject->performRealOnlyForwardTransform (impulseResponse);
+            prepareForConvolution (impulseResponse);
         }
 
         reset();
@@ -148,7 +150,7 @@ struct ConvolutionEngine
     {
         if (FFTSize != other.FFTSize)
         {
-            FFTobject = new FFT (roundDoubleToInt (log2 (other.FFTSize)));
+            FFTobject.reset (new FFT (roundToInt (std::log2 (other.FFTSize))));
             FFTSize = other.FFTSize;
         }
 
@@ -282,6 +284,8 @@ struct ConvolutionEngine
 
         FloatVectorOperations::addWithMultiply      (&(output[FFTSizeDiv2]), input, &(impulse[FFTSizeDiv2]), static_cast<int> (FFTSizeDiv2));
         FloatVectorOperations::addWithMultiply      (&(output[FFTSizeDiv2]), &(input[FFTSizeDiv2]), impulse, static_cast<int> (FFTSizeDiv2));
+
+        output[FFTSize] += input[FFTSize] * impulse[FFTSize];
     }
 
     /** Undo the re-organization of samples from the function prepareForConvolution.
@@ -331,7 +335,6 @@ struct ConvolutionEngine
 */
 struct Convolution::Pimpl  : private Thread
 {
-public:
     enum class ChangeRequest
     {
         changeEngine = 0,
@@ -341,6 +344,8 @@ public:
         changeImpulseResponseSize,
         changeStereo,
         changeTrimming,
+        changeNormalization,
+        changeIgnore,
         numChangeRequestTypes
     };
 
@@ -350,14 +355,21 @@ public:
     Pimpl()  : Thread ("Convolution"), abstractFifo (fifoSize)
     {
         abstractFifo.reset();
+        fifoRequestsType.resize (fifoSize);
+        fifoRequestsParameter.resize (fifoSize);
+
         requestsType.resize (fifoSize);
         requestsParameter.resize (fifoSize);
 
-        for (auto i = 0u; i < 4; ++i)
+        for (auto i = 0; i < 4; ++i)
             engines.add (new ConvolutionEngine());
 
         currentInfo.maximumBufferSize = 0;
         currentInfo.buffer = &impulseResponse;
+
+        temporaryBuffer.setSize (2, static_cast<int> (maximumTimeInSamples), false, false, true);
+        impulseResponseOriginal.setSize (2, static_cast<int> (maximumTimeInSamples), false, false, true);
+        impulseResponse.setSize (2, static_cast<int> (maximumTimeInSamples), false, false, true);
     }
 
     ~Pimpl()
@@ -374,14 +386,14 @@ public:
 
         if (size1 > 0)
         {
-            requestsType.setUnchecked (start1, type);
-            requestsParameter.setUnchecked (start1, parameter);
+            fifoRequestsType.setUnchecked (start1, type);
+            fifoRequestsParameter.setUnchecked (start1, parameter);
         }
 
         if (size2 > 0)
         {
-            requestsType.setUnchecked (start2, type);
-            requestsParameter.setUnchecked (start2, parameter);
+            fifoRequestsType.setUnchecked (start2, type);
+            fifoRequestsParameter.setUnchecked (start2, parameter);
         }
 
         abstractFifo.finishedWrite (size1 + size2);
@@ -395,19 +407,19 @@ public:
 
         if (size1 > 0)
         {
-            for (int i = 0; i < size1; ++i)
+            for (auto i = 0; i < size1; ++i)
             {
-                requestsType.setUnchecked (start1 + i, types[i]);
-                requestsParameter.setUnchecked (start1 + i, parameters[i]);
+                fifoRequestsType.setUnchecked (start1 + i, types[i]);
+                fifoRequestsParameter.setUnchecked (start1 + i, parameters[i]);
             }
         }
 
         if (size2 > 0)
         {
-            for (int i = 0; i < size2; ++i)
+            for (auto i = 0; i < size2; ++i)
             {
-                requestsType.setUnchecked (start2 + i, types[i + size1]);
-                requestsParameter.setUnchecked (start2 + i, parameters[i + size1]);
+                fifoRequestsType.setUnchecked (start2 + i, types[i + size1]);
+                fifoRequestsParameter.setUnchecked (start2 + i, parameters[i + size1]);
             }
         }
 
@@ -422,14 +434,14 @@ public:
 
         if (size1 > 0)
         {
-            type = requestsType[start1];
-            parameter = requestsParameter[start1];
+            type = fifoRequestsType[start1];
+            parameter = fifoRequestsParameter[start1];
         }
 
         if (size2 > 0)
         {
-            type = requestsType[start2];
-            parameter = requestsParameter[start2];
+            type = fifoRequestsType[start2];
+            parameter = fifoRequestsParameter[start2];
         }
 
         abstractFifo.finishedRead (size1 + size2);
@@ -453,10 +465,9 @@ public:
         if (getNumRemainingEntries() == 0 || isThreadRunning() || mustInterpolate)
             return;
 
-        // retrieve the information from the FIFO for processing
-        Array<ChangeRequest> requests;
-        Array<juce::var> requestParameters;
+        auto numRequests = 0;
 
+        // retrieve the information from the FIFO for processing
         while (getNumRemainingEntries() > 0)
         {
             ChangeRequest type = ChangeRequest::changeEngine;
@@ -464,37 +475,34 @@ public:
 
             readFromFifo (type, parameter);
 
-            requests.add (type);
-            requestParameters.add (parameter);
+            requestsType.setUnchecked (numRequests, type);
+            requestsParameter.setUnchecked (numRequests, parameter);
+
+            numRequests++;
         }
 
         // remove any useless messages
-        for (int i = 0; i < (int) ChangeRequest::numChangeRequestTypes; ++i)
+        for (auto i = 0; i < (int) ChangeRequest::numChangeRequestTypes; ++i)
         {
             bool exists = false;
 
-            for (int n = requests.size(); --n >= 0;)
+            for (auto n = numRequests; --n >= 0;)
             {
-                if (requests[n] == (ChangeRequest) i)
+                if (requestsType[n] == (ChangeRequest) i)
                 {
                     if (! exists)
-                    {
                         exists = true;
-                    }
                     else
-                    {
-                        requests.remove (n);
-                        requestParameters.remove (n);
-                    }
+                        requestsType.setUnchecked (n, ChangeRequest::changeIgnore);
                 }
             }
         }
 
         changeLevel = 0;
 
-        for (int n = 0; n < requests.size(); ++n)
+        for (auto n = 0; n < numRequests; ++n)
         {
-            switch (requests[n])
+            switch (requestsType[n])
             {
                 case ChangeRequest::changeEngine:
                     changeLevel = 3;
@@ -502,7 +510,7 @@ public:
 
                 case ChangeRequest::changeSampleRate:
                 {
-                    double newSampleRate = requestParameters[n];
+                    double newSampleRate = requestsParameter[n];
 
                     if (currentInfo.sampleRate != newSampleRate)
                         changeLevel = 3;
@@ -513,7 +521,7 @@ public:
 
                 case ChangeRequest::changeMaximumBufferSize:
                 {
-                    int newMaximumBufferSize = requestParameters[n];
+                    int newMaximumBufferSize = requestsParameter[n];
 
                     if (currentInfo.maximumBufferSize != (size_t) newMaximumBufferSize)
                         changeLevel = 3;
@@ -524,7 +532,7 @@ public:
 
                 case ChangeRequest::changeSource:
                 {
-                    auto* arrayParameters = requestParameters[n].getArray();
+                    auto* arrayParameters = requestsParameter[n].getArray();
                     auto newSourceType = static_cast<SourceType> (static_cast<int> (arrayParameters->getUnchecked (0)));
 
                     if (currentInfo.sourceType != newSourceType)
@@ -536,7 +544,7 @@ public:
                         auto* newMemoryBlock = prm.getBinaryData();
 
                         auto* newPtr = newMemoryBlock->getData();
-                        auto newSize = newMemoryBlock->getSize();
+                        auto newSize = (int) newMemoryBlock->getSize();
 
                         if (currentInfo.sourceData != newPtr || currentInfo.sourceDataSize != newSize)
                             changeLevel = jmax (2, changeLevel);
@@ -560,11 +568,11 @@ public:
                     }
                     else if (newSourceType == SourceType::sourceAudioBuffer)
                     {
-                        double bufferSampleRate (arrayParameters->getUnchecked (1));
+                        double originalSampleRate (arrayParameters->getUnchecked (1));
                         changeLevel = jmax (2, changeLevel);
 
                         currentInfo.sourceType = SourceType::sourceAudioBuffer;
-                        currentInfo.bufferSampleRate = bufferSampleRate;
+                        currentInfo.originalSampleRate = originalSampleRate;
                         currentInfo.fileImpulseResponse = File();
                         currentInfo.sourceData = nullptr;
                         currentInfo.sourceDataSize = 0;
@@ -574,21 +582,21 @@ public:
 
                 case ChangeRequest::changeImpulseResponseSize:
                 {
-                    int64 newSize = requestParameters[n];
+                    int64 newSize = requestsParameter[n];
 
-                    if (currentInfo.impulseResponseSize != (size_t) newSize)
+                    if (currentInfo.wantedSize != newSize)
                         changeLevel = jmax (1, changeLevel);
 
-                    currentInfo.impulseResponseSize = (size_t) newSize;
+                    currentInfo.wantedSize = newSize;
                 }
                 break;
 
                 case ChangeRequest::changeStereo:
                 {
-                    bool newWantsStereo = requestParameters[n];
+                    bool newWantsStereo = requestsParameter[n];
 
                     if (currentInfo.wantsStereo != newWantsStereo)
-                        changeLevel = jmax (1, changeLevel);
+                        changeLevel = jmax (0, changeLevel);
 
                     currentInfo.wantsStereo = newWantsStereo;
                 }
@@ -596,14 +604,28 @@ public:
 
                 case ChangeRequest::changeTrimming:
                 {
-                    bool newWantsTrimming = requestParameters[n];
+                    bool newWantsTrimming = requestsParameter[n];
 
                     if (currentInfo.wantsTrimming != newWantsTrimming)
-                        changeLevel = jmax(1, changeLevel);
+                        changeLevel = jmax (1, changeLevel);
 
                     currentInfo.wantsTrimming = newWantsTrimming;
                 }
                 break;
+
+                case ChangeRequest::changeNormalization:
+                {
+                    bool newWantsNormalization = requestsParameter[n];
+
+                    if (currentInfo.wantsNormalization != newWantsNormalization)
+                        changeLevel = jmax (1, changeLevel);
+
+                    currentInfo.wantsNormalization = newWantsNormalization;
+                }
+                break;
+
+                case ChangeRequest::changeIgnore:
+                    break;
 
                 default:
                     jassertfalse;
@@ -621,8 +643,8 @@ public:
             if (currentInfo.maximumBufferSize == 0)
                 currentInfo.maximumBufferSize = 128;
 
-            currentInfo.bufferSampleRate = currentInfo.sampleRate;
-            currentInfo.impulseResponseSize = 1;
+            currentInfo.originalSampleRate = currentInfo.sampleRate;
+            currentInfo.wantedSize = 1;
             currentInfo.fileImpulseResponse = File();
             currentInfo.sourceData = nullptr;
             currentInfo.sourceDataSize = 0;
@@ -637,46 +659,35 @@ public:
         // action depending on the change level
         if (changeLevel == 3)
         {
-            interpolationBuffer.setSize (2, static_cast<int> (currentInfo.maximumBufferSize));
+            interpolationBuffer.setSize (2, static_cast<int> (currentInfo.maximumBufferSize), false, false, true);
 
+            loadImpulseResponse();
             processImpulseResponse();
             initializeConvolutionEngines();
         }
-        else if (changeLevel == 2)
-        {
-            startThread();
-        }
-        else if (changeLevel == 1)
+        else if (changeLevel > 0)
         {
             startThread();
         }
     }
 
     //==============================================================================
-    void copyBufferToTemporaryLocation (const AudioBuffer<float>& buffer)
+    /** This function copies a buffer to a temporary location, so that any external
+        audio source can be processed then in the dedicated thread.
+    */
+    void copyBufferToTemporaryLocation (dsp::AudioBlock<float> block)
     {
         const SpinLock::ScopedLockType sl (processLock);
 
-        auto numChannels = buffer.getNumChannels() > 1 ? 2 : 1;
-        temporaryBuffer.setSize (numChannels, buffer.getNumSamples(), false, false, true);
+        currentInfo.originalNumChannels = (block.getNumChannels() > 1 ? 2 : 1);
+        currentInfo.originalSize = (int) jmin ((size_t) maximumTimeInSamples, block.getNumSamples());
 
-        for (auto channel = 0; channel < numChannels; ++channel)
-            temporaryBuffer.copyFrom (channel, 0, buffer, channel, 0, buffer.getNumSamples());
-    }
-
-    /** Copies a buffer from a temporary location to the impulseResponseOriginal
-        buffer for the sourceAudioBuffer. */
-    void copyBufferFromTemporaryLocation()
-    {
-        const SpinLock::ScopedLockType sl (processLock);
-
-        impulseResponseOriginal.setSize (2, temporaryBuffer.getNumSamples(), false, false, true);
-
-        for (auto channel = 0; channel < temporaryBuffer.getNumChannels(); ++channel)
-            impulseResponseOriginal.copyFrom (channel, 0, temporaryBuffer, channel, 0, temporaryBuffer.getNumSamples());
+        for (auto channel = 0; channel < currentInfo.originalNumChannels; ++channel)
+            temporaryBuffer.copyFrom (channel, 0, block.getChannelPointer ((size_t) channel), (int) currentInfo.originalSize);
     }
 
     //==============================================================================
+    /** Resets the convolution engines states. */
     void reset()
     {
         for (auto* e : engines)
@@ -690,7 +701,7 @@ public:
     {
         processFifo();
 
-        size_t numChannels = input.getNumChannels();
+        size_t numChannels = jmin (input.getNumChannels(), (size_t) (currentInfo.wantsStereo ? 2 : 1));
         size_t numSamples  = jmin (input.getNumSamples(), output.getNumSamples());
 
         if (mustInterpolate == false)
@@ -700,7 +711,7 @@ public:
         }
         else
         {
-            auto interpolated = AudioBlock<float> (interpolationBuffer).getSubBlock (0, numSamples);
+            auto interpolated = dsp::AudioBlock<float> (interpolationBuffer).getSubBlock (0, numSamples);
 
             for (size_t channel = 0; channel < numChannels; ++channel)
             {
@@ -718,6 +729,14 @@ public:
                 buffer += interpolated.getSingleChannelBlock (channel);
             }
 
+            if (input.getNumChannels() > 1 && currentInfo.wantsStereo == false)
+            {
+                auto&& buffer = output.getSingleChannelBlock (1);
+
+                changeVolumes[1].applyGain (buffer.getChannelPointer (0), (int) numSamples);
+                changeVolumes[3].applyGain (buffer.getChannelPointer (0), (int) numSamples);
+            }
+
             if (changeVolumes[0].isSmoothing() == false)
             {
                 mustInterpolate = false;
@@ -726,101 +745,137 @@ public:
                     engines[channel]->copyStateFromOtherEngine (*engines[channel + 2]);
             }
         }
+
+        if (input.getNumChannels() > 1 && currentInfo.wantsStereo == false)
+            output.getSingleChannelBlock (1).copy (output.getSingleChannelBlock (0));
     }
+
+    //==============================================================================
+    const int64 maximumTimeInSamples = 10 * 96000;
 
 private:
     //==============================================================================
+    /** This the thread run function which does the preparation of data depending
+        on the requested change level.
+    */
     void run() override
     {
         if (changeLevel == 2)
         {
-            processImpulseResponse();
+            loadImpulseResponse();
 
             if (isThreadRunning() && threadShouldExit())
                 return;
+        }
 
-            initializeConvolutionEngines();
-        }
-        else if (changeLevel == 1)
-        {
-            initializeConvolutionEngines();
-        }
-    }
-
-    void processImpulseResponse()
-    {
-
-        if (currentInfo.sourceType == SourceType::sourceBinaryData)
-        {
-            copyAudioStreamInAudioBuffer (new MemoryInputStream (currentInfo.sourceData, currentInfo.sourceDataSize, false));
-        }
-        else if (currentInfo.sourceType == SourceType::sourceAudioFile)
-        {
-            copyAudioStreamInAudioBuffer (new FileInputStream (currentInfo.fileImpulseResponse));
-        }
-        else if (currentInfo.sourceType == SourceType::sourceAudioBuffer)
-        {
-            copyBufferFromTemporaryLocation();
-            trimAndResampleImpulseResponse (temporaryBuffer.getNumChannels(), currentInfo.bufferSampleRate, currentInfo.wantsTrimming);
-        }
+        processImpulseResponse();
 
         if (isThreadRunning() && threadShouldExit())
             return;
 
-        if (currentInfo.wantsStereo)
+        initializeConvolutionEngines();
+    }
+
+    /** Loads the impulse response from the requested audio source. */
+    void loadImpulseResponse()
+    {
+        if (currentInfo.sourceType == SourceType::sourceBinaryData)
         {
-            normalizeImpulseResponse (currentInfo.buffer->getWritePointer(0), currentInfo.buffer->getNumSamples(), 1.0);
-            normalizeImpulseResponse (currentInfo.buffer->getWritePointer(1), currentInfo.buffer->getNumSamples(), 1.0);
+            if (! (copyAudioStreamInAudioBuffer (new MemoryInputStream (currentInfo.sourceData, (size_t) currentInfo.sourceDataSize, false))))
+                return;
         }
-        else
+        else if (currentInfo.sourceType == SourceType::sourceAudioFile)
         {
-            normalizeImpulseResponse (currentInfo.buffer->getWritePointer (0), currentInfo.buffer->getNumSamples(), 1.0);
+            if (! (copyAudioStreamInAudioBuffer (new FileInputStream (currentInfo.fileImpulseResponse))))
+                return;
         }
+        else if (currentInfo.sourceType == SourceType::sourceAudioBuffer)
+        {
+            copyBufferFromTemporaryLocation();
+        }
+    }
+
+    /** Processes the impulse response data with the requested treatments
+        and resampling if needed.
+    */
+    void processImpulseResponse()
+    {
+        trimAndResampleImpulseResponse (currentInfo.originalNumChannels, currentInfo.originalSampleRate, currentInfo.wantsTrimming);
+
+        if (isThreadRunning() && threadShouldExit())
+            return;
+
+        if (currentInfo.wantsNormalization)
+        {
+            if (currentInfo.originalNumChannels > 1)
+            {
+                normalizeImpulseResponse (currentInfo.buffer->getWritePointer (0), (int) currentInfo.finalSize, 1.0);
+                normalizeImpulseResponse (currentInfo.buffer->getWritePointer (1), (int) currentInfo.finalSize, 1.0);
+            }
+            else
+            {
+                normalizeImpulseResponse (currentInfo.buffer->getWritePointer (0), (int) currentInfo.finalSize, 1.0);
+            }
+        }
+
+        if (currentInfo.originalNumChannels == 1)
+            currentInfo.buffer->copyFrom (1, 0, *currentInfo.buffer, 0, 0, (int) currentInfo.finalSize);
     }
 
     /** Converts the data from an audio file into a stereo audio buffer of floats, and
         performs resampling if necessary.
     */
-    double copyAudioStreamInAudioBuffer (InputStream* stream)
+    bool copyAudioStreamInAudioBuffer (InputStream* stream)
     {
         AudioFormatManager manager;
         manager.registerBasicFormats();
 
         if (ScopedPointer<AudioFormatReader> formatReader = manager.createReaderFor (stream))
         {
-            auto maximumTimeInSeconds = 10.0;
-            int64 maximumLength = static_cast<int64> (roundDoubleToInt (maximumTimeInSeconds * formatReader->sampleRate));
-            auto numChannels = formatReader->numChannels > 1 ? 2 : 1;
+            currentInfo.originalNumChannels = formatReader->numChannels > 1 ? 2 : 1;
+            currentInfo.originalSampleRate = formatReader->sampleRate;
+            currentInfo.originalSize = static_cast<int> (jmin (maximumTimeInSamples, formatReader->lengthInSamples));
 
-            impulseResponseOriginal.setSize (2, static_cast<int> (jmin (maximumLength, formatReader->lengthInSamples)), false, false, true);
             impulseResponseOriginal.clear();
-            formatReader->read (&(impulseResponseOriginal), 0, impulseResponseOriginal.getNumSamples(), 0, true, numChannels > 1);
+            formatReader->read (&(impulseResponseOriginal), 0, (int) currentInfo.originalSize, 0, true, currentInfo.originalNumChannels > 1);
 
-            return trimAndResampleImpulseResponse (numChannels, formatReader->sampleRate, currentInfo.wantsTrimming);
+            return true;
         }
-        else
-            return 0.0;
+
+        return false;
     }
 
-    double trimAndResampleImpulseResponse (int numChannels, double bufferSampleRate, bool mustTrim)
+    /** Copies a buffer from a temporary location to the impulseResponseOriginal
+        buffer for the sourceAudioBuffer.
+    */
+    void copyBufferFromTemporaryLocation()
+    {
+        const SpinLock::ScopedLockType sl (processLock);
+
+        for (auto channel = 0; channel < currentInfo.originalNumChannels; ++channel)
+            impulseResponseOriginal.copyFrom (channel, 0, temporaryBuffer, channel, 0, (int) currentInfo.originalSize);
+    }
+
+    /** Trim and resample the impulse response if needed. */
+    void trimAndResampleImpulseResponse (int numChannels, double srcSampleRate, bool mustTrim)
     {
         auto thresholdTrim = Decibels::decibelsToGain (-80.0f);
         auto indexStart = 0;
-        auto indexEnd = impulseResponseOriginal.getNumSamples() - 1;
+        auto indexEnd = currentInfo.originalSize - 1;
 
         if (mustTrim)
         {
-            indexStart = impulseResponseOriginal.getNumSamples() - 1;
+            indexStart = currentInfo.originalSize - 1;
             indexEnd = 0;
 
             for (auto channel = 0; channel < numChannels; ++channel)
             {
                 auto localIndexStart = 0;
-                auto localIndexEnd = impulseResponseOriginal.getNumSamples() - 1;
+                auto localIndexEnd = currentInfo.originalSize - 1;
 
                 auto* channelData = impulseResponseOriginal.getReadPointer (channel);
 
-                while (localIndexStart < impulseResponseOriginal.getNumSamples() - 1
+                while (localIndexStart < currentInfo.originalSize - 1
                         && channelData[localIndexStart] <= thresholdTrim
                         && channelData[localIndexStart] >= -thresholdTrim)
                     ++localIndexStart;
@@ -843,44 +898,39 @@ private:
                     for (auto i = 0; i < indexEnd - indexStart + 1; ++i)
                         channelData[i] = channelData[i + indexStart];
 
-                    for (auto i = indexEnd - indexStart + 1; i < impulseResponseOriginal.getNumSamples() - 1; ++i)
+                    for (auto i = indexEnd - indexStart + 1; i < currentInfo.originalSize - 1; ++i)
                         channelData[i] = 0.0f;
                 }
             }
         }
 
-        double factorReading;
-
-        if (currentInfo.sampleRate == bufferSampleRate)
+        if (currentInfo.sampleRate == srcSampleRate)
         {
             // No resampling
-            factorReading = 1.0;
-            auto impulseSize = jmin (static_cast<int> (currentInfo.impulseResponseSize), indexEnd - indexStart + 1);
+            currentInfo.finalSize = jmin (static_cast<int> (currentInfo.wantedSize), indexEnd - indexStart + 1);
 
-            impulseResponse.setSize (2, impulseSize);
             impulseResponse.clear();
 
             for (auto channel = 0; channel < numChannels; ++channel)
-                impulseResponse.copyFrom (channel, 0, impulseResponseOriginal, channel, 0, impulseSize);
+                impulseResponse.copyFrom (channel, 0, impulseResponseOriginal, channel, 0, (int) currentInfo.finalSize);
         }
         else
         {
             // Resampling
-            factorReading = bufferSampleRate / currentInfo.sampleRate;
-            auto impulseSize = jmin (static_cast<int> (currentInfo.impulseResponseSize), roundDoubleToInt ((indexEnd - indexStart + 1) / factorReading));
+            auto factorReading = srcSampleRate / currentInfo.sampleRate;
+            currentInfo.finalSize = jmin (static_cast<int> (currentInfo.wantedSize), roundToInt ((indexEnd - indexStart + 1) / factorReading));
 
-            impulseResponse.setSize (2, impulseSize);
             impulseResponse.clear();
 
             MemoryAudioSource memorySource (impulseResponseOriginal, false);
-            ResamplingAudioSource resamplingSource (&memorySource, false, numChannels);
+            ResamplingAudioSource resamplingSource (&memorySource, false, (int) numChannels);
 
             resamplingSource.setResamplingRatio (factorReading);
-            resamplingSource.prepareToPlay (impulseSize, currentInfo.sampleRate);
+            resamplingSource.prepareToPlay ((int) currentInfo.finalSize, currentInfo.sampleRate);
 
             AudioSourceChannelInfo info;
             info.startSample = 0;
-            info.numSamples = impulseSize;
+            info.numSamples = (int) currentInfo.finalSize;
             info.buffer = &impulseResponse;
 
             resamplingSource.getNextAudioBlock (info);
@@ -888,44 +938,42 @@ private:
 
         // Filling the second channel with the first if necessary
         if (numChannels == 1)
-            impulseResponse.copyFrom (1, 0, impulseResponse, 0, 0, impulseResponse.getNumSamples());
-
-        return factorReading;
+            impulseResponse.copyFrom (1, 0, impulseResponse, 0, 0, (int) currentInfo.finalSize);
     }
 
+    /** Normalization of the impulse response based on its energy. */
     void normalizeImpulseResponse (float* samples, int numSamples, double factorResampling) const
     {
         auto magnitude = 0.0f;
 
-        for (int i = 0; i < numSamples; ++i)
+        for (auto i = 0; i < numSamples; ++i)
             magnitude += samples[i] * samples[i];
 
         auto magnitudeInv = 1.0f / (4.0f * std::sqrt (magnitude)) * 0.5f * static_cast <float> (factorResampling);
 
-        for (int i = 0; i < numSamples; ++i)
+        for (auto i = 0; i < numSamples; ++i)
             samples[i] *= magnitudeInv;
     }
 
+    // ================================================================================================================
+    /** Initializes the convolution engines depending on the provided sizes
+        and performs the FFT on the impulse responses.
+    */
     void initializeConvolutionEngines()
     {
         if (currentInfo.maximumBufferSize == 0)
             return;
 
-        auto numChannels = (currentInfo.wantsStereo ? 2 : 1);
-
         if (changeLevel == 3)
         {
-            for (int i = 0; i < numChannels; ++i)
+            for (auto i = 0; i < 2; ++i)
                 engines[i]->initializeConvolutionEngine (currentInfo, i);
-
-            if (numChannels == 1)
-                engines[1]->copyStateFromOtherEngine (*engines[0]);
 
             mustInterpolate = false;
         }
         else
         {
-            for (int i = 0; i < numChannels; ++i)
+            for (auto i = 0; i < 2; ++i)
             {
                 engines[i + 2]->initializeConvolutionEngine (currentInfo, i);
                 engines[i + 2]->reset();
@@ -934,10 +982,7 @@ private:
                     return;
             }
 
-            if (numChannels == 1)
-                engines[3]->copyStateFromOtherEngine (*engines[2]);
-
-            for (size_t i = 0; i < 2; ++i)
+            for (auto i = 0; i < 2; ++i)
             {
                 changeVolumes[i].setValue (1.0f);
                 changeVolumes[i].reset (currentInfo.sampleRate, 0.05);
@@ -957,6 +1002,9 @@ private:
     //==============================================================================
     static constexpr int fifoSize = 256;            // the size of the fifo which handles all the change requests
     AbstractFifo abstractFifo;                      // the abstract fifo
+
+    Array<ChangeRequest> fifoRequestsType;          // an array of ChangeRequest
+    Array<juce::var> fifoRequestsParameter;         // an array of change parameters
 
     Array<ChangeRequest> requestsType;              // an array of ChangeRequest
     Array<juce::var> requestsParameter;             // an array of change parameters
@@ -988,7 +1036,7 @@ private:
 //==============================================================================
 Convolution::Convolution()
 {
-    pimpl = new Pimpl();
+    pimpl.reset (new Pimpl());
     pimpl->addToFifo (Convolution::Pimpl::ChangeRequest::changeEngine, juce::var (0));
 }
 
@@ -996,15 +1044,21 @@ Convolution::~Convolution()
 {
 }
 
-void Convolution::loadImpulseResponse (const void* sourceData, size_t sourceDataSize, bool wantsStereo, bool wantsTrimming, size_t size)
+void Convolution::loadImpulseResponse (const void* sourceData, size_t sourceDataSize,
+                                       bool wantsStereo, bool wantsTrimming, size_t size,
+                                       bool wantsNormalization)
 {
     if (sourceData == nullptr)
         return;
 
+    auto maximumSamples = (size_t) pimpl->maximumTimeInSamples;
+    auto wantedSize = (size == 0 ? maximumSamples : jmin (size, maximumSamples));
+
     Pimpl::ChangeRequest types[] = { Pimpl::ChangeRequest::changeSource,
                                      Pimpl::ChangeRequest::changeImpulseResponseSize,
                                      Pimpl::ChangeRequest::changeStereo,
-                                     Pimpl::ChangeRequest::changeTrimming };
+                                     Pimpl::ChangeRequest::changeTrimming,
+                                     Pimpl::ChangeRequest::changeNormalization };
 
     Array<juce::var> sourceParameter;
 
@@ -1012,22 +1066,28 @@ void Convolution::loadImpulseResponse (const void* sourceData, size_t sourceData
     sourceParameter.add (juce::var (sourceData, sourceDataSize));
 
     juce::var parameters[] = { juce::var (sourceParameter),
-                               juce::var (static_cast<int64> (size)),
+                               juce::var (static_cast<int64> (wantedSize)),
                                juce::var (wantsStereo),
-                               juce::var (wantsTrimming) };
+                               juce::var (wantsTrimming),
+                               juce::var (wantsNormalization) };
 
-    pimpl->addToFifo (types, parameters, 3);
+    pimpl->addToFifo (types, parameters, 5);
 }
 
-void Convolution::loadImpulseResponse (const File& fileImpulseResponse, bool wantsStereo, bool wantsTrimming, size_t size)
+void Convolution::loadImpulseResponse (const File& fileImpulseResponse, bool wantsStereo,
+                                       bool wantsTrimming, size_t size, bool wantsNormalization)
 {
     if (! fileImpulseResponse.existsAsFile())
         return;
 
+    auto maximumSamples = (size_t) pimpl->maximumTimeInSamples;
+    auto wantedSize = (size == 0 ? maximumSamples : jmin (size, maximumSamples));
+
     Pimpl::ChangeRequest types[] = { Pimpl::ChangeRequest::changeSource,
                                      Pimpl::ChangeRequest::changeImpulseResponseSize,
                                      Pimpl::ChangeRequest::changeStereo,
-                                     Pimpl::ChangeRequest::changeTrimming };
+                                     Pimpl::ChangeRequest::changeTrimming,
+                                     Pimpl::ChangeRequest::changeNormalization };
 
     Array<juce::var> sourceParameter;
 
@@ -1035,38 +1095,51 @@ void Convolution::loadImpulseResponse (const File& fileImpulseResponse, bool wan
     sourceParameter.add (juce::var (fileImpulseResponse.getFullPathName()));
 
     juce::var parameters[] = { juce::var (sourceParameter),
-                               juce::var (static_cast<int64> (size)),
+                               juce::var (static_cast<int64> (wantedSize)),
                                juce::var (wantsStereo),
-                               juce::var (wantsTrimming) };
+                               juce::var (wantsTrimming),
+                               juce::var (wantsNormalization) };
 
-    pimpl->addToFifo (types, parameters, 3);
+    pimpl->addToFifo (types, parameters, 5);
 }
 
-void Convolution::copyAndLoadImpulseResponseFromBuffer (const AudioBuffer<float>& buffer,
-                                                        double bufferSampleRate, bool wantsStereo, bool wantsTrimming, size_t size)
+void Convolution::copyAndLoadImpulseResponseFromBuffer (AudioBuffer<float>& buffer,
+                                                        double bufferSampleRate, bool wantsStereo, bool wantsTrimming, bool wantsNormalization, size_t size)
+{
+    copyAndLoadImpulseResponseFromBlock (AudioBlock<float> (buffer), bufferSampleRate,
+        wantsStereo, wantsTrimming, wantsNormalization, size);
+}
+
+void Convolution::copyAndLoadImpulseResponseFromBlock (AudioBlock<float> block, double bufferSampleRate,
+                                                       bool wantsStereo, bool wantsTrimming, bool wantsNormalization, size_t size)
 {
     jassert (bufferSampleRate > 0);
 
-    if (buffer.getNumSamples() == 0)
+    if (block.getNumSamples() == 0)
         return;
 
-    pimpl->copyBufferToTemporaryLocation (buffer);
+    auto maximumSamples = (size_t) pimpl->maximumTimeInSamples;
+    auto wantedSize = (size == 0 ? maximumSamples : jmin (size, maximumSamples));
+
+    pimpl->copyBufferToTemporaryLocation (block);
 
     Pimpl::ChangeRequest types[] = { Pimpl::ChangeRequest::changeSource,
                                      Pimpl::ChangeRequest::changeImpulseResponseSize,
                                      Pimpl::ChangeRequest::changeStereo,
-                                     Pimpl::ChangeRequest::changeTrimming };
+                                     Pimpl::ChangeRequest::changeTrimming,
+                                     Pimpl::ChangeRequest::changeNormalization };
 
     Array<juce::var> sourceParameter;
     sourceParameter.add (juce::var ((int) ConvolutionEngine::ProcessingInformation::SourceType::sourceAudioBuffer));
     sourceParameter.add (juce::var (bufferSampleRate));
 
     juce::var parameters[] = { juce::var (sourceParameter),
-                               juce::var (static_cast<int64> (size)),
+                               juce::var (static_cast<int64> (wantedSize)),
                                juce::var (wantsStereo),
-                               juce::var (wantsTrimming) };
+                               juce::var (wantsTrimming),
+                               juce::var (wantsNormalization) };
 
-    pimpl->addToFifo (types, parameters, 3);
+    pimpl->addToFifo (types, parameters, 5);
 }
 
 void Convolution::prepare (const ProcessSpec& spec)
@@ -1091,6 +1164,8 @@ void Convolution::prepare (const ProcessSpec& spec)
     dryBuffer = AudioBlock<float> (dryBufferStorage,
                                    jmin (spec.numChannels, 2u),
                                    spec.maximumBlockSize);
+
+    isActive = true;
 }
 
 void Convolution::reset() noexcept
@@ -1101,10 +1176,13 @@ void Convolution::reset() noexcept
 
 void Convolution::processSamples (const AudioBlock<float>& input, AudioBlock<float>& output, bool isBypassed) noexcept
 {
+    if (! isActive)
+        return;
+
     jassert (input.getNumChannels() == output.getNumChannels());
     jassert (isPositiveAndBelow (input.getNumChannels(), static_cast<size_t> (3))); // only mono and stereo is supported
 
-    auto numChannels = input.getNumChannels();
+    auto numChannels = jmin (input.getNumChannels(), (size_t) 2);
     auto numSamples  = jmin (input.getNumSamples(), output.getNumSamples());
 
     auto dry = dryBuffer.getSubsetChannelBlock (0, numChannels);

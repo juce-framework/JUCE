@@ -102,7 +102,7 @@ private:
     {
         AppDelegateClass()  : ObjCClass<NSObject> ("JUCEAppDelegate_")
         {
-            addMethod (@selector (applicationWillFinishLaunching:), applicationWillFinishLaunching, "v@:@@");
+            addMethod (@selector (applicationWillFinishLaunching:), applicationWillFinishLaunching, "v@:@");
             addMethod (@selector (getUrl:withReplyEvent:),          getUrl_withReplyEvent,          "v@:@@");
             addMethod (@selector (applicationShouldTerminate:),     applicationShouldTerminate,     "I@:@");
             addMethod (@selector (applicationWillTerminate:),       applicationWillTerminate,       "v@:@");
@@ -116,17 +116,41 @@ private:
             addMethod (@selector (mainMenuTrackingEnded:),          mainMenuTrackingEnded,          "v@:@");
             addMethod (@selector (dummyMethod),                     dummyMethod,                    "v@:");
 
+           #if JUCE_PUSH_NOTIFICATIONS
+            //==============================================================================
+            addIvar<NSObject<NSApplicationDelegate, NSUserNotificationCenterDelegate>*> ("pushNotificationsDelegate");
+
+            addMethod (@selector (applicationDidFinishLaunching:),                                applicationDidFinishLaunching,          "v@:@");
+            addMethod (@selector (setPushNotificationsDelegate:),                                 setPushNotificationsDelegate,           "v@:@");
+            addMethod (@selector (application:didRegisterForRemoteNotificationsWithDeviceToken:), registeredForRemoteNotifications,       "v@:@@");
+            addMethod (@selector (application:didFailToRegisterForRemoteNotificationsWithError:), failedToRegisterForRemoteNotifications, "v@:@@");
+            addMethod (@selector (application:didReceiveRemoteNotification:),                     didReceiveRemoteNotification,           "v@:@@");
+           #endif
+
             registerClass();
         }
 
     private:
-        static void applicationWillFinishLaunching (id self, SEL, NSApplication*, NSNotification*)
+        static void applicationWillFinishLaunching (id self, SEL, NSNotification*)
         {
             [[NSAppleEventManager sharedAppleEventManager] setEventHandler: self
                                                                andSelector: @selector (getUrl:withReplyEvent:)
                                                              forEventClass: kInternetEventClass
                                                                 andEventID: kAEGetURL];
         }
+
+       #if JUCE_PUSH_NOTIFICATIONS
+        static void applicationDidFinishLaunching (id self, SEL, NSNotification* notification)
+        {
+            if (notification.userInfo != nil)
+            {
+                NSUserNotification* userNotification = [notification.userInfo objectForKey: nsStringLiteral ("NSApplicationLaunchUserNotificationKey")];
+
+                if (userNotification != nil && userNotification.userInfo != nil)
+                    didReceiveRemoteNotification (self, nil, [NSApplication sharedApplication], userNotification.userInfo);
+            }
+        }
+       #endif
 
         static NSApplicationTerminateReply applicationShouldTerminate (id /*self*/, SEL, NSApplication*)
         {
@@ -178,7 +202,7 @@ private:
         static void broadcastMessageCallback (id /*self*/, SEL, NSNotification* n)
         {
             NSDictionary* dict = (NSDictionary*) [n userInfo];
-            const String messageString (nsStringToJuce ((NSString*) [dict valueForKey: nsStringLiteral ("message")]));
+            auto messageString = nsStringToJuce ((NSString*) [dict valueForKey: nsStringLiteral ("message")]);
             MessageManager::getInstance()->deliverBroadcastMessage (messageString);
         }
 
@@ -216,13 +240,80 @@ private:
 
             return s;
         }
+
+       #if JUCE_PUSH_NOTIFICATIONS
+        //==============================================================================
+        static void setPushNotificationsDelegate (id self, SEL, NSObject<NSApplicationDelegate, NSUserNotificationCenterDelegate>* delegate)
+        {
+            object_setInstanceVariable (self, "pushNotificationsDelegate", delegate);
+        }
+
+        static NSObject<NSApplicationDelegate, NSUserNotificationCenterDelegate>* getPushNotificationsDelegate (id self)
+        {
+            return getIvar<NSObject<NSApplicationDelegate, NSUserNotificationCenterDelegate>*> (self, "pushNotificationsDelegate");
+        }
+
+        static void registeredForRemoteNotifications (id self, SEL, NSApplication* application, NSData* deviceToken)
+        {
+            auto* delegate = getPushNotificationsDelegate (self);
+
+            SEL selector = NSSelectorFromString (@"application:didRegisterForRemoteNotificationsWithDeviceToken:");
+
+            if (delegate != nil && [delegate respondsToSelector: selector])
+            {
+                NSInvocation* invocation = [NSInvocation invocationWithMethodSignature: [delegate methodSignatureForSelector: selector]];
+                [invocation setSelector: selector];
+                [invocation setTarget: delegate];
+                [invocation setArgument: &application atIndex:2];
+                [invocation setArgument: &deviceToken atIndex:3];
+
+                [invocation invoke];
+            }
+        }
+
+        static void failedToRegisterForRemoteNotifications (id self, SEL, NSApplication* application, NSError* error)
+        {
+            auto* delegate = getPushNotificationsDelegate (self);
+
+            SEL selector = NSSelectorFromString (@"application:didFailToRegisterForRemoteNotificationsWithError:");
+
+            if (delegate != nil && [delegate respondsToSelector: selector])
+            {
+                NSInvocation* invocation = [NSInvocation invocationWithMethodSignature: [delegate methodSignatureForSelector: selector]];
+                [invocation setSelector: selector];
+                [invocation setTarget: delegate];
+                [invocation setArgument: &application atIndex:2];
+                [invocation setArgument: &error       atIndex:3];
+
+                [invocation invoke];
+            }
+        }
+
+        static void didReceiveRemoteNotification (id self, SEL, NSApplication* application, NSDictionary* userInfo)
+        {
+            auto* delegate = getPushNotificationsDelegate (self);
+
+            SEL selector = NSSelectorFromString (@"application:didReceiveRemoteNotification:");
+
+            if (delegate != nil && [delegate respondsToSelector: selector])
+            {
+                NSInvocation* invocation = [NSInvocation invocationWithMethodSignature: [delegate methodSignatureForSelector: selector]];
+                [invocation setSelector: selector];
+                [invocation setTarget: delegate];
+                [invocation setArgument: &application atIndex:2];
+                [invocation setArgument: &userInfo    atIndex:3];
+
+                [invocation invoke];
+            }
+        }
+       #endif
     };
 };
 
 //==============================================================================
 void MessageManager::runDispatchLoop()
 {
-    if (! quitMessagePosted) // check that the quit message wasn't already posted..
+    if (quitMessagePosted.get() == 0) // check that the quit message wasn't already posted..
     {
         JUCE_AUTORELEASEPOOL
         {
@@ -292,7 +383,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
 
     uint32 endTime = Time::getMillisecondCounter() + (uint32) millisecondsToRunFor;
 
-    while (! quitMessagePosted)
+    while (quitMessagePosted.get() == 0)
     {
         JUCE_AUTORELEASEPOOL
         {
@@ -311,7 +402,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
         }
     }
 
-    return ! quitMessagePosted;
+    return quitMessagePosted.get() == 0;
 }
 #endif
 
@@ -423,7 +514,7 @@ private:
     };
 };
 
-MountedVolumeListChangeDetector::MountedVolumeListChangeDetector()  { pimpl = new Pimpl (*this); }
+MountedVolumeListChangeDetector::MountedVolumeListChangeDetector()  { pimpl.reset (new Pimpl (*this)); }
 MountedVolumeListChangeDetector::~MountedVolumeListChangeDetector() {}
 #endif
 

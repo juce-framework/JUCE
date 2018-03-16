@@ -49,6 +49,8 @@ namespace juce
     int numItems = myList.size(); // returns 2
     MyObject* lastInList = myList.getLast();
     @endcode
+
+    @tags{Core}
 */
 template <class ObjectType>
 class LinkedListPointer

@@ -57,20 +57,7 @@ private:
 
 
 //==============================================================================
-ScrollBar::ScrollBar (const bool shouldBeVertical)
-    : totalRange (0.0, 1.0),
-      visibleRange (0.0, 0.1),
-      singleStepSize (0.1),
-      thumbAreaStart (0),
-      thumbAreaSize (0),
-      thumbStart (0),
-      thumbSize (0),
-      initialDelayInMillisecs (100),
-      repeatDelayInMillisecs (50),
-      minimumDelayInMillisecs (10),
-      vertical (shouldBeVertical),
-      isDraggingThumb (false),
-      autohides (true)
+ScrollBar::ScrollBar (bool shouldBeVertical)  : vertical (shouldBeVertical)
 {
     setRepaintsOnMouseActivity (true);
     setFocusContainer (true);
@@ -78,8 +65,8 @@ ScrollBar::ScrollBar (const bool shouldBeVertical)
 
 ScrollBar::~ScrollBar()
 {
-    upButton = nullptr;
-    downButton = nullptr;
+    upButton.reset();
+    downButton.reset();
 }
 
 //==============================================================================
@@ -184,14 +171,14 @@ void ScrollBar::removeListener (Listener* const listener)
 
 void ScrollBar::handleAsyncUpdate()
 {
-    double start = visibleRange.getStart(); // (need to use a temp variable for VC7 compatibility)
-    listeners.call (&ScrollBar::Listener::scrollBarMoved, this, start);
+    auto start = visibleRange.getStart(); // (need to use a temp variable for VC7 compatibility)
+    listeners.call ([=] (Listener& l) { l.scrollBarMoved (this, start); });
 }
 
 //==============================================================================
 void ScrollBar::updateThumbPosition()
 {
-    const int minimumScrollBarThumbSize = getLookAndFeel().getMinimumScrollbarThumbSize (*this);
+    auto minimumScrollBarThumbSize = getLookAndFeel().getMinimumScrollbarThumbSize (*this);
 
     int newThumbSize = roundToInt (totalRange.getLength() > 0 ? (visibleRange.getLength() * thumbAreaSize) / totalRange.getLength()
                                                               : thumbAreaSize);
@@ -208,8 +195,7 @@ void ScrollBar::updateThumbPosition()
         newThumbStart += roundToInt (((visibleRange.getStart() - totalRange.getStart()) * (thumbAreaSize - newThumbSize))
                                          / (totalRange.getLength() - visibleRange.getLength()));
 
-    setVisible ((! autohides) || (totalRange.getLength() > visibleRange.getLength()
-                                    && visibleRange.getLength() > 0.0));
+    Component::setVisible (getVisibility());
 
     if (thumbStart != newThumbStart  || thumbSize != newThumbSize)
     {
@@ -258,7 +244,7 @@ void ScrollBar::paint (Graphics& g)
 {
     if (thumbAreaSize > 0)
     {
-        LookAndFeel& lf = getLookAndFeel();
+        auto& lf = getLookAndFeel();
 
         const int thumb = (thumbAreaSize > lf.getMinimumScrollbarThumbSize (*this))
                              ? thumbSize : 0;
@@ -282,9 +268,9 @@ void ScrollBar::lookAndFeelChanged()
 
 void ScrollBar::resized()
 {
-    const int length = vertical ? getHeight() : getWidth();
+    auto length = vertical ? getHeight() : getWidth();
 
-    LookAndFeel& lf = getLookAndFeel();
+    auto& lf = getLookAndFeel();
     const bool buttonsVisible = lf.areScrollbarButtonsVisible();
     int buttonSize = 0;
 
@@ -292,8 +278,11 @@ void ScrollBar::resized()
     {
         if (upButton == nullptr)
         {
-            addAndMakeVisible (upButton   = new ScrollbarButton (vertical ? 0 : 3, *this));
-            addAndMakeVisible (downButton = new ScrollbarButton (vertical ? 2 : 1, *this));
+            upButton  .reset (new ScrollbarButton (vertical ? 0 : 3, *this));
+            downButton.reset (new ScrollbarButton (vertical ? 2 : 1, *this));
+
+            addAndMakeVisible (upButton.get());
+            addAndMakeVisible (downButton.get());
 
             setButtonRepeatSpeed (initialDelayInMillisecs, repeatDelayInMillisecs, minimumDelayInMillisecs);
         }
@@ -302,8 +291,8 @@ void ScrollBar::resized()
     }
     else
     {
-        upButton = nullptr;
-        downButton = nullptr;
+        upButton.reset();
+        downButton.reset();
     }
 
     if (length < 32 + lf.getMinimumScrollbarThumbSize (*this))
@@ -430,6 +419,24 @@ bool ScrollBar::keyPressed (const KeyPress& key)
     }
 
     return false;
+}
+
+void ScrollBar::setVisible (bool shouldBeVisible)
+{
+    if (userVisibilityFlag != shouldBeVisible)
+    {
+        userVisibilityFlag = shouldBeVisible;
+        Component::setVisible (getVisibility());
+    }
+}
+
+bool ScrollBar::getVisibility() const noexcept
+{
+    if (! userVisibilityFlag)
+        return false;
+
+    return (! autohides) || (totalRange.getLength() > visibleRange.getLength()
+                                    && visibleRange.getLength() > 0.0);
 }
 
 } // namespace juce

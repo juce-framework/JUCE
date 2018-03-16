@@ -54,10 +54,10 @@ void TreePanelBase::saveOpenness()
 {
     if (project != nullptr)
     {
-        const ScopedPointer<XmlElement> opennessState (tree.getOpennessState (true));
+        ScopedPointer<XmlElement> opennessState (tree.getOpennessState (true));
 
         if (opennessState != nullptr)
-            project->getStoredProperties().setValue (opennessStateKey, opennessState);
+            project->getStoredProperties().setValue (opennessStateKey, opennessState.get());
         else
             project->getStoredProperties().removeValue (opennessStateKey);
     }
@@ -96,7 +96,7 @@ void JucerTreeViewBase::paintIcon (Graphics &g, Rectangle<float> area)
 {
     g.setColour (getContentColour (true));
     getIcon().draw (g, area, isIconCrossedOut());
-    textX = roundToInt (area.getRight());
+    textX = roundToInt (area.getRight()) + 7;
 }
 
 void JucerTreeViewBase::paintItem (Graphics& g, int width, int height)
@@ -132,8 +132,7 @@ Component* JucerTreeViewBase::createItemComponent()
 }
 
 //==============================================================================
-class RenameTreeItemCallback  : public ModalComponentManager::Callback,
-                                public TextEditor::Listener
+class RenameTreeItemCallback  : public ModalComponentManager::Callback
 {
 public:
     RenameTreeItemCallback (JucerTreeViewBase& ti, Component& parent, const Rectangle<int>& bounds)
@@ -143,7 +142,9 @@ public:
         ed.setPopupMenuEnabled (false);
         ed.setSelectAllWhenFocused (true);
         ed.setFont (item.getFont());
-        ed.addListener (this);
+        ed.onReturnKey = [this] { ed.exitModalState (1); };
+        ed.onEscapeKey = [this] { ed.exitModalState (0); };
+        ed.onFocusLost = [this] { ed.exitModalState (0); };
         ed.setText (item.getRenamingName());
         ed.setBounds (bounds);
 
@@ -156,11 +157,6 @@ public:
         if (resultCode != 0)
             item.setName (ed.getText());
     }
-
-    void textEditorTextChanged (TextEditor&) override               {}
-    void textEditorReturnKeyPressed (TextEditor& editor) override    { editor.exitModalState (1); }
-    void textEditorEscapeKeyPressed (TextEditor& editor) override    { editor.exitModalState (0); }
-    void textEditorFocusLost (TextEditor& editor) override           { editor.exitModalState (0); }
 
 private:
     struct RenameEditor   : public TextEditor
@@ -269,5 +265,5 @@ void JucerTreeViewBase::itemDoubleClicked (const MouseEvent&)
 
 void JucerTreeViewBase::cancelDelayedSelectionTimer()
 {
-    delayedSelectionTimer = nullptr;
+    delayedSelectionTimer.reset();
 }

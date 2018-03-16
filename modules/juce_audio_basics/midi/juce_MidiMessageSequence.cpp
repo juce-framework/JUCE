@@ -80,8 +80,8 @@ MidiMessageSequence::MidiEventHolder* MidiMessageSequence::getEventPointer (int 
     return list[index];
 }
 
-MidiMessageSequence::MidiEventHolder** MidiMessageSequence::begin() const noexcept     { return list.begin(); }
-MidiMessageSequence::MidiEventHolder** MidiMessageSequence::end() const noexcept       { return list.end(); }
+MidiMessageSequence::MidiEventHolder** MidiMessageSequence::begin() const noexcept          { return list.begin(); }
+MidiMessageSequence::MidiEventHolder** MidiMessageSequence::end() const noexcept            { return list.end(); }
 
 double MidiMessageSequence::getTimeOfMatchingKeyUp (int index) const noexcept
 {
@@ -204,20 +204,10 @@ void MidiMessageSequence::addSequence (const MidiMessageSequence& other,
     sort();
 }
 
-struct MidiMessageSequenceSorter
-{
-    static int compareElements (const MidiMessageSequence::MidiEventHolder* first,
-                                const MidiMessageSequence::MidiEventHolder* second) noexcept
-    {
-        auto diff = first->message.getTimeStamp() - second->message.getTimeStamp();
-        return (diff > 0) - (diff < 0);
-    }
-};
-
 void MidiMessageSequence::sort() noexcept
 {
-    MidiMessageSequenceSorter sorter;
-    list.sort (sorter, true);
+    std::stable_sort (list.begin(), list.end(),
+                      [] (const MidiEventHolder* a, const MidiEventHolder* b) { return a->message.getTimeStamp() < b->message.getTimeStamp(); });
 }
 
 void MidiMessageSequence::updateMatchedPairs() noexcept

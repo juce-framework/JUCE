@@ -38,7 +38,7 @@ CodeDocument& SourceCodeDocument::getCodeDocument()
 {
     if (codeDoc == nullptr)
     {
-        codeDoc = new CodeDocument();
+        codeDoc.reset (new CodeDocument());
         reloadInternal();
         codeDoc->clearUndoHistory();
     }
@@ -48,7 +48,7 @@ CodeDocument& SourceCodeDocument::getCodeDocument()
 
 Component* SourceCodeDocument::createEditor()
 {
-    SourceCodeEditor* e = new SourceCodeEditor (this, getCodeDocument());
+    auto* e = new SourceCodeEditor (this, getCodeDocument());
     applyLastState (*(e->editor));
     return e;
 }
@@ -105,7 +105,7 @@ bool SourceCodeDocument::saveAs()
 
 void SourceCodeDocument::updateLastState (CodeEditorComponent& editor)
 {
-    lastState = new CodeEditorComponent::State (editor);
+    lastState.reset (new CodeEditorComponent::State (editor));
 }
 
 void SourceCodeDocument::applyLastState (CodeEditorComponent& editor) const
@@ -119,7 +119,7 @@ SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* doc, CodeDocu
     : DocumentEditorComponent (doc)
 {
     GenericCodeEditorComponent* ed = nullptr;
-    const File file (document->getFile());
+    auto file = document->getFile();
 
     if (fileNeedsCppSyntaxHighlighting (file))
     {
@@ -160,7 +160,7 @@ SourceCodeEditor::~SourceCodeEditor()
 
     getAppSettings().appearance.settings.removeListener (this);
 
-    if (SourceCodeDocument* doc = dynamic_cast<SourceCodeDocument*> (getDocument()))
+    if (auto* doc = dynamic_cast<SourceCodeDocument*> (getDocument()))
         doc->updateLastState (*editor);
 }
 
@@ -169,7 +169,8 @@ void SourceCodeEditor::setEditor (GenericCodeEditorComponent* newEditor)
     if (editor != nullptr)
         editor->getDocument().removeListener (this);
 
-    addAndMakeVisible (editor = newEditor);
+    editor.reset (newEditor);
+    addAndMakeVisible (newEditor);
 
     editor->setFont (AppearanceSettings::getDefaultCodeFont());
     editor->setTabSize (4, true);
@@ -182,11 +183,11 @@ void SourceCodeEditor::setEditor (GenericCodeEditorComponent* newEditor)
 
 void SourceCodeEditor::scrollToKeepRangeOnScreen (Range<int> range)
 {
-    const int space = jmin (10, editor->getNumLinesOnScreen() / 3);
+    auto space = jmin (10, editor->getNumLinesOnScreen() / 3);
     const CodeDocument::Position start (editor->getDocument(), range.getStart());
     const CodeDocument::Position end   (editor->getDocument(), range.getEnd());
 
-    editor->scrollToKeepLinesOnScreen (Range<int> (start.getLineNumber() - space, end.getLineNumber() + space));
+    editor->scrollToKeepLinesOnScreen ({ start.getLineNumber() - space, end.getLineNumber() + space });
 }
 
 void SourceCodeEditor::highlight (Range<int> range, bool cursorAtStart)
@@ -286,7 +287,7 @@ void GenericCodeEditorComponent::getAllCommands (Array <CommandID>& commands)
 
 void GenericCodeEditorComponent::getCommandInfo (const CommandID commandID, ApplicationCommandInfo& result)
 {
-    const bool anythingSelected = isHighlightActive();
+    auto anythingSelected = isHighlightActive();
 
     switch (commandID)
     {
@@ -343,27 +344,21 @@ void GenericCodeEditorComponent::removeListener (GenericCodeEditorComponent::Lis
 }
 
 //==============================================================================
-class GenericCodeEditorComponent::FindPanel  : public Component,
-                                               private TextEditor::Listener,
-                                               private Button::Listener
+class GenericCodeEditorComponent::FindPanel  : public Component
 {
 public:
     FindPanel()
-        : caseButton ("Case-sensitive"),
-          findPrev ("<"),
-          findNext (">")
     {
         editor.setColour (CaretComponent::caretColourId, Colours::black);
 
         addAndMakeVisible (editor);
-        label.setText ("Find:", dontSendNotification);
         label.setColour (Label::textColourId, Colours::white);
         label.attachToComponent (&editor, false);
 
         addAndMakeVisible (caseButton);
         caseButton.setColour (ToggleButton::textColourId, Colours::white);
         caseButton.setToggleState (isCaseSensitiveSearch(), dontSendNotification);
-        caseButton.addListener (this);
+        caseButton.onClick = [this] { setCaseSensitiveSearch (caseButton.getToggleState()); };
 
         findPrev.setConnectedEdges (Button::ConnectedOnRight);
         findNext.setConnectedEdges (Button::ConnectedOnLeft);
@@ -376,7 +371,13 @@ public:
         findNext.setWantsKeyboardFocus (false);
 
         editor.setText (getSearchString());
-        editor.addListener (this);
+        editor.onTextChange = [this] { changeSearchString(); };
+        editor.onReturnKey  = [] { ProjucerApplication::getCommandManager().invokeDirectly (CommandIDs::findNext, true); };
+        editor.onEscapeKey  = [this]
+        {
+            if (auto* ed = getOwner())
+                ed->hideFindPanel();
+        };
     }
 
     void setCommandManager (ApplicationCommandManager* cm)
@@ -406,30 +407,12 @@ public:
         findPrev.setBounds (getWidth() - 70, y, 30, 22);
     }
 
-    void buttonClicked (Button*) override
-    {
-        setCaseSensitiveSearch (caseButton.getToggleState());
-    }
-
-    void textEditorTextChanged (TextEditor&) override
+    void changeSearchString()
     {
         setSearchString (editor.getText());
 
-        if (GenericCodeEditorComponent* ed = getOwner())
+        if (auto* ed = getOwner())
             ed->findNext (true, false);
-    }
-
-    void textEditorFocusLost (TextEditor&) override {}
-
-    void textEditorReturnKeyPressed (TextEditor&) override
-    {
-        ProjucerApplication::getCommandManager().invokeDirectly (CommandIDs::findNext, true);
-    }
-
-    void textEditorEscapeKeyPressed (TextEditor&) override
-    {
-        if (GenericCodeEditorComponent* ed = getOwner())
-            ed->hideFindPanel();
     }
 
     GenericCodeEditorComponent* getOwner() const
@@ -438,9 +421,10 @@ public:
     }
 
     TextEditor editor;
-    Label label;
-    ToggleButton caseButton;
-    TextButton findPrev, findNext;
+    Label label  { {}, "Find:" };
+    ToggleButton caseButton  { "Case-sensitive" };
+    TextButton findPrev  { "<" },
+               findNext  { ">" };
 };
 
 void GenericCodeEditorComponent::resized()
@@ -458,10 +442,9 @@ void GenericCodeEditorComponent::showFindPanel()
 {
     if (findPanel == nullptr)
     {
-        findPanel = new FindPanel();
+        findPanel.reset (new FindPanel());
         findPanel->setCommandManager (&ProjucerApplication::getCommandManager());
-
-        addAndMakeVisible (findPanel);
+        addAndMakeVisible (findPanel.get());
         resized();
     }
 
@@ -474,12 +457,12 @@ void GenericCodeEditorComponent::showFindPanel()
 
 void GenericCodeEditorComponent::hideFindPanel()
 {
-    findPanel = nullptr;
+    findPanel.reset();
 }
 
 void GenericCodeEditorComponent::findSelection()
 {
-    const String selected (getTextInRange (getHighlightedRegion()));
+    auto selected = getTextInRange (getHighlightedRegion());
 
     if (selected.isNotEmpty())
     {
@@ -490,19 +473,19 @@ void GenericCodeEditorComponent::findSelection()
 
 void GenericCodeEditorComponent::findNext (bool forwards, bool skipCurrentSelection)
 {
-    const Range<int> highlight (getHighlightedRegion());
+    auto highlight = getHighlightedRegion();
     const CodeDocument::Position startPos (getDocument(), skipCurrentSelection ? highlight.getEnd()
                                                                                : highlight.getStart());
-    int lineNum = startPos.getLineNumber();
-    int linePos = startPos.getIndexInLine();
+    auto lineNum = startPos.getLineNumber();
+    auto linePos = startPos.getIndexInLine();
 
-    const int totalLines = getDocument().getNumLines();
-    const String searchText (getSearchString());
-    const bool caseSensitive = isCaseSensitiveSearch();
+    auto totalLines = getDocument().getNumLines();
+    auto searchText = getSearchString();
+    auto caseSensitive = isCaseSensitiveSearch();
 
-    for (int linesToSearch = totalLines; --linesToSearch >= 0;)
+    for (auto linesToSearch = totalLines; --linesToSearch >= 0;)
     {
-        String line (getDocument().getLine (lineNum));
+        auto line = getDocument().getLine (lineNum);
         int index;
 
         if (forwards)
@@ -550,7 +533,7 @@ void GenericCodeEditorComponent::handleEscapeKey()
 void GenericCodeEditorComponent::editorViewportPositionChanged()
 {
     CodeEditorComponent::editorViewportPositionChanged();
-    listeners.call (&Listener::codeEditorViewportMoved, *this);
+    listeners.call ([this] (Listener& l) { l.codeEditorViewportMoved (*this); });
 }
 
 //==============================================================================
@@ -567,13 +550,13 @@ void CppCodeEditorComponent::handleReturnKey()
 {
     GenericCodeEditorComponent::handleReturnKey();
 
-    CodeDocument::Position pos (getCaretPos());
+    auto pos = getCaretPos();
 
     String blockIndent, lastLineIndent;
     CodeHelpers::getIndentForCurrentBlock (pos, getTabString (getTabSize()), blockIndent, lastLineIndent);
 
-    const String remainderOfBrokenLine (pos.getLineText());
-    const int numLeadingWSChars = CodeHelpers::getLeadingWhitespace (remainderOfBrokenLine).length();
+    auto remainderOfBrokenLine = pos.getLineText();
+    auto numLeadingWSChars = CodeHelpers::getLeadingWhitespace (remainderOfBrokenLine).length();
 
     if (numLeadingWSChars > 0)
         getDocument().deleteSection (pos, pos.movedBy (numLeadingWSChars));
@@ -583,8 +566,8 @@ void CppCodeEditorComponent::handleReturnKey()
     else
         insertTextAtCaret (lastLineIndent);
 
-    const String previousLine (pos.movedByLines (-1).getLineText());
-    const String trimmedPreviousLine (previousLine.trim());
+    auto previousLine = pos.movedByLines (-1).getLineText();
+    auto trimmedPreviousLine = previousLine.trim();
 
     if ((trimmedPreviousLine.startsWith ("if ")
           || trimmedPreviousLine.startsWith ("if(")
@@ -602,7 +585,7 @@ void CppCodeEditorComponent::insertTextAtCaret (const String& newText)
 {
     if (getHighlightedRegion().isEmpty())
     {
-        const CodeDocument::Position pos (getCaretPos());
+        auto pos = getCaretPos();
 
         if ((newText == "{" || newText == "}")
              && pos.getLineNumber() > 0
@@ -654,12 +637,12 @@ void CppCodeEditorComponent::insertComponentClass()
 
     while (aw.runModalLoop() != 0)
     {
-        const String className (aw.getTextEditorContents (classNameField).trim());
+        auto className = aw.getTextEditorContents (classNameField).trim();
 
         if (className == CodeHelpers::makeValidIdentifier (className, false, true, false))
         {
             String code (BinaryData::jucer_InlineComponentTemplate_h);
-            code = code.replace ("COMPONENTCLASS", className);
+            code = code.replace ("%%component_class%%", className);
 
             insertTextAtCaret (code);
             break;

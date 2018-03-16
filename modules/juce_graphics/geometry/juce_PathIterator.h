@@ -36,6 +36,8 @@ namespace juce
     geometric operations on.
 
     @see Path
+
+    @tags{Graphics}
 */
 class JUCE_API  PathFlatteningIterator  final
 {
@@ -95,14 +97,14 @@ private:
     //==============================================================================
     const Path& path;
     const AffineTransform transform;
-    float* points;
+    const float* source;
     const float toleranceSquared;
     float subPathCloseX = 0, subPathCloseY = 0;
     const bool isIdentityTransform;
 
     HeapBlock<float> stackBase { 32 };
     float* stackPos;
-    size_t index = 0, stackSize = 32;
+    size_t stackSize = 32;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PathFlatteningIterator)
 };

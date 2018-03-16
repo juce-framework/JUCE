@@ -289,7 +289,7 @@ public:
     void paint (Graphics& g) override
     {
         jassert (dynamic_cast<CodeEditorComponent*> (getParentComponent()) != nullptr);
-        const CodeEditorComponent& editor = *static_cast<CodeEditorComponent*> (getParentComponent());
+        auto& editor = *static_cast<CodeEditorComponent*> (getParentComponent());
 
         g.fillAll (editor.findColour (CodeEditorComponent::backgroundColourId)
                     .overlaidWith (editor.findColour (lineNumberBackgroundId)));
@@ -301,10 +301,10 @@ public:
         const int lastLineToDraw = jmin (editor.lines.size(), clip.getBottom() / lineH + 1,
                                          lastNumLines - editor.firstLineOnScreen);
 
-        const Font lineNumberFont (editor.getFont().withHeight (jmin (13.0f, lineHeightFloat * 0.8f)));
-        const float w = getWidth() - 2.0f;
-
+        auto lineNumberFont = editor.getFont().withHeight (jmin (13.0f, lineHeightFloat * 0.8f));
+        auto w = getWidth() - 2.0f;
         GlyphArrangement ga;
+
         for (int i = firstLineToDraw; i < lastLineToDraw; ++i)
             ga.addFittedText (lineNumberFont, String (editor.firstLineOnScreen + i + 1),
                               0, (float) (lineH * i), w, lineHeightFloat,
@@ -316,7 +316,7 @@ public:
 
     void documentChanged (CodeDocument& doc, int newFirstLine)
     {
-        const int newNumLines = doc.getNumLines();
+        auto newNumLines = doc.getNumLines();
 
         if (newNumLines != lastNumLines || firstLine != newFirstLine)
         {
@@ -339,7 +339,7 @@ CodeEditorComponent::CodeEditorComponent (CodeDocument& doc, CodeTokeniser* cons
       selectionEnd (doc, 0, 0),
       codeTokeniser (tokeniser)
 {
-    pimpl = new Pimpl (*this);
+    pimpl.reset (new Pimpl (*this));
 
     caretPos.setPositionMaintained (true);
     selectionStart.setPositionMaintained (true);
@@ -349,7 +349,8 @@ CodeEditorComponent::CodeEditorComponent (CodeDocument& doc, CodeTokeniser* cons
     setMouseCursor (MouseCursor::IBeamCursor);
     setWantsKeyboardFocus (true);
 
-    addAndMakeVisible (caret = getLookAndFeel().createCaretComponent (this));
+    caret.reset (getLookAndFeel().createCaretComponent (this));
+    addAndMakeVisible (caret.get());
 
     addAndMakeVisible (verticalScrollBar);
     verticalScrollBar.setSingleStepSize (1.0);
@@ -366,14 +367,14 @@ CodeEditorComponent::CodeEditorComponent (CodeDocument& doc, CodeTokeniser* cons
 
     setLineNumbersShown (true);
 
-    verticalScrollBar.addListener (pimpl);
-    horizontalScrollBar.addListener (pimpl);
-    document.addListener (pimpl);
+    verticalScrollBar.addListener (pimpl.get());
+    horizontalScrollBar.addListener (pimpl.get());
+    document.addListener (pimpl.get());
 }
 
 CodeEditorComponent::~CodeEditorComponent()
 {
-    document.removeListener (pimpl);
+    document.removeListener (pimpl.get());
 }
 
 int CodeEditorComponent::getGutterSize() const noexcept
@@ -405,7 +406,7 @@ void CodeEditorComponent::setTemporaryUnderlining (const Array<Range<int>>&)
 
 Rectangle<int> CodeEditorComponent::getCaretRectangle()
 {
-    return getLocalArea (caret, caret->getLocalBounds());
+    return getLocalArea (caret.get(), caret->getLocalBounds());
 }
 
 void CodeEditorComponent::setLineNumbersShown (const bool shouldBeShown)
@@ -413,10 +414,13 @@ void CodeEditorComponent::setLineNumbersShown (const bool shouldBeShown)
     if (showLineNumbers != shouldBeShown)
     {
         showLineNumbers = shouldBeShown;
-        gutter = nullptr;
+        gutter.reset();
 
         if (shouldBeShown)
-            addAndMakeVisible (gutter = new GutterComponent());
+        {
+            gutter.reset (new GutterComponent());
+            addAndMakeVisible (gutter.get());
+        }
 
         resized();
     }
@@ -429,16 +433,16 @@ void CodeEditorComponent::setReadOnly (bool b) noexcept
         readOnly = b;
 
         if (b)
-            removeChildComponent (caret);
+            removeChildComponent (caret.get());
         else
-            addAndMakeVisible (caret);
+            addAndMakeVisible (caret.get());
     }
 }
 
 //==============================================================================
 void CodeEditorComponent::resized()
 {
-    const int visibleWidth = getWidth() - scrollbarThickness - getGutterSize();
+    auto visibleWidth = getWidth() - scrollbarThickness - getGutterSize();
     linesOnScreen   = jmax (1, (getHeight() - scrollbarThickness) / lineHeight);
     columnsOnScreen = jmax (1, (int) (visibleWidth / charWidth));
     lines.clear();
@@ -503,9 +507,8 @@ void CodeEditorComponent::rebuildLineTokens()
 {
     pimpl->cancelPendingUpdate();
 
-    const int numNeeded = linesOnScreen + 1;
-
-    int minLineToRepaint = numNeeded;
+    auto numNeeded = linesOnScreen + 1;
+    auto minLineToRepaint = numNeeded;
     int maxLineToRepaint = 0;
 
     if (numNeeded != lines.size())

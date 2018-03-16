@@ -42,6 +42,8 @@ namespace juce
     To use:
     1) Create an AudioProcessorValueTreeState, and give it some parameters using createAndAddParameter().
     2) Initialise the state member variable with a type name.
+
+    @tags{Audio}
 */
 class JUCE_API  AudioProcessorValueTreeState  : private Timer,
                                                 private ValueTree::Listener
@@ -80,6 +82,8 @@ public:
         @param isAutomatableParameter   Set this value to false if this parameter should not be automatable
         @param isDiscrete               Set this value to true to make this parameter take discrete values in a host.
                                         @see AudioProcessorParameter::isDiscrete
+        @param category                 Which category the parameter should use.
+                                        @see AudioProcessorParameter::Category
 
         @returns the parameter object that was created
     */
@@ -92,7 +96,9 @@ public:
                                                           std::function<float (const String&)> textToValueFunction,
                                                           bool isMetaParameter = false,
                                                           bool isAutomatableParameter = true,
-                                                          bool isDiscrete = false);
+                                                          bool isDiscrete = false,
+                                                          AudioProcessorParameter::Category category
+                                                             = AudioProcessorParameter::genericParameter);
 
     /** Returns a parameter by its ID string. */
     AudioProcessorParameterWithID* getParameter (StringRef parameterID) const noexcept;
@@ -125,6 +131,33 @@ public:
 
     /** Returns the range that was set when the given parameter was created. */
     NormalisableRange<float> getParameterRange (StringRef parameterID) const noexcept;
+
+    /** Returns a copy of the state value tree.
+
+        The AudioProcessorValueTreeState's ValueTree is updated internally on the
+        message thread, but there may be cases when you may want to access the state
+        from a different thread (getStateInformation is a good example). This method
+        flushes all pending audio parameter value updates and returns a copy of the
+        state in a thread safe way.
+
+        Note: This method uses locks to synchronise thread access, so whilst it is
+        thread-safe, it is not realtime-safe. Do not call this method from within
+        your audio processing code!
+    */
+    ValueTree copyState();
+
+    /** Replaces the state value tree.
+
+        The AudioProcessorValueTreeState's ValueTree is updated internally on the
+        message thread, but there may be cases when you may want to modify the state
+        from a different thread (setStateInformation is a good example). This method
+        allows you to replace the state in a thread safe way.
+
+        Note: This method uses locks to synchronise thread access, so whilst it is
+        thread-safe, it is not realtime-safe. Do not call this method from within
+        your audio processing code!
+    */
+    void replaceState (const ValueTree& newState);
 
     /** A reference to the processor with which this state is associated. */
     AudioProcessor& processor;
@@ -219,6 +252,7 @@ private:
     friend struct Parameter;
 
     ValueTree getOrCreateChildValueTree (const String&);
+    bool flushParameterValuesToValueTree();
     void timerCallback() override;
 
     void valueTreePropertyChanged (ValueTree&, const Identifier&) override;
@@ -229,8 +263,11 @@ private:
     void valueTreeRedirected (ValueTree&) override;
     void updateParameterConnectionsToChildTrees();
 
-    Identifier valueType, valuePropertyID, idPropertyID;
-    bool updatingConnections;
+    Identifier valueType { "PARAM" },
+               valuePropertyID { "value" },
+               idPropertyID { "id" };
+
+    CriticalSection valueTreeChanging;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorValueTreeState)
 };

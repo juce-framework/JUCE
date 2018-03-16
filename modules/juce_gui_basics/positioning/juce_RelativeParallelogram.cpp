@@ -95,9 +95,9 @@ AffineTransform RelativeParallelogram::resetToPerpendicular (Expression::Scope* 
     topRight.moveToAbsolute (newTopRight, scope);
     bottomLeft.moveToAbsolute (newBottomLeft, scope);
 
-    return AffineTransform::fromTargetPoints (corners[0].x, corners[0].y, corners[0].x, corners[0].y,
-                                              corners[1].x, corners[1].y, newTopRight.x, newTopRight.y,
-                                              corners[2].x, corners[2].y, newBottomLeft.x, newBottomLeft.y);
+    return AffineTransform::fromTargetPoints (corners[0], corners[0],
+                                              corners[1], newTopRight,
+                                              corners[2], newBottomLeft);
 }
 
 bool RelativeParallelogram::isDynamic() const

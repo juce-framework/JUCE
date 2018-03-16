@@ -43,6 +43,8 @@ class TreeView;
     do this the first time it's opened, or it might want to refresh itself each time.
     It also has the option of deleting its sub-items when it is closed, or leaving them
     in place.
+
+    @tags{GUI}
 */
 class JUCE_API  TreeViewItem
 {
@@ -182,7 +184,7 @@ public:
 
     /** Selects or deselects the item.
         If shouldNotify == sendNotification, then a callback will be made
-        to itemSelectionChanged()
+        to itemSelectionChanged() if the item's selection has changed.
     */
     void setSelected (bool shouldBeSelected,
                       bool deselectOtherItemsFirst,
@@ -631,6 +633,8 @@ private:
 
     Use one of these to hold and display a structure of TreeViewItem objects.
 
+
+    @tags{GUI}
 */
 class JUCE_API  TreeView  : public Component,
                             public SettableTooltipClient,

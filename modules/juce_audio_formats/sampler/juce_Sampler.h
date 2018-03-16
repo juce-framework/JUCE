@@ -38,6 +38,8 @@ namespace juce
     give it some SampledSound objects to play.
 
     @see SamplerVoice, Synthesiser, SynthesiserSound
+
+    @tags{Audio}
 */
 class JUCE_API  SamplerSound    : public SynthesiserSound
 {
@@ -79,7 +81,7 @@ public:
     /** Returns the audio sample data.
         This could return nullptr if there was a problem loading the data.
     */
-    AudioSampleBuffer* getAudioData() const noexcept        { return data; }
+    AudioBuffer<float>* getAudioData() const noexcept       { return data.get(); }
 
 
     //==============================================================================
@@ -92,7 +94,7 @@ private:
     friend class SamplerVoice;
 
     String name;
-    ScopedPointer<AudioSampleBuffer> data;
+    ScopedPointer<AudioBuffer<float>> data;
     double sourceSampleRate;
     BigInteger midiNotes;
     int length = 0, attackSamples = 0, releaseSamples = 0;
@@ -110,6 +112,8 @@ private:
     give it some SampledSound objects to play.
 
     @see SamplerSound, Synthesiser, SynthesiserVoice
+
+    @tags{Audio}
 */
 class JUCE_API  SamplerVoice    : public SynthesiserVoice
 {
@@ -130,7 +134,7 @@ public:
     void pitchWheelMoved (int newValue) override;
     void controllerMoved (int controllerNumber, int newValue) override;
 
-    void renderNextBlock (AudioSampleBuffer&, int startSample, int numSamples) override;
+    void renderNextBlock (AudioBuffer<float>&, int startSample, int numSamples) override;
 
 
 private:

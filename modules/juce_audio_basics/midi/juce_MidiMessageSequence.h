@@ -31,6 +31,8 @@ namespace juce
     written to a standard midi file.
 
     @see MidiMessage, MidiFile
+
+    @tags{Audio}
 */
 class JUCE_API  MidiMessageSequence
 {

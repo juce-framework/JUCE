@@ -54,7 +54,7 @@ ButtonDocument::ButtonDocument (SourceCodeDocument* c)
 
     for (int i = 7; --i >= 0;)
     {
-        paintRoutines[i] = new PaintRoutine();
+        paintRoutines[i].reset (new PaintRoutine());
         paintRoutines[i]->setDocument (this);
         paintRoutines[i]->setBackgroundColour (Colours::transparentBlack);
     }
@@ -71,7 +71,7 @@ static const char* const stateNames[] =
     "common background"
 };
 
-int stateNameToIndex (const String& name)
+static int stateNameToIndex (const String& name)
 {
     for (int i = 7; --i >= 0;)
         if (name.equalsIgnoreCase (stateNames[i]))
@@ -113,14 +113,14 @@ PaintRoutine* ButtonDocument::getPaintRoutine (const int index) const
         if (paintStatesEnabled [i])
         {
             if (index == n)
-                return paintRoutines [i];
-            else
-                ++n;
+                return paintRoutines[i].get();
+
+            ++n;
         }
     }
 
     jassertfalse;
-    return 0;
+    return {};
 }
 
 void ButtonDocument::setStatePaintRoutineEnabled (const int index, bool b)

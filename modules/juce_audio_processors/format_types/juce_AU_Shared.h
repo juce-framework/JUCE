@@ -32,6 +32,8 @@
 namespace juce
 {
 
+#ifndef DOXYGEN
+
 struct AudioUnitHelpers
 {
     class ChannelRemapper
@@ -213,7 +215,7 @@ struct AudioUnitHelpers
         }
 
         //==============================================================================
-        AudioSampleBuffer& getBuffer (UInt32 frames) noexcept
+        AudioBuffer<float>& getBuffer (UInt32 frames) noexcept
         {
             jassert (pushIdx == scratch.getNumChannels());
 
@@ -240,9 +242,7 @@ struct AudioUnitHelpers
         }
 
         //==============================================================================
-        AudioSampleBuffer scratch;
-        AudioSampleBuffer mutableBuffer;
-
+        AudioBuffer<float> scratch, mutableBuffer;
         HeapBlock<float*> channels;
         int pushIdx, popIdx;
     };
@@ -531,5 +531,7 @@ struct AudioUnitHelpers
        #endif
     }
 };
+
+#endif // ! DOXYGEN
 
 } // namespace juce

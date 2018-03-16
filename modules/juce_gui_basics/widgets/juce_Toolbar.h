@@ -47,11 +47,12 @@ class ToolbarItemFactory;
     component as a source of new items.
 
     @see ToolbarItemFactory, ToolbarItemComponent, ToolbarItemPalette
+
+    @tags{GUI}
 */
 class JUCE_API  Toolbar   : public Component,
                             public DragAndDropContainer,
-                            public DragAndDropTarget,
-                            private Button::Listener
+                            public DragAndDropTarget
 {
 public:
     //==============================================================================
@@ -312,15 +313,15 @@ public:
 private:
     //==============================================================================
     ScopedPointer<Button> missingItemsButton;
-    bool vertical, isEditingActive;
-    ToolbarItemStyle toolbarStyle;
+    bool vertical = false, isEditingActive = false;
+    ToolbarItemStyle toolbarStyle = iconsOnly;
     class MissingItemsComponent;
     friend class MissingItemsComponent;
     OwnedArray<ToolbarItemComponent> items;
     class Spacer;
     class CustomisationDialog;
 
-    void buttonClicked (Button*) override;
+    void showMissingItems();
     void addItemInternal (ToolbarItemFactory& factory, int itemId, int insertIndex);
 
     ToolbarItemComponent* getNextActiveComponent (int index, int delta) const;

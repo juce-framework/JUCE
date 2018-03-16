@@ -153,7 +153,7 @@ void WindowingFunction<FloatType>::fillWindowingTables (FloatType* samples, size
     // DC frequency amplitude must be one
     if (normalize)
     {
-        FloatType sum = {};
+        FloatType sum (0);
 
         for (size_t i = 0; i < size; ++i)
             sum += samples[i];

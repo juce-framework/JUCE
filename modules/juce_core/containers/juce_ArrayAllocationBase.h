@@ -34,6 +34,8 @@ namespace juce
     the "empty base class optimisation" pattern to reduce their footprint.
 
     @see Array, OwnedArray, ReferenceCountedArray
+
+    @tags{Core}
 */
 template <class ElementType, class TypeOfCriticalSectionToUse>
 class ArrayAllocationBase  : public TypeOfCriticalSectionToUse

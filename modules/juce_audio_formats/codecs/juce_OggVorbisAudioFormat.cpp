@@ -263,7 +263,7 @@ public:
 private:
     OggVorbisNamespace::OggVorbis_File ovFile;
     OggVorbisNamespace::ov_callbacks callbacks;
-    AudioSampleBuffer reservoir;
+    AudioBuffer<float> reservoir;
     int reservoirStart = 0, samplesInReservoir = 0;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OggReader)
@@ -486,7 +486,9 @@ int OggVorbisAudioFormat::estimateOggFileQuality (const File& source)
 {
     if (auto* in = source.createInputStream())
     {
-        if (ScopedPointer<AudioFormatReader> r = createReaderFor (in, true))
+        ScopedPointer<AudioFormatReader> r (createReaderFor (in, true));
+
+        if (r != nullptr)
         {
             auto lengthSecs = r->lengthInSamples / r->sampleRate;
             auto approxBitsPerSecond = (int) (source.getSize() * 8 / lengthSecs);

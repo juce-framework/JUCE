@@ -41,6 +41,8 @@ namespace juce
     each time.
 
     @see Image, ImageFileFormat
+
+    @tags{Graphics}
 */
 class JUCE_API  ImageCache
 {

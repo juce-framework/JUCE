@@ -1107,7 +1107,7 @@ public:
 
     MidiServiceType* getService();
 
-    juce_DeclareSingleton (MidiService, false)
+    JUCE_DECLARE_SINGLETON (MidiService, false)
 
 private:
     MidiService();
@@ -1115,7 +1115,7 @@ private:
     ScopedPointer<MidiServiceType> internal;
 };
 
-juce_ImplementSingleton (MidiService)
+JUCE_IMPLEMENT_SINGLETON (MidiService)
 
 MidiService::~MidiService()
 {

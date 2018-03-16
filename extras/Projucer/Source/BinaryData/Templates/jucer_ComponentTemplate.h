@@ -11,8 +11,8 @@
 
   ------------------------------------------------------------------------------
 
-  The Projucer is part of the JUCE library - "Jules' Utility Class Extensions"
-  Copyright (c) 2015 - ROLI Ltd.
+  The Projucer is part of the JUCE library.
+  Copyright (c) 2017 - ROLI Ltd.
 
   ==============================================================================
 */
@@ -20,10 +20,10 @@
 #pragma once
 
 //[Headers]     -- You can add your own extra header files here --
-%%includeJUCEHeader%%
+%%include_juce_header%%
 //[/Headers]
 
-%%includeFilesH%%
+%%include_files_h%%
 
 //==============================================================================
 /**
@@ -33,28 +33,28 @@
     Describe your class and how it works here!
                                                                     //[/Comments]
 */
-%%classDeclaration%%
+%%class_declaration%%
 {
 public:
     //==============================================================================
-    %%className%% (%%constructorParams%%);
-    ~%%className%%();
+    %%class_name%% (%%constructor_params%%);
+    ~%%class_name%%();
 
     //==============================================================================
     //[UserMethods]     -- You can add your own custom methods in this section.
     //[/UserMethods]
 
-    %%publicMemberDeclarations%%
+    %%public_member_declarations%%
 
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.
     //[/UserVariables]
 
     //==============================================================================
-    %%privateMemberDeclarations%%
+    %%private_member_declarations%%
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%className%%)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%class_name%%)
 };
 
 //[EndFile] You can add extra defines here...

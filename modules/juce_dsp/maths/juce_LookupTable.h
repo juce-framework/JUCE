@@ -46,6 +46,8 @@ namespace dsp
         auto outValue = lut[17];
 
     @see LookupTableTransform
+
+    @tags{DSP}
 */
 template <typename FloatType>
 class LookupTable
@@ -166,6 +168,8 @@ private:
     range, it will return either the first or the last recorded LookupTable value.
 
     @see LookupTable
+
+    @tags{DSP}
 */
 template <typename FloatType>
 class LookupTableTransform

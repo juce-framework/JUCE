@@ -599,7 +599,7 @@ public:
                         channels [i] = inputs [i];
                 }
 
-                AudioSampleBuffer chans (channels, totalChans, numSamples);
+                AudioBuffer<float> chans (channels, totalChans, numSamples);
 
                 if (mBypassed)
                     juceFilter->processBlockBypassed (chans, midiEvents);
@@ -685,9 +685,24 @@ public:
     ComponentResult UpdateControlValue (long controlIndex, long value) override
     {
         if (controlIndex != bypassControlIndex)
-            juceFilter->setParameter (controlIndex - 2, longToFloat (value));
+        {
+            auto paramIndex = controlIndex - 2;
+            auto floatValue = longToFloat (value);
+
+            if (auto* param = owner.getParameters()[paramIndex])
+            {
+                param->setValue (floatValue);
+                param->sendValueChangedMessageToListeners (floatValue);
+            }
+            else
+            {
+                juceFilter->setParameter (paramIndex, floatValue);
+            }
+        }
         else
+        {
             mBypassed = (value > 0);
+        }
 
         return CProcess::UpdateControlValue (controlIndex, value);
     }

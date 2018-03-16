@@ -189,13 +189,13 @@ public:
                 button->setNewKey (button->currentKeyEntryWindow->lastPress, false);
             }
 
-            button->currentKeyEntryWindow = nullptr;
+            button->currentKeyEntryWindow.reset();
         }
     }
 
     void assignNewKey()
     {
-        currentKeyEntryWindow = new KeyEntryWindow (owner);
+        currentKeyEntryWindow.reset (new KeyEntryWindow (owner));
         currentKeyEntryWindow->enterModalState (true, ModalCallbackFunction::forComponent (keyChosen, this));
     }
 
@@ -336,7 +336,6 @@ private:
 
 //==============================================================================
 class KeyMappingEditorComponent::TopLevelItem   : public TreeViewItem,
-                                                  public Button::Listener,
                                                   private ChangeListener
 {
 public:
@@ -372,27 +371,15 @@ public:
         }
     }
 
-    static void resetToDefaultsCallback (int result, KeyMappingEditorComponent* owner)
-    {
-        if (result != 0 && owner != nullptr)
-            owner->getMappings().resetToDefaultMappings();
-    }
-
-    void buttonClicked (Button*) override
-    {
-        AlertWindow::showOkCancelBox (AlertWindow::QuestionIcon,
-                                      TRANS("Reset to defaults"),
-                                      TRANS("Are you sure you want to reset all the key-mappings to their default state?"),
-                                      TRANS("Reset"),
-                                      String(),
-                                      &owner,
-                                      ModalCallbackFunction::forComponent (resetToDefaultsCallback, &owner));
-    }
-
 private:
     KeyMappingEditorComponent& owner;
 };
 
+static void resetKeyMappingsToDefaultsCallback (int result, KeyMappingEditorComponent* owner)
+{
+    if (result != 0 && owner != nullptr)
+        owner->getMappings().resetToDefaultMappings();
+}
 
 //==============================================================================
 KeyMappingEditorComponent::KeyMappingEditorComponent (KeyPressMappingSet& mappingManager,
@@ -400,19 +387,28 @@ KeyMappingEditorComponent::KeyMappingEditorComponent (KeyPressMappingSet& mappin
     : mappings (mappingManager),
       resetButton (TRANS ("reset to defaults"))
 {
-    treeItem = new TopLevelItem (*this);
+    treeItem.reset (new TopLevelItem (*this));
 
     if (showResetToDefaultButton)
     {
         addAndMakeVisible (resetButton);
-        resetButton.addListener (treeItem);
+
+        resetButton.onClick = [this]
+        {
+            AlertWindow::showOkCancelBox (AlertWindow::QuestionIcon,
+                                          TRANS("Reset to defaults"),
+                                          TRANS("Are you sure you want to reset all the key-mappings to their default state?"),
+                                          TRANS("Reset"),
+                                          {}, this,
+                                          ModalCallbackFunction::forComponent (resetKeyMappingsToDefaultsCallback, this));
+        };
     }
 
     addAndMakeVisible (tree);
     tree.setColour (TreeView::backgroundColourId, findColour (backgroundColourId));
     tree.setRootItemVisible (false);
     tree.setDefaultOpenness (true);
-    tree.setRootItem (treeItem);
+    tree.setRootItem (treeItem.get());
     tree.setIndentSize (12);
 }
 

@@ -254,7 +254,7 @@ namespace CoreMidiHelpers
 
     static String getGlobalMidiClientName()
     {
-        if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
+        if (auto* app = JUCEApplicationBase::getInstance())
             return app->getApplicationName();
 
         return "JUCE";
@@ -318,8 +318,7 @@ namespace CoreMidiHelpers
     class MidiPortAndCallback
     {
     public:
-        MidiPortAndCallback (MidiInputCallback& cb)
-            : input (nullptr), active (false), callback (cb), concatenator (2048)
+        MidiPortAndCallback (MidiInputCallback& cb)  : callback (cb)
         {
         }
 
@@ -332,18 +331,19 @@ namespace CoreMidiHelpers
                 activeCallbacks.removeFirstMatchingValue (this);
             }
 
-            if (portAndEndpoint != 0 && portAndEndpoint->port != 0)
+            if (portAndEndpoint != nullptr && portAndEndpoint->port != 0)
                 CHECK_ERROR (MIDIPortDisconnectSource (portAndEndpoint->port, portAndEndpoint->endPoint));
         }
 
         void handlePackets (const MIDIPacketList* const pktlist)
         {
-            const double time = Time::getMillisecondCounterHiRes() * 0.001;
+            auto time = Time::getMillisecondCounterHiRes() * 0.001;
 
             const ScopedLock sl (callbackLock);
+
             if (activeCallbacks.contains (this) && active)
             {
-                const MIDIPacket* packet = &pktlist->packet[0];
+                auto* packet = &pktlist->packet[0];
 
                 for (unsigned int i = 0; i < pktlist->numPackets; ++i)
                 {
@@ -355,13 +355,13 @@ namespace CoreMidiHelpers
             }
         }
 
-        MidiInput* input;
+        MidiInput* input = nullptr;
         ScopedPointer<MidiPortAndEndpoint> portAndEndpoint;
-        volatile bool active;
+        volatile bool active = false;
 
     private:
         MidiInputCallback& callback;
-        MidiDataConcatenator concatenator;
+        MidiDataConcatenator concatenator { 2048 };
     };
 
     static void midiInputProc (const MIDIPacketList* pktlist, void* readProcRefCon, void* /*srcConnRefCon*/)
@@ -511,15 +511,15 @@ MidiInput* MidiInput::openDevice (int index, MidiInputCallback* callback)
                     MIDIPortRef port;
                     ScopedPointer<MidiPortAndCallback> mpc (new MidiPortAndCallback (*callback));
 
-                    if (CHECK_ERROR (MIDIInputPortCreate (client, name.cfString, midiInputProc, mpc, &port)))
+                    if (CHECK_ERROR (MIDIInputPortCreate (client, name.cfString, midiInputProc, mpc.get(), &port)))
                     {
                         if (CHECK_ERROR (MIDIPortConnectSource (port, endPoint, nullptr)))
                         {
-                            mpc->portAndEndpoint = new MidiPortAndEndpoint (port, endPoint);
+                            mpc->portAndEndpoint.reset (new MidiPortAndEndpoint (port, endPoint));
 
                             newInput = new MidiInput (getDevices() [index]);
                             mpc->input = newInput;
-                            newInput->internal = mpc;
+                            newInput->internal = mpc.get();
 
                             const ScopedLock sl (callbackLock);
                             activeCallbacks.add (mpc.release());
@@ -553,15 +553,15 @@ MidiInput* MidiInput::createNewDevice (const String& deviceName, MidiInputCallba
         ScopedCFString name;
         name.cfString = deviceName.toCFString();
 
-        if (CHECK_ERROR (MIDIDestinationCreate (client, name.cfString, midiInputProc, mpc, &endPoint)))
+        if (CHECK_ERROR (MIDIDestinationCreate (client, name.cfString, midiInputProc, mpc.get(), &endPoint)))
         {
             CoreMidiHelpers::setUniqueIdForMidiPort (endPoint, deviceName, true);
 
-            mpc->portAndEndpoint = new MidiPortAndEndpoint (0, endPoint);
+            mpc->portAndEndpoint.reset (new MidiPortAndEndpoint (0, endPoint));
 
             mi = new MidiInput (deviceName);
             mpc->input = mi;
-            mi->internal = mpc;
+            mi->internal = mpc.get();
 
             const ScopedLock sl (callbackLock);
             activeCallbacks.add (mpc.release());

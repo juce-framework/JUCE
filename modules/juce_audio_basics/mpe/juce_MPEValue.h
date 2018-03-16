@@ -30,13 +30,16 @@ namespace juce
     (corresponding to 1 or 2 MIDI bytes, respectively). It also offers helper
     functions to query the value in a variety of representations that can be
     useful in an audio or MIDI context.
+
+    @tags{Audio}
 */
 class JUCE_API  MPEValue
 {
 public:
     //==============================================================================
-    /** Default constructor. Constructs an MPEValue corresponding
-        to the centre value.
+    /** Default constructor.
+
+        Constructs an MPEValue corresponding to the centre value.
     */
     MPEValue() noexcept;
 
@@ -60,12 +63,14 @@ public:
     static MPEValue maxValue() noexcept;
 
     /** Retrieves the current value as an integer between 0 and 127.
+
         Information will be lost if the value was initialised with a precision
         higher than 7-bit.
     */
     int as7BitInt() const noexcept;
 
     /** Retrieves the current value as an integer between 0 and 16383.
+
         Resolution will be lost if the value was initialised with a precision
         higher than 14-bit.
     */
@@ -86,7 +91,7 @@ public:
 private:
     //==============================================================================
     MPEValue (int normalisedValue);
-    int normalisedValue;
+    int normalisedValue = 8192;
 };
 
 } // namespace juce

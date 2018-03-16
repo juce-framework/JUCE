@@ -36,12 +36,12 @@ ImagePixelData::ImagePixelData (const Image::PixelFormat format, const int w, co
 
 ImagePixelData::~ImagePixelData()
 {
-    listeners.call (&Listener::imageDataBeingDeleted, this);
+    listeners.call ([this] (Listener& l) { l.imageDataBeingDeleted (this); });
 }
 
 void ImagePixelData::sendDataChangeMessage()
 {
-    listeners.call (&Listener::imageDataChanged, this);
+    listeners.call ([this] (Listener& l) { l.imageDataChanged (this); });
 }
 
 int ImagePixelData::getSharedCount() const noexcept
@@ -87,7 +87,7 @@ public:
           pixelStride (format_ == Image::RGB ? 3 : ((format_ == Image::ARGB) ? 4 : 1)),
           lineStride ((pixelStride * jmax (1, w) + 3) & ~3)
     {
-        imageData.allocate ((size_t) (lineStride * jmax (1, h)), clearImage);
+        imageData.allocate ((size_t) lineStride * (size_t) jmax (1, h), clearImage);
     }
 
     LowLevelGraphicsContext* createLowLevelContext() override
@@ -98,7 +98,7 @@ public:
 
     void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode) override
     {
-        bitmap.data = imageData + x * pixelStride + y * lineStride;
+        bitmap.data = imageData + (size_t) x * (size_t) pixelStride + (size_t) y * (size_t) lineStride;
         bitmap.pixelFormat = pixelFormat;
         bitmap.lineStride = lineStride;
         bitmap.pixelStride = pixelStride;
@@ -110,7 +110,7 @@ public:
     ImagePixelData::Ptr clone() override
     {
         SoftwarePixelData* s = new SoftwarePixelData (pixelFormat, width, height, false);
-        memcpy (s->imageData, imageData, (size_t) (lineStride * height));
+        memcpy (s->imageData, imageData, (size_t) lineStride * (size_t) height);
         return s;
     }
 

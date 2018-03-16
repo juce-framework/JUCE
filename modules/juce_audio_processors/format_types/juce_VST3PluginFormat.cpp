@@ -169,8 +169,8 @@ static void setStateForAllBusesOfType (Vst::IComponent* component,
 }
 
 //==============================================================================
-/** Assigns a complete AudioSampleBuffer's channels to an AudioBusBuffers' */
-static void associateWholeBufferTo (Vst::AudioBusBuffers& vstBuffers, AudioSampleBuffer& buffer) noexcept
+/** Assigns a complete AudioBuffer's channels to an AudioBusBuffers' */
+static void associateWholeBufferTo (Vst::AudioBusBuffers& vstBuffers, AudioBuffer<float>& buffer) noexcept
 {
     vstBuffers.channelBuffers32 = buffer.getArrayOfWritePointers();
     vstBuffers.numChannels      = buffer.getNumChannels();
@@ -283,7 +283,10 @@ struct VST3HostContext  : public Vst::IComponentHandler,  // From VST V3.0.0
             if (index < 0)
                 return kResultFalse;
 
-            plugin->beginParameterChangeGesture (index);
+            if (auto* param = plugin->getParameters()[index])
+                param->beginChangeGesture();
+            else
+                jassertfalse; // Invalid parameter index!
         }
 
         return kResultTrue;
@@ -298,7 +301,10 @@ struct VST3HostContext  : public Vst::IComponentHandler,  // From VST V3.0.0
             if (index < 0)
                 return kResultFalse;
 
-            plugin->sendParamChangeMessageToListeners (index, (float) valueNormalized);
+            if (auto* param = plugin->getParameters()[index])
+                param->sendValueChangedMessageToListeners ((float) valueNormalized);
+            else
+                jassertfalse; // Invalid parameter index!
 
             {
                 Steinberg::int32 eventIndex;
@@ -322,7 +328,10 @@ struct VST3HostContext  : public Vst::IComponentHandler,  // From VST V3.0.0
             if (index < 0)
                 return kResultFalse;
 
-            plugin->endParameterChangeGesture (index);
+            if (auto* param = plugin->getParameters()[index])
+                param->endChangeGesture();
+            else
+                jassertfalse; // Invalid parameter index!
         }
 
         return kResultTrue;
@@ -897,14 +906,14 @@ struct DescriptionFactory
 
                 if (pf2.loadFrom (factory))
                 {
-                    info2 = new PClassInfo2();
-                    pf2->getClassInfo2 (i, info2);
+                    info2.reset (new PClassInfo2());
+                    pf2->getClassInfo2 (i, info2.get());
                 }
 
                 if (pf3.loadFrom (factory))
                 {
-                    infoW = new PClassInfoW();
-                    pf3->getClassInfoUnicode (i, infoW);
+                    infoW.reset (new PClassInfoW());
+                    pf3->getClassInfoUnicode (i, infoW.get());
                 }
             }
 
@@ -923,7 +932,7 @@ struct DescriptionFactory
                         auto numOutputs = getNumSingleDirectionChannelsFor (component, false, true);
 
                         createPluginDescription (desc, file, companyName, name,
-                                                 info, info2, infoW, numInputs, numOutputs);
+                                                 info, info2.get(), infoW.get(), numInputs, numOutputs);
 
                         component->terminate();
                     }
@@ -1246,7 +1255,7 @@ private:
     //==============================================================================
     bool open (const File& f, const PluginDescription& description)
     {
-        dllHandle = new DLLHandle (f.getFullPathName());
+        dllHandle.reset (new DLLHandle (f.getFullPathName()));
 
         ComSmartPtr<IPluginFactory> pluginFactory (dllHandle->getPluginFactory());
 
@@ -1572,23 +1581,23 @@ struct VST3ComponentHolder
 
             if (pf2.loadFrom (factory))
             {
-                info2 = new PClassInfo2();
-                pf2->getClassInfo2 (classIdx, info2);
+                info2.reset (new PClassInfo2());
+                pf2->getClassInfo2 (classIdx, info2.get());
             }
             else
             {
-                info2 = nullptr;
+                info2.reset();
             }
 
             if (pf3.loadFrom (factory))
             {
                 pf3->setHostContext (host->getFUnknown());
-                infoW = new PClassInfoW();
-                pf3->getClassInfoUnicode (classIdx, infoW);
+                infoW.reset (new PClassInfoW());
+                pf3->getClassInfoUnicode (classIdx, infoW.get());
             }
             else
             {
-                infoW = nullptr;
+                infoW.reset();
             }
 
             Vst::BusInfo bus;
@@ -1606,7 +1615,7 @@ struct VST3ComponentHolder
 
             createPluginDescription (description, module->file,
                                      factoryInfo.vendor, module->name,
-                                     info, info2, infoW,
+                                     info, info2.get(), infoW.get(),
                                      totalNumInputChannels,
                                      totalNumOutputChannels);
 
@@ -1640,6 +1649,8 @@ struct VST3ComponentHolder
 
         if (! component.loadFrom (factory, info.cid) || component == nullptr)
             return false;
+
+        cidOfComponent = FUID (info.cid);
 
         if (warnOnFailure (component->initialize (host->getFUnknown())) != kResultOk)
             return false;
@@ -1675,6 +1686,7 @@ struct VST3ComponentHolder
     ComSmartPtr<IPluginFactory> factory;
     ComSmartPtr<VST3HostContext> host;
     ComSmartPtr<Vst::IComponent> component;
+    FUID cidOfComponent;
 
     bool isComponentInitialised = false;
 };
@@ -1682,6 +1694,118 @@ struct VST3ComponentHolder
 //==============================================================================
 struct VST3PluginInstance : public AudioPluginInstance
 {
+    struct VST3Parameter final  : public Parameter
+    {
+        VST3Parameter (VST3PluginInstance& parent,
+                       Steinberg::Vst::ParamID parameterID,
+                       const String& parameterName,
+                       const String& parameterLabel,
+                       Steinberg::Vst::ParamValue defaultParameterValue,
+                       bool parameterIsAutomatable,
+                       bool parameterIsDiscrete,
+                       int numParameterSteps)
+            : pluginInstance (parent),
+              paramID (parameterID),
+              name (parameterName),
+              label (parameterLabel),
+              defaultValue (defaultParameterValue),
+              automatable (parameterIsAutomatable),
+              discrete (parameterIsDiscrete),
+              numSteps (numParameterSteps)
+        {
+        }
+
+        virtual float getValue() const override
+        {
+            if (pluginInstance.editController != nullptr)
+            {
+                return (float) pluginInstance.editController->getParamNormalized (paramID);
+            }
+
+            return 0.0f;
+        }
+
+        virtual void setValue (float newValue) override
+        {
+            if (pluginInstance.editController != nullptr)
+            {
+                pluginInstance.editController->setParamNormalized (paramID, (double) newValue);
+
+                Steinberg::int32 index;
+                pluginInstance.inputParameterChanges->addParameterData (paramID, index)
+                                                    ->addPoint (0, newValue, index);
+            }
+        }
+
+        String getText (float value, int maximumLength) const override
+        {
+            if (pluginInstance.editController != nullptr)
+            {
+                Vst::String128 result;
+
+                if (pluginInstance.editController->getParamStringByValue (paramID, value, result) == kResultOk)
+                    return toString (result).substring (0, maximumLength);
+            }
+
+            return Parameter::getText (value, maximumLength);
+        }
+
+        float getValueForText (const String& text) const override
+        {
+            if (pluginInstance.editController != nullptr)
+            {
+                Vst::ParamValue result;
+
+                if (pluginInstance.editController->getParamValueByString (paramID, toString (text), result) == kResultOk)
+                    return (float) result;
+            }
+
+            return Parameter::getValueForText (text);
+        }
+
+        float getDefaultValue() const override
+        {
+            return (float) defaultValue;
+        }
+
+        String getName (int /*maximumStringLength*/) const override
+        {
+            return name;
+        }
+
+        String getLabel() const override
+        {
+            return label;
+        }
+
+        bool isAutomatable() const override
+        {
+            return automatable;
+        }
+
+        bool isDiscrete() const override
+        {
+            return discrete;
+        }
+
+        int getNumSteps() const override
+        {
+            return numSteps;
+        }
+
+        StringArray getAllValueStrings() const override
+        {
+            return {};
+        }
+
+        VST3PluginInstance& pluginInstance;
+        const Steinberg::Vst::ParamID paramID;
+        const String name, label;
+        const Steinberg::Vst::ParamValue defaultValue;
+        const bool automatable, discrete;
+        const int numSteps;
+    };
+
     VST3PluginInstance (VST3ComponentHolder* componentHolder)
       : AudioPluginInstance (getBusProperties (componentHolder->component)),
         holder (componentHolder),
@@ -1707,7 +1831,9 @@ struct VST3PluginInstance : public AudioPluginInstance
 
         editController->setComponentHandler (nullptr);
 
-        if (isControllerInitialised)    editController->terminate();
+        if (isControllerInitialised)
+            editController->terminate();
+
         holder->terminate();
 
         componentConnection = nullptr;
@@ -1747,9 +1873,30 @@ struct VST3PluginInstance : public AudioPluginInstance
         editController->setComponentHandler (holder->host);
         grabInformationObjects();
         interconnectComponentAndController();
+
+        for (int i = 0; i < editController->getParameterCount(); ++i)
+        {
+            Vst::ParameterInfo paramInfo = { 0 };
+            editController->getParameterInfo (i, paramInfo);
+
+            bool isDiscrete = paramInfo.stepCount != 0;
+            int numSteps = isDiscrete ? paramInfo.stepCount + 1
+                                      : AudioProcessor::getDefaultNumParameterSteps();
+
+            addParameter (new VST3Parameter (*this,
+                                             paramInfo.id,
+                                             toString (paramInfo.title),
+                                             toString (paramInfo.units),
+                                             paramInfo.defaultNormalizedValue,
+                                             (paramInfo.flags & Vst::ParameterInfo::kCanAutomate) != 0,
+                                             isDiscrete,
+                                             numSteps));
+        }
+
         synchroniseStates();
         syncProgramNames();
         setupIO();
+
         return true;
     }
 
@@ -1912,6 +2059,24 @@ struct VST3PluginInstance : public AudioPluginInstance
         associateTo (data, midiMessages);
 
         processor->process (data);
+
+        for (auto* q : outputParameterChanges->queues)
+        {
+            if (editController != nullptr)
+            {
+                auto numPoints = q->getPointCount();
+
+                if (numPoints > 0)
+                {
+                    Steinberg::int32 sampleOffset;
+                    Steinberg::Vst::ParamValue value;
+                    q->getPoint (numPoints - 1, sampleOffset, value);
+                    editController->setParamNormalized (q->getParameterId(), value);
+                }
+            }
+
+            q->clear();
+        }
 
         MidiEventList::toMidiBuffer (midiMessages, *midiOutputs);
 
@@ -2098,8 +2263,8 @@ struct VST3PluginInstance : public AudioPluginInstance
                  && getBusInfo (false, true, busIdx).channelCount == 2;
     }
 
-    bool acceptsMidi() const override    { return getBusInfo (true,  false).channelCount > 0; }
-    bool producesMidi() const override   { return getBusInfo (false, false).channelCount > 0; }
+    bool acceptsMidi() const override    { return getNumSingleDirectionBusesFor (holder->component, true,  false) > 0; }
+    bool producesMidi() const override   { return getNumSingleDirectionBusesFor (holder->component, false, false) > 0; }
 
     //==============================================================================
     /** May return a negative value as a means of informing us that the plugin has "infinite tail," or 0 for "no tail." */
@@ -2133,82 +2298,6 @@ struct VST3PluginInstance : public AudioPluginInstance
 
         ComSmartPtr<IPlugView> view (tryCreatingView(), false);
         return view != nullptr;
-    }
-
-    //==============================================================================
-    int getNumParameters() override
-    {
-        if (editController != nullptr)
-            return (int) editController->getParameterCount();
-
-        return 0;
-    }
-
-    const String getParameterName (int parameterIndex) override
-    {
-        return toString (getParameterInfoForIndex (parameterIndex).title);
-    }
-
-    const String getParameterText (int parameterIndex) override
-    {
-        if (editController != nullptr)
-        {
-            auto id = getParameterInfoForIndex (parameterIndex).id;
-
-            Vst::String128 result;
-            warnOnFailure (editController->getParamStringByValue (id, editController->getParamNormalized (id), result));
-
-            return toString (result);
-        }
-
-        return {};
-    }
-
-    int getParameterNumSteps (int parameterIndex) override
-    {
-        if (editController != nullptr)
-        {
-            const auto numSteps = getParameterInfoForIndex (parameterIndex).stepCount;
-
-            if (numSteps > 0)
-                return numSteps;
-        }
-
-        return AudioProcessor::getDefaultNumParameterSteps();
-    }
-
-    bool isParameterDiscrete (int parameterIndex) const override
-    {
-        if (editController != nullptr)
-        {
-            const auto numSteps = getParameterInfoForIndex (parameterIndex).stepCount;
-            return numSteps > 0;
-        }
-
-        return false;
-    }
-
-    float getParameter (int parameterIndex) override
-    {
-        if (editController != nullptr)
-        {
-            auto id = getParameterInfoForIndex (parameterIndex).id;
-            return (float) editController->getParamNormalized (id);
-        }
-
-        return 0.0f;
-    }
-
-    void setParameter (int parameterIndex, float newValue) override
-    {
-        if (editController != nullptr)
-        {
-            auto paramID = getParameterInfoForIndex (parameterIndex).id;
-            editController->setParamNormalized (paramID, (double) newValue);
-
-            Steinberg::int32 index;
-            inputParameterChanges->addParameterData (paramID, index)->addPoint (0, newValue, index);
-        }
     }
 
     //==============================================================================
@@ -2279,6 +2368,17 @@ struct VST3PluginInstance : public AudioPluginInstance
                     editController->setState (controllerStream);
             }
         }
+    }
+
+    bool setStateFromPresetFile (const MemoryBlock& rawData)
+    {
+        ComSmartPtr<Steinberg::MemoryStream> memoryStream = new Steinberg::MemoryStream (rawData.getData(), (int) rawData.getSize());
+
+        if (memoryStream == nullptr || holder->component == nullptr)
+            return false;
+
+        return Steinberg::Vst::PresetFile::loadPreset (memoryStream, holder->cidOfComponent,
+                                                       holder->component, editController, nullptr);
     }
 
     //==============================================================================
@@ -2764,6 +2864,14 @@ AudioPluginInstance* VST3Classes::VST3ComponentHolder::createPluginInstance()
 VST3PluginFormat::VST3PluginFormat() {}
 VST3PluginFormat::~VST3PluginFormat() {}
 
+bool VST3PluginFormat::setStateFromVSTPresetFile (AudioPluginInstance* api, const MemoryBlock& rawData)
+{
+    if (auto vst3 = dynamic_cast<VST3Classes::VST3PluginInstance*> (api))
+        return vst3->setStateFromPresetFile (rawData);
+
+    return false;
+}
+
 void VST3PluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& results, const String& fileOrIdentifier)
 {
     if (fileMightContainThisPluginType (fileOrIdentifier))
@@ -2784,14 +2892,14 @@ void VST3PluginFormat::createPluginInstance (const PluginDescription& descriptio
 
         if (const VST3Classes::VST3ModuleHandle::Ptr module = VST3Classes::VST3ModuleHandle::findOrCreateModule (file, description))
         {
-            ScopedPointer<VST3Classes::VST3ComponentHolder> holder = new VST3Classes::VST3ComponentHolder (module);
+            ScopedPointer<VST3Classes::VST3ComponentHolder> holder (new VST3Classes::VST3ComponentHolder (module));
 
             if (holder->initialise())
             {
-                result = new VST3Classes::VST3PluginInstance (holder.release());
+                result.reset (new VST3Classes::VST3PluginInstance (holder.release()));
 
                 if (! result->initialise())
-                    result = nullptr;
+                    result.reset();
             }
         }
 

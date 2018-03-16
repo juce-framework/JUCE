@@ -37,6 +37,8 @@ namespace juce
     Be sure to deregister listeners before you delete them!
 
     @see Component::addComponentListener, Component::removeComponentListener
+
+    @tags{GUI}
 */
 class JUCE_API  ComponentListener
 {
@@ -91,6 +93,7 @@ public:
 
     /** Called when the component's name is changed.
 
+        @param component    the component that had its name changed
         @see Component::setName, Component::getName
     */
     virtual void componentNameChanged (Component& component);
@@ -104,8 +107,17 @@ public:
         this - so if the object that's being deleted is a subclass of Component, then the
         subclass layers of the object will already have been destructed when it gets to this
         point!
+
+        @param component    the component that was deleted
     */
     virtual void componentBeingDeleted (Component& component);
+
+    /* Called when the component's enablement is changed.
+
+       @param component    the component that had its enablement changed
+       @see Component::setEnabled, Component::isEnabled, Component::enablementChanged
+    */
+    virtual void componentEnablementChanged (Component& component);
 };
 
 } // namespace juce

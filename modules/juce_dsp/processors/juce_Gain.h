@@ -31,6 +31,8 @@ namespace dsp
 
 /**
     Applies a gain to audio samples as single samples or AudioBlocks.
+
+    @tags{DSP}
 */
 template <typename FloatType>
 class Gain
@@ -102,6 +104,16 @@ public:
 
         auto len         = inBlock.getNumSamples();
         auto numChannels = inBlock.getNumChannels();
+
+        if (context.isBypassed)
+        {
+            gain.skip (static_cast<int> (len));
+
+            if (context.usesSeparateInputAndOutputBlocks())
+                outBlock.copy (inBlock);
+
+            return;
+        }
 
         if (numChannels == 1)
         {

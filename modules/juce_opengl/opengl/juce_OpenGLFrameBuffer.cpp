@@ -180,11 +180,11 @@ bool OpenGLFrameBuffer::initialise (OpenGLContext& context, int width, int heigh
 {
     jassert (context.isActive()); // The context must be active when creating a framebuffer!
 
-    pimpl = nullptr;
-    pimpl = new Pimpl (context, width, height, false, false);
+    pimpl.reset();
+    pimpl.reset (new Pimpl (context, width, height, false, false));
 
     if (! pimpl->createdOk())
-        pimpl = nullptr;
+        pimpl.reset();
 
     return pimpl != nullptr;
 }
@@ -202,11 +202,11 @@ bool OpenGLFrameBuffer::initialise (OpenGLContext& context, const Image& image)
 
 bool OpenGLFrameBuffer::initialise (OpenGLFrameBuffer& other)
 {
-    const Pimpl* const p = other.pimpl;
+    auto* p = other.pimpl.get();
 
     if (p == nullptr)
     {
-        pimpl = nullptr;
+        pimpl.reset();
         return true;
     }
 
@@ -234,16 +234,16 @@ bool OpenGLFrameBuffer::initialise (OpenGLFrameBuffer& other)
 
 void OpenGLFrameBuffer::release()
 {
-    pimpl = nullptr;
-    savedState = nullptr;
+    pimpl.reset();
+    savedState.reset();
 }
 
 void OpenGLFrameBuffer::saveAndRelease()
 {
     if (pimpl != nullptr)
     {
-        savedState = new SavedState (*this, pimpl->width, pimpl->height);
-        pimpl = nullptr;
+        savedState.reset (new SavedState (*this, pimpl->width, pimpl->height));
+        pimpl.reset();
     }
 }
 
@@ -251,12 +251,13 @@ bool OpenGLFrameBuffer::reloadSavedCopy (OpenGLContext& context)
 {
     if (savedState != nullptr)
     {
-        ScopedPointer<SavedState> state (savedState);
+        ScopedPointer<SavedState> state;
+        std::swap (state, savedState);
 
         if (state->restore (context, *this))
             return true;
 
-        savedState = state;
+        std::swap (state, savedState);
     }
 
     return false;

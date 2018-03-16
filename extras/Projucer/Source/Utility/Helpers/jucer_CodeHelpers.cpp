@@ -135,14 +135,6 @@ namespace CodeHelpers
         return "#include \"" + includePath + "\"";
     }
 
-    String makeHeaderGuardName (const File& file)
-    {
-        return file.getFileName().toUpperCase()
-                                 .replaceCharacters (" .", "__")
-                                 .retainCharacters ("_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-                + "_INCLUDED";
-    }
-
     String makeBinaryDataIdentifierName (const File& file)
     {
         return makeValidIdentifier (file.getFileName()

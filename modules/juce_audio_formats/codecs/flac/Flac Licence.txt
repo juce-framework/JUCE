@@ -1,7 +1,7 @@
 
 =====================================================================
 
-I've incorporated FLAC directly into the Juce codebase because it makes
+I've incorporated FLAC directly into the JUCE codebase because it makes
 things much easier than having to make all your builds link correctly to
 the appropriate libraries on every different platform.
 

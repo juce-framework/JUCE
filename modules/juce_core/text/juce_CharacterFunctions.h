@@ -60,6 +60,8 @@ namespace juce
  #define T(stringLiteral)   JUCE_T(stringLiteral)
 #endif
 
+#if ! DOXYGEN
+
 //==============================================================================
 // GNU libstdc++ does not have std::make_unsigned
 namespace internal
@@ -73,6 +75,8 @@ namespace internal
     template <> struct make_unsigned<long long>                 { typedef unsigned long long type; };
 }
 
+#endif
+
 //==============================================================================
 /**
     A collection of functions for manipulating characters and character strings.
@@ -81,6 +85,8 @@ namespace internal
     classes, but some of them may be useful to call directly.
 
     @see String, CharPointer_UTF8, CharPointer_UTF16, CharPointer_UTF32
+
+    @tags{Core}
 */
 class JUCE_API  CharacterFunctions
 {
@@ -399,6 +405,7 @@ public:
         return isNeg ? - (IntType) v : (IntType) v;
     }
 
+    /** Parses a character string, to read a hexadecimal value. */
     template <typename ResultType>
     struct HexParser
     {

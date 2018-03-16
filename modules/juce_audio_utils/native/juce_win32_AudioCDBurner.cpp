@@ -236,7 +236,7 @@ AudioCDBurner::AudioCDBurner (const int deviceIndex)
     IDiscRecorder* discRecorder = CDBurnerHelpers::enumCDBurners (0, deviceIndex, &discMaster);
 
     if (discRecorder != nullptr)
-        pimpl = new Pimpl (*this, discMaster, discRecorder);
+        pimpl.reset (new Pimpl (*this, discMaster, discRecorder));
 }
 
 AudioCDBurner::~AudioCDBurner()
@@ -373,7 +373,7 @@ bool AudioCDBurner::addAudioTrack (AudioSource* audioSource, int numSamples)
     hr = pimpl->redbook->CreateAudioTrack ((long) numSamples / (bytesPerBlock * 4));
 
     HeapBlock<byte> buffer (bytesPerBlock);
-    AudioSampleBuffer sourceBuffer (2, samplesPerBlock);
+    AudioBuffer<float> sourceBuffer (2, samplesPerBlock);
     int samplesDone = 0;
 
     source->prepareToPlay (samplesPerBlock, 44100.0);

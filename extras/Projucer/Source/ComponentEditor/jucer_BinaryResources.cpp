@@ -38,10 +38,8 @@ BinaryResources::~BinaryResources()
 
 BinaryResources& BinaryResources::operator= (const BinaryResources& other)
 {
-    for (int i = 0; i < other.resources.size(); ++i)
-        add (other.resources[i]->name,
-             other.resources[i]->originalFilename,
-             other.resources[i]->data);
+    for (auto* r : other.resources)
+        add (r->name, r->originalFilename, r->data);
 
     return *this;
 }
@@ -69,17 +67,17 @@ StringArray BinaryResources::getResourceNames() const
 {
     StringArray s;
 
-    for (int i = 0; i < resources.size(); ++i)
-        s.add (resources.getUnchecked(i)->name);
+    for (auto* r : resources)
+        s.add (r->name);
 
     return s;
 }
 
 BinaryResources::BinaryResource* BinaryResources::findResource (const String& name) const noexcept
 {
-    for (int i = resources.size(); --i >= 0;)
-        if (resources.getUnchecked(i)->name == name)
-            return resources.getUnchecked(i);
+    for (auto* r : resources)
+        if (r->name == name)
+            return r;
 
     return nullptr;
 }
@@ -91,9 +89,9 @@ const BinaryResources::BinaryResource* BinaryResources::getResource (const Strin
 
 const BinaryResources::BinaryResource* BinaryResources::getResourceForFile (const File& file) const
 {
-    for (int i = resources.size(); --i >= 0;)
-        if (resources.getUnchecked(i)->originalFilename == file.getFullPathName())
-            return resources.getUnchecked(i);
+    for (auto* r : resources)
+        if (r->originalFilename == file.getFullPathName())
+            return r;
 
     return nullptr;
 }
@@ -111,7 +109,7 @@ bool BinaryResources::add (const String& name, const File& file)
 
 void BinaryResources::add (const String& name, const String& originalFileName, const MemoryBlock& data)
 {
-    BinaryResource* r = findResource (name);
+    auto* r = findResource (name);
 
     if (r == nullptr)
     {
@@ -121,14 +119,14 @@ void BinaryResources::add (const String& name, const String& originalFileName, c
 
     r->originalFilename = originalFileName;
     r->data = data;
-    r->drawable = nullptr;
+    r->drawable.reset();
 
     changed();
 }
 
 bool BinaryResources::reload (const int index)
 {
-    return resources[index] != 0
+    return resources[index] != nullptr
             && add (resources [index]->name,
                     File (resources [index]->originalFilename));
 }
@@ -159,16 +157,15 @@ String BinaryResources::browseForResource (const String& title,
         return name;
     }
 
-    return String();
+    return {};
 }
 
 String BinaryResources::findUniqueName (const String& rootName) const
 {
-    String nameRoot (CodeHelpers::makeValidIdentifier (rootName, true, true, false));
-    String name (nameRoot);
+    auto nameRoot = CodeHelpers::makeValidIdentifier (rootName, true, true, false);
+    auto name = nameRoot;
 
-    const StringArray names (getResourceNames());
-
+    auto names = getResourceNames();
     int suffix = 1;
 
     while (names.contains (name))
@@ -177,9 +174,9 @@ String BinaryResources::findUniqueName (const String& rootName) const
     return name;
 }
 
-void BinaryResources::remove (const int i)
+void BinaryResources::remove (int i)
 {
-    if (resources[i] != 0)
+    if (resources[i] != nullptr)
     {
         resources.remove (i);
         changed();
@@ -188,13 +185,13 @@ void BinaryResources::remove (const int i)
 
 const Drawable* BinaryResources::getDrawable (const String& name) const
 {
-    if (BinaryResources::BinaryResource* const res = const_cast<BinaryResources::BinaryResource*> (getResource (name)))
+    if (auto* res = const_cast<BinaryResources::BinaryResource*> (getResource (name)))
     {
         if (res->drawable == nullptr && res->data.getSize() > 0)
-            res->drawable = Drawable::createFromImageData (res->data.getData(),
-                                                           res->data.getSize());
+            res->drawable.reset (Drawable::createFromImageData (res->data.getData(),
+                                                                res->data.getSize()));
 
-        return res->drawable;
+        return res->drawable.get();
     }
 
     return nullptr;
@@ -202,11 +199,11 @@ const Drawable* BinaryResources::getDrawable (const String& name) const
 
 Image BinaryResources::getImageFromCache (const String& name) const
 {
-    if (const BinaryResources::BinaryResource* const res = getResource (name))
+    if (auto* res = getResource (name))
         if (res->data.getSize() > 0)
             return ImageCache::getFromMemory (res->data.getData(), (int) res->data.getSize());
 
-    return Image();
+    return {};
 }
 
 void BinaryResources::loadFromCpp (const File& cppFileLocation, const String& cppFile)
@@ -225,22 +222,22 @@ void BinaryResources::loadFromCpp (const File& cppFileLocation, const String& cp
             tokens.trim();
             tokens.removeEmptyStrings();
 
-            const String resourceName (tokens[0]);
-            const int resourceSize = tokens[1].getIntValue();
-            const String originalFileName (cppFileLocation.getSiblingFile (tokens[2].unquoted()).getFullPathName());
+            auto resourceName = tokens[0];
+            auto resourceSize = tokens[1].getIntValue();
+            auto originalFileName = cppFileLocation.getSiblingFile (tokens[2].unquoted()).getFullPathName();
 
             jassert (resourceName.isNotEmpty() && resourceSize > 0);
 
             if (resourceName.isNotEmpty() && resourceSize > 0)
             {
-                const int firstLine = i;
+                auto firstLine = i;
 
                 while (i < cpp.size())
                     if (cpp [i++].contains ("}"))
                         break;
 
-                const String dataString (cpp.joinIntoString (" ", firstLine, i - firstLine)
-                                            .fromFirstOccurrenceOf ("{", false, false));
+                auto dataString = cpp.joinIntoString (" ", firstLine, i - firstLine)
+                                     .fromFirstOccurrenceOf ("{", false, false);
 
                 MemoryOutputStream out;
                 String::CharPointerType t (dataString.getCharPointer());
@@ -248,17 +245,21 @@ void BinaryResources::loadFromCpp (const File& cppFileLocation, const String& cp
 
                 while (! t.isEmpty())
                 {
-                    const juce_wchar c = t.getAndAdvance();
+                    auto c = t.getAndAdvance();
 
                     if (c >= '0' && c <= '9')
+                    {
                         n = n * 10 + (c - '0');
+                    }
                     else if (c == ',')
                     {
                         out.writeByte ((char) n);
                         n = 0;
                     }
                     else if (c == '}')
+                    {
                         break;
+                    }
                 }
 
                 jassert (resourceSize < (int) out.getDataSize() && resourceSize > (int) out.getDataSize() - 2);
@@ -284,21 +285,21 @@ void BinaryResources::fillInGeneratedCode (GeneratedCode& code) const
         defs << "//==============================================================================\n";
         defs << "// Binary resources - be careful not to edit any of these sections!\n\n";
 
-        for (int i = 0; i < resources.size(); ++i)
+        for (auto* r : resources)
         {
             code.publicMemberDeclarations
                 << "static const char* "
-                << resources[i]->name
+                << r->name
                 << ";\nstatic const int "
-                << resources[i]->name
+                << r->name
                 << "Size;\n";
 
-            const String name (resources[i]->name);
-            const MemoryBlock& mb = resources[i]->data;
+            auto name = r->name;
+            auto& mb = r->data;
 
             defs << "// JUCER_RESOURCE: " << name << ", " << (int) mb.getSize()
                 << ", \""
-                << File (resources[i]->originalFilename)
+                << File (r->originalFilename)
                     .getRelativePathFrom (code.document->getCppFile())
                     .replaceCharacter ('\\', '/')
                 << "\"\n";
@@ -313,7 +314,7 @@ void BinaryResources::fillInGeneratedCode (GeneratedCode& code) const
 
             for (size_t j = 0; j < mb.getSize(); ++j)
             {
-                const int num = (int) (unsigned char) mb[j];
+                auto num = (int) (unsigned char) mb[j];
                 defs << num << ',';
 
                 charsOnLine += 2;

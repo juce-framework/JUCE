@@ -32,6 +32,8 @@ namespace juce
     A subclass of this is used to drive a ListBox.
 
     @see ListBox
+
+    @tags{GUI}
 */
 class JUCE_API  ListBoxModel
 {
@@ -174,6 +176,8 @@ private:
     more specialised tasks, it can supply a custom component to fill each row.
 
     @see ComboBox, TableListBox
+
+    @tags{GUI}
 */
 class JUCE_API  ListBox  : public Component,
                            public SettableTooltipClient
@@ -497,7 +501,7 @@ public:
     void setHeaderComponent (Component* newHeaderComponent);
 
     /** Returns whatever header component was set with setHeaderComponent(). */
-    Component* getHeaderComponent() const noexcept      { return headerComponent; }
+    Component* getHeaderComponent() const noexcept      { return headerComponent.get(); }
 
     /** Changes the width of the rows in the list.
 

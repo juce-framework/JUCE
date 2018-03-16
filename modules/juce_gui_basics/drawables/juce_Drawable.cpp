@@ -41,6 +41,9 @@ Drawable::Drawable (const Drawable& other)
 
     setComponentID (other.getComponentID());
     setTransform (other.getTransform());
+
+    if (auto* clipPath = other.drawableClipPath.get())
+        setClipPath (clipPath->createCopy());
 }
 
 Drawable::~Drawable()
@@ -109,9 +112,9 @@ DrawableComposite* Drawable::getParent() const
 
 void Drawable::setClipPath (Drawable* clipPath)
 {
-    if (drawableClipPath != clipPath)
+    if (drawableClipPath.get() != clipPath)
     {
-        drawableClipPath = clipPath;
+        drawableClipPath.reset (clipPath);
         repaint();
     }
 }
@@ -207,76 +210,6 @@ Drawable* Drawable::createFromImageFile (const File& file)
     FileInputStream fin (file);
 
     return fin.openedOk() ? createFromImageDataStream (fin) : nullptr;
-}
-
-//==============================================================================
-template <class DrawableClass>
-struct DrawableTypeHandler  : public ComponentBuilder::TypeHandler
-{
-    DrawableTypeHandler() : ComponentBuilder::TypeHandler (DrawableClass::valueTreeType)
-    {
-    }
-
-    Component* addNewComponentFromState (const ValueTree& state, Component* parent)
-    {
-        auto* d = new DrawableClass();
-
-        if (parent != nullptr)
-            parent->addAndMakeVisible (d);
-
-        updateComponentFromState (d, state);
-        return d;
-    }
-
-    void updateComponentFromState (Component* component, const ValueTree& state)
-    {
-        if (auto* d = dynamic_cast<DrawableClass*> (component))
-            d->refreshFromValueTree (state, *this->getBuilder());
-        else
-            jassertfalse;
-    }
-};
-
-void Drawable::registerDrawableTypeHandlers (ComponentBuilder& builder)
-{
-    builder.registerTypeHandler (new DrawableTypeHandler<DrawablePath>());
-    builder.registerTypeHandler (new DrawableTypeHandler<DrawableComposite>());
-    builder.registerTypeHandler (new DrawableTypeHandler<DrawableRectangle>());
-    builder.registerTypeHandler (new DrawableTypeHandler<DrawableImage>());
-    builder.registerTypeHandler (new DrawableTypeHandler<DrawableText>());
-}
-
-Drawable* Drawable::createFromValueTree (const ValueTree& tree, ComponentBuilder::ImageProvider* imageProvider)
-{
-    ComponentBuilder builder (tree);
-    builder.setImageProvider (imageProvider);
-    registerDrawableTypeHandlers (builder);
-
-    ScopedPointer<Component> comp (builder.createComponent());
-    auto* d = dynamic_cast<Drawable*> (static_cast<Component*> (comp));
-
-    if (d != nullptr)
-        comp.release();
-
-    return d;
-}
-
-//==============================================================================
-Drawable::ValueTreeWrapperBase::ValueTreeWrapperBase (const ValueTree& s)  : state (s)
-{
-}
-
-String Drawable::ValueTreeWrapperBase::getID() const
-{
-    return state [ComponentBuilder::idProperty];
-}
-
-void Drawable::ValueTreeWrapperBase::setID (const String& newID)
-{
-    if (newID.isEmpty())
-        state.removeProperty (ComponentBuilder::idProperty, nullptr);
-    else
-        state.setProperty (ComponentBuilder::idProperty, newID, nullptr);
 }
 
 } // namespace juce

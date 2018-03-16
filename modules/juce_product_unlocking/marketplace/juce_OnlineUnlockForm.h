@@ -45,6 +45,8 @@ namespace juce
     if you need to get rid of it sooner.
 
     @see OnlineUnlockStatus
+
+    @tags{ProductUnlocking}
 */
 class JUCE_API  OnlineUnlockForm  : public Component,
                                     private Button::Listener
@@ -55,7 +57,8 @@ public:
     */
     OnlineUnlockForm (OnlineUnlockStatus&,
                       const String& userInstructions,
-                      bool hasCancelButton = true);
+                      bool hasCancelButton = true,
+                      bool overlayHasCancelButton = false);
 
     /** Destructor. */
     ~OnlineUnlockForm();
@@ -80,6 +83,8 @@ public:
 private:
     OnlineUnlockStatus& status;
     ScopedPointer<BubbleMessageComponent> bubble;
+
+    bool showOverlayCancelButton;
 
     struct OverlayComp;
     friend struct OverlayComp;

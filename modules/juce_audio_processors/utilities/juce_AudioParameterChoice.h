@@ -32,17 +32,32 @@ namespace juce
     an indexed, named choice from a list.
 
     @see AudioParameterFloat, AudioParameterInt, AudioParameterBool
+
+    @tags{Audio}
 */
 class JUCE_API  AudioParameterChoice  : public AudioProcessorParameterWithID
 {
 public:
-    /** Creates a AudioParameterChoice with an ID, name, and list of items.
-        On creation, its value is set to the default index.
+    /** Creates a AudioParameterChoice with the specified parameters.
+
+        @param parameterID         The parameter ID to use
+        @param name                The parameter name to use
+        @param choices             The set of choices to use
+        @param defaultItemIndex    The index of the default choice
+        @param label               An optional label for the parameter's value
+        @param stringFromIndex     An optional lambda function that converts a choice
+                                   index to a string with a maximum length. This may
+                                   be used by hosts to display the parameter's value.
+        @param indexFromString     An optional lambda function that parses a string and
+                                   converts it into a choice index. Some hosts use this
+                                   to allow users to type in parameter values.
     */
     AudioParameterChoice (const String& parameterID, const String& name,
                           const StringArray& choices,
                           int defaultItemIndex,
-                          const String& label = String());
+                          const String& label = String(),
+                          std::function<String (int index, int maximumStringLength)> stringFromIndex = nullptr,
+                          std::function<int (const String& text)> indexFromString = nullptr);
 
     /** Destructor. */
     ~AudioParameterChoice();
@@ -63,12 +78,14 @@ public:
     /** Provides access to the list of choices that this parameter is working with. */
     const StringArray choices;
 
+protected:
+    /** Override this method if you are interested in receiving callbacks
+        when the parameter value changes.
+    */
+    virtual void valueChanged (int newValue);
 
 private:
     //==============================================================================
-    float value, defaultValue;
-    const int maxIndex;
-
     float getValue() const override;
     void setValue (float newValue) override;
     float getDefaultValue() const override;
@@ -80,6 +97,12 @@ private:
     int limitRange (int) const noexcept;
     float convertTo0to1 (int) const noexcept;
     int convertFrom0to1 (float) const noexcept;
+
+    float value;
+    const int maxIndex;
+    const float defaultValue;
+    std::function<String (int, int)> stringFromIndexFunction;
+    std::function<int (const String&)> indexFromStringFunction;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioParameterChoice)
 };

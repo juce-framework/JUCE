@@ -33,88 +33,85 @@ namespace dsp
 namespace ProcessorHelpers  // Internal helper classes used in building the ProcessorChain
 {
     template <int arg>
-    struct GetterHelper
+    struct AccessHelper
     {
         template <typename ProcessorType>
-        static auto& get (ProcessorType& a) noexcept    { return GetterHelper<arg - 1>::get (a.processors); }
+        static auto& get (ProcessorType& a) noexcept                 { return AccessHelper<arg - 1>::get (a.processors); }
+
+        template <typename ProcessorType>
+        static void setBypassed (ProcessorType& a, bool bypassed)    { AccessHelper<arg - 1>::setBypassed (a.processors, bypassed); }
     };
 
     template <>
-    struct GetterHelper<0>
+    struct AccessHelper<0>
     {
         template <typename ProcessorType>
-        static auto& get (ProcessorType& a) noexcept    { return a.getProcessor(); }
+        static auto& get (ProcessorType& a) noexcept                 { return a.getProcessor(); }
+
+        template <typename ProcessorType>
+        static void setBypassed (ProcessorType& a, bool bypassed)    { a.isBypassed = bypassed; }
     };
 
-    template <typename Processor, typename Subclass>
-    struct ChainBase
+    //==============================================================================
+    template <bool isFirst, typename Processor, typename Subclass>
+    struct ChainElement
     {
+        void prepare (const ProcessSpec& spec)
+        {
+            processor.prepare (spec);
+        }
+
+        template <typename ProcessContext>
+        void process (const ProcessContext& context) noexcept
+        {
+            if (context.usesSeparateInputAndOutputBlocks() && ! isFirst)
+            {
+                jassert (context.getOutputBlock().getNumChannels() == context.getInputBlock().getNumChannels());
+                ProcessContextReplacing<typename ProcessContext::SampleType> replacingContext (context.getOutputBlock());
+                replacingContext.isBypassed = (isBypassed || context.isBypassed);
+
+                processor.process (replacingContext);
+            }
+            else
+            {
+                ProcessContext contextCopy (context);
+                contextCopy.isBypassed = (isBypassed || context.isBypassed);
+
+                processor.process (contextCopy);
+            }
+        }
+
+        void reset()
+        {
+            processor.reset();
+        }
+
+        bool isBypassed = false;
         Processor processor;
 
         Processor& getProcessor() noexcept       { return processor; }
         Subclass& getThis() noexcept             { return *static_cast<Subclass*> (this); }
 
-        template <int arg> auto& get() noexcept  { return GetterHelper<arg>::get (getThis()); }
+        template <int arg> auto& get() noexcept                      { return AccessHelper<arg>::get (getThis()); }
+        template <int arg> void setBypassed (bool bypassed) noexcept { AccessHelper<arg>::setBypassed (getThis(), bypassed); }
     };
 
-    template <typename FirstProcessor, typename... SubsequentProcessors>
-    struct Chain  : public ChainBase<FirstProcessor, Chain<FirstProcessor, SubsequentProcessors...>>
+    //==============================================================================
+    template <bool isFirst, typename FirstProcessor, typename... SubsequentProcessors>
+    struct ChainBase  : public ChainElement<isFirst, FirstProcessor, ChainBase<isFirst, FirstProcessor, SubsequentProcessors...>>
     {
-        using Base = ChainBase<FirstProcessor, Chain<FirstProcessor, SubsequentProcessors...>>;
-
-        void prepare (const ProcessSpec& spec)
-        {
-            Base::processor.prepare (spec);
-            processors.prepare (spec);
-        }
+        using Base = ChainElement<isFirst, FirstProcessor, ChainBase<isFirst, FirstProcessor, SubsequentProcessors...>>;
 
         template <typename ProcessContext>
-        void process (ProcessContext& context) noexcept
-        {
-            Base::processor.process (context);
+        void process (const ProcessContext& context) noexcept  { Base::process (context); processors.process (context); }
+        void prepare (const ProcessSpec& spec)                 { Base::prepare (spec); processors.prepare (spec); }
+        void reset()                                           { Base::reset(); processors.reset(); }
 
-            if (context.usesSeparateInputAndOutputBlocks())
-            {
-                jassert (context.getOutputBlock().getNumChannels() == context.getInputBlock().getNumChannels());
-                ProcessContextReplacing<typename ProcessContext::SampleType> replacingContext (context.getOutputBlock());
-                processors.process (replacingContext);
-            }
-            else
-            {
-                processors.process (context);
-            }
-        }
-
-        void reset()
-        {
-            Base::processor.reset();
-            processors.reset();
-        }
-
-        Chain<SubsequentProcessors...> processors;
+        ChainBase<false, SubsequentProcessors...> processors;
     };
 
-    template <typename ProcessorType>
-    struct Chain<ProcessorType>  : public ChainBase<ProcessorType, Chain<ProcessorType>>
-    {
-        using Base = ChainBase<ProcessorType, Chain<ProcessorType>>;
-
-        template <typename ProcessContext>
-        void process (ProcessContext& context) noexcept
-        {
-            Base::processor.process (context);
-        }
-
-        void prepare (const ProcessSpec& spec)
-        {
-            Base::processor.prepare (spec);
-        }
-
-        void reset()
-        {
-            Base::processor.reset();
-        }
-    };
+    template <bool isFirst, typename ProcessorType>
+    struct ChainBase<isFirst, ProcessorType>  : public ChainElement<isFirst, ProcessorType, ChainBase<isFirst, ProcessorType>> {};
 }
 #endif
 
@@ -125,7 +122,7 @@ namespace ProcessorHelpers  // Internal helper classes used in building the Proc
     classes into a single processor which will call process() on them all in sequence.
 */
 template <typename... Processors>
-using ProcessorChain = ProcessorHelpers::Chain<Processors...>;
+using ProcessorChain = ProcessorHelpers::ChainBase<true, Processors...>;
 
 } // namespace dsp
 } // namespace juce

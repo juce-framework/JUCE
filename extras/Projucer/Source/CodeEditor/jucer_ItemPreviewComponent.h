@@ -43,25 +43,24 @@ public:
 
         if (drawable != nullptr)
         {
-            Rectangle<float> contentBounds (drawable->getDrawableBounds());
+            auto contentBounds = drawable->getDrawableBounds();
 
-            if (DrawableComposite* dc = dynamic_cast<DrawableComposite*> (drawable.get()))
+            if (auto* dc = dynamic_cast<DrawableComposite*> (drawable.get()))
             {
-                Rectangle<float> r (dc->getContentArea().resolve (nullptr));
+                auto r = dc->getContentArea();
 
                 if (! r.isEmpty())
                     contentBounds = r;
             }
 
-            Rectangle<float> area = RectanglePlacement (RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize)
-                                        .appliedTo (contentBounds, Rectangle<float> (4.0f, 22.0f, getWidth() - 8.0f, getHeight() - 26.0f));
+            auto area = RectanglePlacement (RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize)
+                            .appliedTo (contentBounds, Rectangle<float> (4.0f, 22.0f, getWidth() - 8.0f, getHeight() - 26.0f));
 
             Path p;
             p.addRectangle (area);
             DropShadow (Colours::black.withAlpha (0.5f), 6, Point<int> (0, 1)).drawForPath (g, p);
 
-            g.fillCheckerBoard (area.getSmallestIntegerContainer(), 24, 24,
-                                Colour (0xffffffff), Colour (0xffeeeeee));
+            g.fillCheckerBoard (area, 24.0f, 24.0f, Colour (0xffffffff), Colour (0xffeeeeee));
 
             drawable->draw (g, 1.0f, RectanglePlacement (RectanglePlacement::stretchToFit)
                                         .getTransformToFit (contentBounds, area.toFloat()));
@@ -81,28 +80,28 @@ private:
     {
         facts.clear();
         facts.add (file.getFullPathName());
-        drawable = nullptr;
+        drawable.reset();
 
         {
             ScopedPointer<InputStream> input (file.createInputStream());
 
             if (input != nullptr)
             {
-                const int64 totalSize = input->getTotalLength();
-
+                auto totalSize = input->getTotalLength();
                 String formatName;
-                if (ImageFileFormat* format = ImageFileFormat::findImageFormatForStream (*input))
+
+                if (auto* format = ImageFileFormat::findImageFormatForStream (*input))
                     formatName = " " + format->getFormatName();
 
-                input = nullptr;
+                input.reset();
 
-                Image image (ImageCache::getFromFile (file));
+                auto image = ImageCache::getFromFile (file);
 
                 if (image.isValid())
                 {
-                    DrawableImage* d = new DrawableImage();
+                    auto* d = new DrawableImage();
                     d->setImage (image);
-                    drawable = d;
+                    drawable.reset (d);
 
                     facts.add (String (image.getWidth()) + " x " + String (image.getHeight()) + formatName);
                 }
@@ -117,7 +116,7 @@ private:
             ScopedPointer<XmlElement> svg (XmlDocument::parse (file));
 
             if (svg != nullptr)
-                drawable = Drawable::createFromSVG (*svg);
+                drawable.reset (Drawable::createFromSVG (*svg));
         }
 
         facts.removeEmptyStrings (true);

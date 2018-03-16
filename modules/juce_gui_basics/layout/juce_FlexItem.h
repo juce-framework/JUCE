@@ -31,6 +31,8 @@ namespace juce
     Describes the properties of an item inside a FlexBox container.
 
     @see FlexBox
+
+    @tags{GUI}
 */
 class JUCE_API  FlexItem  final
 {
@@ -42,16 +44,18 @@ public:
     /** Creates an item with the given size. */
     FlexItem (float width, float height) noexcept;
 
-    /** Creates an item with the given size and target component. */
+    /** Creates an item with the given size and target Component. */
     FlexItem (float width, float height, Component& targetComponent) noexcept;
 
     /** Creates an item that represents an embedded FlexBox with a given size. */
     FlexItem (float width, float height, FlexBox& flexBoxToControl) noexcept;
 
-    /** Creates an item with a given target component. */
+    /** Creates an item with a given target Component. */
     FlexItem (Component& componentToControl) noexcept;
 
-    /** Creates an item that represents an embedded FlexBox. */
+    /** Creates an item that represents an embedded FlexBox. This class will not
+        create a copy of the supplied flex box. You need to ensure that the
+        life-time of flexBoxToControl is longer than the FlexItem. */
     FlexItem (FlexBox& flexBoxToControl) noexcept;
 
     //==============================================================================
@@ -88,9 +92,16 @@ public:
     float flexBasis = 0.0f;
 
     /** Possible value for the alignSelf property */
-    enum class AlignSelf  { autoAlign, flexStart, flexEnd, center, stretch };
+    enum class AlignSelf
+    {
+        autoAlign,       /**< Follows the FlexBox container's alignItems property. */
+        flexStart,       /**< Item is aligned towards the start of the cross axis. */
+        flexEnd,         /**< Item is aligned towards the end of the cross axis. */
+        center,          /**< Item is aligned towards the center of the cross axis. */
+        stretch          /**< Item is stretched from start to end of the cross axis. */
+    };
 
-    /** This is the aligh-self property of the item.
+    /** This is the align-self property of the item.
         This determines the alignment of the item along the cross-axis (perpendicular to the direction
         of flow).
     */

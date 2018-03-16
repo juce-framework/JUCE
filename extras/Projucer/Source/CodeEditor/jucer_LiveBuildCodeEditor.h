@@ -234,7 +234,7 @@ private:
             Array<ClassDatabase::Class*> newClasses;
 
             if (childProcess != nullptr)
-                childProcess->getComponentList().globalNamespace.findClassesDeclaredInFile (newClasses, file);
+                const_cast <ClassDatabase::ClassList&> (childProcess->getComponentList()).globalNamespace.findClassesDeclaredInFile (newClasses, file);
 
             for (int i = newClasses.size(); --i >= 0;)
                 if (! newClasses.getUnchecked(i)->getInstantiationFlags().canBeInstantiated())
@@ -345,7 +345,7 @@ private:
                    || underMouse->findParentComponentOfClass<ControlsComponent>() != nullptr))
             return;
 
-        overlay = nullptr;
+        overlay.reset();
 
         if (hasKeyboardFocus (true) && underMouse != nullptr
               && (underMouse == this || underMouse->isParentOf (this)))
@@ -372,7 +372,7 @@ private:
     void hideOverlay()
     {
         stopTimer();
-        overlay = nullptr;
+        overlay.reset();
     }
 
     void focusLost (FocusChangeType) override
@@ -446,7 +446,6 @@ private:
 
     //==============================================================================
     class ControlsComponent   : public Component,
-                                private Slider::Listener,
                                 private ChangeListener
     {
     public:
@@ -464,7 +463,8 @@ private:
             setMouseClickGrabsKeyboardFocus (false);
             addAndMakeVisible (&slider);
             updateRange();
-            slider.addListener (this);
+            slider.onValueChange = [this] { updateSliderValue(); };
+            slider.onDragEnd = [this] { updateRange(); };
 
             if (showColourSelector)
             {
@@ -511,10 +511,10 @@ private:
             g.fillRoundedRectangle (getLocalBounds().toFloat(), 8.0f);
         }
 
-        void sliderValueChanged (Slider* s) override
+        void updateSliderValue()
         {
             const String oldText (document.getTextBetween (start, end));
-            const String newText (CppParserHelpers::getReplacementStringInSameFormat (oldText, s->getValue()));
+            const String newText (CppParserHelpers::getReplacementStringInSameFormat (oldText, slider.getValue()));
 
             if (oldText != newText)
                 document.replaceSection (start.getPosition(), end.getPosition(), newText);
@@ -524,9 +524,6 @@ private:
 
             updateColourSelector();
         }
-
-        void sliderDragStarted (Slider*) override  {}
-        void sliderDragEnded (Slider*) override    { updateRange(); }
 
         void changeListenerCallback (ChangeBroadcaster*) override
         {

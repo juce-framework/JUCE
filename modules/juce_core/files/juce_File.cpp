@@ -247,13 +247,8 @@ bool File::setReadOnly (const bool shouldBeReadOnly,
     bool worked = true;
 
     if (applyRecursively && isDirectory())
-    {
-        Array<File> subFiles;
-        findChildFiles (subFiles, File::findFilesAndDirectories, false);
-
-        for (auto& f : subFiles)
+        for (auto& f : findChildFiles (File::findFilesAndDirectories, false))
             worked = f.setReadOnly (shouldBeReadOnly, true) && worked;
-    }
 
     return setFileReadOnlyInternal (shouldBeReadOnly) && worked;
 }
@@ -268,13 +263,8 @@ bool File::deleteRecursively() const
     bool worked = true;
 
     if (isDirectory())
-    {
-        Array<File> subFiles;
-        findChildFiles (subFiles, File::findFilesAndDirectories, false);
-
-        for (auto& f : subFiles)
+        for (auto& f : findChildFiles (File::findFilesAndDirectories, false))
             worked = f.deleteRecursively() && worked;
-    }
 
     return deleteFile() && worked;
 }
@@ -321,17 +311,11 @@ bool File::copyDirectoryTo (const File& newDirectory) const
 {
     if (isDirectory() && newDirectory.createDirectory())
     {
-        Array<File> subFiles;
-        findChildFiles (subFiles, File::findFiles, false);
-
-        for (auto& f : subFiles)
+        for (auto& f : findChildFiles (File::findFiles, false))
             if (! f.copyFileTo (newDirectory.getChildFile (f.getFileName())))
                 return false;
 
-        subFiles.clear();
-        findChildFiles (subFiles, File::findDirectories, false);
-
-        for (auto& f : subFiles)
+        for (auto& f : findChildFiles (File::findDirectories, false))
             if (! f.copyDirectoryTo (newDirectory.getChildFile (f.getFileName())))
                 return false;
 
@@ -561,14 +545,18 @@ void File::readLines (StringArray& destLines) const
 }
 
 //==============================================================================
-int File::findChildFiles (Array<File>& results,
-                          const int whatToLookFor,
-                          const bool searchRecursively,
-                          const String& wildCardPattern) const
+Array<File> File::findChildFiles (int whatToLookFor, bool searchRecursively, const String& wildcard) const
+{
+    Array<File> results;
+    findChildFiles (results, whatToLookFor, searchRecursively, wildcard);
+    return results;
+}
+
+int File::findChildFiles (Array<File>& results, int whatToLookFor, bool searchRecursively, const String& wildcard) const
 {
     int total = 0;
 
-    for (DirectoryIterator di (*this, searchRecursively, wildCardPattern, whatToLookFor); di.next();)
+    for (DirectoryIterator di (*this, searchRecursively, wildcard, whatToLookFor); di.next();)
     {
         results.add (di.getFile());
         ++total;
@@ -1056,24 +1044,14 @@ public:
 
         beginTest ("Writing");
 
-        File demoFolder (temp.getChildFile ("Juce UnitTests Temp Folder.folder"));
+        File demoFolder (temp.getChildFile ("JUCE UnitTests Temp Folder.folder"));
         expect (demoFolder.deleteRecursively());
         expect (demoFolder.createDirectory());
         expect (demoFolder.isDirectory());
         expect (demoFolder.getParentDirectory() == temp);
         expect (temp.isDirectory());
-
-        {
-            Array<File> files;
-            temp.findChildFiles (files, File::findFilesAndDirectories, false, "*");
-            expect (files.contains (demoFolder));
-        }
-
-        {
-            Array<File> files;
-            temp.findChildFiles (files, File::findDirectories, true, "*.folder");
-            expect (files.contains (demoFolder));
-        }
+        expect (temp.findChildFiles (File::findFilesAndDirectories, false, "*").contains (demoFolder));
+        expect (temp.findChildFiles (File::findDirectories, true, "*.folder").contains (demoFolder));
 
         File tempFile (demoFolder.getNonexistentChildFile ("test", ".txt", false));
 

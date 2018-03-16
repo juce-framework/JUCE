@@ -25,6 +25,7 @@
 */
 
 #include "../Application/jucer_Headers.h"
+#include "jucer_NewProjectWizardClasses.h"
 #include "../ProjectSaving/jucer_ProjectExporter.h"
 #include "../Utility/UI/jucer_SlidingPanelComponent.h"
 
@@ -53,23 +54,23 @@ struct NewProjectWizardClasses
         return 9;
     }
 
-    static NewProjectWizard* createWizardType (int index)
+    static ScopedPointer<NewProjectWizard> createWizardType (int index)
     {
         switch (index)
         {
-            case 0:     return new NewProjectWizardClasses::GUIAppWizard();
-            case 1:     return new NewProjectWizardClasses::AnimatedAppWizard();
-            case 2:     return new NewProjectWizardClasses::OpenGLAppWizard();
-            case 3:     return new NewProjectWizardClasses::ConsoleAppWizard();
-            case 4:     return new NewProjectWizardClasses::AudioAppWizard();
-            case 5:     return new NewProjectWizardClasses::AudioPluginAppWizard();
-            case 6:     return new NewProjectWizardClasses::StaticLibraryWizard();
-            case 7:     return new NewProjectWizardClasses::DynamicLibraryWizard();
-            case 8:     return new NewProjectWizardClasses::BlankAppWizard();
+            case 0:     return ScopedPointer<NewProjectWizard> (new NewProjectWizardClasses::GUIAppWizard());
+            case 1:     return ScopedPointer<NewProjectWizard> (new NewProjectWizardClasses::AnimatedAppWizard());
+            case 2:     return ScopedPointer<NewProjectWizard> (new NewProjectWizardClasses::OpenGLAppWizard());
+            case 3:     return ScopedPointer<NewProjectWizard> (new NewProjectWizardClasses::ConsoleAppWizard());
+            case 4:     return ScopedPointer<NewProjectWizard> (new NewProjectWizardClasses::AudioAppWizard());
+            case 5:     return ScopedPointer<NewProjectWizard> (new NewProjectWizardClasses::AudioPluginAppWizard());
+            case 6:     return ScopedPointer<NewProjectWizard> (new NewProjectWizardClasses::StaticLibraryWizard());
+            case 7:     return ScopedPointer<NewProjectWizard> (new NewProjectWizardClasses::DynamicLibraryWizard());
+            case 8:     return ScopedPointer<NewProjectWizard> (new NewProjectWizardClasses::BlankAppWizard());
             default:    jassertfalse; break;
         }
 
-        return nullptr;
+        return {};
     }
 
     static StringArray getWizardNames()
@@ -77,10 +78,7 @@ struct NewProjectWizardClasses
         StringArray s;
 
         for (int i = 0; i < getNumWizards(); ++i)
-        {
-            ScopedPointer<NewProjectWizard> wiz (createWizardType (i));
-            s.add (wiz->getName());
-        }
+            s.add (createWizardType (i)->getName());
 
         return s;
     }

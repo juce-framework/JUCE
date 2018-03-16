@@ -35,11 +35,10 @@ namespace
     static String fillInBasicTemplateFields (const File& file, const Project::Item& item, const char* templateName)
     {
         return item.project.getFileTemplate (templateName)
-                      .replace ("FILENAME", file.getFileName(), false)
-                      .replace ("DATE", Time::getCurrentTime().toString (true, true, true), false)
-                      .replace ("AUTHOR", SystemStats::getFullUserName(), false)
-                      .replace ("HEADERGUARD", CodeHelpers::makeHeaderGuardName (file), false)
-                      .replace ("INCLUDE_CORRESPONDING_HEADER", CodeHelpers::createIncludeStatement (file.withFileExtension (".h"), file));
+                      .replace ("%%filename%%", file.getFileName(), false)
+                      .replace ("%%date%%", Time::getCurrentTime().toString (true, true, true), false)
+                      .replace ("%%author%%", SystemStats::getFullUserName(), false)
+                      .replace ("%%include_corresponding_header%%", CodeHelpers::createIncludeStatement (file.withFileExtension (".h"), file));
     }
 
     static bool fillInNewCppFileTemplate (const File& file, const Project::Item& item, const char* templateName)
@@ -169,8 +168,8 @@ public:
                         const File& newFile, const char* templateName)
     {
         String content = fillInBasicTemplateFields (newFile, parent, templateName)
-                            .replace ("COMPONENTCLASS", className)
-                            .replace ("INCLUDE_JUCE", CodeHelpers::createIncludeStatement (parent.project.getAppIncludeFile(), newFile));
+                            .replace ("%%component_class%%", className)
+                            .replace ("%%include_juce%%", CodeHelpers::createIncludeStatement (parent.project.getAppIncludeFile(), newFile));
 
         if (FileHelpers::overwriteFileWithNewDataIfDifferent (newFile, content))
         {

@@ -30,9 +30,7 @@
 static const char* resourceFileIdentifierString = "JUCER_BINARY_RESOURCE";
 
 //==============================================================================
-ResourceFile::ResourceFile (Project& p)
-    : project (p),
-      className ("BinaryData")
+ResourceFile::ResourceFile (Project& p)    : project (p)
 {
     addResourcesFromProjectItem (project.getMainGroup());
 }
@@ -66,8 +64,8 @@ void ResourceFile::addFile (const File& file)
 {
     files.add (file);
 
-    const String variableNameRoot (CodeHelpers::makeBinaryDataIdentifierName (file));
-    String variableName (variableNameRoot);
+    auto variableNameRoot = CodeHelpers::makeBinaryDataIdentifierName (file);
+    auto variableName = variableNameRoot;
 
     int suffix = 2;
     while (variableNames.contains (variableName))
@@ -123,14 +121,14 @@ Result ResourceFile::writeHeader (MemoryOutputStream& header)
 
     for (int i = 0; i < files.size(); ++i)
     {
-        const File& file = files.getReference(i);
+        auto& file = files.getReference(i);
 
         if (! file.existsAsFile())
             return Result::fail ("Can't open resource file: " + file.getFullPathName());
 
-        const int64 dataSize = file.getSize();
+        auto dataSize = file.getSize();
 
-        const String variableName (variableNames[i]);
+        auto variableName = variableNames[i];
 
         FileInputStream fileStream (file);
 
@@ -160,7 +158,7 @@ Result ResourceFile::writeHeader (MemoryOutputStream& header)
 
 Result ResourceFile::writeCpp (MemoryOutputStream& cpp, const File& headerFile, int& i, const int maxFileSize)
 {
-    const bool isFirstFile = (i == 0);
+    bool isFirstFile = (i == 0);
 
     cpp << "/* ==================================== " << resourceFileIdentifierString << " ===================================="
         << getComment()
@@ -171,8 +169,8 @@ Result ResourceFile::writeCpp (MemoryOutputStream& cpp, const File& headerFile, 
 
     while (i < files.size())
     {
-        const File& file = files.getReference(i);
-        const String variableName (variableNames[i]);
+        auto& file = files.getReference(i);
+        auto variableName = variableNames[i];
 
         FileInputStream fileStream (file);
 
@@ -181,10 +179,10 @@ Result ResourceFile::writeCpp (MemoryOutputStream& cpp, const File& headerFile, 
             containsAnyImages = containsAnyImages
                                  || (ImageFileFormat::findImageFormatForStream (fileStream) != nullptr);
 
-            const String tempVariable ("temp_binary_data_" + String (i));
+            auto tempVariable = "temp_binary_data_" + String (i);
 
             cpp  << newLine << "//================== " << file.getFileName() << " ==================" << newLine
-                << "static const unsigned char " << tempVariable << "[] =" << newLine;
+                 << "static const unsigned char " << tempVariable << "[] =" << newLine;
 
             {
                 MemoryBlock data;
@@ -224,8 +222,8 @@ Result ResourceFile::writeCpp (MemoryOutputStream& cpp, const File& headerFile, 
         StringArray returnCodes;
         for (int j = 0; j < files.size(); ++j)
         {
-            const File& file = files.getReference(j);
-            const int64 dataSize = file.getSize();
+            auto& file = files.getReference(j);
+            auto dataSize = file.getSize();
             returnCodes.add ("numBytes = " + String (dataSize) + "; return " + variableNames[j] + ";");
         }
 
@@ -252,11 +250,11 @@ Result ResourceFile::writeCpp (MemoryOutputStream& cpp, const File& headerFile, 
 
 Result ResourceFile::write (Array<File>& filesCreated, const int maxFileSize)
 {
-    const File headerFile (project.getBinaryDataHeaderFile());
+    auto headerFile = project.getBinaryDataHeaderFile();
 
     {
         MemoryOutputStream mo;
-        Result r (writeHeader (mo));
+        auto r = writeHeader (mo);
 
         if (r.failed())
             return r;
@@ -272,11 +270,11 @@ Result ResourceFile::write (Array<File>& filesCreated, const int maxFileSize)
 
     for (;;)
     {
-        File cpp (project.getBinaryDataCppFile (fileIndex));
+        auto cpp = project.getBinaryDataCppFile (fileIndex);
 
         MemoryOutputStream mo;
 
-        Result r (writeCpp (mo, headerFile, i, maxFileSize));
+        auto r = writeCpp (mo, headerFile, i, maxFileSize);
 
         if (r.failed())
             return r;

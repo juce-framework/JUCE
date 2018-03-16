@@ -30,17 +30,12 @@
 //==============================================================================
 class ModulesInformationComponent  : public Component,
                                      private ListBoxModel,
-                                     private ValueTree::Listener,
-                                     private Button::Listener
+                                     private ValueTree::Listener
 {
 public:
     ModulesInformationComponent (Project& p)
         : project (p),
-          modulesValueTree (p.getModules().state),
-          header ("Modules", Icon (getIcons().modules, Colours::transparentBlack)),
-          setCopyModeButton  ("Set copy-mode for all modules..."),
-          copyPathButton ("Set paths for all modules..."),
-          globalPathsButton ("Enable/disable global path for modules...")
+          modulesValueTree (p.getModules().state)
     {
         listHeader = new ListBoxHeader ( { "Module", "Version", "Make Local Copy", "Paths" },
                                         { 0.25f, 0.2f, 0.2f, 0.35f } );
@@ -55,13 +50,15 @@ public:
         addAndMakeVisible (header);
 
         addAndMakeVisible (setCopyModeButton);
-        addAndMakeVisible (copyPathButton);
-        addAndMakeVisible (globalPathsButton);
-        setCopyModeButton.addListener (this);
         setCopyModeButton.setTriggeredOnMouseDown (true);
-        copyPathButton.addListener (this);
+        setCopyModeButton.onClick = [this] { showCopyModeMenu(); };
+
+        addAndMakeVisible (copyPathButton);
         copyPathButton.setTriggeredOnMouseDown (true);
-        globalPathsButton.addListener (this);
+        copyPathButton.onClick = [this] { showSetPathsMenu(); };
+
+        addAndMakeVisible (globalPathsButton);
+        globalPathsButton.onClick = [this] { showGlobalPathsMenu(); };
 
         modulesValueTree.addListener (this);
         lookAndFeelChanged();
@@ -99,7 +96,7 @@ public:
 
     void parentSizeChanged() override
     {
-        const auto width = jmax (550, getParentWidth());
+        auto width = jmax (550, getParentWidth());
         auto y = list.getRowPosition (getNumRows() - 1, true).getBottom() + 200;
 
         y = jmax (getParentHeight(), y);
@@ -116,7 +113,7 @@ public:
     {
         ignoreUnused (height);
 
-        auto bounds = Rectangle<int> (0, 0, width, height);
+        Rectangle<int> bounds (0, 0, width, height);
 
         g.setColour (rowIsSelected ? findColour (defaultHighlightColourId) : findColour (rowNumber % 2 == 0 ? widgetBackgroundColourId
                                                                                                             : secondaryWidgetBackgroundColourId));
@@ -126,7 +123,7 @@ public:
         g.setColour (rowIsSelected ? findColour (defaultHighlightedTextColourId) : findColour (widgetTextColourId));
 
         //======================================================================
-        const auto moduleID = project.getModules().getModuleID (rowNumber);
+        auto moduleID = project.getModules().getModuleID (rowNumber);
 
         g.drawFittedText (moduleID, bounds.removeFromLeft (roundToInt (listHeader->getProportionAtIndex (0) * width)), Justification::centredLeft, 1);
 
@@ -138,8 +135,7 @@ public:
         g.drawFittedText (version, bounds.removeFromLeft (roundToInt (listHeader->getProportionAtIndex (1) * width)), Justification::centredLeft, 1);
 
         //======================================================================
-        const auto copyLocally = project.getModules().shouldCopyModuleFilesLocally (moduleID).getValue()
-                                      ? "Yes" : "No";
+        auto copyLocally = project.getModules().shouldCopyModuleFilesLocally (moduleID).getValue() ? "Yes" : "No";
 
         g.drawFittedText (copyLocally, bounds.removeFromLeft (roundToInt (listHeader->getProportionAtIndex (2) * width)), Justification::centredLeft, 1);
 
@@ -165,23 +161,16 @@ public:
 
     void listBoxItemDoubleClicked (int row, const MouseEvent&) override
     {
-        const String moduleID (project.getModules().getModuleID (row));
+        auto moduleID = project.getModules().getModuleID (row);
 
         if (moduleID.isNotEmpty())
-            if (ProjectContentComponent* pcc = findParentComponentOfClass<ProjectContentComponent>())
+            if (auto* pcc = findParentComponentOfClass<ProjectContentComponent>())
                 pcc->showModule (moduleID);
     }
 
     void deleteKeyPressed (int row) override
     {
         project.getModules().removeModule (project.getModules().getModuleID (row));
-    }
-
-    void buttonClicked (Button* b) override
-    {
-        if (b == &setCopyModeButton)   showCopyModeMenu();
-        if (b == &copyPathButton)      showSetPathsMenu();
-        if (b == &globalPathsButton)   showGlobalPathsMenu();
     }
 
     void lookAndFeelChanged() override
@@ -202,10 +191,15 @@ private:
 
     Project& project;
     ValueTree modulesValueTree;
-    ContentViewHeader header;
+
+    ContentViewHeader header  { "Modules", { getIcons().modules, Colours::transparentBlack } };
     ListBox list;
     ListBoxHeader* listHeader;
-    TextButton setCopyModeButton, copyPathButton, globalPathsButton;
+
+    TextButton setCopyModeButton  { "Set copy-mode for all modules..." };
+    TextButton copyPathButton     { "Set paths for all modules..." };
+    TextButton globalPathsButton  { "Enable/disable global path for modules..." };
+
     std::map<String, var> modulePathClipboard;
 
     void valueTreePropertyChanged (ValueTree&, const Identifier&) override    { itemChanged(); }
@@ -235,11 +229,13 @@ private:
 
     void showGlobalPathsMenu()
     {
+        auto areAnyModulesSelected = (list.getNumSelectedRows() > 0);
+
         PopupMenu m;
         m.addItem (1, "Set all modules to use global paths");
         m.addItem (2, "Set all modules to not use global paths");
-        m.addItem (3, "Set selected modules to use global paths");
-        m.addItem (4, "Set selected modules to not use global paths");
+        m.addItem (3, "Set selected modules to use global paths", areAnyModulesSelected);
+        m.addItem (4, "Set selected modules to not use global paths", areAnyModulesSelected);
 
         auto res = m.showAt (&globalPathsButton);
 
@@ -260,7 +256,7 @@ private:
             {
                 auto selected = list.getSelectedRows();
 
-                for (auto i = 0; i < selected.size(); ++i)
+                for (int i = 0; i < selected.size(); ++i)
                     moduleList.getShouldUseGlobalPathValue (moduleList.getModuleID (selected[i])).setValue (enableGlobalPaths);
             }
         }

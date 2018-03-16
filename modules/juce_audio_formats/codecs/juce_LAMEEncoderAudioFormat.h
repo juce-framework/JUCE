@@ -42,6 +42,8 @@ namespace juce
     the writer.
 
     @see AudioFormat
+
+    @tags{Audio}
 */
 class JUCE_API  LAMEEncoderAudioFormat    : public AudioFormat
 {

@@ -38,67 +38,6 @@ DECLARE_JNI_CLASS (AudioAttributesBuilder, "android/media/AudioAttributes$Builde
 #undef JNI_CLASS_MEMBERS
 #endif
 
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
-  STATICMETHOD (createBitmap, "createBitmap", "(IILandroid/graphics/Bitmap$Config;)Landroid/graphics/Bitmap;") \
-  METHOD (setPixel, "setPixel", "(III)V")
-
-DECLARE_JNI_CLASS (Bitmap, "android/graphics/Bitmap");
-#undef JNI_CLASS_MEMBERS
-
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
-  STATICMETHOD (valueOf, "valueOf", "(Ljava/lang/String;)Landroid/graphics/Bitmap$Config;")
-
-DECLARE_JNI_CLASS (BitmapConfig, "android/graphics/Bitmap$Config");
-#undef JNI_CLASS_MEMBERS
-
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
-  METHOD (constructor,     "<init>",          "()V") \
-  METHOD (containsKey,     "containsKey",     "(Ljava/lang/String;)Z") \
-  METHOD (get,             "get",             "(Ljava/lang/String;)Ljava/lang/Object;") \
-  METHOD (getBoolean,      "getBoolean",      "(Ljava/lang/String;)Z") \
-  METHOD (getBundle,       "getBundle",       "(Ljava/lang/String;)Landroid/os/Bundle;") \
-  METHOD (getCharSequence, "getCharSequence", "(Ljava/lang/String;)Ljava/lang/CharSequence;") \
-  METHOD (getInt,          "getInt",          "(Ljava/lang/String;)I") \
-  METHOD (getLong,         "getLong",         "(Ljava/lang/String;)J") \
-  METHOD (getLongArray,    "getLongArray",    "(Ljava/lang/String;)[J") \
-  METHOD (getString,       "getString",       "(Ljava/lang/String;)Ljava/lang/String;") \
-  METHOD (keySet,          "keySet",          "()Ljava/util/Set;") \
-  METHOD (putBoolean,      "putBoolean",      "(Ljava/lang/String;Z)V") \
-  METHOD (putBundle,       "putBundle",       "(Ljava/lang/String;Landroid/os/Bundle;)V") \
-  METHOD (putInt,          "putInt",          "(Ljava/lang/String;I)V") \
-  METHOD (putLong,         "putLong",         "(Ljava/lang/String;J)V") \
-  METHOD (putLongArray,    "putLongArray",    "(Ljava/lang/String;[J)V") \
-  METHOD (putString,       "putString",       "(Ljava/lang/String;Ljava/lang/String;)V")
-
-DECLARE_JNI_CLASS (Bundle, "android/os/Bundle");
-#undef JNI_CLASS_MEMBERS
-
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
-  METHOD (toString, "toString", "()Ljava/lang/String;")
-
-DECLARE_JNI_CLASS (CharSequence, "java/lang/CharSequence");
-#undef JNI_CLASS_MEMBERS
-
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
-  METHOD (hasNext, "hasNext", "()Z") \
-  METHOD (next,    "next",    "()Ljava/lang/Object;")
-
-DECLARE_JNI_CLASS (Iterator, "java/util/Iterator");
-#undef JNI_CLASS_MEMBERS
-
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
-  METHOD (get,    "get",    "(Ljava/lang/Object;)Ljava/lang/Object;") \
-  METHOD (keySet, "keySet", "()Ljava/util/Set;")
-
-DECLARE_JNI_CLASS (JavaMap, "java/util/Map");
-#undef JNI_CLASS_MEMBERS
-
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
-  METHOD (concat, "concat", "(Ljava/lang/String;)Ljava/lang/String;")
-
-DECLARE_JNI_CLASS (JavaString, "java/lang/String");
-#undef JNI_CLASS_MEMBERS
-
 #if __ANDROID_API__ >= 26
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
   METHOD (constructor,             "<init>",                  "(Ljava/lang/String;Ljava/lang/CharSequence;I)V") \
@@ -263,19 +202,6 @@ DECLARE_JNI_CLASS (NotificationManagerApi26, "android/app/NotificationManager");
 #undef JNI_CLASS_MEMBERS
 #endif
 
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
-  METHOD (getClass, "getClass", "()Ljava/lang/Class;") \
-  METHOD (toString, "toString", "()Ljava/lang/String;")
-
-DECLARE_JNI_CLASS (Object, "java/lang/Object");
-#undef JNI_CLASS_MEMBERS
-
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
-  STATICMETHOD (getActivity, "getActivity", "(Landroid/content/Context;ILandroid/content/Intent;I)Landroid/app/PendingIntent;")
-
-DECLARE_JNI_CLASS (PendingIntent, "android/app/PendingIntent");
-#undef JNI_CLASS_MEMBERS
-
 #if __ANDROID_API__ >= 20
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
   STATICMETHOD (getResultsFromIntent, "getResultsFromIntent", "(Landroid/content/Intent;)Landroid/os/Bundle;")
@@ -294,20 +220,6 @@ DECLARE_JNI_CLASS (RemoteInputBuilder, "android/app/RemoteInput$Builder");
 #undef JNI_CLASS_MEMBERS
 #endif
 
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
-  METHOD (getIdentifier, "getIdentifier", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)I")
-
-DECLARE_JNI_CLASS (Resources, "android/content/res/Resources")
-#undef JNI_CLASS_MEMBERS
-
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
-  METHOD (contains, "contains", "(Ljava/lang/Object;)Z") \
-  METHOD (iterator, "iterator", "()Ljava/util/Iterator;") \
-  METHOD (size,     "size",     "()I")
-
-DECLARE_JNI_CLASS (Set, "java/util/Set");
-#undef JNI_CLASS_MEMBERS
-
 #if __ANDROID_API__ >= 23
  #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
    METHOD (getNotification, "getNotification", "()Landroid/app/Notification;")
@@ -315,13 +227,6 @@ DECLARE_JNI_CLASS (Set, "java/util/Set");
  DECLARE_JNI_CLASS (StatusBarNotification, "android/service/notification/StatusBarNotification");
  #undef JNI_CLASS_MEMBERS
 #endif
-
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
-  STATICMETHOD (parse, "parse", "(Ljava/lang/String;)Landroid/net/Uri;") \
-  METHOD (toString, "toString", "()Ljava/lang/String;")
-
-DECLARE_JNI_CLASS (Uri, "android/net/Uri");
-#undef JNI_CLASS_MEMBERS
 
 //==========================================================================
 #if defined(JUCE_FIREBASE_INSTANCE_ID_SERVICE_CLASSNAME)
@@ -472,11 +377,11 @@ struct PushNotifications::Pimpl
             }
         }
 
-        owner.listeners.call (&Listener::deliveredNotificationsListReceived, notifications);
+        owner.listeners.call ([&] (Listener& l) { l.deliveredNotificationsListReceived (notifications); });
       #else
         // Not supported on this platform
         jassertfalse;
-        owner.listeners.call (&Listener::deliveredNotificationsListReceived, {});
+        owner.listeners.call ([] (Listener& l) { l.deliveredNotificationsListReceived ({}); });
       #endif
     }
 
@@ -484,7 +389,7 @@ struct PushNotifications::Pimpl
     {
         auto* env = getEnv();
 
-        auto bundle = LocalRef<jobject> (env->CallObjectMethod (intent, Intent.getExtras));
+        auto bundle = LocalRef<jobject> (env->CallObjectMethod (intent, AndroidIntent.getExtras));
 
         const auto notification = localNotificationBundleToJuceNotification (bundle);
 
@@ -494,29 +399,25 @@ struct PushNotifications::Pimpl
         String notificationButtonActionString    = packageName + ".JUCE_NOTIFICATION_BUTTON_ACTION.";
         String notificationTextInputActionString = packageName + ".JUCE_NOTIFICATION_TEXT_INPUT_ACTION.";
 
-        auto actionString = juceString ((jstring) env->CallObjectMethod (intent, Intent.getAction));
+        auto actionString = juceString ((jstring) env->CallObjectMethod (intent, AndroidIntent.getAction));
 
         if (actionString.contains (notificationString))
         {
-            owner.listeners.call (&PushNotifications::Listener::handleNotification, true, notification);
+            owner.listeners.call ([&] (Listener& l) { l.handleNotification (true, notification); });
         }
         else if (actionString.contains (notificationButtonActionString))
         {
-            String prefix = notificationButtonActionString + notification.identifier + ".";
+            auto prefix = notificationButtonActionString + notification.identifier + ".";
 
             auto actionTitle = actionString.fromLastOccurrenceOf (prefix, false, false)     // skip prefix
                                            .fromFirstOccurrenceOf (".", false, false);      // skip action index
 
-            owner.listeners.call (&PushNotifications::Listener::handleNotificationAction,
-                                  true,
-                                  notification,
-                                  actionTitle,
-                                  {});
+            owner.listeners.call ([&] (Listener& l) { l.handleNotificationAction (true, notification, actionTitle, {}); });
         }
       #if __ANDROID_API__ >= 20
         else if (actionString.contains (notificationTextInputActionString))
         {
-            String prefix = notificationTextInputActionString + notification.identifier + ".";
+            auto prefix = notificationTextInputActionString + notification.identifier + ".";
 
             auto actionTitle = actionString.fromLastOccurrenceOf (prefix, false, false)     // skip prefix
                                            .fromFirstOccurrenceOf (".", false, false);      // skip action index
@@ -525,26 +426,16 @@ struct PushNotifications::Pimpl
             auto resultKeyString = javaString (actionTitle + actionIndex);
 
             auto remoteInputResult = LocalRef<jobject> (env->CallStaticObjectMethod (RemoteInput, RemoteInput.getResultsFromIntent, intent.get()));
+            String responseString;
 
             if (remoteInputResult.get() != 0)
             {
-                auto charSequence      = LocalRef<jobject> (env->CallObjectMethod (remoteInputResult, Bundle.getCharSequence, resultKeyString.get()));
-                auto responseString    = LocalRef<jstring> ((jstring) env->CallObjectMethod (charSequence, CharSequence.toString));
+                auto charSequence      = LocalRef<jobject> (env->CallObjectMethod (remoteInputResult, JavaBundle.getCharSequence, resultKeyString.get()));
+                auto responseStringRef = LocalRef<jstring> ((jstring) env->CallObjectMethod (charSequence, JavaCharSequence.toString));
+                responseString = juceString (responseStringRef.get());
+            }
 
-                owner.listeners.call (&PushNotifications::Listener::handleNotificationAction,
-                                      true,
-                                      notification,
-                                      actionTitle,
-                                      juceString (responseString.get()));
-            }
-            else
-            {
-                owner.listeners.call (&PushNotifications::Listener::handleNotificationAction,
-                                      true,
-                                      notification,
-                                      actionTitle,
-                                      {});
-            }
+            owner.listeners.call ([&] (Listener& l) { l.handleNotificationAction (true, notification, actionTitle, responseString); });
         }
       #endif
     }
@@ -553,10 +444,10 @@ struct PushNotifications::Pimpl
     {
         auto* env = getEnv();
 
-        auto bundle = LocalRef<jobject> (env->CallObjectMethod (intent, Intent.getExtras));
+        auto bundle = LocalRef<jobject> (env->CallObjectMethod (intent, AndroidIntent.getExtras));
+        auto notification = localNotificationBundleToJuceNotification (bundle);
 
-        owner.listeners.call (&PushNotifications::Listener::localNotificationDismissedByUser,
-                              localNotificationBundleToJuceNotification (bundle));
+        owner.listeners.call ([&] (Listener& l) { l.localNotificationDismissedByUser (notification); });
     }
 
     void removeAllDeliveredNotifications()
@@ -601,10 +492,10 @@ struct PushNotifications::Pimpl
     void notifyListenersTokenRefreshed (const String& token)
     {
       #if defined(JUCE_FIREBASE_INSTANCE_ID_SERVICE_CLASSNAME)
-        MessageManager::callAsync ([this, token]()
-           {
-               owner.listeners.call (&PushNotifications::Listener::deviceTokenRefreshed, token);
-           });
+        MessageManager::callAsync ([this, token]
+        {
+            owner.listeners.call ([&] (Listener& l) { l.deviceTokenRefreshed (token); });
+        });
       #else
         ignoreUnused (token);
       #endif
@@ -682,10 +573,10 @@ struct PushNotifications::Pimpl
       #if defined(JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
         auto* env = getEnv();
 
-        auto bundle = LocalRef<jobject> (env->CallObjectMethod (intent, Intent.getExtras));
+        auto bundle = LocalRef<jobject> (env->CallObjectMethod (intent, AndroidIntent.getExtras));
+        auto notification = remoteNotificationBundleToJuceNotification (bundle);
 
-        owner.listeners.call (&PushNotifications::Listener::handleNotification, false,
-                              remoteNotificationBundleToJuceNotification (bundle));
+        owner.listeners.call ([&] (Listener& l) { l.handleNotification (false, notification); });
       #else
         ignoreUnused (intent);
       #endif
@@ -696,10 +587,10 @@ struct PushNotifications::Pimpl
       #if defined(JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
         GlobalRef rn (remoteNotification.get());
 
-        MessageManager::callAsync ([this, rn]()
+        MessageManager::callAsync ([this, rn]
         {
-            owner.listeners.call (&PushNotifications::Listener::handleNotification, false,
-                                  firebaseRemoteNotificationToJuceNotification (rn.get()));
+            auto notification = firebaseRemoteNotificationToJuceNotification (rn.get());
+            owner.listeners.call ([&] (Listener& l) { l.handleNotification (false, notification); });
         });
       #else
         ignoreUnused (remoteNotification);
@@ -709,10 +600,10 @@ struct PushNotifications::Pimpl
     void notifyListenersAboutRemoteNotificationsDeleted()
     {
       #if defined(JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
-        MessageManager::callAsync ([this]()
-           {
-               owner.listeners.call (&PushNotifications::Listener::remoteNotificationsDeleted);
-           });
+        MessageManager::callAsync ([this]
+        {
+            owner.listeners.call ([] (Listener& l) { l.remoteNotificationsDeleted(); });
+        });
       #endif
     }
 
@@ -721,11 +612,11 @@ struct PushNotifications::Pimpl
       #if defined(JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
         GlobalRef mid (messageId);
 
-        MessageManager::callAsync ([this, mid]()
-           {
-               owner.listeners.call (&PushNotifications::Listener::upstreamMessageSent,
-                                     juceString ((jstring) mid.get()));
-           });
+        MessageManager::callAsync ([this, mid]
+        {
+            auto midString = juceString ((jstring) mid.get());
+            owner.listeners.call ([&] (Listener& l) { l.upstreamMessageSent (midString); });
+        });
       #else
         ignoreUnused (messageId);
       #endif
@@ -737,12 +628,13 @@ struct PushNotifications::Pimpl
       #if defined(JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
         GlobalRef mid (messageId), e (error);
 
-        MessageManager::callAsync ([this, mid, e]()
-           {
-               owner.listeners.call (&PushNotifications::Listener::upstreamMessageSendingError,
-                                     juceString ((jstring) mid.get()),
-                                     juceString ((jstring) e.get()));
-           });
+        MessageManager::callAsync ([this, mid, e]
+        {
+            auto midString = juceString ((jstring) mid.get());
+            auto eString   = juceString ((jstring) e.get());
+
+            owner.listeners.call ([&] (Listener& l) { l.upstreamMessageSendingError (midString, eString); });
+        });
       #else
         ignoreUnused (messageId, error);
       #endif
@@ -811,19 +703,19 @@ struct PushNotifications::Pimpl
     {
         auto* env = getEnv();
 
-        auto activityClass = LocalRef<jobject> (env->CallObjectMethod (android.activity, Object.getClass));
-        auto notifyIntent  = LocalRef<jobject> (env->NewObject (Intent, Intent.constructorWithContextAndClass, android.activity.get(), activityClass.get()));
+        auto activityClass = LocalRef<jobject> (env->CallObjectMethod (android.activity, JavaObject.getClass));
+        auto notifyIntent  = LocalRef<jobject> (env->NewObject (AndroidIntent, AndroidIntent.constructorWithContextAndClass, android.activity.get(), activityClass.get()));
 
         auto packageNameString  = LocalRef<jstring> ((jstring) (android.activity.callObjectMethod (JuceAppActivity.getPackageName)));
         auto actionStringSuffix = javaString (".JUCE_NOTIFICATION." + n.identifier);
         auto actionString       = LocalRef<jstring> ((jstring)env->CallObjectMethod (packageNameString, JavaString.concat, actionStringSuffix.get()));
 
-        env->CallObjectMethod (notifyIntent, Intent.setAction, actionString.get());
+        env->CallObjectMethod (notifyIntent, AndroidIntent.setAction, actionString.get());
         // Packaging entire notification into extras bundle here, so that we can retrieve all the details later on
-        env->CallObjectMethod (notifyIntent, Intent.putExtras, juceNotificationToBundle (n).get());
+        env->CallObjectMethod (notifyIntent, AndroidIntent.putExtras, juceNotificationToBundle (n).get());
 
-        auto notifyPendingIntent = LocalRef<jobject> (env->CallStaticObjectMethod (PendingIntent,
-                                                                                   PendingIntent.getActivity,
+        auto notifyPendingIntent = LocalRef<jobject> (env->CallStaticObjectMethod (AndroidPendingIntent,
+                                                                                   AndroidPendingIntent.getActivity,
                                                                                    android.activity.get(),
                                                                                    1002,
                                                                                    notifyIntent.get(),
@@ -834,7 +726,7 @@ struct PushNotifications::Pimpl
         env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setContentIntent, notifyPendingIntent.get());
 
         auto resources = LocalRef<jobject> (env->CallObjectMethod (android.activity, JuceAppActivity.getResources));
-        const int iconId = env->CallIntMethod (resources, Resources.getIdentifier, javaString (n.icon).get(),
+        const int iconId = env->CallIntMethod (resources, AndroidResources.getIdentifier, javaString (n.icon).get(),
                                                javaString ("raw").get(), packageNameString.get());
 
         env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setSmallIcon, iconId);
@@ -860,40 +752,40 @@ struct PushNotifications::Pimpl
     {
         auto* env = getEnv();
 
-        auto bundle = LocalRef<jobject> (env->NewObject (Bundle, Bundle.constructor));
+        auto bundle = LocalRef<jobject> (env->NewObject (JavaBundle, JavaBundle.constructor));
 
-        env->CallVoidMethod (bundle, Bundle.putString,   javaString ("identifier")              .get(), javaString (n.identifier).get());
-        env->CallVoidMethod (bundle, Bundle.putString,   javaString ("title")                   .get(), javaString (n.title).get());
-        env->CallVoidMethod (bundle, Bundle.putString,   javaString ("body")                    .get(), javaString (n.body).get());
-        env->CallVoidMethod (bundle, Bundle.putString,   javaString ("subtitle")                .get(), javaString (n.subtitle).get());
-        env->CallVoidMethod (bundle, Bundle.putInt,      javaString ("badgeNumber")             .get(), n.badgeNumber);
-        env->CallVoidMethod (bundle, Bundle.putString,   javaString ("soundToPlay")             .get(), javaString (n.soundToPlay.toString (true)).get());
-        env->CallVoidMethod (bundle, Bundle.putBundle,   javaString ("properties")              .get(), varToBundleWithPropertiesString (n.properties).get());
-        env->CallVoidMethod (bundle, Bundle.putString,   javaString ("icon")                    .get(), javaString (n.icon).get());
-        env->CallVoidMethod (bundle, Bundle.putString,   javaString ("channelId")               .get(), javaString (n.channelId).get());
-        env->CallVoidMethod (bundle, Bundle.putString,   javaString ("tickerText")              .get(), javaString (n.tickerText).get());
-        env->CallVoidMethod (bundle, Bundle.putInt,      javaString ("progressMax")             .get(), n.progress.max);
-        env->CallVoidMethod (bundle, Bundle.putInt,      javaString ("progressCurrent")         .get(), n.progress.current);
-        env->CallVoidMethod (bundle, Bundle.putBoolean,  javaString ("progressIndeterminate")   .get(), n.progress.indeterminate);
-        env->CallVoidMethod (bundle, Bundle.putString,   javaString ("person")                  .get(), javaString (n.person).get());
-        env->CallVoidMethod (bundle, Bundle.putInt,      javaString ("type")                    .get(), n.type);
-        env->CallVoidMethod (bundle, Bundle.putInt,      javaString ("priority")                .get(), n.priority);
-        env->CallVoidMethod (bundle, Bundle.putInt,      javaString ("lockScreenAppearance")    .get(), n.lockScreenAppearance);
-        env->CallVoidMethod (bundle, Bundle.putString,   javaString ("groupId")                 .get(), javaString (n.groupId).get());
-        env->CallVoidMethod (bundle, Bundle.putString,   javaString ("groupSortKey")            .get(), javaString (n.groupSortKey).get());
-        env->CallVoidMethod (bundle, Bundle.putBoolean,  javaString ("groupSummary")            .get(), n.groupSummary);
-        env->CallVoidMethod (bundle, Bundle.putInt,      javaString ("accentColour")            .get(), n.accentColour.getARGB());
-        env->CallVoidMethod (bundle, Bundle.putInt,      javaString ("ledColour")               .get(), n.ledColour.getARGB());
-        env->CallVoidMethod (bundle, Bundle.putInt,      javaString ("ledBlinkPatternMsToBeOn") .get(), n.ledBlinkPattern.msToBeOn);
-        env->CallVoidMethod (bundle, Bundle.putInt,      javaString ("ledBlinkPatternMsToBeOff").get(), n.ledBlinkPattern.msToBeOff);
-        env->CallVoidMethod (bundle, Bundle.putBoolean,  javaString ("shouldAutoCancel")        .get(), n.shouldAutoCancel);
-        env->CallVoidMethod (bundle, Bundle.putBoolean,  javaString ("localOnly")               .get(), n.localOnly);
-        env->CallVoidMethod (bundle, Bundle.putBoolean,  javaString ("ongoing")                 .get(), n.ongoing);
-        env->CallVoidMethod (bundle, Bundle.putBoolean,  javaString ("alertOnlyOnce")           .get(), n.alertOnlyOnce);
-        env->CallVoidMethod (bundle, Bundle.putInt,      javaString ("timestampVisibility")     .get(), n.timestampVisibility);
-        env->CallVoidMethod (bundle, Bundle.putInt,      javaString ("badgeIconType")           .get(), n.badgeIconType);
-        env->CallVoidMethod (bundle, Bundle.putInt,      javaString ("groupAlertBehaviour")     .get(), n.groupAlertBehaviour);
-        env->CallVoidMethod (bundle, Bundle.putLong,     javaString ("timeoutAfterMs")          .get(), (jlong)n.timeoutAfterMs);
+        env->CallVoidMethod (bundle, JavaBundle.putString,   javaString ("identifier")              .get(), javaString (n.identifier).get());
+        env->CallVoidMethod (bundle, JavaBundle.putString,   javaString ("title")                   .get(), javaString (n.title).get());
+        env->CallVoidMethod (bundle, JavaBundle.putString,   javaString ("body")                    .get(), javaString (n.body).get());
+        env->CallVoidMethod (bundle, JavaBundle.putString,   javaString ("subtitle")                .get(), javaString (n.subtitle).get());
+        env->CallVoidMethod (bundle, JavaBundle.putInt,      javaString ("badgeNumber")             .get(), n.badgeNumber);
+        env->CallVoidMethod (bundle, JavaBundle.putString,   javaString ("soundToPlay")             .get(), javaString (n.soundToPlay.toString (true)).get());
+        env->CallVoidMethod (bundle, JavaBundle.putBundle,   javaString ("properties")              .get(), varToBundleWithPropertiesString (n.properties).get());
+        env->CallVoidMethod (bundle, JavaBundle.putString,   javaString ("icon")                    .get(), javaString (n.icon).get());
+        env->CallVoidMethod (bundle, JavaBundle.putString,   javaString ("channelId")               .get(), javaString (n.channelId).get());
+        env->CallVoidMethod (bundle, JavaBundle.putString,   javaString ("tickerText")              .get(), javaString (n.tickerText).get());
+        env->CallVoidMethod (bundle, JavaBundle.putInt,      javaString ("progressMax")             .get(), n.progress.max);
+        env->CallVoidMethod (bundle, JavaBundle.putInt,      javaString ("progressCurrent")         .get(), n.progress.current);
+        env->CallVoidMethod (bundle, JavaBundle.putBoolean,  javaString ("progressIndeterminate")   .get(), n.progress.indeterminate);
+        env->CallVoidMethod (bundle, JavaBundle.putString,   javaString ("person")                  .get(), javaString (n.person).get());
+        env->CallVoidMethod (bundle, JavaBundle.putInt,      javaString ("type")                    .get(), n.type);
+        env->CallVoidMethod (bundle, JavaBundle.putInt,      javaString ("priority")                .get(), n.priority);
+        env->CallVoidMethod (bundle, JavaBundle.putInt,      javaString ("lockScreenAppearance")    .get(), n.lockScreenAppearance);
+        env->CallVoidMethod (bundle, JavaBundle.putString,   javaString ("groupId")                 .get(), javaString (n.groupId).get());
+        env->CallVoidMethod (bundle, JavaBundle.putString,   javaString ("groupSortKey")            .get(), javaString (n.groupSortKey).get());
+        env->CallVoidMethod (bundle, JavaBundle.putBoolean,  javaString ("groupSummary")            .get(), n.groupSummary);
+        env->CallVoidMethod (bundle, JavaBundle.putInt,      javaString ("accentColour")            .get(), n.accentColour.getARGB());
+        env->CallVoidMethod (bundle, JavaBundle.putInt,      javaString ("ledColour")               .get(), n.ledColour.getARGB());
+        env->CallVoidMethod (bundle, JavaBundle.putInt,      javaString ("ledBlinkPatternMsToBeOn") .get(), n.ledBlinkPattern.msToBeOn);
+        env->CallVoidMethod (bundle, JavaBundle.putInt,      javaString ("ledBlinkPatternMsToBeOff").get(), n.ledBlinkPattern.msToBeOff);
+        env->CallVoidMethod (bundle, JavaBundle.putBoolean,  javaString ("shouldAutoCancel")        .get(), n.shouldAutoCancel);
+        env->CallVoidMethod (bundle, JavaBundle.putBoolean,  javaString ("localOnly")               .get(), n.localOnly);
+        env->CallVoidMethod (bundle, JavaBundle.putBoolean,  javaString ("ongoing")                 .get(), n.ongoing);
+        env->CallVoidMethod (bundle, JavaBundle.putBoolean,  javaString ("alertOnlyOnce")           .get(), n.alertOnlyOnce);
+        env->CallVoidMethod (bundle, JavaBundle.putInt,      javaString ("timestampVisibility")     .get(), n.timestampVisibility);
+        env->CallVoidMethod (bundle, JavaBundle.putInt,      javaString ("badgeIconType")           .get(), n.badgeIconType);
+        env->CallVoidMethod (bundle, JavaBundle.putInt,      javaString ("groupAlertBehaviour")     .get(), n.groupAlertBehaviour);
+        env->CallVoidMethod (bundle, JavaBundle.putLong,     javaString ("timeoutAfterMs")          .get(), (jlong)n.timeoutAfterMs);
 
         const int size = n.vibrationPattern.size();
 
@@ -907,7 +799,7 @@ struct PushNotifications::Pimpl
                 elements[i] = (jlong) n.vibrationPattern[i];
 
             env->SetLongArrayRegion (array, 0, size, elements);
-            env->CallVoidMethod (bundle, Bundle.putLongArray, javaString ("vibrationPattern").get(), array.get());
+            env->CallVoidMethod (bundle, JavaBundle.putLongArray, javaString ("vibrationPattern").get(), array.get());
         }
 
         return bundle;
@@ -1000,9 +892,9 @@ struct PushNotifications::Pimpl
 
         env->CallObjectMethod (notificationBuilder, NotificationBuilderApi20.setLocalOnly, n.localOnly);
 
-        auto extras = LocalRef<jobject> (env->NewObject (Bundle, Bundle.constructor));
+        auto extras = LocalRef<jobject> (env->NewObject (JavaBundle, JavaBundle.constructor));
 
-        env->CallVoidMethod (extras, Bundle.putBundle, javaString ("notificationData").get(),
+        env->CallVoidMethod (extras, JavaBundle.putBundle, javaString ("notificationData").get(),
                              juceNotificationToBundle (n).get());
 
         env->CallObjectMethod (notificationBuilder, NotificationBuilderApi20.addExtras, extras.get());
@@ -1044,18 +936,18 @@ struct PushNotifications::Pimpl
     {
         auto* env = getEnv();
 
-        auto activityClass = LocalRef<jobject> (env->CallObjectMethod (android.activity, Object.getClass));
-        auto deleteIntent  = LocalRef<jobject> (env->NewObject (Intent, Intent.constructorWithContextAndClass, android.activity.get(), activityClass.get()));
+        auto activityClass = LocalRef<jobject> (env->CallObjectMethod (android.activity, JavaObject.getClass));
+        auto deleteIntent  = LocalRef<jobject> (env->NewObject (AndroidIntent, AndroidIntent.constructorWithContextAndClass, android.activity.get(), activityClass.get()));
 
         auto packageNameString  = LocalRef<jstring> ((jstring) (android.activity.callObjectMethod (JuceAppActivity.getPackageName)));
         auto actionStringSuffix = javaString (".JUCE_NOTIFICATION_DELETED." + n.identifier);
         auto actionString       = LocalRef<jstring> ((jstring)env->CallObjectMethod (packageNameString, JavaString.concat, actionStringSuffix.get()));
 
-        env->CallObjectMethod (deleteIntent, Intent.setAction, actionString.get());
-        env->CallObjectMethod (deleteIntent, Intent.putExtras, juceNotificationToBundle (n).get());
+        env->CallObjectMethod (deleteIntent, AndroidIntent.setAction, actionString.get());
+        env->CallObjectMethod (deleteIntent, AndroidIntent.putExtras, juceNotificationToBundle (n).get());
 
-        auto deletePendingIntent = LocalRef<jobject> (env->CallStaticObjectMethod (PendingIntent,
-                                                                                   PendingIntent.getActivity,
+        auto deletePendingIntent = LocalRef<jobject> (env->CallStaticObjectMethod (AndroidPendingIntent,
+                                                                                   AndroidPendingIntent.getActivity,
                                                                                    android.activity.get(),
                                                                                    1002,
                                                                                    deleteIntent.get(),
@@ -1073,8 +965,8 @@ struct PushNotifications::Pimpl
 
         for (const auto& action : n.actions)
         {
-            auto activityClass = LocalRef<jobject> (env->CallObjectMethod (android.activity, Object.getClass));
-            auto notifyIntent  = LocalRef<jobject> (env->NewObject (Intent, Intent.constructorWithContextAndClass, android.activity.get(), activityClass.get()));
+            auto activityClass = LocalRef<jobject> (env->CallObjectMethod (android.activity, JavaObject.getClass));
+            auto notifyIntent  = LocalRef<jobject> (env->NewObject (AndroidIntent, AndroidIntent.constructorWithContextAndClass, android.activity.get(), activityClass.get()));
 
             const bool isTextStyle = action.style == PushNotifications::Notification::Action::text;
 
@@ -1083,23 +975,23 @@ struct PushNotifications::Pimpl
             auto actionStringSuffix  = javaString (notificationActionString + n.identifier + "." + String (actionIndex) + "." + action.title);
             auto actionString        = LocalRef<jstring> ((jstring)env->CallObjectMethod (packageNameString, JavaString.concat, actionStringSuffix.get()));
 
-            env->CallObjectMethod (notifyIntent, Intent.setAction, actionString.get());
+            env->CallObjectMethod (notifyIntent, AndroidIntent.setAction, actionString.get());
             // Packaging entire notification into extras bundle here, so that we can retrieve all the details later on
-            env->CallObjectMethod (notifyIntent, Intent.putExtras, juceNotificationToBundle (n).get());
+            env->CallObjectMethod (notifyIntent, AndroidIntent.putExtras, juceNotificationToBundle (n).get());
 
-            auto notifyPendingIntent = LocalRef<jobject> (env->CallStaticObjectMethod (PendingIntent,
-                                                                                       PendingIntent.getActivity,
+            auto notifyPendingIntent = LocalRef<jobject> (env->CallStaticObjectMethod (AndroidPendingIntent,
+                                                                                       AndroidPendingIntent.getActivity,
                                                                                        android.activity.get(),
                                                                                        1002,
                                                                                        notifyIntent.get(),
                                                                                        0));
 
             auto resources = LocalRef<jobject> (env->CallObjectMethod (android.activity, JuceAppActivity.getResources));
-            int iconId = env->CallIntMethod (resources, Resources.getIdentifier, javaString (action.icon).get(),
+            int iconId = env->CallIntMethod (resources, AndroidResources.getIdentifier, javaString (action.icon).get(),
                                              javaString ("raw").get(), packageNameString.get());
 
             if (iconId == 0)
-                iconId = env->CallIntMethod (resources, Resources.getIdentifier, javaString (n.icon).get(),
+                iconId = env->CallIntMethod (resources, AndroidResources.getIdentifier, javaString (n.icon).get(),
                                              javaString ("raw").get(), packageNameString.get());
 
           #if __ANDROID_API__ >= 20
@@ -1166,7 +1058,7 @@ struct PushNotifications::Pimpl
         auto packageNameString = LocalRef<jstring> ((jstring) (android.activity.callObjectMethod (JuceAppActivity.getPackageName)));
 
         auto resources = LocalRef<jobject> (env->CallObjectMethod (android.activity, JuceAppActivity.getResources));
-        const int id = env->CallIntMethod (resources, Resources.getIdentifier, javaString (url.toString (true)).get(),
+        const int id = env->CallIntMethod (resources, AndroidResources.getIdentifier, javaString (url.toString (true)).get(),
                                            javaString ("raw").get(), packageNameString.get());
 
         auto schemeString   = javaString ("android.resource://");
@@ -1174,7 +1066,7 @@ struct PushNotifications::Pimpl
         auto uriString = LocalRef<jstring> ((jstring) env->CallObjectMethod (schemeString, JavaString.concat, packageNameString.get()));
         uriString = LocalRef<jstring> ((jstring) env->CallObjectMethod (uriString, JavaString.concat, resourceString.get()));
 
-        return LocalRef<jobject> (env->CallStaticObjectMethod (Uri, Uri.parse, uriString.get()));
+        return LocalRef<jobject> (env->CallStaticObjectMethod (AndroidUri, AndroidUri.parse, uriString.get()));
     }
 
     static LocalRef<jobject> imagetoJavaBitmap (const Image& image)
@@ -1183,16 +1075,19 @@ struct PushNotifications::Pimpl
 
         Image imageToUse = image.convertedToFormat (Image::PixelFormat::ARGB);
 
-        auto bitmapConfig = LocalRef<jobject> (env->CallStaticObjectMethod (BitmapConfig, BitmapConfig.valueOf, javaString ("ARGB_8888").get()));
-        auto bitmap = LocalRef<jobject> (env->CallStaticObjectMethod (Bitmap,
-                                                                      Bitmap.createBitmap,
+        auto bitmapConfig = LocalRef<jobject> (env->CallStaticObjectMethod (AndroidBitmapConfig,
+                                                                            AndroidBitmapConfig.valueOf,
+                                                                            javaString ("ARGB_8888").get()));
+
+        auto bitmap = LocalRef<jobject> (env->CallStaticObjectMethod (AndroidBitmap,
+                                                                      AndroidBitmap.createBitmap,
                                                                       image.getWidth(),
                                                                       image.getHeight(),
                                                                       bitmapConfig.get()));
 
         for (int i = 0; i < image.getWidth(); ++i)
             for (int j = 0; j < image.getHeight(); ++j)
-                env->CallVoidMethod (bitmap.get(), Bitmap.setPixel, i, j, image.getPixelAt (i, j).getARGB());
+                env->CallVoidMethod (bitmap.get(), AndroidBitmap.setPixel, i, j, image.getPixelAt (i, j).getARGB());
 
         return bitmap;
     }
@@ -1226,8 +1121,8 @@ struct PushNotifications::Pimpl
     {
         auto* env = getEnv();
 
-        auto bundle = LocalRef<jobject> (env->NewObject (Bundle, Bundle.constructor));
-        env->CallVoidMethod (bundle, Bundle.putString, javaString ("properties").get(),
+        auto bundle = LocalRef<jobject> (env->NewObject (JavaBundle, JavaBundle.constructor));
+        env->CallVoidMethod (bundle, JavaBundle.putString, javaString ("properties").get(),
                              javaString (JSON::toString (varToParse, false)).get());
 
         return bundle;
@@ -1238,7 +1133,7 @@ struct PushNotifications::Pimpl
     {
         auto* env = getEnv();
 
-        auto varString = LocalRef<jstring> ((jstring)env->CallObjectMethod (bundle, Bundle.getString,
+        auto varString = LocalRef<jstring> ((jstring)env->CallObjectMethod (bundle, JavaBundle.getString,
                                                                             javaString ("properties").get()));
 
         var resultVar;
@@ -1308,9 +1203,9 @@ struct PushNotifications::Pimpl
     {
         auto keyString = javaString (key);
 
-        if (env->CallBooleanMethod (bundle, Bundle.containsKey, keyString.get()))
+        if (env->CallBooleanMethod (bundle, JavaBundle.containsKey, keyString.get()))
         {
-            auto value = LocalRef<jstring> ((jstring)env->CallObjectMethod (bundle, Bundle.getString, keyString.get()));
+            auto value = LocalRef<jstring> ((jstring)env->CallObjectMethod (bundle, JavaBundle.getString, keyString.get()));
             return juceString (value);
         }
 
@@ -1321,8 +1216,8 @@ struct PushNotifications::Pimpl
     {
         auto keyString = javaString (key);
 
-        if (env->CallBooleanMethod (bundle, Bundle.containsKey, keyString.get()))
-            return env->CallIntMethod (bundle, Bundle.getInt, keyString.get());
+        if (env->CallBooleanMethod (bundle, JavaBundle.containsKey, keyString.get()))
+            return env->CallIntMethod (bundle, JavaBundle.getInt, keyString.get());
 
         return 0;
     }
@@ -1332,8 +1227,8 @@ struct PushNotifications::Pimpl
     {
         auto keyString = javaString (key);
 
-        if (env->CallBooleanMethod (bundle, Bundle.containsKey, keyString.get()))
-            return (int) env->CallLongMethod (bundle, Bundle.getLong, keyString.get());
+        if (env->CallBooleanMethod (bundle, JavaBundle.containsKey, keyString.get()))
+            return (int) env->CallLongMethod (bundle, JavaBundle.getLong, keyString.get());
 
         return 0;
     }
@@ -1342,9 +1237,9 @@ struct PushNotifications::Pimpl
     {
         auto keyString = javaString (key);
 
-        if (env->CallBooleanMethod (bundle, Bundle.containsKey, keyString.get()))
+        if (env->CallBooleanMethod (bundle, JavaBundle.containsKey, keyString.get()))
         {
-            auto value = LocalRef<jobject> (env->CallObjectMethod (bundle, Bundle.getBundle, keyString.get()));
+            auto value = LocalRef<jobject> (env->CallObjectMethod (bundle, JavaBundle.getBundle, keyString.get()));
             return bundleWithPropertiesStringToVar (value);
         }
 
@@ -1355,8 +1250,8 @@ struct PushNotifications::Pimpl
     {
         auto keyString = javaString (key);
 
-        if (env->CallBooleanMethod (bundle, Bundle.containsKey, keyString.get()))
-            return env->CallBooleanMethod (bundle, Bundle.getBoolean, keyString.get());
+        if (env->CallBooleanMethod (bundle, JavaBundle.containsKey, keyString.get()))
+            return env->CallBooleanMethod (bundle, JavaBundle.getBoolean, keyString.get());
 
         return false;
     }
@@ -1365,9 +1260,9 @@ struct PushNotifications::Pimpl
     {
         auto keyString = javaString (key);
 
-        if (env->CallBooleanMethod (bundle, Bundle.containsKey, keyString.get()))
+        if (env->CallBooleanMethod (bundle, JavaBundle.containsKey, keyString.get()))
         {
-            auto array = LocalRef<jlongArray> ((jlongArray) env->CallObjectMethod (bundle, Bundle.getLongArray, keyString.get()));
+            auto array = LocalRef<jlongArray> ((jlongArray) env->CallObjectMethod (bundle, JavaBundle.getLongArray, keyString.get()));
 
             const int size = env->GetArrayLength (array.get());
 
@@ -1390,10 +1285,13 @@ struct PushNotifications::Pimpl
         auto* env = getEnv();
 
         auto extras = LocalRef<jobject> (env->GetObjectField (notification, AndroidNotification.extras));
-        auto notificationData = LocalRef<jobject> (env->CallObjectMethod (extras, Bundle.getBundle,
+        auto notificationData = LocalRef<jobject> (env->CallObjectMethod (extras, JavaBundle.getBundle,
                                                                           javaString ("notificationData").get()));
 
-        return localNotificationBundleToJuceNotification (notificationData);
+        if (notificationData.get() != nullptr)
+            return localNotificationBundleToJuceNotification (notificationData);
+        else
+            return remoteNotificationBundleToJuceNotification (extras);
       #else
         ignoreUnused (notification);
         return {};
@@ -1415,27 +1313,34 @@ struct PushNotifications::Pimpl
         {
             auto* env = getEnv();
 
-            auto keySet   = LocalRef<jobject> (env->CallObjectMethod (bundle, Bundle.keySet));
-            auto iterator = LocalRef<jobject> (env->CallObjectMethod (keySet, Set.iterator));
+            auto keySet   = LocalRef<jobject> (env->CallObjectMethod (bundle, JavaBundle.keySet));
+            auto iterator = LocalRef<jobject> (env->CallObjectMethod (keySet, JavaSet.iterator));
 
             DynamicObject::Ptr dynamicObject = new DynamicObject();
 
             for (;;)
             {
-                if (! env->CallBooleanMethod (iterator, Iterator.hasNext))
+                if (! env->CallBooleanMethod (iterator, JavaIterator.hasNext))
                     break;
 
-                auto key            = LocalRef<jstring> ((jstring) env->CallObjectMethod (iterator, Iterator.next));
-                auto object         = LocalRef<jobject> (env->CallObjectMethod (bundle, Bundle.get, key.get()));
-                auto objectAsString = LocalRef<jstring> ((jstring) env->CallObjectMethod (object, Object.toString));
-                auto objectClass    = LocalRef<jobject> (env->CallObjectMethod (object, Object.getClass));
-                auto classAsString  = LocalRef<jstring> ((jstring) env->CallObjectMethod (objectClass, JavaClass.getName));
+                auto key            = LocalRef<jstring> ((jstring) env->CallObjectMethod (iterator, JavaIterator.next));
+                auto object         = LocalRef<jobject> (env->CallObjectMethod (bundle, JavaBundle.get, key.get()));
 
-                // Note: seems that Firebase delivers values as strings always, so this check is rather unnecessary,
-                //       at least till they change the behaviour.
-                const var value = juceString (classAsString) == "java.lang.Bundle" ? bundleToVar (object) : var (juceString (objectAsString.get()));
+                if (object.get() != nullptr)
+                {
+                    auto objectAsString = LocalRef<jstring> ((jstring) env->CallObjectMethod (object, JavaObject.toString));
+                    auto objectClass    = LocalRef<jobject> (env->CallObjectMethod (object, JavaObject.getClass));
+                    auto classAsString  = LocalRef<jstring> ((jstring) env->CallObjectMethod (objectClass, JavaClass.getName));
 
-                dynamicObject->setProperty (juceString (key.get()), value);
+                    // Note: seems that Firebase delivers values as strings always, so this check is rather unnecessary,
+                    //       at least till they change the behaviour.
+                    var value = juceString (classAsString) == "java.lang.Bundle" ? bundleToVar (object) : var (juceString (objectAsString.get()));
+                    dynamicObject->setProperty (juceString (key.get()), value);
+                }
+                else
+                {
+                    dynamicObject->setProperty (juceString (key.get()), {});
+                }
             }
 
             return var (dynamicObject);
@@ -1461,16 +1366,16 @@ struct PushNotifications::Pimpl
         const int ttl        = env->CallIntMethod  (remoteNotification, RemoteMessage.getTtl);
 
         auto keySet   = LocalRef<jobject> (env->CallObjectMethod (data, JavaMap.keySet));
-        auto iterator = LocalRef<jobject> (env->CallObjectMethod (keySet, Set.iterator));
+        auto iterator = LocalRef<jobject> (env->CallObjectMethod (keySet, JavaSet.iterator));
 
         DynamicObject::Ptr dataDynamicObject = new DynamicObject();
 
         for (;;)
         {
-            if (! env->CallBooleanMethod (iterator, Iterator.hasNext))
+            if (! env->CallBooleanMethod (iterator, JavaIterator.hasNext))
                 break;
 
-            auto key   = LocalRef<jstring> ((jstring) env->CallObjectMethod (iterator, Iterator.next));
+            auto key   = LocalRef<jstring> ((jstring) env->CallObjectMethod (iterator, JavaIterator.next));
             auto value = LocalRef<jstring> ((jstring) env->CallObjectMethod (data, JavaMap.get, key.get()));
 
             dataDynamicObject->setProperty (juceString (key.get()), juceString (value.get()));
@@ -1524,7 +1429,7 @@ struct PushNotifications::Pimpl
             propertiesDynamicObject->setProperty ("titleLocalizationKey",  juceString (titleLocalizationKey.get()));
             propertiesDynamicObject->setProperty ("bodyLocalizationArgs",  jobjectArrayToStringArray (bodyLocalizationArgs));
             propertiesDynamicObject->setProperty ("titleLocalizationArgs", jobjectArrayToStringArray (titleLocalizationArgs));
-            propertiesDynamicObject->setProperty ("link",                  link.get() != 0 ? juceString ((jstring) env->CallObjectMethod (link, Uri.toString)) : String());
+            propertiesDynamicObject->setProperty ("link",                  link.get() != 0 ? juceString ((jstring) env->CallObjectMethod (link, AndroidUri.toString)) : String());
         }
 
         n.properties = var (propertiesDynamicObject);
@@ -1643,7 +1548,7 @@ struct PushNotifications::Pimpl
                                                                                                JuceAppActivity.getPackageName))
                                                 : String{};
 
-        String intentAction = juceString ((jstring) env->CallObjectMethod (intent, Intent.getAction));
+        String intentAction = juceString ((jstring) env->CallObjectMethod (intent, AndroidIntent.getAction));
 
         for (const auto& string : strings)
             if (intentAction.contains (packageName + string))
@@ -1669,28 +1574,28 @@ struct PushNotifications::Pimpl
     {
         auto* env = getEnv();
 
-        auto categories = LocalRef<jobject> (env->CallObjectMethod (intent, Intent.getCategories));
+        auto categories = LocalRef<jobject> (env->CallObjectMethod (intent, AndroidIntent.getCategories));
 
         int categoriesNum = categories != 0
-                          ? env->CallIntMethod (categories, Set.size)
+                          ? env->CallIntMethod (categories, JavaSet.size)
                           : 0;
 
         if (categoriesNum == 0)
             return false;
 
-        if (! env->CallBooleanMethod (categories, Set.contains, javaString ("android.intent.category.LAUNCHER").get()))
+        if (! env->CallBooleanMethod (categories, JavaSet.contains, javaString ("android.intent.category.LAUNCHER").get()))
             return false;
 
         if (! intentActionContainsAnyOf (intent, StringArray ("android.intent.action.MAIN"), false))
             return false;
 
-        auto extras = LocalRef<jobject> (env->CallObjectMethod (intent, Intent.getExtras));
+        auto extras = LocalRef<jobject> (env->CallObjectMethod (intent, AndroidIntent.getExtras));
 
         if (extras == 0)
             return false;
 
-        return env->CallBooleanMethod (extras, Bundle.containsKey, javaString ("google.sent_time").get())
-            && env->CallBooleanMethod (extras, Bundle.containsKey, javaString ("google.message_id").get());
+        return env->CallBooleanMethod (extras, JavaBundle.containsKey, javaString ("google.sent_time").get())
+            && env->CallBooleanMethod (extras, JavaBundle.containsKey, javaString ("google.message_id").get());
     }
 
     PushNotifications& owner;

@@ -30,16 +30,28 @@ namespace juce
 //==============================================================================
 /**
     A base class for writing audio apps that stream from the audio i/o devices.
+    Conveniently combines a Component with an AudioSource to provide a starting
+    point for your audio applications.
 
     A subclass can inherit from this and implement just a few methods such as
     getNextAudioBlock(). The base class provides a basic AudioDeviceManager object
     and runs audio through the default output device.
+
+    An application should only create one global instance of this object and multiple
+    classes should not inherit from this.
+
+    This class should not be inherited when creating a plug-in as the host will
+    handle audio streams from hardware devices.
+
+    @tags{Audio}
 */
 class JUCE_API AudioAppComponent   : public Component,
                                      public AudioSource
 {
 public:
     AudioAppComponent();
+    AudioAppComponent (AudioDeviceManager&);
+
     ~AudioAppComponent();
 
     /** A subclass should call this from their constructor, to set up the audio. */
@@ -102,14 +114,21 @@ public:
     */
     virtual void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) = 0;
 
+    /** Shuts down the audio device and clears the audio source.
+
+        This method should be called in the destructor of the derived class
+        otherwise an assertion will be triggered.
+    */
     void shutdownAudio();
 
 
-    AudioDeviceManager deviceManager;
+    AudioDeviceManager& deviceManager;
 
 private:
-    //==============================================================================
+    //=============================================================================
+    AudioDeviceManager defaultDeviceManager;
     AudioSourcePlayer audioSourcePlayer;
+    bool usingCustomDeviceManager;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioAppComponent)
 };

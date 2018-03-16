@@ -27,7 +27,7 @@
 namespace juce
 {
 
-ColourGradient::ColourGradient() noexcept
+ColourGradient::ColourGradient() noexcept  : isRadial (false)
 {
    #if JUCE_DEBUG
     point1.setX (987654.0f);
@@ -35,6 +35,33 @@ ColourGradient::ColourGradient() noexcept
    #else
     #define JUCE_COLOURGRADIENT_CHECK_COORDS_INITIALISED
    #endif
+}
+
+ColourGradient::ColourGradient (const ColourGradient& other)
+    : point1 (other.point1), point2 (other.point2), isRadial (other.isRadial), colours (other.colours)
+{}
+
+ColourGradient::ColourGradient (ColourGradient&& other) noexcept
+    : point1 (other.point1), point2 (other.point2), isRadial (other.isRadial),
+      colours (static_cast<Array<ColourPoint>&&> (other.colours))
+{}
+
+ColourGradient& ColourGradient::operator= (const ColourGradient& other)
+{
+    point1 = other.point1;
+    point2 = other.point2;
+    isRadial = other.isRadial;
+    colours = other.colours;
+    return *this;
+}
+
+ColourGradient& ColourGradient::operator= (ColourGradient&& other) noexcept
+{
+    point1 = other.point1;
+    point2 = other.point2;
+    isRadial = other.isRadial;
+    colours = static_cast<Array<ColourPoint>&&> (other.colours);
+    return *this;
 }
 
 ColourGradient::ColourGradient (Colour colour1, float x1, float y1,
@@ -50,12 +77,20 @@ ColourGradient::ColourGradient (Colour colour1, Point<float> p1,
       point2 (p2),
       isRadial (radial)
 {
-    colours.add (ColourPoint (0.0, colour1));
-    colours.add (ColourPoint (1.0, colour2));
+    colours.add (ColourPoint { 0.0, colour1 },
+                 ColourPoint { 1.0, colour2 });
 }
 
-ColourGradient::~ColourGradient()
+ColourGradient::~ColourGradient() {}
+
+ColourGradient ColourGradient::vertical (Colour c1, float y1, Colour c2, float y2)
 {
+    return { c1, 0, y1, c2, 0, y2, false };
+}
+
+ColourGradient ColourGradient::horizontal (Colour c1, float x1, Colour c2, float x2)
+{
+    return { c1, x1, 0, c2, x2, 0, false };
 }
 
 bool ColourGradient::operator== (const ColourGradient& other) const noexcept
@@ -83,7 +118,7 @@ int ColourGradient::addColour (const double proportionAlongGradient, Colour colo
 
     if (proportionAlongGradient <= 0)
     {
-        colours.set (0, ColourPoint (0.0, colour));
+        colours.set (0, { 0.0, colour });
         return 0;
     }
 
@@ -94,7 +129,7 @@ int ColourGradient::addColour (const double proportionAlongGradient, Colour colo
         if (colours.getReference(i).position > pos)
             break;
 
-    colours.insert (i, ColourPoint (pos, colour));
+    colours.insert (i, { pos, colour });
     return i;
 }
 
@@ -116,7 +151,7 @@ int ColourGradient::getNumColours() const noexcept
     return colours.size();
 }
 
-double ColourGradient::getColourPosition (const int index) const noexcept
+double ColourGradient::getColourPosition (int index) const noexcept
 {
     if (isPositiveAndBelow (index, colours.size()))
         return colours.getReference (index).position;
@@ -124,7 +159,7 @@ double ColourGradient::getColourPosition (const int index) const noexcept
     return 0;
  }
 
-Colour ColourGradient::getColour (const int index) const noexcept
+Colour ColourGradient::getColour (int index) const noexcept
 {
     if (isPositiveAndBelow (index, colours.size()))
         return colours.getReference (index).colour;
@@ -138,7 +173,7 @@ void ColourGradient::setColour (int index, Colour newColour) noexcept
         colours.getReference (index).colour = newColour;
 }
 
-Colour ColourGradient::getColourAtPosition (const double position) const noexcept
+Colour ColourGradient::getColourAtPosition (double position) const noexcept
 {
     jassert (colours.getReference(0).position == 0.0); // the first colour specified has to go at position 0
 
@@ -223,12 +258,12 @@ bool ColourGradient::isInvisible() const noexcept
     return true;
 }
 
-bool ColourGradient::ColourPoint::operator== (const ColourPoint& other) const noexcept
+bool ColourGradient::ColourPoint::operator== (ColourPoint other) const noexcept
 {
     return position == other.position && colour == other.colour;
 }
 
-bool ColourGradient::ColourPoint::operator!= (const ColourPoint& other) const noexcept
+bool ColourGradient::ColourPoint::operator!= (ColourPoint other) const noexcept
 {
     return position != other.position || colour != other.colour;
 }

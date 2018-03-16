@@ -281,6 +281,7 @@ String KeyPress::getTextDescription() const
         else if (keyCode == numberPadDivide)            desc << KeyPressHelpers::numberPadPrefix() << '/';
         else if (keyCode == numberPadSeparator)         desc << KeyPressHelpers::numberPadPrefix() << "separator";
         else if (keyCode == numberPadDecimalPoint)      desc << KeyPressHelpers::numberPadPrefix() << '.';
+        else if (keyCode == numberPadEquals)            desc << KeyPressHelpers::numberPadPrefix() << '=';
         else if (keyCode == numberPadDelete)            desc << KeyPressHelpers::numberPadPrefix() << "delete";
         else                                            desc << '#' << String::toHexString (keyCode);
     }

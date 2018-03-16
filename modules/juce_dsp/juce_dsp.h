@@ -36,14 +36,14 @@
 
   ID:                 juce_dsp
   vendor:             juce
-  version:            5.2.0
+  version:            5.3.0
   name:               JUCE DSP classes
   description:        Classes for audio buffer manipulation, digital audio processing, filtering, oversampling, fast math functions etc.
   website:            http://www.juce.com/juce
   license:            GPL/Commercial
   minimumCppStandard: 14
 
-  dependencies:       juce_core, juce_audio_basics, juce_audio_formats
+  dependencies:       juce_audio_basics, juce_audio_formats
   OSXFrameworks:      Accelerate
   iOSFrameworks:      Accelerate
 
@@ -53,10 +53,17 @@
 
 
 #pragma once
+
 #define JUCE_DSP_H_INCLUDED
 
 #include <juce_audio_basics/juce_audio_basics.h>
 #include <juce_audio_formats/juce_audio_formats.h>
+
+#if (! defined (JUCE_STDLIB_HAS_STD_FUNCTION_SUPPORT)) || (! defined (JUCE_HAS_CONSTEXPR))
+ #ifndef JUCE_DEMO_RUNNER
+  #error "juce_dsp module requires your compiler to have a newer version of the standard library"
+ #endif
+#else
 
 #if defined(_M_X64) || defined(__amd64__) || defined(__SSE2__) || (defined(_M_IX86_FP) && _M_IX86_FP == 2)
 
@@ -173,7 +180,7 @@
 
     Enabling this will add a slight performance overhead to the DSP module's
     filters and algorithms. If your audio app already disables denormals altogether
-    (for exmaple, by using the ScopedNoDenormals class or the
+    (for example, by using the ScopedNoDenormals class or the
     FloatVectorOperations::disableDenormalisedNumberSupport method), then you
     can safely disable this flag to shave off a few cpu cycles from the DSP module's
     filters and algorithms.
@@ -241,6 +248,7 @@ namespace juce
 
 #include "maths/juce_SpecialFunctions.h"
 #include "maths/juce_Matrix.h"
+#include "maths/juce_Phase.h"
 #include "maths/juce_Polynomial.h"
 #include "maths/juce_FastMathApproximations.h"
 #include "maths/juce_LookupTable.h"
@@ -255,9 +263,13 @@ namespace juce
 #include "processors/juce_IIRFilter.h"
 #include "processors/juce_FIRFilter.h"
 #include "processors/juce_Oscillator.h"
+#include "processors/juce_LadderFilter.h"
 #include "processors/juce_StateVariableFilter.h"
 #include "processors/juce_Oversampling.h"
+#include "processors/juce_Reverb.h"
 #include "frequency/juce_FFT.h"
 #include "frequency/juce_Convolution.h"
 #include "frequency/juce_Windowing.h"
 #include "filter_design/juce_FilterDesign.h"
+
+#endif

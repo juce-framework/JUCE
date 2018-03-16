@@ -72,6 +72,8 @@ namespace juce
     @endcode
 
     @see WeakReference::Master
+
+    @tags{Core}
 */
 template <class ObjectType, class ReferenceCountingType = ReferenceCountedObject>
 class WeakReference
@@ -81,7 +83,7 @@ public:
     inline WeakReference() noexcept {}
 
     /** Creates a WeakReference that points at the given object. */
-    WeakReference (ObjectType* const object)  : holder (getRef (object)) {}
+    WeakReference (ObjectType* object)  : holder (getRef (object)) {}
 
     /** Creates a copy of another WeakReference. */
     WeakReference (const WeakReference& other) noexcept         : holder (other.holder) {}
@@ -93,7 +95,7 @@ public:
     WeakReference& operator= (const WeakReference& other)       { holder = other.holder; return *this; }
 
     /** Copies another pointer to this one. */
-    WeakReference& operator= (ObjectType* const newObject)      { holder = getRef (newObject); return *this; }
+    WeakReference& operator= (ObjectType* newObject)            { holder = getRef (newObject); return *this; }
 
     /** Move assignment operator */
     WeakReference& operator= (WeakReference&& other) noexcept   { holder = static_cast<SharedRef&&> (other.holder); return *this; }
@@ -119,8 +121,8 @@ public:
     */
     bool wasObjectDeleted() const noexcept                      { return holder != nullptr && holder->get() == nullptr; }
 
-    bool operator== (ObjectType* const object) const noexcept   { return get() == object; }
-    bool operator!= (ObjectType* const object) const noexcept   { return get() != object; }
+    bool operator== (ObjectType* object) const noexcept         { return get() == object; }
+    bool operator!= (ObjectType* object) const noexcept         { return get() != object; }
 
     //==============================================================================
     /** This class is used internally by the WeakReference class - don't use it directly
@@ -130,13 +132,13 @@ public:
     class SharedPointer   : public ReferenceCountingType
     {
     public:
-        explicit SharedPointer (ObjectType* const obj) noexcept : owner (obj) {}
+        explicit SharedPointer (ObjectType* obj) noexcept : owner (obj) {}
 
         inline ObjectType* get() const noexcept     { return owner; }
         void clearPointer() noexcept                { owner = nullptr; }
 
     private:
-        ObjectType* volatile owner;
+        ObjectType* owner;
 
         JUCE_DECLARE_NON_COPYABLE (SharedPointer)
     };
@@ -164,7 +166,7 @@ public:
         /** The first call to this method will create an internal object that is shared by all weak
             references to the object.
         */
-        SharedPointer* getSharedPointer (ObjectType* const object)
+        SharedPointer* getSharedPointer (ObjectType* object)
         {
             if (sharedPointer == nullptr)
             {
@@ -204,7 +206,7 @@ public:
 private:
     SharedRef holder;
 
-    static inline SharedPointer* getRef (ObjectType* const o)
+    static inline SharedPointer* getRef (ObjectType* o)
     {
         return (o != nullptr) ? o->masterReference.getSharedPointer (o) : nullptr;
     }

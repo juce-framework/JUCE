@@ -122,7 +122,7 @@
 					CC27F53A76BFB2675D2683A1,
 					8EBA9CF0874619A8FA0B4E74,
 					748F996DD2778AD1442AECA6,
-					B72A2BF24B6FFD414CD3B1CA, ); name = "Juce Modules"; sourceTree = "<group>"; };
+					B72A2BF24B6FFD414CD3B1CA, ); name = "JUCE Modules"; sourceTree = "<group>"; };
 		3F7D4D52FAA229344338F40C = {isa = PBXGroup; children = (
 					BDE2CEC1C2F9C0EA2FDEDEEC,
 					324682B2C8B9B4ACD9711A7A,
@@ -144,7 +144,7 @@
 					A59D9064C3A2D7EC3DC45420,
 					B96EC82EC3D2813B50386198,
 					1088318C19CEB1861C58B3BA,
-					2C4310E5B49051FC40238E11, ); name = "Juce Library Code"; sourceTree = "<group>"; };
+					2C4310E5B49051FC40238E11, ); name = "JUCE Library Code"; sourceTree = "<group>"; };
 		F31A71A7A7566E4D44B2844C = {isa = PBXGroup; children = (
 					5C7BDD8DF72F2FC2D44D757A, ); name = Resources; sourceTree = "<group>"; };
 		2055BAFF80DBBC11CF2907C0 = {isa = PBXGroup; children = (
@@ -228,6 +228,7 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = ("../../JuceLibraryCode", "../../../../modules", "$(inherited)");
 				INSTALL_PATH = "/usr/bin";
+				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				OTHER_CPLUSPLUSFLAGS = "-Wall -Wshadow -Wstrict-aliasing -Wconversion -Wsign-compare -Woverloaded-virtual -Wextra-semi";
@@ -357,7 +358,7 @@
 					DD4C62A6EA1FD3497B42CDB0,
 					E8585DDC9F9A0EE2FB82FA52,
 					136E27FD16209F9868093A6C, ); buildRules = ( ); dependencies = (  ); name = "UnitTestRunner - ConsoleApp"; productName = UnitTestRunner; productReference = 080EAB9CF5AB2BD6B2BBB173; productType = "com.apple.product-type.tool"; };
-		E1E93F2B4B2D17E011395520 = {isa = PBXProject; buildConfigurationList = 18FC121B1014F7999CD135D3; attributes = { LastUpgradeCheck = 0830; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 99F3717D3FEAFDCA3C22E868; projectDirPath = ""; projectRoot = ""; targets = (B0D62ED1051EE9DFD49F6321); };
+		E1E93F2B4B2D17E011395520 = {isa = PBXProject; buildConfigurationList = 18FC121B1014F7999CD135D3; attributes = { LastUpgradeCheck = 0830; ORGANIZATIONNAME = "ROLI Ltd."; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 99F3717D3FEAFDCA3C22E868; projectDirPath = ""; projectRoot = ""; targets = (B0D62ED1051EE9DFD49F6321); };
 	};
 	rootObject = E1E93F2B4B2D17E011395520;
 }

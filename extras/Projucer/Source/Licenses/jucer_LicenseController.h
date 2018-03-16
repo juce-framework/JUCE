@@ -96,6 +96,7 @@ private:
     //==============================================================================
     void updateState (const LicenseState&);
 
+    static LicenseState licenseStateFromOldSettings (XmlElement*);
     static LicenseState licenseStateFromSettings (PropertiesFile&);
     static void licenseStateToSettings (const LicenseState&, PropertiesFile&);
 
@@ -104,7 +105,7 @@ private:
     struct ModalCompletionCallback;
     friend struct ModalCompletionCallback;
 
-    friend class ScopedPointer<LicenseThread>;
+    friend struct ContainerDeletePolicy<LicenseThread>;
     friend struct LicenseThread;
 
     //==============================================================================

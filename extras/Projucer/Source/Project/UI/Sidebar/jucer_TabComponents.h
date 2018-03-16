@@ -69,7 +69,7 @@ public:
 
     void mouseUp (const MouseEvent& e) override
     {
-        if (arrowPath.getBounds().expanded (3).contains (e.getPosition().toFloat()))
+        if (! e.mouseWasDraggedSinceMouseDown())
             sendChangeMessage();
     }
 
@@ -91,7 +91,6 @@ private:
 
 //==============================================================================
 class FindPanel    : public Component,
-                     private TextEditor::Listener,
                      private Timer,
                      private FocusChangeListener
 {
@@ -100,7 +99,12 @@ public:
         : callback (cb)
     {
         addAndMakeVisible (editor);
-        editor.addListener (this);
+        editor.onTextChange = [this] { startTimer (250); };
+        editor.onFocusLost  = [this]
+        {
+            isFocused = false;
+            repaint();
+        };
 
         Desktop::getInstance().addFocusChangeListener (this);
 
@@ -141,17 +145,6 @@ private:
         editor.setTextToShowWhenEmpty ("Filter...", findColour (widgetTextColourId).withAlpha (0.3f));
     }
 
-    void textEditorTextChanged (TextEditor&) override
-    {
-        startTimer (250);
-    }
-
-    void textEditorFocusLost (TextEditor&) override
-    {
-        isFocused = false;
-        repaint();
-    }
-
     void globalFocusChanged (Component* focusedComponent) override
     {
         if (focusedComponent == &editor)
@@ -171,8 +164,7 @@ private:
 };
 
 //==============================================================================
-class ConcertinaTreeComponent    : public Component,
-                                   private Button::Listener
+class ConcertinaTreeComponent    : public Component
 {
 public:
     ConcertinaTreeComponent (TreePanelBase* tree, bool hasAddButton = false,
@@ -182,13 +174,13 @@ public:
         if (hasAddButton)
         {
             addAndMakeVisible (addButton = new IconButton ("Add", &getIcons().plus));
-            addButton->addListener (this);
+            addButton->onClick = [this] { showAddMenu(); };
         }
 
         if (hasSettingsButton)
         {
             addAndMakeVisible (settingsButton = new IconButton ("Settings", &getIcons().settings));
-            settingsButton->addListener (this);
+            settingsButton->onClick = [this] { showSettings(); };
         }
 
         if (hasFindPanel)
@@ -201,10 +193,10 @@ public:
 
     ~ConcertinaTreeComponent()
     {
-        treeToDisplay = nullptr;
-        addButton = nullptr;
-        findPanel = nullptr;
-        settingsButton = nullptr;
+        treeToDisplay.reset();
+        addButton.reset();
+        findPanel.reset();
+        settingsButton.reset();
     }
 
     void resized() override
@@ -214,7 +206,7 @@ public:
         if (addButton != nullptr || settingsButton != nullptr || findPanel != nullptr)
         {
             auto bottomSlice = bounds.removeFromBottom (25);
-            bottomSlice.removeFromRight (5);
+            bottomSlice.removeFromRight (3);
 
             if (addButton != nullptr)
                 addButton->setBounds (bottomSlice.removeFromRight (25).reduced (2));
@@ -235,14 +227,6 @@ private:
     ScopedPointer<TreePanelBase> treeToDisplay;
     ScopedPointer<IconButton> addButton, settingsButton;
     ScopedPointer<FindPanel> findPanel;
-
-    void buttonClicked (Button* b) override
-    {
-        if (b == addButton)
-            showAddMenu();
-        else if (b == settingsButton)
-            showSettings();
-    }
 
     void showAddMenu()
     {

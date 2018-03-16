@@ -31,7 +31,7 @@ namespace dsp
 
 struct FFTUnitTest  : public UnitTest
 {
-    FFTUnitTest()  : UnitTest("FFT") {}
+    FFTUnitTest()  : UnitTest ("FFT", "DSP") {}
 
     static void fillRandom (Random& random, Complex<float>* buffer, size_t n)
     {
@@ -56,25 +56,25 @@ struct FFTUnitTest  : public UnitTest
     }
 
     static void performReferenceFourier (const Complex<float>* in, Complex<float>* out,
-                                         size_t n, bool reverve)
+                                         size_t n, bool reverse)
     {
-        float base_freq = static_cast<float>(((reverve ? 1.0 : -1.0) * 2.0 * double_Pi)
-                                              / static_cast<float> (n));
+        auto base_freq = static_cast<float> (((reverse ? 1.0 : -1.0) * MathConstants<double>::twoPi)
+                                               / static_cast<float> (n));
 
         for (size_t i = 0; i < n; ++i)
             out[i] = freqConvolution (in, static_cast<float>(i) * base_freq, n);
     }
 
     static void performReferenceFourier (const float* in, Complex<float>* out,
-                                         size_t n, bool reverve)
+                                         size_t n, bool reverse)
     {
         HeapBlock<Complex<float>> buffer (n);
 
         for (size_t i = 0; i < n; ++i)
             buffer.getData()[i] = Complex<float> (in[i], 0.0f);
 
-        float base_freq = static_cast<float>(((reverve ? 1.0 : -1.0) * 2.0 * double_Pi)
-                                             / static_cast<float> (n));
+        float base_freq = static_cast<float> (((reverse ? 1.0 : -1.0) * MathConstants<double>::twoPi)
+                                                / static_cast<float> (n));
 
         for (size_t i = 0; i < n; ++i)
             out[i] = freqConvolution (buffer.getData(), static_cast<float>(i) * base_freq, n);

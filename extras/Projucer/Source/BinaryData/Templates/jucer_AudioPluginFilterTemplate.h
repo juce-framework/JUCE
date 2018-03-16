@@ -10,18 +10,17 @@
 
 #pragma once
 
-APPHEADERS
-
+%%app_headers%%
 
 //==============================================================================
 /**
 */
-class FILTERCLASSNAME  : public AudioProcessor
+class %%filter_class_name%%  : public AudioProcessor
 {
 public:
     //==============================================================================
-    FILTERCLASSNAME();
-    ~FILTERCLASSNAME();
+    %%filter_class_name%%();
+    ~%%filter_class_name%%();
 
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
@@ -31,7 +30,7 @@ public:
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override;
    #endif
 
-    void processBlock (AudioSampleBuffer&, MidiBuffer&) override;
+    void processBlock (AudioBuffer<float>&, MidiBuffer&) override;
 
     //==============================================================================
     AudioProcessorEditor* createEditor() override;
@@ -42,7 +41,7 @@ public:
 
     bool acceptsMidi() const override;
     bool producesMidi() const override;
-    bool isMidiEffect () const override;
+    bool isMidiEffect() const override;
     double getTailLengthSeconds() const override;
 
     //==============================================================================
@@ -58,5 +57,5 @@ public:
 
 private:
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FILTERCLASSNAME)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%filter_class_name%%)
 };

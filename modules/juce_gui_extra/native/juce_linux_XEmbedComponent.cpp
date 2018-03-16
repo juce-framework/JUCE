@@ -523,7 +523,7 @@ private:
                     if (allowResize)
                         configureNotify();
                     else
-                        MessageManager::callAsync([this] () {componentMovedOrResized (owner, true, true);});
+                        MessageManager::callAsync ([this] {componentMovedOrResized (owner, true, true);});
 
                     return true;
             }

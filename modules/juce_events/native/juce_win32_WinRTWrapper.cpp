@@ -22,5 +22,5 @@
 
 namespace juce
 {
-    juce_ImplementSingleton (WinRTWrapper)
+    JUCE_IMPLEMENT_SINGLETON (WinRTWrapper)
 }

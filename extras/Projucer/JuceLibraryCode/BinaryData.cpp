@@ -5323,7 +5323,7 @@ static const unsigned char temp_binary_data_23[] =
 
 const char* wizard_StaticLibrary_svg = (const char*) temp_binary_data_23;
 
-//================== jucer_AnimatedComponentTemplate.cpp ==================
+//================== jucer_AnimatedComponentSimpleTemplate.h ==================
 static const unsigned char temp_binary_data_24[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
@@ -5333,33 +5333,39 @@ static const unsigned char temp_binary_data_24[] =
 "  ==============================================================================\r\n"
 "*/\r\n"
 "\r\n"
-"INCLUDE_JUCE\r\n"
+"#pragma once\r\n"
+"\r\n"
+"%%include_juce%%\r\n"
 "\r\n"
 "//==============================================================================\r\n"
 "/*\r\n"
 "    This component lives inside our window, and this is where you should put all\r\n"
 "    your controls and content.\r\n"
 "*/\r\n"
-"class MainContentComponent   : public AnimatedAppComponent\r\n"
+"class %%content_component_class%%   : public AnimatedAppComponent\r\n"
 "{\r\n"
 "public:\r\n"
 "    //==============================================================================\r\n"
-"    MainContentComponent()\r\n"
+"    %%content_component_class%%()\r\n"
 "    {\r\n"
+"        // Make sure you set the size of the component after\r\n"
+"        // you add any child components.\r\n"
 "        setSize (800, 600);\r\n"
-"        setFramesPerSecond (60);\r\n"
+"        setFramesPerSecond (60); // This sets the frequency of the update calls.\r\n"
 "    }\r\n"
 "\r\n"
-"    ~MainContentComponent()\r\n"
+"    ~%%content_component_class%%()\r\n"
 "    {\r\n"
 "    }\r\n"
 "\r\n"
+"    //==============================================================================\r\n"
 "    void update() override\r\n"
 "    {\r\n"
 "        // This function is called at the frequency specified by the setFramesPerSecond() call\r\n"
 "        // in the constructor. You can use it to update counters, animate values, etc.\r\n"
 "    }\r\n"
 "\r\n"
+"    //==============================================================================\r\n"
 "    void paint (Graphics& g) override\r\n"
 "    {\r\n"
 "        // (Our component is opaque, so we must completely fill the background with a solid colour)\r\n"
@@ -5378,21 +5384,15 @@ static const unsigned char temp_binary_data_24[] =
 "\r\n"
 "private:\r\n"
 "    //==============================================================================\r\n"
-"\r\n"
 "    // Your private member variables go here...\r\n"
 "\r\n"
 "\r\n"
-"\r\n"
-"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainContentComponent)\r\n"
-"};\r\n"
-"\r\n"
-"\r\n"
-"// (This function is called by the app startup code to create our main component)\r\n"
-"Component* createMainContentComponent()    { return new MainContentComponent(); }\r\n";
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)\r\n"
+"};\r\n";
 
-const char* jucer_AnimatedComponentTemplate_cpp = (const char*) temp_binary_data_24;
+const char* jucer_AnimatedComponentSimpleTemplate_h = (const char*) temp_binary_data_24;
 
-//================== jucer_AudioComponentTemplate.cpp ==================
+//================== jucer_AnimatedComponentTemplate.cpp ==================
 static const unsigned char temp_binary_data_25[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
@@ -5402,27 +5402,125 @@ static const unsigned char temp_binary_data_25[] =
 "  ==============================================================================\r\n"
 "*/\r\n"
 "\r\n"
-"INCLUDE_JUCE\r\n"
+"%%include_corresponding_header%%\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"%%content_component_class%%::%%content_component_class%%()\r\n"
+"{\r\n"
+"    // Make sure you set the size of the component after\r\n"
+"    // you add any child components.\r\n"
+"    setSize (800, 600);\r\n"
+"    setFramesPerSecond (60); // This sets the frequency of the update calls.\r\n"
+"}\r\n"
+"\r\n"
+"%%content_component_class%%::~%%content_component_class%%()\r\n"
+"{\r\n"
+"}\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"void %%content_component_class%%::update()\r\n"
+"{\r\n"
+"    // This function is called at the frequency specified by the setFramesPerSecond() call\r\n"
+"    // in the constructor. You can use it to update counters, animate values, etc.\r\n"
+"}\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"void %%content_component_class%%::paint (Graphics& g)\r\n"
+"{\r\n"
+"    // (Our component is opaque, so we must completely fill the background with a solid colour)\r\n"
+"    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));\r\n"
+"\r\n"
+"    // You can add your drawing code here!\r\n"
+"}\r\n"
+"\r\n"
+"void %%content_component_class%%::resized()\r\n"
+"{\r\n"
+"    // This is called when the MainContentComponent is resized.\r\n"
+"    // If you add any child components, this is where you should\r\n"
+"    // update their positions.\r\n"
+"}\r\n";
+
+const char* jucer_AnimatedComponentTemplate_cpp = (const char*) temp_binary_data_25;
+
+//================== jucer_AnimatedComponentTemplate.h ==================
+static const unsigned char temp_binary_data_26[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    This file was auto-generated!\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"#pragma once\r\n"
+"\r\n"
+"%%include_juce%%\r\n"
 "\r\n"
 "//==============================================================================\r\n"
 "/*\r\n"
 "    This component lives inside our window, and this is where you should put all\r\n"
 "    your controls and content.\r\n"
 "*/\r\n"
-"class MainContentComponent   : public AudioAppComponent\r\n"
+"class %%content_component_class%%   : public AnimatedAppComponent\r\n"
 "{\r\n"
 "public:\r\n"
 "    //==============================================================================\r\n"
-"    MainContentComponent()\r\n"
+"    %%content_component_class%%();\r\n"
+"    ~%%content_component_class%%();\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    void update() override;\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    void paint (Graphics& g) override;\r\n"
+"    void resized() override;\r\n"
+"\r\n"
+"private:\r\n"
+"    //==============================================================================\r\n"
+"    // Your private member variables go here...\r\n"
+"\r\n"
+"\r\n"
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)\r\n"
+"};\r\n";
+
+const char* jucer_AnimatedComponentTemplate_h = (const char*) temp_binary_data_26;
+
+//================== jucer_AudioComponentSimpleTemplate.h ==================
+static const unsigned char temp_binary_data_27[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    This file was auto-generated!\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"#pragma once\r\n"
+"\r\n"
+"%%include_juce%%\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"/*\r\n"
+"    This component lives inside our window, and this is where you should put all\r\n"
+"    your controls and content.\r\n"
+"*/\r\n"
+"class %%content_component_class%%   : public AudioAppComponent\r\n"
+"{\r\n"
+"public:\r\n"
+"    //==============================================================================\r\n"
+"    %%content_component_class%%()\r\n"
 "    {\r\n"
+"        // Make sure you set the size of the component after\r\n"
+"        // you add any child components.\r\n"
 "        setSize (800, 600);\r\n"
 "\r\n"
 "        // specify the number of input and output channels that we want to open\r\n"
 "        setAudioChannels (2, 2);\r\n"
 "    }\r\n"
 "\r\n"
-"    ~MainContentComponent()\r\n"
+"    ~%%content_component_class%%()\r\n"
 "    {\r\n"
+"        // This shuts down the audio device and clears the audio source.\r\n"
 "        shutdownAudio();\r\n"
 "    }\r\n"
 "\r\n"
@@ -5476,21 +5574,139 @@ static const unsigned char temp_binary_data_25[] =
 "\r\n"
 "private:\r\n"
 "    //==============================================================================\r\n"
-"\r\n"
 "    // Your private member variables go here...\r\n"
 "\r\n"
 "\r\n"
-"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainContentComponent)\r\n"
-"};\r\n"
-"\r\n"
-"\r\n"
-"// (This function is called by the app startup code to create our main component)\r\n"
-"Component* createMainContentComponent()     { return new MainContentComponent(); }\r\n";
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)\r\n"
+"};\r\n";
 
-const char* jucer_AudioComponentTemplate_cpp = (const char*) temp_binary_data_25;
+const char* jucer_AudioComponentSimpleTemplate_h = (const char*) temp_binary_data_27;
+
+//================== jucer_AudioComponentTemplate.cpp ==================
+static const unsigned char temp_binary_data_28[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    This file was auto-generated!\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"%%include_corresponding_header%%\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"%%content_component_class%%::%%content_component_class%%()\r\n"
+"{\r\n"
+"    // Make sure you set the size of the component after\r\n"
+"    // you add any child components.\r\n"
+"    setSize (800, 600);\r\n"
+"\r\n"
+"    // specify the number of input and output channels that we want to open\r\n"
+"    setAudioChannels (2, 2);\r\n"
+"}\r\n"
+"\r\n"
+"%%content_component_class%%::~%%content_component_class%%()\r\n"
+"{\r\n"
+"    // This shuts down the audio device and clears the audio source.\r\n"
+"    shutdownAudio();\r\n"
+"}\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"void %%content_component_class%%::prepareToPlay (int samplesPerBlockExpected, double sampleRate)\r\n"
+"{\r\n"
+"    // This function will be called when the audio device is started, or when\r\n"
+"    // its settings (i.e. sample rate, block size, etc) are changed.\r\n"
+"\r\n"
+"    // You can use this function to initialise any resources you might need,\r\n"
+"    // but be careful - it will be called on the audio thread, not the GUI thread.\r\n"
+"\r\n"
+"    // For more details, see the help for AudioProcessor::prepareToPlay()\r\n"
+"}\r\n"
+"\r\n"
+"void %%content_component_class%%::getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill)\r\n"
+"{\r\n"
+"    // Your audio-processing code goes here!\r\n"
+"\r\n"
+"    // For more details, see the help for AudioProcessor::getNextAudioBlock()\r\n"
+"\r\n"
+"    // Right now we are not producing any data, in which case we need to clear the buffer\r\n"
+"    // (to prevent the output of random noise)\r\n"
+"    bufferToFill.clearActiveBufferRegion();\r\n"
+"}\r\n"
+"\r\n"
+"void %%content_component_class%%::releaseResources()\r\n"
+"{\r\n"
+"    // This will be called when the audio device stops, or when it is being\r\n"
+"    // restarted due to a setting change.\r\n"
+"\r\n"
+"    // For more details, see the help for AudioProcessor::releaseResources()\r\n"
+"}\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"void %%content_component_class%%::paint (Graphics& g)\r\n"
+"{\r\n"
+"    // (Our component is opaque, so we must completely fill the background with a solid colour)\r\n"
+"    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));\r\n"
+"\r\n"
+"    // You can add your drawing code here!\r\n"
+"}\r\n"
+"\r\n"
+"void %%content_component_class%%::resized()\r\n"
+"{\r\n"
+"    // This is called when the MainContentComponent is resized.\r\n"
+"    // If you add any child components, this is where you should\r\n"
+"    // update their positions.\r\n"
+"}\r\n";
+
+const char* jucer_AudioComponentTemplate_cpp = (const char*) temp_binary_data_28;
+
+//================== jucer_AudioComponentTemplate.h ==================
+static const unsigned char temp_binary_data_29[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    This file was auto-generated!\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"#pragma once\r\n"
+"\r\n"
+"%%include_juce%%\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"/*\r\n"
+"    This component lives inside our window, and this is where you should put all\r\n"
+"    your controls and content.\r\n"
+"*/\r\n"
+"class %%content_component_class%%   : public AudioAppComponent\r\n"
+"{\r\n"
+"public:\r\n"
+"    //==============================================================================\r\n"
+"    %%content_component_class%%();\r\n"
+"    ~%%content_component_class%%();\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override;\r\n"
+"    void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) override;\r\n"
+"    void releaseResources() override;\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    void paint (Graphics& g) override;\r\n"
+"    void resized() override;\r\n"
+"\r\n"
+"private:\r\n"
+"    //==============================================================================\r\n"
+"    // Your private member variables go here...\r\n"
+"\r\n"
+"\r\n"
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)\r\n"
+"};\r\n";
+
+const char* jucer_AudioComponentTemplate_h = (const char*) temp_binary_data_29;
 
 //================== jucer_AudioPluginEditorTemplate.cpp ==================
-static const unsigned char temp_binary_data_26[] =
+static const unsigned char temp_binary_data_30[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -5501,11 +5717,10 @@ static const unsigned char temp_binary_data_26[] =
 "  ==============================================================================\r\n"
 "*/\r\n"
 "\r\n"
-"EDITORCPPHEADERS\r\n"
-"\r\n"
+"%%editor_cpp_headers%%\r\n"
 "\r\n"
 "//==============================================================================\r\n"
-"EDITORCLASSNAME::EDITORCLASSNAME (FILTERCLASSNAME& p)\r\n"
+"%%editor_class_name%%::%%editor_class_name%% (%%filter_class_name%%& p)\r\n"
 "    : AudioProcessorEditor (&p), processor (p)\r\n"
 "{\r\n"
 "    // Make sure that before the constructor has finished, you've set the\r\n"
@@ -5513,12 +5728,12 @@ static const unsigned char temp_binary_data_26[] =
 "    setSize (400, 300);\r\n"
 "}\r\n"
 "\r\n"
-"EDITORCLASSNAME::~EDITORCLASSNAME()\r\n"
+"%%editor_class_name%%::~%%editor_class_name%%()\r\n"
 "{\r\n"
 "}\r\n"
 "\r\n"
 "//==============================================================================\r\n"
-"void EDITORCLASSNAME::paint (Graphics& g)\r\n"
+"void %%editor_class_name%%::paint (Graphics& g)\r\n"
 "{\r\n"
 "    // (Our component is opaque, so we must completely fill the background with a solid colour)\r\n"
 "    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));\r\n"
@@ -5528,16 +5743,16 @@ static const unsigned char temp_binary_data_26[] =
 "    g.drawFittedText (\"Hello World!\", getLocalBounds(), Justification::centred, 1);\r\n"
 "}\r\n"
 "\r\n"
-"void EDITORCLASSNAME::resized()\r\n"
+"void %%editor_class_name%%::resized()\r\n"
 "{\r\n"
 "    // This is generally where you'll want to lay out the positions of any\r\n"
 "    // subcomponents in your editor..\r\n"
 "}\r\n";
 
-const char* jucer_AudioPluginEditorTemplate_cpp = (const char*) temp_binary_data_26;
+const char* jucer_AudioPluginEditorTemplate_cpp = (const char*) temp_binary_data_30;
 
 //================== jucer_AudioPluginEditorTemplate.h ==================
-static const unsigned char temp_binary_data_27[] =
+static const unsigned char temp_binary_data_31[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -5550,17 +5765,16 @@ static const unsigned char temp_binary_data_27[] =
 "\r\n"
 "#pragma once\r\n"
 "\r\n"
-"EDITORHEADERS\r\n"
-"\r\n"
+"%%editor_headers%%\r\n"
 "\r\n"
 "//==============================================================================\r\n"
 "/**\r\n"
 "*/\r\n"
-"class EDITORCLASSNAME  : public AudioProcessorEditor\r\n"
+"class %%editor_class_name%%  : public AudioProcessorEditor\r\n"
 "{\r\n"
 "public:\r\n"
-"    EDITORCLASSNAME (FILTERCLASSNAME&);\r\n"
-"    ~EDITORCLASSNAME();\r\n"
+"    %%editor_class_name%% (%%filter_class_name%%&);\r\n"
+"    ~%%editor_class_name%%();\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
 "    void paint (Graphics&) override;\r\n"
@@ -5569,15 +5783,15 @@ static const unsigned char temp_binary_data_27[] =
 "private:\r\n"
 "    // This reference is provided as a quick way for your editor to\r\n"
 "    // access the processor object that created it.\r\n"
-"    FILTERCLASSNAME& processor;\r\n"
+"    %%filter_class_name%%& processor;\r\n"
 "\r\n"
-"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EDITORCLASSNAME)\r\n"
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%editor_class_name%%)\r\n"
 "};\r\n";
 
-const char* jucer_AudioPluginEditorTemplate_h = (const char*) temp_binary_data_27;
+const char* jucer_AudioPluginEditorTemplate_h = (const char*) temp_binary_data_31;
 
 //================== jucer_AudioPluginFilterTemplate.cpp ==================
-static const unsigned char temp_binary_data_28[] =
+static const unsigned char temp_binary_data_32[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -5588,11 +5802,10 @@ static const unsigned char temp_binary_data_28[] =
 "  ==============================================================================\r\n"
 "*/\r\n"
 "\r\n"
-"FILTERHEADERS\r\n"
-"\r\n"
+"%%filter_headers%%\r\n"
 "\r\n"
 "//==============================================================================\r\n"
-"FILTERCLASSNAME::FILTERCLASSNAME()\r\n"
+"%%filter_class_name%%::%%filter_class_name%%()\r\n"
 "#ifndef JucePlugin_PreferredChannelConfigurations\r\n"
 "     : AudioProcessor (BusesProperties()\r\n"
 "                     #if ! JucePlugin_IsMidiEffect\r\n"
@@ -5606,17 +5819,17 @@ static const unsigned char temp_binary_data_28[] =
 "{\r\n"
 "}\r\n"
 "\r\n"
-"FILTERCLASSNAME::~FILTERCLASSNAME()\r\n"
+"%%filter_class_name%%::~%%filter_class_name%%()\r\n"
 "{\r\n"
 "}\r\n"
 "\r\n"
 "//==============================================================================\r\n"
-"const String FILTERCLASSNAME::getName() const\r\n"
+"const String %%filter_class_name%%::getName() const\r\n"
 "{\r\n"
 "    return JucePlugin_Name;\r\n"
 "}\r\n"
 "\r\n"
-"bool FILTERCLASSNAME::acceptsMidi() const\r\n"
+"bool %%filter_class_name%%::acceptsMidi() const\r\n"
 "{\r\n"
 "   #if JucePlugin_WantsMidiInput\r\n"
 "    return true;\r\n"
@@ -5625,7 +5838,7 @@ static const unsigned char temp_binary_data_28[] =
 "   #endif\r\n"
 "}\r\n"
 "\r\n"
-"bool FILTERCLASSNAME::producesMidi() const\r\n"
+"bool %%filter_class_name%%::producesMidi() const\r\n"
 "{\r\n"
 "   #if JucePlugin_ProducesMidiOutput\r\n"
 "    return true;\r\n"
@@ -5634,7 +5847,7 @@ static const unsigned char temp_binary_data_28[] =
 "   #endif\r\n"
 "}\r\n"
 "\r\n"
-"bool FILTERCLASSNAME::isMidiEffect() const\r\n"
+"bool %%filter_class_name%%::isMidiEffect() const\r\n"
 "{\r\n"
 "   #if JucePlugin_IsMidiEffect\r\n"
 "    return true;\r\n"
@@ -5643,50 +5856,50 @@ static const unsigned char temp_binary_data_28[] =
 "   #endif\r\n"
 "}\r\n"
 "\r\n"
-"double FILTERCLASSNAME::getTailLengthSeconds() const\r\n"
+"double %%filter_class_name%%::getTailLengthSeconds() const\r\n"
 "{\r\n"
 "    return 0.0;\r\n"
 "}\r\n"
 "\r\n"
-"int FILTERCLASSNAME::getNumPrograms()\r\n"
+"int %%filter_class_name%%::getNumPrograms()\r\n"
 "{\r\n"
 "    return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,\r\n"
 "                // so this should be at least 1, even if you're not really implementing programs.\r\n"
 "}\r\n"
 "\r\n"
-"int FILTERCLASSNAME::getCurrentProgram()\r\n"
+"int %%filter_class_name%%::getCurrentProgram()\r\n"
 "{\r\n"
 "    return 0;\r\n"
 "}\r\n"
 "\r\n"
-"void FILTERCLASSNAME::setCurrentProgram (int index)\r\n"
+"void %%filter_class_name%%::setCurrentProgram (int index)\r\n"
 "{\r\n"
 "}\r\n"
 "\r\n"
-"const String FILTERCLASSNAME::getProgramName (int index)\r\n"
+"const String %%filter_class_name%%::getProgramName (int index)\r\n"
 "{\r\n"
 "    return {};\r\n"
 "}\r\n"
 "\r\n"
-"void FILTERCLASSNAME::changeProgramName (int index, const String& newName)\r\n"
+"void %%filter_class_name%%::changeProgramName (int index, const String& newName)\r\n"
 "{\r\n"
 "}\r\n"
 "\r\n"
 "//==============================================================================\r\n"
-"void FILTERCLASSNAME::prepareToPlay (double sampleRate, int samplesPerBlock)\r\n"
+"void %%filter_class_name%%::prepareToPlay (double sampleRate, int samplesPerBlock)\r\n"
 "{\r\n"
 "    // Use this method as the place to do any pre-playback\r\n"
 "    // initialisation that you need..\r\n"
 "}\r\n"
 "\r\n"
-"void FILTERCLASSNAME::releaseResources()\r\n"
+"void %%filter_class_name%%::releaseResources()\r\n"
 "{\r\n"
 "    // When playback stops, you can use this as an opportunity to free up any\r\n"
 "    // spare memory, etc.\r\n"
 "}\r\n"
 "\r\n"
 "#ifndef JucePlugin_PreferredChannelConfigurations\r\n"
-"bool FILTERCLASSNAME::isBusesLayoutSupported (const BusesLayout& layouts) const\r\n"
+"bool %%filter_class_name%%::isBusesLayoutSupported (const BusesLayout& layouts) const\r\n"
 "{\r\n"
 "  #if JucePlugin_IsMidiEffect\r\n"
 "    ignoreUnused (layouts);\r\n"
@@ -5709,11 +5922,11 @@ static const unsigned char temp_binary_data_28[] =
 "}\r\n"
 "#endif\r\n"
 "\r\n"
-"void FILTERCLASSNAME::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)\r\n"
+"void %%filter_class_name%%::processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages)\r\n"
 "{\r\n"
 "    ScopedNoDenormals noDenormals;\r\n"
-"    const int totalNumInputChannels  = getTotalNumInputChannels();\r\n"
-"    const int totalNumOutputChannels = getTotalNumOutputChannels();\r\n"
+"    auto totalNumInputChannels  = getTotalNumInputChannels();\r\n"
+"    auto totalNumOutputChannels = getTotalNumOutputChannels();\r\n"
 "\r\n"
 "    // In case we have more outputs than inputs, this code clears any output\r\n"
 "    // channels that didn't contain input data, (because these aren't\r\n"
@@ -5721,39 +5934,43 @@ static const unsigned char temp_binary_data_28[] =
 "    // This is here to avoid people getting screaming feedback\r\n"
 "    // when they first compile a plugin, but obviously you don't need to keep\r\n"
 "    // this code if your algorithm always overwrites all the output channels.\r\n"
-"    for (int i = totalNumInputChannels; i < totalNumOutputChannels; ++i)\r\n"
+"    for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)\r\n"
 "        buffer.clear (i, 0, buffer.getNumSamples());\r\n"
 "\r\n"
 "    // This is the place where you'd normally do the guts of your plugin's\r\n"
 "    // audio processing...\r\n"
+"    // Make sure to reset the state if your inner loop is processing\r\n"
+"    // the samples and the outer loop is handling the channels.\r\n"
+"    // Alternatively, you can process the samples with the channels\r\n"
+"    // interleaved by keeping the same state.\r\n"
 "    for (int channel = 0; channel < totalNumInputChannels; ++channel)\r\n"
 "    {\r\n"
-"        float* channelData = buffer.getWritePointer (channel);\r\n"
+"        auto* channelData = buffer.getWritePointer (channel);\r\n"
 "\r\n"
 "        // ..do something to the data...\r\n"
 "    }\r\n"
 "}\r\n"
 "\r\n"
 "//==============================================================================\r\n"
-"bool FILTERCLASSNAME::hasEditor() const\r\n"
+"bool %%filter_class_name%%::hasEditor() const\r\n"
 "{\r\n"
 "    return true; // (change this to false if you choose to not supply an editor)\r\n"
 "}\r\n"
 "\r\n"
-"AudioProcessorEditor* FILTERCLASSNAME::createEditor()\r\n"
+"AudioProcessorEditor* %%filter_class_name%%::createEditor()\r\n"
 "{\r\n"
-"    return new EDITORCLASSNAME (*this);\r\n"
+"    return new %%editor_class_name%% (*this);\r\n"
 "}\r\n"
 "\r\n"
 "//==============================================================================\r\n"
-"void FILTERCLASSNAME::getStateInformation (MemoryBlock& destData)\r\n"
+"void %%filter_class_name%%::getStateInformation (MemoryBlock& destData)\r\n"
 "{\r\n"
 "    // You should use this method to store your parameters in the memory block.\r\n"
 "    // You could do that either as raw data, or use the XML or ValueTree classes\r\n"
 "    // as intermediaries to make it easy to save and load complex data.\r\n"
 "}\r\n"
 "\r\n"
-"void FILTERCLASSNAME::setStateInformation (const void* data, int sizeInBytes)\r\n"
+"void %%filter_class_name%%::setStateInformation (const void* data, int sizeInBytes)\r\n"
 "{\r\n"
 "    // You should use this method to restore your parameters from this memory block,\r\n"
 "    // whose contents will have been created by the getStateInformation() call.\r\n"
@@ -5763,13 +5980,13 @@ static const unsigned char temp_binary_data_28[] =
 "// This creates new instances of the plugin..\r\n"
 "AudioProcessor* JUCE_CALLTYPE createPluginFilter()\r\n"
 "{\r\n"
-"    return new FILTERCLASSNAME();\r\n"
+"    return new %%filter_class_name%%();\r\n"
 "}\r\n";
 
-const char* jucer_AudioPluginFilterTemplate_cpp = (const char*) temp_binary_data_28;
+const char* jucer_AudioPluginFilterTemplate_cpp = (const char*) temp_binary_data_32;
 
 //================== jucer_AudioPluginFilterTemplate.h ==================
-static const unsigned char temp_binary_data_29[] =
+static const unsigned char temp_binary_data_33[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -5782,18 +5999,17 @@ static const unsigned char temp_binary_data_29[] =
 "\r\n"
 "#pragma once\r\n"
 "\r\n"
-"APPHEADERS\r\n"
-"\r\n"
+"%%app_headers%%\r\n"
 "\r\n"
 "//==============================================================================\r\n"
 "/**\r\n"
 "*/\r\n"
-"class FILTERCLASSNAME  : public AudioProcessor\r\n"
+"class %%filter_class_name%%  : public AudioProcessor\r\n"
 "{\r\n"
 "public:\r\n"
 "    //==============================================================================\r\n"
-"    FILTERCLASSNAME();\r\n"
-"    ~FILTERCLASSNAME();\r\n"
+"    %%filter_class_name%%();\r\n"
+"    ~%%filter_class_name%%();\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
 "    void prepareToPlay (double sampleRate, int samplesPerBlock) override;\r\n"
@@ -5803,7 +6019,7 @@ static const unsigned char temp_binary_data_29[] =
 "    bool isBusesLayoutSupported (const BusesLayout& layouts) const override;\r\n"
 "   #endif\r\n"
 "\r\n"
-"    void processBlock (AudioSampleBuffer&, MidiBuffer&) override;\r\n"
+"    void processBlock (AudioBuffer<float>&, MidiBuffer&) override;\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
 "    AudioProcessorEditor* createEditor() override;\r\n"
@@ -5814,7 +6030,7 @@ static const unsigned char temp_binary_data_29[] =
 "\r\n"
 "    bool acceptsMidi() const override;\r\n"
 "    bool producesMidi() const override;\r\n"
-"    bool isMidiEffect () const override;\r\n"
+"    bool isMidiEffect() const override;\r\n"
 "    double getTailLengthSeconds() const override;\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
@@ -5830,13 +6046,13 @@ static const unsigned char temp_binary_data_29[] =
 "\r\n"
 "private:\r\n"
 "    //==============================================================================\r\n"
-"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FILTERCLASSNAME)\r\n"
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%filter_class_name%%)\r\n"
 "};\r\n";
 
-const char* jucer_AudioPluginFilterTemplate_h = (const char*) temp_binary_data_29;
+const char* jucer_AudioPluginFilterTemplate_h = (const char*) temp_binary_data_33;
 
 //================== jucer_ComponentTemplate.cpp ==================
-static const unsigned char temp_binary_data_30[] =
+static const unsigned char temp_binary_data_34[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -5850,8 +6066,8 @@ static const unsigned char temp_binary_data_30[] =
 "\r\n"
 "  ------------------------------------------------------------------------------\r\n"
 "\r\n"
-"  The Projucer is part of the JUCE library - \"Jules' Utility Class Extensions\"\r\n"
-"  Copyright (c) 2015 - ROLI Ltd.\r\n"
+"  The Projucer is part of the JUCE library.\r\n"
+"  Copyright (c) 2017 - ROLI Ltd.\r\n"
 "\r\n"
 "  ==============================================================================\r\n"
 "*/\r\n"
@@ -5859,13 +6075,13 @@ static const unsigned char temp_binary_data_30[] =
 "//[Headers] You can add your own extra header files here...\r\n"
 "//[/Headers]\r\n"
 "\r\n"
-"%%includeFilesCPP%%\r\n"
+"%%include_files_cpp%%\r\n"
 "\r\n"
 "//[MiscUserDefs] You can add your own user definitions and misc code here...\r\n"
 "//[/MiscUserDefs]\r\n"
 "\r\n"
 "//==============================================================================\r\n"
-"%%className%%::%%className%% (%%constructorParams%%)\r\n"
+"%%class_name%%::%%class_name%% (%%constructor_params%%)\r\n"
 "%%initialisers%%{\r\n"
 "    //[Constructor_pre] You can add your own custom stuff here..\r\n"
 "    //[/Constructor_pre]\r\n"
@@ -5876,7 +6092,7 @@ static const unsigned char temp_binary_data_30[] =
 "    //[/Constructor]\r\n"
 "}\r\n"
 "\r\n"
-"%%className%%::~%%className%%()\r\n"
+"%%class_name%%::~%%class_name%%()\r\n"
 "{\r\n"
 "    //[Destructor_pre]. You can add your own custom destruction code here..\r\n"
 "    //[/Destructor_pre]\r\n"
@@ -5888,7 +6104,7 @@ static const unsigned char temp_binary_data_30[] =
 "}\r\n"
 "\r\n"
 "//==============================================================================\r\n"
-"%%methodDefinitions%%\r\n"
+"%%method_definitions%%\r\n"
 "\r\n"
 "//[MiscUserCode] You can add your own definitions of your custom methods or any other code here...\r\n"
 "//[/MiscUserCode]\r\n"
@@ -5908,14 +6124,14 @@ static const unsigned char temp_binary_data_30[] =
 "*/\r\n"
 "#endif\r\n"
 "\r\n"
-"%%staticMemberDefinitions%%\r\n"
+"%%static_member_definitions%%\r\n"
 "//[EndFile] You can add extra defines here...\r\n"
 "//[/EndFile]\r\n";
 
-const char* jucer_ComponentTemplate_cpp = (const char*) temp_binary_data_30;
+const char* jucer_ComponentTemplate_cpp = (const char*) temp_binary_data_34;
 
 //================== jucer_ComponentTemplate.h ==================
-static const unsigned char temp_binary_data_31[] =
+static const unsigned char temp_binary_data_35[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -5929,8 +6145,8 @@ static const unsigned char temp_binary_data_31[] =
 "\r\n"
 "  ------------------------------------------------------------------------------\r\n"
 "\r\n"
-"  The Projucer is part of the JUCE library - \"Jules' Utility Class Extensions\"\r\n"
-"  Copyright (c) 2015 - ROLI Ltd.\r\n"
+"  The Projucer is part of the JUCE library.\r\n"
+"  Copyright (c) 2017 - ROLI Ltd.\r\n"
 "\r\n"
 "  ==============================================================================\r\n"
 "*/\r\n"
@@ -5938,10 +6154,10 @@ static const unsigned char temp_binary_data_31[] =
 "#pragma once\r\n"
 "\r\n"
 "//[Headers]     -- You can add your own extra header files here --\r\n"
-"%%includeJUCEHeader%%\r\n"
+"%%include_juce_header%%\r\n"
 "//[/Headers]\r\n"
 "\r\n"
-"%%includeFilesH%%\r\n"
+"%%include_files_h%%\r\n"
 "\r\n"
 "//==============================================================================\r\n"
 "/**\r\n"
@@ -5951,79 +6167,37 @@ static const unsigned char temp_binary_data_31[] =
 "    Describe your class and how it works here!\r\n"
 "                                                                    //[/Comments]\r\n"
 "*/\r\n"
-"%%classDeclaration%%\r\n"
+"%%class_declaration%%\r\n"
 "{\r\n"
 "public:\r\n"
 "    //==============================================================================\r\n"
-"    %%className%% (%%constructorParams%%);\r\n"
-"    ~%%className%%();\r\n"
+"    %%class_name%% (%%constructor_params%%);\r\n"
+"    ~%%class_name%%();\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
 "    //[UserMethods]     -- You can add your own custom methods in this section.\r\n"
 "    //[/UserMethods]\r\n"
 "\r\n"
-"    %%publicMemberDeclarations%%\r\n"
+"    %%public_member_declarations%%\r\n"
 "\r\n"
 "private:\r\n"
 "    //[UserVariables]   -- You can add your own custom variables in this section.\r\n"
 "    //[/UserVariables]\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
-"    %%privateMemberDeclarations%%\r\n"
+"    %%private_member_declarations%%\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
-"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%className%%)\r\n"
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%class_name%%)\r\n"
 "};\r\n"
 "\r\n"
 "//[EndFile] You can add extra defines here...\r\n"
 "//[/EndFile]\r\n";
 
-const char* jucer_ComponentTemplate_h = (const char*) temp_binary_data_31;
+const char* jucer_ComponentTemplate_h = (const char*) temp_binary_data_35;
 
-//================== jucer_ContentCompTemplate.cpp ==================
-static const unsigned char temp_binary_data_32[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"    This file was auto-generated!\r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
-"INCLUDE_CORRESPONDING_HEADER\r\n"
-"\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"CONTENTCOMPCLASS::CONTENTCOMPCLASS()\r\n"
-"{\r\n"
-"    setSize (600, 400);\r\n"
-"}\r\n"
-"\r\n"
-"CONTENTCOMPCLASS::~CONTENTCOMPCLASS()\r\n"
-"{\r\n"
-"}\r\n"
-"\r\n"
-"void CONTENTCOMPCLASS::paint (Graphics& g)\r\n"
-"{\r\n"
-"    // (Our component is opaque, so we must completely fill the background with a solid colour)\r\n"
-"    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));\r\n"
-"\r\n"
-"    g.setFont (Font (16.0f));\r\n"
-"    g.setColour (Colours::white);\r\n"
-"    g.drawText (\"Hello World!\", getLocalBounds(), Justification::centred, true);\r\n"
-"}\r\n"
-"\r\n"
-"void CONTENTCOMPCLASS::resized()\r\n"
-"{\r\n"
-"    // This is called when the CONTENTCOMPCLASS is resized.\r\n"
-"    // If you add any child components, this is where you should\r\n"
-"    // update their positions.\r\n"
-"}\r\n";
-
-const char* jucer_ContentCompTemplate_cpp = (const char*) temp_binary_data_32;
-
-//================== jucer_ContentCompTemplate.h ==================
-static const unsigned char temp_binary_data_33[] =
+//================== jucer_ContentCompSimpleTemplate.h ==================
+static const unsigned char temp_binary_data_36[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -6034,45 +6208,151 @@ static const unsigned char temp_binary_data_33[] =
 "\r\n"
 "#pragma once\r\n"
 "\r\n"
-"INCLUDE_JUCE\r\n"
-"\r\n"
+"%%include_juce%%\r\n"
 "\r\n"
 "//==============================================================================\r\n"
 "/*\r\n"
 "    This component lives inside our window, and this is where you should put all\r\n"
 "    your controls and content.\r\n"
 "*/\r\n"
-"class CONTENTCOMPCLASS   : public Component\r\n"
+"class %%content_component_class%%   : public Component\r\n"
 "{\r\n"
 "public:\r\n"
 "    //==============================================================================\r\n"
-"    CONTENTCOMPCLASS();\r\n"
-"    ~CONTENTCOMPCLASS();\r\n"
+"    %%content_component_class%%()\r\n"
+"    {\r\n"
+"        setSize (600, 400);\r\n"
+"    }\r\n"
 "\r\n"
+"    ~%%content_component_class%%()\r\n"
+"    {\r\n"
+"    }\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    void paint (Graphics& g) override\r\n"
+"    {\r\n"
+"        // (Our component is opaque, so we must completely fill the background with a solid colour)\r\n"
+"        g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));\r\n"
+"\r\n"
+"        g.setFont (Font (16.0f));\r\n"
+"        g.setColour (Colours::white);\r\n"
+"        g.drawText (\"Hello World!\", getLocalBounds(), Justification::centred, true);\r\n"
+"    }\r\n"
+"\r\n"
+"    void resized() override\r\n"
+"    {\r\n"
+"        // This is called when the %%content_component_class%% is resized.\r\n"
+"        // If you add any child components, this is where you should\r\n"
+"        // update their positions.\r\n"
+"    }\r\n"
+"\r\n"
+"\r\n"
+"private:\r\n"
+"    //==============================================================================\r\n"
+"    // Your private member variables go here...\r\n"
+"\r\n"
+"\r\n"
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)\r\n"
+"};\r\n";
+
+const char* jucer_ContentCompSimpleTemplate_h = (const char*) temp_binary_data_36;
+
+//================== jucer_ContentCompTemplate.cpp ==================
+static const unsigned char temp_binary_data_37[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    This file was auto-generated!\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"%%include_corresponding_header%%\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"%%content_component_class%%::%%content_component_class%%()\r\n"
+"{\r\n"
+"    setSize (600, 400);\r\n"
+"}\r\n"
+"\r\n"
+"%%content_component_class%%::~%%content_component_class%%()\r\n"
+"{\r\n"
+"}\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"void %%content_component_class%%::paint (Graphics& g)\r\n"
+"{\r\n"
+"    // (Our component is opaque, so we must completely fill the background with a solid colour)\r\n"
+"    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));\r\n"
+"\r\n"
+"    g.setFont (Font (16.0f));\r\n"
+"    g.setColour (Colours::white);\r\n"
+"    g.drawText (\"Hello World!\", getLocalBounds(), Justification::centred, true);\r\n"
+"}\r\n"
+"\r\n"
+"void %%content_component_class%%::resized()\r\n"
+"{\r\n"
+"    // This is called when the %%content_component_class%% is resized.\r\n"
+"    // If you add any child components, this is where you should\r\n"
+"    // update their positions.\r\n"
+"}\r\n";
+
+const char* jucer_ContentCompTemplate_cpp = (const char*) temp_binary_data_37;
+
+//================== jucer_ContentCompTemplate.h ==================
+static const unsigned char temp_binary_data_38[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    This file was auto-generated!\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"#pragma once\r\n"
+"\r\n"
+"%%include_juce%%\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"/*\r\n"
+"    This component lives inside our window, and this is where you should put all\r\n"
+"    your controls and content.\r\n"
+"*/\r\n"
+"class %%content_component_class%%   : public Component\r\n"
+"{\r\n"
+"public:\r\n"
+"    //==============================================================================\r\n"
+"    %%content_component_class%%();\r\n"
+"    ~%%content_component_class%%();\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
 "    void paint (Graphics&) override;\r\n"
 "    void resized() override;\r\n"
 "\r\n"
 "private:\r\n"
 "    //==============================================================================\r\n"
-"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CONTENTCOMPCLASS)\r\n"
+"    // Your private member variables go here...\r\n"
+"\r\n"
+"\r\n"
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_ContentCompTemplate_h = (const char*) temp_binary_data_33;
+const char* jucer_ContentCompTemplate_h = (const char*) temp_binary_data_38;
 
 //================== jucer_InlineComponentTemplate.h ==================
-static const unsigned char temp_binary_data_34[] =
+static const unsigned char temp_binary_data_39[] =
 "//==============================================================================\r\n"
-"class COMPONENTCLASS    : public Component\r\n"
+"class %%component_class%%    : public Component\r\n"
 "{\r\n"
 "public:\r\n"
-"    COMPONENTCLASS()\r\n"
+"    %%component_class%%()\r\n"
 "    {\r\n"
 "        // In your constructor, you should add any child components, and\r\n"
 "        // initialise any special settings that your component needs.\r\n"
 "\r\n"
 "    }\r\n"
 "\r\n"
-"    ~COMPONENTCLASS()\r\n"
+"    ~%%component_class%%()\r\n"
 "    {\r\n"
 "    }\r\n"
 "\r\n"
@@ -6087,7 +6367,7 @@ static const unsigned char temp_binary_data_34[] =
 "\r\n"
 "        g.setColour (Colours::white);\r\n"
 "        g.setFont (14.0f);\r\n"
-"        g.drawText (\"COMPONENTCLASS\", getLocalBounds(),\r\n"
+"        g.drawText (\"%%component_class%%\", getLocalBounds(),\r\n"
 "                    Justification::centred, true);   // draw some placeholder text\r\n"
 "    }\r\n"
 "\r\n"
@@ -6099,25 +6379,24 @@ static const unsigned char temp_binary_data_34[] =
 "    }\r\n"
 "\r\n"
 "private:\r\n"
-"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (COMPONENTCLASS)\r\n"
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_InlineComponentTemplate_h = (const char*) temp_binary_data_34;
+const char* jucer_InlineComponentTemplate_h = (const char*) temp_binary_data_39;
 
 //================== jucer_MainConsoleAppTemplate.cpp ==================
-static const unsigned char temp_binary_data_35[] =
+static const unsigned char temp_binary_data_40[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
 "    This file was auto-generated!\r\n"
 "\r\n"
-"    It contains the basic startup code for a Juce application.\r\n"
+"    It contains the basic startup code for a JUCE application.\r\n"
 "\r\n"
 "  ==============================================================================\r\n"
 "*/\r\n"
 "\r\n"
-"APPHEADERS\r\n"
-"\r\n"
+"%%app_headers%%\r\n"
 "\r\n"
 "//==============================================================================\r\n"
 "int main (int argc, char* argv[])\r\n"
@@ -6129,33 +6408,32 @@ static const unsigned char temp_binary_data_35[] =
 "    return 0;\r\n"
 "}\r\n";
 
-const char* jucer_MainConsoleAppTemplate_cpp = (const char*) temp_binary_data_35;
+const char* jucer_MainConsoleAppTemplate_cpp = (const char*) temp_binary_data_40;
 
 //================== jucer_MainTemplate_NoWindow.cpp ==================
-static const unsigned char temp_binary_data_36[] =
+static const unsigned char temp_binary_data_41[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
 "    This file was auto-generated!\r\n"
 "\r\n"
-"    It contains the basic startup code for a Juce application.\r\n"
+"    It contains the basic startup code for a JUCE application.\r\n"
 "\r\n"
 "  ==============================================================================\r\n"
 "*/\r\n"
 "\r\n"
-"APPHEADERS\r\n"
-"\r\n"
+"%%app_headers%%\r\n"
 "\r\n"
 "//==============================================================================\r\n"
-"class APPCLASSNAME  : public JUCEApplication\r\n"
+"class %%app_class_name%%  : public JUCEApplication\r\n"
 "{\r\n"
 "public:\r\n"
 "    //==============================================================================\r\n"
-"    APPCLASSNAME() {}\r\n"
+"    %%app_class_name%%() {}\r\n"
 "\r\n"
 "    const String getApplicationName() override       { return ProjectInfo::projectName; }\r\n"
 "    const String getApplicationVersion() override    { return ProjectInfo::versionString; }\r\n"
-"    bool moreThanOneInstanceAllowed() override       { return ALLOWMORETHANONEINSTANCE; }\r\n"
+"    bool moreThanOneInstanceAllowed() override       { return %%allow_more_than_one_instance%%; }\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
 "    void initialise (const String& commandLine) override\r\n"
@@ -6186,36 +6464,34 @@ static const unsigned char temp_binary_data_36[] =
 "\r\n"
 "//==============================================================================\r\n"
 "// This macro generates the main() routine that launches the app.\r\n"
-"START_JUCE_APPLICATION (APPCLASSNAME)\r\n";
+"START_JUCE_APPLICATION (%%app_class_name%%)\r\n";
 
-const char* jucer_MainTemplate_NoWindow_cpp = (const char*) temp_binary_data_36;
+const char* jucer_MainTemplate_NoWindow_cpp = (const char*) temp_binary_data_41;
 
 //================== jucer_MainTemplate_SimpleWindow.cpp ==================
-static const unsigned char temp_binary_data_37[] =
+static const unsigned char temp_binary_data_42[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
 "    This file was auto-generated!\r\n"
 "\r\n"
-"    It contains the basic startup code for a Juce application.\r\n"
+"    It contains the basic startup code for a JUCE application.\r\n"
 "\r\n"
 "  ==============================================================================\r\n"
 "*/\r\n"
 "\r\n"
-"APPHEADERS\r\n"
-"\r\n"
-"Component* createMainContentComponent();\r\n"
+"%%app_headers%%\r\n"
 "\r\n"
 "//==============================================================================\r\n"
-"class APPCLASSNAME  : public JUCEApplication\r\n"
+"class %%app_class_name%%  : public JUCEApplication\r\n"
 "{\r\n"
 "public:\r\n"
 "    //==============================================================================\r\n"
-"    APPCLASSNAME() {}\r\n"
+"    %%app_class_name%%() {}\r\n"
 "\r\n"
 "    const String getApplicationName() override       { return ProjectInfo::projectName; }\r\n"
 "    const String getApplicationVersion() override    { return ProjectInfo::versionString; }\r\n"
-"    bool moreThanOneInstanceAllowed() override       { return ALLOWMORETHANONEINSTANCE; }\r\n"
+"    bool moreThanOneInstanceAllowed() override       { return %%allow_more_than_one_instance%%; }\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
 "    void initialise (const String& commandLine) override\r\n"
@@ -6250,7 +6526,7 @@ static const unsigned char temp_binary_data_37[] =
 "    //==============================================================================\r\n"
 "    /*\r\n"
 "        This class implements the desktop window that contains an instance of\r\n"
-"        our CONTENTCOMPCLASS class.\r\n"
+"        our %%content_component_class%% class.\r\n"
 "    */\r\n"
 "    class MainWindow    : public DocumentWindow\r\n"
 "    {\r\n"
@@ -6261,7 +6537,7 @@ static const unsigned char temp_binary_data_37[] =
 "                                                    DocumentWindow::allButtons)\r\n"
 "        {\r\n"
 "            setUsingNativeTitleBar (true);\r\n"
-"            setContentOwned (createMainContentComponent(), true);\r\n"
+"            setContentOwned (new %%content_component_class%%(), true);\r\n"
 "            setResizable (true, true);\r\n"
 "\r\n"
 "            centreWithSize (getWidth(), getHeight());\r\n"
@@ -6293,35 +6569,34 @@ static const unsigned char temp_binary_data_37[] =
 "\r\n"
 "//==============================================================================\r\n"
 "// This macro generates the main() routine that launches the app.\r\n"
-"START_JUCE_APPLICATION (APPCLASSNAME)\r\n";
+"START_JUCE_APPLICATION (%%app_class_name%%)\r\n";
 
-const char* jucer_MainTemplate_SimpleWindow_cpp = (const char*) temp_binary_data_37;
+const char* jucer_MainTemplate_SimpleWindow_cpp = (const char*) temp_binary_data_42;
 
 //================== jucer_MainTemplate_Window.cpp ==================
-static const unsigned char temp_binary_data_38[] =
+static const unsigned char temp_binary_data_43[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
 "    This file was auto-generated!\r\n"
 "\r\n"
-"    It contains the basic startup code for a Juce application.\r\n"
+"    It contains the basic startup code for a JUCE application.\r\n"
 "\r\n"
 "  ==============================================================================\r\n"
 "*/\r\n"
 "\r\n"
-"APPHEADERS\r\n"
-"\r\n"
+"%%app_headers%%\r\n"
 "\r\n"
 "//==============================================================================\r\n"
-"class APPCLASSNAME  : public JUCEApplication\r\n"
+"class %%app_class_name%%  : public JUCEApplication\r\n"
 "{\r\n"
 "public:\r\n"
 "    //==============================================================================\r\n"
-"    APPCLASSNAME() {}\r\n"
+"    %%app_class_name%%() {}\r\n"
 "\r\n"
 "    const String getApplicationName() override       { return ProjectInfo::projectName; }\r\n"
 "    const String getApplicationVersion() override    { return ProjectInfo::versionString; }\r\n"
-"    bool moreThanOneInstanceAllowed() override       { return ALLOWMORETHANONEINSTANCE; }\r\n"
+"    bool moreThanOneInstanceAllowed() override       { return %%allow_more_than_one_instance%%; }\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
 "    void initialise (const String& commandLine) override\r\n"
@@ -6356,7 +6631,7 @@ static const unsigned char temp_binary_data_38[] =
 "    //==============================================================================\r\n"
 "    /*\r\n"
 "        This class implements the desktop window that contains an instance of\r\n"
-"        our CONTENTCOMPCLASS class.\r\n"
+"        our %%content_component_class%% class.\r\n"
 "    */\r\n"
 "    class MainWindow    : public DocumentWindow\r\n"
 "    {\r\n"
@@ -6367,7 +6642,7 @@ static const unsigned char temp_binary_data_38[] =
 "                                                    DocumentWindow::allButtons)\r\n"
 "        {\r\n"
 "            setUsingNativeTitleBar (true);\r\n"
-"            setContentOwned (new CONTENTCOMPCLASS(), true);\r\n"
+"            setContentOwned (new %%content_component_class%%(), true);\r\n"
 "\r\n"
 "            centreWithSize (getWidth(), getHeight());\r\n"
 "            setVisible (true);\r\n"
@@ -6398,38 +6673,38 @@ static const unsigned char temp_binary_data_38[] =
 "\r\n"
 "//==============================================================================\r\n"
 "// This macro generates the main() routine that launches the app.\r\n"
-"START_JUCE_APPLICATION (APPCLASSNAME)\r\n";
+"START_JUCE_APPLICATION (%%app_class_name%%)\r\n";
 
-const char* jucer_MainTemplate_Window_cpp = (const char*) temp_binary_data_38;
+const char* jucer_MainTemplate_Window_cpp = (const char*) temp_binary_data_43;
 
 //================== jucer_NewComponentTemplate.cpp ==================
-static const unsigned char temp_binary_data_39[] =
+static const unsigned char temp_binary_data_44[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
-"    FILENAME\r\n"
-"    Created: DATE\r\n"
-"    Author:  AUTHOR\r\n"
+"    %%filename%%\r\n"
+"    Created: %%date%%\r\n"
+"    Author:  %%author%%\r\n"
 "\r\n"
 "  ==============================================================================\r\n"
 "*/\r\n"
 "\r\n"
-"INCLUDE_JUCE\r\n"
-"INCLUDE_CORRESPONDING_HEADER\r\n"
+"%%include_juce%%\r\n"
+"%%include_corresponding_header%%\r\n"
 "\r\n"
 "//==============================================================================\r\n"
-"COMPONENTCLASS::COMPONENTCLASS()\r\n"
+"%%component_class%%::%%component_class%%()\r\n"
 "{\r\n"
 "    // In your constructor, you should add any child components, and\r\n"
 "    // initialise any special settings that your component needs.\r\n"
 "\r\n"
 "}\r\n"
 "\r\n"
-"COMPONENTCLASS::~COMPONENTCLASS()\r\n"
+"%%component_class%%::~%%component_class%%()\r\n"
 "{\r\n"
 "}\r\n"
 "\r\n"
-"void COMPONENTCLASS::paint (Graphics& g)\r\n"
+"void %%component_class%%::paint (Graphics& g)\r\n"
 "{\r\n"
 "    /* This demo code just fills the component's background and\r\n"
 "       draws some placeholder text to get you started.\r\n"
@@ -6445,115 +6720,115 @@ static const unsigned char temp_binary_data_39[] =
 "\r\n"
 "    g.setColour (Colours::white);\r\n"
 "    g.setFont (14.0f);\r\n"
-"    g.drawText (\"COMPONENTCLASS\", getLocalBounds(),\r\n"
+"    g.drawText (\"%%component_class%%\", getLocalBounds(),\r\n"
 "                Justification::centred, true);   // draw some placeholder text\r\n"
 "}\r\n"
 "\r\n"
-"void COMPONENTCLASS::resized()\r\n"
+"void %%component_class%%::resized()\r\n"
 "{\r\n"
 "    // This method is where you should set the bounds of any child\r\n"
 "    // components that your component contains..\r\n"
 "\r\n"
 "}\r\n";
 
-const char* jucer_NewComponentTemplate_cpp = (const char*) temp_binary_data_39;
+const char* jucer_NewComponentTemplate_cpp = (const char*) temp_binary_data_44;
 
 //================== jucer_NewComponentTemplate.h ==================
-static const unsigned char temp_binary_data_40[] =
+static const unsigned char temp_binary_data_45[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
-"    FILENAME\r\n"
-"    Created: DATE\r\n"
-"    Author:  AUTHOR\r\n"
+"    %%filename%%\r\n"
+"    Created: %%date%%\r\n"
+"    Author:  %%author%%\r\n"
 "\r\n"
 "  ==============================================================================\r\n"
 "*/\r\n"
 "\r\n"
 "#pragma once\r\n"
 "\r\n"
-"INCLUDE_JUCE\r\n"
+"%%include_juce%%\r\n"
 "\r\n"
 "//==============================================================================\r\n"
 "/*\r\n"
 "*/\r\n"
-"class COMPONENTCLASS    : public Component\r\n"
+"class %%component_class%%    : public Component\r\n"
 "{\r\n"
 "public:\r\n"
-"    COMPONENTCLASS();\r\n"
-"    ~COMPONENTCLASS();\r\n"
+"    %%component_class%%();\r\n"
+"    ~%%component_class%%();\r\n"
 "\r\n"
 "    void paint (Graphics&) override;\r\n"
 "    void resized() override;\r\n"
 "\r\n"
 "private:\r\n"
-"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (COMPONENTCLASS)\r\n"
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_NewComponentTemplate_h = (const char*) temp_binary_data_40;
+const char* jucer_NewComponentTemplate_h = (const char*) temp_binary_data_45;
 
 //================== jucer_NewCppFileTemplate.cpp ==================
-static const unsigned char temp_binary_data_41[] =
+static const unsigned char temp_binary_data_46[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
-"    FILENAME\r\n"
-"    Created: DATE\r\n"
-"    Author:  AUTHOR\r\n"
+"    %%filename%%\r\n"
+"    Created: %%date%%\r\n"
+"    Author:  %%author%%\r\n"
 "\r\n"
 "  ==============================================================================\r\n"
 "*/\r\n"
 "\r\n"
-"INCLUDE_CORRESPONDING_HEADER\r\n";
+"%%include_corresponding_header%%\r\n";
 
-const char* jucer_NewCppFileTemplate_cpp = (const char*) temp_binary_data_41;
+const char* jucer_NewCppFileTemplate_cpp = (const char*) temp_binary_data_46;
 
 //================== jucer_NewCppFileTemplate.h ==================
-static const unsigned char temp_binary_data_42[] =
+static const unsigned char temp_binary_data_47[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
-"    FILENAME\r\n"
-"    Created: DATE\r\n"
-"    Author:  AUTHOR\r\n"
+"    %%filename%%\r\n"
+"    Created: %%date%%\r\n"
+"    Author:  %%author%%\r\n"
 "\r\n"
 "  ==============================================================================\r\n"
 "*/\r\n"
 "\r\n"
 "#pragma once\r\n";
 
-const char* jucer_NewCppFileTemplate_h = (const char*) temp_binary_data_42;
+const char* jucer_NewCppFileTemplate_h = (const char*) temp_binary_data_47;
 
 //================== jucer_NewInlineComponentTemplate.h ==================
-static const unsigned char temp_binary_data_43[] =
+static const unsigned char temp_binary_data_48[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
-"    FILENAME\r\n"
-"    Created: DATE\r\n"
-"    Author:  AUTHOR\r\n"
+"    %%filename%%\r\n"
+"    Created: %%date%%\r\n"
+"    Author:  %%author%%\r\n"
 "\r\n"
 "  ==============================================================================\r\n"
 "*/\r\n"
 "\r\n"
 "#pragma once\r\n"
 "\r\n"
-"INCLUDE_JUCE\r\n"
+"%%include_juce%%\r\n"
 "\r\n"
 "//==============================================================================\r\n"
 "/*\r\n"
 "*/\r\n"
-"class COMPONENTCLASS    : public Component\r\n"
+"class %%component_class%%    : public Component\r\n"
 "{\r\n"
 "public:\r\n"
-"    COMPONENTCLASS()\r\n"
+"    %%component_class%%()\r\n"
 "    {\r\n"
 "        // In your constructor, you should add any child components, and\r\n"
 "        // initialise any special settings that your component needs.\r\n"
 "\r\n"
 "    }\r\n"
 "\r\n"
-"    ~COMPONENTCLASS()\r\n"
+"    ~%%component_class%%()\r\n"
 "    {\r\n"
 "    }\r\n"
 "\r\n"
@@ -6573,7 +6848,7 @@ static const unsigned char temp_binary_data_43[] =
 "\r\n"
 "        g.setColour (Colours::white);\r\n"
 "        g.setFont (14.0f);\r\n"
-"        g.drawText (\"COMPONENTCLASS\", getLocalBounds(),\r\n"
+"        g.drawText (\"%%component_class%%\", getLocalBounds(),\r\n"
 "                    Justification::centred, true);   // draw some placeholder text\r\n"
 "    }\r\n"
 "\r\n"
@@ -6585,13 +6860,13 @@ static const unsigned char temp_binary_data_43[] =
 "    }\r\n"
 "\r\n"
 "private:\r\n"
-"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (COMPONENTCLASS)\r\n"
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_NewInlineComponentTemplate_h = (const char*) temp_binary_data_43;
+const char* jucer_NewInlineComponentTemplate_h = (const char*) temp_binary_data_48;
 
-//================== jucer_OpenGLComponentTemplate.cpp ==================
-static const unsigned char temp_binary_data_44[] =
+//================== jucer_OpenGLComponentSimpleTemplate.h ==================
+static const unsigned char temp_binary_data_49[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -6600,41 +6875,52 @@ static const unsigned char temp_binary_data_44[] =
 "  ==============================================================================\r\n"
 "*/\r\n"
 "\r\n"
-"INCLUDE_JUCE\r\n"
+"#pragma once\r\n"
+"\r\n"
+"%%include_juce%%\r\n"
 "\r\n"
 "//==============================================================================\r\n"
 "/*\r\n"
 "    This component lives inside our window, and this is where you should put all\r\n"
 "    your controls and content.\r\n"
 "*/\r\n"
-"class MainContentComponent   : public OpenGLAppComponent\r\n"
+"class %%content_component_class%%   : public OpenGLAppComponent\r\n"
 "{\r\n"
 "public:\r\n"
 "    //==============================================================================\r\n"
-"    MainContentComponent()\r\n"
+"    %%content_component_class%%()\r\n"
 "    {\r\n"
+"        // Make sure you set the size of the component after\r\n"
+"        // you add any child components.\r\n"
 "        setSize (800, 600);\r\n"
 "    }\r\n"
 "\r\n"
-"    ~MainContentComponent()\r\n"
+"    ~%%content_component_class%%()\r\n"
 "    {\r\n"
+"        // This shuts down the GL system and stops the rendering calls.\r\n"
 "        shutdownOpenGL();\r\n"
 "    }\r\n"
 "\r\n"
+"    //==============================================================================\r\n"
 "    void initialise() override\r\n"
 "    {\r\n"
+"        // Initialise GL objects for rendering here.\r\n"
 "    }\r\n"
 "\r\n"
 "    void shutdown() override\r\n"
 "    {\r\n"
+"        // Free any GL objects created for rendering here.\r\n"
 "    }\r\n"
 "\r\n"
 "    void render() override\r\n"
 "    {\r\n"
+"        // This clears the context with a black background.\r\n"
 "        OpenGLHelpers::clear (Colours::black);\r\n"
 "\r\n"
+"        // Add your rendering code here...\r\n"
 "    }\r\n"
 "\r\n"
+"    //==============================================================================\r\n"
 "    void paint (Graphics& g) override\r\n"
 "    {\r\n"
 "        // You can add your component specific drawing code here!\r\n"
@@ -6651,22 +6937,199 @@ static const unsigned char temp_binary_data_44[] =
 "\r\n"
 "private:\r\n"
 "    //==============================================================================\r\n"
-"\r\n"
-"    // private member variables\r\n"
-"\r\n"
+"    // Your private member variables go here...\r\n"
 "\r\n"
 "\r\n"
-"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainContentComponent)\r\n"
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)\r\n"
+"};\r\n";
+
+const char* jucer_OpenGLComponentSimpleTemplate_h = (const char*) temp_binary_data_49;
+
+//================== jucer_OpenGLComponentTemplate.cpp ==================
+static const unsigned char temp_binary_data_50[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    This file was auto-generated!\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"%%include_corresponding_header%%\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"%%content_component_class%%::%%content_component_class%%()\r\n"
+"{\r\n"
+"    // Make sure you set the size of the component after\r\n"
+"    // you add any child components.\r\n"
+"    setSize (800, 600);\r\n"
+"}\r\n"
+"\r\n"
+"%%content_component_class%%::~%%content_component_class%%()\r\n"
+"{\r\n"
+"    // This shuts down the GL system and stops the rendering calls.\r\n"
+"    shutdownOpenGL();\r\n"
+"}\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"void %%content_component_class%%::initialise()\r\n"
+"{\r\n"
+"    // Initialise GL objects for rendering here.\r\n"
+"}\r\n"
+"\r\n"
+"void %%content_component_class%%::shutdown()\r\n"
+"{\r\n"
+"    // Free any GL objects created for rendering here.\r\n"
+"}\r\n"
+"\r\n"
+"void %%content_component_class%%::render()\r\n"
+"{\r\n"
+"    // This clears the context with a black background.\r\n"
+"    OpenGLHelpers::clear (Colours::black);\r\n"
+"\r\n"
+"    // Add your rendering code here...\r\n"
+"}\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"void %%content_component_class%%::paint (Graphics& g)\r\n"
+"{\r\n"
+"    // You can add your component specific drawing code here!\r\n"
+"    // This will draw over the top of the openGL background.\r\n"
+"}\r\n"
+"\r\n"
+"void %%content_component_class%%::resized()\r\n"
+"{\r\n"
+"    // This is called when the %%content_component_class%% is resized.\r\n"
+"    // If you add any child components, this is where you should\r\n"
+"    // update their positions.\r\n"
+"}\r\n";
+
+const char* jucer_OpenGLComponentTemplate_cpp = (const char*) temp_binary_data_50;
+
+//================== jucer_OpenGLComponentTemplate.h ==================
+static const unsigned char temp_binary_data_51[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    This file was auto-generated!\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"#pragma once\r\n"
+"\r\n"
+"%%include_juce%%\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"/*\r\n"
+"    This component lives inside our window, and this is where you should put all\r\n"
+"    your controls and content.\r\n"
+"*/\r\n"
+"class %%content_component_class%%   : public OpenGLAppComponent\r\n"
+"{\r\n"
+"public:\r\n"
+"    //==============================================================================\r\n"
+"    %%content_component_class%%();\r\n"
+"    ~%%content_component_class%%();\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    void initialise() override;\r\n"
+"    void shutdown() override;\r\n"
+"    void render() override;\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    void paint (Graphics& g) override;\r\n"
+"    void resized() override;\r\n"
+"\r\n"
+"private:\r\n"
+"    //==============================================================================\r\n"
+"    // Your private member variables go here...\r\n"
+"\r\n"
+"\r\n"
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)\r\n"
+"};\r\n";
+
+const char* jucer_OpenGLComponentTemplate_h = (const char*) temp_binary_data_51;
+
+//================== jucer_PIPMain.cpp ==================
+static const unsigned char temp_binary_data_52[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    This file was auto-generated and contains the startup code for a PIP.\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"#include \"../JuceLibraryCode/JuceHeader.h\"\r\n"
+"#include \"%%filename%%\"\r\n"
+"\r\n"
+"%%component_begin%%\r\n"
+"class Application    : public JUCEApplication\r\n"
+"{\r\n"
+"public:\r\n"
+"    //==============================================================================\r\n"
+"    Application() {}\r\n"
+"\r\n"
+"    const String getApplicationName() override       { return \"%%project_name%%\"; }\r\n"
+"    const String getApplicationVersion() override    { return \"%%project_version%%\"; }\r\n"
+"\r\n"
+"    void initialise (const String&) override         { %%startup%% }\r\n"
+"    void shutdown() override                         { %%shutdown%% }\r\n"
+"\r\n"
+"private:\r\n"
+"    class MainWindow    : public DocumentWindow\r\n"
+"    {\r\n"
+"    public:\r\n"
+"        MainWindow (const String& name, Component* c)  : DocumentWindow (name,\r\n"
+"                                                                         Desktop::getInstance().getDefaultLookAndFeel()\r\n"
+"                                                                                               .findColour (ResizableWindow::backgroundColourId),\r\n"
+"                                                                         DocumentWindow::allButtons)\r\n"
+"        {\r\n"
+"            setUsingNativeTitleBar (true);\r\n"
+"            setContentOwned (c, true);\r\n"
+"\r\n"
+"           #if JUCE_ANDROID || JUCE_IOS\r\n"
+"            setFullScreen (true);\r\n"
+"           #else\r\n"
+"            setResizable (true, false);\r\n"
+"            setResizeLimits (300, 250, 10000, 10000);\r\n"
+"            centreWithSize (getWidth(), getHeight());\r\n"
+"           #endif\r\n"
+"\r\n"
+"            setVisible (true);\r\n"
+"        }\r\n"
+"\r\n"
+"        void closeButtonPressed() override\r\n"
+"        {\r\n"
+"            JUCEApplication::getInstance()->systemRequestedQuit();\r\n"
+"        }\r\n"
+"\r\n"
+"    private:\r\n"
+"        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)\r\n"
+"    };\r\n"
+"    ScopedPointer<MainWindow> mainWindow;\r\n"
 "};\r\n"
 "\r\n"
+"//==============================================================================\r\n"
+"START_JUCE_APPLICATION (Application)\r\n"
+"%%component_end%%\r\n"
 "\r\n"
-"// (This function is called by the app startup code to create our main component)\r\n"
-"Component* createMainContentComponent()    { return new MainContentComponent(); }\r\n";
+"%%audioprocessor_begin%%\r\n"
+"//==============================================================================\r\n"
+"AudioProcessor* JUCE_CALLTYPE createPluginFilter()\r\n"
+"{\r\n"
+"    return new %%class_name%%();\r\n"
+"}\r\n"
+"%%audioprocessor_end%%\r\n"
+"\r\n"
+"%%console_begin%%\r\n"
+"%%console_end%%\r\n";
 
-const char* jucer_OpenGLComponentTemplate_cpp = (const char*) temp_binary_data_44;
+const char* jucer_PIPMain_cpp = (const char*) temp_binary_data_52;
 
 //================== colourscheme_dark.xml ==================
-static const unsigned char temp_binary_data_45[] =
+static const unsigned char temp_binary_data_53[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
 "\r\n"
 "<COLOUR_SCHEME font=\"&lt;Monospaced&gt;; 13.0\">\r\n"
@@ -6691,10 +7154,10 @@ static const unsigned char temp_binary_data_45[] =
 "  <COLOUR name=\"Error\" colour=\"FFE60000\"/>\r\n"
 "</COLOUR_SCHEME>\r\n";
 
-const char* colourscheme_dark_xml = (const char*) temp_binary_data_45;
+const char* colourscheme_dark_xml = (const char*) temp_binary_data_53;
 
 //================== colourscheme_light.xml ==================
-static const unsigned char temp_binary_data_46[] =
+static const unsigned char temp_binary_data_54[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
 "\r\n"
 "<COLOUR_SCHEME font=\"&lt;Monospaced&gt;; 13.0\">\r\n"
@@ -6719,10 +7182,16 @@ static const unsigned char temp_binary_data_46[] =
 "  <COLOUR name=\"Error\" colour=\"ffcc0000\"/>\r\n"
 "</COLOUR_SCHEME>\r\n";
 
-const char* colourscheme_light_xml = (const char*) temp_binary_data_46;
+const char* colourscheme_light_xml = (const char*) temp_binary_data_54;
+
+//================== nothingtoseehere.txt ==================
+static const unsigned char temp_binary_data_55[] =
+"VUEtMTk3NTkzMTgtNA==";
+
+const char* nothingtoseehere_txt = (const char*) temp_binary_data_55;
 
 //================== offlinepage.html ==================
-static const unsigned char temp_binary_data_47[] =
+static const unsigned char temp_binary_data_56[] =
 "<html>\n"
 "  <head>\n"
 "    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=11\">\n"
@@ -6766,10 +7235,10 @@ static const unsigned char temp_binary_data_47[] =
 "  </body>\n"
 "</html>";
 
-const char* offlinepage_html = (const char*) temp_binary_data_47;
+const char* offlinepage_html = (const char*) temp_binary_data_56;
 
 //================== projucer_EULA.txt ==================
-static const unsigned char temp_binary_data_48[] =
+static const unsigned char temp_binary_data_57[] =
 "\r\n"
 "IMPORTANT NOTICE: PLEASE READ CAREFULLY BEFORE INSTALLING THE SOFTWARE:\r\n"
 "\r\n"
@@ -6933,10 +7402,10 @@ static const unsigned char temp_binary_data_48[] =
 "\r\n"
 "10.6. Please note that this License, its subject matter and its formation, are governed by English law. You and we both agree to that the courts of England and Wales will have exclusive jurisdiction.\r\n";
 
-const char* projucer_EULA_txt = (const char*) temp_binary_data_48;
+const char* projucer_EULA_txt = (const char*) temp_binary_data_57;
 
 //================== RecentFilesMenuTemplate.nib ==================
-static const unsigned char temp_binary_data_49[] =
+static const unsigned char temp_binary_data_58[] =
 { 98,112,108,105,115,116,48,48,212,0,1,0,2,0,3,0,4,0,5,0,6,1,53,1,54,88,36,118,101,114,115,105,111,110,88,36,111,98,106,101,99,116,115,89,36,97,114,99,104,105,118,101,114,84,36,116,111,112,18,0,1,134,160,175,16,74,0,7,0,8,0,31,0,35,0,36,0,42,0,46,0,50,
 0,53,0,57,0,74,0,77,0,78,0,86,0,87,0,97,0,112,0,113,0,114,0,119,0,120,0,121,0,124,0,128,0,129,0,132,0,143,0,144,0,145,0,149,0,153,0,162,0,163,0,164,0,169,0,173,0,180,0,181,0,182,0,185,0,192,0,193,0,200,0,201,0,208,0,209,0,216,0,217,0,224,0,225,0,226,
 0,229,0,230,0,232,0,249,1,11,1,29,1,30,1,31,1,32,1,33,1,34,1,35,1,36,1,37,1,38,1,39,1,40,1,41,1,42,1,43,1,44,1,47,1,50,85,36,110,117,108,108,219,0,9,0,10,0,11,0,12,0,13,0,14,0,15,0,16,0,17,0,18,0,19,0,20,0,21,0,22,0,23,0,24,0,25,0,26,0,27,0,28,0,29,0,
@@ -6973,7 +7442,7 @@ static const unsigned char temp_binary_data_49[] =
 7,157,7,159,7,161,7,163,7,165,7,167,7,169,7,171,7,173,7,175,7,177,7,179,7,181,7,190,7,192,7,225,7,227,7,229,7,231,7,233,7,235,7,237,7,239,7,241,7,243,7,245,7,247,7,249,7,251,7,253,7,255,8,2,8,5,8,8,8,11,8,14,8,17,8,20,8,23,8,26,8,29,8,32,8,35,8,38,8,
 41,8,44,8,53,8,55,8,56,8,65,8,67,8,68,8,77,8,92,8,97,8,115,8,120,8,134,0,0,0,0,0,0,2,2,0,0,0,0,0,0,1,57,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,136,0,0 };
 
-const char* RecentFilesMenuTemplate_nib = (const char*) temp_binary_data_49;
+const char* RecentFilesMenuTemplate_nib = (const char*) temp_binary_data_58;
 
 
 const char* getNamedResource (const char*, int&) throw();
@@ -7010,29 +7479,38 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x52a8dfdf:  numBytes = 1859; return wizard_Openfile_svg;
         case 0x58e2ae48:  numBytes = 4551; return wizard_OpenGL_svg;
         case 0xb1da6f9e:  numBytes = 7488; return wizard_StaticLibrary_svg;
-        case 0x6cf2645e:  numBytes = 1887; return jucer_AnimatedComponentTemplate_cpp;
-        case 0xafccbd3f:  numBytes = 3141; return jucer_AudioComponentTemplate_cpp;
-        case 0x27c5a93a:  numBytes = 1310; return jucer_AudioPluginEditorTemplate_cpp;
-        case 0x4d0721bf:  numBytes = 938; return jucer_AudioPluginEditorTemplate_h;
-        case 0x51b49ac5:  numBytes = 5647; return jucer_AudioPluginFilterTemplate_cpp;
-        case 0x488afa0a:  numBytes = 2245; return jucer_AudioPluginFilterTemplate_h;
-        case 0xabad7041:  numBytes = 2151; return jucer_ComponentTemplate_cpp;
-        case 0xfc72fe86:  numBytes = 2064; return jucer_ComponentTemplate_h;
-        case 0x0b66646c:  numBytes = 1029; return jucer_ContentCompTemplate_cpp;
-        case 0x6fa10171:  numBytes = 886; return jucer_ContentCompTemplate_h;
-        case 0x28d496ad:  numBytes = 1208; return jucer_InlineComponentTemplate_h;
-        case 0x8905395b:  numBytes = 470; return jucer_MainConsoleAppTemplate_cpp;
-        case 0x5e5ea047:  numBytes = 1992; return jucer_MainTemplate_NoWindow_cpp;
-        case 0xda2391f8:  numBytes = 4001; return jucer_MainTemplate_SimpleWindow_cpp;
-        case 0x400bc026:  numBytes = 3913; return jucer_MainTemplate_Window_cpp;
-        case 0xf4842835:  numBytes = 1436; return jucer_NewComponentTemplate_cpp;
-        case 0xe7bf237a:  numBytes = 610; return jucer_NewComponentTemplate_h;
-        case 0x02a2a077:  numBytes = 262; return jucer_NewCppFileTemplate_cpp;
-        case 0x0842c43c:  numBytes = 246; return jucer_NewCppFileTemplate_h;
-        case 0x36e634a1:  numBytes = 1635; return jucer_NewInlineComponentTemplate_h;
-        case 0x7fbac252:  numBytes = 1716; return jucer_OpenGLComponentTemplate_cpp;
+        case 0xd11e6d35:  numBytes = 2085; return jucer_AnimatedComponentSimpleTemplate_h;
+        case 0x6cf2645e:  numBytes = 1563; return jucer_AnimatedComponentTemplate_cpp;
+        case 0x97b055e3:  numBytes = 1201; return jucer_AnimatedComponentTemplate_h;
+        case 0xfb6f6d96:  numBytes = 3194; return jucer_AudioComponentSimpleTemplate_h;
+        case 0xafccbd3f:  numBytes = 2635; return jucer_AudioComponentTemplate_cpp;
+        case 0x915d7304:  numBytes = 1374; return jucer_AudioComponentTemplate_h;
+        case 0x27c5a93a:  numBytes = 1356; return jucer_AudioPluginEditorTemplate_cpp;
+        case 0x4d0721bf:  numBytes = 977; return jucer_AudioPluginEditorTemplate_h;
+        case 0x51b49ac5:  numBytes = 6036; return jucer_AudioPluginFilterTemplate_cpp;
+        case 0x488afa0a:  numBytes = 2272; return jucer_AudioPluginFilterTemplate_h;
+        case 0xabad7041:  numBytes = 2126; return jucer_ComponentTemplate_cpp;
+        case 0xfc72fe86:  numBytes = 2042; return jucer_ComponentTemplate_h;
+        case 0x1657b643:  numBytes = 1693; return jucer_ContentCompSimpleTemplate_h;
+        case 0x0b66646c:  numBytes = 1190; return jucer_ContentCompTemplate_cpp;
+        case 0x6fa10171:  numBytes = 1071; return jucer_ContentCompTemplate_h;
+        case 0x28d496ad:  numBytes = 1233; return jucer_InlineComponentTemplate_h;
+        case 0x8905395b:  numBytes = 473; return jucer_MainConsoleAppTemplate_cpp;
+        case 0x5e5ea047:  numBytes = 2021; return jucer_MainTemplate_NoWindow_cpp;
+        case 0xda2391f8:  numBytes = 4004; return jucer_MainTemplate_SimpleWindow_cpp;
+        case 0x400bc026:  numBytes = 3964; return jucer_MainTemplate_Window_cpp;
+        case 0xf4842835:  numBytes = 1491; return jucer_NewComponentTemplate_cpp;
+        case 0xe7bf237a:  numBytes = 646; return jucer_NewComponentTemplate_h;
+        case 0x02a2a077:  numBytes = 278; return jucer_NewCppFileTemplate_cpp;
+        case 0x0842c43c:  numBytes = 258; return jucer_NewCppFileTemplate_h;
+        case 0x36e634a1:  numBytes = 1676; return jucer_NewInlineComponentTemplate_h;
+        case 0x6bdeb129:  numBytes = 2174; return jucer_OpenGLComponentSimpleTemplate_h;
+        case 0x7fbac252:  numBytes = 1665; return jucer_OpenGLComponentTemplate_cpp;
+        case 0x491fa0d7:  numBytes = 1263; return jucer_OpenGLComponentTemplate_h;
+        case 0xf4ca9e9a:  numBytes = 2446; return jucer_PIPMain_cpp;
         case 0x763d39dc:  numBytes = 1050; return colourscheme_dark_xml;
         case 0xe8b08520:  numBytes = 1050; return colourscheme_light_xml;
+        case 0x938e96ec:  numBytes = 20; return nothingtoseehere_txt;
         case 0xf11580d8:  numBytes = 1155; return offlinepage_html;
         case 0xd6bb7d1d:  numBytes = 14361; return projucer_EULA_txt;
         case 0xa41e649d:  numBytes = 2842; return RecentFilesMenuTemplate_nib;
@@ -7069,14 +7547,19 @@ const char* namedResourceList[] =
     "wizard_Openfile_svg",
     "wizard_OpenGL_svg",
     "wizard_StaticLibrary_svg",
+    "jucer_AnimatedComponentSimpleTemplate_h",
     "jucer_AnimatedComponentTemplate_cpp",
+    "jucer_AnimatedComponentTemplate_h",
+    "jucer_AudioComponentSimpleTemplate_h",
     "jucer_AudioComponentTemplate_cpp",
+    "jucer_AudioComponentTemplate_h",
     "jucer_AudioPluginEditorTemplate_cpp",
     "jucer_AudioPluginEditorTemplate_h",
     "jucer_AudioPluginFilterTemplate_cpp",
     "jucer_AudioPluginFilterTemplate_h",
     "jucer_ComponentTemplate_cpp",
     "jucer_ComponentTemplate_h",
+    "jucer_ContentCompSimpleTemplate_h",
     "jucer_ContentCompTemplate_cpp",
     "jucer_ContentCompTemplate_h",
     "jucer_InlineComponentTemplate_h",
@@ -7089,9 +7572,13 @@ const char* namedResourceList[] =
     "jucer_NewCppFileTemplate_cpp",
     "jucer_NewCppFileTemplate_h",
     "jucer_NewInlineComponentTemplate_h",
+    "jucer_OpenGLComponentSimpleTemplate_h",
     "jucer_OpenGLComponentTemplate_cpp",
+    "jucer_OpenGLComponentTemplate_h",
+    "jucer_PIPMain_cpp",
     "colourscheme_dark_xml",
     "colourscheme_light_xml",
+    "nothingtoseehere_txt",
     "offlinepage_html",
     "projucer_EULA_txt",
     "RecentFilesMenuTemplate_nib"

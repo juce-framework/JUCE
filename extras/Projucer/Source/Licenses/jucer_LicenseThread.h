@@ -174,7 +174,7 @@ struct LicenseThread : NetWorkerThread
             if (statusCode == 200)
             {
                 var result = JSON::parse (shared->readEntireStreamAsString());
-                shared = nullptr;
+                shared.reset();
 
                 auto newState = licenseStateFromJSON (result, stateToUpdate.authToken, stateToUpdate.avatar);
 
@@ -222,7 +222,7 @@ struct LicenseThread : NetWorkerThread
 
                 var json = JSON::parse (shared->withExtraHeaders (accessTokenHeader)
                                           .readEntireStreamAsString());
-                shared = nullptr;
+                shared.reset();
 
                 if (auto* jsonLicenses = json.getArray())
                 {
@@ -452,7 +452,7 @@ struct LicenseThread : NetWorkerThread
         if (owner.state.avatar.isValid() != newState.avatar.isValid())         { changed = true; }
 
         if (changed)
-            executeOnMessageThreadAndBlock ([this, updatedState]() { owner.updateState (updatedState); });
+            executeOnMessageThreadAndBlock ([this, updatedState] { owner.updateState (updatedState); });
     }
 
     //==============================================================================

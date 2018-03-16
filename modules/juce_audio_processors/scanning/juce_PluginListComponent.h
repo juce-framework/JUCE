@@ -31,11 +31,12 @@ namespace juce
 /**
     A component displaying a list of plugins, with options to scan for them,
     add, remove and sort them.
+
+    @tags{Audio}
 */
 class JUCE_API  PluginListComponent   : public Component,
                                         public FileDragAndDropTarget,
-                                        private ChangeListener,
-                                        private Button::Listener
+                                        private ChangeListener
 {
 public:
     //==============================================================================
@@ -76,6 +77,11 @@ public:
 
     /** Triggers an asynchronous scan for the given format. */
     void scanFor (AudioPluginFormat&);
+
+    /** Triggers an asynchronous scan for the given format and scans only the given files or identifiers.
+        @see AudioPluginFormat::searchPathsForPlugins
+    */
+    void scanFor (AudioPluginFormat&, const StringArray& filesOrIdentifiersToScan);
 
     /** Returns true if there's currently a scan in progress. */
     bool isScanning() const noexcept;
@@ -119,11 +125,11 @@ private:
     bool canShowSelectedFolder() const;
     void removeMissingPlugins();
     void removePluginItem (int index);
+    void showOptionsMenu();
 
     void resized() override;
     bool isInterestedInFileDrag (const StringArray&) override;
     void filesDropped (const StringArray&, int, int) override;
-    void buttonClicked (Button*) override;
     void changeListenerCallback (ChangeBroadcaster*) override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginListComponent)

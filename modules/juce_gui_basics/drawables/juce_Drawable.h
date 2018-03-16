@@ -32,6 +32,8 @@ namespace juce
     The base class for objects which can draw themselves, e.g. polygons, images, etc.
 
     @see DrawableComposite, DrawableImage, DrawablePath, DrawableText
+
+    @tags{GUI}
 */
 class JUCE_API  Drawable  : public Component
 {
@@ -176,22 +178,6 @@ public:
     static Path parseSVGPath (const String& svgPath);
 
     //==============================================================================
-    /** Tries to create a Drawable from a previously-saved ValueTree.
-        The ValueTree must have been created by the createValueTree() method.
-        If there are any images used within the drawable, you'll need to provide a valid
-        ImageProvider object that can be used to retrieve these images from whatever type
-        of identifier is used to represent them.
-        Internally, this uses a ComponentBuilder, and registerDrawableTypeHandlers().
-    */
-    static Drawable* createFromValueTree (const ValueTree& tree, ComponentBuilder::ImageProvider* imageProvider);
-
-    /** Creates a ValueTree to represent this Drawable.
-        The ValueTree that is returned can be turned back into a Drawable with createFromValueTree().
-        If there are any images used in this drawable, you'll need to provide a valid ImageProvider
-        object that can be used to create storable representations of them.
-    */
-    virtual ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const = 0;
-
     /** Returns the area that this drawble covers.
         The result is expressed in this drawable's own coordinate space, and does not take
         into account any transforms that may be applied to the component.
@@ -202,28 +188,6 @@ public:
         return true if any instances of this colour were found.
     */
     virtual bool replaceColour (Colour originalColour, Colour replacementColour);
-
-    //==============================================================================
-    /** Internal class used to manage ValueTrees that represent Drawables. */
-    class ValueTreeWrapperBase
-    {
-    public:
-        ValueTreeWrapperBase (const ValueTree& state);
-
-        ValueTree& getState() noexcept          { return state; }
-
-        String getID() const;
-        void setID (const String& newID);
-
-        ValueTree state;
-    };
-
-    //==============================================================================
-    /** Registers a set of ComponentBuilder::TypeHandler objects that can be used to
-        load all the different Drawable types from a saved state.
-        @see ComponentBuilder::registerTypeHandler()
-    */
-    static void registerDrawableTypeHandlers (ComponentBuilder& componentBuilder);
 
 protected:
     //==============================================================================
@@ -242,42 +206,9 @@ protected:
     Point<int> originRelativeToComponent;
     ScopedPointer<Drawable> drawableClipPath;
 
-  #ifndef DOXYGEN
-    /** Internal utility class used by Drawables. */
-    template <class DrawableType>
-    class Positioner  : public RelativeCoordinatePositionerBase
-    {
-    public:
-        Positioner (DrawableType& c)
-            : RelativeCoordinatePositionerBase (c),
-              owner (c)
-        {}
-
-        bool registerCoordinates() override      { return owner.registerCoordinates (*this); }
-
-        void applyToComponentBounds() override
-        {
-            ComponentScope scope (getComponent());
-            owner.recalculateCoordinates (&scope);
-        }
-
-        void applyNewBounds (const Rectangle<int>&) override
-        {
-            jassertfalse; // drawables can't be resized directly!
-        }
-
-    private:
-        DrawableType& owner;
-
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Positioner)
-    };
-
-    Drawable (const Drawable&);
-  #endif
-
-private:
     void nonConstDraw (Graphics&, float opacity, const AffineTransform&);
 
+    Drawable (const Drawable&);
     Drawable& operator= (const Drawable&);
     JUCE_LEAK_DETECTOR (Drawable)
 };

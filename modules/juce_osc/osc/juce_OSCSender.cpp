@@ -215,20 +215,31 @@ struct OSCSender::Pimpl
         if (! disconnect())
             return false;
 
-        socket = new DatagramSocket (true);
+        socket.setOwned (new DatagramSocket (true));
         targetHostName = newTargetHost;
         targetPortNumber = newTargetPort;
 
         if (socket->bindToPort (0)) // 0 = use any local port assigned by the OS.
             return true;
 
-        socket = nullptr;
+        socket.reset();
         return false;
+    }
+
+    bool connectToSocket (DatagramSocket& newSocket, const String& newTargetHost, int newTargetPort)
+    {
+        if (! disconnect())
+            return false;
+
+        socket.setNonOwned (&newSocket);
+        targetHostName = newTargetHost;
+        targetPortNumber = newTargetPort;
+        return true;
     }
 
     bool disconnect()
     {
-        socket = nullptr;
+        socket.reset();
         return true;
     }
 
@@ -273,7 +284,7 @@ private:
     }
 
     //==============================================================================
-    ScopedPointer<DatagramSocket> socket;
+    OptionalScopedPointer<DatagramSocket> socket;
     String targetHostName;
     int targetPortNumber = 0;
 
@@ -289,13 +300,18 @@ OSCSender::OSCSender()   : pimpl (new Pimpl())
 OSCSender::~OSCSender()
 {
     pimpl->disconnect();
-    pimpl = nullptr;
+    pimpl.reset();
 }
 
 //==============================================================================
 bool OSCSender::connect (const String& targetHostName, int targetPortNumber)
 {
     return pimpl->connect (targetHostName, targetPortNumber);
+}
+
+bool OSCSender::connectToSocket (DatagramSocket& socket, const String& targetHostName, int targetPortNumber)
+{
+    return pimpl->connectToSocket (socket, targetHostName, targetPortNumber);
 }
 
 bool OSCSender::disconnect()

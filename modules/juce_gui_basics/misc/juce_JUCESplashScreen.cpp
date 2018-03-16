@@ -36,6 +36,7 @@ namespace juce
    under the GPL v3 license.
 
    End User License Agreement: www.juce.com/juce-5-licence
+
   ==============================================================================
 */
 
@@ -72,15 +73,18 @@ struct ReportingThread;
 struct ReportingThreadContainer  : public ChangeListener,
                                    public DeletedAtShutdown
 {
+    ReportingThreadContainer() {}
+    ~ReportingThreadContainer() { clearSingletonInstance(); }
+
     void sendReport (String, String&, StringPairArray&);
     void changeListenerCallback (ChangeBroadcaster*) override;
 
     ScopedPointer<ReportingThread> reportingThread;
 
-    juce_DeclareSingleton_SingleThreaded_Minimal (ReportingThreadContainer)
+    JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (ReportingThreadContainer)
 };
 
-juce_ImplementSingleton_SingleThreaded (ReportingThreadContainer)
+JUCE_IMPLEMENT_SINGLETON (ReportingThreadContainer)
 
 //==============================================================================
 struct ReportingThread  : public Thread,
@@ -117,7 +121,7 @@ struct ReportingThread  : public Thread,
 
     void run() override
     {
-        webStream = new WebInputStream (url, true);
+        webStream.reset (new WebInputStream (url, true));
         webStream->withExtraHeaders (headers);
         webStream->connect (nullptr);
 
@@ -134,14 +138,13 @@ private:
 //==============================================================================
 void ReportingThreadContainer::sendReport (String address, String& userAgent, StringPairArray& parameters)
 {
-    reportingThread = new ReportingThread (*this, address, userAgent, parameters);
-
+    reportingThread.reset (new ReportingThread (*this, address, userAgent, parameters));
     reportingThread->startThread();
 }
 
 void ReportingThreadContainer::changeListenerCallback (ChangeBroadcaster*)
 {
-    reportingThread = nullptr;
+    reportingThread.reset();
 }
 
 //==============================================================================
@@ -347,7 +350,10 @@ void JUCESplashScreen::parentHierarchyChanged()
 
 bool JUCESplashScreen::hitTest (int x, int y)
 {
-    return getLogoArea (getLocalBounds().toFloat()).contains ((float) x, (float) y);
+    if (! hasStartedFading)
+        return getLogoArea (getLocalBounds().toFloat()).contains ((float) x, (float) y);
+
+    return false;
 }
 
 void JUCESplashScreen::mouseUp (const MouseEvent&)

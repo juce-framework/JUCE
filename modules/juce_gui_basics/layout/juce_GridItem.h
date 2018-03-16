@@ -30,6 +30,8 @@ namespace juce
 /**
     Defines an item in a Grid
     @see Grid
+
+    @tags{GUI}
 */
 class JUCE_API  GridItem
 {
@@ -37,7 +39,7 @@ public:
     enum class Keyword { autoValue };
 
     //==============================================================================
-    /** */
+    /** Represents a span. */
     struct Span
     {
         explicit Span (int numberToUse) noexcept : number (numberToUse)
@@ -64,7 +66,7 @@ public:
     };
 
     //==============================================================================
-    /** */
+    /** Represents a property. */
     struct Property
     {
         /** */
@@ -103,41 +105,62 @@ public:
     };
 
     //==============================================================================
-    /** */
+    /** Represents start and end properties. */
     struct StartAndEndProperty { Property start, end; };
 
     //==============================================================================
-    /** */
-    enum class JustifySelf : int { start = 0, end, center, stretch, autoValue };
-    /** */
-    enum class AlignSelf   : int { start = 0, end, center, stretch, autoValue };
+    /** Possible values for the justifySelf property. */
+    enum class JustifySelf : int
+    {
+        start = 0,               /**< Content inside the item is justified towards the left. */
+        end,                     /**< Content inside the item is justified towards the right. */
+        center,                  /**< Content inside the item is justified towards the center. */
+        stretch,                 /**< Content inside the item is stretched from left to right. */
+        autoValue                /**< Follows the Grid container's justifyItems property. */
+    };
 
-    /** */
+    /** Possible values for the alignSelf property. */
+    enum class AlignSelf   : int
+    {
+        start = 0,               /**< Content inside the item is aligned towards the top. */
+        end,                     /**< Content inside the item is aligned towards the bottom. */
+        center,                  /**< Content inside the item is aligned towards the center. */
+        stretch,                 /**< Content inside the item is stretched from top to bottom. */
+        autoValue                /**< Follows the Grid container's alignItems property. */
+    };
+
+    /** Creates an item with default parameters. */
     GridItem() noexcept;
-    /** */
+    /** Creates an item with a given Component to use. */
     GridItem (juce::Component& componentToUse) noexcept;
-    /** */
+    /** Creates an item with a given Component to use. */
     GridItem (juce::Component* componentToUse) noexcept;
 
     /** Destructor. */
     ~GridItem() noexcept;
 
     //==============================================================================
-    /** */
+    /** If this is non-null, it represents a Component whose bounds are controlled by this item. */
     juce::Component* associatedComponent = nullptr;
 
     //==============================================================================
-    /** */
+    /** Determines the order used to lay out items in their grid container. */
     int order = 0;
 
-    /** */
+    /** This is the justify-self property of the item.
+        This determines the alignment of the item along the row.
+    */
     JustifySelf  justifySelf = JustifySelf::autoValue;
-    /** */
+
+    /** This is the align-self property of the item.
+        This determines the alignment of the item along the column.
+    */
     AlignSelf    alignSelf   = AlignSelf::autoValue;
 
-    /** */
+    /** These are the start and end properties of the column. */
     StartAndEndProperty column = { Keyword::autoValue, Keyword::autoValue };
-    /** */
+
+    /** These are the start and end properties of the row. */
     StartAndEndProperty row    = { Keyword::autoValue, Keyword::autoValue };
 
     /** */
@@ -159,6 +182,7 @@ public:
     float minHeight = 0;
     float maxHeight = notAssigned;
 
+    /** Represents a margin. */
     struct Margin
     {
         Margin() noexcept;
@@ -172,10 +196,10 @@ public:
         float bottom;
     };
 
-    /** */
+    /** The margin to leave around this item. */
     Margin margin;
 
-    /** */
+    /** The item's current bounds. */
     juce::Rectangle<float> currentBounds;
 
     /** Short-hand */
@@ -196,28 +220,28 @@ public:
     /** Short-hand */
     GridItem withArea (const juce::String& areaName)  const noexcept;
 
-    /**  */
+    /** Returns a copy of this object with a new row property. */
     GridItem withRow (StartAndEndProperty row) const noexcept;
 
-    /**  */
+    /** Returns a copy of this object with a new column property. */
     GridItem withColumn (StartAndEndProperty column) const noexcept;
 
-    /** */
+    /** Returns a copy of this object with a new alignSelf property. */
     GridItem withAlignSelf (AlignSelf newAlignSelf) const noexcept;
 
-    /** */
+    /** Returns a copy of this object with a new justifySelf property. */
     GridItem withJustifySelf (JustifySelf newJustifySelf) const noexcept;
 
-    /** */
+    /** Returns a copy of this object with a new width. */
     GridItem withWidth (float newWidth) const noexcept;
 
-    /** */
+    /** Returns a copy of this object with a new height. */
     GridItem withHeight (float newHeight) const noexcept;
 
-    /** */
+    /** Returns a copy of this object with a new size. */
     GridItem withSize (float newWidth, float newHeight) const noexcept;
 
-    /** */
+    /** Returns a copy of this object with a new margin. */
     GridItem withMargin (Margin newMargin) const noexcept;
 
     /** Returns a copy of this object with a new order. */

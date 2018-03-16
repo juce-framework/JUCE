@@ -52,11 +52,11 @@ public:
         {
             setMouseCursor (m->getMouseCursorForRow (row));
 
-            customComponent = m->refreshComponentForRow (newRow, nowSelected, customComponent.release());
+            customComponent.reset (m->refreshComponentForRow (newRow, nowSelected, customComponent.release()));
 
             if (customComponent != nullptr)
             {
-                addAndMakeVisible (customComponent);
+                addAndMakeVisible (customComponent.get());
                 customComponent->setBounds (getLocalBounds());
             }
         }
@@ -377,7 +377,8 @@ struct ListBoxMouseMoveSelector  : public MouseListener
 ListBox::ListBox (const String& name, ListBoxModel* const m)
     : Component (name), model (m)
 {
-    addAndMakeVisible (viewport = new ListViewport (*this));
+    viewport.reset (new ListViewport (*this));
+    addAndMakeVisible (viewport.get());
 
     ListBox::setWantsKeyboardFocus (true);
     ListBox::colourChanged();
@@ -385,8 +386,8 @@ ListBox::ListBox (const String& name, ListBoxModel* const m)
 
 ListBox::~ListBox()
 {
-    headerComponent = nullptr;
-    viewport = nullptr;
+    headerComponent.reset();
+    viewport.reset();
 }
 
 void ListBox::setModel (ListBoxModel* const newModel)
@@ -408,11 +409,11 @@ void ListBox::setMouseMoveSelectsRows (bool b)
     if (b)
     {
         if (mouseMoveSelector == nullptr)
-            mouseMoveSelector = new ListBoxMouseMoveSelector (*this);
+            mouseMoveSelector.reset (new ListBoxMouseMoveSelector (*this));
     }
     else
     {
-        mouseMoveSelector = nullptr;
+        mouseMoveSelector.reset();
     }
 }
 
@@ -451,7 +452,7 @@ void ListBox::visibilityChanged()
 
 Viewport* ListBox::getViewport() const noexcept
 {
-    return viewport;
+    return viewport.get();
 }
 
 //==============================================================================
@@ -654,7 +655,7 @@ int ListBox::getInsertionIndexForPosition (const int x, const int y) const noexc
 Component* ListBox::getComponentForRowNumber (const int row) const noexcept
 {
     if (auto* listRowComp = viewport->getComponentForRowIfOnscreen (row))
-        return listRowComp->customComponent;
+        return listRowComp->customComponent.get();
 
     return nullptr;
 }
@@ -849,18 +850,17 @@ void ListBox::parentHierarchyChanged()
     colourChanged();
 }
 
-void ListBox::setOutlineThickness (const int newThickness)
+void ListBox::setOutlineThickness (int newThickness)
 {
     outlineThickness = newThickness;
     resized();
 }
 
-void ListBox::setHeaderComponent (Component* const newHeaderComponent)
+void ListBox::setHeaderComponent (Component* newHeaderComponent)
 {
-    if (headerComponent != newHeaderComponent)
+    if (headerComponent.get() != newHeaderComponent)
     {
-        headerComponent = newHeaderComponent;
-
+        headerComponent.reset (newHeaderComponent);
         addAndMakeVisible (newHeaderComponent);
         ListBox::resized();
     }

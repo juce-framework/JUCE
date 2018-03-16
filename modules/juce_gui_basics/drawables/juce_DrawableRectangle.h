@@ -34,6 +34,8 @@ namespace juce
     For details on how to change the fill and stroke, see the DrawableShape class.
 
     @see Drawable, DrawableShape
+
+    @tags{GUI}
 */
 class JUCE_API  DrawableRectangle  : public DrawableShape
 {
@@ -47,54 +49,26 @@ public:
 
     //==============================================================================
     /** Sets the rectangle's bounds. */
-    void setRectangle (const RelativeParallelogram& newBounds);
+    void setRectangle (Parallelogram<float> newBounds);
 
     /** Returns the rectangle's bounds. */
-    const RelativeParallelogram& getRectangle() const noexcept          { return bounds; }
+    Parallelogram<float> getRectangle() const noexcept              { return bounds; }
 
     /** Returns the corner size to be used. */
-    const RelativePoint& getCornerSize() const noexcept                 { return cornerSize; }
+    Point<float> getCornerSize() const noexcept                     { return cornerSize; }
 
     /** Sets a new corner size for the rectangle */
-    void setCornerSize (const RelativePoint& newSize);
+    void setCornerSize (Point<float> newSize);
 
     //==============================================================================
     /** @internal */
     Drawable* createCopy() const;
-    /** @internal */
-    void refreshFromValueTree (const ValueTree& tree, ComponentBuilder& builder);
-    /** @internal */
-    ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const;
-    /** @internal */
-    static const Identifier valueTreeType;
-
-    //==============================================================================
-    /** Internally-used class for wrapping a DrawableRectangle's state into a ValueTree. */
-    class ValueTreeWrapper   : public DrawableShape::FillAndStrokeState
-    {
-    public:
-        ValueTreeWrapper (const ValueTree& state);
-
-        RelativeParallelogram getRectangle() const;
-        void setRectangle (const RelativeParallelogram& newBounds, UndoManager*);
-
-        void setCornerSize (const RelativePoint& cornerSize, UndoManager*);
-        RelativePoint getCornerSize() const;
-        Value getCornerSizeValue (UndoManager*);
-
-        static const Identifier topLeft, topRight, bottomLeft, cornerSize;
-    };
-
 
 private:
-    friend class Drawable::Positioner<DrawableRectangle>;
-
-    RelativeParallelogram bounds;
-    RelativePoint cornerSize;
+    Parallelogram<float> bounds;
+    Point<float> cornerSize;
 
     void rebuildPath();
-    bool registerCoordinates (RelativeCoordinatePositionerBase&);
-    void recalculateCoordinates (Expression::Scope*);
 
     DrawableRectangle& operator= (const DrawableRectangle&);
     JUCE_LEAK_DETECTOR (DrawableRectangle)

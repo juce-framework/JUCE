@@ -32,6 +32,8 @@ namespace juce
     A drawable object which renders a line of text.
 
     @see Drawable
+
+    @tags{GUI}
 */
 class JUCE_API  DrawableText  : public Drawable
 {
@@ -58,8 +60,8 @@ public:
     Colour getColour() const noexcept                                   { return colour; }
 
     /** Sets the font to use.
-        Note that the font height and horizontal scale are set as RelativeCoordinates using
-        setFontHeight and setFontHorizontalScale. If applySizeAndScale is true, then these height
+        Note that the font height and horizontal scale are set using setFontHeight() and
+        setFontHorizontalScale(). If applySizeAndScale is true, then these height
         and scale values will be changed to match the dimensions of the font supplied;
         if it is false, then the new font object's height and scale are ignored.
     */
@@ -75,16 +77,16 @@ public:
     Justification getJustification() const noexcept                     { return justification; }
 
     /** Returns the parallelogram that defines the text bounding box. */
-    const RelativeParallelogram& getBoundingBox() const noexcept        { return bounds; }
+    Parallelogram<float> getBoundingBox() const noexcept                { return bounds; }
 
     /** Sets the bounding box that contains the text. */
-    void setBoundingBox (const RelativeParallelogram& newBounds);
+    void setBoundingBox (Parallelogram<float> newBounds);
 
-    const RelativeCoordinate& getFontHeight() const                     { return fontHeight; }
-    void setFontHeight (const RelativeCoordinate& newHeight);
+    float getFontHeight() const noexcept                                { return fontHeight; }
+    void setFontHeight (float newHeight);
 
-    const RelativeCoordinate& getFontHorizontalScale() const            { return fontHScale; }
-    void setFontHorizontalScale (const RelativeCoordinate& newScale);
+    float getFontHorizontalScale() const noexcept                       { return fontHScale; }
+    void setFontHorizontalScale (float newScale);
 
     //==============================================================================
     /** @internal */
@@ -92,62 +94,19 @@ public:
     /** @internal */
     Drawable* createCopy() const override;
     /** @internal */
-    void refreshFromValueTree (const ValueTree& tree, ComponentBuilder& builder);
-    /** @internal */
-    ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const override;
-    /** @internal */
-    static const Identifier valueTreeType;
-    /** @internal */
     Rectangle<float> getDrawableBounds() const override;
     /** @internal */
     Path getOutlineAsPath() const override;
 
-    //==============================================================================
-    /** Internally-used class for wrapping a DrawableText's state into a ValueTree. */
-    class ValueTreeWrapper   : public Drawable::ValueTreeWrapperBase
-    {
-    public:
-        ValueTreeWrapper (const ValueTree& state);
-
-        String getText() const;
-        void setText (const String& newText, UndoManager* undoManager);
-        Value getTextValue (UndoManager* undoManager);
-
-        Colour getColour() const;
-        void setColour (Colour newColour, UndoManager* undoManager);
-
-        Justification getJustification() const;
-        void setJustification (Justification newJustification, UndoManager* undoManager);
-
-        Font getFont() const;
-        void setFont (const Font& newFont, UndoManager* undoManager);
-        Value getFontValue (UndoManager* undoManager);
-
-        RelativeParallelogram getBoundingBox() const;
-        void setBoundingBox (const RelativeParallelogram& newBounds, UndoManager* undoManager);
-
-        RelativeCoordinate getFontHeight() const;
-        void setFontHeight (const RelativeCoordinate& newHeight, UndoManager* undoManager);
-
-        RelativeCoordinate getFontHorizontalScale() const;
-        void setFontHorizontalScale (const RelativeCoordinate& newScale, UndoManager* undoManager);
-
-        static const Identifier text, colour, font, justification, topLeft, topRight, bottomLeft, fontHeight, fontHScale;
-    };
-
 private:
     //==============================================================================
-    RelativeParallelogram bounds;
-    RelativeCoordinate fontHeight, fontHScale;
-    Point<float> resolvedPoints[3];
+    Parallelogram<float> bounds;
+    float fontHeight, fontHScale;
     Font font, scaledFont;
     String text;
     Colour colour;
     Justification justification;
 
-    friend class Drawable::Positioner<DrawableText>;
-    bool registerCoordinates (RelativeCoordinatePositionerBase&);
-    void recalculateCoordinates (Expression::Scope*);
     void refreshBounds();
     Rectangle<int> getTextArea (float width, float height) const;
     AffineTransform getTextTransform (float width, float height) const;

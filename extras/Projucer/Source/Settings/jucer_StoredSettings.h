@@ -30,7 +30,7 @@
 #include "jucer_AppearanceSettings.h"
 
 //==============================================================================
-class StoredSettings : public ValueTree::Listener
+class StoredSettings   : public ValueTree::Listener
 {
 public:
     StoredSettings();
@@ -51,9 +51,10 @@ public:
     //==============================================================================
     Array<Colour> swatchColours;
 
-    struct ColourSelectorWithSwatches    : public ColourSelector
+    struct ColourSelectorWithSwatches   : public ColourSelector
     {
-        ColourSelectorWithSwatches() {}
+        ColourSelectorWithSwatches();
+        ~ColourSelectorWithSwatches();
 
         int getNumSwatches() const override;
         Colour getSwatchColour (int index) const override;
@@ -69,7 +70,11 @@ public:
     Value getStoredPath (const Identifier& key);
     Value getFallbackPathForOS (const Identifier& key, DependencyPathOS);
 
-    bool isGlobalPathValid (const File& relativeTo, const Identifier& key, const String& path);
+    bool isGlobalPathValid (const File& relativeTo, const Identifier& key, const String& path) const noexcept;
+
+    //==============================================================================
+    bool shouldAskUserToSetJUCEPath() noexcept;
+    void setDontAskAboutJUCEPathAgain() noexcept;
 
 private:
     OwnedArray<PropertiesFile> propertyFiles;
@@ -83,7 +88,7 @@ private:
 
         propertyFiles.getUnchecked (0)->setValue (isProjectDefaults ? "PROJECT_DEFAULT_SETTINGS"
                                                                     : "FALLBACK_PATHS",
-                                                  data);
+                                                  data.get());
     }
 
     void updateGlobalPreferences();
@@ -95,6 +100,7 @@ private:
     void saveSwatchColours();
 
     void updateOldProjectSettingsFiles();
+    void checkJUCEPaths();
 
     //==============================================================================
     void valueTreePropertyChanged (ValueTree& vt, const Identifier&) override  { changed (vt == projectDefaults); }

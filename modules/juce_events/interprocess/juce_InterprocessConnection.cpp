@@ -37,7 +37,7 @@ InterprocessConnection::InterprocessConnection (bool callbacksOnMessageThread, u
     : useMessageThread (callbacksOnMessageThread),
       magicMessageHeader (magicMessageHeaderNumber)
 {
-    thread = new ConnectionThread (*this);
+    thread.reset (new ConnectionThread (*this));
 }
 
 InterprocessConnection::~InterprocessConnection()
@@ -45,7 +45,7 @@ InterprocessConnection::~InterprocessConnection()
     callbackConnectionState = false;
     disconnect();
     masterReference.clear();
-    thread = nullptr;
+    thread.reset();
 }
 
 //==============================================================================
@@ -56,7 +56,7 @@ bool InterprocessConnection::connectToSocket (const String& hostName,
     disconnect();
 
     const ScopedLock sl (pipeAndSocketLock);
-    socket = new StreamingSocket();
+    socket.reset (new StreamingSocket());
 
     if (socket->connect (hostName, portNumber, timeOutMillisecs))
     {
@@ -65,7 +65,7 @@ bool InterprocessConnection::connectToSocket (const String& hostName,
         return true;
     }
 
-    socket = nullptr;
+    socket.reset();
     return false;
 }
 
@@ -121,8 +121,8 @@ void InterprocessConnection::disconnect()
 void InterprocessConnection::deletePipeAndSocket()
 {
     const ScopedLock sl (pipeAndSocketLock);
-    socket = nullptr;
-    pipe = nullptr;
+    socket.reset();
+    pipe.reset();
 }
 
 bool InterprocessConnection::isConnected() const
@@ -179,7 +179,7 @@ int InterprocessConnection::writeData (void* data, int dataSize)
 void InterprocessConnection::initialiseWithSocket (StreamingSocket* newSocket)
 {
     jassert (socket == nullptr && pipe == nullptr);
-    socket = newSocket;
+    socket.reset (newSocket);
     connectionMadeInt();
     thread->startThread();
 }
@@ -187,7 +187,7 @@ void InterprocessConnection::initialiseWithSocket (StreamingSocket* newSocket)
 void InterprocessConnection::initialiseWithPipe (NamedPipe* newPipe)
 {
     jassert (socket == nullptr && pipe == nullptr);
-    pipe = newPipe;
+    pipe.reset (newPipe);
     connectionMadeInt();
     thread->startThread();
 }
@@ -325,7 +325,7 @@ void InterprocessConnection::runThread()
     {
         if (socket != nullptr)
         {
-            auto ready = socket->waitUntilReady (true, 0);
+            auto ready = socket->waitUntilReady (true, 100);
 
             if (ready < 0)
             {

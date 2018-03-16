@@ -40,6 +40,8 @@ namespace juce
     to manually sort them using your preferred comparator after collecting the list.
 
     It also provides an estimate of its progress, using a (highly inaccurate!) algorithm.
+
+    @tags{Core}
 */
 class JUCE_API  DirectoryIterator  final
 {
@@ -140,11 +142,11 @@ private:
     StringArray wildCards;
     NativeIterator fileFinder;
     String wildCard, path;
-    int index;
-    mutable int totalNumFiles;
+    int index = -1;
+    mutable int totalNumFiles = -1;
     const int whatToLookFor;
     const bool isRecursive;
-    bool hasBeenAdvanced;
+    bool hasBeenAdvanced = false;
     ScopedPointer<DirectoryIterator> subIterator;
     File currentFile;
 

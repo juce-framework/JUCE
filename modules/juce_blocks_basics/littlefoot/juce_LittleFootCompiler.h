@@ -31,6 +31,8 @@ namespace littlefoot
 /**
     This class compiles littlefoot source code into a littlefoot::Program object
     which can be executed by a littlefoot::Runner.
+
+    @tags{Blocks}
 */
 struct Compiler
 {
@@ -91,6 +93,9 @@ struct Compiler
     Array<uint8> compiledObjectCode;
 
 private:
+
+   #ifndef DOXYGEN
+
     struct Statement;
     struct Expression;
     struct BlockStatement;
@@ -405,7 +410,7 @@ private:
                 f->block->simplify (*this);
         }
 
-        Function* findFunction (FunctionID functionID) const noexcept
+        const Function* findFunction (FunctionID functionID) const noexcept
         {
             for (auto f : functions)
                 if (f->functionID == functionID)
@@ -414,7 +419,7 @@ private:
             return nullptr;
         }
 
-        NativeFunction* findNativeFunction (FunctionID functionID) const noexcept
+        const NativeFunction* findNativeFunction (FunctionID functionID) const noexcept
         {
             for (auto& f : nativeFunctions)
                 if (f.functionID == functionID)
@@ -2062,6 +2067,9 @@ private:
 
         void emitCast (CodeGenerator& cg, Type destType, int stackDepth) const
         {
+            if (arguments.size() != 1)
+                location.throwError (getTypeName (destType) + " cast operation requires a single argument");
+
             auto* arg = arguments.getReference (0);
             const auto sourceType = arg->getType (cg);
             arg->emit (cg, sourceType, stackDepth);
@@ -2189,6 +2197,8 @@ private:
         if (v.isBool())                 return Type::bool_;
         return Type::void_;
     }
+
+   #endif // ! DOXYGEN
 };
 
 }

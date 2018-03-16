@@ -38,6 +38,8 @@ namespace juce
     also subclass this for custom uses.
 
     @see ResizableCornerComponent, ResizableBorderComponent, ResizableWindow
+
+    @tags{GUI}
 */
 class JUCE_API  ComponentBoundsConstrainer
 {

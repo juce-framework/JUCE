@@ -34,6 +34,8 @@ namespace juce
     https://css-tricks.com/snippets/css/complete-guide-grid/
 
     @see GridItem
+
+    @tags{GUI}
 */
 class JUCE_API  Grid  final
 {
@@ -60,7 +62,7 @@ public:
     };
 
     //==============================================================================
-    /** */
+    /** Represents a track. */
     struct TrackInfo  final
     {
         /** Creates a track with auto dimension. */
@@ -97,74 +99,118 @@ public:
     };
 
     //==============================================================================
-    /** */
-    enum class JustifyItems : int   { start = 0, end, center, stretch };
-    /** */
-    enum class AlignItems : int     { start = 0, end, center, stretch };
-    /** */
-    enum class JustifyContent       { start, end, center, stretch, spaceAround, spaceBetween, spaceEvenly };
-    /** */
-    enum class AlignContent         { start, end, center, stretch, spaceAround, spaceBetween, spaceEvenly };
-    /** */
-    enum class AutoFlow             { row, column, rowDense, columnDense };
+    /** Possible values for the justifyItems property. */
+    enum class JustifyItems : int
+    {
+        start = 0,                /**< Content inside the item is justified towards the left. */
+        end,                      /**< Content inside the item is justified towards the right. */
+        center,                   /**< Content inside the item is justified towards the center. */
+        stretch                   /**< Content inside the item is stretched from left to right. */
+    };
+
+    /** Possible values for the alignItems property. */
+    enum class AlignItems : int
+    {
+        start = 0,                /**< Content inside the item is aligned towards the top. */
+        end,                      /**< Content inside the item is aligned towards the bottom. */
+        center,                   /**< Content inside the item is aligned towards the center. */
+        stretch                   /**< Content inside the item is stretched from top to bottom. */
+    };
+
+    /** Possible values for the justifyContent property. */
+    enum class JustifyContent
+    {
+        start,                    /**< Items are justified towards the left of the container. */
+        end,                      /**< Items are justified towards the right of the container. */
+        center,                   /**< Items are justified towards the center of the container. */
+        stretch,                  /**< Items are stretched from left to right of the container. */
+        spaceAround,              /**< Items are evenly spaced along the row with spaces between them. */
+        spaceBetween,             /**< Items are evenly spaced along the row with spaces around them. */
+        spaceEvenly               /**< Items are evenly spaced along the row with even amount of spaces between them. */
+    };
+
+    /** Possible values for the alignContent property. */
+    enum class AlignContent
+    {
+        start,                    /**< Items are aligned towards the top of the container. */
+        end,                      /**< Items are aligned towards the bottom of the container. */
+        center,                   /**< Items are aligned towards the center of the container. */
+        stretch,                  /**< Items are stretched from top to bottom of the container. */
+        spaceAround,              /**< Items are evenly spaced along the column with spaces between them. */
+        spaceBetween,             /**< Items are evenly spaced along the column with spaces around them. */
+        spaceEvenly               /**< Items are evenly spaced along the column with even amount of spaces between them. */
+    };
+
+    /** Possible values for the autoFlow property. */
+    enum class AutoFlow
+    {
+        row,                      /**< Fills the grid by adding rows of items. */
+        column,                   /**< Fills the grid by adding columns of items. */
+        rowDense,                 /**< Fills the grid by adding rows of items and attempts to fill in gaps. */
+        columnDense               /**< Fills the grid by adding columns of items and attempts to fill in gaps. */
+    };
 
 
     //==============================================================================
-    /** */
+    /** Creates an empty Grid container with default parameters. */
     Grid() noexcept;
 
     /** Destructor */
     ~Grid() noexcept;
 
     //==============================================================================
-    /** */
+    /** Specifies the alignment of content inside the items along the rows. */
     JustifyItems   justifyItems   = JustifyItems::stretch;
-    /** */
+
+    /** Specifies the alignment of content inside the items along the columns. */
     AlignItems     alignItems     = AlignItems::stretch;
-    /** */
+
+    /** Specifies the alignment of items along the rows. */
     JustifyContent justifyContent = JustifyContent::stretch;
-    /** */
+
+    /** Specifies the alignment of items along the columns. */
     AlignContent   alignContent   = AlignContent::stretch;
-    /** */
+
+    /** Specifies how the auto-placement algorithm places items. */
     AutoFlow       autoFlow       = AutoFlow::row;
 
 
     //==============================================================================
-    /** */
+    /** The set of column tracks to lay out. */
     juce::Array<TrackInfo> templateColumns;
 
-    /** */
+    /** The set of row tracks to lay out. */
     juce::Array<TrackInfo> templateRows;
 
     /** Template areas */
     juce::StringArray templateAreas;
 
-    /** */
+    /** The row track for auto dimension. */
     TrackInfo autoRows;
 
-    /** */
+    /** The column track for auto dimension. */
     TrackInfo autoColumns;
 
-    /** */
+    /** The gap in pixels between columns. */
     Px columnGap { 0 };
-    /** */
+    /** The gap in pixels between rows. */
     Px rowGap { 0 };
 
-    /** */
+    /** Sets the gap between rows and columns in pixels. */
     void setGap (Px sizeInPixels) noexcept          { rowGap = columnGap = sizeInPixels; }
 
     //==============================================================================
-    /** */
+    /** The set of items to lay-out. */
     juce::Array<GridItem> items;
 
     //==============================================================================
-    /** */
+    /** Lays-out the grid's items within the given rectangle. */
     void performLayout (juce::Rectangle<int>);
 
     //==============================================================================
-    /** */
+    /** Returns the number of columns. */
     int getNumberOfColumns() const noexcept         { return templateColumns.size(); }
-    /** */
+    /** Returns the number of rows. */
     int getNumberOfRows() const noexcept            { return templateRows.size(); }
 
 private:

@@ -36,6 +36,8 @@ namespace juce
     GlyphArrangement class will do what you need for text layout.
 
     @see GlyphArrangement, Font
+
+    @tags{Graphics}
 */
 class JUCE_API  PositionedGlyph  final
 {
@@ -118,6 +120,8 @@ private:
     Graphics class, but can be used directly if more control is needed.
 
     @see Font, PositionedGlyph
+
+    @tags{Graphics}
 */
 class JUCE_API  GlyphArrangement  final
 {
@@ -146,7 +150,10 @@ public:
                         careful not to pass an out-of-range index here, as it
                         doesn't do any bounds-checking.
     */
-    PositionedGlyph& getGlyph (int index) const noexcept;
+    PositionedGlyph& getGlyph (int index) noexcept;
+
+    const PositionedGlyph* begin() const                        { return glyphs.begin(); }
+    const PositionedGlyph* end() const                          { return glyphs.end(); }
 
     //==============================================================================
     /** Clears all text from the arrangement and resets it. */

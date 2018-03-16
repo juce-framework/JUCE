@@ -60,6 +60,8 @@ namespace juce
     @endcode
 
     @see File, FileOutputStream
+
+    @tags{Core}
 */
 class JUCE_API  TemporaryFile
 {
@@ -140,7 +142,7 @@ public:
         - and that you don't have any streams open to the target file, which would
           prevent it being overwritten
 
-        If the file move succeeds, this returns false, and the temporary file will
+        If the file move succeeds, this returns true, and the temporary file will
         have disappeared. If it fails, the temporary file will probably still exist,
         but will be deleted when this object is destroyed.
     */

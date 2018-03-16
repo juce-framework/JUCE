@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+#if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
+extern juce::AudioProcessor* JUCE_API JUCE_CALLTYPE createPluginFilterOfType (juce::AudioProcessor::WrapperType type);
+#endif
+
 namespace juce
 {
 
@@ -34,14 +38,15 @@ namespace juce
     The object will create your processor using the same createPluginFilter()
     function that the other plugin wrappers use, and will run it through the
     computer's audio/MIDI devices using AudioDeviceManager and AudioProcessorPlayer.
+
+    @tags{Audio}
 */
-class StandalonePluginHolder    : private AudioIODeviceCallback
-                               #if JUCE_IOS || JUCE_ANDROID
-                                , Timer
-                               #endif
+class StandalonePluginHolder    : private AudioIODeviceCallback,
+                                  private Timer
 {
 public:
     //==============================================================================
+    /** Structure used for the number of inputs and outputs. */
     struct PluginInOuts   { short numIns, numOuts; };
 
     //==============================================================================
@@ -63,11 +68,18 @@ public:
                             bool takeOwnershipOfSettings = true,
                             const String& preferredDefaultDeviceName = String(),
                             const AudioDeviceManager::AudioDeviceSetup* preferredSetupOptions = nullptr,
-                            const Array<PluginInOuts>& channels = Array<PluginInOuts>())
+                            const Array<PluginInOuts>& channels = Array<PluginInOuts>(),
+                           #if JUCE_ANDROID || JUCE_IOS
+                            bool shouldAutoOpenMidiDevices = true
+                           #else
+                            bool shouldAutoOpenMidiDevices = false
+                           #endif
+                            )
 
         : settings (settingsToUse, takeOwnershipOfSettings),
           channelConfiguration (channels),
-          shouldMuteInput (! isInterAppAudioConnected())
+          shouldMuteInput (! isInterAppAudioConnected()),
+          autoOpenMidiDevices (shouldAutoOpenMidiDevices)
     {
         createPlugin();
 
@@ -91,16 +103,13 @@ public:
         reloadPluginState();
         startPlaying();
 
-       #if JUCE_IOS || JUCE_ANDROID
-        startTimer (500);
-       #endif
+       if (autoOpenMidiDevices)
+           startTimer (500);
     }
 
     virtual ~StandalonePluginHolder()
     {
-       #if JUCE_IOS || JUCE_ANDROID
         stopTimer();
-       #endif
 
         deletePlugin();
         shutDownAudioDevices();
@@ -241,21 +250,36 @@ public:
     {
         DialogWindow::LaunchOptions o;
 
-        auto totalInChannels  = processor->getMainBusNumInputChannels();
-        auto totalOutChannels = processor->getMainBusNumOutputChannels();
+        int minNumInputs  = std::numeric_limits<int>::max(), maxNumInputs  = 0,
+            minNumOutputs = std::numeric_limits<int>::max(), maxNumOutputs = 0;
+
+        auto updateMinAndMax = [] (int newValue, int& minValue, int& maxValue)
+        {
+            minValue = jmin (minValue, newValue);
+            maxValue = jmax (maxValue, newValue);
+        };
 
         if (channelConfiguration.size() > 0)
         {
             auto defaultConfig = channelConfiguration.getReference (0);
-            totalInChannels  = defaultConfig.numIns;
-            totalOutChannels = defaultConfig.numOuts;
+            updateMinAndMax ((int) defaultConfig.numIns,  minNumInputs,  maxNumInputs);
+            updateMinAndMax ((int) defaultConfig.numOuts, minNumOutputs, maxNumOutputs);
         }
 
+        if (auto* bus = processor->getBus (true, 0))
+            updateMinAndMax (bus->getDefaultLayout().size(), minNumInputs, maxNumInputs);
+
+        if (auto* bus = processor->getBus (false, 0))
+            updateMinAndMax (bus->getDefaultLayout().size(), minNumOutputs, maxNumOutputs);
+
+        minNumInputs  = jmin (minNumInputs,  maxNumInputs);
+        minNumOutputs = jmin (minNumOutputs, maxNumOutputs);
+
         o.content.setOwned (new SettingsComponent (*this, deviceManager,
-                                                          totalInChannels,
-                                                          totalInChannels,
-                                                          totalOutChannels,
-                                                          totalOutChannels));
+                                                          minNumInputs,
+                                                          maxNumInputs,
+                                                          minNumOutputs,
+                                                          maxNumOutputs));
         o.content->setSize (500, 550);
 
         o.dialogTitle                   = TRANS("Audio/MIDI Settings");
@@ -289,7 +313,7 @@ public:
 
         if (settings != nullptr)
         {
-            savedState      = settings->getXmlValue ("audioSetup");
+            savedState = settings->getXmlValue ("audioSetup");
 
            #if ! (JUCE_IOS || JUCE_ANDROID)
             shouldMuteInput.setValue (settings->getBoolValue ("shouldMuteInput", true));
@@ -382,13 +406,11 @@ public:
     // avoid feedback loop by default
     bool processorHasPotentialFeedbackLoop = true;
     Value shouldMuteInput;
-    AudioSampleBuffer emptyBuffer;
+    AudioBuffer<float> emptyBuffer;
+    bool autoOpenMidiDevices;
 
     ScopedPointer<AudioDeviceManager::AudioDeviceSetup> options;
-
-   #if JUCE_IOS || JUCE_ANDROID
     StringArray lastMidiDevices;
-   #endif
 
 private:
     //==============================================================================
@@ -513,7 +535,6 @@ private:
         deviceManager.removeAudioCallback (this);
     }
 
-   #if JUCE_IOS || JUCE_ANDROID
     void timerCallback() override
     {
         auto newMidiDevices = MidiInput::getDevices();
@@ -529,7 +550,6 @@ private:
                     deviceManager.setMidiInputEnabled (newDevice, true);
         }
     }
-   #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StandalonePluginHolder)
 };
@@ -541,6 +561,8 @@ private:
     Just create one of these objects in your JUCEApplicationBase::initialise() method, and
     let it do its work. It will create your filter object using the same createPluginFilter() function
     that the other plugin wrappers use.
+
+    @tags{Audio}
 */
 class StandaloneFilterWindow    : public DocumentWindow,
                                   public Button::Listener
@@ -561,24 +583,33 @@ public:
                             bool takeOwnershipOfSettings,
                             const String& preferredDefaultDeviceName = String(),
                             const AudioDeviceManager::AudioDeviceSetup* preferredSetupOptions = nullptr,
-                            const Array<PluginInOuts>& constrainToConfiguration = Array<PluginInOuts> ())
+                            const Array<PluginInOuts>& constrainToConfiguration = {},
+                           #if JUCE_ANDROID || JUCE_IOS
+                            bool autoOpenMidiDevices = true
+                           #else
+                            bool autoOpenMidiDevices = false
+                           #endif
+                            )
         : DocumentWindow (title, backgroundColour, DocumentWindow::minimiseButton | DocumentWindow::closeButton),
           optionsButton ("Options")
     {
+       #if JUCE_IOS || JUCE_ANDROID
+        setTitleBarHeight (0);
+       #else
         setTitleBarButtonsRequired (DocumentWindow::minimiseButton | DocumentWindow::closeButton, false);
 
         Component::addAndMakeVisible (optionsButton);
         optionsButton.addListener (this);
         optionsButton.setTriggeredOnMouseDown (true);
+       #endif
 
         pluginHolder = new StandalonePluginHolder (settingsToUse, takeOwnershipOfSettings,
                                                    preferredDefaultDeviceName, preferredSetupOptions,
-                                                   constrainToConfiguration);
+                                                   constrainToConfiguration, autoOpenMidiDevices);
 
        #if JUCE_IOS || JUCE_ANDROID
         setFullScreen (true);
         setContentOwned (new MainContentComponent (*this), false);
-        Desktop::getInstance().setKioskModeComponent (this, false);
        #else
         setContentOwned (new MainContentComponent (*this), true);
 
@@ -685,15 +716,15 @@ public:
 
 private:
     //==============================================================================
-    class MainContentComponent : public Component, private Value::Listener,
-                                                           Button::Listener,
-                                                           ComponentListener
+    class MainContentComponent  : public Component,
+                                  private Value::Listener,
+                                  private Button::Listener,
+                                  private ComponentListener
     {
     public:
         MainContentComponent (StandaloneFilterWindow& filterWindow)
             : owner (filterWindow), notification (this),
-              editor (owner.getAudioProcessor()->createEditorIfNeeded()),
-              shouldShowNotification (false)
+              editor (owner.getAudioProcessor()->createEditorIfNeeded())
         {
             Value& inputMutedValue = owner.pluginHolder->getMuteInputValue();
 
@@ -821,7 +852,7 @@ private:
         StandaloneFilterWindow& owner;
         NotificationArea notification;
         ScopedPointer<AudioProcessorEditor> editor;
-        bool shouldShowNotification;
+        bool shouldShowNotification = false;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainContentComponent)
     };

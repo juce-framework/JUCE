@@ -35,13 +35,13 @@
 
   ID:               juce_audio_utils
   vendor:           juce
-  version:          5.2.0
+  version:          5.3.0
   name:             JUCE extra audio utility classes
   description:      Classes for audio-related GUI and miscellaneous tasks.
   website:          http://www.juce.com/juce
   license:          GPL/Commercial
 
-  dependencies:     juce_gui_extra, juce_audio_basics, juce_audio_processors, juce_audio_formats
+  dependencies:     juce_gui_extra, juce_audio_processors, juce_audio_formats, juce_audio_devices
   OSXFrameworks:    DiscRecording
   iOSFrameworks:    CoreAudioKit
 

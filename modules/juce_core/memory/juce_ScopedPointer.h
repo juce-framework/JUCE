@@ -59,6 +59,8 @@ namespace juce
     ScopedPointer contains an overloaded constructor that should cause a syntax error in these
     circumstances, but it does mean that instead of returning a ScopedPointer from a function,
     you'd need to return a raw pointer (or use a std::auto_ptr instead).
+
+    @tags{Core}
 */
 template <class ObjectType>
 class ScopedPointer
@@ -66,17 +68,13 @@ class ScopedPointer
 public:
     //==============================================================================
     /** Creates a ScopedPointer containing a null pointer. */
-    inline ScopedPointer() noexcept   : object (nullptr)
-    {
-    }
+    inline ScopedPointer() noexcept {}
 
     /** Creates a ScopedPointer containing a null pointer. */
-    inline ScopedPointer (decltype (nullptr)) noexcept   : object (nullptr)
-    {
-    }
+    inline ScopedPointer (decltype (nullptr)) noexcept {}
 
     /** Creates a ScopedPointer that owns the specified object. */
-    inline ScopedPointer (ObjectType* const objectToTakePossessionOf) noexcept
+    inline ScopedPointer (ObjectType* objectToTakePossessionOf) noexcept
         : object (objectToTakePossessionOf)
     {
     }
@@ -88,15 +86,14 @@ public:
         be a null pointer.
     */
     ScopedPointer (ScopedPointer& objectToTransferFrom) noexcept
-        : object (objectToTransferFrom.object)
+        : object (objectToTransferFrom.release())
     {
-        objectToTransferFrom.object = nullptr;
     }
 
     /** Destructor.
-        This will delete the object that this ScopedPointer currently refers to.
+        If the ScopedPointer currently refers to an object, it'll be deleted.
     */
-    inline ~ScopedPointer()                 { ContainerDeletePolicy<ObjectType>::destroy (object); }
+    inline ~ScopedPointer()         { reset(); }
 
     /** Changes this ScopedPointer to point to a new object.
 
@@ -114,38 +111,24 @@ public:
             // Two ScopedPointers should never be able to refer to the same object - if
             // this happens, you must have done something dodgy!
             jassert (object == nullptr || object != objectToTransferFrom.object);
-
-            ObjectType* const oldObject = object;
-            object = objectToTransferFrom.object;
-            objectToTransferFrom.object = nullptr;
-            ContainerDeletePolicy<ObjectType>::destroy (oldObject);
+            reset (objectToTransferFrom.release());
         }
 
         return *this;
     }
 
     /** Changes this ScopedPointer to point to a new object.
-
-        If this ScopedPointer already points to an object, that object
-        will first be deleted.
-
+        If this ScopedPointer already points to an object, that object will first be deleted.
         The pointer that you pass in may be a nullptr.
     */
-    ScopedPointer& operator= (ObjectType* const newObjectToTakePossessionOf)
+    ScopedPointer& operator= (ObjectType* newObjectToTakePossessionOf)
     {
-        if (object != newObjectToTakePossessionOf)
-        {
-            ObjectType* const oldObject = object;
-            object = newObjectToTakePossessionOf;
-            ContainerDeletePolicy<ObjectType>::destroy (oldObject);
-        }
-
+        reset (newObjectToTakePossessionOf);
         return *this;
     }
 
     /** Take ownership of another ScopedPointer */
-    ScopedPointer (ScopedPointer&& other) noexcept
-        : object (other.object)
+    ScopedPointer (ScopedPointer&& other) noexcept  : object (other.object)
     {
         other.object = nullptr;
     }
@@ -153,9 +136,7 @@ public:
     /** Take ownership of another ScopedPointer */
     ScopedPointer& operator= (ScopedPointer&& other) noexcept
     {
-        ContainerDeletePolicy<ObjectType>::destroy (object);
-        object = other.object;
-        other.object = nullptr;
+        reset (other.release());
         return *this;
     }
 
@@ -173,10 +154,34 @@ public:
     inline ObjectType* operator->() const noexcept                                  { return object; }
 
     //==============================================================================
-    /** Removes the current object from this ScopedPointer without deleting it.
+    /** Clears this pointer, deleting the object it points to if there is one. */
+    void reset()
+    {
+        ContainerDeletePolicy<ObjectType>::destroy (object);
+        object = {};
+    }
+
+    /** Sets this pointer to a new object, deleting the old object that it was previously pointing to if there was one. */
+    void reset (ObjectType* newObject)
+    {
+        if (object != newObject)
+        {
+            auto* oldObject = object;
+            object = newObject;
+            ContainerDeletePolicy<ObjectType>::destroy (oldObject);
+        }
+    }
+
+    /** Sets this pointer to a new object, deleting the old object that it was previously pointing to if there was one. */
+    void reset (ScopedPointer& newObject)
+    {
+        reset (newObject.release());
+    }
+
+    /** Detaches and returns the current object from this ScopedPointer without deleting it.
         This will return the current object, and set the ScopedPointer to a null pointer.
     */
-    ObjectType* release() noexcept                                                  { ObjectType* const o = object; object = nullptr; return o; }
+    ObjectType* release() noexcept                                                  { auto* o = object; object = {}; return o; }
 
     //==============================================================================
     /** Swaps this object with that of another ScopedPointer.
@@ -198,49 +203,85 @@ public:
 
 private:
     //==============================================================================
-    ObjectType* object;
+    ObjectType* object = nullptr;
 
-    // (Required as an alternative to the overloaded & operator).
-    const ScopedPointer* getAddress() const noexcept                                { return this; }
+    const ScopedPointer* getAddress() const noexcept  { return this; } // Used internally to avoid the & operator
 
-  #if ! JUCE_MSVC  // (MSVC can't deal with multiple copy constructors)
-    /* The copy constructors are private to stop people accidentally copying a const ScopedPointer
-       (the compiler would let you do so by implicitly casting the source to its raw object pointer).
-
-       A side effect of this is that in a compiler that doesn't support C++11, you may hit an
-       error when you write something like this:
-
-          ScopedPointer<MyClass> m = new MyClass();  // Compile error: copy constructor is private.
-
-       Even though the compiler would normally ignore the assignment here, it can't do so when the
-       copy constructor is private. It's very easy to fix though - just write it like this:
-
-          ScopedPointer<MyClass> m (new MyClass());  // Compiles OK
-
-       It's probably best to use the latter form when writing your object declarations anyway, as
-       this is a better representation of the code that you actually want the compiler to produce.
-    */
-    JUCE_DECLARE_NON_COPYABLE (ScopedPointer)
-  #endif
+   #if ! JUCE_MSVC  // (MSVC can't deal with multiple copy constructors)
+    ScopedPointer (const ScopedPointer&) = delete;
+    ScopedPointer& operator= (const ScopedPointer&) = delete;
+   #endif
 };
 
 //==============================================================================
-/** Compares a ScopedPointer with another pointer.
-    This can be handy for checking whether this is a null pointer.
-*/
-template <class ObjectType>
-bool operator== (const ScopedPointer<ObjectType>& pointer1, ObjectType* const pointer2) noexcept
+/** Compares a ScopedPointer with another pointer. */
+template <typename ObjectType1, typename ObjectType2>
+bool operator== (ObjectType1* pointer1, const ScopedPointer<ObjectType2>& pointer2) noexcept
 {
-    return static_cast<ObjectType*> (pointer1) == pointer2;
+    return pointer1 == pointer2.get();
 }
 
-/** Compares a ScopedPointer with another pointer.
-    This can be handy for checking whether this is a null pointer.
-*/
-template <class ObjectType>
-bool operator!= (const ScopedPointer<ObjectType>& pointer1, ObjectType* const pointer2) noexcept
+/** Compares a ScopedPointer with another pointer. */
+template <typename ObjectType1, typename ObjectType2>
+bool operator!= (ObjectType1* pointer1, const ScopedPointer<ObjectType2>& pointer2) noexcept
 {
-    return static_cast<ObjectType*> (pointer1) != pointer2;
+    return pointer1 != pointer2.get();
+}
+
+/** Compares a ScopedPointer with another pointer. */
+template <typename ObjectType1, typename ObjectType2>
+bool operator== (const ScopedPointer<ObjectType1>& pointer1, ObjectType2* pointer2) noexcept
+{
+    return pointer1.get() == pointer2;
+}
+
+/** Compares a ScopedPointer with another pointer. */
+template <typename ObjectType1, typename ObjectType2>
+bool operator!= (const ScopedPointer<ObjectType1>& pointer1, ObjectType2* pointer2) noexcept
+{
+    return pointer1.get() != pointer2;
+}
+
+/** Compares a ScopedPointer with another pointer. */
+template <typename ObjectType1, typename ObjectType2>
+bool operator== (const ScopedPointer<ObjectType1>& pointer1, const ScopedPointer<ObjectType2>& pointer2) noexcept
+{
+    return pointer1.get() == pointer2.get();
+}
+
+/** Compares a ScopedPointer with another pointer. */
+template <typename ObjectType1, typename ObjectType2>
+bool operator!= (const ScopedPointer<ObjectType1>& pointer1, const ScopedPointer<ObjectType2>& pointer2) noexcept
+{
+    return pointer1.get() != pointer2.get();
+}
+
+/** Compares a ScopedPointer with a nullptr. */
+template <class ObjectType>
+bool operator== (decltype (nullptr), const ScopedPointer<ObjectType>& pointer) noexcept
+{
+    return pointer.get() == nullptr;
+}
+
+/** Compares a ScopedPointer with a nullptr. */
+template <class ObjectType>
+bool operator!= (decltype (nullptr), const ScopedPointer<ObjectType>& pointer) noexcept
+{
+    return pointer.get() != nullptr;
+}
+
+/** Compares a ScopedPointer with a nullptr. */
+template <class ObjectType>
+bool operator== (const ScopedPointer<ObjectType>& pointer, decltype (nullptr)) noexcept
+{
+    return pointer.get() == nullptr;
+}
+
+/** Compares a ScopedPointer with a nullptr. */
+template <class ObjectType>
+bool operator!= (const ScopedPointer<ObjectType>& pointer, decltype (nullptr)) noexcept
+{
+    return pointer.get() != nullptr;
 }
 
 //==============================================================================

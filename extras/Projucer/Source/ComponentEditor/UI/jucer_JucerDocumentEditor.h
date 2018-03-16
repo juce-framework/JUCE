@@ -41,7 +41,7 @@ public:
     JucerDocumentEditor (JucerDocument* const document);
     ~JucerDocumentEditor();
 
-    JucerDocument* getDocument() const noexcept         { return document; }
+    JucerDocument* getDocument() const noexcept         { return document.get(); }
 
     void refreshPropertiesPanel() const;
     void updateTabs();

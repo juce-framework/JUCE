@@ -33,6 +33,8 @@ namespace juce
     when a button is clicked.
 
     @see Analytics, AnalyticsDestination::AnalyticsEvent
+
+    @tags{Analytics}
 */
 class JUCE_API  ButtonTracker   : private Button::Listener
 {
@@ -50,12 +52,15 @@ public:
         @param triggeredEventName          the name of the generated event
         @param triggeredEventParameters    the parameters to add to the generated
                                            event
+        @param triggeredEventType          (optional) an integer to indicate the event
+                                           type, which will be set to 0 if not supplied.
 
         @see Analytics, AnalyticsDestination::AnalyticsEvent
     */
     ButtonTracker (Button& buttonToTrack,
                    const String& triggeredEventName,
-                   const StringPairArray& triggeredEventParameters = {});
+                   const StringPairArray& triggeredEventParameters = {},
+                   int triggeredEventType = 0);
 
     /** Destructor. */
     ~ButtonTracker();
@@ -67,6 +72,7 @@ private:
     Button& button;
     const String eventName;
     const StringPairArray eventParameters;
+    const int eventType;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ButtonTracker)
 };

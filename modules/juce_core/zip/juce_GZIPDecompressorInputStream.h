@@ -32,6 +32,8 @@ namespace juce
          BufferedInputStream, so that it has to read larger blocks less often.
 
     @see GZIPCompressorOutputStream
+
+    @tags{Core}
 */
 class JUCE_API  GZIPDecompressorInputStream  : public InputStream
 {
@@ -82,9 +84,9 @@ private:
     OptionalScopedPointer<InputStream> sourceStream;
     const int64 uncompressedStreamLength;
     const Format format;
-    bool isEof;
-    int activeBufferSize;
-    int64 originalSourcePos, currentPos;
+    bool isEof = false;
+    int activeBufferSize = 0;
+    int64 originalSourcePos, currentPos = 0;
     HeapBlock<uint8> buffer;
 
     class GZIPDecompressHelper;

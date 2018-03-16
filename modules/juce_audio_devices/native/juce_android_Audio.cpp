@@ -423,7 +423,7 @@ private:
     String lastError;
     BigInteger activeOutputChans, activeInputChans;
     GlobalRef outputDevice, inputDevice;
-    AudioSampleBuffer inputChannelBuffer, outputChannelBuffer;
+    AudioBuffer<float> inputChannelBuffer, outputChannelBuffer;
     jmethodID getUnderrunCount = 0;
 
     void closeDevices()
@@ -482,10 +482,16 @@ private:
 
 
 //==============================================================================
+extern bool isOboeAvailable();
 extern bool isOpenSLAvailable();
 
 AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_Android()
 {
+   #if JUCE_USE_ANDROID_OBOE
+    if (isOboeAvailable())
+        return nullptr;
+   #endif
+
    #if JUCE_USE_ANDROID_OPENSLES
     if (isOpenSLAvailable())
         return nullptr;

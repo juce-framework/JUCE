@@ -30,12 +30,14 @@ namespace juce
 //==============================================================================
 /**
     A type of UI component that displays the parameters of an AudioProcessor as
-    a simple list of sliders.
+    a simple list of sliders, combo boxes and switches.
 
     This can be used for showing an editor for a processor that doesn't supply
     its own custom editor.
 
     @see AudioProcessor
+
+    @tags{Audio}
 */
 class JUCE_API  GenericAudioProcessorEditor      : public AudioProcessorEditor
 {
@@ -50,7 +52,7 @@ public:
 
 private:
     //==============================================================================
-    PropertyPanel panel;
+    Viewport view;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GenericAudioProcessorEditor)
 };

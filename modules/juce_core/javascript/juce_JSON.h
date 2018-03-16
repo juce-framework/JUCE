@@ -32,6 +32,8 @@ namespace juce
     object to JSON-formatted text.
 
     @see var
+
+    @tags{Core}
 */
 class JUCE_API  JSON
 {
@@ -126,7 +128,7 @@ public:
 
 private:
     //==============================================================================
-    JSON() JUCE_DELETED_FUNCTION; // This class can't be instantiated - just use its static methods.
+    JSON() = delete; // This class can't be instantiated - just use its static methods.
 };
 
 } // namespace juce

@@ -32,6 +32,8 @@ namespace juce
     AudioProcessor.
 
     @see AudioProcessor::addParameter
+
+    @tags{Audio}
 */
 class JUCE_API  AudioProcessorParameter
 {
@@ -133,6 +135,18 @@ public:
     */
     virtual bool isDiscrete() const;
 
+    /** Returns whether the parameter represents a boolean switch, typically with
+        "On" and "Off" states.
+
+        This information may or may not be used, depending on the host. If you
+        want the host to display a switch, rather than a two item dropdown menu,
+        override this method to return true. You also need to override
+        isDiscrete() to return `true` and getNumSteps() to return `2`.
+
+        @see isDiscrete getNumSteps
+    */
+    virtual bool isBoolean() const;
+
     /** Returns a textual version of the supplied parameter value.
         The default implementation just returns the floating point value
         as a string, but this could do anything you need for a custom type
@@ -187,10 +201,101 @@ public:
     /** Returns the index of this parameter in its parent processor's parameter list. */
     int getParameterIndex() const noexcept              { return parameterIndex; }
 
+    //==============================================================================
+    /** Returns the current value of the parameter as a String.
+
+        This function can be called when you are hosting plug-ins to get a
+        more specialsed textual represenation of the current value from the
+        plug-in, for example "On" rather than "1.0".
+
+        If you are implementing a plug-in then you should ignore this function
+        and instead override getText.
+    */
+    virtual String getCurrentValueAsText() const;
+
+    /** Returns the set of strings which represent the possible states a parameter
+        can be in.
+
+        If you are hosting a plug-in you can use the result of this funtion to
+        populate a ComboBox listing the allowed values.
+
+        If you are implementing a plug-in then you do not need to override this.
+    */
+    virtual StringArray getAllValueStrings() const;
+
+    //==============================================================================
+    /**
+        A base class for listeners that want to know about changes to an
+        AudioProcessorParameter.
+
+        Use AudioProcessorParameter::addListener() to register your listener with
+        an AudioProcessorParameter.
+
+        This Listener replaces most of the functionality in the
+        AudioProcessorListener class, which will be deprecated and removed.
+    */
+    class JUCE_API  Listener
+    {
+    public:
+        /** Destructor. */
+        virtual ~Listener()  {}
+
+        /** Receives a callback when a parameter has been changed.
+
+            IMPORTANT NOTE: this will be called synchronously when a parameter changes, and
+            many audio processors will change their parameter during their audio callback.
+            This means that not only has your handler code got to be completely thread-safe,
+            but it's also got to be VERY fast, and avoid blocking. If you need to handle
+            this event on your message thread, use this callback to trigger an AsyncUpdater
+            or ChangeBroadcaster which you can respond to on the message thread.
+        */
+        virtual void parameterValueChanged (int parameterIndex, float newValue) = 0;
+
+        /** Indicates that a parameter change gesture has started.
+
+            E.g. if the user is dragging a slider, this would be called with gestureIsStarting
+            being true when they first press the mouse button, and it will be called again with
+            gestureIsStarting being false when they release it.
+
+            IMPORTANT NOTE: this will be called synchronously, and many audio processors will
+            call it during their audio callback. This means that not only has your handler code
+            got to be completely thread-safe, but it's also got to be VERY fast, and avoid
+            blocking. If you need to handle this event on your message thread, use this callback
+            to trigger an AsyncUpdater or ChangeBroadcaster which you can respond to later on the
+            message thread.
+        */
+        virtual void parameterGestureChanged (int parameterIndex, bool gestureIsStarting) = 0;
+    };
+
+    /** Registers a listener to receive events when the parameter's state changes.
+        If the listener is already registered, this will not register it again.
+
+        @see removeListener
+    */
+    void addListener (Listener* newListener);
+
+    /** Removes a previously registered parameter listener
+
+        @see addListener
+    */
+    void removeListener (Listener* listener);
+
+    //==============================================================================
+    /** @internal */
+    void sendValueChangedMessageToListeners (float newValue);
+
 private:
+    //==============================================================================
     friend class AudioProcessor;
     AudioProcessor* processor = nullptr;
     int parameterIndex = -1;
+    CriticalSection listenerLock;
+    Array<Listener*> listeners;
+    mutable StringArray valueStrings;
+
+   #if JUCE_DEBUG
+    bool isPerformingGesture = false;
+   #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorParameter)
 };

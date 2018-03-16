@@ -48,6 +48,7 @@ namespace juce
     // x is now 4
     @endcode
 
+    @tags{Core}
 */
 template <typename ValueType>
 class ScopedValueSetter

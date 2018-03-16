@@ -38,6 +38,8 @@ namespace juce
     system, then call openDevice to open one for use. Once you have a CameraDevice
     object, you can get a viewer component from it, and use its methods to
     stream to a file or capture still-frames.
+
+    @tags{Video}
 */
 class JUCE_API  CameraDevice
 {
@@ -158,11 +160,6 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CameraDevice)
 };
-
-#ifndef DOXYGEN
- /** This typedef is just for compatibility with VC6 - newer code should use the CameraDevice::Listener class directly. */
- typedef CameraDevice::Listener CameraImageListener;
-#endif
 
 #endif
 

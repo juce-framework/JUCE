@@ -53,6 +53,8 @@ namespace SIMDInternal
 /**
     Useful fallback routines to use if the native SIMD op is not supported. You
     should never need to use this directly. Use juce_SIMDRegister instead.
+
+    @tags{DSP}
 */
 template <typename ScalarType, typename vSIMDType>
 struct SIMDFallbackOps
@@ -115,6 +117,19 @@ struct SIMDFallbackOps
             dst [i] = aSrc [i] + (bSrc [i] * cSrc [i]);
 
         return retval;
+    }
+
+    //==============================================================================
+    static forcedinline bool allEqual (vSIMDType a, vSIMDType b) noexcept
+    {
+        auto* aSrc = reinterpret_cast<const ScalarType*> (&a);
+        auto* bSrc = reinterpret_cast<const ScalarType*> (&b);
+
+        for (size_t i = 0; i < n; ++i)
+            if (aSrc[i] != bSrc[i])
+                return false;
+
+        return true;
     }
 
     //==============================================================================
@@ -198,6 +213,25 @@ struct SIMDFallbackOps
             dst [i] = s;
 
         return retval;
+    }
+
+    static forcedinline vSIMDType load (const ScalarType* a) noexcept
+    {
+        vSIMDType retval;
+        auto* dst = reinterpret_cast<ScalarType*> (&retval);
+
+        for (size_t i = 0; i < n; ++i)
+            dst [i] = a[i];
+
+        return retval;
+    }
+
+    static forcedinline void store (vSIMDType value, ScalarType* dest) noexcept
+    {
+        const auto* src = reinterpret_cast<const ScalarType*> (&value);
+
+        for (size_t i = 0; i < n; ++i)
+            dest[i] = src[i];
     }
 
     template <unsigned int shuffle_idx>

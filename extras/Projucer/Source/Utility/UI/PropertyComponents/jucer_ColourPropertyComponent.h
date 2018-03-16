@@ -66,8 +66,8 @@ private:
             const Colour colour (getColour());
 
             g.fillAll (Colours::grey);
-            g.fillCheckerBoard (getLocalBounds().reduced (2),
-                                10, 10,
+            g.fillCheckerBoard (getLocalBounds().reduced (2).toFloat(),
+                                10.0f, 10.0f,
                                 Colour (0xffdddddd).overlaidWith (colour),
                                 Colour (0xffffffff).overlaidWith (colour));
 
@@ -140,8 +140,7 @@ private:
     //==============================================================================
     struct PopupColourSelector   : public Component,
                                    public ChangeListener,
-                                   public Value::Listener,
-                                   public Button::Listener
+                                   public Value::Listener
     {
         PopupColourSelector (const Value& colour,
                              Colour defaultCol,
@@ -158,7 +157,11 @@ private:
             if (canResetToDefault)
             {
                 addAndMakeVisible (defaultButton);
-                defaultButton.addListener (this);
+                defaultButton.onClick = [this]
+                {
+                    setColour (defaultColour);
+                    selector.setCurrentColour (defaultColour);
+                };
             }
 
             colourValue.addListener (this);
@@ -196,12 +199,6 @@ private:
                 else
                     colourValue = newColour.toDisplayString (true);
             }
-        }
-
-        void buttonClicked (Button*) override
-        {
-            setColour (defaultColour);
-            selector.setCurrentColour (defaultColour);
         }
 
         void changeListenerCallback (ChangeBroadcaster*) override

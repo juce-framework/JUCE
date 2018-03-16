@@ -31,6 +31,8 @@ namespace dsp
 
 /**
     Generates a signal based on a user-supplied function.
+
+    @tags{DSP}
 */
 template <typename SampleType>
 class Oscillator
@@ -41,27 +43,47 @@ public:
     */
     using NumericType = typename SampleTypeHelpers::ElementType<SampleType>::Type;
 
+    /** Creates an uninitialised oscillator. Call initialise before first use. */
+    Oscillator()
+    {}
+
     /** Creates an oscillator with a periodic input function (-pi..pi).
 
         If lookup table is not zero, then the function will be approximated
         with a lookup table.
     */
-    Oscillator (const std::function<NumericType (NumericType)>& function, size_t lookupTableNumPoints = 0)
-        : generator (function), frequency (440.0f)
+    Oscillator (const std::function<NumericType (NumericType)>& function,
+                size_t lookupTableNumPoints = 0)
+    {
+        initialise (function, lookupTableNumPoints);
+    }
+
+    /** Returns true if the Oscillator has been initialised. */
+    bool isInitialised() const noexcept     { return static_cast<bool> (generator); }
+
+    /** Initialises the oscillator with a waveform. */
+    void initialise (const std::function<NumericType (NumericType)>& function,
+                     size_t lookupTableNumPoints = 0)
     {
         if (lookupTableNumPoints != 0)
         {
-            auto table = new LookupTableTransform<NumericType> (generator, static_cast <NumericType> (-1.0 * double_Pi),
-                                                                static_cast<NumericType> (double_Pi), lookupTableNumPoints);
+            auto* table = new LookupTableTransform<NumericType> (function,
+                                                                 -MathConstants<NumericType>::pi,
+                                                                 MathConstants<NumericType>::pi,
+                                                                 lookupTableNumPoints);
 
             lookupTable = table;
             generator = [table] (NumericType x) { return (*table) (x); };
+        }
+        else
+        {
+            generator = function;
         }
     }
 
     //==============================================================================
     /** Sets the frequency of the oscillator. */
-    void setFrequency (NumericType newGain) noexcept             { frequency.setValue (newGain); }
+    void setFrequency (NumericType newFrequency, bool force = false) noexcept    { frequency.setValue (newFrequency, force); }
 
     /** Returns the current frequency of the oscillator. */
     NumericType getFrequency() const noexcept                    { return frequency.getTargetValue(); }
@@ -79,7 +101,7 @@ public:
     /** Resets the internal state of the oscillator */
     void reset() noexcept
     {
-        pos = 0.0;
+        phase.reset();
 
         if (sampleRate > 0)
             frequency.reset (sampleRate, 0.05);
@@ -87,65 +109,124 @@ public:
 
     //==============================================================================
     /** Returns the result of processing a single sample. */
-    SampleType JUCE_VECTOR_CALLTYPE processSample (SampleType) noexcept
+    SampleType JUCE_VECTOR_CALLTYPE processSample (SampleType input) noexcept
     {
-        auto increment = static_cast<NumericType> (2.0 * double_Pi) * frequency.getNextValue() / sampleRate;
-        auto value = generator (pos - static_cast<NumericType> (double_Pi));
-        pos = std::fmod (pos + increment, static_cast<NumericType> (2.0 * double_Pi));
-
-        return value;
+        jassert (isInitialised());
+        auto increment = MathConstants<NumericType>::twoPi * frequency.getNextValue() / sampleRate;
+        return input + generator (phase.advance (increment) - MathConstants<NumericType>::pi);
     }
 
     /** Processes the input and output buffers supplied in the processing context. */
     template <typename ProcessContext>
     void process (const ProcessContext& context) noexcept
     {
+        jassert (isInitialised());
         auto&& outBlock = context.getOutputBlock();
+        auto&& inBlock  = context.getInputBlock();
 
         // this is an output-only processory
-        jassert (context.getInputBlock().getNumChannels() == 0 || (! context.usesSeparateInputAndOutputBlocks()));
         jassert (outBlock.getNumSamples() <= static_cast<size_t> (rampBuffer.size()));
 
         auto len           = outBlock.getNumSamples();
         auto numChannels   = outBlock.getNumChannels();
-        auto baseIncrement = static_cast<NumericType> (2.0 * double_Pi) / sampleRate;
+        auto inputChannels = inBlock.getNumChannels();
+        auto baseIncrement = MathConstants<NumericType>::twoPi / sampleRate;
+
+        if (context.isBypassed)
+            context.getOutputBlock().clear();
 
         if (frequency.isSmoothing())
         {
             auto* buffer = rampBuffer.getRawDataPointer();
 
             for (size_t i = 0; i < len; ++i)
+                buffer[i] = phase.advance (baseIncrement * frequency.getNextValue())
+                              - MathConstants<NumericType>::pi;
+
+            if (! context.isBypassed)
             {
-                buffer[i] = pos - static_cast<NumericType> (double_Pi);
+                size_t ch;
 
-                pos = std::fmod (pos + (baseIncrement * frequency.getNextValue()), static_cast<NumericType> (2.0 * double_Pi));
-            }
+                if (context.usesSeparateInputAndOutputBlocks())
+                {
+                    for (ch = 0; ch < jmin (numChannels, inputChannels); ++ch)
+                    {
+                        auto* dst = outBlock.getChannelPointer (ch);
+                        auto* src = inBlock.getChannelPointer (ch);
 
-            for (size_t ch = 0; ch < numChannels; ++ch)
-            {
-                auto* dst = outBlock.getChannelPointer (ch);
+                        for (size_t i = 0; i < len; ++i)
+                            dst[i] = src[i] + generator (buffer[i]);
+                    }
+                }
+                else
+                {
+                    for (ch = 0; ch < jmin (numChannels, inputChannels); ++ch)
+                    {
+                        auto* dst = outBlock.getChannelPointer (ch);
 
-                for (size_t i = 0; i < len; ++i)
-                    dst[i] = generator (buffer[i]);
+                        for (size_t i = 0; i < len; ++i)
+                            dst[i] += generator (buffer[i]);
+                    }
+                }
+
+                for (; ch < numChannels; ++ch)
+                {
+                    auto* dst = outBlock.getChannelPointer (ch);
+
+                    for (size_t i = 0; i < len; ++i)
+                        dst[i] = generator (buffer[i]);
+                }
             }
         }
         else
         {
             auto freq = baseIncrement * frequency.getNextValue();
+            auto p = phase;
 
-            for (size_t ch = 0; ch < numChannels; ++ch)
+            if (context.isBypassed)
             {
-                auto p = pos;
-                auto* dst = outBlock.getChannelPointer (ch);
+                frequency.skip (static_cast<int> (len));
+                p.advance (freq * static_cast<NumericType> (len));
+            }
+            else
+            {
+                size_t ch;
 
-                for (size_t i = 0; i < len; ++i)
+                if (context.usesSeparateInputAndOutputBlocks())
                 {
-                    dst[i] = generator (p - static_cast<NumericType> (double_Pi));
-                    p = std::fmod (p + freq, static_cast<NumericType> (2.0 * double_Pi));
+                    for (ch = 0; ch < jmin (numChannels, inputChannels); ++ch)
+                    {
+                        p = phase;
+                        auto* dst = outBlock.getChannelPointer (ch);
+                        auto* src = inBlock.getChannelPointer (ch);
+
+                        for (size_t i = 0; i < len; ++i)
+                            dst[i] = src[i] + generator (p.advance (freq) - MathConstants<NumericType>::pi);
+                    }
+                }
+                else
+                {
+                    for (ch = 0; ch < jmin (numChannels, inputChannels); ++ch)
+                    {
+                        p = phase;
+                        auto* dst = outBlock.getChannelPointer (ch);
+
+                        for (size_t i = 0; i < len; ++i)
+                            dst[i] += generator (p.advance (freq) - MathConstants<NumericType>::pi);
+                    }
+                }
+
+                for (; ch < numChannels; ++ch)
+                {
+                    p = phase;
+                    auto* dst = outBlock.getChannelPointer (ch);
+
+                    for (size_t i = 0; i < len; ++i)
+                        dst[i] = generator (p.advance (freq) - MathConstants<NumericType>::pi);
                 }
             }
 
-            pos = std::fmod (pos + freq * static_cast<NumericType> (len), static_cast<NumericType> (2.0 * double_Pi));
+            phase = p;
         }
     }
 
@@ -154,8 +235,9 @@ private:
     std::function<NumericType (NumericType)> generator;
     ScopedPointer<LookupTableTransform<NumericType>> lookupTable;
     Array<NumericType> rampBuffer;
-    LinearSmoothedValue<NumericType> frequency {static_cast<NumericType> (440.0)};
-    NumericType sampleRate = 48000.0, pos = 0.0;
+    LinearSmoothedValue<NumericType> frequency { static_cast<NumericType> (440.0) };
+    NumericType sampleRate = 48000.0;
+    Phase<NumericType> phase;
 };
 
 } // namespace dsp

@@ -20,8 +20,13 @@
   ==============================================================================
 */
 
-
 #include "juce_blocks_basics.h"
+
+#if (! defined (JUCE_STDLIB_HAS_STD_FUNCTION_SUPPORT)) || (! defined (JUCE_HAS_CONSTEXPR))
+ #ifndef JUCE_DEMO_RUNNER
+  #error "juce_blocks_basics module requires your compiler to have a newer version of the standard library"
+ #endif
+#else
 
 #include "protocol/juce_BitPackingUtilities.h"
 #include "protocol/juce_BlocksProtocolDefinitions.h"
@@ -35,3 +40,5 @@
 #include "topology/juce_RuleBasedTopologySource.cpp"
 #include "visualisers/juce_DrumPadLEDProgram.cpp"
 #include "visualisers/juce_BitmapLEDProgram.cpp"
+
+#endif

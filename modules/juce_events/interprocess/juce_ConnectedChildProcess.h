@@ -41,6 +41,8 @@ namespace juce
     The juce demo app has a good example of this class in action.
 
     @see ChildProcessMaster, InterprocessConnection, ChildProcess
+
+    @tags{Events}
 */
 class JUCE_API  ChildProcessSlave
 {
@@ -126,6 +128,8 @@ private:
     The juce demo app has a good example of this class in action.
 
     @see ChildProcessSlave, InterprocessConnection, ChildProcess
+
+    @tags{Events}
 */
 class JUCE_API ChildProcessMaster
 {
@@ -135,7 +139,10 @@ public:
     */
     ChildProcessMaster();
 
-    /** Destructor. */
+    /** Destructor.
+        Note that the destructor calls killSlaveProcess(), but doesn't wait for
+        the child process to finish terminating.
+    */
     virtual ~ChildProcessMaster();
 
     /** Attempts to launch and connect to a slave process.
@@ -152,11 +159,19 @@ public:
 
         If this all works, the method returns true, and you can begin sending and
         receiving messages with the slave process.
+
+        If a child process is already running, this will call killSlaveProcess() and
+        start a new one.
     */
     bool launchSlaveProcess (const File& executableToLaunch,
                              const String& commandLineUniqueID,
                              int timeoutMs = 0,
                              int streamFlags = ChildProcess::wantStdOut | ChildProcess::wantStdErr);
+
+    /** Sends a kill message to the slave, and disconnects from it.
+        Note that this won't wait for it to terminate.
+    */
+    void killSlaveProcess();
 
     /** This will be called to deliver a message from the slave process.
         The call will probably be made on a background thread, so be careful with your thread-safety!
@@ -176,7 +191,7 @@ public:
     bool sendMessageToSlave (const MemoryBlock&);
 
 private:
-    ChildProcess childProcess;
+    ScopedPointer<ChildProcess> childProcess;
 
     struct Connection;
     friend struct Connection;

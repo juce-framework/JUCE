@@ -17,18 +17,17 @@
 // [BEGIN_USER_CODE_SECTION]
 
 /*
- ==============================================================================
- In accordance with the terms of the JUCE 5 End-Use License Agreement, the
- JUCE Code in SECTION A cannot be removed, changed or otherwise rendered
- ineffective unless you have a JUCE Indie or Pro license, or are using JUCE
- under the GPL v3 license.
+  ==============================================================================
 
- End User License Agreement: www.juce.com/juce-5-licence
+   In accordance with the terms of the JUCE 5 End-Use License Agreement, the
+   JUCE Code in SECTION A cannot be removed, changed or otherwise rendered
+   ineffective unless you have a JUCE Indie or Pro license, or are using JUCE
+   under the GPL v3 license.
 
- If you are using a GPL v3 license then you can set JUCER_ENABLE_GPL_MODE to
- 1 to use the Projucer without online license validation.
- ==============================================================================
- */
+   End User License Agreement: www.juce.com/juce-5-licence
+
+  ==============================================================================
+*/
 
 // BEGIN SECTION A
 
@@ -47,6 +46,7 @@
    under the GPL v3 license.
 
    End User License Agreement: www.juce.com/juce-5-licence
+
   ==============================================================================
 */
 
@@ -60,12 +60,12 @@
  #define JUCE_REPORT_APP_USAGE 0
 #endif
 
-
 // END SECTION A
 
 #define JUCE_USE_DARK_SPLASH_SCREEN 1
 
 //==============================================================================
+#define JUCE_MODULE_AVAILABLE_juce_analytics            1
 #define JUCE_MODULE_AVAILABLE_juce_core                 1
 #define JUCE_MODULE_AVAILABLE_juce_cryptography         1
 #define JUCE_MODULE_AVAILABLE_juce_data_structures      1
@@ -80,7 +80,7 @@
 // juce_core flags:
 
 #ifndef    JUCE_FORCE_DEBUG
- //#define JUCE_FORCE_DEBUG 1
+ //#define JUCE_FORCE_DEBUG 0
 #endif
 
 #ifndef    JUCE_LOG_ASSERTIONS
@@ -92,7 +92,7 @@
 #endif
 
 #ifndef    JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
- //#define JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES 1
+ //#define JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES 0
 #endif
 
 #ifndef    JUCE_INCLUDE_ZLIB_CODE
@@ -115,7 +115,7 @@
 // juce_events flags:
 
 #ifndef    JUCE_EXECUTE_APP_SUSPEND_ON_IOS_BACKGROUND_TASK
- //#define JUCE_EXECUTE_APP_SUSPEND_ON_IOS_BACKGROUND_TASK 1
+ //#define JUCE_EXECUTE_APP_SUSPEND_ON_IOS_BACKGROUND_TASK 0
 #endif
 
 //==============================================================================
@@ -133,7 +133,15 @@
 // juce_gui_basics flags:
 
 #ifndef    JUCE_ENABLE_REPAINT_DEBUGGING
- //#define JUCE_ENABLE_REPAINT_DEBUGGING 1
+ //#define JUCE_ENABLE_REPAINT_DEBUGGING 0
+#endif
+
+#ifndef    JUCE_USE_XRANDR
+ //#define JUCE_USE_XRANDR 1
+#endif
+
+#ifndef    JUCE_USE_XINERAMA
+ //#define JUCE_USE_XINERAMA 1
 #endif
 
 #ifndef    JUCE_USE_XSHM
@@ -141,7 +149,7 @@
 #endif
 
 #ifndef    JUCE_USE_XRENDER
- //#define JUCE_USE_XRENDER 1
+ //#define JUCE_USE_XRENDER 0
 #endif
 
 #ifndef    JUCE_USE_XCURSOR
@@ -156,7 +164,7 @@
 #endif
 
 #ifndef    JUCE_ENABLE_LIVE_CONSTANT_EDITOR
- //#define JUCE_ENABLE_LIVE_CONSTANT_EDITOR 1
+ //#define JUCE_ENABLE_LIVE_CONSTANT_EDITOR 0
 #endif
 //==============================================================================
 #ifndef    JUCE_STANDALONE_APPLICATION

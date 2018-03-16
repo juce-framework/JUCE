@@ -261,7 +261,7 @@ XmlElement* KeyPressMappingSet::createXml (const bool saveDifferencesFromDefault
 
     if (saveDifferencesFromDefaultSet)
     {
-        defaultSet = new KeyPressMappingSet (commandManager);
+        defaultSet.reset (new KeyPressMappingSet (commandManager));
         defaultSet->resetToDefaultMappings();
     }
 

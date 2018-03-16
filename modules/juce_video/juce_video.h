@@ -36,13 +36,13 @@
 
   ID:               juce_video
   vendor:           juce
-  version:          5.2.0
+  version:          5.3.0
   name:             JUCE video playback and capture classes
   description:      Classes for playing video and capturing camera input.
   website:          http://www.juce.com/juce
   license:          GPL/Commercial
 
-  dependencies:     juce_data_structures juce_cryptography
+  dependencies:     juce_gui_extra
   OSXFrameworks:    AVKit AVFoundation CoreMedia
   iOSFrameworks:    AVKit AVFoundation CoreMedia
 

@@ -366,7 +366,7 @@ public:
 
 private:
     FlacNamespace::FLAC__StreamDecoder* decoder;
-    AudioSampleBuffer reservoir;
+    AudioBuffer<float> reservoir;
     int reservoirStart = 0, samplesInReservoir = 0;
     bool ok = false, scanningForLength = false;
 

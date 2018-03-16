@@ -40,24 +40,29 @@ namespace juce
     remote notifications, inspect the Notification's fields for notification details.
     Bear in mind that some fields will not be available when receiving a remote
     notification.
+
+    @tags{GUI}
 */
-class JUCE_API PushNotifications
+class JUCE_API PushNotifications    : private DeletedAtShutdown
 {
 public:
-    juce_DeclareSingleton (PushNotifications, false)
+   #ifndef DOXYGEN
+    JUCE_DECLARE_SINGLETON (PushNotifications, false)
+   #endif
 
     //==========================================================================
     /** Represents a notification that can be sent or received. */
     struct Notification
     {
         Notification() = default;
+        Notification (const Notification& other);
 
         /** Checks whether a given notification is correctly configured for a given OS. */
         bool isValid() const noexcept;
 
         /** Represents an action on a notification that can be presented as a button or a text input.
             On Android, each notification has its action specified explicitly, on iOS you configure an
-            allowed set of actions on startup and pack them into categories (see @class Settings).
+            allowed set of actions on startup and pack them into categories (see Settings).
         */
         struct Action
         {
@@ -124,6 +129,14 @@ public:
         URL soundToPlay;     /**< Optional: empty when the notification should be silent. When the name is set to
                                   "default_os_sound", then a default sound will be used.
 
+                                  For a custom sound on OSX, set the URL to the name of a sound file (preferably without
+                                  an extension) and place the sound file directly in bundle's "Resources" directory (you
+                                  can use "Xcode Resource" tickbox in Projucer to achieve that), i.e. it cannot be in a
+                                  subdirectory of "Resources" like "Resources/sound". Alternatively, if a sound file
+                                  cannot be found in bundle's "Resources" directory, the OS may look for the sound in the
+                                  following paths: "~/Library/Sounds", "/Library/Sounds", "/Network/Library/Sounds",
+                                  "/System/Library/Sounds".
+
                                   For a custom sound on iOS, set the URL to a relative path within your bundle, including
                                   file extension. For instance, if your bundle contains "sounds" folder with "my_sound.caf"
                                   file, then the URL should be "sounds/my_sound.caf".
@@ -168,7 +181,7 @@ public:
                                      number of actions to be presented, so always present most important actions first.
                                      Available from Android API 16 or above. */
 
-        /**< Used to represent a progress of some operation. */
+        /** Used to represent a progress of some operation. */
         struct Progress
         {
             int  max = 0;               /**< Max possible value of a progress. A typical usecase is to set max to 100 and increment
@@ -242,7 +255,7 @@ public:
         Colour ledColour;     /**< Optional: Sets the led colour. The hardware will do its best to approximate the colour.
                                    The default colour will be used if ledColour is not set. */
 
-        /**< Allows to control the time the device's led is on and off. */
+        /** Allows to control the time the device's led is on and off. */
         struct LedBlinkPattern
         {
             int msToBeOn  = 0;   /**< The led will be on for the given number of milliseconds, after which it will turn off. */
@@ -271,7 +284,7 @@ public:
         bool alertOnlyOnce = false; /**< Optional: Set this flag if you would only like the sound, vibrate and ticker to be played if the notification
                                          is not already showing. */
 
-        /**< Controls timestamp visibility and format. */
+        /** Controls timestamp visibility and format. */
         enum TimestampVisibility
         {
             off,                    /**< Do not show timestamp. */
@@ -282,7 +295,7 @@ public:
 
         TimestampVisibility timestampVisibility = normal;  /**< Optional. */
 
-        /**< Controls badge icon type to use if a notification is shown as a badge. Available from Android API 26 or above. */
+        /** Controls badge icon type to use if a notification is shown as a badge. Available from Android API 26 or above. */
         enum BadgeIconType
         {
             none,
@@ -312,7 +325,11 @@ public:
 
     //==========================================================================
     /** Describes settings we want to use for current device. Note that at the
-        moment this is only used on iOS.
+        moment this is only used on iOS and partially on OSX.
+
+        On OSX only allow* flags are used and they control remote notifications only.
+        To control sound, alert and badge settings for local notifications on OSX,
+        use Notifications settings in System Preferences.
 
         To setup push notifications for current device, provide permissions required,
         as well as register categories of notifications you want to support. Each
@@ -411,9 +428,13 @@ public:
         on user's subsequent changes in OS settings, the actual current settings may be
         different (e.g. user might have later decided to disable sounds).
 
-        Note that settings are currently only used on iOS. When calling on other platforms, Settings
-        with no categories and all allow* flags set to true will be received in
-        Listener::notificationSettingsReceived().
+        Note that settings are currently only used on iOS and partially on OSX.
+
+        On OSX, only allow* flags are used and they refer to remote notifications only. For
+        local notifications, refer to System Preferences.
+
+        When calling this function on other platforms, Settings with no categories and all allow*
+        flags set to true will be received in Listener::notificationSettingsReceived().
     */
     void requestSettingsUsed();
 
@@ -443,7 +464,7 @@ public:
         Notification::LockScreenAppearance lockScreenAppearance = Notification::showPartially;  /**< Optional. */
 
         String description;                 /**< Optional: user visible description of the channel. */
-        String groupId;                     /**< Required: group this channel belongs to (see @class ChannelGroup). */
+        String groupId;                     /**< Required: group this channel belongs to (see ChannelGroup). */
         Colour ledColour;                   /**< Optional: sets the led colour for notifications in this channel. */
         bool bypassDoNotDisturb = false;    /**< Optional: true if notifications in this channel can bypass do not disturb setting. */
         bool canShowBadge = false;          /**< Optional: true if notifications in this channel can show badges in a Launcher application. */
@@ -486,7 +507,7 @@ public:
 
     //==========================================================================
     /** Checks whether notifications are enabled for given application.
-        On iOS this will always return true, use requestSettingsUsed() instead.
+        On iOS and OSX this will always return true, use requestSettingsUsed() instead.
     */
     bool areNotificationsEnabled() const;
 

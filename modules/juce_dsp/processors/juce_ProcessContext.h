@@ -32,6 +32,8 @@ namespace dsp
 /**
     This structure is passed into a DSP algorithm's prepare() method, and contains
     information about various aspects of the context in which it can expect to be called.
+
+    @tags{DSP}
 */
 struct ProcessSpec
 {
@@ -50,6 +52,8 @@ struct ProcessSpec
     This is a handy base class for the state of a processor (such as parameter values)
     which is typically shared among several procoessors. This is useful to for
     multi-mono filters which share the same state among several mono processors.
+
+    @tags{DSP}
 */
 struct ProcessorState  : public ReferenceCountedObject
 {
@@ -68,6 +72,8 @@ struct ProcessorState  : public ReferenceCountedObject
     getInputBlock() and getOutputBlock() methods.
 
     @see ProcessContextNonReplacing
+
+    @tags{DSP}
 */
 template <typename ContextSampleType>
 struct ProcessContextReplacing
@@ -117,6 +123,8 @@ private:
     getOutputBlock().
 
     @see ProcessContextReplacing
+
+    @tags{DSP}
 */
 template <typename ContextSampleType>
 struct ProcessContextNonReplacing

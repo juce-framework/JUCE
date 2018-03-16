@@ -41,8 +41,9 @@ struct FFT::Engine
 {
     Engine (int priorityToUse) : enginePriority (priorityToUse)
     {
-        EnginePriorityComparator comparator;
-        getEngines().addSorted (comparator, this);
+        auto& list = getEngines();
+        list.add (this);
+        std::sort (list.begin(), list.end(), [] (Engine* a, Engine* b) { return b->enginePriority < a->enginePriority; });
     }
 
     virtual ~Engine() {}
@@ -61,15 +62,6 @@ struct FFT::Engine
     }
 
 private:
-    struct EnginePriorityComparator
-    {
-        static int compareElements (Engine* first, Engine* second) noexcept
-        {
-            // sort in reverse order
-            return DefaultElementComparator<int>::compareElements (second->enginePriority, first->enginePriority);
-        }
-    };
-
     static Array<Engine*>& getEngines()
     {
         static Array<Engine*> engines;
@@ -204,13 +196,13 @@ struct FFTFallback  : public FFT::Instance
         FFTConfig (int sizeOfFFT, bool isInverse)
             : fftSize (sizeOfFFT), inverse (isInverse), twiddleTable ((size_t) sizeOfFFT)
         {
-            const double inverseFactor = (inverse ? 2.0 : -2.0) * double_Pi / (double) fftSize;
+            auto inverseFactor = (inverse ? 2.0 : -2.0) * MathConstants<double>::pi / (double) fftSize;
 
             if (fftSize <= 4)
             {
                 for (int i = 0; i < fftSize; ++i)
                 {
-                    const double phase = i * inverseFactor;
+                    auto phase = i * inverseFactor;
 
                     twiddleTable[i].real ((float) std::cos (phase));
                     twiddleTable[i].imag ((float) std::sin (phase));
@@ -220,7 +212,7 @@ struct FFTFallback  : public FFT::Instance
             {
                 for (int i = 0; i < fftSize / 4; ++i)
                 {
-                    const double phase = i * inverseFactor;
+                    auto phase = i * inverseFactor;
 
                     twiddleTable[i].real ((float) std::cos (phase));
                     twiddleTable[i].imag ((float) std::sin (phase));
@@ -228,7 +220,7 @@ struct FFTFallback  : public FFT::Instance
 
                 for (int i = fftSize / 4; i < fftSize / 2; ++i)
                 {
-                    const int index = i - fftSize / 4;
+                    auto index = i - fftSize / 4;
 
                     twiddleTable[i].real (inverse ? -twiddleTable[index].imag() : twiddleTable[index].imag());
                     twiddleTable[i].imag (inverse ? twiddleTable[index].real() : -twiddleTable[index].real());
@@ -239,12 +231,12 @@ struct FFTFallback  : public FFT::Instance
 
                 for (int i = fftSize / 2; i < fftSize; ++i)
                 {
-                    const int index = fftSize / 2 - (i - fftSize / 2);
+                    auto index = fftSize / 2 - (i - fftSize / 2);
                     twiddleTable[i] = conj(twiddleTable[index]);
                 }
             }
 
-            const int root = (int) std::sqrt ((double) fftSize);
+            auto root = (int) std::sqrt ((double) fftSize);
             int divisor = 4, n = fftSize;
 
             for (int i = 0; i < numElementsInArray (factors); ++i)
@@ -609,14 +601,14 @@ struct FFTWImpl  : public FFT::Instance
 
       #if ! JUCE_DSP_USE_STATIC_FFTW
        #if JUCE_MAC
-        const char* libsuffix = "dylib";
+        auto libName = "libfftw3f.dylib";
        #elif JUCE_WINDOWS
-        const char* libsuffix = "dll";
+        auto libName = "libfftw3f.dll";
        #else
-        const char* libsuffix = "so";
+        auto libName = "libfftw3f.so";
        #endif
 
-        if (lib.open (String ("libfftw3f.") + libsuffix))
+        if (lib.open (libName))
       #endif
         {
             Symbols symbols;

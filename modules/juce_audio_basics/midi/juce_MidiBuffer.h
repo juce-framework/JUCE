@@ -27,7 +27,7 @@ namespace juce
 /**
     Holds a sequence of time-stamped midi events.
 
-    Analogous to the AudioSampleBuffer, this holds a set of midi events with
+    Analogous to the AudioBuffer, this holds a set of midi events with
     integer time-stamps. The buffer is kept sorted in order of the time-stamps.
 
     If you're working with a sequence of midi events that may need to be manipulated
@@ -36,6 +36,8 @@ namespace juce
     midi data.
 
     @see MidiMessage
+
+    @tags{Audio}
 */
 class JUCE_API  MidiBuffer
 {

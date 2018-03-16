@@ -35,7 +35,7 @@
 
   ID:               juce_data_structures
   vendor:           juce
-  version:          5.2.0
+  version:          5.3.0
   name:             JUCE data model helper classes
   description:      Classes for undo/redo management, and smart data structures.
   website:          http://www.juce.com/juce
@@ -60,5 +60,6 @@
 #include "values/juce_ValueTree.h"
 #include "values/juce_ValueTreeSynchroniser.h"
 #include "values/juce_CachedValue.h"
+#include "values/juce_ValueWithDefault.h"
 #include "app_properties/juce_PropertiesFile.h"
 #include "app_properties/juce_ApplicationProperties.h"

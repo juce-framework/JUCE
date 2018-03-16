@@ -161,7 +161,7 @@ void PaintElementPath::setInitialBounds (int w, int h)
 //==============================================================================
 int PaintElementPath::getBorderSize() const
 {
-    return isStrokePresent ? 1 + roundFloatToInt (strokeType.stroke.getStrokeThickness())
+    return isStrokePresent ? 1 + roundToInt (strokeType.stroke.getStrokeThickness())
                            : 0;
 }
 

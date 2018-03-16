@@ -28,6 +28,9 @@ extern HWND juce_messageWindowHandle;
 typedef bool (*CheckEventBlockedByModalComps) (const MSG&);
 CheckEventBlockedByModalComps isEventBlockedByModalComps = nullptr;
 
+typedef void (*SettingChangeCallbackFunc) (void);
+SettingChangeCallbackFunc settingChangeCallback = nullptr;
+
 //==============================================================================
 namespace WindowsMessageHelpers
 {
@@ -101,6 +104,11 @@ namespace WindowsMessageHelpers
                 handleBroadcastMessage (reinterpret_cast<const COPYDATASTRUCT*> (lParam));
                 return 0;
             }
+            else if (message == WM_SETTINGCHANGE)
+            {
+                if (settingChangeCallback != nullptr)
+                    settingChangeCallback();
+            }
         }
 
         return DefWindowProc (h, message, wParam, lParam);
@@ -133,7 +141,7 @@ bool MessageManager::dispatchNextMessageOnSystemQueue (const bool returnIfNoPend
         }
         else if (m.message == WM_QUIT)
         {
-            if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
+            if (auto* app = JUCEApplicationBase::getInstance())
                 app->systemRequestedQuit();
         }
         else if (isEventBlockedByModalComps == nullptr || ! isEventBlockedByModalComps (m))
@@ -226,7 +234,7 @@ struct MountedVolumeListChangeDetector::Pimpl   : private DeviceChangeDetector
     Array<File> lastVolumeList;
 };
 
-MountedVolumeListChangeDetector::MountedVolumeListChangeDetector()  { pimpl = new Pimpl (*this); }
+MountedVolumeListChangeDetector::MountedVolumeListChangeDetector()  { pimpl.reset (new Pimpl (*this)); }
 MountedVolumeListChangeDetector::~MountedVolumeListChangeDetector() {}
 
 } // namespace juce

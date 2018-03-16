@@ -61,7 +61,7 @@ public:
     {
         const int buttonHeight = 26;
 
-        Rectangle<int> area (getLocalBounds());
+        auto area = getLocalBounds();
 
         text.createLayout (getLookAndFeel().createFileChooserHeaderText (getName(), instructions),
                            getWidth() - 12.0f);
@@ -69,7 +69,7 @@ public:
         area.removeFromTop (roundToInt (text.getHeight()) + 10);
 
         chooserComponent.setBounds (area.removeFromTop (area.getHeight() - buttonHeight - 20));
-        Rectangle<int> buttonArea (area.reduced (16, 10));
+        auto buttonArea = area.reduced (16, 10);
 
         okButton.changeWidthToFitText (buttonHeight);
         okButton.setBounds (buttonArea.removeFromRight (okButton.getWidth() + 16));
@@ -85,8 +85,6 @@ public:
 
     FileBrowserComponent& chooserComponent;
     TextButton okButton, cancelButton, newFolderButton;
-
-private:
     String instructions;
     TextLayout text;
 };
@@ -95,10 +93,10 @@ private:
 FileChooserDialogBox::FileChooserDialogBox (const String& name,
                                             const String& instructions,
                                             FileBrowserComponent& chooserComponent,
-                                            const bool warnAboutOverwritingExistingFiles_,
+                                            bool shouldWarn,
                                             Colour backgroundColour)
     : ResizableWindow (name, backgroundColour, true),
-      warnAboutOverwritingExistingFiles (warnAboutOverwritingExistingFiles_)
+      warnAboutOverwritingExistingFiles (shouldWarn)
 {
     content = new ContentComponent (name, instructions, chooserComponent);
     setContentOwned (content, false);
@@ -106,9 +104,10 @@ FileChooserDialogBox::FileChooserDialogBox (const String& name,
     setResizable (true, true);
     setResizeLimits (300, 300, 1200, 1000);
 
-    content->okButton.addListener (this);
-    content->cancelButton.addListener (this);
-    content->newFolderButton.addListener (this);
+    content->okButton.onClick        = [this] { okButtonPressed(); };
+    content->cancelButton.onClick    = [this] { closeButtonPressed(); };
+    content->newFolderButton.onClick = [this] { createNewFolder(); };
+
     content->chooserComponent.addListener (this);
 
     FileChooserDialogBox::selectionChanged();
@@ -149,29 +148,13 @@ void FileChooserDialogBox::centreWithDefaultSize (Component* componentToCentreAr
 
 int FileChooserDialogBox::getDefaultWidth() const
 {
-    if (Component* const previewComp = content->chooserComponent.getPreviewComponent())
+    if (auto* previewComp = content->chooserComponent.getPreviewComponent())
         return 400 + previewComp->getWidth();
 
     return 600;
 }
 
 //==============================================================================
-void FileChooserDialogBox::buttonClicked (Button* button)
-{
-    if (button == &(content->okButton))
-    {
-        okButtonPressed();
-    }
-    else if (button == &(content->cancelButton))
-    {
-        closeButtonPressed();
-    }
-    else if (button == &(content->newFolderButton))
-    {
-        createNewFolder();
-    }
-}
-
 void FileChooserDialogBox::closeButtonPressed()
 {
     setVisible (false);
@@ -235,13 +218,13 @@ void FileChooserDialogBox::createNewFolderCallback (int result, FileChooserDialo
 
 void FileChooserDialogBox::createNewFolder()
 {
-    File parent (content->chooserComponent.getRoot());
+    auto parent = content->chooserComponent.getRoot();
 
     if (parent.isDirectory())
     {
-        AlertWindow* aw = new AlertWindow (TRANS("New Folder"),
-                                           TRANS("Please enter the name for the folder"),
-                                           AlertWindow::NoIcon, this);
+        auto* aw = new AlertWindow (TRANS("New Folder"),
+                                    TRANS("Please enter the name for the folder"),
+                                    AlertWindow::NoIcon, this);
 
         aw->addTextEditor ("Folder Name", String(), String(), false);
         aw->addButton (TRANS("Create Folder"), 1, KeyPress (KeyPress::returnKey));
@@ -256,18 +239,16 @@ void FileChooserDialogBox::createNewFolder()
 
 void FileChooserDialogBox::createNewFolderConfirmed (const String& nameFromDialog)
 {
-    const String name (File::createLegalFileName (nameFromDialog));
+    auto name = File::createLegalFileName (nameFromDialog);
 
     if (! name.isEmpty())
     {
-        const File parent (content->chooserComponent.getRoot());
+        auto parent = content->chooserComponent.getRoot();
 
         if (! parent.getChildFile (name).createDirectory())
-        {
             AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
                                               TRANS ("New Folder"),
                                               TRANS ("Couldn't create the folder!"));
-        }
 
         content->chooserComponent.refresh();
     }

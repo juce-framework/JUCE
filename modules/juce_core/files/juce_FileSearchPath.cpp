@@ -55,8 +55,8 @@ void FileSearchPath::init (const String& path)
     directories.trim();
     directories.removeEmptyStrings();
 
-    for (int i = directories.size(); --i >= 0;)
-        directories.set (i, directories[i].unquoted());
+    for (auto& d : directories)
+        d = d.unquoted();
 }
 
 int FileSearchPath::getNumPaths() const
@@ -64,37 +64,38 @@ int FileSearchPath::getNumPaths() const
     return directories.size();
 }
 
-File FileSearchPath::operator[] (const int index) const
+File FileSearchPath::operator[] (int index) const
 {
-    return File (directories [index]);
+    return File (directories[index]);
 }
 
 String FileSearchPath::toString() const
 {
-    StringArray directories2 (directories);
-    for (int i = directories2.size(); --i >= 0;)
-        if (directories2[i].containsChar (';'))
-            directories2.set (i, directories2[i].quoted());
+    auto dirs = directories;
 
-    return directories2.joinIntoString (";");
+    for (auto& d : dirs)
+        if (d.containsChar (';'))
+            d = d.quoted();
+
+    return dirs.joinIntoString (";");
 }
 
-void FileSearchPath::add (const File& dir, const int insertIndex)
+void FileSearchPath::add (const File& dir, int insertIndex)
 {
     directories.insert (insertIndex, dir.getFullPathName());
 }
 
 bool FileSearchPath::addIfNotAlreadyThere (const File& dir)
 {
-    for (int i = 0; i < directories.size(); ++i)
-        if (File (directories[i]) == dir)
+    for (auto& d : directories)
+        if (File (d) == dir)
             return false;
 
     add (dir);
     return true;
 }
 
-void FileSearchPath::remove (const int index)
+void FileSearchPath::remove (int index)
 {
     directories.remove (index);
 }
@@ -115,7 +116,7 @@ void FileSearchPath::removeRedundantPaths()
         {
             const File d2 (directories[j]);
 
-            if ((i != j) && (d1.isAChildOf (d2) || d1 == d2))
+            if (i != j && (d1.isAChildOf (d2) || d1 == d2))
             {
                 directories.remove (i);
                 break;
@@ -131,18 +132,20 @@ void FileSearchPath::removeNonExistentPaths()
             directories.remove (i);
 }
 
-int FileSearchPath::findChildFiles (Array<File>& results,
-                                    const int whatToLookFor,
-                                    const bool searchRecursively,
-                                    const String& wildCardPattern) const
+Array<File> FileSearchPath::findChildFiles (int whatToLookFor, bool recurse, const String& wildcard) const
+{
+    Array<File> results;
+    findChildFiles (results, whatToLookFor, recurse, wildcard);
+    return results;
+}
+
+int FileSearchPath::findChildFiles (Array<File>& results, int whatToLookFor,
+                                    bool recurse, const String& wildcard) const
 {
     int total = 0;
 
-    for (int i = 0; i < directories.size(); ++i)
-        total += operator[] (i).findChildFiles (results,
-                                                whatToLookFor,
-                                                searchRecursively,
-                                                wildCardPattern);
+    for (auto& d : directories)
+        total += File (d).findChildFiles (results, whatToLookFor, recurse, wildcard);
 
     return total;
 }
@@ -150,18 +153,16 @@ int FileSearchPath::findChildFiles (Array<File>& results,
 bool FileSearchPath::isFileInPath (const File& fileToCheck,
                                    const bool checkRecursively) const
 {
-    for (int i = directories.size(); --i >= 0;)
+    for (auto& d : directories)
     {
-        const File d (directories[i]);
-
         if (checkRecursively)
         {
-            if (fileToCheck.isAChildOf (d))
+            if (fileToCheck.isAChildOf (File (d)))
                 return true;
         }
         else
         {
-            if (fileToCheck.getParentDirectory() == d)
+            if (fileToCheck.getParentDirectory() == File (d))
                 return true;
         }
     }

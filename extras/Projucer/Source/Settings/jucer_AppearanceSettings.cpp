@@ -40,11 +40,11 @@ AppearanceSettings::AppearanceSettings (bool updateAppWhenChanged)
         CPlusPlusCodeTokeniser tokeniser;
         CodeEditorComponent editor (doc, &tokeniser);
 
-        const CodeEditorComponent::ColourScheme cs (editor.getColourScheme());
+        CodeEditorComponent::ColourScheme cs (editor.getColourScheme());
 
         for (int i = cs.types.size(); --i >= 0;)
         {
-            CodeEditorComponent::ColourScheme::TokenType& t = cs.types.getReference(i);
+            auto& t = cs.types.getReference(i);
             getColourValue (t.name) = t.colour.toString();
         }
 
@@ -80,8 +80,7 @@ void AppearanceSettings::refreshPresetSchemeList()
     writeDefaultSchemeFile (BinaryData::colourscheme_dark_xml,  "Default (Dark)");
     writeDefaultSchemeFile (BinaryData::colourscheme_light_xml, "Default (Light)");
 
-    Array<File> newSchemes;
-    getSchemesFolder().findChildFiles (newSchemes, File::findFiles, false, String ("*") + getSchemeFileSuffix());
+    auto newSchemes = getSchemesFolder().findChildFiles (File::findFiles, false, String ("*") + getSchemeFileSuffix());
 
     if (newSchemes != presetSchemeFiles)
     {
@@ -208,7 +207,7 @@ Value AppearanceSettings::getColourValue (const String& colourName)
     {
         c = ValueTree ("COLOUR");
         c.setProperty (Ids::name, colourName, nullptr);
-        settings.addChild (c, -1, nullptr);
+        settings.appendChild (c, nullptr);
     }
 
     return c.getPropertyAsValue (Ids::colour, nullptr);

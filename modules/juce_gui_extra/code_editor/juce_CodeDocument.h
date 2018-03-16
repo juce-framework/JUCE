@@ -40,6 +40,8 @@ class CodeDocumentLine;
     quick to insert and delete.
 
     @see CodeEditorComponent
+
+    @tags{GUI}
 */
 class JUCE_API  CodeDocument
 {
@@ -250,13 +252,13 @@ public:
 
     //==============================================================================
     /** Returns the preferred new-line characters for the document.
-        This will be either "\n", "\r\n", or (rarely) "\r".
+        This will be either "\\n", "\\r\\n", or (rarely) "\\r".
         @see setNewLineCharacters
     */
     String getNewLineCharacters() const noexcept          { return newLineChars; }
 
     /** Sets the new-line characters that the document should use.
-        The string must be either "\n", "\r\n", or (rarely) "\r".
+        The string must be either "\\n", "\\r\\n", or (rarely) "\\r".
         @see getNewLineCharacters
     */
     void setNewLineCharacters (const String& newLineCharacters) noexcept;

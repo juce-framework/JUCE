@@ -31,10 +31,12 @@ namespace dsp
 
 /**
     This class provides a set of functions which generates FIR::Coefficients
-    and IIR::Coefficients, of high-order lowpass filters. They can be used
+    and IIR::Coefficients, of high-order low-pass filters. They can be used
     for processing directly audio as an equalizer, in resampling algorithms etc.
 
     see FIRFilter::Coefficients, FIRFilter, WindowingFunction, IIRFilter::Coefficients, IIRFilter
+
+    @tags{DSP}
 */
 template <typename FloatType>
 struct FilterDesign
@@ -142,7 +144,7 @@ struct FilterDesign
 
     //==============================================================================
     /** This method returns an array of IIR::Coefficients, made to be used in
-        cascaded IIRFilters, providing a minimum phase lowpass filter without any
+        cascaded IIRFilters, providing a minimum phase low-pass filter without any
         ripple in the pass band and in the stop band.
 
         The algorithms are based on "Lecture Notes on Elliptic Filter Design" by
@@ -161,8 +163,35 @@ struct FilterDesign
                                                                               FloatType passbandAttenuationdB,
                                                                               FloatType stopbandAttenuationdB);
 
+    //==============================================================================
     /** This method returns an array of IIR::Coefficients, made to be used in
-        cascaded IIRFilters, providing a minimum phase lowpass filter without any
+        cascaded IIRFilters, providing a minimum phase low-pass filter without any
+        ripple in the pass band and in the stop band.
+
+        @param frequency                    the cutoff frequency of the low-pass filter
+        @param sampleRate                   the sample rate being used in the filter design
+        @param order                        the order of the resulting IIR filter, providing
+                                            an attenuation of -6 dB times order / octave
+    */
+
+    static Array<IIRCoefficients> designIIRLowpassHighOrderButterworthMethod (FloatType frequency, double sampleRate,
+                                                                              int order);
+
+    /** This method returns an array of IIR::Coefficients, made to be used in
+        cascaded IIRFilters, providing a minimum phase high-pass filter without any
+        ripple in the pass band and in the stop band.
+
+        @param frequency                    the cutoff frequency of the high-pass filter
+        @param sampleRate                   the sample rate being used in the filter design
+        @param order                        the order of the resulting IIR filter, providing
+                                            an attenuation of -6 dB times order / octave
+    */
+
+    static Array<IIRCoefficients> designIIRHighpassHighOrderButterworthMethod (FloatType frequency, double sampleRate,
+                                                                               int order);
+
+    /** This method returns an array of IIR::Coefficients, made to be used in
+        cascaded IIRFilters, providing a minimum phase low-pass filter without any
         ripple in the stop band only.
 
         The algorithms are based on "Lecture Notes on Elliptic Filter Design" by
@@ -181,7 +210,7 @@ struct FilterDesign
                                                                              FloatType stopbandAttenuationdB);
 
     /** This method returns an array of IIR::Coefficients, made to be used in
-        cascaded IIRFilters, providing a minimum phase lowpass filter without any
+        cascaded IIRFilters, providing a minimum phase low-pass filter without any
         ripple in the pass band only.
 
         The algorithms are based on "Lecture Notes on Elliptic Filter Design" by
@@ -200,7 +229,7 @@ struct FilterDesign
                                                                              FloatType stopbandAttenuationdB);
 
     /** This method returns an array of IIR::Coefficients, made to be used in
-        cascaded IIR::Filters, providing a minimum phase lowpass filter with ripples
+        cascaded IIR::Filters, providing a minimum phase low-pass filter with ripples
         in both the pass band and in the stop band.
 
         The algorithms are based on "Lecture Notes on Elliptic Filter Design" by

@@ -74,7 +74,9 @@ namespace juce
     };
 
     @endcode
- */
+
+    @tags{Core}
+*/
 template <typename SharedObjectType>
 class SharedResourcePointer
 {

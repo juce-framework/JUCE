@@ -60,6 +60,11 @@ String SystemStats::getDeviceDescription()
     return getCpuInfo ("Hardware");
 }
 
+String SystemStats::getDeviceManufacturer()
+{
+    return {};
+}
+
 String SystemStats::getCpuVendor()
 {
     auto v = getCpuInfo ("vendor_id");
