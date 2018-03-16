@@ -58,7 +58,7 @@ public:
         addAndMakeVisible (privacyPolicyLink);
         privacyPolicyLink.setButtonText ("Privacy Policy");
         privacyPolicyLink.setFont (Font (14.0f), false);
-        privacyPolicyLink.setURL (URL ("https://juce.com/privacy-policy"));
+        privacyPolicyLink.setURL (URL ("https://juce.com/juce-5-privacy-policy"));
 
         addAndMakeVisible (okButton);
 

@@ -1220,7 +1220,7 @@ void ProjucerApplication::launchForumBrowser()
 
 void ProjucerApplication::launchModulesBrowser()
 {
-    URL modulesLink ("https://juce.com/doc/modules");
+    URL modulesLink ("https://docs.juce.com/master/modules.html");
 
     if (modulesLink.isWellFormed())
         modulesLink.launchInDefaultBrowser();
@@ -1228,7 +1228,7 @@ void ProjucerApplication::launchModulesBrowser()
 
 void ProjucerApplication::launchClassesBrowser()
 {
-    URL classesLink ("https://juce.com/doc/classes");
+    URL classesLink ("https://docs.juce.com/master/classes.html");
 
     if (classesLink.isWellFormed())
         classesLink.launchInDefaultBrowser();
@@ -1236,7 +1236,7 @@ void ProjucerApplication::launchClassesBrowser()
 
 void ProjucerApplication::launchTutorialsBrowser()
 {
-    URL tutorialsLink ("https://juce.com/tutorials");
+    URL tutorialsLink ("https://juce.com/learn/tutorials");
 
     if (tutorialsLink.isWellFormed())
         tutorialsLink.launchInDefaultBrowser();
