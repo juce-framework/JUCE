@@ -267,14 +267,20 @@ public:
 
         if (type != currentType)
         {
-            cabinetType.set(type);
+            cabinetType.set (type);
 
             auto maxSize = static_cast<size_t> (roundToInt (getSampleRate() * (8192.0 / 44100.0)));
+            auto assetName = (type == 0 ? "Impulse1.wav" : "Impulse2.wav");
 
-            if (type == 0)
-                convolution.loadImpulseResponse (getAssetsDirectory().getChildFile ("Impulse1.wav"), false, true, maxSize);
-            else
-                convolution.loadImpulseResponse (getAssetsDirectory().getChildFile ("Impulse2.wav"), false, true, maxSize);
+            ScopedPointer<InputStream> assetInputStream (createAssetInputStream (assetName));
+            if (assetInputStream != nullptr)
+            {
+                currentCabinetData.reset();
+                assetInputStream->readIntoMemoryBlock (currentCabinetData);
+
+                convolution.loadImpulseResponse (currentCabinetData.getData(), currentCabinetData.getSize(),
+                                                 false, true, maxSize);
+            }
         }
 
         cabinetIsBypassed = ! cabinetSimParam->get();
@@ -541,6 +547,7 @@ private:
     //==============================================================================
     dsp::ProcessorDuplicator<dsp::IIR::Filter<float>, dsp::IIR::Coefficients<float>> lowPassFilter, highPassFilter;
     dsp::Convolution convolution;
+    MemoryBlock currentCabinetData;
 
     static constexpr size_t numWaveShapers = 2;
     dsp::WaveShaper<float> waveShapers[numWaveShapers];

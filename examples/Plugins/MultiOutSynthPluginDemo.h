@@ -89,7 +89,7 @@ public:
                 synth[midiChannel]->addVoice (new SamplerVoice());
         }
 
-        loadNewSample (getAssetsDirectory().getChildFile ("singing.ogg"));
+        loadNewSample (createAssetInputStream ("singing.ogg"), "ogg");
     }
 
     ~MultiOutSynth() {}
@@ -155,10 +155,9 @@ private:
         return output;
     }
 
-    void loadNewSample (const File& sampleFile)
+    void loadNewSample (InputStream* soundBuffer, const char* format)
     {
-        auto* soundBuffer = sampleFile.createInputStream();
-        ScopedPointer<AudioFormatReader> formatReader (formatManager.findFormatForFileExtension ("ogg")->createReaderFor (soundBuffer, true));
+        ScopedPointer<AudioFormatReader> formatReader (formatManager.findFormatForFileExtension (format)->createReaderFor (soundBuffer, true));
 
         BigInteger midiNotes;
         midiNotes.setRange (0, 126, true);

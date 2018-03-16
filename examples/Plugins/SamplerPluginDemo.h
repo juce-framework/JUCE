@@ -183,7 +183,7 @@ private:
 class MPESamplerSound final
 {
 public:
-    void setSample (ScopedPointer<Sample> value)
+    void setSample (std::unique_ptr<Sample> value)
     {
         sample = move (value);
         setLoopPointsInSeconds (loopPoints);
@@ -227,7 +227,7 @@ public:
     }
 
 private:
-    ScopedPointer<Sample> sample;
+    std::unique_ptr<Sample> sample;
     double centreFrequencyInHz { 440.0 };
     Range<double> loopPoints;
     LoopMode loopMode { LoopMode::none };
@@ -477,27 +477,27 @@ private:
 };
 
 template <typename Contents, typename... Args>
-ScopedPointer<ReferenceCountingAdapter<Contents>>
+std::unique_ptr<ReferenceCountingAdapter<Contents>>
 make_reference_counted (Args&&... args)
 {
     auto adapter = new ReferenceCountingAdapter<Contents> (std::forward<Args> (args)...);
-    return ScopedPointer<ReferenceCountingAdapter<Contents>> (adapter);
+    return std::unique_ptr<ReferenceCountingAdapter<Contents>> (adapter);
 }
 
 //==============================================================================
-inline ScopedPointer<AudioFormatReader> makeAudioFormatReader (AudioFormatManager& manager,
+inline std::unique_ptr<AudioFormatReader> makeAudioFormatReader (AudioFormatManager& manager,
                                                                  const void* sampleData,
                                                                  size_t dataSize)
 {
-    return ScopedPointer<AudioFormatReader> (manager.createReaderFor (new MemoryInputStream (sampleData,
+    return std::unique_ptr<AudioFormatReader> (manager.createReaderFor (new MemoryInputStream (sampleData,
                                                                                                dataSize,
                                                                                                false)));
 }
 
-inline ScopedPointer<AudioFormatReader> makeAudioFormatReader (AudioFormatManager& manager,
+inline std::unique_ptr<AudioFormatReader> makeAudioFormatReader (AudioFormatManager& manager,
                                                                  const File& file)
 {
-    return ScopedPointer<AudioFormatReader> (manager.createReaderFor (file));
+    return std::unique_ptr<AudioFormatReader> (manager.createReaderFor (file));
 }
 
 //==============================================================================
@@ -505,8 +505,8 @@ class AudioFormatReaderFactory
 {
 public:
     virtual ~AudioFormatReaderFactory() noexcept = default;
-    virtual ScopedPointer<AudioFormatReader> make (AudioFormatManager&) const = 0;
-    virtual ScopedPointer<AudioFormatReaderFactory> clone() const = 0;
+    virtual std::unique_ptr<AudioFormatReader> make (AudioFormatManager&) const = 0;
+    virtual std::unique_ptr<AudioFormatReaderFactory> clone() const = 0;
 };
 
 //==============================================================================
@@ -518,14 +518,14 @@ public:
           dataSize (dataSize)
     {}
 
-    ScopedPointer<AudioFormatReader> make (AudioFormatManager&manager ) const override
+    std::unique_ptr<AudioFormatReader> make (AudioFormatManager&manager ) const override
     {
         return makeAudioFormatReader (manager, sampleData, dataSize);
     }
 
-    ScopedPointer<AudioFormatReaderFactory> clone() const override
+    std::unique_ptr<AudioFormatReaderFactory> clone() const override
     {
-        return ScopedPointer<AudioFormatReaderFactory> (new MemoryAudioFormatReaderFactory (*this));
+        return std::unique_ptr<AudioFormatReaderFactory> (new MemoryAudioFormatReaderFactory (*this));
     }
 
 private:
@@ -541,14 +541,14 @@ public:
         : file (std::move (file))
     {}
 
-    ScopedPointer<AudioFormatReader> make (AudioFormatManager& manager) const override
+    std::unique_ptr<AudioFormatReader> make (AudioFormatManager& manager) const override
     {
         return makeAudioFormatReader (manager, file);
     }
 
-    ScopedPointer<AudioFormatReaderFactory> clone() const override
+    std::unique_ptr<AudioFormatReaderFactory> clone() const override
     {
-        return ScopedPointer<AudioFormatReaderFactory> (new FileAudioFormatReaderFactory (*this));
+        return std::unique_ptr<AudioFormatReaderFactory> (new FileAudioFormatReaderFactory (*this));
     }
 
 private:
@@ -951,12 +951,12 @@ public:
         return *this;
     }
 
-    ScopedPointer<AudioFormatReader> getSampleReader() const
+    std::unique_ptr<AudioFormatReader> getSampleReader() const
     {
         return sampleReader != nullptr ? sampleReader.get()->make (*audioFormatManager) : nullptr;
     }
 
-    void setSampleReader (ScopedPointer<AudioFormatReaderFactory> readerFactory,
+    void setSampleReader (std::unique_ptr<AudioFormatReaderFactory> readerFactory,
                           UndoManager* undoManager)
     {
         sampleReader.setValue (move (readerFactory), undoManager);
@@ -1888,7 +1888,7 @@ public:
         {
             undoManager->beginNewTransaction();
             auto readerFactory = new FileAudioFormatReaderFactory (fc.getResult());
-            dataModel.setSampleReader (ScopedPointer<AudioFormatReaderFactory> (readerFactory),
+            dataModel.setSampleReader (std::unique_ptr<AudioFormatReaderFactory> (readerFactory),
                                        undoManager);
         };
 
@@ -2021,7 +2021,7 @@ struct ProcessorState
     int legacyPitchbendRange;
     bool voiceStealingEnabled;
     MPEZoneLayout mpeZoneLayout;
-    ScopedPointer<AudioFormatReaderFactory> readerFactory;
+    std::unique_ptr<AudioFormatReaderFactory> readerFactory;
     Range<double> loopPointsSeconds;
     double centreFrequencyHz;
     LoopMode loopMode;
@@ -2062,12 +2062,20 @@ public:
     SamplerAudioProcessor()
         : AudioProcessor (BusesProperties().withOutput ("Output", AudioChannelSet::stereo(), true))
     {
+        if (auto* asset = createAssetInputStream ("cello.wav"))
+        {
+            ScopedPointer<InputStream> inputStream (asset);
+            inputStream->readIntoMemoryBlock (mb);
+
+            readerFactory.reset (new MemoryAudioFormatReaderFactory (mb.getData(), mb.getSize()));
+        }
+
         // Set up initial sample, which we load from a binary resource
         AudioFormatManager manager;
         manager.registerBasicFormats();
         auto reader = readerFactory->make (manager);
         auto sound = samplerSound.load();
-        auto sample = ScopedPointer<Sample> (new Sample (*reader, 10.0));
+        auto sample = std::unique_ptr<Sample> (new Sample (*reader, 10.0));
         auto lengthInSeconds = sample->getLength() / sample->getSampleRate();
         sound->setLoopPointsInSeconds ({lengthInSeconds * 0.1, lengthInSeconds * 0.9 });
         sound->setSample (move (sample));
@@ -2181,15 +2189,15 @@ public:
 
     // These should be called from the GUI thread, and will block until the
     // command buffer has enough room to accept a command.
-    void setSample (ScopedPointer<AudioFormatReaderFactory> readerFactory,
+    void setSample (std::unique_ptr<AudioFormatReaderFactory> readerFactory,
                                            AudioFormatManager& formatManager)
     {
         class SetSampleCommand
         {
         public:
-            SetSampleCommand (ScopedPointer<AudioFormatReaderFactory> readerFactory,
-                              ScopedPointer<Sample> sample,
-                              std::vector<ScopedPointer<MPESamplerVoice>> newVoices)
+            SetSampleCommand (std::unique_ptr<AudioFormatReaderFactory> readerFactory,
+                              std::unique_ptr<Sample> sample,
+                              std::vector<std::unique_ptr<MPESamplerVoice>> newVoices)
                 : readerFactory (move (readerFactory)),
                   sample (move (sample)),
                   newVoices (move (newVoices))
@@ -2210,15 +2218,15 @@ public:
             }
 
         private:
-            ScopedPointer<AudioFormatReaderFactory> readerFactory;
-            ScopedPointer<Sample> sample;
-            std::vector<ScopedPointer<MPESamplerVoice>> newVoices;
+            std::unique_ptr<AudioFormatReaderFactory> readerFactory;
+            std::unique_ptr<Sample> sample;
+            std::vector<std::unique_ptr<MPESamplerVoice>> newVoices;
         };
 
         // Note that all allocation happens here, on the main message thread. Then,
         // we transfer ownership across to the audio thread.
         auto loadedSamplerSound = samplerSound.load();
-        std::vector<ScopedPointer<MPESamplerVoice>> newSamplerVoices;
+        std::vector<std::unique_ptr<MPESamplerVoice>> newSamplerVoices;
         newSamplerVoices.reserve (maxVoices);
 
         for (auto i = 0; i != maxVoices; ++i)
@@ -2234,7 +2242,7 @@ public:
         {
             auto reader = readerFactory->make (formatManager);
             pushCommand (SetSampleCommand (move (readerFactory),
-                                           ScopedPointer<Sample> (new Sample (*reader, 10.0)),
+                                           std::unique_ptr<Sample> (new Sample (*reader, 10.0)),
                                            move (newSamplerVoices)));
         }
     }
@@ -2307,7 +2315,7 @@ public:
         class SetNumVoicesCommand
         {
         public:
-            SetNumVoicesCommand (std::vector<ScopedPointer<MPESamplerVoice>> newVoices)
+            SetNumVoicesCommand (std::vector<std::unique_ptr<MPESamplerVoice>> newVoices)
                 : newVoices (move (newVoices))
             {}
 
@@ -2325,12 +2333,12 @@ public:
             }
 
         private:
-            std::vector<ScopedPointer<MPESamplerVoice>> newVoices;
+            std::vector<std::unique_ptr<MPESamplerVoice>> newVoices;
         };
 
         numberOfVoices = std::min (maxVoices, numberOfVoices);
         auto loadedSamplerSound = samplerSound.load();
-        std::vector<ScopedPointer<MPESamplerVoice>> newSamplerVoices;
+        std::vector<std::unique_ptr<MPESamplerVoice>> newSamplerVoices;
         newSamplerVoices.reserve (numberOfVoices);
 
         for (auto i = 0; i != numberOfVoices; ++i)
@@ -2441,7 +2449,7 @@ private:
             jassert (files.size() == 1);
             undoManager.beginNewTransaction();
             auto readerFactory = new FileAudioFormatReaderFactory (files[0]);
-            dataModel.setSampleReader (ScopedPointer<AudioFormatReaderFactory> (readerFactory),
+            dataModel.setSampleReader (std::unique_ptr<AudioFormatReaderFactory> (readerFactory),
                                        &undoManager);
 
         }
@@ -2559,12 +2567,12 @@ private:
     };
 
     template <typename Func>
-    static ScopedPointer<Command> make_command (Func&& func)
+    static std::unique_ptr<Command> make_command (Func&& func)
     {
-        return ScopedPointer<TemplateCommand<Func>> (new TemplateCommand<Func> (std::forward<Func> (func)));
+        return std::unique_ptr<TemplateCommand<Func>> (new TemplateCommand<Func> (std::forward<Func> (func)));
     }
 
-    using CommandFifo = MoveOnlyFifo<ScopedPointer<Command>>;
+    using CommandFifo = MoveOnlyFifo<std::unique_ptr<Command>>;
 
     class OutgoingBufferCleaner  : public Timer
     {
@@ -2604,7 +2612,8 @@ private:
     CommandFifo outgoingCommands;
     OutgoingBufferCleaner outgoingBufferCleaner { outgoingCommands };
 
-    ScopedPointer<AudioFormatReaderFactory> readerFactory { new FileAudioFormatReaderFactory (getAssetsDirectory().getChildFile ("cello.wav")) };
+    MemoryBlock mb;
+    std::unique_ptr<AudioFormatReaderFactory> readerFactory;
     AtomicSharedPtr<MPESamplerSound> samplerSound { std::make_shared<MPESamplerSound>() };
     MPESynthesiser synthesiser;
 
