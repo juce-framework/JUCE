@@ -605,7 +605,7 @@ void ProjucerApplication::createExamplesPopupMenu (PopupMenu& menu) noexcept
     }
 }
 
-Array<File> ProjucerApplication::getSortedExampleDirectories() const noexcept
+Array<File> ProjucerApplication::getSortedExampleDirectories() noexcept
 {
     Array<File> exampleDirectories;
 
@@ -662,6 +662,16 @@ bool ProjucerApplication::findWindowAndOpenPIP (const File& pip)
     return false;
 }
 
+File ProjucerApplication::getJUCEExamplesDirectoryPathFromGlobal() noexcept
+{
+    auto globalPath = getAppSettings().getStoredPath (Ids::jucePath).toString();
+
+    if (globalPath.isNotEmpty())
+        return File (globalPath).getChildFile ("examples");
+
+    return {};
+}
+
 void ProjucerApplication::findAndLaunchExample (int selectedIndex)
 {
     File example;
@@ -689,7 +699,7 @@ void ProjucerApplication::findAndLaunchExample (int selectedIndex)
     Analytics::getInstance()->logEvent ("Example Opened", data, ProjucerAnalyticsEvent::exampleEvent);
 }
 
-File ProjucerApplication::findDemoRunnerExecutable() const noexcept
+File ProjucerApplication::findDemoRunnerExecutable() noexcept
 {
     auto buildsPath = getJUCEExamplesDirectoryPathFromGlobal().getChildFile ("DemoRunner").getChildFile ("Builds");
 
@@ -751,7 +761,7 @@ File ProjucerApplication::findDemoRunnerExecutable() const noexcept
     return {};
 }
 
-File ProjucerApplication::findDemoRunnerProject() const noexcept
+File ProjucerApplication::findDemoRunnerProject() noexcept
 {
     auto buildsPath = getJUCEExamplesDirectoryPathFromGlobal().getChildFile ("DemoRunner").getChildFile ("Builds");
 

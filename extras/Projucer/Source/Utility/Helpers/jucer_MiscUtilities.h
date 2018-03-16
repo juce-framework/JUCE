@@ -68,7 +68,6 @@ StringArray getModulesRequiredForAudioProcessor() noexcept;
 
 bool isPIPFile (const File&) noexcept;
 
-File getJUCEExamplesDirectoryPathFromGlobal() noexcept;
 bool isValidJUCEExamplesDirectory (const File&) noexcept;
 
 //==============================================================================

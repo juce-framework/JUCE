@@ -395,12 +395,12 @@ Result PIPGenerator::setProjectSettings (ValueTree& jucerTree)
 
     if (useLocalCopy && isJUCEExample (pipFile))
     {
-        auto examplesDirectory = getJUCEExamplesDirectoryPathFromGlobal();
+        auto juceDir = getAppSettings().getStoredPath (Ids::jucePath).toString();
 
-        if (isValidJUCEExamplesDirectory (examplesDirectory))
+        if (juceDir.isNotEmpty() && isValidJUCEExamplesDirectory (File (juceDir).getChildFile ("examples")))
         {
              defines += ((defines.isEmpty() ? "" : " ") + String ("PIP_JUCE_EXAMPLES_DIRECTORY=")
-                         + Base64::toBase64 (examplesDirectory.getFullPathName()));
+                         + Base64::toBase64 (File (juceDir).getChildFile ("examples").getFullPathName()));
         }
         else
         {

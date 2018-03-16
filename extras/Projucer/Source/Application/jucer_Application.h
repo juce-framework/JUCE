@@ -177,14 +177,15 @@ private:
     void deleteTemporaryFiles() const noexcept;
 
     void createExamplesPopupMenu (PopupMenu&) noexcept;
-    Array<File> getSortedExampleDirectories() const noexcept;
+    Array<File> getSortedExampleDirectories() noexcept;
     Array<File> getSortedExampleFilesInDirectory (const File&) const noexcept;
 
     bool findWindowAndOpenPIP (const File&);
 
+    File getJUCEExamplesDirectoryPathFromGlobal() noexcept;
     void findAndLaunchExample (int);
-    File findDemoRunnerExecutable() const noexcept;
-    File findDemoRunnerProject() const noexcept;
+    File findDemoRunnerExecutable() noexcept;
+    File findDemoRunnerProject() noexcept;
     void launchDemoRunner();
 
     int numExamples = 0;
