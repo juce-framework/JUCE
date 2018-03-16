@@ -56,6 +56,7 @@
 #include <iomanip>
 #include <sstream>
 #include <functional>
+#include <mutex>
 
 namespace IDs
 {
@@ -350,9 +351,9 @@ private:
         auto invAlpha = 1.0f - alpha;
 
         // just using a very simple linear interpolation here..
-        auto l = currentLevel * (inL[pos] * invAlpha + inL[nextPos] * alpha);
-        auto r = (inR != nullptr) ? currentLevel * (inR[pos] * invAlpha + inR[nextPos] * alpha)
-                                  : l;
+        auto l = static_cast<float> (currentLevel * (inL[pos] * invAlpha + inL[nextPos] * alpha));
+        auto r = static_cast<float> ((inR != nullptr) ? currentLevel * (inR[pos] * invAlpha + inR[nextPos] * alpha)
+                                                      : l);
 
         if (outR != nullptr)
         {
@@ -360,7 +361,9 @@ private:
             outR[writePos] += r;
         }
         else
+        {
             outL[writePos] += (l + r) * 0.5f;
+        }
 
         std::tie (currentSamplePos, currentDirection) = getNextState (currentFrequency,
                                                                       currentLoopBegin,
@@ -394,11 +397,11 @@ private:
         backward
     };
 
-    std::tuple<double, Direction> getNextState (double frequency,
-                                                double loopBegin,
-                                                double loopEnd) const
+    std::tuple<double, Direction> getNextState (double freq,
+                                                double begin,
+                                                double end) const
     {
-        auto nextPitchRatio = frequency / samplerSound->getCentreFrequencyInHz();
+        auto nextPitchRatio = freq / samplerSound->getCentreFrequencyInHz();
 
         auto nextSamplePos = currentSamplePos;
         auto nextDirection = currentDirection;
@@ -418,9 +421,9 @@ private:
         // Update current sample position, taking loop mode into account
         // If the loop mode was changed while we were travelling backwards, deal
         // with it gracefully.
-        if (nextDirection == Direction::backward && nextSamplePos < loopBegin)
+        if (nextDirection == Direction::backward && nextSamplePos < begin)
         {
-            nextSamplePos = loopBegin;
+            nextSamplePos = begin;
             nextDirection = Direction::forward;
 
             return { nextSamplePos, nextDirection };
@@ -429,13 +432,13 @@ private:
         if (samplerSound->getLoopMode() == LoopMode::none)
             return { nextSamplePos, nextDirection };
 
-        if (nextDirection == Direction::forward && loopEnd < nextSamplePos && !isTailingOff())
+        if (nextDirection == Direction::forward && end < nextSamplePos && !isTailingOff())
         {
             if (samplerSound->getLoopMode() == LoopMode::forward)
-                nextSamplePos = loopBegin;
+                nextSamplePos = begin;
             else if (samplerSound->getLoopMode() == LoopMode::pingpong)
             {
-                nextSamplePos = loopEnd;
+                nextSamplePos = end;
                 nextDirection = Direction::backward;
             }
         }
@@ -625,8 +628,8 @@ public:
     {
     public:
         virtual ~Listener() noexcept = default;
-        virtual void totalRangeChanged   (Range<double> value) {}
-        virtual void visibleRangeChanged (Range<double> value) {}
+        virtual void totalRangeChanged   (Range<double>) {}
+        virtual void visibleRangeChanged (Range<double>) {}
     };
 
     VisibleRangeDataModel()
@@ -691,8 +694,7 @@ public:
     }
 
 private:
-    void valueTreePropertyChanged (ValueTree &treeWhosePropertyHasChanged,
-                                   const Identifier &property) override
+    void valueTreePropertyChanged (ValueTree &, const Identifier &property) override
     {
         if (property == IDs::totalRange)
         {
@@ -727,13 +729,13 @@ public:
     {
     public:
         virtual ~Listener() noexcept = default;
-        virtual void synthVoicesChanged (int value) {}
-        virtual void voiceStealingEnabledChanged (bool value) {}
-        virtual void legacyModeEnabledChanged (bool value) {}
-        virtual void mpeZoneLayoutChanged (const MPEZoneLayout& value) {}
-        virtual void legacyFirstChannelChanged (int value) {}
-        virtual void legacyLastChannelChanged (int value) {}
-        virtual void legacyPitchbendRangeChanged (int value) {}
+        virtual void synthVoicesChanged (int) {}
+        virtual void voiceStealingEnabledChanged (bool) {}
+        virtual void legacyModeEnabledChanged (bool) {}
+        virtual void mpeZoneLayoutChanged (const MPEZoneLayout&) {}
+        virtual void legacyFirstChannelChanged (int) {}
+        virtual void legacyLastChannelChanged (int) {}
+        virtual void legacyPitchbendRangeChanged (int) {}
     };
 
     MPESettingsDataModel()
@@ -852,8 +854,7 @@ public:
     }
 
 private:
-    void valueTreePropertyChanged (ValueTree &treeWhosePropertyHasChanged,
-                                   const Identifier &property) override
+    void valueTreePropertyChanged (ValueTree&, const Identifier &property) override
     {
         if (property == IDs::synthVoices)
         {
@@ -918,10 +919,10 @@ public:
     {
     public:
         virtual ~Listener() noexcept = default;
-        virtual void sampleReaderChanged (std::shared_ptr<AudioFormatReaderFactory> value) {}
-        virtual void centreFrequencyHzChanged (double value) {}
-        virtual void loopModeChanged (LoopMode value) {}
-        virtual void loopPointsSecondsChanged (Range<double> value) {}
+        virtual void sampleReaderChanged (std::shared_ptr<AudioFormatReaderFactory>) {}
+        virtual void centreFrequencyHzChanged (double) {}
+        virtual void loopModeChanged (LoopMode) {}
+        virtual void loopPointsSecondsChanged (Range<double>) {}
     };
 
     explicit DataModel (AudioFormatManager& audioFormatManager)
@@ -966,8 +967,8 @@ public:
 
     double getSampleLengthSeconds() const
     {
-        if (auto sampleReader = getSampleReader())
-            return sampleReader->lengthInSamples / sampleReader->sampleRate;
+        if (auto r = getSampleReader())
+            return r->lengthInSamples / r->sampleRate;
 
         return 1.0;
     }
@@ -1031,8 +1032,7 @@ public:
     }
 
 private:
-    void valueTreePropertyChanged (ValueTree &treeWhosePropertyHasChanged,
-                                   const Identifier &property) override
+    void valueTreePropertyChanged (ValueTree&, const Identifier& property) override
     {
         if (property == IDs::sampleReader)
         {
@@ -1438,7 +1438,8 @@ private:
 
         newPath.startNewSubPath (bounds.getBottomLeft().toFloat());
         newPath.lineTo (bounds.getBottomRight().toFloat());
-        Point<float> apex (bounds.getX() + (bounds.getWidth() / 2), bounds.getBottom() - triHeight);
+        Point<float> apex (static_cast<float> (bounds.getX() + (bounds.getWidth() / 2)),
+                           static_cast<float> (bounds.getBottom() - triHeight));
         newPath.lineTo (apex);
         newPath.closeSubPath();
 
@@ -1459,7 +1460,7 @@ private:
 
     bool hitTest (int x, int y) override
     {
-        return path.contains (x, y);
+        return path.contains ((float) x, (float) y);
     }
 
     void mouseDown (const MouseEvent& e) override
@@ -1511,14 +1512,14 @@ private:
                                            0,
                                            bg.darker(),
                                            0,
-                                           getHeight(),
+                                           (float) getHeight(),
                                            false));
 
         g.fillAll();
         g.setColour (bg.brighter());
-        g.drawHorizontalLine (0, 0, getWidth());
+        g.drawHorizontalLine (0, 0.0f, (float) getWidth());
         g.setColour (bg.darker());
-        g.drawHorizontalLine (1, 0, getWidth());
+        g.drawHorizontalLine (1, 0.0f, (float) getWidth());
         g.setColour (Colours::lightgrey);
 
         auto minLog = std::ceil (std::log10 (visibleRange.getVisibleRange().getLength() / maxDivisions));
@@ -1533,15 +1534,15 @@ private:
                               / visibleRange.getVisibleRange().getLength();
 
             std::ostringstream out_stream;
-            out_stream << std::setprecision (precision) << time;
+            out_stream << std::setprecision (roundToInt (precision)) << roundToInt (time);
 
             g.drawText (out_stream.str(),
-                        Rectangle<int> (Point<int> (xPos + 3, 0),
-                                        Point<int> (xPos + minDivisionWidth, getHeight())),
+                        Rectangle<int> (Point<int> (roundToInt (xPos) + 3, 0),
+                                        Point<int> (roundToInt (xPos + minDivisionWidth), getHeight())),
                         Justification::centredLeft,
                         false);
 
-            g.drawVerticalLine (xPos, 2, getHeight());
+            g.drawVerticalLine (roundToInt (xPos), 2.0f, (float) getHeight());
         }
     }
 
@@ -1566,7 +1567,7 @@ private:
         visibleRange.setVisibleRange (range, nullptr);
     }
 
-    void visibleRangeChanged (Range<double> value) override
+    void visibleRangeChanged (Range<double>) override
     {
         repaint();
     }
@@ -1610,7 +1611,7 @@ private:
         positionLoopPointMarkers();
     }
 
-    void loopPointMouseDown (LoopPointMarker& marker, const MouseEvent& e)
+    void loopPointMouseDown (LoopPointMarker&, const MouseEvent&)
     {
         loopPointsOnMouseDown = dataModel.getLoopPointsSeconds();
         undoManager->beginNewTransaction();
@@ -1634,12 +1635,12 @@ private:
         dataModel.setLoopPointsSeconds (newLoopRange, undoManager);
     }
 
-    void loopPointsSecondsChanged (Range<double> value) override
+    void loopPointsSecondsChanged (Range<double>) override
     {
         positionLoopPointMarkers();
     }
 
-    void visibleRangeChanged      (Range<double> value) override
+    void visibleRangeChanged (Range<double>) override
     {
         positionLoopPointMarkers();
     }
@@ -1666,7 +1667,7 @@ private:
             auto ptr  = std::get<0> (tup);
             auto time = std::get<1> (tup);
             ptr->setSize (halfMarkerWidth * 2, getHeight());
-            ptr->setTopLeftPosition (timeToXPosition (time) - halfMarkerWidth, 0);
+            ptr->setTopLeftPosition (roundToInt (timeToXPosition (time) - halfMarkerWidth), 0);
         }
     }
 
@@ -1700,7 +1701,7 @@ private:
 
         for (auto position : provider())
         {
-            g.drawVerticalLine (timeToXPosition (position), 0, getHeight());
+            g.drawVerticalLine (roundToInt (timeToXPosition (position)), 0.0f, (float) getHeight());
         }
     }
 
@@ -1753,7 +1754,7 @@ private:
         if (numChannels == 0)
         {
             g.setColour (Colours::white);
-            g.drawFittedText ("No File Loaded", getLocalBounds(), Justification::centred, 1.0f);
+            g.drawFittedText ("No File Loaded", getLocalBounds(), Justification::centred, 1);
             return;
         }
 
@@ -2085,7 +2086,7 @@ public:
             synthesiser.addVoice (new MPESamplerVoice (sound));
     }
 
-    void prepareToPlay (double sampleRate, int samplesPerBlock) override
+    void prepareToPlay (double sampleRate, int) override
     {
         synthesiser.setCurrentPlaybackSampleRate (sampleRate);
     }
@@ -2180,25 +2181,26 @@ public:
         // Update the current playback positions
         for (auto i = 0; i != maxVoices; ++i)
         {
-            MPESamplerVoice* voicePtr = nullptr;
-            playbackPositions[i] = (i < numVoices && (voicePtr = dynamic_cast<MPESamplerVoice*> (synthesiser.getVoice (i))))
-                                    ? voicePtr->getCurrentSamplePosition() / loadedSamplerSound->getSample()->getSampleRate()
-                                    : 0;
+            auto* voicePtr = dynamic_cast<MPESamplerVoice*> (synthesiser.getVoice (i));
+
+            if (i < numVoices && voicePtr != nullptr)
+                playbackPositions[i] = static_cast<float> (voicePtr->getCurrentSamplePosition() / loadedSamplerSound->getSample()->getSampleRate());
+            else
+                playbackPositions[i] = 0.0f;
         }
     }
 
     // These should be called from the GUI thread, and will block until the
     // command buffer has enough room to accept a command.
-    void setSample (std::unique_ptr<AudioFormatReaderFactory> readerFactory,
-                                           AudioFormatManager& formatManager)
+    void setSample (std::unique_ptr<AudioFormatReaderFactory> fact, AudioFormatManager& formatManager)
     {
         class SetSampleCommand
         {
         public:
-            SetSampleCommand (std::unique_ptr<AudioFormatReaderFactory> readerFactory,
+            SetSampleCommand (std::unique_ptr<AudioFormatReaderFactory> r,
                               std::unique_ptr<Sample> sample,
                               std::vector<std::unique_ptr<MPESamplerVoice>> newVoices)
-                : readerFactory (move (readerFactory)),
+                : readerFactory (move (r)),
                   sample (move (sample)),
                   newVoices (move (newVoices))
             {}
@@ -2232,16 +2234,16 @@ public:
         for (auto i = 0; i != maxVoices; ++i)
             newSamplerVoices.emplace_back (new MPESamplerVoice (loadedSamplerSound));
 
-        if (readerFactory == nullptr)
+        if (fact == nullptr)
         {
-            pushCommand (SetSampleCommand (move (readerFactory),
+            pushCommand (SetSampleCommand (move (fact),
                                            nullptr,
                                            move (newSamplerVoices)));
         }
         else
         {
-            auto reader = readerFactory->make (formatManager);
-            pushCommand (SetSampleCommand (move (readerFactory),
+            auto reader = fact->make (formatManager);
+            pushCommand (SetSampleCommand (move (fact),
                                            std::unique_ptr<Sample> (new Sample (*reader, 10.0)),
                                            move (newSamplerVoices)));
         }
@@ -2448,8 +2450,8 @@ private:
         {
             jassert (files.size() == 1);
             undoManager.beginNewTransaction();
-            auto readerFactory = new FileAudioFormatReaderFactory (files[0]);
-            dataModel.setSampleReader (std::unique_ptr<AudioFormatReaderFactory> (readerFactory),
+            auto r = new FileAudioFormatReaderFactory (files[0]);
+            dataModel.setSampleReader (std::unique_ptr<AudioFormatReaderFactory> (r),
                                        &undoManager);
 
         }
@@ -2493,22 +2495,22 @@ private:
                 setProcessorMPEMode();
         }
 
-        void mpeZoneLayoutChanged (const MPEZoneLayout& value) override
+        void mpeZoneLayoutChanged (const MPEZoneLayout&) override
         {
             setProcessorMPEMode();
         }
 
-        void legacyFirstChannelChanged (int value) override
+        void legacyFirstChannelChanged (int) override
         {
             setProcessorLegacyMode();
         }
 
-        void legacyLastChannelChanged (int value) override
+        void legacyLastChannelChanged (int) override
         {
             setProcessorLegacyMode();
         }
 
-        void legacyPitchbendRangeChanged (int value) override
+        void legacyPitchbendRangeChanged (int) override
         {
             setProcessorLegacyMode();
         }
