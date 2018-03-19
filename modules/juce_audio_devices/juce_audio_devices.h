@@ -108,6 +108,13 @@
  #define JUCE_JACK 0
 #endif
 
+/** Config: JUCE_BELA
+    Enables Bela audio devices on Bela boards.
+*/
+#ifndef JUCE_BELA
+ #define JUCE_BELA 0
+#endif
+
 /** Config: JUCE_USE_ANDROID_OBOE
     ***
     DEVELOPER PREVIEW - Oboe is currently in developer preview and
