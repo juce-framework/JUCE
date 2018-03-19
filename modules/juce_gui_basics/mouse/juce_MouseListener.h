@@ -155,6 +155,19 @@ public:
     virtual void mouseWheelMove (const MouseEvent& event,
                                  const MouseWheelDetails& wheel);
 
+    /** Called when a pinch-to-zoom mouse-gesture is used.
+
+        If not overridden, a component will forward this message to its parent, so
+        that parent components can collect gesture messages that are unused by child
+        components.
+
+        @param event   details about the mouse event
+        @param scaleFactor  a multiplier to indicate by how much the size of the target
+                            should be changed. A value of 1.0 would indicate no change,
+                            values greater than 1.0 mean it should be enlarged.
+    */
+    virtual void mouseMagnify (const MouseEvent& event, float scaleFactor);
+
 
 private:
    #if JUCE_CATCH_DEPRECATED_CODE_MISUSE

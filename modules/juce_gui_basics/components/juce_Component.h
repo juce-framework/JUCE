@@ -1596,7 +1596,7 @@ public:
                             should be changed. A value of 1.0 would indicate no change,
                             values greater than 1.0 mean it should be enlarged.
     */
-    virtual void mouseMagnify (const MouseEvent& event, float scaleFactor);
+    virtual void mouseMagnify (const MouseEvent& event, float scaleFactor) override;
 
     //==============================================================================
     /** Ensures that a non-stop stream of mouse-drag events will be sent during the
