@@ -325,6 +325,9 @@ public:
         auto font = ProjucerLookAndFeel::getPropertyComponentFont();
         auto nameWidth = font.getStringWidthFloat (pp->getName());
 
+        if (availableTextWidth == 0)
+            return 1;
+
         return static_cast<int> (nameWidth / availableTextWidth);
     }
 
