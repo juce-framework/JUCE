@@ -204,6 +204,25 @@ public:
                              bool allowVerticalScrollingWithoutScrollbar = false,
                              bool allowHorizontalScrollingWithoutScrollbar = false);
 
+    /** Changes where the scroll bars are positioned
+
+        If verticalScrollbarOnRight is set to true, then the vertical scrollbar will
+        appear on the right side of the view port's content (this is the default),
+        otherwise it will be on the left side of the content.
+
+        If horizontalScrollbarAtBottom is set to true, then the horizontal scrollbar
+        will appear at the bottom of the view port's content (this is the default),
+        otherwise it will be at the top.
+    */
+    void setScrollBarPosition (bool verticalScrollbarOnRight,
+                               bool horizontalScrollbarAtBottom);
+
+    /** True if the vertical scrollbar will appear on the right side of the content */
+    bool isVerticalScrollbarOnTheRight() const noexcept         { return vScrollbarRight; }
+
+    /** True if the horizontal scrollbar will appear at the bottom of the content */
+    bool isHorizontalScrollbarAtBottom() const noexcept         { return hScrollbarBottom; }
+
     /** True if the vertical scrollbar is enabled.
         @see setScrollBarsShown
     */
@@ -300,6 +319,7 @@ private:
     bool showHScrollbar = true, showVScrollbar = true, deleteContent = true;
     bool customScrollBarThickness = false;
     bool allowScrollingWithoutScrollbarV = false, allowScrollingWithoutScrollbarH = false;
+    bool vScrollbarRight = true, hScrollbarBottom = true;
 
     struct DragToScrollListener;
     friend struct DragToScrollListener;
