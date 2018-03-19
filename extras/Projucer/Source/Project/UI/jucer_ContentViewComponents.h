@@ -326,7 +326,7 @@ public:
         auto nameWidth = font.getStringWidthFloat (pp->getName());
 
         if (availableTextWidth == 0)
-            return 1;
+            return 0;
 
         return static_cast<int> (nameWidth / availableTextWidth);
     }
