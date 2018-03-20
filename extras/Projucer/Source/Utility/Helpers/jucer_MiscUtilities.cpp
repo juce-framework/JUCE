@@ -365,7 +365,7 @@ bool isJUCEModule (const String& moduleID) noexcept
 
 bool isValidExporterName (const String& exporterName) noexcept
 {
-    return getJUCEExporters().contains (exporterName);
+    return getJUCEExporters().contains (exporterName, true);
 }
 
 String getTargetFolderForExporter (const String& exporterName) noexcept
