@@ -262,12 +262,14 @@ void ContentSharer::sharingFinished (bool succeeded, const String& errorDescript
     std::function<void (bool, String)> cb;
     std::swap (cb, callback);
 
+    String error (errorDescription);
+
   #if JUCE_IOS || JUCE_ANDROID
     pimpl.reset();
   #endif
 
     if (cb)
-        cb (succeeded, errorDescription);
+        cb (succeeded, error);
 }
 
 void ContentSharer::deleteTemporaryFiles()
