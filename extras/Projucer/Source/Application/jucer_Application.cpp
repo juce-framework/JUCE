@@ -773,7 +773,7 @@ File ProjucerApplication::findDemoRunnerProject() noexcept
 
     if (file.exists())
         return file;
-   #elif JUCE_WINDOW
+   #elif JUCE_WINDOWS
     auto file = buildsPath.getChildFile ("VisualStudio2017").getChildFile ("DemoRunner.sln");
 
     if (file.existsAsFile())
