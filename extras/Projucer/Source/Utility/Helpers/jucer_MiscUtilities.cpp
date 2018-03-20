@@ -346,7 +346,7 @@ String getTargetFolderForExporter (const String& exporterName) noexcept
     if (exporterName == "XCODE_IPHONE")          return "iOS";
     if (exporterName == "VS2017")                return "VisualStudio2017";
     if (exporterName == "VS2015")                return "VisualStudio2015";
-    if (exporterName == "VS2013")                return "MacOVisualStudio2015SX";
+    if (exporterName == "VS2013")                return "VisualStudio2013";
     if (exporterName == "LINUX_MAKE")            return "LinuxMakefile";
     if (exporterName == "ANDROIDSTUDIO")         return "Android";
     if (exporterName == "CODEBLOCKS_WINDOWS")    return "CodeBlocksWindows";
