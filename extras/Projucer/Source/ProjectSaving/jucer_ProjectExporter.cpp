@@ -96,6 +96,16 @@ StringArray ProjectExporter::getExporterNames()
     return s;
 }
 
+StringArray ProjectExporter::getExporterValueTreeNames()
+{
+    StringArray s;
+
+    for (auto& n : getExporterNames())
+        s.add (getValueTreeNameForExporter (n));
+
+    return s;
+}
+
 String ProjectExporter::getValueTreeNameForExporter (const String& exporterName)
 {
     if (exporterName == XcodeProjectExporter::getNameMac())
@@ -127,6 +137,22 @@ String ProjectExporter::getValueTreeNameForExporter (const String& exporterName)
 
     if (exporterName == CLionProjectExporter::getName())
         return CLionProjectExporter::getValueTreeTypeName();
+
+    return {};
+}
+
+String ProjectExporter::getTargetFolderForExporter (const String& exporterValueTreeName)
+{
+    if (exporterValueTreeName == "XCODE_MAC")             return "MacOSX";
+    if (exporterValueTreeName == "XCODE_IPHONE")          return "iOS";
+    if (exporterValueTreeName == "VS2017")                return "VisualStudio2017";
+    if (exporterValueTreeName == "VS2015")                return "VisualStudio2015";
+    if (exporterValueTreeName == "VS2013")                return "VisualStudio2013";
+    if (exporterValueTreeName == "LINUX_MAKE")            return "LinuxMakefile";
+    if (exporterValueTreeName == "ANDROIDSTUDIO")         return "Android";
+    if (exporterValueTreeName == "CODEBLOCKS_WINDOWS")    return "CodeBlocksWindows";
+    if (exporterValueTreeName == "CODEBLOCKS_LINUX")      return "CodeBlocksLinux";
+    if (exporterValueTreeName == "CLION")                 return "CLion";
 
     return {};
 }

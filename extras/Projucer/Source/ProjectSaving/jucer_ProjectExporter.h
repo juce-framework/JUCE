@@ -59,8 +59,10 @@ public:
     };
 
     static StringArray getExporterNames();
+    static StringArray getExporterValueTreeNames();
     static Array<ExporterTypeInfo> getExporterTypes();
     static String getValueTreeNameForExporter (const String& exporterName);
+    static String getTargetFolderForExporter (const String& exporterValueTreeName);
     static StringArray getAllDefaultBuildsFolders();
 
     static ProjectExporter* createNewExporter (Project&, const int index);

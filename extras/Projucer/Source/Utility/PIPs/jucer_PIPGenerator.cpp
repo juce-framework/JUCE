@@ -25,6 +25,7 @@
 */
 
 #include "../../Application/jucer_Headers.h"
+#include "../../ProjectSaving/jucer_ProjectExporter.h"
 #include "jucer_PIPGenerator.h"
 
 //==============================================================================
@@ -83,6 +84,11 @@ static bool isJUCEExample (const File& pipFile)
     }
 
     return false;
+}
+
+static bool isValidExporterName (const String& exporterName)
+{
+    return ProjectExporter::getExporterValueTreeNames().contains (exporterName, true);
 }
 
 //==============================================================================
@@ -297,7 +303,7 @@ ValueTree PIPGenerator::createExporterChild (const String& exporterName)
 {
     ValueTree exporter (exporterName);
 
-    exporter.setProperty (Ids::targetFolder, "Builds/" + getTargetFolderForExporter (exporterName), nullptr);
+    exporter.setProperty (Ids::targetFolder, "Builds/" + ProjectExporter::getTargetFolderForExporter (exporterName), nullptr);
 
     {
         ValueTree configs (Ids::CONFIGURATIONS);

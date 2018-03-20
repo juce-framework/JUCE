@@ -322,66 +322,9 @@ StringArray getJUCEModules() noexcept
     return juceModuleIds;
 }
 
-StringArray getJUCEExporters (bool lowerCase) noexcept
-{
-    static StringArray validExportersUpper =
-    {
-        "XCODE_MAC",
-        "XCODE_IPHONE",
-        "VS2013",
-        "VS2015",
-        "VS2017",
-        "LINUX_MAKE",
-        "ANDROIDSTUDIO",
-        "CODEBLOCKS_WINDOWS",
-        "CODEBLOCKS_LINUX",
-        "CLION"
-    };
-
-    static StringArray validExportersLower =
-    {
-        "xcode_mac",
-        "xcode_iphone",
-        "vs2013",
-        "vs2015",
-        "vs2017",
-        "linux_make",
-        "androidstudio",
-        "codeblocks_windows",
-        "codeblocks_linux",
-        "clion"
-    };
-
-    if (lowerCase)
-        return validExportersLower;
-
-    return validExportersUpper;
-}
-
 bool isJUCEModule (const String& moduleID) noexcept
 {
     return getJUCEModules().contains (moduleID);
-}
-
-bool isValidExporterName (const String& exporterName) noexcept
-{
-    return getJUCEExporters().contains (exporterName, true);
-}
-
-String getTargetFolderForExporter (const String& exporterName) noexcept
-{
-    if (exporterName == "XCODE_MAC")             return "MacOSX";
-    if (exporterName == "XCODE_IPHONE")          return "iOS";
-    if (exporterName == "VS2017")                return "VisualStudio2017";
-    if (exporterName == "VS2015")                return "VisualStudio2015";
-    if (exporterName == "VS2013")                return "VisualStudio2013";
-    if (exporterName == "LINUX_MAKE")            return "LinuxMakefile";
-    if (exporterName == "ANDROIDSTUDIO")         return "Android";
-    if (exporterName == "CODEBLOCKS_WINDOWS")    return "CodeBlocksWindows";
-    if (exporterName == "CODEBLOCKS_LINUX")      return "CodeBlocksLinux";
-    if (exporterName == "CLION")                 return "CLion";
-
-    return {};
 }
 
 StringArray getModulesRequiredForConsole() noexcept
