@@ -224,7 +224,10 @@ public class JuceAppActivity   extends $$JuceAppActivityBaseClass$$
 
         // Ensure that navigation/status bar visibility is correctly restored.
         for (int i = 0; i < viewHolder.getChildCount(); ++i)
-            ((ComponentPeerView) viewHolder.getChildAt (i)).appResumed();
+        {
+            if (viewHolder.getChildAt (i) instanceof ComponentPeerView)
+                ((ComponentPeerView) viewHolder.getChildAt (i)).appResumed();
+        }
     }
 
     @Override
