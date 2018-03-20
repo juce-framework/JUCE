@@ -30,6 +30,8 @@ namespace juce
 //==============================================================================
 /**
     This class contains some static methods for showing native alert windows.
+
+    @tags{GUI}
 */
 class NativeMessageBox
 {

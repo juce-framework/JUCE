@@ -40,6 +40,8 @@ namespace juce
     and implement the stateChanged() method to transmit the encoded change (maybe
     via a network or other means) to a remote destination, where it can be
     applied to a target tree.
+
+    @tags{DataStructures}
 */
 class JUCE_API  ValueTreeSynchroniser  : private ValueTree::Listener
 {

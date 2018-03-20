@@ -79,6 +79,8 @@ namespace HeapBlockHelper
     that the system's malloc() function doesn't throw).
 
     @see Array, OwnedArray, MemoryBlock
+
+    @tags{Core}
 */
 template <class ElementType, bool throwOnFailure = false>
 class HeapBlock

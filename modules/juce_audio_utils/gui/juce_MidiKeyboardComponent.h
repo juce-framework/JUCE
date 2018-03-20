@@ -44,6 +44,8 @@ namespace juce
     keyboard is scrolled, you can register a ChangeListener for callbacks.
 
     @see MidiKeyboardState
+
+    @tags{Audio}
 */
 class JUCE_API  MidiKeyboardComponent  : public Component,
                                          public MidiKeyboardStateListener,

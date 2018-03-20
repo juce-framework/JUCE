@@ -37,6 +37,8 @@ namespace juce
     Drawable objects.
 
     @see Drawable
+
+    @tags{GUI}
 */
 class JUCE_API  DrawableComposite  : public Drawable
 {

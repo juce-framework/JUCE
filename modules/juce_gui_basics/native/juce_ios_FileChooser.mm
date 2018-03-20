@@ -143,6 +143,9 @@ private:
         {
             for (auto filter : filters)
             {
+                if (filter.isEmpty())
+                    continue;
+
                 // iOS only supports file extension wild cards
                 jassert (filter.upToLastOccurrenceOf (".", true, false) == "*.");
 

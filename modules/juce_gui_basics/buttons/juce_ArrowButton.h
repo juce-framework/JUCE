@@ -32,6 +32,8 @@ namespace juce
     A button with an arrow in it.
 
     @see Button
+
+    @tags{GUI}
 */
 class JUCE_API  ArrowButton  : public Button
 {

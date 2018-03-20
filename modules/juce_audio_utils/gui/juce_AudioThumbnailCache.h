@@ -36,6 +36,8 @@ namespace juce
     having to re-scan audio files too often.
 
     @see AudioThumbnail
+
+    @tags{Audio}
 */
 class JUCE_API  AudioThumbnailCache
 {

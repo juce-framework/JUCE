@@ -30,6 +30,8 @@ namespace juce
 //==============================================================================
 /**
     Holds a quaternion (a 3D vector and a scalar value).
+
+    @tags{OpenGL}
 */
 template <typename Type>
 class Quaternion

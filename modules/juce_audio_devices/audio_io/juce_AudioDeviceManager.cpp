@@ -427,6 +427,9 @@ String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& newSetup
 
     stopDevice();
 
+    if (! newSetup.useDefaultInputChannels)    numInputChansNeeded  = newSetup.inputChannels.countNumberOfSetBits();
+    if (! newSetup.useDefaultOutputChannels)   numOutputChansNeeded = newSetup.outputChannels.countNumberOfSetBits();
+
     auto newInputDeviceName  (numInputChansNeeded  == 0 ? String() : newSetup.inputDeviceName);
     auto newOutputDeviceName (numOutputChansNeeded == 0 ? String() : newSetup.outputDeviceName);
 

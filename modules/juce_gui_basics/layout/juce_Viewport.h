@@ -39,6 +39,8 @@ namespace juce
     A subclass of the viewport can be created which will receive calls to its
     visibleAreaChanged() method when the subcomponent changes position or size.
 
+
+    @tags{GUI}
 */
 class JUCE_API  Viewport  : public Component,
                             private ComponentListener,

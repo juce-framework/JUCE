@@ -37,6 +37,8 @@ namespace dsp
 
     This is an extremely simple bias implementation that simply adds a value to a signal.
     More complicated bias behaviours exist in real circuits - for your homework ;).
+
+    @tags{DSP}
 */
 template <typename FloatType>
 class Bias

@@ -36,6 +36,8 @@ namespace juce
     adjacent rectangles.
 
     @see Rectangle
+
+    @tags{Graphics}
 */
 template <typename ValueType>
 class RectangleList  final

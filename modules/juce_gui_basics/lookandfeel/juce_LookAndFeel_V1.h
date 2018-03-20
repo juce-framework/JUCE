@@ -31,6 +31,8 @@ namespace juce
 /**
     The original JUCE look-and-feel, as used back from 2002 to about 2007ish.
     @see LookAndFeel, LookAndFeel_V2, LookAndFeel_V3
+
+    @tags{GUI}
 */
 class JUCE_API  LookAndFeel_V1    : public LookAndFeel_V2
 {

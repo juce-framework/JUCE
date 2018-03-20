@@ -60,6 +60,8 @@ namespace juce
     @endcode
 
     @see File, FileOutputStream
+
+    @tags{Core}
 */
 class JUCE_API  TemporaryFile
 {

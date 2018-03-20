@@ -36,6 +36,8 @@ namespace juce
     user clicks on a different tab.
 
     @see TabbedButtonBar
+
+    @tags{GUI}
 */
 class JUCE_API  TabbedComponent  : public Component
 {

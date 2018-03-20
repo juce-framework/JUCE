@@ -27,6 +27,8 @@ namespace BlocksProtocol
 
 /**
     Helper class for constructing a packet for sending to a BLOCKS device
+
+    @tags{Blocks}
 */
 template <int maxPacketBytes>
 struct HostPacketBuilder

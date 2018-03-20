@@ -23,7 +23,10 @@
 namespace juce
 {
 
-/** Base class for an entity that provides access to a blocks topology. */
+/** Base class for an entity that provides access to a blocks topology.
+
+    @tags{Blocks}
+*/
 class TopologySource
 {
 public:
@@ -35,6 +38,7 @@ public:
     virtual BlockTopology getCurrentTopology() const = 0;
 
     //==========================================================================
+    /** Used to receive callbacks for topology changes */
     struct Listener
     {
         virtual ~Listener() {}

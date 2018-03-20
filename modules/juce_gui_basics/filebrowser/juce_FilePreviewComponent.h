@@ -38,6 +38,8 @@ namespace juce
     to allow it to update itself appropriately.
 
     @see FileChooser, ImagePreviewComponent
+
+    @tags{GUI}
 */
 class JUCE_API  FilePreviewComponent  : public Component
 {

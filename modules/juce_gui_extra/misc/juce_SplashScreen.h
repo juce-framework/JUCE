@@ -67,6 +67,8 @@ namespace juce
     }
 
     @endcode
+
+    @tags{GUI}
 */
 class JUCE_API  SplashScreen  : public Component,
                                 private Timer,

@@ -36,6 +36,8 @@ namespace juce
     geometric operations on.
 
     @see Path
+
+    @tags{Graphics}
 */
 class JUCE_API  PathFlatteningIterator  final
 {

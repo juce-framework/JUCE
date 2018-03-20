@@ -35,6 +35,8 @@ namespace juce
     It can connect to a network port, receive incoming OSC packets from the
     network via UDP, parse them, and forward the included OSCMessage and OSCBundle
     objects to its listeners.
+
+    @tags{OSC}
 */
 class JUCE_API  OSCReceiver
 {

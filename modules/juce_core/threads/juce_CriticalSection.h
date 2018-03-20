@@ -36,6 +36,8 @@ namespace juce
     C++ static object order-of-construction warnings should be heeded.
 
     @see ScopedLock, ScopedTryLock, ScopedUnlock, SpinLock, ReadWriteLock, Thread, InterProcessLock
+
+    @tags{Core}
 */
 class JUCE_API  CriticalSection
 {
@@ -125,6 +127,8 @@ private:
     manage to optimise it out of existence.
 
     @see CriticalSection, Array, OwnedArray, ReferenceCountedArray
+
+    @tags{Core}
 */
 class JUCE_API  DummyCriticalSection
 {

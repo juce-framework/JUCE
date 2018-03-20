@@ -32,6 +32,8 @@ namespace juce
     A button that contains a filled shape.
 
     @see Button, ImageButton, TextButton, ArrowButton
+
+    @tags{GUI}
 */
 class JUCE_API  ShapeButton  : public Button
 {

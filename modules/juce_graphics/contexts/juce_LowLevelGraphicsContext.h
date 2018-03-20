@@ -40,6 +40,8 @@ namespace juce
     E.g. the LowLevelGraphicsSoftwareRenderer renders onto an image in memory, but other
     subclasses could render directly to a windows HDC, a Quartz context, or an OpenGL
     context.
+
+    @tags{Graphics}
 */
 class JUCE_API  LowLevelGraphicsContext
 {

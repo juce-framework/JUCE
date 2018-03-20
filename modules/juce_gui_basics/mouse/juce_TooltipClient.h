@@ -36,6 +36,8 @@ namespace juce
     the tooltip returned by its getTooltip() method.
 
     @see TooltipWindow, SettableTooltipClient
+
+    @tags{GUI}
 */
 class JUCE_API  TooltipClient
 {
@@ -60,6 +62,8 @@ public:
     tooltips.
 
     @see TooltipClient, TooltipWindow
+
+    @tags{GUI}
 */
 class JUCE_API  SettableTooltipClient   : public TooltipClient
 {

@@ -31,6 +31,8 @@ namespace juce
     You generally won't use this directly, but see the macros JUCE_DECLARE_SINGLETON,
     JUCE_DECLARE_SINGLETON_SINGLETHREADED, JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL,
     and JUCE_IMPLEMENT_SINGLETON for how it is intended to be used.
+
+    @tags{Core}
 */
 template <typename Type, typename MutexType, bool onlyCreateOncePerRun>
 struct SingletonHolder  : private MutexType // (inherited so we can use the empty-base-class optimisation)

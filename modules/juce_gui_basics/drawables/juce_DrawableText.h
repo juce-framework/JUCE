@@ -32,6 +32,8 @@ namespace juce
     A drawable object which renders a line of text.
 
     @see Drawable
+
+    @tags{GUI}
 */
 class JUCE_API  DrawableText  : public Drawable
 {

@@ -50,22 +50,22 @@ public:
 	};
 
 	/// Set the drawing flags.
-	void SetFlags(uint32 flags);
+	void SetFlags(juce::uint32 flags);
 
 	/// Get the drawing flags.
-	uint32 GetFlags() const;
+	juce::uint32 GetFlags() const;
 
 	/// Append flags to the current flags.
-	void AppendFlags(uint32 flags);
+	void AppendFlags(juce::uint32 flags);
 
 	/// Clear flags from the current flags.
-	void ClearFlags(uint32 flags);
+	void ClearFlags(juce::uint32 flags);
 
 	/// Draw a closed polygon provided in CCW order.
-	virtual void DrawPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color) = 0;
+	virtual void DrawPolygon(const b2Vec2* vertices, juce::int32 vertexCount, const b2Color& color) = 0;
 
 	/// Draw a solid closed polygon provided in CCW order.
-	virtual void DrawSolidPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color) = 0;
+	virtual void DrawSolidPolygon(const b2Vec2* vertices, juce::int32 vertexCount, const b2Color& color) = 0;
 
 	/// Draw a circle.
 	virtual void DrawCircle(const b2Vec2& center, float32 radius, const b2Color& color) = 0;
@@ -81,7 +81,7 @@ public:
 	virtual void DrawTransform(const b2Transform& xf) = 0;
 
 protected:
-	uint32 m_drawFlags;
+	juce::uint32 m_drawFlags;
 };
 
 #endif

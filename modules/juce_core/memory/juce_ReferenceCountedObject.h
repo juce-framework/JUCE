@@ -54,6 +54,8 @@ namespace juce
     version, use SingleThreadedReferenceCountedObject instead.
 
     @see ReferenceCountedObjectPtr, ReferenceCountedArray, SingleThreadedReferenceCountedObject
+
+    @tags{Core}
 */
 class JUCE_API  ReferenceCountedObject
 {
@@ -140,6 +142,8 @@ private:
     For more details on how to use it, see the ReferenceCountedObject class notes.
 
     @see ReferenceCountedObject, ReferenceCountedObjectPtr, ReferenceCountedArray
+
+    @tags{Core}
 */
 class JUCE_API  SingleThreadedReferenceCountedObject
 {
@@ -230,6 +234,8 @@ private:
     @endcode
 
     @see ReferenceCountedObject, ReferenceCountedObjectArray
+
+    @tags{Core}
 */
 template <class ReferenceCountedObjectClass>
 class ReferenceCountedObjectPtr

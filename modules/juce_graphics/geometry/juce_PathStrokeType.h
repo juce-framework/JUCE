@@ -36,6 +36,8 @@ namespace juce
     stroke to draw.
 
     @see Path, Graphics::strokePath
+
+    @tags{Graphics}
 */
 class JUCE_API  PathStrokeType
 {

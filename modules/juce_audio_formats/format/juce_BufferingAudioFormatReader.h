@@ -33,6 +33,8 @@ namespace juce
     another reader.
 
     @see AudioFormatReader
+
+    @tags{Audio}
 */
 class JUCE_API  BufferingAudioReader  : public AudioFormatReader,
                                         private TimeSliceClient

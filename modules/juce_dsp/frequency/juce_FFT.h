@@ -39,6 +39,8 @@ namespace dsp
     The FFT class itself contains lookup tables, so there's some overhead in creating
     one, you should create and cache an FFT object for each size/direction of transform
     that you need, and re-use them to perform the actual operation.
+
+    @tags{DSP}
 */
 class JUCE_API  FFT
 {

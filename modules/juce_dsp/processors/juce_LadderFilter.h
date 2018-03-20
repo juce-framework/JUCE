@@ -31,6 +31,8 @@ namespace dsp
 
 /**
     Multi-mode filter based on the Moog ladder filter.
+
+    @tags{DSP}
 */
 template <typename Type>
 class LadderFilter

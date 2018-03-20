@@ -38,6 +38,8 @@ namespace juce
     MIDI device to set its zone layout, add zones etc.
 
     @see MPEInstrument
+
+    @tags{Audio}
 */
 class JUCE_API  MPEZoneLayout
 {

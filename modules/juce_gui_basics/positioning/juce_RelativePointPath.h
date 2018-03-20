@@ -35,6 +35,8 @@ namespace juce
     unlike a Path, its points can be dynamic instead of just fixed.
 
     @see RelativePoint, RelativeCoordinate
+
+    @tags{GUI}
 */
 class JUCE_API  RelativePointPath
 {
@@ -92,6 +94,7 @@ public:
     };
 
     //==============================================================================
+    /** Class for the start sub path element */
     class JUCE_API  StartSubPath  : public ElementBase
     {
     public:
@@ -107,6 +110,7 @@ public:
     };
 
     //==============================================================================
+    /** Class for the close sub path element */
     class JUCE_API  CloseSubPath  : public ElementBase
     {
     public:
@@ -120,6 +124,7 @@ public:
     };
 
     //==============================================================================
+    /** Class for the line to element */
     class JUCE_API  LineTo  : public ElementBase
     {
     public:
@@ -135,6 +140,7 @@ public:
     };
 
     //==============================================================================
+    /** Class for the quadratic to element */
     class JUCE_API  QuadraticTo  : public ElementBase
     {
     public:
@@ -151,6 +157,7 @@ public:
     };
 
     //==============================================================================
+    /** Class for the cubic to element */
     class JUCE_API  CubicTo  : public ElementBase
     {
     public:

@@ -30,6 +30,8 @@ namespace juce
 //==============================================================================
 /**
     Base class for Component::Positioners that are based upon relative coordinates.
+
+    @tags{GUI}
 */
 class JUCE_API  RelativeCoordinatePositionerBase  : public Component::Positioner,
                                                     public ComponentListener,

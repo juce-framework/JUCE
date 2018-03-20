@@ -26,6 +26,8 @@ namespace juce
 //==============================================================================
 /**
     An AudioSource which takes some float audio data as an input.
+
+    @tags{Audio}
 */
 class JUCE_API MemoryAudioSource   : public AudioSource
 {

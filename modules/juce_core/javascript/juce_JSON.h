@@ -32,6 +32,8 @@ namespace juce
     object to JSON-formatted text.
 
     @see var
+
+    @tags{Core}
 */
 class JUCE_API  JSON
 {

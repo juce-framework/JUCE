@@ -49,6 +49,8 @@ namespace juce
     the ability to render audio and to manage voices.
 
     @see MPENote, MPEZoneLayout, MPESynthesiser
+
+    @tags{Audio}
 */
 class JUCE_API  MPEInstrument
 {

@@ -78,6 +78,8 @@ namespace juce
     @endcode
 
     @see JUCEApplication, START_JUCE_APPLICATION
+
+    @tags{Events}
 */
 class JUCE_API  JUCEApplicationBase
 {

@@ -41,6 +41,8 @@ namespace juce
     TypeOfCriticalSectionToUse parameter, instead of the default DummyCriticalSection.
 
     @see Array, ReferenceCountedArray, StringArray, CriticalSection
+
+    @tags{Core}
 */
 template <class ObjectClass,
           class TypeOfCriticalSectionToUse = DummyCriticalSection>

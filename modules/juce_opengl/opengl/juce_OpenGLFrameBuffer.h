@@ -30,6 +30,8 @@ namespace juce
 //==============================================================================
 /**
     Creates an openGL frame buffer.
+
+    @tags{OpenGL}
 */
 class JUCE_API  OpenGLFrameBuffer
 {

@@ -37,7 +37,9 @@ namespace juce
     This should be able to understand formats such as mp3, m4a, etc.
 
     @see AudioFormat
- */
+
+    @tags{Audio}
+*/
 class JUCE_API  CoreAudioFormat     : public AudioFormat
 {
 public:

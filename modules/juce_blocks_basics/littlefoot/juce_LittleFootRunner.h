@@ -131,7 +131,10 @@ enum class Type  : uint8
 };
 
 //==============================================================================
-/** Defines a native function that the program can call. */
+/** Defines a native function that the program can call.
+
+    @tags{Blocks}
+*/
 struct NativeFunction
 {
     using ImplementationFunction = int32 (*) (void*, const int32*);
@@ -209,6 +212,8 @@ private:
       2 bytes - byte offset of function 2 code
                 etc..
       ...function code...
+
+    @tags{Blocks}
 */
 struct Program
 {
@@ -406,6 +411,8 @@ private:
     Program code goes at address 0, followed by any shared data the program needs
     globals are at the top end of the buffer
     stack space stretches downwards from the start of the globals
+
+    @tags{Blocks}
 */
 template <int programAndHeapSpace, int stackAndGlobalsSpace>
 struct Runner

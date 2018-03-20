@@ -29,8 +29,10 @@ namespace juce
 namespace dsp
 {
 
+#ifndef DOXYGEN
 template <typename NumericType>
 class OversamplingEngine;
+#endif
 
 //===============================================================================
 /**
@@ -53,6 +55,8 @@ class OversamplingEngine;
     Nyquist frequency but the latency is minimum.
 
     @see FilterDesign.
+
+    @tags{DSP}
 */
 template <typename SampleType>
 class JUCE_API  Oversampling

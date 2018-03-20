@@ -1,11 +1,11 @@
 /*
   ==============================================================================
 
-    FILENAME
-    Created: DATE
-    Author:  AUTHOR
+    %%filename%%
+    Created: %%date%%
+    Author:  %%author%%
 
   ==============================================================================
 */
 
-INCLUDE_CORRESPONDING_HEADER
+%%include_corresponding_header%%

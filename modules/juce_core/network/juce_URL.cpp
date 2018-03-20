@@ -145,6 +145,9 @@ URL::URL (const String& u)  : url (u)
 
 URL::URL (File localFile)
 {
+    if (localFile == File())
+        return;
+
     while (! localFile.isRoot())
     {
         url = "/" + addEscapeChars (localFile.getFileName(), false) + url;

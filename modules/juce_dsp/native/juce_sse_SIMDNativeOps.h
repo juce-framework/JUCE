@@ -51,7 +51,10 @@ template <typename type>
 struct SIMDNativeOps;
 
 //==============================================================================
-/** Single-precision floating point SSE intrinsics. */
+/** Single-precision floating point SSE intrinsics.
+
+    @tags{DSP}
+*/
 template <>
 struct SIMDNativeOps<float>
 {
@@ -111,7 +114,10 @@ struct SIMDNativeOps<float>
 };
 
 //==============================================================================
-/** Double-precision floating point SSE intrinsics. */
+/** Double-precision floating point SSE intrinsics.
+
+    @tags{DSP}
+*/
 template <>
 struct SIMDNativeOps<double>
 {
@@ -172,7 +178,10 @@ struct SIMDNativeOps<double>
 };
 
 //==============================================================================
-/** Signed 8-bit integer SSE intrinsics. */
+/** Signed 8-bit integer SSE intrinsics.
+
+    @tags{DSP}
+*/
 template <>
 struct SIMDNativeOps<int8_t>
 {
@@ -257,7 +266,10 @@ struct SIMDNativeOps<int8_t>
 };
 
 //==============================================================================
-/** Unsigned 8-bit integer SSE intrinsics. */
+/** Unsigned 8-bit integer SSE intrinsics.
+
+    @tags{DSP}
+*/
 template <>
 struct SIMDNativeOps<uint8_t>
 {
@@ -339,7 +351,10 @@ struct SIMDNativeOps<uint8_t>
 };
 
 //==============================================================================
-/** Signed 16-bit integer SSE intrinsics. */
+/** Signed 16-bit integer SSE intrinsics.
+
+    @tags{DSP}
+*/
 template <>
 struct SIMDNativeOps<int16_t>
 {
@@ -401,7 +416,10 @@ struct SIMDNativeOps<int16_t>
 };
 
 //==============================================================================
-/** Unsigned 16-bit integer SSE intrinsics. */
+/** Unsigned 16-bit integer SSE intrinsics.
+
+    @tags{DSP}
+*/
 template <>
 struct SIMDNativeOps<uint16_t>
 {
@@ -470,7 +488,10 @@ struct SIMDNativeOps<uint16_t>
 };
 
 //==============================================================================
-/** Signed 32-bit integer SSE intrinsics. */
+/** Signed 32-bit integer SSE intrinsics.
+
+    @tags{DSP}
+*/
 template <>
 struct SIMDNativeOps<int32_t>
 {
@@ -555,7 +576,10 @@ struct SIMDNativeOps<int32_t>
 };
 
 //==============================================================================
-/** Unsigned 32-bit integer SSE intrinsics. */
+/** Unsigned 32-bit integer SSE intrinsics.
+
+    @tags{DSP}
+*/
 template <>
 struct SIMDNativeOps<uint32_t>
 {
@@ -647,7 +671,10 @@ struct SIMDNativeOps<uint32_t>
 };
 
 //==============================================================================
-/** Signed 64-bit integer SSE intrinsics. */
+/** Signed 64-bit integer SSE intrinsics.
+
+    @tags{DSP}
+*/
 template <>
 struct SIMDNativeOps<int64_t>
 {
@@ -738,7 +765,10 @@ struct SIMDNativeOps<int64_t>
 };
 
 //==============================================================================
-/** Unsigned 64-bit integer SSE intrinsics. */
+/** Unsigned 64-bit integer SSE intrinsics.
+
+    @tags{DSP}
+*/
 template <>
 struct SIMDNativeOps<uint64_t>
 {

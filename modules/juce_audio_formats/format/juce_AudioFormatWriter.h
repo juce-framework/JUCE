@@ -38,6 +38,8 @@ namespace juce
     you can call its write() method to store the samples, and then delete it.
 
     @see AudioFormat, AudioFormatReader
+
+    @tags{Audio}
 */
 class JUCE_API  AudioFormatWriter
 {
@@ -210,6 +212,7 @@ public:
         */
         bool write (const float* const* data, int numSamples);
 
+        /** Receiver for incoming data. */
         class JUCE_API  IncomingDataReceiver
         {
         public:
@@ -223,8 +226,8 @@ public:
 
         /** Allows you to specify a callback that this writer should update with the
             incoming data.
-            The receiver will be cleared and will the writer will begin adding data to
-            it as the data arrives. Pass a null pointer to remove the current receiver.
+            The receiver will be cleared and the writer will begin adding data to it
+            as the data arrives. Pass a null pointer to remove the current receiver.
 
             The object passed-in must not be deleted while this writer is still using it.
         */

@@ -55,6 +55,8 @@ namespace juce
     AudioDeviceManager class.
 
     @see AudioIODevice, AudioDeviceManager
+
+    @tags{Audio}
 */
 class JUCE_API  AudioIODeviceType
 {

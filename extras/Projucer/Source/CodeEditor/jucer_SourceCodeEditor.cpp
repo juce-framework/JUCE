@@ -642,7 +642,7 @@ void CppCodeEditorComponent::insertComponentClass()
         if (className == CodeHelpers::makeValidIdentifier (className, false, true, false))
         {
             String code (BinaryData::jucer_InlineComponentTemplate_h);
-            code = code.replace ("COMPONENTCLASS", className);
+            code = code.replace ("%%component_class%%", className);
 
             insertTextAtCaret (code);
             break;

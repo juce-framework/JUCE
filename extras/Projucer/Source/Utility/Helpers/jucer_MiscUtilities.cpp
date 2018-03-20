@@ -27,6 +27,21 @@
 #include "../../Application/jucer_Headers.h"
 
 //==============================================================================
+const char* getLineEnding()  { return "\r\n"; }
+
+String joinLinesIntoSourceFile (StringArray& lines)
+{
+    while (lines.size() > 10 && lines [lines.size() - 1].isEmpty())
+        lines.remove (lines.size() - 1);
+
+    return lines.joinIntoString (getLineEnding()) + getLineEnding();
+}
+
+String trimCommentCharsFromStartOfLine (const String& line)
+{
+    return line.trimStart().trimCharactersAtStart ("*/").trimStart();
+}
+
 String createAlphaNumericUID()
 {
     String uid;
@@ -274,4 +289,35 @@ bool fileNeedsCppSyntaxHighlighting (const File& file)
 
     return CharPointer_UTF8::isValidString (fileStart, sizeof (fileStart))
              && String (fileStart).trimStart().startsWith ("// -*- C++ -*-");
+}
+
+//==============================================================================
+bool isJUCEModule (const String& moduleID) noexcept
+{
+    static StringArray juceModuleIds =
+    {
+        "juce_analytics",
+        "juce_audio_basics",
+        "juce_audio_devices",
+        "juce_audio_formats",
+        "juce_audio_plugin_client",
+        "juce_audio_processors",
+        "juce_audio_utils",
+        "juce_blocks_basics",
+        "juce_box2d",
+        "juce_core",
+        "juce_cryptography",
+        "juce_data_structures",
+        "juce_dsp",
+        "juce_events",
+        "juce_graphics",
+        "juce_gui_basics",
+        "juce_gui_extra",
+        "juce_opengl",
+        "juce_osc",
+        "juce_product_unlocking",
+        "juce_video"
+    };
+
+    return juceModuleIds.contains (moduleID);
 }

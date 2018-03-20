@@ -67,6 +67,8 @@ namespace juce
     be thrown!
 
     @see RelativePoint, RelativeRectangle
+
+    @tags{GUI}
 */
 class JUCE_API  RelativeCoordinate
 {
@@ -158,6 +160,7 @@ public:
         static const String height;         /**< "height" */
     };
 
+    /** @internal */
     struct StandardStrings
     {
         enum Type

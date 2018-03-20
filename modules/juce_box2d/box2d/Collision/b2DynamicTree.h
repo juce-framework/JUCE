@@ -39,15 +39,15 @@ struct b2TreeNode
 
 	union
 	{
-		int32 parent;
-		int32 next;
+		juce::int32 parent;
+		juce::int32 next;
 	};
 
-	int32 child1;
-	int32 child2;
+	juce::int32 child1;
+	juce::int32 child2;
 
 	// leaf = 0, free node = -1
-	int32 height;
+	juce::int32 height;
 };
 
 /// A dynamic AABB tree broad-phase, inspired by Nathanael Presson's btDbvt.
@@ -68,23 +68,23 @@ public:
 	~b2DynamicTree();
 
 	/// Create a proxy. Provide a tight fitting AABB and a userData pointer.
-	int32 CreateProxy(const b2AABB& aabb, void* userData);
+	juce::int32 CreateProxy(const b2AABB& aabb, void* userData);
 
 	/// Destroy a proxy. This asserts if the id is invalid.
-	void DestroyProxy(int32 proxyId);
+	void DestroyProxy(juce::int32 proxyId);
 
 	/// Move a proxy with a swepted AABB. If the proxy has moved outside of its fattened AABB,
 	/// then the proxy is removed from the tree and re-inserted. Otherwise
 	/// the function returns immediately.
 	/// @return true if the proxy was re-inserted.
-	bool MoveProxy(int32 proxyId, const b2AABB& aabb1, const b2Vec2& displacement);
+	bool MoveProxy(juce::int32 proxyId, const b2AABB& aabb1, const b2Vec2& displacement);
 
 	/// Get proxy user data.
 	/// @return the proxy user data or 0 if the id is invalid.
-	void* GetUserData(int32 proxyId) const;
+	void* GetUserData(juce::int32 proxyId) const;
 
 	/// Get the fat AABB for a proxy.
-	const b2AABB& GetFatAABB(int32 proxyId) const;
+	const b2AABB& GetFatAABB(juce::int32 proxyId) const;
 
 	/// Query an AABB for overlapping proxies. The callback class
 	/// is called for each proxy that overlaps the supplied AABB.
@@ -106,11 +106,11 @@ public:
 
 	/// Compute the height of the binary tree in O(N) time. Should not be
 	/// called often.
-	int32 GetHeight() const;
+	juce::int32 GetHeight() const;
 
 	/// Get the maximum balance of an node in the tree. The balance is the difference
 	/// in height of the two children of a node.
-	int32 GetMaxBalance() const;
+	juce::int32 GetMaxBalance() const;
 
 	/// Get the ratio of the sum of the node areas to the root area.
 	float32 GetAreaRatio() const;
@@ -120,41 +120,41 @@ public:
 
 private:
 
-	int32 AllocateNode();
-	void FreeNode(int32 node);
+	juce::int32 AllocateNode();
+	void FreeNode(juce::int32 node);
 
-	void InsertLeaf(int32 node);
-	void RemoveLeaf(int32 node);
+	void InsertLeaf(juce::int32 node);
+	void RemoveLeaf(juce::int32 node);
 
-	int32 Balance(int32 index);
+	juce::int32 Balance(juce::int32 index);
 
-	int32 ComputeHeight() const;
-	int32 ComputeHeight(int32 nodeId) const;
+	juce::int32 ComputeHeight() const;
+	juce::int32 ComputeHeight(juce::int32 nodeId) const;
 
-	void ValidateStructure(int32 index) const;
-	void ValidateMetrics(int32 index) const;
+	void ValidateStructure(juce::int32 index) const;
+	void ValidateMetrics(juce::int32 index) const;
 
-	int32 m_root;
+	juce::int32 m_root;
 
 	b2TreeNode* m_nodes;
-	int32 m_nodeCount;
-	int32 m_nodeCapacity;
+	juce::int32 m_nodeCount;
+	juce::int32 m_nodeCapacity;
 
-	int32 m_freeList;
+	juce::int32 m_freeList;
 
 	/// This is used to incrementally traverse the tree for re-balancing.
-	uint32 m_path;
+	juce::uint32 m_path;
 
-	int32 m_insertionCount;
+	juce::int32 m_insertionCount;
 };
 
-inline void* b2DynamicTree::GetUserData(int32 proxyId) const
+inline void* b2DynamicTree::GetUserData(juce::int32 proxyId) const
 {
 	b2Assert(0 <= proxyId && proxyId < m_nodeCapacity);
 	return m_nodes[proxyId].userData;
 }
 
-inline const b2AABB& b2DynamicTree::GetFatAABB(int32 proxyId) const
+inline const b2AABB& b2DynamicTree::GetFatAABB(juce::int32 proxyId) const
 {
 	b2Assert(0 <= proxyId && proxyId < m_nodeCapacity);
 	return m_nodes[proxyId].aabb;
@@ -163,12 +163,12 @@ inline const b2AABB& b2DynamicTree::GetFatAABB(int32 proxyId) const
 template <typename T>
 inline void b2DynamicTree::Query(T* callback, const b2AABB& aabb) const
 {
-	b2GrowableStack<int32, 256> stack;
+	b2GrowableStack<juce::int32, 256> stack;
 	stack.Push(m_root);
 
 	while (stack.GetCount() > 0)
 	{
-		int32 nodeId = stack.Pop();
+		juce::int32 nodeId = stack.Pop();
 		if (nodeId == b2_nullNode)
 		{
 			continue;
@@ -221,12 +221,12 @@ inline void b2DynamicTree::RayCast(T* callback, const b2RayCastInput& input) con
 		segmentAABB.upperBound = b2Max(p1, t);
 	}
 
-	b2GrowableStack<int32, 256> stack;
+	b2GrowableStack<juce::int32, 256> stack;
 	stack.Push(m_root);
 
 	while (stack.GetCount() > 0)
 	{
-		int32 nodeId = stack.Pop();
+		juce::int32 nodeId = stack.Pop();
 		if (nodeId == b2_nullNode)
 		{
 			continue;

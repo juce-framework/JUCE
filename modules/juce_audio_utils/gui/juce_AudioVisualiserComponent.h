@@ -40,6 +40,8 @@ namespace juce
     for fancy additional features that you'd like it to support! If you're building a
     real-world app that requires more powerful waveform display, you'll probably want to
     create your own component instead.
+
+    @tags{Audio}
 */
 class JUCE_API AudioVisualiserComponent  : public Component,
                                            private Timer

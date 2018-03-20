@@ -35,6 +35,8 @@ namespace juce
     using writeToStream()/readFromStream(), or as JSON by using the JSON class.
 
     @see JSON, DynamicObject
+
+    @tags{Core}
 */
 class JUCE_API  var
 {
@@ -328,7 +330,10 @@ JUCE_API bool operator== (const var&, const char*);
 JUCE_API bool operator!= (const var&, const char*);
 
 //==============================================================================
-/** This template-overloaded class can be used to convert between var and custom types. */
+/** This template-overloaded class can be used to convert between var and custom types.
+
+    @tags{Core}
+*/
 template <typename Type>
 struct VariantConverter
 {
@@ -336,12 +341,13 @@ struct VariantConverter
     static var toVar (const Type& t)               { return t; }
 };
 
-/** This template-overloaded class can be used to convert between var and custom types. */
+#ifndef DOXYGEN
 template <>
 struct VariantConverter<String>
 {
     static String fromVar (const var& v)           { return v.toString(); }
     static var toVar (const String& s)             { return s; }
 };
+#endif
 
 } // namespace juce

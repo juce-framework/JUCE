@@ -59,6 +59,8 @@ namespace juce
     @endcode
 
     @see XmlElement
+
+    @tags{Core}
 */
 class JUCE_API  XmlDocument
 {

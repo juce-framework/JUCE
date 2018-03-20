@@ -30,6 +30,8 @@ namespace juce
     Input sources can be added and removed while the mixer is running as long as their
     prepareToPlay() and releaseResources() methods are called before and after adding
     them to the mixer.
+
+    @tags{Audio}
 */
 class JUCE_API  MixerAudioSource  : public AudioSource
 {

@@ -43,7 +43,7 @@ public:
 
 	b2BroadPhase m_broadPhase;
 	b2Contact* m_contactList;
-	int32 m_contactCount;
+	juce::int32 m_contactCount;
 	b2ContactFilter* m_contactFilter;
 	b2ContactListener* m_contactListener;
 	b2BlockAllocator* m_allocator;

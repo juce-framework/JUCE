@@ -46,7 +46,7 @@ inline float32 b2InvSqrt(float32 x)
 	union
 	{
 		float32 x;
-		int32 i;
+		juce::int32 i;
 	} convert;
 
 	convert.x = x;
@@ -79,13 +79,13 @@ struct b2Vec2
 	b2Vec2 operator -() const { b2Vec2 v; v.Set(-x, -y); return v; }
 
 	/// Read from and indexed element.
-	float32 operator () (int32 i) const
+	float32 operator () (juce::int32 i) const
 	{
 		return (&x)[i];
 	}
 
 	/// Write to an indexed element.
-	float32& operator () (int32 i)
+	float32& operator () (juce::int32 i)
 	{
 		return (&x)[i];
 	}
@@ -684,7 +684,7 @@ template<typename T> inline void b2Swap(T& a, T& b)
 /// that recursively "folds" the upper bits into the lower bits. This process yields a bit vector with
 /// the same most significant 1 as x, but all 1's below it. Adding 1 to that value yields the next
 /// largest power of 2. For a 32-bit value:"
-inline uint32 b2NextPowerOfTwo(uint32 x)
+inline juce::uint32 b2NextPowerOfTwo(juce::uint32 x)
 {
 	x |= (x >> 1);
 	x |= (x >> 2);
@@ -694,7 +694,7 @@ inline uint32 b2NextPowerOfTwo(uint32 x)
 	return x + 1;
 }
 
-inline bool b2IsPowerOfTwo(uint32 x)
+inline bool b2IsPowerOfTwo(juce::uint32 x)
 {
 	bool result = x > 0 && (x & (x - 1)) == 0;
 	return result;

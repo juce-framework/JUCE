@@ -25,6 +25,8 @@ namespace juce
 
 /**
     Represents an LED strip on a device.
+
+    @tags{Blocks}
 */
 class LEDRow
 {

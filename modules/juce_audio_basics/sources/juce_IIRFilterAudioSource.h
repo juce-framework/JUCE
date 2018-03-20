@@ -26,6 +26,8 @@ namespace juce
 //==============================================================================
 /**
     An AudioSource that performs an IIR filter on another source.
+
+    @tags{Audio}
 */
 class JUCE_API  IIRFilterAudioSource  : public AudioSource
 {

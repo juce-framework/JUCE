@@ -32,6 +32,8 @@ namespace juce
     AudioProcessor.
 
     @see AudioProcessor::addParameter
+
+    @tags{Audio}
 */
 class JUCE_API  AudioProcessorParameter
 {

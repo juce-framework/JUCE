@@ -28,6 +28,8 @@ namespace juce
 /**
     Contains some static helper functions for manipulating the MS Windows registry
     (Only available on Windows, of course!)
+
+    @tags{Core}
 */
 class JUCE_API  WindowsRegistry
 {

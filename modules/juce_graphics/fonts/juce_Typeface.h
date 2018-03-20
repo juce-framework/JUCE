@@ -41,6 +41,8 @@ namespace juce
     class does everything you typically need for rendering text.
 
     @see CustomTypeface, Font
+
+    @tags{Graphics}
 */
 class JUCE_API  Typeface  : public ReferenceCountedObject
 {

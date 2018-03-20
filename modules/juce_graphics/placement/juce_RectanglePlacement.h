@@ -34,6 +34,8 @@ namespace juce
 
     Although similar to Justification, this is more specific, and has some extra
     options.
+
+    @tags{Graphics}
 */
 class JUCE_API  RectanglePlacement
 {

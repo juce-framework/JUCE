@@ -33,6 +33,8 @@ namespace juce
     to connect.
 
     @see InterprocessConnection
+
+    @tags{Events}
 */
 class JUCE_API  InterprocessConnectionServer    : private Thread
 {

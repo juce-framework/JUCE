@@ -32,6 +32,8 @@ namespace juce
     A PropertyComponent that shows its value as editable text.
 
     @see PropertyComponent
+
+    @tags{GUI}
 */
 class JUCE_API  TextPropertyComponent  : public PropertyComponent
 {
@@ -122,6 +124,7 @@ public:
     void colourChanged() override;
 
     //==============================================================================
+    /** Used to receive callbacks for text changes */
     class JUCE_API Listener
     {
     public:

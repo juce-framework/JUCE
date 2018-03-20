@@ -35,6 +35,8 @@ namespace juce
     One of these acts with a StretchableLayoutManager to resize the other components.
 
     @see StretchableLayoutManager
+
+    @tags{GUI}
 */
 class JUCE_API  StretchableLayoutResizerBar  : public Component
 {

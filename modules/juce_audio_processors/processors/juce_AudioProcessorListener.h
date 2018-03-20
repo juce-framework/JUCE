@@ -34,6 +34,8 @@ namespace juce
     Use AudioProcessor::addListener() to register your listener with an AudioProcessor.
 
     @see AudioProcessor
+
+    @tags{Audio}
 */
 class JUCE_API  AudioProcessorListener
 {

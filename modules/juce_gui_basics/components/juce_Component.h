@@ -30,6 +30,8 @@ namespace juce
 //==============================================================================
 /**
     The base class for all JUCE user-interface objects.
+
+    @tags{GUI}
 */
 class JUCE_API  Component  : public MouseListener
 {

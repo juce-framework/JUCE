@@ -32,6 +32,8 @@ namespace juce
 
     Negative values are possible, but the value isn't stored as 2s-complement, so
     be careful if you use negative values and look at the values of individual bits.
+
+    @tags{Core}
 */
 class JUCE_API  BigInteger
 {

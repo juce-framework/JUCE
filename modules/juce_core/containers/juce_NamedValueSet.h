@@ -28,6 +28,8 @@ namespace juce
 
     This can be used as a basic structure to hold a set of var object, which can
     be retrieved by using their identifier.
+
+    @tags{Core}
 */
 class JUCE_API  NamedValueSet
 {
@@ -50,6 +52,7 @@ public:
     bool operator!= (const NamedValueSet&) const noexcept;
 
     //==============================================================================
+    /** Structure for a named var object */
     struct JUCE_API  NamedValue
     {
         NamedValue() noexcept;

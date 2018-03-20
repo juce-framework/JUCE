@@ -32,6 +32,8 @@ namespace juce
     an object, based upon a keypress event.
 
     It's currently used internally by the TextEditor and CodeEditorComponent.
+
+    @tags{GUI}
 */
 template <class CallbackClass>
 struct TextEditorKeyMapper

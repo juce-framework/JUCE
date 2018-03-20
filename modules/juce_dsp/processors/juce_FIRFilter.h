@@ -48,6 +48,8 @@ namespace FIR
         thanks to FFT.
 
         @see FIRFilter::Coefficients, Convolution, FFT
+
+        @tags{DSP}
     */
     template <typename SampleType>
     class Filter
@@ -208,6 +210,8 @@ namespace FIR
         A set of coefficients for use in an FIRFilter object.
 
         @see FIRFilter
+
+        @tags{DSP}
     */
     template <typename NumericType>
     struct Coefficients  : public ProcessorState

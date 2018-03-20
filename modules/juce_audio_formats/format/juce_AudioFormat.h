@@ -33,6 +33,8 @@ namespace juce
     file formats.
 
     @see AudioFormatReader, AudioFormatWriter, WavAudioFormat, AiffAudioFormat
+
+    @tags{Audio}
 */
 class JUCE_API  AudioFormat
 {

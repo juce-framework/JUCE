@@ -40,6 +40,8 @@ namespace juce
     You should derive your own class from this base class, and if you're building a
     plugin, you should implement a global function called createPluginFilter() which
     creates and returns a new instance of your subclass.
+
+    @tags{Audio}
 */
 class JUCE_API  AudioProcessor
 {
@@ -1480,6 +1482,7 @@ protected:
         bool isActivatedByDefault;
     };
 
+    /** Structure used for AudioProcessor Callbacks */
     struct BusesProperties
     {
         /** The layouts of the input buses */

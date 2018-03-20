@@ -32,6 +32,8 @@ namespace juce
     it, and any subsequent attempts to call write() will cause an assertion.
 
     @see GZIPDecompressorInputStream
+
+    @tags{Core}
 */
 class JUCE_API  GZIPCompressorOutputStream  : public OutputStream
 {

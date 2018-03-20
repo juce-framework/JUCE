@@ -32,6 +32,8 @@ namespace juce
     dream of.
 
     @see StringArray, StringPairArray
+
+    @tags{Core}
 */
 class JUCE_API  String  final
 {
@@ -1415,7 +1417,7 @@ JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, StringRef
 
 } // namespace juce
 
-#if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS // just used to avoid compiling this under compilers that lack libc++
+#if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS && ! DOXYGEN // just used to avoid compiling this under compilers that lack libc++
 namespace std
 {
     template <> struct hash<juce::String>

@@ -36,6 +36,8 @@ class ScopedNoDenormals;
 /**
     A collection of simple vector operations on arrays of floats, accelerated with
     SIMD instructions where possible.
+
+    @tags{Audio}
 */
 class JUCE_API  FloatVectorOperations
 {
@@ -237,6 +239,8 @@ private:
 /**
      Helper class providing an RAII-based mechanism for temporarily disabling
      denormals on your CPU.
+
+    @tags{Audio}
 */
 class ScopedNoDenormals
 {

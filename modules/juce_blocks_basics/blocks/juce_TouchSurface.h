@@ -25,6 +25,8 @@ namespace juce
 
 /**
     Represents the touch surface of a BLOCKS device.
+
+    @tags{Blocks}
 */
 class TouchSurface
 {
@@ -35,6 +37,7 @@ public:
     virtual ~TouchSurface();
 
     //==============================================================================
+    /** Structure used to describe touch properties */
     struct Touch
     {
         /** A touch index, which will stay constant for each finger as it is tracked. */

@@ -36,6 +36,10 @@ namespace juce
 
 using namespace BlocksProtocol;
 
+/** Manages the configuration of blocks
+
+    @tags{Blocks}
+*/
 struct BlockConfigManager
 {
     void setDeviceIndex (TopologyIndex newDeviceIndex)                       { deviceIndex = newDeviceIndex; }
@@ -52,6 +56,7 @@ struct BlockConfigManager
 
     static constexpr uint32 numConfigItems = 61;
 
+    /** Structure describing a configuration */
     struct ConfigDescription
     {
         ConfigItemId item;

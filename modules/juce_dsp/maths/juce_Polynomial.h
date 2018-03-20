@@ -31,6 +31,8 @@ namespace dsp
 
 /**
     A class representing a polynomial
+
+    @tags{DSP}
 */
 template <typename FloatingType>
 class Polynomial

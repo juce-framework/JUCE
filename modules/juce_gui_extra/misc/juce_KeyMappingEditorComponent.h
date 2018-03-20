@@ -33,6 +33,8 @@ namespace juce
     object.
 
     @see KeyPressMappingSet
+
+    @tags{GUI}
 */
 class JUCE_API  KeyMappingEditorComponent  : public Component
 {

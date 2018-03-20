@@ -35,6 +35,8 @@ namespace juce
     table cells, and reacting to events.
 
     @see TableListBox
+
+    @tags{GUI}
 */
 class JUCE_API  TableListBoxModel
 {
@@ -203,6 +205,8 @@ private:
 
 
     @see TableListBoxModel, TableHeaderComponent
+
+    @tags{GUI}
 */
 class JUCE_API  TableListBox   : public ListBox,
                                  private ListBoxModel,

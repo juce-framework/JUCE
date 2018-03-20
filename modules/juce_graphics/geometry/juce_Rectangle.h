@@ -32,6 +32,8 @@ namespace juce
     Manages a rectangle and allows geometric operations to be performed on it.
 
     @see RectangleList, Path, Line, Point
+
+    @tags{Graphics}
 */
 template <typename ValueType>
 class Rectangle

@@ -30,6 +30,8 @@ namespace juce
 //==============================================================================
 /**
     Handles reading/writing to the system's clipboard.
+
+    @tags{GUI}
 */
 class JUCE_API  SystemClipboard
 {

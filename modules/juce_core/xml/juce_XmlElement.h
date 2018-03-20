@@ -131,6 +131,8 @@ namespace juce
     @endcode
 
     @see XmlDocument
+
+    @tags{Core}
 */
 class JUCE_API  XmlElement
 {

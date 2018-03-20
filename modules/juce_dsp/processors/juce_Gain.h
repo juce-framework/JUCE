@@ -31,6 +31,8 @@ namespace dsp
 
 /**
     Applies a gain to audio samples as single samples or AudioBlocks.
+
+    @tags{DSP}
 */
 template <typename FloatType>
 class Gain

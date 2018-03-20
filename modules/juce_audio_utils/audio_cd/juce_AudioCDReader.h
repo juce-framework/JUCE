@@ -39,6 +39,8 @@ namespace juce
     within the stream.
 
     @see AudioFormatReader
+
+    @tags{Audio}
 */
 class JUCE_API  AudioCDReader  : public AudioFormatReader
 {

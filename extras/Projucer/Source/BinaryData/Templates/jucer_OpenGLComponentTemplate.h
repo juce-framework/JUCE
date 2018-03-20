@@ -8,19 +8,19 @@
 
 #pragma once
 
-INCLUDE_JUCE
+%%include_juce%%
 
 //==============================================================================
 /*
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class CONTENTCOMPCLASS   : public OpenGLAppComponent
+class %%content_component_class%%   : public OpenGLAppComponent
 {
 public:
     //==============================================================================
-    CONTENTCOMPCLASS();
-    ~CONTENTCOMPCLASS();
+    %%content_component_class%%();
+    ~%%content_component_class%%();
 
     //==============================================================================
     void initialise() override;
@@ -36,5 +36,5 @@ private:
     // Your private member variables go here...
 
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CONTENTCOMPCLASS)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)
 };

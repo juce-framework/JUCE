@@ -108,8 +108,7 @@ void ProjucerLookAndFeel::drawButtonBackground (Graphics& g,
     const auto cornerSize = button.findParentComponentOfClass<PropertyComponent>() != nullptr ? 0.0f : 3.0f;
     const auto bounds = button.getLocalBounds().toFloat();
 
-    auto baseColour = backgroundColour.withMultipliedSaturation (button.hasKeyboardFocus (true) ? 1.3f : 0.9f)
-                                      .withMultipliedAlpha (button.isEnabled() ? 1.0f : 0.5f);
+    auto baseColour = backgroundColour.withMultipliedAlpha (button.isEnabled() ? 1.0f : 0.5f);
 
     if (isButtonDown || isMouseOverButton)
         baseColour = baseColour.contrasting (isButtonDown ? 0.2f : 0.05f);

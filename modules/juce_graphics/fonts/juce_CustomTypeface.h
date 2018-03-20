@@ -43,6 +43,8 @@ namespace juce
     and then call Typeface::createSystemTypefaceFor() to load it from memory.
 
     @see Typeface, Font
+
+    @tags{Graphics}
 */
 class JUCE_API  CustomTypeface  : public Typeface
 {

@@ -42,6 +42,8 @@ namespace juce
     matching OSC address patterns.
 
     @see OSCMessageListener, OSCAddressPattern, OSCMessage
+
+    @tags{OSC}
 */
 class JUCE_API  OSCAddress
 {
@@ -92,6 +94,8 @@ private:
     of the message.
 
     @see OSCMessage, OSCAddress, OSCMessageListener
+
+    @tags{OSC}
 */
 class JUCE_API  OSCAddressPattern
 {

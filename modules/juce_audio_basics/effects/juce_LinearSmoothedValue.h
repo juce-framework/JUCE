@@ -27,9 +27,9 @@ namespace juce
 /**
     Utility class for linearly smoothed values like volume etc. that should
     not change abruptly but as a linear ramp, to avoid audio glitches.
-*/
 
-//==============================================================================
+    @tags{Audio}
+*/
 template <typename FloatType>
 class LinearSmoothedValue
 {

@@ -36,6 +36,8 @@ namespace juce
 
     You can retrieve the hash as a raw 32-byte block, or as a 64-digit hex string.
     @see MD5
+
+    @tags{Cryptography}
 */
 class JUCE_API  SHA256
 {

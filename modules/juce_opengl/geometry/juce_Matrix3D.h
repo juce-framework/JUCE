@@ -32,6 +32,8 @@ namespace juce
     A 4x4 3D transformation matrix.
 
     @see Vector3D, Quaternion, AffineTransform
+
+    @tags{OpenGL}
 */
 template <typename Type>
 class Matrix3D

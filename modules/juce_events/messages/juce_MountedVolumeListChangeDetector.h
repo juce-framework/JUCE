@@ -34,6 +34,8 @@ namespace juce
     to get the callbacks, there's no need to do anything else.
 
     @see File::findFileSystemRoots()
+
+    @tags{Events}
 */
 class JUCE_API  MountedVolumeListChangeDetector
 {

@@ -37,6 +37,8 @@ namespace juce
     JUCE 2D operations.
 
     @see Image, ImageType, ImagePixelData, OpenGLFrameBuffer
+
+    @tags{OpenGL}
 */
 class JUCE_API  OpenGLImageType     : public ImageType
 {
