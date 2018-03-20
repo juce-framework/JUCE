@@ -149,7 +149,7 @@ public:
     {
         name = getName();
 
-        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + "Android");
+        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderForExporter (getValueTreeTypeName()));
     }
 
     //==============================================================================

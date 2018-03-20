@@ -74,7 +74,7 @@ public:
     {
         name = getName();
 
-        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + "CLion");
+        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderForExporter (getValueTreeTypeName()));
     }
 
     //==============================================================================

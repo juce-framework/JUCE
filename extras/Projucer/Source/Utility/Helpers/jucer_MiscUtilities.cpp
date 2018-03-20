@@ -292,7 +292,7 @@ bool fileNeedsCppSyntaxHighlighting (const File& file)
 }
 
 //==============================================================================
-bool isJUCEModule (const String& moduleID) noexcept
+StringArray getJUCEModules() noexcept
 {
     static StringArray juceModuleIds =
     {
@@ -319,12 +319,12 @@ bool isJUCEModule (const String& moduleID) noexcept
         "juce_video"
     };
 
-    return juceModuleIds.contains (moduleID);
+    return juceModuleIds;
 }
 
-bool isValidExporterName (const String& exporterName) noexcept
+StringArray getJUCEExporters (bool lowerCase) noexcept
 {
-    static StringArray validExporters =
+    static StringArray validExportersUpper =
     {
         "XCODE_MAC",
         "XCODE_IPHONE",
@@ -334,10 +334,38 @@ bool isValidExporterName (const String& exporterName) noexcept
         "LINUX_MAKE",
         "ANDROIDSTUDIO",
         "CODEBLOCKS_WINDOWS",
-        "CODEBLOCKS_LINUX"
+        "CODEBLOCKS_LINUX",
+        "CLION"
     };
 
-    return validExporters.contains (exporterName);
+    static StringArray validExportersLower =
+    {
+        "xcode_mac",
+        "xcode_iphone",
+        "vs2013",
+        "vs2015",
+        "vs2017",
+        "linux_make",
+        "androidstudio",
+        "codeblocks_windows",
+        "codeblocks_linux",
+        "clion"
+    };
+
+    if (lowerCase)
+        return validExportersLower;
+
+    return validExportersUpper;
+}
+
+bool isJUCEModule (const String& moduleID) noexcept
+{
+    return getJUCEModules().contains (moduleID);
+}
+
+bool isValidExporterName (const String& exporterName) noexcept
+{
+    return getJUCEExporters().contains (exporterName);
 }
 
 String getTargetFolderForExporter (const String& exporterName) noexcept
@@ -351,6 +379,7 @@ String getTargetFolderForExporter (const String& exporterName) noexcept
     if (exporterName == "ANDROIDSTUDIO")         return "Android";
     if (exporterName == "CODEBLOCKS_WINDOWS")    return "CodeBlocksWindows";
     if (exporterName == "CODEBLOCKS_LINUX")      return "CodeBlocksLinux";
+    if (exporterName == "CLION")                 return "CLion";
 
     return {};
 }

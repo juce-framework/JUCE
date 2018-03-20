@@ -58,6 +58,9 @@ void addPlistDictionaryKeyInt (XmlElement* xml, const String& key, int value);
 
 bool fileNeedsCppSyntaxHighlighting (const File& file);
 
+StringArray getJUCEModules() noexcept;
+StringArray getJUCEExporters (bool lowerCase = false) noexcept;
+
 bool isJUCEModule (const String& moduleID) noexcept;
 bool isValidExporterName (const String& exporterName) noexcept;
 String getTargetFolderForExporter (const String& exporterName) noexcept;

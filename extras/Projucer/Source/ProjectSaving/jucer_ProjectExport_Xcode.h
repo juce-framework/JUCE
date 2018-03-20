@@ -89,7 +89,7 @@ public:
     {
         name = iOS ? getNameiOS() : getNameMac();
 
-        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + (iOS ? "iOS" : "MacOSX"));
+        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderForExporter (getValueTreeTypeName (isIOS)));
     }
 
     static XcodeProjectExporter* createForSettings (Project& project, const ValueTree& settings)

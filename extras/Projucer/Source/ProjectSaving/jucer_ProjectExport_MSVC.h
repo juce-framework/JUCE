@@ -31,7 +31,7 @@
 class MSVCProjectExporterBase   : public ProjectExporter
 {
 public:
-    MSVCProjectExporterBase (Project& p, const ValueTree& t, const char* const folderName)
+    MSVCProjectExporterBase (Project& p, const ValueTree& t, String folderName)
         : ProjectExporter (p, t),
           IPPLibraryValue       (settings, Ids::IPPLibrary,                   getUndoManager()),
           platformToolsetValue  (settings, Ids::toolset,                      getUndoManager()),
@@ -1810,7 +1810,7 @@ class MSVCProjectExporterVC2013  : public MSVCProjectExporterBase
 {
 public:
     MSVCProjectExporterVC2013 (Project& p, const ValueTree& t)
-        : MSVCProjectExporterBase (p, t, "VisualStudio2013")
+        : MSVCProjectExporterBase (p, t, getTargetFolderForExporter (getValueTreeTypeName()))
     {
         name = getName();
 
@@ -1856,7 +1856,7 @@ class MSVCProjectExporterVC2015  : public MSVCProjectExporterBase
 {
 public:
     MSVCProjectExporterVC2015 (Project& p, const ValueTree& t)
-        : MSVCProjectExporterBase (p, t, "VisualStudio2015")
+        : MSVCProjectExporterBase (p, t, getTargetFolderForExporter (getValueTreeTypeName()))
     {
         name = getName();
 
@@ -1901,7 +1901,7 @@ class MSVCProjectExporterVC2017  : public MSVCProjectExporterBase
 {
 public:
     MSVCProjectExporterVC2017 (Project& p, const ValueTree& t)
-        : MSVCProjectExporterBase (p, t, "VisualStudio2017")
+        : MSVCProjectExporterBase (p, t, getTargetFolderForExporter (getValueTreeTypeName()))
     {
         name = getName();
 
