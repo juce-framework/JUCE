@@ -151,11 +151,12 @@ private:
 //==============================================================================
 TextPropertyComponent::TextPropertyComponent (const String& name,
                                               int maxNumChars,
-                                              bool isMultiLine,
+                                              bool multiLine,
                                               bool isEditable)
-    : PropertyComponent (name)
+    : PropertyComponent (name),
+      isMultiLine (multiLine)
 {
-    createEditor (maxNumChars, isMultiLine, isEditable);
+    createEditor (maxNumChars, isEditable);
 }
 
 TextPropertyComponent::TextPropertyComponent (const Value& valueToControl,
@@ -198,7 +199,7 @@ Value& TextPropertyComponent::getValue() const
     return textEditor->getTextValue();
 }
 
-void TextPropertyComponent::createEditor (int maxNumChars, bool isMultiLine, bool isEditable)
+void TextPropertyComponent::createEditor (int maxNumChars, bool isEditable)
 {
     textEditor.reset (new LabelComp (*this, maxNumChars, isMultiLine, isEditable));
     addAndMakeVisible (textEditor.get());

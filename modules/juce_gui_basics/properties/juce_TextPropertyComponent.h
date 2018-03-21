@@ -107,6 +107,10 @@ public:
     Value& getValue() const;
 
     //==============================================================================
+    /** Returns true if the text editor allows carriage returns. */
+    bool isTextEditorMultiLine() const noexcept    { return isMultiLine; }
+
+    //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the component.
 
         These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
@@ -164,6 +168,8 @@ public:
     virtual void textWasEdited();
 
 private:
+    bool isMultiLine;
+
     class RemapperValueSourceWithDefault;
 
     class LabelComp;
@@ -173,7 +179,7 @@ private:
     ListenerList<Listener> listenerList;
 
     void callListeners();
-    void createEditor (int maxNumChars, bool isMultiLine, bool isEditable);
+    void createEditor (int maxNumChars, bool isEditable);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextPropertyComponent)
 };
