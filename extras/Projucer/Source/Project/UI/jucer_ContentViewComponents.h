@@ -294,7 +294,8 @@ public:
 
             pp->setBounds (40, height, width - 50, propertyHeight);
 
-            resizePropertyComponent (pp);
+            if (shouldResizePropertyComponent (pp))
+                resizePropertyComponent (pp);
 
             height += pp->getHeight() + 10;
         }
@@ -318,6 +319,37 @@ public:
         descriptionLayout.draw (g, textArea);
     }
 
+    OwnedArray<PropertyComponent> properties;
+
+private:
+    OwnedArray<InfoButton> infoButtons;
+    ContentViewHeader header;
+    AttributedString description;
+    TextLayout descriptionLayout;
+    int headerSize = 40;
+
+    //==============================================================================
+    bool shouldResizePropertyComponent (PropertyComponent* p)
+    {
+        if (auto* textComp = dynamic_cast<TextPropertyComponent*> (p))
+            return ! textComp->isTextEditorMultiLine();
+
+        return (dynamic_cast<ChoicePropertyComponent*>  (p) != nullptr
+             || dynamic_cast<ButtonPropertyComponent*>  (p) != nullptr
+             || dynamic_cast<BooleanPropertyComponent*> (p) != nullptr);
+    }
+
+    void resizePropertyComponent (PropertyComponent* pp)
+    {
+        for (auto i = pp->getNumChildComponents() - 1; i >= 0; --i)
+        {
+            auto* child = pp->getChildComponent (i);
+
+            auto bounds = child->getBounds();
+            child->setBounds (bounds.withSizeKeepingCentre (child->getWidth(), pp->getPreferredHeight()));
+        }
+    }
+
     int getHeightMultiplier (PropertyComponent* pp)
     {
         auto availableTextWidth = ProjucerLookAndFeel::getTextWidthForPropertyComponent (pp);
@@ -331,28 +363,6 @@ public:
         return static_cast<int> (nameWidth / availableTextWidth);
     }
 
-    void resizePropertyComponent (PropertyComponent* pp)
-    {
-        if (pp->getName() == "Dependencies")
-            return;
-
-        for (auto i = pp->getNumChildComponents() - 1; i >= 0; --i)
-        {
-            auto* child = pp->getChildComponent (i);
-
-            auto bounds = child->getBounds();
-            child->setBounds (bounds.withSizeKeepingCentre (child->getWidth(), pp->getPreferredHeight()));
-        }
-    }
-
-    OwnedArray<PropertyComponent> properties;
-
-private:
-    OwnedArray<InfoButton> infoButtons;
-    ContentViewHeader header;
-    AttributedString description;
-    TextLayout descriptionLayout;
-    int headerSize = 40;
-
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PropertyGroupComponent)
 };
