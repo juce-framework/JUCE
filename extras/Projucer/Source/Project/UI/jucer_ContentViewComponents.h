@@ -263,6 +263,9 @@ public:
                 infoButtons.getLast()->setAssociatedComponent (prop);
                 prop->setTooltip ({}); // set the tooltip to empty so it only displays when its button is clicked
             }
+
+            if (auto* multiChoice = dynamic_cast<MultiChoicePropertyComponent*> (prop))
+                multiChoice->onHeightChange = [this] { updateSize (getX(), getY(), getWidth()); };
         }
     }
 

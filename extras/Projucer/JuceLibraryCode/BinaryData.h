@@ -164,8 +164,14 @@ namespace BinaryData
     extern const char*   jucer_OpenGLComponentTemplate_h;
     const int            jucer_OpenGLComponentTemplate_hSize = 1263;
 
+    extern const char*   jucer_PIPAudioProcessorTemplate_h;
+    const int            jucer_PIPAudioProcessorTemplate_hSize = 4926;
+
     extern const char*   jucer_PIPMain_cpp;
     const int            jucer_PIPMain_cppSize = 2446;
+
+    extern const char*   jucer_PIPTemplate_h;
+    const int            jucer_PIPTemplate_hSize = 517;
 
     extern const char*   colourscheme_dark_xml;
     const int            colourscheme_dark_xmlSize = 1050;
@@ -189,7 +195,7 @@ namespace BinaryData
     extern const char* namedResourceList[];
 
     // Number of elements in the namedResourceList array.
-    const int namedResourceListSize = 59;
+    const int namedResourceListSize = 61;
 
     // If you provide the name of one of the binary resource variables above, this function will
     // return the corresponding data and its size (or a null pointer if the name isn't found).

@@ -37,6 +37,7 @@
 #include "Windows/jucer_ApplicationUsageDataWindowComponent.h"
 #include "Windows/jucer_EditorColourSchemeWindowComponent.h"
 #include "Windows/jucer_GlobalPathsWindowComponent.h"
+#include "Windows/jucer_PIPCreatorWindowComponent.h"
 #include "Windows/jucer_FloatingToolWindow.h"
 
 #include "../LiveBuildEngine/jucer_MessageIDs.h"

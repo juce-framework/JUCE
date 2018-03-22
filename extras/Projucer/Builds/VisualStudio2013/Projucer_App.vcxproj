@@ -1450,6 +1450,7 @@
     <ClInclude Include="..\..\Source\Application\Windows\jucer_EditorColourSchemeWindowComponent.h"/>
     <ClInclude Include="..\..\Source\Application\Windows\jucer_FloatingToolWindow.h"/>
     <ClInclude Include="..\..\Source\Application\Windows\jucer_GlobalPathsWindowComponent.h"/>
+    <ClInclude Include="..\..\Source\Application\Windows\jucer_PIPCreatorWindowComponent.h"/>
     <ClInclude Include="..\..\Source\Application\Windows\jucer_SVGPathDataWindowComponent.h"/>
     <ClInclude Include="..\..\Source\Application\Windows\jucer_TranslationToolWindowComponent.h"/>
     <ClInclude Include="..\..\Source\Application\Windows\jucer_UTF8WindowComponent.h"/>
@@ -1476,6 +1477,8 @@
     <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_NewInlineComponentTemplate.h"/>
     <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_OpenGLComponentSimpleTemplate.h"/>
     <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_OpenGLComponentTemplate.h"/>
+    <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_PIPAudioProcessorTemplate.h"/>
+    <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_PIPTemplate.h"/>
     <ClInclude Include="..\..\Source\CodeEditor\jucer_DocumentEditorComponent.h"/>
     <ClInclude Include="..\..\Source\CodeEditor\jucer_ItemPreviewComponent.h"/>
     <ClInclude Include="..\..\Source\CodeEditor\jucer_LiveBuildCodeEditor.h"/>
