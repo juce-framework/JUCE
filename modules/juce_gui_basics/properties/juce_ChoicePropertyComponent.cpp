@@ -155,7 +155,7 @@ ChoicePropertyComponent::ChoicePropertyComponent (const Value& valueToControl,
                                                                              correspondingValues)));
 }
 
-ChoicePropertyComponent::ChoicePropertyComponent (ValueWithDefault valueToControl,
+ChoicePropertyComponent::ChoicePropertyComponent (const ValueWithDefault& valueToControl,
                                                   const String& name,
                                                   const StringArray& choiceList,
                                                   const Array<var>& correspondingValues)
@@ -167,7 +167,7 @@ ChoicePropertyComponent::ChoicePropertyComponent (ValueWithDefault valueToContro
                                                                                         correspondingValues)));
 }
 
-ChoicePropertyComponent::ChoicePropertyComponent (ValueWithDefault valueToControl,
+ChoicePropertyComponent::ChoicePropertyComponent (const ValueWithDefault& valueToControl,
                                                   const String& name)
     : PropertyComponent (name),
       choices ({ "Enabled", "Disabled" })
