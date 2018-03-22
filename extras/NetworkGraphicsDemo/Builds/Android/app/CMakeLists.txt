@@ -1081,6 +1081,8 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_gui_basics/properties/juce_ButtonPropertyComponent.h"
     "../../../../../modules/juce_gui_basics/properties/juce_ChoicePropertyComponent.cpp"
     "../../../../../modules/juce_gui_basics/properties/juce_ChoicePropertyComponent.h"
+    "../../../../../modules/juce_gui_basics/properties/juce_MultiChoicePropertyComponent.cpp"
+    "../../../../../modules/juce_gui_basics/properties/juce_MultiChoicePropertyComponent.h"
     "../../../../../modules/juce_gui_basics/properties/juce_PropertyComponent.cpp"
     "../../../../../modules/juce_gui_basics/properties/juce_PropertyComponent.h"
     "../../../../../modules/juce_gui_basics/properties/juce_PropertyPanel.cpp"
@@ -2320,6 +2322,8 @@ set_source_files_properties("../../../../../modules/juce_gui_basics/properties/j
 set_source_files_properties("../../../../../modules/juce_gui_basics/properties/juce_ButtonPropertyComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/properties/juce_ChoicePropertyComponent.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/properties/juce_ChoicePropertyComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_basics/properties/juce_MultiChoicePropertyComponent.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_basics/properties/juce_MultiChoicePropertyComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/properties/juce_PropertyComponent.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/properties/juce_PropertyComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/properties/juce_PropertyPanel.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
