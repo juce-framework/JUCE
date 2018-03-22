@@ -387,7 +387,7 @@ const FloatType MathConstants<FloatType>::sqrt2 = static_cast<FloatType> (1.4142
 
 #endif
 
-
+#ifndef DOXYGEN
 /** A double-precision constant for pi.
     @deprecated This is deprecated in favour of MathConstants<double>::pi.
     The reason is that "double_Pi" was a confusing name, and many people misused it,
@@ -401,7 +401,7 @@ const JUCE_CONSTEXPR double  double_Pi  = MathConstants<double>::pi;
     wrongly thinking it meant 2 * pi !
 */
 const JUCE_CONSTEXPR float   float_Pi   = MathConstants<float>::pi;
-
+#endif
 
 /** Converts an angle in degrees to radians. */
 template <typename FloatType>
