@@ -323,7 +323,7 @@ public:
     //==============================================================================
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override
     {
-        return (layouts.getMainOutputChannels() == 2);
+        return (layouts.getMainOutputChannels() <= 2);
     }
 
     void prepareToPlay (double sampleRate, int estimatedMaxSizeOfBuffer) override
