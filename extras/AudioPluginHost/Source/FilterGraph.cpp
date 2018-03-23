@@ -49,7 +49,7 @@ FilterGraph::FilterGraph (AudioPluginFormatManager& fm)
 
 FilterGraph::~FilterGraph()
 {
-    graph.addListener (this);
+    graph.removeListener (this);
     graph.removeChangeListener (this);
     graph.clear();
 }
