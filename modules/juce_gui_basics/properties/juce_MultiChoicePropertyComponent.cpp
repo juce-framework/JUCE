@@ -29,6 +29,21 @@ namespace juce
 {
 
 //==============================================================================
+class StringComparator
+{
+public:
+    static int compareElements (var first, var second)
+    {
+        if (first.toString() > second.toString())
+            return 1;
+        else if (first.toString() < second.toString())
+            return -1;
+
+        return 0;
+    }
+};
+
+//==============================================================================
 class MultiChoicePropertyComponent::MultiChoiceRemapperSource    : public Value::ValueSource,
                                                                    private Value::Listener
 {
@@ -44,21 +59,26 @@ public:
     {
         if (auto* arr = sourceValue.getValue().getArray())
             if (arr->contains (varToControl))
-                return 1;
+                return true;
 
-        return 0;
+        return false;
     }
 
     void setValue (const var& newValue) override
     {
         if (auto* arr = sourceValue.getValue().getArray())
         {
-            auto newValueInt = static_cast<int> (newValue);
+            auto temp = *arr;
 
-            if (newValueInt == 1)
-                arr->addIfNotAlreadyThere (varToControl);
+            if (static_cast<bool> (newValue))
+                temp.addIfNotAlreadyThere (varToControl);
             else
-                arr->remove (arr->indexOf (varToControl));
+                temp.remove (arr->indexOf (varToControl));
+
+            StringComparator c;
+            temp.sort (c);
+
+            sourceValue = temp;
         }
     }
 
@@ -77,7 +97,7 @@ class MultiChoicePropertyComponent::MultiChoiceRemapperSourceWithDefault    : pu
                                                                               private Value::Listener
 {
 public:
-    MultiChoiceRemapperSourceWithDefault (const ValueWithDefault& vwd, var v)
+    MultiChoiceRemapperSourceWithDefault (ValueWithDefault& vwd, var v)
         : valueWithDefault (vwd),
           sourceValue (valueWithDefault.getPropertyAsValue()),
           varToControl (v)
@@ -89,26 +109,31 @@ public:
     {
         if (auto* arr = valueWithDefault.get().getArray())
             if (arr->contains (varToControl))
-                return 1;
+                return true;
 
-        return 0;
+        return false;
     }
 
     void setValue (const var& newValue) override
     {
         if (auto* arr = valueWithDefault.get().getArray())
         {
-            auto newValueInt = static_cast<int> (newValue);
+            auto temp = *arr;
 
-            if (newValueInt == 1)
-                arr->addIfNotAlreadyThere (varToControl);
+            if (static_cast<bool> (newValue))
+                temp.addIfNotAlreadyThere (varToControl);
             else
-                arr->remove (arr->indexOf (varToControl));
+                temp.remove (arr->indexOf (varToControl));
+
+            StringComparator c;
+            temp.sort (c);
+
+            valueWithDefault = temp;
         }
     }
 
 private:
-    ValueWithDefault valueWithDefault;
+    ValueWithDefault& valueWithDefault;
     Value sourceValue;
     var varToControl;
 
@@ -161,7 +186,7 @@ MultiChoicePropertyComponent::MultiChoicePropertyComponent (const Value& valueTo
                                                                                                correspondingValues[i])));
 }
 
-MultiChoicePropertyComponent::MultiChoicePropertyComponent (const ValueWithDefault& valueToControl,
+MultiChoicePropertyComponent::MultiChoicePropertyComponent (ValueWithDefault& valueToControl,
                                                             const String& propertyName,
                                                             const StringArray& choices,
                                                             const Array<var>& correspondingValues)
@@ -173,6 +198,8 @@ MultiChoicePropertyComponent::MultiChoicePropertyComponent (const ValueWithDefau
     for (int i = 0; i < choiceButtons.size(); ++i)
         choiceButtons[i]->getToggleStateValue().referTo (Value (new MultiChoiceRemapperSourceWithDefault (valueToControl,
                                                                                                           correspondingValues[i])));
+
+    valueToControl.onDefaultChange = [this] { repaint(); };
 }
 
 void MultiChoicePropertyComponent::paint (Graphics& g)

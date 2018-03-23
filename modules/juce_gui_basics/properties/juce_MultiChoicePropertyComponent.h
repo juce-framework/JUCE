@@ -67,7 +67,7 @@ public:
                                     valueToControl value. This array must contain the same number of items
                                     as the choices array
     */
-    MultiChoicePropertyComponent (const ValueWithDefault& valueToControl,
+    MultiChoicePropertyComponent (ValueWithDefault& valueToControl,
                                   const String& propertyName,
                                   const StringArray& choices,
                                   const Array<var>& correspondingValues);
