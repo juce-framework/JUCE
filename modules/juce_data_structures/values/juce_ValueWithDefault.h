@@ -94,7 +94,12 @@ public:
     void setDefault (const var& newDefault)
     {
         if (defaultValue != newDefault)
+        {
             defaultValue = newDefault;
+
+            if (onDefaultChange != nullptr)
+                onDefaultChange();
+        }
     }
 
     /** Returns true if the property does not exist or is empty. */
@@ -108,6 +113,9 @@ public:
     {
         targetTree.removeProperty (targetProperty, nullptr);
     }
+
+    /** You can assign a lambda to this callback object to have it called when the default value is changed. */
+    std::function<void()> onDefaultChange;
 
     //==============================================================================
     /** Sets the property and returns the new ValueWithDefault. This will modify the property in the referenced ValueTree. */
