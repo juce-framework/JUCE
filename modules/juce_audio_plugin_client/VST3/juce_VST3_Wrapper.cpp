@@ -2054,6 +2054,13 @@ private:
                         for (int i = 0; i < numChans; ++i)
                             if (busChannels[i] != nullptr)
                                 channelList.set (totalInputChans++, busChannels[i]);
+                            else if (FloatType* tmpBuffer = getTmpBufferForChannel<FloatType> (totalInputChans, data.numSamples))
+                            {
+                                tmpBufferNeedsClearing = true;
+                                channelList.set (totalInputChans++, tmpBuffer);
+                            }
+                            else
+                                return;
                     }
                 }
                 else
