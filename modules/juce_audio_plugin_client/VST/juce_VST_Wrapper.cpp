@@ -260,6 +260,8 @@ public:
        : hostCallback (cb),
          processor (af)
     {
+        inParameterChangedCallback = false;
+
         // VST-2 does not support disabling buses: so always enable all of them
         processor->enableAllBuses();
 
@@ -723,6 +725,8 @@ public:
             if (auto* param = processor->getParameters()[index])
             {
                 param->setValue (value);
+
+                inParameterChangedCallback = true;
                 param->sendValueChangedMessageToListeners (value);
             }
             else
@@ -740,6 +744,12 @@ public:
 
     void audioProcessorParameterChanged (AudioProcessor*, int index, float newValue) override
     {
+        if (inParameterChangedCallback.get())
+        {
+            inParameterChangedCallback = false;
+            return;
+        }
+
         if (hostCallback != nullptr)
             hostCallback (&vstEffect, hostOpcodeParameterChanged, index, 0, 0, newValue);
     }
@@ -1477,6 +1487,8 @@ private:
 
     HeapBlock<VstSpeakerConfiguration> cachedInArrangement, cachedOutArrangement;
 
+    ThreadLocalValue<bool> inParameterChangedCallback;
+
     static JuceVSTWrapper* getWrapper (VstEffectInterface* v) noexcept  { return static_cast<JuceVSTWrapper*> (v->effectPointer); }
 
     bool isProcessLevelOffline()
@@ -1828,6 +1840,8 @@ private:
             {
                 auto value = param->getValueForText (String::fromUTF8 ((char*) args.ptr));
                 param->setValue (value);
+
+                inParameterChangedCallback = true;
                 param->sendValueChangedMessageToListeners (value);
 
                 return 1;
