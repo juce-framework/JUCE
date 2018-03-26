@@ -25,7 +25,7 @@
 
  name:             MultiTouchDemo
  version:          1.0.0
- vendor:           juce
+ vendor:           JUCE
  website:          http://juce.com
  description:      Showcases multi-touch features.
 

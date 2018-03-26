@@ -25,7 +25,7 @@
 
  name:             BlocksDrawingDemo
  version:          1.0.0
- vendor:           juce
+ vendor:           JUCE
  website:          http://juce.com
  description:      Blocks application to draw shapes.
 

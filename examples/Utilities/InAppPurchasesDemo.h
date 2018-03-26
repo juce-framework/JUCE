@@ -25,7 +25,7 @@
 
  name:             InAppPurchasesDemo
  version:          1.0.0
- vendor:           juce
+ vendor:           JUCE
  website:          http://juce.com
  description:      Showcases in-app purchases features. To run this demo you must enable the
                    "In-App Purchases Capability" option in the Projucer exporter.

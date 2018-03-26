@@ -25,7 +25,7 @@
 
  name:             SystemInfoDemo
  version:          1.0.0
- vendor:           juce
+ vendor:           JUCE
  website:          http://juce.com
  description:      Displays system information.
 

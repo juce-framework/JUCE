@@ -25,7 +25,7 @@
 
  name:             LookAndFeelDemo
  version:          1.0.0
- vendor:           juce
+ vendor:           JUCE
  website:          http://juce.com
  description:      Showcases custom look and feel components.
 
