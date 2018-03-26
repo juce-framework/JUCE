@@ -1845,8 +1845,15 @@ private:
             topLevelGroupIDs.add (addEntitlementsFile (entitlements));
 
         for (auto& group : getAllGroups())
+        {
             if (group.getNumChildren() > 0)
-                topLevelGroupIDs.add (addProjectItem (group));
+            {
+                auto groupID = addProjectItem (group);
+
+                if (groupID.isNotEmpty())
+                    topLevelGroupIDs.add (groupID);
+            }
+        }
     }
 
     void addExtraGroupsToProject (StringArray& topLevelGroupIDs) const
@@ -2669,11 +2676,16 @@ private:
             StringArray childIDs;
             for (int i = 0; i < projectItem.getNumChildren(); ++i)
             {
-                auto childID = addProjectItem (projectItem.getChild(i));
+                auto child = projectItem.getChild (i);
 
-                if (childID.isNotEmpty())
+                auto childID = addProjectItem (child);
+
+                if (childID.isNotEmpty() && ! child.shouldBeAddedToXcodeResources())
                     childIDs.add (childID);
             }
+
+            if (childIDs.isEmpty())
+                return {};
 
             return addGroup (projectItem, childIDs);
         }
