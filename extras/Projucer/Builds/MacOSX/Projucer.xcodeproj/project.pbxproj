@@ -294,6 +294,7 @@
 		9F01BA9942D038EA8B5289A8 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QTKit.framework; path = System/Library/Frameworks/QTKit.framework; sourceTree = SDKROOT; };
 		9F2D3E5FC10F7C3270908E97 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_ButtonDocument.h"; path = "../../Source/ComponentEditor/Documents/jucer_ButtonDocument.h"; sourceTree = "SOURCE_ROOT"; };
 		9F959ECF8CD9B7314AE604A9 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_LabelHandler.h"; path = "../../Source/ComponentEditor/Components/jucer_LabelHandler.h"; sourceTree = "SOURCE_ROOT"; };
+		A081306A9E95CA114B81910F = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_CompileEngineSettings.h"; path = "../../Source/LiveBuildEngine/jucer_CompileEngineSettings.h"; sourceTree = "SOURCE_ROOT"; };
 		A085174413736ACC8D7D42A2 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_ProjectWizard_openGL.h"; path = "../../Source/Wizards/jucer_ProjectWizard_openGL.h"; sourceTree = "SOURCE_ROOT"; };
 		A0BBBFBA13A1308B3CD725D5 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_ComponentLayoutPanel.h"; path = "../../Source/ComponentEditor/UI/jucer_ComponentLayoutPanel.h"; sourceTree = "SOURCE_ROOT"; };
 		A160AEF56553A658E6EA6A8E = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "jucer_MainTemplate_Window.cpp"; path = "../../Source/BinaryData/Templates/jucer_MainTemplate_Window.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -629,6 +630,7 @@
 					A978DFE87D9BB5EFE5B3DAAC,
 					D2FE76E4CF003856278343CC,
 					BA186B51EE4884CD8E3F2741,
+					A081306A9E95CA114B81910F,
 					ADD6A3CF5D7DE55E57E8E38B,
 					A9954DC7F876A7006743ACB6,
 					ADA538034910F52FDD2DC88D,

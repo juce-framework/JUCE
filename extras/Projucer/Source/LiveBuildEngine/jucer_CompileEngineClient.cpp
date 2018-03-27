@@ -42,93 +42,25 @@
 #endif
 
 //==============================================================================
-namespace ProjectProperties
+static File getProjucerTempFolder() noexcept
 {
-    const Identifier liveSettingsType ("LIVE_SETTINGS");
    #if JUCE_MAC
-    const Identifier liveSettingsSubtype ("OSX");
-   #elif JUCE_WINDOWS
-    const Identifier liveSettingsSubtype ("WINDOWS");
-   #elif JUCE_LINUX
-    const Identifier liveSettingsSubtype ("LINUX");
+    return { "~/Library/Caches/com.juce.projucer" };
+   #else
+    return File::getSpecialLocation (File::tempDirectory).getChildFile ("com.juce.projucer");
+   #endif
+}
+
+static File getCacheLocationForProject (Project& project) noexcept
+{
+    auto cacheFolderName = project.getProjectFilenameRootString() + "_" + project.getProjectUIDString();
+
+   #if JUCE_DEBUG
+    cacheFolderName += "_debug";
    #endif
 
-    static ValueTree getLiveSettings (Project& project)
-    {
-        return project.getProjectRoot().getOrCreateChildWithName (liveSettingsType, nullptr)
-                                       .getOrCreateChildWithName (liveSettingsSubtype, nullptr);
-    }
-
-    static ValueWithDefault getLiveSetting (Project& p, const Identifier& i, var defaultValue = var())
-    {
-        auto tree = getLiveSettings (p);
-        return { tree, i, p.getUndoManagerFor (tree), defaultValue };
-    }
-
-    static ValueWithDefault  getUserHeaderPathValue (Project& p)                { return getLiveSetting    (p, Ids::headerPath); }
-    static ValueWithDefault  getSystemHeaderPathValue (Project& p)              { return getLiveSetting    (p, Ids::systemHeaderPath); }
-    static ValueWithDefault  getExtraDLLsValue (Project& p)                     { return getLiveSetting    (p, Ids::extraDLLs); }
-    static ValueWithDefault  getExtraCompilerFlagsValue (Project& p)            { return getLiveSetting    (p, Ids::extraCompilerFlags); }
-    static ValueWithDefault  getExtraPreprocessorDefsValue (Project& p)         { return getLiveSetting    (p, Ids::defines); }
-    static ValueWithDefault  getWindowsTargetPlatformVersionValue (Project& p)  { return getLiveSetting    (p, Ids::liveWindowsTargetPlatformVersion, "10.0.16299.0"); }
-
-    static File getProjucerTempFolder()
-    {
-       #if JUCE_MAC
-        return File ("~/Library/Caches/com.juce.projucer");
-       #else
-        return File::getSpecialLocation (File::tempDirectory).getChildFile ("com.juce.projucer");
-       #endif
-    }
-
-    static File getCacheLocation (Project& project)
-    {
-        auto cacheFolderName = project.getProjectFilenameRootString() + "_" + project.getProjectUIDString();
-
-       #if JUCE_DEBUG
-        cacheFolderName += "_debug";
-       #endif
-
-        return getProjucerTempFolder()
-                .getChildFile ("Intermediate Files")
-                .getChildFile (cacheFolderName);
-    }
+    return getProjucerTempFolder().getChildFile ("Intermediate Files").getChildFile (cacheFolderName);
 }
-
-//==============================================================================
-void LiveBuildProjectSettings::getLiveSettings (Project& project, PropertyListBuilder& props)
-{
-    using namespace ProjectProperties;
-
-    props.addSearchPathProperty (getUserHeaderPathValue (project), "User Header Paths", "User header search paths.");
-    props.addSearchPathProperty (getSystemHeaderPathValue (project), "System header paths", "System header search paths.");
-
-    props.add (new TextPropertyComponent (getExtraPreprocessorDefsValue (project), "Preprocessor Definitions", 32768, true),
-               "Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace or commas "
-               "to separate the items - to include a space or comma in a definition, precede it with a backslash.");
-
-    props.add (new TextPropertyComponent (getExtraCompilerFlagsValue (project), "Extra Compiler Flags", 2048, true),
-               "Extra command-line flags to be passed to the compiler. This string can contain references to preprocessor"
-               " definitions in the form ${NAME_OF_DEFINITION}, which will be replaced with their values.");
-
-    props.add (new TextPropertyComponent (getExtraDLLsValue (project), "Extra Dynamic Libraries", 2048, true),
-               "Extra dynamic libs that the running code may require. Use new-lines or commas to separate the items.");
-
-    props.add (new TextPropertyComponent (getWindowsTargetPlatformVersionValue (project), "Windows Target Platform", 256, false),
-                                         "The Windows target platform to use.");
-}
-
-void LiveBuildProjectSettings::updateNewlyOpenedProject (Project&) { /* placeholder */ }
-
-bool LiveBuildProjectSettings::isBuildDisabled (Project& p)
-{
-    const bool defaultBuildDisabled = true;
-    return p.getStoredProperties().getBoolValue ("buildDisabled", defaultBuildDisabled);
-}
-
-void LiveBuildProjectSettings::setBuildDisabled (Project& p, bool b)    { p.getStoredProperties().setValue ("buildDisabled", b); }
-bool LiveBuildProjectSettings::areWarningsDisabled (Project& p)         { return p.getStoredProperties().getBoolValue ("warningsDisabled"); }
-void LiveBuildProjectSettings::setWarningsDisabled (Project& p, bool b) { p.getStoredProperties().setValue ("warningsDisabled", b); }
 
 //==============================================================================
 class ClientIPC  : public MessageHandler,
@@ -161,26 +93,22 @@ public:
     void launchServer()
     {
         DBG ("Client: Launching Server...");
-        const String pipeName ("ipc_" + String::toHexString (Random().nextInt64()));
 
-        const String command (createCommandLineForLaunchingServer (pipeName,
-                                                                   owner.project.getProjectUIDString(),
-                                                                   ProjectProperties::getCacheLocation (owner.project)));
+        auto pipeName = "ipc_" + String::toHexString (Random().nextInt64());
+        auto command = createCommandLineForLaunchingServer (pipeName, owner.project.getProjectUIDString(),
+                                                            getCacheLocationForProject (owner.project));
 
        #if RUN_CLANG_IN_CHILD_PROCESS
         if (! childProcess.start (command))
-        {
             jassertfalse;
-        }
        #else
         server = createClangServer (command);
        #endif
 
-        bool ok = connectToPipe (pipeName, 10000);
-        jassert (ok);
-
-        if (ok)
+        if (connectToPipe (pipeName, 10000))
             MessageTypes::sendPing (*this);
+        else
+            jassertfalse;
 
         startTimer (serverKeepAliveTimeout);
     }
@@ -317,14 +245,14 @@ public:
         build.setSystemIncludes (getSystemIncludePaths());
         build.setUserIncludes (getUserIncludes());
 
-        build.setGlobalDefs (getGlobalDefs (project));
-        build.setCompileFlags (ProjectProperties::getExtraCompilerFlagsValue (project).get().toString().trim());
+        build.setGlobalDefs (getGlobalDefs());
+        build.setCompileFlags (project.getCompileEngineSettings().getExtraCompilerFlagsString());
         build.setExtraDLLs (getExtraDLLs());
         build.setJuceModulesFolder (EnabledModuleList::findDefaultModulesFolder (project).getFullPathName());
 
         build.setUtilsCppInclude (project.getAppIncludeFile().getFullPathName());
 
-        build.setWindowsTargetPlatformVersion (ProjectProperties::getWindowsTargetPlatformVersionValue (project).get().toString());
+        build.setWindowsTargetPlatformVersion (project.getCompileEngineSettings().getWindowsTargetPlatformVersionString());
 
         scanForProjectFiles (project, build);
 
@@ -376,15 +304,14 @@ private:
     void valueTreeParentChanged (ValueTree&) override                            { projectStructureChanged(); }
     void valueTreeChildOrderChanged (ValueTree&, int, int) override              {}
 
-    static String getGlobalDefs (Project& proj)
+    String getGlobalDefs()
     {
         StringArray defs;
 
-        defs.add (ProjectProperties::getExtraPreprocessorDefsValue (proj).get().toString());
+        defs.add (project.getCompileEngineSettings().getExtraPreprocessorDefsString());
 
         {
-            auto projectDefines = proj.getPreprocessorDefs();
-            StringArray result;
+            auto projectDefines = project.getPreprocessorDefs();
 
             for (int i = 0; i < projectDefines.size(); ++i)
             {
@@ -398,7 +325,7 @@ private:
             }
         }
 
-        for (Project::ExporterIterator exporter (proj); exporter.next();)
+        for (Project::ExporterIterator exporter (project); exporter.next();)
             if (exporter->canLaunchProject())
                 defs.add (exporter->getExporterIdentifierMacro() + "=1");
 
@@ -422,7 +349,7 @@ private:
 
         if (projectItem.shouldBeCompiled())
         {
-            const File f (projectItem.getFile());
+            auto f = projectItem.getFile();
 
             if (f.exists())
                 compileUnits.add (f);
@@ -430,7 +357,7 @@ private:
 
         if (projectItem.shouldBeAddedToTargetProject() && ! projectItem.shouldBeAddedToBinaryResources())
         {
-            const File f (projectItem.getFile());
+            auto f = projectItem.getFile();
 
             if (f.exists())
                 userFiles.add (f);
@@ -455,11 +382,11 @@ private:
             {
                 if (exporter->canLaunchProject())
                 {
-                    for (const LibraryModule* m : modules)
+                    for (auto* m : modules)
                     {
-                        const File localModuleFolder = proj.getModules().shouldCopyModuleFilesLocally (m->moduleInfo.getID()).getValue()
-                                                          ? proj.getLocalModuleFolder (m->moduleInfo.getID())
-                                                          : m->moduleInfo.getFolder();
+                        auto localModuleFolder = proj.getModules().shouldCopyModuleFilesLocally (m->moduleInfo.getID()).getValue()
+                                                        ? proj.getLocalModuleFolder (m->moduleInfo.getID())
+                                                        : m->moduleInfo.getFolder();
 
 
                         m->findAndAddCompiledUnits (*exporter, nullptr, compileUnits,
@@ -477,14 +404,14 @@ private:
 
         for (int i = 0; ; ++i)
         {
-            const File binaryDataCpp (proj.getBinaryDataCppFile (i));
+            auto binaryDataCpp = proj.getBinaryDataCppFile (i);
             if (! binaryDataCpp.exists())
                 break;
 
             compileUnits.add (binaryDataCpp);
         }
 
-        for (int i = compileUnits.size(); --i >= 0;)
+        for (auto i = compileUnits.size(); --i >= 0;)
             if (compileUnits.getReference(i).hasFileExtension (".r"))
                 compileUnits.remove (i);
 
@@ -493,14 +420,14 @@ private:
 
     static bool doesProjectMatchSavedHeaderState (Project& project)
     {
-        ValueTree liveModules (project.getProjectRoot().getChildWithName (Ids::MODULES));
+        auto liveModules = project.getProjectRoot().getChildWithName (Ids::MODULES);
 
         ScopedPointer<XmlElement> xml (XmlDocument::parse (project.getFile()));
 
         if (xml == nullptr || ! xml->hasTagName (Ids::JUCERPROJECT.toString()))
             return false;
 
-        ValueTree diskModules (ValueTree::fromXml (*xml).getChildWithName (Ids::MODULES));
+        auto diskModules = ValueTree::fromXml (*xml).getChildWithName (Ids::MODULES);
 
         return liveModules.isEquivalentTo (diskModules);
     }
@@ -521,14 +448,15 @@ private:
     {
         StringArray paths;
         paths.add (project.getGeneratedCodeFolder().getFullPathName());
-        paths.addArray (getSearchPathsFromString (ProjectProperties::getUserHeaderPathValue (project).get().toString()));
+        paths.addArray (getSearchPathsFromString (project.getCompileEngineSettings().getUserHeaderPathString()));
+
         return convertSearchPathsToAbsolute (paths);
     }
 
     StringArray getSystemIncludePaths()
     {
         StringArray paths;
-        paths.addArray (getSearchPathsFromString (ProjectProperties::getSystemHeaderPathValue (project).get().toString()));
+        paths.addArray (getSearchPathsFromString (project.getCompileEngineSettings().getSystemHeaderPathString()));
 
         auto isVST3Host = project.getModules().isModuleEnabled ("juce_audio_processors")
                        && project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3");
@@ -558,10 +486,10 @@ private:
 
     StringArray getExtraDLLs()
     {
-        StringArray dlls;
-        dlls.addTokens (ProjectProperties::getExtraDLLsValue (project).get().toString(), "\n\r,", StringRef());
+        auto dlls = StringArray::fromTokens (project.getCompileEngineSettings().getExtraDLLsString(), "\n\r,", {});
         dlls.trim();
         dlls.removeEmptyStrings();
+
         return dlls;
     }
 
@@ -570,14 +498,11 @@ private:
 
 //==============================================================================
 CompileEngineChildProcess::CompileEngineChildProcess (Project& p)
-    : project (p),
-      continuousRebuild (false)
+    : project (p)
 {
     ProjucerApplication::getApp().openDocumentManager.addListener (this);
-
     createProcess();
-
-    errorList.setWarningsEnabled (! LiveBuildProjectSettings::areWarningsDisabled (project));
+    errorList.setWarningsEnabled (project.getCompileEngineSettings().areWarningsEnabled());
 }
 
 CompileEngineChildProcess::~CompileEngineChildProcess()
@@ -773,7 +698,7 @@ private:
 
     void timerCallback() override
     {
-        if (owner.continuousRebuild)
+        if (owner.project.getCompileEngineSettings().isContinuousRebuildEnabled())
             flushEditorChanges();
         else
             stopTimer();
@@ -911,11 +836,6 @@ void CompileEngineChildProcess::handlePing()
 }
 
 //==============================================================================
-void CompileEngineChildProcess::setContinuousRebuild (bool b)
-{
-    continuousRebuild = b;
-}
-
 void CompileEngineChildProcess::flushEditorChanges()
 {
     for (Editor* ed : editors)
@@ -967,7 +887,7 @@ void CompileEngineChildProcess::handleHighlightCode (const SourceCodeRange& loca
 
 void CompileEngineChildProcess::cleanAllCachedFilesForProject (Project& p)
 {
-    File cacheFolder (ProjectProperties::getCacheLocation (p));
+    File cacheFolder (getCacheLocationForProject (p));
 
     if (cacheFolder.isDirectory())
         cacheFolder.deleteRecursively();

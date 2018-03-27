@@ -2160,6 +2160,9 @@
     <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_CompileEngineServer.h">
       <Filter>Projucer\LiveBuildEngine</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_CompileEngineSettings.h">
+      <Filter>Projucer\LiveBuildEngine</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_CppHelpers.h">
       <Filter>Projucer\LiveBuildEngine</Filter>
     </ClInclude>

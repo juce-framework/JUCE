@@ -35,7 +35,7 @@ struct LiveBuildSettingsComponent  : public Component
         addAndMakeVisible (&group);
 
         PropertyListBuilder props;
-        LiveBuildProjectSettings::getLiveSettings (p, props);
+        p.getCompileEngineSettings().getLiveSettings (props);
 
         group.setProperties (props);
         group.setName ("Live Build Settings");

@@ -94,7 +94,6 @@ public:
     void createNewProject();
     void createNewProjectFromClipboard();
     void createNewPIP();
-    void updateNewlyOpenedProject (Project&);
     void askUserToOpenFile();
     bool openFile (const File&);
     bool closeAllDocuments (bool askUserToSave);

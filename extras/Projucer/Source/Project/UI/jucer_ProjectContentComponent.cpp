@@ -1168,7 +1168,7 @@ void ProjectContentComponent::setBuildEnabled (bool isEnabled, bool displayError
         if (! displayError)
             lastCrashMessage = {};
 
-        LiveBuildProjectSettings::setBuildDisabled (*project, ! isEnabled);
+        project->getCompileEngineSettings().setBuildEnabled (isEnabled);
         killChildProcess();
         refreshTabsIfBuildStatusChanged();
 
@@ -1208,7 +1208,7 @@ void ProjectContentComponent::handleCrash (const String& message)
 
 bool ProjectContentComponent::isBuildEnabled() const
 {
-    return project != nullptr && ! LiveBuildProjectSettings::isBuildDisabled (*project)
+    return project != nullptr && project->getCompileEngineSettings().isBuildEnabled()
             && CompileEngineDLL::getInstance()->isLoaded();
 }
 
@@ -1222,7 +1222,7 @@ void ProjectContentComponent::refreshTabsIfBuildStatusChanged()
 
 bool ProjectContentComponent::areWarningsEnabled() const
 {
-    return project != nullptr && ! LiveBuildProjectSettings::areWarningsDisabled (*project);
+    return project != nullptr && project->getCompileEngineSettings().areWarningsEnabled();
 }
 
 void ProjectContentComponent::updateWarningState()
@@ -1235,7 +1235,7 @@ void ProjectContentComponent::toggleWarnings()
 {
     if (project != nullptr)
     {
-        LiveBuildProjectSettings::setWarningsDisabled (*project, areWarningsEnabled());
+        project->getCompileEngineSettings().setWarningsEnabled (! areWarningsEnabled());
         updateWarningState();
     }
 }
@@ -1314,16 +1314,14 @@ void ProjectContentComponent::timerCallback()
 
 bool ProjectContentComponent::isContinuousRebuildEnabled()
 {
-    return getAppSettings().getGlobalProperties().getBoolValue ("continuousRebuild", true);
+    return project != nullptr && project->getCompileEngineSettings().isContinuousRebuildEnabled();
 }
 
 void ProjectContentComponent::setContinuousRebuildEnabled (bool b)
 {
-    if (childProcess != nullptr)
+    if (project != nullptr && childProcess != nullptr)
     {
-        childProcess->setContinuousRebuild (b);
-
-        getAppSettings().getGlobalProperties().setValue ("continuousRebuild", b);
+        project->getCompileEngineSettings().setContinuousRebuildEnabled (b);
         ProjucerApplication::getCommandManager().commandStatusChanged();
     }
 }
@@ -1331,12 +1329,7 @@ void ProjectContentComponent::setContinuousRebuildEnabled (bool b)
 ReferenceCountedObjectPtr<CompileEngineChildProcess> ProjectContentComponent::getChildProcess()
 {
     if (childProcess == nullptr && isBuildEnabled())
-    {
         childProcess = ProjucerApplication::getApp().childProcessCache->getOrCreate (*project);
-
-        if (childProcess != nullptr)
-            childProcess->setContinuousRebuild (isContinuousRebuildEnabled());
-    }
 
     return childProcess;
 }

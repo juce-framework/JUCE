@@ -1561,6 +1561,7 @@
     <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_CompileEngineClient.h"/>
     <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_CompileEngineDLL.h"/>
     <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_CompileEngineServer.h"/>
+    <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_CompileEngineSettings.h"/>
     <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_CppHelpers.h"/>
     <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_DiagnosticMessage.h"/>
     <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_DownloadCompileEngineThread.h"/>

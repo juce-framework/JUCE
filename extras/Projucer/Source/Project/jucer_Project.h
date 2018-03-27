@@ -27,6 +27,7 @@
 #pragma once
 
 #include "jucer_ProjectType.h"
+#include "../LiveBuildEngine/jucer_CompileEngineSettings.h"
 
 class ProjectExporter;
 class LibraryModule;
@@ -347,6 +348,9 @@ public:
     //==============================================================================
     bool shouldSendGUIBuilderAnalyticsEvent() noexcept;
 
+    //==============================================================================
+    CompileEngineSettings& getCompileEngineSettings()    { return compileEngineSettings; }
+
 private:
     ValueTree projectRoot  { Ids::JUCERPROJECT };
 
@@ -360,6 +364,9 @@ private:
                      pluginIsMidiEffectPluginValue, pluginEditorNeedsKeyFocusValue, pluginVSTCategoryValue, pluginAUExportPrefixValue,
                      pluginAUMainTypeValue, pluginRTASCategoryValue, pluginRTASBypassDisabledValue, pluginRTASMultiMonoDisabledValue,
                      pluginAAXIdentifierValue, pluginAAXCategoryValue, pluginAAXBypassDisabledValue, pluginAAXMultiMonoDisabledValue;
+
+    //==============================================================================
+    CompileEngineSettings compileEngineSettings  { projectRoot };
 
     //==============================================================================
     File tempDirectory = {};

@@ -516,6 +516,8 @@
             resource="0" file="Source/LiveBuildEngine/jucer_CompileEngineServer.cpp"/>
       <FILE id="RraER0" name="jucer_CompileEngineServer.h" compile="0" resource="0"
             file="Source/LiveBuildEngine/jucer_CompileEngineServer.h"/>
+      <FILE id="hKqvP1" name="jucer_CompileEngineSettings.h" compile="0"
+            resource="0" file="Source/LiveBuildEngine/jucer_CompileEngineSettings.h"/>
       <FILE id="YlfzAt" name="jucer_CppHelpers.h" compile="0" resource="0"
             file="Source/LiveBuildEngine/jucer_CppHelpers.h"/>
       <FILE id="yW3rHq" name="jucer_DiagnosticMessage.h" compile="0" resource="0"

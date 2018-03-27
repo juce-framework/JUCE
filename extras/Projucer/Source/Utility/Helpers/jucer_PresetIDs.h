@@ -321,6 +321,9 @@ namespace Ids
     DECLARE_ID (website);
     DECLARE_ID (mainClass);
     DECLARE_ID (moduleFlags);
+    DECLARE_ID (buildEnabled);
+    DECLARE_ID (continuousRebuildEnabled);
+    DECLARE_ID (warningsEnabled);
 
     const Identifier ID ("id");
     const Identifier ID_uppercase ("ID");

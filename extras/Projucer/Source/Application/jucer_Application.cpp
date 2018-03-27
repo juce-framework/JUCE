@@ -1107,11 +1107,6 @@ void ProjucerApplication::createNewPIP()
     showPIPCreatorWindow();
 }
 
-void ProjucerApplication::updateNewlyOpenedProject (Project& p)
-{
-    LiveBuildProjectSettings::updateNewlyOpenedProject (p);
-}
-
 void ProjucerApplication::askUserToOpenFile()
 {
     FileChooser fc ("Open File");
