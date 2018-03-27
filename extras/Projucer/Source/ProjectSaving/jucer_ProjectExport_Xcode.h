@@ -129,6 +129,9 @@ public:
     bool isPushNotificationsEnabled() const          { return iosPushNotificationsValue.get(); }
     bool isAppGroupsEnabled() const                  { return iosAppGroupsValue.get(); }
     bool isiCloudPermissionsEnabled() const          { return iCloudPermissionsValue.get(); }
+    bool isFileSharingEnabled() const                { return uiFileSharingEnabledValue.get(); }
+    bool isDocumentBrowserEnabled() const            { return uiSupportsDocumentBrowserValue.get(); }
+    bool isStatusBarHidden() const                   { return uiStatusBarHiddenValue.get(); }
 
     String getIosDevelopmentTeamIDString() const     { return iosDevelopmentTeamIDValue.get(); }
     String getAppGroupIdString() const               { return iosAppGroupsIDValue.get(); }
@@ -1341,13 +1344,13 @@ public:
                 }
             }
 
-            if (owner.settings [Ids::UIFileSharingEnabled] && type != AudioUnitv3PlugIn)
+            if (owner.isFileSharingEnabled() && type != AudioUnitv3PlugIn)
                 addPlistDictionaryKeyBool (dict, "UIFileSharingEnabled", true);
 
-            if (owner.settings [Ids::UISupportsDocumentBrowser])
+            if (owner.isDocumentBrowserEnabled())
                 addPlistDictionaryKeyBool (dict, "UISupportsDocumentBrowser", true);
 
-            if (owner.settings [Ids::UIStatusBarHidden] && type != AudioUnitv3PlugIn)
+            if (owner.isStatusBarHidden() && type != AudioUnitv3PlugIn)
                 addPlistDictionaryKeyBool (dict, "UIStatusBarHidden", true);
 
             if (owner.iOS)
