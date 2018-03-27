@@ -389,6 +389,7 @@ private:
     void createAudioPluginPropertyEditors (PropertyListBuilder& props);
 
     //==============================================================================
+    void updateTitle();
     void updateProjectSettings();
     ValueTree getConfigurations() const;
     ValueTree getConfigNode();

@@ -82,8 +82,14 @@ const char* Project::projectFileExtension = ".jucer";
 //==============================================================================
 void Project::setTitle (const String& newTitle)
 {
-    projectRoot.setProperty (Ids::name, newTitle, getUndoManager());
-    getMainGroup().getNameValue() = newTitle;
+    projectNameValue = newTitle;
+
+    updateTitle();
+}
+
+void Project::updateTitle()
+{
+    getMainGroup().getNameValue() = getProjectNameString();
 
     bundleIdentifierValue.setDefault (getDefaultBundleIdentifierString());
     pluginAAXIdentifierValue.setDefault (getDefaultAAXIdentifierString());
@@ -547,7 +553,7 @@ void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& prope
         }
         else if (property == Ids::name)
         {
-            setTitle (projectRoot [Ids::name]);
+            updateTitle();
         }
         else if (property == Ids::defines)
         {
