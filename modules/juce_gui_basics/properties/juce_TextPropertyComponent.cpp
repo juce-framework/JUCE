@@ -169,7 +169,7 @@ TextPropertyComponent::TextPropertyComponent (const Value& valueToControl,
     textEditor->getTextValue().referTo (valueToControl);
 }
 
-TextPropertyComponent::TextPropertyComponent (const ValueWithDefault& valueToControl,
+TextPropertyComponent::TextPropertyComponent (ValueWithDefault& valueToControl,
                                               const String& name,
                                               int maxNumChars,
                                               bool isMultiLine,
@@ -178,6 +178,12 @@ TextPropertyComponent::TextPropertyComponent (const ValueWithDefault& valueToCon
 {
     textEditor->getTextValue().referTo (Value (new RemapperValueSourceWithDefault (valueToControl)));
     textEditor->setTextToDisplayWhenEmpty (valueToControl.getDefault(), 0.5f);
+
+    valueToControl.onDefaultChange = [this, &valueToControl]
+    {
+        textEditor->setTextToDisplayWhenEmpty (valueToControl.getDefault(), 0.5f);
+        repaint();
+    };
 }
 
 TextPropertyComponent::~TextPropertyComponent()

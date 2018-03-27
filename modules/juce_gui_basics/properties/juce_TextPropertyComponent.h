@@ -83,7 +83,7 @@ public:
 
         @see TextEditor, setEditable
     */
-    TextPropertyComponent (const ValueWithDefault& valueToControl,
+    TextPropertyComponent (ValueWithDefault& valueToControl,
                            const String& propertyName,
                            int maxNumChars,
                            bool isMultiLine,
