@@ -1,36 +1,70 @@
 /**
 @page controlling_led_grids Controlling LED grids
 
-@section basic_usage Basic usage
+@section controlling_led_grids_basic_usage Basic usage
 
-An LED grid on a BLOCKS device can be controlled via an LEDGrid object, which can be obtained from the Block::getLEDGrid function of a Block---see the @ref discovering_blocks section for details of how to obtain a %Block object.
+An LED grid on a BLOCKS device can be controlled via an LEDGrid object, which can be obtained from the Block::getLEDGrid() function of a Block --- see the @ref discovering_blocks section for details of how to obtain a %Block object.
 
-Using an LED grid requires an LEDGrid::Program to operate the LEDs.
-This program specifies some code to run on the device, and can also provide methods to be called from your application which can comminucate with the code running on the device via a block of shared memory.
+Using a LED grid requires a Block::Program to operate the LEDs.
+This program specifies some code to run on the device, and can also provide methods to be called from your application which can communicate with the code running on the device via a block of shared memory.
 The code which runs on the device must be specified using @ref the_littlefoot_language, which is described in the corresponding section.
 However, for a very wide range of applications, the BitmapLEDProgram provided with the BLOCKS SDK is sufficient and you will not need to create your own.
 Using a %BitmapLEDProgram to change the colour of LEDs is demonstated below.
 
 @code{.cpp}
-// This should be called when doing the initial configuration of your application.
-void setBitmapLEDProgram (Block& block)
+class BlockProgramExample
 {
-    if (auto grid = block->getLEDGrid())
-        grid->setProgram (new BitmapLEDProgram (*grid));
-}
+public:
+    // This should be called when doing the initial configuration of your application.
+    void setBitmapLEDProgram (Block& block)
+    {
+        block.setProgram (new BitmapLEDProgram (block));
+    }
 
-// Once a BitmapLEDProgram is loaded we can use its setLED method to change the
-// colour of LEDs on the corresponding device.
-void setLED (Block& block, int x, int y, Colour c)
-{
-    if (auto grid = block->getLEDGrid())
-        if (auto program = dynamic_cast<BitmapLEDProgram*> (grid->getProgram()))
+    // Once a BitmapLEDProgram is loaded we can use its setLED() method to change the
+    // colour of LEDs on the corresponding device.
+    void setLED (Block& block, int x, int y, LEDColour c)
+    {
+        if (auto program = dynamic_cast<BitmapLEDProgram*> (block.getProgram()))
             program->setLED (x, y, c);
+    }
+};
+@endcode
+
+@section controlling_led_grids_example_usage Example usage
+
+To add this functionality to the BlockFinder example project, add the above functions to the BlockFinder class implementation. Then in the @s_projcode{topologyChanged()} callback, check if the connected %Block is a Lightpad and call the above functions as shown below:
+
+@code{.cpp}
+void topologyChanged() override
+{
+    //...
+    for (auto& block : currentTopology.blocks)
+    {
+        //...
+        if (block->getType() == Block::lightPadBlock)
+        {
+            setBitmapLEDProgram (*block);
+            setLED (*block, 7, 7, LEDColour (0xff00ff00));
+        }
+    }
 }
 @endcode
 
-@section advanced_usage Advanced Usage
+If you run the application now and connect a Lightpad, you should see a single green dot displayed in the centre of the surface.
 
-Using a custom %LEDGrid::Program allows more precise control over the operation of the LEDs.
-The code which will actually execute on the device, returned by your overriden LEDGrid::Program::getLittleFootProgram() function, must be specified in the LittleFoot language.
+@section controlling_led_grids_advanced_usage Advanced Usage
+
+Using a custom %Block::Program allows more precise control over the operation of the LEDs.
+The code which will actually execute on the device, returned by your overriden Block::Program::getLittleFootProgram() function, must be specified in the LittleFoot language.
+
+Learn more about other Block methods from the following pages:
+
+@ref getting_touch_events
+
+@ref getting_control_button_events
+
+@ref controlling_led_strips
+
+@ref controlling_control_buttons
 */

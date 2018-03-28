@@ -3,37 +3,89 @@
 
 Control button events are communicated from Lightpad and Control Blocks to your application via ControlButton objects.
 
-You can obtain an array of %ControlButton pointers associated with a specific Lightpad or Control %Block from its corresponding Block object using the Block::getButtons method---see the @ref discovering_blocks page for an example of how to obtain %Block objects.
+You can obtain an array of %ControlButton pointers associated with a specific Lightpad or Control %Block from its corresponding Block object using the Block::getButtons() method --- see the @ref discovering_blocks page for an example of how to obtain %Block objects.
 Each pointer to a %ControlButton will be valid for the lifetime of the %Block object.
 
 Once you have a %ControlButton you must register as a ControlButton::Listener to receive button pressed and button released callbacks.
-The process for doing this is to have one of your application's classes inherit from %ControlButton::Listener and override the pure virtual methods ControlButton::Listener::buttonPressed and ControlButton::Listener::buttonReleased.
+The process for doing this is to have one of your application's classes inherit from %ControlButton::Listener and override the pure virtual methods ControlButton::Listener::buttonPressed() and ControlButton::Listener::buttonReleased().
 Then, when you register your derived class as a listener to a particular %ControlButton, your overriden methods will be called when the corresponding button is pressed and released.
 
 Registering a class derived from %ControlButton::Listener with multiple %ControlButton objects is done as follows:
+
 @code{.cpp}
 class ControlButtonListenerExample : public ControlButton::Listener
 {
 public:
     ControlButtonListenerExample (Block& block)
     {
-        for (auto button : block->getButtons())
+        for (auto button : block.getButtons())
             button->addListener (this);
     }
 
-    virtual void buttonPressed (ControlButton&, sourceControlButton, Block::Timestamp timestamp) override
+    void buttonPressed (ControlButton& sourceControlButton, Block::Timestamp timestamp) override
     {
         // Do something when the sourceControlButton is pressed!
     }
 
-    virtual void buttonReleased (ControlButton&, sourceControlButton, Block::Timestamp timestamp) override
+    void buttonReleased (ControlButton& sourceControlButton, Block::Timestamp timestamp) override
     {
         // Do something when the sourceControlButton is released!
     }
 };
 @endcode
 
-When your overriden <code>buttonPressed</code> or <code>buttonReleased</code> methods are called you have access to two paramters: a reference to the %ControlButton that generated this event and timestamp for the event.
+When your overriden @s_projcode{buttonPressed()} or @s_projcode{buttonReleased()} methods are called you have access to two parameters: a reference to the %ControlButton that generated this event and timestamp for the event.
 
-You will find multiple examples of control button listeners in the @ref example_applications pages.
+@section getting_control_button_events_example_usage Example usage
+
+To add this functionality to the BlockFinder example project, add %ControlButton::Listener as a base class to the BlockFinder class and override the @s_projcode{buttonPressed()} and @s_projcode{buttonReleased()} functions as follows:
+
+@code{.cpp}
+class BlockFinder : private TopologySource::Listener,
+                    private ControlButton::Listener
+{
+//...
+private:
+    //...
+    void buttonPressed (ControlButton& sourceControlButton, Block::Timestamp timestamp) override
+    {
+        Logger::writeToLog ("Button Pressed!");
+    }
+
+    void buttonReleased (ControlButton& sourceControlButton, Block::Timestamp timestamp) override
+    {
+        Logger::writeToLog ("Button Released!");
+    }
+    //...
+};
+@endcode
+
+Then in the @s_projcode{topologyChanged()} callback, add the BlockFinder class as a listener to all the buttons on connected Blocks in the current topology to receive button pressed and button released callbacks as shown below:
+
+@code{.cpp}
+void topologyChanged() override
+{
+    //...
+    for (auto& block : currentTopology.blocks)
+    {
+        //...
+        for (auto button : block->getButtons())
+            button->addListener (this);
+    }
+}
+@endcode
+
+If you run the application now and connect a Lightpad or Control %Block, you should see text in the logger whenever buttons are pressed or released.
+
+You can also find multiple examples of control button listeners in the @ref example_applications pages.
+
+Learn more about other Block methods from the following pages:
+
+@ref getting_touch_events
+
+@ref controlling_led_grids
+
+@ref controlling_led_strips
+
+@ref controlling_control_buttons
 */

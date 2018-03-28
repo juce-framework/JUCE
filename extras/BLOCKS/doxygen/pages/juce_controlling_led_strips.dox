@@ -3,15 +3,52 @@
 
 Control Blocks have a strip of LEDs which can be controlled via an LEDRow object.
 
-A pointer to an %LEDRow object can be obtained from the Block::getLEDRow method of a Block---see the @ref discovering_blocks section for details of how to obtain a %Block object.
+A pointer to an %LEDRow object can be obtained from the Block::getLEDRow() method of a Block --- see the @ref discovering_blocks section for details of how to obtain a %Block object.
 Once you have an %LEDRow there are a few functions that you can use to interact with the strip of LEDs on a device.
-A code snippet showing how to turn the whole strip of LEDs on a %Block orange is shown below.
+A code snippet showing how to turn the whole strip of LEDs on a %Block yellow is shown below.
+
 @code{.cpp}
-void setWholeLEDRowOrange (Block& block)
+class BlockLEDExample
 {
-    if (auto ledRow = block->getLEDRow())
-        for (int i = 0; i < ledRow.getNumLEDs(); ++i)
-            ledRow.setLEDColour (i, Colours::orange);
+public:
+    void setWholeLEDRowYellow (Block& block)
+    {
+        if (auto ledRow = block.getLEDRow())
+            for (int i = 0; i < ledRow->getNumLEDs(); ++i)
+                ledRow->setLEDColour (i, LEDColour (0xffffff00));
+    }
+};
+@endcode
+
+@section controlling_led_strips_example_usage Example usage
+
+To add this functionality to the BlockFinder example project, add the above function to the BlockFinder class implementation. Then in the @s_projcode{topologyChanged()} callback, check if the connected %Block is a Control %Block and call the above function as shown below:
+
+@code{.cpp}
+void topologyChanged() override
+{
+    //...
+    for (auto& block : currentTopology.blocks)
+    {
+        //...
+        if (block->getType() == Block::liveBlock || block->getType() == Block::loopBlock
+            || block->getType() == Block::developerControlBlock || block->getType() == Block::touchBlock)
+        {
+            setWholeLEDRowYellow (*block);
+        }
+    }
 }
 @endcode
+
+If you run the application now and connect a Control %Block, you should see the LEDs in the strip turn yellow.
+
+Learn more about other Block methods from the following pages:
+
+@ref getting_touch_events
+
+@ref getting_control_button_events
+
+@ref controlling_led_grids
+
+@ref controlling_control_buttons
 */

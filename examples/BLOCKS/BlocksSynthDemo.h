@@ -751,7 +751,7 @@ private:
     void clearOldTouchTimes (const Time now)
     {
         for (auto i = touchMessageTimesInLastSecond.size(); --i >= 0;)
-            if (touchMessageTimesInLastSecond.getReference(i) < now - juce::RelativeTime::seconds (0.33))
+            if (touchMessageTimesInLastSecond.getReference(i) < now - RelativeTime::seconds (0.33))
                 touchMessageTimesInLastSecond.remove (i);
     }
 
@@ -835,7 +835,7 @@ private:
     PhysicalTopologySource topologySource;
     Block::Ptr activeBlock;
 
-    Array<juce::Time> touchMessageTimesInLastSecond;
+    Array<Time> touchMessageTimesInLastSecond;
 
     int waveshapeMode = 0;
 
