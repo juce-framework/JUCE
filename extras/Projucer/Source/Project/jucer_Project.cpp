@@ -235,7 +235,7 @@ void Project::initialiseAudioPluginValues()
     pluginAUMainTypeValue.referTo            (projectRoot, Ids::pluginAUMainType,           getUndoManager());
 
     pluginVSTCategoryValue.referTo           (projectRoot, Ids::pluginVSTCategory,          getUndoManager(), getDefaultVSTCategories(), ",");
-    pluginVST3CategoryValue.referTo          (projectRoot, Ids::pluginVST3Category,         getUndoManager(), getDefaultVSTCategories(), ",");
+    pluginVST3CategoryValue.referTo          (projectRoot, Ids::pluginVST3Category,         getUndoManager(), getDefaultVST3Categories(), ",");
     pluginRTASCategoryValue.referTo          (projectRoot, Ids::pluginRTASCategory,         getUndoManager(), getDefaultRTASCategories(), ",");
     pluginAAXCategoryValue.referTo           (projectRoot, Ids::pluginAAXCategory,          getUndoManager(), getDefaultAAXCategories(), ",");
 }
@@ -677,7 +677,7 @@ void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& prope
         else if (property == Ids::pluginCharacteristicsValue)
         {
             pluginVSTCategoryValue.setDefault  (getDefaultVSTCategories());
-            pluginVST3CategoryValue.setDefault (getDefaultVSTCategories());
+            pluginVST3CategoryValue.setDefault (getDefaultVST3Categories());
             pluginRTASCategoryValue.setDefault (getDefaultRTASCategories());
             pluginAAXCategoryValue.setDefault  (getDefaultAAXCategories());
 
@@ -1544,7 +1544,17 @@ bool Project::isConfigFlagEnabled (const String& name, bool defaultIsEnabled) co
 }
 
 //==============================================================================
-static String getVSTCategoryStringFromSelection (Array<var> selected) noexcept
+String Project::getVSTCategoryString() const noexcept
+{
+    auto v = pluginVSTCategoryValue.get();
+
+    if (auto* arr = v.getArray())
+        return arr->getFirst().toString();
+
+    return {};
+}
+
+static String getVST3CategoryStringFromSelection (Array<var> selected) noexcept
 {
     StringArray categories;
 
@@ -1554,22 +1564,12 @@ static String getVSTCategoryStringFromSelection (Array<var> selected) noexcept
     return categories.joinIntoString ("|");
 }
 
-String Project::getVSTCategoryString() const noexcept
-{
-    auto v = pluginVSTCategoryValue.get();
-
-    if (auto* arr = v.getArray())
-        return getVSTCategoryStringFromSelection (*arr);
-
-    return {};
-}
-
 String Project::getVST3CategoryString() const noexcept
 {
     auto v = pluginVST3CategoryValue.get();
 
     if (auto* arr = v.getArray())
-        return getVSTCategoryStringFromSelection (*arr);
+        return getVST3CategoryStringFromSelection (*arr);
 
     return {};
 }
