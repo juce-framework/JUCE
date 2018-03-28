@@ -287,7 +287,10 @@ void MultiChoicePropertyComponent::resized()
     auto bounds = getLookAndFeel().getPropertyComponentContentPosition (*this);
 
     bounds.removeFromBottom (5);
-    expandButton.setBounds (bounds.removeFromBottom (10));
+
+    auto buttonSlice = bounds.removeFromBottom (10);
+    expandButton.setSize (10, 10);
+    expandButton.setCentrePosition (buttonSlice.getCentre());
 
     numHidden = 0;
 
