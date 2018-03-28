@@ -265,7 +265,15 @@ public:
             }
 
             if (auto* multiChoice = dynamic_cast<MultiChoicePropertyComponent*> (prop))
-                multiChoice->onHeightChange = [this] { updateSize (getX(), getY(), getWidth()); };
+            {
+                multiChoice->onHeightChange = [this]
+                {
+                    updateSize (getX(), getY(), getWidth());
+
+                    if (auto* parent = getParentComponent())
+                        parent->parentSizeChanged();
+                };
+            }
         }
     }
 
