@@ -48,9 +48,10 @@ class MultiChoicePropertyComponent::MultiChoiceRemapperSource    : public Value:
                                                                    private Value::Listener
 {
 public:
-    MultiChoiceRemapperSource (const Value& source, var v)
+    MultiChoiceRemapperSource (const Value& source, var v, int c)
         : sourceValue (source),
-          varToControl (v)
+          varToControl (v),
+          maxChoices (c)
     {
         sourceValue.addListener (this);
     }
@@ -71,9 +72,14 @@ public:
             auto temp = *arr;
 
             if (static_cast<bool> (newValue))
-                temp.addIfNotAlreadyThere (varToControl);
+            {
+                if (temp.addIfNotAlreadyThere (varToControl) && (maxChoices != -1) && (temp.size() > maxChoices))
+                     temp.remove (temp.size() - 2);
+            }
             else
+            {
                 temp.remove (arr->indexOf (varToControl));
+            }
 
             StringComparator c;
             temp.sort (c);
@@ -86,6 +92,9 @@ private:
     Value sourceValue;
     var varToControl;
 
+    int maxChoices;
+
+    //==============================================================================
     void valueChanged (Value&) override    { sendChangeMessage (true); }
 
     //==============================================================================
@@ -97,47 +106,97 @@ class MultiChoicePropertyComponent::MultiChoiceRemapperSourceWithDefault    : pu
                                                                               private Value::Listener
 {
 public:
-    MultiChoiceRemapperSourceWithDefault (ValueWithDefault& vwd, var v)
+    MultiChoiceRemapperSourceWithDefault (ValueWithDefault& vwd, var v, int c, ToggleButton* b)
         : valueWithDefault (vwd),
+          varToControl (v),
           sourceValue (valueWithDefault.getPropertyAsValue()),
-          varToControl (v)
+          maxChoices (c),
+          buttonToControl (b)
     {
         sourceValue.addListener (this);
     }
 
     var getValue() const override
     {
-        if (auto* arr = valueWithDefault.get().getArray())
+        auto v = valueWithDefault.get();
+
+        if (auto* arr = v.getArray())
+        {
             if (arr->contains (varToControl))
+            {
+                updateButtonTickColour();
                 return true;
+            }
+        }
 
         return false;
     }
 
     void setValue (const var& newValue) override
     {
-        if (auto* arr = valueWithDefault.get().getArray())
-        {
-            auto temp = *arr;
+        auto v = valueWithDefault.get();
 
-            if (static_cast<bool> (newValue))
-                temp.addIfNotAlreadyThere (varToControl);
+        OptionalScopedPointer<Array<var>> arrayToControl;
+
+        if (valueWithDefault.isUsingDefault())
+            arrayToControl.set (new Array<var>(), true); // use an empty array so the default values are overwritten
+        else
+            arrayToControl.set (v.getArray(), false);
+
+        if (arrayToControl != nullptr)
+        {
+            auto temp = *arrayToControl;
+
+            bool newState = newValue;
+
+            if (valueWithDefault.isUsingDefault())
+            {
+                if (auto* defaultArray = v.getArray())
+                {
+                    if (defaultArray->contains (varToControl))
+                        newState = true; // force the state as the user is setting it explicitly
+                }
+            }
+
+            if (newState)
+            {
+                if (temp.addIfNotAlreadyThere (varToControl) && (maxChoices != -1) && (temp.size() > maxChoices))
+                    temp.remove (temp.size() - 2);
+            }
             else
-                temp.remove (arr->indexOf (varToControl));
+            {
+                temp.remove (temp.indexOf (varToControl));
+            }
 
             StringComparator c;
             temp.sort (c);
 
             valueWithDefault = temp;
+
+            if (temp.size() == 0)
+                valueWithDefault.resetToDefault();
         }
     }
 
 private:
     ValueWithDefault& valueWithDefault;
-    Value sourceValue;
     var varToControl;
+    Value sourceValue;
 
+    int maxChoices;
+
+    ToggleButton* buttonToControl;
+
+    //==============================================================================
     void valueChanged (Value&) override    { sendChangeMessage (true); }
+
+    void updateButtonTickColour() const noexcept
+    {
+        auto alpha = valueWithDefault.isUsingDefault() ? 0.4f : 1.0f;
+        auto baseColour = buttonToControl->findColour (ToggleButton::tickColourId);
+
+        buttonToControl->setColour (ToggleButton::tickColourId, baseColour.withAlpha (alpha));
+    }
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MultiChoiceRemapperSourceWithDefault)
@@ -175,7 +234,8 @@ MultiChoicePropertyComponent::MultiChoicePropertyComponent (const String& proper
 MultiChoicePropertyComponent::MultiChoicePropertyComponent (const Value& valueToControl,
                                                             const String& propertyName,
                                                             const StringArray& choices,
-                                                            const Array<var>& correspondingValues)
+                                                            const Array<var>& correspondingValues,
+                                                            int maxChoices)
     : MultiChoicePropertyComponent (propertyName, choices, correspondingValues)
 {
     // The value to control must be an array!
@@ -183,13 +243,15 @@ MultiChoicePropertyComponent::MultiChoicePropertyComponent (const Value& valueTo
 
     for (int i = 0; i < choiceButtons.size(); ++i)
         choiceButtons[i]->getToggleStateValue().referTo (Value (new MultiChoiceRemapperSource (valueToControl,
-                                                                                               correspondingValues[i])));
+                                                                                               correspondingValues[i],
+                                                                                               maxChoices)));
 }
 
 MultiChoicePropertyComponent::MultiChoicePropertyComponent (ValueWithDefault& valueToControl,
                                                             const String& propertyName,
                                                             const StringArray& choices,
-                                                            const Array<var>& correspondingValues)
+                                                            const Array<var>& correspondingValues,
+                                                            int maxChoices)
     : MultiChoicePropertyComponent (propertyName, choices, correspondingValues)
 {
     // The value to control must be an array!
@@ -197,7 +259,9 @@ MultiChoicePropertyComponent::MultiChoicePropertyComponent (ValueWithDefault& va
 
     for (int i = 0; i < choiceButtons.size(); ++i)
         choiceButtons[i]->getToggleStateValue().referTo (Value (new MultiChoiceRemapperSourceWithDefault (valueToControl,
-                                                                                                          correspondingValues[i])));
+                                                                                                          correspondingValues[i],
+                                                                                                          maxChoices,
+                                                                                                          choiceButtons[i])));
 
     valueToControl.onDefaultChange = [this] { repaint(); };
 }

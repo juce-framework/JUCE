@@ -51,11 +51,14 @@ public:
                                     These are the values that will be read and written to the
                                     valueToControl value. This array must contain the same number of items
                                     as the choices array
+        @param maxChoice            the maxmimum number of values which can be selected at once. The default of
+                                    -1 will not limit the number that can be selected
     */
     MultiChoicePropertyComponent (const Value& valueToControl,
                                   const String& propertyName,
                                   const StringArray& choices,
-                                  const Array<var>& correspondingValues);
+                                  const Array<var>& correspondingValues,
+                                  int maxChoices = -1);
 
     /** Creates the component using a ValueWithDefault object. This will select the default options.
 
@@ -66,11 +69,14 @@ public:
                                     These are the values that will be read and written to the
                                     valueToControl value. This array must contain the same number of items
                                     as the choices array
+        @param maxChoice            the maxmimum number of values which can be selected at once. The default of
+                                    -1 will not limit the number that can be selected
     */
     MultiChoicePropertyComponent (ValueWithDefault& valueToControl,
                                   const String& propertyName,
                                   const StringArray& choices,
-                                  const Array<var>& correspondingValues);
+                                  const Array<var>& correspondingValues,
+                                  int maxChoices = -1);
 
     //==============================================================================
     /** Returns true if the list of options is expanded. */
