@@ -82,16 +82,18 @@ public:
 
     static Font applyNameToFont (const String& typefaceName, const Font& font)
     {
-        if (typefaceName == getDefaultFont())  return Font (font.getHeight(), font.getStyleFlags());
-        if (typefaceName == getDefaultSans())  return Font (Font::getDefaultSansSerifFontName(), font.getHeight(), font.getStyleFlags());
-        if (typefaceName == getDefaultSerif()) return Font (Font::getDefaultSerifFontName(), font.getHeight(), font.getStyleFlags());
-        if (typefaceName == getDefaultMono())  return Font (Font::getDefaultMonospacedFontName(), font.getHeight(), font.getStyleFlags());
+        auto extraKerning = font.getExtraKerningFactor();
 
-        auto f = Font (typefaceName, font.getHeight(), font.getStyleFlags()).withExtraKerningFactor (font.getExtraKerningFactor());
+        if (typefaceName == getDefaultFont())  return Font (font.getHeight(), font.getStyleFlags()).withExtraKerningFactor (extraKerning);
+        if (typefaceName == getDefaultSans())  return Font (Font::getDefaultSansSerifFontName(), font.getHeight(), font.getStyleFlags()).withExtraKerningFactor (extraKerning);
+        if (typefaceName == getDefaultSerif()) return Font (Font::getDefaultSerifFontName(), font.getHeight(), font.getStyleFlags()).withExtraKerningFactor (extraKerning);
+        if (typefaceName == getDefaultMono())  return Font (Font::getDefaultMonospacedFontName(), font.getHeight(), font.getStyleFlags()).withExtraKerningFactor (extraKerning);
+
+        auto f = Font (typefaceName, font.getHeight(), font.getStyleFlags()).withExtraKerningFactor (extraKerning);
+
         if (f.getAvailableStyles().contains (font.getTypefaceStyle()))
-        {
             f.setTypefaceStyle (font.getTypefaceStyle());
-        }
+
         return f;
     }
 
