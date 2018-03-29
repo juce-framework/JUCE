@@ -51,7 +51,7 @@ public:
                                     These are the values that will be read and written to the
                                     valueToControl value. This array must contain the same number of items
                                     as the choices array
-        @param maxChoice            the maxmimum number of values which can be selected at once. The default of
+        @param maxChoices           the maxmimum number of values which can be selected at once. The default of
                                     -1 will not limit the number that can be selected
     */
     MultiChoicePropertyComponent (const Value& valueToControl,
@@ -69,7 +69,7 @@ public:
                                     These are the values that will be read and written to the
                                     valueToControl value. This array must contain the same number of items
                                     as the choices array
-        @param maxChoice            the maxmimum number of values which can be selected at once. The default of
+        @param maxChoices           the maxmimum number of values which can be selected at once. The default of
                                     -1 will not limit the number that can be selected
     */
     MultiChoicePropertyComponent (ValueWithDefault& valueToControl,
