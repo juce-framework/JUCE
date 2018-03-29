@@ -172,6 +172,10 @@ public:
     bool isPluginAAXMultiMonoDisabled() const         { return checkMultiChoiceVar (pluginCharacteristicsValue, Ids::pluginAAXDisableMultiMono); }
 
     //==============================================================================
+    static StringArray getAllAUMainTypeStrings() noexcept;
+    static Array<var> getAllAUMainTypeVars() noexcept;
+    Array<var> getDefaultAUMainTypes() const noexcept;
+
     static StringArray getAllVSTCategoryStrings() noexcept;
     Array<var> getDefaultVSTCategories() const noexcept;
 
@@ -186,13 +190,12 @@ public:
     static Array<var> getAllRTASCategoryVars() noexcept;
     Array<var> getDefaultRTASCategories() const noexcept;
 
+    String getAUMainTypeString() const noexcept;
     String getVSTCategoryString() const noexcept;
     String getVST3CategoryString() const noexcept;
     int getAAXCategory() const noexcept;
     int getRTASCategory() const noexcept;
 
-    String getAUMainTypeString();
-    String getAUMainTypeCode();
     String getIAATypeCode();
     String getIAAPluginName();
 

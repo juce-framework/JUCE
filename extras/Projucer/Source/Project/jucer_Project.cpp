@@ -237,12 +237,12 @@ void Project::initialiseAudioPluginValues()
     pluginAAXIdentifierValue.referTo         (projectRoot, Ids::aaxIdentifier,              getUndoManager(), getDefaultAAXIdentifierString());
     pluginAUExportPrefixValue.referTo        (projectRoot, Ids::pluginAUExportPrefix,       getUndoManager(),
                                               CodeHelpers::makeValidIdentifier (getProjectNameString(), false, true, false) + "AU");
-    pluginAUMainTypeValue.referTo            (projectRoot, Ids::pluginAUMainType,           getUndoManager());
 
-    pluginVSTCategoryValue.referTo           (projectRoot, Ids::pluginVSTCategory,          getUndoManager(), getDefaultVSTCategories(), ",");
+    pluginAUMainTypeValue.referTo            (projectRoot, Ids::pluginAUMainType,           getUndoManager(), getDefaultAUMainTypes(),    ",");
+    pluginVSTCategoryValue.referTo           (projectRoot, Ids::pluginVSTCategory,          getUndoManager(), getDefaultVSTCategories(),  ",");
     pluginVST3CategoryValue.referTo          (projectRoot, Ids::pluginVST3Category,         getUndoManager(), getDefaultVST3Categories(), ",");
     pluginRTASCategoryValue.referTo          (projectRoot, Ids::pluginRTASCategory,         getUndoManager(), getDefaultRTASCategories(), ",");
-    pluginAAXCategoryValue.referTo           (projectRoot, Ids::pluginAAXCategory,          getUndoManager(), getDefaultAAXCategories(), ",");
+    pluginAAXCategoryValue.referTo           (projectRoot, Ids::pluginAAXCategory,          getUndoManager(), getDefaultAAXCategories(),  ",");
 }
 
 void Project::updateOldStyleConfigList()
@@ -390,6 +390,20 @@ void Project::updatePluginCategories()
 
         if (vstCategory.isNotEmpty() && getAllVSTCategoryStrings().contains (vstCategory))
             pluginVSTCategoryValue = Array<var> (vstCategory);
+    }
+
+    {
+        auto auMainType = projectRoot.getProperty (Ids::pluginAUMainType, {}).toString();
+
+        if (auMainType.isNotEmpty())
+        {
+            if (getAllAUMainTypeVars().contains (auMainType))
+                pluginAUMainTypeValue = Array<var> (auMainType);
+            else if (getAllAUMainTypeVars().contains (auMainType.quoted ('\'')))
+                pluginAUMainTypeValue = Array<var> (auMainType.quoted ('\''));
+            else if (getAllAUMainTypeStrings().contains (auMainType))
+                pluginAUMainTypeValue = Array<var> (getAllAUMainTypeVars()[getAllAUMainTypeStrings().indexOf (auMainType)]);
+        }
     }
 }
 
@@ -681,6 +695,7 @@ void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& prope
         }
         else if (property == Ids::pluginCharacteristicsValue)
         {
+            pluginAUMainTypeValue.setDefault   (getDefaultAUMainTypes());
             pluginVSTCategoryValue.setDefault  (getDefaultVSTCategories());
             pluginVST3CategoryValue.setDefault (getDefaultVST3Categories());
             pluginRTASCategoryValue.setDefault (getDefaultRTASCategories());
@@ -1010,8 +1025,9 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
                "The value to use for the JucePlugin_AAXIdentifier setting");
     props.add (new TextPropertyComponent (pluginAUExportPrefixValue, "Plugin AU Export Prefix", 128, false),
                "A prefix for the names of exported entry-point functions that the component exposes - typically this will be a version of your plugin's name that can be used as part of a C++ token.");
-    props.add (new TextPropertyComponent (pluginAUMainTypeValue, "Plugin AU Main Type", 128, false),
-               "In an AU, this is the value that is set as JucePlugin_AUMainType. Leave it blank unless you want to use a custom value.");
+
+    props.add (new MultiChoicePropertyComponent (pluginAUMainTypeValue, "Plugin AU Main Type", getAllAUMainTypeStrings(), getAllAUMainTypeVars(), 1),
+               "AU main type.");
 
     {
         Array<var> vstCategoryVars;
@@ -1019,7 +1035,7 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
             vstCategoryVars.add (s);
 
         props.add (new MultiChoicePropertyComponent (pluginVSTCategoryValue, "Plugin VST Category", getAllVSTCategoryStrings(), vstCategoryVars, 1),
-                   "VST category");
+                   "VST category.");
     }
 
     {
@@ -1028,13 +1044,13 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
             vst3CategoryVars.add (s);
 
         props.add (new MultiChoicePropertyComponent (pluginVST3CategoryValue, "Plugin VST3 Category", getAllVST3CategoryStrings(), vst3CategoryVars),
-                   "VST3 category");
+                   "VST3 category.");
     }
 
     props.add (new MultiChoicePropertyComponent (pluginRTASCategoryValue, "Plugin RTAS Category", getAllRTASCategoryStrings(), getAllRTASCategoryVars()),
-               "RTAS category");
+               "RTAS category.");
     props.add (new MultiChoicePropertyComponent (pluginAAXCategoryValue, "Plugin AAX Category", getAllAAXCategoryStrings(), getAllAAXCategoryVars()),
-               "AAX category");
+               "AAX category.");
 }
 
 //==============================================================================
@@ -1549,6 +1565,17 @@ bool Project::isConfigFlagEnabled (const String& name, bool defaultIsEnabled) co
 }
 
 //==============================================================================
+String Project::getAUMainTypeString() const noexcept
+{
+    auto v = pluginAUMainTypeValue.get();
+
+    if (auto* arr = v.getArray())
+        return arr->getFirst().toString();
+
+    jassertfalse;
+    return {};
+}
+
 String Project::getVSTCategoryString() const noexcept
 {
     auto v = pluginVSTCategoryValue.get();
@@ -1556,6 +1583,7 @@ String Project::getVSTCategoryString() const noexcept
     if (auto* arr = v.getArray())
         return arr->getFirst().toString();
 
+    jassertfalse;
     return {};
 }
 
@@ -1576,6 +1604,7 @@ String Project::getVST3CategoryString() const noexcept
     if (auto* arr = v.getArray())
         return getVST3CategoryStringFromSelection (*arr);
 
+    jassertfalse;
     return {};
 }
 
@@ -1607,38 +1636,6 @@ int Project::getRTASCategory() const noexcept
     }
 
     return res;
-}
-
-String Project::getAUMainTypeString()
-{
-    auto s = getPluginAUMainTypeString();
-
-    if (s.isEmpty())
-    {
-        // Unfortunately, Rez uses a header where kAudioUnitType_MIDIProcessor is undefined
-        // Use aumi instead.
-        if      (isPluginMidiEffect())      s = "'aumi'";
-        else if (isPluginSynth())           s = "kAudioUnitType_MusicDevice";
-        else if (pluginWantsMidiInput())    s = "kAudioUnitType_MusicEffect";
-        else                                s = "kAudioUnitType_Effect";
-    }
-
-    return s;
-}
-
-String Project::getAUMainTypeCode()
-{
-    auto s = getPluginAUMainTypeString();
-
-    if (s.isEmpty())
-    {
-        if      (isPluginMidiEffect())      s = "aumi";
-        else if (isPluginSynth())           s = "aumu";
-        else if (pluginWantsMidiInput())    s = "aumf";
-        else                                s = "aufx";
-    }
-
-    return s;
 }
 
 String Project::getIAATypeCode()
@@ -1686,6 +1683,33 @@ bool Project::isVST3PluginHost()
 }
 
 //==============================================================================
+StringArray Project::getAllAUMainTypeStrings() noexcept
+{
+    static StringArray auMainTypeStrings { "kAudioUnitType_Effect", "kAudioUnitType_FormatConverter", "kAudioUnitType_Generator", "kAudioUnitType_MIDIProcessor",
+                                           "kAudioUnitType_Mixer", "kAudioUnitType_MusicDevice", "kAudioUnitType_MusicEffect", "kAudioUnitType_OfflineEffect",
+                                           "kAudioUnitType_Output", "kAudioUnitType_Panner" };
+
+    return auMainTypeStrings;
+}
+
+Array<var> Project::getAllAUMainTypeVars() noexcept
+{
+    static Array<var> auMainTypeVars { "'aufx'", "'aufc'", "'augn'", "'aumi'",
+                                       "'aumx'", "'aumu'", "'aumf'", "'auol'",
+                                       "'auou'", "'aupn'" };
+
+    return auMainTypeVars;
+}
+
+Array<var> Project::getDefaultAUMainTypes() const noexcept
+{
+    if (isPluginMidiEffect())      return { "'aumi'" };
+    if (isPluginSynth())           return { "'aumu'" };
+    if (pluginWantsMidiInput())    return { "'aumf'" };
+
+    return { "'aufx'" };
+}
+
 StringArray Project::getAllVSTCategoryStrings() noexcept
 {
     static StringArray vstCategoryStrings { "kPlugCategUnknown", "kPlugCategEffect", "kPlugCategSynth", "kPlugCategAnalysis", "kPlugCategMastering",

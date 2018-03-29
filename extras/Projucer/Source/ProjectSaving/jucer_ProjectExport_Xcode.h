@@ -1518,7 +1518,7 @@ public:
             addPlistDictionaryKey (dict, "description", owner.project.getPluginDescriptionString());
             addPlistDictionaryKey (dict, "factoryFunction", owner.project.getPluginAUExportPrefixString() + "Factory");
             addPlistDictionaryKey (dict, "manufacturer", pluginManufacturerCode);
-            addPlistDictionaryKey (dict, "type", owner.project.getAUMainTypeCode());
+            addPlistDictionaryKey (dict, "type", owner.project.getAUMainTypeString().removeCharacters ("'"));
             addPlistDictionaryKey (dict, "subtype", pluginSubType);
             addPlistDictionaryKeyInt (dict, "version", owner.project.getVersionAsHexInteger());
 
@@ -1553,7 +1553,7 @@ public:
             addPlistDictionaryKey (componentDict, "description", owner.project.getPluginDescriptionString());
             addPlistDictionaryKey (componentDict, "factoryFunction",owner.project. getPluginAUExportPrefixString() + "FactoryAUv3");
             addPlistDictionaryKey (componentDict, "manufacturer", owner.project.getPluginManufacturerCodeString().substring (0, 4));
-            addPlistDictionaryKey (componentDict, "type", owner.project.getAUMainTypeCode());
+            addPlistDictionaryKey (componentDict, "type", owner.project.getAUMainTypeString().removeCharacters ("'"));
             addPlistDictionaryKey (componentDict, "subtype", owner.project.getPluginCodeString().substring (0, 4));
             addPlistDictionaryKeyInt (componentDict, "version", owner.project.getVersionAsHexInteger());
             addPlistDictionaryKeyBool (componentDict, "sandboxSafe", true);
