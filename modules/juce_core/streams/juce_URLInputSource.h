@@ -28,6 +28,8 @@ namespace juce
     A type of InputSource that represents a URL.
 
     @see InputSource
+
+    @tags{Core}
 */
 class JUCE_API  URLInputSource     : public InputSource
 {
