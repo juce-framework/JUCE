@@ -8,7 +8,7 @@ Version 5.3.0
   - Added support for Android OBOE (developer preview)
   - Updated JUCE's MPE classes to comply with the new MMA-adopted specification
   - Multiple documentation updates
-  - Restructed the examples and extras directories and updated all JUCE examples
+  - Restructured the examples and extras directories and updated all JUCE examples
   - Multiple hosted parameter improvements
   - Overhauled the GenericAudioProcessorEditor
   - Added support for a subset of the Cockos VST extensions
