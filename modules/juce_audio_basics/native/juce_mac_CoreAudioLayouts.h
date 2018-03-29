@@ -23,7 +23,7 @@
 namespace juce
 {
 
-#if JUCE_MAC || JUCE_IOS && ! DOXYGEN
+#if ! DOXYGEN && (JUCE_MAC || JUCE_IOS)
 
 struct CoreAudioLayouts
 {
