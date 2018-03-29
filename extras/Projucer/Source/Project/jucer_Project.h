@@ -151,9 +151,6 @@ public:
     }
 
     //==============================================================================
-    static StringArray getPluginFormatNames() noexcept;
-    static Array<var> getPluginFormatVars() noexcept;
-
     bool shouldBuildVST() const                       { return checkMultiChoiceVar (pluginFormatsValue, Ids::buildVST); }
     bool shouldBuildVST3() const                      { return checkMultiChoiceVar (pluginFormatsValue, Ids::buildVST3); }
     bool shouldBuildAU() const                        { return checkMultiChoiceVar (pluginFormatsValue, Ids::buildAU); }
