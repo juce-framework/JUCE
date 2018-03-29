@@ -142,15 +142,22 @@ Result ResourceFile::writeHeader (MemoryOutputStream& header)
         }
     }
 
-    header << "    // Points to the start of a list of resource names." << newLine
-           << "    extern const char* namedResourceList[];" << newLine
+    header << "    // Number of elements in the namedResourceList and originalFileNames arrays."                             << newLine
+           << "    const int namedResourceListSize = " << files.size() <<  ";"                                               << newLine
            << newLine
-           << "    // Number of elements in the namedResourceList array." << newLine
-           << "    const int namedResourceListSize = " << files.size() <<  ";" << newLine
+           << "    // Points to the start of a list of resource names."                                                      << newLine
+           << "    extern const char* namedResourceList[];"                                                                  << newLine
            << newLine
-           << "    // If you provide the name of one of the binary resource variables above, this function will" << newLine
-           << "    // return the corresponding data and its size (or a null pointer if the name isn't found)." << newLine
-           << "    const char* getNamedResource (const char* resourceNameUTF8, int& dataSizeInBytes) throw();" << newLine
+           << "    // Points to the start of a list of resource filenames."                                                  << newLine
+           << "    extern const char* originalFilenames[];"                                                                  << newLine
+           << newLine
+           << "    // If you provide the name of one of the binary resource variables above, this function will"             << newLine
+           << "    // return the corresponding data and its size (or a null pointer if the name isn't found)."               << newLine
+           << "    const char* getNamedResource (const char* resourceNameUTF8, int& dataSizeInBytes) noexcept;"              << newLine
+           << newLine
+           << "    // If you provide the name of one of the binary resource variables above, this function will"             << newLine
+           << "    // return the corresponding original, non-mangled filename (or a null pointer if the name isn't found)."  << newLine
+           << "    const char* getNamedResourceOriginalFilename (const char* resourceNameUTF8) noexcept;"                    << newLine
            << "}" << newLine;
 
     return Result::ok();
@@ -215,35 +222,53 @@ Result ResourceFile::writeCpp (MemoryOutputStream& cpp, const File& headerFile, 
 
         cpp << newLine
             << newLine
-            << "const char* getNamedResource (const char*, int&) throw();" << newLine
-            << "const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw()" << newLine
+            << "const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) noexcept" << newLine
             << "{" << newLine;
 
         StringArray returnCodes;
-        for (int j = 0; j < files.size(); ++j)
+        for (auto& file : files)
         {
-            auto& file = files.getReference(j);
             auto dataSize = file.getSize();
-            returnCodes.add ("numBytes = " + String (dataSize) + "; return " + variableNames[j] + ";");
+            returnCodes.add ("numBytes = " + String (dataSize) + "; return " + variableNames[files.indexOf (file)] + ";");
         }
 
         CodeHelpers::createStringMatcher (cpp, "resourceNameUTF8", variableNames, returnCodes, 4);
 
         cpp << "    numBytes = 0;" << newLine
-            << "    return 0;" << newLine
+            << "    return nullptr;" << newLine
             << "}" << newLine
-            << newLine
-            << "const char* namedResourceList[] =" << newLine
+            << newLine;
+
+        cpp << "const char* namedResourceList[] =" << newLine
             << "{" << newLine;
 
         for (int j = 0; j < files.size(); ++j)
             cpp << "    " << variableNames[j].quoted() << (j < files.size() - 1 ? "," : "") << newLine;
 
-        cpp << "};" << newLine;
+        cpp << "};" << newLine << newLine;
+
+        cpp << "const char* originalFilenames[] =" << newLine
+            << "{" << newLine;
+
+        for (auto& f : files)
+            cpp << "    " << f.getFileName().quoted() << (files.indexOf (f) < files.size() - 1 ? "," : "") << newLine;
+
+        cpp << "};" << newLine << newLine;
+
+        cpp << "const char* getNamedResourceOriginalFilename (const char* resourceNameUTF8) noexcept"                << newLine
+            << "{"                                                                                                   << newLine
+            << "    for (unsigned int i = 0; i < (sizeof (namedResourceList) / sizeof (namedResourceList[0])); ++i)" << newLine
+            << "    {"                                                                                               << newLine
+            << "        if (namedResourceList[i] == resourceNameUTF8)"                                               << newLine
+            << "            return originalFilenames[i];"                                                            << newLine
+            << "    }"                                                                                               << newLine
+            <<                                                                                                          newLine
+            << "    return nullptr;"                                                                                 << newLine
+            << "}"                                                                                                   << newLine
+            <<                                                                                                          newLine;
     }
 
-    cpp << newLine
-        << "}" << newLine;
+    cpp << "}" << newLine;
 
     return Result::ok();
 }
