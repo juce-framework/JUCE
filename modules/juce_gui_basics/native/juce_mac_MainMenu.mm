@@ -143,14 +143,17 @@ public:
         auto menuNames = currentModel->getMenuBarNames();
         auto indexOfMenu = (int) [superMenu indexOfItemWithSubmenu: menu] - 1;
 
-        removeItemRecursive (menu);
+        if (indexOfMenu >= 0)
+        {
+            removeItemRecursive (menu);
 
-        auto updatedPopup = currentModel->getMenuForIndex (indexOfMenu, menuNames[indexOfMenu]);
+            auto updatedPopup = currentModel->getMenuForIndex (indexOfMenu, menuNames[indexOfMenu]);
 
-        for (PopupMenu::MenuItemIterator iter (updatedPopup); iter.next();)
-            addMenuItem (iter, menu, 1, indexOfMenu);
+            for (PopupMenu::MenuItemIterator iter (updatedPopup); iter.next();)
+                addMenuItem (iter, menu, 1, indexOfMenu);
 
-        [menu update];
+            [menu update];
+        }
     }
 
     void menuBarItemsChanged (MenuBarModel*) override
