@@ -93,9 +93,14 @@ void Project::setTitle (const String& newTitle)
 
 void Project::updateTitle()
 {
-    getMainGroup().getNameValue() = getProjectNameString();
+    auto projectName = getProjectNameString();
 
+    getMainGroup().getNameValue() = projectName;
+
+    pluginNameValue.setDefault (projectName);
+    pluginDescriptionValue.setDefault (projectName);
     bundleIdentifierValue.setDefault (getDefaultBundleIdentifierString());
+    pluginAUExportPrefixValue.setDefault (CodeHelpers::makeValidIdentifier (projectName, false, true, false) + "AU");
     pluginAAXIdentifierValue.setDefault (getDefaultAAXIdentifierString());
 }
 
