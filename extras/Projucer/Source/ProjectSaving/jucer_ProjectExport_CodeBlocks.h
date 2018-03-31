@@ -181,13 +181,7 @@ public:
     }
 
     //==============================================================================
-    void initialiseDependencyPathValues() override
-    {
-        auto pathOS = isLinux() ? TargetOS::linux
-                                : TargetOS::windows;
-
-        vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder), Ids::vst3Path, pathOS)));
-    }
+    void initialiseDependencyPathValues() override {}
 
 private:
     ValueWithDefault targetPlatformValue;
@@ -288,7 +282,6 @@ private:
                     case pluginBundle:
                         switch (type)
                         {
-                            case VST3PlugIn:    return ".vst3";
                             case VSTPlugIn:     return ".so";
                             default:            break;
                         }
@@ -305,8 +298,7 @@ private:
 
         bool isDynamicLibrary() const
         {
-            return (type == DynamicLibrary || type == VST3PlugIn
-                     || type == VSTPlugIn);
+            return (type == DynamicLibrary || type == VSTPlugIn);
         }
 
         const CodeBlocksProjectExporter& exporter;
@@ -529,7 +521,6 @@ private:
                 return 2;
             case ProjectType::Target::DynamicLibrary:
             case ProjectType::Target::VSTPlugIn:
-            case ProjectType::Target::VST3PlugIn:
                 return 3;
             default:
                 break;
@@ -578,7 +569,7 @@ private:
 
             if (isLinux())
             {
-                bool keepPrefix = (target.type == ProjectType::Target::VSTPlugIn || target.type == ProjectType::Target::VST3PlugIn);
+                bool keepPrefix = (target.type == ProjectType::Target::VSTPlugIn);
 
                 output->setAttribute ("prefix_auto", keepPrefix ? 0 : 1);
             }
