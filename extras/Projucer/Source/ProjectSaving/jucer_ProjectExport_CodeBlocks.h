@@ -187,12 +187,6 @@ public:
                                 : TargetOS::windows;
 
         vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder), Ids::vst3Path, pathOS)));
-
-        if (! isLinux())
-        {
-            aaxPath.referTo  (Value (new DependencyPathValueSource (getSetting (Ids::aaxFolder), Ids::aaxPath, pathOS)));
-            rtasPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::rtasFolder), Ids::rtasPath, pathOS)));
-        }
     }
 
 private:
@@ -312,7 +306,7 @@ private:
         bool isDynamicLibrary() const
         {
             return (type == DynamicLibrary || type == VST3PlugIn
-                     || type == VSTPlugIn || type == AAXPlugIn);
+                     || type == VSTPlugIn);
         }
 
         const CodeBlocksProjectExporter& exporter;
@@ -584,8 +578,7 @@ private:
 
             if (isLinux())
             {
-                bool keepPrefix = (target.type == ProjectType::Target::VSTPlugIn || target.type == ProjectType::Target::VST3PlugIn
-                                || target.type == ProjectType::Target::AAXPlugIn || target.type == ProjectType::Target::RTASPlugIn);
+                bool keepPrefix = (target.type == ProjectType::Target::VSTPlugIn || target.type == ProjectType::Target::VST3PlugIn);
 
                 output->setAttribute ("prefix_auto", keepPrefix ? 0 : 1);
             }
