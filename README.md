@@ -1,3 +1,9 @@
+# JUZE
+
+JUZE is a fork of JUCE that uses American spellings.
+
+There's more info [here](https://decomposer.de/juze.html).
+
 # The JUCE 5 Library
 
 **BY DOWNLOADING, INSTALLING OR USING ANY PART OF THE JUCE LIBRARY, YOU AGREE
