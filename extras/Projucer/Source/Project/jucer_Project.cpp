@@ -219,7 +219,7 @@ void Project::initialiseProjectValues()
     userNotesValue.referTo                     (projectRoot, Ids::userNotes,  getUndoManager());
 
     maxBinaryFileSizeValue.referTo             (projectRoot, Ids::maxBinaryFileSize,        getUndoManager(), 10240 * 1024);
-    includeBinaryDataInJuceHeaderValue.referTo (projectRoot, Ids::includeBinaryInAppConfig, getUndoManager(), true);
+    includeBinaryDataInJuceHeaderValue.referTo (projectRoot, Ids::includeBinaryInJuceHeader, getUndoManager(), projectRoot.hasProperty(Ids::includeBinaryInAppConfig) ? projectRoot[Ids::includeBinaryInAppConfig] : true);
     binaryDataNamespaceValue.referTo           (projectRoot, Ids::binaryDataNamespace,      getUndoManager(), "BinaryData");
 }
 

@@ -243,6 +243,7 @@ namespace Ids
     DECLARE_ID (userNotes);
     DECLARE_ID (maxBinaryFileSize);
     DECLARE_ID (includeBinaryInAppConfig);
+    DECLARE_ID (includeBinaryInJuceHeader);
     DECLARE_ID (binaryDataNamespace);
     DECLARE_ID (characterSet);
     DECLARE_ID (JUCERPROJECT);
