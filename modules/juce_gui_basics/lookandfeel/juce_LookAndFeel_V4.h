@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -38,13 +38,13 @@ class JUCE_API  LookAndFeel_V4   : public LookAndFeel_V3
 {
 public:
     /**
-         A struct containing the set of colours to apply to the GUI
+         A struct containing the set of colors to apply to the GUI
     */
-    class ColourScheme
+    class ColorScheme
     {
     public:
-        /** The standard set of colours to use. */
-        enum UIColour
+        /** The standard set of colors to use. */
+        enum UIColor
         {
             windowBackground = 0,
             widgetBackground,
@@ -56,55 +56,55 @@ public:
             highlightedFill,
             menuText,
 
-            numColours
+            numColors
         };
 
-        template <typename... ItemColours>
-        ColourScheme (ItemColours... coloursToUse)
+        template <typename... ItemColors>
+        ColorScheme (ItemColors... colorsToUse)
         {
-            static_assert (sizeof... (coloursToUse) == numColours, "Must supply one colour for each UIColour item");
-            const Colour c[] = { Colour (coloursToUse)... };
+            static_assert (sizeof... (colorsToUse) == numColors, "Must supply one color for each UIColor item");
+            const Color c[] = { Color (colorsToUse)... };
 
-            for (int i = 0; i < numColours; ++i)
+            for (int i = 0; i < numColors; ++i)
                 palette[i] = c[i];
         }
 
-        ColourScheme (const ColourScheme&) = default;
-        ColourScheme& operator= (const ColourScheme&) = default;
+        ColorScheme (const ColorScheme&) = default;
+        ColorScheme& operator= (const ColorScheme&) = default;
 
-        /** Returns a colour from the scheme */
-        Colour getUIColour (UIColour colourToGet) const noexcept;
+        /** Returns a color from the scheme */
+        Color getUIColor (UIColor colorToGet) const noexcept;
 
-        /** Sets a scheme colour. */
-        void setUIColour (UIColour colourToSet, Colour newColour) noexcept;
+        /** Sets a scheme color. */
+        void setUIColor (UIColor colorToSet, Color newColor) noexcept;
 
-        /** Returns true if two ColourPalette objects contain the same colours. */
-        bool operator== (const ColourScheme&) const noexcept;
-        /** Returns false if two ColourPalette objects contain the same colours. */
-        bool operator!= (const ColourScheme&) const noexcept;
+        /** Returns true if two ColorPalette objects contain the same colors. */
+        bool operator== (const ColorScheme&) const noexcept;
+        /** Returns false if two ColorPalette objects contain the same colors. */
+        bool operator!= (const ColorScheme&) const noexcept;
 
     private:
-        Colour palette[numColours];
+        Color palette[numColors];
     };
 
     //==============================================================================
-    /** Creates a LookAndFeel_V4 object with a default colour scheme. */
+    /** Creates a LookAndFeel_V4 object with a default color scheme. */
     LookAndFeel_V4();
 
-    /** Creates a LookAndFeel_V4 object with a given colour scheme. */
-    LookAndFeel_V4 (ColourScheme);
+    /** Creates a LookAndFeel_V4 object with a given color scheme. */
+    LookAndFeel_V4 (ColorScheme);
 
     /** Destructor. */
     ~LookAndFeel_V4();
 
     //==============================================================================
-    void setColourScheme (ColourScheme);
-    ColourScheme& getCurrentColourScheme() noexcept       { return currentColourScheme; }
+    void setColorScheme (ColorScheme);
+    ColorScheme& getCurrentColorScheme() noexcept       { return currentColorScheme; }
 
-    static ColourScheme getDarkColourScheme();
-    static ColourScheme getMidnightColourScheme();
-    static ColourScheme getGreyColourScheme();
-    static ColourScheme getLightColourScheme();
+    static ColorScheme getDarkColorScheme();
+    static ColorScheme getMidnightColorScheme();
+    static ColorScheme getGrayColorScheme();
+    static ColorScheme getLightColorScheme();
 
     //==============================================================================
     Button* createDocumentWindowButton (int) override;
@@ -114,7 +114,7 @@ public:
     //==============================================================================
     Font getTextButtonFont (TextButton&, int buttonHeight) override;
 
-    void drawButtonBackground (Graphics&, Button&, const Colour& backgroundColour,
+    void drawButtonBackground (Graphics&, Button&, const Color& backgroundColor,
                                bool isMouseOverButton, bool isButtonDown) override;
 
     void drawToggleButton (Graphics&, ToggleButton&, bool isMouseOverButton, bool isButtonDown) override;
@@ -175,7 +175,7 @@ public:
     void drawPopupMenuItem (Graphics&, const Rectangle<int>& area,
                             bool isSeparator, bool isActive, bool isHighlighted, bool isTicked, bool hasSubMenu,
                             const String& text, const String& shortcutKeyText,
-                            const Drawable* icon, const Colour* textColour) override;
+                            const Drawable* icon, const Color* textColor) override;
 
     void getIdealPopupMenuItemSize (const String& text, bool isSeparator, int standardMenuItemHeight,
                                     int& idealWidth, int& idealHeight) override;
@@ -206,7 +206,7 @@ public:
                            float rotaryEndAngle, Slider&) override;
 
     void drawPointer (Graphics&, float x, float y, float diameter,
-                      const Colour&, int direction) noexcept;
+                      const Color&, int direction) noexcept;
 
     Label* createSliderTextBox (Slider&) override;
 
@@ -247,8 +247,8 @@ private:
     int getPropertyComponentIndent (PropertyComponent&);
 
     //==============================================================================
-    void initialiseColours();
-    ColourScheme currentColourScheme;
+    void initializeColors();
+    ColorScheme currentColorScheme;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LookAndFeel_V4)

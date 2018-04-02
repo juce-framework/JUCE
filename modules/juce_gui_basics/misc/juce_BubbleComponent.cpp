@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -32,7 +32,7 @@ BubbleComponent::BubbleComponent()
 {
     setInterceptsMouseClicks (false, false);
 
-    shadow.setShadowProperties (DropShadow (Colours::black.withAlpha (0.35f), 5, Point<int>()));
+    shadow.setShadowProperties (DropShadow (Colors::black.withAlpha (0.35f), 5, Point<int>()));
     setComponentEffect (&shadow);
 }
 
@@ -110,7 +110,7 @@ void BubbleComponent::setPosition (Rectangle<int> rectangleToPointTo,
 
     if (jmax (spaceAbove, spaceBelow) >= jmax (spaceLeft, spaceRight))
     {
-        targetX = rectangleToPointTo.getCentre().x;
+        targetX = rectangleToPointTo.getCenter().x;
         arrowTip.x = totalW / 2;
 
         if (spaceAbove >= spaceBelow)
@@ -128,7 +128,7 @@ void BubbleComponent::setPosition (Rectangle<int> rectangleToPointTo,
     }
     else
     {
-        targetY = rectangleToPointTo.getCentre().y;
+        targetY = rectangleToPointTo.getCenter().y;
         arrowTip.y = totalH / 2;
 
         if (spaceLeft > spaceRight)

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -283,7 +283,7 @@ public:
         o.content->setSize (500, 550);
 
         o.dialogTitle                   = TRANS("Audio/MIDI Settings");
-        o.dialogBackgroundColour        = o.content->getLookAndFeel().findColour (ResizableWindow::backgroundColourId);
+        o.dialogBackgroundColor        = o.content->getLookAndFeel().findColor (ResizableWindow::backgroundColorId);
         o.escapeKeyTriggersCloseButton  = true;
         o.useNativeTitleBar             = true;
         o.resizable                     = false;
@@ -330,7 +330,7 @@ public:
             totalOutChannels = defaultConfig.numOuts;
         }
 
-        deviceManager.initialise (enableAudioInput ? totalInChannels : 0,
+        deviceManager.initialize (enableAudioInput ? totalInChannels : 0,
                                   totalOutChannels,
                                   savedState,
                                   true,
@@ -450,7 +450,7 @@ private:
 
         void paint (Graphics& g) override
         {
-            g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+            g.fillAll (getLookAndFeel().findColor (ResizableWindow::backgroundColorId));
         }
 
         void resized() override
@@ -558,7 +558,7 @@ private:
 /**
     A class that can be used to run a simple standalone application containing your filter.
 
-    Just create one of these objects in your JUCEApplicationBase::initialise() method, and
+    Just create one of these objects in your JUCEApplicationBase::initialize() method, and
     let it do its work. It will create your filter object using the same createPluginFilter() function
     that the other plugin wrappers use.
 
@@ -572,13 +572,13 @@ public:
     typedef StandalonePluginHolder::PluginInOuts PluginInOuts;
 
     //==============================================================================
-    /** Creates a window with a given title and colour.
+    /** Creates a window with a given title and color.
         The settings object can be a PropertySet that the class should use to
         store its settings (it can also be null). If takeOwnershipOfSettings is
         true, then the settings object will be owned and deleted by this object.
     */
     StandaloneFilterWindow (const String& title,
-                            Colour backgroundColour,
+                            Color backgroundColor,
                             PropertySet* settingsToUse,
                             bool takeOwnershipOfSettings,
                             const String& preferredDefaultDeviceName = String(),
@@ -590,13 +590,13 @@ public:
                             bool autoOpenMidiDevices = false
                            #endif
                             )
-        : DocumentWindow (title, backgroundColour, DocumentWindow::minimiseButton | DocumentWindow::closeButton),
+        : DocumentWindow (title, backgroundColor, DocumentWindow::minimizeButton | DocumentWindow::closeButton),
           optionsButton ("Options")
     {
        #if JUCE_IOS || JUCE_ANDROID
         setTitleBarHeight (0);
        #else
-        setTitleBarButtonsRequired (DocumentWindow::minimiseButton | DocumentWindow::closeButton, false);
+        setTitleBarButtonsRequired (DocumentWindow::minimizeButton | DocumentWindow::closeButton, false);
 
         Component::addAndMakeVisible (optionsButton);
         optionsButton.addListener (this);
@@ -621,11 +621,11 @@ public:
             if (x != -100 && y != -100)
                 setBoundsConstrained ({ x, y, getWidth(), getHeight() });
             else
-                centreWithSize (getWidth(), getHeight());
+                centerWithSize (getWidth(), getHeight());
         }
         else
         {
-            centreWithSize (getWidth(), getHeight());
+            centerWithSize (getWidth(), getHeight());
         }
        #endif
     }
@@ -784,7 +784,7 @@ private:
             {
                 setOpaque (true);
 
-                notification.setColour (Label::textColourId, Colours::black);
+                notification.setColor (Label::textColorId, Colors::black);
 
                 settingsButton.addListener (settingsButtonListener);
 
@@ -796,10 +796,10 @@ private:
             {
                 auto r = getLocalBounds();
 
-                g.setColour (Colours::darkgoldenrod);
+                g.setColor (Colors::darkgoldenrod);
                 g.fillRect (r.removeFromBottom (1));
 
-                g.setColour (Colours::lightgoldenrodyellow);
+                g.setColor (Colors::lightgoldenrodyellow);
                 g.fillRect (r);
             }
 

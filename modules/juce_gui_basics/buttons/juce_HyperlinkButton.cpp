@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -33,7 +33,7 @@ HyperlinkButton::HyperlinkButton (const String& linkText,
      url (linkURL),
      font (14.0f, Font::underlined),
      resizeFont (true),
-     justification (Justification::centred)
+     justification (Justification::centered)
 {
     setMouseCursor (MouseCursor::PointingHandCursor);
     setTooltip (linkURL.toString (false));
@@ -43,7 +43,7 @@ HyperlinkButton::HyperlinkButton()
    : Button (String()),
      font (14.0f, Font::underlined),
      resizeFont (true),
-     justification (Justification::centred)
+     justification (Justification::centered)
 {
     setMouseCursor (MouseCursor::PointingHandCursor);
 }
@@ -91,7 +91,7 @@ void HyperlinkButton::setJustificationType (Justification newJustification)
     }
 }
 
-void HyperlinkButton::colourChanged()
+void HyperlinkButton::colorChanged()
 {
     repaint();
 }
@@ -107,18 +107,18 @@ void HyperlinkButton::paintButton (Graphics& g,
                                    bool isMouseOverButton,
                                    bool isButtonDown)
 {
-    const Colour textColour (findColour (textColourId));
+    const Color textColor (findColor (textColorId));
 
     if (isEnabled())
-        g.setColour ((isMouseOverButton) ? textColour.darker ((isButtonDown) ? 1.3f : 0.4f)
-                                         : textColour);
+        g.setColor ((isMouseOverButton) ? textColor.darker ((isButtonDown) ? 1.3f : 0.4f)
+                                         : textColor);
     else
-        g.setColour (textColour.withMultipliedAlpha (0.4f));
+        g.setColor (textColor.withMultipliedAlpha (0.4f));
 
     g.setFont (getFontToUse());
 
     g.drawText (getButtonText(), getLocalBounds().reduced (1, 0),
-                justification.getOnlyHorizontalFlags() | Justification::verticallyCentred,
+                justification.getOnlyHorizontalFlags() | Justification::verticallyCentered,
                 true);
 }
 

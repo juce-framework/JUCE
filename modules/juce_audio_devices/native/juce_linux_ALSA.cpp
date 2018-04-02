@@ -500,7 +500,7 @@ public:
           inputChannelBuffer (1, 1),
           outputChannelBuffer (1, 1)
     {
-        initialiseRatesAndChannels();
+        initializeRatesAndChannels();
     }
 
     ~ALSAThread()
@@ -818,7 +818,7 @@ private:
         return true;
     }
 
-    void initialiseRatesAndChannels()
+    void initializeRatesAndChannels()
     {
         sampleRates.clear();
         channelNamesOut.clear();

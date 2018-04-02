@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -29,7 +29,7 @@ namespace juce
 
 //==============================================================================
 /**
-    Enables drag-and-drop behaviour for a component and all its sub-components.
+    Enables drag-and-drop behavior for a component and all its sub-components.
 
     For a component to be able to make or receive drag-and-drop events, one of its parent
     components must derive from this class. It's probably best for the top-level
@@ -84,7 +84,7 @@ public:
                                                  children of components other than this one.
         @param imageOffsetFromMouse              if an image has been passed-in, this specifies the offset
                                                  at which the image should be drawn from the mouse. If it isn't
-                                                 specified, then the image will be centred around the mouse. If
+                                                 specified, then the image will be centered around the mouse. If
                                                  an image hasn't been passed-in, this will be ignored.
         @param inputSourceCausingDrag            the mouse input source which started the drag. When calling
                                                  from within a mouseDown or mouseDrag event, you can pass

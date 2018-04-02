@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -93,10 +93,10 @@ public:
         jassert (peer != nullptr);
 
         auto windowH = (Window) peer->getNativeHandle();
-        auto colourMap = XCreateColormap (display, windowH, bestVisual->visual, AllocNone);
+        auto colorMap = XCreateColormap (display, windowH, bestVisual->visual, AllocNone);
 
         XSetWindowAttributes swa;
-        swa.colormap = colourMap;
+        swa.colormap = colorMap;
         swa.border_pixel = 0;
         swa.event_mask = ExposureMask | StructureNotifyMask;
 
@@ -118,7 +118,7 @@ public:
         XSaveContext (display, (XID) embeddedWindow, windowHandleXContext, (XPointer) peer);
 
         XMapWindow (display, embeddedWindow);
-        XFreeColormap (display, colourMap);
+        XFreeColormap (display, colorMap);
 
         XSync (display, False);
 
@@ -142,7 +142,7 @@ public:
         XWindowSystem::getInstance()->displayUnref();
     }
 
-    bool initialiseOnRenderThread (OpenGLContext& c)
+    bool initializeOnRenderThread (OpenGLContext& c)
     {
         ScopedXLock xlock (display);
         renderContext = glXCreateContext (display, bestVisual, (GLXContext) contextToShareWith, GL_TRUE);

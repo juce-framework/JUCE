@@ -125,15 +125,15 @@ public:
                                           double Q,
                                           float gainFactor) noexcept;
 
-    /** Returns the coefficients for a peak filter centred around a
+    /** Returns the coefficients for a peak filter centered around a
         given frequency, with a variable Q and gain.
 
-        The gain is a scale factor that the centre frequencies are multiplied by, so
-        values greater than 1.0 will boost the centre frequencies, values less than
+        The gain is a scale factor that the center frequencies are multiplied by, so
+        values greater than 1.0 will boost the center frequencies, values less than
         1.0 will attenuate them.
     */
     static IIRCoefficients makePeakFilter (double sampleRate,
-                                           double centreFrequency,
+                                           double centerFrequency,
                                            double Q,
                                            float gainFactor) noexcept;
 

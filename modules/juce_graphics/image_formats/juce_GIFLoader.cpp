@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -50,11 +50,11 @@ public:
         if (in.read (buf, 3) != 3)
             return;
 
-        int numColours = 2 << (buf[0] & 7);
+        int numColors = 2 << (buf[0] & 7);
         int transparent = -1;
 
         if ((buf[0] & 0x80) != 0)
-            readPalette (numColours);
+            readPalette (numColors);
 
         for (;;)
         {
@@ -77,10 +77,10 @@ public:
                 imageWidth  = (int) ByteOrder::littleEndianShort (buf + 4);
                 imageHeight = (int) ByteOrder::littleEndianShort (buf + 6);
 
-                numColours = 2 << (buf[8] & 7);
+                numColors = 2 << (buf[8] & 7);
 
                 if ((buf[8] & 0x80) != 0)
-                    if (! readPalette (numColours))
+                    if (! readPalette (numColors))
                         break;
 
                 image = Image (transparent >= 0 ? Image::ARGB : Image::RGB,
@@ -203,7 +203,7 @@ private:
         }
     }
 
-    void initialise (const int inputCodeSize)
+    void initialize (const int inputCodeSize)
     {
         setCodeSize = inputCodeSize;
         codeSize = setCodeSize + 1;
@@ -307,9 +307,9 @@ private:
         return code;
     }
 
-    int getCode (const int codeSize_, const bool shouldInitialise)
+    int getCode (const int codeSize_, const bool shouldInitialize)
     {
-        if (shouldInitialise)
+        if (shouldInitialize)
         {
             currentBit = 0;
             lastBit = 0;
@@ -354,7 +354,7 @@ private:
         if (input.read (&c, 1) != 1)
             return false;
 
-        initialise (c);
+        initialize (c);
 
         if (transparent >= 0)
             palette [transparent].setARGB (0, 0, 0, 0);

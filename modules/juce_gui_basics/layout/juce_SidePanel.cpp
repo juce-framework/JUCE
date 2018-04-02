@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -143,17 +143,17 @@ void SidePanel::paint (Graphics& g)
 {
     auto& lf = getLookAndFeel();
 
-    auto bgColour     = lf.findColour (SidePanel::backgroundColour);
-    auto shadowColour = lf.findColour (SidePanel::shadowBaseColour);
+    auto bgColor     = lf.findColor (SidePanel::backgroundColor);
+    auto shadowColor = lf.findColor (SidePanel::shadowBaseColor);
 
-    g.setGradientFill (ColourGradient (shadowColour.withAlpha (0.7f), (isOnLeft ? shadowArea.getTopLeft()
+    g.setGradientFill (ColorGradient (shadowColor.withAlpha (0.7f), (isOnLeft ? shadowArea.getTopLeft()
                                                                                 : shadowArea.getTopRight()).toFloat(),
-                                       shadowColour.withAlpha (0.0f), (isOnLeft ? shadowArea.getTopRight()
+                                       shadowColor.withAlpha (0.0f), (isOnLeft ? shadowArea.getTopRight()
                                                                                 : shadowArea.getTopLeft()).toFloat(), false));
     g.fillRect (shadowArea);
 
     g.excludeClipRegion (shadowArea);
-    g.fillAll (bgColour);
+    g.fillAll (bgColor);
 }
 
 void SidePanel::parentHierarchyChanged()
@@ -226,12 +226,12 @@ void SidePanel::lookAndFeelChanged()
 
     dismissButton.setShape (lf.getSidePanelDismissButtonShape (*this), false, true, false);
 
-    dismissButton.setColours (lf.findColour (SidePanel::dismissButtonNormalColour),
-                              lf.findColour (SidePanel::dismissButtonOverColour),
-                              lf.findColour (SidePanel::dismissButtonDownColour));
+    dismissButton.setColors (lf.findColor (SidePanel::dismissButtonNormalColor),
+                              lf.findColor (SidePanel::dismissButtonOverColor),
+                              lf.findColor (SidePanel::dismissButtonDownColor));
 
     titleLabel.setFont (lf.getSidePanelTitleFont (*this));
-    titleLabel.setColour (Label::textColourId, findColour (SidePanel::titleTextColour));
+    titleLabel.setColor (Label::textColorId, findColor (SidePanel::titleTextColor));
     titleLabel.setJustificationType (lf.getSidePanelTitleJustification (*this));
 }
 

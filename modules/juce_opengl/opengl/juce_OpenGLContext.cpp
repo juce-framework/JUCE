@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -37,7 +37,7 @@ struct AppInactivityCallback // NB: this is a duplicate of an internal declarati
 extern Array<AppInactivityCallback*> appBecomingInactiveCallbacks;
 
 // On iOS, all GL calls will crash when the app is running in the background, so
-// this prevents them from happening (which some messy locking behaviour)
+// this prevents them from happening (which some messy locking behavior)
 struct iOSBackgroundProcessCheck  : public AppInactivityCallback
 {
     iOSBackgroundProcessCheck()     { isBackgroundProcess(); appBecomingInactiveCallbacks.add (this); }
@@ -120,7 +120,7 @@ public:
             renderThread.reset();
         }
 
-        hasInitialised = false;
+        hasInitialized = false;
     }
 
     //==============================================================================
@@ -181,7 +181,7 @@ public:
 
         if (fbW != viewportArea.getWidth() || fbH != viewportArea.getHeight() || ! cachedImageFrameBuffer.isValid())
         {
-            if (! cachedImageFrameBuffer.initialise (context, viewportArea.getWidth(), viewportArea.getHeight()))
+            if (! cachedImageFrameBuffer.initialize (context, viewportArea.getWidth(), viewportArea.getHeight()))
                 return false;
 
             validArea.clear();
@@ -259,7 +259,7 @@ public:
             {
                 paintComponent();
 
-                if (! hasInitialised)
+                if (! hasInitialized)
                     return false;
 
                 messageManagerLock.exit();
@@ -283,7 +283,7 @@ public:
             lastScreenBounds = component.getTopLevelComponent()->getScreenBounds();
 
             auto newScale = Desktop::getInstance().getDisplays()
-                              .getDisplayContaining (lastScreenBounds.getCentre()).scale;
+                              .getDisplayContaining (lastScreenBounds.getCenter()).scale;
 
             auto localBounds = component.getLocalBounds();
 
@@ -401,12 +401,12 @@ public:
         if (JUCE_IS_REPAINT_DEBUGGING_ACTIVE)
        #endif
         {
-            // enabling this code will fill all areas that get repainted with a colour overlay, to show
+            // enabling this code will fill all areas that get repainted with a color overlay, to show
             // clearly when things are being repainted.
             g.restoreState();
 
             static Random rng;
-            g.fillAll (Colour ((uint8) rng.nextInt (255),
+            g.fillAll (Color ((uint8) rng.nextInt (255),
                                (uint8) rng.nextInt (255),
                                (uint8) rng.nextInt (255),
                                (uint8) 0x50));
@@ -419,7 +419,7 @@ public:
         updateViewportSize (true);
 
        #if JUCE_MAC
-        if (hasInitialised)
+        if (hasInitialized)
         {
             [nativeContext->view update];
             renderFrame();
@@ -442,14 +442,14 @@ public:
             } while (! mmLock.retryLock());
         }
 
-        if (! initialiseOnThread())
+        if (! initializeOnThread())
         {
-            hasInitialised = false;
+            hasInitialized = false;
 
             return ThreadPoolJob::jobHasFinished;
         }
 
-        hasInitialised = true;
+        hasInitialized = true;
 
         while (! shouldExit())
         {
@@ -470,7 +470,7 @@ public:
                 repaintEvent.wait (-1);
         }
 
-        hasInitialised = false;
+        hasInitialized = false;
         context.makeActive();
         shutdownOnThread();
         OpenGLContext::deactivateCurrentContext();
@@ -478,7 +478,7 @@ public:
         return ThreadPoolJob::jobHasFinished;
     }
 
-    bool initialiseOnThread()
+    bool initializeOnThread()
     {
         // On android, this can get called twice, so drop any previous state..
         associatedObjectNames.clear();
@@ -487,16 +487,16 @@ public:
 
         context.makeActive();
 
-        if (! nativeContext->initialiseOnRenderThread (context))
+        if (! nativeContext->initializeOnRenderThread (context))
             return false;
 
        #if JUCE_ANDROID
-        // On android the context may be created in initialiseOnRenderThread
+        // On android the context may be created in initializeOnRenderThread
         // and we therefore need to call makeActive again
         context.makeActive();
        #endif
 
-        context.extensions.initialise();
+        context.extensions.initialize();
 
        #if JUCE_OPENGL3
         if (OpenGLShaderProgram::getLanguageVersion() > 1.2)
@@ -637,7 +637,7 @@ public:
    #else
     bool shadersAvailable = false;
    #endif
-    bool hasInitialised = false;
+    bool hasInitialized = false;
     Atomic<int> needsUpdate { 1 }, destroying;
     uint32 lastMMLockReleaseTime = 0;
 
@@ -708,7 +708,7 @@ public:
         if (canBeAttached (comp))
         {
             if (isAttached (comp))
-                comp.repaint(); // (needed when windows are un-minimised)
+                comp.repaint(); // (needed when windows are un-minimized)
             else
                 attach();
         }
@@ -745,16 +745,16 @@ private:
 
     bool canBeAttached (const Component& comp) noexcept
     {
-        return (! context.overrideCanAttach) && comp.getWidth() > 0 && comp.getHeight() > 0 && isShowingOrMinimised (comp);
+        return (! context.overrideCanAttach) && comp.getWidth() > 0 && comp.getHeight() > 0 && isShowingOrMinimized (comp);
     }
 
-    static bool isShowingOrMinimised (const Component& c)
+    static bool isShowingOrMinimized (const Component& c)
     {
         if (! c.isVisible())
             return false;
 
         if (auto* p = c.getParentComponent())
-            return isShowingOrMinimised (*p);
+            return isShowingOrMinimized (*p);
 
         return c.getPeer() != nullptr;
     }

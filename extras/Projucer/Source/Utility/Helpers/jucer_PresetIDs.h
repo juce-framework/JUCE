@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -50,7 +50,7 @@ namespace Ids
     DECLARE_ID (companyEmail);
     DECLARE_ID (displaySplashScreen);
     DECLARE_ID (reportAppUsage);
-    DECLARE_ID (splashScreenColour);
+    DECLARE_ID (splashScreenColor);
     DECLARE_ID (position);
     DECLARE_ID (source);
     DECLARE_ID (width);
@@ -88,7 +88,7 @@ namespace Ids
     DECLARE_ID (alwaysGenerateDebugSymbols);
     DECLARE_ID (targetName);
     DECLARE_ID (binaryPath);
-    DECLARE_ID (optimisation);
+    DECLARE_ID (optimization);
     DECLARE_ID (defines);
     DECLARE_ID (headerPath);
     DECLARE_ID (systemHeaderPath);
@@ -112,7 +112,7 @@ namespace Ids
     DECLARE_ID (cppLibType);
     DECLARE_ID (codeSigningIdentity);
     DECLARE_ID (fastMath);
-    DECLARE_ID (linkTimeOptimisation);
+    DECLARE_ID (linkTimeOptimization);
     DECLARE_ID (vstBinaryLocation);
     DECLARE_ID (vst3BinaryLocation);
     DECLARE_ID (auBinaryLocation);
@@ -162,7 +162,7 @@ namespace Ids
     DECLARE_ID (parentClasses);
     DECLARE_ID (constructorParams);
     DECLARE_ID (objectConstructionArgs);
-    DECLARE_ID (memberInitialisers);
+    DECLARE_ID (memberInitializers);
     DECLARE_ID (canBeAggregated);
     DECLARE_ID (rootItemVisible);
     DECLARE_ID (openByDefault);
@@ -240,7 +240,7 @@ namespace Ids
     DECLARE_ID (clionCodeBlocksEnabled);
     DECLARE_ID (clionExePath);
     DECLARE_ID (font);
-    DECLARE_ID (colour);
+    DECLARE_ID (color);
     DECLARE_ID (userNotes);
     DECLARE_ID (maxBinaryFileSize);
     DECLARE_ID (includeBinaryInAppConfig);
@@ -287,7 +287,7 @@ namespace Ids
     DECLARE_ID (declaration);
     DECLARE_ID (definition);
     DECLARE_ID (classDecl);
-    DECLARE_ID (initialisers);
+    DECLARE_ID (initializers);
     DECLARE_ID (destructors);
     DECLARE_ID (buildVST);
     DECLARE_ID (buildVST3);

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -207,8 +207,8 @@ public:
                                                       : "Absolute distance from bottom of ") + relCompName,
                        true, posMode == PositionedRectangle::absoluteFromParentBottomRight);
 
-            m.addItem (12, "Absolute distance from centre of " + relCompName,
-                       true, posMode == PositionedRectangle::absoluteFromParentCentre);
+            m.addItem (12, "Absolute distance from center of " + relCompName,
+                       true, posMode == PositionedRectangle::absoluteFromParentCenter);
 
             m.addItem (13, ((dimension == componentX) ? "Percentage of width of "
                                                       : "Percentage of height of ") + relCompName,
@@ -224,7 +224,7 @@ public:
                                                          : "Anchored at top of component",
                            true, anchor == PositionedRectangle::anchorAtLeftOrTop);
 
-                m.addItem (15, "Anchored at centre of component", true, anchor == PositionedRectangle::anchorAtCentre);
+                m.addItem (15, "Anchored at center of component", true, anchor == PositionedRectangle::anchorAtCenter);
 
                 m.addItem (16, (dimension == componentX) ? "Anchored at right of component"
                                                          : "Anchored at bottom of component",
@@ -280,9 +280,9 @@ public:
 
         case 12:
             if (dimension == componentX)
-                xMode = PositionedRectangle::absoluteFromParentCentre;
+                xMode = PositionedRectangle::absoluteFromParentCenter;
             else
-                yMode = PositionedRectangle::absoluteFromParentCentre;
+                yMode = PositionedRectangle::absoluteFromParentCenter;
             break;
 
         case 13:
@@ -301,9 +301,9 @@ public:
 
         case 15:
             if (dimension == componentX)
-                xAnchor = PositionedRectangle::anchorAtCentre;
+                xAnchor = PositionedRectangle::anchorAtCenter;
             else
-                yAnchor = PositionedRectangle::anchorAtCentre;
+                yAnchor = PositionedRectangle::anchorAtCenter;
             break;
 
         case 16:
@@ -434,8 +434,8 @@ protected:
 
         void lookAndFeelChanged() override
         {
-            setColour (backgroundColourId, findColour (widgetBackgroundColourId));
-            setColour (textColourId, findColour (widgetTextColourId));
+            setColor (backgroundColorId, findColor (widgetBackgroundColorId));
+            setColor (textColorId, findColor (widgetTextColorId));
         }
     };
 

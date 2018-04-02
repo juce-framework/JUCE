@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -309,16 +309,16 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
             imageNeedsFlipping = false;
         }
 
-        Rectangle<int> centred (RectanglePlacement (RectanglePlacement::centred)
+        Rectangle<int> centered (RectanglePlacement (RectanglePlacement::centered)
                                     .appliedTo (Rectangle<int> (width, height), area));
 
         RectangleList<int> borders (area);
-        borders.subtract (centred);
-        g.setColour (Colours::black);
+        borders.subtract (centered);
+        g.setColor (Colors::black);
         g.fillRectList (borders);
 
-        g.drawImage (activeImage, centred.getX(), centred.getY(),
-                     centred.getWidth(), centred.getHeight(), 0, 0, width, height);
+        g.drawImage (activeImage, centered.getX(), centered.getY(),
+                     centered.getWidth(), centered.getHeight(), 0, 0, width, height);
     }
 
     bool createFileCaptureFilter (const File& file, int quality)
@@ -751,7 +751,7 @@ struct CameraDevice::ViewerComponent  : public Component,
 
     void paint (Graphics& g) override
     {
-        g.setColour (Colours::black);
+        g.setColor (Colors::black);
         g.setImageResamplingQuality (Graphics::lowResamplingQuality);
 
         if (owner != nullptr)

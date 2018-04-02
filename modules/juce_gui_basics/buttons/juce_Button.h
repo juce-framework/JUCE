@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -31,7 +31,7 @@ namespace juce
 /**
     A base class for buttons.
 
-    This contains all the logic for button behaviours such as enabling/disabling,
+    This contains all the logic for button behaviors such as enabling/disabling,
     responding to shortcut keystrokes, auto-repeating when held down, toggle-buttons
     and radio groups, etc.
 
@@ -90,7 +90,7 @@ public:
                                 off. If it's a member of a button group, this will
                                 always try to turn it on, and to turn off any other
                                 buttons in the group
-        @param notification     determines the behaviour if the value changes - this
+        @param notification     determines the behavior if the value changes - this
                                 can invoke a synchronous call to clicked(), but
                                 sendNotificationAsync is not supported
         @see getToggleState, setRadioGroupId
@@ -369,7 +369,7 @@ public:
     {
         virtual ~LookAndFeelMethods() {}
 
-        virtual void drawButtonBackground (Graphics&, Button&, const Colour& backgroundColour,
+        virtual void drawButtonBackground (Graphics&, Button&, const Color& backgroundColor,
                                            bool isMouseOverButton, bool isButtonDown) = 0;
 
         virtual Font getTextButtonFont (TextButton&, int buttonHeight) = 0;

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -29,7 +29,7 @@ namespace juce
 
 /**
     A subclass of AudioProcessorParameter that provides an easy way to create a
-    parameter which maps onto a given NormalisableRange.
+    parameter which maps onto a given NormalizableRange.
 
     @see AudioParameterInt, AudioParameterBool, AudioParameterChoice
 
@@ -42,19 +42,19 @@ public:
 
         @param parameterID         The parameter ID to use
         @param name                The parameter name to use
-        @param normalisableRange   The NormalisableRange to use
-        @param defaultValue        The non-normalised default value
+        @param normalizableRange   The NormalizableRange to use
+        @param defaultValue        The non-normalized default value
         @param label               An optional label for the parameter's value
         @param category            An optional parameter category
-        @param stringFromValue     An optional lambda function that converts a non-normalised
+        @param stringFromValue     An optional lambda function that converts a non-normalized
                                    value to a string with a maximum length. This may
                                    be used by hosts to display the parameter's value.
         @param valueFromString     An optional lambda function that parses a string and
-                                   converts it into a non-normalised value. Some hosts use
+                                   converts it into a non-normalized value. Some hosts use
                                    this to allow users to type in parameter values.
     */
     AudioParameterFloat (const String& parameterID, const String& name,
-                         NormalisableRange<float> normalisableRange,
+                         NormalizableRange<float> normalizableRange,
                          float defaultValue,
                          const String& label = String(),
                          Category category = AudioProcessorParameter::genericParameter,
@@ -64,7 +64,7 @@ public:
     /** Creates a AudioParameterFloat with an ID, name, and range.
         On creation, its value is set to the default value.
         For control over skew factors, you can use the other
-        constructor and provide a NormalisableRange.
+        constructor and provide a NormalizableRange.
     */
     AudioParameterFloat (String parameterID, String name,
                          float minValue,
@@ -83,7 +83,7 @@ public:
     AudioParameterFloat& operator= (float newValue);
 
     /** Provides access to the parameter's range. */
-    NormalisableRange<float> range;
+    NormalizableRange<float> range;
 
 protected:
     /** Override this method if you are interested in receiving callbacks

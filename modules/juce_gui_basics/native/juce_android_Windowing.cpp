@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -56,17 +56,17 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, launchApp, void, (JNIEnv* en
 {
     setEnv (env);
 
-    android.initialise (env, activity, appFile, appDataDir);
+    android.initialize (env, activity, appFile, appDataDir);
 
     DBG (SystemStats::getJUCEVersion());
 
     JUCEApplicationBase::createInstance = &juce_CreateApplication;
 
-    initialiseJuce_GUI();
+    initializeJuce_GUI();
 
     if (JUCEApplicationBase* app = JUCEApplicationBase::createInstance())
     {
-        if (! app->initialiseApp())
+        if (! app->initializeApp())
             exit (app->shutdownApp());
     }
     else
@@ -228,7 +228,7 @@ public:
           sizeAllocated (0),
           scale ((float) Desktop::getInstance().getDisplays().getMainDisplay().scale)
     {
-        // NB: must not put this in the initialiser list, as it invokes a callback,
+        // NB: must not put this in the initializer list, as it invokes a callback,
         // which will fail if the peer is only half-constructed.
         view = GlobalRef (android.activity.callObjectMethod (JuceAppActivity.createNewView,
                                                              (jboolean) component.isOpaque(),
@@ -367,12 +367,12 @@ public:
         return screenPosition - getScreenPosition();
     }
 
-    void setMinimised (bool /*shouldBeMinimised*/) override
+    void setMinimized (bool /*shouldBeMinimized*/) override
     {
         // n/a
     }
 
-    bool isMinimised() const override
+    bool isMinimized() const override
     {
         return false;
     }
@@ -758,7 +758,7 @@ private:
         ImageType* createType() const override                      { return new SoftwareImageType(); }
         LowLevelGraphicsContext* createLowLevelContext() override   { return new LowLevelGraphicsSoftwareRenderer (Image (this)); }
 
-        void initialiseBitmapData (Image::BitmapData& bm, int x, int y, Image::BitmapData::ReadWriteMode /*mode*/) override
+        void initializeBitmapData (Image::BitmapData& bm, int x, int y, Image::BitmapData::ReadWriteMode /*mode*/) override
         {
             bm.lineStride = width * static_cast<int> (sizeof (jint));
             bm.pixelStride = static_cast<int> (sizeof (jint));

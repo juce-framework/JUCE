@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -155,7 +155,7 @@ public:
                                             supported on all platforms, and best left as 0 unless you know
                                             what you're doing.
         @see removeFromDesktop, isOnDesktop, userTriedToCloseWindow,
-             getPeer, ComponentPeer::setMinimised, ComponentPeer::StyleFlags,
+             getPeer, ComponentPeer::setMinimized, ComponentPeer::StyleFlags,
              ComponentPeer::getStyleFlags, ComponentPeer::setFullScreen
     */
     virtual void addToDesktop (int windowStyleFlags,
@@ -196,11 +196,11 @@ public:
     */
     virtual void userTriedToCloseWindow();
 
-    /** Called for a desktop component which has just been minimised or un-minimised.
+    /** Called for a desktop component which has just been minimized or un-minimized.
         This will only be called for components on the desktop.
-        @see getPeer, ComponentPeer::setMinimised, ComponentPeer::isMinimised
+        @see getPeer, ComponentPeer::setMinimized, ComponentPeer::isMinimized
     */
-    virtual void minimisationStateChanged (bool isNowMinimised);
+    virtual void minimizationStateChanged (bool isNowMinimized);
 
     /** Returns the default scale factor to use for this component when it is placed
         on the desktop.
@@ -525,38 +525,38 @@ public:
                          Justification justification,
                          bool onlyReduceInSize);
 
-    /** Changes the position of the component's centre.
+    /** Changes the position of the component's center.
 
-        Leaves the component's size unchanged, but sets the position of its centre
+        Leaves the component's size unchanged, but sets the position of its center
         relative to its parent's top-left.
 
         @see setBounds
     */
-    void setCentrePosition (int x, int y);
+    void setCenterPosition (int x, int y);
 
-    /** Changes the position of the component's centre.
+    /** Changes the position of the component's center.
 
-        Leaves the component's size unchanged, but sets the position of its centre
+        Leaves the component's size unchanged, but sets the position of its center
         relative to its parent's top-left.
 
         @see setBounds
     */
-    void setCentrePosition (Point<int> newCentrePosition);
+    void setCenterPosition (Point<int> newCenterPosition);
 
-    /** Changes the position of the component's centre.
+    /** Changes the position of the component's center.
 
-        Leaves the size unchanged, but positions its centre relative to its parent's size.
-        E.g. setCentreRelative (0.5f, 0.5f) would place it centrally in its parent.
+        Leaves the size unchanged, but positions its center relative to its parent's size.
+        E.g. setCenterRelative (0.5f, 0.5f) would place it centrally in its parent.
     */
-    void setCentreRelative (float x, float y);
+    void setCenterRelative (float x, float y);
 
-    /** Changes the component's size and centres it within its parent.
+    /** Changes the component's size and centers it within its parent.
 
         After changing the size, the component will be moved so that it's
-        centred within its parent. If the component is on the desktop (or has no
-        parent component), then it'll be centred within the main monitor area.
+        centered within its parent. If the component is on the desktop (or has no
+        parent component), then it'll be centered within the main monitor area.
     */
-    void centreWithSize (int width, int height);
+    void centerWithSize (int width, int height);
 
     //==============================================================================
     /** Sets a transform matrix to be applied to this component.
@@ -619,7 +619,7 @@ public:
 
         If there's only one monitor, this will return its size - if there are multiple
         monitors, it will return the area of the monitor that contains the component's
-        centre.
+        center.
     */
     Rectangle<int> getParentMonitorArea() const;
 
@@ -852,7 +852,7 @@ public:
         component's parent.
 
         Note that for components on the desktop, this method will be ignored, because it's
-        not always possible to implement this behaviour on all platforms.
+        not always possible to implement this behavior on all platforms.
 
         @param x    the x coordinate to test, relative to the left hand edge of this
                     component. This value is guaranteed to be greater than or equal to
@@ -993,7 +993,7 @@ public:
     void repaint (Rectangle<int> area);
 
     //==============================================================================
-    /** Makes the component use an internal buffer to optimise its redrawing.
+    /** Makes the component use an internal buffer to optimize its redrawing.
 
         Setting this flag to true will cause the component to allocate an
         internal buffer into which it paints itself and all its child components, so that
@@ -1135,11 +1135,11 @@ public:
     //==============================================================================
     /** Indicates whether any parts of the component might be transparent.
 
-        Components that always paint all of their contents with solid colour and
+        Components that always paint all of their contents with solid color and
         thus completely cover any components behind them should use this method
         to tell the repaint system that they are opaque.
 
-        This information is used to optimise drawing, because it means that
+        This information is used to optimize drawing, because it means that
         objects underneath opaque windows don't need to be painted.
 
         By default, components are considered transparent, unless this is used to
@@ -1395,7 +1395,7 @@ public:
 
     /** Called when setAlpha() is used to change the alpha value of this component.
         If you override this, you should also invoke the base class's implementation
-        during your overridden function, as it performs some repainting behaviour.
+        during your overridden function, as it performs some repainting behavior.
     */
     virtual void alphaChanged();
 
@@ -1412,7 +1412,7 @@ public:
     /** Returns the mouse cursor shape to use when the mouse is over this component.
 
         The default implementation will return the cursor that was set by setCursor()
-        but can be overridden for more specialised purposes, e.g. returning different
+        but can be overridden for more specialized purposes, e.g. returning different
         cursors depending on the mouse position.
 
         @see MouseCursor
@@ -2060,52 +2060,52 @@ public:
     const NamedValueSet& getProperties() const noexcept                 { return properties; }
 
     //==============================================================================
-    /** Looks for a colour that has been registered with the given colour ID number.
+    /** Looks for a color that has been registered with the given color ID number.
 
-        If a colour has been set for this ID number using setColour(), then it is
+        If a color has been set for this ID number using setColor(), then it is
         returned. If none has been set, the method will try calling the component's
-        LookAndFeel class's findColour() method. If none has been registered with the
+        LookAndFeel class's findColor() method. If none has been registered with the
         look-and-feel either, it will just return black.
 
-        The colour IDs for various purposes are stored as enums in the components that
-        they are relevant to - for an example, see Slider::ColourIds,
-        Label::ColourIds, TextEditor::ColourIds, TreeView::ColourIds, etc.
+        The color IDs for various purposes are stored as enums in the components that
+        they are relevant to - for an example, see Slider::ColorIds,
+        Label::ColorIds, TextEditor::ColorIds, TreeView::ColorIds, etc.
 
-        @see setColour, isColourSpecified, colourChanged, LookAndFeel::findColour, LookAndFeel::setColour
+        @see setColor, isColorSpecified, colorChanged, LookAndFeel::findColor, LookAndFeel::setColor
     */
-    Colour findColour (int colourID, bool inheritFromParent = false) const;
+    Color findColor (int colorID, bool inheritFromParent = false) const;
 
-    /** Registers a colour to be used for a particular purpose.
+    /** Registers a color to be used for a particular purpose.
 
-        Changing a colour will cause a synchronous callback to the colourChanged()
+        Changing a color will cause a synchronous callback to the colorChanged()
         method, which your component can override if it needs to do something when
-        colours are altered.
+        colors are altered.
 
-        For more details about colour IDs, see the comments for findColour().
+        For more details about color IDs, see the comments for findColor().
 
-        @see findColour, isColourSpecified, colourChanged, LookAndFeel::findColour, LookAndFeel::setColour
+        @see findColor, isColorSpecified, colorChanged, LookAndFeel::findColor, LookAndFeel::setColor
     */
-    void setColour (int colourID, Colour newColour);
+    void setColor (int colorID, Color newColor);
 
-    /** If a colour has been set with setColour(), this will remove it.
-        This allows you to make a colour revert to its default state.
+    /** If a color has been set with setColor(), this will remove it.
+        This allows you to make a color revert to its default state.
     */
-    void removeColour (int colourID);
+    void removeColor (int colorID);
 
-    /** Returns true if the specified colour ID has been explicitly set for this
-        component using the setColour() method.
+    /** Returns true if the specified color ID has been explicitly set for this
+        component using the setColor() method.
     */
-    bool isColourSpecified (int colourID) const;
+    bool isColorSpecified (int colorID) const;
 
-    /** This looks for any colours that have been specified for this component,
+    /** This looks for any colors that have been specified for this component,
         and copies them to the specified target component.
     */
-    void copyAllExplicitColoursTo (Component& target) const;
+    void copyAllExplicitColorsTo (Component& target) const;
 
-    /** This method is called when a colour is changed by the setColour() method.
-        @see setColour, findColour
+    /** This method is called when a color is changed by the setColor() method.
+        @see setColor, findColor
     */
-    virtual void colourChanged();
+    virtual void colorChanged();
 
     //==============================================================================
     /** Returns the underlying native window handle for this component.
@@ -2375,7 +2375,7 @@ private:
     virtual void filesDropped (const StringArray&, int, int) {}
 
     // This is included here to cause an error if you use or overload it - it has been deprecated in
-    // favour of contains (Point<int>)
+    // favor of contains (Point<int>)
     void contains (int, int) = delete;
    #endif
 

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -53,11 +53,11 @@ public:
     /** Returns the currently displayed text */
     const String& getText() const noexcept                              { return text;}
 
-    /** Sets the colour of the text. */
-    void setColour (Colour newColour);
+    /** Sets the color of the text. */
+    void setColor (Color newColor);
 
-    /** Returns the current text colour. */
-    Colour getColour() const noexcept                                   { return colour; }
+    /** Returns the current text color. */
+    Color getColor() const noexcept                                   { return color; }
 
     /** Sets the font to use.
         Note that the font height and horizontal scale are set using setFontHeight() and
@@ -104,7 +104,7 @@ private:
     float fontHeight, fontHScale;
     Font font, scaledFont;
     String text;
-    Colour colour;
+    Color color;
     Justification justification;
 
     void refreshBounds();

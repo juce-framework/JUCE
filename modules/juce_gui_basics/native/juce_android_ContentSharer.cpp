@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -50,7 +50,7 @@ DECLARE_JNI_CLASS (AssetFileDescriptor, "android/content/res/AssetFileDescriptor
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  METHOD (close, "close", "()V")
 
-DECLARE_JNI_CLASS (JavaCloseable, "java/io/Closeable");
+DECLARE_JNI_CLASS (JavaClosable, "java/io/Closable");
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -228,7 +228,7 @@ private:
         ~StreamCloser()
         {
             if (stream.get() != 0)
-                getEnv()->CallVoidMethod (stream, JavaCloseable.close);
+                getEnv()->CallVoidMethod (stream, JavaClosable.close);
         }
 
         GlobalRef stream;

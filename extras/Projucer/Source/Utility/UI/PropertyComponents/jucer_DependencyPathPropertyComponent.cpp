@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -86,7 +86,7 @@ try : TextPropertyComponent (propertyName, 1024, false),
 }
 catch (const std::bad_cast&)
 {
-    // a DependencyPathPropertyComponent must be initialised with a Value
+    // a DependencyPathPropertyComponent must be initialized with a Value
     // that is referring to a DependencyPathValueSource!
     jassertfalse;
     throw;
@@ -102,18 +102,18 @@ void DependencyPathPropertyComponent::valueChanged (Value& value)
 
 void DependencyPathPropertyComponent::textWasEdited()
 {
-    setColour (textColourId, getTextColourToDisplay());
+    setColor (textColorId, getTextColorToDisplay());
     TextPropertyComponent::textWasEdited();
 }
 
-Colour DependencyPathPropertyComponent::getTextColourToDisplay() const
+Color DependencyPathPropertyComponent::getTextColorToDisplay() const
 {
     if (! pathValueSource.isUsingProjectSettings())
-        return pathValueSource.isValidPath (pathRelativeTo) ? findColour (widgetTextColourId).withMultipliedAlpha (0.5f)
-                                                            : Colours::red.withMultipliedAlpha (0.5f);
+        return pathValueSource.isValidPath (pathRelativeTo) ? findColor (widgetTextColorId).withMultipliedAlpha (0.5f)
+                                                            : Colors::red.withMultipliedAlpha (0.5f);
 
-    return pathValueSource.isValidPath (pathRelativeTo) ? findColour (widgetTextColourId)
-                                                        : Colours::red;
+    return pathValueSource.isValidPath (pathRelativeTo) ? findColor (widgetTextColorId)
+                                                        : Colors::red;
 }
 
 void DependencyPathPropertyComponent::setEditorText (Label* label)
@@ -165,7 +165,7 @@ try : TextPropertyComponent (propertyDescription, 1024, false),
 }
 catch (const std::bad_cast&)
 {
-    // a DependencyPathPropertyComponent must be initialised with a Value
+    // a DependencyPathPropertyComponent must be initialized with a Value
     // that is referring to a DependencyPathValueSource!
     jassertfalse;
     throw;
@@ -183,7 +183,7 @@ void DependencyFilePathPropertyComponent::paintOverChildren (Graphics& g)
 {
     if (highlightForDragAndDrop)
     {
-        g.setColour (findColour (defaultHighlightColourId).withAlpha (0.5f));
+        g.setColor (findColor (defaultHighlightColorId).withAlpha (0.5f));
         g.fillRect (getChildComponent (0)->getBounds());
     }
 }
@@ -220,7 +220,7 @@ void DependencyFilePathPropertyComponent::enablementChanged()
 
 void DependencyFilePathPropertyComponent::textWasEdited()
 {
-    setColour (textColourId, getTextColourToDisplay());
+    setColor (textColorId, getTextColorToDisplay());
     TextPropertyComponent::textWasEdited();
 }
 
@@ -258,7 +258,7 @@ void DependencyFilePathPropertyComponent::browse()
     }
 }
 
-Colour DependencyFilePathPropertyComponent::getTextColourToDisplay() const
+Color DependencyFilePathPropertyComponent::getTextColorToDisplay() const
 {
     auto alpha = 1.0f;
     auto key = pathValueSource.getKey();
@@ -268,13 +268,13 @@ Colour DependencyFilePathPropertyComponent::getTextColourToDisplay() const
         alpha = 0.5f;
 
     if ((key == Ids::defaultUserModulePath && getValue().toString().contains (";")) || ! pathValueSource.appliesToThisOS())
-        return findColour (widgetTextColourId).withMultipliedAlpha (alpha);
+        return findColor (widgetTextColorId).withMultipliedAlpha (alpha);
 
     auto usingGlobalPath = (getValue().refersToSameSourceAs (globalSettingsValue));
 
     auto isValidPath = getAppSettings().isGlobalPathValid (pathRelativeTo, key,
                                                            (usingGlobalPath ? globalSettingsValue : pathValue).toString());
 
-    return isValidPath ? findColour (widgetTextColourId).withMultipliedAlpha (alpha)
-                       : Colours::red.withMultipliedAlpha (alpha);
+    return isValidPath ? findColor (widgetTextColorId).withMultipliedAlpha (alpha)
+                       : Colors::red.withMultipliedAlpha (alpha);
 }

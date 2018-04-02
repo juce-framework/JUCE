@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -125,12 +125,12 @@ public:
         The default implementation of this method does nothing but you should use it to
         cancel any WebInputStreams that may be connecting.
     */
-    virtual void userCancelled();
+    virtual void userCanceled();
 
     //==============================================================================
     // The following methods can be called by your app:
 
-    /** Returns true if the product has been successfully authorised for this machine.
+    /** Returns true if the product has been successfully authorized for this machine.
 
         The reason it returns a variant rather than a bool is just to make it marginally
         more tedious for crackers to work around. Hopefully if this method gets inlined

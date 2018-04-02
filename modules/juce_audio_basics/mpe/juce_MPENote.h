@@ -28,7 +28,7 @@ namespace juce
     This struct represents a playing MPE note.
 
     A note is identified by a unique ID, or alternatively, by a MIDI channel
-    and an initial note. It is characterised by five dimensions of continuous
+    and an initial note. It is characterized by five dimensions of continuous
     expressive control. Their current values are represented as
     MPEValue objects.
 
@@ -81,7 +81,7 @@ struct JUCE_API  MPENote
 
         Constructs an invalid MPE note (a note with the key state MPENote::off
         and an invalid MIDI channel. The only allowed use for such a note is to
-        call isValid() on it; everything else is undefined behaviour.
+        call isValid() on it; everything else is undefined behavior.
     */
     MPENote() noexcept;
 
@@ -125,23 +125,23 @@ struct JUCE_API  MPENote
 
         @see totalPitchbendInSemitones, getFrequencyInHertz
     */
-    MPEValue pitchbend       { MPEValue::centreValue() };
+    MPEValue pitchbend       { MPEValue::centerValue() };
 
     /** Current pressure with which the note is held down.
         This dimension can be modulated while the note sounds.
     */
-    MPEValue pressure        { MPEValue::centreValue() };
+    MPEValue pressure        { MPEValue::centerValue() };
 
     /** Inital value of timbre when the note was triggered.
         This should never change during the lifetime of an MPENote object.
     */
-    MPEValue initialTimbre   { MPEValue::centreValue() };
+    MPEValue initialTimbre   { MPEValue::centerValue() };
 
     /** Current value of the note's third expressive dimension, typically
         encoding some kind of timbre parameter.
         This dimension can be modulated while the note sounds.
     */
-    MPEValue timbre          { MPEValue::centreValue() };
+    MPEValue timbre          { MPEValue::centerValue() };
 
     /** The release velocity ("lift") of the note after a note-off has been
         received.

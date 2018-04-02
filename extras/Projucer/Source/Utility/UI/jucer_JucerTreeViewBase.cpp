@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -86,15 +86,15 @@ Font JucerTreeViewBase::getFont() const
     return Font (getItemHeight() * 0.6f);
 }
 
-void JucerTreeViewBase::paintOpenCloseButton (Graphics& g, const Rectangle<float>& area, Colour /*backgroundColour*/, bool isMouseOver)
+void JucerTreeViewBase::paintOpenCloseButton (Graphics& g, const Rectangle<float>& area, Color /*backgroundColor*/, bool isMouseOver)
 {
-    g.setColour (getOwnerView()->findColour (isSelected() ? defaultHighlightedTextColourId : treeIconColourId));
-    TreeViewItem::paintOpenCloseButton (g, area, getOwnerView()->findColour (defaultIconColourId), isMouseOver);
+    g.setColor (getOwnerView()->findColor (isSelected() ? defaultHighlightedTextColorId : treeIconColorId));
+    TreeViewItem::paintOpenCloseButton (g, area, getOwnerView()->findColor (defaultIconColorId), isMouseOver);
 }
 
 void JucerTreeViewBase::paintIcon (Graphics &g, Rectangle<float> area)
 {
-    g.setColour (getContentColour (true));
+    g.setColor (getContentColor (true));
     getIcon().draw (g, area, isIconCrossedOut());
     textX = roundToInt (area.getRight()) + 7;
 }
@@ -105,25 +105,25 @@ void JucerTreeViewBase::paintItem (Graphics& g, int width, int height)
 
     auto bounds = g.getClipBounds().withY (0).withHeight (height).toFloat();
 
-    g.setColour (getOwnerView()->findColour (treeIconColourId).withMultipliedAlpha (0.4f));
+    g.setColor (getOwnerView()->findColor (treeIconColorId).withMultipliedAlpha (0.4f));
     g.fillRect (bounds.removeFromBottom (0.5f).reduced (5, 0));
 }
 
-Colour JucerTreeViewBase::getContentColour (bool isIcon) const
+Color JucerTreeViewBase::getContentColor (bool isIcon) const
 {
-    if (isMissing())      return Colours::red;
-    if (isSelected())     return getOwnerView()->findColour (defaultHighlightedTextColourId);
-    if (hasWarnings())    return getOwnerView()->findColour (defaultHighlightColourId);
+    if (isMissing())      return Colors::red;
+    if (isSelected())     return getOwnerView()->findColor (defaultHighlightedTextColorId);
+    if (hasWarnings())    return getOwnerView()->findColor (defaultHighlightColorId);
 
-    return getOwnerView()->findColour (isIcon ? treeIconColourId : defaultTextColourId);
+    return getOwnerView()->findColor (isIcon ? treeIconColorId : defaultTextColorId);
 }
 
 void JucerTreeViewBase::paintContent (Graphics& g, const Rectangle<int>& area)
 {
     g.setFont (getFont());
-    g.setColour (getContentColour (false));
+    g.setColor (getContentColor (false));
 
-    g.drawFittedText (getDisplayName(), area, Justification::centredLeft, 1, 1.0f);
+    g.drawFittedText (getDisplayName(), area, Justification::centeredLeft, 1, 1.0f);
 }
 
 Component* JucerTreeViewBase::createItemComponent()

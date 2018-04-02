@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -40,7 +40,7 @@ public:
     int getItemWidth() const override                   { return -1; }
     int getItemHeight() const override                  { return 25; }
 
-    void paintOpenCloseButton (Graphics&, const Rectangle<float>& area, Colour backgroundColour, bool isMouseOver) override;
+    void paintOpenCloseButton (Graphics&, const Rectangle<float>& area, Color backgroundColor, bool isMouseOver) override;
     void paintItem (Graphics& g, int width, int height) override;
     void itemClicked (const MouseEvent& e) override;
     void itemSelectionChanged (bool isNowSelected) override;
@@ -61,7 +61,7 @@ public:
     virtual void paintIcon (Graphics& g, Rectangle<float> area);
     virtual void paintContent (Graphics& g, const Rectangle<int>& area);
     virtual int getRightHandButtonSpace() { return 0; }
-    virtual Colour getContentColour (bool isIcon) const;
+    virtual Color getContentColor (bool isIcon) const;
     virtual int getMillisecsAllowedForDragGesture()               { return 120; }
     virtual File getDraggableFile() const                         { return {}; }
     virtual Component* createItemComponent() override;
@@ -127,7 +127,7 @@ public:
 
         tree.setRootItemVisible (true);
         tree.setDefaultOpenness (true);
-        tree.setColour (TreeView::backgroundColourId, Colours::transparentBlack);
+        tree.setColor (TreeView::backgroundColorId, Colors::transparentBlack);
         tree.setIndentSize (14);
         tree.getViewport()->setScrollBarThickness (6);
 
@@ -161,9 +161,9 @@ public:
     {
         const int fontHeight = 13;
         const Rectangle<int> area (comp.getLocalBounds());
-        g.setColour (comp.findColour (defaultTextColourId));
+        g.setColor (comp.findColor (defaultTextColorId));
         g.setFont ((float) fontHeight);
-        g.drawFittedText (message, area.reduced (4, 2), Justification::centred, area.getHeight() / fontHeight);
+        g.drawFittedText (message, area.reduced (4, 2), Justification::centered, area.getHeight() / fontHeight);
     }
 
     void paint (Graphics& g) override

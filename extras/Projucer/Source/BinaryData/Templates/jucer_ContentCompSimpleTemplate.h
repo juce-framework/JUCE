@@ -31,12 +31,12 @@ public:
     //==============================================================================
     void paint (Graphics& g) override
     {
-        // (Our component is opaque, so we must completely fill the background with a solid colour)
-        g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+        // (Our component is opaque, so we must completely fill the background with a solid color)
+        g.fillAll (getLookAndFeel().findColor (ResizableWindow::backgroundColorId));
 
         g.setFont (Font (16.0f));
-        g.setColour (Colours::white);
-        g.drawText ("Hello World!", getLocalBounds(), Justification::centred, true);
+        g.setColor (Colors::white);
+        g.drawText ("Hello World!", getLocalBounds(), Justification::centered, true);
     }
 
     void resized() override

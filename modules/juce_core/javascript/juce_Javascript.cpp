@@ -300,12 +300,12 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
         ResultCode perform (const Scope& s, var*) const override
         {
-            s.scope->setProperty (name, initialiser->getResult (s));
+            s.scope->setProperty (name, initializer->getResult (s));
             return ok;
         }
 
         Identifier name;
-        ExpPtr initialiser;
+        ExpPtr initializer;
     };
 
     struct LoopStatement  : public Statement
@@ -314,7 +314,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
         ResultCode perform (const Scope& s, var* returnedValue) const override
         {
-            initialiser->perform (s, nullptr);
+            initializer->perform (s, nullptr);
 
             while (isDoLoop || condition->getResult (s))
             {
@@ -333,7 +333,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             return ok;
         }
 
-        ScopedPointer<Statement> initialiser, iterator, body;
+        ScopedPointer<Statement> initializer, iterator, body;
         ExpPtr condition;
         bool isDoLoop;
     };
@@ -791,13 +791,13 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             DynamicObject::Ptr newObject (new DynamicObject());
 
             for (int i = 0; i < names.size(); ++i)
-                newObject->setProperty (names.getUnchecked(i), initialisers.getUnchecked(i)->getResult (s));
+                newObject->setProperty (names.getUnchecked(i), initializers.getUnchecked(i)->getResult (s));
 
             return newObject.get();
         }
 
         Array<Identifier> names;
-        OwnedArray<Expression> initialisers;
+        OwnedArray<Expression> initializers;
     };
 
     struct ArrayDeclaration  : public Expression
@@ -1170,7 +1170,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         {
             ScopedPointer<VarStatement> s (new VarStatement (location));
             s->name = parseIdentifier();
-            s->initialiser.reset (matchIf (TokenTypes::assign) ? parseExpression() : new Expression (location));
+            s->initializer.reset (matchIf (TokenTypes::assign) ? parseExpression() : new Expression (location));
 
             if (matchIf (TokenTypes::comma))
             {
@@ -1200,7 +1200,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         {
             ScopedPointer<LoopStatement> s (new LoopStatement (location, false));
             match (TokenTypes::openParen);
-            s->initialiser.reset (parseStatement());
+            s->initializer.reset (parseStatement());
 
             if (matchIf (TokenTypes::semicolon))
                 s->condition.reset (new LiteralValue (location, true));
@@ -1225,7 +1225,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         Statement* parseDoOrWhileLoop (bool isDoLoop)
         {
             ScopedPointer<LoopStatement> s (new LoopStatement (location, isDoLoop));
-            s->initialiser.reset (new Statement (location));
+            s->initializer.reset (new Statement (location));
             s->iterator.reset (new Statement (location));
 
             if (isDoLoop)
@@ -1335,7 +1335,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
                     match (TokenTypes::colon);
 
                     e->names.add (memberName);
-                    e->initialisers.add (parseExpression());
+                    e->initializers.add (parseExpression());
 
                     if (currentType != TokenTypes::closeBrace)
                         match (TokenTypes::comma);

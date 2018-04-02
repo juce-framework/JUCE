@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -31,7 +31,7 @@ namespace juce
 /**
     As the title suggests, this is a button containing an image.
 
-    The colour and transparency of the image can be set to vary when the
+    The color and transparency of the image can be set to vary when the
     button state changes.
 
     @see Button, ShapeButton, TextButton
@@ -44,7 +44,7 @@ public:
     //==============================================================================
     /** Creates an ImageButton.
 
-        Use setImage() to specify the image to use. The colours and opacities that
+        Use setImage() to specify the image to use. The colors and opacities that
         are specified here can be changed later using setImages().
 
         @param name                 the name to give the component
@@ -68,26 +68,26 @@ public:
         @param normalImage                          the image to use when the button is in its normal state.
                                                     button no longer needs it.
         @param imageOpacityWhenNormal               the opacity to use when drawing the normal image.
-        @param overlayColourWhenNormal              an overlay colour to use to fill the alpha channel of the
-                                                    normal image - if this colour is transparent, no overlay
+        @param overlayColorWhenNormal              an overlay color to use to fill the alpha channel of the
+                                                    normal image - if this color is transparent, no overlay
                                                     will be drawn. The overlay will be drawn over the top of the
                                                     image, so you can basically add a solid or semi-transparent
-                                                    colour to the image to brighten or darken it
+                                                    color to the image to brighten or darken it
         @param overImage                            the image to use when the mouse is over the button. If
                                                     you want to use the same image as was set in the normalImage
                                                     parameter, this value can be a null image.
         @param imageOpacityWhenOver                 the opacity to use when drawing the image when the mouse
                                                     is over the button
-        @param overlayColourWhenOver                an overlay colour to use to fill the alpha channel of the
-                                                    image when the mouse is over - if this colour is transparent,
+        @param overlayColorWhenOver                an overlay color to use to fill the alpha channel of the
+                                                    image when the mouse is over - if this color is transparent,
                                                     no overlay will be drawn
         @param downImage                            an image to use when the button is pressed down. If set
                                                     to a null image, the 'over' image will be drawn instead (or the
                                                     normal image if there isn't an 'over' image either).
         @param imageOpacityWhenDown                 the opacity to use when drawing the image when the button
                                                     is pressed
-        @param overlayColourWhenDown                an overlay colour to use to fill the alpha channel of the
-                                                    image when the button is pressed down - if this colour is
+        @param overlayColorWhenDown                an overlay color to use to fill the alpha channel of the
+                                                    image when the button is pressed down - if this color is
                                                     transparent, no overlay will be drawn
         @param hitTestAlphaThreshold                if set to zero, the mouse is considered to be over the button
                                                     whenever it's inside the button's bounding rectangle. If
@@ -101,13 +101,13 @@ public:
                     bool preserveImageProportions,
                     const Image& normalImage,
                     float imageOpacityWhenNormal,
-                    Colour overlayColourWhenNormal,
+                    Color overlayColorWhenNormal,
                     const Image& overImage,
                     float imageOpacityWhenOver,
-                    Colour overlayColourWhenOver,
+                    Color overlayColorWhenOver,
                     const Image& downImage,
                     float imageOpacityWhenDown,
-                    Colour overlayColourWhenDown,
+                    Color overlayColorWhenDown,
                     float hitTestAlphaThreshold = 0.0f);
 
     /** Returns the currently set 'normal' image. */
@@ -135,7 +135,7 @@ public:
 
         virtual void drawImageButton (Graphics&, Image*,
                                       int imageX, int imageY, int imageW, int imageH,
-                                      const Colour& overlayColour, float imageOpacity, ImageButton&) = 0;
+                                      const Color& overlayColor, float imageOpacity, ImageButton&) = 0;
     };
 
 protected:
@@ -152,7 +152,7 @@ private:
     Rectangle<int> imageBounds;
     Image normalImage, overImage, downImage;
     float normalOpacity, overOpacity, downOpacity;
-    Colour normalOverlay, overOverlay, downOverlay;
+    Color normalOverlay, overOverlay, downOverlay;
 
     Image getCurrentImage() const;
 

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -774,8 +774,8 @@ struct PushNotifications::Pimpl
         env->CallVoidMethod (bundle, JavaBundle.putString,   javaString ("groupId")                 .get(), javaString (n.groupId).get());
         env->CallVoidMethod (bundle, JavaBundle.putString,   javaString ("groupSortKey")            .get(), javaString (n.groupSortKey).get());
         env->CallVoidMethod (bundle, JavaBundle.putBoolean,  javaString ("groupSummary")            .get(), n.groupSummary);
-        env->CallVoidMethod (bundle, JavaBundle.putInt,      javaString ("accentColour")            .get(), n.accentColour.getARGB());
-        env->CallVoidMethod (bundle, JavaBundle.putInt,      javaString ("ledColour")               .get(), n.ledColour.getARGB());
+        env->CallVoidMethod (bundle, JavaBundle.putInt,      javaString ("accentColor")            .get(), n.accentColor.getARGB());
+        env->CallVoidMethod (bundle, JavaBundle.putInt,      javaString ("ledColor")               .get(), n.ledColor.getARGB());
         env->CallVoidMethod (bundle, JavaBundle.putInt,      javaString ("ledBlinkPatternMsToBeOn") .get(), n.ledBlinkPattern.msToBeOn);
         env->CallVoidMethod (bundle, JavaBundle.putInt,      javaString ("ledBlinkPatternMsToBeOff").get(), n.ledBlinkPattern.msToBeOff);
         env->CallVoidMethod (bundle, JavaBundle.putBoolean,  javaString ("shouldAutoCancel")        .get(), n.shouldAutoCancel);
@@ -784,7 +784,7 @@ struct PushNotifications::Pimpl
         env->CallVoidMethod (bundle, JavaBundle.putBoolean,  javaString ("alertOnlyOnce")           .get(), n.alertOnlyOnce);
         env->CallVoidMethod (bundle, JavaBundle.putInt,      javaString ("timestampVisibility")     .get(), n.timestampVisibility);
         env->CallVoidMethod (bundle, JavaBundle.putInt,      javaString ("badgeIconType")           .get(), n.badgeIconType);
-        env->CallVoidMethod (bundle, JavaBundle.putInt,      javaString ("groupAlertBehaviour")     .get(), n.groupAlertBehaviour);
+        env->CallVoidMethod (bundle, JavaBundle.putInt,      javaString ("groupAlertBehavior")     .get(), n.groupAlertBehavior);
         env->CallVoidMethod (bundle, JavaBundle.putLong,     javaString ("timeoutAfterMs")          .get(), (jlong)n.timeoutAfterMs);
 
         const int size = n.vibrationPattern.size();
@@ -830,11 +830,11 @@ struct PushNotifications::Pimpl
         if (n.tickerText.isNotEmpty())
             env->CallObjectMethod (notificationBuilder, NotificationBuilderBase.setTicker, javaString (n.tickerText).get());
 
-        if (n.ledColour != Colour())
+        if (n.ledColor != Color())
         {
             env->CallObjectMethod (notificationBuilder,
                                    NotificationBuilderBase.setLights,
-                                   n.ledColour.getARGB(),
+                                   n.ledColor.getARGB(),
                                    n.ledBlinkPattern.msToBeOn,
                                    n.ledBlinkPattern.msToBeOff);
         }
@@ -908,8 +908,8 @@ struct PushNotifications::Pimpl
         if (categoryString.isNotEmpty())
             env->CallObjectMethod (notificationBuilder, NotificationBuilderApi21.setCategory, javaString (categoryString).get());
 
-        if (n.accentColour != Colour())
-            env->CallObjectMethod (notificationBuilder, NotificationBuilderApi21.setColor, n.accentColour.getARGB());
+        if (n.accentColor != Color())
+            env->CallObjectMethod (notificationBuilder, NotificationBuilderApi21.setColor, n.accentColor.getARGB());
 
         env->CallObjectMethod (notificationBuilder, NotificationBuilderApi21.setVisibility, n.lockScreenAppearance);
       #endif
@@ -924,7 +924,7 @@ struct PushNotifications::Pimpl
 
       #if __ANDROID_API__ >= 26
         env->CallObjectMethod (notificationBuilder, NotificationBuilderApi26.setBadgeIconType, n.badgeIconType);
-        env->CallObjectMethod (notificationBuilder, NotificationBuilderApi26.setGroupAlertBehavior, n.groupAlertBehaviour);
+        env->CallObjectMethod (notificationBuilder, NotificationBuilderApi26.setGroupAlertBehavior, n.groupAlertBehavior);
         env->CallObjectMethod (notificationBuilder, NotificationBuilderApi26.setTimeoutAfter, (jlong) n.timeoutAfterMs);
       #endif
 
@@ -1176,8 +1176,8 @@ struct PushNotifications::Pimpl
             n.groupId      = getStringFromBundle (env, "groupId", bundle);
             n.groupSortKey = getStringFromBundle (env, "groupSortKey", bundle);
             n.groupSummary = getBoolFromBundle   (env, "groupSummary", bundle);
-            n.accentColour = Colour ((uint32) getIntFromBundle (env, "accentColour", bundle));
-            n.ledColour    = Colour ((uint32) getIntFromBundle (env, "ledColour", bundle));
+            n.accentColor = Color ((uint32) getIntFromBundle (env, "accentColor", bundle));
+            n.ledColor    = Color ((uint32) getIntFromBundle (env, "ledColor", bundle));
 
             PushNotifications::Notification::LedBlinkPattern ledBlinkPattern;
             ledBlinkPattern.msToBeOn  = getIntFromBundle (env, "ledBlinkPatternMsToBeOn", bundle);
@@ -1192,7 +1192,7 @@ struct PushNotifications::Pimpl
             n.alertOnlyOnce       = getBoolFromBundle (env, "alertOnlyOnce", bundle);
             n.timestampVisibility = (PushNotifications::Notification::TimestampVisibility) getIntFromBundle (env, "timestampVisibility", bundle);
             n.badgeIconType       = (PushNotifications::Notification::BadgeIconType) getIntFromBundle (env, "badgeIconType", bundle);
-            n.groupAlertBehaviour = (PushNotifications::Notification::GroupAlertBehaviour) getIntFromBundle (env, "groupAlertBehaviour", bundle);
+            n.groupAlertBehavior = (PushNotifications::Notification::GroupAlertBehavior) getIntFromBundle (env, "groupAlertBehavior", bundle);
             n.timeoutAfterMs      = getLongFromBundle (env, "timeoutAfterMs", bundle);
         }
 
@@ -1333,7 +1333,7 @@ struct PushNotifications::Pimpl
                     auto classAsString  = LocalRef<jstring> ((jstring) env->CallObjectMethod (objectClass, JavaClass.getName));
 
                     // Note: seems that Firebase delivers values as strings always, so this check is rather unnecessary,
-                    //       at least till they change the behaviour.
+                    //       at least till they change the behavior.
                     var value = juceString (classAsString) == "java.lang.Bundle" ? bundleToVar (object) : var (juceString (objectAsString.get()));
                     dynamicObject->setProperty (juceString (key.get()), value);
                 }
@@ -1416,11 +1416,11 @@ struct PushNotifications::Pimpl
             n.body       = juceString (body.get());
             n.soundToPlay = URL (juceString (sound.get()));
 
-            auto colourString = juceString (color.get()).substring (1);
-            const uint8 r = (uint8) colourString.substring (0, 2).getIntValue();
-            const uint8 g = (uint8) colourString.substring (2, 4).getIntValue();
-            const uint8 b = (uint8) colourString.substring (4, 6).getIntValue();
-            n.accentColour = Colour (r, g, b);
+            auto colorString = juceString (color.get()).substring (1);
+            const uint8 r = (uint8) colorString.substring (0, 2).getIntValue();
+            const uint8 g = (uint8) colorString.substring (2, 4).getIntValue();
+            const uint8 b = (uint8) colorString.substring (4, 6).getIntValue();
+            n.accentColor = Color (r, g, b);
 
             // Note: ignoring icon, because Firebase passes it as a string.
 
@@ -1500,7 +1500,7 @@ struct PushNotifications::Pimpl
             env->CallVoidMethod (channel, NotificationChannel.setDescription,          javaString (c.description).get());
             env->CallVoidMethod (channel, NotificationChannel.setGroup,                javaString (c.groupId).get());
             env->CallVoidMethod (channel, NotificationChannel.setImportance,           c.importance);
-            env->CallVoidMethod (channel, NotificationChannel.setLightColor,           c.ledColour.getARGB());
+            env->CallVoidMethod (channel, NotificationChannel.setLightColor,           c.ledColor.getARGB());
             env->CallVoidMethod (channel, NotificationChannel.setLockscreenVisibility, c.lockScreenAppearance);
             env->CallVoidMethod (channel, NotificationChannel.setShowBadge,            c.canShowBadge);
 

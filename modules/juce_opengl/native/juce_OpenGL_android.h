@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -45,7 +45,7 @@ public:
                    bool /*useMultisampling*/,
                    OpenGLVersion)
         : component (comp),
-          hasInitialised (false),
+          hasInitialized (false),
           juceContext (nullptr), surface (EGL_NO_SURFACE), context (EGL_NO_CONTEXT)
     {
         JNIEnv* env = getEnv();
@@ -54,7 +54,7 @@ public:
         if (component.getPeer()->getNativeHandle() == nullptr)
             return;
 
-        // Initialise the EGL display
+        // Initialize the EGL display
         if (! initEGLDisplay())
             return;
 
@@ -70,13 +70,13 @@ public:
         env->CallVoidMethod ((jobject) component.getPeer()->getNativeHandle(),
                              AndroidViewGroup.addView, surfaceView.get());
 
-        // initialise the geometry of the view
+        // initialize the geometry of the view
         Rectangle<int> bounds = component.getTopLevelComponent()
             ->getLocalArea (&component, component.getLocalBounds());
         bounds *= component.getDesktopScaleFactor();
 
         updateWindowPosition (bounds);
-        hasInitialised = true;
+        hasInitialized = true;
     }
 
     ~NativeContext()
@@ -88,9 +88,9 @@ public:
     }
 
     //==============================================================================
-    bool initialiseOnRenderThread (OpenGLContext& aContext)
+    bool initializeOnRenderThread (OpenGLContext& aContext)
     {
-        jassert (hasInitialised);
+        jassert (hasInitialized);
 
         // has the context already attached?
         jassert (surface == EGL_NO_SURFACE && context == EGL_NO_CONTEXT);
@@ -138,7 +138,7 @@ public:
 
     void shutdownOnRenderThread()
     {
-        jassert (hasInitialised);
+        jassert (hasInitialized);
 
         // is there a context available to detach?
         jassert (surface != EGL_NO_SURFACE && context != EGL_NO_CONTEXT);
@@ -153,7 +153,7 @@ public:
     //==============================================================================
     bool makeActive() const noexcept
     {
-        if (! hasInitialised)
+        if (! hasInitialized)
             return false;
 
         if (surface == EGL_NO_SURFACE || context == EGL_NO_CONTEXT)
@@ -178,7 +178,7 @@ public:
     int getSwapInterval() const                 { return 0; }
 
     //==============================================================================
-    bool createdOk() const noexcept             { return hasInitialised; }
+    bool createdOk() const noexcept             { return hasInitialized; }
     void* getRawContext() const noexcept        { return surfaceView.get(); }
     GLuint getFrameBufferID() const noexcept    { return 0; }
 
@@ -225,7 +225,7 @@ private:
     //==============================================================================
     bool initEGLDisplay()
     {
-        // already initialised?
+        // already initialized?
         if (display != EGL_NO_DISPLAY)
             return true;
 
@@ -266,7 +266,7 @@ private:
     }
 
     //==============================================================================
-    bool hasInitialised;
+    bool hasInitialized;
 
     GlobalRef surfaceView;
     Rectangle<int> lastBounds;

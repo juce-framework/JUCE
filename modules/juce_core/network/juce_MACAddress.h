@@ -50,7 +50,7 @@ public:
     explicit MACAddress (const uint8 bytes[6]) noexcept;
 
     /** Creates an address from a hex string.
-        If the string isn't a 6-byte hex value, this will just default-initialise
+        If the string isn't a 6-byte hex value, this will just default-initialize
         the object.
     */
     explicit MACAddress (StringRef address);

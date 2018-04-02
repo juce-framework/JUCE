@@ -104,7 +104,7 @@ public:
 
     /** Creates an active-sense message.
         Since the MidiMessage has to contain a valid message, this default constructor
-        just initialises it with an empty sysex message.
+        just initializes it with an empty sysex message.
     */
     MidiMessage() noexcept;
 
@@ -156,7 +156,7 @@ public:
         audio samples from the start of the buffer.
 
         If the message was created by a MidiInput, see MidiInputCallback::handleIncomingMidiMessage()
-        for details of the way that it initialises this value.
+        for details of the way that it initializes this value.
 
         @see setTimeStamp, addToTimeStamp
     */

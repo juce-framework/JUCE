@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -94,8 +94,8 @@ FileChooserDialogBox::FileChooserDialogBox (const String& name,
                                             const String& instructions,
                                             FileBrowserComponent& chooserComponent,
                                             bool shouldWarn,
-                                            Colour backgroundColour)
-    : ResizableWindow (name, backgroundColour, true),
+                                            Color backgroundColor)
+    : ResizableWindow (name, backgroundColor, true),
       warnAboutOverwritingExistingFiles (shouldWarn)
 {
     content = new ContentComponent (name, instructions, chooserComponent);
@@ -131,7 +131,7 @@ bool FileChooserDialogBox::showAt (int x, int y, int w, int h)
     if (h <= 0)  h = 500;
 
     if (x < 0 || y < 0)
-        centreWithSize (w, h);
+        centerWithSize (w, h);
     else
         setBounds (x, y, w, h);
 
@@ -141,9 +141,9 @@ bool FileChooserDialogBox::showAt (int x, int y, int w, int h)
 }
 #endif
 
-void FileChooserDialogBox::centreWithDefaultSize (Component* componentToCentreAround)
+void FileChooserDialogBox::centerWithDefaultSize (Component* componentToCenterAround)
 {
-    centreAroundComponent (componentToCentreAround, getDefaultWidth(), 500);
+    centerAroundComponent (componentToCenterAround, getDefaultWidth(), 500);
 }
 
 int FileChooserDialogBox::getDefaultWidth() const

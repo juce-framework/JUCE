@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -92,8 +92,8 @@ public:
     /** Returns this tab's index in its tab bar. */
     int getIndex() const;
 
-    /** Returns the colour of the tab. */
-    Colour getTabBackgroundColour() const;
+    /** Returns the color of the tab. */
+    Color getTabBackgroundColor() const;
 
     /** Returns true if this is the frontmost (selected) tab. */
     bool isFrontTab() const;
@@ -211,7 +211,7 @@ public:
         If this is the first tab added, it'll also be automatically selected.
     */
     void addTab (const String& tabName,
-                 Colour tabBackgroundColour,
+                 Color tabBackgroundColor,
                  int insertIndex);
 
     /** Changes the name of one of the tabs. */
@@ -273,33 +273,33 @@ public:
     /** Callback method to indicate that the user has right-clicked on a tab. */
     virtual void popupMenuClickOnTab (int tabIndex, const String& tabName);
 
-    /** Returns the colour of a tab.
-        This is the colour that was specified in addTab().
+    /** Returns the color of a tab.
+        This is the color that was specified in addTab().
     */
-    Colour getTabBackgroundColour (int tabIndex);
+    Color getTabBackgroundColor (int tabIndex);
 
-    /** Changes the background colour of a tab.
-        @see addTab, getTabBackgroundColour
+    /** Changes the background color of a tab.
+        @see addTab, getTabBackgroundColor
     */
-    void setTabBackgroundColour (int tabIndex, Colour newColour);
+    void setTabBackgroundColor (int tabIndex, Color newColor);
 
     //==============================================================================
-    /** A set of colour IDs to use to change the colour of various aspects of the component.
+    /** A set of color IDs to use to change the color of various aspects of the component.
 
-        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        These constants can be used either via the Component::setColor(), or LookAndFeel::setColor()
         methods.
 
-        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+        @see Component::setColor, Component::findColor, LookAndFeel::setColor, LookAndFeel::findColor
     */
-    enum ColourIds
+    enum ColorIds
     {
-        tabOutlineColourId              = 0x1005812,    /**< The colour to use to draw an outline around the tabs.  */
-        tabTextColourId                 = 0x1005813,    /**< The colour to use to draw the tab names. If this isn't specified,
-                                                             the look and feel will choose an appropriate colour. */
-        frontOutlineColourId            = 0x1005814,    /**< The colour to use to draw an outline around the currently-selected tab.  */
-        frontTextColourId               = 0x1005815,    /**< The colour to use to draw the currently-selected tab name. If
+        tabOutlineColorId              = 0x1005812,    /**< The color to use to draw an outline around the tabs.  */
+        tabTextColorId                 = 0x1005813,    /**< The color to use to draw the tab names. If this isn't specified,
+                                                             the look and feel will choose an appropriate color. */
+        frontOutlineColorId            = 0x1005814,    /**< The color to use to draw an outline around the currently-selected tab.  */
+        frontTextColorId               = 0x1005815,    /**< The color to use to draw the currently-selected tab name. If
                                                              this isn't specified, the look and feel will choose an appropriate
-                                                             colour. */
+                                                             color. */
     };
 
     //==============================================================================
@@ -349,7 +349,7 @@ private:
     {
         ScopedPointer<TabBarButton> button;
         String name;
-        Colour colour;
+        Color color;
     };
 
     OwnedArray<TabInfo> tabs;

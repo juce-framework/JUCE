@@ -185,7 +185,7 @@ static bool deviceListContains (AudioIODeviceType* type, bool isInput, const Str
 }
 
 //==============================================================================
-String AudioDeviceManager::initialise (const int numInputChannelsNeeded,
+String AudioDeviceManager::initialize (const int numInputChannelsNeeded,
                                        const int numOutputChannelsNeeded,
                                        const XmlElement* const xml,
                                        const bool selectDefaultDeviceOnFailure,
@@ -198,13 +198,13 @@ String AudioDeviceManager::initialise (const int numInputChannelsNeeded,
     numOutputChansNeeded = numOutputChannelsNeeded;
 
     if (xml != nullptr && xml->hasTagName ("DEVICESETUP"))
-        return initialiseFromXML (*xml, selectDefaultDeviceOnFailure,
+        return initializeFromXML (*xml, selectDefaultDeviceOnFailure,
                                   preferredDefaultDeviceName, preferredSetupOptions);
 
-    return initialiseDefault (preferredDefaultDeviceName, preferredSetupOptions);
+    return initializeDefault (preferredDefaultDeviceName, preferredSetupOptions);
 }
 
-String AudioDeviceManager::initialiseDefault (const String& preferredDefaultDeviceName,
+String AudioDeviceManager::initializeDefault (const String& preferredDefaultDeviceName,
                                               const AudioDeviceSetup* preferredSetupOptions)
 {
     AudioDeviceSetup setup;
@@ -241,7 +241,7 @@ String AudioDeviceManager::initialiseDefault (const String& preferredDefaultDevi
     return setAudioDeviceSetup (setup, false);
 }
 
-String AudioDeviceManager::initialiseFromXML (const XmlElement& xml,
+String AudioDeviceManager::initializeFromXML (const XmlElement& xml,
                                               bool selectDefaultDeviceOnFailure,
                                               const String& preferredDefaultDeviceName,
                                               const AudioDeviceSetup* preferredSetupOptions)
@@ -295,7 +295,7 @@ String AudioDeviceManager::initialiseFromXML (const XmlElement& xml,
         setMidiInputEnabled (m, midiInsFromXml.contains (m));
 
     if (error.isNotEmpty() && selectDefaultDeviceOnFailure)
-        error = initialise (numInputChansNeeded, numOutputChansNeeded,
+        error = initialize (numInputChansNeeded, numOutputChansNeeded,
                             nullptr, false, preferredDefaultDeviceName);
 
     setDefaultMidiOutput (xml.getStringAttribute ("defaultMidiOutput"));
@@ -303,12 +303,12 @@ String AudioDeviceManager::initialiseFromXML (const XmlElement& xml,
     return error;
 }
 
-String AudioDeviceManager::initialiseWithDefaultDevices (int numInputChannelsNeeded,
+String AudioDeviceManager::initializeWithDefaultDevices (int numInputChannelsNeeded,
                                                          int numOutputChannelsNeeded)
 {
     lastExplicitSettings.reset();
 
-    return initialise (numInputChannelsNeeded, numOutputChannelsNeeded,
+    return initialize (numInputChannelsNeeded, numOutputChannelsNeeded,
                        nullptr, false, {}, nullptr);
 }
 

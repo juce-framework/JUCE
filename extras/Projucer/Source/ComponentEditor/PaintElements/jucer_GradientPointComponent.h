@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -27,13 +27,13 @@
 #pragma once
 
 #include "jucer_PointComponent.h"
-#include "jucer_ColouredElement.h"
+#include "jucer_ColoredElement.h"
 
 //==============================================================================
 class GradientPointComponent    : public PointComponent
 {
 public:
-    GradientPointComponent (ColouredElement* const owner_,
+    GradientPointComponent (ColoredElement* const owner_,
                             const bool isStroke_,
                             const bool isStart_)
         : PointComponent (owner_),
@@ -44,7 +44,7 @@ public:
 
     RelativePositionedRectangle getPosition()
     {
-        ColouredElement* e = dynamic_cast<ColouredElement*> (owner);
+        ColoredElement* e = dynamic_cast<ColoredElement*> (owner);
 
         if (isStroke)
             return isStart ? e->getStrokeType().fill.gradPos1
@@ -56,7 +56,7 @@ public:
 
     void setPosition (const RelativePositionedRectangle& newPos)
     {
-        ColouredElement* e = dynamic_cast<ColouredElement*> (owner);
+        ColoredElement* e = dynamic_cast<ColoredElement*> (owner);
 
         if (isStroke)
         {
@@ -86,7 +86,7 @@ public:
     {
         PointComponent::updatePosition();
 
-        ColouredElement* e = dynamic_cast<ColouredElement*> (owner);
+        ColoredElement* e = dynamic_cast<ColoredElement*> (owner);
 
         JucerFillType f (isStroke ? e->getStrokeType().fill
                                   : e->getFillType());

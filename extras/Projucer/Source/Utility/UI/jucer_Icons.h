@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -31,39 +31,39 @@
 struct Icon
 {
     Icon() : path (nullptr) {}
-    Icon (const Path& p, Colour c)  : path (&p), colour (c) {}
-    Icon (const Path* p, Colour c)  : path (p),  colour (c) {}
+    Icon (const Path& p, Color c)  : path (&p), color (c) {}
+    Icon (const Path* p, Color c)  : path (p),  color (c) {}
 
     void draw (Graphics& g, const juce::Rectangle<float>& area, bool isCrossedOut) const
     {
         if (path != nullptr)
         {
-            g.setColour (colour);
+            g.setColor (color);
 
-            const RectanglePlacement placement (RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize);
+            const RectanglePlacement placement (RectanglePlacement::centered | RectanglePlacement::onlyReduceInSize);
             g.fillPath (*path, placement.getTransformToFit (path->getBounds(), area));
 
             if (isCrossedOut)
             {
-                g.setColour (Colours::red.withAlpha (0.8f));
+                g.setColor (Colors::red.withAlpha (0.8f));
                 g.drawLine ((float) area.getX(), area.getY() + area.getHeight() * 0.2f,
                             (float) area.getRight(), area.getY() + area.getHeight() * 0.8f, 3.0f);
             }
         }
     }
 
-    Icon withContrastingColourTo (Colour background) const
+    Icon withContrastingColorTo (Color background) const
     {
-        return Icon (path, background.contrasting (colour, 0.6f));
+        return Icon (path, background.contrasting (color, 0.6f));
     }
 
-    Icon withColour (Colour newColour)
+    Icon withColor (Color newColor)
     {
-        return Icon (path, newColour);
+        return Icon (path, newColor);
     }
 
     const Path* path;
-    Colour colour;
+    Color color;
 };
 
 //==============================================================================

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -30,7 +30,7 @@ namespace juce
 #if JUCE_USE_DIRECTWRITE
 namespace
 {
-    static String getLocalisedName (IDWriteLocalizedStrings* names)
+    static String getLocalizedName (IDWriteLocalizedStrings* names)
     {
         jassert (names != nullptr);
 
@@ -55,7 +55,7 @@ namespace
         ComSmartPtr<IDWriteLocalizedStrings> familyNames;
         HRESULT hr = family->GetFamilyNames (familyNames.resetAndGetPointerAddress());
         jassert (SUCCEEDED (hr)); ignoreUnused (hr);
-        return getLocalisedName (familyNames);
+        return getLocalizedName (familyNames);
     }
 
     static String getFontFaceName (IDWriteFont* font)
@@ -64,7 +64,7 @@ namespace
         ComSmartPtr<IDWriteLocalizedStrings> faceNames;
         HRESULT hr = font->GetFaceNames (faceNames.resetAndGetPointerAddress());
         jassert (SUCCEEDED (hr)); ignoreUnused (hr);
-        return getLocalisedName (faceNames);
+        return getLocalizedName (faceNames);
     }
 
     inline Point<float> convertPoint (D2D1_POINT_2F p) noexcept   { return Point<float> ((float) p.x, (float) p.y); }
@@ -172,7 +172,7 @@ public:
                 ComSmartPtr<IDWriteLocalizedStrings> faceNames;
                 hr = dwFont->GetFaceNames (faceNames.resetAndGetPointerAddress());
 
-                if (font.getTypefaceStyle() == getLocalisedName (faceNames))
+                if (font.getTypefaceStyle() == getLocalizedName (faceNames))
                     break;
             }
 

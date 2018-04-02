@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -47,7 +47,7 @@ public:
     };
 
     //==============================================================================
-    /** Creates an uninitialised filter. Call prepare() before first use. */
+    /** Creates an uninitialized filter. Call prepare() before first use. */
     LadderFilter();
 
     /** Enables or disables the filter. If disabled it will simply pass through the input signal. */
@@ -56,7 +56,7 @@ public:
     /** Sets filter mode. */
     void setMode (Mode newValue) noexcept;
 
-    /** Initialises the filter. */
+    /** Initializes the filter. */
     void prepare (const juce::dsp::ProcessSpec& spec);
 
     /** Returns the current number of channels. */

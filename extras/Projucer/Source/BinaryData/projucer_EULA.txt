@@ -17,9 +17,9 @@ OPERATING SYSTEM REQUIREMENTS: The Software requires a Windows or MAC OS X opera
 
 IMPORTANT NOTICE TO ALL USERS:
 
-- BY CLICKING ON THE "ACCEPT" BUTTON BELOW YOU AGREE TO THE TERMS OF THIS LICENCE WHICH WILL BIND YOU AND YOUR EMPLOYEES.
+- BY CLICKING ON THE "ACCEPT" BUTTON BELOW YOU AGREE TO THE TERMS OF THIS LICENSE WHICH WILL BIND YOU AND YOUR EMPLOYEES.
 
-- IF YOU DO NOT AGREE TO THE TERMS OF THIS LICENCE, WE WILL NOT LICENSE THE SOFTWARE AND DOCUMENTATION TO YOU AND YOU MUST DISCONTINUE THE INSTALLATION PROCESS.
+- IF YOU DO NOT AGREE TO THE TERMS OF THIS LICENSE, WE WILL NOT LICENSE THE SOFTWARE AND DOCUMENTATION TO YOU AND YOU MUST DISCONTINUE THE INSTALLATION PROCESS.
 
 
 You should print a copy of this License for future reference.
@@ -114,7 +114,7 @@ You should print a copy of this License for future reference.
 
 7.2. Upon termination for any reason:
    (a) all rights granted to you under this License shall cease;
-   (b) you must cease all activities authorised by this License;
+   (b) you must cease all activities authorized by this License;
    (c) you must immediately delete or remove the Software from all computer equipment in your possession and immediately destroy or return to us (at our option) all copies of the Software then in your possession, custody or control and, in the case of destruction, certify to us that you have done so.
 
 8. Communications between us
@@ -129,7 +129,7 @@ You should print a copy of this License for future reference.
 
 10. Other important terms
 
-10.1. We may transfer our rights and obligations under this License to another organisation, but this will not affect your rights or our obligations under this License.
+10.1. We may transfer our rights and obligations under this License to another organization, but this will not affect your rights or our obligations under this License.
 
 10.2. You may only transfer your rights or your obligations under this License to another person if we agree in writing.
 

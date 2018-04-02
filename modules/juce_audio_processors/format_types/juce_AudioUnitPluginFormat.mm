@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -328,7 +328,7 @@ public:
               valuesHaveStrings (parameterValuesHaveStrings),
               isSwitch (isBoolean),
               valueLabel (label),
-              defaultValue (normaliseParamValue (defaultParameterValue))
+              defaultValue (normalizeParamValue (defaultParameterValue))
         {
             auValueStrings = Parameter::getAllValueStrings();
         }
@@ -347,7 +347,7 @@ public:
                                        0,
                                        &value);
 
-                value = normaliseParamValue (value);
+                value = normalizeParamValue (value);
             }
 
             return value;
@@ -449,7 +449,7 @@ public:
                                                          &propertySize);
 
                     if (! err)
-                        return normaliseParamValue (valueString.outValue);
+                        return normalizeParamValue (valueString.outValue);
                 }
             }
 
@@ -497,7 +497,7 @@ public:
            #endif
         }
 
-        float normaliseParamValue (float scaledValue) const noexcept
+        float normalizeParamValue (float scaledValue) const noexcept
         {
             if (discrete)
                 return scaledValue / (getNumSteps() - 1);
@@ -505,12 +505,12 @@ public:
             return (scaledValue - minValue) / range;
         }
 
-        float scaleParamValue (float normalisedValue) const noexcept
+        float scaleParamValue (float normalizedValue) const noexcept
         {
             if (discrete)
-                return normalisedValue * (getNumSteps() - 1);
+                return normalizedValue * (getNumSteps() - 1);
 
-            return minValue + (range * normalisedValue);
+            return minValue + (range * normalizedValue);
         }
 
         AudioUnitPluginInstance& pluginInstance;
@@ -618,7 +618,7 @@ public:
         audioUnit = nullptr;
     }
 
-    bool initialise (double rate, int blockSize)
+    bool initialize (double rate, int blockSize)
     {
         producesMidiMessages = canProduceMidiOutput();
         setRateAndBufferSizeDetails (rate, blockSize);
@@ -1579,7 +1579,7 @@ private:
                 {
                     jassert (dynamic_cast<AUInstanceParameter*> (param) != nullptr);
                     auto* auparam = static_cast<AUInstanceParameter*> (param);
-                    param->sendValueChangedMessageToListeners (auparam->normaliseParamValue (newValue));
+                    param->sendValueChangedMessageToListeners (auparam->normalizeParamValue (newValue));
                 }
 
                 break;
@@ -2095,7 +2095,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (Colours::white);
+        g.fillAll (Colors::white);
     }
 
     void resized() override
@@ -2293,7 +2293,7 @@ public:
     //==============================================================================
     void paint (Graphics& g) override
     {
-        g.fillAll (Colours::black);
+        g.fillAll (Colors::black);
     }
 
     void resized() override
@@ -2506,15 +2506,15 @@ void AudioUnitPluginFormat::createPluginInstance (const PluginDescription& desc,
                 {
                     ScopedPointer<AudioUnitPluginInstance> instance (new AudioUnitPluginInstance (audioUnit));
 
-                    if (instance->initialise (sampleRate, framesPerBuffer))
+                    if (instance->initialize (sampleRate, framesPerBuffer))
                         originalCallback (passUserData, instance.release(), StringRef());
                     else
                         originalCallback (passUserData, nullptr,
-                                          NEEDS_TRANS ("Unable to initialise the AudioUnit plug-in"));
+                                          NEEDS_TRANS ("Unable to initialize the AudioUnit plug-in"));
                 }
                 else
                 {
-                    String errMsg = NEEDS_TRANS ("An OS error occurred during initialisation of the plug-in (XXX)");
+                    String errMsg = NEEDS_TRANS ("An OS error occurred during initialization of the plug-in (XXX)");
                     originalCallback (passUserData, nullptr, errMsg.replace ("XXX", String (err)));
                 }
 

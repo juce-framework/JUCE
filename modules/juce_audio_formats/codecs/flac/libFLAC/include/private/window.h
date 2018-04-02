@@ -67,7 +67,7 @@ void FLAC__window_triangle(FLAC__real *window, const FLAC__int32 L);
 void FLAC__window_tukey(FLAC__real *window, const FLAC__int32 L, const FLAC__real p);
 void FLAC__window_partial_tukey(FLAC__real *window, const FLAC__int32 L, const FLAC__real p, const FLAC__real start, const FLAC__real end);
 void FLAC__window_punchout_tukey(FLAC__real *window, const FLAC__int32 L, const FLAC__real p, const FLAC__real start, const FLAC__real end);
-void FLAC__window_welch(FLAC__real *window, const FLAC__int32 L);
+void FLAC__window_welsh(FLAC__real *window, const FLAC__int32 L);
 
 #endif /* !defined FLAC__INTEGER_ONLY_LIBRARY */
 

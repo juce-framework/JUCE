@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -95,15 +95,15 @@ template <> struct ContainerDeletePolicy<const __CFString>   { static void destr
 // make sure the audio processor is initialized before the AUBase class
 struct AudioProcessorHolder
 {
-    AudioProcessorHolder (bool initialiseGUI)
+    AudioProcessorHolder (bool initializeGUI)
     {
-        if (initialiseGUI)
+        if (initializeGUI)
         {
            #if BUILD_AU_CARBON_UI
             NSApplicationLoad();
            #endif
 
-            initialiseJuce_GUI();
+            initializeJuce_GUI();
         }
 
         juceFilter = createPluginFilterOfType (AudioProcessor::wrapperType_AudioUnit);

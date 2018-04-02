@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -224,12 +224,12 @@ namespace CoreTextTypeLayout
         {
            #if defined (MAC_OS_X_VERSION_10_8) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_8
             case Justification::right:                  return kCTTextAlignmentRight;
-            case Justification::horizontallyCentred:    return kCTTextAlignmentCenter;
+            case Justification::horizontallyCentered:    return kCTTextAlignmentCenter;
             case Justification::horizontallyJustified:  return kCTTextAlignmentJustified;
             default:                                    return kCTTextAlignmentLeft;
            #else
             case Justification::right:                  return kCTRightTextAlignment;
-            case Justification::horizontallyCentred:    return kCTCenterTextAlignment;
+            case Justification::horizontallyCentered:    return kCTCenterTextAlignment;
             case Justification::horizontallyJustified:  return kCTJustifiedTextAlignment;
             default:                                    return kCTLeftTextAlignment;
            #endif
@@ -260,7 +260,7 @@ namespace CoreTextTypeLayout
     static CFAttributedStringRef createCFAttributedString (const AttributedString& text)
     {
        #if JUCE_IOS
-        CGColorSpaceRef rgbColourSpace = CGColorSpaceCreateDeviceRGB();
+        CGColorSpaceRef rgbColorSpace = CGColorSpaceCreateDeviceRGB();
        #endif
 
         CFMutableAttributedStringRef attribString = CFAttributedStringCreateMutable (kCFAllocatorDefault, 0);
@@ -303,23 +303,23 @@ namespace CoreTextTypeLayout
             }
 
             {
-                const Colour col (attr.colour);
+                const Color col (attr.color);
 
                #if JUCE_IOS
                 const CGFloat components[] = { col.getFloatRed(),
                                                col.getFloatGreen(),
                                                col.getFloatBlue(),
                                                col.getFloatAlpha() };
-                CGColorRef colour = CGColorCreate (rgbColourSpace, components);
+                CGColorRef color = CGColorCreate (rgbColorSpace, components);
                #else
-                CGColorRef colour = CGColorCreateGenericRGB (col.getFloatRed(),
+                CGColorRef color = CGColorCreateGenericRGB (col.getFloatRed(),
                                                              col.getFloatGreen(),
                                                              col.getFloatBlue(),
                                                              col.getFloatAlpha());
                #endif
 
-                CFAttributedStringSetAttribute (attribString, range, kCTForegroundColorAttributeName, colour);
-                CGColorRelease (colour);
+                CFAttributedStringSetAttribute (attribString, range, kCTForegroundColorAttributeName, color);
+                CGColorRelease (color);
             }
         }
 
@@ -347,7 +347,7 @@ namespace CoreTextTypeLayout
                                         kCTParagraphStyleAttributeName, ctParagraphStyleRef);
         CFRelease (ctParagraphStyleRef);
        #if JUCE_IOS
-        CGColorSpaceRelease (rgbColourSpace);
+        CGColorSpaceRelease (rgbColorSpace);
        #endif
         return attribString;
     }
@@ -400,8 +400,8 @@ namespace CoreTextTypeLayout
 
         // Ugly hack to fix a bug in OS X Sierra where the CTFrame needs to be slightly
         // larger than the font height - otherwise the CTFrame will be invalid
-        if (verticalJustification == Justification::verticallyCentred)
-            ctFrameArea = area.withSizeKeepingCentre (area.getWidth(), area.getHeight() * 1.1f);
+        if (verticalJustification == Justification::verticallyCentered)
+            ctFrameArea = area.withSizeKeepingCenter (area.getWidth(), area.getHeight() * 1.1f);
         else if (verticalJustification == Justification::bottom)
             ctFrameArea = area.withTop (area.getY() - (area.getHeight() * 0.1f));
         else
@@ -410,12 +410,12 @@ namespace CoreTextTypeLayout
         CTFrameRef frame = createCTFrame (text, CGRectMake ((CGFloat) ctFrameArea.getX(), flipHeight - (CGFloat) ctFrameArea.getBottom(),
                                                             (CGFloat) ctFrameArea.getWidth(), (CGFloat) ctFrameArea.getHeight()));
 
-        if (verticalJustification == Justification::verticallyCentred
+        if (verticalJustification == Justification::verticallyCentered
              || verticalJustification == Justification::bottom)
         {
             float adjust = ctFrameArea.getHeight() - findCTFrameHeight (frame);
 
-            if (verticalJustification == Justification::verticallyCentred)
+            if (verticalJustification == Justification::verticallyCentered)
                 adjust *= 0.5f;
 
             CGContextSaveGState (context);
@@ -503,7 +503,7 @@ namespace CoreTextTypeLayout
                 {
                     const CGFloat* const components = CGColorGetComponents (cgRunColor);
 
-                    glyphRun->colour = Colour::fromFloatRGBA ((float) components[0],
+                    glyphRun->color = Color::fromFloatRGBA ((float) components[0],
                                                               (float) components[1],
                                                               (float) components[2],
                                                               (float) components[3]);
@@ -546,7 +546,7 @@ public:
         if (ctFontRef != nullptr)
         {
             fontRef = CTFontCopyGraphicsFont (ctFontRef, nullptr);
-            initialiseMetrics();
+            initializeMetrics();
         }
     }
 
@@ -597,12 +597,12 @@ public:
                     CFRelease (fontStyle);
                 }
 
-                initialiseMetrics();
+                initializeMetrics();
             }
         }
     }
 
-    void initialiseMetrics()
+    void initializeMetrics()
     {
         const float ctAscent  = std::abs ((float) CTFontGetAscent (ctFontRef));
         const float ctDescent = std::abs ((float) CTFontGetDescent (ctFontRef));

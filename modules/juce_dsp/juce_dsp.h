@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -246,12 +246,12 @@ namespace juce
  #include "containers/juce_SIMDRegister.h"
 #endif
 
-#include "maths/juce_SpecialFunctions.h"
-#include "maths/juce_Matrix.h"
-#include "maths/juce_Phase.h"
-#include "maths/juce_Polynomial.h"
-#include "maths/juce_FastMathApproximations.h"
-#include "maths/juce_LookupTable.h"
+#include "math/juce_SpecialFunctions.h"
+#include "math/juce_Matrix.h"
+#include "math/juce_Phase.h"
+#include "math/juce_Polynomial.h"
+#include "math/juce_FastMathApproximations.h"
+#include "math/juce_LookupTable.h"
 #include "containers/juce_AudioBlock.h"
 #include "processors/juce_ProcessContext.h"
 #include "processors/juce_ProcessorWrapper.h"

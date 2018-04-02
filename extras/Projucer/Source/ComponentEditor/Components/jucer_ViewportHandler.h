@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -286,8 +286,8 @@ private:
         void paint (Graphics& g) override
         {
             g.fillCheckerBoard (getLocalBounds().toFloat(), 50.0f, 50.0f,
-                                Colours::lightgrey.withAlpha (0.5f),
-                                Colours::darkgrey.withAlpha (0.5f));
+                                Colors::lightgray.withAlpha (0.5f),
+                                Colors::darkgray.withAlpha (0.5f));
         }
     };
 

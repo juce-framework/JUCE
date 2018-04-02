@@ -42,7 +42,7 @@ public:
         The object is initially in an unsignalled state.
 
         @param manualReset  If this is false, the event will be reset automatically when the wait()
-                            method is called. If manualReset is true, then once the event is signalled,
+                            method is called. If manualReset is true, then once the event is signaled,
                             the only way to reset it will be by calling the reset() method.
     */
     explicit WaitableEvent (bool manualReset = false) noexcept;
@@ -55,18 +55,18 @@ public:
     ~WaitableEvent() noexcept;
 
     //==============================================================================
-    /** Suspends the calling thread until the event has been signalled.
+    /** Suspends the calling thread until the event has been signaled.
 
         This will wait until the object's signal() method is called by another thread,
         or until the timeout expires.
 
-        After the event has been signalled, this method will return true and if manualReset
+        After the event has been signaled, this method will return true and if manualReset
         was set to false in the WaitableEvent's constructor, then the event will be reset.
 
         @param timeOutMilliseconds  the maximum time to wait, in milliseconds. A negative
                                     value will cause it to wait forever.
 
-        @returns    true if the object has been signalled, false if the timeout expires first.
+        @returns    true if the object has been signaled, false if the timeout expires first.
         @see signal, reset
     */
     bool wait (int timeOutMilliseconds = -1) const noexcept;
@@ -91,7 +91,7 @@ public:
 
     //==============================================================================
     /** Resets the event to an unsignalled state.
-        If it's not already signalled, this does nothing.
+        If it's not already signaled, this does nothing.
     */
     void reset() const noexcept;
 

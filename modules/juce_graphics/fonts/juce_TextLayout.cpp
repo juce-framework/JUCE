@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -49,19 +49,19 @@ TextLayout::Glyph::~Glyph() noexcept {}
 
 //==============================================================================
 TextLayout::Run::Run() noexcept
-    : colour (0xff000000)
+    : color (0xff000000)
 {
 }
 
 TextLayout::Run::Run (Range<int> range, int numGlyphsToPreallocate)
-    : colour (0xff000000), stringRange (range)
+    : color (0xff000000), stringRange (range)
 {
     glyphs.ensureStorageAllocated (numGlyphsToPreallocate);
 }
 
 TextLayout::Run::Run (const Run& other)
     : font (other.font),
-      colour (other.colour),
+      color (other.color),
       glyphs (other.glyphs),
       stringRange (other.stringRange)
 {
@@ -236,7 +236,7 @@ void TextLayout::draw (Graphics& g, Rectangle<float> area) const
         for (auto* run : line->runs)
         {
             context.setFont (run->font);
-            context.setFill (run->colour);
+            context.setFill (run->color);
 
             for (auto& glyph : run->glyphs)
                 context.drawGlyph (glyph.glyphCode, AffineTransform::translation (lineOrigin.x + glyph.anchor.x,
@@ -317,8 +317,8 @@ namespace TextLayoutHelpers
 {
     struct Token
     {
-        Token (const String& t, const Font& f, Colour c, bool whitespace)
-            : text (t), font (f), colour (c),
+        Token (const String& t, const Font& f, Color c, bool whitespace)
+            : text (t), font (f), color (c),
               area (font.getStringWidthFloat (t), f.getHeight()),
               isWhitespace (whitespace),
               isNewLine (t.containsChar ('\n') || t.containsChar ('\r'))
@@ -326,7 +326,7 @@ namespace TextLayoutHelpers
 
         const String text;
         const Font font;
-        const Colour colour;
+        const Color color;
         Rectangle<float> area;
         int line;
         float lineHeight;
@@ -395,7 +395,7 @@ namespace TextLayoutHelpers
 
                 if (auto* nextToken = tokens[i + 1])
                 {
-                    if (t.font != nextToken->font || t.colour != nextToken->colour)
+                    if (t.font != nextToken->font || t.color != nextToken->color)
                     {
                         addRun (*currentLine, currentRun.release(), t, runStartPosition, charPosition);
                         runStartPosition = charPosition;
@@ -429,16 +429,16 @@ namespace TextLayoutHelpers
                 }
             }
 
-            if ((text.getJustification().getFlags() & (Justification::right | Justification::horizontallyCentred)) != 0)
+            if ((text.getJustification().getFlags() & (Justification::right | Justification::horizontallyCentered)) != 0)
             {
                 auto totalW = layout.getWidth();
-                bool isCentred = (text.getJustification().getFlags() & Justification::horizontallyCentred) != 0;
+                bool isCentered = (text.getJustification().getFlags() & Justification::horizontallyCentered) != 0;
 
                 for (int i = 0; i < layout.getNumLines(); ++i)
                 {
                     auto dx = totalW - layout.getLine(i).getLineBoundsX().getLength();
 
-                    if (isCentred)
+                    if (isCentered)
                         dx /= 2.0f;
 
                     layout.getLine(i).lineOrigin.x += dx;
@@ -452,7 +452,7 @@ namespace TextLayoutHelpers
         {
             glyphRun->stringRange = { start, end };
             glyphRun->font = t.font;
-            glyphRun->colour = t.colour;
+            glyphRun->color = t.color;
             glyphLine.ascent  = jmax (glyphLine.ascent,  t.font.getAscent());
             glyphLine.descent = jmax (glyphLine.descent, t.font.getDescent());
             glyphLine.runs.add (glyphRun);
@@ -466,7 +466,7 @@ namespace TextLayoutHelpers
             return CharacterFunctions::isWhitespace (c) ? 2 : 1;
         }
 
-        void appendText (const String& stringText, const Font& font, Colour colour)
+        void appendText (const String& stringText, const Font& font, Color color)
         {
             auto t = stringText.getCharPointer();
             String currentString;
@@ -484,7 +484,7 @@ namespace TextLayoutHelpers
                 if (charType == 0 || charType != lastCharType)
                 {
                     if (currentString.isNotEmpty())
-                        tokens.add (new Token (currentString, font, colour,
+                        tokens.add (new Token (currentString, font, color,
                                                lastCharType == 2 || lastCharType == 0));
 
                     currentString = String::charToString (c);
@@ -501,7 +501,7 @@ namespace TextLayoutHelpers
             }
 
             if (currentString.isNotEmpty())
-                tokens.add (new Token (currentString, font, colour, lastCharType == 2));
+                tokens.add (new Token (currentString, font, color, lastCharType == 2));
         }
 
         void layoutRuns (float maxWidth, float extraLineSpacing, AttributedString::WordWrap wordWrap)
@@ -561,7 +561,7 @@ namespace TextLayoutHelpers
                 auto& attr = text.getAttribute (i);
 
                 appendText (text.getText().substring (attr.range.getStart(), attr.range.getEnd()),
-                            attr.font, attr.colour);
+                            attr.font, attr.color);
             }
         }
 

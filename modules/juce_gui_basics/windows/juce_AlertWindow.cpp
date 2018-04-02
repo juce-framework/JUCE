@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -153,7 +153,7 @@ void AlertWindow::addTextEditor (const String& name,
     textBoxes.add (ed);
     allComps.add (ed);
 
-    ed->setColour (TextEditor::outlineColourId, findColour (ComboBox::outlineColourId));
+    ed->setColor (TextEditor::outlineColorId, findColor (ComboBox::outlineColorId));
     ed->setFont (getLookAndFeel().getAlertWindowMessageFont());
     addAndMakeVisible (ed);
     ed->setText (initialContents);
@@ -214,12 +214,12 @@ class AlertTextComp  : public TextEditor
 public:
     AlertTextComp (AlertWindow& owner, const String& message, const Font& font)
     {
-        if (owner.isColourSpecified (AlertWindow::textColourId))
-            setColour (TextEditor::textColourId, owner.findColour (AlertWindow::textColourId));
+        if (owner.isColorSpecified (AlertWindow::textColorId))
+            setColor (TextEditor::textColorId, owner.findColor (AlertWindow::textColorId));
 
-        setColour (TextEditor::backgroundColourId, Colours::transparentBlack);
-        setColour (TextEditor::outlineColourId, Colours::transparentBlack);
-        setColour (TextEditor::shadowColourId, Colours::transparentBlack);
+        setColor (TextEditor::backgroundColorId, Colors::transparentBlack);
+        setColor (TextEditor::outlineColorId, Colors::transparentBlack);
+        setColor (TextEditor::shadowColorId, Colors::transparentBlack);
 
         setReadOnly (true);
         setMultiLine (true, true);
@@ -305,7 +305,7 @@ void AlertWindow::paint (Graphics& g)
     auto& lf = getLookAndFeel();
     lf.drawAlertBox (g, *this, textArea, textLayout);
 
-    g.setColour (findColour (textColourId));
+    g.setColor (findColor (textColorId));
     g.setFont (lf.getAlertWindowFont());
 
     for (int i = textBoxes.size(); --i >= 0;)
@@ -315,7 +315,7 @@ void AlertWindow::paint (Graphics& g)
         g.drawFittedText (textboxNames[i],
                           te->getX(), te->getY() - 14,
                           te->getWidth(), 14,
-                          Justification::centredLeft, 1);
+                          Justification::centeredLeft, 1);
     }
 
     for (int i = comboBoxNames.size(); --i >= 0;)
@@ -325,14 +325,14 @@ void AlertWindow::paint (Graphics& g)
         g.drawFittedText (comboBoxNames[i],
                           cb->getX(), cb->getY() - 14,
                           cb->getWidth(), 14,
-                          Justification::centredLeft, 1);
+                          Justification::centeredLeft, 1);
     }
 
     for (auto* c : customComps)
         g.drawFittedText (c->getName(),
                           c->getX(), c->getY() - 14,
                           c->getWidth(), 14,
-                          Justification::centredLeft, 1);
+                          Justification::centeredLeft, 1);
 }
 
 void AlertWindow::updateLayout (const bool onlyIncreaseSize)
@@ -358,11 +358,11 @@ void AlertWindow::updateLayout (const bool onlyIncreaseSize)
     if (text.isNotEmpty())
         attributedText.append ("\n\n" + text, messageFont);
 
-    attributedText.setColour (findColour (textColourId));
+    attributedText.setColor (findColor (textColorId));
 
     if (alertIconType == NoIcon)
     {
-        attributedText.setJustification (Justification::centredTop);
+        attributedText.setJustification (Justification::centeredTop);
         textLayout.createLayoutWithBalancedLineLengths (attributedText, (float) w);
     }
     else
@@ -421,9 +421,9 @@ void AlertWindow::updateLayout (const bool onlyIncreaseSize)
     }
 
     if (! isVisible())
-        centreAroundComponent (associatedComponent, w, h);
+        centerAroundComponent (associatedComponent, w, h);
     else
-        setBounds (getBounds().withSizeKeepingCentre (w, h));
+        setBounds (getBounds().withSizeKeepingCenter (w, h));
 
     textArea.setBounds (edgeGap, edgeGap, w - (edgeGap * 2), h - edgeGap);
 

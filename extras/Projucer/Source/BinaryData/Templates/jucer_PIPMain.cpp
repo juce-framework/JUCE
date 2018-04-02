@@ -19,7 +19,7 @@ public:
     const String getApplicationName() override       { return "%%project_name%%"; }
     const String getApplicationVersion() override    { return "%%project_version%%"; }
 
-    void initialise (const String&) override         { %%startup%% }
+    void initialize (const String&) override         { %%startup%% }
     void shutdown() override                         { %%shutdown%% }
 
 private:
@@ -28,7 +28,7 @@ private:
     public:
         MainWindow (const String& name, Component* c)  : DocumentWindow (name,
                                                                          Desktop::getInstance().getDefaultLookAndFeel()
-                                                                                               .findColour (ResizableWindow::backgroundColourId),
+                                                                                               .findColor (ResizableWindow::backgroundColorId),
                                                                          DocumentWindow::allButtons)
         {
             setUsingNativeTitleBar (true);
@@ -39,7 +39,7 @@ private:
            #else
             setResizable (true, false);
             setResizeLimits (300, 250, 10000, 10000);
-            centreWithSize (getWidth(), getHeight());
+            centerWithSize (getWidth(), getHeight());
            #endif
 
             setVisible (true);

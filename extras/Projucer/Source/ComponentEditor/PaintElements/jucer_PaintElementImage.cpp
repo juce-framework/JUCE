@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -52,19 +52,19 @@ void PaintElementImage::draw (Graphics& g, const ComponentLayout* layout, const 
     {
         image->drawWithin (g, r.toFloat(),
                            mode == stretched ? RectanglePlacement::stretchToFit
-                                             : (mode == proportionalReducingOnly ? (RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize)
-                                                                                 : RectanglePlacement::centred),
+                                             : (mode == proportionalReducingOnly ? (RectanglePlacement::centered | RectanglePlacement::onlyReduceInSize)
+                                                                                 : RectanglePlacement::centered),
                            (float) opacity);
     }
     else
     {
-        g.setColour (Colours::grey.withAlpha (0.5f));
+        g.setColor (Colors::gray.withAlpha (0.5f));
         g.fillRect (r);
 
-        g.setColour (Colours::black);
+        g.setColor (Colors::black);
         g.drawText ("(image missing)",
                     r.getX(), r.getY(), r.getWidth(), r.getHeight(),
-                    Justification::centred, true);
+                    Justification::centered, true);
     }
 }
 
@@ -98,9 +98,9 @@ void PaintElementImage::fillInGeneratedCode (GeneratedCode& code, String& paintM
             code.addImageResourceLoader (imageVariable, resourceName);
 
             if (opacity >= 254.0 / 255.0)
-                r << "    g.setColour (Colours::black);\n";
+                r << "    g.setColor (Colors::black);\n";
             else
-                r << "    g.setColour (Colours::black.withAlpha (" << CodeHelpers::floatLiteral (opacity, 3) << "));\n";
+                r << "    g.setColor (Colors::black.withAlpha (" << CodeHelpers::floatLiteral (opacity, 3) << "));\n";
 
 
             if (mode == stretched)
@@ -116,9 +116,9 @@ void PaintElementImage::fillInGeneratedCode (GeneratedCode& code, String& paintM
                   << "                       ";
 
                 if (mode == proportionalReducingOnly)
-                    r << "RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize";
+                    r << "RectanglePlacement::centered | RectanglePlacement::onlyReduceInSize";
                 else
-                    r << "RectanglePlacement::centred";
+                    r << "RectanglePlacement::centered";
 
                 r << ",\n"
                   << "                       false);\n";
@@ -142,17 +142,17 @@ void PaintElementImage::fillInGeneratedCode (GeneratedCode& code, String& paintM
                     << imageVariable << " = nullptr;\n";
 
                 if (opacity >= 254.0 / 255.0)
-                    r << "    g.setColour (Colours::black);\n";
+                    r << "    g.setColor (Colors::black);\n";
                 else
-                    r << "    g.setColour (Colours::black.withAlpha (" << CodeHelpers::floatLiteral (opacity, 3) << "));\n";
+                    r << "    g.setColor (Colors::black.withAlpha (" << CodeHelpers::floatLiteral (opacity, 3) << "));\n";
 
                 r << "    jassert (" << imageVariable << " != 0);\n"
                   << "    if (" << imageVariable << " != 0)\n"
                   << "        " << imageVariable  << "->drawWithin (g, Rectangle<float> (x, y, width, height),\n"
                   << "    " << String::repeatedString (" ", imageVariable.length() + 18)
                   << (mode == stretched ? "RectanglePlacement::stretchToFit"
-                                        : (mode == proportionalReducingOnly ? "RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize"
-                                                                            : "RectanglePlacement::centred"))
+                                        : (mode == proportionalReducingOnly ? "RectanglePlacement::centered | RectanglePlacement::onlyReduceInSize"
+                                                                            : "RectanglePlacement::centered"))
                   << ", " << CodeHelpers::floatLiteral (opacity, 3) << ");\n";
             }
         }

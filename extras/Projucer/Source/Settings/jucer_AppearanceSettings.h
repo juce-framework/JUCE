@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -37,12 +37,12 @@ public:
     bool readFromXML (const XmlElement&);
     bool writeToFile (const File& file) const;
 
-    void updateColourScheme();
+    void updateColorScheme();
     void applyToCodeEditor (CodeEditorComponent& editor) const;
 
-    StringArray getColourNames() const;
-    Value getColourValue (const String& colourName);
-    bool getColour (const String& name, Colour& resultIfFound) const;
+    StringArray getColorNames() const;
+    Value getColorValue (const String& colorName);
+    bool getColor (const String& name, Color& resultIfFound) const;
 
     Font getCodeFont() const;
     Value getCodeFontValue();
@@ -65,12 +65,12 @@ private:
 
     static void writeDefaultSchemeFile (const String& xml, const String& name);
 
-    void valueTreePropertyChanged (ValueTree&, const Identifier&) override   { updateColourScheme(); }
-    void valueTreeChildAdded (ValueTree&, ValueTree&) override               { updateColourScheme(); }
-    void valueTreeChildRemoved (ValueTree&, ValueTree&, int) override        { updateColourScheme(); }
-    void valueTreeChildOrderChanged (ValueTree&, int, int) override          { updateColourScheme(); }
-    void valueTreeParentChanged (ValueTree&) override                        { updateColourScheme(); }
-    void valueTreeRedirected (ValueTree&) override                           { updateColourScheme(); }
+    void valueTreePropertyChanged (ValueTree&, const Identifier&) override   { updateColorScheme(); }
+    void valueTreeChildAdded (ValueTree&, ValueTree&) override               { updateColorScheme(); }
+    void valueTreeChildRemoved (ValueTree&, ValueTree&, int) override        { updateColorScheme(); }
+    void valueTreeChildOrderChanged (ValueTree&, int, int) override          { updateColorScheme(); }
+    void valueTreeParentChanged (ValueTree&) override                        { updateColorScheme(); }
+    void valueTreeRedirected (ValueTree&) override                           { updateColorScheme(); }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AppearanceSettings)
 };

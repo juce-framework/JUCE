@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -355,10 +355,10 @@ protected:
 
     Icon getIcon() const override
     {
-        auto colour = getOwnerView()->findColour (isSelected() ? defaultHighlightedTextColourId
-                                                               : treeIconColourId);
+        auto color = getOwnerView()->findColor (isSelected() ? defaultHighlightedTextColorId
+                                                               : treeIconColorId);
 
-        return item.getIcon (isOpen()).withColour (colour);
+        return item.getIcon (isOpen()).withColor (color);
     }
 
     bool isIconCrossedOut() const override  { return item.isIconCrossedOut(); }

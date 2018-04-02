@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -86,7 +86,7 @@ struct SidePanelHeader    : public Component
 
     void paint (Graphics& g) override
     {
-        g.fillAll (owner.getSidePanel().findColour (SidePanel::backgroundColour));
+        g.fillAll (owner.getSidePanel().findColor (SidePanel::backgroundColor));
     }
 
     void resized() override
@@ -110,20 +110,20 @@ struct SidePanelHeader    : public Component
 
         titleLabel.setFont (lf.getSidePanelTitleFont (sidePanel));
         titleLabel.setJustificationType (lf.getSidePanelTitleJustification (sidePanel));
-        titleLabel.setColour (Label::textColourId, owner.findColour (SidePanel::titleTextColour));
+        titleLabel.setColor (Label::textColorId, owner.findColor (SidePanel::titleTextColor));
 
-        auto normal = sidePanel.findColour (SidePanel::dismissButtonNormalColour);
-        auto over = sidePanel.findColour (SidePanel::dismissButtonOverColour);
-        auto down = sidePanel.findColour (SidePanel::dismissButtonDownColour);
+        auto normal = sidePanel.findColor (SidePanel::dismissButtonNormalColor);
+        auto over = sidePanel.findColor (SidePanel::dismissButtonOverColor);
+        auto down = sidePanel.findColor (SidePanel::dismissButtonDownColor);
 
-        homeButton.setColours (normal, over, down);
-        settingsButton.setColours (normal, over, down);
+        homeButton.setColors (normal, over, down);
+        settingsButton.setColors (normal, over, down);
     }
 
     MainComponent& owner;
     Label titleLabel;
-    ShapeButton homeButton      { "Home", Colours::transparentBlack, Colours::transparentBlack, Colours::transparentBlack },
-                settingsButton  { "Settings", Colours::transparentBlack, Colours::transparentBlack, Colours::transparentBlack };
+    ShapeButton homeButton      { "Home", Colors::transparentBlack, Colors::transparentBlack, Colors::transparentBlack },
+                settingsButton  { "Settings", Colors::transparentBlack, Colors::transparentBlack, Colors::transparentBlack };
 };
 
 //==============================================================================
@@ -149,9 +149,9 @@ public:
     {
         Rectangle<int> bounds (0, 0, width, height);
 
-        auto textColour = findColour (Label::textColourId);
+        auto textColor = findColor (Label::textColorId);
 
-        g.setColour (textColour.withAlpha (0.4f));
+        g.setColor (textColor.withAlpha (0.4f));
 
         if (rowNumber == 0)
             g.fillRect (bounds.removeFromTop (2).reduced (7, 0));
@@ -160,18 +160,18 @@ public:
 
         if (rowIsSelected)
         {
-            g.setColour (findColour (TextEditor::highlightColourId).withAlpha (0.4f));
+            g.setColor (findColor (TextEditor::highlightColorId).withAlpha (0.4f));
             g.fillRect (bounds);
-            textColour = findColour (TextEditor::highlightedTextColourId);
+            textColor = findColor (TextEditor::highlightedTextColorId);
         }
 
-        g.setColour (textColour);
+        g.setColor (textColor);
 
         if (selectedCategory.isEmpty())
         {
             if (isPositiveAndBelow (rowNumber, JUCEDemos::getCategories().size()))
                 g.drawFittedText (JUCEDemos::getCategories()[rowNumber].name,
-                                  bounds, Justification::centred, 1);
+                                  bounds, Justification::centered, 1);
         }
         else
         {
@@ -179,7 +179,7 @@ public:
 
             if (isPositiveAndBelow (rowNumber, category.demos.size()))
                 g.drawFittedText (category.demos[rowNumber].demoFile.getFileName(),
-                                  bounds, Justification::centred, 1);
+                                  bounds, Justification::centered, 1);
         }
     }
 
@@ -227,8 +227,8 @@ private:
 
         void paint (Graphics& g) override
         {
-            g.setColour (findColour (Label::textColourId));
-            g.drawFittedText ("<", getLocalBounds().reduced (20, 0), Justification::centredLeft, 1);
+            g.setColor (findColor (Label::textColorId));
+            g.drawFittedText ("<", getLocalBounds().reduced (20, 0), Justification::centeredLeft, 1);
         }
 
         void mouseDown (const MouseEvent&) override
@@ -303,7 +303,7 @@ MainComponent::~MainComponent()
 //==============================================================================
 void MainComponent::paint (Graphics& g)
 {
-    g.fillAll (findColour (ResizableWindow::backgroundColourId));
+    g.fillAll (findColor (ResizableWindow::backgroundColorId));
 }
 
 void MainComponent::resized()

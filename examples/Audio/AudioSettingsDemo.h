@@ -62,7 +62,7 @@ public:
                                      [this] (bool granted)
                                      {
                                          int numInputChannels = granted ? 2 : 0;
-                                         audioDeviceManager.initialise (numInputChannels, 2, nullptr, true, {}, nullptr);
+                                         audioDeviceManager.initialize (numInputChannels, 2, nullptr, true, {}, nullptr);
                                      });
        #endif
 
@@ -93,7 +93,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground));
+        g.fillAll (getUIColorIfAvailable (LookAndFeel_V4::ColorScheme::UIColor::windowBackground));
     }
 
     void resized() override

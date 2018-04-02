@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -248,7 +248,7 @@ public:
                                                                                           .replace ("456", version.toString())));
 
         titleLabel->setFont (Font (15.00f, Font::bold));
-        titleLabel->setJustificationType (Justification::centredLeft);
+        titleLabel->setJustificationType (Justification::centeredLeft);
         titleLabel->setEditable (false, false, false);
 
         addAndMakeVisible (contentLabel = new Label ("Content Label",
@@ -323,8 +323,8 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (findColour (backgroundColourId));
-        g.setColour (findColour (defaultTextColourId));
+        g.fillAll (findColor (backgroundColorId));
+        g.setColor (findColor (defaultTextColorId));
 
         if (juceIcon != nullptr)
             juceIcon->drawWithin (g, Rectangle<float> (20, 17, 64, 64),
@@ -373,9 +373,9 @@ public:
         DialogWindow::LaunchOptions lo;
         lo.dialogTitle = TRANS ("Download \"123\" version 456?").replace ("456", version.toString())
                                                                 .replace ("123", productName);
-        lo.dialogBackgroundColour = userDialog->findColour (backgroundColourId);
+        lo.dialogBackgroundColor = userDialog->findColor (backgroundColorId);
         lo.content = userDialog;
-        lo.componentToCentreAround = nullptr;
+        lo.componentToCenterAround = nullptr;
         lo.escapeKeyTriggersCloseButton = true;
         lo.useNativeTitleBar = true;
         lo.resizable = false;
@@ -394,8 +394,8 @@ private:
 
     void lookAndFeelChanged() override
     {
-        cancelButton->setColour (TextButton::buttonColourId,
-                                 findColour (secondaryButtonBackgroundColourId));
+        cancelButton->setColor (TextButton::buttonColorId,
+                                 findColor (secondaryButtonBackgroundColorId));
         changeLog->applyFontToAllText (changeLog->getFont());
     }
 

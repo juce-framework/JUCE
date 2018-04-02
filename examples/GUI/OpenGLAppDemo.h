@@ -66,7 +66,7 @@ public:
         shutdownOpenGL();
     }
 
-    void initialise() override
+    void initialize() override
     {
         createShaders();
     }
@@ -100,7 +100,7 @@ public:
         jassert (OpenGLHelpers::isContextActive());
 
         auto desktopScale = (float) openGLContext.getRenderingScale();
-        OpenGLHelpers::clear (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+        OpenGLHelpers::clear (getLookAndFeel().findColor (ResizableWindow::backgroundColorId));
 
         glEnable (GL_BLEND);
         glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -128,7 +128,7 @@ public:
         // You can add your component specific drawing code here!
         // This will draw over the top of the openGL background.
 
-        g.setColour (getLookAndFeel().findColour (Label::textColourId));
+        g.setColor (getLookAndFeel().findColor (Label::textColorId));
         g.setFont (20);
         g.drawText ("OpenGL Example", 25, 20, 300, 30, Justification::left);
         g.drawLine (20, 20, 170, 20);
@@ -146,39 +146,39 @@ public:
     {
         vertexShader =
             "attribute vec4 position;\n"
-            "attribute vec4 sourceColour;\n"
+            "attribute vec4 sourceColor;\n"
             "attribute vec2 textureCoordIn;\n"
             "\n"
             "uniform mat4 projectionMatrix;\n"
             "uniform mat4 viewMatrix;\n"
             "\n"
-            "varying vec4 destinationColour;\n"
+            "varying vec4 destinationColor;\n"
             "varying vec2 textureCoordOut;\n"
             "\n"
             "void main()\n"
             "{\n"
-            "    destinationColour = sourceColour;\n"
+            "    destinationColor = sourceColor;\n"
             "    textureCoordOut = textureCoordIn;\n"
             "    gl_Position = projectionMatrix * viewMatrix * position;\n"
             "}\n";
 
         fragmentShader =
            #if JUCE_OPENGL_ES
-            "varying lowp vec4 destinationColour;\n"
+            "varying lowp vec4 destinationColor;\n"
             "varying lowp vec2 textureCoordOut;\n"
            #else
-            "varying vec4 destinationColour;\n"
+            "varying vec4 destinationColor;\n"
             "varying vec2 textureCoordOut;\n"
            #endif
             "\n"
             "void main()\n"
             "{\n"
            #if JUCE_OPENGL_ES
-            "    lowp vec4 colour = vec4(0.95, 0.57, 0.03, 0.7);\n"
+            "    lowp vec4 color = vec4(0.95, 0.57, 0.03, 0.7);\n"
            #else
-            "    vec4 colour = vec4(0.95, 0.57, 0.03, 0.7);\n"
+            "    vec4 color = vec4(0.95, 0.57, 0.03, 0.7);\n"
            #endif
-            "    gl_FragColor = colour;\n"
+            "    gl_FragColor = color;\n"
             "}\n";
 
         ScopedPointer<OpenGLShaderProgram> newShader (new OpenGLShaderProgram (openGLContext));
@@ -214,7 +214,7 @@ private:
     {
         float position[3];
         float normal[3];
-        float colour[4];
+        float color[4];
         float texCoord[2];
     };
 
@@ -226,7 +226,7 @@ private:
         {
             position      .reset (createAttribute (openGLContext, shaderProgram, "position"));
             normal        .reset (createAttribute (openGLContext, shaderProgram, "normal"));
-            sourceColour  .reset (createAttribute (openGLContext, shaderProgram, "sourceColour"));
+            sourceColor  .reset (createAttribute (openGLContext, shaderProgram, "sourceColor"));
             textureCoordIn.reset (createAttribute (openGLContext, shaderProgram, "textureCoordIn"));
         }
 
@@ -244,10 +244,10 @@ private:
                 glContext.extensions.glEnableVertexAttribArray (normal->attributeID);
             }
 
-            if (sourceColour.get() != nullptr)
+            if (sourceColor.get() != nullptr)
             {
-                glContext.extensions.glVertexAttribPointer (sourceColour->attributeID, 4, GL_FLOAT, GL_FALSE, sizeof (Vertex), (GLvoid*) (sizeof (float) * 6));
-                glContext.extensions.glEnableVertexAttribArray (sourceColour->attributeID);
+                glContext.extensions.glVertexAttribPointer (sourceColor->attributeID, 4, GL_FLOAT, GL_FALSE, sizeof (Vertex), (GLvoid*) (sizeof (float) * 6));
+                glContext.extensions.glEnableVertexAttribArray (sourceColor->attributeID);
             }
 
             if (textureCoordIn.get() != nullptr)
@@ -261,11 +261,11 @@ private:
         {
             if (position.get() != nullptr)       glContext.extensions.glDisableVertexAttribArray (position->attributeID);
             if (normal.get() != nullptr)         glContext.extensions.glDisableVertexAttribArray (normal->attributeID);
-            if (sourceColour.get() != nullptr)   glContext.extensions.glDisableVertexAttribArray (sourceColour->attributeID);
+            if (sourceColor.get() != nullptr)   glContext.extensions.glDisableVertexAttribArray (sourceColor->attributeID);
             if (textureCoordIn.get() != nullptr) glContext.extensions.glDisableVertexAttribArray (textureCoordIn->attributeID);
         }
 
-        ScopedPointer<OpenGLShaderProgram::Attribute> position, normal, sourceColour, textureCoordIn;
+        ScopedPointer<OpenGLShaderProgram::Attribute> position, normal, sourceColor, textureCoordIn;
 
     private:
         static OpenGLShaderProgram::Attribute* createAttribute (OpenGLContext& openGLContext,
@@ -339,7 +339,7 @@ private:
                 openGLContext.extensions.glBindBuffer (GL_ARRAY_BUFFER, vertexBuffer);
 
                 Array<Vertex> vertices;
-                createVertexListFromMesh (aShape.mesh, vertices, Colours::green);
+                createVertexListFromMesh (aShape.mesh, vertices, Colors::green);
 
                 openGLContext.extensions.glBufferData (GL_ARRAY_BUFFER,
                                                        static_cast<GLsizeiptr> (static_cast<size_t> (vertices.size()) * sizeof (Vertex)),
@@ -374,7 +374,7 @@ private:
         WavefrontObjFile shapeFile;
         OwnedArray<VertexBuffer> vertexBuffers;
 
-        static void createVertexListFromMesh (const WavefrontObjFile::Mesh& mesh, Array<Vertex>& list, Colour colour)
+        static void createVertexListFromMesh (const WavefrontObjFile::Mesh& mesh, Array<Vertex>& list, Color color)
         {
             auto scale = 0.2f;
             WavefrontObjFile::TextureCoord defaultTexCoord { 0.5f, 0.5f };
@@ -388,7 +388,7 @@ private:
 
                 list.add ({ { scale * v.x, scale * v.y, scale * v.z, },
                             { scale * n.x, scale * n.y, scale * n.z, },
-                            { colour.getFloatRed(), colour.getFloatGreen(), colour.getFloatBlue(), colour.getFloatAlpha() },
+                            { color.getFloatRed(), color.getFloatGreen(), color.getFloatBlue(), color.getFloatAlpha() },
                             { tc.x, tc.y } });
             }
         }

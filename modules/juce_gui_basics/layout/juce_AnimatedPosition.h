@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -30,27 +30,27 @@ namespace juce
 //==============================================================================
 /**
     Models a 1-dimensional position that can be dragged around by the user, and which
-    will then continue moving with a customisable physics behaviour when released.
+    will then continue moving with a customizable physics behavior when released.
 
     This is useful for things like scrollable views or objects that can be dragged and
-    thrown around with the mouse/touch, and by writing your own behaviour class, you can
-    customise the trajectory that it follows when released.
+    thrown around with the mouse/touch, and by writing your own behavior class, you can
+    customize the trajectory that it follows when released.
 
     The class uses its own Timer to continuously change its value when a drag ends, and
     Listener objects can be registered to receive callbacks whenever the value changes.
 
     The value is stored as a double, and can be used to represent whatever units you need.
 
-    The template parameter Behaviour must be a class that implements various methods to
+    The template parameter Behavior must be a class that implements various methods to
     return the physics of the value's movement - you can use the classes provided for this
-    in the AnimatedPositionBehaviours namespace, or write your own custom behaviour.
+    in the AnimatedPositionBehaviors namespace, or write your own custom behavior.
 
-    @see AnimatedPositionBehaviours::ContinuousWithMomentum,
-         AnimatedPositionBehaviours::SnapToPageBoundaries
+    @see AnimatedPositionBehaviors::ContinuousWithMomentum,
+         AnimatedPositionBehaviors::SnapToPageBoundaries
 
     @tags{GUI}
 */
-template <typename Behaviour>
+template <typename Behavior>
 class AnimatedPosition  : private Timer
 {
 public:
@@ -74,7 +74,7 @@ public:
         After calling this method, you should make calls to the drag() method
         each time the mouse drags the position around, and always be sure to
         finish with a call to endDrag() when the mouse is released, which allows
-        the position to continue moving freely according to the specified behaviour.
+        the position to continue moving freely according to the specified behavior.
     */
     void beginDrag()
     {
@@ -147,10 +147,10 @@ public:
     void removeListener (Listener* listener)    { listeners.remove (listener); }
 
     //==============================================================================
-    /** The behaviour object.
+    /** The behavior object.
         This is public to let you tweak any parameters that it provides.
     */
-    Behaviour behaviour;
+    Behavior behavior;
 
 private:
     //==============================================================================
@@ -171,7 +171,7 @@ private:
     {
         auto now = Time::getCurrentTime();
         releaseVelocity = getSpeed (lastDrag, position, now, newPos);
-        behaviour.releasedWithVelocity (newPos, releaseVelocity);
+        behavior.releasedWithVelocity (newPos, releaseVelocity);
         lastDrag = now;
 
         setPositionAndSendChange (newPos);
@@ -193,9 +193,9 @@ private:
         auto now = Time::getCurrentTime();
         auto elapsed = jlimit (0.001, 0.020, (now - lastUpdate).inSeconds());
         lastUpdate = now;
-        auto newPos = behaviour.getNextPosition (position, elapsed);
+        auto newPos = behavior.getNextPosition (position, elapsed);
 
-        if (behaviour.isStopped (newPos))
+        if (behavior.isStopped (newPos))
             stopTimer();
         else
             startTimerHz (60);

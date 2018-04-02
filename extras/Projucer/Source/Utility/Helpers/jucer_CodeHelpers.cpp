@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -68,7 +68,7 @@ namespace CodeHelpers
         return lines.joinIntoString (newLine);
     }
 
-    String makeValidIdentifier (String s, bool capitalise, bool removeColons, bool allowTemplates, bool allowAsterisks)
+    String makeValidIdentifier (String s, bool capitalize, bool removeColons, bool allowTemplates, bool allowAsterisks)
     {
         if (s.isEmpty())
             return "unknown";
@@ -101,12 +101,12 @@ namespace CodeHelpers
 
         String n (words[0]);
 
-        if (capitalise)
+        if (capitalize)
             n = n.toLowerCase();
 
         for (int i = 1; i < words.size(); ++i)
         {
-            if (capitalise && words[i].length() > 1)
+            if (capitalize && words[i].length() > 1)
                 n << words[i].substring (0, 1).toUpperCase()
                   << words[i].substring (1).toLowerCase();
             else
@@ -244,50 +244,50 @@ namespace CodeHelpers
         return value ? "true" : "false";
     }
 
-    String colourToCode (Colour col)
+    String colorToCode (Color col)
     {
-        const Colour colours[] =
+        const Color colors[] =
         {
-            #define COL(col)  Colours::col,
-            #include "jucer_Colours.h"
+            #define COL(col)  Colors::col,
+            #include "jucer_Colors.h"
             #undef COL
-            Colours::transparentBlack
+            Colors::transparentBlack
         };
 
-        static const char* colourNames[] =
+        static const char* colorNames[] =
         {
             #define COL(col)  #col,
-            #include "jucer_Colours.h"
+            #include "jucer_Colors.h"
             #undef COL
             0
         };
 
-        for (int i = 0; i < numElementsInArray (colourNames) - 1; ++i)
-            if (col == colours[i])
-                return "Colours::" + String (colourNames[i]);
+        for (int i = 0; i < numElementsInArray (colorNames) - 1; ++i)
+            if (col == colors[i])
+                return "Colors::" + String (colorNames[i]);
 
-        return "Colour (0x" + hexString8Digits ((int) col.getARGB()) + ')';
+        return "Color (0x" + hexString8Digits ((int) col.getARGB()) + ')';
     }
 
     String justificationToCode (Justification justification)
     {
         switch (justification.getFlags())
         {
-            case Justification::centred:                return "Justification::centred";
-            case Justification::centredLeft:            return "Justification::centredLeft";
-            case Justification::centredRight:           return "Justification::centredRight";
-            case Justification::centredTop:             return "Justification::centredTop";
-            case Justification::centredBottom:          return "Justification::centredBottom";
+            case Justification::centered:                return "Justification::centered";
+            case Justification::centeredLeft:            return "Justification::centeredLeft";
+            case Justification::centeredRight:           return "Justification::centeredRight";
+            case Justification::centeredTop:             return "Justification::centeredTop";
+            case Justification::centeredBottom:          return "Justification::centeredBottom";
             case Justification::topLeft:                return "Justification::topLeft";
             case Justification::topRight:               return "Justification::topRight";
             case Justification::bottomLeft:             return "Justification::bottomLeft";
             case Justification::bottomRight:            return "Justification::bottomRight";
             case Justification::left:                   return "Justification::left";
             case Justification::right:                  return "Justification::right";
-            case Justification::horizontallyCentred:    return "Justification::horizontallyCentred";
+            case Justification::horizontallyCentered:    return "Justification::horizontallyCentered";
             case Justification::top:                    return "Justification::top";
             case Justification::bottom:                 return "Justification::bottom";
-            case Justification::verticallyCentred:      return "Justification::verticallyCentred";
+            case Justification::verticallyCentered:      return "Justification::verticallyCentered";
             case Justification::horizontallyJustified:  return "Justification::horizontallyJustified";
             default:                                    break;
         }

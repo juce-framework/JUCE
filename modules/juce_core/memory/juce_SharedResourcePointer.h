@@ -49,7 +49,7 @@ namespace juce
     struct MySharedData
     {
         // There's no need to ever create an instance of this class directly yourself,
-        // but it does need a public constructor that does the initialisation.
+        // but it does need a public constructor that does the initialization.
         MySharedData()
         {
             sharedStuff = generateHeavyweightStuff();
@@ -89,12 +89,12 @@ public:
     */
     SharedResourcePointer()
     {
-        initialise();
+        initialize();
     }
 
     SharedResourcePointer (const SharedResourcePointer&)
     {
-        initialise();
+        initialize();
     }
 
     /** Destructor.
@@ -143,7 +143,7 @@ private:
 
     SharedObjectType* sharedObject;
 
-    void initialise()
+    void initialize()
     {
         auto& holder = getSharedObjectHolder();
         const SpinLock::ScopedLockType sl (holder.lock);

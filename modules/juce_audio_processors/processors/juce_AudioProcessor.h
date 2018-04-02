@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -59,7 +59,7 @@ protected:
     /** Constructor for multi-bus AudioProcessors
 
         If your AudioProcessor supports multiple buses than use this constructor
-        to initialise the bus layouts and bus names of your plug-in.
+        to initialize the bus layouts and bus names of your plug-in.
     */
     AudioProcessor (const BusesProperties& ioLayouts);
 
@@ -691,7 +691,7 @@ public:
         out the state and position of the playhead.
 
         You can ONLY call this from your processBlock() method! Calling it at other
-        times will produce undefined behaviour, as the host may not have any context
+        times will produce undefined behavior, as the host may not have any context
         in which a time would make sense, and some hosts will almost certainly have
         multithreading issues if it's not called on the audio thread.
 
@@ -808,13 +808,13 @@ public:
         passing through it.
 
         The host will call this to find the latency - the processor itself should set this value
-        by calling setLatencySamples() as soon as it can during its initialisation.
+        by calling setLatencySamples() as soon as it can during its initialization.
     */
     int getLatencySamples() const noexcept                      { return latencySamples; }
 
     /** Your processor subclass should call this to set the number of samples delay that it introduces.
 
-        The processor should call this as soon as it can during initialisation, and can call it
+        The processor should call this as soon as it can during initialization, and can call it
         later if the value changes.
     */
     void setLatencySamples (int newLatency);
@@ -868,7 +868,7 @@ public:
 
         If the host tries to make an audio callback while processing is suspended, the
         processor will return an empty buffer, but won't block the audio thread like it would
-        do if you use the getCallbackLock() critical section to synchronise access.
+        do if you use the getCallbackLock() critical section to synchronize access.
 
         Any code that calls processBlock() should call isSuspended() before doing so, and
         if the processor is suspended, it should avoid the call and emit silence or
@@ -996,7 +996,7 @@ public:
     virtual float getParameter (int parameterIndex);
 
     /** Returns the name of a parameter as a text string with a preferred maximum length.
-        If you want to provide customised short versions of your parameter names that
+        If you want to provide customized short versions of your parameter names that
         will look better in constrained spaces (e.g. the displays on hardware controller
         devices or mixing desks) then you should implement this method.
         If you don't override it, the default implementation will call getParameterName(int),
@@ -1014,7 +1014,7 @@ public:
     virtual const String getParameterText (int parameterIndex);
 
     /** Returns the value of a parameter as a text string with a preferred maximum length.
-        If you want to provide customised short versions of your parameter values that
+        If you want to provide customized short versions of your parameter values that
         will look better in constrained spaces (e.g. the displays on hardware controller
         devices or mixing desks) then you should implement this method.
         If you don't override it, the default implementation will call getParameterText(int),
@@ -1346,20 +1346,20 @@ public:
     struct TrackProperties
     {
         String name;    // The name of the track - this will be empty if the track name is not known
-        Colour colour;  // The colour of the track - this will be transparentBlack if the colour is not known
+        Color color;  // The color of the track - this will be transparentBlack if the color is not known
 
         // other properties may be added in the future
     };
 
     /** Informs the AudioProcessor that track properties such as the track's name or
-        colour has been changed.
+        color has been changed.
 
         If you are hosting this AudioProcessor then use this method to inform the
         AudioProcessor about which track the AudioProcessor is loaded on. This method
         may only be called on the message thread.
 
         If you are implemeting an AudioProcessor then you can override this callback
-        to do something useful with the track properties such as changing the colour
+        to do something useful with the track properties such as changing the color
         of your AudioProcessor's editor. It's entirely up to the host when and how
         often this callback will be called.
 
@@ -1390,7 +1390,7 @@ public:
     JUCE_DEPRECATED (virtual const String getInputChannelName  (int channelIndex) const);
     JUCE_DEPRECATED (virtual const String getOutputChannelName (int channelIndex) const);
 
-    /** Returns true if the specified channel is part of a stereo pair with its neighbour.
+    /** Returns true if the specified channel is part of a stereo pair with its neighbor.
 
         These functions are deprecated: your audio processor should specify the audio
         channel pairing information by modifying the busLayout member variable in

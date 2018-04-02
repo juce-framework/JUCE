@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -114,7 +114,7 @@ public:
         the alert cancel its modal state.
         By default this setting is true - turn it off if you don't want the box to respond to
         the escape key. Note that it is ignored if you have any buttons, and in that case you
-        should give the buttons appropriate keypresses to trigger cancelling if you want to.
+        should give the buttons appropriate keypresses to trigger canceling if you want to.
     */
     void setEscapeKeyCancels (bool shouldEscapeKeyCancel);
 
@@ -240,7 +240,7 @@ public:
         @param message      a longer, more descriptive message to show underneath the
                             headline
         @param buttonText   the text to show in the button - if this string is empty, the
-                            default string "OK" (or a localised version) will be used.
+                            default string "OK" (or a localized version) will be used.
         @param associatedComponent   if this is non-null, it specifies the component that the
                             alert window should be associated with. Depending on the look
                             and feel, this might be used for positioning of the alert window.
@@ -263,7 +263,7 @@ public:
         @param message      a longer, more descriptive message to show underneath the
                             headline
         @param buttonText   the text to show in the button - if this string is empty, the
-                            default string "OK" (or a localised version) will be used.
+                            default string "OK" (or a localized version) will be used.
         @param associatedComponent   if this is non-null, it specifies the component that the
                             alert window should be associated with. Depending on the look
                             and feel, this might be used for positioning of the alert window.
@@ -296,10 +296,10 @@ public:
         @param message      a longer, more descriptive message to show underneath the
                             headline
         @param button1Text  the text to show in the first button - if this string is
-                            empty, the default string "OK" (or a localised version of it)
+                            empty, the default string "OK" (or a localized version of it)
                             will be used.
         @param button2Text  the text to show in the second button - if this string is
-                            empty, the default string "cancel" (or a localised version of it)
+                            empty, the default string "cancel" (or a localized version of it)
                             will be used.
         @param associatedComponent   if this is non-null, it specifies the component that the
                             alert window should be associated with. Depending on the look
@@ -347,11 +347,11 @@ public:
         @param message      a longer, more descriptive message to show underneath the
                             headline
         @param button1Text  the text to show in the first button - if an empty string, then
-                            "yes" will be used (or a localised version of it)
+                            "yes" will be used (or a localized version of it)
         @param button2Text  the text to show in the first button - if an empty string, then
-                            "no" will be used (or a localised version of it)
+                            "no" will be used (or a localized version of it)
         @param button3Text  the text to show in the first button - if an empty string, then
-                            "cancel" will be used (or a localised version of it)
+                            "cancel" will be used (or a localized version of it)
         @param associatedComponent   if this is non-null, it specifies the component that the
                             alert window should be associated with. Depending on the look
                             and feel, this might be used for positioning of the alert window.
@@ -359,7 +359,7 @@ public:
                             returning immediately, and the callback will receive a call to its
                             modalStateFinished() when the box is dismissed, with its parameter
                             being 1 if the "yes" button was pressed, 2 for the "no" button, or 0
-                            if it was cancelled. The callback object will be owned and deleted by the
+                            if it was canceled. The callback object will be owned and deleted by the
                             system, so make sure that it works safely and doesn't keep any references
                             to objects that might be deleted before it gets called.
 
@@ -403,18 +403,18 @@ public:
 
 
     //==============================================================================
-    /** A set of colour IDs to use to change the colour of various aspects of the alert box.
+    /** A set of color IDs to use to change the color of various aspects of the alert box.
 
-        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        These constants can be used either via the Component::setColor(), or LookAndFeel::setColor()
         methods.
 
-        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+        @see Component::setColor, Component::findColor, LookAndFeel::setColor, LookAndFeel::findColor
     */
-    enum ColourIds
+    enum ColorIds
     {
-        backgroundColourId          = 0x1001800,  /**< The background colour for the window. */
-        textColourId                = 0x1001810,  /**< The colour for the text. */
-        outlineColourId             = 0x1001820   /**< An optional colour to use to draw a border around the window. */
+        backgroundColorId          = 0x1001800,  /**< The background color for the window. */
+        textColorId                = 0x1001810,  /**< The color for the text. */
+        outlineColorId             = 0x1001820   /**< An optional color to use to draw a border around the window. */
     };
 
     //==============================================================================

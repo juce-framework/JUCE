@@ -135,7 +135,7 @@ public:
         structure will be undefined.
 
         You can ONLY call this from your processBlock() method! Calling it at other
-        times will produce undefined behaviour, as the host may not have any context
+        times will produce undefined behavior, as the host may not have any context
         in which a time would make sense, and some hosts will almost certainly have
         multithreading issues if it's not called on the audio thread.
     */

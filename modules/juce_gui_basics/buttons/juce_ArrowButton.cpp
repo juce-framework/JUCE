@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -27,8 +27,8 @@
 namespace juce
 {
 
-ArrowButton::ArrowButton (const String& name, float arrowDirectionInRadians, Colour arrowColour)
-   : Button (name), colour (arrowColour)
+ArrowButton::ArrowButton (const String& name, float arrowDirectionInRadians, Color arrowColor)
+   : Button (name), color (arrowColor)
 {
     path.addTriangle (0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.5f);
     path.applyTransform (AffineTransform::rotation (MathConstants<float>::twoPi * arrowDirectionInRadians, 0.5f, 0.5f));
@@ -43,9 +43,9 @@ void ArrowButton::paintButton (Graphics& g, bool /*isMouseOverButton*/, bool isB
     const float offset = isButtonDown ? 1.0f : 0.0f;
     p.applyTransform (path.getTransformToScaleToFit (offset, offset, getWidth() - 3.0f, getHeight() - 3.0f, false));
 
-    DropShadow (Colours::black.withAlpha (0.3f), isButtonDown ? 2 : 4, Point<int>()).drawForPath (g, p);
+    DropShadow (Colors::black.withAlpha (0.3f), isButtonDown ? 2 : 4, Point<int>()).drawForPath (g, p);
 
-    g.setColour (colour);
+    g.setColor (color);
     g.fillPath (p);
 }
 

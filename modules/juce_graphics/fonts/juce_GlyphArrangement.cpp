@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -321,7 +321,7 @@ void GlyphArrangement::addJustifiedText (const Font& font, const String& text,
 
         if (horizontalLayout.testFlags (Justification::horizontallyJustified))
             spreadOutLine (lineStartIndex, i - lineStartIndex, maxLineWidth);
-        else if (horizontalLayout.testFlags (Justification::horizontallyCentred))
+        else if (horizontalLayout.testFlags (Justification::horizontallyCentered))
             deltaX = (maxLineWidth - (currentLineEndX - currentLineStartX)) * 0.5f;
         else if (horizontalLayout.testFlags (Justification::right))
             deltaX = maxLineWidth - (currentLineEndX - currentLineStartX);
@@ -410,7 +410,7 @@ void GlyphArrangement::addLinesWithLineBreaks (const String& text, const Font& f
     auto bb = ga.getBoundingBox (0, -1, false);
     auto dy = y - bb.getY();
 
-    if (layout.testFlags (Justification::verticallyCentred))   dy += (height - bb.getHeight()) * 0.5f;
+    if (layout.testFlags (Justification::verticallyCentered))   dy += (height - bb.getHeight()) * 0.5f;
     else if (layout.testFlags (Justification::bottom))         dy += (height - bb.getHeight());
 
     ga.moveRangeOfGlyphs (0, -1, 0.0f, dy);
@@ -495,11 +495,11 @@ void GlyphArrangement::justifyGlyphs (int startIndex, int num,
     if (glyphs.size() > 0 && num > 0)
     {
         auto bb = getBoundingBox (startIndex, num, ! justification.testFlags (Justification::horizontallyJustified
-                                                                               | Justification::horizontallyCentred));
+                                                                               | Justification::horizontallyCentered));
         float deltaX = x, deltaY = y;
 
         if (justification.testFlags (Justification::horizontallyJustified))     deltaX -= bb.getX();
-        else if (justification.testFlags (Justification::horizontallyCentred))  deltaX += (width - bb.getWidth()) * 0.5f - bb.getX();
+        else if (justification.testFlags (Justification::horizontallyCentered))  deltaX += (width - bb.getWidth()) * 0.5f - bb.getX();
         else if (justification.testFlags (Justification::right))                deltaX += width - bb.getRight();
         else                                                                    deltaX -= bb.getX();
 
@@ -702,7 +702,7 @@ void GlyphArrangement::splitLines (const String& text, Font font, int startIndex
 
         endIndex -= fitLineIntoSpace (startIndex, endIndex - startIndex,
                                       x, lineY, width, font.getHeight(), font,
-                                      layout.getOnlyHorizontalFlags() | Justification::verticallyCentred,
+                                      layout.getOnlyHorizontalFlags() | Justification::verticallyCentered,
                                       minimumHorizontalScale);
 
         startIndex = endIndex;

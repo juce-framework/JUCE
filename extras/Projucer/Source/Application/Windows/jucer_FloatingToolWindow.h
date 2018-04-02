@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -38,7 +38,7 @@ struct FloatingToolWindow  : public DialogWindow
                         int defaultW, int defaultH,
                         int minW, int minH,
                         int maxW, int maxH)
-        : DialogWindow (title, content->findColour (secondaryBackgroundColourId), true, true),
+        : DialogWindow (title, content->findColor (secondaryBackgroundColorId), true, true),
           windowPosProperty (windowPosPropertyName),
           owner (ownerPointer)
     {
@@ -54,7 +54,7 @@ struct FloatingToolWindow  : public DialogWindow
         if (windowState.isNotEmpty())
             restoreWindowStateFromString (windowState);
         else
-            centreAroundComponent (Component::getCurrentlyFocusedComponent(), defaultW, defaultH);
+            centerAroundComponent (Component::getCurrentlyFocusedComponent(), defaultW, defaultH);
 
         setVisible (true);
         owner.reset (this);
@@ -79,7 +79,7 @@ struct FloatingToolWindow  : public DialogWindow
 
     void paint (Graphics& g) override
     {
-        g.fillAll (findColour (secondaryBackgroundColourId));
+        g.fillAll (findColor (secondaryBackgroundColorId));
     }
 
 private:

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -118,7 +118,7 @@ public:
         try to load it, optionally showing a message if it fails.
 
         @returns    a result indicating success; This will be a failure message if the user
-                    cancelled or if they picked a file which failed to load correctly
+                    canceled or if they picked a file which failed to load correctly
         @see loadFrom
     */
     Result loadFromUserSpecifiedFile (bool showMessageOnFailure);
@@ -129,7 +129,7 @@ public:
     enum SaveResult
     {
         savedOk = 0,            /**< indicates that a file was saved successfully. */
-        userCancelledSave,      /**< indicates that the user aborted the save operation. */
+        userCanceledSave,      /**< indicates that the user aborted the save operation. */
         failedToWriteToFile     /**< indicates that it tried to write to a file but this failed. */
     };
 
@@ -160,7 +160,7 @@ public:
         If it does need saving it'll prompt the user, and if they say "discard changes" it'll
         return savedOk, so again, you can safely delete the document.
 
-        If the user clicks "cancel", it'll return userCancelledSave, so if you can abort the
+        If the user clicks "cancel", it'll return userCanceledSave, so if you can abort the
         close-document operation.
 
         And if they click "save changes", it'll try to save and either return savedOk, or
@@ -275,7 +275,7 @@ protected:
     virtual void setLastDocumentOpened (const File& file) = 0;
 
    #if JUCE_MODAL_LOOPS_PERMITTED
-    /** This is called by saveAsInteractive() to allow you to optionally customise the
+    /** This is called by saveAsInteractive() to allow you to optionally customize the
         filename that the user is presented with in the save dialog.
         The defaultFile parameter is an initial suggestion based on what the class knows
         about the current document - you can return a variation on this file with a different

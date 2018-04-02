@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -58,7 +58,7 @@ public:
     const Image& getImage() const;
 
     /** Sets the method of positioning that will be used to fit the image within the component's bounds.
-        By default the positioning is centred, and will fit the image inside the component's bounds
+        By default the positioning is centered, and will fit the image inside the component's bounds
         whilst keeping its aspect ratio correct, but you can change it to whatever layout you need.
     */
     void setImagePlacement (RectanglePlacement newPlacement);

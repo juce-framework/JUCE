@@ -167,11 +167,11 @@ namespace BinaryData
     extern const char*   jucer_PIPMain_cpp;
     const int            jucer_PIPMain_cppSize = 2446;
 
-    extern const char*   colourscheme_dark_xml;
-    const int            colourscheme_dark_xmlSize = 1050;
+    extern const char*   colorscheme_dark_xml;
+    const int            colorscheme_dark_xmlSize = 1050;
 
-    extern const char*   colourscheme_light_xml;
-    const int            colourscheme_light_xmlSize = 1050;
+    extern const char*   colorscheme_light_xml;
+    const int            colorscheme_light_xmlSize = 1050;
 
     extern const char*   nothingtoseehere_txt;
     const int            nothingtoseehere_txtSize = 20;

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -37,7 +37,7 @@ namespace juce
     memory and writes them out to disk lazily when they are changed.
 
     Because this class derives from ChangeBroadcaster, ChangeListeners can be registered
-    with it, and these will be signalled when a value changes.
+    with it, and these will be signaled when a value changes.
 
     @see PropertySet
 
@@ -90,7 +90,7 @@ public:
             The PropertiesFile class always used to put its settings files in "Library/Preferences", but Apple
             have changed their advice, and now stipulate that settings should go in "Library/Application Support".
 
-            Because older apps would be broken by a silent change in this class's behaviour, you must now
+            Because older apps would be broken by a silent change in this class's behavior, you must now
             explicitly set the osxLibrarySubFolder value to indicate which path you want to use.
 
             In newer apps, you should always set this to "Application Support" or
@@ -105,13 +105,13 @@ public:
         String osxLibrarySubFolder;
 
         /** If true, the file will be created in a location that's shared between users.
-            The default constructor initialises this value to false.
+            The default constructor initializes this value to false.
         */
         bool commonToAllUsers;
 
         /** If true, this means that property names are matched in a case-insensitive manner.
             See the PropertySet constructor for more info.
-            The default constructor initialises this value to false.
+            The default constructor initializes this value to false.
         */
         bool ignoreCaseOfKeyNames;
 
@@ -138,7 +138,7 @@ public:
             processes from writing to the file at the same time. The PropertiesFile will keep a
             pointer to this object but will not take ownership of it - the caller is responsible for
             making sure that the lock doesn't get deleted before the PropertiesFile has been deleted.
-            The default constructor initialises this value to nullptr, so you don't need to touch it
+            The default constructor initializes this value to nullptr, so you don't need to touch it
             unless you want to use a lock.
         */
         InterProcessLock* processLock;

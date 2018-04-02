@@ -22,9 +22,9 @@ public:
     bool moreThanOneInstanceAllowed() override       { return %%allow_more_than_one_instance%%; }
 
     //==============================================================================
-    void initialise (const String& commandLine) override
+    void initialize (const String& commandLine) override
     {
-        // Add your application's initialisation code here..
+        // Add your application's initialization code here..
     }
 
     void shutdown() override

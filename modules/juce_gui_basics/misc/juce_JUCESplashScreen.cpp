@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -35,7 +35,7 @@ namespace juce
    ineffective unless you have a JUCE Indie or Pro license, or are using JUCE
    under the GPL v3 license.
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
 
   ==============================================================================
 */
@@ -304,16 +304,16 @@ void JUCESplashScreen::paint (Graphics& g)
     Point<float> bottomRight (0.9f * r.getWidth(),
                               0.9f * r.getHeight());
 
-    ColourGradient cg (Colour (0x00000000), Line<float> (0.0f, r.getHeight(), r.getWidth(), 0.0f)
+    ColorGradient cg (Color (0x00000000), Line<float> (0.0f, r.getHeight(), r.getWidth(), 0.0f)
                                               .findNearestPointTo (bottomRight),
-                       Colour (0xff000000), bottomRight, false);
-    cg.addColour (0.25f, Colour (0x10000000));
-    cg.addColour (0.50f, Colour (0x30000000));
-    cg.addColour (0.75f, Colour (0x70000000));
+                       Color (0xff000000), bottomRight, false);
+    cg.addColor (0.25f, Color (0x10000000));
+    cg.addColor (0.50f, Color (0x30000000));
+    cg.addColor (0.75f, Color (0x70000000));
     g.setFillType (cg);
     g.fillAll();
 
-    content->drawWithin (g, getLogoArea (r), RectanglePlacement::centred, 1.0f);
+    content->drawWithin (g, getLogoArea (r), RectanglePlacement::centered, 1.0f);
 
     if (splashDisplayTime == 0)
         splashDisplayTime = Time::getMillisecondCounter();

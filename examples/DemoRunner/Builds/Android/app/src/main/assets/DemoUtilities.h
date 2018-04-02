@@ -32,18 +32,18 @@
 */
 
 //==============================================================================
-inline Colour getRandomColour (float brightness) noexcept
+inline Color getRandomColor (float brightness) noexcept
 {
-    return Colour::fromHSV (Random::getSystemRandom().nextFloat(), 0.5f, brightness, 1.0f);
+    return Color::fromHSV (Random::getSystemRandom().nextFloat(), 0.5f, brightness, 1.0f);
 }
 
-inline Colour getRandomBrightColour() noexcept  { return getRandomColour (0.8f); }
-inline Colour getRandomDarkColour() noexcept    { return getRandomColour (0.3f); }
+inline Color getRandomBrightColor() noexcept  { return getRandomColor (0.8f); }
+inline Color getRandomDarkColor() noexcept    { return getRandomColor (0.3f); }
 
-inline Colour getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour uiColour, Colour fallback = Colour (0xff4d4d4d)) noexcept
+inline Color getUIColorIfAvailable (LookAndFeel_V4::ColorScheme::UIColor uiColor, Color fallback = Color (0xff4d4d4d)) noexcept
 {
     if (auto* v4 = dynamic_cast<LookAndFeel_V4*> (&LookAndFeel::getDefaultLookAndFeel()))
-        return v4->getCurrentColourScheme().getUIColour (uiColour);
+        return v4->getCurrentColorScheme().getUIColor (uiColor);
 
     return fallback;
 }
@@ -140,12 +140,12 @@ inline Path getJUCELogoPath()
 
 //==============================================================================
 #if JUCE_MODULE_AVAILABLE_juce_gui_extra
- inline CodeEditorComponent::ColourScheme getDarkCodeEditorColourScheme()
+ inline CodeEditorComponent::ColorScheme getDarkCodeEditorColorScheme()
  {
      struct Type
      {
          const char* name;
-         juce::uint32 colour;
+         juce::uint32 color;
      };
 
      const Type types[] =
@@ -163,20 +163,20 @@ inline Path getJUCELogoPath()
          { "Preprocessor Text",  0xfff8f631 }
      };
 
-     CodeEditorComponent::ColourScheme cs;
+     CodeEditorComponent::ColorScheme cs;
 
      for (auto& t : types)
-         cs.set (t.name, Colour (t.colour));
+         cs.set (t.name, Color (t.color));
 
      return cs;
  }
 
- inline CodeEditorComponent::ColourScheme getLightCodeEditorColourScheme()
+ inline CodeEditorComponent::ColorScheme getLightCodeEditorColorScheme()
  {
      struct Type
      {
          const char* name;
-         juce::uint32 colour;
+         juce::uint32 color;
      };
 
      const Type types[] =
@@ -194,10 +194,10 @@ inline Path getJUCELogoPath()
          { "Preprocessor Text",  0xff660000 }
      };
 
-     CodeEditorComponent::ColourScheme cs;
+     CodeEditorComponent::ColorScheme cs;
 
      for (auto& t : types)
-         cs.set (t.name, Colour (t.colour));
+         cs.set (t.name, Color (t.color));
 
      return cs;
  }

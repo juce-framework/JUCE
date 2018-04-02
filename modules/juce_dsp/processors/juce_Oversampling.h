@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -125,7 +125,7 @@ public:
 
     /** Must be called to perform the downsampling, after the upsampling and the
         non-linear processing. The output signal is probably delayed by the internal
-        latency of the whole oversampling behaviour, so don't forget to take this
+        latency of the whole oversampling behavior, so don't forget to take this
         into account.
     */
     void processSamplesDown (dsp::AudioBlock<SampleType> &outputBlock) noexcept;

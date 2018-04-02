@@ -59,14 +59,14 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground,
-                                           Colour::greyLevel (0.4f)));
+        g.fillAll (getUIColorIfAvailable (LookAndFeel_V4::ColorScheme::UIColor::windowBackground,
+                                           Color::grayLevel (0.4f)));
 
-        g.setColour (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::defaultText,
-                                             Colours::lightgrey));
+        g.setColor (getUIColorIfAvailable (LookAndFeel_V4::ColorScheme::UIColor::defaultText,
+                                             Colors::lightgray));
         g.setFont (14.0f);
         g.drawFittedText ("Drag here with as many fingers as you have!",
-                          getLocalBounds().reduced (30), Justification::centred, 4);
+                          getLocalBounds().reduced (30), Justification::centered, 4);
 
         for (auto* trail : trails)
             drawTrail (*trail, g);
@@ -124,7 +124,7 @@ public:
 
         MouseInputSource source;
         Path path;
-        Colour colour  { getRandomBrightColour().withAlpha (0.6f) };
+        Color color  { getRandomBrightColor().withAlpha (0.6f) };
         Point<float> lastPoint, currentPosition;
         ModifierKeys modifierKeys;
 
@@ -135,12 +135,12 @@ public:
 
     void drawTrail (Trail& trail, Graphics& g)
     {
-        g.setColour (trail.colour);
+        g.setColor (trail.color);
         g.fillPath (trail.path);
 
         auto radius = 40.0f;
 
-        g.setColour (Colours::black);
+        g.setColor (Colors::black);
         g.drawEllipse (trail.currentPosition.x - radius,
                        trail.currentPosition.y - radius,
                        radius * 2.0f, radius * 2.0f, 2.0f);
@@ -164,7 +164,7 @@ public:
                     Rectangle<int> ((int) trail.currentPosition.x - 200,
                                     (int) trail.currentPosition.y - 60,
                                     400, 20),
-                    Justification::centredTop, false);
+                    Justification::centeredTop, false);
     }
 
     Trail* getTrail (const MouseInputSource& source)

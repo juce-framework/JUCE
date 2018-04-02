@@ -30,7 +30,7 @@ namespace juce
     Examples of arrays are: Array<int>, Array<Rectangle> or Array<MyClass*>
 
     The Array class can be used to hold simple, non-polymorphic objects as well as primitive types - to
-    do so, the class must fulfil these requirements:
+    do so, the class must fulfill these requirements:
     - it must have a copy constructor and assignment operator
     - it must be able to be relocated in memory by a memcpy without this causing any problems - so
       objects whose functionality relies on external pointers or references to themselves can not be used.
@@ -40,7 +40,7 @@ namespace juce
     ReferenceCountedArray class for more powerful ways of holding lists of objects.
 
     For holding lists of strings, you can use Array\<String\>, but it's usually better to use the
-    specialised class StringArray, which provides more useful functions.
+    specialized class StringArray, which provides more useful functions.
 
     To make all the array's methods thread-safe, pass in "CriticalSection" as the templated
     TypeOfCriticalSectionToUse parameter, instead of the default DummyCriticalSection.
@@ -366,7 +366,7 @@ public:
     inline ElementType* end() const noexcept
     {
        #if JUCE_DEBUG
-        if (data.elements == nullptr || numUsed <= 0) // (to keep static analysers happy)
+        if (data.elements == nullptr || numUsed <= 0) // (to keep static analyzers happy)
             return data.elements;
        #endif
 
@@ -760,7 +760,7 @@ public:
     /** Inserts a new element into the array, assuming that the array is sorted.
 
         This will use a comparator to find the position at which the new element
-        should go. If the array isn't sorted, the behaviour of this
+        should go. If the array isn't sorted, the behavior of this
         method will be unpredictable.
 
         @param comparator   the comparator to use to compare the elements - see the sort()
@@ -781,7 +781,7 @@ public:
     /** Inserts a new element into the array, assuming that the array is sorted.
 
         This will use the DefaultElementComparator class for sorting, so your ElementType
-        must be suitable for use with that class. If the array isn't sorted, the behaviour of this
+        must be suitable for use with that class. If the array isn't sorted, the behavior of this
         method will be unpredictable.
 
         @param newElement   the new element to insert to the array
@@ -796,7 +796,7 @@ public:
     /** Finds the index of an element in the array, assuming that the array is sorted.
 
         This will use a comparator to do a binary-chop to find the index of the given
-        element, if it exists. If the array isn't sorted, the behaviour of this
+        element, if it exists. If the array isn't sorted, the behavior of this
         method will be unpredictable.
 
         @param comparator           the comparator to use to compare the elements - see the sort()
@@ -884,7 +884,7 @@ public:
         This will remove the element pointed to by the given iterator,
         and move back all the subsequent elements to close the gap.
         If the iterator passed in does not point to an element within the
-        array, behaviour is undefined.
+        array, behavior is undefined.
 
         @param elementToRemove  a pointer to the element to remove
         @see removeFirstMatchingValue, removeAllInstancesOf, removeRange, removeIf
@@ -1016,7 +1016,7 @@ public:
                 memmove (e, e + numberToRemove, ((size_t) numToShift) * sizeof (ElementType));
 
             numUsed -= numberToRemove;
-            minimiseStorageAfterRemoval();
+            minimizeStorageAfterRemoval();
         }
     }
 
@@ -1036,7 +1036,7 @@ public:
             data.elements[numUsed - i].~ElementType();
 
         numUsed -= howManyToRemove;
-        minimiseStorageAfterRemoval();
+        minimizeStorageAfterRemoval();
     }
 
     /** Removes any elements which are also in another array.
@@ -1166,7 +1166,7 @@ public:
         removing elements, they may have quite a lot of unused space allocated.
         This method will reduce the amount of allocated storage to a minimum.
     */
-    void minimiseStorageOverheads()
+    void minimizeStorageOverheads()
     {
         const ScopedLockType lock (getLock());
         data.shrinkToNoMoreThan (numUsed);
@@ -1264,7 +1264,7 @@ private:
         if (numberToShift > 0)
             memmove (e, e + 1, ((size_t) numberToShift) * sizeof (ElementType));
 
-        minimiseStorageAfterRemoval();
+        minimizeStorageAfterRemoval();
     }
 
     inline void deleteAllElements() noexcept
@@ -1273,7 +1273,7 @@ private:
             data.elements[i].~ElementType();
     }
 
-    void minimiseStorageAfterRemoval()
+    void minimizeStorageAfterRemoval()
     {
         if (data.numAllocated > jmax (minimumAllocatedSize, numUsed * 2))
             data.shrinkToNoMoreThan (jmax (numUsed, jmax (minimumAllocatedSize, 64 / (int) sizeof (ElementType))));

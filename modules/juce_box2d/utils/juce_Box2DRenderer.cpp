@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -46,9 +46,9 @@ void Box2DRenderer::render (Graphics& g, b2World& world,
     world.DrawDebugData();
 }
 
-Colour Box2DRenderer::getColour (const b2Color& c) const
+Color Box2DRenderer::getColor (const b2Color& c) const
 {
-    return Colour::fromFloatRGBA (c.r, c.g, c.b, 1.0f);
+    return Color::fromFloatRGBA (c.r, c.g, c.b, 1.0f);
 }
 
 float Box2DRenderer::getLineThickness() const
@@ -68,7 +68,7 @@ static void createPath (Path& p, const b2Vec2* vertices, int32 vertexCount)
 
 void Box2DRenderer::DrawPolygon (const b2Vec2* vertices, int32 vertexCount, const b2Color& color)
 {
-    graphics->setColour (getColour (color));
+    graphics->setColor (getColor (color));
 
     Path p;
     createPath (p, vertices, vertexCount);
@@ -77,7 +77,7 @@ void Box2DRenderer::DrawPolygon (const b2Vec2* vertices, int32 vertexCount, cons
 
 void Box2DRenderer::DrawSolidPolygon (const b2Vec2* vertices, int32 vertexCount, const b2Color& color)
 {
-    graphics->setColour (getColour (color));
+    graphics->setColor (getColor (color));
 
     Path p;
     createPath (p, vertices, vertexCount);
@@ -86,22 +86,22 @@ void Box2DRenderer::DrawSolidPolygon (const b2Vec2* vertices, int32 vertexCount,
 
 void Box2DRenderer::DrawCircle (const b2Vec2& center, float32 radius, const b2Color& color)
 {
-    graphics->setColour (getColour (color));
+    graphics->setColor (getColor (color));
     graphics->drawEllipse (center.x - radius, center.y - radius,
                            radius * 2.0f, radius * 2.0f,
                            getLineThickness());
 }
 
-void Box2DRenderer::DrawSolidCircle (const b2Vec2& center, float32 radius, const b2Vec2& /*axis*/, const b2Color& colour)
+void Box2DRenderer::DrawSolidCircle (const b2Vec2& center, float32 radius, const b2Vec2& /*axis*/, const b2Color& color)
 {
-    graphics->setColour (getColour (colour));
+    graphics->setColor (getColor (color));
     graphics->fillEllipse (center.x - radius, center.y - radius,
                            radius * 2.0f, radius * 2.0f);
 }
 
 void Box2DRenderer::DrawSegment (const b2Vec2& p1, const b2Vec2& p2, const b2Color& color)
 {
-    graphics->setColour (getColour (color));
+    graphics->setColor (getColor (color));
     graphics->drawLine (p1.x, p1.y, p2.x, p2.y, getLineThickness());
 }
 

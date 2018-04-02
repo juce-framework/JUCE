@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -28,8 +28,8 @@ namespace juce
 {
 
 DrawableText::DrawableText()
-    : colour (Colours::black),
-      justification (Justification::centredLeft)
+    : color (Colors::black),
+      justification (Justification::centeredLeft)
 {
     setBoundingBox (Parallelogram<float> ({ 0.0f, 0.0f, 50.0f, 20.0f }));
     setFont (Font (15.0f), true);
@@ -42,7 +42,7 @@ DrawableText::DrawableText (const DrawableText& other)
       fontHScale (other.fontHScale),
       font (other.font),
       text (other.text),
-      colour (other.colour),
+      color (other.color),
       justification (other.justification)
 {
     refreshBounds();
@@ -67,11 +67,11 @@ void DrawableText::setText (const String& newText)
     }
 }
 
-void DrawableText::setColour (Colour newColour)
+void DrawableText::setColor (Color newColor)
 {
-    if (colour != newColour)
+    if (color != newColor)
     {
-        colour = newColour;
+        color = newColor;
         repaint();
     }
 }
@@ -163,7 +163,7 @@ void DrawableText::paint (Graphics& g)
 
     g.addTransform (getTextTransform (w, h));
     g.setFont (scaledFont);
-    g.setColour (colour);
+    g.setColor (color);
 
     g.drawFittedText (text, getTextArea (w, h), justification, 0x100000);
 }

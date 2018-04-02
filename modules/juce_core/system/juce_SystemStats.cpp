@@ -86,9 +86,9 @@ StringArray SystemStats::getDeviceIdentifiers()
 //==============================================================================
 struct CPUInformation
 {
-    CPUInformation() noexcept    { initialise(); }
+    CPUInformation() noexcept    { initialize(); }
 
-    void initialise() noexcept;
+    void initialize() noexcept;
 
     int numLogicalCPUs = 0, numPhysicalCPUs = 0;
 

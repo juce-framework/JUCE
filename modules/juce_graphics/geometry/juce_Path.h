@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -221,7 +221,7 @@ public:
         calls - instead use two lineTo() calls, followed by a closeSubPath()
         to join the final point back to the start.
 
-        This ensures that closes shapes are recognised as such, and this is
+        This ensures that closes shapes are recognized as such, and this is
         important for tasks like drawing strokes, which needs to know whether to
         draw end-caps or not.
 
@@ -434,36 +434,36 @@ public:
         @param width        the width of the rectangle in which the elliptical outline fits
         @param height       the height of the rectangle in which the elliptical outline fits
         @param fromRadians  the angle (clockwise) in radians at which to start the arc segment (where 0 is the
-                            top-centre of the ellipse)
+                            top-center of the ellipse)
         @param toRadians    the angle (clockwise) in radians at which to end the arc segment (where 0 is the
-                            top-centre of the ellipse). This angle can be greater than 2*Pi, so for example to
+                            top-center of the ellipse). This angle can be greater than 2*Pi, so for example to
                             draw a curve clockwise from the 9 o'clock position to the 3 o'clock position via
                             12 o'clock, you'd use 1.5*Pi and 2.5*Pi as the start and finish points.
         @param startAsNewSubPath    if true, the arc will begin a new subpath from its starting point; if false,
                             it will be added to the current sub-path, continuing from the current postition
 
-        @see addCentredArc, arcTo, addPieSegment, addEllipse
+        @see addCenteredArc, arcTo, addPieSegment, addEllipse
     */
     void addArc (float x, float y, float width, float height,
                  float fromRadians,
                  float toRadians,
                  bool startAsNewSubPath = false);
 
-    /** Adds an arc which is centred at a given point, and can have a rotation specified.
+    /** Adds an arc which is centered at a given point, and can have a rotation specified.
 
         Note that when specifying the start and end angles, the curve will be drawn either clockwise
         or anti-clockwise according to whether the end angle is greater than the start. This means
         that sometimes you may need to use values greater than 2*Pi for the end angle.
 
-        @param centreX      the centre x of the ellipse
-        @param centreY      the centre y of the ellipse
+        @param centerX      the center x of the ellipse
+        @param centerY      the center y of the ellipse
         @param radiusX      the horizontal radius of the ellipse
         @param radiusY      the vertical radius of the ellipse
-        @param rotationOfEllipse    an angle by which the whole ellipse should be rotated about its centre, in radians (clockwise)
+        @param rotationOfEllipse    an angle by which the whole ellipse should be rotated about its center, in radians (clockwise)
         @param fromRadians  the angle (clockwise) in radians at which to start the arc segment (where 0 is the
-                            top-centre of the ellipse)
+                            top-center of the ellipse)
         @param toRadians    the angle (clockwise) in radians at which to end the arc segment (where 0 is the
-                            top-centre of the ellipse). This angle can be greater than 2*Pi, so for example to
+                            top-center of the ellipse). This angle can be greater than 2*Pi, so for example to
                             draw a curve clockwise from the 9 o'clock position to the 3 o'clock position via
                             12 o'clock, you'd use 1.5*Pi and 2.5*Pi as the start and finish points.
         @param startAsNewSubPath    if true, the arc will begin a new subpath from its starting point; if false,
@@ -471,7 +471,7 @@ public:
 
         @see addArc, arcTo
     */
-    void addCentredArc (float centreX, float centreY,
+    void addCenteredArc (float centerX, float centerY,
                         float radiusX, float radiusY,
                         float rotationOfEllipse,
                         float fromRadians,
@@ -492,11 +492,11 @@ public:
         @param width        the width of the rectangle in which the elliptical outline fits
         @param height       the height of the rectangle in which the elliptical outline fits
         @param fromRadians  the angle (clockwise) in radians at which to start the arc segment (where 0 is the
-                            top-centre of the ellipse)
+                            top-center of the ellipse)
         @param toRadians    the angle (clockwise) in radians at which to end the arc segment (where 0 is the
-                            top-centre of the ellipse)
+                            top-center of the ellipse)
         @param innerCircleProportionalSize  if this is > 0, then the pie will be drawn as a curved band around a hollow
-                            ellipse at its centre, where this value indicates the inner ellipse's size with
+                            ellipse at its center, where this value indicates the inner ellipse's size with
                             respect to the outer one.
         @see addArc
     */
@@ -516,11 +516,11 @@ public:
 
         @param segmentBounds the outer rectangle in which the elliptical outline fits
         @param fromRadians   the angle (clockwise) in radians at which to start the arc segment (where 0 is the
-                             top-centre of the ellipse)
+                             top-center of the ellipse)
         @param toRadians     the angle (clockwise) in radians at which to end the arc segment (where 0 is the
-                             top-centre of the ellipse)
+                             top-center of the ellipse)
         @param innerCircleProportionalSize  if this is > 0, then the pie will be drawn as a curved band around a hollow
-                             ellipse at its centre, where this value indicates the inner ellipse's size with
+                             ellipse at its center, where this value indicates the inner ellipse's size with
                              respect to the outer one.
         @see addArc
     */
@@ -550,7 +550,7 @@ public:
     /** Adds a polygon shape to the path.
         @see addStar
     */
-    void addPolygon (Point<float> centre,
+    void addPolygon (Point<float> center,
                      int numberOfSides,
                      float radius,
                      float startAngle = 0.0f);
@@ -558,7 +558,7 @@ public:
     /** Adds a star shape to the path.
         @see addPolygon
     */
-    void addStar (Point<float> centre,
+    void addStar (Point<float> center,
                   int numberOfPoints,
                   float innerRadius,
                   float outerRadius,
@@ -663,7 +663,7 @@ public:
     */
     AffineTransform getTransformToScaleToFit (float x, float y, float width, float height,
                                               bool preserveProportions,
-                                              Justification justificationType = Justification::centred) const;
+                                              Justification justificationType = Justification::centered) const;
 
     /** Returns a transform that can be used to rescale the path to fit into a given space.
 
@@ -681,7 +681,7 @@ public:
     */
     AffineTransform getTransformToScaleToFit (Rectangle<float> area,
                                               bool preserveProportions,
-                                              Justification justificationType = Justification::centred) const;
+                                              Justification justificationType = Justification::centered) const;
 
     /** Creates a version of this path where all sharp corners have been replaced by curves.
 

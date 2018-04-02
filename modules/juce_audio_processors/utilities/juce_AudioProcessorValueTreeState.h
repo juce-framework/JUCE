@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -41,7 +41,7 @@ namespace juce
 
     To use:
     1) Create an AudioProcessorValueTreeState, and give it some parameters using createAndAddParameter().
-    2) Initialise the state member variable with a type name.
+    2) Initialize the state member variable with a type name.
 
     @tags{Audio}
 */
@@ -73,8 +73,8 @@ public:
         @param parameterName            The name that the parameter will return from AudioProcessorParameter::getName()
         @param labelText                The label that the parameter will return from AudioProcessorParameter::getLabel()
         @param valueRange               A mapping that will be used to determine the value range which this parameter uses
-        @param defaultValue             A default value for the parameter (in non-normalised units)
-        @param valueToTextFunction      A function that will convert a non-normalised value to a string for the
+        @param defaultValue             A default value for the parameter (in non-normalized units)
+        @param valueToTextFunction      A function that will convert a non-normalized value to a string for the
                                         AudioProcessorParameter::getText() method. This can be nullptr to use the
                                         default implementation
         @param textToValueFunction      The inverse of valueToTextFunction
@@ -90,7 +90,7 @@ public:
     AudioProcessorParameterWithID* createAndAddParameter (const String& parameterID,
                                                           const String& parameterName,
                                                           const String& labelText,
-                                                          NormalisableRange<float> valueRange,
+                                                          NormalizableRange<float> valueRange,
                                                           float defaultValue,
                                                           std::function<String (float)> valueToTextFunction,
                                                           std::function<float (const String&)> textToValueFunction,
@@ -130,7 +130,7 @@ public:
     Value getParameterAsValue (StringRef parameterID) const;
 
     /** Returns the range that was set when the given parameter was created. */
-    NormalisableRange<float> getParameterRange (StringRef parameterID) const noexcept;
+    NormalizableRange<float> getParameterRange (StringRef parameterID) const noexcept;
 
     /** Returns a copy of the state value tree.
 
@@ -140,7 +140,7 @@ public:
         flushes all pending audio parameter value updates and returns a copy of the
         state in a thread safe way.
 
-        Note: This method uses locks to synchronise thread access, so whilst it is
+        Note: This method uses locks to synchronize thread access, so whilst it is
         thread-safe, it is not realtime-safe. Do not call this method from within
         your audio processing code!
     */
@@ -153,7 +153,7 @@ public:
         from a different thread (setStateInformation is a good example). This method
         allows you to replace the state in a thread safe way.
 
-        Note: This method uses locks to synchronise thread access, so whilst it is
+        Note: This method uses locks to synchronize thread access, so whilst it is
         thread-safe, it is not realtime-safe. Do not call this method from within
         your audio processing code!
     */
@@ -164,7 +164,7 @@ public:
 
     /** The state of the whole processor.
 
-        This must be initialised after all calls to createAndAddParameter().
+        This must be initialized after all calls to createAndAddParameter().
         You can replace this with your own ValueTree object, and can add properties and
         children to the tree. This class will automatically add children for each of the
         parameter objects that are created by createAndAddParameter().

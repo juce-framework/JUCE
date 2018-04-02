@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -39,15 +39,15 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (Colours::white.withAlpha (0.25f));
+        g.fillAll (Colors::white.withAlpha (0.25f));
 
-        g.setColour (Colours::black.withAlpha (0.5f));
+        g.setColor (Colors::black.withAlpha (0.5f));
         g.drawRect (getLocalBounds());
         g.drawLine (0.0f, 0.0f, (float) getWidth(), (float) getHeight());
         g.drawLine (0.0f, (float) getHeight(), (float) getWidth(), 0.0f);
 
         g.setFont (14.0f);
-        g.drawText (actualClassName, 0, 0, getWidth(), getHeight() / 2, Justification::centred, true);
+        g.drawText (actualClassName, 0, 0, getWidth(), getHeight() / 2, Justification::centered, true);
     }
 
     void setClassName (const String& newName)

@@ -193,7 +193,7 @@ namespace LinuxErrorHandling
 }
 
 //==============================================================================
-void MessageManager::doPlatformSpecificInitialisation()
+void MessageManager::doPlatformSpecificInitialization()
 {
     if (JUCEApplicationBase::isStandaloneApp())
         LinuxErrorHandling::installKeyboardBreakHandler();

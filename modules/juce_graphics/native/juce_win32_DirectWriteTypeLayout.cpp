@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -127,7 +127,7 @@ namespace DirectWriteTypeLayout
             const float fontHeightToEmSizeFactor = (float) dwFontMetrics.designUnitsPerEm / totalHeight;
 
             glyphRunLayout->font = getFontForRun (*glyphRun, glyphRun->fontEmSize / fontHeightToEmSizeFactor);
-            glyphRunLayout->colour = getColourOf (static_cast<ID2D1SolidColorBrush*> (clientDrawingEffect));
+            glyphRunLayout->color = getColorOf (static_cast<ID2D1SolidColorBrush*> (clientDrawingEffect));
 
             const Point<float> lineOrigin (layout->getLine (currentLine).lineOrigin);
             float x = baselineOriginX - lineOrigin.x;
@@ -164,13 +164,13 @@ namespace DirectWriteTypeLayout
             return (std::abs ((float) n) / (float) metrics.designUnitsPerEm) * glyphRun.fontEmSize;
         }
 
-        static Colour getColourOf (ID2D1SolidColorBrush* d2dBrush) noexcept
+        static Color getColorOf (ID2D1SolidColorBrush* d2dBrush) noexcept
         {
             if (d2dBrush == nullptr)
-                return Colours::black;
+                return Colors::black;
 
-            const D2D1_COLOR_F colour (d2dBrush->GetColor());
-            return Colour::fromFloatRGBA (colour.r, colour.g, colour.b, colour.a);
+            const D2D1_COLOR_F color (d2dBrush->GetColor());
+            return Color::fromFloatRGBA (color.r, color.g, color.b, color.a);
         }
 
         Font getFontForRun (const DWRITE_GLYPH_RUN& glyphRun, float fontHeight)
@@ -222,7 +222,7 @@ namespace DirectWriteTypeLayout
         {
             case Justification::left:                   break;
             case Justification::right:                  alignment = DWRITE_TEXT_ALIGNMENT_TRAILING; break;
-            case Justification::horizontallyCentred:    alignment = DWRITE_TEXT_ALIGNMENT_CENTER; break;
+            case Justification::horizontallyCentered:    alignment = DWRITE_TEXT_ALIGNMENT_CENTER; break;
             case Justification::horizontallyJustified:  break; // DirectWrite cannot justify text, default to left alignment
             default:                                    jassertfalse; break; // Illegal justification flags
         }
@@ -295,7 +295,7 @@ namespace DirectWriteTypeLayout
         }
 
         {
-            const Colour col (attr.colour);
+            const Color col (attr.color);
             ComSmartPtr<ID2D1SolidColorBrush> d2dBrush;
             renderTarget.CreateSolidColorBrush (D2D1::ColorF (col.getFloatRed(),
                                                               col.getFloatGreen(),
@@ -303,7 +303,7 @@ namespace DirectWriteTypeLayout
                                                               col.getFloatAlpha()),
                                                 d2dBrush.resetAndGetPointerAddress());
 
-            // We need to call SetDrawingEffect with a legimate brush to get DirectWrite to break text based on colours
+            // We need to call SetDrawingEffect with a legimate brush to get DirectWrite to break text based on colors
             textLayout.SetDrawingEffect (d2dBrush, range);
         }
     }

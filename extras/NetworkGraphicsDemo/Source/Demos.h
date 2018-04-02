@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -45,7 +45,7 @@ struct GridLines  : public AnimatedContent
         auto limits = canvas.getLimits();
         float lineThickness = 0.1f;
 
-        g.setColour (Colours::blue);
+        g.setColor (Colors::blue);
         g.drawRect (canvas.getLimits(), lineThickness);
 
         for (float y = limits.getY(); y < limits.getBottom(); y += 2.0f)
@@ -54,11 +54,11 @@ struct GridLines  : public AnimatedContent
         for (float x = limits.getX(); x < limits.getRight(); x += 2.0f)
             g.drawLine (x, limits.getY(), x, limits.getBottom(), lineThickness);
 
-        g.setColour (Colours::darkred);
-        g.drawLine (limits.getX(), limits.getCentreY(), limits.getRight(), limits.getCentreY(), lineThickness);
-        g.drawLine (limits.getCentreX(), limits.getY(), limits.getCentreX(), limits.getBottom(), lineThickness);
+        g.setColor (Colors::darkred);
+        g.drawLine (limits.getX(), limits.getCenterY(), limits.getRight(), limits.getCenterY(), lineThickness);
+        g.drawLine (limits.getCenterX(), limits.getY(), limits.getCenterX(), limits.getBottom(), lineThickness);
 
-        g.setColour (Colours::lightgrey);
+        g.setColor (Colors::lightgray);
         g.drawLine (limits.getX(), limits.getY(), limits.getRight(), limits.getBottom(), lineThickness);
         g.drawLine (limits.getX(), limits.getBottom(), limits.getRight(), limits.getY(), lineThickness);
     }
@@ -94,7 +94,7 @@ struct BackgroundLogo  : public AnimatedContent
 
     void generateCanvas (Graphics& g, SharedCanvasDescription& canvas, Rectangle<float> activeArea) override
     {
-        logo->drawWithin (g, canvas.getLimits().reduced (3.0f), RectanglePlacement (RectanglePlacement::centred), 0.6f);
+        logo->drawWithin (g, canvas.getLimits().reduced (3.0f), RectanglePlacement (RectanglePlacement::centered), 0.6f);
     }
 
     ScopedPointer<Drawable> logo;
@@ -114,7 +114,7 @@ struct FlockDemo  : public BackgroundLogo
         for (int i = numBirds; --i >= 0;)
             birds.add ({});
 
-        centreOfGravity = {};
+        centerOfGravity = {};
         lastGravityMove = {};
         fakeMouseTouchLengthToRun = 0;
         fakeMouseTouchPosition = {};
@@ -137,26 +137,26 @@ struct FlockDemo  : public BackgroundLogo
             {
                 --fakeMouseTouchLengthToRun;
                 fakeMouseTouchPosition += fakeMouseTouchVelocity;
-                centreOfGravity = fakeMouseTouchPosition;
+                centerOfGravity = fakeMouseTouchPosition;
             }
             else
             {
-                centreOfGravity = {};
+                centerOfGravity = {};
 
                 if (rng.nextInt (300) == 2 && canvas.clients.size() > 0)
                 {
                     fakeMouseTouchLengthToRun = 50;
-                    fakeMouseTouchPosition = canvas.clients.getReference (rng.nextInt (canvas.clients.size())).centre;
+                    fakeMouseTouchPosition = canvas.clients.getReference (rng.nextInt (canvas.clients.size())).center;
                     fakeMouseTouchVelocity = { rng.nextFloat() * 0.3f - 0.15f,
                                                rng.nextFloat() * 0.3f - 0.15f };
                 }
             }
         }
 
-        g.setColour (Colours::white.withAlpha (0.2f));
+        g.setColor (Colors::white.withAlpha (0.2f));
 
-        if (! centreOfGravity.isOrigin())
-            g.fillEllipse (centreOfGravity.getX() - 1.0f, centreOfGravity.getY() - 1.0f, 2.0f, 2.0f);
+        if (! centerOfGravity.isOrigin())
+            g.fillEllipse (centerOfGravity.getX() - 1.0f, centerOfGravity.getY() - 1.0f, 2.0f, 2.0f);
 
         for (int i = 0; i < birds.size(); ++i)
             for (int j = i + 1; j < birds.size(); ++j)
@@ -164,8 +164,8 @@ struct FlockDemo  : public BackgroundLogo
 
         for (auto& b : birds)
         {
-            if (! centreOfGravity.isOrigin())
-                b.move (centreOfGravity, 0.4f);
+            if (! centerOfGravity.isOrigin())
+                b.move (centerOfGravity, 0.4f);
 
             b.update();
             b.draw (g);
@@ -184,7 +184,7 @@ struct FlockDemo  : public BackgroundLogo
     bool isRingNear (Point<float> p) const
     {
         for (auto& r : rings)
-            if (r.centre.getDistanceFrom (p) < 1.0f)
+            if (r.center.getDistanceFrom (p) < 1.0f)
                 return true;
 
         return false;
@@ -193,7 +193,7 @@ struct FlockDemo  : public BackgroundLogo
     void handleTouch (Point<float> position) override
     {
         lastGravityMove = Time::getCurrentTime();
-        centreOfGravity = position;
+        centerOfGravity = position;
         fakeMouseTouchLengthToRun = 0;
 
         if (! isRingNear (position))
@@ -211,7 +211,7 @@ struct FlockDemo  : public BackgroundLogo
             velocity.x = rng.nextFloat() * 0.001f;
             velocity.y = rng.nextFloat() * 0.001f;
 
-            colour = Colour::fromHSV (rng.nextFloat(), 0.2f, 0.9f, rng.nextFloat() * 0.4f + 0.2f);
+            color = Color::fromHSV (rng.nextFloat(), 0.2f, 0.9f, rng.nextFloat() * 0.4f + 0.2f);
 
             shape.addTriangle (0.0f, 0.0f, -0.3f, 1.0f, 0.3f, 1.0f);
             shape = shape.createPathWithRoundedCorners (0.2f);
@@ -220,7 +220,7 @@ struct FlockDemo  : public BackgroundLogo
         }
 
         Point<float> pos, velocity, acc;
-        Colour colour;
+        Color color;
         Path shape;
 
         void move (Point<float> target, float strength)
@@ -262,7 +262,7 @@ struct FlockDemo  : public BackgroundLogo
 
         void draw (Graphics& g)
         {
-            g.setColour (colour);
+            g.setColor (color);
             g.fillPath (shape, AffineTransform::rotation (Point<float>().getAngleToPoint (velocity)).translated (pos));
         }
     };
@@ -319,7 +319,7 @@ struct FlockDemo  : public BackgroundLogo
 
     Random rng;
     Array<Bird> birds;
-    Point<float> centreOfGravity;
+    Point<float> centerOfGravity;
     Time lastGravityMove;
 
     int fakeMouseTouchLengthToRun = 0;
@@ -328,7 +328,7 @@ struct FlockDemo  : public BackgroundLogo
     //==============================================================================
     struct Ring
     {
-        Point<float> centre;
+        Point<float> center;
         float diameter, opacity;
 
         bool update()
@@ -343,14 +343,14 @@ struct FlockDemo  : public BackgroundLogo
         {
             const float thickness = 0.2f;
 
-            auto r = Rectangle<float> (diameter, diameter).withCentre (centre);
+            auto r = Rectangle<float> (diameter, diameter).withCenter (center);
 
             Path p;
             p.addEllipse (r);
             p.addEllipse (r.reduced (thickness));
             p.setUsingNonZeroWinding (false);
 
-            g.setColour (Colours::white.withAlpha (opacity));
+            g.setColor (Colors::white.withAlpha (opacity));
             g.fillPath (p);
 
         }
@@ -407,11 +407,11 @@ struct FlockWithText  : public FlockDemo
         String text = String (messages[currentMessage]).replace ("NUMDEVICES", String (canvas.clients.size()));
 
         AttributedString as;
-        as.append (text, Font (textSize * scale), Colour (0x80ffffff).withMultipliedAlpha (alpha));
+        as.append (text, Font (textSize * scale), Color (0x80ffffff).withMultipliedAlpha (alpha));
 
-        as.setJustification (Justification::centred);
-        auto centre = canvas.clients[clientIndex % canvas.clients.size()].centre * scale;
-        as.draw (g, Rectangle<float> (textBlockWidth * scale, textBlockWidth * scale).withCentre (centre));
+        as.setJustification (Justification::centered);
+        auto center = canvas.clients[clientIndex % canvas.clients.size()].center * scale;
+        as.draw (g, Rectangle<float> (textBlockWidth * scale, textBlockWidth * scale).withCenter (center));
     }
 
     void tick()
@@ -442,7 +442,7 @@ struct FlockWithText  : public FlockDemo
     StringArray messages;
     int currentMessage = 0, clientIndex = 0;
     float alpha = 0;
-    Point<float> centre;
+    Point<float> center;
     Time currentMessageStart;
 };
 
@@ -485,7 +485,7 @@ struct MultiLogo  : public BackgroundLogo
             for (float y = limits.getY(); y < limits.getBottom(); y += logoSize)
             {
                 logo->drawWithin (g, Rectangle<float> (x, y, logoSize, logoSize).reduced (indent),
-                                  RectanglePlacement (RectanglePlacement::centred), 0.5f);
+                                  RectanglePlacement (RectanglePlacement::centered), 0.5f);
             }
         }
     }

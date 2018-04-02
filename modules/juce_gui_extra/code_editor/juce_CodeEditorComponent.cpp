@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -95,7 +95,7 @@ public:
                const int lineH, const float characterWidth) const
     {
         AttributedString as;
-        as.setJustification (Justification::centredLeft);
+        as.setJustification (Justification::centeredLeft);
 
         int column = 0;
 
@@ -105,7 +105,7 @@ public:
             if (tokenX > rightClip)
                 break;
 
-            as.append (token.text.initialSectionNotContaining ("\r\n"), fontToUse, owner.getColourForTokenType (token.tokenType));
+            as.append (token.text.initialSectionNotContaining ("\r\n"), fontToUse, owner.getColorForTokenType (token.tokenType));
             column += token.length;
         }
 
@@ -291,8 +291,8 @@ public:
         jassert (dynamic_cast<CodeEditorComponent*> (getParentComponent()) != nullptr);
         auto& editor = *static_cast<CodeEditorComponent*> (getParentComponent());
 
-        g.fillAll (editor.findColour (CodeEditorComponent::backgroundColourId)
-                    .overlaidWith (editor.findColour (lineNumberBackgroundId)));
+        g.fillAll (editor.findColor (CodeEditorComponent::backgroundColorId)
+                    .overlaidWith (editor.findColor (lineNumberBackgroundId)));
 
         auto clip = g.getClipBounds();
         const int lineH = editor.lineHeight;
@@ -308,9 +308,9 @@ public:
         for (int i = firstLineToDraw; i < lastLineToDraw; ++i)
             ga.addFittedText (lineNumberFont, String (editor.firstLineOnScreen + i + 1),
                               0, (float) (lineH * i), w, lineHeightFloat,
-                              Justification::centredRight, 1, 0.2f);
+                              Justification::centeredRight, 1, 0.2f);
 
-        g.setColour (editor.findColour (lineNumberTextId));
+        g.setColor (editor.findColor (lineNumberTextId));
         ga.draw (g);
     }
 
@@ -363,7 +363,7 @@ CodeEditorComponent::CodeEditorComponent (CodeDocument& doc, CodeTokeniser* cons
     setFont (f);
 
     if (codeTokeniser != nullptr)
-        setColourScheme (codeTokeniser->getDefaultColourScheme());
+        setColorScheme (codeTokeniser->getDefaultColorScheme());
 
     setLineNumbersShown (true);
 
@@ -462,7 +462,7 @@ void CodeEditorComponent::resized()
 
 void CodeEditorComponent::paint (Graphics& g)
 {
-    g.fillAll (findColour (CodeEditorComponent::backgroundColourId));
+    g.fillAll (findColor (CodeEditorComponent::backgroundColorId));
 
     auto gutterSize = getGutterSize();
     g.reduceClipRegion (gutterSize, 0, verticalScrollBar.getX() - gutterSize, horizontalScrollBar.getY());
@@ -481,7 +481,7 @@ void CodeEditorComponent::paint (Graphics& g)
         for (int i = firstLineToDraw; i < lastLineToDraw; ++i)
             lines.getUnchecked(i)->getHighlightArea (highlightArea, x, lineHeight * i, lineHeight, charWidth);
 
-        g.setColour (findColour (CodeEditorComponent::highlightColourId));
+        g.setColor (findColor (CodeEditorComponent::highlightColorId));
         g.fillRectList (highlightArea);
     }
 
@@ -1502,34 +1502,34 @@ void CodeEditorComponent::setFont (const Font& newFont)
     resized();
 }
 
-void CodeEditorComponent::ColourScheme::set (const String& name, Colour colour)
+void CodeEditorComponent::ColorScheme::set (const String& name, Color color)
 {
     for (auto& tt : types)
     {
         if (tt.name == name)
         {
-            tt.colour = colour;
+            tt.color = color;
             return;
         }
     }
 
     TokenType tt;
     tt.name = name;
-    tt.colour = colour;
+    tt.color = color;
     types.add (tt);
 }
 
-void CodeEditorComponent::setColourScheme (const ColourScheme& scheme)
+void CodeEditorComponent::setColorScheme (const ColorScheme& scheme)
 {
-    colourScheme = scheme;
+    colorScheme = scheme;
     repaint();
 }
 
-Colour CodeEditorComponent::getColourForTokenType (const int tokenType) const
+Color CodeEditorComponent::getColorForTokenType (const int tokenType) const
 {
-    return isPositiveAndBelow (tokenType, colourScheme.types.size())
-                ? colourScheme.types.getReference (tokenType).colour
-                : findColour (CodeEditorComponent::defaultTextColourId);
+    return isPositiveAndBelow (tokenType, colorScheme.types.size())
+                ? colorScheme.types.getReference (tokenType).color
+                : findColor (CodeEditorComponent::defaultTextColorId);
 }
 
 void CodeEditorComponent::clearCachedIterators (const int firstLineToBeInvalid)

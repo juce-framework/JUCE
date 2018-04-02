@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -33,32 +33,32 @@ namespace juce
     This will automatically position itself, and can be told to delete itself after
     being on-screen for a minimum length of time.
 
-    To use it, just create one of these in your JUCEApplicationBase::initialise() method,
-    and when your initialisation tasks have finished running, call its deleteAfterDelay()
+    To use it, just create one of these in your JUCEApplicationBase::initialize() method,
+    and when your initialization tasks have finished running, call its deleteAfterDelay()
     method to make it automatically get rid of itself.
 
     Note that although you could call deleteAfterDelay() as soon as you create the
-    SplashScreen object, if you've got a long initialisation procedure, you probably
-    don't want the splash to time-out and disappear before the initialisation has
+    SplashScreen object, if you've got a long initialization procedure, you probably
+    don't want the splash to time-out and disappear before the initialization has
     finished, which is why it makes sense to not call this method until the end of
     your init tasks.
 
     E.g. @code
 
-    void MyApp::initialise (const String& commandLine)
+    void MyApp::initialize (const String& commandLine)
     {
         splash = new SplashScreen ("Welcome to my app!",
                                    ImageFileFormat::loadFrom (File ("/foobar/splash.jpg")),
                                    true);
 
-        // now kick off your initialisation work on some kind of thread or task, and
-        launchBackgroundInitialisationThread();
+        // now kick off your initialization work on some kind of thread or task, and
+        launchBackgroundInitializationThread();
     }
 
-    void MyApp::myInitialisationWorkFinished()
+    void MyApp::myInitializationWorkFinished()
     {
         // ..assuming this is some kind of callback method that is triggered when
-        // your background initialisation threads have finished, and it's time to open
+        // your background initialization threads have finished, and it's time to open
         // your main window, etc..
 
         splash->deleteAfterDelay (RelativeTime::seconds (4), false);
@@ -78,17 +78,17 @@ public:
     //==============================================================================
     /** Creates a SplashScreen object.
 
-        When called, the constructor will position the SplashScreen in the centre of the
+        When called, the constructor will position the SplashScreen in the center of the
         display, and after the time specified, it will automatically delete itself.
 
-        Bear in mind that if you call this during your JUCEApplicationBase::initialise()
+        Bear in mind that if you call this during your JUCEApplicationBase::initialize()
         method and then block the message thread by performing some kind of task, then
         obviously neither your splash screen nor any other GUI will appear until you
         allow the message thread to resume and do its work. So if you have time-consuming
         tasks to do during startup, use a background thread for them.
 
         After creating one of these (or your subclass of it), you should do your app's
-        initialisation work, and then call the deleteAfterDelay() method to tell this object
+        initialization work, and then call the deleteAfterDelay() method to tell this object
         to delete itself after the user has had chance to get a good look at it.
 
         If you're writing a custom splash screen class, there's another protected constructor
@@ -111,11 +111,11 @@ public:
     /** Tells the component to auto-delete itself after a timeout period, or when the
         mouse is clicked.
 
-        You should call this after finishing your app's initialisation work.
+        You should call this after finishing your app's initialization work.
 
         Note that although you could call deleteAfterDelay() as soon as you create the
-        SplashScreen object, if you've got a long initialisation procedure, you probably
-        don't want the splash to time-out and disappear before your initialisation has
+        SplashScreen object, if you've got a long initialization procedure, you probably
+        don't want the splash to time-out and disappear before your initialization has
         finished, which is why it makes sense to not call this method and start the
         self-delete timer until you're ready.
 
@@ -125,7 +125,7 @@ public:
         @param minimumTotalTimeToDisplayFor    how long the splash screen should stay visible for.
                                 Note that this time is measured from the construction-time of this
                                 object, not from the time that the deleteAfterDelay() method is
-                                called, so if you call this method after a long initialisation
+                                called, so if you call this method after a long initialization
                                 period, it may be deleted without any further delay.
         @param removeOnMouseClick   if true, the window will be deleted as soon as the user clicks
                                 the mouse (anywhere)

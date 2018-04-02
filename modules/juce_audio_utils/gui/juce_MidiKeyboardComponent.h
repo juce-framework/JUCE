@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -196,24 +196,24 @@ public:
     void setScrollButtonsVisible (bool canScroll);
 
     //==============================================================================
-    /** A set of colour IDs to use to change the colour of various aspects of the keyboard.
+    /** A set of color IDs to use to change the color of various aspects of the keyboard.
 
-        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        These constants can be used either via the Component::setColor(), or LookAndFeel::setColor()
         methods.
 
-        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+        @see Component::setColor, Component::findColor, LookAndFeel::setColor, LookAndFeel::findColor
     */
-    enum ColourIds
+    enum ColorIds
     {
-        whiteNoteColourId               = 0x1005000,
-        blackNoteColourId               = 0x1005001,
-        keySeparatorLineColourId        = 0x1005002,
-        mouseOverKeyOverlayColourId     = 0x1005003,  /**< This colour will be overlaid on the normal note colour. */
-        keyDownOverlayColourId          = 0x1005004,  /**< This colour will be overlaid on the normal note colour. */
-        textLabelColourId               = 0x1005005,
-        upDownButtonBackgroundColourId  = 0x1005006,
-        upDownButtonArrowColourId       = 0x1005007,
-        shadowColourId                  = 0x1005008
+        whiteNoteColorId               = 0x1005000,
+        blackNoteColorId               = 0x1005001,
+        keySeparatorLineColorId        = 0x1005002,
+        mouseOverKeyOverlayColorId     = 0x1005003,  /**< This color will be overlaid on the normal note color. */
+        keyDownOverlayColorId          = 0x1005004,  /**< This color will be overlaid on the normal note color. */
+        textLabelColorId               = 0x1005005,
+        upDownButtonBackgroundColorId  = 0x1005006,
+        upDownButtonArrowColorId       = 0x1005007,
+        shadowColorId                  = 0x1005008
     };
 
     /** Returns the position within the component of the left-hand edge of a key.
@@ -312,7 +312,7 @@ public:
     /** @internal */
     void handleNoteOff (MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity) override;
     /** @internal */
-    void colourChanged() override;
+    void colorChanged() override;
 
 protected:
     //==============================================================================
@@ -326,7 +326,7 @@ protected:
     virtual void drawWhiteNote (int midiNoteNumber,
                                 Graphics& g, Rectangle<float> area,
                                 bool isDown, bool isOver,
-                                Colour lineColour, Colour textColour);
+                                Color lineColor, Color textColor);
 
     /** Draws a black note in the given rectangle.
 
@@ -338,7 +338,7 @@ protected:
     virtual void drawBlackNote (int midiNoteNumber,
                                 Graphics& g, Rectangle<float> area,
                                 bool isDown, bool isOver,
-                                Colour noteFillColour);
+                                Color noteFillColor);
 
     /** Allows text to be drawn on the white notes.
         By default this is used to label the C in each octave, but could be used for other things.
@@ -426,8 +426,8 @@ private:
    #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
     // Note that the parameters for these method have changed
     virtual int getKeyPosition (int, float, int&, int&) const { return 0; }
-    virtual int drawWhiteNote (int, Graphics&, int, int, int, int, bool, bool, const Colour&, const Colour&) { return 0; }
-    virtual int drawBlackNote (int, Graphics&, int, int, int, int, bool, bool, const Colour&) { return 0; }
+    virtual int drawWhiteNote (int, Graphics&, int, int, int, int, bool, bool, const Color&, const Color&) { return 0; }
+    virtual int drawBlackNote (int, Graphics&, int, int, int, int, bool, bool, const Color&) { return 0; }
    #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiKeyboardComponent)

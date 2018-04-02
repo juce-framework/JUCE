@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -44,13 +44,13 @@ void ImageButton::setImages (const bool resizeButtonNowToFitThisImage,
                              const bool preserveImageProportions,
                              const Image& normalImage_,
                              const float imageOpacityWhenNormal,
-                             Colour overlayColourWhenNormal,
+                             Color overlayColorWhenNormal,
                              const Image& overImage_,
                              const float imageOpacityWhenOver,
-                             Colour overlayColourWhenOver,
+                             Color overlayColorWhenOver,
                              const Image& downImage_,
                              const float imageOpacityWhenDown,
-                             Colour overlayColourWhenDown,
+                             Color overlayColorWhenDown,
                              const float hitTestAlphaThreshold)
 {
     normalImage = normalImage_;
@@ -69,11 +69,11 @@ void ImageButton::setImages (const bool resizeButtonNowToFitThisImage,
     preserveProportions = preserveImageProportions;
 
     normalOpacity = imageOpacityWhenNormal;
-    normalOverlay = overlayColourWhenNormal;
+    normalOverlay = overlayColorWhenNormal;
     overOpacity   = imageOpacityWhenOver;
-    overOverlay   = overlayColourWhenOver;
+    overOverlay   = overlayColorWhenOver;
     downOpacity   = imageOpacityWhenDown;
-    downOverlay   = overlayColourWhenDown;
+    downOverlay   = overlayColorWhenDown;
 
     alphaThreshold = (uint8) jlimit (0, 0xff, roundToInt (255.0f * hitTestAlphaThreshold));
 

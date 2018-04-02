@@ -464,12 +464,12 @@ private:
                 if (arraySize > 0)
                     location.throwError ("Arrays not yet implemented!");
 
-                var constantInitialiser;
+                var constantInitializer;
 
                 if (isConst)
-                    constantInitialiser = parseConstantExpressionInitialiser (type);
+                    constantInitializer = parseConstantExpressionInitializer (type);
 
-                blockBeingParsed->addVariable ({ name, type, true, isConst, constantInitialiser }, location);
+                blockBeingParsed->addVariable ({ name, type, true, isConst, constantInitializer }, location);
 
                 if (matchIf (Token::comma))
                 {
@@ -482,7 +482,7 @@ private:
             }
         }
 
-        var parseConstantExpressionInitialiser (Type expectedType)
+        var parseConstantExpressionInitializer (Type expectedType)
         {
             var result;
             match (Token::assign);
@@ -814,7 +814,7 @@ private:
 
                 if (isConst)
                 {
-                    auto constantValue = parseConstantExpressionInitialiser (type);
+                    auto constantValue = parseConstantExpressionInitializer (type);
                     blockBeingParsed->addVariable ({ name, type, false, true, constantValue }, loc);
                 }
                 else
@@ -870,7 +870,7 @@ private:
             block->statements.add (loopStatement);
             match (Token::openParen);
 
-            loopStatement->initialiser = parseStatement();
+            loopStatement->initializer = parseStatement();
             loopStatement->condition = matchIf (Token::semicolon) ? allocate<LiteralValue> (location, blockBeingParsed, true)
                                                                   : matchEndOfStatement (parseExpression());
             loopStatement->iterator = matchIf (Token::closeParen) ? allocate<Statement> (location, blockBeingParsed)
@@ -884,7 +884,7 @@ private:
         StatementPtr parseDoOrWhileLoop (bool isDoLoop)
         {
             auto loopStatement          = allocate<LoopStatement> (location, blockBeingParsed, isDoLoop);
-            loopStatement->initialiser  = allocate<Statement> (location, blockBeingParsed);
+            loopStatement->initializer  = allocate<Statement> (location, blockBeingParsed);
             loopStatement->iterator     = allocate<Statement> (location, blockBeingParsed);
 
             if (isDoLoop)
@@ -1487,7 +1487,7 @@ private:
 
         void emit (CodeGenerator& cg, Type, int stackDepth) const override
         {
-            initialiser->emit (cg, Type::void_, stackDepth);
+            initializer->emit (cg, Type::void_, stackDepth);
 
             auto loopStart = cg.createMarker();
             cg.attachMarker (loopStart);
@@ -1521,7 +1521,7 @@ private:
 
         StatementPtr simplify (SyntaxTreeBuilder& stb) override
         {
-            initialiser = initialiser->simplify (stb);
+            initializer = initializer->simplify (stb);
             iterator = iterator->simplify (stb);
             body = body->simplify (stb);
             condition = condition->simplify (stb);
@@ -1530,10 +1530,10 @@ private:
 
         void visitSubStatements (Statement::Visitor& visit) const override
         {
-            visit (condition); visit (initialiser); visit (iterator); visit (body);
+            visit (condition); visit (initializer); visit (iterator); visit (body);
         }
 
-        StatementPtr initialiser, iterator, body;
+        StatementPtr initializer, iterator, body;
         ExpPtr condition;
         bool isDoLoop;
     };

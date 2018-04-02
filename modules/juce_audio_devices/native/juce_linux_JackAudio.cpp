@@ -459,7 +459,7 @@ private:
 
     static void threadInitCallback (void* /* callbackArgument */)
     {
-        JUCE_JACK_LOG ("JackAudioIODevice::initialise");
+        JUCE_JACK_LOG ("JackAudioIODevice::initialize");
     }
 
     static void shutdownCallback (void* callbackArgument)

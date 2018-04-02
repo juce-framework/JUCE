@@ -65,8 +65,8 @@ static void showBubbleMessage (Component& targetComponent, const String& textToS
     }
 
     AttributedString text (textToShow);
-    text.setJustification (Justification::centred);
-    text.setColour (targetComponent.findColour (TextButton::textColourOffId));
+    text.setJustification (Justification::centered);
+    text.setColor (targetComponent.findColor (TextButton::textColorOffId));
 
     bmc->showAt (&targetComponent, text, 2000, true, false);
 }
@@ -89,13 +89,13 @@ struct SnappingSlider  : public Slider
     }
 };
 
-/** A TextButton that pops up a colour chooser to change its colours. */
-class ColourChangeButton  : public TextButton,
+/** A TextButton that pops up a color chooser to change its colors. */
+class ColorChangeButton  : public TextButton,
                             public ChangeListener
 {
 public:
-    ColourChangeButton()
-        : TextButton ("Click to change colour...")
+    ColorChangeButton()
+        : TextButton ("Click to change color...")
     {
         setSize (10, 24);
         changeWidthToFitText();
@@ -103,20 +103,20 @@ public:
 
     void clicked() override
     {
-        auto* colourSelector = new ColourSelector();
-        colourSelector->setName ("background");
-        colourSelector->setCurrentColour (findColour (TextButton::buttonColourId));
-        colourSelector->addChangeListener (this);
-        colourSelector->setColour (ColourSelector::backgroundColourId, Colours::transparentBlack);
-        colourSelector->setSize (300, 400);
+        auto* colorSelector = new ColorSelector();
+        colorSelector->setName ("background");
+        colorSelector->setCurrentColor (findColor (TextButton::buttonColorId));
+        colorSelector->addChangeListener (this);
+        colorSelector->setColor (ColorSelector::backgroundColorId, Colors::transparentBlack);
+        colorSelector->setSize (300, 400);
 
-        CallOutBox::launchAsynchronously (colourSelector, getScreenBounds(), nullptr);
+        CallOutBox::launchAsynchronously (colorSelector, getScreenBounds(), nullptr);
     }
 
     void changeListenerCallback (ChangeBroadcaster* source) override
     {
-        if (auto* cs = dynamic_cast<ColourSelector*> (source))
-            setColour (TextButton::buttonColourId, cs->getCurrentColour());
+        if (auto* cs = dynamic_cast<ColorSelector*> (source))
+            setColor (TextButton::buttonColorId, cs->getCurrentColor());
     }
 };
 
@@ -298,13 +298,13 @@ struct ButtonsPage   : public Component
             Path p;
             p.addStar ({}, i + 5, 20.0f, 50.0f, -0.2f);
             normal.setPath (p);
-            normal.setFill (Colours::lightblue);
-            normal.setStrokeFill (Colours::black);
+            normal.setFill (Colors::lightblue);
+            normal.setStrokeFill (Colors::black);
             normal.setStrokeThickness (4.0f);
 
             over.setPath (p);
-            over.setFill (Colours::blue);
-            over.setStrokeFill (Colours::black);
+            over.setFill (Colors::blue);
+            over.setStrokeFill (Colors::black);
             over.setStrokeThickness (4.0f);
 
             auto* db = addToList (new DrawableButton (String (i + 5) + " points", DrawableButton::ImageAboveTextLabel));
@@ -325,10 +325,10 @@ struct ButtonsPage   : public Component
 
             tb->setClickingTogglesState (true);
             tb->setRadioGroupId (34567);
-            tb->setColour (TextButton::textColourOffId,  Colours::black);
-            tb->setColour (TextButton::textColourOnId,   Colours::black);
-            tb->setColour (TextButton::buttonColourId,   Colours::white);
-            tb->setColour (TextButton::buttonOnColourId, Colours::blueviolet.brighter());
+            tb->setColor (TextButton::textColorOffId,  Colors::black);
+            tb->setColor (TextButton::textColorOnId,   Colors::black);
+            tb->setColor (TextButton::buttonColorId,   Colors::white);
+            tb->setColor (TextButton::buttonOnColorId, Colors::blueviolet.brighter());
 
             tb->setBounds (20 + i * 55, 260, 55, 24);
             tb->setConnectedEdges (((i != 0) ? Button::ConnectedOnLeft : 0)
@@ -339,10 +339,10 @@ struct ButtonsPage   : public Component
         }
 
         {
-            auto* colourChangeButton = new ColourChangeButton();
-            components.add (colourChangeButton);
-            addAndMakeVisible (colourChangeButton);
-            colourChangeButton->setTopLeftPosition (20, 320);
+            auto* colorChangeButton = new ColorChangeButton();
+            components.add (colorChangeButton);
+            addAndMakeVisible (colorChangeButton);
+            colorChangeButton->setTopLeftPosition (20, 320);
         }
 
         {
@@ -358,21 +358,21 @@ struct ButtonsPage   : public Component
             Path p;
             p.addStar ({}, 5, 20.0f, 50.0f, 0.2f);
             normal.setPath (p);
-            normal.setFill (getRandomDarkColour());
+            normal.setFill (getRandomDarkColor());
         }
 
         {
             Path p;
             p.addStar ({}, 9, 25.0f, 50.0f, 0.0f);
             over.setPath (p);
-            over.setFill (getRandomBrightColour());
-            over.setStrokeFill (getRandomDarkColour());
+            over.setFill (getRandomBrightColor());
+            over.setStrokeFill (getRandomDarkColor());
             over.setStrokeThickness (5.0f);
         }
 
         DrawableImage down;
         down.setImage (getImageFromAssets ("juce_icon.png"));
-        down.setOverlayColour (Colours::black.withAlpha (0.3f));
+        down.setOverlayColor (Colors::black.withAlpha (0.3f));
 
         auto popupMessageCallback = [this]
         {
@@ -416,8 +416,8 @@ struct ButtonsPage   : public Component
             auto db = addToList (new DrawableButton ("Button 4", DrawableButton::ImageOnButtonBackground));
             db->setImages (&normal, &over, &down);
             db->setClickingTogglesState (true);
-            db->setColour (DrawableButton::backgroundColourId,   Colours::white);
-            db->setColour (DrawableButton::backgroundOnColourId, Colours::yellow);
+            db->setColor (DrawableButton::backgroundColorId,   Colors::white);
+            db->setColor (DrawableButton::backgroundOnColorId, Colors::yellow);
             db->setBounds (400, 150, 50, 50);
             db->setTooltip ("This is a DrawableButton on a standard button background");
             db->onClick = popupMessageCallback;
@@ -425,9 +425,9 @@ struct ButtonsPage   : public Component
 
         {
             auto sb = addToList (new ShapeButton ("ShapeButton",
-                                                  getRandomDarkColour(),
-                                                  getRandomDarkColour(),
-                                                  getRandomDarkColour()));
+                                                  getRandomDarkColor(),
+                                                  getRandomDarkColor(),
+                                                  getRandomDarkColor()));
             sb->setShape (getJUCELogoPath(), false, true, false);
             sb->setBounds (260, 220, 200, 120);
         }
@@ -438,13 +438,13 @@ struct ButtonsPage   : public Component
             auto juceImage = getImageFromAssets ("juce_icon.png");
 
             ib->setImages (true, true, true,
-                           juceImage, 0.7f, Colours::transparentBlack,
-                           juceImage, 1.0f, Colours::transparentBlack,
-                           juceImage, 1.0f, getRandomBrightColour().withAlpha (0.8f),
+                           juceImage, 0.7f, Colors::transparentBlack,
+                           juceImage, 1.0f, Colors::transparentBlack,
+                           juceImage, 1.0f, getRandomBrightColor().withAlpha (0.8f),
                            0.5f);
 
             ib->setBounds (260, 350, 100, 100);
-            ib->setTooltip ("ImageButton - showing alpha-channel hit-testing and colour overlay when clicked");
+            ib->setTooltip ("ImageButton - showing alpha-channel hit-testing and color overlay when clicked");
         }
     }
 
@@ -482,7 +482,7 @@ struct MiscPage   : public Component
         addAndMakeVisible (comboBox);
         comboBox.setBounds (10, 85, 200, 24);
         comboBox.setEditableText (true);
-        comboBox.setJustificationType (Justification::centred);
+        comboBox.setJustificationType (Justification::centered);
 
         for (int i = 1; i < 100; ++i)
             comboBox.addItem ("combo box item " + String (i), i);
@@ -534,10 +534,10 @@ public:
         orientationButton.changeWidthToFitText (22);
         orientationButton.setTopLeftPosition (depthSlider.getX(), depthSlider.getBottom() + 20);
 
-        addAndMakeVisible (customiseButton);
-        customiseButton.onClick = [this] { toolbar.showCustomisationDialog (factory); };
-        customiseButton.changeWidthToFitText (22);
-        customiseButton.setTopLeftPosition (orientationButton.getRight() + 20, orientationButton.getY());
+        addAndMakeVisible (customizeButton);
+        customizeButton.onClick = [this] { toolbar.showCustomizationDialog (factory); };
+        customizeButton.changeWidthToFitText (22);
+        customizeButton.setTopLeftPosition (orientationButton.getRight() + 20, orientationButton.getY());
     }
 
     void resized() override
@@ -567,7 +567,7 @@ private:
                             "Tango icon project."};
 
     TextButton orientationButton  { "Vertical/Horizontal" },
-               customiseButton    { "Customise..." };
+               customizeButton    { "Customize..." };
 
     //==============================================================================
     class DemoToolbarItemFactory   : public ToolbarItemFactory
@@ -595,7 +595,7 @@ private:
         {
             // This returns the complete list of all item IDs that are allowed to
             // go in our toolbar. Any items you might want to add must be listed here. The
-            // order in which they are listed will be used by the toolbar customisation panel.
+            // order in which they are listed will be used by the toolbar customization panel.
 
             ids.add (doc_new);
             ids.add (doc_open);
@@ -727,7 +727,7 @@ private:
                 comboBox.setSize (newArea.getWidth() - 2,
                                   jmin (newArea.getHeight() - 2, 22));
 
-                comboBox.setCentrePosition (newArea.getCentreX(), newArea.getCentreY());
+                comboBox.setCenterPosition (newArea.getCenterX(), newArea.getCenterY());
             }
 
         private:
@@ -757,7 +757,7 @@ public:
         table.setModel (this);
 
         // give it a border
-        table.setColour (ListBox::outlineColourId, Colours::grey);
+        table.setColor (ListBox::outlineColorId, Colors::gray);
         table.setOutlineThickness (1);
 
         // Add some columns to the table header, based on the column list in our database..
@@ -789,12 +789,12 @@ public:
     // This is overloaded from TableListBoxModel, and should fill in the background of the whole row
     void paintRowBackground (Graphics& g, int rowNumber, int /*width*/, int /*height*/, bool rowIsSelected) override
     {
-        auto alternateColour = getLookAndFeel().findColour (ListBox::backgroundColourId)
-                                               .interpolatedWith (getLookAndFeel().findColour (ListBox::textColourId), 0.03f);
+        auto alternateColor = getLookAndFeel().findColor (ListBox::backgroundColorId)
+                                               .interpolatedWith (getLookAndFeel().findColor (ListBox::textColorId), 0.03f);
         if (rowIsSelected)
-            g.fillAll (Colours::lightblue);
+            g.fillAll (Colors::lightblue);
         else if (rowNumber % 2)
-            g.fillAll (alternateColour);
+            g.fillAll (alternateColor);
     }
 
     // This is overloaded from TableListBoxModel, and must paint any cells that aren't using custom
@@ -802,17 +802,17 @@ public:
     void paintCell (Graphics& g, int rowNumber, int columnId,
                     int width, int height, bool /*rowIsSelected*/) override
     {
-        g.setColour (getLookAndFeel().findColour (ListBox::textColourId));
+        g.setColor (getLookAndFeel().findColor (ListBox::textColorId));
         g.setFont (font);
 
         if (auto* rowElement = dataList->getChildElement (rowNumber))
         {
             auto text = rowElement->getStringAttribute (getAttributeNameForColumnId (columnId));
 
-            g.drawText (text, 2, 0, width - 4, height, Justification::centredLeft, true);
+            g.drawText (text, 2, 0, width - 4, height, Justification::centeredLeft, true);
         }
 
-        g.setColour (getLookAndFeel().findColour (ListBox::backgroundColourId));
+        g.setColor (getLookAndFeel().findColor (ListBox::backgroundColorId));
         g.fillRect (width - 1, 0, 1, height);
     }
 
@@ -961,7 +961,7 @@ private:
         {
             auto& lf = getLookAndFeel();
             if (! dynamic_cast<LookAndFeel_V4*> (&lf))
-                lf.setColour (textColourId, Colours::black);
+                lf.setColor (textColorId, Colors::black);
 
             Label::paint (g);
         }
@@ -969,7 +969,7 @@ private:
     private:
         TableDemoComponent& owner;
         int row, columnId;
-        Colour textColour;
+        Color textColor;
     };
 
     //==============================================================================
@@ -1107,14 +1107,14 @@ private:
                                int width, int height, bool rowIsSelected) override
         {
             if (rowIsSelected)
-                g.fillAll (Colours::lightblue);
+                g.fillAll (Colors::lightblue);
 
-            g.setColour (LookAndFeel::getDefaultLookAndFeel().findColour (Label::textColourId));
+            g.setColor (LookAndFeel::getDefaultLookAndFeel().findColor (Label::textColorId));
             g.setFont (height * 0.7f);
 
             g.drawText ("Draggable Thing #" + String (rowNumber + 1),
                         5, 0, width, height,
-                        Justification::centredLeft, true);
+                        Justification::centeredLeft, true);
         }
 
         var getDragSourceDescription (const SparseSet<int>& selectedRows) override
@@ -1142,18 +1142,18 @@ private:
 
         void paint (Graphics& g) override
         {
-            g.fillAll (Colours::green.withAlpha (0.2f));
+            g.fillAll (Colors::green.withAlpha (0.2f));
 
             // draw a red line around the comp if the user's currently dragging something over it..
             if (somethingIsBeingDraggedOver)
             {
-                g.setColour (Colours::red);
+                g.setColor (Colors::red);
                 g.drawRect (getLocalBounds(), 3);
             }
 
-            g.setColour (getLookAndFeel().findColour (Label::textColourId));
+            g.setColor (getLookAndFeel().findColor (Label::textColorId));
             g.setFont (14.0f);
-            g.drawFittedText (message, getLocalBounds().reduced (10, 0), Justification::centred, 4);
+            g.drawFittedText (message, getLocalBounds().reduced (10, 0), Justification::centered, 4);
         }
 
         //==============================================================================
@@ -1280,14 +1280,14 @@ struct DemoTabbedComponent  : public TabbedComponent
     DemoTabbedComponent()
         : TabbedComponent (TabbedButtonBar::TabsAtTop)
     {
-        auto colour = findColour (ResizableWindow::backgroundColourId);
+        auto color = findColor (ResizableWindow::backgroundColorId);
 
-        addTab ("Buttons",     colour, new ButtonsPage(),        true);
-        addTab ("Sliders",     colour, new SlidersPage(),        true);
-        addTab ("Toolbars",    colour, new ToolbarDemoComp(),    true);
-        addTab ("Misc",        colour, new MiscPage(),           true);
-        addTab ("Tables",      colour, new TableDemoComponent(), true);
-        addTab ("Drag & Drop", colour, new DragAndDropDemo(),    true);
+        addTab ("Buttons",     color, new ButtonsPage(),        true);
+        addTab ("Sliders",     color, new SlidersPage(),        true);
+        addTab ("Toolbars",    color, new ToolbarDemoComp(),    true);
+        addTab ("Misc",        color, new MiscPage(),           true);
+        addTab ("Tables",      color, new TableDemoComponent(), true);
+        addTab ("Drag & Drop", color, new DragAndDropDemo(),    true);
 
         getTabbedButtonBar().getTabButton (5)->setExtraComponent (new CustomTabButton(), TabBarButton::afterText);
     }
@@ -1307,7 +1307,7 @@ struct DemoTabbedComponent  : public TabbedComponent
             Path star;
             star.addStar ({}, 7, 1.0f, 2.0f);
 
-            g.setColour (Colours::green);
+            g.setColor (Colors::green);
             g.fillPath (star, star.getTransformToScaleToFit (getLocalBounds().reduced (2).toFloat(), true));
         }
 
@@ -1340,7 +1340,7 @@ struct WidgetsDemo   : public Component
 
     void paint (Graphics& g) override
     {
-        g.fillAll (Colours::lightgrey);
+        g.fillAll (Colors::lightgray);
     }
 
     void resized() override

@@ -204,7 +204,7 @@
     <ClCompile Include="..\..\Source\ComponentEditor\Components\jucer_ComponentTypeHandler.cpp"/>
     <ClCompile Include="..\..\Source\ComponentEditor\Documents\jucer_ButtonDocument.cpp"/>
     <ClCompile Include="..\..\Source\ComponentEditor\Documents\jucer_ComponentDocument.cpp"/>
-    <ClCompile Include="..\..\Source\ComponentEditor\PaintElements\jucer_ColouredElement.cpp"/>
+    <ClCompile Include="..\..\Source\ComponentEditor\PaintElements\jucer_ColoredElement.cpp"/>
     <ClCompile Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElement.cpp"/>
     <ClCompile Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElementGroup.cpp"/>
     <ClCompile Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElementImage.cpp"/>
@@ -315,13 +315,13 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\logging\juce_Logger.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\maths\juce_BigInteger.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_core\math\juce_BigInteger.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\maths\juce_Expression.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_core\math\juce_Expression.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\maths\juce_Random.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_core\math\juce_Random.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\memory\juce_MemoryBlock.cpp">
@@ -447,7 +447,7 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\text\juce_Identifier.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\text\juce_LocalisedStrings.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_core\text\juce_LocalizedStrings.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\text\juce_String.cpp">
@@ -585,7 +585,7 @@
     <ClCompile Include="..\..\..\..\modules\juce_data_structures\values\juce_ValueTree.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_data_structures\values\juce_ValueTreeSynchroniser.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_data_structures\values\juce_ValueTreeSynchronizer.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_data_structures\juce_data_structures.cpp">
@@ -642,16 +642,16 @@
     <ClCompile Include="..\..\..\..\modules\juce_events\juce_events.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_graphics\colour\juce_Colour.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\color\juce_Color.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_graphics\colour\juce_ColourGradient.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\color\juce_ColorGradient.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_graphics\colour\juce_Colours.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\color\juce_Colors.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_graphics\colour\juce_FillType.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\color\juce_FillType.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\contexts\juce_GraphicsContext.cpp">
@@ -1368,7 +1368,7 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_BubbleMessageComponent.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_ColourSelector.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_ColorSelector.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_KeyMappingEditorComponent.cpp">
@@ -1444,7 +1444,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\Source\Application\Windows\jucer_AboutWindowComponent.h"/>
     <ClInclude Include="..\..\Source\Application\Windows\jucer_ApplicationUsageDataWindowComponent.h"/>
-    <ClInclude Include="..\..\Source\Application\Windows\jucer_EditorColourSchemeWindowComponent.h"/>
+    <ClInclude Include="..\..\Source\Application\Windows\jucer_EditorColorSchemeWindowComponent.h"/>
     <ClInclude Include="..\..\Source\Application\Windows\jucer_FloatingToolWindow.h"/>
     <ClInclude Include="..\..\Source\Application\Windows\jucer_GlobalPathsWindowComponent.h"/>
     <ClInclude Include="..\..\Source\Application\Windows\jucer_SVGPathDataWindowComponent.h"/>
@@ -1498,7 +1498,7 @@
     <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_ViewportHandler.h"/>
     <ClInclude Include="..\..\Source\ComponentEditor\Documents\jucer_ButtonDocument.h"/>
     <ClInclude Include="..\..\Source\ComponentEditor\Documents\jucer_ComponentDocument.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_ColouredElement.h"/>
+    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_ColoredElement.h"/>
     <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_ElementSiblingComponent.h"/>
     <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_FillType.h"/>
     <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_GradientPointComponent.h"/>
@@ -1514,10 +1514,10 @@
     <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElementUndoableAction.h"/>
     <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_PointComponent.h"/>
     <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_StrokeType.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\Properties\jucer_ColourPropertyComponent.h"/>
+    <ClInclude Include="..\..\Source\ComponentEditor\Properties\jucer_ColorPropertyComponent.h"/>
     <ClInclude Include="..\..\Source\ComponentEditor\Properties\jucer_ComponentBooleanProperty.h"/>
     <ClInclude Include="..\..\Source\ComponentEditor\Properties\jucer_ComponentChoiceProperty.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\Properties\jucer_ComponentColourProperty.h"/>
+    <ClInclude Include="..\..\Source\ComponentEditor\Properties\jucer_ComponentColorProperty.h"/>
     <ClInclude Include="..\..\Source\ComponentEditor\Properties\jucer_ComponentTextProperty.h"/>
     <ClInclude Include="..\..\Source\ComponentEditor\Properties\jucer_FilePropertyComponent.h"/>
     <ClInclude Include="..\..\Source\ComponentEditor\Properties\jucer_FontPropertyComponent.h"/>
@@ -1591,7 +1591,7 @@
     <ClInclude Include="..\..\Source\Settings\jucer_AppearanceSettings.h"/>
     <ClInclude Include="..\..\Source\Settings\jucer_StoredSettings.h"/>
     <ClInclude Include="..\..\Source\Utility\Helpers\jucer_CodeHelpers.h"/>
-    <ClInclude Include="..\..\Source\Utility\Helpers\jucer_Colours.h"/>
+    <ClInclude Include="..\..\Source\Utility\Helpers\jucer_Colors.h"/>
     <ClInclude Include="..\..\Source\Utility\Helpers\jucer_FileHelpers.h"/>
     <ClInclude Include="..\..\Source\Utility\Helpers\jucer_MiscUtilities.h"/>
     <ClInclude Include="..\..\Source\Utility\Helpers\jucer_PresetIDs.h"/>
@@ -1599,7 +1599,7 @@
     <ClInclude Include="..\..\Source\Utility\Helpers\jucer_TranslationHelpers.h"/>
     <ClInclude Include="..\..\Source\Utility\Helpers\jucer_ValueSourceHelpers.h"/>
     <ClInclude Include="..\..\Source\Utility\PIPs\jucer_PIPGenerator.h"/>
-    <ClInclude Include="..\..\Source\Utility\UI\PropertyComponents\jucer_ColourPropertyComponent.h"/>
+    <ClInclude Include="..\..\Source\Utility\UI\PropertyComponents\jucer_ColorPropertyComponent.h"/>
     <ClInclude Include="..\..\Source\Utility\UI\PropertyComponents\jucer_DependencyPathPropertyComponent.h"/>
     <ClInclude Include="..\..\Source\Utility\UI\PropertyComponents\jucer_FilePathPropertyComponent.h"/>
     <ClInclude Include="..\..\Source\Utility\UI\PropertyComponents\jucer_PropertyComponentsWithEnablement.h"/>
@@ -1658,13 +1658,13 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\javascript\juce_JSON.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\logging\juce_FileLogger.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\logging\juce_Logger.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_BigInteger.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_Expression.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_MathsFunctions.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_NormalisableRange.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_Random.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_Range.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_StatisticsAccumulator.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\math\juce_BigInteger.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\math\juce_Expression.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\math\juce_MathFunctions.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\math\juce_NormalizableRange.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\math\juce_Random.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\math\juce_Range.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\math\juce_StatisticsAccumulator.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_Atomic.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_ByteOrder.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_ContainerDeletePolicy.h"/>
@@ -1716,7 +1716,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_CharPointer_UTF16.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_CharPointer_UTF32.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_Identifier.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_LocalisedStrings.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_LocalizedStrings.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_NewLine.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_String.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_StringArray.h"/>
@@ -1775,7 +1775,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_data_structures\values\juce_CachedValue.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_data_structures\values\juce_Value.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_data_structures\values\juce_ValueTree.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_data_structures\values\juce_ValueTreeSynchroniser.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_data_structures\values\juce_ValueTreeSynchronizer.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_data_structures\values\juce_ValueWithDefault.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_data_structures\juce_data_structures.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\broadcasters\juce_ActionBroadcaster.h"/>
@@ -1789,7 +1789,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_ApplicationBase.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_CallbackMessage.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_DeletedAtShutdown.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_Initialisation.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_Initialization.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_Message.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_MessageListener.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_MessageManager.h"/>
@@ -1802,11 +1802,11 @@
     <ClInclude Include="..\..\..\..\modules\juce_events\timers\juce_MultiTimer.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\timers\juce_Timer.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\juce_events.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\colour\juce_Colour.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\colour\juce_ColourGradient.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\colour\juce_Colours.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\colour\juce_FillType.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\colour\juce_PixelFormats.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\color\juce_Color.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\color\juce_ColorGradient.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\color\juce_Colors.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\color\juce_FillType.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\color\juce_PixelFormats.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\contexts\juce_GraphicsContext.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\contexts\juce_LowLevelGraphicsContext.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\contexts\juce_LowLevelGraphicsPostScriptRenderer.h"/>
@@ -1909,7 +1909,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\keyboard\juce_TextEditorKeyMapper.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\keyboard\juce_TextInputTarget.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_AnimatedPosition.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_AnimatedPositionBehaviours.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_AnimatedPositionBehaviors.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_ComponentAnimator.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_ComponentBoundsConstrainer.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_ComponentBuilder.h"/>
@@ -2014,7 +2014,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_AnimatedAppComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_AppleRemote.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_BubbleMessageComponent.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_ColourSelector.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_ColorSelector.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_KeyMappingEditorComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_LiveConstantEditor.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_PreferencesPanel.h"/>
@@ -2054,8 +2054,8 @@
     <None Include="..\..\Source\BinaryData\Icons\wizard_Openfile.svg"/>
     <None Include="..\..\Source\BinaryData\Icons\wizard_OpenGL.svg"/>
     <None Include="..\..\Source\BinaryData\Icons\wizard_StaticLibrary.svg"/>
-    <None Include="..\..\Source\BinaryData\colourscheme_dark.xml"/>
-    <None Include="..\..\Source\BinaryData\colourscheme_light.xml"/>
+    <None Include="..\..\Source\BinaryData\colorscheme_dark.xml"/>
+    <None Include="..\..\Source\BinaryData\colorscheme_light.xml"/>
     <None Include="..\..\Source\BinaryData\nothingtoseehere.txt"/>
     <None Include="..\..\Source\BinaryData\offlinepage.html"/>
     <None Include="..\..\Source\BinaryData\projucer_EULA.txt"/>

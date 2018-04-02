@@ -38,7 +38,7 @@ class JUCE_API  StreamingSocket  final
 {
 public:
     //==============================================================================
-    /** Creates an uninitialised socket.
+    /** Creates an uninitialized socket.
 
         To connect it, use the connect() method, after which you can read() or write()
         to it.

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -282,28 +282,28 @@ void TopLevelWindow::addToDesktop (int windowStyleFlags, void* nativeWindowToAtt
 }
 
 //==============================================================================
-void TopLevelWindow::centreAroundComponent (Component* c, const int width, const int height)
+void TopLevelWindow::centerAroundComponent (Component* c, const int width, const int height)
 {
     if (c == nullptr)
         c = TopLevelWindow::getActiveTopLevelWindow();
 
     if (c == nullptr || c->getBounds().isEmpty())
     {
-        centreWithSize (width, height);
+        centerWithSize (width, height);
     }
     else
     {
-        auto targetCentre = c->localPointToGlobal (c->getLocalBounds().getCentre());
+        auto targetCenter = c->localPointToGlobal (c->getLocalBounds().getCenter());
         auto parentArea = c->getParentMonitorArea();
 
         if (auto* parent = getParentComponent())
         {
-            targetCentre = parent->getLocalPoint (nullptr, targetCentre);
+            targetCenter = parent->getLocalPoint (nullptr, targetCenter);
             parentArea   = parent->getLocalBounds();
         }
 
-        setBounds (Rectangle<int> (targetCentre.x - width / 2,
-                                   targetCentre.y - height / 2,
+        setBounds (Rectangle<int> (targetCenter.x - width / 2,
+                                   targetCenter.y - height / 2,
                                    width, height)
                      .constrainedWithin (parentArea.reduced (12, 12)));
     }

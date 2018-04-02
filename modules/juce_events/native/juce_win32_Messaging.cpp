@@ -194,7 +194,7 @@ void MessageManager::broadcastMessage (const String& value)
 }
 
 //==============================================================================
-void MessageManager::doPlatformSpecificInitialisation()
+void MessageManager::doPlatformSpecificInitialization()
 {
     OleInitialize (0);
 

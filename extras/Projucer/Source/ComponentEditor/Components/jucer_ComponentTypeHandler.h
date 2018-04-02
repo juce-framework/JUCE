@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -71,19 +71,19 @@ public:
                                                bool multipleSelected);
 
 
-    void registerEditableColour (int colourId,
-                                 const String& colourIdCode,
-                                 const String& colourName,
+    void registerEditableColor (int colorId,
+                                 const String& colorIdCode,
+                                 const String& colorName,
                                  const String& xmlTagName);
 
-    #define registerColour(colourId, colourName, xmlTagName)   \
-        registerEditableColour (colourId, #colourId, colourName, xmlTagName)
+    #define registerColor(colorId, colorName, xmlTagName)   \
+        registerEditableColor (colorId, #colorId, colorName, xmlTagName)
 
-    void addColourProperties (Component* component,
+    void addColorProperties (Component* component,
                               JucerDocument& document,
                               Array<PropertyComponent*>& props);
 
-    String getColourIntialisationCode (Component* component,
+    String getColorIntialisationCode (Component* component,
                                        const String& objectName);
 
     //==============================================================================
@@ -129,13 +129,13 @@ protected:
     const String typeName, className, virtualClass, componentClassRawName;
     int defaultWidth, defaultHeight;
 
-    struct ComponentColourInfo
+    struct ComponentColorInfo
     {
-        int colourId;
-        String colourIdCode, colourName, xmlTagName;
+        int colorId;
+        String colorIdCode, colorName, xmlTagName;
     };
 
-    OwnedArray <ComponentColourInfo> colours;
+    OwnedArray <ComponentColorInfo> colors;
 
 private:
     JUCE_DECLARE_NON_COPYABLE (ComponentTypeHandler)

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -144,14 +144,14 @@ public:
 
     /** Returns a transform which is the same as this one followed by a rotation.
 
-        The rotation is specified by a number of radians to rotate clockwise, centred around
+        The rotation is specified by a number of radians to rotate clockwise, centered around
         the origin (0, 0).
     */
     AffineTransform rotated (float angleInRadians) const noexcept;
 
     /** Returns a transform which is the same as this one followed by a rotation about a given point.
 
-        The rotation is specified by a number of radians to rotate clockwise, centred around
+        The rotation is specified by a number of radians to rotate clockwise, centered around
         the coordinates passed in.
     */
     AffineTransform rotated (float angleInRadians,
@@ -167,18 +167,18 @@ public:
                                      float pivotY) noexcept;
 
     /** Returns a transform which is the same as this one followed by a re-scaling.
-        The scaling is centred around the origin (0, 0).
+        The scaling is centered around the origin (0, 0).
     */
     AffineTransform scaled (float factorX,
                             float factorY) const noexcept;
 
     /** Returns a transform which is the same as this one followed by a re-scaling.
-        The scaling is centred around the origin (0, 0).
+        The scaling is centered around the origin (0, 0).
     */
     AffineTransform scaled (float factor) const noexcept;
 
     /** Returns a transform which is the same as this one followed by a re-scaling.
-        The scaling is centred around the origin provided.
+        The scaling is centered around the origin provided.
     */
     AffineTransform scaled (float factorX, float factorY,
                             float pivotX, float pivotY) const noexcept;
@@ -190,16 +190,16 @@ public:
     /** Returns a new transform which is a re-scale about the origin. */
     static AffineTransform scale (float factor) noexcept;
 
-    /** Returns a new transform which is a re-scale centred around the point provided. */
+    /** Returns a new transform which is a re-scale centered around the point provided. */
     static AffineTransform scale (float factorX, float factorY,
                                   float pivotX, float pivotY) noexcept;
 
     /** Returns a transform which is the same as this one followed by a shear.
-        The shear is centred around the origin (0, 0).
+        The shear is centered around the origin (0, 0).
     */
     AffineTransform sheared (float shearX, float shearY) const noexcept;
 
-    /** Returns a shear transform, centred around the origin (0, 0). */
+    /** Returns a shear transform, centered around the origin (0, 0). */
     static AffineTransform shear (float shearX, float shearY) noexcept;
 
     /** Returns a transform that will flip coordinates vertically within a window of the given height.

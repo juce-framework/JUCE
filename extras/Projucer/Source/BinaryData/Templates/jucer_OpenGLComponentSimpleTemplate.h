@@ -33,9 +33,9 @@ public:
     }
 
     //==============================================================================
-    void initialise() override
+    void initialize() override
     {
-        // Initialise GL objects for rendering here.
+        // Initialize GL objects for rendering here.
     }
 
     void shutdown() override
@@ -46,7 +46,7 @@ public:
     void render() override
     {
         // This clears the context with a black background.
-        OpenGLHelpers::clear (Colours::black);
+        OpenGLHelpers::clear (Colors::black);
 
         // Add your rendering code here...
     }

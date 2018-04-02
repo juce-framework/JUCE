@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -34,12 +34,12 @@ public:
     TextEditorHandler()
         : ComponentTypeHandler ("Text Editor", "TextEditor", typeid (TextEditor), 150, 24)
     {
-        registerColour (TextEditor::textColourId, "text", "textcol");
-        registerColour (TextEditor::backgroundColourId, "background", "bkgcol");
-        registerColour (TextEditor::highlightColourId, "highlight", "hilitecol");
-        registerColour (TextEditor::outlineColourId, "outline", "outlinecol");
-        registerColour (TextEditor::shadowColourId, "shadow", "shadowcol");
-        registerColour (CaretComponent::caretColourId, "caret", "caretcol");
+        registerColor (TextEditor::textColorId, "text", "textcol");
+        registerColor (TextEditor::backgroundColorId, "background", "bkgcol");
+        registerColor (TextEditor::highlightColorId, "highlight", "hilitecol");
+        registerColor (TextEditor::outlineColorId, "outline", "outlinecol");
+        registerColor (TextEditor::shadowColorId, "shadow", "shadowcol");
+        registerColor (CaretComponent::caretColorId, "caret", "caretcol");
     }
 
     Component* createNewComponent (JucerDocument*) override
@@ -102,7 +102,7 @@ public:
             props.add (new TextEditorCaretProperty (t, document));
             props.add (new TextEditorPopupMenuProperty (t, document));
 
-            addColourProperties (t, document, props);
+            addColorProperties (t, document, props);
         }
     }
 
@@ -125,7 +125,7 @@ public:
           << memberVariableName << "->setScrollbarsShown (" << CodeHelpers::boolLiteral (te->areScrollbarsShown()) << ");\n"
           << memberVariableName << "->setCaretVisible (" << CodeHelpers::boolLiteral (te->isCaretVisible()) << ");\n"
           << memberVariableName << "->setPopupMenuEnabled (" << CodeHelpers::boolLiteral (te->isPopupMenuEnabled()) << ");\n"
-          << getColourIntialisationCode (component, memberVariableName)
+          << getColorIntialisationCode (component, memberVariableName)
           << memberVariableName << "->setText (" << quotedString (te->getProperties() ["initialText"].toString(), code.shouldUseTransMacro()) << ");\n\n";
 
         code.constructorCode += s;

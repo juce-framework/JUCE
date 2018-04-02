@@ -1196,7 +1196,7 @@ int vorbis_encode_ctl(vorbis_info *vi,int number,void *arg){
            parameter drawn from the base_setting that can be altered
            by an encctl is the lowpass, so that is explictly flagged
            to not be overwritten when we fetch a new template and
-           recompute the dependant settings */
+           recompute the dependent settings */
         new_template = get_setup_template(hi->coupling_p?vi->channels:-1,
                                           vi->rate,
                                           hi->req,

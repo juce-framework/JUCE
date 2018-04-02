@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -36,7 +36,7 @@ public:
         addAndMakeVisible (headerLabel);
         headerLabel.setText ("Application Usage Analytics", dontSendNotification);
         headerLabel.setFont (Font (20.0f, Font::FontStyleFlags::bold));
-        headerLabel.setJustificationType (Justification::centred);
+        headerLabel.setJustificationType (Justification::centered);
 
         auto textToShow = String ("We use analytics services to understand how developers use our software in order for JUCE to improve its software and services. ");
 
@@ -48,7 +48,7 @@ public:
         addAndMakeVisible (bodyLabel);
         bodyLabel.setText (textToShow, dontSendNotification);
         bodyLabel.setFont (Font (14.0f));
-        bodyLabel.setJustificationType (Justification::centredLeft);
+        bodyLabel.setJustificationType (Justification::centeredLeft);
 
         addAndMakeVisible (juceEULALink);
         juceEULALink.setButtonText ("JUCE EULA");
@@ -80,7 +80,7 @@ public:
         else
         {
             addAndMakeVisible (upgradeLicenseButton);
-            upgradeLicenseButton.setColour (TextButton::buttonColourId, findColour (secondaryButtonBackgroundColourId));
+            upgradeLicenseButton.setColor (TextButton::buttonColorId, findColor (secondaryButtonBackgroundColorId));
 
             upgradeLicenseButton.onClick = []
             {
@@ -134,17 +134,17 @@ public:
             auto left = bounds.removeFromLeft (bounds.getWidth() / 2);
 
             upgradeLicenseButton.setSize (buttonW, buttonH);
-            upgradeLicenseButton.setCentrePosition (left.getCentreX(), left.getCentreY());
+            upgradeLicenseButton.setCenterPosition (left.getCenterX(), left.getCenterY());
         }
 
         okButton.setSize (buttonW, buttonH);
-        okButton.setCentrePosition (bounds.getCentreX(), bounds.getCentreY());
+        okButton.setCenterPosition (bounds.getCenterX(), bounds.getCenterY());
         okButton.onClick = [] { ProjucerApplication::getApp().dismissApplicationUsageDataAgreementPopup(); };
     }
 
     void paint (Graphics& g) override
     {
-        g.fillAll (findColour (backgroundColourId));
+        g.fillAll (findColor (backgroundColorId));
     }
 
 private:
@@ -156,7 +156,7 @@ private:
 
     void lookAndFeelChanged() override
     {
-        upgradeLicenseButton.setColour (TextButton::buttonColourId, findColour (secondaryButtonBackgroundColourId));
+        upgradeLicenseButton.setColor (TextButton::buttonColorId, findColor (secondaryButtonBackgroundColorId));
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ApplicationUsageDataWindowComponent)

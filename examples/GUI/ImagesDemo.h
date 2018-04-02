@@ -58,7 +58,7 @@ public:
         directoryThread.startThread (1);
 
         fileTree.addListener (this);
-        fileTree.setColour (TreeView::backgroundColourId, Colours::grey);
+        fileTree.setColor (TreeView::backgroundColorId, Colors::gray);
         addAndMakeVisible (fileTree);
 
         addAndMakeVisible (resizerBar);
@@ -87,7 +87,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (Colours::white);
+        g.fillAll (Colors::white);
     }
 
     void resized() override

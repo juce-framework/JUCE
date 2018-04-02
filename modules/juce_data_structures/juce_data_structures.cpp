@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -37,7 +37,7 @@
 
 #include "values/juce_Value.cpp"
 #include "values/juce_ValueTree.cpp"
-#include "values/juce_ValueTreeSynchroniser.cpp"
+#include "values/juce_ValueTreeSynchronizer.cpp"
 #include "values/juce_CachedValue.cpp"
 #include "undomanager/juce_UndoManager.cpp"
 #include "app_properties/juce_ApplicationProperties.cpp"

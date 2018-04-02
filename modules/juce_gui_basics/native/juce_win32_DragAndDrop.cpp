@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -217,7 +217,7 @@ namespace DragAndDropHelpers
         for (int i = fileNames.size(); --i >= 0;)
             totalBytes += (int) CharPointer_UTF16::getBytesRequiredFor (fileNames[i].getCharPointer()) + sizeof (WCHAR);
 
-        HDROP hDrop = (HDROP) GlobalAlloc (GMEM_MOVEABLE | GMEM_ZEROINIT, sizeof (DROPFILES) + totalBytes + 4);
+        HDROP hDrop = (HDROP) GlobalAlloc (GMEM_MOVABLE | GMEM_ZEROINIT, sizeof (DROPFILES) + totalBytes + 4);
 
         if (hDrop != 0)
         {
@@ -275,7 +275,7 @@ bool DragAndDropContainer::performExternalDragDropOfText (const String& text, Co
 
     auto numBytes = CharPointer_UTF16::getBytesRequiredFor (text.getCharPointer());
 
-    medium.hGlobal = GlobalAlloc (GMEM_MOVEABLE | GMEM_ZEROINIT, numBytes + 2);
+    medium.hGlobal = GlobalAlloc (GMEM_MOVABLE | GMEM_ZEROINIT, numBytes + 2);
     WCHAR* const data = static_cast<WCHAR*> (GlobalLock (medium.hGlobal));
 
     text.copyToUTF16 (data, numBytes);

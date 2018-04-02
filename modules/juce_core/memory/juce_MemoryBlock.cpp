@@ -25,12 +25,12 @@ namespace juce
 
 MemoryBlock::MemoryBlock() noexcept {}
 
-MemoryBlock::MemoryBlock (size_t initialSize, bool initialiseToZero)
+MemoryBlock::MemoryBlock (size_t initialSize, bool initializeToZero)
 {
     if (initialSize > 0)
     {
         size = initialSize;
-        data.allocate (initialSize, initialiseToZero);
+        data.allocate (initialSize, initializeToZero);
     }
     else
     {
@@ -49,19 +49,19 @@ MemoryBlock::MemoryBlock (const MemoryBlock& other)
     }
 }
 
-MemoryBlock::MemoryBlock (const void* const dataToInitialiseFrom, const size_t sizeInBytes)
+MemoryBlock::MemoryBlock (const void* const dataToInitializeFrom, const size_t sizeInBytes)
     : size (sizeInBytes)
 {
     jassert (((ssize_t) sizeInBytes) >= 0);
 
     if (size > 0)
     {
-        jassert (dataToInitialiseFrom != nullptr); // non-zero size, but a zero pointer passed-in?
+        jassert (dataToInitializeFrom != nullptr); // non-zero size, but a zero pointer passed-in?
 
         data.malloc (size);
 
-        if (dataToInitialiseFrom != nullptr)
-            memcpy (data, dataToInitialiseFrom, size);
+        if (dataToInitializeFrom != nullptr)
+            memcpy (data, dataToInitializeFrom, size);
     }
 }
 
@@ -112,7 +112,7 @@ bool MemoryBlock::matches (const void* dataToCompare, size_t dataSize) const noe
 
 //==============================================================================
 // this will resize the block to this size
-void MemoryBlock::setSize (const size_t newSize, const bool initialiseToZero)
+void MemoryBlock::setSize (const size_t newSize, const bool initializeToZero)
 {
     if (size != newSize)
     {
@@ -126,12 +126,12 @@ void MemoryBlock::setSize (const size_t newSize, const bool initialiseToZero)
             {
                 data.realloc (newSize);
 
-                if (initialiseToZero && (newSize > size))
+                if (initializeToZero && (newSize > size))
                     zeromem (data + size, newSize - size);
             }
             else
             {
-                data.allocate (newSize, initialiseToZero);
+                data.allocate (newSize, initializeToZero);
             }
 
             size = newSize;
@@ -145,10 +145,10 @@ void MemoryBlock::reset()
     size = 0;
 }
 
-void MemoryBlock::ensureSize (size_t minimumSize, bool initialiseToZero)
+void MemoryBlock::ensureSize (size_t minimumSize, bool initializeToZero)
 {
     if (size < minimumSize)
-        setSize (minimumSize, initialiseToZero);
+        setSize (minimumSize, initializeToZero);
 }
 
 void MemoryBlock::swapWith (MemoryBlock& other) noexcept

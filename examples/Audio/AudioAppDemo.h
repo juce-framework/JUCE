@@ -114,27 +114,27 @@ public:
     //==============================================================================
     void paint (Graphics& g) override
     {
-        // (Our component is opaque, so we must completely fill the background with a solid colour)
-        g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+        // (Our component is opaque, so we must completely fill the background with a solid color)
+        g.fillAll (getLookAndFeel().findColor (ResizableWindow::backgroundColorId));
 
-        auto centreY = getHeight() / 2.0f;
+        auto centerY = getHeight() / 2.0f;
         auto radius = amplitude * 200.0f;
 
         // Draw an ellipse based on the mouse position and audio volume
-        g.setColour (Colours::lightgreen);
+        g.setColor (Colors::lightgreen);
         g.fillEllipse  (jmax (0.0f, lastMousePosition.x) - radius / 2.0f,
                         jmax (0.0f, lastMousePosition.y) - radius / 2.0f,
                         radius, radius);
 
         // Draw a representative sine wave.
         Path wavePath;
-        wavePath.startNewSubPath (0, centreY);
+        wavePath.startNewSubPath (0, centerY);
 
         for (auto x = 1.0f; x < getWidth(); ++x)
-            wavePath.lineTo (x, centreY + amplitude * getHeight() * 2.0f
+            wavePath.lineTo (x, centerY + amplitude * getHeight() * 2.0f
                                             * std::sin (x * frequency * 0.0001f));
 
-        g.setColour (getLookAndFeel().findColour (Slider::thumbColourId));
+        g.setColor (getLookAndFeel().findColor (Slider::thumbColorId));
         g.strokePath (wavePath, PathStrokeType (2.0f));
     }
 

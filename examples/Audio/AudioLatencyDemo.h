@@ -317,8 +317,8 @@ public:
         resultsBox.setCaretVisible (false);
         resultsBox.setPopupMenuEnabled (true);
 
-        resultsBox.setColour (TextEditor::outlineColourId, Colour (0x1c000000));
-        resultsBox.setColour (TextEditor::shadowColourId,  Colour (0x16000000));
+        resultsBox.setColor (TextEditor::outlineColorId, Color (0x1c000000));
+        resultsBox.setColor (TextEditor::shadowColorId,  Color (0x16000000));
 
         resultsBox.setText ("Running this test measures the round-trip latency between the audio output and input "
                             "devices you\'ve got selected.\n\n"
@@ -334,7 +334,7 @@ public:
                                      [this] (bool granted)
                                      {
                                          int numInputChannels = granted ? 2 : 0;
-                                         audioDeviceManager.initialise (numInputChannels, 2, nullptr, true, {}, nullptr);
+                                         audioDeviceManager.initialize (numInputChannels, 2, nullptr, true, {}, nullptr);
                                      });
        #endif
 
@@ -364,7 +364,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (findColour (ResizableWindow::backgroundColourId));
+        g.fillAll (findColor (ResizableWindow::backgroundColorId));
     }
 
     void resized() override

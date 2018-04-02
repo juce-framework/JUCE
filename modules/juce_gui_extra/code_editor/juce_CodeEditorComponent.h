@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -221,52 +221,52 @@ public:
     bool isReadOnly() const noexcept                    { return readOnly; }
 
     //==============================================================================
-    /** Defines a syntax highlighting colour scheme */
-    struct JUCE_API  ColourScheme
+    /** Defines a syntax highlighting color scheme */
+    struct JUCE_API  ColorScheme
     {
-        /** Defines a colour for a token type */
+        /** Defines a color for a token type */
         struct TokenType
         {
             String name;
-            Colour colour;
+            Color color;
         };
 
         Array<TokenType> types;
 
-        void set (const String& name, Colour colour);
+        void set (const String& name, Color color);
     };
 
     /** Changes the syntax highlighting scheme.
         The token type values are dependent on the tokeniser being used - use
         CodeTokeniser::getTokenTypes() to get a list of the token types.
-        @see getColourForTokenType
+        @see getColorForTokenType
     */
-    void setColourScheme (const ColourScheme& scheme);
+    void setColorScheme (const ColorScheme& scheme);
 
-    /** Returns the current syntax highlighting colour scheme. */
-    const ColourScheme& getColourScheme() const noexcept    { return colourScheme; }
+    /** Returns the current syntax highlighting color scheme. */
+    const ColorScheme& getColorScheme() const noexcept    { return colorScheme; }
 
-    /** Returns one the syntax highlighting colour for the given token.
+    /** Returns one the syntax highlighting color for the given token.
         The token type values are dependent on the tokeniser being used.
-        @see setColourScheme
+        @see setColorScheme
     */
-    Colour getColourForTokenType (int tokenType) const;
+    Color getColorForTokenType (int tokenType) const;
 
     //==============================================================================
-    /** A set of colour IDs to use to change the colour of various aspects of the editor.
+    /** A set of color IDs to use to change the color of various aspects of the editor.
 
-        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        These constants can be used either via the Component::setColor(), or LookAndFeel::setColor()
         methods.
 
-        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+        @see Component::setColor, Component::findColor, LookAndFeel::setColor, LookAndFeel::findColor
     */
-    enum ColourIds
+    enum ColorIds
     {
-        backgroundColourId          = 0x1004500,  /**< A colour to use to fill the editor's background. */
-        highlightColourId           = 0x1004502,  /**< The colour to use for the highlighted background under selected text. */
-        defaultTextColourId         = 0x1004503,  /**< The colour to use for text when no syntax colouring is enabled. */
-        lineNumberBackgroundId      = 0x1004504,  /**< The colour to use for filling the background of the line-number gutter. */
-        lineNumberTextId            = 0x1004505,  /**< The colour to use for drawing the line numbers. */
+        backgroundColorId          = 0x1004500,  /**< A color to use to fill the editor's background. */
+        highlightColorId           = 0x1004502,  /**< The color to use for the highlighted background under selected text. */
+        defaultTextColorId         = 0x1004503,  /**< The color to use for text when no syntax coloring is enabled. */
+        lineNumberBackgroundId      = 0x1004504,  /**< The color to use for filling the background of the line-number gutter. */
+        lineNumberTextId            = 0x1004505,  /**< The color to use for drawing the line numbers. */
     };
 
     //==============================================================================
@@ -277,11 +277,11 @@ public:
     int getScrollbarThickness() const noexcept          { return scrollbarThickness; }
 
     //==============================================================================
-    /** Called when the return key is pressed - this can be overridden for custom behaviour. */
+    /** Called when the return key is pressed - this can be overridden for custom behavior. */
     virtual void handleReturnKey();
-    /** Called when the tab key is pressed - this can be overridden for custom behaviour. */
+    /** Called when the tab key is pressed - this can be overridden for custom behavior. */
     virtual void handleTabKey();
-    /** Called when the escape key is pressed - this can be overridden for custom behaviour. */
+    /** Called when the escape key is pressed - this can be overridden for custom behavior. */
     virtual void handleEscapeKey();
 
     /** Called when the view position is scrolled horizontally or vertically. */
@@ -402,7 +402,7 @@ private:
 
     //==============================================================================
     CodeTokeniser* codeTokeniser;
-    ColourScheme colourScheme;
+    ColorScheme colorScheme;
 
     class CodeEditorLine;
     OwnedArray<CodeEditorLine> lines;

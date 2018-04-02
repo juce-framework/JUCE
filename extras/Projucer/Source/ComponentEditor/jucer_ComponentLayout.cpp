@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -414,7 +414,7 @@ Component* ComponentLayout::addNewComponent (ComponentTypeHandler* const type, i
     if (c != nullptr)
     {
         c->setSize (type->getDefaultWidth(), type->getDefaultHeight());
-        c->setCentrePosition (x, y);
+        c->setCenterPosition (x, y);
         updateStoredComponentPosition (c, false);
 
         c->getProperties().set ("id", nextCompUID++);
@@ -1039,7 +1039,7 @@ void positionToCode (const RelativePositionedRectangle& position,
         if (d != 0)
             x << " - " << d;
     }
-    else if (position.rect.getPositionModeX() == PositionedRectangle::absoluteFromParentCentre)
+    else if (position.rect.getPositionModeX() == PositionedRectangle::absoluteFromParentCenter)
     {
         if (xrx.isNotEmpty())
             x << bracketIfNeeded (xrx) << " + " << bracketIfNeeded (xrw) << " / 2";
@@ -1055,7 +1055,7 @@ void positionToCode (const RelativePositionedRectangle& position,
     {
         if (position.rect.getAnchorPointX() == PositionedRectangle::anchorAtRightOrBottom)
             x << " - " << bracketIfNeeded (w);
-        else if (position.rect.getAnchorPointX() == PositionedRectangle::anchorAtCentre)
+        else if (position.rect.getAnchorPointX() == PositionedRectangle::anchorAtCenter)
             x << " - (" << bracketIfNeeded (w) << " / 2)";
     }
 
@@ -1085,7 +1085,7 @@ void positionToCode (const RelativePositionedRectangle& position,
         if (d != 0)
             y << " - " << d;
     }
-    else if (position.rect.getPositionModeY() == PositionedRectangle::absoluteFromParentCentre)
+    else if (position.rect.getPositionModeY() == PositionedRectangle::absoluteFromParentCenter)
     {
         if (yry.isNotEmpty())
             y << bracketIfNeeded (yry) << " + " << bracketIfNeeded (yrh) << " / 2";
@@ -1101,7 +1101,7 @@ void positionToCode (const RelativePositionedRectangle& position,
     {
         if (position.rect.getAnchorPointY() == PositionedRectangle::anchorAtRightOrBottom)
             y << " - " << bracketIfNeeded (h);
-        else if (position.rect.getAnchorPointY() == PositionedRectangle::anchorAtCentre)
+        else if (position.rect.getAnchorPointY() == PositionedRectangle::anchorAtCenter)
             y << " - (" << bracketIfNeeded (h) << " / 2)";
     }
 }

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -184,10 +184,10 @@ void Graphics::endTransparencyLayer()
 }
 
 //==============================================================================
-void Graphics::setColour (Colour newColour)
+void Graphics::setColor (Color newColor)
 {
     saveStateIfPending();
-    context.setFill (newColour);
+    context.setFill (newColor);
 }
 
 void Graphics::setOpacity (float newOpacity)
@@ -196,14 +196,14 @@ void Graphics::setOpacity (float newOpacity)
     context.setOpacity (newOpacity);
 }
 
-void Graphics::setGradientFill (const ColourGradient& gradient)
+void Graphics::setGradientFill (const ColorGradient& gradient)
 {
     setFillType (gradient);
 }
 
-void Graphics::setGradientFill (ColourGradient&& gradient)
+void Graphics::setGradientFill (ColorGradient&& gradient)
 {
-    setFillType (static_cast<ColourGradient&&> (gradient));
+    setFillType (static_cast<ColorGradient&&> (gradient));
 }
 
 void Graphics::setTiledImageFill (const Image& imageToUse, const int anchorX, const int anchorY, const float opacity)
@@ -260,7 +260,7 @@ void Graphics::drawSingleLineText (const String& text, const int startX, const i
         {
             auto w = arr.getBoundingBox (0, -1, true).getWidth();
 
-            if ((flags & (Justification::horizontallyCentred | Justification::horizontallyJustified)) != 0)
+            if ((flags & (Justification::horizontallyCentered | Justification::horizontallyJustified)) != 0)
                 w /= 2.0f;
 
             arr.draw (*this, AffineTransform::translation (-w, 0));
@@ -379,14 +379,14 @@ void Graphics::fillAll() const
     fillRect (context.getClipBounds());
 }
 
-void Graphics::fillAll (Colour colourToUse) const
+void Graphics::fillAll (Color colorToUse) const
 {
-    if (! colourToUse.isTransparent())
+    if (! colorToUse.isTransparent())
     {
         auto clip = context.getClipBounds();
 
         context.saveState();
-        context.setFill (colourToUse);
+        context.setFill (colorToUse);
         context.fillRect (clip, false);
         context.restoreState();
     }
@@ -513,7 +513,7 @@ void Graphics::drawArrow (Line<float> line, float lineThickness, float arrowhead
 }
 
 void Graphics::fillCheckerBoard (Rectangle<float> area, float checkWidth, float checkHeight,
-                                 Colour colour1, Colour colour2) const
+                                 Color color1, Color color2) const
 {
     jassert (checkWidth > 0 && checkHeight > 0); // can't be zero or less!
 
@@ -521,9 +521,9 @@ void Graphics::fillCheckerBoard (Rectangle<float> area, float checkWidth, float 
     {
         context.saveState();
 
-        if (colour1 == colour2)
+        if (color1 == color2)
         {
-            context.setFill (colour1);
+            context.setFill (color1);
             context.fillRect (area);
         }
         else
@@ -549,7 +549,7 @@ void Graphics::fillCheckerBoard (Rectangle<float> area, float checkWidth, float 
                             checks.addWithoutMerging ({ x, y, checkWidth, checkHeight });
 
                     checks.clipTo (area);
-                    context.setFill (i == ((checkNumX ^ checkNumY) & 1) ? colour1 : colour2);
+                    context.setFill (i == ((checkNumX ^ checkNumY) & 1) ? color1 : color2);
                     context.fillRectList (checks);
                 }
             }

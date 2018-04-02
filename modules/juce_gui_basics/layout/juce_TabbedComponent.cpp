@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -71,9 +71,9 @@ struct TabbedComponent::ButtonBar  : public TabbedButtonBar
         owner.popupMenuClickOnTab (tabIndex, tabName);
     }
 
-    Colour getTabBackgroundColour (const int tabIndex)
+    Color getTabBackgroundColor (const int tabIndex)
     {
-        return owner.tabs->getTabBackgroundColour (tabIndex);
+        return owner.tabs->getTabBackgroundColor (tabIndex);
     }
 
     TabBarButton* createTabButton (const String& tabName, int tabIndex)
@@ -145,7 +145,7 @@ void TabbedComponent::clearTabs()
 }
 
 void TabbedComponent::addTab (const String& tabName,
-                              Colour tabBackgroundColour,
+                              Color tabBackgroundColor,
                               Component* const contentComponent,
                               const bool deleteComponentWhenNotNeeded,
                               const int insertIndex)
@@ -155,7 +155,7 @@ void TabbedComponent::addTab (const String& tabName,
     if (deleteComponentWhenNotNeeded && contentComponent != nullptr)
         contentComponent->getProperties().set (TabbedComponentHelpers::deleteComponentId, true);
 
-    tabs->addTab (tabName, tabBackgroundColour, insertIndex);
+    tabs->addTab (tabName, tabBackgroundColor, insertIndex);
     resized();
 }
 
@@ -195,14 +195,14 @@ Component* TabbedComponent::getTabContentComponent (const int tabIndex) const no
     return contentComponents [tabIndex];
 }
 
-Colour TabbedComponent::getTabBackgroundColour (const int tabIndex) const noexcept
+Color TabbedComponent::getTabBackgroundColor (const int tabIndex) const noexcept
 {
-    return tabs->getTabBackgroundColour (tabIndex);
+    return tabs->getTabBackgroundColor (tabIndex);
 }
 
-void TabbedComponent::setTabBackgroundColour (const int tabIndex, Colour newColour)
+void TabbedComponent::setTabBackgroundColor (const int tabIndex, Color newColor)
 {
-    tabs->setTabBackgroundColour (tabIndex, newColour);
+    tabs->setTabBackgroundColor (tabIndex, newColor);
 
     if (getCurrentTabIndex() == tabIndex)
         repaint();
@@ -239,14 +239,14 @@ void TabbedComponent::setIndent (const int indentThickness)
 
 void TabbedComponent::paint (Graphics& g)
 {
-    g.fillAll (findColour (backgroundColourId));
+    g.fillAll (findColor (backgroundColorId));
 
     auto content = getLocalBounds();
     BorderSize<int> outline (outlineThickness);
     TabbedComponentHelpers::getTabArea (content, outline, getOrientation(), tabDepth);
 
     g.reduceClipRegion (content);
-    g.fillAll (tabs->getTabBackgroundColour (getCurrentTabIndex()));
+    g.fillAll (tabs->getTabBackgroundColor (getCurrentTabIndex()));
 
     if (outlineThickness > 0)
     {
@@ -254,7 +254,7 @@ void TabbedComponent::paint (Graphics& g)
         rl.subtract (outline.subtractedFrom (content));
 
         g.reduceClipRegion (rl);
-        g.fillAll (findColour (outlineColourId));
+        g.fillAll (findColor (outlineColorId));
     }
 }
 

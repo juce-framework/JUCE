@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -56,7 +56,7 @@ namespace LiveConstantEditor
     inline void setFromString (float& v,          const String& s)    { v = (float) parseDouble (s); }
     inline void setFromString (bool& v,           const String& s)    { v = (s == "true"); }
     inline void setFromString (String& v,         const String& s)    { v = s; }
-    inline void setFromString (Colour& v,         const String& s)    { v = Colour ((uint32) parseInt (s)); }
+    inline void setFromString (Color& v,         const String& s)    { v = Color ((uint32) parseInt (s)); }
 
     template <typename Type>
     inline String getAsString (const Type& v, bool)              { return String (v); }
@@ -69,14 +69,14 @@ namespace LiveConstantEditor
     inline String getAsString (bool v, bool)                     { return v ? "true" : "false"; }
     inline String getAsString (int64 v, bool preferHex)          { return intToString ((int64) v, preferHex); }
     inline String getAsString (uint64 v, bool preferHex)         { return intToString ((int64) v, preferHex); }
-    inline String getAsString (Colour v, bool)                   { return intToString ((int) v.getARGB(), true); }
+    inline String getAsString (Color v, bool)                   { return intToString ((int) v.getARGB(), true); }
 
     template <typename Type>    struct isStringType              { enum { value = 0 }; };
     template <>                 struct isStringType<String>      { enum { value = 1 }; };
 
     template <typename Type>
     inline String getAsCode (Type& v, bool preferHex)       { return getAsString (v, preferHex); }
-    inline String getAsCode (Colour v, bool)                { return "Colour (0x" + String::toHexString ((int) v.getARGB()).paddedLeft ('0', 8) + ")"; }
+    inline String getAsCode (Color v, bool)                { return "Color (0x" + String::toHexString ((int) v.getARGB()).paddedLeft ('0', 8) + ")"; }
     inline String getAsCode (const String& v, bool)         { return CppTokeniserFunctions::addEscapeChars(v).quoted(); }
     inline String getAsCode (const char* v, bool)           { return getAsCode (String (v), false); }
 
@@ -132,7 +132,7 @@ namespace LiveConstantEditor
     };
 
     //==============================================================================
-    Component* createColourEditor (LivePropertyEditorBase&);
+    Component* createColorEditor (LivePropertyEditorBase&);
     Component* createIntegerSlider (LivePropertyEditorBase&);
     Component* createFloatSlider (LivePropertyEditorBase&);
     Component* createBoolSlider (LivePropertyEditorBase&);
@@ -148,7 +148,7 @@ namespace LiveConstantEditor
     template<> struct CustomEditor<uint64>          { static Component* create (LivePropertyEditorBase& e) { return createIntegerSlider (e); } };
     template<> struct CustomEditor<float>           { static Component* create (LivePropertyEditorBase& e) { return createFloatSlider (e); } };
     template<> struct CustomEditor<double>          { static Component* create (LivePropertyEditorBase& e) { return createFloatSlider (e); } };
-    template<> struct CustomEditor<Colour>          { static Component* create (LivePropertyEditorBase& e) { return createColourEditor (e); } };
+    template<> struct CustomEditor<Color>          { static Component* create (LivePropertyEditorBase& e) { return createColorEditor (e); } };
     template<> struct CustomEditor<bool>            { static Component* create (LivePropertyEditorBase& e) { return createBoolSlider (e); } };
 
     template <typename Type>
@@ -265,7 +265,7 @@ namespace LiveConstantEditor
     that automatically pops-up a window containing an editor that allows the value to be
     tweaked at run-time. The editor window will also force all visible components to be
     resized and repainted whenever a value is changed, so that if you use this to wrap
-    a colour or layout parameter, you'll be able to immediately see the effects of changing it.
+    a color or layout parameter, you'll be able to immediately see the effects of changing it.
 
     The editor will also load the original source-file that contains each JUCE_LIVE_CONSTANT
     macro, and will display a preview of the modified source code as you adjust the values.
@@ -278,27 +278,27 @@ namespace LiveConstantEditor
       it'll only work if the source files are stored locally in the same location as they
       were when you compiled the program.
     - It's only designed to cope with simple types: primitives, string literals, and
-      the Colour class, so if you try using it for other classes or complex expressions,
+      the Color class, so if you try using it for other classes or complex expressions,
       good luck!
     - The editor window will get popped up whenever a new value is used for the first
       time. You can close the window, but there's no way to get it back without restarting
       the app!
 
-    e.g. in this example the colours, font size, and text used in the paint method can
+    e.g. in this example the colors, font size, and text used in the paint method can
     all be adjusted live:
     @code
     void MyComp::paint (Graphics& g) override
     {
-        g.fillAll (JUCE_LIVE_CONSTANT (Colour (0xffddddff)));
+        g.fillAll (JUCE_LIVE_CONSTANT (Color (0xffddddff)));
 
-        Colour fontColour = JUCE_LIVE_CONSTANT (Colour (0xff005500));
+        Color fontColor = JUCE_LIVE_CONSTANT (Color (0xff005500));
         float fontSize = JUCE_LIVE_CONSTANT (16.0f);
 
-        g.setColour (fontColour);
+        g.setColor (fontColor);
         g.setFont (fontSize);
 
         g.drawFittedText (JUCE_LIVE_CONSTANT ("Hello world!"),
-                          getLocalBounds(), Justification::centred, 2);
+                          getLocalBounds(), Justification::centered, 2);
     }
     @endcode
  */

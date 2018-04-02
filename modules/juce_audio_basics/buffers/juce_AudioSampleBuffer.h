@@ -315,7 +315,7 @@ public:
 
         If clearExtraSpace is true, then any extra channels or space that is
         allocated will be also be cleared. If false, then this space is left
-        uninitialised.
+        uninitialized.
 
         If avoidReallocating is true, then changing the buffer's size won't reduce the
         amount of memory that is currently allocated (but it will still increase it if
@@ -558,7 +558,7 @@ public:
     //==============================================================================
     /** Returns a sample from the buffer.
         The channel and index are not checked - they are expected to be in-range. If not,
-        an assertion will be thrown, but in a release build, you're into 'undefined behaviour'
+        an assertion will be thrown, but in a release build, you're into 'undefined behavior'
         territory.
     */
     Type getSample (int channel, int sampleIndex) const noexcept
@@ -570,7 +570,7 @@ public:
 
     /** Sets a sample in the buffer.
         The channel and index are not checked - they are expected to be in-range. If not,
-        an assertion will be thrown, but in a release build, you're into 'undefined behaviour'
+        an assertion will be thrown, but in a release build, you're into 'undefined behavior'
         territory.
     */
     void setSample (int destChannel, int destSample, Type newValue) noexcept
@@ -583,7 +583,7 @@ public:
 
     /** Adds a value to a sample in the buffer.
         The channel and index are not checked - they are expected to be in-range. If not,
-        an assertion will be thrown, but in a release build, you're into 'undefined behaviour'
+        an assertion will be thrown, but in a release build, you're into 'undefined behavior'
         territory.
     */
     void addSample (int destChannel, int destSample, Type valueToAdd) noexcept

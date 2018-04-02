@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -63,7 +63,7 @@ public:
     class JUCE_API  Position
     {
     public:
-        /** Creates an uninitialised position.
+        /** Creates an uninitialized position.
             Don't attempt to call any methods on this until you've given it an owner document
             to refer to!
         */
@@ -237,7 +237,7 @@ public:
     */
     void replaceAllContent (const String& newContent);
 
-    /** Analyses the changes between the current content and some new text, and applies
+    /** Analyzes the changes between the current content and some new text, and applies
         those changes.
     */
     void applyChanges (const String& newContent);

@@ -167,7 +167,7 @@ defined(PNG_READ_BACKGROUND_SUPPORTED)
 
 #ifdef PNG_oFFs_SUPPORTED
    /* The oFFs chunk gives the offset in "offset_unit_type" units rightwards
-    * and downwards from the top-left corner of the display, page, or other
+    * and downward from the top-left corner of the display, page, or other
     * application-specific co-ordinate space.  See the PNG_OFFSET_ defines
     * below for the unit types.  Valid if (valid & PNG_INFO_oFFs) non-zero.
     */

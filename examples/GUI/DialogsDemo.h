@@ -164,7 +164,7 @@ public:
     //==============================================================================
     void paint (Graphics& g) override
     {
-        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground));
+        g.fillAll (getUIColorIfAvailable (LookAndFeel_V4::ColorScheme::UIColor::windowBackground));
     }
 
     void resized() override
@@ -225,14 +225,14 @@ private:
         }
         else if (type == calloutBoxWindow)
         {
-            auto* colourSelector = new ColourSelector();
+            auto* colorSelector = new ColorSelector();
 
-            colourSelector->setName ("background");
-            colourSelector->setCurrentColour (findColour (TextButton::buttonColourId));
-            colourSelector->setColour (ColourSelector::backgroundColourId, Colours::transparentBlack);
-            colourSelector->setSize (300, 400);
+            colorSelector->setName ("background");
+            colorSelector->setCurrentColor (findColor (TextButton::buttonColorId));
+            colorSelector->setColor (ColorSelector::backgroundColorId, Colors::transparentBlack);
+            colorSelector->setSize (300, 400);
 
-            CallOutBox::launchAsynchronously (colourSelector, button.getScreenBounds(), nullptr);
+            CallOutBox::launchAsynchronously (colorSelector, button.getScreenBounds(), nullptr);
         }
         else if (type == extraComponentsAlertWindow)
         {
@@ -422,8 +422,8 @@ private:
 
             Image myImage2 (Image::RGB, 500, 500, true);
             Graphics g (myImage2);
-            g.setColour (Colours::green);
-            ColourGradient gradient (Colours::yellow, 170, 170, Colours::cyan, 170, 20, true);
+            g.setColor (Colors::green);
+            ColorGradient gradient (Colors::yellow, 170, 170, Colors::cyan, 170, 20, true);
             g.setGradientFill (gradient);
             g.fillEllipse (20, 20, 300, 300);
 

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -57,9 +57,9 @@ Project::Project (const File& f)
     moveOldPropertyFromProjectToAllExporters (Ids::bigIcon);
     moveOldPropertyFromProjectToAllExporters (Ids::smallIcon);
 
-    initialiseProjectValues();
-    initialiseMainGroup();
-    initialiseAudioPluginValues();
+    initializeProjectValues();
+    initializeMainGroup();
+    initializeAudioPluginValues();
 
     parsedPreprocessorDefs = parsePreprocessorDefs (preprocessorDefsValue.get());
 
@@ -158,7 +158,7 @@ void Project::updateDeprecatedProjectSettingsInteractively()
         exporter->updateDeprecatedProjectSettingsInteractively();
 }
 
-void Project::initialiseMainGroup()
+void Project::initializeMainGroup()
 {
     // Create main file group if missing
     if (! projectRoot.getChildWithName (Ids::MAINGROUP).isValid())
@@ -167,10 +167,10 @@ void Project::initialiseMainGroup()
         projectRoot.addChild (mainGroup.state, 0, 0);
     }
 
-    getMainGroup().initialiseMissingProperties();
+    getMainGroup().initializeMissingProperties();
 }
 
-void Project::initialiseProjectValues()
+void Project::initializeProjectValues()
 {
     projectNameValue.referTo         (projectRoot, Ids::name,             getUndoManager(), "JUCE Project");
     projectUIDValue.referTo          (projectRoot, Ids::ID,               getUndoManager(), createAlphaNumericUID());
@@ -184,7 +184,7 @@ void Project::initialiseProjectValues()
     companyEmailValue.referTo        (projectRoot, Ids::companyEmail,     getUndoManager());
 
     displaySplashScreenValue.referTo (projectRoot, Ids::displaySplashScreen, getUndoManager(), ! ProjucerApplication::getApp().isPaidOrGPL());
-    splashScreenColourValue.referTo  (projectRoot, Ids::splashScreenColour,  getUndoManager(), "Dark");
+    splashScreenColorValue.referTo  (projectRoot, Ids::splashScreenColor,  getUndoManager(), "Dark");
     reportAppUsageValue.referTo      (projectRoot, Ids::reportAppUsage,      getUndoManager());
 
     if (ProjucerApplication::getApp().isPaidOrGPL())
@@ -208,7 +208,7 @@ void Project::initialiseProjectValues()
     binaryDataNamespaceValue.referTo           (projectRoot, Ids::binaryDataNamespace,      getUndoManager(), "BinaryData");
 }
 
-void Project::initialiseAudioPluginValues()
+void Project::initializeAudioPluginValues()
 {
     buildVSTValue.referTo                    (projectRoot, Ids::buildVST,        getUndoManager(), true);
     buildVST3Value.referTo                   (projectRoot, Ids::buildVST3,       getUndoManager(), false);
@@ -419,9 +419,9 @@ Result Project::loadDocument (const File& file)
     enabledModulesList.reset();
     projectRoot = newTree;
 
-    initialiseProjectValues();
-    initialiseMainGroup();
-    initialiseAudioPluginValues();
+    initializeProjectValues();
+    initializeMainGroup();
+    initializeAudioPluginValues();
 
     parsedPreprocessorDefs = parsePreprocessorDefs (preprocessorDefsValue.get());
 
@@ -745,7 +745,7 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
 
     {
         String licenseRequiredTagline ("Required for closed source applications without an Indie or Pro JUCE license");
-        String licenseRequiredInfo ("In accordance with the terms of the JUCE 5 End-Use License Agreement (www.juce.com/juce-5-licence), "
+        String licenseRequiredInfo ("In accordance with the terms of the JUCE 5 End-Use License Agreement (www.juce.com/juce-5-license), "
                                     "this option can only be disabled for closed source applications if you have a JUCE Indie or Pro "
                                     "license, or are using JUCE under the GPL v3 license.");
 
@@ -777,10 +777,10 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
         }
     }
 
-    props.add (new ChoicePropertyComponent (splashScreenColourValue, "Splash Screen Colour",
+    props.add (new ChoicePropertyComponent (splashScreenColorValue, "Splash Screen Color",
                                             { "Dark", "Light" },
                                             { "Dark", "Light" }),
-               "Choose the colour of the JUCE splash screen.");
+               "Choose the color of the JUCE splash screen.");
 
     {
         StringArray projectTypeNames;
@@ -1017,7 +1017,7 @@ Project::Item Project::Item::createGroup (Project& project, const String& name, 
 {
     Item group (project, ValueTree (Ids::GROUP), isModuleCode);
     group.setID (uid);
-    group.initialiseMissingProperties();
+    group.initializeMissingProperties();
     group.getNameValue() = name;
     return group;
 }
@@ -1179,7 +1179,7 @@ File Project::Item::determineGroupFolder() const
     return f;
 }
 
-void Project::Item::initialiseMissingProperties()
+void Project::Item::initializeMissingProperties()
 {
     if (! state.hasProperty (Ids::ID))
         setID (createAlphaNumericUID());
@@ -1191,7 +1191,7 @@ void Project::Item::initialiseMissingProperties()
     else if (isGroup())
     {
         for (auto i = getNumChildren(); --i >= 0;)
-            getChild(i).initialiseMissingProperties();
+            getChild(i).initializeMissingProperties();
     }
 }
 
@@ -1351,7 +1351,7 @@ bool Project::Item::addFileRetainingSortOrder (const File& file, bool shouldComp
 void Project::Item::addFileUnchecked (const File& file, int insertIndex, const bool shouldCompile)
 {
     Item item (project, ValueTree (Ids::FILE), belongsToModule);
-    item.initialiseMissingProperties();
+    item.initializeMissingProperties();
     item.getNameValue() = file.getFileName();
     item.getShouldCompileValue() = shouldCompile && file.hasFileExtension (fileTypesToCompileByDefault);
     item.getShouldAddToBinaryResourcesValue() = project.shouldBeAddedToBinaryResourcesByDefault (file);
@@ -1366,7 +1366,7 @@ void Project::Item::addFileUnchecked (const File& file, int insertIndex, const b
 bool Project::Item::addRelativeFile (const RelativePath& file, int insertIndex, bool shouldCompile)
 {
     Item item (project, ValueTree (Ids::FILE), belongsToModule);
-    item.initialiseMissingProperties();
+    item.initializeMissingProperties();
     item.getNameValue() = file.getFileName();
     item.getShouldCompileValue() = shouldCompile;
     item.getShouldAddToBinaryResourcesValue() = project.shouldBeAddedToBinaryResourcesByDefault (file);
@@ -1388,15 +1388,15 @@ Icon Project::Item::getIcon (bool isOpen) const
     if (isFile())
     {
         if (isImageFile())
-            return Icon (icons.imageDoc, Colours::transparentBlack);
+            return Icon (icons.imageDoc, Colors::transparentBlack);
 
-        return { icons.file, Colours::transparentBlack };
+        return { icons.file, Colors::transparentBlack };
     }
 
     if (isMainGroup())
-        return { icons.juceLogo, Colours::orange };
+        return { icons.juceLogo, Colors::orange };
 
-    return { isOpen ? icons.openFolder : icons.closedFolder, Colours::transparentBlack };
+    return { isOpen ? icons.openFolder : icons.closedFolder, Colors::transparentBlack };
 }
 
 bool Project::Item::isIconCrossedOut() const

@@ -62,16 +62,16 @@ public:
     //==============================================================================
     void paint (Graphics& g) override
     {
-        g.fillAll (Colours::transparentBlack);
+        g.fillAll (Colors::transparentBlack);
 
         auto area = g.getClipBounds();
-        g.setColour (getLookAndFeel().findColour (Slider::thumbColourId));
+        g.setColor (getLookAndFeel().findColor (Slider::thumbColorId));
         g.fillRoundedRectangle (area.toFloat(), 6.0);
 
         auto unfilledHeight = area.getHeight() * (1.0 - level);
         g.reduceClipRegion (area.getX(), area.getY(),
                             area.getWidth(), (int) unfilledHeight);
-        g.setColour (getLookAndFeel().findColour (Slider::trackColourId));
+        g.setColor (getLookAndFeel().findColor (Slider::trackColorId));
         g.fillRoundedRectangle (area.toFloat(), 6.0);
     }
 
@@ -155,7 +155,7 @@ public:
         parameters.createAndAddParameter ("gain",
                                           "Gain",
                                           {},
-                                          NormalisableRange<float> (0.0f, 1.0f),
+                                          NormalizableRange<float> (0.0f, 1.0f),
                                           (float) (1.0 / 3.14),
                                           nullptr,
                                           nullptr);
@@ -345,7 +345,7 @@ private:
             // Configure the switch to host button.
 
             switchToHostButtonLabel.setFont (Font (Font::getDefaultMonospacedFontName(), 18.0f, Font::plain));
-            switchToHostButtonLabel.setJustificationType (Justification::centredRight);
+            switchToHostButtonLabel.setJustificationType (Justification::centeredRight);
             switchToHostButtonLabel.setText ("Switch to\nhost app:", dontSendNotification);
             addChildComponent (switchToHostButtonLabel);
 
@@ -375,7 +375,7 @@ private:
         //==============================================================================
         void paint (Graphics& g) override
         {
-            g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+            g.fillAll (getLookAndFeel().findColor (ResizableWindow::backgroundColorId));
         }
 
         void resized() override
@@ -501,12 +501,12 @@ private:
 
             if (visible)
             {
-                auto playColour = lastPosInfo.isPlaying ? Colours::green : defaultButtonColour;
-                playButton.setColours (playColour, playColour, playColour);
+                auto playColor = lastPosInfo.isPlaying ? Colors::green : defaultButtonColor;
+                playButton.setColors (playColor, playColor, playColor);
                 playButton.repaint();
 
-                auto recordColour = lastPosInfo.isRecording ? Colours::red : defaultButtonColour;
-                recordButton.setColours (recordColour, recordColour, recordColour);
+                auto recordColor = lastPosInfo.isRecording ? Colors::red : defaultButtonColor;
+                recordButton.setColors (recordColor, recordColor, recordColor);
                 recordButton.repaint();
             }
         }
@@ -525,9 +525,9 @@ private:
                 {
                     auto icon = hostType.getHostIcon (buttonSize);
                     switchToHostButton.setImages(false, true, true,
-                                                 icon, 1.0, Colours::transparentBlack,
-                                                 icon, 1.0, Colours::transparentBlack,
-                                                 icon, 1.0, Colours::transparentBlack);
+                                                 icon, 1.0, Colors::transparentBlack,
+                                                 icon, 1.0, Colors::transparentBlack,
+                                                 icon, 1.0, Colors::transparentBlack);
                 }
             }
         }
@@ -536,10 +536,10 @@ private:
         AudioProcessorValueTreeState& parameters;
 
         const int buttonSize = 30;
-        const Colour defaultButtonColour = Colours::darkgrey;
-        ShapeButton rewindButton {"Rewind", defaultButtonColour, defaultButtonColour, defaultButtonColour};
-        ShapeButton playButton   {"Play",   defaultButtonColour, defaultButtonColour, defaultButtonColour};
-        ShapeButton recordButton {"Record", defaultButtonColour, defaultButtonColour, defaultButtonColour};
+        const Color defaultButtonColor = Colors::darkgray;
+        ShapeButton rewindButton {"Rewind", defaultButtonColor, defaultButtonColor, defaultButtonColor};
+        ShapeButton playButton   {"Play",   defaultButtonColor, defaultButtonColor, defaultButtonColor};
+        ShapeButton recordButton {"Record", defaultButtonColor, defaultButtonColor, defaultButtonColor};
 
         Slider gainSlider;
         AudioProcessorValueTreeState::SliderAttachment gainAttachment = { parameters, "gain", gainSlider };

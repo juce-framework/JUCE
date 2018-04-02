@@ -285,7 +285,7 @@ public:
         }
 
         // Fill a black square for the Lightpad
-        g.fillAll (Colours::black);
+        g.fillAll (Colors::black);
 
         // size ration between physical and on-screen blocks
         Point<float> ratio (r.getWidth()  / block->getWidth(),
@@ -302,10 +302,10 @@ public:
                                         touch.touch.y);
 
             auto blob = Rectangle<float> (circleSize, circleSize)
-                           .withCentre (touchPosition) * ratio;
+                           .withCenter (touchPosition) * ratio;
 
-            ColourGradient cg (colourArray[touch.touch.index],  blob.getCentreX(), blob.getCentreY(),
-                               Colours::transparentBlack,       blob.getRight(),   blob.getBottom(),
+            ColorGradient cg (colorArray[touch.touch.index],  blob.getCenterX(), blob.getCenterY(),
+                               Colors::transparentBlack,       blob.getRight(),   blob.getBottom(),
                                true);
 
             g.setGradientFill (cg);
@@ -316,14 +316,14 @@ public:
     void handleTouchChange (TouchSurface::Touch touch) override { touches.updateTouch (touch); }
 
 private:
-    /** An Array of colours to use for touches */
-    Array<Colour> colourArray = { Colours::red,
-                                  Colours::blue,
-                                  Colours::green,
-                                  Colours::yellow,
-                                  Colours::white,
-                                  Colours::hotpink,
-                                  Colours::mediumpurple };
+    /** An Array of colors to use for touches */
+    Array<Color> colorArray = { Colors::red,
+                                  Colors::blue,
+                                  Colors::green,
+                                  Colors::yellow,
+                                  Colors::white,
+                                  Colors::hotpink,
+                                  Colors::mediumpurple };
 
     /** A list of current Touch events */
     TouchList<TouchSurface::Touch> touches;
@@ -374,9 +374,9 @@ public:
 
         auto row = r;
 
-        auto ledRow     = row.removeFromTop (rowHeight)    .withSizeKeepingCentre (r.getWidth(), ledWidth);
-        auto buttonRow1 = row.removeFromTop (rowHeight * 2).withSizeKeepingCentre (r.getWidth(), buttonWidth);
-        auto buttonRow2 = row.removeFromTop (rowHeight * 2).withSizeKeepingCentre (r.getWidth(), buttonWidth);
+        auto ledRow     = row.removeFromTop (rowHeight)    .withSizeKeepingCenter (r.getWidth(), ledWidth);
+        auto buttonRow1 = row.removeFromTop (rowHeight * 2).withSizeKeepingCenter (r.getWidth(), buttonWidth);
+        auto buttonRow2 = row.removeFromTop (rowHeight * 2).withSizeKeepingCenter (r.getWidth(), buttonWidth);
 
         for (auto* led : leds)
         {
@@ -404,7 +404,7 @@ public:
         auto r = getLocalBounds().toFloat();
 
         // Fill a black rectangle for the Control Block
-        g.setColour (Colours::black);
+        g.setColor (Colors::black);
         g.fillRoundedRectangle (r, r.getWidth() / 20.0f);
     }
 
@@ -439,15 +439,15 @@ private:
     struct ControlBlockSubComponent   : public Component,
                                         public TooltipClient
     {
-        ControlBlockSubComponent (Colour componentColourToUse)
-            : componentColour (componentColourToUse)
+        ControlBlockSubComponent (Color componentColorToUse)
+            : componentColor (componentColorToUse)
         {}
 
         /** Subclasses should override this to paint the button on the screen */
         virtual void paint (Graphics&) override = 0;
 
-        /** Sets the colour of the button */
-        void setColour (Colour c)   { componentColour = c; }
+        /** Sets the color of the button */
+        void setColor (Color c)   { componentColor = c; }
 
         /** Sets the on state of the button */
         void setOnState (bool isOn)
@@ -467,7 +467,7 @@ private:
         }
 
         //==============================================================================
-        Colour componentColour;
+        Color componentColor;
         bool onState = false;
 
         //==============================================================================
@@ -479,11 +479,11 @@ private:
     */
     struct LEDComponent  : public ControlBlockSubComponent
     {
-        LEDComponent() : ControlBlockSubComponent (Colours::green) {}
+        LEDComponent() : ControlBlockSubComponent (Colors::green) {}
 
         void paint (Graphics& g) override
         {
-            g.setColour (componentColour.withAlpha (onState ? 1.0f : 0.2f));
+            g.setColor (componentColor.withAlpha (onState ? 1.0f : 0.2f));
             g.fillEllipse (getLocalBounds().toFloat());
         }
     };
@@ -493,11 +493,11 @@ private:
     */
     struct CircleButtonComponent  : public ControlBlockSubComponent
     {
-        CircleButtonComponent() : ControlBlockSubComponent (Colours::blue) {}
+        CircleButtonComponent() : ControlBlockSubComponent (Colors::blue) {}
 
         void paint (Graphics& g) override
         {
-            g.setColour (componentColour.withAlpha (onState ? 1.0f : 0.2f));
+            g.setColor (componentColor.withAlpha (onState ? 1.0f : 0.2f));
             g.fillEllipse (getLocalBounds().toFloat());
         }
     };
@@ -508,15 +508,15 @@ private:
     */
     struct RoundedRectangleButtonComponent  : public ControlBlockSubComponent
     {
-        RoundedRectangleButtonComponent() : ControlBlockSubComponent (Colours::blue) {}
+        RoundedRectangleButtonComponent() : ControlBlockSubComponent (Colors::blue) {}
 
         void paint (Graphics& g) override
         {
             auto r = getLocalBounds().toFloat();
 
-            g.setColour (componentColour.withAlpha (0.2f));
+            g.setColor (componentColor.withAlpha (0.2f));
             g.fillRoundedRectangle (r.toFloat(), 20.0f);
-            g.setColour (componentColour.withAlpha (1.0f));
+            g.setColor (componentColor.withAlpha (1.0f));
 
             // is a button pressed?
             if (doubleButtonOnState[0] || doubleButtonOnState[1])
@@ -576,7 +576,7 @@ public:
     BlocksMonitorDemo()
     {
         noBlocksLabel.setText ("No BLOCKS connected...", dontSendNotification);
-        noBlocksLabel.setJustificationType (Justification::centred);
+        noBlocksLabel.setJustificationType (Justification::centered);
 
         zoomOutButton.setButtonText ("+");
         zoomOutButton.onClick = [this] { blockUnitInPixels = (int) (blockUnitInPixels * 1.05f); resized(); };
@@ -678,7 +678,7 @@ public:
 
             blockUnitInPixels = static_cast<int> (jmin ((getHeight() / totalHeight) - 50, (getWidth() / totalWidth) - 50));
 
-            masterBlockComponent->centreWithSize (masterBlockComponent->block->getWidth()  * blockUnitInPixels,
+            masterBlockComponent->centerWithSize (masterBlockComponent->block->getWidth()  * blockUnitInPixels,
                                                   masterBlockComponent->block->getHeight() * blockUnitInPixels);
 
             isInitialResized = false;

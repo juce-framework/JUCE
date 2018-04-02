@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -78,7 +78,7 @@ public:
 
     /** Tells the scrollbar whether to make itself invisible when not needed.
 
-        The default behaviour is for a scrollbar to become invisible when the thumb
+        The default behavior is for a scrollbar to become invisible when the thumb
         fills the whole of its range (i.e. when it can't be moved). Setting this
         value to false forces the bar to always be visible.
         @see autoHides()
@@ -278,18 +278,18 @@ public:
                                int minimumDelayInMillisecs = -1);
 
     //==============================================================================
-    /** A set of colour IDs to use to change the colour of various aspects of the component.
+    /** A set of color IDs to use to change the color of various aspects of the component.
 
-        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        These constants can be used either via the Component::setColor(), or LookAndFeel::setColor()
         methods.
 
-        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+        @see Component::setColor, Component::findColor, LookAndFeel::setColor, LookAndFeel::findColor
     */
-    enum ColourIds
+    enum ColorIds
     {
-        backgroundColourId          = 0x1000300,    /**< The background colour of the scrollbar. */
-        thumbColourId               = 0x1000400,    /**< A base colour to use for the thumb. The look and feel will probably use variations on this colour. */
-        trackColourId               = 0x1000401     /**< A base colour to use for the slot area of the bar. The look and feel will probably use variations on this colour. */
+        backgroundColorId          = 0x1000300,    /**< The background color of the scrollbar. */
+        thumbColorId               = 0x1000400,    /**< A base color to use for the thumb. The look and feel will probably use variations on this color. */
+        trackColorId               = 0x1000401     /**< A base color to use for the slot area of the bar. The look and feel will probably use variations on this color. */
     };
 
     //==============================================================================

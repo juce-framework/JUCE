@@ -40,7 +40,7 @@
     </XCODE_MAC>
     <VS2013 targetFolder="Builds/VisualStudio2013" bigIcon="Ww6bQw">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JUCE Network Graphics Demo"/>
+        <CONFIGURATION name="Debug" isDebug="1" optimization="1" targetName="JUCE Network Graphics Demo"/>
         <CONFIGURATION name="Release" isDebug="0" targetName="JUCE Network Graphics Demo"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
@@ -131,7 +131,7 @@
                    androidNDKPath="" bigIcon="Ww6bQw" gradleToolchainVersion="3.6">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" androidArchitectures="armeabi armeabi-v7a x86" isDebug="1"
-                       optimisation="6" targetName="JUCE Network Graphics Demo" defines="JUCE_DEBUG=0"/>
+                       optimization="6" targetName="JUCE Network Graphics Demo" defines="JUCE_DEBUG=0"/>
         <CONFIGURATION name="Release" androidArchitectures="" isDebug="0" targetName="JUCE Network Graphics Demo"/>
       </CONFIGURATIONS>
       <MODULEPATHS>

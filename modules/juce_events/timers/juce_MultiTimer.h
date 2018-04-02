@@ -91,7 +91,7 @@ public:
 
     /** Stops a timer.
 
-        If a timer has been started with the given ID number, it will be cancelled.
+        If a timer has been started with the given ID number, it will be canceled.
         No more callbacks will be made for the specified timer after this method returns.
 
         If this is called from a different thread, any callbacks that may

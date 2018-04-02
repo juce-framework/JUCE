@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -42,7 +42,7 @@ public:
        #endif
 
         addAndMakeVisible (titleLabel);
-        titleLabel.setJustificationType (Justification::centred);
+        titleLabel.setJustificationType (Justification::centered);
         titleLabel.setFont (Font (35.0f, Font::FontStyleFlags::bold));
 
         auto buildDate = Time::getCompilationDate();
@@ -53,9 +53,9 @@ public:
                                                  + " " + String (buildDate.getYear()),
                               dontSendNotification);
 
-        versionLabel.setJustificationType (Justification::centred);
+        versionLabel.setJustificationType (Justification::centered);
         addAndMakeVisible (copyrightLabel);
-        copyrightLabel.setJustificationType (Justification::centred);
+        copyrightLabel.setJustificationType (Justification::centered);
 
         addAndMakeVisible (aboutButton);
         aboutButton.setTooltip ( {} );
@@ -79,7 +79,7 @@ public:
 
         auto rightSlice  = bounds.removeFromRight (150);
         auto leftSlice   = bounds.removeFromLeft (150);
-        auto centreSlice = bounds;
+        auto centerSlice = bounds;
 
         //======================================================================
         rightSlice.removeFromRight (20);
@@ -96,30 +96,30 @@ public:
         //======================================================================
         auto titleHeight = 40;
 
-        centreSlice.removeFromTop ((centreSlice.getHeight() / 2) - (titleHeight / 2));
+        centerSlice.removeFromTop ((centerSlice.getHeight() / 2) - (titleHeight / 2));
 
-        titleLabel.setBounds (centreSlice.removeFromTop (titleHeight));
+        titleLabel.setBounds (centerSlice.removeFromTop (titleHeight));
 
-        centreSlice.removeFromTop (10);
-        versionLabel.setBounds (centreSlice.removeFromTop (40));
+        centerSlice.removeFromTop (10);
+        versionLabel.setBounds (centerSlice.removeFromTop (40));
 
-        centreSlice.removeFromTop (10);
+        centerSlice.removeFromTop (10);
 
         if (licenseButton.isShowing())
-            licenseButton.setBounds (centreSlice.removeFromTop (25).reduced (25, 0));
+            licenseButton.setBounds (centerSlice.removeFromTop (25).reduced (25, 0));
 
-        aboutButton.setBounds (centreSlice.removeFromBottom (20));
+        aboutButton.setBounds (centerSlice.removeFromBottom (20));
     }
 
     void paint (Graphics& g) override
     {
-        g.fillAll (findColour (backgroundColourId));
+        g.fillAll (findColor (backgroundColorId));
 
         if (juceLogo != nullptr)
-            juceLogo->drawWithin (g, juceLogoBounds.translated (-75, -75), RectanglePlacement::centred, 1.0);
+            juceLogo->drawWithin (g, juceLogoBounds.translated (-75, -75), RectanglePlacement::centered, 1.0);
 
         if (huckleberryLogo != nullptr)
-            huckleberryLogo->drawWithin (g, huckleberryLogoBounds, RectanglePlacement::centred, 1.0);
+            huckleberryLogo->drawWithin (g, huckleberryLogoBounds, RectanglePlacement::centered, 1.0);
     }
 
 private:

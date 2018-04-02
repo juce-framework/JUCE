@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -29,10 +29,10 @@ namespace juce
 
 //==============================================================================
 /**
-    A text string with a set of colour/font settings that are associated with sub-ranges
+    A text string with a set of color/font settings that are associated with sub-ranges
     of the text.
 
-    An attributed string lets you create a string with varied fonts, colours, word-wrapping,
+    An attributed string lets you create a string with varied fonts, colors, word-wrapping,
     layout, etc., and draw it using AttributedString::draw().
 
     @see TextLayout
@@ -61,22 +61,22 @@ public:
     const String& getText() const noexcept                  { return text; }
 
     /** Replaces all the text.
-        This will change the text, but won't affect any of the colour or font attributes
+        This will change the text, but won't affect any of the color or font attributes
         that have been added.
     */
     void setText (const String& newText);
 
-    /** Appends some text (with a default font and colour). */
+    /** Appends some text (with a default font and color). */
     void append (const String& textToAppend);
-    /** Appends some text, with a specified font, and the default colour (black). */
+    /** Appends some text, with a specified font, and the default color (black). */
     void append (const String& textToAppend, const Font& font);
-    /** Appends some text, with a specified colour, and the default font. */
-    void append (const String& textToAppend, Colour colour);
-    /** Appends some text, with a specified font and colour. */
-    void append (const String& textToAppend, const Font& font, Colour colour);
+    /** Appends some text, with a specified color, and the default font. */
+    void append (const String& textToAppend, Color color);
+    /** Appends some text, with a specified font and color. */
+    void append (const String& textToAppend, const Font& font, Color color);
 
     /** Appends another AttributedString to this one.
-        Note that this will only append the text, fonts, and colours - it won't copy any
+        Note that this will only append the text, fonts, and colors - it won't copy any
         other properties such as justification, line-spacing, etc from the other object.
     */
     void append (const AttributedString& other);
@@ -106,7 +106,7 @@ public:
     void setJustification (Justification newJustification) noexcept;
 
     //==============================================================================
-    /** Types of word-wrap behaviour.
+    /** Types of word-wrap behavior.
         @see getWordWrap, setWordWrap
     */
     enum WordWrap
@@ -116,10 +116,10 @@ public:
         byChar, /**< Lines are wrapped on a character boundary. */
     };
 
-    /** Returns the word-wrapping behaviour. */
+    /** Returns the word-wrapping behavior. */
     WordWrap getWordWrap() const noexcept                   { return wordWrap; }
 
-    /** Sets the word-wrapping behaviour. */
+    /** Sets the word-wrapping behavior. */
     void setWordWrap (WordWrap newWordWrap) noexcept;
 
     //==============================================================================
@@ -158,8 +158,8 @@ public:
         Attribute (Attribute&&) noexcept;
         Attribute& operator= (Attribute&&) noexcept;
 
-        /** Creates an attribute that specifies the font and colour for a range of characters. */
-        Attribute (Range<int> range, const Font& font, Colour colour) noexcept;
+        /** Creates an attribute that specifies the font and color for a range of characters. */
+        Attribute (Range<int> range, const Font& font, Color color) noexcept;
 
         /** The range of characters to which this attribute will be applied. */
         Range<int> range;
@@ -167,8 +167,8 @@ public:
         /** The font for this range of characters. */
         Font font;
 
-        /** The colour for this range of characters. */
-        Colour colour;
+        /** The color for this range of characters. */
+        Color color;
 
     private:
         JUCE_LEAK_DETECTOR (Attribute)
@@ -183,11 +183,11 @@ public:
     const Attribute& getAttribute (int index) const noexcept    { return attributes.getReference (index); }
 
     //==============================================================================
-    /** Adds a colour attribute for the specified range. */
-    void setColour (Range<int> range, Colour colour);
+    /** Adds a color attribute for the specified range. */
+    void setColor (Range<int> range, Color color);
 
-    /** Removes all existing colour attributes, and applies this colour to the whole string. */
-    void setColour (Colour colour);
+    /** Removes all existing color attributes, and applies this color to the whole string. */
+    void setColor (Color color);
 
     /** Adds a font attribute for the specified range. */
     void setFont (Range<int> range, const Font& font);

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -36,17 +36,17 @@ public:
     {
         if (onlyHorizontalOptions)
         {
-            choices.add ("centre");
+            choices.add ("center");
             choices.add ("left");
             choices.add ("right");
         }
         else
         {
-            choices.add ("centred");
-            choices.add ("centred left");
-            choices.add ("centred right");
-            choices.add ("centred top");
-            choices.add ("centred bottom");
+            choices.add ("centered");
+            choices.add ("centered left");
+            choices.add ("centered right");
+            choices.add ("centered top");
+            choices.add ("centered bottom");
             choices.add ("top left");
             choices.add ("top right");
             choices.add ("bottom left");
@@ -61,11 +61,11 @@ public:
     //==============================================================================
     void setIndex (int newIndex)
     {
-        const int types[] = { Justification::centred,
-                              Justification::centredLeft,
-                              Justification::centredRight,
-                              Justification::centredTop,
-                              Justification::centredBottom,
+        const int types[] = { Justification::centered,
+                              Justification::centeredLeft,
+                              Justification::centeredRight,
+                              Justification::centeredTop,
+                              Justification::centeredBottom,
                               Justification::topLeft,
                               Justification::topRight,
                               Justification::bottomLeft,
@@ -80,11 +80,11 @@ public:
 
     int getIndex() const
     {
-        const int types[] = { Justification::centred,
-                              Justification::centredLeft,
-                              Justification::centredRight,
-                              Justification::centredTop,
-                              Justification::centredBottom,
+        const int types[] = { Justification::centered,
+                              Justification::centeredLeft,
+                              Justification::centeredRight,
+                              Justification::centeredTop,
+                              Justification::centeredBottom,
                               Justification::topLeft,
                               Justification::topRight,
                               Justification::bottomLeft,

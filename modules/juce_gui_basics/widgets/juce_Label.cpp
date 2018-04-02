@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -32,9 +32,9 @@ Label::Label (const String& name, const String& labelText)
       textValue (labelText),
       lastTextValue (labelText)
 {
-    setColour (TextEditor::textColourId, Colours::black);
-    setColour (TextEditor::backgroundColourId, Colours::transparentBlack);
-    setColour (TextEditor::outlineColourId, Colours::transparentBlack);
+    setColor (TextEditor::textColorId, Colors::black);
+    setColor (TextEditor::backgroundColorId, Colors::transparentBlack);
+    setColor (TextEditor::outlineColorId, Colors::transparentBlack);
 
     textValue.addListener (this);
 }
@@ -303,21 +303,21 @@ bool Label::isBeingEdited() const noexcept
     return editor != nullptr;
 }
 
-static void copyColourIfSpecified (Label& l, TextEditor& ed, int colourID, int targetColourID)
+static void copyColorIfSpecified (Label& l, TextEditor& ed, int colorID, int targetColorID)
 {
-    if (l.isColourSpecified (colourID) || l.getLookAndFeel().isColourSpecified (colourID))
-        ed.setColour (targetColourID, l.findColour (colourID));
+    if (l.isColorSpecified (colorID) || l.getLookAndFeel().isColorSpecified (colorID))
+        ed.setColor (targetColorID, l.findColor (colorID));
 }
 
 TextEditor* Label::createEditorComponent()
 {
     auto* ed = new TextEditor (getName());
     ed->applyFontToAllText (getLookAndFeel().getLabelFont (*this));
-    copyAllExplicitColoursTo (*ed);
+    copyAllExplicitColorsTo (*ed);
 
-    copyColourIfSpecified (*this, *ed, textWhenEditingColourId, TextEditor::textColourId);
-    copyColourIfSpecified (*this, *ed, backgroundWhenEditingColourId, TextEditor::backgroundColourId);
-    copyColourIfSpecified (*this, *ed, outlineWhenEditingColourId, TextEditor::focusedOutlineColourId);
+    copyColorIfSpecified (*this, *ed, textWhenEditingColorId, TextEditor::textColorId);
+    copyColorIfSpecified (*this, *ed, backgroundWhenEditingColorId, TextEditor::backgroundColorId);
+    copyColorIfSpecified (*this, *ed, outlineWhenEditingColorId, TextEditor::focusedOutlineColorId);
 
     return ed;
 }
@@ -371,7 +371,7 @@ void Label::enablementChanged()
     repaint();
 }
 
-void Label::colourChanged()
+void Label::colorChanged()
 {
     repaint();
 }

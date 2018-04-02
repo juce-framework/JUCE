@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -63,7 +63,7 @@ File PropertiesFile::Options::getDefaultFile() const
         /* The PropertiesFile class always used to put its settings files in "Library/Preferences", but Apple
            have changed their advice, and now stipulate that settings should go in "Library/Application Support".
 
-           Because older apps would be broken by a silent change in this class's behaviour, you must now
+           Because older apps would be broken by a silent change in this class's behavior, you must now
            explicitly set the osxLibrarySubFolder value to indicate which path you want to use.
 
            In newer apps, you should always set this to "Application Support"

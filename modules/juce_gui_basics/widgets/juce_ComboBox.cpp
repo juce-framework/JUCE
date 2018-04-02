@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -373,7 +373,7 @@ void ComboBox::paint (Graphics& g)
          && label->getText().isEmpty()
          && ! label->isBeingEdited())
     {
-        g.setColour (findColour (textColourId).withMultipliedAlpha (0.5f));
+        g.setColor (findColor (textColorId).withMultipliedAlpha (0.5f));
         g.setFont (label->getLookAndFeel().getLabelFont (*label));
         g.drawFittedText (textWhenNothingSelected, label->getBounds().reduced (2, 1),
                           label->getJustificationType(),
@@ -392,7 +392,7 @@ void ComboBox::enablementChanged()
     repaint();
 }
 
-void ComboBox::colourChanged()
+void ComboBox::colorChanged()
 {
     lookAndFeelChanged();
 }
@@ -434,13 +434,13 @@ void ComboBox::lookAndFeelChanged()
     label->onTextChange = [this] { triggerAsyncUpdate(); };
     label->addMouseListener (this, false);
 
-    label->setColour (Label::backgroundColourId, Colours::transparentBlack);
-    label->setColour (Label::textColourId, findColour (ComboBox::textColourId));
+    label->setColor (Label::backgroundColorId, Colors::transparentBlack);
+    label->setColor (Label::textColorId, findColor (ComboBox::textColorId));
 
-    label->setColour (TextEditor::textColourId, findColour (ComboBox::textColourId));
-    label->setColour (TextEditor::backgroundColourId, Colours::transparentBlack);
-    label->setColour (TextEditor::highlightColourId, findColour (TextEditor::highlightColourId));
-    label->setColour (TextEditor::outlineColourId, Colours::transparentBlack);
+    label->setColor (TextEditor::textColorId, findColor (ComboBox::textColorId));
+    label->setColor (TextEditor::backgroundColorId, Colors::transparentBlack);
+    label->setColor (TextEditor::highlightColorId, findColor (TextEditor::highlightColorId));
+    label->setColor (TextEditor::outlineColorId, Colors::transparentBlack);
 
     resized();
 }

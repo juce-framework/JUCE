@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -49,7 +49,7 @@ protected:
 
         @param sourceStream     the stream to read from - this will be deleted
                                 by this object when it is no longer needed. (Some
-                                specialised readers might not use this parameter and
+                                specialized readers might not use this parameter and
                                 can leave it as nullptr).
         @param formatName       the description that will be returned by the getFormatName()
                                 method
@@ -131,7 +131,7 @@ public:
 
         This will read a block of samples from the stream, and measure the
         highest and lowest sample levels from the channels in that section, returning
-        these as normalised floating-point levels.
+        these as normalized floating-point levels.
 
         @param startSample  the offset into the audio stream to start reading from. It's
                             ok for this to be beyond the start or end of the stream.
@@ -150,7 +150,7 @@ public:
 
         This will read a block of samples from the stream, and measure the
         highest and lowest sample levels from the channels in that section, returning
-        these as normalised floating-point levels.
+        these as normalized floating-point levels.
 
         @param startSample          the offset into the audio stream to start reading from. It's
                                     ok for this to be beyond the start or end of the stream.

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -96,10 +96,10 @@ public:
         {
             waiting = 0,    /**< The download is waiting to start. Called at the beginning of a download operation. */
             active,         /**< The download is in progress. */
-            paused,         /**< The download was paused and is awaiting resuming or cancelling. */
+            paused,         /**< The download was paused and is awaiting resuming or canceling. */
             finished,       /**< The download was finished successfully. */
             failed,         /**< The download failed (e.g. because of no internet connection). */
-            cancelled,      /**< The download was cancelled. */
+            canceled,      /**< The download was canceled. */
         };
 
         virtual ~Download() {}
@@ -164,14 +164,14 @@ public:
             If the download was in progress and the application was closed, the download may happily continue in the
             background by OS. If you open the app and the download is still in progress, you will receive this callback.
             If the download finishes in the background before you start the app again, you will receive productDownloadFinished
-            callback instead. The download will only stop when it is explicitly cancelled or when it is finished.
+            callback instead. The download will only stop when it is explicitly canceled or when it is finished.
         */
         virtual void productDownloadProgressUpdate (Download&, float /*progress*/, RelativeTime /*timeRemaining*/) {}
 
         /** iOS only: Called when a product download is paused. This may also be called after the application starts, if
             the download was in a paused state and the application was closed before finishing the download.
 
-            Only after the download is finished successfully or cancelled you will stop receiving this callback on startup.
+            Only after the download is finished successfully or canceled you will stop receiving this callback on startup.
         */
         virtual void productDownloadPaused (Download&) {}
 
@@ -190,7 +190,7 @@ public:
     /** Checks whether in-app purchases is supported on current platform. On iOS this always returns true. */
     bool isInAppPurchasesSupported() const;
 
-    /** Asynchronously requests information for products with given ids. Upon completion, for each enquired product
+    /** Asynchronously requests information for products with given ids. Upon completion, for each inquired product
         there is going to be a corresponding Product object.
         If there is no information available for the given product identifier, it will be ignored.
      */

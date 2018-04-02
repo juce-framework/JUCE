@@ -54,7 +54,7 @@ public:
     ReadWriteLock() noexcept;
 
     /** Destructor.
-        If the object is deleted whilst locked, any subsequent behaviour is undefined.
+        If the object is deleted whilst locked, any subsequent behavior is undefined.
     */
     ~ReadWriteLock() noexcept;
 

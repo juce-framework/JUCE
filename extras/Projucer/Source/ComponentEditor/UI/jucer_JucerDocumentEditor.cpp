@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -70,18 +70,18 @@ public:
 
         if (rowIsSelected)
         {
-            g.fillAll (findColour (TextEditor::highlightColourId));
-            g.setColour (findColour (defaultHighlightedTextColourId));
+            g.fillAll (findColor (TextEditor::highlightColorId));
+            g.setColor (findColor (defaultHighlightedTextColorId));
         }
         else
         {
-            g.setColour (findColour (defaultTextColourId));
+            g.setColor (findColor (defaultTextColorId));
         }
 
         g.setFont (height * 0.6f);
         g.drawText (returnValues [row] + " " + baseClasses [row] + "::" + methods [row],
                     30, 0, width - 32, height,
-                    Justification::centredLeft, true);
+                    Justification::centeredLeft, true);
 
         getLookAndFeel().drawTickBox (g, *this, 6, 2, 18, 18, document.isOptionalMethodEnabled (methods [row]), true, false, false);
     }
@@ -98,7 +98,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (Colours::white);
+        g.fillAll (Colors::white);
     }
 
     void resized() override
@@ -149,7 +149,7 @@ public:
         props.add (new ComponentCompNameProperty (doc));
         props.add (new ComponentParentClassesProperty (doc));
         props.add (new ComponentConstructorParamsProperty (doc));
-        props.add (new ComponentInitialisersProperty (doc));
+        props.add (new ComponentInitializersProperty (doc));
         props.add (new ComponentInitialSizeProperty (doc, true));
         props.add (new ComponentInitialSizeProperty (doc, false));
         props.add (new FixedSizeProperty (doc));
@@ -178,7 +178,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (findColour (secondaryBackgroundColourId));
+        g.fillAll (findColor (secondaryBackgroundColorId));
     }
 
     void changeListenerCallback (ChangeBroadcaster*) override
@@ -240,17 +240,17 @@ private:
     };
 
     //==============================================================================
-    class ComponentInitialisersProperty   : public ComponentTextProperty <Component>
+    class ComponentInitializersProperty   : public ComponentTextProperty <Component>
     {
     public:
-        ComponentInitialisersProperty (JucerDocument& doc)
-            : ComponentTextProperty <Component> ("Member initialisers", 16384, true, 0, doc)
+        ComponentInitializersProperty (JucerDocument& doc)
+            : ComponentTextProperty <Component> ("Member initializers", 16384, true, 0, doc)
         {
             preferredHeight = 24 * 3;
         }
 
-        void setText (const String& newText) override    { document.setVariableInitialisers (newText); }
-        String getText() const override                  { return document.getVariableInitialisers(); }
+        void setText (const String& newText) override    { document.setVariableInitializers (newText); }
+        String getText() const override                  { return document.getVariableInitializers(); }
     };
 
 
@@ -311,7 +311,7 @@ private:
     };
 };
 
-static const Colour tabColour (Colour (0xff888888));
+static const Color tabColor (Color (0xff888888));
 
 static SourceCodeEditor* createCodeEditor (const File& file, SourceCodeDocument& sourceCodeDoc)
 {
@@ -334,15 +334,15 @@ JucerDocumentEditor::JucerDocumentEditor (JucerDocument* const doc)
         addAndMakeVisible (tabbedComponent);
         tabbedComponent.setOutline (0);
 
-        tabbedComponent.addTab ("Class", tabColour, new ClassPropertiesPanel (*document), true);
+        tabbedComponent.addTab ("Class", tabColor, new ClassPropertiesPanel (*document), true);
 
         if (document->getComponentLayout() != nullptr)
-            tabbedComponent.addTab ("Subcomponents", tabColour,
+            tabbedComponent.addTab ("Subcomponents", tabColor,
                                     compLayoutPanel = new ComponentLayoutPanel (*document, *document->getComponentLayout()), true);
 
-        tabbedComponent.addTab ("Resources", tabColour, new ResourceEditorPanel (*document), true);
+        tabbedComponent.addTab ("Resources", tabColor, new ResourceEditorPanel (*document), true);
 
-        tabbedComponent.addTab ("Code", tabColour, createCodeEditor (document->getCppFile(),
+        tabbedComponent.addTab ("Code", tabColor, createCodeEditor (document->getCppFile(),
                                                                      document->getCppDocument()), true);
 
         updateTabs();
@@ -420,7 +420,7 @@ void JucerDocumentEditor::updateTabs()
             if (numPaintRoutinesSeen == 0)
                 index = document->getComponentLayout() != nullptr ? 2 : 1;
 
-            tabbedComponent.addTab (paintRoutineNames[i], tabColour,
+            tabbedComponent.addTab (paintRoutineNames[i], tabColor,
                                     new PaintRoutinePanel (*document,
                                                            *document->getPaintRoutine (i),
                                                            this), true, index);
@@ -431,7 +431,7 @@ void JucerDocumentEditor::updateTabs()
 //==============================================================================
 void JucerDocumentEditor::paint (Graphics& g)
 {
-    g.fillAll (findColour (backgroundColourId));
+    g.fillAll (findColor (backgroundColorId));
 }
 
 void JucerDocumentEditor::resized()
@@ -805,7 +805,7 @@ void JucerDocumentEditor::getCommandInfo (const CommandID commandID, Application
         break;
 
     case JucerCommandIDs::bringBackLostItems:
-        result.setInfo (TRANS("Retrieve offscreen items"), TRANS("Moves any items that are lost beyond the edges of the screen back to the centre."), CommandCategories::editing, 0);
+        result.setInfo (TRANS("Retrieve offscreen items"), TRANS("Moves any items that are lost beyond the edges of the screen back to the center."), CommandCategories::editing, 0);
         result.setActive (currentPaintRoutine != nullptr || currentLayout != nullptr);
         result.defaultKeypresses.add (KeyPress ('m', cmd, 0));
         break;

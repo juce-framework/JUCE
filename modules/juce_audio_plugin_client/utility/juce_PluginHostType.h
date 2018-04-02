@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -56,7 +56,7 @@ public:
         AdobeAudition,              /**< Represents Adobe Audition. */
         AdobePremierePro,           /**< Represents Adobe Premiere Pro. */
         AppleLogic,                 /**< Represents Apple Logic Pro. */
-        Ardour,                     /**< Represents Ardour. */
+        Ardor,                     /**< Represents Ardor. */
         BitwigStudio,               /**< Represents Bitwig Studio. */
         CakewalkSonar8,             /**< Represents Cakewalk Sonar 8. */
         CakewalkSonarGeneric,       /**< Represents Cakewalk Sonar. */
@@ -105,8 +105,8 @@ public:
     bool isAbletonLive() const noexcept       { return type == AbletonLive6 || type == AbletonLive7 || type == AbletonLive8 || type == AbletonLiveGeneric; }
     /** Returns true if the host is Adobe Audition. */
     bool isAdobeAudition() const noexcept     { return type == AdobeAudition; }
-    /** Returns true if the host is Ardour. */
-    bool isArdour() const noexcept            { return type == Ardour; }
+    /** Returns true if the host is Ardor. */
+    bool isArdor() const noexcept            { return type == Ardor; }
     /** Returns true if the host is Bitwig Studio. */
     bool isBitwigStudio() const noexcept      { return type == BitwigStudio; }
     /** Returns true if the host is any version of Steinberg Cubase. */
@@ -345,7 +345,7 @@ private:
         if (hostFilename.containsIgnoreCase   ("Sadie"))             return SADiE;
 
        #elif JUCE_LINUX
-        if (hostFilename.containsIgnoreCase   ("Ardour"))            return Ardour;
+        if (hostFilename.containsIgnoreCase   ("Ardor"))            return Ardor;
         if (hostFilename.startsWithIgnoreCase ("Waveform"))          return TracktionWaveform;
         if (hostFilename.containsIgnoreCase   ("Tracktion"))         return TracktionGeneric;
         if (hostFilename.startsWith           ("Bitwig"))            return BitwigStudio;

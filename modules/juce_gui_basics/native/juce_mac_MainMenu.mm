@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -691,7 +691,7 @@ namespace MainMenuHelpers
         createMenuItem (menu, TRANS("Quit") + String (" ") + appName, @selector (terminate:), nsStringLiteral ("q"));
     }
 
-    // Since our app has no NIB, this initialises a standard app menu...
+    // Since our app has no NIB, this initializes a standard app menu...
     static void rebuildMainMenu (const PopupMenu* extraItems)
     {
         // this can't be used in a plugin!
@@ -784,7 +784,7 @@ static void mainMenuTrackingChanged (bool isTracking)
     }
 }
 
-void juce_initialiseMacMainMenu()
+void juce_initializeMacMainMenu()
 {
     menuTrackingChangedCallback = mainMenuTrackingChanged;
 
@@ -796,12 +796,12 @@ void juce_initialiseMacMainMenu()
 NSMenu* createNSMenu (const PopupMenu&, const String&, int, int, bool);
 NSMenu* createNSMenu (const PopupMenu& menu, const String& name, int topLevelMenuId, int topLevelIndex, bool addDelegate)
 {
-    juce_initialiseMacMainMenu();
+    juce_initializeMacMainMenu();
 
     if (auto* mm = JuceMainMenuHandler::instance)
         return mm->createMenu (menu, name, topLevelMenuId, topLevelIndex, addDelegate);
 
-    jassertfalse; // calling this before making sure the OSX main menu stuff was initialised?
+    jassertfalse; // calling this before making sure the OSX main menu stuff was initialized?
     return nil;
 }
 

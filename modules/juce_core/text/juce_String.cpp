@@ -68,7 +68,7 @@ public:
     typedef String::CharPointerType::CharType CharType;
 
     //==============================================================================
-    static CharPointerType createUninitialisedBytes (size_t numBytes)
+    static CharPointerType createUninitializedBytes (size_t numBytes)
     {
         numBytes = (numBytes + 3) & ~(size_t) 3;
         auto s = reinterpret_cast<StringHolder*> (new char [sizeof (StringHolder) - sizeof (CharType) + numBytes]);
@@ -84,7 +84,7 @@ public:
             return CharPointerType (&(emptyString.text));
 
         auto bytesNeeded = sizeof (CharType) + CharPointerType::getBytesRequiredFor (text);
-        auto dest = createUninitialisedBytes (bytesNeeded);
+        auto dest = createUninitializedBytes (bytesNeeded);
         CharPointerType (dest).writeAll (text);
         return dest;
     }
@@ -105,7 +105,7 @@ public:
             ++numChars;
         }
 
-        auto dest = createUninitialisedBytes (bytesNeeded);
+        auto dest = createUninitializedBytes (bytesNeeded);
         CharPointerType (dest).writeWithCharLimit (text, (int) numChars + 1);
         return dest;
     }
@@ -126,7 +126,7 @@ public:
             ++numChars;
         }
 
-        auto dest = createUninitialisedBytes (bytesNeeded);
+        auto dest = createUninitializedBytes (bytesNeeded);
         CharPointerType (dest).writeWithCharLimit (start, numChars + 1);
         return dest;
     }
@@ -138,7 +138,7 @@ public:
 
         auto numBytes = (size_t) (reinterpret_cast<const char*> (end.getAddress())
                                    - reinterpret_cast<const char*> (start.getAddress()));
-        auto dest = createUninitialisedBytes (numBytes + sizeof (CharType));
+        auto dest = createUninitializedBytes (numBytes + sizeof (CharType));
         memcpy (dest.getAddress(), start, numBytes);
         dest.getAddress()[numBytes / sizeof (CharType)] = 0;
         return dest;
@@ -146,7 +146,7 @@ public:
 
     static CharPointerType createFromFixedLength (const char* const src, const size_t numChars)
     {
-        auto dest = createUninitialisedBytes (numChars * sizeof (CharType) + sizeof (CharType));
+        auto dest = createUninitializedBytes (numChars * sizeof (CharType) + sizeof (CharType));
         CharPointerType (dest).writeWithCharLimit (CharPointer_UTF8 (src), (int) (numChars + 1));
         return dest;
     }
@@ -184,7 +184,7 @@ public:
 
         if (b == (StringHolder*) &emptyString)
         {
-            auto newText = createUninitialisedBytes (numBytes);
+            auto newText = createUninitializedBytes (numBytes);
             newText.writeNull();
             return newText;
         }
@@ -192,7 +192,7 @@ public:
         if (b->allocatedNumBytes >= numBytes && b->refCount.get() <= 0)
             return text;
 
-        auto newText = createUninitialisedBytes (jmax (b->allocatedNumBytes, numBytes));
+        auto newText = createUninitializedBytes (jmax (b->allocatedNumBytes, numBytes));
         memcpy (newText.getAddress(), text.getAddress(), b->allocatedNumBytes);
         release (b);
 
@@ -286,7 +286,7 @@ String& String::operator= (String&& other) noexcept
 inline String::PreallocationBytes::PreallocationBytes (const size_t num) noexcept : numBytes (num) {}
 
 String::String (const PreallocationBytes& preallocationSize)
-    : text (StringHolder::createUninitialisedBytes (preallocationSize.numBytes + sizeof (CharPointerType::CharType)))
+    : text (StringHolder::createUninitializedBytes (preallocationSize.numBytes + sizeof (CharPointerType::CharType)))
 {
 }
 
@@ -405,7 +405,7 @@ namespace NumberToStringConverters
             return printDigits (t, static_cast<uint64> (n));
 
         // NB: this needs to be careful not to call -std::numeric_limits<int64>::min(),
-        // which has undefined behaviour
+        // which has undefined behavior
         t = printDigits (t, static_cast<uint64> (-(n + 1)) + 1);
         *--t = '-';
         return t;
@@ -422,7 +422,7 @@ namespace NumberToStringConverters
             return printDigits (t, static_cast<unsigned int> (n));
 
         // NB: this needs to be careful not to call -std::numeric_limits<int>::min(),
-        // which has undefined behaviour
+        // which has undefined behavior
         t = printDigits (t, static_cast<unsigned int> (-(n + 1)) + 1);
         *--t = '-';
         return t;
@@ -2062,7 +2062,7 @@ struct StringEncodingConverter
         void* const newSpace = addBytesToPointer (text.getAddress(), (int) endOffset);
         const CharPointerType_Dest extraSpace (static_cast<DestChar*> (newSpace));
 
-       #if JUCE_DEBUG // (This just avoids spurious warnings from valgrind about the uninitialised bytes at the end of the buffer..)
+       #if JUCE_DEBUG // (This just avoids spurious warnings from valgrind about the uninitialized bytes at the end of the buffer..)
         auto bytesToClear = (size_t) jmin ((int) extraBytesNeeded, 4);
         zeromem (addBytesToPointer (newSpace, extraBytesNeeded - bytesToClear), bytesToClear);
        #endif

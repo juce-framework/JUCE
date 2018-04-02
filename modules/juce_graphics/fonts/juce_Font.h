@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -93,7 +93,7 @@ public:
     /** Creates a basic sans-serif font at a default height.
 
         You should use one of the other constructors for creating a font that you're planning
-        on drawing with - this constructor is here to help initialise objects before changing
+        on drawing with - this constructor is here to help initialize objects before changing
         the font's settings later.
     */
     Font();
@@ -295,7 +295,7 @@ public:
     /** Makes the font italic or non-italic. */
     void setItalic (bool shouldBeItalic);
     /** Returns a copy of this font with the italic attribute set. */
-    Font italicised() const;
+    Font italicized() const;
     /** Returns true if the font is italic. */
     bool isItalic() const noexcept;
 

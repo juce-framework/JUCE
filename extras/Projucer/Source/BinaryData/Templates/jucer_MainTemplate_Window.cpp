@@ -22,9 +22,9 @@ public:
     bool moreThanOneInstanceAllowed() override       { return %%allow_more_than_one_instance%%; }
 
     //==============================================================================
-    void initialise (const String& commandLine) override
+    void initialize (const String& commandLine) override
     {
-        // This method is where you should put your application's initialisation code..
+        // This method is where you should put your application's initialization code..
 
         mainWindow = new MainWindow (getApplicationName());
     }
@@ -61,13 +61,13 @@ public:
     public:
         MainWindow (String name)  : DocumentWindow (name,
                                                     Desktop::getInstance().getDefaultLookAndFeel()
-                                                                          .findColour (ResizableWindow::backgroundColourId),
+                                                                          .findColor (ResizableWindow::backgroundColorId),
                                                     DocumentWindow::allButtons)
         {
             setUsingNativeTitleBar (true);
             setContentOwned (new %%content_component_class%%(), true);
 
-            centreWithSize (getWidth(), getHeight());
+            centerWithSize (getWidth(), getHeight());
             setVisible (true);
         }
 

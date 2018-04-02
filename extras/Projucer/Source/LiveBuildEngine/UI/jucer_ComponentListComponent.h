@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -92,7 +92,7 @@ private:
         String getDisplayName() const override      { return (namespaceToShow != nullptr ? namespaceToShow->name : String()) + "::"; }
         void setName (const String&) override       {}
         bool isMissing() const override             { return false; }
-        Icon getIcon() const override               { return Icon (getIcons().graph, getContentColour (true)); }
+        Icon getIcon() const override               { return Icon (getIcons().graph, getContentColor (true)); }
         bool canBeSelected() const override         { return true; }
         bool mightContainSubItems() override        { return namespaceToShow != nullptr && ! namespaceToShow->isEmpty(); }
         String getUniqueName() const override       { return uniqueID; }
@@ -154,7 +154,7 @@ private:
         String getDisplayName() const override      { return displayName; }
         void setName (const String&) override       {}
         bool isMissing() const override             { return false; }
-        Icon getIcon() const override               { return Icon (getIcons().box, getContentColour (true)); }
+        Icon getIcon() const override               { return Icon (getIcons().box, getContentColor (true)); }
         bool canBeSelected() const override         { return true; }
         bool mightContainSubItems() override        { return false; }
         String getUniqueName() const override       { return comp.getName(); }
@@ -170,15 +170,15 @@ private:
             return content;
         }
 
-        Colour getContentColour (bool isIcon) const override
+        Color getContentColor (bool isIcon) const override
         {
             auto alpha = comp.getInstantiationFlags().canBeInstantiated() ? 1.0f : 0.4f;
             auto& lf = ProjucerApplication::getApp().lookAndFeel;
 
             if (isSelected())
-                return lf.findColour (defaultHighlightedTextColourId).withMultipliedAlpha (alpha);
+                return lf.findColor (defaultHighlightedTextColorId).withMultipliedAlpha (alpha);
 
-            return lf.findColour (isIcon ? treeIconColourId : defaultTextColourId).withMultipliedAlpha (alpha);
+            return lf.findColor (isIcon ? treeIconColorId : defaultTextColorId).withMultipliedAlpha (alpha);
         }
 
         bool canBeLaunched() const
@@ -227,11 +227,11 @@ private:
                 const Path& path = isShowCode ? getIcons().code
                                               : getIcons().play;
 
-                auto colour = classItem.getContentColour (true).withAlpha (isButtonDown ? 1.0f
+                auto color = classItem.getContentColor (true).withAlpha (isButtonDown ? 1.0f
                                                                                         : (isMouseOverButton ? 0.8f
                                                                                                              : 0.5f));
 
-                Icon (path, colour).draw (g, getLocalBounds().reduced (getHeight() / 5).toFloat(), false);
+                Icon (path, color).draw (g, getLocalBounds().reduced (getHeight() / 5).toFloat(), false);
             }
 
             void clicked() override

@@ -49,8 +49,8 @@
 //==============================================================================
 struct DemoFlexPanel   : public juce::Component
 {
-    DemoFlexPanel (juce::Colour col, FlexItem& item)
-        : flexItem (item), colour (col)
+    DemoFlexPanel (juce::Color col, FlexItem& item)
+        : flexItem (item), color (col)
     {
         int x = 70;
         int y = 3;
@@ -80,7 +80,7 @@ struct DemoFlexPanel   : public juce::Component
         alignSelfCombo.setBounds (x, y, 90, 18);
         alignSelfCombo.onChange = [this] { updateAssignSelf(); };
         alignSelfCombo.setSelectedId (5);
-        alignSelfCombo.setColour (ComboBox::outlineColourId, Colours::transparentBlack);
+        alignSelfCombo.setColor (ComboBox::outlineColorId, Colors::transparentBlack);
         addAndMakeVisible (alignSelfCombo);
         addLabel ("align-self", alignSelfCombo);
     }
@@ -131,10 +131,10 @@ struct DemoFlexPanel   : public juce::Component
     {
         auto r = getLocalBounds();
 
-        g.setColour (colour);
+        g.setColor (color);
         g.fillRect (r);
 
-        g.setColour (Colours::black);
+        g.setColor (Colors::black);
         g.drawFittedText ("w: " + String (r.getWidth()) + newLine + "h: " + String (r.getHeight()),
                           r.reduced (4), Justification::bottomRight, 2);
     }
@@ -152,7 +152,7 @@ struct DemoFlexPanel   : public juce::Component
     TextEditor flexOrderEditor, flexGrowEditor, flexShrinkEditor, flexBasisEditor;
     ComboBox alignSelfCombo;
 
-    juce::Colour colour;
+    juce::Color color;
     OwnedArray<Label> labels;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DemoFlexPanel)
@@ -184,9 +184,9 @@ struct FlexBoxDemo   : public juce::Component
 
     void paint (Graphics& g) override
     {
-        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground,
-                                           Colours::lightgrey));
-        g.setColour (Colours::white);
+        g.fillAll (getUIColorIfAvailable (LookAndFeel_V4::ColorScheme::UIColor::windowBackground,
+                                           Colors::lightgray));
+        g.setColor (Colors::white);
         g.fillRect (getFlexBoxBounds());
     }
 
@@ -261,14 +261,14 @@ struct FlexBoxDemo   : public juce::Component
 
     void setupFlexBoxItems()
     {
-        addItem (Colours::orange);
-        addItem (Colours::aqua);
-        addItem (Colours::lightcoral);
-        addItem (Colours::aquamarine);
-        addItem (Colours::forestgreen);
+        addItem (Colors::orange);
+        addItem (Colors::aqua);
+        addItem (Colors::lightcoral);
+        addItem (Colors::aquamarine);
+        addItem (Colors::forestgreen);
     }
 
-    void addItem (Colour colour)
+    void addItem (Color color)
     {
         flexBox.items.add (FlexItem (100, 150)
                              .withMargin (10)
@@ -276,7 +276,7 @@ struct FlexBoxDemo   : public juce::Component
 
         auto& flexItem = flexBox.items.getReference (flexBox.items.size() - 1);
 
-        auto panel = panels.add (new DemoFlexPanel (colour, flexItem));
+        auto panel = panels.add (new DemoFlexPanel (color, flexItem));
         flexItem.associatedComponent = panel;
         addAndMakeVisible (panel);
     }

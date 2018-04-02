@@ -309,7 +309,7 @@ start_pass_main2 (j_decompress_ptr cinfo, J_BUF_MODE pass_mode)
   my_main_ptr4 main_ = (my_main_ptr4) cinfo->main;
 
   switch (pass_mode) {
-  case JBUF_PASS_THRU:
+  case JBUF_PASS_THROUGH:
     if (cinfo->upsample->need_context_rows) {
       main_->pub.process_data = process_data_context_main;
       make_funny_pointers(cinfo); /* Create the xbuffer[] lists */

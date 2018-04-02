@@ -71,7 +71,7 @@ public:
         {
             const ScopedLock lock (createConnectionLock);
 
-            if (hasBeenCancelled)
+            if (hasBeenCanceled)
                 return false;
         }
 
@@ -193,7 +193,7 @@ public:
         {
             const ScopedLock lock (createConnectionLock);
 
-            hasBeenCancelled = true;
+            hasBeenCanceled = true;
 
             closeConnection();
         }
@@ -243,7 +243,7 @@ private:
     int numRedirectsToFollow = 5;
     StringPairArray responseHeaders;
     CriticalSection createConnectionLock;
-    bool hasBeenCancelled = false;
+    bool hasBeenCanceled = false;
 
     void closeConnection()
     {
@@ -319,7 +319,7 @@ private:
         {
             const ScopedLock lock (createConnectionLock);
 
-            connection = hasBeenCancelled ? 0
+            connection = hasBeenCanceled ? 0
                                           : InternetConnect (sessionHandle,
                                                              uc.lpszHostName, uc.nPort,
                                                              uc.lpszUserName, uc.lpszPassword,
@@ -357,7 +357,7 @@ private:
         {
             const ScopedLock lock (createConnectionLock);
 
-            request = hasBeenCancelled ? 0
+            request = hasBeenCanceled ? 0
                                        : HttpOpenRequest (connection, httpRequestCmd.toWideCharPointer(),
                                                           uc.lpszUrlPath, 0, 0, mimeTypes, flags, 0);
         }

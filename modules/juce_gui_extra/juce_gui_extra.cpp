@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -115,7 +115,7 @@
 #include "code_editor/juce_XMLCodeTokeniser.cpp"
 #include "code_editor/juce_LuaCodeTokeniser.cpp"
 #include "misc/juce_BubbleMessageComponent.cpp"
-#include "misc/juce_ColourSelector.cpp"
+#include "misc/juce_ColorSelector.cpp"
 #include "misc/juce_KeyMappingEditorComponent.cpp"
 #include "misc/juce_PreferencesPanel.cpp"
 #include "misc/juce_PushNotifications.cpp"

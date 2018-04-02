@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -39,9 +39,9 @@ public:
 
     void paintRowBackground (Graphics& g, int /*rowNumber*/, int /*width*/, int /*height*/, bool rowIsSelected) override
     {
-        const auto defaultColour = owner.findColour (ListBox::backgroundColourId);
-        const auto c = rowIsSelected ? defaultColour.interpolatedWith (owner.findColour (ListBox::textColourId), 0.5f)
-                                     : defaultColour;
+        const auto defaultColor = owner.findColor (ListBox::backgroundColorId);
+        const auto c = rowIsSelected ? defaultColor.interpolatedWith (owner.findColor (ListBox::textColorId), 0.5f)
+                                     : defaultColor;
 
         g.fillAll (c);
     }
@@ -65,7 +65,7 @@ public:
             if (columnId == nameCol)
                 text = list.getBlacklistedFiles() [row - list.getNumTypes()];
             else if (columnId == descCol)
-                text = TRANS("Deactivated after failing to initialise correctly");
+                text = TRANS("Deactivated after failing to initialize correctly");
         }
         else if (const PluginDescription* const desc = list.getType (row))
         {
@@ -83,12 +83,12 @@ public:
 
         if (text.isNotEmpty())
         {
-            const auto defaultTextColour = owner.findColour (ListBox::textColourId);
-            g.setColour (isBlacklisted ? Colours::red
-                                       : columnId == nameCol ? defaultTextColour
-                                                             : defaultTextColour.interpolatedWith (Colours::transparentBlack, 0.3f));
+            const auto defaultTextColor = owner.findColor (ListBox::textColorId);
+            g.setColor (isBlacklisted ? Colors::red
+                                       : columnId == nameCol ? defaultTextColor
+                                                             : defaultTextColor.interpolatedWith (Colors::transparentBlack, 0.3f));
             g.setFont (Font (height * 0.7f, Font::bold));
-            g.drawFittedText (text, 4, 0, width - 6, height, Justification::centredLeft, 1, 0.9f);
+            g.drawFittedText (text, 4, 0, width - 6, height, Justification::centeredLeft, 1, 0.9f);
         }
     }
 

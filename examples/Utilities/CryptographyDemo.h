@@ -121,15 +121,15 @@ private:
 
     void lookAndFeelChanged() override
     {
-        rsaGroup.setColour (GroupComponent::outlineColourId,
-                            getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::outline,
-                                                    Colours::grey));
-        rsaGroup.setColour (GroupComponent::textColourId,
-                            getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::defaultText,
-                                                    Colours::white));
-        rsaResultBox.setColour (TextEditor::backgroundColourId,
-                                getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::widgetBackground,
-                                                        Colours::white.withAlpha (0.5f)));
+        rsaGroup.setColor (GroupComponent::outlineColorId,
+                            getUIColorIfAvailable (LookAndFeel_V4::ColorScheme::UIColor::outline,
+                                                    Colors::gray));
+        rsaGroup.setColor (GroupComponent::textColorId,
+                            getUIColorIfAvailable (LookAndFeel_V4::ColorScheme::UIColor::defaultText,
+                                                    Colors::white));
+        rsaResultBox.setColor (TextEditor::backgroundColorId,
+                                getUIColorIfAvailable (LookAndFeel_V4::ColorScheme::UIColor::widgetBackground,
+                                                        Colors::white.withAlpha (0.5f)));
 
         bitSize.applyFontToAllText (bitSize.getFont());
         rsaResultBox.applyFontToAllText (rsaResultBox.getFont());
@@ -219,15 +219,15 @@ private:
 
     void lookAndFeelChanged() override
     {
-        hashGroup.setColour (GroupComponent::outlineColourId,
-                             getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::outline,
-                                                     Colours::grey));
-        hashGroup.setColour (GroupComponent::textColourId,
-                             getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::defaultText,
-                                                     Colours::white));
-        hashEntryBox.setColour (TextEditor::backgroundColourId,
-                                getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::widgetBackground,
-                                                        Colours::white.withAlpha (0.5f)));
+        hashGroup.setColor (GroupComponent::outlineColorId,
+                             getUIColorIfAvailable (LookAndFeel_V4::ColorScheme::UIColor::outline,
+                                                     Colors::gray));
+        hashGroup.setColor (GroupComponent::textColorId,
+                             getUIColorIfAvailable (LookAndFeel_V4::ColorScheme::UIColor::defaultText,
+                                                     Colors::white));
+        hashEntryBox.setColor (TextEditor::backgroundColorId,
+                                getUIColorIfAvailable (LookAndFeel_V4::ColorScheme::UIColor::widgetBackground,
+                                                        Colors::white.withAlpha (0.5f)));
 
         hashEntryBox.applyFontToAllText (hashEntryBox.getFont());
     }
@@ -249,8 +249,8 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground,
-                                           Colour::greyLevel (0.4f)));
+        g.fillAll (getUIColorIfAvailable (LookAndFeel_V4::ColorScheme::UIColor::windowBackground,
+                                           Color::grayLevel (0.4f)));
     }
 
     void resized() override

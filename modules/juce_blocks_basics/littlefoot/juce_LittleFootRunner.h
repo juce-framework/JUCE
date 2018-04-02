@@ -410,7 +410,7 @@ private:
 
     Program code goes at address 0, followed by any shared data the program needs
     globals are at the top end of the buffer
-    stack space stretches downwards from the start of the globals
+    stack space stretches downward from the start of the globals
 
     @tags{Blocks}
 */
@@ -528,7 +528,7 @@ struct Runner
             auto& dest = getProgramAndDataStart()[index];
 
             if (index < program.getProgramSize() && dest != value)
-                heapStart = nullptr; // force a re-initialise of the memory layout when the program changes
+                heapStart = nullptr; // force a re-initialize of the memory layout when the program changes
 
             dest = value;
         }
@@ -599,7 +599,7 @@ struct Runner
 
         /** */
         FunctionExecutionContext (Runner& r, FunctionID function) noexcept
-            : runner (&r.reinitialiseProgramLayoutIfProgramHasChanged()),
+            : runner (&r.reinitializeProgramLayoutIfProgramHasChanged()),
               programBase (r.program.programStart), heapStart (r.heapStart),
               stack (r.stackEnd), stackStart (r.stackStart), stackEnd (r.stackEnd),
               globals (r.globals), heapSize (r.heapSize),
@@ -833,7 +833,7 @@ private:
     int32* globals    = nullptr;
     uint16 heapSize   = 0;
 
-    Runner& reinitialiseProgramLayoutIfProgramHasChanged() noexcept
+    Runner& reinitializeProgramLayoutIfProgramHasChanged() noexcept
     {
         if (heapStart == nullptr && program.checksumMatches())
         {

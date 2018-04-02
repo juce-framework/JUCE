@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -55,7 +55,7 @@ public:
                 bluetooth dialog is closed.
         @param  btWindowBounds The bounds of the bluetooth window that will
                 be opened. The dialog itself is opened by the OS so cannot
-                be customised by JUCE.
+                be customized by JUCE.
         @return true if the dialogue was opened, false on error.
 
         @see ModalComponentManager::Callback

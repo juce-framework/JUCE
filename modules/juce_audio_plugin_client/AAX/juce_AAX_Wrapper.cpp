@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -158,21 +158,21 @@ namespace AAXClasses
 
     static AAXChannelStreamOrder aaxChannelOrder[] =
     {
-        { AAX_eStemFormat_Mono,     { AudioChannelSet::centre, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown } },
+        { AAX_eStemFormat_Mono,     { AudioChannelSet::center, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown } },
         { AAX_eStemFormat_Stereo,   { AudioChannelSet::left, AudioChannelSet::right, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown } },
-        { AAX_eStemFormat_LCR,      { AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown } },
-        { AAX_eStemFormat_LCRS,     { AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::centreSurround, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown } },
+        { AAX_eStemFormat_LCR,      { AudioChannelSet::left, AudioChannelSet::center, AudioChannelSet::right, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown } },
+        { AAX_eStemFormat_LCRS,     { AudioChannelSet::left, AudioChannelSet::center, AudioChannelSet::right, AudioChannelSet::centerSurround, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown } },
         { AAX_eStemFormat_Quad,     { AudioChannelSet::left, AudioChannelSet::right,  AudioChannelSet::leftSurround, AudioChannelSet::rightSurround, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown } },
-        { AAX_eStemFormat_5_0,      { AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::leftSurround, AudioChannelSet::rightSurround, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown } },
-        { AAX_eStemFormat_5_1,      { AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::leftSurround, AudioChannelSet::rightSurround, AudioChannelSet::LFE, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown } },
-        { AAX_eStemFormat_6_0,      { AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::leftSurround, AudioChannelSet::centreSurround, AudioChannelSet::rightSurround, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown } },
-        { AAX_eStemFormat_6_1,      { AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::leftSurround, AudioChannelSet::centreSurround, AudioChannelSet::rightSurround, AudioChannelSet::LFE, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown } },
-        { AAX_eStemFormat_7_0_SDDS, { AudioChannelSet::left, AudioChannelSet::leftCentre, AudioChannelSet::centre, AudioChannelSet::rightCentre, AudioChannelSet::right, AudioChannelSet::leftSurround, AudioChannelSet::rightSurround, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown } },
-        { AAX_eStemFormat_7_0_DTS,  { AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::leftSurroundSide, AudioChannelSet::rightSurroundSide, AudioChannelSet::leftSurroundRear, AudioChannelSet::rightSurroundRear, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown } },
-        { AAX_eStemFormat_7_1_SDDS, { AudioChannelSet::left, AudioChannelSet::leftCentre, AudioChannelSet::centre, AudioChannelSet::rightCentre, AudioChannelSet::right, AudioChannelSet::leftSurround, AudioChannelSet::rightSurround, AudioChannelSet::LFE, AudioChannelSet::unknown, AudioChannelSet::unknown } },
-        { AAX_eStemFormat_7_1_DTS,  { AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::leftSurroundSide, AudioChannelSet::rightSurroundSide, AudioChannelSet::leftSurroundRear, AudioChannelSet::rightSurroundRear, AudioChannelSet::LFE, AudioChannelSet::unknown, AudioChannelSet::unknown } },
-        { AAX_eStemFormat_7_0_2,    { AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::leftSurroundSide, AudioChannelSet::rightSurroundSide, AudioChannelSet::leftSurroundRear, AudioChannelSet::rightSurroundRear, AudioChannelSet::topSideLeft, AudioChannelSet::topSideRight, AudioChannelSet::unknown } },
-        { AAX_eStemFormat_7_1_2,    { AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::leftSurroundSide, AudioChannelSet::rightSurroundSide, AudioChannelSet::leftSurroundRear, AudioChannelSet::rightSurroundRear, AudioChannelSet::LFE, AudioChannelSet::topSideLeft, AudioChannelSet::topSideRight } },
+        { AAX_eStemFormat_5_0,      { AudioChannelSet::left, AudioChannelSet::center, AudioChannelSet::right, AudioChannelSet::leftSurround, AudioChannelSet::rightSurround, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown } },
+        { AAX_eStemFormat_5_1,      { AudioChannelSet::left, AudioChannelSet::center, AudioChannelSet::right, AudioChannelSet::leftSurround, AudioChannelSet::rightSurround, AudioChannelSet::LFE, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown } },
+        { AAX_eStemFormat_6_0,      { AudioChannelSet::left, AudioChannelSet::center, AudioChannelSet::right, AudioChannelSet::leftSurround, AudioChannelSet::centerSurround, AudioChannelSet::rightSurround, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown } },
+        { AAX_eStemFormat_6_1,      { AudioChannelSet::left, AudioChannelSet::center, AudioChannelSet::right, AudioChannelSet::leftSurround, AudioChannelSet::centerSurround, AudioChannelSet::rightSurround, AudioChannelSet::LFE, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown } },
+        { AAX_eStemFormat_7_0_SDDS, { AudioChannelSet::left, AudioChannelSet::leftCenter, AudioChannelSet::center, AudioChannelSet::rightCenter, AudioChannelSet::right, AudioChannelSet::leftSurround, AudioChannelSet::rightSurround, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown } },
+        { AAX_eStemFormat_7_0_DTS,  { AudioChannelSet::left, AudioChannelSet::center, AudioChannelSet::right, AudioChannelSet::leftSurroundSide, AudioChannelSet::rightSurroundSide, AudioChannelSet::leftSurroundRear, AudioChannelSet::rightSurroundRear, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown } },
+        { AAX_eStemFormat_7_1_SDDS, { AudioChannelSet::left, AudioChannelSet::leftCenter, AudioChannelSet::center, AudioChannelSet::rightCenter, AudioChannelSet::right, AudioChannelSet::leftSurround, AudioChannelSet::rightSurround, AudioChannelSet::LFE, AudioChannelSet::unknown, AudioChannelSet::unknown } },
+        { AAX_eStemFormat_7_1_DTS,  { AudioChannelSet::left, AudioChannelSet::center, AudioChannelSet::right, AudioChannelSet::leftSurroundSide, AudioChannelSet::rightSurroundSide, AudioChannelSet::leftSurroundRear, AudioChannelSet::rightSurroundRear, AudioChannelSet::LFE, AudioChannelSet::unknown, AudioChannelSet::unknown } },
+        { AAX_eStemFormat_7_0_2,    { AudioChannelSet::left, AudioChannelSet::center, AudioChannelSet::right, AudioChannelSet::leftSurroundSide, AudioChannelSet::rightSurroundSide, AudioChannelSet::leftSurroundRear, AudioChannelSet::rightSurroundRear, AudioChannelSet::topSideLeft, AudioChannelSet::topSideRight, AudioChannelSet::unknown } },
+        { AAX_eStemFormat_7_1_2,    { AudioChannelSet::left, AudioChannelSet::center, AudioChannelSet::right, AudioChannelSet::leftSurroundSide, AudioChannelSet::rightSurroundSide, AudioChannelSet::leftSurroundRear, AudioChannelSet::rightSurroundRear, AudioChannelSet::LFE, AudioChannelSet::topSideLeft, AudioChannelSet::topSideRight } },
         { AAX_eStemFormat_None,     { AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown } },
     };
 
@@ -300,18 +300,18 @@ namespace AAXClasses
         }
     }
 
-    static Colour getColourFromHighlightEnum (AAX_EHighlightColor colour) noexcept
+    static Color getColorFromHighlightEnum (AAX_EHighlightColor color) noexcept
     {
-        switch (colour)
+        switch (color)
         {
-            case AAX_eHighlightColor_Red:       return Colours::red;
-            case AAX_eHighlightColor_Blue:      return Colours::blue;
-            case AAX_eHighlightColor_Green:     return Colours::green;
-            case AAX_eHighlightColor_Yellow:    return Colours::yellow;
+            case AAX_eHighlightColor_Red:       return Colors::red;
+            case AAX_eHighlightColor_Blue:      return Colors::blue;
+            case AAX_eHighlightColor_Green:     return Colors::green;
+            case AAX_eHighlightColor_Yellow:    return Colors::yellow;
             default:                            jassertfalse; break;
         }
 
-        return Colours::black;
+        return Colors::black;
     }
 
     static int juceChannelIndexToAax (int juceIndex, const AudioChannelSet& channelSet)
@@ -477,7 +477,7 @@ namespace AAXClasses
             return AAX_SUCCESS;
         }
 
-        AAX_Result SetControlHighlightInfo (AAX_CParamID paramID, AAX_CBoolean isHighlighted, AAX_EHighlightColor colour) override
+        AAX_Result SetControlHighlightInfo (AAX_CParamID paramID, AAX_CBoolean isHighlighted, AAX_EHighlightColor color) override
         {
             if (component != nullptr && component->pluginEditor != nullptr)
             {
@@ -486,7 +486,7 @@ namespace AAXClasses
                     AudioProcessorEditor::ParameterControlHighlightInfo info;
                     info.parameterIndex  = getParamIndexFromID (paramID);
                     info.isHighlighted   = (isHighlighted != 0);
-                    info.suggestedColour = getColourFromHighlightEnum (colour);
+                    info.suggestedColor = getColorFromHighlightEnum (color);
 
                     component->pluginEditor->setControlHighlight (info);
                 }
@@ -550,7 +550,7 @@ namespace AAXClasses
 
             void paint (Graphics& g) override
             {
-                g.fillAll (Colours::black);
+                g.fillAll (Colors::black);
             }
 
             template <typename MethodType>
@@ -599,7 +599,7 @@ namespace AAXClasses
         };
 
         ScopedPointer<ContentWrapperComponent> component;
-        ScopedJuceInitialiser_GUI libraryInitialiser;
+        ScopedJuceInitializer_GUI libraryInitializer;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceAAX_GUI)
     };
@@ -1364,7 +1364,7 @@ namespace AAXClasses
                         // the one used last time prepareToPlay was called.
                         // currently, this should never actually happen, because as of Pro Tools 12,
                         // the maximum possible value is 1024, and we call prepareToPlay with that
-                        // value during initialisation.
+                        // value during initialization.
                         pluginInstance->prepareToPlay (sampleRate, bufferSize);
                         maxBufferSize = bufferSize;
                         sideChainBuffer.calloc (static_cast<size_t> (maxBufferSize));
@@ -1739,7 +1739,7 @@ namespace AAXClasses
         }
 
         //==============================================================================
-        ScopedJuceInitialiser_GUI libraryInitialiser;
+        ScopedJuceInitializer_GUI libraryInitializer;
 
         ScopedPointer<AudioProcessor> pluginInstance;
 
@@ -1771,7 +1771,7 @@ namespace AAXClasses
         // and the size of the data returned. To avoid generating
         // it again in GetChunk, we need to store it somewhere.
         // However, as GetChunkSize and GetChunk can be called
-        // on different threads, we store it in thread dependant storage
+        // on different threads, we store it in thread dependent storage
         // in a hash map with the thread id as a key.
         mutable ThreadLocalValue<ChunkMemoryBlock> perThreadFilterData;
         CriticalSection perThreadDataLock;
@@ -2106,7 +2106,7 @@ void AAX_CALLBACK AAXClasses::algorithmProcessCallback (JUCEAlgorithmContext* co
 AAX_Result JUCE_CDECL GetEffectDescriptions (AAX_ICollection*);
 AAX_Result JUCE_CDECL GetEffectDescriptions (AAX_ICollection* collection)
 {
-    ScopedJuceInitialiser_GUI libraryInitialiser;
+    ScopedJuceInitializer_GUI libraryInitializer;
 
     ScopedPointer<const AAX_IFeatureInfo> stemFormatFeatureInfo;
 

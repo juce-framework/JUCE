@@ -105,24 +105,24 @@ bool getNotificationValueForKey (NSNotification* notification, NSString* key, NS
         audioSessionHolder = holder;
 
         auto session = [AVAudioSession sharedInstance];
-        auto centre = [NSNotificationCenter defaultCenter];
+        auto center = [NSNotificationCenter defaultCenter];
 
-        [centre addObserver: self
+        [center addObserver: self
                    selector: @selector (audioSessionChangedInterruptionType:)
                        name: AVAudioSessionInterruptionNotification
                      object: session];
 
-        [centre addObserver: self
+        [center addObserver: self
                    selector: @selector (handleMediaServicesLost)
                        name: AVAudioSessionMediaServicesWereLostNotification
                      object: session];
 
-        [centre addObserver: self
+        [center addObserver: self
                    selector: @selector (handleMediaServicesReset)
                        name: AVAudioSessionMediaServicesWereResetNotification
                      object: session];
 
-        [centre addObserver: self
+        [center addObserver: self
                    selector: @selector (handleRouteChange:)
                        name: AVAudioSessionRouteChangeNotification
                      object: session];

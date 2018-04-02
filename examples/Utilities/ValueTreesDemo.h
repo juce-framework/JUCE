@@ -69,13 +69,13 @@ public:
 
     void paintItem (Graphics& g, int width, int height) override
     {
-        g.setColour (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::defaultText,
-                                             Colours::black));
+        g.setColor (getUIColorIfAvailable (LookAndFeel_V4::ColorScheme::UIColor::defaultText,
+                                             Colors::black));
         g.setFont (15.0f);
 
         g.drawText (tree["name"].toString(),
                     4, 0, width - 4, height,
-                    Justification::centredLeft, true);
+                    Justification::centeredLeft, true);
     }
 
     void itemOpennessChanged (bool isNowOpen) override
@@ -204,7 +204,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground));
+        g.fillAll (getUIColorIfAvailable (LookAndFeel_V4::ColorScheme::UIColor::windowBackground));
     }
 
     void resized() override

@@ -71,11 +71,11 @@ public:
 
         if (isPositiveAndBelow (row, oscLogList.size()))
         {
-            g.setColour (Colours::white);
+            g.setColor (Colors::white);
 
             g.drawText (oscLogList[row],
                         Rectangle<int> (width, height).reduced (4, 0),
-                        Justification::centredLeft, true);
+                        Justification::centeredLeft, true);
         }
     }
 
@@ -447,12 +447,12 @@ private:
         else
             text += "Disconnected";
 
-        auto textColour = isConnected() ? Colours::green : Colours::red;
+        auto textColor = isConnected() ? Colors::green : Colors::red;
 
         connectionStatusLabel.setText (text, dontSendNotification);
         connectionStatusLabel.setFont (Font (15.00f, Font::bold));
-        connectionStatusLabel.setColour (Label::textColourId, textColour);
-        connectionStatusLabel.setJustificationType (Justification::centredRight);
+        connectionStatusLabel.setColor (Label::textColorId, textColor);
+        connectionStatusLabel.setJustificationType (Justification::centeredRight);
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OSCMonitorDemo)

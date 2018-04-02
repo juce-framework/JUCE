@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -179,12 +179,12 @@ String GeneratedCode::getClassDeclaration() const
     return r;
 }
 
-String GeneratedCode::getInitialiserList() const
+String GeneratedCode::getInitializerList() const
 {
-    StringArray inits (initialisers);
+    StringArray inits (initializers);
 
-    if (parentClassInitialiser.isNotEmpty())
-        inits.insert (0, parentClassInitialiser);
+    if (parentClassInitializer.isNotEmpty())
+        inits.insert (0, parentClassInitializer);
 
     inits = getCleanedStringArray (inits);
 
@@ -329,7 +329,7 @@ void GeneratedCode::applyToCode (String& code,
 
     replaceTemplate (code, "class_name", className);
     replaceTemplate (code, "constructor_params", constructorParams);
-    replaceTemplate (code, "initialisers", getInitialiserList());
+    replaceTemplate (code, "initializers", getInitializerList());
 
     replaceTemplate (code, "class_declaration", getClassDeclaration());
     replaceTemplate (code, "private_member_declarations", privateMemberDeclarations);

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -36,7 +36,7 @@ public:
         : project (p), exporter (e), configListTree (exporter->getConfigurations()),
           exporterIndex (index)
     {
-        exporter->initialiseDependencyPathValues();
+        exporter->initializeDependencyPathValues();
         configListTree.addListener (this);
         targetLocationValue.referTo (exporter->getTargetLocationValue());
         targetLocationValue.addListener (this);
@@ -56,12 +56,12 @@ public:
     {
         if (e != nullptr)
         {
-            if         (e->isXcode())        return Icon (getIcons().xcode,        Colours::transparentBlack);
-            else if    (e->isVisualStudio()) return Icon (getIcons().visualStudio, Colours::transparentBlack);
-            else if    (e->isAndroid())      return Icon (getIcons().android,      Colours::transparentBlack);
-            else if    (e->isCodeBlocks())   return Icon (getIcons().codeBlocks,   Colours::transparentBlack);
-            else if    (e->isMakefile())     return Icon (getIcons().linux,        Colours::transparentBlack);
-            else if    (e->isCLion())        return Icon (getIcons().clion,        Colours::transparentBlack);
+            if         (e->isXcode())        return Icon (getIcons().xcode,        Colors::transparentBlack);
+            else if    (e->isVisualStudio()) return Icon (getIcons().visualStudio, Colors::transparentBlack);
+            else if    (e->isAndroid())      return Icon (getIcons().android,      Colors::transparentBlack);
+            else if    (e->isCodeBlocks())   return Icon (getIcons().codeBlocks,   Colors::transparentBlack);
+            else if    (e->isMakefile())     return Icon (getIcons().linux,        Colors::transparentBlack);
+            else if    (e->isCLion())        return Icon (getIcons().clion,        Colors::transparentBlack);
         }
 
         return Icon();
@@ -69,7 +69,7 @@ public:
 
     Icon getIcon() const override
     {
-        return getIconForExporter (exporter.get()).withColour (getContentColour (true));
+        return getIconForExporter (exporter.get()).withColor (getContentColor (true));
     }
 
     void showDocument() override
@@ -229,7 +229,7 @@ public:
     String getRenamingName() const override         { return getDisplayName(); }
     String getDisplayName() const override          { return config->getName(); }
     void setName (const String&) override           {}
-    Icon getIcon() const override                   { return Icon (getIcons().config, getContentColour (true)); }
+    Icon getIcon() const override                   { return Icon (getIcons().config, getContentColor (true)); }
     void itemOpennessChanged (bool) override        {}
 
     void showDocument() override
@@ -284,7 +284,7 @@ private:
     {
     public:
         SettingsComp (ProjectExporter::BuildConfiguration* conf)
-            : group (conf->exporter.getName() + " - " + conf->getName(), Icon (getIcons().config, Colours::transparentBlack))
+            : group (conf->exporter.getName() + " - " + conf->getName(), Icon (getIcons().config, Colors::transparentBlack))
         {
             addAndMakeVisible (group);
 
@@ -326,7 +326,7 @@ public:
     String getRenamingName() const override          { return getDisplayName(); }
     String getDisplayName() const override           { return "Exporters"; }
     void setName (const String&) override            {}
-    Icon getIcon() const override                    { return project.getMainGroup().getIcon (isOpen()).withColour (getContentColour (true)); }
+    Icon getIcon() const override                    { return project.getMainGroup().getIcon (isOpen()).withColor (getContentColor (true)); }
 
     void showPopupMenu() override
     {

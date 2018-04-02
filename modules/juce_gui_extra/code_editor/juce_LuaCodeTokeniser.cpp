@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -213,26 +213,26 @@ int LuaTokeniser::readNextToken (CodeDocument::Iterator& source)
     return LuaTokeniserFunctions::readNextToken (source);
 }
 
-CodeEditorComponent::ColourScheme LuaTokeniser::getDefaultColourScheme()
+CodeEditorComponent::ColorScheme LuaTokeniser::getDefaultColorScheme()
 {
-    static const CodeEditorComponent::ColourScheme::TokenType types[] =
+    static const CodeEditorComponent::ColorScheme::TokenType types[] =
     {
-        { "Error",          Colour (0xffcc0000) },
-        { "Comment",        Colour (0xff3c3c3c) },
-        { "Keyword",        Colour (0xff0000cc) },
-        { "Operator",       Colour (0xff225500) },
-        { "Identifier",     Colour (0xff000000) },
-        { "Integer",        Colour (0xff880000) },
-        { "Float",          Colour (0xff885500) },
-        { "String",         Colour (0xff990099) },
-        { "Bracket",        Colour (0xff000055) },
-        { "Punctuation",    Colour (0xff004400) }
+        { "Error",          Color (0xffcc0000) },
+        { "Comment",        Color (0xff3c3c3c) },
+        { "Keyword",        Color (0xff0000cc) },
+        { "Operator",       Color (0xff225500) },
+        { "Identifier",     Color (0xff000000) },
+        { "Integer",        Color (0xff880000) },
+        { "Float",          Color (0xff885500) },
+        { "String",         Color (0xff990099) },
+        { "Bracket",        Color (0xff000055) },
+        { "Punctuation",    Color (0xff004400) }
     };
 
-    CodeEditorComponent::ColourScheme cs;
+    CodeEditorComponent::ColorScheme cs;
 
     for (auto& t : types)
-        cs.set (t.name, Colour (t.colour));
+        cs.set (t.name, Color (t.color));
 
     return cs;
 }

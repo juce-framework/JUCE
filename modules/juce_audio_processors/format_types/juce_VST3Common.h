@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -157,22 +157,22 @@ static inline Steinberg::Vst::Speaker getSpeakerType (const AudioChannelSet& set
     {
         case AudioChannelSet::left:              return kSpeakerL;
         case AudioChannelSet::right:             return kSpeakerR;
-        case AudioChannelSet::centre:            return (set == AudioChannelSet::mono() ? kSpeakerM : kSpeakerC);
+        case AudioChannelSet::center:            return (set == AudioChannelSet::mono() ? kSpeakerM : kSpeakerC);
 
         case AudioChannelSet::LFE:               return kSpeakerLfe;
         case AudioChannelSet::leftSurround:      return kSpeakerLs;
         case AudioChannelSet::rightSurround:     return kSpeakerRs;
-        case AudioChannelSet::leftCentre:        return kSpeakerLc;
-        case AudioChannelSet::rightCentre:       return kSpeakerRc;
-        case AudioChannelSet::centreSurround:    return kSpeakerCs;
+        case AudioChannelSet::leftCenter:        return kSpeakerLc;
+        case AudioChannelSet::rightCenter:       return kSpeakerRc;
+        case AudioChannelSet::centerSurround:    return kSpeakerCs;
         case AudioChannelSet::leftSurroundSide:  return (1ull << 26); /* kSpeakerLcs */
         case AudioChannelSet::rightSurroundSide: return (1ull << 27); /* kSpeakerRcs */
         case AudioChannelSet::topMiddle:         return (1ull << 11); /* kSpeakerTm */
         case AudioChannelSet::topFrontLeft:      return kSpeakerTfl;
-        case AudioChannelSet::topFrontCentre:    return kSpeakerTfc;
+        case AudioChannelSet::topFrontCenter:    return kSpeakerTfc;
         case AudioChannelSet::topFrontRight:     return kSpeakerTfr;
         case AudioChannelSet::topRearLeft:       return kSpeakerTrl;
-        case AudioChannelSet::topRearCentre:     return kSpeakerTrc;
+        case AudioChannelSet::topRearCenter:     return kSpeakerTrc;
         case AudioChannelSet::topRearRight:      return kSpeakerTrr;
         case AudioChannelSet::LFE2:              return kSpeakerLfe2;
         case AudioChannelSet::leftSurroundRear:  return kSpeakerSl;
@@ -225,24 +225,24 @@ static inline AudioChannelSet::ChannelType getChannelType (Steinberg::Vst::Speak
     {
         case kSpeakerL:     return AudioChannelSet::left;
         case kSpeakerR:     return AudioChannelSet::right;
-        case kSpeakerC:     return AudioChannelSet::centre;
+        case kSpeakerC:     return AudioChannelSet::center;
         case kSpeakerLfe:   return AudioChannelSet::LFE;
         case kSpeakerLs:    return AudioChannelSet::leftSurround;
         case kSpeakerRs:    return AudioChannelSet::rightSurround;
-        case kSpeakerLc:    return AudioChannelSet::leftCentre;
-        case kSpeakerRc:    return AudioChannelSet::rightCentre;
-        case kSpeakerCs:    return AudioChannelSet::centreSurround;
+        case kSpeakerLc:    return AudioChannelSet::leftCenter;
+        case kSpeakerRc:    return AudioChannelSet::rightCenter;
+        case kSpeakerCs:    return AudioChannelSet::centerSurround;
         case kSpeakerSl:    return AudioChannelSet::leftSurroundRear;
         case kSpeakerSr:    return AudioChannelSet::rightSurroundRear;
         case (1ull << 11):  return AudioChannelSet::topMiddle;  /* kSpeakerTm */
         case kSpeakerTfl:   return AudioChannelSet::topFrontLeft;
-        case kSpeakerTfc:   return AudioChannelSet::topFrontCentre;
+        case kSpeakerTfc:   return AudioChannelSet::topFrontCenter;
         case kSpeakerTfr:   return AudioChannelSet::topFrontRight;
         case kSpeakerTrl:   return AudioChannelSet::topRearLeft;
-        case kSpeakerTrc:   return AudioChannelSet::topRearCentre;
+        case kSpeakerTrc:   return AudioChannelSet::topRearCenter;
         case kSpeakerTrr:   return AudioChannelSet::topRearRight;
         case kSpeakerLfe2:  return AudioChannelSet::LFE2;
-        case (1ull << 19):  return ((arr & kSpeakerC) != 0 ? AudioChannelSet::discreteChannel0 : AudioChannelSet::centre);
+        case (1ull << 19):  return ((arr & kSpeakerC) != 0 ? AudioChannelSet::discreteChannel0 : AudioChannelSet::center);
         case (1ull << 20):  return AudioChannelSet::ambisonicACN0;  /* kSpeakerACN0 */
         case (1ull << 21):  return AudioChannelSet::ambisonicACN1;  /* kSpeakerACN1 */
         case (1ull << 22):  return AudioChannelSet::ambisonicACN2;  /* kSpeakerACN2 */
@@ -466,21 +466,21 @@ public:
                     case Steinberg::Vst::Event::kNoteOnEvent:
                         result.addEvent (MidiMessage::noteOn (createSafeChannel (e.noteOn.channel),
                                                               createSafeNote (e.noteOn.pitch),
-                                                              (Steinberg::uint8) denormaliseToMidiValue (e.noteOn.velocity)),
+                                                              (Steinberg::uint8) denormalizeToMidiValue (e.noteOn.velocity)),
                                          e.sampleOffset);
                         break;
 
                     case Steinberg::Vst::Event::kNoteOffEvent:
                         result.addEvent (MidiMessage::noteOff (createSafeChannel (e.noteOff.channel),
                                                                createSafeNote (e.noteOff.pitch),
-                                                               (Steinberg::uint8) denormaliseToMidiValue (e.noteOff.velocity)),
+                                                               (Steinberg::uint8) denormalizeToMidiValue (e.noteOff.velocity)),
                                          e.sampleOffset);
                         break;
 
                     case Steinberg::Vst::Event::kPolyPressureEvent:
                         result.addEvent (MidiMessage::aftertouchChange (createSafeChannel (e.polyPressure.channel),
                                                                         createSafeNote (e.polyPressure.pitch),
-                                                                        denormaliseToMidiValue (e.polyPressure.pressure)),
+                                                                        denormalizeToMidiValue (e.polyPressure.pressure)),
                                          e.sampleOffset);
                         break;
 
@@ -517,7 +517,7 @@ public:
                 e.type              = Steinberg::Vst::Event::kNoteOnEvent;
                 e.noteOn.channel    = createSafeChannel (msg.getChannel());
                 e.noteOn.pitch      = createSafeNote (msg.getNoteNumber());
-                e.noteOn.velocity   = normaliseMidiValue (msg.getVelocity());
+                e.noteOn.velocity   = normalizeMidiValue (msg.getVelocity());
                 e.noteOn.length     = 0;
                 e.noteOn.tuning     = 0.0f;
                 e.noteOn.noteId     = -1;
@@ -527,7 +527,7 @@ public:
                 e.type              = Steinberg::Vst::Event::kNoteOffEvent;
                 e.noteOff.channel   = createSafeChannel (msg.getChannel());
                 e.noteOff.pitch     = createSafeNote (msg.getNoteNumber());
-                e.noteOff.velocity  = normaliseMidiValue (msg.getVelocity());
+                e.noteOff.velocity  = normalizeMidiValue (msg.getVelocity());
                 e.noteOff.tuning    = 0.0f;
                 e.noteOff.noteId    = -1;
             }
@@ -543,7 +543,7 @@ public:
                 e.type                   = Steinberg::Vst::Event::kPolyPressureEvent;
                 e.polyPressure.channel   = createSafeChannel (msg.getChannel());
                 e.polyPressure.pitch     = createSafeNote (msg.getNoteNumber());
-                e.polyPressure.pressure  = normaliseMidiValue (msg.getAfterTouchValue());
+                e.polyPressure.pressure  = normalizeMidiValue (msg.getAfterTouchValue());
             }
             else
             {
@@ -567,8 +567,8 @@ private:
     static Steinberg::int16 createSafeNote (int note) noexcept        { return (Steinberg::int16) jlimit (0, 127, note); }
     static int createSafeNote (Steinberg::int16 note) noexcept        { return jlimit (0, 127, (int) note); }
 
-    static float normaliseMidiValue (int value) noexcept              { return jlimit (0.0f, 1.0f, (float) value / 127.0f); }
-    static int denormaliseToMidiValue (float value) noexcept          { return roundToInt (jlimit (0.0f, 127.0f, value * 127.0f)); }
+    static float normalizeMidiValue (int value) noexcept              { return jlimit (0.0f, 1.0f, (float) value / 127.0f); }
+    static int denormalizeToMidiValue (float value) noexcept          { return roundToInt (jlimit (0.0f, 127.0f, value * 127.0f)); }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiEventList)
 };

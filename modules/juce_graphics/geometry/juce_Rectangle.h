@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -124,14 +124,14 @@ public:
     /** Returns the y coordinate of the rectangle's bottom edge. */
     inline ValueType getBottom() const noexcept                     { return pos.y + h; }
 
-    /** Returns the x coordinate of the rectangle's centre. */
-    ValueType getCentreX() const noexcept                           { return pos.x + w / (ValueType) 2; }
+    /** Returns the x coordinate of the rectangle's center. */
+    ValueType getCenterX() const noexcept                           { return pos.x + w / (ValueType) 2; }
 
-    /** Returns the y coordinate of the rectangle's centre. */
-    ValueType getCentreY() const noexcept                           { return pos.y + h / (ValueType) 2; }
+    /** Returns the y coordinate of the rectangle's center. */
+    ValueType getCenterY() const noexcept                           { return pos.y + h / (ValueType) 2; }
 
-    /** Returns the centre point of the rectangle. */
-    Point<ValueType> getCentre() const noexcept                     { return { pos.x + w / (ValueType) 2,
+    /** Returns the center point of the rectangle. */
+    Point<ValueType> getCenter() const noexcept                     { return { pos.x + w / (ValueType) 2,
                                                                                pos.y + h / (ValueType) 2 }; }
 
     /** Returns the aspect ratio of the rectangle's width / height.
@@ -186,12 +186,12 @@ public:
     /** Changes the rectangle's height */
     inline void setHeight (ValueType newHeight) noexcept                                            { h = newHeight; }
 
-    /** Changes the position of the rectangle's centre (leaving its size unchanged). */
-    inline void setCentre (ValueType newCentreX, ValueType newCentreY) noexcept                     { pos.x = newCentreX - w / (ValueType) 2;
-                                                                                                      pos.y = newCentreY - h / (ValueType) 2; }
+    /** Changes the position of the rectangle's center (leaving its size unchanged). */
+    inline void setCenter (ValueType newCenterX, ValueType newCenterY) noexcept                     { pos.x = newCenterX - w / (ValueType) 2;
+                                                                                                      pos.y = newCenterY - h / (ValueType) 2; }
 
-    /** Changes the position of the rectangle's centre (leaving its size unchanged). */
-    inline void setCentre (Point<ValueType> newCentre) noexcept                                     { setCentre (newCentre.x, newCentre.y); }
+    /** Changes the position of the rectangle's center (leaving its size unchanged). */
+    inline void setCenter (Point<ValueType> newCenter) noexcept                                     { setCenter (newCenter.x, newCenter.y); }
 
     /** Changes the position of the rectangle's left and right edges. */
     void setHorizontalRange (Range<ValueType> range) noexcept                                       { pos.x = range.getStart(); w = range.getLength(); }
@@ -220,9 +220,9 @@ public:
     /** Returns a rectangle whose size is the same as this one, but whose top-left position is (0, 0). */
     Rectangle withZeroOrigin() const noexcept                                                       { return { w, h }; }
 
-    /** Returns a rectangle with the same size as this one, but a new centre position. */
-    Rectangle withCentre (Point<ValueType> newCentre) const noexcept                                { return { newCentre.x - w / (ValueType) 2,
-                                                                                                               newCentre.y - h / (ValueType) 2, w, h }; }
+    /** Returns a rectangle with the same size as this one, but a new center position. */
+    Rectangle withCenter (Point<ValueType> newCenter) const noexcept                                { return { newCenter.x - w / (ValueType) 2,
+                                                                                                               newCenter.y - h / (ValueType) 2, w, h }; }
 
     /** Returns a rectangle which has the same position and height as this one, but with a different width. */
     Rectangle withWidth (ValueType newWidth) const noexcept                                         { return { pos.x, pos.y, newWidth, h }; }
@@ -233,8 +233,8 @@ public:
     /** Returns a rectangle with the same top-left position as this one, but a new size. */
     Rectangle withSize (ValueType newWidth, ValueType newHeight) const noexcept                     { return { pos.x, pos.y, newWidth, newHeight }; }
 
-    /** Returns a rectangle with the same centre position as this one, but a new size. */
-    Rectangle withSizeKeepingCentre (ValueType newWidth, ValueType newHeight) const noexcept        { return { pos.x + (w - newWidth)  / (ValueType) 2,
+    /** Returns a rectangle with the same center position as this one, but a new size. */
+    Rectangle withSizeKeepingCenter (ValueType newWidth, ValueType newHeight) const noexcept        { return { pos.x + (w - newWidth)  / (ValueType) 2,
                                                                                                                pos.y + (h - newHeight) / (ValueType) 2, newWidth, newHeight }; }
 
     /** Moves the x position, adjusting the width so that the right-hand edge remains in the same place.
@@ -339,7 +339,7 @@ public:
         return *this;
     }
 
-    /** Returns a rectangle that has been scaled by the given amount, centred around the origin.
+    /** Returns a rectangle that has been scaled by the given amount, centered around the origin.
         Note that if the rectangle has int coordinates and it's scaled by a
         floating-point amount, then the result will be converted back to integer
         coordinates using getSmallestIntegerContainer().
@@ -352,7 +352,7 @@ public:
         return r;
     }
 
-    /** Scales this rectangle by the given amount, centred around the origin.
+    /** Scales this rectangle by the given amount, centered around the origin.
         Note that if the rectangle has int coordinates and it's scaled by a
         floating-point amount, then the result will be converted back to integer
         coordinates using getSmallestIntegerContainer().
@@ -367,7 +367,7 @@ public:
         return *this;
     }
 
-    /** Scales this rectangle by the given X and Y factors, centred around the origin.
+    /** Scales this rectangle by the given X and Y factors, centered around the origin.
         Note that if the rectangle has int coordinates and it's scaled by a
         floating-point amount, then the result will be converted back to integer
         coordinates using getSmallestIntegerContainer().
@@ -382,7 +382,7 @@ public:
         return *this;
     }
 
-    /** Scales this rectangle by the given amount, centred around the origin. */
+    /** Scales this rectangle by the given amount, centered around the origin. */
     template <typename FloatType>
     Rectangle operator/ (FloatType scaleFactor) const noexcept
     {
@@ -391,7 +391,7 @@ public:
         return r;
     }
 
-    /** Scales this rectangle by the given amount, centred around the origin. */
+    /** Scales this rectangle by the given amount, centered around the origin. */
     template <typename FloatType>
     Rectangle operator/= (FloatType scaleFactor) noexcept
     {
@@ -402,7 +402,7 @@ public:
         return *this;
     }
 
-    /** Scales this rectangle by the given X and Y factors, centred around the origin. */
+    /** Scales this rectangle by the given X and Y factors, centered around the origin. */
     template <typename FloatType>
     Rectangle operator/= (Point<FloatType> scaleFactor) noexcept
     {
@@ -583,7 +583,7 @@ public:
 
     /** Returns a rectangle based on some proportional coordinates relative to this one.
         So for example getProportion ({ 0.25f, 0.25f, 0.5f, 0.5f }) would return a rectangle
-        of half the original size, with the same centre.
+        of half the original size, with the same center.
     */
     template <typename FloatType>
     Rectangle getProportion (Rectangle<FloatType> proportionalRect) const noexcept

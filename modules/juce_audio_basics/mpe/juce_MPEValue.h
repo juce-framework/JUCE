@@ -39,7 +39,7 @@ public:
     //==============================================================================
     /** Default constructor.
 
-        Constructs an MPEValue corresponding to the centre value.
+        Constructs an MPEValue corresponding to the center value.
     */
     MPEValue() noexcept;
 
@@ -53,8 +53,8 @@ public:
     */
     static MPEValue from14BitInt (int value) noexcept;
 
-    /** Constructs an MPEValue corresponding to the centre value. */
-    static MPEValue centreValue() noexcept;
+    /** Constructs an MPEValue corresponding to the center value. */
+    static MPEValue centerValue() noexcept;
 
     /** Constructs an MPEValue corresponding to the minimum value. */
     static MPEValue minValue() noexcept;
@@ -64,14 +64,14 @@ public:
 
     /** Retrieves the current value as an integer between 0 and 127.
 
-        Information will be lost if the value was initialised with a precision
+        Information will be lost if the value was initialized with a precision
         higher than 7-bit.
     */
     int as7BitInt() const noexcept;
 
     /** Retrieves the current value as an integer between 0 and 16383.
 
-        Resolution will be lost if the value was initialised with a precision
+        Resolution will be lost if the value was initialized with a precision
         higher than 14-bit.
     */
     int as14BitInt() const noexcept;
@@ -90,8 +90,8 @@ public:
 
 private:
     //==============================================================================
-    MPEValue (int normalisedValue);
-    int normalisedValue = 8192;
+    MPEValue (int normalizedValue);
+    int normalizedValue = 8192;
 };
 
 } // namespace juce

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -50,7 +50,7 @@ namespace juce
        marker called "foobar", you'd set it to "foobar + 10".
 
     See the Expression class for details about the operators that are supported, but for example
-    if you wanted to make your component remains centred within its parent with a size of 100, 100,
+    if you wanted to make your component remains centered within its parent with a size of 100, 100,
     you could express it as:
     @code myComp.setBounds (RelativeBounds ("parent.width / 2 - 50, parent.height / 2 - 50, left + 100, top + 100"));
     @endcode

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -118,7 +118,7 @@ public:
     void setViewPositionProportionately (double proportionX, double proportionY);
 
     /** If the specified position is at the edges of the viewport, this method scrolls
-        the viewport to bring that position nearer to the centre.
+        the viewport to bring that position nearer to the center.
 
         Call this if you're dragging an object inside a viewport and want to make it scroll
         when the user approaches an edge. You might also find Component::beginDragAutoRepeat()
@@ -231,12 +231,12 @@ public:
     void setSingleStepSizes (int stepX, int stepY);
 
     /** Returns a pointer to the scrollbar component being used.
-        Handy if you need to customise the bar somehow.
+        Handy if you need to customize the bar somehow.
     */
     ScrollBar& getVerticalScrollBar() noexcept                  { return *verticalScrollBar; }
 
     /** Returns a pointer to the scrollbar component being used.
-        Handy if you need to customise the bar somehow.
+        Handy if you need to customize the bar somehow.
     */
     ScrollBar& getHorizontalScrollBar() noexcept                { return *horizontalScrollBar; }
 
@@ -285,7 +285,7 @@ public:
 protected:
     //==============================================================================
     /** Creates the Scrollbar components that will be added to the Viewport.
-        Subclasses can override this if they need to customise the scrollbars in some way.
+        Subclasses can override this if they need to customize the scrollbars in some way.
     */
     virtual ScrollBar* createScrollBarComponent (bool isVertical);
 

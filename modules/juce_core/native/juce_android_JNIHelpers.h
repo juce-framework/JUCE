@@ -205,11 +205,11 @@ public:
 
     inline operator jclass() const noexcept { return classRef; }
 
-    static void initialiseAllClasses (JNIEnv*);
+    static void initializeAllClasses (JNIEnv*);
     static void releaseAllClasses (JNIEnv*);
 
 protected:
-    virtual void initialiseFields (JNIEnv*) = 0;
+    virtual void initializeFields (JNIEnv*) = 0;
 
     jmethodID resolveMethod (JNIEnv*, const char* methodName, const char* params);
     jmethodID resolveStaticMethod (JNIEnv*, const char* methodName, const char* params);
@@ -221,7 +221,7 @@ private:
     jclass classRef;
 
     static Array<JNIClassBase*>& getClasses();
-    void initialise (JNIEnv*);
+    void initialize (JNIEnv*);
     void release (JNIEnv*);
 
     JUCE_DECLARE_NON_COPYABLE (JNIClassBase)
@@ -241,7 +241,7 @@ private:
     public: \
         CppClassName ## _Class() : JNIClassBase (javaPath) {} \
     \
-        void initialiseFields (JNIEnv* env) \
+        void initializeFields (JNIEnv* env) \
         { \
             ignoreUnused (env); \
             JNI_CLASS_MEMBERS (CREATE_JNI_METHOD, CREATE_JNI_STATICMETHOD, CREATE_JNI_FIELD, CREATE_JNI_STATICFIELD); \
@@ -270,7 +270,7 @@ class AndroidSystem
 public:
     AndroidSystem();
 
-    void initialise (JNIEnv*, jobject activity, jstring appFile, jstring appDataDir);
+    void initialize (JNIEnv*, jobject activity, jstring appFile, jstring appDataDir);
     void shutdown (JNIEnv*);
 
     //==============================================================================

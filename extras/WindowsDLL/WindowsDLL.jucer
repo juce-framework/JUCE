@@ -7,7 +7,7 @@
   <EXPORTFORMATS>
     <VS2017 targetFolder="Builds/VisualStudio2017">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="juce_dll"/>
+        <CONFIGURATION name="Debug" isDebug="1" optimization="1" targetName="juce_dll"/>
         <CONFIGURATION name="Release" isDebug="0" targetName="juce_dll"/>
       </CONFIGURATIONS>
       <MODULEPATHS>

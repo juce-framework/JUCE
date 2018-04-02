@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -34,8 +34,8 @@ public:
 
     void buttonClicked (Button* button) override
     {
-        if      (button == owner.getMinimiseButton())  owner.minimiseButtonPressed();
-        else if (button == owner.getMaximiseButton())  owner.maximiseButtonPressed();
+        if      (button == owner.getMinimizeButton())  owner.minimizeButtonPressed();
+        else if (button == owner.getMaximizeButton())  owner.maximizeButtonPressed();
         else if (button == owner.getCloseButton())     owner.closeButtonPressed();
     }
 
@@ -47,10 +47,10 @@ private:
 
 //==============================================================================
 DocumentWindow::DocumentWindow (const String& title,
-                                Colour backgroundColour,
+                                Color backgroundColor,
                                 int requiredButtons_,
                                 bool addToDesktop_)
-    : ResizableWindow (title, backgroundColour, addToDesktop_),
+    : ResizableWindow (title, backgroundColor, addToDesktop_),
       requiredButtons (requiredButtons_),
      #if JUCE_MAC
       positionTitleBarButtonsOnLeft (true)
@@ -114,9 +114,9 @@ void DocumentWindow::setTitleBarButtonsRequired (const int buttons, const bool o
     lookAndFeelChanged();
 }
 
-void DocumentWindow::setTitleBarTextCentred (const bool textShouldBeCentred)
+void DocumentWindow::setTitleBarTextCentered (const bool textShouldBeCentered)
 {
-    drawTitleTextCentred = textShouldBeCentred;
+    drawTitleTextCentered = textShouldBeCentered;
     repaintTitleBar();
 }
 
@@ -164,7 +164,7 @@ void DocumentWindow::closeButtonPressed()
         it delete the window in whatever way is appropriate for your app. E.g. you
         might just want to call "delete this".
 
-        If your app is centred around this window such that the whole app should quit when
+        If your app is centered around this window such that the whole app should quit when
         the window is closed, then you will probably want to use this method as an opportunity
         to call JUCEApplicationBase::quit(), and leave the window to be deleted later by your
         JUCEApplicationBase::shutdown() method. (Doing it this way means that your window will
@@ -174,12 +174,12 @@ void DocumentWindow::closeButtonPressed()
     jassertfalse;
 }
 
-void DocumentWindow::minimiseButtonPressed()
+void DocumentWindow::minimizeButtonPressed()
 {
-    setMinimised (true);
+    setMinimized (true);
 }
 
-void DocumentWindow::maximiseButtonPressed()
+void DocumentWindow::maximizeButtonPressed()
 {
     setFullScreen (! isFullScreen());
 }
@@ -213,14 +213,14 @@ void DocumentWindow::paint (Graphics& g)
                                                  titleSpaceX1,
                                                  jmax (1, titleSpaceX2 - titleSpaceX1),
                                                  titleBarIcon.isValid() ? &titleBarIcon : 0,
-                                                 ! drawTitleTextCentred);
+                                                 ! drawTitleTextCentered);
 }
 
 void DocumentWindow::resized()
 {
     ResizableWindow::resized();
 
-    if (auto* b = getMaximiseButton())
+    if (auto* b = getMaximizeButton())
         b->setToggleState (isFullScreen(), dontSendNotification);
 
     auto titleBarArea = getTitleBarArea();
@@ -271,15 +271,15 @@ Rectangle<int> DocumentWindow::getTitleBarArea()
 }
 
 Button* DocumentWindow::getCloseButton()    const noexcept  { return titleBarButtons[2].get(); }
-Button* DocumentWindow::getMinimiseButton() const noexcept  { return titleBarButtons[0].get(); }
-Button* DocumentWindow::getMaximiseButton() const noexcept  { return titleBarButtons[1].get(); }
+Button* DocumentWindow::getMinimizeButton() const noexcept  { return titleBarButtons[0].get(); }
+Button* DocumentWindow::getMaximizeButton() const noexcept  { return titleBarButtons[1].get(); }
 
 int DocumentWindow::getDesktopWindowStyleFlags() const
 {
     auto styleFlags = ResizableWindow::getDesktopWindowStyleFlags();
 
-    if ((requiredButtons & minimiseButton) != 0)  styleFlags |= ComponentPeer::windowHasMinimiseButton;
-    if ((requiredButtons & maximiseButton) != 0)  styleFlags |= ComponentPeer::windowHasMaximiseButton;
+    if ((requiredButtons & minimizeButton) != 0)  styleFlags |= ComponentPeer::windowHasMinimizeButton;
+    if ((requiredButtons & maximizeButton) != 0)  styleFlags |= ComponentPeer::windowHasMaximizeButton;
     if ((requiredButtons & closeButton)    != 0)  styleFlags |= ComponentPeer::windowHasCloseButton;
 
     return styleFlags;
@@ -294,8 +294,8 @@ void DocumentWindow::lookAndFeelChanged()
     {
         auto& lf = getLookAndFeel();
 
-        if ((requiredButtons & minimiseButton) != 0)  titleBarButtons[0].reset (lf.createDocumentWindowButton (minimiseButton));
-        if ((requiredButtons & maximiseButton) != 0)  titleBarButtons[1].reset (lf.createDocumentWindowButton (maximiseButton));
+        if ((requiredButtons & minimizeButton) != 0)  titleBarButtons[0].reset (lf.createDocumentWindowButton (minimizeButton));
+        if ((requiredButtons & maximizeButton) != 0)  titleBarButtons[1].reset (lf.createDocumentWindowButton (maximizeButton));
         if ((requiredButtons & closeButton)    != 0)  titleBarButtons[2].reset (lf.createDocumentWindowButton (closeButton));
 
         for (auto& b : titleBarButtons)
@@ -349,8 +349,8 @@ void DocumentWindow::activeWindowStatusChanged()
 void DocumentWindow::mouseDoubleClick (const MouseEvent& e)
 {
     if (getTitleBarArea().contains (e.x, e.y))
-        if (auto* maximise = getMaximiseButton())
-            maximise->triggerClick();
+        if (auto* maximize = getMaximizeButton())
+            maximize->triggerClick();
 }
 
 void DocumentWindow::userTriedToCloseWindow()

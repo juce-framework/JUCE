@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -153,10 +153,10 @@ public:
         */
         String shortcutKeyDescription;
 
-        /** A colour to use to draw the menu text.
-            By default this is transparent black, which means that the LookAndFeel should choose the colour.
+        /** A color to use to draw the menu text.
+            By default this is transparent black, which means that the LookAndFeel should choose the color.
         */
-        Colour colour;
+        Color color;
 
         /** True if this menu item is enabled. */
         bool isEnabled = true;
@@ -184,10 +184,10 @@ public:
                                 zero, because that's used to indicate that the user didn't
                                 select anything.
         @param itemText         the text to show.
-        @param isEnabled        if false, the item will be shown 'greyed-out' and can't be picked
+        @param isEnabled        if false, the item will be shown 'grayed-out' and can't be picked
         @param isTicked         if true, the item will be shown with a tick next to it
 
-        @see addSeparator, addColouredItem, addCustomItem, addSubMenu
+        @see addSeparator, addColoredItem, addCustomItem, addSubMenu
     */
     void addItem (int itemResultID,
                   const String& itemText,
@@ -201,11 +201,11 @@ public:
                                 zero, because that's used to indicate that the user didn't
                                 select anything.
         @param itemText         the text to show.
-        @param isEnabled        if false, the item will be shown 'greyed-out' and can't be picked
+        @param isEnabled        if false, the item will be shown 'grayed-out' and can't be picked
         @param isTicked         if true, the item will be shown with a tick next to it
         @param iconToUse        if this is a valid image, it will be displayed to the left of the item.
 
-        @see addSeparator, addColouredItem, addCustomItem, addSubMenu
+        @see addSeparator, addColoredItem, addCustomItem, addSubMenu
     */
     void addItem (int itemResultID,
                   const String& itemText,
@@ -220,12 +220,12 @@ public:
                                 zero, because that's used to indicate that the user didn't
                                 select anything.
         @param itemText         the text to show.
-        @param isEnabled        if false, the item will be shown 'greyed-out' and can't be picked
+        @param isEnabled        if false, the item will be shown 'grayed-out' and can't be picked
         @param isTicked         if true, the item will be shown with a tick next to it
         @param iconToUse        a Drawable object to use as the icon to the left of the item.
                                 The menu will take ownership of this drawable object and will
                                 delete it later when no longer needed
-        @see addSeparator, addColouredItem, addCustomItem, addSubMenu
+        @see addSeparator, addColoredItem, addCustomItem, addSubMenu
     */
     void addItem (int itemResultID,
                   const String& itemText,
@@ -249,28 +249,28 @@ public:
                          const String& displayName = String(),
                          Drawable* iconToUse = nullptr);
 
-    /** Appends a text item with a special colour.
+    /** Appends a text item with a special color.
 
-        This is the same as addItem(), but specifies a colour to use for the
-        text, which will override the default colours that are used by the
+        This is the same as addItem(), but specifies a color to use for the
+        text, which will override the default colors that are used by the
         current look-and-feel. See addItem() for a description of the parameters.
     */
-    void addColouredItem (int itemResultID,
+    void addColoredItem (int itemResultID,
                           const String& itemText,
-                          Colour itemTextColour,
+                          Color itemTextColor,
                           bool isEnabled = true,
                           bool isTicked = false,
                           const Image& iconToUse = Image());
 
-    /** Appends a text item with a special colour.
+    /** Appends a text item with a special color.
 
-        This is the same as addItem(), but specifies a colour to use for the
-        text, which will override the default colours that are used by the
+        This is the same as addItem(), but specifies a color to use for the
+        text, which will override the default colors that are used by the
         current look-and-feel. See addItem() for a description of the parameters.
     */
-    void addColouredItem (int itemResultID,
+    void addColoredItem (int itemResultID,
                           const String& itemText,
-                          Colour itemTextColour,
+                          Color itemTextColor,
                           bool isEnabled,
                           bool isTicked,
                           Drawable* iconToUse);
@@ -395,7 +395,7 @@ public:
         enum class PopupDirection
         {
             upwards,
-            downwards
+            downward
         };
 
         //==============================================================================
@@ -426,7 +426,7 @@ public:
         Component* targetComponent = nullptr;
         Component* parentComponent = nullptr;
         int visibleItemID = 0, minWidth = 0, minColumns = 1, maxColumns = 0, standardHeight = 0;
-        PopupDirection preferredPopupDirection = PopupDirection::downwards;
+        PopupDirection preferredPopupDirection = PopupDirection::downward;
     };
 
     //==============================================================================
@@ -530,29 +530,29 @@ public:
     //==============================================================================
     /** Specifies a look-and-feel for the menu and any sub-menus that it has.
 
-        This can be called before show() if you need a customised menu. Be careful
+        This can be called before show() if you need a customized menu. Be careful
         not to delete the LookAndFeel object before the menu has been deleted.
     */
     void setLookAndFeel (LookAndFeel* newLookAndFeel);
 
     //==============================================================================
-    /** A set of colour IDs to use to change the colour of various aspects of the menu.
+    /** A set of color IDs to use to change the color of various aspects of the menu.
 
-        These constants can be used either via the LookAndFeel::setColour()
+        These constants can be used either via the LookAndFeel::setColor()
         method for the look and feel that is set for this menu with setLookAndFeel()
 
-        @see setLookAndFeel, LookAndFeel::setColour, LookAndFeel::findColour
+        @see setLookAndFeel, LookAndFeel::setColor, LookAndFeel::findColor
     */
-    enum ColourIds
+    enum ColorIds
     {
-        backgroundColourId             = 0x1000700,  /**< The colour to fill the menu's background with. */
-        textColourId                   = 0x1000600,  /**< The colour for normal menu item text, (unless the
-                                                          colour is specified when the item is added). */
-        headerTextColourId             = 0x1000601,  /**< The colour for section header item text (see the
+        backgroundColorId             = 0x1000700,  /**< The color to fill the menu's background with. */
+        textColorId                   = 0x1000600,  /**< The color for normal menu item text, (unless the
+                                                          color is specified when the item is added). */
+        headerTextColorId             = 0x1000601,  /**< The color for section header item text (see the
                                                           addSectionHeader() method). */
-        highlightedBackgroundColourId  = 0x1000900,  /**< The colour to fill the background of the currently
+        highlightedBackgroundColorId  = 0x1000900,  /**< The color to fill the background of the currently
                                                           highlighted menu item. */
-        highlightedTextColourId        = 0x1000800,  /**< The colour to use for the text of the currently
+        highlightedTextColorId        = 0x1000800,  /**< The color to use for the text of the currently
                                                           highlighted item. */
     };
 
@@ -696,7 +696,7 @@ public:
                                         const String& text,
                                         const String& shortcutKeyText,
                                         const Drawable* icon,
-                                        const Colour* textColour) = 0;
+                                        const Color* textColor) = 0;
 
         virtual void drawPopupMenuSectionHeader (Graphics&, const Rectangle<int>& area,
                                                  const String& sectionName) = 0;
@@ -760,7 +760,7 @@ private:
 
    #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
     // These methods have new implementations now - see its new definition
-    int drawPopupMenuItem (Graphics&, int, int, bool, bool, bool, bool, bool, const String&, const String&, Image*, const Colour*) { return 0; }
+    int drawPopupMenuItem (Graphics&, int, int, bool, bool, bool, bool, bool, const String&, const String&, Image*, const Color*) { return 0; }
    #endif
 
     JUCE_LEAK_DETECTOR (PopupMenu)

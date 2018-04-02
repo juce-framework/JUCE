@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -240,7 +240,7 @@ public:
 
         If you're planning on using the TreeView::getOpennessState() method, then
         these strings will be used to identify which nodes are open. The string
-        should be unique amongst the item's sibling items, but it's ok for there
+        should be unique among the item's sibling items, but it's ok for there
         to be duplicates at other levels of the tree.
 
         If you're not going to store the state, then it's ok not to bother implementing
@@ -344,14 +344,14 @@ public:
 
     /** Draws the item's open/close button.
 
-        If you don't implement this method, the default behaviour is to call
+        If you don't implement this method, the default behavior is to call
         LookAndFeel::drawTreeviewPlusMinusBox(), but you can override it for custom
         effects. You may want to override it and call the base-class implementation
-        with a different backgroundColour parameter, if your implementation has a
-        background colour other than the default (white).
+        with a different backgroundColor parameter, if your implementation has a
+        background color other than the default (white).
     */
     virtual void paintOpenCloseButton (Graphics&, const Rectangle<float>& area,
-                                       Colour backgroundColour, bool isMouseOver);
+                                       Color backgroundColor, bool isMouseOver);
 
     /** Draws the line that connects this item to the vertical line extending below its parent. */
     virtual void paintHorizontalConnectingLine (Graphics&, const Line<float>& line);
@@ -411,7 +411,7 @@ public:
         a drag-and-drop operation, using this string as the source description, with the treeview
         itself as the source component.
 
-        If you need more complex drag-and-drop behaviour, you can use custom components for
+        If you need more complex drag-and-drop behavior, you can use custom components for
         the items, and use those to trigger the drag.
 
         To accept drag-and-drop in your tree, see isInterestedInDragSource(),
@@ -835,21 +835,21 @@ public:
                                bool restoreStoredSelection);
 
     //==============================================================================
-    /** A set of colour IDs to use to change the colour of various aspects of the treeview.
+    /** A set of color IDs to use to change the color of various aspects of the treeview.
 
-        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        These constants can be used either via the Component::setColor(), or LookAndFeel::setColor()
         methods.
 
-        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+        @see Component::setColor, Component::findColor, LookAndFeel::setColor, LookAndFeel::findColor
     */
-    enum ColourIds
+    enum ColorIds
     {
-        backgroundColourId             = 0x1000500, /**< A background colour to fill the component with. */
-        linesColourId                  = 0x1000501, /**< The colour to draw the lines with.*/
-        dragAndDropIndicatorColourId   = 0x1000502, /**< The colour to use for the drag-and-drop target position indicator. */
-        selectedItemBackgroundColourId = 0x1000503, /**< The colour to use to fill the background of any selected items. */
-        oddItemsColourId               = 0x1000504, /**< The colour to use to fill the backround of the odd numbered items. */
-        evenItemsColourId              = 0x1000505  /**< The colour to use to fill the backround of the even numbered items. */
+        backgroundColorId             = 0x1000500, /**< A background color to fill the component with. */
+        linesColorId                  = 0x1000501, /**< The color to draw the lines with.*/
+        dragAndDropIndicatorColorId   = 0x1000502, /**< The color to use for the drag-and-drop target position indicator. */
+        selectedItemBackgroundColorId = 0x1000503, /**< The color to use to fill the background of any selected items. */
+        oddItemsColorId               = 0x1000504, /**< The color to use to fill the backround of the odd numbered items. */
+        evenItemsColorId              = 0x1000505  /**< The color to use to fill the backround of the even numbered items. */
     };
 
     //==============================================================================
@@ -861,7 +861,7 @@ public:
         virtual ~LookAndFeelMethods() {}
 
         virtual void drawTreeviewPlusMinusBox (Graphics&, const Rectangle<float>& area,
-                                               Colour backgroundColour, bool isItemOpen, bool isMouseOver) = 0;
+                                               Color backgroundColor, bool isItemOpen, bool isMouseOver) = 0;
 
         virtual bool areLinesDrawnForTreeView (TreeView&) = 0;
         virtual int getTreeViewIndentSize (TreeView&) = 0;
@@ -875,7 +875,7 @@ public:
     /** @internal */
     bool keyPressed (const KeyPress&) override;
     /** @internal */
-    void colourChanged() override;
+    void colorChanged() override;
     /** @internal */
     void enablementChanged() override;
     /** @internal */

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -41,13 +41,13 @@ public:
     ~LookAndFeel_V3();
 
     //==============================================================================
-    void drawButtonBackground (Graphics&, Button&, const Colour& backgroundColour,
+    void drawButtonBackground (Graphics&, Button&, const Color& backgroundColor,
                                bool isMouseOverButton, bool isButtonDown) override;
 
     void drawTableHeaderBackground (Graphics&, TableHeaderComponent&) override;
 
     void drawTreeviewPlusMinusBox (Graphics&, const Rectangle<float>& area,
-                                   Colour backgroundColour, bool isOpen, bool isMouseOver) override;
+                                   Color backgroundColor, bool isOpen, bool isMouseOver) override;
     bool areLinesDrawnForTreeView (TreeView&) override;
     int getTreeViewIndentSize (TreeView&) override;
 
@@ -89,11 +89,11 @@ public:
     Path getTickShape (float height) override;
     Path getCrossShape (float height) override;
 
-    static void createTabTextLayout (const TabBarButton& button, float length, float depth, Colour colour, TextLayout&);
+    static void createTabTextLayout (const TabBarButton& button, float length, float depth, Color color, TextLayout&);
 
 private:
     Image backgroundTexture;
-    Colour backgroundTextureBaseColour;
+    Color backgroundTextureBaseColor;
 };
 
 } // namespace juce

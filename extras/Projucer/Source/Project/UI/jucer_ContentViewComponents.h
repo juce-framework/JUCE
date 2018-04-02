@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -37,15 +37,15 @@ struct ContentViewHeader    : public Component
 
     void paint (Graphics& g) override
     {
-        g.fillAll (findColour (contentHeaderBackgroundColourId));
+        g.fillAll (findColor (contentHeaderBackgroundColorId));
 
         auto bounds = getLocalBounds().reduced (20, 0);
 
-        icon.withColour (Colours::white).draw (g, bounds.toFloat().removeFromRight (30), false);
+        icon.withColor (Colors::white).draw (g, bounds.toFloat().removeFromRight (30), false);
 
-        g.setColour (Colours::white);
+        g.setColor (Colors::white);
         g.setFont (Font (18.0f));
-        g.drawFittedText (name, bounds, Justification::centredLeft, 1);
+        g.drawFittedText (name, bounds, Justification::centeredLeft, 1);
     }
 
     String name;
@@ -168,12 +168,12 @@ public:
         auto bounds = getLocalBounds().toFloat().reduced (2);
         auto& icon = getIcons().info;
 
-        g.setColour (findColour (treeIconColourId).withMultipliedAlpha (isMouseOverButton || isButtonDown ? 1.0f : 0.5f));
+        g.setColor (findColor (treeIconColorId).withMultipliedAlpha (isMouseOverButton || isButtonDown ? 1.0f : 0.5f));
 
         if (isButtonDown)
             g.fillEllipse (bounds);
         else
-            g.fillPath (icon, RectanglePlacement (RectanglePlacement::centred)
+            g.fillPath (icon, RectanglePlacement (RectanglePlacement::centered)
                         .getTransformToFit (icon.getBounds(), bounds));
     }
 
@@ -218,11 +218,11 @@ private:
 
         void paint (Graphics& g) override
         {
-            g.fillAll (findColour (secondaryBackgroundColourId));
+            g.fillAll (findColor (secondaryBackgroundColorId));
 
-            g.setColour (findColour (defaultTextColourId));
+            g.setColor (findColor (defaultTextColorId));
             g.setFont (Font (14.0f));
-            g.drawFittedText (stringToDisplay, getLocalBounds(), Justification::centred, 10, 1.0f);
+            g.drawFittedText (stringToDisplay, getLocalBounds(), Justification::centered, 10, 1.0f);
         }
 
         String stringToDisplay;
@@ -242,9 +242,9 @@ public:
         addAndMakeVisible (header);
 
         description.setFont ({ 16.0f });
-        description.setColour (getLookAndFeel().findColour (defaultTextColourId));
+        description.setColor (getLookAndFeel().findColor (defaultTextColorId));
         description.setLineSpacing (5.0f);
-        description.setJustification (Justification::centredLeft);
+        description.setJustification (Justification::centeredLeft);
     }
 
     void setProperties (const PropertyListBuilder& newProps)
@@ -289,7 +289,7 @@ public:
             if (buttonToUse != nullptr)
             {
                 buttonToUse->setSize (20, 20);
-                buttonToUse->setCentrePosition (20, height + (propertyHeight / 2));
+                buttonToUse->setCenterPosition (20, height + (propertyHeight / 2));
             }
 
             pp->setBounds (40, height, width - 50, propertyHeight);
@@ -308,7 +308,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.setColour (findColour (secondaryBackgroundColourId));
+        g.setColor (findColor (secondaryBackgroundColorId));
         g.fillRect (getLocalBounds());
 
         auto textArea = getLocalBounds().toFloat()
@@ -338,7 +338,7 @@ public:
             auto* child = pp->getChildComponent (i);
 
             auto bounds = child->getBounds();
-            child->setBounds (bounds.withSizeKeepingCentre (child->getWidth(), pp->getPreferredHeight()));
+            child->setBounds (bounds.withSizeKeepingCenter (child->getWidth(), pp->getPreferredHeight()));
         }
     }
 

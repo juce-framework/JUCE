@@ -470,8 +470,8 @@ prepare_for_output_pass (j_decompress_ptr cinfo)
       if (cinfo->quantize_colors)
 	(*cinfo->cquantize->start_pass) (cinfo, master->pub.is_dummy_pass);
       (*cinfo->post->start_pass) (cinfo,
-	    (master->pub.is_dummy_pass ? JBUF_SAVE_AND_PASS : JBUF_PASS_THRU));
-      (*cinfo->main->start_pass) (cinfo, JBUF_PASS_THRU);
+	    (master->pub.is_dummy_pass ? JBUF_SAVE_AND_PASS : JBUF_PASS_THROUGH));
+      (*cinfo->main->start_pass) (cinfo, JBUF_PASS_THROUGH);
     }
   }
 

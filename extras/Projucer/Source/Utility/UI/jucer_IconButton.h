@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -32,7 +32,7 @@ struct IconButton    : public Button
 {
     IconButton (String name, const Path* p)
         : Button (name),
-          icon (p, Colours::transparentBlack)
+          icon (p, Colors::transparentBlack)
     {
         lookAndFeelChanged();
         setTooltip (name);
@@ -49,13 +49,13 @@ struct IconButton    : public Button
             alpha = 0.2f;
         }
 
-        auto backgroundColour = isIDEButton ? Colours::white
-                                            : isUserButton ? findColour (userButtonBackgroundColourId)
-                                                           : findColour (defaultButtonBackgroundColourId);
+        auto backgroundColor = isIDEButton ? Colors::white
+                                            : isUserButton ? findColor (userButtonBackgroundColorId)
+                                                           : findColor (defaultButtonBackgroundColorId);
 
-        backgroundColour = isButtonDown ? backgroundColour.darker (0.5f)
-                                        : isMouseOverButton ? backgroundColour.darker (0.2f)
-                                                            : backgroundColour;
+        backgroundColor = isButtonDown ? backgroundColor.darker (0.5f)
+                                        : isMouseOverButton ? backgroundColor.darker (0.2f)
+                                                            : backgroundColor;
 
         auto bounds = getLocalBounds().toFloat();
 
@@ -66,7 +66,7 @@ struct IconButton    : public Button
         ellipse.addEllipse (bounds);
         g.reduceClipRegion(ellipse);
 
-        g.setColour (backgroundColour.withAlpha (alpha));
+        g.setColor (backgroundColor.withAlpha (alpha));
         g.fillAll();
 
         if (iconImage != Image())
@@ -79,7 +79,7 @@ struct IconButton    : public Button
         }
         else
         {
-            icon.withColour (findColour (defaultIconColourId).withAlpha (alpha)).draw (g, bounds.reduced (2, 2), false);
+            icon.withColor (findColor (defaultIconColorId).withAlpha (alpha)).draw (g, bounds.reduced (2, 2), false);
         }
     }
 

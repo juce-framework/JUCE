@@ -108,8 +108,8 @@ public:
     /** Returns true if this button has a controllable light. */
     virtual bool hasLight() const = 0;
 
-    /** If the button can light-up, this sets its colour. */
-    virtual bool setLightColour (LEDColour newColour) = 0;
+    /** If the button can light-up, this sets its color. */
+    virtual bool setLightColor (LEDColor newColor) = 0;
 
     /** A listener that can be attached to a ControlButton object so that it
         gets called when the button is pushed or released.

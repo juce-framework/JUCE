@@ -27,7 +27,7 @@
  version:          1.0.0
  vendor:           juce
  website:          http://juce.com
- description:      Blocks synthesiser application.
+ description:      Blocks synthesizer application.
 
  dependencies:     juce_audio_basics, juce_audio_devices, juce_audio_formats,
                    juce_audio_processors, juce_audio_utils, juce_blocks_basics,
@@ -51,7 +51,7 @@
 /**
     Base class for oscillators
 */
-class OscillatorBase   : public SynthesiserVoice
+class OscillatorBase   : public SynthesizerVoice
 {
 public:
     OscillatorBase()
@@ -60,7 +60,7 @@ public:
         phaseIncrement.reset (getSampleRate(), 0.1);
     }
 
-    void startNote (int midiNoteNumber, float velocity, SynthesiserSound*, int) override
+    void startNote (int midiNoteNumber, float velocity, SynthesizerSound*, int) override
     {
         frequency = MidiMessage::getMidiNoteInHertz (midiNoteNumber);
         phaseIncrement.setValue (((MathConstants<double>::twoPi) * frequency) / sampleRate);
@@ -120,7 +120,7 @@ public:
     }
 
     /** Subclasses should override this to say whether they can play the given sound */
-    virtual bool canPlaySound (SynthesiserSound*) override = 0;
+    virtual bool canPlaySound (SynthesizerSound*) override = 0;
 
     /** Subclasses should override this to render a waveshape */
     virtual double renderWaveShape (const double currentPhase) = 0;
@@ -143,7 +143,7 @@ private:
 /**
     Sine sound struct - applies to MIDI channel 1
 */
-struct SineSound : public SynthesiserSound
+struct SineSound : public SynthesizerSound
 {
     SineSound () {}
 
@@ -162,7 +162,7 @@ struct SineVoice : public OscillatorBase
 {
     SineVoice() {};
 
-    bool canPlaySound (SynthesiserSound* sound) override { return dynamic_cast<SineSound*> (sound) != nullptr; }
+    bool canPlaySound (SynthesizerSound* sound) override { return dynamic_cast<SineSound*> (sound) != nullptr; }
 
     double renderWaveShape (const double currentPhase) override { return sin (currentPhase); }
 
@@ -174,7 +174,7 @@ struct SineVoice : public OscillatorBase
 /**
     Square sound struct - applies to MIDI channel 2
 */
-struct SquareSound : public SynthesiserSound
+struct SquareSound : public SynthesizerSound
 {
     SquareSound() {}
 
@@ -193,7 +193,7 @@ struct SquareVoice : public OscillatorBase
 {
     SquareVoice() {};
 
-    bool canPlaySound (SynthesiserSound* sound) override { return dynamic_cast<SquareSound*> (sound) != nullptr; }
+    bool canPlaySound (SynthesizerSound* sound) override { return dynamic_cast<SquareSound*> (sound) != nullptr; }
 
     double renderWaveShape (const double currentPhase) override { return (currentPhase < MathConstants<double>::pi ? 0.0 : 1.0); }
 
@@ -205,7 +205,7 @@ struct SquareVoice : public OscillatorBase
 /**
     Sawtooth sound - applies to MIDI channel 3
 */
-struct SawSound : public SynthesiserSound
+struct SawSound : public SynthesizerSound
 {
     SawSound() {}
 
@@ -224,7 +224,7 @@ struct SawVoice : public OscillatorBase
 {
     SawVoice() {}
 
-    bool canPlaySound (SynthesiserSound* sound) override { return dynamic_cast<SawSound*> (sound) != nullptr; }
+    bool canPlaySound (SynthesizerSound* sound) override { return dynamic_cast<SawSound*> (sound) != nullptr; }
 
     double renderWaveShape (const double currentPhase) override { return (1.0 / MathConstants<double>::pi) * currentPhase - 1.0; }
 
@@ -236,7 +236,7 @@ struct SawVoice : public OscillatorBase
 /**
     Triangle sound - applies to MIDI channel 4
 */
-struct TriangleSound : public SynthesiserSound
+struct TriangleSound : public SynthesizerSound
 {
     TriangleSound() {}
 
@@ -255,7 +255,7 @@ struct TriangleVoice : public OscillatorBase
 {
     TriangleVoice() {}
 
-    bool canPlaySound (SynthesiserSound* sound) override { return dynamic_cast<TriangleSound*> (sound) != nullptr; }
+    bool canPlaySound (SynthesizerSound* sound) override { return dynamic_cast<TriangleSound*> (sound) != nullptr; }
 
     double renderWaveShape (const double currentPhase) override
     {
@@ -278,24 +278,24 @@ public:
     {
         // Set up the audio device manager
        #ifndef JUCE_DEMO_RUNNER
-        audioDeviceManager.initialiseWithDefaultDevices (0, 2);
+        audioDeviceManager.initializeWithDefaultDevices (0, 2);
        #endif
 
         audioDeviceManager.addAudioCallback (this);
 
-        // Set up the synthesiser and add each of the waveshapes
-        synthesiser.clearVoices();
-        synthesiser.clearSounds();
+        // Set up the synthesizer and add each of the waveshapes
+        synthesizer.clearVoices();
+        synthesizer.clearSounds();
 
-        synthesiser.addVoice (new SineVoice());
-        synthesiser.addVoice (new SquareVoice());
-        synthesiser.addVoice (new SawVoice());
-        synthesiser.addVoice (new TriangleVoice());
+        synthesizer.addVoice (new SineVoice());
+        synthesizer.addVoice (new SquareVoice());
+        synthesizer.addVoice (new SawVoice());
+        synthesizer.addVoice (new TriangleVoice());
 
-        synthesiser.addSound (new SineSound());
-        synthesiser.addSound (new SquareSound());
-        synthesiser.addSound (new SawSound());
-        synthesiser.addSound (new TriangleSound());
+        synthesizer.addSound (new SineSound());
+        synthesizer.addSound (new SquareSound());
+        synthesizer.addSound (new SawSound());
+        synthesizer.addSound (new TriangleSound());
     }
 
     ~Audio()
@@ -310,50 +310,50 @@ public:
         AudioBuffer<float> sampleBuffer (outputChannelData, numOutputChannels, numSamples);
         sampleBuffer.clear();
 
-        synthesiser.renderNextBlock (sampleBuffer, MidiBuffer(), 0, numSamples);
+        synthesizer.renderNextBlock (sampleBuffer, MidiBuffer(), 0, numSamples);
     }
 
     void audioDeviceAboutToStart (AudioIODevice* device) override
     {
-        synthesiser.setCurrentPlaybackSampleRate (device->getCurrentSampleRate());
+        synthesizer.setCurrentPlaybackSampleRate (device->getCurrentSampleRate());
     }
 
     void audioDeviceStopped() override {}
 
-    /** Called to turn a synthesiser note on */
+    /** Called to turn a synthesizer note on */
     void noteOn (int channel, int noteNum, float velocity)
     {
-        synthesiser.noteOn (channel, noteNum, velocity);
+        synthesizer.noteOn (channel, noteNum, velocity);
     }
 
-    /** Called to turn a synthesiser note off */
+    /** Called to turn a synthesizer note off */
     void noteOff (int channel, int noteNum, float velocity)
     {
-        synthesiser.noteOff (channel, noteNum, velocity, false);
+        synthesizer.noteOff (channel, noteNum, velocity, false);
     }
 
-    /** Called to turn all synthesiser notes off */
+    /** Called to turn all synthesizer notes off */
     void allNotesOff()
     {
         for (auto i = 1; i < 5; ++i)
-            synthesiser.allNotesOff (i, false);
+            synthesizer.allNotesOff (i, false);
     }
 
-    /** Send pressure change message to synthesiser */
+    /** Send pressure change message to synthesizer */
     void pressureChange (int channel, float newPressure)
     {
-        synthesiser.handleChannelPressure (channel, static_cast<int> (newPressure * 127));
+        synthesizer.handleChannelPressure (channel, static_cast<int> (newPressure * 127));
     }
 
-    /** Send pitch change message to synthesiser */
+    /** Send pitch change message to synthesizer */
     void pitchChange (int channel, float pitchChange)
     {
-        synthesiser.handlePitchWheel (channel, static_cast<int> (pitchChange * 127));
+        synthesizer.handlePitchWheel (channel, static_cast<int> (pitchChange * 127));
     }
 
 private:
     AudioDeviceManager audioDeviceManager;
-    Synthesiser synthesiser;
+    Synthesizer synthesizer;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Audio)
@@ -531,7 +531,7 @@ struct SynthGrid
         constructGridFillArray();
     }
 
-    /** Creates a GridFill object for each pad in the grid and sets its colour
+    /** Creates a GridFill object for each pad in the grid and sets its color
         and fill before adding it to an array of GridFill objects
      */
     void constructGridFillArray()
@@ -546,9 +546,9 @@ struct SynthGrid
 
                 auto padNum = (i * 5) + j;
 
-                fill.colour =  notes.contains (padNum) ? baseGridColour
-                                                       : tonics.contains (padNum) ? Colours::white
-                                                                                  : Colours::black;
+                fill.color =  notes.contains (padNum) ? baseGridColor
+                                                       : tonics.contains (padNum) ? Colors::white
+                                                                                  : Colors::black;
                 fill.fillType = DrumPadGridProgram::GridFill::FillType::gradient;
                 gridFillArray.add (fill);
             }
@@ -568,8 +568,8 @@ struct SynthGrid
     float width, height;
 
     Array<DrumPadGridProgram::GridFill> gridFillArray;
-    Colour baseGridColour = Colours::green;
-    Colour touchColour    = Colours::red;
+    Color baseGridColor = Colors::green;
+    Color touchColor    = Colors::red;
 
     Array<int> tonics = { 4, 12, 20 };
     Array<int> notes  = { 1, 3, 6, 7, 9, 11, 14, 15, 17, 19, 22, 24 };
@@ -611,9 +611,9 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.setColour (getLookAndFeel().findColour (Label::textColourId));
+        g.setColor (getLookAndFeel().findColor (Label::textColorId));
         g.drawText ("Connect a Lightpad Block to play.",
-                    getLocalBounds(), Justification::centred, false);
+                    getLocalBounds(), Justification::centered, false);
     }
 
     void resized() override
@@ -716,7 +716,7 @@ private:
                         return;
 
                     gridProgram->sendTouch (touch.x, touch.y, touch.z,
-                                            layout.touchColour);
+                                            layout.touchColor);
 
                     // Send pitch change and pressure values to the Audio class
                     audio.pitchChange (midiChannel, (touch.x - touch.startX) / activeBlock->getWidth());
@@ -734,7 +734,7 @@ private:
     /** Overridden from ControlButton::Listener. Called when a button on the Lightpad is released */
     void buttonReleased (ControlButton&, Block::Timestamp) override
     {
-        // Turn any active synthesiser notes off
+        // Turn any active synthesizer notes off
         audio.allNotesOff();
 
         // Switch modes
@@ -775,7 +775,7 @@ private:
             // Set the LEDGrid program
             block.setProgram (new WaveshapeProgram (block));
 
-            // Initialise the program
+            // Initialize the program
             if (auto* waveshapeProgram = getWaveshapeProgram())
             {
                 waveshapeProgram->setWaveshapeType (static_cast<uint8> (waveshapeMode));

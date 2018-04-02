@@ -102,7 +102,7 @@ public:
         malloc call.
 
         If you want an array of zero values, you can use the calloc() method or the
-        other constructor that takes an InitialisationState parameter.
+        other constructor that takes an InitializationState parameter.
     */
     template <typename SizeType>
     explicit HeapBlock (SizeType numElements)
@@ -113,12 +113,12 @@ public:
 
     /** Creates a HeapBlock containing a number of elements.
 
-        The initialiseToZero parameter determines whether the new memory should be cleared,
-        or left uninitialised.
+        The initializeToZero parameter determines whether the new memory should be cleared,
+        or left uninitialized.
     */
     template <typename SizeType>
-    HeapBlock (SizeType numElements, bool initialiseToZero)
-        : data (static_cast<ElementType*> (initialiseToZero
+    HeapBlock (SizeType numElements, bool initializeToZero)
+        : data (static_cast<ElementType*> (initializeToZero
                                                ? std::calloc (static_cast<size_t> (numElements), sizeof (ElementType))
                                                : std::malloc (static_cast<size_t> (numElements) * sizeof (ElementType))))
     {
@@ -179,7 +179,7 @@ public:
     inline operator const void*() const noexcept                             { return static_cast<const void*> (data); }
 
     /** Lets you use indirect calls to the first element in the array.
-        Obviously this will cause problems if the array hasn't been initialised, because it'll
+        Obviously this will cause problems if the array hasn't been initialized, because it'll
         be referencing a null pointer.
     */
     inline ElementType* operator->() const  noexcept                         { return data; }
@@ -242,13 +242,13 @@ public:
 
     /** Allocates a specified amount of memory and optionally clears it.
         This does the same job as either malloc() or calloc(), depending on the
-        initialiseToZero parameter.
+        initializeToZero parameter.
     */
     template <typename SizeType>
-    void allocate (SizeType newNumElements, bool initialiseToZero)
+    void allocate (SizeType newNumElements, bool initializeToZero)
     {
         std::free (data);
-        data = static_cast<ElementType*> (initialiseToZero
+        data = static_cast<ElementType*> (initializeToZero
                                              ? std::calloc (static_cast<size_t> (newNumElements), sizeof (ElementType))
                                              : std::malloc (static_cast<size_t> (newNumElements) * sizeof (ElementType)));
         throwOnAllocationFailure();

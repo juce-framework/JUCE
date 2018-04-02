@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -462,7 +462,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
     String getDeviceToken()
     {
         // You need to call requestPermissionsWithSettings() first.
-        jassert (initialised);
+        jassert (initialized);
 
         return deviceToken;
     }
@@ -478,7 +478,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
 
         deviceToken = nsStringToJuce (deviceTokenString);
 
-        initialised = true;
+        initialized = true;
 
         owner.listeners.call ([&] (Listener& l) { l.deviceTokenRefreshed (deviceToken); });
     }
@@ -546,7 +546,7 @@ private:
     const bool isEarlierThanMavericks = std::floor (NSFoundationVersionNumber) < NSFoundationVersionNumber10_9;
     const bool isEarlierThanYosemite  = std::floor (NSFoundationVersionNumber) <= NSFoundationVersionNumber10_9;
 
-    bool initialised = false;
+    bool initialized = false;
     String deviceToken;
 
     PushNotifications::Settings settings;

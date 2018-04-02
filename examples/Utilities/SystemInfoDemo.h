@@ -205,7 +205,7 @@ public:
         addAndMakeVisible (resultsBox);
         resultsBox.setReadOnly (true);
         resultsBox.setMultiLine (true);
-        resultsBox.setColour (TextEditor::backgroundColourId, Colours::transparentBlack);
+        resultsBox.setColor (TextEditor::backgroundColorId, Colors::transparentBlack);
         resultsBox.setFont ({ Font::getDefaultMonospacedFontName(), 12.0f, Font::plain });
         resultsBox.setText (getAllSystemInfo());
 
@@ -214,8 +214,8 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground,
-                                           Colour::greyLevel (0.93f)));
+        g.fillAll (getUIColorIfAvailable (LookAndFeel_V4::ColorScheme::UIColor::windowBackground,
+                                           Color::grayLevel (0.93f)));
     }
 
     void resized() override

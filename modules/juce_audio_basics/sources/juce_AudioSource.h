@@ -31,7 +31,7 @@ namespace juce
 */
 struct JUCE_API  AudioSourceChannelInfo
 {
-    /** Creates an uninitialised AudioSourceChannelInfo. */
+    /** Creates an uninitialized AudioSourceChannelInfo. */
     AudioSourceChannelInfo() noexcept
     {
     }
@@ -126,7 +126,7 @@ public:
 
         The prepareToPlay() method is guaranteed to be called at least once on an 'unpreprared'
         source to put it into a 'prepared' state before any calls will be made to getNextAudioBlock().
-        This callback allows the source to initialise any resources it might need when playing.
+        This callback allows the source to initialize any resources it might need when playing.
 
         Once playback has finished, the releaseResources() method is called to put the stream
         back into an 'unprepared' state.

@@ -69,7 +69,7 @@
 #include "messages/juce_DeletedAtShutdown.h"
 #include "messages/juce_NotificationType.h"
 #include "messages/juce_ApplicationBase.h"
-#include "messages/juce_Initialisation.h"
+#include "messages/juce_Initialization.h"
 #include "messages/juce_MountedVolumeListChangeDetector.h"
 #include "broadcasters/juce_ActionBroadcaster.h"
 #include "broadcasters/juce_ActionListener.h"

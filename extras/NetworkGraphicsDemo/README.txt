@@ -32,7 +32,7 @@ left/right to select the demo to run.
 These are some interesting bits of code in here - notably a special
 LowLevelGraphicsContext class which allows the content generator to simply
 draw to a Graphics object as you normally would, but instead of painting to the
-screen, everything that is drawn gets serialised into binary packets and broadcast
+screen, everything that is drawn gets serialized into binary packets and broadcast
 over UDP to the slaves, which each render their own part of it.
 
 The content should be easy to hack - have a look in Demos.h. Have fun tweaking it

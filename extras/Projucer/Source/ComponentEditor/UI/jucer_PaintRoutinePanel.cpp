@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -26,24 +26,24 @@
 
 #include "../../Application/jucer_Headers.h"
 #include "jucer_PaintRoutinePanel.h"
-#include "../Properties/jucer_ColourPropertyComponent.h"
+#include "../Properties/jucer_ColorPropertyComponent.h"
 #include "../PaintElements/jucer_PaintElementPath.h"
 
 //==============================================================================
-class ComponentBackgroundColourProperty    : public JucerColourPropertyComponent,
+class ComponentBackgroundColorProperty    : public JucerColorPropertyComponent,
                                              private ChangeListener
 {
 public:
-    ComponentBackgroundColourProperty (JucerDocument& doc,
+    ComponentBackgroundColorProperty (JucerDocument& doc,
                                        PaintRoutine& routine_)
-        : JucerColourPropertyComponent ("background", false),
+        : JucerColorPropertyComponent ("background", false),
           document (doc),
           routine (routine_)
     {
         document.addChangeListener (this);
     }
 
-    ~ComponentBackgroundColourProperty()
+    ~ComponentBackgroundColorProperty()
     {
         document.removeChangeListener (this);
     }
@@ -53,8 +53,8 @@ public:
         refresh();
     }
 
-    void setColour (Colour newColour) override    { routine.setBackgroundColour (newColour); }
-    Colour getColour() const override             { return routine.getBackgroundColour(); }
+    void setColor (Color newColor) override    { routine.setBackgroundColor (newColor); }
+    Color getColor() const override             { return routine.getBackgroundColor(); }
 
     void resetToDefault() override
     {
@@ -116,7 +116,7 @@ public:
         if (document != nullptr)
         {
             Array <PropertyComponent*> props;
-            props.add (new ComponentBackgroundColourProperty (*document, paintRoutine));
+            props.add (new ComponentBackgroundColorProperty (*document, paintRoutine));
 
             propsPanel->addSection ("Class Properties", props);
         }

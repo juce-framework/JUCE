@@ -14,7 +14,7 @@
                       { "file": "juce_core.mm",  "target": "xcode" } ],
 
   "browse":         [ "text/*",
-                      "maths/*",
+                      "math/*",
                       "memory/*",
                       "containers/*",
                       "threads/*",

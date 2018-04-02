@@ -23,7 +23,7 @@ public:
     ~%%content_component_class%%();
 
     //==============================================================================
-    void initialise() override;
+    void initialize() override;
     void shutdown() override;
     void render() override;
 

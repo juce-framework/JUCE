@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -118,12 +118,12 @@ AffineTransform RectanglePlacement::getTransformToFit (const Rectangle<float>& s
         if ((flags & xRight) != 0)
             newX += destination.getWidth() - source.getWidth() * scaleX;             // right
         else if ((flags & xLeft) == 0)
-            newX += (destination.getWidth() - source.getWidth() * scaleX) / 2.0f;    // centre
+            newX += (destination.getWidth() - source.getWidth() * scaleX) / 2.0f;    // center
 
         if ((flags & yBottom) != 0)
             newY += destination.getHeight() - source.getHeight() * scaleX;             // bottom
         else if ((flags & yTop) == 0)
-            newY += (destination.getHeight() - source.getHeight() * scaleX) / 2.0f;    // centre
+            newY += (destination.getHeight() - source.getHeight() * scaleX) / 2.0f;    // center
     }
 
     return AffineTransform::translation (-source.getX(), -source.getY())

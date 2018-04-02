@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -254,7 +254,7 @@ struct TranslationHelpers
         return mungeStrings (strings);
     }
 
-    static String getPreTranslationText (const LocalisedStrings& strings)
+    static String getPreTranslationText (const LocalizedStrings& strings)
     {
         return mungeStrings (strings.getMappings().getAllKeys());
     }
@@ -283,7 +283,7 @@ struct TranslationHelpers
 
     static String createFinishedTranslationFile (StringArray preStrings,
                                                  StringArray postStrings,
-                                                 const LocalisedStrings& original)
+                                                 const LocalizedStrings& original)
     {
         const StringPairArray& originalStrings (original.getMappings());
 

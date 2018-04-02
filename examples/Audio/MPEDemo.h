@@ -27,7 +27,7 @@
  version:          1.0.0
  vendor:           juce
  website:          http://juce.com
- description:      Simple MPE synthesiser application.
+ description:      Simple MPE synthesizer application.
 
  dependencies:     juce_audio_basics, juce_audio_devices, juce_audio_formats,
                    juce_audio_processors, juce_audio_utils, juce_core,
@@ -48,36 +48,36 @@
 
 
 //==============================================================================
-class ZoneColourPicker
+class ZoneColorPicker
 {
 public:
-    ZoneColourPicker() {}
+    ZoneColorPicker() {}
 
     //==============================================================================
-    Colour getColourForMidiChannel (int midiChannel) noexcept
+    Color getColorForMidiChannel (int midiChannel) noexcept
     {
         if (legacyModeEnabled)
-            return Colours::white;
+            return Colors::white;
 
         if (zoneLayout.getLowerZone().isUsingChannelAsMemberChannel (midiChannel))
-            return getColourForZone (true);
+            return getColorForZone (true);
 
         if (zoneLayout.getUpperZone().isUsingChannelAsMemberChannel (midiChannel))
-            return getColourForZone (false);
+            return getColorForZone (false);
 
-        return Colours::transparentBlack;
+        return Colors::transparentBlack;
     }
 
     //==============================================================================
-    Colour getColourForZone (bool isLowerZone) const noexcept
+    Color getColorForZone (bool isLowerZone) const noexcept
     {
         if (legacyModeEnabled)
-            return Colours::white;
+            return Colors::white;
 
         if (isLowerZone)
-            return Colours::blue;
+            return Colors::blue;
 
-        return Colours::red;
+        return Colors::red;
     }
 
     //==============================================================================
@@ -89,24 +89,24 @@ private:
     MPEZoneLayout zoneLayout;
     bool legacyModeEnabled = false;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ZoneColourPicker)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ZoneColorPicker)
 };
 
 //==============================================================================
 class NoteComponent : public Component
 {
 public:
-    NoteComponent (const MPENote& n, Colour colourToUse)
-        : note (n), colour (colourToUse)
+    NoteComponent (const MPENote& n, Color colorToUse)
+        : note (n), color (colorToUse)
     {}
 
     //==============================================================================
-    void update (const MPENote& newNote, Point<float> newCentre)
+    void update (const MPENote& newNote, Point<float> newCenter)
     {
         note = newNote;
-        centre = newCentre;
+        center = newCenter;
 
-        setBounds (getSquareAroundCentre (jmax (getNoteOnRadius(), getNoteOffRadius(), getPressureRadius()))
+        setBounds (getSquareAroundCenter (jmax (getNoteOnRadius(), getNoteOffRadius(), getPressureRadius()))
                      .getUnion (getTextRectangle())
                      .getSmallestIntegerContainer()
                      .expanded (3));
@@ -118,56 +118,56 @@ public:
     void paint (Graphics& g) override
     {
         if (note.keyState == MPENote::keyDown || note.keyState == MPENote::keyDownAndSustained)
-            drawPressedNoteCircle (g, colour);
+            drawPressedNoteCircle (g, color);
         else if (note.keyState == MPENote::sustained)
-            drawSustainedNoteCircle (g, colour);
+            drawSustainedNoteCircle (g, color);
         else
             return;
 
-        drawNoteLabel (g, colour);
+        drawNoteLabel (g, color);
     }
 
     //==============================================================================
     MPENote note;
-    Colour colour;
-    Point<float> centre;
+    Color color;
+    Point<float> center;
 
 private:
     //==============================================================================
-    void drawPressedNoteCircle (Graphics& g, Colour zoneColour)
+    void drawPressedNoteCircle (Graphics& g, Color zoneColor)
     {
-        g.setColour (zoneColour.withAlpha (0.3f));
-        g.fillEllipse (translateToLocalBounds (getSquareAroundCentre (getNoteOnRadius())));
-        g.setColour (zoneColour);
-        g.drawEllipse (translateToLocalBounds (getSquareAroundCentre (getPressureRadius())), 2.0f);
+        g.setColor (zoneColor.withAlpha (0.3f));
+        g.fillEllipse (translateToLocalBounds (getSquareAroundCenter (getNoteOnRadius())));
+        g.setColor (zoneColor);
+        g.drawEllipse (translateToLocalBounds (getSquareAroundCenter (getPressureRadius())), 2.0f);
     }
 
     //==============================================================================
-    void drawSustainedNoteCircle (Graphics& g, Colour zoneColour)
+    void drawSustainedNoteCircle (Graphics& g, Color zoneColor)
     {
-        g.setColour (zoneColour);
+        g.setColor (zoneColor);
         Path circle, dashedCircle;
-        circle.addEllipse (translateToLocalBounds (getSquareAroundCentre (getNoteOffRadius())));
+        circle.addEllipse (translateToLocalBounds (getSquareAroundCenter (getNoteOffRadius())));
         float dashLengths[] = { 3.0f, 3.0f };
         PathStrokeType (2.0, PathStrokeType::mitered).createDashedStroke (dashedCircle, circle, dashLengths, 2);
         g.fillPath (dashedCircle);
     }
 
     //==============================================================================
-    void drawNoteLabel (Graphics& g, Colour /**zoneColour*/)
+    void drawNoteLabel (Graphics& g, Color /**zoneColor*/)
     {
         auto textBounds = translateToLocalBounds (getTextRectangle()).getSmallestIntegerContainer();
 
-        g.drawText ("+", textBounds, Justification::centred);
-        g.drawText (MidiMessage::getMidiNoteName (note.initialNote, true, true, 3), textBounds, Justification::centredBottom);
+        g.drawText ("+", textBounds, Justification::centered);
+        g.drawText (MidiMessage::getMidiNoteName (note.initialNote, true, true, 3), textBounds, Justification::centeredBottom);
         g.setFont (Font (22.0f, Font::bold));
-        g.drawText (String (note.midiChannel), textBounds, Justification::centredTop);
+        g.drawText (String (note.midiChannel), textBounds, Justification::centeredTop);
     }
 
     //==============================================================================
-    Rectangle<float> getSquareAroundCentre (float radius) const noexcept
+    Rectangle<float> getSquareAroundCenter (float radius) const noexcept
     {
-        return Rectangle<float> (radius * 2.0f, radius * 2.0f).withCentre (centre);
+        return Rectangle<float> (radius * 2.0f, radius * 2.0f).withCenter (center);
     }
 
     Rectangle<float> translateToLocalBounds (Rectangle<float> r) const noexcept
@@ -177,7 +177,7 @@ private:
 
     Rectangle<float> getTextRectangle() const noexcept
     {
-        return Rectangle<float> (30.0f, 50.0f).withCentre (centre);
+        return Rectangle<float> (30.0f, 50.0f).withCenter (center);
     }
 
     float getNoteOnRadius()   const noexcept   { return note.noteOnVelocity .asUnsignedFloat() * maxNoteRadius; }
@@ -190,20 +190,20 @@ private:
 };
 
 //==============================================================================
-class Visualiser : public Component,
+class Visualizer : public Component,
                    public MPEInstrument::Listener,
                    private AsyncUpdater
 {
 public:
     //==============================================================================
-    Visualiser (ZoneColourPicker& zoneColourPicker)
-        : colourPicker (zoneColourPicker)
+    Visualizer (ZoneColorPicker& zoneColorPicker)
+        : colorPicker (zoneColorPicker)
     {}
 
     //==============================================================================
     void paint (Graphics& g) override
     {
-        g.fillAll (Colours::black);
+        g.fillAll (Colors::black);
 
         auto noteDistance = float (getWidth()) / 128;
         for (auto i = 0; i < 128; ++i)
@@ -211,14 +211,14 @@ public:
             auto x = noteDistance * i;
             auto noteHeight = int (MidiMessage::isMidiNoteBlack (i) ? 0.7 * getHeight() : getHeight());
 
-            g.setColour (MidiMessage::isMidiNoteBlack (i) ? Colours::white : Colours::grey);
+            g.setColor (MidiMessage::isMidiNoteBlack (i) ? Colors::white : Colors::gray);
             g.drawLine (x, 0.0f, x, (float) noteHeight);
 
             if (i > 0 && i % 12 == 0)
             {
-                g.setColour (Colours::grey);
+                g.setColor (Colors::gray);
                 auto octaveNumber = (i / 12) - 2;
-                g.drawText ("C" + String (octaveNumber), (int) x - 15, getHeight() - 30, 30, 30, Justification::centredBottom);
+                g.drawText ("C" + String (octaveNumber), (int) x - 15, getHeight() - 30, 30, 30, Justification::centeredBottom);
             }
         }
     }
@@ -290,15 +290,15 @@ private:
 
         for (auto& note : activeNotes)
             if (findNoteComponent (note.noteID) == nullptr)
-                addAndMakeVisible (noteComponents.add (new NoteComponent (note, colourPicker.getColourForMidiChannel(note.midiChannel))));
+                addAndMakeVisible (noteComponents.add (new NoteComponent (note, colorPicker.getColorForMidiChannel(note.midiChannel))));
 
         for (auto& noteComp : noteComponents)
             if (auto* noteInfo = findActiveNote (noteComp->note.noteID))
-                noteComp->update (*noteInfo, getCentrePositionForNote (*noteInfo));
+                noteComp->update (*noteInfo, getCenterPositionForNote (*noteInfo));
     }
 
     //==============================================================================
-    Point<float> getCentrePositionForNote (MPENote note) const
+    Point<float> getCenterPositionForNote (MPENote note) const
     {
         auto n = float (note.initialNote) + float (note.totalPitchbendInSemitones);
         auto x = getWidth() * n / 128;
@@ -311,9 +311,9 @@ private:
     OwnedArray<NoteComponent> noteComponents;
     CriticalSection lock;
     Array<MPENote> activeNotes;
-    ZoneColourPicker& colourPicker;
+    ZoneColorPicker& colorPicker;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Visualiser)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Visualizer)
 };
 
 //==============================================================================
@@ -342,13 +342,13 @@ public:
         addAndMakeVisible (isLowerZoneButton);
         isLowerZoneButton.setToggleState (true, NotificationType::dontSendNotification);
 
-        initialiseComboBoxWithConsecutiveIntegers (memberChannels, memberChannelsLabel, 0, 16, defaultMemberChannels);
-        initialiseComboBoxWithConsecutiveIntegers (masterPitchbendRange, masterPitchbendRangeLabel, 0, 96, defaultMasterPitchbendRange);
-        initialiseComboBoxWithConsecutiveIntegers (notePitchbendRange, notePitchbendRangeLabel, 0, 96, defaultNotePitchbendRange);
+        initializeComboBoxWithConsecutiveIntegers (memberChannels, memberChannelsLabel, 0, 16, defaultMemberChannels);
+        initializeComboBoxWithConsecutiveIntegers (masterPitchbendRange, masterPitchbendRangeLabel, 0, 96, defaultMasterPitchbendRange);
+        initializeComboBoxWithConsecutiveIntegers (notePitchbendRange, notePitchbendRangeLabel, 0, 96, defaultNotePitchbendRange);
 
-        initialiseComboBoxWithConsecutiveIntegers (legacyStartChannel, legacyStartChannelLabel, 1, 16, 1, false);
-        initialiseComboBoxWithConsecutiveIntegers (legacyEndChannel, legacyEndChannelLabel, 1, 16, 16, false);
-        initialiseComboBoxWithConsecutiveIntegers (legacyPitchbendRange, legacyPitchbendRangeLabel, 0, 96, 2, false);
+        initializeComboBoxWithConsecutiveIntegers (legacyStartChannel, legacyStartChannelLabel, 1, 16, 1, false);
+        initializeComboBoxWithConsecutiveIntegers (legacyEndChannel, legacyEndChannelLabel, 1, 16, 16, false);
+        initializeComboBoxWithConsecutiveIntegers (legacyPitchbendRange, legacyPitchbendRangeLabel, 0, 96, 2, false);
 
         addAndMakeVisible (setZoneButton);
         setZoneButton.onClick = [this] { setZoneButtonClicked(); };
@@ -359,7 +359,7 @@ public:
         addAndMakeVisible (voiceStealingEnabledToggle);
         voiceStealingEnabledToggle.onClick = [this] { voiceStealingEnabledToggleClicked(); };
 
-        initialiseComboBoxWithConsecutiveIntegers (numberOfVoices, numberOfVoicesLabel, 1, 20, 15);
+        initializeComboBoxWithConsecutiveIntegers (numberOfVoices, numberOfVoicesLabel, 1, 20, 15);
     }
 
     //==============================================================================
@@ -403,7 +403,7 @@ public:
 
 private:
     //==============================================================================
-    void initialiseComboBoxWithConsecutiveIntegers (ComboBox& comboBox, Label& labelToAttach,
+    void initializeComboBoxWithConsecutiveIntegers (ComboBox& comboBox, Label& labelToAttach,
                                                     int firstValue, int numValues, int valueToSelect,
                                                     bool makeVisible = true)
     {
@@ -578,8 +578,8 @@ class ZoneLayoutComponent : public Component,
 {
 public:
     //==============================================================================
-    ZoneLayoutComponent (const ZoneColourPicker& zoneColourPicker)
-        : colourPicker (zoneColourPicker)
+    ZoneLayoutComponent (const ZoneColorPicker& zoneColorPicker)
+        : colorPicker (zoneColorPicker)
     {}
 
     //==============================================================================
@@ -627,7 +627,7 @@ private:
     //==============================================================================
     void paintBackground (Graphics& g)
     {
-        g.setColour (Colours::black);
+        g.setColor (Colors::black);
         auto channelWidth = getChannelRectangleWidth();
 
         for (auto i = 0; i < numMidiChannels; ++i)
@@ -651,22 +651,22 @@ private:
 
         for (auto zone : activeZones)
         {
-            auto zoneColour = colourPicker.getColourForZone (zone.isLowerZone());
+            auto zoneColor = colorPicker.getColorForZone (zone.isLowerZone());
 
             auto xPos = zone.isLowerZone() ? 0 : zone.getLastMemberChannel() - 1;
 
             Rectangle<int> zoneRect { int (channelWidth * (xPos)), 20,
                                       int (channelWidth * (zone.numMemberChannels + 1)), getHeight() - 20 };
 
-            g.setColour (zoneColour);
+            g.setColor (zoneColor);
             g.drawRect (zoneRect, 3);
 
             auto masterRect = zone.isLowerZone() ? zoneRect.removeFromLeft ((int) channelWidth) : zoneRect.removeFromRight ((int) channelWidth);
 
-            g.setColour (zoneColour.withAlpha (0.3f));
+            g.setColor (zoneColor.withAlpha (0.3f));
             g.fillRect (masterRect);
 
-            g.setColour (zoneColour.contrasting());
+            g.setColor (zoneColor.contrasting());
             g.drawText ("<>" + String (zone.masterPitchbendRange),  masterRect.reduced (4), Justification::top,    false);
             g.drawText ("<>" + String (zone.perNotePitchbendRange), masterRect.reduced (4), Justification::bottom, false);
         }
@@ -684,7 +684,7 @@ private:
 
         zoneRect.removeFromTop (20);
 
-        g.setColour (Colours::white);
+        g.setColor (Colors::white);
         g.drawRect (zoneRect, 3);
         g.drawText ("LGCY", zoneRect.reduced (4, 4), Justification::topLeft, false);
         g.drawText ("<>" + String (legacyModePitchbendRange), zoneRect.reduced (4, 4), Justification::bottomLeft, false);
@@ -698,7 +698,7 @@ private:
 
     //==============================================================================
     MPEZoneLayout zoneLayout;
-    const ZoneColourPicker& colourPicker;
+    const ZoneColorPicker& colorPicker;
 
     bool legacyModeEnabled = false;
     int legacyModePitchbendRange = 48;
@@ -707,7 +707,7 @@ private:
 };
 
 //==============================================================================
-class MPEDemoSynthVoice : public MPESynthesiserVoice
+class MPEDemoSynthVoice : public MPESynthesizerVoice
 {
 public:
     //==============================================================================
@@ -870,11 +870,11 @@ public:
     //==============================================================================
     MPEDemo()
         : audioSetupComp (audioDeviceManager, 0, 0, 0, 256, true, true, true, false),
-          zoneLayoutComp (colourPicker),
-          visualiserComp (colourPicker)
+          zoneLayoutComp (colorPicker),
+          visualizerComp (colorPicker)
     {
        #ifndef JUCE_DEMO_RUNNER
-        audioDeviceManager.initialise (0, 2, 0, true, {}, 0);
+        audioDeviceManager.initialize (0, 2, 0, true, {}, 0);
        #endif
 
         audioDeviceManager.addMidiInputCallback ({}, this);
@@ -883,15 +883,15 @@ public:
         addAndMakeVisible (audioSetupComp);
         addAndMakeVisible (MPESetupComp);
         addAndMakeVisible (zoneLayoutComp);
-        addAndMakeVisible (visualiserViewport);
+        addAndMakeVisible (visualizerViewport);
 
-        visualiserViewport.setScrollBarsShown (false, true);
-        visualiserViewport.setViewedComponent (&visualiserComp, false);
-        visualiserViewport.setViewPositionProportionately (0.5, 0.0);
+        visualizerViewport.setScrollBarsShown (false, true);
+        visualizerViewport.setViewedComponent (&visualizerComp, false);
+        visualizerViewport.setViewPositionProportionately (0.5, 0.0);
 
         MPESetupComp.addListener (&zoneLayoutComp);
         MPESetupComp.addListener (this);
-        visualiserInstrument.addListener (&visualiserComp);
+        visualizerInstrument.addListener (&visualizerComp);
 
         synth.setVoiceStealingEnabled (false);
         for (auto i = 0; i < 15; ++i)
@@ -909,16 +909,16 @@ public:
     //==============================================================================
     void resized() override
     {
-        auto visualiserCompWidth  = 2800;
-        auto visualiserCompHeight = 300;
+        auto visualizerCompWidth  = 2800;
+        auto visualizerCompHeight = 300;
         auto zoneLayoutCompHeight = 60;
         auto audioSetupCompRelativeWidth = 0.55f;
 
         auto r = getLocalBounds();
 
-        visualiserViewport.setBounds (r.removeFromBottom (visualiserCompHeight));
-        visualiserComp    .setBounds ({ visualiserCompWidth,
-                                        visualiserViewport.getHeight() - visualiserViewport.getScrollBarThickness() });
+        visualizerViewport.setBounds (r.removeFromBottom (visualizerCompHeight));
+        visualizerComp    .setBounds ({ visualizerCompWidth,
+                                        visualizerViewport.getHeight() - visualizerViewport.getScrollBarThickness() });
 
         zoneLayoutComp.setBounds (r.removeFromBottom (zoneLayoutCompHeight));
         audioSetupComp.setBounds (r.removeFromLeft (proportionOfWidth (audioSetupCompRelativeWidth)));
@@ -952,7 +952,7 @@ private:
     void handleIncomingMidiMessage (MidiInput* /*source*/,
                                     const MidiMessage& message) override
     {
-        visualiserInstrument.processNextMidiEvent (message);
+        visualizerInstrument.processNextMidiEvent (message);
         midiCollector.addMessageToQueue (message);
     }
 
@@ -974,9 +974,9 @@ private:
         else
             zoneLayout.setUpperZone (numMemberChannels, perNotePitchbendRange, masterPitchbendRange);
 
-        visualiserInstrument.setZoneLayout (zoneLayout);
+        visualizerInstrument.setZoneLayout (zoneLayout);
         synth.setZoneLayout (zoneLayout);
-        colourPicker.setZoneLayout (zoneLayout);
+        colorPicker.setZoneLayout (zoneLayout);
     }
 
     void allZonesCleared() override
@@ -986,24 +986,24 @@ private:
             midiOutput->sendBlockOfMessagesNow (MPEMessages::clearAllZones());
 
         zoneLayout.clearAllZones();
-        visualiserInstrument.setZoneLayout (zoneLayout);
+        visualizerInstrument.setZoneLayout (zoneLayout);
         synth.setZoneLayout (zoneLayout);
-        colourPicker.setZoneLayout (zoneLayout);
+        colorPicker.setZoneLayout (zoneLayout);
     }
 
     void legacyModeChanged (bool legacyModeShouldBeEnabled, int pitchbendRange, Range<int> channelRange) override
     {
-        colourPicker.setLegacyModeEnabled (legacyModeShouldBeEnabled);
+        colorPicker.setLegacyModeEnabled (legacyModeShouldBeEnabled);
 
         if (legacyModeShouldBeEnabled)
         {
             synth.enableLegacyMode (pitchbendRange, channelRange);
-            visualiserInstrument.enableLegacyMode (pitchbendRange, channelRange);
+            visualizerInstrument.enableLegacyMode (pitchbendRange, channelRange);
         }
         else
         {
             synth.setZoneLayout (zoneLayout);
-            visualiserInstrument.setZoneLayout (zoneLayout);
+            visualizerInstrument.setZoneLayout (zoneLayout);
         }
     }
 
@@ -1030,17 +1030,17 @@ private:
    #endif
 
     MPEZoneLayout zoneLayout;
-    ZoneColourPicker colourPicker;
+    ZoneColorPicker colorPicker;
 
     AudioDeviceSelectorComponent audioSetupComp;
     MPESetupComponent MPESetupComp;
     ZoneLayoutComponent zoneLayoutComp;
 
-    Visualiser visualiserComp;
-    Viewport visualiserViewport;
-    MPEInstrument visualiserInstrument;
+    Visualizer visualizerComp;
+    Viewport visualizerViewport;
+    MPEInstrument visualizerInstrument;
 
-    MPESynthesiser synth;
+    MPESynthesizer synth;
     MidiMessageCollector midiCollector;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MPEDemo)

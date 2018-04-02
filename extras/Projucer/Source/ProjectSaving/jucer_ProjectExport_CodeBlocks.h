@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -192,7 +192,7 @@ public:
     }
 
     //==============================================================================
-    void initialiseDependencyPathValues() override
+    void initializeDependencyPathValues() override
     {
         auto pathOS = isLinux() ? TargetOS::linux
                                 : TargetOS::windows;
@@ -220,13 +220,13 @@ private:
               architectureTypeValue (config, exporter.isWindows() ? Ids::windowsCodeBlocksArchitecture
                                                                   : Ids::linuxCodeBlocksArchitecture, getUndoManager(), "-m64")
         {
-            linkTimeOptimisationValue.setDefault (false);
-            optimisationLevelValue.setDefault (isDebug() ? gccO0 : gccO3);
+            linkTimeOptimizationValue.setDefault (false);
+            optimizationLevelValue.setDefault (isDebug() ? gccO0 : gccO3);
         }
 
         void createConfigProperties (PropertyListBuilder& props) override
         {
-            addGCCOptimisationProperty (props);
+            addGCCOptimizationProperty (props);
 
             props.add (new ChoicePropertyComponent (architectureTypeValue, "Architecture",
                                                     { "32-bit (-m32)", "64-bit (-m64)", "ARM v6",       "ARM v7" },
@@ -417,9 +417,9 @@ private:
         if (auto* codeBlocksConfig = dynamic_cast<const CodeBlocksBuildConfiguration*> (&config))
             flags.add (codeBlocksConfig->getArchitectureTypeString());
 
-        flags.add ("-O" + config.getGCCOptimisationFlag());
+        flags.add ("-O" + config.getGCCOptimizationFlag());
 
-        if (config.isLinkTimeOptimisationEnabled())
+        if (config.isLinkTimeOptimizationEnabled())
             flags.add ("-flto");
 
         {
@@ -475,7 +475,7 @@ private:
         if (! config.isDebug())
             flags.add ("-s");
 
-        if (config.isLinkTimeOptimisationEnabled())
+        if (config.isLinkTimeOptimizationEnabled())
             flags.add ("-flto");
 
         flags.addTokens (replacePreprocessorTokens (config, getExtraLinkerFlagsString()).trim(), " \n", "\"'");

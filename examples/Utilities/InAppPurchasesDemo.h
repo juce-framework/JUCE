@@ -259,15 +259,15 @@ public:
         Rectangle<int> r (0, 0, w, h);
 
         auto& lf = Desktop::getInstance().getDefaultLookAndFeel();
-        g.setColour (lf.findColour (isSelected ? TextEditor::highlightColourId : ListBox::backgroundColourId));
+        g.setColor (lf.findColor (isSelected ? TextEditor::highlightColorId : ListBox::backgroundColorId));
         g.fillRect (r);
 
-        g.setColour (lf.findColour (ListBox::textColourId));
+        g.setColor (lf.findColor (ListBox::textColorId));
 
         g.setFont (18);
 
         String phrase = (isPositiveAndBelow (row, phrases.size()) ? phrases[row] : String{});
-        g.drawText (phrase, 10, 0, w, h, Justification::centredLeft);
+        g.drawText (phrase, 10, 0, w, h, Justification::centeredLeft);
     }
 
 private:
@@ -303,22 +303,22 @@ public:
             auto r = getLocalBounds().reduced (4);
             {
                 auto voiceIconBounds = r.removeFromLeft (r.getHeight());
-                g.setColour (Colours::black);
+                g.setColor (Colors::black);
                 g.drawRect (voiceIconBounds);
 
                 voiceIconBounds.reduce (1, 1);
-                g.setColour (hasBeenPurchased ? Colours::white : Colours::grey);
+                g.setColor (hasBeenPurchased ? Colors::white : Colors::gray);
                 g.fillRect (voiceIconBounds);
 
                 g.drawImage (avatar, voiceIconBounds.toFloat());
 
                 if (! hasBeenPurchased)
                 {
-                    g.setColour (Colours::white.withAlpha (0.8f));
+                    g.setColor (Colors::white.withAlpha (0.8f));
                     g.fillRect (voiceIconBounds);
 
                     if (purchaseInProgress)
-                        getLookAndFeel().drawSpinningWaitAnimation (g, Colours::darkgrey,
+                        getLookAndFeel().drawSpinningWaitAnimation (g, Colors::darkgray,
                                                                     voiceIconBounds.getX(),
                                                                     voiceIconBounds.getY(),
                                                                     voiceIconBounds.getWidth(),
@@ -334,7 +334,7 @@ public:
             auto w = static_cast<int> (h * 1.5);
 
             r.removeFromLeft (h);
-            purchaseButton.setBounds (r.removeFromRight (w).withSizeKeepingCentre (w, h / 2));
+            purchaseButton.setBounds (r.removeFromRight (w).withSizeKeepingCenter (w, h / 2));
 
             nameLabel.setBounds (r.removeFromTop (18));
             priceLabel.setBounds (r.removeFromTop (18));
@@ -361,10 +361,10 @@ public:
                     stopTimer();
 
                 nameLabel.setFont (Font (16).withStyle (Font::bold | (hasBeenPurchased ? 0 : Font::italic)));
-                nameLabel.setColour (Label::textColourId, hasBeenPurchased ? Colours::white : Colours::grey);
+                nameLabel.setColor (Label::textColorId, hasBeenPurchased ? Colors::white : Colors::gray);
 
                 priceLabel.setFont (Font (10).withStyle (purchase.priceIsKnown ? 0 : Font::italic));
-                priceLabel.setColour (Label::textColourId, hasBeenPurchased ? Colours::white : Colours::grey);
+                priceLabel.setColor (Label::textColorId, hasBeenPurchased ? Colors::white : Colors::gray);
                 priceLabel.setText (purchase.purchasePrice, NotificationType::dontSendNotification);
 
                 if (rowNumber == 0)
@@ -451,7 +451,7 @@ public:
         auto r = Rectangle<int> (0, 0, w, h).reduced (4);
 
         auto& lf = Desktop::getInstance().getDefaultLookAndFeel();
-        g.setColour (lf.findColour (isSelected ? TextEditor::highlightColourId : ListBox::backgroundColourId));
+        g.setColor (lf.findColor (isSelected ? TextEditor::highlightColorId : ListBox::backgroundColorId));
         g.fillRect (r);
     }
 
@@ -473,7 +473,7 @@ public:
         Desktop::getInstance().getDefaultLookAndFeel().setUsingNativeAlertWindows (true);
 
         dm.addAudioCallback (&player);
-        dm.initialiseWithDefaultDevices (0, 2);
+        dm.initializeWithDefaultDevices (0, 2);
 
         setOpaque (true);
 
@@ -546,7 +546,7 @@ private:
     void paint (Graphics& g) override
     {
         g.fillAll (Desktop::getInstance().getDefaultLookAndFeel()
-                      .findColour (ResizableWindow::backgroundColourId));
+                      .findColor (ResizableWindow::backgroundColorId));
     }
 
     //==============================================================================

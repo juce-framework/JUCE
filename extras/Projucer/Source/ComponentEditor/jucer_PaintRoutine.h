@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -60,8 +60,8 @@ public:
     void elementToFront (PaintElement* element, const bool undoable);
     void elementToBack (PaintElement* element, const bool undoable);
 
-    const Colour getBackgroundColour() const noexcept                       { return backgroundColour; }
-    void setBackgroundColour (Colour newColour) noexcept;
+    const Color getBackgroundColor() const noexcept                       { return backgroundColor; }
+    void setBackgroundColor (Color newColor) noexcept;
 
     void fillWithBackground (Graphics& g, const bool drawOpaqueBackground);
     void drawElements (Graphics& g, const Rectangle<int>& relativeTo);
@@ -115,7 +115,7 @@ private:
     SelectedItemSet <PathPoint*> selectedPoints;
     JucerDocument* document;
 
-    Colour backgroundColour;
+    Color backgroundColor;
 
     friend class DeleteElementAction;
     friend class FrontOrBackElementAction;

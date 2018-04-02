@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -87,12 +87,12 @@ public:
         bool isBundle() const noexcept;
 
         /** Returns a reference to the contained OSCMessage.
-            If the OSCBundle element is not an OSCMessage, behaviour is undefined.
+            If the OSCBundle element is not an OSCMessage, behavior is undefined.
          */
         const OSCMessage& getMessage() const;
 
         /** Returns a reference to the contained OSCBundle.
-            If the OSCBundle element is not an OSCBundle, behaviour is undefined.
+            If the OSCBundle element is not an OSCBundle, behavior is undefined.
         */
         const OSCBundle& getBundle() const;
 
@@ -110,7 +110,7 @@ public:
     bool isEmpty() const noexcept                                { return elements.isEmpty(); }
 
     /** Returns a reference to the OSCBundle element at index i in this bundle.
-        This method does not check the range and results in undefined behaviour
+        This method does not check the range and results in undefined behavior
         in case i < 0 or i >= size().
     */
     OSCBundle::Element& operator[] (const int i) noexcept

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -68,7 +68,7 @@ struct NewProjectWizard
     virtual StringArray getFileCreationOptions()                        { return {}; }
     virtual Result processResultsFromSetupItems (WizardComp&)           { return Result::ok(); }
 
-    virtual bool initialiseProject (Project& project) = 0;
+    virtual bool initializeProject (Project& project) = 0;
 
     virtual StringArray getDefaultModules()
     {
@@ -136,7 +136,7 @@ struct NewProjectWizard
             project->setFile (projectFile);
             project->setTitle (appTitle);
 
-            if (! initialiseProject (*project))
+            if (! initializeProject (*project))
                 return nullptr;
 
             addExporters (*project, wc);

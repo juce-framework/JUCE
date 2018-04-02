@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -106,12 +106,12 @@ public:
     LassoComponent() {}
 
     //==============================================================================
-    /** Call this in your mouseDown event, to initialise a drag.
+    /** Call this in your mouseDown event, to initialize a drag.
 
         Pass in a suitable LassoSource object which the lasso will use to find
         the items and change the selection.
 
-        After using this method to initialise the lasso, repeatedly call dragLasso()
+        After using this method to initialize the lasso, repeatedly call dragLasso()
         in your component's mouseDrag callback.
 
         @see dragLasso, endLasso, LassoSource
@@ -134,7 +134,7 @@ public:
     /** Call this in your mouseDrag event, to update the lasso's position.
 
         This must be repeatedly calling when the mouse is dragged, after you've
-        first initialised the lasso with beginLasso().
+        first initialized the lasso with beginLasso().
 
         This method takes into account the modifier keys that are being held down, so
         if shift is pressed, then the lassoed items will be added to any that were
@@ -182,20 +182,20 @@ public:
     }
 
     //==============================================================================
-    /** A set of colour IDs to use to change the colour of various aspects of the label.
+    /** A set of color IDs to use to change the color of various aspects of the label.
 
-        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        These constants can be used either via the Component::setColor(), or LookAndFeel::setColor()
         methods.
 
-        Note that you can also use the constants from TextEditor::ColourIds to change the
-        colour of the text editor that is opened when a label is editable.
+        Note that you can also use the constants from TextEditor::ColorIds to change the
+        color of the text editor that is opened when a label is editable.
 
-        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+        @see Component::setColor, Component::findColor, LookAndFeel::setColor, LookAndFeel::findColor
     */
-    enum ColourIds
+    enum ColorIds
     {
-        lassoFillColourId       = 0x1000440, /**< The colour to fill the lasso rectangle with. */
-        lassoOutlineColourId    = 0x1000441, /**< The colour to draw the outline with. */
+        lassoFillColorId       = 0x1000440, /**< The color to fill the lasso rectangle with. */
+        lassoOutlineColorId    = 0x1000441, /**< The color to draw the outline with. */
     };
 
     //==============================================================================

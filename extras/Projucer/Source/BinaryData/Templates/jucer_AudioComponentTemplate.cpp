@@ -31,7 +31,7 @@ void %%content_component_class%%::prepareToPlay (int samplesPerBlockExpected, do
     // This function will be called when the audio device is started, or when
     // its settings (i.e. sample rate, block size, etc) are changed.
 
-    // You can use this function to initialise any resources you might need,
+    // You can use this function to initialize any resources you might need,
     // but be careful - it will be called on the audio thread, not the GUI thread.
 
     // For more details, see the help for AudioProcessor::prepareToPlay()
@@ -59,8 +59,8 @@ void %%content_component_class%%::releaseResources()
 //==============================================================================
 void %%content_component_class%%::paint (Graphics& g)
 {
-    // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+    // (Our component is opaque, so we must completely fill the background with a solid color)
+    g.fillAll (getLookAndFeel().findColor (ResizableWindow::backgroundColorId));
 
     // You can add your drawing code here!
 }

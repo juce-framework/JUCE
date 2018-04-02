@@ -377,19 +377,19 @@ int StringArray::addLines (StringRef sourceText)
     return numLines;
 }
 
-StringArray StringArray::fromTokens (StringRef stringToTokenise, bool preserveQuotedStrings)
+StringArray StringArray::fromTokens (StringRef stringToTokenize, bool preserveQuotedStrings)
 {
     StringArray s;
-    s.addTokens (stringToTokenise, preserveQuotedStrings);
+    s.addTokens (stringToTokenize, preserveQuotedStrings);
     return s;
 }
 
-StringArray StringArray::fromTokens (StringRef stringToTokenise,
+StringArray StringArray::fromTokens (StringRef stringToTokenize,
                                      StringRef breakCharacters,
                                      StringRef quoteCharacters)
 {
     StringArray s;
-    s.addTokens (stringToTokenise, breakCharacters, quoteCharacters);
+    s.addTokens (stringToTokenize, breakCharacters, quoteCharacters);
     return s;
 }
 
@@ -459,9 +459,9 @@ void StringArray::ensureStorageAllocated (int minNumElements)
     strings.ensureStorageAllocated (minNumElements);
 }
 
-void StringArray::minimiseStorageOverheads()
+void StringArray::minimizeStorageOverheads()
 {
-    strings.minimiseStorageOverheads();
+    strings.minimizeStorageOverheads();
 }
 
 } // namespace juce

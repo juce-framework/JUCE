@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -27,11 +27,11 @@
 namespace juce
 {
 
-ShapeButton::ShapeButton (const String& t, Colour n, Colour o, Colour d)
+ShapeButton::ShapeButton (const String& t, Color n, Color o, Color d)
   : Button (t),
-    normalColour   (n), overColour   (o), downColour   (d),
-    normalColourOn (n), overColourOn (o), downColourOn (d),
-    useOnColours(false),
+    normalColor   (n), overColor   (o), downColor   (d),
+    normalColorOn (n), overColorOn (o), downColorOn (d),
+    useOnColors(false),
     maintainShapeProportions (false),
     outlineWidth (0.0f)
 {
@@ -39,28 +39,28 @@ ShapeButton::ShapeButton (const String& t, Colour n, Colour o, Colour d)
 
 ShapeButton::~ShapeButton() {}
 
-void ShapeButton::setColours (Colour newNormalColour, Colour newOverColour, Colour newDownColour)
+void ShapeButton::setColors (Color newNormalColor, Color newOverColor, Color newDownColor)
 {
-    normalColour = newNormalColour;
-    overColour   = newOverColour;
-    downColour   = newDownColour;
+    normalColor = newNormalColor;
+    overColor   = newOverColor;
+    downColor   = newDownColor;
 }
 
-void ShapeButton::setOnColours (Colour newNormalColourOn, Colour newOverColourOn, Colour newDownColourOn)
+void ShapeButton::setOnColors (Color newNormalColorOn, Color newOverColorOn, Color newDownColorOn)
 {
-    normalColourOn = newNormalColourOn;
-    overColourOn   = newOverColourOn;
-    downColourOn   = newDownColourOn;
+    normalColorOn = newNormalColorOn;
+    overColorOn   = newOverColorOn;
+    downColorOn   = newDownColorOn;
 }
 
-void ShapeButton::shouldUseOnColours (bool shouldUse)
+void ShapeButton::shouldUseOnColors (bool shouldUse)
 {
-    useOnColours = shouldUse;
+    useOnColors = shouldUse;
 }
 
-void ShapeButton::setOutline (Colour newOutlineColour, const float newOutlineWidth)
+void ShapeButton::setOutline (Color newOutlineColor, const float newOutlineWidth)
 {
-    outlineColour = newOutlineColour;
+    outlineColor = newOutlineColor;
     outlineWidth = newOutlineWidth;
 }
 
@@ -77,7 +77,7 @@ void ShapeButton::setShape (const Path& newShape,
     shape = newShape;
     maintainShapeProportions = maintainShapeProportions_;
 
-    shadow.setShadowProperties (DropShadow (Colours::black.withAlpha (0.5f), 3, Point<int>()));
+    shadow.setShadowProperties (DropShadow (Colors::black.withAlpha (0.5f), 3, Point<int>()));
     setComponentEffect (hasShadow ? &shadow : nullptr);
 
     if (resizeNowToFitThisShape)
@@ -120,15 +120,15 @@ void ShapeButton::paintButton (Graphics& g, bool isMouseOverButton, bool isButto
 
     const AffineTransform trans (shape.getTransformToScaleToFit (r, maintainShapeProportions));
 
-    if      (isButtonDown)      g.setColour (getToggleState() && useOnColours ? downColourOn   : downColour);
-    else if (isMouseOverButton) g.setColour (getToggleState() && useOnColours ? overColourOn   : overColour);
-    else                        g.setColour (getToggleState() && useOnColours ? normalColourOn : normalColour);
+    if      (isButtonDown)      g.setColor (getToggleState() && useOnColors ? downColorOn   : downColor);
+    else if (isMouseOverButton) g.setColor (getToggleState() && useOnColors ? overColorOn   : overColor);
+    else                        g.setColor (getToggleState() && useOnColors ? normalColorOn : normalColor);
 
     g.fillPath (shape, trans);
 
     if (outlineWidth > 0.0f)
     {
-        g.setColour (outlineColour);
+        g.setColor (outlineColor);
         g.strokePath (shape, PathStrokeType (outlineWidth), trans);
     }
 }

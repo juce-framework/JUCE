@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -64,10 +64,10 @@ struct CompileEngineDLL  : private DeletedAtShutdown
         return true;
     }
 
-    void initialise (CrashCallbackFunction crashFn, QuitCallbackFunction quitFn, bool setupSignals)
+    void initialize (CrashCallbackFunction crashFn, QuitCallbackFunction quitFn, bool setupSignals)
     {
         if (isLoaded())
-            projucer_initialise (crashFn, quitFn, setPropertyCallback, getPropertyCallback, setupSignals);
+            projucer_initialize (crashFn, quitFn, setPropertyCallback, getPropertyCallback, setupSignals);
     }
 
     void shutdown()

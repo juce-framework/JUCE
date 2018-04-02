@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -61,8 +61,8 @@ public:
     }
 
     /** Sets the viewport area within which mouse-drag positions will occur.
-        You'll need to set this rectangle before calling mouseDown. The centre of the
-        rectangle is assumed to be the centre of the object that will be rotated, and
+        You'll need to set this rectangle before calling mouseDown. The center of the
+        rectangle is assumed to be the center of the object that will be rotated, and
         the size of the rectangle will be used to scale the object radius - see setRadius().
     */
     void setViewport (const Rectangle<int>& newArea) noexcept
@@ -80,7 +80,7 @@ public:
 
     /** Begins a mouse-drag operation.
         You must call this before any calls to mouseDrag(). The position that is supplied
-        will be treated as being relative to the centre of the rectangle passed to setViewport().
+        will be treated as being relative to the center of the rectangle passed to setViewport().
     */
     template <typename Type>
     void mouseDown (Point<Type> mousePos) noexcept
@@ -130,8 +130,8 @@ private:
         // calling any of the mouse input methods!
         jassert (scale > 0);
 
-        return Point<float> ((mousePos.x - (float) area.getCentreX()) / (float) scale,
-                             ((float) area.getCentreY() - mousePos.y) / (float) scale);
+        return Point<float> ((mousePos.x - (float) area.getCenterX()) / (float) scale,
+                             ((float) area.getCenterY() - mousePos.y) / (float) scale);
     }
 
     VectorType projectOnSphere (const Point<float> pos) const noexcept

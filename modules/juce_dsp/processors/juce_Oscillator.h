@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -43,7 +43,7 @@ public:
     */
     using NumericType = typename SampleTypeHelpers::ElementType<SampleType>::Type;
 
-    /** Creates an uninitialised oscillator. Call initialise before first use. */
+    /** Creates an uninitialized oscillator. Call initialize before first use. */
     Oscillator()
     {}
 
@@ -55,14 +55,14 @@ public:
     Oscillator (const std::function<NumericType (NumericType)>& function,
                 size_t lookupTableNumPoints = 0)
     {
-        initialise (function, lookupTableNumPoints);
+        initialize (function, lookupTableNumPoints);
     }
 
-    /** Returns true if the Oscillator has been initialised. */
-    bool isInitialised() const noexcept     { return static_cast<bool> (generator); }
+    /** Returns true if the Oscillator has been initialized. */
+    bool isInitialized() const noexcept     { return static_cast<bool> (generator); }
 
-    /** Initialises the oscillator with a waveform. */
-    void initialise (const std::function<NumericType (NumericType)>& function,
+    /** Initializes the oscillator with a waveform. */
+    void initialize (const std::function<NumericType (NumericType)>& function,
                      size_t lookupTableNumPoints = 0)
     {
         if (lookupTableNumPoints != 0)
@@ -111,7 +111,7 @@ public:
     /** Returns the result of processing a single sample. */
     SampleType JUCE_VECTOR_CALLTYPE processSample (SampleType input) noexcept
     {
-        jassert (isInitialised());
+        jassert (isInitialized());
         auto increment = MathConstants<NumericType>::twoPi * frequency.getNextValue() / sampleRate;
         return input + generator (phase.advance (increment) - MathConstants<NumericType>::pi);
     }
@@ -120,7 +120,7 @@ public:
     template <typename ProcessContext>
     void process (const ProcessContext& context) noexcept
     {
-        jassert (isInitialised());
+        jassert (isInitialized());
         auto&& outBlock = context.getOutputBlock();
         auto&& inBlock  = context.getInputBlock();
 

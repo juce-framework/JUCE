@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -129,7 +129,7 @@ public:
             Array<PropertyComponent*> properties;
 
             properties.add (new TabNameProperty (t, doc, i));
-            properties.add (new TabColourProperty (t, doc, i));
+            properties.add (new TabColorProperty (t, doc, i));
 
             properties.add (new TabContentTypeProperty (t, doc, i));
 
@@ -197,7 +197,7 @@ public:
                 << "->addTab ("
                 << quotedString (t->getTabNames() [i], code.shouldUseTransMacro())
                 << ", "
-                << CodeHelpers::colourToCode (t->getTabBackgroundColour (i));
+                << CodeHelpers::colorToCode (t->getTabBackgroundColor (i));
 
             if (contentClassName.isNotEmpty())
             {
@@ -223,7 +223,7 @@ public:
     //==============================================================================
     static void addNewTab (TabbedComponent* tc, const int insertIndex = -1)
     {
-        tc->addTab ("Tab " + String (tc->getNumTabs()), Colours::lightgrey,
+        tc->addTab ("Tab " + String (tc->getNumTabs()), Colors::lightgray,
                     new TabDemoContentComp(), true, insertIndex);
     }
 
@@ -232,7 +232,7 @@ public:
     {
         XmlElement* xml = new XmlElement ("TAB");
         xml->setAttribute ("name", tc->getTabNames() [tabIndex]);
-        xml->setAttribute ("colour", tc->getTabBackgroundColour (tabIndex).toString());
+        xml->setAttribute ("color", tc->getTabBackgroundColor (tabIndex).toString());
 
         if (TabDemoContentComp* const tdc = dynamic_cast<TabDemoContentComp*> (tc->getTabContentComponent (tabIndex)))
         {
@@ -248,7 +248,7 @@ public:
     static void restoreTabState (TabbedComponent* tc, int tabIndex, const XmlElement& xml)
     {
         tc->setTabName (tabIndex, xml.getStringAttribute ("name", "Tab"));
-        tc->setTabBackgroundColour (tabIndex, Colour::fromString (xml.getStringAttribute ("colour", Colours::lightgrey.toString())));
+        tc->setTabBackgroundColor (tabIndex, Color::fromString (xml.getStringAttribute ("color", Colors::lightgray.toString())));
 
         if (TabDemoContentComp* const tdc = dynamic_cast<TabDemoContentComp*> (tc->getTabContentComponent (tabIndex)))
         {
@@ -357,8 +357,8 @@ private:
         {
             if (jucerComp == nullptr)
                 g.fillCheckerBoard (getLocalBounds().toFloat(), 50.0f, 50.0f,
-                                    Colour::greyLevel (0.9f).withAlpha (0.4f),
-                                    Colour::greyLevel (0.8f).withAlpha (0.4f));
+                                    Color::grayLevel (0.9f).withAlpha (0.4f),
+                                    Color::grayLevel (0.8f).withAlpha (0.4f));
         }
 
         void resized() override
@@ -785,12 +785,12 @@ private:
     };
 
     //==============================================================================
-    class TabColourProperty  : public JucerColourPropertyComponent,
+    class TabColorProperty  : public JucerColorPropertyComponent,
                                private ChangeListener
     {
     public:
-        TabColourProperty (TabbedComponent* comp, JucerDocument& doc, const int tabIndex_)
-            : JucerColourPropertyComponent ("colour", false),
+        TabColorProperty (TabbedComponent* comp, JucerDocument& doc, const int tabIndex_)
+            : JucerColorPropertyComponent ("color", false),
               component (comp),
               document (doc),
               tabIndex (tabIndex_)
@@ -798,22 +798,22 @@ private:
             document.addChangeListener (this);
         }
 
-        ~TabColourProperty()
+        ~TabColorProperty()
         {
             document.removeChangeListener (this);
         }
 
-        void setColour (Colour newColour) override
+        void setColor (Color newColor) override
         {
             document.getUndoManager().undoCurrentTransactionOnly();
 
-            document.perform (new TabColourChangeAction (component, *document.getComponentLayout(), tabIndex, newColour),
-                              "Change tab colour");
+            document.perform (new TabColorChangeAction (component, *document.getComponentLayout(), tabIndex, newColor),
+                              "Change tab color");
         }
 
-        Colour getColour() const override
+        Color getColor() const override
         {
-            return component->getTabBackgroundColour (tabIndex);
+            return component->getTabBackgroundColor (tabIndex);
         }
 
         void resetToDefault() override
@@ -828,22 +828,22 @@ private:
         JucerDocument& document;
         int tabIndex;
 
-        class TabColourChangeAction  : public ComponentUndoableAction<TabbedComponent>
+        class TabColorChangeAction  : public ComponentUndoableAction<TabbedComponent>
         {
         public:
-            TabColourChangeAction (TabbedComponent* comp, ComponentLayout& l,
-                                   int tabIndex_, Colour newValue_)
+            TabColorChangeAction (TabbedComponent* comp, ComponentLayout& l,
+                                   int tabIndex_, Color newValue_)
                 : ComponentUndoableAction<TabbedComponent> (comp, l),
                   tabIndex (tabIndex_),
                   newValue (newValue_)
             {
-                oldValue = comp->getTabBackgroundColour (tabIndex);
+                oldValue = comp->getTabBackgroundColor (tabIndex);
             }
 
             bool perform()
             {
                 showCorrectTab();
-                getComponent()->setTabBackgroundColour (tabIndex, newValue);
+                getComponent()->setTabBackgroundColor (tabIndex, newValue);
                 changed();
                 return true;
             }
@@ -851,14 +851,14 @@ private:
             bool undo()
             {
                 showCorrectTab();
-                getComponent()->setTabBackgroundColour (tabIndex, oldValue);
+                getComponent()->setTabBackgroundColor (tabIndex, oldValue);
                 changed();
                 return true;
             }
 
         private:
             const int tabIndex;
-            Colour newValue, oldValue;
+            Color newValue, oldValue;
         };
     };
 

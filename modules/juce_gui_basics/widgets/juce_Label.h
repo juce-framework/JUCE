@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -92,30 +92,30 @@ public:
     Font getFont() const noexcept;
 
     //==============================================================================
-    /** A set of colour IDs to use to change the colour of various aspects of the label.
+    /** A set of color IDs to use to change the color of various aspects of the label.
 
-        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        These constants can be used either via the Component::setColor(), or LookAndFeel::setColor()
         methods.
 
-        Note that you can also use the constants from TextEditor::ColourIds to change the
-        colour of the text editor that is opened when a label is editable.
+        Note that you can also use the constants from TextEditor::ColorIds to change the
+        color of the text editor that is opened when a label is editable.
 
-        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+        @see Component::setColor, Component::findColor, LookAndFeel::setColor, LookAndFeel::findColor
     */
-    enum ColourIds
+    enum ColorIds
     {
-        backgroundColourId             = 0x1000280, /**< The background colour to fill the label with. */
-        textColourId                   = 0x1000281, /**< The colour for the text. */
-        outlineColourId                = 0x1000282, /**< An optional colour to use to draw a border around the label.
+        backgroundColorId             = 0x1000280, /**< The background color to fill the label with. */
+        textColorId                   = 0x1000281, /**< The color for the text. */
+        outlineColorId                = 0x1000282, /**< An optional color to use to draw a border around the label.
                                                          Leave this transparent to not have an outline. */
-        backgroundWhenEditingColourId  = 0x1000283, /**< The background colour when the label is being edited. */
-        textWhenEditingColourId        = 0x1000284, /**< The colour for the text when the label is being edited. */
-        outlineWhenEditingColourId     = 0x1000285  /**< An optional border colour when the label is being edited. */
+        backgroundWhenEditingColorId  = 0x1000283, /**< The background color when the label is being edited. */
+        textWhenEditingColorId        = 0x1000284, /**< The color for the text when the label is being edited. */
+        outlineWhenEditingColorId     = 0x1000285  /**< An optional border color when the label is being edited. */
     };
 
     //==============================================================================
     /** Sets the style of justification to be used for positioning the text.
-        (The default is Justification::centredLeft)
+        (The default is Justification::centeredLeft)
     */
     void setJustificationType (Justification justification);
 
@@ -231,7 +231,7 @@ public:
         @param lossOfFocusDiscardsChanges   if true, clicking somewhere else while the text is being
                                             edited will discard any changes; if false, then this will
                                             commit the changes.
-        @see showEditor, setEditorColours, TextEditor
+        @see showEditor, setEditorColors, TextEditor
     */
     void setEditable (bool editOnSingleClick,
                       bool editOnDoubleClick = false,
@@ -285,7 +285,7 @@ public:
 protected:
     //==============================================================================
     /** Creates the TextEditor component that will be used when the user has clicked on the label.
-        Subclasses can override this if they need to customise this component in some way.
+        Subclasses can override this if they need to customize this component in some way.
     */
     virtual TextEditor* createEditorComponent();
 
@@ -333,7 +333,7 @@ protected:
     /** @internal */
     void textEditorFocusLost (TextEditor&) override;
     /** @internal */
-    void colourChanged() override;
+    void colorChanged() override;
     /** @internal */
     void valueChanged (Value&) override;
     /** @internal */
@@ -344,7 +344,7 @@ private:
     Value textValue;
     String lastTextValue;
     Font font { 15.0f };
-    Justification justification = Justification::centredLeft;
+    Justification justification = Justification::centeredLeft;
     ScopedPointer<TextEditor> editor;
     ListenerList<Listener> listeners;
     WeakReference<Component> ownerComponent;

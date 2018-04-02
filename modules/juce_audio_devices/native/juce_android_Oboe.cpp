@@ -1060,7 +1060,7 @@ public:
     OboeAudioIODeviceType()
         : AudioIODeviceType (OboeAudioIODevice::oboeTypeName)
     {
-        // Not using scanForDevices() to maintain behaviour backwards compatible with older APIs
+        // Not using scanForDevices() to maintain behavior backwards compatible with older APIs
         checkAvailableDevices();
     }
 

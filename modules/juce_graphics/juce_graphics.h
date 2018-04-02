@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -109,10 +109,10 @@ namespace juce
 #include "placement/juce_Justification.h"
 #include "geometry/juce_Path.h"
 #include "geometry/juce_RectangleList.h"
-#include "colour/juce_PixelFormats.h"
-#include "colour/juce_Colour.h"
-#include "colour/juce_ColourGradient.h"
-#include "colour/juce_Colours.h"
+#include "color/juce_PixelFormats.h"
+#include "color/juce_Color.h"
+#include "color/juce_ColorGradient.h"
+#include "color/juce_Colors.h"
 #include "geometry/juce_BorderSize.h"
 #include "geometry/juce_EdgeTable.h"
 #include "geometry/juce_PathIterator.h"
@@ -130,7 +130,7 @@ namespace juce
 #include "contexts/juce_GraphicsContext.h"
 #include "contexts/juce_LowLevelGraphicsContext.h"
 #include "images/juce_Image.h"
-#include "colour/juce_FillType.h"
+#include "color/juce_FillType.h"
 #include "native/juce_RenderingHelpers.h"
 #include "contexts/juce_LowLevelGraphicsSoftwareRenderer.h"
 #include "contexts/juce_LowLevelGraphicsPostScriptRenderer.h"

@@ -76,7 +76,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
 //==============================================================================
 static ScopedPointer<MessageQueue> messageQueue;
 
-void MessageManager::doPlatformSpecificInitialisation()
+void MessageManager::doPlatformSpecificInitialization()
 {
     if (messageQueue == nullptr)
         messageQueue = new MessageQueue();

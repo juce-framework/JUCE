@@ -47,7 +47,7 @@ public:
     CriticalSection() noexcept;
 
     /** Destructor.
-        If the critical section is deleted whilst locked, any subsequent behaviour
+        If the critical section is deleted whilst locked, any subsequent behavior
         is unpredictable.
     */
     ~CriticalSection() noexcept;
@@ -124,7 +124,7 @@ private:
     doesn't perform any locking.
 
     This is currently used by some templated classes, and most compilers should
-    manage to optimise it out of existence.
+    manage to optimize it out of existence.
 
     @see CriticalSection, Array, OwnedArray, ReferenceCountedArray
 

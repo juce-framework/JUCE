@@ -1193,7 +1193,7 @@ struct PhysicalTopologySource::Internal
 
         //==============================================================================
         /** Flurries of topology messages sometimes arrive due to loose connections.
-            Avoid informing listeners until they've stabilised.
+            Avoid informing listeners until they've stabilized.
         */
         struct TopologyBroadcastThrottle  : private juce::Timer
         {
@@ -1642,32 +1642,32 @@ struct PhysicalTopologySource::Internal
         //==============================================================================
         int32 getLocalConfigValue (uint32 item) override
         {
-            initialiseDeviceIndexAndConnection();
+            initializeDeviceIndexAndConnection();
             return config.getItemValue ((BlocksProtocol::ConfigItemId) item);
         }
 
         void setLocalConfigValue (uint32 item, int32 value) override
         {
-            initialiseDeviceIndexAndConnection();
+            initializeDeviceIndexAndConnection();
             config.setItemValue ((BlocksProtocol::ConfigItemId) item, value);
         }
 
         void setLocalConfigRange (uint32 item, int32 min, int32 max) override
         {
-            initialiseDeviceIndexAndConnection();
+            initializeDeviceIndexAndConnection();
             config.setItemMin ((BlocksProtocol::ConfigItemId) item, min);
             config.setItemMax ((BlocksProtocol::ConfigItemId) item, max);
         }
 
         void setLocalConfigItemActive (uint32 item, bool isActive) override
         {
-            initialiseDeviceIndexAndConnection();
+            initializeDeviceIndexAndConnection();
             config.setItemActive ((BlocksProtocol::ConfigItemId) item, isActive);
         }
 
         bool isLocalConfigItemActive (uint32 item) override
         {
-            initialiseDeviceIndexAndConnection();
+            initializeDeviceIndexAndConnection();
             return config.getItemActive ((BlocksProtocol::ConfigItemId) item);
         }
 
@@ -1684,13 +1684,13 @@ struct PhysicalTopologySource::Internal
 
         ConfigMetaData getLocalConfigMetaData (uint32 item) override
         {
-            initialiseDeviceIndexAndConnection();
+            initializeDeviceIndexAndConnection();
             return config.getMetaData ((BlocksProtocol::ConfigItemId) item);
         }
 
         void requestFactoryConfigSync() override
         {
-            initialiseDeviceIndexAndConnection();
+            initializeDeviceIndexAndConnection();
             config.requestFactoryConfigSync();
         }
 
@@ -1803,7 +1803,7 @@ struct PhysicalTopologySource::Internal
         bool isStillConnected = true;
         bool isMaster = false;
 
-        void initialiseDeviceIndexAndConnection()
+        void initializeDeviceIndexAndConnection()
         {
             config.setDeviceIndex ((TopologyIndex) getDeviceIndex());
             config.setDeviceComms (listenerToMidiConnection);
@@ -1864,11 +1864,11 @@ struct PhysicalTopologySource::Internal
             startTimer (300);
         }
 
-        void setButtonColour (uint32 index, LEDColour colour)
+        void setButtonColor (uint32 index, LEDColor color)
         {
             if (index < 10)
             {
-                colours[index] = colour;
+                colors[index] = color;
                 flush();
             }
         }
@@ -1878,28 +1878,28 @@ struct PhysicalTopologySource::Internal
             return static_cast<const BlockImplementation&> (block).modelData.numLEDRowLEDs;
         }
 
-        void setLEDColour (int index, LEDColour colour) override
+        void setLEDColor (int index, LEDColor color) override
         {
             if ((uint32) index < 15u)
             {
-                colours[10 + index] = colour;
+                colors[10 + index] = color;
                 flush();
             }
         }
 
-        void setOverlayColour (LEDColour colour) override
+        void setOverlayColor (LEDColor color) override
         {
-            colours[25] = colour;
+            colors[25] = color;
             flush();
         }
 
-        void resetOverlayColour() override
+        void resetOverlayColor() override
         {
-            setOverlayColour ({});
+            setOverlayColor ({});
         }
 
     private:
-        LEDColour colours[26];
+        LEDColor colors[26];
 
         void timerCallback() override
         {
@@ -1925,15 +1925,15 @@ struct PhysicalTopologySource::Internal
         void flush()
         {
             if (block.getProgram() != nullptr)
-                for (uint32 i = 0; i < (uint32) numElementsInArray (colours); ++i)
-                    write565Colour (16 * i, colours[i]);
+                for (uint32 i = 0; i < (uint32) numElementsInArray (colors); ++i)
+                    write565Color (16 * i, colors[i]);
         }
 
-        void write565Colour (uint32 bitIndex, LEDColour colour)
+        void write565Color (uint32 bitIndex, LEDColor color)
         {
-            block.setDataBits (bitIndex,      5, colour.getRed()   >> 3);
-            block.setDataBits (bitIndex + 5,  6, colour.getGreen() >> 2);
-            block.setDataBits (bitIndex + 11, 5, colour.getBlue()  >> 3);
+            block.setDataBits (bitIndex,      5, color.getRed()   >> 3);
+            block.setDataBits (bitIndex + 5,  6, color.getGreen() >> 2);
+            block.setDataBits (bitIndex + 11, 5, color.getBlue()  >> 3);
         }
 
         struct DefaultLEDGridProgram  : public Block::Program
@@ -1945,14 +1945,14 @@ struct PhysicalTopologySource::Internal
                 /*  Data format:
 
                     0:  10 x 5-6-5 bits for button LED RGBs
-                    20: 15 x 5-6-5 bits for LED row colours
-                    50:  1 x 5-6-5 bits for LED row overlay colour
+                    20: 15 x 5-6-5 bits for LED row colors
+                    50:  1 x 5-6-5 bits for LED row overlay color
                 */
                 return R"littlefoot(
 
                 #heapsize: 128
 
-                int getColour (int bitIndex)
+                int getColor (int bitIndex)
                 {
                     return makeARGB (255,
                                      getHeapBits (bitIndex,      5) << 3,
@@ -1960,26 +1960,26 @@ struct PhysicalTopologySource::Internal
                                      getHeapBits (bitIndex + 11, 5) << 3);
                 }
 
-                int getButtonColour (int index)
+                int getButtonColor (int index)
                 {
-                    return getColour (16 * index);
+                    return getColor (16 * index);
                 }
 
-                int getLEDColour (int index)
+                int getLEDColor (int index)
                 {
                     if (getHeapInt (50))
-                        return getColour (50 * 8);
+                        return getColor (50 * 8);
 
-                    return getColour (20 * 8 + 16 * index);
+                    return getColor (20 * 8 + 16 * index);
                 }
 
                 void repaint()
                 {
                     for (int x = 0; x < 15; ++x)
-                        fillPixel (getLEDColour (x), x, 0);
+                        fillPixel (getLEDColor (x), x, 0);
 
                     for (int i = 0; i < 10; ++i)
-                        fillPixel (getButtonColour (i), i, 1);
+                        fillPixel (getButtonColor (i), i, 1);
                 }
 
                 void handleMessage (int p1, int p2) {}
@@ -2127,13 +2127,13 @@ struct PhysicalTopologySource::Internal
 
         bool hasLight() const override                  { return blockImpl.isControlBlock(); }
 
-        bool setLightColour (LEDColour colour) override
+        bool setLightColor (LEDColor color) override
         {
             if (hasLight())
             {
                 if (auto row = blockImpl.ledRow.get())
                 {
-                    row->setButtonColour ((uint32) buttonIndex, colour);
+                    row->setButtonColor ((uint32) buttonIndex, color);
                     return true;
                 }
             }
@@ -2179,10 +2179,10 @@ struct PhysicalTopologySource::Internal
 
         juce::String getName() const override               { return info.name; }
 
-        bool setColour (LEDColour newColour) override
+        bool setColor (LEDColor newColor) override
         {
             // XXX TODO!
-            juce::ignoreUnused (newColour);
+            juce::ignoreUnused (newColor);
             return false;
         }
 

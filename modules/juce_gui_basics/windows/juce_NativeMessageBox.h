@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -145,7 +145,7 @@ public:
                             returning immediately, and the callback will receive a call to its
                             modalStateFinished() when the box is dismissed, with its parameter
                             being 1 if the "yes" button was pressed, 2 for the "no" button, or 0
-                            if it was cancelled, The callback object will be owned and deleted by the
+                            if it was canceled, The callback object will be owned and deleted by the
                             system, so make sure that it works safely and doesn't keep any references
                             to objects that might be deleted before it gets called. You can use the
                             ModalCallbackFunction to easily pass in a lambda for this parameter.

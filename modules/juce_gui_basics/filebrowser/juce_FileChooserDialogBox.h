@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -49,7 +49,7 @@ namespace juce
                                         "Please choose some kind of file that you want to open...",
                                         browser,
                                         false,
-                                        Colours::lightgrey);
+                                        Colors::lightgray);
 
         if (dialogBox.show())
         {
@@ -80,7 +80,7 @@ public:
         @param warnAboutOverwritingExistingFiles     if true, then the user will be asked to confirm
                                 if they try to select a file that already exists. (This
                                 flag is only used when saving files)
-        @param backgroundColour the background colour for the top level window
+        @param backgroundColor the background color for the top level window
 
         @see FileBrowserComponent, FilePreviewComponent
     */
@@ -88,7 +88,7 @@ public:
                           const String& instructions,
                           FileBrowserComponent& browserComponent,
                           bool warnAboutOverwritingExistingFiles,
-                          Colour backgroundColour);
+                          Color backgroundColor);
 
     /** Destructor. */
     ~FileChooserDialogBox();
@@ -98,7 +98,7 @@ public:
     /** Displays and runs the dialog box modally.
 
         This will show the box with the specified size, returning true if the user
-        pressed 'ok', or false if they cancelled.
+        pressed 'ok', or false if they canceled.
 
         Leave the width or height as 0 to use the default size
     */
@@ -107,7 +107,7 @@ public:
     /** Displays and runs the dialog box modally.
 
         This will show the box with the specified size at the specified location,
-        returning true if the user pressed 'ok', or false if they cancelled.
+        returning true if the user pressed 'ok', or false if they canceled.
 
         Leave the width or height as 0 to use the default size.
     */
@@ -115,21 +115,21 @@ public:
    #endif
 
     /** Sets the size of this dialog box to its default and positions it either in the
-        centre of the screen, or centred around a component that is provided.
+        center of the screen, or centered around a component that is provided.
     */
-    void centreWithDefaultSize (Component* componentToCentreAround = nullptr);
+    void centerWithDefaultSize (Component* componentToCenterAround = nullptr);
 
     //==============================================================================
-    /** A set of colour IDs to use to change the colour of various aspects of the box.
+    /** A set of color IDs to use to change the color of various aspects of the box.
 
-        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        These constants can be used either via the Component::setColor(), or LookAndFeel::setColor()
         methods.
 
-        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+        @see Component::setColor, Component::findColor, LookAndFeel::setColor, LookAndFeel::findColor
     */
-    enum ColourIds
+    enum ColorIds
     {
-        titleTextColourId      = 0x1000850, /**< The colour to use to draw the box's title. */
+        titleTextColorId      = 0x1000850, /**< The color to use to draw the box's title. */
     };
 
 private:

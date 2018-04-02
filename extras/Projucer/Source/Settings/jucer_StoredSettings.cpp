@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -121,7 +121,7 @@ void StoredSettings::updateKeyMappings()
 void StoredSettings::flush()
 {
     updateGlobalPreferences();
-    saveSwatchColours();
+    saveSwatchColors();
 
     for (auto i = propertyFiles.size(); --i >= 0;)
         propertyFiles.getUnchecked(i)->saveIfNeeded();
@@ -146,7 +146,7 @@ void StoredSettings::reload()
 
     lastWizardFolder = getGlobalProperties().getValue ("lastWizardFolder");
 
-    loadSwatchColours();
+    loadSwatchColors();
 }
 
 Array<File> StoredSettings::getLastProjects()
@@ -226,52 +226,52 @@ void StoredSettings::setDontAskAboutJUCEPathAgain() noexcept
 }
 
 //==============================================================================
-void StoredSettings::loadSwatchColours()
+void StoredSettings::loadSwatchColors()
 {
-    swatchColours.clear();
+    swatchColors.clear();
 
-    #define COL(col)  Colours::col,
+    #define COL(col)  Colors::col,
 
-    const Colour colours[] =
+    const Color colors[] =
     {
-        #include "../Utility/Helpers/jucer_Colours.h"
-        Colours::transparentBlack
+        #include "../Utility/Helpers/jucer_Colors.h"
+        Colors::transparentBlack
     };
 
     #undef COL
 
-    const auto numSwatchColours = 24;
+    const auto numSwatchColors = 24;
     auto& props = getGlobalProperties();
 
-    for (auto i = 0; i < numSwatchColours; ++i)
-        swatchColours.add (Colour::fromString (props.getValue ("swatchColour" + String (i),
-                                                               colours [2 + i].toString())));
+    for (auto i = 0; i < numSwatchColors; ++i)
+        swatchColors.add (Color::fromString (props.getValue ("swatchColor" + String (i),
+                                                               colors [2 + i].toString())));
 }
 
-void StoredSettings::saveSwatchColours()
+void StoredSettings::saveSwatchColors()
 {
     auto& props = getGlobalProperties();
 
-    for (auto i = 0; i < swatchColours.size(); ++i)
-        props.setValue ("swatchColour" + String (i), swatchColours.getReference(i).toString());
+    for (auto i = 0; i < swatchColors.size(); ++i)
+        props.setValue ("swatchColor" + String (i), swatchColors.getReference(i).toString());
 }
 
-StoredSettings::ColourSelectorWithSwatches::ColourSelectorWithSwatches() {}
-StoredSettings::ColourSelectorWithSwatches::~ColourSelectorWithSwatches() {}
+StoredSettings::ColorSelectorWithSwatches::ColorSelectorWithSwatches() {}
+StoredSettings::ColorSelectorWithSwatches::~ColorSelectorWithSwatches() {}
 
-int StoredSettings::ColourSelectorWithSwatches::getNumSwatches() const
+int StoredSettings::ColorSelectorWithSwatches::getNumSwatches() const
 {
-    return getAppSettings().swatchColours.size();
+    return getAppSettings().swatchColors.size();
 }
 
-Colour StoredSettings::ColourSelectorWithSwatches::getSwatchColour (int index) const
+Color StoredSettings::ColorSelectorWithSwatches::getSwatchColor (int index) const
 {
-    return getAppSettings().swatchColours [index];
+    return getAppSettings().swatchColors [index];
 }
 
-void StoredSettings::ColourSelectorWithSwatches::setSwatchColour (int index, const Colour& newColour)
+void StoredSettings::ColorSelectorWithSwatches::setSwatchColor (int index, const Color& newColor)
 {
-    getAppSettings().swatchColours.set (index, newColour);
+    getAppSettings().swatchColors.set (index, newColor);
 }
 
 //==============================================================================
@@ -431,7 +431,7 @@ bool StoredSettings::isGlobalPathValid (const File& relativeTo, const Identifier
     }
     else
     {
-        // didn't recognise the key provided!
+        // didn't recognize the key provided!
         jassertfalse;
         return false;
     }

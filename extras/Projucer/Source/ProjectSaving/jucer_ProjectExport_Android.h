@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -93,7 +93,7 @@ public:
     }
 
     //==============================================================================
-    void initialiseDependencyPathValues() override
+    void initializeDependencyPathValues() override
     {
         sdkPath.referTo  (Value (new DependencyPathValueSource (getSetting (Ids::androidSDKPath), Ids::androidSDKPath, TargetOS::getThisOS())));
         ndkPath.referTo  (Value (new DependencyPathValueSource (getSetting (Ids::androidNDKPath), Ids::androidNDKPath, TargetOS::getThisOS())));
@@ -321,8 +321,8 @@ protected:
               androidAdditionalRawValueResources (config, Ids::androidAdditionalRawValueResources, getUndoManager()),
               androidCustomStringXmlElements     (config, Ids::androidCustomStringXmlElements,     getUndoManager())
         {
-            linkTimeOptimisationValue.setDefault (false);
-            optimisationLevelValue.setDefault (isDebug() ? gccO0 : gccO3);
+            linkTimeOptimizationValue.setDefault (false);
+            optimizationLevelValue.setDefault (isDebug() ? gccO0 : gccO3);
         }
 
         String getArchitectures() const               { return androidArchitectures.get().toString(); }
@@ -334,7 +334,7 @@ protected:
 
         void createConfigProperties (PropertyListBuilder& props) override
         {
-            addGCCOptimisationProperty (props);
+            addGCCOptimizationProperty (props);
 
             props.add (new TextPropertyComponent (androidArchitectures, "Architectures", 256, false),
                        "A list of the ARM architectures to build (for a fat binary). Leave empty to build for all possible android archiftectures.");
@@ -364,12 +364,12 @@ protected:
                        "<string name2=\"value2\">text2</string>\n");
         }
 
-        String getProductFlavourNameIdentifier() const
+        String getProductFlavorNameIdentifier() const
         {
             return getName().toLowerCase().replaceCharacter (L' ', L'_') + String ("_");
         }
 
-        String getProductFlavourCMakeIdentifier() const
+        String getProductFlavorCMakeIdentifier() const
         {
             return getName().toUpperCase().replaceCharacter (L' ', L'_');
         }
@@ -463,7 +463,7 @@ private:
                        && cfgHeaderPaths.size() == 0 && cfgLibraryPaths.size() == 0)
                     continue;
 
-                mo << (first ? "IF" : "ELSEIF") << "(JUCE_BUILD_CONFIGURATION MATCHES \"" << cfg.getProductFlavourCMakeIdentifier() <<"\")" << newLine;
+                mo << (first ? "IF" : "ELSEIF") << "(JUCE_BUILD_CONFIGURATION MATCHES \"" << cfg.getProductFlavorCMakeIdentifier() <<"\")" << newLine;
 
                 if (isLibrary())
                     mo << "    SET(BINARY_NAME \"" << getNativeModuleBinaryName (cfg) << "\")" << newLine;
@@ -489,7 +489,7 @@ private:
                     mo << newLine;
                 }
 
-                if (cfg.isLinkTimeOptimisationEnabled())
+                if (cfg.isLinkTimeOptimizationEnabled())
                 {
                     // There's no MIPS support for LTO
                     String mipsCondition ("NOT (ANDROID_ABI STREQUAL \"mips\" OR ANDROID_ABI STREQUAL \"mips64\")");
@@ -498,7 +498,7 @@ private:
 
                     for (auto& variable : cmakeVariables)
                     {
-                        auto configVariable = variable + "_" + cfg.getProductFlavourCMakeIdentifier();
+                        auto configVariable = variable + "_" + cfg.getProductFlavorCMakeIdentifier();
                         mo << "        SET(" << configVariable << " \"${" << configVariable << "} -flto\")" << newLine;
                     }
 
@@ -516,9 +516,9 @@ private:
                 {
                     if (auto* cfg = dynamic_cast<const AndroidBuildConfiguration*> (config.get()))
                     {
-                        mo << "ELSE(JUCE_BUILD_CONFIGURATION MATCHES \"" << cfg->getProductFlavourCMakeIdentifier() <<"\")" << newLine;
+                        mo << "ELSE(JUCE_BUILD_CONFIGURATION MATCHES \"" << cfg->getProductFlavorCMakeIdentifier() <<"\")" << newLine;
                         mo << "    MESSAGE( FATAL_ERROR \"No matching build-configuration found.\" )" << newLine;
-                        mo << "ENDIF(JUCE_BUILD_CONFIGURATION MATCHES \"" << cfg->getProductFlavourCMakeIdentifier() <<"\")" << newLine << newLine;
+                        mo << "ENDIF(JUCE_BUILD_CONFIGURATION MATCHES \"" << cfg->getProductFlavorCMakeIdentifier() <<"\")" << newLine << newLine;
                     }
                 }
             }
@@ -624,7 +624,7 @@ private:
         mo << getAndroidSigningConfig()                                                      << newLine;
         mo << getAndroidDefaultConfig()                                                      << newLine;
         mo << getAndroidBuildTypes()                                                         << newLine;
-        mo << getAndroidProductFlavours()                                                    << newLine;
+        mo << getAndroidProductFlavors()                                                    << newLine;
         mo << getAndroidVariantFilter()                                                      << newLine;
 
         mo << getAndroidRepositories()                                                       << newLine;
@@ -636,7 +636,7 @@ private:
         return mo.toString();
     }
 
-    String getAndroidProductFlavours() const
+    String getAndroidProductFlavors() const
     {
         MemoryOutputStream mo;
 
@@ -647,7 +647,7 @@ private:
         {
             auto& cfg = dynamic_cast<const AndroidBuildConfiguration&> (*config);
 
-            mo << "        " << cfg.getProductFlavourNameIdentifier() << " {" << newLine;
+            mo << "        " << cfg.getProductFlavorNameIdentifier() << " {" << newLine;
 
             if (cfg.getArchitectures().isNotEmpty())
             {
@@ -662,11 +662,11 @@ private:
             if (getProject().getProjectType().isStaticLibrary())
                 mo << "                    targets \"" << getNativeModuleBinaryName (cfg) << "\"" << newLine;
 
-            mo << "                    arguments \"-DJUCE_BUILD_CONFIGURATION=" << cfg.getProductFlavourCMakeIdentifier() << "\""
+            mo << "                    arguments \"-DJUCE_BUILD_CONFIGURATION=" << cfg.getProductFlavorCMakeIdentifier() << "\""
                                            << ", \"-DCMAKE_CXX_FLAGS_" << (cfg.isDebug() ? "DEBUG" : "RELEASE")
-                                           << "=-O" << cfg.getGCCOptimisationFlag() << "\""
+                                           << "=-O" << cfg.getGCCOptimizationFlag() << "\""
                                            << ", \"-DCMAKE_C_FLAGS_"   << (cfg.isDebug() ? "DEBUG" : "RELEASE")
-                                           << "=-O" << cfg.getGCCOptimisationFlag() << "\"" << newLine;
+                                           << "=-O" << cfg.getGCCOptimizationFlag() << "\"" << newLine;
 
             mo << "                }"                   << newLine;
             mo << "            }"                       << newLine << newLine;
@@ -776,7 +776,7 @@ private:
         {
             auto& cfg = dynamic_cast<const AndroidBuildConfiguration&> (*config);
 
-            mo << "        if (names.contains (\"" << cfg.getProductFlavourNameIdentifier() << "\")"                  << newLine;
+            mo << "        if (names.contains (\"" << cfg.getProductFlavorNameIdentifier() << "\")"                  << newLine;
             mo << "              && variant.buildType.name != \"" << (cfg.isDebug() ? "debug" : "release") << "\") {" << newLine;
             mo << "            setIgnore(true)"                                                                       << newLine;
             mo << "        }"                                                                                         << newLine;
@@ -840,8 +840,8 @@ private:
     {
         String props;
 
-        props << "ndk.dir=" << sanitisePath (ndkPath.toString()) << newLine
-              << "sdk.dir=" << sanitisePath (sdkPath.toString()) << newLine;
+        props << "ndk.dir=" << sanitizePath (ndkPath.toString()) << newLine
+              << "sdk.dir=" << sanitizePath (sdkPath.toString()) << newLine;
 
         return props;
     }
@@ -1387,7 +1387,7 @@ private:
         writeIcons (folder.getChildFile ("app/src/main/res/"));
     }
 
-    static String sanitisePath (String path)
+    static String sanitizePath (String path)
     {
         return expandHomeFolderToken (path).replace ("\\", "\\\\");
     }

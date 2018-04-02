@@ -32,8 +32,8 @@ namespace juce
 
     To use the system, you need to create subclasses of both ChildProcessSlave and
     ChildProcessMaster. To instantiate the ChildProcessSlave object, you must
-    add some code to your main() or JUCEApplication::initialise() function that
-    calls the initialiseFromCommandLine() method to check the app's command-line
+    add some code to your main() or JUCEApplication::initialize() function that
+    calls the initializeFromCommandLine() method to check the app's command-line
     parameters to see whether it's being launched as a child process. If this returns
     true then the slave process can be allowed to run, and its handleMessageFromMaster()
     method will be called whenever a message arrives.
@@ -48,7 +48,7 @@ class JUCE_API  ChildProcessSlave
 {
 public:
     /** Creates a non-connected slave process.
-        Use initialiseFromCommandLine to connect to a master process.
+        Use initializeFromCommandLine to connect to a master process.
     */
     ChildProcessSlave();
 
@@ -59,7 +59,7 @@ public:
         ChildProcessMaster::launchSlaveProcess(), and if so, connects to that master process.
 
         In an exe that can be used as a child process, you should add some code to your
-        main() or JUCEApplication::initialise() that calls this method.
+        main() or JUCEApplication::initialize() that calls this method.
 
         The commandLineUniqueID should be a short alphanumeric identifier (no spaces!)
         that matches the string passed to ChildProcessMaster::launchSlaveProcess().
@@ -71,7 +71,7 @@ public:
 
         Returns true if the command-line matches and the connection is made successfully.
     */
-    bool initialiseFromCommandLine (const String& commandLine,
+    bool initializeFromCommandLine (const String& commandLine,
                                     const String& commandLineUniqueID,
                                     int timeoutMs = 0);
 
@@ -134,7 +134,7 @@ private:
 class JUCE_API ChildProcessMaster
 {
 public:
-    /** Creates an uninitialised master process object.
+    /** Creates an uninitialized master process object.
         Use launchSlaveProcess to launch and connect to a child process.
     */
     ChildProcessMaster();
@@ -149,7 +149,7 @@ public:
         This will start the given executable, passing it a special command-line
         parameter based around the commandLineUniqueID string, which must be a
         short alphanumeric string (no spaces!) that identifies your app. The exe
-        that gets launched must respond by calling ChildProcessSlave::initialiseFromCommandLine()
+        that gets launched must respond by calling ChildProcessSlave::initializeFromCommandLine()
         in its startup code, and must use a matching ID to commandLineUniqueID.
 
         The timeoutMs parameter lets you specify how long the child process is allowed

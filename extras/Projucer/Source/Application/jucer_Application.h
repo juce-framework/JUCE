@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -48,10 +48,10 @@ public:
     static ApplicationCommandManager& getCommandManager();
 
     //==============================================================================
-    void initialise (const String& commandLine) override;
-    void initialiseBasics();
-    bool initialiseLogger (const char* filePrefix);
-    void initialiseWindows (const String& commandLine);
+    void initialize (const String& commandLine) override;
+    void initializeBasics();
+    bool initializeLogger (const char* filePrefix);
+    void initializeWindows (const String& commandLine);
 
     void shutdown() override;
     void systemRequestedQuit() override;
@@ -62,7 +62,7 @@ public:
     const String getApplicationVersion() override    { return ProjectInfo::versionString; }
 
     String getVersionDescription() const;
-    bool moreThanOneInstanceAllowed() override       { return true; } // this is handled manually in initialise()
+    bool moreThanOneInstanceAllowed() override       { return true; } // this is handled manually in initialize()
 
     void anotherInstanceStarted (const String& commandLine) override;
 
@@ -74,7 +74,7 @@ public:
     void createEditMenu (PopupMenu&);
     void createViewMenu (PopupMenu&);
     void createBuildMenu (PopupMenu&);
-    void createColourSchemeItems (PopupMenu&);
+    void createColorSchemeItems (PopupMenu&);
     void createWindowMenu (PopupMenu&);
     void createDocumentMenu (PopupMenu&);
     void createToolsMenu (PopupMenu&);
@@ -109,7 +109,7 @@ public:
     void dismissApplicationUsageDataAgreementPopup();
 
     void showPathsWindow (bool highlightJUCEPath = false);
-    void showEditorColourSchemeWindow();
+    void showEditorColorSchemeWindow();
 
     void launchForumBrowser();
     void launchModulesBrowser();
@@ -126,9 +126,9 @@ public:
     bool isPaidOrGPL() const              { return licenseController == nullptr || licenseController->getState().isPaidOrGPL(); }
 
     //==============================================================================
-    void selectEditorColourSchemeWithName (const String& schemeName);
-    static bool isEditorColourSchemeADefaultScheme (const StringArray& schemes, int editorColourSchemeIndex);
-    static int getEditorColourSchemeForGUIColourScheme (const StringArray& schemes, int guiColourSchemeIndex);
+    void selectEditorColorSchemeWithName (const String& schemeName);
+    static bool isEditorColorSchemeADefaultScheme (const StringArray& schemes, int editorColorSchemeIndex);
+    static int getEditorColorSchemeForGUIColorScheme (const StringArray& schemes, int guiColorSchemeIndex);
 
     //==============================================================================
     void setAnalyticsEnabled (bool);
@@ -147,7 +147,7 @@ public:
     ScopedPointer<ApplicationCommandManager> commandManager;
 
     ScopedPointer<Component> utf8Window, svgPathWindow, aboutWindow, applicationUsageDataWindow,
-                             pathsWindow, editorColourSchemeWindow;
+                             pathsWindow, editorColorSchemeWindow;
 
     ScopedPointer<FileLogger> logger;
 
@@ -198,13 +198,13 @@ private:
     ScopedPointer<AlertWindow> pathAlert;
 
     //==============================================================================
-    void setColourScheme (int index, bool saveSetting);
+    void setColorScheme (int index, bool saveSetting);
 
-    void setEditorColourScheme (int index, bool saveSetting);
-    void updateEditorColourSchemeIfNeeded();
+    void setEditorColorScheme (int index, bool saveSetting);
+    void updateEditorColorSchemeIfNeeded();
 
-    int selectedColourSchemeIndex = 0;
+    int selectedColorSchemeIndex = 0;
 
-    int selectedEditorColourSchemeIndex = 0;
-    int numEditorColourSchemes = 0;
+    int selectedEditorColorSchemeIndex = 0;
+    int numEditorColorSchemes = 0;
 };

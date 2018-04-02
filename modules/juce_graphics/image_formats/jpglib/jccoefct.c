@@ -105,7 +105,7 @@ start_pass_coef (j_compress_ptr cinfo, J_BUF_MODE pass_mode)
   start_iMCU_row(cinfo);
 
   switch (pass_mode) {
-  case JBUF_PASS_THRU:
+  case JBUF_PASS_THROUGH:
     if (coef->whole_image[0] != NULL)
       ERREXIT(cinfo, JERR_BAD_BUFFER_MODE);
     coef->pub.compress_data = compress_data;

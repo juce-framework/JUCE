@@ -23,9 +23,9 @@
 }
 
 //==============================================================================
-void %%content_component_class%%::initialise()
+void %%content_component_class%%::initialize()
 {
-    // Initialise GL objects for rendering here.
+    // Initialize GL objects for rendering here.
 }
 
 void %%content_component_class%%::shutdown()
@@ -36,7 +36,7 @@ void %%content_component_class%%::shutdown()
 void %%content_component_class%%::render()
 {
     // This clears the context with a black background.
-    OpenGLHelpers::clear (Colours::black);
+    OpenGLHelpers::clear (Colors::black);
 
     // Add your rendering code here...
 }

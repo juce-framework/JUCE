@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -399,7 +399,7 @@ struct MouseWheelDetails  final
         If isReversed is true, then a negative deltaY means that the wheel has been
         pushed physically upwards.
         If isReversed is false, then a negative deltaY means that the wheel has been
-        pushed physically downwards.
+        pushed physically downward.
     */
     float deltaY;
 

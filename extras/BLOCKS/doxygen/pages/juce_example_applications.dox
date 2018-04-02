@@ -15,15 +15,15 @@ A quick guide to getting up and running with JUCE can be found <a href="https://
 
 @subpage example_blocks_monitor
 
-BlocksMonitor is a simple JUCE application that shows currently connected Lightpad and Control %Block devices and visualises touches and button presses.
+BlocksMonitor is a simple JUCE application that shows currently connected Lightpad and Control %Block devices and visualizes touches and button presses.
 It also displays some basic information about the Blocks.
 
 @subpage example_blocks_drawing
 
 BlocksDrawing is a JUCE application that allows you to use your Lightpad as a drawing surface.
-You can choose from a palette of 9 base colours and paint them on the 15x15 LED grid, blending between colours using touch pressure.
+You can choose from a palette of 9 base colors and paint them on the 15x15 LED grid, blending between colors using touch pressure.
 
 @subpage example_blocks_synth
 
-BlocksSynth is a JUCE application that turns your Lightpad into a simple monophonic synthesiser capable of playing 4 different waveshapes - sine, square, sawtooth and triangle.
+BlocksSynth is a JUCE application that turns your Lightpad into a simple monophonic synthesizer capable of playing 4 different waveshapes - sine, square, sawtooth and triangle.
 */

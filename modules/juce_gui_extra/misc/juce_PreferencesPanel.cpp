@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -75,23 +75,23 @@ void PreferencesPanel::addSettingsPage (const String& title, const void* imageDa
     icon.setImage (ImageCache::getFromMemory (imageData, imageDataSize));
 
     iconOver.setImage (ImageCache::getFromMemory (imageData, imageDataSize));
-    iconOver.setOverlayColour (Colours::black.withAlpha (0.12f));
+    iconOver.setOverlayColor (Colors::black.withAlpha (0.12f));
 
     iconDown.setImage (ImageCache::getFromMemory (imageData, imageDataSize));
-    iconDown.setOverlayColour (Colours::black.withAlpha (0.25f));
+    iconDown.setOverlayColor (Colors::black.withAlpha (0.25f));
 
     addSettingsPage (title, &icon, &iconOver, &iconDown);
 }
 
 //==============================================================================
-void PreferencesPanel::showInDialogBox (const String& dialogTitle, int dialogWidth, int dialogHeight, Colour backgroundColour)
+void PreferencesPanel::showInDialogBox (const String& dialogTitle, int dialogWidth, int dialogHeight, Color backgroundColor)
 {
     setSize (dialogWidth, dialogHeight);
 
     DialogWindow::LaunchOptions o;
     o.content.setNonOwned (this);
     o.dialogTitle                   = dialogTitle;
-    o.dialogBackgroundColour        = backgroundColour;
+    o.dialogBackgroundColor        = backgroundColor;
     o.escapeKeyTriggersCloseButton  = false;
     o.useNativeTitleBar             = false;
     o.resizable                     = false;
@@ -111,7 +111,7 @@ void PreferencesPanel::resized()
 
 void PreferencesPanel::paint (Graphics& g)
 {
-    g.setColour (Colours::grey);
+    g.setColor (Colors::gray);
     g.fillRect (0, buttonSize + 2, getWidth(), 1);
 }
 

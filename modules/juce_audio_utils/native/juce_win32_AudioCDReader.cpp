@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -241,7 +241,7 @@ class CDDeviceHandle;
 class CDController
 {
 public:
-    CDController() : initialised (false) {}
+    CDController() : initialized (false) {}
     virtual ~CDController() {}
 
     virtual bool read (CDReadBuffer&) = 0;
@@ -253,7 +253,7 @@ public:
 public:
     CDDeviceHandle* deviceInfo;
     int framesToCheck, framesOverlap;
-    bool initialised;
+    bool initialized;
 
     void prepare (SRB_ExecSCSICmd& s);
     void perform (SRB_ExecSCSICmd& s);
@@ -462,7 +462,7 @@ public:
 
     void shutDown()
     {
-        if (initialised)
+        if (initialized)
         {
             BYTE bufPointer[] = { 0, 0, 0, 8, 83, 0, 0, 0, 0, 0, 8, 0 };
 
@@ -526,11 +526,11 @@ public:
         if (rb.numFrames * 2352 > rb.bufferSize)
             return false;
 
-        if (! initialised)
+        if (! initialized)
         {
-            initialised = init();
+            initialized = init();
 
-            if (! initialised)
+            if (! initialized)
                 return false;
         }
 
@@ -568,10 +568,10 @@ public:
         if (rb.numFrames * 2352 > rb.bufferSize)
             return false;
 
-        if (! initialised)
+        if (! initialized)
         {
             setPaused (false);
-            initialised = true;
+            initialized = true;
         }
 
         SRB_ExecSCSICmd s;
@@ -625,14 +625,14 @@ public:
         if (rb.numFrames * 2352 > rb.bufferSize)
             return false;
 
-        if (! initialised)
+        if (! initialized)
         {
             setPaused (true);
 
             if (deviceInfo->readType == READTYPE_READ_D4_1)
                 selectD4Mode();
 
-            initialised = true;
+            initialized = true;
         }
 
         SRB_ExecSCSICmd s;

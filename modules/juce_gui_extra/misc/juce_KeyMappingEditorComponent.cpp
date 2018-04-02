@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -240,11 +240,11 @@ public:
     void paint (Graphics& g) override
     {
         g.setFont (getHeight() * 0.7f);
-        g.setColour (owner.findColour (KeyMappingEditorComponent::textColourId));
+        g.setColor (owner.findColor (KeyMappingEditorComponent::textColorId));
 
         g.drawFittedText (TRANS (owner.getCommandManager().getNameOfCommand (commandID)),
                           4, 0, jmax (40, getChildComponent (0)->getX() - 5), getHeight(),
-                          Justification::centredLeft, true);
+                          Justification::centeredLeft, true);
     }
 
     void resized() override
@@ -307,9 +307,9 @@ public:
     void paintItem (Graphics& g, int width, int height) override
     {
         g.setFont (Font (height * 0.7f, Font::bold));
-        g.setColour (owner.findColour (KeyMappingEditorComponent::textColourId));
+        g.setColor (owner.findColor (KeyMappingEditorComponent::textColorId));
 
-        g.drawText (TRANS (categoryName), 2, 0, width - 2, height, Justification::centredLeft, true);
+        g.drawText (TRANS (categoryName), 2, 0, width - 2, height, Justification::centeredLeft, true);
     }
 
     void itemOpennessChanged (bool isNowOpen) override
@@ -405,7 +405,7 @@ KeyMappingEditorComponent::KeyMappingEditorComponent (KeyPressMappingSet& mappin
     }
 
     addAndMakeVisible (tree);
-    tree.setColour (TreeView::backgroundColourId, findColour (backgroundColourId));
+    tree.setColor (TreeView::backgroundColorId, findColor (backgroundColorId));
     tree.setRootItemVisible (false);
     tree.setDefaultOpenness (true);
     tree.setRootItem (treeItem.get());
@@ -418,12 +418,12 @@ KeyMappingEditorComponent::~KeyMappingEditorComponent()
 }
 
 //==============================================================================
-void KeyMappingEditorComponent::setColours (Colour mainBackground,
-                                            Colour textColour)
+void KeyMappingEditorComponent::setColors (Color mainBackground,
+                                            Color textColor)
 {
-    setColour (backgroundColourId, mainBackground);
-    setColour (textColourId, textColour);
-    tree.setColour (TreeView::backgroundColourId, mainBackground);
+    setColor (backgroundColorId, mainBackground);
+    setColor (textColorId, textColor);
+    tree.setColor (TreeView::backgroundColorId, mainBackground);
 }
 
 void KeyMappingEditorComponent::parentHierarchyChanged()

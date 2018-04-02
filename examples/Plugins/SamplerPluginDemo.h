@@ -64,7 +64,7 @@ namespace IDs
 
 DECLARE_ID (DATA_MODEL)
 DECLARE_ID (sampleReader)
-DECLARE_ID (centreFrequencyHz)
+DECLARE_ID (centerFrequencyHz)
 DECLARE_ID (loopMode)
 DECLARE_ID (loopPointsSeconds)
 
@@ -206,14 +206,14 @@ public:
         return loopPoints;
     }
 
-    void setCentreFrequencyInHz (double centre)
+    void setCenterFrequencyInHz (double center)
     {
-        centreFrequencyInHz = centre;
+        centerFrequencyInHz = center;
     }
 
-    double getCentreFrequencyInHz() const
+    double getCenterFrequencyInHz() const
     {
-        return centreFrequencyInHz;
+        return centerFrequencyInHz;
     }
 
     void setLoopMode (LoopMode type)
@@ -228,13 +228,13 @@ public:
 
 private:
     std::unique_ptr<Sample> sample;
-    double centreFrequencyInHz { 440.0 };
+    double centerFrequencyInHz { 440.0 };
     Range<double> loopPoints;
     LoopMode loopMode { LoopMode::none };
 };
 
 //==============================================================================
-class MPESamplerVoice  : public MPESynthesiserVoice
+class MPESamplerVoice  : public MPESynthesizerVoice
 {
 public:
     explicit MPESamplerVoice (std::shared_ptr<const MPESamplerSound> sound)
@@ -398,7 +398,7 @@ private:
                                                 double loopBegin,
                                                 double loopEnd) const
     {
-        auto nextPitchRatio = frequency / samplerSound->getCentreFrequencyInHz();
+        auto nextPitchRatio = frequency / samplerSound->getCenterFrequencyInHz();
 
         auto nextSamplePos = currentSamplePos;
         auto nextDirection = currentDirection;
@@ -416,7 +416,7 @@ private:
         }
 
         // Update current sample position, taking loop mode into account
-        // If the loop mode was changed while we were travelling backwards, deal
+        // If the loop mode was changed while we were traveling backwards, deal
         // with it gracefully.
         if (nextDirection == Direction::backward && nextSamplePos < loopBegin)
         {
@@ -919,7 +919,7 @@ public:
     public:
         virtual ~Listener() noexcept = default;
         virtual void sampleReaderChanged (std::shared_ptr<AudioFormatReaderFactory> value) {}
-        virtual void centreFrequencyHzChanged (double value) {}
+        virtual void centerFrequencyHzChanged (double value) {}
         virtual void loopModeChanged (LoopMode value) {}
         virtual void loopPointsSecondsChanged (Range<double> value) {}
     };
@@ -932,7 +932,7 @@ public:
         : audioFormatManager (&audioFormatManager),
           valueTree (vt),
           sampleReader      (valueTree, IDs::sampleReader,      nullptr),
-          centreFrequencyHz (valueTree, IDs::centreFrequencyHz, nullptr),
+          centerFrequencyHz (valueTree, IDs::centerFrequencyHz, nullptr),
           loopMode          (valueTree, IDs::loopMode,          nullptr, LoopMode::none),
           loopPointsSeconds (valueTree, IDs::loopPointsSeconds, nullptr)
     {
@@ -972,14 +972,14 @@ public:
         return 1.0;
     }
 
-    double getCentreFrequencyHz() const
+    double getCenterFrequencyHz() const
     {
-        return centreFrequencyHz;
+        return centerFrequencyHz;
     }
 
-    void setCentreFrequencyHz (double value, UndoManager* undoManager)
+    void setCenterFrequencyHz (double value, UndoManager* undoManager)
     {
-        centreFrequencyHz.setValue (Range<double> (20, 20000).clipValue (value),
+        centerFrequencyHz.setValue (Range<double> (20, 20000).clipValue (value),
                                     undoManager);
     }
 
@@ -1039,10 +1039,10 @@ private:
             sampleReader.forceUpdateOfCachedValue();
             listenerList.call ([this] (Listener& l) { l.sampleReaderChanged (sampleReader); });
         }
-        else if (property == IDs::centreFrequencyHz)
+        else if (property == IDs::centerFrequencyHz)
         {
-            centreFrequencyHz.forceUpdateOfCachedValue();
-            listenerList.call ([this] (Listener& l) { l.centreFrequencyHzChanged (centreFrequencyHz); });
+            centerFrequencyHz.forceUpdateOfCachedValue();
+            listenerList.call ([this] (Listener& l) { l.centerFrequencyHzChanged (centerFrequencyHz); });
         }
         else if (property == IDs::loopMode)
         {
@@ -1066,7 +1066,7 @@ private:
     ValueTree valueTree;
 
     CachedValue<std::shared_ptr<AudioFormatReaderFactory>> sampleReader;
-    CachedValue<double> centreFrequencyHz;
+    CachedValue<double> centerFrequencyHz;
     CachedValue<LoopMode> loopMode;
     CachedValue<Range<double>> loopPointsSeconds;
 
@@ -1075,7 +1075,7 @@ private:
 
 namespace
 {
-void initialiseComboBoxWithConsecutiveIntegers (Component& owner,
+void initializeComboBoxWithConsecutiveIntegers (Component& owner,
                                                 ComboBox& comboBox,
                                                 Label& label,
                                                 int firstValue,
@@ -1108,9 +1108,9 @@ public:
     {
         dataModel.addListener (*this);
 
-        initialiseComboBoxWithConsecutiveIntegers (*this, legacyStartChannel, legacyStartChannelLabel, 1, 16, 1);
-        initialiseComboBoxWithConsecutiveIntegers (*this, legacyEndChannel, legacyEndChannelLabel, 1, 16, 16);
-        initialiseComboBoxWithConsecutiveIntegers (*this, legacyPitchbendRange, legacyPitchbendRangeLabel, 0, 96, 2);
+        initializeComboBoxWithConsecutiveIntegers (*this, legacyStartChannel, legacyStartChannelLabel, 1, 16, 1);
+        initializeComboBoxWithConsecutiveIntegers (*this, legacyEndChannel, legacyEndChannelLabel, 1, 16, 16);
+        initializeComboBoxWithConsecutiveIntegers (*this, legacyPitchbendRange, legacyPitchbendRangeLabel, 0, 96, 2);
 
         legacyStartChannel.onChange = [this]
         {
@@ -1233,9 +1233,9 @@ public:
         addAndMakeVisible (isLowerZoneButton);
         isLowerZoneButton.setToggleState (true, NotificationType::dontSendNotification);
 
-        initialiseComboBoxWithConsecutiveIntegers (*this, memberChannels, memberChannelsLabel, 0, 16, 15);
-        initialiseComboBoxWithConsecutiveIntegers (*this, masterPitchbendRange, masterPitchbendRangeLabel, 0, 96, 2);
-        initialiseComboBoxWithConsecutiveIntegers (*this, notePitchbendRange, notePitchbendRangeLabel, 0, 96, 48);
+        initializeComboBoxWithConsecutiveIntegers (*this, memberChannels, memberChannelsLabel, 0, 16, 15);
+        initializeComboBoxWithConsecutiveIntegers (*this, masterPitchbendRange, masterPitchbendRangeLabel, 0, 96, 2);
+        initializeComboBoxWithConsecutiveIntegers (*this, notePitchbendRange, notePitchbendRangeLabel, 0, 96, 48);
 
         for (auto& button : { &setZoneButton, &clearAllZonesButton })
             addAndMakeVisible (button);
@@ -1331,7 +1331,7 @@ public:
         addAndMakeVisible (newSettings);
         addChildComponent (legacySettings);
 
-        initialiseComboBoxWithConsecutiveIntegers (*this, numberOfVoices, numberOfVoicesLabel, 1, 20, 15);
+        initializeComboBoxWithConsecutiveIntegers (*this, numberOfVoices, numberOfVoicesLabel, 1, 20, 15);
         numberOfVoices.onChange = [this]
         {
             undoManager->beginNewTransaction();
@@ -1449,12 +1449,12 @@ private:
 
     void paint (Graphics& g) override
     {
-        g.setColour (Colours::deepskyblue);
+        g.setColor (Colors::deepskyblue);
         g.fillPath (path);
 
         auto height = 20;
-        g.setColour (Colours::white);
-        g.drawText (text, getLocalBounds().removeFromBottom (height), Justification::centred);
+        g.setColor (Colors::white);
+        g.drawText (text, getLocalBounds().removeFromBottom (height), Justification::centered);
     }
 
     bool hitTest (int x, int y) override
@@ -1503,10 +1503,10 @@ private:
         auto maxDivisions     = getWidth() / minDivisionWidth;
 
         auto lookFeel = dynamic_cast<LookAndFeel_V4*> (&getLookAndFeel());
-        auto bg = lookFeel->getCurrentColourScheme()
-                           .getUIColour (LookAndFeel_V4::ColourScheme::UIColour::widgetBackground);
+        auto bg = lookFeel->getCurrentColorScheme()
+                           .getUIColor (LookAndFeel_V4::ColorScheme::UIColor::widgetBackground);
 
-        g.setGradientFill (ColourGradient (bg.brighter(),
+        g.setGradientFill (ColorGradient (bg.brighter(),
                                            0,
                                            0,
                                            bg.darker(),
@@ -1515,11 +1515,11 @@ private:
                                            false));
 
         g.fillAll();
-        g.setColour (bg.brighter());
+        g.setColor (bg.brighter());
         g.drawHorizontalLine (0, 0, getWidth());
-        g.setColour (bg.darker());
+        g.setColor (bg.darker());
         g.drawHorizontalLine (1, 0, getWidth());
-        g.setColour (Colours::lightgrey);
+        g.setColor (Colors::lightgray);
 
         auto minLog = std::ceil (std::log10 (visibleRange.getVisibleRange().getLength() / maxDivisions));
         auto precision = 2 + std::abs (minLog);
@@ -1538,7 +1538,7 @@ private:
             g.drawText (out_stream.str(),
                         Rectangle<int> (Point<int> (xPos + 3, 0),
                                         Point<int> (xPos + minDivisionWidth, getHeight())),
-                        Justification::centredLeft,
+                        Justification::centeredLeft,
                         false);
 
             g.drawVerticalLine (xPos, 2, getHeight());
@@ -1696,7 +1696,7 @@ public:
 private:
     void paint (Graphics& g) override
     {
-        g.setColour (Colours::red);
+        g.setColor (Colors::red);
 
         for (auto position : provider())
         {
@@ -1747,13 +1747,13 @@ private:
     void paint (Graphics& g) override
     {
         // Draw the waveforms
-        g.fillAll (Colours::black);
+        g.fillAll (Colors::black);
         auto numChannels = thumbnail.getNumChannels();
 
         if (numChannels == 0)
         {
-            g.setColour (Colours::white);
-            g.drawFittedText ("No File Loaded", getLocalBounds(), Justification::centred, 1.0f);
+            g.setColor (Colors::white);
+            g.drawFittedText ("No File Loaded", getLocalBounds(), Justification::centered, 1.0f);
             return;
         }
 
@@ -1791,9 +1791,9 @@ private:
 
     void drawChannel (Graphics& g, int channel, Rectangle<int> bounds)
     {
-        g.setGradientFill (ColourGradient (Colours::lightblue,
+        g.setGradientFill (ColorGradient (Colors::lightblue,
                                            bounds.getTopLeft().toFloat(),
-                                           Colours::darkgrey,
+                                           Colors::darkgray,
                                            bounds.getBottomLeft().toFloat(),
                                            false));
         thumbnail.drawChannel (g,
@@ -1899,17 +1899,17 @@ public:
                                      setReader);
         };
 
-        addAndMakeVisible (centreFrequency);
-        centreFrequency.onValueChange = [this]
+        addAndMakeVisible (centerFrequency);
+        centerFrequency.onValueChange = [this]
         {
             undoManager->beginNewTransaction();
-            dataModel.setCentreFrequencyHz (centreFrequency.getValue(),
-                                            centreFrequency.isMouseButtonDown() ? nullptr : undoManager);
+            dataModel.setCenterFrequencyHz (centerFrequency.getValue(),
+                                            centerFrequency.isMouseButtonDown() ? nullptr : undoManager);
         };
 
-        centreFrequency.setRange (20, 20000, 1);
-        centreFrequency.setSliderStyle (Slider::SliderStyle::IncDecButtons);
-        centreFrequency.setIncDecButtonsMode (Slider::IncDecButtonMode::incDecButtonsDraggable_Vertical);
+        centerFrequency.setRange (20, 20000, 1);
+        centerFrequency.setSliderStyle (Slider::SliderStyle::IncDecButtons);
+        centerFrequency.setIncDecButtonsMode (Slider::IncDecButtonMode::incDecButtonsDraggable_Vertical);
 
         auto radioGroupId = 1;
 
@@ -1947,7 +1947,7 @@ public:
             }
         };
 
-        addAndMakeVisible (centreFrequencyLabel);
+        addAndMakeVisible (centerFrequencyLabel);
         addAndMakeVisible (loopKindLabel);
     }
 
@@ -1959,8 +1959,8 @@ private:
         auto topBar = bounds.removeFromTop (50);
         auto padding = 4;
         loadNewSampleButton .setBounds (topBar.removeFromRight (100).reduced (padding));
-        centreFrequencyLabel.setBounds (topBar.removeFromLeft  (100).reduced (padding));
-        centreFrequency     .setBounds (topBar.removeFromLeft  (100).reduced (padding));
+        centerFrequencyLabel.setBounds (topBar.removeFromLeft  (100).reduced (padding));
+        centerFrequency     .setBounds (topBar.removeFromLeft  (100).reduced (padding));
 
         auto bottomBar = bounds.removeFromBottom (50);
         loopKindLabel   .setBounds (bottomBar.removeFromLeft (100).reduced (padding));
@@ -1987,21 +1987,21 @@ private:
         }
     }
 
-    void centreFrequencyHzChanged (double value) override
+    void centerFrequencyHzChanged (double value) override
     {
-        centreFrequency.setValue (value, dontSendNotification);
+        centerFrequency.setValue (value, dontSendNotification);
     }
 
     DataModel dataModel;
     WaveformEditor waveformEditor;
     TextButton loadNewSampleButton { "Load New Sample" };
-    Slider centreFrequency;
+    Slider centerFrequency;
 
     TextButton loopKindNone        { "None" },
                loopKindForward     { "Forward" },
                loopKindPingpong    { "Ping Pong" };
 
-    Label centreFrequencyLabel     { {}, "Sample Centre Freq / Hz" },
+    Label centerFrequencyLabel     { {}, "Sample Center Freq / Hz" },
           loopKindLabel            { {}, "Looping Mode" };
 
 
@@ -2023,7 +2023,7 @@ struct ProcessorState
     MPEZoneLayout mpeZoneLayout;
     std::unique_ptr<AudioFormatReaderFactory> readerFactory;
     Range<double> loopPointsSeconds;
-    double centreFrequencyHz;
+    double centerFrequencyHz;
     LoopMode loopMode;
 };
 
@@ -2082,12 +2082,12 @@ public:
 
         // Start with the max number of voices
         for (auto i = 0; i != maxVoices; ++i)
-            synthesiser.addVoice (new MPESamplerVoice (sound));
+            synthesizer.addVoice (new MPESamplerVoice (sound));
     }
 
     void prepareToPlay (double sampleRate, int samplesPerBlock) override
     {
-        synthesiser.setCurrentPlaybackSampleRate (sampleRate);
+        synthesizer.setCurrentPlaybackSampleRate (sampleRate);
     }
 
     void releaseResources() override {}
@@ -2107,17 +2107,17 @@ public:
         std::lock_guard<std::mutex> lock (commandQueueMutex);
 
         ProcessorState state;
-        state.synthVoices          = synthesiser.getNumVoices();
-        state.legacyModeEnabled    = synthesiser.isLegacyModeEnabled();
-        state.legacyChannels       = synthesiser.getLegacyModeChannelRange();
-        state.legacyPitchbendRange = synthesiser.getLegacyModePitchbendRange();
-        state.voiceStealingEnabled = synthesiser.isVoiceStealingEnabled();
-        state.mpeZoneLayout        = synthesiser.getZoneLayout();
+        state.synthVoices          = synthesizer.getNumVoices();
+        state.legacyModeEnabled    = synthesizer.isLegacyModeEnabled();
+        state.legacyChannels       = synthesizer.getLegacyModeChannelRange();
+        state.legacyPitchbendRange = synthesizer.getLegacyModePitchbendRange();
+        state.voiceStealingEnabled = synthesizer.isVoiceStealingEnabled();
+        state.mpeZoneLayout        = synthesizer.getZoneLayout();
         state.readerFactory        = readerFactory == nullptr ? nullptr : readerFactory->clone();
 
         auto sound = samplerSound.load();
         state.loopPointsSeconds = sound->getLoopPointsInSeconds();
-        state.centreFrequencyHz = sound->getCentreFrequencyInHz();
+        state.centerFrequencyHz = sound->getCenterFrequencyInHz();
         state.loopMode          = sound->getLoopMode();
 
         return new SamplerAudioProcessorEditor (*this, std::move (state));
@@ -2168,20 +2168,20 @@ public:
             }
         }
 
-        synthesiser.renderNextBlock (buffer, midiMessages, 0, buffer.getNumSamples());
+        synthesizer.renderNextBlock (buffer, midiMessages, 0, buffer.getNumSamples());
 
         auto loadedSamplerSound = samplerSound.load();
 
         if (loadedSamplerSound->getSample() == nullptr)
             return;
 
-        auto numVoices = synthesiser.getNumVoices();
+        auto numVoices = synthesizer.getNumVoices();
 
         // Update the current playback positions
         for (auto i = 0; i != maxVoices; ++i)
         {
             MPESamplerVoice* voicePtr = nullptr;
-            playbackPositions[i] = (i < numVoices && (voicePtr = dynamic_cast<MPESamplerVoice*> (synthesiser.getVoice (i))))
+            playbackPositions[i] = (i < numVoices && (voicePtr = dynamic_cast<MPESamplerVoice*> (synthesizer.getVoice (i))))
                                     ? voicePtr->getCurrentSamplePosition() / loadedSamplerSound->getSample()->getSampleRate()
                                     : 0;
         }
@@ -2208,12 +2208,12 @@ public:
                 proc.readerFactory = move (readerFactory);
                 auto samplerSound = proc.samplerSound.load();
                 samplerSound->setSample (move (sample));
-                auto numberOfVoices = proc.synthesiser.getNumVoices();
-                proc.synthesiser.clearVoices();
+                auto numberOfVoices = proc.synthesizer.getNumVoices();
+                proc.synthesizer.clearVoices();
 
-                for (auto it = begin (newVoices); proc.synthesiser.getNumVoices() < numberOfVoices; ++it)
+                for (auto it = begin (newVoices); proc.synthesizer.getNumVoices() < numberOfVoices; ++it)
                 {
-                    proc.synthesiser.addVoice (it->release());
+                    proc.synthesizer.addVoice (it->release());
                 }
             }
 
@@ -2247,13 +2247,13 @@ public:
         }
     }
 
-    void setCentreFrequency (double centreFrequency)
+    void setCenterFrequency (double centerFrequency)
     {
-        pushCommand ([centreFrequency] (SamplerAudioProcessor& proc)
+        pushCommand ([centerFrequency] (SamplerAudioProcessor& proc)
                      {
                          auto loaded = proc.samplerSound.load();
                          if (loaded != nullptr)
-                             loaded->setCentreFrequencyInHz (centreFrequency);
+                             loaded->setCenterFrequencyInHz (centerFrequency);
                      });
     }
 
@@ -2285,7 +2285,7 @@ public:
                          // ensuring that the layout doesn't get copied or destroyed on the
                          // audio thread. If the audio glitches while updating midi settings
                          // it doesn't matter too much.
-                         proc.synthesiser.setZoneLayout (layout);
+                         proc.synthesizer.setZoneLayout (layout);
                      });
     }
 
@@ -2293,7 +2293,7 @@ public:
     {
         pushCommand ([pitchbendRange, channelRange] (SamplerAudioProcessor& proc)
                      {
-                         proc.synthesiser.enableLegacyMode (pitchbendRange, channelRange);
+                         proc.synthesizer.enableLegacyMode (pitchbendRange, channelRange);
                      });
     }
 
@@ -2301,7 +2301,7 @@ public:
     {
         pushCommand ([voiceStealingEnabled] (SamplerAudioProcessor& proc)
                      {
-                         proc.synthesiser.setVoiceStealingEnabled (voiceStealingEnabled);
+                         proc.synthesizer.setVoiceStealingEnabled (voiceStealingEnabled);
                      });
     }
 
@@ -2321,13 +2321,13 @@ public:
 
             void operator() (SamplerAudioProcessor& proc)
             {
-                if (newVoices.size() < proc.synthesiser.getNumVoices())
-                    proc.synthesiser.reduceNumVoices (int (newVoices.size()));
+                if (newVoices.size() < proc.synthesizer.getNumVoices())
+                    proc.synthesizer.reduceNumVoices (int (newVoices.size()));
                 else
                 {
-                    for (auto it = begin (newVoices); proc.synthesiser.getNumVoices() < newVoices.size(); ++it)
+                    for (auto it = begin (newVoices); proc.synthesizer.getNumVoices() < newVoices.size(); ++it)
                     {
-                        proc.synthesiser.addVoice (it->release());
+                        proc.synthesizer.addVoice (it->release());
                     }
                 }
             }
@@ -2353,7 +2353,7 @@ public:
     // getPlaybackPosiiton(9), there's a chance the audio engine will have
     // been updated to remove some voices in the meantime, so the returned
     // value won't correspond to an existing voice.
-    int getNumVoices() const                    { return synthesiser.getNumVoices(); }
+    int getNumVoices() const                    { return synthesizer.getNumVoices(); }
     float getPlaybackPosition (int voice) const { return playbackPositions.at (voice); }
 
 private:
@@ -2389,8 +2389,8 @@ private:
             addAndMakeVisible (tabbedComponent);
 
             auto lookFeel = dynamic_cast<LookAndFeel_V4*> (&getLookAndFeel());
-            auto bg = lookFeel->getCurrentColourScheme()
-                               .getUIColour (LookAndFeel_V4::ColourScheme::UIColour::widgetBackground);
+            auto bg = lookFeel->getCurrentColorScheme()
+                               .getUIColor (LookAndFeel_V4::ColorScheme::UIColor::widgetBackground);
 
             tabbedComponent.addTab ("Sample Editor", bg, &mainSamplerView, false);
             tabbedComponent.addTab ("MPE Settings", bg, &settingsComponent, false);
@@ -2405,7 +2405,7 @@ private:
 
             dataModel.setSampleReader (move (state.readerFactory),    nullptr);
             dataModel.setLoopPointsSeconds  (state.loopPointsSeconds, nullptr);
-            dataModel.setCentreFrequencyHz  (state.centreFrequencyHz, nullptr);
+            dataModel.setCenterFrequencyHz  (state.centerFrequencyHz, nullptr);
             dataModel.setLoopMode           (state.loopMode,          nullptr);
 
             // Make sure that before the constructor has finished, you've set the
@@ -2460,9 +2460,9 @@ private:
                                  dataModel.getAudioFormatManager());
         }
 
-        void centreFrequencyHzChanged (double value) override
+        void centerFrequencyHzChanged (double value) override
         {
-            processor.setCentreFrequency (value);
+            processor.setCenterFrequency (value);
         }
 
         void loopPointsSecondsChanged (Range<double> value) override
@@ -2615,7 +2615,7 @@ private:
     MemoryBlock mb;
     std::unique_ptr<AudioFormatReaderFactory> readerFactory;
     AtomicSharedPtr<MPESamplerSound> samplerSound { std::make_shared<MPESamplerSound>() };
-    MPESynthesiser synthesiser;
+    MPESynthesizer synthesizer;
 
     // This mutex is used to ensure we don't modify the processor state during
     // a call to createEditor, which would cause the UI to become desynched
@@ -2624,7 +2624,7 @@ private:
 
     static const int maxVoices { 20 };
 
-    // This is used for visualising the current playback position of each voice.
+    // This is used for visualizing the current playback position of each voice.
     std::array<std::atomic<float>, maxVoices> playbackPositions;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SamplerAudioProcessor)

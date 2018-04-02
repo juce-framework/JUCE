@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -30,7 +30,7 @@ namespace juce
 //==============================================================================
 /**
     A powerful tree structure that can be used to hold free-form data, and which can
-    handle its own undo and redo behaviour.
+    handle its own undo and redo behavior.
 
     A ValueTree contains a list of named properties as var objects, and also holds
     any number of sub-trees.
@@ -43,8 +43,8 @@ namespace juce
     Each ValueTree has a type name, in much the same way as an XmlElement has a tag name,
     and much of the structure of a ValueTree is similar to an XmlElement tree.
     You can convert a ValueTree to and from an XmlElement, and as long as the XML doesn't
-    contain text elements, the conversion works well and makes a good serialisation
-    format. They can also be serialised to a binary format, which is very fast and compact.
+    contain text elements, the conversion works well and makes a good serialization
+    format. They can also be serialized to a binary format, which is very fast and compact.
 
     All the methods that change data take an optional UndoManager, which will be used
     to track any changes to the object. For this to work, you have to be careful to

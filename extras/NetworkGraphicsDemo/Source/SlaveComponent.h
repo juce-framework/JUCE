@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -108,13 +108,13 @@ private:
         if (message.isEmpty() || ! message[0].isBlob())
             return;
 
-        if (packetiser.appendIncomingBlock (message[0].getBlob()))
+        if (packetizer.appendIncomingBlock (message[0].getBlob()))
         {
             const ScopedLock sl (canvasLock);
 
             MemoryBlock newCanvasData;
 
-            if (packetiser.reassemble (newCanvasData))
+            if (packetizer.reassemble (newCanvasData))
             {
                 MemoryInputStream i (newCanvasData.getData(), newCanvasData.getSize(), false);
                 canvas2.load (i);
@@ -126,7 +126,7 @@ private:
     //==============================================================================
     String getMachineInfoToDisplay() const
     {
-        //auto display = Desktop::getInstance().getDisplays().getDisplayContaining (getScreenBounds().getCentre());
+        //auto display = Desktop::getInstance().getDisplays().getDisplayContaining (getScreenBounds().getCenter());
         return getOSName();//     + "   " + String (display.dpi) + "   "  + String (display.scale);
     }
 
@@ -147,32 +147,32 @@ private:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (canvas.backgroundColour);
+        g.fillAll (canvas.backgroundColor);
 
         auto clientArea = getAreaInGlobalSpace();
 
         if (clientArea.isEmpty())
         {
-            g.setColour (Colours::red.withAlpha (0.5f));
+            g.setColor (Colors::red.withAlpha (0.5f));
             g.setFont (20.0f);
-            g.drawText ("Not Connected", getLocalBounds(), Justification::centred, false);
+            g.drawText ("Not Connected", getLocalBounds(), Justification::centered, false);
             return;
         }
 
         canvas.draw (g, getLocalBounds().toFloat(), clientArea);
 
         g.setFont (Font (34.0f));
-        g.setColour (Colours::white.withAlpha (0.6f));
+        g.setColor (Colors::white.withAlpha (0.6f));
 
         g.drawText (getMachineInfoToDisplay(),
                     getLocalBounds().reduced (10).removeFromBottom (20),
-                    Justification::centredRight, true);
+                    Justification::centeredRight, true);
 
         if (error.isNotEmpty())
         {
-            g.setColour (Colours::red);
+            g.setColor (Colors::red);
             g.drawText (error, getLocalBounds().reduced (10).removeFromBottom (80),
-                        Justification::centredRight, true);
+                        Justification::centeredRight, true);
         }
     }
 
@@ -181,8 +181,8 @@ private:
         if (auto client = canvas.findClient (clientName))
         {
             auto screenBounds = getScreenBounds();
-            auto display = Desktop::getInstance().getDisplays().getDisplayContaining (screenBounds.getCentre());
-            return ((screenBounds - display.userArea.getCentre()).toFloat() / (client->scaleFactor * display.dpi / display.scale)) + client->centre;
+            auto display = Desktop::getInstance().getDisplays().getDisplayContaining (screenBounds.getCenter());
+            return ((screenBounds - display.userArea.getCenter()).toFloat() / (client->scaleFactor * display.dpi / display.scale)) + client->center;
         }
 
         return {};
@@ -192,8 +192,8 @@ private:
     {
         if (auto client = canvas.findClient (clientName))
         {
-            auto display = Desktop::getInstance().getDisplays().getDisplayContaining (getScreenBounds().getCentre());
-            return (display.userArea.toFloat() / (client->scaleFactor * display.dpi / display.scale)).withCentre (client->centre);
+            auto display = Desktop::getInstance().getDisplays().getDisplayContaining (getScreenBounds().getCenter());
+            return (display.userArea.toFloat() / (client->scaleFactor * display.dpi / display.scale)).withCenter (client->center);
         }
 
         return {};
@@ -217,7 +217,7 @@ private:
     String clientName, error;
 
     CriticalSection canvasLock;
-    BlockPacketiser packetiser;
+    BlockPacketizer packetizer;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SlaveCanvasComponent)
 };

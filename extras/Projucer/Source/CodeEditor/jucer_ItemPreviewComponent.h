@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -39,7 +39,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (findColour (backgroundColourId));
+        g.fillAll (findColor (backgroundColorId));
 
         if (drawable != nullptr)
         {
@@ -53,21 +53,21 @@ public:
                     contentBounds = r;
             }
 
-            auto area = RectanglePlacement (RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize)
+            auto area = RectanglePlacement (RectanglePlacement::centered | RectanglePlacement::onlyReduceInSize)
                             .appliedTo (contentBounds, Rectangle<float> (4.0f, 22.0f, getWidth() - 8.0f, getHeight() - 26.0f));
 
             Path p;
             p.addRectangle (area);
-            DropShadow (Colours::black.withAlpha (0.5f), 6, Point<int> (0, 1)).drawForPath (g, p);
+            DropShadow (Colors::black.withAlpha (0.5f), 6, Point<int> (0, 1)).drawForPath (g, p);
 
-            g.fillCheckerBoard (area, 24.0f, 24.0f, Colour (0xffffffff), Colour (0xffeeeeee));
+            g.fillCheckerBoard (area, 24.0f, 24.0f, Color (0xffffffff), Color (0xffeeeeee));
 
             drawable->draw (g, 1.0f, RectanglePlacement (RectanglePlacement::stretchToFit)
                                         .getTransformToFit (contentBounds, area.toFloat()));
         }
 
         g.setFont (Font (14.0f, Font::bold));
-        g.setColour (findColour (defaultTextColourId));
+        g.setColor (findColor (defaultTextColorId));
         g.drawMultiLineText (facts.joinIntoString ("\n"), 10, 15, getWidth() - 16);
     }
 

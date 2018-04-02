@@ -53,10 +53,10 @@ enum KeyPressCommandIDs
     buttonMoveRight,
     buttonMoveDown,
     buttonMoveLeft,
-    nextButtonColour,
-    previousButtonColour,
-    nextBackgroundColour,
-    previousBackgroundColour
+    nextButtonColor,
+    previousButtonColor,
+    nextBackgroundColor,
+    previousBackgroundColor
 };
 
 //==============================================================================
@@ -70,9 +70,9 @@ class KeyPressTarget : public Component,
 public:
     KeyPressTarget()
     {
-        Array<Colour> coloursToUse { Colours::darkblue, Colours::darkgrey, Colours::red,
-                                     Colours::green, Colours::blue, Colours::hotpink };
-        colours.addArray (coloursToUse);
+        Array<Color> colorsToUse { Colors::darkblue, Colors::darkgray, Colors::red,
+                                     Colors::green, Colors::blue, Colors::hotpink };
+        colors.addArray (colorsToUse);
 
         addAndMakeVisible (button);
     }
@@ -86,8 +86,8 @@ public:
         if (buttonX < -150 || buttonX > bounds.getWidth()
             || buttonY < -30 || buttonY > bounds.getHeight())
         {
-            buttonX = bounds.getCentreX() - 75;
-            buttonY = bounds.getCentreY() - 15;
+            buttonX = bounds.getCenterX() - 75;
+            buttonY = bounds.getCenterY() - 15;
         }
 
         button.setBounds (buttonX, buttonY, 150, 30);
@@ -95,7 +95,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (colours.getUnchecked (backgroundColourIndex));
+        g.fillAll (colors.getUnchecked (backgroundColorIndex));
     }
 
     //==============================================================================
@@ -106,8 +106,8 @@ public:
     {
         Array<CommandID> ids { KeyPressCommandIDs::buttonMoveUp, KeyPressCommandIDs::buttonMoveRight,
                                KeyPressCommandIDs::buttonMoveDown, KeyPressCommandIDs::buttonMoveLeft,
-                               KeyPressCommandIDs::nextButtonColour, KeyPressCommandIDs::previousButtonColour,
-                               KeyPressCommandIDs::nextBackgroundColour, KeyPressCommandIDs::previousBackgroundColour };
+                               KeyPressCommandIDs::nextButtonColor, KeyPressCommandIDs::previousButtonColor,
+                               KeyPressCommandIDs::nextBackgroundColor, KeyPressCommandIDs::previousBackgroundColor };
 
         commands.addArray (ids);
     }
@@ -132,20 +132,20 @@ public:
                 result.setInfo ("Move left", "Move the button left", "Button", 0);
                 result.addDefaultKeypress (KeyPress::leftKey, 0);
                 break;
-            case KeyPressCommandIDs::nextButtonColour:
-                result.setInfo ("Next colour", "Change the colour of the button to the next in the list", "Button", 0);
+            case KeyPressCommandIDs::nextButtonColor:
+                result.setInfo ("Next color", "Change the color of the button to the next in the list", "Button", 0);
                 result.addDefaultKeypress (KeyPress::rightKey, ModifierKeys::shiftModifier);
                 break;
-            case KeyPressCommandIDs::previousButtonColour:
-                result.setInfo ("Previous colour", "Change the colour of the button to the previous in the list", "Button", 0);
+            case KeyPressCommandIDs::previousButtonColor:
+                result.setInfo ("Previous color", "Change the color of the button to the previous in the list", "Button", 0);
                 result.addDefaultKeypress (KeyPress::leftKey, ModifierKeys::shiftModifier);
                 break;
-            case KeyPressCommandIDs::nextBackgroundColour:
-                result.setInfo ("Next colour", "Change the colour of the background to the next in the list", "Other", 0);
+            case KeyPressCommandIDs::nextBackgroundColor:
+                result.setInfo ("Next color", "Change the color of the background to the next in the list", "Other", 0);
                 result.addDefaultKeypress (KeyPress::rightKey, ModifierKeys::commandModifier);
                 break;
-            case KeyPressCommandIDs::previousBackgroundColour:
-                result.setInfo ("Previous colour", "Change the colour of the background to the previous in the list", "Other", 0);
+            case KeyPressCommandIDs::previousBackgroundColor:
+                result.setInfo ("Previous color", "Change the color of the background to the previous in the list", "Other", 0);
                 result.addDefaultKeypress (KeyPress::leftKey, ModifierKeys::commandModifier);
                 break;
             default:
@@ -173,24 +173,24 @@ public:
                 buttonX -= 5;
                 resized();
                 break;
-            case KeyPressCommandIDs::nextButtonColour:
-                ++buttonColourIndex %= colours.size();
-                button.setColour (TextButton::buttonColourId, colours.getUnchecked (buttonColourIndex));
+            case KeyPressCommandIDs::nextButtonColor:
+                ++buttonColorIndex %= colors.size();
+                button.setColor (TextButton::buttonColorId, colors.getUnchecked (buttonColorIndex));
                 break;
-            case KeyPressCommandIDs::previousButtonColour:
-                --buttonColourIndex;
-                if (buttonColourIndex < 0)
-                    buttonColourIndex = colours.size() - 1;
-                button.setColour (TextButton::buttonColourId, colours.getUnchecked (buttonColourIndex));
+            case KeyPressCommandIDs::previousButtonColor:
+                --buttonColorIndex;
+                if (buttonColorIndex < 0)
+                    buttonColorIndex = colors.size() - 1;
+                button.setColor (TextButton::buttonColorId, colors.getUnchecked (buttonColorIndex));
                 break;
-            case KeyPressCommandIDs::nextBackgroundColour:
-                ++backgroundColourIndex %= colours.size();
+            case KeyPressCommandIDs::nextBackgroundColor:
+                ++backgroundColorIndex %= colors.size();
                 repaint();
                 break;
-            case KeyPressCommandIDs::previousBackgroundColour:
-                --backgroundColourIndex;
-                if (backgroundColourIndex < 0)
-                    backgroundColourIndex = colours.size() - 1;
+            case KeyPressCommandIDs::previousBackgroundColor:
+                --backgroundColorIndex;
+                if (backgroundColorIndex < 0)
+                    backgroundColorIndex = colors.size() - 1;
                 repaint();
                 break;
             default:
@@ -204,10 +204,10 @@ private:
     TextButton button;
     int buttonX = -200, buttonY = -200;
 
-    Array<Colour> colours;
+    Array<Color> colors;
 
-    int buttonColourIndex     = 0;
-    int backgroundColourIndex = 1;
+    int buttonColorIndex     = 0;
+    int backgroundColorIndex = 1;
 };
 
 //==============================================================================
@@ -234,8 +234,8 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground,
-                                           Colour::greyLevel (0.93f)));
+        g.fillAll (getUIColorIfAvailable (LookAndFeel_V4::ColorScheme::UIColor::windowBackground,
+                                           Color::grayLevel (0.93f)));
     }
 
     void resized() override
@@ -256,8 +256,8 @@ private:
     {
         auto* lf = &LookAndFeel::getDefaultLookAndFeel();
 
-        keyMappingEditor.setColours (lf->findColour (KeyMappingEditorComponent::backgroundColourId),
-                                     lf->findColour (KeyMappingEditorComponent::textColourId));
+        keyMappingEditor.setColors (lf->findColor (KeyMappingEditorComponent::backgroundColorId),
+                                     lf->findColor (KeyMappingEditorComponent::textColorId));
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KeyMappingsDemo)

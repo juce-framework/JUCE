@@ -407,8 +407,8 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
 #endif
 
 //==============================================================================
-void initialiseNSApplication();
-void initialiseNSApplication()
+void initializeNSApplication();
+void initializeNSApplication()
 {
     JUCE_AUTORELEASEPOOL
     {
@@ -418,7 +418,7 @@ void initialiseNSApplication()
 
 static AppDelegate* appDelegate = nullptr;
 
-void MessageManager::doPlatformSpecificInitialisation()
+void MessageManager::doPlatformSpecificInitialization()
 {
     if (appDelegate == nil)
         appDelegate = new AppDelegate();

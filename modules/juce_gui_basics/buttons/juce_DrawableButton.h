@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -44,13 +44,13 @@ public:
     //==============================================================================
     enum ButtonStyle
     {
-        ImageFitted,                /**< The button will just display the images, but will resize and centre them to fit inside it. */
+        ImageFitted,                /**< The button will just display the images, but will resize and center them to fit inside it. */
         ImageRaw,                   /**< The button will just display the images in their normal size and position.
                                          This leaves it up to the caller to make sure the images are the correct size and position for the button. */
         ImageAboveTextLabel,        /**< Draws the button as a text label across the bottom with the image resized and scaled to fit above it. */
         ImageOnButtonBackground,    /**< Draws the button as a standard rounded-rectangle button with the image on top.
-                                         Note that if you use this style, the colour IDs that control the button colour are
-                                         TextButton::buttonColourId and TextButton::buttonOnColourId. */
+                                         Note that if you use this style, the color IDs that control the button color are
+                                         TextButton::buttonColorId and TextButton::buttonOnColorId. */
         ImageStretched              /**< Fills the button with a stretched version of the image. */
     };
 
@@ -142,29 +142,29 @@ public:
     virtual Rectangle<float> getImageBounds() const;
 
     //==============================================================================
-    /** A set of colour IDs to use to change the colour of various aspects of the link.
+    /** A set of color IDs to use to change the color of various aspects of the link.
 
-        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        These constants can be used either via the Component::setColor(), or LookAndFeel::setColor()
         methods.
 
-        Note that when the ImageOnButtonBackground style is used, the colour IDs that control
-        the button colour are TextButton::buttonColourId and TextButton::buttonOnColourId.
+        Note that when the ImageOnButtonBackground style is used, the color IDs that control
+        the button color are TextButton::buttonColorId and TextButton::buttonOnColorId.
 
-        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+        @see Component::setColor, Component::findColor, LookAndFeel::setColor, LookAndFeel::findColor
     */
-    enum ColourIds
+    enum ColorIds
     {
-        textColourId             = 0x1004010,  /**< The colour to use for the button's text label. */
-        textColourOnId           = 0x1004013,  /**< The colour to use for the button's text when the button's toggle state is "on". */
+        textColorId             = 0x1004010,  /**< The color to use for the button's text label. */
+        textColorOnId           = 0x1004013,  /**< The color to use for the button's text when the button's toggle state is "on". */
 
-        backgroundColourId       = 0x1004011,  /**< The colour used to fill the button's background (when
+        backgroundColorId       = 0x1004011,  /**< The color used to fill the button's background (when
                                                     the button is toggled 'off'). Note that if you use the
-                                                    ImageOnButtonBackground style, you should use TextButton::buttonColourId
-                                                    to change the button's colour. */
-        backgroundOnColourId     = 0x1004012,  /**< The colour used to fill the button's background (when
+                                                    ImageOnButtonBackground style, you should use TextButton::buttonColorId
+                                                    to change the button's color. */
+        backgroundOnColorId     = 0x1004012,  /**< The color used to fill the button's background (when
                                                     the button is toggled 'on'). Note that if you use the
-                                                    ImageOnButtonBackground style, you should use TextButton::buttonOnColourId
-                                                    to change the button's colour. */
+                                                    ImageOnButtonBackground style, you should use TextButton::buttonOnColorId
+                                                    to change the button's color. */
     };
 
     //==============================================================================
@@ -177,7 +177,7 @@ public:
     /** @internal */
     void enablementChanged() override;
     /** @internal */
-    void colourChanged() override;
+    void colorChanged() override;
 
 private:
     //==============================================================================

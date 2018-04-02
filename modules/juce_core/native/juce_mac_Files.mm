@@ -362,7 +362,7 @@ public:
                 if (file == nil)
                     return false;
 
-                [enumerator skipDescendents];
+                [enumerator skipDescendants];
                 filenameFound = nsStringToJuce (file).convertToPrecomposedUnicode();
 
                 if (wildcardUTF8 == nullptr)

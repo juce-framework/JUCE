@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -34,7 +34,7 @@ public:
     ToggleButtonHandler()
         : ButtonHandler ("Toggle Button", "ToggleButton", typeid (ToggleButton), 150, 24)
     {
-        registerColour (ToggleButton::textColourId, "text colour", "txtcol");
+        registerColor (ToggleButton::textColorId, "text color", "txtcol");
     }
 
     Component* createNewComponent (JucerDocument*) override
@@ -53,7 +53,7 @@ public:
         if (auto* tb = dynamic_cast<ToggleButton*> (component))
             props.add (new ToggleButtonStateProperty (tb, document));
 
-        addColourProperties (component, document, props);
+        addColorProperties (component, document, props);
     }
 
     XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout) override
@@ -88,7 +88,7 @@ public:
         if (tb->getToggleState())
             s << memberVariableName << "->setToggleState (true, dontSendNotification);\n";
 
-        s << getColourIntialisationCode (component, memberVariableName)
+        s << getColorIntialisationCode (component, memberVariableName)
           << '\n';
 
         code.constructorCode += s;

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -152,7 +152,7 @@ LivePropertyEditorBase::LivePropertyEditorBase (LiveValueBase& v, CodeDocument& 
 
 void LivePropertyEditorBase::paint (Graphics& g)
 {
-    g.setColour (Colours::white);
+    g.setColor (Colors::white);
     g.fillRect (getLocalBounds().removeFromBottom (1));
 }
 
@@ -298,7 +298,7 @@ class ValueList::EditorWindow  : public DocumentWindow,
 {
 public:
     EditorWindow (ValueList& list)
-        : DocumentWindow ("Live Values", Colours::lightgrey, DocumentWindow::closeButton)
+        : DocumentWindow ("Live Values", Colors::lightgray, DocumentWindow::closeButton)
     {
         setLookAndFeel (&lookAndFeel);
         setUsingNativeTitleBar (true);
@@ -310,7 +310,7 @@ public:
         setContentNonOwned (&viewport, true);
         setResizable (true, false);
         setResizeLimits (500, 400, 10000, 10000);
-        centreWithSize (getWidth(), getHeight());
+        centerWithSize (getWidth(), getHeight());
         setVisible (true);
     }
 
@@ -385,42 +385,42 @@ CodeDocument& ValueList::getDocument (const File& file)
 }
 
 //==============================================================================
-struct ColourEditorComp  : public Component,
+struct ColorEditorComp  : public Component,
                            private ChangeListener
 {
-    ColourEditorComp (LivePropertyEditorBase& e)  : editor (e)
+    ColorEditorComp (LivePropertyEditorBase& e)  : editor (e)
     {
         setMouseCursor (MouseCursor::PointingHandCursor);
     }
 
-    Colour getColour() const
+    Color getColor() const
     {
-        return Colour ((uint32) parseInt (editor.value.getStringValue (false)));
+        return Color ((uint32) parseInt (editor.value.getStringValue (false)));
     }
 
     void paint (Graphics& g) override
     {
         g.fillCheckerBoard (getLocalBounds().toFloat(), 6.0f, 6.0f,
-                            Colour (0xffdddddd).overlaidWith (getColour()),
-                            Colour (0xffffffff).overlaidWith (getColour()));
+                            Color (0xffdddddd).overlaidWith (getColor()),
+                            Color (0xffffffff).overlaidWith (getColor()));
     }
 
     void mouseDown (const MouseEvent&) override
     {
-        auto* colourSelector = new ColourSelector();
-        colourSelector->setName ("Colour");
-        colourSelector->setCurrentColour (getColour());
-        colourSelector->addChangeListener (this);
-        colourSelector->setColour (ColourSelector::backgroundColourId, Colours::transparentBlack);
-        colourSelector->setSize (300, 400);
+        auto* colorSelector = new ColorSelector();
+        colorSelector->setName ("Color");
+        colorSelector->setCurrentColor (getColor());
+        colorSelector->addChangeListener (this);
+        colorSelector->setColor (ColorSelector::backgroundColorId, Colors::transparentBlack);
+        colorSelector->setSize (300, 400);
 
-        CallOutBox::launchAsynchronously (colourSelector, getScreenBounds(), nullptr);
+        CallOutBox::launchAsynchronously (colorSelector, getScreenBounds(), nullptr);
     }
 
     void changeListenerCallback (ChangeBroadcaster* source) override
     {
-        if (auto* cs = dynamic_cast<ColourSelector*> (source))
-            editor.applyNewValue (getAsString (cs->getCurrentColour(), true));
+        if (auto* cs = dynamic_cast<ColorSelector*> (source))
+            editor.applyNewValue (getAsString (cs->getCurrentColor(), true));
 
         repaint();
     }
@@ -428,9 +428,9 @@ struct ColourEditorComp  : public Component,
     LivePropertyEditorBase& editor;
 };
 
-Component* createColourEditor (LivePropertyEditorBase& editor)
+Component* createColorEditor (LivePropertyEditorBase& editor)
 {
-    return new ColourEditorComp (editor);
+    return new ColorEditorComp (editor);
 }
 
 //==============================================================================

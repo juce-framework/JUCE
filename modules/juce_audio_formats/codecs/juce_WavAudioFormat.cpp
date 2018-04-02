@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -112,7 +112,7 @@ const char* const WavAudioFormat::riffInfoMoreInfoURL           = "IMIU";
 const char* const WavAudioFormat::riffInfoMusicBy               = "IMUS";
 const char* const WavAudioFormat::riffInfoNinthLanguage         = "IAS9";
 const char* const WavAudioFormat::riffInfoNumberOfParts         = "PRT2";
-const char* const WavAudioFormat::riffInfoOrganisation          = "TORG";
+const char* const WavAudioFormat::riffInfoOrganization          = "TORG";
 const char* const WavAudioFormat::riffInfoPart                  = "PRT1";
 const char* const WavAudioFormat::riffInfoProducedBy            = "IPRO";
 const char* const WavAudioFormat::riffInfoProductName           = "IPRD";
@@ -620,7 +620,7 @@ namespace WavFileHelpers
             WavAudioFormat::riffInfoMusicBy,
             WavAudioFormat::riffInfoNinthLanguage,
             WavAudioFormat::riffInfoNumberOfParts,
-            WavAudioFormat::riffInfoOrganisation,
+            WavAudioFormat::riffInfoOrganization,
             WavAudioFormat::riffInfoPart,
             WavAudioFormat::riffInfoProducedBy,
             WavAudioFormat::riffInfoProductName,
@@ -1298,7 +1298,7 @@ public:
 
         if (metadataValues.size() > 0)
         {
-            // The meta data should have been sanitised for the WAV format.
+            // The meta data should have been sanitized for the WAV format.
             // If it was originally sourced from an AIFF file the MetaDataSource
             // key should be removed (or set to "WAV") once this has been done
             jassert (metadataValues.getValue ("MetaDataSource", "None") != "AIFF");
@@ -1348,7 +1348,7 @@ public:
         {
             // failed to write to disk, so let's try writing the header.
             // If it's just run out of disk space, then if it does manage
-            // to write the header, we'll still have a useable file..
+            // to write the header, we'll still have a usable file..
             writeHeader();
             writeFailed = true;
             return false;
@@ -1433,7 +1433,7 @@ private:
 
                The JUCE_WAV_DO_NOT_PAD_HEADER_SIZE macro allows you to disable this feature in case
                you need to create files for crappy WAV players with bugs that stop them skipping chunks
-               which they don't recognise. But DO NOT USE THIS option unless you really have no choice,
+               which they don't recognize. But DO NOT USE THIS option unless you really have no choice,
                because it means that if you write more than 2^32 samples to the file, you'll corrupt it.
             */
             writeChunkHeader (chunkName ("JUNK"), 28 + (isWaveFmtEx? 0 : 24));

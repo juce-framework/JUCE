@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -42,7 +42,7 @@ public:
     ~LookAndFeel_V2();
 
     //==============================================================================
-    void drawButtonBackground (Graphics&, Button&, const Colour& backgroundColour,
+    void drawButtonBackground (Graphics&, Button&, const Color& backgroundColor,
                                bool isMouseOverButton, bool isButtonDown) override;
     Font getTextButtonFont (TextButton&, int buttonHeight) override;
 
@@ -92,7 +92,7 @@ public:
 
     //==============================================================================
     void drawProgressBar (Graphics&, ProgressBar&, int width, int height, double progress, const String& textToShow) override;
-    void drawSpinningWaitAnimation (Graphics&, const Colour& colour, int x, int y, int w, int h) override;
+    void drawSpinningWaitAnimation (Graphics&, const Color& color, int x, int y, int w, int h) override;
     bool isProgressBarOpaque (ProgressBar&) override;
 
     //==============================================================================
@@ -115,7 +115,7 @@ public:
 
     //==============================================================================
     void drawTreeviewPlusMinusBox (Graphics&, const Rectangle<float>& area,
-                                   Colour backgroundColour, bool isOpen, bool isMouseOver) override;
+                                   Color backgroundColor, bool isOpen, bool isMouseOver) override;
     bool areLinesDrawnForTreeView (TreeView&) override;
     int getTreeViewIndentSize (TreeView&) override;
 
@@ -156,7 +156,7 @@ public:
     void drawPopupMenuItem (Graphics&, const Rectangle<int>& area,
                             bool isSeparator, bool isActive, bool isHighlighted, bool isTicked, bool hasSubMenu,
                             const String& text, const String& shortcutKeyText,
-                            const Drawable* icon, const Colour* textColour) override;
+                            const Drawable* icon, const Color* textColor) override;
 
     void drawPopupMenuSectionHeader (Graphics&, const Rectangle<int>& area,
                                      const String& sectionName) override;
@@ -253,8 +253,8 @@ public:
 
     void positionDocumentWindowButtons (DocumentWindow&,
                                         int titleBarX, int titleBarY, int titleBarW, int titleBarH,
-                                        Button* minimiseButton,
-                                        Button* maximiseButton,
+                                        Button* minimizeButton,
+                                        Button* maximizeButton,
                                         Button* closeButton,
                                         bool positionTitleBarButtonsOnLeft) override;
 
@@ -289,7 +289,7 @@ public:
     //==============================================================================
     void drawImageButton (Graphics&, Image*,
                           int imageX, int imageY, int imageW, int imageH,
-                          const Colour& overlayColour, float imageOpacity, ImageButton&) override;
+                          const Color& overlayColor, float imageOpacity, ImageButton&) override;
 
     //==============================================================================
     void drawTableHeaderBackground (Graphics&, TableHeaderComponent&) override;
@@ -332,39 +332,39 @@ public:
     Path getSidePanelDismissButtonShape (SidePanel&) override;
 
     //==============================================================================
-    /** Draws a 3D raised (or indented) bevel using two colours.
+    /** Draws a 3D raised (or indented) bevel using two colors.
 
         The bevel is drawn inside the given rectangle, and greater bevel thicknesses
         extend inwards.
 
-        The top-left colour is used for the top- and left-hand edges of the
-        bevel; the bottom-right colour is used for the bottom- and right-hand
+        The top-left color is used for the top- and left-hand edges of the
+        bevel; the bottom-right color is used for the bottom- and right-hand
         edges.
 
         If useGradient is true, then the bevel fades out to make it look more curved
         and less angular. If sharpEdgeOnOutside is true, the outside of the bevel is
-        sharp, and it fades towards the centre; if sharpEdgeOnOutside is false, then
-        the centre edges are sharp and it fades towards the outside.
+        sharp, and it fades towards the center; if sharpEdgeOnOutside is false, then
+        the center edges are sharp and it fades towards the outside.
     */
     static void drawBevel (Graphics&,
                            int x, int y, int width, int height,
                            int bevelThickness,
-                           const Colour& topLeftColour = Colours::white,
-                           const Colour& bottomRightColour = Colours::black,
+                           const Color& topLeftColor = Colors::white,
+                           const Color& bottomRightColor = Colors::black,
                            bool useGradient = true,
                            bool sharpEdgeOnOutside = true);
 
     /** Utility function to draw a shiny, glassy circle (for round LED-type buttons). */
     static void drawGlassSphere (Graphics&, float x, float y, float diameter,
-                                 const Colour&, float outlineThickness) noexcept;
+                                 const Color&, float outlineThickness) noexcept;
 
     static void drawGlassPointer (Graphics&, float x, float y, float diameter,
-                                  const Colour&, float outlineThickness, int direction) noexcept;
+                                  const Color&, float outlineThickness, int direction) noexcept;
 
     /** Utility function to draw a shiny, glassy oblong (for text buttons). */
     static void drawGlassLozenge (Graphics&,
                                   float x, float y, float width, float height,
-                                  const Colour&, float outlineThickness, float cornerSize,
+                                  const Color&, float outlineThickness, float cornerSize,
                                   bool flatOnLeft, bool flatOnRight, bool flatOnTop, bool flatOnBottom) noexcept;
 
 private:
@@ -373,7 +373,7 @@ private:
 
     void drawShinyButtonShape (Graphics&,
                                float x, float y, float w, float h, float maxCornerSize,
-                               const Colour&, float strokeWidth,
+                               const Color&, float strokeWidth,
                                bool flatOnLeft, bool flatOnRight, bool flatOnTop, bool flatOnBottom) noexcept;
 
     class GlassWindowButton;

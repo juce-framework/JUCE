@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -27,9 +27,9 @@
 namespace juce
 {
 
-DialogWindow::DialogWindow (const String& name, Colour colour,
+DialogWindow::DialogWindow (const String& name, Color color,
                             const bool escapeCloses, const bool onDesktop)
-    : DocumentWindow (name, colour, DocumentWindow::closeButton, onDesktop),
+    : DocumentWindow (name, color, DocumentWindow::closeButton, onDesktop),
       escapeKeyTriggersCloseButton (escapeCloses)
 {
 }
@@ -78,7 +78,7 @@ class DefaultDialogWindow   : public DialogWindow
 {
 public:
     DefaultDialogWindow (LaunchOptions& options)
-        : DialogWindow (options.dialogTitle, options.dialogBackgroundColour,
+        : DialogWindow (options.dialogTitle, options.dialogBackgroundColor,
                         options.escapeKeyTriggersCloseButton, true)
     {
         setUsingNativeTitleBar (options.useNativeTitleBar);
@@ -89,7 +89,7 @@ public:
         else
             setContentNonOwned (options.content.release(), true);
 
-        centreAroundComponent (options.componentToCentreAround, getWidth(), getHeight());
+        centerAroundComponent (options.componentToCenterAround, getWidth(), getHeight());
         setResizable (options.resizable, options.useBottomRightCornerResizer);
     }
 
@@ -128,8 +128,8 @@ int DialogWindow::LaunchOptions::runModal()
 //==============================================================================
 void DialogWindow::showDialog (const String& dialogTitle,
                                Component* const contentComponent,
-                               Component* const componentToCentreAround,
-                               Colour backgroundColour,
+                               Component* const componentToCenterAround,
+                               Color backgroundColor,
                                const bool escapeKeyTriggersCloseButton,
                                const bool resizable,
                                const bool useBottomRightCornerResizer)
@@ -137,8 +137,8 @@ void DialogWindow::showDialog (const String& dialogTitle,
     LaunchOptions o;
     o.dialogTitle = dialogTitle;
     o.content.setNonOwned (contentComponent);
-    o.componentToCentreAround = componentToCentreAround;
-    o.dialogBackgroundColour = backgroundColour;
+    o.componentToCenterAround = componentToCenterAround;
+    o.dialogBackgroundColor = backgroundColor;
     o.escapeKeyTriggersCloseButton = escapeKeyTriggersCloseButton;
     o.useNativeTitleBar = false;
     o.resizable = resizable;
@@ -150,8 +150,8 @@ void DialogWindow::showDialog (const String& dialogTitle,
 #if JUCE_MODAL_LOOPS_PERMITTED
 int DialogWindow::showModalDialog (const String& dialogTitle,
                                    Component* const contentComponent,
-                                   Component* const componentToCentreAround,
-                                   Colour backgroundColour,
+                                   Component* const componentToCenterAround,
+                                   Color backgroundColor,
                                    const bool escapeKeyTriggersCloseButton,
                                    const bool resizable,
                                    const bool useBottomRightCornerResizer)
@@ -159,8 +159,8 @@ int DialogWindow::showModalDialog (const String& dialogTitle,
     LaunchOptions o;
     o.dialogTitle = dialogTitle;
     o.content.setNonOwned (contentComponent);
-    o.componentToCentreAround = componentToCentreAround;
-    o.dialogBackgroundColour = backgroundColour;
+    o.componentToCenterAround = componentToCenterAround;
+    o.dialogBackgroundColor = backgroundColor;
     o.escapeKeyTriggersCloseButton = escapeKeyTriggersCloseButton;
     o.useNativeTitleBar = false;
     o.resizable = resizable;

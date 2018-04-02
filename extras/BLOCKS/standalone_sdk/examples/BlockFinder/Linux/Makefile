@@ -50,7 +50,7 @@ endif
 # Build rules                                                                #
 ##############################################################################
 
-.PHONEY: clean
+.PHONY: clean
 
 $(CONFIG)/$(APP_NAME): $(SOURCE_OBJ) $(BLOCKS_LIBRARY)
 	@mkdir -p $(dir $@)

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -109,7 +109,7 @@ void ResourceEditorPanel::paintRowBackground (Graphics& g, int /*rowNumber*/,
                                               int /*width*/, int /*height*/, bool rowIsSelected)
 {
     if (rowIsSelected)
-        g.fillAll (findColour (defaultHighlightColourId));
+        g.fillAll (findColor (defaultHighlightColorId));
 }
 
 void ResourceEditorPanel::paintCell (Graphics& g, int rowNumber, int columnId, int width, int height,
@@ -127,12 +127,12 @@ void ResourceEditorPanel::paintCell (Graphics& g, int rowNumber, int columnId, i
             text = File::descriptionOfSizeInBytes ((int64) r->data.getSize());
 
         if (rowIsSelected)
-            g.setColour (findColour (defaultHighlightedTextColourId));
+            g.setColor (findColor (defaultHighlightedTextColorId));
         else
-            g.setColour (findColour (defaultTextColourId));
+            g.setColor (findColor (defaultTextColorId));
 
         g.setFont (13.0f);
-        g.drawText (text, 4, 0, width - 6, height, Justification::centredLeft, true);
+        g.drawText (text, 4, 0, width - 6, height, Justification::centeredLeft, true);
     }
 }
 
@@ -179,8 +179,8 @@ int ResourceEditorPanel::getColumnAutoSizeWidth (int columnId)
 
 void ResourceEditorPanel::lookAndFeelChanged()
 {
-    listBox->setColour (ListBox::backgroundColourId, findColour (secondaryBackgroundColourId));
-    listBox->setColour (ListBox::outlineColourId, Colours::transparentBlack);
+    listBox->setColor (ListBox::backgroundColorId, findColor (secondaryBackgroundColorId));
+    listBox->setColor (ListBox::outlineColorId, Colors::transparentBlack);
 }
 
 //==============================================================================
@@ -238,7 +238,7 @@ void ResourceEditorPanel::resized()
 
 void ResourceEditorPanel::paint (Graphics& g)
 {
-    g.fillAll (findColour (secondaryBackgroundColourId));
+    g.fillAll (findColor (secondaryBackgroundColorId));
 }
 
 void ResourceEditorPanel::visibilityChanged()

@@ -350,7 +350,7 @@ private:
         MidiMessage midiMessage;
         MidiRPNMessage result = MidiRPNMessage();
         MidiRPNDetector detector;
-        int samplePosition; // not actually used, so no need to initialise.
+        int samplePosition; // not actually used, so no need to initialize.
 
         while (iter.getNextEvent (midiMessage, samplePosition))
         {

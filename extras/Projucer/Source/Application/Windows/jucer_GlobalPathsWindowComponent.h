@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -64,12 +64,12 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (findColour (backgroundColourId));
+        g.fillAll (findColor (backgroundColorId));
     }
 
     void paintOverChildren (Graphics& g) override
     {
-        g.setColour (findColour (defaultHighlightColourId).withAlpha (flashAlpha));
+        g.setColor (findColor (defaultHighlightColorId).withAlpha (flashAlpha));
         g.fillRect (boundsToHighlight);
     }
 
@@ -79,7 +79,7 @@ public:
 
         auto topSlice = b.removeFromTop (25);
         osSelector.setSize (200, 25);
-        osSelector.setCentrePosition (topSlice.getCentre());
+        osSelector.setCenterPosition (topSlice.getCenter());
 
         info.setBounds (osSelector.getBounds().withWidth (osSelector.getHeight()).translated ((osSelector.getWidth() + 5), 0).reduced (2));
 
@@ -280,7 +280,7 @@ private:
         {
             addAndMakeVisible (l);
             l->setFont (Font (18.0f, Font::FontStyleFlags::bold));
-            l->setJustificationType (Justification::centredLeft);
+            l->setJustificationType (Justification::centeredLeft);
         }
     }
 

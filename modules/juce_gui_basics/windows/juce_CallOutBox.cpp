@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -43,7 +43,7 @@ CallOutBox::CallOutBox (Component& c, Rectangle<int> area, Component* const pare
         setAlwaysOnTop (juce_areThereAnyAlwaysOnTopWindows());
 
         updatePosition (area, Desktop::getInstance().getDisplays()
-                                .getDisplayContaining (area.getCentre()).userArea);
+                                .getDisplayContaining (area.getCenter()).userArea);
 
         addToDesktop (ComponentPeer::windowIsTemporary);
 
@@ -205,39 +205,39 @@ void CallOutBox::updatePosition (const Rectangle<int>& newAreaToPointTo, const R
     auto hhReduced = (float) (hh - borderSpace * 2);
     auto arrowIndent = borderSpace - arrowSize;
 
-    Point<float> targets[4] = { { (float) targetArea.getCentreX(), (float) targetArea.getBottom() },
-                                { (float) targetArea.getRight(),   (float) targetArea.getCentreY() },
-                                { (float) targetArea.getX(),       (float) targetArea.getCentreY() },
-                                { (float) targetArea.getCentreX(), (float) targetArea.getY() } };
+    Point<float> targets[4] = { { (float) targetArea.getCenterX(), (float) targetArea.getBottom() },
+                                { (float) targetArea.getRight(),   (float) targetArea.getCenterY() },
+                                { (float) targetArea.getX(),       (float) targetArea.getCenterY() },
+                                { (float) targetArea.getCenterX(), (float) targetArea.getY() } };
 
     Line<float> lines[4] = { { targets[0].translated (-hwReduced, hh - arrowIndent),    targets[0].translated (hwReduced, hh - arrowIndent) },
                              { targets[1].translated (hw - arrowIndent, -hhReduced),    targets[1].translated (hw - arrowIndent, hhReduced) },
                              { targets[2].translated (-(hw - arrowIndent), -hhReduced), targets[2].translated (-(hw - arrowIndent), hhReduced) },
                              { targets[3].translated (-hwReduced, -(hh - arrowIndent)), targets[3].translated (hwReduced, -(hh - arrowIndent)) } };
 
-    auto centrePointArea = newAreaToFitIn.reduced (hw, hh).toFloat();
-    auto targetCentre = targetArea.getCentre().toFloat();
+    auto centerPointArea = newAreaToFitIn.reduced (hw, hh).toFloat();
+    auto targetCenter = targetArea.getCenter().toFloat();
 
     float nearest = 1.0e9f;
 
     for (int i = 0; i < 4; ++i)
     {
-        Line<float> constrainedLine (centrePointArea.getConstrainedPoint (lines[i].getStart()),
-                                     centrePointArea.getConstrainedPoint (lines[i].getEnd()));
+        Line<float> constrainedLine (centerPointArea.getConstrainedPoint (lines[i].getStart()),
+                                     centerPointArea.getConstrainedPoint (lines[i].getEnd()));
 
-        auto centre = constrainedLine.findNearestPointTo (targetCentre);
-        auto distanceFromCentre = centre.getDistanceFrom (targets[i]);
+        auto center = constrainedLine.findNearestPointTo (targetCenter);
+        auto distanceFromCenter = center.getDistanceFrom (targets[i]);
 
-        if (! centrePointArea.intersects (lines[i]))
-            distanceFromCentre += 1000.0f;
+        if (! centerPointArea.intersects (lines[i]))
+            distanceFromCenter += 1000.0f;
 
-        if (distanceFromCentre < nearest)
+        if (distanceFromCenter < nearest)
         {
-            nearest = distanceFromCentre;
+            nearest = distanceFromCenter;
             targetPoint = targets[i];
 
-            newBounds.setPosition ((int) (centre.x - hw),
-                                   (int) (centre.y - hh));
+            newBounds.setPosition ((int) (center.x - hw),
+                                   (int) (center.y - hh));
         }
     }
 

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -429,7 +429,7 @@ private:
             << "   ineffective unless you have a JUCE Indie or Pro license, or are using JUCE" << newLine
             << "   under the GPL v3 license." << newLine
             << newLine
-            << "   End User License Agreement: www.juce.com/juce-5-licence" << newLine
+            << "   End User License Agreement: www.juce.com/juce-5-license" << newLine
             << newLine
             << "  ==============================================================================" << newLine
             << "*/" << newLine
@@ -446,7 +446,7 @@ private:
             << newLine
             << "// END SECTION A" << newLine
             << newLine
-            << "#define JUCE_USE_DARK_SPLASH_SCREEN "  << (project.getSplashScreenColourString() == "Dark" ? "1" : "0") << newLine;
+            << "#define JUCE_USE_DARK_SPLASH_SCREEN "  << (project.getSplashScreenColorString() == "Dark" ? "1" : "0") << newLine;
 
         out << newLine
             << "//==============================================================================" << newLine;

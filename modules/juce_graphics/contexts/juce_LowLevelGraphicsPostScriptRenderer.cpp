@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -61,7 +61,7 @@ LowLevelGraphicsPostScriptRenderer::LowLevelGraphicsPostScriptRenderer (OutputSt
            "\n%%CreationDate: none"
            "\n%%LanguageLevel: 2"
            "\n%%EndComments"
-           "\n%%BeginProlog"
+           "\n%%BeginPrologue"
            "\n%%BeginResource: JRes"
            "\n/bd {bind def} bind def"
            "\n/c {setrgbcolor} bd"
@@ -74,7 +74,7 @@ LowLevelGraphicsPostScriptRenderer::LowLevelGraphicsPostScriptRenderer (OutputSt
            "\n/doclip {initclip newpath} bd"
            "\n/endclip {clip newpath} bd"
            "\n%%EndResource"
-           "\n%%EndProlog"
+           "\n%%EndPrologue"
            "\n%%BeginSetup"
            "\n%%EndSetup"
            "\n%%Page: 1 1"
@@ -221,13 +221,13 @@ void LowLevelGraphicsPostScriptRenderer::writeClip()
     }
 }
 
-void LowLevelGraphicsPostScriptRenderer::writeColour (Colour colour)
+void LowLevelGraphicsPostScriptRenderer::writeColor (Color color)
 {
-    Colour c (Colours::white.overlaidWith (colour));
+    Color c (Colors::white.overlaidWith (color));
 
-    if (lastColour != c)
+    if (lastColor != c)
     {
-        lastColour = c;
+        lastColor = c;
 
         out << String (c.getFloatRed(), 3) << ' '
             << String (c.getFloatGreen(), 3) << ' '
@@ -346,10 +346,10 @@ void LowLevelGraphicsPostScriptRenderer::fillRect (const Rectangle<int>& r, cons
 
 void LowLevelGraphicsPostScriptRenderer::fillRect (const Rectangle<float>& r)
 {
-    if (stateStack.getLast()->fillType.isColour())
+    if (stateStack.getLast()->fillType.isColor())
     {
         writeClip();
-        writeColour (stateStack.getLast()->fillType.colour);
+        writeColor (stateStack.getLast()->fillType.color);
 
         Rectangle<float> r2 (r.translated ((float) stateStack.getLast()->xOffset,
                                            (float) stateStack.getLast()->yOffset));
@@ -372,7 +372,7 @@ void LowLevelGraphicsPostScriptRenderer::fillRectList (const RectangleList<float
 //==============================================================================
 void LowLevelGraphicsPostScriptRenderer::fillPath (const Path& path, const AffineTransform& t)
 {
-    if (stateStack.getLast()->fillType.isColour())
+    if (stateStack.getLast()->fillType.isColor())
     {
         writeClip();
 
@@ -381,7 +381,7 @@ void LowLevelGraphicsPostScriptRenderer::fillPath (const Path& path, const Affin
                                         (float) stateStack.getLast()->yOffset));
         writePath (p);
 
-        writeColour (stateStack.getLast()->fillType.colour);
+        writeColor (stateStack.getLast()->fillType.color);
 
         out << "fill\n";
     }
@@ -404,8 +404,8 @@ void LowLevelGraphicsPostScriptRenderer::fillPath (const Path& path, const Affin
         const Rectangle<int> bounds (stateStack.getLast()->clip.getBounds());
 
         // ideally this would draw lots of lines or ellipses to approximate the gradient, but for the
-        // time-being, this just fills it with the average colour..
-        writeColour (stateStack.getLast()->fillType.gradient->getColourAtPosition (0.5f));
+        // time-being, this just fills it with the average color..
+        writeColor (stateStack.getLast()->fillType.gradient->getColorAtPosition (0.5f));
         out << bounds.getX() << ' ' << -bounds.getBottom() << ' ' << bounds.getWidth() << ' ' << bounds.getHeight() << " rectfill\n";
 
         out << "grestore\n";
@@ -424,7 +424,7 @@ void LowLevelGraphicsPostScriptRenderer::writeImage (const Image& im,
 
     int charsOnLine = 0;
     const Image::BitmapData srcData (im, 0, 0, w, h);
-    Colour pixel;
+    Color pixel;
 
     for (int y = h; --y >= 0;)
     {
@@ -438,20 +438,20 @@ void LowLevelGraphicsPostScriptRenderer::writeImage (const Image& im,
                 {
                     PixelARGB p (*(const PixelARGB*) pixelData);
                     p.unpremultiply();
-                    pixel = Colours::white.overlaidWith (Colour (p));
+                    pixel = Colors::white.overlaidWith (Color (p));
                 }
                 else if (im.isRGB())
                 {
-                    pixel = Colour (*((const PixelRGB*) pixelData));
+                    pixel = Color (*((const PixelRGB*) pixelData));
                 }
                 else
                 {
-                    pixel = Colour ((uint8) 0, (uint8) 0, (uint8) 0, *pixelData);
+                    pixel = Color ((uint8) 0, (uint8) 0, (uint8) 0, *pixelData);
                 }
             }
             else
             {
-                pixel = Colours::transparentWhite;
+                pixel = Colors::transparentWhite;
             }
 
             const uint8 pixelValues[3] = { pixel.getRed(), pixel.getGreen(), pixel.getBlue() };

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -41,7 +41,7 @@ namespace StateVariableFilter
         An IIR filter that can perform low, band and high-pass filtering on an audio
         signal, with 12 dB of attenuation / octave, using a TPT structure, designed
         for fast modulation (see Vadim Zavalishin's documentation about TPT
-        structures for more information). Its behaviour is based on the analog
+        structures for more information). Its behavior is based on the analog
         state variable filter circuit.
 
         Note : the bandpass here is not the one in the RBJ CookBook, its gain can be

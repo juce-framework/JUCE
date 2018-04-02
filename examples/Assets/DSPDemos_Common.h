@@ -111,23 +111,23 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (Colour (0xff495358));
+        g.fillAll (Color (0xff495358));
 
-        g.setColour (Colours::white);
+        g.setColor (Colors::white);
 
         if (thumbnail.getTotalLength() > 0.0)
         {
             thumbnail.drawChannels (g, getLocalBounds().reduced (2),
                                     0.0, thumbnail.getTotalLength(), 1.0f);
 
-            g.setColour (Colours::black);
+            g.setColor (Colors::black);
             g.fillRect (static_cast<float> (currentPosition * getWidth()), 0.0f,
                         1.0f, static_cast<float> (getHeight()));
         }
         else
         {
             g.drawFittedText ("No audio file loaded.\nDrop a file here or click the \"Load File...\" button.", getLocalBounds(),
-                              Justification::centred, 2);
+                              Justification::centered, 2);
         }
     }
 
@@ -245,7 +245,7 @@ public:
             auto* paramLabel = new Label ({}, demoParameter->name);
 
             paramLabel->attachToComponent (demoParameter->getComponent(), true);
-            paramLabel->setJustificationType (Justification::centredLeft);
+            paramLabel->setJustificationType (Justification::centeredLeft);
             addAndMakeVisible (paramLabel);
             labels.add (paramLabel);
         }
@@ -263,7 +263,7 @@ public:
             comp->setSize (jmin (bounds.getWidth(), p->getPreferredWidth()), p->getPreferredHeight());
 
             auto compBounds = bounds.removeFromTop (p->getPreferredHeight());
-            comp->setCentrePosition (compBounds.getCentre());
+            comp->setCenterPosition (compBounds.getCenter());
         }
     }
 
@@ -354,7 +354,7 @@ public:
         audioDeviceManager.addAudioCallback (&audioSourcePlayer);
 
        #ifndef JUCE_DEMO_RUNNER
-        audioDeviceManager.initialiseWithDefaultDevices (0, 2);
+        audioDeviceManager.initializeWithDefaultDevices (0, 2);
        #endif
 
         init();
@@ -377,7 +377,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.setColour (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+        g.setColor (getLookAndFeel().findColor (ResizableWindow::backgroundColorId));
         g.fillRect (getLocalBounds());
     }
 
@@ -535,11 +535,11 @@ private:
             addAndMakeVisible (playButton);
             addAndMakeVisible (loopButton);
 
-            playButton.setColour (TextButton::buttonColourId, Colour (0xff79ed7f));
-            playButton.setColour (TextButton::textColourOffId, Colours::black);
+            playButton.setColor (TextButton::buttonColorId, Color (0xff79ed7f));
+            playButton.setColor (TextButton::textColorOffId, Colors::black);
 
-            loadButton.setColour (TextButton::buttonColourId, Colour (0xff797fed));
-            loadButton.setColour (TextButton::textColourOffId, Colours::black);
+            loadButton.setColor (TextButton::buttonColorId, Color (0xff797fed));
+            loadButton.setColor (TextButton::textColorOffId, Colors::black);
 
             loadButton.onClick = [this] { openFile(); };
             playButton.onClick = [this] { audioFileReader.togglePlay(); };
@@ -558,7 +558,7 @@ private:
 
         void paint (Graphics& g) override
         {
-            g.setColour (getLookAndFeel().findColour (ResizableWindow::backgroundColourId).darker());
+            g.setColor (getLookAndFeel().findColor (ResizableWindow::backgroundColorId).darker());
             g.fillRect (getLocalBounds());
         }
 
@@ -574,7 +574,7 @@ private:
 
             loopButton.setSize (0, 25);
             loopButton.changeWidthToFitText();
-            loopButton.setCentrePosition (loopBounds.getCentre());
+            loopButton.setCenterPosition (loopBounds.getCenter());
 
             thumbnailComp.setBounds (bounds);
         }
@@ -631,7 +631,7 @@ private:
         void valueChanged (Value& v) override
         {
             playButton.setButtonText (v.getValue() ? "Stop" : "Play");
-            playButton.setColour (TextButton::buttonColourId, v.getValue() ? Colour (0xffed797f) : Colour (0xff79ed7f));
+            playButton.setColor (TextButton::buttonColorId, v.getValue() ? Color (0xffed797f) : Color (0xff79ed7f));
         }
 
         //==============================================================================

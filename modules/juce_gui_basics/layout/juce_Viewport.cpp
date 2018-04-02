@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -200,7 +200,7 @@ void Viewport::componentMovedOrResized (Component&, bool, bool)
 }
 
 //==============================================================================
-typedef AnimatedPosition<AnimatedPositionBehaviours::ContinuousWithMomentum> ViewportDragPosition;
+typedef AnimatedPosition<AnimatedPositionBehaviors::ContinuousWithMomentum> ViewportDragPosition;
 
 struct Viewport::DragToScrollListener   : private MouseListener,
                                           private ViewportDragPosition::Listener
@@ -210,8 +210,8 @@ struct Viewport::DragToScrollListener   : private MouseListener,
         viewport.contentHolder.addMouseListener (this, true);
         offsetX.addListener (this);
         offsetY.addListener (this);
-        offsetX.behaviour.setMinimumVelocity (60);
-        offsetY.behaviour.setMinimumVelocity (60);
+        offsetX.behavior.setMinimumVelocity (60);
+        offsetY.behavior.setMinimumVelocity (60);
     }
 
     ~DragToScrollListener()

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -104,7 +104,7 @@ public:
         the box will continue to run modally until the user clicks on some other component, at
         which point it will be dismissed and deleted automatically.
 
-        It returns a reference to the newly-created box so that you can customise it, but don't
+        It returns a reference to the newly-created box so that you can customize it, but don't
         keep a pointer to it, as it'll be deleted at some point when it gets closed.
 
         @param contentComponent     the component to display inside the call-out. This should

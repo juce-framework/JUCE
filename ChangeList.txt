@@ -15,7 +15,7 @@ Version 5.3.0
   - Added support for loading VST3 preset files
   - Added boolean AudioProcessorParameters
   - Added thread safe methods for getting and setting the AudioProcessorValueTreeState state
-  - Added customisable MacOS icons
+  - Added customizable MacOS icons
 
 Version 5.2.1
   - Added native content sharing support for iOS and Android
@@ -38,8 +38,8 @@ Version 5.2.1
   - Added lambda callbacks to ListenerList, Slider, Button, Label, ComboBox and TextEditor
   - Fixed the live-build engine on Windows
   - Multiple DSP module fixes and features
-  - Multiple threading and undefined behaviour fixes and improvements
-  - Various graphics optimisations
+  - Multiple threading and undefined behavior fixes and improvements
+  - Various graphics optimizations
   - Multiple Projucer UI and UX improvements
   - Various documentation tweaks and fixes
 
@@ -50,7 +50,7 @@ Version 5.2.0
   - Added in-app purchase support for macOS
   - Added a plugin binary copy step to the Visual Studio exporter
   - Added an option to set the debug information format in the Visual Studio exporter
-  - Added a link-time optimisation option to all exporters
+  - Added a link-time optimization option to all exporters
   - Added support for adding asm files to Android projects
   - Improved the reliability of the Projucer's live-build engine
   - Added support for AUv2 Midi Effect plug-in hosting
@@ -106,7 +106,7 @@ Version 5.1.0
 Version 5.0.2
   - Improved project save speed in the Projucer
   - Added option to save individual exporters in the Projucer
-  - Added the ability to create custom colour schemes for the Projucer’s code editor
+  - Added the ability to create custom color schemes for the Projucer’s code editor
   - Minor fixes to JUCE’s SVG parser
   - Various bug fixes in the way JUCE handles Hi-DPI monitors
   - Improved code browsing in Visual Studio Exports
@@ -146,7 +146,7 @@ Version 5.0.0
   - Added support for non-experimental gradle plug-in versions >= 2.2 and Android Studio 2.3
   - Added support for closed-source third-party modules
   - Added support for Windows 10 Bluetooth LE MIDI devices
-  - Modernised JUCE codebase to use C++11/14 features
+  - Modernized JUCE codebase to use C++11/14 features
   - Added support for Linux embedded platforms
   - Added support for WebBrowserComponent on Linux
   - Added support for IPv6
@@ -161,7 +161,7 @@ Version 4.3.1
   - Added withRightX and withBottomY methods to Rectangle
   - Added support for windows 10 on screen keyboard
   - Added move semantics to AudioBuffer
-  - Added colour coding scheme to module icons in the Projucer to indicate which type of license a module uses
+  - Added color coding scheme to module icons in the Projucer to indicate which type of license a module uses
   - Removed all deprecation warnings for macOS Sierra
   - Fixed multiple touch, pen and mouse input related bugs on Windows
   - Added submenu support to ComboBoxes and simplified the usage of ComboBoxes
@@ -186,7 +186,7 @@ Version 4.2.4
   - Added FlexBox layout engine
   - Removed dependency on external Steinberg SDK when building and/or hosting VST2 plug-ins
   - Added support for MIDI network sessions in the iOS simulator
-  - Added support for symmetric skew to Slider, NormalisableRange and SliderPropertyComponent
+  - Added support for symmetric skew to Slider, NormalizableRange and SliderPropertyComponent
   - Projucer now asks the user what to do when it detects that the .jucer file was modified outside of the Projucer
   - Improved support for Windows 10 touch devices
   - Added begin/end iterator methods for ValueTree, for handy range-based-for loops over its children
@@ -269,7 +269,7 @@ Version 3.2.0
   - Midi channel pressure support
   - New example projects ComponentTutorialExample, SimpleFFTExample,
     PluckedStringsDemo
-  - New class ValueTreeSynchroniser, for remote-syncing multiple
+  - New class ValueTreeSynchronizer, for remote-syncing multiple
     ValueTrees
   - HTTPS/SSL support on Linux
   - Added methods for degrees to radians conversions
@@ -281,7 +281,7 @@ Version 3.2.0
   - Added Whirlpool hash class to the cryptography module
   - Various improvements for parameter automation in VST, VST-3,
     AudioUnits and AAX
-  - Various improvements to JUCE Synthesiser
+  - Various improvements to JUCE Synthesizer
   - Linux Code::Blocks project support
   - Multicast support
   - Add support to generate project version numbers from project git tags

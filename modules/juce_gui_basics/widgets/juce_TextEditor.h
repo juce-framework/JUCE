@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -32,7 +32,7 @@ namespace juce
     An editable text box.
 
     A TextEditor can either be in single- or multi-line mode, and supports mixed
-    fonts and colours.
+    fonts and colors.
 
     @see TextEditor::Listener, Label
 
@@ -78,7 +78,7 @@ public:
     bool isMultiLine() const;
 
     //==============================================================================
-    /** Changes the behaviour of the return key.
+    /** Changes the behavior of the return key.
 
         If set to true, the return key will insert a new-line into the text; if false
         it will trigger a call to the TextEditor::Listener::textEditorReturnKeyPressed()
@@ -131,7 +131,7 @@ public:
     //==============================================================================
     /** Makes the caret visible or invisible.
         By default the caret is visible.
-        @see setCaretColour, setCaretPosition
+        @see setCaretColor, setCaretPosition
     */
     void setCaretVisible (bool shouldBeVisible);
 
@@ -193,38 +193,38 @@ public:
     bool isPopupMenuCurrentlyActive() const noexcept                { return menuActive; }
 
     //==============================================================================
-    /** A set of colour IDs to use to change the colour of various aspects of the editor.
+    /** A set of color IDs to use to change the color of various aspects of the editor.
 
-        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        These constants can be used either via the Component::setColor(), or LookAndFeel::setColor()
         methods.
 
-        NB: You can also set the caret colour using CaretComponent::caretColourId
+        NB: You can also set the caret color using CaretComponent::caretColorId
 
-        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+        @see Component::setColor, Component::findColor, LookAndFeel::setColor, LookAndFeel::findColor
     */
-    enum ColourIds
+    enum ColorIds
     {
-        backgroundColourId       = 0x1000200, /**< The colour to use for the text component's background - this can be
+        backgroundColorId       = 0x1000200, /**< The color to use for the text component's background - this can be
                                                    transparent if necessary. */
 
-        textColourId             = 0x1000201, /**< The colour that will be used when text is added to the editor. Note
-                                                   that because the editor can contain multiple colours, calling this
-                                                   method won't change the colour of existing text - to do that, use
-                                                   the applyColourToAllText() method */
+        textColorId             = 0x1000201, /**< The color that will be used when text is added to the editor. Note
+                                                   that because the editor can contain multiple colors, calling this
+                                                   method won't change the color of existing text - to do that, use
+                                                   the applyColorToAllText() method */
 
-        highlightColourId        = 0x1000202, /**< The colour with which to fill the background of highlighted sections of
+        highlightColorId        = 0x1000202, /**< The color with which to fill the background of highlighted sections of
                                                    the text - this can be transparent if you don't want to show any
                                                    highlighting.*/
 
-        highlightedTextColourId  = 0x1000203, /**< The colour with which to draw the text in highlighted sections. */
+        highlightedTextColorId  = 0x1000203, /**< The color with which to draw the text in highlighted sections. */
 
-        outlineColourId          = 0x1000205, /**< If this is non-transparent, it will be used to draw a box around
+        outlineColorId          = 0x1000205, /**< If this is non-transparent, it will be used to draw a box around
                                                    the edge of the component. */
 
-        focusedOutlineColourId   = 0x1000206, /**< If this is non-transparent, it will be used to draw a box around
+        focusedOutlineColorId   = 0x1000206, /**< If this is non-transparent, it will be used to draw a box around
                                                    the edge of the component when it has focus. */
 
-        shadowColourId           = 0x1000207, /**< If this is non-transparent, it'll be used to draw an inner shadow
+        shadowColorId           = 0x1000207, /**< If this is non-transparent, it'll be used to draw an inner shadow
                                                    around the edge of the editor. */
     };
 
@@ -254,12 +254,12 @@ public:
     */
     const Font& getFont() const noexcept            { return currentFont; }
 
-    /** Applies a colour to all the text in the editor.
+    /** Applies a color to all the text in the editor.
 
-        If the changeCurrentTextColour argument is true then this will also set the
-        new colour as the colour to be used for any new text that's added.
+        If the changeCurrentTextColor argument is true then this will also set the
+        new color as the color to be used for any new text that's added.
     */
-    void applyColourToAllText (const Colour& newColour, bool changeCurrentTextColour = true);
+    void applyColorToAllText (const Color& newColor, bool changeCurrentTextColor = true);
 
     //==============================================================================
     /** If set to true, focusing on the editor will highlight all its text.
@@ -277,7 +277,7 @@ public:
         string is only displayed, it's not taken to actually be the contents of
         the editor.
     */
-    void setTextToShowWhenEmpty (const String& text, Colour colourToUse);
+    void setTextToShowWhenEmpty (const String& text, Color colorToUse);
 
     //==============================================================================
     /** Changes the size of the scrollbars that are used.
@@ -347,9 +347,9 @@ public:
 
     /** Sets the entire content of the editor.
 
-        This will clear the editor and insert the given text (using the current text colour
-        and font). You can set the current text colour using
-        @code setColour (TextEditor::textColourId, ...);
+        This will clear the editor and insert the given text (using the current text color
+        and font). You can set the current text color using
+        @code setColor (TextEditor::textColorId, ...);
         @endcode
 
         @param newText                  the text to add
@@ -734,7 +734,7 @@ private:
     int caretPosition = 0;
     OwnedArray<UniformTextSection> sections;
     String textToShowWhenEmpty;
-    Colour colourForTextWhenEmpty;
+    Color colorForTextWhenEmpty;
     juce_wchar passwordCharacter;
     OptionalScopedPointer<InputFilter> inputFilter;
     Value textValue;
@@ -760,7 +760,7 @@ private:
     void coalesceSimilarSections();
     void splitSection (int sectionIndex, int charToSplitAt);
     void clearInternal (UndoManager*);
-    void insert (const String&, int insertIndex, const Font&, Colour, UndoManager*, int newCaretPos);
+    void insert (const String&, int insertIndex, const Font&, Color, UndoManager*, int newCaretPos);
     void reinsert (int insertIndex, const OwnedArray<UniformTextSection>&);
     void remove (Range<int>, UndoManager*, int caretPositionToMoveTo);
     void getCharPosition (int index, Point<float>&, float& lineHeight) const;

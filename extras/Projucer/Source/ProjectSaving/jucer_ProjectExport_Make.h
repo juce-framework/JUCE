@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -39,13 +39,13 @@ protected:
             : BuildConfiguration (p, settings, e),
               architectureTypeValue (config, Ids::linuxArchitecture, getUndoManager(), "-march=native")
         {
-            linkTimeOptimisationValue.setDefault (false);
-            optimisationLevelValue.setDefault (isDebug() ? gccO0 : gccO3);
+            linkTimeOptimizationValue.setDefault (false);
+            optimizationLevelValue.setDefault (isDebug() ? gccO0 : gccO3);
         }
 
         void createConfigProperties (PropertyListBuilder& props) override
         {
-            addGCCOptimisationProperty (props);
+            addGCCOptimizationProperty (props);
 
             props.add (new ChoicePropertyComponent (architectureTypeValue, "Architecture",
                                                     { "<None>",      "Native",        "32-bit (-m32)", "64-bit (-m64)", "ARM v6",       "ARM v7" },
@@ -421,7 +421,7 @@ public:
     }
 
     //==============================================================================
-    void initialiseDependencyPathValues() override
+    void initializeDependencyPathValues() override
     {
         vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder),
                                                                 Ids::vst3Path,
@@ -515,9 +515,9 @@ private:
             result.add ("-ggdb");
         }
 
-        result.add ("-O" + config.getGCCOptimisationFlag());
+        result.add ("-O" + config.getGCCOptimizationFlag());
 
-        if (config.isLinkTimeOptimisationEnabled())
+        if (config.isLinkTimeOptimizationEnabled())
             result.add ("-flto");
 
         auto extra = replacePreprocessorTokens (config, getExtraCompilerFlagsString()).trim();
@@ -588,7 +588,7 @@ private:
         if (! config.isDebug())
             result.add ("-fvisibility=hidden");
 
-        if (config.isLinkTimeOptimisationEnabled())
+        if (config.isLinkTimeOptimizationEnabled())
             result.add ("-flto");
 
         auto extraFlags = getExtraLinkerFlagsString().trim();

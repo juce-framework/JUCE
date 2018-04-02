@@ -40,7 +40,7 @@ class JUCE_API  InterprocessConnectionServer    : private Thread
 {
 public:
     //==============================================================================
-    /** Creates an uninitialised server object.
+    /** Creates an uninitialized server object.
     */
     InterprocessConnectionServer();
 

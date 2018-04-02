@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -36,7 +36,7 @@ public:
                 "Type any string into the box, and it'll be shown below as a portable UTF-8 literal, "
                 "ready to cut-and-paste into your source-code...")
     {
-        desc.setJustificationType (Justification::centred);
+        desc.setJustificationType (Justification::centered);
         addAndMakeVisible (desc);
 
         userText.setMultiLine (true, true);

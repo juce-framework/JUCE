@@ -1042,8 +1042,8 @@ private:
 public:
     WinRTMidiService()
     {
-        if (! WinRTWrapper::getInstance()->isInitialised())
-            throw std::runtime_error ("Failed to initialise the WinRT wrapper");
+        if (! WinRTWrapper::getInstance()->isInitialized())
+            throw std::runtime_error ("Failed to initialize the WinRT wrapper");
 
         midiInFactory = WinRTWrapper::getInstance()->getWRLFactory<IMidiInPortStatics> (&RuntimeClass_Windows_Devices_Midi_MidiInPort[0]);
         if (midiInFactory == nullptr)

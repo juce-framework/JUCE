@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -173,7 +173,7 @@ struct LegacyParametersPanel   : public Component
 
     void paint (Graphics& g) override
     {
-        g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+        g.fillAll (getLookAndFeel().findColor (ResizableWindow::backgroundColorId));
     }
 
     void resized() override
@@ -363,7 +363,7 @@ private:
                 // When a parameter provides a list of strings we must set its
                 // value using those strings, rather than a float, because VSTs can
                 // have uneven spacing between the different allowed values and we
-                // want the snapping behaviour to be consistent with what we do with
+                // want the snapping behavior to be consistent with what we do with
                 // a combo box.
                 String selectedText = buttonState ? buttons[1]->getButtonText() : buttons[0]->getButtonText();
                 getParameter().setValueNotifyingHost (getParameter().getValueForText (selectedText));
@@ -473,9 +473,9 @@ public:
         slider.setScrollWheelEnabled (false);
         addAndMakeVisible (slider);
 
-        valueLabel.setColour (Label::outlineColourId, slider.findColour (Slider::textBoxOutlineColourId));
+        valueLabel.setColor (Label::outlineColorId, slider.findColor (Slider::textBoxOutlineColorId));
         valueLabel.setBorderSize ({ 1, 1, 1, 1 });
-        valueLabel.setJustificationType (Justification::centred);
+        valueLabel.setJustificationType (Justification::centered);
         addAndMakeVisible (valueLabel);
 
         // Set the initial value.
@@ -556,7 +556,7 @@ public:
         : parameter (param)
     {
         parameterName.setText (parameter.getName (128), dontSendNotification);
-        parameterName.setJustificationType (Justification::centredRight);
+        parameterName.setJustificationType (Justification::centeredRight);
         addAndMakeVisible (parameterName);
 
         parameterLabel.setText (parameter.getLabel(), dontSendNotification);
@@ -629,7 +629,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+        g.fillAll (getLookAndFeel().findColor (ResizableWindow::backgroundColorId));
     }
 
     void resized() override
@@ -671,7 +671,7 @@ GenericAudioProcessorEditor::~GenericAudioProcessorEditor() {}
 
 void GenericAudioProcessorEditor::paint (Graphics& g)
 {
-    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+    g.fillAll (getLookAndFeel().findColor (ResizableWindow::backgroundColorId));
 }
 
 void GenericAudioProcessorEditor::resized()

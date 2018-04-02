@@ -1383,7 +1383,7 @@ public:
         fifoWritePointers = fifos.getArrayOfWritePointers();
         fifos.clear();
         startThread (9);
-        threadInitialised.wait();
+        threadInitialized.wait();
 
         return {};
     }
@@ -1559,7 +1559,7 @@ private:
     AudioBuffer<float> fifos;
     const float** fifoReadPointers = nullptr;
     float** fifoWritePointers = nullptr;
-    WaitableEvent threadInitialised;
+    WaitableEvent threadInitialized;
     CriticalSection closeLock;
 
     BigInteger inputChannelsRequested, outputChannelsRequested;
@@ -1592,7 +1592,7 @@ private:
 
         jassert (numInputChans + numOutputChans == buffer.getNumChannels());
 
-        threadInitialised.signal();
+        threadInitialized.signal();
 
         while (! threadShouldExit())
         {

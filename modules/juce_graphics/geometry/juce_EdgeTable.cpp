@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -104,7 +104,7 @@ EdgeTable::EdgeTable (Rectangle<int> area, const Path& path, const AffineTransfo
         }
     }
 
-    sanitiseLevels (path.isUsingNonZeroWinding());
+    sanitizeLevels (path.isUsingNonZeroWinding());
 }
 
 EdgeTable::EdgeTable (Rectangle<int> rectangleToAdd)
@@ -149,7 +149,7 @@ EdgeTable::EdgeTable (const RectangleList<int>& rectanglesToAdd)
             addEdgePointPair (x1, x2, y++, 255);
     }
 
-    sanitiseLevels (true);
+    sanitizeLevels (true);
 }
 
 EdgeTable::EdgeTable (const RectangleList<float>& rectanglesToAdd)
@@ -191,7 +191,7 @@ EdgeTable::EdgeTable (const RectangleList<float>& rectanglesToAdd)
         }
     }
 
-    sanitiseLevels (true);
+    sanitizeLevels (true);
 }
 
 EdgeTable::EdgeTable (Rectangle<float> rectangleToAdd)
@@ -324,7 +324,7 @@ void EdgeTable::copyEdgeTableData (int* dest, int destLineStride, const int* src
     }
 }
 
-void EdgeTable::sanitiseLevels (const bool useNonZeroWinding) noexcept
+void EdgeTable::sanitizeLevels (const bool useNonZeroWinding) noexcept
 {
     // Convert the table from relative windings to absolute levels..
     int* lineStart = table;
@@ -412,7 +412,7 @@ inline void EdgeTable::remapWithExtraSpace (int numPoints)
     jassert (numPoints < maxEdgesPerLine);
 }
 
-void EdgeTable::optimiseTable()
+void EdgeTable::optimizeTable()
 {
     int maxLineElements = 0;
 
@@ -522,7 +522,7 @@ void EdgeTable::intersectWithEdgeTableLine (const int y, const int* const otherL
 
     auto right = bounds.getRight() << 8;
 
-    // optimise for the common case where our line lies entirely within a
+    // optimize for the common case where our line lies entirely within a
     // single pair of points, as happens when clipping to a simple rect.
     if (srcNum2 == 2 && otherLine[2] >= 255)
     {

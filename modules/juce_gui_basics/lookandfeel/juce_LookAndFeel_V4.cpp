@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -27,79 +27,79 @@
 namespace juce
 {
 
-Colour LookAndFeel_V4::ColourScheme::getUIColour (UIColour index) const noexcept
+Color LookAndFeel_V4::ColorScheme::getUIColor (UIColor index) const noexcept
 {
-    if (isPositiveAndBelow (index, numColours))
+    if (isPositiveAndBelow (index, numColors))
         return palette[index];
 
     jassertfalse;
     return {};
 }
 
-void LookAndFeel_V4::ColourScheme::setUIColour (UIColour index, Colour newColour) noexcept
+void LookAndFeel_V4::ColorScheme::setUIColor (UIColor index, Color newColor) noexcept
 {
-    if (isPositiveAndBelow (index, numColours))
-        palette[index] = newColour;
+    if (isPositiveAndBelow (index, numColors))
+        palette[index] = newColor;
     else
         jassertfalse;
 }
 
-bool LookAndFeel_V4::ColourScheme::operator== (const ColourScheme& other) const noexcept
+bool LookAndFeel_V4::ColorScheme::operator== (const ColorScheme& other) const noexcept
 {
-    for (auto i = 0; i < numColours; ++i)
+    for (auto i = 0; i < numColors; ++i)
         if (palette[i] != other.palette[i])
             return false;
 
     return true;
 }
 
-bool LookAndFeel_V4::ColourScheme::operator!= (const ColourScheme& other) const noexcept
+bool LookAndFeel_V4::ColorScheme::operator!= (const ColorScheme& other) const noexcept
 {
     return ! operator== (other);
 }
 
 //==============================================================================
-LookAndFeel_V4::LookAndFeel_V4()  : currentColourScheme (getDarkColourScheme())
+LookAndFeel_V4::LookAndFeel_V4()  : currentColorScheme (getDarkColorScheme())
 {
-    initialiseColours();
+    initializeColors();
 }
 
-LookAndFeel_V4::LookAndFeel_V4 (ColourScheme scheme)  : currentColourScheme (scheme)
+LookAndFeel_V4::LookAndFeel_V4 (ColorScheme scheme)  : currentColorScheme (scheme)
 {
-    initialiseColours();
+    initializeColors();
 }
 
 LookAndFeel_V4::~LookAndFeel_V4()  {}
 
 //==============================================================================
-void LookAndFeel_V4::setColourScheme (ColourScheme newColourScheme)
+void LookAndFeel_V4::setColorScheme (ColorScheme newColorScheme)
 {
-    currentColourScheme = newColourScheme;
-    initialiseColours();
+    currentColorScheme = newColorScheme;
+    initializeColors();
 }
 
-LookAndFeel_V4::ColourScheme LookAndFeel_V4::getDarkColourScheme()
+LookAndFeel_V4::ColorScheme LookAndFeel_V4::getDarkColorScheme()
 {
     return { 0xff323e44, 0xff263238, 0xff323e44,
              0xff8e989b, 0xffffffff, 0xff42a2c8,
              0xffffffff, 0xff181f22, 0xffffffff };
 }
 
-LookAndFeel_V4::ColourScheme LookAndFeel_V4::getMidnightColourScheme()
+LookAndFeel_V4::ColorScheme LookAndFeel_V4::getMidnightColorScheme()
 {
     return { 0xff2f2f3a, 0xff191926, 0xffd0d0d0,
              0xff66667c, 0xc8ffffff, 0xffd8d8d8,
              0xffffffff, 0xff606073, 0xff000000 };
 }
 
-LookAndFeel_V4::ColourScheme LookAndFeel_V4::getGreyColourScheme()
+LookAndFeel_V4::ColorScheme LookAndFeel_V4::getGrayColorScheme()
 {
     return { 0xff505050, 0xff424242, 0xff606060,
              0xffa6a6a6, 0xffffffff, 0xff21ba90,
              0xff000000, 0xffffffff, 0xffffffff };
 }
 
-LookAndFeel_V4::ColourScheme LookAndFeel_V4::getLightColourScheme()
+LookAndFeel_V4::ColorScheme LookAndFeel_V4::getLightColorScheme()
 {
     return { 0xffefefef, 0xffffffff, 0xffffffff,
              0xffdddddd, 0xff000000, 0xffa9a9a9,
@@ -110,33 +110,33 @@ LookAndFeel_V4::ColourScheme LookAndFeel_V4::getLightColourScheme()
 class LookAndFeel_V4_DocumentWindowButton   : public Button
 {
 public:
-    LookAndFeel_V4_DocumentWindowButton (const String& name, Colour c, const Path& normal, const Path& toggled)
-        : Button (name), colour (c), normalShape (normal), toggledShape (toggled)
+    LookAndFeel_V4_DocumentWindowButton (const String& name, Color c, const Path& normal, const Path& toggled)
+        : Button (name), color (c), normalShape (normal), toggledShape (toggled)
     {
     }
 
     void paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown) override
     {
-        auto background = Colours::grey;
+        auto background = Colors::gray;
 
         if (auto* rw = findParentComponentOfClass<ResizableWindow>())
             if (auto lf = dynamic_cast<LookAndFeel_V4*> (&rw->getLookAndFeel()))
-                background = lf->getCurrentColourScheme().getUIColour (LookAndFeel_V4::ColourScheme::widgetBackground);
+                background = lf->getCurrentColorScheme().getUIColor (LookAndFeel_V4::ColorScheme::widgetBackground);
 
         g.fillAll (background);
 
-        g.setColour ((! isEnabled() || isButtonDown) ? colour.withAlpha (0.6f)
-                                                     : colour);
+        g.setColor ((! isEnabled() || isButtonDown) ? color.withAlpha (0.6f)
+                                                     : color);
 
         if (isMouseOverButton)
         {
             g.fillAll();
-            g.setColour (background);
+            g.setColor (background);
         }
 
         auto& p = getToggleState() ? toggledShape : normalShape;
 
-        auto reducedRect = Justification (Justification::centred)
+        auto reducedRect = Justification (Justification::centered)
                               .appliedToRectangle (Rectangle<int> (getHeight(), getHeight()), getLocalBounds())
                               .toFloat()
                               .reduced (getHeight() * 0.3f);
@@ -145,7 +145,7 @@ public:
     }
 
 private:
-    Colour colour;
+    Color color;
     Path normalShape, toggledShape;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LookAndFeel_V4_DocumentWindowButton)
@@ -161,17 +161,17 @@ Button* LookAndFeel_V4::createDocumentWindowButton (int buttonType)
         shape.addLineSegment ({ 0.0f, 0.0f, 1.0f, 1.0f }, crossThickness);
         shape.addLineSegment ({ 1.0f, 0.0f, 0.0f, 1.0f }, crossThickness);
 
-        return new LookAndFeel_V4_DocumentWindowButton ("close", Colour (0xff9A131D), shape, shape);
+        return new LookAndFeel_V4_DocumentWindowButton ("close", Color (0xff9A131D), shape, shape);
     }
 
-    if (buttonType == DocumentWindow::minimiseButton)
+    if (buttonType == DocumentWindow::minimizeButton)
     {
         shape.addLineSegment ({ 0.0f, 0.5f, 1.0f, 0.5f }, crossThickness);
 
-        return new LookAndFeel_V4_DocumentWindowButton ("minimise", Colour (0xffaa8811), shape, shape);
+        return new LookAndFeel_V4_DocumentWindowButton ("minimize", Color (0xffaa8811), shape, shape);
     }
 
-    if (buttonType == DocumentWindow::maximiseButton)
+    if (buttonType == DocumentWindow::maximizeButton)
     {
         shape.addLineSegment ({ 0.5f, 0.0f, 0.5f, 1.0f }, crossThickness);
         shape.addLineSegment ({ 0.0f, 0.5f, 1.0f, 0.5f }, crossThickness);
@@ -185,7 +185,7 @@ Button* LookAndFeel_V4::createDocumentWindowButton (int buttonType)
         fullscreenShape.addRectangle (45.0f, 45.0f, 100.0f, 100.0f);
         PathStrokeType (30.0f).createStrokedPath (fullscreenShape, fullscreenShape);
 
-        return new LookAndFeel_V4_DocumentWindowButton ("maximise", Colour (0xff0A830A), shape, fullscreenShape);
+        return new LookAndFeel_V4_DocumentWindowButton ("maximize", Color (0xff0A830A), shape, fullscreenShape);
     }
 
     jassertfalse;
@@ -195,8 +195,8 @@ Button* LookAndFeel_V4::createDocumentWindowButton (int buttonType)
 void LookAndFeel_V4::positionDocumentWindowButtons (DocumentWindow&,
                                                     int titleBarX, int titleBarY,
                                                     int titleBarW, int titleBarH,
-                                                    Button* minimiseButton,
-                                                    Button* maximiseButton,
+                                                    Button* minimizeButton,
+                                                    Button* maximizeButton,
                                                     Button* closeButton,
                                                     bool positionTitleBarButtonsOnLeft)
 {
@@ -214,16 +214,16 @@ void LookAndFeel_V4::positionDocumentWindowButtons (DocumentWindow&,
     }
 
     if (positionTitleBarButtonsOnLeft)
-        std::swap (minimiseButton, maximiseButton);
+        std::swap (minimizeButton, maximizeButton);
 
-    if (maximiseButton != nullptr)
+    if (maximizeButton != nullptr)
     {
-        maximiseButton->setBounds (x, titleBarY, buttonW, titleBarH);
+        maximizeButton->setBounds (x, titleBarY, buttonW, titleBarH);
         x += positionTitleBarButtonsOnLeft ? buttonW : -buttonW;
     }
 
-    if (minimiseButton != nullptr)
-        minimiseButton->setBounds (x, titleBarY, buttonW, titleBarH);
+    if (minimizeButton != nullptr)
+        minimizeButton->setBounds (x, titleBarY, buttonW, titleBarH);
 }
 
 void LookAndFeel_V4::drawDocumentWindowTitleBar (DocumentWindow& window, Graphics& g,
@@ -235,7 +235,7 @@ void LookAndFeel_V4::drawDocumentWindowTitleBar (DocumentWindow& window, Graphic
 
     auto isActive = window.isActiveWindow();
 
-    g.setColour (getCurrentColourScheme().getUIColour (ColourScheme::widgetBackground));
+    g.setColor (getCurrentColorScheme().getUIColor (ColorScheme::widgetBackground));
     g.fillAll();
 
     Font font (h * 0.65f, Font::plain);
@@ -262,17 +262,17 @@ void LookAndFeel_V4::drawDocumentWindowTitleBar (DocumentWindow& window, Graphic
     {
         g.setOpacity (isActive ? 1.0f : 0.6f);
         g.drawImageWithin (*icon, textX, (h - iconH) / 2, iconW, iconH,
-                           RectanglePlacement::centred, false);
+                           RectanglePlacement::centered, false);
         textX += iconW;
         textW -= iconW;
     }
 
-    if (window.isColourSpecified (DocumentWindow::textColourId) || isColourSpecified (DocumentWindow::textColourId))
-        g.setColour (window.findColour (DocumentWindow::textColourId));
+    if (window.isColorSpecified (DocumentWindow::textColorId) || isColorSpecified (DocumentWindow::textColorId))
+        g.setColor (window.findColor (DocumentWindow::textColorId));
     else
-        g.setColour (getCurrentColourScheme().getUIColour (ColourScheme::defaultText));
+        g.setColor (getCurrentColorScheme().getUIColor (ColorScheme::defaultText));
 
-    g.drawText (window.getName(), textX, 0, textW, h, Justification::centredLeft, true);
+    g.drawText (window.getName(), textX, 0, textW, h, Justification::centeredLeft, true);
 }
 
 //==============================================================================
@@ -283,20 +283,20 @@ Font LookAndFeel_V4::getTextButtonFont (TextButton&, int buttonHeight)
 
 void LookAndFeel_V4::drawButtonBackground (Graphics& g,
                                            Button& button,
-                                           const Colour& backgroundColour,
+                                           const Color& backgroundColor,
                                            bool isMouseOverButton,
                                            bool isButtonDown)
 {
     auto cornerSize = 6.0f;
     auto bounds = button.getLocalBounds().toFloat().reduced (0.5f, 0.5f);
 
-    auto baseColour = backgroundColour.withMultipliedSaturation (button.hasKeyboardFocus (true) ? 1.3f : 0.9f)
+    auto baseColor = backgroundColor.withMultipliedSaturation (button.hasKeyboardFocus (true) ? 1.3f : 0.9f)
                                       .withMultipliedAlpha (button.isEnabled() ? 1.0f : 0.5f);
 
     if (isButtonDown || isMouseOverButton)
-        baseColour = baseColour.contrasting (isButtonDown ? 0.2f : 0.05f);
+        baseColor = baseColor.contrasting (isButtonDown ? 0.2f : 0.05f);
 
-    g.setColour (baseColour);
+    g.setColor (baseColor);
 
     if (button.isConnectedOnLeft() || button.isConnectedOnRight())
     {
@@ -311,14 +311,14 @@ void LookAndFeel_V4::drawButtonBackground (Graphics& g,
 
         g.fillPath (path);
 
-        g.setColour (button.findColour (ComboBox::outlineColourId));
+        g.setColor (button.findColor (ComboBox::outlineColorId));
         g.strokePath (path, PathStrokeType (1.0f));
     }
     else
     {
         g.fillRoundedRectangle (bounds, cornerSize);
 
-        g.setColour (button.findColour (ComboBox::outlineColourId));
+        g.setColor (button.findColor (ComboBox::outlineColorId));
         g.drawRoundedRectangle (bounds, cornerSize, 1.0f);
     }
 }
@@ -336,7 +336,7 @@ void LookAndFeel_V4::drawToggleButton (Graphics& g, ToggleButton& button,
                  isMouseOverButton,
                  isButtonDown);
 
-    g.setColour (button.findColour (ToggleButton::textColourId));
+    g.setColor (button.findColor (ToggleButton::textColorId));
     g.setFont (fontSize);
 
     if (! button.isEnabled())
@@ -345,7 +345,7 @@ void LookAndFeel_V4::drawToggleButton (Graphics& g, ToggleButton& button,
     g.drawFittedText (button.getButtonText(),
                       button.getLocalBounds().withTrimmedLeft (roundToInt (tickWidth) + 10)
                                              .withTrimmedRight (2),
-                      Justification::centredLeft, 10);
+                      Justification::centeredLeft, 10);
 }
 
 void LookAndFeel_V4::drawTickBox (Graphics& g, Component& component,
@@ -359,12 +359,12 @@ void LookAndFeel_V4::drawTickBox (Graphics& g, Component& component,
 
     Rectangle<float> tickBounds (x, y, w, h);
 
-    g.setColour (component.findColour (ToggleButton::tickDisabledColourId));
+    g.setColor (component.findColor (ToggleButton::tickDisabledColorId));
     g.drawRoundedRectangle (tickBounds, 4.0f, 1.0f);
 
     if (ticked)
     {
-        g.setColour (component.findColour (ToggleButton::tickColourId));
+        g.setColor (component.findColor (ToggleButton::tickColorId));
         auto tick = getTickShape (0.75f);
         g.fillPath (tick, tick.getTransformToScaleToFit (tickBounds.reduced (4, 5).toFloat(), false));
     }
@@ -392,7 +392,7 @@ AlertWindow* LookAndFeel_V4::createAlertWindow (const String& title, const Strin
                                                   iconType, numButtons, associatedComponent);
 
     auto bounds = aw->getBounds();
-    bounds = bounds.withSizeKeepingCentre (bounds.getWidth() + boundsOffset, bounds.getHeight() + boundsOffset);
+    bounds = bounds.withSizeKeepingCenter (bounds.getWidth() + boundsOffset, bounds.getHeight() + boundsOffset);
     aw->setBounds (bounds);
 
     for (auto* child : aw->getChildren())
@@ -407,13 +407,13 @@ void LookAndFeel_V4::drawAlertBox (Graphics& g, AlertWindow& alert,
 {
     auto cornerSize = 4.0f;
 
-    g.setColour (alert.findColour (AlertWindow::outlineColourId));
+    g.setColor (alert.findColor (AlertWindow::outlineColorId));
     g.drawRoundedRectangle (alert.getLocalBounds().toFloat(), cornerSize, 2.0f);
 
     auto bounds = alert.getLocalBounds().reduced (1);
     g.reduceClipRegion (bounds);
 
-    g.setColour (alert.findColour (AlertWindow::backgroundColourId));
+    g.setColor (alert.findColor (AlertWindow::backgroundColorId));
     g.fillRoundedRectangle (bounds.toFloat(), cornerSize);
 
     auto iconSpaceUsed = 0;
@@ -431,7 +431,7 @@ void LookAndFeel_V4::drawAlertBox (Graphics& g, AlertWindow& alert,
     {
         Path icon;
         char character;
-        uint32 colour;
+        uint32 color;
 
         if (alert.getAlertType() == AlertWindow::WarningIcon)
         {
@@ -442,11 +442,11 @@ void LookAndFeel_V4::drawAlertBox (Graphics& g, AlertWindow& alert,
                               static_cast<float> (iconRect.getX()), static_cast<float> (iconRect.getBottom()));
 
             icon = icon.createPathWithRoundedCorners (5.0f);
-            colour = 0x66ff2a00;
+            color = 0x66ff2a00;
         }
         else
         {
-            colour = Colour (0xff00b0b9).withAlpha (0.4f).getARGB();
+            color = Color (0xff00b0b9).withAlpha (0.4f).getARGB();
             character = alert.getAlertType() == AlertWindow::InfoIcon ? 'i' : '?';
 
             icon.addEllipse (iconRect.toFloat());
@@ -457,17 +457,17 @@ void LookAndFeel_V4::drawAlertBox (Graphics& g, AlertWindow& alert,
                           String::charToString ((juce_wchar) (uint8) character),
                           static_cast<float> (iconRect.getX()), static_cast<float> (iconRect.getY()),
                           static_cast<float> (iconRect.getWidth()), static_cast<float> (iconRect.getHeight()),
-                          Justification::centred, false);
+                          Justification::centered, false);
         ga.createPath (icon);
 
         icon.setUsingNonZeroWinding (false);
-        g.setColour (Colour (colour));
+        g.setColor (Color (color));
         g.fillPath (icon);
 
         iconSpaceUsed = iconWidth;
     }
 
-    g.setColour (alert.findColour (AlertWindow::textColourId));
+    g.setColor (alert.findColor (AlertWindow::textColorId));
 
     Rectangle<int> alertBounds (bounds.getX() + iconSpaceUsed, 30,
                                 bounds.getWidth(), bounds.getHeight() - getAlertWindowButtonHeight() - 20);
@@ -494,12 +494,12 @@ void LookAndFeel_V4::drawLinearProgressBar (Graphics& g, ProgressBar& progressBa
                                             int width, int height,
                                             double progress, const String& textToShow)
 {
-    auto background = progressBar.findColour (ProgressBar::backgroundColourId);
-    auto foreground = progressBar.findColour (ProgressBar::foregroundColourId);
+    auto background = progressBar.findColor (ProgressBar::backgroundColorId);
+    auto foreground = progressBar.findColor (ProgressBar::foregroundColorId);
 
     auto barBounds = progressBar.getLocalBounds().toFloat();
 
-    g.setColour (background);
+    g.setColor (background);
     g.fillRoundedRectangle (barBounds, progressBar.getHeight() * 0.5f);
 
     if (progress >= 0.0f && progress <= 1.0f)
@@ -509,13 +509,13 @@ void LookAndFeel_V4::drawLinearProgressBar (Graphics& g, ProgressBar& progressBa
         g.reduceClipRegion (p);
 
         barBounds.setWidth (barBounds.getWidth() * (float) progress);
-        g.setColour (foreground);
+        g.setColor (foreground);
         g.fillRoundedRectangle (barBounds, progressBar.getHeight() * 0.5f);
     }
     else
     {
         // spinning bar..
-        g.setColour (background);
+        g.setColor (background);
 
         auto stripeWidth = height * 2;
         auto position = static_cast<int> (Time::getMillisecondCounter() / 15) % stripeWidth;
@@ -532,7 +532,7 @@ void LookAndFeel_V4::drawLinearProgressBar (Graphics& g, ProgressBar& progressBa
 
         {
             Graphics g2 (im);
-            g2.setColour (foreground);
+            g2.setColor (foreground);
             g2.fillRoundedRectangle (barBounds, progressBar.getHeight() * 0.5f);
         }
 
@@ -542,22 +542,22 @@ void LookAndFeel_V4::drawLinearProgressBar (Graphics& g, ProgressBar& progressBa
 
     if (textToShow.isNotEmpty())
     {
-        g.setColour (Colour::contrasting (background, foreground));
+        g.setColor (Color::contrasting (background, foreground));
         g.setFont (height * 0.6f);
 
-        g.drawText (textToShow, 0, 0, width, height, Justification::centred, false);
+        g.drawText (textToShow, 0, 0, width, height, Justification::centered, false);
     }
 }
 
 void LookAndFeel_V4::drawCircularProgressBar (Graphics& g, ProgressBar& progressBar, const String& progressText)
 {
-    auto background = progressBar.findColour (ProgressBar::backgroundColourId);
-    auto foreground = progressBar.findColour (ProgressBar::foregroundColourId);
+    auto background = progressBar.findColor (ProgressBar::backgroundColorId);
+    auto foreground = progressBar.findColor (ProgressBar::foregroundColorId);
 
     auto barBounds = progressBar.getLocalBounds().reduced (2, 2).toFloat();
 
     auto rotationInDegrees  = static_cast<float> ((Time::getMillisecondCounter() / 10) % 360);
-    auto normalisedRotation = rotationInDegrees / 360.0f;
+    auto normalizedRotation = rotationInDegrees / 360.0f;
 
     auto rotationOffset = 22.5f;
     auto maxRotation    = 315.0f;
@@ -565,22 +565,22 @@ void LookAndFeel_V4::drawCircularProgressBar (Graphics& g, ProgressBar& progress
     auto startInDegrees = rotationInDegrees;
     auto endInDegrees   = startInDegrees + rotationOffset;
 
-    if (normalisedRotation >= 0.25f && normalisedRotation < 0.5f)
+    if (normalizedRotation >= 0.25f && normalizedRotation < 0.5f)
     {
-        auto rescaledRotation = (normalisedRotation * 4.0f) - 1.0f;
+        auto rescaledRotation = (normalizedRotation * 4.0f) - 1.0f;
         endInDegrees = startInDegrees + rotationOffset + (maxRotation * rescaledRotation);
     }
-    else if (normalisedRotation >= 0.5f && normalisedRotation <= 1.0f)
+    else if (normalizedRotation >= 0.5f && normalizedRotation <= 1.0f)
     {
         endInDegrees = startInDegrees + rotationOffset + maxRotation;
-        auto rescaledRotation = 1.0f - ((normalisedRotation * 2.0f) - 1.0f);
+        auto rescaledRotation = 1.0f - ((normalizedRotation * 2.0f) - 1.0f);
         startInDegrees = endInDegrees - rotationOffset - (maxRotation * rescaledRotation);
     }
 
-    g.setColour (background);
+    g.setColor (background);
     Path arcPath2;
-    arcPath2.addCentredArc (barBounds.getCentreX(),
-                            barBounds.getCentreY(),
+    arcPath2.addCenteredArc (barBounds.getCenterX(),
+                            barBounds.getCenterY(),
                             barBounds.getWidth() * 0.5f,
                             barBounds.getHeight() * 0.5f, 0.0f,
                             0.0f,
@@ -588,10 +588,10 @@ void LookAndFeel_V4::drawCircularProgressBar (Graphics& g, ProgressBar& progress
                             true);
     g.strokePath (arcPath2, PathStrokeType (4.0f));
 
-    g.setColour (foreground);
+    g.setColor (foreground);
     Path arcPath;
-    arcPath.addCentredArc (barBounds.getCentreX(),
-                           barBounds.getCentreY(),
+    arcPath.addCenteredArc (barBounds.getCenterX(),
+                           barBounds.getCenterY(),
                            barBounds.getWidth() * 0.5f,
                            barBounds.getHeight() * 0.5f,
                            0.0f,
@@ -599,14 +599,14 @@ void LookAndFeel_V4::drawCircularProgressBar (Graphics& g, ProgressBar& progress
                            degreesToRadians (endInDegrees),
                            true);
 
-    arcPath.applyTransform (AffineTransform::rotation (normalisedRotation * MathConstants<float>::pi * 2.25f, barBounds.getCentreX(), barBounds.getCentreY()));
+    arcPath.applyTransform (AffineTransform::rotation (normalizedRotation * MathConstants<float>::pi * 2.25f, barBounds.getCenterX(), barBounds.getCenterY()));
     g.strokePath (arcPath, PathStrokeType (4.0f));
 
     if (progressText.isNotEmpty())
     {
-        g.setColour (progressBar.findColour (TextButton::textColourOffId));
+        g.setColor (progressBar.findColor (TextButton::textColorOffId));
         g.setFont ({ 12.0f, Font::italic });
-        g.drawText (progressText, barBounds, Justification::centred, false);
+        g.drawText (progressText, barBounds, Justification::centered, false);
     }
 }
 
@@ -628,8 +628,8 @@ void LookAndFeel_V4::drawScrollbar (Graphics& g, ScrollBar& scrollbar, int x, in
     else
         thumbBounds = { thumbStartPosition, y, thumbSize, height };
 
-    auto c = scrollbar.findColour (ScrollBar::ColourIds::thumbColourId);
-    g.setColour (isMouseOver ? c.brighter (0.25f) : c);
+    auto c = scrollbar.findColor (ScrollBar::ColorIds::thumbColorId);
+    g.setColor (isMouseOver ? c.brighter (0.25f) : c);
     g.fillRoundedRectangle (thumbBounds.reduced (1).toFloat(), 4.0f);
 }
 
@@ -664,10 +664,10 @@ void LookAndFeel_V4::fillTextEditorBackground (Graphics& g, int width, int heigh
 {
     if (dynamic_cast<AlertWindow*> (textEditor.getParentComponent()) != nullptr)
     {
-        g.setColour (textEditor.findColour (TextEditor::backgroundColourId));
+        g.setColor (textEditor.findColor (TextEditor::backgroundColorId));
         g.fillRect (0, 0, width, height);
 
-        g.setColour (textEditor.findColour (TextEditor::outlineColourId));
+        g.setColor (textEditor.findColor (TextEditor::outlineColorId));
         g.drawHorizontalLine (height - 1, 0.0f, static_cast<float> (width));
     }
     else
@@ -684,12 +684,12 @@ void LookAndFeel_V4::drawTextEditorOutline (Graphics& g, int width, int height, 
         {
             if (textEditor.hasKeyboardFocus (true) && ! textEditor.isReadOnly())
             {
-                g.setColour (textEditor.findColour (TextEditor::focusedOutlineColourId));
+                g.setColor (textEditor.findColor (TextEditor::focusedOutlineColorId));
                 g.drawRect (0, 0, width, height, 2);
             }
             else
             {
-                g.setColour (textEditor.findColour (TextEditor::outlineColourId));
+                g.setColor (textEditor.findColor (TextEditor::outlineColorId));
                 g.drawRect (0, 0, width, height);
             }
         }
@@ -705,7 +705,7 @@ Button* LookAndFeel_V4::createFileBrowserGoUpButton()
     arrowPath.addArrow ({ 50.0f, 100.0f, 50.0f, 0.0f }, 40.0f, 100.0f, 50.0f);
 
     DrawablePath arrowImage;
-    arrowImage.setFill (goUpButton->findColour (TextButton::textColourOffId));
+    arrowImage.setFill (goUpButton->findColor (TextButton::textColorOffId));
     arrowImage.setPath (arrowPath);
 
     goUpButton->setImages (&arrowImage);
@@ -761,33 +761,33 @@ void LookAndFeel_V4::drawPopupMenuItem (Graphics& g, const Rectangle<int>& area,
                                         const bool isHighlighted, const bool isTicked,
                                         const bool hasSubMenu, const String& text,
                                         const String& shortcutKeyText,
-                                        const Drawable* icon, const Colour* const textColourToUse)
+                                        const Drawable* icon, const Color* const textColorToUse)
 {
     if (isSeparator)
     {
         auto r  = area.reduced (5, 0);
         r.removeFromTop (roundToInt ((r.getHeight() * 0.5f) - 0.5f));
 
-        g.setColour (findColour (PopupMenu::textColourId).withAlpha (0.3f));
+        g.setColor (findColor (PopupMenu::textColorId).withAlpha (0.3f));
         g.fillRect (r.removeFromTop (1));
     }
     else
     {
-        auto textColour = (textColourToUse == nullptr ? findColour (PopupMenu::textColourId)
-                                                      : *textColourToUse);
+        auto textColor = (textColorToUse == nullptr ? findColor (PopupMenu::textColorId)
+                                                      : *textColorToUse);
 
         auto r  = area.reduced (1);
 
         if (isHighlighted && isActive)
         {
-            g.setColour (findColour (PopupMenu::highlightedBackgroundColourId));
+            g.setColor (findColor (PopupMenu::highlightedBackgroundColorId));
             g.fillRect (r);
 
-            g.setColour (findColour (PopupMenu::highlightedTextColourId));
+            g.setColor (findColor (PopupMenu::highlightedTextColorId));
         }
         else
         {
-            g.setColour (textColour.withMultipliedAlpha (isActive ? 1.0f : 0.5f));
+            g.setColor (textColor.withMultipliedAlpha (isActive ? 1.0f : 0.5f));
         }
 
         r.reduce (jmin (5, area.getWidth() / 20), 0);
@@ -805,7 +805,7 @@ void LookAndFeel_V4::drawPopupMenuItem (Graphics& g, const Rectangle<int>& area,
 
         if (icon != nullptr)
         {
-            icon->drawWithin (g, iconArea, RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize, 1.0f);
+            icon->drawWithin (g, iconArea, RectanglePlacement::centered | RectanglePlacement::onlyReduceInSize, 1.0f);
             r.removeFromLeft (roundToInt (maxFontHeight * 0.5f));
         }
         else if (isTicked)
@@ -819,7 +819,7 @@ void LookAndFeel_V4::drawPopupMenuItem (Graphics& g, const Rectangle<int>& area,
             auto arrowH = 0.6f * getPopupMenuFont().getAscent();
 
             auto x = static_cast<float> (r.removeFromRight ((int) arrowH).getX());
-            auto halfH = static_cast<float> (r.getCentreY());
+            auto halfH = static_cast<float> (r.getCenterY());
 
             Path path;
             path.startNewSubPath (x, halfH - arrowH * 0.5f);
@@ -830,7 +830,7 @@ void LookAndFeel_V4::drawPopupMenuItem (Graphics& g, const Rectangle<int>& area,
         }
 
         r.removeFromRight (3);
-        g.drawFittedText (text, r, Justification::centredLeft, 1);
+        g.drawFittedText (text, r, Justification::centeredLeft, 1);
 
         if (shortcutKeyText.isNotEmpty())
         {
@@ -839,7 +839,7 @@ void LookAndFeel_V4::drawPopupMenuItem (Graphics& g, const Rectangle<int>& area,
             f2.setHorizontalScale (0.95f);
             g.setFont (f2);
 
-            g.drawText (shortcutKeyText, r, Justification::centredRight, true);
+            g.drawText (shortcutKeyText, r, Justification::centeredRight, true);
         }
     }
 }
@@ -867,15 +867,15 @@ void LookAndFeel_V4::getIdealPopupMenuItemSize (const String& text, const bool i
 void LookAndFeel_V4::drawMenuBarBackground (Graphics& g, int width, int height,
                                             bool, MenuBarComponent& menuBar)
 {
-    auto colour = menuBar.findColour (TextButton::buttonColourId).withAlpha (0.4f);
+    auto color = menuBar.findColor (TextButton::buttonColorId).withAlpha (0.4f);
 
     Rectangle<int> r (width, height);
 
-    g.setColour (colour.contrasting (0.15f));
+    g.setColor (color.contrasting (0.15f));
     g.fillRect  (r.removeFromTop (1));
     g.fillRect  (r.removeFromBottom (1));
 
-    g.setGradientFill (ColourGradient::vertical (colour, 0, colour.darker (0.2f), (float) height));
+    g.setGradientFill (ColorGradient::vertical (color, 0, color.darker (0.2f), (float) height));
     g.fillRect (r);
 }
 
@@ -886,21 +886,21 @@ void LookAndFeel_V4::drawMenuBarItem (Graphics& g, int width, int height,
 {
     if (! menuBar.isEnabled())
     {
-        g.setColour (menuBar.findColour (TextButton::textColourOffId)
+        g.setColor (menuBar.findColor (TextButton::textColorOffId)
                             .withMultipliedAlpha (0.5f));
     }
     else if (isMenuOpen || isMouseOverItem)
     {
-        g.fillAll   (menuBar.findColour (TextButton::buttonOnColourId));
-        g.setColour (menuBar.findColour (TextButton::textColourOnId));
+        g.fillAll   (menuBar.findColor (TextButton::buttonOnColorId));
+        g.setColor (menuBar.findColor (TextButton::textColorOnId));
     }
     else
     {
-        g.setColour (menuBar.findColour (TextButton::textColourOffId));
+        g.setColor (menuBar.findColor (TextButton::textColorOffId));
     }
 
     g.setFont (getMenuBarFont (menuBar, itemIndex, itemText));
-    g.drawFittedText (itemText, 0, 0, width, height, Justification::centred, 1);
+    g.drawFittedText (itemText, 0, 0, width, height, Justification::centered, 1);
 }
 
 //==============================================================================
@@ -910,19 +910,19 @@ void LookAndFeel_V4::drawComboBox (Graphics& g, int width, int height, bool,
     auto cornerSize = box.findParentComponentOfClass<ChoicePropertyComponent>() != nullptr ? 0.0f : 3.0f;
     Rectangle<int> boxBounds (0, 0, width, height);
 
-    g.setColour (box.findColour (ComboBox::backgroundColourId));
+    g.setColor (box.findColor (ComboBox::backgroundColorId));
     g.fillRoundedRectangle (boxBounds.toFloat(), cornerSize);
 
-    g.setColour (box.findColour (ComboBox::outlineColourId));
+    g.setColor (box.findColor (ComboBox::outlineColorId));
     g.drawRoundedRectangle (boxBounds.toFloat().reduced (0.5f, 0.5f), cornerSize, 1.0f);
 
     Rectangle<int> arrowZone (width - 30, 0, 20, height);
     Path path;
-    path.startNewSubPath (arrowZone.getX() + 3.0f, arrowZone.getCentreY() - 2.0f);
-    path.lineTo (static_cast<float> (arrowZone.getCentreX()), arrowZone.getCentreY() + 3.0f);
-    path.lineTo (arrowZone.getRight() - 3.0f, arrowZone.getCentreY() - 2.0f);
+    path.startNewSubPath (arrowZone.getX() + 3.0f, arrowZone.getCenterY() - 2.0f);
+    path.lineTo (static_cast<float> (arrowZone.getCenterX()), arrowZone.getCenterY() + 3.0f);
+    path.lineTo (arrowZone.getRight() - 3.0f, arrowZone.getCenterY() - 2.0f);
 
-    g.setColour (box.findColour (ComboBox::arrowColourId).withAlpha ((box.isEnabled() ? 0.9f : 0.2f)));
+    g.setColor (box.findColor (ComboBox::arrowColorId).withAlpha ((box.isEnabled() ? 0.9f : 0.2f)));
     g.strokePath (path, PathStrokeType (2.0f));
 }
 
@@ -955,7 +955,7 @@ void LookAndFeel_V4::drawLinearSlider (Graphics& g, int x, int y, int width, int
 {
     if (slider.isBar())
     {
-        g.setColour (slider.findColour (Slider::trackColourId));
+        g.setColor (slider.findColor (Slider::trackColorId));
         g.fillRect (slider.isHorizontal() ? Rectangle<float> (static_cast<float> (x), y + 0.5f, sliderPos - x, height - 1.0f)
                                           : Rectangle<float> (x + 0.5f, sliderPos, width - 1.0f, y + (height - sliderPos)));
     }
@@ -975,7 +975,7 @@ void LookAndFeel_V4::drawLinearSlider (Graphics& g, int x, int y, int width, int
         Path backgroundTrack;
         backgroundTrack.startNewSubPath (startPoint);
         backgroundTrack.lineTo (endPoint);
-        g.setColour (slider.findColour (Slider::backgroundColourId));
+        g.setColor (slider.findColor (Slider::backgroundColorId));
         g.strokePath (backgroundTrack, { trackWidth, PathStrokeType::curved, PathStrokeType::rounded });
 
         Path valueTrack;
@@ -1006,38 +1006,38 @@ void LookAndFeel_V4::drawLinearSlider (Graphics& g, int x, int y, int width, int
 
         valueTrack.startNewSubPath (minPoint);
         valueTrack.lineTo (isThreeVal ? thumbPoint : maxPoint);
-        g.setColour (slider.findColour (Slider::trackColourId));
+        g.setColor (slider.findColor (Slider::trackColorId));
         g.strokePath (valueTrack, { trackWidth, PathStrokeType::curved, PathStrokeType::rounded });
 
         if (! isTwoVal)
         {
-            g.setColour (slider.findColour (Slider::thumbColourId));
-            g.fillEllipse (Rectangle<float> (static_cast<float> (thumbWidth), static_cast<float> (thumbWidth)).withCentre (isThreeVal ? thumbPoint : maxPoint));
+            g.setColor (slider.findColor (Slider::thumbColorId));
+            g.fillEllipse (Rectangle<float> (static_cast<float> (thumbWidth), static_cast<float> (thumbWidth)).withCenter (isThreeVal ? thumbPoint : maxPoint));
         }
 
         if (isTwoVal || isThreeVal)
         {
             auto sr = jmin (trackWidth, (slider.isHorizontal() ? height : width) * 0.4f);
-            auto pointerColour = slider.findColour (Slider::thumbColourId);
+            auto pointerColor = slider.findColor (Slider::thumbColorId);
 
             if (slider.isHorizontal())
             {
                 drawPointer (g, minSliderPos - sr,
                              jmax (0.0f, y + height * 0.5f - trackWidth * 2.0f),
-                             trackWidth * 2.0f, pointerColour, 2);
+                             trackWidth * 2.0f, pointerColor, 2);
 
                 drawPointer (g, maxSliderPos - trackWidth,
                              jmin (y + height - trackWidth * 2.0f, y + height * 0.5f),
-                             trackWidth * 2.0f, pointerColour, 4);
+                             trackWidth * 2.0f, pointerColor, 4);
             }
             else
             {
                 drawPointer (g, jmax (0.0f, x + width * 0.5f - trackWidth * 2.0f),
                              minSliderPos - trackWidth,
-                             trackWidth * 2.0f, pointerColour, 1);
+                             trackWidth * 2.0f, pointerColor, 1);
 
                 drawPointer (g, jmin (x + width - trackWidth * 2.0f, x + width * 0.5f), maxSliderPos - sr,
-                             trackWidth * 2.0f, pointerColour, 3);
+                             trackWidth * 2.0f, pointerColor, 3);
             }
         }
     }
@@ -1046,8 +1046,8 @@ void LookAndFeel_V4::drawLinearSlider (Graphics& g, int x, int y, int width, int
 void LookAndFeel_V4::drawRotarySlider (Graphics& g, int x, int y, int width, int height, float sliderPos,
                                        const float rotaryStartAngle, const float rotaryEndAngle, Slider& slider)
 {
-    auto outline = slider.findColour (Slider::rotarySliderOutlineColourId);
-    auto fill    = slider.findColour (Slider::rotarySliderFillColourId);
+    auto outline = slider.findColor (Slider::rotarySliderOutlineColorId);
+    auto fill    = slider.findColor (Slider::rotarySliderFillColorId);
 
     auto bounds = Rectangle<int> (x, y, width, height).toFloat().reduced (10);
 
@@ -1057,8 +1057,8 @@ void LookAndFeel_V4::drawRotarySlider (Graphics& g, int x, int y, int width, int
     auto arcRadius = radius - lineW * 0.5f;
 
     Path backgroundArc;
-    backgroundArc.addCentredArc (bounds.getCentreX(),
-                                 bounds.getCentreY(),
+    backgroundArc.addCenteredArc (bounds.getCenterX(),
+                                 bounds.getCenterY(),
                                  arcRadius,
                                  arcRadius,
                                  0.0f,
@@ -1066,14 +1066,14 @@ void LookAndFeel_V4::drawRotarySlider (Graphics& g, int x, int y, int width, int
                                  rotaryEndAngle,
                                  true);
 
-    g.setColour (outline);
+    g.setColor (outline);
     g.strokePath (backgroundArc, PathStrokeType (lineW, PathStrokeType::curved, PathStrokeType::rounded));
 
     if (slider.isEnabled())
     {
         Path valueArc;
-        valueArc.addCentredArc (bounds.getCentreX(),
-                                bounds.getCentreY(),
+        valueArc.addCenteredArc (bounds.getCenterX(),
+                                bounds.getCenterY(),
                                 arcRadius,
                                 arcRadius,
                                 0.0f,
@@ -1081,20 +1081,20 @@ void LookAndFeel_V4::drawRotarySlider (Graphics& g, int x, int y, int width, int
                                 toAngle,
                                 true);
 
-        g.setColour (fill);
+        g.setColor (fill);
         g.strokePath (valueArc, PathStrokeType (lineW, PathStrokeType::curved, PathStrokeType::rounded));
     }
 
     auto thumbWidth = lineW * 2.0f;
-    Point<float> thumbPoint (bounds.getCentreX() + arcRadius * std::cos (toAngle - MathConstants<float>::halfPi),
-                             bounds.getCentreY() + arcRadius * std::sin (toAngle - MathConstants<float>::halfPi));
+    Point<float> thumbPoint (bounds.getCenterX() + arcRadius * std::cos (toAngle - MathConstants<float>::halfPi),
+                             bounds.getCenterY() + arcRadius * std::sin (toAngle - MathConstants<float>::halfPi));
 
-    g.setColour (slider.findColour (Slider::thumbColourId));
-    g.fillEllipse (Rectangle<float> (thumbWidth, thumbWidth).withCentre (thumbPoint));
+    g.setColor (slider.findColor (Slider::thumbColorId));
+    g.fillEllipse (Rectangle<float> (thumbWidth, thumbWidth).withCenter (thumbPoint));
 }
 
 void LookAndFeel_V4::drawPointer (Graphics& g, const float x, const float y, const float diameter,
-                                  const Colour& colour, const int direction) noexcept
+                                  const Color& color, const int direction) noexcept
 {
     Path p;
     p.startNewSubPath (x + diameter * 0.5f, y);
@@ -1106,7 +1106,7 @@ void LookAndFeel_V4::drawPointer (Graphics& g, const float x, const float y, con
 
     p.applyTransform (AffineTransform::rotation (direction * MathConstants<float>::halfPi,
                                                  x + diameter * 0.5f, y + diameter * 0.5f));
-    g.setColour (colour);
+    g.setColor (color);
     g.fillPath (p);
 }
 
@@ -1114,10 +1114,10 @@ Label* LookAndFeel_V4::createSliderTextBox (Slider& slider)
 {
     auto* l = LookAndFeel_V2::createSliderTextBox (slider);
 
-    if (getCurrentColourScheme() == LookAndFeel_V4::getGreyColourScheme() && (slider.getSliderStyle() == Slider::LinearBar
+    if (getCurrentColorScheme() == LookAndFeel_V4::getGrayColorScheme() && (slider.getSliderStyle() == Slider::LinearBar
                                                                                || slider.getSliderStyle() == Slider::LinearBarVertical))
     {
-        l->setColour (Label::textColourId, Colours::black.withAlpha (0.7f));
+        l->setColor (Label::textColorId, Colors::black.withAlpha (0.7f));
     }
 
     return l;
@@ -1129,13 +1129,13 @@ void LookAndFeel_V4::drawTooltip (Graphics& g, const String& text, int width, in
     Rectangle<int> bounds (width, height);
     auto cornerSize = 5.0f;
 
-    g.setColour (findColour (TooltipWindow::backgroundColourId));
+    g.setColor (findColor (TooltipWindow::backgroundColorId));
     g.fillRoundedRectangle (bounds.toFloat(), cornerSize);
 
-    g.setColour (findColour (TooltipWindow::outlineColourId));
+    g.setColor (findColor (TooltipWindow::outlineColorId));
     g.drawRoundedRectangle (bounds.toFloat().reduced (0.5f, 0.5f), cornerSize, 1.0f);
 
-    LookAndFeelHelpers::layoutTooltipText (text, findColour (TooltipWindow::textColourId))
+    LookAndFeelHelpers::layoutTooltipText (text, findColor (TooltipWindow::textColorId))
                        .draw (g, { static_cast<float> (width), static_cast<float> (height) });
 }
 
@@ -1152,10 +1152,10 @@ void LookAndFeel_V4::drawConcertinaPanelHeader (Graphics& g, const Rectangle<int
     p.addRoundedRectangle (bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(),
                            cornerSize, cornerSize, isTopPanel, isTopPanel, false, false);
 
-    auto bkg = Colours::grey;
+    auto bkg = Colors::gray;
 
-    g.setGradientFill (ColourGradient::vertical (Colours::white.withAlpha (isMouseOver ? 0.4f : 0.2f), static_cast<float> (area.getY()),
-                                                 Colours::darkgrey.withAlpha (0.1f), static_cast<float> (area.getBottom())));
+    g.setGradientFill (ColorGradient::vertical (Colors::white.withAlpha (isMouseOver ? 0.4f : 0.2f), static_cast<float> (area.getY()),
+                                                 Colors::darkgray.withAlpha (0.1f), static_cast<float> (area.getBottom())));
     g.fillPath (p);
 }
 
@@ -1167,7 +1167,7 @@ void LookAndFeel_V4::drawLevelMeter (Graphics& g, int width, int height, float l
     auto totalBlocks = 7;
     auto spacingFraction = 0.03f;
 
-    g.setColour (findColour (ResizableWindow::backgroundColourId));
+    g.setColor (findColor (ResizableWindow::backgroundColorId));
     g.fillRoundedRectangle (0.0f, 0.0f, static_cast<float> (width), static_cast<float> (height), outerCornerSize);
 
     auto doubleOuterBorderWidth = 2.0f * outerBorderWidth;
@@ -1181,14 +1181,14 @@ void LookAndFeel_V4::drawLevelMeter (Graphics& g, int width, int height, float l
 
     auto blockCornerSize = 0.1f * blockWidth;
 
-    auto c = findColour (Slider::thumbColourId);
+    auto c = findColor (Slider::thumbColorId);
 
     for (auto i = 0; i < totalBlocks; ++i)
     {
         if (i >= numBlocks)
-            g.setColour (c.withAlpha (0.5f));
+            g.setColor (c.withAlpha (0.5f));
         else
-            g.setColour (i < totalBlocks - 1 ? c : Colours::red);
+            g.setColor (i < totalBlocks - 1 ? c : Colors::red);
 
         g.fillRoundedRectangle (outerBorderWidth + (i * blockWidth) + blockRectSpacing,
                                 outerBorderWidth,
@@ -1201,7 +1201,7 @@ void LookAndFeel_V4::drawLevelMeter (Graphics& g, int width, int height, float l
 //==============================================================================
 void LookAndFeel_V4::paintToolbarBackground (Graphics& g, int w, int h, Toolbar& toolbar)
 {
-    auto background = toolbar.findColour (Toolbar::backgroundColourId);
+    auto background = toolbar.findColor (Toolbar::backgroundColorId);
 
     g.setGradientFill ({ background, 0.0f, 0.0f,
                          background.darker (0.2f),
@@ -1214,18 +1214,18 @@ void LookAndFeel_V4::paintToolbarBackground (Graphics& g, int w, int h, Toolbar&
 void LookAndFeel_V4::paintToolbarButtonLabel (Graphics& g, int x, int y, int width, int height,
                                               const String& text, ToolbarItemComponent& component)
 {
-    auto baseTextColour = component.findParentComponentOfClass<PopupMenu::CustomComponent>() != nullptr
-                              ? component.findColour (PopupMenu::textColourId)
-                              : component.findColour (Toolbar::labelTextColourId);
+    auto baseTextColor = component.findParentComponentOfClass<PopupMenu::CustomComponent>() != nullptr
+                              ? component.findColor (PopupMenu::textColorId)
+                              : component.findColor (Toolbar::labelTextColorId);
 
-    g.setColour (baseTextColour.withAlpha (component.isEnabled() ? 1.0f : 0.25f));
+    g.setColor (baseTextColor.withAlpha (component.isEnabled() ? 1.0f : 0.25f));
 
     auto fontHeight = jmin (14.0f, height * 0.85f);
     g.setFont (fontHeight);
 
     g.drawFittedText (text,
                       x, y, width, height,
-                      Justification::centred,
+                      Justification::centered,
                       jmax (1, height / (int) fontHeight));
 }
 
@@ -1237,19 +1237,19 @@ void LookAndFeel_V4::drawPropertyPanelSectionHeader (Graphics& g, const String& 
     auto buttonIndent = (height - buttonSize) * 0.5f;
 
     drawTreeviewPlusMinusBox (g, { buttonIndent, buttonIndent, buttonSize, buttonSize },
-                              findColour (ResizableWindow::backgroundColourId), isOpen, false);
+                              findColor (ResizableWindow::backgroundColorId), isOpen, false);
 
     auto textX = static_cast<int> ((buttonIndent * 2.0f + buttonSize + 2.0f));
 
-    g.setColour (findColour (PropertyComponent::labelTextColourId));
+    g.setColor (findColor (PropertyComponent::labelTextColorId));
 
     g.setFont ({ height * 0.7f, Font::bold });
-    g.drawText (name, textX, 0, width - textX - 4, height, Justification::centredLeft, true);
+    g.drawText (name, textX, 0, width - textX - 4, height, Justification::centeredLeft, true);
 }
 
 void LookAndFeel_V4::drawPropertyComponentBackground (Graphics& g, int width, int height, PropertyComponent& component)
 {
-    g.setColour (component.findColour (PropertyComponent::backgroundColourId));
+    g.setColor (component.findColor (PropertyComponent::backgroundColorId));
     g.fillRect  (0, 0, width, height - 1);
 }
 
@@ -1259,7 +1259,7 @@ void LookAndFeel_V4::drawPropertyComponentLabel (Graphics& g, int width, int hei
 
     auto indent = getPropertyComponentIndent (component);
 
-    g.setColour (component.findColour (PropertyComponent::labelTextColourId)
+    g.setColor (component.findColor (PropertyComponent::labelTextColorId)
                           .withMultipliedAlpha (component.isEnabled() ? 1.0f : 0.6f));
 
     g.setFont (jmin (height, 24) * 0.65f);
@@ -1268,7 +1268,7 @@ void LookAndFeel_V4::drawPropertyComponentLabel (Graphics& g, int width, int hei
 
     g.drawFittedText (component.getName(),
                       indent, r.getY(), r.getX() - 5, r.getHeight(),
-                      Justification::centredLeft, 2);
+                      Justification::centeredLeft, 2);
 }
 
 int LookAndFeel_V4::getPropertyComponentIndent (PropertyComponent& component)
@@ -1291,16 +1291,16 @@ void LookAndFeel_V4::drawCallOutBoxBackground (CallOutBox& box, Graphics& g,
         cachedImage = { Image::ARGB, box.getWidth(), box.getHeight(), true };
         Graphics g2 (cachedImage);
 
-        DropShadow (Colours::black.withAlpha (0.7f), 8, { 0, 2 }).drawForPath (g2, path);
+        DropShadow (Colors::black.withAlpha (0.7f), 8, { 0, 2 }).drawForPath (g2, path);
     }
 
-    g.setColour (Colours::black);
+    g.setColor (Colors::black);
     g.drawImageAt (cachedImage, 0, 0);
 
-    g.setColour (currentColourScheme.getUIColour (ColourScheme::UIColour::widgetBackground).withAlpha (0.8f));
+    g.setColor (currentColorScheme.getUIColor (ColorScheme::UIColor::widgetBackground).withAlpha (0.8f));
     g.fillPath (path);
 
-    g.setColour (currentColourScheme.getUIColour (ColourScheme::UIColour::outline).withAlpha (0.8f));
+    g.setColor (currentColorScheme.getUIColor (ColorScheme::UIColor::outline).withAlpha (0.8f));
     g.strokePath (path, PathStrokeType (2.0f));
 }
 
@@ -1309,177 +1309,177 @@ void LookAndFeel_V4::drawStretchableLayoutResizerBar (Graphics& g, int /*w*/, in
                                       bool isMouseOver, bool isMouseDragging)
 {
     if (isMouseOver || isMouseDragging)
-        g.fillAll (currentColourScheme.getUIColour (ColourScheme::UIColour::defaultFill).withAlpha (0.5f));
+        g.fillAll (currentColorScheme.getUIColor (ColorScheme::UIColor::defaultFill).withAlpha (0.5f));
 }
 
 //==============================================================================
-void LookAndFeel_V4::initialiseColours()
+void LookAndFeel_V4::initializeColors()
 {
     const uint32 transparent = 0x00000000;
 
-    const uint32 coloursToUse[] =
+    const uint32 colorsToUse[] =
     {
-        TextButton::buttonColourId,                 currentColourScheme.getUIColour (ColourScheme::UIColour::widgetBackground).getARGB(),
-        TextButton::buttonOnColourId,               currentColourScheme.getUIColour (ColourScheme::UIColour::highlightedFill).getARGB(),
-        TextButton::textColourOnId,                 currentColourScheme.getUIColour (ColourScheme::UIColour::highlightedText).getARGB(),
-        TextButton::textColourOffId,                currentColourScheme.getUIColour (ColourScheme::UIColour::defaultText).getARGB(),
+        TextButton::buttonColorId,                 currentColorScheme.getUIColor (ColorScheme::UIColor::widgetBackground).getARGB(),
+        TextButton::buttonOnColorId,               currentColorScheme.getUIColor (ColorScheme::UIColor::highlightedFill).getARGB(),
+        TextButton::textColorOnId,                 currentColorScheme.getUIColor (ColorScheme::UIColor::highlightedText).getARGB(),
+        TextButton::textColorOffId,                currentColorScheme.getUIColor (ColorScheme::UIColor::defaultText).getARGB(),
 
-        ToggleButton::textColourId,                 currentColourScheme.getUIColour (ColourScheme::UIColour::defaultText).getARGB(),
-        ToggleButton::tickColourId,                 currentColourScheme.getUIColour (ColourScheme::UIColour::defaultText).getARGB(),
-        ToggleButton::tickDisabledColourId,         currentColourScheme.getUIColour (ColourScheme::UIColour::defaultText).withAlpha (0.5f).getARGB(),
+        ToggleButton::textColorId,                 currentColorScheme.getUIColor (ColorScheme::UIColor::defaultText).getARGB(),
+        ToggleButton::tickColorId,                 currentColorScheme.getUIColor (ColorScheme::UIColor::defaultText).getARGB(),
+        ToggleButton::tickDisabledColorId,         currentColorScheme.getUIColor (ColorScheme::UIColor::defaultText).withAlpha (0.5f).getARGB(),
 
-        TextEditor::backgroundColourId,             currentColourScheme.getUIColour (ColourScheme::UIColour::widgetBackground).getARGB(),
-        TextEditor::textColourId,                   currentColourScheme.getUIColour (ColourScheme::UIColour::defaultText).getARGB(),
-        TextEditor::highlightColourId,              currentColourScheme.getUIColour (ColourScheme::UIColour::defaultFill).withAlpha (0.4f).getARGB(),
-        TextEditor::highlightedTextColourId,        currentColourScheme.getUIColour (ColourScheme::UIColour::highlightedText).getARGB(),
-        TextEditor::outlineColourId,                currentColourScheme.getUIColour (ColourScheme::UIColour::outline).getARGB(),
-        TextEditor::focusedOutlineColourId,         currentColourScheme.getUIColour (ColourScheme::UIColour::outline).getARGB(),
-        TextEditor::shadowColourId,                 transparent,
+        TextEditor::backgroundColorId,             currentColorScheme.getUIColor (ColorScheme::UIColor::widgetBackground).getARGB(),
+        TextEditor::textColorId,                   currentColorScheme.getUIColor (ColorScheme::UIColor::defaultText).getARGB(),
+        TextEditor::highlightColorId,              currentColorScheme.getUIColor (ColorScheme::UIColor::defaultFill).withAlpha (0.4f).getARGB(),
+        TextEditor::highlightedTextColorId,        currentColorScheme.getUIColor (ColorScheme::UIColor::highlightedText).getARGB(),
+        TextEditor::outlineColorId,                currentColorScheme.getUIColor (ColorScheme::UIColor::outline).getARGB(),
+        TextEditor::focusedOutlineColorId,         currentColorScheme.getUIColor (ColorScheme::UIColor::outline).getARGB(),
+        TextEditor::shadowColorId,                 transparent,
 
-        CaretComponent::caretColourId,              currentColourScheme.getUIColour (ColourScheme::UIColour::defaultFill).getARGB(),
+        CaretComponent::caretColorId,              currentColorScheme.getUIColor (ColorScheme::UIColor::defaultFill).getARGB(),
 
-        Label::backgroundColourId,                  transparent,
-        Label::textColourId,                        currentColourScheme.getUIColour (ColourScheme::UIColour::defaultText).getARGB(),
-        Label::outlineColourId,                     transparent,
-        Label::textWhenEditingColourId,             currentColourScheme.getUIColour (ColourScheme::UIColour::defaultText).getARGB(),
+        Label::backgroundColorId,                  transparent,
+        Label::textColorId,                        currentColorScheme.getUIColor (ColorScheme::UIColor::defaultText).getARGB(),
+        Label::outlineColorId,                     transparent,
+        Label::textWhenEditingColorId,             currentColorScheme.getUIColor (ColorScheme::UIColor::defaultText).getARGB(),
 
-        ScrollBar::backgroundColourId,              transparent,
-        ScrollBar::thumbColourId,                   currentColourScheme.getUIColour (ColourScheme::UIColour::defaultFill).getARGB(),
-        ScrollBar::trackColourId,                   transparent,
+        ScrollBar::backgroundColorId,              transparent,
+        ScrollBar::thumbColorId,                   currentColorScheme.getUIColor (ColorScheme::UIColor::defaultFill).getARGB(),
+        ScrollBar::trackColorId,                   transparent,
 
-        TreeView::linesColourId,                    transparent,
-        TreeView::backgroundColourId,               transparent,
-        TreeView::dragAndDropIndicatorColourId,     currentColourScheme.getUIColour (ColourScheme::UIColour::outline).getARGB(),
-        TreeView::selectedItemBackgroundColourId,   transparent,
-        TreeView::oddItemsColourId,                 transparent,
-        TreeView::evenItemsColourId,                transparent,
+        TreeView::linesColorId,                    transparent,
+        TreeView::backgroundColorId,               transparent,
+        TreeView::dragAndDropIndicatorColorId,     currentColorScheme.getUIColor (ColorScheme::UIColor::outline).getARGB(),
+        TreeView::selectedItemBackgroundColorId,   transparent,
+        TreeView::oddItemsColorId,                 transparent,
+        TreeView::evenItemsColorId,                transparent,
 
-        PopupMenu::backgroundColourId,              currentColourScheme.getUIColour (ColourScheme::UIColour::menuBackground).getARGB(),
-        PopupMenu::textColourId,                    currentColourScheme.getUIColour (ColourScheme::UIColour::menuText).getARGB(),
-        PopupMenu::headerTextColourId,              currentColourScheme.getUIColour (ColourScheme::UIColour::menuText).getARGB(),
-        PopupMenu::highlightedTextColourId,         currentColourScheme.getUIColour (ColourScheme::UIColour::highlightedText).getARGB(),
-        PopupMenu::highlightedBackgroundColourId,   currentColourScheme.getUIColour (ColourScheme::UIColour::highlightedFill).getARGB(),
+        PopupMenu::backgroundColorId,              currentColorScheme.getUIColor (ColorScheme::UIColor::menuBackground).getARGB(),
+        PopupMenu::textColorId,                    currentColorScheme.getUIColor (ColorScheme::UIColor::menuText).getARGB(),
+        PopupMenu::headerTextColorId,              currentColorScheme.getUIColor (ColorScheme::UIColor::menuText).getARGB(),
+        PopupMenu::highlightedTextColorId,         currentColorScheme.getUIColor (ColorScheme::UIColor::highlightedText).getARGB(),
+        PopupMenu::highlightedBackgroundColorId,   currentColorScheme.getUIColor (ColorScheme::UIColor::highlightedFill).getARGB(),
 
-        ComboBox::buttonColourId,                   currentColourScheme.getUIColour (ColourScheme::UIColour::outline).getARGB(),
-        ComboBox::outlineColourId,                  currentColourScheme.getUIColour (ColourScheme::UIColour::outline).getARGB(),
-        ComboBox::textColourId,                     currentColourScheme.getUIColour (ColourScheme::UIColour::defaultText).getARGB(),
-        ComboBox::backgroundColourId,               currentColourScheme.getUIColour (ColourScheme::UIColour::widgetBackground).getARGB(),
-        ComboBox::arrowColourId,                    currentColourScheme.getUIColour (ColourScheme::UIColour::defaultText).getARGB(),
-        ComboBox::focusedOutlineColourId,           currentColourScheme.getUIColour (ColourScheme::UIColour::outline).getARGB(),
+        ComboBox::buttonColorId,                   currentColorScheme.getUIColor (ColorScheme::UIColor::outline).getARGB(),
+        ComboBox::outlineColorId,                  currentColorScheme.getUIColor (ColorScheme::UIColor::outline).getARGB(),
+        ComboBox::textColorId,                     currentColorScheme.getUIColor (ColorScheme::UIColor::defaultText).getARGB(),
+        ComboBox::backgroundColorId,               currentColorScheme.getUIColor (ColorScheme::UIColor::widgetBackground).getARGB(),
+        ComboBox::arrowColorId,                    currentColorScheme.getUIColor (ColorScheme::UIColor::defaultText).getARGB(),
+        ComboBox::focusedOutlineColorId,           currentColorScheme.getUIColor (ColorScheme::UIColor::outline).getARGB(),
 
-        PropertyComponent::backgroundColourId,      currentColourScheme.getUIColour (ColourScheme::UIColour::widgetBackground).getARGB(),
-        PropertyComponent::labelTextColourId,       currentColourScheme.getUIColour (ColourScheme::UIColour::defaultText).getARGB(),
+        PropertyComponent::backgroundColorId,      currentColorScheme.getUIColor (ColorScheme::UIColor::widgetBackground).getARGB(),
+        PropertyComponent::labelTextColorId,       currentColorScheme.getUIColor (ColorScheme::UIColor::defaultText).getARGB(),
 
-        TextPropertyComponent::backgroundColourId,  currentColourScheme.getUIColour (ColourScheme::UIColour::widgetBackground).getARGB(),
-        TextPropertyComponent::textColourId,        currentColourScheme.getUIColour (ColourScheme::UIColour::defaultText).getARGB(),
-        TextPropertyComponent::outlineColourId,     currentColourScheme.getUIColour (ColourScheme::UIColour::outline).getARGB(),
+        TextPropertyComponent::backgroundColorId,  currentColorScheme.getUIColor (ColorScheme::UIColor::widgetBackground).getARGB(),
+        TextPropertyComponent::textColorId,        currentColorScheme.getUIColor (ColorScheme::UIColor::defaultText).getARGB(),
+        TextPropertyComponent::outlineColorId,     currentColorScheme.getUIColor (ColorScheme::UIColor::outline).getARGB(),
 
-        BooleanPropertyComponent::backgroundColourId, currentColourScheme.getUIColour (ColourScheme::UIColour::widgetBackground).getARGB(),
-        BooleanPropertyComponent::outlineColourId,    currentColourScheme.getUIColour (ColourScheme::UIColour::outline).getARGB(),
+        BooleanPropertyComponent::backgroundColorId, currentColorScheme.getUIColor (ColorScheme::UIColor::widgetBackground).getARGB(),
+        BooleanPropertyComponent::outlineColorId,    currentColorScheme.getUIColor (ColorScheme::UIColor::outline).getARGB(),
 
-        ListBox::backgroundColourId,                currentColourScheme.getUIColour (ColourScheme::UIColour::widgetBackground).getARGB(),
-        ListBox::outlineColourId,                   currentColourScheme.getUIColour (ColourScheme::UIColour::outline).getARGB(),
-        ListBox::textColourId,                      currentColourScheme.getUIColour (ColourScheme::UIColour::defaultText).getARGB(),
+        ListBox::backgroundColorId,                currentColorScheme.getUIColor (ColorScheme::UIColor::widgetBackground).getARGB(),
+        ListBox::outlineColorId,                   currentColorScheme.getUIColor (ColorScheme::UIColor::outline).getARGB(),
+        ListBox::textColorId,                      currentColorScheme.getUIColor (ColorScheme::UIColor::defaultText).getARGB(),
 
-        Slider::backgroundColourId,                 currentColourScheme.getUIColour (ColourScheme::UIColour::widgetBackground).getARGB(),
-        Slider::thumbColourId,                      currentColourScheme.getUIColour (ColourScheme::UIColour::defaultFill).getARGB(),
-        Slider::trackColourId,                      currentColourScheme.getUIColour (ColourScheme::UIColour::highlightedFill).getARGB(),
-        Slider::rotarySliderFillColourId,           currentColourScheme.getUIColour (ColourScheme::UIColour::highlightedFill).getARGB(),
-        Slider::rotarySliderOutlineColourId,        currentColourScheme.getUIColour (ColourScheme::UIColour::widgetBackground).getARGB(),
-        Slider::textBoxTextColourId,                currentColourScheme.getUIColour (ColourScheme::UIColour::defaultText).getARGB(),
-        Slider::textBoxBackgroundColourId,          currentColourScheme.getUIColour (ColourScheme::UIColour::widgetBackground).withAlpha (0.0f).getARGB(),
-        Slider::textBoxHighlightColourId,           currentColourScheme.getUIColour (ColourScheme::UIColour::defaultFill).withAlpha (0.4f).getARGB(),
-        Slider::textBoxOutlineColourId,             currentColourScheme.getUIColour (ColourScheme::UIColour::outline).getARGB(),
+        Slider::backgroundColorId,                 currentColorScheme.getUIColor (ColorScheme::UIColor::widgetBackground).getARGB(),
+        Slider::thumbColorId,                      currentColorScheme.getUIColor (ColorScheme::UIColor::defaultFill).getARGB(),
+        Slider::trackColorId,                      currentColorScheme.getUIColor (ColorScheme::UIColor::highlightedFill).getARGB(),
+        Slider::rotarySliderFillColorId,           currentColorScheme.getUIColor (ColorScheme::UIColor::highlightedFill).getARGB(),
+        Slider::rotarySliderOutlineColorId,        currentColorScheme.getUIColor (ColorScheme::UIColor::widgetBackground).getARGB(),
+        Slider::textBoxTextColorId,                currentColorScheme.getUIColor (ColorScheme::UIColor::defaultText).getARGB(),
+        Slider::textBoxBackgroundColorId,          currentColorScheme.getUIColor (ColorScheme::UIColor::widgetBackground).withAlpha (0.0f).getARGB(),
+        Slider::textBoxHighlightColorId,           currentColorScheme.getUIColor (ColorScheme::UIColor::defaultFill).withAlpha (0.4f).getARGB(),
+        Slider::textBoxOutlineColorId,             currentColorScheme.getUIColor (ColorScheme::UIColor::outline).getARGB(),
 
-        ResizableWindow::backgroundColourId,        currentColourScheme.getUIColour (ColourScheme::UIColour::windowBackground).getARGB(),
+        ResizableWindow::backgroundColorId,        currentColorScheme.getUIColor (ColorScheme::UIColor::windowBackground).getARGB(),
 
-        DocumentWindow::textColourId,               currentColourScheme.getUIColour (ColourScheme::UIColour::defaultText).getARGB(),
+        DocumentWindow::textColorId,               currentColorScheme.getUIColor (ColorScheme::UIColor::defaultText).getARGB(),
 
-        AlertWindow::backgroundColourId,            currentColourScheme.getUIColour (ColourScheme::UIColour::widgetBackground).getARGB(),
-        AlertWindow::textColourId,                  currentColourScheme.getUIColour (ColourScheme::UIColour::defaultText).getARGB(),
-        AlertWindow::outlineColourId,               currentColourScheme.getUIColour (ColourScheme::UIColour::outline).getARGB(),
+        AlertWindow::backgroundColorId,            currentColorScheme.getUIColor (ColorScheme::UIColor::widgetBackground).getARGB(),
+        AlertWindow::textColorId,                  currentColorScheme.getUIColor (ColorScheme::UIColor::defaultText).getARGB(),
+        AlertWindow::outlineColorId,               currentColorScheme.getUIColor (ColorScheme::UIColor::outline).getARGB(),
 
-        ProgressBar::backgroundColourId,            currentColourScheme.getUIColour (ColourScheme::UIColour::widgetBackground).getARGB(),
-        ProgressBar::foregroundColourId,            currentColourScheme.getUIColour (ColourScheme::UIColour::highlightedFill).getARGB(),
+        ProgressBar::backgroundColorId,            currentColorScheme.getUIColor (ColorScheme::UIColor::widgetBackground).getARGB(),
+        ProgressBar::foregroundColorId,            currentColorScheme.getUIColor (ColorScheme::UIColor::highlightedFill).getARGB(),
 
-        TooltipWindow::backgroundColourId,          currentColourScheme.getUIColour (ColourScheme::UIColour::highlightedFill).getARGB(),
-        TooltipWindow::textColourId,                currentColourScheme.getUIColour (ColourScheme::UIColour::highlightedText).getARGB(),
-        TooltipWindow::outlineColourId,             transparent,
+        TooltipWindow::backgroundColorId,          currentColorScheme.getUIColor (ColorScheme::UIColor::highlightedFill).getARGB(),
+        TooltipWindow::textColorId,                currentColorScheme.getUIColor (ColorScheme::UIColor::highlightedText).getARGB(),
+        TooltipWindow::outlineColorId,             transparent,
 
-        TabbedComponent::backgroundColourId,        transparent,
-        TabbedComponent::outlineColourId,           currentColourScheme.getUIColour (ColourScheme::UIColour::outline).getARGB(),
-        TabbedButtonBar::tabOutlineColourId,        currentColourScheme.getUIColour (ColourScheme::UIColour::outline).withAlpha (0.5f).getARGB(),
-        TabbedButtonBar::frontOutlineColourId,      currentColourScheme.getUIColour (ColourScheme::UIColour::outline).getARGB(),
+        TabbedComponent::backgroundColorId,        transparent,
+        TabbedComponent::outlineColorId,           currentColorScheme.getUIColor (ColorScheme::UIColor::outline).getARGB(),
+        TabbedButtonBar::tabOutlineColorId,        currentColorScheme.getUIColor (ColorScheme::UIColor::outline).withAlpha (0.5f).getARGB(),
+        TabbedButtonBar::frontOutlineColorId,      currentColorScheme.getUIColor (ColorScheme::UIColor::outline).getARGB(),
 
-        Toolbar::backgroundColourId,                currentColourScheme.getUIColour (ColourScheme::UIColour::widgetBackground).withAlpha (0.4f).getARGB(),
-        Toolbar::separatorColourId,                 currentColourScheme.getUIColour (ColourScheme::UIColour::outline).getARGB(),
-        Toolbar::buttonMouseOverBackgroundColourId, currentColourScheme.getUIColour (ColourScheme::UIColour::widgetBackground).contrasting (0.2f).getARGB(),
-        Toolbar::buttonMouseDownBackgroundColourId, currentColourScheme.getUIColour (ColourScheme::UIColour::widgetBackground).contrasting (0.5f).getARGB(),
-        Toolbar::labelTextColourId,                 currentColourScheme.getUIColour (ColourScheme::UIColour::defaultText).getARGB(),
-        Toolbar::editingModeOutlineColourId,        currentColourScheme.getUIColour (ColourScheme::UIColour::outline).getARGB(),
+        Toolbar::backgroundColorId,                currentColorScheme.getUIColor (ColorScheme::UIColor::widgetBackground).withAlpha (0.4f).getARGB(),
+        Toolbar::separatorColorId,                 currentColorScheme.getUIColor (ColorScheme::UIColor::outline).getARGB(),
+        Toolbar::buttonMouseOverBackgroundColorId, currentColorScheme.getUIColor (ColorScheme::UIColor::widgetBackground).contrasting (0.2f).getARGB(),
+        Toolbar::buttonMouseDownBackgroundColorId, currentColorScheme.getUIColor (ColorScheme::UIColor::widgetBackground).contrasting (0.5f).getARGB(),
+        Toolbar::labelTextColorId,                 currentColorScheme.getUIColor (ColorScheme::UIColor::defaultText).getARGB(),
+        Toolbar::editingModeOutlineColorId,        currentColorScheme.getUIColor (ColorScheme::UIColor::outline).getARGB(),
 
-        DrawableButton::textColourId,               currentColourScheme.getUIColour (ColourScheme::UIColour::defaultText).getARGB(),
-        DrawableButton::textColourOnId,             currentColourScheme.getUIColour (ColourScheme::UIColour::highlightedText).getARGB(),
-        DrawableButton::backgroundColourId,         transparent,
-        DrawableButton::backgroundOnColourId,       currentColourScheme.getUIColour (ColourScheme::UIColour::highlightedFill).getARGB(),
+        DrawableButton::textColorId,               currentColorScheme.getUIColor (ColorScheme::UIColor::defaultText).getARGB(),
+        DrawableButton::textColorOnId,             currentColorScheme.getUIColor (ColorScheme::UIColor::highlightedText).getARGB(),
+        DrawableButton::backgroundColorId,         transparent,
+        DrawableButton::backgroundOnColorId,       currentColorScheme.getUIColor (ColorScheme::UIColor::highlightedFill).getARGB(),
 
-        HyperlinkButton::textColourId,              currentColourScheme.getUIColour (ColourScheme::UIColour::defaultText).interpolatedWith (Colours::blue, 0.4f).getARGB(),
+        HyperlinkButton::textColorId,              currentColorScheme.getUIColor (ColorScheme::UIColor::defaultText).interpolatedWith (Colors::blue, 0.4f).getARGB(),
 
-        GroupComponent::outlineColourId,            currentColourScheme.getUIColour (ColourScheme::UIColour::outline).getARGB(),
-        GroupComponent::textColourId,               currentColourScheme.getUIColour (ColourScheme::UIColour::defaultText).getARGB(),
+        GroupComponent::outlineColorId,            currentColorScheme.getUIColor (ColorScheme::UIColor::outline).getARGB(),
+        GroupComponent::textColorId,               currentColorScheme.getUIColor (ColorScheme::UIColor::defaultText).getARGB(),
 
-        BubbleComponent::backgroundColourId,        currentColourScheme.getUIColour (ColourScheme::UIColour::widgetBackground).getARGB(),
-        BubbleComponent::outlineColourId,           currentColourScheme.getUIColour (ColourScheme::UIColour::outline).getARGB(),
+        BubbleComponent::backgroundColorId,        currentColorScheme.getUIColor (ColorScheme::UIColor::widgetBackground).getARGB(),
+        BubbleComponent::outlineColorId,           currentColorScheme.getUIColor (ColorScheme::UIColor::outline).getARGB(),
 
-        DirectoryContentsDisplayComponent::highlightColourId,          currentColourScheme.getUIColour (ColourScheme::UIColour::highlightedFill).getARGB(),
-        DirectoryContentsDisplayComponent::textColourId,               currentColourScheme.getUIColour (ColourScheme::UIColour::menuText).getARGB(),
-        DirectoryContentsDisplayComponent::highlightedTextColourId,    currentColourScheme.getUIColour (ColourScheme::UIColour::highlightedText).getARGB(),
+        DirectoryContentsDisplayComponent::highlightColorId,          currentColorScheme.getUIColor (ColorScheme::UIColor::highlightedFill).getARGB(),
+        DirectoryContentsDisplayComponent::textColorId,               currentColorScheme.getUIColor (ColorScheme::UIColor::menuText).getARGB(),
+        DirectoryContentsDisplayComponent::highlightedTextColorId,    currentColorScheme.getUIColor (ColorScheme::UIColor::highlightedText).getARGB(),
 
-        0x1000440, /*LassoComponent::lassoFillColourId*/        currentColourScheme.getUIColour (ColourScheme::UIColour::defaultFill).getARGB(),
-        0x1000441, /*LassoComponent::lassoOutlineColourId*/     currentColourScheme.getUIColour (ColourScheme::UIColour::outline).getARGB(),
+        0x1000440, /*LassoComponent::lassoFillColorId*/        currentColorScheme.getUIColor (ColorScheme::UIColor::defaultFill).getARGB(),
+        0x1000441, /*LassoComponent::lassoOutlineColorId*/     currentColorScheme.getUIColor (ColorScheme::UIColor::outline).getARGB(),
 
-        0x1005000, /*MidiKeyboardComponent::whiteNoteColourId*/               0xffffffff,
-        0x1005001, /*MidiKeyboardComponent::blackNoteColourId*/               0xff000000,
-        0x1005002, /*MidiKeyboardComponent::keySeparatorLineColourId*/        0x66000000,
-        0x1005003, /*MidiKeyboardComponent::mouseOverKeyOverlayColourId*/     0x80ffff00,
-        0x1005004, /*MidiKeyboardComponent::keyDownOverlayColourId*/          0xffb6b600,
-        0x1005005, /*MidiKeyboardComponent::textLabelColourId*/               0xff000000,
-        0x1005006, /*MidiKeyboardComponent::upDownButtonBackgroundColourId*/  0xffd3d3d3,
-        0x1005007, /*MidiKeyboardComponent::upDownButtonArrowColourId*/       0xff000000,
-        0x1005008, /*MidiKeyboardComponent::shadowColourId*/                  0x4c000000,
+        0x1005000, /*MidiKeyboardComponent::whiteNoteColorId*/               0xffffffff,
+        0x1005001, /*MidiKeyboardComponent::blackNoteColorId*/               0xff000000,
+        0x1005002, /*MidiKeyboardComponent::keySeparatorLineColorId*/        0x66000000,
+        0x1005003, /*MidiKeyboardComponent::mouseOverKeyOverlayColorId*/     0x80ffff00,
+        0x1005004, /*MidiKeyboardComponent::keyDownOverlayColorId*/          0xffb6b600,
+        0x1005005, /*MidiKeyboardComponent::textLabelColorId*/               0xff000000,
+        0x1005006, /*MidiKeyboardComponent::upDownButtonBackgroundColorId*/  0xffd3d3d3,
+        0x1005007, /*MidiKeyboardComponent::upDownButtonArrowColorId*/       0xff000000,
+        0x1005008, /*MidiKeyboardComponent::shadowColorId*/                  0x4c000000,
 
-        0x1004500, /*CodeEditorComponent::backgroundColourId*/                currentColourScheme.getUIColour (ColourScheme::UIColour::widgetBackground).getARGB(),
-        0x1004502, /*CodeEditorComponent::highlightColourId*/                 currentColourScheme.getUIColour (ColourScheme::UIColour::defaultFill).withAlpha (0.4f).getARGB(),
-        0x1004503, /*CodeEditorComponent::defaultTextColourId*/               currentColourScheme.getUIColour (ColourScheme::UIColour::defaultText).getARGB(),
-        0x1004504, /*CodeEditorComponent::lineNumberBackgroundId*/            currentColourScheme.getUIColour (ColourScheme::UIColour::highlightedFill).withAlpha (0.5f).getARGB(),
-        0x1004505, /*CodeEditorComponent::lineNumberTextId*/                  currentColourScheme.getUIColour (ColourScheme::UIColour::defaultFill).getARGB(),
+        0x1004500, /*CodeEditorComponent::backgroundColorId*/                currentColorScheme.getUIColor (ColorScheme::UIColor::widgetBackground).getARGB(),
+        0x1004502, /*CodeEditorComponent::highlightColorId*/                 currentColorScheme.getUIColor (ColorScheme::UIColor::defaultFill).withAlpha (0.4f).getARGB(),
+        0x1004503, /*CodeEditorComponent::defaultTextColorId*/               currentColorScheme.getUIColor (ColorScheme::UIColor::defaultText).getARGB(),
+        0x1004504, /*CodeEditorComponent::lineNumberBackgroundId*/            currentColorScheme.getUIColor (ColorScheme::UIColor::highlightedFill).withAlpha (0.5f).getARGB(),
+        0x1004505, /*CodeEditorComponent::lineNumberTextId*/                  currentColorScheme.getUIColor (ColorScheme::UIColor::defaultFill).getARGB(),
 
-        0x1007000, /*ColourSelector::backgroundColourId*/                     currentColourScheme.getUIColour (ColourScheme::UIColour::widgetBackground).getARGB(),
-        0x1007001, /*ColourSelector::labelTextColourId*/                      currentColourScheme.getUIColour (ColourScheme::UIColour::defaultText).getARGB(),
+        0x1007000, /*ColorSelector::backgroundColorId*/                     currentColorScheme.getUIColor (ColorScheme::UIColor::widgetBackground).getARGB(),
+        0x1007001, /*ColorSelector::labelTextColorId*/                      currentColorScheme.getUIColor (ColorScheme::UIColor::defaultText).getARGB(),
 
-        0x100ad00, /*KeyMappingEditorComponent::backgroundColourId*/          currentColourScheme.getUIColour (ColourScheme::UIColour::widgetBackground).getARGB(),
-        0x100ad01, /*KeyMappingEditorComponent::textColourId*/                currentColourScheme.getUIColour (ColourScheme::UIColour::defaultText).getARGB(),
+        0x100ad00, /*KeyMappingEditorComponent::backgroundColorId*/          currentColorScheme.getUIColor (ColorScheme::UIColor::widgetBackground).getARGB(),
+        0x100ad01, /*KeyMappingEditorComponent::textColorId*/                currentColorScheme.getUIColor (ColorScheme::UIColor::defaultText).getARGB(),
 
-        FileSearchPathListComponent::backgroundColourId,        currentColourScheme.getUIColour (ColourScheme::UIColour::menuBackground).getARGB(),
+        FileSearchPathListComponent::backgroundColorId,        currentColorScheme.getUIColor (ColorScheme::UIColor::menuBackground).getARGB(),
 
-        FileChooserDialogBox::titleTextColourId,                currentColourScheme.getUIColour (ColourScheme::UIColour::defaultText).getARGB(),
+        FileChooserDialogBox::titleTextColorId,                currentColorScheme.getUIColor (ColorScheme::UIColor::defaultText).getARGB(),
 
-        SidePanel::backgroundColour,                            currentColourScheme.getUIColour (ColourScheme::UIColour::widgetBackground).getARGB(),
-        SidePanel::titleTextColour,                             currentColourScheme.getUIColour (ColourScheme::UIColour::defaultText).getARGB(),
-        SidePanel::shadowBaseColour,                            currentColourScheme.getUIColour (ColourScheme::UIColour::widgetBackground).darker().getARGB(),
-        SidePanel::dismissButtonNormalColour,                   currentColourScheme.getUIColour (ColourScheme::UIColour::defaultFill).getARGB(),
-        SidePanel::dismissButtonOverColour,                     currentColourScheme.getUIColour (ColourScheme::UIColour::defaultFill).darker().getARGB(),
-        SidePanel::dismissButtonDownColour,                     currentColourScheme.getUIColour (ColourScheme::UIColour::defaultFill).brighter().getARGB(),
+        SidePanel::backgroundColor,                            currentColorScheme.getUIColor (ColorScheme::UIColor::widgetBackground).getARGB(),
+        SidePanel::titleTextColor,                             currentColorScheme.getUIColor (ColorScheme::UIColor::defaultText).getARGB(),
+        SidePanel::shadowBaseColor,                            currentColorScheme.getUIColor (ColorScheme::UIColor::widgetBackground).darker().getARGB(),
+        SidePanel::dismissButtonNormalColor,                   currentColorScheme.getUIColor (ColorScheme::UIColor::defaultFill).getARGB(),
+        SidePanel::dismissButtonOverColor,                     currentColorScheme.getUIColor (ColorScheme::UIColor::defaultFill).darker().getARGB(),
+        SidePanel::dismissButtonDownColor,                     currentColorScheme.getUIColor (ColorScheme::UIColor::defaultFill).brighter().getARGB(),
 
-        FileBrowserComponent::currentPathBoxBackgroundColourId,    currentColourScheme.getUIColour (ColourScheme::UIColour::menuBackground).getARGB(),
-        FileBrowserComponent::currentPathBoxTextColourId,          currentColourScheme.getUIColour (ColourScheme::UIColour::menuText).getARGB(),
-        FileBrowserComponent::currentPathBoxArrowColourId,         currentColourScheme.getUIColour (ColourScheme::UIColour::menuText).getARGB(),
-        FileBrowserComponent::filenameBoxBackgroundColourId,       currentColourScheme.getUIColour (ColourScheme::UIColour::menuBackground).getARGB(),
-        FileBrowserComponent::filenameBoxTextColourId,             currentColourScheme.getUIColour (ColourScheme::UIColour::menuText).getARGB(),
+        FileBrowserComponent::currentPathBoxBackgroundColorId,    currentColorScheme.getUIColor (ColorScheme::UIColor::menuBackground).getARGB(),
+        FileBrowserComponent::currentPathBoxTextColorId,          currentColorScheme.getUIColor (ColorScheme::UIColor::menuText).getARGB(),
+        FileBrowserComponent::currentPathBoxArrowColorId,         currentColorScheme.getUIColor (ColorScheme::UIColor::menuText).getARGB(),
+        FileBrowserComponent::filenameBoxBackgroundColorId,       currentColorScheme.getUIColor (ColorScheme::UIColor::menuBackground).getARGB(),
+        FileBrowserComponent::filenameBoxTextColorId,             currentColorScheme.getUIColor (ColorScheme::UIColor::menuText).getARGB(),
     };
 
-    for (int i = 0; i < numElementsInArray (coloursToUse); i += 2)
-        setColour ((int) coloursToUse [i], Colour ((uint32) coloursToUse [i + 1]));
+    for (int i = 0; i < numElementsInArray (colorsToUse); i += 2)
+        setColor ((int) colorsToUse [i], Color ((uint32) colorsToUse [i + 1]));
 }
 
 } // namespace juce

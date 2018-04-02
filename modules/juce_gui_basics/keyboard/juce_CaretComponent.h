@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -50,20 +50,20 @@ public:
     /** Sets the caret's position to place it next to the given character.
         The area is the rectangle containing the entire character that the caret is
         positioned on, so by default a vertical-line caret may choose to just show itself
-        at the left of this area. You can override this method to customise its size.
+        at the left of this area. You can override this method to customize its size.
         This method will also force the caret to reset its timer and become visible (if
         appropriate), so that as it moves, you can see where it is.
     */
     virtual void setCaretPosition (const Rectangle<int>& characterArea);
 
-    /** A set of colour IDs to use to change the colour of various aspects of the caret.
-        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+    /** A set of color IDs to use to change the color of various aspects of the caret.
+        These constants can be used either via the Component::setColor(), or LookAndFeel::setColor()
         methods.
-        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+        @see Component::setColor, Component::findColor, LookAndFeel::setColor, LookAndFeel::findColor
     */
-    enum ColourIds
+    enum ColorIds
     {
-        caretColourId    = 0x1000204, /**< The colour with which to draw the caret. */
+        caretColorId    = 0x1000204, /**< The color with which to draw the caret. */
     };
 
     //==============================================================================

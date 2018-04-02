@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -35,7 +35,7 @@ struct Spinner  : public Component,
 
     void paint (Graphics& g) override
     {
-        getLookAndFeel().drawSpinningWaitAnimation (g, Colours::darkgrey, 0, 0, getWidth(), getHeight());
+        getLookAndFeel().drawSpinningWaitAnimation (g, Colors::darkgray, 0, 0, getWidth(), getHeight());
     }
 };
 
@@ -69,14 +69,14 @@ struct OnlineUnlockForm::OverlayComp  : public Component,
 
     void paint (Graphics& g) override
     {
-        g.fillAll (Colours::white.withAlpha (0.97f));
+        g.fillAll (Colors::white.withAlpha (0.97f));
 
-        g.setColour (Colours::black);
+        g.setColor (Colors::black);
         g.setFont (15.0f);
 
         g.drawFittedText (TRANS("Contacting XYZ...").replace ("XYZ", form.status.getWebsiteName()),
                           getLocalBounds().reduced (20, 0).removeFromTop (proportionOfHeight (0.6f)),
-                          Justification::centred, 5);
+                          Justification::centered, 5);
     }
 
     void resized() override
@@ -131,7 +131,7 @@ struct OnlineUnlockForm::OverlayComp  : public Component,
     {
         if (button == cancelButton.get())
         {
-            form.status.userCancelled();
+            form.status.userCanceled();
 
             spinner.setVisible (false);
             stopTimer();
@@ -176,7 +176,7 @@ OnlineUnlockForm::OnlineUnlockForm (OnlineUnlockStatus& s,
     setOpaque (true);
 
     emailBox.setText (status.getUserEmail());
-    message.setJustificationType (Justification::centred);
+    message.setJustificationType (Justification::centered);
 
     addAndMakeVisible (message);
     addAndMakeVisible (emailBox);
@@ -205,7 +205,7 @@ OnlineUnlockForm::~OnlineUnlockForm()
 
 void OnlineUnlockForm::paint (Graphics& g)
 {
-    g.fillAll (Colours::lightgrey);
+    g.fillAll (Colors::lightgray);
 }
 
 void OnlineUnlockForm::resized()
@@ -226,7 +226,7 @@ void OnlineUnlockForm::resized()
     cancelButton.changeWidthToFitText (buttonHeight);
 
     const int gap = 20;
-    buttonArea = buttonArea.withSizeKeepingCentre (registerButton.getWidth()
+    buttonArea = buttonArea.withSizeKeepingCenter (registerButton.getWidth()
                                                      + (cancelButton.isVisible() ? gap + cancelButton.getWidth() : 0),
                                                    buttonHeight);
     registerButton.setBounds (buttonArea.removeFromLeft (registerButton.getWidth()));
@@ -260,7 +260,7 @@ void OnlineUnlockForm::resized()
 
 void OnlineUnlockForm::lookAndFeelChanged()
 {
-    Colour labelCol (findColour (TextEditor::backgroundColourId).contrasting (0.5f));
+    Color labelCol (findColor (TextEditor::backgroundColorId).contrasting (0.5f));
 
     emailBox.setTextToShowWhenEmpty (TRANS("Email Address"), labelCol);
     passwordBox.setTextToShowWhenEmpty (TRANS("Password"), labelCol);

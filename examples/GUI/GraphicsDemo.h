@@ -55,20 +55,20 @@ public:
     {
         setOpaque (true);
 
-        initialiseToggle (animatePosition, "Animate Position",  true);
-        initialiseToggle (animateRotation, "Animate Rotation",  true);
-        initialiseToggle (animateSize,     "Animate Size",      false);
-        initialiseToggle (animateShear,    "Animate Shearing",  false);
-        initialiseToggle (animateAlpha,    "Animate Alpha",     false);
-        initialiseToggle (clipToRectangle, "Clip to Rectangle", false);
-        initialiseToggle (clipToPath,      "Clip to Path",      false);
-        initialiseToggle (clipToImage,     "Clip to Image",     false);
-        initialiseToggle (quality,         "Higher quality image interpolation", false);
+        initializeToggle (animatePosition, "Animate Position",  true);
+        initializeToggle (animateRotation, "Animate Rotation",  true);
+        initializeToggle (animateSize,     "Animate Size",      false);
+        initializeToggle (animateShear,    "Animate Shearing",  false);
+        initializeToggle (animateAlpha,    "Animate Alpha",     false);
+        initializeToggle (clipToRectangle, "Clip to Rectangle", false);
+        initializeToggle (clipToPath,      "Clip to Path",      false);
+        initializeToggle (clipToImage,     "Clip to Image",     false);
+        initializeToggle (quality,         "Higher quality image interpolation", false);
     }
 
     void paint (Graphics& g) override
     {
-        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground));
+        g.fillAll (getUIColorIfAvailable (LookAndFeel_V4::ColorScheme::UIColor::windowBackground));
     }
 
     void resized() override
@@ -97,7 +97,7 @@ public:
         quality.setBounds (r.removeFromTop (buttonHeight));
     }
 
-    void initialiseToggle (ToggleButton& b, const char* name, bool on)
+    void initializeToggle (ToggleButton& b, const char* name, bool on)
     {
         addAndMakeVisible (b);
         b.setButtonText (name);
@@ -197,10 +197,10 @@ public:
                             + "\nActual FPS: " + String (averageActualFPS, 1),
                           0, 10.0f, getWidth() - 10.0f, (float) getHeight(), Justification::topRight, 3);
 
-        g.setColour (Colours::white.withAlpha (0.5f));
+        g.setColor (Colors::white.withAlpha (0.5f));
         g.fillRect (ga.getBoundingBox (0, ga.getNumGlyphs(), true).getSmallestIntegerContainer().expanded (4));
 
-        g.setColour (Colours::black);
+        g.setColor (Colors::black);
         ga.draw (g);
     }
 
@@ -253,8 +253,8 @@ public:
 
         Graphics g (clipImage);
 
-        g.setGradientFill (ColourGradient (Colours::transparentBlack, 0, 0,
-                                           Colours::black, 0, 300, false));
+        g.setGradientFill (ColorGradient (Colors::transparentBlack, 0, 0,
+                                           Colors::black, 0, 300, false));
 
         for (int i = 0; i < 20; ++i)
             g.fillRect (Random::getSystemRandom().nextInt (200),
@@ -291,26 +291,26 @@ public:
 
         const int rectSize = jmin (getWidth(), getHeight()) / 2 - 20;
 
-        g.setColour (colour1.withAlpha (getAlpha()));
+        g.setColor (color1.withAlpha (getAlpha()));
         g.fillRect (-rectSize, -rectSize, rectSize, rectSize);
 
-        g.setGradientFill (ColourGradient (colour1, 10.0f, (float) -rectSize,
-                                           colour2, 10.0f + rectSize, 0.0f, false));
+        g.setGradientFill (ColorGradient (color1, 10.0f, (float) -rectSize,
+                                           color2, 10.0f + rectSize, 0.0f, false));
         g.setOpacity (getAlpha());
         g.fillRect (10, -rectSize, rectSize, rectSize);
 
-        g.setGradientFill (ColourGradient (colour1, rectSize * -0.5f, 10.0f + rectSize * 0.5f,
-                                           colour2, 0, 10.0f + rectSize, true));
+        g.setGradientFill (ColorGradient (color1, rectSize * -0.5f, 10.0f + rectSize * 0.5f,
+                                           color2, 0, 10.0f + rectSize, true));
         g.setOpacity (getAlpha());
         g.fillRect (-rectSize, 10, rectSize, rectSize);
 
-        g.setGradientFill (ColourGradient (colour1, 10.0f, 10.0f,
-                                           colour2, 10.0f + rectSize, 10.0f + rectSize, false));
+        g.setGradientFill (ColorGradient (color1, 10.0f, 10.0f,
+                                           color2, 10.0f + rectSize, 10.0f + rectSize, false));
         g.setOpacity (getAlpha());
         g.drawRect (10, 10, rectSize, rectSize, 5);
     }
 
-    Colour colour1 { Colours::red }, colour2 { Colours::green };
+    Color color1 { Colors::red }, color2 { Colors::green };
 };
 
 //==============================================================================
@@ -325,8 +325,8 @@ public:
     {
         logoPath = getJUCELogoPath();
 
-        // rescale the logo path so that it's centred about the origin and has the right size.
-        logoPath.applyTransform (RectanglePlacement (RectanglePlacement::centred)
+        // rescale the logo path so that it's centered about the origin and has the right size.
+        logoPath.applyTransform (RectanglePlacement (RectanglePlacement::centered)
                                  .getTransformToFit (logoPath.getBounds(),
                                                      Rectangle<float> (-120.0f, -120.0f, 240.0f, 240.0f)));
 
@@ -343,26 +343,26 @@ public:
 
         if (useLinearGradient || useRadialGradient)
         {
-            Colour c1 (gradientColours[0].getValue(), gradientColours[1].getValue(), gradientColours[2].getValue(), 1.0f);
-            Colour c2 (gradientColours[3].getValue(), gradientColours[4].getValue(), gradientColours[5].getValue(), 1.0f);
-            Colour c3 (gradientColours[6].getValue(), gradientColours[7].getValue(), gradientColours[8].getValue(), 1.0f);
+            Color c1 (gradientColors[0].getValue(), gradientColors[1].getValue(), gradientColors[2].getValue(), 1.0f);
+            Color c2 (gradientColors[3].getValue(), gradientColors[4].getValue(), gradientColors[5].getValue(), 1.0f);
+            Color c3 (gradientColors[6].getValue(), gradientColors[7].getValue(), gradientColors[8].getValue(), 1.0f);
 
             auto x1 = gradientPositions[0].getValue() * getWidth()  * 0.25f;
             auto y1 = gradientPositions[1].getValue() * getHeight() * 0.25f;
             auto x2 = gradientPositions[2].getValue() * getWidth()  * 0.75f;
             auto y2 = gradientPositions[3].getValue() * getHeight() * 0.75f;
 
-            ColourGradient gradient (c1, x1, y1,
+            ColorGradient gradient (c1, x1, y1,
                                      c2, x2, y2,
                                      useRadialGradient);
 
-            gradient.addColour (gradientIntermediate.getValue(), c3);
+            gradient.addColor (gradientIntermediate.getValue(), c3);
 
             g.setGradientFill (gradient);
         }
         else
         {
-            g.setColour (Colours::blue);
+            g.setColor (Colors::blue);
         }
 
         g.setOpacity (getAlpha());
@@ -371,7 +371,7 @@ public:
 
     Path logoPath;
     bool useLinearGradient, useRadialGradient;
-    SlowerBouncingNumber gradientColours[9], gradientPositions[4], gradientIntermediate;
+    SlowerBouncingNumber gradientColors[9], gradientPositions[4], gradientIntermediate;
 };
 
 //==============================================================================
@@ -400,7 +400,7 @@ public:
         p.closeSubPath();
 
         PathStrokeType stroke (0.5f + 10.0f * thickness.getValue());
-        g.setColour (Colours::purple.withAlpha (getAlpha()));
+        g.setColor (Colors::purple.withAlpha (getAlpha()));
         g.strokePath (p, stroke, AffineTransform());
     }
 
@@ -453,12 +453,12 @@ public:
         : GraphicsDemoBase (cc, "Glyphs")
     {
         glyphs.addFittedText ({ 20.0f }, "The Quick Brown Fox Jumped Over The Lazy Dog",
-                              -120, -50, 240, 100, Justification::centred, 2, 1.0f);
+                              -120, -50, 240, 100, Justification::centered, 2, 1.0f);
     }
 
     void drawDemo (Graphics& g) override
     {
-        g.setColour (Colours::black.withAlpha (getAlpha()));
+        g.setColor (Colors::black.withAlpha (getAlpha()));
         glyphs.draw (g, getTransform());
     }
 
@@ -531,7 +531,7 @@ public:
                 verticalLines.addWithoutMerging (Rectangle<float> ((float) x, y - length * 0.5f, 1.0f, length));
             }
 
-            g.setColour (Colours::blue.withAlpha (getAlpha()));
+            g.setColor (Colors::blue.withAlpha (getAlpha()));
             g.fillRectList (verticalLines);
         }
 
@@ -548,11 +548,11 @@ public:
                 horizontalLines.addWithoutMerging (Rectangle<float> (x - length * 0.5f, (float) y, length, 1.0f));
             }
 
-            g.setColour (Colours::green.withAlpha (getAlpha()));
+            g.setColor (Colors::green.withAlpha (getAlpha()));
             g.fillRectList (horizontalLines);
         }
 
-        g.setColour (Colours::red.withAlpha (getAlpha()));
+        g.setColor (Colors::red.withAlpha (getAlpha()));
 
         auto w = (float) getWidth();
         auto h = (float) getHeight();
@@ -584,7 +584,7 @@ public:
     void paint (Graphics& g) override
     {
         g.fillCheckerBoard (getLocalBounds().toFloat(), 48.0f, 48.0f,
-                            Colours::lightgrey, Colours::white);
+                            Colors::lightgray, Colors::white);
     }
 
     void timerCallback() override
@@ -659,12 +659,12 @@ public:
         if (auto* demo = demos[rowNumber])
         {
             if (rowIsSelected)
-                g.fillAll (Colour::contrasting (findColour (ListBox::textColourId),
-                                                findColour (ListBox::backgroundColourId)));
+                g.fillAll (Color::contrasting (findColor (ListBox::textColorId),
+                                                findColor (ListBox::backgroundColorId)));
 
-            g.setColour (findColour (ListBox::textColourId));
+            g.setColor (findColor (ListBox::textColorId));
             g.setFont (14.0f);
-            g.drawFittedText (demo->getName(), 8, 0, width - 10, height, Justification::centredLeft, 2);
+            g.drawFittedText (demo->getName(), 8, 0, width - 10, height, Justification::centeredLeft, 2);
         }
     }
 
@@ -700,7 +700,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (Colours::grey);
+        g.fillAll (Colors::gray);
     }
 
     void resized() override

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -139,9 +139,9 @@ void TestComponent::paint (Graphics& g)
 {
     if (loadedDocument == nullptr)
     {
-        g.fillAll (Colours::white.withAlpha (0.25f));
+        g.fillAll (Colors::white.withAlpha (0.25f));
 
-        g.setColour (Colours::black.withAlpha (0.5f));
+        g.setColor (Colors::black.withAlpha (0.5f));
         g.drawRect (getLocalBounds());
         g.drawLine (0.0f, 0.0f, (float) getWidth(), (float) getHeight());
         g.drawLine (0.0f, (float) getHeight(), (float) getWidth(), 0.0f);
@@ -149,10 +149,10 @@ void TestComponent::paint (Graphics& g)
         g.setFont (14.0f);
         g.drawText ("Projucer Component",
                     0, 0, getWidth(), getHeight() / 2,
-                    Justification::centred, true);
+                    Justification::centered, true);
         g.drawText ("(no file loaded)",
                     0, getHeight() / 2, getWidth(), getHeight() / 2,
-                    Justification::centred, true);
+                    Justification::centered, true);
     }
 }
 
@@ -171,7 +171,7 @@ void TestComponent::showInDialogBox (JucerDocument& document)
     DialogWindow::LaunchOptions o;
     o.content.setOwned (new TestComponent (nullptr, document.createCopy(), true));
     o.dialogTitle                   = "Testing: " + document.getClassName();
-    o.dialogBackgroundColour        = Colours::azure;
+    o.dialogBackgroundColor        = Colors::azure;
     o.escapeKeyTriggersCloseButton  = true;
     o.useNativeTitleBar             = false;
     o.resizable                     = true;

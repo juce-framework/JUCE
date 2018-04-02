@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -45,12 +45,12 @@ HeaderComponent::HeaderComponent()
 
     addAndMakeVisible  (juceIcon = new ImageComponent ("icon"));
     juceIcon->setImage (ImageCache::getFromMemory (BinaryData::juce_icon_png, BinaryData::juce_icon_pngSize),
-                        RectanglePlacement::centred);
+                        RectanglePlacement::centered);
 
     projectNameLabel.setText ({}, dontSendNotification);
     addAndMakeVisible (projectNameLabel);
 
-    initialiseButtons();
+    initializeButtons();
 }
 
 HeaderComponent::~HeaderComponent()
@@ -90,7 +90,7 @@ void HeaderComponent::resized()
     auto exporterWidth = jmin (400, bounds.getWidth() / 2);
     Rectangle<int> exporterBounds (0, 0, exporterWidth, bounds.getHeight());
 
-    exporterBounds.setCentre (bounds.getCentre());
+    exporterBounds.setCenter (bounds.getCenter());
 
     runAppButton->setBounds (exporterBounds.removeFromRight (exporterBounds.getHeight()).reduced (2));
     saveAndOpenInIDEButton->setBounds (exporterBounds.removeFromRight (exporterBounds.getHeight()).reduced (2));
@@ -105,10 +105,10 @@ void HeaderComponent::resized()
 
 void HeaderComponent::paint (Graphics& g)
 {
-    g.fillAll (findColour (backgroundColourId));
+    g.fillAll (findColor (backgroundColorId));
 
     if (isBuilding)
-        getLookAndFeel().drawSpinningWaitAnimation (g, findColour (treeIconColourId),
+        getLookAndFeel().drawSpinningWaitAnimation (g, findColor (treeIconColorId),
                                                     runAppButton->getX(), runAppButton->getY(),
                                                     runAppButton->getWidth(), runAppButton->getHeight());
 }
@@ -256,7 +256,7 @@ static void sendProjectButtonAnalyticsEvent (StringRef label)
     Analytics::getInstance()->logEvent ("Project Button",  data, ProjucerAnalyticsEvent::projectEvent);
 }
 
-void HeaderComponent::initialiseButtons() noexcept
+void HeaderComponent::initializeButtons() noexcept
 {
     auto& icons = getIcons();
 

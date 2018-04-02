@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -1082,7 +1082,7 @@ bool AudioProcessor::canApplyBusCountChange (bool isInput, bool isAdding,
 
     auto num = getBusCount (isInput);
 
-    // No way for me to find out the default layout if there are no other busses!!
+    // No way for me to find out the default layout if there are no other buses!!
     if (num == 0)
         return false;
 

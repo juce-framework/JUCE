@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -61,22 +61,22 @@ public:
     ~Graphics();
 
     //==============================================================================
-    /** Changes the current drawing colour.
+    /** Changes the current drawing color.
 
-        This sets the colour that will now be used for drawing operations - it also
-        sets the opacity to that of the colour passed-in.
+        This sets the color that will now be used for drawing operations - it also
+        sets the opacity to that of the color passed-in.
 
         If a brush is being used when this method is called, the brush will be deselected,
-        and any subsequent drawing will be done with a solid colour brush instead.
+        and any subsequent drawing will be done with a solid color brush instead.
 
         @see setOpacity
     */
-    void setColour (Colour newColour);
+    void setColor (Color newColor);
 
-    /** Changes the opacity to use with the current colour.
+    /** Changes the opacity to use with the current color.
 
-        If a solid colour is being used for drawing, this changes its opacity
-        to this new value (i.e. it doesn't multiply the colour's opacity by this amount).
+        If a solid color is being used for drawing, this changes its opacity
+        to this new value (i.e. it doesn't multiply the color's opacity by this amount).
 
         If a gradient is being used, this will have no effect on it.
 
@@ -85,10 +85,10 @@ public:
     void setOpacity (float newOpacity);
 
     /** Sets the context to use a gradient for its fill pattern. */
-    void setGradientFill (const ColourGradient& gradient);
+    void setGradientFill (const ColorGradient& gradient);
 
     /** Sets the context to use a gradient for its fill pattern. */
-    void setGradientFill (ColourGradient&& gradient);
+    void setGradientFill (ColorGradient&& gradient);
 
     /** Sets the context to use a tiled image pattern for filling.
         Make sure that you don't delete this image while it's still being used by
@@ -99,7 +99,7 @@ public:
                             float opacity);
 
     /** Changes the current fill settings.
-        @see setColour, setGradientFill, setTiledImageFill
+        @see setColor, setGradientFill, setTiledImageFill
     */
     void setFillType (const FillType& newFill);
 
@@ -121,7 +121,7 @@ public:
 
     /** Draws a one-line text string.
 
-        This will use the current colour (or brush) to fill the text. The font is the last
+        This will use the current color (or brush) to fill the text. The font is the last
         one specified by setFont().
 
         @param text          the string to draw
@@ -192,7 +192,7 @@ public:
     /** Tries to draw a text string inside a given space.
 
         This does its best to make the given text readable within the specified rectangle,
-        so it useful for labelling things.
+        so it useful for labeling things.
 
         If the text is too big, it'll be squashed horizontally or broken over multiple lines
         if the maximumLinesToUse value allows this. If the text just won't fit into the space,
@@ -217,7 +217,7 @@ public:
     /** Tries to draw a text string inside a given space.
 
         This does its best to make the given text readable within the specified rectangle,
-        so it useful for labelling things.
+        so it useful for labeling things.
 
         If the text is too big, it'll be squashed horizontally or broken over multiple lines
         if the maximumLinesToUse value allows this. If the text just won't fit into the space,
@@ -240,135 +240,135 @@ public:
                          float minimumHorizontalScale = 0.0f) const;
 
     //==============================================================================
-    /** Fills the context's entire clip region with the current colour or brush.
+    /** Fills the context's entire clip region with the current color or brush.
 
-        (See also the fillAll (Colour) method which is a quick way of filling
-        it with a given colour).
+        (See also the fillAll (Color) method which is a quick way of filling
+        it with a given color).
     */
     void fillAll() const;
 
-    /** Fills the context's entire clip region with a given colour.
+    /** Fills the context's entire clip region with a given color.
 
-        This leaves the context's current colour and brush unchanged, it just
-        uses the specified colour temporarily.
+        This leaves the context's current color and brush unchanged, it just
+        uses the specified color temporarily.
     */
-    void fillAll (Colour colourToUse) const;
+    void fillAll (Color colorToUse) const;
 
     //==============================================================================
-    /** Fills a rectangle with the current colour or brush.
+    /** Fills a rectangle with the current color or brush.
         @see drawRect, fillRoundedRectangle
     */
     void fillRect (Rectangle<int> rectangle) const;
 
-    /** Fills a rectangle with the current colour or brush.
+    /** Fills a rectangle with the current color or brush.
         @see drawRect, fillRoundedRectangle
     */
     void fillRect (Rectangle<float> rectangle) const;
 
-    /** Fills a rectangle with the current colour or brush.
+    /** Fills a rectangle with the current color or brush.
         @see drawRect, fillRoundedRectangle
     */
     void fillRect (int x, int y, int width, int height) const;
 
-    /** Fills a rectangle with the current colour or brush.
+    /** Fills a rectangle with the current color or brush.
         @see drawRect, fillRoundedRectangle
     */
     void fillRect (float x, float y, float width, float height) const;
 
-    /** Fills a set of rectangles using the current colour or brush.
+    /** Fills a set of rectangles using the current color or brush.
         If you have a lot of rectangles to draw, it may be more efficient
         to create a RectangleList and use this method than to call fillRect()
         multiple times.
     */
     void fillRectList (const RectangleList<float>& rectangles) const;
 
-    /** Fills a set of rectangles using the current colour or brush.
+    /** Fills a set of rectangles using the current color or brush.
         If you have a lot of rectangles to draw, it may be more efficient
         to create a RectangleList and use this method than to call fillRect()
         multiple times.
     */
     void fillRectList (const RectangleList<int>& rectangles) const;
 
-    /** Uses the current colour or brush to fill a rectangle with rounded corners.
+    /** Uses the current color or brush to fill a rectangle with rounded corners.
         @see drawRoundedRectangle, Path::addRoundedRectangle
     */
     void fillRoundedRectangle (float x, float y, float width, float height,
                                float cornerSize) const;
 
-    /** Uses the current colour or brush to fill a rectangle with rounded corners.
+    /** Uses the current color or brush to fill a rectangle with rounded corners.
         @see drawRoundedRectangle, Path::addRoundedRectangle
     */
     void fillRoundedRectangle (Rectangle<float> rectangle,
                                float cornerSize) const;
 
-    /** Fills a rectangle with a checkerboard pattern, alternating between two colours. */
+    /** Fills a rectangle with a checkerboard pattern, alternating between two colors. */
     void fillCheckerBoard (Rectangle<float> area,
                            float checkWidth, float checkHeight,
-                           Colour colour1, Colour colour2) const;
+                           Color color1, Color color2) const;
 
-    /** Draws a rectangular outline, using the current colour or brush.
+    /** Draws a rectangular outline, using the current color or brush.
         The lines are drawn inside the given rectangle, and greater line thicknesses extend inwards.
         @see fillRect
     */
     void drawRect (int x, int y, int width, int height, int lineThickness = 1) const;
 
-    /** Draws a rectangular outline, using the current colour or brush.
+    /** Draws a rectangular outline, using the current color or brush.
         The lines are drawn inside the given rectangle, and greater line thicknesses extend inwards.
         @see fillRect
     */
     void drawRect (float x, float y, float width, float height, float lineThickness = 1.0f) const;
 
-    /** Draws a rectangular outline, using the current colour or brush.
+    /** Draws a rectangular outline, using the current color or brush.
         The lines are drawn inside the given rectangle, and greater line thicknesses extend inwards.
         @see fillRect
     */
     void drawRect (Rectangle<int> rectangle, int lineThickness = 1) const;
 
-    /** Draws a rectangular outline, using the current colour or brush.
+    /** Draws a rectangular outline, using the current color or brush.
         The lines are drawn inside the given rectangle, and greater line thicknesses extend inwards.
         @see fillRect
     */
     void drawRect (Rectangle<float> rectangle, float lineThickness = 1.0f) const;
 
-    /** Uses the current colour or brush to draw the outline of a rectangle with rounded corners.
+    /** Uses the current color or brush to draw the outline of a rectangle with rounded corners.
         @see fillRoundedRectangle, Path::addRoundedRectangle
     */
     void drawRoundedRectangle (float x, float y, float width, float height,
                                float cornerSize, float lineThickness) const;
 
-    /** Uses the current colour or brush to draw the outline of a rectangle with rounded corners.
+    /** Uses the current color or brush to draw the outline of a rectangle with rounded corners.
         @see fillRoundedRectangle, Path::addRoundedRectangle
     */
     void drawRoundedRectangle (Rectangle<float> rectangle,
                                float cornerSize, float lineThickness) const;
 
     //==============================================================================
-    /** Fills an ellipse with the current colour or brush.
+    /** Fills an ellipse with the current color or brush.
         The ellipse is drawn to fit inside the given rectangle.
         @see drawEllipse, Path::addEllipse
     */
     void fillEllipse (float x, float y, float width, float height) const;
 
-    /** Fills an ellipse with the current colour or brush.
+    /** Fills an ellipse with the current color or brush.
         The ellipse is drawn to fit inside the given rectangle.
         @see drawEllipse, Path::addEllipse
     */
     void fillEllipse (Rectangle<float> area) const;
 
-    /** Draws an elliptical stroke using the current colour or brush.
+    /** Draws an elliptical stroke using the current color or brush.
         @see fillEllipse, Path::addEllipse
     */
     void drawEllipse (float x, float y, float width, float height,
                       float lineThickness) const;
 
-    /** Draws an elliptical stroke using the current colour or brush.
+    /** Draws an elliptical stroke using the current color or brush.
         @see fillEllipse, Path::addEllipse
     */
     void drawEllipse (Rectangle<float> area, float lineThickness) const;
 
     //==============================================================================
     /** Draws a line between two points.
-        The line is 1 pixel wide and drawn with the current colour or brush.
+        The line is 1 pixel wide and drawn with the current color or brush.
         TIP: If you're trying to draw horizontal or vertical lines, don't use this -
         it's better to use fillRect() instead unless you really need an angled line.
     */
@@ -382,7 +382,7 @@ public:
     void drawLine (float startX, float startY, float endX, float endY, float lineThickness) const;
 
     /** Draws a line between two points.
-        The line is 1 pixel wide and drawn with the current colour or brush.
+        The line is 1 pixel wide and drawn with the current color or brush.
         TIP: If you're trying to draw horizontal or vertical lines, don't use this -
         it's better to use fillRect() instead unless you really need an angled line.
     */
@@ -430,13 +430,13 @@ public:
     void drawHorizontalLine (int y, float left, float right) const;
 
     //==============================================================================
-    /** Fills a path using the currently selected colour or brush. */
+    /** Fills a path using the currently selected color or brush. */
     void fillPath (const Path& path) const;
 
-    /** Fills a path using the currently selected colour or brush, and adds a transform. */
+    /** Fills a path using the currently selected color or brush, and adds a transform. */
     void fillPath (const Path& path, const AffineTransform& transform) const;
 
-    /** Draws a path's outline using the currently selected colour or brush. */
+    /** Draws a path's outline using the currently selected color or brush. */
     void strokePath (const Path& path,
                      const PathStrokeType& strokeType,
                      const AffineTransform& transform = {}) const;
@@ -461,7 +461,7 @@ public:
     */
     enum ResamplingQuality
     {
-        lowResamplingQuality     = 0,    /**< Just uses a nearest-neighbour algorithm for resampling. */
+        lowResamplingQuality     = 0,    /**< Just uses a nearest-neighbor algorithm for resampling. */
         mediumResamplingQuality  = 1,    /**< Uses bilinear interpolation for upsampling and area-averaging for downsampling. */
         highResamplingQuality    = 2,    /**< Uses bicubic interpolation for upsampling and area-averaging for downsampling. */
     };
@@ -481,7 +481,7 @@ public:
 
         Images are composited using the context's current opacity, so if you
         don't want it to be drawn semi-transparently, be sure to call setOpacity (1.0f)
-        (or setColour() with an opaque colour) before drawing images.
+        (or setColor() with an opaque color) before drawing images.
     */
     void drawImageAt (const Image& imageToDraw, int topLeftX, int topLeftY,
                       bool fillAlphaChannelWithCurrentBrush = false) const;
@@ -493,7 +493,7 @@ public:
 
         Images are composited using the context's current opacity, so if you
         don't want it to be drawn semi-transparently, be sure to call setOpacity (1.0f)
-        (or setColour() with an opaque colour) before drawing images.
+        (or setColor() with an opaque color) before drawing images.
 
         @param imageToDraw      the image to overlay
         @param destX            the left of the destination rectangle
@@ -506,7 +506,7 @@ public:
         @param sourceHeight     the height of the rectangle to copy from the source image
         @param fillAlphaChannelWithCurrentBrush     if true, then instead of drawing the source image's pixels,
                                                     the source image's alpha channel is used as a mask with
-                                                    which to fill the destination using the current colour
+                                                    which to fill the destination using the current color
                                                     or brush. (If the source is has no alpha channel, then
                                                     it will just fill the target with a solid rectangle)
         @see setImageResamplingQuality, drawImageAt, drawImageWithin, fillAlphaMap
@@ -523,7 +523,7 @@ public:
 
         Images are composited using the context's current opacity, so if you
         don't want it to be drawn semi-transparently, be sure to call setOpacity (1.0f)
-        (or setColour() with an opaque colour) before drawing images.
+        (or setColor() with an opaque color) before drawing images.
 
         If fillAlphaChannelWithCurrentBrush is set to true, then the image's RGB channels
         are ignored and it is filled with the current brush, masked by its alpha channel.
@@ -546,7 +546,7 @@ public:
                                         class for more details about this.
         @param fillAlphaChannelWithCurrentBrush     if true, then instead of drawing the image, just its
                                                     alpha channel will be used as a mask with which to
-                                                    draw with the current brush or colour. This is
+                                                    draw with the current brush or color. This is
                                                     similar to fillAlphaMap(), and see also drawImage()
         @see drawImage, drawImageTransformed, drawImageAt, RectanglePlacement
     */
@@ -571,7 +571,7 @@ public:
                                         class for more details about this.
         @param fillAlphaChannelWithCurrentBrush     if true, then instead of drawing the image, just its
                                                     alpha channel will be used as a mask with which to
-                                                    draw with the current brush or colour. This is
+                                                    draw with the current brush or color. This is
                                                     similar to fillAlphaMap(), and see also drawImage()
         @see setImageResamplingQuality, drawImage, drawImageTransformed, drawImageAt, RectanglePlacement
     */
@@ -589,7 +589,7 @@ public:
     /** Checks whether a rectangle overlaps the context's clipping region.
 
         If this returns false, no part of the given area can be drawn onto, so this
-        method can be used to optimise a component's paint() method, by letting it
+        method can be used to optimize a component's paint() method, by letting it
         avoid drawing complex objects that aren't within the region being repainted.
     */
     bool clipRegionIntersects (Rectangle<int> area) const;
@@ -720,7 +720,7 @@ public:
     */
     void addTransform (const AffineTransform& transform);
 
-    /** Resets the current colour, brush, and font to default settings. */
+    /** Resets the current color, brush, and font to default settings. */
     void resetToDefaultState();
 
     /** Returns true if this context is drawing to a vector-based device, such as a printer. */

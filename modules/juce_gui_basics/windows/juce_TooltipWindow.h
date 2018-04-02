@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -88,23 +88,23 @@ public:
     void hideTip();
 
     /** Asks a component for its tooltip.
-        This can be overridden if you need custom lookup behaviour or to modify the strings.
+        This can be overridden if you need custom lookup behavior or to modify the strings.
     */
     virtual String getTipFor (Component&);
 
     //==============================================================================
-    /** A set of colour IDs to use to change the colour of various aspects of the tooltip.
+    /** A set of color IDs to use to change the color of various aspects of the tooltip.
 
-        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        These constants can be used either via the Component::setColor(), or LookAndFeel::setColor()
         methods.
 
-        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+        @see Component::setColor, Component::findColor, LookAndFeel::setColor, LookAndFeel::findColor
     */
-    enum ColourIds
+    enum ColorIds
     {
-        backgroundColourId      = 0x1001b00,    /**< The colour to fill the background with. */
-        textColourId            = 0x1001c00,    /**< The colour to use for the text. */
-        outlineColourId         = 0x1001c10     /**< The colour to use to draw an outline around the tooltip. */
+        backgroundColorId      = 0x1001b00,    /**< The color to fill the background with. */
+        textColorId            = 0x1001c00,    /**< The color to use for the text. */
+        outlineColorId         = 0x1001c10     /**< The color to use to draw an outline around the tooltip. */
     };
 
     //==============================================================================

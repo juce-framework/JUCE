@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -29,7 +29,7 @@ namespace juce
 
 //==============================================================================
 /**
-    A Pre-formatted piece of text, which may contain multiple fonts and colours.
+    A Pre-formatted piece of text, which may contain multiple fonts and colors.
 
     A TextLayout is created from an AttributedString, and once created can be
     quickly drawn into a Graphics context.
@@ -112,7 +112,7 @@ public:
     };
 
     //==============================================================================
-    /** A sequence of glyphs with a common font and colour. */
+    /** A sequence of glyphs with a common font and color. */
     class JUCE_API  Run
     {
     public:
@@ -125,7 +125,7 @@ public:
         Range<float> getRunBoundsX() const noexcept;
 
         Font font;              /**< The run's font. */
-        Colour colour;          /**< The run's colour. */
+        Color color;          /**< The run's color. */
         Array<Glyph> glyphs;    /**< The glyphs in this run. */
         Range<int> stringRange; /**< The character range that this run represents in the
                                      original string that was used to create it. */

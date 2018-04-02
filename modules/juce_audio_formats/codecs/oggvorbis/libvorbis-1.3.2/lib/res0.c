@@ -245,7 +245,7 @@ static vorbis_info_residue *res0_unpack(vorbis_info *vi,oggpack_buffer *opb){
   /* verify the phrasebook is not specifying an impossible or
      inconsistent partitioning scheme. */
   /* modify the phrasebook ranging check from r16327; an early beta
-     encoder had a bug where it used an oversized phrasebook by
+     encoder had a bug where it used an oversize phrasebook by
      accident.  These files should continue to be playable, but don't
      allow an exploit */
   {

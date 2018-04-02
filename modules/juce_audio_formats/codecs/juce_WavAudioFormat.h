@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -137,7 +137,7 @@ public:
     static const char* const riffInfoMusicBy;               /**< Metadata property name used in INFO chunks. */
     static const char* const riffInfoNinthLanguage;         /**< Metadata property name used in INFO chunks. */
     static const char* const riffInfoNumberOfParts;         /**< Metadata property name used in INFO chunks. */
-    static const char* const riffInfoOrganisation;          /**< Metadata property name used in INFO chunks. */
+    static const char* const riffInfoOrganization;          /**< Metadata property name used in INFO chunks. */
     static const char* const riffInfoPart;                  /**< Metadata property name used in INFO chunks. */
     static const char* const riffInfoProducedBy;            /**< Metadata property name used in INFO chunks. */
     static const char* const riffInfoProductName;           /**< Metadata property name used in INFO chunks. */

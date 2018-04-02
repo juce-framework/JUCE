@@ -23,7 +23,7 @@
 namespace juce
 {
 
-static SpinLock deletedAtShutdownLock; // use a spin lock because it can be statically initialised
+static SpinLock deletedAtShutdownLock; // use a spin lock because it can be statically initialized
 
 static Array<DeletedAtShutdown*>& getDeletedAtShutdownObjects()
 {

@@ -165,9 +165,9 @@ bool Process::setMaxNumberOfFileHandles (int newMaxNumber) noexcept
     return setrlimit (RLIMIT_NOFILE, &lim) == 0;
 }
 
-struct MaxNumFileHandlesInitialiser
+struct MaxNumFileHandlesInitializer
 {
-    MaxNumFileHandlesInitialiser() noexcept
+    MaxNumFileHandlesInitializer() noexcept
     {
        #ifndef JUCE_PREFERRED_MAX_FILE_HANDLES
         enum { JUCE_PREFERRED_MAX_FILE_HANDLES = 8192 };
@@ -183,7 +183,7 @@ struct MaxNumFileHandlesInitialiser
     }
 };
 
-static MaxNumFileHandlesInitialiser maxNumFileHandlesInitialiser;
+static MaxNumFileHandlesInitializer maxNumFileHandlesInitializer;
 #endif
 
 //==============================================================================

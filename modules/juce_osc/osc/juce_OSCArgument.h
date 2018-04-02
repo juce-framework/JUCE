@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -76,24 +76,24 @@ public:
     bool isBlob() const noexcept            { return type == OSCTypes::blob; }
 
     /** Returns the value of the OSCArgument as an int32.
-        If the type of the OSCArgument is not int32, the behaviour is undefined.
+        If the type of the OSCArgument is not int32, the behavior is undefined.
      */
     int32 getInt32() const noexcept;
 
     /** Returns the value of the OSCArgument as a float32.
-        If the type of the OSCArgument is not float32, the behaviour is undefined.
+        If the type of the OSCArgument is not float32, the behavior is undefined.
      */
     float getFloat32() const noexcept;
 
     /** Returns the value of the OSCArgument as a string.
-        If the type of the OSCArgument is not string, the behaviour is undefined.
+        If the type of the OSCArgument is not string, the behavior is undefined.
      */
     String getString() const noexcept;
 
     /** Returns the binary data contained in the blob and owned by the OSCArgument,
         as a reference to a JUCE MemoryBlock object.
 
-        If the type of the OSCArgument is not blob, the behaviour is undefined.
+        If the type of the OSCArgument is not blob, the behavior is undefined.
      */
     const MemoryBlock& getBlob() const noexcept;
 

@@ -758,19 +758,19 @@ String XmlDocument::expandExternalEntity (const String& entity)
         if (dtdText.isNotEmpty())
         {
             dtdText = dtdText.trimCharactersAtEnd (">");
-            tokenisedDTD.addTokens (dtdText, true);
+            tokenizedDTD.addTokens (dtdText, true);
 
-            if (tokenisedDTD[tokenisedDTD.size() - 2].equalsIgnoreCase ("system")
-                 && tokenisedDTD[tokenisedDTD.size() - 1].isQuotedString())
+            if (tokenizedDTD[tokenizedDTD.size() - 2].equalsIgnoreCase ("system")
+                 && tokenizedDTD[tokenizedDTD.size() - 1].isQuotedString())
             {
-                auto fn = tokenisedDTD[tokenisedDTD.size() - 1];
+                auto fn = tokenizedDTD[tokenizedDTD.size() - 1];
 
-                tokenisedDTD.clear();
-                tokenisedDTD.addTokens (getFileContents (fn), true);
+                tokenizedDTD.clear();
+                tokenizedDTD.addTokens (getFileContents (fn), true);
             }
             else
             {
-                tokenisedDTD.clear();
+                tokenizedDTD.clear();
                 auto openBracket = dtdText.indexOfChar ('[');
 
                 if (openBracket > 0)
@@ -778,24 +778,24 @@ String XmlDocument::expandExternalEntity (const String& entity)
                     auto closeBracket = dtdText.lastIndexOfChar (']');
 
                     if (closeBracket > openBracket)
-                        tokenisedDTD.addTokens (dtdText.substring (openBracket + 1,
+                        tokenizedDTD.addTokens (dtdText.substring (openBracket + 1,
                                                                    closeBracket), true);
                 }
             }
 
-            for (int i = tokenisedDTD.size(); --i >= 0;)
+            for (int i = tokenizedDTD.size(); --i >= 0;)
             {
-                if (tokenisedDTD[i].startsWithChar ('%')
-                     && tokenisedDTD[i].endsWithChar (';'))
+                if (tokenizedDTD[i].startsWithChar ('%')
+                     && tokenizedDTD[i].endsWithChar (';'))
                 {
-                    auto parsed = getParameterEntity (tokenisedDTD[i].substring (1, tokenisedDTD[i].length() - 1));
+                    auto parsed = getParameterEntity (tokenizedDTD[i].substring (1, tokenizedDTD[i].length() - 1));
                     StringArray newToks;
                     newToks.addTokens (parsed, true);
 
-                    tokenisedDTD.remove (i);
+                    tokenizedDTD.remove (i);
 
                     for (int j = newToks.size(); --j >= 0;)
-                        tokenisedDTD.insert (i, newToks[j]);
+                        tokenizedDTD.insert (i, newToks[j]);
                 }
             }
         }
@@ -803,13 +803,13 @@ String XmlDocument::expandExternalEntity (const String& entity)
         needToLoadDTD = false;
     }
 
-    for (int i = 0; i < tokenisedDTD.size(); ++i)
+    for (int i = 0; i < tokenizedDTD.size(); ++i)
     {
-        if (tokenisedDTD[i] == entity)
+        if (tokenizedDTD[i] == entity)
         {
-            if (tokenisedDTD[i - 1].equalsIgnoreCase ("<!entity"))
+            if (tokenizedDTD[i - 1].equalsIgnoreCase ("<!entity"))
             {
-                auto ent = tokenisedDTD [i + 1].trimCharactersAtEnd (">").trim().unquoted();
+                auto ent = tokenizedDTD [i + 1].trimCharactersAtEnd (">").trim().unquoted();
 
                 // check for sub-entities..
                 auto ampersand = ent.indexOfChar ('&');
@@ -844,16 +844,16 @@ String XmlDocument::expandExternalEntity (const String& entity)
 
 String XmlDocument::getParameterEntity (const String& entity)
 {
-    for (int i = 0; i < tokenisedDTD.size(); ++i)
+    for (int i = 0; i < tokenizedDTD.size(); ++i)
     {
-        if (tokenisedDTD[i] == entity
-             && tokenisedDTD [i - 1] == "%"
-             && tokenisedDTD [i - 2].equalsIgnoreCase ("<!entity"))
+        if (tokenizedDTD[i] == entity
+             && tokenizedDTD [i - 1] == "%"
+             && tokenizedDTD [i - 2].equalsIgnoreCase ("<!entity"))
         {
-            auto ent = tokenisedDTD [i + 1].trimCharactersAtEnd (">");
+            auto ent = tokenizedDTD [i + 1].trimCharactersAtEnd (">");
 
             if (ent.equalsIgnoreCase ("system"))
-                return getFileContents (tokenisedDTD [i + 2].trimCharactersAtEnd (">"));
+                return getFileContents (tokenizedDTD [i + 2].trimCharactersAtEnd (">"));
 
             return ent.trim().unquoted();
         }

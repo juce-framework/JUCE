@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -36,8 +36,8 @@ namespace juce
 class JUCE_API  OpenGLFrameBuffer
 {
 public:
-    /** Creates an uninitialised buffer.
-        To actually allocate the buffer, use initialise().
+    /** Creates an uninitialized buffer.
+        To actually allocate the buffer, use initialize().
     */
     OpenGLFrameBuffer();
 
@@ -49,17 +49,17 @@ public:
         Note that a valid openGL context must be selected when you call this method,
         or it will fail.
     */
-    bool initialise (OpenGLContext& context, int width, int height);
+    bool initialize (OpenGLContext& context, int width, int height);
 
     /** Tries to allocates a buffer containing a copy of a given image.
         Note that a valid openGL context must be selected when you call this method,
         or it will fail.
     */
-    bool initialise (OpenGLContext& context, const Image& content);
+    bool initialize (OpenGLContext& context, const Image& content);
 
     /** Tries to allocate a copy of another framebuffer.
     */
-    bool initialise (OpenGLFrameBuffer& other);
+    bool initialize (OpenGLFrameBuffer& other);
 
     /** Releases the buffer, if one has been allocated.
         Any saved state that was created with saveAndRelease() will also be freed by this call.
@@ -97,14 +97,14 @@ public:
     /** Deselects this buffer as the current OpenGL rendering target. */
     void releaseAsRenderingTarget();
 
-    /** Returns the ID of this framebuffer, or 0 if it isn't initialised. */
+    /** Returns the ID of this framebuffer, or 0 if it isn't initialized. */
     GLuint getFrameBufferID() const noexcept;
 
     /** Returns the current frame buffer ID for the current context. */
     static GLuint getCurrentFrameBufferTarget() noexcept;
 
-    /** Clears the framebuffer with the specified colour. */
-    void clear (Colour colour);
+    /** Clears the framebuffer with the specified color. */
+    void clear (Color color);
 
     /** Selects the framebuffer as the current target, and clears it to transparent. */
     void makeCurrentAndClear();

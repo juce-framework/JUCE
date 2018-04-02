@@ -193,8 +193,8 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (Colours::darkgrey);
-        g.setColour (Colours::lightgrey);
+        g.fillAll (Colors::darkgray);
+        g.setColor (Colors::lightgray);
 
         if (thumbnail.getTotalLength() > 0.0)
         {
@@ -207,7 +207,7 @@ public:
         else
         {
             g.setFont (14.0f);
-            g.drawFittedText ("(No file recorded)", getLocalBounds(), Justification::centred, 2);
+            g.drawFittedText ("(No file recorded)", getLocalBounds(), Justification::centered, 2);
         }
     }
 
@@ -240,12 +240,12 @@ public:
         explanationLabel.setFont (Font (15.0f, Font::plain));
         explanationLabel.setJustificationType (Justification::topLeft);
         explanationLabel.setEditable (false, false, false);
-        explanationLabel.setColour (TextEditor::textColourId, Colours::black);
-        explanationLabel.setColour (TextEditor::backgroundColourId, Colour (0x00000000));
+        explanationLabel.setColor (TextEditor::textColorId, Colors::black);
+        explanationLabel.setColor (TextEditor::backgroundColorId, Color (0x00000000));
 
         addAndMakeVisible (recordButton);
-        recordButton.setColour (TextButton::buttonColourId, Colour (0xffff5c5c));
-        recordButton.setColour (TextButton::textColourOnId, Colours::black);
+        recordButton.setColor (TextButton::buttonColorId, Color (0xffff5c5c));
+        recordButton.setColor (TextButton::textColorOnId, Colors::black);
 
         recordButton.onClick = [this]
         {
@@ -262,7 +262,7 @@ public:
                                      [this] (bool granted)
                                      {
                                          int numInputChannels = granted ? 2 : 0;
-                                         audioDeviceManager.initialise (numInputChannels, 2, nullptr, true, {}, nullptr);
+                                         audioDeviceManager.initialize (numInputChannels, 2, nullptr, true, {}, nullptr);
                                      });
        #endif
 
@@ -280,7 +280,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground));
+        g.fillAll (getUIColorIfAvailable (LookAndFeel_V4::ColorScheme::UIColor::windowBackground));
     }
 
     void resized() override

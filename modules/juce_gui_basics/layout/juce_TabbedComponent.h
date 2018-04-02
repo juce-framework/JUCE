@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -84,7 +84,7 @@ public:
         If this thickness is > 0, a line will be drawn around the three sides of the content
         component which don't touch the tab-bar, and the content component will be inset by this amount.
 
-        To set the colour of the line, use setColour (outlineColourId, ...).
+        To set the color of the line, use setColor (outlineColorId, ...).
     */
     void setOutline (int newThickness);
 
@@ -108,7 +108,7 @@ public:
         @see TabbedButtonBar::addTab
     */
     void addTab (const String& tabName,
-                 Colour tabBackgroundColour,
+                 Color tabBackgroundColor,
                  Component* contentComponent,
                  bool deleteComponentWhenNotNeeded,
                  int insertIndex = -1);
@@ -132,15 +132,15 @@ public:
 
     /** Returns the content component that was added for the given index.
         Be careful not to reposition or delete the components that are returned, as
-        this will interfere with the TabbedComponent's behaviour.
+        this will interfere with the TabbedComponent's behavior.
     */
     Component* getTabContentComponent (int tabIndex) const noexcept;
 
-    /** Returns the colour of one of the tabs. */
-    Colour getTabBackgroundColour (int tabIndex) const noexcept;
+    /** Returns the color of one of the tabs. */
+    Color getTabBackgroundColor (int tabIndex) const noexcept;
 
-    /** Changes the background colour of one of the tabs. */
-    void setTabBackgroundColour (int tabIndex, Colour newColour);
+    /** Changes the background color of one of the tabs. */
+    void setTabBackgroundColor (int tabIndex, Color newColor);
 
     //==============================================================================
     /** Changes the currently-selected tab.
@@ -177,17 +177,17 @@ public:
     TabbedButtonBar& getTabbedButtonBar() const noexcept            { return *tabs; }
 
     //==============================================================================
-    /** A set of colour IDs to use to change the colour of various aspects of the component.
+    /** A set of color IDs to use to change the color of various aspects of the component.
 
-        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        These constants can be used either via the Component::setColor(), or LookAndFeel::setColor()
         methods.
 
-        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+        @see Component::setColor, Component::findColor, LookAndFeel::setColor, LookAndFeel::findColor
     */
-    enum ColourIds
+    enum ColorIds
     {
-        backgroundColourId          = 0x1005800,    /**< The colour to fill the background behind the tabs. */
-        outlineColourId             = 0x1005801,    /**< The colour to use to draw an outline around the content.
+        backgroundColorId          = 0x1005800,    /**< The color to fill the background behind the tabs. */
+        outlineColorId             = 0x1005801,    /**< The color to use to draw an outline around the content.
                                                          (See setOutline)  */
     };
 

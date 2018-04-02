@@ -94,7 +94,7 @@ public:
 
         // Create an address box..
         addAndMakeVisible (addressTextBox);
-        addressTextBox.setTextToShowWhenEmpty ("Enter a web address, e.g. https://www.juce.com", Colours::grey);
+        addressTextBox.setTextToShowWhenEmpty ("Enter a web address, e.g. https://www.juce.com", Colors::gray);
         addressTextBox.onReturnKey = [this] { webView->goToURL (addressTextBox.getText()); };
 
         // create the actual browser component
@@ -117,8 +117,8 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground,
-                                           Colours::grey));
+        g.fillAll (getUIColorIfAvailable (LookAndFeel_V4::ColorScheme::UIColor::windowBackground,
+                                           Colors::gray));
     }
 
     void resized() override

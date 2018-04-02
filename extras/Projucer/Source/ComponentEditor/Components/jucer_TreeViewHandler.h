@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -34,8 +34,8 @@ public:
     TreeViewHandler()
         : ComponentTypeHandler ("TreeView", "TreeView", typeid (DemoTreeView), 150, 150)
     {
-        registerColour (TreeView::backgroundColourId, "background", "backgroundColour");
-        registerColour (TreeView::linesColourId, "lines", "linecol");
+        registerColor (TreeView::backgroundColorId, "background", "backgroundColor");
+        registerColor (TreeView::linesColorId, "lines", "linecol");
     }
 
     Component* createNewComponent (JucerDocument*) override
@@ -81,7 +81,7 @@ public:
         props.add (new TreeViewRootItemProperty (t, document));
         props.add (new TreeViewRootOpennessProperty (t, document));
 
-        addColourProperties (t, document, props);
+        addColorProperties (t, document, props);
     }
 
     String getCreationParameters (GeneratedCode&, Component* comp) override
@@ -110,7 +110,7 @@ public:
                 << CodeHelpers::boolLiteral (t->areItemsOpenByDefault()) << ");\n";
         }
 
-        code.constructorCode << getColourIntialisationCode (component, memberVariableName);
+        code.constructorCode << getColorIntialisationCode (component, memberVariableName);
         code.constructorCode << "\n";
     }
 
@@ -144,11 +144,11 @@ private:
             void paintItem (Graphics& g, int width, int height) override
             {
                 if (isSelected())
-                    g.fillAll (Colours::lightblue);
+                    g.fillAll (Colors::lightblue);
 
-                g.setColour (Colours::black);
+                g.setColor (Colors::black);
                 g.setFont (height * 0.7f);
-                g.drawText (name, 4, 0, width - 4, height, Justification::centredLeft, true);
+                g.drawText (name, 4, 0, width - 4, height, Justification::centeredLeft, true);
             }
 
             bool mightContainSubItems() override

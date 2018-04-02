@@ -9,7 +9,7 @@
                objCExtraSuffix="M73TRi" vst3Folder="" extraCompilerFlags="-Wall -Wshadow -Wstrict-aliasing -Wconversion -Wsign-compare -Woverloaded-virtual -Wextra-semi">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="AudioPluginHost"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="AudioPluginHost"/>
+        <CONFIGURATION name="Release" isDebug="0" optimization="2" targetName="AudioPluginHost"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_video" path="../../modules"/>
@@ -31,7 +31,7 @@
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile" vstFolder="" vst3Folder="">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="AudioPluginHost" libraryPath="/usr/X11R6/lib/"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="AudioPluginHost"
+        <CONFIGURATION name="Release" isDebug="0" optimization="2" targetName="AudioPluginHost"
                        libraryPath="/usr/X11R6/lib/"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
@@ -53,7 +53,7 @@
     </LINUX_MAKE>
     <VS2013 targetFolder="Builds/VisualStudio2013" vstFolder="" vst3Folder="">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" winArchitecture="32-bit" isDebug="1" optimisation="1"
+        <CONFIGURATION name="Debug" winArchitecture="32-bit" isDebug="1" optimization="1"
                        targetName="AudioPluginHost"/>
         <CONFIGURATION name="Release" winArchitecture="32-bit" isDebug="0" targetName="AudioPluginHost"
                        debugInformationFormat="ProgramDatabase"/>

@@ -65,7 +65,7 @@ public:
           currentChannelLayout (AudioChannelSet::disabled()),
           layoutTitle          ("LayoutTitleLabel", getLayoutName())
     {
-        layoutTitle.setJustificationType (Justification::centred);
+        layoutTitle.setJustificationType (Justification::centered);
         addAndMakeVisible (layoutTitle);
         addAndMakeVisible (noChannelsLabel);
 
@@ -96,7 +96,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+        g.fillAll (getLookAndFeel().findColor (ResizableWindow::backgroundColorId));
     }
 
     void updateButton (Button* btn)
@@ -148,14 +148,14 @@ public:
 
             if (auto* listener = dynamic_cast<ChannelClickListener*> (getAudioProcessor()))
             {
-                auto   activeColour = getLookAndFeel().findColour (Slider::thumbColourId);
-                auto inactiveColour = getLookAndFeel().findColour (Slider::trackColourId);
+                auto   activeColor = getLookAndFeel().findColor (Slider::thumbColorId);
+                auto inactiveColor = getLookAndFeel().findColor (Slider::trackColorId);
 
                 for (auto i = 0; i < activeChannels.size(); ++i)
                 {
                     auto isActive = listener->isChannelActive (i);
                     activeChannels.getReference (i) = isActive;
-                    channelButtons[i]->setColour (TextButton::buttonColourId, isActive ? activeColour : inactiveColour);
+                    channelButtons[i]->setColor (TextButton::buttonColorId, isActive ? activeColor : inactiveColor);
                     channelButtons[i]->repaint();
                 }
             }
@@ -183,8 +183,8 @@ private:
         {
             if (auto* listener = dynamic_cast<ChannelClickListener*> (getAudioProcessor()))
             {
-                auto   activeColour = getLookAndFeel().findColour (Slider::thumbColourId);
-                auto inactiveColour = getLookAndFeel().findColour (Slider::trackColourId);
+                auto   activeColor = getLookAndFeel().findColor (Slider::thumbColorId);
+                auto inactiveColor = getLookAndFeel().findColor (Slider::trackColorId);
 
                 for (auto i = 0; i < activeChannels.size(); ++i)
                 {
@@ -192,7 +192,7 @@ private:
                     if (activeChannels.getReference (i) != isActive)
                     {
                         activeChannels.getReference (i) = isActive;
-                        channelButtons[i]->setColour (TextButton::buttonColourId, isActive ? activeColour : inactiveColour);
+                        channelButtons[i]->setColor (TextButton::buttonColorId, isActive ? activeColor : inactiveColor);
                         channelButtons[i]->repaint();
                     }
                 }

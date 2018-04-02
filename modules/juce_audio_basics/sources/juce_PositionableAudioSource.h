@@ -53,7 +53,7 @@ public:
         should return samples from this position.
 
         Note that this may be called on a different thread to getNextAudioBlock(),
-        so the subclass should make sure it's synchronised.
+        so the subclass should make sure it's synchronized.
     */
     virtual void setNextReadPosition (int64 newPosition) = 0;
 

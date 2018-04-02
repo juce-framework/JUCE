@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -615,13 +615,13 @@ namespace
         auto preTranslated  = getFileCheckingForExistence (args[1]).loadFileAsString();
         auto postTranslated = getFileCheckingForExistence (args[2]).loadFileAsString();
 
-        auto localisedContent = (args.size() > 3 ? getFileCheckingForExistence (args[3]).loadFileAsString() : String());
-        auto localised        = LocalisedStrings (localisedContent, false);
+        auto localizedContent = (args.size() > 3 ? getFileCheckingForExistence (args[3]).loadFileAsString() : String());
+        auto localized        = LocalizedStrings (localizedContent, false);
 
         using TH = TranslationHelpers;
         std::cout << TH::createFinishedTranslationFile (TH::withTrimmedEnds (TH::breakApart (preTranslated)),
                                                         TH::withTrimmedEnds (TH::breakApart (postTranslated)),
-                                                        localised) << std::endl;
+                                                        localized) << std::endl;
     }
 
     //==============================================================================
@@ -807,13 +807,13 @@ namespace
                   << "    Zips all modules in a given folder and creates an index for them." << std::endl
                   << std::endl
                   << " " << appName << " --trim-whitespace target_folder" << std::endl
-                  << "    Scans the given folder for C/C++ source files (recursively), and trims any trailing whitespace from their lines, as well as normalising their line-endings to CR-LF." << std::endl
+                  << "    Scans the given folder for C/C++ source files (recursively), and trims any trailing whitespace from their lines, as well as normalizing their line-endings to CR-LF." << std::endl
                   << std::endl
                   << " " << appName << " --remove-tabs target_folder" << std::endl
                   << "    Scans the given folder for C/C++ source files (recursively), and replaces any tab characters with 4 spaces." << std::endl
                   << std::endl
                   << " " << appName << " --tidy-divider-comments target_folder" << std::endl
-                  << "    Scans the given folder for C/C++ source files (recursively), and normalises any juce-style comment division lines (i.e. any lines that look like //===== or //------- or /////////// will be replaced)." << std::endl
+                  << "    Scans the given folder for C/C++ source files (recursively), and normalizes any juce-style comment division lines (i.e. any lines that look like //===== or //------- or /////////// will be replaced)." << std::endl
                   << std::endl
                   << " " << appName << " --fix-broken-include-paths target_folder" << std::endl
                   << "    Scans the given folder for C/C++ source files (recursively). Where a file contains an #include of one of the other filenames, it changes it to use the optimum relative path. Helpful for auto-fixing includes when re-arranging files and folders in a project." << std::endl
@@ -828,7 +828,7 @@ namespace
                   << "    Scans each of the given folders (recursively) for any NEEDS_TRANS macros, and generates a translation file that can be used with Projucer's translation file builder" << std::endl
                   << std::endl
                   << " " << appName << " --trans-finish pre_translated_file post_translated_file optional_existing_translation_file" << std::endl
-                  << "    Creates a completed translations mapping file, that can be used to initialise a LocalisedStrings object. This allows you to localise the strings in your project" << std::endl
+                  << "    Creates a completed translations mapping file, that can be used to initialize a LocalizedStrings object. This allows you to localize the strings in your project" << std::endl
                   << std::endl
                   << " " << appName << " --set-global-search-path os identifier_to_set new_path" << std::endl
                   << "    Sets the global path for a specified os and identifier. The os should be either osx, windows or linux and the identifiers can be any of the following: "

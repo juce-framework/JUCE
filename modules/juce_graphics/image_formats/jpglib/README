@@ -104,7 +104,7 @@ be reliable, portable, industrial-strength code.  We do not claim to have
 achieved that goal in every aspect of the software, but we strive for it.
 
 We welcome the use of this software as a component of commercial products.
-No royalty is required, but we do ask for an acknowledgement in product
+No royalty is required, but we do ask for an acknowledgment in product
 documentation, as described under LEGAL ISSUES.
 
 
@@ -339,7 +339,7 @@ Some JPEG programs produce files that are not compatible with our library.
 The root of the problem is that the ISO JPEG committee failed to specify a
 concrete file format.  Some vendors "filled in the blanks" on their own,
 creating proprietary formats that no one else could read.  (For example, none
-of the early commercial JPEG implementations for the Macintosh were able to
+of the early commercial JPEG implementations for the Mackintosh were able to
 exchange compressed files.)
 
 The file format we have adopted is called JFIF (see REFERENCES).  This format

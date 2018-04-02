@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -58,10 +58,10 @@ public:
                                                         title bar and frame. if not specified, the window will be
                                                         borderless. */
         windowIsResizable           = (1 << 4),    /**< Indicates that the window should have a resizable border. */
-        windowHasMinimiseButton     = (1 << 5),    /**< Indicates that if the window has a title bar, it should have a
-                                                        minimise button on it. */
-        windowHasMaximiseButton     = (1 << 6),    /**< Indicates that if the window has a title bar, it should have a
-                                                        maximise button on it. */
+        windowHasMinimizeButton     = (1 << 5),    /**< Indicates that if the window has a title bar, it should have a
+                                                        minimize button on it. */
+        windowHasMaximizeButton     = (1 << 6),    /**< Indicates that if the window has a title bar, it should have a
+                                                        maximize button on it. */
         windowHasCloseButton        = (1 << 7),    /**< Indicates that if the window has a title bar, it should have a
                                                         close button on it. */
         windowHasDropShadow         = (1 << 8),    /**< Indicates that the window should have a drop-shadow (this may
@@ -173,11 +173,11 @@ public:
     */
     Rectangle<int> getAreaCoveredBy (Component& subComponent) const;
 
-    /** Minimises the window. */
-    virtual void setMinimised (bool shouldBeMinimised) = 0;
+    /** Minimizes the window. */
+    virtual void setMinimized (bool shouldBeMinimized) = 0;
 
-    /** True if the window is currently minimised. */
-    virtual bool isMinimised() const = 0;
+    /** True if the window is currently minimized. */
+    virtual bool isMinimized() const = 0;
 
     /** Enable/disable fullscreen mode for the window. */
     virtual void setFullScreen (bool shouldBeFullScreen) = 0;
@@ -376,7 +376,7 @@ private:
     WeakReference<Component> lastFocusedComponent, dragAndDropTargetComponent;
     Component* lastDragAndDropCompUnderMouse = nullptr;
     const uint32 uniqueID;
-    bool isWindowMinimised = false;
+    bool isWindowMinimized = false;
     Component* getTargetForKeyPress();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentPeer)

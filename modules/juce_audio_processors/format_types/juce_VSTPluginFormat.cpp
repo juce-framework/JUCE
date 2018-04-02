@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -47,7 +47,7 @@ using namespace Vst2;
 
 #if JUCE_MSVC
  #pragma warning (pop)
- #pragma warning (disable: 4355) // ("this" used in initialiser list warning)
+ #pragma warning (disable: 4355) // ("this" used in initializer list warning)
 #endif
 
 #include "juce_VSTMidiEventList.h"
@@ -1178,21 +1178,21 @@ struct VSTPluginInstance     : public AudioPluginInstance,
         desc.isInstrument = (vstEffect != nullptr && (vstEffect->flags & vstEffectFlagIsSynth) != 0);
     }
 
-    bool initialiseEffect (double initialSampleRate, int initialBlockSize)
+    bool initializeEffect (double initialSampleRate, int initialBlockSize)
     {
         if (vstEffect != nullptr)
         {
             vstEffect->hostSpace2 = (pointer_sized_int) (pointer_sized_int) this;
-            initialise (initialSampleRate, initialBlockSize);
+            initialize (initialSampleRate, initialBlockSize);
             return true;
         }
 
         return false;
     }
 
-    void initialise (double initialSampleRate, int initialBlockSize)
+    void initialize (double initialSampleRate, int initialBlockSize)
     {
-        if (initialised || vstEffect == nullptr)
+        if (initialized || vstEffect == nullptr)
             return;
 
        #if JUCE_WINDOWS
@@ -1203,8 +1203,8 @@ struct VSTPluginInstance     : public AudioPluginInstance,
         jassert (MessageManager::getInstance()->isThisTheMessageThread());
        #endif
 
-        JUCE_VST_LOG ("Initialising VST: " + vstModule->pluginName + " (" + getVersion() + ")");
-        initialised = true;
+        JUCE_VST_LOG ("Initializing VST: " + vstModule->pluginName + " (" + getVersion() + ")");
+        initialized = true;
 
         setRateAndBufferSizeDetails (initialSampleRate, initialBlockSize);
 
@@ -1316,9 +1316,9 @@ struct VSTPluginInstance     : public AudioPluginInstance,
                               | vstTimingInfoFlagAutomationWriteModeActive
                               | vstTimingInfoFlagAutomationReadModeActive;
 
-        initialise (rate, samplesPerBlockExpected);
+        initialize (rate, samplesPerBlockExpected);
 
-        if (initialised)
+        if (initialized)
         {
             wantsMidiMessages = wantsMidiMessages || (pluginCanDo ("receiveVstMidiEvent") > 0);
 
@@ -1353,7 +1353,7 @@ struct VSTPluginInstance     : public AudioPluginInstance,
             if (! isPowerOn)
                 setPower (true);
 
-            // dodgy hack to force some plugins to initialise the sample rate..
+            // dodgy hack to force some plugins to initialize the sample rate..
             if (! hasEditor())
             {
                 if (auto* firstParam = getParameters()[0])
@@ -1372,7 +1372,7 @@ struct VSTPluginInstance     : public AudioPluginInstance,
 
     void releaseResources() override
     {
-        if (initialised)
+        if (initialized)
         {
             dispatch (plugInOpcodeStopProcess, 0, 0, 0, 0);
             setPower (false);
@@ -1934,7 +1934,7 @@ struct VSTPluginInstance     : public AudioPluginInstance,
 private:
     String name;
     CriticalSection lock;
-    bool wantsMidiMessages = false, initialised = false, isPowerOn = false;
+    bool wantsMidiMessages = false, initialized = false, isPowerOn = false;
     mutable StringArray programNames;
     AudioBuffer<float> outOfPlaceBuffer;
 
@@ -2207,7 +2207,7 @@ private:
         auto numSamples  = buffer.getNumSamples();
         auto numChannels = buffer.getNumChannels();
 
-        if (initialised)
+        if (initialized)
         {
             if (auto* currentPlayHead = getPlayHead())
             {
@@ -2308,7 +2308,7 @@ private:
         }
         else
         {
-            // Not initialised, so just bypass..
+            // Not initialized, so just bypass..
             for (int i = getTotalNumOutputChannels(); --i >= 0;)
                 buffer.clear (i, 0, buffer.getNumSamples());
         }
@@ -2745,7 +2745,7 @@ public:
    #if JUCE_MAC
     void paint (Graphics& g) override
     {
-        g.fillAll (Colours::black);
+        g.fillAll (Colors::black);
     }
    #else
     void paint (Graphics& g) override
@@ -2767,7 +2767,7 @@ public:
         }
         else
         {
-            g.fillAll (Colours::black);
+            g.fillAll (Colors::black);
         }
     }
    #endif
@@ -3342,7 +3342,7 @@ void VSTPluginFormat::createPluginInstance (const PluginDescription& desc,
 
             result.reset (VSTPluginInstance::create (module, sampleRate, blockSize));
 
-            if (result != nullptr && ! result->initialiseEffect (sampleRate, blockSize))
+            if (result != nullptr && ! result->initializeEffect (sampleRate, blockSize))
                 result.reset();
         }
 
@@ -3507,7 +3507,7 @@ AudioPluginInstance* VSTPluginFormat::createCustomVSTFromMainCall (void* entryPo
         ScopedPointer<VSTPluginInstance> result (VSTPluginInstance::create (module, initialSampleRate, initialBufferSize));
 
         if (result != nullptr)
-            if (result->initialiseEffect (initialSampleRate, initialBufferSize))
+            if (result->initializeEffect (initialSampleRate, initialBufferSize))
                 return result.release();
     }
 

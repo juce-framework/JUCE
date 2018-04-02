@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -107,21 +107,21 @@ public:
     Value& getValue() const;
 
     //==============================================================================
-    /** A set of colour IDs to use to change the colour of various aspects of the component.
+    /** A set of color IDs to use to change the color of various aspects of the component.
 
-        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        These constants can be used either via the Component::setColor(), or LookAndFeel::setColor()
         methods.
 
-        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+        @see Component::setColor, Component::findColor, LookAndFeel::setColor, LookAndFeel::findColor
     */
-    enum ColourIds
+    enum ColorIds
     {
-        backgroundColourId          = 0x100e401,    /**< The colour to fill the background of the text area. */
-        textColourId                = 0x100e402,    /**< The colour to use for the editable text. */
-        outlineColourId             = 0x100e403,    /**< The colour to use to draw an outline around the text area. */
+        backgroundColorId          = 0x100e401,    /**< The color to fill the background of the text area. */
+        textColorId                = 0x100e402,    /**< The color to use for the editable text. */
+        outlineColorId             = 0x100e403,    /**< The color to use to draw an outline around the text area. */
     };
 
-    void colourChanged() override;
+    void colorChanged() override;
 
     //==============================================================================
     /** Used to receive callbacks for text changes */
@@ -149,7 +149,7 @@ public:
     //==============================================================================
     /** Sets whether the text property component can have files dropped onto it by an external application.
 
-        The default setting for this is true but you may want to disable this behaviour if you derive
+        The default setting for this is true but you may want to disable this behavior if you derive
         from this class and want your subclass to respond to the file drag.
     */
     void setInterestedInFileDrag (bool isInterested);

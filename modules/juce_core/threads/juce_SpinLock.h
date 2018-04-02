@@ -30,7 +30,7 @@ namespace juce
 
     Note that unlike a CriticalSection, this type of lock is not re-entrant, and may
     be less efficient when used in a highly contended situation, but it's very small and
-    requires almost no initialisation.
+    requires almost no initialization.
     It's most appropriate for simple situations where you're only going to hold the
     lock for a very brief time.
 

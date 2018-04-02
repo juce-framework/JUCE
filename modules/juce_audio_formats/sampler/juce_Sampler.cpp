@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -71,12 +71,12 @@ bool SamplerSound::appliesToChannel (int /*midiChannel*/)
 SamplerVoice::SamplerVoice() {}
 SamplerVoice::~SamplerVoice() {}
 
-bool SamplerVoice::canPlaySound (SynthesiserSound* sound)
+bool SamplerVoice::canPlaySound (SynthesizerSound* sound)
 {
     return dynamic_cast<const SamplerSound*> (sound) != nullptr;
 }
 
-void SamplerVoice::startNote (int midiNoteNumber, float velocity, SynthesiserSound* s, int /*currentPitchWheelPosition*/)
+void SamplerVoice::startNote (int midiNoteNumber, float velocity, SynthesizerSound* s, int /*currentPitchWheelPosition*/)
 {
     if (auto* sound = dynamic_cast<const SamplerSound*> (s))
     {

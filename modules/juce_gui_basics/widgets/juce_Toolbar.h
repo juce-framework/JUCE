@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -42,7 +42,7 @@ class ToolbarItemFactory;
     ToolbarItemFactory - each type of item is given a unique ID number, and a
     toolbar might contain more than one instance of a particular item type.
 
-    Toolbars can be interactively customised, allowing the user to drag the items
+    Toolbars can be interactively customized, allowing the user to drag the items
     around, and to drag items onto or off the toolbar, using the ToolbarItemPalette
     component as a source of new items.
 
@@ -183,22 +183,22 @@ public:
     void setStyle (const ToolbarItemStyle& newStyle);
 
     //==============================================================================
-    /** Flags used by the showCustomisationDialog() method. */
-    enum CustomisationFlags
+    /** Flags used by the showCustomizationDialog() method. */
+    enum CustomizationFlags
     {
-        allowIconsOnlyChoice            = 1,    /**< If this flag is specified, the customisation dialog can
+        allowIconsOnlyChoice            = 1,    /**< If this flag is specified, the customization dialog can
                                                      show the "icons only" option on its choice of toolbar styles. */
-        allowIconsWithTextChoice        = 2,    /**< If this flag is specified, the customisation dialog can
+        allowIconsWithTextChoice        = 2,    /**< If this flag is specified, the customization dialog can
                                                      show the "icons with text" option on its choice of toolbar styles. */
-        allowTextOnlyChoice             = 4,    /**< If this flag is specified, the customisation dialog can
+        allowTextOnlyChoice             = 4,    /**< If this flag is specified, the customization dialog can
                                                      show the "text only" option on its choice of toolbar styles. */
-        showResetToDefaultsButton       = 8,    /**< If this flag is specified, the customisation dialog can
+        showResetToDefaultsButton       = 8,    /**< If this flag is specified, the customization dialog can
                                                      show a button to reset the toolbar to its default set of items. */
 
-        allCustomisationOptionsEnabled = (allowIconsOnlyChoice | allowIconsWithTextChoice | allowTextOnlyChoice | showResetToDefaultsButton)
+        allCustomizationOptionsEnabled = (allowIconsOnlyChoice | allowIconsWithTextChoice | allowTextOnlyChoice | showResetToDefaultsButton)
     };
 
-    /** Pops up a modal dialog box that allows this toolbar to be customised by the user.
+    /** Pops up a modal dialog box that allows this toolbar to be customized by the user.
 
         The dialog contains a ToolbarItemPalette and various controls for editing other
         aspects of the toolbar. The dialog box will be opened modally, but the method will
@@ -207,18 +207,18 @@ public:
         The factory is used to determine the set of items that will be shown on the
         palette.
 
-        The optionFlags parameter is a bitwise-or of values from the CustomisationFlags
+        The optionFlags parameter is a bitwise-or of values from the CustomizationFlags
         enum.
 
         @see ToolbarItemPalette
     */
-    void showCustomisationDialog (ToolbarItemFactory& factory,
-                                  int optionFlags = allCustomisationOptionsEnabled);
+    void showCustomizationDialog (ToolbarItemFactory& factory,
+                                  int optionFlags = allCustomizationOptionsEnabled);
 
     /** Turns on or off the toolbar's editing mode, in which its items can be
         rearranged by the user.
 
-        (In most cases it's easier just to use showCustomisationDialog() instead of
+        (In most cases it's easier just to use showCustomizationDialog() instead of
         trying to enable editing directly).
 
         @see ToolbarItemPalette
@@ -226,29 +226,29 @@ public:
     void setEditingActive (bool editingEnabled);
 
     //==============================================================================
-    /** A set of colour IDs to use to change the colour of various aspects of the toolbar.
+    /** A set of color IDs to use to change the color of various aspects of the toolbar.
 
-        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        These constants can be used either via the Component::setColor(), or LookAndFeel::setColor()
         methods.
 
-        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+        @see Component::setColor, Component::findColor, LookAndFeel::setColor, LookAndFeel::findColor
     */
-    enum ColourIds
+    enum ColorIds
     {
-        backgroundColourId          = 0x1003200,  /**< A colour to use to fill the toolbar's background. For
+        backgroundColorId          = 0x1003200,  /**< A color to use to fill the toolbar's background. For
                                                        more control over this, override LookAndFeel::paintToolbarBackground(). */
-        separatorColourId           = 0x1003210,  /**< A colour to use to draw the separator lines. */
+        separatorColorId           = 0x1003210,  /**< A color to use to draw the separator lines. */
 
-        buttonMouseOverBackgroundColourId = 0x1003220,  /**< A colour used to paint the background of buttons when the mouse is
+        buttonMouseOverBackgroundColorId = 0x1003220,  /**< A color used to paint the background of buttons when the mouse is
                                                              over them. */
-        buttonMouseDownBackgroundColourId = 0x1003230,  /**< A colour used to paint the background of buttons when the mouse is
+        buttonMouseDownBackgroundColorId = 0x1003230,  /**< A color used to paint the background of buttons when the mouse is
                                                              held down on them. */
 
-        labelTextColourId           = 0x1003240,        /**< A colour to use for drawing the text under buttons
+        labelTextColorId           = 0x1003240,        /**< A color to use for drawing the text under buttons
                                                              when the style is set to iconsWithText or textOnly. */
 
-        editingModeOutlineColourId  = 0x1003250   /**< A colour to use for an outline around buttons when
-                                                       the customisation dialog is active and the mouse moves over them. */
+        editingModeOutlineColorId  = 0x1003250   /**< A color to use for an outline around buttons when
+                                                       the customization dialog is active and the mouse moves over them. */
     };
 
     //==============================================================================
@@ -319,7 +319,7 @@ private:
     friend class MissingItemsComponent;
     OwnedArray<ToolbarItemComponent> items;
     class Spacer;
-    class CustomisationDialog;
+    class CustomizationDialog;
 
     void showMissingItems();
     void addItemInternal (ToolbarItemFactory& factory, int itemId, int insertIndex);

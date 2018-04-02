@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -58,19 +58,19 @@ public:
     /** Returns the image's opacity. */
     float getOpacity() const noexcept                           { return opacity; }
 
-    /** Sets a colour to draw over the image's alpha channel.
+    /** Sets a color to draw over the image's alpha channel.
 
         By default this is transparent so isn't drawn, but if you set a non-transparent
-        colour here, then it will be overlaid on the image, using the image's alpha
+        color here, then it will be overlaid on the image, using the image's alpha
         channel as a mask.
 
         This is handy for doing things like darkening or lightening an image by overlaying
         it with semi-transparent black or white.
     */
-    void setOverlayColour (Colour newOverlayColour);
+    void setOverlayColor (Color newOverlayColor);
 
-    /** Returns the overlay colour. */
-    Colour getOverlayColour() const noexcept                    { return overlayColour; }
+    /** Returns the overlay color. */
+    Color getOverlayColor() const noexcept                    { return overlayColor; }
 
     /** Sets the bounding box within which the image should be displayed. */
     void setBoundingBox (Parallelogram<float> newBounds);
@@ -100,7 +100,7 @@ private:
     //==============================================================================
     Image image;
     float opacity = 1.0f;
-    Colour overlayColour { 0 };
+    Color overlayColor { 0 };
     Parallelogram<float> bounds;
 
     DrawableImage& operator= (const DrawableImage&);

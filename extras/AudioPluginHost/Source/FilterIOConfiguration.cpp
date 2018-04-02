@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -104,7 +104,7 @@ private:
     //==============================================================================
     int getNumRows() override                                             { return 1; }
     void paintCell (Graphics&, int, int, int, int, bool) override         {}
-    void paintRowBackground (Graphics& g, int, int, int, bool) override   { g.fillAll (Colours::grey); }
+    void paintRowBackground (Graphics& g, int, int, int, bool) override   { g.fillAll (Colors::gray); }
 
     Component* refreshComponentForCell (int, int columnId, bool,
                                         Component* existingComponentToUpdate) override
@@ -129,9 +129,9 @@ private:
             textButton->setRadioGroupId (1, NotificationType::dontSendNotification);
             textButton->setClickingTogglesState (true);
 
-            auto busColour = Colours::green.withRotatedHue (static_cast<float> (columnId) / 5.0f);
-            textButton->setColour (TextButton::buttonColourId, busColour);
-            textButton->setColour (TextButton::buttonOnColourId, busColour.withMultipliedBrightness (2.0f));
+            auto busColor = Colors::green.withRotatedHue (static_cast<float> (columnId) / 5.0f);
+            textButton->setColor (TextButton::buttonColorId, busColor);
+            textButton->setColor (TextButton::buttonOnColorId, busColor.withMultipliedBrightness (2.0f));
         }
 
         textButton->addListener (this);
@@ -205,7 +205,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+        g.fillAll (getLookAndFeel().findColor (ResizableWindow::backgroundColorId));
     }
 
     void resized() override
@@ -479,7 +479,7 @@ FilterIOConfigurationWindow::~FilterIOConfigurationWindow()
 
 void FilterIOConfigurationWindow::paint (Graphics& g)
 {
-     g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+     g.fillAll (getLookAndFeel().findColor (ResizableWindow::backgroundColorId));
 }
 
 void FilterIOConfigurationWindow::resized()

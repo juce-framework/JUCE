@@ -88,7 +88,7 @@ bool NamedValueSet::operator== (const NamedValueSet& other) const noexcept
 
     for (int i = 0; i < num; ++i)
     {
-        // optimise for the case where the keys are in the same order
+        // optimize for the case where the keys are in the same order
         if (values.getReference(i).name == other.values.getReference(i).name)
         {
             if (values.getReference(i).value != other.values.getReference(i).value)

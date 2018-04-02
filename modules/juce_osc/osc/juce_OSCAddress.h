@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -134,7 +134,7 @@ public:
 
         @returns true if the OSCAddressPattern contains OSC wildcards, false otherwise.
     */
-    bool containsWildcards() const noexcept     { return wasInitialisedWithWildcards; }
+    bool containsWildcards() const noexcept     { return wasInitializedWithWildcards; }
 
     /** Converts the OSCAddressPattern to a String.
         Note: trailing slashes are always removed automatically.
@@ -148,7 +148,7 @@ private:
     //==============================================================================
     StringArray oscSymbols;
     String asString;
-    bool wasInitialisedWithWildcards;
+    bool wasInitializedWithWildcards;
 };
 
 } // namespace juce

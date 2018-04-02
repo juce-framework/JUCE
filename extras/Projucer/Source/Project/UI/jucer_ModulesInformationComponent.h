@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -41,7 +41,7 @@ public:
                                         { 0.25f, 0.2f, 0.2f, 0.35f } );
         list.setHeaderComponent (listHeader);
         list.setModel (this);
-        list.setColour (ListBox::backgroundColourId, Colours::transparentBlack);
+        list.setColor (ListBox::backgroundColorId, Colors::transparentBlack);
         addAndMakeVisible (list);
         list.updateContent();
         list.setRowHeight (30);
@@ -66,7 +66,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.setColour (findColour (secondaryBackgroundColourId));
+        g.setColor (findColor (secondaryBackgroundColorId));
         g.fillRect (getLocalBounds().reduced (12, 0));
     }
 
@@ -115,29 +115,29 @@ public:
 
         Rectangle<int> bounds (0, 0, width, height);
 
-        g.setColour (rowIsSelected ? findColour (defaultHighlightColourId) : findColour (rowNumber % 2 == 0 ? widgetBackgroundColourId
-                                                                                                            : secondaryWidgetBackgroundColourId));
+        g.setColor (rowIsSelected ? findColor (defaultHighlightColorId) : findColor (rowNumber % 2 == 0 ? widgetBackgroundColorId
+                                                                                                            : secondaryWidgetBackgroundColorId));
         g.fillRect (bounds.withTrimmedBottom (1));
 
         bounds.removeFromLeft (5);
-        g.setColour (rowIsSelected ? findColour (defaultHighlightedTextColourId) : findColour (widgetTextColourId));
+        g.setColor (rowIsSelected ? findColor (defaultHighlightedTextColorId) : findColor (widgetTextColorId));
 
         //======================================================================
         auto moduleID = project.getModules().getModuleID (rowNumber);
 
-        g.drawFittedText (moduleID, bounds.removeFromLeft (roundToInt (listHeader->getProportionAtIndex (0) * width)), Justification::centredLeft, 1);
+        g.drawFittedText (moduleID, bounds.removeFromLeft (roundToInt (listHeader->getProportionAtIndex (0) * width)), Justification::centeredLeft, 1);
 
         //======================================================================
         auto version = project.getModules().getModuleInfo (moduleID).getVersion();
         if (version.isEmpty())
             version = "?";
 
-        g.drawFittedText (version, bounds.removeFromLeft (roundToInt (listHeader->getProportionAtIndex (1) * width)), Justification::centredLeft, 1);
+        g.drawFittedText (version, bounds.removeFromLeft (roundToInt (listHeader->getProportionAtIndex (1) * width)), Justification::centeredLeft, 1);
 
         //======================================================================
         auto copyLocally = project.getModules().shouldCopyModuleFilesLocally (moduleID).getValue() ? "Yes" : "No";
 
-        g.drawFittedText (copyLocally, bounds.removeFromLeft (roundToInt (listHeader->getProportionAtIndex (2) * width)), Justification::centredLeft, 1);
+        g.drawFittedText (copyLocally, bounds.removeFromLeft (roundToInt (listHeader->getProportionAtIndex (2) * width)), Justification::centeredLeft, 1);
 
         //======================================================================
         String pathText;
@@ -156,7 +156,7 @@ public:
             pathText = paths.joinIntoString (", ");
         }
 
-        g.drawFittedText (pathText, bounds.removeFromLeft (roundToInt (listHeader->getProportionAtIndex (3) * width)), Justification::centredLeft, 1);
+        g.drawFittedText (pathText, bounds.removeFromLeft (roundToInt (listHeader->getProportionAtIndex (3) * width)), Justification::centeredLeft, 1);
     }
 
     void listBoxItemDoubleClicked (int row, const MouseEvent&) override
@@ -175,9 +175,9 @@ public:
 
     void lookAndFeelChanged() override
     {
-        setCopyModeButton.setColour (TextButton::buttonColourId, findColour (secondaryButtonBackgroundColourId));
-        copyPathButton.setColour    (TextButton::buttonColourId, findColour (defaultButtonBackgroundColourId));
-        globalPathsButton.setColour (TextButton::buttonColourId, findColour (defaultButtonBackgroundColourId));
+        setCopyModeButton.setColor (TextButton::buttonColorId, findColor (secondaryButtonBackgroundColorId));
+        copyPathButton.setColor    (TextButton::buttonColorId, findColor (defaultButtonBackgroundColorId));
+        globalPathsButton.setColor (TextButton::buttonColorId, findColor (defaultButtonBackgroundColorId));
     }
 
 private:
@@ -192,7 +192,7 @@ private:
     Project& project;
     ValueTree modulesValueTree;
 
-    ContentViewHeader header  { "Modules", { getIcons().modules, Colours::transparentBlack } };
+    ContentViewHeader header  { "Modules", { getIcons().modules, Colors::transparentBlack } };
     ListBox list;
     ListBoxHeader* listHeader;
 

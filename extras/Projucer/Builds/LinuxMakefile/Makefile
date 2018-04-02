@@ -79,7 +79,7 @@ OBJECTS_APP := \
   $(JUCE_OBJDIR)/jucer_ComponentTypeHandler_d7e70242.o \
   $(JUCE_OBJDIR)/jucer_ButtonDocument_b2cabdec.o \
   $(JUCE_OBJDIR)/jucer_ComponentDocument_1d8c1063.o \
-  $(JUCE_OBJDIR)/jucer_ColouredElement_acb45c39.o \
+  $(JUCE_OBJDIR)/jucer_ColoredElement_acb45c39.o \
   $(JUCE_OBJDIR)/jucer_PaintElement_db652060.o \
   $(JUCE_OBJDIR)/jucer_PaintElementGroup_256346c9.o \
   $(JUCE_OBJDIR)/jucer_PaintElementImage_49702ba5.o \
@@ -197,9 +197,9 @@ $(JUCE_OBJDIR)/jucer_ComponentDocument_1d8c1063.o: ../../Source/ComponentEditor/
 	@echo "Compiling jucer_ComponentDocument.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
-$(JUCE_OBJDIR)/jucer_ColouredElement_acb45c39.o: ../../Source/ComponentEditor/PaintElements/jucer_ColouredElement.cpp
+$(JUCE_OBJDIR)/jucer_ColoredElement_acb45c39.o: ../../Source/ComponentEditor/PaintElements/jucer_ColoredElement.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling jucer_ColouredElement.cpp"
+	@echo "Compiling jucer_ColoredElement.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/jucer_PaintElement_db652060.o: ../../Source/ComponentEditor/PaintElements/jucer_PaintElement.cpp

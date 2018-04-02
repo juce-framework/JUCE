@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -32,7 +32,7 @@ namespace CodeHelpers
 {
     String indent (const String& code, int numSpaces, bool indentFirstLine);
     String unindent (const String& code, int numSpaces);
-    String makeValidIdentifier (String s, bool capitalise, bool removeColons,
+    String makeValidIdentifier (String s, bool capitalize, bool removeColons,
                                 bool allowTemplates, bool allowAsterisks = false);
     String createIncludeStatement (const File& includedFile, const File& targetFile);
     String createIncludeStatement (const String& includePath);
@@ -42,7 +42,7 @@ namespace CodeHelpers
     String floatLiteral (double value, int numDecPlaces);
     String boolLiteral (bool value);
 
-    String colourToCode (Colour);
+    String colorToCode (Color);
     String justificationToCode (Justification);
 
     String alignFunctionCallParams (const String& call, const StringArray& parameters, int maxLineLength);

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -130,7 +130,7 @@ public:
                                   is browsing. The component will not be deleted by this
                                   object, so the caller must take care of it.
         @returns    true if the user selected a file, in which case, use the getResult()
-                    method to find out what it was. Returns false if they cancelled instead.
+                    method to find out what it was. Returns false if they canceled instead.
         @see browseForFileToSave, browseForDirectory
     */
     bool browseForFileToOpen (FilePreviewComponent* previewComponent = nullptr);
@@ -138,7 +138,7 @@ public:
     /** Same as browseForFileToOpen, but allows the user to select multiple files.
 
         The files that are returned can be obtained by calling getResults(). See
-        browseForFileToOpen() for more info about the behaviour of this method.
+        browseForFileToOpen() for more info about the behavior of this method.
     */
     bool browseForMultipleFilesToOpen (FilePreviewComponent* previewComponent = nullptr);
 
@@ -152,7 +152,7 @@ public:
                     exists
         @returns    true if the user chose a file and pressed 'ok', in which case, use
                     the getResult() method to find out what the file was. Returns false
-                    if they cancelled instead.
+                    if they canceled instead.
         @see browseForFileToOpen, browseForDirectory
     */
     bool browseForFileToSave (bool warnAboutOverwritingExistingFiles);
@@ -164,7 +164,7 @@ public:
 
         @returns    true if the user chose a directory and pressed 'ok', in which case, use
                     the getResult() method to find out what they chose. Returns false
-                    if they cancelled instead.
+                    if they canceled instead.
         @see browseForFileToOpen, browseForFileToSave
     */
     bool browseForDirectory();
@@ -172,7 +172,7 @@ public:
     /** Same as browseForFileToOpen, but allows the user to select multiple files and directories.
 
         The files that are returned can be obtained by calling getResults(). See
-        browseForFileToOpen() for more info about the behaviour of this method.
+        browseForFileToOpen() for more info about the behavior of this method.
     */
     bool browseForMultipleFilesOrDirectories (FilePreviewComponent* previewComponent = nullptr);
 
@@ -182,7 +182,7 @@ public:
 
         @returns    true if the user chose a directory and pressed 'ok', in which case, use
                     the getResult() method to find out what they chose. Returns false
-                    if they cancelled instead.
+                    if they canceled instead.
         @see FileBrowserComponent::FileChooserFlags
     */
     bool showDialog (int flags, FilePreviewComponent* previewComponent);
@@ -213,7 +213,7 @@ public:
         find out what file or directory they chose.
 
         Note that the file returned is only valid if the browse method returned true (i.e.
-        if the user pressed 'ok' rather than cancelling).
+        if the user pressed 'ok' rather than canceling).
 
         On mobile platforms, the file browser may return a URL instead of a local file.
         Therefore, om mobile platforms, you should call getURLResult() instead.

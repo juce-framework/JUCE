@@ -189,7 +189,7 @@ FLAC_API const char * const FLAC__StreamMetadata_Picture_TypeString[] = {
 	"During recording",
 	"During performance",
 	"Movie/video screen capture",
-	"A bright coloured fish",
+	"A bright colored fish",
 	"Illustration",
 	"Band/artist logotype",
 	"Publisher/Studio logotype"

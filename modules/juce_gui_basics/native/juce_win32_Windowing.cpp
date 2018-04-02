@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -547,7 +547,7 @@ public:
         return new LowLevelGraphicsSoftwareRenderer (Image (this));
     }
 
-    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode) override
+    void initializeBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode) override
     {
         bitmap.data = imageData + x * pixelStride + y * lineStride;
         bitmap.pixelFormat = pixelFormat;
@@ -702,7 +702,7 @@ namespace IconConverters
                     auto oldObject = ::SelectObject (dc, dib);
 
                     auto numPixels = bm.bmWidth * bm.bmHeight;
-                    auto numColourComponents = numPixels * 4;
+                    auto numColorComponents = numPixels * 4;
 
                     // Windows icon data comes as two layers, an XOR mask which contains the bulk
                     // of the image data and an AND mask which provides the transparency. Annoyingly
@@ -711,7 +711,7 @@ namespace IconConverters
                     // mask contains an alpha channel.
 
                     HeapBlock<bool> opacityMask (numPixels);
-                    memset (bitmapImageData, 0, numColourComponents);
+                    memset (bitmapImageData, 0, numColorComponents);
                     ::DrawIconEx (dc, 0, 0, icon, bm.bmWidth, bm.bmHeight, 0, nullptr, DI_MASK);
 
                     for (int i = 0; i < numPixels; ++i)
@@ -720,9 +720,9 @@ namespace IconConverters
                     Image result = Image (Image::ARGB, bm.bmWidth, bm.bmHeight, true);
                     Image::BitmapData imageData (result, Image::BitmapData::readWrite);
 
-                    memset (bitmapImageData, 0, numColourComponents);
+                    memset (bitmapImageData, 0, numColorComponents);
                     ::DrawIconEx (dc, 0, 0, icon, bm.bmWidth, bm.bmHeight, 0, nullptr, DI_NORMAL);
-                    memcpy (imageData.data, bitmapImageData, numColourComponents);
+                    memcpy (imageData.data, bitmapImageData, numColorComponents);
 
                     auto imageHasAlphaChannel = [&imageData, numPixels]()
                     {
@@ -1164,13 +1164,13 @@ public:
         }
     }
 
-    void setMinimised (bool shouldBeMinimised) override
+    void setMinimized (bool shouldBeMinimized) override
     {
-        if (shouldBeMinimised != isMinimised())
-            ShowWindow (hwnd, shouldBeMinimised ? SW_MINIMIZE : SW_SHOWNORMAL);
+        if (shouldBeMinimized != isMinimized())
+            ShowWindow (hwnd, shouldBeMinimized ? SW_MINIMIZE : SW_SHOWNORMAL);
     }
 
-    bool isMinimised() const override
+    bool isMinimized() const override
     {
         WINDOWPLACEMENT wp;
         wp.length = sizeof (WINDOWPLACEMENT);
@@ -1181,7 +1181,7 @@ public:
 
     void setFullScreen (bool shouldBeFullScreen) override
     {
-        setMinimised (false);
+        setMinimized (false);
 
         if (isFullScreen() != shouldBeFullScreen)
         {
@@ -1266,7 +1266,7 @@ public:
 
     void toFront (bool makeActive) override
     {
-        setMinimised (false);
+        setMinimized (false);
 
         const bool oldDeactivate = shouldDeactivateTitleBar;
         shouldDeactivateTitleBar = ((styleFlags & windowIsTemporary) == 0);
@@ -1286,7 +1286,7 @@ public:
     {
         if (auto* otherPeer = dynamic_cast<HWNDComponentPeer*> (other))
         {
-            setMinimised (false);
+            setMinimized (false);
 
             // Must be careful not to try to put a topmost window behind a normal one, or Windows
             // promotes the normal one to be topmost!
@@ -1761,7 +1761,7 @@ private:
             else
             {
                 // annoyingly, windows won't let you have a min/max button without a close button
-                jassert ((styleFlags & (windowHasMinimiseButton | windowHasMaximiseButton)) == 0);
+                jassert ((styleFlags & (windowHasMinimizeButton | windowHasMaximizeButton)) == 0);
             }
 
             if ((styleFlags & windowIsResizable) != 0)
@@ -1781,8 +1781,8 @@ private:
         else
             exstyle |= WS_EX_APPWINDOW;
 
-        if ((styleFlags & windowHasMinimiseButton) != 0)    type |= WS_MINIMIZEBOX;
-        if ((styleFlags & windowHasMaximiseButton) != 0)    type |= WS_MAXIMIZEBOX;
+        if ((styleFlags & windowHasMinimizeButton) != 0)    type |= WS_MINIMIZEBOX;
+        if ((styleFlags & windowHasMaximizeButton) != 0)    type |= WS_MAXIMIZEBOX;
         if ((styleFlags & windowIgnoresMouseClicks) != 0)   exstyle |= WS_EX_TRANSPARENT;
         if ((styleFlags & windowIsSemiTransparent) != 0)    exstyle |= WS_EX_LAYERED;
 
@@ -2880,7 +2880,7 @@ private:
         modifiersAtLastCallback = -1;
         updateKeyModifiers();
 
-        if (isMinimised())
+        if (isMinimized())
         {
             component.repaint();
             handleMovedOrResized();
@@ -2953,7 +2953,7 @@ private:
         }
     }
 
-    void initialiseSysMenu (HMENU menu) const
+    void initializeSysMenu (HMENU menu) const
     {
         if (! hasTitleBar())
         {
@@ -2962,7 +2962,7 @@ private:
                 EnableMenuItem (menu, SC_RESTORE,  MF_BYCOMMAND | MF_ENABLED);
                 EnableMenuItem (menu, SC_MOVE,     MF_BYCOMMAND | MF_GRAYED);
             }
-            else if (! isMinimised())
+            else if (! isMinimized())
             {
                 EnableMenuItem (menu, SC_MAXIMIZE, MF_BYCOMMAND | MF_GRAYED);
             }
@@ -2973,10 +2973,10 @@ private:
     {
         forceDisplayUpdate();
 
-        if (fullScreen && ! isMinimised())
+        if (fullScreen && ! isMinimized())
         {
             auto& display = Desktop::getInstance().getDisplays()
-                           .getDisplayContaining (component.getScreenBounds().getCentre());
+                           .getDisplayContaining (component.getScreenBounds().getCenter());
 
             setWindowPos (hwnd, display.userArea * display.scale,
                           SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOSENDCHANGING);
@@ -3285,7 +3285,7 @@ private:
                 break;
 
             case WM_INITMENU:
-                initialiseSysMenu ((HMENU) wParam);
+                initializeSysMenu ((HMENU) wParam);
                 break;
 
             case WM_SYSCOMMAND:
@@ -3305,9 +3305,9 @@ private:
                 case SC_KEYMENU:
                    #if ! JUCE_WINDOWS_ALT_KEY_TRIGGERS_MENU
                     // This test prevents a press of the ALT key from triggering the ancient top-left window menu.
-                    // By default we suppress this behaviour because it's unlikely that more than a tiny subset of
+                    // By default we suppress this behavior because it's unlikely that more than a tiny subset of
                     // our users will actually want it, and it causes problems if you're trying to use the ALT key
-                    // as a modifier for mouse actions. If you really need the old behaviour, then just define
+                    // as a modifier for mouse actions. If you really need the old behavior, then just define
                     // JUCE_WINDOWS_ALT_KEY_TRIGGERS_MENU=1 in your app.
                     if ((lParam >> 16) <= 0) // Values above zero indicate that a mouse-click triggered the menu
                         return 0;
@@ -3332,7 +3332,7 @@ private:
 
                     if (! hasTitleBar())
                     {
-                        setMinimised (true);
+                        setMinimized (true);
                         return 0;
                     }
                     break;
@@ -3351,8 +3351,8 @@ private:
                     }
                     else
                     {
-                        if (isMinimised())
-                            setMinimised (false);
+                        if (isMinimized())
+                            setMinimized (false);
                         else if (isFullScreen())
                             setFullScreen (false);
 
@@ -3439,7 +3439,7 @@ private:
         {
             if (compositionInProgress)
             {
-                // If this occurs, the user has cancelled the composition, so clear their changes..
+                // If this occurs, the user has canceled the composition, so clear their changes..
                 if (auto* target = owner.findCurrentTextInputTarget())
                 {
                     target->setHighlightedRegion (compositionRange);
@@ -3962,7 +3962,7 @@ void SystemClipboard::copyTextToClipboard (const String& text)
 
             if (bytesNeeded > 0)
             {
-                if (auto bufH = GlobalAlloc (GMEM_MOVEABLE | GMEM_DDESHARE | GMEM_ZEROINIT, bytesNeeded + sizeof (WCHAR)))
+                if (auto bufH = GlobalAlloc (GMEM_MOVABLE | GMEM_DDESHARE | GMEM_ZEROINIT, bytesNeeded + sizeof (WCHAR)))
                 {
                     if (auto* data = static_cast<WCHAR*> (GlobalLock (bufH)))
                     {

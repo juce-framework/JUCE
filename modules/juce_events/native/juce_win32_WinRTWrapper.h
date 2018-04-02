@@ -33,7 +33,7 @@ public:
     public:
         ScopedHString (String str)
         {
-            if (WinRTWrapper::getInstance()->isInitialised())
+            if (WinRTWrapper::getInstance()->isInitialized())
                 WinRTWrapper::getInstance()->createHString (str.toWideCharPointer(),
                                                             static_cast<uint32_t> (str.length()),
                                                             &hstr);
@@ -41,7 +41,7 @@ public:
 
         ~ScopedHString()
         {
-            if (WinRTWrapper::getInstance()->isInitialised() && hstr != nullptr)
+            if (WinRTWrapper::getInstance()->isInitialized() && hstr != nullptr)
                 WinRTWrapper::getInstance()->deleteHString (hstr);
         }
 
@@ -66,16 +66,16 @@ public:
 
     String hStringToString (HSTRING hstr)
     {
-        if (isInitialised())
+        if (isInitialized())
             if (const wchar_t* str = getHStringRawBuffer (hstr, nullptr))
                 return String (str);
 
         return {};
     }
 
-    bool isInitialised() const noexcept
+    bool isInitialized() const noexcept
     {
-        return initialised;
+        return initialized;
     }
 
     template <class ComClass>
@@ -83,7 +83,7 @@ public:
     {
         ComSmartPtr<ComClass> comPtr;
 
-        if (isInitialised())
+        if (isInitialized())
         {
             ScopedHString classID (runtimeClassID);
             if (classID.get() != nullptr)
@@ -111,11 +111,11 @@ private:
             return;
 
         HRESULT status = roInitialize (1);
-        initialised = ! (status != S_OK && status != S_FALSE && status != 0x80010106L);
+        initialized = ! (status != S_OK && status != S_FALSE && status != 0x80010106L);
     }
 
     HMODULE winRTHandle = nullptr;
-    bool initialised = false;
+    bool initialized = false;
 
     typedef HRESULT (WINAPI* RoInitializeFuncPtr) (int);
     typedef HRESULT (WINAPI* WindowsCreateStringFuncPtr) (LPCWSTR, UINT32, HSTRING*);

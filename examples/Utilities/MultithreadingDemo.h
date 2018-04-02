@@ -61,19 +61,19 @@ public:
         dx = std::sin (angle) * speed;
         dy = std::cos (angle) * speed;
 
-        colour = Colour ((juce::uint32) Random::getSystemRandom().nextInt())
+        color = Color ((juce::uint32) Random::getSystemRandom().nextInt())
                     .withAlpha (0.5f)
                     .withBrightness (0.7f);
     }
 
     void paint (Graphics& g) override
     {
-        g.setColour (colour);
+        g.setColor (color);
         g.fillEllipse (innerX, innerY, size, size);
 
-        g.setColour (Colours::black);
+        g.setColor (Colors::black);
         g.setFont (10.0f);
-        g.drawText (String::toHexString ((int64) threadId), getLocalBounds(), Justification::centred, false);
+        g.drawText (String::toHexString ((int64) threadId), getLocalBounds(), Justification::centered, false);
     }
 
     void parentSizeChanged() override
@@ -119,7 +119,7 @@ private:
           dx = 0.0f, dy = 0.0f, innerX = 0.0f, innerY = 0.0f,
           parentWidth = 50.0f, parentHeight = 50.0f;
 
-    Colour colour;
+    Color color;
     Thread::ThreadID threadId = 0;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BouncingBallComp)
@@ -255,7 +255,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground));
+        g.fillAll (getUIColorIfAvailable (LookAndFeel_V4::ColorScheme::UIColor::windowBackground));
     }
 
 private:

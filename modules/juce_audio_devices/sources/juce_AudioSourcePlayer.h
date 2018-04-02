@@ -92,7 +92,7 @@ public:
     /** Implementation of the AudioIODeviceCallback method. */
     void audioDeviceStopped() override;
 
-    /** An alternative method for initialising the source without an AudioIODevice. */
+    /** An alternative method for initializing the source without an AudioIODevice. */
     void prepareToPlay (double sampleRate, int blockSize);
 
 private:

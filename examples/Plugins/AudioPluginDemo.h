@@ -27,7 +27,7 @@
  version:          1.0.0
  vendor:           juce
  website:          http://juce.com
- description:      Synthesiser audio plugin.
+ description:      Synthesizer audio plugin.
 
  dependencies:     juce_audio_basics, juce_audio_devices, juce_audio_formats,
                    juce_audio_plugin_client, juce_audio_processors,
@@ -49,7 +49,7 @@
 
 //==============================================================================
 /** A demo synth sound that's just a basic sine wave.. */
-class SineWaveSound : public SynthesiserSound
+class SineWaveSound : public SynthesizerSound
 {
 public:
     SineWaveSound() {}
@@ -60,18 +60,18 @@ public:
 
 //==============================================================================
 /** A simple demo synth voice that just plays a sine wave.. */
-class SineWaveVoice   : public SynthesiserVoice
+class SineWaveVoice   : public SynthesizerVoice
 {
 public:
     SineWaveVoice() {}
 
-    bool canPlaySound (SynthesiserSound* sound) override
+    bool canPlaySound (SynthesizerSound* sound) override
     {
         return dynamic_cast<SineWaveSound*> (sound) != nullptr;
     }
 
     void startNote (int midiNoteNumber, float velocity,
-                    SynthesiserSound* /*sound*/,
+                    SynthesizerSound* /*sound*/,
                     int /*currentPitchWheelPosition*/) override
     {
         currentAngle = 0.0;
@@ -182,7 +182,7 @@ public:
         addParameter (gainParam  = new AudioParameterFloat ("gain",  "Gain",           0.0f, 1.0f, 0.9f));
         addParameter (delayParam = new AudioParameterFloat ("delay", "Delay Feedback", 0.0f, 1.0f, 0.5f));
 
-        initialiseSynth();
+        initializeSynth();
     }
 
     ~JuceDemoPluginAudioProcessor() {}
@@ -212,7 +212,7 @@ public:
     void prepareToPlay (double newSampleRate, int /*samplesPerBlock*/) override
     {
         // Use this method as the place to do any pre-playback
-        // initialisation that you need..
+        // initialization that you need..
         synth.setCurrentPlaybackSampleRate (newSampleRate);
         keyboardState.reset();
 
@@ -357,7 +357,7 @@ public:
     AudioParameterFloat* gainParam  = nullptr;
     AudioParameterFloat* delayParam = nullptr;
 
-    // Current track colour and name
+    // Current track color and name
     TrackProperties trackProperties;
 
 private:
@@ -412,7 +412,7 @@ private:
         //==============================================================================
         void paint (Graphics& g) override
         {
-            g.setColour (backgroundColour);
+            g.setColor (backgroundColor);
             g.fillAll();
         }
 
@@ -446,11 +446,11 @@ private:
 
         void updateTrackProperties()
         {
-            auto trackColour = getProcessor().trackProperties.colour;
+            auto trackColor = getProcessor().trackProperties.color;
             auto& lf = getLookAndFeel();
 
-            backgroundColour = (trackColour == Colour() ? lf.findColour (ResizableWindow::backgroundColourId)
-                                                        : trackColour.withAlpha (1.0f).withBrightness (0.266f));
+            backgroundColor = (trackColor == Color() ? lf.findColor (ResizableWindow::backgroundColorId)
+                                                        : trackColor.withAlpha (1.0f).withBrightness (0.266f));
             repaint();
         }
 
@@ -500,7 +500,7 @@ private:
               delayLabel { {}, "Delay:" };
 
         ScopedPointer<ParameterSlider> gainSlider, delaySlider;
-        Colour backgroundColour;
+        Color backgroundColor;
 
         //==============================================================================
         JuceDemoPluginAudioProcessor& getProcessor() const
@@ -631,9 +631,9 @@ private:
 
     int delayPosition = 0;
 
-    Synthesiser synth;
+    Synthesizer synth;
 
-    void initialiseSynth()
+    void initializeSynth()
     {
         auto numVoices = 8;
 

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -81,7 +81,7 @@ public:
     virtual bool canCopeWithDuplicateFiles() = 0;
     virtual bool supportsUserDefinedConfigurations() const = 0; // false if exporter only supports two configs Debug and Release
     virtual void updateDeprecatedProjectSettingsInteractively();
-    virtual void initialiseDependencyPathValues() {}
+    virtual void initializeDependencyPathValues() {}
 
     // IDE targeted by exporter
     virtual bool isXcode() const         = 0;
@@ -245,9 +245,9 @@ public:
         String getTargetBinaryNameString() const               { return targetNameValue.get(); }
         String getTargetBinaryRelativePathString() const       { return targetBinaryPathValue.get(); }
 
-        int getOptimisationLevelInt() const                    { return optimisationLevelValue.get(); }
-        String getGCCOptimisationFlag() const;
-        bool isLinkTimeOptimisationEnabled() const             { return linkTimeOptimisationValue.get(); }
+        int getOptimizationLevelInt() const                    { return optimizationLevelValue.get(); }
+        String getGCCOptimizationFlag() const;
+        bool isLinkTimeOptimizationEnabled() const             { return linkTimeOptimizationValue.get(); }
 
         String getBuildConfigPreprocessorDefsString() const    { return ppDefinesValue.get(); }
         StringPairArray getAllPreprocessorDefs() const;        // includes inherited definitions
@@ -266,7 +266,7 @@ public:
 
         //==============================================================================
         void createPropertyEditors (PropertyListBuilder&);
-        void addGCCOptimisationProperty (PropertyListBuilder&);
+        void addGCCOptimizationProperty (PropertyListBuilder&);
         void removeFromExporter();
 
         //==============================================================================
@@ -275,8 +275,8 @@ public:
         const ProjectExporter& exporter;
 
     protected:
-        ValueWithDefault isDebugValue, configNameValue, targetNameValue, targetBinaryPathValue, optimisationLevelValue,
-                         linkTimeOptimisationValue, ppDefinesValue, headerSearchPathValue, librarySearchPathValue, userNotesValue;
+        ValueWithDefault isDebugValue, configNameValue, targetNameValue, targetBinaryPathValue, optimizationLevelValue,
+                         linkTimeOptimizationValue, ppDefinesValue, headerSearchPathValue, librarySearchPathValue, userNotesValue;
 
     private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BuildConfiguration)
@@ -346,7 +346,7 @@ public:
 
     ValueTree settings;
 
-    enum GCCOptimisationLevel
+    enum GCCOptimizationLevel
     {
         gccO0     = 1,
         gccO1     = 4,
@@ -363,7 +363,7 @@ protected:
     const ProjectType& projectType;
     const String projectName;
     const File projectFolder;
-    Value vst3Path, rtasPath, aaxPath; // these must be initialised in the specific exporter c'tors!
+    Value vst3Path, rtasPath, aaxPath; // these must be initialized in the specific exporter c'tors!
 
     ValueWithDefault targetLocationValue, extraCompilerFlagsValue, extraLinkerFlagsValue, externalLibrariesValue,
                      userNotesValue, gnuExtensionsValue, bigIconValue, smallIconValue, extraPPDefsValue;

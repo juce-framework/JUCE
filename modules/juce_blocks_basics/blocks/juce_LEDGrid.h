@@ -24,20 +24,20 @@ namespace juce
 {
 
 /**
-    A simple ARGB colour class for setting LEDs.
+    A simple ARGB color class for setting LEDs.
 
     @tags{Blocks}
 */
-struct LEDColour
+struct LEDColor
 {
-    LEDColour() noexcept = default;
-    LEDColour (const LEDColour&) noexcept = default;
-    LEDColour& operator= (const LEDColour&) noexcept = default;
+    LEDColor() noexcept = default;
+    LEDColor (const LEDColor&) noexcept = default;
+    LEDColor& operator= (const LEDColor&) noexcept = default;
 
-    LEDColour (uint32 argbColour) noexcept : argb (argbColour) {}
+    LEDColor (uint32 argbColor) noexcept : argb (argbColor) {}
 
-    template <typename ColourType>
-    LEDColour (const ColourType& colour)  : LEDColour (colour.getARGB()) {}
+    template <typename ColorType>
+    LEDColor (const ColorType& color)  : LEDColor (color.getARGB()) {}
 
     uint8 getAlpha() const noexcept         { return (uint8) (argb >> 24); }
     uint8 getRed() const noexcept           { return (uint8) (argb >> 16); }
@@ -84,13 +84,13 @@ public:
         using Ptr = juce::ReferenceCountedObjectPtr<Renderer>;
     };
 
-    /** Set the visualiser that will create visuals for this block (nullptr for none).
+    /** Set the visualizer that will create visuals for this block (nullptr for none).
         Note that the LEDGrid will NOT take ownership of this object, so the caller
         must ensure that it doesn't get deleted while in use here.
     */
     void setRenderer (Renderer::Ptr newRenderer) noexcept   { renderer = newRenderer; }
 
-    /** Returns the visualiser currently attached to this block (nullptr for none). */
+    /** Returns the visualizer currently attached to this block (nullptr for none). */
     Renderer::Ptr getRenderer() const noexcept              { return renderer; }
 
     /** The device that this LEDGrid belongs to. */

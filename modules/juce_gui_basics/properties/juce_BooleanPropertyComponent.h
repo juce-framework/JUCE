@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -81,17 +81,17 @@ public:
     virtual bool getState() const;
 
     //==============================================================================
-    /** A set of colour IDs to use to change the colour of various aspects of the component.
+    /** A set of color IDs to use to change the color of various aspects of the component.
 
-        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        These constants can be used either via the Component::setColor(), or LookAndFeel::setColor()
         methods.
 
-        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+        @see Component::setColor, Component::findColor, LookAndFeel::setColor, LookAndFeel::findColor
     */
-    enum ColourIds
+    enum ColorIds
     {
-        backgroundColourId          = 0x100e801,    /**< The colour to fill the background of the button area. */
-        outlineColourId             = 0x100e803,    /**< The colour to use to draw an outline around the text area. */
+        backgroundColorId          = 0x100e801,    /**< The color to fill the background of the button area. */
+        outlineColorId             = 0x100e803,    /**< The color to use to draw an outline around the text area. */
     };
 
     //==============================================================================

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -60,15 +60,15 @@ struct SliderHandler  : public ComponentTypeHandler
     SliderHandler()
         : ComponentTypeHandler ("Slider", "Slider", typeid (Slider), 150, 24)
     {
-        registerColour (Slider::backgroundColourId, "background", "bkgcol");
-        registerColour (Slider::thumbColourId, "thumb", "thumbcol");
-        registerColour (Slider::trackColourId, "track", "trackcol");
-        registerColour (Slider::rotarySliderFillColourId, "rotary fill", "rotarysliderfill");
-        registerColour (Slider::rotarySliderOutlineColourId, "rotary outln", "rotaryslideroutline");
-        registerColour (Slider::textBoxTextColourId, "textbox text", "textboxtext");
-        registerColour (Slider::textBoxBackgroundColourId, "textbox bkgd", "textboxbkgd");
-        registerColour (Slider::textBoxHighlightColourId, "textbox highlt", "textboxhighlight");
-        registerColour (Slider::textBoxOutlineColourId, "textbox outln", "textboxoutline");
+        registerColor (Slider::backgroundColorId, "background", "bkgcol");
+        registerColor (Slider::thumbColorId, "thumb", "thumbcol");
+        registerColor (Slider::trackColorId, "track", "trackcol");
+        registerColor (Slider::rotarySliderFillColorId, "rotary fill", "rotarysliderfill");
+        registerColor (Slider::rotarySliderOutlineColorId, "rotary outln", "rotaryslideroutline");
+        registerColor (Slider::textBoxTextColorId, "textbox text", "textboxtext");
+        registerColor (Slider::textBoxBackgroundColorId, "textbox bkgd", "textboxbkgd");
+        registerColor (Slider::textBoxHighlightColorId, "textbox highlt", "textboxhighlight");
+        registerColor (Slider::textBoxOutlineColorId, "textbox outln", "textboxoutline");
     }
 
     Component* createNewComponent (JucerDocument*) override
@@ -141,7 +141,7 @@ struct SliderHandler  : public ComponentTypeHandler
           << textBoxPosToString (s->getTextBoxPosition())
           << ", " << CodeHelpers::boolLiteral (! s->isTextBoxEditable())
           << ", " << s->getTextBoxWidth() << ", " << s->getTextBoxHeight() << ");\n"
-          << getColourIntialisationCode (component, memberVariableName);
+          << getColorIntialisationCode (component, memberVariableName);
 
         if (needsSliderListener (component))
             r << memberVariableName << "->addListener (this);\n";
@@ -198,7 +198,7 @@ struct SliderHandler  : public ComponentTypeHandler
             props.add (new SliderCallbackProperty (s, document));
         }
 
-        addColourProperties (component, document, props);
+        addColorProperties (component, document, props);
     }
 
     static bool needsSliderListener (Component* slider)

@@ -8,7 +8,7 @@ EXAMPLE_SOURCE_FILES := $(foreach DIR,$(EXAMPLE_DIRS),$(shell find $(DIR) -type 
 DOCUMENTATION_FILES := $(shell find pages -type f -name "*.dox" | sed 's/ /\\ /g')
 IMAGES := $(shell find images -type f | sed 's/ /\\ /g')
 
-.PHONEY: clean
+.PHONY: clean
 
 doc/index.html: build/Doxyfile DoxygenLayout.xml footer.html header.html stylesheet.css $(DOCUMENTATION_FILES) $(EXAMPLE_SOURCE_FILES) $(IMAGES)
 	doxygen $<

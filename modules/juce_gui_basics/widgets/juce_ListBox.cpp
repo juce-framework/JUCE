@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -315,7 +315,7 @@ public:
     void paint (Graphics& g) override
     {
         if (isOpaque())
-            g.fillAll (owner.findColour (ListBox::backgroundColourId));
+            g.fillAll (owner.findColor (ListBox::backgroundColorId));
     }
 
     bool keyPressed (const KeyPress& key) override
@@ -381,7 +381,7 @@ ListBox::ListBox (const String& name, ListBoxModel* const m)
     addAndMakeVisible (viewport.get());
 
     ListBox::setWantsKeyboardFocus (true);
-    ListBox::colourChanged();
+    ListBox::colorChanged();
 }
 
 ListBox::~ListBox()
@@ -423,14 +423,14 @@ void ListBox::paint (Graphics& g)
     if (! hasDoneInitialUpdate)
         updateContent();
 
-    g.fillAll (findColour (backgroundColourId));
+    g.fillAll (findColor (backgroundColorId));
 }
 
 void ListBox::paintOverChildren (Graphics& g)
 {
     if (outlineThickness > 0)
     {
-        g.setColour (findColour (outlineColourId));
+        g.setColor (findColor (outlineColorId));
         g.drawRect (getLocalBounds(), outlineThickness);
     }
 }
@@ -838,16 +838,16 @@ int ListBox::getVisibleContentWidth() const noexcept            { return viewpor
 ScrollBar& ListBox::getVerticalScrollBar() const noexcept       { return viewport->getVerticalScrollBar(); }
 ScrollBar& ListBox::getHorizontalScrollBar() const noexcept     { return viewport->getHorizontalScrollBar(); }
 
-void ListBox::colourChanged()
+void ListBox::colorChanged()
 {
-    setOpaque (findColour (backgroundColourId).isOpaque());
+    setOpaque (findColor (backgroundColorId).isOpaque());
     viewport->setOpaque (isOpaque());
     repaint();
 }
 
 void ListBox::parentHierarchyChanged()
 {
-    colourChanged();
+    colorChanged();
 }
 
 void ListBox::setOutlineThickness (int newThickness)

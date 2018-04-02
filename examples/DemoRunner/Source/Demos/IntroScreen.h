@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -44,12 +44,12 @@ public:
                                   .replace ("{date}",    String (__DATE__).replace ("  ", " ")),
                               dontSendNotification);
 
-        linkButton.setColour (HyperlinkButton::textColourId, Colours::lightblue);
+        linkButton.setColor (HyperlinkButton::textColorId, Colors::lightblue);
     }
 
     void paint (Graphics& g) override
     {
-        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground));
+        g.fillAll (getUIColorIfAvailable (LookAndFeel_V4::ColorScheme::UIColor::windowBackground));
     }
 
     void resized() override
@@ -96,11 +96,11 @@ private:
                 ++i;
             }
 
-            g.setColour (Colour::greyLevel (0.4f));
+            g.setColor (Color::grayLevel (0.4f));
             g.fillPath (wavePath);
 
-            g.setColour (Colour (0xc4f39082));
-            g.fillPath (logoPath, RectanglePlacement (RectanglePlacement::centred)
+            g.setColor (Color (0xc4f39082));
+            g.fillPath (logoPath, RectanglePlacement (RectanglePlacement::centered)
                                     .getTransformToFit (logoPath.getBounds(),
                                                         getLocalBounds().reduced (20, getHeight() / 4).toFloat()));
         }

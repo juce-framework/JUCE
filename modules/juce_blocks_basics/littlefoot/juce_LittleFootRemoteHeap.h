@@ -25,7 +25,7 @@ namespace littlefoot
 
 //==============================================================================
 /**
-    This class manages the synchronisation of a remote block of heap memory used
+    This class manages the synchronization of a remote block of heap memory used
     by a littlefoot program running on a block.
 
     Data in the block can be changed by calling setByte, setBytes, setBits etc, and

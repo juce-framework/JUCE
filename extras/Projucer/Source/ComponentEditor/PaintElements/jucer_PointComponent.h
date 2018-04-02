@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -50,17 +50,17 @@ public:
             const Rectangle<int> area (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
             const Rectangle<int> r (getPosition().getRectangle (area, owner->getDocument()->getComponentLayout()));
 
-            setCentrePosition (r.getX(), r.getY());
+            setCenterPosition (r.getX(), r.getY());
         }
     }
 
     //==============================================================================
     void paint (Graphics& g) override
     {
-        g.setColour (Colours::white);
+        g.setColor (Colors::white);
         g.drawEllipse (2.0f, 2.0f, getWidth() - 4.0f, getHeight() - 4.0f, 2.0f);
 
-        g.setColour (Colours::black);
+        g.setColor (Colors::black);
         g.drawEllipse (1.0f, 1.0f, getWidth() - 2.0f, getHeight() - 2.0f, 2.0f);
     }
 

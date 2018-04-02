@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -66,8 +66,8 @@ private:
         {
             addAndMakeVisible (textbox);
             textbox.getTextValue().referTo (value);
-            textbox.onReturnKey  = [this] { updateEditorColour (textbox); };
-            textbox.onFocusLost  = [this] { updateEditorColour (textbox); };
+            textbox.onReturnKey  = [this] { updateEditorColor (textbox); };
+            textbox.onFocusLost  = [this] { updateEditorColor (textbox); };
 
             addAndMakeVisible (button);
             button.onClick = [this] { browse(); };
@@ -79,7 +79,7 @@ private:
         {
             if (highlightForDragAndDrop)
             {
-                g.setColour (findColour (defaultHighlightColourId).withAlpha (0.5f));
+                g.setColor (findColor (defaultHighlightColorId).withAlpha (0.5f));
                 g.fillRect (textbox.getBounds());
             }
         }
@@ -130,7 +130,7 @@ private:
             }
         }
 
-        void updateEditorColour (TextEditor& editor)
+        void updateEditorColor (TextEditor& editor)
         {
             if (supportsMultiplePaths)
             {
@@ -141,19 +141,19 @@ private:
                 AttributedString str;
                 for (auto p : paths)
                 {
-                    if (root.getChildFile (p.trim()).exists())    editor.setColour (TextEditor::textColourId, findColour (widgetTextColourId));
-                    else                                          editor.setColour (TextEditor::textColourId, Colours::red);
+                    if (root.getChildFile (p.trim()).exists())    editor.setColor (TextEditor::textColorId, findColor (widgetTextColorId));
+                    else                                          editor.setColor (TextEditor::textColorId, Colors::red);
 
                     editor.insertTextAtCaret (p);
 
                     if (paths.indexOf (p) < paths.size() - 1)
                     {
-                        editor.setColour (TextEditor::textColourId, findColour (widgetTextColourId));
+                        editor.setColor (TextEditor::textColorId, findColor (widgetTextColorId));
                         editor.insertTextAtCaret (";");
                     }
                 }
 
-                editor.setColour (TextEditor::textColourId, findColour (widgetTextColourId));
+                editor.setColor (TextEditor::textColorId, findColor (widgetTextColorId));
             }
             else
             {
@@ -171,9 +171,9 @@ private:
                 const auto currentFile = root.getChildFile (pathToCheck);
 
                 if (currentFile.exists())
-                    editor.applyColourToAllText (findColour (widgetTextColourId));
+                    editor.applyColorToAllText (findColor (widgetTextColorId));
                 else
-                    editor.applyColourToAllText (Colours::red);
+                    editor.applyColorToAllText (Colors::red);
             }
         }
 
@@ -187,17 +187,17 @@ private:
             else
                 value = pathName;
 
-            updateEditorColour (textbox);
+            updateEditorColor (textbox);
         }
 
         void lookAndFeelChanged() override
         {
-            textbox.setColour (TextEditor::backgroundColourId, findColour (widgetBackgroundColourId));
-            textbox.setColour (TextEditor::outlineColourId, Colours::transparentBlack);
-            updateEditorColour (textbox);
+            textbox.setColor (TextEditor::backgroundColorId, findColor (widgetBackgroundColorId));
+            textbox.setColor (TextEditor::outlineColorId, Colors::transparentBlack);
+            updateEditorColor (textbox);
 
-            button.setColour (TextButton::buttonColourId, findColour (secondaryButtonBackgroundColourId));
-            button.setColour (TextButton::textColourOffId, Colours::white);
+            button.setColor (TextButton::buttonColorId, findColor (secondaryButtonBackgroundColorId));
+            button.setColor (TextButton::textColorOffId, Colors::white);
         }
 
         Value value;

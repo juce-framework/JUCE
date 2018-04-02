@@ -35,7 +35,7 @@ void logFailure (HRESULT hr)
 {
     ignoreUnused (hr);
     jassert (hr != (HRESULT) 0x800401f0); // If you hit this, it means you're trying to call from
-                                          // a thread which hasn't been initialised with CoInitialize().
+                                          // a thread which hasn't been initialized with CoInitialize().
 
    #if JUCE_WASAPI_LOGGING
     if (FAILED (hr))
@@ -439,7 +439,7 @@ public:
         client = createClient();
 
         if (client != nullptr
-             && tryInitialisingWithBufferSize (bufferSizeSamples))
+             && tryInitializingWithBufferSize (bufferSizeSamples))
         {
             sampleRateHasChanged = false;
             shouldClose = false;
@@ -644,7 +644,7 @@ private:
         return false;
     }
 
-    bool tryInitialisingWithBufferSize (const int bufferSizeSamples)
+    bool tryInitializingWithBufferSize (const int bufferSizeSamples)
     {
         WAVEFORMATEXTENSIBLE format;
 
@@ -1005,7 +1005,7 @@ public:
         close();
     }
 
-    bool initialise()
+    bool initialize()
     {
         latencyIn = latencyOut = 0;
         Array<double> ratesIn, ratesOut;
@@ -1395,7 +1395,7 @@ private:
         // sample rate change
         if (! deviceBecameInactive)
         {
-            initialise();
+            initialize();
 
             open (lastKnownInputChannels, lastKnownOutputChannels,
                   getChangedSampleRate(), currentBufferSizeSamples);
@@ -1499,7 +1499,7 @@ public:
                                               inputDeviceIds [inputIndex],
                                               exclusiveMode);
 
-            if (! device->initialise())
+            if (! device->initialize())
                 device = nullptr;
         }
 

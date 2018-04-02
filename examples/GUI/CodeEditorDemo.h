@@ -84,8 +84,8 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground,
-                                           Colours::lightgrey));
+        g.fillAll (getUIColorIfAvailable (LookAndFeel_V4::ColorScheme::UIColor::windowBackground,
+                                           Colors::lightgray));
     }
 
     void resized() override
@@ -119,22 +119,22 @@ private:
     {
         if (auto* v4 = dynamic_cast<LookAndFeel_V4*> (&LookAndFeel::getDefaultLookAndFeel()))
         {
-            auto useLight = v4->getCurrentColourScheme() == LookAndFeel_V4::getLightColourScheme();
-            editor->setColourScheme (useLight ? getLightCodeEditorColourScheme()
-                                              : getDarkCodeEditorColourScheme());
+            auto useLight = v4->getCurrentColorScheme() == LookAndFeel_V4::getLightColorScheme();
+            editor->setColorScheme (useLight ? getLightCodeEditorColorScheme()
+                                              : getDarkCodeEditorColorScheme());
         }
         else
         {
-            editor->setColourScheme (cppTokeniser.getDefaultColourScheme());
+            editor->setColorScheme (cppTokeniser.getDefaultColorScheme());
         }
     }
 
-    CodeEditorComponent::ColourScheme getDarkCodeEditorColourScheme()
+    CodeEditorComponent::ColorScheme getDarkCodeEditorColorScheme()
     {
         struct Type
         {
             const char* name;
-            juce::uint32 colour;
+            juce::uint32 color;
         };
 
         const Type types[] =
@@ -152,20 +152,20 @@ private:
             { "Preprocessor Text",  0xfff8f631 }
         };
 
-        CodeEditorComponent::ColourScheme cs;
+        CodeEditorComponent::ColorScheme cs;
 
         for (auto& t : types)
-            cs.set (t.name, Colour (t.colour));
+            cs.set (t.name, Color (t.color));
 
         return cs;
     }
 
-    CodeEditorComponent::ColourScheme getLightCodeEditorColourScheme()
+    CodeEditorComponent::ColorScheme getLightCodeEditorColorScheme()
     {
         struct Type
         {
             const char* name;
-            juce::uint32 colour;
+            juce::uint32 color;
         };
 
         const Type types[] =
@@ -183,10 +183,10 @@ private:
             { "Preprocessor Text",  0xff660000 }
         };
 
-        CodeEditorComponent::ColourScheme cs;
+        CodeEditorComponent::ColorScheme cs;
 
         for (auto& t : types)
-            cs.set (t.name, Colour (t.colour));
+            cs.set (t.name, Color (t.color));
 
         return cs;
     }

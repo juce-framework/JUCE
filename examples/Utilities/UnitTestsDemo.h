@@ -165,8 +165,8 @@ struct UnitTestClasses
         //==============================================================================
         void paint (Graphics& g) override
         {
-            g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground,
-                                               Colours::grey));
+            g.fillAll (getUIColorIfAvailable (LookAndFeel_V4::ColorScheme::UIColor::windowBackground,
+                                               Colors::gray));
         }
 
         void resized() override

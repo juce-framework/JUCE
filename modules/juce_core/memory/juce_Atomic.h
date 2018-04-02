@@ -43,7 +43,7 @@ namespace juce
  {
      typedef typename AtomicHelpers::DiffTypeHelper<Type>::Type DiffType;
 
-     /** Creates a new value, initialised to zero. */
+     /** Creates a new value, initialized to zero. */
      Atomic() noexcept  : value (0) {}
 
      /** Creates a new value, with a given initial value. */
@@ -174,7 +174,7 @@ namespace juce
      /** Resulting type when subtracting the underlying Type. */
      typedef typename AtomicBase<Type>::DiffType DiffType;
 
-     /** Creates a new value, initialised to zero. */
+     /** Creates a new value, initialized to zero. */
      inline Atomic() noexcept {}
 
      /** Creates a new value, with a given initial value. */
@@ -331,7 +331,7 @@ namespace juce
  };
 
  //==============================================================================
- // Specialisation for void* which does not include the pointer arithmetic
+ // Specialization for void* which does not include the pointer arithmetic
  template <>
  class Atomic<void*> : public AtomicBase<void*>
  {

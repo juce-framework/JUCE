@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -228,7 +228,7 @@ struct Target
         : context (c), frameBufferID (fb.getFrameBufferID()),
           bounds (origin.x, origin.y, fb.getWidth(), fb.getHeight())
     {
-        jassert (frameBufferID != 0); // trying to render into an uninitialised framebuffer object.
+        jassert (frameBufferID != 0); // trying to render into an uninitialized framebuffer object.
     }
 
     Target (const Target& other) noexcept
@@ -359,8 +359,8 @@ private:
 struct ShaderPrograms  : public ReferenceCountedObject
 {
     ShaderPrograms (OpenGLContext& context)
-        : solidColourProgram (context),
-          solidColourMasked (context),
+        : solidColorProgram (context),
+          solidColorMasked (context),
           radialGradient (context),
           radialGradientMasked (context),
           linearGradient1 (context),
@@ -387,13 +387,13 @@ struct ShaderPrograms  : public ReferenceCountedObject
 
             if (vertexShader == nullptr)
                 vertexShader = "attribute vec2 position;"
-                               "attribute vec4 colour;"
+                               "attribute vec4 color;"
                                "uniform vec4 screenBounds;"
-                               "varying " JUCE_MEDIUMP " vec4 frontColour;"
+                               "varying " JUCE_MEDIUMP " vec4 frontColor;"
                                "varying " JUCE_HIGHP " vec2 pixelPos;"
                                "void main()"
                                "{"
-                                 "frontColour = colour;"
+                                 "frontColor = color;"
                                  "vec2 adjustedPos = position - screenBounds.xy;"
                                  "pixelPos = adjustedPos;"
                                  "vec2 scaledPos = adjustedPos / screenBounds.zw;"
@@ -421,7 +421,7 @@ struct ShaderPrograms  : public ReferenceCountedObject
         ShaderBase (OpenGLContext& context, const char* fragmentShader, const char* vertexShader = nullptr)
             : ShaderProgramHolder (context, fragmentShader, vertexShader),
               positionAttribute (program, "position"),
-              colourAttribute (program, "colour"),
+              colorAttribute (program, "color"),
               screenBounds (program, "screenBounds")
         {}
 
@@ -433,18 +433,18 @@ struct ShaderPrograms  : public ReferenceCountedObject
         void bindAttributes (OpenGLContext& context)
         {
             context.extensions.glVertexAttribPointer ((GLuint) positionAttribute.attributeID, 2, GL_SHORT, GL_FALSE, 8, (void*) 0);
-            context.extensions.glVertexAttribPointer ((GLuint) colourAttribute.attributeID, 4, GL_UNSIGNED_BYTE, GL_TRUE, 8, (void*) 4);
+            context.extensions.glVertexAttribPointer ((GLuint) colorAttribute.attributeID, 4, GL_UNSIGNED_BYTE, GL_TRUE, 8, (void*) 4);
             context.extensions.glEnableVertexAttribArray ((GLuint) positionAttribute.attributeID);
-            context.extensions.glEnableVertexAttribArray ((GLuint) colourAttribute.attributeID);
+            context.extensions.glEnableVertexAttribArray ((GLuint) colorAttribute.attributeID);
         }
 
         void unbindAttributes (OpenGLContext& context)
         {
             context.extensions.glDisableVertexAttribArray ((GLuint) positionAttribute.attributeID);
-            context.extensions.glDisableVertexAttribArray ((GLuint) colourAttribute.attributeID);
+            context.extensions.glDisableVertexAttribArray ((GLuint) colorAttribute.attributeID);
         }
 
-        OpenGLShaderProgram::Attribute positionAttribute, colourAttribute;
+        OpenGLShaderProgram::Attribute positionAttribute, colorAttribute;
 
     private:
         OpenGLShaderProgram::Uniform screenBounds;
@@ -469,14 +469,14 @@ struct ShaderPrograms  : public ReferenceCountedObject
     };
 
     //==============================================================================
-    #define JUCE_DECLARE_VARYING_COLOUR   "varying " JUCE_MEDIUMP " vec4 frontColour;"
+    #define JUCE_DECLARE_VARYING_COLOR   "varying " JUCE_MEDIUMP " vec4 frontColor;"
     #define JUCE_DECLARE_VARYING_PIXELPOS "varying " JUCE_HIGHP " vec2 pixelPos;"
 
-    struct SolidColourProgram  : public ShaderBase
+    struct SolidColorProgram  : public ShaderBase
     {
-        SolidColourProgram (OpenGLContext& context)
-            : ShaderBase (context, JUCE_DECLARE_VARYING_COLOUR
-                          "void main() { gl_FragColor = frontColour; }")
+        SolidColorProgram (OpenGLContext& context)
+            : ShaderBase (context, JUCE_DECLARE_VARYING_COLOR
+                          "void main() { gl_FragColor = frontColor; }")
         {}
     };
 
@@ -486,13 +486,13 @@ struct ShaderPrograms  : public ReferenceCountedObject
                                               "1.0 - (pixelPos.y - float (maskBounds.y)) / float (maskBounds.w))"
     #define JUCE_GET_MASK_ALPHA         "texture2D (maskTexture, " JUCE_FRAGCOORD_TO_MASK_POS ").a"
 
-    struct SolidColourMaskedProgram  : public ShaderBase
+    struct SolidColorMaskedProgram  : public ShaderBase
     {
-        SolidColourMaskedProgram (OpenGLContext& context)
+        SolidColorMaskedProgram (OpenGLContext& context)
             : ShaderBase (context,
-                          JUCE_DECLARE_MASK_UNIFORMS JUCE_DECLARE_VARYING_COLOUR JUCE_DECLARE_VARYING_PIXELPOS
+                          JUCE_DECLARE_MASK_UNIFORMS JUCE_DECLARE_VARYING_COLOR JUCE_DECLARE_VARYING_PIXELPOS
                           "void main() {"
-                            "gl_FragColor = frontColour * " JUCE_GET_MASK_ALPHA ";"
+                            "gl_FragColor = frontColor * " JUCE_GET_MASK_ALPHA ";"
                           "}"),
               maskParams (program)
         {}
@@ -524,17 +524,17 @@ struct ShaderPrograms  : public ReferenceCountedObject
     #define JUCE_DECLARE_RADIAL_UNIFORMS  "uniform sampler2D gradientTexture;" JUCE_DECLARE_MATRIX_UNIFORM
     #define JUCE_MATRIX_TIMES_FRAGCOORD   "(mat2 (matrix[0], matrix[3], matrix[1], matrix[4]) * pixelPos" \
                                           " + vec2 (matrix[2], matrix[5]))"
-    #define JUCE_GET_TEXTURE_COLOUR       "(frontColour.a * texture2D (gradientTexture, vec2 (gradientPos, 0.5)))"
+    #define JUCE_GET_TEXTURE_COLOR       "(frontColor.a * texture2D (gradientTexture, vec2 (gradientPos, 0.5)))"
 
     struct RadialGradientProgram  : public ShaderBase
     {
         RadialGradientProgram (OpenGLContext& context)
             : ShaderBase (context, JUCE_DECLARE_VARYING_PIXELPOS
-                          JUCE_DECLARE_RADIAL_UNIFORMS JUCE_DECLARE_VARYING_COLOUR
+                          JUCE_DECLARE_RADIAL_UNIFORMS JUCE_DECLARE_VARYING_COLOR
                           "void main()"
                           "{"
                             JUCE_MEDIUMP " float gradientPos = length (" JUCE_MATRIX_TIMES_FRAGCOORD ");"
-                            "gl_FragColor = " JUCE_GET_TEXTURE_COLOUR ";"
+                            "gl_FragColor = " JUCE_GET_TEXTURE_COLOR ";"
                           "}"),
               gradientParams (program)
         {}
@@ -546,12 +546,12 @@ struct ShaderPrograms  : public ReferenceCountedObject
     {
         RadialGradientMaskedProgram (OpenGLContext& context)
             : ShaderBase (context, JUCE_DECLARE_VARYING_PIXELPOS
-                          JUCE_DECLARE_RADIAL_UNIFORMS JUCE_DECLARE_VARYING_COLOUR
+                          JUCE_DECLARE_RADIAL_UNIFORMS JUCE_DECLARE_VARYING_COLOR
                           JUCE_DECLARE_MASK_UNIFORMS
                           "void main()"
                           "{"
                             JUCE_MEDIUMP " float gradientPos = length (" JUCE_MATRIX_TIMES_FRAGCOORD ");"
-                            "gl_FragColor = " JUCE_GET_TEXTURE_COLOUR " * " JUCE_GET_MASK_ALPHA ";"
+                            "gl_FragColor = " JUCE_GET_TEXTURE_COLOR " * " JUCE_GET_MASK_ALPHA ";"
                           "}"),
               gradientParams (program),
               maskParams (program)
@@ -574,7 +574,7 @@ struct ShaderPrograms  : public ReferenceCountedObject
 
     #define JUCE_DECLARE_LINEAR_UNIFORMS  "uniform sampler2D gradientTexture;" \
                                           "uniform " JUCE_MEDIUMP " vec4 gradientInfo;" \
-                                          JUCE_DECLARE_VARYING_COLOUR JUCE_DECLARE_VARYING_PIXELPOS
+                                          JUCE_DECLARE_VARYING_COLOR JUCE_DECLARE_VARYING_PIXELPOS
     #define JUCE_CALC_LINEAR_GRAD_POS1    JUCE_MEDIUMP " float gradientPos = (pixelPos.y - (gradientInfo.y + (gradientInfo.z * (pixelPos.x - gradientInfo.x)))) / gradientInfo.w;"
     #define JUCE_CALC_LINEAR_GRAD_POS2    JUCE_MEDIUMP " float gradientPos = (pixelPos.x - (gradientInfo.x + (gradientInfo.z * (pixelPos.y - gradientInfo.y)))) / gradientInfo.w;"
 
@@ -585,7 +585,7 @@ struct ShaderPrograms  : public ReferenceCountedObject
                           "void main()"
                           "{"
                             JUCE_CALC_LINEAR_GRAD_POS1
-                            "gl_FragColor = " JUCE_GET_TEXTURE_COLOUR ";"
+                            "gl_FragColor = " JUCE_GET_TEXTURE_COLOR ";"
                           "}"),
               gradientParams (program)
         {}
@@ -601,7 +601,7 @@ struct ShaderPrograms  : public ReferenceCountedObject
                           "void main()"
                           "{"
                             JUCE_CALC_LINEAR_GRAD_POS1
-                            "gl_FragColor = " JUCE_GET_TEXTURE_COLOUR " * " JUCE_GET_MASK_ALPHA ";"
+                            "gl_FragColor = " JUCE_GET_TEXTURE_COLOR " * " JUCE_GET_MASK_ALPHA ";"
                           "}"),
               gradientParams (program),
               maskParams (program)
@@ -618,7 +618,7 @@ struct ShaderPrograms  : public ReferenceCountedObject
                           "void main()"
                           "{"
                             JUCE_CALC_LINEAR_GRAD_POS2
-                            "gl_FragColor = " JUCE_GET_TEXTURE_COLOUR ";"
+                            "gl_FragColor = " JUCE_GET_TEXTURE_COLOR ";"
                           "}"),
               gradientParams (program)
         {}
@@ -634,7 +634,7 @@ struct ShaderPrograms  : public ReferenceCountedObject
                           "void main()"
                           "{"
                             JUCE_CALC_LINEAR_GRAD_POS2
-                            "gl_FragColor = " JUCE_GET_TEXTURE_COLOUR " * " JUCE_GET_MASK_ALPHA ";"
+                            "gl_FragColor = " JUCE_GET_TEXTURE_COLOR " * " JUCE_GET_MASK_ALPHA ";"
                           "}"),
               gradientParams (program),
               maskParams (program)
@@ -687,7 +687,7 @@ struct ShaderPrograms  : public ReferenceCountedObject
 
     #define JUCE_DECLARE_IMAGE_UNIFORMS "uniform sampler2D imageTexture;" \
                                         "uniform " JUCE_MEDIUMP " vec2 imageLimits;" \
-                                        JUCE_DECLARE_MATRIX_UNIFORM JUCE_DECLARE_VARYING_COLOUR JUCE_DECLARE_VARYING_PIXELPOS
+                                        JUCE_DECLARE_MATRIX_UNIFORM JUCE_DECLARE_VARYING_COLOR JUCE_DECLARE_VARYING_PIXELPOS
     #define JUCE_GET_IMAGE_PIXEL        "texture2D (imageTexture, vec2 (texturePos.x, 1.0 - texturePos.y))"
     #define JUCE_CLAMP_TEXTURE_COORD    JUCE_HIGHP " vec2 texturePos = clamp (" JUCE_MATRIX_TIMES_FRAGCOORD ", vec2 (0, 0), imageLimits);"
     #define JUCE_MOD_TEXTURE_COORD      JUCE_HIGHP " vec2 texturePos = mod (" JUCE_MATRIX_TIMES_FRAGCOORD ", imageLimits);"
@@ -695,23 +695,23 @@ struct ShaderPrograms  : public ReferenceCountedObject
     struct ImageProgram  : public ShaderBase
     {
         ImageProgram (OpenGLContext& context)
-            : ShaderBase (context, JUCE_DECLARE_VARYING_COLOUR
+            : ShaderBase (context, JUCE_DECLARE_VARYING_COLOR
                           "uniform sampler2D imageTexture;"
                           "varying " JUCE_HIGHP " vec2 texturePos;"
                           "void main()"
                           "{"
-                            "gl_FragColor = frontColour.a * " JUCE_GET_IMAGE_PIXEL ";"
+                            "gl_FragColor = frontColor.a * " JUCE_GET_IMAGE_PIXEL ";"
                           "}",
                           "uniform " JUCE_MEDIUMP " vec2 imageLimits;"
                           JUCE_DECLARE_MATRIX_UNIFORM
                           "attribute vec2 position;"
-                          "attribute vec4 colour;"
+                          "attribute vec4 color;"
                           "uniform vec4 screenBounds;"
-                          "varying " JUCE_MEDIUMP " vec4 frontColour;"
+                          "varying " JUCE_MEDIUMP " vec4 frontColor;"
                           "varying " JUCE_HIGHP " vec2 texturePos;"
                           "void main()"
                           "{"
-                            "frontColour = colour;"
+                            "frontColor = color;"
                             "vec2 adjustedPos = position - screenBounds.xy;"
                             "vec2 pixelPos = adjustedPos;"
                             "texturePos = clamp (" JUCE_MATRIX_TIMES_FRAGCOORD ", vec2 (0, 0), imageLimits);"
@@ -731,7 +731,7 @@ struct ShaderPrograms  : public ReferenceCountedObject
                           "void main()"
                           "{"
                             JUCE_CLAMP_TEXTURE_COORD
-                            "gl_FragColor = frontColour.a * " JUCE_GET_IMAGE_PIXEL " * " JUCE_GET_MASK_ALPHA ";"
+                            "gl_FragColor = frontColor.a * " JUCE_GET_IMAGE_PIXEL " * " JUCE_GET_MASK_ALPHA ";"
                           "}"),
               imageParams (program),
               maskParams (program)
@@ -748,7 +748,7 @@ struct ShaderPrograms  : public ReferenceCountedObject
                           "void main()"
                           "{"
                             JUCE_MOD_TEXTURE_COORD
-                            "gl_FragColor = frontColour.a * " JUCE_GET_IMAGE_PIXEL ";"
+                            "gl_FragColor = frontColor.a * " JUCE_GET_IMAGE_PIXEL ";"
                           "}"),
               imageParams (program)
         {}
@@ -763,7 +763,7 @@ struct ShaderPrograms  : public ReferenceCountedObject
                           "void main()"
                           "{"
                             JUCE_MOD_TEXTURE_COORD
-                            "gl_FragColor = frontColour.a * " JUCE_GET_IMAGE_PIXEL " * " JUCE_GET_MASK_ALPHA ";"
+                            "gl_FragColor = frontColor.a * " JUCE_GET_IMAGE_PIXEL " * " JUCE_GET_MASK_ALPHA ";"
                           "}"),
               imageParams (program),
               maskParams (program)
@@ -780,7 +780,7 @@ struct ShaderPrograms  : public ReferenceCountedObject
                           "void main()"
                           "{"
                             JUCE_MOD_TEXTURE_COORD
-                            "gl_FragColor = frontColour.a * " JUCE_GET_IMAGE_PIXEL ";"
+                            "gl_FragColor = frontColor.a * " JUCE_GET_IMAGE_PIXEL ";"
                           "}"),
               imageParams (program)
         {}
@@ -800,7 +800,7 @@ struct ShaderPrograms  : public ReferenceCountedObject
                                  "&& texturePos.y >= -roundingError"
                                  "&& texturePos.x <= imageLimits.x + roundingError"
                                  "&& texturePos.y <= imageLimits.y + roundingError)"
-                             "gl_FragColor = frontColour * " JUCE_GET_IMAGE_PIXEL ".a;"
+                             "gl_FragColor = frontColor * " JUCE_GET_IMAGE_PIXEL ".a;"
                             "else "
                              "gl_FragColor = vec4 (0, 0, 0, 0);"
                           "}"),
@@ -810,8 +810,8 @@ struct ShaderPrograms  : public ReferenceCountedObject
         ImageParams imageParams;
     };
 
-    SolidColourProgram solidColourProgram;
-    SolidColourMaskedProgram solidColourMasked;
+    SolidColorProgram solidColorProgram;
+    SolidColorMaskedProgram solidColorMasked;
     RadialGradientProgram radialGradient;
     RadialGradientMaskedProgram radialGradientMasked;
     LinearGradient1Program linearGradient1;
@@ -896,7 +896,7 @@ struct StateHelpers
     struct EdgeTableRenderer
     {
         EdgeTableRenderer (QuadQueueType& q, PixelARGB c) noexcept
-            : quadQueue (q), colour (c)
+            : quadQueue (q), color (c)
         {}
 
         void setEdgeTableYPos (int y) noexcept
@@ -906,43 +906,43 @@ struct StateHelpers
 
         void handleEdgeTablePixel (int x, int alphaLevel) noexcept
         {
-            auto c = colour;
+            auto c = color;
             c.multiplyAlpha (alphaLevel);
             quadQueue.add (x, currentY, 1, 1, c);
         }
 
         void handleEdgeTablePixelFull (int x) noexcept
         {
-            quadQueue.add (x, currentY, 1, 1, colour);
+            quadQueue.add (x, currentY, 1, 1, color);
         }
 
         void handleEdgeTableLine (int x, int width, int alphaLevel) noexcept
         {
-            auto c = colour;
+            auto c = color;
             c.multiplyAlpha (alphaLevel);
             quadQueue.add (x, currentY, width, 1, c);
         }
 
         void handleEdgeTableLineFull (int x, int width) noexcept
         {
-            quadQueue.add (x, currentY, width, 1, colour);
+            quadQueue.add (x, currentY, width, 1, color);
         }
 
         void handleEdgeTableRectangle (int x, int y, int width, int height, int alphaLevel) noexcept
         {
-            auto c = colour;
+            auto c = color;
             c.multiplyAlpha (alphaLevel);
             quadQueue.add (x, y, width, height, c);
         }
 
         void handleEdgeTableRectangleFull (int x, int y, int width, int height) noexcept
         {
-            quadQueue.add (x, y, width, height, colour);
+            quadQueue.add (x, y, width, height, color);
         }
 
     private:
         QuadQueueType& quadQueue;
-        const PixelARGB colour;
+        const PixelARGB color;
         int currentY;
 
         JUCE_DECLARE_NON_COPYABLE (EdgeTableRenderer)
@@ -952,14 +952,14 @@ struct StateHelpers
     struct FloatRectangleRenderer
     {
         FloatRectangleRenderer (QuadQueueType& q, PixelARGB c) noexcept
-            : quadQueue (q), colour (c)
+            : quadQueue (q), color (c)
         {}
 
         void operator() (int x, int y, int w, int h, int alpha) noexcept
         {
             if (w > 0 && h > 0)
             {
-                PixelARGB c (colour);
+                PixelARGB c (color);
                 c.multiplyAlpha (alpha);
                 quadQueue.add (x, y, w, h, c);
             }
@@ -967,7 +967,7 @@ struct StateHelpers
 
     private:
         QuadQueueType& quadQueue;
-        const PixelARGB colour;
+        const PixelARGB color;
 
         JUCE_DECLARE_NON_COPYABLE (FloatRectangleRenderer)
     };
@@ -1118,7 +1118,7 @@ struct StateHelpers
             gradientNeedsRefresh = true;
         }
 
-        void bindTextureForGradient (ActiveTextures& activeTextures, const ColourGradient& gradient)
+        void bindTextureForGradient (ActiveTextures& activeTextures, const ColorGradient& gradient)
         {
             if (gradientNeedsRefresh)
             {
@@ -1167,7 +1167,7 @@ struct StateHelpers
             context.extensions.glDeleteBuffers (2, buffers);
         }
 
-        void initialise() noexcept
+        void initialize() noexcept
         {
             JUCE_CHECK_OPENGL_ERROR
 
@@ -1196,7 +1196,7 @@ struct StateHelpers
             JUCE_CHECK_OPENGL_ERROR
         }
 
-        void add (int x, int y, int w, int h, PixelARGB colour) noexcept
+        void add (int x, int y, int w, int h, PixelARGB color) noexcept
         {
             jassert (w > 0 && h > 0);
 
@@ -1207,17 +1207,17 @@ struct StateHelpers
             v[2].y = v[3].y = (GLshort) (y + h);
 
            #if JUCE_BIG_ENDIAN
-            auto rgba = (GLuint) ((colour.getRed() << 24) | (colour.getGreen() << 16)
-                                | (colour.getBlue() << 8) |  colour.getAlpha());
+            auto rgba = (GLuint) ((color.getRed() << 24) | (color.getGreen() << 16)
+                                | (color.getBlue() << 8) |  color.getAlpha());
            #else
-            auto rgba = (GLuint) ((colour.getAlpha() << 24) | (colour.getBlue() << 16)
-                                | (colour.getGreen() << 8) |  colour.getRed());
+            auto rgba = (GLuint) ((color.getAlpha() << 24) | (color.getBlue() << 16)
+                                | (color.getGreen() << 8) |  color.getRed());
            #endif
 
-            v[0].colour = rgba;
-            v[1].colour = rgba;
-            v[2].colour = rgba;
-            v[3].colour = rgba;
+            v[0].color = rgba;
+            v[1].color = rgba;
+            v[2].color = rgba;
+            v[3].color = rgba;
 
             numVertices += 4;
 
@@ -1225,38 +1225,38 @@ struct StateHelpers
                 draw();
         }
 
-        void add (Rectangle<int> r, PixelARGB colour) noexcept
+        void add (Rectangle<int> r, PixelARGB color) noexcept
         {
-            add (r.getX(), r.getY(), r.getWidth(), r.getHeight(), colour);
+            add (r.getX(), r.getY(), r.getWidth(), r.getHeight(), color);
         }
 
-        void add (Rectangle<float> r, PixelARGB colour) noexcept
+        void add (Rectangle<float> r, PixelARGB color) noexcept
         {
-            FloatRectangleRenderer<ShaderQuadQueue> frr (*this, colour);
-            RenderingHelpers::FloatRectangleRasterisingInfo (r).iterate (frr);
+            FloatRectangleRenderer<ShaderQuadQueue> frr (*this, color);
+            RenderingHelpers::FloatRectangleRasterizingInfo (r).iterate (frr);
         }
 
-        void add (const RectangleList<int>& list, PixelARGB colour) noexcept
+        void add (const RectangleList<int>& list, PixelARGB color) noexcept
         {
             for (auto& i : list)
-                add (i, colour);
+                add (i, color);
         }
 
-        void add (const RectangleList<int>& list, Rectangle<int> clip, PixelARGB colour) noexcept
+        void add (const RectangleList<int>& list, Rectangle<int> clip, PixelARGB color) noexcept
         {
             for (auto& i : list)
             {
                 auto r = i.getIntersection (clip);
 
                 if (! r.isEmpty())
-                    add (r, colour);
+                    add (r, color);
             }
         }
 
         template <typename IteratorType>
-        void add (const IteratorType& et, PixelARGB colour)
+        void add (const IteratorType& et, PixelARGB color)
         {
-            EdgeTableRenderer<ShaderQuadQueue> etr (*this, colour);
+            EdgeTableRenderer<ShaderQuadQueue> etr (*this, color);
             et.iterate (etr);
         }
 
@@ -1270,7 +1270,7 @@ struct StateHelpers
         struct VertexInfo
         {
             GLshort x, y;
-            GLuint colour;
+            GLuint color;
         };
 
         enum { maxNumQuads = 256 };
@@ -1387,7 +1387,7 @@ struct GLState
         blendMode.resync();
         JUCE_CHECK_OPENGL_ERROR
         activeTextures.clear();
-        shaderQuadQueue.initialise();
+        shaderQuadQueue.initialize();
         cachedImageList = CachedImageList::get (t.context);
         JUCE_CHECK_OPENGL_ERROR
     }
@@ -1411,7 +1411,7 @@ struct GLState
         JUCE_CHECK_OPENGL_ERROR
     }
 
-    void setShaderForGradientFill (const ColourGradient& g, const AffineTransform& transform,
+    void setShaderForGradientFill (const ColorGradient& g, const AffineTransform& transform,
                                    int maskTextureID, const Rectangle<int>* maskArea)
     {
         JUCE_CHECK_OPENGL_ERROR
@@ -1705,23 +1705,23 @@ struct SavedState  : public RenderingHelpers::SavedStateBase<SavedState>
     }
 
     template <typename IteratorType>
-    void fillWithSolidColour (IteratorType& iter, PixelARGB colour, bool replaceContents) const
+    void fillWithSolidColor (IteratorType& iter, PixelARGB color, bool replaceContents) const
     {
         if (! isUsingCustomShader)
         {
             state->activeTextures.disableTextures (state->shaderQuadQueue);
             state->blendMode.setBlendMode (state->shaderQuadQueue, replaceContents);
-            state->setShader (state->currentShader.programs->solidColourProgram);
+            state->setShader (state->currentShader.programs->solidColorProgram);
         }
 
-        state->shaderQuadQueue.add (iter, colour);
+        state->shaderQuadQueue.add (iter, color);
     }
 
     template <typename IteratorType>
-    void fillWithGradient (IteratorType& iter, ColourGradient& gradient, const AffineTransform& trans, bool /*isIdentity*/) const
+    void fillWithGradient (IteratorType& iter, ColorGradient& gradient, const AffineTransform& trans, bool /*isIdentity*/) const
     {
         state->setShaderForGradientFill (gradient, trans, 0, nullptr);
-        state->shaderQuadQueue.add (iter, fillType.colour.getPixelARGB());
+        state->shaderQuadQueue.add (iter, fillType.color.getPixelARGB());
     }
 
     void fillRectWithCustomShader (OpenGLRendering::ShaderPrograms::ShaderBase& shader, Rectangle<int> area)
@@ -1753,7 +1753,7 @@ struct ShaderContext   : public RenderingHelpers::StackBasedLowLevelGraphicsCont
 {
     ShaderContext (const Target& target)  : glState (target)
     {
-        stack.initialise (new SavedState (&glState));
+        stack.initialize (new SavedState (&glState));
     }
 
     void fillRectWithCustomShader (ShaderPrograms::ShaderBase& shader, Rectangle<int> area)
@@ -1887,9 +1887,9 @@ struct CustomProgram  : public ReferenceCountedObject,
 };
 
 OpenGLGraphicsContextCustomShader::OpenGLGraphicsContextCustomShader (const String& fragmentShaderCode)
-    : code (String (JUCE_DECLARE_VARYING_COLOUR
+    : code (String (JUCE_DECLARE_VARYING_COLOR
                     JUCE_DECLARE_VARYING_PIXELPOS
-                    "\n#define pixelAlpha frontColour.a\n") + fragmentShaderCode),
+                    "\n#define pixelAlpha frontColor.a\n") + fragmentShaderCode),
       hashName (String::toHexString (fragmentShaderCode.hashCode64()) + "_shader")
 {
 }

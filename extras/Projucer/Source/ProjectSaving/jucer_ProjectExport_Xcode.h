@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -397,7 +397,7 @@ public:
     }
 
     //==============================================================================
-    void initialiseDependencyPathValues() override
+    void initializeDependencyPathValues() override
     {
         vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder), Ids::vst3Path, TargetOS::osx)));
         aaxPath. referTo (Value (new DependencyPathValueSource (getSetting (Ids::aaxFolder),  Ids::aaxPath,  TargetOS::osx)));
@@ -432,14 +432,14 @@ protected:
             updateOldPluginBinaryLocations();
             updateOldSDKDefaults();
 
-            optimisationLevelValue.setDefault (isDebug() ? gccO0 : gccO3);
+            optimizationLevelValue.setDefault (isDebug() ? gccO0 : gccO3);
         }
 
         //==========================================================================
         void createConfigProperties (PropertyListBuilder& props) override
         {
             addXcodePluginInstallPathProperties (props);
-            addGCCOptimisationProperty (props);
+            addGCCOptimizationProperty (props);
 
             if (iOS)
             {
@@ -831,7 +831,7 @@ public:
             v->setProperty ("isa", "PBXFileReference", nullptr);
             v->setProperty ("explicitFileType", fileType, nullptr);
             v->setProperty ("includeInIndex", (int) 0, nullptr);
-            v->setProperty ("path", sanitisePath (binaryName), nullptr);
+            v->setProperty ("path", sanitizePath (binaryName), nullptr);
             v->setProperty ("sourceTree", "BUILT_PRODUCTS_DIR", nullptr);
             owner.pbxFileReferences.add (v);
         }
@@ -922,7 +922,7 @@ public:
             auto* v = new ValueTree (buildPhaseId);
             v->setProperty ("isa", buildPhaseType, nullptr);
             v->setProperty ("buildActionMask", "2147483647", nullptr);
-            v->setProperty ("files", indentParenthesisedList (fileIds), nullptr);
+            v->setProperty ("files", indentParenthesizedList (fileIds), nullptr);
             v->setProperty ("runOnlyForDeploymentPostprocessing", (int) 0, nullptr);
 
             if (humanReadableName.isNotEmpty())
@@ -999,7 +999,7 @@ public:
             s.set ("HEADER_SEARCH_PATHS", String ("(") + getHeaderSearchPaths (config).joinIntoString (", ") + ", \"$(inherited)\")");
             s.set ("USE_HEADERMAP", String (static_cast<bool> (config.exporter.settings.getProperty ("useHeaderMap")) ? "YES" : "NO"));
 
-            s.set ("GCC_OPTIMIZATION_LEVEL", config.getGCCOptimisationFlag());
+            s.set ("GCC_OPTIMIZATION_LEVEL", config.getGCCOptimizationFlag());
 
             if (shouldCreatePList())
             {
@@ -1025,10 +1025,10 @@ public:
                 }
 
                 if (defsList.size() > 0)
-                    s.set ("INFOPLIST_PREPROCESSOR_DEFINITIONS", indentParenthesisedList (defsList));
+                    s.set ("INFOPLIST_PREPROCESSOR_DEFINITIONS", indentParenthesizedList (defsList));
             }
 
-            if (config.isLinkTimeOptimisationEnabled())
+            if (config.isLinkTimeOptimizationEnabled())
                 s.set ("LLVM_LTO", "YES");
 
             if (config.isFastMathEnabled())
@@ -1074,7 +1074,7 @@ public:
                 jassert (! xcodeCopyToProductInstallPathAfterBuild);
 
                 RelativePath binaryPath (config.getTargetBinaryRelativePathString(), RelativePath::projectFolder);
-                configurationBuildDir = sanitisePath (binaryPath.rebased (owner.projectFolder, owner.getTargetFolder(), RelativePath::buildTargetFolder)
+                configurationBuildDir = sanitizePath (binaryPath.rebased (owner.projectFolder, owner.getTargetFolder(), RelativePath::buildTargetFolder)
                                                                 .toUnixStyle());
             }
 
@@ -1197,7 +1197,7 @@ public:
                 defsList.add ("\"" + def + "\"");
             }
 
-            s.set ("GCC_PREPROCESSOR_DEFINITIONS", indentParenthesisedList (defsList));
+            s.set ("GCC_PREPROCESSOR_DEFINITIONS", indentParenthesizedList (defsList));
 
             StringArray customFlags;
             customFlags.addTokens (config.getCustomXcodeFlagsString(), ",", "\"'");
@@ -1712,7 +1712,7 @@ private:
                      iosBackgroundAudioValue, iosBackgroundBleValue, iosPushNotificationsValue, iosAppGroupsValue, iCloudPermissionsValue,
                      iosDevelopmentTeamIDValue, iosAppGroupsIDValue, keepCustomXcodeSchemesValue, useHeaderMapValue;
 
-    static String sanitisePath (const String& path)
+    static String sanitizePath (const String& path)
     {
         if (path.startsWithChar ('~'))
             return "$(HOME)" + path.substring (1);
@@ -1987,10 +1987,10 @@ private:
         v->setProperty ("isa", target.type == XcodeTarget::AggregateTarget ? "PBXAggregateTarget" : "PBXNativeTarget", nullptr);
         v->setProperty ("buildConfigurationList", createID (String ("__configList") + targetName), nullptr);
 
-        v->setProperty ("buildPhases", indentParenthesisedList (target.buildPhaseIDs), nullptr);
+        v->setProperty ("buildPhases", indentParenthesizedList (target.buildPhaseIDs), nullptr);
         v->setProperty ("buildRules", "( )", nullptr);
 
-        v->setProperty ("dependencies", indentParenthesisedList (getTargetDependencies (target)), nullptr);
+        v->setProperty ("dependencies", indentParenthesizedList (getTargetDependencies (target)), nullptr);
         v->setProperty (Ids::name, target.getXcodeSchemeName(), nullptr);
         v->setProperty ("productName", projectName, nullptr);
 
@@ -2049,7 +2049,7 @@ private:
         {
             for (int x = 0; x < w; ++x)
             {
-                auto pixel = bitmap.getPixelColour (x, y);
+                auto pixel = bitmap.getPixelColor (x, y);
                 out.writeByte ((char) pixel.getAlpha());
                 out.writeByte ((char) pixel.getRed());
                 out.writeByte ((char) pixel.getGreen());
@@ -2064,7 +2064,7 @@ private:
         {
             for (int x = 0; x < w; ++x)
             {
-                auto pixel = bitmap.getPixelColour (x, y);
+                auto pixel = bitmap.getPixelColor (x, y);
                 out.writeByte ((char) pixel.getAlpha());
             }
         }
@@ -2149,10 +2149,10 @@ private:
                 {
                     Image background (Image::RGB, image.getWidth(), image.getHeight(), false);
                     Graphics g (background);
-                    g.fillAll (Colours::white);
+                    g.fillAll (Colors::white);
 
                     g.drawImageWithin (image, 0, 0, image.getWidth(), image.getHeight(),
-                                       RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize);
+                                       RectanglePlacement::centered | RectanglePlacement::onlyReduceInSize);
 
                     image = background;
                 }
@@ -2226,7 +2226,7 @@ private:
             searchPath = srcRoot + searchPath;
         }
 
-        return sanitisePath (searchPath);
+        return sanitizePath (searchPath);
     }
 
     StringPairArray getProjectSettings (const XcodeBuildConfiguration& config) const
@@ -2726,7 +2726,7 @@ private:
     {
         auto* v = new ValueTree (groupID);
         v->setProperty ("isa", "PBXGroup", nullptr);
-        v->setProperty ("children", indentParenthesisedList (childIDs), nullptr);
+        v->setProperty ("children", indentParenthesizedList (childIDs), nullptr);
         v->setProperty (Ids::name, groupName, nullptr);
         v->setProperty ("sourceTree", "<group>", nullptr);
         pbxGroups.add (v);
@@ -2753,7 +2753,7 @@ private:
     {
         auto* v = new ValueTree (listID);
         v->setProperty ("isa", "XCConfigurationList", nullptr);
-        v->setProperty ("buildConfigurations", indentParenthesisedList (target.configIDs), nullptr);
+        v->setProperty ("buildConfigurations", indentParenthesizedList (target.configIDs), nullptr);
         v->setProperty ("defaultConfigurationIsVisible", (int) 0, nullptr);
 
         if (auto* first = configsToUse.getFirst())
@@ -2771,7 +2771,7 @@ private:
 
         auto* v = new ValueTree (listID);
         v->setProperty ("isa", "XCConfigurationList", nullptr);
-        v->setProperty ("buildConfigurations", indentParenthesisedList (configIDs), nullptr);
+        v->setProperty ("buildConfigurations", indentParenthesizedList (configIDs), nullptr);
         v->setProperty ("defaultConfigurationIsVisible", (int) 0, nullptr);
 
         if (auto* first = configsToUse.getFirst())
@@ -3011,7 +3011,7 @@ private:
         for (auto& type : getiOSLaunchImageTypes())
         {
             Image image (Image::ARGB, type.width, type.height, true); // (empty black image)
-            image.clear (image.getBounds(), Colours::black);
+            image.clear (image.getBounds(), Colors::black);
 
             MemoryOutputStream pngData;
             PNGImageFormat pngFormat;
@@ -3056,7 +3056,7 @@ private:
 
     //==============================================================================
     static String indentBracedList (const StringArray& list)        { return "{" + indentList (list, ";", 0, true) + " }"; }
-    static String indentParenthesisedList (const StringArray& list) { return "(" + indentList (list, ",", 1, false) + " )"; }
+    static String indentParenthesizedList (const StringArray& list) { return "(" + indentList (list, ",", 1, false) + " )"; }
 
     static String indentList (const StringArray& list, const String& separator, int extraTabs, bool shouldSort)
     {

@@ -553,7 +553,7 @@ bool StreamingSocket::createListener (const int newPortNumber, const String& loc
     if (handle < 0)
         return false;
 
-   #if ! JUCE_WINDOWS // on windows, adding this option produces behaviour different to posix
+   #if ! JUCE_WINDOWS // on windows, adding this option produces behavior different to posix
     SocketHelpers::makeReusable (handle);
    #endif
 

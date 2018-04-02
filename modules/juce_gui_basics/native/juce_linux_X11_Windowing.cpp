@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -626,7 +626,7 @@ public:
         return new LowLevelGraphicsSoftwareRenderer (Image (this));
     }
 
-    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode) override
+    void initializeBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode) override
     {
         bitmap.data = imageData + x * pixelStride + y * lineStride;
         bitmap.pixelFormat = pixelFormat;
@@ -786,7 +786,7 @@ public:
         Rectangle<int> usableBounds;
         // top-left point of display in scaled coordinates. This
         // is different from totalBounds.getTopLeft() / scale,
-        // because the neighbouring display may have a different
+        // because the neighboring display may have a different
         // scale factor
         Point<int> topLeftScaled;
         double dpi, scale;
@@ -840,7 +840,7 @@ public:
             if (displayBounds.contains (pt))
                 return dpy;
 
-            int distance = displayBounds.getCentre().getDistanceFrom (pt);
+            int distance = displayBounds.getCenter().getDistanceFrom (pt);
             if (distance <= minDistance)
             {
                 minDistance = distance;
@@ -1385,21 +1385,21 @@ void ContainerDeletePolicy<XRRCrtcInfo>::destroy (XRRCrtcInfo* ptr)
 
 namespace PixmapHelpers
 {
-    Pixmap createColourPixmapFromImage (::Display* display, const Image& image)
+    Pixmap createColorPixmapFromImage (::Display* display, const Image& image)
     {
         ScopedXLock xlock (display);
 
         const unsigned int width = (unsigned int) image.getWidth();
         const unsigned int height = (unsigned int) image.getHeight();
-        HeapBlock<uint32> colour (width * height);
+        HeapBlock<uint32> color (width * height);
         int index = 0;
 
         for (int y = 0; y < (int)  height; ++y)
             for (int x = 0; x < (int) width; ++x)
-                colour[index++] = image.getPixelAt (x, y).getARGB();
+                color[index++] = image.getPixelAt (x, y).getARGB();
 
         XImage* ximage = XCreateImage (display, CopyFromParent, 24, ZPixmap,
-                                       0, reinterpret_cast<char*> (colour.getData()),
+                                       0, reinterpret_cast<char*> (color.getData()),
                                        width, height, 32, 0);
 
         Pixmap pixmap = XCreatePixmap (display, DefaultRootWindow (display),
@@ -1649,9 +1649,9 @@ public:
         return StringArray ("Software Renderer");
     }
 
-    void setMinimised (bool shouldBeMinimised) override
+    void setMinimized (bool shouldBeMinimized) override
     {
-        if (shouldBeMinimised)
+        if (shouldBeMinimized)
         {
             Window root = RootWindow (display, DefaultScreen (display));
 
@@ -1672,7 +1672,7 @@ public:
         }
     }
 
-    bool isMinimised() const override
+    bool isMinimized() const override
     {
         ScopedXLock xlock (display);
         GetXProperty prop (display, windowH, atoms->state, 0, 64, false, atoms->state);
@@ -1686,9 +1686,9 @@ public:
 
     void setFullScreen (const bool shouldBeFullScreen) override
     {
-        auto r = lastNonFullscreenBounds; // (get a copy of this before de-minimising)
+        auto r = lastNonFullscreenBounds; // (get a copy of this before de-minimizing)
 
-        setMinimised (false);
+        setMinimized (false);
 
         if (fullScreen != shouldBeFullScreen)
         {
@@ -1864,7 +1864,7 @@ public:
             if (otherPeer->styleFlags & windowIsTemporary)
                 return;
 
-            setMinimised (false);
+            setMinimized (false);
 
             Window newStack[] = { otherPeer->windowH, windowH };
 
@@ -1946,7 +1946,7 @@ public:
             wmHints = XAllocWMHints();
 
         wmHints->flags |= IconPixmapHint | IconMaskHint;
-        wmHints->icon_pixmap = PixmapHelpers::createColourPixmapFromImage (display, newIcon);
+        wmHints->icon_pixmap = PixmapHelpers::createColorPixmapFromImage (display, newIcon);
         wmHints->icon_mask = PixmapHelpers::createMaskPixmapFromImage (display, newIcon);
 
         XSetWMHints (display, windowH, wmHints);
@@ -2924,13 +2924,13 @@ private:
             if ((styleFlags & windowHasCloseButton) != 0)
                 motifHints.functions |= 32; /* MWM_FUNC_CLOSE */
 
-            if ((styleFlags & windowHasMinimiseButton) != 0)
+            if ((styleFlags & windowHasMinimizeButton) != 0)
             {
                 motifHints.functions |= 8; /* MWM_FUNC_MINIMIZE */
                 motifHints.decorations |= 0x20; /* MWM_DECOR_MINIMIZE */
             }
 
-            if ((styleFlags & windowHasMaximiseButton) != 0)
+            if ((styleFlags & windowHasMaximizeButton) != 0)
             {
                 motifHints.functions |= 0x10; /* MWM_FUNC_MAXIMIZE */
                 motifHints.decorations |= 0x40; /* MWM_DECOR_MAXIMIZE */
@@ -2955,10 +2955,10 @@ private:
             if ((styleFlags & windowIsResizable) != 0)
                 netHints [num++] = Atoms::getIfExists (display, "_NET_WM_ACTION_RESIZE");
 
-            if ((styleFlags & windowHasMaximiseButton) != 0)
+            if ((styleFlags & windowHasMaximizeButton) != 0)
                 netHints [num++] = Atoms::getIfExists (display, "_NET_WM_ACTION_FULLSCREEN");
 
-            if ((styleFlags & windowHasMinimiseButton) != 0)
+            if ((styleFlags & windowHasMinimizeButton) != 0)
                 netHints [num++] = Atoms::getIfExists (display, "_NET_WM_ACTION_MINIMIZE");
 
             if ((styleFlags & windowHasCloseButton) != 0)
@@ -3073,7 +3073,7 @@ private:
         xchangeProperty (windowH, atoms->XdndActionDescription, XA_STRING, 8, "", 0);
         xchangeProperty (windowH, atoms->XdndAware, XA_ATOM, 32, &atoms->DndVersion, 1);
 
-        initialisePointerMap();
+        initializePointerMap();
         updateModifierMappings();
     }
 
@@ -3695,7 +3695,7 @@ private:
 
     int pointerMap[5] = {};
 
-    void initialisePointerMap()
+    void initializePointerMap()
     {
         const int numButtons = XGetPointerMapping (display, 0, 0);
         pointerMap[2] = pointerMap[3] = pointerMap[4] = Keys::NoButton;
@@ -3757,15 +3757,15 @@ namespace WindowingHelpers
     }
 }
 
-struct WindowingCallbackInitialiser
+struct WindowingCallbackInitializer
 {
-    WindowingCallbackInitialiser()
+    WindowingCallbackInitializer()
     {
         dispatchWindowMessage = WindowingHelpers::windowMessageReceive;
     }
 };
 
-static WindowingCallbackInitialiser windowingInitialiser;
+static WindowingCallbackInitializer windowingInitializer;
 
 //==============================================================================
 JUCE_API bool JUCE_CALLTYPE Process::isForegroundProcess()
@@ -4197,7 +4197,7 @@ void* CustomMouseCursorInfo::create() const
             const char mask = (char) (1 << (msbfirst ? (7 - (x & 7)) : (x & 7)));
             const unsigned int offset = (unsigned int) y * stride + ((unsigned int) x >> 3);
 
-            const Colour c (im.getPixelAt (x, y));
+            const Color c (im.getPixelAt (x, y));
 
             if (c.getAlpha() >= 128)        maskPlane[offset]   |= mask;
             if (c.getBrightness() >= 0.5f)  sourcePlane[offset] |= mask;

@@ -47,7 +47,7 @@ MessageManager* MessageManager::getInstance()
     if (instance == nullptr)
     {
         instance = new MessageManager();
-        doPlatformSpecificInitialisation();
+        doPlatformSpecificInitialization();
     }
 
     return instance;
@@ -221,7 +221,7 @@ void MessageManager::setCurrentThreadAsMessageThread()
 
         // This is needed on windows to make sure the message window is created by this thread
         doPlatformSpecificShutdown();
-        doPlatformSpecificInitialisation();
+        doPlatformSpecificInitialization();
     }
 }
 
@@ -425,8 +425,8 @@ void MessageManagerLock::exitSignalSent()
 }
 
 //==============================================================================
-JUCE_API void JUCE_CALLTYPE initialiseJuce_GUI();
-JUCE_API void JUCE_CALLTYPE initialiseJuce_GUI()
+JUCE_API void JUCE_CALLTYPE initializeJuce_GUI();
+JUCE_API void JUCE_CALLTYPE initializeJuce_GUI()
 {
     JUCE_AUTORELEASEPOOL
     {
@@ -446,7 +446,7 @@ JUCE_API void JUCE_CALLTYPE shutdownJuce_GUI()
 
 static int numScopedInitInstances = 0;
 
-ScopedJuceInitialiser_GUI::ScopedJuceInitialiser_GUI()  { if (numScopedInitInstances++ == 0) initialiseJuce_GUI(); }
-ScopedJuceInitialiser_GUI::~ScopedJuceInitialiser_GUI() { if (--numScopedInitInstances == 0) shutdownJuce_GUI(); }
+ScopedJuceInitializer_GUI::ScopedJuceInitializer_GUI()  { if (numScopedInitInstances++ == 0) initializeJuce_GUI(); }
+ScopedJuceInitializer_GUI::~ScopedJuceInitializer_GUI() { if (--numScopedInitInstances == 0) shutdownJuce_GUI(); }
 
 } // namespace juce

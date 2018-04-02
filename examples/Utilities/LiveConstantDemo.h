@@ -53,20 +53,20 @@ struct LiveConstantDemoComponent  : public Component
 
     void paint (Graphics& g) override
     {
-        g.fillAll (JUCE_LIVE_CONSTANT (Colour (0xffe5e7a7)));
+        g.fillAll (JUCE_LIVE_CONSTANT (Color (0xffe5e7a7)));
 
-        g.setColour (JUCE_LIVE_CONSTANT (Colours::red.withAlpha (0.2f)));
+        g.setColor (JUCE_LIVE_CONSTANT (Colors::red.withAlpha (0.2f)));
         auto blockWidth  = JUCE_LIVE_CONSTANT (0x120);
         auto blockHeight = JUCE_LIVE_CONSTANT (200);
         g.fillRect ((getWidth() - blockWidth) / 2, (getHeight() - blockHeight) / 2, blockWidth, blockHeight);
 
-        auto fontColour = JUCE_LIVE_CONSTANT (Colour (0xff000a55));
+        auto fontColor = JUCE_LIVE_CONSTANT (Color (0xff000a55));
         auto fontSize   = JUCE_LIVE_CONSTANT (30.0f);
 
-        g.setColour (fontColour);
+        g.setColor (fontColor);
         g.setFont (fontSize);
 
-        g.drawFittedText (getDemoText(), getLocalBounds(), Justification::centred, 2);
+        g.drawFittedText (getDemoText(), getLocalBounds(), Justification::centered, 2);
     }
 
     static String getDemoText()
@@ -98,7 +98,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground));
+        g.fillAll (getUIColorIfAvailable (LookAndFeel_V4::ColorScheme::UIColor::windowBackground));
     }
 
     void resized() override
@@ -115,7 +115,7 @@ public:
         startButton.setVisible (false);
         demoComp   .setVisible (true);
 
-        descriptionLabel.setText ("Tweak some of the colours and values in the pop-up window to see what "
+        descriptionLabel.setText ("Tweak some of the colors and values in the pop-up window to see what "
                                   "the effect of your changes would be on the component below...",
                                   dontSendNotification);
     }

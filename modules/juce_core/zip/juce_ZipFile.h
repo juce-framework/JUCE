@@ -191,7 +191,7 @@ public:
             method is called.
 
             The compressionLevel can be between 0 (no compression), and 9 (maximum compression).
-            If the storedPathName parameter is specified, you can customise the partial pathname that
+            If the storedPathName parameter is specified, you can customize the partial pathname that
             will be stored for this file.
         */
         void addFile (const File& fileToAdd, int compressionLevel,

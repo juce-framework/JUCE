@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -94,7 +94,7 @@ public:
         so that it's next to, but doesn't overlap the given component.
 
         It'll put itself either above, below, or to the side of the component depending
-        on where there's the most space, honouring any restrictions that were set
+        on where there's the most space, honoring any restrictions that were set
         with setAllowedPlacement().
     */
     void setPosition (Component* componentToPointTo,
@@ -108,7 +108,7 @@ public:
         they are screen coordinates if not.
 
         It'll put itself either above, below, or to the side of this point, depending
-        on where there's the most space, honouring any restrictions that were set
+        on where there's the most space, honoring any restrictions that were set
         with setAllowedPlacement().
     */
     void setPosition (Point<int> arrowTipPosition, int arrowLength = 10);
@@ -121,7 +121,7 @@ public:
         if it has one, or they are screen coordinates if not.
 
         It'll put itself either above, below, or to the side of the component depending
-        on where there's the most space, honouring any restrictions that were set
+        on where there's the most space, honoring any restrictions that were set
         with setAllowedPlacement().
 
         distanceFromTarget is the amount of space to leave between the bubble and the
@@ -131,17 +131,17 @@ public:
                       int distanceFromTarget = 15, int arrowLength = 10);
 
     //==============================================================================
-    /** A set of colour IDs to use to change the colour of various aspects of the bubble component.
+    /** A set of color IDs to use to change the color of various aspects of the bubble component.
 
-        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        These constants can be used either via the Component::setColor(), or LookAndFeel::setColor()
         methods.
 
-        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+        @see Component::setColor, Component::findColor, LookAndFeel::setColor, LookAndFeel::findColor
     */
-    enum ColourIds
+    enum ColorIds
     {
-        backgroundColourId            = 0x1000af0, /**< A background colour to fill the bubble with. */
-        outlineColourId               = 0x1000af1  /**< The colour to use for an outline around the bubble. */
+        backgroundColorId            = 0x1000af0, /**< A background color to fill the bubble with. */
+        outlineColorId               = 0x1000af1  /**< The color to use for an outline around the bubble. */
     };
 
 

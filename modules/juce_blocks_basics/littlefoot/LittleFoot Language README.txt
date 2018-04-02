@@ -17,7 +17,7 @@ Comments are the same format as C/C++/java/etc
 So for example:
 
 
-    // global variables. These are initialised to 0 or false when the program is loaded, and
+    // global variables. These are initialized to 0 or false when the program is loaded, and
     // you can't currently provide any other initial values
     int foo, bar;
 
@@ -80,9 +80,9 @@ Depending on the context, there will also be some built-in functions that the
 program can use to do what it needs to do. Currently in the standard Pad BLOCK program,
 you have the following functions available:
 
-    int makeARGB (int alpha, int red, int green, int blue);         // combines a set of 8-bit ARGB values into a 32-bit colour
-    int blendARGB (int baseColour, int overlaidColour);             // blends the overlaid ARGB colour onto the base one and returns the new colour
-    void fillPixel (int rgb, int x, int y);                         // sets a LED colour on the display
+    int makeARGB (int alpha, int red, int green, int blue);         // combines a set of 8-bit ARGB values into a 32-bit color
+    int blendARGB (int baseColor, int overlaidColor);             // blends the overlaid ARGB color onto the base one and returns the new color
+    void fillPixel (int rgb, int x, int y);                         // sets a LED color on the display
     void fillRect (int rgb, int x, int y, int width, int height);   // fills a rectangle on the display
 
 A BLOCKs program needs to provide a repaint() function which the block will call

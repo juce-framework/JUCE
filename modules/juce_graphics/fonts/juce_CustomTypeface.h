@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -62,7 +62,7 @@ public:
 
         @see writeToStream
     */
-    explicit CustomTypeface (InputStream& serialisedTypefaceStream);
+    explicit CustomTypeface (InputStream& serializedTypefaceStream);
 
     /** Destructor. */
     ~CustomTypeface();
@@ -73,7 +73,7 @@ public:
 
     /** Sets the vital statistics for the typeface.
         @param fontFamily the typeface's font family
-        @param ascent     the ascent - this is normalised to a height of 1.0 and this is
+        @param ascent     the ascent - this is normalized to a height of 1.0 and this is
                           the value that will be returned by Typeface::getAscent(). The
                           descent is assumed to be (1.0 - ascent)
         @param isBold     should be true if the typeface is bold
@@ -88,7 +88,7 @@ public:
     /** Sets the vital statistics for the typeface.
         @param fontFamily the typeface's font family
         @param fontStyle  the typeface's font style
-        @param ascent     the ascent - this is normalised to a height of 1.0 and this is
+        @param ascent     the ascent - this is normalized to a height of 1.0 and this is
                           the value that will be returned by Typeface::getAscent(). The
                           descent is assumed to be (1.0 - ascent)
         @param defaultCharacter  the character to be used as a replacement if there's
@@ -99,7 +99,7 @@ public:
 
     /** Adds a glyph to the typeface.
 
-        The path that is passed in is normalised so that the font height is 1.0, and its
+        The path that is passed in is normalized so that the font height is 1.0, and its
         origin is the anchor point of the character on its baseline.
 
         The width is the nominal width of the character, and any extra kerning values that
@@ -129,7 +129,7 @@ public:
     bool writeToStream (OutputStream& outputStream);
 
     //==============================================================================
-    // The following methods implement the basic Typeface behaviour.
+    // The following methods implement the basic Typeface behavior.
     float getAscent() const override;
     float getDescent() const override;
     float getHeightToPointsFactor() const override;

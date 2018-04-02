@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -63,7 +63,7 @@ public:
     /** Destructor. */
     ~OnlineUnlockForm();
 
-    /** This is called when the form is dismissed (either cancelled or when registration
+    /** This is called when the form is dismissed (either canceled or when registration
         succeeds).
         By default it will delete this, but you can override it to do other things.
     */

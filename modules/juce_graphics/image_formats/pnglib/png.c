@@ -1233,7 +1233,7 @@ png_XYZ_from_xy(png_XYZ *XYZ, const png_xy *xy)
     *
     * Notice the last statement of the assumption gives an equation in three of
     * the nine values we want to calculate.  8 more equations come from the
-    * above routine as summarised at the top above (the chromaticity
+    * above routine as summarized at the top above (the chromaticity
     * calculation):
     *
     *    Given: color-x = color-X / (color-X + color-Y + color-Z)
@@ -1915,11 +1915,11 @@ png_icc_check_header(png_const_structrp png_ptr, png_colorspacerp colorspace,
          "PCS illuminant is not D50");
 
    /* The PNG spec requires this:
-    * "If the iCCP chunk is present, the image samples conform to the colour
+    * "If the iCCP chunk is present, the image samples conform to the color
     * space represented by the embedded ICC profile as defined by the
-    * International Color Consortium [ICC]. The colour space of the ICC profile
-    * shall be an RGB colour space for colour images (PNG colour types 2, 3, and
-    * 6), or a greyscale colour space for greyscale images (PNG colour types 0
+    * International Color Consortium [ICC]. The color space of the ICC profile
+    * shall be an RGB color space for color images (PNG color types 2, 3, and
+    * 6), or a grayscale color space for grayscale images (PNG color types 0
     * and 4)."
     *
     * This checking code ensures the embedded profile (on either read or write)
@@ -1934,7 +1934,7 @@ png_icc_check_header(png_const_structrp png_ptr, png_colorspacerp colorspace,
     * must be an error - there is no specification of what it means.  Thus it is
     * almost certainly more correct to ignore the profile.
     */
-   temp = png_get_uint_32(profile+16); /* data colour space field */
+   temp = png_get_uint_32(profile+16); /* data color space field */
    switch (temp)
    {
       case 0x52474220: /* 'RGB ' */
@@ -3096,7 +3096,7 @@ png_fixed(png_const_structrp png_ptr, double fp, png_const_charp)
 /* muldiv functions */
 /* This API takes signed arguments and rounds the result to the nearest
  * integer (or, for a fixed point number - the standard argument - to
- * the nearest .00001).  Overflow and divide by zero are signalled in
+ * the nearest .00001).  Overflow and divide by zero are signaled in
  * the result, a boolean - true on success, false on overflow.
  */
 int

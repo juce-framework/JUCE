@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -30,20 +30,20 @@ namespace juce
 ThreadWithProgressWindow::ThreadWithProgressWindow (const String& title,
                                                     const bool hasProgressBar,
                                                     const bool hasCancelButton,
-                                                    const int cancellingTimeOutMs,
+                                                    const int cancelingTimeOutMs,
                                                     const String& cancelButtonText,
-                                                    Component* componentToCentreAround)
+                                                    Component* componentToCenterAround)
    : Thread ("ThreadWithProgressWindow"),
      progress (0.0),
-     timeOutMsWhenCancelling (cancellingTimeOutMs),
-     wasCancelledByUser (false)
+     timeOutMsWhenCanceling (cancelingTimeOutMs),
+     wasCanceledByUser (false)
 {
     alertWindow.reset (LookAndFeel::getDefaultLookAndFeel()
                            .createAlertWindow (title, {},
                                                cancelButtonText.isEmpty() ? TRANS("Cancel")
                                                                           : cancelButtonText,
                                                {}, {}, AlertWindow::NoIcon, hasCancelButton ? 1 : 0,
-                                               componentToCentreAround));
+                                               componentToCenterAround));
 
     // if there are no buttons, we won't allow the user to interrupt the thread.
     alertWindow->setEscapeKeyCancels (false);
@@ -54,7 +54,7 @@ ThreadWithProgressWindow::ThreadWithProgressWindow (const String& title,
 
 ThreadWithProgressWindow::~ThreadWithProgressWindow()
 {
-    stopThread (timeOutMsWhenCancelling);
+    stopThread (timeOutMsWhenCanceling);
 }
 
 void ThreadWithProgressWindow::launchThread (int priority)
@@ -90,11 +90,11 @@ void ThreadWithProgressWindow::timerCallback()
     if (! (threadStillRunning && alertWindow->isCurrentlyModal()))
     {
         stopTimer();
-        stopThread (timeOutMsWhenCancelling);
+        stopThread (timeOutMsWhenCanceling);
         alertWindow->exitModalState (1);
         alertWindow->setVisible (false);
 
-        wasCancelledByUser = threadStillRunning;
+        wasCanceledByUser = threadStillRunning;
         threadComplete (threadStillRunning);
         return; // (this may be deleted now)
     }
@@ -113,7 +113,7 @@ bool ThreadWithProgressWindow::runThread (const int priority)
     while (isTimerRunning())
         MessageManager::getInstance()->runDispatchLoopUntil (5);
 
-    return ! wasCancelledByUser;
+    return ! wasCanceledByUser;
 }
 #endif
 

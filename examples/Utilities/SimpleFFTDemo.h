@@ -92,7 +92,7 @@ public:
     //==============================================================================
     void paint (Graphics& g) override
     {
-        g.fillAll (Colours::black);
+        g.fillAll (Colors::black);
 
         g.setOpacity (1.0f);
         g.drawImage (spectrogramImage, getLocalBounds().toFloat());
@@ -148,7 +148,7 @@ public:
             auto fftDataIndex = jlimit (0, fftSize / 2, (int) (skewedProportionY * fftSize / 2));
             auto level = jmap (fftData[fftDataIndex], 0.0f, jmax (maxLevel.getEnd(), 1e-5f), 0.0f, 1.0f);
 
-            spectrogramImage.setPixelAt (rightHandEdge, y, Colour::fromHSV (level, 1.0f, level, 1.0f));
+            spectrogramImage.setPixelAt (rightHandEdge, y, Color::fromHSV (level, 1.0f, level, 1.0f));
         }
     }
 

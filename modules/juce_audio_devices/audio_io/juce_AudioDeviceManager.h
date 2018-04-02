@@ -44,7 +44,7 @@ namespace juce
     to do just that - the AudioDeviceSelectorComponent class, which contains a set of
     device selection/sample-rate/latency controls.
 
-    To use an AudioDeviceManager, create one, and use initialise() to set it up. Then
+    To use an AudioDeviceManager, create one, and use initialize() to set it up. Then
     call addAudioCallback() to register your audio callback with it, and use that to process
     your audio data.
 
@@ -69,7 +69,7 @@ public:
     //==============================================================================
     /** Creates a default AudioDeviceManager.
 
-        Initially no audio device will be selected. You should call the initialise() method
+        Initially no audio device will be selected. You should call the initialize() method
         and register an audio callback with setAudioCallback() before it'll be able to
         actually make any noise.
     */
@@ -85,7 +85,7 @@ public:
         An AudioDeviceManager uses this class to save/load its current settings, and to
         specify your preferred options when opening a device.
 
-        @see AudioDeviceManager::setAudioDeviceSetup(), AudioDeviceManager::initialise()
+        @see AudioDeviceManager::setAudioDeviceSetup(), AudioDeviceManager::initialize()
     */
     struct JUCE_API  AudioDeviceSetup
     {
@@ -93,7 +93,7 @@ public:
 
             The default constructor sets all the member variables to indicate default values.
             You can then fill-in any values you want to before passing the object to
-            AudioDeviceManager::initialise().
+            AudioDeviceManager::initialize().
         */
         AudioDeviceSetup();
 
@@ -186,7 +186,7 @@ public:
 
         @returns an error message if anything went wrong, or an empty string if it worked ok.
     */
-    String initialise (int numInputChannelsNeeded,
+    String initialize (int numInputChannelsNeeded,
                        int numOutputChannelsNeeded,
                        const XmlElement* savedState,
                        bool selectDefaultDeviceOnFailure,
@@ -194,13 +194,13 @@ public:
                        const AudioDeviceSetup* preferredSetupOptions = nullptr);
 
     /** Resets everything to a default device setup, clearing any stored settings. */
-    String initialiseWithDefaultDevices (int numInputChannelsNeeded,
+    String initializeWithDefaultDevices (int numInputChannelsNeeded,
                                          int numOutputChannelsNeeded);
 
     /** Returns some XML representing the current state of the manager.
 
         This stores the current device, its samplerate, block size, etc, and
-        can be restored later with initialise().
+        can be restored later with initialize().
 
         Note that this can return a null pointer if no settings have been explicitly changed
         (i.e. if the device manager has just been left in its default state).
@@ -227,7 +227,7 @@ public:
                                     will be returned. If it's false, then the device is treated as a
                                     temporary or default device, and a call to createStateXml() will
                                     return either the last settings that were made with treatAsChosenDevice
-                                    as true, or the last XML settings that were passed into initialise().
+                                    as true, or the last XML settings that were passed into initialize().
         @returns an error message if anything went wrong, or an empty string if it worked ok.
 
         @see getAudioDeviceSetup
@@ -444,13 +444,13 @@ public:
     LevelMeter::Ptr getOutputLevelGetter() noexcept         { return outputLevelGetter; }
 
     //==============================================================================
-    /** Returns the a lock that can be used to synchronise access to the audio callback.
+    /** Returns the a lock that can be used to synchronize access to the audio callback.
         Obviously while this is locked, you're blocking the audio thread from running, so
         it must only be used for very brief periods when absolutely necessary.
     */
     CriticalSection& getAudioCallbackLock() noexcept        { return audioCallbackLock; }
 
-    /** Returns the a lock that can be used to synchronise access to the midi callback.
+    /** Returns the a lock that can be used to synchronize access to the midi callback.
         Obviously while this is locked, you're blocking the midi system from running, so
         it must only be used for very brief periods when absolutely necessary.
     */
@@ -529,8 +529,8 @@ private:
     double chooseBestSampleRate (double preferred) const;
     int chooseBestBufferSize (int preferred) const;
     void insertDefaultDeviceNames (AudioDeviceSetup&) const;
-    String initialiseDefault (const String& preferredDefaultDeviceName, const AudioDeviceSetup*);
-    String initialiseFromXML (const XmlElement&, bool selectDefaultDeviceOnFailure,
+    String initializeDefault (const String& preferredDefaultDeviceName, const AudioDeviceSetup*);
+    String initializeFromXML (const XmlElement&, bool selectDefaultDeviceOnFailure,
                               const String& preferredDefaultDeviceName, const AudioDeviceSetup*);
 
     AudioIODeviceType* findType (const String& inputName, const String& outputName);

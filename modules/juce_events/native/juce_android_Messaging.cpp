@@ -123,7 +123,7 @@ private:
 JUCE_IMPLEMENT_SINGLETON (AndroidMessageQueue)
 
 //==============================================================================
-void MessageManager::doPlatformSpecificInitialisation() { AndroidMessageQueue::getInstance(); }
+void MessageManager::doPlatformSpecificInitialization() { AndroidMessageQueue::getInstance(); }
 void MessageManager::doPlatformSpecificShutdown()       { AndroidMessageQueue::deleteInstance(); }
 
 //==============================================================================

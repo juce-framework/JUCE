@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -49,9 +49,9 @@ public:
 
     //==============================================================================
     /** Sets a fill type for the path.
-        This colour is used to fill the path - if you don't want the path to be
+        This color is used to fill the path - if you don't want the path to be
         filled (e.g. if you're just drawing an outline), set this to a transparent
-        colour.
+        color.
 
         @see setPath, setStrokeFill
     */
@@ -74,7 +74,7 @@ public:
 
     /** Changes the properties of the outline that will be drawn around the path.
         If the stroke has 0 thickness, no stroke will be drawn.
-        @see setStrokeThickness, setStrokeColour
+        @see setStrokeThickness, setStrokeColor
     */
     void setStrokeType (const PathStrokeType& newStrokeType);
 
@@ -100,7 +100,7 @@ public:
     /** @internal */
     bool hitTest (int x, int y) override;
     /** @internal */
-    bool replaceColour (Colour originalColour, Colour replacementColour) override;
+    bool replaceColor (Color originalColor, Color replacementColor) override;
     /** @internal */
     Path getOutlineAsPath() const override;
 
@@ -110,7 +110,7 @@ protected:
     void pathChanged();
     /** Called when the cached stroke should be updated. */
     void strokeChanged();
-    /** True if there's a stroke with a non-zero thickness and non-transparent colour. */
+    /** True if there's a stroke with a non-zero thickness and non-transparent color. */
     bool isStrokeVisible() const noexcept;
 
     //==============================================================================

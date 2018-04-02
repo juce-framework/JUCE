@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -34,8 +34,8 @@ public:
     GroupComponentHandler()
         : ComponentTypeHandler ("Group Box", "GroupComponent", typeid (GroupComponent), 200, 150)
     {
-        registerColour (GroupComponent::outlineColourId, "outline", "outlinecol");
-        registerColour (GroupComponent::textColourId, "text", "textcol");
+        registerColor (GroupComponent::outlineColorId, "outline", "outlinecol");
+        registerColor (GroupComponent::textColorId, "text", "textcol");
     }
 
     Component* createNewComponent (JucerDocument*) override
@@ -97,7 +97,7 @@ public:
               << ");\n";
         }
 
-        s << getColourIntialisationCode (component, memberVariableName)
+        s << getColorIntialisationCode (component, memberVariableName)
           << '\n';
 
         code.constructorCode += s;
@@ -117,7 +117,7 @@ public:
             props.add (new GroupJustificationProperty (gc, document));
         }
 
-        addColourProperties (component, document, props);
+        addColorProperties (component, document, props);
     }
 
 private:

@@ -57,7 +57,7 @@ namespace juce
 //==============================================================================
 #if JUCE_IOS || JUCE_LINUX
   /** This will try to break into the debugger if the app is currently being debugged.
-      If called by an app that's not being debugged, the behaviour isn't defined - it may
+      If called by an app that's not being debugged, the behavior isn't defined - it may
       crash or not, depending on the platform.
       @see jassert()
   */
@@ -130,7 +130,7 @@ namespace juce
 
       This macro gets turned into a no-op when you're building with debugging turned off, so be
       careful that the expression you pass to it doesn't perform any actions that are vital for the
-      correct behaviour of your program!
+      correct behavior of your program!
       @see jassertfalse
   */
   #define jassert(expression)       JUCE_BLOCK_WITH_FORCED_SEMICOLON (if (! (expression)) jassertfalse;)
@@ -292,10 +292,10 @@ namespace juce
 //==============================================================================
 #if JUCE_GCC || DOXYGEN
  /** This can be appended to a function declaration to tell gcc to disable associative
-     math optimisations which break some floating point algorithms. */
- #define JUCE_NO_ASSOCIATIVE_MATH_OPTIMISATIONS   __attribute__((__optimize__("no-associative-math")))
+     math optimizations which break some floating point algorithms. */
+ #define JUCE_NO_ASSOCIATIVE_MATH_OPTIMIZATIONS   __attribute__((__optimize__("no-associative-math")))
 #else
- #define JUCE_NO_ASSOCIATIVE_MATH_OPTIMISATIONS
+ #define JUCE_NO_ASSOCIATIVE_MATH_OPTIMIZATIONS
 #endif
 
 } // namespace juce

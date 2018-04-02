@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -58,20 +58,20 @@ public:
     void paintButton (Graphics& g, bool isMouseOverButton, bool /*isButtonDown*/) override
     {
         const Rectangle<float> r (getLocalBounds().toFloat());
-        const Colour buttonColour (0xffA35E93);
+        const Color buttonColor (0xffA35E93);
 
         if (isMouseOverButton)
         {
             if (getStyle() == ImageFitted)
             {
-                hoverBackground->drawWithin (g, r, RectanglePlacement::centred, 1.0);
-                thumb->drawWithin (g, r, RectanglePlacement::centred, 1.0);
+                hoverBackground->drawWithin (g, r, RectanglePlacement::centered, 1.0);
+                thumb->drawWithin (g, r, RectanglePlacement::centered, 1.0);
             }
             else
             {
-                g.setColour (buttonColour.withAlpha (0.3f));
+                g.setColor (buttonColor.withAlpha (0.3f));
                 g.fillRoundedRectangle (r.reduced (2.0f, 2.0f), 10.0f);
-                g.setColour (buttonColour);
+                g.setColor (buttonColor);
                 g.drawRoundedRectangle (r.reduced (2.0f, 2.0f), 10.0f, 2.0f);
             }
         }
@@ -79,11 +79,11 @@ public:
         {
             if (getStyle() == ImageFitted)
             {
-                thumb->drawWithin (g, r, RectanglePlacement::centred, 1.0);
+                thumb->drawWithin (g, r, RectanglePlacement::centered, 1.0);
             }
             else
             {
-                g.setColour (buttonColour);
+                g.setColor (buttonColor);
                 g.drawRoundedRectangle (r.reduced (2.0f, 2.0f), 10.0f, 2.0f);
             }
         }
@@ -97,17 +97,17 @@ public:
         }
         else
         {
-            textTarget = RectanglePlacement (RectanglePlacement::centred).appliedTo (thumb->getDrawableBounds(), r);
+            textTarget = RectanglePlacement (RectanglePlacement::centered).appliedTo (thumb->getDrawableBounds(), r);
             textTarget = textTarget.removeFromBottom (textTarget.getHeight() * 0.3f);
         }
 
-        g.setColour (findColour (defaultTextColourId));
-        g.drawText (name, textTarget, Justification::centred, true);
+        g.setColor (findColor (defaultTextColorId));
+        g.drawText (name, textTarget, Justification::centered, true);
     }
 
     void resized() override
     {
-        thumb->setBoundsToFit (getLocalBounds(), Justification::centred, false);
+        thumb->setBoundsToFit (getLocalBounds(), Justification::centered, false);
     }
 
     void setDescription (String descript) noexcept
@@ -173,21 +173,21 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.setColour (findColour (contentHeaderBackgroundColourId));
+        g.setColor (findColor (contentHeaderBackgroundColorId));
         g.fillRect (getLocalBounds().removeFromTop (60));
 
-        g.setColour (Colours::white);
+        g.setColor (Colors::white);
         g.setFont (20.0f);
-        g.drawText ("Create New Project", 0, 0, getWidth(), 60, Justification::centred, true);
+        g.drawText ("Create New Project", 0, 0, getWidth(), 60, Justification::centered, true);
 
         auto descriptionBox = (getLocalBounds().reduced (30).removeFromBottom (50));
 
-        g.setColour (findColour (defaultTextColourId));
+        g.setColor (findColor (defaultTextColorId));
         g.setFont (15.0f);
 
         for (int i = 0; i < optionButtons.size(); ++i)
             if (optionButtons.getUnchecked(i)->isOver())
-                g.drawFittedText (optionButtons.getUnchecked(i)->getDescription(), descriptionBox, Justification::centredBottom, 5, 1.0f);
+                g.drawFittedText (optionButtons.getUnchecked(i)->getDescription(), descriptionBox, Justification::centeredBottom, 5, 1.0f);
     }
 
     void resized() override

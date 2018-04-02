@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -94,10 +94,10 @@ public:
     enum TextEntryBoxPosition
     {
         NoTextBox,              /**< Doesn't display a text box.  */
-        TextBoxLeft,            /**< Puts the text box to the left of the slider, vertically centred.  */
-        TextBoxRight,           /**< Puts the text box to the right of the slider, vertically centred.  */
-        TextBoxAbove,           /**< Puts the text box above the slider, horizontally centred.  */
-        TextBoxBelow            /**< Puts the text box below the slider, horizontally centred.  */
+        TextBoxLeft,            /**< Puts the text box to the left of the slider, vertically centered.  */
+        TextBoxRight,           /**< Puts the text box to the right of the slider, vertically centered.  */
+        TextBoxAbove,           /**< Puts the text box above the slider, horizontally centered.  */
+        TextBoxBelow            /**< Puts the text box below the slider, horizontally centered.  */
     };
 
     /** Describes the type of mouse-dragging that is happening when a value is being changed.
@@ -267,7 +267,7 @@ public:
     /** Sets up a skew factor to alter the way values are distributed.
 
         This allows you to specify the slider value that should appear in the
-        centre of the slider's visible range.
+        center of the slider's visible range.
 
         @see setSkewFactor, getSkewFactor, isSymmetricSkew
      */
@@ -419,11 +419,11 @@ public:
     */
     void setRange (Range<double> newRange, double newInterval);
 
-    /** Sets a NormalisableRange to use for the Slider values.
+    /** Sets a NormalizableRange to use for the Slider values.
 
-        @param newNormalisableRange     the NormalisableRange to use
+        @param newNormalizableRange     the NormalizableRange to use
     */
-    void setNormalisableRange (NormalisableRange<double> newNormalisableRange);
+    void setNormalizableRange (NormalizableRange<double> newNormalizableRange);
 
     /** Returns the slider's range. */
     Range<double> getRange() const noexcept;
@@ -605,10 +605,10 @@ public:
     /** You can assign a lambda to this callback object to have it called when the slider's drag ends. */
     std::function<void()> onDragEnd;
 
-    /** You can assign a lambda that will be used to convert textual values to the slider's normalised position. */
+    /** You can assign a lambda that will be used to convert textual values to the slider's normalized position. */
     std::function<double (const String&)> valueFromTextFunction;
 
-    /** You can assign a lambda that will be used to convert the slider's normalised position to a textual value. */
+    /** You can assign a lambda that will be used to convert the slider's normalized position to a textual value. */
     std::function<String (double)> textFromValueFunction;
 
     //==============================================================================
@@ -735,7 +735,7 @@ public:
 
     /** Turns the slider's current value into a text string.
 
-        Subclasses can override this to customise the formatting of the text-entry box.
+        Subclasses can override this to customize the formatting of the text-entry box.
 
         The default implementation just turns the value into a string, using
         a number of decimal places based on the range interval. If a suffix string
@@ -845,26 +845,26 @@ public:
     bool isBar() const noexcept;
 
     //==============================================================================
-    /** A set of colour IDs to use to change the colour of various aspects of the slider.
+    /** A set of color IDs to use to change the color of various aspects of the slider.
 
-        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        These constants can be used either via the Component::setColor(), or LookAndFeel::setColor()
         methods.
 
-        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+        @see Component::setColor, Component::findColor, LookAndFeel::setColor, LookAndFeel::findColor
     */
-    enum ColourIds
+    enum ColorIds
     {
-        backgroundColourId          = 0x1001200,  /**< A colour to use to fill the slider's background. */
-        thumbColourId               = 0x1001300,  /**< The colour to draw the thumb with. It's up to the look
+        backgroundColorId          = 0x1001200,  /**< A color to use to fill the slider's background. */
+        thumbColorId               = 0x1001300,  /**< The color to draw the thumb with. It's up to the look
                                                        and feel class how this is used. */
-        trackColourId               = 0x1001310,  /**< The colour to draw the groove that the thumb moves along. */
-        rotarySliderFillColourId    = 0x1001311,  /**< For rotary sliders, this colour fills the outer curve. */
-        rotarySliderOutlineColourId = 0x1001312,  /**< For rotary sliders, this colour is used to draw the outer curve's outline. */
+        trackColorId               = 0x1001310,  /**< The color to draw the groove that the thumb moves along. */
+        rotarySliderFillColorId    = 0x1001311,  /**< For rotary sliders, this color fills the outer curve. */
+        rotarySliderOutlineColorId = 0x1001312,  /**< For rotary sliders, this color is used to draw the outer curve's outline. */
 
-        textBoxTextColourId         = 0x1001400,  /**< The colour for the text in the text-editor box used for editing the value. */
-        textBoxBackgroundColourId   = 0x1001500,  /**< The background colour for the text-editor box. */
-        textBoxHighlightColourId    = 0x1001600,  /**< The text highlight colour for the text-editor box. */
-        textBoxOutlineColourId      = 0x1001700   /**< The colour to use for a border around the text-editor box. */
+        textBoxTextColorId         = 0x1001400,  /**< The color for the text in the text-editor box used for editing the value. */
+        textBoxBackgroundColorId   = 0x1001500,  /**< The background color for the text-editor box. */
+        textBoxHighlightColorId    = 0x1001600,  /**< The text highlight color for the text-editor box. */
+        textBoxOutlineColorId      = 0x1001700   /**< The color to use for a border around the text-editor box. */
     };
 
     //==============================================================================
@@ -962,7 +962,7 @@ public:
     /** @internal */
     void focusOfChildComponentChanged (FocusChangeType) override;
     /** @internal */
-    void colourChanged() override;
+    void colorChanged() override;
     /** @internal */
     void mouseMove (const MouseEvent&) override;
     /** @internal */

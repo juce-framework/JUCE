@@ -45,12 +45,12 @@ Array<JNIClassBase*>& JNIClassBase::getClasses()
     return classes;
 }
 
-void JNIClassBase::initialise (JNIEnv* env)
+void JNIClassBase::initialize (JNIEnv* env)
 {
     classRef = (jclass) env->NewGlobalRef (LocalRef<jobject> (env->FindClass (classPath)));
     jassert (classRef != 0);
 
-    initialiseFields (env);
+    initializeFields (env);
 }
 
 void JNIClassBase::release (JNIEnv* env)
@@ -58,11 +58,11 @@ void JNIClassBase::release (JNIEnv* env)
     env->DeleteGlobalRef (classRef);
 }
 
-void JNIClassBase::initialiseAllClasses (JNIEnv* env)
+void JNIClassBase::initializeAllClasses (JNIEnv* env)
 {
     const Array<JNIClassBase*>& classes = getClasses();
     for (int i = classes.size(); --i >= 0;)
-        classes.getUnchecked(i)->initialise (env);
+        classes.getUnchecked(i)->initialize (env);
 }
 
 void JNIClassBase::releaseAllClasses (JNIEnv* env)
@@ -307,13 +307,13 @@ AndroidSystem::AndroidSystem() : screenWidth (0), screenHeight (0), dpi (160)
 {
 }
 
-void AndroidSystem::initialise (JNIEnv* env, jobject act, jstring file, jstring dataDir)
+void AndroidSystem::initialize (JNIEnv* env, jobject act, jstring file, jstring dataDir)
 {
     setEnv (env);
 
     screenWidth = screenHeight = 0;
     dpi = 160;
-    JNIClassBase::initialiseAllClasses (env);
+    JNIClassBase::initializeAllClasses (env);
 
     activity = GlobalRef (act);
     appFile = juceString (env, file);
@@ -469,7 +469,7 @@ String SystemStats::getUserRegion()      { return AndroidStatsHelpers::getLocale
 String SystemStats::getDisplayLanguage() { return getUserLanguage() + "-" + getUserRegion(); }
 
 //==============================================================================
-void CPUInformation::initialise() noexcept
+void CPUInformation::initialize() noexcept
 {
     numPhysicalCPUs = numLogicalCPUs = jmax ((int) 1, (int) android_getCpuCount());
 

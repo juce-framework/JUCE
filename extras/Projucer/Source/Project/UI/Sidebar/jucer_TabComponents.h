@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -35,12 +35,12 @@ public:
     ConcertinaHeader (String n, Path p)
         : Component (n), name (n), iconPath (p)
     {
-        panelIcon = Icon (iconPath, Colours::white);
+        panelIcon = Icon (iconPath, Colors::white);
 
         nameLabel.setText (name, dontSendNotification);
-        nameLabel.setJustificationType (Justification::centredLeft);
+        nameLabel.setJustificationType (Justification::centeredLeft);
         nameLabel.setInterceptsMouseClicks (false, false);
-        nameLabel.setColour (Label::textColourId, Colours::white);
+        nameLabel.setColor (Label::textColorId, Colors::white);
 
         addAndMakeVisible (nameLabel);
     }
@@ -56,13 +56,13 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.setColour (findColour (defaultButtonBackgroundColourId));
+        g.setColor (findColor (defaultButtonBackgroundColorId));
         g.fillRoundedRectangle (getLocalBounds().reduced (2, 3).toFloat(), 2.0f);
 
-        g.setColour (Colours::white);
+        g.setColor (Colors::white);
         g.fillPath (arrowPath = ProjucerLookAndFeel::getArrowPath (arrowBounds,
                                                                    getParentComponent()->getBoundsInParent().getY() == yPosition ? 2 : 0,
-                                                                   true, Justification::centred));
+                                                                   true, Justification::centered));
 
         panelIcon.draw (g, iconBounds.toFloat(), false);
     }
@@ -121,7 +121,7 @@ public:
         if (! isFocused)
             return;
 
-        g.setColour (findColour (defaultHighlightColourId));
+        g.setColor (findColor (defaultHighlightColorId));
 
         Path p;
         p.addRoundedRectangle (getLocalBounds().reduced (2), 3.0f);
@@ -142,7 +142,7 @@ private:
     //==============================================================================
     void lookAndFeelChanged() override
     {
-        editor.setTextToShowWhenEmpty ("Filter...", findColour (widgetTextColourId).withAlpha (0.3f));
+        editor.setTextToShowWhenEmpty ("Filter...", findColor (widgetTextColorId).withAlpha (0.3f));
     }
 
     void globalFocusChanged (Component* focusedComponent) override

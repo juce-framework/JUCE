@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -137,7 +137,7 @@ private:
 
         void paint (Graphics& g) override
         {
-            g.fillAll (Colours::lightgrey);
+            g.fillAll (Colors::lightgray);
         }
 
         void resized() override
@@ -331,7 +331,7 @@ private:
     }
 
     //==============================================================================
-    void initialised (HWND hWnd)
+    void initialized (HWND hWnd)
     {
         SendMessage (hWnd, BFFM_SETSELECTIONW, TRUE, (LPARAM) initialPath.toWideCharPointer());
         initDialog (hWnd);
@@ -435,7 +435,7 @@ private:
 
         switch (msg)
         {
-            case BFFM_INITIALIZED:       self->initialised (hWnd);                             break;
+            case BFFM_INITIALIZED:       self->initialized (hWnd);                             break;
             case BFFM_VALIDATEFAILEDW:   self->validateFailed (String ((LPCWSTR)     lParam)); break;
             case BFFM_VALIDATEFAILEDA:   self->validateFailed (String ((const char*) lParam)); break;
             default: break;

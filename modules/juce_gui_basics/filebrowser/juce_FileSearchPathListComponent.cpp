@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -36,8 +36,8 @@ FileSearchPathListComponent::FileSearchPathListComponent()
 {
     listBox.setModel (this);
     addAndMakeVisible (listBox);
-    listBox.setColour (ListBox::backgroundColourId, Colours::black.withAlpha (0.02f));
-    listBox.setColour (ListBox::outlineColourId, Colours::black.withAlpha (0.1f));
+    listBox.setColor (ListBox::backgroundColorId, Colors::black.withAlpha (0.02f));
+    listBox.setColor (ListBox::outlineColorId, Colors::black.withAlpha (0.1f));
     listBox.setOutlineThickness (1);
 
     addAndMakeVisible (addButton);
@@ -54,13 +54,13 @@ FileSearchPathListComponent::FileSearchPathListComponent()
     addAndMakeVisible (upButton);
     upButton.onClick = [this] { moveSelection (-1); };
 
-    auto arrowColour = findColour (ListBox::textColourId);
+    auto arrowColor = findColor (ListBox::textColorId);
 
     {
         Path arrowPath;
         arrowPath.addArrow ({ 50.0f, 100.0f, 50.0f, 0.0f }, 40.0f, 100.0f, 50.0f);
         DrawablePath arrowImage;
-        arrowImage.setFill (arrowColour);
+        arrowImage.setFill (arrowColor);
         arrowImage.setPath (arrowPath);
 
         upButton.setImages (&arrowImage);
@@ -73,7 +73,7 @@ FileSearchPathListComponent::FileSearchPathListComponent()
         Path arrowPath;
         arrowPath.addArrow ({ 50.0f, 0.0f, 50.0f, 100.0f }, 40.0f, 100.0f, 50.0f);
         DrawablePath arrowImage;
-        arrowImage.setFill (arrowColour);
+        arrowImage.setFill (arrowColor);
         arrowImage.setPath (arrowPath);
 
         downButton.setImages (&arrowImage);
@@ -127,16 +127,16 @@ int FileSearchPathListComponent::getNumRows()
 void FileSearchPathListComponent::paintListBoxItem (int rowNumber, Graphics& g, int width, int height, bool rowIsSelected)
 {
     if (rowIsSelected)
-        g.fillAll (findColour (TextEditor::highlightColourId));
+        g.fillAll (findColor (TextEditor::highlightColorId));
 
-    g.setColour (findColour (ListBox::textColourId));
+    g.setColor (findColor (ListBox::textColorId));
     Font f (height * 0.7f);
     f.setHorizontalScale (0.9f);
     g.setFont (f);
 
     g.drawText (path[rowNumber].getFullPathName(),
                 4, 0, width - 6, height,
-                Justification::centredLeft, true);
+                Justification::centeredLeft, true);
 }
 
 void FileSearchPathListComponent::deleteKeyPressed (int row)
@@ -176,7 +176,7 @@ void FileSearchPathListComponent::selectedRowsChanged (int)
 
 void FileSearchPathListComponent::paint (Graphics& g)
 {
-    g.fillAll (findColour (backgroundColourId));
+    g.fillAll (findColor (backgroundColorId));
 }
 
 void FileSearchPathListComponent::resized()

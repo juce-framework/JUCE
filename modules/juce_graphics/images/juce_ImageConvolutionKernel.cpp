@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -86,14 +86,14 @@ void ImageConvolutionKernel::rescaleAllValues (const float multiplier)
 void ImageConvolutionKernel::createGaussianBlur (const float radius)
 {
     const double radiusFactor = -1.0 / (radius * radius * 2);
-    const int centre = size >> 1;
+    const int center = size >> 1;
 
     for (int y = size; --y >= 0;)
     {
         for (int x = size; --x >= 0;)
         {
-            auto cx = x - centre;
-            auto cy = y - centre;
+            auto cx = x - center;
+            auto cy = y - center;
 
             values [x + y * size] = (float) std::exp (radiusFactor * (cx * cx + cy * cy));
         }

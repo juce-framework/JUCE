@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -32,7 +32,7 @@ namespace juce
     Represents a type of justification to be used when positioning graphical items.
 
     e.g. it indicates whether something should be placed top-left, top-right,
-    centred, etc.
+    centered, etc.
 
     It is used in various places wherever this kind of information is needed.
 
@@ -68,10 +68,10 @@ public:
     inline bool testFlags (int flagsToTest) const noexcept      { return (flags & flagsToTest) != 0; }
 
     /** Returns just the flags from this object that deal with vertical layout. */
-    int getOnlyVerticalFlags() const noexcept                   { return flags & (top | bottom | verticallyCentred); }
+    int getOnlyVerticalFlags() const noexcept                   { return flags & (top | bottom | verticallyCentered); }
 
     /** Returns just the flags from this object that deal with horizontal layout. */
-    int getOnlyHorizontalFlags() const noexcept                 { return flags & (left | right | horizontallyCentred | horizontallyJustified); }
+    int getOnlyHorizontalFlags() const noexcept                 { return flags & (left | right | horizontallyCentered | horizontallyJustified); }
 
     //==============================================================================
     /** Adjusts the position of a rectangle to fit it into a space.
@@ -84,11 +84,11 @@ public:
                            ValueType spaceX, ValueType spaceY, ValueType spaceW, ValueType spaceH) const noexcept
     {
         x = spaceX;
-        if ((flags & horizontallyCentred) != 0)     x += (spaceW - w) / (ValueType) 2;
+        if ((flags & horizontallyCentered) != 0)     x += (spaceW - w) / (ValueType) 2;
         else if ((flags & right) != 0)              x += spaceW - w;
 
         y = spaceY;
-        if ((flags & verticallyCentred) != 0)       y += (spaceH - h) / (ValueType) 2;
+        if ((flags & verticallyCentered) != 0)       y += (spaceH - h) / (ValueType) 2;
         else if ((flags & bottom) != 0)             y += spaceH - h;
     }
 
@@ -115,9 +115,9 @@ public:
         /** Indicates that the item should be aligned against the right edge of the available space. */
         right                           = 2,
 
-        /** Indicates that the item should be placed in the centre between the left and right
+        /** Indicates that the item should be placed in the center between the left and right
             sides of the available space. */
-        horizontallyCentred             = 4,
+        horizontallyCentered             = 4,
 
         //==============================================================================
         /** Indicates that the item should be aligned against the top edge of the available space. */
@@ -126,9 +126,9 @@ public:
         /** Indicates that the item should be aligned against the bottom edge of the available space. */
         bottom                          = 16,
 
-        /** Indicates that the item should be placed in the centre between the top and bottom
+        /** Indicates that the item should be placed in the center between the top and bottom
             sides of the available space. */
-        verticallyCentred               = 32,
+        verticallyCentered               = 32,
 
         //==============================================================================
         /** Indicates that lines of text should be spread out to fill the maximum width
@@ -137,30 +137,30 @@ public:
         horizontallyJustified           = 64,
 
         //==============================================================================
-        /** Indicates that the item should be centred vertically and horizontally.
-            This is equivalent to (horizontallyCentred | verticallyCentred)
+        /** Indicates that the item should be centered vertically and horizontally.
+            This is equivalent to (horizontallyCentered | verticallyCentered)
         */
-        centred                         = 36,
+        centered                         = 36,
 
-        /** Indicates that the item should be centred vertically but placed on the left hand side.
-            This is equivalent to (left | verticallyCentred)
+        /** Indicates that the item should be centered vertically but placed on the left hand side.
+            This is equivalent to (left | verticallyCentered)
         */
-        centredLeft                     = 33,
+        centeredLeft                     = 33,
 
-        /** Indicates that the item should be centred vertically but placed on the right hand side.
-            This is equivalent to (right | verticallyCentred)
+        /** Indicates that the item should be centered vertically but placed on the right hand side.
+            This is equivalent to (right | verticallyCentered)
         */
-        centredRight                    = 34,
+        centeredRight                    = 34,
 
-        /** Indicates that the item should be centred horizontally and placed at the top.
-            This is equivalent to (horizontallyCentred | top)
+        /** Indicates that the item should be centered horizontally and placed at the top.
+            This is equivalent to (horizontallyCentered | top)
         */
-        centredTop                      = 12,
+        centeredTop                      = 12,
 
-        /** Indicates that the item should be centred horizontally and placed at the bottom.
-            This is equivalent to (horizontallyCentred | bottom)
+        /** Indicates that the item should be centered horizontally and placed at the bottom.
+            This is equivalent to (horizontallyCentered | bottom)
         */
-        centredBottom                   = 20,
+        centeredBottom                   = 20,
 
         /** Indicates that the item should be placed in the top-left corner.
             This is equivalent to (left | top)

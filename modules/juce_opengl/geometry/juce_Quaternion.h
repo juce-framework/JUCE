@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -45,7 +45,7 @@ public:
     /** Creates a quaternion from an angle and an axis. */
     static Quaternion fromAngle (Type angle, Vector3D<Type> axis) noexcept
     {
-        return Quaternion (axis.normalised() * std::sin (angle / (Type) 2), std::cos (angle / (Type) 2));
+        return Quaternion (axis.normalized() * std::sin (angle / (Type) 2), std::cos (angle / (Type) 2));
     }
 
     Quaternion& operator= (Quaternion other) noexcept
@@ -66,7 +66,7 @@ public:
     Type length() const noexcept        { return std::sqrt (normal()); }
     Type normal() const noexcept        { return scalar * scalar + vector.lengthSquared(); }
 
-    Quaternion normalised() const noexcept
+    Quaternion normalized() const noexcept
     {
         const Type len (length());
         jassert (len > 0);

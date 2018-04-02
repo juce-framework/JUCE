@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -175,25 +175,25 @@ private:
 
             void paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown) override
             {
-                Colour background (findColour (CodeEditorComponent::backgroundColourId)
+                Color background (findColor (CodeEditorComponent::backgroundColorId)
                                      .contrasting()
-                                     .overlaidWith (Colours::yellow.withAlpha (0.5f))
+                                     .overlaidWith (Colors::yellow.withAlpha (0.5f))
                                      .withAlpha (0.4f));
-                g.setColour (background);
+                g.setColor (background);
                 g.fillRoundedRectangle (getLocalBounds().toFloat(), 3.0f);
 
                 const Path& path = getIcons().play;
 
-                Colour col (background.contrasting (Colours::lightgreen, 0.6f));
+                Color col (background.contrasting (Colors::lightgreen, 0.6f));
 
                 Rectangle<int> r (getLocalBounds().reduced (getHeight() / 5));
 
                 Icon (path, col.withAlpha (isButtonDown ? 1.0f : (isMouseOverButton ? 0.8f : 0.5f)))
                    .draw (g, r.removeFromLeft (getHeight()).toFloat(), false);
 
-                g.setColour (Colours::white);
+                g.setColor (Colors::white);
                 g.setFont (getHeight() * 0.7f);
-                g.drawFittedText (getName(), r, Justification::centredLeft, 1);
+                g.drawFittedText (getName(), r, Justification::centeredLeft, 1);
             }
 
             void clicked() override
@@ -309,10 +309,10 @@ private:
 
         void paint (Graphics& g) override
         {
-            const auto diagColour = diagnosticType == DiagnosticMessage::Type::error ? Colours::red
-                                                                                     : Colour (200, 200, 64);
+            const auto diagColor = diagnosticType == DiagnosticMessage::Type::error ? Colors::red
+                                                                                     : Color (200, 200, 64);
 
-            g.setColour (diagColour.withAlpha (0.2f));
+            g.setColor (diagColor.withAlpha (0.2f));
             g.fillRect (getLocalBounds().withTrimmedBottom (lineOffset));
 
             Path path;
@@ -321,7 +321,7 @@ private:
                               (arrowXMax + arrowXMin) / 2.0f, (float) lineOffset,
                               (float) arrowXMax, bottomY);
 
-            g.setColour (diagColour.withAlpha (0.8f));
+            g.setColor (diagColor.withAlpha (0.8f));
             g.fillPath (path);
         }
 
@@ -357,12 +357,12 @@ private:
 
             if (end.getPosition() > start.getPosition())
             {
-                Range<int> selection = optimiseSelection ({ start.getPosition(), end.getPosition() });
+                Range<int> selection = optimizeSelection ({ start.getPosition(), end.getPosition() });
 
                 String text = getTextInRange (selection).toLowerCase();
 
                 if (isIntegerLiteral (text) || isFloatLiteral (text))
-                    overlay = new LiteralHighlightOverlay (*this, selection, mightBeColourValue (text));
+                    overlay = new LiteralHighlightOverlay (*this, selection, mightBeColorValue (text));
             }
         }
 
@@ -416,14 +416,14 @@ private:
     static bool isIntegerLiteral (const String& text)   { return CppParserHelpers::parseSingleToken (text) == CPlusPlusCodeTokeniser::tokenType_integer; }
     static bool isFloatLiteral (const String& text)     { return CppParserHelpers::parseSingleToken (text) == CPlusPlusCodeTokeniser::tokenType_float; }
 
-    static bool mightBeColourValue (const String& text)
+    static bool mightBeColorValue (const String& text)
     {
         return isIntegerLiteral (text)
                  && text.trim().startsWith ("0x")
                  && text.trim().length() > 7;
     }
 
-    Range<int> optimiseSelection (Range<int> selection)
+    Range<int> optimizeSelection (Range<int> selection)
     {
         String text (getTextInRange (selection));
 
@@ -450,7 +450,7 @@ private:
     {
     public:
         ControlsComponent (CodeDocument& doc, const Range<int>& selection,
-                           CompileEngineChildProcess* cp, bool showColourSelector)
+                           CompileEngineChildProcess* cp, bool showColorSelector)
             : document (doc),
               start (doc, selection.getStart()),
               end (doc, selection.getEnd()),
@@ -466,9 +466,9 @@ private:
             slider.onValueChange = [this] { updateSliderValue(); };
             slider.onDragEnd = [this] { updateRange(); };
 
-            if (showColourSelector)
+            if (showColorSelector)
             {
-                updateColourSelector();
+                updateColorSelector();
                 selector.setWantsKeyboardFocus (false);
                 selector.setMouseClickGrabsKeyboardFocus (false);
                 addAndMakeVisible (&selector);
@@ -497,7 +497,7 @@ private:
 
     private:
         Slider slider;
-        ColourSelector selector;
+        ColorSelector selector;
 
         CodeDocument& document;
         CodeDocument::Position start, end;
@@ -507,7 +507,7 @@ private:
 
         void paint (Graphics& g) override
         {
-            g.setColour (LiteralHighlightOverlay::getBackgroundColour());
+            g.setColor (LiteralHighlightOverlay::getBackgroundColor());
             g.fillRoundedRectangle (getLocalBounds().toFloat(), 8.0f);
         }
 
@@ -522,29 +522,29 @@ private:
             if (childProcess != nullptr)
                 childProcess->flushEditorChanges();
 
-            updateColourSelector();
+            updateColorSelector();
         }
 
         void changeListenerCallback (ChangeBroadcaster*) override
         {
-            setNewColour (selector.getCurrentColour());
+            setNewColor (selector.getCurrentColor());
         }
 
-        void updateColourSelector()
+        void updateColorSelector()
         {
-            selector.setCurrentColour (getCurrentColour());
+            selector.setCurrentColor (getCurrentColor());
         }
 
-        Colour getCurrentColour() const
+        Color getCurrentColor() const
         {
             int64 val;
             if (CppParserHelpers::parseInt (document.getTextBetween (start, end), val))
-                return Colour ((uint32) val);
+                return Color ((uint32) val);
 
-            return Colours::white;
+            return Colors::white;
         }
 
-        void setNewColour (const Colour& c)
+        void setNewColor (const Color& c)
         {
             const String oldText (document.getTextBetween (start, end));
             const String newText (CppParserHelpers::getReplacementStringInSameFormat (oldText, (int64) c.getARGB()));
@@ -600,11 +600,11 @@ private:
     struct LiteralHighlightOverlay  : public Component,
                                       private CodeDocument::Listener
     {
-        LiteralHighlightOverlay (LiveBuildCodeEditor& e, Range<int> section, bool showColourSelector)
+        LiteralHighlightOverlay (LiveBuildCodeEditor& e, Range<int> section, bool showColorSelector)
             : owner (e),
               start (e.getDocument(), section.getStart()),
               end   (e.getDocument(), section.getEnd()),
-              controls (e.getDocument(), section, e.getChildProcess(), showColourSelector)
+              controls (e.getDocument(), section, e.getChildProcess(), showColorSelector)
         {
             if (e.hasKeyboardFocus (true))
                 previouslyFocused = Component::getCurrentlyFocusedComponent();
@@ -642,7 +642,7 @@ private:
 
         void paint (Graphics& g) override
         {
-            g.setColour (getBackgroundColour());
+            g.setColor (getBackgroundColor());
 
             Rectangle<int> r (getLocalBounds());
             g.fillRect (r.removeFromTop (borderSize));
@@ -674,7 +674,7 @@ private:
         Component::SafePointer<Component> previouslyFocused;
 
         static const int borderSize = 4;
-        static Colour getBackgroundColour() { return Colour (0xcb5c7879); }
+        static Color getBackgroundColor() { return Color (0xcb5c7879); }
     };
 
     ScopedPointer<LiteralHighlightOverlay> overlay;

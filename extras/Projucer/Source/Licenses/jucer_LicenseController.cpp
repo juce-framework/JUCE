@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -125,7 +125,7 @@ LicenseState LicenseController::getState() const noexcept
 
     // if the user has never logged in before and the user is running from command line
     // then we have no way to ask the user to log in, so fallback to GPL mode
-    if (guiNotInitialisedYet
+    if (guiNotInitializedYet
         && (state.type == LicenseState::Type::notLoggedIn
          || state.type == LicenseState::Type::noLicenseChosenYet))
     {
@@ -138,9 +138,9 @@ LicenseState LicenseController::getState() const noexcept
 
 void LicenseController::startWebviewIfNeeded()
 {
-    if (guiNotInitialisedYet)
+    if (guiNotInitializedYet)
     {
-        guiNotInitialisedYet = false;
+        guiNotInitializedYet = false;
         auto stateParam = getState();
         listeners.call ([&] (StateChangedCallback& l) { l.licenseStateChanged (stateParam); });
     }

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -34,7 +34,7 @@ public:
     HyperlinkButtonHandler()
         : ButtonHandler ("Hyperlink Button", "HyperlinkButton", typeid (HyperlinkButton), 150, 24)
     {
-        registerColour (HyperlinkButton::textColourId, "text", "textCol");
+        registerColor (HyperlinkButton::textColorId, "text", "textCol");
     }
 
     Component* createNewComponent (JucerDocument*) override
@@ -56,7 +56,7 @@ public:
         if (auto* hb = dynamic_cast<HyperlinkButton*> (component))
             props.add (new HyperlinkURLProperty (hb, document));
 
-        addColourProperties (component, document, props);
+        addColorProperties (component, document, props);
     }
 
     XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout) override
@@ -93,7 +93,7 @@ public:
     {
         ButtonHandler::fillInCreationCode (code, component, memberVariableName);
 
-        code.constructorCode << getColourIntialisationCode (component, memberVariableName)
+        code.constructorCode << getColorIntialisationCode (component, memberVariableName)
                              << '\n';
     }
 

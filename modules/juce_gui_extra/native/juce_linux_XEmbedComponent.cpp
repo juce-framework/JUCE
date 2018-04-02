@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -424,7 +424,7 @@ private:
             // on which screen it might appear to get a scaling factor :-(
             auto& displays = Desktop::getInstance().getDisplays();
             auto* peer = owner.getPeer();
-            const double scale = (peer != nullptr ? displays.getDisplayContaining (peer->getBounds().getCentre())
+            const double scale = (peer != nullptr ? displays.getDisplayContaining (peer->getBounds().getCenter())
                                   : displays.getMainDisplay()).scale;
 
             Point<int> topLeftInPeer
@@ -594,7 +594,7 @@ private:
         if (auto* peer = owner.getPeer())
         {
             auto r = peer->getComponent().getLocalArea (&owner, owner.getLocalBounds());
-            auto scale = Desktop::getInstance().getDisplays().getDisplayContaining (peer->localToGlobal (r.getCentre())).scale;
+            auto scale = Desktop::getInstance().getDisplays().getDisplayContaining (peer->localToGlobal (r.getCenter())).scale;
 
             return r * scale;
         }
@@ -663,7 +663,7 @@ XEmbedComponent::~XEmbedComponent() {}
 
 void XEmbedComponent::paint (Graphics& g)
 {
-    g.fillAll (Colours::lightgrey);
+    g.fillAll (Colors::lightgray);
 }
 
 void XEmbedComponent::focusGained (FocusChangeType changeType)     { pimpl->focusGained (changeType); }

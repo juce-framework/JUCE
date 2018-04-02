@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -154,7 +154,7 @@ public:
         listBox.setOpaque (false);
         listBox.setMultipleSelectionEnabled (true);
         listBox.setClickingTogglesRowSelection (true);
-        listBox.setColour (ListBox::backgroundColourId, Colours::transparentBlack);
+        listBox.setColor (ListBox::backgroundColorId, Colors::transparentBlack);
         addAndMakeVisible (listBox);
 
         selectDefaultExporterIfNoneSelected();
@@ -203,8 +203,8 @@ public:
         if (auto* platform = platforms[rowNumber])
         {
             auto bounds = getLocalBounds().withHeight (height).withTrimmedBottom (1);
-            g.setColour (findColour (rowNumber % 2 == 0 ? widgetBackgroundColourId
-                                                        : secondaryWidgetBackgroundColourId));
+            g.setColor (findColor (rowNumber % 2 == 0 ? widgetBackgroundColorId
+                                                        : secondaryWidgetBackgroundColorId));
             g.fillRect (bounds);
 
             bounds.removeFromLeft (10);
@@ -218,8 +218,8 @@ public:
                                iconBounds.getHeight(), RectanglePlacement::fillDestination);
 
             bounds.removeFromLeft (10);
-            g.setColour (findColour (widgetTextColourId));
-            g.drawFittedText (platform->name, bounds, Justification::centredLeft, 1);
+            g.setColor (findColor (widgetTextColorId));
+            g.drawFittedText (platform->name, bounds, Justification::centeredLeft, 1);
         }
     }
 
@@ -239,14 +239,14 @@ private:
     {
         auto sideLength = jmin (bounds.getWidth(), bounds.getHeight());
 
-        bounds = bounds.withSizeKeepingCentre (sideLength, sideLength).reduced (4);
+        bounds = bounds.withSizeKeepingCenter (sideLength, sideLength).reduced (4);
 
-        g.setColour (findColour (ToggleButton::tickDisabledColourId));
+        g.setColor (findColor (ToggleButton::tickDisabledColorId));
         g.drawRoundedRectangle (bounds.toFloat(), 2.0f, 1.0f);
 
         if (isToggled)
         {
-            g.setColour (findColour (ToggleButton::tickColourId));
+            g.setColor (findColor (ToggleButton::tickColorId));
             const auto tick = getTickShape (0.75f);
             g.fillPath (tick, tick.getTransformToScaleToFit (bounds.reduced (4, 5).toFloat(), false));
         }
@@ -306,12 +306,12 @@ public:
         projectType.onChange = [this] { updateFileCreationTypes(); };
 
         addChildAndSetID (&fileOutline, "fileOutline");
-        fileOutline.setColour (GroupComponent::outlineColourId, Colours::black.withAlpha (0.2f));
-        fileOutline.setTextLabelPosition (Justification::centred);
+        fileOutline.setColor (GroupComponent::outlineColorId, Colors::black.withAlpha (0.2f));
+        fileOutline.setTextLabelPosition (Justification::centered);
 
         addChildAndSetID (&targetsOutline, "targetsOutline");
-        targetsOutline.setColour (GroupComponent::outlineColourId, Colours::black.withAlpha (0.2f));
-        targetsOutline.setTextLabelPosition (Justification::centred);
+        targetsOutline.setColor (GroupComponent::outlineColorId, Colors::black.withAlpha (0.2f));
+        targetsOutline.setTextLabelPosition (Justification::centered);
 
         addChildAndSetID (&platformTargets, "platformTargets");
 
@@ -340,7 +340,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (findColour (backgroundColourId));
+        g.fillAll (findColor (backgroundColorId));
     }
 
     void resized() override
@@ -493,9 +493,9 @@ private:
 
     void lookAndFeelChanged() override
     {
-        projectName.setColour (TextEditor::backgroundColourId, findColour (backgroundColourId));
-        projectName.setColour (TextEditor::textColourId, findColour (defaultTextColourId));
-        projectName.setColour (TextEditor::outlineColourId, findColour (defaultTextColourId));
+        projectName.setColor (TextEditor::backgroundColorId, findColor (backgroundColorId));
+        projectName.setColor (TextEditor::textColorId, findColor (defaultTextColorId));
+        projectName.setColor (TextEditor::outlineColorId, findColor (defaultTextColorId));
         projectName.applyFontToAllText (projectName.getFont());
 
         fileBrowser.resized();

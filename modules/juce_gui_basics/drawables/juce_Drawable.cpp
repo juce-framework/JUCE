@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -142,13 +142,13 @@ void Drawable::setBoundsToEnclose (Rectangle<float> area)
 }
 
 //==============================================================================
-bool Drawable::replaceColour (Colour original, Colour replacement)
+bool Drawable::replaceColor (Color original, Color replacement)
 {
     bool changed = false;
 
     for (auto* c : getChildren())
         if (auto* d = dynamic_cast<Drawable*> (c))
-            changed = d->replaceColour (original, replacement) || changed;
+            changed = d->replaceColor (original, replacement) || changed;
 
     return changed;
 }

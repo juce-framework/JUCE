@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -35,7 +35,7 @@ DrawableImage::DrawableImage (const DrawableImage& other)
     : Drawable (other),
       image (other.image),
       opacity (other.opacity),
-      overlayColour (other.overlayColour),
+      overlayColor (other.overlayColor),
       bounds (other.bounds)
 {
     setBounds (other.getBounds());
@@ -67,9 +67,9 @@ void DrawableImage::setOpacity (const float newOpacity)
     opacity = newOpacity;
 }
 
-void DrawableImage::setOverlayColour (Colour newOverlayColour)
+void DrawableImage::setOverlayColor (Color newOverlayColor)
 {
-    overlayColour = newOverlayColour;
+    overlayColor = newOverlayColor;
 }
 
 void DrawableImage::setBoundingBox (Rectangle<float> newBounds)
@@ -105,15 +105,15 @@ void DrawableImage::paint (Graphics& g)
 {
     if (image.isValid())
     {
-        if (opacity > 0.0f && ! overlayColour.isOpaque())
+        if (opacity > 0.0f && ! overlayColor.isOpaque())
         {
             g.setOpacity (opacity);
             g.drawImageAt (image, 0, 0, false);
         }
 
-        if (! overlayColour.isTransparent())
+        if (! overlayColor.isTransparent())
         {
-            g.setColour (overlayColour.withMultipliedAlpha (opacity));
+            g.setColor (overlayColor.withMultipliedAlpha (opacity));
             g.drawImageAt (image, 0, 0, true);
         }
     }

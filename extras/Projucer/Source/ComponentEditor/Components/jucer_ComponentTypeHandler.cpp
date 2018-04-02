@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -32,7 +32,7 @@
 #include "../UI/jucer_ComponentOverlayComponent.h"
 #include "jucer_ComponentNameProperty.h"
 #include "../Properties/jucer_PositionPropertyBase.h"
-#include "../Properties/jucer_ComponentColourProperty.h"
+#include "../Properties/jucer_ComponentColorProperty.h"
 #include "../UI/jucer_TestComponent.h"
 
 static String getTypeInfoName (const std::type_info& info)
@@ -167,12 +167,12 @@ XmlElement* ComponentTypeHandler::createXmlFor (Component* comp, const Component
         if (ttc->getTooltip().isNotEmpty())
             e->setAttribute ("tooltip", ttc->getTooltip());
 
-    for (int i = 0; i < colours.size(); ++i)
+    for (int i = 0; i < colors.size(); ++i)
     {
-        if (comp->isColourSpecified (colours[i]->colourId))
+        if (comp->isColorSpecified (colors[i]->colorId))
         {
-            e->setAttribute (colours[i]->xmlTagName,
-                             comp->findColour (colours[i]->colourId).toString());
+            e->setAttribute (colors[i]->xmlTagName,
+                             comp->findColor (colors[i]->colorId).toString());
         }
     }
 
@@ -206,12 +206,12 @@ bool ComponentTypeHandler::restoreFromXml (const XmlElement& xml,
     if (SettableTooltipClient* const ttc = dynamic_cast<SettableTooltipClient*> (comp))
         ttc->setTooltip (xml.getStringAttribute ("tooltip"));
 
-    for (int i = 0; i < colours.size(); ++i)
+    for (int i = 0; i < colors.size(); ++i)
     {
-        const String col (xml.getStringAttribute (colours[i]->xmlTagName, String()));
+        const String col (xml.getStringAttribute (colors[i]->xmlTagName, String()));
 
         if (col.isNotEmpty())
-            comp->setColour (colours[i]->colourId, Colour::fromString (col));
+            comp->setColor (colors[i]->colorId, Color::fromString (col));
     }
 
     return true;
@@ -493,44 +493,44 @@ void ComponentTypeHandler::addPropertiesToPropertyPanel (Component* comp, JucerD
     panel.addSection (getClassName (comp), props);
 }
 
-void ComponentTypeHandler::registerEditableColour (int colourId,
-                                                   const String& colourIdCode,
-                                                   const String& colourName, const String& xmlTagName)
+void ComponentTypeHandler::registerEditableColor (int colorId,
+                                                   const String& colorIdCode,
+                                                   const String& colorName, const String& xmlTagName)
 {
-    ComponentColourInfo* const c = new ComponentColourInfo();
+    ComponentColorInfo* const c = new ComponentColorInfo();
 
-    c->colourId = colourId;
-    c->colourIdCode = colourIdCode;
-    c->colourName = colourName;
+    c->colorId = colorId;
+    c->colorIdCode = colorIdCode;
+    c->colorName = colorName;
     c->xmlTagName = xmlTagName;
 
-    colours.add (c);
+    colors.add (c);
 }
 
-void ComponentTypeHandler::addColourProperties (Component* component,
+void ComponentTypeHandler::addColorProperties (Component* component,
                                                 JucerDocument& document,
                                                 Array<PropertyComponent*>& props)
 {
-    for (int i = 0; i < colours.size(); ++i)
-        props.add (new ComponentColourIdProperty (component, document,
-                                                  colours[i]->colourId,
-                                                  colours[i]->colourName,
+    for (int i = 0; i < colors.size(); ++i)
+        props.add (new ComponentColorIdProperty (component, document,
+                                                  colors[i]->colorId,
+                                                  colors[i]->colorName,
                                                   true));
 }
 
-String ComponentTypeHandler::getColourIntialisationCode (Component* component,
+String ComponentTypeHandler::getColorIntialisationCode (Component* component,
                                                          const String& objectName)
 {
     String s;
 
-    for (int i = 0; i < colours.size(); ++i)
+    for (int i = 0; i < colors.size(); ++i)
     {
-        if (component->isColourSpecified (colours[i]->colourId))
+        if (component->isColorSpecified (colors[i]->colorId))
         {
-            s << objectName << "->setColour ("
-              << colours[i]->colourIdCode
+            s << objectName << "->setColor ("
+              << colors[i]->colorIdCode
               << ", "
-              << CodeHelpers::colourToCode (component->findColour (colours[i]->colourId))
+              << CodeHelpers::colorToCode (component->findColor (colors[i]->colorId))
               << ");\n";
         }
     }

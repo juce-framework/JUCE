@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -44,7 +44,7 @@ class MenuWindow;
 
 static bool canBeTriggered (const PopupMenu::Item& item) noexcept        { return item.isEnabled && item.itemID != 0 && ! item.isSectionHeader; }
 static bool hasActiveSubMenu (const PopupMenu::Item& item) noexcept      { return item.isEnabled && item.subMenu != nullptr && item.subMenu->items.size() > 0; }
-static const Colour* getColour (const PopupMenu::Item& item) noexcept    { return item.colour != Colour() ? &item.colour : nullptr; }
+static const Color* getColor (const PopupMenu::Item& item) noexcept    { return item.color != Color() ? &item.color : nullptr; }
 static bool hasSubMenu (const PopupMenu::Item& item) noexcept            { return item.subMenu != nullptr && (item.itemID == 0 || item.subMenu->getNumItems() > 0); }
 
 //==============================================================================
@@ -121,7 +121,7 @@ struct ItemComponent  : public Component
                                                 item.text,
                                                 item.shortcutKeyDescription,
                                                 item.image.get(),
-                                                getColour (item));
+                                                getColor (item));
     }
 
     void resized() override
@@ -220,7 +220,7 @@ public:
             if (auto* targetComponent = options.getTargetComponent())
                 scaleFactor = getApproximateScaleFactorForTargetComponent (targetComponent);
 
-        setOpaque (lf.findColour (PopupMenu::backgroundColourId).isOpaque()
+        setOpaque (lf.findColor (PopupMenu::backgroundColorId).isOpaque()
                      || ! Desktop::canUseSemiTransparentWindows());
 
         for (int i = 0; i < menu.items.size(); ++i)
@@ -279,7 +279,7 @@ public:
     void paint (Graphics& g) override
     {
         if (isOpaque())
-            g.fillAll (Colours::white);
+            g.fillAll (Colors::white);
 
         getLookAndFeel().drawPopupMenuBackground (g, getWidth(), getHeight());
     }
@@ -612,7 +612,7 @@ public:
 
     void calculateWindowPos (Rectangle<int> target, const bool alignToRectangle)
     {
-        auto parentArea = getParentArea (target.getCentre()) / scaleFactor;
+        auto parentArea = getParentArea (target.getCenter()) / scaleFactor;
 
         if (parentComponent != nullptr)
             target = parentComponent->getLocalArea (nullptr, target).getIntersection (parentArea);
@@ -639,7 +639,7 @@ public:
         }
         else
         {
-            bool tendTowardsRight = target.getCentreX() < parentArea.getCentreX();
+            bool tendTowardsRight = target.getCenterX() < parentArea.getCenterX();
 
             if (parent != nullptr)
             {
@@ -678,7 +678,7 @@ public:
             if (getLookAndFeel().getPopupMenuBorderSize() == 0) // workaround for dismissing the window on mouse up when border size is 0
                 x += tendTowardsRight ? 1 : -1;
 
-            y = target.getCentreY() > parentArea.getCentreY() ? jmax (parentArea.getY(), target.getBottom() - heightToUse)
+            y = target.getCenterY() > parentArea.getCenterY() ? jmax (parentArea.getY(), target.getBottom() - heightToUse)
                                                               : target.getY();
         }
 
@@ -1330,7 +1330,7 @@ PopupMenu::Item::Item (const Item& other)
     customCallback (other.customCallback),
     commandManager (other.commandManager),
     shortcutKeyDescription (other.shortcutKeyDescription),
-    colour (other.colour),
+    color (other.color),
     isEnabled (other.isEnabled),
     isTicked (other.isTicked),
     isSeparator (other.isSeparator),
@@ -1348,7 +1348,7 @@ PopupMenu::Item& PopupMenu::Item::operator= (const Item& other)
     customCallback = other.customCallback;
     commandManager = other.commandManager;
     shortcutKeyDescription = other.shortcutKeyDescription;
-    colour = other.colour;
+    color = other.color;
     isEnabled = other.isEnabled;
     isTicked = other.isTicked;
     isSeparator = other.isSeparator;
@@ -1428,26 +1428,26 @@ void PopupMenu::addCommandItem (ApplicationCommandManager* commandManager,
     }
 }
 
-void PopupMenu::addColouredItem (int itemResultID, const String& itemText, Colour itemTextColour,
+void PopupMenu::addColoredItem (int itemResultID, const String& itemText, Color itemTextColor,
                                  bool isActive, bool isTicked, Drawable* iconToUse)
 {
     Item i;
     i.text = itemText;
     i.itemID = itemResultID;
-    i.colour = itemTextColour;
+    i.color = itemTextColor;
     i.isEnabled = isActive;
     i.isTicked = isTicked;
     i.image.reset (iconToUse);
     addItem (i);
 }
 
-void PopupMenu::addColouredItem (int itemResultID, const String& itemText, Colour itemTextColour,
+void PopupMenu::addColoredItem (int itemResultID, const String& itemText, Color itemTextColor,
                                  bool isActive, bool isTicked, const Image& iconToUse)
 {
     Item i;
     i.text = itemText;
     i.itemID = itemResultID;
-    i.colour = itemTextColour;
+    i.color = itemTextColor;
     i.isEnabled = isActive;
     i.isTicked = isTicked;
     i.image.reset (createDrawableFromImage (iconToUse));

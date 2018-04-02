@@ -79,7 +79,7 @@ bool InterprocessConnection::connectToPipe (const String& pipeName, const int ti
     {
         const ScopedLock sl (pipeAndSocketLock);
         pipeReceiveMessageTimeout = timeoutMs;
-        initialiseWithPipe (newPipe.release());
+        initializeWithPipe (newPipe.release());
         return true;
     }
 
@@ -96,7 +96,7 @@ bool InterprocessConnection::createPipe (const String& pipeName, const int timeo
     {
         const ScopedLock sl (pipeAndSocketLock);
         pipeReceiveMessageTimeout = timeoutMs;
-        initialiseWithPipe (newPipe.release());
+        initializeWithPipe (newPipe.release());
         return true;
     }
 
@@ -176,7 +176,7 @@ int InterprocessConnection::writeData (void* data, int dataSize)
 }
 
 //==============================================================================
-void InterprocessConnection::initialiseWithSocket (StreamingSocket* newSocket)
+void InterprocessConnection::initializeWithSocket (StreamingSocket* newSocket)
 {
     jassert (socket == nullptr && pipe == nullptr);
     socket.reset (newSocket);
@@ -184,7 +184,7 @@ void InterprocessConnection::initialiseWithSocket (StreamingSocket* newSocket)
     thread->startThread();
 }
 
-void InterprocessConnection::initialiseWithPipe (NamedPipe* newPipe)
+void InterprocessConnection::initializeWithPipe (NamedPipe* newPipe)
 {
     jassert (socket == nullptr && pipe == nullptr);
     pipe.reset (newPipe);

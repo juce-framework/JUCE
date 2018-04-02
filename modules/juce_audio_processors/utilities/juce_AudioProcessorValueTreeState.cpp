@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -32,7 +32,7 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
 {
     Parameter (AudioProcessorValueTreeState& s,
                const String& parameterID, const String& paramName, const String& labelText,
-               NormalisableRange<float> r, float defaultVal,
+               NormalizableRange<float> r, float defaultVal,
                std::function<String (float)> valueToText,
                std::function<float (const String&)> textToValue,
                bool meta,
@@ -101,18 +101,18 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
         updateFromValueTree();
     }
 
-    void setUnnormalisedValue (float newUnnormalisedValue)
+    void setUnnormalizedValue (float newUnnormalizedValue)
     {
-        if (value != newUnnormalisedValue)
+        if (value != newUnnormalizedValue)
         {
-            const float newValue = range.convertTo0to1 (newUnnormalisedValue);
+            const float newValue = range.convertTo0to1 (newUnnormalizedValue);
             setValueNotifyingHost (newValue);
         }
     }
 
     void updateFromValueTree()
     {
-        setUnnormalisedValue (state.getProperty (owner.valuePropertyID, defaultValue));
+        setUnnormalizedValue (state.getProperty (owner.valuePropertyID, defaultValue));
     }
 
     void copyValueToValueTree()
@@ -158,7 +158,7 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
     ListenerList<AudioProcessorValueTreeState::Listener> listeners;
     std::function<String (float)> valueToTextFunction;
     std::function<float (const String&)> textToValueFunction;
-    NormalisableRange<float> range;
+    NormalizableRange<float> range;
     float value, defaultValue;
     Atomic<int> needsUpdate;
     bool listenersNeedCalling;
@@ -178,7 +178,7 @@ AudioProcessorValueTreeState::AudioProcessorValueTreeState (AudioProcessor& p, U
 AudioProcessorValueTreeState::~AudioProcessorValueTreeState() {}
 
 AudioProcessorParameterWithID* AudioProcessorValueTreeState::createAndAddParameter (const String& paramID, const String& paramName,
-                                                                                    const String& labelText, NormalisableRange<float> r,
+                                                                                    const String& labelText, NormalizableRange<float> r,
                                                                                     float defaultVal, std::function<String (float)> valueToTextFunction,
                                                                                     std::function<float (const String&)> textToValueFunction,
                                                                                     bool isMetaParameter,
@@ -217,12 +217,12 @@ Value AudioProcessorValueTreeState::getParameterAsValue (StringRef paramID) cons
     return Value();
 }
 
-NormalisableRange<float> AudioProcessorValueTreeState::getParameterRange (StringRef paramID) const noexcept
+NormalizableRange<float> AudioProcessorValueTreeState::getParameterRange (StringRef paramID) const noexcept
 {
     if (Parameter* p = Parameter::getParameterForID (processor, paramID))
         return p->range;
 
-    return NormalisableRange<float>();
+    return NormalizableRange<float>();
 }
 
 AudioProcessorParameterWithID* AudioProcessorValueTreeState::getParameter (StringRef paramID) const noexcept
@@ -355,12 +355,12 @@ struct AttachedControlBase  : public AudioProcessorValueTreeState::Listener,
         state.removeParameterListener (paramID, this);
     }
 
-    void setNewUnnormalisedValue (float newUnnormalisedValue)
+    void setNewUnnormalizedValue (float newUnnormalizedValue)
     {
         if (AudioProcessorParameter* p = state.getParameter (paramID))
         {
             const float newValue = state.getParameterRange (paramID)
-                                        .convertTo0to1 (newUnnormalisedValue);
+                                        .convertTo0to1 (newUnnormalizedValue);
 
             if (p->getValue() != newValue)
                 p->setValueNotifyingHost (newValue);
@@ -421,7 +421,7 @@ struct AudioProcessorValueTreeState::SliderAttachment::Pimpl  : private Attached
     Pimpl (AudioProcessorValueTreeState& s, const String& p, Slider& sl)
         : AttachedControlBase (s, p), slider (sl), ignoreCallbacks (false)
     {
-        NormalisableRange<float> range (state.getParameterRange (paramID));
+        NormalizableRange<float> range (state.getParameterRange (paramID));
 
         if (range.interval != 0 || range.skew != 0)
         {
@@ -432,11 +432,11 @@ struct AudioProcessorValueTreeState::SliderAttachment::Pimpl  : private Attached
         {
             auto convertFrom0To1Function = [range] (double currentRangeStart,
                                                     double currentRangeEnd,
-                                                    double normalisedValue) mutable
+                                                    double normalizedValue) mutable
             {
                 range.start = (float) currentRangeStart;
                 range.end = (float) currentRangeEnd;
-                return (double) range.convertFrom0to1 ((float) normalisedValue);
+                return (double) range.convertFrom0to1 ((float) normalizedValue);
             };
 
             auto convertTo0To1Function = [range] (double currentRangeStart,
@@ -457,7 +457,7 @@ struct AudioProcessorValueTreeState::SliderAttachment::Pimpl  : private Attached
                 return (double) range.snapToLegalValue ((float) valueToSnap);
             };
 
-            slider.setNormalisableRange ({ (double) range.start, (double) range.end,
+            slider.setNormalizableRange ({ (double) range.start, (double) range.end,
                                            convertFrom0To1Function,
                                            convertTo0To1Function,
                                            snapToLegalValueFunction });
@@ -499,7 +499,7 @@ struct AudioProcessorValueTreeState::SliderAttachment::Pimpl  : private Attached
         const ScopedLock selfCallbackLock (selfCallbackMutex);
 
         if ((! ignoreCallbacks) && (! ModifierKeys::getCurrentModifiers().isRightButtonDown()))
-            setNewUnnormalisedValue ((float) s->getValue());
+            setNewUnnormalizedValue ((float) s->getValue());
     }
 
     void sliderDragStarted (Slider*) override { beginParameterChange(); }
@@ -553,7 +553,7 @@ struct AudioProcessorValueTreeState::ComboBoxAttachment::Pimpl  : private Attach
         if (! ignoreCallbacks)
         {
             beginParameterChange();
-            setNewUnnormalisedValue ((float) comboBox->getSelectedId() - 1.0f);
+            setNewUnnormalizedValue ((float) comboBox->getSelectedId() - 1.0f);
             endParameterChange();
         }
     }
@@ -606,7 +606,7 @@ struct AudioProcessorValueTreeState::ButtonAttachment::Pimpl  : private Attached
         if (! ignoreCallbacks)
         {
             beginParameterChange();
-            setNewUnnormalisedValue (b->getToggleState() ? 1.0f : 0.0f);
+            setNewUnnormalizedValue (b->getToggleState() ? 1.0f : 0.0f);
             endParameterChange();
         }
     }

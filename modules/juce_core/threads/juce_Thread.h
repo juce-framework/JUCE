@@ -62,7 +62,7 @@ public:
         You must never attempt to delete a Thread object while it's still running -
         always call stopThread() and make sure your thread has stopped before deleting
         the object. Failing to do so will throw an assertion, and put you firmly into
-        undefined behaviour territory.
+        undefined behavior territory.
     */
     virtual ~Thread();
 
@@ -272,7 +272,7 @@ public:
 
         A negative time-out value means that the method will wait indefinitely.
 
-        @returns    true if the event has been signalled, false if the timeout expires.
+        @returns    true if the event has been signaled, false if the timeout expires.
     */
     bool wait (int timeOutMilliseconds) const;
 

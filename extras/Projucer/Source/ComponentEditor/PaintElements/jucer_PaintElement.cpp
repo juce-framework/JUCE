@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -423,11 +423,11 @@ void PaintElement::paint (Graphics& g)
         if (selected)
         {
             const BorderSize<int> borderSize (border->getBorderThickness());
-            auto baseColour = findColour (defaultHighlightColourId);
+            auto baseColor = findColor (defaultHighlightColorId);
 
             drawResizableBorder (g, getWidth(), getHeight(), borderSize,
                                  (isMouseOverOrDragging() || border->isMouseOverOrDragging()),
-                                 baseColour.withAlpha (owner->getSelectedElements().getSelectedItem (0) == this ? 1.0f : 0.3f));
+                                 baseColor.withAlpha (owner->getSelectedElements().getSelectedItem (0) == this ? 1.0f : 0.3f));
         }
         else if (isMouseOverOrDragging())
         {

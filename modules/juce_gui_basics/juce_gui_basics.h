@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -60,7 +60,7 @@
 //==============================================================================
 /** Config: JUCE_ENABLE_REPAINT_DEBUGGING
     If this option is turned on, each area of the screen that gets repainted will
-    flash in a random colour, so that you can see exactly which bits of your
+    flash in a random color, so that you can see exactly which bits of your
     components are being drawn.
 */
 #ifndef JUCE_ENABLE_REPAINT_DEBUGGING
@@ -198,7 +198,7 @@ namespace juce
 #include "buttons/juce_TextButton.h"
 #include "buttons/juce_ToggleButton.h"
 #include "layout/juce_AnimatedPosition.h"
-#include "layout/juce_AnimatedPositionBehaviours.h"
+#include "layout/juce_AnimatedPositionBehaviors.h"
 #include "layout/juce_ComponentBuilder.h"
 #include "layout/juce_ComponentMovementWatcher.h"
 #include "layout/juce_ConcertinaPanel.h"

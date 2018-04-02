@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -49,7 +49,7 @@ public:
         @param searchRecursively        true to search recursively
         @param deadMansPedalFile        if this isn't File(), then it will be used as a file
                                         to store the names of any plugins that crash during
-                                        initialisation. If there are any plugins listed in it,
+                                        initialization. If there are any plugins listed in it,
                                         then these will always be scanned after all other possible
                                         files have been tried - in this way, even if there's a few
                                         dodgy plugins in your path, then a couple of rescans

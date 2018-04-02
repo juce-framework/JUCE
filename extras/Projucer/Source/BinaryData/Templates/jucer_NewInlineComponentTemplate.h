@@ -21,7 +21,7 @@ public:
     %%component_class%%()
     {
         // In your constructor, you should add any child components, and
-        // initialise any special settings that your component needs.
+        // initialize any special settings that your component needs.
 
     }
 
@@ -38,15 +38,15 @@ public:
            drawing code..
         */
 
-        g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));   // clear the background
+        g.fillAll (getLookAndFeel().findColor (ResizableWindow::backgroundColorId));   // clear the background
 
-        g.setColour (Colours::grey);
+        g.setColor (Colors::gray);
         g.drawRect (getLocalBounds(), 1);   // draw an outline around the component
 
-        g.setColour (Colours::white);
+        g.setColor (Colors::white);
         g.setFont (14.0f);
         g.drawText ("%%component_class%%", getLocalBounds(),
-                    Justification::centred, true);   // draw some placeholder text
+                    Justification::centered, true);   // draw some placeholder text
     }
 
     void resized() override

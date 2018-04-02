@@ -101,7 +101,7 @@ public:
     /** You can optionally implement this method to set up your test.
         This method will be called before runTest().
     */
-    virtual void initialise();
+    virtual void initialize();
 
     /** You can optionally implement this method to clear up after your test has been run.
         This method will be called after runTest() has returned.
@@ -315,7 +315,7 @@ private:
     UnitTest objects.
 
     By using a subclass of UnitTestRunner, you can intercept logging messages and
-    perform custom behaviour when each test completes.
+    perform custom behavior when each test completes.
 
     @see UnitTest
 
@@ -402,7 +402,7 @@ public:
 
 protected:
     /** Called when the list of results changes.
-        You can override this to perform some sort of behaviour when results are added.
+        You can override this to perform some sort of behavior when results are added.
     */
     virtual void resultsUpdated();
 

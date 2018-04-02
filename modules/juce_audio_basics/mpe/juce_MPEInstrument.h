@@ -42,13 +42,13 @@ namespace juce
     MPENoteChanged, and MPENoteFinished. Implement such a
     Listener class to react to note changes and trigger some functionality for
     your application that depends on the MPE note state.
-    For example, you can use this class to write an MPE visualiser.
+    For example, you can use this class to write an MPE visualizer.
 
     If you want to write a real-time audio synth with MPE functionality,
-    you should instead use the classes MPESynthesiserBase, which adds
+    you should instead use the classes MPESynthesizerBase, which adds
     the ability to render audio and to manage voices.
 
-    @see MPENote, MPEZoneLayout, MPESynthesiser
+    @see MPENote, MPEZoneLayout, MPESynthesizer
 
     @tags{Audio}
 */
@@ -303,7 +303,7 @@ public:
         master channel. MIDI channels outside of this range will be ignored.
 
         @param pitchbendRange   The note pitchbend range in semitones to use when in legacy mode.
-                                Must be between 0 and 96, otherwise behaviour is undefined.
+                                Must be between 0 and 96, otherwise behavior is undefined.
                                 The default pitchbend range in legacy mode is +/- 2 semitones.
 
         @param channelRange     The range of MIDI channels to use for notes when in legacy mode.

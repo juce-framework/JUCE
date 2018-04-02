@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -70,24 +70,24 @@ const char* const projectItemDragType   = "Project Items";
 const char* const drawableItemDragType  = "Drawable Items";
 const char* const componentItemDragType = "Components";
 
-enum ColourIds
+enum ColorIds
 {
-    backgroundColourId                = 0x2340000,
-    secondaryBackgroundColourId       = 0x2340001,
-    defaultTextColourId               = 0x2340002,
-    widgetTextColourId                = 0x2340003,
-    defaultButtonBackgroundColourId   = 0x2340004,
-    secondaryButtonBackgroundColourId = 0x2340005,
-    userButtonBackgroundColourId      = 0x2340006,
-    defaultIconColourId               = 0x2340007,
-    treeIconColourId                  = 0x2340008,
-    defaultHighlightColourId          = 0x2340009,
-    defaultHighlightedTextColourId    = 0x234000a,
-    codeEditorLineNumberColourId      = 0x234000b,
-    activeTabIconColourId             = 0x234000c,
-    inactiveTabBackgroundColourId     = 0x234000d,
-    inactiveTabIconColourId           = 0x234000e,
-    contentHeaderBackgroundColourId   = 0x234000f,
-    widgetBackgroundColourId          = 0x2340010,
-    secondaryWidgetBackgroundColourId = 0x2340011,
+    backgroundColorId                = 0x2340000,
+    secondaryBackgroundColorId       = 0x2340001,
+    defaultTextColorId               = 0x2340002,
+    widgetTextColorId                = 0x2340003,
+    defaultButtonBackgroundColorId   = 0x2340004,
+    secondaryButtonBackgroundColorId = 0x2340005,
+    userButtonBackgroundColorId      = 0x2340006,
+    defaultIconColorId               = 0x2340007,
+    treeIconColorId                  = 0x2340008,
+    defaultHighlightColorId          = 0x2340009,
+    defaultHighlightedTextColorId    = 0x234000a,
+    codeEditorLineNumberColorId      = 0x234000b,
+    activeTabIconColorId             = 0x234000c,
+    inactiveTabBackgroundColorId     = 0x234000d,
+    inactiveTabIconColorId           = 0x234000e,
+    contentHeaderBackgroundColorId   = 0x234000f,
+    widgetBackgroundColorId          = 0x2340010,
+    secondaryWidgetBackgroundColorId = 0x2340011,
 };

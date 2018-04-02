@@ -149,7 +149,7 @@ private:
     String::CharPointerType input { nullptr };
     bool outOfData = false, errorOccurred = false;
     String lastError, dtdText;
-    StringArray tokenisedDTD;
+    StringArray tokenizedDTD;
     bool needToLoadDTD = false, ignoreEmptyTextElements = true;
     ScopedPointer<InputSource> inputSource;
 

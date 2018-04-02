@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -637,7 +637,7 @@ public:
 
         if (metadataValues.size() > 0)
         {
-            // The meta data should have been sanitised for the AIFF format.
+            // The meta data should have been sanitized for the AIFF format.
             // If it was originally sourced from a WAV file the MetaDataSource
             // key should be removed (or set to "AIFF") once this has been done
             jassert (metadataValues.getValue ("MetaDataSource", "None") != "WAV");
@@ -685,7 +685,7 @@ public:
         {
             // failed to write to disk, so let's try writing the header.
             // If it's just run out of disk space, then if it does manage
-            // to write the header, we'll still have a useable file..
+            // to write the header, we'll still have a usable file..
             writeHeader();
             writeFailed = true;
             return false;

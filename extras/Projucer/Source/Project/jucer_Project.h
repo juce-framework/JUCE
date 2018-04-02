@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -120,7 +120,7 @@ public:
 
     bool shouldDisplaySplashScreen() const               { return displaySplashScreenValue.get(); }
     bool shouldReportAppUsage() const                    { return reportAppUsageValue.get(); }
-    String getSplashScreenColourString() const           { return splashScreenColourValue.get(); }
+    String getSplashScreenColorString() const           { return splashScreenColorValue.get(); }
 
     String getCppStandardString() const                  { return cppStandardValue.get(); }
 
@@ -184,7 +184,7 @@ public:
         Item (const Item& other);
 
         static Item createGroup (Project& project, const String& name, const String& uid, bool isModuleCode);
-        void initialiseMissingProperties();
+        void initializeMissingProperties();
 
         //==============================================================================
         bool isValid() const                            { return state.isValid(); }
@@ -351,7 +351,7 @@ private:
     ValueTree projectRoot  { Ids::JUCERPROJECT };
 
     ValueWithDefault projectNameValue, projectUIDValue, projectTypeValue, versionValue, bundleIdentifierValue, companyNameValue, companyCopyrightValue,
-                     companyWebsiteValue, companyEmailValue, displaySplashScreenValue, reportAppUsageValue, splashScreenColourValue, cppStandardValue,
+                     companyWebsiteValue, companyEmailValue, displaySplashScreenValue, reportAppUsageValue, splashScreenColorValue, cppStandardValue,
                      headerSearchPathsValue, preprocessorDefsValue, userNotesValue, maxBinaryFileSizeValue, includeBinaryDataInAppConfigValue, binaryDataNamespaceValue;
 
     ValueWithDefault buildVSTValue, buildVST3Value, buildAUValue, buildAUv3Value, buildRTASValue, buildAAXValue, buildStandaloneValue,
@@ -380,9 +380,9 @@ private:
     StringPairArray parsedPreprocessorDefs;
 
     //==============================================================================
-    void initialiseProjectValues();
-    void initialiseMainGroup();
-    void initialiseAudioPluginValues();
+    void initializeProjectValues();
+    void initializeMainGroup();
+    void initializeAudioPluginValues();
 
     bool setCppVersionFromOldExporterSettings();
 

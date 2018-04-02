@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -156,7 +156,7 @@ public:
 
     bool restore (OpenGLContext& context, OpenGLFrameBuffer& buffer)
     {
-        if (buffer.initialise (context, width, height))
+        if (buffer.initialize (context, width, height))
         {
             buffer.writePixels (data, Rectangle<int> (width, height));
             return true;
@@ -176,7 +176,7 @@ private:
 OpenGLFrameBuffer::OpenGLFrameBuffer() {}
 OpenGLFrameBuffer::~OpenGLFrameBuffer() {}
 
-bool OpenGLFrameBuffer::initialise (OpenGLContext& context, int width, int height)
+bool OpenGLFrameBuffer::initialize (OpenGLContext& context, int width, int height)
 {
     jassert (context.isActive()); // The context must be active when creating a framebuffer!
 
@@ -189,18 +189,18 @@ bool OpenGLFrameBuffer::initialise (OpenGLContext& context, int width, int heigh
     return pimpl != nullptr;
 }
 
-bool OpenGLFrameBuffer::initialise (OpenGLContext& context, const Image& image)
+bool OpenGLFrameBuffer::initialize (OpenGLContext& context, const Image& image)
 {
     if (! image.isARGB())
-        return initialise (context, image.convertedToFormat (Image::ARGB));
+        return initialize (context, image.convertedToFormat (Image::ARGB));
 
     Image::BitmapData bitmap (image, Image::BitmapData::readOnly);
 
-    return initialise (context, bitmap.width, bitmap.height)
+    return initialize (context, bitmap.width, bitmap.height)
             && writePixels ((const PixelARGB*) bitmap.data, image.getBounds());
 }
 
-bool OpenGLFrameBuffer::initialise (OpenGLFrameBuffer& other)
+bool OpenGLFrameBuffer::initialize (OpenGLFrameBuffer& other)
 {
     auto* p = other.pimpl.get();
 
@@ -212,7 +212,7 @@ bool OpenGLFrameBuffer::initialise (OpenGLFrameBuffer& other)
 
     const Rectangle<int> area (pimpl->width, pimpl->height);
 
-    if (initialise (p->context, area.getWidth(), area.getHeight()))
+    if (initialize (p->context, area.getWidth(), area.getHeight()))
     {
         pimpl->bind();
 
@@ -298,11 +298,11 @@ void OpenGLFrameBuffer::releaseAsRenderingTarget()
         pimpl->unbind();
 }
 
-void OpenGLFrameBuffer::clear (Colour colour)
+void OpenGLFrameBuffer::clear (Color color)
 {
     if (makeCurrentRenderingTarget())
     {
-        OpenGLHelpers::clear (colour);
+        OpenGLHelpers::clear (color);
         releaseAsRenderingTarget();
     }
 }

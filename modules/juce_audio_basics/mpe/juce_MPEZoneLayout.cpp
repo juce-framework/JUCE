@@ -171,7 +171,7 @@ void MPEZoneLayout::processNextMidiBuffer (const MidiBuffer& buffer)
 {
     MidiBuffer::Iterator iter (buffer);
     MidiMessage message;
-    int samplePosition; // not actually used, so no need to initialise.
+    int samplePosition; // not actually used, so no need to initialize.
 
     while (iter.getNextEvent (message, samplePosition))
         processNextMidiEvent (message);
@@ -216,7 +216,7 @@ public:
 
     void runTest() override
     {
-        beginTest ("initialisation");
+        beginTest ("initialization");
         {
             MPEZoneLayout layout;
             expect (! layout.getLowerZone().isActive());

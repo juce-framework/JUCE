@@ -57,11 +57,11 @@ public:
     {
         auto area = getLocalBounds().reduced (2);
 
-        g.setColour (Colours::orange);
+        g.setColor (Colors::orange);
         g.drawRoundedRectangle (area.toFloat(), 10.0f, 2.0f);
 
-        g.setColour (findColour (TextButton::textColourOffId));
-        g.drawFittedText ("Drag Me!", area, Justification::centred, 1);
+        g.setColor (findColor (TextButton::textColorOffId));
+        g.drawFittedText ("Drag Me!", area, Justification::centered, 1);
     }
 
     void resized() override
@@ -97,7 +97,7 @@ struct BallComponent  : public Component
         : position (pos),
           speed (Random::getSystemRandom().nextFloat() *  4.0f - 2.0f,
                  Random::getSystemRandom().nextFloat() * -6.0f - 2.0f),
-          colour (Colours::white)
+          color (Colors::white)
     {
         setSize (20, 20);
         step();
@@ -108,7 +108,7 @@ struct BallComponent  : public Component
         position += speed;
         speed.y += 0.1f;
 
-        setCentrePosition ((int) position.x,
+        setCenterPosition ((int) position.x,
                            (int) position.y);
 
         if (auto* parent = getParentComponent())
@@ -120,15 +120,15 @@ struct BallComponent  : public Component
 
     void paint (Graphics& g) override
     {
-        g.setColour (colour);
+        g.setColor (color);
         g.fillEllipse (2.0f, 2.0f, getWidth() - 4.0f, getHeight() - 4.0f);
 
-        g.setColour (Colours::darkgrey);
+        g.setColor (Colors::darkgray);
         g.drawEllipse (2.0f, 2.0f, getWidth() - 4.0f, getHeight() - 4.0f, 1.0f);
     }
 
     Point<float> position, speed;
-    Colour colour;
+    Color color;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BallComponent)
 };
@@ -160,12 +160,12 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (findColour (ResizableWindow::backgroundColourId));
+        g.fillAll (findColor (ResizableWindow::backgroundColorId));
     }
 
     void resized() override
     {
-        ballGenerator.centreWithSize (80, 50);
+        ballGenerator.centerWithSize (80, 50);
         triggerAnimation();
     }
 
@@ -186,20 +186,20 @@ private:
         Path star1;
         star1.addStar ({}, 5, 20.0f, 50.0f, 0.2f);
         normal.setPath (star1);
-        normal.setFill (Colours::red);
+        normal.setFill (Colors::red);
 
         Path star2;
         star2.addStar ({}, 7, 30.0f, 50.0f, 0.0f);
         over.setPath (star2);
-        over.setFill (Colours::pink);
-        over.setStrokeFill (Colours::black);
+        over.setFill (Colors::pink);
+        over.setStrokeFill (Colors::black);
         over.setStrokeThickness (5.0f);
 
         auto juceIcon = getImageFromAssets ("juce_icon.png");
 
         DrawableImage down;
         down.setImage (juceIcon);
-        down.setOverlayColour (Colours::black.withAlpha (0.3f));
+        down.setOverlayColor (Colors::black.withAlpha (0.3f));
 
         if (Random::getSystemRandom().nextInt (10) > 2)
         {
@@ -215,8 +215,8 @@ private:
 
             if (Random::getSystemRandom().nextBool())
             {
-                d->setColour (DrawableButton::backgroundColourId,   getRandomBrightColour());
-                d->setColour (DrawableButton::backgroundOnColourId, getRandomBrightColour());
+                d->setColor (DrawableButton::backgroundColorId,   getRandomBrightColor());
+                d->setColor (DrawableButton::backgroundOnColorId, getRandomBrightColor());
             }
 
             d->setClickingTogglesState (Random::getSystemRandom().nextBool());
@@ -226,9 +226,9 @@ private:
         auto* b = new ImageButton ("ImageButton");
 
         b->setImages (true, true, true,
-                      juceIcon, 0.7f, Colours::transparentBlack,
-                      juceIcon, 1.0f, getRandomDarkColour()  .withAlpha (0.2f),
-                      juceIcon, 1.0f, getRandomBrightColour().withAlpha (0.8f),
+                      juceIcon, 0.7f, Colors::transparentBlack,
+                      juceIcon, 1.0f, getRandomDarkColor()  .withAlpha (0.2f),
+                      juceIcon, 1.0f, getRandomBrightColor().withAlpha (0.8f),
                       0.5f);
         return b;
     }
@@ -240,9 +240,9 @@ private:
         auto* b = new ImageButton ("ImageButton");
 
         b->setImages (true, true, true,
-                      juceIcon, 1.0f, Colours::transparentBlack,
-                      juceIcon, 1.0f, Colours::white,
-                      juceIcon, 1.0f, Colours::white,
+                      juceIcon, 1.0f, Colors::transparentBlack,
+                      juceIcon, 1.0f, Colors::white,
+                      juceIcon, 1.0f, Colors::white,
                       0.5f);
 
         return b;
@@ -292,7 +292,7 @@ private:
 
         // Randomly generate new balls
         if (Random::getSystemRandom().nextInt (100) < 4)
-            addAndMakeVisible (balls.add (new BallComponent (ballGenerator.getBounds().getCentre().toFloat())));
+            addAndMakeVisible (balls.add (new BallComponent (ballGenerator.getBounds().getCenter().toFloat())));
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AnimationDemo)

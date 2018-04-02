@@ -146,11 +146,11 @@ namespace DSoundLogging
             case MAKE_HRESULT(1, 0x878, 100):   result = "Bad format"; break;
             case E_NOTIMPL:                     result = "Unsupported function"; break;
             case MAKE_HRESULT(1, 0x878, 120):   result = "No driver"; break;
-            case MAKE_HRESULT(1, 0x878, 130):   result = "Already initialised"; break;
+            case MAKE_HRESULT(1, 0x878, 130):   result = "Already initialized"; break;
             case CLASS_E_NOAGGREGATION:         result = "No aggregation"; break;
             case MAKE_HRESULT(1, 0x878, 150):   result = "Buffer lost"; break;
             case MAKE_HRESULT(1, 0x878, 160):   result = "Another app has priority"; break;
-            case MAKE_HRESULT(1, 0x878, 170):   result = "Uninitialised"; break;
+            case MAKE_HRESULT(1, 0x878, 170):   result = "Uninitialized"; break;
             case E_NOINTERFACE:                 result = "No interface"; break;
             case S_OK:                          result = "No error"; break;
             default:                            return "Unknown error: " + String ((int) hr);
@@ -205,7 +205,7 @@ namespace
     DSOUND_FUNCTION (DirectSoundEnumerateW, (LPDSENUMCALLBACKW, LPVOID))
     DSOUND_FUNCTION (DirectSoundCaptureEnumerateW, (LPDSENUMCALLBACKW, LPVOID))
 
-    void initialiseDSoundFunctions()
+    void initializeDSoundFunctions()
     {
         if (dsDirectSoundCreate == nullptr)
         {
@@ -368,7 +368,7 @@ public:
         return error;
     }
 
-    void synchronisePosition()
+    void synchronizePosition()
     {
         if (pOutputBuffer != nullptr)
         {
@@ -624,7 +624,7 @@ public:
         return error;
     }
 
-    void synchronisePosition()
+    void synchronizePosition()
     {
         if (pInputBuffer != nullptr)
         {
@@ -917,10 +917,10 @@ private:
             sleep (5);
 
             for (int i = 0; i < outChans.size(); ++i)
-                outChans.getUnchecked(i)->synchronisePosition();
+                outChans.getUnchecked(i)->synchronizePosition();
 
             for (int i = 0; i < inChans.size(); ++i)
-                inChans.getUnchecked(i)->synchronisePosition();
+                inChans.getUnchecked(i)->synchronizePosition();
         }
     }
 
@@ -1182,10 +1182,10 @@ String DSoundAudioIODevice::openDevice (const BigInteger& inputChannels,
     if (error.isEmpty())
     {
         for (int i = 0; i < outChans.size(); ++i)
-            outChans.getUnchecked(i)->synchronisePosition();
+            outChans.getUnchecked(i)->synchronizePosition();
 
         for (int i = 0; i < inChans.size(); ++i)
-            inChans.getUnchecked(i)->synchronisePosition();
+            inChans.getUnchecked(i)->synchronizePosition();
 
         startThread (9);
         sleep (10);
@@ -1212,7 +1212,7 @@ public:
         : AudioIODeviceType ("DirectSound"),
           DeviceChangeDetector (L"DirectSound")
     {
-        initialiseDSoundFunctions();
+        initializeDSoundFunctions();
     }
 
     void scanForDevices()

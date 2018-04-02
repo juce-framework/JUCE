@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -250,10 +250,10 @@ public:
         bool groupSummary = false;   /**< Optional: if true, then this notification will be a group summary of the group set with groupId.
                                                     Available from Android API 20 or above. */
 
-        Colour accentColour;  /**< Optional: sets accent colour. The default colour will be used if accentColour is not set.
+        Color accentColor;  /**< Optional: sets accent color. The default color will be used if accentColor is not set.
                                              Available from Android API 21 or above. */
-        Colour ledColour;     /**< Optional: Sets the led colour. The hardware will do its best to approximate the colour.
-                                   The default colour will be used if ledColour is not set. */
+        Color ledColor;     /**< Optional: Sets the led color. The hardware will do its best to approximate the color.
+                                   The default color will be used if ledColor is not set. */
 
         /** Allows to control the time the device's led is on and off. */
         struct LedBlinkPattern
@@ -271,7 +271,7 @@ public:
                                            vibrate for two seconds, followed by 3 seconds of no vibration and finally, 4 seconds of
                                            vibration. */
 
-        bool shouldAutoCancel = true; /**< Optional: If true, the notification will be automatically cancelled when a user clicks it in the panel. */
+        bool shouldAutoCancel = true; /**< Optional: If true, the notification will be automatically canceled when a user clicks it in the panel. */
 
         bool localOnly = true;  /**< Optional: whether or not the notification should bridge to other devices.
                                                Available from Android API 20 or above. */
@@ -305,8 +305,8 @@ public:
 
         BadgeIconType badgeIconType = large;
 
-        /** Controls sound and vibration behaviour for group notifications. Available from Android API 26 or above. */
-        enum GroupAlertBehaviour
+        /** Controls sound and vibration behavior for group notifications. Available from Android API 26 or above. */
+        enum GroupAlertBehavior
         {
             alertAll,           /**< both child notifications and group notifications should produce sound and vibration. */
             AlertSummary,       /**< all child notifications in the group should have no sound nor vibration, even
@@ -315,10 +315,10 @@ public:
                                      corresponding notification channel has sounds and vibrations enabled. */
         };
 
-        GroupAlertBehaviour groupAlertBehaviour = alertAll;
+        GroupAlertBehavior groupAlertBehavior = alertAll;
 
         int timeoutAfterMs = 0;    /**< specifies a duration in milliseconds, after which the notification should be
-                                        cancelled, if it is not already canceled. Available from Android API 26 or above. */
+                                        canceled, if it is not already canceled. Available from Android API 26 or above. */
         /**@}*/
     };
 
@@ -407,7 +407,7 @@ public:
         Array<Category> categories;   /**< list of categories the app wants to support */
     };
 
-    /** Initialises push notifications on current device with the settings provided.
+    /** Initializes push notifications on current device with the settings provided.
         Call this on your application startup and on iOS the first time the application starts,
         a user will be presented with a permission request dialog to give push notifications permission.
         Once a user responds, Listener::notificationSettingsReceived() will be called so that
@@ -465,7 +465,7 @@ public:
 
         String description;                 /**< Optional: user visible description of the channel. */
         String groupId;                     /**< Required: group this channel belongs to (see ChannelGroup). */
-        Colour ledColour;                   /**< Optional: sets the led colour for notifications in this channel. */
+        Color ledColor;                   /**< Optional: sets the led color for notifications in this channel. */
         bool bypassDoNotDisturb = false;    /**< Optional: true if notifications in this channel can bypass do not disturb setting. */
         bool canShowBadge = false;          /**< Optional: true if notifications in this channel can show badges in a Launcher application. */
         bool enableLights = false;          /**< Optional: true if notifications in this channel should show lights (subject to hardware support). */

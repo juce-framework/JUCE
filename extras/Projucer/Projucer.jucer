@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="M70qfTRRk" name="Projucer" projectType="guiapp" juceFolder="../../juce"
               jucerVersion="5.3.0" version="5.3.0" bundleIdentifier="com.juce.theprojucer"
-              defines="" splashScreenColour="Dark" displaySplashScreen="0"
+              defines="" splashScreenColor="Dark" displaySplashScreen="0"
               reportAppUsage="0" companyName="ROLI Ltd." companyCopyright="ROLI Ltd."
               cppLanguageStandard="11">
   <EXPORTFORMATS>
@@ -32,7 +32,7 @@
             bigIcon="rv1F4h" vstFolder="">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="Projucer" headerPath=""
-                       libraryPath="" defines="" wholeProgramOptimisation="1" debugInformationFormat="ProgramDatabase"
+                       libraryPath="" defines="" wholeProgramOptimization="1" debugInformationFormat="ProgramDatabase"
                        useRuntimeLibDLL="1"/>
         <CONFIGURATION name="Release" isDebug="0" targetName="Projucer" headerPath=""
                        libraryPath="" useRuntimeLibDLL="0" debugInformationFormat="None"/>
@@ -70,7 +70,7 @@
     <VS2017 targetFolder="Builds/VisualStudio2017" bigIcon="rv1F4h">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="Projucer" useRuntimeLibDLL="0"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Projucer"
+        <CONFIGURATION name="Release" isDebug="0" optimization="3" targetName="Projucer"
                        debugInformationFormat="None" useRuntimeLibDLL="0"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
@@ -111,8 +111,8 @@
               file="Source/Application/Windows/jucer_AboutWindowComponent.h"/>
         <FILE id="cWiY1u" name="jucer_ApplicationUsageDataWindowComponent.h"
               compile="0" resource="0" file="Source/Application/Windows/jucer_ApplicationUsageDataWindowComponent.h"/>
-        <FILE id="gAju2c" name="jucer_EditorColourSchemeWindowComponent.h"
-              compile="0" resource="0" file="Source/Application/Windows/jucer_EditorColourSchemeWindowComponent.h"/>
+        <FILE id="gAju2c" name="jucer_EditorColorSchemeWindowComponent.h"
+              compile="0" resource="0" file="Source/Application/Windows/jucer_EditorColorSchemeWindowComponent.h"/>
         <FILE id="YO9U3v" name="jucer_FloatingToolWindow.h" compile="0" resource="0"
               file="Source/Application/Windows/jucer_FloatingToolWindow.h"/>
         <FILE id="dqgeFF" name="jucer_GlobalPathsWindowComponent.h" compile="0"
@@ -258,10 +258,10 @@
         <FILE id="aUkNL5" name="jucer_PIPMain.cpp" compile="0" resource="1"
               file="Source/BinaryData/Templates/jucer_PIPMain.cpp"/>
       </GROUP>
-      <FILE id="oXM3fR" name="colourscheme_dark.xml" compile="0" resource="1"
-            file="Source/BinaryData/colourscheme_dark.xml"/>
-      <FILE id="ZZ5K4s" name="colourscheme_light.xml" compile="0" resource="1"
-            file="Source/BinaryData/colourscheme_light.xml"/>
+      <FILE id="oXM3fR" name="colorscheme_dark.xml" compile="0" resource="1"
+            file="Source/BinaryData/colorscheme_dark.xml"/>
+      <FILE id="ZZ5K4s" name="colorscheme_light.xml" compile="0" resource="1"
+            file="Source/BinaryData/colorscheme_light.xml"/>
       <FILE id="gjEdBX" name="nothingtoseehere.txt" compile="0" resource="1"
             file="Source/BinaryData/nothingtoseehere.txt"/>
       <FILE id="ckpkjs" name="offlinepage.html" compile="0" resource="1"
@@ -341,10 +341,10 @@
               file="Source/ComponentEditor/Documents/jucer_ComponentDocument.h"/>
       </GROUP>
       <GROUP id="{E7D2D3DF-1623-5F4A-25C7-A413E0E01CA0}" name="PaintElements">
-        <FILE id="x4gzmh" name="jucer_ColouredElement.cpp" compile="1" resource="0"
-              file="Source/ComponentEditor/PaintElements/jucer_ColouredElement.cpp"/>
-        <FILE id="fbsXYA" name="jucer_ColouredElement.h" compile="0" resource="0"
-              file="Source/ComponentEditor/PaintElements/jucer_ColouredElement.h"/>
+        <FILE id="x4gzmh" name="jucer_ColoredElement.cpp" compile="1" resource="0"
+              file="Source/ComponentEditor/PaintElements/jucer_ColoredElement.cpp"/>
+        <FILE id="fbsXYA" name="jucer_ColoredElement.h" compile="0" resource="0"
+              file="Source/ComponentEditor/PaintElements/jucer_ColoredElement.h"/>
         <FILE id="FEKebz" name="jucer_ElementSiblingComponent.h" compile="0"
               resource="0" file="Source/ComponentEditor/PaintElements/jucer_ElementSiblingComponent.h"/>
         <FILE id="OEAia2" name="jucer_FillType.h" compile="0" resource="0"
@@ -385,14 +385,14 @@
               file="Source/ComponentEditor/PaintElements/jucer_StrokeType.h"/>
       </GROUP>
       <GROUP id="{92298E18-53B2-1971-64E3-2212358223B1}" name="Properties">
-        <FILE id="fLr3TV" name="jucer_ColourPropertyComponent.h" compile="0"
-              resource="0" file="Source/ComponentEditor/Properties/jucer_ColourPropertyComponent.h"/>
+        <FILE id="fLr3TV" name="jucer_ColorPropertyComponent.h" compile="0"
+              resource="0" file="Source/ComponentEditor/Properties/jucer_ColorPropertyComponent.h"/>
         <FILE id="TB8fD6" name="jucer_ComponentBooleanProperty.h" compile="0"
               resource="0" file="Source/ComponentEditor/Properties/jucer_ComponentBooleanProperty.h"/>
         <FILE id="NW5DER" name="jucer_ComponentChoiceProperty.h" compile="0"
               resource="0" file="Source/ComponentEditor/Properties/jucer_ComponentChoiceProperty.h"/>
-        <FILE id="dsuebZ" name="jucer_ComponentColourProperty.h" compile="0"
-              resource="0" file="Source/ComponentEditor/Properties/jucer_ComponentColourProperty.h"/>
+        <FILE id="dsuebZ" name="jucer_ComponentColorProperty.h" compile="0"
+              resource="0" file="Source/ComponentEditor/Properties/jucer_ComponentColorProperty.h"/>
         <FILE id="sSiXcs" name="jucer_ComponentTextProperty.h" compile="0"
               resource="0" file="Source/ComponentEditor/Properties/jucer_ComponentTextProperty.h"/>
         <FILE id="J1Oxkr" name="jucer_FilePropertyComponent.h" compile="0"
@@ -615,7 +615,7 @@
               file="Source/Utility/Helpers/jucer_CodeHelpers.cpp"/>
         <FILE id="BAetgk" name="jucer_CodeHelpers.h" compile="0" resource="0"
               file="Source/Utility/Helpers/jucer_CodeHelpers.h"/>
-        <FILE id="T0VJHN" name="jucer_Colours.h" compile="0" resource="0" file="Source/Utility/Helpers/jucer_Colours.h"/>
+        <FILE id="T0VJHN" name="jucer_Colors.h" compile="0" resource="0" file="Source/Utility/Helpers/jucer_Colors.h"/>
         <FILE id="uU5v1P" name="jucer_FileHelpers.cpp" compile="1" resource="0"
               file="Source/Utility/Helpers/jucer_FileHelpers.cpp"/>
         <FILE id="AmiISQ" name="jucer_FileHelpers.h" compile="0" resource="0"
@@ -641,8 +641,8 @@
       </GROUP>
       <GROUP id="{35F9B4BB-E683-1394-4BF2-C8F0C772168F}" name="UI">
         <GROUP id="{FE8C76CF-7C05-EC86-8997-C9941B88670B}" name="PropertyComponents">
-          <FILE id="eleFsw" name="jucer_ColourPropertyComponent.h" compile="0"
-                resource="0" file="Source/Utility/UI/PropertyComponents/jucer_ColourPropertyComponent.h"/>
+          <FILE id="eleFsw" name="jucer_ColorPropertyComponent.h" compile="0"
+                resource="0" file="Source/Utility/UI/PropertyComponents/jucer_ColorPropertyComponent.h"/>
           <FILE id="D0OfLg" name="jucer_DependencyPathPropertyComponent.cpp"
                 compile="1" resource="0" file="Source/Utility/UI/PropertyComponents/jucer_DependencyPathPropertyComponent.cpp"/>
           <FILE id="gcbJOL" name="jucer_DependencyPathPropertyComponent.h" compile="0"

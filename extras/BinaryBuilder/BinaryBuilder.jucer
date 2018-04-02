@@ -9,7 +9,7 @@
                objCExtraSuffix="OeJtJb">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="BinaryBuilder"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="BinaryBuilder"/>
+        <CONFIGURATION name="Release" isDebug="0" optimization="2" targetName="BinaryBuilder"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../modules"/>
@@ -18,7 +18,7 @@
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile" vstFolder="~/SDKs/vstsdk2.4">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="BinaryBuilder" libraryPath="/usr/X11R6/lib/"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="BinaryBuilder"
+        <CONFIGURATION name="Release" isDebug="0" optimization="2" targetName="BinaryBuilder"
                        libraryPath="/usr/X11R6/lib/"/>
       </CONFIGURATIONS>
       <MODULEPATHS>

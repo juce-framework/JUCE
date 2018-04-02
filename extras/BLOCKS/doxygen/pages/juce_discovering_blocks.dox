@@ -9,7 +9,7 @@ This page gives an overview of the classes and methods available to aid BLOCKS d
 Groups of connected Lightpad and Control Blocks are described by a BlockTopology.
 
 A %BlockTopology contains an array of references to Block objects, which provide access to Lightpad and Control %Block functionality, and an array of BlockDeviceConnection objects, which describe the connections between devices.
-Once you have a %BlockTopology you have all the information required to visualise and interact with your Lightpads and Control Blocks.
+Once you have a %BlockTopology you have all the information required to visualize and interact with your Lightpads and Control Blocks.
 For more information about using %Block objects see the @ref the_block_object section.
 
 For Lightpads and Control Blocks a %BlockTopology can be obtained from a PhysicalTopologySource.

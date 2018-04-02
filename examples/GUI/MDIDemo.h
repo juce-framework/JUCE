@@ -179,7 +179,7 @@ public:
         addAndMakeVisible (addNoteButton);
 
         addAndMakeVisible (multiDocumentPanel);
-        multiDocumentPanel.setBackgroundColour (Colours::transparentBlack);
+        multiDocumentPanel.setBackgroundColor (Colors::transparentBlack);
 
         updateLayoutMode();
         addNote ("Notes Demo", "You can drag-and-drop text files onto this page to open them as notes..");
@@ -190,7 +190,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground));
+        g.fillAll (getUIColorIfAvailable (LookAndFeel_V4::ColorScheme::UIColor::windowBackground));
     }
 
     void resized() override
@@ -240,7 +240,7 @@ private:
 
     void updateLayoutMode()
     {
-        multiDocumentPanel.setLayoutMode (showInTabsButton.getToggleState() ? MultiDocumentPanel::MaximisedWindowsWithTabs
+        multiDocumentPanel.setLayoutMode (showInTabsButton.getToggleState() ? MultiDocumentPanel::MaximizedWindowsWithTabs
                                                                             : MultiDocumentPanel::FloatingWindows);
     }
 
@@ -249,7 +249,7 @@ private:
         auto* newNote = new Note (name, content);
         newNote->setSize (200, 200);
 
-        multiDocumentPanel.addDocument (newNote, Colours::lightblue.withAlpha (0.6f), true);
+        multiDocumentPanel.addDocument (newNote, Colors::lightblue.withAlpha (0.6f), true);
     }
 
     void addExistingNotes()

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -38,9 +38,9 @@ public:
     {
     }
 
-    bool initialise()
+    bool initialize()
     {
-        return frameBuffer.initialise (context, width, height);
+        return frameBuffer.initialize (context, width, height);
     }
 
     LowLevelGraphicsContext* createLowLevelContext() override
@@ -60,7 +60,7 @@ public:
         return newImage.getPixelData();
     }
 
-    void initialiseBitmapData (Image::BitmapData& bitmapData, int x, int y, Image::BitmapData::ReadWriteMode mode) override
+    void initializeBitmapData (Image::BitmapData& bitmapData, int x, int y, Image::BitmapData::ReadWriteMode mode) override
     {
         bitmapData.pixelFormat = pixelFormat;
         bitmapData.lineStride  = lineStride;
@@ -68,9 +68,9 @@ public:
 
         switch (mode)
         {
-            case Image::BitmapData::writeOnly:  DataReleaser<Dummy,  Writer>::initialise (frameBuffer, bitmapData, x, y); break;
-            case Image::BitmapData::readOnly:   DataReleaser<Reader, Dummy> ::initialise (frameBuffer, bitmapData, x, y); break;
-            case Image::BitmapData::readWrite:  DataReleaser<Reader, Writer>::initialise (frameBuffer, bitmapData, x, y); break;
+            case Image::BitmapData::writeOnly:  DataReleaser<Dummy,  Writer>::initialize (frameBuffer, bitmapData, x, y); break;
+            case Image::BitmapData::readOnly:   DataReleaser<Reader, Dummy> ::initialize (frameBuffer, bitmapData, x, y); break;
+            case Image::BitmapData::readWrite:  DataReleaser<Reader, Writer>::initialize (frameBuffer, bitmapData, x, y); break;
             default:                            jassertfalse; break;
         }
 
@@ -154,7 +154,7 @@ private:
             writer.write (data);
         }
 
-        static void initialise (OpenGLFrameBuffer& frameBuffer, Image::BitmapData& bitmapData, int x, int y)
+        static void initialize (OpenGLFrameBuffer& frameBuffer, Image::BitmapData& bitmapData, int x, int y)
         {
             auto* r = new DataReleaser (frameBuffer, x, y, bitmapData.width, bitmapData.height);
             bitmapData.dataReleaser.reset (r);
@@ -189,10 +189,10 @@ ImagePixelData::Ptr OpenGLImageType::create (Image::PixelFormat, int width, int 
 
     ScopedPointer<OpenGLFrameBufferImage> im (new OpenGLFrameBufferImage (*currentContext, width, height));
 
-    if (! im->initialise())
+    if (! im->initialize())
         return ImagePixelData::Ptr();
 
-    im->frameBuffer.clear (Colours::transparentBlack);
+    im->frameBuffer.clear (Colors::transparentBlack);
     return im.release();
 }
 

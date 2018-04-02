@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -38,13 +38,13 @@ public:
 
         imageData.allocate ((size_t) lineStride * (size_t) jmax (1, height), clearImage);
 
-        CGColorSpaceRef colourSpace = (format == Image::SingleChannel) ? CGColorSpaceCreateDeviceGray()
+        CGColorSpaceRef colorSpace = (format == Image::SingleChannel) ? CGColorSpaceCreateDeviceGray()
                                                                        : CGColorSpaceCreateDeviceRGB();
 
         context = CGBitmapContextCreate (imageData, (size_t) width, (size_t) height, 8, (size_t) lineStride,
-                                         colourSpace, getCGImageFlags (format));
+                                         colorSpace, getCGImageFlags (format));
 
-        CGColorSpaceRelease (colourSpace);
+        CGColorSpaceRelease (colorSpace);
     }
 
     ~CoreGraphicsImage()
@@ -60,7 +60,7 @@ public:
         return new CoreGraphicsContext (context, height, 1.0f);
     }
 
-    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode) override
+    void initializeBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode) override
     {
         bitmap.data = imageData + x * pixelStride + y * lineStride;
         bitmap.pixelFormat = pixelFormat;
@@ -84,7 +84,7 @@ public:
     ImageType* createType() const override    { return new NativeImageType(); }
 
     //==============================================================================
-    static CGImageRef getCachedImageRef (const Image& juceImage, CGColorSpaceRef colourSpace)
+    static CGImageRef getCachedImageRef (const Image& juceImage, CGColorSpaceRef colorSpace)
     {
         CoreGraphicsImage* const cgim = dynamic_cast<CoreGraphicsImage*> (juceImage.getPixelData());
 
@@ -94,7 +94,7 @@ public:
             return cgim->cachedImageRef;
         }
 
-        CGImageRef ref = createImage (juceImage, colourSpace, false);
+        CGImageRef ref = createImage (juceImage, colorSpace, false);
 
         if (cgim != nullptr)
         {
@@ -105,7 +105,7 @@ public:
         return ref;
     }
 
-    static CGImageRef createImage (const Image& juceImage, CGColorSpaceRef colourSpace, const bool mustOutliveSource)
+    static CGImageRef createImage (const Image& juceImage, CGColorSpaceRef colorSpace, const bool mustOutliveSource)
     {
         const Image::BitmapData srcData (juceImage, Image::BitmapData::readOnly);
         CGDataProviderRef provider;
@@ -125,7 +125,7 @@ public:
                                              (size_t) srcData.height,
                                              8, (size_t) srcData.pixelStride * 8,
                                              (size_t) srcData.lineStride,
-                                             colourSpace, getCGImageFlags (juceImage.getFormat()), provider,
+                                             colorSpace, getCGImageFlags (juceImage.getFormat()), provider,
                                              0, true, kCGRenderingIntentDefault);
 
         CGDataProviderRelease (provider);
@@ -179,8 +179,8 @@ CoreGraphicsContext::CoreGraphicsContext (CGContextRef c, const float h, const f
     CGContextSetAllowsFontSmoothing (context, true);
     CGContextSetShouldAntialias (context, true);
     CGContextSetBlendMode (context, kCGBlendModeNormal);
-    rgbColourSpace = CGColorSpaceCreateDeviceRGB();
-    greyColourSpace = CGColorSpaceCreateDeviceGray();
+    rgbColorSpace = CGColorSpaceCreateDeviceRGB();
+    grayColorSpace = CGColorSpaceCreateDeviceGray();
     setFont (Font());
 }
 
@@ -188,8 +188,8 @@ CoreGraphicsContext::~CoreGraphicsContext()
 {
     CGContextRestoreGState (context);
     CGContextRelease (context);
-    CGColorSpaceRelease (rgbColourSpace);
-    CGColorSpaceRelease (greyColourSpace);
+    CGColorSpaceRelease (rgbColorSpace);
+    CGColorSpaceRelease (grayColorSpace);
 }
 
 //==============================================================================
@@ -292,7 +292,7 @@ void CoreGraphicsContext::clipToImageAlpha (const Image& sourceImage, const Affi
         if (sourceImage.getFormat() != Image::SingleChannel)
             singleChannelImage = sourceImage.convertedToFormat (Image::SingleChannel);
 
-        CGImageRef image = CoreGraphicsImage::createImage (singleChannelImage, greyColourSpace, true);
+        CGImageRef image = CoreGraphicsImage::createImage (singleChannelImage, grayColorSpace, true);
 
         flip();
         AffineTransform t (AffineTransform::verticalFlip (sourceImage.getHeight()).followedBy (transform));
@@ -376,10 +376,10 @@ void CoreGraphicsContext::setFill (const FillType& fillType)
 {
     state->setFill (fillType);
 
-    if (fillType.isColour())
+    if (fillType.isColor())
     {
-        CGContextSetRGBFillColor (context, fillType.colour.getFloatRed(), fillType.colour.getFloatGreen(),
-                                  fillType.colour.getFloatBlue(), fillType.colour.getFloatAlpha());
+        CGContextSetRGBFillColor (context, fillType.color.getFloatRed(), fillType.color.getFloatGreen(),
+                                  fillType.color.getFloatBlue(), fillType.color.getFloatAlpha());
         CGContextSetAlpha (context, 1.0f);
     }
 }
@@ -422,7 +422,7 @@ void CoreGraphicsContext::fillCGRect (const CGRect& cgRect, const bool replaceEx
     }
     else
     {
-        if (state->fillType.isColour())
+        if (state->fillType.isColor())
         {
             CGContextFillRect (context, cgRect);
         }
@@ -447,7 +447,7 @@ void CoreGraphicsContext::fillPath (const Path& path, const AffineTransform& tra
 {
     CGContextSaveGState (context);
 
-    if (state->fillType.isColour())
+    if (state->fillType.isColor())
     {
         flip();
         applyTransform (transform);
@@ -485,8 +485,8 @@ void CoreGraphicsContext::drawImage (const Image& sourceImage, const AffineTrans
 {
     const int iw = sourceImage.getWidth();
     const int ih = sourceImage.getHeight();
-    CGImageRef image = CoreGraphicsImage::getCachedImageRef (sourceImage, sourceImage.getFormat() == Image::PixelFormat::SingleChannel ? greyColourSpace
-                                                                                                                                       : rgbColourSpace);
+    CGImageRef image = CoreGraphicsImage::getCachedImageRef (sourceImage, sourceImage.getFormat() == Image::PixelFormat::SingleChannel ? grayColorSpace
+                                                                                                                                       : rgbColorSpace);
 
     CGContextSaveGState (context);
     CGContextSetAlpha (context, state->fillType.getOpacity());
@@ -540,13 +540,13 @@ void CoreGraphicsContext::drawImage (const Image& sourceImage, const AffineTrans
 //==============================================================================
 void CoreGraphicsContext::drawLine (const Line<float>& line)
 {
-    if (state->fillType.isColour())
+    if (state->fillType.isColor())
     {
         CGContextSetLineCap (context, kCGLineCapSquare);
         CGContextSetLineWidth (context, 1.0f);
         CGContextSetRGBStrokeColor (context,
-                                    state->fillType.colour.getFloatRed(), state->fillType.colour.getFloatGreen(),
-                                    state->fillType.colour.getFloatBlue(), state->fillType.colour.getFloatAlpha());
+                                    state->fillType.color.getFloatRed(), state->fillType.color.getFloatGreen(),
+                                    state->fillType.color.getFloatBlue(), state->fillType.color.getFloatAlpha());
 
         CGPoint cgLine[] = { { (CGFloat) line.getStartX(), flipHeight - (CGFloat) line.getStartY() },
                              { (CGFloat) line.getEndX(),   flipHeight - (CGFloat) line.getEndY()   } };
@@ -570,7 +570,7 @@ void CoreGraphicsContext::fillRectList (const RectangleList<float>& list)
     for (auto& r : list)
         rects[num++] = CGRectMake (r.getX(), flipHeight - r.getBottom(), r.getWidth(), r.getHeight());
 
-    if (state->fillType.isColour())
+    if (state->fillType.isColor())
     {
         CGContextFillRects (context, rects, num);
     }
@@ -617,7 +617,7 @@ const Font& CoreGraphicsContext::getFont()
 
 void CoreGraphicsContext::drawGlyph (int glyphNumber, const AffineTransform& transform)
 {
-    if (state->fontRef != 0 && state->fillType.isColour())
+    if (state->fontRef != 0 && state->fillType.isColor())
     {
        #if JUCE_CLANG
         #pragma clang diagnostic push
@@ -704,29 +704,29 @@ void CoreGraphicsContext::SavedState::setFill (const FillType& newFill)
     }
 }
 
-static CGGradientRef createGradient (const ColourGradient& g, CGColorSpaceRef colourSpace)
+static CGGradientRef createGradient (const ColorGradient& g, CGColorSpaceRef colorSpace)
 {
-    const int numColours = g.getNumColours();
-    CGFloat* const data = (CGFloat*) alloca ((size_t) numColours * 5 * sizeof (CGFloat));
+    const int numColors = g.getNumColors();
+    CGFloat* const data = (CGFloat*) alloca ((size_t) numColors * 5 * sizeof (CGFloat));
     CGFloat* const locations = data;
-    CGFloat* const components = data + numColours;
+    CGFloat* const components = data + numColors;
     CGFloat* comps = components;
 
-    for (int i = 0; i < numColours; ++i)
+    for (int i = 0; i < numColors; ++i)
     {
-        const Colour colour (g.getColour (i));
-        *comps++ = (CGFloat) colour.getFloatRed();
-        *comps++ = (CGFloat) colour.getFloatGreen();
-        *comps++ = (CGFloat) colour.getFloatBlue();
-        *comps++ = (CGFloat) colour.getFloatAlpha();
-        locations[i] = (CGFloat) g.getColourPosition (i);
+        const Color color (g.getColor (i));
+        *comps++ = (CGFloat) color.getFloatRed();
+        *comps++ = (CGFloat) color.getFloatGreen();
+        *comps++ = (CGFloat) color.getFloatBlue();
+        *comps++ = (CGFloat) color.getFloatAlpha();
+        locations[i] = (CGFloat) g.getColorPosition (i);
 
         // There's a bug (?) in the way the CG renderer works where it seems
-        // to go wrong if you have two colour stops both at position 0..
+        // to go wrong if you have two color stops both at position 0..
         jassert (i == 0 || locations[i] != 0);
     }
 
-    return CGGradientCreateWithColorComponents (colourSpace, components, locations, (size_t) numColours);
+    return CGGradientCreateWithColorComponents (colorSpace, components, locations, (size_t) numColors);
 }
 
 void CoreGraphicsContext::drawGradient()
@@ -735,7 +735,7 @@ void CoreGraphicsContext::drawGradient()
     applyTransform (state->fillType.transform);
     CGContextSetAlpha (context, state->fillType.getOpacity());
 
-    const ColourGradient& g = *state->fillType.gradient;
+    const ColorGradient& g = *state->fillType.gradient;
 
     CGPoint p1 (convertToCGPoint (g.point1));
     CGPoint p2 (convertToCGPoint (g.point2));
@@ -743,7 +743,7 @@ void CoreGraphicsContext::drawGradient()
     state->fillType.transform.transformPoints (p1.x, p1.y, p2.x, p2.y);
 
     if (state->gradient == 0)
-        state->gradient = createGradient (g, rgbColourSpace);
+        state->gradient = createGradient (g, rgbColorSpace);
 
     if (g.isRadial)
         CGContextDrawRadialGradient (context, state->gradient, p1, 0, p1, g.point1.getDistanceFrom (g.point2),
@@ -896,10 +896,10 @@ Image juce_createImageFromCIImage (CIImage* im, int w, int h)
     return Image (cgImage);
 }
 
-CGImageRef juce_createCoreGraphicsImage (const Image& juceImage, CGColorSpaceRef colourSpace,
+CGImageRef juce_createCoreGraphicsImage (const Image& juceImage, CGColorSpaceRef colorSpace,
                                          const bool mustOutliveSource)
 {
-    return CoreGraphicsImage::createImage (juceImage, colourSpace, mustOutliveSource);
+    return CoreGraphicsImage::createImage (juceImage, colorSpace, mustOutliveSource);
 }
 
 CGContextRef juce_getImageContext (const Image& image)
@@ -934,9 +934,9 @@ CGContextRef juce_getImageContext (const Image& image)
          auto requiredSize = NSMakeSize (image.getWidth() / scaleFactor, image.getHeight() / scaleFactor);
 
          [im setSize: requiredSize];
-         CGColorSpaceRef colourSpace = CGColorSpaceCreateDeviceRGB();
-         CGImageRef imageRef = juce_createCoreGraphicsImage (image, colourSpace, true);
-         CGColorSpaceRelease (colourSpace);
+         CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+         CGImageRef imageRef = juce_createCoreGraphicsImage (image, colorSpace, true);
+         CGColorSpaceRelease (colorSpace);
 
          NSBitmapImageRep* imageRep = [[NSBitmapImageRep alloc] initWithCGImage: imageRef];
          [imageRep setSize: requiredSize];

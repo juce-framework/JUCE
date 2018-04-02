@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -34,7 +34,7 @@ namespace dsp
     impulse response in the frequency domain, using the juce FFT class.
 
     It provides some thread-safe functions to load impulse responses as well,
-    from audio files or memory on the fly without any noticeable artefacts,
+    from audio files or memory on the fly without any noticeable artifacts,
     performing resampling and trimming if necessary.
 
     The processing is equivalent to the time domain convolution done in the
@@ -51,7 +51,7 @@ class JUCE_API  Convolution
 {
 public:
     //==============================================================================
-    /** Initialises an object for performing convolution in the frequency domain. */
+    /** Initializes an object for performing convolution in the frequency domain. */
     Convolution();
 
     /** Destructor. */

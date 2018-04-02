@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -85,15 +85,15 @@ bool JUCEApplication::perform (const InvocationInfo& info)
 
 //==============================================================================
 #if JUCE_MAC
- extern void juce_initialiseMacMainMenu();
+ extern void juce_initializeMacMainMenu();
 #endif
 
-bool JUCEApplication::initialiseApp()
+bool JUCEApplication::initializeApp()
 {
-    if (JUCEApplicationBase::initialiseApp())
+    if (JUCEApplicationBase::initializeApp())
     {
        #if JUCE_MAC
-        juce_initialiseMacMainMenu(); // (needs to get the app's name)
+        juce_initializeMacMainMenu(); // (needs to get the app's name)
        #endif
 
         return true;

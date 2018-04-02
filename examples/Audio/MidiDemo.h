@@ -288,13 +288,13 @@ private:
         void paintListBoxItem (int rowNumber, Graphics &g,
                                int width, int height, bool rowIsSelected) override
         {
-            auto textColour = getLookAndFeel().findColour (ListBox::textColourId);
+            auto textColor = getLookAndFeel().findColor (ListBox::textColorId);
 
             if (rowIsSelected)
-                g.fillAll (textColour.interpolatedWith (getLookAndFeel().findColour (ListBox::backgroundColourId), 0.5));
+                g.fillAll (textColor.interpolatedWith (getLookAndFeel().findColor (ListBox::backgroundColorId), 0.5));
 
 
-            g.setColour (textColour);
+            g.setColor (textColor);
             g.setFont (height * 0.7f);
 
             if (isInput)
@@ -302,14 +302,14 @@ private:
                 if (rowNumber < parent.getNumMidiInputs())
                     g.drawText (parent.getMidiDevice (rowNumber, true)->name,
                                 5, 0, width, height,
-                                Justification::centredLeft, true);
+                                Justification::centeredLeft, true);
             }
             else
             {
                 if (rowNumber < parent.getNumMidiOutputs())
                     g.drawText (parent.getMidiDevice (rowNumber, false)->name,
                                 5, 0, width, height,
-                                Justification::centredLeft, true);
+                                Justification::centeredLeft, true);
             }
         }
 
@@ -458,10 +458,10 @@ private:
     void addLabelAndSetStyle (Label& label)
     {
         label.setFont (Font (15.00f, Font::plain));
-        label.setJustificationType (Justification::centredLeft);
+        label.setJustificationType (Justification::centeredLeft);
         label.setEditable (false, false, false);
-        label.setColour (TextEditor::textColourId, Colours::black);
-        label.setColour (TextEditor::backgroundColourId, Colour (0x00000000));
+        label.setColor (TextEditor::textColorId, Colors::black);
+        label.setColor (TextEditor::backgroundColorId, Color (0x00000000));
 
         addAndMakeVisible (label);
     }

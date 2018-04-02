@@ -200,7 +200,7 @@ public:
     //==============================================================================
     /** Creates a GenericScopedTryLock.
 
-        If acquireLockOnInitialisation is true then as soon as this ScopedTryLock
+        If acquireLockOnInitialization is true then as soon as this ScopedTryLock
         is created, it will attempt to acquire the lock with tryEnter.
 
         You can retry acquiring the lock by calling retryLock.
@@ -214,8 +214,8 @@ public:
 
         @see retryLock, isLocked
     */
-    inline explicit GenericScopedTryLock (const LockType& lock, bool acquireLockOnInitialisation = true) noexcept
-        : lock_ (lock), lockWasSuccessful (acquireLockOnInitialisation && lock.tryEnter()) {}
+    inline explicit GenericScopedTryLock (const LockType& lock, bool acquireLockOnInitialization = true) noexcept
+        : lock_ (lock), lockWasSuccessful (acquireLockOnInitialization && lock.tryEnter()) {}
 
     /** Destructor.
 

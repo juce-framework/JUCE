@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -42,7 +42,7 @@ extern "C"
     // these as callable functions.
     #define LIVE_DLL_FUNCTIONS(X) \
         X (projucer_getVersion,     int, ()) \
-        X (projucer_initialise,     void, (CrashCallbackFunction, QuitCallbackFunction, SetPropertyFunction, GetPropertyFunction, bool setupSignals)) \
+        X (projucer_initialize,     void, (CrashCallbackFunction, QuitCallbackFunction, SetPropertyFunction, GetPropertyFunction, bool setupSignals)) \
         X (projucer_shutdown,       void, ()) \
         X (projucer_createBuilder,  LiveCodeBuilder, (SendMessageFunction, void* userInfo, const char* projectID, const char* cacheFolder)) \
         X (projucer_sendMessage,    void, (LiveCodeBuilder, const void* messageData, size_t messageDataSize)) \

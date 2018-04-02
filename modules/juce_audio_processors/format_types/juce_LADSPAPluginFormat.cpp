@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -281,7 +281,7 @@ public:
 
     LADSPAPluginInstance (const LADSPAModuleHandle::Ptr& m)
         : module (m), plugin (nullptr), handle (nullptr),
-          initialised (false), tempBuffer (1, 1)
+          initialized (false), tempBuffer (1, 1)
     {
         ++insideLADSPACallback;
 
@@ -323,22 +323,22 @@ public:
         if (handle != nullptr && plugin != nullptr && plugin->cleanup != nullptr)
             plugin->cleanup (handle);
 
-        initialised = false;
+        initialized = false;
         module = nullptr;
         plugin = nullptr;
         handle = nullptr;
     }
 
-    void initialise (double initialSampleRate, int initialBlockSize)
+    void initialize (double initialSampleRate, int initialBlockSize)
     {
         setPlayConfigDetails (inputs.size(), outputs.size(), initialSampleRate, initialBlockSize);
 
-        if (initialised || plugin == nullptr || handle == nullptr)
+        if (initialized || plugin == nullptr || handle == nullptr)
             return;
 
-        JUCE_LADSPA_LOG ("Initialising LADSPA: " + name);
+        JUCE_LADSPA_LOG ("Initializing LADSPA: " + name);
 
-        initialised = true;
+        initialized = true;
 
         inputs.clear();
         outputs.clear();
@@ -423,13 +423,13 @@ public:
     {
         setLatencySamples (0);
 
-        initialise (newSampleRate, samplesPerBlockExpected);
+        initialize (newSampleRate, samplesPerBlockExpected);
 
-        if (initialised)
+        if (initialized)
         {
             tempBuffer.setSize (jmax (1, outputs.size()), samplesPerBlockExpected);
 
-            // dodgy hack to force some plugins to initialise the sample rate..
+            // dodgy hack to force some plugins to initialize the sample rate..
             if (auto* firstParam = getParameters()[0])
             {
                 const float old = firstParam->getValue();
@@ -454,7 +454,7 @@ public:
     {
         auto numSamples = buffer.getNumSamples();
 
-        if (initialised && plugin != nullptr && handle != nullptr)
+        if (initialized && plugin != nullptr && handle != nullptr)
         {
             for (int i = 0; i < inputs.size(); ++i)
                 plugin->connect_port (handle, inputs[i],
@@ -590,7 +590,7 @@ private:
     LADSPA_Handle handle;
     String name;
     CriticalSection lock;
-    bool initialised;
+    bool initialized;
     AudioBuffer<float> tempBuffer;
     Array<int> inputs, outputs;
 
@@ -618,7 +618,7 @@ void LADSPAPluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& res
     if (instance == nullptr || ! instance->isValid())
         return;
 
-    instance->initialise (44100.0, 512);
+    instance->initialize (44100.0, 512);
 
     instance->fillInPluginDescription (desc);
 
@@ -666,7 +666,7 @@ void LADSPAPluginFormat::createPluginInstance (const PluginDescription& desc,
             result = new LADSPAPluginInstance (module);
 
             if (result->plugin != nullptr && result->isValid())
-                result->initialise (sampleRate, blockSize);
+                result->initialize (sampleRate, blockSize);
             else
                 result = nullptr;
         }

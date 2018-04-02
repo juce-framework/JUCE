@@ -394,7 +394,7 @@ UInt32		AUIOElement::GetChannelLayoutTags (AudioChannelLayoutTag		*outLayoutTags
 // (though in most cases it won't be!!!)
 // The size of the ACL is always returned by the method
 // if outMapPtr is NOT-NULL, then AU should copy into this pointer (outMapPtr) the current ACL that it has in use.
-// the AU should also return whether the property is writable (that is the client can provide any arbitrary ACL that the audio unit will then honour)
+// the AU should also return whether the property is writable (that is the client can provide any arbitrary ACL that the audio unit will then honor)
 // or if the property is read only - which is the generally preferred mode.
 // If the AU doesn't require an AudioChannelLayout, then just return 0.
 UInt32		AUIOElement::GetAudioChannelLayout (AudioChannelLayout		*outMapPtr,

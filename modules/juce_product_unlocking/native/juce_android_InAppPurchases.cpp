@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -819,7 +819,7 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
         switch (statusCode)
         {
             case 0:  return NEEDS_TRANS ("Success");
-            case 1:  return NEEDS_TRANS ("Cancelled by user");
+            case 1:  return NEEDS_TRANS ("Canceled by user");
             case 2:  return NEEDS_TRANS ("Service unavailable");
             case 3:  return NEEDS_TRANS ("Billing unavailable");
             case 4:  return NEEDS_TRANS ("Item unavailable");

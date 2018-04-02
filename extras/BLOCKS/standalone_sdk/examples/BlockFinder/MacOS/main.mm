@@ -26,8 +26,8 @@
 
 int main (int argc, const char * argv[])
 {
-    // Initialise the JUCE code.
-    juce::ScopedJuceInitialiser_GUI platform;
+    // Initialize the JUCE code.
+    juce::ScopedJuceInitializer_GUI platform;
 
     // Create our JUCE object.
     BlockFinder finder;

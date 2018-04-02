@@ -29,7 +29,7 @@ class MyJUCEApp  : public juce::JUCEApplicationBase
 public:
     MyJUCEApp()  {}
     ~MyJUCEApp() {}
-    void initialise (const juce::String&) override {}
+    void initialize (const juce::String&) override {}
     void shutdown() override {}
     const juce::String getApplicationName() override { return "BlockFinder"; }
     const juce::String getApplicationVersion() override { return "1.0.0"; }

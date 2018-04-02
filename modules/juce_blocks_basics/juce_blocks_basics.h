@@ -77,8 +77,8 @@ namespace juce
 #include "topology/juce_TopologySource.h"
 #include "topology/juce_PhysicalTopologySource.h"
 #include "topology/juce_RuleBasedTopologySource.h"
-#include "visualisers/juce_DrumPadLEDProgram.h"
-#include "visualisers/juce_BitmapLEDProgram.h"
+#include "visualizers/juce_DrumPadLEDProgram.h"
+#include "visualizers/juce_BitmapLEDProgram.h"
 
 namespace juce
 {

@@ -180,7 +180,7 @@ StringArray JUCE_CALLTYPE JUCEApplicationBase::getCommandLineParameterArray()
 #endif
 
 #if JUCE_MAC
- extern void initialiseNSApplication();
+ extern void initializeNSApplication();
 #endif
 
 #if JUCE_LINUX && JUCE_MODULE_AVAILABLE_juce_gui_extra && (! defined(JUCE_WEB_BROWSER) || JUCE_WEB_BROWSER)
@@ -225,7 +225,7 @@ int JUCEApplicationBase::main (int argc, const char* argv[])
         juce_argv = argv;
 
        #if JUCE_MAC
-        initialiseNSApplication();
+        initializeNSApplication();
        #endif
 
        #if JUCE_LINUX && JUCE_MODULE_AVAILABLE_juce_gui_extra && (! defined(JUCE_WEB_BROWSER) || JUCE_WEB_BROWSER)
@@ -247,13 +247,13 @@ int JUCEApplicationBase::main (int argc, const char* argv[])
 //==============================================================================
 int JUCEApplicationBase::main()
 {
-    ScopedJuceInitialiser_GUI libraryInitialiser;
+    ScopedJuceInitializer_GUI libraryInitializer;
     jassert (createInstance != nullptr);
 
     const ScopedPointer<JUCEApplicationBase> app (createInstance());
     jassert (app != nullptr);
 
-    if (! app->initialiseApp())
+    if (! app->initializeApp())
         return app->shutdownApp();
 
     JUCE_TRY
@@ -269,7 +269,7 @@ int JUCEApplicationBase::main()
 #endif
 
 //==============================================================================
-bool JUCEApplicationBase::initialiseApp()
+bool JUCEApplicationBase::initializeApp()
 {
    #if JUCE_HANDLE_MULTIPLE_INSTANCES
     if ((! moreThanOneInstanceAllowed()) && sendCommandLineToPreexistingInstance())
@@ -294,9 +294,9 @@ bool JUCEApplicationBase::initialiseApp()
    #endif
 
     // let the app do its setting-up..
-    initialise (getCommandLineParameters());
+    initialize (getCommandLineParameters());
 
-    stillInitialising = false;
+    stillInitializing = false;
 
     if (MessageManager::getInstance()->hasStopMessageBeenSent())
         return false;

@@ -49,7 +49,7 @@ public:
         A MidiInput object will call this method when a midi event arrives. It'll be
         called on a high-priority system thread, so avoid doing anything time-consuming
         in here, and avoid making any UI calls. You might find the MidiBuffer class helpful
-        for queueing incoming messages for use later.
+        for queuing incoming messages for use later.
 
         @param source   the MidiInput object that generated the message
         @param message  the incoming message. The message's timestamp is set to a value

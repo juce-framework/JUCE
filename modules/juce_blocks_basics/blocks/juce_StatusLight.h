@@ -40,8 +40,8 @@ public:
     /** Returns a name to describe this light. */
     virtual juce::String getName() const = 0;
 
-    /** Changes the light's colour. */
-    virtual bool setColour (LEDColour newColour) = 0;
+    /** Changes the light's color. */
+    virtual bool setColor (LEDColor newColor) = 0;
 
     /** The device that this LED belongs to. */
     Block& block;

@@ -266,7 +266,7 @@ void FLAC__window_punchout_tukey(FLAC__real *window, const FLAC__int32 L, const 
 	}
 }
 
-void FLAC__window_welch(FLAC__real *window, const FLAC__int32 L)
+void FLAC__window_welsh(FLAC__real *window, const FLAC__int32 L)
 {
 	const FLAC__int32 N = L - 1;
 	const double N2 = (double)N / 2.;

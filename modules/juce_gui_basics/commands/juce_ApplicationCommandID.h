@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -45,7 +45,7 @@ typedef int CommandID;
     here to help different apps to use the same numeric values for them.
 
     Of course you don't have to use these, but some of them are used internally by
-    JUCE - e.g. the quit ID is recognised as a command by the JUCEApplication class.
+    JUCE - e.g. the quit ID is recognized as a command by the JUCEApplication class.
 
     @see ApplicationCommandInfo, ApplicationCommandManager,
          ApplicationCommandTarget, KeyPressMappingSet
@@ -56,7 +56,7 @@ namespace StandardApplicationCommandIDs
     {
         /** This command ID should be used to send a "Quit the App" command.
 
-            This command is recognised by the JUCEApplication class, so if it is invoked
+            This command is recognized by the JUCEApplication class, so if it is invoked
             and no other ApplicationCommandTarget handles the event first, the JUCEApplication
             object will catch it and call JUCEApplicationBase::systemRequestedQuit().
         */

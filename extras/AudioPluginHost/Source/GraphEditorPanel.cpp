@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -74,9 +74,9 @@ struct GraphEditorPanel::PinComponent   : public Component,
         p.addEllipse (w * 0.25f, h * 0.25f, w * 0.5f, h * 0.5f);
         p.addRectangle (w * 0.4f, isInput ? (0.5f * h) : 0.0f, w * 0.2f, h * 0.5f);
 
-        auto colour = (pin.isMIDI() ? Colours::red : Colours::green);
+        auto color = (pin.isMIDI() ? Colors::red : Colors::green);
 
-        g.setColour (colour.withRotatedHue (busIdx / 5.0f));
+        g.setColor (color.withRotatedHue (busIdx / 5.0f));
         g.fillPath (p);
     }
 
@@ -113,7 +113,7 @@ struct GraphEditorPanel::FilterComponent   : public Component
 {
     FilterComponent (GraphEditorPanel& p, uint32 id)  : panel (p), graph (p.graph), pluginID (id)
     {
-        shadow.setShadowProperties (DropShadow (Colours::black.withAlpha (0.5f), 3, { 0, 1 }));
+        shadow.setShadowProperties (DropShadow (Colors::black.withAlpha (0.5f), 3, { 0, 1 }));
         setComponentEffect (&shadow);
 
         setSize (150, 60);
@@ -141,7 +141,7 @@ struct GraphEditorPanel::FilterComponent   : public Component
             if (getParentComponent() != nullptr)
                 pos = getParentComponent()->getLocalPoint (nullptr, pos);
 
-            pos += getLocalBounds().getCentre();
+            pos += getLocalBounds().getCenter();
 
             graph.setNodePosition (pluginID,
                                    { pos.x / (double) getParentWidth(),
@@ -178,12 +178,12 @@ struct GraphEditorPanel::FilterComponent   : public Component
     {
         auto boxArea = getLocalBounds().reduced (4, pinSize);
 
-        g.setColour (findColour (TextEditor::backgroundColourId));
+        g.setColor (findColor (TextEditor::backgroundColorId));
         g.fillRect (boxArea.toFloat());
 
-        g.setColour (findColour (TextEditor::textColourId));
+        g.setColor (findColor (TextEditor::textColorId));
         g.setFont (font);
-        g.drawFittedText (getName(), boxArea, Justification::centred, 2);
+        g.drawFittedText (getName(), boxArea, Justification::centered, 2);
     }
 
     void resized() override
@@ -217,7 +217,7 @@ struct GraphEditorPanel::FilterComponent   : public Component
     {
         for (auto* pin : pins)
             if (pin->pin.channelIndex == index && isInput == pin->isInput)
-                return getPosition().toFloat() + pin->getBounds().getCentre().toFloat();
+                return getPosition().toFloat() + pin->getBounds().getCenter().toFloat();
 
         return {};
     }
@@ -251,7 +251,7 @@ struct GraphEditorPanel::FilterComponent   : public Component
 
         {
             auto p = graph.getNodePosition (pluginID);
-            setCentreRelative ((float) p.x, (float) p.y);
+            setCenterRelative ((float) p.x, (float) p.y);
         }
 
         if (numIns != numInputs || numOuts != numOutputs)
@@ -419,9 +419,9 @@ struct GraphEditorPanel::ConnectorComponent   : public Component,
     void paint (Graphics& g) override
     {
         if (connection.source.isMIDI() || connection.destination.isMIDI())
-            g.setColour (Colours::red);
+            g.setColor (Colors::red);
         else
-            g.setColour (Colours::green);
+            g.setColor (Colors::green);
 
         g.fillPath (linePath);
     }
@@ -553,7 +553,7 @@ GraphEditorPanel::~GraphEditorPanel()
 
 void GraphEditorPanel::paint (Graphics& g)
 {
-    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+    g.fillAll (getLookAndFeel().findColor (ResizableWindow::backgroundColorId));
 }
 
 void GraphEditorPanel::mouseDown (const MouseEvent& e)
@@ -601,8 +601,8 @@ GraphEditorPanel::PinComponent* GraphEditorPanel::findPinAt (Point<float> pos) c
 {
     for (auto* fc : nodes)
     {
-        // NB: A Visual Studio optimiser error means we have to put this Component* in a local
-        // variable before trying to cast it, or it gets mysteriously optimised away..
+        // NB: A Visual Studio optimizer error means we have to put this Component* in a local
+        // variable before trying to cast it, or it gets mysteriously optimized away..
         auto* comp = fc->getComponentAt (pos.toInt() - fc->getPosition());
 
         if (auto* pin = dynamic_cast<PinComponent*> (comp))
@@ -706,7 +706,7 @@ void GraphEditorPanel::dragConnector (const MouseEvent& e)
 
             if (graph.graph.canConnect (connection))
             {
-                pos = (pin->getParentComponent()->getPosition() + pin->getBounds().getCentre()).toFloat();
+                pos = (pin->getParentComponent()->getPosition() + pin->getBounds().getCenter()).toFloat();
                 draggingConnector->setTooltip (pin->getTooltip());
             }
         }
@@ -763,8 +763,8 @@ struct GraphDocumentComponent::TooltipBar   : public Component,
     void paint (Graphics& g) override
     {
         g.setFont (Font (getHeight() * 0.7f, Font::bold));
-        g.setColour (Colours::black);
-        g.drawFittedText (tip, 10, 0, getWidth() - 12, getHeight(), Justification::centredLeft, 1);
+        g.setColor (Colors::black);
+        g.drawFittedText (tip, 10, 0, getWidth() - 12, getHeight(), Justification::centeredLeft, 1);
     }
 
     void timerCallback() override

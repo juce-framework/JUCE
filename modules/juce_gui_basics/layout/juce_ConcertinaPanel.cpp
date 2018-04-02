@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -59,7 +59,7 @@ struct ConcertinaPanel::PanelSizes
         }
 
         bool canExpand() const noexcept     { return size < maxSize; }
-        bool isMinimised() const noexcept   { return size <= minSize; }
+        bool isMinimized() const noexcept   { return size <= minSize; }
 
         int size, minSize, maxSize;
     };
@@ -139,7 +139,7 @@ private:
         Array<Panel*> expandableItems;
 
         for (int i = start; i < end; ++i)
-            if (get(i).canExpand() && ! get(i).isMinimised())
+            if (get(i).canExpand() && ! get(i).isMinimized())
                 expandableItems.add (& get(i));
 
         for (int attempts = 4; --attempts >= 0 && spaceDiff > 0;)

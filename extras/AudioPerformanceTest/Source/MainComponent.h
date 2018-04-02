@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -73,7 +73,7 @@ public:
 
         AudioBuffer<float>& outputAudio = *bufferToFill.buffer;
         std::size_t bufferSize = (std::size_t) outputAudio.getNumSamples();
-        initialiseBuffers (bufferToFill, bufferSize);
+        initializeBuffers (bufferToFill, bufferSize);
 
         for (int ch = 0; ch < outputAudio.getNumChannels(); ++ch)
             crunchSomeNumbers (outputAudio.getWritePointer (ch), bufferSize, numLoopIterationsPerCallback);
@@ -108,17 +108,17 @@ public:
     //==============================================================================
     void paint (Graphics& g) override
     {
-        g.fillAll (Colours::black);
+        g.fillAll (Colors::black);
         g.setFont (Font (16.0f));
-        g.setColour (Colours::white);
+        g.setColor (Colors::white);
         g.drawText ("loop iterations / audio callback",
-                    getLocalBounds().withY (loopIterationsSlider.getHeight()), Justification::centred, true);
+                    getLocalBounds().withY (loopIterationsSlider.getHeight()), Justification::centered, true);
     }
 
     //==============================================================================
     void resized() override
     {
-        loopIterationsSlider.setBounds (getLocalBounds().withSizeKeepingCentre (proportionOfWidth (0.9f), 50));
+        loopIterationsSlider.setBounds (getLocalBounds().withSizeKeepingCenter (proportionOfWidth (0.9f), 50));
     }
 
 private:
@@ -128,8 +128,8 @@ private:
         loopIterationsSlider.setSliderStyle (Slider::LinearBar);
         loopIterationsSlider.setRange (0, 30000, 250);
         loopIterationsSlider.setValue (15000);
-        loopIterationsSlider.setColour (Slider::thumbColourId, Colours::white);
-        loopIterationsSlider.setColour (Slider::textBoxTextColourId, Colours::grey);
+        loopIterationsSlider.setColor (Slider::thumbColorId, Colors::white);
+        loopIterationsSlider.setColor (Slider::textBoxTextColorId, Colors::gray);
         updateNumLoopIterationsPerCallback();
         addAndMakeVisible (loopIterationsSlider);
     }
@@ -143,7 +143,7 @@ private:
     }
 
     //==============================================================================
-    void initialiseBuffers (const AudioSourceChannelInfo& bufferToFill, std::size_t bufferSize)
+    void initializeBuffers (const AudioSourceChannelInfo& bufferToFill, std::size_t bufferSize)
     {
         if (bufferSize != a.size())
         {

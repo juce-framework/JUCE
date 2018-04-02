@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -30,7 +30,7 @@
 
 //==============================================================================
 AppearanceSettings::AppearanceSettings (bool updateAppWhenChanged)
-    : settings ("COLOUR_SCHEME")
+    : settings ("COLOR_SCHEME")
 {
     if (! ProjucerApplication::getApp().isRunningCommandLine)
     {
@@ -40,12 +40,12 @@ AppearanceSettings::AppearanceSettings (bool updateAppWhenChanged)
         CPlusPlusCodeTokeniser tokeniser;
         CodeEditorComponent editor (doc, &tokeniser);
 
-        CodeEditorComponent::ColourScheme cs (editor.getColourScheme());
+        CodeEditorComponent::ColorScheme cs (editor.getColorScheme());
 
         for (int i = cs.types.size(); --i >= 0;)
         {
             auto& t = cs.types.getReference(i);
-            getColourValue (t.name) = t.colour.toString();
+            getColorValue (t.name) = t.color.toString();
         }
 
         getCodeFontValue() = getDefaultCodeFont().toString();
@@ -77,8 +77,8 @@ void AppearanceSettings::writeDefaultSchemeFile (const String& xmlString, const 
 
 void AppearanceSettings::refreshPresetSchemeList()
 {
-    writeDefaultSchemeFile (BinaryData::colourscheme_dark_xml,  "Default (Dark)");
-    writeDefaultSchemeFile (BinaryData::colourscheme_light_xml, "Default (Light)");
+    writeDefaultSchemeFile (BinaryData::colorscheme_dark_xml,  "Default (Dark)");
+    writeDefaultSchemeFile (BinaryData::colorscheme_light_xml, "Default (Light)");
 
     auto newSchemes = getSchemesFolder().findChildFiles (File::findFiles, false, String ("*") + getSchemeFileSuffix());
 
@@ -146,7 +146,7 @@ Font AppearanceSettings::getDefaultCodeFont()
     return Font (Font::getDefaultMonospacedFontName(), Font::getDefaultStyle(), 13.0f);
 }
 
-StringArray AppearanceSettings::getColourNames() const
+StringArray AppearanceSettings::getColorNames() const
 {
     StringArray s;
 
@@ -154,32 +154,32 @@ StringArray AppearanceSettings::getColourNames() const
     {
         const ValueTree c (settings.getChild(i));
 
-        if (c.hasType ("COLOUR"))
+        if (c.hasType ("COLOR"))
             s.add (c [Ids::name]);
     }
 
     return s;
 }
 
-void AppearanceSettings::updateColourScheme()
+void AppearanceSettings::updateColorScheme()
 {
     ProjucerApplication::getApp().mainWindowList.sendLookAndFeelChange();
 }
 
 void AppearanceSettings::applyToCodeEditor (CodeEditorComponent& editor) const
 {
-    CodeEditorComponent::ColourScheme cs (editor.getColourScheme());
+    CodeEditorComponent::ColorScheme cs (editor.getColorScheme());
 
     for (int i = cs.types.size(); --i >= 0;)
     {
-        CodeEditorComponent::ColourScheme::TokenType& t = cs.types.getReference(i);
-        getColour (t.name, t.colour);
+        CodeEditorComponent::ColorScheme::TokenType& t = cs.types.getReference(i);
+        getColor (t.name, t.color);
     }
 
-    editor.setColourScheme (cs);
+    editor.setColorScheme (cs);
     editor.setFont (getCodeFont());
 
-    editor.setColour (ScrollBar::thumbColourId, editor.findColour (CodeEditorComponent::backgroundColourId)
+    editor.setColor (ScrollBar::thumbColorId, editor.findColor (CodeEditorComponent::backgroundColorId)
                                                       .contrasting()
                                                       .withAlpha (0.13f));
 }
@@ -199,27 +199,27 @@ Value AppearanceSettings::getCodeFontValue()
     return settings.getPropertyAsValue (Ids::font, nullptr);
 }
 
-Value AppearanceSettings::getColourValue (const String& colourName)
+Value AppearanceSettings::getColorValue (const String& colorName)
 {
-    ValueTree c (settings.getChildWithProperty (Ids::name, colourName));
+    ValueTree c (settings.getChildWithProperty (Ids::name, colorName));
 
     if (! c.isValid())
     {
-        c = ValueTree ("COLOUR");
-        c.setProperty (Ids::name, colourName, nullptr);
+        c = ValueTree ("COLOR");
+        c.setProperty (Ids::name, colorName, nullptr);
         settings.appendChild (c, nullptr);
     }
 
-    return c.getPropertyAsValue (Ids::colour, nullptr);
+    return c.getPropertyAsValue (Ids::color, nullptr);
 }
 
-bool AppearanceSettings::getColour (const String& name, Colour& result) const
+bool AppearanceSettings::getColor (const String& name, Color& result) const
 {
-    const ValueTree colour (settings.getChildWithProperty (Ids::name, name));
+    const ValueTree color (settings.getChildWithProperty (Ids::name, name));
 
-    if (colour.isValid())
+    if (color.isValid())
     {
-        result = Colour::fromString (colour [Ids::colour].toString());
+        result = Color::fromString (color [Ids::color].toString());
         return true;
     }
 

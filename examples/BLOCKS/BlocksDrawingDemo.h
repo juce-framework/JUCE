@@ -53,21 +53,21 @@
 */
 struct LEDComponent : public Component
 {
-    LEDComponent() : ledColour (Colours::black) { setInterceptsMouseClicks (false, false); }
+    LEDComponent() : ledColor (Colors::black) { setInterceptsMouseClicks (false, false); }
 
-    void setColour (Colour newColour)
+    void setColor (Color newColor)
     {
-        ledColour = newColour;
+        ledColor = newColor;
         repaint();
     }
 
     void paint (Graphics& g) override
     {
-        g.setColour (ledColour);
+        g.setColor (ledColor);
         g.fillEllipse (getLocalBounds().toFloat());
     }
 
-    Colour ledColour;
+    Color ledColor;
 };
 
 //==============================================================================
@@ -97,7 +97,7 @@ public:
         }
 
         // Fill a black square for the Lightpad
-        g.fillAll (Colours::black);
+        g.fillAll (Colors::black);
     }
 
     void resized() override
@@ -145,13 +145,13 @@ public:
     }
 
     //==============================================================================
-    /** Sets the colour of one of the LEDComponents */
-    void setLEDColour (int x, int y, Colour c)
+    /** Sets the color of one of the LEDComponents */
+    void setLEDColor (int x, int y, Color c)
     {
         x = jmin (x, 14);
         y = jmin (y, 14);
 
-        leds.getUnchecked ((x * 15) + y)->setColour (c);
+        leds.getUnchecked ((x * 15) + y)->setColor (c);
     }
 
     //==============================================================================
@@ -178,16 +178,16 @@ private:
 /**
     A struct that handles the setup and layout of the DrumPadGridProgram
 */
-struct ColourGrid
+struct ColorGrid
 {
-    ColourGrid (int cols, int rows)
+    ColorGrid (int cols, int rows)
         : numColumns (cols),
           numRows (rows)
     {
         constructGridFillArray();
     }
 
-    /** Creates a GridFill object for each pad in the grid and sets its colour
+    /** Creates a GridFill object for each pad in the grid and sets its color
         and fill before adding it to an array of GridFill objects
     */
     void constructGridFillArray()
@@ -201,42 +201,42 @@ struct ColourGrid
             for (auto j = 0; j < numRows; ++j)
             {
                 DrumPadGridProgram::GridFill fill;
-                Colour colourToUse = colourArray.getUnchecked (counter);
+                Color colorToUse = colorArray.getUnchecked (counter);
 
-                fill.colour = colourToUse.withBrightness (colourToUse == currentColour ? 1.0f : 0.1f);
+                fill.color = colorToUse.withBrightness (colorToUse == currentColor ? 1.0f : 0.1f);
 
-                if (colourToUse == Colours::black)
+                if (colorToUse == Colors::black)
                     fill.fillType = DrumPadGridProgram::GridFill::FillType::hollow;
                 else
                     fill.fillType = DrumPadGridProgram::GridFill::FillType::filled;
 
                 gridFillArray.add (fill);
 
-                if (++counter == colourArray.size())
+                if (++counter == colorArray.size())
                     counter = 0;
             }
         }
     }
 
-    /** Sets which colour should be active for a given touch co-ordinate. Returns
-        true if the colour has changed
+    /** Sets which color should be active for a given touch co-ordinate. Returns
+        true if the color has changed
     */
-    bool setActiveColourForTouch (int x, int y)
+    bool setActiveColorForTouch (int x, int y)
     {
-        auto colourHasChanged = false;
+        auto colorHasChanged = false;
 
         auto xindex = x / 5;
         auto yindex = y / 5;
 
-        auto newColour = colourArray.getUnchecked ((yindex * 3) + xindex);
-        if (currentColour != newColour)
+        auto newColor = colorArray.getUnchecked ((yindex * 3) + xindex);
+        if (currentColor != newColor)
         {
-            currentColour = newColour;
+            currentColor = newColor;
             constructGridFillArray();
-            colourHasChanged = true;
+            colorHasChanged = true;
         }
 
-        return colourHasChanged;
+        return colorHasChanged;
     }
 
     //==============================================================================
@@ -244,14 +244,14 @@ struct ColourGrid
 
     Array<DrumPadGridProgram::GridFill> gridFillArray;
 
-    Array<Colour> colourArray = { Colours::white, Colours::red, Colours::green,
-                                  Colours::blue, Colours::hotpink, Colours::orange,
-                                  Colours::magenta, Colours::cyan, Colours::black };
+    Array<Color> colorArray = { Colors::white, Colors::red, Colors::green,
+                                  Colors::blue, Colors::hotpink, Colors::orange,
+                                  Colors::magenta, Colors::cyan, Colors::black };
 
-    Colour currentColour = Colours::hotpink;
+    Color currentColor = Colors::hotpink;
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ColourGrid)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ColorGrid)
 };
 
 //==============================================================================
@@ -275,7 +275,7 @@ public:
         topologySource.addListener (this);
 
         infoLabel.setText ("Connect a Lightpad Block to draw.", dontSendNotification);
-        infoLabel.setJustificationType (Justification::centred);
+        infoLabel.setJustificationType (Justification::centered);
         addAndMakeVisible (infoLabel);
 
         addAndMakeVisible (lightpadComponent);
@@ -293,14 +293,14 @@ public:
         brightnessSlider.setTextBoxStyle (Slider::TextEntryBoxPosition::NoTextBox, false, 0, 0);
         brightnessSlider.onValueChange = [this]
         {
-            brightnessLED.setColour (layout.currentColour
-                                           .withBrightness (layout.currentColour == Colours::black ? 0.0f
+            brightnessLED.setColor (layout.currentColor
+                                           .withBrightness (layout.currentColor == Colors::black ? 0.0f
                                                                                                    : static_cast<float> (brightnessSlider.getValue())));
         };
         addAndMakeVisible (brightnessSlider);
 
         brightnessLED.setAlwaysOnTop (true);
-        brightnessLED.setColour (layout.currentColour.withBrightness (static_cast<float> (brightnessSlider.getValue())));
+        brightnessLED.setColor (layout.currentColor.withBrightness (static_cast<float> (brightnessSlider.getValue())));
         addAndMakeVisible (brightnessLED);
 
        #if JUCE_IOS
@@ -323,7 +323,7 @@ public:
 
     void resized() override
     {
-        infoLabel.centreWithSize (getWidth(), 100);
+        infoLabel.centerWithSize (getWidth(), 100);
 
         auto bounds = getLocalBounds().reduced (20);
 
@@ -362,7 +362,7 @@ public:
 
         // lightpad component
         auto sideLength = jmin (bounds.getWidth() - 40, bounds.getHeight() - 40);
-        lightpadComponent.centreWithSize (sideLength, sideLength);
+        lightpadComponent.centerWithSize (sideLength, sideLength);
     }
 
     /** Overridden from TopologySource::Listener. Called when the topology changes */
@@ -422,22 +422,22 @@ private:
         auto xLed = roundToInt (touch.x * scaleX);
         auto yLed = roundToInt (touch.y * scaleY);
 
-        if (currentMode == colourPalette)
+        if (currentMode == colorPalette)
         {
-            if (layout.setActiveColourForTouch (xLed, yLed))
+            if (layout.setActiveColorForTouch (xLed, yLed))
             {
-                if (auto* colourPaletteProgram = getPaletteProgram())
+                if (auto* colorPaletteProgram = getPaletteProgram())
                 {
-                    colourPaletteProgram->setGridFills (layout.numColumns, layout.numRows, layout.gridFillArray);
-                    brightnessLED.setColour (layout.currentColour
-                                                   .withBrightness (layout.currentColour == Colours::black ? 0.0f
+                    colorPaletteProgram->setGridFills (layout.numColumns, layout.numRows, layout.gridFillArray);
+                    brightnessLED.setColor (layout.currentColor
+                                                   .withBrightness (layout.currentColor == Colors::black ? 0.0f
                                                                                                            : static_cast<float> (brightnessSlider.getValue())));
                 }
             }
         }
         else if (currentMode == canvas)
         {
-            drawLED ((uint32) xLed, (uint32) yLed, touch.z, layout.currentColour);
+            drawLED ((uint32) xLed, (uint32) yLed, touch.z, layout.currentColor);
         }
     }
 
@@ -455,7 +455,7 @@ private:
             else
                 doublePress = true;
         }
-        else if (currentMode == colourPalette)
+        else if (currentMode == colorPalette)
         {
             // Switch to canvas mode and set the LEDGrid program
             currentMode = canvas;
@@ -467,7 +467,7 @@ private:
     {
         drawLED ((uint32) x, (uint32) y,
                  z == 0.0f ? static_cast<float> (brightnessSlider.getValue())
-                           : z * static_cast<float> (brightnessSlider.getValue()), layout.currentColour);
+                           : z * static_cast<float> (brightnessSlider.getValue()), layout.currentColor);
     }
 
     void timerCallback() override
@@ -481,8 +481,8 @@ private:
         }
         else
         {
-            // Switch to colour palette mode and set the LEDGrid program
-            currentMode = colourPalette;
+            // Switch to color palette mode and set the LEDGrid program
+            currentMode = colorPalette;
             setLEDProgram (*activeBlock);
         }
 
@@ -511,7 +511,7 @@ private:
             // Redraw any previously drawn LEDs
             redrawLEDs();
         }
-        else if (currentMode == colourPalette)
+        else if (currentMode == colorPalette)
         {
             block.setProgram (new DrumPadGridProgram (block));
 
@@ -530,8 +530,8 @@ private:
             {
                 for (uint32 y = 0; y < 15; ++ y)
                 {
-                    canvasProgram->setLED (x, y, Colours::black);
-                    lightpadComponent.setLEDColour (x, y, Colours::black);
+                    canvasProgram->setLED (x, y, Colors::black);
+                    lightpadComponent.setLEDColor (x, y, Colors::black);
                 }
             }
 
@@ -541,20 +541,20 @@ private:
     }
 
     /** Sets an LED on the Lightpad for a given touch co-ordinate and pressure */
-    void drawLED (uint32 x0, uint32 y0, float z, Colour drawColour)
+    void drawLED (uint32 x0, uint32 y0, float z, Color drawColor)
     {
         if (auto* canvasProgram = getCanvasProgram())
         {
             // Check if the activeLeds array already contains an ActiveLED object for this LED
             auto index = getLEDAt (x0, y0);
 
-            // If the colour is black then just set the LED to black and return
-            if (drawColour == Colours::black)
+            // If the color is black then just set the LED to black and return
+            if (drawColor == Colors::black)
             {
                 if (index >= 0)
                 {
-                    canvasProgram->setLED (x0, y0, Colours::black);
-                    lightpadComponent.setLEDColour (x0, y0, Colours::black);
+                    canvasProgram->setLED (x0, y0, Colors::black);
+                    lightpadComponent.setLEDColor (x0, y0, Colors::black);
                     activeLeds.remove (index);
                 }
 
@@ -568,13 +568,13 @@ private:
                 ActiveLED led;
                 led.x = x0;
                 led.y = y0;
-                led.colour = drawColour;
+                led.color = drawColor;
                 led.brightness = z;
 
                 activeLeds.add (led);
-                canvasProgram->setLED (led.x, led.y, led.colour.withBrightness (led.brightness));
+                canvasProgram->setLED (led.x, led.y, led.color.withBrightness (led.brightness));
 
-                lightpadComponent.setLEDColour (led.x, led.y, led.colour.withBrightness (led.brightness));
+                lightpadComponent.setLEDColor (led.x, led.y, led.color.withBrightness (led.brightness));
 
                 return;
             }
@@ -582,19 +582,19 @@ private:
             // Get the ActiveLED object for this LED
             auto currentLed = activeLeds.getReference (index);
 
-            // If the LED colour is the same as the draw colour, add the brightnesses together.
-            // If it is different, blend the colours
-            if (currentLed.colour == drawColour)
+            // If the LED color is the same as the draw color, add the brightnesses together.
+            // If it is different, blend the colors
+            if (currentLed.color == drawColor)
                 currentLed.brightness = jmin (currentLed.brightness + z, 1.0f);
             else
-                currentLed.colour = currentLed.colour.interpolatedWith (drawColour, z);
+                currentLed.color = currentLed.color.interpolatedWith (drawColor, z);
 
 
             // Set the LED on the Block and change the ActiveLED object in the activeLeds array
             if (canvasProgram != nullptr)
-                canvasProgram->setLED (currentLed.x, currentLed.y, currentLed.colour.withBrightness (currentLed.brightness));
+                canvasProgram->setLED (currentLed.x, currentLed.y, currentLed.color.withBrightness (currentLed.brightness));
 
-            lightpadComponent.setLEDColour (currentLed.x, currentLed.y, currentLed.colour.withBrightness (currentLed.brightness));
+            lightpadComponent.setLEDColor (currentLed.x, currentLed.y, currentLed.color.withBrightness (currentLed.brightness));
 
             activeLeds.set (index, currentLed);
         }
@@ -608,8 +608,8 @@ private:
             // Iterate over the activeLeds array and set the LEDs on the Block
             for (auto led : activeLeds)
             {
-                canvasProgram->setLED (led.x, led.y, led.colour.withBrightness (led.brightness));
-                lightpadComponent.setLEDColour (led.x, led.y, led.colour.withBrightness (led.brightness));
+                canvasProgram->setLED (led.x, led.y, led.color.withBrightness (led.brightness));
+                lightpadComponent.setLEDColor (led.x, led.y, led.color.withBrightness (led.brightness));
             }
         }
     }
@@ -634,12 +634,12 @@ private:
     //==============================================================================
     /**
         A struct that represents an active LED on the Lightpad.
-        Has a position, colour and brightness.
+        Has a position, color and brightness.
     */
     struct ActiveLED
     {
         uint32 x, y;
-        Colour colour;
+        Color color;
         float brightness;
 
         /** Returns true if this LED occupies the given co-ordinates */
@@ -662,13 +662,13 @@ private:
     //==============================================================================
     enum DisplayMode
     {
-        colourPalette = 0,
+        colorPalette = 0,
         canvas
     };
-    DisplayMode currentMode = colourPalette;
+    DisplayMode currentMode = colorPalette;
 
     //==============================================================================
-    ColourGrid layout { 3, 3 };
+    ColorGrid layout { 3, 3 };
     PhysicalTopologySource topologySource;
     Block::Ptr activeBlock;
 

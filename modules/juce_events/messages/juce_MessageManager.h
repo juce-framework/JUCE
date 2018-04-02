@@ -227,7 +227,7 @@ public:
 
             Unlike other JUCE critical sections, this method **will** block waiting for the lock.
 
-            To ensure predictable behaviour, you should re-check your abort condition if tryEnter
+            To ensure predictable behavior, you should re-check your abort condition if tryEnter
             returns false.
 
             This method can be used if you want to do some work while waiting for the
@@ -326,7 +326,7 @@ private:
 
     static bool postMessageToSystemQueue (MessageBase*);
     static void* exitModalLoopCallback (void*);
-    static void doPlatformSpecificInitialisation();
+    static void doPlatformSpecificInitialization();
     static void doPlatformSpecificShutdown();
     static bool dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages);
 
@@ -429,7 +429,7 @@ public:
     MessageManagerLock (Thread* threadToCheckForExitSignal = nullptr);
 
     //==============================================================================
-    /** This has the same behaviour as the other constructor, but takes a ThreadPoolJob
+    /** This has the same behavior as the other constructor, but takes a ThreadPoolJob
         instead of a thread.
 
         See the MessageManagerLock (Thread*) constructor for details on how this works.

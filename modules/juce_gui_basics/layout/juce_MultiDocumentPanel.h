@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -48,14 +48,14 @@ public:
     //==============================================================================
     /**
     */
-    MultiDocumentPanelWindow (Colour backgroundColour);
+    MultiDocumentPanelWindow (Color backgroundColor);
 
     /** Destructor. */
     ~MultiDocumentPanelWindow();
 
     //==============================================================================
     /** @internal */
-    void maximiseButtonPressed() override;
+    void maximizeButtonPressed() override;
     /** @internal */
     void closeButtonPressed() override;
     /** @internal */
@@ -133,14 +133,14 @@ public:
         or DocumentWindow.
 
         @param component            the component to add
-        @param backgroundColour     the background colour to use to fill the component's
+        @param backgroundColor     the background color to use to fill the component's
                                     window or tab
         @param deleteWhenRemoved    if true, then when the component is removed by closeDocument()
                                     or closeAllDocuments(), then it will be deleted. If false, then
                                     the caller must handle the component's deletion
     */
     bool addDocument (Component* component,
-                      Colour backgroundColour,
+                      Color backgroundColor,
                       bool deleteWhenRemoved);
 
     /** Closes one of the documents.
@@ -220,7 +220,7 @@ public:
     enum LayoutMode
     {
         FloatingWindows,            /**< In this mode, there are overlapping DocumentWindow components for each document. */
-        MaximisedWindowsWithTabs    /**< In this mode, a TabbedComponent is used to show one document at a time. */
+        MaximizedWindowsWithTabs    /**< In this mode, a TabbedComponent is used to show one document at a time. */
     };
 
     /** Changes the panel's mode.
@@ -232,18 +232,18 @@ public:
     /** Returns the current layout mode. */
     LayoutMode getLayoutMode() const noexcept                           { return mode; }
 
-    /** Sets the background colour for the whole panel.
+    /** Sets the background color for the whole panel.
 
-        Each document has its own background colour, but this is the one used to fill the areas
+        Each document has its own background color, but this is the one used to fill the areas
         behind them.
     */
-    void setBackgroundColour (Colour newBackgroundColour);
+    void setBackgroundColor (Color newBackgroundColor);
 
-    /** Returns the current background colour.
+    /** Returns the current background color.
 
-        @see setBackgroundColour
+        @see setBackgroundColor
     */
-    Colour getBackgroundColour() const noexcept                         { return backgroundColour; }
+    Color getBackgroundColor() const noexcept                         { return backgroundColor; }
 
     /** If the panel is being used in tabbed mode, this returns the TabbedComponent that's involved. */
     TabbedComponent* getCurrentTabbedComponent() const noexcept         { return tabComponent.get(); }
@@ -261,7 +261,7 @@ public:
         and not close.
 
         Normally, you'd use this method to ask the user if they want to save any changes,
-        then return true if the save operation went ok. If the user cancelled the save
+        then return true if the save operation went ok. If the user canceled the save
         operation you could return false here to abort the close operation.
 
         If your component is based on the FileBasedDocument class, then you'd probably want
@@ -289,10 +289,10 @@ public:
 
 private:
     //==============================================================================
-    LayoutMode mode = MaximisedWindowsWithTabs;
+    LayoutMode mode = MaximizedWindowsWithTabs;
     Array<Component*> components;
     ScopedPointer<TabbedComponent> tabComponent;
-    Colour backgroundColour { Colours::lightblue };
+    Color backgroundColor { Colors::lightblue };
     int maximumNumDocuments = 0, numDocsBeforeTabsUsed = 0;
 
     struct TabbedComponentInternal;

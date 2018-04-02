@@ -670,7 +670,7 @@ public class JUCENetworkGraphicsDemo   extends Activity
             setFocusableInTouchMode (true);
             setOnFocusChangeListener (this);
 
-            // swap red and blue colours to match internal opengl texture format
+            // swap red and blue colors to match internal opengl texture format
             ColorMatrix colorMatrix = new ColorMatrix();
 
             float[] colorTransform = { 0,    0,    1.0f, 0,    0,
@@ -1238,11 +1238,11 @@ public class JUCENetworkGraphicsDemo   extends Activity
             }
         }
 
-        private final InputStream getCancellableStream (final boolean isInput) throws ExecutionException
+        private final InputStream getCancelableStream (final boolean isInput) throws ExecutionException
         {
             synchronized (createFutureLock)
             {
-                if (hasBeenCancelled.get())
+                if (hasBeenCanceled.get())
                     return null;
 
                 streamFuture = executor.submit (new Callable<BufferedInputStream>()
@@ -1312,7 +1312,7 @@ public class JUCENetworkGraphicsDemo   extends Activity
 
                                 synchronized (createStreamLock)
                                 {
-                                    if (hasBeenCancelled.get())
+                                    if (hasBeenCanceled.get())
                                         return false;
 
                                     connection.disconnect();
@@ -1357,14 +1357,14 @@ public class JUCENetworkGraphicsDemo   extends Activity
         {
             synchronized (createStreamLock)
             {
-                if (hasBeenCancelled.get())
+                if (hasBeenCanceled.get())
                     return false;
 
                 try
                 {
                     try
                     {
-                        inputStream = getCancellableStream (true);
+                        inputStream = getCancelableStream (true);
                     }
                     catch (ExecutionException e)
                     {
@@ -1383,9 +1383,9 @@ public class JUCENetworkGraphicsDemo   extends Activity
                     try
                     {
                         if (statusCode[0] >= 400)
-                            inputStream = getCancellableStream (false);
+                            inputStream = getCancelableStream (false);
                         else
-                            inputStream = getCancellableStream (true);
+                            inputStream = getCancelableStream (true);
                     }
                     catch (ExecutionException e)
                     {}
@@ -1472,7 +1472,7 @@ public class JUCENetworkGraphicsDemo   extends Activity
 
             synchronized (createStreamLock)
             {
-                hasBeenCancelled.set (true);
+                hasBeenCanceled.set (true);
 
                 connection = null;
             }
@@ -1521,7 +1521,7 @@ public class JUCENetworkGraphicsDemo   extends Activity
         private long position;
         private final ReentrantLock createStreamLock = new ReentrantLock();
         private final Object createFutureLock = new Object();
-        private AtomicBoolean hasBeenCancelled = new AtomicBoolean();
+        private AtomicBoolean hasBeenCanceled = new AtomicBoolean();
 
         private final ExecutorService executor = Executors.newCachedThreadPool (Executors.defaultThreadFactory());
         Future<BufferedInputStream> streamFuture;

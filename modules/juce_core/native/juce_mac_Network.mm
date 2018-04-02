@@ -156,7 +156,7 @@ public:
         {
             const ScopedLock lock (createTaskLock);
 
-            hasBeenCancelled = true;
+            hasBeenCanceled = true;
         }
 
         signalThreadShouldExit();
@@ -168,13 +168,13 @@ public:
         {
             const ScopedLock lock (createTaskLock);
 
-            if (hasBeenCancelled)
+            if (hasBeenCanceled)
                 return false;
         }
 
         startThread();
 
-        while (isThreadRunning() && ! initialised)
+        while (isThreadRunning() && ! initialized)
         {
             if (listener != nullptr)
                 if (! listener->postDataSendProgress (inputStream, (int) latestTotalBytes, (int) [[request HTTPBody] length]))
@@ -238,7 +238,7 @@ public:
             statusCode = (int) [httpResponse statusCode];
         }
 
-        initialised = true;
+        initialized = true;
 
         if (completionHandler != nil)
         {
@@ -262,7 +262,7 @@ public:
        #endif
 
         hasFailed = (error != nullptr);
-        initialised = true;
+        initialized = true;
         signalThreadShouldExit();
     }
 
@@ -274,7 +274,7 @@ public:
             return;
 
         [data appendData: newData];
-        initialised = true;
+        initialized = true;
     }
 
     void didSendBodyData (int64_t totalBytesWritten)
@@ -305,7 +305,7 @@ public:
         {
             const ScopedLock lock (createTaskLock);
 
-            if (! hasBeenCancelled)
+            if (! hasBeenCanceled)
                 task = [session dataTaskWithRequest: request];
         }
 
@@ -319,7 +319,7 @@ public:
             wait (5);
 
         hasFinished = true;
-        initialised = true;
+        initialized = true;
     }
 
     int64 contentLength = -1;
@@ -331,12 +331,12 @@ public:
     NSMutableData* data = nil;
     NSDictionary* headers = nil;
     int statusCode = 0;
-    bool initialised = false, hasFailed = false, hasFinished = false, isBeingDeleted = false;
+    bool initialized = false, hasFailed = false, hasFinished = false, isBeingDeleted = false;
     const int numRedirectsToFollow;
     int numRedirects = 0;
     int64 latestTotalBytes = 0;
     CriticalSection createTaskLock;
-    bool hasBeenCancelled = false;
+    bool hasBeenCanceled = false;
 
 private:
     //==============================================================================
@@ -703,7 +703,7 @@ public:
     {
         startThread();
 
-        while (isThreadRunning() && ! initialised)
+        while (isThreadRunning() && ! initialized)
         {
             if (listener != nullptr)
                 if (! listener->postDataSendProgress (inputStream, latestTotalBytes, (int) [[request HTTPBody] length]))
@@ -721,7 +721,7 @@ public:
             const ScopedLock dLock (dataLock);
             const ScopedLock connectionLock (createConnectionLock);
 
-            hasBeenCancelled = true;
+            hasBeenCanceled = true;
 
             if (connection != nil)
                 [connection cancel];
@@ -785,7 +785,7 @@ public:
             statusCode = (int) [httpResponse statusCode];
         }
 
-        initialised = true;
+        initialized = true;
     }
 
     NSURLRequest* willSendRequest (NSURLRequest* newRequest, NSURLResponse* redirectResponse)
@@ -805,7 +805,7 @@ public:
     {
         DBG (nsStringToJuce ([error description])); ignoreUnused (error);
         nsUrlErrorCode = [error code];
-        hasFailed = initialised = true;
+        hasFailed = initialized = true;
         signalThreadShouldExit();
     }
 
@@ -813,7 +813,7 @@ public:
     {
         const ScopedLock sl (dataLock);
         [data appendData: newData];
-        initialised = true;
+        initialized = true;
     }
 
     void didSendBodyData (NSInteger totalBytesWritten, NSInteger /*totalBytesExpected*/)
@@ -823,7 +823,7 @@ public:
 
     void finishedLoading()
     {
-        hasFinished = initialised = true;
+        hasFinished = initialized = true;
         signalThreadShouldExit();
     }
 
@@ -832,7 +832,7 @@ public:
         {
             const ScopedLock lock (createConnectionLock);
 
-            if (hasBeenCancelled)
+            if (hasBeenCanceled)
                 return;
 
             connection = [[NSURLConnection alloc] initWithRequest: request
@@ -857,12 +857,12 @@ public:
     NSDictionary* headers = nil;
     NSInteger nsUrlErrorCode = 0;
     int statusCode = 0;
-    bool initialised = false, hasFailed = false, hasFinished = false;
+    bool initialized = false, hasFailed = false, hasFinished = false;
     const int numRedirectsToFollow;
     int numRedirects = 0;
     int latestTotalBytes = 0;
     CriticalSection createConnectionLock;
-    bool hasBeenCancelled = false;
+    bool hasBeenCanceled = false;
 
 private:
     //==============================================================================
@@ -953,7 +953,7 @@ public:
         {
             const ScopedLock lock (createConnectionLock);
 
-            if (hasBeenCancelled)
+            if (hasBeenCanceled)
                 return false;
 
             createConnection();
@@ -998,7 +998,7 @@ public:
             if (connection != nullptr)
                 connection->cancel();
 
-            hasBeenCancelled = true;
+            hasBeenCanceled = true;
         }
     }
 
@@ -1084,7 +1084,7 @@ private:
     String httpRequestCmd;
     StringPairArray responseHeaders;
     CriticalSection createConnectionLock;
-    bool hasBeenCancelled = false;
+    bool hasBeenCanceled = false;
 
     void createConnection()
     {

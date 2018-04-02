@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -72,7 +72,7 @@ public:
     {
         int parameterIndex;
         bool isHighlighted;
-        Colour suggestedColour;
+        Color suggestedColor;
     };
 
     /** Some types of plugin can call this to suggest that the control for a particular
@@ -97,7 +97,7 @@ public:
         support this functionality, and even then the host may choose to ignore this
         information.
 
-        The default behaviour is to report support for both cases.
+        The default behavior is to report support for both cases.
     */
     virtual bool supportsHostMIDIControllerPresence (bool hostMIDIControllerIsAvailable);
 
@@ -194,7 +194,7 @@ private:
     };
 
     //==============================================================================
-    void initialise();
+    void initialize();
     void editorResized (bool wasResized);
     void updatePeer();
     void attachConstrainer (ComponentBoundsConstrainer*);

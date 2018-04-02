@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -255,7 +255,7 @@ struct ScalingHelpers
     static Rectangle<float> subtractPosition (Rectangle<float> p, const Component& c) noexcept  { return p - c.getPosition().toFloat(); }
 };
 
-static const char colourPropertyPrefix[] = "jcclr_";
+static const char colorPropertyPrefix[] = "jcclr_";
 
 //==============================================================================
 struct Component::ComponentHelpers
@@ -267,14 +267,14 @@ struct Component::ComponentHelpers
     }
    #endif
 
-    static Identifier getColourPropertyID (int colourID)
+    static Identifier getColorPropertyID (int colorID)
     {
         char buffer[32];
         auto* end = buffer + numElementsInArray (buffer) - 1;
         auto* t = end;
         *t = 0;
 
-        for (auto v = (uint32) colourID;;)
+        for (auto v = (uint32) colorID;;)
         {
             *--t = "0123456789abcdef" [v & 15];
             v >>= 4;
@@ -283,8 +283,8 @@ struct Component::ComponentHelpers
                 break;
         }
 
-        for (int i = (int) sizeof (colourPropertyPrefix) - 1; --i >= 0;)
-            *--t = colourPropertyPrefix[i];
+        for (int i = (int) sizeof (colorPropertyPrefix) - 1; --i >= 0;)
+            *--t = colorPropertyPrefix[i];
 
         return t;
     }
@@ -580,7 +580,7 @@ bool Component::isShowing() const
         return parentComponent->isShowing();
 
     if (auto* peer = getPeer())
-        return ! peer->isMinimised();
+        return ! peer->isMinimized();
 
     return false;
 }
@@ -625,7 +625,7 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
         auto topLeft = getScreenPosition();
 
         bool wasFullscreen = false;
-        bool wasMinimised = false;
+        bool wasMinimized = false;
         ComponentBoundsConstrainer* currentConstrainer = nullptr;
         Rectangle<int> oldNonFullScreenBounds;
         int oldRenderingEngine = -1;
@@ -635,7 +635,7 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
             ScopedPointer<ComponentPeer> oldPeerToDelete (peer);
 
             wasFullscreen = peer->isFullScreen();
-            wasMinimised = peer->isMinimised();
+            wasMinimized = peer->isMinimized();
             currentConstrainer = peer->getConstrainer();
             oldNonFullScreenBounds = peer->getNonFullScreenBounds();
             oldRenderingEngine = peer->getCurrentRenderingEngine();
@@ -680,8 +680,8 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
                 peer->setNonFullScreenBounds (oldNonFullScreenBounds);
             }
 
-            if (wasMinimised)
-                peer->setMinimised (true);
+            if (wasMinimized)
+                peer->setMinimized (true);
 
            #if JUCE_WINDOWS
             if (isAlwaysOnTop())
@@ -742,7 +742,7 @@ void Component::userTriedToCloseWindow()
     jassertfalse;
 }
 
-void Component::minimisationStateChanged (bool) {}
+void Component::minimizationStateChanged (bool) {}
 
 float Component::getDesktopScaleFactor() const  { return Desktop::getInstance().getGlobalScaleFactor(); }
 
@@ -800,9 +800,9 @@ struct StandardCachedComponentImage  : public CachedComponentImage
 
             if (! owner.isOpaque())
             {
-                lg.setFill (Colours::transparentBlack);
+                lg.setFill (Colors::transparentBlack);
                 lg.fillRect (compBounds, true);
-                lg.setFill (Colours::black);
+                lg.setFill (Colors::black);
             }
 
             owner.paintEntireComponent (imG, true);
@@ -810,7 +810,7 @@ struct StandardCachedComponentImage  : public CachedComponentImage
 
         validArea = compBounds;
 
-        g.setColour (Colours::black.withAlpha (owner.getAlpha()));
+        g.setColor (Colors::black.withAlpha (owner.getAlpha()));
         g.drawImageTransformed (image, AffineTransform::scale (compBounds.getWidth()  / (float) imageBounds.getWidth(),
                                                                compBounds.getHeight() / (float) imageBounds.getHeight()), false);
     }
@@ -1046,7 +1046,7 @@ int Component::getParentHeight() const noexcept
 
 Rectangle<int> Component::getParentMonitorArea() const
 {
-    return Desktop::getInstance().getDisplays().getDisplayContaining (getScreenBounds().getCentre()).userArea;
+    return Desktop::getInstance().getDisplays().getDisplayContaining (getScreenBounds().getCenter()).userArea;
 }
 
 int Component::getScreenX() const                       { return getScreenPosition().x; }
@@ -1177,12 +1177,12 @@ void Component::setTopLeftPosition (Point<int> pos)     { setBounds (pos.x, pos.
 void Component::setTopRightPosition (int x, int y)      { setTopLeftPosition (x - getWidth(), y); }
 void Component::setBounds (Rectangle<int> r)            { setBounds (r.getX(), r.getY(), r.getWidth(), r.getHeight()); }
 
-void Component::setCentrePosition (Point<int> p)        { setBounds (getBounds().withCentre (p.transformedBy (getTransform().inverted()))); }
-void Component::setCentrePosition (int x, int y)        { setCentrePosition ({ x, y }); }
+void Component::setCenterPosition (Point<int> p)        { setBounds (getBounds().withCenter (p.transformedBy (getTransform().inverted()))); }
+void Component::setCenterPosition (int x, int y)        { setCenterPosition ({ x, y }); }
 
-void Component::setCentreRelative (float x, float y)
+void Component::setCenterRelative (float x, float y)
 {
-    setCentrePosition (roundToInt (getParentWidth() * x),
+    setCenterPosition (roundToInt (getParentWidth() * x),
                        roundToInt (getParentHeight() * y));
 }
 
@@ -1197,13 +1197,13 @@ void Component::setBoundsRelative (float x, float y, float w, float h)
     setBoundsRelative ({ x, y, w, h });
 }
 
-void Component::centreWithSize (int width, int height)
+void Component::centerWithSize (int width, int height)
 {
     auto parentArea = ComponentHelpers::getParentOrMainMonitorBounds (*this)
                           .transformedBy (getTransform().inverted());
 
-    setBounds (parentArea.getCentreX() - width / 2,
-               parentArea.getCentreY() - height / 2,
+    setBounds (parentArea.getCenterX() - width / 2,
+               parentArea.getCenterY() - height / 2,
                width, height);
 }
 
@@ -1251,7 +1251,7 @@ void Component::setBoundsToFit (Rectangle<int> targetArea, Justification justifi
 void Component::setTransform (const AffineTransform& newTransform)
 {
     // If you pass in a transform with no inverse, the component will have no dimensions,
-    // and there will be all sorts of maths errors when converting coordinates.
+    // and there will be all sorts of math errors when converting coordinates.
     jassert (! newTransform.isSingularity());
 
     if (newTransform.isIdentity())
@@ -2066,7 +2066,7 @@ void Component::setLookAndFeel (LookAndFeel* newLookAndFeel)
 }
 
 void Component::lookAndFeelChanged() {}
-void Component::colourChanged() {}
+void Component::colorChanged() {}
 
 void Component::sendLookAndFeelChange()
 {
@@ -2076,7 +2076,7 @@ void Component::sendLookAndFeelChange()
 
     if (safePointer != nullptr)
     {
-        colourChanged();
+        colorChanged();
 
         if (safePointer != nullptr)
         {
@@ -2093,36 +2093,36 @@ void Component::sendLookAndFeelChange()
     }
 }
 
-Colour Component::findColour (int colourID, bool inheritFromParent) const
+Color Component::findColor (int colorID, bool inheritFromParent) const
 {
-    if (auto* v = properties.getVarPointer (ComponentHelpers::getColourPropertyID (colourID)))
-        return Colour ((uint32) static_cast<int> (*v));
+    if (auto* v = properties.getVarPointer (ComponentHelpers::getColorPropertyID (colorID)))
+        return Color ((uint32) static_cast<int> (*v));
 
     if (inheritFromParent && parentComponent != nullptr
-         && (lookAndFeel == nullptr || ! lookAndFeel->isColourSpecified (colourID)))
-        return parentComponent->findColour (colourID, true);
+         && (lookAndFeel == nullptr || ! lookAndFeel->isColorSpecified (colorID)))
+        return parentComponent->findColor (colorID, true);
 
-    return getLookAndFeel().findColour (colourID);
+    return getLookAndFeel().findColor (colorID);
 }
 
-bool Component::isColourSpecified (int colourID) const
+bool Component::isColorSpecified (int colorID) const
 {
-    return properties.contains (ComponentHelpers::getColourPropertyID (colourID));
+    return properties.contains (ComponentHelpers::getColorPropertyID (colorID));
 }
 
-void Component::removeColour (int colourID)
+void Component::removeColor (int colorID)
 {
-    if (properties.remove (ComponentHelpers::getColourPropertyID (colourID)))
-        colourChanged();
+    if (properties.remove (ComponentHelpers::getColorPropertyID (colorID)))
+        colorChanged();
 }
 
-void Component::setColour (int colourID, Colour colour)
+void Component::setColor (int colorID, Color color)
 {
-    if (properties.set (ComponentHelpers::getColourPropertyID (colourID), (int) colour.getARGB()))
-        colourChanged();
+    if (properties.set (ComponentHelpers::getColorPropertyID (colorID), (int) color.getARGB()))
+        colorChanged();
 }
 
-void Component::copyAllExplicitColoursTo (Component& target) const
+void Component::copyAllExplicitColorsTo (Component& target) const
 {
     bool changed = false;
 
@@ -2130,13 +2130,13 @@ void Component::copyAllExplicitColoursTo (Component& target) const
     {
         auto name = properties.getName(i);
 
-        if (name.toString().startsWith (colourPropertyPrefix))
+        if (name.toString().startsWith (colorPropertyPrefix))
             if (target.properties.set (name, properties [name]))
                 changed = true;
     }
 
     if (changed)
-        target.colourChanged();
+        target.colorChanged();
 }
 
 //==============================================================================

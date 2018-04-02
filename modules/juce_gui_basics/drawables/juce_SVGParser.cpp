@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -118,7 +118,7 @@ public:
     struct SetGradientStopsOp
     {
         const SVGState* state;
-        ColourGradient* gradient;
+        ColorGradient* gradient;
 
         bool operator() (const XmlPath& xml) const
         {
@@ -378,15 +378,15 @@ public:
 
                                     if (last != p2)
                                     {
-                                        double centreX, centreY, startAngle, deltaAngle;
+                                        double centerX, centerY, startAngle, deltaAngle;
                                         double rx = p1.x, ry = p1.y;
 
-                                        endpointToCentreParameters (last.x, last.y, p2.x, p2.y,
+                                        endpointToCenterParameters (last.x, last.y, p2.x, p2.y,
                                                                     angle, largeArc, sweep,
-                                                                    rx, ry, centreX, centreY,
+                                                                    rx, ry, centerX, centerY,
                                                                     startAngle, deltaAngle);
 
-                                        path.addCentredArc ((float) centreX, (float) centreY,
+                                        path.addCenteredArc ((float) centerX, (float) centerY,
                                                             (float) rx, (float) ry,
                                                             angle, (float) startAngle, (float) (startAngle + deltaAngle),
                                                             false);
@@ -689,7 +689,7 @@ private:
 
         auto dp = new DrawablePath();
         setCommonAttributes (*dp, xml);
-        dp->setFill (Colours::transparentBlack);
+        dp->setFill (Colors::transparentBlack);
 
         path.applyTransform (transform);
 
@@ -701,8 +701,8 @@ private:
         dp->setFill (getPathFillType (path, xml, "fill",
                                       getStyleAttribute (xml, "fill-opacity"),
                                       getStyleAttribute (xml, "opacity"),
-                                      pathContainsClosedSubPath (path) ? Colours::black
-                                                                       : Colours::transparentBlack));
+                                      pathContainsClosedSubPath (path) ? Colors::black
+                                                                       : Colors::transparentBlack));
 
         auto strokeType = getStyleAttribute (xml, "stroke");
 
@@ -711,7 +711,7 @@ private:
             dp->setStrokeFill (getPathFillType (path, xml, "stroke",
                                                 getStyleAttribute (xml, "stroke-opacity"),
                                                 getStyleAttribute (xml, "opacity"),
-                                                Colours::transparentBlack));
+                                                Colors::transparentBlack));
 
             dp->setStrokeType (getStrokeFor (xml));
         }
@@ -817,7 +817,7 @@ private:
         return false;
     }
 
-    bool addGradientStopsIn (ColourGradient& cg, const XmlPath& fillXml) const
+    bool addGradientStopsIn (ColorGradient& cg, const XmlPath& fillXml) const
     {
         bool result = false;
 
@@ -825,7 +825,7 @@ private:
         {
             forEachXmlChildElementWithTagName (*fillXml, e, "stop")
             {
-                auto col = parseColour (fillXml.getChild (e), "stop-color", Colours::black);
+                auto col = parseColor (fillXml.getChild (e), "stop-color", Colors::black);
 
                 auto opacity = getStyleAttribute (fillXml.getChild (e), "stop-opacity", "1");
                 col = col.withMultipliedAlpha (jlimit (0.0f, 1.0f, opacity.getFloatValue()));
@@ -835,7 +835,7 @@ private:
                 if (e->getStringAttribute ("offset").containsChar ('%'))
                     offset *= 0.01;
 
-                cg.addColour (jlimit (0.0, 1.0, offset), col);
+                cg.addColor (jlimit (0.0, 1.0, offset), col);
                 result = true;
             }
         }
@@ -847,7 +847,7 @@ private:
                                   const Path& path,
                                   const float opacity) const
     {
-        ColourGradient gradient;
+        ColorGradient gradient;
 
         {
             auto linkedID = getLinkedID (fillXml);
@@ -861,24 +861,24 @@ private:
 
         addGradientStopsIn (gradient, fillXml);
 
-        if (int numColours = gradient.getNumColours())
+        if (int numColors = gradient.getNumColors())
         {
-            if (gradient.getColourPosition (0) > 0)
-                gradient.addColour (0.0, gradient.getColour (0));
+            if (gradient.getColorPosition (0) > 0)
+                gradient.addColor (0.0, gradient.getColor (0));
 
-            if (gradient.getColourPosition (numColours - 1) < 1.0)
-                gradient.addColour (1.0, gradient.getColour (numColours - 1));
+            if (gradient.getColorPosition (numColors - 1) < 1.0)
+                gradient.addColor (1.0, gradient.getColor (numColors - 1));
         }
         else
         {
-            gradient.addColour (0.0, Colours::black);
-            gradient.addColour (1.0, Colours::black);
+            gradient.addColor (0.0, Colors::black);
+            gradient.addColor (1.0, Colors::black);
         }
 
         if (opacity < 1.0f)
             gradient.multiplyOpacity (opacity);
 
-        jassert (gradient.getNumColours() > 0);
+        jassert (gradient.getNumColors() > 0);
 
         gradient.isRadial = fillXml->hasTagNameIgnoringNamespace ("radialGradient");
 
@@ -932,7 +932,7 @@ private:
             }
 
             if (gradient.point1 == gradient.point2)
-                return Colour (gradient.getColour (gradient.getNumColours() - 1));
+                return Color (gradient.getColor (gradient.getNumColors() - 1));
         }
 
         FillType type (gradient);
@@ -972,7 +972,7 @@ private:
                               StringRef fillAttribute,
                               const String& fillOpacity,
                               const String& overallOpacity,
-                              const Colour defaultColour) const
+                              const Color defaultColor) const
     {
         float opacity = 1.0f;
 
@@ -994,9 +994,9 @@ private:
         }
 
         if (isNone (fill))
-            return Colours::transparentBlack;
+            return Colors::transparentBlack;
 
-        return parseColour (xml, fillAttribute, defaultColour).withMultipliedAlpha (opacity);
+        return parseColor (xml, fillAttribute, defaultColor).withMultipliedAlpha (opacity);
     }
 
     static PathStrokeType::JointStyle getJointStyle (const String& join) noexcept
@@ -1091,7 +1091,7 @@ private:
                 else
                     dt->setTransform (transform);
 
-                dt->setColour (parseColour (xml, "fill", Colours::black)
+                dt->setColor (parseColor (xml, "fill", Colors::black)
                                  .withMultipliedAlpha (getStyleAttribute (xml, "fill-opacity", "1").getFloatValue()));
 
                 Rectangle<float> bounds (xCoords[0], yCoords[0] - font.getAscent(),
@@ -1490,7 +1490,7 @@ private:
     }
 
     //==============================================================================
-    Colour parseColour (const XmlPath& xml, StringRef attributeName, const Colour defaultColour) const
+    Color parseColor (const XmlPath& xml, StringRef attributeName, const Color defaultColor) const
     {
         auto text = getStyleAttribute (xml, attributeName);
 
@@ -1511,11 +1511,11 @@ private:
             }
 
             if (numChars <= 3)
-                return Colour ((uint8) (hex[0] * 0x11),
+                return Color ((uint8) (hex[0] * 0x11),
                                (uint8) (hex[1] * 0x11),
                                (uint8) (hex[2] * 0x11));
 
-            return Colour ((uint8) ((hex[0] << 4) + hex[1]),
+            return Color ((uint8) ((hex[0] << 4) + hex[1]),
                            (uint8) ((hex[2] << 4) + hex[3]),
                            (uint8) ((hex[4] << 4) + hex[5]));
         }
@@ -1533,11 +1533,11 @@ private:
                 tokens.removeEmptyStrings();
 
                 if (tokens[0].containsChar ('%'))
-                    return Colour ((uint8) roundToInt (2.55 * tokens[0].getDoubleValue()),
+                    return Color ((uint8) roundToInt (2.55 * tokens[0].getDoubleValue()),
                                    (uint8) roundToInt (2.55 * tokens[1].getDoubleValue()),
                                    (uint8) roundToInt (2.55 * tokens[2].getDoubleValue()));
 
-                return Colour ((uint8) tokens[0].getIntValue(),
+                return Color ((uint8) tokens[0].getIntValue(),
                                (uint8) tokens[1].getIntValue(),
                                (uint8) tokens[2].getIntValue());
             }
@@ -1547,10 +1547,10 @@ private:
         {
             for (const XmlPath* p = xml.parent; p != nullptr; p = p->parent)
                 if (getStyleAttribute (*p, attributeName).isNotEmpty())
-                    return parseColour (*p, attributeName, defaultColour);
+                    return parseColor (*p, attributeName, defaultColor);
         }
 
-        return Colours::findColourForName (text, defaultColour);
+        return Colors::findColorForName (text, defaultColor);
     }
 
     static AffineTransform parseTransform (String t)
@@ -1606,12 +1606,12 @@ private:
         return result;
     }
 
-    static void endpointToCentreParameters (double x1, double y1,
+    static void endpointToCenterParameters (double x1, double y1,
                                             double x2, double y2,
                                             double angle,
                                             bool largeArc, bool sweep,
                                             double& rx, double& ry,
-                                            double& centreX, double& centreY,
+                                            double& centerX, double& centerY,
                                             double& startAngle, double& deltaAngle) noexcept
     {
         const double midX = (x1 - x2) * 0.5;
@@ -1649,8 +1649,8 @@ private:
         const double cpx = ((rx * yp) / ry) * c;
         const double cpy = ((-ry * xp) / rx) * c;
 
-        centreX = ((x1 + x2) * 0.5) + (cosAngle * cpx) - (sinAngle * cpy);
-        centreY = ((y1 + y2) * 0.5) + (sinAngle * cpx) + (cosAngle * cpy);
+        centerX = ((x1 + x2) * 0.5) + (cosAngle * cpx) - (sinAngle * cpy);
+        centerY = ((y1 + y2) * 0.5) + (sinAngle * cpx) + (cosAngle * cpy);
 
         const double ux = (xp - cpx) / rx;
         const double uy = (yp - cpy) / ry;

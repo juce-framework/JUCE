@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -97,7 +97,7 @@ public:
         //==============================================================================
         enum Zones
         {
-            centre  = 0,
+            center  = 0,
             left    = 1,
             top     = 2,
             right   = 4,
@@ -127,7 +127,7 @@ public:
         MouseCursor getMouseCursor() const noexcept;
 
         /** Returns true if dragging this zone will move the enire object without resizing it. */
-        bool isDraggingWholeObject() const noexcept     { return zone == centre; }
+        bool isDraggingWholeObject() const noexcept     { return zone == center; }
         /** Returns true if dragging this zone will move the object's left edge. */
         bool isDraggingLeftEdge() const noexcept        { return (zone & left) != 0; }
         /** Returns true if dragging this zone will move the object's right edge. */

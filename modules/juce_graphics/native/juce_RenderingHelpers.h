@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -322,9 +322,9 @@ public:
 
     @tags{Graphics}
 */
-struct FloatRectangleRasterisingInfo
+struct FloatRectangleRasterizingInfo
 {
-    FloatRectangleRasterisingInfo (Rectangle<float> area)
+    FloatRectangleRasterizingInfo (Rectangle<float> area)
         : left   (roundToInt (256.0f * area.getX())),
           top    (roundToInt (256.0f * area.getY())),
           right  (roundToInt (256.0f * area.getRight())),
@@ -408,18 +408,18 @@ struct FloatRectangleRasterisingInfo
 };
 
 //==============================================================================
-/** Contains classes for calculating the colour of pixels within various types of gradient. */
+/** Contains classes for calculating the color of pixels within various types of gradient. */
 namespace GradientPixelIterators
 {
-    /** Iterates the colour of pixels in a linear gradient */
+    /** Iterates the color of pixels in a linear gradient */
     struct Linear
     {
-        Linear (const ColourGradient& gradient, const AffineTransform& transform,
-                const PixelARGB* colours, int numColours)
-            : lookupTable (colours),
-              numEntries (numColours)
+        Linear (const ColorGradient& gradient, const AffineTransform& transform,
+                const PixelARGB* colors, int numColors)
+            : lookupTable (colors),
+              numEntries (numColors)
         {
-            jassert (numColours >= 0);
+            jassert (numColors >= 0);
             auto p1 = gradient.point1;
             auto p2 = gradient.point2;
 
@@ -482,17 +482,17 @@ namespace GradientPixelIterators
     };
 
     //==============================================================================
-    /** Iterates the colour of pixels in a circular radial gradient */
+    /** Iterates the color of pixels in a circular radial gradient */
     struct Radial
     {
-        Radial (const ColourGradient& gradient, const AffineTransform&,
-                const PixelARGB* colours, int numColours)
-            : lookupTable (colours),
-              numEntries (numColours),
+        Radial (const ColorGradient& gradient, const AffineTransform&,
+                const PixelARGB* colors, int numColors)
+            : lookupTable (colors),
+              numEntries (numColors),
               gx1 (gradient.point1.x),
               gy1 (gradient.point1.y)
         {
-            jassert (numColours >= 0);
+            jassert (numColors >= 0);
             auto diff = gradient.point1 - gradient.point2;
             maxDist = diff.x * diff.x + diff.y * diff.y;
             invScale = numEntries / std::sqrt (maxDist);
@@ -523,12 +523,12 @@ namespace GradientPixelIterators
     };
 
     //==============================================================================
-    /** Iterates the colour of pixels in a skewed radial gradient */
+    /** Iterates the color of pixels in a skewed radial gradient */
     struct TransformedRadial   : public Radial
     {
-        TransformedRadial (const ColourGradient& gradient, const AffineTransform& transform,
-                           const PixelARGB* colours, int numColours)
-            : Radial (gradient, transform, colours, numColours),
+        TransformedRadial (const ColorGradient& gradient, const AffineTransform& transform,
+                           const PixelARGB* colors, int numColors)
+            : Radial (gradient, transform, colors, numColors),
               inverseTransform (transform.inverted())
         {
             tM10 = inverseTransform.mat10;
@@ -574,21 +574,21 @@ namespace GradientPixelIterators
 /** Contains classes for filling edge tables with various fill types. */
 namespace EdgeTableFillers
 {
-    /** Fills an edge-table with a solid colour. */
+    /** Fills an edge-table with a solid color. */
     template <class PixelType, bool replaceExisting = false>
-    struct SolidColour
+    struct SolidColor
     {
-        SolidColour (const Image::BitmapData& image, PixelARGB colour)
-            : destData (image), sourceColour (colour)
+        SolidColor (const Image::BitmapData& image, PixelARGB color)
+            : destData (image), sourceColor (color)
         {
             if (sizeof (PixelType) == 3 && destData.pixelStride == sizeof (PixelType))
             {
-                areRGBComponentsEqual = sourceColour.getRed() == sourceColour.getGreen()
-                                            && sourceColour.getGreen() == sourceColour.getBlue();
-                filler[0].set (sourceColour);
-                filler[1].set (sourceColour);
-                filler[2].set (sourceColour);
-                filler[3].set (sourceColour);
+                areRGBComponentsEqual = sourceColor.getRed() == sourceColor.getGreen()
+                                            && sourceColor.getGreen() == sourceColor.getBlue();
+                filler[0].set (sourceColor);
+                filler[1].set (sourceColor);
+                filler[2].set (sourceColor);
+                filler[3].set (sourceColor);
             }
             else
             {
@@ -604,22 +604,22 @@ namespace EdgeTableFillers
         forcedinline void handleEdgeTablePixel (int x, int alphaLevel) const noexcept
         {
             if (replaceExisting)
-                getPixel (x)->set (sourceColour);
+                getPixel (x)->set (sourceColor);
             else
-                getPixel (x)->blend (sourceColour, (uint32) alphaLevel);
+                getPixel (x)->blend (sourceColor, (uint32) alphaLevel);
         }
 
         forcedinline void handleEdgeTablePixelFull (int x) const noexcept
         {
             if (replaceExisting)
-                getPixel (x)->set (sourceColour);
+                getPixel (x)->set (sourceColor);
             else
-                getPixel (x)->blend (sourceColour);
+                getPixel (x)->blend (sourceColor);
         }
 
         forcedinline void handleEdgeTableLine (int x, int width, int alphaLevel) const noexcept
         {
-            auto p = sourceColour;
+            auto p = sourceColor;
             p.multiplyAlpha (alphaLevel);
 
             auto* dest = getPixel (x);
@@ -634,15 +634,15 @@ namespace EdgeTableFillers
         {
             auto* dest = getPixel (x);
 
-            if (replaceExisting || sourceColour.getAlpha() >= 0xff)
-                replaceLine (dest, sourceColour, width);
+            if (replaceExisting || sourceColor.getAlpha() >= 0xff)
+                replaceLine (dest, sourceColor, width);
             else
-                blendLine (dest, sourceColour, width);
+                blendLine (dest, sourceColor, width);
         }
 
         void handleEdgeTableRectangle (int x, int y, int width, int height, int alphaLevel) noexcept
         {
-            auto p = sourceColour;
+            auto p = sourceColor;
             p.multiplyAlpha (alphaLevel);
 
             setEdgeTableYPos (y);
@@ -674,7 +674,7 @@ namespace EdgeTableFillers
     private:
         const Image::BitmapData& destData;
         PixelType* linePixels;
-        PixelARGB sourceColour;
+        PixelARGB sourceColor;
         PixelRGB filler[4];
         bool areRGBComponentsEqual;
 
@@ -683,18 +683,18 @@ namespace EdgeTableFillers
             return addBytesToPointer (linePixels, x * destData.pixelStride);
         }
 
-        inline void blendLine (PixelType* dest, PixelARGB colour, int width) const noexcept
+        inline void blendLine (PixelType* dest, PixelARGB color, int width) const noexcept
         {
-            JUCE_PERFORM_PIXEL_OP_LOOP (blend (colour))
+            JUCE_PERFORM_PIXEL_OP_LOOP (blend (color))
         }
 
-        forcedinline void replaceLine (PixelRGB* dest, PixelARGB colour, int width) const noexcept
+        forcedinline void replaceLine (PixelRGB* dest, PixelARGB color, int width) const noexcept
         {
             if (destData.pixelStride == sizeof (*dest))
             {
                 if (areRGBComponentsEqual)  // if all the component values are the same, we can cheat..
                 {
-                    memset (dest, colour.getRed(), (size_t) width * 3);
+                    memset (dest, color.getRed(), (size_t) width * 3);
                 }
                 else
                 {
@@ -704,7 +704,7 @@ namespace EdgeTableFillers
 
                         while (width > 8 && (((pointer_sized_int) dest) & 7) != 0)
                         {
-                            dest->set (colour);
+                            dest->set (color);
                             ++dest;
                             --width;
                         }
@@ -722,31 +722,31 @@ namespace EdgeTableFillers
 
                     while (--width >= 0)
                     {
-                        dest->set (colour);
+                        dest->set (color);
                         ++dest;
                     }
                 }
             }
             else
             {
-                JUCE_PERFORM_PIXEL_OP_LOOP (set (colour))
+                JUCE_PERFORM_PIXEL_OP_LOOP (set (color))
             }
         }
 
-        forcedinline void replaceLine (PixelAlpha* dest, const PixelARGB colour, int width) const noexcept
+        forcedinline void replaceLine (PixelAlpha* dest, const PixelARGB color, int width) const noexcept
         {
             if (destData.pixelStride == sizeof (*dest))
-                memset (dest, colour.getAlpha(), (size_t) width);
+                memset (dest, color.getAlpha(), (size_t) width);
             else
-                JUCE_PERFORM_PIXEL_OP_LOOP (setAlpha (colour.getAlpha()))
+                JUCE_PERFORM_PIXEL_OP_LOOP (setAlpha (color.getAlpha()))
         }
 
-        forcedinline void replaceLine (PixelARGB* dest, const PixelARGB colour, int width) const noexcept
+        forcedinline void replaceLine (PixelARGB* dest, const PixelARGB color, int width) const noexcept
         {
-            JUCE_PERFORM_PIXEL_OP_LOOP (set (colour))
+            JUCE_PERFORM_PIXEL_OP_LOOP (set (color))
         }
 
-        JUCE_DECLARE_NON_COPYABLE (SolidColour)
+        JUCE_DECLARE_NON_COPYABLE (SolidColor)
     };
 
     //==============================================================================
@@ -754,9 +754,9 @@ namespace EdgeTableFillers
     template <class PixelType, class GradientType>
     struct Gradient  : public GradientType
     {
-        Gradient (const Image::BitmapData& dest, const ColourGradient& gradient, const AffineTransform& transform,
-                  const PixelARGB* colours, int numColours)
-            : GradientType (gradient, transform, colours, numColours - 1),
+        Gradient (const Image::BitmapData& dest, const ColorGradient& gradient, const AffineTransform& transform,
+                  const PixelARGB* colors, int numColors)
+            : GradientType (gradient, transform, colors, numColors - 1),
               destData (dest)
         {
         }
@@ -1116,7 +1116,7 @@ namespace EdgeTableFillers
                     {
                         if (isPositiveAndBelow (loResY, maxY))
                         {
-                            // In the centre of the image..
+                            // In the center of the image..
                             render4PixelAverage (dest, this->srcData.getPixelPointer (loResX, loResY),
                                                  hiResX & 255, hiResY & 255);
                             ++dest;
@@ -1584,22 +1584,22 @@ namespace EdgeTableFillers
     }
 
     template <class Iterator, class DestPixelType>
-    void renderSolidFill (Iterator& iter, const Image::BitmapData& destData, PixelARGB fillColour, bool replaceContents, DestPixelType*)
+    void renderSolidFill (Iterator& iter, const Image::BitmapData& destData, PixelARGB fillColor, bool replaceContents, DestPixelType*)
     {
         if (replaceContents)
         {
-            EdgeTableFillers::SolidColour<DestPixelType, true> r (destData, fillColour);
+            EdgeTableFillers::SolidColor<DestPixelType, true> r (destData, fillColor);
             iter.iterate (r);
         }
         else
         {
-            EdgeTableFillers::SolidColour<DestPixelType, false> r (destData, fillColour);
+            EdgeTableFillers::SolidColor<DestPixelType, false> r (destData, fillColor);
             iter.iterate (r);
         }
     }
 
     template <class Iterator, class DestPixelType>
-    void renderGradient (Iterator& iter, const Image::BitmapData& destData, const ColourGradient& g, const AffineTransform& transform,
+    void renderGradient (Iterator& iter, const Image::BitmapData& destData, const ColorGradient& g, const AffineTransform& transform,
                          const PixelARGB* lookupTable, int numLookupEntries, bool isIdentity, DestPixelType*)
     {
         if (g.isRadial)
@@ -1648,10 +1648,10 @@ struct ClipRegions
         virtual bool clipRegionIntersects (Rectangle<int>) const = 0;
         virtual Rectangle<int> getClipBounds() const = 0;
 
-        virtual void fillRectWithColour (SavedStateType&, Rectangle<int>, PixelARGB colour, bool replaceContents) const = 0;
-        virtual void fillRectWithColour (SavedStateType&, Rectangle<float>, PixelARGB colour) const = 0;
-        virtual void fillAllWithColour (SavedStateType&, PixelARGB colour, bool replaceContents) const = 0;
-        virtual void fillAllWithGradient (SavedStateType&, ColourGradient&, const AffineTransform&, bool isIdentity) const = 0;
+        virtual void fillRectWithColor (SavedStateType&, Rectangle<int>, PixelARGB color, bool replaceContents) const = 0;
+        virtual void fillRectWithColor (SavedStateType&, Rectangle<float>, PixelARGB color) const = 0;
+        virtual void fillAllWithColor (SavedStateType&, PixelARGB color, bool replaceContents) const = 0;
+        virtual void fillAllWithGradient (SavedStateType&, ColorGradient&, const AffineTransform&, bool isIdentity) const = 0;
         virtual void renderImageTransformed (SavedStateType&, const Image&, int alpha, const AffineTransform&, Graphics::ResamplingQuality, bool tiledFill) const = 0;
         virtual void renderImageUntransformed (SavedStateType&, const Image&, int alpha, int x, int y, bool tiledFill) const = 0;
     };
@@ -1770,7 +1770,7 @@ struct ClipRegions
             return edgeTable.getMaximumBounds();
         }
 
-        void fillRectWithColour (SavedStateType& state, Rectangle<int> area, PixelARGB colour, bool replaceContents) const override
+        void fillRectWithColor (SavedStateType& state, Rectangle<int> area, PixelARGB color, bool replaceContents) const override
         {
             auto totalClip = edgeTable.getMaximumBounds();
             auto clipped = totalClip.getIntersection (area);
@@ -1779,11 +1779,11 @@ struct ClipRegions
             {
                 EdgeTableRegion et (clipped);
                 et.edgeTable.clipToEdgeTable (edgeTable);
-                state.fillWithSolidColour (et.edgeTable, colour, replaceContents);
+                state.fillWithSolidColor (et.edgeTable, color, replaceContents);
             }
         }
 
-        void fillRectWithColour (SavedStateType& state, Rectangle<float> area, PixelARGB colour) const override
+        void fillRectWithColor (SavedStateType& state, Rectangle<float> area, PixelARGB color) const override
         {
             auto totalClip = edgeTable.getMaximumBounds().toFloat();
             auto clipped = totalClip.getIntersection (area);
@@ -1792,16 +1792,16 @@ struct ClipRegions
             {
                 EdgeTableRegion et (clipped);
                 et.edgeTable.clipToEdgeTable (edgeTable);
-                state.fillWithSolidColour (et.edgeTable, colour, false);
+                state.fillWithSolidColor (et.edgeTable, color, false);
             }
         }
 
-        void fillAllWithColour (SavedStateType& state, PixelARGB colour, bool replaceContents) const override
+        void fillAllWithColor (SavedStateType& state, PixelARGB color, bool replaceContents) const override
         {
-            state.fillWithSolidColour (edgeTable, colour, replaceContents);
+            state.fillWithSolidColor (edgeTable, color, replaceContents);
         }
 
-        void fillAllWithGradient (SavedStateType& state, ColourGradient& gradient, const AffineTransform& transform, bool isIdentity) const override
+        void fillAllWithGradient (SavedStateType& state, ColorGradient& gradient, const AffineTransform& transform, bool isIdentity) const override
         {
             state.fillWithGradient (edgeTable, gradient, transform, isIdentity);
         }
@@ -1885,24 +1885,24 @@ struct ClipRegions
         bool clipRegionIntersects (Rectangle<int> r) const override   { return clip.intersects (r); }
         Rectangle<int> getClipBounds() const override                 { return clip.getBounds(); }
 
-        void fillRectWithColour (SavedStateType& state, Rectangle<int> area, PixelARGB colour, bool replaceContents) const override
+        void fillRectWithColor (SavedStateType& state, Rectangle<int> area, PixelARGB color, bool replaceContents) const override
         {
             SubRectangleIterator iter (clip, area);
-            state.fillWithSolidColour (iter, colour, replaceContents);
+            state.fillWithSolidColor (iter, color, replaceContents);
         }
 
-        void fillRectWithColour (SavedStateType& state, Rectangle<float> area, PixelARGB colour) const override
+        void fillRectWithColor (SavedStateType& state, Rectangle<float> area, PixelARGB color) const override
         {
             SubRectangleIteratorFloat iter (clip, area);
-            state.fillWithSolidColour (iter, colour, false);
+            state.fillWithSolidColor (iter, color, false);
         }
 
-        void fillAllWithColour (SavedStateType& state, PixelARGB colour, bool replaceContents) const override
+        void fillAllWithColor (SavedStateType& state, PixelARGB color, bool replaceContents) const override
         {
-            state.fillWithSolidColour (*this, colour, replaceContents);
+            state.fillWithSolidColor (*this, color, replaceContents);
         }
 
-        void fillAllWithGradient (SavedStateType& state, ColourGradient& gradient, const AffineTransform& transform, bool isIdentity) const override
+        void fillAllWithGradient (SavedStateType& state, ColorGradient& gradient, const AffineTransform& transform, bool isIdentity) const override
         {
             state.fillWithGradient (*this, gradient, transform, isIdentity);
         }
@@ -1978,7 +1978,7 @@ struct ClipRegions
             template <class Renderer>
             void iterate (Renderer& r) const noexcept
             {
-                const RenderingHelpers::FloatRectangleRasterisingInfo f (area);
+                const RenderingHelpers::FloatRectangleRasterizingInfo f (area);
 
                 for (auto& i : clip)
                 {
@@ -2259,9 +2259,9 @@ public:
 
     void fillTargetRect (Rectangle<int> r, bool replaceContents)
     {
-        if (fillType.isColour())
+        if (fillType.isColor())
         {
-            clip->fillRectWithColour (getThis(), r, fillType.colour.getPixelARGB(), replaceContents);
+            clip->fillRectWithColor (getThis(), r, fillType.color.getPixelARGB(), replaceContents);
         }
         else
         {
@@ -2274,9 +2274,9 @@ public:
 
     void fillTargetRect (Rectangle<float> r)
     {
-        if (fillType.isColour())
+        if (fillType.isColor())
         {
-            clip->fillRectWithColour (getThis(), r, fillType.colour.getPixelARGB());
+            clip->fillRectWithColor (getThis(), r, fillType.color.getPixelARGB());
         }
         else
         {
@@ -2376,9 +2376,9 @@ public:
             auto* edgeTableClip = new EdgeTableRegionType (edgeTable);
             edgeTableClip->edgeTable.translate (x, y);
 
-            if (fillType.isColour())
+            if (fillType.isColor())
             {
-                auto brightness = fillType.colour.getBrightness() - 0.5f;
+                auto brightness = fillType.color.getBrightness() - 0.5f;
 
                 if (brightness > 0.0f)
                     edgeTableClip->edgeTable.multiplyLevels (1.0f + 1.6f * brightness);
@@ -2397,7 +2397,7 @@ public:
 
     void drawImage (const Image& sourceImage, const AffineTransform& trans)
     {
-        if (clip != nullptr && ! fillType.colour.isTransparent())
+        if (clip != nullptr && ! fillType.color.isTransparent())
             renderImage (sourceImage, trans, nullptr);
     }
 
@@ -2412,7 +2412,7 @@ public:
     void renderImage (const Image& sourceImage, const AffineTransform& trans, const BaseRegionType* tiledFillClipRegion)
     {
         auto t = transform.getTransformWith (trans);
-        auto alpha = fillType.colour.getAlpha();
+        auto alpha = fillType.color.getAlpha();
 
         if (isOnlyTranslationAllowingError (t, 0.002f))
         {
@@ -2471,7 +2471,7 @@ public:
         {
             if (fillType.isGradient())
             {
-                jassert (! replaceContents); // that option is just for solid colours
+                jassert (! replaceContents); // that option is just for solid colors
 
                 auto g2 = *(fillType.gradient);
                 g2.multiplyOpacity (fillType.getOpacity());
@@ -2495,7 +2495,7 @@ public:
             }
             else
             {
-                shapeToFill->fillAllWithColour (getThis(), fillType.colour.getPixelARGB(), replaceContents);
+                shapeToFill->fillAllWithColor (getThis(), fillType.color.getPixelARGB(), replaceContents);
             }
         }
     }
@@ -2635,20 +2635,20 @@ public:
     }
 
     template <typename IteratorType>
-    void fillWithSolidColour (IteratorType& iter, PixelARGB colour, bool replaceContents) const
+    void fillWithSolidColor (IteratorType& iter, PixelARGB color, bool replaceContents) const
     {
         Image::BitmapData destData (image, Image::BitmapData::readWrite);
 
         switch (destData.pixelFormat)
         {
-            case Image::ARGB:   EdgeTableFillers::renderSolidFill (iter, destData, colour, replaceContents, (PixelARGB*) 0); break;
-            case Image::RGB:    EdgeTableFillers::renderSolidFill (iter, destData, colour, replaceContents, (PixelRGB*) 0); break;
-            default:            EdgeTableFillers::renderSolidFill (iter, destData, colour, replaceContents, (PixelAlpha*) 0); break;
+            case Image::ARGB:   EdgeTableFillers::renderSolidFill (iter, destData, color, replaceContents, (PixelARGB*) 0); break;
+            case Image::RGB:    EdgeTableFillers::renderSolidFill (iter, destData, color, replaceContents, (PixelRGB*) 0); break;
+            default:            EdgeTableFillers::renderSolidFill (iter, destData, color, replaceContents, (PixelAlpha*) 0); break;
         }
     }
 
     template <typename IteratorType>
-    void fillWithGradient (IteratorType& iter, ColourGradient& gradient, const AffineTransform& trans, bool isIdentity) const
+    void fillWithGradient (IteratorType& iter, ColorGradient& gradient, const AffineTransform& trans, bool isIdentity) const
     {
         HeapBlock<PixelARGB> lookupTable;
         auto numLookupEntries = gradient.createLookupTable (trans, lookupTable);
@@ -2683,7 +2683,7 @@ public:
 
     SavedStateStack() noexcept {}
 
-    void initialise (StateObjectType* state)
+    void initialize (StateObjectType* state)
     {
         currentState.reset (state);
     }

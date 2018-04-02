@@ -95,7 +95,7 @@ void %%filter_class_name%%::changeProgramName (int index, const String& newName)
 void %%filter_class_name%%::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     // Use this method as the place to do any pre-playback
-    // initialisation that you need..
+    // initialization that you need..
 }
 
 void %%filter_class_name%%::releaseResources()

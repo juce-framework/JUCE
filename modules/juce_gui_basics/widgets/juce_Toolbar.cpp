@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -83,7 +83,7 @@ public:
 
         if (drawBar)
         {
-            g.setColour (findColour (Toolbar::separatorColourId, true));
+            g.setColor (findColor (Toolbar::separatorColorId, true));
 
             auto thickness = 0.2f;
 
@@ -95,7 +95,7 @@ public:
 
         if (getEditingMode() != normalMode && ! drawBar)
         {
-            g.setColour (findColour (Toolbar::separatorColourId, true));
+            g.setColor (findColor (Toolbar::separatorColorId, true));
 
             auto indentX = jmin (2, (w - 3) / 2);
             auto indentY = jmin (2, (h - 3) / 2);
@@ -488,10 +488,10 @@ void Toolbar::updateAllItemPositions (bool animate)
         missingItemsButton->setEnabled (! isEditingActive);
 
         if (vertical)
-            missingItemsButton->setCentrePosition (getWidth() / 2,
+            missingItemsButton->setCenterPosition (getWidth() / 2,
                                                    getHeight() - 4 - extrasButtonSize / 2);
         else
-            missingItemsButton->setCentrePosition (getWidth() - 4 - extrasButtonSize / 2,
+            missingItemsButton->setCenterPosition (getWidth() - 4 - extrasButtonSize / 2,
                                                    getHeight() / 2);
 
         auto maxLength = itemsOffTheEnd ? (vertical ? missingItemsButton->getY()
@@ -643,20 +643,20 @@ void Toolbar::itemDropped (const SourceDetails& dragSourceDetails)
 void Toolbar::mouseDown (const MouseEvent&) {}
 
 //==============================================================================
-class Toolbar::CustomisationDialog   : public DialogWindow
+class Toolbar::CustomizationDialog   : public DialogWindow
 {
 public:
-    CustomisationDialog (ToolbarItemFactory& factory, Toolbar& bar, int optionFlags)
-        : DialogWindow (TRANS("Add/remove items from toolbar"), Colours::white, true, true),
+    CustomizationDialog (ToolbarItemFactory& factory, Toolbar& bar, int optionFlags)
+        : DialogWindow (TRANS("Add/remove items from toolbar"), Colors::white, true, true),
           toolbar (bar)
     {
-        setContentOwned (new CustomiserPanel (factory, toolbar, optionFlags), true);
+        setContentOwned (new CustomizerPanel (factory, toolbar, optionFlags), true);
         setResizable (true, true);
         setResizeLimits (400, 300, 1500, 1000);
         positionNearBar();
     }
 
-    ~CustomisationDialog()
+    ~CustomizationDialog()
     {
         toolbar.setEditingActive (false);
     }
@@ -680,7 +680,7 @@ public:
 
         if (toolbar.isVertical())
         {
-            if (pos.x > screenSize.getCentreX())
+            if (pos.x > screenSize.getCenterX())
                 pos.x -= getWidth() - gap;
             else
                 pos.x += toolbar.getWidth() + gap;
@@ -689,7 +689,7 @@ public:
         {
             pos.x += (toolbar.getWidth() - getWidth()) / 2;
 
-            if (pos.y > screenSize.getCentreY())
+            if (pos.y > screenSize.getCenterY())
                 pos.y -= getHeight() - gap;
             else
                 pos.y += toolbar.getHeight() + gap;
@@ -701,10 +701,10 @@ public:
 private:
     Toolbar& toolbar;
 
-    class CustomiserPanel  : public Component
+    class CustomizerPanel  : public Component
     {
     public:
-        CustomiserPanel (ToolbarItemFactory& tbf, Toolbar& bar, int optionFlags)
+        CustomizerPanel (ToolbarItemFactory& tbf, Toolbar& bar, int optionFlags)
            : factory (tbf), toolbar (bar), palette (tbf, bar),
              instructions ({}, TRANS ("You can drag the items above and drop them onto a toolbar to add them.")
                                  + "\n\n"
@@ -763,12 +763,12 @@ private:
 
         void paint (Graphics& g) override
         {
-            Colour background;
+            Color background;
 
             if (auto* dw = findParentComponentOfClass<DialogWindow>())
-                background = dw->getBackgroundColour();
+                background = dw->getBackgroundColor();
 
-            g.setColour (background.contrasting().withAlpha (0.3f));
+            g.setColor (background.contrasting().withAlpha (0.3f));
             g.fillRect (palette.getX(), palette.getBottom() - 1, palette.getWidth(), 1);
         }
 
@@ -794,11 +794,11 @@ private:
     };
 };
 
-void Toolbar::showCustomisationDialog (ToolbarItemFactory& factory, const int optionFlags)
+void Toolbar::showCustomizationDialog (ToolbarItemFactory& factory, const int optionFlags)
 {
     setEditingActive (true);
 
-    (new CustomisationDialog (factory, *this, optionFlags))
+    (new CustomizationDialog (factory, *this, optionFlags))
         ->enterModalState (true, nullptr, true);
 }
 

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -175,7 +175,7 @@ void SourceCodeEditor::setEditor (GenericCodeEditorComponent* newEditor)
     editor->setFont (AppearanceSettings::getDefaultCodeFont());
     editor->setTabSize (4, true);
 
-    updateColourScheme();
+    updateColorScheme();
     getAppSettings().appearance.settings.addListener (this);
 
     editor->getDocument().addListener (this);
@@ -210,7 +210,7 @@ void SourceCodeEditor::resized()
     editor->setBounds (getLocalBounds());
 }
 
-void SourceCodeEditor::updateColourScheme()
+void SourceCodeEditor::updateColorScheme()
 {
     getAppSettings().appearance.applyToCodeEditor (*editor);
 }
@@ -222,15 +222,15 @@ void SourceCodeEditor::checkSaveState()
 
 void SourceCodeEditor::lookAndFeelChanged()
 {
-    updateColourScheme();
+    updateColorScheme();
 }
 
-void SourceCodeEditor::valueTreePropertyChanged (ValueTree&, const Identifier&)   { updateColourScheme(); }
-void SourceCodeEditor::valueTreeChildAdded (ValueTree&, ValueTree&)               { updateColourScheme(); }
-void SourceCodeEditor::valueTreeChildRemoved (ValueTree&, ValueTree&, int)        { updateColourScheme(); }
-void SourceCodeEditor::valueTreeChildOrderChanged (ValueTree&, int, int)          { updateColourScheme(); }
-void SourceCodeEditor::valueTreeParentChanged (ValueTree&)                        { updateColourScheme(); }
-void SourceCodeEditor::valueTreeRedirected (ValueTree&)                           { updateColourScheme(); }
+void SourceCodeEditor::valueTreePropertyChanged (ValueTree&, const Identifier&)   { updateColorScheme(); }
+void SourceCodeEditor::valueTreeChildAdded (ValueTree&, ValueTree&)               { updateColorScheme(); }
+void SourceCodeEditor::valueTreeChildRemoved (ValueTree&, ValueTree&, int)        { updateColorScheme(); }
+void SourceCodeEditor::valueTreeChildOrderChanged (ValueTree&, int, int)          { updateColorScheme(); }
+void SourceCodeEditor::valueTreeParentChanged (ValueTree&)                        { updateColorScheme(); }
+void SourceCodeEditor::valueTreeRedirected (ValueTree&)                           { updateColorScheme(); }
 
 void SourceCodeEditor::codeDocumentTextInserted (const String&, int)              { checkSaveState(); }
 void SourceCodeEditor::codeDocumentTextDeleted (int, int)                         { checkSaveState(); }
@@ -349,14 +349,14 @@ class GenericCodeEditorComponent::FindPanel  : public Component
 public:
     FindPanel()
     {
-        editor.setColour (CaretComponent::caretColourId, Colours::black);
+        editor.setColor (CaretComponent::caretColorId, Colors::black);
 
         addAndMakeVisible (editor);
-        label.setColour (Label::textColourId, Colours::white);
+        label.setColor (Label::textColorId, Colors::white);
         label.attachToComponent (&editor, false);
 
         addAndMakeVisible (caseButton);
-        caseButton.setColour (ToggleButton::textColourId, Colours::white);
+        caseButton.setColor (ToggleButton::textColorId, Colors::white);
         caseButton.setToggleState (isCaseSensitiveSearch(), dontSendNotification);
         caseButton.onClick = [this] { setCaseSensitiveSearch (caseButton.getToggleState()); };
 
@@ -391,9 +391,9 @@ public:
         Path outline;
         outline.addRoundedRectangle (1.0f, 1.0f, getWidth() - 2.0f, getHeight() - 2.0f, 8.0f);
 
-        g.setColour (Colours::black.withAlpha (0.6f));
+        g.setColor (Colors::black.withAlpha (0.6f));
         g.fillPath (outline);
-        g.setColour (Colours::white.withAlpha (0.8f));
+        g.setColor (Colors::white.withAlpha (0.8f));
         g.strokePath (outline, PathStrokeType (1.0f));
     }
 

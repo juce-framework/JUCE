@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -473,7 +473,7 @@ void Path::addArc (float x, float y, float w, float h,
     auto radiusX = w / 2.0f;
     auto radiusY = h / 2.0f;
 
-    addCentredArc (x + radiusX,
+    addCenteredArc (x + radiusX,
                    y + radiusY,
                    radiusX, radiusY,
                    0.0f,
@@ -481,7 +481,7 @@ void Path::addArc (float x, float y, float w, float h,
                    startAsNewSubPath);
 }
 
-void Path::addCentredArc (float centreX, float centreY,
+void Path::addCenteredArc (float centerX, float centerY,
                           float radiusX, float radiusY,
                           float rotationOfEllipse,
                           float fromRadians, float toRadians,
@@ -489,12 +489,12 @@ void Path::addCentredArc (float centreX, float centreY,
 {
     if (radiusX > 0.0f && radiusY > 0.0f)
     {
-        Point<float> centre (centreX, centreY);
-        auto rotation = AffineTransform::rotation (rotationOfEllipse, centreX, centreY);
+        Point<float> center (centerX, centerY);
+        auto rotation = AffineTransform::rotation (rotationOfEllipse, centerX, centerY);
         auto angle = fromRadians;
 
         if (startAsNewSubPath)
-            startNewSubPath (centre.getPointOnCircumference (radiusX, radiusY, angle).transformedBy (rotation));
+            startNewSubPath (center.getPointOnCircumference (radiusX, radiusY, angle).transformedBy (rotation));
 
         if (fromRadians < toRadians)
         {
@@ -503,7 +503,7 @@ void Path::addCentredArc (float centreX, float centreY,
 
             while (angle < toRadians)
             {
-                lineTo (centre.getPointOnCircumference (radiusX, radiusY, angle).transformedBy (rotation));
+                lineTo (center.getPointOnCircumference (radiusX, radiusY, angle).transformedBy (rotation));
                 angle += PathHelpers::ellipseAngularIncrement;
             }
         }
@@ -514,12 +514,12 @@ void Path::addCentredArc (float centreX, float centreY,
 
             while (angle > toRadians)
             {
-                lineTo (centre.getPointOnCircumference (radiusX, radiusY, angle).transformedBy (rotation));
+                lineTo (center.getPointOnCircumference (radiusX, radiusY, angle).transformedBy (rotation));
                 angle -= PathHelpers::ellipseAngularIncrement;
             }
         }
 
-        lineTo (centre.getPointOnCircumference (radiusX, radiusY, toRadians).transformedBy (rotation));
+        lineTo (center.getPointOnCircumference (radiusX, radiusY, toRadians).transformedBy (rotation));
     }
 }
 
@@ -529,9 +529,9 @@ void Path::addPieSegment (float x, float y, float width, float height,
 {
     auto radiusX = width * 0.5f;
     auto radiusY = height * 0.5f;
-    Point<float> centre (x + radiusX, y + radiusY);
+    Point<float> center (x + radiusX, y + radiusY);
 
-    startNewSubPath (centre.getPointOnCircumference (radiusX, radiusY, fromRadians));
+    startNewSubPath (center.getPointOnCircumference (radiusX, radiusY, fromRadians));
     addArc (x, y, width, height, fromRadians, toRadians);
 
     if (std::abs (fromRadians - toRadians) > MathConstants<float>::pi * 1.999f)
@@ -543,8 +543,8 @@ void Path::addPieSegment (float x, float y, float width, float height,
             radiusX *= innerCircleProportionalSize;
             radiusY *= innerCircleProportionalSize;
 
-            startNewSubPath (centre.getPointOnCircumference (radiusX, radiusY, toRadians));
-            addArc (centre.x - radiusX, centre.y - radiusY, radiusX * 2.0f, radiusY * 2.0f, toRadians, fromRadians);
+            startNewSubPath (center.getPointOnCircumference (radiusX, radiusY, toRadians));
+            addArc (center.x - radiusX, center.y - radiusY, radiusX * 2.0f, radiusY * 2.0f, toRadians, fromRadians);
         }
     }
     else
@@ -554,11 +554,11 @@ void Path::addPieSegment (float x, float y, float width, float height,
             radiusX *= innerCircleProportionalSize;
             radiusY *= innerCircleProportionalSize;
 
-            addArc (centre.x - radiusX, centre.y - radiusY, radiusX * 2.0f, radiusY * 2.0f, toRadians, fromRadians);
+            addArc (center.x - radiusX, center.y - radiusY, radiusX * 2.0f, radiusY * 2.0f, toRadians, fromRadians);
         }
         else
         {
-            lineTo (centre);
+            lineTo (center);
         }
     }
 
@@ -609,7 +609,7 @@ void Path::addArrow (Line<float> line, float lineThickness,
     closeSubPath();
 }
 
-void Path::addPolygon (Point<float> centre, int numberOfSides,
+void Path::addPolygon (Point<float> center, int numberOfSides,
                        float radius, float startAngle)
 {
     jassert (numberOfSides > 1); // this would be silly.
@@ -621,7 +621,7 @@ void Path::addPolygon (Point<float> centre, int numberOfSides,
         for (int i = 0; i < numberOfSides; ++i)
         {
             auto angle = startAngle + i * angleBetweenPoints;
-            auto p = centre.getPointOnCircumference (radius, angle);
+            auto p = center.getPointOnCircumference (radius, angle);
 
             if (i == 0)
                 startNewSubPath (p);
@@ -633,7 +633,7 @@ void Path::addPolygon (Point<float> centre, int numberOfSides,
     }
 }
 
-void Path::addStar (Point<float> centre, int numberOfPoints, float innerRadius,
+void Path::addStar (Point<float> center, int numberOfPoints, float innerRadius,
                     float outerRadius, float startAngle)
 {
     jassert (numberOfPoints > 1); // this would be silly.
@@ -645,14 +645,14 @@ void Path::addStar (Point<float> centre, int numberOfPoints, float innerRadius,
         for (int i = 0; i < numberOfPoints; ++i)
         {
             auto angle = startAngle + i * angleBetweenPoints;
-            auto p = centre.getPointOnCircumference (outerRadius, angle);
+            auto p = center.getPointOnCircumference (outerRadius, angle);
 
             if (i == 0)
                 startNewSubPath (p);
             else
                 lineTo (p);
 
-            lineTo (centre.getPointOnCircumference (innerRadius, angle + angleBetweenPoints * 0.5f));
+            lineTo (center.getPointOnCircumference (innerRadius, angle + angleBetweenPoints * 0.5f));
         }
 
         closeSubPath();
@@ -908,22 +908,22 @@ AffineTransform Path::getTransformToScaleToFit (float x, float y, float w, float
             newH = w * srcRatio;
         }
 
-        auto newXCentre = x;
-        auto newYCentre = y;
+        auto newXCenter = x;
+        auto newYCenter = y;
 
-        if (justification.testFlags (Justification::left))          newXCentre += newW * 0.5f;
-        else if (justification.testFlags (Justification::right))    newXCentre += w - newW * 0.5f;
-        else                                                        newXCentre += w * 0.5f;
+        if (justification.testFlags (Justification::left))          newXCenter += newW * 0.5f;
+        else if (justification.testFlags (Justification::right))    newXCenter += w - newW * 0.5f;
+        else                                                        newXCenter += w * 0.5f;
 
-        if (justification.testFlags (Justification::top))           newYCentre += newH * 0.5f;
-        else if (justification.testFlags (Justification::bottom))   newYCentre += h - newH * 0.5f;
-        else                                                        newYCentre += h * 0.5f;
+        if (justification.testFlags (Justification::top))           newYCenter += newH * 0.5f;
+        else if (justification.testFlags (Justification::bottom))   newYCenter += h - newH * 0.5f;
+        else                                                        newYCenter += h * 0.5f;
 
         return AffineTransform::translation (boundsRect.getWidth()  * -0.5f - boundsRect.getX(),
                                              boundsRect.getHeight() * -0.5f - boundsRect.getY())
                     .scaled (newW / boundsRect.getWidth(),
                              newH / boundsRect.getHeight())
-                    .translated (newXCentre, newYCentre);
+                    .translated (newXCenter, newYCenter);
     }
     else
     {

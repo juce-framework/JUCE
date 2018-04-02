@@ -51,30 +51,30 @@ struct GridDemo   : public Component
 {
     GridDemo()
     {
-        addGridItemPanel (Colours::aquamarine, "0");
-        addGridItemPanel (Colours::red,        "1");
-        addGridItemPanel (Colours::blue,       "2");
-        addGridItemPanel (Colours::green,      "3");
-        addGridItemPanel (Colours::orange,     "4");
-        addGridItemPanel (Colours::white,      "5");
-        addGridItemPanel (Colours::aquamarine, "6");
-        addGridItemPanel (Colours::red,        "7");
-        addGridItemPanel (Colours::blue,       "8");
-        addGridItemPanel (Colours::green,      "9");
-        addGridItemPanel (Colours::orange,     "10");
-        addGridItemPanel (Colours::white,      "11");
+        addGridItemPanel (Colors::aquamarine, "0");
+        addGridItemPanel (Colors::red,        "1");
+        addGridItemPanel (Colors::blue,       "2");
+        addGridItemPanel (Colors::green,      "3");
+        addGridItemPanel (Colors::orange,     "4");
+        addGridItemPanel (Colors::white,      "5");
+        addGridItemPanel (Colors::aquamarine, "6");
+        addGridItemPanel (Colors::red,        "7");
+        addGridItemPanel (Colors::blue,       "8");
+        addGridItemPanel (Colors::green,      "9");
+        addGridItemPanel (Colors::orange,     "10");
+        addGridItemPanel (Colors::white,      "11");
 
         setSize (750, 750);
     }
 
-    void addGridItemPanel (Colour colour, const char* text)
+    void addGridItemPanel (Color color, const char* text)
     {
-        addAndMakeVisible (items.add (new GridItemPanel (colour, text)));
+        addAndMakeVisible (items.add (new GridItemPanel (color, text)));
     }
 
     void paint (Graphics& g) override
     {
-        g.fillAll (Colours::black);
+        g.fillAll (Colors::black);
     }
 
     void resized() override
@@ -118,20 +118,20 @@ struct GridDemo   : public Component
     //==============================================================================
     struct GridItemPanel  : public Component
     {
-        GridItemPanel (Colour colourToUse, const String& textToUse)
-            : colour (colourToUse),
+        GridItemPanel (Color colorToUse, const String& textToUse)
+            : color (colorToUse),
               text (textToUse)
         {}
 
         void paint (Graphics& g) override
         {
-            g.fillAll (colour.withAlpha (0.5f));
+            g.fillAll (color.withAlpha (0.5f));
 
-            g.setColour (Colours::black);
-            g.drawText (text, getLocalBounds().withSizeKeepingCentre (100, 100), Justification::centred, false);
+            g.setColor (Colors::black);
+            g.drawText (text, getLocalBounds().withSizeKeepingCenter (100, 100), Justification::centered, false);
         }
 
-        Colour colour;
+        Color color;
         String text;
     };
 

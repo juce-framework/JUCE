@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -142,7 +142,7 @@ public:
     JuceAudioUnitv3Base (AUAudioUnit* audioUnit) : au (audioUnit)
     {
         jassert (MessageManager::getInstance()->isThisTheMessageThread());
-        initialiseJuce_GUI();
+        initializeJuce_GUI();
     }
 
     virtual ~JuceAudioUnitv3Base() {}
@@ -178,8 +178,8 @@ public:
     virtual NSTimeInterval getTailTime()                                   = 0;
 
     //==============================================================================
-    virtual AUAudioUnitBusArray* getInputBusses()                          = 0;
-    virtual AUAudioUnitBusArray* getOutputBusses()                         = 0;
+    virtual AUAudioUnitBusArray* getInputBuses()                          = 0;
+    virtual AUAudioUnitBusArray* getOutputBuses()                         = 0;
     virtual NSArray<NSNumber*>* getChannelCapabilities()                   = 0;
     virtual bool shouldChangeToFormat (AVAudioFormat*, AUAudioUnitBus*)    = 0;
 
@@ -255,8 +255,8 @@ private:
             addMethod (@selector (tailTime),                        getTailTime,                    @encode (NSTimeInterval),  "@:");
 
             //==============================================================================
-            addMethod (@selector (inputBusses),                     getInputBusses,                 "@@:");
-            addMethod (@selector (outputBusses),                    getOutputBusses,                "@@:");
+            addMethod (@selector (inputBuses),                     getInputBuses,                 "@@:");
+            addMethod (@selector (outputBuses),                    getOutputBuses,                "@@:");
             addMethod (@selector (channelCapabilities),             getChannelCapabilities,         "@@:");
             addMethod (@selector (shouldChangeToFormat:forBus:),    shouldChangeToFormat,           "B@:@@");
 
@@ -370,8 +370,8 @@ private:
         static NSTimeInterval getTailTime (id self, SEL)                                            { return _this (self)->getTailTime(); }
 
         //==============================================================================
-        static AUAudioUnitBusArray* getInputBusses   (id self, SEL)                                 { return _this (self)->getInputBusses(); }
-        static AUAudioUnitBusArray* getOutputBusses  (id self, SEL)                                 { return _this (self)->getOutputBusses(); }
+        static AUAudioUnitBusArray* getInputBuses   (id self, SEL)                                 { return _this (self)->getInputBuses(); }
+        static AUAudioUnitBusArray* getOutputBuses  (id self, SEL)                                 { return _this (self)->getOutputBuses(); }
         static NSArray<NSNumber*>* getChannelCapabilities (id self, SEL)                            { return _this (self)->getChannelCapabilities(); }
         static BOOL shouldChangeToFormat (id self, SEL, AVAudioFormat* format, AUAudioUnitBus* bus) { return _this (self)->shouldChangeToFormat (format, bus) ? YES : NO; }
 
@@ -510,8 +510,8 @@ public:
         addParameters();
         addPresets();
 
-        addAudioUnitBusses (true);
-        addAudioUnitBusses (false);
+        addAudioUnitBuses (true);
+        addAudioUnitBuses (false);
     }
 
     AudioProcessor& getAudioProcessor() const noexcept        { return **processorHolder; }
@@ -645,8 +645,8 @@ public:
     }
 
     //==============================================================================
-    AUAudioUnitBusArray* getInputBusses() override            { return inputBusses;  }
-    AUAudioUnitBusArray* getOutputBusses() override           { return outputBusses; }
+    AUAudioUnitBusArray* getInputBuses() override            { return inputBuses;  }
+    AUAudioUnitBusArray* getOutputBuses() override           { return outputBuses; }
     NSArray<NSNumber*>* getChannelCapabilities() override     { return channelCapabilities; }
 
     bool shouldChangeToFormat (AVAudioFormat* format, AUAudioUnitBus* auBus) override
@@ -766,7 +766,7 @@ public:
             const int n = AudioUnitHelpers::getBusCount (&processor, isInput);
             Array<AudioChannelSet>& channelSets = (isInput ? layouts.inputBuses : layouts.outputBuses);
 
-            AUAudioUnitBusArray* auBuses = (isInput ? [getAudioUnit() inputBusses] : [getAudioUnit() outputBusses]);
+            AUAudioUnitBusArray* auBuses = (isInput ? [getAudioUnit() inputBuses] : [getAudioUnit() outputBuses]);
             jassert ([auBuses count] == static_cast<NSUInteger> (n));
 
             for (int busIdx = 0; busIdx < n; ++busIdx)
@@ -821,7 +821,7 @@ public:
         audioBuffer.prepare (totalInChannels, totalOutChannels, static_cast<int> (maxFrames));
 
         double sampleRate = (jmax (AudioUnitHelpers::getBusCount (&processor, true), AudioUnitHelpers::getBusCount (&processor, false)) > 0 ?
-                             [[[([inputBusses count] > 0 ? inputBusses : outputBusses) objectAtIndexedSubscript: 0] format] sampleRate] : 44100.0);
+                             [[[([inputBuses count] > 0 ? inputBuses : outputBuses) objectAtIndexedSubscript: 0] format] sampleRate] : 44100.0);
 
         processor.setRateAndBufferSizeDetails (sampleRate, static_cast<int> (maxFrames));
         processor.prepareToPlay (sampleRate, static_cast<int> (maxFrames));
@@ -1094,7 +1094,7 @@ private:
     };
 
     //==============================================================================
-    void addAudioUnitBusses (bool isInput)
+    void addAudioUnitBuses (bool isInput)
     {
         ScopedPointer<NSMutableArray<AUAudioUnitBus*>> array = [[NSMutableArray<AUAudioUnitBus*> alloc] init];
         AudioProcessor& processor = getAudioProcessor();
@@ -1115,9 +1115,9 @@ private:
             [array addObject: audioUnitBus];
         }
 
-        (isInput ? inputBusses : outputBusses) = [[AUAudioUnitBusArray alloc] initWithAudioUnit: au
+        (isInput ? inputBuses : outputBuses) = [[AUAudioUnitBusArray alloc] initWithAudioUnit: au
                                                                                         busType: (isInput ? AUAudioUnitBusTypeInput : AUAudioUnitBusTypeOutput)
-                                                                                         busses: array];
+                                                                                         buses: array];
     }
 
     // When parameters are discrete we need to use integer values.
@@ -1305,7 +1305,7 @@ private:
         const AUAudioFrameCount maxFrames = [getAudioUnit() maximumFramesToRender];
 
         for (int busIdx = 0; busIdx < n; ++busIdx)
-            busBuffers.add (new BusBuffer ([(isInput ? inputBusses : outputBusses) objectAtIndexedSubscript: static_cast<unsigned int> (busIdx)],
+            busBuffers.add (new BusBuffer ([(isInput ? inputBuses : outputBuses) objectAtIndexedSubscript: static_cast<unsigned int> (busIdx)],
                                            static_cast<int> (maxFrames)));
     }
 
@@ -1478,9 +1478,9 @@ private:
         if (param != nullptr)
         {
             int idx = getJuceParameterIndexForAUAddress ([param address]);
-            auto normalisedValue = value / getMaximumParameterValue (idx);
+            auto normalizedValue = value / getMaximumParameterValue (idx);
 
-            setAudioProcessorParameter (idx, normalisedValue);
+            setAudioProcessorParameter (idx, normalizedValue);
         }
     }
 
@@ -1578,8 +1578,8 @@ private:
 
     int totalInChannels, totalOutChannels;
 
-    ScopedPointer<AUAudioUnitBusArray> inputBusses;
-    ScopedPointer<AUAudioUnitBusArray> outputBusses;
+    ScopedPointer<AUAudioUnitBusArray> inputBuses;
+    ScopedPointer<AUAudioUnitBusArray> outputBuses;
 
     ObjCBlock<AUImplementorValueObserver> paramObserver;
     ObjCBlock<AUImplementorValueProvider> paramProvider;
@@ -1640,7 +1640,7 @@ public:
         jassert (MessageManager::getInstance()->isThisTheMessageThread());
 
         PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_AudioUnitv3;
-        initialiseJuce_GUI();
+        initializeJuce_GUI();
     }
 
     ~JuceAUViewController()

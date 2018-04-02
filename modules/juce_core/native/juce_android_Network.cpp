@@ -141,7 +141,7 @@ public:
             stream.clear();
         }
 
-        hasBeenCancelled = true;
+        hasBeenCanceled = true;
     }
 
     bool connect (WebInputStream::Listener* /*listener*/)
@@ -191,7 +191,7 @@ public:
             {
                 const ScopedLock lock (createStreamLock);
 
-                if (! hasBeenCancelled)
+                if (! hasBeenCanceled)
                     stream = GlobalRef (LocalRef<jobject> (env->CallStaticObjectMethod (JuceAppActivity,
                                                                                         JuceAppActivity.createHTTPStream,
                                                                                         javaString (address).get(),
@@ -329,7 +329,7 @@ private:
     String httpRequest, headers;
     StringPairArray responseHeaders;
     CriticalSection createStreamLock;
-    bool hasBeenCancelled = false;
+    bool hasBeenCanceled = false;
     int readPosition = 0;
 
     GlobalRef stream;

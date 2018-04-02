@@ -336,19 +336,19 @@ private:
             addAndMakeVisible (highPassFilterFreqSlider.get());
 
             addAndMakeVisible (inputVolumeLabel);
-            inputVolumeLabel.setJustificationType (Justification::centredLeft);
+            inputVolumeLabel.setJustificationType (Justification::centeredLeft);
             inputVolumeLabel.attachToComponent (inputVolumeSlider.get(), true);
 
             addAndMakeVisible (outputVolumeLabel);
-            outputVolumeLabel.setJustificationType (Justification::centredLeft);
+            outputVolumeLabel.setJustificationType (Justification::centeredLeft);
             outputVolumeLabel.attachToComponent (outputVolumeSlider.get(), true);
 
             addAndMakeVisible (lowPassFilterFreqLabel);
-            lowPassFilterFreqLabel.setJustificationType (Justification::centredLeft);
+            lowPassFilterFreqLabel.setJustificationType (Justification::centeredLeft);
             lowPassFilterFreqLabel.attachToComponent (lowPassFilterFreqSlider.get(), true);
 
             addAndMakeVisible (highPassFilterFreqLabel);
-            highPassFilterFreqLabel.setJustificationType (Justification::centredLeft);
+            highPassFilterFreqLabel.setJustificationType (Justification::centeredLeft);
             highPassFilterFreqLabel.attachToComponent (highPassFilterFreqSlider.get(), true);
 
             //==============================================================================
@@ -362,7 +362,7 @@ private:
             stereoBox.setSelectedId (processor.stereoParam->getIndex() + 1);
 
             addAndMakeVisible (stereoLabel);
-            stereoLabel.setJustificationType (Justification::centredLeft);
+            stereoLabel.setJustificationType (Justification::centeredLeft);
             stereoLabel.attachToComponent (&stereoBox, true);
 
             //==============================================================================
@@ -376,7 +376,7 @@ private:
             slopeBox.setSelectedId(processor.slopeParam->getIndex() + 1);
 
             addAndMakeVisible(slopeLabel);
-            slopeLabel.setJustificationType(Justification::centredLeft);
+            slopeLabel.setJustificationType(Justification::centeredLeft);
             slopeLabel.attachToComponent(&slopeBox, true);
 
             //==============================================================================
@@ -390,7 +390,7 @@ private:
             waveshaperBox.setSelectedId (processor.waveshaperParam->getIndex() + 1);
 
             addAndMakeVisible (waveshaperLabel);
-            waveshaperLabel.setJustificationType (Justification::centredLeft);
+            waveshaperLabel.setJustificationType (Justification::centeredLeft);
             waveshaperLabel.attachToComponent (&waveshaperBox, true);
 
             //==============================================================================
@@ -404,7 +404,7 @@ private:
             cabinetTypeBox.setSelectedId (processor.cabinetTypeParam->getIndex() + 1);
 
             addAndMakeVisible (cabinetTypeLabel);
-            cabinetTypeLabel.setJustificationType (Justification::centredLeft);
+            cabinetTypeLabel.setJustificationType (Justification::centeredLeft);
             cabinetTypeLabel.attachToComponent (&cabinetTypeBox, true);
 
             //==============================================================================
@@ -427,7 +427,7 @@ private:
         //==============================================================================
         void paint (Graphics& g) override
         {
-            g.setColour (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+            g.setColor (getLookAndFeel().findColor (ResizableWindow::backgroundColorId));
             g.fillAll();
         }
 
@@ -466,12 +466,12 @@ private:
             //==============================================================================
             auto buttonSlice = bounds.removeFromTop (30);
             cabinetSimButton.setSize (200, buttonSlice.getHeight());
-            cabinetSimButton.setCentrePosition (buttonSlice.getCentre());
+            cabinetSimButton.setCenterPosition (buttonSlice.getCenter());
             bounds.removeFromTop(5);
 
             buttonSlice = bounds.removeFromTop (30);
             oversamplingButton.setSize(200, buttonSlice.getHeight());
-            oversamplingButton.setCentrePosition(buttonSlice.getCentre());
+            oversamplingButton.setCenterPosition(buttonSlice.getCenter());
         }
 
     private:

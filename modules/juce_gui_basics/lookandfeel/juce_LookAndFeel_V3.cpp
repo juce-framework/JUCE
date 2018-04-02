@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -29,22 +29,22 @@ namespace juce
 
 LookAndFeel_V3::LookAndFeel_V3()
 {
-    setColour (TreeView::selectedItemBackgroundColourId, Colour (0x301111ee));
+    setColor (TreeView::selectedItemBackgroundColorId, Color (0x301111ee));
 
-    const Colour textButtonColour (0xffeeeeff);
-    setColour (TextButton::buttonColourId, textButtonColour);
-    setColour (TextButton::buttonOnColourId, Colour (0xff888888));
-    setColour (ComboBox::buttonColourId, textButtonColour);
-    setColour (ComboBox::focusedOutlineColourId, textButtonColour);
-    setColour (TextEditor::outlineColourId, Colours::transparentBlack);
-    setColour (TabbedButtonBar::tabOutlineColourId, Colour (0x66000000));
-    setColour (TabbedComponent::outlineColourId, Colour (0x66000000));
-    setColour (Slider::trackColourId, Colour (0xbbffffff));
-    setColour (Slider::thumbColourId, Colour (0xffddddff));
-    setColour (BubbleComponent::backgroundColourId, Colour (0xeeeeeedd));
-    setColour (ScrollBar::thumbColourId, Colour::greyLevel (0.8f).contrasting().withAlpha (0.13f));
-    setColour (TableHeaderComponent::backgroundColourId, Colours::white.withAlpha (0.6f));
-    setColour (TableHeaderComponent::outlineColourId,    Colours::black.withAlpha (0.5f));
+    const Color textButtonColor (0xffeeeeff);
+    setColor (TextButton::buttonColorId, textButtonColor);
+    setColor (TextButton::buttonOnColorId, Color (0xff888888));
+    setColor (ComboBox::buttonColorId, textButtonColor);
+    setColor (ComboBox::focusedOutlineColorId, textButtonColor);
+    setColor (TextEditor::outlineColorId, Colors::transparentBlack);
+    setColor (TabbedButtonBar::tabOutlineColorId, Color (0x66000000));
+    setColor (TabbedComponent::outlineColorId, Color (0x66000000));
+    setColor (Slider::trackColorId, Color (0xbbffffff));
+    setColor (Slider::thumbColorId, Color (0xffddddff));
+    setColor (BubbleComponent::backgroundColorId, Color (0xeeeeeedd));
+    setColor (ScrollBar::thumbColorId, Color::grayLevel (0.8f).contrasting().withAlpha (0.13f));
+    setColor (TableHeaderComponent::backgroundColorId, Colors::white.withAlpha (0.6f));
+    setColor (TableHeaderComponent::outlineColorId,    Colors::black.withAlpha (0.5f));
 }
 
 LookAndFeel_V3::~LookAndFeel_V3() {}
@@ -55,7 +55,7 @@ void LookAndFeel_V3::drawStretchableLayoutResizerBar (Graphics& g, int /*w*/, in
                                                       bool isMouseOver, bool isMouseDragging)
 {
     if (isMouseOver || isMouseDragging)
-        g.fillAll (Colours::yellow.withAlpha (0.4f));
+        g.fillAll (Colors::yellow.withAlpha (0.4f));
 }
 
 void LookAndFeel_V3::drawScrollbar (Graphics& g, ScrollBar& scrollbar, int x, int y, int width, int height,
@@ -76,15 +76,15 @@ void LookAndFeel_V3::drawScrollbar (Graphics& g, ScrollBar& scrollbar, int x, in
                                            thumbSize - thumbIndentx2, height - thumbIndentx2, (height - thumbIndentx2) * 0.5f);
     }
 
-    Colour thumbCol (scrollbar.findColour (ScrollBar::thumbColourId, true));
+    Color thumbCol (scrollbar.findColor (ScrollBar::thumbColorId, true));
 
     if (isMouseOver || isMouseDown)
         thumbCol = thumbCol.withMultipliedAlpha (2.0f);
 
-    g.setColour (thumbCol);
+    g.setColor (thumbCol);
     g.fillPath (thumbPath);
 
-    g.setColour (thumbCol.contrasting ((isMouseOver  || isMouseDown) ? 0.2f : 0.1f));
+    g.setColor (thumbCol.contrasting ((isMouseOver  || isMouseDown) ? 0.2f : 0.1f));
     g.strokePath (thumbPath, PathStrokeType (1.0f));
 }
 
@@ -92,46 +92,46 @@ void LookAndFeel_V3::drawConcertinaPanelHeader (Graphics& g, const Rectangle<int
                                                 bool isMouseOver, bool /*isMouseDown*/,
                                                 ConcertinaPanel&, Component& panel)
 {
-    const Colour bkg (Colours::grey);
+    const Color bkg (Colors::gray);
 
-    g.setGradientFill (ColourGradient::vertical (Colours::white.withAlpha (isMouseOver ? 0.4f : 0.2f), (float) area.getY(),
-                                                 Colours::darkgrey.withAlpha (0.1f), (float) area.getBottom()));
+    g.setGradientFill (ColorGradient::vertical (Colors::white.withAlpha (isMouseOver ? 0.4f : 0.2f), (float) area.getY(),
+                                                 Colors::darkgray.withAlpha (0.1f), (float) area.getBottom()));
     g.fillAll();
 
-    g.setColour (bkg.contrasting().withAlpha (0.1f));
+    g.setColor (bkg.contrasting().withAlpha (0.1f));
     g.fillRect (area.withHeight (1));
     g.fillRect (area.withTop (area.getBottom() - 1));
 
-    g.setColour (bkg.contrasting());
+    g.setColor (bkg.contrasting());
     g.setFont (Font (area.getHeight() * 0.6f).boldened());
-    g.drawFittedText (panel.getName(), 4, 0, area.getWidth() - 6, area.getHeight(), Justification::centredLeft, 1);
+    g.drawFittedText (panel.getName(), 4, 0, area.getWidth() - 6, area.getHeight(), Justification::centeredLeft, 1);
 }
 
-static void drawButtonShape (Graphics& g, const Path& outline, Colour baseColour, float height)
+static void drawButtonShape (Graphics& g, const Path& outline, Color baseColor, float height)
 {
-    const float mainBrightness = baseColour.getBrightness();
-    const float mainAlpha = baseColour.getFloatAlpha();
+    const float mainBrightness = baseColor.getBrightness();
+    const float mainAlpha = baseColor.getFloatAlpha();
 
-    g.setGradientFill (ColourGradient::vertical (baseColour.brighter (0.2f), 0.0f,
-                                                 baseColour.darker (0.25f), height));
+    g.setGradientFill (ColorGradient::vertical (baseColor.brighter (0.2f), 0.0f,
+                                                 baseColor.darker (0.25f), height));
     g.fillPath (outline);
 
-    g.setColour (Colours::white.withAlpha (0.4f * mainAlpha * mainBrightness * mainBrightness));
+    g.setColor (Colors::white.withAlpha (0.4f * mainAlpha * mainBrightness * mainBrightness));
     g.strokePath (outline, PathStrokeType (1.0f), AffineTransform::translation (0.0f, 1.0f)
                                                         .scaled (1.0f, (height - 1.6f) / height));
 
-    g.setColour (Colours::black.withAlpha (0.4f * mainAlpha));
+    g.setColor (Colors::black.withAlpha (0.4f * mainAlpha));
     g.strokePath (outline, PathStrokeType (1.0f));
 }
 
-void LookAndFeel_V3::drawButtonBackground (Graphics& g, Button& button, const Colour& backgroundColour,
+void LookAndFeel_V3::drawButtonBackground (Graphics& g, Button& button, const Color& backgroundColor,
                                            bool isMouseOverButton, bool isButtonDown)
 {
-    Colour baseColour (backgroundColour.withMultipliedSaturation (button.hasKeyboardFocus (true) ? 1.3f : 0.9f)
+    Color baseColor (backgroundColor.withMultipliedSaturation (button.hasKeyboardFocus (true) ? 1.3f : 0.9f)
                                        .withMultipliedAlpha (button.isEnabled() ? 0.9f : 0.5f));
 
     if (isButtonDown || isMouseOverButton)
-        baseColour = baseColour.contrasting (isButtonDown ? 0.2f : 0.1f);
+        baseColor = baseColor.contrasting (isButtonDown ? 0.2f : 0.1f);
 
     const bool flatOnLeft   = button.isConnectedOnLeft();
     const bool flatOnRight  = button.isConnectedOnRight();
@@ -152,22 +152,22 @@ void LookAndFeel_V3::drawButtonBackground (Graphics& g, Button& button, const Co
                                      ! (flatOnLeft  || flatOnBottom),
                                      ! (flatOnRight || flatOnBottom));
 
-        drawButtonShape (g, outline, baseColour, height);
+        drawButtonShape (g, outline, baseColor, height);
     }
 }
 
 void LookAndFeel_V3::drawTableHeaderBackground (Graphics& g, TableHeaderComponent& header)
 {
     Rectangle<int> r (header.getLocalBounds());
-    auto outlineColour = header.findColour (TableHeaderComponent::outlineColourId);
+    auto outlineColor = header.findColor (TableHeaderComponent::outlineColorId);
 
-    g.setColour (outlineColour);
+    g.setColor (outlineColor);
     g.fillRect (r.removeFromBottom (1));
 
-    g.setColour (header.findColour (TableHeaderComponent::backgroundColourId));
+    g.setColor (header.findColor (TableHeaderComponent::backgroundColorId));
     g.fillRect (r);
 
-    g.setColour (outlineColour);
+    g.setColor (outlineColor);
 
     for (int i = header.getNumColumns (true); --i >= 0;)
         g.fillRect (header.getColumnPosition (i).removeFromRight (1));
@@ -177,14 +177,14 @@ int LookAndFeel_V3::getTabButtonOverlap (int /*tabDepth*/)            { return -
 int LookAndFeel_V3::getTabButtonSpaceAroundImage()                    { return 0; }
 
 void LookAndFeel_V3::createTabTextLayout (const TabBarButton& button, float length, float depth,
-                                          Colour colour, TextLayout& textLayout)
+                                          Color color, TextLayout& textLayout)
 {
     Font font (depth * 0.5f);
     font.setUnderline (button.hasKeyboardFocus (false));
 
     AttributedString s;
-    s.setJustification (Justification::centred);
-    s.append (button.getButtonText().trim(), font, colour);
+    s.setJustification (Justification::centered);
+    s.append (button.getButtonText().trim(), font, color);
 
     textLayout.createLayout (s, length);
 }
@@ -195,11 +195,11 @@ void LookAndFeel_V3::drawTabButton (TabBarButton& button, Graphics& g, bool isMo
 
     const TabbedButtonBar::Orientation o = button.getTabbedButtonBar().getOrientation();
 
-    const Colour bkg (button.getTabBackgroundColour());
+    const Color bkg (button.getTabBackgroundColor());
 
     if (button.getToggleState())
     {
-        g.setColour (bkg);
+        g.setColor (bkg);
     }
     else
     {
@@ -214,13 +214,13 @@ void LookAndFeel_V3::drawTabButton (TabBarButton& button, Graphics& g, bool isMo
             default:                              jassertfalse; break;
         }
 
-        g.setGradientFill (ColourGradient (bkg.brighter (0.2f), p1.toFloat(),
+        g.setGradientFill (ColorGradient (bkg.brighter (0.2f), p1.toFloat(),
                                            bkg.darker (0.1f),   p2.toFloat(), false));
     }
 
     g.fillRect (activeArea);
 
-    g.setColour (button.findColour (TabbedButtonBar::tabOutlineColourId));
+    g.setColor (button.findColor (TabbedButtonBar::tabOutlineColorId));
 
     Rectangle<int> r (activeArea);
 
@@ -231,17 +231,17 @@ void LookAndFeel_V3::drawTabButton (TabBarButton& button, Graphics& g, bool isMo
 
     const float alpha = button.isEnabled() ? ((isMouseOver || isMouseDown) ? 1.0f : 0.8f) : 0.3f;
 
-    Colour col (bkg.contrasting().withMultipliedAlpha (alpha));
+    Color col (bkg.contrasting().withMultipliedAlpha (alpha));
 
     if (TabbedButtonBar* bar = button.findParentComponentOfClass<TabbedButtonBar>())
     {
-        TabbedButtonBar::ColourIds colID = button.isFrontTab() ? TabbedButtonBar::frontTextColourId
-                                                               : TabbedButtonBar::tabTextColourId;
+        TabbedButtonBar::ColorIds colID = button.isFrontTab() ? TabbedButtonBar::frontTextColorId
+                                                               : TabbedButtonBar::tabTextColorId;
 
-        if (bar->isColourSpecified (colID))
-            col = bar->findColour (colID);
-        else if (isColourSpecified (colID))
-            col = findColour (colID);
+        if (bar->isColorSpecified (colID))
+            col = bar->findColor (colID);
+        else if (isColorSpecified (colID))
+            col = findColor (colID);
     }
 
     const Rectangle<float> area (button.getTextArea().toFloat());
@@ -275,8 +275,8 @@ void LookAndFeel_V3::drawTabAreaBehindFrontButton (TabbedButtonBar& bar, Graphic
     const float shadowSize = 0.15f;
 
     Rectangle<int> shadowRect, line;
-    ColourGradient gradient (Colours::black.withAlpha (bar.isEnabled() ? 0.08f : 0.04f), 0, 0,
-                             Colours::transparentBlack, 0, 0, false);
+    ColorGradient gradient (Colors::black.withAlpha (bar.isEnabled() ? 0.08f : 0.04f), 0, 0,
+                             Colors::transparentBlack, 0, 0, false);
 
     switch (bar.getOrientation())
     {
@@ -312,7 +312,7 @@ void LookAndFeel_V3::drawTabAreaBehindFrontButton (TabbedButtonBar& bar, Graphic
     g.setGradientFill (gradient);
     g.fillRect (shadowRect.expanded (2, 2));
 
-    g.setColour (bar.findColour (TabbedButtonBar::tabOutlineColourId));
+    g.setColor (bar.findColor (TabbedButtonBar::tabOutlineColorId));
     g.fillRect (line);
 }
 
@@ -322,24 +322,24 @@ void LookAndFeel_V3::drawTextEditorOutline (Graphics& g, int width, int height, 
     {
         if (textEditor.hasKeyboardFocus (true) && ! textEditor.isReadOnly())
         {
-            g.setColour (textEditor.findColour (TextEditor::focusedOutlineColourId));
+            g.setColor (textEditor.findColor (TextEditor::focusedOutlineColorId));
             g.drawRect (0, 0, width, height, 2);
         }
         else
         {
-            g.setColour (textEditor.findColour (TextEditor::outlineColourId));
+            g.setColor (textEditor.findColor (TextEditor::outlineColorId));
             g.drawRect (0, 0, width, height);
         }
     }
 }
 
 void LookAndFeel_V3::drawTreeviewPlusMinusBox (Graphics& g, const Rectangle<float>& area,
-                                               Colour backgroundColour, bool isOpen, bool isMouseOver)
+                                               Color backgroundColor, bool isOpen, bool isMouseOver)
 {
     Path p;
     p.addTriangle (0.0f, 0.0f, 1.0f, isOpen ? 0.0f : 0.5f, isOpen ? 0.5f : 0.0f, 1.0f);
 
-    g.setColour (backgroundColour.contrasting().withAlpha (isMouseOver ? 0.5f : 0.3f));
+    g.setColor (backgroundColor.contrasting().withAlpha (isMouseOver ? 0.5f : 0.3f));
     g.fillPath (p, p.getTransformToScaleToFit (area.reduced (2, area.getHeight() / 4), true));
 }
 
@@ -356,16 +356,16 @@ int LookAndFeel_V3::getTreeViewIndentSize (TreeView&)
 void LookAndFeel_V3::drawComboBox (Graphics& g, int width, int height, const bool /*isButtonDown*/,
                                    int buttonX, int buttonY, int buttonW, int buttonH, ComboBox& box)
 {
-    g.fillAll (box.findColour (ComboBox::backgroundColourId));
+    g.fillAll (box.findColor (ComboBox::backgroundColorId));
 
     if (box.isEnabled() && box.hasKeyboardFocus (false))
     {
-        g.setColour (box.findColour (ComboBox::focusedOutlineColourId));
+        g.setColor (box.findColor (ComboBox::focusedOutlineColorId));
         g.drawRect (0, 0, width, height, 2);
     }
     else
     {
-        g.setColour (box.findColour (ComboBox::outlineColourId));
+        g.setColor (box.findColor (ComboBox::outlineColorId));
         g.drawRect (0, 0, width, height);
     }
 
@@ -381,7 +381,7 @@ void LookAndFeel_V3::drawComboBox (Graphics& g, int width, int height, const boo
                    buttonX + buttonW * (1.0f - arrowX), buttonY + buttonH * 0.55f,
                    buttonX + buttonW * arrowX,          buttonY + buttonH * 0.55f);
 
-    g.setColour (box.findColour (ComboBox::arrowColourId).withMultipliedAlpha (box.isEnabled() ? 1.0f : 0.3f));
+    g.setColor (box.findColor (ComboBox::arrowColorId).withMultipliedAlpha (box.isEnabled() ? 1.0f : 0.3f));
     g.fillPath (p);
 }
 
@@ -389,7 +389,7 @@ void LookAndFeel_V3::drawLinearSlider (Graphics& g, int x, int y, int width, int
                                        float sliderPos, float minSliderPos, float maxSliderPos,
                                        const Slider::SliderStyle style, Slider& slider)
 {
-    g.fillAll (slider.findColour (Slider::backgroundColourId));
+    g.fillAll (slider.findColor (Slider::backgroundColorId));
 
     if (style == Slider::LinearBar || style == Slider::LinearBarVertical)
     {
@@ -402,15 +402,15 @@ void LookAndFeel_V3::drawLinearSlider (Graphics& g, int x, int y, int width, int
         else
             p.addRectangle (fx, fy, sliderPos - fx, fh);
 
-        auto baseColour = slider.findColour (Slider::thumbColourId)
+        auto baseColor = slider.findColor (Slider::thumbColorId)
                                 .withMultipliedSaturation (slider.isEnabled() ? 1.0f : 0.5f)
                                 .withMultipliedAlpha (0.8f);
 
-        g.setGradientFill (ColourGradient::vertical (baseColour.brighter (0.08f), 0.0f,
-                                                     baseColour.darker (0.08f), (float) height));
+        g.setGradientFill (ColorGradient::vertical (baseColor.brighter (0.08f), 0.0f,
+                                                     baseColor.darker (0.08f), (float) height));
         g.fillPath (p);
 
-        g.setColour (baseColour.darker (0.2f));
+        g.setColor (baseColor.darker (0.2f));
 
         if (style == Slider::LinearBarVertical)
             g.fillRect (fx, sliderPos, fw, 1.0f);
@@ -432,16 +432,16 @@ void LookAndFeel_V3::drawLinearSliderBackground (Graphics& g, int x, int y, int 
 {
     const float sliderRadius = (float) (getSliderThumbRadius (slider) - 2);
 
-    const Colour trackColour (slider.findColour (Slider::trackColourId));
-    const Colour gradCol1 (trackColour.overlaidWith (Colour (slider.isEnabled() ? 0x13000000 : 0x09000000)));
-    const Colour gradCol2 (trackColour.overlaidWith (Colour (0x06000000)));
+    const Color trackColor (slider.findColor (Slider::trackColorId));
+    const Color gradCol1 (trackColor.overlaidWith (Color (slider.isEnabled() ? 0x13000000 : 0x09000000)));
+    const Color gradCol2 (trackColor.overlaidWith (Color (0x06000000)));
     Path indent;
 
     if (slider.isHorizontal())
     {
         auto iy = y + height * 0.5f - sliderRadius * 0.5f;
 
-        g.setGradientFill (ColourGradient::vertical (gradCol1, iy, gradCol2, iy + sliderRadius));
+        g.setGradientFill (ColorGradient::vertical (gradCol1, iy, gradCol2, iy + sliderRadius));
 
         indent.addRoundedRectangle (x - sliderRadius * 0.5f, iy, width + sliderRadius, sliderRadius, 5.0f);
     }
@@ -449,24 +449,24 @@ void LookAndFeel_V3::drawLinearSliderBackground (Graphics& g, int x, int y, int 
     {
         auto ix = x + width * 0.5f - sliderRadius * 0.5f;
 
-        g.setGradientFill (ColourGradient::horizontal (gradCol1, ix, gradCol2, ix + sliderRadius));
+        g.setGradientFill (ColorGradient::horizontal (gradCol1, ix, gradCol2, ix + sliderRadius));
 
         indent.addRoundedRectangle (ix, y - sliderRadius * 0.5f, sliderRadius, height + sliderRadius, 5.0f);
     }
 
     g.fillPath (indent);
 
-    g.setColour (trackColour.contrasting (0.5f));
+    g.setColor (trackColor.contrasting (0.5f));
     g.strokePath (indent, PathStrokeType (0.5f));
 }
 
 void LookAndFeel_V3::drawPopupMenuBackground (Graphics& g, int width, int height)
 {
-    g.fillAll (findColour (PopupMenu::backgroundColourId));
+    g.fillAll (findColor (PopupMenu::backgroundColorId));
     ignoreUnused (width, height);
 
    #if ! JUCE_MAC
-    g.setColour (findColour (PopupMenu::textColourId).withAlpha (0.6f));
+    g.setColor (findColor (PopupMenu::textColorId).withAlpha (0.6f));
     g.drawRect (0, 0, width, height);
    #endif
 }
@@ -474,35 +474,35 @@ void LookAndFeel_V3::drawPopupMenuBackground (Graphics& g, int width, int height
 void LookAndFeel_V3::drawMenuBarBackground (Graphics& g, int width, int height,
                                             bool, MenuBarComponent& menuBar)
 {
-    auto colour = menuBar.findColour (PopupMenu::backgroundColourId);
+    auto color = menuBar.findColor (PopupMenu::backgroundColorId);
 
     Rectangle<int> r (width, height);
 
-    g.setColour (colour.contrasting (0.15f));
+    g.setColor (color.contrasting (0.15f));
     g.fillRect (r.removeFromTop (1));
     g.fillRect (r.removeFromBottom (1));
 
-    g.setGradientFill (ColourGradient::vertical (colour, 0, colour.darker (0.08f), (float) height));
+    g.setGradientFill (ColorGradient::vertical (color, 0, color.darker (0.08f), (float) height));
     g.fillRect (r);
 }
 
 void LookAndFeel_V3::drawKeymapChangeButton (Graphics& g, int width, int height,
                                              Button& button, const String& keyDescription)
 {
-    const Colour textColour (button.findColour (0x100ad01 /*KeyMappingEditorComponent::textColourId*/, true));
+    const Color textColor (button.findColor (0x100ad01 /*KeyMappingEditorComponent::textColorId*/, true));
 
     if (keyDescription.isNotEmpty())
     {
         if (button.isEnabled())
         {
-            g.setColour (textColour.withAlpha (button.isDown() ? 0.4f : (button.isOver() ? 0.2f : 0.1f)));
+            g.setColor (textColor.withAlpha (button.isDown() ? 0.4f : (button.isOver() ? 0.2f : 0.1f)));
             g.fillRoundedRectangle (button.getLocalBounds().toFloat(), 4.0f);
             g.drawRoundedRectangle (button.getLocalBounds().toFloat(), 4.0f, 1.0f);
         }
 
-        g.setColour (textColour);
+        g.setColor (textColor);
         g.setFont (height * 0.6f);
-        g.drawFittedText (keyDescription, 4, 0, width - 8, height, Justification::centred, 1);
+        g.drawFittedText (keyDescription, 4, 0, width - 8, height, Justification::centered, 1);
     }
     else
     {
@@ -516,13 +516,13 @@ void LookAndFeel_V3::drawKeymapChangeButton (Graphics& g, int width, int height,
         p.addRectangle (50.0f - thickness, 50.0f + thickness, thickness * 2.0f, 50.0f - indent - thickness);
         p.setUsingNonZeroWinding (false);
 
-        g.setColour (textColour.darker(0.1f).withAlpha (button.isDown() ? 0.7f : (button.isOver() ? 0.5f : 0.3f)));
+        g.setColor (textColor.darker(0.1f).withAlpha (button.isDown() ? 0.7f : (button.isOver() ? 0.5f : 0.3f)));
         g.fillPath (p, p.getTransformToScaleToFit (2.0f, 2.0f, width - 4.0f, height - 4.0f, true));
     }
 
     if (button.hasKeyboardFocus (false))
     {
-        g.setColour (textColour.withAlpha (0.4f));
+        g.setColor (textColor.withAlpha (0.4f));
         g.drawRect (0, 0, width, height);
     }
 }
@@ -531,32 +531,32 @@ void LookAndFeel_V3::drawKeymapChangeButton (Graphics& g, int width, int height,
 class LookAndFeel_V3_DocumentWindowButton   : public Button
 {
 public:
-    LookAndFeel_V3_DocumentWindowButton (const String& name, Colour c, const Path& normal, const Path& toggled)
-        : Button (name), colour (c), normalShape (normal), toggledShape (toggled)
+    LookAndFeel_V3_DocumentWindowButton (const String& name, Color c, const Path& normal, const Path& toggled)
+        : Button (name), color (c), normalShape (normal), toggledShape (toggled)
     {
     }
 
     void paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown) override
     {
-        Colour background (Colours::grey);
+        Color background (Colors::gray);
 
         if (ResizableWindow* rw = findParentComponentOfClass<ResizableWindow>())
-            background = rw->getBackgroundColour();
+            background = rw->getBackgroundColor();
 
         const float cx = getWidth() * 0.5f, cy = getHeight() * 0.5f;
         const float diam = jmin (cx, cy) * (isButtonDown ? 0.60f : 0.65f);
 
-        g.setColour (background);
+        g.setColor (background);
         g.fillEllipse (cx - diam, cy - diam, diam * 2.0f, diam * 2.0f);
 
-        Colour c (background.contrasting (colour, 0.6f));
+        Color c (background.contrasting (color, 0.6f));
 
         if (! isEnabled())
             c = c.withAlpha (0.6f);
         else if (isMouseOverButton)
             c = c.brighter();
 
-        g.setColour (c);
+        g.setColor (c);
         g.drawEllipse (cx - diam, cy - diam, diam * 2.0f, diam * 2.0f, diam * 0.2f);
 
         Path& p = getToggleState() ? toggledShape : normalShape;
@@ -567,7 +567,7 @@ public:
     }
 
 private:
-    Colour colour;
+    Color color;
     Path normalShape, toggledShape;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LookAndFeel_V3_DocumentWindowButton)
@@ -583,17 +583,17 @@ Button* LookAndFeel_V3::createDocumentWindowButton (int buttonType)
         shape.addLineSegment (Line<float> (0.0f, 0.0f, 1.0f, 1.0f), crossThickness * 1.4f);
         shape.addLineSegment (Line<float> (1.0f, 0.0f, 0.0f, 1.0f), crossThickness * 1.4f);
 
-        return new LookAndFeel_V3_DocumentWindowButton ("close", Colour (0xffdd1100), shape, shape);
+        return new LookAndFeel_V3_DocumentWindowButton ("close", Color (0xffdd1100), shape, shape);
     }
 
-    if (buttonType == DocumentWindow::minimiseButton)
+    if (buttonType == DocumentWindow::minimizeButton)
     {
         shape.addLineSegment (Line<float> (0.0f, 0.5f, 1.0f, 0.5f), crossThickness);
 
-        return new LookAndFeel_V3_DocumentWindowButton ("minimise", Colour (0xffaa8811), shape, shape);
+        return new LookAndFeel_V3_DocumentWindowButton ("minimize", Color (0xffaa8811), shape, shape);
     }
 
-    if (buttonType == DocumentWindow::maximiseButton)
+    if (buttonType == DocumentWindow::maximizeButton)
     {
         shape.addLineSegment (Line<float> (0.5f, 0.0f, 0.5f, 1.0f), crossThickness);
         shape.addLineSegment (Line<float> (0.0f, 0.5f, 1.0f, 0.5f), crossThickness);
@@ -607,7 +607,7 @@ Button* LookAndFeel_V3::createDocumentWindowButton (int buttonType)
         fullscreenShape.addRectangle (45.0f, 45.0f, 100.0f, 100.0f);
         PathStrokeType (30.0f).createStrokedPath (fullscreenShape, fullscreenShape);
 
-        return new LookAndFeel_V3_DocumentWindowButton ("maximise", Colour (0xff119911), shape, fullscreenShape);
+        return new LookAndFeel_V3_DocumentWindowButton ("maximize", Color (0xff119911), shape, fullscreenShape);
     }
 
     jassertfalse;

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -30,12 +30,12 @@ namespace juce
 //==============================================================================
 /**
     One of these objects holds a list of all the commands your app can perform,
-    and despatches these commands when needed.
+    and dispatches these commands when needed.
 
     Application commands are a good way to trigger actions in your app, e.g. "Quit",
     "Copy", "Paste", etc. Menus, buttons and keypresses can all be given commands
     to invoke automatically, which means you don't have to handle the result of a menu
-    or button click manually. Commands are despatched to ApplicationCommandTarget objects
+    or button click manually. Commands are dispatched to ApplicationCommandTarget objects
     which can choose which events they want to handle.
 
     This architecture also allows for nested ApplicationCommandTargets, so that for example

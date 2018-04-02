@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -34,10 +34,10 @@ public:
     TextButtonHandler()
         : ButtonHandler ("Text Button", "TextButton", typeid (TextButton), 150, 24)
     {
-        registerColour (TextButton::buttonColourId, "background (normal)", "bgColOff");
-        registerColour (TextButton::buttonOnColourId, "background (on)", "bgColOn");
-        registerColour (TextButton::textColourOffId, "text colour (normal)", "textCol");
-        registerColour (TextButton::textColourOnId, "text colour (on)", "textColOn");
+        registerColor (TextButton::buttonColorId, "background (normal)", "bgColOff");
+        registerColor (TextButton::buttonOnColorId, "background (on)", "bgColOn");
+        registerColor (TextButton::textColorOffId, "text color (normal)", "textCol");
+        registerColor (TextButton::textColorOnId, "text color (on)", "textColOn");
     }
 
     Component* createNewComponent (JucerDocument*) override
@@ -53,7 +53,7 @@ public:
         if (multipleSelected)
             return;
 
-        addColourProperties (component, document, props);
+        addColorProperties (component, document, props);
     }
 
     XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout) override
@@ -72,7 +72,7 @@ public:
 
         String s;
 
-        s << getColourIntialisationCode (component, memberVariableName)
+        s << getColorIntialisationCode (component, memberVariableName)
           << '\n';
 
         code.constructorCode += s;

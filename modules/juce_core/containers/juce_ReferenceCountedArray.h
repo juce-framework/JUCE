@@ -485,7 +485,7 @@ public:
     /** Inserts a new object into the array assuming that the array is sorted.
 
         This will use a comparator to find the position at which the new object
-        should go. If the array isn't sorted, the behaviour of this
+        should go. If the array isn't sorted, the behavior of this
         method will be unpredictable.
 
         @param comparator   the comparator object to use to compare the elements - see the
@@ -523,7 +523,7 @@ public:
     /** Finds the index of an object in the array, assuming that the array is sorted.
 
         This will use a comparator to do a binary-chop to find the index of the given
-        element, if it exists. If the array isn't sorted, the behaviour of this
+        element, if it exists. If the array isn't sorted, the behavior of this
         method will be unpredictable.
 
         @param comparator           the comparator to use to compare the elements - see the sort()
@@ -588,7 +588,7 @@ public:
                 memmove (e, e + 1, sizeof (ObjectClass*) * (size_t) numberToShift);
 
             if ((numUsed << 1) < data.numAllocated)
-                minimiseStorageOverheads();
+                minimizeStorageOverheads();
         }
     }
 
@@ -618,7 +618,7 @@ public:
                 memmove (e, e + 1, sizeof (ObjectClass*) * (size_t) numberToShift);
 
             if ((numUsed << 1) < data.numAllocated)
-                minimiseStorageOverheads();
+                minimizeStorageOverheads();
         }
 
         return removedItem;
@@ -681,7 +681,7 @@ public:
             }
 
             if ((numUsed << 1) < data.numAllocated)
-                minimiseStorageOverheads();
+                minimizeStorageOverheads();
         }
     }
 
@@ -854,7 +854,7 @@ public:
         removing elements, they may have quite a lot of unused space allocated.
         This method will reduce the amount of allocated storage to a minimum.
     */
-    void minimiseStorageOverheads() noexcept
+    void minimizeStorageOverheads() noexcept
     {
         const ScopedLockType lock (getLock());
         data.shrinkToNoMoreThan (numUsed);

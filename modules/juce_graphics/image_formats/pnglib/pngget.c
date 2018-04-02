@@ -337,7 +337,7 @@ png_get_y_pixels_per_inch(png_const_structrp png_ptr, png_const_inforp info_ptr)
 static png_fixed_point
 png_fixed_inches_from_microns(png_const_structrp png_ptr, png_int_32 microns)
 {
-   /* Convert from metres * 1,000,000 to inches * 100,000, meters to
+   /* Convert from meters * 1,000,000 to inches * 100,000, meters to
     * inches is simply *(100/2.54), so we want *(10/2.54) == 500/127.
     * Notice that this can overflow - a warning is output and 0 is
     * returned.

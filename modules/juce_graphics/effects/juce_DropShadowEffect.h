@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -39,7 +39,7 @@ struct JUCE_API  DropShadow
     DropShadow() noexcept;
 
     /** Creates a drop-shadow object with the given parameters. */
-    DropShadow (Colour shadowColour, int radius, Point<int> offset) noexcept;
+    DropShadow (Color shadowColor, int radius, Point<int> offset) noexcept;
 
     /** Renders a drop-shadow based on the alpha-channel of the given image. */
     void drawForImage (Graphics& g, const Image& srcImage) const;
@@ -52,11 +52,11 @@ struct JUCE_API  DropShadow
     */
     void drawForRectangle (Graphics& g, const Rectangle<int>& area) const;
 
-    /** The colour with which to render the shadow.
+    /** The color with which to render the shadow.
         In most cases you'll probably want to leave this as black with an alpha
         value of around 0.5
     */
-    Colour colour;
+    Color color;
 
     /** The approximate spread of the shadow. */
     int radius;
@@ -88,7 +88,7 @@ class JUCE_API  DropShadowEffect  : public ImageEffectFilter
 public:
     //==============================================================================
     /** Creates a default drop-shadow effect.
-        To customise the shadow's appearance, use the setShadowProperties() method.
+        To customize the shadow's appearance, use the setShadowProperties() method.
     */
     DropShadowEffect();
 

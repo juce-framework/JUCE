@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -62,21 +62,21 @@ public:
 
     Icon getIcon() const override
     {
-        auto iconColour = getOwnerView()->findColour (isSelected() ? defaultHighlightedTextColourId
-                                                                   : treeIconColourId);
+        auto iconColor = getOwnerView()->findColor (isSelected() ? defaultHighlightedTextColorId
+                                                                   : treeIconColorId);
 
         if (! isSelected())
         {
             if (moduleInfo.isValid() && moduleInfo.getVendor() == "juce")
             {
                 if (moduleInfo.getLicense() == "ISC")
-                    iconColour = Colours::lightblue;
+                    iconColor = Colors::lightblue;
                 else if (moduleInfo.getLicense() == "GPL/Commercial")
-                    iconColour = Colours::orange;
+                    iconColor = Colors::orange;
             }
         }
 
-        return Icon (getIcons().singleModule, iconColour);
+        return Icon (getIcons().singleModule, iconColor);
     }
 
     void showAddMenu() override
@@ -138,7 +138,7 @@ private:
     public:
         ModuleSettingsPanel (Project& p, const String& modID, TreeView* tree)
             : group (p.getModules().getModuleInfo (modID).getID(),
-                     Icon (getIcons().singleModule, Colours::transparentBlack)),
+                     Icon (getIcons().singleModule, Colors::transparentBlack)),
               project (p),
               modulesTree (tree),
               moduleID (modID)
@@ -299,20 +299,20 @@ private:
                     bounds.removeFromTop (bounds.getHeight() / 6);
                     auto bottomSlice = bounds;
 
-                    g.setColour (findColour (defaultTextColourId));
+                    g.setColor (findColor (defaultTextColorId));
 
-                    g.drawFittedText (info.getName(),                   topSlice.removeFromTop (topSlice.getHeight() / 4), Justification::centredLeft, 1);
-                    g.drawFittedText ("Version: "  + info.getVersion(), topSlice.removeFromTop (topSlice.getHeight() / 3), Justification::centredLeft, 1);
-                    g.drawFittedText ("License: "  + info.getLicense(), topSlice.removeFromTop (topSlice.getHeight() / 2), Justification::centredLeft, 1);
+                    g.drawFittedText (info.getName(),                   topSlice.removeFromTop (topSlice.getHeight() / 4), Justification::centeredLeft, 1);
+                    g.drawFittedText ("Version: "  + info.getVersion(), topSlice.removeFromTop (topSlice.getHeight() / 3), Justification::centeredLeft, 1);
+                    g.drawFittedText ("License: "  + info.getLicense(), topSlice.removeFromTop (topSlice.getHeight() / 2), Justification::centeredLeft, 1);
                     g.drawFittedText ("Location: " + info.getFolder().getParentDirectory().getFullPathName(),
-                                      topSlice.removeFromTop (topSlice.getHeight()), Justification::centredLeft, 1);
+                                      topSlice.removeFromTop (topSlice.getHeight()), Justification::centeredLeft, 1);
 
                     g.drawFittedText (info.getDescription(), bottomSlice, Justification::topLeft, 3, 1.0f);
                 }
                 else
                 {
-                    g.setColour (Colours::red);
-                    g.drawFittedText ("Cannot find this module at the specified path!", bounds, Justification::centred, 1);
+                    g.setColor (Colors::red);
+                    g.drawFittedText ("Cannot find this module at the specified path!", bounds, Justification::centered, 1);
                 }
             }
 
@@ -339,8 +339,8 @@ private:
                   missingDependencies (project.getModules().getExtraDependenciesNeeded (modID))
             {
                 addAndMakeVisible (fixButton);
-                fixButton.setColour (TextButton::buttonColourId, Colours::red);
-                fixButton.setColour (TextButton::textColourOffId, Colours::white);
+                fixButton.setColor (TextButton::buttonColorId, Colors::red);
+                fixButton.setColor (TextButton::textColorOffId, Colors::white);
                 fixButton.onClick = [this] { fixDependencies(); };
             }
 
@@ -352,7 +352,7 @@ private:
                              "To build correctly, it requires the following modules to be added:\n");
                 text << missingDependencies.joinIntoString (", ");
 
-                g.setColour (Colours::red);
+                g.setColor (Colors::red);
                 g.drawFittedText (text, getLocalBounds().reduced (10), Justification::topLeft, 3);
             }
 
@@ -460,7 +460,7 @@ private:
                 auto text = String ("This module has a higher C++ language standard requirement than your project!\n\n"
                                     "To use this module you need to increase the C++ standard of the project.\n");
 
-                g.setColour (findColour (defaultHighlightColourId));
+                g.setColor (findColor (defaultHighlightColorId));
                 g.drawFittedText (text, getLocalBounds().reduced (10), Justification::topLeft, 3);
             }
 
@@ -502,7 +502,7 @@ public:
     String getDisplayName() const override  { return "Modules"; }
     void setName (const String&) override   {}
     bool isMissing() const override         { return false; }
-    Icon getIcon() const override           { return Icon (getIcons().graph, getContentColour (true)); }
+    Icon getIcon() const override           { return Icon (getIcons().graph, getContentColor (true)); }
 
     void showDocument() override
     {

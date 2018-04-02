@@ -1287,7 +1287,7 @@ PNG_FIXED_EXPORT(228, void, png_set_alpha_mode_fixed, (png_structrp png_ptr,
  * extra viewing correction used in early Mac display systems was implemented as
  * a power 1.45 lookup table.
  *
- * Any system where a programmable lookup table is used or where the behavior of
+ * Any system where a programable lookup table is used or where the behavior of
  * the final display device characteristics can be changed requires system
  * specific code to obtain the current characteristic.  However this can be
  * difficult and most PNG gamma correction only requires an approximate value.
@@ -3085,7 +3085,7 @@ typedef struct
     */
 
 #define PNG_IMAGE_FLAG_FAST 0x02
-   /* On write emphasise speed over compression; the resultant PNG file will be
+   /* On write emphasize speed over compression; the resultant PNG file will be
     * larger but will be produced significantly faster, particular for large
     * images.  Do not use this option for images which will be distributed, only
     * used it when producing intermediate files that will be read back in

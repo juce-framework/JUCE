@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -71,11 +71,11 @@ public:
     {
         if (state == errors || state == warnings)
         {
-            g.setColour (state == errors ? Colours::red : Colours::yellow);
+            g.setColor (state == errors ? Colors::red : Colors::yellow);
             const Path& icon = (state == errors) ? getIcons().warning
                                                  : getIcons().info;
 
-            g.fillPath (icon, RectanglePlacement (RectanglePlacement::centred)
+            g.fillPath (icon, RectanglePlacement (RectanglePlacement::centered)
                                 .getTransformToFit (icon.getBounds(),
                                                     getCentralArea().reduced (1, 1).toFloat()));
         }
@@ -121,7 +121,7 @@ private:
         {
             if (findParentComponentOfClass<TabBarButton>() != nullptr)
             {
-                getLookAndFeel().drawSpinningWaitAnimation (g, findColour (treeIconColourId),
+                getLookAndFeel().drawSpinningWaitAnimation (g, findColor (treeIconColorId),
                                                             0, 0, getWidth(), getHeight());
                 startTimer (1000 / 20);
             }

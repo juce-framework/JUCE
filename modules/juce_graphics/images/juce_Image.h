@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -44,7 +44,7 @@ class ImagePixelData;
     Image myImage (Image::RGB, 500, 500, true);
 
     Graphics g (myImage);
-    g.setColour (Colours::red);
+    g.setColor (Colors::red);
     g.fillEllipse (20, 20, 300, 200);  // draws a red ellipse in our image.
     @endcode
 
@@ -64,8 +64,8 @@ public:
     enum PixelFormat
     {
         UnknownFormat,
-        RGB,                /**<< each pixel is a 3-byte packed RGB colour value. For byte order, see the PixelRGB class. */
-        ARGB,               /**<< each pixel is a 4-byte ARGB premultiplied colour value. For byte order, see the PixelARGB class. */
+        RGB,                /**<< each pixel is a 3-byte packed RGB color value. For byte order, see the PixelRGB class. */
+        ARGB,               /**<< each pixel is a 4-byte ARGB premultiplied color value. For byte order, see the PixelARGB class. */
         SingleChannel       /**<< each pixel is a 1-byte alpha channel value. */
     };
 
@@ -183,12 +183,12 @@ public:
     bool hasAlphaChannel() const noexcept;
 
     //==============================================================================
-    /** Clears a section of the image with a given colour.
+    /** Clears a section of the image with a given color.
 
         This won't do any alpha-blending - it just sets all pixels in the image to
-        the given colour (which may be non-opaque if the image has an alpha channel).
+        the given color (which may be non-opaque if the image has an alpha channel).
     */
-    void clear (const Rectangle<int>& area, Colour colourToClearTo = Colour (0x00000000));
+    void clear (const Rectangle<int>& area, Color colorToClearTo = Color (0x00000000));
 
     /** Returns a rescaled version of this image.
 
@@ -243,26 +243,26 @@ public:
     Image getClippedImage (const Rectangle<int>& area) const;
 
     //==============================================================================
-    /** Returns the colour of one of the pixels in the image.
+    /** Returns the color of one of the pixels in the image.
 
         If the coordinates given are beyond the image's boundaries, this will
-        return Colours::transparentBlack.
+        return Colors::transparentBlack.
 
-        @see setPixelAt, Image::BitmapData::getPixelColour
+        @see setPixelAt, Image::BitmapData::getPixelColor
     */
-    Colour getPixelAt (int x, int y) const;
+    Color getPixelAt (int x, int y) const;
 
-    /** Sets the colour of one of the image's pixels.
+    /** Sets the color of one of the image's pixels.
 
         If the coordinates are beyond the image's boundaries, then nothing will happen.
 
         Note that this won't do any alpha-blending, it'll just replace the existing pixel
-        with the given one. The colour's opacity will be ignored if this image doesn't have
+        with the given one. The color's opacity will be ignored if this image doesn't have
         an alpha-channel.
 
-        @see getPixelAt, Image::BitmapData::setPixelColour
+        @see getPixelAt, Image::BitmapData::setPixelColor
     */
-    void setPixelAt (int x, int y, Colour colour);
+    void setPixelAt (int x, int y, Color color);
 
     /** Changes the opacity of a pixel.
 
@@ -286,7 +286,7 @@ public:
     */
     void multiplyAllAlphas (float amountToMultiplyBy);
 
-    /** Changes all the colours to be shades of grey, based on their current luminosity.
+    /** Changes all the colors to be shades of gray, based on their current luminosity.
     */
     void desaturate();
 
@@ -334,17 +334,17 @@ public:
         */
         inline uint8* getPixelPointer (int x, int y) const noexcept         { return data + y * lineStride + x * pixelStride; }
 
-        /** Returns the colour of a given pixel.
+        /** Returns the color of a given pixel.
             For performance reasons, this won't do any bounds-checking on the coordinates, so it's the caller's
             repsonsibility to make sure they're within the image's size.
         */
-        Colour getPixelColour (int x, int y) const noexcept;
+        Color getPixelColor (int x, int y) const noexcept;
 
-        /** Sets the colour of a given pixel.
+        /** Sets the color of a given pixel.
             For performance reasons, this won't do any bounds-checking on the coordinates, so it's the caller's
             repsonsibility to make sure they're within the image's size.
         */
-        void setPixelColour (int x, int y, Colour colour) const noexcept;
+        void setPixelColor (int x, int y, Color color) const noexcept;
 
         /** Returns the size of the bitmap. */
         Rectangle<int> getBounds() const noexcept                           { return Rectangle<int> (width, height); }
@@ -456,8 +456,8 @@ public:
     virtual Ptr clone() = 0;
     /** Creates an instance of the type of this image. */
     virtual ImageType* createType() const = 0;
-    /** Initialises a BitmapData object. */
-    virtual void initialiseBitmapData (Image::BitmapData&, int x, int y, Image::BitmapData::ReadWriteMode) = 0;
+    /** Initializes a BitmapData object. */
+    virtual void initializeBitmapData (Image::BitmapData&, int x, int y, Image::BitmapData::ReadWriteMode) = 0;
     /** Returns the number of Image objects which are currently referring to the same internal
         shared image data. This is different to the reference count as an instance of ImagePixelData
         can internally depend on another ImagePixelData via it's member variables. */

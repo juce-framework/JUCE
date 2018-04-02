@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -26,22 +26,22 @@
 
 #pragma once
 
-#include "jucer_ColouredElement.h"
+#include "jucer_ColoredElement.h"
 #include "../Properties/jucer_FontPropertyComponent.h"
 #include "../Properties/jucer_JustificationProperty.h"
 
 //==============================================================================
-class PaintElementText   : public ColouredElement
+class PaintElementText   : public ColoredElement
 {
 public:
     PaintElementText (PaintRoutine* pr)
-        : ColouredElement (pr, "Text", false, false),
+        : ColoredElement (pr, "Text", false, false),
           text ("Your text goes here"),
           font (15.0f),
           typefaceName (FontPropertyComponent::getDefaultFont()),
-          justification (Justification::centred)
+          justification (Justification::centered)
     {
-        fillType.colour = Colours::black;
+        fillType.color = Colors::black;
         position.rect.setWidth (200);
         position.rect.setHeight (30);
     }
@@ -67,7 +67,7 @@ public:
 
     void getEditableProperties (Array<PropertyComponent*>& props, bool multipleSelected) override
     {
-        ColouredElement::getEditableProperties (props, multipleSelected);
+        ColoredElement::getEditableProperties (props, multipleSelected);
 
         if (multipleSelected)
             return;
@@ -122,7 +122,7 @@ public:
     {
         XmlElement* e = new XmlElement (getTagName());
         position.applyToXml (*e);
-        addColourAttributes (e);
+        addColorAttributes (e);
         e->setAttribute ("text", text);
         e->setAttribute ("fontname", typefaceName);
         e->setAttribute ("fontsize", roundToInt (font.getHeight() * 100.0) / 100.0);
@@ -143,7 +143,7 @@ public:
         if (xml.hasTagName (getTagName()))
         {
             position.restoreFromXml (xml, position);
-            loadColourAttributes (xml);
+            loadColorAttributes (xml);
 
             text = xml.getStringAttribute ("text", "Hello World");
             typefaceName = xml.getStringAttribute ("fontname", FontPropertyComponent::getDefaultFont());
@@ -152,7 +152,7 @@ public:
             font.setBold (xml.getBoolAttribute ("bold", false));
             font.setItalic (xml.getBoolAttribute ("italic", false));
             font.setExtraKerningFactor ((float) xml.getDoubleAttribute ("kerning", 0.0));
-            justification = Justification (xml.getIntAttribute ("justification", Justification::centred));
+            justification = Justification (xml.getIntAttribute ("justification", Justification::centered));
             auto fontStyle = xml.getStringAttribute ("typefaceStyle");
             if (! fontStyle.isEmpty())
                 font.setTypefaceStyle (fontStyle);

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -63,14 +63,14 @@ struct TextAtom
 };
 
 //==============================================================================
-// a run of text with a single font and colour
+// a run of text with a single font and color
 class TextEditor::UniformTextSection
 {
 public:
-    UniformTextSection (const String& text, const Font& f, Colour col, juce_wchar passwordChar)
-        : font (f), colour (col)
+    UniformTextSection (const String& text, const Font& f, Color col, juce_wchar passwordChar)
+        : font (f), color (col)
     {
-        initialiseAtoms (text, passwordChar);
+        initializeAtoms (text, passwordChar);
     }
 
     UniformTextSection (const UniformTextSection&) = default;
@@ -78,7 +78,7 @@ public:
     // VS2013 can't default move constructors
     UniformTextSection (UniformTextSection&& other)
         : font (static_cast<Font&&> (other.font)),
-          colour (other.colour),
+          color (other.color),
           atoms (static_cast<Array<TextAtom>&&> (other.atoms))
     {
     }
@@ -121,7 +121,7 @@ public:
 
     UniformTextSection* split (int indexToBreakAt, juce_wchar passwordChar)
     {
-        auto* section2 = new UniformTextSection (String(), font, colour, passwordChar);
+        auto* section2 = new UniformTextSection (String(), font, color, passwordChar);
         int index = 0;
 
         for (int i = 0; i < atoms.size(); ++i)
@@ -216,11 +216,11 @@ public:
 
     //==============================================================================
     Font font;
-    Colour colour;
+    Color color;
     Array<TextAtom> atoms;
 
 private:
-    void initialiseAtoms (const String& textToParse, const juce_wchar passwordChar)
+    void initializeAtoms (const String& textToParse, const juce_wchar passwordChar)
     {
         auto text = textToParse.getCharPointer();
 
@@ -506,7 +506,7 @@ struct TextEditor::Iterator
 
     float getJustificationOffset (float lineWidth) const
     {
-        if (justification.getOnlyHorizontalFlags() == Justification::horizontallyCentred)
+        if (justification.getOnlyHorizontalFlags() == Justification::horizontallyCentered)
             return jmax (0.0f, (justificationWidth - lineWidth) * 0.5f);
 
         if (justification.getOnlyHorizontalFlags() == Justification::right)
@@ -523,7 +523,7 @@ struct TextEditor::Iterator
             if (lastSection != currentSection)
             {
                 lastSection = currentSection;
-                g.setColour (currentSection->colour);
+                g.setColor (currentSection->color);
                 g.setFont (currentSection->font);
             }
 
@@ -545,7 +545,7 @@ struct TextEditor::Iterator
         area.add (startX, lineY, endX - startX, lineHeight * lineSpacing);
     }
 
-    void drawUnderline (Graphics& g, Range<int> underline, Colour colour) const
+    void drawUnderline (Graphics& g, Range<int> underline, Color color) const
     {
         auto startX    = roundToInt (indexToX (underline.getStart()));
         auto endX      = roundToInt (indexToX (underline.getEnd()));
@@ -553,10 +553,10 @@ struct TextEditor::Iterator
 
         Graphics::ScopedSaveState state (g);
         g.reduceClipRegion ({ startX, baselineY, endX - startX, 1 });
-        g.fillCheckerBoard ({ (float) endX, baselineY + 1.0f }, 3.0f, 1.0f, colour, Colours::transparentBlack);
+        g.fillCheckerBoard ({ (float) endX, baselineY + 1.0f }, 3.0f, 1.0f, color, Colors::transparentBlack);
     }
 
-    void drawSelectedText (Graphics& g, Range<int> selected, Colour selectedTextColour) const
+    void drawSelectedText (Graphics& g, Range<int> selected, Color selectedTextColor) const
     {
         if (passwordCharacter != 0 || ! atom->isWhitespace())
         {
@@ -571,7 +571,7 @@ struct TextEditor::Iterator
                 ga2.removeRangeOfGlyphs (0, selected.getEnd() - indexInText);
                 ga.removeRangeOfGlyphs (selected.getEnd() - indexInText, -1);
 
-                g.setColour (currentSection->colour);
+                g.setColor (currentSection->color);
                 ga2.draw (g);
             }
 
@@ -581,11 +581,11 @@ struct TextEditor::Iterator
                 ga2.removeRangeOfGlyphs (selected.getStart() - indexInText, -1);
                 ga.removeRangeOfGlyphs (0, selected.getStart() - indexInText);
 
-                g.setColour (currentSection->colour);
+                g.setColor (currentSection->color);
                 ga2.draw (g);
             }
 
-            g.setColour (selectedTextColour);
+            g.setColor (selectedTextColor);
             ga.draw (g);
         }
     }
@@ -698,20 +698,20 @@ private:
 struct TextEditor::InsertAction  : public UndoableAction
 {
     InsertAction (TextEditor& ed, const String& newText, int insertPos,
-                  const Font& newFont, Colour newColour, int oldCaret, int newCaret)
+                  const Font& newFont, Color newColor, int oldCaret, int newCaret)
         : owner (ed),
           text (newText),
           insertIndex (insertPos),
           oldCaretPos (oldCaret),
           newCaretPos (newCaret),
           font (newFont),
-          colour (newColour)
+          color (newColor)
     {
     }
 
     bool perform() override
     {
-        owner.insert (text, insertIndex, font, colour, 0, newCaretPos);
+        owner.insert (text, insertIndex, font, color, 0, newCaretPos);
         return true;
     }
 
@@ -731,7 +731,7 @@ private:
     const String text;
     const int insertIndex, oldCaretPos, newCaretPos;
     const Font font;
-    const Colour colour;
+    const Color color;
 
     JUCE_DECLARE_NON_COPYABLE (InsertAction)
 };
@@ -1025,12 +1025,12 @@ void TextEditor::applyFontToAllText (const Font& newFont, bool changeCurrentFont
     if (changeCurrentFont)
         currentFont = newFont;
 
-    auto overallColour = findColour (textColourId);
+    auto overallColor = findColor (textColorId);
 
     for (auto* uts : sections)
     {
         uts->setFont (newFont, passwordCharacter);
-        uts->colour = overallColour;
+        uts->color = overallColor;
     }
 
     coalesceSimilarSections();
@@ -1039,13 +1039,13 @@ void TextEditor::applyFontToAllText (const Font& newFont, bool changeCurrentFont
     repaint();
 }
 
-void TextEditor::applyColourToAllText (const Colour& newColour, bool changeCurrentTextColour)
+void TextEditor::applyColorToAllText (const Color& newColor, bool changeCurrentTextColor)
 {
     for (auto* uts : sections)
-        uts->colour = newColour;
+        uts->color = newColor;
 
-    if (changeCurrentTextColour)
-        setColour (TextEditor::textColourId, newColour);
+    if (changeCurrentTextColor)
+        setColor (TextEditor::textColorId, newColor);
     else
         repaint();
 }
@@ -1128,10 +1128,10 @@ void TextEditor::setInputRestrictions (int maxLen, const String& chars)
     setInputFilter (new LengthAndCharacterRestriction (maxLen, chars), true);
 }
 
-void TextEditor::setTextToShowWhenEmpty (const String& text, Colour colourToUse)
+void TextEditor::setTextToShowWhenEmpty (const String& text, Color colorToUse)
 {
     textToShowWhenEmpty = text;
-    colourForTextWhenEmpty = colourToUse;
+    colorForTextWhenEmpty = colorToUse;
 }
 
 void TextEditor::setPasswordCharacter (juce_wchar newPasswordCharacter)
@@ -1171,7 +1171,7 @@ void TextEditor::setText (const String& newText, bool sendTextChangeMessage)
         bool cursorWasAtEnd = oldCursorPos >= getTotalNumChars();
 
         clearInternal (nullptr);
-        insert (newText, 0, currentFont, findColour (textColourId), 0, caretPosition);
+        insert (newText, 0, currentFont, findColor (textColorId), 0, caretPosition);
 
         // if you're adding text with line-feeds to a single-line text editor, it
         // ain't gonna look right!
@@ -1526,7 +1526,7 @@ void TextEditor::insertTextAtCaret (const String& t)
     remove (selection, getUndoManager(),
             newText.isNotEmpty() ? newCaretPos - 1 : newCaretPos);
 
-    insert (newText, insertIndex, currentFont, findColour (textColourId),
+    insert (newText, insertIndex, currentFont, findColor (textColorId),
             getUndoManager(), newCaretPos);
 
     textChanged();
@@ -1577,7 +1577,7 @@ void TextEditor::drawContent (Graphics& g)
     {
         g.setOrigin (leftIndent, topIndent);
         auto clip = g.getClipBounds();
-        Colour selectedTextColour;
+        Color selectedTextColor;
         Iterator i (*this);
 
         if (! selection.isEmpty())
@@ -1594,10 +1594,10 @@ void TextEditor::drawContent (Graphics& g)
                 }
             }
 
-            g.setColour (findColour (highlightColourId).withMultipliedAlpha (hasKeyboardFocus (true) ? 1.0f : 0.5f));
+            g.setColor (findColor (highlightColorId).withMultipliedAlpha (hasKeyboardFocus (true) ? 1.0f : 0.5f));
             g.fillRectList (selectionArea);
 
-            selectedTextColour = findColour (highlightedTextColourId);
+            selectedTextColor = findColor (highlightedTextColorId);
         }
 
         const UniformTextSection* lastSection = nullptr;
@@ -1608,7 +1608,7 @@ void TextEditor::drawContent (Graphics& g)
             {
                 if (selection.intersects ({ i.indexInText, i.indexInText + i.atom->numChars }))
                 {
-                    i.drawSelectedText (g, selection, selectedTextColour);
+                    i.drawSelectedText (g, selection, selectedTextColor);
                     lastSection = nullptr;
                 }
                 else
@@ -1627,7 +1627,7 @@ void TextEditor::drawContent (Graphics& g)
                 if (i2.lineY + i2.lineHeight >= clip.getY()
                       && underlinedSection.intersects ({ i2.indexInText, i2.indexInText + i2.atom->numChars }))
                 {
-                    i2.drawUnderline (g, underlinedSection, findColour (textColourId));
+                    i2.drawUnderline (g, underlinedSection, findColor (textColorId));
                 }
             }
         }
@@ -1645,16 +1645,16 @@ void TextEditor::paintOverChildren (Graphics& g)
          && (! hasKeyboardFocus (false))
          && getTotalNumChars() == 0)
     {
-        g.setColour (colourForTextWhenEmpty);
+        g.setColor (colorForTextWhenEmpty);
         g.setFont (getFont());
 
         if (isMultiLine())
             g.drawText (textToShowWhenEmpty, getLocalBounds(),
-                        Justification::centred, true);
+                        Justification::centered, true);
         else
             g.drawText (textToShowWhenEmpty,
                         leftIndent, 0, viewport->getWidth() - leftIndent, getHeight(),
-                        Justification::centredLeft, true);
+                        Justification::centeredLeft, true);
     }
 
     getLookAndFeel().drawTextEditorOutline (g, getWidth(), getHeight(), *this);
@@ -2165,7 +2165,7 @@ void TextEditor::clearInternal (UndoManager* const um)
 }
 
 void TextEditor::insert (const String& text, int insertIndex, const Font& font,
-                         Colour colour, UndoManager* um, int caretPositionToMoveTo)
+                         Color color, UndoManager* um, int caretPositionToMoveTo)
 {
     if (text.isNotEmpty())
     {
@@ -2174,7 +2174,7 @@ void TextEditor::insert (const String& text, int insertIndex, const Font& font,
             if (um->getNumActionsInCurrentTransaction() > TextEditorDefs::maxActionsPerTransaction)
                 newTransaction();
 
-            um->perform (new InsertAction (*this, text, insertIndex, font, colour,
+            um->perform (new InsertAction (*this, text, insertIndex, font, color,
                                            caretPosition, caretPositionToMoveTo));
         }
         else
@@ -2191,14 +2191,14 @@ void TextEditor::insert (const String& text, int insertIndex, const Font& font,
 
                 if (insertIndex == index)
                 {
-                    sections.insert (i, new UniformTextSection (text, font, colour, passwordCharacter));
+                    sections.insert (i, new UniformTextSection (text, font, color, passwordCharacter));
                     break;
                 }
 
                 if (insertIndex > index && insertIndex < nextIndex)
                 {
                     splitSection (i, insertIndex - index);
-                    sections.insert (i + 1, new UniformTextSection (text, font, colour, passwordCharacter));
+                    sections.insert (i + 1, new UniformTextSection (text, font, color, passwordCharacter));
                     break;
                 }
 
@@ -2206,7 +2206,7 @@ void TextEditor::insert (const String& text, int insertIndex, const Font& font,
             }
 
             if (nextIndex == insertIndex)
-                sections.add (new UniformTextSection (text, font, colour, passwordCharacter));
+                sections.add (new UniformTextSection (text, font, color, passwordCharacter));
 
             coalesceSimilarSections();
             totalNumChars = -1;
@@ -2522,7 +2522,7 @@ void TextEditor::coalesceSimilarSections()
         auto* s2 = sections.getUnchecked (i + 1);
 
         if (s1->font == s2->font
-             && s1->colour == s2->colour)
+             && s1->color == s2->color)
         {
             s1->append (*s2, passwordCharacter);
             sections.remove (i + 1);

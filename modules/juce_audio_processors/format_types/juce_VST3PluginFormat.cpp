@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -1316,7 +1316,7 @@ struct VST3PluginWindow : public AudioProcessorEditor,
 
     void paint (Graphics& g) override
     {
-        g.fillAll (Colours::black);
+        g.fillAll (Colors::black);
     }
 
     void mouseWheelMove (const MouseEvent&, const MouseWheelDetails& wheel) override
@@ -1443,7 +1443,7 @@ private:
     struct ChildComponent  : public Component
     {
         ChildComponent() {}
-        void paint (Graphics& g) override  { g.fillAll (Colours::cornflowerblue); }
+        void paint (Graphics& g) override  { g.fillAll (Colors::cornflowerblue); }
         using Component::createNewPeer;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChildComponent)
@@ -1526,7 +1526,7 @@ struct VST3ComponentHolder
 
     bool fetchController (ComSmartPtr<Vst::IEditController>& editController)
     {
-        if (! isComponentInitialised && ! initialise())
+        if (! isComponentInitialized && ! initialize())
             return false;
 
         // Get the IEditController:
@@ -1559,7 +1559,7 @@ struct VST3ComponentHolder
     //==============================================================================
     void fillInPluginDescription (PluginDescription& description) const
     {
-        jassert (module != nullptr && isComponentInitialised);
+        jassert (module != nullptr && isComponentInitialized);
 
         PFactoryInfo factoryInfo;
         factory->getFactoryInfo (&factoryInfo);
@@ -1626,9 +1626,9 @@ struct VST3ComponentHolder
     }
 
     //==============================================================================
-    bool initialise()
+    bool initialize()
     {
-        if (isComponentInitialised) return true;
+        if (isComponentInitialized) return true;
 
        #if JUCE_WINDOWS
         // On Windows it's highly advisable to create your plugins using the message thread,
@@ -1655,15 +1655,15 @@ struct VST3ComponentHolder
         if (warnOnFailure (component->initialize (host->getFUnknown())) != kResultOk)
             return false;
 
-        isComponentInitialised = true;
+        isComponentInitialized = true;
 
         return true;
     }
 
     void terminate()
     {
-        if (isComponentInitialised) component->terminate();
-        isComponentInitialised = false;
+        if (isComponentInitialized) component->terminate();
+        isComponentInitialized = false;
     }
 
     //==============================================================================
@@ -1688,7 +1688,7 @@ struct VST3ComponentHolder
     ComSmartPtr<Vst::IComponent> component;
     FUID cidOfComponent;
 
-    bool isComponentInitialised = false;
+    bool isComponentInitialized = false;
 };
 
 //==============================================================================
@@ -1831,7 +1831,7 @@ struct VST3PluginInstance : public AudioPluginInstance
 
         editController->setComponentHandler (nullptr);
 
-        if (isControllerInitialised)
+        if (isControllerInitialized)
             editController->terminate();
 
         holder->terminate();
@@ -1848,7 +1848,7 @@ struct VST3PluginInstance : public AudioPluginInstance
         editController = nullptr;
     }
 
-    bool initialise()
+    bool initialize()
     {
        #if JUCE_WINDOWS
         // On Windows it's highly advisable to create your plugins using the message thread,
@@ -1857,10 +1857,10 @@ struct VST3PluginInstance : public AudioPluginInstance
         jassert (MessageManager::getInstance()->isThisTheMessageThread());
        #endif
 
-        if (! holder->initialise())
+        if (! holder->initialize())
             return false;
 
-        if (! isControllerInitialised)
+        if (! isControllerInitialized)
         {
             if (! holder->fetchController (editController))
                 return false;
@@ -1869,7 +1869,7 @@ struct VST3PluginInstance : public AudioPluginInstance
         // (May return an error if the plugin combines the IComponent and IEditController implementations)
         editController->initialize (holder->host->getFUnknown());
 
-        isControllerInitialised = true;
+        isControllerInitialized = true;
         editController->setComponentHandler (holder->host);
         grabInformationObjects();
         interconnectComponentAndController();
@@ -1893,7 +1893,7 @@ struct VST3PluginInstance : public AudioPluginInstance
                                              numSteps));
         }
 
-        synchroniseStates();
+        synchronizeStates();
         syncProgramNames();
         setupIO();
 
@@ -1958,7 +1958,7 @@ struct VST3PluginInstance : public AudioPluginInstance
 
         warnOnFailure (processor->setupProcessing (setup));
 
-        holder->initialise();
+        holder->initialize();
         editController->setComponentHandler (holder->host);
 
 
@@ -2215,7 +2215,7 @@ struct VST3PluginInstance : public AudioPluginInstance
         tresult PLUGIN_API getInt (AttrID id, Steinberg::int64& value) override
         {
             if      (! std::strcmp (Vst::ChannelContext::kChannelNameLengthKey, id)) value = props.name.length();
-            else if (! std::strcmp (Vst::ChannelContext::kChannelColorKey,      id)) value = static_cast<Steinberg::int64> (props.colour.getARGB());
+            else if (! std::strcmp (Vst::ChannelContext::kChannelColorKey,      id)) value = static_cast<Steinberg::int64> (props.color.getARGB());
             else return kResultFalse;
 
             return kResultTrue;
@@ -2588,7 +2588,7 @@ private:
     ComSmartPtr<ParamValueQueueList> inputParameterChanges, outputParameterChanges;
     ComSmartPtr<MidiEventList> midiInputs, midiOutputs;
     Vst::ProcessContext timingInfo; //< Only use this in processBlock()!
-    bool isControllerInitialised = false, isActive = false;
+    bool isControllerInitialized = false, isActive = false;
 
     //==============================================================================
     /** Some plugins need to be "connected" to intercommunicate between their implemented classes */
@@ -2604,7 +2604,7 @@ private:
         }
     }
 
-    void synchroniseStates()
+    void synchronizeStates()
     {
         Steinberg::MemoryStream stream;
 
@@ -2851,7 +2851,7 @@ private:
 //==============================================================================
 AudioPluginInstance* VST3Classes::VST3ComponentHolder::createPluginInstance()
 {
-    if (! initialise())
+    if (! initialize())
         return nullptr;
 
     auto* plugin = new VST3PluginInstance (this);
@@ -2894,11 +2894,11 @@ void VST3PluginFormat::createPluginInstance (const PluginDescription& descriptio
         {
             ScopedPointer<VST3Classes::VST3ComponentHolder> holder (new VST3Classes::VST3ComponentHolder (module));
 
-            if (holder->initialise())
+            if (holder->initialize())
             {
                 result.reset (new VST3Classes::VST3PluginInstance (holder.release()));
 
-                if (! result->initialise())
+                if (! result->initialize())
                     result.reset();
             }
         }

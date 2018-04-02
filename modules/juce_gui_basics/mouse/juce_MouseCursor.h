@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -84,7 +84,7 @@ public:
 
         @param image    the image to use for the cursor - if this is bigger than the
                         system can manage, it might get scaled down first, and might
-                        also have to be turned to black-and-white if it can't do colour
+                        also have to be turned to black-and-white if it can't do color
                         cursors.
         @param hotSpotX the x position of the cursor's hotspot within the image
         @param hotSpotY the y position of the cursor's hotspot within the image
@@ -95,7 +95,7 @@ public:
 
         @param image    the image to use for the cursor - if this is bigger than the
                         system can manage, it might get scaled down first, and might
-                        also have to be turned to black-and-white if it can't do colour
+                        also have to be turned to black-and-white if it can't do color
                         cursors.
         @param hotSpotX the x position of the cursor's hotspot within the image
         @param hotSpotY the y position of the cursor's hotspot within the image
@@ -123,7 +123,7 @@ public:
     /** Checks whether two mouse cursors are the same.
 
         For custom cursors, two cursors created from the same image won't be
-        recognised as the same, only MouseCursor objects that have been
+        recognized as the same, only MouseCursor objects that have been
         copied from the same object.
     */
     bool operator== (const MouseCursor&) const noexcept;
@@ -131,7 +131,7 @@ public:
     /** Checks whether two mouse cursors are the same.
 
         For custom cursors, two cursors created from the same image won't be
-        recognised as the same, only MouseCursor objects that have been
+        recognized as the same, only MouseCursor objects that have been
         copied from the same object.
     */
     bool operator!= (const MouseCursor&) const noexcept;

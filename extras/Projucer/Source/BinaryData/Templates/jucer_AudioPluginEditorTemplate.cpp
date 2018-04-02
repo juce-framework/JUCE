@@ -26,12 +26,12 @@
 //==============================================================================
 void %%editor_class_name%%::paint (Graphics& g)
 {
-    // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+    // (Our component is opaque, so we must completely fill the background with a solid color)
+    g.fillAll (getLookAndFeel().findColor (ResizableWindow::backgroundColorId));
 
-    g.setColour (Colours::white);
+    g.setColor (Colors::white);
     g.setFont (15.0f);
-    g.drawFittedText ("Hello World!", getLocalBounds(), Justification::centred, 1);
+    g.drawFittedText ("Hello World!", getLocalBounds(), Justification::centered, 1);
 }
 
 void %%editor_class_name%%::resized()

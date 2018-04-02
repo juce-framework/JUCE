@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -69,12 +69,12 @@ static void blurSingleChannelImage (Image& image, int radius)
 
 //==============================================================================
 DropShadow::DropShadow() noexcept
-    : colour (0x90000000), radius (4)
+    : color (0x90000000), radius (4)
 {
 }
 
-DropShadow::DropShadow (Colour shadowColour, const int r, Point<int> o) noexcept
-    : colour (shadowColour), radius (r), offset (o)
+DropShadow::DropShadow (Color shadowColor, const int r, Point<int> o) noexcept
+    : color (shadowColor), radius (r), offset (o)
 {
     jassert (radius > 0);
 }
@@ -90,7 +90,7 @@ void DropShadow::drawForImage (Graphics& g, const Image& srcImage) const
 
         blurSingleChannelImage (shadowImage, radius);
 
-        g.setColour (colour);
+        g.setColor (color);
         g.drawImageAt (shadowImage, offset.x, offset.y, true);
     }
 }
@@ -109,22 +109,22 @@ void DropShadow::drawForPath (Graphics& g, const Path& path) const
 
         {
             Graphics g2 (renderedPath);
-            g2.setColour (Colours::white);
+            g2.setColor (Colors::white);
             g2.fillPath (path, AffineTransform::translation ((float) (offset.x - area.getX()),
                                                              (float) (offset.y - area.getY())));
         }
 
         blurSingleChannelImage (renderedPath, radius);
 
-        g.setColour (colour);
+        g.setColor (color);
         g.drawImageAt (renderedPath, area.getX(), area.getY(), true);
     }
 }
 
-static void drawShadowSection (Graphics& g, ColourGradient& cg, Rectangle<float> area,
-                               bool isCorner, float centreX, float centreY, float edgeX, float edgeY)
+static void drawShadowSection (Graphics& g, ColorGradient& cg, Rectangle<float> area,
+                               bool isCorner, float centerX, float centerY, float edgeX, float edgeY)
 {
-    cg.point1 = area.getRelativePoint (centreX, centreY);
+    cg.point1 = area.getRelativePoint (centerX, centerY);
     cg.point2 = area.getRelativePoint (edgeX, edgeY);
     cg.isRadial = isCorner;
 
@@ -134,10 +134,10 @@ static void drawShadowSection (Graphics& g, ColourGradient& cg, Rectangle<float>
 
 void DropShadow::drawForRectangle (Graphics& g, const Rectangle<int>& targetArea) const
 {
-    ColourGradient cg (colour, 0, 0, colour.withAlpha (0.0f), 0, 0, false);
+    ColorGradient cg (color, 0, 0, color.withAlpha (0.0f), 0, 0, false);
 
     for (float i = 0.05f; i < 1.0f; i += 0.1f)
-        cg.addColour (1.0 - i, colour.withMultipliedAlpha (i * i));
+        cg.addColor (1.0 - i, color.withMultipliedAlpha (i * i));
 
     const float radiusInset = (radius + 1) / 2.0f;
     const float expandedRadius = radius + radiusInset;
@@ -159,7 +159,7 @@ void DropShadow::drawForRectangle (Graphics& g, const Rectangle<int>& targetArea
     drawShadowSection (g, cg, r.removeFromLeft  (expandedRadius), false, 1.0f, 0, 0, 0);
     drawShadowSection (g, cg, r.removeFromRight (expandedRadius), false, 0, 0, 1.0f, 0);
 
-    g.setColour (colour);
+    g.setColor (color);
     g.fillRect (area);
 }
 
@@ -176,7 +176,7 @@ void DropShadowEffect::applyEffect (Image& image, Graphics& g, float scaleFactor
 {
     DropShadow s (shadow);
     s.radius = roundToInt (s.radius * scaleFactor);
-    s.colour = s.colour.withMultipliedAlpha (alpha);
+    s.color = s.color.withMultipliedAlpha (alpha);
     s.offset.x = roundToInt (s.offset.x * scaleFactor);
     s.offset.y = roundToInt (s.offset.y * scaleFactor);
 

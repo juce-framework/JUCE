@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -62,23 +62,23 @@ public:
     ~TextButton();
 
     //==============================================================================
-    /** A set of colour IDs to use to change the colour of various aspects of the button.
+    /** A set of color IDs to use to change the color of various aspects of the button.
 
-        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        These constants can be used either via the Component::setColor(), or LookAndFeel::setColor()
         methods.
 
-        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+        @see Component::setColor, Component::findColor, LookAndFeel::setColor, LookAndFeel::findColor
     */
-    enum ColourIds
+    enum ColorIds
     {
-        buttonColourId                  = 0x1000100,  /**< The colour used to fill the button shape (when the button is toggled
+        buttonColorId                  = 0x1000100,  /**< The color used to fill the button shape (when the button is toggled
                                                            'off'). The look-and-feel class might re-interpret this to add
                                                            effects, etc. */
-        buttonOnColourId                = 0x1000101,  /**< The colour used to fill the button shape (when the button is toggled
+        buttonOnColorId                = 0x1000101,  /**< The color used to fill the button shape (when the button is toggled
                                                            'on'). The look-and-feel class might re-interpret this to add
                                                            effects, etc. */
-        textColourOffId                 = 0x1000102,  /**< The colour to use for the button's text when the button's toggle state is "off". */
-        textColourOnId                  = 0x1000103   /**< The colour to use for the button's text.when the button's toggle state is "on". */
+        textColorOffId                 = 0x1000102,  /**< The color to use for the button's text when the button's toggle state is "off". */
+        textColorOnId                  = 0x1000103   /**< The color to use for the button's text.when the button's toggle state is "on". */
     };
 
     //==============================================================================
@@ -101,7 +101,7 @@ public:
     /** @internal */
     void paintButton (Graphics&, bool isMouseOverButton, bool isButtonDown) override;
     /** @internal */
-    void colourChanged() override;
+    void colorChanged() override;
 
 private:
    #if JUCE_CATCH_DEPRECATED_CODE_MISUSE

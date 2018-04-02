@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -81,7 +81,7 @@ public:
     void paint (Graphics& g) override
     {
         if (isOpaque())
-            g.fillAll (Colours::white);
+            g.fillAll (Colors::white);
 
         g.setOpacity (1.0f);
         g.drawImageAt (image, 0, 0);
@@ -353,11 +353,11 @@ private:
 
         if (shouldSnapBack && sourceDetails.sourceComponent != nullptr)
         {
-            auto target = sourceDetails.sourceComponent->localPointToGlobal (sourceDetails.sourceComponent->getLocalBounds().getCentre());
-            auto ourCentre = localPointToGlobal (getLocalBounds().getCentre());
+            auto target = sourceDetails.sourceComponent->localPointToGlobal (sourceDetails.sourceComponent->getLocalBounds().getCenter());
+            auto ourCenter = localPointToGlobal (getLocalBounds().getCenter());
 
             animator.animateComponent (this,
-                                       getBounds() + (target - ourCentre),
+                                       getBounds() + (target - ourCenter),
                                        0.0f, 120,
                                        true, 1.0, 1.0);
         }
@@ -446,7 +446,7 @@ void DragAndDropContainer::startDragging (const var& sourceDescription,
     else
     {
         if (imageOffsetFromMouse == nullptr)
-            imageOffset = dragImage.getBounds().getCentre();
+            imageOffset = dragImage.getBounds().getCenter();
         else
             imageOffset = dragImage.getBounds().getConstrainedPoint (-*imageOffsetFromMouse);
     }
@@ -557,14 +557,14 @@ const MouseInputSource* DragAndDropContainer::getMouseInputSourceForDrag (Compon
         auto minDistance = std::numeric_limits<float>::max();
         auto& desktop = Desktop::getInstance();
 
-        auto centrePoint = sourceComponent ? sourceComponent->getScreenBounds().getCentre().toFloat() : Point<float>();
+        auto centerPoint = sourceComponent ? sourceComponent->getScreenBounds().getCenter().toFloat() : Point<float>();
         auto numDragging = desktop.getNumDraggingMouseSources();
 
         for (auto i = 0; i < numDragging; ++i)
         {
             if (auto* ms = desktop.getDraggingMouseSource (i))
             {
-                auto distance =  ms->getScreenPosition().getDistanceSquaredFrom (centrePoint);
+                auto distance =  ms->getScreenPosition().getDistanceSquaredFrom (centerPoint);
 
                 if (distance < minDistance)
                 {

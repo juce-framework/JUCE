@@ -24,11 +24,11 @@
 /* This component scrolls a continuous waveform showing the audio that's
    coming into whatever audio inputs this object is connected to.
 */
-class LiveScrollingAudioDisplay  : public AudioVisualiserComponent,
+class LiveScrollingAudioDisplay  : public AudioVisualizerComponent,
                                    public AudioIODeviceCallback
 {
 public:
-    LiveScrollingAudioDisplay()  : AudioVisualiserComponent (1)
+    LiveScrollingAudioDisplay()  : AudioVisualizerComponent (1)
     {
         setSamplesPerBlock (256);
         setBufferSize (1024);

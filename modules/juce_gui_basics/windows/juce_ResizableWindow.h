@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -55,8 +55,8 @@ public:
     //==============================================================================
     /** Creates a ResizableWindow.
 
-        This constructor doesn't specify a background colour, so the LookAndFeel's default
-        background colour will be used.
+        This constructor doesn't specify a background color, so the LookAndFeel's default
+        background color will be used.
 
         @param name                 the name to give the component
         @param addToDesktop         if true, the window will be automatically added to the
@@ -68,12 +68,12 @@ public:
     /** Creates a ResizableWindow.
 
         @param name                 the name to give the component
-        @param backgroundColour     the colour to use for filling the window's background.
+        @param backgroundColor     the color to use for filling the window's background.
         @param addToDesktop         if true, the window will be automatically added to the
                                     desktop; if false, you can use it as a child component
     */
     ResizableWindow (const String& name,
-                     Colour backgroundColour,
+                     Color backgroundColor,
                      bool addToDesktop);
 
     /** Destructor.
@@ -82,33 +82,33 @@ public:
     ~ResizableWindow();
 
     //==============================================================================
-    /** Returns the colour currently being used for the window's background.
+    /** Returns the color currently being used for the window's background.
 
-        As a convenience the window will fill itself with this colour, but you
-        can override the paint() method if you need more customised behaviour.
+        As a convenience the window will fill itself with this color, but you
+        can override the paint() method if you need more customized behavior.
 
-        This method is the same as retrieving the colour for ResizableWindow::backgroundColourId.
+        This method is the same as retrieving the color for ResizableWindow::backgroundColorId.
 
-        @see setBackgroundColour
+        @see setBackgroundColor
     */
-    Colour getBackgroundColour() const noexcept;
+    Color getBackgroundColor() const noexcept;
 
-    /** Changes the colour currently being used for the window's background.
+    /** Changes the color currently being used for the window's background.
 
-        As a convenience the window will fill itself with this colour, but you
-        can override the paint() method if you need more customised behaviour.
+        As a convenience the window will fill itself with this color, but you
+        can override the paint() method if you need more customized behavior.
 
         Note that the opaque state of this window is altered by this call to reflect
-        the opacity of the colour passed-in. On window systems which can't support
+        the opacity of the color passed-in. On window systems which can't support
         semi-transparent windows this might cause problems, (though it's unlikely you'll
         be using this class as a base for a semi-transparent component anyway).
 
-        You can also use the ResizableWindow::backgroundColourId colour id to set
-        this colour.
+        You can also use the ResizableWindow::backgroundColorId color id to set
+        this color.
 
-        @see getBackgroundColour
+        @see getBackgroundColor
     */
-    void setBackgroundColour (Colour newColour);
+    void setBackgroundColor (Color newColor);
 
     //==============================================================================
     /** Make the window resizable or fixed.
@@ -185,19 +185,19 @@ public:
     */
     void setFullScreen (bool shouldBeFullScreen);
 
-    /** Returns true if the window is currently minimised.
-        @see setMinimised
+    /** Returns true if the window is currently minimized.
+        @see setMinimized
     */
-    bool isMinimised() const;
+    bool isMinimized() const;
 
-    /** Minimises the window, or restores it to its previous position and size.
+    /** Minimizes the window, or restores it to its previous position and size.
 
-        When being un-minimised, it'll return to the last position and size it
-        was in before being minimised.
+        When being un-minimized, it'll return to the last position and size it
+        was in before being minimized.
 
-        @see isMinimised
+        @see isMinimized
     */
-    void setMinimised (bool shouldMinimise);
+    void setMinimized (bool shouldMinimize);
 
     /** Returns true if the window has been placed in kiosk-mode.
         @see Desktop::setKioskComponent
@@ -241,7 +241,7 @@ public:
 
     /** Changes the current content component.
 
-        This sets a component that will be placed in the centre of the ResizableWindow,
+        This sets a component that will be placed in the center of the ResizableWindow,
         (leaving a space around the edge for the border).
 
         You should never add components directly to a ResizableWindow (or any of its subclasses)
@@ -260,7 +260,7 @@ public:
 
     /** Changes the current content component.
 
-        This sets a component that will be placed in the centre of the ResizableWindow,
+        This sets a component that will be placed in the center of the ResizableWindow,
         (leaving a space around the edge for the border).
 
         You should never add components directly to a ResizableWindow (or any of its subclasses)
@@ -301,16 +301,16 @@ public:
     virtual BorderSize<int> getContentComponentBorder();
 
     //==============================================================================
-    /** A set of colour IDs to use to change the colour of various aspects of the window.
+    /** A set of color IDs to use to change the color of various aspects of the window.
 
-        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        These constants can be used either via the Component::setColor(), or LookAndFeel::setColor()
         methods.
 
-        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+        @see Component::setColor, Component::findColor, LookAndFeel::setColor, LookAndFeel::findColor
     */
-    enum ColourIds
+    enum ColorIds
     {
-        backgroundColourId          = 0x1005700,  /**< A colour to use to fill the window's background. */
+        backgroundColorId          = 0x1005700,  /**< A color to use to fill the window's background. */
     };
 
     //==============================================================================
@@ -394,7 +394,7 @@ private:
     bool hasBeenResized = false;
    #endif
 
-    void initialise (bool addToDesktop);
+    void initialize (bool addToDesktop);
     void updateLastPosIfNotFullScreen();
     void updateLastPosIfShowing();
     void setContent (Component*, bool takeOwnership, bool resizeToFit);

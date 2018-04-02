@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -75,7 +75,7 @@ namespace
             AttributedString::Attribute& a1 = atts.getReference (i);
             AttributedString::Attribute& a2 = atts.getReference (i + 1);
 
-            if (a1.colour == a2.colour && a1.font == a2.font)
+            if (a1.color == a2.color && a1.font == a2.font)
             {
                 a1.range.setEnd (a2.range.getEnd());
                 atts.remove (i + 1);
@@ -87,26 +87,26 @@ namespace
     }
 
     void appendRange (Array<AttributedString::Attribute>& atts,
-                      int length, const Font* f, const Colour* c)
+                      int length, const Font* f, const Color* c)
     {
         if (atts.size() == 0)
         {
             atts.add (AttributedString::Attribute (Range<int> (0, length),
                                                    f != nullptr ? *f : Font(),
-                                                   c != nullptr ? *c : Colour (0xff000000)));
+                                                   c != nullptr ? *c : Color (0xff000000)));
         }
         else
         {
             const int start = getLength (atts);
             atts.add (AttributedString::Attribute (Range<int> (start, start + length),
                                                    f != nullptr ? *f : atts.getReference (atts.size() - 1).font,
-                                                   c != nullptr ? *c : atts.getReference (atts.size() - 1).colour));
+                                                   c != nullptr ? *c : atts.getReference (atts.size() - 1).color));
             mergeAdjacentRanges (atts);
         }
     }
 
-    void applyFontAndColour (Array<AttributedString::Attribute>& atts,
-                             Range<int> range, const Font* f, const Colour* c)
+    void applyFontAndColor (Array<AttributedString::Attribute>& atts,
+                             Range<int> range, const Font* f, const Color* c)
     {
         range = splitAttributeRanges (atts, range);
 
@@ -119,7 +119,7 @@ namespace
                 if (range.getEnd() <= att.range.getStart())
                     break;
 
-                if (c != nullptr) att.colour = *c;
+                if (c != nullptr) att.color = *c;
                 if (f != nullptr) att.font = *f;
             }
         }
@@ -138,13 +138,13 @@ namespace
 }
 
 //==============================================================================
-AttributedString::Attribute::Attribute() noexcept : colour (0xff000000) {}
+AttributedString::Attribute::Attribute() noexcept : color (0xff000000) {}
 AttributedString::Attribute::~Attribute() noexcept {}
 
 AttributedString::Attribute::Attribute (Attribute&& other) noexcept
     : range (other.range),
       font (static_cast<Font&&> (other.font)),
-      colour (other.colour)
+      color (other.color)
 {
 }
 
@@ -152,14 +152,14 @@ AttributedString::Attribute& AttributedString::Attribute::operator= (Attribute&&
 {
     range = other.range;
     font = static_cast<Font&&> (other.font);
-    colour = other.colour;
+    color = other.color;
     return *this;
 }
 
 AttributedString::Attribute::Attribute (const Attribute& other) noexcept
     : range (other.range),
       font (other.font),
-      colour (other.colour)
+      color (other.color)
 {
 }
 
@@ -167,12 +167,12 @@ AttributedString::Attribute& AttributedString::Attribute::operator= (const Attri
 {
     range = other.range;
     font = other.font;
-    colour = other.colour;
+    color = other.color;
     return *this;
 }
 
-AttributedString::Attribute::Attribute (Range<int> r, const Font& f, Colour c) noexcept
-    : range (r), font (f), colour (c)
+AttributedString::Attribute::Attribute (Range<int> r, const Font& f, Color c) noexcept
+    : range (r), font (f), color (c)
 {
 }
 
@@ -267,16 +267,16 @@ void AttributedString::append (const String& textToAppend, const Font& font)
     appendRange (attributes, textToAppend.length(), &font, nullptr);
 }
 
-void AttributedString::append (const String& textToAppend, Colour colour)
+void AttributedString::append (const String& textToAppend, Color color)
 {
     text += textToAppend;
-    appendRange (attributes, textToAppend.length(), nullptr, &colour);
+    appendRange (attributes, textToAppend.length(), nullptr, &color);
 }
 
-void AttributedString::append (const String& textToAppend, const Font& font, Colour colour)
+void AttributedString::append (const String& textToAppend, const Font& font, Color color)
 {
     text += textToAppend;
-    appendRange (attributes, textToAppend.length(), &font, &colour);
+    appendRange (attributes, textToAppend.length(), &font, &color);
 }
 
 void AttributedString::append (const AttributedString& other)
@@ -318,19 +318,19 @@ void AttributedString::setLineSpacing (const float newLineSpacing) noexcept
     lineSpacing = newLineSpacing;
 }
 
-void AttributedString::setColour (Range<int> range, Colour colour)
+void AttributedString::setColor (Range<int> range, Color color)
 {
-    applyFontAndColour (attributes, range, nullptr, &colour);
+    applyFontAndColor (attributes, range, nullptr, &color);
 }
 
 void AttributedString::setFont (Range<int> range, const Font& font)
 {
-    applyFontAndColour (attributes, range, &font, nullptr);
+    applyFontAndColor (attributes, range, &font, nullptr);
 }
 
-void AttributedString::setColour (Colour colour)
+void AttributedString::setColor (Color color)
 {
-    setColour (Range<int> (0, getLength (attributes)), colour);
+    setColor (Range<int> (0, getLength (attributes)), color);
 }
 
 void AttributedString::setFont (const Font& font)

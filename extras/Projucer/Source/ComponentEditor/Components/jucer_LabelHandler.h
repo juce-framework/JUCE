@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -34,12 +34,12 @@ public:
     LabelHandler()
         : ComponentTypeHandler ("Label", "Label", typeid (Label), 150, 24)
     {
-        registerColour (Label::backgroundColourId, "background", "bkgCol");
-        registerColour (Label::textColourId, "text", "textCol");
-        registerColour (Label::outlineColourId, "outline", "outlineCol");
-        registerColour (TextEditor::textColourId, "editor text", "edTextCol");
-        registerColour (TextEditor::backgroundColourId, "editor bkg", "edBkgCol");
-        registerColour (TextEditor::highlightColourId, "highlight", "hiliteCol");
+        registerColor (Label::backgroundColorId, "background", "bkgCol");
+        registerColor (Label::textColorId, "text", "textCol");
+        registerColor (Label::outlineColorId, "outline", "outlineCol");
+        registerColor (TextEditor::textColorId, "editor text", "edTextCol");
+        registerColor (TextEditor::backgroundColorId, "editor bkg", "edBkgCol");
+        registerColor (TextEditor::highlightColorId, "highlight", "hiliteCol");
     }
 
     Component* createNewComponent (JucerDocument*) override
@@ -95,7 +95,7 @@ public:
         l->getProperties().set ("typefaceName", xml.getStringAttribute ("fontname", FontPropertyComponent::getDefaultFont()));
         updateLabelFont (l);
 
-        l->setJustificationType (Justification (xml.getIntAttribute ("justification", Justification::centred)));
+        l->setJustificationType (Justification (xml.getIntAttribute ("justification", Justification::centered)));
 
         l->setText (xml.getStringAttribute ("labelText", "Label Text"), dontSendNotification);
 
@@ -140,7 +140,7 @@ public:
           << CodeHelpers::boolLiteral (l->isEditableOnSingleClick()) << ", "
           << CodeHelpers::boolLiteral (l->isEditableOnDoubleClick()) << ", "
           << CodeHelpers::boolLiteral (l->doesLossOfFocusDiscardChanges()) << ");\n"
-          << getColourIntialisationCode (component, memberVariableName);
+          << getColorIntialisationCode (component, memberVariableName);
 
         if (needsCallback (component))
             s << memberVariableName << "->addListener (this);\n";
@@ -196,7 +196,7 @@ public:
                 props.add (new LabelLossOfFocusProperty (l, document));
         }
 
-        addColourProperties (component, document, props);
+        addColorProperties (component, document, props);
     }
 
     static bool needsCallback (Component* label)
@@ -331,7 +331,7 @@ private:
         void setIndex (int newIndex)
         {
             document.perform (new LabelFocusLossChangeAction (component, *document.getComponentLayout(), newIndex == 0),
-                              "Change Label focus behaviour");
+                              "Change Label focus behavior");
         }
 
         int getIndex() const

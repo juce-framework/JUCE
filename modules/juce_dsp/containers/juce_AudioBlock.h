@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -91,7 +91,7 @@ public:
     {
     }
 
-    /** Allocates a suitable amount of space in a HeapBlock, and initialises this object
+    /** Allocates a suitable amount of space in a HeapBlock, and initializes this object
         to point into it.
         The HeapBlock must of course not be freed or re-allocated while this object is still in
         use, because it will be referencing its data.
@@ -192,7 +192,7 @@ public:
 
     /** Returns a sample from the buffer.
         The channel and index are not checked - they are expected to be in-range. If not,
-        an assertion will be thrown, but in a release build, you're into 'undefined behaviour'
+        an assertion will be thrown, but in a release build, you're into 'undefined behavior'
         territory.
     */
     SampleType getSample (int channel, int sampleIndex) const noexcept
@@ -204,7 +204,7 @@ public:
 
     /** Modifies a sample in the buffer.
         The channel and index are not checked - they are expected to be in-range. If not,
-        an assertion will be thrown, but in a release build, you're into 'undefined behaviour'
+        an assertion will be thrown, but in a release build, you're into 'undefined behavior'
         territory.
     */
     void setSample (int destChannel, int destSample, SampleType newValue) noexcept
@@ -216,7 +216,7 @@ public:
 
     /** Adds a value to a sample in the buffer.
         The channel and index are not checked - they are expected to be in-range. If not,
-        an assertion will be thrown, but in a release build, you're into 'undefined behaviour'
+        an assertion will be thrown, but in a release build, you're into 'undefined behavior'
         territory.
     */
     void addSample (int destChannel, int destSample, SampleType valueToAdd) noexcept

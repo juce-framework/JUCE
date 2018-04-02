@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -38,7 +38,7 @@
 //==============================================================================
 PaintRoutine::PaintRoutine()
     : document (nullptr),
-      backgroundColour (ProjucerApplication::getApp().lookAndFeel.findColour (backgroundColourId))
+      backgroundColor (ProjucerApplication::getApp().lookAndFeel.findColor (backgroundColorId))
 {
     clear();
 }
@@ -66,9 +66,9 @@ bool PaintRoutine::perform (UndoableAction* action, const String& actionName)
     return false;
 }
 
-void PaintRoutine::setBackgroundColour (Colour newColour) noexcept
+void PaintRoutine::setBackgroundColor (Color newColor) noexcept
 {
-    backgroundColour = newColour;
+    backgroundColor = newColor;
     changed();
 }
 
@@ -460,7 +460,7 @@ void PaintRoutine::bringLostItemsBackOnScreen (const Rectangle<int>& parentArea)
 
         if (! r.intersects (parentArea))
         {
-            r.setPosition (parentArea.getCentreX(), parentArea.getCentreY());
+            r.setPosition (parentArea.getCenterX(), parentArea.getCenterY());
             c->setCurrentBounds (r, parentArea, true);
         }
     }
@@ -523,17 +523,17 @@ void PaintRoutine::endDragging()
 //==============================================================================
 void PaintRoutine::fillWithBackground (Graphics& g, const bool drawOpaqueBackground)
 {
-    if ((! backgroundColour.isOpaque()) && drawOpaqueBackground)
+    if ((! backgroundColor.isOpaque()) && drawOpaqueBackground)
     {
         g.fillCheckerBoard (Rectangle<float> ((float) g.getClipBounds().getRight(),
                                               (float) g.getClipBounds().getBottom()),
                             50.0f, 50.0f,
-                            Colour (0xffdddddd).overlaidWith (backgroundColour),
-                            Colour (0xffffffff).overlaidWith (backgroundColour));
+                            Color (0xffdddddd).overlaidWith (backgroundColor),
+                            Color (0xffffffff).overlaidWith (backgroundColor));
     }
     else
     {
-        g.fillAll (backgroundColour);
+        g.fillAll (backgroundColor);
     }
 }
 
@@ -598,7 +598,7 @@ const char* PaintRoutine::xmlTagName = "BACKGROUND";
 XmlElement* PaintRoutine::createXml() const
 {
     auto* xml = new XmlElement (xmlTagName);
-    xml->setAttribute ("backgroundColour", backgroundColour.toString());
+    xml->setAttribute ("backgroundColor", backgroundColor.toString());
 
     for (auto* e : elements)
         xml->addChildElement (e->createXml());
@@ -610,7 +610,7 @@ bool PaintRoutine::loadFromXml (const XmlElement& xml)
 {
     if (xml.hasTagName (xmlTagName))
     {
-        backgroundColour = Colour::fromString (xml.getStringAttribute ("backgroundColour", Colours::white.toString()));
+        backgroundColor = Color::fromString (xml.getStringAttribute ("backgroundColor", Colors::white.toString()));
 
         clear();
 
@@ -626,8 +626,8 @@ bool PaintRoutine::loadFromXml (const XmlElement& xml)
 
 void PaintRoutine::fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode) const
 {
-    if (! backgroundColour.isTransparent())
-        paintMethodCode << "g.fillAll (" << CodeHelpers::colourToCode (backgroundColour) << ");\n\n";
+    if (! backgroundColor.isTransparent())
+        paintMethodCode << "g.fillAll (" << CodeHelpers::colorToCode (backgroundColor) << ");\n\n";
 
     for (auto* e : elements)
         e->fillInGeneratedCode (code, paintMethodCode);

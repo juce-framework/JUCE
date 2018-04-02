@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -63,7 +63,7 @@ public:
 
         The prepareToPlay() method is guaranteed to be called at least once on an 'unpreprared'
         source to put it into a 'prepared' state before any calls will be made to getNextAudioBlock().
-        This callback allows the source to initialise any resources it might need when playing.
+        This callback allows the source to initialize any resources it might need when playing.
 
         Once playback has finished, the releaseResources() method is called to put the stream
         back into an 'unprepared' state.

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -245,7 +245,7 @@ public:
 
         tapDetector = [[WebViewTapDetector alloc] init];
         urlDetector = [[WebViewURLChangeDetector alloc] initWithWebBrowserOwner: owner];
-        gestureRecogniser = nil;
+        gestureRecognizer = nil;
         webView.delegate = urlDetector;
        #endif
     }
@@ -259,8 +259,8 @@ public:
         [clickListener release];
        #else
         webView.delegate = nil;
-        [webView removeGestureRecognizer: gestureRecogniser];
-        [gestureRecogniser release];
+        [webView removeGestureRecognizer: gestureRecognizer];
+        [gestureRecognizer release];
         [tapDetector release];
         [urlDetector release];
        #endif
@@ -351,7 +351,7 @@ private:
     UIWebView* webView;
     WebViewTapDetector* tapDetector;
     WebViewURLChangeDetector* urlDetector;
-    UITapGestureRecognizer* gestureRecogniser;
+    UITapGestureRecognizer* gestureRecognizer;
    #endif
 };
 

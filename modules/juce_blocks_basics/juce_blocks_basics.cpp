@@ -38,7 +38,7 @@
 #include "blocks/juce_Block.cpp"
 #include "topology/juce_PhysicalTopologySource.cpp"
 #include "topology/juce_RuleBasedTopologySource.cpp"
-#include "visualisers/juce_DrumPadLEDProgram.cpp"
-#include "visualisers/juce_BitmapLEDProgram.cpp"
+#include "visualizers/juce_DrumPadLEDProgram.cpp"
+#include "visualizers/juce_BitmapLEDProgram.cpp"
 
 #endif

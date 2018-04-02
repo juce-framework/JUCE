@@ -177,7 +177,7 @@ public:
 
     /** If the var is an array, this can be used to return one of its elements.
         To call this method, you must make sure that the var is actually an array, and
-        that the index is a valid number. If these conditions aren't met, behaviour is
+        that the index is a valid number. If these conditions aren't met, behavior is
         undefined.
         For more control over the array's contents, you can call getArray() and manipulate
         it directly as an Array\<var\>.
@@ -186,7 +186,7 @@ public:
 
     /** If the var is an array, this can be used to return one of its elements.
         To call this method, you must make sure that the var is actually an array, and
-        that the index is a valid number. If these conditions aren't met, behaviour is
+        that the index is a valid number. If these conditions aren't met, behavior is
         undefined.
         For more control over the array's contents, you can call getArray() and manipulate
         it directly as an Array\<var\>.
@@ -276,12 +276,12 @@ public:
 
    #if JUCE_ALLOW_STATIC_NULL_VARIABLES
     /** This was a static empty var object, but is now deprecated as it's too easy to accidentally
-        use it indirectly during a static constructor, leading to hard-to-find order-of-initialisation
+        use it indirectly during a static constructor, leading to hard-to-find order-of-initialization
         problems.
         @deprecated If you need a default-constructed var, just use var() or {}.
         The only time you might miss having var::null available might be if you need to return an
         empty var from a function by reference, but if you need to do that, it's easy enough to use
-        a function-local static var and return that, avoiding any order-of-initialisation issues.
+        a function-local static var and return that, avoiding any order-of-initialization issues.
     */
     static const var null;
    #endif

@@ -139,7 +139,7 @@ String SystemStats::getUserRegion()      { return getLocaleValue (_NL_IDENTIFICA
 String SystemStats::getDisplayLanguage() { return getUserLanguage() + "-" + getUserRegion(); }
 
 //==============================================================================
-void CPUInformation::initialise() noexcept
+void CPUInformation::initialize() noexcept
 {
     auto flags = getCpuInfo ("flags");
     hasMMX   = flags.contains ("mmx");

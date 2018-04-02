@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -66,7 +66,7 @@ struct MasterContentComponent  : public Component,
     {
         String name, ipAddress;
         float widthInches, heightInches;
-        Point<float> centre; // in inches
+        Point<float> center; // in inches
         float scaleFactor;
     };
 
@@ -94,10 +94,10 @@ struct MasterContentComponent  : public Component,
         String lastScale = properties.getValue ("scale_" + name);
 
         if (lastX.isEmpty() || lastY.isEmpty())
-            setClientCentre (name, { Random().nextFloat() * 10.0f,
+            setClientCenter (name, { Random().nextFloat() * 10.0f,
                                      Random().nextFloat() * 10.0f });
         else
-            setClientCentre (name, Point<float> (lastX.getFloatValue(),
+            setClientCenter (name, Point<float> (lastX.getFloatValue(),
                                                  lastY.getFloatValue()));
 
         if (lastScale.isNotEmpty())
@@ -117,15 +117,15 @@ struct MasterContentComponent  : public Component,
         updateDeviceComponents();
     }
 
-    void setClientCentre (const String& name, Point<float> newCentre)
+    void setClientCenter (const String& name, Point<float> newCenter)
     {
         if (auto c = getClient (name))
         {
-            newCentre = currentCanvas.getLimits().getConstrainedPoint (newCentre);
-            c->centre = newCentre;
+            newCenter = currentCanvas.getLimits().getConstrainedPoint (newCenter);
+            c->center = newCenter;
 
-            properties.setValue ("lastX_" + name, String (newCentre.x));
-            properties.setValue ("lastY_" + name, String (newCentre.y));
+            properties.setValue ("lastX_" + name, String (newCenter.x));
+            properties.setValue ("lastY_" + name, String (newCenter.y));
 
             startTimer (1);
         }
@@ -148,10 +148,10 @@ struct MasterContentComponent  : public Component,
         }
     }
 
-    Point<float> getClientCentre (const String& name) const
+    Point<float> getClientCenter (const String& name) const
     {
         if (auto c = getClient (name))
-            return c->centre;
+            return c->center;
 
         return {};
     }
@@ -160,7 +160,7 @@ struct MasterContentComponent  : public Component,
     {
         if (auto c = getClient (name))
             return Rectangle<float> (c->widthInches, c->heightInches)
-                     .withCentre (c->centre);
+                     .withCenter (c->center);
 
         return {};
     }
@@ -170,10 +170,10 @@ struct MasterContentComponent  : public Component,
         Rectangle<float> r;
 
         if (clients.size() > 0)
-            r = Rectangle<float> (1.0f, 1.0f).withCentre (clients.getReference (0).centre);
+            r = Rectangle<float> (1.0f, 1.0f).withCenter (clients.getReference (0).center);
 
         for (int i = 1; i < clients.size(); ++i)
-            r = r.getUnion (Rectangle<float> (1.0f, 1.0f).withCentre (clients.getReference (i).centre));
+            r = r.getUnion (Rectangle<float> (1.0f, 1.0f).withCenter (clients.getReference (i).center));
 
         return r.expanded (6.0f);
     }
@@ -212,25 +212,25 @@ private:
     //==============================================================================
     void paint (Graphics& g) override
     {
-        g.fillAll (Colours::black);
+        g.fillAll (Colors::black);
 
         currentCanvas.draw (g, getLocalBounds().toFloat(), currentCanvas.getLimits());
 
         if (error.isNotEmpty())
         {
-            g.setColour (Colours::red);
+            g.setColor (Colors::red);
             g.setFont (20.0f);
             g.drawText (error, getLocalBounds().reduced (10).removeFromBottom (80),
-                        Justification::centredRight, true);
+                        Justification::centeredRight, true);
         }
 
         if (content != nullptr)
         {
-            g.setColour (Colours::white);
+            g.setColor (Colors::white);
             g.setFont (17.0f);
             g.drawText ("Demo: " + content->getName(),
                         getLocalBounds().reduced (10).removeFromTop (30),
-                        Justification::centredLeft, true);
+                        Justification::centeredLeft, true);
         }
     }
 
@@ -286,21 +286,21 @@ private:
 
         void paint (Graphics& g) override
         {
-            g.fillAll (Colours::blue.withAlpha (0.4f));
+            g.fillAll (Colors::blue.withAlpha (0.4f));
 
-            g.setColour (Colours::white);
+            g.setColor (Colors::white);
             g.setFont (11.0f);
-            g.drawFittedText (getName(), getLocalBounds(), Justification::centred, 2);
+            g.drawFittedText (getName(), getLocalBounds(), Justification::centered, 2);
         }
 
         void mouseDown (const MouseEvent&) override
         {
-            dragStartLocation = editor.getClientCentre (getName());
+            dragStartLocation = editor.getClientCenter (getName());
         }
 
         void mouseDrag (const MouseEvent& e) override
         {
-            editor.setClientCentre (getName(), dragStartLocation
+            editor.setClientCenter (getName(), dragStartLocation
                                                 + editor.localSpaceToVirtual (e.getPosition().toFloat())
                                                 - editor.localSpaceToVirtual (e.getMouseDownPosition().toFloat()));
         }
@@ -332,11 +332,11 @@ private:
     //==============================================================================
     void broadcastNewCanvasState (const MemoryBlock& canvasData)
     {
-        BlockPacketiser packetiser;
-        packetiser.createBlocksFromData (canvasData, 1000);
+        BlockPacketizer packetizer;
+        packetizer.createBlocksFromData (canvasData, 1000);
 
         for (const auto& client : clients)
-            for (auto& b : packetiser.blocks)
+            for (auto& b : packetizer.blocks)
                 sendToIPAddress (client.ipAddress, masterPortNumber, canvasStateOSCAddress, b);
     }
 
@@ -363,10 +363,10 @@ private:
 
     void updateCanvasInfo (SharedCanvasDescription& canvas)
     {
-        canvas.backgroundColour = Colours::black;
+        canvas.backgroundColor = Colors::black;
 
         for (const auto& c : clients)
-            canvas.clients.add ({ c.name, c.centre, c.scaleFactor });
+            canvas.clients.add ({ c.name, c.center, c.scaleFactor });
     }
 
     const Client* getClient (const String& name) const

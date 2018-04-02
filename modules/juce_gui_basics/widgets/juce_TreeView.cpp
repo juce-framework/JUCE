@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -501,9 +501,9 @@ void TreeView::setRootItemVisible (const bool shouldBeVisible)
     itemsChanged();
 }
 
-void TreeView::colourChanged()
+void TreeView::colorChanged()
 {
-    setOpaque (findColour (backgroundColourId).isOpaque());
+    setOpaque (findColor (backgroundColorId).isOpaque());
     repaint();
 }
 
@@ -657,7 +657,7 @@ void TreeView::restoreOpennessState (const XmlElement& newState, const bool rest
 //==============================================================================
 void TreeView::paint (Graphics& g)
 {
-    g.fillAll (findColour (backgroundColourId));
+    g.fillAll (findColor (backgroundColorId));
 }
 
 void TreeView::resized()
@@ -900,7 +900,7 @@ struct TreeView::InsertPoint
                 }
             }
 
-            if (oldY > itemPos.getCentreY())
+            if (oldY > itemPos.getCenterY())
             {
                 pos.y += item->getItemHeight();
 
@@ -964,7 +964,7 @@ public:
         p.startNewSubPath (h - 2.0f, h / 2.0f);
         p.lineTo ((float) getWidth(), h / 2.0f);
 
-        g.setColour (findColour (TreeView::dragAndDropIndicatorColourId, true));
+        g.setColor (findColor (TreeView::dragAndDropIndicatorColorId, true));
         g.strokePath (p, PathStrokeType (2.0f));
     }
 
@@ -993,7 +993,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.setColour (findColour (TreeView::dragAndDropIndicatorColourId, true));
+        g.setColor (findColor (TreeView::dragAndDropIndicatorColorId, true));
         g.drawRoundedRectangle (1.0f, 1.0f, getWidth() - 2.0f, getHeight() - 2.0f, 3.0f, 2.0f);
     }
 
@@ -1336,21 +1336,21 @@ void TreeViewItem::paintItem (Graphics&, int, int)
 {
 }
 
-void TreeViewItem::paintOpenCloseButton (Graphics& g, const Rectangle<float>& area, Colour backgroundColour, bool isMouseOver)
+void TreeViewItem::paintOpenCloseButton (Graphics& g, const Rectangle<float>& area, Color backgroundColor, bool isMouseOver)
 {
     getOwnerView()->getLookAndFeel()
-       .drawTreeviewPlusMinusBox (g, area, backgroundColour, isOpen(), isMouseOver);
+       .drawTreeviewPlusMinusBox (g, area, backgroundColor, isOpen(), isMouseOver);
 }
 
 void TreeViewItem::paintHorizontalConnectingLine (Graphics& g, const Line<float>& line)
 {
-   g.setColour (ownerView->findColour (TreeView::linesColourId));
+   g.setColor (ownerView->findColor (TreeView::linesColorId));
    g.drawLine (line);
 }
 
 void TreeViewItem::paintVerticalConnectingLine (Graphics& g, const Line<float>& line)
 {
-   g.setColour (ownerView->findColour (TreeView::linesColourId));
+   g.setColor (ownerView->findColor (TreeView::linesColorId));
    g.drawLine (line);
 }
 
@@ -1544,10 +1544,10 @@ void TreeViewItem::paintRecursively (Graphics& g, int width)
                                 drawsInLeftMargin ? itemW + indent : itemW, itemHeight))
         {
             if (isSelected())
-                g.fillAll (ownerView->findColour (TreeView::selectedItemBackgroundColourId));
+                g.fillAll (ownerView->findColor (TreeView::selectedItemBackgroundColorId));
             else
-                g.fillAll ((getRowNumberInTree() % 2 == 0) ? ownerView->findColour (TreeView::oddItemsColourId)
-                                                           : ownerView->findColour (TreeView::evenItemsColourId));
+                g.fillAll ((getRowNumberInTree() % 2 == 0) ? ownerView->findColor (TreeView::oddItemsColorId)
+                                                           : ownerView->findColor (TreeView::evenItemsColorId));
 
             paintItem (g, itemWidth < 0 ? width - indent : itemWidth, itemHeight);
         }
@@ -1586,10 +1586,10 @@ void TreeViewItem::paintRecursively (Graphics& g, int width)
 
         if (mightContainSubItems())
         {
-            auto backgroundColour = ownerView->findColour (TreeView::backgroundColourId);
+            auto backgroundColor = ownerView->findColor (TreeView::backgroundColorId);
 
             paintOpenCloseButton (g, Rectangle<float> ((float) (depth * indentWidth), 0, (float) indentWidth, (float) itemHeight),
-                                  backgroundColour.isTransparent() ? Colours::white : backgroundColour,
+                                  backgroundColor.isTransparent() ? Colors::white : backgroundColor,
                                   ownerView->viewport->getContentComp()->isMouseOverButton (this));
         }
     }

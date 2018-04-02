@@ -133,7 +133,7 @@ static int findNumberOfPhysicalCores() noexcept
 }
 
 //==============================================================================
-void CPUInformation::initialise() noexcept
+void CPUInformation::initialize() noexcept
 {
     int info[4] = { 0 };
     callCPUID (info, 1);
@@ -163,15 +163,15 @@ void CPUInformation::initialise() noexcept
 }
 
 #if JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
-struct DebugFlagsInitialiser
+struct DebugFlagsInitializer
 {
-    DebugFlagsInitialiser()
+    DebugFlagsInitializer()
     {
         _CrtSetDbgFlag (_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
     }
 };
 
-static DebugFlagsInitialiser debugFlagsInitialiser;
+static DebugFlagsInitializer debugFlagsInitializer;
 #endif
 
 //==============================================================================
@@ -315,7 +315,7 @@ public:
         // This macro allows you to override the default timer-period
         // used on Windows. By default this is set to 1, because that has
         // always been the value used in JUCE apps, and changing it could
-        // affect the behaviour of existing code, but you may wish to make
+        // affect the behavior of existing code, but you may wish to make
         // it larger (or set it to 0 to use the system default) to make your
         // app less demanding on the CPU.
         // For more info, see win32 documentation about the timeBeginPeriod
@@ -429,7 +429,7 @@ bool Time::setSystemTimeToThisTime() const
 
     // do this twice because of daylight saving conversion problems - the
     // first one sets it up, the second one kicks it in.
-    // NB: the local variable is here to avoid analysers warning about having
+    // NB: the local variable is here to avoid analyzers warning about having
     // two identical sub-expressions in the return statement
     bool firstCallToSetTimezone = SetLocalTime (&st) != 0;
     return firstCallToSetTimezone && SetLocalTime (&st) != 0;

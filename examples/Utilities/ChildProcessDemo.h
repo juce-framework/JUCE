@@ -98,7 +98,7 @@ public:
         testResultsBox.setFont ({ Font::getDefaultMonospacedFontName(), 12.0f, Font::plain });
 
         logMessage (String ("This demo uses the ChildProcessMaster and ChildProcessSlave classes to launch and communicate "
-                            "with a child process, sending messages in the form of serialised ValueTree objects.") + newLine);
+                            "with a child process, sending messages in the form of serialized ValueTree objects.") + newLine);
 
         setSize (500, 500);
     }
@@ -110,7 +110,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground));
+        g.fillAll (getUIColorIfAvailable (LookAndFeel_V4::ColorScheme::UIColor::windowBackground));
     }
 
     void resized() override
@@ -250,7 +250,7 @@ public:
             we'll just increment that number and send back a new message containing the new number.
 
             Obviously in a real app you'll probably want to look at the type of the message, and do
-            some more interesting behaviour.
+            some more interesting behavior.
         */
 
         ValueTree reply ("REPLY");
@@ -278,7 +278,7 @@ public:
 };
 
 //==============================================================================
-/*  The JUCEApplication::initialise method calls this function to allow the
+/*  The JUCEApplication::initialize method calls this function to allow the
     child process to launch when the command line parameters indicate that we're
     being asked to run as a child process..
 */
@@ -286,7 +286,7 @@ bool invokeChildProcessDemo (const String& commandLine)
 {
     ScopedPointer<DemoSlaveProcess> slave (new DemoSlaveProcess());
 
-    if (slave->initialiseFromCommandLine (commandLine, demoCommandLineUID))
+    if (slave->initializeFromCommandLine (commandLine, demoCommandLineUID))
     {
         slave.release(); // allow the slave object to stay alive - it'll handle its own deletion.
         return true;
@@ -297,7 +297,7 @@ bool invokeChildProcessDemo (const String& commandLine)
 
 #ifndef JUCE_DEMO_RUNNER
  //==============================================================================
- // As we need to modify the JUCEApplication::initialise method to launch the child process
+ // As we need to modify the JUCEApplication::initialize method to launch the child process
  // based on the command line parameters, we can't just use the normal auto-generated Main.cpp.
  // Instead, we don't do anything in Main.cpp and create a JUCEApplication subclass here with
  // the necessary modifications.
@@ -310,7 +310,7 @@ bool invokeChildProcessDemo (const String& commandLine)
      const String getApplicationName() override              { return "ChildProcessDemo"; }
      const String getApplicationVersion() override           { return "1.0.0"; }
 
-     void initialise (const String& commandLine) override
+     void initialize (const String& commandLine) override
      {
          // launches the child process if the command line parameters contain the demo UID
          if (invokeChildProcessDemo (commandLine))
@@ -327,13 +327,13 @@ bool invokeChildProcessDemo (const String& commandLine)
      public:
          MainWindow (const String& name, Component* c)  : DocumentWindow (name,
                                                                           Desktop::getInstance().getDefaultLookAndFeel()
-                                                                                                .findColour (ResizableWindow::backgroundColourId),
+                                                                                                .findColor (ResizableWindow::backgroundColorId),
                                                                           DocumentWindow::allButtons)
          {
              setUsingNativeTitleBar (true);
              setContentOwned (c, true);
 
-             centreWithSize (getWidth(), getHeight());
+             centerWithSize (getWidth(), getHeight());
 
              setVisible (true);
          }

@@ -72,18 +72,18 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground));
+        g.fillAll (getUIColorIfAvailable (LookAndFeel_V4::ColorScheme::UIColor::windowBackground));
 
-        g.setColour (Colours::white);
+        g.setColor (Colors::white);
         g.setFont (15.0f);
         g.drawFittedText ("Drag the corner-points around to show how complex components can have affine-transforms applied...",
-                          getLocalBounds().removeFromBottom (40).reduced (10, 0), Justification::centred, 3);
+                          getLocalBounds().removeFromBottom (40).reduced (10, 0), Justification::centered, 3);
     }
 
     void resized() override
     {
         for (auto* d : draggers)
-            d->setCentrePosition (proportionOfWidth  (d->relativePos.x),
+            d->setCenterPosition (proportionOfWidth  (d->relativePos.x),
                                   proportionOfHeight (d->relativePos.y));
     }
 
@@ -106,10 +106,10 @@ private:
 
         void paint (Graphics& g) override
         {
-            g.setColour (Colours::white.withAlpha (isMouseOverOrDragging() ? 0.9f : 0.5f));
+            g.setColor (Colors::white.withAlpha (isMouseOverOrDragging() ? 0.9f : 0.5f));
             g.fillEllipse (getLocalBounds().reduced (3).toFloat());
 
-            g.setColour (Colours::darkgreen);
+            g.setColor (Colors::darkgreen);
             g.drawEllipse (getLocalBounds().reduced (3).toFloat(), 2.0f);
         }
 
@@ -121,7 +121,7 @@ private:
         void moved() override
         {
             if (isMouseButtonDown())
-                relativePos = getBounds().getCentre().toFloat() / Point<int> (getParentWidth(), getParentHeight()).toFloat();
+                relativePos = getBounds().getCenter().toFloat() / Point<int> (getParentWidth(), getParentHeight()).toFloat();
         }
 
         void mouseDown (const MouseEvent& e) override   { dragger.startDraggingComponent (this, e); }
@@ -140,7 +140,7 @@ private:
 
     Point<float> getDraggerPos (int index) const
     {
-        return draggers.getUnchecked (index)->getBounds().getCentre().toFloat();
+        return draggers.getUnchecked (index)->getBounds().getCenter().toFloat();
     }
 
     void updateTransform()

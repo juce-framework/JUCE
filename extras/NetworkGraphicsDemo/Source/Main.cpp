@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -67,7 +67,7 @@ public:
     void anotherInstanceStarted (const String&) override {}
 
     //==============================================================================
-    void initialise (const String& commandLine) override
+    void initialize (const String& commandLine) override
     {
        #if ! JUCE_IOS && ! JUCE_ANDROID
         // Run as the master if we have a command-line flag "master" or if the exe itself
@@ -100,7 +100,7 @@ public:
     struct MainWindow    : public DocumentWindow
     {
         MainWindow (PropertiesFile& props)
-            : DocumentWindow ("JUCE Networked Graphics Demo - Master", Colours::white, DocumentWindow::allButtons)
+            : DocumentWindow ("JUCE Networked Graphics Demo - Master", Colors::white, DocumentWindow::allButtons)
         {
             setUsingNativeTitleBar (true);
             setContentOwned (new MasterContentComponent (props), true);
@@ -112,7 +112,7 @@ public:
         }
 
         MainWindow (PropertiesFile& props, int windowIndex)
-            : DocumentWindow ("JUCE Networked Graphics Demo", Colours::black, DocumentWindow::allButtons)
+            : DocumentWindow ("JUCE Networked Graphics Demo", Colors::black, DocumentWindow::allButtons)
         {
             setUsingNativeTitleBar (true);
             setContentOwned (new SlaveCanvasComponent (props, windowIndex), true);

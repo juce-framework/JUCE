@@ -71,7 +71,7 @@ public:
     {
         if (isDragOver)
         {
-            g.setColour (Colours::red);
+            g.setColor (Colors::red);
             g.drawRect (fileChooser.getBounds(), 2);
         }
     }
@@ -145,7 +145,7 @@ public:
         directoryThread.startThread (1);
 
         fileTree.addListener (this);
-        fileTree.setColour (FileTreeComponent::backgroundColourId, Colours::lightgrey.withAlpha (0.6f));
+        fileTree.setColor (FileTreeComponent::backgroundColorId, Colors::lightgray.withAlpha (0.6f));
         addAndMakeVisible (fileTree);
 
         addAndMakeVisible (resizerBar);
@@ -181,7 +181,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground));
+        g.fillAll (getUIColorIfAvailable (LookAndFeel_V4::ColorScheme::UIColor::windowBackground));
     }
 
     void resized() override

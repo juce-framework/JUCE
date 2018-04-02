@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -78,18 +78,18 @@ public:
     bool isActiveWindow() const noexcept                    { return isCurrentlyActive; }
 
     //==============================================================================
-    /** This will set the bounds of the window so that it's centred in front of another
+    /** This will set the bounds of the window so that it's centered in front of another
         window.
 
         If your app has a few windows open and want to pop up a dialog box for one of
         them, you can use this to show it in front of the relevant parent window, which
         is a bit neater than just having it appear in the middle of the screen.
 
-        If componentToCentreAround is nullptr, then the currently active TopLevelWindow will
+        If componentToCenterAround is nullptr, then the currently active TopLevelWindow will
         be used instead. If no window is focused, it'll just default to the middle of the
         screen.
     */
-    void centreAroundComponent (Component* componentToCentreAround,
+    void centerAroundComponent (Component* componentToCenterAround,
                                 int width, int height);
 
     //==============================================================================

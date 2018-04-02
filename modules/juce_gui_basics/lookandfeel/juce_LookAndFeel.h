@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -134,35 +134,35 @@ public:
     static void setDefaultLookAndFeel (LookAndFeel* newDefaultLookAndFeel) noexcept;
 
     //==============================================================================
-    /** Looks for a colour that has been registered with the given colour ID number.
+    /** Looks for a color that has been registered with the given color ID number.
 
-        If a colour has been set for this ID number using setColour(), then it is
-        returned. If none has been set, it will just return Colours::black.
+        If a color has been set for this ID number using setColor(), then it is
+        returned. If none has been set, it will just return Colors::black.
 
-        The colour IDs for various purposes are stored as enums in the components that
-        they are relevant to - for an example, see Slider::ColourIds,
-        Label::ColourIds, TextEditor::ColourIds, TreeView::ColourIds, etc.
+        The color IDs for various purposes are stored as enums in the components that
+        they are relevant to - for an example, see Slider::ColorIds,
+        Label::ColorIds, TextEditor::ColorIds, TreeView::ColorIds, etc.
 
-        If you're looking up a colour for use in drawing a component, it's usually
-        best not to call this directly, but to use the Component::findColour() method
-        instead. That will first check whether a suitable colour has been registered
+        If you're looking up a color for use in drawing a component, it's usually
+        best not to call this directly, but to use the Component::findColor() method
+        instead. That will first check whether a suitable color has been registered
         directly with the component, and will fall-back on calling the component's
-        LookAndFeel's findColour() method if none is found.
+        LookAndFeel's findColor() method if none is found.
 
-        @see setColour, Component::findColour, Component::setColour
+        @see setColor, Component::findColor, Component::setColor
     */
-    Colour findColour (int colourId) const noexcept;
+    Color findColor (int colorId) const noexcept;
 
-    /** Registers a colour to be used for a particular purpose.
-        For more details, see the comments for findColour().
-        @see findColour, Component::findColour, Component::setColour
+    /** Registers a color to be used for a particular purpose.
+        For more details, see the comments for findColor().
+        @see findColor, Component::findColor, Component::setColor
     */
-    void setColour (int colourId, Colour colour) noexcept;
+    void setColor (int colorId, Color color) noexcept;
 
-    /** Returns true if the specified colour ID has been explicitly set using the
-        setColour() method.
+    /** Returns true if the specified color ID has been explicitly set using the
+        setColor() method.
     */
-    bool isColourSpecified (int colourId) const noexcept;
+    bool isColorSpecified (int colorId) const noexcept;
 
     //==============================================================================
     /** Returns the typeface that should be used for a given font.
@@ -190,7 +190,7 @@ public:
 
     //==============================================================================
     /** Override this to get the chance to swap a component's mouse cursor for a
-        customised one.
+        customized one.
     */
     virtual MouseCursor getMouseCursorFor (Component&);
 
@@ -208,7 +208,7 @@ public:
         This method should use the current time to animate itself, so just keep
         repainting it every so often.
     */
-    virtual void drawSpinningWaitAnimation (Graphics&, const Colour& colour,
+    virtual void drawSpinningWaitAnimation (Graphics&, const Color& color,
                                             int x, int y, int w, int h) = 0;
 
     //==============================================================================
@@ -226,16 +226,16 @@ public:
 
 private:
     //==============================================================================
-    struct ColourSetting
+    struct ColorSetting
     {
-        int colourID;
-        Colour colour;
+        int colorID;
+        Color color;
 
-        bool operator<  (const ColourSetting& other) const noexcept  { return colourID <  other.colourID; }
-        bool operator== (const ColourSetting& other) const noexcept  { return colourID == other.colourID; }
+        bool operator<  (const ColorSetting& other) const noexcept  { return colorID <  other.colorID; }
+        bool operator== (const ColorSetting& other) const noexcept  { return colorID == other.colorID; }
     };
 
-    SortedSet<ColourSetting> colours;
+    SortedSet<ColorSetting> colors;
     String defaultSans, defaultSerif, defaultFixed;
     Typeface::Ptr defaultTypeface;
     bool useNativeAlertWindows = false;

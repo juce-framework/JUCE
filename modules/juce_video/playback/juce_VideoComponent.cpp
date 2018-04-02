@@ -101,7 +101,7 @@ void VideoComponent::resized()
         }
         else
         {
-            r = RectanglePlacement (RectanglePlacement::centred).appliedTo (nativeSize, r);
+            r = RectanglePlacement (RectanglePlacement::centered).appliedTo (nativeSize, r);
             stopTimer();
         }
     }

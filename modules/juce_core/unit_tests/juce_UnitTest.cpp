@@ -65,7 +65,7 @@ StringArray UnitTest::getAllCategories()
     return categories;
 }
 
-void UnitTest::initialise()  {}
+void UnitTest::initialize()  {}
 void UnitTest::shutdown()   {}
 
 void UnitTest::performTest (UnitTestRunner* const newRunner)
@@ -73,7 +73,7 @@ void UnitTest::performTest (UnitTestRunner* const newRunner)
     jassert (newRunner != nullptr);
     runner = newRunner;
 
-    initialise();
+    initialize();
     runTest();
     shutdown();
 }

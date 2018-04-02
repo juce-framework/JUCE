@@ -56,7 +56,7 @@ public:
     static AudioChannelSet JUCE_CALLTYPE disabled();
 
     //==============================================================================
-    /** Creates a one-channel mono set (centre).
+    /** Creates a one-channel mono set (center).
 
         Is equivalent to: kMonoAAX (VST), AAX_eStemFormat_Mono (AAX), kAudioChannelLayoutTag_Mono (CoreAudio)
     */
@@ -71,7 +71,7 @@ public:
 
 
     //==============================================================================
-    /** Creates a set containing an LCR set (left, right, centre).
+    /** Creates a set containing an LCR set (left, right, center).
 
         Is equivalent to: k30Cine (VST), AAX_eStemFormat_LCR (AAX), kAudioChannelLayoutTag_MPEG_3_0_A (CoreAudio)
 
@@ -90,7 +90,7 @@ public:
     static AudioChannelSet JUCE_CALLTYPE createLRS();
 
 
-    /** Creates a set containing an LCRS set (left, right, centre, surround).
+    /** Creates a set containing an LCRS set (left, right, center, surround).
 
         Is equivalent to: k40Cine (VST), AAX_eStemFormat_LCRS (AAX), kAudioChannelLayoutTag_MPEG_4_0_A (CoreAudio)
 
@@ -102,7 +102,7 @@ public:
 
 
     //==============================================================================
-    /** Creates a set for a 5.0 surround setup (left, right, centre, leftSurround, rightSurround).
+    /** Creates a set for a 5.0 surround setup (left, right, center, leftSurround, rightSurround).
 
         Is equivalent to: k50 (VST), AAX_eStemFormat_5_0 (AAX), kAudioChannelLayoutTag_MPEG_5_0_A (CoreAudio)
 
@@ -112,7 +112,7 @@ public:
     static AudioChannelSet JUCE_CALLTYPE create5point0();
 
 
-    /** Creates a set for a 5.1 surround setup (left, right, centre, leftSurround, rightSurround, LFE).
+    /** Creates a set for a 5.1 surround setup (left, right, center, leftSurround, rightSurround, LFE).
 
         Is equivalent to: k51 (VST), AAX_eStemFormat_5_1 (AAX), kAudioChannelLayoutTag_MPEG_5_1_A (CoreAudio)
 
@@ -123,7 +123,7 @@ public:
     static AudioChannelSet JUCE_CALLTYPE create5point1();
 
 
-    /** Creates a set for a 6.0 Cine surround setup (left, right, centre, leftSurround, rightSurround, centreSurround).
+    /** Creates a set for a 6.0 Cine surround setup (left, right, center, leftSurround, rightSurround, centerSurround).
 
         Is equivalent to: k60Cine (VST), AAX_eStemFormat_6_0 (AAX), kAudioChannelLayoutTag_AudioUnit_6_0 (CoreAudio)
 
@@ -134,7 +134,7 @@ public:
     static AudioChannelSet JUCE_CALLTYPE create6point0();
 
 
-    /** Creates a set for a 6.1 Cine surround setup (left, right, centre, leftSurround, rightSurround, centreSurround, LFE).
+    /** Creates a set for a 6.1 Cine surround setup (left, right, center, leftSurround, rightSurround, centerSurround, LFE).
 
          Is equivalent to: k61Cine (VST), AAX_eStemFormat_6_1 (AAX), kAudioChannelLayoutTag_MPEG_6_1_A (CoreAudio)
 
@@ -159,7 +159,7 @@ public:
     static AudioChannelSet JUCE_CALLTYPE create6point1Music();
 
 
-    /** Creates a set for a DTS 7.0 surround setup (left, right, centre, leftSurroundSide, rightSurroundSide, leftSurroundRear, rightSurroundRear).
+    /** Creates a set for a DTS 7.0 surround setup (left, right, center, leftSurroundSide, rightSurroundSide, leftSurroundRear, rightSurroundRear).
 
         Is equivalent to: k70Music (VST), AAX_eStemFormat_7_0_DTS (AAX), kAudioChannelLayoutTag_AudioUnit_7_0 (CoreAudio)
 
@@ -168,7 +168,7 @@ public:
     static AudioChannelSet JUCE_CALLTYPE create7point0();
 
 
-    /** Creates a set for a SDDS 7.0 surround setup (left, right, centre, leftSurround, rightSurround, leftCentre, rightCentre).
+    /** Creates a set for a SDDS 7.0 surround setup (left, right, center, leftSurround, rightSurround, leftCenter, rightCenter).
 
         Is equivalent to: k70Cine (VST), AAX_eStemFormat_7_0_SDDS (AAX), kAudioChannelLayoutTag_AudioUnit_7_0_Front (CoreAudio)
 
@@ -177,7 +177,7 @@ public:
     static AudioChannelSet JUCE_CALLTYPE create7point0SDDS();
 
 
-    /** Creates a set for a DTS 7.1 surround setup (left, right, centre, leftSurroundSide, rightSurroundSide, leftSurroundRear, rightSurroundRear, LFE).
+    /** Creates a set for a DTS 7.1 surround setup (left, right, center, leftSurroundSide, rightSurroundSide, leftSurroundRear, rightSurroundRear, LFE).
 
         Is equivalent to: k71CineSideFill (VST), AAX_eStemFormat_7_1_DTS (AAX), kAudioChannelLayoutTag_MPEG_7_1_C/kAudioChannelLayoutTag_ITU_3_4_1 (CoreAudio)
 
@@ -187,7 +187,7 @@ public:
     static AudioChannelSet JUCE_CALLTYPE create7point1();
 
 
-    /** Creates a set for a 7.1 surround setup (left, right, centre, leftSurround, rightSurround, leftCentre, rightCentre, LFE).
+    /** Creates a set for a 7.1 surround setup (left, right, center, leftSurround, rightSurround, leftCenter, rightCenter, LFE).
 
         Is equivalent to: k71Cine (VST), AAX_eStemFormat_7_1_SDDS (AAX), kAudioChannelLayoutTag_MPEG_7_1_A (CoreAudio)
 
@@ -196,13 +196,13 @@ public:
     */
     static AudioChannelSet JUCE_CALLTYPE create7point1SDDS();
 
-    /** Creates a set for Dolby Atmos 7.0.2 surround setup (left, right, centre, leftSurroundSide, rightSurroundSide, leftSurroundRear, rightSurroundRear, topSideLeft, topSideRight).
+    /** Creates a set for Dolby Atmos 7.0.2 surround setup (left, right, center, leftSurroundSide, rightSurroundSide, leftSurroundRear, rightSurroundRear, topSideLeft, topSideRight).
 
         Is equivalent to: n/a (VST), AAX_eStemFormat_7_0_2 (AAX), n/a (CoreAudio)
     */
     static AudioChannelSet JUCE_CALLTYPE create7point0point2();
 
-    /** Creates a set for Dolby Atmos 7.1.2 surround setup (left, right, centre, leftSurroundSide, rightSurroundSide, leftSurroundRear, rightSurroundRear, LFE, topSideLeft, topSideRight).
+    /** Creates a set for Dolby Atmos 7.1.2 surround setup (left, right, center, leftSurroundSide, rightSurroundSide, leftSurroundRear, rightSurroundRear, LFE, topSideLeft, topSideRight).
 
         Is equivalent to: k71_2 (VST), AAX_eStemFormat_7_1_2 (AAX), n/a (CoreAudio)
     */
@@ -221,28 +221,28 @@ public:
     static AudioChannelSet JUCE_CALLTYPE quadraphonic();
 
 
-    /** Creates a set for pentagonal surround setup (left, right, centre, leftSurroundRear, rightSurroundRear).
+    /** Creates a set for pentagonal surround setup (left, right, center, leftSurroundRear, rightSurroundRear).
 
         Is equivalent to: n/a (VST), n/a (AAX), kAudioChannelLayoutTag_Pentagonal (CoreAudio)
     */
     static AudioChannelSet JUCE_CALLTYPE pentagonal();
 
 
-    /** Creates a set for hexagonal surround setup (left, right, leftSurroundRear, rightSurroundRear, centre, surroundCentre).
+    /** Creates a set for hexagonal surround setup (left, right, leftSurroundRear, rightSurroundRear, center, surroundCenter).
 
         Is equivalent to: n/a (VST), n/a (AAX), kAudioChannelLayoutTag_Hexagonal (CoreAudio)
     */
     static AudioChannelSet JUCE_CALLTYPE hexagonal();
 
 
-    /** Creates a set for octagonal surround setup (left, right, leftSurround, rightSurround, centre, centreSurround, wideLeft, wideRight).
+    /** Creates a set for octagonal surround setup (left, right, leftSurround, rightSurround, center, centerSurround, wideLeft, wideRight).
 
         Is equivalent to: n/a (VST), n/a (AAX), kAudioChannelLayoutTag_Octagonal (CoreAudio)
     */
     static AudioChannelSet JUCE_CALLTYPE octagonal();
 
     //==============================================================================
-    /** Creates a set for ACN, SN3D normalised ambisonic surround setups with a given order.
+    /** Creates a set for ACN, SN3D normalized ambisonic surround setups with a given order.
 
         Is equivalent to: kAmbiXXXOrderACN (VST), AAX_eStemFormat_Ambi_XXX_ACN (AAX), kAudioChannelLayoutTag_HOA_ACN_SN3D (CoreAudio)
     */
@@ -279,24 +279,24 @@ public:
         //==============================================================================
         left                = 1, /**< L channel. */
         right               = 2, /**< R channel. */
-        centre              = 3, /**< C channel. (Sometimes M for mono) */
+        center              = 3, /**< C channel. (Sometimes M for mono) */
 
         //==============================================================================
         LFE                 = 4,              /**< LFE channel. */
         leftSurround        = 5,              /**< Ls channel.  */
         rightSurround       = 6,              /**< Rs channel.  */
-        leftCentre          = 7,              /**< Lc (AAX/VST), Lc used as Lss in AU for most layouts. */
-        rightCentre         = 8,              /**< Rc (AAX/VST), Rc used as Rss in AU for most layouts. */
-        centreSurround      = 9,              /**< Cs/S channel. */
-        surround            = centreSurround, /**< Same as Centre Surround channel. */
-        leftSurroundSide    = 10,             /**< Lss (AXX), Side Left  "Sl" (VST), Left Centre  "LC" (AU) channel. */
-        rightSurroundSide   = 11,             /**< Rss (AXX), Side right "Sr" (VST), Right Centre "Rc" (AU) channel. */
+        leftCenter          = 7,              /**< Lc (AAX/VST), Lc used as Lss in AU for most layouts. */
+        rightCenter         = 8,              /**< Rc (AAX/VST), Rc used as Rss in AU for most layouts. */
+        centerSurround      = 9,              /**< Cs/S channel. */
+        surround            = centerSurround, /**< Same as Center Surround channel. */
+        leftSurroundSide    = 10,             /**< Lss (AXX), Side Left  "Sl" (VST), Left Center  "LC" (AU) channel. */
+        rightSurroundSide   = 11,             /**< Rss (AXX), Side right "Sr" (VST), Right Center "Rc" (AU) channel. */
         topMiddle           = 12,             /**< Top Middle channel.       */
         topFrontLeft        = 13,             /**< Top Front Left channel.   */
-        topFrontCentre      = 14,             /**< Top Front Centre channel. */
+        topFrontCenter      = 14,             /**< Top Front Center channel. */
         topFrontRight       = 15,             /**< Top Front Right channel.  */
         topRearLeft         = 16,             /**< Top Rear Left channel.    */
-        topRearCentre       = 17,             /**< Top Rear Centre channel.  */
+        topRearCenter       = 17,             /**< Top Rear Center channel.  */
         topRearRight        = 18,             /**< Top Rear Right channel.   */
         LFE2                = 19,             /**< Second LFE channel.       */
         leftSurroundRear    = 20,             /**< Lsr (AAX), Lcs (VST), Rls (AU) channel. */
@@ -310,7 +310,7 @@ public:
         topSideRight        = 29, /**< Rts (AAX), Tsr (VST) channel for Dolby Atmos. */
 
         //==============================================================================
-        // Ambisonic ACN formats - all channels are SN3D normalised
+        // Ambisonic ACN formats - all channels are SN3D normalized
 
         // zero-th and first-order ambisonic ACN
         ambisonicACN0       = 24, /**< Zero-th ambisonic channel number 0.     */

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -29,7 +29,7 @@ namespace juce
 namespace dsp
 {
 
-/** A template specialisation to find corresponding mask type for primitives. */
+/** A template specialization to find corresponding mask type for primitives. */
 namespace SIMDInternal
 {
     template <typename Primitive> struct MaskTypeFor        { typedef Primitive type; };

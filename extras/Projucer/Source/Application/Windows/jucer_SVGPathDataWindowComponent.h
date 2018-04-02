@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -35,7 +35,7 @@ class SVGPathDataComponent  : public Component,
 public:
     SVGPathDataComponent()
     {
-        desc.setJustificationType (Justification::centred);
+        desc.setJustificationType (Justification::centered);
         addAndMakeVisible (desc);
 
         userText.setFont (getAppSettings().appearance.getCodeFont().withHeight (13.0f));
@@ -121,11 +121,11 @@ public:
     {
         if (dragOver)
         {
-            g.setColour (findColour (secondaryBackgroundColourId).brighter());
+            g.setColor (findColor (secondaryBackgroundColorId).brighter());
             g.fillAll();
         }
 
-        g.setColour (findColour (defaultTextColourId));
+        g.setColor (findColor (defaultTextColorId));
         path.applyTransform (path.getTransformToScaleToFit (previewPathArea.reduced (4).toFloat(), true));
 
         if (fillPathButton.getToggleState())

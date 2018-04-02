@@ -258,7 +258,7 @@ public:
 
         Note that if a matching element already exists, the new value will be assigned
         to the existing one using operator=, so that if there are any differences between
-        the objects which were not recognised by the object's operator==, then the
+        the objects which were not recognized by the object's operator==, then the
         set will always contain a copy of the most recently added one.
 
         @param newElement   the new object to add to the set
@@ -449,9 +449,9 @@ public:
         removing elements, they may have quite a lot of unused space allocated.
         This method will reduce the amount of allocated storage to a minimum.
     */
-    void minimiseStorageOverheads() noexcept
+    void minimizeStorageOverheads() noexcept
     {
-        data.minimiseStorageOverheads();
+        data.minimizeStorageOverheads();
     }
 
     /** Increases the set's internal storage to hold a minimum number of elements.

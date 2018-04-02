@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -81,8 +81,8 @@ public:
     String getConstructorParams() const                                     { return constructorParams; }
     void setConstructorParams (const String& newParams);
 
-    String getVariableInitialisers() const                                  { return variableInitialisers; }
-    void setVariableInitialisers (const String& newInitlialisers);
+    String getVariableInitializers() const                                  { return variableInitializers; }
+    void setVariableInitializers (const String& newInitlialisers);
 
     void setFixedSize (const bool isFixed);
     bool isFixedSize() const noexcept                                       { return fixedSize; }
@@ -142,7 +142,7 @@ protected:
     SourceCodeDocument* cpp;
 
     String className, componentName, templateFile;
-    String parentClasses, constructorParams, variableInitialisers;
+    String parentClasses, constructorParams, variableInitializers;
 
     bool fixedSize = false;
     int initialWidth = 600, initialHeight = 400;

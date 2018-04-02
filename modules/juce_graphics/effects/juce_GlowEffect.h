@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -29,7 +29,7 @@ namespace juce
 
 //==============================================================================
 /**
-    A component effect that adds a coloured blur around the component's contents.
+    A component effect that adds a colored blur around the component's contents.
 
     (This will only work on non-opaque components).
 
@@ -42,7 +42,7 @@ class JUCE_API  GlowEffect  : public ImageEffectFilter
 public:
     //==============================================================================
     /** Creates a default 'glow' effect.
-        To customise its appearance, use the setGlowProperties() method.
+        To customize its appearance, use the setGlowProperties() method.
     */
     GlowEffect();
 
@@ -50,14 +50,14 @@ public:
     ~GlowEffect();
 
     //==============================================================================
-    /** Sets the glow's radius and colour.
+    /** Sets the glow's radius and color.
 
-        The radius is how large the blur should be, and the colour is
-        used to render it (for a less intense glow, lower the colour's
+        The radius is how large the blur should be, and the color is
+        used to render it (for a less intense glow, lower the color's
         opacity).
     */
     void setGlowProperties (float newRadius,
-                            Colour newColour,
+                            Color newColor,
                             Point<int> offset = {});
 
 
@@ -68,7 +68,7 @@ public:
 private:
     //==============================================================================
     float radius = 2.0f;
-    Colour colour { Colours::white };
+    Color color { Colors::white };
     Point<int> offset;
 
     JUCE_LEAK_DETECTOR (GlowEffect)

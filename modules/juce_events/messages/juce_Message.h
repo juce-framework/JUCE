@@ -44,7 +44,7 @@ class JUCE_API  Message  : public MessageManager::MessageBase
 {
 public:
     //==============================================================================
-    /** Creates an uninitialised message. */
+    /** Creates an uninitialized message. */
     Message() noexcept;
     ~Message();
 

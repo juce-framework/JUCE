@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -74,7 +74,7 @@ public:
 
         @code
         Graphics g (myImage);
-        g.setColour (Colours::green);
+        g.setColor (Colors::green);
         g.fillEllipse (20, 20, 300, 200);
         Array<Image> images;
         images.add (myImage);

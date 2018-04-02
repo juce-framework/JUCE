@@ -1159,7 +1159,7 @@ private:
             driverError = getLastDriverError();
 
         if ((! initOk) && driverError.isEmpty())
-            driverError = "Driver failed to initialise";
+            driverError = "Driver failed to initialize";
 
         if (driverError.isEmpty())
         {
@@ -1240,7 +1240,7 @@ private:
                         updateSampleRates();
 
                         readLatencies();                          // ..doing these steps because cubase does so at this stage
-                        createDummyBuffers (preferredBufferSize); // in initialisation, and some devices fail if we don't.
+                        createDummyBuffers (preferredBufferSize); // in initialization, and some devices fail if we don't.
                         readLatencies();
 
                         // start and stop because cubase does it..

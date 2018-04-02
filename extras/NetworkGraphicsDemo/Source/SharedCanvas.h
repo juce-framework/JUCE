@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -39,20 +39,20 @@ struct SharedCanvasDescription
 {
     SharedCanvasDescription() {}
 
-    Colour backgroundColour = Colours::black;
+    Color backgroundColor = Colors::black;
 
-    struct ColouredPath
+    struct ColoredPath
     {
         Path path;
         FillType fill;
     };
 
-    Array<ColouredPath> paths;
+    Array<ColoredPath> paths;
 
     struct ClientArea
     {
         String name;
-        Point<float> centre; // in inches
+        Point<float> center; // in inches
         float scaleFactor; // extra scaling
     };
 
@@ -67,7 +67,7 @@ struct SharedCanvasDescription
 
     void swapWith (SharedCanvasDescription& other)
     {
-        std::swap (backgroundColour, other.backgroundColour);
+        std::swap (backgroundColor, other.backgroundColor);
         paths.swapWith (other.paths);
         clients.swapWith (other.clients);
     }
@@ -121,19 +121,19 @@ struct SharedCanvasDescription
     }
 
     //==============================================================================
-    // Serialisation...
+    // Serialization...
 
     void save (OutputStream& out) const
     {
         out.writeInt (magic);
-        out.writeInt ((int) backgroundColour.getARGB());
+        out.writeInt ((int) backgroundColor.getARGB());
 
         out.writeInt (clients.size());
 
         for (const auto& c : clients)
         {
             out.writeString (c.name);
-            writePoint (out, c.centre);
+            writePoint (out, c.center);
             out.writeFloat (c.scaleFactor);
         }
 
@@ -151,7 +151,7 @@ struct SharedCanvasDescription
         if (in.readInt() != magic)
             return;
 
-        backgroundColour = Colour ((uint32) in.readInt());
+        backgroundColor = Color ((uint32) in.readInt());
 
         {
             const int numClients = in.readInt();
@@ -161,7 +161,7 @@ struct SharedCanvasDescription
             {
                 ClientArea c;
                 c.name = in.readString();
-                c.centre = readPoint (in);
+                c.center = readPoint (in);
                 c.scaleFactor = in.readFloat();
                 clients.add (c);
             }
@@ -173,7 +173,7 @@ struct SharedCanvasDescription
 
             for (int i = 0; i < numPaths; ++i)
             {
-                ColouredPath p;
+                ColoredPath p;
                 p.fill = readFill (in);
                 p.path.loadPathFromStream (in);
 
@@ -223,27 +223,27 @@ private:
 
     static void writeFill (OutputStream& out, const FillType& f)
     {
-        if (f.isColour())
+        if (f.isColor())
         {
             out.writeByte (0);
-            out.writeInt ((int) f.colour.getARGB());
+            out.writeInt ((int) f.color.getARGB());
         }
         else if (f.isGradient())
         {
-            const ColourGradient& cg = *f.gradient;
-            jassert (cg.getNumColours() >= 2);
+            const ColorGradient& cg = *f.gradient;
+            jassert (cg.getNumColors() >= 2);
 
             out.writeByte (cg.isRadial ? 2 : 1);
 
             writePoint (out, cg.point1);
             writePoint (out, cg.point2);
 
-            out.writeCompressedInt (cg.getNumColours());
+            out.writeCompressedInt (cg.getNumColors());
 
-            for (int i = 0; i < cg.getNumColours(); ++i)
+            for (int i = 0; i < cg.getNumColors(); ++i)
             {
-                out.writeDouble (cg.getColourPosition (i));
-                out.writeInt ((int) cg.getColour(i).getARGB());
+                out.writeDouble (cg.getColorPosition (i));
+                out.writeInt ((int) cg.getColor(i).getARGB());
             }
         }
         else
@@ -257,7 +257,7 @@ private:
         int type = in.readByte();
 
         if (type == 0)
-            return FillType (Colour ((uint32) in.readInt()));
+            return FillType (Color ((uint32) in.readInt()));
 
         if (type > 2)
         {
@@ -265,21 +265,21 @@ private:
             return FillType();
         }
 
-        ColourGradient cg;
+        ColorGradient cg;
         cg.point1 = readPoint (in);
         cg.point2 = readPoint (in);
 
-        cg.clearColours();
+        cg.clearColors();
 
-        int numColours = in.readCompressedInt();
+        int numColors = in.readCompressedInt();
 
-        for (int i = 0; i < numColours; ++i)
+        for (int i = 0; i < numColors; ++i)
         {
             const double pos = in.readDouble();
-            cg.addColour (pos, Colour ((uint32) in.readInt()));
+            cg.addColor (pos, Color ((uint32) in.readInt()));
         }
 
-        jassert (cg.getNumColours() >= 2);
+        jassert (cg.getNumColors() >= 2);
 
         return FillType (cg);
     }
@@ -444,7 +444,7 @@ private:
 /** Helper for breaking and reassembling a memory block into smaller checksummed
     blocks that will fit inside UDP packets
 */
-struct BlockPacketiser
+struct BlockPacketizer
 {
     void createBlocksFromData (const MemoryBlock& data, size_t maxBlockSize)
     {

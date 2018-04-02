@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -59,9 +59,9 @@
 #include "processors/juce_IIRFilter.cpp"
 #include "processors/juce_LadderFilter.cpp"
 #include "processors/juce_Oversampling.cpp"
-#include "maths/juce_SpecialFunctions.cpp"
-#include "maths/juce_Matrix.cpp"
-#include "maths/juce_LookupTable.cpp"
+#include "math/juce_SpecialFunctions.cpp"
+#include "math/juce_Matrix.cpp"
+#include "math/juce_LookupTable.cpp"
 #include "frequency/juce_FFT.cpp"
 #include "frequency/juce_Convolution.cpp"
 #include "frequency/juce_Windowing.cpp"
@@ -82,7 +82,7 @@
 #endif
 
 #if JUCE_UNIT_TESTS
-#include "maths/juce_Matrix_test.cpp"
+#include "math/juce_Matrix_test.cpp"
 #if JUCE_USE_SIMD
 #include "containers/juce_SIMDRegister_test.cpp"
 #endif

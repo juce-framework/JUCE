@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -42,7 +42,7 @@ public:
     void drawPropertyComponentLabel (Graphics&, int width, int height, PropertyComponent&) override;
     Rectangle<int> getPropertyComponentContentPosition (PropertyComponent&) override;
 
-    void drawButtonBackground (Graphics&, Button&, const Colour& backgroundColour,
+    void drawButtonBackground (Graphics&, Button&, const Color& backgroundColor,
                                bool isMouseOverButton, bool isButtonDown) override;
     void drawButtonText (Graphics&, TextButton&, bool isMouseOverButton, bool isButtonDown) override;
     void drawToggleButton (Graphics&, ToggleButton&, bool isMouseOverButton, bool isButtonDown) override;
@@ -73,7 +73,7 @@ public:
                        ComboBox&) override;
 
     void drawTreeviewPlusMinusBox (Graphics&, const Rectangle<float>& area,
-                                   Colour backgroundColour, bool isItemOpen, bool isMouseOver) override;
+                                   Color backgroundColor, bool isItemOpen, bool isMouseOver) override;
 
     void drawProgressBar (Graphics&, ProgressBar&, int width, int height, double progress, const String& textToShow) override;
 
@@ -86,7 +86,7 @@ public:
     static int getTextWidthForPropertyComponent (PropertyComponent* pp)    { return jmin (200, pp->getWidth() / 2); }
 
     //==============================================================================
-    void setupColours();
+    void setupColors();
 
 private:
 

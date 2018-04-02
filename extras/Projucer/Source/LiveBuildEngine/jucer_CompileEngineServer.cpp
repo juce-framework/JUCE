@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -263,7 +263,7 @@ void* createClangServer (const String& commandLine)
 
     if (ipc->dll.isLoaded())
     {
-        ipc->dll.initialise (crashCallback, quitCallback, (bool) RUN_CLANG_IN_CHILD_PROCESS);
+        ipc->dll.initialize (crashCallback, quitCallback, (bool) RUN_CLANG_IN_CHILD_PROCESS);
 
         currentServer = ipc.release();
         return currentServer;

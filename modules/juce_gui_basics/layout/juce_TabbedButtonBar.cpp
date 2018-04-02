@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -36,7 +36,7 @@ TabBarButton::TabBarButton (const String& name, TabbedButtonBar& bar)
 TabBarButton::~TabBarButton() {}
 
 int TabBarButton::getIndex() const                      { return owner.indexOfTabButton (this); }
-Colour TabBarButton::getTabBackgroundColour() const     { return owner.getTabBackgroundColour (getIndex()); }
+Color TabBarButton::getTabBackgroundColor() const     { return owner.getTabBackgroundColor (getIndex()); }
 bool TabBarButton::isFrontTab() const                   { return getToggleState(); }
 
 void TabBarButton::paintButton (Graphics& g, const bool isMouseOverButton, const bool isButtonDown)
@@ -105,14 +105,14 @@ void TabBarButton::calcAreas (Rectangle<int>& extraComp, Rectangle<int>& textAre
 
         if (orientation == TabbedButtonBar::TabsAtLeft || orientation == TabbedButtonBar::TabsAtRight)
         {
-            if (extraComp.getCentreY() > textArea.getCentreY())
+            if (extraComp.getCenterY() > textArea.getCenterY())
                 textArea.setBottom (jmin (textArea.getBottom(), extraComp.getY()));
             else
                 textArea.setTop (jmax (textArea.getY(), extraComp.getBottom()));
         }
         else
         {
-            if (extraComp.getCentreX() > textArea.getCentreX())
+            if (extraComp.getCenterX() > textArea.getCenterX())
                 textArea.setRight (jmin (textArea.getRight(), extraComp.getX()));
             else
                 textArea.setLeft (jmax (textArea.getX(), extraComp.getRight()));
@@ -243,7 +243,7 @@ void TabbedButtonBar::clearTabs()
 }
 
 void TabbedButtonBar::addTab (const String& tabName,
-                              Colour tabBackgroundColour,
+                              Color tabBackgroundColor,
                               int insertIndex)
 {
     jassert (tabName.isNotEmpty()); // you have to give them all a name..
@@ -257,7 +257,7 @@ void TabbedButtonBar::addTab (const String& tabName,
 
         auto* newTab = new TabInfo();
         newTab->name = tabName;
-        newTab->colour = tabBackgroundColour;
+        newTab->color = tabBackgroundColor;
         newTab->button.reset (createTabButton (tabName, insertIndex));
         jassert (newTab->button != nullptr);
 
@@ -448,12 +448,12 @@ void TabbedButtonBar::updateTabPositions (bool animate)
         if (isVertical())
         {
             tabsButtonPos = getHeight() - buttonSize / 2 - 1;
-            extraTabsButton->setCentrePosition (getWidth() / 2, tabsButtonPos);
+            extraTabsButton->setCenterPosition (getWidth() / 2, tabsButtonPos);
         }
         else
         {
             tabsButtonPos = getWidth() - buttonSize / 2 - 1;
-            extraTabsButton->setCentrePosition (tabsButtonPos, getHeight() / 2);
+            extraTabsButton->setCenterPosition (tabsButtonPos, getHeight() / 2);
         }
 
         totalLength = 0;
@@ -532,21 +532,21 @@ void TabbedButtonBar::updateTabPositions (bool animate)
 }
 
 //==============================================================================
-Colour TabbedButtonBar::getTabBackgroundColour (int tabIndex)
+Color TabbedButtonBar::getTabBackgroundColor (int tabIndex)
 {
     if (auto* tab = tabs[tabIndex])
-        return tab->colour;
+        return tab->color;
 
-    return Colours::transparentBlack;
+    return Colors::transparentBlack;
 }
 
-void TabbedButtonBar::setTabBackgroundColour (int tabIndex, Colour newColour)
+void TabbedButtonBar::setTabBackgroundColor (int tabIndex, Color newColor)
 {
     if (auto* tab = tabs [tabIndex])
     {
-        if (tab->colour != newColour)
+        if (tab->color != newColor)
         {
-            tab->colour = newColour;
+            tab->color = newColor;
             repaint();
         }
     }

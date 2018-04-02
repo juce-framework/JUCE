@@ -32,7 +32,7 @@ namespace juce
 {
 
 // This file provides interfaces for managing the internal configuration of Blocks
-// and synchronises with the connected Block
+// and synchronizes with the connected Block
 
 using namespace BlocksProtocol;
 
@@ -50,7 +50,7 @@ struct BlockConfigManager
         integer,
         floating,
         boolean,
-        colour,
+        color,
         options
     };
 

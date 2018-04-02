@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -78,7 +78,7 @@ public:
 
     /** Sets the style of justification to be used for positioning the text.
 
-        The default is Justification::centredLeft. The text is displayed using a
+        The default is Justification::centeredLeft. The text is displayed using a
         Label component inside the ComboBox.
     */
     void setJustificationType (Justification justification);
@@ -260,7 +260,7 @@ public:
 
     /** Pops up the combo box's list.
         This is virtual so that you can override it with your own custom popup
-        mechanism if you need some really unusual behaviour.
+        mechanism if you need some really unusual behavior.
     */
     virtual void showPopup();
 
@@ -340,23 +340,23 @@ public:
 
 
     //==============================================================================
-    /** A set of colour IDs to use to change the colour of various aspects of the combo box.
+    /** A set of color IDs to use to change the color of various aspects of the combo box.
 
-        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        These constants can be used either via the Component::setColor(), or LookAndFeel::setColor()
         methods.
 
-        To change the colours of the menu that pops up, you can set the colour IDs in PopupMenu::ColourIDs.
+        To change the colors of the menu that pops up, you can set the color IDs in PopupMenu::ColorIDs.
 
-        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+        @see Component::setColor, Component::findColor, LookAndFeel::setColor, LookAndFeel::findColor
     */
-    enum ColourIds
+    enum ColorIds
     {
-        backgroundColourId     = 0x1000b00,   /**< The background colour to fill the box with. */
-        textColourId           = 0x1000a00,   /**< The colour for the text in the box. */
-        outlineColourId        = 0x1000c00,   /**< The colour for an outline around the box. */
-        buttonColourId         = 0x1000d00,   /**< The base colour for the button (a LookAndFeel class will probably use variations on this). */
-        arrowColourId          = 0x1000e00,   /**< The colour for the arrow shape that pops up the menu */
-        focusedOutlineColourId = 0x1000f00    /**< The colour that will be used to draw a box around the edge of the component when it has focus. */
+        backgroundColorId     = 0x1000b00,   /**< The background color to fill the box with. */
+        textColorId           = 0x1000a00,   /**< The color for the text in the box. */
+        outlineColorId        = 0x1000c00,   /**< The color for an outline around the box. */
+        buttonColorId         = 0x1000d00,   /**< The base color for the button (a LookAndFeel class will probably use variations on this). */
+        arrowColorId          = 0x1000e00,   /**< The color for the arrow shape that pops up the menu */
+        focusedOutlineColorId = 0x1000f00    /**< The color that will be used to draw a box around the edge of the component when it has focus. */
     };
 
     //==============================================================================
@@ -382,7 +382,7 @@ public:
     /** @internal */
     void enablementChanged() override;
     /** @internal */
-    void colourChanged() override;
+    void colorChanged() override;
     /** @internal */
     void focusGained (Component::FocusChangeType) override;
     /** @internal */

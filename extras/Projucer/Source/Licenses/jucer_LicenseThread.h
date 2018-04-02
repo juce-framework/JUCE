@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -185,7 +185,7 @@ struct LicenseThread : NetWorkerThread
             {
                 selectNewLicense = false;
 
-                // un-authorised: token has expired
+                // un-authorized: token has expired
                 stateToUpdate = LicenseState();
             }
         }
@@ -206,9 +206,9 @@ struct LicenseThread : NetWorkerThread
         {
             static Identifier licenseTypeIdentifier   ("type");
             static Identifier licenseStatusIdentifier ("status");
-            static Identifier projucerLicenseTypeIdentifier ("licence_type");
+            static Identifier projucerLicenseTypeIdentifier ("license_type");
             static Identifier productNameIdentifier ("product_name");
-            static Identifier licenseIdentifier ("licence");
+            static Identifier licenseIdentifier ("license");
             static Identifier serialIdentifier  ("serial_number");
             static Identifier versionIdentifier ("product_version");
             static Identifier searchInternalIdentifier ("search_internal_id");
@@ -259,7 +259,7 @@ struct LicenseThread : NetWorkerThread
 
             const String& redirectURL       = result["page-redirect"];
             const String& productKey        = result["register-product"];
-            const String& chosenLicenseType = result["redeem-licence-type"];
+            const String& chosenLicenseType = result["redeem-license-type"];
 
             if (redirectURL.isNotEmpty())
             {
@@ -328,7 +328,7 @@ struct LicenseThread : NetWorkerThread
         HashMap<String, String> result;
 
         if (requiredWebview && ! threadShouldExit())
-            queryWebview ("https://juce.com/webviews/registration-complete", "licence_provisioned", result);
+            queryWebview ("https://juce.com/webviews/registration-complete", "license_provisioned", result);
 
         stateToUpdate.type = getBestLicenseTypeFromLicenses (licenses);
     }

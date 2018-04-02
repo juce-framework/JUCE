@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -41,7 +41,7 @@ public:
     ~LookAndFeel_V1();
 
     //==============================================================================
-    void drawButtonBackground (Graphics&, Button&, const Colour& backgroundColour,
+    void drawButtonBackground (Graphics&, Button&, const Color& backgroundColor,
                                bool isMouseOverButton, bool isButtonDown) override;
 
     void drawToggleButton (Graphics&, ToggleButton&, bool isMouseOverButton, bool isButtonDown) override;
@@ -92,7 +92,7 @@ public:
 
     void positionDocumentWindowButtons (DocumentWindow&,
                                         int titleBarX, int titleBarY, int titleBarW, int titleBarH,
-                                        Button* minimiseButton, Button* maximiseButton, Button* closeButton,
+                                        Button* minimizeButton, Button* maximizeButton, Button* closeButton,
                                         bool positionTitleBarButtonsOnLeft) override;
 
 private:

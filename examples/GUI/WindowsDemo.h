@@ -51,8 +51,8 @@
 class BasicWindow   : public DocumentWindow
 {
 public:
-    BasicWindow (const String& name, Colour backgroundColour, int buttonsNeeded)
-        : DocumentWindow (name, backgroundColour, buttonsNeeded)
+    BasicWindow (const String& name, Color backgroundColor, int buttonsNeeded)
+        : DocumentWindow (name, backgroundColor, buttonsNeeded)
     {}
 
     void closeButtonPressed()
@@ -65,21 +65,21 @@ private:
 };
 
 //==============================================================================
-/** This window contains a ColourSelector which can be used to change the window's colour. */
-class ColourSelectorWindow   : public DocumentWindow,
+/** This window contains a ColorSelector which can be used to change the window's color. */
+class ColorSelectorWindow   : public DocumentWindow,
                                private ChangeListener
 {
 public:
-    ColourSelectorWindow (const String& name, Colour backgroundColour, int buttonsNeeded)
-        : DocumentWindow (name, backgroundColour, buttonsNeeded)
+    ColorSelectorWindow (const String& name, Color backgroundColor, int buttonsNeeded)
+        : DocumentWindow (name, backgroundColor, buttonsNeeded)
     {
-        selector.setCurrentColour (backgroundColour);
-        selector.setColour (ColourSelector::backgroundColourId, Colours::transparentWhite);
+        selector.setCurrentColor (backgroundColor);
+        selector.setColor (ColorSelector::backgroundColorId, Colors::transparentWhite);
         selector.addChangeListener (this);
         setContentOwned (&selector, false);
     }
 
-    ~ColourSelectorWindow()
+    ~ColorSelectorWindow()
     {
         selector.removeChangeListener (this);
     }
@@ -90,17 +90,17 @@ public:
     }
 
 private:
-    ColourSelector selector  { ColourSelector::showColourAtTop
-                             | ColourSelector::showSliders
-                             | ColourSelector::showColourspace };
+    ColorSelector selector  { ColorSelector::showColorAtTop
+                             | ColorSelector::showSliders
+                             | ColorSelector::showColorspace };
 
     void changeListenerCallback (ChangeBroadcaster* source)
     {
         if (source == &selector)
-            setBackgroundColour (selector.getCurrentColour());
+            setBackgroundColor (selector.getCurrentColor());
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ColourSelectorWindow)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ColorSelectorWindow)
 };
 
 //==============================================================================
@@ -123,7 +123,7 @@ public:
         direction.x = random.nextFloat() * 8.0f - 4.0f;
         direction.y = random.nextFloat() * 8.0f - 4.0f;
 
-        colour = Colour ((juce::uint32) random.nextInt())
+        color = Color ((juce::uint32) random.nextInt())
                     .withAlpha (0.5f)
                     .withBrightness (0.7f);
 
@@ -132,7 +132,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.setColour (colour);
+        g.setColor (color);
         g.fillEllipse (ballBounds - getPosition().toFloat());
     }
 
@@ -149,7 +149,7 @@ public:
     }
 
 private:
-    Colour colour;
+    Color color;
     Rectangle<float> ballBounds;
     Point<float> direction;
 
@@ -184,15 +184,15 @@ public:
     void paint (Graphics& g) override
     {
         if (isOpaque())
-            g.fillAll (Colours::white);
+            g.fillAll (Colors::white);
         else
-            g.fillAll (Colours::blue.withAlpha (0.2f));
+            g.fillAll (Colors::blue.withAlpha (0.2f));
 
         g.setFont (16.0f);
-        g.setColour (Colours::black);
+        g.setColor (Colors::black);
         g.drawFittedText ("This window has no titlebar and a transparent background.",
                           getLocalBounds().reduced (8, 0),
-                          Justification::centred, 5);
+                          Justification::centered, 5);
 
         g.drawRect (getLocalBounds());
     }
@@ -245,8 +245,8 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground,
-                                           Colours::grey));
+        g.fillAll (getUIColorIfAvailable (LookAndFeel_V4::ColorScheme::UIColor::windowBackground,
+                                           Colors::gray));
     }
 
     void resized() override
@@ -300,7 +300,7 @@ private:
         DialogWindow::LaunchOptions options;
         auto* label = new Label();
         label->setText (m, dontSendNotification);
-        label->setColour (Label::textColourId, Colours::whitesmoke);
+        label->setColor (Label::textColorId, Colors::whitesmoke);
         options.content.setOwned (label);
 
         Rectangle<int> area (0, 0, 300, 200);
@@ -308,7 +308,7 @@ private:
         options.content->setSize (area.getWidth(), area.getHeight());
 
         options.dialogTitle                   = "Dialog Window";
-        options.dialogBackgroundColour        = Colour (0xff0e345a);
+        options.dialogBackgroundColor        = Color (0xff0e345a);
         options.escapeKeyTriggersCloseButton  = true;
         options.useNativeTitleBar             = false;
         options.resizable                     = true;
@@ -316,12 +316,12 @@ private:
         dialogWindow = options.launchAsync();
 
         if (dialogWindow != nullptr)
-            dialogWindow->centreWithSize (300, 200);
+            dialogWindow->centerWithSize (300, 200);
     }
 
     void showDocumentWindow (bool native)
     {
-        auto* dw = new ColourSelectorWindow ("Document Window", getRandomBrightColour(), DocumentWindow::allButtons);
+        auto* dw = new ColorSelectorWindow ("Document Window", getRandomBrightColor(), DocumentWindow::allButtons);
         windows.add (dw);
 
         Rectangle<int> area (0, 0, 300, 400);

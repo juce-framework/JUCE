@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -93,7 +93,7 @@ static bool recursionCheck = false;
 namespace juce
 {
  #if JUCE_MAC
-  extern JUCE_API void initialiseMacVST();
+  extern JUCE_API void initializeMacVST();
   extern JUCE_API void* attachComponentToWindowRefVST (Component*, void* parent, bool isNSView);
   extern JUCE_API void detachComponentFromWindowRefVST (Component*, void* window, bool isNSView);
   extern JUCE_API void setNativeHostWindowSizeVST (void* window, Component*, int newWidth, int newHeight, bool isNSView);
@@ -164,7 +164,7 @@ struct SharedMessageThread  : public Thread
     {
         startThread (7);
 
-        while (! initialised)
+        while (! initialized)
             sleep (1);
     }
 
@@ -178,8 +178,8 @@ struct SharedMessageThread  : public Thread
 
     void run() override
     {
-        initialiseJuce_GUI();
-        initialised = true;
+        initializeJuce_GUI();
+        initialized = true;
 
         MessageManager::getInstance()->setCurrentThreadAsMessageThread();
 
@@ -191,7 +191,7 @@ struct SharedMessageThread  : public Thread
 
     JUCE_DECLARE_SINGLETON (SharedMessageThread, false)
 
-    bool initialised = false;
+    bool initialized = false;
 };
 
 JUCE_IMPLEMENT_SINGLETON (SharedMessageThread)
@@ -569,7 +569,7 @@ public:
 
             /** If this plug-in is a synth or it can receive midi events we need to tell the
                 host that we want midi. In the SDK this method is marked as deprecated, but
-                some hosts rely on this behaviour.
+                some hosts rely on this behavior.
             */
             if (vstEffect.flags & vstEffectFlagIsSynth || JucePlugin_WantsMidiInput || JucePlugin_IsMidiEffect)
             {
@@ -807,7 +807,7 @@ public:
 
             if (channelType == AudioChannelSet::left
                 || channelType == AudioChannelSet::leftSurround
-                || channelType == AudioChannelSet::leftCentre
+                || channelType == AudioChannelSet::leftCenter
                 || channelType == AudioChannelSet::leftSurroundSide
                 || channelType == AudioChannelSet::topFrontLeft
                 || channelType == AudioChannelSet::topRearLeft
@@ -932,35 +932,35 @@ public:
         {
             static const Mapping mappings[] =
             {
-                { vstSpeakerConfigTypeMono,                          { centre, unknown } },
+                { vstSpeakerConfigTypeMono,                          { center, unknown } },
                 { vstSpeakerConfigTypeLR,                            { left, right, unknown } },
                 { vstSpeakerConfigTypeLsRs,                          { leftSurround, rightSurround, unknown } },
-                { vstSpeakerConfigTypeLcRc,                          { leftCentre, rightCentre, unknown } },
+                { vstSpeakerConfigTypeLcRc,                          { leftCenter, rightCenter, unknown } },
                 { vstSpeakerConfigTypeSlSr,                          { leftSurroundRear, rightSurroundRear, unknown } },
-                { vstSpeakerConfigTypeCLfe,                          { centre, LFE, unknown } },
-                { vstSpeakerConfigTypeLRC,                           { left, right, centre, unknown } },
+                { vstSpeakerConfigTypeCLfe,                          { center, LFE, unknown } },
+                { vstSpeakerConfigTypeLRC,                           { left, right, center, unknown } },
                 { vstSpeakerConfigTypeLRS,                           { left, right, surround, unknown } },
-                { vstSpeakerConfigTypeLRCLfe,                        { left, right, centre, LFE, unknown } },
+                { vstSpeakerConfigTypeLRCLfe,                        { left, right, center, LFE, unknown } },
                 { vstSpeakerConfigTypeLRLfeS,                        { left, right, LFE, surround, unknown } },
-                { vstSpeakerConfigTypeLRCS,                          { left, right, centre, surround, unknown } },
+                { vstSpeakerConfigTypeLRCS,                          { left, right, center, surround, unknown } },
                 { vstSpeakerConfigTypeLRLsRs,                        { left, right, leftSurround, rightSurround, unknown } },
-                { vstSpeakerConfigTypeLRCLfeS,                       { left, right, centre, LFE, surround, unknown } },
+                { vstSpeakerConfigTypeLRCLfeS,                       { left, right, center, LFE, surround, unknown } },
                 { vstSpeakerConfigTypeLRLfeLsRs,                     { left, right, LFE, leftSurround, rightSurround, unknown } },
-                { vstSpeakerConfigTypeLRCLsRs,                       { left, right, centre, leftSurround, rightSurround, unknown } },
-                { vstSpeakerConfigTypeLRCLfeLsRs,                    { left, right, centre, LFE, leftSurround, rightSurround, unknown } },
-                { vstSpeakerConfigTypeLRCLsRsCs,                     { left, right, centre, leftSurround, rightSurround, surround, unknown } },
+                { vstSpeakerConfigTypeLRCLsRs,                       { left, right, center, leftSurround, rightSurround, unknown } },
+                { vstSpeakerConfigTypeLRCLfeLsRs,                    { left, right, center, LFE, leftSurround, rightSurround, unknown } },
+                { vstSpeakerConfigTypeLRCLsRsCs,                     { left, right, center, leftSurround, rightSurround, surround, unknown } },
                 { vstSpeakerConfigTypeLRLsRsSlSr,                    { left, right, leftSurround, rightSurround, leftSurroundRear, rightSurroundRear, unknown } },
-                { vstSpeakerConfigTypeLRCLfeLsRsCs,                  { left, right, centre, LFE, leftSurround, rightSurround, surround, unknown } },
+                { vstSpeakerConfigTypeLRCLfeLsRsCs,                  { left, right, center, LFE, leftSurround, rightSurround, surround, unknown } },
                 { vstSpeakerConfigTypeLRLfeLsRsSlSr,                 { left, right, LFE, leftSurround, rightSurround, leftSurroundRear, rightSurroundRear, unknown } },
-                { vstSpeakerConfigTypeLRCLsRsLcRc,                   { left, right, centre, leftSurround, rightSurround, topFrontLeft, topFrontRight, unknown } },
-                { vstSpeakerConfigTypeLRCLsRsSlSr,                   { left, right, centre, leftSurround, rightSurround, leftSurroundRear, rightSurroundRear, unknown } },
-                { vstSpeakerConfigTypeLRCLfeLsRsLcRc,                { left, right, centre, LFE, leftSurround, rightSurround, topFrontLeft, topFrontRight, unknown } },
-                { vstSpeakerConfigTypeLRCLfeLsRsSlSr,                { left, right, centre, LFE, leftSurround, rightSurround, leftSurroundRear, rightSurroundRear, unknown } },
-                { vstSpeakerConfigTypeLRCLsRsLcRcCs,                 { left, right, centre, leftSurround, rightSurround, topFrontLeft, topFrontRight, surround, unknown } },
-                { vstSpeakerConfigTypeLRCLsRsCsSlSr,                 { left, right, centre, leftSurround, rightSurround, surround, leftSurroundRear, rightSurroundRear, unknown } },
-                { vstSpeakerConfigTypeLRCLfeLsRsLcRcCs,              { left, right, centre, LFE, leftSurround, rightSurround, topFrontLeft, topFrontRight, surround, unknown } },
-                { vstSpeakerConfigTypeLRCLfeLsRsCsSlSr,              { left, right, centre, LFE, leftSurround, rightSurround, surround, leftSurroundRear, rightSurroundRear, unknown } },
-                { vstSpeakerConfigTypeLRCLfeLsRsTflTfcTfrTrlTrrLfe2, { left, right, centre, LFE, leftSurround, rightSurround, topFrontLeft, topFrontCentre, topFrontRight, topRearLeft, topRearRight, LFE2, unknown } },
+                { vstSpeakerConfigTypeLRCLsRsLcRc,                   { left, right, center, leftSurround, rightSurround, topFrontLeft, topFrontRight, unknown } },
+                { vstSpeakerConfigTypeLRCLsRsSlSr,                   { left, right, center, leftSurround, rightSurround, leftSurroundRear, rightSurroundRear, unknown } },
+                { vstSpeakerConfigTypeLRCLfeLsRsLcRc,                { left, right, center, LFE, leftSurround, rightSurround, topFrontLeft, topFrontRight, unknown } },
+                { vstSpeakerConfigTypeLRCLfeLsRsSlSr,                { left, right, center, LFE, leftSurround, rightSurround, leftSurroundRear, rightSurroundRear, unknown } },
+                { vstSpeakerConfigTypeLRCLsRsLcRcCs,                 { left, right, center, leftSurround, rightSurround, topFrontLeft, topFrontRight, surround, unknown } },
+                { vstSpeakerConfigTypeLRCLsRsCsSlSr,                 { left, right, center, leftSurround, rightSurround, surround, leftSurroundRear, rightSurroundRear, unknown } },
+                { vstSpeakerConfigTypeLRCLfeLsRsLcRcCs,              { left, right, center, LFE, leftSurround, rightSurround, topFrontLeft, topFrontRight, surround, unknown } },
+                { vstSpeakerConfigTypeLRCLfeLsRsCsSlSr,              { left, right, center, LFE, leftSurround, rightSurround, surround, leftSurroundRear, rightSurroundRear, unknown } },
+                { vstSpeakerConfigTypeLRCLfeLsRsTflTfcTfrTrlTrrLfe2, { left, right, center, LFE, leftSurround, rightSurround, topFrontLeft, topFrontCenter, topFrontRight, topRearLeft, topRearRight, LFE2, unknown } },
                 { vstSpeakerConfigTypeEmpty,                         { unknown } }
             };
 
@@ -973,21 +973,21 @@ public:
             {
                 case AudioChannelSet::left:              return vstIndividualSpeakerTypeLeft;
                 case AudioChannelSet::right:             return vstIndividualSpeakerTypeRight;
-                case AudioChannelSet::centre:            return vstIndividualSpeakerTypeCentre;
+                case AudioChannelSet::center:            return vstIndividualSpeakerTypeCenter;
                 case AudioChannelSet::LFE:               return vstIndividualSpeakerTypeLFE;
                 case AudioChannelSet::leftSurround:      return vstIndividualSpeakerTypeLeftSurround;
                 case AudioChannelSet::rightSurround:     return vstIndividualSpeakerTypeRightSurround;
-                case AudioChannelSet::leftCentre:        return vstIndividualSpeakerTypeLeftCentre;
-                case AudioChannelSet::rightCentre:       return vstIndividualSpeakerTypeRightCentre;
+                case AudioChannelSet::leftCenter:        return vstIndividualSpeakerTypeLeftCenter;
+                case AudioChannelSet::rightCenter:       return vstIndividualSpeakerTypeRightCenter;
                 case AudioChannelSet::surround:          return vstIndividualSpeakerTypeSurround;
                 case AudioChannelSet::leftSurroundRear:  return vstIndividualSpeakerTypeLeftRearSurround;
                 case AudioChannelSet::rightSurroundRear: return vstIndividualSpeakerTypeRightRearSurround;
                 case AudioChannelSet::topMiddle:         return vstIndividualSpeakerTypeTopMiddle;
                 case AudioChannelSet::topFrontLeft:      return vstIndividualSpeakerTypeTopFrontLeft;
-                case AudioChannelSet::topFrontCentre:    return vstIndividualSpeakerTypeTopFrontCentre;
+                case AudioChannelSet::topFrontCenter:    return vstIndividualSpeakerTypeTopFrontCenter;
                 case AudioChannelSet::topFrontRight:     return vstIndividualSpeakerTypeTopFrontRight;
                 case AudioChannelSet::topRearLeft:       return vstIndividualSpeakerTypeTopRearLeft;
-                case AudioChannelSet::topRearCentre:     return vstIndividualSpeakerTypeTopRearCentre;
+                case AudioChannelSet::topRearCenter:     return vstIndividualSpeakerTypeTopRearCenter;
                 case AudioChannelSet::topRearRight:      return vstIndividualSpeakerTypeTopRearRight;
                 case AudioChannelSet::LFE2:              return vstIndividualSpeakerTypeLFE2;
                 default: break;
@@ -1002,21 +1002,21 @@ public:
             {
                 case vstIndividualSpeakerTypeLeft:              return AudioChannelSet::left;
                 case vstIndividualSpeakerTypeRight:             return AudioChannelSet::right;
-                case vstIndividualSpeakerTypeCentre:            return AudioChannelSet::centre;
+                case vstIndividualSpeakerTypeCenter:            return AudioChannelSet::center;
                 case vstIndividualSpeakerTypeLFE:               return AudioChannelSet::LFE;
                 case vstIndividualSpeakerTypeLeftSurround:      return AudioChannelSet::leftSurround;
                 case vstIndividualSpeakerTypeRightSurround:     return AudioChannelSet::rightSurround;
-                case vstIndividualSpeakerTypeLeftCentre:        return AudioChannelSet::leftCentre;
-                case vstIndividualSpeakerTypeRightCentre:       return AudioChannelSet::rightCentre;
+                case vstIndividualSpeakerTypeLeftCenter:        return AudioChannelSet::leftCenter;
+                case vstIndividualSpeakerTypeRightCenter:       return AudioChannelSet::rightCenter;
                 case vstIndividualSpeakerTypeSurround:          return AudioChannelSet::surround;
                 case vstIndividualSpeakerTypeLeftRearSurround:  return AudioChannelSet::leftSurroundRear;
                 case vstIndividualSpeakerTypeRightRearSurround: return AudioChannelSet::rightSurroundRear;
                 case vstIndividualSpeakerTypeTopMiddle:         return AudioChannelSet::topMiddle;
                 case vstIndividualSpeakerTypeTopFrontLeft:      return AudioChannelSet::topFrontLeft;
-                case vstIndividualSpeakerTypeTopFrontCentre:    return AudioChannelSet::topFrontCentre;
+                case vstIndividualSpeakerTypeTopFrontCenter:    return AudioChannelSet::topFrontCenter;
                 case vstIndividualSpeakerTypeTopFrontRight:     return AudioChannelSet::topFrontRight;
                 case vstIndividualSpeakerTypeTopRearLeft:       return AudioChannelSet::topRearLeft;
-                case vstIndividualSpeakerTypeTopRearCentre:     return AudioChannelSet::topRearCentre;
+                case vstIndividualSpeakerTypeTopRearCenter:     return AudioChannelSet::topRearCenter;
                 case vstIndividualSpeakerTypeTopRearRight:      return AudioChannelSet::topRearRight;
                 case vstIndividualSpeakerTypeLFE2:              return AudioChannelSet::LFE2;
                 default: break;
@@ -2148,7 +2148,7 @@ namespace
     {
         JUCE_AUTORELEASEPOOL
         {
-            initialiseJuce_GUI();
+            initializeJuce_GUI();
 
             try
             {
@@ -2184,7 +2184,7 @@ namespace
     {
         PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_VST;
 
-        initialiseMacVST();
+        initializeMacVST();
         return pluginEntryPoint (audioMaster);
     }
 
@@ -2193,7 +2193,7 @@ namespace
     {
         PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_VST;
 
-        initialiseMacVST();
+        initializeMacVST();
         return pluginEntryPoint (audioMaster);
     }
 
@@ -2218,7 +2218,7 @@ namespace
         return VSTPluginMain (audioMaster);
     }
 
-    // don't put initialiseJuce_GUI or shutdownJuce_GUI in these... it will crash!
+    // don't put initializeJuce_GUI or shutdownJuce_GUI in these... it will crash!
     __attribute__((constructor)) void myPluginInit() {}
     __attribute__((destructor))  void myPluginFini() {}
 

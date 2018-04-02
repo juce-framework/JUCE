@@ -43,7 +43,7 @@ public:
     /** Opens a file and maps it to an area of virtual memory.
 
         The file should already exist, and should already be the size that you want to work with
-        when you call this. If the file is resized after being opened, the behaviour is undefined.
+        when you call this. If the file is resized after being opened, the behavior is undefined.
 
         If the file exists and the operation succeeds, the getData() and getSize() methods will
         return the location and size of the data that can be read or written. Note that the entire
@@ -62,7 +62,7 @@ public:
     /** Opens a section of a file and maps it to an area of virtual memory.
 
         The file should already exist, and should already be the size that you want to work with
-        when you call this. If the file is resized after being opened, the behaviour is undefined.
+        when you call this. If the file is resized after being opened, the behavior is undefined.
 
         If the file exists and the operation succeeds, the getData() and getSize() methods will
         return the location and size of the data that can be read or written. Note that the entire

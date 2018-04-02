@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -57,7 +57,7 @@ public:
         if (multipleSelected)
             return;
 
-        addColourProperties (component, document, props);
+        addColorProperties (component, document, props);
 
         if (auto* ib = dynamic_cast<ImageButton*> (component))
         {
@@ -67,15 +67,15 @@ public:
 
             props.add (new ImageButtonResourceProperty (layout, ib, normalImage, "normal image"));
             props.add (new ImageButtonOpacityProperty (layout, ib, "opacity", normalImage));
-            props.add (new ImageButtonColourProperty (layout, ib, "overlay col.", normalImage));
+            props.add (new ImageButtonColorProperty (layout, ib, "overlay col.", normalImage));
 
             props.add (new ImageButtonResourceProperty (layout, ib, overImage, "over image"));
             props.add (new ImageButtonOpacityProperty (layout, ib, "opacity", overImage));
-            props.add (new ImageButtonColourProperty (layout, ib, "overlay col.", overImage));
+            props.add (new ImageButtonColorProperty (layout, ib, "overlay col.", overImage));
 
             props.add (new ImageButtonResourceProperty (layout, ib, downImage, "down image"));
             props.add (new ImageButtonOpacityProperty (layout, ib, "opacity", downImage));
-            props.add (new ImageButtonColourProperty (layout, ib, "overlay col.", downImage));
+            props.add (new ImageButtonColorProperty (layout, ib, "overlay col.", downImage));
         }
     }
 
@@ -89,15 +89,15 @@ public:
 
         e->setAttribute ("resourceNormal", getImageResource (ib, normalImage));
         e->setAttribute ("opacityNormal", getImageOpacity (ib, normalImage));
-        e->setAttribute ("colourNormal", getImageColour (ib, normalImage).toString());
+        e->setAttribute ("colorNormal", getImageColor (ib, normalImage).toString());
 
         e->setAttribute ("resourceOver", getImageResource (ib, overImage));
         e->setAttribute ("opacityOver", getImageOpacity (ib, overImage));
-        e->setAttribute ("colourOver", getImageColour (ib, overImage).toString());
+        e->setAttribute ("colorOver", getImageColor (ib, overImage).toString());
 
         e->setAttribute ("resourceDown", getImageResource (ib, downImage));
         e->setAttribute ("opacityDown", getImageOpacity (ib, downImage));
-        e->setAttribute ("colourDown", getImageColour (ib, downImage).toString());
+        e->setAttribute ("colorDown", getImageColor (ib, downImage).toString());
 
         return e;
     }
@@ -114,15 +114,15 @@ public:
 
         setImageResource (l, ib, normalImage, xml.getStringAttribute ("resourceNormal", String()), false);
         setImageOpacity (l, ib, normalImage, (float) xml.getDoubleAttribute ("opacityNormal", 1.0f), false);
-        setImageColour (l, ib, normalImage, Colour::fromString (xml.getStringAttribute ("colourNormal", "0")), false);
+        setImageColor (l, ib, normalImage, Color::fromString (xml.getStringAttribute ("colorNormal", "0")), false);
 
         setImageResource (l, ib, overImage, xml.getStringAttribute ("resourceOver", String()), false);
         setImageOpacity (l, ib, overImage, (float) xml.getDoubleAttribute ("opacityOver", 1.0f), false);
-        setImageColour (l, ib, overImage, Colour::fromString (xml.getStringAttribute ("colourOver", "0")), false);
+        setImageColor (l, ib, overImage, Color::fromString (xml.getStringAttribute ("colorOver", "0")), false);
 
         setImageResource (l, ib, downImage, xml.getStringAttribute ("resourceDown", String()), false);
         setImageOpacity (l, ib, downImage, (float) xml.getDoubleAttribute ("opacityDown", 1.0f), false);
-        setImageColour (l, ib, downImage, Colour::fromString (xml.getStringAttribute ("colourDown", "0")), false);
+        setImageColor (l, ib, downImage, Color::fromString (xml.getStringAttribute ("colorDown", "0")), false);
 
         return true;
     }
@@ -135,7 +135,7 @@ public:
 
         String s;
 
-        s << getColourIntialisationCode (component, memberVariableName)
+        s << getColorIntialisationCode (component, memberVariableName)
           << '\n';
 
         const String indent (String::repeatedString (" ", memberVariableName.length() + 13));
@@ -145,15 +145,15 @@ public:
           << indent
           << getImageCreationCode (ib, normalImage) << ", "
           << CodeHelpers::floatLiteral (getImageOpacity (ib, normalImage), 3) << ", "
-          << CodeHelpers::colourToCode (getImageColour (ib, normalImage)) << ",\n"
+          << CodeHelpers::colorToCode (getImageColor (ib, normalImage)) << ",\n"
           << indent
           << getImageCreationCode (ib, overImage) << ", "
           << CodeHelpers::floatLiteral (getImageOpacity (ib, overImage), 3) << ", "
-          << CodeHelpers::colourToCode (getImageColour (ib, overImage)) << ",\n"
+          << CodeHelpers::colorToCode (getImageColor (ib, overImage)) << ",\n"
           << indent
           << getImageCreationCode (ib, downImage) << ", "
           << CodeHelpers::floatLiteral (getImageOpacity (ib, downImage), 3) << ", "
-          << CodeHelpers::colourToCode (getImageColour (ib, downImage))
+          << CodeHelpers::colorToCode (getImageColor (ib, downImage))
           << ");\n";
 
         code.constructorCode += s;
@@ -417,68 +417,68 @@ public:
     };
 
     //==============================================================================
-    class SetImageColourAction   : public ComponentUndoableAction <ImageButton>
+    class SetImageColorAction   : public ComponentUndoableAction <ImageButton>
     {
     public:
-        SetImageColourAction (ImageButton* const button,
+        SetImageColorAction (ImageButton* const button,
                               ComponentLayout& layout_,
                               const ImageRole role_,
-                              Colour newState_)
+                              Color newState_)
             : ComponentUndoableAction<ImageButton> (button, layout_),
               role (role_),
               newState (newState_),
               layout (layout_)
         {
-            oldState = ImageButtonHandler::getImageColour (button, role_);
+            oldState = ImageButtonHandler::getImageColor (button, role_);
         }
 
         bool perform()
         {
             showCorrectTab();
-            ImageButtonHandler::setImageColour (layout, getComponent(), role, newState, false);
+            ImageButtonHandler::setImageColor (layout, getComponent(), role, newState, false);
             return true;
         }
 
         bool undo()
         {
             showCorrectTab();
-            ImageButtonHandler::setImageColour (layout, getComponent(), role, oldState, false);
+            ImageButtonHandler::setImageColor (layout, getComponent(), role, oldState, false);
             return true;
         }
 
     private:
         const ImageRole role;
-        Colour newState, oldState;
+        Color newState, oldState;
         ComponentLayout& layout;
     };
 
-    static Colour getImageColour (ImageButton* button, const ImageRole role)
+    static Color getImageColor (ImageButton* button, const ImageRole role)
     {
-        return Colour::fromString (button->getProperties().getWithDefault ("imageColour" + String ((int) role), "0").toString());
+        return Color::fromString (button->getProperties().getWithDefault ("imageColor" + String ((int) role), "0").toString());
     }
 
-    static void setImageColour (ComponentLayout& layout, ImageButton* button,
-                                const ImageRole role, Colour colour, const bool undoable)
+    static void setImageColor (ComponentLayout& layout, ImageButton* button,
+                                const ImageRole role, Color color, const bool undoable)
     {
         if (undoable)
         {
-            layout.perform (new SetImageColourAction (button, layout, role, colour), "change imagebutton colour");
+            layout.perform (new SetImageColorAction (button, layout, role, color), "change imagebutton color");
         }
         else
         {
-            button->getProperties().set ("imageColour" + String ((int) role), colour.toString());
+            button->getProperties().set ("imageColor" + String ((int) role), color.toString());
             updateButtonImages (*layout.getDocument(), button);
             layout.changed();
         }
     }
 
-    class ImageButtonColourProperty    : public JucerColourPropertyComponent,
+    class ImageButtonColorProperty    : public JucerColorPropertyComponent,
                                          public ChangeListener
     {
     public:
-        ImageButtonColourProperty (ComponentLayout& layout_, ImageButton* const owner_,
+        ImageButtonColorProperty (ComponentLayout& layout_, ImageButton* const owner_,
                                    const String& name, const ImageRole role_)
-            : JucerColourPropertyComponent (name, false),
+            : JucerColorPropertyComponent (name, false),
               owner (owner_),
               layout (layout_),
               role (role_)
@@ -486,19 +486,19 @@ public:
             layout_.getDocument()->addChangeListener (this);
         }
 
-        ~ImageButtonColourProperty()
+        ~ImageButtonColorProperty()
         {
             layout.getDocument()->removeChangeListener (this);
         }
 
-        void setColour (Colour newColour)
+        void setColor (Color newColor)
         {
-            setImageColour (layout, owner, role, newColour, true);
+            setImageColor (layout, owner, role, newColor, true);
         }
 
-        Colour getColour() const
+        Color getColor() const
         {
-            return getImageColour (owner, role);
+            return getImageColor (owner, role);
         }
 
         void resetToDefault() {}
@@ -524,12 +524,12 @@ public:
         ib->setImages (false, true, doesImageKeepProportions (ib),
                        norm,
                        getImageOpacity (ib, normalImage),
-                       getImageColour (ib, normalImage),
+                       getImageColor (ib, normalImage),
                        over,
                        getImageOpacity (ib, overImage),
-                       getImageColour (ib, overImage),
+                       getImageColor (ib, overImage),
                        down,
                        getImageOpacity (ib, downImage),
-                       getImageColour (ib, downImage));
+                       getImageColor (ib, downImage));
     }
 };

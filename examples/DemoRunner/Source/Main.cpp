@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -85,7 +85,7 @@ public:
     bool moreThanOneInstanceAllowed() override       { return true; }
 
     //==============================================================================
-    void initialise (const String& commandLine) override
+    void initialize (const String& commandLine) override
     {
         registerAllDemos();
 
@@ -111,7 +111,7 @@ private:
     public:
         MainAppWindow (const String& name)
             : DocumentWindow (name, Desktop::getInstance().getDefaultLookAndFeel()
-                                                          .findColour (ResizableWindow::backgroundColourId),
+                                                          .findColor (ResizableWindow::backgroundColorId),
                               DocumentWindow::allButtons)
         {
             setUsingNativeTitleBar (true);

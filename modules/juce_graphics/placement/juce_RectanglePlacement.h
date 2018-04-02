@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -44,8 +44,8 @@ public:
     /** Creates a RectanglePlacement object using a combination of flags from the Flags enum. */
     inline RectanglePlacement (int placementFlags) noexcept  : flags (placementFlags) {}
 
-    /** Creates a default RectanglePlacement object, which is equivalent to using the 'centred' flag. */
-    inline RectanglePlacement() noexcept                     : flags (centred) {}
+    /** Creates a default RectanglePlacement object, which is equivalent to using the 'centered' flag. */
+    inline RectanglePlacement() noexcept                     : flags (centered) {}
 
     /** Creates a copy of another RectanglePlacement object. */
     RectanglePlacement (const RectanglePlacement&) noexcept;
@@ -67,7 +67,7 @@ public:
         /** Indicates that the source rectangle's right edge should be aligned with the right edge of the target rectangle. */
         xRight                                  = 2,
 
-        /** Indicates that the source should be placed in the centre between the left and right
+        /** Indicates that the source should be placed in the center between the left and right
             sides of the available space. */
         xMid                                    = 4,
 
@@ -80,7 +80,7 @@ public:
             destination rectangle. */
         yBottom                                 = 16,
 
-        /** Indicates that the source should be placed in the centre between the top and bottom
+        /** Indicates that the source should be placed in the center between the top and bottom
             sides of the available space. */
         yMid                                    = 32,
 
@@ -117,7 +117,7 @@ public:
 
         //==============================================================================
         /** A shorthand value that is equivalent to (xMid | yMid). */
-        centred                                 = 4 + 32
+        centered                                 = 4 + 32
     };
 
     //==============================================================================

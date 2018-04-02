@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -219,7 +219,7 @@ private:
             const AndroidBluetoothMidiDevice& device = devices.getReference (rowNumber);
             const String statusString (getDeviceStatusString (device.connectionStatus));
 
-            g.fillAll (Colours::white);
+            g.fillAll (Colors::white);
 
             const float xmargin = 3.0f;
             const float ymargin = 3.0f;
@@ -228,42 +228,42 @@ private:
 
             g.setFont (fontHeight);
 
-            g.setColour (getDeviceNameFontColour (device.connectionStatus));
+            g.setColor (getDeviceNameFontColor (device.connectionStatus));
             g.drawText (device.name,
                         Rectangle<float> (xmargin, ymargin, deviceNameWidth - (2.0f * xmargin), height - (2.0f * ymargin)),
                         Justification::topLeft, true);
 
-            g.setColour (getDeviceStatusFontColour (device.connectionStatus));
+            g.setColor (getDeviceStatusFontColor (device.connectionStatus));
             g.drawText (statusString,
                         Rectangle<float> (deviceNameWidth + xmargin, ymargin,
                                           width - deviceNameWidth - (2.0f * xmargin), height - (2.0f * ymargin)),
                         Justification::topRight, true);
 
-            g.setColour (Colours::grey);
+            g.setColor (Colors::gray);
             g.drawHorizontalLine (height - 1, xmargin, width);
         }
     }
 
     //==============================================================================
-    static Colour getDeviceNameFontColour (DeviceStatus deviceStatus) noexcept
+    static Color getDeviceNameFontColor (DeviceStatus deviceStatus) noexcept
     {
         if (deviceStatus == AndroidBluetoothMidiDevice::offline)
-            return Colours::grey;
+            return Colors::gray;
 
-        return Colours::black;
+        return Colors::black;
     }
 
-    static Colour getDeviceStatusFontColour (DeviceStatus deviceStatus) noexcept
+    static Color getDeviceStatusFontColor (DeviceStatus deviceStatus) noexcept
     {
         if (deviceStatus == AndroidBluetoothMidiDevice::offline
             || deviceStatus == AndroidBluetoothMidiDevice::connecting
             || deviceStatus == AndroidBluetoothMidiDevice::disconnecting)
-            return Colours::grey;
+            return Colors::gray;
 
         if (deviceStatus == AndroidBluetoothMidiDevice::connected)
-            return Colours::green;
+            return Colors::green;
 
-        return Colours::black;
+        return Colors::black;
     }
 
     static String getDeviceStatusString (DeviceStatus deviceStatus) noexcept
@@ -422,13 +422,13 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (bounds.isEmpty() ? Colours::black.withAlpha (0.6f) : Colours::black);
+        g.fillAll (bounds.isEmpty() ? Colors::black.withAlpha (0.6f) : Colors::black);
 
-        g.setColour (Colour (0xffdfdfdf));
+        g.setColor (Color (0xffdfdfdf));
         Rectangle<int> overlayBounds = getOverlayBounds();
         g.fillRect (overlayBounds);
 
-        g.setColour (Colours::black);
+        g.setColor (Colors::black);
         g.setFont (16);
         g.drawText ("Bluetooth MIDI Devices",
                     overlayBounds.removeFromTop (20).reduced (3, 3),
@@ -468,7 +468,7 @@ private:
             const int pw = getParentWidth();
             const int ph = getParentHeight();
 
-            return Rectangle<int> (pw, ph).withSizeKeepingCentre (jmin (400, pw - 14),
+            return Rectangle<int> (pw, ph).withSizeKeepingCenter (jmin (400, pw - 14),
                                                                   jmin (300, ph - 40));
         }
 

@@ -1039,7 +1039,7 @@ public:
     //==============================================================================
    #if JUCE_ALLOW_STATIC_NULL_VARIABLES
     /** This was a static empty File object, but is now deprecated as it's too easy to accidentally
-        use it indirectly during a static constructor, leading to hard-to-find order-of-initialisation
+        use it indirectly during a static constructor, leading to hard-to-find order-of-initialization
         problems.
         @deprecated If you need a default-constructed File object, just use File() or {}.
     */

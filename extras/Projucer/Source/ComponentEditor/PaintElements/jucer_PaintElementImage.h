@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -26,7 +26,7 @@
 
 #pragma once
 
-#include "jucer_ColouredElement.h"
+#include "jucer_ColoredElement.h"
 #include "../Properties/jucer_FilePropertyComponent.h"
 #include "jucer_ImageResourceProperty.h"
 #include "jucer_PaintElementUndoableAction.h"

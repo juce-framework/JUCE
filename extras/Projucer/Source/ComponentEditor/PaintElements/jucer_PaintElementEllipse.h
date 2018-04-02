@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -26,14 +26,14 @@
 
 #pragma once
 
-#include "jucer_ColouredElement.h"
+#include "jucer_ColoredElement.h"
 
 //==============================================================================
-class PaintElementEllipse   : public ColouredElement
+class PaintElementEllipse   : public ColoredElement
 {
 public:
     PaintElementEllipse (PaintRoutine* pr)
-        : ColouredElement (pr, "Ellipse", true, false)
+        : ColoredElement (pr, "Ellipse", true, false)
     {
     }
 
@@ -55,7 +55,7 @@ public:
 
     void getEditableProperties (Array<PropertyComponent*>& props, bool multipleSelected) override
     {
-        ColouredElement::getEditableProperties (props, multipleSelected);
+        ColoredElement::getEditableProperties (props, multipleSelected);
         props.add (new ShapeToPathProperty (this));
     }
 
@@ -117,7 +117,7 @@ public:
     {
         XmlElement* e = new XmlElement (getTagName());
         position.applyToXml (*e);
-        addColourAttributes (e);
+        addColorAttributes (e);
 
         return e;
     }
@@ -127,7 +127,7 @@ public:
         if (xml.hasTagName (getTagName()))
         {
             position.restoreFromXml (xml, position);
-            loadColourAttributes (xml);
+            loadColorAttributes (xml);
 
             return true;
         }

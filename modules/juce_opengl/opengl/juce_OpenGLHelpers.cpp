@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -68,10 +68,10 @@ bool OpenGLHelpers::isExtensionSupported (const char* const extensionName)
     return false;
 }
 
-void OpenGLHelpers::clear (Colour colour)
+void OpenGLHelpers::clear (Color color)
 {
-    glClearColor (colour.getFloatRed(), colour.getFloatGreen(),
-                  colour.getFloatBlue(), colour.getFloatAlpha());
+    glClearColor (color.getFloatRed(), color.getFloatGreen(),
+                  color.getFloatBlue(), color.getFloatAlpha());
 
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }

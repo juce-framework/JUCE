@@ -51,7 +51,7 @@
 struct OpenGLDemoClasses
 {
     /** Vertex data to be passed to the shaders.
-        For the purposes of this demo, each vertex will have a 3D position, a colour and a
+        For the purposes of this demo, each vertex will have a 3D position, a color and a
         2D texture co-ordinate. Of course you can ignore these or manipulate them in the
         shader programs but are some useful defaults to work from.
      */
@@ -59,7 +59,7 @@ struct OpenGLDemoClasses
     {
         float position[3];
         float normal[3];
-        float colour[4];
+        float color[4];
         float texCoord[2];
     };
 
@@ -71,7 +71,7 @@ struct OpenGLDemoClasses
         {
             position      .reset (createAttribute (openGLContext, shader, "position"));
             normal        .reset (createAttribute (openGLContext, shader, "normal"));
-            sourceColour  .reset (createAttribute (openGLContext, shader, "sourceColour"));
+            sourceColor  .reset (createAttribute (openGLContext, shader, "sourceColor"));
             textureCoordIn.reset (createAttribute (openGLContext, shader, "textureCoordIn"));
         }
 
@@ -89,10 +89,10 @@ struct OpenGLDemoClasses
                 openGLContext.extensions.glEnableVertexAttribArray (normal->attributeID);
             }
 
-            if (sourceColour.get() != nullptr)
+            if (sourceColor.get() != nullptr)
             {
-                openGLContext.extensions.glVertexAttribPointer (sourceColour->attributeID, 4, GL_FLOAT, GL_FALSE, sizeof (Vertex), (GLvoid*) (sizeof (float) * 6));
-                openGLContext.extensions.glEnableVertexAttribArray (sourceColour->attributeID);
+                openGLContext.extensions.glVertexAttribPointer (sourceColor->attributeID, 4, GL_FLOAT, GL_FALSE, sizeof (Vertex), (GLvoid*) (sizeof (float) * 6));
+                openGLContext.extensions.glEnableVertexAttribArray (sourceColor->attributeID);
             }
 
             if (textureCoordIn.get() != nullptr)
@@ -106,11 +106,11 @@ struct OpenGLDemoClasses
         {
             if (position.get() != nullptr)        openGLContext.extensions.glDisableVertexAttribArray (position->attributeID);
             if (normal.get() != nullptr)          openGLContext.extensions.glDisableVertexAttribArray (normal->attributeID);
-            if (sourceColour.get() != nullptr)    openGLContext.extensions.glDisableVertexAttribArray (sourceColour->attributeID);
+            if (sourceColor.get() != nullptr)    openGLContext.extensions.glDisableVertexAttribArray (sourceColor->attributeID);
             if (textureCoordIn.get() != nullptr)  openGLContext.extensions.glDisableVertexAttribArray (textureCoordIn->attributeID);
         }
 
-        ScopedPointer<OpenGLShaderProgram::Attribute> position, normal, sourceColour, textureCoordIn;
+        ScopedPointer<OpenGLShaderProgram::Attribute> position, normal, sourceColor, textureCoordIn;
 
     private:
         static OpenGLShaderProgram::Attribute* createAttribute (OpenGLContext& openGLContext,
@@ -187,7 +187,7 @@ struct OpenGLDemoClasses
                 openGLContext.extensions.glBindBuffer (GL_ARRAY_BUFFER, vertexBuffer);
 
                 Array<Vertex> vertices;
-                createVertexListFromMesh (shape.mesh, vertices, Colours::green);
+                createVertexListFromMesh (shape.mesh, vertices, Colors::green);
 
                 openGLContext.extensions.glBufferData (GL_ARRAY_BUFFER, vertices.size() * (int) sizeof (Vertex),
                                                        vertices.getRawDataPointer(), GL_STATIC_DRAW);
@@ -220,7 +220,7 @@ struct OpenGLDemoClasses
         WavefrontObjFile shapeFile;
         OwnedArray<VertexBuffer> vertexBuffers;
 
-        static void createVertexListFromMesh (const WavefrontObjFile::Mesh& mesh, Array<Vertex>& list, Colour colour)
+        static void createVertexListFromMesh (const WavefrontObjFile::Mesh& mesh, Array<Vertex>& list, Color color)
         {
             auto scale = 0.2f;
             WavefrontObjFile::TextureCoord defaultTexCoord = { 0.5f, 0.5f };
@@ -238,7 +238,7 @@ struct OpenGLDemoClasses
 
                 list.add ({ { scale * v.x, scale * v.y, scale * v.z, },
                             { scale * n.x, scale * n.y, scale * n.z, },
-                            { colour.getFloatRed(), colour.getFloatGreen(), colour.getFloatBlue(), colour.getFloatAlpha() },
+                            { color.getFloatRed(), color.getFloatGreen(), color.getFloatBlue(), color.getFloatAlpha() },
                             { tc.x, tc.y } });
             }
         }
@@ -270,17 +270,17 @@ struct OpenGLDemoClasses
 
             {
                 Graphics g (image);
-                g.fillAll (Colours::lightcyan);
+                g.fillAll (Colors::lightcyan);
 
-                g.setColour (Colours::darkred);
+                g.setColor (Colors::darkred);
                 g.drawRect (0, 0, size, size, 2);
 
-                g.setColour (Colours::green);
+                g.setColor (Colors::green);
                 g.fillEllipse (x.getValue() * size * 0.9f, y.getValue() * size * 0.9f, size * 0.1f, size * 0.1f);
 
-                g.setColour (Colours::black);
+                g.setColor (Colors::black);
                 g.setFont (40);
-                g.drawFittedText (String (Time::getCurrentTime().getMilliseconds()), image.getBounds(), Justification::centred, 1);
+                g.drawFittedText (String (Time::getCurrentTime().getMilliseconds()), image.getBounds(), Justification::centered, 1);
             }
 
             texture.loadImage (image);
@@ -388,9 +388,9 @@ struct OpenGLDemoClasses
 
             addAndMakeVisible (tabbedComp);
             tabbedComp.setTabBarDepth (25);
-            tabbedComp.setColour (TabbedButtonBar::tabTextColourId, Colours::grey);
-            tabbedComp.addTab ("Vertex", Colours::transparentBlack, &vertexEditorComp, false);
-            tabbedComp.addTab ("Fragment", Colours::transparentBlack, &fragmentEditorComp, false);
+            tabbedComp.setColor (TabbedButtonBar::tabTextColorId, Colors::gray);
+            tabbedComp.addTab ("Vertex", Colors::transparentBlack, &vertexEditorComp, false);
+            tabbedComp.addTab ("Fragment", Colors::transparentBlack, &fragmentEditorComp, false);
 
             vertexDocument.addListener (this);
             fragmentDocument.addListener (this);
@@ -421,7 +421,7 @@ struct OpenGLDemoClasses
             lookAndFeelChanged();
         }
 
-        void initialise()
+        void initialize()
         {
             showBackgroundToggle.setToggleState (false, sendNotification);
             textureBox.setSelectedItemIndex (0);
@@ -561,14 +561,14 @@ struct OpenGLDemoClasses
 
         void lookAndFeelChanged() override
         {
-            auto editorBackground = getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground,
-                                                            Colours::white);
+            auto editorBackground = getUIColorIfAvailable (LookAndFeel_V4::ColorScheme::UIColor::windowBackground,
+                                                            Colors::white);
 
             for (int i = tabbedComp.getNumTabs(); i >= 0; --i)
-                tabbedComp.setTabBackgroundColour (i, editorBackground);
+                tabbedComp.setTabBackgroundColor (i, editorBackground);
 
-            vertexEditorComp  .setColour (CodeEditorComponent::backgroundColourId, editorBackground);
-            fragmentEditorComp.setColour (CodeEditorComponent::backgroundColourId, editorBackground);
+            vertexEditorComp  .setColor (CodeEditorComponent::backgroundColorId, editorBackground);
+            fragmentEditorComp.setColor (CodeEditorComponent::backgroundColorId, editorBackground);
         }
 
         OpenGLDemo& demo;
@@ -618,7 +618,7 @@ struct OpenGLDemoClasses
             openGLContext.attachTo (*this);
             openGLContext.setContinuousRepainting (true);
 
-            controlsOverlay->initialise();
+            controlsOverlay->initialize();
 
             setSize (500, 500);
         }
@@ -630,7 +630,7 @@ struct OpenGLDemoClasses
 
         void newOpenGLContextCreated() override
         {
-            // nothing to do in this case - we'll initialise our shaders + textures
+            // nothing to do in this case - we'll initialize our shaders + textures
             // on demand, during the render callback.
             freeAllContextObjects();
 
@@ -665,8 +665,8 @@ struct OpenGLDemoClasses
 
             auto desktopScale = (float) openGLContext.getRenderingScale();
 
-            OpenGLHelpers::clear (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground,
-                                                          Colours::lightblue));
+            OpenGLHelpers::clear (getUIColorIfAvailable (LookAndFeel_V4::ColorScheme::UIColor::windowBackground,
+                                                          Colors::lightblue));
 
             if (textureToUse != nullptr)
                 if (! textureToUse->applyTo (texture))
@@ -682,7 +682,7 @@ struct OpenGLDemoClasses
                 return;
 
             // Having used the juce 2D renderer, it will have messed-up a whole load of GL state, so
-            // we need to initialise some important settings before doing our normal GL 3D drawing..
+            // we need to initialize some important settings before doing our normal GL 3D drawing..
             glEnable (GL_DEPTH_TEST);
             glDepthFunc (GL_LESS);
             glEnable (GL_BLEND);
@@ -799,9 +799,9 @@ struct OpenGLDemoClasses
 
                     auto hue = s.hue.getValue();
 
-                    g.setGradientFill (ColourGradient (Colours::green.withRotatedHue (hue).withAlpha (0.8f),
+                    g.setGradientFill (ColorGradient (Colors::green.withRotatedHue (hue).withAlpha (0.8f),
                                                        0, 0,
-                                                       Colours::red.withRotatedHue (hue).withAlpha (0.5f),
+                                                       Colors::red.withRotatedHue (hue).withAlpha (0.5f),
                                                        0, (float) getHeight(), false));
                     g.fillPath (p);
                 }
@@ -895,20 +895,20 @@ struct OpenGLDemoClasses
                 SHADER_DEMO_HEADER
                 "attribute vec4 position;\n"
                 "attribute vec4 normal;\n"
-                "attribute vec4 sourceColour;\n"
+                "attribute vec4 sourceColor;\n"
                 "attribute vec2 textureCoordIn;\n"
                 "\n"
                 "uniform mat4 projectionMatrix;\n"
                 "uniform mat4 viewMatrix;\n"
                 "uniform vec4 lightPosition;\n"
                 "\n"
-                "varying vec4 destinationColour;\n"
+                "varying vec4 destinationColor;\n"
                 "varying vec2 textureCoordOut;\n"
                 "varying float lightIntensity;\n"
                 "\n"
                 "void main()\n"
                 "{\n"
-                "    destinationColour = sourceColour;\n"
+                "    destinationColor = sourceColor;\n"
                 "    textureCoordOut = textureCoordIn;\n"
                 "\n"
                 "    vec4 light = viewMatrix * lightPosition;\n"
@@ -919,11 +919,11 @@ struct OpenGLDemoClasses
 
                 SHADER_DEMO_HEADER
                #if JUCE_OPENGL_ES
-                "varying lowp vec4 destinationColour;\n"
+                "varying lowp vec4 destinationColor;\n"
                 "varying lowp vec2 textureCoordOut;\n"
                 "varying highp float lightIntensity;\n"
                #else
-                "varying vec4 destinationColour;\n"
+                "varying vec4 destinationColor;\n"
                 "varying vec2 textureCoordOut;\n"
                 "varying float lightIntensity;\n"
                #endif
@@ -934,12 +934,12 @@ struct OpenGLDemoClasses
                 "{\n"
                #if JUCE_OPENGL_ES
                 "   highp float l = max (0.3, lightIntensity * 0.3);\n"
-                "   highp vec4 colour = vec4 (l, l, l, 1.0);\n"
+                "   highp vec4 color = vec4 (l, l, l, 1.0);\n"
                #else
                 "   float l = max (0.3, lightIntensity * 0.3);\n"
-                "   vec4 colour = vec4 (l, l, l, 1.0);\n"
+                "   vec4 color = vec4 (l, l, l, 1.0);\n"
                #endif
-                "    gl_FragColor = colour * texture2D (demoTexture, textureCoordOut);\n"
+                "    gl_FragColor = color * texture2D (demoTexture, textureCoordOut);\n"
                 "}\n"
             },
 
@@ -948,28 +948,28 @@ struct OpenGLDemoClasses
 
                 SHADER_DEMO_HEADER
                 "attribute vec4 position;\n"
-                "attribute vec4 sourceColour;\n"
+                "attribute vec4 sourceColor;\n"
                 "attribute vec2 textureCoordIn;\n"
                 "\n"
                 "uniform mat4 projectionMatrix;\n"
                 "uniform mat4 viewMatrix;\n"
                 "\n"
-                "varying vec4 destinationColour;\n"
+                "varying vec4 destinationColor;\n"
                 "varying vec2 textureCoordOut;\n"
                 "\n"
                 "void main()\n"
                 "{\n"
-                "    destinationColour = sourceColour;\n"
+                "    destinationColor = sourceColor;\n"
                 "    textureCoordOut = textureCoordIn;\n"
                 "    gl_Position = projectionMatrix * viewMatrix * position;\n"
                 "}\n",
 
                 SHADER_DEMO_HEADER
                #if JUCE_OPENGL_ES
-                "varying lowp vec4 destinationColour;\n"
+                "varying lowp vec4 destinationColor;\n"
                 "varying lowp vec2 textureCoordOut;\n"
                #else
-                "varying vec4 destinationColour;\n"
+                "varying vec4 destinationColor;\n"
                 "varying vec2 textureCoordOut;\n"
                #endif
                 "\n"
@@ -982,38 +982,38 @@ struct OpenGLDemoClasses
             },
 
             {
-                "Flat Colour",
+                "Flat Color",
 
                 SHADER_DEMO_HEADER
                 "attribute vec4 position;\n"
-                "attribute vec4 sourceColour;\n"
+                "attribute vec4 sourceColor;\n"
                 "attribute vec2 textureCoordIn;\n"
                 "\n"
                 "uniform mat4 projectionMatrix;\n"
                 "uniform mat4 viewMatrix;\n"
                 "\n"
-                "varying vec4 destinationColour;\n"
+                "varying vec4 destinationColor;\n"
                 "varying vec2 textureCoordOut;\n"
                 "\n"
                 "void main()\n"
                 "{\n"
-                "    destinationColour = sourceColour;\n"
+                "    destinationColor = sourceColor;\n"
                 "    textureCoordOut = textureCoordIn;\n"
                 "    gl_Position = projectionMatrix * viewMatrix * position;\n"
                 "}\n",
 
                 SHADER_DEMO_HEADER
                #if JUCE_OPENGL_ES
-                "varying lowp vec4 destinationColour;\n"
+                "varying lowp vec4 destinationColor;\n"
                 "varying lowp vec2 textureCoordOut;\n"
                #else
-                "varying vec4 destinationColour;\n"
+                "varying vec4 destinationColor;\n"
                 "varying vec2 textureCoordOut;\n"
                #endif
                 "\n"
                 "void main()\n"
                 "{\n"
-                "    gl_FragColor = destinationColour;\n"
+                "    gl_FragColor = destinationColor;\n"
                 "}\n"
             },
 
@@ -1022,13 +1022,13 @@ struct OpenGLDemoClasses
 
                 SHADER_DEMO_HEADER
                 "attribute vec4 position;\n"
-                "attribute vec4 sourceColour;\n"
+                "attribute vec4 sourceColor;\n"
                 "attribute vec2 textureCoordIn;\n"
                 "\n"
                 "uniform mat4 projectionMatrix;\n"
                 "uniform mat4 viewMatrix;\n"
                 "\n"
-                "varying vec4 destinationColour;\n"
+                "varying vec4 destinationColor;\n"
                 "varying vec2 textureCoordOut;\n"
                 "\n"
                 "varying float xPos;\n"
@@ -1046,13 +1046,13 @@ struct OpenGLDemoClasses
 
                 SHADER_DEMO_HEADER
                #if JUCE_OPENGL_ES
-                "varying lowp vec4 destinationColour;\n"
+                "varying lowp vec4 destinationColor;\n"
                 "varying lowp vec2 textureCoordOut;\n"
                 "varying lowp float xPos;\n"
                 "varying lowp float yPos;\n"
                 "varying lowp float zPos;\n"
                #else
-                "varying vec4 destinationColour;\n"
+                "varying vec4 destinationColor;\n"
                 "varying vec2 textureCoordOut;\n"
                 "varying float xPos;\n"
                 "varying float yPos;\n"
@@ -1066,7 +1066,7 @@ struct OpenGLDemoClasses
             },
 
             {
-                "Changing Colour",
+                "Changing Color",
 
                 SHADER_DEMO_HEADER
                 "attribute vec4 position;\n"
@@ -1138,13 +1138,13 @@ struct OpenGLDemoClasses
                 "{\n"
                #if JUCE_OPENGL_ES
                 "   highp float l = lightIntensity * 0.25;\n"
-                "   highp vec4 colour = vec4 (l, l, l, 1.0);\n"
+                "   highp vec4 color = vec4 (l, l, l, 1.0);\n"
                #else
                 "   float l = lightIntensity * 0.25;\n"
-                "   vec4 colour = vec4 (l, l, l, 1.0);\n"
+                "   vec4 color = vec4 (l, l, l, 1.0);\n"
                #endif
                 "\n"
-                "    gl_FragColor = colour;\n"
+                "    gl_FragColor = color;\n"
                 "}\n"
             },
 
@@ -1183,13 +1183,13 @@ struct OpenGLDemoClasses
                 "{\n"
                #if JUCE_OPENGL_ES
                 "   highp float l = lightIntensity * 0.25;\n"
-                "   highp vec4 colour = vec4 (l, l, l, 1.0);\n"
+                "   highp vec4 color = vec4 (l, l, l, 1.0);\n"
                #else
                 "   float l = lightIntensity * 0.25;\n"
-                "   vec4 colour = vec4 (l, l, l, 1.0);\n"
+                "   vec4 color = vec4 (l, l, l, 1.0);\n"
                #endif
                 "\n"
-                "    gl_FragColor = colour;\n"
+                "    gl_FragColor = color;\n"
                 "}\n"
             },
 
@@ -1225,22 +1225,22 @@ struct OpenGLDemoClasses
                 "{\n"
                #if JUCE_OPENGL_ES
                 "    highp float intensity = lightIntensity * 0.5;\n"
-                "    highp vec4 colour;\n"
+                "    highp vec4 color;\n"
                #else
                 "    float intensity = lightIntensity * 0.5;\n"
-                "    vec4 colour;\n"
+                "    vec4 color;\n"
                #endif
                 "\n"
                 "    if (intensity > 0.95)\n"
-                "        colour = vec4 (1.0, 0.5, 0.5, 1.0);\n"
+                "        color = vec4 (1.0, 0.5, 0.5, 1.0);\n"
                 "    else if (intensity > 0.5)\n"
-                "        colour  = vec4 (0.6, 0.3, 0.3, 1.0);\n"
+                "        color  = vec4 (0.6, 0.3, 0.3, 1.0);\n"
                 "    else if (intensity > 0.25)\n"
-                "        colour  = vec4 (0.4, 0.2, 0.2, 1.0);\n"
+                "        color  = vec4 (0.4, 0.2, 0.2, 1.0);\n"
                 "    else\n"
-                "        colour  = vec4 (0.2, 0.1, 0.1, 1.0);\n"
+                "        color  = vec4 (0.2, 0.1, 0.1, 1.0);\n"
                 "\n"
-                "    gl_FragColor = colour;\n"
+                "    gl_FragColor = color;\n"
                 "}\n"
             }
         };

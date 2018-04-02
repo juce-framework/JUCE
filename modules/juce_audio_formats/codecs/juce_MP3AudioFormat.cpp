@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -1760,7 +1760,7 @@ private:
             for (int i = 0; i < 12; ++i)
             {
                 layer1Step2 (si, fraction);
-                synthesise (fraction[single], 0, pcm0, samplesDone);
+                synthesize (fraction[single], 0, pcm0, samplesDone);
             }
         }
         else
@@ -1768,7 +1768,7 @@ private:
             for (int i = 0; i < 12; ++i)
             {
                 layer1Step2 (si, fraction);
-                synthesiseStereo (fraction[0], fraction[1], pcm0, pcm1, samplesDone);
+                synthesizeStereo (fraction[0], fraction[1], pcm0, pcm1, samplesDone);
             }
         }
     }
@@ -1788,7 +1788,7 @@ private:
                 layer2Step2 (si, i >> 2, fraction);
 
                 for (int j = 0; j < 3; ++j)
-                    synthesise (fraction[single][j], 0, pcm0, samplesDone);
+                    synthesize (fraction[single][j], 0, pcm0, samplesDone);
             }
         }
         else
@@ -1798,7 +1798,7 @@ private:
                 layer2Step2 (si, i >> 2, fraction);
 
                 for (int j = 0; j < 3; ++j)
-                    synthesiseStereo (fraction[0][j], fraction[1][j], pcm0, pcm1, samplesDone);
+                    synthesizeStereo (fraction[0][j], fraction[1][j], pcm0, pcm1, samplesDone);
             }
         }
     }
@@ -1891,9 +1891,9 @@ private:
             for (int ss = 0; ss < 18; ++ss)
             {
                 if (single >= 0)
-                    synthesise (hybridOut[0][ss], 0, pcm0, samplesDone);
+                    synthesize (hybridOut[0][ss], 0, pcm0, samplesDone);
                 else
-                    synthesiseStereo (hybridOut[0][ss], hybridOut[1][ss], pcm0, pcm1, samplesDone);
+                    synthesizeStereo (hybridOut[0][ss], hybridOut[1][ss], pcm0, pcm1, samplesDone);
             }
         }
     }
@@ -2861,14 +2861,14 @@ private:
         }
     }
 
-    void synthesiseStereo (const float* bandPtr0, const float* bandPtr1, float* out0, float* out1, int& samplesDone) noexcept
+    void synthesizeStereo (const float* bandPtr0, const float* bandPtr1, float* out0, float* out1, int& samplesDone) noexcept
     {
         auto dummy = samplesDone;
-        synthesise (bandPtr0, 0, out0, dummy);
-        synthesise (bandPtr1, 1, out1, samplesDone);
+        synthesize (bandPtr0, 0, out0, dummy);
+        synthesize (bandPtr1, 1, out1, samplesDone);
     }
 
-    void synthesise (const float* bandPtr, int channel, float* out, int& samplesDone)
+    void synthesize (const float* bandPtr, int channel, float* out, int& samplesDone)
     {
         out += samplesDone;
         const int bo = channel == 0 ? ((synthBo - 1) & 15) : synthBo;

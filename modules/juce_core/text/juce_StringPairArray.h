@@ -137,7 +137,7 @@ public:
         removing elements, they may have quite a lot of unused space allocated.
         This method will reduce the amount of allocated storage to a minimum.
     */
-    void minimiseStorageOverheads();
+    void minimizeStorageOverheads();
 
 
 private:

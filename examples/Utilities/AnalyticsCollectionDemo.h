@@ -204,7 +204,7 @@ public:
 private:
     void saveUnloggedEvents (const std::deque<AnalyticsEvent>& eventsToSave) override
     {
-        // Save unsent events to disk. Here we use XML as a serialisation format, but
+        // Save unsent events to disk. Here we use XML as a serialization format, but
         // you can use anything else as long as the restoreUnloggedEvents method can
         // restore events from disk. If you're saving very large numbers of events then
         // a binary format may be more suitable if it is faster - remember that this
@@ -343,12 +343,12 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+        g.fillAll (getLookAndFeel().findColor (ResizableWindow::backgroundColorId));
     }
 
     void resized() override
     {
-        eventButton.centreWithSize (100, 40);
+        eventButton.centerWithSize (100, 40);
         eventButton.setBounds (eventButton.getBounds().translated (0, 25));
         crashButton.setBounds (eventButton.getBounds().translated (0, -50));
     }

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -88,10 +88,10 @@ struct CodeContent    : public Component
     {
         auto* v4 = dynamic_cast <LookAndFeel_V4*> (&Desktop::getInstance().getDefaultLookAndFeel());
 
-        if (v4 != nullptr && (v4->getCurrentColourScheme() != LookAndFeel_V4::getLightColourScheme()))
-            codeEditor.setColourScheme (getDarkColourScheme());
+        if (v4 != nullptr && (v4->getCurrentColorScheme() != LookAndFeel_V4::getLightColorScheme()))
+            codeEditor.setColorScheme (getDarkColorScheme());
         else
-            codeEditor.setColourScheme (getLightColourScheme());
+            codeEditor.setColorScheme (getLightColorScheme());
     }
 
     CodeDocument document;
@@ -105,13 +105,13 @@ DemoContentComponent::DemoContentComponent (Component& mainComponent, std::funct
     : TabbedComponent (TabbedButtonBar::Orientation::TabsAtTop),
       demoChangedCallback (callback)
 {
-    addTab ("Demo",     Colours::transparentBlack, demoContent = new DemoContent(), false);
+    addTab ("Demo",     Colors::transparentBlack, demoContent = new DemoContent(), false);
 
    #if ! (JUCE_ANDROID || JUCE_IOS)
-    addTab ("Code",     Colours::transparentBlack, codeContent = new CodeContent(), false);
+    addTab ("Code",     Colors::transparentBlack, codeContent = new CodeContent(), false);
    #endif
 
-    addTab ("Settings", Colours::transparentBlack, new SettingsContent (dynamic_cast<MainComponent&> (mainComponent)),           true);
+    addTab ("Settings", Colors::transparentBlack, new SettingsContent (dynamic_cast<MainComponent&> (mainComponent)),           true);
 
     setTabBarDepth (40);
     lookAndFeelChanged();
@@ -183,10 +183,10 @@ void DemoContentComponent::clearCurrentDemo()
 
 void DemoContentComponent::lookAndFeelChanged()
 {
-    auto backgroundColour = findColour (ResizableWindow::backgroundColourId);
+    auto backgroundColor = findColor (ResizableWindow::backgroundColorId);
 
     for (int i = 0; i < getNumTabs(); ++i)
-        setTabBackgroundColour (i, backgroundColour);
+        setTabBackgroundColor (i, backgroundColor);
 }
 
 String DemoContentComponent::trimPIP (const String& fileContents)

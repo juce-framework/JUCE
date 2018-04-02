@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -58,14 +58,14 @@ public:
         @param name                 the name to give the component - this is also
                                     the title shown at the top of the window. To change
                                     this later, use setName()
-        @param backgroundColour     the colour to use for filling the window's background.
+        @param backgroundColor     the color to use for filling the window's background.
         @param escapeKeyTriggersCloseButton if true, then pressing the escape key will cause the
                                             close button to be triggered
         @param addToDesktop         if true, the window will be automatically added to the
                                     desktop; if false, you can use it as a child component
     */
     DialogWindow (const String& name,
-                  Colour backgroundColour,
+                  Color backgroundColor,
                   bool escapeKeyTriggersCloseButton,
                   bool addToDesktop = true);
 
@@ -78,7 +78,7 @@ public:
     /** This class defines a collection of settings to be used to open a DialogWindow.
 
         The easiest way to open a DialogWindow is to create yourself a LaunchOptions structure,
-        initialise its fields with the appropriate details, and then call its launchAsync()
+        initialize its fields with the appropriate details, and then call its launchAsync()
         method to launch the dialog.
     */
     struct JUCE_API  LaunchOptions
@@ -88,8 +88,8 @@ public:
         /** The title to give the window. */
         String dialogTitle;
 
-        /** The background colour for the window. */
-        Colour dialogBackgroundColour = Colours::lightgrey;
+        /** The background color for the window. */
+        Color dialogBackgroundColor = Colors::lightgray;
 
         /** The content component to show in the window. This must not be null!
             Using an OptionalScopedPointer to hold this pointer lets you indicate whether
@@ -99,10 +99,10 @@ public:
         OptionalScopedPointer<Component> content;
 
         /** If this is not a nullptr, it indicates a component that you'd like to position this
-            dialog box in front of. See the DocumentWindow::centreAroundComponent() method for
+            dialog box in front of. See the DocumentWindow::centerAroundComponent() method for
             more info about this parameter.
         */
-        Component* componentToCentreAround = nullptr;
+        Component* componentToCenterAround = nullptr;
 
         /** If true, then the escape key will trigger the dialog's close button. */
         bool escapeKeyTriggersCloseButton = true;
@@ -176,11 +176,11 @@ public:
                                     be before calling this method. The component won't
                                     be deleted by this call, so you can re-use it or delete
                                     it afterwards
-        @param componentToCentreAround  if this is not a nullptr, it indicates a component that
+        @param componentToCenterAround  if this is not a nullptr, it indicates a component that
                                     you'd like to show this dialog box in front of. See the
-                                    DocumentWindow::centreAroundComponent() method for more
+                                    DocumentWindow::centerAroundComponent() method for more
                                     info on this parameter
-        @param backgroundColour     a colour to use for the dialog box's background colour
+        @param backgroundColor     a color to use for the dialog box's background color
         @param escapeKeyTriggersCloseButton if true, then pressing the escape key will cause the
                                             close button to be triggered
         @param shouldBeResizable    if true, the dialog window has either a resizable border, or
@@ -190,8 +190,8 @@ public:
     */
     static void showDialog (const String& dialogTitle,
                             Component* contentComponent,
-                            Component* componentToCentreAround,
-                            Colour backgroundColour,
+                            Component* componentToCenterAround,
+                            Color backgroundColor,
                             bool escapeKeyTriggersCloseButton,
                             bool shouldBeResizable = false,
                             bool useBottomRightCornerResizer = false);
@@ -222,11 +222,11 @@ public:
                                     be before calling this method. The component won't
                                     be deleted by this call, so you can re-use it or delete
                                     it afterwards
-        @param componentToCentreAround  if this is not a nullptr, it indicates a component that
+        @param componentToCenterAround  if this is not a nullptr, it indicates a component that
                                     you'd like to show this dialog box in front of. See the
-                                    DocumentWindow::centreAroundComponent() method for more
+                                    DocumentWindow::centerAroundComponent() method for more
                                     info on this parameter
-        @param backgroundColour     a colour to use for the dialog box's background colour
+        @param backgroundColor     a color to use for the dialog box's background color
         @param escapeKeyTriggersCloseButton if true, then pressing the escape key will cause the
                                             close button to be triggered
         @param shouldBeResizable    if true, the dialog window has either a resizable border, or
@@ -236,8 +236,8 @@ public:
     */
     static int showModalDialog (const String& dialogTitle,
                                 Component* contentComponent,
-                                Component* componentToCentreAround,
-                                Colour backgroundColour,
+                                Component* componentToCenterAround,
+                                Color backgroundColor,
                                 bool escapeKeyTriggersCloseButton,
                                 bool shouldBeResizable = false,
                                 bool useBottomRightCornerResizer = false);
@@ -245,7 +245,7 @@ public:
 
 
     /** Called when the escape key is pressed.
-        This can be overridden to do things other than the default behaviour, which is to hide
+        This can be overridden to do things other than the default behavior, which is to hide
         the window. Return true if the key has been used, or false if it was ignored.
     */
     virtual bool escapeKeyPressed();

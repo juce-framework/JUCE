@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -29,19 +29,19 @@ namespace juce
 
 //==============================================================================
 /**
-    A subclass of SynthesiserSound that represents a sampled audio clip.
+    A subclass of SynthesizerSound that represents a sampled audio clip.
 
     This is a pretty basic sampler, and just attempts to load the whole audio stream
     into memory.
 
-    To use it, create a Synthesiser, add some SamplerVoice objects to it, then
+    To use it, create a Synthesizer, add some SamplerVoice objects to it, then
     give it some SampledSound objects to play.
 
-    @see SamplerVoice, Synthesiser, SynthesiserSound
+    @see SamplerVoice, Synthesizer, SynthesizerSound
 
     @tags{Audio}
 */
-class JUCE_API  SamplerSound    : public SynthesiserSound
+class JUCE_API  SamplerSound    : public SynthesizerSound
 {
 public:
     //==============================================================================
@@ -54,7 +54,7 @@ public:
         @param source       the audio to load. This object can be safely deleted by the
                             caller after this constructor returns
         @param midiNotes    the set of midi keys that this sound should be played on. This
-                            is used by the SynthesiserSound::appliesToNote() method
+                            is used by the SynthesizerSound::appliesToNote() method
         @param midiNoteForNormalPitch   the midi note at which the sample should be played
                                         with its natural rate. All other notes will be pitched
                                         up or down relative to this one
@@ -106,16 +106,16 @@ private:
 
 //==============================================================================
 /**
-    A subclass of SynthesiserVoice that can play a SamplerSound.
+    A subclass of SynthesizerVoice that can play a SamplerSound.
 
-    To use it, create a Synthesiser, add some SamplerVoice objects to it, then
+    To use it, create a Synthesizer, add some SamplerVoice objects to it, then
     give it some SampledSound objects to play.
 
-    @see SamplerSound, Synthesiser, SynthesiserVoice
+    @see SamplerSound, Synthesizer, SynthesizerVoice
 
     @tags{Audio}
 */
-class JUCE_API  SamplerVoice    : public SynthesiserVoice
+class JUCE_API  SamplerVoice    : public SynthesizerVoice
 {
 public:
     //==============================================================================
@@ -126,9 +126,9 @@ public:
     ~SamplerVoice();
 
     //==============================================================================
-    bool canPlaySound (SynthesiserSound*) override;
+    bool canPlaySound (SynthesizerSound*) override;
 
-    void startNote (int midiNoteNumber, float velocity, SynthesiserSound*, int pitchWheel) override;
+    void startNote (int midiNoteNumber, float velocity, SynthesizerSound*, int pitchWheel) override;
     void stopNote (float velocity, bool allowTailOff) override;
 
     void pitchWheelMoved (int newValue) override;

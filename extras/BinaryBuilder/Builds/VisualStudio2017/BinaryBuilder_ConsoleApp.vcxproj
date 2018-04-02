@@ -203,13 +203,13 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\logging\juce_Logger.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\maths\juce_BigInteger.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_core\math\juce_BigInteger.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\maths\juce_Expression.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_core\math\juce_Expression.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\maths\juce_Random.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_core\math\juce_Random.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\memory\juce_MemoryBlock.cpp">
@@ -335,7 +335,7 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\text\juce_Identifier.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\text\juce_LocalisedStrings.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_core\text\juce_LocalizedStrings.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\text\juce_String.cpp">
@@ -466,13 +466,13 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\javascript\juce_JSON.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\logging\juce_FileLogger.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\logging\juce_Logger.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_BigInteger.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_Expression.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_MathsFunctions.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_NormalisableRange.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_Random.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_Range.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_StatisticsAccumulator.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\math\juce_BigInteger.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\math\juce_Expression.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\math\juce_MathFunctions.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\math\juce_NormalizableRange.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\math\juce_Random.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\math\juce_Range.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\math\juce_StatisticsAccumulator.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_Atomic.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_ByteOrder.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_ContainerDeletePolicy.h"/>
@@ -524,7 +524,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_CharPointer_UTF16.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_CharPointer_UTF32.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_Identifier.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_LocalisedStrings.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_LocalizedStrings.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_NewLine.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_String.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_StringArray.h"/>

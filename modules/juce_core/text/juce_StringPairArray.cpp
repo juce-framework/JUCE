@@ -54,7 +54,7 @@ bool StringPairArray::operator== (const StringPairArray& other) const
 
     for (int i = 0; i < num; ++i)
     {
-        if (keys[i] == other.keys[i]) // optimise for the case where the keys are in the same order
+        if (keys[i] == other.keys[i]) // optimize for the case where the keys are in the same order
         {
             if (values[i] != other.values[i])
                 return false;
@@ -160,10 +160,10 @@ String StringPairArray::getDescription() const
     return s;
 }
 
-void StringPairArray::minimiseStorageOverheads()
+void StringPairArray::minimizeStorageOverheads()
 {
-    keys.minimiseStorageOverheads();
-    values.minimiseStorageOverheads();
+    keys.minimizeStorageOverheads();
+    values.minimizeStorageOverheads();
 }
 
 } // namespace juce

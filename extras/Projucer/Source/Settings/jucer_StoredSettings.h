@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -49,16 +49,16 @@ public:
     void setLastProjects (const Array<File>& files);
 
     //==============================================================================
-    Array<Colour> swatchColours;
+    Array<Color> swatchColors;
 
-    struct ColourSelectorWithSwatches   : public ColourSelector
+    struct ColorSelectorWithSwatches   : public ColorSelector
     {
-        ColourSelectorWithSwatches();
-        ~ColourSelectorWithSwatches();
+        ColorSelectorWithSwatches();
+        ~ColorSelectorWithSwatches();
 
         int getNumSwatches() const override;
-        Colour getSwatchColour (int index) const override;
-        void setSwatchColour (int index, const Colour& newColour) override;
+        Color getSwatchColor (int index) const override;
+        void setSwatchColor (int index, const Color& newColor) override;
     };
 
     //==============================================================================
@@ -96,8 +96,8 @@ private:
     void updateLastWizardFolder();
     void updateKeyMappings();
 
-    void loadSwatchColours();
-    void saveSwatchColours();
+    void loadSwatchColors();
+    void saveSwatchColors();
 
     void updateOldProjectSettingsFiles();
     void checkJUCEPaths();

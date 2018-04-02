@@ -45,7 +45,7 @@ void MidiOutput::sendBlockOfMessagesNow (const MidiBuffer& buffer)
 {
     MidiBuffer::Iterator i (buffer);
     MidiMessage message;
-    int samplePosition; // Note: not actually used, so no need to initialise.
+    int samplePosition; // Note: not actually used, so no need to initialize.
 
     while (i.getNextEvent (message, samplePosition))
         sendMessageNow (message);

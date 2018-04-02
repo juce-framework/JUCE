@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -30,14 +30,14 @@ namespace juce
 ResizableWindow::ResizableWindow (const String& name, bool shouldAddToDesktop)
     : TopLevelWindow (name, shouldAddToDesktop)
 {
-    initialise (shouldAddToDesktop);
+    initialize (shouldAddToDesktop);
 }
 
-ResizableWindow::ResizableWindow (const String& name, Colour bkgnd, bool shouldAddToDesktop)
+ResizableWindow::ResizableWindow (const String& name, Color bkgnd, bool shouldAddToDesktop)
     : TopLevelWindow (name, shouldAddToDesktop)
 {
-    setBackgroundColour (bkgnd);
-    initialise (shouldAddToDesktop);
+    setBackgroundColor (bkgnd);
+    initialize (shouldAddToDesktop);
 }
 
 ResizableWindow::~ResizableWindow()
@@ -59,7 +59,7 @@ ResizableWindow::~ResizableWindow()
     jassert (getNumChildComponents() == 0);
 }
 
-void ResizableWindow::initialise (const bool shouldAddToDesktop)
+void ResizableWindow::initialize (const bool shouldAddToDesktop)
 {
     /*
       ==========================================================================
@@ -69,7 +69,7 @@ void ResizableWindow::initialise (const bool shouldAddToDesktop)
        ineffective unless you have a JUCE Indie or Pro license, or are using
        JUCE under the GPL v3 license.
 
-       End User License Agreement: www.juce.com/juce-5-licence
+       End User License Agreement: www.juce.com/juce-5-license
 
       ==========================================================================
     */
@@ -398,20 +398,20 @@ void ResizableWindow::lookAndFeelChanged()
     }
 }
 
-Colour ResizableWindow::getBackgroundColour() const noexcept
+Color ResizableWindow::getBackgroundColor() const noexcept
 {
-    return findColour (backgroundColourId, false);
+    return findColor (backgroundColorId, false);
 }
 
-void ResizableWindow::setBackgroundColour (Colour newColour)
+void ResizableWindow::setBackgroundColor (Color newColor)
 {
-    auto backgroundColour = newColour;
+    auto backgroundColor = newColor;
 
     if (! Desktop::canUseSemiTransparentWindows())
-        backgroundColour = newColour.withAlpha (1.0f);
+        backgroundColor = newColor.withAlpha (1.0f);
 
-    setColour (backgroundColourId, backgroundColour);
-    setOpaque (backgroundColour.isOpaque());
+    setColor (backgroundColorId, backgroundColor);
+    setOpaque (backgroundColor.isOpaque());
     repaint();
 }
 
@@ -438,7 +438,7 @@ void ResizableWindow::setFullScreen (const bool shouldBeFullScreen)
         {
             if (auto* peer = getPeer())
             {
-                // keep a copy of this intact in case the real one gets messed-up while we're un-maximising
+                // keep a copy of this intact in case the real one gets messed-up while we're un-maximizing
                 auto lastPos = lastNonFullScreenPos;
 
                 peer->setFullScreen (shouldBeFullScreen);
@@ -463,22 +463,22 @@ void ResizableWindow::setFullScreen (const bool shouldBeFullScreen)
     }
 }
 
-bool ResizableWindow::isMinimised() const
+bool ResizableWindow::isMinimized() const
 {
     if (auto* peer = getPeer())
-        return peer->isMinimised();
+        return peer->isMinimized();
 
     return false;
 }
 
-void ResizableWindow::setMinimised (const bool shouldMinimise)
+void ResizableWindow::setMinimized (const bool shouldMinimize)
 {
-    if (shouldMinimise != isMinimised())
+    if (shouldMinimize != isMinimized())
     {
         if (auto* peer = getPeer())
         {
             updateLastPosIfShowing();
-            peer->setMinimised (shouldMinimise);
+            peer->setMinimized (shouldMinimize);
         }
         else
         {
@@ -507,7 +507,7 @@ void ResizableWindow::updateLastPosIfShowing()
 
 void ResizableWindow::updateLastPosIfNotFullScreen()
 {
-    if (! (isFullScreen() || isMinimised() || isKioskMode()))
+    if (! (isFullScreen() || isMinimized() || isKioskMode()))
         lastNonFullScreenPos = getBounds();
 }
 
@@ -565,7 +565,7 @@ bool ResizableWindow::restoreWindowStateFromString (const String& s)
 
         if (onScreenArea.getWidth() * onScreenArea.getHeight() < 32 * 32)
         {
-            auto screen = desktop.getDisplays().getDisplayContaining (newPos.getCentre()).userArea;
+            auto screen = desktop.getDisplays().getDisplayContaining (newPos.getCenter()).userArea;
 
             newPos.setSize (jmin (newPos.getWidth(),  screen.getWidth()),
                             jmin (newPos.getHeight(), screen.getHeight()));

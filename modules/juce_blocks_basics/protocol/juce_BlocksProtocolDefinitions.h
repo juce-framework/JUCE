@@ -536,7 +536,7 @@ static constexpr const char* ledProgramLittleFootFunctions[] =
     "setButtonMode/vii",
     "setButtonType/viii",
     "setButtonMinMaxDefault/viiii",
-    "setButtonColours/viii",
+    "setButtonColors/viii",
     "setButtonTriState/vii",
     nullptr
 };

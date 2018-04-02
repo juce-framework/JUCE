@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -137,13 +137,13 @@ void ComponentPeer::handlePaint (LowLevelGraphicsContext& contextToPaintTo)
     if (JUCE_IS_REPAINT_DEBUGGING_ACTIVE)
    #endif
     {
-        // enabling this code will fill all areas that get repainted with a colour overlay, to show
+        // enabling this code will fill all areas that get repainted with a color overlay, to show
         // clearly when things are being repainted.
         g.restoreState();
 
         static Random rng;
 
-        g.fillAll (Colour ((uint8) rng.nextInt (255),
+        g.fillAll (Color ((uint8) rng.nextInt (255),
                            (uint8) rng.nextInt (255),
                            (uint8) rng.nextInt (255),
                            (uint8) 0x50));
@@ -302,9 +302,9 @@ void ComponentPeer::handleMovedOrResized()
 {
     ModifierKeys::updateCurrentModifiers();
 
-    const bool nowMinimised = isMinimised();
+    const bool nowMinimized = isMinimized();
 
-    if (component.flags.hasHeavyweightPeerFlag && ! nowMinimised)
+    if (component.flags.hasHeavyweightPeerFlag && ! nowMinimized)
     {
         const WeakReference<Component> deletionChecker (&component);
 
@@ -328,10 +328,10 @@ void ComponentPeer::handleMovedOrResized()
         }
     }
 
-    if (isWindowMinimised != nowMinimised)
+    if (isWindowMinimized != nowMinimized)
     {
-        isWindowMinimised = nowMinimised;
-        component.minimisationStateChanged (nowMinimised);
+        isWindowMinimized = nowMinimized;
+        component.minimizationStateChanged (nowMinimized);
         component.sendVisibilityChangeMessage();
     }
 

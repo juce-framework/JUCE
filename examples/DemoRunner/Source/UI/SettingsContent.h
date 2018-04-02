@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -43,7 +43,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (findColour (ResizableWindow::backgroundColourId));
+        g.fillAll (findColor (ResizableWindow::backgroundColorId));
     }
 
     void resized() override
@@ -88,14 +88,14 @@ private:
             };
 
             addAndMakeVisible (lookAndFeelLabel);
-            lookAndFeelLabel.setJustificationType (Justification::centredRight);
+            lookAndFeelLabel.setJustificationType (Justification::centeredRight);
             lookAndFeelLabel.attachToComponent (&lookAndFeelSelector, true);
 
             addAndMakeVisible (rendererSelector);
             rendererSelector.onChange = [this] { mainComponent.setRenderingEngine (rendererSelector.getSelectedItemIndex()); };
 
             addAndMakeVisible (rendererLabel);
-            rendererLabel.setJustificationType (Justification::centredRight);
+            rendererLabel.setJustificationType (Justification::centeredRight);
             rendererLabel.attachToComponent (&rendererSelector, true);
 
             addAndMakeVisible (audioSettings = new AudioDeviceSelectorComponent (getSharedAudioDeviceManager(),
@@ -107,7 +107,7 @@ private:
 
         void paint (Graphics& g) override
         {
-            g.fillAll (findColour (ResizableWindow::backgroundColourId).contrasting (0.2f));
+            g.fillAll (findColor (ResizableWindow::backgroundColorId).contrasting (0.2f));
         }
 
         void resized() override
@@ -190,15 +190,15 @@ private:
         {
             lookAndFeelNames.addArray ({ "LookAndFeel_V1", "LookAndFeel_V2", "LookAndFeel_V3",
                                          "LookAndFeel_V4 (Dark)", "LookAndFeel_V4 (Midnight)",
-                                         "LookAndFeel_V4 (Grey)", "LookAndFeel_V4 (Light)" });
+                                         "LookAndFeel_V4 (Gray)", "LookAndFeel_V4 (Light)" });
 
             lookAndFeels.add (new LookAndFeel_V1());
             lookAndFeels.add (new LookAndFeel_V2());
             lookAndFeels.add (new LookAndFeel_V3());
-            lookAndFeels.add (new LookAndFeel_V4 (LookAndFeel_V4::getDarkColourScheme()));
-            lookAndFeels.add (new LookAndFeel_V4 (LookAndFeel_V4::getMidnightColourScheme()));
-            lookAndFeels.add (new LookAndFeel_V4 (LookAndFeel_V4::getGreyColourScheme()));
-            lookAndFeels.add (new LookAndFeel_V4 (LookAndFeel_V4::getLightColourScheme()));
+            lookAndFeels.add (new LookAndFeel_V4 (LookAndFeel_V4::getDarkColorScheme()));
+            lookAndFeels.add (new LookAndFeel_V4 (LookAndFeel_V4::getMidnightColorScheme()));
+            lookAndFeels.add (new LookAndFeel_V4 (LookAndFeel_V4::getGrayColorScheme()));
+            lookAndFeels.add (new LookAndFeel_V4 (LookAndFeel_V4::getLightColorScheme()));
         }
     };
 

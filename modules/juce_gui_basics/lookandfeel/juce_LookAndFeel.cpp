@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -39,11 +39,11 @@ extern GetTypefaceForFont juce_getTypefaceForFont;
 LookAndFeel::LookAndFeel()
 {
     /* if this fails it means you're trying to create a LookAndFeel object before
-       the static Colours have been initialised. That ain't gonna work. It probably
+       the static Colors have been initialized. That ain't gonna work. It probably
        means that you're using a static LookAndFeel object and that your compiler has
-       decided to intialise it before the Colours class.
+       decided to intialise it before the Colors class.
     */
-    jassert (Colours::white == Colour (0xffffffff));
+    jassert (Colors::white == Color (0xffffffff));
 
     juce_getTypefaceForFont = getTypefaceForFontFromLookAndFeel;
 }
@@ -66,7 +66,7 @@ LookAndFeel::~LookAndFeel()
        the Components will be destroyed before the LookAndFeel.
 
        Deleting a LookAndFeel is unlikely to cause a crash since most things will use a
-       safe WeakReference to it, but it could cause some unexpected graphical behaviour,
+       safe WeakReference to it, but it could cause some unexpected graphical behavior,
        so it's advisable to clear up any references before destroying them!
     */
     jassert (masterReference.getNumActiveWeakReferences() == 0
@@ -75,33 +75,33 @@ LookAndFeel::~LookAndFeel()
 }
 
 //==============================================================================
-Colour LookAndFeel::findColour (int colourID) const noexcept
+Color LookAndFeel::findColor (int colorID) const noexcept
 {
-    const ColourSetting c = { colourID, Colour() };
-    auto index = colours.indexOf (c);
+    const ColorSetting c = { colorID, Color() };
+    auto index = colors.indexOf (c);
 
     if (index >= 0)
-        return colours.getReference (index).colour;
+        return colors.getReference (index).color;
 
     jassertfalse;
-    return Colours::black;
+    return Colors::black;
 }
 
-void LookAndFeel::setColour (int colourID, Colour newColour) noexcept
+void LookAndFeel::setColor (int colorID, Color newColor) noexcept
 {
-    const ColourSetting c = { colourID, newColour };
-    auto index = colours.indexOf (c);
+    const ColorSetting c = { colorID, newColor };
+    auto index = colors.indexOf (c);
 
     if (index >= 0)
-        colours.getReference (index).colour = newColour;
+        colors.getReference (index).color = newColor;
     else
-        colours.add (c);
+        colors.add (c);
 }
 
-bool LookAndFeel::isColourSpecified (const int colourID) const noexcept
+bool LookAndFeel::isColorSpecified (const int colorID) const noexcept
 {
-    const ColourSetting c = { colourID, Colour() };
-    return colours.contains (c);
+    const ColorSetting c = { colorID, Color() };
+    return colors.contains (c);
 }
 
 //==============================================================================

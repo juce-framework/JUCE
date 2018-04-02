@@ -71,7 +71,7 @@ public:
         scrollbar.setAutoHide (false);
         scrollbar.addListener (this);
 
-        currentPositionMarker.setFill (Colours::white.withAlpha (0.85f));
+        currentPositionMarker.setFill (Colors::white.withAlpha (0.85f));
         addAndMakeVisible (currentPositionMarker);
     }
 
@@ -116,9 +116,9 @@ public:
         if (thumbnail.getTotalLength() > 0)
         {
             auto newScale = jmax (0.001, thumbnail.getTotalLength() * (1.0 - jlimit (0.0, 0.99, amount)));
-            auto timeAtCentre = xToTime (getWidth() / 2.0f);
+            auto timeAtCenter = xToTime (getWidth() / 2.0f);
 
-            setRange ({ timeAtCentre - newScale * 0.5, timeAtCentre + newScale * 0.5 });
+            setRange ({ timeAtCenter - newScale * 0.5, timeAtCenter + newScale * 0.5 });
         }
     }
 
@@ -137,8 +137,8 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (Colours::darkgrey);
-        g.setColour (Colours::lightblue);
+        g.fillAll (Colors::darkgray);
+        g.setColor (Colors::lightblue);
 
         if (thumbnail.getTotalLength() > 0.0)
         {
@@ -151,7 +151,7 @@ public:
         else
         {
             g.setFont (14.0f);
-            g.drawFittedText ("(No audio file selected)", getLocalBounds(), Justification::centred, 2);
+            g.drawFittedText ("(No audio file selected)", getLocalBounds(), Justification::centered, 2);
         }
     }
 
@@ -280,10 +280,10 @@ public:
     {
         addAndMakeVisible (zoomLabel);
         zoomLabel.setFont (Font (15.00f, Font::plain));
-        zoomLabel.setJustificationType (Justification::centredRight);
+        zoomLabel.setJustificationType (Justification::centeredRight);
         zoomLabel.setEditable (false, false, false);
-        zoomLabel.setColour (TextEditor::textColourId, Colours::black);
-        zoomLabel.setColour (TextEditor::backgroundColourId, Colour (0x00000000));
+        zoomLabel.setColor (TextEditor::textColorId, Colors::black);
+        zoomLabel.setColor (TextEditor::backgroundColorId, Color (0x00000000));
 
         addAndMakeVisible (followTransportButton);
         followTransportButton.onClick = [this] { updateFollowTransportState(); };
@@ -292,8 +292,8 @@ public:
         explanation.setFont (Font (14.00f, Font::plain));
         explanation.setJustificationType (Justification::bottomRight);
         explanation.setEditable (false, false, false);
-        explanation.setColour (TextEditor::textColourId, Colours::black);
-        explanation.setColour (TextEditor::backgroundColourId, Colour (0x00000000));
+        explanation.setColor (TextEditor::textColorId, Colors::black);
+        explanation.setColor (TextEditor::backgroundColorId, Color (0x00000000));
 
         addAndMakeVisible (zoomSlider);
         zoomSlider.setRange (0, 1, 0);
@@ -305,8 +305,8 @@ public:
         thumbnail->addChangeListener (this);
 
         addAndMakeVisible (startStopButton);
-        startStopButton.setColour (TextButton::buttonColourId, Colour (0xff79ed7f));
-        startStopButton.setColour (TextButton::textColourOffId, Colours::black);
+        startStopButton.setColor (TextButton::buttonColorId, Color (0xff79ed7f));
+        startStopButton.setColor (TextButton::textColorOffId, Colors::black);
         startStopButton.onClick = [this] { startOrStop(); };
 
         // audio setup
@@ -322,7 +322,7 @@ public:
 
         directoryList.setDirectory (File::getSpecialLocation (File::userHomeDirectory), true, true);
 
-        fileTreeComp.setColour (FileTreeComponent::backgroundColourId, Colours::lightgrey.withAlpha (0.6f));
+        fileTreeComp.setColor (FileTreeComponent::backgroundColorId, Colors::lightgray.withAlpha (0.6f));
         fileTreeComp.addListener (this);
        #endif
 
@@ -331,7 +331,7 @@ public:
                                      [this] (bool granted)
                                      {
                                          int numInputChannels = granted ? 2 : 0;
-                                         audioDeviceManager.initialise (numInputChannels, 2, nullptr, true, {}, nullptr);
+                                         audioDeviceManager.initialize (numInputChannels, 2, nullptr, true, {}, nullptr);
                                      });
        #endif
 
@@ -360,7 +360,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground));
+        g.fillAll (getUIColorIfAvailable (LookAndFeel_V4::ColorScheme::UIColor::windowBackground));
     }
 
     void resized() override

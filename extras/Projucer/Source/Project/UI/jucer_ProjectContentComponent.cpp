@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -44,15 +44,15 @@ struct LogoComponent  : public Component
 
     void paint (Graphics& g) override
     {
-        g.setColour (findColour (defaultTextColourId));
+        g.setColor (findColor (defaultTextColorId));
 
         auto r = getLocalBounds();
 
         g.setFont (15.0f);
-        g.drawFittedText (getVersionInfo(), r.removeFromBottom (50), Justification::centredBottom, 3);
+        g.drawFittedText (getVersionInfo(), r.removeFromBottom (50), Justification::centeredBottom, 3);
 
         logo->drawWithin (g, r.withTrimmedBottom (r.getHeight() / 4).toFloat(),
-                          RectanglePlacement (RectanglePlacement::centred), 1.0f);
+                          RectanglePlacement (RectanglePlacement::centered), 1.0f);
     }
 
     static String getVersionInfo()
@@ -75,7 +75,7 @@ ProjectContentComponent::ProjectContentComponent()
     addAndMakeVisible (header = new HeaderComponent());
 
     addAndMakeVisible (fileNameLabel = new Label());
-    fileNameLabel->setJustificationType (Justification::centred);
+    fileNameLabel->setJustificationType (Justification::centered);
 
     sidebarSizeConstrainer.setMinimumWidth (200);
     sidebarSizeConstrainer.setMaximumWidth (500);
@@ -107,7 +107,7 @@ ProjectContentComponent::~ProjectContentComponent()
 
 void ProjectContentComponent::paint (Graphics& g)
 {
-    g.fillAll (findColour (backgroundColourId));
+    g.fillAll (findColor (backgroundColorId));
 }
 
 void ProjectContentComponent::resized()
@@ -201,14 +201,14 @@ void ProjectContentComponent::createProjectTabs()
 {
     jassert (project != nullptr);
 
-    auto tabColour = Colours::transparentBlack;
+    auto tabColor = Colors::transparentBlack;
 
     auto* pTab = new ProjectTab (project);
-    sidebarTabs.addTab ("Project", tabColour, pTab, true);
+    sidebarTabs.addTab ("Project", tabColor, pTab, true);
 
     CompileEngineChildProcess::Ptr childProc (getChildProcess());
 
-    sidebarTabs.addTab ("Build", tabColour, new LiveBuildTab (childProc, lastCrashMessage), true);
+    sidebarTabs.addTab ("Build", tabColor, new LiveBuildTab (childProc, lastCrashMessage), true);
 
     if (childProc != nullptr)
     {
@@ -709,8 +709,8 @@ void ProjectContentComponent::deleteSelectedTreeItems()
 void ProjectContentComponent::showBubbleMessage (Rectangle<int> pos, const String& text)
 {
     addChildComponent (bubbleMessage);
-    bubbleMessage.setColour (BubbleComponent::backgroundColourId, Colours::white.withAlpha (0.7f));
-    bubbleMessage.setColour (BubbleComponent::outlineColourId, Colours::black.withAlpha (0.8f));
+    bubbleMessage.setColor (BubbleComponent::backgroundColorId, Colors::white.withAlpha (0.7f));
+    bubbleMessage.setColor (BubbleComponent::outlineColorId, Colors::black.withAlpha (0.8f));
     bubbleMessage.setAlwaysOnTop (true);
 
     bubbleMessage.showAt (pos, AttributedString (text), 3000, true, false);
@@ -755,7 +755,7 @@ struct AsyncCommandRetrier  : public Timer
     JUCE_DECLARE_NON_COPYABLE (AsyncCommandRetrier)
 };
 
-static bool reinvokeCommandAfterCancellingModalComps (const ApplicationCommandTarget::InvocationInfo& info)
+static bool reinvokeCommandAfterCancelingModalComps (const ApplicationCommandTarget::InvocationInfo& info)
 {
     if (ModalComponentManager::getInstance()->cancelAllModalComponents())
     {
@@ -1078,7 +1078,7 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
         case CommandIDs::goToNextDoc:
         case CommandIDs::goToCounterpart:
         case CommandIDs::saveAndOpenInIDE:
-            if (reinvokeCommandAfterCancellingModalComps (info))
+            if (reinvokeCommandAfterCancelingModalComps (info))
             {
                 grabKeyboardFocus(); // to force any open labels to close their text editors
                 return true;

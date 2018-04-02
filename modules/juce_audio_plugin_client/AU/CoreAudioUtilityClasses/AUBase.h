@@ -314,7 +314,7 @@ public:
 							return kAudio_UnimplementedError;
 						}
 
-	// Override this method if your AU processes multiple output busses completely independently --
+	// Override this method if your AU processes multiple output buses completely independently --
 	// you'll want to just call Render without the NeedsToRender check.
 	// Otherwise, override Render().
 	//
@@ -872,7 +872,7 @@ protected:
 
 	// Usually, you won't override this method.  You only need to call this if your DSP code
 	// is prepared to handle scheduled immediate and ramped parameter changes.
-	// Before calling this method, it is assumed you have already called PullInput() on the input busses
+	// Before calling this method, it is assumed you have already called PullInput() on the input buses
 	// for which the DSP code depends.  ProcessForScheduledParams() will call (potentially repeatedly)
 	// virtual method ProcessScheduledSlice() to perform the actual DSP for a given sub-division of
 	// the buffer.  The job of ProcessForScheduledParams() is to sub-divide the buffer into smaller

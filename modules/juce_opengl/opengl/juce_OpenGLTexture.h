@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -51,7 +51,7 @@ public:
 
     /** Creates a texture from a raw array of pixels.
         If width and height are not powers-of-two, the texture will be created with a
-        larger size, and only the subsection (0, 0, width, height) will be initialised.
+        larger size, and only the subsection (0, 0, width, height) will be initialized.
         The data is sent directly to the OpenGL driver without being flipped vertically,
         so the first pixel will be mapped onto texture coordinate (0, 0).
     */
@@ -66,7 +66,7 @@ public:
 
     /** Creates an alpha-channel texture from an array of alpha values.
         If width and height are not powers-of-two, the texture will be created with a
-        larger size, and only the subsection (0, 0, width, height) will be initialised.
+        larger size, and only the subsection (0, 0, width, height) will be initialized.
         The data is sent directly to the OpenGL driver without being flipped vertically,
         so the first pixel will be mapped onto texture coordinate (0, 0).
     */

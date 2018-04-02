@@ -241,7 +241,7 @@ bool ChildProcessSlave::sendMessageToMaster (const MemoryBlock& mb)
     return false;
 }
 
-bool ChildProcessSlave::initialiseFromCommandLine (const String& commandLine,
+bool ChildProcessSlave::initializeFromCommandLine (const String& commandLine,
                                                    const String& commandLineUniqueID,
                                                    int timeoutMs)
 {

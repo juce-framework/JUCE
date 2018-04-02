@@ -52,9 +52,9 @@
     A very basic generator of a simulated plucked string sound, implementing
     the Karplus-Strong algorithm.
 
-    Not performance-optimised!
+    Not performance-optimized!
 */
-class StringSynthesiser
+class StringSynthesizer
 {
 public:
     //==============================================================================
@@ -64,10 +64,10 @@ public:
         @param frequencyInHz   The fundamental frequency of the simulated string in
                                Hertz.
     */
-    StringSynthesiser (double sampleRate, double frequencyInHz)
+    StringSynthesizer (double sampleRate, double frequencyInHz)
     {
         doPluckForNextBuffer.set (false);
-        prepareSynthesiserState (sampleRate, frequencyInHz);
+        prepareSynthesizerState (sampleRate, frequencyInHz);
     }
 
     //==============================================================================
@@ -120,7 +120,7 @@ public:
 
 private:
     //==============================================================================
-    void prepareSynthesiserState (double sampleRate, double frequencyInHz)
+    void prepareSynthesizerState (double sampleRate, double frequencyInHz)
     {
         auto delayLineLength = (size_t) roundToInt (sampleRate / frequencyInHz);
 
@@ -162,7 +162,7 @@ private:
     std::vector<float> excitationSample, delayLine;
     int pos = 0;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StringSynthesiser)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StringSynthesizer)
 };
 
 //==============================================================================
@@ -174,8 +174,8 @@ class StringComponent   : public Component,
                           private Timer
 {
 public:
-    StringComponent (int lengthInPixels, Colour stringColour)
-        : length (lengthInPixels), colour (stringColour)
+    StringComponent (int lengthInPixels, Color stringColor)
+        : length (lengthInPixels), color (stringColor)
     {
         // ignore mouse-clicks so that our parent can get them instead.
         setInterceptsMouseClicks (false, false);
@@ -193,7 +193,7 @@ public:
     //==============================================================================
     void paint (Graphics& g) override
     {
-        g.setColour (colour);
+        g.setColor (color);
         g.strokePath (generateStringPath(), PathStrokeType (2.0f));
     }
 
@@ -236,7 +236,7 @@ public:
 private:
     //==============================================================================
     int length;
-    Colour colour;
+    Color color;
 
     int height = 20;
     float amplitude = 0.0f;
@@ -365,7 +365,7 @@ private:
         for (auto stringParams : getDefaultStringParameters())
         {
             stringLines.add (new StringComponent (stringParams.lengthInPixels,
-                                                  Colour::fromHSV (Random().nextFloat(), 0.6f, 0.9f, 1.0f)));
+                                                  Color::fromHSV (Random().nextFloat(), 0.6f, 0.9f, 1.0f)));
         }
     }
 
@@ -375,13 +375,13 @@ private:
 
         for (auto stringParams : getDefaultStringParameters())
         {
-            stringSynths.add (new StringSynthesiser (sampleRate, stringParams.frequencyInHz));
+            stringSynths.add (new StringSynthesizer (sampleRate, stringParams.frequencyInHz));
         }
     }
 
     //==============================================================================
     OwnedArray<StringComponent> stringLines;
-    OwnedArray<StringSynthesiser> stringSynths;
+    OwnedArray<StringSynthesizer> stringSynths;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluckedStringsDemo)
 };

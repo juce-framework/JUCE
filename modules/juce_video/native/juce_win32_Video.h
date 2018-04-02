@@ -284,7 +284,7 @@ struct VideoComponent::Pimpl  : public Component
         if (videoLoaded)
             context->handleUpdateNowIfNeeded();
         else
-            g.fillAll (Colours::grey);
+            g.fillAll (Colors::gray);
     }
 
     void updateContextPosition()

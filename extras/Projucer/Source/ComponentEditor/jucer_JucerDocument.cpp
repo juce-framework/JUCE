@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -183,11 +183,11 @@ void JucerDocument::setConstructorParams (const String& newParams)
     }
 }
 
-void JucerDocument::setVariableInitialisers (const String& newInitlialisers)
+void JucerDocument::setVariableInitializers (const String& newInitlialisers)
 {
-    if (variableInitialisers != newInitlialisers)
+    if (variableInitializers != newInitlialisers)
     {
-        variableInitialisers = newInitlialisers;
+        variableInitializers = newInitlialisers;
         changed();
     }
 }
@@ -335,7 +335,7 @@ XmlElement* JucerDocument::createXml() const
     doc->setAttribute ("componentName", componentName);
     doc->setAttribute ("parentClasses", parentClasses);
     doc->setAttribute ("constructorParams", constructorParams);
-    doc->setAttribute ("variableInitialisers", variableInitialisers);
+    doc->setAttribute ("variableInitializers", variableInitializers);
     doc->setAttribute ("snapPixels", snapGridPixels);
     doc->setAttribute ("snapActive", snapActive);
     doc->setAttribute ("snapShown", snapShown);
@@ -370,7 +370,7 @@ bool JucerDocument::loadFromXml (const XmlElement& xml)
         componentName = xml.getStringAttribute ("componentName", String());
         parentClasses = xml.getStringAttribute ("parentClasses", defaultParentClasses);
         constructorParams = xml.getStringAttribute ("constructorParams", String());
-        variableInitialisers = xml.getStringAttribute ("variableInitialisers", String());
+        variableInitializers = xml.getStringAttribute ("variableInitializers", String());
 
         fixedSize = xml.getBoolAttribute ("fixedSize", false);
         initialWidth = xml.getIntAttribute ("initialWidth", 300);
@@ -407,7 +407,7 @@ void JucerDocument::fillInGeneratedCode (GeneratedCode& code) const
     code.componentName = componentName;
     code.parentClasses = parentClasses;
     code.constructorParams = constructorParams;
-    code.initialisers.addLines (variableInitialisers);
+    code.initializers.addLines (variableInitializers);
 
     if (! componentName.isEmpty())
         code.constructorCode << "setName (" + quotedString (componentName, false) + ");\n";

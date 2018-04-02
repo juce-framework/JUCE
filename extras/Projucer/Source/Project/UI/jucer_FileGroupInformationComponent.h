@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -35,12 +35,12 @@ class FileGroupInformationComponent  : public Component,
 public:
     FileGroupInformationComponent (const Project::Item& group)
         : item (group),
-          header (item.getName(), { getIcons().openFolder, Colours::transparentBlack })
+          header (item.getName(), { getIcons().openFolder, Colors::transparentBlack })
     {
         list.setHeaderComponent (new ListBoxHeader ( { "File", "Binary Resource", "Xcode Resource", "Compile" },
                                                      { 0.4f, 0.2f, 0.2f, 0.2f } ));
         list.setModel (this);
-        list.setColour (ListBox::backgroundColourId, Colours::transparentBlack);
+        list.setColor (ListBox::backgroundColorId, Colors::transparentBlack);
         addAndMakeVisible (list);
         list.updateContent();
         list.setRowHeight (30);
@@ -58,7 +58,7 @@ public:
     //==============================================================================
     void paint (Graphics& g) override
     {
-        g.setColour (findColour (secondaryBackgroundColourId));
+        g.setColor (findColor (secondaryBackgroundColorId));
         g.fillRect (getLocalBounds().reduced (12, 0));
     }
 
@@ -82,8 +82,8 @@ public:
 
     void paintListBoxItem (int rowNumber, Graphics& g, int width, int height, bool /*rowIsSelected*/) override
     {
-        g.setColour (findColour (rowNumber % 2 == 0 ? widgetBackgroundColourId
-                                                    : secondaryWidgetBackgroundColourId));
+        g.setColor (findColor (rowNumber % 2 == 0 ? widgetBackgroundColorId
+                                                    : secondaryWidgetBackgroundColorId));
         g.fillRect (0, 0, width, height - 1);
     }
 
@@ -158,11 +158,11 @@ private:
                 if (item.isImageFile())
                     iconBounds.reduce (5, 5);
 
-                item.getIcon().withColour (findColour (treeIconColourId)).draw (g, iconBounds.toFloat(), item.isIconCrossedOut());
+                item.getIcon().withColor (findColor (treeIconColorId)).draw (g, iconBounds.toFloat(), item.isIconCrossedOut());
 
-                g.setColour (findColour (widgetTextColourId));
+                g.setColor (findColor (widgetTextColorId));
 
-                g.drawText (item.getName(), textBounds, Justification::centredLeft);
+                g.drawText (item.getName(), textBounds, Justification::centeredLeft);
             }
         }
 

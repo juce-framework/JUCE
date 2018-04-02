@@ -1241,12 +1241,12 @@ public:
     //==============================================================================
    #if JUCE_ALLOW_STATIC_NULL_VARIABLES
     /** This was a static empty string object, but is now deprecated as it's too easy to accidentally
-        use it indirectly during a static constructor, leading to hard-to-find order-of-initialisation
+        use it indirectly during a static constructor, leading to hard-to-find order-of-initialization
         problems.
         @deprecated If you need an empty String object, just use String() or {}.
         The only time you might miss having String::empty available might be if you need to return an
         empty string from a function by reference, but if you need to do that, it's easy enough to use
-        a function-local static String object and return that, avoiding any order-of-initialisation issues.
+        a function-local static String object and return that, avoiding any order-of-initialization issues.
     */
     static const String empty;
    #endif

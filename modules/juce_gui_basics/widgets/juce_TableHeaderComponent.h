@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -100,7 +100,7 @@ public:
                                 properties of this column
         @param insertIndex      the index at which the column should be added. A value of 0 puts it at the start (left-hand side)
                                 and -1 puts it at the end (right-hand size) of the table. Note that the index the index within
-                                all columns, not just the index amongst those that are currently visible
+                                all columns, not just the index among those that are currently visible
     */
     void addColumn (const String& columnName,
                     int columnId,
@@ -211,15 +211,15 @@ public:
 
         If there's no such column ID, this will return -1.
 
-        If onlyCountVisibleColumns is true, this will return the index amongst the visible columns;
-        otherwise it'll return the index amongst all the columns, including any hidden ones.
+        If onlyCountVisibleColumns is true, this will return the index among the visible columns;
+        otherwise it'll return the index among all the columns, including any hidden ones.
     */
     int getIndexOfColumnId (int columnId, bool onlyCountVisibleColumns) const;
 
     /** Returns the ID of the column at a given index.
 
-        If onlyCountVisibleColumns is true, this will count the index amongst the visible columns;
-        otherwise it'll count it amongst all the columns, including any hidden ones.
+        If onlyCountVisibleColumns is true, this will count the index among the visible columns;
+        otherwise it'll count it among all the columns, including any hidden ones.
 
         If the index is out-of-range, it'll return 0.
     */
@@ -369,20 +369,20 @@ public:
     virtual void reactToMenuItem (int menuReturnId, int columnIdClicked);
 
     //==============================================================================
-    /** A set of colour IDs to use to change the colour of various aspects of the TableHeaderComponent.
+    /** A set of color IDs to use to change the color of various aspects of the TableHeaderComponent.
 
-        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+        @see Component::setColor, Component::findColor, LookAndFeel::setColor, LookAndFeel::findColor
     */
-    enum ColourIds
+    enum ColorIds
     {
-        textColourId                   = 0x1003800, /**< The colour for the text in the header. */
-        backgroundColourId             = 0x1003810, /**< The colour of the table header background.
+        textColorId                   = 0x1003800, /**< The color for the text in the header. */
+        backgroundColorId             = 0x1003810, /**< The color of the table header background.
                                                          It's up to the LookAndFeel how this is used. */
-        outlineColourId                = 0x1003820, /**< The colour of the table header's outline. */
-        highlightColourId              = 0x1003830, /**< The colour of the table header background when
+        outlineColorId                = 0x1003820, /**< The color of the table header's outline. */
+        highlightColorId              = 0x1003830, /**< The color of the table header background when
                                                          the mouse is over or down above the the table
                                                          header. It's up to the LookAndFeel to use a
-                                                         variant of this colour to destiuish between
+                                                         variant of this color to destiuish between
                                                          the down and hover state. */
     };
 
@@ -418,7 +418,7 @@ public:
     /** @internal */
     MouseCursor getMouseCursor() override;
 
-    /** Can be overridden for more control over the pop-up menu behaviour. */
+    /** Can be overridden for more control over the pop-up menu behavior. */
     virtual void showColumnChooserMenu (int columnIdClicked);
 
 private:

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -38,7 +38,7 @@ namespace juce
 
     It also includes a callback that lets you know when the top-level peer is changed.
 
-    This class is used by specialised components like WebBrowserComponent
+    This class is used by specialized components like WebBrowserComponent
     because they need to keep their custom windows in the right place and respond to
     changes in the peer.
 

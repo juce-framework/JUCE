@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -34,7 +34,7 @@ namespace dsp
 
     This is only a simple low-footprint implementation and isn't tuned for speed - it may
     be useful for simple applications where one of the more complex FFT libraries would be
-    overkill. (But in the future it may end up becoming optimised of course...)
+    overkill. (But in the future it may end up becoming optimized of course...)
 
     The FFT class itself contains lookup tables, so there's some overhead in creating
     one, you should create and cache an FFT object for each size/direction of transform
@@ -46,7 +46,7 @@ class JUCE_API  FFT
 {
 public:
     //==============================================================================
-    /** Initialises an object for performing forward and inverse FFT with the given size.
+    /** Initializes an object for performing forward and inverse FFT with the given size.
         The number of points the FFT will operate on will be 2 ^ order.
     */
     FFT (int order);

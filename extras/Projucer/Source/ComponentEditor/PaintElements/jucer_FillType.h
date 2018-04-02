@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -43,7 +43,7 @@ public:
     {
         image = Image();
         mode = other.mode;
-        colour = other.colour;
+        color = other.color;
         gradCol1 = other.gradCol1;
         gradCol2 = other.gradCol2;
         gradPos1 = other.gradPos1;
@@ -57,7 +57,7 @@ public:
     {
         image = Image();
         mode = other.mode;
-        colour = other.colour;
+        color = other.color;
         gradCol1 = other.gradCol1;
         gradCol2 = other.gradCol2;
         gradPos1 = other.gradPos1;
@@ -72,7 +72,7 @@ public:
     bool operator== (const JucerFillType& other) const
     {
         return mode == other.mode
-            && colour == other.colour
+            && color == other.color
             && gradCol1 == other.gradCol1
             && gradCol2 == other.gradCol2
             && gradPos1 == other.gradPos1
@@ -90,10 +90,10 @@ public:
     //==============================================================================
     void setFillType (Graphics& g, JucerDocument* const document, const Rectangle<int>& parentArea)
     {
-        if (mode == solidColour)
+        if (mode == solidColor)
         {
             image = Image();
-            g.setColour (colour);
+            g.setColor (color);
         }
         else if (mode == imageBrush)
         {
@@ -111,7 +111,7 @@ public:
             Rectangle<int> r1 (gradPos1.getRectangle (parentArea, document->getComponentLayout()));
             Rectangle<int> r2 (gradPos2.getRectangle (parentArea, document->getComponentLayout()));
 
-            g.setGradientFill (ColourGradient (gradCol1, (float) r1.getX(), (float) r1.getY(),
+            g.setGradientFill (ColorGradient (gradCol1, (float) r1.getX(), (float) r1.getY(),
                                                gradCol2, (float) r2.getX(), (float) r2.getY(),
                                                mode == radialGradient));
         }
@@ -123,13 +123,13 @@ public:
 
         switch (mode)
         {
-            case solidColour:
-                s << "Colour " << type << "Colour = " << CodeHelpers::colourToCode (colour) << ";\n";
+            case solidColor:
+                s << "Color " << type << "Color = " << CodeHelpers::colorToCode (color) << ";\n";
                 break;
 
             case linearGradient:
             case radialGradient:
-                s << "Colour " << type << "Colour1 = " << CodeHelpers::colourToCode (gradCol1) << ", " << type << "Colour2 = " << CodeHelpers::colourToCode (gradCol2) << ";\n";
+                s << "Color " << type << "Color1 = " << CodeHelpers::colorToCode (gradCol1) << ", " << type << "Color2 = " << CodeHelpers::colorToCode (gradCol2) << ";\n";
                 break;
 
             case imageBrush:
@@ -149,8 +149,8 @@ public:
 
         switch (mode)
         {
-            case solidColour:
-                s << "g.setColour (" << type << "Colour);\n";
+            case solidColor:
+                s << "g.setColor (" << type << "Color);\n";
                 break;
 
             case linearGradient:
@@ -161,14 +161,14 @@ public:
                     positionToCode (gradPos1, code.document->getComponentLayout(), x1, y1, w, h);
                     positionToCode (gradPos2, code.document->getComponentLayout(), x2, y2, w, h);
 
-                    s << "g.setGradientFill (ColourGradient (";
+                    s << "g.setGradientFill (ColorGradient (";
 
                     auto indent = String::repeatedString (" ", s.length());
 
-                    s << type << "Colour1,\n"
+                    s << type << "Color1,\n"
                       << indent << castToFloat (x1) << " - " << castToFloat (x0) << " + x,\n"
                       << indent << castToFloat (y1) << " - " << castToFloat (y0) << " + y,\n"
-                      << indent << type << "Colour2,\n"
+                      << indent << type << "Color2,\n"
                       << indent << castToFloat (x2) << " - " << castToFloat (x0) << " + x,\n"
                       << indent << castToFloat (y2) << " - " << castToFloat (y0) << " + y,\n"
                       << indent << CodeHelpers::boolLiteral (mode == radialGradient) << "));\n";
@@ -209,8 +209,8 @@ public:
     {
         switch (mode)
         {
-            case solidColour:
-                return "solid: " + colour.toString();
+            case solidColor:
+                return "solid: " + color.toString();
 
             case linearGradient:
             case radialGradient:
@@ -249,8 +249,8 @@ public:
 
             if (toks[0] == "solid")
             {
-                mode = solidColour;
-                colour = Colour::fromString (toks[1]);
+                mode = solidColor;
+                color = Color::fromString (toks[1]);
             }
             else if (toks[0] == "linear"
                       || toks[0] == "radial")
@@ -262,8 +262,8 @@ public:
                 gradPos2 = RelativePositionedRectangle();
                 gradPos2.rect = PositionedRectangle (toks[2]);
 
-                gradCol1 = Colour::fromString (toks[3].fromFirstOccurrenceOf ("=", false, false));
-                gradCol2 = Colour::fromString (toks[4].fromFirstOccurrenceOf ("=", false, false));
+                gradCol1 = Color::fromString (toks[3].fromFirstOccurrenceOf ("=", false, false));
+                gradCol2 = Color::fromString (toks[4].fromFirstOccurrenceOf ("=", false, false));
             }
             else if (toks[0] == "image")
             {
@@ -284,8 +284,8 @@ public:
     {
         switch (mode)
         {
-        case solidColour:
-            return colour.isOpaque();
+        case solidColor:
+            return color.isOpaque();
 
         case linearGradient:
         case radialGradient:
@@ -308,8 +308,8 @@ public:
     {
         switch (mode)
         {
-        case solidColour:
-            return colour.isTransparent();
+        case solidColor:
+            return color.isTransparent();
 
         case linearGradient:
         case radialGradient:
@@ -329,14 +329,14 @@ public:
     //==============================================================================
     enum FillMode
     {
-        solidColour,
+        solidColor,
         linearGradient,
         radialGradient,
         imageBrush
     };
 
     FillMode mode;
-    Colour colour, gradCol1, gradCol2;
+    Color color, gradCol1, gradCol2;
 
     // just the x, y, of these are used
     RelativePositionedRectangle gradPos1, gradPos2;
@@ -352,10 +352,10 @@ private:
     void reset()
     {
         image = Image();
-        mode = solidColour;
-        colour = Colours::brown.withHue (Random::getSystemRandom().nextFloat());
-        gradCol1 = Colours::red;
-        gradCol2 = Colours::green;
+        mode = solidColor;
+        color = Colors::brown.withHue (Random::getSystemRandom().nextFloat());
+        gradCol1 = Colors::red;
+        gradCol2 = Colors::green;
         gradPos1 = RelativePositionedRectangle();
         gradPos1.rect = PositionedRectangle ("50 50");
         gradPos2 = RelativePositionedRectangle();
@@ -409,11 +409,11 @@ private:
                     Graphics g (image);
                     g.fillCheckerBoard (image.getBounds().toFloat(),
                                         image.getWidth() * 0.5f, image.getHeight() * 0.5f,
-                                        Colours::white, Colours::lightgrey);
+                                        Colors::white, Colors::lightgray);
 
                     g.setFont (12.0f);
-                    g.setColour (Colours::grey);
-                    g.drawText ("(image missing)", 0, 0, image.getWidth(), image.getHeight() / 2, Justification::centred, true);
+                    g.setColor (Colors::gray);
+                    g.drawText ("(image missing)", 0, 0, image.getWidth(), image.getHeight() / 2, Justification::centered, true);
 
                     ImageCache::addImageToCache (image, hashCode);
                 }

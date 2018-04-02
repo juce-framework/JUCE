@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -121,7 +121,7 @@ struct FlexBoxLayoutCalculation
         }
     }
 
-    void initialiseItems() noexcept
+    void initializeItems() noexcept
     {
         if (owner.flexWrap == FlexBox::Wrap::noWrap)  // for single-line, all items go in line 1
         {
@@ -778,7 +778,7 @@ void FlexBox::performLayout (Rectangle<float> targetArea)
         FlexBoxLayoutCalculation layout (*this, targetArea.getWidth(), targetArea.getHeight());
 
         layout.createStates();
-        layout.initialiseItems();
+        layout.initializeItems();
         layout.resolveFlexibleLengths();
         layout.resolveAutoMarginsOnMainAxis();
         layout.calculateCrossSizesByLine();

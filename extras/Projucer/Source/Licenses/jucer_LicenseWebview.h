@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -32,14 +32,14 @@ class LicenseWebview : public DialogWindow
 {
 public:
     LicenseWebview (ModalComponentManager::Callback* callbackToUse, const String& request)
-        : DialogWindow ("Log-in to Projucer", Colour (0xfff1f1f1), true, true)
+        : DialogWindow ("Log-in to Projucer", Color (0xfff1f1f1), true, true)
     {
         LicenseWebviewContent* content;
 
         setUsingNativeTitleBar (true);
         setContentOwned (content = new LicenseWebviewContent (*this, callbackToUse), true);
 
-        centreWithSize (getWidth(), getHeight());
+        centerWithSize (getWidth(), getHeight());
 
         content->goToURL (request);
     }
@@ -110,7 +110,7 @@ private:
             void paint (Graphics& g) override
             {
                 auto r = getLocalBounds().reduced (30, 20);
-                g.fillAll (Colour (backgroundColour));
+                g.fillAll (Color (backgroundColor));
 
                 if (juceLogo != nullptr)
                     juceLogo->drawWithin (g, r.toFloat(), RectanglePlacement::xLeft + RectanglePlacement::yMid, 1.0);
@@ -136,7 +136,7 @@ private:
                 }
             }
 
-            const uint32 backgroundColour = 0xff414141;
+            const uint32 backgroundColor = 0xff414141;
             ScopedPointer<Drawable> juceLogo
                 = Drawable::createFromImageData (BinaryData::jucelogowithtext_svg,
                                                  BinaryData::jucelogowithtext_svgSize);
@@ -167,7 +167,7 @@ private:
             webview.goToURL (lastURL);
         }
 
-        void paint (Graphics& g) override     { g.fillAll (Colours::lightblue); }
+        void paint (Graphics& g) override     { g.fillAll (Colors::lightblue); }
 
         void resized() override
         {

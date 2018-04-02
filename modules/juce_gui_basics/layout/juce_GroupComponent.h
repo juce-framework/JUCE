@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -72,17 +72,17 @@ public:
     Justification getTextLabelPosition() const noexcept           { return justification; }
 
     //==============================================================================
-    /** A set of colour IDs to use to change the colour of various aspects of the component.
+    /** A set of color IDs to use to change the color of various aspects of the component.
 
-        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        These constants can be used either via the Component::setColor(), or LookAndFeel::setColor()
         methods.
 
-        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+        @see Component::setColor, Component::findColor, LookAndFeel::setColor, LookAndFeel::findColor
     */
-    enum ColourIds
+    enum ColorIds
     {
-        outlineColourId     = 0x1005400,    /**< The colour to use for drawing the line around the edge. */
-        textColourId        = 0x1005410     /**< The colour to use to draw the text label. */
+        outlineColorId     = 0x1005400,    /**< The color to use for drawing the line around the edge. */
+        textColorId        = 0x1005410     /**< The color to use to draw the text label. */
     };
 
     //==============================================================================
@@ -101,7 +101,7 @@ public:
     /** @internal */
     void enablementChanged() override;
     /** @internal */
-    void colourChanged() override;
+    void colorChanged() override;
 
 private:
     String text;

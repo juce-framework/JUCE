@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -99,7 +99,7 @@ private:
         String getDisplayName() const override           { return "Errors and Warnings"; }
         void setName (const String&) override            {}
         bool isMissing() const override                  { return false; }
-        Icon getIcon() const override                    { return Icon (getIcons().bug, getContentColour (true)); }
+        Icon getIcon() const override                    { return Icon (getIcons().bug, getContentColor (true)); }
         bool canBeSelected() const override              { return true; }
         bool mightContainSubItems() override             { return true; }
         String getUniqueName() const override            { return "errors"; }
@@ -148,7 +148,7 @@ private:
         void setName (const String&) override    {}
         void addSubItems() override              {}
         bool isMissing() const override          { return false; }
-        Icon getIcon() const override            { return Icon (getIcons().bug, getContentColour (true)); }
+        Icon getIcon() const override            { return Icon (getIcons().bug, getContentColor (true)); }
         bool canBeSelected() const override      { return true; }
         bool mightContainSubItems() override     { return true; }
         String getUniqueName() const override    { return String::toHexString (compileUnit.hashCode64()); }
@@ -229,7 +229,7 @@ private:
         void setName (const String&) override            {}
         bool isMissing() const override                  { return false; }
         Icon getIcon() const override                    { return Icon (message.isNote() ? getIcons().info
-                                                                                         : getIcons().warning, getContentColour (true)); }
+                                                                                         : getIcons().warning, getContentColor (true)); }
         bool canBeSelected() const override              { return true; }
         bool mightContainSubItems() override             { return getNumSubItems() != 0; }
         String getUniqueName() const override            { return uniqueID; }
@@ -240,8 +240,8 @@ private:
 
             AttributedString s (message.message);
             s.setFont (Font (12.0f));
-            s.setColour (getContentColour (false));
-            s.setJustification (Justification::centredLeft);
+            s.setColor (getContentColor (false));
+            s.setJustification (Justification::centeredLeft);
 
             text.createLayout (s, (float) area.getWidth());
 
@@ -255,24 +255,24 @@ private:
             text.draw (g, area.toFloat());
         }
 
-        Colour getContentColour (bool isIcon) const override
+        Color getContentColor (bool isIcon) const override
         {
             if (isIcon)
             {
                 if (isSelected())
-                    return getOwnerView()->findColour (defaultHighlightedTextColourId);
+                    return getOwnerView()->findColor (defaultHighlightedTextColorId);
 
                 if (message.isError())
-                    return Colours::red;
+                    return Colors::red;
 
                 if (message.isWarning())
-                    return Colours::yellow;
+                    return Colors::yellow;
 
-                return getOwnerView()->findColour (treeIconColourId);
+                return getOwnerView()->findColor (treeIconColorId);
             }
 
-            return getOwnerView()->findColour (isSelected() ? defaultHighlightedTextColourId
-                                                            : defaultTextColourId);
+            return getOwnerView()->findColor (isSelected() ? defaultHighlightedTextColorId
+                                                            : defaultTextColorId);
         }
 
         void showPopupMenu() override

@@ -241,7 +241,7 @@ template <typename SuperclassType>
 struct ObjCClass
 {
     ObjCClass (const char* nameRoot)
-        : cls (objc_allocateClassPair ([SuperclassType class], getRandomisedName (nameRoot).toUTF8(), 0))
+        : cls (objc_allocateClassPair ([SuperclassType class], getRandomizedName (nameRoot).toUTF8(), 0))
     {
     }
 
@@ -317,7 +317,7 @@ struct ObjCClass
     Class cls;
 
 private:
-    static String getRandomisedName (const char* root)
+    static String getRandomizedName (const char* root)
     {
         return root + String::toHexString (juce::Random::getSystemRandom().nextInt64());
     }

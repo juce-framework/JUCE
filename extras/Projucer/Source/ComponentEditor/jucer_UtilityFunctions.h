@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -88,10 +88,10 @@ inline String castToFloat (const String& expression)
 inline void drawResizableBorder (Graphics& g, int w, int h,
                                  const BorderSize<int> borderSize,
                                  const bool isMouseOver,
-                                 Colour borderColour)
+                                 Color borderColor)
 {
     ignoreUnused (isMouseOver);
-    g.setColour (borderColour);
+    g.setColor (borderColor);
 
     g.fillRect (0, 0, w, borderSize.getTop());
     g.fillRect (0, 0, borderSize.getLeft(), h);
@@ -112,7 +112,7 @@ inline void drawMouseOverCorners (Graphics& g, int w, int h)
     r.subtract (Rectangle<int> (size, 0, w - size - size, h));
     r.subtract (Rectangle<int> (0, size, w, h - size - size));
 
-    g.setColour (Colours::black);
+    g.setColor (Colors::black);
 
     for (int i = r.getNumRectangles(); --i >= 0;)
         g.fillRect (r.getRectangle (i));

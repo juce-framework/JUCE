@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -72,7 +72,7 @@ Image ImageType::convert (const Image& source) const
     {
         for (int y = 0; y < dest.height; ++y)
             for (int x = 0; x < dest.width; ++x)
-                dest.setPixelColour (x, y, src.getPixelColour (x, y));
+                dest.setPixelColor (x, y, src.getPixelColor (x, y));
     }
 
     return newImage;
@@ -96,7 +96,7 @@ public:
         return new LowLevelGraphicsSoftwareRenderer (Image (this));
     }
 
-    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode) override
+    void initializeBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode) override
     {
         bitmap.data = imageData + (size_t) x * (size_t) pixelStride + (size_t) y * (size_t) lineStride;
         bitmap.pixelFormat = pixelFormat;
@@ -170,9 +170,9 @@ public:
         return g;
     }
 
-    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode) override
+    void initializeBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode) override
     {
-        sourceImage->initialiseBitmapData (bitmap, x + area.getX(), y + area.getY(), mode);
+        sourceImage->initializeBitmapData (bitmap, x + area.getX(), y + area.getY(), mode);
 
         if (mode != Image::BitmapData::readOnly)
             sendDataChangeMessage();
@@ -324,7 +324,7 @@ Image Image::convertedToFormat (PixelFormat newFormat) const
     {
         if (! hasAlphaChannel())
         {
-            newImage.clear (getBounds(), Colours::black);
+            newImage.clear (getBounds(), Colors::black);
         }
         else
         {
@@ -380,7 +380,7 @@ Image::BitmapData::BitmapData (Image& im, const int x, const int y, const int w,
     jassert (im.image != nullptr);
     jassert (x >= 0 && y >= 0 && w > 0 && h > 0 && x + w <= im.getWidth() && y + h <= im.getHeight());
 
-    im.image->initialiseBitmapData (*this, x, y, mode);
+    im.image->initializeBitmapData (*this, x, y, mode);
     jassert (data != nullptr && pixelStride > 0 && lineStride != 0);
 }
 
@@ -391,7 +391,7 @@ Image::BitmapData::BitmapData (const Image& im, const int x, const int y, const 
     jassert (im.image != nullptr);
     jassert (x >= 0 && y >= 0 && w > 0 && h > 0 && x + w <= im.getWidth() && y + h <= im.getHeight());
 
-    im.image->initialiseBitmapData (*this, x, y, readOnly);
+    im.image->initializeBitmapData (*this, x, y, readOnly);
     jassert (data != nullptr && pixelStride > 0 && lineStride != 0);
 }
 
@@ -402,7 +402,7 @@ Image::BitmapData::BitmapData (const Image& im, BitmapData::ReadWriteMode mode)
     // The BitmapData class must be given a valid image!
     jassert (im.image != nullptr);
 
-    im.image->initialiseBitmapData (*this, 0, 0, mode);
+    im.image->initializeBitmapData (*this, 0, 0, mode);
     jassert (data != nullptr && pixelStride > 0 && lineStride != 0);
 }
 
@@ -410,7 +410,7 @@ Image::BitmapData::~BitmapData()
 {
 }
 
-Colour Image::BitmapData::getPixelColour (const int x, const int y) const noexcept
+Color Image::BitmapData::getPixelColor (const int x, const int y) const noexcept
 {
     jassert (isPositiveAndBelow (x, width) && isPositiveAndBelow (y, height));
 
@@ -418,21 +418,21 @@ Colour Image::BitmapData::getPixelColour (const int x, const int y) const noexce
 
     switch (pixelFormat)
     {
-        case Image::ARGB:           return Colour ( ((const PixelARGB*)  pixel)->getUnpremultiplied());
-        case Image::RGB:            return Colour (*((const PixelRGB*)   pixel));
-        case Image::SingleChannel:  return Colour (*((const PixelAlpha*) pixel));
+        case Image::ARGB:           return Color ( ((const PixelARGB*)  pixel)->getUnpremultiplied());
+        case Image::RGB:            return Color (*((const PixelRGB*)   pixel));
+        case Image::SingleChannel:  return Color (*((const PixelAlpha*) pixel));
         default:                    jassertfalse; break;
     }
 
-    return Colour();
+    return Color();
 }
 
-void Image::BitmapData::setPixelColour (const int x, const int y, Colour colour) const noexcept
+void Image::BitmapData::setPixelColor (const int x, const int y, Color color) const noexcept
 {
     jassert (isPositiveAndBelow (x, width) && isPositiveAndBelow (y, height));
 
     uint8* const pixel = getPixelPointer (x, y);
-    const PixelARGB col (colour.getPixelARGB());
+    const PixelARGB col (color.getPixelARGB());
 
     switch (pixelFormat)
     {
@@ -444,34 +444,34 @@ void Image::BitmapData::setPixelColour (const int x, const int y, Colour colour)
 }
 
 //==============================================================================
-void Image::clear (const Rectangle<int>& area, Colour colourToClearTo)
+void Image::clear (const Rectangle<int>& area, Color colorToClearTo)
 {
     if (image != nullptr)
     {
         const ScopedPointer<LowLevelGraphicsContext> g (image->createLowLevelContext());
-        g->setFill (colourToClearTo);
+        g->setFill (colorToClearTo);
         g->fillRect (area, true);
     }
 }
 
 //==============================================================================
-Colour Image::getPixelAt (const int x, const int y) const
+Color Image::getPixelAt (const int x, const int y) const
 {
     if (isPositiveAndBelow (x, getWidth()) && isPositiveAndBelow (y, getHeight()))
     {
         const BitmapData srcData (*this, x, y, 1, 1);
-        return srcData.getPixelColour (0, 0);
+        return srcData.getPixelColor (0, 0);
     }
 
-    return Colour();
+    return Color();
 }
 
-void Image::setPixelAt (const int x, const int y, Colour colour)
+void Image::setPixelAt (const int x, const int y, Color color)
 {
     if (isPositiveAndBelow (x, getWidth()) && isPositiveAndBelow (y, getHeight()))
     {
         const BitmapData destData (*this, x, y, 1, 1, BitmapData::writeOnly);
-        destData.setPixelColour (0, 0, colour);
+        destData.setPixelColor (0, 0, color);
     }
 }
 

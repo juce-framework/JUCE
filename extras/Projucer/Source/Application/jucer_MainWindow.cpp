@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -34,8 +34,8 @@
 //==============================================================================
 MainWindow::MainWindow()
     : DocumentWindow (ProjucerApplication::getApp().getApplicationName(),
-                      ProjucerApplication::getApp().lookAndFeel.getCurrentColourScheme()
-                                                   .getUIColour (LookAndFeel_V4::ColourScheme::UIColour::windowBackground),
+                      ProjucerApplication::getApp().lookAndFeel.getCurrentColorScheme()
+                                                   .getUIColor (LookAndFeel_V4::ColorScheme::UIColor::windowBackground),
                       DocumentWindow::allButtons,
                       false)
 {
@@ -48,7 +48,7 @@ MainWindow::MainWindow()
     createProjectContentCompIfNeeded();
 
     setResizable (true, false);
-    centreWithSize (800, 600);
+    centerWithSize (800, 600);
 
     ApplicationCommandManager& commandManager = ProjucerApplication::getCommandManager();
 
@@ -71,7 +71,7 @@ MainWindow::MainWindow()
     // don't want the window to take focus when the title-bar is clicked..
     setWantsKeyboardFocus (false);
 
-    getLookAndFeel().setColour (ColourSelector::backgroundColourId, Colours::transparentBlack);
+    getLookAndFeel().setColor (ColorSelector::backgroundColorId, Colors::transparentBlack);
 
     projectNameValue.addListener (this);
 
@@ -510,7 +510,7 @@ void MainWindow::showStartPage()
 
     setContentOwned (createNewProjectWizardComponent(), true);
 
-    centreWithSize (900, 630);
+    centerWithSize (900, 630);
     setVisible (true);
     addToDesktop();
 
@@ -803,8 +803,8 @@ void MainWindowList::avoidSuperimposedWindows (MainWindow* const mw)
         {
             int dx = 40, dy = 30;
 
-            if (b1.getCentreX() >= mw->getScreenBounds().getCentreX())   dx = -dx;
-            if (b1.getCentreY() >= mw->getScreenBounds().getCentreY())   dy = -dy;
+            if (b1.getCenterX() >= mw->getScreenBounds().getCenterX())   dx = -dx;
+            if (b1.getCenterY() >= mw->getScreenBounds().getCenterY())   dy = -dy;
 
             mw->setBounds (b1.translated (dx, dy));
         }

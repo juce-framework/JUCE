@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -35,8 +35,8 @@ class MainHostWindow::PluginListWindow  : public DocumentWindow
 public:
     PluginListWindow (MainHostWindow& mw, AudioPluginFormatManager& pluginFormatManager)
         : DocumentWindow ("Available Plugins",
-                          LookAndFeel::getDefaultLookAndFeel().findColour (ResizableWindow::backgroundColourId),
-                          DocumentWindow::minimiseButton | DocumentWindow::closeButton),
+                          LookAndFeel::getDefaultLookAndFeel().findColor (ResizableWindow::backgroundColorId),
+                          DocumentWindow::minimizeButton | DocumentWindow::closeButton),
           owner (mw)
     {
         auto deadMansPedalFile = getAppProperties().getUserSettings()
@@ -75,7 +75,7 @@ private:
 //==============================================================================
 MainHostWindow::MainHostWindow()
     : DocumentWindow (JUCEApplication::getInstance()->getApplicationName(),
-                      LookAndFeel::getDefaultLookAndFeel().findColour (ResizableWindow::backgroundColourId),
+                      LookAndFeel::getDefaultLookAndFeel().findColor (ResizableWindow::backgroundColorId),
                       DocumentWindow::allButtons)
 {
     formatManager.addDefaultFormats();
@@ -84,11 +84,11 @@ MainHostWindow::MainHostWindow()
     ScopedPointer<XmlElement> savedAudioState (getAppProperties().getUserSettings()
                                                    ->getXmlValue ("audioDeviceState"));
 
-    deviceManager.initialise (256, 256, savedAudioState, true);
+    deviceManager.initialize (256, 256, savedAudioState, true);
 
     setResizable (true, false);
     setResizeLimits (500, 400, 10000, 10000);
-    centreWithSize (800, 600);
+    centerWithSize (800, 600);
 
     graphHolder = new GraphDocumentComponent (formatManager, deviceManager);
 
@@ -530,8 +530,8 @@ void MainHostWindow::showAudioSettings()
     DialogWindow::LaunchOptions o;
     o.content.setNonOwned (&audioSettingsComp);
     o.dialogTitle                   = "Audio Settings";
-    o.componentToCentreAround       = this;
-    o.dialogBackgroundColour        = getLookAndFeel().findColour (ResizableWindow::backgroundColourId);
+    o.componentToCenterAround       = this;
+    o.dialogBackgroundColor        = getLookAndFeel().findColor (ResizableWindow::backgroundColorId);
     o.escapeKeyTriggersCloseButton  = true;
     o.useNativeTitleBar             = false;
     o.resizable                     = false;

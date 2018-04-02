@@ -27,7 +27,7 @@
  version:          1.0.0
  vendor:           juce
  website:          http://juce.com
- description:      AUv3 synthesiser audio plugin.
+ description:      AUv3 synthesizer audio plugin.
 
  dependencies:     juce_audio_basics, juce_audio_devices, juce_audio_formats,
                    juce_audio_plugin_client, juce_audio_processors,
@@ -55,26 +55,26 @@ public:
     //==============================================================================
     MaterialLookAndFeel()
     {
-        setColour (ResizableWindow::backgroundColourId, windowBackgroundColour);
-        setColour (TextButton::buttonOnColourId,        brightButtonColour);
-        setColour (TextButton::buttonColourId,          disabledButtonColour);
+        setColor (ResizableWindow::backgroundColorId, windowBackgroundColor);
+        setColor (TextButton::buttonOnColorId,        brightButtonColor);
+        setColor (TextButton::buttonColorId,          disabledButtonColor);
     }
 
     //==============================================================================
     void drawButtonBackground (Graphics& g,
                                Button& button,
-                               const Colour& /*backgroundColour*/,
+                               const Color& /*backgroundColor*/,
                                bool /*isMouseOverButton*/,
                                bool isButtonDown) override
     {
         auto buttonRect = button.getLocalBounds().toFloat();
 
         if (isButtonDown)
-            g.setColour (brightButtonColour.withAlpha (0.7f));
+            g.setColor (brightButtonColor.withAlpha (0.7f));
         else if (! button.isEnabled())
-            g.setColour (disabledButtonColour);
+            g.setColor (disabledButtonColor);
         else
-            g.setColour (brightButtonColour);
+            g.setColor (brightButtonColor);
 
         g.fillRoundedRectangle (buttonRect, 5.0f);
     }
@@ -88,14 +88,14 @@ public:
         g.setFont (font);
 
         if (button.isEnabled())
-            g.setColour (Colours::white);
+            g.setColor (Colors::white);
         else
-            g.setColour (backgroundColour);
+            g.setColor (backgroundColor);
 
         g.drawFittedText (button.getButtonText(), 0, 0,
                           button.getWidth(),
                           button.getHeight(),
-                          Justification::centred, 2);
+                          Justification::centered, 2);
     }
 
     //==============================================================================
@@ -106,34 +106,34 @@ public:
         ignoreUnused (style, minSliderPos, maxSliderPos);
 
         auto r = Rectangle<int> (x + haloRadius, y, width - (haloRadius * 2), height);
-        auto backgroundBar = r.withSizeKeepingCentre(r.getWidth(), 2);
+        auto backgroundBar = r.withSizeKeepingCenter(r.getWidth(), 2);
 
         sliderPos = (sliderPos - minSliderPos) / static_cast<float> (width);
 
         auto knobPos = static_cast<int> (sliderPos * r.getWidth());
 
-        g.setColour (sliderActivePart);
+        g.setColor (sliderActivePart);
         g.fillRect (backgroundBar.removeFromLeft (knobPos));
 
-        g.setColour (sliderInactivePart);
+        g.setColor (sliderInactivePart);
         g.fillRect (backgroundBar);
 
         if (slider.isMouseOverOrDragging())
         {
             auto haloBounds = r.withTrimmedLeft (knobPos - haloRadius)
                                .withWidth (haloRadius * 2)
-                               .withSizeKeepingCentre (haloRadius * 2, haloRadius * 2);
+                               .withSizeKeepingCenter (haloRadius * 2, haloRadius * 2);
 
-            g.setColour (sliderActivePart.withAlpha (0.5f));
+            g.setColor (sliderActivePart.withAlpha (0.5f));
             g.fillEllipse (haloBounds.toFloat());
         }
 
         auto knobRadius = slider.isMouseOverOrDragging() ? knobActiveRadius : knobInActiveRadius;
         auto knobBounds = r.withTrimmedLeft (knobPos - knobRadius)
                            .withWidth (knobRadius * 2)
-                           .withSizeKeepingCentre (knobRadius * 2, knobRadius * 2);
+                           .withSizeKeepingCenter (knobRadius * 2, knobRadius * 2);
 
-        g.setColour (sliderActivePart);
+        g.setColor (sliderActivePart);
         g.fillEllipse (knobBounds.toFloat());
     }
 
@@ -164,12 +164,12 @@ public:
     };
 
     //==============================================================================
-    const Colour windowBackgroundColour = Colour (0xff262328);
-    const Colour backgroundColour       = Colour (0xff4d4d4d);
-    const Colour brightButtonColour     = Colour (0xff80cbc4);
-    const Colour disabledButtonColour   = Colour (0xffe4e4e4);
-    const Colour sliderInactivePart     = Colour (0xff545d62);
-    const Colour sliderActivePart       = Colour (0xff80cbc4);
+    const Color windowBackgroundColor = Color (0xff262328);
+    const Color backgroundColor       = Color (0xff4d4d4d);
+    const Color brightButtonColor     = Color (0xff80cbc4);
+    const Color disabledButtonColor   = Color (0xffe4e4e4);
+    const Color sliderInactivePart     = Color (0xff545d62);
+    const Color sliderActivePart       = Color (0xff80cbc4);
 };
 
 //==============================================================================
@@ -202,8 +202,8 @@ public:
             proAudioIcon.setPath (proAudioPath);
             addAndMakeVisible (proAudioIcon);
 
-            auto proAudioIconColour = findColour (TextButton::buttonOnColourId);
-            proAudioIcon.setFill (FillType (proAudioIconColour));
+            auto proAudioIconColor = findColor (TextButton::buttonOnColorId);
+            proAudioIcon.setFill (FillType (proAudioIconColor));
         }
 
         setSize (600, 400);
@@ -213,7 +213,7 @@ public:
     //==============================================================================
     void paint (Graphics& g) override
     {
-        g.fillAll (findColour (ResizableWindow::backgroundColourId));
+        g.fillAll (findColor (ResizableWindow::backgroundColorId));
     }
 
     void resized() override
@@ -223,7 +223,7 @@ public:
         auto guiElementAreaHeight = r.getHeight() / 3;
 
         proAudioIcon.setTransformToFit (r.removeFromLeft (proportionOfWidth (0.25))
-                                         .withSizeKeepingCentre (guiElementAreaHeight, guiElementAreaHeight)
+                                         .withSizeKeepingCenter (guiElementAreaHeight, guiElementAreaHeight)
                                          .toFloat(),
                                         RectanglePlacement::fillDestination);
 
@@ -232,8 +232,8 @@ public:
 
         auto buttonHeight = guiElementAreaHeight - margin;
 
-        recordButton  .setBounds (r.removeFromTop (guiElementAreaHeight).withSizeKeepingCentre (r.getWidth(), buttonHeight));
-        roomSizeSlider.setBounds (r.removeFromTop (guiElementAreaHeight).withSizeKeepingCentre (r.getWidth(), buttonHeight));
+        recordButton  .setBounds (r.removeFromTop (guiElementAreaHeight).withSizeKeepingCenter (r.getWidth(), buttonHeight));
+        roomSizeSlider.setBounds (r.removeFromTop (guiElementAreaHeight).withSizeKeepingCenter (r.getWidth(), buttonHeight));
     }
 
     //==============================================================================
@@ -419,7 +419,7 @@ private:
 
         BigInteger midiNotes;
         midiNotes.setRange (0, 126, true);
-        SynthesiserSound::Ptr newSound = new SamplerSound ("Voice", *formatReader, midiNotes, 0x40, 0.0, 0.0, 10.0);
+        SynthesizerSound::Ptr newSound = new SamplerSound ("Voice", *formatReader, midiNotes, 0x40, 0.0, 0.0, 10.0);
         synth.removeSound (0);
         sound = newSound;
         synth.addSound (sound);
@@ -453,8 +453,8 @@ private:
     AudioBuffer<float> currentRecording;
 
     Reverb reverb;
-    Synthesiser synth;
-    SynthesiserSound::Ptr sound;
+    Synthesizer synth;
+    SynthesizerSound::Ptr sound;
 
     AudioParameterBool* isRecordingParam;
     AudioParameterFloat* roomSizeParam;

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -129,7 +129,7 @@ private:
 
 //==============================================================================
 PaintElementPath::PaintElementPath (PaintRoutine* pr)
-    : ColouredElement (pr, "Path", true, true),
+    : ColoredElement (pr, "Path", true, true),
       nonZeroWinding (true)
 {
 }
@@ -267,7 +267,7 @@ void PaintElementPath::drawExtraEditorGraphics (Graphics& g, const Rectangle<int
         {
             if (owner->getSelectedPoints().isSelected (p))
             {
-                g.setColour (Colours::red);
+                g.setColor (Colors::red);
                 Point<float> p1, p2;
 
                 if (numPoints > 2)
@@ -298,7 +298,7 @@ void PaintElementPath::drawExtraEditorGraphics (Graphics& g, const Rectangle<int
 
 void PaintElementPath::resized()
 {
-    ColouredElement::resized();
+    ColoredElement::resized();
 }
 
 void PaintElementPath::parentSizeChanged()
@@ -317,19 +317,19 @@ void PaintElementPath::mouseDown (const MouseEvent& e)
     if (points [mouseDownOnSegment] != nullptr)
         mouseDownSelectSegmentStatus = owner->getSelectedPoints().addToSelectionOnMouseDown (points [mouseDownOnSegment], e.mods);
     else
-        ColouredElement::mouseDown (e);
+        ColoredElement::mouseDown (e);
 }
 
 void PaintElementPath::mouseDrag (const MouseEvent& e)
 {
     if (mouseDownOnSegment < 0)
-        ColouredElement::mouseDrag (e);
+        ColoredElement::mouseDrag (e);
 }
 
 void PaintElementPath::mouseUp (const MouseEvent& e)
 {
     if (points [mouseDownOnSegment] == 0)
-        ColouredElement::mouseUp (e);
+        ColoredElement::mouseUp (e);
     else
         owner->getSelectedPoints().addToSelectionOnMouseUp (points [mouseDownOnSegment],
                                                             e.mods, false, mouseDownSelectSegmentStatus);
@@ -338,7 +338,7 @@ void PaintElementPath::mouseUp (const MouseEvent& e)
 //==============================================================================
 void PaintElementPath::changed()
 {
-    ColouredElement::changed();
+    ColoredElement::changed();
     lastPathBounds = Rectangle<int>();
 }
 
@@ -355,7 +355,7 @@ void PaintElementPath::getEditableProperties (Array <PropertyComponent*>& props,
         return;
 
     props.add (new PathWindingModeProperty (this));
-    getColourSpecificProperties (props);
+    getColorSpecificProperties (props);
 }
 
 //==============================================================================
@@ -486,7 +486,7 @@ XmlElement* PaintElementPath::createXml() const
 {
     XmlElement* e = new XmlElement (getTagName());
     position.applyToXml (*e);
-    addColourAttributes (e);
+    addColorAttributes (e);
     e->setAttribute ("nonZeroWinding", nonZeroWinding);
     e->addTextElement (pathToString());
 
@@ -498,7 +498,7 @@ bool PaintElementPath::loadFromXml (const XmlElement& xml)
     if (xml.hasTagName (getTagName()))
     {
         position.restoreFromXml (xml, position);
-        loadColourAttributes (xml);
+        loadColorAttributes (xml);
         nonZeroWinding = xml.getBoolAttribute ("nonZeroWinding", true);
 
         restorePathFromString (xml.getAllSubText().trim());
@@ -513,7 +513,7 @@ bool PaintElementPath::loadFromXml (const XmlElement& xml)
 //==============================================================================
 void PaintElementPath::createSiblingComponents()
 {
-    ColouredElement::createSiblingComponents();
+    ColoredElement::createSiblingComponents();
 
     for (int i = 0; i < points.size(); ++i)
     {
@@ -1546,7 +1546,7 @@ void PathPointComponent::updatePosition()
     double x, y;
     path->getPoint (index, pointNumber, x, y, area);
 
-    setCentrePosition (roundToInt (x),
+    setCenterPosition (roundToInt (x),
                        roundToInt (y));
 }
 
@@ -1557,18 +1557,18 @@ void PathPointComponent::showPopupMenu()
 void PathPointComponent::paint (Graphics& g)
 {
     if (isMouseOverOrDragging())
-        g.fillAll (Colours::red);
+        g.fillAll (Colors::red);
 
     if (selected)
     {
-        g.setColour (Colours::red);
+        g.setColor (Colors::red);
         g.drawRect (getLocalBounds());
     }
 
-    g.setColour (Colours::white);
+    g.setColor (Colors::white);
     g.fillRect (getWidth() / 2 - 3, getHeight() / 2 - 3, 7, 7);
 
-    g.setColour (Colours::black);
+    g.setColor (Colors::black);
 
     if (pointNumber < path->getPoint (index)->getNumPoints() - 1)
         g.drawRect (getWidth() / 2 - 2, getHeight() / 2 - 2, 5, 5);

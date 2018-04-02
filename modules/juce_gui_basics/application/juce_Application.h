@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -29,7 +29,7 @@ namespace juce
 
 //==============================================================================
 /**
-    An instance of this class is used to specify initialisation and shutdown
+    An instance of this class is used to specify initialization and shutdown
     code for the application.
 
     Any application that wants to run an event loop must declare a subclass of
@@ -54,7 +54,7 @@ namespace juce
             MyJUCEApp()  {}
             ~MyJUCEApp() {}
 
-            void initialise (const String& commandLine) override
+            void initialize (const String& commandLine) override
             {
                 myMainWindow = new MyApplicationWindow();
                 myMainWindow->setBounds (100, 100, 400, 500);
@@ -96,7 +96,7 @@ public:
     /** Constructs a JUCE app object.
 
         If subclasses implement a constructor or destructor, they shouldn't call any
-        JUCE code in there - put your startup/shutdown code in initialise() and
+        JUCE code in there - put your startup/shutdown code in initialize() and
         shutdown() instead.
     */
     JUCEApplication();
@@ -104,7 +104,7 @@ public:
     /** Destructor.
 
         If subclasses implement a constructor or destructor, they shouldn't call any
-        JUCE code in there - put your startup/shutdown code in initialise() and
+        JUCE code in there - put your startup/shutdown code in initialize() and
         shutdown() instead.
     */
     ~JUCEApplication();
@@ -142,7 +142,7 @@ public:
     /** Called when the operating system is trying to close the application.
 
         The default implementation of this method is to call quit(), but it may
-        be overloaded to ignore the request or do some other special behaviour
+        be overloaded to ignore the request or do some other special behavior
         instead. For example, you might want to offer the user the chance to save
         their changes before quitting, and give them the chance to cancel.
 
@@ -186,7 +186,7 @@ public:
     bool perform (const InvocationInfo&) override;
 
 private:
-    bool initialiseApp() override;
+    bool initializeApp() override;
 
     JUCE_DECLARE_NON_COPYABLE (JUCEApplication)
 };

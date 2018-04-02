@@ -54,7 +54,7 @@ public:
 
         /** Subclasses should implement this method and use it as their opportunity to
             examine the given topology and modify it. For example they may want to substitute
-            one or more blocks for more specialised, aggregated Block objects.
+            one or more blocks for more specialized, aggregated Block objects.
         */
         virtual void transformTopology (BlockTopology&) = 0;
     };

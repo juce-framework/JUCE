@@ -55,11 +55,11 @@ public:
         addAndMakeVisible (helloWorldLabel);
 
         helloWorldLabel.setFont (Font (40.00f, Font::bold));
-        helloWorldLabel.setJustificationType (Justification::centred);
+        helloWorldLabel.setJustificationType (Justification::centered);
         helloWorldLabel.setEditable (false, false, false);
-        helloWorldLabel.setColour (Label::textColourId, Colours::black);
-        helloWorldLabel.setColour (TextEditor::textColourId, Colours::black);
-        helloWorldLabel.setColour (TextEditor::backgroundColourId, Colour (0x00000000));
+        helloWorldLabel.setColor (Label::textColorId, Colors::black);
+        helloWorldLabel.setColor (TextEditor::textColorId, Colors::black);
+        helloWorldLabel.setColor (TextEditor::backgroundColorId, Color (0x00000000));
 
         addAndMakeVisible (quitButton);
         quitButton.onClick = [this] { JUCEApplication::quit(); };
@@ -70,12 +70,12 @@ public:
     //==============================================================================
     void paint (Graphics& g) override
     {
-        g.fillAll (Colour (0xffc1d0ff));
+        g.fillAll (Color (0xffc1d0ff));
 
-        g.setColour (Colours::white);
+        g.setColor (Colors::white);
         g.fillPath (internalPath);
 
-        g.setColour (Colour (0xff6f6f6f));
+        g.setColor (Color (0xff6f6f6f));
         g.strokePath (internalPath, PathStrokeType (5.200f));
     }
 

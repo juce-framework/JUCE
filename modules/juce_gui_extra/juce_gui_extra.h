@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -37,7 +37,7 @@
   vendor:           juce
   version:          5.3.0
   name:             JUCE extended GUI classes
-  description:      Miscellaneous GUI classes for specialised tasks.
+  description:      Miscellaneous GUI classes for specialized tasks.
   website:          http://www.juce.com/juce
   license:          GPL/Commercial
 
@@ -89,7 +89,7 @@
 #include "embedding/juce_XEmbedComponent.h"
 #include "misc/juce_AppleRemote.h"
 #include "misc/juce_BubbleMessageComponent.h"
-#include "misc/juce_ColourSelector.h"
+#include "misc/juce_ColorSelector.h"
 #include "misc/juce_KeyMappingEditorComponent.h"
 #include "misc/juce_PreferencesPanel.h"
 #include "misc/juce_PushNotifications.h"

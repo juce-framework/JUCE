@@ -9,7 +9,7 @@ Version 5.3.0
 
 Change
 ------
-The JUCE examples have been cleaned up, modernised and converted into 
+The JUCE examples have been cleaned up, modernized and converted into 
 PIPs (Projucer Instant Projects). The JUCE Demo has been removed and replaced by the 
 DemoRunner application and larger projects such as the Audio Plugin Host and the 
 Network Graphics Demo have been moved into the extras directory.
@@ -36,7 +36,7 @@ Rationale
 ---------
 The JUCE examples had inconsistent naming, coding styles and the projects and build products
 took up a large amount of space in the repository. Replacing them with PIPs reduces the file size
-and allows us to categorise the examples better, as well as cleaning up the code.
+and allows us to categorize the examples better, as well as cleaning up the code.
 
 
 Change
@@ -106,7 +106,7 @@ Possible Issues
 ---------------
 The most significant changes have occurred in the MPEZoneLayout classes and
 programs using the higher level MPE classes such as MPEInstrument,
-MPESynthesiser, MPESynthesiserBase and MPESynthesiserVoice should be
+MPESynthesizer, MPESynthesizerBase and MPESynthesizerVoice should be
 unaffected.
 
 Previously, any MIDI channel from 1 - 15 could be selected to be the master
@@ -153,7 +153,7 @@ Use Process::hide().
 
 Rationale
 ---------
-The old behaviour JUCEApplicationBase::quit() was confusing JUCE code, as a new
+The old behavior JUCEApplicationBase::quit() was confusing JUCE code, as a new
 instance of JUCE app was attempted to be created, while the older instance was
 still running in background. This would result in assertions when starting a
 second instance.
@@ -327,11 +327,11 @@ Rationale
 ---------
 The old system for presenting plug-in parameters to a host as either continuous
 or discrete is inconsistent between plug-in types and lacks sufficient
-flexibility. This change harmonises the behaviour and allows individual
+flexibility. This change harmonizes the behavior and allows individual
 parameters to be marked as continuous or discrete. If AudioUnit and AudioUnit
 v3 parameters are not marked as high precision then hosts like Logic Pro only
 offer a limited number of parameter values, which again produces different
-behaviour for different plug-in types.
+behavior for different plug-in types.
 
 
 Change
@@ -373,7 +373,7 @@ Rationale
 Letting things implicitly convert to bool to produce a String opens the door to
 all kinds of nasty type conversion edge cases. Furthermore, before this change,
 MacOS would automatically convert bools to ints but this wouldn't occur on
-different platform. Now the behaviour is consistent across all operating
+different platform. Now the behavior is consistent across all operating
 systems supported by JUCE.
 
 
@@ -391,11 +391,11 @@ update their method signature.
 Workaround
 ----------
 Your custom DynamicObject class can choose to ignore the additional parameter
-if you don't wish to support this behaviour.
+if you don't wish to support this behavior.
 
 Rationale
 ---------
-When serialising the results of calculations to JSON the rounding of floating
+When serializing the results of calculations to JSON the rounding of floating
 point numbers can result in numbers with 17 significant figures where only a
 few are required. This change to DynamicObject is required to support
 truncating those numbers.
@@ -476,7 +476,7 @@ insecure connections.
 
 Rationale
 ---------
-The previous behaviour resulted in network connections on Windows having all
+The previous behavior resulted in network connections on Windows having all
 the HTTPS security features disabled, exposing users to network attacks. HTTPS
 connections on Windows are now secure and will fail when connecting to an
 insecure web address.
@@ -490,7 +490,7 @@ wrapped in JUCE's Atomic class or not.
 Possible Issues
 ---------------
 Any code using pointer arithmetic on Atomic<T*> will now have a different
-result leading to undefined behaviour or crashes.
+result leading to undefined behavior or crashes.
 
 Workaround
 ----------
@@ -509,7 +509,7 @@ jassert (++a == ++b);
 
 Pointer a in the above code would be advanced by sizeof(int) whereas the JUCE's
 Atomic always advances it's underlying pointer by a single byte. The same is
-true for operator+=/operator-= and operator--. The difference in behaviour is
+true for operator+=/operator-= and operator--. The difference in behavior is
 confusing and unintuitive. Furthermore, this aligns JUCE's Atomic type with
 std::atomic.
 
@@ -640,7 +640,7 @@ bypass control to be a parameter - so JUCE automatically creates this parameter
 for you in the VST3 backend). This causes subtle problems if a parameter is
 added to an update of an already published plug-in. The new parameter’s id
 would be identical to the id of the bypass parameter in old versions of your
-plug-in, causing seemingly random plug-in bypass behaviour when user’s upgrade
+plug-in, causing seemingly random plug-in bypass behavior when user’s upgrade
 their plug-in.
 
 Most plug-in backends differentiate between a parameter’s id an index, so this

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -43,7 +43,7 @@ namespace IIR
 
         If you need a lowpass, bandpass or highpass filter with fast modulation of
         its cutoff frequency, you might use the class StateVariableFilter instead,
-        which is designed to prevent artefacts at parameter changes, instead of the
+        which is designed to prevent artifacts at parameter changes, instead of the
         class Filter.
 
         @see Filter::Coefficients, FilterAudioSource, StateVariableFilter
@@ -243,14 +243,14 @@ namespace IIR
         static Ptr makeHighShelf (double sampleRate, NumericType cutOffFrequency,
                                   NumericType Q, NumericType gainFactor);
 
-        /** Returns the coefficients for a peak filter centred around a
+        /** Returns the coefficients for a peak filter centered around a
             given frequency, with a variable Q and gain.
 
-            The gain is a scale factor that the centre frequencies are multiplied by, so
-            values greater than 1.0 will boost the centre frequencies, values less than
+            The gain is a scale factor that the center frequencies are multiplied by, so
+            values greater than 1.0 will boost the center frequencies, values less than
             1.0 will attenuate them.
         */
-        static Ptr makePeakFilter (double sampleRate, NumericType centreFrequency,
+        static Ptr makePeakFilter (double sampleRate, NumericType centerFrequency,
                                    NumericType Q, NumericType gainFactor);
 
         //==============================================================================

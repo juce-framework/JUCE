@@ -1733,8 +1733,8 @@ FLAC_API FLAC__bool FLAC__stream_encoder_set_apodization(FLAC__StreamEncoder *en
 				}
 			}
 		}
-		else if(n==5  && 0 == strncmp("welch"        , specification, n))
-			encoder->protected_->apodizations[encoder->protected_->num_apodizations++].type = FLAC__APODIZATION_WELCH;
+		else if(n==5  && 0 == strncmp("welsh"        , specification, n))
+			encoder->protected_->apodizations[encoder->protected_->num_apodizations++].type = FLAC__APODIZATION_WELSH;
 		if (encoder->protected_->num_apodizations == 32)
 			break;
 		if (s)
@@ -2518,8 +2518,8 @@ FLAC__bool resize_buffers_(FLAC__StreamEncoder *encoder, unsigned new_blocksize)
 				case FLAC__APODIZATION_PUNCHOUT_TUKEY:
 					FLAC__window_punchout_tukey(encoder->private_->window[i], new_blocksize, encoder->protected_->apodizations[i].parameters.multiple_tukey.p, encoder->protected_->apodizations[i].parameters.multiple_tukey.start, encoder->protected_->apodizations[i].parameters.multiple_tukey.end);
 					break;
-				case FLAC__APODIZATION_WELCH:
-					FLAC__window_welch(encoder->private_->window[i], new_blocksize);
+				case FLAC__APODIZATION_WELSH:
+					FLAC__window_welsh(encoder->private_->window[i], new_blocksize);
 					break;
 				default:
 					FLAC__ASSERT(0);

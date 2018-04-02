@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -63,18 +63,18 @@ public:
     void changeWidthToFitText();
 
     //==============================================================================
-    /** A set of colour IDs to use to change the colour of various aspects of the button.
+    /** A set of color IDs to use to change the color of various aspects of the button.
 
-        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        These constants can be used either via the Component::setColor(), or LookAndFeel::setColor()
         methods.
 
-        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+        @see Component::setColor, Component::findColor, LookAndFeel::setColor, LookAndFeel::findColor
     */
-    enum ColourIds
+    enum ColorIds
     {
-        textColourId            = 0x1006501,  /**< The colour to use for the button's text. */
-        tickColourId            = 0x1006502,  /**< The colour to use for the tick mark. */
-        tickDisabledColourId    = 0x1006503   /**< The colour to use for the disabled tick mark. */
+        textColorId            = 0x1006501,  /**< The color to use for the button's text. */
+        tickColorId            = 0x1006502,  /**< The color to use for the tick mark. */
+        tickDisabledColorId    = 0x1006503   /**< The color to use for the disabled tick mark. */
     };
 
 protected:
@@ -82,7 +82,7 @@ protected:
     /** @internal */
     void paintButton (Graphics&, bool isMouseOverButton, bool isButtonDown) override;
     /** @internal */
-    void colourChanged() override;
+    void colorChanged() override;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToggleButton)

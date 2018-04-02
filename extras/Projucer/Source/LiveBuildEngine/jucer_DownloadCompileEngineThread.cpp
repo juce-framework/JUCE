@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -41,7 +41,7 @@ bool DownloadCompileEngineThread::downloadAndInstall()
         return true;
     }
 
-    if (d.cancelledByUser)
+    if (d.canceledByUser)
         return false;
 
     return withError (d.result.getErrorMessage());
@@ -49,13 +49,13 @@ bool DownloadCompileEngineThread::downloadAndInstall()
 
 DownloadCompileEngineThread::DownloadCompileEngineThread()
     : ThreadWithProgressWindow ("Downloading live-build engine", true, true),
-      result (Result::ok()), cancelledByUser (false)
+      result (Result::ok()), canceledByUser (false)
 {
 }
 
 void DownloadCompileEngineThread::threadComplete (bool userPressedCancel)
 {
-    cancelledByUser = userPressedCancel;
+    canceledByUser = userPressedCancel;
 }
 
 void DownloadCompileEngineThread::run()

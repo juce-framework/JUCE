@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -159,18 +159,18 @@ void BurgerMenuComponent::paintListBoxItem (int rowIndex, Graphics& g, int w, in
     auto row = (rowIndex < rows.size() ? rows.getReference (rowIndex)
                                        : Row { true, 0, {} });
 
-    g.fillAll (findColour (PopupMenu::backgroundColourId));
+    g.fillAll (findColor (PopupMenu::backgroundColorId));
 
     if (row.isMenuHeader)
     {
         lf.drawPopupMenuSectionHeader (g, r.reduced (20, 0), row.item.text);
-        g.setColour (Colours::grey);
+        g.setColor (Colors::gray);
         g.fillRect (r.withHeight (1));
     }
     else
     {
         auto& item = row.item;
-        auto* colour = item.colour != Colour() ? &item.colour : nullptr;
+        auto* color = item.color != Color() ? &item.color : nullptr;
 
         if (item.customComponent == nullptr)
             lf.drawPopupMenuItem (g, r.reduced (20, 0),
@@ -182,7 +182,7 @@ void BurgerMenuComponent::paintListBoxItem (int rowIndex, Graphics& g, int w, in
                                   item.text,
                                   item.shortcutKeyDescription,
                                   item.image.get(),
-                                  colour);
+                                  color);
     }
 }
 

@@ -87,10 +87,10 @@ struct BurgerMenuHeader  : public Component
 private:
     void paint (Graphics& g) override
     {
-        auto titleBarBackgroundColour = getLookAndFeel().findColour (ResizableWindow::backgroundColourId)
+        auto titleBarBackgroundColor = getLookAndFeel().findColor (ResizableWindow::backgroundColorId)
                                                         .darker();
 
-        g.setColour (titleBarBackgroundColour);
+        g.setColor (titleBarBackgroundColor);
         g.fillRect (getLocalBounds());
     }
 
@@ -98,7 +98,7 @@ private:
     {
         auto r = getLocalBounds();
 
-        burgerButton.setBounds (r.removeFromRight (40).withSizeKeepingCentre (20, 20));
+        burgerButton.setBounds (r.removeFromRight (40).withSizeKeepingCenter (20, 20));
 
         titleLabel.setFont (Font (getHeight() * 0.5f, Font::plain));
         titleLabel.setBounds (r);
@@ -112,7 +112,7 @@ private:
     SidePanel& sidePanel;
 
     Label titleLabel         { "titleLabel", "JUCE Demo" };
-    ShapeButton burgerButton { "burgerButton", Colours::lightgrey, Colours::lightgrey, Colours::white };
+    ShapeButton burgerButton { "burgerButton", Colors::lightgray, Colors::lightgray, Colors::white };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BurgerMenuHeader)
 };
@@ -130,12 +130,12 @@ public:
         menuPositionInsideWindow = 1,
         menuPositionGlobalMenuBar,
         menuPositionBurgerMenu,
-        outerColourRed,
-        outerColourGreen,
-        outerColourBlue,
-        innerColourRed,
-        innerColourGreen,
-        innerColourBlue
+        outerColorRed,
+        outerColorGreen,
+        outerColorBlue,
+        innerColorRed,
+        innerColorGreen,
+        innerColorBlue
     };
 
     //==============================================================================
@@ -192,7 +192,7 @@ public:
     //==============================================================================
     StringArray getMenuBarNames() override
     {
-        return { "Menu Position", "Outer Colour", "Inner Colour" };
+        return { "Menu Position", "Outer Color", "Inner Color" };
     }
 
     PopupMenu getMenuForIndex (int menuIndex, const String& /*menuName*/) override
@@ -209,15 +209,15 @@ public:
         }
         else if (menuIndex == 1)
         {
-            menu.addCommandItem (&commandManager, CommandIDs::outerColourRed);
-            menu.addCommandItem (&commandManager, CommandIDs::outerColourGreen);
-            menu.addCommandItem (&commandManager, CommandIDs::outerColourBlue);
+            menu.addCommandItem (&commandManager, CommandIDs::outerColorRed);
+            menu.addCommandItem (&commandManager, CommandIDs::outerColorGreen);
+            menu.addCommandItem (&commandManager, CommandIDs::outerColorBlue);
         }
         else if (menuIndex == 2)
         {
-            menu.addCommandItem (&commandManager, CommandIDs::innerColourRed);
-            menu.addCommandItem (&commandManager, CommandIDs::innerColourGreen);
-            menu.addCommandItem (&commandManager, CommandIDs::innerColourBlue);
+            menu.addCommandItem (&commandManager, CommandIDs::innerColorRed);
+            menu.addCommandItem (&commandManager, CommandIDs::innerColorGreen);
+            menu.addCommandItem (&commandManager, CommandIDs::innerColorBlue);
         }
 
         return menu;
@@ -347,7 +347,7 @@ private:
 
         void paint (Graphics& g) override
         {
-            g.fillAll (currentColour);
+            g.fillAll (currentColor);
         }
 
         //==============================================================================
@@ -358,9 +358,9 @@ private:
 
         void getAllCommands (Array<CommandID>& c) override
         {
-            Array<CommandID> commands { CommandIDs::outerColourRed,
-                                        CommandIDs::outerColourGreen,
-                                        CommandIDs::outerColourBlue };
+            Array<CommandID> commands { CommandIDs::outerColorRed,
+                                        CommandIDs::outerColorGreen,
+                                        CommandIDs::outerColorBlue };
 
             c.addArray (commands);
         }
@@ -369,19 +369,19 @@ private:
         {
             switch (commandID)
             {
-                case CommandIDs::outerColourRed:
-                    result.setInfo ("Red", "Sets the outer colour to red", "Outer", 0);
-                    result.setTicked (currentColour == Colours::red);
+                case CommandIDs::outerColorRed:
+                    result.setInfo ("Red", "Sets the outer color to red", "Outer", 0);
+                    result.setTicked (currentColor == Colors::red);
                     result.addDefaultKeypress ('r', ModifierKeys::commandModifier);
                     break;
-                case CommandIDs::outerColourGreen:
-                    result.setInfo ("Green", "Sets the outer colour to green", "Outer", 0);
-                    result.setTicked (currentColour == Colours::green);
+                case CommandIDs::outerColorGreen:
+                    result.setInfo ("Green", "Sets the outer color to green", "Outer", 0);
+                    result.setTicked (currentColor == Colors::green);
                     result.addDefaultKeypress ('g', ModifierKeys::commandModifier);
                     break;
-                case CommandIDs::outerColourBlue:
-                    result.setInfo ("Blue", "Sets the outer colour to blue", "Outer", 0);
-                    result.setTicked (currentColour == Colours::blue);
+                case CommandIDs::outerColorBlue:
+                    result.setInfo ("Blue", "Sets the outer color to blue", "Outer", 0);
+                    result.setTicked (currentColor == Colors::blue);
                     result.addDefaultKeypress ('b', ModifierKeys::commandModifier);
                     break;
                 default:
@@ -393,14 +393,14 @@ private:
         {
             switch (info.commandID)
             {
-                case CommandIDs::outerColourRed:
-                    currentColour = Colours::red;
+                case CommandIDs::outerColorRed:
+                    currentColor = Colors::red;
                     break;
-                case CommandIDs::outerColourGreen:
-                    currentColour = Colours::green;
+                case CommandIDs::outerColorGreen:
+                    currentColor = Colors::green;
                     break;
-                case CommandIDs::outerColourBlue:
-                    currentColour = Colours::blue;
+                case CommandIDs::outerColorBlue:
+                    currentColor = Colors::blue;
                     break;
                 default:
                     return false;
@@ -427,7 +427,7 @@ private:
 
             void paint (Graphics& g) override
             {
-                g.fillAll (currentColour);
+                g.fillAll (currentColor);
             }
 
             //==============================================================================
@@ -439,9 +439,9 @@ private:
 
             void getAllCommands (Array<CommandID>& c) override
             {
-                Array<CommandID> commands { CommandIDs::innerColourRed,
-                                            CommandIDs::innerColourGreen,
-                                            CommandIDs::innerColourBlue };
+                Array<CommandID> commands { CommandIDs::innerColorRed,
+                                            CommandIDs::innerColorGreen,
+                                            CommandIDs::innerColorBlue };
 
                 c.addArray (commands);
             }
@@ -450,19 +450,19 @@ private:
             {
                 switch (commandID)
                 {
-                    case CommandIDs::innerColourRed:
-                        result.setInfo ("Red", "Sets the inner colour to red", "Inner", 0);
-                        result.setTicked (currentColour == Colours::red);
+                    case CommandIDs::innerColorRed:
+                        result.setInfo ("Red", "Sets the inner color to red", "Inner", 0);
+                        result.setTicked (currentColor == Colors::red);
                         result.addDefaultKeypress ('r', ModifierKeys::commandModifier | ModifierKeys::shiftModifier);
                         break;
-                    case CommandIDs::innerColourGreen:
-                        result.setInfo ("Green", "Sets the inner colour to green", "Inner", 0);
-                        result.setTicked (currentColour == Colours::green);
+                    case CommandIDs::innerColorGreen:
+                        result.setInfo ("Green", "Sets the inner color to green", "Inner", 0);
+                        result.setTicked (currentColor == Colors::green);
                         result.addDefaultKeypress ('g', ModifierKeys::commandModifier | ModifierKeys::shiftModifier);
                         break;
-                    case CommandIDs::innerColourBlue:
-                        result.setInfo ("Blue", "Sets the inner colour to blue", "Inner", 0);
-                        result.setTicked (currentColour == Colours::blue);
+                    case CommandIDs::innerColorBlue:
+                        result.setInfo ("Blue", "Sets the inner color to blue", "Inner", 0);
+                        result.setTicked (currentColor == Colors::blue);
                         result.addDefaultKeypress ('b', ModifierKeys::commandModifier | ModifierKeys::shiftModifier);
                         break;
                     default:
@@ -474,14 +474,14 @@ private:
             {
                 switch (info.commandID)
                 {
-                    case CommandIDs::innerColourRed:
-                        currentColour = Colours::red;
+                    case CommandIDs::innerColorRed:
+                        currentColor = Colors::red;
                         break;
-                    case CommandIDs::innerColourGreen:
-                        currentColour = Colours::green;
+                    case CommandIDs::innerColorGreen:
+                        currentColor = Colors::green;
                         break;
-                    case CommandIDs::innerColourBlue:
-                        currentColour = Colours::blue;
+                    case CommandIDs::innerColorBlue:
+                        currentColor = Colors::blue;
                         break;
                     default:
                         return false;
@@ -493,13 +493,13 @@ private:
 
             ApplicationCommandManager& commandManager;
 
-            Colour currentColour { Colours::blue };
+            Color currentColor { Colors::blue };
         };
 
         ApplicationCommandManager& commandManager;
         InnerCommandTarget innerCommandTarget;
 
-        Colour currentColour { Colours::red };
+        Color currentColor { Colors::red };
     };
 
     OuterCommandTarget outerCommandTarget { commandManager };

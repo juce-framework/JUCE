@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -69,7 +69,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (bounds.isEmpty() ? Colours::black.withAlpha (0.5f) : Colours::black);
+        g.fillAll (bounds.isEmpty() ? Colors::black.withAlpha (0.5f) : Colors::black);
     }
 
     void inputAttemptWhenModal() override           { close(); }
@@ -87,7 +87,7 @@ private:
             const int ph = getParentHeight();
 
             nativeSelectorComponent.setBounds (Rectangle<int> (pw, ph)
-                                                 .withSizeKeepingCentre (jmin (400, pw),
+                                                 .withSizeKeepingCenter (jmin (400, pw),
                                                                          jmin (450, ph - 40)));
         }
         else

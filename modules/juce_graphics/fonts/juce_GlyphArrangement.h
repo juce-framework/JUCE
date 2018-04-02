@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -190,7 +190,7 @@ public:
         exceeds the value set in maxLineWidth.
 
         Each line that is added will be laid out using the flags set in horizontalLayout, so
-        the lines can be left- or right-justified, or centred horizontally in the space
+        the lines can be left- or right-justified, or centered horizontally in the space
         between x and (x + maxLineWidth).
 
         The y coordinate is the position of the baseline of the first line of text - subsequent
@@ -205,7 +205,7 @@ public:
     /** Tries to fit some text within a given space.
 
         This does its best to make the given text readable within the specified rectangle,
-        so it useful for labelling things.
+        so it useful for labeling things.
 
         If the text is too big, it'll be squashed horizontally or broken over multiple lines
         if the maximumLinesToUse value allows this. If the text just won't fit into the space,

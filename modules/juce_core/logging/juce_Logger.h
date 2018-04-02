@@ -79,7 +79,7 @@ protected:
     //==============================================================================
     Logger();
 
-    /** This is overloaded by subclasses to implement custom logging behaviour.
+    /** This is overloaded by subclasses to implement custom logging behavior.
         @see setCurrentLogger
     */
     virtual void logMessage (const String& message) = 0;

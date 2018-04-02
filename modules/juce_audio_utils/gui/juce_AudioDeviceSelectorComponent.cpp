@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -102,7 +102,7 @@ public:
         if (isPositiveAndBelow (row, items.size()))
         {
             if (rowIsSelected)
-                g.fillAll (findColour (TextEditor::highlightColourId)
+                g.fillAll (findColor (TextEditor::highlightColorId)
                                .withMultipliedAlpha (0.3f));
 
             auto item = items[row];
@@ -115,8 +115,8 @@ public:
                                           enabled, true, true, false);
 
             g.setFont (height * 0.6f);
-            g.setColour (findColour (ListBox::textColourId, true).withMultipliedAlpha (enabled ? 1.0f : 0.6f));
-            g.drawText (item, x, 0, width - x - 2, height, Justification::centredLeft, true);
+            g.setColor (findColor (ListBox::textColorId, true).withMultipliedAlpha (enabled ? 1.0f : 0.6f));
+            g.drawText (item, x, 0, width - x - 2, height, Justification::centeredLeft, true);
         }
     }
 
@@ -144,11 +144,11 @@ public:
 
         if (items.isEmpty())
         {
-            g.setColour (Colours::grey);
+            g.setColor (Colors::gray);
             g.setFont (13.0f);
             g.drawText (noItemsMessage,
                         0, 0, getWidth(), getHeight() / 2,
-                        Justification::centred, true);
+                        Justification::centered, true);
         }
     }
 
@@ -260,14 +260,14 @@ public:
             if (outputChanList != nullptr)
             {
                 outputChanList->setBounds (r.removeFromTop (outputChanList->getBestHeight (maxListBoxHeight)));
-                outputChanLabel->setBounds (0, outputChanList->getBounds().getCentreY() - h / 2, r.getX(), h);
+                outputChanLabel->setBounds (0, outputChanList->getBounds().getCenterY() - h / 2, r.getX(), h);
                 r.removeFromTop (space);
             }
 
             if (inputChanList != nullptr)
             {
                 inputChanList->setBounds (r.removeFromTop (inputChanList->getBestHeight (maxListBoxHeight)));
-                inputChanLabel->setBounds (0, inputChanList->getBounds().getCentreY() - h / 2, r.getX(), h);
+                inputChanLabel->setBounds (0, inputChanList->getBounds().getCenterY() - h / 2, r.getX(), h);
                 r.removeFromTop (space);
             }
 
@@ -438,7 +438,7 @@ public:
                                                                       TRANS ("(no audio output channels found)")));
                     addAndMakeVisible (outputChanList.get());
                     outputChanLabel.reset (new Label ({}, TRANS("Active output channels:")));
-                    outputChanLabel->setJustificationType (Justification::centredRight);
+                    outputChanLabel->setJustificationType (Justification::centeredRight);
                     outputChanLabel->attachToComponent (outputChanList.get(), true);
                 }
 
@@ -459,7 +459,7 @@ public:
                                                                      TRANS("(no audio input channels found)")));
                     addAndMakeVisible (inputChanList.get());
                     inputChanLabel.reset (new Label ({}, TRANS("Active input channels:")));
-                    inputChanLabel->setJustificationType (Justification::centredRight);
+                    inputChanLabel->setJustificationType (Justification::centeredRight);
                     inputChanLabel->attachToComponent (inputChanList.get(), true);
                 }
 
@@ -765,7 +765,7 @@ public:
         {
             if (isPositiveAndBelow (row, items.size()))
             {
-                g.fillAll (findColour (ListBox::backgroundColourId));
+                g.fillAll (findColor (ListBox::backgroundColorId));
 
                 auto item = items[row];
                 bool enabled = false;
@@ -795,8 +795,8 @@ public:
                                               enabled, true, true, false);
 
                 g.setFont (height * 0.6f);
-                g.setColour (findColour (ListBox::textColourId, true).withMultipliedAlpha (enabled ? 1.0f : 0.6f));
-                g.drawText (item, x + 5, 0, width - x - 5, height, Justification::centredLeft, true);
+                g.setColor (findColor (ListBox::textColorId, true).withMultipliedAlpha (enabled ? 1.0f : 0.6f));
+                g.drawText (item, x + 5, 0, width - x - 5, height, Justification::centeredLeft, true);
             }
         }
 
@@ -824,11 +824,11 @@ public:
 
             if (items.isEmpty())
             {
-                g.setColour (Colours::grey);
+                g.setColor (Colors::gray);
                 g.setFont (13.0f);
                 g.drawText (noItemsMessage,
                             0, 0, getWidth(), getHeight() / 2,
-                            Justification::centred, true);
+                            Justification::centered, true);
             }
         }
 
@@ -988,7 +988,7 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
         deviceTypeDropDown->onChange = [this] { updateDeviceType(); };
 
         deviceTypeDropDownLabel.reset (new Label ({}, TRANS("Audio device type:")));
-        deviceTypeDropDownLabel->setJustificationType (Justification::centredRight);
+        deviceTypeDropDownLabel->setJustificationType (Justification::centeredRight);
         deviceTypeDropDownLabel->attachToComponent (deviceTypeDropDown.get(), true);
     }
 

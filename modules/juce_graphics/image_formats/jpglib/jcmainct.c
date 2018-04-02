@@ -80,7 +80,7 @@ start_pass_main (j_compress_ptr cinfo, J_BUF_MODE pass_mode)
   main_->pass_mode = pass_mode;	/* save mode for use by process_data */
 
   switch (pass_mode) {
-  case JBUF_PASS_THRU:
+  case JBUF_PASS_THROUGH:
 #ifdef FULL_MAIN_BUFFER_SUPPORTED
     if (main_->whole_image[0] != NULL)
       ERREXIT(cinfo, JERR_BAD_BUFFER_MODE);

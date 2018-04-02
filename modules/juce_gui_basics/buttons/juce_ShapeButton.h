@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -42,14 +42,14 @@ public:
     /** Creates a ShapeButton.
 
         @param name             a name to give the component - see Component::setName()
-        @param normalColour     the colour to fill the shape with when the mouse isn't over
-        @param overColour       the colour to use when the mouse is over the shape
-        @param downColour       the colour to use when the button is in the pressed-down state
+        @param normalColor     the color to fill the shape with when the mouse isn't over
+        @param overColor       the color to use when the mouse is over the shape
+        @param downColor       the color to use when the button is in the pressed-down state
     */
     ShapeButton (const String& name,
-                 Colour normalColour,
-                 Colour overColour,
-                 Colour downColour);
+                 Color normalColor,
+                 Color overColor,
+                 Color downColor);
 
     /** Destructor. */
     ~ShapeButton();
@@ -68,39 +68,39 @@ public:
                    bool maintainShapeProportions,
                    bool hasDropShadow);
 
-    /** Set the colours to use for drawing the shape.
+    /** Set the colors to use for drawing the shape.
 
-        @param normalColour     the colour to fill the shape with when the mouse isn't over
-        @param overColour       the colour to use when the mouse is over the shape
-        @param downColour       the colour to use when the button is in the pressed-down state
+        @param normalColor     the color to fill the shape with when the mouse isn't over
+        @param overColor       the color to use when the mouse is over the shape
+        @param downColor       the color to use when the button is in the pressed-down state
     */
-    void setColours (Colour normalColour,
-                     Colour overColour,
-                     Colour downColour);
+    void setColors (Color normalColor,
+                     Color overColor,
+                     Color downColor);
 
-    /** Sets the colours to use for drawing the shape when the button's toggle state is 'on'. To enable this behaviour, use the
-        shouldUseOnColours() method.
+    /** Sets the colors to use for drawing the shape when the button's toggle state is 'on'. To enable this behavior, use the
+        shouldUseOnColors() method.
 
-        @param normalColourOn   the colour to fill the shape with when the mouse isn't over and the button's toggle state is 'on'
-        @param overColourOn     the colour to use when the mouse is over the shape and the button's toggle state is 'on'
-        @param downColourOn     the colour to use when the button is in the pressed-down state and the button's toggle state is 'on'
+        @param normalColorOn   the color to fill the shape with when the mouse isn't over and the button's toggle state is 'on'
+        @param overColorOn     the color to use when the mouse is over the shape and the button's toggle state is 'on'
+        @param downColorOn     the color to use when the button is in the pressed-down state and the button's toggle state is 'on'
      */
-    void setOnColours (Colour normalColourOn,
-                       Colour overColourOn,
-                       Colour downColourOn);
+    void setOnColors (Color normalColorOn,
+                       Color overColorOn,
+                       Color downColorOn);
 
-    /** Set whether the button should use the 'on' set of colours when its toggle state is 'on'.
-        By default these will be the same as the normal colours but the setOnColours method can be
-        used to provide a different set of colours.
+    /** Set whether the button should use the 'on' set of colors when its toggle state is 'on'.
+        By default these will be the same as the normal colors but the setOnColors method can be
+        used to provide a different set of colors.
     */
-    void shouldUseOnColours (bool shouldUse);
+    void shouldUseOnColors (bool shouldUse);
 
     /** Sets up an outline to draw around the shape.
 
-        @param outlineColour        the colour to use
+        @param outlineColor        the color to use
         @param outlineStrokeWidth   the thickness of line to draw
     */
-    void setOutline (Colour outlineColour, float outlineStrokeWidth);
+    void setOutline (Color outlineColor, float outlineStrokeWidth);
 
     /** This lets you specify a border to be left around the edge of the button when
         drawing the shape.
@@ -112,9 +112,9 @@ public:
 
 private:
     //==============================================================================
-    Colour normalColour,   overColour,   downColour,
-           normalColourOn, overColourOn, downColourOn, outlineColour;
-    bool useOnColours;
+    Color normalColor,   overColor,   downColor,
+           normalColorOn, overColorOn, downColorOn, outlineColor;
+    bool useOnColors;
     DropShadowEffect shadow;
     Path shape;
     BorderSize<int> border;

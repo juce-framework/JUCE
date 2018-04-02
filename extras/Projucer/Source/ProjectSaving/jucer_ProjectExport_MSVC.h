@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -119,7 +119,7 @@ public:
     }
 
     //==============================================================================
-    void initialiseDependencyPathValues() override
+    void initializeDependencyPathValues() override
     {
         vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder),
                                                                 Ids::vst3Path,
@@ -158,9 +158,9 @@ public:
             if (! isDebug())
                 updateOldLTOSetting();
 
-            initialisePluginDefaultValues();
+            initializePluginDefaultValues();
 
-            optimisationLevelValue.setDefault (isDebug() ? optimisationOff : optimiseFull);
+            optimizationLevelValue.setDefault (isDebug() ? optimizationOff : optimizeFull);
         }
 
         //==============================================================================
@@ -235,10 +235,10 @@ public:
             props.add (new ChoicePropertyComponent (fastMathValue, "Relax IEEE Compliance"),
                        "Enable this to use FAST_MATH non-IEEE mode. (Warning: this can have unexpected results!)");
 
-            props.add (new ChoicePropertyComponent (optimisationLevelValue, "Optimisation",
-                                                    { "Disabled (/Od)", "Minimise size (/O1)", "Maximise speed (/O2)", "Full optimisation (/Ox)" },
-                                                    { optimisationOff,  optimiseMinSize,       optimiseMaxSpeed,       optimiseFull }),
-                       "The optimisation level for this configuration");
+            props.add (new ChoicePropertyComponent (optimizationLevelValue, "Optimization",
+                                                    { "Disabled (/Od)", "Minimize size (/O1)", "Maximize speed (/O2)", "Full optimization (/Ox)" },
+                                                    { optimizationOff,  optimizeMinSize,       optimizeMaxSpeed,       optimizeFull }),
+                       "The optimization level for this configuration");
 
             props.add (new TextPropertyComponent (intermediatesPathValue, "Intermediates Path", 2048, false),
                        "An optional path to a folder to use for the intermediate build files. Note that Visual Studio allows "
@@ -306,8 +306,8 @@ public:
         //==============================================================================
         void updateOldLTOSetting()
         {
-            if (config.getPropertyAsValue ("wholeProgramOptimisation", nullptr) != Value())
-                linkTimeOptimisationValue = (static_cast<int> (config ["wholeProgramOptimisation"]) == 0);
+            if (config.getPropertyAsValue ("wholeProgramOptimization", nullptr) != Value())
+                linkTimeOptimizationValue = (static_cast<int> (config ["wholeProgramOptimization"]) == 0);
         }
 
         void addVisualStudioPluginInstallPathProperties (PropertyListBuilder& props)
@@ -341,7 +341,7 @@ public:
 
         }
 
-        void initialisePluginDefaultValues()
+        void initializePluginDefaultValues()
         {
             vstBinaryLocation.referTo  (config, Ids::vstBinaryLocation,  getUndoManager(), ((is64Bit() ? "%ProgramW6432%"
                                                                                                        : "%programfiles(x86)%") + String ("\\Steinberg\\Vstplugins")));
@@ -414,7 +414,7 @@ public:
                 e->setAttribute ("Label", "Configuration");
                 e->createNewChildElement ("ConfigurationType")->addTextElement (getProjectType());
                 e->createNewChildElement ("UseOfMfc")->addTextElement ("false");
-                e->createNewChildElement ("WholeProgramOptimization")->addTextElement (config.isLinkTimeOptimisationEnabled() ? "true"
+                e->createNewChildElement ("WholeProgramOptimization")->addTextElement (config.isLinkTimeOptimizationEnabled() ? "true"
                                                                                                                               : "false");
 
                 auto charSet = config.getCharacterSetString();
@@ -527,7 +527,7 @@ public:
                 {
                     auto* cl = group->createNewChildElement ("ClCompile");
 
-                    cl->createNewChildElement ("Optimization")->addTextElement (getOptimisationLevelString (config.getOptimisationLevelInt()));
+                    cl->createNewChildElement ("Optimization")->addTextElement (getOptimizationLevelString (config.getOptimizationLevelInt()));
 
                     if (isDebug || config.shouldGenerateDebugSymbols())
                     {
@@ -952,13 +952,13 @@ public:
             return intDir + getName();
         }
 
-        static const char* getOptimisationLevelString (int level)
+        static const char* getOptimizationLevelString (int level)
         {
             switch (level)
             {
-                case optimiseMinSize:   return "MinSpace";
-                case optimiseMaxSpeed:  return "MaxSpeed";
-                case optimiseFull:      return "Full";
+                case optimizeMinSize:   return "MinSpace";
+                case optimizeMaxSpeed:  return "MaxSpeed";
+                case optimizeFull:      return "Full";
                 default:                return "Disabled";
             }
         }
@@ -1353,12 +1353,12 @@ public:
             "Path to a manifest input file which should be linked into your binary (path is relative to jucer file).");
     }
 
-    enum OptimisationLevel
+    enum OptimizationLevel
     {
-        optimisationOff = 1,
-        optimiseMinSize = 2,
-        optimiseFull = 3,
-        optimiseMaxSpeed = 4
+        optimizationOff = 1,
+        optimizeMinSize = 2,
+        optimizeFull = 3,
+        optimizeMaxSpeed = 4
     };
 
     //==============================================================================
@@ -1593,7 +1593,7 @@ protected:
         {
             for (int x = 0; x < w; ++x)
             {
-                auto pixel = bitmap.getPixelColour (x, y);
+                auto pixel = bitmap.getPixelColor (x, y);
 
                 if (pixel.getAlpha() <= alphaThreshold)
                 {
@@ -1615,7 +1615,7 @@ protected:
 
             for (int x = 0; x < w; ++x)
             {
-                auto pixel = bitmap.getPixelColour (x, y);
+                auto pixel = bitmap.getPixelColor (x, y);
 
                 mask <<= 1;
                 if (pixel.getAlpha() <= alphaThreshold)
@@ -1670,7 +1670,7 @@ protected:
             out.writeByte ((char) h);
             out.writeByte (0);
             out.writeByte (0);
-            out.writeShort (1); // colour planes
+            out.writeShort (1); // color planes
             out.writeShort (32); // bits per pixel
             out.writeInt ((int) (dataBlock.getDataSize() - oldDataSize));
             out.writeInt (dataBlockStart + (int) oldDataSize);

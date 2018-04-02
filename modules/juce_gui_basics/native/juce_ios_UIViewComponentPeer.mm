@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -118,7 +118,7 @@ using namespace juce;
 - (void) touchesBegan:     (NSSet*) touches  withEvent: (UIEvent*) event;
 - (void) touchesMoved:     (NSSet*) touches  withEvent: (UIEvent*) event;
 - (void) touchesEnded:     (NSSet*) touches  withEvent: (UIEvent*) event;
-- (void) touchesCancelled: (NSSet*) touches  withEvent: (UIEvent*) event;
+- (void) touchesCanceled: (NSSet*) touches  withEvent: (UIEvent*) event;
 
 - (BOOL) becomeFirstResponder;
 - (BOOL) resignFirstResponder;
@@ -181,8 +181,8 @@ public:
     Point<float> localToGlobal (Point<float> relativePosition) override;
     Point<float> globalToLocal (Point<float> screenPosition) override;
     void setAlpha (float newAlpha) override;
-    void setMinimised (bool) override                       {}
-    bool isMinimised() const override                       { return false; }
+    void setMinimized (bool) override                       {}
+    bool isMinimized() const override                       { return false; }
     void setFullScreen (bool shouldBeFullScreen) override;
     bool isFullScreen() const override                      { return fullScreen; }
     bool contains (Point<int> localPos, bool trueIfInAChildWindow) const override;
@@ -469,7 +469,7 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
         owner->handleTouches (event, false, true, false);
 }
 
-- (void) touchesCancelled: (NSSet*) touches withEvent: (UIEvent*) event
+- (void) touchesCanceled: (NSSet*) touches withEvent: (UIEvent*) event
 {
     if (owner != nullptr)
         owner->handleTouches (event, false, true, true);
@@ -727,14 +727,14 @@ void UIViewComponentPeer::updateTransformAndScreenBounds()
     }
     else if (! isSharedWindow)
     {
-        // this will re-centre the window, but leave its size unchanged
-        const float centreRelX = oldArea.getCentreX() / (float) oldDesktop.getWidth();
-        const float centreRelY = oldArea.getCentreY() / (float) oldDesktop.getHeight();
+        // this will re-center the window, but leave its size unchanged
+        const float centerRelX = oldArea.getCenterX() / (float) oldDesktop.getWidth();
+        const float centerRelY = oldArea.getCenterY() / (float) oldDesktop.getHeight();
 
         const Rectangle<int> newDesktop (desktop.getDisplays().getMainDisplay().userArea);
 
-        const int x = ((int) (newDesktop.getWidth()  * centreRelX)) - (oldArea.getWidth()  / 2);
-        const int y = ((int) (newDesktop.getHeight() * centreRelY)) - (oldArea.getHeight() / 2);
+        const int x = ((int) (newDesktop.getWidth()  * centerRelX)) - (oldArea.getWidth()  / 2);
+        const int y = ((int) (newDesktop.getHeight() * centerRelY)) - (oldArea.getHeight() / 2);
 
         component.setBounds (oldArea.withPosition (x, y));
     }
@@ -863,7 +863,7 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, const bool isDown, cons
         }
         else if (isUp)
         {
-            if (! ([touch phase] == UITouchPhaseEnded || [touch phase] == UITouchPhaseCancelled))
+            if (! ([touch phase] == UITouchPhaseEnded || [touch phase] == UITouchPhaseCanceled))
                 continue;
 
             modsToSend = modsToSend.withoutMouseButtons();

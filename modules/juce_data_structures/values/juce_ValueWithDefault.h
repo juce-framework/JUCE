@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -32,7 +32,7 @@ namespace juce
     This class acts as a wrapper around a property inside a ValueTree.
 
     If the property inside the ValueTree is missing or empty the ValueWithDefault will automatically
-    return a default value, which can be specified when initialising the ValueWithDefault.
+    return a default value, which can be specified when initializing the ValueWithDefault.
 
     @tags{DataStructures}
 */
@@ -40,7 +40,7 @@ class ValueWithDefault
 {
 public:
     //==============================================================================
-    /** Creates an unitialised ValueWithDefault. Initialise it using one of the referTo() methods. */
+    /** Creates an unitialised ValueWithDefault. Initialize it using one of the referTo() methods. */
     ValueWithDefault()    : undoManager (nullptr) {}
 
     /** Creates an ValueWithDefault object. The default value will be an empty var. */

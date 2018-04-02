@@ -29,7 +29,7 @@ namespace juce
     particular type.
 
     The generic implementation of this class simply calls 'delete', but you can
-    create a specialised version of it for a particular class if you need to
+    create a specialized version of it for a particular class if you need to
     delete that type of object in a more appropriate way.
 
     @see ScopedPointer, OwnedArray
@@ -44,7 +44,7 @@ struct ContainerDeletePolicy
         // If the line below triggers a compiler error, it means that you are using
         // an incomplete type for ObjectType (for example, a type that is declared
         // but not defined). This is a problem because then the following delete is
-        // undefined behaviour. The purpose of the sizeof is to capture this situation.
+        // undefined behavior. The purpose of the sizeof is to capture this situation.
         // If this was caused by a ScopedPointer to a forward-declared type, move the
         // implementation of all methods trying to use the ScopedPointer (e.g. the destructor
         // of the class owning it) into cpp files where they can see to the definition

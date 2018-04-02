@@ -220,19 +220,19 @@ public:
 
     /** Breaks up a string into tokens and adds them to this array.
 
-        This will tokenise the given string using whitespace characters as the
+        This will tokenize the given string using whitespace characters as the
         token delimiters, and will add these tokens to the end of the array.
         @returns    the number of tokens added
         @see fromTokens
     */
-    int addTokens (StringRef stringToTokenise, bool preserveQuotedStrings);
+    int addTokens (StringRef stringToTokenize, bool preserveQuotedStrings);
 
     /** Breaks up a string into tokens and adds them to this array.
 
-        This will tokenise the given string (using the string passed in to define the
+        This will tokenize the given string (using the string passed in to define the
         token delimiters), and will add these tokens to the end of the array.
 
-        @param stringToTokenise     the string to tokenise
+        @param stringToTokenize     the string to tokenize
         @param breakCharacters      a string of characters, any of which will be considered
                                     to be a token delimiter.
         @param quoteCharacters      if this string isn't empty, it defines a set of characters
@@ -241,7 +241,7 @@ public:
         @returns    the number of tokens added
         @see fromTokens
     */
-    int addTokens (StringRef stringToTokenise,
+    int addTokens (StringRef stringToTokenize,
                    StringRef breakCharacters,
                    StringRef quoteCharacters);
 
@@ -255,19 +255,19 @@ public:
 
     /** Returns an array containing the tokens in a given string.
 
-        This will tokenise the given string using whitespace characters as the
+        This will tokenize the given string using whitespace characters as the
         token delimiters, and return the parsed tokens as an array.
         @see addTokens
     */
-    static StringArray fromTokens (StringRef stringToTokenise,
+    static StringArray fromTokens (StringRef stringToTokenize,
                                    bool preserveQuotedStrings);
 
     /** Returns an array containing the tokens in a given string.
 
-        This will tokenise the given string using the breakCharacters string to define
+        This will tokenize the given string using the breakCharacters string to define
         the token delimiters, and will return the parsed tokens as an array.
 
-        @param stringToTokenise     the string to tokenise
+        @param stringToTokenize     the string to tokenize
         @param breakCharacters      a string of characters, any of which will be considered
                                     to be a token delimiter.
         @param quoteCharacters      if this string isn't empty, it defines a set of characters
@@ -275,7 +275,7 @@ public:
                                     between quotes is not broken up into tokens.
         @see addTokens
     */
-    static StringArray fromTokens (StringRef stringToTokenise,
+    static StringArray fromTokens (StringRef stringToTokenize,
                                    StringRef breakCharacters,
                                    StringRef quoteCharacters);
 
@@ -419,7 +419,7 @@ public:
         removing elements, they may have quite a lot of unused space allocated.
         This method will reduce the amount of allocated storage to a minimum.
     */
-    void minimiseStorageOverheads();
+    void minimizeStorageOverheads();
 
     /** This is the array holding the actual strings. This is public to allow direct access
         to array methods that may not already be provided by the StringArray class.

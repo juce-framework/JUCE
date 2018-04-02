@@ -66,7 +66,7 @@ namespace SystemStatsHelpers
 }
 
 //==============================================================================
-void CPUInformation::initialise() noexcept
+void CPUInformation::initialize() noexcept
 {
    #if JUCE_INTEL && ! JUCE_NO_INLINE_ASM
     uint32 a = 0, b = 0, d = 0, c = 0;
@@ -258,7 +258,7 @@ String SystemStats::getDisplayLanguage()
 }
 
 //==============================================================================
-/*  NB: these are kept outside the HiResCounterInfo struct and initialised to 1 to avoid
+/*  NB: these are kept outside the HiResCounterInfo struct and initialized to 1 to avoid
     division-by-zero errors if some other static constructor calls us before this file's
     static constructors have had a chance to fill them in correctly..
 */

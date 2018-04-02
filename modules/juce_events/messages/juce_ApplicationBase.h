@@ -47,7 +47,7 @@ namespace juce
             MyJUCEApp()  {}
             ~MyJUCEApp() {}
 
-            void initialise (const String& commandLine) override
+            void initialize (const String& commandLine) override
             {
                 myMainWindow = new MyApplicationWindow();
                 myMainWindow->setBounds (100, 100, 400, 500);
@@ -115,7 +115,7 @@ public:
 
     /** Called when the application starts.
 
-        This will be called once to let the application do whatever initialisation
+        This will be called once to let the application do whatever initialization
         it needs, create its windows, etc.
 
         After the method returns, the normal event-dispatch loop will be run,
@@ -123,7 +123,7 @@ public:
         method will be called to let the application clear up anything it needs
         to delete.
 
-        If during the initialise() method, the application decides not to start-up
+        If during the initialize() method, the application decides not to start-up
         after all, it can just call the quit() method and the event loop won't be run.
 
         @param commandLineParameters    the line passed in does not include the name of
@@ -132,7 +132,7 @@ public:
                                         JUCEApplication::getCommandLineParameters()
         @see shutdown, quit
     */
-    virtual void initialise (const String& commandLineParameters) = 0;
+    virtual void initialize (const String& commandLineParameters) = 0;
 
     /* Called to allow the application to clear up before exiting.
 
@@ -157,7 +157,7 @@ public:
     /** Called when the operating system is trying to close the application.
 
         The default implementation of this method is to call quit(), but it may
-        be overloaded to ignore the request or do some other special behaviour
+        be overloaded to ignore the request or do some other special behavior
         instead. For example, you might want to offer the user the chance to save
         their changes before quitting, and give them the chance to cancel.
 
@@ -254,13 +254,13 @@ public:
         or other kind of shared library. */
     static bool isStandaloneApp() noexcept                      { return createInstance != nullptr; }
 
-    /** Returns true if the application hasn't yet completed its initialise() method
+    /** Returns true if the application hasn't yet completed its initialize() method
         and entered the main event loop.
 
         This is handy for things like splash screens to know when the app's up-and-running
         properly.
     */
-    bool isInitialising() const noexcept                        { return stillInitialising; }
+    bool isInitializing() const noexcept                        { return stillInitializing; }
 
 
     //==============================================================================
@@ -277,7 +277,7 @@ public:
     static void* iOSCustomDelegate;
    #endif
 
-    virtual bool initialiseApp();
+    virtual bool initializeApp();
     int shutdownApp();
     static void JUCE_CALLTYPE sendUnhandledException (const std::exception*, const char* sourceFile, int lineNumber);
     bool sendCommandLineToPreexistingInstance();
@@ -287,7 +287,7 @@ private:
     //==============================================================================
     static JUCEApplicationBase* appInstance;
     int appReturnValue = 0;
-    bool stillInitialising = true;
+    bool stillInitializing = true;
 
     struct MultipleInstanceHandler;
     friend struct MultipleInstanceHandler;

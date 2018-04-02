@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -43,7 +43,7 @@ public:
         createNativeWindow (component);
 
         PIXELFORMATDESCRIPTOR pfd;
-        initialisePixelFormatDescriptor (pfd, pixelFormat);
+        initializePixelFormatDescriptor (pfd, pixelFormat);
 
         auto pixFormat = ChoosePixelFormat (dc, &pfd);
 
@@ -55,7 +55,7 @@ public:
         if (renderContext != 0)
         {
             makeActive();
-            initialiseGLExtensions();
+            initializeGLExtensions();
 
             auto wglFormat = wglChoosePixelFormatExtension (pixelFormat);
             deactivateCurrentContext();
@@ -89,7 +89,7 @@ public:
         releaseDC();
     }
 
-    bool initialiseOnRenderThread (OpenGLContext& c)
+    bool initializeOnRenderThread (OpenGLContext& c)
     {
         context = &c;
         return true;
@@ -159,7 +159,7 @@ private:
     JUCE_DECLARE_WGL_EXTENSION_FUNCTION (wglGetSwapIntervalEXT,    int, ())
     #undef JUCE_DECLARE_WGL_EXTENSION_FUNCTION
 
-    void initialiseGLExtensions()
+    void initializeGLExtensions()
     {
         #define JUCE_INIT_WGL_FUNCTION(name)    name = (type_ ## name) OpenGLHelpers::getExtensionFunction (#name);
         JUCE_INIT_WGL_FUNCTION (wglChoosePixelFormatARB);
@@ -194,7 +194,7 @@ private:
         ReleaseDC ((HWND) nativeWindow->getNativeHandle(), dc);
     }
 
-    static void initialisePixelFormatDescriptor (PIXELFORMATDESCRIPTOR& pfd, const OpenGLPixelFormat& pixelFormat)
+    static void initializePixelFormatDescriptor (PIXELFORMATDESCRIPTOR& pfd, const OpenGLPixelFormat& pixelFormat)
     {
         zerostruct (pfd);
         pfd.nSize           = sizeof (pfd);

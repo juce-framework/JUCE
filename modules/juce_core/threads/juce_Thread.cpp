@@ -58,7 +58,7 @@ struct CurrentThreadHolder   : public ReferenceCountedObject
     JUCE_DECLARE_NON_COPYABLE (CurrentThreadHolder)
 };
 
-static char currentThreadHolderLock [sizeof (SpinLock)]; // (statically initialised to zeros).
+static char currentThreadHolderLock [sizeof (SpinLock)]; // (statically initialized to zeros).
 
 static SpinLock* castToSpinLockWithoutAliasingWarning (void* s)
 {

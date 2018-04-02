@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -42,15 +42,15 @@ namespace juce
     to the underlying ValueTree.
 
     If the property inside the ValueTree is missing, the CachedValue will automatically
-    return an optional default value, which can be specified when initialising the CachedValue.
+    return an optional default value, which can be specified when initializing the CachedValue.
 
     To create one, you can either use the constructor to attach the CachedValue to a
-    ValueTree, or can create an uninitialised CachedValue with its default constructor and
+    ValueTree, or can create an uninitialized CachedValue with its default constructor and
     then attach it later with the referTo() methods.
 
     Common types like String, int, double which can be easily converted to a var should work
     out-of-the-box, but if you want to use more complex custom types, you may need to implement
-    some template specialisations of VariantConverter which this class uses to convert between
+    some template specializations of VariantConverter which this class uses to convert between
     the type and the ValueTree's internal var.
 
     @tags{DataStructures}
@@ -61,7 +61,7 @@ class CachedValue   : private ValueTree::Listener
 public:
     //==============================================================================
     /** Default constructor.
-        Creates a default CachedValue not referring to any property. To initialise the
+        Creates a default CachedValue not referring to any property. To initialize the
         object, call one of the referTo() methods.
     */
     CachedValue();

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -50,7 +50,7 @@ public:
         addAndMakeVisible (loggedInUsernameLabel = new Label ("Username Label"));
 
         loggedInUsernameLabel->setFont (standardFont);
-        loggedInUsernameLabel->setJustificationType (Justification::centred);
+        loggedInUsernameLabel->setJustificationType (Justification::centered);
         loggedInUsernameLabel->setMinimumHorizontalScale (0.75f);
 
        #if JUCER_ENABLE_GPL_MODE
@@ -60,11 +60,11 @@ public:
         addAndMakeVisible (licenseTypeLabel = new Label ("License Type Label"));
 
         licenseTypeLabel->setFont (standardFont);
-        licenseTypeLabel->setJustificationType (Justification::centred);
+        licenseTypeLabel->setJustificationType (Justification::centered);
         licenseTypeLabel->setMinimumHorizontalScale (1.0f);
 
         addAndMakeVisible (logoutButton = new TextButton (isInsideWebview ? "Select different account..." : "Logout"));
-        logoutButton->setColour (TextButton::buttonColourId, findColour (secondaryButtonBackgroundColourId));
+        logoutButton->setColor (TextButton::buttonColorId, findColor (secondaryButtonBackgroundColorId));
 
         logoutButton->onClick = [this]
         {
@@ -91,7 +91,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (findColour (secondaryBackgroundColourId));
+        g.fillAll (findColor (secondaryBackgroundColorId));
     }
 
     void resized() override
@@ -139,7 +139,7 @@ private:
     void lookAndFeelChanged() override
     {
         if (logoutButton != nullptr)
-            logoutButton->setColour (TextButton::buttonColourId, findColour (secondaryButtonBackgroundColourId));
+            logoutButton->setColor (TextButton::buttonColorId, findColor (secondaryButtonBackgroundColorId));
     }
    #endif
 

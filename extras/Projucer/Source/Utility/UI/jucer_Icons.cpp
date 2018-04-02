@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -1534,7 +1534,7 @@ const uint8 clion[] = { 110,109,0,0,0,0,0,0,0,0,98,0,0,0,0,170,170,38,67,0,0,0,0
     jassert (dp != nullptr);
     Path p (dp->getPath());
 
-    p.applyTransform (RectanglePlacement (RectanglePlacement::centred).getTransformToFit (p.getBounds(),
+    p.applyTransform (RectanglePlacement (RectanglePlacement::centered).getTransformToFit (p.getBounds(),
                                                                                           Rectangle<float> (500.0f, 500.0f)));
 
     MemoryOutputStream data;

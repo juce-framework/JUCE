@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -117,7 +117,7 @@ Result FileBasedDocument::loadFromUserSpecifiedFile (const bool showMessageOnFai
     if (fc.browseForFileToOpen())
         return loadFrom (fc.getResult(), showMessageOnFailure);
 
-    return Result::fail (TRANS("User cancelled"));
+    return Result::fail (TRANS("User canceled"));
 }
 
 static bool askToOverwriteFile (const File& newFile)
@@ -160,7 +160,7 @@ FileBasedDocument::SaveResult FileBasedDocument::saveAs (const File& newFile,
     if (warnAboutOverwritingExistingFiles
           && newFile.exists()
           && ! askToOverwriteFile (newFile))
-        return userCancelledSave;
+        return userCanceledSave;
 
     MouseCursor::showWaitCursor();
 
@@ -213,7 +213,7 @@ FileBasedDocument::SaveResult FileBasedDocument::saveIfNeededAndUserAgrees()
     if (r == 2)  // discard changes
         return savedOk;
 
-    return userCancelledSave;
+    return userCanceledSave;
 }
 
 File FileBasedDocument::getSuggestedSaveAsFile (const File& defaultFile)
@@ -252,14 +252,14 @@ FileBasedDocument::SaveResult FileBasedDocument::saveAsInteractive (const bool w
             chosen = chosen.withFileExtension (fileExtension);
 
             if (chosen.exists() && ! askToOverwriteFile (chosen))
-                return userCancelledSave;
+                return userCanceledSave;
         }
 
         setLastDocumentOpened (chosen);
         return saveAs (chosen, false, false, true);
     }
 
-    return userCancelledSave;
+    return userCanceledSave;
 }
 #endif
 

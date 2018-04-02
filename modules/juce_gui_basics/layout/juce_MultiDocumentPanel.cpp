@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -27,9 +27,9 @@
 namespace juce
 {
 
-MultiDocumentPanelWindow::MultiDocumentPanelWindow (Colour backgroundColour)
-    : DocumentWindow (String(), backgroundColour,
-                      DocumentWindow::maximiseButton | DocumentWindow::closeButton, false)
+MultiDocumentPanelWindow::MultiDocumentPanelWindow (Color backgroundColor)
+    : DocumentWindow (String(), backgroundColor,
+                      DocumentWindow::maximizeButton | DocumentWindow::closeButton, false)
 {
 }
 
@@ -38,10 +38,10 @@ MultiDocumentPanelWindow::~MultiDocumentPanelWindow()
 }
 
 //==============================================================================
-void MultiDocumentPanelWindow::maximiseButtonPressed()
+void MultiDocumentPanelWindow::maximizeButtonPressed()
 {
     if (auto* owner = getOwner())
-        owner->setLayoutMode (MultiDocumentPanel::MaximisedWindowsWithTabs);
+        owner->setLayoutMode (MultiDocumentPanel::MaximizedWindowsWithTabs);
     else
         jassertfalse; // these windows are only designed to be used inside a MultiDocumentPanel!
 }
@@ -121,7 +121,7 @@ bool MultiDocumentPanel::closeAllDocuments (const bool checkItsOkToCloseFirst)
 
 MultiDocumentPanelWindow* MultiDocumentPanel::createNewDocumentWindow()
 {
-    return new MultiDocumentPanelWindow (backgroundColour);
+    return new MultiDocumentPanelWindow (backgroundColor);
 }
 
 void MultiDocumentPanel::addWindow (Component* component)
@@ -133,7 +133,7 @@ void MultiDocumentPanel::addWindow (Component* component)
     dw->setName (component->getName());
 
     auto bkg = component->getProperties() ["mdiDocumentBkg_"];
-    dw->setBackgroundColour (bkg.isVoid() ? backgroundColour : Colour ((uint32) static_cast<int> (bkg)));
+    dw->setBackgroundColor (bkg.isVoid() ? backgroundColor : Color ((uint32) static_cast<int> (bkg)));
 
     int x = 4;
 
@@ -152,7 +152,7 @@ void MultiDocumentPanel::addWindow (Component* component)
 }
 
 bool MultiDocumentPanel::addDocument (Component* const component,
-                                      Colour docColour,
+                                      Color docColor,
                                       const bool deleteWhenRemoved)
 {
     // If you try passing a full DocumentWindow or ResizableWindow in here, you'll end up
@@ -164,7 +164,7 @@ bool MultiDocumentPanel::addDocument (Component* const component,
 
     components.add (component);
     component->getProperties().set ("mdiDocumentDelete_", deleteWhenRemoved);
-    component->getProperties().set ("mdiDocumentBkg_", (int) docColour.getARGB());
+    component->getProperties().set ("mdiDocumentBkg_", (int) docColor.getARGB());
     component->addComponentListener (this);
 
     if (mode == FloatingWindows)
@@ -198,14 +198,14 @@ bool MultiDocumentPanel::addDocument (Component* const component,
             auto temp = components;
 
             for (auto& c : temp)
-                tabComponent->addTab (c->getName(), docColour, c, false);
+                tabComponent->addTab (c->getName(), docColor, c, false);
 
             resized();
         }
         else
         {
             if (tabComponent != nullptr)
-                tabComponent->addTab (component->getName(), docColour, component, false);
+                tabComponent->addTab (component->getName(), docColor, component, false);
             else
                 addAndMakeVisible (component);
         }
@@ -411,17 +411,17 @@ void MultiDocumentPanel::setLayoutMode (const LayoutMode newLayoutMode)
 
         for (auto* c : tempComps)
             addDocument (c,
-                         Colour ((uint32) static_cast<int> (c->getProperties().getWithDefault ("mdiDocumentBkg_", (int) Colours::white.getARGB()))),
+                         Color ((uint32) static_cast<int> (c->getProperties().getWithDefault ("mdiDocumentBkg_", (int) Colors::white.getARGB()))),
                          MultiDocHelpers::shouldDeleteComp (c));
     }
 }
 
-void MultiDocumentPanel::setBackgroundColour (Colour newBackgroundColour)
+void MultiDocumentPanel::setBackgroundColor (Color newBackgroundColor)
 {
-    if (backgroundColour != newBackgroundColour)
+    if (backgroundColor != newBackgroundColor)
     {
-        backgroundColour = newBackgroundColour;
-        setOpaque (newBackgroundColour.isOpaque());
+        backgroundColor = newBackgroundColor;
+        setOpaque (newBackgroundColor.isOpaque());
         repaint();
     }
 }
@@ -429,12 +429,12 @@ void MultiDocumentPanel::setBackgroundColour (Colour newBackgroundColour)
 //==============================================================================
 void MultiDocumentPanel::paint (Graphics& g)
 {
-    g.fillAll (backgroundColour);
+    g.fillAll (backgroundColor);
 }
 
 void MultiDocumentPanel::resized()
 {
-    if (mode == MaximisedWindowsWithTabs || components.size() == numDocsBeforeTabsUsed)
+    if (mode == MaximizedWindowsWithTabs || components.size() == numDocsBeforeTabsUsed)
     {
         for (auto* child : getChildren())
             child->setBounds (getLocalBounds());

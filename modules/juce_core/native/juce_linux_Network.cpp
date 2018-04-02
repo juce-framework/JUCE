@@ -122,7 +122,7 @@ public:
         {
             const ScopedLock lock (createSocketLock);
 
-            if (hasBeenCancelled)
+            if (hasBeenCanceled)
                 return false;
         }
 
@@ -136,7 +136,7 @@ public:
     {
         const ScopedLock lock (createSocketLock);
 
-        hasBeenCancelled = true;
+        hasBeenCanceled = true;
 
         statusCode = -1;
         finished = true;
@@ -268,7 +268,7 @@ private:
     int64 chunkEnd = 0;
     bool isChunked = false, readingChunk = false;
     CriticalSection closeSocketLock, createSocketLock;
-    bool hasBeenCancelled = false;
+    bool hasBeenCanceled = false;
 
     void closeSocket (bool resetLevelsOfRedirection = true)
     {
@@ -341,7 +341,7 @@ private:
         {
             const ScopedLock lock (createSocketLock);
 
-            socketHandle = hasBeenCancelled ? -1
+            socketHandle = hasBeenCanceled ? -1
                                             : socket (result->ai_family, result->ai_socktype, 0);
         }
 

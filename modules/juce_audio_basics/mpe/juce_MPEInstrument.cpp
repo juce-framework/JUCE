@@ -40,7 +40,7 @@ MPEInstrument::MPEInstrument() noexcept
     pressureDimension.value = &MPENote::pressure;
     timbreDimension.value = &MPENote::timbre;
 
-    // the default value for pressure is 0, for all other dimension it is centre (= default MPEValue)
+    // the default value for pressure is 0, for all other dimension it is center (= default MPEValue)
     std::fill_n (pressureDimension.lastValueReceivedOnChannel, 16, MPEValue::minValue());
 
     legacyMode.isEnabled = false;
@@ -329,8 +329,8 @@ void MPEInstrument::noteOff (int midiChannel,
         // last dimension values received for this note should not be re-used for
         // any new notes, so reset them:
         pressureDimension.lastValueReceivedOnChannel[midiChannel - 1] = MPEValue::minValue();
-        pitchbendDimension.lastValueReceivedOnChannel[midiChannel - 1] = MPEValue::centreValue();
-        timbreDimension.lastValueReceivedOnChannel[midiChannel - 1] = MPEValue::centreValue();
+        pitchbendDimension.lastValueReceivedOnChannel[midiChannel - 1] = MPEValue::centerValue();
+        timbreDimension.lastValueReceivedOnChannel[midiChannel - 1] = MPEValue::centerValue();
 
         if (note->keyState == MPENote::off)
         {
@@ -366,7 +366,7 @@ void MPEInstrument::timbre (int midiChannel, MPEValue value)
 MPEValue MPEInstrument::getInitialValueForNewNote (int midiChannel, MPEDimension& dimension) const
 {
     if (getLastNotePlayedPtr (midiChannel) != nullptr)
-        return &dimension == &pressureDimension ? MPEValue::minValue() : MPEValue::centreValue();
+        return &dimension == &pressureDimension ? MPEValue::minValue() : MPEValue::centerValue();
 
     return dimension.lastValueReceivedOnChannel[midiChannel - 1];
 }
@@ -1050,8 +1050,8 @@ public:
         beginTest ("getMostRecentNoteOtherThan");
         {
             MPENote testNote (3, 60,
-                              MPEValue::centreValue(), MPEValue::centreValue(),
-                              MPEValue::centreValue(), MPEValue::centreValue());
+                              MPEValue::centerValue(), MPEValue::centerValue(),
+                              MPEValue::centerValue(), MPEValue::centerValue());
 
             {
                 // case 1: the note to exclude is not the most recent one.
@@ -1332,7 +1332,7 @@ public:
                 MPEZoneLayout layout = testLayout;
                 test.setZoneLayout (layout);  // default should be +/- 2 semitones
                 test.noteOn (3, 60, MPEValue::from7BitInt (100));
-                test.pitchbend (1, MPEValue::from14BitInt (4096)); //halfway between -max and centre
+                test.pitchbend (1, MPEValue::from14BitInt (4096)); //halfway between -max and center
                 expectDoubleWithinRelativeError (test.getMostRecentNote (3).totalPitchbendInSemitones, -1.0, 0.01);
 
                 layout.setLowerZone (5, 48, 96);
@@ -1657,7 +1657,7 @@ public:
             expectEquals (test.lastMPEValueReceived.as7BitInt(), 33);
 
             // note on with velocity = 0 should trigger noteOff method call
-            // with a note off velocity of 64 (centre value)
+            // with a note off velocity of 64 (center value)
 
             test.processNextMidiEvent (MidiMessage::noteOn (5, 11, uint8 (0)));
             expectEquals (test.noteOffCallCounter, 2);
@@ -1762,7 +1762,7 @@ public:
 
             MidiBuffer::Iterator iter (buffer);
             MidiMessage message;
-            int samplePosition; // not actually used, so no need to initialise.
+            int samplePosition; // not actually used, so no need to initialize.
 
             while (iter.getNextEvent (message, samplePosition))
                 test.processNextMidiEvent (message);

@@ -41,8 +41,8 @@ public:
     //==============================================================================
     void paint (Graphics& g) override
     {
-        // (Our component is opaque, so we must completely fill the background with a solid colour)
-        g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+        // (Our component is opaque, so we must completely fill the background with a solid color)
+        g.fillAll (getLookAndFeel().findColor (ResizableWindow::backgroundColorId));
 
         // You can add your drawing code here!
     }

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -29,7 +29,7 @@ namespace juce
 
 //==============================================================================
 /**
-    A table of horizontal scan-line segments - used for rasterising Paths.
+    A table of horizontal scan-line segments - used for rasterizing Paths.
 
     @see Path, Graphics
 
@@ -90,7 +90,7 @@ public:
         This will shrink the table down to use as little memory as possible - useful for
         read-only tables that get stored and re-used for rendering.
     */
-    void optimiseTable();
+    void optimizeTable();
 
 
     //==============================================================================
@@ -214,7 +214,7 @@ private:
     void remapWithExtraSpace (int numPointsNeeded);
     void intersectWithEdgeTableLine (int y, const int* otherLine);
     void clipEdgeTableLineToRange (int* line, int x1, int x2) noexcept;
-    void sanitiseLevels (bool useNonZeroWinding) noexcept;
+    void sanitizeLevels (bool useNonZeroWinding) noexcept;
     static void copyEdgeTableData (int* dest, int destLineStride, const int* src, int srcLineStride, int numLines) noexcept;
 
     JUCE_LEAK_DETECTOR (EdgeTable)

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -29,8 +29,8 @@ namespace juce
 
 DrawableShape::DrawableShape()
     : strokeType (0.0f),
-      mainFill (Colours::black),
-      strokeFill (Colours::black)
+      mainFill (Colors::black),
+      strokeFill (Colors::black)
 {
 }
 
@@ -154,9 +154,9 @@ bool DrawableShape::hitTest (int x, int y)
 }
 
 //==============================================================================
-static bool replaceColourInFill (FillType& fill, Colour original, Colour replacement)
+static bool replaceColorInFill (FillType& fill, Color original, Color replacement)
 {
-    if (fill.colour == original && fill.isColour())
+    if (fill.color == original && fill.isColor())
     {
         fill = FillType (replacement);
         return true;
@@ -165,10 +165,10 @@ static bool replaceColourInFill (FillType& fill, Colour original, Colour replace
     return false;
 }
 
-bool DrawableShape::replaceColour (Colour original, Colour replacement)
+bool DrawableShape::replaceColor (Color original, Color replacement)
 {
-    bool changed1 = replaceColourInFill (mainFill,   original, replacement);
-    bool changed2 = replaceColourInFill (strokeFill, original, replacement);
+    bool changed1 = replaceColorInFill (mainFill,   original, replacement);
+    bool changed2 = replaceColorInFill (strokeFill, original, replacement);
     return changed1 || changed2;
 }
 

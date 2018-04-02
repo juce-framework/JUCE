@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -173,7 +173,7 @@ private:
 
     To create a list, you'll need to create a subclass of ListBoxModel. This can
     either paint each row of the list and respond to events via callbacks, or for
-    more specialised tasks, it can supply a custom component to fill each row.
+    more specialized tasks, it can supply a custom component to fill each row.
 
     @see ComboBox, TableListBox
 
@@ -230,7 +230,7 @@ public:
         each row that the user clicks, without affecting other selected rows.
 
         (This only has an effect if multiple selection is also enabled).
-        If not enabled, you can still get the same row-flipping behaviour by holding
+        If not enabled, you can still get the same row-flipping behavior by holding
         down CMD or CTRL when clicking.
     */
     void setClickingTogglesRowSelection (bool flipRowSelection) noexcept;
@@ -461,31 +461,31 @@ public:
     int getNumRowsOnScreen() const noexcept;
 
     //==============================================================================
-    /** A set of colour IDs to use to change the colour of various aspects of the label.
+    /** A set of color IDs to use to change the color of various aspects of the label.
 
-        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        These constants can be used either via the Component::setColor(), or LookAndFeel::setColor()
         methods.
 
-        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+        @see Component::setColor, Component::findColor, LookAndFeel::setColor, LookAndFeel::findColor
     */
-    enum ColourIds
+    enum ColorIds
     {
-        backgroundColourId      = 0x1002800, /**< The background colour to fill the list with.
+        backgroundColorId      = 0x1002800, /**< The background color to fill the list with.
                                                   Make this transparent if you don't want the background to be filled. */
-        outlineColourId         = 0x1002810, /**< An optional colour to use to draw a border around the list.
+        outlineColorId         = 0x1002810, /**< An optional color to use to draw a border around the list.
                                                   Make this transparent to not have an outline. */
-        textColourId            = 0x1002820  /**< The preferred colour to use for drawing text in the listbox. */
+        textColorId            = 0x1002820  /**< The preferred color to use for drawing text in the listbox. */
     };
 
     /** Sets the thickness of a border that will be drawn around the box.
 
-        To set the colour of the outline, use @code setColour (ListBox::outlineColourId, colourXYZ); @endcode
-        @see outlineColourId
+        To set the color of the outline, use @code setColor (ListBox::outlineColorId, colorXYZ); @endcode
+        @see outlineColorId
     */
     void setOutlineThickness (int outlineThickness);
 
     /** Returns the thickness of outline that will be drawn around the listbox.
-        @see setOutlineColour
+        @see setOutlineColor
     */
     int getOutlineThickness() const noexcept            { return outlineThickness; }
 
@@ -566,7 +566,7 @@ public:
     /** @internal */
     void mouseUp (const MouseEvent&) override;
     /** @internal */
-    void colourChanged() override;
+    void colorChanged() override;
     /** @internal */
     void parentHierarchyChanged() override;
     /** @internal */
@@ -596,7 +596,7 @@ private:
     // This method's bool parameter has changed: see the new method signature.
     JUCE_DEPRECATED (void setSelectedRows (const SparseSet<int>&, bool));
     // This method has been replaced by the more flexible method createSnapshotOfRows.
-    // Please call createSnapshotOfRows (getSelectedRows(), x, y) to get the same behaviour.
+    // Please call createSnapshotOfRows (getSelectedRows(), x, y) to get the same behavior.
     JUCE_DEPRECATED (virtual void createSnapshotOfSelectedRows (int&, int&)) {}
    #endif
 

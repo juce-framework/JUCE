@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -41,7 +41,7 @@ public:
     bool moreThanOneInstanceAllowed() override       { return true; }
 
     //==============================================================================
-    void initialise (const String&) override
+    void initialize (const String&) override
     {
         mainWindow = new MainWindow (getApplicationName());
     }
@@ -62,7 +62,7 @@ public:
     {
     public:
         MainWindow (String name)  : DocumentWindow (name,
-                                                    Colours::lightgrey,
+                                                    Colors::lightgray,
                                                     DocumentWindow::allButtons)
         {
             setUsingNativeTitleBar (true);
@@ -72,7 +72,7 @@ public:
            #if JUCE_IOS || JUCE_ANDROID
             setFullScreen (true);
            #else
-            centreWithSize (getWidth(), getHeight());
+            centerWithSize (getWidth(), getHeight());
            #endif
 
             setVisible (true);

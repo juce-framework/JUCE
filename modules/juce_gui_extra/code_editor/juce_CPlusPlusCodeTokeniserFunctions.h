@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -28,7 +28,7 @@ namespace juce
 {
 
 //==============================================================================
-/** Class containing some basic functions for simple tokenising of C++ code.
+/** Class containing some basic functions for simple tokenizing of C++ code.
 
     @tags{GUI}
 */
@@ -551,7 +551,7 @@ struct CppTokeniserFunctions
     /** Takes a UTF8 string and writes it to a stream using standard C++ escape sequences for any
         non-ascii bytes.
 
-        Although not strictly a tokenising function, this is still a function that often comes in
+        Although not strictly a tokenizing function, this is still a function that often comes in
         handy when working with C++ code!
 
         Note that addEscapeChars() is easier to use than this function if you're working with Strings.
@@ -659,7 +659,7 @@ struct CppTokeniserFunctions
     /** Takes a string and returns a version of it where standard C++ escape sequences have been
         used to replace any non-ascii bytes.
 
-        Although not strictly a tokenising function, this is still a function that often comes in
+        Although not strictly a tokenizing function, this is still a function that often comes in
         handy when working with C++ code!
 
         @see writeEscapeChars

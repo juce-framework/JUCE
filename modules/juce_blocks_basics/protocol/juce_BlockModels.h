@@ -33,12 +33,12 @@ struct BlockDataSheet
 {
     BlockDataSheet (const BlocksProtocol::BlockSerialNumber& serial)  : serialNumber (serial)
     {
-        if (serialNumber.isPadBlock())      initialiseForPadBlock2x2();
-        if (serialNumber.isLiveBlock())     initialiseForControlBlockLive();
-        if (serialNumber.isLoopBlock())     initialiseForControlBlockLoop();
-        if (serialNumber.isDevCtrlBlock())  initialiseForControlBlockDeveloper();
-        if (serialNumber.isTouchBlock())    initialiseForControlBlockTouch();
-        if (serialNumber.isSeaboardBlock()) initialiseForSeaboardBlock();
+        if (serialNumber.isPadBlock())      initializeForPadBlock2x2();
+        if (serialNumber.isLiveBlock())     initializeForControlBlockLive();
+        if (serialNumber.isLoopBlock())     initializeForControlBlockLoop();
+        if (serialNumber.isDevCtrlBlock())  initializeForControlBlockDeveloper();
+        if (serialNumber.isTouchBlock())    initializeForControlBlockTouch();
+        if (serialNumber.isSeaboardBlock()) initializeForSeaboardBlock();
     }
 
     Block::ConnectionPort convertPortIndexToConnectorPort (BlocksProtocol::ConnectorPort port) const noexcept
@@ -81,7 +81,7 @@ struct BlockDataSheet
 
 private:
     //==============================================================================
-    void initialiseForPadBlock2x2()
+    void initializeForPadBlock2x2()
     {
         apiType = Block::Type::lightPadBlock;
 
@@ -101,9 +101,9 @@ private:
         addModeButton();
     }
 
-    void initialiseForControlBlockLoop()
+    void initializeForControlBlockLoop()
     {
-        initialiseControlBlock ("Loop BLOCK", Block::Type::loopBlock,
+        initializeControlBlock ("Loop BLOCK", Block::Type::loopBlock,
                                 ControlButton::ButtonFunction::mode,
                                 ControlButton::ButtonFunction::volume,
                                 ControlButton::ButtonFunction::click,
@@ -116,9 +116,9 @@ private:
                                 ControlButton::ButtonFunction::up);
     }
 
-    void initialiseForControlBlockLive()
+    void initializeForControlBlockLive()
     {
-        initialiseControlBlock ("Live BLOCK", Block::Type::liveBlock,
+        initializeControlBlock ("Live BLOCK", Block::Type::liveBlock,
                                 ControlButton::ButtonFunction::mode,
                                 ControlButton::ButtonFunction::volume,
                                 ControlButton::ButtonFunction::scale,
@@ -131,9 +131,9 @@ private:
                                 ControlButton::ButtonFunction::up);
     }
 
-    void initialiseForControlBlockDeveloper()
+    void initializeForControlBlockDeveloper()
     {
-        initialiseControlBlock ("Dev Ctrl BLOCK", Block::Type::developerControlBlock,
+        initializeControlBlock ("Dev Ctrl BLOCK", Block::Type::developerControlBlock,
                                 ControlButton::ButtonFunction::button0,
                                 ControlButton::ButtonFunction::button1,
                                 ControlButton::ButtonFunction::button2,
@@ -146,9 +146,9 @@ private:
                                 ControlButton::ButtonFunction::up);
     }
 
-    void initialiseForControlBlockTouch()
+    void initializeForControlBlockTouch()
     {
-        initialiseControlBlock ("Touch BLOCK", Block::Type::touchBlock,
+        initializeControlBlock ("Touch BLOCK", Block::Type::touchBlock,
                                 ControlButton::ButtonFunction::velocitySensitivity,
                                 ControlButton::ButtonFunction::glideSensitivity,
                                 ControlButton::ButtonFunction::slideSensitivity,
@@ -161,7 +161,7 @@ private:
                                 ControlButton::ButtonFunction::up);
     }
 
-    void initialiseControlBlock (const char* name, Block::Type type,
+    void initializeControlBlock (const char* name, Block::Type type,
                                  ControlButton::ButtonFunction b1, ControlButton::ButtonFunction b2,
                                  ControlButton::ButtonFunction b3, ControlButton::ButtonFunction b4,
                                  ControlButton::ButtonFunction b5, ControlButton::ButtonFunction b6,
@@ -201,7 +201,7 @@ private:
         numLEDRowLEDs = 15;
     }
 
-    void initialiseForSeaboardBlock()
+    void initializeForSeaboardBlock()
     {
         apiType = Block::Type::seaboardBlock;
 

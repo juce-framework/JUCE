@@ -152,7 +152,7 @@
 
 /** Config: JUCE_ALLOW_STATIC_NULL_VARIABLES
     If disabled, this will turn off dangerous static globals like String::empty, var::null, etc
-    which can cause nasty order-of-initialisation problems if they are referenced during static
+    which can cause nasty order-of-initialization problems if they are referenced during static
     constructor code.
 */
 #ifndef JUCE_ALLOW_STATIC_NULL_VARIABLES
@@ -194,7 +194,7 @@ namespace juce
 }
 
 #include "memory/juce_Memory.h"
-#include "maths/juce_MathsFunctions.h"
+#include "math/juce_MathFunctions.h"
 #include "memory/juce_ByteOrder.h"
 #include "memory/juce_Atomic.h"
 #include "text/juce_CharacterFunctions.h"
@@ -227,9 +227,9 @@ namespace juce
 #include "memory/juce_WeakReference.h"
 #include "threads/juce_ScopedLock.h"
 #include "threads/juce_CriticalSection.h"
-#include "maths/juce_Range.h"
-#include "maths/juce_NormalisableRange.h"
-#include "maths/juce_StatisticsAccumulator.h"
+#include "math/juce_Range.h"
+#include "math/juce_NormalizableRange.h"
+#include "math/juce_StatisticsAccumulator.h"
 #include "containers/juce_ElementComparator.h"
 #include "containers/juce_ArrayAllocationBase.h"
 #include "containers/juce_Array.h"
@@ -247,7 +247,7 @@ namespace juce
 #include "text/juce_StringArray.h"
 #include "text/juce_StringPairArray.h"
 #include "text/juce_TextDiff.h"
-#include "text/juce_LocalisedStrings.h"
+#include "text/juce_LocalizedStrings.h"
 #include "text/juce_Base64.h"
 #include "misc/juce_Result.h"
 #include "containers/juce_Variant.h"
@@ -276,9 +276,9 @@ namespace juce
 #include "logging/juce_FileLogger.h"
 #include "javascript/juce_JSON.h"
 #include "javascript/juce_Javascript.h"
-#include "maths/juce_BigInteger.h"
-#include "maths/juce_Expression.h"
-#include "maths/juce_Random.h"
+#include "math/juce_BigInteger.h"
+#include "math/juce_Expression.h"
+#include "math/juce_Random.h"
 #include "misc/juce_RuntimePermissions.h"
 #include "misc/juce_Uuid.h"
 #include "misc/juce_WindowsRegistry.h"

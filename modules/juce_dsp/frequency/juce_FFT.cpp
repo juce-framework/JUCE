@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -438,8 +438,8 @@ struct AppleFFT  : public FFT::Instance
     AppleFFT (int orderToUse)
         : order (static_cast<vDSP_Length> (orderToUse)),
           fftSetup (vDSP_create_fftsetup (order, 2)),
-          forwardNormalisation (.5f),
-          inverseNormalisation (1.0f / static_cast<float> (1 << order))
+          forwardNormalization (.5f),
+          inverseNormalization (1.0f / static_cast<float> (1 << order))
     {}
 
     ~AppleFFT() override
@@ -461,7 +461,7 @@ struct AppleFFT  : public FFT::Instance
         vDSP_fft_zop (fftSetup, &splitInput,  2, &splitOutput, 2,
                       order, inverse ?  kFFTDirection_Inverse : kFFTDirection_Forward);
 
-        float factor = (inverse ? inverseNormalisation : forwardNormalisation * 2.0f);
+        float factor = (inverse ? inverseNormalization : forwardNormalization * 2.0f);
         vDSP_vsmul ((float*) output, 1, &factor, (float*) output, 1, static_cast<size_t> (size << 1));
     }
 
@@ -473,7 +473,7 @@ struct AppleFFT  : public FFT::Instance
 
         inoutData[size] = 0.0f;
         vDSP_fft_zrip (fftSetup, &splitInOut, 2, order, kFFTDirection_Forward);
-        vDSP_vsmul (inoutData, 1, &forwardNormalisation, inoutData, 1, static_cast<size_t> (size << 1));
+        vDSP_vsmul (inoutData, 1, &forwardNormalization, inoutData, 1, static_cast<size_t> (size << 1));
 
         mirrorResult (inout, ignoreNegativeFreqs);
     }
@@ -491,7 +491,7 @@ struct AppleFFT  : public FFT::Instance
             inout[0] = Complex<float> (inout[0].real(), inout[size >> 1].real());
 
         vDSP_fft_zrip (fftSetup, &splitInOut, 2, order, kFFTDirection_Inverse);
-        vDSP_vsmul (inoutData, 1, &inverseNormalisation, inoutData, 1, static_cast<size_t> (size << 1));
+        vDSP_vsmul (inoutData, 1, &inverseNormalization, inoutData, 1, static_cast<size_t> (size << 1));
         vDSP_vclr (inoutData + size, 1, static_cast<size_t> (size));
     }
 
@@ -524,7 +524,7 @@ private:
     //==============================================================================
     vDSP_Length order;
     FFTSetup fftSetup;
-    float forwardNormalisation, inverseNormalisation;
+    float forwardNormalization, inverseNormalization;
 };
 
 FFT::EngineImpl<AppleFFT> appleFFT;

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -456,7 +456,7 @@ public:
 
             {
                 // Test unaligned data encryption/decryption. This will be flagged up by a check for
-                // undefined behaviour!
+                // undefined behavior!
                 auto nudge = static_cast<uintptr_t> (random.nextInt (sizeof(void*) - 1));
                 auto unalignedData = (void*) (reinterpret_cast<uintptr_t> (data.getData()) + nudge);
                 size_t newSize = data.getSize() - nudge;

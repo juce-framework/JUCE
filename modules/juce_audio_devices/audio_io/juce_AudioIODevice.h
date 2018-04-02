@@ -118,7 +118,7 @@ public:
 
 //==============================================================================
 /**
-    Base class for an audio device with synchronised input and output channels.
+    Base class for an audio device with synchronized input and output channels.
 
     Subclasses of this are used to implement different protocols such as DirectSound,
     ASIO, CoreAudio, etc.

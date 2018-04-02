@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -156,7 +156,7 @@ public:
             [window setIgnoresMouseEvents: (windowStyleFlags & windowIgnoresMouseClicks) != 0];
 
            #if defined (MAC_OS_X_VERSION_10_7) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7)
-            if ((windowStyleFlags & (windowHasMaximiseButton | windowHasTitleBar)) == (windowHasMaximiseButton | windowHasTitleBar))
+            if ((windowStyleFlags & (windowHasMaximizeButton | windowHasTitleBar)) == (windowHasMaximizeButton | windowHasTitleBar))
                 [window setCollectionBehavior: NSWindowCollectionBehaviorFullScreenPrimary];
 
             if ([window respondsToSelector: @selector (setRestorable:)])
@@ -268,9 +268,9 @@ public:
         }
         else
         {
-            // Repaint behaviour of setFrame seemed to change in 10.11, and the drawing became synchronous,
+            // Repaint behavior of setFrame seemed to change in 10.11, and the drawing became synchronous,
             // causing performance issues. But sending an async update causes flickering in older versions,
-            // hence this version check to use the old behaviour on pre 10.11 machines
+            // hence this version check to use the old behavior on pre 10.11 machines
             static bool isPre10_11 = SystemStats::getOperatingSystemType() <= SystemStats::MacOSX_10_10;
 
             [window setFrame: [window frameRectForContentRect: flippedScreenRect (r)]
@@ -329,18 +329,18 @@ public:
             [window setAlphaValue: (CGFloat) newAlpha];
     }
 
-    void setMinimised (bool shouldBeMinimised) override
+    void setMinimized (bool shouldBeMinimized) override
     {
         if (! isSharedWindow)
         {
-            if (shouldBeMinimised)
+            if (shouldBeMinimized)
                 [window miniaturize: nil];
             else
                 [window deminiaturize: nil];
         }
     }
 
-    bool isMinimised() const override
+    bool isMinimized() const override
     {
         return [window isMiniaturized];
     }
@@ -351,8 +351,8 @@ public:
         {
             auto r = lastNonFullscreenBounds;
 
-            if (isMinimised())
-                setMinimised (false);
+            if (isMinimized())
+                setMinimized (false);
 
             if (fullScreen != shouldBeFullScreen)
             {
@@ -898,9 +898,9 @@ public:
                     invokePaint (*context);
                 }
 
-                CGColorSpaceRef colourSpace = CGColorSpaceCreateDeviceRGB();
-                CGImageRef image = juce_createCoreGraphicsImage (temp, colourSpace, false);
-                CGColorSpaceRelease (colourSpace);
+                CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+                CGImageRef image = juce_createCoreGraphicsImage (temp, colorSpace, false);
+                CGColorSpaceRelease (colorSpace);
                 CGContextDrawImage (cg, CGRectMake (r.origin.x, r.origin.y, clipW, clipH), image);
                 CGImageRelease (image);
             }
@@ -1243,7 +1243,7 @@ public:
         unsigned int style = (flags & windowHasTitleBar) != 0 ? NSWindowStyleMaskTitled
                                                               : NSWindowStyleMaskBorderless;
 
-        if ((flags & windowHasMinimiseButton) != 0)  style |= NSWindowStyleMaskMiniaturizable;
+        if ((flags & windowHasMinimizeButton) != 0)  style |= NSWindowStyleMaskMiniaturizable;
         if ((flags & windowHasCloseButton) != 0)     style |= NSWindowStyleMaskClosable;
         if ((flags & windowIsResizable) != 0)        style |= NSWindowStyleMaskResizable;
         return style;
@@ -1640,7 +1640,7 @@ private:
     static void willMoveToWindow (id self, SEL, NSWindow* w)   { if (auto* p = getOwner (self)) p->redirectWillMoveToWindow (w); }
 
     static BOOL acceptsFirstMouse (id, SEL, NSEvent*)          { return YES; }
-    static BOOL wantsDefaultClipping (id, SEL)                 { return YES; } // (this is the default, but may want to customise it in future)
+    static BOOL wantsDefaultClipping (id, SEL)                 { return YES; } // (this is the default, but may want to customize it in future)
     static BOOL worksWhenModal (id self, SEL)                  { if (auto* p = getOwner (self)) return p->worksWhenModal(); return NO; }
 
     static void drawRect (id self, SEL, NSRect r)              { if (auto* p = getOwner (self)) p->drawRect (r); }

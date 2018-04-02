@@ -24,7 +24,7 @@ namespace juce
 {
 
 MPEValue::MPEValue() noexcept                             {}
-MPEValue::MPEValue (int value)  : normalisedValue (value) {}
+MPEValue::MPEValue (int value)  : normalizedValue (value) {}
 
 //==============================================================================
 MPEValue MPEValue::from7BitInt (int value) noexcept
@@ -45,36 +45,36 @@ MPEValue MPEValue::from14BitInt (int value) noexcept
 
 //==============================================================================
 MPEValue MPEValue::minValue() noexcept      { return MPEValue::from7BitInt (0); }
-MPEValue MPEValue::centreValue() noexcept   { return MPEValue::from7BitInt (64); }
+MPEValue MPEValue::centerValue() noexcept   { return MPEValue::from7BitInt (64); }
 MPEValue MPEValue::maxValue() noexcept      { return MPEValue::from7BitInt (127); }
 
 int MPEValue::as7BitInt() const noexcept
 {
-    return normalisedValue >> 7;
+    return normalizedValue >> 7;
 }
 
 int MPEValue::as14BitInt() const noexcept
 {
-    return normalisedValue;
+    return normalizedValue;
 }
 
 //==============================================================================
 float MPEValue::asSignedFloat() const noexcept
 {
-    return (normalisedValue < 8192)
-           ? jmap<float> (float (normalisedValue), 0.0f, 8192.0f, -1.0f, 0.0f)
-           : jmap<float> (float (normalisedValue), 8192.0f, 16383.0f, 0.0f, 1.0f);
+    return (normalizedValue < 8192)
+           ? jmap<float> (float (normalizedValue), 0.0f, 8192.0f, -1.0f, 0.0f)
+           : jmap<float> (float (normalizedValue), 8192.0f, 16383.0f, 0.0f, 1.0f);
 }
 
 float MPEValue::asUnsignedFloat() const noexcept
 {
-    return jmap<float> (float (normalisedValue), 0.0f, 16383.0f, 0.0f, 1.0f);
+    return jmap<float> (float (normalizedValue), 0.0f, 16383.0f, 0.0f, 1.0f);
 }
 
 //==============================================================================
 bool MPEValue::operator== (const MPEValue& other) const noexcept
 {
-    return normalisedValue == other.normalisedValue;
+    return normalizedValue == other.normalizedValue;
 }
 
 bool MPEValue::operator!= (const MPEValue& other) const noexcept
@@ -109,8 +109,8 @@ public:
             expectEquals (MPEValue::minValue().as7BitInt(), 0);
             expectEquals (MPEValue::minValue().as14BitInt(), 0);
 
-            expectEquals (MPEValue::centreValue().as7BitInt(), 64);
-            expectEquals (MPEValue::centreValue().as14BitInt(), 8192);
+            expectEquals (MPEValue::centerValue().as7BitInt(), 64);
+            expectEquals (MPEValue::centerValue().as14BitInt(), 8192);
 
             expectEquals (MPEValue::maxValue().as7BitInt(), 127);
             expectEquals (MPEValue::maxValue().as14BitInt(), 16383);
@@ -128,13 +128,13 @@ public:
             expectValuesConsistent (MPEValue::from14BitInt (16383), 127, 16383, 1.0f, 1.0f);
         }
 
-        beginTest ("centre value");
+        beginTest ("center value");
         {
             expectValuesConsistent (MPEValue::from7BitInt (64),    64, 8192, 0.0f, 0.5f);
             expectValuesConsistent (MPEValue::from14BitInt (8192), 64, 8192, 0.0f, 0.5f);
         }
 
-        beginTest ("value halfway between min and centre");
+        beginTest ("value halfway between min and center");
         {
             expectValuesConsistent (MPEValue::from7BitInt (32),    32, 4096, -0.5f, 0.25f);
             expectValuesConsistent (MPEValue::from14BitInt (4096), 32, 4096, -0.5f, 0.25f);

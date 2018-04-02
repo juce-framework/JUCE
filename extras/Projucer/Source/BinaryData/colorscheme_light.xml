@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<COLOR_SCHEME font="&lt;Monospaced&gt;; 13.0">
+  <COLOR name="Main Window Bkgd" color="FFE6E7E9"/>
+  <COLOR name="Treeview Highlight" color="401111ee"/>
+  <COLOR name="Code Background" color="ffffffff"/>
+  <COLOR name="Line Number Bkgd" color="44999999"/>
+  <COLOR name="Line Numbers" color="44000000"/>
+  <COLOR name="Plain Text" color="ff000000"/>
+  <COLOR name="Selected Text Bkgd" color="401111ee"/>
+  <COLOR name="Caret" color="ff000000"/>
+  <COLOR name="Preprocessor Text" color="ff660000"/>
+  <COLOR name="Punctuation" color="ff004400"/>
+  <COLOR name="Bracket" color="ff000055"/>
+  <COLOR name="String" color="ff990099"/>
+  <COLOR name="Float" color="ff885500"/>
+  <COLOR name="Integer" color="ff880000"/>
+  <COLOR name="Identifier" color="ff000000"/>
+  <COLOR name="Operator" color="ff225500"/>
+  <COLOR name="Keyword" color="ff0000cc"/>
+  <COLOR name="Comment" color="ff00aa00"/>
+  <COLOR name="Error" color="ffcc0000"/>
+</COLOR_SCHEME>

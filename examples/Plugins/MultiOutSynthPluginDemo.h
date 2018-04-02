@@ -27,7 +27,7 @@
  version:          1.0.0
  vendor:           juce
  website:          http://juce.com
- description:      Multi-out synthesiser audio plugin.
+ description:      Multi-out synthesizer audio plugin.
 
  dependencies:     juce_audio_basics, juce_audio_devices, juce_audio_formats,
                    juce_audio_plugin_client, juce_audio_processors,
@@ -83,7 +83,7 @@ public:
 
         for (int midiChannel = 0; midiChannel < maxMidiChannel; ++midiChannel)
         {
-            synth.add (new Synthesiser());
+            synth.add (new Synthesizer());
 
             for (int i = 0; i < maxNumberOfVoices; ++i)
                 synth[midiChannel]->addVoice (new SamplerVoice());
@@ -161,7 +161,7 @@ private:
 
         BigInteger midiNotes;
         midiNotes.setRange (0, 126, true);
-        SynthesiserSound::Ptr newSound = new SamplerSound ("Voice", *formatReader, midiNotes, 0x40, 0.0, 0.0, 10.0);
+        SynthesizerSound::Ptr newSound = new SamplerSound ("Voice", *formatReader, midiNotes, 0x40, 0.0, 0.0, 10.0);
 
         for (int channel = 0; channel < maxMidiChannel; ++channel)
             synth[channel]->removeSound (0);
@@ -174,8 +174,8 @@ private:
 
     //==============================================================================
     AudioFormatManager formatManager;
-    OwnedArray<Synthesiser> synth;
-    SynthesiserSound::Ptr sound;
+    OwnedArray<Synthesizer> synth;
+    SynthesizerSound::Ptr sound;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MultiOutSynth)

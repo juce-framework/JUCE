@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -803,13 +803,13 @@ Image ProjectExporter::rescaleImageForIcon (Drawable& d, const int size)
         Image newIm (Image::ARGB, size, size, true, SoftwareImageType());
         Graphics g (newIm);
         g.drawImageWithin (im, 0, 0, size, size,
-                           RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize, false);
+                           RectanglePlacement::centered | RectanglePlacement::onlyReduceInSize, false);
         return newIm;
     }
 
     Image im (Image::ARGB, size, size, true, SoftwareImageType());
     Graphics g (im);
-    d.drawWithin (g, im.getBounds().toFloat(), RectanglePlacement::centred, 1.0f);
+    d.drawWithin (g, im.getBounds().toFloat(), RectanglePlacement::centered, 1.0f);
     return im;
 }
 
@@ -850,8 +850,8 @@ ProjectExporter::BuildConfiguration::BuildConfiguration (Project& p, const Value
      configNameValue           (config, Ids::name,                 getUndoManager(), "Build Configuration"),
      targetNameValue           (config, Ids::targetName,           getUndoManager(), project.getProjectFilenameRootString()),
      targetBinaryPathValue     (config, Ids::binaryPath,           getUndoManager()),
-     optimisationLevelValue    (config, Ids::optimisation,         getUndoManager()),
-     linkTimeOptimisationValue (config, Ids::linkTimeOptimisation, getUndoManager(), ! isDebug()),
+     optimizationLevelValue    (config, Ids::optimization,         getUndoManager()),
+     linkTimeOptimizationValue (config, Ids::linkTimeOptimization, getUndoManager(), ! isDebug()),
      ppDefinesValue            (config, Ids::defines,              getUndoManager()),
      headerSearchPathValue     (config, Ids::headerPath,           getUndoManager()),
      librarySearchPathValue    (config, Ids::libraryPath,          getUndoManager()),
@@ -863,9 +863,9 @@ ProjectExporter::BuildConfiguration::~BuildConfiguration()
 {
 }
 
-String ProjectExporter::BuildConfiguration::getGCCOptimisationFlag() const
+String ProjectExporter::BuildConfiguration::getGCCOptimizationFlag() const
 {
-    switch (getOptimisationLevelInt())
+    switch (getOptimizationLevelInt())
     {
         case gccO0:     return "0";
         case gccO1:     return "1";
@@ -879,13 +879,13 @@ String ProjectExporter::BuildConfiguration::getGCCOptimisationFlag() const
     return "0";
 }
 
-void ProjectExporter::BuildConfiguration::addGCCOptimisationProperty (PropertyListBuilder& props)
+void ProjectExporter::BuildConfiguration::addGCCOptimizationProperty (PropertyListBuilder& props)
 {
-    props.add (new ChoicePropertyComponent (optimisationLevelValue, "Optimisation",
-                                            { "-O0 (no optimisation)", "-Os (minimise code size)", "-O1 (fast)", "-O2 (faster)",
-                                              "-O3 (fastest with safe optimisations)", "-Ofast (uses aggressive optimisations)" },
+    props.add (new ChoicePropertyComponent (optimizationLevelValue, "Optimization",
+                                            { "-O0 (no optimization)", "-Os (minimize code size)", "-O1 (fast)", "-O2 (faster)",
+                                              "-O3 (fastest with safe optimizations)", "-Ofast (uses aggressive optimizations)" },
                                             { gccO0, gccOs, gccO1, gccO2, gccO3, gccOfast }),
-               "The optimisation level for this configuration");
+               "The optimization level for this configuration");
 }
 
 void ProjectExporter::BuildConfiguration::createPropertyEditors (PropertyListBuilder& props)
@@ -912,8 +912,8 @@ void ProjectExporter::BuildConfiguration::createPropertyEditors (PropertyListBui
                "Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace, commas, or "
                "new-lines to separate the items - to include a space or comma in a definition, precede it with a backslash.");
 
-    props.add (new ChoicePropertyComponent (linkTimeOptimisationValue, "Link-Time Optimisation"),
-               "Enable this to perform link-time code optimisation. This is recommended for release builds.");
+    props.add (new ChoicePropertyComponent (linkTimeOptimizationValue, "Link-Time Optimization"),
+               "Enable this to perform link-time code optimization. This is recommended for release builds.");
 
     createConfigProperties (props);
 

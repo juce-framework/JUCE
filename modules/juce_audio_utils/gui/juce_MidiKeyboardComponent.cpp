@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -74,7 +74,7 @@ MidiKeyboardComponent::MidiKeyboardComponent (MidiKeyboardState& s, Orientation 
     addChildComponent (scrollDown.get());
     addChildComponent (scrollUp.get());
 
-    // initialise with a default set of qwerty key-mappings..
+    // initialize with a default set of qwerty key-mappings..
     int note = 0;
 
     for (char c : "awsedftgyhujkolp;")
@@ -83,7 +83,7 @@ MidiKeyboardComponent::MidiKeyboardComponent (MidiKeyboardState& s, Orientation 
     mouseOverNotes.insertMultiple (0, -1, 32);
     mouseDownNotes.insertMultiple (0, -1, 32);
 
-    colourChanged();
+    colorChanged();
     setWantsKeyboardFocus (true);
 
     state.addListener (this);
@@ -162,9 +162,9 @@ void MidiKeyboardComponent::setScrollButtonsVisible (bool newCanScroll)
     }
 }
 
-void MidiKeyboardComponent::colourChanged()
+void MidiKeyboardComponent::colorChanged()
 {
-    setOpaque (findColour (whiteNoteColourId).isOpaque());
+    setOpaque (findColor (whiteNoteColorId).isOpaque());
     repaint();
 }
 
@@ -346,10 +346,10 @@ void MidiKeyboardComponent::repaintNote (int noteNum)
 
 void MidiKeyboardComponent::paint (Graphics& g)
 {
-    g.fillAll (findColour (whiteNoteColourId));
+    g.fillAll (findColor (whiteNoteColorId));
 
-    auto lineColour = findColour (keySeparatorLineColourId);
-    auto textColour = findColour (textLabelColourId);
+    auto lineColor = findColor (keySeparatorLineColorId);
+    auto textColor = findColor (textLabelColorId);
 
     for (int octave = 0; octave < 128; octave += 12)
     {
@@ -360,7 +360,7 @@ void MidiKeyboardComponent::paint (Graphics& g)
             if (noteNum >= rangeStart && noteNum <= rangeEnd)
                 drawWhiteNote (noteNum, g, getRectangleForKey (noteNum),
                                state.isNoteOnForChannels (midiInChannelMask, noteNum),
-                               mouseOverNotes.contains (noteNum), lineColour, textColour);
+                               mouseOverNotes.contains (noteNum), lineColor, textColor);
         }
     }
 
@@ -379,11 +379,11 @@ void MidiKeyboardComponent::paint (Graphics& g)
         y2 = 5.0f;
 
     auto x = getKeyPos (rangeEnd).getEnd();
-    auto shadowCol = findColour (shadowColourId);
+    auto shadowCol = findColor (shadowColorId);
 
     if (! shadowCol.isTransparent())
     {
-        g.setGradientFill (ColourGradient (shadowCol, x1, y1, shadowCol.withAlpha (0.0f), x2, y2, false));
+        g.setGradientFill (ColorGradient (shadowCol, x1, y1, shadowCol.withAlpha (0.0f), x2, y2, false));
 
         switch (orientation)
         {
@@ -394,9 +394,9 @@ void MidiKeyboardComponent::paint (Graphics& g)
         }
     }
 
-    if (! lineColour.isTransparent())
+    if (! lineColor.isTransparent())
     {
-        g.setColour (lineColour);
+        g.setColor (lineColor);
 
         switch (orientation)
         {
@@ -407,7 +407,7 @@ void MidiKeyboardComponent::paint (Graphics& g)
         }
     }
 
-    auto blackNoteColour = findColour (blackNoteColourId);
+    auto blackNoteColor = findColor (blackNoteColorId);
 
     for (int octave = 0; octave < 128; octave += 12)
     {
@@ -418,20 +418,20 @@ void MidiKeyboardComponent::paint (Graphics& g)
             if (noteNum >= rangeStart && noteNum <= rangeEnd)
                 drawBlackNote (noteNum, g, getRectangleForKey (noteNum),
                                state.isNoteOnForChannels (midiInChannelMask, noteNum),
-                               mouseOverNotes.contains (noteNum), blackNoteColour);
+                               mouseOverNotes.contains (noteNum), blackNoteColor);
         }
     }
 }
 
 void MidiKeyboardComponent::drawWhiteNote (int midiNoteNumber, Graphics& g, Rectangle<float> area,
-                                           bool isDown, bool isOver, Colour lineColour, Colour textColour)
+                                           bool isDown, bool isOver, Color lineColor, Color textColor)
 {
-    auto c = Colours::transparentWhite;
+    auto c = Colors::transparentWhite;
 
-    if (isDown)  c = findColour (keyDownOverlayColourId);
-    if (isOver)  c = c.overlaidWith (findColour (mouseOverKeyOverlayColourId));
+    if (isDown)  c = findColor (keyDownOverlayColorId);
+    if (isOver)  c = c.overlaidWith (findColor (mouseOverKeyOverlayColorId));
 
-    g.setColour (c);
+    g.setColor (c);
     g.fillRect (area);
 
     auto text = getWhiteNoteText (midiNoteNumber);
@@ -440,21 +440,21 @@ void MidiKeyboardComponent::drawWhiteNote (int midiNoteNumber, Graphics& g, Rect
     {
         auto fontHeight = jmin (12.0f, keyWidth * 0.9f);
 
-        g.setColour (textColour);
+        g.setColor (textColor);
         g.setFont (Font (fontHeight).withHorizontalScale (0.8f));
 
         switch (orientation)
         {
-            case horizontalKeyboard:            g.drawText (text, area.withTrimmedLeft (1.0f).withTrimmedBottom (2.0f), Justification::centredBottom, false); break;
-            case verticalKeyboardFacingLeft:    g.drawText (text, area.reduced (2.0f), Justification::centredLeft,   false); break;
-            case verticalKeyboardFacingRight:   g.drawText (text, area.reduced (2.0f), Justification::centredRight,  false); break;
+            case horizontalKeyboard:            g.drawText (text, area.withTrimmedLeft (1.0f).withTrimmedBottom (2.0f), Justification::centeredBottom, false); break;
+            case verticalKeyboardFacingLeft:    g.drawText (text, area.reduced (2.0f), Justification::centeredLeft,   false); break;
+            case verticalKeyboardFacingRight:   g.drawText (text, area.reduced (2.0f), Justification::centeredRight,  false); break;
             default: break;
         }
     }
 
-    if (! lineColour.isTransparent())
+    if (! lineColor.isTransparent())
     {
-        g.setColour (lineColour);
+        g.setColor (lineColor);
 
         switch (orientation)
         {
@@ -478,24 +478,24 @@ void MidiKeyboardComponent::drawWhiteNote (int midiNoteNumber, Graphics& g, Rect
 }
 
 void MidiKeyboardComponent::drawBlackNote (int /*midiNoteNumber*/, Graphics& g, Rectangle<float> area,
-                                           bool isDown, bool isOver, Colour noteFillColour)
+                                           bool isDown, bool isOver, Color noteFillColor)
 {
-    auto c = noteFillColour;
+    auto c = noteFillColor;
 
-    if (isDown)  c = c.overlaidWith (findColour (keyDownOverlayColourId));
-    if (isOver)  c = c.overlaidWith (findColour (mouseOverKeyOverlayColourId));
+    if (isDown)  c = c.overlaidWith (findColor (keyDownOverlayColorId));
+    if (isOver)  c = c.overlaidWith (findColor (mouseOverKeyOverlayColorId));
 
-    g.setColour (c);
+    g.setColor (c);
     g.fillRect (area);
 
     if (isDown)
     {
-        g.setColour (noteFillColour);
+        g.setColor (noteFillColor);
         g.drawRect (area);
     }
     else
     {
-        g.setColour (c.brighter());
+        g.setColor (c.brighter());
         auto sideIndent = 1.0f / 8.0f;
         auto topIndent = 7.0f / 8.0f;
         auto w = area.getWidth();
@@ -530,7 +530,7 @@ void MidiKeyboardComponent::drawUpDownButton (Graphics& g, int w, int h,
                                               bool buttonDown,
                                               bool movesOctavesUp)
 {
-    g.fillAll (findColour (upDownButtonBackgroundColourId));
+    g.fillAll (findColor (upDownButtonBackgroundColorId));
 
     float angle = 0;
 
@@ -546,7 +546,7 @@ void MidiKeyboardComponent::drawUpDownButton (Graphics& g, int w, int h,
     path.addTriangle (0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.5f);
     path.applyTransform (AffineTransform::rotation (MathConstants<float>::twoPi * angle, 0.5f, 0.5f));
 
-    g.setColour (findColour (upDownButtonArrowColourId)
+    g.setColor (findColor (upDownButtonArrowColorId)
                   .withAlpha (buttonDown ? 1.0f : (mouseOver ? 0.6f : 0.4f)));
 
     g.fillPath (path, path.getTransformToScaleToFit (1.0f, 1.0f, w - 2.0f, h - 2.0f, true));

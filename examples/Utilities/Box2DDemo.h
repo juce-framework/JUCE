@@ -112,13 +112,13 @@ public:
         auto& lf = LookAndFeel::getDefaultLookAndFeel();
 
         if (rowIsSelected)
-            g.fillAll (Colour::contrasting (lf.findColour (ListBox::textColourId),
-                                            lf.findColour (ListBox::backgroundColourId)));
+            g.fillAll (Color::contrasting (lf.findColor (ListBox::textColorId),
+                                            lf.findColor (ListBox::backgroundColorId)));
 
-        g.setColour (lf.findColour (ListBox::textColourId));
+        g.setColor (lf.findColor (ListBox::textColorId));
         g.setFont (h * 0.7f);
         g.drawText (tests[row], Rectangle<int> (0, 0, w, h).reduced (2),
-                    Justification::centredLeft, true);
+                    Justification::centeredLeft, true);
     }
 
 private:
@@ -137,7 +137,7 @@ struct Box2DRenderComponent  : public Component
 
     void paint (Graphics& g) override
     {
-        g.fillAll (Colours::white);
+        g.fillAll (Colors::white);
 
         if (currentTest.get() != nullptr)
         {
@@ -197,7 +197,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground));
+        g.fillAll (getUIColorIfAvailable (LookAndFeel_V4::ColorScheme::UIColor::windowBackground));
     }
 
     void resized() override

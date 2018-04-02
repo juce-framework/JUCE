@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -84,14 +84,14 @@ public:
     virtual bool isSuitableForFont (const Font&) const          { return true; }
 
     /** Returns the ascent of the font, as a proportion of its height.
-        The height is considered to always be normalised as 1.0, so this will be a
+        The height is considered to always be normalized as 1.0, so this will be a
         value less that 1.0, indicating the proportion of the font that lies above
         its baseline.
     */
     virtual float getAscent() const = 0;
 
     /** Returns the descent of the font, as a proportion of its height.
-        The height is considered to always be normalised as 1.0, so this will be a
+        The height is considered to always be normalized as 1.0, so this will be a
         value less that 1.0, indicating the proportion of the font that lies below
         its baseline.
     */
@@ -103,19 +103,19 @@ public:
     virtual float getHeightToPointsFactor() const = 0;
 
     /** Measures the width of a line of text.
-        The distance returned is based on the font having an normalised height of 1.0.
+        The distance returned is based on the font having an normalized height of 1.0.
         You should never need to call this directly! Use Font::getStringWidth() instead!
     */
     virtual float getStringWidth (const String& text) = 0;
 
     /** Converts a line of text into its glyph numbers and their positions.
-        The distances returned are based on the font having an normalised height of 1.0.
+        The distances returned are based on the font having an normalized height of 1.0.
         You should never need to call this directly! Use Font::getGlyphPositions() instead!
     */
     virtual void getGlyphPositions (const String& text, Array<int>& glyphs, Array<float>& xOffsets) = 0;
 
     /** Returns the outline for a glyph.
-        The path returned will be normalised to a font height of 1.0.
+        The path returned will be normalized to a font height of 1.0.
     */
     virtual bool getOutlineForGlyph (int glyphNumber, Path& path) = 0;
 
@@ -139,7 +139,7 @@ public:
 
     /** Makes an attempt at performing a good overall distortion that will scale a font of
         the given size to align vertically with the pixel grid. The path should be an unscaled
-        (i.e. normalised to height of 1.0) path for a glyph.
+        (i.e. normalized to height of 1.0) path for a glyph.
     */
     void applyVerticalHintingTransform (float fontHeight, Path& path);
 

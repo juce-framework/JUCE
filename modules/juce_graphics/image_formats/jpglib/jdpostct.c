@@ -75,7 +75,7 @@ start_pass_dpost (j_decompress_ptr cinfo, J_BUF_MODE pass_mode)
   my_post_ptr post = (my_post_ptr) cinfo->post;
 
   switch (pass_mode) {
-  case JBUF_PASS_THRU:
+  case JBUF_PASS_THROUGH:
     if (cinfo->quantize_colors) {
       /* Single-pass processing with color quantization. */
       post->pub.post_process_data = post_process_1pass;

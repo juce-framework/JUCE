@@ -920,7 +920,7 @@ FLAC_API FLAC__bool FLAC__stream_encoder_set_loose_mid_side_stereo(FLAC__StreamE
  * \c blackman, \c blackman_harris_4term_92db, \c connes, \c flattop,
  * \c gauss(STDDEV), \c hamming, \c hann, \c kaiser_bessel, \c nuttall,
  * \c rectangle, \c triangle, \c tukey(P), \c partial_tukey(n[/ov[/P]]),
- * \c punchout_tukey(n[/ov[/P]]), \c welch.
+ * \c punchout_tukey(n[/ov[/P]]), \c welsh.
  *
  * For \c gauss(STDDEV), STDDEV specifies the standard deviation
  * (0<STDDEV<=0.5).

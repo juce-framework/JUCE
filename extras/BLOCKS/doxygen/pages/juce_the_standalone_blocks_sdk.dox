@@ -46,7 +46,7 @@ The <tt>main</tt> function of the MacOS application is the easiest to understand
 <tt>BlockFinder/MacOS/main.mm</tt>:
 @include BlockFinder/MacOS/main.mm
 
-Here we simply perform some JUCE initialisation, instantiate a BlockFinder class, then run the event loop.
+Here we simply perform some JUCE initialization, instantiate a BlockFinder class, then run the event loop.
 Whilst in the event loop, the <tt>finder</tt> object receives TopologySource::Listener::topologyChanged() callbacks and we see output printed to stdout when BLOCKS are connected or disconnected.
 
 @section standalone_dependencies Standalone SDK dependencies

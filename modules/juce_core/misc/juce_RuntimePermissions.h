@@ -41,7 +41,7 @@ namespace juce
 
     Old code:
 
-        audioDeviceManager.initialise (2, 2, nullptr, true, String(), nullptr);
+        audioDeviceManager.initialize (2, 2, nullptr, true, String(), nullptr);
 
     New code:
 
@@ -51,11 +51,11 @@ namespace juce
             {
                  if (! wasGranted)
                  {
-                     // e.g. display an error or initialise with 0 input channels
+                     // e.g. display an error or initialize with 0 input channels
                      return;
                  }
 
-                 audioDeviceManager.initialise (2, 2, nullptr, true, String(), nullptr);
+                 audioDeviceManager.initialize (2, 2, nullptr, true, String(), nullptr);
             }
         );
 
@@ -68,7 +68,7 @@ public:
     enum PermissionID
     {
         /** Permission to access the microphone (required on Android).
-            You need to request this, for example, to initialise an AudioDeviceManager with
+            You need to request this, for example, to initialize an AudioDeviceManager with
             a non-zero number of input channels, and to open the default audio input device.
         */
         recordAudio = 1,

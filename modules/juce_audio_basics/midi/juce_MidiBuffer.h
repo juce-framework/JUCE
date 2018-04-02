@@ -163,7 +163,7 @@ public:
         Used to iterate through the events in a MidiBuffer.
 
         Note that altering the buffer while an iterator is using it will produce
-        undefined behaviour.
+        undefined behavior.
 
         @see MidiBuffer
     */

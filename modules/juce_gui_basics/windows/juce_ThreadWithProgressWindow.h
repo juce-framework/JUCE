@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -95,20 +95,20 @@ public:
         @param hasProgressBar           whether the dialog box should have a progress bar (see
                                         setProgress() )
         @param hasCancelButton          whether the dialog box should have a cancel button
-        @param timeOutMsWhenCancelling  when 'cancel' is pressed, this is how long to wait for
+        @param timeOutMsWhenCanceling  when 'cancel' is pressed, this is how long to wait for
                                         the thread to stop before killing it forcibly (see
                                         Thread::stopThread() )
         @param cancelButtonText         the text that should be shown in the cancel button
                                         (if it has one). Leave this empty for the default "Cancel"
-        @param componentToCentreAround  if this is non-null, the window will be positioned
-                                        so that it's centred around this component.
+        @param componentToCenterAround  if this is non-null, the window will be positioned
+                                        so that it's centered around this component.
     */
     ThreadWithProgressWindow (const String& windowTitle,
                               bool hasProgressBar,
                               bool hasCancelButton,
-                              int timeOutMsWhenCancelling = 10000,
+                              int timeOutMsWhenCanceling = 10000,
                               const String& cancelButtonText = String(),
-                              Component* componentToCentreAround = nullptr);
+                              Component* componentToCenterAround = nullptr);
 
     /** Destructor. */
     ~ThreadWithProgressWindow();
@@ -167,8 +167,8 @@ private:
     ScopedPointer<AlertWindow> alertWindow;
     String message;
     CriticalSection messageLock;
-    const int timeOutMsWhenCancelling;
-    bool wasCancelledByUser;
+    const int timeOutMsWhenCanceling;
+    bool wasCanceledByUser;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThreadWithProgressWindow)
 };

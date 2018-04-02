@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -78,17 +78,17 @@ void ComponentOverlayComponent::paint (Graphics& g)
 {
     jassert (target != nullptr);
 
-    border->setColour (backgroundColourId, Colours::transparentBlack);
+    border->setColor (backgroundColorId, Colors::transparentBlack);
     if (selected)
     {
         auto selectedItems = layout.getSelectedSet();
-        auto baseColour = findColour (defaultHighlightColourId);
+        auto baseColor = findColor (defaultHighlightColorId);
 
         const BorderSize<int> borderSize (border->getBorderThickness());
 
         drawResizableBorder (g, getWidth(), getHeight(), borderSize,
                              (isMouseOverOrDragging() || border->isMouseOverOrDragging()),
-                             baseColour.withAlpha (selectedItems.getSelectedItem (0) == target ? 1.0f : 0.3f));
+                             baseColor.withAlpha (selectedItems.getSelectedItem (0) == target ? 1.0f : 0.3f));
     }
     else if (isMouseOverOrDragging())
     {

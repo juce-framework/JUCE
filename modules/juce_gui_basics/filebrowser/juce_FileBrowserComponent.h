@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -71,7 +71,7 @@ public:
     /** Creates a FileBrowserComponent.
 
         @param flags                    A combination of flags from the FileChooserFlags enumeration, used to
-                                        specify the component's behaviour. The flags must contain either openMode
+                                        specify the component's behavior. The flags must contain either openMode
                                         or saveMode, and canSelectFiles and/or canSelectDirectories.
         @param initialFileOrDirectory   The file or directory that should be selected when the component begins.
                                         If this is File(), a default directory will be chosen.
@@ -214,20 +214,20 @@ public:
                                                  Button* goUpButton) = 0;
     };
 
-    /** A set of colour IDs to use to change the colour of various aspects of the FileBrowserComponent.
+    /** A set of color IDs to use to change the color of various aspects of the FileBrowserComponent.
 
-        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        These constants can be used either via the Component::setColor(), or LookAndFeel::setColor()
         methods.
 
-        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+        @see Component::setColor, Component::findColor, LookAndFeel::setColor, LookAndFeel::findColor
     */
-    enum ColourIds
+    enum ColorIds
     {
-        currentPathBoxBackgroundColourId    = 0x1000640, /**< The colour to use to fill the background of the current path ComboBox. */
-        currentPathBoxTextColourId          = 0x1000641, /**< The colour to use for the text of the current path ComboBox. */
-        currentPathBoxArrowColourId         = 0x1000642, /**< The colour to use to draw the arrow of the current path ComboBox. */
-        filenameBoxBackgroundColourId       = 0x1000643, /**< The colour to use to fill the background of the filename TextEditor. */
-        filenameBoxTextColourId             = 0x1000644  /**< The colour to use for the text of the filename TextEditor. */
+        currentPathBoxBackgroundColorId    = 0x1000640, /**< The color to use to fill the background of the current path ComboBox. */
+        currentPathBoxTextColorId          = 0x1000641, /**< The color to use for the text of the current path ComboBox. */
+        currentPathBoxArrowColorId         = 0x1000642, /**< The color to use to draw the arrow of the current path ComboBox. */
+        filenameBoxBackgroundColorId       = 0x1000643, /**< The color to use to fill the background of the filename TextEditor. */
+        filenameBoxTextColorId             = 0x1000644  /**< The color to use for the text of the filename TextEditor. */
     };
 
     //==============================================================================

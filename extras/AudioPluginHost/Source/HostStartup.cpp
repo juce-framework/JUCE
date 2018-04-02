@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -40,9 +40,9 @@ class PluginHostApp  : public JUCEApplication,
 public:
     PluginHostApp() {}
 
-    void initialise (const String&) override
+    void initialize (const String&) override
     {
-        // initialise our settings file..
+        // initialize our settings file..
 
         PropertiesFile::Options options;
         options.applicationName     = "Juce Audio Plugin Host";
@@ -62,11 +62,11 @@ public:
 
         // Important note! We're going to use an async update here so that if we need
         // to re-open a file and instantiate some plugins, it will happen AFTER this
-        // initialisation method has returned.
+        // initialization method has returned.
         // On Windows this probably won't make a difference, but on OSX there's a subtle event loop
         // issue that can happen if a plugin runs one of those irritating modal dialogs while it's
         // being loaded. If that happens inside this method, the OSX event loop seems to be in some
-        // kind of special "initialisation" mode and things get confused. But if we load the plugin
+        // kind of special "initialization" mode and things get confused. But if we load the plugin
         // later when the normal event loop is running, everything's fine.
         triggerAsyncUpdate();
     }

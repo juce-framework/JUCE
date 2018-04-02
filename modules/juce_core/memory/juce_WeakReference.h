@@ -40,7 +40,7 @@ namespace juce
         MyObject()
         {
             // If you're planning on using your WeakReferences in a multi-threaded situation, you may choose
-            // to create a WeakReference to the object here in the constructor, which will pre-initialise the
+            // to create a WeakReference to the object here in the constructor, which will pre-initialize the
             // embedded object, avoiding an (extremely unlikely) race condition that could occur if multiple
             // threads overlap while creating the first WeakReference to it.
         }

@@ -43,7 +43,7 @@ public:
         The path can be semicolon- or comma-separated, e.g.
         "/foo/bar;/foo/moose;/fish/moose"
 
-        The separate folders are tokenised and added to the search path.
+        The separate folders are tokenized and added to the search path.
     */
     FileSearchPath (const String& path);
 
@@ -56,7 +56,7 @@ public:
     /** Destructor. */
     ~FileSearchPath();
 
-    /** Uses a string containing a list of pathnames to re-initialise this list.
+    /** Uses a string containing a list of pathnames to re-initialize this list.
 
         This search path is cleared and the semicolon- or comma-separated folders
         in this string are added instead. e.g. "/foo/bar;/foo/moose;/fish/moose"

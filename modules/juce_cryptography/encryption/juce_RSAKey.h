@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -98,7 +98,7 @@ public:
     //==============================================================================
     /** Creates a null key object.
 
-        Initialise a pair of objects for use with the createKeyPair() method.
+        Initialize a pair of objects for use with the createKeyPair() method.
     */
     RSAKey();
 
@@ -132,7 +132,7 @@ public:
         private key object to decode it.
 
         Returns false if the operation couldn't be completed, e.g. if this key hasn't been
-        initialised correctly.
+        initialized correctly.
 
         NOTE: This method dumbly applies this key to this data. If you encode some data
         and then try to decode it with a key that doesn't match, this method will still

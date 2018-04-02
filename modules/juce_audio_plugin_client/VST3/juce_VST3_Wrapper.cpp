@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -74,7 +74,7 @@ using namespace Steinberg;
 
 //==============================================================================
 #if JUCE_MAC
-  extern void initialiseMacVST();
+  extern void initializeMacVST();
 
  #if ! JUCE_64BIT
   extern void updateEditorCompBoundsVST (Component*);
@@ -104,7 +104,7 @@ public:
 private:
     Atomic<int> refCount;
     ScopedPointer<AudioProcessor> audioProcessor;
-    ScopedJuceInitialiser_GUI libraryInitialiser;
+    ScopedJuceInitializer_GUI libraryInitializer;
 
     JuceAudioProcessor() = delete;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceAudioProcessor)
@@ -473,10 +473,10 @@ public:
                 }
 
                 {
-                    int64 colour;
-                    if (list->getInt (Vst::ChannelContext::kChannelColorKey, colour) == kResultTrue)
-                        trackProperties.colour = Colour (Vst::ChannelContext::GetRed ((uint32) colour),  Vst::ChannelContext::GetGreen ((uint32) colour),
-                                                         Vst::ChannelContext::GetBlue ((uint32) colour), Vst::ChannelContext::GetAlpha ((uint32) colour));
+                    int64 color;
+                    if (list->getInt (Vst::ChannelContext::kChannelColorKey, color) == kResultTrue)
+                        trackProperties.color = Color (Vst::ChannelContext::GetRed ((uint32) color),  Vst::ChannelContext::GetGreen ((uint32) color),
+                                                         Vst::ChannelContext::GetBlue ((uint32) color), Vst::ChannelContext::GetAlpha ((uint32) color));
                 }
 
 
@@ -634,7 +634,7 @@ private:
 
     //==============================================================================
     ComSmartPtr<JuceAudioProcessor> audioProcessor;
-    ScopedJuceInitialiser_GUI libraryInitialiser;
+    ScopedJuceInitializer_GUI libraryInitializer;
 
     struct MidiController
     {
@@ -695,14 +695,14 @@ private:
             parameterToMidiControllerOffset = static_cast<Vst::ParamID> (usingManagedParameter ? paramMidiControllerOffset
                                                                                                : parameters.getParameterCount());
 
-            initialiseMidiControllerMappings();
+            initializeMidiControllerMappings();
            #endif
 
             audioProcessorChanged (pluginInstance);
         }
     }
 
-    void initialiseMidiControllerMappings()
+    void initializeMidiControllerMappings()
     {
         for (int c = 0, p = 0; c < numMIDIChannels; ++c)
         {
@@ -985,7 +985,7 @@ private:
 
             void paint (Graphics& g) override
             {
-                g.fillAll (Colours::black);
+                g.fillAll (Colors::black);
             }
 
             juce::Rectangle<int> getSizeToContainChild()
@@ -1104,7 +1104,7 @@ private:
         WindowsHooks hooks;
        #endif
 
-        ScopedJuceInitialiser_GUI libraryInitialiser;
+        ScopedJuceInitializer_GUI libraryInitializer;
 
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceVST3Editor)
@@ -1147,7 +1147,7 @@ public:
        #endif
 
         // VST-3 requires your default layout to be non-discrete!
-        // For example, your default layout must be mono, stereo, quadrophonic
+        // For example, your default layout must be mono, stereo, quadraphonic
         // and not AudioChannelSet::discreteChannels (2) etc.
         jassert (checkBusFormatsAreNotDiscrete());
 
@@ -1481,7 +1481,7 @@ public:
 
     bool readFromMemoryStream (IBStream* state)
     {
-        FUnknownPtr<ISizeableStream> s (state);
+        FUnknownPtr<ISizableStream> s (state);
         Steinberg::int64 size = 0;
 
         if (s != nullptr
@@ -2149,7 +2149,7 @@ private:
     bool isMidiOutputBusEnabled = false;
    #endif
 
-    ScopedJuceInitialiser_GUI libraryInitialiser;
+    ScopedJuceInitializer_GUI libraryInitializer;
 
    #if ! JUCE_FORCE_USE_LEGACY_PARAM_IDS
     bool usingManagedParameter;
@@ -2457,7 +2457,7 @@ DEF_CLASS_IID (JuceAudioProcessor)
 bool initModule()
 {
    #if JUCE_MAC
-    initialiseMacVST();
+    initializeMacVST();
    #endif
 
     return true;
@@ -2689,7 +2689,7 @@ struct JucePluginFactory  : public IPluginFactory3
 
 private:
     //==============================================================================
-    ScopedJuceInitialiser_GUI libraryInitialiser;
+    ScopedJuceInitializer_GUI libraryInitializer;
     Atomic<int> refCount { 1 };
     const PFactoryInfo factoryInfo;
     ComSmartPtr<Vst::IHostApplication> host;

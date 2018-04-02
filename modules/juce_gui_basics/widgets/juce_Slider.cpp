@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -136,11 +136,11 @@ public:
 
     void setRange (double newMin, double newMax, double newInt)
     {
-        normRange = NormalisableRange<double> (newMin, newMax, newInt);
+        normRange = NormalizableRange<double> (newMin, newMax, newInt);
         updateRange();
     }
 
-    void setNormalisableRange (NormalisableRange<double> newRange)
+    void setNormalizableRange (NormalizableRange<double> newRange)
     {
         normRange = newRange;
         updateRange();
@@ -676,8 +676,8 @@ public:
     //==============================================================================
     void handleRotaryDrag (const MouseEvent& e)
     {
-        auto dx = e.position.x - sliderRect.getCentreX();
-        auto dy = e.position.y - sliderRect.getCentreY();
+        auto dx = e.position.x - sliderRect.getCenterX();
+        auto dy = e.position.y - sliderRect.getCenterY();
 
         if (dx * dx + dy * dy > 25.0f)
         {
@@ -1162,7 +1162,7 @@ public:
 
             if ((style == LinearBar || style == LinearBarVertical) && valueBox == nullptr)
             {
-                g.setColour (owner.findColour (Slider::textBoxOutlineColourId));
+                g.setColor (owner.findColor (Slider::textBoxOutlineColorId));
                 g.drawRect (0, 0, owner.getWidth(), owner.getHeight(), 1);
             }
         }
@@ -1229,7 +1229,7 @@ public:
     ListenerList<Slider::Listener> listeners;
     Value currentValue, valueMin, valueMax;
     double lastCurrentValue = 0, lastValueMin = 0, lastValueMax = 0;
-    NormalisableRange<double> normRange { 0.0, 10.0 };
+    NormalizableRange<double> normRange { 0.0, 10.0 };
     double doubleClickReturnValue = 0;
     double valueWhenLastDragged = 0, valueOnMouseDown = 0, lastAngle = 0;
     double velocityModeSensitivity = 1.0, velocityModeOffset = 0, minMaxDiff = 0;
@@ -1291,8 +1291,8 @@ public:
         void paintContent (Graphics& g, int w, int h) override
         {
             g.setFont (font);
-            g.setColour (owner.findColour (TooltipWindow::textColourId, true));
-            g.drawFittedText (text, Rectangle<int> (w, h), Justification::centred, 1);
+            g.setColor (owner.findColor (TooltipWindow::textColorId, true));
+            g.drawFittedText (text, Rectangle<int> (w, h), Justification::centered, 1);
         }
 
         void getContentSize (int& w, int& h) override
@@ -1424,7 +1424,7 @@ void Slider::setSkewFactor (double factor, bool symmetricSkew)
 
 void Slider::setSkewFactorFromMidPoint (double sliderValueToShowAtMidPoint)
 {
-    pimpl->normRange.setSkewForCentre (sliderValueToShowAtMidPoint);
+    pimpl->normRange.setSkewForCenter (sliderValueToShowAtMidPoint);
 }
 
 int Slider::getMouseDragSensitivity() const noexcept        { return pimpl->pixelsForFullDragExtent; }
@@ -1471,7 +1471,7 @@ void Slider::setPopupDisplayEnabled (bool showOnDrag, bool showOnHover, Componen
 Component* Slider::getCurrentPopupDisplay() const noexcept      { return pimpl->popupDisplay.get(); }
 
 //==============================================================================
-void Slider::colourChanged()        { lookAndFeelChanged(); }
+void Slider::colorChanged()        { lookAndFeelChanged(); }
 void Slider::lookAndFeelChanged()   { pimpl->lookAndFeelChanged (getLookAndFeel()); }
 void Slider::enablementChanged()    { repaint(); pimpl->updateTextBoxEnablement(); }
 
@@ -1483,7 +1483,7 @@ double Slider::getInterval() const noexcept      { return pimpl->normRange.inter
 
 void Slider::setRange (double newMin, double newMax, double newInt)      { pimpl->setRange (newMin, newMax, newInt); }
 void Slider::setRange (Range<double> newRange, double newInt)            { pimpl->setRange (newRange.getStart(), newRange.getEnd(), newInt); }
-void Slider::setNormalisableRange (NormalisableRange<double> newRange)   { pimpl->setNormalisableRange (newRange); }
+void Slider::setNormalizableRange (NormalizableRange<double> newRange)   { pimpl->setNormalizableRange (newRange); }
 
 double Slider::getValue() const                  { return pimpl->getValue(); }
 Value& Slider::getValueObject() noexcept         { return pimpl->currentValue; }

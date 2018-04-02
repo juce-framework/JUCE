@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -55,10 +55,10 @@ public:
     {
         if (snapShown && snapGridSize > 2)
         {
-            Colour col (Colours::black);
+            Color col (Colors::black);
 
             if (backgroundGraphics != nullptr)
-                col = backgroundGraphics->getBackgroundColour().contrasting();
+                col = backgroundGraphics->getBackgroundColor().contrasting();
 
             const Rectangle<int> clip (g.getClipBounds());
 
@@ -70,7 +70,7 @@ public:
             for (int y = clip.getY() - (clip.getY() % snapGridSize); y < clip.getBottom(); y += snapGridSize)
                 gridLines.addWithoutMerging (Rectangle<float> (0.0f, (float) y, (float) clip.getRight(), 1.0f));
 
-            g.setColour (col.withAlpha (0.1f));
+            g.setColor (col.withAlpha (0.1f));
             g.fillRectList (gridLines);
         }
     }

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -33,7 +33,7 @@ D2D1_RECT_F rectangleToRectF (const Rectangle<Type>& r)
     return D2D1::RectF ((float) r.getX(), (float) r.getY(), (float) r.getRight(), (float) r.getBottom());
 }
 
-static D2D1_COLOR_F colourToD2D (Colour c)
+static D2D1_COLOR_F colorToD2D (Color c)
 {
     return D2D1::ColorF::ColorF (c.getFloatRed(), c.getFloatGreen(), c.getFloatBlue(), c.getFloatAlpha());
 }
@@ -164,7 +164,7 @@ struct Direct2DLowLevelGraphicsContext::Pimpl
     SharedResourcePointer<Direct2DFactories> factories;
 
     ComSmartPtr<ID2D1HwndRenderTarget> renderingTarget;
-    ComSmartPtr<ID2D1SolidColorBrush> colourBrush;
+    ComSmartPtr<ID2D1SolidColorBrush> colorBrush;
 };
 
 //==============================================================================
@@ -190,7 +190,7 @@ public:
         {
             const D2D1_SIZE_U size (owner.pimpl->renderingTarget->GetPixelSize());
             clipRect.setSize (size.width, size.height);
-            setFill (FillType (Colours::black));
+            setFill (FillType (Colors::black));
         }
     }
 
@@ -426,11 +426,11 @@ public:
     {
         if (currentBrush == nullptr)
         {
-            if (fillType.isColour())
+            if (fillType.isColor())
             {
-                D2D1_COLOR_F colour = colourToD2D (fillType.colour);
-                owner.pimpl->colourBrush->SetColor (colour);
-                currentBrush = owner.pimpl->colourBrush;
+                D2D1_COLOR_F color = colorToD2D (fillType.color);
+                owner.pimpl->colorBrush->SetColor (color);
+                currentBrush = owner.pimpl->colorBrush;
             }
             else if (fillType.isTiledImage())
             {
@@ -466,14 +466,14 @@ public:
                 brushProps.opacity = fillType.getOpacity();
                 brushProps.transform = transformToMatrix (fillType.transform.followedBy (transform));
 
-                const int numColors = fillType.gradient->getNumColours();
+                const int numColors = fillType.gradient->getNumColors();
 
                 HeapBlock<D2D1_GRADIENT_STOP> stops (numColors);
 
-                for (int i = fillType.gradient->getNumColours(); --i >= 0;)
+                for (int i = fillType.gradient->getNumColors(); --i >= 0;)
                 {
-                    stops[i].color = colourToD2D (fillType.gradient->getColour (i));
-                    stops[i].position = (FLOAT) fillType.gradient->getColourPosition (i);
+                    stops[i].color = colorToD2D (fillType.gradient->getColor (i));
+                    stops[i].position = (FLOAT) fillType.gradient->getColorPosition (i);
                 }
 
                 owner.pimpl->renderingTarget->CreateGradientStopCollection (stops.getData(), numColors, gradientStops.resetAndGetPointerAddress());
@@ -575,7 +575,7 @@ Direct2DLowLevelGraphicsContext::Direct2DLowLevelGraphicsContext (HWND hwnd_)
     {
         HRESULT hr = pimpl->factories->d2dFactory->CreateHwndRenderTarget (props, propsHwnd, pimpl->renderingTarget.resetAndGetPointerAddress());
         jassert (SUCCEEDED (hr)); ignoreUnused (hr);
-        hr = pimpl->renderingTarget->CreateSolidColorBrush (D2D1::ColorF::ColorF (0.0f, 0.0f, 0.0f, 1.0f), pimpl->colourBrush.resetAndGetPointerAddress());
+        hr = pimpl->renderingTarget->CreateSolidColorBrush (D2D1::ColorF::ColorF (0.0f, 0.0f, 0.0f, 1.0f), pimpl->colorBrush.resetAndGetPointerAddress());
     }
 }
 
@@ -763,7 +763,7 @@ void Direct2DLowLevelGraphicsContext::drawImage (const Image& image, const Affin
 
 void Direct2DLowLevelGraphicsContext::drawLine (const Line <float>& line)
 {
-    // xxx doesn't seem to be correctly aligned, may need nudging by 0.5 to match the software renderer's behaviour
+    // xxx doesn't seem to be correctly aligned, may need nudging by 0.5 to match the software renderer's behavior
     pimpl->renderingTarget->SetTransform (transformToMatrix (currentState->transform));
     currentState->createBrush();
 

@@ -65,7 +65,7 @@ public:
         @param magicMessageHeaderNumber     a magic number to use in the header to check the
                                             validity of the data blocks being sent and received. This
                                             can be any number, but the sender and receiver must obviously
-                                            use matching values or they won't recognise each other.
+                                            use matching values or they won't recognize each other.
     */
     InterprocessConnection (bool callbacksOnMessageThread = true,
                             uint32 magicMessageHeaderNumber = 0xf2b49e2c);
@@ -187,8 +187,8 @@ private:
     int pipeReceiveMessageTimeout = -1;
 
     friend class InterprocessConnectionServer;
-    void initialiseWithSocket (StreamingSocket*);
-    void initialiseWithPipe (NamedPipe*);
+    void initializeWithSocket (StreamingSocket*);
+    void initializeWithPipe (NamedPipe*);
     void deletePipeAndSocket();
     void connectionMadeInt();
     void connectionLostInt();

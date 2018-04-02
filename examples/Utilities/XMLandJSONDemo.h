@@ -67,18 +67,18 @@ public:
 
     void paintItem (Graphics& g, int width, int height) override
     {
-        // if this item is selected, fill it with a background colour..
+        // if this item is selected, fill it with a background color..
         if (isSelected())
-            g.fillAll (Colours::blue.withAlpha (0.3f));
+            g.fillAll (Colors::blue.withAlpha (0.3f));
 
-        // use a "colour" attribute in the xml tag for this node to set the text colour..
-        g.setColour (Colour::fromString (xml.getStringAttribute ("colour", "ff000000")));
+        // use a "color" attribute in the xml tag for this node to set the text color..
+        g.setColor (Color::fromString (xml.getStringAttribute ("color", "ff000000")));
         g.setFont (height * 0.7f);
 
         // draw the xml element's tag name..
         g.drawText (xml.getTagName(),
                     4, 0, width - 4, height,
-                    Justification::centredLeft, true);
+                    Justification::centeredLeft, true);
     }
 
     void itemOpennessChanged (bool isNowOpen) override
@@ -138,17 +138,17 @@ public:
 
     void paintItem (Graphics& g, int width, int height) override
     {
-        // if this item is selected, fill it with a background colour..
+        // if this item is selected, fill it with a background color..
         if (isSelected())
-            g.fillAll (Colours::blue.withAlpha (0.3f));
+            g.fillAll (Colors::blue.withAlpha (0.3f));
 
-        g.setColour (Colours::black);
+        g.setColor (Colors::black);
         g.setFont (height * 0.7f);
 
         // draw the element's tag name..
         g.drawText (getText(),
                     4, 0, width - 4, height,
-                    Justification::centredLeft, true);
+                    Justification::centeredLeft, true);
     }
 
     void itemOpennessChanged (bool isNowOpen) override
@@ -261,15 +261,15 @@ public:
         codeDocument.addListener (this);
 
         addAndMakeVisible (resultsTree);
-        resultsTree.setColour (TreeView::backgroundColourId, Colours::white);
+        resultsTree.setColor (TreeView::backgroundColorId, Colors::white);
         resultsTree.setDefaultOpenness (true);
 
         addAndMakeVisible (errorMessage);
         errorMessage.setReadOnly (true);
         errorMessage.setMultiLine (true);
         errorMessage.setCaretVisible (false);
-        errorMessage.setColour (TextEditor::outlineColourId, Colours::transparentWhite);
-        errorMessage.setColour (TextEditor::shadowColourId,  Colours::transparentWhite);
+        errorMessage.setColor (TextEditor::outlineColorId, Colors::transparentWhite);
+        errorMessage.setColor (TextEditor::shadowColorId,  Colors::transparentWhite);
 
         typeBox.setSelectedId (1);
 
@@ -283,7 +283,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground));
+        g.fillAll (getUIColorIfAvailable (LookAndFeel_V4::ColorScheme::UIColor::windowBackground));
     }
 
     void resized() override

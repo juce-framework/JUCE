@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -31,7 +31,7 @@
 //==============================================================================
 ProjucerLookAndFeel::ProjucerLookAndFeel()
 {
-    setupColours();
+    setupColors();
 }
 
 ProjucerLookAndFeel::~ProjucerLookAndFeel() {}
@@ -39,12 +39,12 @@ ProjucerLookAndFeel::~ProjucerLookAndFeel() {}
 void ProjucerLookAndFeel::drawTabButton (TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown)
 {
     const auto area = button.getActiveArea();
-    auto backgroundColour = findColour (button.isFrontTab() ? secondaryBackgroundColourId
-                                                            : inactiveTabBackgroundColourId);
-    auto iconColour = findColour (button.isFrontTab() ? activeTabIconColourId
-                                                      : inactiveTabIconColourId);
+    auto backgroundColor = findColor (button.isFrontTab() ? secondaryBackgroundColorId
+                                                            : inactiveTabBackgroundColorId);
+    auto iconColor = findColor (button.isFrontTab() ? activeTabIconColorId
+                                                      : inactiveTabIconColorId);
 
-    g.setColour (backgroundColour);
+    g.setColor (backgroundColor);
     g.fillRect (area);
 
     const auto alpha = button.isEnabled() ? ((isMouseOver || isMouseDown) ? 1.0f : 0.8f) : 0.3f;
@@ -52,21 +52,21 @@ void ProjucerLookAndFeel::drawTabButton (TabBarButton& button, Graphics& g, bool
    #ifndef BUILDING_JUCE_COMPILEENGINE
     if (button.getName() == "Project")
     {
-        auto icon = Icon (getIcons().closedFolder, iconColour.withMultipliedAlpha (alpha));
+        auto icon = Icon (getIcons().closedFolder, iconColor.withMultipliedAlpha (alpha));
         icon.draw (g, button.getTextArea().reduced (8, 8).toFloat(), false);
     }
     else if (button.getName() == "Build")
     {
-        auto icon = Icon (getIcons().buildTab, iconColour.withMultipliedAlpha (alpha));
+        auto icon = Icon (getIcons().buildTab, iconColor.withMultipliedAlpha (alpha));
         icon.draw (g, button.getTextArea().reduced (8, 8).toFloat(), false);
     }
     else
    #endif
     {
-        auto textColour = findColour (defaultTextColourId).withMultipliedAlpha (alpha);
+        auto textColor = findColor (defaultTextColorId).withMultipliedAlpha (alpha);
 
         TextLayout textLayout;
-        LookAndFeel_V3::createTabTextLayout (button, (float) area.getWidth(), (float) area.getHeight(), textColour, textLayout);
+        LookAndFeel_V3::createTabTextLayout (button, (float) area.getWidth(), (float) area.getHeight(), textColor, textLayout);
 
         textLayout.draw (g, button.getTextArea().toFloat());
     }
@@ -84,13 +84,13 @@ void ProjucerLookAndFeel::drawPropertyComponentLabel (Graphics& g, int width, in
 {
     ignoreUnused (width);
 
-    g.setColour (component.findColour (defaultTextColourId)
+    g.setColor (component.findColor (defaultTextColorId)
                           .withMultipliedAlpha (component.isEnabled() ? 1.0f : 0.6f));
 
     auto textWidth = getTextWidthForPropertyComponent (&component);
 
     g.setFont (getPropertyComponentFont());
-    g.drawFittedText (component.getName(), 0, 0, textWidth - 5, height, Justification::centredLeft, 5, 1.0f);
+    g.drawFittedText (component.getName(), 0, 0, textWidth - 5, height, Justification::centeredLeft, 5, 1.0f);
 }
 
 Rectangle<int> ProjucerLookAndFeel::getPropertyComponentContentPosition (PropertyComponent& component)
@@ -101,19 +101,19 @@ Rectangle<int> ProjucerLookAndFeel::getPropertyComponentContentPosition (Propert
 
 void ProjucerLookAndFeel::drawButtonBackground (Graphics& g,
                                                 Button& button,
-                                                const Colour& backgroundColour,
+                                                const Color& backgroundColor,
                                                 bool isMouseOverButton,
                                                 bool isButtonDown)
 {
     const auto cornerSize = button.findParentComponentOfClass<PropertyComponent>() != nullptr ? 0.0f : 3.0f;
     const auto bounds = button.getLocalBounds().toFloat();
 
-    auto baseColour = backgroundColour.withMultipliedAlpha (button.isEnabled() ? 1.0f : 0.5f);
+    auto baseColor = backgroundColor.withMultipliedAlpha (button.isEnabled() ? 1.0f : 0.5f);
 
     if (isButtonDown || isMouseOverButton)
-        baseColour = baseColour.contrasting (isButtonDown ? 0.2f : 0.05f);
+        baseColor = baseColor.contrasting (isButtonDown ? 0.2f : 0.05f);
 
-    g.setColour (baseColour);
+    g.setColor (baseColor);
 
     if (button.isConnectedOnLeft() || button.isConnectedOnRight())
     {
@@ -140,8 +140,8 @@ void ProjucerLookAndFeel::drawButtonText (Graphics& g, TextButton& button, bool 
 
     g.setFont (getTextButtonFont (button, button.getHeight()));
 
-    g.setColour (button.findColour (button.getToggleState() ? TextButton::textColourOnId
-                                                            : TextButton::textColourOffId)
+    g.setColor (button.findColor (button.getToggleState() ? TextButton::textColorOnId
+                                                            : TextButton::textColorOffId)
                                    .withMultipliedAlpha (button.isEnabled() ? 1.0f
                                                                             : 0.5f));
 
@@ -150,7 +150,7 @@ void ProjucerLookAndFeel::drawButtonText (Graphics& g, TextButton& button, bool 
 
     auto textBounds = button.getLocalBounds().reduced (xIndent, yIndent);
 
-    g.drawFittedText (button.getButtonText(), textBounds, Justification::centred, 3, 1.0f);
+    g.drawFittedText (button.getButtonText(), textBounds, Justification::centered, 3, 1.0f);
 }
 
 void ProjucerLookAndFeel::drawToggleButton (Graphics& g, ToggleButton& button, bool isMouseOverButton, bool isButtonDown)
@@ -170,14 +170,14 @@ void ProjucerLookAndFeel::drawToggleButton (Graphics& g, ToggleButton& button, b
     auto rectBounds = isTextEmpty ? bounds
                                   : bounds.removeFromLeft (jmin (sideLength, bounds.getWidth() / 3));
 
-    rectBounds = rectBounds.withSizeKeepingCentre (sideLength, sideLength).reduced (4);
+    rectBounds = rectBounds.withSizeKeepingCenter (sideLength, sideLength).reduced (4);
 
-    g.setColour (button.findColour (ToggleButton::tickDisabledColourId));
+    g.setColor (button.findColor (ToggleButton::tickDisabledColorId));
     g.drawRoundedRectangle (rectBounds.toFloat(), 2.0f, 1.0f);
 
     if (button.getToggleState())
     {
-        g.setColour (button.findColour (ToggleButton::tickColourId));
+        g.setColor (button.findColor (ToggleButton::tickColorId));
         const auto tick = getTickShape (0.75f);
         g.fillPath (tick, tick.getTransformToScaleToFit (rectBounds.reduced (2).toFloat(), false));
     }
@@ -189,19 +189,19 @@ void ProjucerLookAndFeel::drawToggleButton (Graphics& g, ToggleButton& button, b
         const auto fontSize = jmin (15.0f, button.getHeight() * 0.75f);
 
         g.setFont (fontSize);
-        g.setColour (isPropertyComponentChild ? findColour (widgetTextColourId)
-                                              : button.findColour (ToggleButton::textColourId));
+        g.setColor (isPropertyComponentChild ? findColor (widgetTextColorId)
+                                              : button.findColor (ToggleButton::textColorId));
 
-        g.drawFittedText (button.getButtonText(), bounds, Justification::centredLeft, 2);
+        g.drawFittedText (button.getButtonText(), bounds, Justification::centeredLeft, 2);
     }
 }
 
 void ProjucerLookAndFeel::fillTextEditorBackground (Graphics& g, int width, int height, TextEditor& textEditor)
 {
-    g.setColour (textEditor.findColour (TextEditor::backgroundColourId));
+    g.setColor (textEditor.findColor (TextEditor::backgroundColorId));
     g.fillRect (0, 0, width, height);
 
-    g.setColour (textEditor.findColour (TextEditor::outlineColourId));
+    g.setColor (textEditor.findColor (TextEditor::outlineColorId));
     g.drawHorizontalLine (height - 1, 0.0f, static_cast<float> (width));
 }
 
@@ -221,18 +221,18 @@ void ProjucerLookAndFeel::layoutFileBrowserComponent (FileBrowserComponent& brow
     auto bottomSlice = b.removeFromBottom (sectionHeight);
 
     currentPathBox->setBounds (topSlice.removeFromLeft (topSlice.getWidth() - buttonWidth));
-    currentPathBox->setColour (ComboBox::backgroundColourId,    findColour (backgroundColourId));
-    currentPathBox->setColour (ComboBox::textColourId,          findColour (defaultTextColourId));
-    currentPathBox->setColour (ComboBox::arrowColourId,         findColour (defaultTextColourId));
+    currentPathBox->setColor (ComboBox::backgroundColorId,    findColor (backgroundColorId));
+    currentPathBox->setColor (ComboBox::textColorId,          findColor (defaultTextColorId));
+    currentPathBox->setColor (ComboBox::arrowColorId,         findColor (defaultTextColorId));
 
     topSlice.removeFromLeft (6);
     goUpButton->setBounds (topSlice);
 
     bottomSlice.removeFromLeft (50);
     filenameBox->setBounds (bottomSlice);
-    filenameBox->setColour (TextEditor::backgroundColourId, findColour (backgroundColourId));
-    filenameBox->setColour (TextEditor::textColourId,       findColour (defaultTextColourId));
-    filenameBox->setColour (TextEditor::outlineColourId,    findColour (defaultTextColourId));
+    filenameBox->setColor (TextEditor::backgroundColorId, findColor (backgroundColorId));
+    filenameBox->setColor (TextEditor::textColorId,       findColor (defaultTextColorId));
+    filenameBox->setColor (TextEditor::outlineColorId,    findColor (defaultTextColorId));
     filenameBox->applyFontToAllText (filenameBox->getFont());
 
     if (previewComp != nullptr)
@@ -251,11 +251,11 @@ void ProjucerLookAndFeel::drawFileBrowserRow (Graphics& g, int width, int height
 {
     if (auto fileListComp = dynamic_cast<Component*> (&dcc))
     {
-        fileListComp->setColour (DirectoryContentsDisplayComponent::textColourId,
-                                 findColour (isItemSelected ? defaultHighlightedTextColourId : defaultTextColourId));
+        fileListComp->setColor (DirectoryContentsDisplayComponent::textColorId,
+                                 findColor (isItemSelected ? defaultHighlightedTextColorId : defaultTextColorId));
 
-        fileListComp->setColour (DirectoryContentsDisplayComponent::highlightColourId,
-                                 findColour (defaultHighlightColourId).withAlpha (0.75f));
+        fileListComp->setColor (DirectoryContentsDisplayComponent::highlightColorId,
+                                 findColor (defaultHighlightColorId).withAlpha (0.75f));
     }
 
 
@@ -266,25 +266,25 @@ void ProjucerLookAndFeel::drawFileBrowserRow (Graphics& g, int width, int height
 
 void ProjucerLookAndFeel::drawCallOutBoxBackground (CallOutBox&, Graphics& g, const Path& path, Image&)
 {
-    g.setColour (findColour (secondaryBackgroundColourId));
+    g.setColor (findColor (secondaryBackgroundColorId));
     g.fillPath (path);
 
-    g.setColour (findColour (userButtonBackgroundColourId));
+    g.setColor (findColor (userButtonBackgroundColorId));
     g.strokePath (path, PathStrokeType (2.0f));
 }
 
 void ProjucerLookAndFeel::drawMenuBarBackground (Graphics& g, int width, int height,
                                                  bool, MenuBarComponent& menuBar)
 {
-    const auto colour = menuBar.findColour (backgroundColourId).withAlpha (0.75f);
+    const auto color = menuBar.findColor (backgroundColorId).withAlpha (0.75f);
 
     Rectangle<int> r (width, height);
 
-    g.setColour (colour.contrasting (0.15f));
+    g.setColor (color.contrasting (0.15f));
     g.fillRect  (r.removeFromTop (1));
     g.fillRect  (r.removeFromBottom (1));
 
-    g.setGradientFill (ColourGradient (colour, 0, 0, colour.darker (0.2f), 0, (float)height, false));
+    g.setGradientFill (ColorGradient (color, 0, 0, color.darker (0.2f), 0, (float)height, false));
     g.fillRect (r);
 }
 
@@ -295,21 +295,21 @@ void ProjucerLookAndFeel::drawMenuBarItem (Graphics& g, int width, int height,
 {
     if (! menuBar.isEnabled())
     {
-        g.setColour (menuBar.findColour (defaultTextColourId)
+        g.setColor (menuBar.findColor (defaultTextColorId)
                             .withMultipliedAlpha (0.5f));
     }
     else if (isMenuOpen || isMouseOverItem)
     {
-        g.fillAll   (menuBar.findColour (defaultHighlightColourId).withAlpha (0.75f));
-        g.setColour (menuBar.findColour (defaultHighlightedTextColourId));
+        g.fillAll   (menuBar.findColor (defaultHighlightColorId).withAlpha (0.75f));
+        g.setColor (menuBar.findColor (defaultHighlightedTextColorId));
     }
     else
     {
-        g.setColour (menuBar.findColour (defaultTextColourId));
+        g.setColor (menuBar.findColor (defaultTextColorId));
     }
 
     g.setFont (getMenuBarFont (menuBar, itemIndex, itemText));
-    g.drawFittedText (itemText, 0, 0, width, height, Justification::centred, 1);
+    g.drawFittedText (itemText, 0, 0, width, height, Justification::centered, 1);
 }
 
 void ProjucerLookAndFeel::drawResizableFrame (Graphics& g, int w, int h, const BorderSize<int>& border)
@@ -327,31 +327,31 @@ void ProjucerLookAndFeel::drawComboBox (Graphics& g, int width, int height, bool
 
     if (isChoiceCompChild)
     {
-        box.setColour (ComboBox::textColourId, findColour (widgetTextColourId));
+        box.setColor (ComboBox::textColorId, findColor (widgetTextColorId));
 
-        g.setColour (findColour (widgetBackgroundColourId));
+        g.setColor (findColor (widgetBackgroundColorId));
         g.fillRect (boxBounds);
 
         auto arrowZone = boxBounds.removeFromRight (boxBounds.getHeight()).reduced (0, 2).toFloat();
-        g.setColour (Colours::black);
+        g.setColor (Colors::black);
         g.fillPath (getChoiceComponentArrowPath (arrowZone));
     }
     else
     {
-        g.setColour (box.findColour (ComboBox::outlineColourId));
+        g.setColor (box.findColor (ComboBox::outlineColorId));
         g.drawRoundedRectangle (boxBounds.toFloat().reduced (0.5f, 0.5f), cornerSize, 1.0f);
 
         auto arrowZone = boxBounds.removeFromRight (boxBounds.getHeight()).toFloat();
-        g.setColour (box.findColour (ComboBox::arrowColourId).withAlpha ((box.isEnabled() ? 0.9f : 0.2f)));
-        g.fillPath (getArrowPath (arrowZone, 2, true, Justification::centred));
+        g.setColor (box.findColor (ComboBox::arrowColorId).withAlpha ((box.isEnabled() ? 0.9f : 0.2f)));
+        g.fillPath (getArrowPath (arrowZone, 2, true, Justification::centered));
 
     }
 }
 
 void ProjucerLookAndFeel::drawTreeviewPlusMinusBox (Graphics& g, const Rectangle<float>& area,
-                                                    Colour, bool isOpen, bool /**isMouseOver*/)
+                                                    Color, bool isOpen, bool /**isMouseOver*/)
 {
-    g.strokePath (getArrowPath (area, isOpen ? 2 : 1, false, Justification::centredRight), PathStrokeType (2.0f));
+    g.strokePath (getArrowPath (area, isOpen ? 2 : 1, false, Justification::centeredRight), PathStrokeType (2.0f));
 }
 
 void ProjucerLookAndFeel::drawProgressBar (Graphics& g, ProgressBar& progressBar,
@@ -359,15 +359,15 @@ void ProjucerLookAndFeel::drawProgressBar (Graphics& g, ProgressBar& progressBar
 {
     ignoreUnused (width, height, progress);
 
-    const auto background = progressBar.findColour (ProgressBar::backgroundColourId);
-    const auto foreground = progressBar.findColour (defaultButtonBackgroundColourId);
+    const auto background = progressBar.findColor (ProgressBar::backgroundColorId);
+    const auto foreground = progressBar.findColor (defaultButtonBackgroundColorId);
 
     const auto sideLength = jmin (width, height);
 
-    auto barBounds = progressBar.getLocalBounds().withSizeKeepingCentre (sideLength, sideLength).reduced (1).toFloat();
+    auto barBounds = progressBar.getLocalBounds().withSizeKeepingCenter (sideLength, sideLength).reduced (1).toFloat();
 
     auto rotationInDegrees  = static_cast<float> ((Time::getMillisecondCounter() / 10) % 360);
-    auto normalisedRotation = rotationInDegrees / 360.0f;
+    auto normalizedRotation = rotationInDegrees / 360.0f;
 
     const auto rotationOffset = 22.5f;
     const auto maxRotation    = 315.0f;
@@ -375,22 +375,22 @@ void ProjucerLookAndFeel::drawProgressBar (Graphics& g, ProgressBar& progressBar
     auto startInDegrees = rotationInDegrees;
     auto endInDegrees   = startInDegrees + rotationOffset;
 
-    if (normalisedRotation >= 0.25f && normalisedRotation < 0.5f)
+    if (normalizedRotation >= 0.25f && normalizedRotation < 0.5f)
     {
-        const auto rescaledRotation = (normalisedRotation * 4.0f) - 1.0f;
+        const auto rescaledRotation = (normalizedRotation * 4.0f) - 1.0f;
         endInDegrees = startInDegrees + rotationOffset + (maxRotation * rescaledRotation);
     }
-    else if (normalisedRotation >= 0.5f && normalisedRotation <= 1.0f)
+    else if (normalizedRotation >= 0.5f && normalizedRotation <= 1.0f)
     {
         endInDegrees = startInDegrees + rotationOffset + maxRotation;
-        const auto rescaledRotation = 1.0f - ((normalisedRotation * 2.0f) - 1.0f);
+        const auto rescaledRotation = 1.0f - ((normalizedRotation * 2.0f) - 1.0f);
         startInDegrees = endInDegrees - rotationOffset - (maxRotation * rescaledRotation);
     }
 
-    g.setColour (background);
+    g.setColor (background);
     Path arcPath2;
-    arcPath2.addCentredArc (barBounds.getCentreX(),
-                            barBounds.getCentreY(),
+    arcPath2.addCenteredArc (barBounds.getCenterX(),
+                            barBounds.getCenterY(),
                             barBounds.getWidth() * 0.5f,
                             barBounds.getHeight() * 0.5f, 0.0f,
                             0.0f,
@@ -398,10 +398,10 @@ void ProjucerLookAndFeel::drawProgressBar (Graphics& g, ProgressBar& progressBar
                             true);
     g.strokePath (arcPath2, PathStrokeType (2.0f));
 
-    g.setColour (foreground);
+    g.setColor (foreground);
     Path arcPath;
-    arcPath.addCentredArc (barBounds.getCentreX(),
-                           barBounds.getCentreY(),
+    arcPath.addCenteredArc (barBounds.getCenterX(),
+                           barBounds.getCenterY(),
                            barBounds.getWidth() * 0.5f,
                            barBounds.getHeight() * 0.5f,
                            0.0f,
@@ -409,15 +409,15 @@ void ProjucerLookAndFeel::drawProgressBar (Graphics& g, ProgressBar& progressBar
                            degreesToRadians (endInDegrees),
                            true);
 
-    arcPath.applyTransform (AffineTransform::rotation (normalisedRotation * MathConstants<float>::pi * 2.25f,
-                                                       barBounds.getCentreX(), barBounds.getCentreY()));
+    arcPath.applyTransform (AffineTransform::rotation (normalizedRotation * MathConstants<float>::pi * 2.25f,
+                                                       barBounds.getCenterX(), barBounds.getCenterY()));
     g.strokePath (arcPath, PathStrokeType (2.0f));
 
     if (textToShow.isNotEmpty())
     {
-        g.setColour (progressBar.findColour (TextButton::textColourOffId));
+        g.setColor (progressBar.findColor (TextButton::textColorOffId));
         g.setFont (Font (12.0f, 2));
-        g.drawText (textToShow, barBounds, Justification::centred, false);
+        g.drawText (textToShow, barBounds, Justification::centered, false);
     }
 }
 
@@ -428,35 +428,35 @@ Path ProjucerLookAndFeel::getArrowPath (Rectangle<float> arrowZone, const int di
     auto w = jmin (arrowZone.getWidth(),  (direction == 0 || direction == 2) ? 8.0f : filled ? 5.0f : 8.0f);
     auto h = jmin (arrowZone.getHeight(), (direction == 0 || direction == 2) ? 5.0f : filled ? 8.0f : 5.0f);
 
-    if (justification == Justification::centred)
+    if (justification == Justification::centered)
     {
         arrowZone.reduce ((arrowZone.getWidth() - w) / 2, (arrowZone.getHeight() - h) / 2);
     }
-    else if (justification == Justification::centredRight)
+    else if (justification == Justification::centeredRight)
     {
         arrowZone.removeFromLeft (arrowZone.getWidth() - w);
         arrowZone.reduce (0, (arrowZone.getHeight() - h) / 2);
     }
-    else if (justification == Justification::centredLeft)
+    else if (justification == Justification::centeredLeft)
     {
         arrowZone.removeFromRight (arrowZone.getWidth() - w);
         arrowZone.reduce (0, (arrowZone.getHeight() - h) / 2);
     }
     else
     {
-        jassertfalse; // currently only supports centred justifications
+        jassertfalse; // currently only supports centered justifications
     }
 
     Path path;
     path.startNewSubPath (arrowZone.getX(), arrowZone.getBottom());
-    path.lineTo (arrowZone.getCentreX(), arrowZone.getY());
+    path.lineTo (arrowZone.getCenterX(), arrowZone.getY());
     path.lineTo (arrowZone.getRight(), arrowZone.getBottom());
 
     if (filled)
         path.closeSubPath();
 
     path.applyTransform (AffineTransform::rotation (direction * MathConstants<float>::halfPi,
-                                                    arrowZone.getCentreX(), arrowZone.getCentreY()));
+                                                    arrowZone.getCenterX(), arrowZone.getCenterY()));
 
     return path;
 }
@@ -466,8 +466,8 @@ Path ProjucerLookAndFeel::getChoiceComponentArrowPath (Rectangle<float> arrowZon
     auto topBounds = arrowZone.removeFromTop (arrowZone.getHeight() * 0.5f);
     auto bottomBounds = arrowZone;
 
-    auto topArrow = getArrowPath (topBounds, 0, true, Justification::centred);
-    auto bottomArrow = getArrowPath (bottomBounds, 2, true, Justification::centred);
+    auto topArrow = getArrowPath (topBounds, 0, true, Justification::centered);
+    auto bottomArrow = getArrowPath (bottomBounds, 2, true, Justification::centered);
 
     topArrow.addPath (bottomArrow);
 
@@ -475,100 +475,100 @@ Path ProjucerLookAndFeel::getChoiceComponentArrowPath (Rectangle<float> arrowZon
 }
 
 //==============================================================================
-void ProjucerLookAndFeel::setupColours()
+void ProjucerLookAndFeel::setupColors()
 {
-    auto& colourScheme = getCurrentColourScheme();
+    auto& colorScheme = getCurrentColorScheme();
 
-    if (colourScheme == getDarkColourScheme())
+    if (colorScheme == getDarkColorScheme())
     {
-        setColour (backgroundColourId,                   Colour (0xff323e44));
-        setColour (secondaryBackgroundColourId,          Colour (0xff263238));
-        setColour (defaultTextColourId,                  Colours::white);
-        setColour (widgetTextColourId,                   Colours::white);
-        setColour (defaultButtonBackgroundColourId,      Colour (0xffa45c94));
-        setColour (secondaryButtonBackgroundColourId,    Colours::black);
-        setColour (userButtonBackgroundColourId,         Colour (0xffa45c94));
-        setColour (defaultIconColourId,                  Colours::white);
-        setColour (treeIconColourId,                     Colour (0xffa9a9a9));
-        setColour (defaultHighlightColourId,             Colour (0xffe0ec65));
-        setColour (defaultHighlightedTextColourId,       Colours::black);
-        setColour (codeEditorLineNumberColourId,         Colour (0xffaaaaaa));
-        setColour (activeTabIconColourId,                Colours::white);
-        setColour (inactiveTabBackgroundColourId,        Colour (0xff181f22));
-        setColour (inactiveTabIconColourId,              Colour (0xffa9a9a9));
-        setColour (contentHeaderBackgroundColourId,      Colours::black);
-        setColour (widgetBackgroundColourId,             Colour (0xff495358));
-        setColour (secondaryWidgetBackgroundColourId,    Colour (0xff303b41));
+        setColor (backgroundColorId,                   Color (0xff323e44));
+        setColor (secondaryBackgroundColorId,          Color (0xff263238));
+        setColor (defaultTextColorId,                  Colors::white);
+        setColor (widgetTextColorId,                   Colors::white);
+        setColor (defaultButtonBackgroundColorId,      Color (0xffa45c94));
+        setColor (secondaryButtonBackgroundColorId,    Colors::black);
+        setColor (userButtonBackgroundColorId,         Color (0xffa45c94));
+        setColor (defaultIconColorId,                  Colors::white);
+        setColor (treeIconColorId,                     Color (0xffa9a9a9));
+        setColor (defaultHighlightColorId,             Color (0xffe0ec65));
+        setColor (defaultHighlightedTextColorId,       Colors::black);
+        setColor (codeEditorLineNumberColorId,         Color (0xffaaaaaa));
+        setColor (activeTabIconColorId,                Colors::white);
+        setColor (inactiveTabBackgroundColorId,        Color (0xff181f22));
+        setColor (inactiveTabIconColorId,              Color (0xffa9a9a9));
+        setColor (contentHeaderBackgroundColorId,      Colors::black);
+        setColor (widgetBackgroundColorId,             Color (0xff495358));
+        setColor (secondaryWidgetBackgroundColorId,    Color (0xff303b41));
 
-        colourScheme.setUIColour (LookAndFeel_V4::ColourScheme::UIColour::defaultFill, Colour (0xffa45c94));
+        colorScheme.setUIColor (LookAndFeel_V4::ColorScheme::UIColor::defaultFill, Color (0xffa45c94));
     }
-    else if (colourScheme == getGreyColourScheme())
+    else if (colorScheme == getGrayColorScheme())
     {
-        setColour (backgroundColourId,                   Colour (0xff505050));
-        setColour (secondaryBackgroundColourId,          Colour (0xff424241));
-        setColour (defaultTextColourId,                  Colours::white);
-        setColour (widgetTextColourId,                   Colours::black);
-        setColour (defaultButtonBackgroundColourId,      Colour (0xff26ba90));
-        setColour (secondaryButtonBackgroundColourId,    Colours::black);
-        setColour (userButtonBackgroundColourId,         Colour (0xff26ba90));
-        setColour (defaultIconColourId,                  Colours::white);
-        setColour (treeIconColourId,                     Colour (0xffa9a9a9));
-        setColour (defaultHighlightColourId,             Colour (0xffe0ec65));
-        setColour (defaultHighlightedTextColourId,       Colours::black);
-        setColour (codeEditorLineNumberColourId,         Colour (0xffaaaaaa));
-        setColour (activeTabIconColourId,                Colours::white);
-        setColour (inactiveTabBackgroundColourId,        Colour (0xff373737));
-        setColour (inactiveTabIconColourId,              Colour (0xffa9a9a9));
-        setColour (contentHeaderBackgroundColourId,      Colours::black);
-        setColour (widgetBackgroundColourId,             Colours::white);
-        setColour (secondaryWidgetBackgroundColourId,    Colour (0xffdddddd));
+        setColor (backgroundColorId,                   Color (0xff505050));
+        setColor (secondaryBackgroundColorId,          Color (0xff424241));
+        setColor (defaultTextColorId,                  Colors::white);
+        setColor (widgetTextColorId,                   Colors::black);
+        setColor (defaultButtonBackgroundColorId,      Color (0xff26ba90));
+        setColor (secondaryButtonBackgroundColorId,    Colors::black);
+        setColor (userButtonBackgroundColorId,         Color (0xff26ba90));
+        setColor (defaultIconColorId,                  Colors::white);
+        setColor (treeIconColorId,                     Color (0xffa9a9a9));
+        setColor (defaultHighlightColorId,             Color (0xffe0ec65));
+        setColor (defaultHighlightedTextColorId,       Colors::black);
+        setColor (codeEditorLineNumberColorId,         Color (0xffaaaaaa));
+        setColor (activeTabIconColorId,                Colors::white);
+        setColor (inactiveTabBackgroundColorId,        Color (0xff373737));
+        setColor (inactiveTabIconColorId,              Color (0xffa9a9a9));
+        setColor (contentHeaderBackgroundColorId,      Colors::black);
+        setColor (widgetBackgroundColorId,             Colors::white);
+        setColor (secondaryWidgetBackgroundColorId,    Color (0xffdddddd));
     }
-    else if (colourScheme == getLightColourScheme())
+    else if (colorScheme == getLightColorScheme())
     {
-        setColour (backgroundColourId,                   Colour (0xffefefef));
-        setColour (secondaryBackgroundColourId,          Colour (0xfff9f9f9));
-        setColour (defaultTextColourId,                  Colours::black);
-        setColour (widgetTextColourId,                   Colours::black);
-        setColour (defaultButtonBackgroundColourId,      Colour (0xff42a2c8));
-        setColour (secondaryButtonBackgroundColourId,    Colour (0xffa1c677));
-        setColour (userButtonBackgroundColourId,         Colour (0xff42a2c8));
-        setColour (defaultIconColourId,                  Colours::white);
-        setColour (treeIconColourId,                     Colour (0xffa9a9a9));
-        setColour (defaultHighlightColourId,             Colour (0xffffd05b));
-        setColour (defaultHighlightedTextColourId,       Colour (0xff585656));
-        setColour (codeEditorLineNumberColourId,         Colour (0xff888888));
-        setColour (activeTabIconColourId,                Colour (0xff42a2c8));
-        setColour (inactiveTabBackgroundColourId,        Colour (0xffd5d5d5));
-        setColour (inactiveTabIconColourId,              Colour (0xffa9a9a9));
-        setColour (contentHeaderBackgroundColourId,      Colour (0xff42a2c8));
-        setColour (widgetBackgroundColourId,             Colours::white);
-        setColour (secondaryWidgetBackgroundColourId,    Colour (0xfff4f4f4));
+        setColor (backgroundColorId,                   Color (0xffefefef));
+        setColor (secondaryBackgroundColorId,          Color (0xfff9f9f9));
+        setColor (defaultTextColorId,                  Colors::black);
+        setColor (widgetTextColorId,                   Colors::black);
+        setColor (defaultButtonBackgroundColorId,      Color (0xff42a2c8));
+        setColor (secondaryButtonBackgroundColorId,    Color (0xffa1c677));
+        setColor (userButtonBackgroundColorId,         Color (0xff42a2c8));
+        setColor (defaultIconColorId,                  Colors::white);
+        setColor (treeIconColorId,                     Color (0xffa9a9a9));
+        setColor (defaultHighlightColorId,             Color (0xffffd05b));
+        setColor (defaultHighlightedTextColorId,       Color (0xff585656));
+        setColor (codeEditorLineNumberColorId,         Color (0xff888888));
+        setColor (activeTabIconColorId,                Color (0xff42a2c8));
+        setColor (inactiveTabBackgroundColorId,        Color (0xffd5d5d5));
+        setColor (inactiveTabIconColorId,              Color (0xffa9a9a9));
+        setColor (contentHeaderBackgroundColorId,      Color (0xff42a2c8));
+        setColor (widgetBackgroundColorId,             Colors::white);
+        setColor (secondaryWidgetBackgroundColorId,    Color (0xfff4f4f4));
     }
 
-    setColour (Label::textColourId,                             findColour (defaultTextColourId));
-    setColour (Label::textWhenEditingColourId,                  findColour (widgetTextColourId));
-    setColour (TextEditor::highlightColourId,                   findColour (defaultHighlightColourId).withAlpha (0.75f));
-    setColour (TextEditor::highlightedTextColourId,             findColour (defaultHighlightedTextColourId));
-    setColour (TextEditor::outlineColourId,                     Colours::transparentBlack);
-    setColour (TextEditor::focusedOutlineColourId,              Colours::transparentBlack);
-    setColour (TextEditor::backgroundColourId,                  findColour (widgetBackgroundColourId));
-    setColour (TextEditor::textColourId,                        findColour (widgetTextColourId));
-    setColour (TextButton::buttonColourId,                      findColour (defaultButtonBackgroundColourId));
-    setColour (ScrollBar::ColourIds::thumbColourId,             Colour (0xffd0d8e0));
-    setColour (TextPropertyComponent::outlineColourId,          Colours::transparentBlack);
-    setColour (TextPropertyComponent::backgroundColourId,       findColour (widgetBackgroundColourId));
-    setColour (TextPropertyComponent::textColourId,             findColour (widgetTextColourId));
-    setColour (BooleanPropertyComponent::outlineColourId,       Colours::transparentBlack);
-    setColour (BooleanPropertyComponent::backgroundColourId,    findColour (widgetBackgroundColourId));
-    setColour (ToggleButton::tickDisabledColourId,              Colour (0xffa9a9a9));
-    setColour (ToggleButton::tickColourId,                      findColour (defaultButtonBackgroundColourId).withMultipliedBrightness(1.3f));
-    setColour (CodeEditorComponent::backgroundColourId,         findColour (secondaryBackgroundColourId));
-    setColour (CodeEditorComponent::lineNumberTextId,           findColour (codeEditorLineNumberColourId));
-    setColour (CodeEditorComponent::lineNumberBackgroundId,     findColour (backgroundColourId));
-    setColour (CodeEditorComponent::highlightColourId,          findColour (defaultHighlightColourId).withAlpha (0.5f));
-    setColour (CaretComponent::caretColourId,                   findColour (defaultButtonBackgroundColourId));
-    setColour (TreeView::selectedItemBackgroundColourId,        findColour (defaultHighlightColourId));
-    setColour (PopupMenu::highlightedBackgroundColourId,        findColour (defaultHighlightColourId).withAlpha (0.75f));
-    setColour (PopupMenu::highlightedTextColourId,              findColour (defaultHighlightedTextColourId));
-    setColour (0x1000440, /*LassoComponent::lassoFillColourId*/ findColour (defaultHighlightColourId).withAlpha (0.3f));
+    setColor (Label::textColorId,                             findColor (defaultTextColorId));
+    setColor (Label::textWhenEditingColorId,                  findColor (widgetTextColorId));
+    setColor (TextEditor::highlightColorId,                   findColor (defaultHighlightColorId).withAlpha (0.75f));
+    setColor (TextEditor::highlightedTextColorId,             findColor (defaultHighlightedTextColorId));
+    setColor (TextEditor::outlineColorId,                     Colors::transparentBlack);
+    setColor (TextEditor::focusedOutlineColorId,              Colors::transparentBlack);
+    setColor (TextEditor::backgroundColorId,                  findColor (widgetBackgroundColorId));
+    setColor (TextEditor::textColorId,                        findColor (widgetTextColorId));
+    setColor (TextButton::buttonColorId,                      findColor (defaultButtonBackgroundColorId));
+    setColor (ScrollBar::ColorIds::thumbColorId,             Color (0xffd0d8e0));
+    setColor (TextPropertyComponent::outlineColorId,          Colors::transparentBlack);
+    setColor (TextPropertyComponent::backgroundColorId,       findColor (widgetBackgroundColorId));
+    setColor (TextPropertyComponent::textColorId,             findColor (widgetTextColorId));
+    setColor (BooleanPropertyComponent::outlineColorId,       Colors::transparentBlack);
+    setColor (BooleanPropertyComponent::backgroundColorId,    findColor (widgetBackgroundColorId));
+    setColor (ToggleButton::tickDisabledColorId,              Color (0xffa9a9a9));
+    setColor (ToggleButton::tickColorId,                      findColor (defaultButtonBackgroundColorId).withMultipliedBrightness(1.3f));
+    setColor (CodeEditorComponent::backgroundColorId,         findColor (secondaryBackgroundColorId));
+    setColor (CodeEditorComponent::lineNumberTextId,           findColor (codeEditorLineNumberColorId));
+    setColor (CodeEditorComponent::lineNumberBackgroundId,     findColor (backgroundColorId));
+    setColor (CodeEditorComponent::highlightColorId,          findColor (defaultHighlightColorId).withAlpha (0.5f));
+    setColor (CaretComponent::caretColorId,                   findColor (defaultButtonBackgroundColorId));
+    setColor (TreeView::selectedItemBackgroundColorId,        findColor (defaultHighlightColorId));
+    setColor (PopupMenu::highlightedBackgroundColorId,        findColor (defaultHighlightColorId).withAlpha (0.75f));
+    setColor (PopupMenu::highlightedTextColorId,              findColor (defaultHighlightedTextColorId));
+    setColor (0x1000440, /*LassoComponent::lassoFillColorId*/ findColor (defaultHighlightColorId).withAlpha (0.3f));
 }

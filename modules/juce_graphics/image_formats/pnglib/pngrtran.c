@@ -1146,7 +1146,7 @@ png_init_palette_transformations(png_structrp png_ptr)
     */
 
    /* The following code cannot be entered in the alpha pre-multiplication case
-    * because PNG_BACKGROUND_EXPAND is cancelled below.
+    * because PNG_BACKGROUND_EXPAND is canceled below.
     */
    if ((png_ptr->transformations & PNG_BACKGROUND_EXPAND) &&
        (png_ptr->transformations & PNG_EXPAND))
@@ -1213,7 +1213,7 @@ png_init_rgb_transformations(png_structrp png_ptr)
     */
 
    /* The following code cannot be entered in the alpha pre-multiplication case
-    * because PNG_BACKGROUND_EXPAND is cancelled below.
+    * because PNG_BACKGROUND_EXPAND is canceled below.
     */
    if ((png_ptr->transformations & PNG_BACKGROUND_EXPAND) &&
        (png_ptr->transformations & PNG_EXPAND) &&
@@ -1340,7 +1340,7 @@ png_init_read_transformations(png_structrp png_ptr)
 #endif
 
    /* Certain transformations have the effect of preventing other
-    * transformations that happen afterward in png_do_read_transformations,
+    * transformations that happen afterwards in png_do_read_transformations,
     * resolve the interdependencies here.  From the code of
     * png_do_read_transformations the order is:
     *
@@ -1461,7 +1461,7 @@ png_init_read_transformations(png_structrp png_ptr)
     * can be performed directly on the palette, and some (such as rgb to gray)
     * can be optimized inside the palette.  This is particularly true of the
     * composite (background and alpha) stuff, which can be pretty much all done
-    * in the palette even if the result is expanded to RGB or gray afterward.
+    * in the palette even if the result is expanded to RGB or gray afterwards.
     *
     * NOTE: this is Not Yet Implemented, the code behaves as in 1.5.1 and
     * earlier and the palette stuff is actually handled on the first row.  This
@@ -1540,7 +1540,7 @@ png_init_read_transformations(png_structrp png_ptr)
     * built when it would be quicker to just calculate the correct value for
     * each palette entry directly.  Also, the test is too tricky - why check
     * PNG_RGB_TO_GRAY if PNG_GAMMA is not set?  The answer seems to be that
-    * PNG_GAMMA is cancelled even if the gamma is known?  The test excludes the
+    * PNG_GAMMA is canceled even if the gamma is known?  The test excludes the
     * PNG_COMPOSE case, so apparently if there is no *overall* gamma correction
     * the gamma tables will not be built even if composition is required on a
     * gamma encoded value.
@@ -3217,7 +3217,7 @@ png_do_gray_to_rgb(png_row_infop row_info, png_bytep row)
  * <http://www.inforamp.net/~poynton/>  (THIS LINK IS DEAD June 2008 but
  * versions dated 1998 through November 2002 have been archived at
  * http://web.archive.org/web/20000816232553/http://www.inforamp.net/
- * ~poynton/notes/colour_and_gamma/ColorFAQ.txt )
+ * ~poynton/notes/color_and_gamma/ColorFAQ.txt )
  * Charles Poynton poynton at poynton.com
  *
  *     Y = 0.212671 * R + 0.715160 * G + 0.072169 * B

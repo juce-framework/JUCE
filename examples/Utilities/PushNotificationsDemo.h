@@ -70,8 +70,8 @@ public:
         addAndMakeVisible (notAvailableYetLabel);
       #endif
 
-        headerLabel         .setJustificationType (Justification::centred);
-        notAvailableYetLabel.setJustificationType (Justification::centred);
+        headerLabel         .setJustificationType (Justification::centered);
+        notAvailableYetLabel.setJustificationType (Justification::centered);
 
       #if JUCE_MAC
         StringArray tabNames { "Params1", "Params2", "Params3", "Params4" };
@@ -79,17 +79,17 @@ public:
         StringArray tabNames { "Req. params", "Opt. params1", "Opt. params2", "Opt. params3" };
       #endif
 
-        auto colour = getLookAndFeel().findColour (ResizableWindow::backgroundColourId);
-        localNotificationsTabs.addTab (tabNames[0], colour, &paramsOneView, false);
-        localNotificationsTabs.addTab (tabNames[1], colour, &paramsTwoView, false);
+        auto color = getLookAndFeel().findColor (ResizableWindow::backgroundColorId);
+        localNotificationsTabs.addTab (tabNames[0], color, &paramsOneView, false);
+        localNotificationsTabs.addTab (tabNames[1], color, &paramsTwoView, false);
       #if JUCE_ANDROID
-        localNotificationsTabs.addTab (tabNames[2], colour, &paramsThreeView, false);
-        localNotificationsTabs.addTab (tabNames[3], colour, &paramsFourView,  false);
+        localNotificationsTabs.addTab (tabNames[2], color, &paramsThreeView, false);
+        localNotificationsTabs.addTab (tabNames[3], color, &paramsFourView,  false);
       #endif
-        localNotificationsTabs.addTab ("Aux. actions", colour, &auxActionsView, false);
+        localNotificationsTabs.addTab ("Aux. actions", color, &auxActionsView, false);
 
-        mainTabs.addTab ("Local",  colour, &localNotificationsTabs, false);
-        mainTabs.addTab ("Remote", colour, &remoteView,             false);
+        mainTabs.addTab ("Local",  color, &localNotificationsTabs, false);
+        mainTabs.addTab ("Remote", color, &remoteView,             false);
 
         auto userArea = Desktop::getInstance().getDisplays().getMainDisplay().userArea;
       #if JUCE_ANDROID || JUCE_IOS
@@ -148,8 +148,8 @@ public:
             { PushNotifications::getInstance()->unsubscribeFromTopic ("sports"); };
       #endif
 
-        paramControls.accentColourButton.onClick = [this] { setupAccentColour(); };
-        paramControls.ledColourButton   .onClick = [this] { setupLedColour(); };
+        paramControls.accentColorButton.onClick = [this] { setupAccentColor(); };
+        paramControls.ledColorButton   .onClick = [this] { setupLedColor(); };
 
         jassert (PushNotifications::getInstance()->areNotificationsEnabled());
 
@@ -171,7 +171,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+        g.fillAll (getLookAndFeel().findColor (ResizableWindow::backgroundColorId));
     }
 
     void resized() override
@@ -372,13 +372,13 @@ private:
         n.groupId      = paramControls.groupIdEditor.getText();
         n.groupSortKey = paramControls.sortKeyEditor.getText();
         n.groupSummary = paramControls.groupSummaryButton.getToggleState();
-        n.groupAlertBehaviour = Notification::GroupAlertBehaviour (paramControls.groupAlertBehaviourComboBox.getSelectedItemIndex());
+        n.groupAlertBehavior = Notification::GroupAlertBehavior (paramControls.groupAlertBehaviorComboBox.getSelectedItemIndex());
     }
 
     void fillOptionalParamsThree (PushNotifications::Notification& n)
     {
-        n.accentColour = paramControls.accentColourButton.findColour (TextButton::buttonColourId, false);
-        n.ledColour    = paramControls.ledColourButton   .findColour (TextButton::buttonColourId, false);
+        n.accentColor = paramControls.accentColorButton.findColor (TextButton::buttonColorId, false);
+        n.ledColor    = paramControls.ledColorButton   .findColor (TextButton::buttonColorId, false);
 
         using Notification = PushNotifications::Notification;
         Notification::LedBlinkPattern ledBlinkPattern;
@@ -410,52 +410,52 @@ private:
         }
     }
 
-    void setupAccentColour()
+    void setupAccentColor()
     {
-        paramControls.accentColourSelector = new ColourSelector();
-        paramControls.accentColourSelector->setName ("accent colour");
-        paramControls.accentColourSelector->setCurrentColour (paramControls.accentColourButton.findColour (TextButton::buttonColourId));
-        paramControls.accentColourSelector->setColour (ColourSelector::backgroundColourId, Colours::transparentBlack);
-        paramControls.accentColourSelector->setSize (200, 200);
-        paramControls.accentColourSelector->addComponentListener (this);
-        paramControls.accentColourSelector->addChangeListener (this);
+        paramControls.accentColorSelector = new ColorSelector();
+        paramControls.accentColorSelector->setName ("accent color");
+        paramControls.accentColorSelector->setCurrentColor (paramControls.accentColorButton.findColor (TextButton::buttonColorId));
+        paramControls.accentColorSelector->setColor (ColorSelector::backgroundColorId, Colors::transparentBlack);
+        paramControls.accentColorSelector->setSize (200, 200);
+        paramControls.accentColorSelector->addComponentListener (this);
+        paramControls.accentColorSelector->addChangeListener (this);
 
-        CallOutBox::launchAsynchronously (paramControls.accentColourSelector, paramControls.accentColourButton.getScreenBounds(), nullptr);
+        CallOutBox::launchAsynchronously (paramControls.accentColorSelector, paramControls.accentColorButton.getScreenBounds(), nullptr);
     }
 
-    void setupLedColour()
+    void setupLedColor()
     {
-        paramControls.ledColourSelector = new ColourSelector();
-        paramControls.ledColourSelector->setName ("led colour");
-        paramControls.ledColourSelector->setCurrentColour (paramControls.ledColourButton.findColour (TextButton::buttonColourId));
-        paramControls.ledColourSelector->setColour (ColourSelector::backgroundColourId, Colours::transparentBlack);
-        paramControls.ledColourSelector->setSize (200, 200);
-        paramControls.ledColourSelector->addComponentListener (this);
-        paramControls.ledColourSelector->addChangeListener (this);
+        paramControls.ledColorSelector = new ColorSelector();
+        paramControls.ledColorSelector->setName ("led color");
+        paramControls.ledColorSelector->setCurrentColor (paramControls.ledColorButton.findColor (TextButton::buttonColorId));
+        paramControls.ledColorSelector->setColor (ColorSelector::backgroundColorId, Colors::transparentBlack);
+        paramControls.ledColorSelector->setSize (200, 200);
+        paramControls.ledColorSelector->addComponentListener (this);
+        paramControls.ledColorSelector->addChangeListener (this);
 
-        CallOutBox::launchAsynchronously (paramControls.ledColourSelector, paramControls.accentColourButton.getScreenBounds(), nullptr);
+        CallOutBox::launchAsynchronously (paramControls.ledColorSelector, paramControls.accentColorButton.getScreenBounds(), nullptr);
     }
 
     void changeListenerCallback (ChangeBroadcaster* source) override
     {
-        if (source == paramControls.accentColourSelector)
+        if (source == paramControls.accentColorSelector)
         {
-            auto c = paramControls.accentColourSelector->getCurrentColour();
-            paramControls.accentColourButton.setColour (TextButton::buttonColourId, c);
+            auto c = paramControls.accentColorSelector->getCurrentColor();
+            paramControls.accentColorButton.setColor (TextButton::buttonColorId, c);
         }
-        else if (source == paramControls.ledColourSelector)
+        else if (source == paramControls.ledColorSelector)
         {
-            auto c = paramControls.ledColourSelector->getCurrentColour();
-            paramControls.ledColourButton.setColour (TextButton::buttonColourId, c);
+            auto c = paramControls.ledColorSelector->getCurrentColor();
+            paramControls.ledColorButton.setColor (TextButton::buttonColorId, c);
         }
     }
 
     void componentBeingDeleted (Component& component) override
     {
-        if (&component == paramControls.accentColourSelector)
-            paramControls.accentColourSelector = nullptr;
-        else if (&component == paramControls.ledColourSelector)
-            paramControls.ledColourSelector = nullptr;
+        if (&component == paramControls.accentColorSelector)
+            paramControls.accentColorSelector = nullptr;
+        else if (&component == paramControls.ledColorSelector)
+            paramControls.ledColorSelector = nullptr;
     }
 
     void handleNotification (bool isLocalNotification, const PushNotifications::Notification& n) override
@@ -558,7 +558,7 @@ private:
         ch1.lockScreenAppearance = PushNotifications::Notification::showCompletely;
         ch1.description = "High Priority Channel for important stuff";
         ch1.groupId = "demoGroup";
-        ch1.ledColour = Colours::red;
+        ch1.ledColor = Colors::red;
         ch1.bypassDoNotDisturb = true;
         ch1.canShowBadge = true;
         ch1.enableLights = true;
@@ -572,7 +572,7 @@ private:
         ch2.lockScreenAppearance = PushNotifications::Notification::showPartially;
         ch2.description = "Medium Priority Channel for standard stuff";
         ch2.groupId = "demoGroup";
-        ch2.ledColour = Colours::yellow;
+        ch2.ledColor = Colors::yellow;
         ch2.canShowBadge = true;
         ch2.enableLights = true;
         ch2.enableVibration = true;
@@ -727,13 +727,13 @@ private:
         TextEditor   sortKeyEditor;
         Label        groupSummaryLabel          { "groupSummaryLabel",          "GroupSummary" };
         ToggleButton groupSummaryButton;
-        Label        groupAlertBehaviourLabel   { "groupAlertBehaviourLabel",   "GroupAlertBehaviour" };
-        ComboBox     groupAlertBehaviourComboBox;
+        Label        groupAlertBehaviorLabel   { "groupAlertBehaviorLabel",   "GroupAlertBehavior" };
+        ComboBox     groupAlertBehaviorComboBox;
 
-        Label        accentColourLabel          { "accentColourLabel",          "AccentColour" };
-        TextButton   accentColourButton;
-        Label        ledColourLabel             { "ledColourLabel",             "LedColour" };
-        TextButton   ledColourButton;
+        Label        accentColorLabel          { "accentColorLabel",          "AccentColor" };
+        TextButton   accentColorButton;
+        Label        ledColorLabel             { "ledColorLabel",             "LedColor" };
+        TextButton   ledColorButton;
         Label        ledMsToBeOnLabel           { "ledMsToBeOnLabel",           "LedMsToBeOn" };
         ComboBox     ledMsToBeOnComboBox;
         Label        ledMsToBeOffLabel          { "ledMsToBeOffLabel",          "LedMsToBeOff" };
@@ -751,8 +751,8 @@ private:
         Label        timeoutAfterLabel          { "timeoutAfterLabel",          "Timeout After Ms" };
         ComboBox     timeoutAfterComboBox;
 
-        ColourSelector* accentColourSelector = nullptr;
-        ColourSelector* ledColourSelector    = nullptr;
+        ColorSelector* accentColorSelector = nullptr;
+        ColorSelector* ledColorSelector    = nullptr;
     };
 
     void setupControls()
@@ -860,10 +860,10 @@ private:
         pc.lockScreenVisibilityComboBox.addItem ("show completely", 3);
         pc.lockScreenVisibilityComboBox.setSelectedItemIndex (1);
 
-        pc.groupAlertBehaviourComboBox.addItem ("alert all",      1);
-        pc.groupAlertBehaviourComboBox.addItem ("alert summary",  2);
-        pc.groupAlertBehaviourComboBox.addItem ("alert children", 3);
-        pc.groupAlertBehaviourComboBox.setSelectedItemIndex (0);
+        pc.groupAlertBehaviorComboBox.addItem ("alert all",      1);
+        pc.groupAlertBehaviorComboBox.addItem ("alert summary",  2);
+        pc.groupAlertBehaviorComboBox.addItem ("alert children", 3);
+        pc.groupAlertBehaviorComboBox.setSelectedItemIndex (0);
 
         pc.timeoutAfterComboBox.addItem ("No timeout", 1);
 
@@ -935,9 +935,9 @@ private:
         paramsThreeView.addRowComponent (new RowComponent (pc.groupIdLabel,               pc.groupIdEditor));
         paramsThreeView.addRowComponent (new RowComponent (pc.sortKeyLabel,               pc.sortKeyEditor));
         paramsThreeView.addRowComponent (new RowComponent (pc.groupSummaryLabel,          pc.groupSummaryButton));
-        paramsThreeView.addRowComponent (new RowComponent (pc.groupAlertBehaviourLabel,   pc.groupAlertBehaviourComboBox));
-        paramsFourView .addRowComponent (new RowComponent (pc.accentColourLabel,          pc.accentColourButton));
-        paramsFourView .addRowComponent (new RowComponent (pc.ledColourLabel,             pc.ledColourButton));
+        paramsThreeView.addRowComponent (new RowComponent (pc.groupAlertBehaviorLabel,   pc.groupAlertBehaviorComboBox));
+        paramsFourView .addRowComponent (new RowComponent (pc.accentColorLabel,          pc.accentColorButton));
+        paramsFourView .addRowComponent (new RowComponent (pc.ledColorLabel,             pc.ledColorButton));
         paramsFourView .addRowComponent (new RowComponent (pc.ledMsToBeOffLabel,          pc.ledMsToBeOffComboBox));
         paramsFourView .addRowComponent (new RowComponent (pc.ledMsToBeOnLabel,           pc.ledMsToBeOnComboBox));
         paramsFourView .addRowComponent (new RowComponent (pc.vibratorMsToBeOffLabel,     pc.vibratorMsToBeOffComboBox));

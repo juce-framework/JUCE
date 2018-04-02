@@ -79,7 +79,7 @@ start_pass_prep (j_compress_ptr cinfo, J_BUF_MODE pass_mode)
 {
   my_prep_ptr prep = (my_prep_ptr) cinfo->prep;
 
-  if (pass_mode != JBUF_PASS_THRU)
+  if (pass_mode != JBUF_PASS_THROUGH)
     ERREXIT(cinfo, JERR_BAD_BUFFER_MODE);
 
   /* Initialize total-height counter for detecting bottom of image */

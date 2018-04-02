@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -38,7 +38,7 @@ public:
         : Component ("Activities"), activityList (activities)
     {
         addAndMakeVisible (&list);
-        list.setColour (ListBox::backgroundColourId, Colours::transparentBlack);
+        list.setColor (ListBox::backgroundColorId, Colors::transparentBlack);
         list.setRowHeight (16);
         list.setModel (this);
 
@@ -64,11 +64,11 @@ public:
 
         if (rowNumber >= 0 && rowNumber < activities.size())
         {
-            g.setColour (findColour (defaultTextColourId));
+            g.setColor (findColor (defaultTextColorId));
 
             g.setFont (height * 0.7f);
             g.drawText (activities [rowNumber],
-                        4, 0, width - 5, height, Justification::centredLeft, true);
+                        4, 0, width - 5, height, Justification::centeredLeft, true);
         }
     }
 

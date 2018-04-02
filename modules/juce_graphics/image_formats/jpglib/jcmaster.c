@@ -412,14 +412,14 @@ prepare_for_pass (j_compress_ptr cinfo)
     if (! cinfo->raw_data_in) {
       (*cinfo->cconvert->start_pass) (cinfo);
       (*cinfo->downsample->start_pass) (cinfo);
-      (*cinfo->prep->start_pass) (cinfo, JBUF_PASS_THRU);
+      (*cinfo->prep->start_pass) (cinfo, JBUF_PASS_THROUGH);
     }
     (*cinfo->fdct->start_pass) (cinfo);
     (*cinfo->entropy->start_pass) (cinfo, cinfo->optimize_coding);
     (*cinfo->coef->start_pass) (cinfo,
 				(master->total_passes > 1 ?
-				 JBUF_SAVE_AND_PASS : JBUF_PASS_THRU));
-    (*cinfo->main->start_pass) (cinfo, JBUF_PASS_THRU);
+				 JBUF_SAVE_AND_PASS : JBUF_PASS_THROUGH));
+    (*cinfo->main->start_pass) (cinfo, JBUF_PASS_THROUGH);
     if (cinfo->optimize_coding) {
       /* No immediate data output; postpone writing frame/scan headers */
       master->pub.call_pass_startup = FALSE;

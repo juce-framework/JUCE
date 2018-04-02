@@ -34,26 +34,26 @@ class JUCE_API  MemoryBlock
 {
 public:
     //==============================================================================
-    /** Create an uninitialised block with 0 size. */
+    /** Create an uninitialized block with 0 size. */
     MemoryBlock() noexcept;
 
     /** Creates a memory block with a given initial size.
 
         @param initialSize          the size of block to create
-        @param initialiseToZero     whether to clear the memory or just leave it uninitialised
+        @param initializeToZero     whether to clear the memory or just leave it uninitialized
     */
     MemoryBlock (const size_t initialSize,
-                 bool initialiseToZero = false);
+                 bool initializeToZero = false);
 
     /** Creates a copy of another memory block. */
     MemoryBlock (const MemoryBlock&);
 
     /** Creates a memory block using a copy of a block of data.
 
-        @param dataToInitialiseFrom     some data to copy into this block
+        @param dataToInitializeFrom     some data to copy into this block
         @param sizeInBytes              how much space to use
     */
-    MemoryBlock (const void* dataToInitialiseFrom, size_t sizeInBytes);
+    MemoryBlock (const void* dataToInitializeFrom, size_t sizeInBytes);
 
     /** Destructor. */
     ~MemoryBlock() noexcept;
@@ -111,28 +111,28 @@ public:
 
         Any data that is present in both the old and new sizes will be retained.
         When enlarging the block, the new space that is allocated at the end can either be
-        cleared, or left uninitialised.
+        cleared, or left uninitialized.
 
         @param newSize                      the new desired size for the block
-        @param initialiseNewSpaceToZero     if the block gets enlarged, this determines
+        @param initializeNewSpaceToZero     if the block gets enlarged, this determines
                                             whether to clear the new section or just leave it
-                                            uninitialised
+                                            uninitialized
         @see ensureSize
     */
     void setSize (const size_t newSize,
-                  bool initialiseNewSpaceToZero = false);
+                  bool initializeNewSpaceToZero = false);
 
     /** Increases the block's size only if it's smaller than a given size.
 
         @param minimumSize                  if the block is already bigger than this size, no action
                                             will be taken; otherwise it will be increased to this size
-        @param initialiseNewSpaceToZero     if the block gets enlarged, this determines
+        @param initializeNewSpaceToZero     if the block gets enlarged, this determines
                                             whether to clear the new section or just leave it
-                                            uninitialised
+                                            uninitialized
         @see setSize
     */
     void ensureSize (const size_t minimumSize,
-                     bool initialiseNewSpaceToZero = false);
+                     bool initializeNewSpaceToZero = false);
 
     /** Frees all the blocks data, setting its size to 0. */
     void reset();
@@ -163,7 +163,7 @@ public:
     /** Chops out a section  of the block.
 
         This will remove a section of the memory block and close the gap around it,
-        shifting any subsequent data downwards and reducing the size of the block.
+        shifting any subsequent data downward and reducing the size of the block.
 
         If the range specified goes beyond the size of the block, it will be clipped.
     */

@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -116,7 +116,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
         SKDownload* download;
     };
 
-    /** Represents a pending request initialised with [SKProductRequest start]. */
+    /** Represents a pending request initialized with [SKProductRequest start]. */
     struct PendingProductInfoRequest
     {
         enum class Type
@@ -162,7 +162,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
               #endif
                 if (state != SKDownloadStateFinished
                      && state != SKDownloadStateFailed
-                     && state != SKDownloadStateCancelled)
+                     && state != SKDownloadStateCanceled)
                 {
                     return false;
                 }
@@ -354,7 +354,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
                                                                                                                             RelativeTime (download.timeRemaining)); }); break;
                     case SKDownloadStateFinished:
                     case SKDownloadStateFailed:
-                    case SKDownloadStateCancelled: processDownloadFinish (pendingDownload, download); break;
+                    case SKDownloadStateCanceled: processDownloadFinish (pendingDownload, download); break;
 
                     default:  jassertfalse; break;  // Unexpected download state
                 }
@@ -602,7 +602,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
                     {
                         if (auto* purchaseData = getAs<NSDictionary> (inAppPurchaseData))
                         {
-                            // Ignore products that were cancelled.
+                            // Ignore products that were canceled.
                             if (purchaseData[nsStringLiteral ("cancellation_date")] != nil)
                                 continue;
 
@@ -712,7 +712,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
             case SKDownloadStatePaused:     return Download::Status::paused;
             case SKDownloadStateFinished:   return Download::Status::finished;
             case SKDownloadStateFailed:     return Download::Status::failed;
-            case SKDownloadStateCancelled:  return Download::Status::cancelled;
+            case SKDownloadStateCanceled:  return Download::Status::canceled;
             default:                        jassertfalse; return Download::Status::waiting;
         }
     }

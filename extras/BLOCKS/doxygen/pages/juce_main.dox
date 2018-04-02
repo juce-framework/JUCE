@@ -32,7 +32,7 @@ This section explains how to capture touch events from a compatible device and, 
 <br>
 @subpage getting_control_button_events
 
-Lightpad and Control Blocks have control buttons, either a mode button on their side or labelled buttons on top, and this section shows you how to obtain button pressed and button released events.
+Lightpad and Control Blocks have control buttons, either a mode button on their side or labeled buttons on top, and this section shows you how to obtain button pressed and button released events.
 
 <br>
 @subpage controlling_led_grids
@@ -42,7 +42,7 @@ This section explains how to control the LED grid on a Lightpad.
 <br>
 @subpage the_littlefoot_language
 
-Advanced SDK users can specify specialised programs to run on Lightpad Blocks.
+Advanced SDK users can specify specialized programs to run on Lightpad Blocks.
 These programs must be written in the LittleFoot language, which is described
 in this section.
 
@@ -55,7 +55,7 @@ Control Blocks have a strip of lights running along one side and this section pr
 @subpage controlling_control_buttons
 
 As well as providing button pressed and button released events, control buttons also have LEDs.
-This section explains how to change the colour of different buttons.
+This section explains how to change the color of different buttons.
 
 <br>
 @subpage the_standalone_blocks_sdk

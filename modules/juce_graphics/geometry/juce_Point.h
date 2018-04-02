@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -158,7 +158,7 @@ public:
 
     /** Returns the angle from this point to another one.
 
-        Taking this point to be the centre of a circle, and the other point being a position on
+        Taking this point to be the center of a circle, and the other point being a position on
         the circumference, the return value is the number of radians clockwise from the 12 o'clock
         direction.
         So 12 o'clock = 0, 3 o'clock = Pi/2, 6 o'clock = Pi, 9 o'clock = -Pi/2
@@ -178,7 +178,7 @@ public:
                       x * std::sin (angleRadians) + y * std::cos (angleRadians));
     }
 
-    /** Taking this point to be the centre of a circle, this returns a point on its circumference.
+    /** Taking this point to be the center of a circle, this returns a point on its circumference.
         @param radius   the radius of the circle.
         @param angle    the angle of the point, in radians clockwise from the 12 o'clock position.
     */
@@ -188,7 +188,7 @@ public:
                                  static_cast<FloatType> (y - radius * std::cos (angle)));
     }
 
-    /** Taking this point to be the centre of an ellipse, this returns a point on its circumference.
+    /** Taking this point to be the center of an ellipse, this returns a point on its circumference.
         @param radiusX  the horizontal radius of the circle.
         @param radiusY  the vertical radius of the circle.
         @param angle    the angle of the point, in radians clockwise from the 12 o'clock position.

@@ -350,7 +350,7 @@ OSStatus 	AUMIDIBase::HandleMidiEvent(UInt8 status, UInt8 channel, UInt8 data1, 
 
 #if CA_AUTO_MIDI_MAP
 // you potentially have a choice to make here - if a param mapping matches, do you still want to process the
-// MIDI event or not. The default behaviour is to continue on with the MIDI event.
+// MIDI event or not. The default behavior is to continue on with the MIDI event.
 	if (mMapManager->HandleHotMapping (status, channel, data1, mAUBaseInstance)) {
 		mAUBaseInstance.PropertyChanged (kAudioUnitProperty_HotMapParameterMIDIMapping, kAudioUnitScope_Global, 0);
 	}

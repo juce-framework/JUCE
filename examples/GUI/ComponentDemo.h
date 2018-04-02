@@ -59,7 +59,7 @@ public:
         // Only shows the red ellipse when the button is on.
         if (isOn)
         {
-            g.setColour (getLookAndFeel().findColour (Slider::thumbColourId));
+            g.setColor (getLookAndFeel().findColor (Slider::thumbColorId));
             g.fillEllipse (getLocalBounds().toFloat());
         }
     }
@@ -90,7 +90,7 @@ public:
         // Adds the child light components and makes them visible
         // within this component.
         // (they currently rely on having a default constructor
-        // so they dont have to be individually initialised)
+        // so they dont have to be individually initialized)
         for (auto i = 0; i < numX * numY; ++i)
             addAndMakeVisible (toggleLights[i]);
     }

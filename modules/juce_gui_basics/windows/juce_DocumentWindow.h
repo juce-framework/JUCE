@@ -11,7 +11,7 @@
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
    27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-5-license
    Privacy Policy: www.juce.com/juce-5-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -29,14 +29,14 @@ namespace juce
 
 //==============================================================================
 /**
-    A resizable window with a title bar and maximise, minimise and close buttons.
+    A resizable window with a title bar and maximize, minimize and close buttons.
 
     This subclass of ResizableWindow creates a fairly standard type of window with
     a title bar and various buttons. The name of the component is shown in the
     title bar, and an icon can optionally be specified with setIcon().
 
     All the methods available to a ResizableWindow are also available to this,
-    so it can easily be made resizable, minimised, maximised, etc.
+    so it can easily be made resizable, minimized, maximized, etc.
 
     It's not advisable to add child components directly to a DocumentWindow: put them
     inside your content component instead. And overriding methods like resized(), moved(), etc
@@ -62,8 +62,8 @@ public:
     */
     enum TitleBarButtons
     {
-        minimiseButton = 1,
-        maximiseButton = 2,
+        minimizeButton = 1,
+        maximizeButton = 2,
         closeButton = 4,
 
         /** A combination of all the buttons above. */
@@ -76,8 +76,8 @@ public:
         @param name             the name to give the component - this is also
                                 the title shown at the top of the window. To change
                                 this later, use setName()
-        @param backgroundColour the colour to use for filling the window's background.
-        @param requiredButtons  specifies which of the buttons (close, minimise, maximise)
+        @param backgroundColor the color to use for filling the window's background.
+        @param requiredButtons  specifies which of the buttons (close, minimize, maximize)
                                 should be shown on the title bar. This value is a bitwise
                                 combination of values from the TitleBarButtons enum. Note
                                 that it can be "allButtons" to get them all. You
@@ -88,7 +88,7 @@ public:
         @see TitleBarButtons
     */
     DocumentWindow (const String& name,
-                    Colour backgroundColour,
+                    Color backgroundColor,
                     int requiredButtons,
                     bool addToDesktop = true);
 
@@ -121,7 +121,7 @@ public:
 
     /** Changes the set of title-bar buttons being shown.
 
-        @param requiredButtons  specifies which of the buttons (close, minimise, maximise)
+        @param requiredButtons  specifies which of the buttons (close, minimize, maximize)
                                 should be shown on the title bar. This value is a bitwise
                                 combination of values from the TitleBarButtons enum. Note
                                 that it can be "allButtons" to get them all.
@@ -131,12 +131,12 @@ public:
     void setTitleBarButtonsRequired (int requiredButtons,
                                      bool positionTitleBarButtonsOnLeft);
 
-    /** Sets whether the title should be centred within the window.
+    /** Sets whether the title should be centered within the window.
 
         If true, the title text is shown in the middle of the title-bar; if false,
         it'll be shown at the left of the bar.
     */
-    void setTitleBarTextCentred (bool textShouldBeCentred);
+    void setTitleBarTextCentered (bool textShouldBeCentered);
 
     //==============================================================================
     /** Creates a menu inside this window.
@@ -174,7 +174,7 @@ public:
         method and make it delete the window in whatever way is appropriate for your
         app. E.g. you might just want to call "delete this".
 
-        If your app is centred around this window such that the whole app should quit when
+        If your app is centered around this window such that the whole app should quit when
         the window is closed, then you will probably want to use this method as an opportunity
         to call JUCEApplicationBase::quit(), and leave the window to be deleted later by your
         JUCEApplicationBase::shutdown() method. (Doing it this way means that your window will
@@ -187,42 +187,42 @@ public:
     */
     virtual void closeButtonPressed();
 
-    /** Callback that is triggered when the minimise button is pressed.
+    /** Callback that is triggered when the minimize button is pressed.
 
-        The default implementation of this calls ResizableWindow::setMinimised(), but
-        you can override it to do more customised behaviour.
+        The default implementation of this calls ResizableWindow::setMinimized(), but
+        you can override it to do more customized behavior.
     */
-    virtual void minimiseButtonPressed();
+    virtual void minimizeButtonPressed();
 
-    /** Callback that is triggered when the maximise button is pressed, or when the
+    /** Callback that is triggered when the maximize button is pressed, or when the
         title-bar is double-clicked.
 
         The default implementation of this calls ResizableWindow::setFullScreen(), but
-        you can override it to do more customised behaviour.
+        you can override it to do more customized behavior.
     */
-    virtual void maximiseButtonPressed();
+    virtual void maximizeButtonPressed();
 
     //==============================================================================
     /** Returns the close button, (or nullptr if there isn't one). */
     Button* getCloseButton() const noexcept;
 
-    /** Returns the minimise button, (or nullptr if there isn't one). */
-    Button* getMinimiseButton() const noexcept;
+    /** Returns the minimize button, (or nullptr if there isn't one). */
+    Button* getMinimizeButton() const noexcept;
 
-    /** Returns the maximise button, (or nullptr if there isn't one). */
-    Button* getMaximiseButton() const noexcept;
+    /** Returns the maximize button, (or nullptr if there isn't one). */
+    Button* getMaximizeButton() const noexcept;
 
     //==============================================================================
-    /** A set of colour IDs to use to change the colour of various aspects of the window.
+    /** A set of color IDs to use to change the color of various aspects of the window.
 
-        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        These constants can be used either via the Component::setColor(), or LookAndFeel::setColor()
         methods.
 
-        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+        @see Component::setColor, Component::findColor, LookAndFeel::setColor, LookAndFeel::findColor
     */
-    enum ColourIds
+    enum ColorIds
     {
-        textColourId                = 0x1005701,  /**< The colour to draw any text with. It's up to the look
+        textColorId                = 0x1005701,  /**< The color to draw any text with. It's up to the look
                                                        and feel class how this is used. */
     };
 
@@ -244,8 +244,8 @@ public:
 
         virtual void positionDocumentWindowButtons (DocumentWindow&,
                                                     int titleBarX, int titleBarY, int titleBarW, int titleBarH,
-                                                    Button* minimiseButton,
-                                                    Button* maximiseButton,
+                                                    Button* minimizeButton,
+                                                    Button* maximizeButton,
                                                     Button* closeButton,
                                                     bool positionTitleBarButtonsOnLeft) = 0;
     };
@@ -279,7 +279,7 @@ public:
 private:
     //==============================================================================
     int titleBarHeight = 26, menuBarHeight = 24, requiredButtons;
-    bool positionTitleBarButtonsOnLeft, drawTitleTextCentred = true;
+    bool positionTitleBarButtonsOnLeft, drawTitleTextCentered = true;
     ScopedPointer<Button> titleBarButtons [3];
     Image titleBarIcon;
     ScopedPointer<Component> menuBar;

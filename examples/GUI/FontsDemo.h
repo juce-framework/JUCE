@@ -85,8 +85,8 @@ public:
 
         listBox.setRowHeight (20);
         listBox.setModel (this);   // Tell the listbox where to get its data model
-        listBox.setColour (ListBox::textColourId, Colours::black);
-        listBox.setColour (ListBox::backgroundColourId, Colours::white);
+        listBox.setColor (ListBox::textColorId, Colors::black);
+        listBox.setColor (ListBox::backgroundColorId, Colors::white);
 
         heightSlider .setRange (3.0, 150.0, 0.01);
         scaleSlider  .setRange (0.2, 3.0, 0.01);
@@ -122,8 +122,8 @@ public:
                              "non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.");
 
         demoTextBox.setCaretPosition (0);
-        demoTextBox.setColour (TextEditor::textColourId, Colours::black);
-        demoTextBox.setColour (TextEditor::backgroundColourId, Colours::white);
+        demoTextBox.setColor (TextEditor::textColorId, Colors::black);
+        demoTextBox.setColor (TextEditor::backgroundColorId, Colors::white);
 
         setSize (750, 750);
     }
@@ -131,7 +131,7 @@ public:
     //==============================================================================
     void paint (Graphics& g) override
     {
-        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground));
+        g.fillAll (getUIColorIfAvailable (LookAndFeel_V4::ColorScheme::UIColor::windowBackground));
     }
 
     void resized() override
@@ -186,15 +186,15 @@ public:
                            int width, int height, bool rowIsSelected) override
     {
         if (rowIsSelected)
-            g.fillAll (Colours::lightblue);
+            g.fillAll (Colors::lightblue);
 
         auto font = fonts[rowNumber];
 
         AttributedString s;
         s.setWordWrap (AttributedString::none);
-        s.setJustification (Justification::centredLeft);
-        s.append (font.getTypefaceName(), font.withHeight (height * 0.7f), Colours::black);
-        s.append ("   " + font.getTypefaceName(), Font (height * 0.5f, Font::italic), Colours::grey);
+        s.setJustification (Justification::centeredLeft);
+        s.append (font.getTypefaceName(), font.withHeight (height * 0.7f), Colors::black);
+        s.append ("   " + font.getTypefaceName(), Font (height * 0.5f, Font::italic), Colors::gray);
 
         s.draw (g, Rectangle<int> (width, height).expanded (-4, 50).toFloat());
     }
@@ -239,7 +239,7 @@ private:
                    .withHorizontalScale    ((float) scaleSlider  .getValue());
 
         if (bold)    font = font.boldened();
-        if (italic)  font = font.italicised();
+        if (italic)  font = font.italicized();
 
         updateStylesList (font);
 
