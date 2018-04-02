@@ -970,8 +970,8 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
                    "(Note that individual resource files which are larger than this size cannot be split across multiple cpp files).");
     }
 
-    props.add (new ChoicePropertyComponent (includeBinaryDataInAppConfigValue, "Include BinaryData in AppConfig"),
-                                             "Include BinaryData.h in the AppConfig.h file");
+    props.add (new ChoicePropertyComponent (includeBinaryDataInAppConfigValue, "Include BinaryData in JuceHeader"),
+                                             "Include BinaryData.h in the JuceHeader.h file");
 
     props.add (new TextPropertyComponent (binaryDataNamespaceValue, "BinaryData Namespace", 256, false),
                                           "The namespace containing the binary assests.");
