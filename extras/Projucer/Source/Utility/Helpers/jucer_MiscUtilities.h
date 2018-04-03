@@ -28,7 +28,7 @@
 
 
 //==============================================================================
-const char* getLineEnding();
+const char* getPreferredLinefeed();
 String joinLinesIntoSourceFile (StringArray& lines);
 
 String trimCommentCharsFromStartOfLine (const String& line);

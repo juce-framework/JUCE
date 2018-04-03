@@ -27,14 +27,12 @@
 #include "../../Application/jucer_Headers.h"
 
 //==============================================================================
-const char* getLineEnding()  { return "\r\n"; }
-
 String joinLinesIntoSourceFile (StringArray& lines)
 {
     while (lines.size() > 10 && lines [lines.size() - 1].isEmpty())
         lines.remove (lines.size() - 1);
 
-    return lines.joinIntoString (getLineEnding()) + getLineEnding();
+    return lines.joinIntoString (getPreferredLinefeed()) + getPreferredLinefeed();
 }
 
 String trimCommentCharsFromStartOfLine (const String& line)
@@ -48,7 +46,7 @@ String createAlphaNumericUID()
     const char chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     Random r;
 
-    uid << chars [r.nextInt (52)]; // make sure the first character is always a letter
+    uid << chars[r.nextInt (52)]; // make sure the first character is always a letter
 
     for (int i = 5; --i >= 0;)
     {
@@ -66,7 +64,7 @@ String hexString8Digits (int value)
 
 String createGUID (const String& seed)
 {
-    const String hex (MD5 ((seed + "_guidsalt").toUTF8()).toHexString().toUpperCase());
+    auto hex = MD5 ((seed + "_guidsalt").toUTF8()).toHexString().toUpperCase();
 
     return "{" + hex.substring (0, 8)
          + "-" + hex.substring (8, 12)

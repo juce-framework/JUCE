@@ -222,7 +222,7 @@ private:
             if (descriptionValue.get().toString().isNotEmpty())   section.add ("  description:      " + descriptionValue.get().toString());
 
             if (! section.isEmpty())
-                metadata.add (section.joinIntoString (getLineEnding()));
+                metadata.add (section.joinIntoString (getPreferredLinefeed()));
         }
 
         {
@@ -235,7 +235,7 @@ private:
             if (exportersString.isNotEmpty())                     section.add ("  exporters:        " + exportersString);
 
             if (! section.isEmpty())
-                metadata.add (section.joinIntoString (getLineEnding()));
+                metadata.add (section.joinIntoString (getPreferredLinefeed()));
         }
 
         {
@@ -245,7 +245,7 @@ private:
             if (definesValue.get().toString().isNotEmpty())       section.add ("  defines:          " + definesValue.get().toString());
 
             if (! section.isEmpty())
-                metadata.add (section.joinIntoString (getLineEnding()));
+                metadata.add (section.joinIntoString (getPreferredLinefeed()));
         }
 
         {
@@ -255,7 +255,7 @@ private:
             if (mainClassValue.get().toString().isNotEmpty())     section.add ("  mainClass:        " + mainClassValue.get().toString());
 
             if (! section.isEmpty())
-                metadata.add (section.joinIntoString (getLineEnding()));
+                metadata.add (section.joinIntoString (getPreferredLinefeed()));
         }
 
         {
@@ -264,10 +264,10 @@ private:
             if (useLocalCopyValue.get())                          section.add ("  useLocalCopy:     " + useLocalCopyValue.get().toString());
 
             if (! section.isEmpty())
-                metadata.add (section.joinIntoString (getLineEnding()));
+                metadata.add (section.joinIntoString (getPreferredLinefeed()));
         }
 
-        return metadata.joinIntoString (String (getLineEnding()) + getLineEnding());
+        return metadata.joinIntoString (String (getPreferredLinefeed()) + getPreferredLinefeed());
     }
 
     void createPIPFile (File fileToSave)
