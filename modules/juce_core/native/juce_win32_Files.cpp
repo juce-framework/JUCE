@@ -236,7 +236,8 @@ bool File::replaceInternal (const File& dest) const
     void* lpReserved = 0;
 
     return ReplaceFile (dest.getFullPathName().toWideCharPointer(), fullPath.toWideCharPointer(),
-                        0, REPLACEFILE_IGNORE_MERGE_ERRORS, lpExclude, lpReserved) != 0;
+                        0, REPLACEFILE_IGNORE_MERGE_ERRORS | REPLACEFILE_IGNORE_ACL_ERRORS,
+                        lpExclude, lpReserved) != 0;
 }
 
 Result File::createDirectoryInternal (const String& fileName) const
