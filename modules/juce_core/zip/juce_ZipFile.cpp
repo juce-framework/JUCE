@@ -453,13 +453,24 @@ struct ZipFile::Builder::Item
     Item (const File& f, InputStream* s, int compression, const String& storedPath, Time time)
         : file (f), stream (s), storedPathname (storedPath), fileTime (time), compressionLevel (compression)
     {
+       #if (defined (JUCE_MAC) || defined (JUCE_LINUX) || defined (JUCE_BSD))
+        symbolicLink = (file.exists() && file.isSymbolicLink());
+       #endif
     }
 
     bool writeData (OutputStream& target, const int64 overallStartPosition)
     {
         MemoryOutputStream compressedData ((size_t) file.getSize());
 
-        if (compressionLevel > 0)
+        if (symbolicLink)
+        {
+            auto relativePath = file.getLinkedTarget().getRelativePathFrom (file);
+            uncompressedSize = relativePath.length();
+
+            checksum = zlibNamespace::crc32 (0, (uint8_t*) relativePath.toRawUTF8(), (unsigned int) uncompressedSize);
+            compressedData << relativePath;
+        }
+        else if (compressionLevel > 0)
         {
             GZIPCompressorOutputStream compressor (compressedData, compressionLevel,
                                                    GZIPCompressorOutputStream::windowBitsRaw);
@@ -486,12 +497,12 @@ struct ZipFile::Builder::Item
     bool writeDirectoryEntry (OutputStream& target)
     {
         target.writeInt (0x02014b50);
-        target.writeShort (20); // version written
+        target.writeShort (symbolicLink ? 0x0314 : 0x0014);
         writeFlagsAndSizes (target);
         target.writeShort (0); // comment length
         target.writeShort (0); // start disk num
         target.writeShort (0); // internal attributes
-        target.writeInt (0); // external attributes
+        target.writeInt (symbolicLink ? 0xA1ED0000 : 0); // external attributes
         target.writeInt ((int) (uint32) headerStart);
         target << storedPathname;
 
@@ -506,6 +517,7 @@ private:
     int64 compressedSize = 0, uncompressedSize = 0, headerStart = 0;
     int compressionLevel = 0;
     unsigned long checksum = 0;
+    bool symbolicLink = false;
 
     static void writeTimeAndDate (OutputStream& target, Time t)
     {
@@ -548,7 +560,7 @@ private:
     {
         target.writeShort (10); // version needed
         target.writeShort ((short) (1 << 11)); // this flag indicates UTF-8 filename encoding
-        target.writeShort (compressionLevel > 0 ? (short) 8 : (short) 0);
+        target.writeShort ((! symbolicLink && compressionLevel > 0) ? (short) 8 : (short) 0); //symlink target path is not compressed
         writeTimeAndDate (target, fileTime);
         target.writeInt ((int) checksum);
         target.writeInt ((int) (uint32) compressedSize);
