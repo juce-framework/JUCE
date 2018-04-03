@@ -502,7 +502,7 @@ struct ZipFile::Builder::Item
         target.writeShort (0); // comment length
         target.writeShort (0); // start disk num
         target.writeShort (0); // internal attributes
-        target.writeInt (symbolicLink ? 0xA1ED0000 : 0); // external attributes
+        target.writeInt ((int) (symbolicLink ? 0xA1ED0000 : 0)); // external attributes
         target.writeInt ((int) (uint32) headerStart);
         target << storedPathname;
 
