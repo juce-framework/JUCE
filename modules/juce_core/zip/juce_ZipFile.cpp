@@ -46,6 +46,10 @@ struct ZipFile::ZipEntryHolder
         entry.uncompressedSize = (int64) readUnalignedLittleEndianInt (buffer + 24);
         streamOffset           = (int64) readUnalignedLittleEndianInt (buffer + 42);
 
+        auto externalFileAttributes = (int32) readUnalignedLittleEndianInt (buffer + 38);
+        auto fileType   = (externalFileAttributes >> 28) & 0xf;
+
+        entry.isSymbolicLink = (fileType == 0xA);
         entry.filename = String::fromUTF8 (buffer + 46, fileNameLen);
     }
 
@@ -430,6 +434,15 @@ Result ZipFile::uncompressEntry (int index, const File& targetDirectory, bool sh
     if (! targetFile.getParentDirectory().createDirectory())
         return Result::fail ("Failed to create target folder: " + targetFile.getParentDirectory().getFullPathName());
 
+    if (zei->entry.isSymbolicLink)
+    {
+        String relativePath (in->readEntireStreamAsString());
+        auto originalFilePath = targetFile.getParentDirectory().getChildFile (relativePath);
+
+        if (! originalFilePath.createSymbolicLink (targetFile, true))
+            return Result::fail ("Failed to create symbolic link: " + targetFile.getFullPathName());
+    }
+    else
     {
         FileOutputStream out (targetFile);
 

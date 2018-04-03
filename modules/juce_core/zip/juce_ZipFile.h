@@ -79,6 +79,9 @@ public:
 
         /** The last time the file was modified. */
         Time fileTime;
+
+        /** True if the zip entry is a symbolic link. */
+        bool isSymbolicLink;
     };
 
     //==============================================================================
