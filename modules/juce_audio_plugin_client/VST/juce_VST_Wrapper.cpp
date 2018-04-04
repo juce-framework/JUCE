@@ -1339,6 +1339,7 @@ public:
 
                     shouldResizeEditor = true;
                    #else
+                    ignoreUnused (resizeEditor);
                     XResizeWindow (display.display, (Window) getWindowHandle(), pos.getWidth(), pos.getHeight());
                    #endif
 
