@@ -109,18 +109,39 @@ struct GraphEditorPanel::PinComponent   : public Component,
 };
 
 //==============================================================================
-struct GraphEditorPanel::FilterComponent   : public Component
+struct GraphEditorPanel::FilterComponent   : public Component, private AudioProcessorParameter::Listener
 {
     FilterComponent (GraphEditorPanel& p, uint32 id)  : panel (p), graph (p.graph), pluginID (id)
     {
         shadow.setShadowProperties (DropShadow (Colours::black.withAlpha (0.5f), 3, { 0, 1 }));
         setComponentEffect (&shadow);
 
+        if (auto f = graph.graph.getNodeForId (pluginID))
+        {
+            if (auto* processor = f->getProcessor())
+            {
+                if (auto* bypassParam = processor->getBypassParameter())
+                    bypassParam->addListener (this);
+            }
+        }
+
         setSize (150, 60);
     }
 
     FilterComponent (const FilterComponent&) = delete;
     FilterComponent& operator= (const FilterComponent&) = delete;
+
+    ~FilterComponent()
+    {
+        if (auto f = graph.graph.getNodeForId (pluginID))
+        {
+            if (auto* processor = f->getProcessor())
+            {
+                if (auto* bypassParam = processor->getBypassParameter())
+                    bypassParam->removeListener (this);
+            }
+        }
+    }
 
     void mouseDown (const MouseEvent& e) override
     {
@@ -177,8 +198,17 @@ struct GraphEditorPanel::FilterComponent   : public Component
     void paint (Graphics& g) override
     {
         auto boxArea = getLocalBounds().reduced (4, pinSize);
+        bool isBypassed = false;
 
-        g.setColour (findColour (TextEditor::backgroundColourId));
+        if (auto* f = graph.graph.getNodeForId (pluginID))
+            isBypassed = f->isBypassed();
+
+        auto boxColour = findColour (TextEditor::backgroundColourId);
+
+        if (isBypassed)
+            boxColour = boxColour.brighter();
+
+        g.setColour (boxColour);
         g.fillRect (boxArea.toFloat());
 
         g.setColour (findColour (TextEditor::textColourId));
@@ -290,6 +320,7 @@ struct GraphEditorPanel::FilterComponent   : public Component
         PopupMenu m;
         m.addItem (1, "Delete this filter");
         m.addItem (2, "Disconnect all pins");
+        m.addItem (3, "Toggle Bypass");
         m.addSeparator();
         m.addItem (10, "Show plugin GUI");
         m.addItem (11, "Show all programs");
@@ -302,6 +333,15 @@ struct GraphEditorPanel::FilterComponent   : public Component
         {
             case 1:   graph.graph.removeNode (pluginID); break;
             case 2:   graph.graph.disconnectNode (pluginID); break;
+            case 3:
+            {
+                if (auto* node = graph.graph.getNodeForId (pluginID))
+                    node->setBypassed (! node->isBypassed());
+
+                repaint();
+
+                break;
+            }
             case 10:  showWindow (PluginWindow::Type::normal); break;
             case 11:  showWindow (PluginWindow::Type::programs); break;
             case 12:  showWindow (PluginWindow::Type::generic); break;
@@ -328,6 +368,13 @@ struct GraphEditorPanel::FilterComponent   : public Component
             if (auto* w = graph.getOrCreateWindowFor (node, type))
                 w->toFront (true);
     }
+
+    void parameterValueChanged (int, float) override
+    {
+        repaint();
+    }
+
+    void parameterGestureChanged (int, bool) override  {}
 
     GraphEditorPanel& panel;
     FilterGraph& graph;

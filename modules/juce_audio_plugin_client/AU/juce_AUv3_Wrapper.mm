@@ -195,6 +195,18 @@ public:
     virtual bool getRenderingOffline()                                     = 0;
     virtual void setRenderingOffline (bool offline)                        = 0;
 
+    virtual bool getShouldBypassEffect()
+    {
+        objc_super s = { getAudioUnit(), [AUAudioUnit class] };
+        return (ObjCMsgSendSuper<BOOL> (&s, @selector (shouldBypassEffect)) == YES);
+    }
+
+    virtual void setShouldBypassEffect (bool shouldBypass)
+    {
+        objc_super s = { getAudioUnit(), [AUAudioUnit class] };
+        ObjCMsgSendSuper<void, BOOL> (&s, @selector (setShouldBypassEffect:), shouldBypass ? YES : NO);
+    }
+
     //==============================================================================
     virtual NSString* getContextName()      const                          = 0;
     virtual void setContextName (NSString*)                                = 0;
@@ -274,6 +286,8 @@ private:
             addMethod (@selector (canProcessInPlace),               getCanProcessInPlace,           @encode (BOOL), "@:");
             addMethod (@selector (isRenderingOffline),              getRenderingOffline,            @encode (BOOL),  "@:");
             addMethod (@selector (setRenderingOffline:),            setRenderingOffline,            "v@:", @encode (BOOL));
+            addMethod (@selector (shouldBypassEffect),              getShouldBypassEffect,          @encode (BOOL),  "@:");
+            addMethod (@selector (setShouldBypassEffect:),          setShouldBypassEffect,          "v@:", @encode (BOOL));
             addMethod (@selector (allocateRenderResourcesAndReturnError:),  allocateRenderResourcesAndReturnError, "B@:^@");
             addMethod (@selector (deallocateRenderResources),       deallocateRenderResources,      "v@:");
 
@@ -388,6 +402,8 @@ private:
         static void setRenderingOffline (id self, SEL, BOOL renderingOffline)                       { _this (self)->setRenderingOffline (renderingOffline); }
         static BOOL allocateRenderResourcesAndReturnError (id self, SEL, NSError** error)           { return _this (self)->allocateRenderResourcesAndReturnError (error) ? YES : NO; }
         static void deallocateRenderResources (id self, SEL)                                        { _this (self)->deallocateRenderResources(); }
+        static BOOL getShouldBypassEffect (id self, SEL)                                            { return _this (self)->getShouldBypassEffect() ? YES : NO; }
+        static void setShouldBypassEffect (id self, SEL, BOOL shouldBypass)                         { _this (self)->setShouldBypassEffect (shouldBypass); }
 
         //==============================================================================
         static NSString* getContextName (id self, SEL)                                              { return _this (self)->getContextName(); }
@@ -417,7 +433,8 @@ JuceAudioUnitv3Base::Class JuceAudioUnitv3Base::audioUnitObjCClass;
 //==============================================================================
 class JuceAudioUnitv3  : public JuceAudioUnitv3Base,
                          public AudioProcessorListener,
-                         public AudioPlayHead
+                         public AudioPlayHead,
+                         private AudioProcessorParameter::Listener
 {
 public:
     JuceAudioUnitv3 (const AudioProcessorHolder::Ptr& processor,
@@ -443,6 +460,9 @@ public:
     {
         auto& processor = getAudioProcessor();
         processor.removeListener (this);
+
+        if (bypassParam != nullptr)
+            bypassParam->removeListener (this);
 
         removeEditor (processor);
 
@@ -733,6 +753,22 @@ public:
             processor.setNonRealtime (offline);
             processor.prepareToPlay (processor.getSampleRate(), processor.getBlockSize());
         }
+    }
+
+    bool getShouldBypassEffect() override
+    {
+        if (bypassParam != nullptr)
+            return (bypassParam->getValue() != 0.0f);
+
+        return JuceAudioUnitv3Base::getShouldBypassEffect();
+    }
+
+    void setShouldBypassEffect (bool shouldBypass) override
+    {
+        if (bypassParam != nullptr)
+            bypassParam->setValue (shouldBypass ? 1.0f : 0.0f);
+
+        JuceAudioUnitv3Base::setShouldBypassEffect (shouldBypass);
     }
 
     //==============================================================================
@@ -1216,7 +1252,6 @@ private:
            #endif
 
             // create methods in AUParameterTree return unretained objects (!) -> see Apple header AUAudioUnitImplementation.h
-
             ScopedPointer<AUParameter> param = [[AUParameterTree createParameterWithIdentifier: juceStringToNS (identifier)
                                                                                           name: juceStringToNS (name)
                                                                                        address: address
@@ -1252,6 +1287,9 @@ private:
             editorParamObserver = CreateObjCBlock (this, &JuceAudioUnitv3::valueChangedForObserver);
             editorObserverToken = [paramTree tokenByAddingParameterObserver: editorParamObserver];
         }
+
+        if ((bypassParam = processor.getBypassParameter()) != nullptr)
+            bypassParam->addListener (this);
     }
 
     void setAudioProcessorParameter (AudioProcessorParameter* juceParam, float value)
@@ -1454,7 +1492,7 @@ private:
 
         if (processor.isSuspended())
             buffer.clear();
-        else if ([au shouldBypassEffect])
+        else if (bypassParam != nullptr && [au shouldBypassEffect])
             processor.processBlockBypassed (buffer, midiBuffer);
         else
             processor.processBlock (buffer, midiBuffer);
@@ -1525,6 +1563,14 @@ private:
         return 0;
     }
 
+    //==============================================================================
+    // this is only ever called for the bypass parameter
+    void parameterValueChanged (int, float newValue) override
+    {
+        JuceAudioUnitv3Base::setShouldBypassEffect (newValue != 0.0f);
+    }
+
+    void parameterGestureChanged (int, bool) override {}
     //==============================================================================
    #if JUCE_FORCE_USE_LEGACY_PARAM_IDS
     inline AUParameterAddress getAUParameterAddressForIndex (int paramIndex) const noexcept     { return static_cast<AUParameterAddress> (paramIndex); }
@@ -1610,6 +1656,7 @@ private:
    #else
     static constexpr bool forceLegacyParamIDs = false;
    #endif
+    AudioProcessorParameter* bypassParam = nullptr;
 };
 
 const double JuceAudioUnitv3::kDefaultSampleRate = 44100.0;

@@ -109,6 +109,13 @@ public:
         NamedValueSet properties;
 
         //==============================================================================
+        /** Returns if the node is bypassed or not. */
+        bool isBypassed() const noexcept;
+
+        /** Tell this node to bypass processing. */
+        void setBypassed (bool shouldBeBypassed) noexcept;
+
+        //==============================================================================
         /** A convenient typedef for referring to a pointer to a node object. */
         typedef ReferenceCountedObjectPtr<Node> Ptr;
 
@@ -126,7 +133,7 @@ public:
 
         const ScopedPointer<AudioProcessor> processor;
         Array<Connection> inputs, outputs;
-        bool isPrepared = false;
+        bool isPrepared = false, bypassed = false;
 
         Node (NodeID, AudioProcessor*) noexcept;
 

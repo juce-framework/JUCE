@@ -503,8 +503,6 @@ struct  GenericAudioProcessorEditor::Pimpl
         owner.addAndMakeVisible (view);
 
         view.setScrollBarsShown (true, false);
-        owner.setSize (view.getViewedComponent()->getWidth() + view.getVerticalScrollBar().getWidth(),
-                       jmin (view.getViewedComponent()->getHeight(), 400));
     }
 
 
@@ -520,7 +518,10 @@ struct  GenericAudioProcessorEditor::Pimpl
 //==============================================================================
 GenericAudioProcessorEditor::GenericAudioProcessorEditor (AudioProcessor* const p)
     : AudioProcessorEditor (p), pimpl (new Pimpl (*this))
-{}
+{
+    setSize (pimpl->view.getViewedComponent()->getWidth() + pimpl->view.getVerticalScrollBar().getWidth(),
+             jmin (pimpl->view.getViewedComponent()->getHeight(), 400));
+}
 
 GenericAudioProcessorEditor::~GenericAudioProcessorEditor() {}
 

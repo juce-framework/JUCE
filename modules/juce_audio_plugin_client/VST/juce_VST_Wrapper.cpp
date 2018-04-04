@@ -223,7 +223,8 @@ struct AbletonLiveHostSpecific
 class JuceVSTWrapper  : public AudioProcessorListener,
                         public AudioPlayHead,
                         private Timer,
-                        private AsyncUpdater
+                        private AsyncUpdater,
+                        private AudioProcessorParameter::Listener
 {
 private:
     //==============================================================================
@@ -281,6 +282,9 @@ public:
         processor->setRateAndBufferSizeDetails (0, 0);
         processor->setPlayHead (this);
         processor->addListener (this);
+
+        if (auto* juceParam = processor->getBypassParameter())
+            juceParam->addListener (this);
 
         juceParameters.update (*processor, false);
 
@@ -759,6 +763,14 @@ public:
         if (hostCallback != nullptr)
             hostCallback (&vstEffect, hostOpcodeParameterChangeGestureEnd, index, 0, 0, 0);
     }
+
+    void parameterValueChanged (int, float newValue) override
+    {
+        // this can only come from the bypass parameter
+        isBypassed = (newValue != 0.0f);
+    }
+
+    void parameterGestureChanged (int, bool) override {}
 
     void audioProcessorChanged (AudioProcessor*) override
     {
@@ -1921,6 +1933,10 @@ private:
     pointer_sized_int handleSetBypass (VstOpCodeArguments args)
     {
         isBypassed = (args.value != 0);
+
+        if (auto* bypass = processor->getBypassParameter())
+            bypass->setValueNotifyingHost (isBypassed ? 1.0f : 0.0f);
+
         return 1;
     }
 

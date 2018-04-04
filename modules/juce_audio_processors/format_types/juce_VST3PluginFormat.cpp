@@ -1883,14 +1883,18 @@ struct VST3PluginInstance : public AudioPluginInstance
             int numSteps = isDiscrete ? paramInfo.stepCount + 1
                                       : AudioProcessor::getDefaultNumParameterSteps();
 
-            addParameter (new VST3Parameter (*this,
-                                             paramInfo.id,
-                                             toString (paramInfo.title),
-                                             toString (paramInfo.units),
-                                             paramInfo.defaultNormalizedValue,
-                                             (paramInfo.flags & Vst::ParameterInfo::kCanAutomate) != 0,
-                                             isDiscrete,
-                                             numSteps));
+            VST3Parameter* p = new VST3Parameter (*this,
+                                                  paramInfo.id,
+                                                  toString (paramInfo.title),
+                                                  toString (paramInfo.units),
+                                                  paramInfo.defaultNormalizedValue,
+                                                  (paramInfo.flags & Vst::ParameterInfo::kCanAutomate) != 0,
+                                                  isDiscrete,
+                                                  numSteps);
+            addParameter (p);
+
+            if ((paramInfo.flags & Vst::ParameterInfo::kIsBypass) != 0)
+                bypassParam = p;
         }
 
         synchroniseStates();
@@ -2015,12 +2019,13 @@ struct VST3PluginInstance : public AudioPluginInstance
         return (processor->canProcessSampleSize (Vst::kSample64) == kResultTrue);
     }
 
+    //==============================================================================
     void processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages) override
     {
         jassert (! isUsingDoublePrecision());
 
         if (isActive && processor != nullptr)
-            processAudio (buffer, midiMessages, Vst::kSample32);
+            processAudio (buffer, midiMessages, Vst::kSample32, false);
     }
 
     void processBlock (AudioBuffer<double>& buffer, MidiBuffer& midiMessages) override
@@ -2028,18 +2033,51 @@ struct VST3PluginInstance : public AudioPluginInstance
         jassert (isUsingDoublePrecision());
 
         if (isActive && processor != nullptr)
-            processAudio (buffer, midiMessages, Vst::kSample64);
+            processAudio (buffer, midiMessages, Vst::kSample64, false);
     }
 
+    void processBlockBypassed (AudioBuffer<float>& buffer, MidiBuffer& midiMessages) override
+    {
+        jassert (! isUsingDoublePrecision());
+
+        if (bypassParam != nullptr)
+        {
+            if (isActive && processor != nullptr)
+                processAudio (buffer, midiMessages, Vst::kSample32, true);
+        }
+        else
+        {
+            AudioProcessor::processBlockBypassed (buffer, midiMessages);
+        }
+    }
+
+    void processBlockBypassed (AudioBuffer<double>& buffer, MidiBuffer& midiMessages) override
+    {
+        jassert (isUsingDoublePrecision());
+
+        if (bypassParam != nullptr)
+        {
+            if (isActive && processor != nullptr)
+                processAudio (buffer, midiMessages, Vst::kSample64, true);
+        }
+        else
+        {
+            AudioProcessor::processBlockBypassed (buffer, midiMessages);
+        }
+    }
+
+    //==============================================================================
     template <typename FloatType>
     void processAudio (AudioBuffer<FloatType>& buffer, MidiBuffer& midiMessages,
-                       Vst::SymbolicSampleSizes sampleSize)
+                       Vst::SymbolicSampleSizes sampleSize, bool isProcessBlockBypassedCall)
     {
         using namespace Vst;
         auto numSamples = buffer.getNumSamples();
 
         auto numInputAudioBuses  = getBusCount (true);
         auto numOutputAudioBuses = getBusCount (false);
+
+        updateBypass (isProcessBlockBypassedCall);
 
         ProcessData data;
         data.processMode            = isNonRealtime() ? kOffline : kRealtime;
@@ -2265,6 +2303,9 @@ struct VST3PluginInstance : public AudioPluginInstance
 
     bool acceptsMidi() const override    { return getNumSingleDirectionBusesFor (holder->component, true,  false) > 0; }
     bool producesMidi() const override   { return getNumSingleDirectionBusesFor (holder->component, false, false) > 0; }
+
+    //==============================================================================
+    AudioProcessorParameter* getBypassParameter() const override         { return bypassParam; }
 
     //==============================================================================
     /** May return a negative value as a means of informing us that the plugin has "infinite tail," or 0 for "no tail." */
@@ -2588,7 +2629,8 @@ private:
     ComSmartPtr<ParamValueQueueList> inputParameterChanges, outputParameterChanges;
     ComSmartPtr<MidiEventList> midiInputs, midiOutputs;
     Vst::ProcessContext timingInfo; //< Only use this in processBlock()!
-    bool isControllerInitialised = false, isActive = false;
+    bool isControllerInitialised = false, isActive = false, lastProcessBlockCallWasBypass = false;
+    VST3Parameter* bypassParam = nullptr;
 
     //==============================================================================
     /** Some plugins need to be "connected" to intercommunicate between their implemented classes */
@@ -2703,6 +2745,28 @@ private:
         holder->component->getBusInfo (busInfo.mediaType, busInfo.direction,
                                        (Steinberg::int32) index, busInfo);
         return busInfo;
+    }
+
+    //==============================================================================
+    void updateBypass (bool processBlockBypassedCalled)
+    {
+        // to remain backward compatible, the logic needs to be the following:
+        // - if processBlockBypassed was called then definitely bypass the VST3
+        // - if processBlock was called then only un-bypass the VST3 if the previous
+        //   call was processBlockBypassed, otherwise do nothing
+        if (processBlockBypassedCalled)
+        {
+            if (bypassParam != nullptr && (bypassParam->getValue() == 0.0f || ! lastProcessBlockCallWasBypass))
+                bypassParam->setValue (1.0f);
+        }
+        else
+        {
+            if (lastProcessBlockCallWasBypass && bypassParam != nullptr)
+                bypassParam->setValue (0.0f);
+
+        }
+
+        lastProcessBlockCallWasBypass = processBlockBypassedCalled;
     }
 
     //==============================================================================

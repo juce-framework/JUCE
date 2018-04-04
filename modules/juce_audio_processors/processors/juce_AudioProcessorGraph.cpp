@@ -270,12 +270,20 @@ private:
             if (processor.isUsingDoublePrecision())
             {
                 tempBufferDouble.makeCopyOf (buffer, true);
-                processor.processBlock (tempBufferDouble, midiMessages);
+
+                if (node->isBypassed())
+                    processor.processBlockBypassed (tempBufferDouble, midiMessages);
+                else
+                    processor.processBlock (tempBufferDouble, midiMessages);
+
                 buffer.makeCopyOf (tempBufferDouble, true);
             }
             else
             {
-                processor.processBlock (buffer, midiMessages);
+                if (node->isBypassed())
+                    processor.processBlockBypassed (buffer, midiMessages);
+                else
+                    processor.processBlock (buffer, midiMessages);
             }
         }
 
@@ -283,12 +291,20 @@ private:
         {
             if (processor.isUsingDoublePrecision())
             {
-                processor.processBlock (buffer, midiMessages);
+                if (node->isBypassed())
+                    processor.processBlockBypassed (buffer, midiMessages);
+                else
+                    processor.processBlock (buffer, midiMessages);
             }
             else
             {
                 tempBufferFloat.makeCopyOf (buffer, true);
-                processor.processBlock (tempBufferFloat, midiMessages);
+
+                if (node->isBypassed())
+                    processor.processBlockBypassed (tempBufferFloat, midiMessages);
+                else
+                    processor.processBlock (tempBufferFloat, midiMessages);
+
                 buffer.makeCopyOf (tempBufferFloat, true);
             }
         }
@@ -824,6 +840,29 @@ bool AudioProcessorGraph::Node::Connection::operator== (const Connection& other)
     return otherNode == other.otherNode
         && thisChannel == other.thisChannel
         && otherChannel == other.otherChannel;
+}
+
+//==============================================================================
+bool AudioProcessorGraph::Node::isBypassed() const noexcept
+{
+    if (processor != nullptr)
+    {
+        if (auto* bypassParam = processor->getBypassParameter())
+            return (bypassParam->getValue() != 0.0f);
+    }
+
+    return bypassed;
+}
+
+void AudioProcessorGraph::Node::setBypassed (bool shouldBeBypassed) noexcept
+{
+    if (processor != nullptr)
+    {
+        if (auto* bypassParam = processor->getBypassParameter())
+            bypassParam->setValueNotifyingHost (shouldBeBypassed ? 1.0f : 0.0f);
+    }
+
+    bypassed = shouldBeBypassed;
 }
 
 //==============================================================================

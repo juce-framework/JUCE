@@ -1010,9 +1010,19 @@ public:
         for (int i = 0; i < getBusCount (false); ++i)  AudioUnitReset (audioUnit, kAudioUnitScope_Output, static_cast<UInt32> (i));
     }
 
-    void processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages) override
+    void processAudio (AudioBuffer<float>& buffer, MidiBuffer& midiMessages, bool processBlockBypassedCalled)
     {
         auto numSamples = buffer.getNumSamples();
+
+        if (auSupportsBypass)
+        {
+            updateBypass (processBlockBypassedCalled);
+        }
+        else if (processBlockBypassedCalled)
+        {
+            AudioProcessor::processBlockBypassed (buffer, midiMessages);
+            return;
+        }
 
         if (prepared)
         {
@@ -1111,7 +1121,18 @@ public:
         }
     }
 
+    void processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages) override
+    {
+        processAudio (buffer, midiMessages, false);
+    }
+
+    void processBlockBypassed (AudioBuffer<float>& buffer, MidiBuffer& midiMessages) override
+    {
+        processAudio (buffer, midiMessages, true);
+    }
+
     //==============================================================================
+    AudioProcessorParameter* getBypassParameter() const override          { return auSupportsBypass ? bypassParam.get() : nullptr; }
     bool hasEditor() const override                  { return true; }
     AudioProcessorEditor* createEditor() override;
 
@@ -1408,6 +1429,14 @@ public:
                 }
             }
         }
+
+        UInt32 propertySize = 0;
+        Boolean writable = false;
+
+        auSupportsBypass = (AudioUnitGetPropertyInfo (audioUnit, kAudioUnitProperty_BypassEffect,
+                                                     kAudioUnitScope_Global, 0, &propertySize, &writable) == noErr
+                              && propertySize >= sizeof (UInt32) && writable);
+        bypassParam = new AUBypassParameter (*this);
     }
 
     void updateLatency()
@@ -1439,7 +1468,7 @@ private:
     String pluginName, manufacturer, version;
     String fileOrIdentifier;
     CriticalSection lock;
-    bool wantsMidiMessages, producesMidiMessages, wasPlaying, prepared, isAUv3, isMidiEffectPlugin;
+    bool wantsMidiMessages, producesMidiMessages, wasPlaying, prepared, isAUv3, isMidiEffectPlugin, lastBypassValue = false;
 
     struct AUBuffer
     {
@@ -1457,6 +1486,99 @@ private:
         }
 
         HeapBlock<AudioBufferList> bufferList;
+    };
+
+    //==============================================================================
+    struct AUBypassParameter    : Parameter
+    {
+        AUBypassParameter (AudioUnitPluginInstance& effectToUse)
+             : parent (effectToUse), currentValue (getCurrentHostValue())
+        {}
+
+        bool getCurrentHostValue()
+        {
+            if (parent.auSupportsBypass)
+            {
+                UInt32 dataSize = sizeof (UInt32);
+                UInt32 value = 0;
+
+                if (AudioUnitGetProperty (parent.audioUnit, kAudioUnitProperty_BypassEffect,
+                                          kAudioUnitScope_Global, 0, &value, &dataSize) == noErr
+                               && dataSize == sizeof (UInt32))
+                    return (value != 0);
+            }
+
+            return false;
+        }
+
+        float getValue() const override
+        {
+            return currentValue ? 1.0f : 0.0f;
+        }
+
+        void setValue (float newValue) override
+        {
+            auto newBypassValue = (newValue != 0.0f);
+
+            const ScopedLock sl (parent.lock);
+
+            if (newBypassValue != currentValue)
+            {
+                currentValue = newBypassValue;
+
+                if (parent.auSupportsBypass)
+                {
+                    UInt32 value = (newValue != 0.0f ? 1 : 0);
+                    AudioUnitSetProperty (parent.audioUnit, kAudioUnitProperty_BypassEffect,
+                                          kAudioUnitScope_Global, 0, &value, sizeof (UInt32));
+
+                   #if JUCE_MAC
+                    jassert (parent.audioUnit != nullptr);
+
+                    AudioUnitEvent ev;
+                    ev.mEventType                       = kAudioUnitEvent_PropertyChange;
+                    ev.mArgument.mProperty.mAudioUnit   = parent.audioUnit;
+                    ev.mArgument.mProperty.mPropertyID  = kAudioUnitProperty_BypassEffect;
+                    ev.mArgument.mProperty.mScope       = kAudioUnitScope_Global;
+                    ev.mArgument.mProperty.mElement     = 0;
+
+                    AUEventListenerNotify (parent.eventListenerRef, nullptr, &ev);
+                   #endif
+                }
+            }
+        }
+
+        float getValueForText (const String& text) const override
+        {
+            String lowercaseText (text.toLowerCase());
+
+            for (auto& testText : onStrings)
+                if (lowercaseText == testText)
+                    return 1.0f;
+
+            for (auto& testText : offStrings)
+                if (lowercaseText == testText)
+                    return 0.0f;
+
+            return text.getIntValue() != 0 ? 1.0f : 0.0f;
+        }
+
+        float getDefaultValue() const override                              { return 0.0f; }
+        String getName (int /*maximumStringLength*/) const override         { return "Bypass"; }
+        String getText (float value, int) const override                    { return (value != 0.0f ? TRANS("On") : TRANS("Off")); }
+        bool isAutomatable() const override                                 { return true; }
+        bool isDiscrete() const override                                    { return true; }
+        bool isBoolean() const override                                     { return true; }
+        int getNumSteps() const override                                    { return 2; }
+        StringArray getAllValueStrings() const override                     { return values; }
+        String getLabel() const override                                    { return {}; }
+
+        AudioUnitPluginInstance& parent;
+        const StringArray onStrings  { TRANS("on"),  TRANS("yes"), TRANS("true") };
+        const StringArray offStrings { TRANS("off"), TRANS("no"),  TRANS("false") };
+        const StringArray values { TRANS("Off"), TRANS("On") };
+
+        bool currentValue = false;
     };
 
     OwnedArray<AUBuffer> outputBufferList;
@@ -1477,6 +1599,8 @@ private:
     MidiDataConcatenator midiConcatenator;
     CriticalSection midiInLock;
     MidiBuffer incomingMidi;
+    ScopedPointer<AUBypassParameter> bypassParam;
+    bool lastProcessBlockCallWasBypass = false, auSupportsBypass = false;
 
     void createPluginCallbacks()
     {
@@ -1536,6 +1660,7 @@ private:
             addPropertyChangeListener (kAudioUnitProperty_PresentPreset);
             addPropertyChangeListener (kAudioUnitProperty_ParameterList);
             addPropertyChangeListener (kAudioUnitProperty_Latency);
+            addPropertyChangeListener (kAudioUnitProperty_BypassEffect);
            #endif
         }
     }
@@ -1607,6 +1732,9 @@ private:
                     sendAllParametersChangedEvents();
                 else if (event.mArgument.mProperty.mPropertyID == kAudioUnitProperty_Latency)
                     updateLatency();
+                else if (event.mArgument.mProperty.mPropertyID == kAudioUnitProperty_BypassEffect)
+                    if (bypassParam != nullptr)
+                        bypassParam->setValueNotifyingHost (bypassParam->getValue());
 
                 break;
         }
@@ -2036,6 +2164,23 @@ private:
         }
 
         return false;
+    }
+
+    //==============================================================================
+    void updateBypass (bool processBlockBypassedCalled)
+    {
+        if (processBlockBypassedCalled && bypassParam != nullptr)
+        {
+            if (bypassParam->getValue() == 0.0f || ! lastProcessBlockCallWasBypass)
+                bypassParam->setValue (1.0f);
+        }
+        else
+        {
+            if (lastProcessBlockCallWasBypass && bypassParam != nullptr)
+                bypassParam->setValue (0.0f);
+        }
+
+        lastProcessBlockCallWasBypass = processBlockBypassedCalled;
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioUnitPluginInstance)

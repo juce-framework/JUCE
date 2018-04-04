@@ -188,6 +188,13 @@ public:
         be the processor's MIDI output. This means that your processor should be careful to
         clear any incoming messages from the array if it doesn't want them to be passed-on.
 
+        If you have implemented the getBypassParameter method, then you need to check the
+        value of this parameter in this callback and bypass your processing if the parameter
+        has a non-zero value.
+
+        Note that when calling this method as a host, the result may still be bypassed as
+        the parameter that controls the bypass may be non-zero.
+
         Be very careful about what you do in this callback - it's going to be called by
         the audio thread, so any kind of interaction with the UI is absolutely
         out of the question. If you change a parameter in here and need to tell your UI to
@@ -251,6 +258,13 @@ public:
         Any messages left in the MIDI buffer when this method has finished are assumed to
         be the processor's MIDI output. This means that your processor should be careful to
         clear any incoming messages from the array if it doesn't want them to be passed-on.
+
+        If you have implemented the getBypassParameter method, then you need to check the
+        value of this parameter in this callback and bypass your processing if the parameter
+        has a non-zero value.
+
+        Note that when calling this method as a host, the result may still be bypassed as
+        the parameter that controls the bypass may be non-zero.
 
         Be very careful about what you do in this callback - it's going to be called by
         the audio thread, so any kind of interaction with the UI is absolutely
@@ -889,6 +903,21 @@ public:
         plugin that it should stop any tails or sounds that have been left running.
     */
     virtual void reset();
+
+    //==============================================================================
+    /** Returns the parameter that controls the AudioProcessor's bypass state.
+
+        If this method returns a nullptr then you can still control the bypass by
+        calling processBlockBypassed instaed of processBlock. On the other hand,
+        if this method returns a non-null value, you should never call
+        processBlockBypassed but use the returned parameter to conrol the bypass
+        state instead.
+
+        A plug-in can override this function to return a parameter which control's your
+        plug-in's bypass. You should always check the value of this parameter in your
+        processBlock callback and bypass any effects if it is non-zero.
+    */
+    virtual AudioProcessorParameter* getBypassParameter() const        { return nullptr; }
 
     //==============================================================================
     /** Returns true if the processor is being run in an offline mode for rendering.

@@ -133,11 +133,6 @@ namespace AAXClasses
         jassert (result == AAX_SUCCESS); ignoreUnused (result);
     }
 
-    static bool isBypassParam (AAX_CParamID paramID) noexcept
-    {
-        return AAX::IsParameterIDEqual (paramID, cDefaultMasterBypassID) != 0;
-    }
-
     // maps a channel index of an AAX format to an index of a juce format
     struct AAXChannelStreamOrder
     {
@@ -483,10 +478,12 @@ namespace AAXClasses
         {
             if (component != nullptr && component->pluginEditor != nullptr)
             {
-                if (! isBypassParam (paramID))
+                auto index = getParamIndexFromID (paramID);
+
+                if (index >= 0)
                 {
                     AudioProcessorEditor::ParameterControlHighlightInfo info;
-                    info.parameterIndex  = getParamIndexFromID (paramID);
+                    info.parameterIndex  = index;
                     info.isHighlighted   = (isHighlighted != 0);
                     info.suggestedColour = getColourFromHighlightEnum (colour);
 
@@ -660,7 +657,6 @@ namespace AAXClasses
             if (err != AAX_SUCCESS)
                 return err;
 
-            addBypassParameter();
             addAudioProcessorParameters();
 
             return AAX_SUCCESS;
@@ -804,21 +800,13 @@ namespace AAXClasses
         AAX_Result UpdateParameterNormalizedValue (AAX_CParamID paramID, double value, AAX_EUpdateSource source) override
         {
             auto result = AAX_CEffectParameters::UpdateParameterNormalizedValue (paramID, value, source);
-
-            if (! isBypassParam (paramID))
-                setAudioProcessorParameter (paramID, value);
+            setAudioProcessorParameter (paramID, value);
 
             return result;
         }
 
         AAX_Result GetParameterValueFromString (AAX_CParamID paramID, double* result, const AAX_IString& text) const override
         {
-            if (isBypassParam (paramID))
-            {
-                *result = (text.Get()[0] == 'B') ? 1.0 : 0.0;
-                return AAX_SUCCESS;
-            }
-
             if (auto* param = getParameterFromID (paramID))
             {
                 if (! LegacyAudioParameter::isLegacy (param))
@@ -833,39 +821,22 @@ namespace AAXClasses
 
         AAX_Result GetParameterStringFromValue (AAX_CParamID paramID, double value, AAX_IString* result, int32_t maxLen) const override
         {
-            if (isBypassParam (paramID))
-            {
-                result->Set (value == 0 ? "Off" : (maxLen >= 8 ? "Bypassed" : "Byp"));
-            }
-            else
-            {
-                if (auto* param = getParameterFromID (paramID))
-                    result->Set (param->getText ((float) value, maxLen).toRawUTF8());
-            }
+            if (auto* param = getParameterFromID (paramID))
+                result->Set (param->getText ((float) value, maxLen).toRawUTF8());
 
             return AAX_SUCCESS;
         }
 
         AAX_Result GetParameterNumberofSteps (AAX_CParamID paramID, int32_t* result) const
         {
-            if (isBypassParam (paramID))
-            {
-                *result = 2;
-            }
-            else
-            {
-                if (auto* param = getParameterFromID (paramID))
-                    *result = param->getNumSteps();
-            }
+            if (auto* param = getParameterFromID (paramID))
+                *result = param->getNumSteps();
 
             return AAX_SUCCESS;
         }
 
         AAX_Result GetParameterNormalizedValue (AAX_CParamID paramID, double* result) const override
         {
-            if (isBypassParam (paramID))
-                return AAX_CEffectParameters::GetParameterNormalizedValue (paramID, result);
-
             if (auto* param = getParameterFromID (paramID))
                 *result = (double) param->getValue();
             else
@@ -876,9 +847,6 @@ namespace AAXClasses
 
         AAX_Result SetParameterNormalizedValue (AAX_CParamID paramID, double newValue) override
         {
-            if (isBypassParam (paramID))
-                return AAX_CEffectParameters::SetParameterNormalizedValue (paramID, newValue);
-
             if (auto* p = mParameterManager.GetParameterByID (paramID))
                 p->SetValueWithFloat ((float) newValue);
 
@@ -889,9 +857,6 @@ namespace AAXClasses
 
         AAX_Result SetParameterNormalizedRelative (AAX_CParamID paramID, double newDeltaValue) override
         {
-            if (isBypassParam (paramID))
-                return AAX_CEffectParameters::SetParameterNormalizedRelative (paramID, newDeltaValue);
-
             if (auto* param = getParameterFromID (paramID))
             {
                 auto newValue = param->getValue() + (float) newDeltaValue;
@@ -907,25 +872,15 @@ namespace AAXClasses
 
         AAX_Result GetParameterNameOfLength (AAX_CParamID paramID, AAX_IString* result, int32_t maxLen) const override
         {
-            if (isBypassParam (paramID))
-            {
-                result->Set (maxLen >= 13 ? "Master Bypass"
-                                          : (maxLen >= 8 ? "Mast Byp"
-                                                         : (maxLen >= 6 ? "MstByp" : "MByp")));
-            }
-            else if (auto* param = getParameterFromID (paramID))
-            {
+            if (auto* param = getParameterFromID (paramID))
                 result->Set (param->getName (maxLen).toRawUTF8());
-            }
 
             return AAX_SUCCESS;
         }
 
         AAX_Result GetParameterName (AAX_CParamID paramID, AAX_IString* result) const override
         {
-            if (isBypassParam (paramID))
-                result->Set ("Master Bypass");
-            else if (auto* param = getParameterFromID (paramID))
+            if (auto* param = getParameterFromID (paramID))
                 result->Set (param->getName (31).toRawUTF8());
 
             return AAX_SUCCESS;
@@ -933,15 +888,12 @@ namespace AAXClasses
 
         AAX_Result GetParameterDefaultNormalizedValue (AAX_CParamID paramID, double* result) const override
         {
-            if (! isBypassParam (paramID))
-            {
-                if (auto* param = getParameterFromID (paramID))
-                    *result = (double) param->getDefaultValue();
-                else
-                    *result = 0.0;
+            if (auto* param = getParameterFromID (paramID))
+                *result = (double) param->getDefaultValue();
+            else
+                *result = 0.0;
 
-                jassert (*result >= 0 && *result <= 1.0f);
-            }
+            jassert (*result >= 0 && *result <= 1.0f);
 
             return AAX_SUCCESS;
         }
@@ -1420,18 +1372,18 @@ namespace AAXClasses
            #endif
         }
 
-        void addBypassParameter()
+        bool isBypassPartOfRegularParemeters() const
         {
-            auto* masterBypass = new AAX_CParameter<bool> (cDefaultMasterBypassID,
-                                                           AAX_CString ("Master Bypass"),
-                                                           false,
-                                                           AAX_CBinaryTaperDelegate<bool>(),
-                                                           AAX_CBinaryDisplayDelegate<bool> ("bypass", "on"),
-                                                           true);
-            masterBypass->SetNumberOfSteps (2);
-            masterBypass->SetType (AAX_eParameterType_Discrete);
-            mParameterManager.AddParameter (masterBypass);
-            mPacketDispatcher.RegisterPacket (cDefaultMasterBypassID, JUCEAlgorithmIDs::bypass);
+            auto& audioProcessor = getPluginInstance();
+
+            int n = juceParameters.getNumParameters();
+
+            if (auto* bypassParam = audioProcessor.getBypassParameter())
+                for (int i = 0; i < n; ++i)
+                    if (juceParameters.getParamForIndex (i) == bypassParam)
+                        return true;
+
+            return false;
         }
 
         void addAudioProcessorParameters()
@@ -1444,14 +1396,35 @@ namespace AAXClasses
             const bool forceLegacyParamIDs = false;
            #endif
 
+            auto bypassPartOfRegularParams = isBypassPartOfRegularParemeters();
+
             juceParameters.update (audioProcessor, forceLegacyParamIDs);
+
+            bool aaxWrapperProvidedBypassParam = false;
+            auto* bypassParameter = pluginInstance->getBypassParameter();
+
+            if (bypassParameter == nullptr)
+            {
+                aaxWrapperProvidedBypassParam = true;
+
+                ownedBypassParameter = new AudioParameterBool (cDefaultMasterBypassID, "Master Bypass", false, {}, {}, {});
+
+                bypassParameter = ownedBypassParameter;
+            }
+
+            if (! bypassPartOfRegularParams)
+                juceParameters.params.add (bypassParameter);
+
             int parameterIndex = 0;
 
             for (auto* juceParam : juceParameters.params)
             {
+                auto isBypassParameter = (juceParam == bypassParameter);
+
                 auto category = juceParam->getCategory();
-                auto paramID  = juceParameters.getParamID (audioProcessor, parameterIndex)
-                                              .toRawUTF8();
+                auto paramID  = isBypassParameter ? cDefaultMasterBypassID
+                                                  : juceParameters.getParamID (audioProcessor, parameterIndex)
+                                                                  .toRawUTF8();
 
                 aaxParamIDs.add (paramID);
                 auto aaxParamID = aaxParamIDs.getReference (parameterIndex++).getCharPointer();
@@ -1493,6 +1466,9 @@ namespace AAXClasses
                                                 | AAX_eParameterOrientation_RotarySingleDotMode | AAX_eParameterOrientation_RotaryLeftMinRightMax));
 
                 mParameterManager.AddParameter (parameter);
+
+                if (isBypassParameter)
+                    mPacketDispatcher.RegisterPacket (aaxParamID, JUCEAlgorithmIDs::bypass);
             }
         }
 
@@ -1785,6 +1761,7 @@ namespace AAXClasses
         Array<String> aaxParamIDs;
         HashMap<int32, AudioProcessorParameter*> paramMap;
         LegacyAudioParametersWrapper juceParameters;
+        ScopedPointer<AudioProcessorParameter> ownedBypassParameter;
 
         Array<AudioProcessorParameter*> aaxMeters;
 
