@@ -1,4 +1,4 @@
-package com.roli.juce.demorunner;
+package com.juce.demorunner;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;

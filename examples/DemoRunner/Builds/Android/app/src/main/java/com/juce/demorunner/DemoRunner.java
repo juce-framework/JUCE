@@ -20,7 +20,7 @@
   ==============================================================================
 */
 
-package com.roli.juce.demorunner;
+package com.juce.demorunner;
 
 import android.app.Activity;
 import android.app.AlertDialog;
