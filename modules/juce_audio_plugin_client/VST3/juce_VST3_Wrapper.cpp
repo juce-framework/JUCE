@@ -1351,11 +1351,11 @@ public:
     {
         if (pluginInstance->getBypassParameter() == nullptr)
         {
-            auto privateData = ValueTree::readFromData (data, static_cast<size_t> (sizeInBytes));
-            auto isBypassed = static_cast<bool> (privateData.getProperty ("Bypass", var (false)));
-
             if (auto* bypassParam = comPluginInstance->getBypassParameter())
-                setBypassed (isBypassed ? 1.0f : 0.0f);
+            {
+                auto privateData = ValueTree::readFromData (data, static_cast<size_t> (sizeInBytes));
+                setBypassed (static_cast<bool> (privateData.getProperty ("Bypass", var (false))));
+            }
         }
     }
 
