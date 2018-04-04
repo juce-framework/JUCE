@@ -1677,6 +1677,11 @@ public:
                    #endif
 
                     editor->addToDesktop (0, view);
+
+                   #if JUCE_IOS
+                    if (JUCE_IOS_MAC_VIEW* peerView = [[[myself view] subviews] objectAtIndex: 0])
+                        [peerView setContentMode: UIViewContentModeTop];
+                   #endif
                 }
             }
         }
