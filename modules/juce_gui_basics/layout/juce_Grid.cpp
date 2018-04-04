@@ -1017,7 +1017,7 @@ void Grid::performLayout (juce::Rectangle<int> targetArea)
                                 + targetArea.toFloat().getPosition();
 
         if (auto* c = item->associatedComponent)
-            c->setBounds (item->currentBounds.toNearestInt());
+            c->setBounds (item->currentBounds.toNearestIntEdges());
     }
 }
 
