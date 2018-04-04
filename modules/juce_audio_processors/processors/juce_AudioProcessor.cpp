@@ -414,6 +414,18 @@ void AudioProcessor::setLatencySamples (const int newLatency)
     }
 }
 
+//==============================================================================
+#if JUCE_GCC
+ #pragma GCC diagnostic push
+ #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#elif JUCE_CLANG
+ #pragma clang diagnostic push
+ #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#elif JUCE_MSVC
+ #pragma warning (push, 0)
+ #pragma warning (disable: 4996)
+#endif
+
 void AudioProcessor::setParameterNotifyingHost (int parameterIndex, float newValue)
 {
     if (auto* param = getParameters()[parameterIndex])
@@ -425,12 +437,6 @@ void AudioProcessor::setParameterNotifyingHost (int parameterIndex, float newVal
         setParameter (parameterIndex, newValue);
         sendParamChangeMessageToListeners (parameterIndex, newValue);
     }
-}
-
-AudioProcessorListener* AudioProcessor::getListenerLocked (int index) const noexcept
-{
-    const ScopedLock sl (listenerLock);
-    return listeners[index];
 }
 
 void AudioProcessor::sendParamChangeMessageToListeners (int parameterIndex, float newValue)
@@ -511,6 +517,49 @@ void AudioProcessor::endParameterChangeGesture (int parameterIndex)
     }
 }
 
+String AudioProcessor::getParameterName (int index, int maximumStringLength)
+{
+    if (auto* p = managedParameters[index])
+        return p->getName (maximumStringLength);
+
+    return getParameterName (index).substring (0, maximumStringLength);
+}
+
+const String AudioProcessor::getParameterText (int index)
+{
+   #if JUCE_DEBUG
+    // if you hit this, then you're probably using the old parameter control methods,
+    // but have forgotten to implement either of the getParameterText() methods.
+    jassert (! textRecursionCheck);
+    ScopedValueSetter<bool> sv (textRecursionCheck, true, false);
+   #endif
+
+    return getParameterText (index, 1024);
+}
+
+String AudioProcessor::getParameterText (int index, int maximumStringLength)
+{
+    if (auto* p = managedParameters[index])
+        return p->getText (p->getValue(), maximumStringLength);
+
+    return getParameterText (index).substring (0, maximumStringLength);
+}
+
+#if JUCE_GCC
+ #pragma GCC diagnostic pop
+#elif JUCE_CLANG
+ #pragma clang diagnostic pop
+#elif JUCE_MSVC
+ #pragma warning (pop)
+#endif
+
+//==============================================================================
+AudioProcessorListener* AudioProcessor::getListenerLocked (int index) const noexcept
+{
+    const ScopedLock sl (listenerLock);
+    return listeners[index];
+}
+
 void AudioProcessor::updateHostDisplay()
 {
     for (int i = listeners.size(); --i >= 0;)
@@ -565,34 +614,6 @@ String AudioProcessor::getParameterID (int index)
         return p->paramID;
 
     return String (index);
-}
-
-String AudioProcessor::getParameterName (int index, int maximumStringLength)
-{
-    if (auto* p = managedParameters[index])
-        return p->getName (maximumStringLength);
-
-    return getParameterName (index).substring (0, maximumStringLength);
-}
-
-const String AudioProcessor::getParameterText (int index)
-{
-   #if JUCE_DEBUG
-    // if you hit this, then you're probably using the old parameter control methods,
-    // but have forgotten to implement either of the getParameterText() methods.
-    jassert (! textRecursionCheck);
-    ScopedValueSetter<bool> sv (textRecursionCheck, true, false);
-   #endif
-
-    return getParameterText (index, 1024);
-}
-
-String AudioProcessor::getParameterText (int index, int maximumStringLength)
-{
-    if (auto* p = managedParameters[index])
-        return p->getText (p->getValue(), maximumStringLength);
-
-    return getParameterText (index).substring (0, maximumStringLength);
 }
 
 int AudioProcessor::getParameterNumSteps (int index)
@@ -1368,9 +1389,6 @@ AudioProcessorParameter::~AudioProcessorParameter()
 
 void AudioProcessorParameter::setValueNotifyingHost (float newValue)
 {
-    // This method can't be used until the parameter has been attached to a processor!
-    jassert (processor != nullptr && parameterIndex >= 0);
-
     setValue (newValue);
     sendValueChangedMessageToListeners (newValue);
 }
@@ -1394,11 +1412,14 @@ void AudioProcessorParameter::beginChangeGesture()
         if (auto* l = listeners[i])
             l->parameterGestureChanged (getParameterIndex(), true);
 
-    // audioProcessorParameterChangeGestureBegin callbacks will shortly be deprecated and
-    // this code will be removed.
-    for (int i = processor->listeners.size(); --i >= 0;)
-        if (auto* l = processor->listeners[i])
-            l->audioProcessorParameterChangeGestureBegin (processor, getParameterIndex());
+    if (processor != nullptr && parameterIndex >= 0)
+    {
+        // audioProcessorParameterChangeGestureBegin callbacks will shortly be deprecated and
+        // this code will be removed.
+        for (int i = processor->listeners.size(); --i >= 0;)
+            if (auto* l = processor->listeners[i])
+                l->audioProcessorParameterChangeGestureBegin (processor, getParameterIndex());
+    }
 }
 
 void AudioProcessorParameter::endChangeGesture()
@@ -1420,11 +1441,14 @@ void AudioProcessorParameter::endChangeGesture()
         if (auto* l = listeners[i])
             l->parameterGestureChanged (getParameterIndex(), false);
 
-    // audioProcessorParameterChangeGestureEnd callbacks will shortly be deprecated and
-    // this code will be removed.
-    for (int i = processor->listeners.size(); --i >= 0;)
-        if (auto* l = processor->listeners[i])
-            l->audioProcessorParameterChangeGestureEnd (processor, getParameterIndex());
+    if (processor != nullptr && parameterIndex >= 0)
+    {
+        // audioProcessorParameterChangeGestureEnd callbacks will shortly be deprecated and
+        // this code will be removed.
+        for (int i = processor->listeners.size(); --i >= 0;)
+            if (auto* l = processor->listeners[i])
+                l->audioProcessorParameterChangeGestureEnd (processor, getParameterIndex());
+    }
 }
 
 void AudioProcessorParameter::sendValueChangedMessageToListeners (float newValue)
@@ -1435,11 +1459,14 @@ void AudioProcessorParameter::sendValueChangedMessageToListeners (float newValue
         if (auto* l = listeners [i])
             l->parameterValueChanged (getParameterIndex(), newValue);
 
-    // audioProcessorParameterChanged callbacks will shortly be deprecated and
-    // this code will be removed.
-    for (int i = processor->listeners.size(); --i >= 0;)
-        if (auto* l = processor->listeners[i])
-            l->audioProcessorParameterChanged (processor, getParameterIndex(), newValue);
+    if (processor != nullptr && parameterIndex >= 0)
+    {
+        // audioProcessorParameterChanged callbacks will shortly be deprecated and
+        // this code will be removed.
+        for (int i = processor->listeners.size(); --i >= 0;)
+            if (auto* l = processor->listeners[i])
+                l->audioProcessorParameterChanged (processor, getParameterIndex(), newValue);
+    }
 }
 
 bool AudioProcessorParameter::isOrientationInverted() const                      { return false; }

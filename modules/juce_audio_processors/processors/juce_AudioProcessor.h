@@ -962,14 +962,14 @@ public:
         NOTE! This method will eventually be deprecated! It's recommended that you use the
         AudioProcessorParameter class instead to manage your parameters.
     */
-    virtual int getNumParameters();
+    JUCE_DEPRECATED (virtual int getNumParameters());
 
     /** Returns the name of a particular parameter.
 
         NOTE! This method will eventually be deprecated! It's recommended that you use the
         AudioProcessorParameter class instead to manage your parameters.
     */
-    virtual const String getParameterName (int parameterIndex);
+    JUCE_DEPRECATED (virtual const String getParameterName (int parameterIndex));
 
     /** Returns the ID of a particular parameter.
 
@@ -980,7 +980,7 @@ public:
         NOTE! This method will eventually be deprecated! It's recommended that you use the
         AudioProcessorParameterWithID class instead to manage your parameters.
      */
-    virtual String getParameterID (int index);
+    JUCE_DEPRECATED (virtual String getParameterID (int index));
 
     /** Called by the host to find out the value of one of the processor's parameters.
 
@@ -993,7 +993,7 @@ public:
         NOTE! This method will eventually be deprecated! It's recommended that you use the
         AudioProcessorParameter class instead to manage your parameters.
     */
-    virtual float getParameter (int parameterIndex);
+    JUCE_DEPRECATED (virtual float getParameter (int parameterIndex));
 
     /** Returns the name of a parameter as a text string with a preferred maximum length.
         If you want to provide customised short versions of your parameter names that
@@ -1005,13 +1005,13 @@ public:
         NOTE! This method will eventually be deprecated! It's recommended that you use
         AudioProcessorParameter::getName() instead.
     */
-    virtual String getParameterName (int parameterIndex, int maximumStringLength);
+    JUCE_DEPRECATED (virtual String getParameterName (int parameterIndex, int maximumStringLength));
 
     /** Returns the value of a parameter as a text string.
         NOTE! This method will eventually be deprecated! It's recommended that you use
         AudioProcessorParameter::getText() instead.
     */
-    virtual const String getParameterText (int parameterIndex);
+    JUCE_DEPRECATED (virtual const String getParameterText (int parameterIndex));
 
     /** Returns the value of a parameter as a text string with a preferred maximum length.
         If you want to provide customised short versions of your parameter values that
@@ -1023,7 +1023,7 @@ public:
         NOTE! This method will eventually be deprecated! It's recommended that you use
         AudioProcessorParameter::getText() instead.
     */
-    virtual String getParameterText (int parameterIndex, int maximumStringLength);
+    JUCE_DEPRECATED (virtual String getParameterText (int parameterIndex, int maximumStringLength));
 
     /** Returns the number of discrete steps that this parameter can represent.
 
@@ -1043,7 +1043,7 @@ public:
 
         @see isParameterDiscrete
     */
-    virtual int getParameterNumSteps (int parameterIndex);
+    JUCE_DEPRECATED (virtual int getParameterNumSteps (int parameterIndex));
 
     /** Returns the default number of steps for a parameter.
 
@@ -1067,7 +1067,7 @@ public:
 
         @see getParameterNumSteps
     */
-    virtual bool isParameterDiscrete (int parameterIndex) const;
+    JUCE_DEPRECATED (virtual bool isParameterDiscrete (int parameterIndex) const);
 
     /** Returns the default value for the parameter.
         By default, this just returns 0.
@@ -1076,7 +1076,7 @@ public:
         NOTE! This method will eventually be deprecated! It's recommended that you use
         AudioProcessorParameter::getDefaultValue() instead.
     */
-    virtual float getParameterDefaultValue (int parameterIndex);
+    JUCE_DEPRECATED (virtual float getParameterDefaultValue (int parameterIndex));
 
     /** Some plugin types may be able to return a label string for a
         parameter's units.
@@ -1084,7 +1084,7 @@ public:
         NOTE! This method will eventually be deprecated! It's recommended that you use
         AudioProcessorParameter::getLabel() instead.
     */
-    virtual String getParameterLabel (int index) const;
+    JUCE_DEPRECATED (virtual String getParameterLabel (int index) const);
 
     /** This can be overridden to tell the host that particular parameters operate in the
         reverse direction. (Not all plugin formats or hosts will actually use this information).
@@ -1092,7 +1092,7 @@ public:
         NOTE! This method will eventually be deprecated! It's recommended that you use
         AudioProcessorParameter::isOrientationInverted() instead.
     */
-    virtual bool isParameterOrientationInverted (int index) const;
+    JUCE_DEPRECATED (virtual bool isParameterOrientationInverted (int index) const);
 
     /** The host will call this method to change the value of one of the processor's parameters.
 
@@ -1110,7 +1110,7 @@ public:
         NOTE! This method will eventually be deprecated! It's recommended that you use
         AudioProcessorParameter::setValue() instead.
     */
-    virtual void setParameter (int parameterIndex, float newValue);
+    JUCE_DEPRECATED (virtual void setParameter (int parameterIndex, float newValue));
 
     /** Your processor can call this when it needs to change one of its parameters.
 
@@ -1133,7 +1133,7 @@ public:
         NOTE! This method will eventually be deprecated! It's recommended that you use
         AudioProcessorParameter::isAutomatable() instead.
     */
-    virtual bool isParameterAutomatable (int parameterIndex) const;
+    JUCE_DEPRECATED (virtual bool isParameterAutomatable (int parameterIndex) const);
 
     /** Should return true if this parameter is a "meta" parameter.
         A meta-parameter is a parameter that changes other params. It is used
@@ -1143,7 +1143,7 @@ public:
         NOTE! This method will eventually be deprecated! It's recommended that you use
         AudioProcessorParameter::isMetaParameter() instead.
     */
-    virtual bool isMetaParameter (int parameterIndex) const;
+    JUCE_DEPRECATED (virtual bool isMetaParameter (int parameterIndex) const);
 
     /** Should return the parameter's category.
         By default, this returns the "generic" category.
@@ -1151,7 +1151,7 @@ public:
         NOTE! This method will eventually be deprecated! It's recommended that you use
         AudioProcessorParameter::getCategory() instead.
     */
-    virtual AudioProcessorParameter::Category getParameterCategory (int parameterIndex) const;
+    JUCE_DEPRECATED (virtual AudioProcessorParameter::Category getParameterCategory (int parameterIndex) const);
 
     /** Sends a signal to the host to tell it that the user is about to start changing this
         parameter.
@@ -1164,7 +1164,7 @@ public:
         NOTE! This method will eventually be deprecated! It's recommended that you use
         AudioProcessorParameter::beginChangeGesture() instead.
     */
-    void beginParameterChangeGesture (int parameterIndex);
+    JUCE_DEPRECATED (void beginParameterChangeGesture (int parameterIndex));
 
     /** Tells the host that the user has finished changing this parameter.
 
@@ -1176,7 +1176,7 @@ public:
         NOTE! This method will eventually be deprecated! It's recommended that you use
         AudioProcessorParameter::endChangeGesture() instead.
     */
-    void endParameterChangeGesture (int parameterIndex);
+    JUCE_DEPRECATED (void endParameterChangeGesture (int parameterIndex));
 
     /** The processor can call this when something (apart from a parameter value) has changed.
 
@@ -1625,8 +1625,6 @@ private:
     friend class JuceVST3Component;
     friend class AudioUnitPluginInstance;
     friend class LADSPAPluginInstance;
-
-    Atomic<int> vst3IsPlaying { 0 };
 
     // This method is no longer used - you can delete it from your AudioProcessor classes.
     JUCE_DEPRECATED_WITH_BODY (virtual bool silenceInProducesSilenceOut() const, { return false; })

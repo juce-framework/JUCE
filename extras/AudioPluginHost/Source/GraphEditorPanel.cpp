@@ -307,6 +307,7 @@ struct GraphEditorPanel::FilterComponent   : public Component
             case 12:  showWindow (PluginWindow::Type::generic); break;
             case 20:  showWindow (PluginWindow::Type::audioIO); break;
             case 21:  testStateSaveLoad(); break;
+
             default:  break;
         }
     }

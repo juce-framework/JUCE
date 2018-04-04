@@ -27,6 +27,14 @@
 namespace juce
 {
 
+#if JUCE_MSVC
+ #pragma warning (push, 0)
+
+ // MSVC does not like it if you override a deprecated method even if you
+ // keep the deprecation attribute. Other compilers are more forgiving.
+ #pragma warning (disable: 4996)
+#endif
+
 //==============================================================================
 /**
     Base class for an active instance of a plugin.
@@ -122,5 +130,9 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginInstance)
 };
+
+#if JUCE_MSVC
+ #pragma warning (pop)
+#endif
 
 } // namespace juce
