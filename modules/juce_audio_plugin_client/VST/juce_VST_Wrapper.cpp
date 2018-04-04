@@ -1288,10 +1288,12 @@ public:
             if (auto* ed = getEditorComp())
             {
                 ed->setTopLeftPosition (0, 0);
-                ed->setBounds (ed->getLocalArea (this, getLocalBounds()));
+
+                if (shouldResizeEditor)
+                    ed->setBounds (ed->getLocalArea (this, getLocalBounds()));
 
                 if (! getHostType().isBitwigStudio())
-                    updateWindowSize();
+                    updateWindowSize (false);
             }
 
            #if JUCE_MAC && ! JUCE_64BIT
@@ -1302,7 +1304,7 @@ public:
 
         void childBoundsChanged (Component*) override
         {
-            updateWindowSize();
+            updateWindowSize (false);
         }
 
         juce::Rectangle<int> getSizeToContainChild()
@@ -1313,7 +1315,7 @@ public:
             return {};
         }
 
-        void updateWindowSize()
+        void updateWindowSize (bool resizeEditor)
         {
             if (! isInSizeWindow)
             {
@@ -1330,7 +1332,12 @@ public:
                     resizeHostWindow (pos.getWidth(), pos.getHeight());
 
                    #if ! JUCE_LINUX // setSize() on linux causes renoise and energyxt to fail.
+                    if (! resizeEditor) // this is needed to prevent an infinite resizing loop due to coordinate rounding
+                        shouldResizeEditor = false;
+
                     setSize (pos.getWidth(), pos.getHeight());
+
+                    shouldResizeEditor = true;
                    #else
                     XResizeWindow (display.display, (Window) getWindowHandle(), pos.getWidth(), pos.getHeight());
                    #endif
@@ -1449,6 +1456,7 @@ public:
         JuceVSTWrapper& wrapper;
         FakeMouseMoveGenerator fakeMouseGenerator;
         bool isInSizeWindow = false;
+        bool shouldResizeEditor = true;
 
        #if JUCE_MAC
         void* hostWindow = {};
@@ -2115,7 +2123,7 @@ private:
                     ed->setScaleFactor (editorScaleFactor);
 
                 if (editorComp != nullptr)
-                    editorComp->updateWindowSize();
+                    editorComp->updateWindowSize (true);
             }
            #endif
         }
