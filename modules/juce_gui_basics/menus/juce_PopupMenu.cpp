@@ -789,7 +789,7 @@ public:
                                                     windowPos.getHeight() - (PopupMenuSettings::scrollZone + m->getHeight())),
                                               currentY);
 
-                        auto parentArea = getParentArea (windowPos.getPosition());
+                        auto parentArea = getParentArea (windowPos.getPosition()) / scaleFactor;
                         auto deltaY = wantedY - currentY;
 
                         windowPos.setSize (jmin (windowPos.getWidth(), parentArea.getWidth()),
