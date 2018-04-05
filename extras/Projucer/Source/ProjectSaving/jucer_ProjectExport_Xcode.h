@@ -415,7 +415,7 @@ protected:
         XcodeBuildConfiguration (Project& p, const ValueTree& t, const bool isIOS, const ProjectExporter& e)
             : BuildConfiguration (p, t, e),
               iOS (isIOS),
-              osxSDKVersion                (config, Ids::osxSDK,                       getUndoManager(), String (osxVersionDefault) + " SDK"),
+              osxSDKVersion                (config, Ids::osxSDK,                       getUndoManager()),
               osxDeploymentTarget          (config, Ids::osxCompatibility,             getUndoManager(), String (osxVersionDefault) + " SDK"),
               iosDeploymentTarget          (config, Ids::iosCompatibility,             getUndoManager(), iosVersionDefault),
               osxArchitecture              (config, Ids::osxArchitecture,              getUndoManager(), osxArch_Default),
@@ -467,7 +467,8 @@ protected:
                 }
 
                 props.add (new ChoicePropertyComponent (osxSDKVersion, "OSX Base SDK Version", sdkVersionNames, versionValues),
-                           "The version of OSX to link against in the Xcode build.");
+                           "The version of OSX to link against in the Xcode build. If \"Default\" is selected then the field will be left "
+                           "empty and the Xcode default will be used.");
 
                 props.add (new ChoicePropertyComponent (osxDeploymentTarget, "OSX Deployment Target", osxVersionNames, versionValues),
                            "The minimum version of OSX that the target binary will be compatible with.");
@@ -511,14 +512,8 @@ protected:
 
         String getCustomXcodeFlagsString() const                { return customXcodeFlags.get(); }
 
+        String getOSXSDKVersionString() const                   { return osxSDKVersion.get(); }
         String getOSXDeploymentTargetString() const             { return osxDeploymentTarget.get(); }
-        String getOSXSDKVersionString() const
-        {
-            if (osxSDKVersion.isUsingDefault())
-                return {};
-
-            return osxSDKVersion.get();
-        }
 
         String getCodeSignIdentityString() const                { return codeSignIdentity.get(); }
         bool isUsingDefaultCodeSignIdentity() const             { return codeSignIdentity.isUsingDefault(); }
