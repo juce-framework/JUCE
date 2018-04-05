@@ -170,7 +170,7 @@ public:
         if (selectedCategory.isEmpty())
         {
             if (isPositiveAndBelow (rowNumber, JUCEDemos::getCategories().size()))
-                g.drawFittedText (JUCEDemos::getCategories()[rowNumber].name,
+                g.drawFittedText (JUCEDemos::getCategories()[(size_t) rowNumber].name,
                                   bounds, Justification::centred, 1);
         }
         else
@@ -178,7 +178,7 @@ public:
             auto& category = JUCEDemos::getCategory (selectedCategory);
 
             if (isPositiveAndBelow (rowNumber, category.demos.size()))
-                g.drawFittedText (category.demos[rowNumber].demoFile.getFileName(),
+                g.drawFittedText (category.demos[(size_t) rowNumber].demoFile.getFileName(),
                                   bounds, Justification::centred, 1);
         }
     }
@@ -191,11 +191,11 @@ public:
 
     void selectedRowsChanged (int row) override
     {
-        if (row == -1)
+        if (row < 0)
             return;
 
         if (selectedCategory.isEmpty())
-            showCategory (JUCEDemos::getCategories()[row].name);
+            showCategory (JUCEDemos::getCategories()[(size_t) row].name);
         else
             demoHolder.setDemo (selectedCategory, row);
     }

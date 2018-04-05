@@ -160,7 +160,7 @@ struct SineSound : public SynthesiserSound
 */
 struct SineVoice : public OscillatorBase
 {
-    SineVoice() {};
+    SineVoice() {}
 
     bool canPlaySound (SynthesiserSound* sound) override { return dynamic_cast<SineSound*> (sound) != nullptr; }
 
@@ -191,7 +191,7 @@ struct SquareSound : public SynthesiserSound
 */
 struct SquareVoice : public OscillatorBase
 {
-    SquareVoice() {};
+    SquareVoice() {}
 
     bool canPlaySound (SynthesiserSound* sound) override { return dynamic_cast<SquareSound*> (sound) != nullptr; }
 
@@ -601,7 +601,7 @@ public:
        #endif
 
         setSize (600, 400);
-    };
+    }
 
     ~BlocksSynthDemo()
     {

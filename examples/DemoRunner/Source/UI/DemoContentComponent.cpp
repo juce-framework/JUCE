@@ -69,7 +69,7 @@ struct CodeContent    : public Component
         codeEditor.setScrollbarThickness (8);
 
         lookAndFeelChanged();
-    };
+    }
 
     void resized() override
     {
@@ -135,7 +135,7 @@ void DemoContentComponent::setDemo (const String& category, int selectedDemoInde
         && (currentDemoIndex == selectedDemoIndex))
         return;
 
-    auto demo = JUCEDemos::getCategory (category).demos[selectedDemoIndex];
+    auto demo = JUCEDemos::getCategory (category).demos[(size_t) selectedDemoIndex];
 
    #if ! (JUCE_ANDROID || JUCE_IOS)
     codeContent->document.replaceAllContent (trimPIP (demo.demoFile.loadFileAsString()));

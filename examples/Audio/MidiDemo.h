@@ -101,7 +101,7 @@ public:
             pairButton.setEnabled (false);
 
         addAndMakeVisible (pairButton);
-        pairButton.onClick = [this]
+        pairButton.onClick = []
         {
             RuntimePermissions::request (RuntimePermissions::bluetoothMidi,
                                          [] (bool wasGranted)
