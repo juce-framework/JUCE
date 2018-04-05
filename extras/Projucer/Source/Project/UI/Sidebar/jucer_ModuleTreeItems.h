@@ -218,7 +218,7 @@ private:
 
             if (info.isValid())
             {
-                OwnedArray <Project::ConfigFlag> configFlags;
+                configFlags.clear();
                 LibraryModule (info).getConfigFlags (project, configFlags);
 
                 for (auto* flag : configFlags)
@@ -245,6 +245,7 @@ private:
         String moduleID;
         Value globalPathValue;
         Value defaultJuceModulePathValue, defaultUserModulePathValue;
+        OwnedArray <Project::ConfigFlag> configFlags;
 
         ReferenceCountedArray<Value::ValueSource> modulePathValueSources;
 
