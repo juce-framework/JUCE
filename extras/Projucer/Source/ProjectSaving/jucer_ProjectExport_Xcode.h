@@ -516,8 +516,14 @@ protected:
 
         String getCustomXcodeFlagsString() const                { return customXcodeFlags.get(); }
 
-        String getOSXSDKVersionString() const                   { return osxSDKVersion.get(); }
         String getOSXDeploymentTargetString() const             { return osxDeploymentTarget.get(); }
+        String getOSXSDKVersionString() const
+        {
+            if (osxSDKVersion.isUsingDefault())
+                return {};
+
+            return osxSDKVersion.get();
+        }
 
         String getCodeSignIdentityString() const                { return codeSignIdentity.get(); }
         bool isUsingDefaultCodeSignIdentity() const             { return codeSignIdentity.isUsingDefault(); }
@@ -1668,8 +1674,8 @@ public:
 
             for (int ver = oldestAllowedDeploymentTarget; ver <= currentSDKVersion; ++ver)
             {
-                if (sdk == getSDKName (ver) && sdkRoot != nullptr) *sdkRoot = String ("macosx10." + String (ver));
-                if (sdkCompat == getSDKName (ver))   deploymentTarget = "10." + String (ver);
+                if (sdk.isNotEmpty() && (sdk == getSDKName (ver) && sdkRoot != nullptr)) *sdkRoot = String ("macosx10." + String (ver));
+                if (sdkCompat == getSDKName (ver))                                       deploymentTarget = "10." + String (ver);
             }
 
             return deploymentTarget;
