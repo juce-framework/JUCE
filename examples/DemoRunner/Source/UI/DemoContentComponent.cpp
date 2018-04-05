@@ -111,7 +111,7 @@ DemoContentComponent::DemoContentComponent (Component& mainComponent, std::funct
     addTab ("Code",     Colours::transparentBlack, codeContent = new CodeContent(), false);
    #endif
 
-    addTab ("Settings", Colours::transparentBlack, new SettingsContent (dynamic_cast<MainComponent&> (mainComponent)),           true);
+    addTab ("Settings", Colours::transparentBlack, new SettingsContent (dynamic_cast<MainComponent&> (mainComponent)), true);
 
     setTabBarDepth (40);
     lookAndFeelChanged();

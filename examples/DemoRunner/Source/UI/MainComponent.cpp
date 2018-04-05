@@ -249,6 +249,15 @@ MainComponent::MainComponent()
         demosPanel.showOrHide (false);
        #endif
 
+        if (isHeavyweight)
+        {
+           #if JUCE_MAC && USE_COREGRAPHICS_RENDERING
+            setRenderingEngine (1);
+           #else
+            setRenderingEngine (0);
+           #endif
+        }
+
         isShowingHeavyweightDemo = isHeavyweight;
         resized();
     });
@@ -393,13 +402,18 @@ void MainComponent::updateRenderingEngine (int renderingEngineIndex)
 {
     if (renderingEngineIndex == (renderingEngines.size() - 1))
     {
+        if (isShowingHeavyweightDemo)
+            return;
+
         openGLContext.attachTo (*getTopLevelComponent());
     }
     else
     {
         openGLContext.detach();
-        peer->setCurrentRenderingEngine (renderingEngineIndex);
     }
+
+    if (peer != nullptr)
+        peer->setCurrentRenderingEngine (renderingEngineIndex);
 
     currentRenderingEngineIdx = renderingEngineIndex;
 }

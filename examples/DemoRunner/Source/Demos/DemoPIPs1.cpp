@@ -105,7 +105,7 @@ void registerDemos_One() noexcept
     REGISTER_DEMO (OscillatorDemo,            DSP,       false)
     REGISTER_DEMO (OverdriveDemo,             DSP,       false)
     #if JUCE_USE_SIMD
-     REGISTER_DEMO (SIMDRegisterDemo,          DSP,       false)
+     REGISTER_DEMO (SIMDRegisterDemo,         DSP,       false)
     #endif
     REGISTER_DEMO (StateVariableFilterDemo,   DSP,       false)
     REGISTER_DEMO (WaveShaperTanhDemo,        DSP,       false)
