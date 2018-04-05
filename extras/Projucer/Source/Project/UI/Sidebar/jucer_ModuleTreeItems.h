@@ -626,6 +626,8 @@ public:
 
         for (auto p : paths)
         {
+            p = p.replace ("~", File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
+
             auto f = File::createFileWithoutCheckingPath (p.trim());
             if (f.exists())
                 list.addAllModulesInFolder (f);
