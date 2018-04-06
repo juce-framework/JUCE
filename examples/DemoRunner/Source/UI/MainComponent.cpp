@@ -410,10 +410,8 @@ void MainComponent::updateRenderingEngine (int renderingEngineIndex)
     else
     {
         openGLContext.detach();
-    }
-
-    if (peer != nullptr)
         peer->setCurrentRenderingEngine (renderingEngineIndex);
+    }
 
     currentRenderingEngineIdx = renderingEngineIndex;
 }
