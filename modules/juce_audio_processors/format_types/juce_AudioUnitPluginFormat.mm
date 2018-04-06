@@ -600,7 +600,7 @@ public:
         }
     }
 
-    // called from the destructer above
+    // called from the destructor above
     void cleanup()
     {
        #if JUCE_MAC
@@ -1132,8 +1132,24 @@ public:
     }
 
     //==============================================================================
-    AudioProcessorParameter* getBypassParameter() const override          { return auSupportsBypass ? bypassParam.get() : nullptr; }
-    bool hasEditor() const override                  { return true; }
+    AudioProcessorParameter* getBypassParameter() const override    { return auSupportsBypass ? bypassParam.get() : nullptr; }
+
+    bool hasEditor() const override
+    {
+       #if JUCE_MAC
+        return true;
+       #elif JUCE_SUPPORTS_AUv3
+        UInt32 dataSize;
+        Boolean isWritable;
+
+        return (AudioUnitGetPropertyInfo (audioUnit, kAudioUnitProperty_RequestViewController,
+                                          kAudioUnitScope_Global, 0, &dataSize, &isWritable) == noErr
+                && dataSize == sizeof (uintptr_t) && isWritable != 0);
+       #else
+        return false;
+       #endif
+    }
+
     AudioProcessorEditor* createEditor() override;
 
     static AudioProcessor::BusesProperties getBusesProperties (AudioComponentInstance comp)
@@ -2314,9 +2330,7 @@ private:
        #if JUCE_SUPPORTS_AUv3
         if (AudioUnitGetPropertyInfo (plugin.audioUnit, kAudioUnitProperty_RequestViewController, kAudioUnitScope_Global,
                                           0, &dataSize, &isWritable) == noErr
-                && dataSize == sizeof (ViewControllerCallbackBlock)
-                && AudioUnitGetPropertyInfo (plugin.audioUnit, kAudioUnitProperty_RequestViewController, kAudioUnitScope_Global,
-                                             0, &dataSize, &isWritable) == noErr)
+                && dataSize == sizeof (ViewControllerCallbackBlock))
         {
             waitingForViewCallback = true;
             ViewControllerCallbackBlock callback;
@@ -2752,11 +2766,11 @@ StringArray AudioUnitPluginFormat::searchPathsForPlugins (const FileSearchPath&,
         {
             ignoreUnused (allowPluginsWhichRequireAsynchronousInstantiation);
 
-          #if JUCE_SUPPORTS_AUv3
+           #if JUCE_SUPPORTS_AUv3
             bool isAUv3 = ((desc.componentFlags & kAudioComponentFlag_IsV3AudioUnit) != 0);
 
             if (allowPluginsWhichRequireAsynchronousInstantiation || ! isAUv3)
-          #endif
+           #endif
                 result.add (AudioUnitFormatHelpers::createPluginIdentifier (desc));
         }
     }
