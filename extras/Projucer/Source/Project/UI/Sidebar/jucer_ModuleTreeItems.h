@@ -408,7 +408,7 @@ private:
                 for (auto missingModule : missingDependencies)
                 {
                     if (auto* info = list.getModuleWithID (missingModule))
-                        modules.addModule (info->moduleFolder, copyLocally, useGlobalPath);
+                        modules.addModule (info->moduleFolder, copyLocally, useGlobalPath, false);
                     else
                         missing.add (missingModule);
                 }
@@ -543,7 +543,8 @@ public:
         for (int i = 0; i < modules.size(); ++i)
             project.getModules().addModule (modules.getReference(i).moduleFolder,
                                             project.getModules().areMostModulesCopiedLocally(),
-                                            project.getModules().areMostModulesUsingGlobalPath());
+                                            project.getModules().areMostModulesUsingGlobalPath(),
+                                            true);
     }
 
     void addSubItems() override
@@ -586,7 +587,6 @@ public:
     void handlePopupMenuResult (int resultCode) override
     {
         auto& modules = project.getModules();
-        auto numModulesBefore = modules.getNumModules();
 
         if (resultCode == 1001)
         {
@@ -600,14 +600,6 @@ public:
                 modules.addModuleInteractive (getAvailableModulesInGlobalUserPath() [resultCode - 200]);
             else if (resultCode < 400)
                 modules.addModuleInteractive (getAvailableModulesInExporterPaths() [resultCode - 300]);
-        }
-
-        if (modules.getNumModules() == numModulesBefore + 1)
-        {
-            StringPairArray data;
-            data.set ("label",  modules.getModuleID (modules.getNumModules() - 1));
-
-            Analytics::getInstance()->logEvent ("Module Added", data, ProjucerAnalyticsEvent::projectEvent);
         }
     }
 
