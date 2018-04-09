@@ -73,6 +73,13 @@ static_assert (AAX_SDK_CURRENT_REVISION >= AAX_SDK_2p3p0_REVISION, "JUCE require
 #include <AAX_IFeatureInfo.h>
 #include <AAX_UIDs.h>
 
+#ifdef AAX_SDK_2p3p1_REVISION
+ #if AAX_SDK_CURRENT_REVISION >= AAX_SDK_2p3p1_REVISION
+  #include <AAX_Exception.h>
+  #include <AAX_Assert.h>
+ #endif
+#endif
+
 #ifdef _MSC_VER
  #pragma warning (pop)
 #endif
