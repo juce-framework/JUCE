@@ -55,13 +55,15 @@ public:
         AbletonLiveGeneric,         /**< Represents Ableton Live. */
         AdobeAudition,              /**< Represents Adobe Audition. */
         AdobePremierePro,           /**< Represents Adobe Premiere Pro. */
+        AppleGarageBand,            /**< Represents Apple GarageBand. */
         AppleLogic,                 /**< Represents Apple Logic Pro. */
+        AppleMainStage,             /**< Represents Apple Main Stage. */
         Ardour,                     /**< Represents Ardour. */
+        AvidProTools,               /**< Represents Avid Pro Tools. */
         BitwigStudio,               /**< Represents Bitwig Studio. */
         CakewalkSonar8,             /**< Represents Cakewalk Sonar 8. */
         CakewalkSonarGeneric,       /**< Represents Cakewalk Sonar. */
         DaVinciResolve,             /**< Represents DaVinci Resolve. */
-        DigidesignProTools,         /**< Represents Avid Pro Tools. */
         DigitalPerformer,           /**< Represents Digital Performer. */
         FinalCut,                   /**< Represents Apple Final Cut Pro. */
         FruityLoops,                /**< Represents Fruity Loops. */
@@ -123,14 +125,18 @@ public:
     bool isFinalCut() const noexcept          { return type == FinalCut; }
     /** Returns true if the host is Fruity Loops. */
     bool isFruityLoops() const noexcept       { return type == FruityLoops; }
+    /** Returns true if the host is Apple GarageBand. */
+    bool isGarageBand() const noexcept        { return type == AppleGarageBand; }
     /** Returns true if the host is Apple Logic Pro. */
     bool isLogic() const noexcept             { return type == AppleLogic; }
+    /** Returns true if the host is Apple MainStage. */
+    bool isMainStage() const noexcept         { return type == AppleMainStage; }
     /** Returns true if the host is any version of Steinberg Nuendo. */
     bool isNuendo() const noexcept            { return type == SteinbergNuendo3 || type == SteinbergNuendo4  || type == SteinbergNuendo5 ||  type == SteinbergNuendoGeneric; }
     /** Returns true if the host is Adobe Premiere Pro. */
     bool isPremiere() const noexcept          { return type == AdobePremierePro; }
     /** Returns true if the host is Avid Pro Tools. */
-    bool isProTools() const noexcept          { return type == DigidesignProTools; }
+    bool isProTools() const noexcept          { return type == AvidProTools; }
     /** Returns true if the host is Merging Pyramix. */
     bool isPyramix() const noexcept           { return type == MergingPyramix; }
     /** Returns true if the host is Muse Receptor. */
@@ -176,12 +182,15 @@ public:
             case AbletonLiveGeneric:       return "Ableton Live";
             case AdobeAudition:            return "Adobe Audition";
             case AdobePremierePro:         return "Adobe Premiere";
+            case AppleGarageBand:          return "Apple GarageBand";
             case AppleLogic:               return "Apple Logic";
+            case AppleMainStage:           return "Apple MainStage";
+            case Ardour:                   return "Ardour";
+            case AvidProTools:             return "ProTools";
             case BitwigStudio:             return "Bitwig Studio";
             case CakewalkSonar8:           return "Cakewalk Sonar 8";
             case CakewalkSonarGeneric:     return "Cakewalk Sonar";
             case DaVinciResolve:           return "DaVinci Resolve";
-            case DigidesignProTools:       return "ProTools";
             case DigitalPerformer:         return "DigitalPerformer";
             case FinalCut:                 return "Final Cut";
             case FruityLoops:              return "FruityLoops";
@@ -213,6 +222,7 @@ public:
             case StudioOne:                return "Studio One";
             case Tracktion3:               return "Tracktion 3";
             case TracktionGeneric:         return "Tracktion";
+            case TracktionWaveform:        return "Tracktion Waveform";
             case VBVSTScanner:             return "VBVSTScanner";
             case WaveBurner:               return "WaveBurner";
             default:                       break;
@@ -270,8 +280,10 @@ private:
         if (hostPath.containsIgnoreCase       ("Live 8."))           return AbletonLive8;
         if (hostFilename.containsIgnoreCase   ("Live"))              return AbletonLiveGeneric;
         if (hostFilename.containsIgnoreCase   ("Adobe Premiere"))    return AdobePremierePro;
-        if (hostFilename.contains             ("Logic"))             return AppleLogic;
-        if (hostFilename.containsIgnoreCase   ("Pro Tools"))         return DigidesignProTools;
+        if (hostFilename.containsIgnoreCase   ("GarageBand"))        return AppleGarageBand;
+        if (hostFilename.containsIgnoreCase   ("Logic"))             return AppleLogic;
+        if (hostFilename.containsIgnoreCase   ("MainStage"))         return AppleMainStage;
+        if (hostFilename.containsIgnoreCase   ("Pro Tools"))         return AvidProTools;
         if (hostFilename.containsIgnoreCase   ("Nuendo 3"))          return SteinbergNuendo3;
         if (hostFilename.containsIgnoreCase   ("Nuendo 4"))          return SteinbergNuendo4;
         if (hostFilename.containsIgnoreCase   ("Nuendo 5"))          return SteinbergNuendo5;
@@ -305,10 +317,12 @@ private:
         if (hostFilename.containsIgnoreCase   ("Live "))             return AbletonLiveGeneric;
         if (hostFilename.containsIgnoreCase   ("Audition"))          return AdobeAudition;
         if (hostFilename.containsIgnoreCase   ("Adobe Premiere"))    return AdobePremierePro;
-        if (hostFilename.containsIgnoreCase   ("ProTools"))          return DigidesignProTools;
+        if (hostFilename.containsIgnoreCase   ("ProTools"))          return AvidProTools;
         if (hostPath.containsIgnoreCase       ("SONAR 8"))           return CakewalkSonar8;
         if (hostFilename.containsIgnoreCase   ("SONAR"))             return CakewalkSonarGeneric;
+        if (hostFilename.containsIgnoreCase   ("GarageBand"))        return AppleGarageBand;
         if (hostFilename.containsIgnoreCase   ("Logic"))             return AppleLogic;
+        if (hostFilename.containsIgnoreCase   ("MainStage"))         return AppleMainStage;
         if (hostFilename.startsWithIgnoreCase ("Waveform"))          return TracktionWaveform;
         if (hostPath.containsIgnoreCase       ("Tracktion 3"))       return Tracktion3;
         if (hostFilename.containsIgnoreCase   ("Tracktion"))         return TracktionGeneric;
