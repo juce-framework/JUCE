@@ -168,7 +168,7 @@ namespace BinaryData
     const int            jucer_PIPAudioProcessorTemplate_hSize = 4926;
 
     extern const char*   jucer_PIPMain_cpp;
-    const int            jucer_PIPMain_cppSize = 2446;
+    const int            jucer_PIPMain_cppSize = 2443;
 
     extern const char*   jucer_PIPTemplate_h;
     const int            jucer_PIPTemplate_hSize = 517;

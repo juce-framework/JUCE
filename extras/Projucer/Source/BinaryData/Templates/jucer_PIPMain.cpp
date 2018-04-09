@@ -26,10 +26,11 @@ private:
     class MainWindow    : public DocumentWindow
     {
     public:
-        MainWindow (const String& name, Component* c)  : DocumentWindow (name,
-                                                                         Desktop::getInstance().getDefaultLookAndFeel()
-                                                                                               .findColour (ResizableWindow::backgroundColourId),
-                                                                         DocumentWindow::allButtons)
+        MainWindow (const String& name, Component* c, JUCEApplication& a)
+            : DocumentWindow (name, Desktop::getInstance().getDefaultLookAndFeel()
+                                                          .findColour (ResizableWindow::backgroundColourId),
+                              DocumentWindow::allButtons),
+              app (a)
         {
             setUsingNativeTitleBar (true);
             setContentOwned (c, true);
@@ -47,10 +48,13 @@ private:
 
         void closeButtonPressed() override
         {
-            JUCEApplication::getInstance()->systemRequestedQuit();
+            app.systemRequestedQuit();
         }
 
     private:
+        JUCEApplication& app;
+
+        //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)
     };
     ScopedPointer<MainWindow> mainWindow;
