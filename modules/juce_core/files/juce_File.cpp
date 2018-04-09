@@ -941,7 +941,9 @@ File File::createTempFile (StringRef fileNameEnding)
     return tempFile;
 }
 
-bool File::createSymbolicLink (const File& linkFileToCreate, bool overwriteExisting) const
+bool File::createSymbolicLink (const File& linkFileToCreate,
+                               const String& nativePathOfTarget,
+                               bool overwriteExisting)
 {
     if (linkFileToCreate.exists())
     {
@@ -959,7 +961,7 @@ bool File::createSymbolicLink (const File& linkFileToCreate, bool overwriteExist
 
    #if JUCE_MAC || JUCE_LINUX
     // one common reason for getting an error here is that the file already exists
-    if (symlink (fullPath.toRawUTF8(), linkFileToCreate.getFullPathName().toRawUTF8()) == -1)
+    if (symlink (nativePathOfTarget.toRawUTF8(), linkFileToCreate.getFullPathName().toRawUTF8()) == -1)
     {
         jassertfalse;
         return false;
@@ -967,14 +969,31 @@ bool File::createSymbolicLink (const File& linkFileToCreate, bool overwriteExist
 
     return true;
    #elif JUCE_MSVC
+    File targetFile (linkFileToCreate.getSiblingFile (nativePathOfTarget));
+
     return CreateSymbolicLink (linkFileToCreate.getFullPathName().toWideCharPointer(),
-                               fullPath.toWideCharPointer(),
-                               isDirectory() ? SYMBOLIC_LINK_FLAG_DIRECTORY : 0) != FALSE;
+                               nativePathOfTarget.toWideCharPointer(),
+                               targetFile.isDirectory() ? SYMBOLIC_LINK_FLAG_DIRECTORY : 0) != FALSE;
    #else
     jassertfalse; // symbolic links not supported on this platform!
     return false;
    #endif
 }
+
+bool File::createSymbolicLink (const File& linkFileToCreate, bool overwriteExisting) const
+{
+    return createSymbolicLink (linkFileToCreate, getFullPathName(), overwriteExisting);
+}
+
+#if ! JUCE_WINDOWS
+File File::getLinkedTarget() const
+{
+    if (isSymbolicLink())
+        return getSiblingFile (getNativeLinkedTarget());
+
+    return *this;
+}
+#endif
 
 //==============================================================================
 MemoryMappedFile::MemoryMappedFile (const File& file, MemoryMappedFile::AccessMode mode, bool exclusive)

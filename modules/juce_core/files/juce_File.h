@@ -987,12 +987,27 @@ public:
     */
     File getLinkedTarget() const;
 
+    /** Create a symbolic link to a native path and return a boolean to indicate success.
+
+        Use this method if you want to create a link to a relative path or a special native
+        file path (such as a device file on Windows).
+    */
+    static bool createSymbolicLink (const File& linkFileToCreate,
+                                    const String& nativePathOfTarget,
+                                    bool overwriteExisting);
+
+    /** This returns the native path that the symbolic link points to. The returned path
+        is a native path of the current OS and can be a relative, absolute or special path. */
+    String getNativeLinkedTarget() const;
+
    #if JUCE_WINDOWS || DOXYGEN
     /** Windows ONLY - Creates a win32 .LNK shortcut file that links to this file. */
     bool createShortcut (const String& description, const File& linkFileToCreate) const;
 
     /** Windows ONLY - Returns true if this is a win32 .LNK file. */
     bool isShortcut() const;
+   #else
+
    #endif
 
     //==============================================================================
