@@ -1422,9 +1422,8 @@ namespace AAXClasses
                 auto isBypassParameter = (juceParam == bypassParameter);
 
                 auto category = juceParam->getCategory();
-                auto paramID  = isBypassParameter ? cDefaultMasterBypassID
-                                                  : juceParameters.getParamID (audioProcessor, parameterIndex)
-                                                                  .toRawUTF8();
+                auto paramID  = isBypassParameter ? String (cDefaultMasterBypassID)
+                                                  : juceParameters.getParamID (audioProcessor, parameterIndex);
 
                 aaxParamIDs.add (paramID);
                 auto aaxParamID = aaxParamIDs.getReference (parameterIndex++).getCharPointer();
