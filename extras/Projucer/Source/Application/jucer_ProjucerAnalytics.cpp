@@ -116,6 +116,14 @@ bool ProjucerAnalyticsDestination::logBatchedEvents (const Array<AnalyticsEvent>
                 break;
             }
 
+            case ProjucerAnalyticsEvent::startPageEvent:
+            {
+                data.set ("ec", "Start Page");
+                setData (event, data);
+
+                break;
+            }
+
             default:
             {
                 // unknown event type!
