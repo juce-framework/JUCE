@@ -610,7 +610,7 @@ namespace AAXClasses
             WindowsHooks hooks;
            #endif
             FakeMouseMoveGenerator fakeMouseGenerator;
-            Rectangle<int> lastValidSize;
+            juce::Rectangle<int> lastValidSize;
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentWrapperComponent)
         };
