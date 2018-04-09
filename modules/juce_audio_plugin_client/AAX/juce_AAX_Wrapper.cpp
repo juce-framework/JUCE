@@ -530,7 +530,8 @@ namespace AAXClasses
 
                 if (pluginEditor != nullptr)
                 {
-                    setBounds (pluginEditor->getLocalBounds());
+                    lastValidSize = pluginEditor->getLocalBounds();
+                    setBounds (lastValidSize);
                     pluginEditor->addMouseListener (this, true);
                 }
 
@@ -579,10 +580,19 @@ namespace AAXClasses
                 {
                     auto w = pluginEditor->getWidth();
                     auto h = pluginEditor->getHeight();
-                    setSize (w, h);
 
                     AAX_Point newSize ((float) h, (float) w);
-                    owner.GetViewContainer()->SetViewSize (newSize);
+
+                    if (owner.GetViewContainer()->SetViewSize (newSize) == AAX_SUCCESS)
+                    {
+                        setSize (w, h);
+                        lastValidSize = getBounds();
+                    }
+                    else
+                    {
+                        auto validSize = pluginEditor->getBounds().withSize (lastValidSize.getWidth(), lastValidSize.getHeight());
+                        pluginEditor->setBoundsConstrained (validSize);
+                    }
                 }
             }
 
@@ -593,6 +603,7 @@ namespace AAXClasses
             WindowsHooks hooks;
            #endif
             FakeMouseMoveGenerator fakeMouseGenerator;
+            Rectangle<int> lastValidSize;
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentWrapperComponent)
         };
