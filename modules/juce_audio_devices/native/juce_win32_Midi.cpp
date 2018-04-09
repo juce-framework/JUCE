@@ -343,7 +343,7 @@ private:
             UINT deviceId;
             HMIDIOUT handle;
 
-            JUCE_LEAK_DETECTOR (MidiOutHandle)
+            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiOutHandle)
         };
 
         WindowsOutputWrapper (WindowsMidiService& p, int index) : parent (p)
