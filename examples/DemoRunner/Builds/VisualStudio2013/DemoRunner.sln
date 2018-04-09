@@ -1,7 +1,7 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2013
 
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DemoRunner - App", "DemoRunner_App.vcxproj", "{8D556BA3-2F01-1E4C-CF03-44E0C67BE7C7}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DemoRunner - App", "DemoRunner_App.vcxproj", "{3EFE3782-F57A-A7C5-1014-34F3EAE599E4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -9,10 +9,10 @@ Global
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{8D556BA3-2F01-1E4C-CF03-44E0C67BE7C7}.Debug|x64.ActiveCfg = Debug|x64
-		{8D556BA3-2F01-1E4C-CF03-44E0C67BE7C7}.Debug|x64.Build.0 = Debug|x64
-		{8D556BA3-2F01-1E4C-CF03-44E0C67BE7C7}.Release|x64.ActiveCfg = Release|x64
-		{8D556BA3-2F01-1E4C-CF03-44E0C67BE7C7}.Release|x64.Build.0 = Release|x64
+		{3EFE3782-F57A-A7C5-1014-34F3EAE599E4}.Debug|x64.ActiveCfg = Debug|x64
+		{3EFE3782-F57A-A7C5-1014-34F3EAE599E4}.Debug|x64.Build.0 = Debug|x64
+		{3EFE3782-F57A-A7C5-1014-34F3EAE599E4}.Release|x64.ActiveCfg = Release|x64
+		{3EFE3782-F57A-A7C5-1014-34F3EAE599E4}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="1" android:versionName="5.2.1"
-          package="com.juce.demorunner">
+          package="com.roli.juce.demorunner">
   <supports-screens android:smallScreens="true" android:normalScreens="true" android:largeScreens="true" android:anyDensity="true"/>
   <uses-sdk android:minSdkVersion="23" android:targetSdkVersion="23"/>
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
@@ -20,7 +20,7 @@
         <category android:name="android.intent.category.LAUNCHER"/>
       </intent-filter>
     </activity>
-    <provider android:name="com.juce.demorunner.SharingContentProvider" android:authorities="com.juce.demorunner.sharingcontentprovider"
+    <provider android:name="com.roli.juce.demorunner.SharingContentProvider" android:authorities="com.roli.juce.demorunner.sharingcontentprovider"
               android:grantUriPermissions="true" android:exported="false"/>
   </application>
 </manifest>
