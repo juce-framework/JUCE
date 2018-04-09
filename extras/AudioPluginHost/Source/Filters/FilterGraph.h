@@ -26,7 +26,7 @@
 
 #pragma once
 
-#include "PluginWindow.h"
+#include "../UI/PluginWindow.h"
 
 
 //==============================================================================
@@ -77,6 +77,8 @@ public:
     Result saveDocument (const File& file) override;
     File getLastDocumentOpened() override;
     void setLastDocumentOpened (const File& file) override;
+
+    static File getDefaultGraphDocumentOnMobile();
 
     //==============================================================================
     AudioProcessorGraph graph;

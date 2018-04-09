@@ -26,7 +26,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "MainHostWindow.h"
-#include "InternalFilters.h"
+#include "../Filters/InternalFilters.h"
 
 
 //==============================================================================
@@ -81,16 +81,24 @@ MainHostWindow::MainHostWindow()
     formatManager.addDefaultFormats();
     formatManager.addFormat (new InternalPluginFormat());
 
-    ScopedPointer<XmlElement> savedAudioState (getAppProperties().getUserSettings()
-                                                   ->getXmlValue ("audioDeviceState"));
+    RuntimePermissions::request (RuntimePermissions::recordAudio,
+                                 [safeThis = SafePointer<MainHostWindow> (this)] (bool granted) mutable
+                                 {
+                                     ScopedPointer<XmlElement> savedAudioState (getAppProperties().getUserSettings()
+                                                                                ->getXmlValue ("audioDeviceState"));
 
-    deviceManager.initialise (256, 256, savedAudioState, true);
+                                     safeThis->deviceManager.initialise (granted ? 256 : 0, 256, savedAudioState, true);
+                                 });
 
+   #if JUCE_IOS || JUCE_ANDROID
+    setFullScreen (true);
+   #else
     setResizable (true, false);
     setResizeLimits (500, 400, 10000, 10000);
     centreWithSize (800, 600);
+   #endif
 
-    graphHolder = new GraphDocumentComponent (formatManager, deviceManager);
+    graphHolder = new GraphDocumentComponent (formatManager, deviceManager, knownPluginList);
 
     setContentNonOwned (graphHolder, false);
 
@@ -106,6 +114,9 @@ MainHostWindow::MainHostWindow()
     if (savedPluginList != nullptr)
         knownPluginList.recreateFromXml (*savedPluginList);
 
+    for (auto* t : internalTypes)
+        knownPluginList.addType (*t);
+
     pluginSortMethod = (KnownPluginList::SortMethod) getAppProperties().getUserSettings()
                             ->getIntValue ("pluginSortMethod", KnownPluginList::sortByManufacturer);
 
@@ -118,11 +129,15 @@ MainHostWindow::MainHostWindow()
 
     Process::setPriority (Process::HighPriority);
 
+  #if JUCE_IOS || JUCE_ANDROID
+    graphHolder->burgerMenu.setModel (this);
+  #else
    #if JUCE_MAC
     setMacMainMenu (this);
    #else
     setMenuBar (this);
    #endif
+  #endif
 
     getCommandManager().setFirstCommandTarget (this);
 }
@@ -138,11 +153,13 @@ MainHostWindow::~MainHostWindow()
     getAppProperties().getUserSettings()->setValue ("mainWindowPos", getWindowStateAsString());
     clearContentComponent();
 
+  #if ! (JUCE_ANDROID || JUCE_IOS)
    #if JUCE_MAC
     setMacMainMenu (nullptr);
    #else
     setMenuBar (nullptr);
    #endif
+  #endif
 
     graphHolder = nullptr;
 }
@@ -181,7 +198,11 @@ void MainHostWindow::tryToQuitApplication()
     {
         new AsyncQuitRetrier();
     }
+   #if JUCE_ANDROID || JUCE_IOS
+    else if (graphHolder == nullptr || graphHolder->graph->saveDocument (FilterGraph::getDefaultGraphDocumentOnMobile()))
+   #else
     else if (graphHolder == nullptr || graphHolder->graph->saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
+   #endif
     {
         // Some plug-ins do not want [NSApp stop] to be called
         // before the plug-ins are not deallocated.
@@ -197,7 +218,7 @@ void MainHostWindow::changeListenerCallback (ChangeBroadcaster* changed)
     {
         menuItemsChanged();
 
-        // save the plugin list every time it gets chnaged, so that if we're scanning
+        // save the plugin list every time it gets changed, so that if we're scanning
         // and it crashes, we've still saved the previous ones
         ScopedPointer<XmlElement> savedPluginList (knownPluginList.createXml());
 
@@ -236,8 +257,10 @@ PopupMenu MainHostWindow::getMenuForIndex (int topLevelMenuIndex, const String& 
     if (topLevelMenuIndex == 0)
     {
         // "File" menu
+       #if ! (JUCE_IOS || JUCE_ANDROID)
         menu.addCommandItem (&getCommandManager(), CommandIDs::newFile);
         menu.addCommandItem (&getCommandManager(), CommandIDs::open);
+       #endif
 
         RecentlyOpenedFilesList recentFiles;
         recentFiles.restoreFromString (getAppProperties().getUserSettings()
@@ -247,8 +270,11 @@ PopupMenu MainHostWindow::getMenuForIndex (int topLevelMenuIndex, const String& 
         recentFiles.createPopupMenuItems (recentFilesMenu, 100, true, true);
         menu.addSubMenu ("Open recent file", recentFilesMenu);
 
+       #if ! (JUCE_IOS || JUCE_ANDROID)
         menu.addCommandItem (&getCommandManager(), CommandIDs::save);
         menu.addCommandItem (&getCommandManager(), CommandIDs::saveAs);
+       #endif
+
         menu.addSeparator();
         menu.addCommandItem (&getCommandManager(), StandardApplicationCommandIDs::quit);
     }
@@ -298,6 +324,7 @@ void MainHostWindow::menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/
             if (auto* graph = graphHolder->graph.get())
                 graph->clear();
     }
+   #if ! (JUCE_ANDROID || JUCE_IOS)
     else if (menuItemID >= 100 && menuItemID < 200)
     {
         RecentlyOpenedFilesList recentFiles;
@@ -309,6 +336,7 @@ void MainHostWindow::menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/
                 if (graph != nullptr && graph->saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
                     graph->loadFrom (recentFiles.getFile (menuItemID - 100), true);
     }
+   #endif
     else if (menuItemID >= 200 && menuItemID < 210)
     {
              if (menuItemID == 200)     pluginSortMethod = KnownPluginList::defaultOrder;
@@ -375,10 +403,13 @@ ApplicationCommandTarget* MainHostWindow::getNextCommandTarget()
 void MainHostWindow::getAllCommands (Array<CommandID>& commands)
 {
     // this returns the set of all commands that this target can perform..
-    const CommandID ids[] = { CommandIDs::newFile,
+    const CommandID ids[] = {
+                             #if ! (JUCE_IOS || JUCE_ANDROID)
+                              CommandIDs::newFile,
                               CommandIDs::open,
                               CommandIDs::save,
                               CommandIDs::saveAs,
+                             #endif
                               CommandIDs::showPluginListEditor,
                               CommandIDs::showAudioSettings,
                               CommandIDs::toggleDoublePrecision,
@@ -395,6 +426,7 @@ void MainHostWindow::getCommandInfo (const CommandID commandID, ApplicationComma
 
     switch (commandID)
     {
+   #if ! (JUCE_IOS || JUCE_ANDROID)
     case CommandIDs::newFile:
         result.setInfo ("New", "Creates a new filter graph file", category, 0);
         result.defaultKeypresses.add(KeyPress('n', ModifierKeys::commandModifier, 0));
@@ -416,6 +448,7 @@ void MainHostWindow::getCommandInfo (const CommandID commandID, ApplicationComma
                         category, 0);
         result.defaultKeypresses.add (KeyPress ('s', ModifierKeys::shiftModifier | ModifierKeys::commandModifier, 0));
         break;
+   #endif
 
     case CommandIDs::showPluginListEditor:
         result.setInfo ("Edit the list of available plug-Ins...", String(), category, 0);
@@ -449,6 +482,7 @@ bool MainHostWindow::perform (const InvocationInfo& info)
 {
     switch (info.commandID)
     {
+   #if ! (JUCE_IOS || JUCE_ANDROID)
     case CommandIDs::newFile:
         if (graphHolder != nullptr && graphHolder->graph != nullptr && graphHolder->graph->saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
             graphHolder->graph->newDocument();
@@ -468,6 +502,7 @@ bool MainHostWindow::perform (const InvocationInfo& info)
         if (graphHolder != nullptr && graphHolder->graph != nullptr)
             graphHolder->graph->saveAs (File(), true, true, true);
         break;
+   #endif
 
     case CommandIDs::showPluginListEditor:
         if (pluginListWindow == nullptr)
@@ -520,15 +555,16 @@ bool MainHostWindow::perform (const InvocationInfo& info)
 
 void MainHostWindow::showAudioSettings()
 {
-    AudioDeviceSelectorComponent audioSettingsComp (deviceManager,
-                                                    0, 256,
-                                                    0, 256,
-                                                    true, true, true, false);
+    auto* audioSettingsComp = new AudioDeviceSelectorComponent (deviceManager,
+                                                                0, 256,
+                                                                0, 256,
+                                                                true, true,
+                                                                true, false);
 
-    audioSettingsComp.setSize (500, 450);
+    audioSettingsComp->setSize (500, 450);
 
     DialogWindow::LaunchOptions o;
-    o.content.setNonOwned (&audioSettingsComp);
+    o.content.setOwned (audioSettingsComp);
     o.dialogTitle                   = "Audio Settings";
     o.componentToCentreAround       = this;
     o.dialogBackgroundColour        = getLookAndFeel().findColour (ResizableWindow::backgroundColourId);
@@ -536,16 +572,20 @@ void MainHostWindow::showAudioSettings()
     o.useNativeTitleBar             = false;
     o.resizable                     = false;
 
-    o.runModal();
+     auto* w = o.create();
+     w->enterModalState (true,
+                         ModalCallbackFunction::create
+                         ([safeThis = SafePointer<MainHostWindow> (this)] (int)
+                         {
+                             ScopedPointer<XmlElement> audioState (safeThis->deviceManager.createStateXml());
 
-    ScopedPointer<XmlElement> audioState (deviceManager.createStateXml());
+                             getAppProperties().getUserSettings()->setValue ("audioDeviceState", audioState);
+                             getAppProperties().getUserSettings()->saveIfNeeded();
 
-    getAppProperties().getUserSettings()->setValue ("audioDeviceState", audioState);
-    getAppProperties().getUserSettings()->saveIfNeeded();
-
-    if (graphHolder != nullptr)
-        if (graphHolder->graph != nullptr)
-            graphHolder->graph->graph.removeIllegalConnections();
+                             if (safeThis->graphHolder != nullptr)
+                                 if (safeThis->graphHolder->graph != nullptr)
+                                     safeThis->graphHolder->graph->graph.removeIllegalConnections();
+                         }), true);
 }
 
 bool MainHostWindow::isInterestedInFileDrag (const StringArray&)
@@ -569,6 +609,7 @@ void MainHostWindow::filesDropped (const StringArray& files, int x, int y)
 {
     if (graphHolder != nullptr)
     {
+       #if ! (JUCE_ANDROID || JUCE_IOS)
         if (files.size() == 1 && File (files[0]).hasFileExtension (FilterGraph::getFilenameSuffix()))
         {
             if (auto* filterGraph = graphHolder->graph.get())
@@ -576,6 +617,7 @@ void MainHostWindow::filesDropped (const StringArray& files, int x, int y)
                     filterGraph->loadFrom (File (files[0]), true);
         }
         else
+       #endif
         {
             OwnedArray<PluginDescription> typesFound;
             knownPluginList.scanAndAddDragAndDroppedFiles (formatManager, files, typesFound);

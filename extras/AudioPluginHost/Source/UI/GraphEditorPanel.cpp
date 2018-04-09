@@ -26,9 +26,73 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "GraphEditorPanel.h"
-#include "InternalFilters.h"
+#include "../Filters/InternalFilters.h"
 #include "MainHostWindow.h"
 
+//==============================================================================
+#if JUCE_IOS
+ class AUScanner
+ {
+ public:
+     AUScanner (KnownPluginList& list)
+         : knownPluginList (list), pool (5)
+     {
+         knownPluginList.clearBlacklistedFiles();
+         paths = formatToScan.getDefaultLocationsToSearch();
+
+         startScan();
+     }
+
+ private:
+     KnownPluginList& knownPluginList;
+     AudioUnitPluginFormat formatToScan;
+
+     ScopedPointer<PluginDirectoryScanner> scanner;
+     FileSearchPath paths;
+
+     ThreadPool pool;
+
+     void startScan()
+     {
+         auto deadMansPedalFile = getAppProperties().getUserSettings()
+                                     ->getFile().getSiblingFile ("RecentlyCrashedPluginsList");
+
+         scanner = new PluginDirectoryScanner (knownPluginList, formatToScan, paths,
+                                               true, deadMansPedalFile, true);
+
+         for (int i = 5; --i >= 0;)
+             pool.addJob (new ScanJob (*this), true);
+     }
+
+     bool doNextScan()
+     {
+         String pluginBeingScanned;
+         if (scanner->scanNextFile (true, pluginBeingScanned))
+             return true;
+
+         return false;
+     }
+
+     struct ScanJob  : public ThreadPoolJob
+     {
+         ScanJob (AUScanner& s)  : ThreadPoolJob ("pluginscan"), scanner (s) {}
+
+         JobStatus runJob()
+         {
+             while (scanner.doNextScan() && ! shouldExit())
+             {}
+
+             return jobHasFinished;
+         }
+
+         AUScanner& scanner;
+
+         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScanJob)
+     };
+
+     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AUScanner)
+ };
+#endif
 
 //==============================================================================
 struct GraphEditorPanel::PinComponent   : public Component,
@@ -109,7 +173,9 @@ struct GraphEditorPanel::PinComponent   : public Component,
 };
 
 //==============================================================================
-struct GraphEditorPanel::FilterComponent   : public Component, private AudioProcessorParameter::Listener
+struct GraphEditorPanel::FilterComponent   : public Component,
+                                             public Timer,
+                                             private AudioProcessorParameter::Listener
 {
     FilterComponent (GraphEditorPanel& p, uint32 id)  : panel (p), graph (p.graph), pluginID (id)
     {
@@ -149,12 +215,22 @@ struct GraphEditorPanel::FilterComponent   : public Component, private AudioProc
 
         toFront (true);
 
-        if (e.mods.isPopupMenu())
-            showPopupMenu();
+        if (isOnTouchDevice())
+        {
+            startTimer (750);
+        }
+        else
+        {
+            if (e.mods.isPopupMenu())
+                showPopupMenu();
+        }
     }
 
     void mouseDrag (const MouseEvent& e) override
     {
+        if (isOnTouchDevice() && e.getDistanceFromDragStart() > 5)
+            stopTimer();
+
         if (! e.mods.isPopupMenu())
         {
             auto pos = originalPos + e.getOffsetFromDragStart();
@@ -174,6 +250,12 @@ struct GraphEditorPanel::FilterComponent   : public Component, private AudioProc
 
     void mouseUp (const MouseEvent& e) override
     {
+        if (isOnTouchDevice())
+        {
+            stopTimer();
+            callAfterDelay (250, []() { PopupMenu::dismissAllActiveMenus(); });
+        }
+
         if (e.mouseWasDraggedSinceMouseDown())
         {
             graph.setChangedFlag (true);
@@ -317,19 +399,26 @@ struct GraphEditorPanel::FilterComponent   : public Component, private AudioProc
 
     void showPopupMenu()
     {
-        PopupMenu m;
-        m.addItem (1, "Delete this filter");
-        m.addItem (2, "Disconnect all pins");
-        m.addItem (3, "Toggle Bypass");
-        m.addSeparator();
-        m.addItem (10, "Show plugin GUI");
-        m.addItem (11, "Show all programs");
-        m.addItem (12, "Show all parameters");
-        m.addSeparator();
-        m.addItem (20, "Configure Audio I/O");
-        m.addItem (21, "Test state save/load");
+        menu = new PopupMenu;
+        menu->addItem (1, "Delete this filter");
+        menu->addItem (2, "Disconnect all pins");
+        menu->addItem (3, "Toggle Bypass");
 
-        switch (m.show())
+        if (getProcessor()->hasEditor())
+        {
+            menu->addSeparator();
+            menu->addItem (10, "Show plugin GUI");
+            menu->addItem (11, "Show all programs");
+            menu->addItem (12, "Show all parameters");
+        }
+
+        menu->addSeparator();
+        menu->addItem (20, "Configure Audio I/O");
+        menu->addItem (21, "Test state save/load");
+
+        menu->showMenuAsync ({}, ModalCallbackFunction::create
+                             ([this] (int r) {
+        switch (r)
         {
             case 1:   graph.graph.removeNode (pluginID); break;
             case 2:   graph.graph.disconnectNode (pluginID); break;
@@ -350,6 +439,7 @@ struct GraphEditorPanel::FilterComponent   : public Component, private AudioProc
 
             default:  break;
         }
+        }));
     }
 
     void testStateSaveLoad()
@@ -369,6 +459,15 @@ struct GraphEditorPanel::FilterComponent   : public Component, private AudioProc
                 w->toFront (true);
     }
 
+    void timerCallback() override
+    {
+        // this should only be called on touch devices
+        jassert (isOnTouchDevice());
+
+        stopTimer();
+        showPopupMenu();
+    }
+
     void parameterValueChanged (int, float) override
     {
         repaint();
@@ -386,6 +485,7 @@ struct GraphEditorPanel::FilterComponent   : public Component, private AudioProc
     Font font { 13.0f, Font::bold };
     int numIns = 0, numOuts = 0;
     DropShadowEffect shadow;
+    ScopedPointer<PopupMenu> menu;
 };
 
 
@@ -606,20 +706,29 @@ void GraphEditorPanel::paint (Graphics& g)
 
 void GraphEditorPanel::mouseDown (const MouseEvent& e)
 {
-    if (e.mods.isPopupMenu())
+    if (isOnTouchDevice())
     {
-        PopupMenu m;
-
-        if (auto* mainWindow = findParentComponentOfClass<MainHostWindow>())
-        {
-            mainWindow->addPluginsToMenu (m);
-
-            auto r = m.show();
-
-            if (auto* desc = mainWindow->getChosenType (r))
-                createNewPlugin (*desc, e.position.toInt());
-        }
+        originalTouchPos = e.position.toInt();
+        startTimer (750);
     }
+
+    if (e.mods.isPopupMenu())
+        showPopupMenu (e.position.toInt());
+}
+
+void GraphEditorPanel::mouseUp (const MouseEvent&)
+{
+    if (isOnTouchDevice())
+    {
+        stopTimer();
+        callAfterDelay (250, []() { PopupMenu::dismissAllActiveMenus(); });
+    }
+}
+
+void GraphEditorPanel::mouseDrag (const MouseEvent& e)
+{
+    if (isOnTouchDevice() && e.getDistanceFromDragStart() > 5)
+        stopTimer();
 }
 
 void GraphEditorPanel::createNewPlugin (const PluginDescription& desc, Point<int> position)
@@ -706,6 +815,24 @@ void GraphEditorPanel::updateComponents()
             comp->setInput (c.source);
             comp->setOutput (c.destination);
         }
+    }
+}
+
+void GraphEditorPanel::showPopupMenu (Point<int> mousePos)
+{
+    menu = new PopupMenu;
+
+    if (auto* mainWindow = findParentComponentOfClass<MainHostWindow>())
+    {
+        mainWindow->addPluginsToMenu (*menu);
+
+        menu->showMenuAsync ({},
+                             ModalCallbackFunction::create ([this, mousePos] (int r)
+                                                            {
+                                                                if (auto* mainWindow = findParentComponentOfClass<MainHostWindow>())
+                                                                    if (auto* desc = mainWindow->getChosenType (r))
+                                                                        createNewPlugin (*desc, mousePos);
+                                                            }));
     }
 }
 
@@ -799,6 +926,15 @@ void GraphEditorPanel::endDraggingConnector (const MouseEvent& e)
     }
 }
 
+void GraphEditorPanel::timerCallback()
+{
+    // this should only be called on touch devices
+    jassert (isOnTouchDevice());
+
+    stopTimer();
+    showPopupMenu (originalTouchPos);
+}
+
 //==============================================================================
 struct GraphDocumentComponent::TooltipBar   : public Component,
                                               private Timer
@@ -837,14 +973,189 @@ struct GraphDocumentComponent::TooltipBar   : public Component,
 };
 
 //==============================================================================
-GraphDocumentComponent::GraphDocumentComponent (AudioPluginFormatManager& fm, AudioDeviceManager& dm)
-    : graph (new FilterGraph (fm)), deviceManager (dm),
+class GraphDocumentComponent::TitleBarComponent    : public Component,
+                                                     private Button::Listener
+{
+public:
+    TitleBarComponent (GraphDocumentComponent& graphDocumentComponent)
+        : owner (graphDocumentComponent)
+    {
+        static const unsigned char burgerMenuPathData[]
+            = { 110,109,0,0,128,64,0,0,32,65,108,0,0,224,65,0,0,32,65,98,254,212,232,65,0,0,32,65,0,0,240,65,252,
+                169,17,65,0,0,240,65,0,0,0,65,98,0,0,240,65,8,172,220,64,254,212,232,65,0,0,192,64,0,0,224,65,0,0,
+                192,64,108,0,0,128,64,0,0,192,64,98,16,88,57,64,0,0,192,64,0,0,0,64,8,172,220,64,0,0,0,64,0,0,0,65,
+                98,0,0,0,64,252,169,17,65,16,88,57,64,0,0,32,65,0,0,128,64,0,0,32,65,99,109,0,0,224,65,0,0,96,65,108,
+                0,0,128,64,0,0,96,65,98,16,88,57,64,0,0,96,65,0,0,0,64,4,86,110,65,0,0,0,64,0,0,128,65,98,0,0,0,64,
+                254,212,136,65,16,88,57,64,0,0,144,65,0,0,128,64,0,0,144,65,108,0,0,224,65,0,0,144,65,98,254,212,232,
+                65,0,0,144,65,0,0,240,65,254,212,136,65,0,0,240,65,0,0,128,65,98,0,0,240,65,4,86,110,65,254,212,232,
+                65,0,0,96,65,0,0,224,65,0,0,96,65,99,109,0,0,224,65,0,0,176,65,108,0,0,128,64,0,0,176,65,98,16,88,57,
+                64,0,0,176,65,0,0,0,64,2,43,183,65,0,0,0,64,0,0,192,65,98,0,0,0,64,254,212,200,65,16,88,57,64,0,0,208,
+                65,0,0,128,64,0,0,208,65,108,0,0,224,65,0,0,208,65,98,254,212,232,65,0,0,208,65,0,0,240,65,254,212,
+                200,65,0,0,240,65,0,0,192,65,98,0,0,240,65,2,43,183,65,254,212,232,65,0,0,176,65,0,0,224,65,0,0,176,
+                65,99,101,0,0 };
+
+        static const unsigned char pluginListPathData[]
+            = { 110,109,193,202,222,64,80,50,21,64,108,0,0,48,65,0,0,0,0,108,160,154,112,65,80,50,21,64,108,0,0,48,65,80,
+                50,149,64,108,193,202,222,64,80,50,21,64,99,109,0,0,192,64,251,220,127,64,108,160,154,32,65,165,135,202,
+                64,108,160,154,32,65,250,220,47,65,108,0,0,192,64,102,144,10,65,108,0,0,192,64,251,220,127,64,99,109,0,0,
+                128,65,251,220,127,64,108,0,0,128,65,103,144,10,65,108,96,101,63,65,251,220,47,65,108,96,101,63,65,166,135,
+                202,64,108,0,0,128,65,251,220,127,64,99,109,96,101,79,65,148,76,69,65,108,0,0,136,65,0,0,32,65,108,80,
+                77,168,65,148,76,69,65,108,0,0,136,65,40,153,106,65,108,96,101,79,65,148,76,69,65,99,109,0,0,64,65,63,247,
+                95,65,108,80,77,128,65,233,161,130,65,108,80,77,128,65,125,238,167,65,108,0,0,64,65,51,72,149,65,108,0,0,64,
+                65,63,247,95,65,99,109,0,0,176,65,63,247,95,65,108,0,0,176,65,51,72,149,65,108,176,178,143,65,125,238,167,65,
+                108,176,178,143,65,233,161,130,65,108,0,0,176,65,63,247,95,65,99,109,12,86,118,63,148,76,69,65,108,0,0,160,
+                64,0,0,32,65,108,159,154,16,65,148,76,69,65,108,0,0,160,64,40,153,106,65,108,12,86,118,63,148,76,69,65,99,
+                109,0,0,0,0,63,247,95,65,108,62,53,129,64,233,161,130,65,108,62,53,129,64,125,238,167,65,108,0,0,0,0,51,
+                72,149,65,108,0,0,0,0,63,247,95,65,99,109,0,0,32,65,63,247,95,65,108,0,0,32,65,51,72,149,65,108,193,202,190,
+                64,125,238,167,65,108,193,202,190,64,233,161,130,65,108,0,0,32,65,63,247,95,65,99,101,0,0 };
+
+        {
+            Path p;
+            p.loadPathFromData (burgerMenuPathData, sizeof (burgerMenuPathData));
+            burgerButton.setShape (p, true, true, false);
+        }
+
+        {
+            Path p;
+            p.loadPathFromData (pluginListPathData, sizeof (pluginListPathData));
+            pluginButton.setShape (p, true, true, false);
+        }
+
+        burgerButton.addListener (this);
+        addAndMakeVisible (burgerButton);
+
+        pluginButton.addListener (this);
+        addAndMakeVisible (pluginButton);
+
+        titleLabel.setJustificationType (Justification::centredLeft);
+        addAndMakeVisible (titleLabel);
+
+        setOpaque (true);
+    }
+
+private:
+    void paint (Graphics& g) override
+    {
+        auto titleBarBackgroundColour = getLookAndFeel().findColour (ResizableWindow::backgroundColourId).darker();
+
+        g.setColour (titleBarBackgroundColour);
+        g.fillRect (getLocalBounds());
+    }
+
+    void resized() override
+    {
+        auto r = getLocalBounds();
+
+        burgerButton.setBounds (r.removeFromLeft (40).withSizeKeepingCentre (20, 20));
+
+        pluginButton.setBounds (r.removeFromRight (40).withSizeKeepingCentre (20, 20));
+
+        titleLabel.setFont (Font (static_cast<float> (getHeight()) * 0.5f, Font::plain));
+        titleLabel.setBounds (r);
+    }
+
+    void buttonClicked (Button* b) override
+    {
+        owner.showSidePanel (b == &burgerButton);
+    }
+
+    GraphDocumentComponent& owner;
+
+    Label titleLabel {"titleLabel", "Plugin Host"};
+    ShapeButton burgerButton {"burgerButton", Colours::lightgrey, Colours::lightgrey, Colours::white};
+    ShapeButton pluginButton {"pluginButton", Colours::lightgrey, Colours::lightgrey, Colours::white};
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TitleBarComponent)
+};
+
+//==============================================================================
+struct GraphDocumentComponent::PluginListBoxModel    : public ListBoxModel,
+                                                       public ChangeListener,
+                                                       public MouseListener
+{
+    PluginListBoxModel (ListBox& lb, KnownPluginList& kpl)
+        : owner (lb),
+          knownPlugins (kpl)
+    {
+        knownPlugins.addChangeListener (this);
+        owner.addMouseListener (this, true);
+
+       #if JUCE_IOS
+        scanner = new AUScanner (knownPlugins);
+       #endif
+    }
+
+    int getNumRows() override
+    {
+        return knownPlugins.getNumTypes();
+    }
+
+    void paintListBoxItem (int rowNumber, Graphics& g,
+                           int width, int height, bool rowIsSelected) override
+    {
+        g.fillAll (rowIsSelected ? Colour (0xff42A2C8)
+                                 : Colour (0xff263238));
+
+        g.setColour (rowIsSelected ? Colours::black : Colours::white);
+
+        if (rowNumber < knownPlugins.getNumTypes())
+            g.drawFittedText (knownPlugins.getType (rowNumber)->name,
+                              { 0, 0, width, height - 2 },
+                              Justification::centred,
+                              1);
+
+        g.setColour (Colours::black.withAlpha (0.4f));
+        g.drawRect (0, height - 1, width, 1);
+    }
+
+    var getDragSourceDescription (const SparseSet<int>& selectedRows) override
+    {
+        if (! isOverSelectedRow)
+            return var();
+
+        return String ("PLUGIN: " + String (selectedRows[0]));
+    }
+
+    void changeListenerCallback (ChangeBroadcaster*) override
+    {
+        owner.updateContent();
+    }
+
+    void mouseDown (const MouseEvent& e) override
+    {
+        isOverSelectedRow = owner.getRowPosition (owner.getSelectedRow(), true)
+                                 .contains (e.getEventRelativeTo (&owner).getMouseDownPosition());
+    }
+
+    ListBox& owner;
+    KnownPluginList& knownPlugins;
+
+    bool isOverSelectedRow = false;
+
+   #if JUCE_IOS
+    ScopedPointer<AUScanner> scanner;
+   #endif
+};
+
+//==============================================================================
+GraphDocumentComponent::GraphDocumentComponent (AudioPluginFormatManager& fm,
+                                                AudioDeviceManager& dm,
+                                                KnownPluginList& kpl)
+    : graph (new FilterGraph (fm)),
+      deviceManager (dm),
+      pluginList (kpl),
       graphPlayer (getAppProperties().getUserSettings()->getBoolValue ("doublePrecisionProcessing", false))
 {
-    addAndMakeVisible (graphPanel = new GraphEditorPanel (*graph));
+    init();
 
     deviceManager.addChangeListener (graphPanel);
+    deviceManager.addAudioCallback (&graphPlayer);
+    deviceManager.addMidiInputCallback (String(), &graphPlayer.getMidiMessageCollector());
+}
 
+void GraphDocumentComponent::init()
+{
+    addAndMakeVisible (graphPanel = new GraphEditorPanel (*graph));
     graphPlayer.setProcessor (&graph->graph);
 
     keyState.addListener (&graphPlayer.getMidiMessageCollector());
@@ -852,10 +1163,30 @@ GraphDocumentComponent::GraphDocumentComponent (AudioPluginFormatManager& fm, Au
     addAndMakeVisible (keyboardComp = new MidiKeyboardComponent (keyState, MidiKeyboardComponent::horizontalKeyboard));
     addAndMakeVisible (statusBar = new TooltipBar());
 
-    deviceManager.addAudioCallback (&graphPlayer);
-    deviceManager.addMidiInputCallback (String(), &graphPlayer.getMidiMessageCollector());
-
     graphPanel->updateComponents();
+
+    if (isOnTouchDevice())
+    {
+        if (isOnTouchDevice())
+            addAndMakeVisible (titleBarComponent = new TitleBarComponent (*this));
+
+        pluginListBoxModel = new PluginListBoxModel (pluginListBox, pluginList);
+
+        pluginListBox.setModel (pluginListBoxModel);
+        pluginListBox.setRowHeight (40);
+
+        pluginListSidePanel.setContent (&pluginListBox, false);
+
+        mobileSettingsSidePanel.setContent (new AudioDeviceSelectorComponent (deviceManager,
+                                                                              0, 2, 0, 2,
+                                                                              true, true, true, false));
+
+        if (isOnTouchDevice())
+        {
+            addAndMakeVisible (pluginListSidePanel);
+            addAndMakeVisible (mobileSettingsSidePanel);
+        }
+    }
 }
 
 GraphDocumentComponent::~GraphDocumentComponent()
@@ -867,12 +1198,19 @@ GraphDocumentComponent::~GraphDocumentComponent()
 
 void GraphDocumentComponent::resized()
 {
+    auto r = getLocalBounds();
+    const int titleBarHeight = 40;
     const int keysHeight = 60;
     const int statusHeight = 20;
 
-    graphPanel->setBounds (0, 0, getWidth(), getHeight() - keysHeight);
-    statusBar->setBounds (0, getHeight() - keysHeight - statusHeight, getWidth(), statusHeight);
-    keyboardComp->setBounds (0, getHeight() - keysHeight, getWidth(), keysHeight);
+    if (isOnTouchDevice())
+        titleBarComponent->setBounds (r.removeFromTop(titleBarHeight));
+
+    keyboardComp->setBounds (r.removeFromBottom (keysHeight));
+    statusBar->setBounds (r.removeFromBottom (statusHeight));
+    graphPanel->setBounds (r);
+
+    checkAvailableWidth();
 }
 
 void GraphDocumentComponent::createNewPlugin (const PluginDescription& desc, Point<int> pos)
@@ -901,6 +1239,60 @@ void GraphDocumentComponent::releaseGraph()
 
     graphPlayer.setProcessor (nullptr);
     graph = nullptr;
+}
+
+bool GraphDocumentComponent::isInterestedInDragSource (const SourceDetails& details)
+{
+    return ((dynamic_cast<ListBox*> (details.sourceComponent.get()) != nullptr)
+            && details.description.toString().startsWith ("PLUGIN"));
+}
+
+void GraphDocumentComponent::itemDropped (const SourceDetails& details)
+{
+    // don't allow items to be dropped behind the sidebar
+    if (pluginListSidePanel.getBounds().contains (details.localPosition))
+        return;
+
+    auto pluginTypeIndex = details.description.toString()
+                                 .fromFirstOccurrenceOf ("PLUGIN: ", false, false)
+                                 .getIntValue();
+
+    // must be a valid index!
+    jassert (isPositiveAndBelow (pluginTypeIndex, pluginList.getNumTypes()));
+
+    createNewPlugin (*pluginList.getType (pluginTypeIndex), details.localPosition);
+}
+
+void GraphDocumentComponent::showSidePanel (bool showSettingsPanel)
+{
+    if (showSettingsPanel)
+        mobileSettingsSidePanel.showOrHide (true);
+    else
+        pluginListSidePanel.showOrHide (true);
+
+    checkAvailableWidth();
+
+    lastOpenedSidePanel = showSettingsPanel ? &mobileSettingsSidePanel
+                                            : &pluginListSidePanel;
+}
+
+void GraphDocumentComponent::hideLastSidePanel()
+{
+    if (lastOpenedSidePanel != nullptr)
+        lastOpenedSidePanel->showOrHide (false);
+
+    if      (mobileSettingsSidePanel.isPanelShowing())    lastOpenedSidePanel = &mobileSettingsSidePanel;
+    else if (pluginListSidePanel.isPanelShowing())        lastOpenedSidePanel = &pluginListSidePanel;
+    else                                                  lastOpenedSidePanel = nullptr;
+}
+
+void GraphDocumentComponent::checkAvailableWidth()
+{
+    if (mobileSettingsSidePanel.isPanelShowing() && pluginListSidePanel.isPanelShowing())
+    {
+        if (getWidth() - (mobileSettingsSidePanel.getWidth() + pluginListSidePanel.getWidth()) < 150)
+            hideLastSidePanel();
+    }
 }
 
 void GraphDocumentComponent::setDoublePrecision (bool doublePrecision)

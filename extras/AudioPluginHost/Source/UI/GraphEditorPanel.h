@@ -26,15 +26,17 @@
 
 #pragma once
 
-#include "FilterGraph.h"
+#include "../Filters/FilterGraph.h"
 
+class MainHostWindow;
 
 //==============================================================================
 /**
     A panel that displays and edits a FilterGraph.
 */
 class GraphEditorPanel   : public Component,
-                           public ChangeListener
+                           public ChangeListener,
+                           private Timer
 {
 public:
     GraphEditorPanel (FilterGraph& graph);
@@ -43,10 +45,19 @@ public:
     void createNewPlugin (const PluginDescription&, Point<int> position);
 
     void paint (Graphics&) override;
-    void mouseDown (const MouseEvent&) override;
     void resized() override;
+
+    void mouseDown (const MouseEvent&) override;
+    void mouseUp   (const MouseEvent&) override;
+    void mouseDrag (const MouseEvent&) override;
+
     void changeListenerCallback (ChangeBroadcaster*) override;
+
+    //==============================================================================
     void updateComponents();
+
+    //==============================================================================
+    void showPopupMenu (Point<int> position);
 
     //==============================================================================
     void beginConnectorDrag (AudioProcessorGraph::NodeAndChannel source,
@@ -66,10 +77,16 @@ private:
     OwnedArray<FilterComponent> nodes;
     OwnedArray<ConnectorComponent> connectors;
     ScopedPointer<ConnectorComponent> draggingConnector;
+    ScopedPointer<PopupMenu> menu;
 
     FilterComponent* getComponentForFilter (AudioProcessorGraph::NodeID) const;
     ConnectorComponent* getComponentForConnection (const AudioProcessorGraph::Connection&) const;
     PinComponent* findPinAt (Point<float>) const;
+
+    //==============================================================================
+    Point<int> originalTouchPos;
+
+    void timerCallback() override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GraphEditorPanel)
 };
@@ -81,11 +98,15 @@ private:
 
     It also manages the graph itself, and plays it.
 */
-class GraphDocumentComponent  : public Component
+class GraphDocumentComponent  : public Component,
+                                public DragAndDropTarget,
+                                public DragAndDropContainer
 {
 public:
     GraphDocumentComponent (AudioPluginFormatManager& formatManager,
-                            AudioDeviceManager& deviceManager);
+                            AudioDeviceManager& deviceManager,
+                            KnownPluginList& pluginList);
+
     ~GraphDocumentComponent();
 
     //==============================================================================
@@ -96,21 +117,52 @@ public:
     //==============================================================================
     ScopedPointer<FilterGraph> graph;
 
-    void resized();
+    void resized() override;
     void unfocusKeyboardComponent();
     void releaseGraph();
 
+    //==============================================================================
+    bool isInterestedInDragSource (const SourceDetails&) override;
+    void itemDropped (const SourceDetails&) override;
+
+    //==============================================================================
     ScopedPointer<GraphEditorPanel> graphPanel;
     ScopedPointer<MidiKeyboardComponent> keyboardComp;
+
+    //==============================================================================
+    void showSidePanel (bool isSettingsPanel);
+    void hideLastSidePanel();
+
+    BurgerMenuComponent burgerMenu;
 
 private:
     //==============================================================================
     AudioDeviceManager& deviceManager;
+    KnownPluginList& pluginList;
+
     AudioProcessorPlayer graphPlayer;
     MidiKeyboardState keyState;
 
     struct TooltipBar;
     ScopedPointer<TooltipBar> statusBar;
 
+    class TitleBarComponent;
+    ScopedPointer<TitleBarComponent> titleBarComponent;
+
+    //==============================================================================
+    struct PluginListBoxModel;
+    ScopedPointer<PluginListBoxModel> pluginListBoxModel;
+
+    ListBox pluginListBox;
+
+    SidePanel mobileSettingsSidePanel { "Settings", 300, true };
+    SidePanel pluginListSidePanel    { "Plugins", 250, false };
+    SidePanel* lastOpenedSidePanel = nullptr;
+
+    //==============================================================================
+    void init();
+    void checkAvailableWidth();
+
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GraphDocumentComponent)
 };

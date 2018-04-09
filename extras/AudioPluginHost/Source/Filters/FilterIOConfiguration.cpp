@@ -25,9 +25,9 @@
 */
 
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "GraphEditorPanel.h"
+#include "../UI/GraphEditorPanel.h"
 #include "InternalFilters.h"
-#include "MainHostWindow.h"
+#include "../UI/MainHostWindow.h"
 #include "FilterIOConfiguration.h"
 
 

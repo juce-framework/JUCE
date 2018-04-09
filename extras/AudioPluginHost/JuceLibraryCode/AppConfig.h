@@ -16,7 +16,9 @@
 //==============================================================================
 // [BEGIN_USER_CODE_SECTION]
 
-// (You can add your own code in this section, and the Projucer will not overwrite it)
+#ifndef JUCE_ANDROID
+ #define JUCE_MODAL_LOOPS_PERMITTED   (! JUCE_IOS)
+#endif
 
 // [END_USER_CODE_SECTION]
 

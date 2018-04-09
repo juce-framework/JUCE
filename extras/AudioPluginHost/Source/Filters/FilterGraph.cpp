@@ -25,10 +25,10 @@
 */
 
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "MainHostWindow.h"
+#include "../UI/MainHostWindow.h"
 #include "FilterGraph.h"
 #include "InternalFilters.h"
-#include "GraphEditorPanel.h"
+#include "../UI/GraphEditorPanel.h"
 
 
 //==============================================================================
@@ -105,9 +105,9 @@ void FilterGraph::addFilterCallback (AudioPluginInstance* instance, const String
 {
     if (instance == nullptr)
     {
-        AlertWindow::showMessageBox (AlertWindow::WarningIcon,
-                                     TRANS("Couldn't create filter"),
-                                     error);
+        AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                          TRANS("Couldn't create filter"),
+                                          error);
     }
     else
     {
@@ -152,9 +152,13 @@ PluginWindow* FilterGraph::getOrCreateWindowFor (AudioProcessorGraph::Node* node
 {
     jassert (node != nullptr);
 
+   #if JUCE_IOS || JUCE_ANDROID
+    closeAnyOpenPluginWindows();
+   #else
     for (auto* w : activePluginWindows)
         if (w->node == node && w->type == type)
             return w;
+   #endif
 
     if (auto* processor = node->getProcessor())
     {
@@ -453,4 +457,10 @@ void FilterGraph::restoreFromXml (const XmlElement& xml)
     }
 
     graph.removeIllegalConnections();
+}
+
+File FilterGraph::getDefaultGraphDocumentOnMobile()
+{
+    auto persistantStorageLocation = File::getSpecialLocation (File::userApplicationDataDirectory);
+    return persistantStorageLocation.getChildFile ("state.filtergraph");
 }
