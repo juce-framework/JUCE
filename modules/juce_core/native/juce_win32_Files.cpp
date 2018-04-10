@@ -840,7 +840,12 @@ String File::getNativeLinkedTarget() const
 
 File File::getLinkedTarget() const
 {
-    return readWindowsShortcutOrLink (*this, true);
+    auto target = readWindowsShortcutOrLink (*this, true);
+
+    if (target.isNotEmpty() && File::isAbsolutePath (target))
+        return File (target);
+
+    return *this;
 }
 
 bool File::createShortcut (const String& description, const File& linkFileToCreate) const
