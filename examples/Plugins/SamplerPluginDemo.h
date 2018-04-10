@@ -694,7 +694,7 @@ public:
     }
 
 private:
-    void valueTreePropertyChanged (ValueTree &, const Identifier &property) override
+    void valueTreePropertyChanged (ValueTree&, const Identifier& property) override
     {
         if (property == IDs::totalRange)
         {
@@ -854,7 +854,7 @@ public:
     }
 
 private:
-    void valueTreePropertyChanged (ValueTree&, const Identifier &property) override
+    void valueTreePropertyChanged (ValueTree&, const Identifier& property) override
     {
         if (property == IDs::synthVoices)
         {

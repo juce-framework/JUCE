@@ -198,15 +198,13 @@ namespace juce
 {
     namespace dsp
     {
-
         template <typename Type>
-        using Complex = ::std::complex<Type>;
+        using Complex = std::complex<Type>;
 
         //==============================================================================
         namespace util
         {
             /** Use this function to prevent denormals on intel CPUs.
-
                 This function will work with both primitives and simple containers.
             */
           #if JUCE_DSP_ENABLE_SNAP_TO_ZERO

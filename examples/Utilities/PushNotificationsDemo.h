@@ -957,7 +957,7 @@ private:
             setWantsKeyboardFocus (true);
         }
 
-        void addRowComponent (RowComponent *rc)
+        void addRowComponent (RowComponent* rc)
         {
             rowComponents.add (rc);
             addAndMakeVisible (rc);
@@ -967,14 +967,14 @@ private:
         {
             auto totalRowUnits = 0;
 
-            for (auto &rc : rowComponents)
+            for (auto* rc : rowComponents)
                 totalRowUnits += rc->rowUnits;
 
             auto rowHeight = getHeight() / totalRowUnits;
 
             auto bounds = getLocalBounds();
 
-            for (auto &rc : rowComponents)
+            for (auto* rc : rowComponents)
                 rc->setBounds (bounds.removeFromTop (rc->rowUnits * rowHeight));
 
             auto* last = rowComponents[rowComponents.size() - 1];
@@ -1007,9 +1007,7 @@ private:
         void resized() override
         {
             auto columnWidth = getWidth();
-
             auto rowHeight = getHeight() / 6;
-
             auto bounds = getLocalBounds();
 
             getDeliveredNotificationsButton .setBounds (bounds.removeFromTop (rowHeight));
@@ -1020,7 +1018,7 @@ private:
 
             removeAllDeliveredNotifsButton  .setBounds (bounds.removeFromTop (rowHeight));
 
-          #if JUCE_IOS || JUCE_MAC
+           #if JUCE_IOS || JUCE_MAC
             getPendingNotificationsButton .setBounds (bounds.removeFromTop (rowHeight));
 
             rowBounds = bounds.removeFromTop (rowHeight);
@@ -1028,7 +1026,7 @@ private:
             pendingNotifIdentifier        .setBounds (rowBounds);
 
             removeAllPendingNotifsButton  .setBounds (bounds.removeFromTop (rowHeight));
-          #endif
+           #endif
         }
 
         TextButton getDeliveredNotificationsButton  { "Get Delivered Notifications" };
@@ -1046,11 +1044,11 @@ private:
         RemoteView()
         {
             addAndMakeVisible (getDeviceTokenButton);
-          #if JUCE_ANDROID
+           #if JUCE_ANDROID
             addAndMakeVisible (sendRemoteMessageButton);
             addAndMakeVisible (subscribeToSportsButton);
             addAndMakeVisible (unsubscribeFromSportsButton);
-          #endif
+           #endif
         }
 
         void resized()
@@ -1085,10 +1083,8 @@ private:
             if (! showedRemoteInstructions && newCurrentTabName == "Remote")
             {
                 PushNotificationsDemo::showRemoteInstructions();
-
                 showedRemoteInstructions = true;
             }
-
         }
 
     private:
@@ -1097,22 +1093,19 @@ private:
 
     static void showRemoteInstructions()
     {
-      #if JUCE_IOS || JUCE_MAC
+       #if JUCE_IOS || JUCE_MAC
         NativeMessageBox::showMessageBoxAsync (AlertWindow::InfoIcon,
                                                "Remote Notifications instructions",
                                                "In order to be able to test remote notifications "
                                                "ensure that the app is signed and that you register "
                                                "the bundle ID for remote notifications in "
                                                "Apple Developer Center.");
-      #endif
+       #endif
     }
 
     Label headerLabel { "headerLabel", "Push Notifications Demo" };
     ParamControls paramControls;
-    ParamsView paramsOneView;
-    ParamsView paramsTwoView;
-    ParamsView paramsThreeView;
-    ParamsView paramsFourView;
+    ParamsView paramsOneView, paramsTwoView, paramsThreeView, paramsFourView;
     AuxActionsView auxActionsView;
     TabbedComponent localNotificationsTabs { TabbedButtonBar::TabsAtTop };
     RemoteView remoteView;

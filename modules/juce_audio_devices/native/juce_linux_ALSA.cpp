@@ -978,9 +978,8 @@ private:
 class ALSAAudioIODeviceType  : public AudioIODeviceType
 {
 public:
-    ALSAAudioIODeviceType (bool onlySoundcards, const String &deviceTypeName)
+    ALSAAudioIODeviceType (bool onlySoundcards, const String& deviceTypeName)
         : AudioIODeviceType (deviceTypeName),
-          hasScanned (false),
           listOnlySoundcards (onlySoundcards)
     {
        #if ! JUCE_ALSA_LOGGING
@@ -1041,7 +1040,7 @@ public:
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
-        if (ALSAAudioIODevice* d = dynamic_cast<ALSAAudioIODevice*> (device))
+        if (auto* d = dynamic_cast<ALSAAudioIODevice*> (device))
             return asInput ? inputIds.indexOf (d->inputId)
                            : outputIds.indexOf (d->outputId);
 
@@ -1070,9 +1069,9 @@ public:
 private:
     //==============================================================================
     StringArray inputNames, outputNames, inputIds, outputIds;
-    bool hasScanned, listOnlySoundcards;
+    bool hasScanned = false, listOnlySoundcards;
 
-    bool testDevice (const String &id, const String &outputName, const String &inputName)
+    bool testDevice (const String& id, const String& outputName, const String& inputName)
     {
         unsigned int minChansOut = 0, maxChansOut = 0;
         unsigned int minChansIn = 0, maxChansIn = 0;
