@@ -42,8 +42,8 @@ struct MasterContentComponent  : public Component,
         createAllDemos (demos);
         setContent (0);
 
-        setSize (15.0f * currentCanvas.getLimits().getWidth(),
-                 15.0f * currentCanvas.getLimits().getHeight());
+        setSize ((int) (15.0f * currentCanvas.getLimits().getWidth()),
+                 (int) (15.0f * currentCanvas.getLimits().getHeight()));
 
         if (! OSCSender::connect (getBroadcastIPAddress(), masterPortNumber))
             error = "Master app OSC sender: network connection error.";

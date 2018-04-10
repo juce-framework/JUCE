@@ -39,7 +39,7 @@ struct LogoComponent  : public Component
     LogoComponent()
     {
         ScopedPointer<XmlElement> svg (XmlDocument::parse (BinaryData::background_logo_svg));
-        logo = Drawable::createFromSVG (*svg);
+        logo.reset (Drawable::createFromSVG (*svg));
     }
 
     void paint (Graphics& g) override
@@ -71,10 +71,14 @@ ProjectContentComponent::ProjectContentComponent()
     setOpaque (true);
     setWantsKeyboardFocus (true);
 
-    addAndMakeVisible (logo = new LogoComponent());
-    addAndMakeVisible (header = new HeaderComponent());
+    logo.reset (new LogoComponent());
+    addAndMakeVisible (logo.get());
 
-    addAndMakeVisible (fileNameLabel = new Label());
+    header.reset (new HeaderComponent());
+    addAndMakeVisible (header.get());
+
+    fileNameLabel.reset (new Label());
+    addAndMakeVisible (fileNameLabel.get());
     fileNameLabel->setJustificationType (Justification::centred);
 
     sidebarSizeConstrainer.setMinimumWidth (200);
@@ -265,8 +269,9 @@ void ProjectContentComponent::rebuildProjectTabs()
                                                              .getFloatValue());
 
         //======================================================================
-        addAndMakeVisible (resizerBar = new ResizableEdgeComponent (&sidebarTabs, &sidebarSizeConstrainer,
-                                                                    ResizableEdgeComponent::rightEdge));
+        resizerBar.reset (new ResizableEdgeComponent (&sidebarTabs, &sidebarSizeConstrainer,
+                                                      ResizableEdgeComponent::rightEdge));
+        addAndMakeVisible (resizerBar.get());
         resizerBar->setAlwaysOnTop (true);
 
         project->addChangeListener (this);
@@ -299,7 +304,7 @@ void ProjectContentComponent::saveOpenDocumentList()
         ScopedPointer<XmlElement> xml (recentDocumentList.createXML());
 
         if (xml != nullptr)
-            project->getStoredProperties().setValue ("lastDocs", xml);
+            project->getStoredProperties().setValue ("lastDocs", xml.get());
     }
 }
 
@@ -419,7 +424,7 @@ bool ProjectContentComponent::setEditorComponent (Component* editor,
         {
             auto* viewport = new ContentViewport (editor);
 
-            contentView = viewport;
+            contentView.reset (viewport);
             currentDocument = nullptr;
             fileNameLabel->setVisible (false);
 
@@ -427,7 +432,7 @@ bool ProjectContentComponent::setEditorComponent (Component* editor,
         }
         else
         {
-            contentView = editor;
+            contentView.reset (editor);
             currentDocument = doc;
             fileNameLabel->setText (doc->getFile().getFileName(), dontSendNotification);
             fileNameLabel->setVisible (true);

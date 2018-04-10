@@ -240,12 +240,12 @@ public:
                 const int type = formatsToTry [i + 1];
                 bitDepth = type & 255;
 
-                converter = createConverter (isInput, bitDepth,
-                                             (type & isFloatBit) != 0,
-                                             (type & isLittleEndianBit) != 0,
-                                             (type & onlyUseLower24Bits) != 0,
-                                             numChannels,
-                                             isInterleaved);
+                converter.reset (createConverter (isInput, bitDepth,
+                                                  (type & isFloatBit) != 0,
+                                                  (type & isLittleEndianBit) != 0,
+                                                  (type & onlyUseLower24Bits) != 0,
+                                                  numChannels,
+                                                  isInterleaved));
                 break;
             }
         }
@@ -563,7 +563,7 @@ public:
 
         if (outputChannelDataForCallback.size() > 0 && outputId.isNotEmpty())
         {
-            outputDevice = new ALSADevice (outputId, false);
+            outputDevice.reset (new ALSADevice (outputId, false));
 
             if (outputDevice->error.isNotEmpty())
             {
@@ -587,7 +587,7 @@ public:
 
         if (inputChannelDataForCallback.size() > 0 && inputId.isNotEmpty())
         {
-            inputDevice = new ALSADevice (inputId, true);
+            inputDevice.reset (new ALSADevice (inputId, true));
 
             if (inputDevice->error.isNotEmpty())
             {

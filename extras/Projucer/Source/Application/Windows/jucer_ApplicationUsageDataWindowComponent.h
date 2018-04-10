@@ -64,7 +64,8 @@ public:
 
         if (showCheckbox)
         {
-            addAndMakeVisible (shareApplicationUsageDataToggle = new ToggleButton());
+            shareApplicationUsageDataToggle.reset (new ToggleButton());
+            addAndMakeVisible (shareApplicationUsageDataToggle.get());
 
             auto* controller = ProjucerApplication::getApp().licenseController.get();
 

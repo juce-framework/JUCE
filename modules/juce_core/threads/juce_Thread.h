@@ -176,7 +176,7 @@ public:
 
     //==============================================================================
     /** Used to receive callbacks for thread exit calls */
-    class Listener
+    class JUCE_API Listener
     {
     public:
         virtual ~Listener() {}

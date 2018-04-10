@@ -135,7 +135,7 @@ Result PIPGenerator::createJucerFile()
 
     auto outputFile = outputDirectory.getChildFile (metadata[Ids::name].toString() + ".jucer");
 
-    ScopedPointer<XmlElement> xml = root.createXml();
+    ScopedPointer<XmlElement> xml (root.createXml());
 
     if (xml->writeToFile (outputFile, {}))
         return Result::ok();

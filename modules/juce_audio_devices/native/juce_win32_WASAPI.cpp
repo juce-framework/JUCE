@@ -731,7 +731,7 @@ public:
     void updateFormatWithType (SourceType*) noexcept
     {
         typedef AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::NonConst> NativeType;
-        converter = new AudioData::ConverterInstance<AudioData::Pointer<SourceType, AudioData::LittleEndian, AudioData::Interleaved, AudioData::Const>, NativeType> (actualNumChannels, 1);
+        converter.reset (new AudioData::ConverterInstance<AudioData::Pointer<SourceType, AudioData::LittleEndian, AudioData::Interleaved, AudioData::Const>, NativeType> (actualNumChannels, 1));
     }
 
     void updateFormat (bool isFloat) override
@@ -888,7 +888,7 @@ public:
     void updateFormatWithType (DestType*)
     {
         typedef AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const> NativeType;
-        converter = new AudioData::ConverterInstance<NativeType, AudioData::Pointer<DestType, AudioData::LittleEndian, AudioData::Interleaved, AudioData::NonConst>> (1, actualNumChannels);
+        converter.reset (new AudioData::ConverterInstance<NativeType, AudioData::Pointer<DestType, AudioData::LittleEndian, AudioData::Interleaved, AudioData::NonConst>> (1, actualNumChannels));
     }
 
     void updateFormat (bool isFloat) override
@@ -1024,8 +1024,8 @@ public:
             }
             else
             {
-                WASAPIDeviceBase* d = inputDevice != nullptr ? static_cast<WASAPIDeviceBase*> (inputDevice)
-                                                             : static_cast<WASAPIDeviceBase*> (outputDevice);
+                WASAPIDeviceBase* d = inputDevice != nullptr ? static_cast<WASAPIDeviceBase*> (inputDevice.get())
+                                                             : static_cast<WASAPIDeviceBase*> (outputDevice.get());
                 defaultSampleRate = d->defaultSampleRate;
                 minBufferSize = d->minBufferSize;
                 defaultBufferSize = d->defaultBufferSize;
@@ -1303,7 +1303,7 @@ public:
             {
                 // Note that this function is handed the input device so it can check for the event and make sure
                 // the input reservoir is filled up correctly even when bufferSize > device actualBufferSize
-                outputDevice->copyBuffers (const_cast<const float**> (outputBuffers), numOutputBuffers, bufferSize, inputDevice, *this);
+                outputDevice->copyBuffers (const_cast<const float**> (outputBuffers), numOutputBuffers, bufferSize, inputDevice.get(), *this);
 
                 if (outputDevice->sampleRateHasChanged)
                 {
@@ -1375,9 +1375,9 @@ private:
             const EDataFlow flow = getDataFlow (device);
 
             if (deviceId == inputDeviceId && flow == eCapture)
-                inputDevice = new WASAPIInputDevice (device, useExclusiveMode);
+                inputDevice.reset (new WASAPIInputDevice (device, useExclusiveMode));
             else if (deviceId == outputDeviceId && flow == eRender)
-                outputDevice = new WASAPIOutputDevice (device, useExclusiveMode);
+                outputDevice.reset (new WASAPIOutputDevice (device, useExclusiveMode));
         }
 
         return (outputDeviceId.isEmpty() || (outputDevice != nullptr && outputDevice->isOk()))
@@ -1492,12 +1492,12 @@ public:
 
         if (outputIndex >= 0 || inputIndex >= 0)
         {
-            device = new WASAPIAudioIODevice (outputDeviceName.isNotEmpty() ? outputDeviceName
-                                                                            : inputDeviceName,
-                                              getTypeName(),
-                                              outputDeviceIds [outputIndex],
-                                              inputDeviceIds [inputIndex],
-                                              exclusiveMode);
+            device.reset (new WASAPIAudioIODevice (outputDeviceName.isNotEmpty() ? outputDeviceName
+                                                                                 : inputDeviceName,
+                                                   getTypeName(),
+                                                   outputDeviceIds [outputIndex],
+                                                   inputDeviceIds [inputIndex],
+                                                   exclusiveMode));
 
             if (! device->initialise())
                 device = nullptr;

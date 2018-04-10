@@ -42,13 +42,13 @@ public:
         ScopedPointer<XmlElement> svg (XmlDocument::parse (thumbSvg));
         jassert (svg != nullptr);
 
-        thumb = Drawable::createFromSVG (*svg);
+        thumb.reset (Drawable::createFromSVG (*svg));
 
         // svg for thumbnail background highlight
         ScopedPointer<XmlElement> backSvg (XmlDocument::parse (BinaryData::wizard_Highlight_svg));
         jassert (backSvg != nullptr);
 
-        hoverBackground = Drawable::createFromSVG (*backSvg);
+        hoverBackground.reset (Drawable::createFromSVG (*backSvg));
 
         name = buttonName;
 

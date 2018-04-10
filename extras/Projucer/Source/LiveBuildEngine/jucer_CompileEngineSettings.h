@@ -98,12 +98,11 @@ private:
         return "WINDOWS";
        #elif JUCE_LINUX
         return "LINUX";
-       #endif
-
+       #else
         // unknown platform?!
         jassertfalse;
-
         return {};
+       #endif
     }
 
     //==============================================================================

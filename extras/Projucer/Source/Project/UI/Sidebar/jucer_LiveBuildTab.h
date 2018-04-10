@@ -69,7 +69,8 @@ class LiveBuildTab    : public Component,
 public:
     LiveBuildTab (CompileEngineChildProcess* child, String lastErrorMessage)
     {
-        addAndMakeVisible (settingsButton = new IconButton ("Settings", &getIcons().settings));
+        settingsButton.reset (new IconButton ("Settings", &getIcons().settings));
+        addAndMakeVisible (settingsButton.get());
         settingsButton->onClick = [this]
         {
             if (auto* pcc = findParentComponentOfClass<ProjectContentComponent>())
@@ -87,16 +88,17 @@ public:
             isEnabled = false;
 
             errorMessage = getErrorMessage();
-            errorMessageLabel = new Label ("Error", errorMessage);
+            errorMessageLabel.reset (new Label ("Error", errorMessage));
             errorMessageLabel->setJustificationType (Justification::centred);
             errorMessageLabel->setFont (Font (12.0f));
             errorMessageLabel->setMinimumHorizontalScale (1.0f);
 
-            addAndMakeVisible (errorMessageLabel);
+            addAndMakeVisible (errorMessageLabel.get());
 
             if (showDownloadButton)
             {
-                addAndMakeVisible (downloadButton = new TextButton ("Download"));
+                downloadButton.reset (new TextButton ("Download"));
+                addAndMakeVisible (downloadButton.get());
                 downloadButton->onClick = [this] { downloadDLL(); };
             }
 
@@ -110,7 +112,8 @@ public:
                     buttonText = "Re-enable";
                 }
 
-                addAndMakeVisible (enableButton = new TextButton (buttonText));
+                enableButton.reset (new TextButton (buttonText));
+                addAndMakeVisible (enableButton.get());
                 enableButton->onClick = [this]
                 {
                     if (auto* pcc = findParentComponentOfClass<ProjectContentComponent>())

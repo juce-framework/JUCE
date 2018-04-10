@@ -149,9 +149,9 @@ private:
         const SpinLock::ScopedLockType sl (holder.lock);
 
         if (++(holder.refCount) == 1)
-            holder.sharedInstance = new SharedObjectType();
+            holder.sharedInstance.reset (new SharedObjectType());
 
-        sharedObject = holder.sharedInstance;
+        sharedObject = holder.sharedInstance.get();
     }
 
     // There's no need to assign to a SharedResourcePointer because every

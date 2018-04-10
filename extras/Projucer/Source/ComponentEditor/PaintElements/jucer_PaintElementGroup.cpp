@@ -65,7 +65,7 @@ void PaintElementGroup::groupSelected (PaintRoutine* routine)
             {
                 ScopedPointer<XmlElement> xml (routine->getElement(i)->createXml());
 
-                if (auto* newOne = ObjectTypes::createElementForXml (xml, routine))
+                if (auto* newOne = ObjectTypes::createElementForXml (xml.get(), routine))
                     newGroup->subElements.add (newOne);
 
                 if (i > frontIndex)

@@ -173,22 +173,25 @@ public:
     {
         if (hasAddButton)
         {
-            addAndMakeVisible (addButton = new IconButton ("Add", &getIcons().plus));
+            addButton.reset (new IconButton ("Add", &getIcons().plus));
+            addAndMakeVisible (addButton.get());
             addButton->onClick = [this] { showAddMenu(); };
         }
 
         if (hasSettingsButton)
         {
-            addAndMakeVisible (settingsButton = new IconButton ("Settings", &getIcons().settings));
+            settingsButton.reset (new IconButton ("Settings", &getIcons().settings));
+            addAndMakeVisible (settingsButton.get());
             settingsButton->onClick = [this] { showSettings(); };
         }
 
         if (hasFindPanel)
         {
-            addAndMakeVisible (findPanel = new FindPanel ([this] (const String& filter) { treeToDisplay->rootItem->setSearchFilter (filter); }));
+            findPanel.reset (new FindPanel ([this] (const String& filter) { treeToDisplay->rootItem->setSearchFilter (filter); }));
+            addAndMakeVisible (findPanel.get());
         }
 
-        addAndMakeVisible (treeToDisplay);
+        addAndMakeVisible (treeToDisplay.get());
     }
 
     ~ConcertinaTreeComponent()

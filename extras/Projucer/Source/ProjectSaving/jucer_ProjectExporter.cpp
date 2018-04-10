@@ -792,15 +792,15 @@ Image ProjectExporter::getBestIconForSize (int size, bool returnNullIfNothingBig
     if (im1 != nullptr && im2 != nullptr)
     {
         if (im1->getWidth() >= size && im2->getWidth() >= size)
-            im = im1->getWidth() < im2->getWidth() ? im1 : im2;
+            im = im1->getWidth() < im2->getWidth() ? im1.get() : im2.get();
         else if (im1->getWidth() >= size)
-            im = im1;
+            im = im1.get();
         else if (im2->getWidth() >= size)
-            im = im2;
+            im = im2.get();
     }
     else
     {
-        im = im1 != nullptr ? im1 : im2;
+        im = im1 != nullptr ? im1.get() : im2.get();
     }
 
     if (im == nullptr)

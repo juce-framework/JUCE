@@ -47,7 +47,8 @@ public:
 
         auto standardFont = Font (16.0f);
 
-        addAndMakeVisible (loggedInUsernameLabel = new Label ("Username Label"));
+        loggedInUsernameLabel.reset (new Label ("Username Label"));
+        addAndMakeVisible (loggedInUsernameLabel.get());
 
         loggedInUsernameLabel->setFont (standardFont);
         loggedInUsernameLabel->setJustificationType (Justification::centred);
@@ -57,13 +58,15 @@ public:
         loggedInUsernameLabel->setText ("GPL Mode: Re-compile with JUCER_ENABLE_GPL_MODE=0 to enable login!",
                                         NotificationType::dontSendNotification);
        #else
-        addAndMakeVisible (licenseTypeLabel = new Label ("License Type Label"));
+        licenseTypeLabel.reset (new Label ("License Type Label"));
+        addAndMakeVisible (licenseTypeLabel.get());
 
         licenseTypeLabel->setFont (standardFont);
         licenseTypeLabel->setJustificationType (Justification::centred);
         licenseTypeLabel->setMinimumHorizontalScale (1.0f);
 
-        addAndMakeVisible (logoutButton = new TextButton (isInsideWebview ? "Select different account..." : "Logout"));
+        logoutButton.reset (new TextButton (isInsideWebview ? "Select different account..." : "Logout"));
+        addAndMakeVisible (logoutButton.get());
         logoutButton->setColour (TextButton::buttonColourId, findColour (secondaryButtonBackgroundColourId));
 
         logoutButton->onClick = [this]
@@ -74,7 +77,8 @@ public:
 
         if (! isInsideWebview)
         {
-            addAndMakeVisible (switchLicenseButton = new TextButton ("Switch License"));
+            switchLicenseButton.reset (new TextButton ("Switch License"));
+            addAndMakeVisible (switchLicenseButton.get());
             switchLicenseButton->onClick = [this]
             {
                 dismissCalloutBox();

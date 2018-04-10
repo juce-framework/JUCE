@@ -31,7 +31,7 @@
 //==============================================================================
 void TreePanelBase::setRoot (JucerTreeViewBase* root)
 {
-    rootItem = root;
+    rootItem.reset (root);
     tree.setRootItem (root);
     tree.getRootItem()->setOpen (true);
 
@@ -243,7 +243,7 @@ void JucerTreeViewBase::itemSelectionChanged (bool isNowSelected)
 {
     if (isNowSelected)
     {
-        delayedSelectionTimer = new ItemSelectionTimer (*this);
+        delayedSelectionTimer.reset (new ItemSelectionTimer (*this));
         delayedSelectionTimer->startTimer (getMillisecsAllowedForDragGesture());
     }
     else

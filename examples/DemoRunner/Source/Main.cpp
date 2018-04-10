@@ -95,7 +95,7 @@ public:
             return;
       #endif
 
-        mainWindow = new MainAppWindow (getApplicationName());
+        mainWindow.reset (new MainAppWindow (getApplicationName()));
     }
 
     void backButtonPressed() override    { mainWindow->getMainComponent().getSidePanel().showOrHide (false); }
@@ -131,7 +131,7 @@ private:
             setVisible (true);
 
            #if JUCE_WINDOWS || JUCE_LINUX || JUCE_MAC
-            taskbarIcon = new DemoTaskbarComponent();
+            taskbarIcon.reset (new DemoTaskbarComponent());
            #endif
         }
 

@@ -74,7 +74,7 @@ public:
         if (! selectsDirectories)
         {
             if (previewComp != nullptr)
-                customComponent = new CustomComponentHolder (previewComp);
+                customComponent.reset (new CustomComponentHolder (previewComp));
 
             setupFilters();
         }
@@ -357,7 +357,7 @@ private:
 
             if (customComponent)
             {
-                Component::SafePointer<Component> custom (customComponent);
+                Component::SafePointer<Component> custom (customComponent.get());
 
                 RECT r, cr;
                 GetWindowRect (hdlg, &r);

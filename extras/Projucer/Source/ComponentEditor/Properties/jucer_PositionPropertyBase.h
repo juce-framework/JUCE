@@ -68,7 +68,8 @@ public:
                 refresh(); // (to clear the text editor if it's got focus)
         };
 
-        addAndMakeVisible (textEditor = new PositionPropLabel (*this));
+        textEditor.reset (new PositionPropLabel (*this));
+        addAndMakeVisible (textEditor.get());
     }
 
     String getText() const

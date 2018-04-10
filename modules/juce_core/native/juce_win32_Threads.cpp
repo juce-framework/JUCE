@@ -509,7 +509,7 @@ private:
 
 bool ChildProcess::start (const String& command, int streamFlags)
 {
-    activeProcess = new ActiveProcess (command, streamFlags);
+    activeProcess.reset (new ActiveProcess (command, streamFlags));
 
     if (! activeProcess->ok)
         activeProcess = nullptr;

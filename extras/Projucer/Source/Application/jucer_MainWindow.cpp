@@ -142,7 +142,7 @@ void MainWindow::closeButtonPressed()
 
 bool MainWindow::closeProject (Project* project, bool askUserToSave)
 {
-    jassert (project == currentProject && project != nullptr);
+    jassert (project == currentProject.get() && project != nullptr);
 
     if (project == nullptr)
         return true;
@@ -177,7 +177,7 @@ void MainWindow::moveProject (File newProjectFileToOpen)
 {
     auto openInIDE = currentProject->shouldOpenInIDEAfterSaving();
 
-    closeProject (currentProject, false);
+    closeProject (currentProject.get(), false);
     openFile (newProjectFileToOpen);
 
     if (currentProject != nullptr)

@@ -199,7 +199,7 @@ void MessageManager::doPlatformSpecificInitialisation()
     OleInitialize (0);
 
     using namespace WindowsMessageHelpers;
-    messageWindow = new HiddenMessageWindow (messageWindowName, (WNDPROC) messageWndProc);
+    messageWindow.reset (new HiddenMessageWindow (messageWindowName, (WNDPROC) messageWndProc));
     juce_messageWindowHandle = messageWindow->getHWND();
 }
 

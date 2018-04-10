@@ -163,8 +163,8 @@ struct VideoComponent::Pimpl  : public Component
     Pimpl()  : videoLoaded (false)
     {
         setOpaque (true);
-        context = new DirectShowContext (*this);
-        componentWatcher = new ComponentWatcher (*this);
+        context.reset (new DirectShowContext (*this));
+        componentWatcher.reset (new ComponentWatcher (*this));
     }
 
     ~Pimpl()
@@ -462,7 +462,7 @@ private:
             {
                 if (SystemStats::getOperatingSystemType() >= SystemStats::WinVista)
                 {
-                    videoRenderer = new VideoRenderers::EVR();
+                    videoRenderer.reset (new VideoRenderers::EVR());
                     hr = videoRenderer->create (graphBuilder, baseFilter, hwnd);
 
                     if (FAILED (hr))
@@ -471,7 +471,7 @@ private:
 
                 if (videoRenderer == nullptr)
                 {
-                    videoRenderer = new VideoRenderers::VMR7();
+                    videoRenderer.reset (new VideoRenderers::VMR7());
                     hr = videoRenderer->create (graphBuilder, baseFilter, hwnd);
                 }
             }
@@ -700,7 +700,7 @@ private:
 
             if (auto* topLevelPeer = component.getTopLevelComponent()->getPeer())
             {
-                nativeWindow = new NativeWindow ((HWND) topLevelPeer->getNativeHandle(), this);
+                nativeWindow.reset (new NativeWindow ((HWND) topLevelPeer->getNativeHandle(), this));
 
                 hwnd = nativeWindow->hwnd;
 

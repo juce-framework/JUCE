@@ -1333,7 +1333,7 @@ void AudioProcessorGraph::processBlock (AudioBuffer<float>& buffer, MidiBuffer& 
     if (isPrepared.get() == 0 && MessageManager::getInstance()->isThisTheMessageThread())
         handleAsyncUpdate();
 
-    processBlockForBuffer<float> (buffer, midiMessages, *this, renderSequenceFloat, isPrepared);
+    processBlockForBuffer<float> (buffer, midiMessages, *this, renderSequenceFloat.get(), isPrepared);
 }
 
 void AudioProcessorGraph::processBlock (AudioBuffer<double>& buffer, MidiBuffer& midiMessages)
@@ -1341,7 +1341,7 @@ void AudioProcessorGraph::processBlock (AudioBuffer<double>& buffer, MidiBuffer&
     if (isPrepared.get() == 0 && MessageManager::getInstance()->isThisTheMessageThread())
         handleAsyncUpdate();
 
-    processBlockForBuffer<double> (buffer, midiMessages, *this, renderSequenceDouble, isPrepared);
+    processBlockForBuffer<double> (buffer, midiMessages, *this, renderSequenceDouble.get(), isPrepared);
 }
 
 //==============================================================================

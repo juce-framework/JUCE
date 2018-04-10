@@ -78,7 +78,8 @@ void SlidingPanelComponent::addTab (const String& tabName,
     PageInfo* page = new PageInfo();
     pages.insert (insertIndex, page);
     page->content = contentComponent;
-    addAndMakeVisible (page->dotButton = new DotButton (*this, pages.indexOf (page)));
+    page->dotButton.reset (new DotButton (*this, pages.indexOf (page)));
+    addAndMakeVisible (page->dotButton.get());
     page->name = tabName;
     page->shouldDelete = deleteComponentWhenNotNeeded;
 

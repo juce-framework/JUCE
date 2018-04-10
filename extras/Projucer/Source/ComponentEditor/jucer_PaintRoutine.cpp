@@ -169,7 +169,7 @@ public:
         : PaintElementUndoableAction <PaintElement> (element),
           oldIndex (-1)
     {
-        xml = element->createXml();
+        xml.reset (element->createXml());
         oldIndex = routine.indexOfElement (element);
     }
 

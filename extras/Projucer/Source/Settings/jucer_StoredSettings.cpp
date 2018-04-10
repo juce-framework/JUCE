@@ -114,7 +114,7 @@ void StoredSettings::updateKeyMappings()
         const ScopedPointer<XmlElement> keys (commandManager->getKeyMappings()->createXml (true));
 
         if (keys != nullptr)
-            getGlobalProperties().setValue ("keyMappings", keys);
+            getGlobalProperties().setValue ("keyMappings", keys.get());
     }
 }
 

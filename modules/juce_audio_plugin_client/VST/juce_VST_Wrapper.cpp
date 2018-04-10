@@ -1072,7 +1072,7 @@ public:
             if (auto* ed = processor->createEditorIfNeeded())
             {
                 vstEffect.flags |= vstEffectFlagHasEditor;
-                editorComp = new EditorCompWrapper (*this, *ed);
+                editorComp.reset (new EditorCompWrapper (*this, *ed));
 
                #if ! (JUCE_MAC || JUCE_IOS)
                 ed->setScaleFactor (editorScaleFactor);

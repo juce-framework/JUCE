@@ -1280,7 +1280,7 @@ public:
             ScopedPointer<XmlElement> plist (XmlDocument::parse (owner.getPListToMergeString()));
 
             if (plist == nullptr || ! plist->hasTagName ("plist"))
-                plist = new XmlElement ("plist");
+                plist.reset (new XmlElement ("plist"));
 
             auto* dict = plist->getChildByName ("dict");
 
@@ -2493,7 +2493,7 @@ private:
         v->setProperty ("path", pathString, nullptr);
         v->setProperty ("sourceTree", sourceTree, nullptr);
 
-        auto existing = pbxFileReferences.indexOfSorted (*this, v);
+        auto existing = pbxFileReferences.indexOfSorted (*this, v.get());
 
         if (existing >= 0)
         {

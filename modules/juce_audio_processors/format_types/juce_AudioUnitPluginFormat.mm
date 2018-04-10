@@ -1452,7 +1452,7 @@ public:
         auSupportsBypass = (AudioUnitGetPropertyInfo (audioUnit, kAudioUnitProperty_BypassEffect,
                                                      kAudioUnitScope_Global, 0, &propertySize, &writable) == noErr
                               && propertySize >= sizeof (UInt32) && writable);
-        bypassParam = new AUBypassParameter (*this);
+        bypassParam.reset (new AUBypassParameter (*this));
     }
 
     void updateLatency()

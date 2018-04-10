@@ -421,10 +421,11 @@ public:
             }
 
             auto projectDir = fileBrowser.getSelectedFile (0);
+            ScopedPointer<Project> project (wizard->runWizard (*this, projectName.getText(),
+                                                               projectDir,
+                                                               modulesPathBox.isUsingGlobalPaths));
 
-            if (ScopedPointer<Project> project = wizard->runWizard (*this, projectName.getText(),
-                                                                    projectDir,
-                                                                    modulesPathBox.isUsingGlobalPaths))
+            if (project != nullptr)
             {
                 mw->setProject (project.release());
                 getAppSettings().lastWizardFolder = projectDir.getParentDirectory();

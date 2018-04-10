@@ -362,7 +362,7 @@ private:
                 String text = getTextInRange (selection).toLowerCase();
 
                 if (isIntegerLiteral (text) || isFloatLiteral (text))
-                    overlay = new LiteralHighlightOverlay (*this, selection, mightBeColourValue (text));
+                    overlay.reset (new LiteralHighlightOverlay (*this, selection, mightBeColourValue (text)));
             }
         }
 

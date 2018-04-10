@@ -107,7 +107,7 @@ struct AudioProcessorHolder
             initialiseJuce_GUI();
         }
 
-        juceFilter = createPluginFilterOfType (AudioProcessor::wrapperType_AudioUnit);
+        juceFilter.reset (createPluginFilterOfType (AudioProcessor::wrapperType_AudioUnit));
 
         // audio units do not have a notion of enabled or un-enabled buses
         juceFilter->enableAllBuses();
@@ -128,8 +128,8 @@ public:
     JuceAU (AudioUnit component)
         : AudioProcessorHolder(activePlugins.size() + activeUIs.size() == 0),
           MusicDeviceBase (component,
-                           (UInt32) AudioUnitHelpers::getBusCount (juceFilter, true),
-                           (UInt32) AudioUnitHelpers::getBusCount (juceFilter, false)),
+                           (UInt32) AudioUnitHelpers::getBusCount (juceFilter.get(), true),
+                           (UInt32) AudioUnitHelpers::getBusCount (juceFilter.get(), false)),
           isBypassed (false),
           mapper (*juceFilter)
     {
@@ -208,7 +208,7 @@ public:
             return err;
 
         mapper.alloc();
-        pulledSucceeded.calloc (static_cast<size_t> (AudioUnitHelpers::getBusCount (juceFilter, true)));
+        pulledSucceeded.calloc (static_cast<size_t> (AudioUnitHelpers::getBusCount (juceFilter.get(), true)));
 
         prepareToPlay();
 
@@ -298,7 +298,7 @@ public:
         if (isInput) return false;
        #endif
 
-        const int busCount = AudioUnitHelpers::getBusCount (juceFilter, isInput);
+        const int busCount = AudioUnitHelpers::getBusCount (juceFilter.get(), isInput);
         return (juceFilter->canAddBus (isInput) || (busCount > 0 && juceFilter->canRemoveBus (isInput)));
        #endif
     }
@@ -311,12 +311,12 @@ public:
         if ((err = scopeToDirection (scope, isInput)) != noErr)
             return err;
 
-        if (count != (UInt32) AudioUnitHelpers::getBusCount (juceFilter, isInput))
+        if (count != (UInt32) AudioUnitHelpers::getBusCount (juceFilter.get(), isInput))
         {
            #ifdef JucePlugin_PreferredChannelConfigurations
             return kAudioUnitErr_PropertyNotWritable;
            #else
-            const int busCount = AudioUnitHelpers::getBusCount (juceFilter, isInput);
+            const int busCount = AudioUnitHelpers::getBusCount (juceFilter.get(), isInput);
 
             if  ((! juceFilter->canAddBus (isInput)) && ((busCount == 0) || (! juceFilter->canRemoveBus (isInput))))
                 return kAudioUnitErr_PropertyNotWritable;
@@ -360,7 +360,7 @@ public:
             if (err != noErr)
             {
                 // restore bus state
-                const int newBusCount = AudioUnitHelpers::getBusCount (juceFilter, isInput);
+                const int newBusCount = AudioUnitHelpers::getBusCount (juceFilter.get(), isInput);
                 for (int i = newBusCount; i != busCount; i += (busCount > newBusCount ? 1 : -1))
                 {
                     if (busCount > newBusCount)
@@ -475,7 +475,7 @@ public:
             switch (inID)
             {
                 case juceFilterObjectPropertyID:
-                    ((void**) outData)[0] = (void*) static_cast<AudioProcessor*> (juceFilter);
+                    ((void**) outData)[0] = (void*) static_cast<AudioProcessor*> (juceFilter.get());
                     ((void**) outData)[1] = (void*) this;
                     return noErr;
 
@@ -996,7 +996,7 @@ public:
     ComponentResult Version() override                   { return JucePlugin_VersionCode; }
     bool SupportsTail() override                         { return true; }
     Float64 GetTailTime() override                       { return juceFilter->getTailLengthSeconds(); }
-    double getSampleRate()                               { return AudioUnitHelpers::getBusCount (juceFilter, false) > 0 ? GetOutput(0)->GetStreamFormat().mSampleRate : 44100.0; }
+    double getSampleRate()                               { return AudioUnitHelpers::getBusCount (juceFilter.get(), false) > 0 ? GetOutput (0)->GetStreamFormat().mSampleRate : 44100.0; }
 
     Float64 GetLatency() override
     {
@@ -1831,7 +1831,7 @@ private:
         busIdx = static_cast<int> (element);
 
         if ((err = scopeToDirection (scope, isInput)) != noErr) return err;
-        if (isPositiveAndBelow (busIdx, AudioUnitHelpers::getBusCount (juceFilter, isInput))) return noErr;
+        if (isPositiveAndBelow (busIdx, AudioUnitHelpers::getBusCount (juceFilter.get(), isInput))) return noErr;
 
         return kAudioUnitErr_InvalidElement;
     }
@@ -1936,8 +1936,8 @@ private:
     OSStatus syncAudioUnitWithProcessor()
     {
         OSStatus err = noErr;
-        const int enabledInputs  = AudioUnitHelpers::getBusCount (juceFilter, true);
-        const int enabledOutputs = AudioUnitHelpers::getBusCount (juceFilter, false);
+        const int enabledInputs  = AudioUnitHelpers::getBusCount (juceFilter.get(), true);
+        const int enabledOutputs = AudioUnitHelpers::getBusCount (juceFilter.get(), false);
 
         if ((err =  MusicDeviceBase::SetBusCount (kAudioUnitScope_Input,  static_cast<UInt32> (enabledInputs))) != noErr)
             return err;
@@ -1958,8 +1958,8 @@ private:
 
     OSStatus syncProcessorWithAudioUnit()
     {
-        const int numInputBuses  = AudioUnitHelpers::getBusCount (juceFilter, true);
-        const int numOutputBuses = AudioUnitHelpers::getBusCount (juceFilter, false);
+        const int numInputBuses  = AudioUnitHelpers::getBusCount (juceFilter.get(), true);
+        const int numOutputBuses = AudioUnitHelpers::getBusCount (juceFilter.get(), false);
 
         const int numInputElements  = static_cast<int> (GetScope(kAudioUnitScope_Input). GetNumberOfElements());
         const int numOutputElements = static_cast<int> (GetScope(kAudioUnitScope_Output).GetNumberOfElements());
@@ -1994,7 +1994,7 @@ private:
             return kAudioUnitErr_FormatNotSupported;
        #endif
 
-        if (! AudioUnitHelpers::setBusesLayout (juceFilter, requestedLayouts))
+        if (! AudioUnitHelpers::setBusesLayout (juceFilter.get(), requestedLayouts))
             return kAudioUnitErr_FormatNotSupported;
 
         // update total channel count
@@ -2094,7 +2094,7 @@ private:
     {
         auto& layouts = isInput ? supportedInputLayouts : supportedOutputLayouts;
         layouts.clear();
-        auto numBuses = AudioUnitHelpers::getBusCount (juceFilter, isInput);
+        auto numBuses = AudioUnitHelpers::getBusCount (juceFilter.get(), isInput);
 
         for (int busNr = 0; busNr < numBuses; ++busNr)
         {
@@ -2109,8 +2109,8 @@ private:
     {
         currentInputLayout.clear(); currentOutputLayout.clear();
 
-        currentInputLayout. resize (AudioUnitHelpers::getBusCount (juceFilter, true));
-        currentOutputLayout.resize (AudioUnitHelpers::getBusCount (juceFilter, false));
+        currentInputLayout. resize (AudioUnitHelpers::getBusCount (juceFilter.get(), true));
+        currentOutputLayout.resize (AudioUnitHelpers::getBusCount (juceFilter.get(), false));
 
         addSupportedLayoutTagsForDirection (true);
         addSupportedLayoutTagsForDirection (false);

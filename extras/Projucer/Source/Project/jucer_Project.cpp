@@ -1819,7 +1819,7 @@ Array<var> Project::getDefaultRTASCategories() const noexcept
 EnabledModuleList& Project::getModules()
 {
     if (enabledModulesList == nullptr)
-        enabledModulesList = new EnabledModuleList (*this, projectRoot.getOrCreateChildWithName (Ids::MODULES, nullptr));
+        enabledModulesList.reset (new EnabledModuleList (*this, projectRoot.getOrCreateChildWithName (Ids::MODULES, nullptr)));
 
     return *enabledModulesList;
 }
@@ -1923,7 +1923,7 @@ bool Project::ExporterIterator::next()
     if (++index >= project.getNumExporters())
         return false;
 
-    exporter = project.createExporter (index);
+    exporter.reset (project.createExporter (index));
 
     if (exporter == nullptr)
     {

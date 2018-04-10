@@ -158,7 +158,7 @@ public:
         setParentProcessID (info[3].getHexValue32());
        #endif
 
-        zombieKiller = new ZombiePatrol (*this);
+        zombieKiller.reset (new ZombiePatrol (*this));
     }
 
     ~ServerIPC()
@@ -259,7 +259,7 @@ void* createClangServer (const String& commandLine)
     StringArray info;
     info.addTokens (commandLine.fromFirstOccurrenceOf (commandPrefix, false, false), commandTokenSeparator, "");
 
-    ScopedPointer<ServerIPC> ipc = new ServerIPC (info);
+    ScopedPointer<ServerIPC> ipc (new ServerIPC (info));
 
     if (ipc->dll.isLoaded())
     {

@@ -146,7 +146,7 @@ public:
         if (JuceWindowIdentifier::isJUCEWindow (hwnd))
             if (ComponentPeer* peer = (ComponentPeer*) GetWindowLongPtr (hwnd, 8))
                 if (SystemTrayIconComponent* const iconComp = dynamic_cast<SystemTrayIconComponent*> (&(peer->getComponent())))
-                    return iconComp->pimpl;
+                    return iconComp->pimpl.get();
 
         return nullptr;
     }

@@ -100,7 +100,7 @@ static String getCurrentDefaultAudioDeviceName (AudioDeviceManager& deviceManage
 AudioDeviceManager& getSharedAudioDeviceManager (int numInputChannels, int numOutputChannels)
 {
     if (sharedAudioDeviceManager == nullptr)
-        sharedAudioDeviceManager = new AudioDeviceManager();
+        sharedAudioDeviceManager.reset (new AudioDeviceManager());
 
     auto* currentDevice = sharedAudioDeviceManager->getCurrentAudioDevice();
 
