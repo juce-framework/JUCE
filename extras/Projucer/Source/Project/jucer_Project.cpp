@@ -61,10 +61,6 @@ Project::Project (const File& f)
     initialiseMainGroup();
     initialiseAudioPluginValues();
 
-    coalescePluginFormatValues();
-    coalescePluginCharacteristicsValues();
-    updatePluginCategories();
-
     parsedPreprocessorDefs = parsePreprocessorDefs (preprocessorDefsValue.get());
 
     getModules().sortAlphabetically();
@@ -380,15 +376,23 @@ void Project::updatePluginCategories()
     {
         auto aaxCategory = projectRoot.getProperty (Ids::pluginAAXCategory, {}).toString();
 
-        if (aaxCategory.isNotEmpty())
+        if (getAllAAXCategoryVars().contains (aaxCategory))
+            pluginAAXCategoryValue = aaxCategory;
+        else if (getAllAAXCategoryStrings().contains (aaxCategory))
             pluginAAXCategoryValue = Array<var> (getAllAAXCategoryVars()[getAllAAXCategoryStrings().indexOf (aaxCategory)]);
+        else
+            pluginAAXCategoryValue.resetToDefault();
     }
 
     {
         auto rtasCategory = projectRoot.getProperty (Ids::pluginRTASCategory, {}).toString();
 
-        if (rtasCategory.isNotEmpty())
+        if (getAllRTASCategoryVars().contains (rtasCategory))
+            pluginRTASCategoryValue = rtasCategory;
+        else if (getAllRTASCategoryStrings().contains (rtasCategory))
             pluginRTASCategoryValue = Array<var> (getAllRTASCategoryVars()[getAllRTASCategoryStrings().indexOf (rtasCategory)]);
+        else
+            pluginRTASCategoryValue.resetToDefault();
     }
 
     {
@@ -396,6 +400,8 @@ void Project::updatePluginCategories()
 
         if (vstCategory.isNotEmpty() && getAllVSTCategoryStrings().contains (vstCategory))
             pluginVSTCategoryValue = Array<var> (vstCategory);
+        else
+            pluginVSTCategoryValue.resetToDefault();
     }
 
     {
@@ -409,6 +415,10 @@ void Project::updatePluginCategories()
                 pluginAUMainTypeValue = Array<var> (auMainType.quoted ('\''));
             else if (getAllAUMainTypeStrings().contains (auMainType))
                 pluginAUMainTypeValue = Array<var> (getAllAUMainTypeVars()[getAllAUMainTypeStrings().indexOf (auMainType)]);
+        }
+        else
+        {
+            pluginAUMainTypeValue.resetToDefault();
         }
     }
 }
