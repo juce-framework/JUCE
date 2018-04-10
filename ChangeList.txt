@@ -4,6 +4,25 @@
 This file just lists the more notable headline features. For more detailed info
 about minor changes and bugfixes, please see the git log!
 
+Version 5.3.1
+  - Add Android and iOS support to AudioPluginHost
+  - Added support for Bela in the form of an AudioIODeviceType
+  - Add bypass support to both hosting and plug-in client code
+  - Added an isBoolean flag to APVTS parameters
+  - Re-worked plug-in wrappers to all use new parameter system via LegacyAudioParameter wrapper class
+  - Fixed an issue where opening the same midi device twice would cause a crash on Windows
+  - Deprecated MouseInputSource::hasMouseMovedSignificantlySincePressed() and replaced with more descriptive methods
+  - Added support for relative or special path symbolic links when compressing/uncompressing zip archives and creating/reading files
+  - Ensured that File::replaceInternal does not fail with ACL errors on Windows
+  - Merged-in some Ogg-Vorbis security fixes
+  - Fixed a bug which would prevent a SystemTrayIconComponent from creating a native popup window on macOS
+  - Various Android and iOS fixes
+  - Added a "PIP Creator" utility tool to the Projucer
+  - Added options for setting plugin categories and characteristics with MultiChoicePropertyComponent in the Projucer
+  - Fixed a Projucer bug where the OSX base SDK version was not being set
+  - Added a command-line option to use LF as linefeeds rather than CRLF in the Projucer cleanup tools
+  - Multiple documentation updates
+
 Version 5.3.0
   - Added support for Android OBOE (developer preview)
   - Updated JUCE's MPE classes to comply with the new MMA-adopted specification
