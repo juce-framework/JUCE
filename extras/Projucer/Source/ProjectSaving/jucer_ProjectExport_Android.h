@@ -577,8 +577,8 @@ private:
 
         mo << "buildscript {"                                                                              << newLine;
         mo << "   repositories {"                                                                          << newLine;
-        mo << "       jcenter()"                                                                           << newLine;
         mo << "       google()"                                                                            << newLine;
+        mo << "       jcenter()"                                                                           << newLine;
         mo << "   }"                                                                                       << newLine;
         mo << "   dependencies {"                                                                          << newLine;
         mo << "       classpath 'com.android.tools.build:gradle:" << androidPluginVersion.get().toString() << "'" << newLine;
@@ -591,6 +591,7 @@ private:
         mo << ""                                                                                       << newLine;
         mo << "allprojects {"                                                                          << newLine;
         mo << "   repositories {"                                                                      << newLine;
+        mo << "       google()"                                                                        << newLine;
         mo << "       jcenter()"                                                                       << newLine;
 
         if (androidEnableRemoteNotifications.get())
