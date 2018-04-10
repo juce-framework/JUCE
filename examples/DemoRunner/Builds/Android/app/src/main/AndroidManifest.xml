@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="1" android:versionName="5.2.1"
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="1" android:versionName="5.3.1"
           package="com.roli.juce.demorunner">
   <supports-screens android:smallScreens="true" android:normalScreens="true" android:largeScreens="true" android:anyDensity="true"/>
   <uses-sdk android:minSdkVersion="23" android:targetSdkVersion="23"/>
