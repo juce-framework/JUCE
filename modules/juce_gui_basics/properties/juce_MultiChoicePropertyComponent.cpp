@@ -326,6 +326,8 @@ void MultiChoicePropertyComponent::setExpanded (bool isExpanded) noexcept
     expandButton.setTransform (AffineTransform::rotation (expanded ? MathConstants<float>::pi : MathConstants<float>::twoPi,
                                                           (float) expandButton.getBounds().getCentreX(),
                                                           (float) expandButton.getBounds().getCentreY()));
+
+    resized();
 }
 
 //==============================================================================
