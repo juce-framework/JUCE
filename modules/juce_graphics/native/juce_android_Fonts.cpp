@@ -199,7 +199,7 @@ public:
     float getStringWidth (const String& text) override
     {
         JNIEnv* env = getEnv();
-        const int numChars = text.length();
+        const int numChars = CharPointer_UTF16::getBytesRequiredFor (text.getCharPointer());
         jfloatArray widths = env->NewFloatArray (numChars);
 
         const int numDone = paint.callIntMethod (AndroidPaint.getTextWidths, javaString (text).get(), widths);
@@ -218,12 +218,10 @@ public:
     void getGlyphPositions (const String& text, Array<int>& glyphs, Array<float>& xOffsets) override
     {
         JNIEnv* env = getEnv();
-        auto jtext = javaString (text);
-
-        const int numChars = env->GetStringLength (jtext.get());
+        const int numChars = CharPointer_UTF16::getBytesRequiredFor (text.getCharPointer());
         jfloatArray widths = env->NewFloatArray (numChars);
 
-        const int numDone = paint.callIntMethod (AndroidPaint.getTextWidths, jtext.get(), widths);
+        const int numDone = paint.callIntMethod (AndroidPaint.getTextWidths, javaString (text).get(), widths);
 
         HeapBlock<jfloat> localWidths (static_cast<size_t> (numDone));
         env->GetFloatArrayRegion (widths, 0, numDone, localWidths);
