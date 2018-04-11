@@ -230,7 +230,8 @@ void Project::initialiseProjectValues()
 
 void Project::initialiseAudioPluginValues()
 {
-    pluginFormatsValue.referTo               (projectRoot, Ids::pluginFormats,              getUndoManager(), Array<var> (Ids::buildVST.toString(), Ids::buildAU.toString()), ",");
+    pluginFormatsValue.referTo               (projectRoot, Ids::pluginFormats,              getUndoManager(),
+                                              Array<var> (Ids::buildVST.toString(), Ids::buildAU.toString(), Ids::buildStandalone.toString()), ",");
     pluginCharacteristicsValue.referTo       (projectRoot, Ids::pluginCharacteristicsValue, getUndoManager(), Array<var> (), ",");
 
     pluginNameValue.referTo                  (projectRoot, Ids::pluginName,                 getUndoManager(), getProjectNameString());
