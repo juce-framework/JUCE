@@ -112,8 +112,11 @@ PIPGenerator::PIPGenerator (const File& pip, const File& output)
         isTemp = true;
     }
 
+    auto isClipboard = (pip.getParentDirectory().getFileName() == "Clipboard"
+                        && pip.getParentDirectory().getParentDirectory().getFileName() == "PIPs");
+
     outputDirectory = outputDirectory.getChildFile (metadata[Ids::name].toString());
-    useLocalCopy = metadata[Ids::useLocalCopy].toString().isNotEmpty();
+    useLocalCopy = metadata[Ids::useLocalCopy].toString().isNotEmpty() || isClipboard;
 }
 
 //==============================================================================
