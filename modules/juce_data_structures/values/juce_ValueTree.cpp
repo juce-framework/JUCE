@@ -220,7 +220,6 @@ public:
         auto newObject = new SharedObject (typeToMatch);
         addChild (newObject, -1, undoManager);
         return ValueTree (newObject);
-
     }
 
     ValueTree getChildWithProperty (const Identifier& propertyName, const var& propertyValue) const
