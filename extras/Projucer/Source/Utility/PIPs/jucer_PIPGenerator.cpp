@@ -458,13 +458,8 @@ Result PIPGenerator::setProjectSettings (ValueTree& jucerTree)
         jucerTree.setProperty (Ids::projectType, "audioplug", nullptr);
         jucerTree.setProperty (Ids::pluginManufacturer, metadata[Ids::vendor], nullptr);
 
-        jucerTree.setProperty (Ids::buildVST,        true, nullptr);
-        jucerTree.setProperty (Ids::buildVST3,       false, nullptr);
-        jucerTree.setProperty (Ids::buildAU,         true, nullptr);
-        jucerTree.setProperty (Ids::buildAUv3,       false, nullptr);
-        jucerTree.setProperty (Ids::buildRTAS,       false, nullptr);
-        jucerTree.setProperty (Ids::buildAAX,        false, nullptr);
-        jucerTree.setProperty (Ids::buildStandalone, true,  nullptr);
+        StringArray pluginFormatsToBuild (Ids::buildVST.toString(), Ids::buildAU.toString(), Ids::buildStandalone.toString());
+        jucerTree.setProperty (Ids::pluginFormats, pluginFormatsToBuild.joinIntoString (","), nullptr);
     }
 
     return Result::ok();
