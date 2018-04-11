@@ -28,6 +28,7 @@
 #include "jucer_Project.h"
 #include "../ProjectSaving/jucer_ProjectSaver.h"
 #include "../Application/jucer_Application.h"
+#include "../LiveBuildEngine/jucer_CompileEngineSettings.h"
 
 namespace
 {
@@ -66,6 +67,8 @@ Project::Project (const File& f)
     getModules().sortAlphabetically();
 
     projectRoot.addListener (this);
+
+    compileEngineSettings.reset (new CompileEngineSettings (projectRoot));
 
     setChangedFlag (false);
     modificationTime = getFile().getLastModificationTime();
@@ -578,6 +581,8 @@ Result Project::loadDocument (const File& file)
 
     if (! ProjucerApplication::getApp().isRunningCommandLine)
         warnAboutOldProjucerVersion();
+
+    compileEngineSettings.reset (new CompileEngineSettings (projectRoot));
 
     return Result::ok();
 }

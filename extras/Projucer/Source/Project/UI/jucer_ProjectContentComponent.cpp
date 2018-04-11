@@ -27,6 +27,7 @@
 #include "../../Application/jucer_Headers.h"
 #include "jucer_ProjectContentComponent.h"
 #include "../../LiveBuildEngine/jucer_DownloadCompileEngineThread.h"
+#include "../../LiveBuildEngine/jucer_CompileEngineSettings.h"
 
 #include "jucer_HeaderComponent.h"
 #include "Sidebar/jucer_TabComponents.h"

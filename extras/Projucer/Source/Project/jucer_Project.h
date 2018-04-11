@@ -27,12 +27,12 @@
 #pragma once
 
 #include "jucer_ProjectType.h"
-#include "../LiveBuildEngine/jucer_CompileEngineSettings.h"
 
 class ProjectExporter;
 class LibraryModule;
 class EnabledModuleList;
 class ProjectContentComponent;
+class CompileEngineSettings;
 
 //==============================================================================
 class Project  : public FileBasedDocument,
@@ -384,7 +384,7 @@ public:
     bool shouldSendGUIBuilderAnalyticsEvent() noexcept;
 
     //==============================================================================
-    CompileEngineSettings& getCompileEngineSettings()    { return compileEngineSettings; }
+    CompileEngineSettings& getCompileEngineSettings()    { return *compileEngineSettings; }
 
 private:
     ValueTree projectRoot  { Ids::JUCERPROJECT };
@@ -398,7 +398,7 @@ private:
                      pluginAUMainTypeValue, pluginRTASCategoryValue, pluginVSTCategoryValue, pluginVST3CategoryValue, pluginAAXCategoryValue;
 
     //==============================================================================
-    CompileEngineSettings compileEngineSettings  { projectRoot };
+    ScopedPointer<CompileEngineSettings> compileEngineSettings;
 
     //==============================================================================
     bool shouldWriteLegacyPluginFormatSettings = false;

@@ -35,7 +35,8 @@
 #include "jucer_ProjectBuildInfo.h"
 #include "jucer_ClientServerMessages.h"
 #include "jucer_CompileEngineClient.h"
-#include "../LiveBuildEngine/jucer_CompileEngineServer.h"
+#include "jucer_CompileEngineServer.h"
+#include "jucer_CompileEngineSettings.h"
 
 #ifndef RUN_CLANG_IN_CHILD_PROCESS
  #error
