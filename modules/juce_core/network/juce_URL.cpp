@@ -148,6 +148,10 @@ URL::URL (File localFile)
     if (localFile == File())
         return;
 
+   #if JUCE_WINDOWS
+    bool isUncPath = localFile.getFullPathName().startsWith ("\\\\");
+   #endif
+
     while (! localFile.isRoot())
     {
         url = "/" + addEscapeChars (localFile.getFileName(), false) + url;
@@ -156,8 +160,18 @@ URL::URL (File localFile)
 
     url = addEscapeChars (localFile.getFileName(), false) + url;
 
-    if (! url.startsWithChar (L'/'))
-        url = "/" + url;
+   #if JUCE_WINDOWS
+    if (isUncPath)
+    {
+        url = url.fromFirstOccurrenceOf ("/", false, false);
+    }
+    else
+   #endif
+    {
+        if (! url.startsWithChar (L'/'))
+            url = "/" + url;
+    }
+
 
     url = "file://" + url;
 
@@ -381,7 +395,9 @@ File URL::fileFromFileSchemeURL (const URL& fileURL)
 
     auto path = removeEscapeChars (fileURL.getDomain()).replace ("+", "%2B");
 
-   #ifndef JUCE_WINDOWS
+   #ifdef JUCE_WINDOWS
+    bool isUncPath = (! fileURL.url.startsWith ("file:///"));
+   #else
     path = File::getSeparatorString() + path;
    #endif
 
@@ -389,6 +405,11 @@ File URL::fileFromFileSchemeURL (const URL& fileURL)
 
     for (auto urlElement : urlElements)
         path += File::getSeparatorString() + removeEscapeChars (urlElement.replace ("+", "%2B"));
+
+   #ifdef JUCE_WINDOWS
+    if (isUncPath)
+        path = "\\\\" + path;
+   #endif
 
     return path;
 }
