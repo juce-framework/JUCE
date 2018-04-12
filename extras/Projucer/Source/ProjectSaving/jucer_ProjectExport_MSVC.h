@@ -493,12 +493,15 @@ public:
                         manifest->addTextElement (config.shouldGenerateManifest() ? "true" : "false");
                     }
 
-                    auto librarySearchPaths = getLibrarySearchPaths (config);
-                    if (librarySearchPaths.size() > 0)
+                    if (type != SharedCodeTarget)
                     {
-                        auto* libPath = props->createNewChildElement ("LibraryPath");
-                        setConditionAttribute (*libPath, config);
-                        libPath->addTextElement ("$(LibraryPath);" + librarySearchPaths.joinIntoString (";"));
+                        auto librarySearchPaths = getLibrarySearchPaths (config);
+                        if (librarySearchPaths.size() > 0)
+                        {
+                            auto* libPath = props->createNewChildElement ("LibraryPath");
+                            setConditionAttribute (*libPath, config);
+                            libPath->addTextElement ("$(LibraryPath);" + librarySearchPaths.joinIntoString (";"));
+                        }
                     }
                 }
             }
@@ -581,11 +584,14 @@ public:
                 }
 
                 auto externalLibraries = getExternalLibraries (config, getOwner().getExternalLibrariesString());
-                auto additionalDependencies = externalLibraries.isNotEmpty() ? getOwner().replacePreprocessorTokens (config, externalLibraries).trim() + ";%(AdditionalDependencies)"
-                                                                                   : String();
+                auto additionalDependencies = type != SharedCodeTarget && externalLibraries.isNotEmpty()
+                                                        ? getOwner().replacePreprocessorTokens (config, externalLibraries).trim() + ";%(AdditionalDependencies)"
+                                                        : String();
+
                 auto librarySearchPaths = config.getLibrarySearchPaths();
-                auto additionalLibraryDirs = librarySearchPaths.size() > 0 ? getOwner().replacePreprocessorTokens (config, librarySearchPaths.joinIntoString (";")) + ";%(AdditionalLibraryDirectories)"
-                                                                           : String();
+                auto additionalLibraryDirs = type != SharedCodeTarget && librarySearchPaths.size() > 0
+                                                       ? getOwner().replacePreprocessorTokens (config, librarySearchPaths.joinIntoString (";")) + ";%(AdditionalLibraryDirectories)"
+                                                       : String();
 
                 {
                     auto* link = group->createNewChildElement ("Link");
@@ -638,6 +644,7 @@ public:
                     bsc->createNewChildElement ("OutputFile")->addTextElement (getOwner().getIntDirFile (config, config.getOutputFilename (".bsc", true)));
                 }
 
+                if (type != SharedCodeTarget)
                 {
                     auto* lib = group->createNewChildElement ("Lib");
 
@@ -701,7 +708,7 @@ public:
             if (otherFilesGroup->getFirstChildElement() != nullptr)
                 projectXml.addChildElement (otherFilesGroup.release());
 
-            if (getOwner().hasResourceFile())
+            if (type != SharedCodeTarget && getOwner().hasResourceFile())
             {
                 auto* rcGroup = projectXml.createNewChildElement ("ItemGroup");
                 auto* e = rcGroup->createNewChildElement ("ResourceCompile");
@@ -892,7 +899,7 @@ public:
             if (otherFilesGroup->getFirstChildElement() != nullptr)
                 filterXml.addChildElement (otherFilesGroup.release());
 
-            if (getOwner().hasResourceFile())
+            if (type != SharedCodeTarget && getOwner().hasResourceFile())
             {
                 auto* rcGroup = filterXml.createNewChildElement ("ItemGroup");
                 auto* e = rcGroup->createNewChildElement ("ResourceCompile");
