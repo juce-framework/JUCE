@@ -259,7 +259,7 @@ namespace AAXClasses
         return AAX_eStemFormat_INT32_MAX;
     }
 
-    static AudioChannelSet channelSetFromStemFormat (AAX_EStemFormat format, bool ignoreLayout) noexcept
+    static inline AudioChannelSet channelSetFromStemFormat (AAX_EStemFormat format, bool ignoreLayout) noexcept
     {
         if (! ignoreLayout)
         {
@@ -2024,7 +2024,7 @@ namespace AAXClasses
         check (desc.AddProcessProc_Native (algorithmProcessCallback, properties));
     }
 
-    static bool hostSupportsStemFormat (AAX_EStemFormat stemFormat, const AAX_IFeatureInfo* featureInfo)
+    static inline bool hostSupportsStemFormat (AAX_EStemFormat stemFormat, const AAX_IFeatureInfo* featureInfo)
     {
         if (featureInfo != nullptr)
         {
@@ -2078,19 +2078,18 @@ namespace AAXClasses
         check (descriptor.AddProcPtr ((void*) JuceAAX_GUI::Create,        kAAX_ProcPtrID_Create_EffectGUI));
         check (descriptor.AddProcPtr ((void*) JuceAAX_Processor::Create,  kAAX_ProcPtrID_Create_EffectParameters));
 
+        Array<int32> pluginIds;
        #if JucePlugin_IsMidiEffect
         // MIDI effect plug-ins do not support any audio channels
         jassert (numInputBuses == 0 && numOutputBuses == 0);
+        ignoreUnused (featureInfo);
 
         if (auto* desc = descriptor.NewComponentDescriptor())
         {
-            createDescriptor (*desc, 0, plugin->getBusesLayout(), *plugin, numMeters);
+            createDescriptor (*desc, plugin->getBusesLayout(), *plugin, pluginIds, numMeters);
             check (descriptor.AddComponent (desc));
         }
-
        #else
-        Array<int32> pluginIds;
-
         const int numIns  = numInputBuses  > 0 ? numElementsInArray (aaxFormats) : 0;
         const int numOuts = numOutputBuses > 0 ? numElementsInArray (aaxFormats) : 0;
 
