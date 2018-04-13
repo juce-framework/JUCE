@@ -56,7 +56,7 @@ void AudioPluginInstance::setParameter (int parameterIndex, float newValue)
     assertOnceOnDeprecatedMethodUse();
 
     if (auto* param = getParameters()[parameterIndex])
-        return param->setValue (newValue);
+        param->setValue (newValue);
 }
 
 const String AudioPluginInstance::getParameterName (int parameterIndex)
