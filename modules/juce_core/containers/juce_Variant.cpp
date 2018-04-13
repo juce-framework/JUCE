@@ -171,7 +171,7 @@ public:
     int toInt (const ValueUnion& data) const noexcept override       { return (int) data.doubleValue; }
     int64 toInt64 (const ValueUnion& data) const noexcept override   { return (int64) data.doubleValue; }
     double toDouble (const ValueUnion& data) const noexcept override { return data.doubleValue; }
-    String toString (const ValueUnion& data) const override          { return String (data.doubleValue); }
+    String toString (const ValueUnion& data) const override          { return String (data.doubleValue, 20); }
     bool toBool (const ValueUnion& data) const noexcept override     { return data.doubleValue != 0.0; }
     bool isDouble() const noexcept override                          { return true; }
 
