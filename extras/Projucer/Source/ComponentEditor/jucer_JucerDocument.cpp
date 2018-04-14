@@ -645,7 +645,7 @@ XmlElement* JucerDocument::pullMetaDataFromCppFile (const String& cpp)
 
 bool JucerDocument::isValidJucerCppFile (const File& f)
 {
-    if (f.hasFileExtension (".cpp"))
+    if (f.hasFileExtension (cppFileExtensions))
         if (ScopedPointer<XmlElement> xml = pullMetaDataFromCppFile (f.loadFileAsString()))
             return xml->hasTagName (jucerCompXmlTag);
 
