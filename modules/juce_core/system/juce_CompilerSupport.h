@@ -51,6 +51,10 @@
    #define JUCE_EXCEPTIONS_DISABLED 1
   #endif
  #endif
+
+ #define JUCE_CXX14_IS_AVAILABLE (__cplusplus >= 201402L)
+ #define JUCE_CXX17_IS_AVAILABLE (__cplusplus >= 201703L)
+
 #endif
 
 //==============================================================================
@@ -79,6 +83,9 @@
   #endif
  #endif
 
+ #define JUCE_CXX14_IS_AVAILABLE (__cplusplus >= 201402L)
+ #define JUCE_CXX17_IS_AVAILABLE (__cplusplus >= 201703L)
+
 #endif
 
 //==============================================================================
@@ -106,6 +113,9 @@
    #define JUCE_EXCEPTIONS_DISABLED 1
   #endif
  #endif
+
+  #define JUCE_CXX14_IS_AVAILABLE (_MSVC_LANG >= 201402L)
+  #define JUCE_CXX17_IS_AVAILABLE (_MSVC_LANG >= 201703L)
 #endif
 
 //==============================================================================

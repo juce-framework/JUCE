@@ -59,6 +59,9 @@
  #pragma GCC diagnostic ignored "-Wconversion"
 #endif
 
+#include <climits>
+#include <cfloat>
+
 #include "box2d/Box2D.h"
 
 #ifdef __GNUC__

@@ -17,7 +17,6 @@
 */
 
 #include "b2PolygonShape.h"
-#include <new>
 
 b2Shape* b2PolygonShape::Clone(b2BlockAllocator* allocator) const
 {

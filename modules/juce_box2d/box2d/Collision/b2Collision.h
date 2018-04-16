@@ -20,7 +20,6 @@
 #define B2_COLLISION_H
 
 #include "../Common/b2Math.h"
-#include <climits>
 
 /// @file
 /// Structures and functions used for computing contact points, distance

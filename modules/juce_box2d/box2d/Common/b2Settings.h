@@ -19,11 +19,8 @@
 #ifndef B2_SETTINGS_H
 #define B2_SETTINGS_H
 
-#include <cassert>
-#include <cmath>
-
 #define B2_NOT_USED(x) ((void)(x))
-#define b2Assert(A) assert(A)
+#define b2Assert(A) jassert(A)
 
 typedef float float32;
 typedef double float64;
