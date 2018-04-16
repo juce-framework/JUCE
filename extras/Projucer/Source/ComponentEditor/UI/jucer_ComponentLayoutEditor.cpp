@@ -350,7 +350,7 @@ bool ComponentLayoutEditor::keyPressed (const KeyPress& key)
 bool ComponentLayoutEditor::isInterestedInFileDrag (const StringArray& filenames)
 {
     const File f (filenames [0]);
-    return f.hasFileExtension (".cpp");
+    return f.hasFileExtension (cppFileExtensions);
 }
 
 void ComponentLayoutEditor::filesDropped (const StringArray& filenames, int x, int y)
@@ -394,7 +394,7 @@ void ComponentLayoutEditor::itemDropped (const SourceDetails& dragSourceDetails)
     StringArray filenames;
 
     for (int i = 0; i < selectedNodes.size(); ++i)
-        if (selectedNodes.getUnchecked(i)->getFile().hasFileExtension (".cpp"))
+        if (selectedNodes.getUnchecked(i)->getFile().hasFileExtension (cppFileExtensions))
             filenames.add (selectedNodes.getUnchecked(i)->getFile().getFullPathName());
 
     filesDropped (filenames, dragSourceDetails.localPosition.x, dragSourceDetails.localPosition.y);
