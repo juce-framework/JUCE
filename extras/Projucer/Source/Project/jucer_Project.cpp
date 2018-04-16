@@ -188,6 +188,10 @@ void Project::initialiseProjectValues()
 {
     projectNameValue.referTo         (projectRoot, Ids::name,             getUndoManager(), "JUCE Project");
     projectUIDValue.referTo          (projectRoot, Ids::ID,               getUndoManager(), createAlphaNumericUID());
+
+    if (projectUIDValue.isUsingDefault())
+        projectUIDValue = projectUIDValue.getDefault();
+
     projectTypeValue.referTo         (projectRoot, Ids::projectType,      getUndoManager(), ProjectType_GUIApp::getTypeName());
     versionValue.referTo             (projectRoot, Ids::version,          getUndoManager(), "1.0.0");
     bundleIdentifierValue.referTo    (projectRoot, Ids::bundleIdentifier, getUndoManager(), getDefaultBundleIdentifierString());
