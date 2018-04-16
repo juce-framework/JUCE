@@ -750,24 +750,20 @@ bool File::replaceWithData (const void* const dataToWrite,
     return tempFile.overwriteTargetFileWithTemporary();
 }
 
-bool File::appendText (const String& text,
-                       const bool asUnicode,
-                       const bool writeUnicodeHeaderBytes) const
+bool File::appendText (const String& text, bool asUnicode, bool writeHeaderBytes, const char* lineFeed) const
 {
     FileOutputStream out (*this);
 
     if (out.failedToOpen())
         return false;
 
-    return out.writeText (text, asUnicode, writeUnicodeHeaderBytes);
+    return out.writeText (text, asUnicode, writeHeaderBytes, lineFeed);
 }
 
-bool File::replaceWithText (const String& textToWrite,
-                            const bool asUnicode,
-                            const bool writeUnicodeHeaderBytes) const
+bool File::replaceWithText (const String& textToWrite, bool asUnicode, bool writeHeaderBytes, const char* lineFeed) const
 {
     TemporaryFile tempFile (*this, TemporaryFile::useHiddenFile);
-    tempFile.getFile().appendText (textToWrite, asUnicode, writeUnicodeHeaderBytes);
+    tempFile.getFile().appendText (textToWrite, asUnicode, writeHeaderBytes, lineFeed);
     return tempFile.overwriteTargetFileWithTemporary();
 }
 
