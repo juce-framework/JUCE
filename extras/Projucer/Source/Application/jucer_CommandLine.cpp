@@ -121,7 +121,7 @@ namespace
 
         TemporaryFile temp (file);
 
-        if (! temp.getFile().replaceWithText (newText, false, false))
+        if (! temp.getFile().replaceWithText (newText, false, false, nullptr))
             throw CommandLineError ("!!! ERROR Couldn't write to temp file!");
 
         if (! temp.overwriteTargetFileWithTemporary())
@@ -368,7 +368,7 @@ namespace
 
     static void cleanWhitespace (const File& file, CleanupOptions options)
     {
-        const String content (file.loadFileAsString());
+        auto content = file.loadFileAsString();
 
         if (content.contains ("%""%") && content.contains ("//["))
             return; // ignore projucer GUI template files
@@ -400,7 +400,7 @@ namespace
 
             if (options.fixDividerComments)
             {
-                String afterIndent (line.trim());
+                auto afterIndent = line.trim();
 
                 if (afterIndent.startsWith ("//") && afterIndent.length() > 20)
                 {
@@ -435,7 +435,7 @@ namespace
 
         for (auto it = args.begin() + 1; it < args.end(); ++it)
         {
-            const File target (getFileCheckingForExistence (*it));
+            auto target = getFileCheckingForExistence (*it);
 
             Array<File> files;
 
