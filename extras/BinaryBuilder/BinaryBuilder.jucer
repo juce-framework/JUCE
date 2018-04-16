@@ -44,4 +44,7 @@
   <MODULES>
     <MODULE id="juce_core" showAllCode="1"/>
   </MODULES>
+  <LIVE_SETTINGS>
+    <OSX/>
+  </LIVE_SETTINGS>
 </JUCERPROJECT>
