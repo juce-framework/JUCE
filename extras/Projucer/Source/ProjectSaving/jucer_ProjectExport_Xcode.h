@@ -2724,7 +2724,7 @@ private:
     String addFramework (const String& frameworkName) const
     {
         auto path = frameworkName;
-        if (! File::isAbsolutePath (path))
+        if (! File::isAbsolutePath (path) && ! path.startsWithChar('.'))
             path = "System/Library/Frameworks/" + path;
 
         if (! path.endsWithIgnoreCase (".framework"))
@@ -2732,7 +2732,7 @@ private:
 
         auto fileRefID = createFileRefID (path);
 
-        addFileReference ((File::isAbsolutePath (frameworkName) ? "" : "${SDKROOT}/") + path);
+        addFileReference ((File::isAbsolutePath (frameworkName) || path.startsWithChar('.') ? "" : "${SDKROOT}/") + path);
         frameworkFileIDs.add (fileRefID);
 
         return addBuildFile (path, fileRefID, false, false);
