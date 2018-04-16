@@ -98,6 +98,10 @@ public:
             writeAppHeader (modules);
             writeModuleCppWrappers (modules);
             writeProjects (modules, specifiedExporterToSave, ! showProgressBox);
+
+            if (project.getProjectType().isAudioPlugin())
+                writePluginCharacteristicsFile();
+
             writeAppConfigFile (modules, appConfigUserContent); // (this is repeated in case the projects added anything to it)
 
             // if the project root has changed after writing the other files then re-save it
