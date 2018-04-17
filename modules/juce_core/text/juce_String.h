@@ -1417,7 +1417,7 @@ JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, StringRef
 
 } // namespace juce
 
-#if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS && ! DOXYGEN // just used to avoid compiling this under compilers that lack libc++
+#if ! DOXYGEN
 namespace std
 {
     template <> struct hash<juce::String>

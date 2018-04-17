@@ -39,8 +39,6 @@
  #endif
 
  #define JUCE_COMPILER_SUPPORTS_NOEXCEPT 1
- #define JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS 1
- #define JUCE_STDLIB_HAS_STD_FUNCTION_SUPPORT 1
 
  #if (__GNUC__ * 100 + __GNUC_MINOR__) >= 500
   #define JUCE_HAS_CONSTEXPR 1
@@ -68,11 +66,6 @@
  #define JUCE_COMPILER_SUPPORTS_NOEXCEPT 1
  #define JUCE_HAS_CONSTEXPR 1
 
- #if defined (_LIBCPP_VERSION) || ! (JUCE_MAC || JUCE_IOS)
-  #define JUCE_STDLIB_HAS_STD_FUNCTION_SUPPORT 1
-  #define JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS 1
- #endif
-
  #ifndef JUCE_COMPILER_SUPPORTS_ARC
   #define JUCE_COMPILER_SUPPORTS_ARC 1
  #endif
@@ -96,9 +89,6 @@
    #error "JUCE requires Visual Studio 2013 or later"
  #endif
 
- #define JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS 1
- #define JUCE_STDLIB_HAS_STD_FUNCTION_SUPPORT 1
-
  #if _MSC_VER >= 1900 // VS2015
   #define JUCE_COMPILER_SUPPORTS_NOEXCEPT 1
   #define JUCE_HAS_CONSTEXPR 1
@@ -119,6 +109,12 @@
 #endif
 
 //==============================================================================
+// C++ library
+#if (defined (__GLIBCXX__) && __GLIBCXX__ < 20130322) || (defined(_LIBCPP_VERSION) && (_LIBCPP_VERSION < 3700))
+ #error "JUCE requires a C++ library containing std::atomic"
+#endif
+
+//==============================================================================
 #if JUCE_HAS_CONSTEXPR
  #define JUCE_CONSTEXPR constexpr
 #else
@@ -129,18 +125,6 @@
  // These are old flags that are now supported on all compatible build targets
  #define JUCE_COMPILER_SUPPORTS_OVERRIDE_AND_FINAL 1
  #define JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES 1
+ #define JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS 1
  #define JUCE_DELETED_FUNCTION = delete
-#endif
-
-//==============================================================================
-#if JUCE_ANDROID
- #define JUCE_ATOMIC_AVAILABLE 1
-#elif defined(_LIBCPP_VERSION)
- #define JUCE_ATOMIC_AVAILABLE (_LIBCPP_VERSION >= 3700)
-#elif defined (__GLIBCXX__)
- #define JUCE_ATOMIC_AVAILABLE (__GLIBCXX__ >= 20130322) // GCC versions 4.8 and later
-#elif defined (_MSC_VER)
- #define JUCE_ATOMIC_AVAILABLE 1 // Visual Studio 2013 and later
-#else
- #define JUCE_ATOMIC_AVAILABLE 0
 #endif

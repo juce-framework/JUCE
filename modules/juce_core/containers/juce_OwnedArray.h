@@ -66,7 +66,7 @@ public:
         deleteAllObjects();
     }
 
-    /** Move constructor */
+    /** Move constructor. */
     OwnedArray (OwnedArray&& other) noexcept
         : data (static_cast<ArrayAllocationBase <ObjectClass*, TypeOfCriticalSectionToUse>&&> (other.data)),
           numUsed (other.numUsed)
@@ -74,14 +74,13 @@ public:
         other.numUsed = 0;
     }
 
-   #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
+    /** Creates an array from a list of objects. */
     OwnedArray (const std::initializer_list<ObjectClass*>& items)
     {
         addArray (items);
     }
-   #endif
 
-    /** Move assignment operator */
+    /** Move assignment operator. */
     OwnedArray& operator= (OwnedArray&& other) noexcept
     {
         const ScopedLockType lock (getLock());
@@ -478,7 +477,7 @@ public:
         }
     }
 
-   #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
+    /** Adds elements from another array to the end of this array. */
     template <typename OtherArrayType>
     void addArray (const std::initializer_list<OtherArrayType>& items)
     {
@@ -491,7 +490,6 @@ public:
             ++numUsed;
         }
     }
-   #endif
 
     /** Adds copies of the elements in another array to the end of this array.
 

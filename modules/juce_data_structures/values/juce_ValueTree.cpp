@@ -588,7 +588,6 @@ ValueTree::ValueTree (const Identifier& type)  : object (new ValueTree::SharedOb
     jassert (type.toString().isNotEmpty()); // All objects must be given a sensible type name!
 }
 
-#if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
 ValueTree::ValueTree (const Identifier& type,
                       std::initializer_list<std::pair<Identifier, var>> properties,
                       std::initializer_list<ValueTree> subTrees)
@@ -600,7 +599,6 @@ ValueTree::ValueTree (const Identifier& type,
     for (auto& tree : subTrees)
         addChild (tree, -1, nullptr);
 }
-#endif
 
 ValueTree::ValueTree (SharedObject* so) noexcept  : object (so)
 {

@@ -33,7 +33,7 @@ namespace
     const char* const osxVersionDefault         = "10.11";
     const char* const iosVersionDefault         = "9.3";
 
-    const int oldestSDKVersion  = 5;
+    const int oldestSDKVersion  = 7;
     const int currentSDKVersion = 13;
     const int minimumAUv3SDKVersion = 11;
 
@@ -421,7 +421,6 @@ protected:
               osxArchitecture              (config, Ids::osxArchitecture,              getUndoManager(), osxArch_Default),
               customXcodeFlags             (config, Ids::customXcodeFlags,             getUndoManager()),
               plistPreprocessorDefinitions (config, Ids::plistPreprocessorDefinitions, getUndoManager()),
-              cppStandardLibrary           (config, Ids::cppLibType,                   getUndoManager()),
               codeSignIdentity             (config, Ids::codeSigningIdentity,          getUndoManager(), iOS ? "iPhone Developer" : "Mac Developer"),
               fastMathEnabled              (config, Ids::fastMath,                     getUndoManager()),
               stripLocalSymbolsEnabled     (config, Ids::stripLocalSymbols,            getUndoManager()),
@@ -487,11 +486,6 @@ protected:
             props.add (new TextPropertyComponent (plistPreprocessorDefinitions, "PList Preprocessor Definitions", 2048, true),
                        "Preprocessor definitions used during PList preprocessing (see PList Preprocess).");
 
-            props.add (new ChoicePropertyComponent (cppStandardLibrary, "C++ Library",
-                                                    { "LLVM libc++", "GNU libstdc++" },
-                                                    { "libc++",      "libstdc++" }),
-                       "The type of C++ std lib that will be linked.");
-
             props.add (new TextPropertyComponent (codeSignIdentity, "Code-Signing Identity", 1024, false),
                        "The name of a code-signing identity for Xcode to apply.");
 
@@ -513,8 +507,6 @@ protected:
         String getPListPreprocessorDefinitionsString() const    { return plistPreprocessorDefinitions.get(); }
 
         bool isFastMathEnabled() const                          { return fastMathEnabled.get(); }
-
-        String getCPPStandardLibraryString() const              { return cppStandardLibrary.get(); }
 
         bool isStripLocalSymbolsEnabled() const                 { return stripLocalSymbolsEnabled.get(); }
 
@@ -540,7 +532,7 @@ protected:
         bool iOS;
 
         ValueWithDefault osxSDKVersion, osxDeploymentTarget, iosDeploymentTarget, osxArchitecture,
-                         customXcodeFlags, plistPreprocessorDefinitions, cppStandardLibrary, codeSignIdentity,
+                         customXcodeFlags, plistPreprocessorDefinitions, codeSignIdentity,
                          fastMathEnabled, stripLocalSymbolsEnabled, pluginBinaryCopyStepEnabled,
                          vstBinaryLocation, vst3BinaryLocation, auBinaryLocation, rtasBinaryLocation, aaxBinaryLocation;
 
@@ -1129,8 +1121,7 @@ public:
                                                                                               : "c++") + cppStandard).quoted());
             }
 
-            if (config.getCPPStandardLibraryString().isNotEmpty())
-                s.set ("CLANG_CXX_LIBRARY", config.getCPPStandardLibraryString().quoted());
+            s.set ("CLANG_CXX_LIBRARY", "\"libc++\"");
 
             s.set ("COMBINE_HIDPI_IMAGES", "YES");
 
@@ -1577,8 +1568,8 @@ public:
                     = RelativePath (owner.getAAXPathValue().toString(), RelativePath::projectFolder)
                         .getChildFile ("Libs");
 
-                String libraryPath (config.isDebug() ? "Debug/libAAXLibrary" : "Release/libAAXLibrary");
-                libraryPath += (isUsingClangCppLibrary (config) ? "_libcpp.a" : ".a");
+                String libraryPath (config.isDebug() ? "Debug" : "Release");
+                libraryPath += "/libAAXLibrary_libcpp.a";
 
                 extraLibs.add   (aaxLibsFolder.getChildFile (libraryPath));
             }
@@ -1637,25 +1628,6 @@ public:
             }
 
             return targetExtraSearchPaths;
-        }
-
-        bool isUsingClangCppLibrary (const BuildConfiguration& config) const
-        {
-            if (auto xcodeConfig = dynamic_cast<const XcodeBuildConfiguration*> (&config))
-            {
-                auto configValue = xcodeConfig->getCPPStandardLibraryString();
-
-                if (configValue.isNotEmpty())
-                    return (configValue == "libc++");
-
-                auto minorOSXDeploymentTarget = getOSXDeploymentTarget (*xcodeConfig)
-                                               .fromLastOccurrenceOf (".", false, false)
-                                               .getIntValue();
-
-                return (minorOSXDeploymentTarget > 8);
-            }
-
-            return false;
         }
 
         String getOSXDeploymentTarget (const XcodeBuildConfiguration& config, String* sdkRoot = nullptr) const

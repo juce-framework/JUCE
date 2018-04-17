@@ -4,6 +4,27 @@ JUCE breaking changes
 Develop
 =======
 
+Change
+------
+JUCE no longer supports OS X deployment targets earlier than 10.7.
+
+Possible Issues
+---------------
+If you were previously targeting OS X 10.5 or 10.6 you will no longer be able
+to build JUCE-based products compatible with those platforms.
+
+Workaround
+----------
+None. With the appropriate JUCE licence you may be able to backport new JUCE
+features, but there will be no official support for this.
+
+Rationale
+---------
+Increasing the minimum supported OS X version allows the JUCE codebase to make
+use of the more modern C++ features found in the 10.7 standard library, which
+in turn will increase thread and memory safety.
+
+
 Version 5.3.0
 =============
 
@@ -75,8 +96,8 @@ InAppPurchases object yourself.
 
 Possible Issues
 ---------------
-Any code using InAppPurchases needs to be updated to retrieve a singleton pointer
-to InAppPurchases.
+Any code using InAppPurchases needs to be updated to retrieve a singleton
+pointer to InAppPurchases.
 
 Workaround
 ----------
