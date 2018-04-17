@@ -93,16 +93,14 @@ public:
 
             auto projectRootHash = project.getProjectRoot().toXmlString().hashCode();
 
+            if (project.getProjectType().isAudioPlugin())
+                writePluginCharacteristicsFile();
+
             writeAppConfigFile (modules, appConfigUserContent);
             writeBinaryDataFiles();
             writeAppHeader (modules);
             writeModuleCppWrappers (modules);
             writeProjects (modules, specifiedExporterToSave, ! showProgressBox);
-
-            if (project.getProjectType().isAudioPlugin())
-                writePluginCharacteristicsFile();
-
-            writeAppConfigFile (modules, appConfigUserContent); // (this is repeated in case the projects added anything to it)
 
             // if the project root has changed after writing the other files then re-save it
             if (project.getProjectRoot().toXmlString().hashCode() != projectRootHash)
@@ -151,16 +149,13 @@ public:
 
         if (errors.size() == 0)
         {
+            if (project.getProjectType().isAudioPlugin())
+                writePluginCharacteristicsFile();
+
             writeAppConfigFile (modules, loadUserContentFromAppConfig());
             writeBinaryDataFiles();
             writeAppHeader (modules);
             writeModuleCppWrappers (modules);
-
-            if (project.getProjectType().isAudioPlugin())
-            {
-                writePluginCharacteristicsFile();
-                writeAppConfigFile (modules, loadUserContentFromAppConfig());
-            }
 
             return Result::ok();
         }
