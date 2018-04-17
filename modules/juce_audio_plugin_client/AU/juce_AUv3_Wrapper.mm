@@ -1238,8 +1238,7 @@ private:
                 }
             }
 
-            AUParameterAddress address = forceLegacyParamIDs ? static_cast<AUParameterAddress> (idx)
-                                                             : generateAUParameterAddress (juceParam);
+            AUParameterAddress address = generateAUParameterAddress (juceParam);
 
            #if ! JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE
             // Consider yourself very unlucky if you hit this assertion. The hash codes of your
@@ -1570,30 +1569,37 @@ private:
     }
 
     void parameterGestureChanged (int, bool) override {}
+
     //==============================================================================
-   #if JUCE_FORCE_USE_LEGACY_PARAM_IDS
-    inline AUParameterAddress getAUParameterAddressForIndex (int paramIndex) const noexcept     { return static_cast<AUParameterAddress> (paramIndex); }
-    inline int getJuceParameterIndexForAUAddress (AUParameterAddress address) const noexcept    { return static_cast<int> (address); }
-   #else
     inline AUParameterAddress getAUParameterAddressForIndex (int paramIndex) const noexcept
     {
-        return juceParameters.isUsingManagedParameters() ? paramAddresses.getReference (paramIndex)
-                                                         : static_cast<AUParameterAddress> (paramIndex);
+       #if JUCE_FORCE_USE_LEGACY_PARAM_IDS
+        return static_cast<AUParameterAddress> (paramIndex);
+       #else
+        return paramAddresses.getReference (paramIndex);
+       #endif
     }
 
     inline int getJuceParameterIndexForAUAddress (AUParameterAddress address) const noexcept
     {
-        return juceParameters.isUsingManagedParameters() ? paramMap[static_cast<int64> (address)]
-                                                         : static_cast<int> (address);
+       #if JUCE_FORCE_USE_LEGACY_PARAM_IDS
+        return static_cast<int> (address);
+       #else
+        return paramMap[static_cast<int64> (address)];
+       #endif
     }
-   #endif
 
     AUParameterAddress generateAUParameterAddress (AudioProcessorParameter* param) const
     {
         const String& juceParamID = LegacyAudioParameter::getParamID (param, forceLegacyParamIDs);
 
-        return juceParameters.isUsingManagedParameters() ? static_cast<AUParameterAddress> (juceParamID.hashCode64())
-                                                         : static_cast<AUParameterAddress> (juceParamID.getIntValue());
+       #if JUCE_FORCE_USE_LEGACY_PARAM_IDS
+        auto result = juceParamID.getIntValue();
+       #else
+        auto result = juceParamID.hashCode64();
+       #endif
+
+        return static_cast<AUParameterAddress> (result);
     }
 
     AudioProcessorParameter* getJuceParameterForAUAddress (AUParameterAddress address) const noexcept

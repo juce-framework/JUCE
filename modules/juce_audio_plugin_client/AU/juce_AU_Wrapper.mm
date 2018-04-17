@@ -1840,28 +1840,27 @@ private:
     void addParameters()
     {
         juceParameters.update (*juceFilter, forceUseLegacyParamIDs);
-
-        // check if all parameters are managed?
         const int numParams = juceParameters.getNumParameters();
 
-        for (auto* param : juceParameters.params)
+        if (forceUseLegacyParamIDs)
         {
-            const AudioUnitParameterID auParamID = generateAUParameterID (param);
-
-            // Consider yourself very unlucky if you hit this assertion. The hash code of your
-            // parameter ids are not unique.
-            jassert (! paramMap.contains (static_cast<int32> (auParamID)));
-
-            auParamIDs.add (auParamID);
-            paramMap.set (static_cast<int32> (auParamID), param);
-
-            if (juceParameters.isUsingManagedParameters())
-                Globals()->SetParameter (auParamID, param->getValue());
-        }
-
-        if (! juceParameters.isUsingManagedParameters())
             Globals()->UseIndexedParameters (numParams);
+        }
+        else
+        {
+            for (auto* param : juceParameters.params)
+            {
+                const AudioUnitParameterID auParamID = generateAUParameterID (param);
 
+                // Consider yourself very unlucky if you hit this assertion. The hash code of your
+                // parameter ids are not unique.
+                jassert (! paramMap.contains (static_cast<int32> (auParamID)));
+
+                auParamIDs.add (auParamID);
+                paramMap.set (static_cast<int32> (auParamID), param);
+                Globals()->SetParameter (auParamID, param->getValue());
+            }
+        }
 
        #if JUCE_DEBUG
         // Some hosts can't handle the huge numbers of discrete parameter values created when
@@ -1917,14 +1916,14 @@ private:
         paramHash &= ~(1 << (sizeof (AudioUnitParameterID) * 8 - 1));
        #endif
 
-        return juceParameters.isUsingManagedParameters() ? paramHash
-                                                         : static_cast<AudioUnitParameterID> (juceParamID.getIntValue());
+        return forceUseLegacyParamIDs ? static_cast<AudioUnitParameterID> (juceParamID.getIntValue())
+                                      : paramHash;
     }
 
     inline AudioUnitParameterID getAUParameterIDForIndex (int paramIndex) const noexcept
     {
-        return juceParameters.isUsingManagedParameters() ? auParamIDs.getReference (paramIndex)
-                                                         : static_cast<AudioUnitParameterID> (paramIndex);
+        return forceUseLegacyParamIDs ? static_cast<AudioUnitParameterID> (paramIndex)
+                                      : auParamIDs.getReference (paramIndex);
     }
 
     AudioProcessorParameter* getParameterForAUParameterID (AudioUnitParameterID address) const noexcept
