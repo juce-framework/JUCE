@@ -1620,6 +1620,13 @@ static String getVST3CategoryStringFromSelection (Array<var> selected) noexcept
     for (auto& category : selected)
         categories.add (category);
 
+    // "Fx" and "Instrument" should come first and if both are present prioritise "Fx"
+    if (categories.contains ("Instrument"))
+        categories.move (categories.indexOf ("Instrument"), 0);
+
+    if (categories.contains ("Fx"))
+        categories.move (categories.indexOf ("Fx"), 0);
+
     return categories.joinIntoString ("|");
 }
 
@@ -1754,9 +1761,9 @@ Array<var> Project::getDefaultVSTCategories() const noexcept
 
 StringArray Project::getAllVST3CategoryStrings() noexcept
 {
-    static StringArray vst3CategoryStrings { "Fx", "Instrument", "Spatial", "Analyzer", "Delay", "Distortion", "EQ", "Filter", "Generator", "Mastering",
-                                             "Modulation", "Pitch Shift", "Restoration", "Reverb", "Surround", "Tools", "Network", "Drum", "Sampler",
-                                             "Synth", "External", "OnlyRT", "OnlyOfflineProcess", "NoOfflineProcess", "Up-Downmix" };
+    static StringArray vst3CategoryStrings { "Fx", "Instrument", "Analyzer", "Delay", "Distortion", "Drum", "Dynamics", "EQ", "External", "Filter",
+                                             "Generator", "Mastering", "Modulation", "Mono", "Network", "NoOfflineProcess", "OnlyOfflineProcess", "OnlyRT",
+                                             "Pitch Shift", "Restoration", "Reverb", "Sampler", "Spatial", "Stereo", "Surround", "Synth", "Tools", "Up-Downmix" };
 
     return vst3CategoryStrings;
 }
