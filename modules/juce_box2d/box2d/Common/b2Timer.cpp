@@ -18,7 +18,7 @@
 
 #include "b2Timer.h"
 
-b2Timer::b2Timer()   
+b2Timer::b2Timer()
 {
     Reset();
 }
