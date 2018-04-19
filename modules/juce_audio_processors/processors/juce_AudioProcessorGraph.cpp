@@ -1045,7 +1045,6 @@ bool AudioProcessorGraph::isAnInputTo (Node& src, Node& dst, int recursionCheck)
     return false;
 }
 
-
 bool AudioProcessorGraph::canConnect (Node* source, int sourceChannel, Node* dest, int destChannel) const noexcept
 {
     bool sourceIsMIDI = sourceChannel == midiChannelIndex;
@@ -1212,8 +1211,11 @@ void AudioProcessorGraph::buildRenderingSequence()
         RenderSequenceBuilder<RenderSequenceDouble> builderD (*this, *newSequenceD);
     }
 
-    newSequenceF->prepareBuffers (getBlockSize());
-    newSequenceD->prepareBuffers (getBlockSize());
+    {
+        const ScopedLock sl (getCallbackLock());
+        newSequenceF->prepareBuffers (getBlockSize());
+        newSequenceD->prepareBuffers (getBlockSize());
+    }
 
     if (anyNodesNeedPreparing())
     {
@@ -1295,10 +1297,10 @@ bool AudioProcessorGraph::producesMidi() const                      { return tru
 void AudioProcessorGraph::getStateInformation (juce::MemoryBlock&)  {}
 void AudioProcessorGraph::setStateInformation (const void*, int)    {}
 
-template <typename Type>
-static void processBlockForBuffer (AudioBuffer<Type>& buffer, MidiBuffer& midiMessages,
+template <typename FloatType, typename SequenceType>
+static void processBlockForBuffer (AudioBuffer<FloatType>& buffer, MidiBuffer& midiMessages,
                                    AudioProcessorGraph& graph,
-                                   GraphRenderSequence<Type>* renderSequence,
+                                   ScopedPointer<SequenceType>& renderSequence,
                                    Atomic<int>& isPrepared)
 {
     if (graph.isNonRealtime())
@@ -1333,7 +1335,7 @@ void AudioProcessorGraph::processBlock (AudioBuffer<float>& buffer, MidiBuffer& 
     if (isPrepared.get() == 0 && MessageManager::getInstance()->isThisTheMessageThread())
         handleAsyncUpdate();
 
-    processBlockForBuffer<float> (buffer, midiMessages, *this, renderSequenceFloat.get(), isPrepared);
+    processBlockForBuffer<float> (buffer, midiMessages, *this, renderSequenceFloat, isPrepared);
 }
 
 void AudioProcessorGraph::processBlock (AudioBuffer<double>& buffer, MidiBuffer& midiMessages)
@@ -1341,7 +1343,7 @@ void AudioProcessorGraph::processBlock (AudioBuffer<double>& buffer, MidiBuffer&
     if (isPrepared.get() == 0 && MessageManager::getInstance()->isThisTheMessageThread())
         handleAsyncUpdate();
 
-    processBlockForBuffer<double> (buffer, midiMessages, *this, renderSequenceDouble.get(), isPrepared);
+    processBlockForBuffer<double> (buffer, midiMessages, *this, renderSequenceDouble, isPrepared);
 }
 
 //==============================================================================
