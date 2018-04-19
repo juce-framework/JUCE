@@ -1134,10 +1134,10 @@ public:
                                 auto identifier     = (uint32) input->readInt();
                                 auto sampleLength   = (uint32) input->readInt();
                                 auto purpose        = (uint32) input->readInt();
-                                auto country        = (uint16) input->readInt();
-                                auto language       = (uint16) input->readInt();
-                                auto dialect        = (uint16) input->readInt();
-                                auto codePage       = (uint16) input->readInt();
+                                auto country        = (uint16) input->readShort();
+                                auto language       = (uint16) input->readShort();
+                                auto dialect        = (uint16) input->readShort();
+                                auto codePage       = (uint16) input->readShort();
                                 auto stringLength   = adtlLength - 20;
 
                                 MemoryBlock textBlock;
