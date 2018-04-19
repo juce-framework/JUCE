@@ -137,7 +137,7 @@ public:
 
         for (auto& exporterName : getExporterNames())
         {
-            ScopedPointer<ProjectExporter> exporter (createNewExporter (getProject(), exporterName));
+            std::unique_ptr<ProjectExporter> exporter (createNewExporter (getProject(), exporterName));
 
             if (isExporterSupported (*exporter))
                 description << exporter->getName() << newLine;
@@ -938,7 +938,7 @@ private:
                 {
                     auto plistFile = exporter.getTargetFolder().getChildFile (targetAttributes["INFOPLIST_FILE"]);
                     XmlDocument infoPlistData (plistFile);
-                    ScopedPointer<XmlElement> plist (infoPlistData.getDocumentElement());
+                    std::unique_ptr<XmlElement> plist (infoPlistData.getDocumentElement());
 
                     if (plist != nullptr)
                     {

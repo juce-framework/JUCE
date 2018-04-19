@@ -94,7 +94,7 @@ private:
     friend class SamplerVoice;
 
     String name;
-    ScopedPointer<AudioBuffer<float>> data;
+    std::unique_ptr<AudioBuffer<float>> data;
     double sourceSampleRate;
     BigInteger midiNotes;
     int length = 0, attackSamples = 0, releaseSamples = 0;

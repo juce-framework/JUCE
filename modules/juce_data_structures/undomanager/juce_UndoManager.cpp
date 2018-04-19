@@ -115,7 +115,7 @@ bool UndoManager::perform (UndoableAction* newAction)
 {
     if (newAction != nullptr)
     {
-        ScopedPointer<UndoableAction> action (newAction);
+        std::unique_ptr<UndoableAction> action (newAction);
 
         if (reentrancyCheck)
         {

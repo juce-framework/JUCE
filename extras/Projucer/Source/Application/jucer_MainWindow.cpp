@@ -60,7 +60,7 @@ MainWindow::MainWindow()
     {
         commandManager.getKeyMappings()->resetToDefaultMappings();
 
-        ScopedPointer<XmlElement> keys (getGlobalProperties().getXmlValue ("keyMappings"));
+        std::unique_ptr<XmlElement> keys (getGlobalProperties().getXmlValue ("keyMappings"));
 
         if (keys != nullptr)
             commandManager.getKeyMappings()->restoreFromXml (*keys);
@@ -234,7 +234,7 @@ bool MainWindow::openFile (const File& file)
 
     if (file.hasFileExtension (Project::projectFileExtension))
     {
-        ScopedPointer<Project> newDoc (new Project (file));
+        std::unique_ptr<Project> newDoc (new Project (file));
 
         auto result = newDoc->loadFrom (file, true);
 

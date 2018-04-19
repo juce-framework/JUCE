@@ -305,7 +305,7 @@ private:
     //==============================================================================
     OwnedArray<ApplicationCommandInfo> commands;
     ListenerList<ApplicationCommandManagerListener> listeners;
-    ScopedPointer<KeyPressMappingSet> keyMappings;
+    std::unique_ptr<KeyPressMappingSet> keyMappings;
     ApplicationCommandTarget* firstTarget = nullptr;
 
     void sendListenerInvokeCallback (const ApplicationCommandTarget::InvocationInfo&);

@@ -6498,7 +6498,7 @@ static const unsigned char temp_binary_data_42[] =
 "    {\r\n"
 "        // This method is where you should put your application's initialisation code..\r\n"
 "\r\n"
-"        mainWindow = new MainWindow (getApplicationName());\r\n"
+"        mainWindow.reset (new MainWindow (getApplicationName()));\r\n"
 "    }\r\n"
 "\r\n"
 "    void shutdown() override\r\n"
@@ -6564,7 +6564,7 @@ static const unsigned char temp_binary_data_42[] =
 "    };\r\n"
 "\r\n"
 "private:\r\n"
-"    ScopedPointer<MainWindow> mainWindow;\r\n"
+"    std::unique_ptr<MainWindow> mainWindow;\r\n"
 "};\r\n"
 "\r\n"
 "//==============================================================================\r\n"
@@ -6603,7 +6603,7 @@ static const unsigned char temp_binary_data_43[] =
 "    {\r\n"
 "        // This method is where you should put your application's initialisation code..\r\n"
 "\r\n"
-"        mainWindow = new MainWindow (getApplicationName());\r\n"
+"        mainWindow.reset (new MainWindow (getApplicationName()));\r\n"
 "    }\r\n"
 "\r\n"
 "    void shutdown() override\r\n"
@@ -6668,7 +6668,7 @@ static const unsigned char temp_binary_data_43[] =
 "    };\r\n"
 "\r\n"
 "private:\r\n"
-"    ScopedPointer<MainWindow> mainWindow;\r\n"
+"    std::unique_ptr<MainWindow> mainWindow;\r\n"
 "};\r\n"
 "\r\n"
 "//==============================================================================\r\n"
@@ -7224,7 +7224,8 @@ static const unsigned char temp_binary_data_53[] =
 "        //==============================================================================\r\n"
 "        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)\r\n"
 "    };\r\n"
-"    ScopedPointer<MainWindow> mainWindow;\r\n"
+"\r\n"
+"    std::unique_ptr<MainWindow> mainWindow;\r\n"
 "};\r\n"
 "\r\n"
 "//==============================================================================\r\n"
@@ -7634,8 +7635,8 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0x28d496ad:  numBytes = 1233; return jucer_InlineComponentTemplate_h;
         case 0x8905395b:  numBytes = 473; return jucer_MainConsoleAppTemplate_cpp;
         case 0x5e5ea047:  numBytes = 2021; return jucer_MainTemplate_NoWindow_cpp;
-        case 0xda2391f8:  numBytes = 4004; return jucer_MainTemplate_SimpleWindow_cpp;
-        case 0x400bc026:  numBytes = 3964; return jucer_MainTemplate_Window_cpp;
+        case 0xda2391f8:  numBytes = 4012; return jucer_MainTemplate_SimpleWindow_cpp;
+        case 0x400bc026:  numBytes = 3972; return jucer_MainTemplate_Window_cpp;
         case 0xf4842835:  numBytes = 1491; return jucer_NewComponentTemplate_cpp;
         case 0xe7bf237a:  numBytes = 646; return jucer_NewComponentTemplate_h;
         case 0x02a2a077:  numBytes = 278; return jucer_NewCppFileTemplate_cpp;
@@ -7645,7 +7646,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0x7fbac252:  numBytes = 1665; return jucer_OpenGLComponentTemplate_cpp;
         case 0x491fa0d7:  numBytes = 1263; return jucer_OpenGLComponentTemplate_h;
         case 0xbc050edc:  numBytes = 4926; return jucer_PIPAudioProcessorTemplate_h;
-        case 0xf4ca9e9a:  numBytes = 2443; return jucer_PIPMain_cpp;
+        case 0xf4ca9e9a:  numBytes = 2447; return jucer_PIPMain_cpp;
         case 0x0b16e320:  numBytes = 517; return jucer_PIPTemplate_h;
         case 0x763d39dc:  numBytes = 1050; return colourscheme_dark_xml;
         case 0xe8b08520:  numBytes = 1050; return colourscheme_light_xml;

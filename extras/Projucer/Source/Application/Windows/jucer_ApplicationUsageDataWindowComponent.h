@@ -152,7 +152,7 @@ private:
     Label headerLabel, bodyLabel;
     HyperlinkButton juceEULALink, privacyPolicyLink;
     Label shareApplicationUsageDataLabel { {}, "Help JUCE to improve its software and services by sharing my application usage data" };
-    ScopedPointer<ToggleButton> shareApplicationUsageDataToggle;
+    std::unique_ptr<ToggleButton> shareApplicationUsageDataToggle;
     TextButton okButton { "OK" }, upgradeLicenseButton { "Upgrade License" };
 
     void lookAndFeelChanged() override

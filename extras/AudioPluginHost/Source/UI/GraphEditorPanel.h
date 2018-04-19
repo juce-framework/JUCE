@@ -76,8 +76,8 @@ private:
 
     OwnedArray<FilterComponent> nodes;
     OwnedArray<ConnectorComponent> connectors;
-    ScopedPointer<ConnectorComponent> draggingConnector;
-    ScopedPointer<PopupMenu> menu;
+    std::unique_ptr<ConnectorComponent> draggingConnector;
+    std::unique_ptr<PopupMenu> menu;
 
     FilterComponent* getComponentForFilter (AudioProcessorGraph::NodeID) const;
     ConnectorComponent* getComponentForConnection (const AudioProcessorGraph::Connection&) const;
@@ -115,7 +115,7 @@ public:
     bool closeAnyOpenPluginWindows();
 
     //==============================================================================
-    ScopedPointer<FilterGraph> graph;
+    std::unique_ptr<FilterGraph> graph;
 
     void resized() override;
     void unfocusKeyboardComponent();
@@ -126,8 +126,8 @@ public:
     void itemDropped (const SourceDetails&) override;
 
     //==============================================================================
-    ScopedPointer<GraphEditorPanel> graphPanel;
-    ScopedPointer<MidiKeyboardComponent> keyboardComp;
+    std::unique_ptr<GraphEditorPanel> graphPanel;
+    std::unique_ptr<MidiKeyboardComponent> keyboardComp;
 
     //==============================================================================
     void showSidePanel (bool isSettingsPanel);
@@ -144,14 +144,14 @@ private:
     MidiKeyboardState keyState;
 
     struct TooltipBar;
-    ScopedPointer<TooltipBar> statusBar;
+    std::unique_ptr<TooltipBar> statusBar;
 
     class TitleBarComponent;
-    ScopedPointer<TitleBarComponent> titleBarComponent;
+    std::unique_ptr<TitleBarComponent> titleBarComponent;
 
     //==============================================================================
     struct PluginListBoxModel;
-    ScopedPointer<PluginListBoxModel> pluginListBoxModel;
+    std::unique_ptr<PluginListBoxModel> pluginListBoxModel;
 
     ListBox pluginListBox;
 

@@ -55,7 +55,7 @@ ImageType::~ImageType() {}
 
 Image ImageType::convert (const Image& source) const
 {
-    if (source.isNull() || getTypeID() == (ScopedPointer<ImageType> (source.getPixelData()->createType())->getTypeID()))
+    if (source.isNull() || getTypeID() == (std::unique_ptr<ImageType> (source.getPixelData()->createType())->getTypeID()))
         return source;
 
     const Image::BitmapData src (source, Image::BitmapData::readOnly);
@@ -181,7 +181,7 @@ public:
     ImagePixelData::Ptr clone() override
     {
         jassert (getReferenceCount() > 0); // (This method can't be used on an unowned pointer, as it will end up self-deleting)
-        const ScopedPointer<ImageType> type (createType());
+        const std::unique_ptr<ImageType> type (createType());
 
         Image newImage (type->create (pixelFormat, area.getWidth(), area.getHeight(), pixelFormat != Image::RGB));
 
@@ -300,7 +300,7 @@ Image Image::rescaled (const int newWidth, const int newHeight, const Graphics::
     if (image == nullptr || (image->width == newWidth && image->height == newHeight))
         return *this;
 
-    const ScopedPointer<ImageType> type (image->createType());
+    const std::unique_ptr<ImageType> type (image->createType());
     Image newImage (type->create (image->pixelFormat, newWidth, newHeight, hasAlphaChannel()));
 
     Graphics g (newImage);
@@ -317,7 +317,7 @@ Image Image::convertedToFormat (PixelFormat newFormat) const
 
     const int w = image->width, h = image->height;
 
-    const ScopedPointer<ImageType> type (image->createType());
+    const std::unique_ptr<ImageType> type (image->createType());
     Image newImage (type->create (newFormat, w, h, false));
 
     if (newFormat == SingleChannel)
@@ -448,7 +448,7 @@ void Image::clear (const Rectangle<int>& area, Colour colourToClearTo)
 {
     if (image != nullptr)
     {
-        const ScopedPointer<LowLevelGraphicsContext> g (image->createLowLevelContext());
+        const std::unique_ptr<LowLevelGraphicsContext> g (image->createLowLevelContext());
         g->setFill (colourToClearTo);
         g->fillRect (area, true);
     }

@@ -187,7 +187,7 @@ ImagePixelData::Ptr OpenGLImageType::create (Image::PixelFormat, int width, int 
     OpenGLContext* currentContext = OpenGLContext::getCurrentContext();
     jassert (currentContext != nullptr); // an OpenGL image can only be created when a valid context is active!
 
-    ScopedPointer<OpenGLFrameBufferImage> im (new OpenGLFrameBufferImage (*currentContext, width, height));
+    std::unique_ptr<OpenGLFrameBufferImage> im (new OpenGLFrameBufferImage (*currentContext, width, height));
 
     if (! im->initialise())
         return ImagePixelData::Ptr();

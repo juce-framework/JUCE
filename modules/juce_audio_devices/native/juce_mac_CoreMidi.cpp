@@ -356,7 +356,7 @@ namespace CoreMidiHelpers
         }
 
         MidiInput* input = nullptr;
-        ScopedPointer<MidiPortAndEndpoint> portAndEndpoint;
+        std::unique_ptr<MidiPortAndEndpoint> portAndEndpoint;
         volatile bool active = false;
 
     private:
@@ -509,7 +509,7 @@ MidiInput* MidiInput::openDevice (int index, MidiInputCallback* callback)
                 if (MIDIClientRef client = getGlobalMidiClient())
                 {
                     MIDIPortRef port;
-                    ScopedPointer<MidiPortAndCallback> mpc (new MidiPortAndCallback (*callback));
+                    std::unique_ptr<MidiPortAndCallback> mpc (new MidiPortAndCallback (*callback));
 
                     if (CHECK_ERROR (MIDIInputPortCreate (client, name.cfString, midiInputProc, mpc.get(), &port)))
                     {
@@ -546,7 +546,7 @@ MidiInput* MidiInput::createNewDevice (const String& deviceName, MidiInputCallba
 
     if (MIDIClientRef client = getGlobalMidiClient())
     {
-        ScopedPointer<MidiPortAndCallback> mpc (new MidiPortAndCallback (*callback));
+        std::unique_ptr<MidiPortAndCallback> mpc (new MidiPortAndCallback (*callback));
         mpc->active = false;
 
         MIDIEndpointRef endPoint;

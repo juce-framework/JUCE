@@ -379,8 +379,8 @@ protected:
     void addAndMakeVisible (Component*, int zOrder = -1);
    #endif
 
-    ScopedPointer<ResizableCornerComponent> resizableCorner;
-    ScopedPointer<ResizableBorderComponent> resizableBorder;
+    std::unique_ptr<ResizableCornerComponent> resizableCorner;
+    std::unique_ptr<ResizableBorderComponent> resizableBorder;
 
 private:
     //==============================================================================

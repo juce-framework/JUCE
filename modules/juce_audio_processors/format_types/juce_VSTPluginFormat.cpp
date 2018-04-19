@@ -578,7 +578,7 @@ struct ModuleHandle    : public ReferenceCountedObject
     File file;
     MainCall moduleMain, customMain = {};
     String pluginName;
-    ScopedPointer<XmlElement> vstXml;
+    std::unique_ptr<XmlElement> vstXml;
 
     typedef ReferenceCountedObjectPtr<ModuleHandle> Ptr;
 
@@ -1946,7 +1946,7 @@ struct VSTPluginInstance     : public AudioPluginInstance,
     VstEffectInterface* vstEffect;
     ModuleHandle::Ptr vstModule;
 
-    ScopedPointer<VSTPluginFormat::ExtraFunctions> extraFunctions;
+    std::unique_ptr<VSTPluginFormat::ExtraFunctions> extraFunctions;
     bool usesCocoaNSView = false;
 
 private:
@@ -2014,9 +2014,9 @@ private:
 
     AudioBuffer<double> tmpBufferDouble;
     HeapBlock<double*> channelBufferDouble;
-    ScopedPointer<VST2BypassParameter> bypassParam;
+    std::unique_ptr<VST2BypassParameter> bypassParam;
 
-    ScopedPointer<VSTXMLInfo> xmlInfo;
+    std::unique_ptr<VSTXMLInfo> xmlInfo;
 
     static pointer_sized_int handleCanDo (const char* name)
     {
@@ -3293,10 +3293,10 @@ private:
     };
 
     friend struct CarbonWrapperComponent;
-    ScopedPointer<CarbonWrapperComponent> carbonWrapper;
+    std::unique_ptr<CarbonWrapperComponent> carbonWrapper;
    #endif
 
-    ScopedPointer<AutoResizingNSViewComponentWithParent> cocoaWrapper;
+    std::unique_ptr<AutoResizingNSViewComponentWithParent> cocoaWrapper;
 
     void resized() override
     {
@@ -3374,7 +3374,7 @@ void VSTPluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& result
     desc.fileOrIdentifier = fileOrIdentifier;
     desc.uid = 0;
 
-    ScopedPointer<VSTPluginInstance> instance (createAndUpdateDesc (*this, desc));
+    std::unique_ptr<VSTPluginInstance> instance (createAndUpdateDesc (*this, desc));
 
     if (instance == nullptr)
         return;
@@ -3402,7 +3402,7 @@ void VSTPluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& result
 
             aboutToScanVSTShellPlugin (desc);
 
-            ScopedPointer<VSTPluginInstance> shellInstance (createAndUpdateDesc (*this, desc));
+            std::unique_ptr<VSTPluginInstance> shellInstance (createAndUpdateDesc (*this, desc));
 
             if (shellInstance != nullptr)
             {
@@ -3423,7 +3423,7 @@ void VSTPluginFormat::createPluginInstance (const PluginDescription& desc,
                                             void* userData,
                                             void (*callback) (void*, AudioPluginInstance*, const String&))
 {
-    ScopedPointer<VSTPluginInstance> result;
+    std::unique_ptr<VSTPluginInstance> result;
 
     if (fileMightContainThisPluginType (desc.fileOrIdentifier))
     {
@@ -3600,7 +3600,7 @@ AudioPluginInstance* VSTPluginFormat::createCustomVSTFromMainCall (void* entryPo
 
     if (module->open())
     {
-        ScopedPointer<VSTPluginInstance> result (VSTPluginInstance::create (module, initialSampleRate, initialBufferSize));
+        std::unique_ptr<VSTPluginInstance> result (VSTPluginInstance::create (module, initialSampleRate, initialBufferSize));
 
         if (result != nullptr)
             if (result->initialiseEffect (initialSampleRate, initialBufferSize))
@@ -3612,7 +3612,7 @@ AudioPluginInstance* VSTPluginFormat::createCustomVSTFromMainCall (void* entryPo
 
 void VSTPluginFormat::setExtraFunctions (AudioPluginInstance* plugin, ExtraFunctions* functions)
 {
-    ScopedPointer<ExtraFunctions> f (functions);
+    std::unique_ptr<ExtraFunctions> f (functions);
 
     if (auto* vst = dynamic_cast<VSTPluginInstance*> (plugin))
         std::swap (vst->extraFunctions, f);

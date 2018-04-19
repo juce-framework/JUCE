@@ -68,7 +68,8 @@ void AppearanceSettings::writeDefaultSchemeFile (const String& xmlString, const 
 
     AppearanceSettings settings (false);
 
-    ScopedPointer<XmlElement> xml (XmlDocument::parse (xmlString));
+    std::unique_ptr<XmlElement> xml (XmlDocument::parse (xmlString));
+
     if (xml != nullptr)
         settings.readFromXML (*xml);
 
@@ -131,13 +132,13 @@ bool AppearanceSettings::readFromXML (const XmlElement& xml)
 
 bool AppearanceSettings::readFromFile (const File& file)
 {
-    const ScopedPointer<XmlElement> xml (XmlDocument::parse (file));
+    const std::unique_ptr<XmlElement> xml (XmlDocument::parse (file));
     return xml != nullptr && readFromXML (*xml);
 }
 
 bool AppearanceSettings::writeToFile (const File& file) const
 {
-    const ScopedPointer<XmlElement> xml (settings.createXml());
+    const std::unique_ptr<XmlElement> xml (settings.createXml());
     return xml != nullptr && xml->writeToFile (file, String());
 }
 

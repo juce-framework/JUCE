@@ -1180,8 +1180,8 @@ bool AudioProcessorGraph::removeIllegalConnections()
 //==============================================================================
 void AudioProcessorGraph::clearRenderingSequence()
 {
-    ScopedPointer<RenderSequenceFloat> oldSequenceF;
-    ScopedPointer<RenderSequenceDouble> oldSequenceD;
+    std::unique_ptr<RenderSequenceFloat> oldSequenceF;
+    std::unique_ptr<RenderSequenceDouble> oldSequenceD;
 
     {
         const ScopedLock sl (getCallbackLock());
@@ -1201,8 +1201,8 @@ bool AudioProcessorGraph::anyNodesNeedPreparing() const noexcept
 
 void AudioProcessorGraph::buildRenderingSequence()
 {
-    ScopedPointer<RenderSequenceFloat>  newSequenceF (new RenderSequenceFloat());
-    ScopedPointer<RenderSequenceDouble> newSequenceD (new RenderSequenceDouble());
+    std::unique_ptr<RenderSequenceFloat>  newSequenceF (new RenderSequenceFloat());
+    std::unique_ptr<RenderSequenceDouble> newSequenceD (new RenderSequenceDouble());
 
     {
         MessageManagerLock mml;
@@ -1300,7 +1300,7 @@ void AudioProcessorGraph::setStateInformation (const void*, int)    {}
 template <typename FloatType, typename SequenceType>
 static void processBlockForBuffer (AudioBuffer<FloatType>& buffer, MidiBuffer& midiMessages,
                                    AudioProcessorGraph& graph,
-                                   ScopedPointer<SequenceType>& renderSequence,
+                                   std::unique_ptr<SequenceType>& renderSequence,
                                    Atomic<int>& isPrepared)
 {
     if (graph.isNonRealtime())

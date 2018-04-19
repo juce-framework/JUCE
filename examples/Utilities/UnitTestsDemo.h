@@ -220,7 +220,7 @@ struct UnitTestClasses
         }
 
     private:
-        ScopedPointer<TestRunnerThread> currentTestThread;
+        std::unique_ptr<TestRunnerThread> currentTestThread;
 
         TextButton startTestButton { "Run Unit Tests..." };
         ComboBox categoriesBox;

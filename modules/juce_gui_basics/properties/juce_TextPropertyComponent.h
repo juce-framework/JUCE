@@ -175,7 +175,7 @@ private:
     class LabelComp;
     friend class LabelComp;
 
-    ScopedPointer<LabelComp> textEditor;
+    std::unique_ptr<LabelComp> textEditor;
     ListenerList<Listener> listenerList;
 
     void callListeners();

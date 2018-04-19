@@ -1615,7 +1615,7 @@ private:
     MidiDataConcatenator midiConcatenator;
     CriticalSection midiInLock;
     MidiBuffer incomingMidi;
-    ScopedPointer<AUBypassParameter> bypassParam;
+    std::unique_ptr<AUBypassParameter> bypassParam;
     bool lastProcessBlockCallWasBypass = false, auSupportsBypass = false;
 
     void createPluginCallbacks()
@@ -2418,7 +2418,8 @@ public:
           audioComponent (nullptr),
           viewComponent (nullptr)
     {
-        addAndMakeVisible (innerWrapper = new InnerWrapperComponent (*this));
+        innerWrapper.reset (new InnerWrapperComponent (*this));
+        addAndMakeVisible (innerWrapper.get());
 
         setOpaque (true);
         setVisible (true);
@@ -2535,7 +2536,7 @@ private:
     };
 
     friend class InnerWrapperComponent;
-    ScopedPointer<InnerWrapperComponent> innerWrapper;
+    std::unique_ptr<InnerWrapperComponent> innerWrapper;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioUnitPluginWindowCarbon)
 };
@@ -2545,7 +2546,7 @@ private:
 //==============================================================================
 AudioProcessorEditor* AudioUnitPluginInstance::createEditor()
 {
-    ScopedPointer<AudioProcessorEditor> w (new AudioUnitPluginWindowCocoa (*this, false));
+    std::unique_ptr<AudioProcessorEditor> w (new AudioUnitPluginWindowCocoa (*this, false));
 
     if (! static_cast<AudioUnitPluginWindowCocoa*> (w.get())->isValid())
         w.reset();
@@ -2593,7 +2594,7 @@ void AudioUnitPluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& 
 
     try
     {
-        ScopedPointer<AudioPluginInstance> createdInstance (createInstanceFromDescription (desc, 44100.0, 512));
+        std::unique_ptr<AudioPluginInstance> createdInstance (createInstanceFromDescription (desc, 44100.0, 512));
 
         if (AudioUnitPluginInstance* auInstance = dynamic_cast<AudioUnitPluginInstance*> (createdInstance.get()))
             results.add (new PluginDescription (auInstance->getPluginDescription()));
@@ -2663,7 +2664,7 @@ void AudioUnitPluginFormat::createPluginInstance (const PluginDescription& desc,
             {
                 if (err == noErr)
                 {
-                    ScopedPointer<AudioUnitPluginInstance> instance (new AudioUnitPluginInstance (audioUnit));
+                    std::unique_ptr<AudioUnitPluginInstance> instance (new AudioUnitPluginInstance (audioUnit));
 
                     if (instance->initialise (sampleRate, framesPerBuffer))
                         originalCallback (passUserData, instance.release(), StringRef());

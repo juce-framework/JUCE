@@ -1220,7 +1220,7 @@ public:
 
         ~EditorCompWrapper()
         {
-            deleteAllChildren(); // note that we can't use a ScopedPointer because the editor may
+            deleteAllChildren(); // note that we can't use a std::unique_ptr because the editor may
                                  // have been transferred to another parent which takes over ownership.
         }
 
@@ -1481,7 +1481,7 @@ private:
     VstEffectInterface vstEffect;
     juce::MemoryBlock chunkMemory;
     juce::uint32 chunkMemoryTime = 0;
-    ScopedPointer<EditorCompWrapper> editorComp;
+    std::unique_ptr<EditorCompWrapper> editorComp;
     VstEditorBounds editorBounds;
     MidiBuffer midiEvents;
     VSTMidiEventList outgoingEvents;

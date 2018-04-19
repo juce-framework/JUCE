@@ -40,7 +40,7 @@ namespace PluginFormatManagerHelpers
         void messageCallback() override          { callback->completionCallback (nullptr, error); }
 
         String error;
-        ScopedPointer<AudioPluginFormat::InstantiationCompletionCallback> callback;
+        std::unique_ptr<AudioPluginFormat::InstantiationCompletionCallback> callback;
     };
 
     struct ErrorLambdaOnMessageThread : public CallbackMessage

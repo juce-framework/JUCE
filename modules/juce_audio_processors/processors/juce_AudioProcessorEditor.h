@@ -177,7 +177,7 @@ public:
      */
     void setBoundsConstrained (Rectangle<int> newBounds);
 
-    ScopedPointer<ResizableCornerComponent> resizableCorner;
+    std::unique_ptr<ResizableCornerComponent> resizableCorner;
 
 private:
     //==============================================================================
@@ -200,7 +200,7 @@ private:
     void attachConstrainer (ComponentBoundsConstrainer*);
 
     //==============================================================================
-    ScopedPointer<AudioProcessorEditorListener> resizeListener;
+    std::unique_ptr<AudioProcessorEditorListener> resizeListener;
     bool resizable;
     ComponentBoundsConstrainer defaultConstrainer;
     ComponentBoundsConstrainer* constrainer = {};

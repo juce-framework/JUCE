@@ -57,7 +57,7 @@ public:
 
 private:
     CriticalSection streamCreationLock;
-    ScopedPointer<WebInputStream> stream;
+    std::unique_ptr<WebInputStream> stream;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TracktionMarketplaceStatus)
 };

@@ -416,7 +416,7 @@ struct FFTFallback  : public FFT::Instance
 
     //==============================================================================
     SpinLock processLock;
-    ScopedPointer<FFTConfig> configForward, configInverse;
+    std::unique_ptr<FFTConfig> configForward, configInverse;
     int size;
 };
 

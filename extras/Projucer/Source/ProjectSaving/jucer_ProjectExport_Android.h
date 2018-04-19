@@ -1332,7 +1332,7 @@ private:
             customStringsXmlContent << cfg.getCustomStringsXml();
             customStringsXmlContent << "\n</resources>";
 
-            ScopedPointer<XmlElement> strings (XmlDocument::parse (customStringsXmlContent));
+            std::unique_ptr<XmlElement> strings (XmlDocument::parse (customStringsXmlContent));
 
             String dir     = cfg.isDebug() ? "debug" : "release";
             String subPath = "app/src/" + dir + "/res/values/string.xml";
@@ -1343,7 +1343,7 @@ private:
 
     void writeAndroidManifest (const File& folder) const
     {
-        ScopedPointer<XmlElement> manifest (createManifestXML());
+        std::unique_ptr<XmlElement> manifest (createManifestXML());
 
         writeXmlOrThrow (*manifest, folder.getChildFile ("src/main/AndroidManifest.xml"), "utf-8", 100, true);
     }
@@ -1366,8 +1366,8 @@ private:
 
     void writeIcons (const File& folder) const
     {
-        ScopedPointer<Drawable> bigIcon (getBigIcon());
-        ScopedPointer<Drawable> smallIcon (getSmallIcon());
+        std::unique_ptr<Drawable> bigIcon (getBigIcon());
+        std::unique_ptr<Drawable> smallIcon (getSmallIcon());
 
         if (bigIcon != nullptr && smallIcon != nullptr)
         {
@@ -1734,7 +1734,7 @@ private:
 
         if (! app->hasAttribute ("android:icon"))
         {
-            ScopedPointer<Drawable> bigIcon (getBigIcon()), smallIcon (getSmallIcon());
+            std::unique_ptr<Drawable> bigIcon (getBigIcon()), smallIcon (getSmallIcon());
 
             if (bigIcon != nullptr || smallIcon != nullptr)
                 app->setAttribute ("android:icon", "@drawable/icon");

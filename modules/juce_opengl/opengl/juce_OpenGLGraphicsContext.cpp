@@ -1667,7 +1667,7 @@ struct SavedState  : public RenderingHelpers::SavedStateBase<SavedState>
                 auto t = transform.getTransformWith (AffineTransform::scale (fontHeight * font.getHorizontalScale(), fontHeight)
                                                                      .followedBy (trans));
 
-                const ScopedPointer<EdgeTable> et (font.getTypeface()->getEdgeTableForGlyph (glyphNumber, t, fontHeight));
+                const std::unique_ptr<EdgeTable> et (font.getTypeface()->getEdgeTableForGlyph (glyphNumber, t, fontHeight));
 
                 if (et != nullptr)
                     fillShape (new EdgeTableRegionType (*et), false);
@@ -1742,7 +1742,7 @@ struct SavedState  : public RenderingHelpers::SavedStateBase<SavedState>
 
 private:
     Image transparencyLayer;
-    ScopedPointer<Target> previousTarget;
+    std::unique_ptr<Target> previousTarget;
 
     SavedState& operator= (const SavedState&);
 };

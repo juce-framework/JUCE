@@ -68,7 +68,7 @@ struct AudioTrackProducerClass  : public ObjCClass <NSObject>
                 source->releaseResources();
         }
 
-        ScopedPointer<AudioSource> source;
+        std::unique_ptr<AudioSource> source;
         int readPosition, lengthInFrames;
     };
 
@@ -282,7 +282,7 @@ public:
     {
         if (DRDevice* dev = [[DRDevice devices] objectAtIndex: static_cast<NSUInteger> (deviceIndex)])
         {
-            device = new OpenDiskDevice (dev);
+            device.reset (new OpenDiskDevice (dev));
             lastState = getDiskState();
             startTimer (1000);
         }
@@ -361,7 +361,7 @@ public:
                                           objectForKey: DRDeviceMediaBlocksFreeKey] intValue];
     }
 
-    ScopedPointer<OpenDiskDevice> device;
+    std::unique_ptr<OpenDiskDevice> device;
 
 private:
     DiskState lastState;
@@ -380,7 +380,7 @@ AudioCDBurner::~AudioCDBurner()
 
 AudioCDBurner* AudioCDBurner::openDevice (const int deviceIndex)
 {
-    ScopedPointer<AudioCDBurner> b (new AudioCDBurner (deviceIndex));
+    std::unique_ptr<AudioCDBurner> b (new AudioCDBurner (deviceIndex));
 
     if (b->pimpl->device == nil)
         b = nullptr;

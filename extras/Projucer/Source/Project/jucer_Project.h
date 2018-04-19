@@ -319,7 +319,7 @@ public:
         ProjectExporter& operator*() const       { return *exporter; }
         ProjectExporter* operator->() const      { return exporter.get(); }
 
-        ScopedPointer<ProjectExporter> exporter;
+        std::unique_ptr<ProjectExporter> exporter;
         int index;
 
     private:
@@ -398,7 +398,7 @@ private:
                      pluginAUMainTypeValue, pluginRTASCategoryValue, pluginVSTCategoryValue, pluginVST3CategoryValue, pluginAAXCategoryValue;
 
     //==============================================================================
-    ScopedPointer<CompileEngineSettings> compileEngineSettings;
+    std::unique_ptr<CompileEngineSettings> compileEngineSettings;
 
     //==============================================================================
     bool shouldWriteLegacyPluginFormatSettings = false;
@@ -427,7 +427,7 @@ private:
 
     //==============================================================================
     friend class Item;
-    ScopedPointer<EnabledModuleList> enabledModulesList;
+    std::unique_ptr<EnabledModuleList> enabledModulesList;
     bool isSaving = false;
     Time modificationTime;
     StringPairArray parsedPreprocessorDefs;

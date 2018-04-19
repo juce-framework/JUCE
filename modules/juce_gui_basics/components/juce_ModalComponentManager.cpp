@@ -104,7 +104,7 @@ void ModalComponentManager::attachCallback (Component* component, Callback* call
 {
     if (callback != nullptr)
     {
-        ScopedPointer<Callback> callbackDeleter (callback);
+        std::unique_ptr<Callback> callbackDeleter (callback);
 
         for (int i = stack.size(); --i >= 0;)
         {
@@ -194,7 +194,7 @@ void ModalComponentManager::handleAsyncUpdate()
 
         if (! item->isActive)
         {
-            ScopedPointer<ModalItem> deleter (stack.removeAndReturn (i));
+            std::unique_ptr<ModalItem> deleter (stack.removeAndReturn (i));
             Component::SafePointer<Component> compToDelete (item->autoDelete ? item->component : nullptr);
 
             for (int j = item->callbacks.size(); --j >= 0;)

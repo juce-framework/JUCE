@@ -184,7 +184,7 @@ bool PropertiesFile::save()
 bool PropertiesFile::loadAsXml()
 {
     XmlDocument parser (file);
-    ScopedPointer<XmlElement> doc (parser.getDocumentElement (true));
+    std::unique_ptr<XmlElement> doc (parser.getDocumentElement (true));
 
     if (doc != nullptr && doc->hasTagName (PropertyFileConstants::fileTag))
     {

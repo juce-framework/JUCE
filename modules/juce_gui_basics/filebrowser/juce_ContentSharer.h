@@ -118,7 +118,7 @@ private:
         virtual void shareText (const String& text) = 0;
     };
 
-    ScopedPointer<Pimpl> pimpl;
+    std::unique_ptr<Pimpl> pimpl;
     Pimpl* createPimpl();
 
     void startNewShare (std::function<void (bool, const String&)>);
@@ -128,11 +128,11 @@ private:
 
     class PrepareImagesThread;
     friend class PrepareImagesThread;
-    ScopedPointer<PrepareImagesThread> prepareImagesThread;
+    std::unique_ptr<PrepareImagesThread> prepareImagesThread;
 
     class PrepareDataThread;
     friend class PrepareDataThread;
-    ScopedPointer<PrepareDataThread> prepareDataThread;
+    std::unique_ptr<PrepareDataThread> prepareDataThread;
 
     void filesToSharePrepared();
   #endif

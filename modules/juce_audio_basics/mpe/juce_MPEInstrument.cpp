@@ -2150,7 +2150,7 @@ private:
 
         bool lastSustainPedalValueReceived, lastSostenutoPedalValueReceived;
         MPEValue lastMPEValueReceived;
-        ScopedPointer<MPENote> lastNoteFinished;
+        std::unique_ptr<MPENote> lastNoteFinished;
 
     private:
         //==============================================================================

@@ -314,7 +314,7 @@ private:
 
     void writeMainProjectFile()
     {
-        ScopedPointer<XmlElement> xml (project.getProjectRoot().createXml());
+        std::unique_ptr<XmlElement> xml (project.getProjectRoot().createXml());
         jassert (xml != nullptr);
 
         if (xml != nullptr)
@@ -704,7 +704,7 @@ private:
 
     private:
         ProjectSaver& owner;
-        ScopedPointer<ProjectExporter> exporter;
+        std::unique_ptr<ProjectExporter> exporter;
         const OwnedArray<LibraryModule>& modules;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ExporterJob)

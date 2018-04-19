@@ -677,7 +677,7 @@ private:
         static Colour getBackgroundColour() { return Colour (0xcb5c7879); }
     };
 
-    ScopedPointer<LiteralHighlightOverlay> overlay;
+    std::unique_ptr<LiteralHighlightOverlay> overlay;
 };
 
 //==============================================================================

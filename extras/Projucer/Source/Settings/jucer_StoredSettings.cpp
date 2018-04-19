@@ -111,7 +111,7 @@ void StoredSettings::updateKeyMappings()
 
     if (auto* commandManager = ProjucerApplication::getApp().commandManager.get())
     {
-        const ScopedPointer<XmlElement> keys (commandManager->getKeyMappings()->createXml (true));
+        const std::unique_ptr<XmlElement> keys (commandManager->getKeyMappings()->createXml (true));
 
         if (keys != nullptr)
             getGlobalProperties().setValue ("keyMappings", keys.get());
@@ -132,11 +132,13 @@ void StoredSettings::reload()
     propertyFiles.clear();
     propertyFiles.add (createPropsFile ("Projucer", false));
 
-    ScopedPointer<XmlElement> projectDefaultsXml (propertyFiles.getFirst()->getXmlValue ("PROJECT_DEFAULT_SETTINGS"));
+    std::unique_ptr<XmlElement> projectDefaultsXml (propertyFiles.getFirst()->getXmlValue ("PROJECT_DEFAULT_SETTINGS"));
+
     if (projectDefaultsXml != nullptr)
         projectDefaults = ValueTree::fromXml (*projectDefaultsXml);
 
-    ScopedPointer<XmlElement> fallbackPathsXml (propertyFiles.getFirst()->getXmlValue ("FALLBACK_PATHS"));
+    std::unique_ptr<XmlElement> fallbackPathsXml (propertyFiles.getFirst()->getXmlValue ("FALLBACK_PATHS"));
+
     if (fallbackPathsXml != nullptr)
         fallbackPaths = ValueTree::fromXml (*fallbackPathsXml);
 

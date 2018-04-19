@@ -27,10 +27,6 @@
 namespace juce
 {
 
-template <> struct ContainerDeletePolicy<UIActivityViewController>                          { static void destroy (NSObject* o) { [o release]; } };
-template <> struct ContainerDeletePolicy<NSObject<UIPopoverPresentationControllerDelegate>> { static void destroy (NSObject* o) { [o release]; } };
-
-//==============================================================================
 class ContentSharer::ContentSharerNativeImpl    : public ContentSharer::Pimpl,
                                                   private Component
 {
@@ -39,7 +35,7 @@ public:
         : owner (cs)
     {
         static PopoverDelegateClass cls;
-        popoverDelegate = [cls.createInstance() init];
+        popoverDelegate.reset ([cls.createInstance() init]);
     }
 
     ~ContentSharerNativeImpl()
@@ -104,8 +100,8 @@ private:
             return;
         }
 
-        controller = [[UIActivityViewController alloc] initWithActivityItems: items
-                                                       applicationActivities: nil];
+        controller.reset ([[UIActivityViewController alloc] initWithActivityItems: items
+                                                            applicationActivities: nil]);
 
         controller.get().excludedActivityTypes = nil;
 
@@ -167,7 +163,7 @@ private:
             }
 
             if (auto* parentController = peer->controller)
-                [parentController showViewController: controller sender: parentController];
+                [parentController showViewController: controller.get() sender: parentController];
 
             if (peer->view.window != nil)
                 peer->view.window.autoresizesSubviews = YES;
@@ -198,8 +194,8 @@ private:
 
     ContentSharer& owner;
     UIViewComponentPeer* peer = nullptr;
-    ScopedPointer<UIActivityViewController> controller;
-    ScopedPointer<NSObject<UIPopoverPresentationControllerDelegate>> popoverDelegate;
+    std::unique_ptr<UIActivityViewController, NSObjectDeleter> controller;
+    std::unique_ptr<NSObject<UIPopoverPresentationControllerDelegate>, NSObjectDeleter> popoverDelegate;
 
     bool succeeded = false;
     String errorDescription;

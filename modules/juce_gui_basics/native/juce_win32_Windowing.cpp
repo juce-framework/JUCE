@@ -1564,10 +1564,10 @@ public:
 
 private:
     HWND hwnd, parentToAddTo;
-    ScopedPointer<DropShadower> shadower;
+    std::unique_ptr<DropShadower> shadower;
     RenderingEngineType currentRenderingEngine;
    #if JUCE_DIRECT2D
-    ScopedPointer<Direct2DLowLevelGraphicsContext> direct2DContext;
+    std::unique_ptr<Direct2DLowLevelGraphicsContext> direct2DContext;
    #endif
     uint32 lastPaintTime = 0;
     ULONGLONG lastMagnifySize = 0;
@@ -2079,7 +2079,7 @@ private:
                         offscreenImage.clear (i);
 
                 {
-                    ScopedPointer<LowLevelGraphicsContext> context (component.getLookAndFeel()
+                    std::unique_ptr<LowLevelGraphicsContext> context (component.getLookAndFeel()
                                                                         .createGraphicsContext (offscreenImage, Point<int> (-x, -y), contextClip));
                     handlePaint (*context);
                 }
@@ -2119,7 +2119,7 @@ private:
         if (currentRenderingEngine != direct2DRenderingEngine)
             direct2DContext = nullptr;
         else if (direct2DContext == nullptr)
-            direct2DContext = new Direct2DLowLevelGraphicsContext (hwnd);
+            direct2DContext.reset (new Direct2DLowLevelGraphicsContext (hwnd));
     }
    #endif
 
@@ -3791,7 +3791,7 @@ private:
     UINT flags;
     HWND owner;
     String title, message;
-    ScopedPointer<ModalComponentManager::Callback> callback;
+    std::unique_ptr<ModalComponentManager::Callback> callback;
 
     static UINT getMessageBoxFlags (AlertWindow::AlertIconType iconType) noexcept
     {
@@ -3837,8 +3837,8 @@ bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType
                                                       Component* associatedComponent,
                                                       ModalComponentManager::Callback* callback)
 {
-    ScopedPointer<WindowsMessageBox> mb (new WindowsMessageBox (iconType, title, message, associatedComponent,
-                                                                MB_OKCANCEL, callback, callback != nullptr));
+    std::unique_ptr<WindowsMessageBox> mb (new WindowsMessageBox (iconType, title, message, associatedComponent,
+                                                                  MB_OKCANCEL, callback, callback != nullptr));
     if (callback == nullptr)
         return mb->getResult() != 0;
 
@@ -3851,8 +3851,8 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconTy
                                                         Component* associatedComponent,
                                                         ModalComponentManager::Callback* callback)
 {
-    ScopedPointer<WindowsMessageBox> mb (new WindowsMessageBox (iconType, title, message, associatedComponent,
-                                                                MB_YESNOCANCEL, callback, callback != nullptr));
+    std::unique_ptr<WindowsMessageBox> mb (new WindowsMessageBox (iconType, title, message, associatedComponent,
+                                                                  MB_YESNOCANCEL, callback, callback != nullptr));
     if (callback == nullptr)
         return mb->getResult();
 
@@ -3865,8 +3865,8 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoBox (AlertWindow::AlertIconType ico
                                                   Component* associatedComponent,
                                                   ModalComponentManager::Callback* callback)
 {
-    ScopedPointer<WindowsMessageBox> mb (new WindowsMessageBox (iconType, title, message, associatedComponent,
-                                                                MB_YESNO, callback, callback != nullptr));
+    std::unique_ptr<WindowsMessageBox> mb (new WindowsMessageBox (iconType, title, message, associatedComponent,
+                                                                  MB_YESNO, callback, callback != nullptr));
     if (callback == nullptr)
         return mb->getResult();
 
@@ -3930,7 +3930,7 @@ public:
     }
 };
 
-static ScopedPointer<ScreenSaverDefeater> screenSaverDefeater;
+static std::unique_ptr<ScreenSaverDefeater> screenSaverDefeater;
 
 void Desktop::setScreenSaverEnabled (const bool isEnabled)
 {

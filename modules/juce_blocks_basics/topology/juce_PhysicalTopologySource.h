@@ -80,7 +80,7 @@ private:
     //==========================================================================
     struct Internal;
     struct DetectorHolder;
-    juce::ScopedPointer<DetectorHolder> detector;
+    std::unique_ptr<DetectorHolder> detector;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PhysicalTopologySource)
 };

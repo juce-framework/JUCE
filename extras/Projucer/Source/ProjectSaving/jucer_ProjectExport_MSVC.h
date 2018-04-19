@@ -684,7 +684,7 @@ public:
                          ->addTextElement (postBuild);
             }
 
-            ScopedPointer<XmlElement> otherFilesGroup (new XmlElement ("ItemGroup"));
+            std::unique_ptr<XmlElement> otherFilesGroup (new XmlElement ("ItemGroup"));
 
             {
                 auto* cppFiles    = projectXml.createNewChildElement ("ItemGroup");
@@ -879,7 +879,7 @@ public:
             auto* groupsXml  = filterXml.createNewChildElement ("ItemGroup");
             auto* cpps       = filterXml.createNewChildElement ("ItemGroup");
             auto* headers    = filterXml.createNewChildElement ("ItemGroup");
-            ScopedPointer<XmlElement> otherFilesGroup (new XmlElement ("ItemGroup"));
+            std::unique_ptr<XmlElement> otherFilesGroup (new XmlElement ("ItemGroup"));
 
             for (int i = 0; i < getOwner().getAllGroups().size(); ++i)
             {

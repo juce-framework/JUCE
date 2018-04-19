@@ -595,7 +595,7 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
 
         if (peer != nullptr)
         {
-            ScopedPointer<ComponentPeer> oldPeerToDelete (peer);
+            std::unique_ptr<ComponentPeer> oldPeerToDelete (peer);
 
             wasFullscreen = peer->isFullScreen();
             wasMinimised = peer->isMinimised();
@@ -2705,7 +2705,7 @@ void Component::grabFocusInternal (FocusChangeType cause, bool canTryParent)
             else
             {
                 // find the default child component..
-                ScopedPointer<KeyboardFocusTraverser> traverser (createFocusTraverser());
+                std::unique_ptr<KeyboardFocusTraverser> traverser (createFocusTraverser());
 
                 if (traverser != nullptr)
                 {
@@ -2753,7 +2753,7 @@ void Component::moveKeyboardFocusToSibling (bool moveToNext)
 
     if (parentComponent != nullptr)
     {
-        ScopedPointer<KeyboardFocusTraverser> traverser (createFocusTraverser());
+        std::unique_ptr<KeyboardFocusTraverser> traverser (createFocusTraverser());
 
         if (traverser != nullptr)
         {

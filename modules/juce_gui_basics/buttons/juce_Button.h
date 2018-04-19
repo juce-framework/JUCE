@@ -484,7 +484,7 @@ private:
     struct CallbackHelper;
     friend struct CallbackHelper;
     friend struct ContainerDeletePolicy<CallbackHelper>;
-    ScopedPointer<CallbackHelper> callbackHelper;
+    std::unique_ptr<CallbackHelper> callbackHelper;
     uint32 buttonPressTime = 0, lastRepeatTime = 0;
     ApplicationCommandManager* commandManagerToUse = nullptr;
     int autoRepeatDelay = -1, autoRepeatSpeed = 0, autoRepeatMinimumDelay = -1;

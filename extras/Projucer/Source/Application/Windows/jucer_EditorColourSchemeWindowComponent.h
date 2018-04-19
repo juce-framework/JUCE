@@ -60,7 +60,7 @@ public:
     }
 
 private:
-    ScopedPointer<Component> content;
+    std::unique_ptr<Component> content;
 
     //==============================================================================
     struct AppearanceEditor

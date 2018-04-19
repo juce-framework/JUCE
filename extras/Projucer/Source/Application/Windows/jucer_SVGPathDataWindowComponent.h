@@ -163,7 +163,7 @@ public:
         dragOver = false;
         repaint();
 
-        ScopedPointer<XmlElement> element (XmlDocument::parse (File (files[0])));
+        std::unique_ptr<XmlElement> element (XmlDocument::parse (File (files[0])));
 
         if (element != nullptr)
         {

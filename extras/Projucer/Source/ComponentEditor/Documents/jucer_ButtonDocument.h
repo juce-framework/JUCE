@@ -67,6 +67,6 @@ public:
                              StringArray& initialContents) const;
 
     //==============================================================================
-    ScopedPointer<PaintRoutine> paintRoutines[7];
+    std::unique_ptr<PaintRoutine> paintRoutines[7];
     bool paintStatesEnabled [7];
 };

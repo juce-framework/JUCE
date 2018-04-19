@@ -53,10 +53,10 @@ public:
 private:
     std::function<void(bool)> demoChangedCallback;
 
-    ScopedPointer<DemoContent> demoContent;
+    std::unique_ptr<DemoContent> demoContent;
 
    #if ! (JUCE_ANDROID || JUCE_IOS)
-    ScopedPointer<CodeContent> codeContent;
+    std::unique_ptr<CodeContent> codeContent;
    #endif
 
     String currentDemoCategory;

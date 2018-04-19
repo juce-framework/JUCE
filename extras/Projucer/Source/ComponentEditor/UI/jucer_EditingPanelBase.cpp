@@ -54,7 +54,7 @@ public:
 
 private:
     double scaleFactor = 1.0;
-    ScopedPointer<Component> content;
+    std::unique_ptr<Component> content;
 };
 
 //==============================================================================
@@ -93,7 +93,7 @@ public:
             else
             {
                 for (int i = getNumChildComponents(); --i >= 0;)
-                    ScopedPointer<DraggerOverlayComp> deleter (dynamic_cast<DraggerOverlayComp*> (getChildComponent (i)));
+                    std::unique_ptr<DraggerOverlayComp> deleter (dynamic_cast<DraggerOverlayComp*> (getChildComponent (i)));
             }
         }
     }

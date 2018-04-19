@@ -604,7 +604,7 @@ namespace AAXClasses
                 }
             }
 
-            ScopedPointer<AudioProcessorEditor> pluginEditor;
+            std::unique_ptr<AudioProcessorEditor> pluginEditor;
             JuceAAX_GUI& owner;
 
            #if JUCE_WINDOWS
@@ -616,7 +616,7 @@ namespace AAXClasses
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentWrapperComponent)
         };
 
-        ScopedPointer<ContentWrapperComponent> component;
+        std::unique_ptr<ContentWrapperComponent> component;
         ScopedJuceInitialiser_GUI libraryInitialiser;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceAAX_GUI)
@@ -1760,7 +1760,7 @@ namespace AAXClasses
         //==============================================================================
         ScopedJuceInitialiser_GUI libraryInitialiser;
 
-        ScopedPointer<AudioProcessor> pluginInstance;
+        std::unique_ptr<AudioProcessor> pluginInstance;
 
         bool isPrepared = false;
         MidiBuffer midiBuffer;
@@ -1778,7 +1778,7 @@ namespace AAXClasses
         Array<String> aaxParamIDs;
         HashMap<int32, AudioProcessorParameter*> paramMap;
         LegacyAudioParametersWrapper juceParameters;
-        ScopedPointer<AudioProcessorParameter> ownedBypassParameter;
+        std::unique_ptr<AudioProcessorParameter> ownedBypassParameter;
 
         Array<AudioProcessorParameter*> aaxMeters;
 
@@ -2032,7 +2032,7 @@ namespace AAXClasses
 
             if (featureInfo->SupportLevel (supportLevel) == AAX_SUCCESS && supportLevel == AAX_eSupportLevel_ByProperty)
             {
-                ScopedPointer<const AAX_IPropertyMap> props (featureInfo->AcquireProperties());
+                std::unique_ptr<const AAX_IPropertyMap> props (featureInfo->AcquireProperties());
 
                 // Due to a bug in ProTools 12.8, ProTools thinks that AAX_eStemFormat_Ambi_1_ACN is not supported
                 // To workaround this bug, check if ProTools supports AAX_eStemFormat_Ambi_2_ACN, and, if yes,
@@ -2051,7 +2051,7 @@ namespace AAXClasses
     static void getPlugInDescription (AAX_IEffectDescriptor& descriptor, const AAX_IFeatureInfo* featureInfo)
     {
         PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_AAX;
-        ScopedPointer<AudioProcessor> plugin (createPluginFilterOfType (AudioProcessor::wrapperType_AAX));
+        std::unique_ptr<AudioProcessor> plugin (createPluginFilterOfType (AudioProcessor::wrapperType_AAX));
         auto numInputBuses  = plugin->getBusCount (true);
         auto numOutputBuses = plugin->getBusCount (false);
 
@@ -2137,7 +2137,7 @@ AAX_Result JUCE_CDECL GetEffectDescriptions (AAX_ICollection* collection)
 {
     ScopedJuceInitialiser_GUI libraryInitialiser;
 
-    ScopedPointer<const AAX_IFeatureInfo> stemFormatFeatureInfo;
+    std::unique_ptr<const AAX_IFeatureInfo> stemFormatFeatureInfo;
 
     if (const auto* hostDescription = collection->DescriptionHost())
         stemFormatFeatureInfo.reset (hostDescription->AcquireFeatureProperties (AAXATTR_ClientFeature_StemFormat));

@@ -131,7 +131,7 @@ public:
     }
 
 private:
-    ScopedPointer<DemoBrowserComponent> webView;
+    std::unique_ptr<DemoBrowserComponent> webView;
 
     TextEditor addressTextBox;
 

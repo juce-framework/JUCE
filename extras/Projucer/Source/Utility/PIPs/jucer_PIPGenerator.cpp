@@ -138,7 +138,7 @@ Result PIPGenerator::createJucerFile()
 
     auto outputFile = outputDirectory.getChildFile (metadata[Ids::name].toString() + ".jucer");
 
-    ScopedPointer<XmlElement> xml (root.createXml());
+    std::unique_ptr<XmlElement> xml (root.createXml());
 
     if (xml->writeToFile (outputFile, {}))
         return Result::ok();
@@ -509,8 +509,8 @@ String PIPGenerator::getMainFileTextForType()
         mainTemplate = mainTemplate.replace ("%%project_name%%",    metadata[Ids::name].toString());
         mainTemplate = mainTemplate.replace ("%%project_version%%", metadata[Ids::version].toString());
 
-        return ensureCorrectWhitespace (mainTemplate.replace ("%%startup%%", "mainWindow = new MainWindow (" + metadata[Ids::name].toString().quoted()
-                                                            + ", new " + metadata[Ids::mainClass].toString() + "(), *this);")
+        return ensureCorrectWhitespace (mainTemplate.replace ("%%startup%%", "mainWindow.reset (new MainWindow (" + metadata[Ids::name].toString().quoted()
+                                                            + ", new " + metadata[Ids::mainClass].toString() + "(), *this));")
                                                     .replace ("%%shutdown%%", "mainWindow = nullptr;"));
     }
     else if (type == "AudioProcessor")

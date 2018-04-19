@@ -466,7 +466,7 @@ public:
 private:
     AudioProcessorParameter& parameter;
     Label parameterName, parameterLabel;
-    ScopedPointer<Component> parameterComp;
+    std::unique_ptr<Component> parameterComp;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParameterDisplayComponent)
 };

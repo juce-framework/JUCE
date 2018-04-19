@@ -110,7 +110,7 @@ struct OpenGLDemoClasses
             if (textureCoordIn.get() != nullptr)  openGLContext.extensions.glDisableVertexAttribArray (textureCoordIn->attributeID);
         }
 
-        ScopedPointer<OpenGLShaderProgram::Attribute> position, normal, sourceColour, textureCoordIn;
+        std::unique_ptr<OpenGLShaderProgram::Attribute> position, normal, sourceColour, textureCoordIn;
 
     private:
         static OpenGLShaderProgram::Attribute* createAttribute (OpenGLContext& openGLContext,
@@ -137,7 +137,7 @@ struct OpenGLDemoClasses
             bouncingNumber  .reset (createUniform (openGLContext, shader, "bouncingNumber"));
         }
 
-        ScopedPointer<OpenGLShaderProgram::Uniform> projectionMatrix, viewMatrix, texture, lightPosition, bouncingNumber;
+        std::unique_ptr<OpenGLShaderProgram::Uniform> projectionMatrix, viewMatrix, texture, lightPosition, bouncingNumber;
 
     private:
         static OpenGLShaderProgram::Uniform* createUniform (OpenGLContext& openGLContext,
@@ -775,7 +775,7 @@ struct OpenGLDemoClasses
         void drawBackground2DStuff (float desktopScale)
         {
             // Create an OpenGLGraphicsContext that will draw into this GL window..
-            ScopedPointer<LowLevelGraphicsContext> glRenderer (createOpenGLGraphicsContext (openGLContext,
+            std::unique_ptr<LowLevelGraphicsContext> glRenderer (createOpenGLGraphicsContext (openGLContext,
                                                                                               roundToInt (desktopScale * getWidth()),
                                                                                               roundToInt (desktopScale * getHeight())));
 
@@ -810,14 +810,14 @@ struct OpenGLDemoClasses
 
         OpenGLContext openGLContext;
 
-        ScopedPointer<DemoControlsOverlay> controlsOverlay;
+        std::unique_ptr<DemoControlsOverlay> controlsOverlay;
 
         float rotation = 0.0f;
 
-        ScopedPointer<OpenGLShaderProgram> shader;
-        ScopedPointer<Shape> shape;
-        ScopedPointer<Attributes> attributes;
-        ScopedPointer<Uniforms> uniforms;
+        std::unique_ptr<OpenGLShaderProgram> shader;
+        std::unique_ptr<Shape> shape;
+        std::unique_ptr<Attributes> attributes;
+        std::unique_ptr<Uniforms> uniforms;
 
         OpenGLTexture texture;
         DemoTexture* textureToUse = nullptr;
@@ -837,7 +837,7 @@ struct OpenGLDemoClasses
         {
             if (newVertexShader.isNotEmpty() || newFragmentShader.isNotEmpty())
             {
-                ScopedPointer<OpenGLShaderProgram> newShader (new OpenGLShaderProgram (openGLContext));
+                std::unique_ptr<OpenGLShaderProgram> newShader (new OpenGLShaderProgram (openGLContext));
 
                 if (newShader->addVertexShader (OpenGLHelpers::translateVertexShaderToV3 (newVertexShader))
                       && newShader->addFragmentShader (OpenGLHelpers::translateFragmentShaderToV3 (newFragmentShader))

@@ -54,7 +54,7 @@ struct DemoContent    : public Component
     void showHomeScreen()                       { setComponent (createIntroDemo()); }
 
 private:
-    ScopedPointer<Component> comp;
+    std::unique_ptr<Component> comp;
 };
 
 //==============================================================================

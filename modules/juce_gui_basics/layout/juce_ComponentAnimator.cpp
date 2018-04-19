@@ -182,7 +182,7 @@ public:
     };
 
     WeakReference<Component> component;
-    ScopedPointer<Component> proxy;
+    std::unique_ptr<Component> proxy;
 
     Rectangle<int> destination;
     double destAlpha;

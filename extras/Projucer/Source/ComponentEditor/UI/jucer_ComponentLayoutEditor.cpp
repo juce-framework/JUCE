@@ -201,7 +201,7 @@ void ComponentLayoutEditor::refreshAllComponents()
 {
     for (int i = getNumChildComponents(); --i >= 0;)
     {
-        ScopedPointer<ComponentOverlayComponent> overlay (dynamic_cast<ComponentOverlayComponent*> (getChildComponent (i)));
+        std::unique_ptr<ComponentOverlayComponent> overlay (dynamic_cast<ComponentOverlayComponent*> (getChildComponent (i)));
 
         if (overlay != nullptr && layout.containsComponent (overlay->target))
             overlay.release();

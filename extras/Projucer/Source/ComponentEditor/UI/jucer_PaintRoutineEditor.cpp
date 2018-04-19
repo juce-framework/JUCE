@@ -264,7 +264,7 @@ void PaintRoutineEditor::filesDropped (const StringArray& filenames, int x, int 
 
     if (f.existsAsFile())
     {
-        ScopedPointer<Drawable> d (Drawable::createFromImageFile (f));
+        std::unique_ptr<Drawable> d (Drawable::createFromImageFile (f));
 
         if (d != nullptr)
         {

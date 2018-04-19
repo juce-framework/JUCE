@@ -369,7 +369,7 @@ public:
 
 private:
     //==============================================================================
-    ScopedPointer<Drawable> folderImage, documentImage;
+    std::unique_ptr<Drawable> folderImage, documentImage;
 
     void drawShinyButtonShape (Graphics&,
                                float x, float y, float w, float h, float maxCornerSize,

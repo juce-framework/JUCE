@@ -92,7 +92,7 @@ public:
     bool isDoublePrecisionProcessing();
     void updatePrecisionMenuItem (ApplicationCommandInfo& info);
 
-    ScopedPointer<GraphDocumentComponent> graphHolder;
+    std::unique_ptr<GraphDocumentComponent> graphHolder;
 
 private:
     //==============================================================================
@@ -104,7 +104,7 @@ private:
     KnownPluginList::SortMethod pluginSortMethod;
 
     class PluginListWindow;
-    ScopedPointer<PluginListWindow> pluginListWindow;
+    std::unique_ptr<PluginListWindow> pluginListWindow;
 
     void showAudioSettings();
 

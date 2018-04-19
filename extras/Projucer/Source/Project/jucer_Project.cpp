@@ -555,7 +555,7 @@ static void forgetRecentFile (const File& file)
 //==============================================================================
 Result Project::loadDocument (const File& file)
 {
-    ScopedPointer<XmlElement> xml (XmlDocument::parse (file));
+    std::unique_ptr<XmlElement> xml (XmlDocument::parse (file));
 
     if (xml == nullptr || ! xml->hasTagName (Ids::JUCERPROJECT.toString()))
         return Result::fail ("Not a valid Jucer project!");
@@ -669,7 +669,7 @@ void Project::moveTemporaryDirectory (const File& newParentDirectory)
 
 bool Project::saveProjectRootToFile()
 {
-    ScopedPointer<XmlElement> xml (projectRoot.createXml());
+    std::unique_ptr<XmlElement> xml (projectRoot.createXml());
 
     if (xml == nullptr)
     {
@@ -1860,7 +1860,7 @@ ProjectExporter* Project::createExporter (int index)
 
 void Project::addNewExporter (const String& exporterName)
 {
-    ScopedPointer<ProjectExporter> exp (ProjectExporter::createNewExporter (*this, exporterName));
+    std::unique_ptr<ProjectExporter> exp (ProjectExporter::createNewExporter (*this, exporterName));
 
     exp->getTargetLocationValue() = exp->getTargetLocationString()
                                        + getUniqueTargetFolderSuffixForExporter (exp->getName(), exp->getTargetLocationString());

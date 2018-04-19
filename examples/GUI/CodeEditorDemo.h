@@ -104,7 +104,7 @@ private:
     CPlusPlusCodeTokeniser cppTokeniser;
 
     // the editor component
-    ScopedPointer<CodeEditorComponent> editor;
+    std::unique_ptr<CodeEditorComponent> editor;
 
     FilenameComponent fileChooser { "File", {}, true, false, false, "*.cpp;*.h;*.hpp;*.c;*.mm;*.m", {},
                                     "Choose a C++ file to open it in the editor" };

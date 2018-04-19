@@ -313,7 +313,7 @@ private:
         }
 
         String deviceName;
-        ScopedPointer<MidiInCollector> collector;
+        std::unique_ptr<MidiInCollector> collector;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowsInputWrapper)
     };
@@ -1055,11 +1055,11 @@ public:
         if (midiOutFactory == nullptr)
             throw std::runtime_error ("Failed to create midi out factory");
 
-        inputDeviceWatcher  = new MidiIODeviceWatcher<IMidiInPortStatics>  (midiInFactory);
+        inputDeviceWatcher.reset (new MidiIODeviceWatcher<IMidiInPortStatics> (midiInFactory));
         if (! inputDeviceWatcher->start())
             throw std::runtime_error ("Failed to start midi input device watcher");
 
-        outputDeviceWatcher = new MidiIODeviceWatcher<IMidiOutPortStatics> (midiOutFactory);
+        outputDeviceWatcher.reset (new MidiIODeviceWatcher<IMidiOutPortStatics> (midiOutFactory));
         if (! outputDeviceWatcher->start())
             throw std::runtime_error ("Failed to start midi output device watcher");
     }
@@ -1093,8 +1093,8 @@ public:
     ComSmartPtr<IMidiInPortStatics>  midiInFactory;
     ComSmartPtr<IMidiOutPortStatics> midiOutFactory;
 
-    ScopedPointer<MidiIODeviceWatcher<IMidiInPortStatics>>  inputDeviceWatcher;
-    ScopedPointer<MidiIODeviceWatcher<IMidiOutPortStatics>> outputDeviceWatcher;
+    std::unique_ptr<MidiIODeviceWatcher<IMidiInPortStatics>>  inputDeviceWatcher;
+    std::unique_ptr<MidiIODeviceWatcher<IMidiOutPortStatics>> outputDeviceWatcher;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WinRTMidiService)
 };
@@ -1114,7 +1114,7 @@ public:
 private:
     MidiService();
 
-    ScopedPointer<MidiServiceType> internal;
+    std::unique_ptr<MidiServiceType> internal;
 };
 
 JUCE_IMPLEMENT_SINGLETON (MidiService)
@@ -1166,8 +1166,8 @@ MidiInput* MidiInput::openDevice (const int index, MidiInputCallback* const call
     if (callback == nullptr)
         return nullptr;
 
-    ScopedPointer<MidiInput> in (new MidiInput (String()));
-    ScopedPointer<MidiServiceType::InputWrapper> wrapper;
+    std::unique_ptr<MidiInput> in (new MidiInput (String()));
+    std::unique_ptr<MidiServiceType::InputWrapper> wrapper;
 
     try
     {
@@ -1204,7 +1204,7 @@ int MidiOutput::getDefaultDeviceIndex()
 
 MidiOutput* MidiOutput::openDevice (const int index)
 {
-    ScopedPointer<MidiServiceType::OutputWrapper> wrapper;
+    std::unique_ptr<MidiServiceType::OutputWrapper> wrapper;
 
     try
     {
@@ -1215,7 +1215,7 @@ MidiOutput* MidiOutput::openDevice (const int index)
         return nullptr;
     }
 
-    ScopedPointer<MidiOutput> out (new MidiOutput (wrapper->getDeviceName()));
+    std::unique_ptr<MidiOutput> out (new MidiOutput (wrapper->getDeviceName()));
     out->internal = wrapper.release();
     return out.release();
 }

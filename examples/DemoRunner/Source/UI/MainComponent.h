@@ -58,7 +58,7 @@ private:
     void updateRenderingEngine (int index);
 
     //==============================================================================
-    ScopedPointer<DemoContentComponent> contentComponent;
+    std::unique_ptr<DemoContentComponent> contentComponent;
     SidePanel demosPanel  { "Demos", 250, true };
 
     OpenGLContext openGLContext;

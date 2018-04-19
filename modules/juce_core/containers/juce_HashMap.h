@@ -144,7 +144,7 @@ public:
 
             while (h != nullptr)
             {
-                const ScopedPointer<HashEntry> deleter (h);
+                const std::unique_ptr<HashEntry> deleter (h);
                 h = h->nextEntry;
             }
 
@@ -241,7 +241,7 @@ public:
         {
             if (entry->key == keyToRemove)
             {
-                const ScopedPointer<HashEntry> deleter (entry);
+                const std::unique_ptr<HashEntry> deleter (entry);
 
                 entry = entry->nextEntry;
 
@@ -274,7 +274,7 @@ public:
             {
                 if (entry->value == valueToRemove)
                 {
-                    const ScopedPointer<HashEntry> deleter (entry);
+                    const std::unique_ptr<HashEntry> deleter (entry);
 
                     entry = entry->nextEntry;
 

@@ -217,7 +217,7 @@ private:
     int64 pos = 0;
     int headerSize = 0;
     InputStream* inputStream;
-    ScopedPointer<InputStream> streamToDelete;
+    std::unique_ptr<InputStream> streamToDelete;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ZipInputStream)
 };
@@ -338,7 +338,7 @@ void ZipFile::sortEntriesByFilename()
 //==============================================================================
 void ZipFile::init()
 {
-    ScopedPointer<InputStream> toDelete;
+    std::unique_ptr<InputStream> toDelete;
     InputStream* in = inputStream;
 
     if (inputSource != nullptr)
@@ -417,7 +417,7 @@ Result ZipFile::uncompressEntry (int index, const File& targetDirectory, bool sh
     if (entryPath.endsWithChar ('/') || entryPath.endsWithChar ('\\'))
         return targetFile.createDirectory(); // (entry is a directory, not a file)
 
-    ScopedPointer<InputStream> in (createStreamForEntry (index));
+    std::unique_ptr<InputStream> in (createStreamForEntry (index));
 
     if (in == nullptr)
         return Result::fail ("Failed to open the zip file for reading");
@@ -523,7 +523,7 @@ struct ZipFile::Builder::Item
 
 private:
     const File file;
-    ScopedPointer<InputStream> stream;
+    std::unique_ptr<InputStream> stream;
     String storedPathname;
     Time fileTime;
     int64 compressedSize = 0, uncompressedSize = 0, headerStart = 0;
@@ -674,7 +674,7 @@ struct ZIPTests   : public UnitTest
         for (auto& entryName : entryNames)
         {
             auto* entry = zip.getEntry (entryName);
-            ScopedPointer<InputStream> input (zip.createStreamForEntry (*entry));
+            std::unique_ptr<InputStream> input (zip.createStreamForEntry (*entry));
             expectEquals (input->readEntireStreamAsString(), entryName);
         }
     }

@@ -76,7 +76,7 @@ public:
         {
             // Create an OutputStream to write to our destination file...
             file.deleteFile();
-            ScopedPointer<FileOutputStream> fileStream (file.createOutputStream());
+            std::unique_ptr<FileOutputStream> fileStream (file.createOutputStream());
 
             if (fileStream.get() != nullptr)
             {
@@ -159,7 +159,7 @@ public:
 private:
     AudioThumbnail& thumbnail;
     TimeSliceThread backgroundThread  { "Audio Recorder Thread" }; // the thread that will write our audio data to disk
-    ScopedPointer<AudioFormatWriter::ThreadedWriter> threadedWriter; // the FIFO used to buffer the incoming data
+    std::unique_ptr<AudioFormatWriter::ThreadedWriter> threadedWriter; // the FIFO used to buffer the incoming data
     double sampleRate   = 0.0;
     int64 nextSampleNum = 0;
 

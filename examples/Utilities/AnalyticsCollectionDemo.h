@@ -211,7 +211,7 @@ private:
         // method is called on app shutdown so it needs to complete quickly!
 
         XmlDocument previouslySavedEvents (savedEventsFile);
-        ScopedPointer<XmlElement> xml (previouslySavedEvents.getDocumentElement());
+        std::unique_ptr<XmlElement> xml (previouslySavedEvents.getDocumentElement());
 
         if (xml.get() == nullptr || xml->getTagName() != "events")
             xml.reset (new XmlElement ("events"));
@@ -247,7 +247,7 @@ private:
     void restoreUnloggedEvents (std::deque<AnalyticsEvent>& restoredEventQueue) override
     {
         XmlDocument savedEvents (savedEventsFile);
-        ScopedPointer<XmlElement> xml (savedEvents.getDocumentElement());
+        std::unique_ptr<XmlElement> xml (savedEvents.getDocumentElement());
 
         if (xml.get() == nullptr || xml->getTagName() != "events")
             return;
@@ -292,7 +292,7 @@ private:
 
     CriticalSection webStreamCreation;
     bool shouldExit = false;
-    ScopedPointer<WebInputStream> webStream;
+    std::unique_ptr<WebInputStream> webStream;
 
     String apiKey;
 
@@ -365,7 +365,7 @@ private:
     }
 
     TextButton eventButton { "Press me!" }, crashButton { "Simulate crash!" };
-    ScopedPointer<ButtonTracker> logEventButtonPress;
+    std::unique_ptr<ButtonTracker> logEventButtonPress;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AnalyticsCollectionDemo)
 };

@@ -323,7 +323,7 @@ private:
     NativeContext* nativeContext = nullptr;
     OpenGLRenderer* renderer = nullptr;
     double currentRenderScale = 1.0;
-    ScopedPointer<Attachment> attachment;
+    std::unique_ptr<Attachment> attachment;
     OpenGLPixelFormat openGLPixelFormat;
     void* contextToShareWith = nullptr;
     OpenGLVersion versionRequired = defaultGLVersion;

@@ -408,7 +408,7 @@ public:
     {
         if (indexToChange >= 0)
         {
-            ScopedPointer<ObjectClass> toDelete;
+            std::unique_ptr<ObjectClass> toDelete;
 
             {
                 const ScopedLockType lock (getLock());
@@ -603,7 +603,7 @@ public:
     */
     void remove (int indexToRemove, bool deleteObject = true)
     {
-        ScopedPointer<ObjectClass> toDelete;
+        std::unique_ptr<ObjectClass> toDelete;
 
         {
             const ScopedLockType lock (getLock());

@@ -143,7 +143,7 @@ private:
     AudioDeviceManager& audioDeviceManager { getSharedAudioDeviceManager() };
    #endif
 
-    ScopedPointer<AudioDeviceSelectorComponent> audioSetupComp;
+    std::unique_ptr<AudioDeviceSelectorComponent> audioSetupComp;
     TextEditor diagnosticsBox;
 
     void changeListenerCallback (ChangeBroadcaster*) override

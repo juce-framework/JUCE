@@ -328,7 +328,7 @@ private:
     AbstractFifo fifo;
     AudioBuffer<float> buffer;
     TimeSliceThread& timeSliceThread;
-    ScopedPointer<AudioFormatWriter> writer;
+    std::unique_ptr<AudioFormatWriter> writer;
     CriticalSection thumbnailLock;
     IncomingDataReceiver* receiver;
     int64 samplesWritten;

@@ -181,7 +181,7 @@ public:
             "    gl_FragColor = colour;\n"
             "}\n";
 
-        ScopedPointer<OpenGLShaderProgram> newShader (new OpenGLShaderProgram (openGLContext));
+        std::unique_ptr<OpenGLShaderProgram> newShader (new OpenGLShaderProgram (openGLContext));
         String statusText;
 
         if (newShader->addVertexShader (OpenGLHelpers::translateVertexShaderToV3 (vertexShader))
@@ -265,7 +265,7 @@ private:
             if (textureCoordIn.get() != nullptr) glContext.extensions.glDisableVertexAttribArray (textureCoordIn->attributeID);
         }
 
-        ScopedPointer<OpenGLShaderProgram::Attribute> position, normal, sourceColour, textureCoordIn;
+        std::unique_ptr<OpenGLShaderProgram::Attribute> position, normal, sourceColour, textureCoordIn;
 
     private:
         static OpenGLShaderProgram::Attribute* createAttribute (OpenGLContext& openGLContext,
@@ -289,7 +289,7 @@ private:
             viewMatrix      .reset (createUniform (openGLContext, shaderProgram, "viewMatrix"));
         }
 
-        ScopedPointer<OpenGLShaderProgram::Uniform> projectionMatrix, viewMatrix;
+        std::unique_ptr<OpenGLShaderProgram::Uniform> projectionMatrix, viewMatrix;
 
     private:
         static OpenGLShaderProgram::Uniform* createUniform (OpenGLContext& openGLContext,
@@ -397,10 +397,10 @@ private:
     const char* vertexShader;
     const char* fragmentShader;
 
-    ScopedPointer<OpenGLShaderProgram> shader;
-    ScopedPointer<Shape> shape;
-    ScopedPointer<Attributes> attributes;
-    ScopedPointer<Uniforms> uniforms;
+    std::unique_ptr<OpenGLShaderProgram> shader;
+    std::unique_ptr<Shape> shape;
+    std::unique_ptr<Attributes> attributes;
+    std::unique_ptr<Uniforms> uniforms;
 
     String newVertexShader, newFragmentShader;
 

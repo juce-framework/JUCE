@@ -514,8 +514,8 @@ public:
             }
 
             // convert data from the source to dest format..
-            ScopedPointer<AudioData::Converter> conv (new AudioData::ConverterInstance <AudioData::Pointer<F1, E1, AudioData::NonInterleaved, AudioData::Const>,
-                                                                                        AudioData::Pointer<F2, E2, AudioData::NonInterleaved, AudioData::NonConst>>());
+            std::unique_ptr<AudioData::Converter> conv (new AudioData::ConverterInstance <AudioData::Pointer<F1, E1, AudioData::NonInterleaved, AudioData::Const>,
+                                                                                          AudioData::Pointer<F2, E2, AudioData::NonInterleaved, AudioData::NonConst>>());
             conv->convertSamples (inPlace ? reversed : converted, original, numSamples);
 
             // ..and back again..

@@ -132,11 +132,11 @@ private:
 
     Rectangle<float> huckleberryLogoBounds, juceLogoBounds;
 
-    ScopedPointer<Drawable> juceLogo { Drawable::createFromImageData (BinaryData::juce_icon_png,
-                                                                      BinaryData::juce_icon_pngSize) };
+    std::unique_ptr<Drawable> juceLogo { Drawable::createFromImageData (BinaryData::juce_icon_png,
+                                                                        BinaryData::juce_icon_pngSize) };
 
-    ScopedPointer<Drawable> huckleberryLogo { Drawable::createFromImageData (BinaryData::huckleberry_icon_svg,
-                                                                             BinaryData::huckleberry_icon_svgSize) };
+    std::unique_ptr<Drawable> huckleberryLogo { Drawable::createFromImageData (BinaryData::huckleberry_icon_svg,
+                                                                               BinaryData::huckleberry_icon_svgSize) };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AboutWindowComponent)
 };

@@ -88,7 +88,7 @@ struct ConvolutionDemoDSP
                 auto selectedType = cabinetTypeParameter->getCurrentSelectedID();
                 auto assetName = (selectedType == 2 ? "guitar_amp.wav" : "cassette_recorder.wav");
 
-                ScopedPointer<InputStream> assetInputStream (createAssetInputStream (assetName));
+                std::unique_ptr<InputStream> assetInputStream (createAssetInputStream (assetName));
                 if (assetInputStream != nullptr)
                 {
                     currentCabinetData.reset();

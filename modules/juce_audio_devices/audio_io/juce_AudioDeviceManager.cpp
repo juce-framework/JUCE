@@ -960,7 +960,7 @@ double AudioDeviceManager::LevelMeter::getCurrentLevel() const noexcept
 void AudioDeviceManager::playTestSound()
 {
     { // cunningly nested to swap, unlock and delete in that order.
-        ScopedPointer<AudioBuffer<float>> oldSound;
+        std::unique_ptr<AudioBuffer<float>> oldSound;
 
         {
             const ScopedLock sl (audioCallbackLock);

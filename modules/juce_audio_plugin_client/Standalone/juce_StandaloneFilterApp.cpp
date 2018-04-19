@@ -102,7 +102,7 @@ public:
         mainWindow.reset (createWindow());
 
        #if JUCE_STANDALONE_FILTER_WINDOW_USE_KIOSK_MODE
-        Desktop::getInstance().setKioskModeComponent (mainWindow, false);
+        Desktop::getInstance().setKioskModeComponent (mainWindow.get(), false);
        #endif
 
         mainWindow->setVisible (true);
@@ -133,7 +133,7 @@ public:
 
 protected:
     ApplicationProperties appProperties;
-    ScopedPointer<StandaloneFilterWindow> mainWindow;
+    std::unique_ptr<StandaloneFilterWindow> mainWindow;
 };
 
 } // namespace juce

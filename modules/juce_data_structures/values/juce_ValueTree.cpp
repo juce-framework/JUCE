@@ -995,7 +995,7 @@ ValueTree ValueTree::fromXml (const XmlElement& xml)
 
 String ValueTree::toXmlString() const
 {
-    ScopedPointer<XmlElement> xml (createXml());
+    std::unique_ptr<XmlElement> xml (createXml());
 
     if (xml != nullptr)
         return xml->createDocument ({});
@@ -1155,8 +1155,8 @@ public:
             }
             expect (v1.isEquivalentTo (ValueTree::readFromGZIPData (zipped.getData(), zipped.getDataSize())));
 
-            ScopedPointer<XmlElement> xml1 (v1.createXml());
-            ScopedPointer<XmlElement> xml2 (v2.createCopy().createXml());
+            std::unique_ptr<XmlElement> xml1 (v1.createXml());
+            std::unique_ptr<XmlElement> xml2 (v2.createCopy().createXml());
             expect (xml1->isEquivalentTo (xml2.get(), false));
 
             auto v4 = v2.createCopy();

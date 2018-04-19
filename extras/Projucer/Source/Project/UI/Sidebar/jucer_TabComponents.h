@@ -227,9 +227,9 @@ public:
     TreePanelBase* getTree() const noexcept    { return treeToDisplay.get(); }
 
 private:
-    ScopedPointer<TreePanelBase> treeToDisplay;
-    ScopedPointer<IconButton> addButton, settingsButton;
-    ScopedPointer<FindPanel> findPanel;
+    std::unique_ptr<TreePanelBase> treeToDisplay;
+    std::unique_ptr<IconButton> addButton, settingsButton;
+    std::unique_ptr<FindPanel> findPanel;
 
     void showAddMenu()
     {

@@ -141,29 +141,29 @@ public:
     //==============================================================================
     ProjucerLookAndFeel lookAndFeel;
 
-    ScopedPointer<StoredSettings> settings;
-    ScopedPointer<Icons> icons;
+    std::unique_ptr<StoredSettings> settings;
+    std::unique_ptr<Icons> icons;
 
     struct MainMenuModel;
-    ScopedPointer<MainMenuModel> menuModel;
+    std::unique_ptr<MainMenuModel> menuModel;
 
     MainWindowList mainWindowList;
     OpenDocumentManager openDocumentManager;
-    ScopedPointer<ApplicationCommandManager> commandManager;
+    std::unique_ptr<ApplicationCommandManager> commandManager;
 
-    ScopedPointer<Component> utf8Window, svgPathWindow, aboutWindow, applicationUsageDataWindow,
+    std::unique_ptr<Component> utf8Window, svgPathWindow, aboutWindow, applicationUsageDataWindow,
                              pathsWindow, editorColourSchemeWindow, pipCreatorWindow;
 
-    ScopedPointer<FileLogger> logger;
+    std::unique_ptr<FileLogger> logger;
 
     bool isRunningCommandLine;
-    ScopedPointer<ChildProcessCache> childProcessCache;
-    ScopedPointer<LicenseController> licenseController;
+    std::unique_ptr<ChildProcessCache> childProcessCache;
+    std::unique_ptr<LicenseController> licenseController;
 
 private:
     void* server = nullptr;
 
-    ScopedPointer<LatestVersionChecker> versionChecker;
+    std::unique_ptr<LatestVersionChecker> versionChecker;
     TooltipWindow tooltipWindow;
 
     void loginOrLogout();
@@ -191,7 +191,7 @@ private:
     void launchDemoRunner();
 
     int numExamples = 0;
-    ScopedPointer<AlertWindow> demoRunnerAlert;
+    std::unique_ptr<AlertWindow> demoRunnerAlert;
 
    #if JUCE_LINUX
     ChildProcess makeProcess;
@@ -201,7 +201,7 @@ private:
     void setupAnalytics();
 
     void showSetJUCEPathAlert();
-    ScopedPointer<AlertWindow> pathAlert;
+    std::unique_ptr<AlertWindow> pathAlert;
 
     //==============================================================================
     void setColourScheme (int index, bool saveSetting);

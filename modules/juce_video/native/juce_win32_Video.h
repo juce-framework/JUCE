@@ -343,7 +343,7 @@ private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentWatcher)
     };
 
-    ScopedPointer<ComponentWatcher> componentWatcher;
+    std::unique_ptr<ComponentWatcher> componentWatcher;
 
     //======================================================================
     struct DirectShowContext    : public AsyncUpdater
@@ -689,7 +689,7 @@ private:
         ComSmartPtr<IBasicAudio> basicAudio;
         ComSmartPtr<IBaseFilter> baseFilter;
 
-        ScopedPointer<VideoRenderers::Base> videoRenderer;
+        std::unique_ptr<VideoRenderers::Base> videoRenderer;
 
         bool hasVideo = false, needToUpdateViewport = true, needToRecreateNativeWindow = false;
 
@@ -879,12 +879,12 @@ private:
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeWindow)
         };
 
-        ScopedPointer<NativeWindow> nativeWindow;
+        std::unique_ptr<NativeWindow> nativeWindow;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DirectShowContext)
     };
 
-    ScopedPointer<DirectShowContext> context;
+    std::unique_ptr<DirectShowContext> context;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
 };

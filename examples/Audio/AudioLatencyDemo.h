@@ -391,8 +391,8 @@ private:
     AudioDeviceManager& audioDeviceManager { getSharedAudioDeviceManager (1, 2) };
    #endif
 
-    ScopedPointer<LatencyTester> latencyTester;
-    ScopedPointer<LiveScrollingAudioDisplay> liveAudioScroller;
+    std::unique_ptr<LatencyTester> latencyTester;
+    std::unique_ptr<LiveScrollingAudioDisplay> liveAudioScroller;
 
     TextButton startTestButton  { "Test Latency" };
     TextEditor resultsBox;

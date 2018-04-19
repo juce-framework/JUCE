@@ -400,7 +400,7 @@ private:
     TimeSliceThread thread  { "audio file preview" };
 
    #if (JUCE_ANDROID || JUCE_IOS)
-    ScopedPointer<FileChooser> fileChooser;
+    std::unique_ptr<FileChooser> fileChooser;
     TextButton chooseFileButton {"Choose Audio File...", "Choose an audio file for playback"};
    #else
     DirectoryContentsList directoryList {nullptr, thread};
@@ -410,9 +410,9 @@ private:
     URL currentAudioFile;
     AudioSourcePlayer audioSourcePlayer;
     AudioTransportSource transportSource;
-    ScopedPointer<AudioFormatReaderSource> currentAudioFileSource;
+    std::unique_ptr<AudioFormatReaderSource> currentAudioFileSource;
 
-    ScopedPointer<DemoThumbnailComp> thumbnail;
+    std::unique_ptr<DemoThumbnailComp> thumbnail;
     Label zoomLabel   { {}, "zoom:" },
           explanation { {}, "Select an audio file in the treeview above, and this page will display its waveform, and let you play it.." };
     Slider zoomSlider                   { Slider::LinearHorizontal, Slider::NoTextBox };
@@ -487,7 +487,7 @@ private:
    #if (JUCE_ANDROID || JUCE_IOS)
     void buttonClicked (Button* btn) override
     {
-        if (btn == &chooseFileButton && fileChooser == nullptr)
+        if (btn == &chooseFileButton && fileChooser.get() == nullptr)
         {
             SafePointer<AudioPlaybackDemo> safeThis (this);
 
@@ -504,7 +504,7 @@ private:
 
             if (FileChooser::isPlatformDialogAvailable())
             {
-                fileChooser = new FileChooser ("Select an audio file...", File(), "*.wav;*.mp3;*.aif");
+                fileChooser.reset (new FileChooser ("Select an audio file...", File(), "*.wav;*.mp3;*.aif"));
 
                 fileChooser->launchAsync (FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles,
                                           [safeThis] (const FileChooser& fc) mutable

@@ -421,7 +421,7 @@ private:
     bool vertical, isDraggingThumb = false, autohides = true, userVisibilityFlag = false;
     class ScrollbarButton;
     friend struct ContainerDeletePolicy<ScrollbarButton>;
-    ScopedPointer<ScrollbarButton> upButton, downButton;
+    std::unique_ptr<ScrollbarButton> upButton, downButton;
     ListenerList<Listener> listeners;
 
     void handleAsyncUpdate() override;

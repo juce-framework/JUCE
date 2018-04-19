@@ -2624,7 +2624,7 @@ void LookAndFeel_V2::layoutFileBrowserComponent (FileBrowserComponent& browserCo
 //==============================================================================
 static Drawable* createDrawableFromSVG (const char* data)
 {
-    ScopedPointer<XmlElement> xml (XmlDocument::parse (data));
+    std::unique_ptr<XmlElement> xml (XmlDocument::parse (data));
     jassert (xml != nullptr);
     return Drawable::createFromSVG (*xml);
 }

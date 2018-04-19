@@ -139,7 +139,7 @@ private:
     ReferenceCountedArray <MessageManager::MessageBase> queue;
     int fd[2];
     pollfd pfds[FD_COUNT];
-    ScopedPointer<LinuxEventLoop::CallbackFunctionBase> readCallback[FD_COUNT];
+    std::unique_ptr<LinuxEventLoop::CallbackFunctionBase> readCallback[FD_COUNT];
     int fdCount = 1;
     int loopCount = 0;
     int bytesInSocket = 0;

@@ -441,7 +441,7 @@ protected:
     };
 
     ComponentLayout* layout;
-    ScopedPointer<PositionPropLabel> textEditor;
+    std::unique_ptr<PositionPropLabel> textEditor;
     TextButton button;
 
     Component* component;

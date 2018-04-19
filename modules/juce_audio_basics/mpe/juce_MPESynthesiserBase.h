@@ -195,7 +195,7 @@ protected:
 protected:
     //==============================================================================
     /** @internal */
-    ScopedPointer<MPEInstrument> instrument;
+    std::unique_ptr<MPEInstrument> instrument;
 
 private:
     //==============================================================================

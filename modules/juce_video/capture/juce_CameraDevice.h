@@ -150,7 +150,7 @@ private:
     struct Pimpl;
     friend struct Pimpl;
     friend struct ContainerDeletePolicy<Pimpl>;
-    ScopedPointer<Pimpl> pimpl;
+    std::unique_ptr<Pimpl> pimpl;
 
     struct ViewerComponent;
     friend struct ViewerComponent;

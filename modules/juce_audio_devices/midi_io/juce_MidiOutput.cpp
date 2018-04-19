@@ -150,7 +150,7 @@ void MidiOutput::run()
 
         if (message != nullptr)
         {
-            const ScopedPointer<PendingMessage> messageDeleter (message);
+            const std::unique_ptr<PendingMessage> messageDeleter (message);
 
             if (eventTime > now)
             {

@@ -152,7 +152,7 @@ public:
     }
 
     ListBox& owner;
-    ScopedPointer<Component> customComponent;
+    std::unique_ptr<Component> customComponent;
     int row = -1;
     bool selected = false, isDragging = false, isDraggingToScroll = false, selectRowOnMouseUp = false;
 

@@ -628,7 +628,7 @@ Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
 
     if (factories->systemFonts != nullptr)
     {
-        ScopedPointer<WindowsDirectWriteTypeface> wtf (new WindowsDirectWriteTypeface (font, factories->systemFonts));
+        std::unique_ptr<WindowsDirectWriteTypeface> wtf (new WindowsDirectWriteTypeface (font, factories->systemFonts));
 
         if (wtf->loadedOk())
             return wtf.release();

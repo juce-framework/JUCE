@@ -84,7 +84,7 @@ struct BackgroundLogo  : public AnimatedContent
             </svg>
             )blahblah";
 
-        ScopedPointer<XmlElement> svg (XmlDocument::parse (logoData));
+        std::unique_ptr<XmlElement> svg (XmlDocument::parse (logoData));
         logo.reset (Drawable::createFromSVG (*svg));
     }
 
@@ -97,7 +97,7 @@ struct BackgroundLogo  : public AnimatedContent
         logo->drawWithin (g, canvas.getLimits().reduced (3.0f), RectanglePlacement (RectanglePlacement::centred), 0.6f);
     }
 
-    ScopedPointer<Drawable> logo;
+    std::unique_ptr<Drawable> logo;
 };
 
 //==============================================================================

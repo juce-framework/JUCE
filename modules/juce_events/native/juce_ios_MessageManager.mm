@@ -74,12 +74,12 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
 #endif
 
 //==============================================================================
-static ScopedPointer<MessageQueue> messageQueue;
+static std::unique_ptr<MessageQueue> messageQueue;
 
 void MessageManager::doPlatformSpecificInitialisation()
 {
     if (messageQueue == nullptr)
-        messageQueue = new MessageQueue();
+        messageQueue.reset (new MessageQueue());
 }
 
 void MessageManager::doPlatformSpecificShutdown()

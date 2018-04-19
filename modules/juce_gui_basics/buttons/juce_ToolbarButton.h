@@ -86,7 +86,7 @@ public:
 
 private:
     //==============================================================================
-    ScopedPointer<Drawable> normalImage, toggledOnImage;
+    std::unique_ptr<Drawable> normalImage, toggledOnImage;
     Drawable* currentImage;
 
     void updateDrawable();

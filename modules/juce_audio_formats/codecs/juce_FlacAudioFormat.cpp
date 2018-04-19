@@ -560,7 +560,7 @@ bool FlacAudioFormat::isCompressed()    { return true; }
 
 AudioFormatReader* FlacAudioFormat::createReaderFor (InputStream* in, const bool deleteStreamIfOpeningFails)
 {
-    ScopedPointer<FlacReader> r (new FlacReader (in));
+    std::unique_ptr<FlacReader> r (new FlacReader (in));
 
     if (r->sampleRate > 0)
         return r.release();
@@ -580,7 +580,7 @@ AudioFormatWriter* FlacAudioFormat::createWriterFor (OutputStream* out,
 {
     if (out != nullptr && getPossibleBitDepths().contains (bitsPerSample))
     {
-        ScopedPointer<FlacWriter> w (new FlacWriter (out, sampleRate, numberOfChannels,
+        std::unique_ptr<FlacWriter> w (new FlacWriter (out, sampleRate, numberOfChannels,
                                                      (uint32) bitsPerSample, qualityOptionIndex));
         if (w->ok)
             return w.release();

@@ -97,7 +97,7 @@ private:
         CGGradientRef gradient;
     };
 
-    ScopedPointer<SavedState> state;
+    std::unique_ptr<SavedState> state;
     OwnedArray<SavedState> stateStack;
 
     void drawGradient();

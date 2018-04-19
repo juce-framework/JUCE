@@ -125,7 +125,7 @@ namespace LiveConstantEditor
         CPlusPlusCodeTokeniser tokeniser;
         CodeEditorComponent sourceEditor;
         CodeDocument::Position valueStart, valueEnd;
-        ScopedPointer<Component> customComp;
+        std::unique_ptr<Component> customComp;
         bool wasHex = false;
 
         JUCE_DECLARE_NON_COPYABLE (LivePropertyEditorBase)

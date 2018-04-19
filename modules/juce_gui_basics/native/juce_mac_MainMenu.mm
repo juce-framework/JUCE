@@ -345,7 +345,7 @@ public:
     static JuceMainMenuHandler* instance;
 
     MenuBarModel* currentModel = nullptr;
-    ScopedPointer<PopupMenu> extraAppleMenuItems;
+    std::unique_ptr<PopupMenu> extraAppleMenuItems;
     uint32 lastUpdateTime = 0;
     NSObject* callback = nil;
     String recentItemsMenuName;
@@ -403,7 +403,7 @@ private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RecentFilesMenuItem)
     };
 
-    ScopedPointer<RecentFilesMenuItem> recent;
+    std::unique_ptr<RecentFilesMenuItem> recent;
 
     //==============================================================================
     static NSMenuItem* findMenuItemWithCommandID (NSMenu* const menu, int commandID)
@@ -625,7 +625,7 @@ public:
 
 private:
     MenuBarModel* const oldMenu;
-    ScopedPointer<PopupMenu> oldAppleMenu;
+    std::unique_ptr<PopupMenu> oldAppleMenu;
     String oldRecentItems;
     NSInteger editMenuIndex;
 

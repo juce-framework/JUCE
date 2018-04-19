@@ -44,8 +44,8 @@ namespace AudioPluginFormatHelpers
             //==============================================================================
             AudioPluginInstance* instance;
             String error;
-            ScopedPointer<AudioPluginFormat::InstantiationCompletionCallback> compCallback;
-            ScopedPointer<CallbackInvoker> owner;
+            std::unique_ptr<AudioPluginFormat::InstantiationCompletionCallback> compCallback;
+            std::unique_ptr<CallbackInvoker> owner;
         };
 
         //==============================================================================
@@ -119,7 +119,7 @@ AudioPluginInstance* AudioPluginFormat::createInstanceFromDescription (const Plu
     WaitableEvent waitForCreation;
     AudioPluginInstance* instance = nullptr;
 
-    ScopedPointer<EventSignaler> eventSignaler (new EventSignaler (waitForCreation, instance, errorMessage));
+    std::unique_ptr<EventSignaler> eventSignaler (new EventSignaler (waitForCreation, instance, errorMessage));
 
     if (! MessageManager::getInstance()->isThisTheMessageThread())
         createPluginInstanceAsync (desc, initialSampleRate, initialBufferSize, eventSignaler.release());

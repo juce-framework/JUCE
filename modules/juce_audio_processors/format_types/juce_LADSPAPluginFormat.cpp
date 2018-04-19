@@ -81,7 +81,7 @@ public:
 
         JUCE_LADSPA_LOG ("Loading LADSPA module: " + file.getFullPathName());
 
-        ScopedPointer<LADSPAModuleHandle> m (new LADSPAModuleHandle (file));
+        std::unique_ptr<LADSPAModuleHandle> m (new LADSPAModuleHandle (file));
 
         if (! m->open())
             m = nullptr;
@@ -613,7 +613,7 @@ void LADSPAPluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& res
     desc.fileOrIdentifier = fileOrIdentifier;
     desc.uid = 0;
 
-    ScopedPointer<LADSPAPluginInstance> instance (dynamic_cast<LADSPAPluginInstance*> (createInstanceFromDescription (desc, 44100.0, 512)));
+    std::unique_ptr<LADSPAPluginInstance> instance (dynamic_cast<LADSPAPluginInstance*> (createInstanceFromDescription (desc, 44100.0, 512)));
 
     if (instance == nullptr || ! instance->isValid())
         return;
@@ -647,8 +647,7 @@ void LADSPAPluginFormat::createPluginInstance (const PluginDescription& desc,
                                                void* userData,
                                                void (*callback) (void*, AudioPluginInstance*, const String&))
 {
-    ScopedPointer<LADSPAPluginInstance> result;
-
+    std::unique_ptr<LADSPAPluginInstance> result;
 
     if (fileMightContainThisPluginType (desc.fileOrIdentifier))
     {
@@ -663,7 +662,7 @@ void LADSPAPluginFormat::createPluginInstance (const PluginDescription& desc,
         {
             shellLADSPAUIDToCreate = desc.uid;
 
-            result = new LADSPAPluginInstance (module);
+            result.reset (new LADSPAPluginInstance (module));
 
             if (result->plugin != nullptr && result->isValid())
                 result->initialise (sampleRate, blockSize);

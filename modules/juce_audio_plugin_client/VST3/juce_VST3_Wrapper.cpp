@@ -221,13 +221,13 @@ private:
 
     //==============================================================================
     Atomic<int> refCount;
-    ScopedPointer<AudioProcessor> audioProcessor;
+    std::unique_ptr<AudioProcessor> audioProcessor;
     ScopedJuceInitialiser_GUI libraryInitialiser;
 
     //==============================================================================
     LegacyAudioParametersWrapper juceParameters;
     HashMap<int32, AudioProcessorParameter*> paramMap;
-    ScopedPointer<AudioProcessorParameter> ownedBypassParameter;
+    std::unique_ptr<AudioProcessorParameter> ownedBypassParameter;
 
     JuceAudioProcessor() = delete;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceAudioProcessor)
@@ -1096,7 +1096,7 @@ private:
                 }
             }
 
-            ScopedPointer<AudioProcessorEditor> pluginEditor;
+            std::unique_ptr<AudioProcessorEditor> pluginEditor;
 
         private:
             JuceVST3Editor& owner;
@@ -1112,7 +1112,7 @@ private:
         ComSmartPtr<JuceVST3EditController> owner;
         AudioProcessor& pluginInstance;
 
-        ScopedPointer<ContentWrapperComponent> component;
+        std::unique_ptr<ContentWrapperComponent> component;
         friend struct ContentWrapperComponent;
 
        #if JUCE_MAC

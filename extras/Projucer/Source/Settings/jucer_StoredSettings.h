@@ -83,8 +83,8 @@ private:
 
     void changed (bool isProjectDefaults)
     {
-        ScopedPointer<XmlElement> data (isProjectDefaults ? projectDefaults.createXml()
-                                                          : fallbackPaths.createXml());
+        std::unique_ptr<XmlElement> data (isProjectDefaults ? projectDefaults.createXml()
+                                                            : fallbackPaths.createXml());
 
         propertyFiles.getUnchecked (0)->setValue (isProjectDefaults ? "PROJECT_DEFAULT_SETTINGS"
                                                                     : "FALLBACK_PATHS",

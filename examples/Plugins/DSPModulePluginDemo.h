@@ -272,7 +272,8 @@ public:
             auto maxSize = static_cast<size_t> (roundToInt (getSampleRate() * (8192.0 / 44100.0)));
             auto assetName = (type == 0 ? "Impulse1.wav" : "Impulse2.wav");
 
-            ScopedPointer<InputStream> assetInputStream (createAssetInputStream (assetName));
+            std::unique_ptr<InputStream> assetInputStream (createAssetInputStream (assetName));
+
             if (assetInputStream != nullptr)
             {
                 currentCabinetData.reset();
@@ -478,7 +479,7 @@ private:
         //==============================================================================
         DspModulePluginDemoAudioProcessor& processor;
 
-        ScopedPointer<ParameterSlider> inputVolumeSlider, outputVolumeSlider,
+        std::unique_ptr<ParameterSlider> inputVolumeSlider, outputVolumeSlider,
                                          lowPassFilterFreqSlider, highPassFilterFreqSlider;
         ComboBox stereoBox, slopeBox, waveshaperBox, cabinetTypeBox;
         ToggleButton cabinetSimButton, oversamplingButton;
@@ -555,7 +556,7 @@ private:
 
     dsp::Gain<float> inputVolume, outputVolume;
 
-    ScopedPointer<dsp::Oversampling<float>> oversampling;
+    std::unique_ptr<dsp::Oversampling<float>> oversampling;
     bool audioCurrentlyOversampled = false;
 
     Atomic<int> cabinetType;

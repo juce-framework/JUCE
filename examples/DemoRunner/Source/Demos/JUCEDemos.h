@@ -72,6 +72,6 @@ CodeEditorComponent::ColourScheme getDarkColourScheme();
 CodeEditorComponent::ColourScheme getLightColourScheme();
 
 //==============================================================================
-extern ScopedPointer<AudioDeviceManager> sharedAudioDeviceManager;
+extern std::unique_ptr<AudioDeviceManager> sharedAudioDeviceManager;
 
 AudioDeviceManager& getSharedAudioDeviceManager (int numInputChannels = -1, int numOutputChannels = -1);

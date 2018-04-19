@@ -96,8 +96,8 @@ struct FallbackDownloadTask  : public URL::DownloadTask,
     }
 
     //==============================================================================
-    const ScopedPointer<FileOutputStream> fileStream;
-    const ScopedPointer<WebInputStream> stream;
+    const std::unique_ptr<FileOutputStream> fileStream;
+    const std::unique_ptr<WebInputStream> stream;
     const size_t bufferSize;
     HeapBlock<char> buffer;
     URL::DownloadTask::Listener* const listener;
@@ -118,11 +118,11 @@ URL::DownloadTask* URL::DownloadTask::createFallbackDownloader (const URL& urlTo
     const size_t bufferSize = 0x8000;
     targetFileToUse.deleteFile();
 
-    ScopedPointer<FileOutputStream> outputStream (targetFileToUse.createOutputStream (bufferSize));
+    std::unique_ptr<FileOutputStream> outputStream (targetFileToUse.createOutputStream (bufferSize));
 
     if (outputStream != nullptr)
     {
-        ScopedPointer<WebInputStream> stream (new WebInputStream (urlToUse, usePostRequest));
+        std::unique_ptr<WebInputStream> stream (new WebInputStream (urlToUse, usePostRequest));
         stream->withExtraHeaders (extraHeadersToUse);
 
         if (stream->connect (nullptr))
@@ -674,7 +674,7 @@ InputStream* URL::createInputStream (const bool usePostCommand,
 
     }
 
-    ScopedPointer<WebInputStream> wi (new WebInputStream (*this, usePostCommand));
+    std::unique_ptr<WebInputStream> wi (new WebInputStream (*this, usePostCommand));
 
     struct ProgressCallbackCaller  : public WebInputStream::Listener
     {
@@ -695,7 +695,7 @@ InputStream* URL::createInputStream (const bool usePostCommand,
         ProgressCallbackCaller& operator= (const ProgressCallbackCaller&) { jassertfalse; return *this; }
     };
 
-    ScopedPointer<ProgressCallbackCaller> callbackCaller
+    std::unique_ptr<ProgressCallbackCaller> callbackCaller
         (progressCallback != nullptr ? new ProgressCallbackCaller (progressCallback, progressCallbackContext) : nullptr);
 
     if (headers.isNotEmpty())
@@ -749,8 +749,8 @@ OutputStream* URL::createOutputStream() const
 //==============================================================================
 bool URL::readEntireBinaryStream (MemoryBlock& destData, bool usePostCommand) const
 {
-    const ScopedPointer<InputStream> in (isLocalFile() ? getLocalFile().createInputStream()
-                                                       : static_cast<InputStream*> (createInputStream (usePostCommand)));
+    const std::unique_ptr<InputStream> in (isLocalFile() ? getLocalFile().createInputStream()
+                                                         : static_cast<InputStream*> (createInputStream (usePostCommand)));
 
     if (in != nullptr)
     {
@@ -763,8 +763,8 @@ bool URL::readEntireBinaryStream (MemoryBlock& destData, bool usePostCommand) co
 
 String URL::readEntireTextStream (bool usePostCommand) const
 {
-    const ScopedPointer<InputStream> in (isLocalFile() ? getLocalFile().createInputStream()
-                                                       : static_cast<InputStream*> (createInputStream (usePostCommand)));
+    const std::unique_ptr<InputStream> in (isLocalFile() ? getLocalFile().createInputStream()
+                                                         : static_cast<InputStream*> (createInputStream (usePostCommand)));
 
     if (in != nullptr)
         return in->readEntireStreamAsString();

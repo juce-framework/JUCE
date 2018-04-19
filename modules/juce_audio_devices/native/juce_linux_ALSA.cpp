@@ -411,7 +411,7 @@ private:
     const bool isInput;
     bool isInterleaved;
     MemoryBlock scratch;
-    ScopedPointer<AudioData::Converter> converter;
+    std::unique_ptr<AudioData::Converter> converter;
 
     //==============================================================================
     template <class SampleType>
@@ -795,7 +795,7 @@ public:
 private:
     //==============================================================================
     const String inputId, outputId;
-    ScopedPointer<ALSADevice> outputDevice, inputDevice;
+    std::unique_ptr<ALSADevice> outputDevice, inputDevice;
     int numCallbacks;
     bool audioIoInProgress;
 

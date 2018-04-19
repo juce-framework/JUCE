@@ -124,7 +124,7 @@ struct SIMDRegisterDemoDSP
 
     //==============================================================================
     IIR::Coefficients<float>::Ptr iirCoefficients;
-    ScopedPointer<IIR::Filter<SIMDRegister<float>>> iir;
+    std::unique_ptr<IIR::Filter<SIMDRegister<float>>> iir;
 
     AudioBlock<SIMDRegister<float>> interleaved;
     AudioBlock<float> zero;

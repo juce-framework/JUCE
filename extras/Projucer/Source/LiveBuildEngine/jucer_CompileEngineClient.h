@@ -96,7 +96,7 @@ public:
 private:
     //==============================================================================
     class ChildProcess;
-    ScopedPointer<ChildProcess> process, runningAppProcess;
+    std::unique_ptr<ChildProcess> process, runningAppProcess;
     ClassDatabase::ClassList lastComponentList;
 
     struct Editor;

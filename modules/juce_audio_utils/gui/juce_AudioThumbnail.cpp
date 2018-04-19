@@ -211,8 +211,8 @@ public:
 
 private:
     AudioThumbnail& owner;
-    ScopedPointer<InputSource> source;
-    ScopedPointer<AudioFormatReader> reader;
+    std::unique_ptr<InputSource> source;
+    std::unique_ptr<AudioFormatReader> reader;
     CriticalSection readerLock;
     uint32 lastReaderUseTime = 0;
 

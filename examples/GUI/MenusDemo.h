@@ -314,7 +314,7 @@ public:
 private:
     ApplicationCommandManager commandManager;
 
-    ScopedPointer<MenuBarComponent> menuBar;
+    std::unique_ptr<MenuBarComponent> menuBar;
     MenuBarPosition menuBarPosition = MenuBarPosition::window;
 
     SidePanel sidePanel { "Menu", 300, false };

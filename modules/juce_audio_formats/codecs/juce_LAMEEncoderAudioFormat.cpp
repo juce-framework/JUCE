@@ -44,8 +44,8 @@ public:
 
         if (auto* out = tempWav.getFile().createOutputStream())
         {
-            writer = wavFormat.createWriterFor (out, sampleRate, numChannels,
-                                                bitsPerSample, metadata, 0);
+            writer.reset (wavFormat.createWriterFor (out, sampleRate, numChannels,
+                                                     bitsPerSample, metadata, 0));
 
             args.add (appFile.getFullPathName());
 
@@ -104,7 +104,7 @@ public:
 private:
     int vbrLevel, cbrBitrate;
     TemporaryFile tempWav { ".wav" };
-    ScopedPointer<AudioFormatWriter> writer;
+    std::unique_ptr<AudioFormatWriter> writer;
     StringArray args;
 
     bool runLameChildProcess (const TemporaryFile& tempMP3, const StringArray& processArgs) const

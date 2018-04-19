@@ -278,7 +278,7 @@ public:
         return true;
     }
 
-    ScopedPointer<ClientIPC> server;
+    std::unique_ptr<ClientIPC> server;
 
     bool openedOk = false;
     bool isRunningApp = false;
@@ -422,7 +422,7 @@ private:
     {
         auto liveModules = project.getProjectRoot().getChildWithName (Ids::MODULES);
 
-        ScopedPointer<XmlElement> xml (XmlDocument::parse (project.getFile()));
+        std::unique_ptr<XmlElement> xml (XmlDocument::parse (project.getFile()));
 
         if (xml == nullptr || ! xml->hasTagName (Ids::JUCERPROJECT.toString()))
             return false;

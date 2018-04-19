@@ -131,10 +131,10 @@ public:
         int itemID = 0;
 
         /** A sub-menu, or nullptr if there isn't one. */
-        ScopedPointer<PopupMenu> subMenu;
+        std::unique_ptr<PopupMenu> subMenu;
 
         /** A drawable to use as an icon, or nullptr if there isn't one. */
-        ScopedPointer<Drawable> image;
+        std::unique_ptr<Drawable> image;
 
         /** A custom component for the item to display, or nullptr if there isn't one. */
         ReferenceCountedObjectPtr<CustomComponent> customComponent;

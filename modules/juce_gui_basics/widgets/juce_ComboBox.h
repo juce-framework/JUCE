@@ -435,7 +435,7 @@ private:
     bool isButtonDown = false, menuActive = false, scrollWheelEnabled = false;
     float mouseWheelAccumulator = 0;
     ListenerList<Listener> listeners;
-    ScopedPointer<Label> label;
+    std::unique_ptr<Label> label;
     String textWhenNothingSelected, noChoicesMessage;
     EditableState labelEditableState = editableUnknown;
 

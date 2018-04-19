@@ -171,7 +171,7 @@ public:
 
 private:
     Project& project;
-    ScopedPointer<ProjectExporter> exporter;
+    std::unique_ptr<ProjectExporter> exporter;
     ValueTree configListTree;
     int exporterIndex;
 

@@ -361,7 +361,7 @@ private:
         MidiDataConcatenator concatenator;
     };
 
-    ScopedPointer<MidiInputThread> inputThread;
+    std::unique_ptr<MidiInputThread> inputThread;
 };
 
 AlsaClient* AlsaClient::instance = nullptr;

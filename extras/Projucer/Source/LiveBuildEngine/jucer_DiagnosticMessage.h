@@ -59,7 +59,7 @@ struct DiagnosticMessage
         note = 2
     };
 
-    ScopedPointer<DiagnosticMessage> associatedDiagnostic;
+    std::unique_ptr<DiagnosticMessage> associatedDiagnostic;
     String message;
     String mainFile;
     SourceCodeRange range;

@@ -145,17 +145,17 @@ private:
     Project* project = nullptr;
     OpenDocumentManager::Document* currentDocument = nullptr;
     RecentDocumentList recentDocumentList;
-    ScopedPointer<Component> logo, translationTool, contentView, header;
+    std::unique_ptr<Component> logo, translationTool, contentView, header;
 
     TabbedComponent sidebarTabs  { TabbedButtonBar::TabsAtTop };
-    ScopedPointer<ResizableEdgeComponent> resizerBar;
+    std::unique_ptr<ResizableEdgeComponent> resizerBar;
     ComponentBoundsConstrainer sidebarSizeConstrainer;
 
     BubbleMessageComponent bubbleMessage;
     ReferenceCountedObjectPtr<CompileEngineChildProcess> childProcess;
     bool isForeground = false;
 
-    ScopedPointer<Label> fileNameLabel;
+    std::unique_ptr<Label> fileNameLabel;
 
     int lastViewedTab = 0;
 

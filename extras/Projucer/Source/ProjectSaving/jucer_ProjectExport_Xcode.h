@@ -1268,7 +1268,7 @@ public:
             if (! shouldCreatePList())
                 return;
 
-            ScopedPointer<XmlElement> plist (XmlDocument::parse (owner.getPListToMergeString()));
+            std::unique_ptr<XmlElement> plist (XmlDocument::parse (owner.getPListToMergeString()));
 
             if (plist == nullptr || ! plist->hasTagName ("plist"))
                 plist.reset (new XmlElement ("plist"));
@@ -2108,11 +2108,13 @@ private:
 
     void getIconImages (OwnedArray<Drawable>& images) const
     {
-        ScopedPointer<Drawable> bigIcon (getBigIcon());
+        std::unique_ptr<Drawable> bigIcon (getBigIcon());
+
         if (bigIcon != nullptr)
             images.add (bigIcon.release());
 
-        ScopedPointer<Drawable> smallIcon (getSmallIcon());
+        std::unique_ptr<Drawable> smallIcon (getSmallIcon());
+
         if (smallIcon != nullptr)
             images.add (smallIcon.release());
     }
@@ -2458,7 +2460,7 @@ private:
     {
         auto fileRefID = createFileRefID (pathString);
 
-        ScopedPointer<ValueTree> v (new ValueTree (fileRefID));
+        std::unique_ptr<ValueTree> v (new ValueTree (fileRefID));
         v->setProperty ("isa", "PBXFileReference", nullptr);
         v->setProperty ("lastKnownFileType", fileType, nullptr);
         v->setProperty (Ids::name, pathString.fromLastOccurrenceOf ("/", false, false), nullptr);
@@ -2852,7 +2854,7 @@ private:
 
     bool xcschemeManagementPlistMatchesTargets (const File& plist) const
     {
-        ScopedPointer<XmlElement> xml (XmlDocument::parse (plist));
+        std::unique_ptr<XmlElement> xml (XmlDocument::parse (plist));
 
         if (xml != nullptr)
             if (auto* dict = xml->getChildByName ("dict"))

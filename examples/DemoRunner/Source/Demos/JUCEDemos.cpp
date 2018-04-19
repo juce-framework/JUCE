@@ -80,7 +80,7 @@ File JUCEDemos::findExamplesDirectoryFromExecutable (File exec)
 }
 
 //==============================================================================
-ScopedPointer<AudioDeviceManager> sharedAudioDeviceManager;
+std::unique_ptr<AudioDeviceManager> sharedAudioDeviceManager;
 
 static String getCurrentDefaultAudioDeviceName (AudioDeviceManager& deviceManager, bool isInput)
 {

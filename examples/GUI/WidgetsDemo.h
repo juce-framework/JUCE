@@ -50,7 +50,7 @@
 
 //==============================================================================
 static void showBubbleMessage (Component& targetComponent, const String& textToShow,
-                               ScopedPointer<BubbleMessageComponent>& bmc)
+                               std::unique_ptr<BubbleMessageComponent>& bmc)
 {
     bmc.reset (new BubbleMessageComponent());
 
@@ -450,7 +450,7 @@ struct ButtonsPage   : public Component
 
 private:
     OwnedArray<Component> components;
-    ScopedPointer<BubbleMessageComponent> bubbleMessage;
+    std::unique_ptr<BubbleMessageComponent> bubbleMessage;
 
     // This little function avoids a bit of code-duplication by adding a component to
     // our list as well as calling addAndMakeVisible on it..
@@ -675,7 +675,7 @@ private:
 
                 for (int i = 0; i < icons.getNumEntries(); ++i)
                 {
-                    ScopedPointer<InputStream> svgFileStream (icons.createStreamForEntry (i));
+                    std::unique_ptr<InputStream> svgFileStream (icons.createStreamForEntry (i));
 
                     if (svgFileStream.get() != nullptr)
                     {
@@ -920,7 +920,7 @@ private:
     TableListBox table;     // the table component itself
     Font font  { 14.0f };
 
-    ScopedPointer<XmlElement> demoData;  // This is the XML document loaded from the embedded file "demo table data.xml"
+    std::unique_ptr<XmlElement> demoData;  // This is the XML document loaded from the embedded file "demo table data.xml"
     XmlElement* columnList = nullptr;     // A pointer to the sub-node of demoData that contains the list of columns
     XmlElement* dataList   = nullptr;     // A pointer to the sub-node of demoData that contains the list of data rows
     int numRows;                          // The number of rows of data we've got
@@ -1321,7 +1321,7 @@ struct DemoTabbedComponent  : public TabbedComponent
                                bubbleMessage);
         }
     private:
-        ScopedPointer<BubbleMessageComponent> bubbleMessage;
+        std::unique_ptr<BubbleMessageComponent> bubbleMessage;
     };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DemoTabbedComponent)

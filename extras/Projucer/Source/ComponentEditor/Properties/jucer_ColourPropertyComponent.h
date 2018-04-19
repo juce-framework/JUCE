@@ -205,5 +205,5 @@ public:
         }
     };
 
-    ScopedPointer<ColourPropEditorComponent> colourPropEditor;
+    std::unique_ptr<ColourPropEditorComponent> colourPropEditor;
 };

@@ -1231,8 +1231,8 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
         void reconfigure (const BigInteger requiredInputChannels,
                           const BigInteger requiredOutputChannels)
         {
-            inputs  = new IOChannelConfig (true,  requiredInputChannels);
-            outputs = new IOChannelConfig (false, requiredOutputChannels);
+            inputs .reset (new IOChannelConfig (true,  requiredInputChannels));
+            outputs.reset (new IOChannelConfig (false, requiredOutputChannels));
 
             audioData.setSize (inputs->numActiveChannels + outputs->numActiveChannels,
                                audioData.getNumSamples());
@@ -1253,8 +1253,8 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
             return inputs->areChannelsAccessible && inputs->numActiveChannels > 0;
         }
 
-        ScopedPointer<IOChannelConfig> inputs;
-        ScopedPointer<IOChannelConfig> outputs;
+        std::unique_ptr<IOChannelConfig> inputs;
+        std::unique_ptr<IOChannelConfig> outputs;
 
         AudioBuffer<float> audioData { 0, 0 };
     };
@@ -1350,7 +1350,7 @@ int iOSAudioIODevice::getOutputLatencyInSamples()                   { return rou
 int iOSAudioIODevice::getXRunCount() const noexcept                 { return pimpl->xrun; }
 
 void iOSAudioIODevice::setMidiMessageCollector (MidiMessageCollector* collector) { pimpl->messageCollector = collector; }
-AudioPlayHead* iOSAudioIODevice::getAudioPlayHead() const           { return pimpl; }
+AudioPlayHead* iOSAudioIODevice::getAudioPlayHead() const           { return pimpl.get(); }
 
 bool iOSAudioIODevice::isInterAppAudioConnected() const             { return pimpl->interAppAudioConnected; }
 #if JUCE_MODULE_AVAILABLE_juce_graphics

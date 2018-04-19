@@ -76,7 +76,7 @@ public:
     const int borderThickness;
 
 private:
-    ScopedPointer<ResizableBorderComponent> border;
+    std::unique_ptr<ResizableBorderComponent> border;
 
     ComponentLayout& layout;
 

@@ -321,8 +321,8 @@ private:
                     fileToSave = fileToSave.getChildFile ("JUCE.png");
                     fileToSave.deleteFile();
 
-                    ScopedPointer<OutputStream> outStream (fileToSave.createOutputStream());
-                    ScopedPointer<InputStream> inStream (createAssetInputStream ("juce_icon.png"));
+                    std::unique_ptr<OutputStream> outStream (fileToSave.createOutputStream());
+                    std::unique_ptr<InputStream> inStream (createAssetInputStream ("juce_icon.png"));
                     outStream->writeFromInputStream (*inStream, -1);
                 }
 
@@ -343,8 +343,8 @@ private:
                                    #if JUCE_ANDROID || JUCE_IOS
                                      if (! result.isEmpty())
                                      {
-                                         ScopedPointer<InputStream>  wi (fileToSave.createInputStream());
-                                         ScopedPointer<OutputStream> wo (result.createOutputStream());
+                                         std::unique_ptr<InputStream>  wi (fileToSave.createInputStream());
+                                         std::unique_ptr<OutputStream> wo (result.createOutputStream());
 
                                          if (wi.get() != nullptr && wo.get() != nullptr)
                                          {
@@ -442,7 +442,7 @@ private:
     }
 
     ImagePreviewComponent imagePreview;
-    ScopedPointer<FileChooser> fc;
+    std::unique_ptr<FileChooser> fc;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DialogsDemo)
 };

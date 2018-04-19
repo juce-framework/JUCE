@@ -113,7 +113,7 @@ struct AudioProcessorHolder
         juceFilter->enableAllBuses();
     }
 
-    ScopedPointer<AudioProcessor> juceFilter;
+    std::unique_ptr<AudioProcessor> juceFilter;
 };
 
 //==============================================================================
@@ -1443,7 +1443,7 @@ public:
 
         ~EditorCompHolder()
         {
-            deleteAllChildren(); // note that we can't use a ScopedPointer because the editor may
+            deleteAllChildren(); // note that we can't use a std::unique_ptr because the editor may
                                  // have been transferred to another parent which takes over ownership.
         }
 
@@ -1559,7 +1559,7 @@ public:
 
         static void deleteEditor (id self)
         {
-            ScopedPointer<EditorCompHolder> editorComp (getEditor (self));
+            std::unique_ptr<EditorCompHolder> editorComp (getEditor (self));
 
             if (editorComp != nullptr)
             {
@@ -2185,7 +2185,7 @@ public:
                 if (AudioProcessorEditor* editorComp = juceFilter->createEditorIfNeeded())
                 {
                     editorComp->setOpaque (true);
-                    windowComp = new ComponentInHIView (editorComp, mCarbonPane);
+                    windowComp.reset (new ComponentInHIView (editorComp, mCarbonPane));
                 }
             }
             else
@@ -2203,7 +2203,7 @@ public:
 private:
     //==============================================================================
     AudioProcessor* juceFilter;
-    ScopedPointer<Component> windowComp;
+    std::unique_ptr<Component> windowComp;
     FakeMouseMoveGenerator fakeMouseGenerator;
 
     void deleteUI()

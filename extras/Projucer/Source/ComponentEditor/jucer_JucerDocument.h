@@ -168,8 +168,8 @@ private:
     bool snapActive = true, snapShown = true;
     float componentOverlayOpacity = 0.33f;
     StringArray activeExtraMethods;
-    ScopedPointer<XmlElement> currentXML;
-    ScopedPointer<Timer> userDocChangeTimer;
+    std::unique_ptr<XmlElement> currentXML;
+    std::unique_ptr<Timer> userDocChangeTimer;
 
     void timerCallback() override;
     void codeDocumentTextInserted (const String& newText, int insertIndex) override;

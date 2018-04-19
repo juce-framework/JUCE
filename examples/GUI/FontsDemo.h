@@ -223,7 +223,7 @@ private:
     ComboBox styleBox;
 
     StretchableLayoutManager verticalLayout;
-    ScopedPointer<StretchableLayoutResizerBar> verticalDividerBar;
+    std::unique_ptr<StretchableLayoutResizerBar> verticalDividerBar;
 
     //==============================================================================
     void refreshPreviewBoxFont()

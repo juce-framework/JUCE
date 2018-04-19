@@ -47,7 +47,7 @@
      KnownPluginList& knownPluginList;
      AudioUnitPluginFormat formatToScan;
 
-     ScopedPointer<PluginDirectoryScanner> scanner;
+     std::unique_ptr<PluginDirectoryScanner> scanner;
      FileSearchPath paths;
 
      ThreadPool pool;
@@ -485,7 +485,7 @@ struct GraphEditorPanel::FilterComponent   : public Component,
     Font font { 13.0f, Font::bold };
     int numIns = 0, numOuts = 0;
     DropShadowEffect shadow;
-    ScopedPointer<PopupMenu> menu;
+    std::unique_ptr<PopupMenu> menu;
 };
 
 
@@ -1081,7 +1081,7 @@ struct GraphDocumentComponent::PluginListBoxModel    : public ListBoxModel,
         owner.addMouseListener (this, true);
 
        #if JUCE_IOS
-        scanner = new AUScanner (knownPlugins);
+        scanner.reset (new AUScanner (knownPlugins));
        #endif
     }
 
@@ -1133,7 +1133,7 @@ struct GraphDocumentComponent::PluginListBoxModel    : public ListBoxModel,
     bool isOverSelectedRow = false;
 
    #if JUCE_IOS
-    ScopedPointer<AUScanner> scanner;
+    std::unique_ptr<AUScanner> scanner;
    #endif
 };
 

@@ -851,7 +851,7 @@ public:
     int reservoirSize, reservoirMask, xruns;
     volatile int reservoirReadPos, reservoirWritePos;
 
-    ScopedPointer<AudioData::Converter> converter;
+    std::unique_ptr<AudioData::Converter> converter;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WASAPIInputDevice)
@@ -969,7 +969,7 @@ public:
     }
 
     ComSmartPtr<IAudioRenderClient> renderClient;
-    ScopedPointer<AudioData::Converter> converter;
+    std::unique_ptr<AudioData::Converter> converter;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WASAPIOutputDevice)
@@ -1326,8 +1326,8 @@ public:
 
 private:
     // Device stats...
-    ScopedPointer<WASAPIInputDevice> inputDevice;
-    ScopedPointer<WASAPIOutputDevice> outputDevice;
+    std::unique_ptr<WASAPIInputDevice> inputDevice;
+    std::unique_ptr<WASAPIOutputDevice> outputDevice;
     const bool useExclusiveMode;
     double defaultSampleRate;
     int minBufferSize, defaultBufferSize;
@@ -1485,7 +1485,7 @@ public:
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
-        ScopedPointer<WASAPIAudioIODevice> device;
+        std::unique_ptr<WASAPIAudioIODevice> device;
 
         const int outputIndex = outputDeviceNames.indexOf (outputDeviceName);
         const int inputIndex = inputDeviceNames.indexOf (inputDeviceName);

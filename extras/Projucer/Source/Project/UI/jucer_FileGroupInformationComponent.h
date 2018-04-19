@@ -89,7 +89,7 @@ public:
 
     Component* refreshComponentForRow (int rowNumber, bool /*isRowSelected*/, Component* existingComponentToUpdate) override
     {
-        ScopedPointer<Component> existing (existingComponentToUpdate);
+        std::unique_ptr<Component> existing (existingComponentToUpdate);
 
         if (rowNumber < getNumRows())
         {

@@ -365,7 +365,7 @@ public:
             virtual ~BitmapDataReleaser() {}
         };
 
-        ScopedPointer<BitmapDataReleaser> dataReleaser;
+        std::unique_ptr<BitmapDataReleaser> dataReleaser;
 
     private:
         JUCE_DECLARE_NON_COPYABLE (BitmapData)

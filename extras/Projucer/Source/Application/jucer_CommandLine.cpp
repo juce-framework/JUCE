@@ -163,7 +163,7 @@ namespace
             }
         }
 
-        ScopedPointer<Project> project;
+        std::unique_ptr<Project> project;
     };
 
     //==============================================================================
@@ -307,7 +307,7 @@ namespace
         std::cout << "Writing: " << targetFile.getFullPathName() << std::endl;
 
         TemporaryFile temp (targetFile);
-        ScopedPointer<FileOutputStream> out (temp.getFile().createOutputStream());
+        std::unique_ptr<FileOutputStream> out (temp.getFile().createOutputStream());
 
         bool ok = out != nullptr && zip.writeToStream (*out, nullptr);
         out.reset();
@@ -732,7 +732,7 @@ namespace
        #endif
 
         auto settingsFile = userAppData.getChildFile ("Projucer").getChildFile ("Projucer.settings");
-        ScopedPointer<XmlElement> xml (XmlDocument::parse (settingsFile));
+        std::unique_ptr<XmlElement> xml (XmlDocument::parse (settingsFile));
         auto settingsTree = ValueTree::fromXml (*xml);
 
         if (! settingsTree.isValid())

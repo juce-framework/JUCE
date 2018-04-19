@@ -178,7 +178,7 @@ public:
         const int maxRedirects = 5;
 
         // we need to do the redirecting manually due to inconsistencies on the way headers are handled on redirects
-        ScopedPointer<InputStream> in;
+        std::unique_ptr<InputStream> in;
 
         for (int redirect = 0; redirect < maxRedirects; ++redirect)
         {
@@ -395,11 +395,11 @@ public:
 
 private:
     bool hasOverwriteButton;
-    ScopedPointer<Label> titleLabel, contentLabel, changeLogLabel, overwriteLabel, overwritePath;
-    ScopedPointer<TextButton> okButton, cancelButton;
-    ScopedPointer<TextEditor> changeLog;
-    ScopedPointer<TextButton> overwriteButton;
-    ScopedPointer<Drawable> juceIcon;
+    std::unique_ptr<Label> titleLabel, contentLabel, changeLogLabel, overwriteLabel, overwritePath;
+    std::unique_ptr<TextButton> okButton, cancelButton;
+    std::unique_ptr<TextEditor> changeLog;
+    std::unique_ptr<TextButton> overwriteButton;
+    std::unique_ptr<Drawable> juceIcon;
 
     void lookAndFeelChanged() override
     {
@@ -626,9 +626,9 @@ void LatestVersionChecker::checkForNewVersion()
 
         const int numRedirects = 0;
 
-        const ScopedPointer<InputStream> in (updateURL.createInputStream (false, nullptr, nullptr,
-                                                                          extraHeaders, 0, &responseHeaders,
-                                                                          &statusCode, numRedirects));
+        const std::unique_ptr<InputStream> in (updateURL.createInputStream (false, nullptr, nullptr,
+                                                                            extraHeaders, 0, &responseHeaders,
+                                                                            &statusCode, numRedirects));
 
         if (threadShouldExit())
             return;  // can't connect: fail silently.

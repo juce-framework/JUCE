@@ -570,7 +570,7 @@ bool CoreAudioFormat::canDoMono()       { return true; }
 AudioFormatReader* CoreAudioFormat::createReaderFor (InputStream* sourceStream,
                                                      bool deleteStreamIfOpeningFails)
 {
-    ScopedPointer<CoreAudioReader> r (new CoreAudioReader (sourceStream));
+    std::unique_ptr<CoreAudioReader> r (new CoreAudioReader (sourceStream));
 
     if (r->ok)
         return r.release();

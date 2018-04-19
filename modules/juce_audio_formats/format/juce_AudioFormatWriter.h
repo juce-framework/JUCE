@@ -241,7 +241,7 @@ public:
     private:
         class Buffer;
         friend struct ContainerDeletePolicy<Buffer>;
-        ScopedPointer<Buffer> buffer;
+        std::unique_ptr<Buffer> buffer;
     };
 
 protected:

@@ -82,21 +82,6 @@
 
 using namespace juce;
 
-// TODO: use SFINAE to automatically generate this for all NSObjects
-template <> struct ContainerDeletePolicy<AUAudioUnitBusArray>                   { static void destroy (NSObject* o) { [o release]; } };
-template <> struct ContainerDeletePolicy<AUParameterTree>                       { static void destroy (NSObject* o) { [o release]; } };
-template <> struct ContainerDeletePolicy<NSMutableArray<AUParameterNode*>>      { static void destroy (NSObject* o) { [o release]; } };
-template <> struct ContainerDeletePolicy<AUParameter>                           { static void destroy (NSObject* o) { [o release]; } };
-template <> struct ContainerDeletePolicy<NSMutableArray<AUAudioUnitBus*>>       { static void destroy (NSObject* o) { [o release]; } };
-template <> struct ContainerDeletePolicy<AUAudioUnitBus>                        { static void destroy (NSObject* o) { [o release]; } };
-template <> struct ContainerDeletePolicy<AVAudioFormat>                         { static void destroy (NSObject* o) { [o release]; } };
-template <> struct ContainerDeletePolicy<AVAudioPCMBuffer>                      { static void destroy (NSObject* o) { [o release]; } };
-template <> struct ContainerDeletePolicy<NSMutableArray<NSNumber*>>             { static void destroy (NSObject* o) { [o release]; } };
-template <> struct ContainerDeletePolicy<NSNumber>                              { static void destroy (NSObject* o) { [o release]; } };
-template <> struct ContainerDeletePolicy<NSMutableArray<AUAudioUnitPreset*>>    { static void destroy (NSObject* o) { [o release]; } };
-template <> struct ContainerDeletePolicy<AUAudioUnitPreset>                     { static void destroy (NSObject* o) { [o release]; } };
-
-//==============================================================================
 struct AudioProcessorHolder  : public ReferenceCountedObject
 {
     AudioProcessorHolder() {}
@@ -112,12 +97,12 @@ struct AudioProcessorHolder  : public ReferenceCountedObject
         bool hostHasMIDIController;
     };
 
-    ScopedPointer<ViewConfig> viewConfiguration;
+    std::unique_ptr<ViewConfig> viewConfiguration;
 
     typedef ReferenceCountedObjectPtr<AudioProcessorHolder> Ptr;
 
 private:
-    ScopedPointer<AudioProcessor> processor;
+    std::unique_ptr<AudioProcessor> processor;
 
     AudioProcessorHolder& operator= (AudioProcessor*) = delete;
     AudioProcessorHolder (AudioProcessorHolder&) = delete;
@@ -1132,17 +1117,17 @@ private:
     //==============================================================================
     void addAudioUnitBusses (bool isInput)
     {
-        ScopedPointer<NSMutableArray<AUAudioUnitBus*>> array ([[NSMutableArray<AUAudioUnitBus*> alloc] init]);
+        std::unique_ptr<NSMutableArray<AUAudioUnitBus*>, NSObjectDeleter> array ([[NSMutableArray<AUAudioUnitBus*> alloc] init]);
         AudioProcessor& processor = getAudioProcessor();
         const int n = AudioUnitHelpers::getBusCount (&processor, isInput);
 
         for (int i = 0; i < n; ++i)
         {
-            ScopedPointer<AUAudioUnitBus> audioUnitBus;
+            std::unique_ptr<AUAudioUnitBus, NSObjectDeleter> audioUnitBus;
 
             {
-                ScopedPointer<AVAudioFormat> defaultFormat ([[AVAudioFormat alloc] initStandardFormatWithSampleRate: kDefaultSampleRate
-                                                                                                           channels: static_cast<AVAudioChannelCount> (processor.getChannelCountOfBus (isInput, i))]);
+                std::unique_ptr<AVAudioFormat, NSObjectDeleter> defaultFormat ([[AVAudioFormat alloc] initStandardFormatWithSampleRate: kDefaultSampleRate
+                                                                                                                              channels: static_cast<AVAudioChannelCount> (processor.getChannelCountOfBus (isInput, i))]);
 
                 audioUnitBus.reset ([[AUAudioUnitBus alloc] initWithFormat: defaultFormat.get()
                                                                      error: nullptr]);
@@ -1169,7 +1154,7 @@ private:
 
     void addParameters()
     {
-        ScopedPointer<NSMutableArray<AUParameterNode*>> params ([[NSMutableArray<AUParameterNode*> alloc] init]);
+        std::unique_ptr<NSMutableArray<AUParameterNode*>, NSObjectDeleter> params ([[NSMutableArray<AUParameterNode*> alloc] init]);
 
         overviewParams.reset ([[NSMutableArray<NSNumber*> alloc] init]);
 
@@ -1206,8 +1191,7 @@ private:
             if (juceParam->isMetaParameter())
                 flags |= kAudioUnitParameterFlag_IsGlobalMeta;
 
-            auto deleter = [](NSMutableArray* arr) { [arr release]; };
-            std::unique_ptr<NSMutableArray, decltype (deleter)> valueStrings (nullptr, deleter);
+            std::unique_ptr<NSMutableArray, NSObjectDeleter> valueStrings;
 
             // is this a meter?
             if (((juceParam->getCategory() & 0xffff0000) >> 16) == 2)
@@ -1250,16 +1234,16 @@ private:
            #endif
 
             // create methods in AUParameterTree return unretained objects (!) -> see Apple header AUAudioUnitImplementation.h
-            ScopedPointer<AUParameter> param ([[AUParameterTree createParameterWithIdentifier: juceStringToNS (identifier)
-                                                                                         name: juceStringToNS (name)
-                                                                                      address: address
-                                                                                          min: 0.0f
-                                                                                          max: getMaximumParameterValue (juceParam)
-                                                                                         unit: unit
-                                                                                     unitName: nullptr
-                                                                                        flags: flags
-                                                                                 valueStrings: valueStrings.get()
-                                                                          dependentParameters: nullptr] retain]);
+            std::unique_ptr<AUParameter, NSObjectDeleter> param ([[AUParameterTree createParameterWithIdentifier: juceStringToNS (identifier)
+                                                                                                            name: juceStringToNS (name)
+                                                                                                         address: address
+                                                                                                             min: 0.0f
+                                                                                                             max: getMaximumParameterValue (juceParam)
+                                                                                                            unit: unit
+                                                                                                        unitName: nullptr
+                                                                                                           flags: flags
+                                                                                                    valueStrings: valueStrings.get()
+                                                                                             dependentParameters: nullptr] retain]);
 
             [param.get() setValue: juceParam->getDefaultValue()];
 
@@ -1311,7 +1295,7 @@ private:
         {
             String name = getAudioProcessor().getProgramName (idx);
 
-            ScopedPointer<AUAudioUnitPreset> preset ([[AUAudioUnitPreset alloc] init]);
+            std::unique_ptr<AUAudioUnitPreset, NSObjectDeleter> preset ([[AUAudioUnitPreset alloc] init]);
             [preset.get() setName: juceStringToNS (name)];
             [preset.get() setNumber: static_cast<NSInteger> (idx)];
 
@@ -1614,8 +1598,7 @@ private:
 
     int totalInChannels, totalOutChannels;
 
-    ScopedPointer<AUAudioUnitBusArray> inputBusses;
-    ScopedPointer<AUAudioUnitBusArray> outputBusses;
+    std::unique_ptr<AUAudioUnitBusArray, NSObjectDeleter> inputBusses, outputBusses;
 
     ObjCBlock<AUImplementorValueObserver> paramObserver;
     ObjCBlock<AUImplementorValueProvider> paramProvider;
@@ -1633,11 +1616,10 @@ private:
     ObjCBlock<AUParameterObserver> editorParamObserver;
     AUParameterObserverToken editorObserverToken;
 
-    ScopedPointer<AUParameterTree> paramTree;
-    ScopedPointer<NSMutableArray<NSNumber*>> overviewParams;
-    ScopedPointer<NSMutableArray<NSNumber*>> channelCapabilities;
+    std::unique_ptr<AUParameterTree, NSObjectDeleter> paramTree;
+    std::unique_ptr<NSMutableArray<NSNumber*>, NSObjectDeleter> overviewParams, channelCapabilities;
 
-    ScopedPointer<NSMutableArray<AUAudioUnitPreset*>> factoryPresets;
+    std::unique_ptr<NSMutableArray<AUAudioUnitPreset*>, NSObjectDeleter> factoryPresets;
 
     ObjCBlock<AUInternalRenderBlock> internalRenderBlock;
 
@@ -1850,7 +1832,7 @@ private:
 
 @implementation JUCE_VIEWCONTROLLER_OBJC_NAME (JucePlugin_AUExportPrefix)
 {
-    ScopedPointer<JuceAUViewController> cpp;
+    std::unique_ptr<JuceAUViewController> cpp;
 }
 
 - (instancetype) initWithNibName: (nullable NSString*) nib bundle: (nullable NSBundle*) bndl { self = [super initWithNibName: nib bundle: bndl]; cpp.reset (new JuceAUViewController (self)); return self; }
