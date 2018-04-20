@@ -2554,7 +2554,7 @@ AudioProcessorEditor* AudioUnitPluginInstance::createEditor()
    #if JUCE_SUPPORT_CARBON
     if (w == nullptr)
     {
-        w = new AudioUnitPluginWindowCarbon (*this);
+        w.reset (new AudioUnitPluginWindowCarbon (*this));
 
         if (! static_cast<AudioUnitPluginWindowCarbon*> (w.get())->isValid())
             w = nullptr;
@@ -2567,8 +2567,6 @@ AudioProcessorEditor* AudioUnitPluginInstance::createEditor()
     return w.release();
 }
 
-
-//==============================================================================
 //==============================================================================
 AudioUnitPluginFormat::AudioUnitPluginFormat()
 {
