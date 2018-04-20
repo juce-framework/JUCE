@@ -55,7 +55,7 @@ public:
     JUCESplashScreen (Component& parentToAddTo);
     ~JUCESplashScreen();
 
-    static Drawable* getSplashScreenLogo();
+    static std::unique_ptr<Drawable> getSplashScreenLogo();
 
 private:
     void paint (Graphics&) override;
