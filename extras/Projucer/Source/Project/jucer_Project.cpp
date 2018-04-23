@@ -388,8 +388,6 @@ void Project::updatePluginCategories()
             pluginAAXCategoryValue = aaxCategory;
         else if (getAllAAXCategoryStrings().contains (aaxCategory))
             pluginAAXCategoryValue = Array<var> (getAllAAXCategoryVars()[getAllAAXCategoryStrings().indexOf (aaxCategory)]);
-        else
-            pluginAAXCategoryValue.resetToDefault();
     }
 
     {
@@ -399,8 +397,6 @@ void Project::updatePluginCategories()
             pluginRTASCategoryValue = rtasCategory;
         else if (getAllRTASCategoryStrings().contains (rtasCategory))
             pluginRTASCategoryValue = Array<var> (getAllRTASCategoryVars()[getAllRTASCategoryStrings().indexOf (rtasCategory)]);
-        else
-            pluginRTASCategoryValue.resetToDefault();
     }
 
     {
