@@ -31,7 +31,7 @@ namespace dsp
 
 #ifndef DOXYGEN
 
-#if JUCE_GCC
+#if JUCE_GCC && (__GNUC__ >= 6)
  #pragma GCC diagnostic push
  #pragma GCC diagnostic ignored "-Wignored-attributes"
 #endif
@@ -872,7 +872,7 @@ struct SIMDNativeOps<uint64_t>
 
 #endif
 
-#if JUCE_GCC
+#if JUCE_GCC && (__GNUC__ >= 6)
  #pragma GCC diagnostic pop
 #endif
 
