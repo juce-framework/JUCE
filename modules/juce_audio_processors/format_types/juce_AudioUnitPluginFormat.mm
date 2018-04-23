@@ -2557,7 +2557,7 @@ AudioProcessorEditor* AudioUnitPluginInstance::createEditor()
         w.reset (new AudioUnitPluginWindowCarbon (*this));
 
         if (! static_cast<AudioUnitPluginWindowCarbon*> (w.get())->isValid())
-            w = nullptr;
+            w.reset();
     }
    #endif
 
