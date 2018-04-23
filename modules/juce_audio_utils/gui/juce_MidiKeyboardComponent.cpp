@@ -307,7 +307,7 @@ int MidiKeyboardComponent::remappedXYToNote (Point<float> pos, float& mousePosit
                 {
                     if (getKeyPos (note).contains (pos.x - xOffset))
                     {
-                        mousePositionVelocity = pos.y / blackNoteLength;
+                        mousePositionVelocity = jmax (0.0f, pos.y / blackNoteLength);
                         return note;
                     }
                 }
@@ -326,7 +326,7 @@ int MidiKeyboardComponent::remappedXYToNote (Point<float> pos, float& mousePosit
                 if (getKeyPos (note).contains (pos.x - xOffset))
                 {
                     auto whiteNoteLength = (orientation == horizontalKeyboard) ? getHeight() : getWidth();
-                    mousePositionVelocity = pos.y / (float) whiteNoteLength;
+                    mousePositionVelocity = jmax (0.0f, pos.y / (float) whiteNoteLength);
                     return note;
                 }
             }
