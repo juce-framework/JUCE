@@ -313,7 +313,7 @@ ValueTree PIPGenerator::createExporterChild (const String& exporterName)
 
     exporter.setProperty (Ids::targetFolder, "Builds/" + ProjectExporter::getTargetFolderForExporter (exporterName), nullptr);
 
-    if (isMobileExporter (exporterName))
+    if (isMobileExporter (exporterName) || (metadata[Ids::name] == "AUv3SynthPlugin" && exporterName == "XCODE_MAC"))
     {
         auto juceDir = getAppSettings().getStoredPath (Ids::jucePath).toString();
 
@@ -321,8 +321,8 @@ ValueTree PIPGenerator::createExporterChild (const String& exporterName)
         {
             auto assetsDirectoryPath = File (juceDir).getChildFile ("examples").getChildFile ("Assets").getFullPathName();
 
-            exporter.setProperty (exporterName == "XCODE_IPHONE" ? Ids::customXcodeResourceFolders
-                                                                 : Ids::androidExtraAssetsFolder,
+            exporter.setProperty (exporterName == "ANDROIDSTUDIO" ? Ids::androidExtraAssetsFolder
+                                                                  : Ids::customXcodeResourceFolders,
                                   assetsDirectoryPath, nullptr);
         }
         else
