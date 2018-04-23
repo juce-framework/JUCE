@@ -462,7 +462,12 @@ Result PIPGenerator::setProjectSettings (ValueTree& jucerTree)
         jucerTree.setProperty (Ids::pluginManufacturer, metadata[Ids::vendor], nullptr);
 
         StringArray pluginFormatsToBuild (Ids::buildVST.toString(), Ids::buildAU.toString(), Ids::buildStandalone.toString());
+        pluginFormatsToBuild.addArray (getExtraPluginFormatsToBuild());
+
         jucerTree.setProperty (Ids::pluginFormats, pluginFormatsToBuild.joinIntoString (","), nullptr);
+
+        if (! getPluginCharacteristics().isEmpty())
+            jucerTree.setProperty (Ids::pluginCharacteristicsValue, getPluginCharacteristics().joinIntoString (","), nullptr);
     }
 
     return Result::ok();
@@ -560,4 +565,31 @@ bool PIPGenerator::copyRelativeFileToLocalSourceDirectory (const File& fileToCop
 {
     return fileToCopy.copyFileTo (outputDirectory.getChildFile ("Source")
                                                  .getChildFile (fileToCopy.getFileName()));
+}
+
+StringArray PIPGenerator::getExtraPluginFormatsToBuild() const
+{
+    auto name = metadata[Ids::name].toString();
+
+    if (name == "AUv3SynthPlugin" || name == "AudioPluginDemo")
+        return { Ids::buildAUv3.toString() };
+
+    if (name == "InterAppAudioEffectPlugin")
+        return { Ids::enableIAA.toString() };
+
+    return {};
+}
+
+StringArray PIPGenerator::getPluginCharacteristics() const
+{
+    StringArray characteristics;
+
+    auto name = metadata[Ids::name].toString();
+
+    if (name == "AudioPluginDemo" || name == "AUv3SynthPlugin" || name == "MultiOutSynthPlugin")    characteristics.add (Ids::pluginWantsMidiIn.toString());
+    if (name == "AUv3SynthPlugin" || name == "MultiOutSynthPlugin")                                 characteristics.add (Ids::pluginIsSynth.toString());
+    if (name == "AudioPluginDemo")                                                                  characteristics.add (Ids::pluginEditorRequiresKeys.toString());
+    if (name == "ArpeggiatorPlugin")                                                                characteristics.add (Ids::pluginIsMidiEffectPlugin.toString());
+
+    return characteristics;
 }
