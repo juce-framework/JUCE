@@ -2037,6 +2037,9 @@ private:
         if (matches ("hasCockosExtensions"))
             return (int32) 0xbeef0000;
 
+        if (auto callbackHandler = dynamic_cast<VSTCallbackHandler*> (processor))
+            return callbackHandler->handleVstPluginCanDo (args.index, args.value, args.ptr, args.opt);
+
         return 0;
     }
 
