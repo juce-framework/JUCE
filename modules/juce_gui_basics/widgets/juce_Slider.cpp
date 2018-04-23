@@ -136,7 +136,8 @@ public:
 
     void setRange (double newMin, double newMax, double newInt)
     {
-        normRange = NormalisableRange<double> (newMin, newMax, newInt);
+        normRange = NormalisableRange<double> (newMin, newMax, newInt,
+                                               normRange.skew, normRange.symmetricSkew);
         updateRange();
     }
 
