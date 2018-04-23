@@ -104,8 +104,8 @@ void ThreadedAnalyticsDestination::EventDispatcher::run()
                     const auto numEventsToAdd = jmin (numNewEvents, freeBatchCapacity);
                     const auto newBatchSize = numEventsInBatch + numEventsToAdd;
 
-                    for (size_t i = numEventsInBatch; i < (size_t) newBatchSize; ++i)
-                        eventsToSend.add (eventQueue[i]);
+                    for (auto i = numEventsInBatch; i < newBatchSize; ++i)
+                        eventsToSend.add (eventQueue[(size_t) i]);
                 }
             }
         }
