@@ -1064,7 +1064,7 @@ struct VSTPluginInstance     : public AudioPluginInstance,
                                             valueType));
         }
 
-        vstSupportsBypass = pluginCanDo ("bypass");
+        vstSupportsBypass = (pluginCanDo ("bypass") > 0);
         setRateAndBufferSizeDetails (sampleRateToUse, blockSizeToUse);
     }
 
@@ -1953,7 +1953,13 @@ private:
     //==============================================================================
     struct VST2BypassParameter    : Parameter
     {
-        VST2BypassParameter (VSTPluginInstance& effectToUse)   : parent (effectToUse) {}
+        VST2BypassParameter (VSTPluginInstance& effectToUse)
+            : parent (effectToUse),
+              onStrings (TRANS("on"), TRANS("yes"), TRANS("true")),
+              offStrings (TRANS("off"), TRANS("no"), TRANS("false")),
+              values (TRANS("Off"), TRANS("On"))
+        {
+        }
 
         void setValue (float newValue) override
         {
@@ -1991,9 +1997,7 @@ private:
 
         VSTPluginInstance& parent;
         bool currentValue = false;
-        StringArray onStrings  { TRANS("on"),  TRANS("yes"), TRANS("true") };
-        StringArray offStrings { TRANS("off"), TRANS("no"),  TRANS("false") };
-        StringArray values { TRANS("Off"), TRANS("On") };
+        StringArray onStrings, offStrings, values;
     };
 
     //==============================================================================
