@@ -227,7 +227,7 @@ namespace Ids
     DECLARE_ID (iCloudPermissions);
     DECLARE_ID (iosDevelopmentTeamID);
     DECLARE_ID (iosAppGroupsId);
-    DECLARE_ID (iosAppExtensionDuplicateResourcesFolder);
+    DECLARE_ID (duplicateAppExResourcesFolder);
     DECLARE_ID (buildToolsVersion);
     DECLARE_ID (gradleVersion);
     const Identifier androidPluginVersion ("gradleWrapperVersion"); // old name is very confusing, but we need to remain backward compatible

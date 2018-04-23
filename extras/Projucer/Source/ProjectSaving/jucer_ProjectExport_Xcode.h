@@ -64,14 +64,15 @@ public:
           extraFrameworksValue                         (settings, Ids::extraFrameworks,                         getUndoManager()),
           postbuildCommandValue                        (settings, Ids::postbuildCommand,                        getUndoManager()),
           prebuildCommandValue                         (settings, Ids::prebuildCommand,                         getUndoManager()),
-          iosAppExtensionDuplicateResourcesFolderValue (settings, Ids::iosAppExtensionDuplicateResourcesFolder, getUndoManager()),
+          duplicateAppExResourcesFolderValue           (settings, Ids::duplicateAppExResourcesFolder,           getUndoManager(), true),
           iosDeviceFamilyValue                         (settings, Ids::iosDeviceFamily,                         getUndoManager(), "1,2"),
           iPhoneScreenOrientationValue                 (settings, Ids::iPhoneScreenOrientation,                 getUndoManager(), "portraitlandscape"),
           iPadScreenOrientationValue                   (settings, Ids::iPadScreenOrientation,                   getUndoManager(), "portraitlandscape"),
           customXcodeResourceFoldersValue              (settings, Ids::customXcodeResourceFolders,              getUndoManager()),
           customXcassetsFolderValue                    (settings, Ids::customXcassetsFolder,                    getUndoManager()),
           microphonePermissionNeededValue              (settings, Ids::microphonePermissionNeeded,              getUndoManager()),
-          microphonePermissionsTextValue               (settings, Ids::microphonePermissionsText,               getUndoManager(), "This is an audio app which requires audio input. If you do not have a USB audio interface connected it will use the microphone."),
+          microphonePermissionsTextValue               (settings, Ids::microphonePermissionsText,               getUndoManager(),
+                                                        "This is an audio app which requires audio input. If you do not have a USB audio interface connected it will use the microphone."),
           uiFileSharingEnabledValue                    (settings, Ids::UIFileSharingEnabled,                    getUndoManager()),
           uiSupportsDocumentBrowserValue               (settings, Ids::UISupportsDocumentBrowser,               getUndoManager()),
           uiStatusBarHiddenValue                       (settings, Ids::UIStatusBarHidden,                       getUndoManager()),
@@ -110,7 +111,7 @@ public:
     String getPostBuildScript() const                { return postbuildCommandValue.get(); }
     String getPreBuildScript() const                 { return prebuildCommandValue.get(); }
 
-    bool shouldDuplicateResourcesFolderForAppExtension() const { return iosAppExtensionDuplicateResourcesFolderValue.get(); }
+    bool shouldDuplicateAppExResourcesFolder() const { return duplicateAppExResourcesFolderValue.get(); }
 
     String getDeviceFamilyString() const             { return iosDeviceFamilyValue.get(); }
 
@@ -195,14 +196,12 @@ public:
                    "This way you can specify them for OS X and iOS separately, and modify the content of the resource folders "
                    "without re-saving the Projucer project.");
 
+        if (getProject().getProjectType().isAudioPlugin())
+            props.add (new ChoicePropertyComponent (duplicateAppExResourcesFolderValue, "Add Duplicate Resources Folder to App Extension"),
+                       "Disable this to prevent the Projucer from creating a duplicate resources folder for AUv3 app extensions.");
+
         if (iOS)
         {
-            if (getProject().getProjectType().isAudioPlugin())
-                props.add (new ChoicePropertyComponent (iosAppExtensionDuplicateResourcesFolderValue,
-                                                        "Don't Add Resources Folder to App Extension"),
-                           "Enable this to prevent the Projucer from creating a resources folder for AUv3 app extensions.");
-
-
             props.add (new ChoicePropertyComponent (iosDeviceFamilyValue, "Device Family",
                                                     { "iPhone", "iPad", "Universal" },
                                                     { "1",      "2",    "1,2" }),
@@ -1682,7 +1681,7 @@ private:
     const bool iOS;
 
     ValueWithDefault customPListValue, pListPrefixHeaderValue, pListPreprocessValue, extraFrameworksValue, postbuildCommandValue,
-                     prebuildCommandValue, iosAppExtensionDuplicateResourcesFolderValue, iosDeviceFamilyValue, iPhoneScreenOrientationValue,
+                     prebuildCommandValue, duplicateAppExResourcesFolderValue, iosDeviceFamilyValue, iPhoneScreenOrientationValue,
                      iPadScreenOrientationValue, customXcodeResourceFoldersValue, customXcassetsFolderValue, microphonePermissionNeededValue, microphonePermissionsTextValue,
                      uiFileSharingEnabledValue, uiSupportsDocumentBrowserValue, uiStatusBarHiddenValue, documentExtensionsValue, iosInAppPurchasesValue,
                      iosBackgroundAudioValue, iosBackgroundBleValue, iosPushNotificationsValue, iosAppGroupsValue, iCloudPermissionsValue,
@@ -1880,8 +1879,7 @@ private:
 
             if (target->type != XcodeTarget::AggregateTarget)
             {
-                auto skipAUv3 = (target->type == XcodeTarget::AudioUnitv3PlugIn
-                                 && ! shouldDuplicateResourcesFolderForAppExtension());
+                auto skipAUv3 = (target->type == XcodeTarget::AudioUnitv3PlugIn && ! shouldDuplicateAppExResourcesFolder());
 
                 if (! projectType.isStaticLibrary() && target->type != XcodeTarget::SharedCodeTarget && ! skipAUv3)
                     target->addBuildPhase ("PBXResourcesBuildPhase", resourceIDs);
