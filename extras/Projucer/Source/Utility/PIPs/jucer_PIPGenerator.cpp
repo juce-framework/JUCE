@@ -573,8 +573,7 @@ StringArray PIPGenerator::getExtraPluginFormatsToBuild() const
 
     if (name == "AUv3SynthPlugin" || name == "AudioPluginDemo")
         return { Ids::buildAUv3.toString() };
-
-    if (name == "InterAppAudioEffectPlugin")
+    else if (name == "InterAppAudioEffectPlugin")
         return { Ids::enableIAA.toString() };
 
     return {};
@@ -582,14 +581,14 @@ StringArray PIPGenerator::getExtraPluginFormatsToBuild() const
 
 StringArray PIPGenerator::getPluginCharacteristics() const
 {
-    StringArray characteristics;
-
     auto name = metadata[Ids::name].toString();
 
-    if (name == "AudioPluginDemo" || name == "AUv3SynthPlugin" || name == "MultiOutSynthPlugin")    characteristics.add (Ids::pluginWantsMidiIn.toString());
-    if (name == "AUv3SynthPlugin" || name == "MultiOutSynthPlugin")                                 characteristics.add (Ids::pluginIsSynth.toString());
-    if (name == "AudioPluginDemo")                                                                  characteristics.add (Ids::pluginEditorRequiresKeys.toString());
-    if (name == "ArpeggiatorPlugin")                                                                characteristics.add (Ids::pluginIsMidiEffectPlugin.toString());
+    if (name == "AudioPluginDemo")
+        return { Ids::pluginWantsMidiIn.toString(), Ids::pluginEditorRequiresKeys.toString() };
+    else if (name == "AUv3SynthPlugin" || name == "MultiOutSynthPlugin")
+        return { Ids::pluginWantsMidiIn.toString(), Ids::pluginIsSynth.toString() };
+    else if (name == "ArpeggiatorPlugin")
+        return { Ids::pluginIsMidiEffectPlugin.toString() };
 
-    return characteristics;
+    return {};
 }
