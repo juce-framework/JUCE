@@ -93,6 +93,8 @@ public:
         // (This function call is for one of the demos, which involves launching a child process)
         if (invokeChildProcessDemo (commandLine))
             return;
+      #else
+        ignoreUnused (commandLine);
       #endif
 
         mainWindow.reset (new MainAppWindow (getApplicationName()));
