@@ -31,6 +31,11 @@ namespace dsp
 
 #ifndef DOXYGEN
 
+#if JUCE_GCC
+ #pragma GCC diagnostic push
+ #pragma GCC diagnostic ignored "-Wignored-attributes"
+#endif
+
 #ifdef _MSC_VER
  #define DECLARE_SSE_SIMD_CONST(type, name) \
     static __declspec(align(16)) const type name [16 / sizeof (type)]
@@ -865,6 +870,10 @@ struct SIMDNativeOps<uint64_t>
     }
 };
 
+#endif
+
+#if JUCE_GCC
+ #pragma GCC diagnostic pop
 #endif
 
 } // namespace dsp
