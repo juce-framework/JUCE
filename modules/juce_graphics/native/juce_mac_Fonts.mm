@@ -815,12 +815,12 @@ Typeface::Ptr Font::getDefaultTypefaceForFont (const Font& font)
 // fallback layout algorithm.
 static bool canAllTypefacesBeUsedInLayout (const AttributedString& text)
 {
-   #if JUCE_MAC && defined (MAC_OS_X_VERSION_10_11) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_11
+   #if JUCE_MAC && defined (MAC_OS_X_VERSION_10_11) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_11 && JUCE_FORCE_USE_NATIVE_TEXT_LAYOUT_FOR_MEMORY_FONTS
     ignoreUnused (text);
     return true;
    #else
 
-   #if JUCE_MAC
+   #if JUCE_MAC && JUCE_FORCE_USE_NATIVE_TEXT_LAYOUT_FOR_MEMORY_FONTS
     if (SystemStats::getOperatingSystemType() >= SystemStats::OperatingSystemType::MacOSX_10_11)
         return true;
    #endif
