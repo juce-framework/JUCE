@@ -1662,7 +1662,9 @@ struct VST3ComponentHolder
 
     void terminate()
     {
-        if (isComponentInitialised) component->terminate();
+        if (isComponentInitialised)
+            component->terminate();
+
         isComponentInitialised = false;
     }
 
@@ -2773,10 +2775,21 @@ private:
     /** @note An IPlugView, when first created, should start with a ref-count of 1! */
     IPlugView* tryCreatingView() const
     {
+        DBG ("tryCreatingView called");
+        std::cout << "AAAAAH" << std::endl;
+        std::cerr << "BBBBBH" << std::endl;
+
         IPlugView* v = editController->createView (Vst::ViewType::kEditor);
 
+        DBG ("editController->createView (Vst::ViewType::kEditor) called");
+
         if (v == nullptr) v = editController->createView (nullptr);
+
+        DBG ("editController->createView (nullptr) called");
+
         if (v == nullptr) editController->queryInterface (IPlugView::iid, (void**) &v);
+
+        DBG ("editController->queryInterface (IPlugView::iid, (void**) &v) called");
 
         return v;
     }
