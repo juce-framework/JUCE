@@ -722,7 +722,7 @@ void AudioDeviceManager::audioDeviceIOCallbackInt (const float** inputChannelDat
         cpuUsageMs += filterAmount * (msTaken - cpuUsageMs);
 
         if (msTaken > msPerBlock)
-            xruns++;
+            ++xruns;
     }
     else
     {
@@ -996,7 +996,7 @@ void AudioDeviceManager::playTestSound()
 int AudioDeviceManager::getXRunCount() const noexcept
 {
     auto deviceXRuns = (currentAudioDevice != nullptr ? currentAudioDevice->getXRunCount() : -1);
-    return (deviceXRuns >= 0 ? deviceXRuns : xruns);
+    return jmax (0, deviceXRuns) + xruns;
 }
 
 } // namespace juce
