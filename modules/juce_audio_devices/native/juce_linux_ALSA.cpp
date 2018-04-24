@@ -58,7 +58,7 @@ static void getDeviceSampleRates (snd_pcm_t* handle, Array<double>& rates)
     for (int i = 0; ratesToTry[i] != 0; ++i)
     {
         if (snd_pcm_hw_params_any (handle, hwParams) >= 0
-            && snd_pcm_hw_params_test_rate (handle, hwParams, (unsigned int) ratesToTry[i], 0) == 0)
+             && snd_pcm_hw_params_test_rate (handle, hwParams, (unsigned int) ratesToTry[i], 0) == 0)
         {
             rates.addIfNotAlreadyThere ((double) ratesToTry[i]);
         }
@@ -358,7 +358,7 @@ public:
             scratch.ensureSize ((size_t) ((int) sizeof (float) * numSamples * numChannelsRunning), false);
             scratch.fillWith (0); // (not clearing this data causes warnings in valgrind)
 
-            snd_pcm_sframes_t num = snd_pcm_readi (handle, scratch.getData(), (snd_pcm_uframes_t) numSamples);
+            auto num = snd_pcm_readi (handle, scratch.getData(), (snd_pcm_uframes_t) numSamples);
 
             if (num < 0)
             {
@@ -378,7 +378,7 @@ public:
         }
         else
         {
-            snd_pcm_sframes_t num = snd_pcm_readn (handle, (void**) data, (snd_pcm_uframes_t) numSamples);
+            auto num = snd_pcm_readn (handle, (void**) data, (snd_pcm_uframes_t) numSamples);
 
             if (num < 0)
             {
@@ -488,17 +488,8 @@ class ALSAThread  : public Thread
 public:
     ALSAThread (const String& inputDeviceID, const String& outputDeviceID)
         : Thread ("JUCE ALSA"),
-          sampleRate (0),
-          bufferSize (0),
-          outputLatency (0),
-          inputLatency (0),
-          callback (0),
           inputId (inputDeviceID),
-          outputId (outputDeviceID),
-          numCallbacks (0),
-          audioIoInProgress (false),
-          inputChannelBuffer (1, 1),
-          outputChannelBuffer (1, 1)
+          outputId (outputDeviceID)
     {
         initialiseRatesAndChannels();
     }
@@ -510,8 +501,8 @@ public:
 
     void open (BigInteger inputChannels,
                BigInteger outputChannels,
-               const double newSampleRate,
-               const int newBufferSize)
+               double newSampleRate,
+               int newBufferSize)
     {
         close();
 
@@ -549,6 +540,35 @@ public:
         outputChannelDataForCallback.clear();
         currentOutputChans.clear();
 
+        // Note that the input device is opened before an output, because we've heard
+        // of drivers where doing it in the reverse order mysteriously fails.. If this
+        // order also causes problems, let us know and we'll see if we can find a compromise!
+
+        if (inputChannelDataForCallback.size() > 0 && inputId.isNotEmpty())
+        {
+            inputDevice.reset (new ALSADevice (inputId, true));
+
+            if (inputDevice->error.isNotEmpty())
+            {
+                error = inputDevice->error;
+                inputDevice.reset();
+                return;
+            }
+
+            ensureMinimumNumBitsSet (currentInputChans, (int) minChansIn);
+
+            if (! inputDevice->setParameters ((unsigned int) sampleRate,
+                                              jlimit ((int) minChansIn, (int) maxChansIn, currentInputChans.getHighestBit() + 1),
+                                              bufferSize))
+            {
+                error = inputDevice->error;
+                inputDevice.reset();
+                return;
+            }
+
+            inputLatency = inputDevice->latency;
+        }
+
         if (outputChannels.getHighestBit() >= 0)
         {
             for (int i = 0; i < maxOutputsRequested; ++i)
@@ -568,7 +588,7 @@ public:
             if (outputDevice->error.isNotEmpty())
             {
                 error = outputDevice->error;
-                outputDevice = nullptr;
+                outputDevice.reset();
                 return;
             }
 
@@ -578,36 +598,11 @@ public:
                                                bufferSize))
             {
                 error = outputDevice->error;
-                outputDevice = nullptr;
+                outputDevice.reset();
                 return;
             }
 
             outputLatency = outputDevice->latency;
-        }
-
-        if (inputChannelDataForCallback.size() > 0 && inputId.isNotEmpty())
-        {
-            inputDevice.reset (new ALSADevice (inputId, true));
-
-            if (inputDevice->error.isNotEmpty())
-            {
-                error = inputDevice->error;
-                inputDevice = nullptr;
-                return;
-            }
-
-            ensureMinimumNumBitsSet (currentInputChans, (int) minChansIn);
-
-            if (! inputDevice->setParameters ((unsigned int) sampleRate,
-                                              jlimit ((int) minChansIn, (int) maxChansIn, currentInputChans.getHighestBit() + 1),
-                                              bufferSize))
-            {
-                error = inputDevice->error;
-                inputDevice = nullptr;
-                return;
-            }
-
-            inputLatency = inputDevice->latency;
         }
 
         if (outputDevice == nullptr && inputDevice == nullptr)
@@ -664,8 +659,8 @@ public:
 
         stopThread (6000);
 
-        inputDevice = nullptr;
-        outputDevice = nullptr;
+        inputDevice.reset();
+        outputDevice.reset();
 
         inputChannelBuffer.setSize (1, 1);
         outputChannelBuffer.setSize (1, 1);
@@ -692,7 +687,7 @@ public:
                     if (threadShouldExit())
                         break;
 
-                    snd_pcm_sframes_t avail = snd_pcm_avail_update (inputDevice->handle);
+                    auto avail = snd_pcm_avail_update (inputDevice->handle);
 
                     if (avail < 0)
                         JUCE_ALSA_FAILED (snd_pcm_recover (inputDevice->handle, (int) avail, 0));
@@ -738,7 +733,7 @@ public:
                 if (threadShouldExit())
                     break;
 
-                snd_pcm_sframes_t avail = snd_pcm_avail_update (outputDevice->handle);
+                auto avail = snd_pcm_avail_update (outputDevice->handle);
 
                 if (avail < 0)
                     JUCE_ALSA_FAILED (snd_pcm_recover (outputDevice->handle, (int) avail, 0));
@@ -784,20 +779,20 @@ public:
 
     //==============================================================================
     String error;
-    double sampleRate;
-    int bufferSize, outputLatency, inputLatency;
+    double sampleRate = 0;
+    int bufferSize = 0, outputLatency = 0, inputLatency = 0;
     BigInteger currentInputChans, currentOutputChans;
 
     Array<double> sampleRates;
     StringArray channelNamesOut, channelNamesIn;
-    AudioIODeviceCallback* callback;
+    AudioIODeviceCallback* callback = nullptr;
 
 private:
     //==============================================================================
     const String inputId, outputId;
     std::unique_ptr<ALSADevice> outputDevice, inputDevice;
-    int numCallbacks;
-    bool audioIoInProgress;
+    int numCallbacks = 0;
+    bool audioIoInProgress = false;
 
     CriticalSection callbackLock;
 
@@ -805,8 +800,8 @@ private:
     Array<const float*> inputChannelDataForCallback;
     Array<float*> outputChannelDataForCallback;
 
-    unsigned int minChansOut, maxChansOut;
-    unsigned int minChansIn, maxChansIn;
+    unsigned int minChansOut = 0, maxChansOut = 0;
+    unsigned int minChansIn = 0, maxChansIn = 0;
 
     bool failed (const int errorNum)
     {
@@ -854,8 +849,6 @@ public:
         : AudioIODevice (deviceName, deviceTypeName),
           inputId (inputDeviceID),
           outputId (outputDeviceID),
-          isOpen_ (false),
-          isStarted (false),
           internal (inputDeviceID, outputDeviceID)
     {
     }
@@ -958,7 +951,7 @@ public:
 
     void stop() override
     {
-        AudioIODeviceCallback* const oldCallback = internal.callback;
+        auto oldCallback = internal.callback;
 
         start (nullptr);
 
@@ -969,7 +962,7 @@ public:
     String inputId, outputId;
 
 private:
-    bool isOpen_, isStarted;
+    bool isOpen_ = false, isStarted = false;
     ALSAThread internal;
 };
 
@@ -1030,7 +1023,7 @@ public:
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
-        const int idx = (forInput ? inputIds : outputIds).indexOf ("default");
+        auto idx = (forInput ? inputIds : outputIds).indexOf ("default");
         return idx >= 0 ? idx : 0;
     }
 
@@ -1052,8 +1045,8 @@ public:
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
-        const int inputIndex = inputNames.indexOf (inputDeviceName);
-        const int outputIndex = outputNames.indexOf (outputDeviceName);
+        auto inputIndex = inputNames.indexOf (inputDeviceName);
+        auto outputIndex = outputNames.indexOf (outputDeviceName);
 
         String deviceName (outputIndex >= 0 ? outputDeviceName
                                             : inputDeviceName);
@@ -1069,7 +1062,8 @@ public:
 private:
     //==============================================================================
     StringArray inputNames, outputNames, inputIds, outputIds;
-    bool hasScanned = false, listOnlySoundcards;
+    bool hasScanned = false;
+    const bool listOnlySoundcards;
 
     bool testDevice (const String& id, const String& outputName, const String& inputName)
     {
@@ -1264,7 +1258,7 @@ private:
             testDevice ("pulse", "Pulseaudio output", "Pulseaudio input");
 
         // make sure the default device is listed first, and followed by the pulse device (if present)
-        int idx = outputIds.indexOf ("pulse");
+        auto idx = outputIds.indexOf ("pulse");
         outputIds.move (idx, 0);
         outputNames.move (idx, 0);
 
@@ -1283,8 +1277,8 @@ private:
 
     static String hintToString (const void* hints, const char* type)
     {
-        char* const hint = snd_device_name_get_hint (hints, type);
-        const String s (String::fromUTF8 (hint));
+        char* hint = snd_device_name_get_hint (hints, type);
+        auto s = String::fromUTF8 (hint);
         ::free (hint);
         return s;
     }
