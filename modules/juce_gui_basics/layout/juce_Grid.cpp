@@ -313,8 +313,12 @@ struct Grid::PlacementHelpers
             strings.add (juce::StringArray::fromTokens (areaString, false));
 
         if (strings.size() > 0)
+        {
             for (auto s : strings)
+            {
                 jassert (s.size() == strings[0].size()); // all rows must have the same number of columns
+            }
+        }
 
         return strings;
     }
