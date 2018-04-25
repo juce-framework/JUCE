@@ -47,7 +47,7 @@ class LADSPAModuleHandle    : public ReferenceCountedObject
 {
 public:
     LADSPAModuleHandle (const File& f)
-        : file (f), moduleMain (nullptr)
+        : file (f)
     {
         getActiveModules().add (this);
     }
@@ -68,9 +68,9 @@ public:
 
     static LADSPAModuleHandle* findOrCreateModule (const File& file)
     {
-        for (int i = getActiveModules().size(); --i >= 0;)
+        for (auto i = getActiveModules().size(); --i >= 0;)
         {
-            LADSPAModuleHandle* const module = getActiveModules().getUnchecked(i);
+            auto* module = getActiveModules().getUnchecked(i);
 
             if (module->file == file)
                 return module;
@@ -92,7 +92,7 @@ public:
     }
 
     File file;
-    LADSPA_Descriptor_Function moduleMain;
+    LADSPA_Descriptor_Function moduleMain = nullptr;
 
 private:
     DynamicLibrary module;
@@ -101,7 +101,8 @@ private:
     {
         module.open (file.getFullPathName());
         moduleMain = (LADSPA_Descriptor_Function) module.getFunction ("ladspa_descriptor");
-        return moduleMain != nullptr;
+
+        return (moduleMain != nullptr);
     }
 
     void close()
@@ -116,172 +117,8 @@ private:
 class LADSPAPluginInstance     : public AudioPluginInstance
 {
 public:
-    struct LADSPAParameter final   : public Parameter
-    {
-        struct ParameterValue
-        {
-            inline ParameterValue() noexcept                   : scaled (0), unscaled (0) {}
-            inline ParameterValue (float s, float u) noexcept  : scaled (s), unscaled (u) {}
-
-            float scaled, unscaled;
-        };
-
-        LADSPAParameter (LADSPAPluginInstance& parent,
-                         int parameterID,
-                         const String& parameterName,
-                         bool parameterIsAutomatable)
-            : pluginInstance (parent),
-              paramID (parameterID),
-              name (parameterName),
-              automatable (parameterIsAutomatable)
-        {
-            reset();
-        }
-
-        virtual float getValue() const override
-        {
-            if (pluginInstance.plugin != nullptr)
-            {
-                const ScopedLock sl (pluginInstance.lock);
-
-                return paramValue.unscaled;
-            }
-
-            return 0.0f;
-        }
-
-        String getCurrentValueAsText() const override
-        {
-            if (auto* interface = pluginInstance.plugin)
-            {
-                const LADSPA_PortRangeHint& hint = interface->PortRangeHints[paramID];
-
-                if (LADSPA_IS_HINT_INTEGER (hint.HintDescriptor))
-                    return String ((int) paramValue.scaled);
-
-                return String (paramValue.scaled, 4);
-            }
-
-            return {};
-        }
-
-        virtual void setValue (float newValue) override
-        {
-            if (auto* interface = pluginInstance.plugin)
-            {
-                const ScopedLock sl (pluginInstance.lock);
-
-                if (paramValue.unscaled != newValue)
-                    paramValue = ParameterValue (getNewParamScaled (interface->PortRangeHints [paramID], newValue), newValue);
-            }
-        }
-
-        float getDefaultValue() const override
-        {
-            return defaultValue;
-        }
-
-        ParameterValue getDefaultParamValue() const
-        {
-            if (auto* interface = pluginInstance.plugin)
-            {
-                const LADSPA_PortRangeHint& hint = interface->PortRangeHints[paramID];
-                const LADSPA_PortRangeHintDescriptor& desc = hint.HintDescriptor;
-
-                if (LADSPA_IS_HINT_HAS_DEFAULT (desc))
-                {
-                    if (LADSPA_IS_HINT_DEFAULT_0 (desc))    return ParameterValue();
-                    if (LADSPA_IS_HINT_DEFAULT_1 (desc))    return ParameterValue (1.0f, 1.0f);
-                    if (LADSPA_IS_HINT_DEFAULT_100 (desc))  return ParameterValue (100.0f, 0.5f);
-                    if (LADSPA_IS_HINT_DEFAULT_440 (desc))  return ParameterValue (440.0f, 0.5f);
-
-                    const float scale = LADSPA_IS_HINT_SAMPLE_RATE (desc) ? (float) pluginInstance.getSampleRate() : 1.0f;
-                    const float lower = hint.LowerBound * scale;
-                    const float upper = hint.UpperBound * scale;
-
-                    if (LADSPA_IS_HINT_BOUNDED_BELOW (desc) && LADSPA_IS_HINT_DEFAULT_MINIMUM (desc))   return ParameterValue (lower, 0.0f);
-                    if (LADSPA_IS_HINT_BOUNDED_ABOVE (desc) && LADSPA_IS_HINT_DEFAULT_MAXIMUM (desc))   return ParameterValue (upper, 1.0f);
-
-                    if (LADSPA_IS_HINT_BOUNDED_BELOW (desc))
-                    {
-                        const bool useLog = LADSPA_IS_HINT_LOGARITHMIC (desc);
-
-                        if (LADSPA_IS_HINT_DEFAULT_LOW    (desc))  return ParameterValue (scaledValue (lower, upper, 0.25f, useLog), 0.25f);
-                        if (LADSPA_IS_HINT_DEFAULT_MIDDLE (desc))  return ParameterValue (scaledValue (lower, upper, 0.50f, useLog), 0.50f);
-                        if (LADSPA_IS_HINT_DEFAULT_HIGH   (desc))  return ParameterValue (scaledValue (lower, upper, 0.75f, useLog), 0.75f);
-                    }
-                }
-            }
-
-            return ParameterValue();
-        }
-
-        void reset()
-        {
-            paramValue = getDefaultParamValue();
-            defaultValue = paramValue.unscaled;
-        }
-
-        String getName (int /*maximumStringLength*/) const override
-        {
-            return name;
-        }
-
-        String getLabel() const override
-        {
-            return {};
-        }
-
-        bool isAutomatable() const override
-        {
-            return automatable;
-        }
-
-        static float scaledValue (float low, float high, float alpha, bool useLog) noexcept
-        {
-            if (useLog && low > 0 && high > 0)
-                return expf (logf (low) * (1.0f - alpha) + logf (high) * alpha);
-
-            return low + (high - low) * alpha;
-        }
-
-        static float toIntIfNecessary (const LADSPA_PortRangeHintDescriptor& desc, float value)
-        {
-            return LADSPA_IS_HINT_INTEGER (desc) ? ((float) (int) value) : value;
-        }
-
-        float getNewParamScaled (const LADSPA_PortRangeHint& hint, float newValue) const
-        {
-            const LADSPA_PortRangeHintDescriptor& desc = hint.HintDescriptor;
-
-            if (LADSPA_IS_HINT_TOGGLED (desc))
-                return (newValue < 0.5f) ? 0.0f : 1.0f;
-
-            const float scale = LADSPA_IS_HINT_SAMPLE_RATE (desc) ? (float) pluginInstance.getSampleRate() : 1.0f;
-            const float lower = hint.LowerBound * scale;
-            const float upper = hint.UpperBound * scale;
-
-            if (LADSPA_IS_HINT_BOUNDED_BELOW (desc) && LADSPA_IS_HINT_BOUNDED_ABOVE (desc))
-                return toIntIfNecessary (desc, scaledValue (lower, upper, newValue, LADSPA_IS_HINT_LOGARITHMIC (desc)));
-
-            if (LADSPA_IS_HINT_BOUNDED_BELOW (desc))   return toIntIfNecessary (desc, newValue);
-            if (LADSPA_IS_HINT_BOUNDED_ABOVE (desc))   return toIntIfNecessary (desc, newValue * upper);
-
-            return 0.0f;
-        }
-
-        LADSPAPluginInstance& pluginInstance;
-        const int paramID;
-        const String name;
-        const bool automatable;
-
-        ParameterValue paramValue;
-        float defaultValue = 0;
-    };
-
     LADSPAPluginInstance (const LADSPAModuleHandle::Ptr& m)
-        : module (m), plugin (nullptr), handle (nullptr),
-          initialised (false), tempBuffer (1, 1)
+        : module (m)
     {
         ++insideLADSPACallback;
 
@@ -291,7 +128,7 @@ public:
 
         if (module->moduleMain != nullptr)
         {
-            plugin = module->moduleMain (shellLADSPAUIDToCreate);
+            plugin = module->moduleMain ((size_t) shellLADSPAUIDToCreate);
 
             if (plugin == nullptr)
             {
@@ -307,7 +144,8 @@ public:
             return;
         }
 
-        const double sampleRate = getSampleRate() > 0 ? getSampleRate() : 44100.0;
+        const auto sampleRate = getSampleRate() > 0 ? getSampleRate()
+                                                    : 44100.0;
 
         handle = plugin->instantiate (plugin, (uint32) sampleRate);
 
@@ -346,24 +184,21 @@ public:
 
         for (unsigned int i = 0; i < plugin->PortCount; ++i)
         {
-            const LADSPA_PortDescriptor portDesc = plugin->PortDescriptors[i];
+            const auto portDesc = plugin->PortDescriptors[i];
 
             if ((portDesc & LADSPA_PORT_CONTROL) != 0)
-                addParameter (new LADSPAParameter (*this,
-                                                   i,
-                                                   String (plugin->PortNames[i]).trim(),
-                                                   (portDesc & LADSPA_PORT_INPUT) != 0));
+                addParameter (new LADSPAParameter (*this, (int) i, String (plugin->PortNames[i]).trim(), (portDesc & LADSPA_PORT_INPUT) != 0));
 
             if ((portDesc & LADSPA_PORT_AUDIO) != 0)
             {
-                if ((portDesc & LADSPA_PORT_INPUT) != 0)    inputs.add (i);
-                if ((portDesc & LADSPA_PORT_OUTPUT) != 0)   outputs.add (i);
+                if ((portDesc & LADSPA_PORT_INPUT) != 0)    inputs.add ((int) i);
+                if ((portDesc & LADSPA_PORT_OUTPUT) != 0)   outputs.add ((int) i);
             }
         }
 
         for (auto* param : getParameters())
             if (auto* ladspaParam = dynamic_cast<LADSPAParameter*> (param))
-                plugin->connect_port (handle, ladspaParam->paramID, &(ladspaParam->paramValue.scaled));
+                plugin->connect_port (handle, (size_t) ladspaParam->paramID, &(ladspaParam->paramValue.scaled));
 
         setPlayConfigDetails (inputs.size(), outputs.size(), initialSampleRate, initialBlockSize);
 
@@ -432,7 +267,7 @@ public:
             // dodgy hack to force some plugins to initialise the sample rate..
             if (auto* firstParam = getParameters()[0])
             {
-                const float old = firstParam->getValue();
+                const auto old = firstParam->getValue();
                 firstParam->setValue ((old < 0.5f) ? 1.0f : 0.0f);
                 firstParam->setValue (old);
             }
@@ -450,23 +285,23 @@ public:
         tempBuffer.setSize (1, 1);
     }
 
-    void processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages)
+    void processBlock (AudioBuffer<float>& buffer, MidiBuffer&)
     {
         auto numSamples = buffer.getNumSamples();
 
         if (initialised && plugin != nullptr && handle != nullptr)
         {
             for (int i = 0; i < inputs.size(); ++i)
-                plugin->connect_port (handle, inputs[i],
+                plugin->connect_port (handle, (size_t) inputs[i],
                                       i < buffer.getNumChannels() ? buffer.getWritePointer (i) : nullptr);
 
             if (plugin->run != nullptr)
             {
                 for (int i = 0; i < outputs.size(); ++i)
-                    plugin->connect_port (handle, outputs.getUnchecked(i),
+                    plugin->connect_port (handle, (size_t) outputs.getUnchecked(i),
                                           i < buffer.getNumChannels() ? buffer.getWritePointer (i) : nullptr);
 
-                plugin->run (handle, numSamples);
+                plugin->run (handle, (size_t) numSamples);
                 return;
             }
 
@@ -476,9 +311,9 @@ public:
                 tempBuffer.clear();
 
                 for (int i = 0; i < outputs.size(); ++i)
-                    plugin->connect_port (handle, outputs.getUnchecked(i), tempBuffer.getWritePointer (i));
+                    plugin->connect_port (handle, (size_t) outputs.getUnchecked(i), tempBuffer.getWritePointer (i));
 
-                plugin->run_adding (handle, numSamples);
+                plugin->run_adding (handle, (size_t) numSamples);
 
                 for (int i = 0; i < outputs.size(); ++i)
                     if (i < buffer.getNumChannels())
@@ -490,7 +325,7 @@ public:
             jassertfalse; // no callback to use?
         }
 
-        for (int i = getTotalNumInputChannels(), e = getTotalNumOutputChannels(); i < e; ++i)
+        for (auto i = getTotalNumInputChannels(), e = getTotalNumOutputChannels(); i < e; ++i)
             buffer.clear (i, 0, numSamples);
     }
 
@@ -514,8 +349,8 @@ public:
     }
 
     //==============================================================================
-    int getNumPrograms()                                { return 0; }
-    int getCurrentProgram()                             { return 0; }
+    int getNumPrograms()       { return 0; }
+    int getCurrentProgram()    { return 0; }
 
     void setCurrentProgram (int)
     {
@@ -524,87 +359,219 @@ public:
                 ladspaParam->reset();
     }
 
-    const String getProgramName (int index)
-    {
-        // XXX
-        return {};
-    }
-
-    void changeProgramName (int index, const String& newName)
-    {
-        // XXX
-    }
+    const String getProgramName (int)              { return {}; }
+    void changeProgramName (int, const String&)    {}
 
     //==============================================================================
     void getStateInformation (MemoryBlock& destData)
     {
         auto numParameters = getParameters().size();
-        destData.setSize (sizeof (float) * numParameters);
+        destData.setSize (sizeof (float) * (size_t) numParameters);
         destData.fillWith (0);
 
-        float* const p = (float*) ((char*) destData.getData());
+        auto* p = (float*) ((char*) destData.getData());
 
         for (int i = 0; i < numParameters; ++i)
             if (auto* param = getParameters()[i])
                 p[i] = param->getValue();
     }
 
-    void getCurrentProgramStateInformation (MemoryBlock& destData)
-    {
-        getStateInformation (destData);
-    }
+    void getCurrentProgramStateInformation (MemoryBlock& destData)                { getStateInformation (destData); }
+    void setCurrentProgramStateInformation (const void* data, int sizeInBytes)    { setStateInformation (data, sizeInBytes); }
 
     void setStateInformation (const void* data, int sizeInBytes)
     {
-        const float* p = static_cast<const float*> (data);
+        ignoreUnused (sizeInBytes);
+
+        auto* p = static_cast<const float*> (data);
 
         for (int i = 0; i < getParameters().size(); ++i)
             if (auto* param = getParameters()[i])
                 param->setValue (p[i]);
     }
 
-    void setCurrentProgramStateInformation (const void* data, int sizeInBytes)
-    {
-        setStateInformation (data, sizeInBytes);
-    }
+    bool hasEditor() const                  { return false; }
+    AudioProcessorEditor* createEditor()    { return nullptr; }
 
-    bool hasEditor() const
-    {
-        return false;
-    }
+    bool isValid() const                    { return handle != nullptr; }
 
-    AudioProcessorEditor* createEditor()
-    {
-        return nullptr;
-    }
-
-    bool isValid() const
-    {
-        return handle != nullptr;
-    }
-
+    //==============================================================================
     LADSPAModuleHandle::Ptr module;
-    const LADSPA_Descriptor* plugin;
+    const LADSPA_Descriptor* plugin = nullptr;
 
 private:
-    LADSPA_Handle handle;
+    //==============================================================================
+    struct LADSPAParameter final   : public Parameter
+    {
+        struct ParameterValue
+        {
+            inline ParameterValue() noexcept                                               {}
+            inline ParameterValue (float s, float u) noexcept  : scaled (s), unscaled (u)  {}
+
+            float scaled = 0, unscaled = 0;
+        };
+
+        LADSPAParameter (LADSPAPluginInstance& parent, int parameterID,
+                         const String& parameterName, bool parameterIsAutomatable)
+            : pluginInstance (parent),
+              paramID (parameterID),
+              name (parameterName),
+              automatable (parameterIsAutomatable)
+        {
+            reset();
+        }
+
+        virtual float getValue() const override
+        {
+            if (pluginInstance.plugin != nullptr)
+            {
+                const ScopedLock sl (pluginInstance.lock);
+
+                return paramValue.unscaled;
+            }
+
+            return 0.0f;
+        }
+
+        String getCurrentValueAsText() const override
+        {
+            if (auto* interface = pluginInstance.plugin)
+            {
+                const auto& hint = interface->PortRangeHints[paramID];
+
+                if (LADSPA_IS_HINT_INTEGER (hint.HintDescriptor))
+                    return String ((int) paramValue.scaled);
+
+                return String (paramValue.scaled, 4);
+            }
+
+            return {};
+        }
+
+        virtual void setValue (float newValue) override
+        {
+            if (auto* interface = pluginInstance.plugin)
+            {
+                const ScopedLock sl (pluginInstance.lock);
+
+                if (paramValue.unscaled != newValue)
+                    paramValue = ParameterValue (getNewParamScaled (interface->PortRangeHints [paramID], newValue), newValue);
+            }
+        }
+
+        float getDefaultValue() const override
+        {
+            return defaultValue;
+        }
+
+        ParameterValue getDefaultParamValue() const
+        {
+            if (auto* interface = pluginInstance.plugin)
+            {
+                const auto& hint = interface->PortRangeHints[paramID];
+                const auto& desc = hint.HintDescriptor;
+
+                if (LADSPA_IS_HINT_HAS_DEFAULT (desc))
+                {
+                    if (LADSPA_IS_HINT_DEFAULT_0 (desc))    return {};
+                    if (LADSPA_IS_HINT_DEFAULT_1 (desc))    return { 1.0f, 1.0f };
+                    if (LADSPA_IS_HINT_DEFAULT_100 (desc))  return { 100.0f, 0.5f };
+                    if (LADSPA_IS_HINT_DEFAULT_440 (desc))  return { 440.0f, 0.5f };
+
+                    const auto scale = LADSPA_IS_HINT_SAMPLE_RATE (desc) ? (float) pluginInstance.getSampleRate()
+                    : 1.0f;
+                    const auto lower = hint.LowerBound * scale;
+                    const auto upper = hint.UpperBound * scale;
+
+                    if (LADSPA_IS_HINT_BOUNDED_BELOW (desc) && LADSPA_IS_HINT_DEFAULT_MINIMUM (desc))   return { lower, 0.0f };
+                    if (LADSPA_IS_HINT_BOUNDED_ABOVE (desc) && LADSPA_IS_HINT_DEFAULT_MAXIMUM (desc))   return { upper, 1.0f };
+
+                    if (LADSPA_IS_HINT_BOUNDED_BELOW (desc))
+                    {
+                        auto useLog = LADSPA_IS_HINT_LOGARITHMIC (desc);
+
+                        if (LADSPA_IS_HINT_DEFAULT_LOW    (desc))  return { scaledValue (lower, upper, 0.25f, useLog), 0.25f };
+                        if (LADSPA_IS_HINT_DEFAULT_MIDDLE (desc))  return { scaledValue (lower, upper, 0.50f, useLog), 0.50f };
+                        if (LADSPA_IS_HINT_DEFAULT_HIGH   (desc))  return { scaledValue (lower, upper, 0.75f, useLog), 0.75f };
+                    }
+                }
+            }
+
+            return {};
+        }
+
+        void reset()
+        {
+            paramValue = getDefaultParamValue();
+            defaultValue = paramValue.unscaled;
+        }
+
+        String getName (int /*maximumStringLength*/) const override    { return name; }
+        String getLabel() const override                               { return {}; }
+
+        bool isAutomatable() const override                            { return automatable; }
+
+        static float scaledValue (float low, float high, float alpha, bool useLog) noexcept
+        {
+            if (useLog && low > 0 && high > 0)
+                return expf (logf (low) * (1.0f - alpha) + logf (high) * alpha);
+
+                return low + (high - low) * alpha;
+        }
+
+        static float toIntIfNecessary (const LADSPA_PortRangeHintDescriptor& desc, float value)
+        {
+            return LADSPA_IS_HINT_INTEGER (desc) ? ((float) (int) value) : value;
+        }
+
+        float getNewParamScaled (const LADSPA_PortRangeHint& hint, float newValue) const
+        {
+            const auto& desc = hint.HintDescriptor;
+
+            if (LADSPA_IS_HINT_TOGGLED (desc))
+                return (newValue < 0.5f) ? 0.0f : 1.0f;
+
+            const auto scale = LADSPA_IS_HINT_SAMPLE_RATE (desc) ? (float) pluginInstance.getSampleRate()
+            : 1.0f;
+            const auto lower = hint.LowerBound * scale;
+            const auto upper = hint.UpperBound * scale;
+
+            if (LADSPA_IS_HINT_BOUNDED_BELOW (desc) && LADSPA_IS_HINT_BOUNDED_ABOVE (desc))
+                return toIntIfNecessary (desc, scaledValue (lower, upper, newValue, LADSPA_IS_HINT_LOGARITHMIC (desc)));
+
+            if (LADSPA_IS_HINT_BOUNDED_BELOW (desc))   return toIntIfNecessary (desc, newValue);
+            if (LADSPA_IS_HINT_BOUNDED_ABOVE (desc))   return toIntIfNecessary (desc, newValue * upper);
+
+            return 0.0f;
+        }
+
+        LADSPAPluginInstance& pluginInstance;
+        const int paramID;
+        const String name;
+        const bool automatable;
+
+        ParameterValue paramValue;
+        float defaultValue = 0.0f;
+    };
+
+    //==============================================================================
+    LADSPA_Handle handle = nullptr;
     String name;
     CriticalSection lock;
-    bool initialised;
-    AudioBuffer<float> tempBuffer;
+    bool initialised = false;
+    AudioBuffer<float> tempBuffer { 1, 1 };
     Array<int> inputs, outputs;
 
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LADSPAPluginInstance)
 };
 
 
 //==============================================================================
-//==============================================================================
 LADSPAPluginFormat::LADSPAPluginFormat() {}
 LADSPAPluginFormat::~LADSPAPluginFormat() {}
 
-void LADSPAPluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& results,
-                                              const String& fileOrIdentifier)
+void LADSPAPluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& results, const String& fileOrIdentifier)
 {
     if (! fileMightContainThisPluginType (fileOrIdentifier))
         return;
@@ -619,14 +586,13 @@ void LADSPAPluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& res
         return;
 
     instance->initialise (44100.0, 512);
-
     instance->fillInPluginDescription (desc);
 
     if (instance->module->moduleMain != nullptr)
     {
         for (int uid = 0;; ++uid)
         {
-            if (const LADSPA_Descriptor* plugin = instance->module->moduleMain (uid))
+            if (auto* plugin = instance->module->moduleMain ((size_t) uid))
             {
                 desc.uid = uid;
                 desc.name = plugin->Name != nullptr ? plugin->Name : "Unknown";
@@ -642,18 +608,16 @@ void LADSPAPluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& res
     }
 }
 
-void LADSPAPluginFormat::createPluginInstance (const PluginDescription& desc,
-                                               double sampleRate, int blockSize,
-                                               void* userData,
-                                               void (*callback) (void*, AudioPluginInstance*, const String&))
+void LADSPAPluginFormat::createPluginInstance (const PluginDescription& desc, double sampleRate, int blockSize,
+                                               void* userData, void (*callback) (void*, AudioPluginInstance*, const String&))
 {
     std::unique_ptr<LADSPAPluginInstance> result;
 
     if (fileMightContainThisPluginType (desc.fileOrIdentifier))
     {
-        File file (desc.fileOrIdentifier);
+        auto file = File (desc.fileOrIdentifier);
 
-        const File previousWorkingDirectory (File::getCurrentWorkingDirectory());
+        auto previousWorkingDirectory = File::getCurrentWorkingDirectory();
         file.getParentDirectory().setAsCurrentWorkingDirectory();
 
         const LADSPAModuleHandle::Ptr module (LADSPAModuleHandle::findOrCreateModule (file));
@@ -688,7 +652,7 @@ bool LADSPAPluginFormat::requiresUnblockedMessageThreadDuringCreation (const Plu
 
 bool LADSPAPluginFormat::fileMightContainThisPluginType (const String& fileOrIdentifier)
 {
-    const File f (File::createFileWithoutCheckingPath (fileOrIdentifier));
+    auto f = File::createFileWithoutCheckingPath (fileOrIdentifier);
     return f.existsAsFile() && f.hasFileExtension (".so");
 }
 
@@ -723,7 +687,7 @@ void LADSPAPluginFormat::recursiveFileSearch (StringArray& results, const File& 
 
     while (iter.next())
     {
-        const File f (iter.getFile());
+        auto f = iter.getFile();
         bool isPlugin = false;
 
         if (fileMightContainThisPluginType (f.getFullPathName()))
@@ -739,9 +703,7 @@ void LADSPAPluginFormat::recursiveFileSearch (StringArray& results, const File& 
 
 FileSearchPath LADSPAPluginFormat::getDefaultLocationsToSearch()
 {
-    return FileSearchPath (SystemStats::getEnvironmentVariable ("LADSPA_PATH",
-                                                                "/usr/lib/ladspa;/usr/local/lib/ladspa;~/.ladspa")
-                             .replace (":", ";"));
+    return  { SystemStats::getEnvironmentVariable ("LADSPA_PATH", "/usr/lib/ladspa;/usr/local/lib/ladspa;~/.ladspa").replace (":", ";") };
 }
 
 } // namespace juce
