@@ -31,7 +31,7 @@
 
  dependencies:     juce_core, juce_cryptography, juce_data_structures, juce_events,
                    juce_graphics, juce_gui_basics, juce_gui_extra, juce_video
- exporters:        xcode_mac, vs2017, linux_make
+ exporters:        xcode_mac, vs2017, androidstudio, xcode_iphone
 
  moduleFlags:      JUCE_USE_CAMERA=1
 
@@ -49,14 +49,17 @@
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
-class CameraDemo  : public Component,
-                    private CameraDevice::Listener,
-                    private AsyncUpdater
+class CameraDemo  : public Component
 {
 public:
     CameraDemo()
     {
         setOpaque (true);
+
+       #if JUCE_ANDROID
+        // Android requires exclusive access to the audio device when recording videos.
+        audioDeviceManager.closeAudioDevice();
+       #endif
 
         addAndMakeVisible (cameraSelectorComboBox);
         updateCameraList();
@@ -76,6 +79,21 @@ public:
         cameraSelectorComboBox.setSelectedId (2);
 
         setSize (500, 500);
+
+       #if JUCE_IOS || JUCE_ANDROID
+        setPortraitOrientationEnabled (true);
+       #endif
+    }
+
+    ~CameraDemo()
+    {
+       #if JUCE_IOS || JUCE_ANDROID
+        setPortraitOrientationEnabled (false);
+       #endif
+
+       #if JUCE_ANDROID
+        audioDeviceManager.restartLastAudioDevice();
+       #endif
     }
 
     //==============================================================================
@@ -101,26 +119,66 @@ public:
         recordMovieButton.setBounds (top.removeFromLeft (recordMovieButton.getWidth()));
 
         r.removeFromTop (4);
-        auto previewArea = r.removeFromTop (r.getHeight() / 2);
+        auto previewArea = shouldUseLandscapeLayout() ? r.removeFromLeft (r.getWidth() / 2)
+                                                      : r.removeFromTop (r.getHeight() / 2);
 
         if (cameraPreviewComp.get() != nullptr)
             cameraPreviewComp->setBounds (previewArea);
 
-        r.removeFromTop (4);
+        if (shouldUseLandscapeLayout())
+            r.removeFromLeft (4);
+        else
+            r.removeFromTop (4);
+
         lastSnapshot.setBounds (r);
     }
 
 
 private:
     //==============================================================================
+    // if this PIP is running inside the demo runner, we'll use the shared device manager instead
+   #ifndef JUCE_DEMO_RUNNER
+    AudioDeviceManager audioDeviceManager;
+   #else
+    AudioDeviceManager& audioDeviceManager { getSharedAudioDeviceManager (0, 2) };
+   #endif
+
     std::unique_ptr<CameraDevice> cameraDevice;
     std::unique_ptr<Component> cameraPreviewComp;
     ImageComponent lastSnapshot;
 
     ComboBox cameraSelectorComboBox  { "Camera" };
     TextButton snapshotButton        { "Take a snapshot" };
+   #if ! JUCE_ANDROID && ! JUCE_IOS
     TextButton recordMovieButton     { "Record a movie (to your desktop)..." };
+   #else
+    TextButton recordMovieButton     { "Record a movie" };
+   #endif
     bool recordingMovie = false;
+    File recordingFile;
+    bool contentSharingPending = false;
+
+    void setPortraitOrientationEnabled (bool shouldBeEnabled)
+    {
+        auto allowedOrientations = Desktop::getInstance().getOrientationsEnabled();
+
+        if (shouldBeEnabled)
+            allowedOrientations |= Desktop::upright;
+        else
+            allowedOrientations &= ~Desktop::upright;
+
+        Desktop::getInstance().setOrientationsEnabled (allowedOrientations);
+    }
+
+    bool shouldUseLandscapeLayout() const noexcept
+    {
+       #if JUCE_ANDROID || JUCE_IOS
+        auto orientation = Desktop::getInstance().getCurrentOrientation();
+        return orientation == Desktop::rotatedClockwise || orientation == Desktop::rotatedAntiClockwise;
+       #else
+        return false;
+       #endif
+    }
 
     void updateCameraList()
     {
@@ -137,25 +195,68 @@ private:
     void cameraChanged()
     {
         // This is called when the user chooses a camera from the drop-down list.
-        cameraDevice     .reset();
+       #if JUCE_IOS
+        // On iOS, when switching camera, open the new camera first, so that it can
+        // share the underlying camera session with the old camera. Otherwise, the
+        // session would have to be closed first, which can take several seconds.
+        if (cameraSelectorComboBox.getSelectedId() == 1)
+            cameraDevice.reset();
+       #else
+        cameraDevice.reset();
+       #endif
         cameraPreviewComp.reset();
         recordingMovie = false;
 
         if (cameraSelectorComboBox.getSelectedId() > 1)
         {
-            // Try to open the user's choice of camera..
-            cameraDevice.reset (CameraDevice::openDevice (cameraSelectorComboBox.getSelectedId() - 2));
+           #if JUCE_ANDROID || JUCE_IOS
+            openCameraAsync();
+           #else
+            cameraDeviceOpenResult (CameraDevice::openDevice (cameraSelectorComboBox.getSelectedId() - 2), {});
+           #endif
+        }
+        else
+        {
+            snapshotButton   .setEnabled (cameraDevice != nullptr && ! contentSharingPending);
+            recordMovieButton.setEnabled (cameraDevice != nullptr && ! contentSharingPending);
+            resized();
+        }
+    }
 
-            // and if it worked, create a preview component for it..
-            if (cameraDevice.get() != nullptr)
-            {
-                cameraPreviewComp.reset (cameraDevice->createViewerComponent());
-                addAndMakeVisible (cameraPreviewComp.get());
-            }
+    void openCameraAsync()
+    {
+        SafePointer<CameraDemo> safeThis (this);
+
+        CameraDevice::openDeviceAsync (cameraSelectorComboBox.getSelectedId() - 2,
+                                       [safeThis] (CameraDevice* device, const String& error) mutable
+                                       {
+                                           if (safeThis)
+                                               safeThis->cameraDeviceOpenResult (device, error);
+                                       });
+    }
+
+    void cameraDeviceOpenResult (CameraDevice* device, const String& error)
+    {
+        // If camera opening worked, create a preview component for it..
+        cameraDevice.reset (device);
+
+        if (cameraDevice.get() != nullptr)
+        {
+           #if JUCE_ANDROID
+            SafePointer<CameraDemo> safeThis (this);
+            cameraDevice->onErrorOccurred = [safeThis] (const String& error) mutable { if (safeThis) safeThis->errorOccurred (error); };
+           #endif
+            cameraPreviewComp.reset (cameraDevice->createViewerComponent());
+            addAndMakeVisible (cameraPreviewComp.get());
+        }
+        else
+        {
+            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon, "Camera open failed",
+                                              "Camera open failed, reason: " + error);
         }
 
-        snapshotButton   .setEnabled (cameraDevice.get() != nullptr);
-        recordMovieButton.setEnabled (cameraDevice.get() != nullptr);
+        snapshotButton   .setEnabled (cameraDevice.get() != nullptr && ! contentSharingPending);
+        recordMovieButton.setEnabled (cameraDevice.get() != nullptr && ! contentSharingPending);
         resized();
     }
 
@@ -169,10 +270,20 @@ private:
                 // Start recording to a file on the user's desktop..
                 recordingMovie = true;
 
-                auto file = File::getSpecialLocation (File::userDesktopDirectory)
-                                 .getNonexistentChildFile ("JuceCameraDemo", CameraDevice::getFileExtension());
+               #if JUCE_ANDROID || JUCE_IOS
+                recordingFile = File::getSpecialLocation (File::tempDirectory)
+               #else
+                recordingFile = File::getSpecialLocation (File::userDesktopDirectory)
+               #endif
+                                 .getNonexistentChildFile ("JuceCameraVideoDemo", CameraDevice::getFileExtension());
 
-                cameraDevice->startRecordingToFile (file);
+               #if JUCE_ANDROID
+                // Android does not support taking pictures while recording video.
+                snapshotButton.setEnabled (false);
+               #endif
+
+                cameraSelectorComboBox.setEnabled (false);
+                cameraDevice->startRecordingToFile (recordingFile);
                 recordMovieButton.setButtonText ("Stop Recording");
             }
             else
@@ -180,40 +291,99 @@ private:
                 // Already recording, so stop...
                 recordingMovie = false;
                 cameraDevice->stopRecording();
+               #if ! JUCE_ANDROID && ! JUCE_IOS
                 recordMovieButton.setButtonText ("Start recording (to a file on your desktop)");
+               #else
+                recordMovieButton.setButtonText ("Record a movie");
+               #endif
+                cameraSelectorComboBox.setEnabled (true);
+
+               #if JUCE_ANDROID
+                snapshotButton.setEnabled (true);
+               #endif
+
+               #if JUCE_ANDROID || JUCE_IOS
+                URL url (recordingFile);
+
+                snapshotButton   .setEnabled (false);
+                recordMovieButton.setEnabled (false);
+                contentSharingPending = true;
+
+                SafePointer<CameraDemo> safeThis (this);
+
+                juce::ContentSharer::getInstance()->shareFiles ({url},
+                                                                [safeThis] (bool success, const String&) mutable
+                                                                {
+                                                                    if (safeThis)
+                                                                        safeThis->sharingFinished (success, false);
+                                                                });
+               #endif
             }
         }
     }
 
     void takeSnapshot()
     {
-        // When the user clicks the snapshot button, we'll attach ourselves to
-        // the camera as a listener, and wait for an image to arrive...
-        cameraDevice->addListener (this);
+        SafePointer<CameraDemo> safeThis (this);
+        cameraDevice->takeStillPicture ([safeThis] (const Image& image) mutable { safeThis->imageReceived (image); });
     }
 
     // This is called by the camera device when a new image arrives
-    void imageReceived (const Image& image) override
+    void imageReceived (const Image& image)
     {
-        // In this app we just want to take one image, so as soon as this happens,
-        // we'll unregister ourselves as a listener.
-        if (cameraDevice.get() != nullptr)
-            cameraDevice->removeListener (this);
+        if (! image.isValid())
+            return;
 
-        // This callback won't be on the message thread, so to get the image back to
-        // the message thread, we'll stash a pointer to it (which is reference-counted in
-        // a thead-safe way), and trigger an async callback which will then display the
-        // new image..
-        incomingImage = image;
-        triggerAsyncUpdate();
+        lastSnapshot.setImage (image);
+
+       #if JUCE_ANDROID || JUCE_IOS
+        auto imageFile = File::getSpecialLocation (File::tempDirectory).getNonexistentChildFile ("JuceCameraPhotoDemo", ".jpg");
+
+        if (auto stream = std::unique_ptr<OutputStream> (imageFile.createOutputStream()))
+        {
+            if (JPEGImageFormat().writeImageToStream (image, *stream))
+            {
+                URL url (imageFile);
+
+                snapshotButton   .setEnabled (false);
+                recordMovieButton.setEnabled (false);
+                contentSharingPending = true;
+
+                SafePointer<CameraDemo> safeThis (this);
+
+                juce::ContentSharer::getInstance()->shareFiles ({url},
+                                                                [safeThis] (bool success, const String&) mutable
+                                                                {
+                                                                    if (safeThis)
+                                                                        safeThis->sharingFinished (success, true);
+                                                                });
+            }
+        }
+       #endif
     }
 
-    Image incomingImage;
-
-    void handleAsyncUpdate() override
+    void errorOccurred (const String& error)
     {
-        if (incomingImage.isValid())
-            lastSnapshot.setImage (incomingImage);
+        AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon,
+                                          "Camera Device Error",
+                                          "An error has occurred: " + error + " Camera will be closed.");
+
+        cameraDevice.reset();
+
+        cameraSelectorComboBox.setSelectedId (1);
+        snapshotButton   .setEnabled (false);
+        recordMovieButton.setEnabled (false);
+    }
+
+    void sharingFinished (bool success, bool isCapture)
+    {
+        AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon,
+                                          isCapture ? "Image sharing result" : "Video sharing result",
+                                          success ? "Success!" : "Failed!");
+
+        contentSharingPending = false;
+        snapshotButton   .setEnabled (true);
+        recordMovieButton.setEnabled (true);
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CameraDemo)

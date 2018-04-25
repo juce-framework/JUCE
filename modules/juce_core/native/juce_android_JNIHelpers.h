@@ -164,39 +164,6 @@ private:
 };
 
 //==============================================================================
-namespace
-{
-    inline String juceString (JNIEnv* env, jstring s)
-    {
-        if (s == 0)
-            return {};
-
-        const char* const utf8 = env->GetStringUTFChars (s, nullptr);
-        CharPointer_UTF8 utf8CP (utf8);
-        const String result (utf8CP);
-        env->ReleaseStringUTFChars (s, utf8);
-        return result;
-    }
-
-    inline String juceString (jstring s)
-    {
-        return juceString (getEnv(), s);
-    }
-
-    inline LocalRef<jstring> javaString (const String& s)
-    {
-        return LocalRef<jstring> (getEnv()->NewStringUTF (s.toUTF8()));
-    }
-
-    inline LocalRef<jstring> javaStringFromChar (const juce_wchar c)
-    {
-        char utf8[8] = { 0 };
-        CharPointer_UTF8 (utf8).write (c);
-        return LocalRef<jstring> (getEnv()->NewStringUTF (utf8));
-    }
-}
-
-//==============================================================================
 class JNIClassBase
 {
 public:
@@ -287,6 +254,7 @@ extern AndroidSystem android;
  METHOD (deleteView,                      "deleteView",                      "(L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$ComponentPeerView;)V") \
  METHOD (createNativeSurfaceView,         "createNativeSurfaceView",         "(J)L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$NativeSurfaceView;") \
  METHOD (finish,                          "finish",                          "()V") \
+ METHOD (getWindowManager,                "getWindowManager",                "()Landroid/view/WindowManager;") \
  METHOD (setRequestedOrientation,         "setRequestedOrientation",         "(I)V") \
  METHOD (getClipboardContent,             "getClipboardContent",             "()Ljava/lang/String;") \
  METHOD (setClipboardContent,             "setClipboardContent",             "(Ljava/lang/String;)V") \
@@ -329,14 +297,21 @@ extern AndroidSystem android;
  METHOD (startActivity,                   "startActivity",                   "(Landroid/content/Intent;)V") \
  METHOD (startActivityForResult,          "startActivityForResult",          "(Landroid/content/Intent;I)V") \
  METHOD (getContentResolver,              "getContentResolver",              "()Landroid/content/ContentResolver;") \
+ METHOD (addAppPausedResumedListener,     "addAppPausedResumedListener",     "(L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$AppPausedResumedListener;J)V") \
+ METHOD (removeAppPausedResumedListener,  "removeAppPausedResumedListener",  "(L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$AppPausedResumedListener;J)V")
 
 DECLARE_JNI_CLASS (JuceAppActivity, JUCE_ANDROID_ACTIVITY_CLASSPATH);
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
-  STATICMETHOD (createBitmap, "createBitmap", "(IILandroid/graphics/Bitmap$Config;)Landroid/graphics/Bitmap;") \
-  METHOD (setPixel, "setPixel", "(III)V")
+  STATICMETHOD (createBitmap,     "createBitmap", "(IILandroid/graphics/Bitmap$Config;)Landroid/graphics/Bitmap;") \
+  STATICMETHOD (createBitmapFrom, "createBitmap", "(Landroid/graphics/Bitmap;IIIILandroid/graphics/Matrix;Z)Landroid/graphics/Bitmap;") \
+  METHOD (compress,  "compress",  "(Landroid/graphics/Bitmap$CompressFormat;ILjava/io/OutputStream;)Z") \
+  METHOD (getHeight, "getHeight", "()I") \
+  METHOD (getWidth,  "getWidth",  "()I") \
+  METHOD (recycle,   "recycle",   "()V") \
+  METHOD (setPixel,  "setPixel",  "(III)V")
 
 DECLARE_JNI_CLASS (AndroidBitmap, "android/graphics/Bitmap");
 #undef JNI_CLASS_MEMBERS
@@ -348,12 +323,43 @@ DECLARE_JNI_CLASS (AndroidBitmapConfig, "android/graphics/Bitmap$Config");
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+  STATICMETHOD (decodeByteArray, "decodeByteArray", "([BII)Landroid/graphics/Bitmap;")
+
+DECLARE_JNI_CLASS (AndroidBitmapFactory, "android/graphics/BitmapFactory");
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
   STATICMETHOD (dumpReferenceTables, "dumpReferenceTables", "()V")
 
   DECLARE_JNI_CLASS (AndroidDebug, "android/os/Debug");
 #undef JNI_CLASS_MEMBERS
 
 #define JUCE_LOG_JNI_REFERENCES_TABLE getEnv()->CallStaticVoidMethod (AndroidDebug, AndroidDebug.dumpReferenceTables);
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ METHOD (getRotation, "getRotation", "()I")
+
+DECLARE_JNI_CLASS (AndroidDisplay, "android/view/Display");
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+  METHOD (constructor,           "<init>",      "()V") \
+  METHOD (constructorWithLooper, "<init>",      "(Landroid/os/Looper;)V") \
+  METHOD (post,                  "post",        "(Ljava/lang/Runnable;)Z") \
+  METHOD (postDelayed,           "postDelayed", "(Ljava/lang/Runnable;J)Z") \
+
+DECLARE_JNI_CLASS (AndroidHandler, "android/os/Handler");
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+  METHOD (constructor, "<init>",     "(Ljava/lang/String;)V") \
+  METHOD (getLooper,   "getLooper",  "()Landroid/os/Looper;") \
+  METHOD (join,        "join",       "()V") \
+  METHOD (quitSafely,  "quitSafely", "()Z") \
+  METHOD (start,       "start",      "()V")
+
+DECLARE_JNI_CLASS (AndroidHandlerThread, "android/os/HandlerThread");
+#undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
   STATICMETHOD (createChooser, "createChooser", "(Landroid/content/Intent;Ljava/lang/CharSequence;)Landroid/content/Intent;") \
@@ -382,8 +388,11 @@ DECLARE_JNI_CLASS (AndroidIntent, "android/content/Intent");
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
- METHOD (constructor,   "<init>",    "()V") \
- METHOD (setValues,     "setValues", "([F)V") \
+ METHOD (constructor,    "<init>",        "()V") \
+ METHOD (postRotate,     "postRotate",    "(FFF)Z") \
+ METHOD (postScale,      "postScale",     "(FFFF)Z") \
+ METHOD (postTranslate,  "postTranslate", "(FF)Z") \
+ METHOD (setValues,      "setValues",     "([F)V")
 
 DECLARE_JNI_CLASS (AndroidMatrix, "android/graphics/Matrix");
 #undef JNI_CLASS_MEMBERS
@@ -418,13 +427,19 @@ DECLARE_JNI_CLASS (AndroidPendingIntent, "android/app/PendingIntent");
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+  METHOD (toString, "toString", "()Ljava/lang/String;")
+
+DECLARE_JNI_CLASS (AndroidRange, "android/util/Range");
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  METHOD (constructor,   "<init>",   "(IIII)V") \
  FIELD (left,           "left",     "I") \
  FIELD (right,          "right",    "I") \
  FIELD (top,            "top",      "I") \
  FIELD (bottom,         "bottom",   "I") \
 
-DECLARE_JNI_CLASS (AndroidRectClass, "android/graphics/Rect");
+DECLARE_JNI_CLASS (AndroidRect, "android/graphics/Rect");
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -432,6 +447,13 @@ DECLARE_JNI_CLASS (AndroidRectClass, "android/graphics/Rect");
   METHOD (openRawResourceFd, "openRawResourceFd", "(I)Landroid/content/res/AssetFileDescriptor;")
 
 DECLARE_JNI_CLASS (AndroidResources, "android/content/res/Resources")
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+  METHOD (getHeight, "getHeight", "()I") \
+  METHOD (getWidth,  "getWidth",  "()I")
+
+DECLARE_JNI_CLASS (AndroidSize, "android/util/Size");
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -465,6 +487,12 @@ DECLARE_JNI_CLASS (AndroidView, "android/view/View");
 DECLARE_JNI_CLASS (AndroidViewGroup, "android/view/ViewGroup")
 #undef JNI_CLASS_MEMBERS
 
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ METHOD (getDefaultDisplay, "getDefaultDisplay", "()Landroid/view/Display;")
+
+DECLARE_JNI_CLASS (AndroidWindowManager, "android/view/WindowManager");
+#undef JNI_CLASS_MEMBERS
+
 //==============================================================================
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
   METHOD (constructor, "<init>",   "(I)V") \
@@ -477,6 +505,7 @@ DECLARE_JNI_CLASS (JavaArrayList, "java/util/ArrayList");
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+  STATICMETHOD (valueOf, "valueOf", "(Z)Ljava/lang/Boolean;") \
   METHOD (booleanValue, "booleanValue", "()Z")
 
 DECLARE_JNI_CLASS (JavaBoolean, "java/lang/Boolean");
@@ -508,12 +537,20 @@ DECLARE_JNI_CLASS (JavaBundle, "android/os/Bundle");
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+  METHOD (get,       "get",       "([B)Ljava/nio/ByteBuffer;") \
+  METHOD (remaining, "remaining", "()I")
+
+DECLARE_JNI_CLASS (JavaByteBuffer, "java/nio/ByteBuffer");
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
   METHOD (toString, "toString", "()Ljava/lang/String;")
 
 DECLARE_JNI_CLASS (JavaCharSequence, "java/lang/CharSequence");
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+  STATICMETHOD (forName, "forName", "(Ljava/lang/String;)Ljava/lang/Class;") \
   METHOD (getName,           "getName",           "()Ljava/lang/String;") \
   METHOD (getModifiers,      "getModifiers",      "()I")            \
   METHOD (isAnnotation,      "isAnnotation",      "()Z") \
@@ -571,7 +608,8 @@ DECLARE_JNI_CLASS (JavaHashMap, "java/util/HashMap");
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
   STATICMETHOD (parseInt, "parseInt", "(Ljava/lang/String;I)I") \
-  STATICMETHOD (valueOf,  "valueOf",  "(I)Ljava/lang/Integer;")
+  STATICMETHOD (valueOf,  "valueOf",  "(I)Ljava/lang/Integer;") \
+  METHOD (intValue, "intValue", "()I")
 
 DECLARE_JNI_CLASS (JavaInteger, "java/lang/Integer");
 #undef JNI_CLASS_MEMBERS
@@ -581,6 +619,13 @@ DECLARE_JNI_CLASS (JavaInteger, "java/lang/Integer");
   METHOD (next,    "next",    "()Ljava/lang/Object;")
 
 DECLARE_JNI_CLASS (JavaIterator, "java/util/Iterator");
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+  METHOD (get,  "get",  "(I)Ljava/lang/Object;") \
+  METHOD (size, "size", "()I")
+
+DECLARE_JNI_CLASS (JavaList, "java/util/List");
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -632,6 +677,71 @@ DECLARE_JNI_CLASS (JavaSet, "java/util/Set");
 
 DECLARE_JNI_CLASS (JavaString, "java/lang/String");
 #undef JNI_CLASS_MEMBERS
+
+//==============================================================================
+namespace
+{
+    inline String juceString (JNIEnv* env, jstring s)
+    {
+        if (s == 0)
+            return {};
+
+        const char* const utf8 = env->GetStringUTFChars (s, nullptr);
+        CharPointer_UTF8 utf8CP (utf8);
+        const String result (utf8CP);
+        env->ReleaseStringUTFChars (s, utf8);
+        return result;
+    }
+
+    inline String juceString (jstring s)
+    {
+        return juceString (getEnv(), s);
+    }
+
+    inline LocalRef<jstring> javaString (const String& s)
+    {
+        return LocalRef<jstring> (getEnv()->NewStringUTF (s.toUTF8()));
+    }
+
+    inline LocalRef<jstring> javaStringFromChar (const juce_wchar c)
+    {
+        char utf8[8] = { 0 };
+        CharPointer_UTF8 (utf8).write (c);
+        return LocalRef<jstring> (getEnv()->NewStringUTF (utf8));
+    }
+
+    inline LocalRef<jobjectArray> juceStringArrayToJava (const StringArray& juceArray)
+    {
+        auto* env = getEnv();
+
+        LocalRef<jobjectArray> result (env->NewObjectArray ((jsize) juceArray.size(),
+                                                            JavaString,
+                                                            javaString ("").get()));
+
+        for (int i = 0; i < juceArray.size(); ++i)
+            env->SetObjectArrayElement (result, i, javaString (juceArray [i]).get());
+
+        return result;
+    }
+
+    inline StringArray javaStringArrayToJuce (const LocalRef<jobjectArray>& javaArray)
+    {
+        if (javaArray.get() == nullptr)
+            return {};
+
+        auto* env = getEnv();
+
+        StringArray result;
+
+        for (int i = 0; i < env->GetArrayLength (javaArray.get()); ++i)
+        {
+            LocalRef<jstring> javaString ((jstring) env->GetObjectArrayElement (javaArray.get(), i));
+            result.add (juceString (javaString.get()));
+        }
+
+        return result;
+    }
+}
 
 //==============================================================================
 class AndroidInterfaceImplementer;

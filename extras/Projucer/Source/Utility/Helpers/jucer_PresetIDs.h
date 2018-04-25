@@ -178,6 +178,8 @@ namespace Ids
     DECLARE_ID (overwriteOnSave);
     DECLARE_ID (microphonePermissionNeeded);
     DECLARE_ID (microphonePermissionsText);
+    DECLARE_ID (cameraPermissionNeeded);
+    DECLARE_ID (cameraPermissionText);
     DECLARE_ID (androidJavaLibs);
     DECLARE_ID (androidRepositories);
     DECLARE_ID (androidDependencies);

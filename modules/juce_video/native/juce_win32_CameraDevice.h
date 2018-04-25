@@ -49,10 +49,11 @@ static const CLSID CLSID_NullRenderer  = { 0xC1F400A4, 0x3F08, 0x11d3, { 0x9F, 0
 
 struct CameraDevice::Pimpl  : public ChangeBroadcaster
 {
-    Pimpl (const String&, int index,
-           int minWidth, int minHeight,
-           int maxWidth, int maxHeight, bool /*highQuality*/)
-       : isRecording (false),
+    Pimpl (CameraDevice& ownerToUse, const String&, int index,
+           int minWidth, int minHeight, int maxWidth, int maxHeight,
+           bool /*highQuality*/)
+       : owner (ownerToUse),
+         isRecording (false),
          openedSuccessfully (false),
          imageNeedsFlipping (false),
          width (0), height (0),
@@ -191,6 +192,22 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
 
     bool openedOk() const noexcept       { return openedSuccessfully; }
 
+    void takeStillPicture (std::function<void (const Image&)> pictureTakenCallbackToUse)
+    {
+        {
+            const ScopedLock sl (callbackLock);
+
+            jassert (pictureTakenCallbackToUse != nullptr);
+
+            if (pictureTakenCallbackToUse == nullptr)
+                return;
+
+            pictureTakenCallback = static_cast<std::function<void (const Image&)>&&> (pictureTakenCallbackToUse);
+        }
+
+        addUser();
+    }
+
     void startRecordingToFile (const File& file, int quality)
     {
         addUser();
@@ -212,32 +229,26 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
         return firstRecordedTime;
     }
 
-    void addListener (CameraDevice::Listener* listenerToAdd)
+    void notifyImageReceivedIfNeeded (const Image& image)
     {
-        const ScopedLock sl (listenerLock);
+        {
+            const ScopedLock sl (callbackLock);
 
-        if (listeners.size() == 0)
-            addUser();
+            if (pictureTakenCallback == nullptr)
+                return;
+        }
 
-        listeners.addIfNotAlreadyThere (listenerToAdd);
-    }
+        WeakReference<Pimpl> weakRef (this);
+        MessageManager::callAsync ([weakRef, image]() mutable
+                                   {
+                                       if (weakRef == nullptr)
+                                           return;
 
-    void removeListener (CameraDevice::Listener* listenerToRemove)
-    {
-        const ScopedLock sl (listenerLock);
-        listeners.removeAllInstancesOf (listenerToRemove);
+                                       if (weakRef->pictureTakenCallback != nullptr)
+                                           weakRef->pictureTakenCallback (image);
 
-        if (listeners.size() == 0)
-            removeUser();
-    }
-
-    void callListeners (const Image& image)
-    {
-        const ScopedLock sl (listenerLock);
-
-        for (int i = listeners.size(); --i >= 0;)
-            if (CameraDevice::Listener* const l = listeners[i])
-                l->imageReceived (image);
+                                       weakRef->pictureTakenCallback = nullptr;
+                                   });
     }
 
     void addUser()
@@ -294,8 +305,7 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
             imageNeedsFlipping = true;
         }
 
-        if (listeners.size() > 0)
-            callListeners (loadingImage);
+        notifyImageReceivedIfNeeded (loadingImage);
 
         sendChangeMessage();
     }
@@ -520,9 +530,9 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
         JUCE_DECLARE_NON_COPYABLE (GrabberCallback)
     };
 
+    CameraDevice& owner;
+
     ComSmartPtr<GrabberCallback> callback;
-    Array<CameraDevice::Listener*> listeners;
-    CriticalSection listenerLock;
 
     bool isRecording, openedSuccessfully;
     int width, height;
@@ -546,6 +556,11 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
 
     bool recordNextFrameTime;
     int previewMaxFPS;
+
+    CriticalSection callbackLock;
+    std::function<void (const Image&)> pictureTakenCallback;
+
+    JUCE_DECLARE_WEAK_REFERENCEABLE (Pimpl)
 
 private:
     void getVideoSizes (IAMStreamConfig* const streamConfig)

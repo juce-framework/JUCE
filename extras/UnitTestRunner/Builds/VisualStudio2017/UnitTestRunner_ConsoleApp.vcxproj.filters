@@ -949,6 +949,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_PropertySet.cpp">
       <Filter>JUCE Modules\juce_core\containers</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_SparseSet.cpp">
+      <Filter>JUCE Modules\juce_core\containers</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_Variant.cpp">
       <Filter>JUCE Modules\juce_core\containers</Filter>
     </ClCompile>
@@ -4465,6 +4468,9 @@
       <Filter>JUCE Modules\juce_video\capture</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_android_CameraDevice.h">
+      <Filter>JUCE Modules\juce_video\native</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_ios_CameraDevice.h">
       <Filter>JUCE Modules\juce_video\native</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_mac_CameraDevice.h">

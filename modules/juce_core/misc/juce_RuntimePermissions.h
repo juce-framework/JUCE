@@ -83,7 +83,10 @@ public:
         readExternalStorage = 3,
 
         /** Permission to write to external storage such as SD cards */
-        writeExternalStorage = 4
+        writeExternalStorage = 4,
+
+        /** Permission to use camera */
+        camera = 5
     };
 
     //==============================================================================

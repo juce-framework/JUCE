@@ -628,6 +628,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_PropertySet.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_SparseSet.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_Variant.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -2638,6 +2641,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_product_unlocking\juce_product_unlocking.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_video\capture\juce_CameraDevice.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_android_CameraDevice.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_ios_CameraDevice.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_mac_CameraDevice.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_mac_Video.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_win32_CameraDevice.h"/>

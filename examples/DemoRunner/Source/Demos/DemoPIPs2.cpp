@@ -34,7 +34,7 @@
 #include "../../../GUI/AnimationAppDemo.h"
 #include "../../../GUI/AnimationDemo.h"
 #include "../../../GUI/BouncingBallWavetableDemo.h"
-#if JUCE_MAC || JUCE_WINDOWS
+#if JUCE_USE_CAMERA && ! JUCE_LINUX
  #include "../../../GUI/CameraDemo.h"
 #endif
 #if ! JUCE_ANDROID
@@ -73,7 +73,7 @@ void registerDemos_Two() noexcept
     REGISTER_DEMO (AnimationAppDemo,          GUI,       false)
     REGISTER_DEMO (AnimationDemo,             GUI,       false)
     REGISTER_DEMO (BouncingBallWavetableDemo, GUI,       false)
-   #if JUCE_MAC || JUCE_WINDOWS
+   #if JUCE_USE_CAMERA && ! JUCE_LINUX
     REGISTER_DEMO (CameraDemo,                GUI,       true)
    #endif
    #if ! JUCE_ANDROID

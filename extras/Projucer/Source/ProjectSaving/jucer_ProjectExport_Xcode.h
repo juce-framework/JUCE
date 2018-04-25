@@ -73,6 +73,9 @@ public:
           microphonePermissionNeededValue              (settings, Ids::microphonePermissionNeeded,              getUndoManager()),
           microphonePermissionsTextValue               (settings, Ids::microphonePermissionsText,               getUndoManager(),
                                                         "This is an audio app which requires audio input. If you do not have a USB audio interface connected it will use the microphone."),
+          cameraPermissionNeededValue                  (settings, Ids::cameraPermissionNeeded,                  getUndoManager()),
+          cameraPermissionTextValue                    (settings, Ids::cameraPermissionText,                    getUndoManager(),
+                                                        "This app requires camera usage to function properly."),
           uiFileSharingEnabledValue                    (settings, Ids::UIFileSharingEnabled,                    getUndoManager()),
           uiSupportsDocumentBrowserValue               (settings, Ids::UISupportsDocumentBrowser,               getUndoManager()),
           uiStatusBarHiddenValue                       (settings, Ids::UIStatusBarHidden,                       getUndoManager()),
@@ -123,6 +126,9 @@ public:
 
     bool isMicrophonePermissionEnabled() const         { return microphonePermissionNeededValue.get(); }
     String getMicrophonePermissionsTextString() const  { return microphonePermissionsTextValue.get(); }
+
+    bool isCameraPermissionEnabled() const           { return cameraPermissionNeededValue.get(); }
+    String getCameraPermissionTextString() const     { return cameraPermissionTextValue.get(); }
 
     bool isInAppPurchasesEnabled() const             { return iosInAppPurchasesValue.get(); }
     bool isBackgroundAudioEnabled() const            { return iosBackgroundAudioValue.get(); }
@@ -236,6 +242,14 @@ public:
             props.add (new TextPropertyComponentWithEnablement (microphonePermissionsTextValue, microphonePermissionNeededValue,
                                                                 "Microphone Access Text", 1024, false),
                        "A short description of why your app requires microphone access.");
+
+            props.add (new ChoicePropertyComponent (cameraPermissionNeededValue, "Camera Access"),
+                       "Enable this to allow your app to use the camera. "
+                       "The user of your app will be prompted to grant camera access permissions.");
+
+            props.add (new TextPropertyComponentWithEnablement (cameraPermissionTextValue, cameraPermissionNeededValue,
+                                                                "Camera Access Text", 1024, false),
+                       "A short description of why your app requires camera access.");
         }
         else if (projectType.isGUIApplication())
         {
@@ -1280,8 +1294,12 @@ public:
             if (owner.iOS)
             {
                 addPlistDictionaryKeyBool (dict, "LSRequiresIPhoneOS", true);
+
                 if (owner.isMicrophonePermissionEnabled())
                     addPlistDictionaryKey (dict, "NSMicrophoneUsageDescription", owner.getMicrophonePermissionsTextString());
+
+                if (owner.isCameraPermissionEnabled())
+                    addPlistDictionaryKey (dict, "NSCameraUsageDescription", owner.getCameraPermissionTextString());
 
                 if (type != AudioUnitv3PlugIn)
                     addPlistDictionaryKeyBool (dict, "UIViewControllerBasedStatusBarAppearance", false);
@@ -1682,7 +1700,8 @@ private:
 
     ValueWithDefault customPListValue, pListPrefixHeaderValue, pListPreprocessValue, extraFrameworksValue, postbuildCommandValue,
                      prebuildCommandValue, duplicateAppExResourcesFolderValue, iosDeviceFamilyValue, iPhoneScreenOrientationValue,
-                     iPadScreenOrientationValue, customXcodeResourceFoldersValue, customXcassetsFolderValue, microphonePermissionNeededValue, microphonePermissionsTextValue,
+                     iPadScreenOrientationValue, customXcodeResourceFoldersValue, customXcassetsFolderValue,
+                     microphonePermissionNeededValue, microphonePermissionsTextValue, cameraPermissionNeededValue, cameraPermissionTextValue,
                      uiFileSharingEnabledValue, uiSupportsDocumentBrowserValue, uiStatusBarHiddenValue, documentExtensionsValue, iosInAppPurchasesValue,
                      iosBackgroundAudioValue, iosBackgroundBleValue, iosPushNotificationsValue, iosAppGroupsValue, iCloudPermissionsValue,
                      iosDevelopmentTeamIDValue, iosAppGroupsIDValue, keepCustomXcodeSchemesValue, useHeaderMapValue;
@@ -2298,6 +2317,9 @@ private:
 
             if (iOS && isPushNotificationsEnabled())
                 xcodeFrameworks.addIfNotAlreadyThere ("UserNotifications");
+
+            if (isiOS() && project.getConfigFlag ("JUCE_USE_CAMERA").get())
+                xcodeFrameworks.addIfNotAlreadyThere ("ImageIO");
 
             xcodeFrameworks.addTokens (getExtraFrameworksString(), ",;", "\"'");
             xcodeFrameworks.trim();

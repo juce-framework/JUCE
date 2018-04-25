@@ -221,22 +221,6 @@ public:
     }
 
 private:
-    static StringArray javaStringArrayToJuce (jobjectArray jStrings)
-    {
-        StringArray retval;
-
-        JNIEnv* env = getEnv();
-        const int count = env->GetArrayLength (jStrings);
-
-        for (int i = 0; i < count; ++i)
-        {
-            LocalRef<jstring> string ((jstring) env->GetObjectArrayElement (jStrings, i));
-            retval.add (juceString (string));
-        }
-
-        return retval;
-    }
-
     GlobalRef deviceManager;
 };
 

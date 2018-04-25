@@ -399,6 +399,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_core/containers/juce_ReferenceCountedArray.h"
     "../../../../../modules/juce_core/containers/juce_ScopedValueSetter.h"
     "../../../../../modules/juce_core/containers/juce_SortedSet.h"
+    "../../../../../modules/juce_core/containers/juce_SparseSet.cpp"
     "../../../../../modules/juce_core/containers/juce_SparseSet.h"
     "../../../../../modules/juce_core/containers/juce_Variant.cpp"
     "../../../../../modules/juce_core/containers/juce_Variant.h"
@@ -1566,6 +1567,7 @@ set_source_files_properties("../../../../../modules/juce_core/containers/juce_Pr
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_ReferenceCountedArray.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_ScopedValueSetter.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_SortedSet.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_core/containers/juce_SparseSet.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_SparseSet.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_Variant.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_Variant.h" PROPERTIES HEADER_FILE_ONLY TRUE)

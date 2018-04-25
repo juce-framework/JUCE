@@ -486,7 +486,7 @@ public:
     {
         ignoreUnused (selection, selectionArgs, sortOrder);
 
-        StringArray requestedColumns = javaStringArrayToJuceStringArray (projection);
+        StringArray requestedColumns = javaStringArrayToJuce (projection);
         StringArray supportedColumns = getSupportedColumns();
 
         StringArray resultColumns;
@@ -501,7 +501,7 @@ public:
         if (resultColumns.isEmpty())
             return nullptr;
 
-        auto resultJavaColumns = juceStringArrayToJavaStringArray (resultColumns);
+        auto resultJavaColumns = juceStringArrayToJava (resultColumns);
 
         auto* env = getEnv();
 
@@ -550,7 +550,7 @@ public:
         if (extension.isEmpty())
             return nullptr;
 
-        return juceStringArrayToJavaStringArray (filterMimeTypes (getMimeTypesForFileExtension (extension),
+        return juceStringArrayToJava (filterMimeTypes (getMimeTypesForFileExtension (extension),
                                                                   juceString (mimeTypeFilter.get())));
     }
 
@@ -681,40 +681,6 @@ private:
         auto filename = fullUri.fromLastOccurrenceOf ("/", false, true);
 
         return { index, filename, prepareFilesThread->getFilePaths()[index.getIntValue()] };
-    }
-
-    static LocalRef<jobjectArray> juceStringArrayToJavaStringArray (const StringArray& juceArray)
-    {
-        auto* env = getEnv();
-
-        auto javaArray = LocalRef<jobjectArray> (env->NewObjectArray ((jsize) juceArray.size(),
-                                                                      JavaString,
-                                                                      javaString ("").get()));
-
-        for (int i = 0; i < juceArray.size(); ++i)
-            env->SetObjectArrayElement (javaArray, i, javaString (juceArray [i]).get());
-
-        return javaArray;
-    }
-
-    static StringArray javaStringArrayToJuceStringArray (const LocalRef<jobjectArray>& javaArray)
-    {
-        if (javaArray.get() == 0)
-            return {};
-
-        auto* env = getEnv();
-
-        const int size = env->GetArrayLength (javaArray.get());
-
-        StringArray juceArray;
-
-        for (int i = 0; i < size; ++i)
-        {
-            auto javaString = LocalRef<jstring> ((jstring) env->GetObjectArrayElement (javaArray.get(), i));
-            juceArray.add (juceString (javaString.get()));
-        }
-
-        return juceArray;
     }
 
     static StringArray getSupportedColumns()
