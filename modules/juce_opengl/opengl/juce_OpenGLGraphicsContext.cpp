@@ -24,6 +24,8 @@
   ==============================================================================
 */
 
+#include <unordered_map>
+
 namespace juce
 {
 
@@ -429,6 +431,11 @@ struct ShaderPrograms  : public ReferenceCountedObject
         {
             screenBounds.set (bounds.getX(), bounds.getY(), 0.5f * bounds.getWidth(), 0.5f * bounds.getHeight());
         }
+        
+        void setUniform (std::string name, float value)
+        {
+            uniforms[name] = value;
+        }
 
         void bindAttributes (OpenGLContext& context)
         {
@@ -445,7 +452,8 @@ struct ShaderPrograms  : public ReferenceCountedObject
         }
 
         OpenGLShaderProgram::Attribute positionAttribute, colourAttribute;
-
+        std::unordered_map<std::string, float> uniforms;
+        
     private:
         OpenGLShaderProgram::Uniform screenBounds;
     };
@@ -1329,6 +1337,9 @@ struct StateHelpers
                 activeShader = &shader;
                 shader.program.use();
                 shader.bindAttributes (context);
+                
+                for (auto& uniform : shader.uniforms)
+                    shader.program.setUniform (uniform.first.c_str(), uniform.second);
 
                 currentBounds = bounds;
                 shader.set2DBounds (bounds.toFloat());
@@ -1910,13 +1921,17 @@ OpenGLShaderProgram* OpenGLGraphicsContextCustomShader::getProgram (LowLevelGrap
     return nullptr;
 }
 
-void OpenGLGraphicsContextCustomShader::fillRect (LowLevelGraphicsContext& gc, Rectangle<int> area) const
+void OpenGLGraphicsContextCustomShader::fillRect (LowLevelGraphicsContext& gc, Rectangle<int> area, std::unordered_map<std::string, std::atomic<float>>& uniforms) const
 {
     String errorMessage;
 
     if (OpenGLRendering::ShaderContext* sc = dynamic_cast<OpenGLRendering::ShaderContext*> (&gc))
         if (CustomProgram* c = CustomProgram::getOrCreate (gc, hashName, code, errorMessage))
+        {
+            for (auto& u : uniforms)
+                c->setUniform (u.first, u.second);
             sc->fillRectWithCustomShader (*c, area);
+        }
 }
 
 Result OpenGLGraphicsContextCustomShader::checkCompilation (LowLevelGraphicsContext& gc)
