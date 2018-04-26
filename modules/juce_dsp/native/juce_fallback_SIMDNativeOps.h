@@ -63,8 +63,11 @@ struct SIMDFallbackOps
     static constexpr size_t mask = (sizeof (vSIMDType) / sizeof (ScalarType)) - 1;
     static constexpr size_t bits = SIMDInternal::Log2Helper<n>::value;
 
-    // corresponding mask type
-    typedef typename SIMDInternal::MaskTypeFor<ScalarType>::type MaskType;
+    // helper types
+    using MaskType = typename SIMDInternal::MaskTypeFor<ScalarType>::type;
+    union UnionType     { vSIMDType v; ScalarType s[n]; };
+    union UnionMaskType { vSIMDType v; MaskType   m[n]; };
+
 
     // fallback methods
     static forcedinline vSIMDType add (vSIMDType a, vSIMDType b) noexcept        { return apply<ScalarAdd> (a, b); }
@@ -82,69 +85,80 @@ struct SIMDFallbackOps
     static forcedinline vSIMDType greaterThan (vSIMDType a, vSIMDType b) noexcept        { return cmp<ScalarGt > (a, b); }
     static forcedinline vSIMDType greaterThanOrEqual (vSIMDType a, vSIMDType b) noexcept { return cmp<ScalarGeq> (a, b); }
 
-    static forcedinline vSIMDType bit_not (vSIMDType a) noexcept
+    static forcedinline ScalarType get (vSIMDType v, size_t i) noexcept
     {
-        vSIMDType retval;
-        auto* dst  = reinterpret_cast<MaskType*> (&retval);
-        auto* aSrc = reinterpret_cast<const MaskType*> (&a);
-
-        for (size_t i = 0; i < n; ++i)
-            dst [i] = ~aSrc [i];
-
-        return retval;
+        UnionType u {v};
+        return u.s[i];
     }
 
-    static forcedinline ScalarType sum (vSIMDType a) noexcept
+    static forcedinline vSIMDType set (vSIMDType v, size_t i, ScalarType s) noexcept
     {
+        UnionType u {v};
+
+        u.s[i] = s;
+        return u.v;
+    }
+
+    static forcedinline vSIMDType bit_not (vSIMDType av) noexcept
+    {
+        UnionMaskType a {av};
+
+        for (size_t i = 0; i < n; ++i)
+            a.m[i] = ~a.m[i];
+
+        return a.v;
+    }
+
+    static forcedinline ScalarType sum (vSIMDType av) noexcept
+    {
+        UnionType a {av};
         auto retval = static_cast<ScalarType> (0);
-        auto* aSrc = reinterpret_cast<const ScalarType*> (&a);
 
         for (size_t i = 0; i < n; ++i)
-            retval += aSrc [i];
+            retval += a.s[i];
 
         return retval;
     }
 
-    static forcedinline vSIMDType multiplyAdd (vSIMDType a, vSIMDType b, vSIMDType c) noexcept
+    static forcedinline vSIMDType multiplyAdd (vSIMDType av, vSIMDType bv, vSIMDType cv) noexcept
     {
-        vSIMDType retval;
-        auto* dst  = reinterpret_cast<ScalarType*> (&retval);
-        auto* aSrc = reinterpret_cast<const ScalarType*> (&a);
-        auto* bSrc = reinterpret_cast<const ScalarType*> (&b);
-        auto* cSrc = reinterpret_cast<const ScalarType*> (&c);
+        UnionType a {av}, b {bv}, c {cv};
 
         for (size_t i = 0; i < n; ++i)
-            dst [i] = aSrc [i] + (bSrc [i] * cSrc [i]);
+            a.s[i] += b.s[i] * c.s[i];
 
-        return retval;
+        return a.v;
     }
 
     //==============================================================================
-    static forcedinline bool allEqual (vSIMDType a, vSIMDType b) noexcept
+    static forcedinline bool allEqual (vSIMDType av, vSIMDType bv) noexcept
     {
-        auto* aSrc = reinterpret_cast<const ScalarType*> (&a);
-        auto* bSrc = reinterpret_cast<const ScalarType*> (&b);
+        UnionType a {av}, b {bv};
 
         for (size_t i = 0; i < n; ++i)
-            if (aSrc[i] != bSrc[i])
+            if (a.s[i] != b.s[i])
                 return false;
 
         return true;
     }
 
     //==============================================================================
-    static forcedinline vSIMDType cmplxmul (vSIMDType a, vSIMDType b) noexcept
+    static forcedinline vSIMDType cmplxmul (vSIMDType av, vSIMDType bv) noexcept
     {
-        vSIMDType retval;
-        auto* dst  = reinterpret_cast<std::complex<ScalarType>*> (&retval);
-        auto* aSrc = reinterpret_cast<const std::complex<ScalarType>*> (&a);
-        auto* bSrc = reinterpret_cast<const std::complex<ScalarType>*> (&b);
+        UnionType a {av}, b {bv}, r;
 
         const int m = n >> 1;
         for (int i = 0; i < m; ++i)
-            dst [i] = aSrc [i] * bSrc [i];
+        {
+            std::complex<ScalarType> result
+                  = std::complex<ScalarType> (a.s[i<<1], a.s[(i<<1)|1])
+                  * std::complex<ScalarType> (b.s[i<<1], b.s[(i<<1)|1]);
 
-        return retval;
+            r.s[i<<1]     = result.real();
+            r.s[(i<<1)|1] = result.imag();
+        }
+
+        return r.v;
     }
 
     struct ScalarAdd { static forcedinline ScalarType   op (ScalarType a, ScalarType b)   noexcept { return a + b; } };
@@ -163,90 +177,78 @@ struct SIMDFallbackOps
 
     // generic apply routines for operations above
     template <typename Op>
-    static forcedinline vSIMDType apply (vSIMDType a, vSIMDType b) noexcept
+    static forcedinline vSIMDType apply (vSIMDType av, vSIMDType bv) noexcept
     {
-        vSIMDType retval;
-        auto* dst  = reinterpret_cast<ScalarType*> (&retval);
-        auto* aSrc = reinterpret_cast<const ScalarType*> (&a);
-        auto* bSrc = reinterpret_cast<const ScalarType*> (&b);
+        UnionType a {av}, b {bv};
 
         for (size_t i = 0; i < n; ++i)
-            dst [i] = Op::op (aSrc [i], bSrc [i]);
+            a.s[i] = Op::op (a.s[i], b.s[i]);
 
-        return retval;
+        return a.v;
     }
 
     template <typename Op>
-    static forcedinline vSIMDType cmp (vSIMDType a, vSIMDType b) noexcept
+    static forcedinline vSIMDType cmp (vSIMDType av, vSIMDType bv) noexcept
     {
-        vSIMDType retval;
-        auto* dst  = reinterpret_cast<MaskType*> (&retval);
-        auto* aSrc = reinterpret_cast<const ScalarType*> (&a);
-        auto* bSrc = reinterpret_cast<const ScalarType*> (&b);
+        UnionType a {av}, b {bv};
+        UnionMaskType r;
 
         for (size_t i = 0; i < n; ++i)
-            dst [i] = Op::op (aSrc [i], bSrc [i]) ? static_cast<MaskType> (-1) : static_cast<MaskType> (0);
+            r.m[i] = Op::op (a.s[i], b.s[i]) ? static_cast<MaskType> (-1) : static_cast<MaskType> (0);
 
-        return retval;
+        return r.v;
     }
 
     template <typename Op>
-    static forcedinline vSIMDType bitapply (vSIMDType a, vSIMDType b) noexcept
+    static forcedinline vSIMDType bitapply (vSIMDType av, vSIMDType bv) noexcept
     {
-        vSIMDType retval;
-        auto* dst  = reinterpret_cast<MaskType*> (&retval);
-        auto* aSrc = reinterpret_cast<const MaskType*> (&a);
-        auto* bSrc = reinterpret_cast<const MaskType*> (&b);
+        UnionMaskType a {av}, b {bv};
 
         for (size_t i = 0; i < n; ++i)
-            dst [i] = Op::op (aSrc [i], bSrc [i]);
+            a.m[i] = Op::op (a.m[i], b.m[i]);
 
-        return retval;
+        return a.v;
     }
 
     static forcedinline vSIMDType expand (ScalarType s) noexcept
     {
-        vSIMDType retval;
-        auto* dst = reinterpret_cast<ScalarType*> (&retval);
+        UnionType r;
 
         for (size_t i = 0; i < n; ++i)
-            dst [i] = s;
+            r.s[i] = s;
 
-        return retval;
+        return r.v;
     }
 
     static forcedinline vSIMDType load (const ScalarType* a) noexcept
     {
-        vSIMDType retval;
-        auto* dst = reinterpret_cast<ScalarType*> (&retval);
+        UnionType r;
 
         for (size_t i = 0; i < n; ++i)
-            dst [i] = a[i];
+            r.s[i] = a[i];
 
-        return retval;
+        return r.v;
     }
 
-    static forcedinline void store (vSIMDType value, ScalarType* dest) noexcept
+    static forcedinline void store (vSIMDType av, ScalarType* dest) noexcept
     {
-        const auto* src = reinterpret_cast<const ScalarType*> (&value);
+        UnionType a {av};
 
         for (size_t i = 0; i < n; ++i)
-            dest[i] = src[i];
+            dest[i] = a.s[i];
     }
 
     template <unsigned int shuffle_idx>
-    static forcedinline vSIMDType shuffle (vSIMDType a) noexcept
+    static forcedinline vSIMDType shuffle (vSIMDType av) noexcept
     {
-        vSIMDType retval;
-        auto* dst  = reinterpret_cast<ScalarType*> (&retval);
-        auto* aSrc = reinterpret_cast<const ScalarType*> (&a);
+        UnionType a {av}, r;
 
         // the compiler will unroll this loop and the index can
         // be computed at compile-time, so this will be super fast
         for (size_t i = 0; i < n; ++i)
-            dst [i] = aSrc [(shuffle_idx >> (bits * i)) & mask];
+            r.s[i] = a.s[(shuffle_idx >> (bits * i)) & mask];
 
-        return retval;
+        return r.v;
     }
 };
 
