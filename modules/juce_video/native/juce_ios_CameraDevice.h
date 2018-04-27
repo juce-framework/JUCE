@@ -123,6 +123,21 @@ struct CameraDevice::Pimpl
         return results;
     }
 
+    void addListener (CameraDevice::Listener* listenerToAdd)
+    {
+        const ScopedLock sl (listenerLock);
+        listeners.add (listenerToAdd);
+
+        if (listeners.size() == 1)
+            triggerStillPictureCapture();
+    }
+
+    void removeListener (CameraDevice::Listener* listenerToRemove)
+    {
+        const ScopedLock sl (listenerLock);
+        listeners.remove (listenerToRemove);
+    }
+
 private:
     static NSArray<AVCaptureDevice*>* getDevices()
     {
@@ -512,11 +527,11 @@ private:
             {
                #pragma clang diagnostic push
                #pragma clang diagnostic ignored "-Wundeclared-selector"
-                addMethod (@selector (sessionDidStartRunning:), started,           "v@:@");
-                addMethod (@selector (sessionDidStopRunning:),  stopped,           "v@:@");
-                addMethod (@selector (sessionRuntimeError:),    runtimeError,      "v@:@");
-                addMethod (@selector (sessionWasInterrupted:),  interrupted,       "v@:@");
-                addMethod (@selector (sessionDidStartRunning:), interruptionEnded, "v@:@");
+                addMethod (@selector (sessionDidStartRunning:),   started,           "v@:@");
+                addMethod (@selector (sessionDidStopRunning:),    stopped,           "v@:@");
+                addMethod (@selector (sessionRuntimeError:),      runtimeError,      "v@:@");
+                addMethod (@selector (sessionWasInterrupted:),    interrupted,       "v@:@");
+                addMethod (@selector (sessionInterruptionEnded:), interruptionEnded, "v@:@");
                #pragma clang diagnostic pop
 
                 addIvar<CaptureSession*> ("owner");
@@ -641,7 +656,10 @@ private:
                              NSData* imageData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation: imageSampleBuffer];
 
                              auto image = ImageFileFormat::loadFrom (imageData.bytes, (size_t) imageData.length);
-                             MessageManager::callAsync ([this, image]() { imageTaken (image); });
+
+                             callListeners (image);
+
+                             MessageManager::callAsync ([this, image]() { notifyPictureTaken (image); });
                          }];
                 }
                 else
@@ -815,7 +833,10 @@ private:
                     auto* imageData = UIImageJPEGRepresentation (uiImage, 0.f);
 
                     auto image = ImageFileFormat::loadFrom (imageData.bytes, (size_t) imageData.length);
-                    MessageManager::callAsync ([self, image]() { getOwner (self).imageTaken (image); });
+
+                    getOwner (self).callListeners (image);
+
+                    MessageManager::callAsync ([self, image]() { getOwner (self).notifyPictureTaken (image); });
                 }
 
                 static UIImage* getImageWithCorrectOrientation (CGImagePropertyOrientation imageOrientation,
@@ -912,7 +933,10 @@ private:
                     auto* imageData = UIImageJPEGRepresentation (uiImage, 0.f);
 
                     auto image = ImageFileFormat::loadFrom (imageData.bytes, (size_t) imageData.length);
-                    MessageManager::callAsync ([self, image]() { getOwner (self).imageTaken (image); });
+
+                    getOwner (self).callListeners (image);
+
+                    MessageManager::callAsync ([self, image]() { getOwner (self).notifyPictureTaken (image); });
                 }
 
                 static CGImagePropertyOrientation uiImageOrientationToCGImageOrientation (UIImageOrientation orientation)
@@ -932,11 +956,16 @@ private:
             };
 
             //==============================================================================
-            void imageTaken (const Image& image)
+            void callListeners (const Image& image)
+            {
+                captureSession.callListeners (image);
+            }
+
+            void notifyPictureTaken (const Image& image)
             {
                 takingPicture = false;
 
-                captureSession.notifyImageReceived (image);
+                captureSession.notifyPictureTaken (image);
             }
 
             CaptureSession& captureSession;
@@ -1105,9 +1134,14 @@ private:
             owner.cameraSessionRuntimeError (error);
         }
 
-        void notifyImageReceived (const Image& image)
+        void callListeners (const Image& image)
         {
-            owner.notifyImageReceived (image);
+            owner.callListeners (image);
+        }
+
+        void notifyPictureTaken (const Image& image)
+        {
+            owner.notifyPictureTaken (image);
         }
 
         Pimpl& owner;
@@ -1152,9 +1186,15 @@ private:
         }
     }
 
-    void notifyImageReceived (const Image& image)
+    void callListeners (const Image& image)
     {
-        JUCE_CAMERA_LOG ("notifyImageReceived()");
+        const ScopedLock sl (listenerLock);
+        listeners.call ([=] (Listener& l) { l.imageReceived (image); });
+    }
+
+    void notifyPictureTaken (const Image& image)
+    {
+        JUCE_CAMERA_LOG ("notifyPictureTaken()");
 
         if (pictureTakenCallback != nullptr)
             pictureTakenCallback (image);
@@ -1170,6 +1210,9 @@ private:
     CameraDevice& owner;
     String cameraId;
     InternalOpenCameraResultCallback cameraOpenCallback;
+
+    CriticalSection listenerLock;
+    ListenerList<Listener> listeners;
 
     std::function<void (const Image&)> pictureTakenCallback;
 

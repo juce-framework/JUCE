@@ -6,33 +6,6 @@ Develop
 
 Change
 ------
-CameraDevice::Listener::imageReceived() has been replaced by a new function
-CameraDevice::takeStillPicture(). The callback passed in takeStillPicture()
-will always be triggered on the message thread.
-
-Possible Issues
----------------
-The code handling image capture needs to be adjusted to work well on a message
-thread.  This means that you should not perform any lengthy operations in your
-callback, as this will stall your UI.
-
-Workaround
-----------
-Use CameraDevice::takeStillPicture() instead of old listener callback. Pass
-your lambda or other std::function compliant object to takeStillPicture which
-will be called for you when the capture has finished. If you want to perform
-any time consuming operation upon receiving the picture, schedule it on a
-separate worker thread.
-
-Rationale
----------
-The old Listener interface was not working in a typical listener pattern. It
-feels more natural to request still picture capture with a dedicated function.
-This is also more compliant with async mobile APIs.
-
-
-Change
-------
 JUCE no longer supports OS X deployment targets earlier than 10.7.
 
 Possible Issues

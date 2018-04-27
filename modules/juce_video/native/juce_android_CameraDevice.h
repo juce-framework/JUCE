@@ -534,6 +534,9 @@ struct CameraDevice::Pimpl
     void startRecordingToFile (const File&, int) {}
     void stopRecording() {}
 
+    void addListener (CameraDevice::Listener*) {}
+    void removeListener (CameraDevice::Listener*) {}
+
     String getCameraId() const noexcept      { return {}; }
     bool openedOk() const noexcept           { return false; }
     Time getTimeOfFirstRecordedFrame() const { return {}; }
@@ -666,6 +669,21 @@ struct CameraDevice::Pimpl
             printDebugCameraInfo (cameraManagerToUse, result);
 
         return results;
+    }
+
+    void addListener (CameraDevice::Listener* listenerToAdd)
+    {
+        const ScopedLock sl (listenerLock);
+        listeners.add (listenerToAdd);
+
+        if (listeners.size() == 1)
+            triggerStillPictureCapture();
+    }
+
+    void removeListener (CameraDevice::Listener* listenerToRemove)
+    {
+        const ScopedLock sl (listenerLock);
+        listeners.remove (listenerToRemove);
     }
 
 private:
@@ -1197,9 +1215,11 @@ private:
 
             WeakReference<ImageReader> safeThis (this);
 
+            owner.callListeners (image);
+
             // Android may take multiple pictures before it handles a request to stop.
             if (hasNotifiedListeners.compareAndSetBool (1, 0))
-                MessageManager::callAsync ([safeThis, image]() mutable { if (safeThis != nullptr) safeThis->owner.notifyImageReceived (image); });
+                MessageManager::callAsync ([safeThis, image]() mutable { if (safeThis != nullptr) safeThis->owner.notifyPictureTaken (image); });
         }
 
         struct ImageBuffer
@@ -1901,7 +1921,9 @@ private:
 
                     // Delay still picture capture for devices that can't handle it right after
                     // stopRepeating/abortCaptures calls.
-                    delayedCaptureRunnable = GlobalRef (CreateJavaInterface (&runnable, "java/lang/Runnable").get());
+                    if (delayedCaptureRunnable.get() == nullptr)
+                        delayedCaptureRunnable = GlobalRef (CreateJavaInterface (&runnable, "java/lang/Runnable").get());
+
                     env->CallBooleanMethod (handler, AndroidHandler.postDelayed, delayedCaptureRunnable.get(), (jlong) 200);
                 }
 
@@ -1950,8 +1972,6 @@ private:
 
                     if (Pimpl::checkHasExceptionOccurred())
                         return;
-
-                    delayedCaptureRunnable.clear();
 
                     // NB: for preview, using preview capture request again
                     env->CallIntMethod (captureSession, CameraCaptureSession.setRepeatingRequest, previewCaptureRequest.get(),
@@ -2773,6 +2793,9 @@ private:
 
     std::unique_ptr<ScopedCameraDevice> scopedCameraDevice;
 
+    CriticalSection listenerLock;
+    ListenerList<Listener> listeners;
+
     std::function<void (const Image&)> pictureTakenCallback;
 
     Time firstRecordedFrameTimeMs;
@@ -2888,9 +2911,16 @@ private:
             cameraOpenCallback (cameraId, error);
     }
 
-    void notifyImageReceived (const Image& image)
+    //==============================================================================
+    void callListeners (const Image& image)
     {
-        JUCE_CAMERA_LOG ("notifyImageReceived()");
+        const ScopedLock sl (listenerLock);
+        listeners.call ([=] (Listener& l) { l.imageReceived (image); });
+    }
+
+    void notifyPictureTaken (const Image& image)
+    {
+        JUCE_CAMERA_LOG ("notifyPictureTaken()");
 
         if (pictureTakenCallback != nullptr)
             pictureTakenCallback (image);

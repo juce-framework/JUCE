@@ -195,7 +195,7 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
     void takeStillPicture (std::function<void (const Image&)> pictureTakenCallbackToUse)
     {
         {
-            const ScopedLock sl (callbackLock);
+            const ScopedLock sl (pictureTakenCallbackLock);
 
             jassert (pictureTakenCallbackToUse != nullptr);
 
@@ -229,10 +229,35 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
         return firstRecordedTime;
     }
 
-    void notifyImageReceivedIfNeeded (const Image& image)
+    void addListener (CameraDevice::Listener* listenerToAdd)
+    {
+        const ScopedLock sl (listenerLock);
+
+        if (listeners.size() == 0)
+            addUser();
+
+        listeners.add (listenerToAdd);
+    }
+
+    void removeListener (CameraDevice::Listener* listenerToRemove)
+    {
+        const ScopedLock sl (listenerLock);
+        listeners.remove (listenerToRemove);
+
+        if (listeners.size() == 0)
+            removeUser();
+    }
+
+    void callListeners (const Image& image)
+    {
+        const ScopedLock sl (listenerLock);
+        listeners.call ([=] (Listener& l) { l.imageReceived (image); });
+    }
+
+    void notifyPictureTakenIfNeeded (const Image& image)
     {
         {
-            const ScopedLock sl (callbackLock);
+            const ScopedLock sl (pictureTakenCallbackLock);
 
             if (pictureTakenCallback == nullptr)
                 return;
@@ -305,7 +330,10 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
             imageNeedsFlipping = true;
         }
 
-        notifyImageReceivedIfNeeded (loadingImage);
+        if (listeners.size() > 0)
+            callListeners (loadingImage);
+
+        notifyPictureTakenIfNeeded (loadingImage);
 
         sendChangeMessage();
     }
@@ -534,6 +562,12 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
 
     ComSmartPtr<GrabberCallback> callback;
 
+    CriticalSection listenerLock;
+    ListenerList<Listener> listeners;
+
+    CriticalSection pictureTakenCallbackLock;
+    std::function<void (const Image&)> pictureTakenCallback;
+
     bool isRecording, openedSuccessfully;
     int width, height;
     Time firstRecordedTime;
@@ -556,9 +590,6 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
 
     bool recordNextFrameTime;
     int previewMaxFPS;
-
-    CriticalSection callbackLock;
-    std::function<void (const Image&)> pictureTakenCallback;
 
     JUCE_DECLARE_WEAK_REFERENCEABLE (Pimpl)
 

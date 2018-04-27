@@ -175,8 +175,8 @@ struct CameraDevice::Pimpl
 
     void handleImageCapture (const Image& image)
     {
-        if (pictureTakenCallback != nullptr)
-            pictureTakenCallback (image);
+        const ScopedLock sl (listenerLock);
+        listeners.call ([=] (Listener& l) { l.imageReceived (image); });
     }
 
     void triggerImageCapture()
@@ -199,10 +199,31 @@ struct CameraDevice::Pimpl
 
                 auto image = ImageFileFormat::loadFrom (imageData.bytes, (size_t) imageData.length);
 
+                handleImageCapture (image);
+
                 WeakReference<Pimpl> weakRef (this);
-                MessageManager::callAsync ([weakRef, image]() mutable { if (weakRef != nullptr) weakRef->handleImageCapture (image); });
+                MessageManager::callAsync ([weakRef, image]() mutable
+                {
+                    if (weakRef != nullptr && weakRef->pictureTakenCallback != nullptr)
+                        weakRef->pictureTakenCallback (image);
+                });
             }];
         }
+    }
+
+    void addListener (CameraDevice::Listener* listenerToAdd)
+    {
+        const ScopedLock sl (listenerLock);
+        listeners.add (listenerToAdd);
+
+        if (listeners.size() == 1)
+            triggerImageCapture();
+    }
+
+    void removeListener (CameraDevice::Listener* listenerToRemove)
+    {
+        const ScopedLock sl (listenerLock);
+        listeners.remove (listenerToRemove);
     }
 
     static StringArray getAvailableDevices()
@@ -230,6 +251,9 @@ struct CameraDevice::Pimpl
     String openingError;
     Time firstPresentationTime;
     bool isRecording = false;
+
+    CriticalSection listenerLock;
+    ListenerList<Listener> listeners;
 
     std::function<void (const Image&)> pictureTakenCallback;
 

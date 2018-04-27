@@ -180,6 +180,18 @@ void CameraDevice::stopRecording()
     pimpl->stopRecording();
 }
 
+void CameraDevice::addListener (Listener* listenerToAdd)
+{
+    if (listenerToAdd != nullptr)
+        pimpl->addListener (listenerToAdd);
+}
+
+void CameraDevice::removeListener (Listener* listenerToRemove)
+{
+    if (listenerToRemove != nullptr)
+        pimpl->removeListener (listenerToRemove);
+}
+
 //==============================================================================
 StringArray CameraDevice::getAvailableDevices()
 {
