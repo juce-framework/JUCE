@@ -584,7 +584,7 @@ private:
     //==============================================================================
     void asyncCheckForUnusedCollectors()
     {
-        startTimer (500);
+        startTimer (10);
     }
 
     void timerCallback() override
