@@ -122,8 +122,7 @@ public:
         If the socket is ready on return, this returns 1. If it times-out before
         the socket becomes ready, it returns 0. If an error occurs, it returns -1.
     */
-    int waitUntilReady (bool readyForReading,
-                        int timeoutMsecs) const;
+    int waitUntilReady (bool readyForReading, int timeoutMsecs);
 
     /** Reads bytes from the socket.
 
@@ -177,8 +176,9 @@ public:
 private:
     //==============================================================================
     String hostName;
-    int volatile portNumber = 0, handle = -1;
-    bool connected = false, isListener = false;
+    std::atomic<int> portNumber { 0 }, handle { -1 };
+    std::atomic<bool> connected { false };
+    bool isListener = false;
     mutable CriticalSection readLock;
 
     StreamingSocket (const String& hostname, int portNumber, int handle);
@@ -263,8 +263,7 @@ public:
         If the socket is ready on return, this returns 1. If it times-out before
         the socket becomes ready, it returns 0. If an error occurs, it returns -1.
     */
-    int waitUntilReady (bool readyForReading,
-                        int timeoutMsecs) const;
+    int waitUntilReady (bool readyForReading, int timeoutMsecs);
 
     /** Reads bytes from the socket.
 
@@ -320,19 +319,16 @@ public:
 
     //==============================================================================
     /** Join a multicast group.
-
         @returns true if it succeeds.
     */
     bool joinMulticast (const String& multicastIPAddress);
 
     /** Leave a multicast group.
-
         @returns true if it succeeds.
     */
     bool leaveMulticast (const String& multicastIPAddress);
 
     /** Enables or disables multicast loopback.
-
         @returns true if it succeeds.
     */
     bool setMulticastLoopbackEnabled (bool enableLoopback);
@@ -350,7 +346,7 @@ public:
 
 private:
     //==============================================================================
-    int handle = -1;
+    std::atomic<int> handle { -1 };
     bool isBound = false;
     String lastBindAddress, lastServerHost;
     int lastServerPort = -1;
