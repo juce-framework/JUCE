@@ -104,7 +104,7 @@ public:
 
     /** Checks whether multiple instances of the app are allowed.
 
-        If you application class returns true for this, more than one instance is
+        If your application class returns true for this, more than one instance is
         permitted to run (except on the Mac where this isn't possible).
 
         If it's false, the second instance won't start, but it you will still get a
