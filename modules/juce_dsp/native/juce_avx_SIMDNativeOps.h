@@ -63,7 +63,7 @@ struct SIMDNativeOps;
 template <>
 struct SIMDNativeOps<float>
 {
-    typedef __m256 vSIMDType;
+    using vSIMDType = __m256;
 
     //==============================================================================
     DECLARE_AVX_SIMD_CONST (int32_t, kAllBitsSet);
@@ -133,7 +133,7 @@ struct SIMDNativeOps<float>
 template <>
 struct SIMDNativeOps<double>
 {
-    typedef __m256d vSIMDType;
+    using vSIMDType = __m256d;
 
     //==============================================================================
     DECLARE_AVX_SIMD_CONST (int64_t, kAllBitsSet);
@@ -200,7 +200,7 @@ struct SIMDNativeOps<double>
 template <>
 struct SIMDNativeOps<int8_t>
 {
-    typedef __m256i vSIMDType;
+    using vSIMDType = __m256i;
 
     //==============================================================================
     DECLARE_AVX_SIMD_CONST (int8_t, kAllBitsSet);
@@ -273,7 +273,7 @@ template <>
 struct SIMDNativeOps<uint8_t>
 {
     //==============================================================================
-    typedef __m256i vSIMDType;
+    using vSIMDType = __m256i;
 
     //==============================================================================
     DECLARE_AVX_SIMD_CONST (uint8_t, kHighBit);
@@ -348,7 +348,7 @@ template <>
 struct SIMDNativeOps<int16_t>
 {
     //==============================================================================
-    typedef __m256i vSIMDType;
+    using vSIMDType = __m256i;
 
     //==============================================================================
     DECLARE_AVX_SIMD_CONST (int16_t, kAllBitsSet);
@@ -403,7 +403,7 @@ template <>
 struct SIMDNativeOps<uint16_t>
 {
     //==============================================================================
-    typedef __m256i vSIMDType;
+    using vSIMDType = __m256i;
 
     //==============================================================================
     DECLARE_AVX_SIMD_CONST (uint16_t, kHighBit);
@@ -461,7 +461,7 @@ template <>
 struct SIMDNativeOps<int32_t>
 {
     //==============================================================================
-    typedef __m256i vSIMDType;
+    using vSIMDType = __m256i;
 
     //==============================================================================
     DECLARE_AVX_SIMD_CONST (int32_t, kAllBitsSet);
@@ -514,7 +514,7 @@ template <>
 struct SIMDNativeOps<uint32_t>
 {
     //==============================================================================
-    typedef __m256i vSIMDType;
+    using vSIMDType = __m256i;
 
     //==============================================================================
     DECLARE_AVX_SIMD_CONST (uint32_t, kAllBitsSet);
@@ -570,7 +570,7 @@ template <>
 struct SIMDNativeOps<int64_t>
 {
     //==============================================================================
-    typedef __m256i vSIMDType;
+    using vSIMDType = __m256i;
 
     //==============================================================================
     DECLARE_AVX_SIMD_CONST (int64_t, kAllBitsSet);
@@ -608,7 +608,7 @@ template <>
 struct SIMDNativeOps<uint64_t>
 {
     //==============================================================================
-    typedef __m256i vSIMDType;
+    using vSIMDType = __m256i;
 
     //==============================================================================
     DECLARE_AVX_SIMD_CONST (uint64_t, kAllBitsSet);

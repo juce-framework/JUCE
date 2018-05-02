@@ -234,7 +234,7 @@ public:
         BuildConfiguration (Project& project, const ValueTree& configNode, const ProjectExporter&);
         ~BuildConfiguration();
 
-        typedef ReferenceCountedObjectPtr<BuildConfiguration> Ptr;
+        using Ptr = ReferenceCountedObjectPtr<BuildConfiguration>;
 
         //==============================================================================
         virtual void createConfigProperties (PropertyListBuilder&) = 0;

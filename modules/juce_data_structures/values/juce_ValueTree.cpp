@@ -30,7 +30,7 @@ namespace juce
 class ValueTree::SharedObject  : public ReferenceCountedObject
 {
 public:
-    typedef ReferenceCountedObjectPtr<SharedObject> Ptr;
+    using Ptr = ReferenceCountedObjectPtr<SharedObject>;
 
     explicit SharedObject (const Identifier& t) noexcept  : type (t) {}
 

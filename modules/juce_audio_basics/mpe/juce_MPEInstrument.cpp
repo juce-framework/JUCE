@@ -2062,7 +2062,8 @@ private:
     class UnitTestInstrument : public MPEInstrument,
                                private MPEInstrument::Listener
     {
-        typedef MPEInstrument Base;
+        using Base = MPEInstrument;
+
     public:
         UnitTestInstrument()
             : noteOnCallCounter (0),  noteOffCallCounter (0), pitchbendCallCounter (0),

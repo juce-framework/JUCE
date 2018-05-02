@@ -58,7 +58,7 @@ public:
         close();
     }
 
-    typedef ReferenceCountedObjectPtr<LADSPAModuleHandle> Ptr;
+    using Ptr = ReferenceCountedObjectPtr<LADSPAModuleHandle>;
 
     static Array<LADSPAModuleHandle*>& getActiveModules()
     {

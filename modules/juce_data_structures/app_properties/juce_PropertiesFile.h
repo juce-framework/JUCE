@@ -239,7 +239,7 @@ private:
     Options options;
     bool loadedOk = false, needsWriting = false;
 
-    typedef const std::unique_ptr<InterProcessLock::ScopedLockType> ProcessScopedLock;
+    using ProcessScopedLock = const std::unique_ptr<InterProcessLock::ScopedLockType>;
     InterProcessLock::ScopedLockType* createProcessLock() const;
 
     void timerCallback() override;

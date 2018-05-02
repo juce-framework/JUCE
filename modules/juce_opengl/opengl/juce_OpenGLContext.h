@@ -334,7 +334,7 @@ private:
     //==============================================================================
     struct AsyncWorker  : public ReferenceCountedObject
     {
-        typedef ReferenceCountedObjectPtr<AsyncWorker> Ptr;
+        using Ptr = ReferenceCountedObjectPtr<AsyncWorker>;
         virtual void operator() (OpenGLContext&) = 0;
         virtual ~AsyncWorker() {}
     };

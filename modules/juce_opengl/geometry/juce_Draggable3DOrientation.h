@@ -36,8 +36,8 @@ namespace juce
 class Draggable3DOrientation
 {
 public:
-    typedef Vector3D<float> VectorType;
-    typedef Quaternion<float> QuaternionType;
+    using VectorType      = Vector3D<float>;
+    using QuaternionType  = Quaternion<float>;
 
     /** Creates a Draggable3DOrientation, initially set up to be aligned along the X axis. */
     Draggable3DOrientation (float objectRadius = 0.5f) noexcept
@@ -65,7 +65,7 @@ public:
         rectangle is assumed to be the centre of the object that will be rotated, and
         the size of the rectangle will be used to scale the object radius - see setRadius().
     */
-    void setViewport (const Rectangle<int>& newArea) noexcept
+    void setViewport (Rectangle<int> newArea) noexcept
     {
         area = newArea;
     }
@@ -95,9 +95,9 @@ public:
     template <typename Type>
     void mouseDrag (Point<Type> mousePos) noexcept
     {
-        const VectorType oldPos (projectOnSphere (lastMouse));
+        auto oldPos = projectOnSphere (lastMouse);
         lastMouse = mousePosToProportion (mousePos.toFloat());
-        const VectorType newPos (projectOnSphere (lastMouse));
+        auto newPos = projectOnSphere (lastMouse);
 
         quaternion *= rotationFromMove (oldPos, newPos);
     }
@@ -122,36 +122,36 @@ private:
     QuaternionType quaternion;
     Point<float> lastMouse;
 
-    Point<float> mousePosToProportion (const Point<float> mousePos) const noexcept
+    Point<float> mousePosToProportion (Point<float> mousePos) const noexcept
     {
-        const int scale = (jmin (area.getWidth(), area.getHeight()) / 2);
+        auto scale = jmin (area.getWidth(), area.getHeight()) / 2;
 
         // You must call setViewport() to give this object a valid window size before
         // calling any of the mouse input methods!
         jassert (scale > 0);
 
-        return Point<float> ((mousePos.x - (float) area.getCentreX()) / (float) scale,
-                             ((float) area.getCentreY() - mousePos.y) / (float) scale);
+        return { (mousePos.x - (float) area.getCentreX()) / (float) scale,
+                 ((float) area.getCentreY() - mousePos.y) / (float) scale };
     }
 
-    VectorType projectOnSphere (const Point<float> pos) const noexcept
+    VectorType projectOnSphere (Point<float> pos) const noexcept
     {
-        const float radiusSquared = radius * radius;
-        const float xySquared = pos.x * pos.x + pos.y * pos.y;
+        auto radiusSquared = radius * radius;
+        auto xySquared = pos.x * pos.x + pos.y * pos.y;
 
-        return VectorType (pos.x, pos.y,
-                           xySquared < radiusSquared * 0.5f ? std::sqrt (radiusSquared - xySquared)
-                                                            : (radiusSquared / (2.0f * std::sqrt (xySquared))));
+        return { pos.x, pos.y,
+                 xySquared < radiusSquared * 0.5f ? std::sqrt (radiusSquared - xySquared)
+                                                  : (radiusSquared / (2.0f * std::sqrt (xySquared))) };
     }
 
     QuaternionType rotationFromMove (const VectorType& from, const VectorType& to) const noexcept
     {
-        VectorType rotationAxis (to ^ from);
+        auto rotationAxis = (to ^ from);
 
         if (rotationAxis.lengthIsBelowEpsilon())
             rotationAxis = VectorType::xAxis();
 
-        const float d = jlimit (-1.0f, 1.0f, (from - to).length() / (2.0f * radius));
+        auto d = jlimit (-1.0f, 1.0f, (from - to).length() / (2.0f * radius));
 
         return QuaternionType::fromAngle (2.0f * std::asin (d), rotationAxis);
     }

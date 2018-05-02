@@ -26,8 +26,8 @@ namespace juce
 #ifndef DOXYGEN
  namespace AtomicHelpers
  {
-     template <typename T> struct DiffTypeHelper     { typedef T Type; };
-     template <typename T> struct DiffTypeHelper<T*> { typedef std::ptrdiff_t Type; };
+     template <typename T> struct DiffTypeHelper     { using Type = T; };
+     template <typename T> struct DiffTypeHelper<T*> { using Type = std::ptrdiff_t; };
  }
 #endif
 

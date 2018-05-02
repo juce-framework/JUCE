@@ -64,36 +64,36 @@ struct SIMDRegister
 {
     //==============================================================================
     /** The type that represents the individual constituents of the SIMD Register */
-    typedef Type ElementType;
+    using ElementType = Type;
 
     /** STL compatible value_type definition (same as ElementType). */
-    typedef ElementType value_type;
+    using value_type = ElementType;
 
     /** The corresponding primitive integer type, for example, this will be int32_t
         if type is a float. */
-    typedef typename SIMDInternal::MaskTypeFor<ElementType>::type MaskType;
+    using MaskType = typename SIMDInternal::MaskTypeFor<ElementType>::type;
 
     //==============================================================================
     // Here are some types which are needed internally
 
     /** The native primitive type (used internally). */
-    typedef typename SIMDInternal::PrimitiveType<ElementType>::type PrimitiveType;
+    using PrimitiveType = typename SIMDInternal::PrimitiveType<ElementType>::type;
 
     /** The native operations for this platform and type combination (used internally) */
-    typedef SIMDNativeOps<PrimitiveType> NativeOps;
+    using NativeOps = SIMDNativeOps<PrimitiveType>;
 
     /** The native type (used internally). */
-    typedef typename NativeOps::vSIMDType vSIMDType;
+    using vSIMDType = typename NativeOps::vSIMDType;
 
     /** The corresponding integer SIMDRegister type (used internally). */
-    typedef SIMDRegister<MaskType> vMaskType;
+    using vMaskType = SIMDRegister<MaskType>;
 
     /** The internal native type for the corresponding mask type (used internally). */
-    typedef typename vMaskType::vSIMDType vMaskSIMDType;
+    using vMaskSIMDType = typename vMaskType::vSIMDType;
 
     /** Wrapper for operations which need to be handled differently for complex
         and scalar types (used internally). */
-    typedef CmplxSIMDOps<ElementType> CmplxOps;
+    using CmplxOps = CmplxSIMDOps<ElementType>;
 
     /** Type which is returned when using the subscript operator. The returned type
         should be used just like the type ElementType. */

@@ -32,19 +32,19 @@ namespace dsp
 /** A template specialisation to find corresponding mask type for primitives. */
 namespace SIMDInternal
 {
-    template <typename Primitive> struct MaskTypeFor        { typedef Primitive type; };
-    template <> struct MaskTypeFor <float>                  { typedef uint32_t  type; };
-    template <> struct MaskTypeFor <double>                 { typedef uint64_t  type; };
-    template <> struct MaskTypeFor <char>                   { typedef uint8_t   type; };
-    template <> struct MaskTypeFor <int8_t>                 { typedef uint8_t   type; };
-    template <> struct MaskTypeFor <int16_t>                { typedef uint16_t  type; };
-    template <> struct MaskTypeFor <int32_t>                { typedef uint32_t  type; };
-    template <> struct MaskTypeFor <int64_t>                { typedef uint64_t  type; };
-    template <> struct MaskTypeFor <std::complex<float>>    { typedef uint32_t  type; };
-    template <> struct MaskTypeFor <std::complex<double>>   { typedef uint64_t  type; };
+    template <typename Primitive> struct MaskTypeFor        { using type = Primitive; };
+    template <> struct MaskTypeFor <float>                  { using type = uint32_t; };
+    template <> struct MaskTypeFor <double>                 { using type = uint64_t; };
+    template <> struct MaskTypeFor <char>                   { using type = uint8_t; };
+    template <> struct MaskTypeFor <int8_t>                 { using type = uint8_t; };
+    template <> struct MaskTypeFor <int16_t>                { using type = uint16_t; };
+    template <> struct MaskTypeFor <int32_t>                { using type = uint32_t; };
+    template <> struct MaskTypeFor <int64_t>                { using type = uint64_t; };
+    template <> struct MaskTypeFor <std::complex<float>>    { using type = uint32_t; };
+    template <> struct MaskTypeFor <std::complex<double>>   { using type = uint64_t; };
 
-    template <typename Primitive> struct PrimitiveType                           { typedef Primitive type; };
-    template <typename Primitive> struct PrimitiveType<std::complex<Primitive>>  { typedef Primitive type; };
+    template <typename Primitive> struct PrimitiveType                           { using type = Primitive; };
+    template <typename Primitive> struct PrimitiveType<std::complex<Primitive>>  { using type = Primitive; };
 
     template <int n>    struct Log2Helper    { enum { value = Log2Helper<n/2>::value + 1 }; };
     template <>         struct Log2Helper<1> { enum { value = 0 }; };

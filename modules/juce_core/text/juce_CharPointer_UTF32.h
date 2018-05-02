@@ -34,7 +34,7 @@ namespace juce
 class CharPointer_UTF32  final
 {
 public:
-    typedef juce_wchar CharType;
+    using CharType = juce_wchar;
 
     inline explicit CharPointer_UTF32 (const CharType* rawPointer) noexcept
         : data (const_cast<CharType*> (rawPointer))

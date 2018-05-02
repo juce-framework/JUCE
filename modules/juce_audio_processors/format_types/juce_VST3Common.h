@@ -577,8 +577,8 @@ private:
 template <typename FloatType>
 struct VST3BufferExchange
 {
-    typedef Array<FloatType*> Bus;
-    typedef Array<Bus> BusMap;
+    using Bus = Array<FloatType*>;
+    using BusMap = Array<Bus>;
 
     static inline void assignRawPointer (Steinberg::Vst::AudioBusBuffers& vstBuffers, float** raw)  { vstBuffers.channelBuffers32 = raw; }
     static inline void assignRawPointer (Steinberg::Vst::AudioBusBuffers& vstBuffers, double** raw) { vstBuffers.channelBuffers64 = raw; }

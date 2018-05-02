@@ -64,8 +64,8 @@ template <>
 struct SIMDNativeOps<uint32_t>
 {
     //==============================================================================
-    typedef uint32x4_t vSIMDType;
-    typedef SIMDFallbackOps<uint32_t, vSIMDType> fb;
+    using vSIMDType = uint32x4_t;
+    using fb = SIMDFallbackOps<uint32_t, vSIMDType>;
 
     //==============================================================================
     DECLARE_NEON_SIMD_CONST (uint32_t, kAllBitsSet);
@@ -108,8 +108,8 @@ template <>
 struct SIMDNativeOps<int32_t>
 {
     //==============================================================================
-    typedef int32x4_t vSIMDType;
-    typedef SIMDFallbackOps<int32_t, vSIMDType> fb;
+    using vSIMDType = int32x4_t;
+    using fb = SIMDFallbackOps<int32_t, vSIMDType>;
 
     //==============================================================================
     DECLARE_NEON_SIMD_CONST (int32_t, kAllBitsSet);
@@ -153,8 +153,8 @@ template <>
 struct SIMDNativeOps<int8_t>
 {
     //==============================================================================
-    typedef int8x16_t vSIMDType;
-    typedef SIMDFallbackOps<int8_t, vSIMDType> fb;
+    using vSIMDType = int8x16_t;
+    using fb = SIMDFallbackOps<int8_t, vSIMDType>;
 
     //==============================================================================
     DECLARE_NEON_SIMD_CONST (int8_t, kAllBitsSet);
@@ -193,8 +193,8 @@ template <>
 struct SIMDNativeOps<uint8_t>
 {
     //==============================================================================
-    typedef uint8x16_t vSIMDType;
-    typedef SIMDFallbackOps<uint8_t, vSIMDType> fb;
+    using vSIMDType = uint8x16_t;
+    using fb = SIMDFallbackOps<uint8_t, vSIMDType>;
 
     //==============================================================================
     DECLARE_NEON_SIMD_CONST (uint8_t, kAllBitsSet);
@@ -233,8 +233,8 @@ template <>
 struct SIMDNativeOps<int16_t>
 {
     //==============================================================================
-    typedef int16x8_t vSIMDType;
-    typedef SIMDFallbackOps<int16_t, vSIMDType> fb;
+    using vSIMDType = int16x8_t;
+    using fb = SIMDFallbackOps<int16_t, vSIMDType>;
 
     //==============================================================================
     DECLARE_NEON_SIMD_CONST (int16_t, kAllBitsSet);
@@ -274,8 +274,8 @@ template <>
 struct SIMDNativeOps<uint16_t>
 {
     //==============================================================================
-    typedef uint16x8_t vSIMDType;
-    typedef SIMDFallbackOps<uint16_t, vSIMDType> fb;
+    using vSIMDType = uint16x8_t;
+    using fb = SIMDFallbackOps<uint16_t, vSIMDType>;
 
     //==============================================================================
     DECLARE_NEON_SIMD_CONST (uint16_t, kAllBitsSet);
@@ -314,8 +314,8 @@ template <>
 struct SIMDNativeOps<int64_t>
 {
     //==============================================================================
-    typedef int64x2_t vSIMDType;
-    typedef SIMDFallbackOps<int64_t, vSIMDType> fb;
+    using vSIMDType = int64x2_t;
+    using fb = SIMDFallbackOps<int64_t, vSIMDType>;
 
     //==============================================================================
     DECLARE_NEON_SIMD_CONST (int64_t, kAllBitsSet);
@@ -355,8 +355,8 @@ template <>
 struct SIMDNativeOps<uint64_t>
 {
     //==============================================================================
-    typedef uint64x2_t vSIMDType;
-    typedef SIMDFallbackOps<uint64_t, vSIMDType> fb;
+    using vSIMDType = uint64x2_t;
+    using fb = SIMDFallbackOps<uint64_t, vSIMDType>;
 
     //==============================================================================
     DECLARE_NEON_SIMD_CONST (uint64_t, kAllBitsSet);
@@ -395,9 +395,9 @@ template <>
 struct SIMDNativeOps<float>
 {
     //==============================================================================
-    typedef float32x4_t vSIMDType;
-    typedef uint32x4_t vMaskType;
-    typedef SIMDFallbackOps<float, vSIMDType> fb;
+    using vSIMDType = float32x4_t;
+    using vMaskType = uint32x4_t;
+    using fb = SIMDFallbackOps<float, vSIMDType>;
 
     //==============================================================================
     DECLARE_NEON_SIMD_CONST (int32_t, kAllBitsSet);
@@ -456,33 +456,33 @@ template <>
 struct SIMDNativeOps<double>
 {
     //==============================================================================
-    typedef struct { double v[2]; } vSIMDType;
-    typedef SIMDFallbackOps<double, vSIMDType> fb;
+    using vSIMDType = struct { double v[2]; };
+    using fb = SIMDFallbackOps<double, vSIMDType>;
 
-    static forcedinline vSIMDType expand (double s) noexcept                     { return {{s, s}}; }
-    static forcedinline vSIMDType load (const double* a) noexcept                { return {{a[0], a[1]}}; }
-    static forcedinline void store (vSIMDType v, double* a) noexcept             { a[0] = v.v[0]; a[1] = v.v[1]; }
-    static forcedinline double get (vSIMDType v, size_t i) noexcept              { return v.v[i]; }
-    static forcedinline vSIMDType set (vSIMDType v, size_t i, double s) noexcept { v.v[i] = s; return v; }
-    static forcedinline vSIMDType add (vSIMDType a, vSIMDType b) noexcept        { return {{a.v[0] + b.v[0], a.v[1] + b.v[1]}}; }
-    static forcedinline vSIMDType sub (vSIMDType a, vSIMDType b) noexcept        { return {{a.v[0] - b.v[0], a.v[1] - b.v[1]}}; }
-    static forcedinline vSIMDType mul (vSIMDType a, vSIMDType b) noexcept        { return {{a.v[0] * b.v[0], a.v[1] * b.v[1]}}; }
-    static forcedinline vSIMDType bit_and (vSIMDType a, vSIMDType b) noexcept    { return fb::bit_and (a, b); }
-    static forcedinline vSIMDType bit_or  (vSIMDType a, vSIMDType b) noexcept    { return fb::bit_or  (a, b); }
-    static forcedinline vSIMDType bit_xor (vSIMDType a, vSIMDType b) noexcept    { return fb::bit_xor (a, b); }
-    static forcedinline vSIMDType bit_notand (vSIMDType a, vSIMDType b) noexcept { return fb::bit_notand (a, b); }
-    static forcedinline vSIMDType bit_not (vSIMDType a) noexcept                 { return fb::bit_not (a); }
-    static forcedinline vSIMDType min (vSIMDType a, vSIMDType b) noexcept                    { return fb::min (a, b); }
-    static forcedinline vSIMDType max (vSIMDType a, vSIMDType b) noexcept                    { return fb::max (a, b); }
-    static forcedinline vSIMDType equal (vSIMDType a, vSIMDType b) noexcept                  { return fb::equal (a, b); }
-    static forcedinline vSIMDType notEqual (vSIMDType a, vSIMDType b) noexcept               { return fb::notEqual (a, b); }
-    static forcedinline vSIMDType greaterThan (vSIMDType a, vSIMDType b) noexcept            { return fb::greaterThan (a, b); }
-    static forcedinline vSIMDType greaterThanOrEqual (vSIMDType a, vSIMDType b) noexcept     { return fb::greaterThanOrEqual (a, b); }
-    static forcedinline bool      allEqual (vSIMDType a, vSIMDType b) noexcept               { return fb::allEqual (a, b); }
+    static forcedinline vSIMDType expand (double s) noexcept                                   { return {{s, s}}; }
+    static forcedinline vSIMDType load (const double* a) noexcept                              { return {{a[0], a[1]}}; }
+    static forcedinline void store (vSIMDType v, double* a) noexcept                           { a[0] = v.v[0]; a[1] = v.v[1]; }
+    static forcedinline double get (vSIMDType v, size_t i) noexcept                            { return v.v[i]; }
+    static forcedinline vSIMDType set (vSIMDType v, size_t i, double s) noexcept               { v.v[i] = s; return v; }
+    static forcedinline vSIMDType add (vSIMDType a, vSIMDType b) noexcept                      { return {{a.v[0] + b.v[0], a.v[1] + b.v[1]}}; }
+    static forcedinline vSIMDType sub (vSIMDType a, vSIMDType b) noexcept                      { return {{a.v[0] - b.v[0], a.v[1] - b.v[1]}}; }
+    static forcedinline vSIMDType mul (vSIMDType a, vSIMDType b) noexcept                      { return {{a.v[0] * b.v[0], a.v[1] * b.v[1]}}; }
+    static forcedinline vSIMDType bit_and (vSIMDType a, vSIMDType b) noexcept                  { return fb::bit_and (a, b); }
+    static forcedinline vSIMDType bit_or  (vSIMDType a, vSIMDType b) noexcept                  { return fb::bit_or  (a, b); }
+    static forcedinline vSIMDType bit_xor (vSIMDType a, vSIMDType b) noexcept                  { return fb::bit_xor (a, b); }
+    static forcedinline vSIMDType bit_notand (vSIMDType a, vSIMDType b) noexcept               { return fb::bit_notand (a, b); }
+    static forcedinline vSIMDType bit_not (vSIMDType a) noexcept                               { return fb::bit_not (a); }
+    static forcedinline vSIMDType min (vSIMDType a, vSIMDType b) noexcept                      { return fb::min (a, b); }
+    static forcedinline vSIMDType max (vSIMDType a, vSIMDType b) noexcept                      { return fb::max (a, b); }
+    static forcedinline vSIMDType equal (vSIMDType a, vSIMDType b) noexcept                    { return fb::equal (a, b); }
+    static forcedinline vSIMDType notEqual (vSIMDType a, vSIMDType b) noexcept                 { return fb::notEqual (a, b); }
+    static forcedinline vSIMDType greaterThan (vSIMDType a, vSIMDType b) noexcept              { return fb::greaterThan (a, b); }
+    static forcedinline vSIMDType greaterThanOrEqual (vSIMDType a, vSIMDType b) noexcept       { return fb::greaterThanOrEqual (a, b); }
+    static forcedinline bool      allEqual (vSIMDType a, vSIMDType b) noexcept                 { return fb::allEqual (a, b); }
     static forcedinline vSIMDType multiplyAdd (vSIMDType a, vSIMDType b, vSIMDType c) noexcept { return fb::multiplyAdd (a, b, c); }
-    static forcedinline vSIMDType cmplxmul (vSIMDType a, vSIMDType b) noexcept { return fb::cmplxmul (a, b); }
-    static forcedinline double sum (vSIMDType a) noexcept { return fb::sum (a); }
-    static forcedinline vSIMDType oddevensum (vSIMDType a) noexcept { return a; }
+    static forcedinline vSIMDType cmplxmul (vSIMDType a, vSIMDType b) noexcept                 { return fb::cmplxmul (a, b); }
+    static forcedinline double sum (vSIMDType a) noexcept                                      { return fb::sum (a); }
+    static forcedinline vSIMDType oddevensum (vSIMDType a) noexcept                            { return a; }
 };
 
 #endif

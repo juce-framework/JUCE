@@ -648,7 +648,7 @@ private:
     Atomic<int> refCount;
     String appName;
 
-    typedef std::map<Vst::ParamID, int> ParamMapType;
+    using ParamMapType = std::map<Vst::ParamID, int>;
     ParamMapType paramToIndexMap;
 
     int getIndexOfParamID (Vst::ParamID paramID)
@@ -1219,7 +1219,7 @@ struct VST3ModuleHandle  : public ReferenceCountedObject
     }
 
     //==============================================================================
-    typedef ReferenceCountedObjectPtr<VST3ModuleHandle> Ptr;
+    using Ptr = ReferenceCountedObjectPtr<VST3ModuleHandle>;
 
     static VST3ModuleHandle::Ptr findOrCreateModule (const File& file, const PluginDescription& description)
     {
@@ -1451,13 +1451,13 @@ private:
 
     ChildComponent embeddedComponent;
     std::unique_ptr<ComponentPeer> peer;
-    typedef HWND HandleFormat;
+    using HandleFormat = HWND;
    #elif JUCE_MAC
     AutoResizingNSViewComponentWithParent embeddedComponent;
-    typedef NSView* HandleFormat;
+    using HandleFormat = NSView*;
    #else
     Component embeddedComponent;
-    typedef void* HandleFormat;
+    using HandleFormat = void*;
    #endif
 
     HandleFormat pluginHandle = {};

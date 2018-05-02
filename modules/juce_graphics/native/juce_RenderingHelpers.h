@@ -1632,7 +1632,7 @@ struct ClipRegions
         Base() {}
         virtual ~Base() {}
 
-        typedef ReferenceCountedObjectPtr<Base> Ptr;
+        using Ptr = ReferenceCountedObjectPtr<Base>;
 
         virtual Ptr clone() const = 0;
         virtual Ptr applyClipTo (const Ptr& target) const = 0;
@@ -1669,7 +1669,7 @@ struct ClipRegions
         EdgeTableRegion (const EdgeTableRegion& other)  : Base(), edgeTable (other.edgeTable) {}
         EdgeTableRegion& operator= (const EdgeTableRegion&) = delete;
 
-        typedef typename Base::Ptr Ptr;
+        using Ptr = typename Base::Ptr;
 
         Ptr clone() const override                           { return new EdgeTableRegion (*this); }
         Ptr applyClipTo (const Ptr& target) const override   { return target->clipToEdgeTable (edgeTable); }
@@ -1850,7 +1850,7 @@ struct ClipRegions
         RectangleListRegion (const RectangleList<int>& r)  : clip (r) {}
         RectangleListRegion (const RectangleListRegion& other) : Base(), clip (other.clip) {}
 
-        typedef typename Base::Ptr Ptr;
+        using Ptr = typename Base::Ptr;
 
         Ptr clone() const override                           { return new RectangleListRegion (*this); }
         Ptr applyClipTo (const Ptr& target) const override   { return target->clipToRectangleList (clip); }
@@ -2080,9 +2080,9 @@ template <class SavedStateType>
 class SavedStateBase
 {
 public:
-    typedef typename ClipRegions<SavedStateType>::Base                   BaseRegionType;
-    typedef typename ClipRegions<SavedStateType>::EdgeTableRegion        EdgeTableRegionType;
-    typedef typename ClipRegions<SavedStateType>::RectangleListRegion    RectangleListRegionType;
+    using BaseRegionType           = typename ClipRegions<SavedStateType>::Base;
+    using EdgeTableRegionType      = typename ClipRegions<SavedStateType>::EdgeTableRegion;
+    using RectangleListRegionType  = typename ClipRegions<SavedStateType>::RectangleListRegion;
 
     SavedStateBase (Rectangle<int> initialClip)
         : clip (new RectangleListRegionType (initialClip)),
@@ -2516,7 +2516,7 @@ public:
 //==============================================================================
 class SoftwareRendererSavedState  : public SavedStateBase<SoftwareRendererSavedState>
 {
-    typedef SavedStateBase<SoftwareRendererSavedState> BaseClass;
+    using BaseClass = SavedStateBase<SoftwareRendererSavedState>;
 
 public:
     SoftwareRendererSavedState (const Image& im, Rectangle<int> clipBounds)
@@ -2564,7 +2564,7 @@ public:
         }
     }
 
-    typedef GlyphCache<CachedGlyphEdgeTable<SoftwareRendererSavedState>, SoftwareRendererSavedState> GlyphCacheType;
+    using GlyphCacheType = GlyphCache<CachedGlyphEdgeTable<SoftwareRendererSavedState>, SoftwareRendererSavedState>;
 
     static void clearGlyphCache()
     {

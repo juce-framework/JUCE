@@ -37,7 +37,7 @@ namespace juce
 class CharPointer_ASCII  final
 {
 public:
-    typedef char CharType;
+    using CharType = char;
 
     inline explicit CharPointer_ASCII (const CharType* rawPointer) noexcept
         : data (const_cast<CharType*> (rawPointer))

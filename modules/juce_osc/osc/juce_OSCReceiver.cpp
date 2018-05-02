@@ -525,7 +525,7 @@ private:
     //==============================================================================
     void callListeners (const OSCBundle::Element& content)
     {
-        typedef OSCReceiver::Listener<OSCReceiver::MessageLoopCallback> Listener;
+        using Listener = OSCReceiver::Listener<OSCReceiver::MessageLoopCallback>;
 
         if (content.isMessage())
         {
@@ -541,7 +541,7 @@ private:
 
     void callRealtimeListeners (const OSCBundle::Element& content)
     {
-        typedef OSCReceiver::Listener<OSCReceiver::RealtimeCallback> Listener;
+        using Listener = OSCReceiver::Listener<OSCReceiver::RealtimeCallback>;
 
         if (content.isMessage())
         {

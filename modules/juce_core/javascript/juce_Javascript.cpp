@@ -75,8 +75,8 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
     Time timeout;
 
-    typedef const var::NativeFunctionArgs& Args;
-    typedef const char* TokenType;
+    using Args = const var::NativeFunctionArgs&;
+    using TokenType = const char*;
 
     void execute (const String& code)
     {
@@ -263,7 +263,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         ResultCode perform (const Scope& s, var*) const override  { getResult (s); return ok; }
     };
 
-    typedef std::unique_ptr<Expression> ExpPtr;
+    using ExpPtr = std::unique_ptr<Expression>;
 
     struct BlockStatement  : public Statement
     {

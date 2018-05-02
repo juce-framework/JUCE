@@ -416,11 +416,10 @@ public:
     */
     struct LevelMeter    : public ReferenceCountedObject
     {
-        typedef ReferenceCountedObjectPtr<LevelMeter> Ptr;
-
         LevelMeter() noexcept;
-
         double getCurrentLevel() const noexcept;
+
+        using Ptr = ReferenceCountedObjectPtr<LevelMeter>;
 
     private:
         friend class AudioDeviceManager;

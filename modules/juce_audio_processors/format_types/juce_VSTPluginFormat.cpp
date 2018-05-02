@@ -580,7 +580,7 @@ struct ModuleHandle    : public ReferenceCountedObject
     String pluginName;
     std::unique_ptr<XmlElement> vstXml;
 
-    typedef ReferenceCountedObjectPtr<ModuleHandle> Ptr;
+    using Ptr = ReferenceCountedObjectPtr<ModuleHandle>;
 
     static Array<ModuleHandle*>& getActiveModules()
     {

@@ -274,7 +274,8 @@ private:
         return clampedValue;
     }
 
-    typedef std::function<ValueType(ValueType, ValueType, ValueType)> ConverstionFunction;
+    using ConverstionFunction = std::function<ValueType(ValueType, ValueType, ValueType)>;
+
     ConverstionFunction convertFrom0To1Function  = {},
                         convertTo0To1Function    = {},
                         snapToLegalValueFunction = {};
