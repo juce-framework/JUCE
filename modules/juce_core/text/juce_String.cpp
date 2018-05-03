@@ -2207,7 +2207,8 @@ StringRef::StringRef (String::CharPointerType stringLiteral) noexcept  : text (s
     jassert (stringLiteral.getAddress() != nullptr); // This must be a valid string literal, not a null pointer!!
 }
 
-StringRef::StringRef (const String& string) noexcept  : text (string.getCharPointer()) {}
+StringRef::StringRef (const String& string) noexcept   : text (string.getCharPointer()) {}
+StringRef::StringRef (const std::string& string)       : StringRef (string.c_str()) {}
 
 
 //==============================================================================
