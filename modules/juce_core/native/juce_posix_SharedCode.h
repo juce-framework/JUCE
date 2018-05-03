@@ -158,7 +158,7 @@ bool Process::setMaxNumberOfFileHandles (int newMaxNumber) noexcept
         if (newMaxNumber <= 0 && lim.rlim_cur == RLIM_INFINITY && lim.rlim_max == RLIM_INFINITY)
             return true;
 
-        if (lim.rlim_cur >= (rlim_t) newMaxNumber)
+        if (newMaxNumber > 0 && lim.rlim_cur >= (rlim_t) newMaxNumber)
             return true;
     }
 
