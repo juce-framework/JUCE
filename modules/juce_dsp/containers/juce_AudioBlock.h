@@ -265,7 +265,7 @@ public:
 
         All indices and sizes are in the receiver's units, i.e. if SampleType is a
         SIMDRegister then incrementing srcPos by one will increase the sample position
-        in the AudioBuffer's units by a factor of SIMDRegister::\<SampleType\>::SIMDNumElements.
+        in the AudioBuffer's units by a factor of SIMDRegister<SampleType>::SIMDNumElements.
     */
     forcedinline AudioBlock& copyFrom (const AudioBuffer<NumericType>& src, size_t srcPos = 0, size_t dstPos = 0,
                                        size_t numElements = std::numeric_limits<size_t>::max())
@@ -287,7 +287,7 @@ public:
 
         All indices and sizes are in the receiver's units, i.e. if SampleType is a
         SIMDRegister then incrementing dstPos by one will increase the sample position
-        in the AudioBuffer's units by a factor of SIMDRegister::\<SampleType\>::SIMDNumElements.
+        in the AudioBuffer's units by a factor of SIMDRegister<SampleType>::SIMDNumElements.
     */
     forcedinline const AudioBlock& copyTo (AudioBuffer<NumericType>& dst, size_t srcPos = 0, size_t dstPos = 0,
                                            size_t numElements = std::numeric_limits<size_t>::max()) const

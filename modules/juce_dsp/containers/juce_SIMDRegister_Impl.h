@@ -45,6 +45,7 @@ private:
     size_t idx;
 };
 
+#ifndef DOXYGEN
 //==============================================================================
 /* This class is used internally by SIMDRegister to abstract away differences
    in operations which are different for complex and pure floating point types. */
@@ -157,6 +158,7 @@ struct CmplxSIMDOps<std::complex<Scalar>>
         return SIMDNativeOps<Scalar>::add (a, SIMDNativeOps<Scalar>::cmplxmul (b, c));
     }
 };
+#endif
 
 //==============================================================================
  namespace util
