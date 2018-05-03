@@ -24,10 +24,13 @@
   ==============================================================================
 */
 
+#pragma once
+
 #include "jucer_ProjectExport_CodeBlocks.h"
 #include "jucer_ProjectExport_Make.h"
 #include "jucer_ProjectExport_Xcode.h"
 
+//==============================================================================
 class CLionProjectExporter  : public ProjectExporter
 {
 protected:
