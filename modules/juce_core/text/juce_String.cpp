@@ -851,6 +851,7 @@ JUCE_API String JUCE_CALLTYPE operator+ (wchar_t s1, const String& s2)        { 
 JUCE_API String JUCE_CALLTYPE operator+ (String s1, const String& s2)         { return s1 += s2; }
 JUCE_API String JUCE_CALLTYPE operator+ (String s1, const char* s2)           { return s1 += s2; }
 JUCE_API String JUCE_CALLTYPE operator+ (String s1, const wchar_t* s2)        { return s1 += s2; }
+JUCE_API String JUCE_CALLTYPE operator+ (String s1, const std::string& s2)    { return s1 += s2.c_str(); }
 
 JUCE_API String JUCE_CALLTYPE operator+ (String s1, char s2)                  { return s1 += s2; }
 JUCE_API String JUCE_CALLTYPE operator+ (String s1, wchar_t s2)               { return s1 += s2; }
@@ -868,6 +869,7 @@ JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const char* s2)        { 
 JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const wchar_t* s2)     { return s1 += s2; }
 JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const String& s2)      { return s1 += s2; }
 JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, StringRef s2)          { return s1 += s2; }
+JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const std::string& s2) { return s1 += s2.c_str(); }
 
 JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, uint8  number)         { return s1 += (int) number; }
 JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, short  number)         { return s1 += (int) number; }
