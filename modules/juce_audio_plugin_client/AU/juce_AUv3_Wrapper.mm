@@ -908,7 +908,7 @@ public:
 
     void selectViewConfiguration (AUAudioUnitViewConfiguration* config) override
     {
-        processorHolder->viewConfiguration = new AudioProcessorHolder::ViewConfig { [config width], [config height], [config hostHasController] == YES };
+        processorHolder->viewConfiguration.reset (new AudioProcessorHolder::ViewConfig { [config width], [config height], [config hostHasController] == YES });
     }
    #endif
 
