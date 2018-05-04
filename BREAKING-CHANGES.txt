@@ -6,6 +6,27 @@ Develop
 
 Change
 ------
+The behaviour of an UndoManager used by an AudioProcessorValueTreeState has
+been improved.
+
+Possible Issues
+---------------
+If your plug-in contains an UndoManager used by an AudioProcessorValueTreeState
+and relies upon the old behaviour of the UndoManager then it is possible that
+the new behaviour is no longer appropriate for your use case.
+
+Workaround
+----------
+Use an external UndoManager to reproduce the old behaviour manually.
+
+Rationale
+---------
+This change fixes a few bugs in the behaviour of an UndoManager used by an
+AudioProcessorValueTreeState.
+
+
+Change
+------
 JUCE no longer supports OS X deployment targets earlier than 10.7.
 
 Possible Issues
