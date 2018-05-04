@@ -916,6 +916,10 @@ struct VSTPluginInstance     : public AudioPluginInstance,
 
         String getName (int maximumStringLength) const override
         {
+            if (name.isEmpty())
+                return pluginInstance.getTextForOpcode (getParameterIndex(),
+                                                        plugInOpcodeGetParameterName);
+
             if (name.length() <= maximumStringLength)
                 return name;
 
@@ -933,7 +937,9 @@ struct VSTPluginInstance     : public AudioPluginInstance,
 
         String getLabel() const override
         {
-            return label;
+            return label.isEmpty() ? pluginInstance.getTextForOpcode (getParameterIndex(),
+                                                                      plugInOpcodeGetParameterLabel)
+                                   : label;
         }
 
         bool isAutomatable() const override
@@ -989,10 +995,10 @@ struct VSTPluginInstance     : public AudioPluginInstance,
 
         for (int i = 0; i < vstEffect->numParameters; ++i)
         {
-            String paramName (getTextForOpcode (i, plugInOpcodeGetParameterName));
+            String paramName;
             Array<String> shortParamNames;
             float defaultValue = 0;
-            String label (getTextForOpcode (i, plugInOpcodeGetParameterLabel));
+            String label;
             bool isAutomatable = dispatch (plugInOpcodeIsParameterAutomatable, i, 0, 0, 0) != 0;
             bool isDiscrete = false;
             int numSteps = AudioProcessor::getDefaultNumParameterSteps();
