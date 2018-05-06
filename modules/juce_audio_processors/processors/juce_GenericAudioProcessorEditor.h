@@ -52,7 +52,8 @@ public:
 
 private:
     //==============================================================================
-    Viewport view;
+    struct Pimpl;
+    ScopedPointer<Pimpl> pimpl;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GenericAudioProcessorEditor)
 };

@@ -7579,8 +7579,7 @@ static const unsigned char temp_binary_data_60[] =
 const char* RecentFilesMenuTemplate_nib = (const char*) temp_binary_data_60;
 
 
-const char* getNamedResource (const char*, int&) throw();
-const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw()
+const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) noexcept
 {
     unsigned int hash = 0;
     if (resourceNameUTF8 != 0)
@@ -7654,7 +7653,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
     }
 
     numBytes = 0;
-    return 0;
+    return nullptr;
 }
 
 const char* namedResourceList[] =
@@ -7721,5 +7720,81 @@ const char* namedResourceList[] =
     "projucer_EULA_txt",
     "RecentFilesMenuTemplate_nib"
 };
+
+const char* originalFilenames[] =
+{
+    "gradle-wrapper.jar",
+    "gradlew",
+    "gradlew.bat",
+    "LICENSE",
+    "background_logo.svg",
+    "export_android.svg",
+    "export_clion.svg",
+    "export_codeBlocks.svg",
+    "export_linux.svg",
+    "export_visualStudio.svg",
+    "export_xcode.svg",
+    "huckleberry_icon.svg",
+    "juce-logo-with-text.svg",
+    "juce_icon.png",
+    "wizard_AnimatedApp.svg",
+    "wizard_AudioApp.svg",
+    "wizard_AudioPlugin.svg",
+    "wizard_ConsoleApp.svg",
+    "wizard_DLL.svg",
+    "wizard_GUI.svg",
+    "wizard_Highlight.svg",
+    "wizard_Openfile.svg",
+    "wizard_OpenGL.svg",
+    "wizard_StaticLibrary.svg",
+    "jucer_AnimatedComponentSimpleTemplate.h",
+    "jucer_AnimatedComponentTemplate.cpp",
+    "jucer_AnimatedComponentTemplate.h",
+    "jucer_AudioComponentSimpleTemplate.h",
+    "jucer_AudioComponentTemplate.cpp",
+    "jucer_AudioComponentTemplate.h",
+    "jucer_AudioPluginEditorTemplate.cpp",
+    "jucer_AudioPluginEditorTemplate.h",
+    "jucer_AudioPluginFilterTemplate.cpp",
+    "jucer_AudioPluginFilterTemplate.h",
+    "jucer_ComponentTemplate.cpp",
+    "jucer_ComponentTemplate.h",
+    "jucer_ContentCompSimpleTemplate.h",
+    "jucer_ContentCompTemplate.cpp",
+    "jucer_ContentCompTemplate.h",
+    "jucer_InlineComponentTemplate.h",
+    "jucer_MainConsoleAppTemplate.cpp",
+    "jucer_MainTemplate_NoWindow.cpp",
+    "jucer_MainTemplate_SimpleWindow.cpp",
+    "jucer_MainTemplate_Window.cpp",
+    "jucer_NewComponentTemplate.cpp",
+    "jucer_NewComponentTemplate.h",
+    "jucer_NewCppFileTemplate.cpp",
+    "jucer_NewCppFileTemplate.h",
+    "jucer_NewInlineComponentTemplate.h",
+    "jucer_OpenGLComponentSimpleTemplate.h",
+    "jucer_OpenGLComponentTemplate.cpp",
+    "jucer_OpenGLComponentTemplate.h",
+    "jucer_PIPAudioProcessorTemplate.h",
+    "jucer_PIPMain.cpp",
+    "jucer_PIPTemplate.h",
+    "colourscheme_dark.xml",
+    "colourscheme_light.xml",
+    "nothingtoseehere.txt",
+    "offlinepage.html",
+    "projucer_EULA.txt",
+    "RecentFilesMenuTemplate.nib"
+};
+
+const char* getNamedResourceOriginalFilename (const char* resourceNameUTF8) noexcept
+{
+    for (unsigned int i = 0; i < (sizeof (namedResourceList) / sizeof (namedResourceList[0])); ++i)
+    {
+        if (namedResourceList[i] == resourceNameUTF8)
+            return originalFilenames[i];
+    }
+
+    return nullptr;
+}
 
 }

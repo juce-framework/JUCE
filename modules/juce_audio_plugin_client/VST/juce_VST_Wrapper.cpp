@@ -79,6 +79,7 @@
 #include "../utility/juce_FakeMouseMoveGenerator.h"
 #include "../utility/juce_WindowsHooks.h"
 
+#include "../../juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp"
 #include "../../juce_audio_processors/format_types/juce_VSTCommon.h"
 
 #ifdef _MSC_VER
@@ -281,6 +282,8 @@ public:
         processor->setPlayHead (this);
         processor->addListener (this);
 
+        juceParameters.update (*processor, false);
+
         memset (&vstEffect, 0, sizeof (vstEffect));
         vstEffect.interfaceIdentifier = juceVstInterfaceIdentifier;
         vstEffect.dispatchFunction = dispatcherCB;
@@ -288,7 +291,7 @@ public:
         vstEffect.setParameterValueFunction = setParameterCB;
         vstEffect.getParameterValueFunction = getParameterCB;
         vstEffect.numPrograms = jmax (1, af->getNumPrograms());
-        vstEffect.numParameters = af->getNumParameters();
+        vstEffect.numParameters = juceParameters.getNumParameters();
         vstEffect.numInputChannels = maxNumInChannels;
         vstEffect.numOutputChannels = maxNumOutChannels;
         vstEffect.latency = processor->getLatencySamples();
@@ -706,11 +709,10 @@ public:
     //==============================================================================
     float getParameter (int32 index) const
     {
-        if (processor == nullptr)
-            return 0.0f;
+        if (auto* param = juceParameters.getParamForIndex (index))
+            return param->getValue();
 
-        jassert (isPositiveAndBelow (index, processor->getNumParameters()));
-        return processor->getParameter (index);
+        return 0.0f;
     }
 
     static float getParameterCB (VstEffectInterface* vstInterface, int32 index)
@@ -720,20 +722,12 @@ public:
 
     void setParameter (int32 index, float value)
     {
-        if (processor != nullptr)
+        if (auto* param = juceParameters.getParamForIndex (index))
         {
-            if (auto* param = processor->getParameters()[index])
-            {
-                param->setValue (value);
+            param->setValue (value);
 
-                inParameterChangedCallback = true;
-                param->sendValueChangedMessageToListeners (value);
-            }
-            else
-            {
-                jassert (isPositiveAndBelow (index, processor->getNumParameters()));
-                processor->setParameter (index, value);
-            }
+            inParameterChangedCallback = true;
+            param->sendValueChangedMessageToListeners (value);
         }
     }
 
@@ -1472,6 +1466,8 @@ private:
     VSTMidiEventList outgoingEvents;
     float editorScaleFactor = 1.0f;
 
+    LegacyAudioParametersWrapper juceParameters;
+
     bool isProcessing = false, isBypassed = false, hasShutdown = false;
     bool firstProcessCallback = true, shouldDeleteEditor = false;
 
@@ -1664,11 +1660,10 @@ private:
 
     pointer_sized_int handleGetParameterLabel (VstOpCodeArguments args)
     {
-        if (processor != nullptr)
+        if (auto* param = juceParameters.getParamForIndex (args.index))
         {
-            jassert (isPositiveAndBelow (args.index, processor->getNumParameters()));
             // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
-            processor->getParameterLabel (args.index).copyToUTF8 ((char*) args.ptr, 24 + 1);
+            param->getLabel().copyToUTF8 ((char*) args.ptr, 24 + 1);
         }
 
         return 0;
@@ -1676,11 +1671,10 @@ private:
 
     pointer_sized_int handleGetParameterText (VstOpCodeArguments args)
     {
-        if (processor != nullptr)
+        if (auto* param = juceParameters.getParamForIndex (args.index))
         {
-            jassert (isPositiveAndBelow (args.index, processor->getNumParameters()));
             // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
-            processor->getParameterText (args.index, 24).copyToUTF8 ((char*) args.ptr, 24 + 1);
+            param->getCurrentValueAsText().copyToUTF8 ((char*) args.ptr, 24 + 1);
         }
 
         return 0;
@@ -1688,11 +1682,10 @@ private:
 
     pointer_sized_int handleGetParameterName (VstOpCodeArguments args)
     {
-        if (processor != nullptr)
+        if (auto* param = juceParameters.getParamForIndex (args.index))
         {
-            jassert (isPositiveAndBelow (args.index, processor->getNumParameters()));
             // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
-            processor->getParameterName (args.index, 32).copyToUTF8 ((char*) args.ptr, 32 + 1);
+            param->getName (32).copyToUTF8 ((char*) args.ptr, 32 + 1);
         }
 
         return 0;
@@ -1823,20 +1816,20 @@ private:
 
     pointer_sized_int handleIsParameterAutomatable (VstOpCodeArguments args)
     {
-        if (processor == nullptr)
-            return 0;
+        if (auto* param = juceParameters.getParamForIndex (args.index))
+        {
+            const bool isMeter = (((param->getCategory() & 0xffff0000) >> 16) == 2);
+            return (param->isAutomatable() && (! isMeter) ? 1 : 0);
+        }
 
-        const bool isMeter = (((processor->getParameterCategory (args.index) & 0xffff0000) >> 16) == 2);
-        return (processor->isParameterAutomatable (args.index) && (! isMeter) ? 1 : 0);
+        return 0;
     }
 
     pointer_sized_int handleParameterValueForText (VstOpCodeArguments args)
     {
-        if (processor != nullptr)
+        if (auto* param = juceParameters.getParamForIndex (args.index))
         {
-            jassert (isPositiveAndBelow (args.index, processor->getNumParameters()));
-
-            if (auto* param = processor->getParameters()[args.index])
+            if (! LegacyAudioParameter::isLegacy (param))
             {
                 auto value = param->getValueForText (String::fromUTF8 ((char*) args.ptr));
                 param->setValue (value);
@@ -2120,11 +2113,14 @@ private:
     {
         if (processor != nullptr && dest != nullptr)
         {
-            if (auto* param = processor->getParameters()[(int) paramIndex])
+            if (auto* param = juceParameters.getParamForIndex ((int) paramIndex))
             {
-                String text (param->getText (value, 1024));
-                memcpy (dest, text.toRawUTF8(), ((size_t) text.length()) + 1);
-                return 0xbeef;
+                if (! LegacyAudioParameter::isLegacy (param))
+                {
+                    String text (param->getText (value, 1024));
+                    memcpy (dest, text.toRawUTF8(), ((size_t) text.length()) + 1);
+                    return 0xbeef;
+                }
             }
         }
 

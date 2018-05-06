@@ -439,6 +439,12 @@ XmlElement* XmlElement::getNextElementWithTagName (StringRef requiredTagName) co
     return e;
 }
 
+void XmlElement::setTagName (StringRef newTagName)
+{
+    jassert (isValidXmlName (newTagName));
+    tagName = StringPool::getGlobalPool().getPooledString (newTagName);
+}
+
 //==============================================================================
 int XmlElement::getNumAttributes() const noexcept
 {

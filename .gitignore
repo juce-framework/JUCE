@@ -29,6 +29,7 @@ contents.xcworkspacedata
 profile
 **/MacOSX/build
 **/iOS/build
+**/IDEWorkspaceChecks.plist
 **/Linux/build
 **/LinuxMakefile/build
 **/VisualStudio2005/Debug
