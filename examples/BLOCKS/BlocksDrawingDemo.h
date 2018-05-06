@@ -25,7 +25,7 @@
 
  name:             BlocksDrawingDemo
  version:          1.0.0
- vendor:           juce
+ vendor:           JUCE
  website:          http://juce.com
  description:      Blocks application to draw shapes.
 
@@ -648,6 +648,7 @@ private:
             return xPos == x && yPos == y;
         }
     };
+
     Array<ActiveLED> activeLeds;
 
     int getLEDAt (uint32 x, uint32 y) const
@@ -665,6 +666,7 @@ private:
         colourPalette = 0,
         canvas
     };
+
     DisplayMode currentMode = colourPalette;
 
     //==============================================================================

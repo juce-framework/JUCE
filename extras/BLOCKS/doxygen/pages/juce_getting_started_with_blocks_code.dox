@@ -1,0 +1,40 @@
+/**
+@page getting_started_with_blocks_code Getting started with BLOCKS CODE
+
+@section downloading_blocks_code Downloading BLOCKS CODE
+
+In order to facilitate the development of simple BLOCKS applications using the LittleFoot language, BLOCKS CODE IDE was created to provide a self-contained solution that compiles and uploads your code automatically onto BLOCKS devices.
+
+BLOCK CODE is available for macOS and Windows and you can download the IDE @blockscode{here}.
+
+@section ide_interface The IDE interface
+
+After having installed the software, launch the application and you should see a main window pop up, similar to the one shown here:
+
+@image html blocks_code_interface.png "The BLOCKS CODE interface"
+
+BLOCKS CODE presents a simple interface with a code editor that highlights the syntax of the LittleFoot language and provides a side panel to browse properties relating to the project. It is divided into four tabs as follows:
+
+@image html blocks_code_tabs.png "Side panel tabs"
+
+@subsection ide_interface_project The Project tab
+
+The Project tab lists all the LittleFoot programs that are currently open and by clicking on any of them, you can instantly upload the code to the device (if there is a device connected). This also selects the code that can be edited in the code editor and displays any unsaved file with a red file icon.
+
+@subsection ide_interface_targets The Targets tab
+
+The Targets tab lists all the connected BLOCKS devices to the computer, whether it be via USB or Bluetooth. For every device connected, you have the option to rename the device name, choose it as a target or interact with it. When a program is opened, it is automatically uploaded to all the BLOCKS designated as targets and multiple devices can be selected as targets. However, only one device can be selected to be interacted with and this allows you to change the parameters displayed in the next tab.
+
+@subsection ide_interface_parameters The Parameters tab
+
+The Parameters tab displays all the available parameters for the selected %Block in the Targets tab that can be interacted with. This includes parameters created via the \<metadata\> tag or any configuration flag enabled at runtime. These parameters can be tweaked at runtime in order to dynamically control variables in the program uploaded onto the %Block.
+
+@subsection ide_interface_logging The Logging tab
+
+The Logging tab displays values that are logged using the @s_projcode{log()} function in the LittleFoot program. If multiple %Block devices are logging values at the same time, the logs are prefixed by the four-character device ID.
+
+@section blocks_code_language The LittleFoot language
+
+For a brief introduction to the LittleFoot language, please refer to @ref the_littlefoot_language page or jump straight into the @ref example_scripts to get coding.
+
+*/

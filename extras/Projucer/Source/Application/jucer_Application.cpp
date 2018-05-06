@@ -378,6 +378,7 @@ void ProjucerApplication::createFileMenu (PopupMenu& menu)
 {
     menu.addCommandItem (commandManager, CommandIDs::newProject);
     menu.addCommandItem (commandManager, CommandIDs::newProjectFromClipboard);
+    menu.addCommandItem (commandManager, CommandIDs::newPIP);
     menu.addSeparator();
     menu.addCommandItem (commandManager, CommandIDs::open);
 
@@ -771,7 +772,7 @@ File ProjucerApplication::findDemoRunnerProject() noexcept
 
     if (file.exists())
         return file;
-   #elif JUCE_WINDOW
+   #elif JUCE_WINDOWS
     auto file = buildsPath.getChildFile ("VisualStudio2017").getChildFile ("DemoRunner.sln");
 
     if (file.existsAsFile())
@@ -900,6 +901,7 @@ void ProjucerApplication::getAllCommands (Array <CommandID>& commands)
 
     const CommandID ids[] = { CommandIDs::newProject,
                               CommandIDs::newProjectFromClipboard,
+                              CommandIDs::newPIP,
                               CommandIDs::open,
                               CommandIDs::launchDemoRunner,
                               CommandIDs::closeAllWindows,
@@ -932,6 +934,11 @@ void ProjucerApplication::getCommandInfo (CommandID commandID, ApplicationComman
     case CommandIDs::newProjectFromClipboard:
         result.setInfo ("New Project From Clipboard...", "Creates a new JUCE project from the clipboard contents", CommandCategories::general, 0);
         result.defaultKeypresses.add (KeyPress ('n', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
+        break;
+
+    case CommandIDs::newPIP:
+        result.setInfo ("New PIP...", "Opens the PIP Creator utility for creating a new PIP", CommandCategories::general, 0);
+            result.defaultKeypresses.add (KeyPress ('p', ModifierKeys::commandModifier, 0));
         break;
 
     case CommandIDs::launchDemoRunner:
@@ -1043,6 +1050,7 @@ bool ProjucerApplication::perform (const InvocationInfo& info)
     {
         case CommandIDs::newProject:                createNewProject(); break;
         case CommandIDs::newProjectFromClipboard:   createNewProjectFromClipboard(); break;
+        case CommandIDs::newPIP:                    createNewPIP(); break;
         case CommandIDs::open:                      askUserToOpenFile(); break;
         case CommandIDs::launchDemoRunner:          launchDemoRunner(); break;
         case CommandIDs::saveAll:                   openDocumentManager.saveAll(); break;
@@ -1092,9 +1100,9 @@ void ProjucerApplication::createNewProjectFromClipboard()
     }
 }
 
-void ProjucerApplication::updateNewlyOpenedProject (Project& p)
+void ProjucerApplication::createNewPIP()
 {
-    LiveBuildProjectSettings::updateNewlyOpenedProject (p);
+    showPIPCreatorWindow();
 }
 
 void ProjucerApplication::askUserToOpenFile()
@@ -1145,8 +1153,7 @@ void ProjucerApplication::showUTF8ToolWindow()
     if (utf8Window != nullptr)
         utf8Window->toFront (true);
     else
-        new FloatingToolWindow ("UTF-8 String Literal Converter",
-                                "utf8WindowPos",
+        new FloatingToolWindow ("UTF-8 String Literal Converter", "utf8WindowPos",
                                 new UTF8Component(), utf8Window, true,
                                 500, 500, 300, 300, 1000, 1000);
 }
@@ -1156,8 +1163,7 @@ void ProjucerApplication::showSVGPathDataToolWindow()
     if (svgPathWindow != nullptr)
         svgPathWindow->toFront (true);
     else
-        new FloatingToolWindow ("SVG Path Converter",
-                                "svgPathWindowPos",
+        new FloatingToolWindow ("SVG Path Converter", "svgPathWindowPos",
                                 new SVGPathDataComponent(), svgPathWindow, true,
                                 500, 500, 300, 300, 1000, 1000);
 }
@@ -1177,9 +1183,8 @@ void ProjucerApplication::showApplicationUsageDataAgreementPopup()
     if (applicationUsageDataWindow != nullptr)
         applicationUsageDataWindow->toFront (true);
     else
-        new FloatingToolWindow ("Application Usage Analytics",
-                                {}, new ApplicationUsageDataWindowComponent (isPaidOrGPL()),
-                                applicationUsageDataWindow, false,
+        new FloatingToolWindow ("Application Usage Analytics", {},
+                                new ApplicationUsageDataWindowComponent (isPaidOrGPL()), applicationUsageDataWindow, false,
                                 400, 300, 400, 300, 400, 300);
 }
 
@@ -1194,8 +1199,7 @@ void ProjucerApplication::showPathsWindow (bool highlightJUCEPath)
     if (pathsWindow != nullptr)
         pathsWindow->toFront (true);
     else
-        new FloatingToolWindow ("Global Paths",
-                                "pathsWindowPos",
+        new FloatingToolWindow ("Global Paths", "pathsWindowPos",
                                 new GlobalPathsWindowComponent(), pathsWindow, false,
                                 600, 650, 600, 650, 600, 650);
 
@@ -1209,14 +1213,19 @@ void ProjucerApplication::showEditorColourSchemeWindow()
     if (editorColourSchemeWindow != nullptr)
         editorColourSchemeWindow->toFront (true);
     else
-    {
-        new FloatingToolWindow ("Editor Colour Scheme",
-                                "editorColourSchemeWindowPos",
-                                new EditorColourSchemeWindowComponent(),
-                                editorColourSchemeWindow,
-                                false,
+        new FloatingToolWindow ("Editor Colour Scheme", "editorColourSchemeWindowPos",
+                                new EditorColourSchemeWindowComponent(), editorColourSchemeWindow, false,
                                 500, 500, 500, 500, 500, 500);
-    }
+}
+
+void ProjucerApplication::showPIPCreatorWindow()
+{
+    if (pipCreatorWindow != nullptr)
+        pipCreatorWindow->toFront (true);
+    else
+        new FloatingToolWindow ("PIP Creator", "pipCreatorWindowPos",
+                                new PIPCreatorWindowComponent(), pipCreatorWindow, false,
+                                600, 750, 600, 750, 600, 750);
 }
 
 void ProjucerApplication::launchForumBrowser()
@@ -1423,6 +1432,7 @@ void ProjucerApplication::setColourScheme (int index, bool saveSetting)
     if (applicationUsageDataWindow != nullptr)  applicationUsageDataWindow->sendLookAndFeelChange();
     if (pathsWindow != nullptr)                 pathsWindow->sendLookAndFeelChange();
     if (editorColourSchemeWindow != nullptr)    editorColourSchemeWindow->sendLookAndFeelChange();
+    if (pipCreatorWindow != nullptr)            pipCreatorWindow->sendLookAndFeelChange();
 
     auto* mcm = ModalComponentManager::getInstance();
     for (auto i = 0; i < mcm->getNumModalComponents(); ++i)

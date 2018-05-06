@@ -25,7 +25,7 @@
 
  name:             InterAppAudioEffectPlugin
  version:          1.0.0
- vendor:           juce
+ vendor:           JUCE
  website:          http://juce.com
  description:      Inter-app audio effect plugin.
 
@@ -175,7 +175,7 @@ public:
 
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override
     {
-        if (layouts.getMainInputChannelSet() != AudioChannelSet::stereo())
+        if (layouts.getMainInputChannels() > 2)
             return false;
 
         if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())

@@ -93,7 +93,7 @@ public:
     //==============================================================================
     void createNewProject();
     void createNewProjectFromClipboard();
-    void updateNewlyOpenedProject (Project&);
+    void createNewPIP();
     void askUserToOpenFile();
     bool openFile (const File&);
     bool closeAllDocuments (bool askUserToSave);
@@ -113,6 +113,8 @@ public:
 
     void showPathsWindow (bool highlightJUCEPath = false);
     void showEditorColourSchemeWindow();
+
+    void showPIPCreatorWindow();
 
     void launchForumBrowser();
     void launchModulesBrowser();
@@ -150,7 +152,7 @@ public:
     ScopedPointer<ApplicationCommandManager> commandManager;
 
     ScopedPointer<Component> utf8Window, svgPathWindow, aboutWindow, applicationUsageDataWindow,
-                             pathsWindow, editorColourSchemeWindow;
+                             pathsWindow, editorColourSchemeWindow, pipCreatorWindow;
 
     ScopedPointer<FileLogger> logger;
 

@@ -292,7 +292,7 @@ bool fileNeedsCppSyntaxHighlighting (const File& file)
 }
 
 //==============================================================================
-bool isJUCEModule (const String& moduleID) noexcept
+StringArray getJUCEModules() noexcept
 {
     static StringArray juceModuleIds =
     {
@@ -319,40 +319,12 @@ bool isJUCEModule (const String& moduleID) noexcept
         "juce_video"
     };
 
-    return juceModuleIds.contains (moduleID);
+    return juceModuleIds;
 }
 
-bool isValidExporterName (const String& exporterName) noexcept
+bool isJUCEModule (const String& moduleID) noexcept
 {
-    static StringArray validExporters =
-    {
-        "XCODE_MAC",
-        "XCODE_IPHONE",
-        "VS2013",
-        "VS2015",
-        "VS2017",
-        "LINUX_MAKE",
-        "ANDROIDSTUDIO",
-        "CODEBLOCKS_WINDOWS",
-        "CODEBLOCKS_LINUX"
-    };
-
-    return validExporters.contains (exporterName);
-}
-
-String getTargetFolderForExporter (const String& exporterName) noexcept
-{
-    if (exporterName == "XCODE_MAC")             return "MacOSX";
-    if (exporterName == "XCODE_IPHONE")          return "iOS";
-    if (exporterName == "VS2017")                return "VisualStudio2017";
-    if (exporterName == "VS2015")                return "VisualStudio2015";
-    if (exporterName == "VS2013")                return "MacOVisualStudio2015SX";
-    if (exporterName == "LINUX_MAKE")            return "LinuxMakefile";
-    if (exporterName == "ANDROIDSTUDIO")         return "Android";
-    if (exporterName == "CODEBLOCKS_WINDOWS")    return "CodeBlocksWindows";
-    if (exporterName == "CODEBLOCKS_LINUX")      return "CodeBlocksLinux";
-
-    return {};
+    return getJUCEModules().contains (moduleID);
 }
 
 StringArray getModulesRequiredForConsole() noexcept

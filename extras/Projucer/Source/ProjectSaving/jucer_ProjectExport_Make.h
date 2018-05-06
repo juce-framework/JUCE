@@ -328,7 +328,7 @@ public:
     {
         name = getNameLinux();
 
-        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + "LinuxMakefile");
+        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderForExporter (getValueTreeTypeName()));
     }
 
     //==============================================================================

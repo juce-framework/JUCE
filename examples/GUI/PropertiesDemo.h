@@ -25,7 +25,7 @@
 
  name:             PropertiesDemo
  version:          1.0.0
- vendor:           juce
+ vendor:           JUCE
  website:          http://juce.com
  description:      Displays various property components.
 
@@ -141,58 +141,27 @@ static Array<PropertyComponent*> createChoices (int howMany)
     StringArray choices;
     Array<var> choiceVars;
 
-    for (int i = 0; i < howMany; ++i)
+    for (int i = 0; i < 12; ++i)
     {
         choices.add ("Item " + String (i));
         choiceVars.add (i);
     }
 
     for (int i = 0; i < howMany; ++i)
-        comps.add (new ChoicePropertyComponent (Value (Random::getSystemRandom().nextInt (6)), "Choice Property " + String (i + 1), choices, choiceVars));
+        comps.add (new ChoicePropertyComponent (Value (Random::getSystemRandom().nextInt (12)), "Choice Property " + String (i + 1), choices, choiceVars));
+
+    for (int i = 0; i < howMany; ++i)
+        comps.add (new MultiChoicePropertyComponent (Value (Array<var>()), "Multi-Choice Property " + String (i + 1), choices, choiceVars));
 
     return comps;
 }
 
 //==============================================================================
-class PropertiesDemo   : public Component
-{
-public:
-    PropertiesDemo()
-    {
-        setOpaque (true);
-        addAndMakeVisible (propertyPanel);
-
-        propertyPanel.addSection ("Text Editors",      createTextEditors());
-        propertyPanel.addSection ("Sliders",           createSliders (3));
-        propertyPanel.addSection ("Choice Properties", createChoices (6));
-        propertyPanel.addSection ("Buttons & Toggles", createButtons (3));
-
-        setSize (750, 650);
-    }
-
-    void paint (Graphics& g) override
-    {
-        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground,
-                                           Colour::greyLevel (0.8f)));
-    }
-
-    void resized() override
-    {
-        propertyPanel.setBounds (getLocalBounds().reduced (4));
-    }
-
-private:
-    PropertyPanel propertyPanel;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PropertiesDemo)
-};
-
-//==============================================================================
-class ConcertinaDemo   : public Component,
+class PropertiesDemo   : public Component,
                          private Timer
 {
 public:
-    ConcertinaDemo()
+    PropertiesDemo()
     {
         setOpaque (true);
         addAndMakeVisible (concertinaPanel);
@@ -212,7 +181,7 @@ public:
 
         {
             auto* panel = new PropertyPanel ("Choice Properties");
-            panel->addProperties (createChoices (12));
+            panel->addProperties (createChoices (3));
             addPanel (panel);
         }
 
@@ -222,6 +191,8 @@ public:
             addPanel (panel);
         }
 
+
+        setSize (750, 650);
         startTimer (300);
     }
 
@@ -251,5 +222,5 @@ private:
         concertinaPanel.setMaximumPanelSize (panel, panel->getTotalContentHeight());
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ConcertinaDemo)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PropertiesDemo)
 };

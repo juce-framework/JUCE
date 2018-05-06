@@ -42,7 +42,7 @@ INCLUDES := -I$(SDK_PATH)
 ifeq ($(PLATFORM),MacOS)
     LIBS := -framework Accelerate -framework AudioToolbox -framework Carbon -framework Cocoa -framework CoreAudio -framework CoreMIDI -framework IOKit -framework OpenGL -framework QuartzCore
 else
-    LIBS := -L/usr/X11R6/lib/ $(shell pkg-config --libs alsa freetype2 libcurl x11 xext xinerama) -lGL -ldl -lpthread -lrt
+    LIBS := -L/usr/X11R6/lib/ $(shell pkg-config --libs alsa libcurl x11) -ldl -lpthread -lrt
     CXXFLAGS += -DLINUX=1
 endif
 

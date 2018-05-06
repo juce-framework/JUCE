@@ -1,0 +1,34 @@
+/**
+@page example_scripts Example LittleFoot Scripts
+
+@section downloading_the_example_script Downloading the example script
+
+These example scripts demonstrate the functionality of the LittleFoot language.
+
+The example scripts are self-contained and do not rely on the standalone BLOCKS SDK or the JUCE library.
+You will find the examples in the Littlefoot-Examples repository, which you can download from GitHub @littlefootgithub{here}.
+Each example comes with a @s_file{.littlefoot} file that can be loaded into the BLOCKS CODE IDE and uploaded onto BLOCKS.
+
+@section example_scripts_overview Overview
+
+@subpage example_bitmap_led_program
+
+The %BitmapLEDProgram class contains a simple LittleFoot program that sets the LEDs of a Lightpad from the heap's content.
+
+@subpage example_dynamic_parameters
+
+Learn how to use BLOCKS CODE metadata to interact with your BLOCKS using dynamic parameters.
+
+@subpage example_colour_pressure_map
+
+Learn how to display coloured pressure maps on the Lightpad %Block.
+
+@subpage example_tic_tac_toe
+
+Implement the classic game of Tic Tac Toe on the Lightpad %Block.
+
+@subpage example_music_gen
+
+Develop a MIDI note music generator with interesting visuals on the Lightpad %Block.
+
+*/

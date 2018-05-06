@@ -13,11 +13,11 @@ When powered on by pressing the power button on the bottom edge, you will be abl
 
 The power button also functions as a toggle for the Bluetooth connection - when the blue light on the button is illuminated, the device is able to connect via Bluetooth and send and receive MIDI data.
 Pressing this button will turn the light off and disable the Bluetooth functionality.
-Currently MIDI over Bluetooth is only supported on Mac OS.
+Currently MIDI over Bluetooth is only supported on macOS.
 
-@subsection mac_bluetooth MacOS
+@subsection mac_bluetooth macOS
 
-To connect a BLOCKS device via Bluetooth on MacOS, follow these steps:
+To connect a BLOCKS device via Bluetooth on macOS, follow these steps:
 
 - Open the "Audio Midi Setup" application (found in Applications/Utilities)
 - Click on the menu item: Window -> Show MIDI Studio
@@ -29,4 +29,6 @@ To connect a BLOCKS device via Bluetooth on MacOS, follow these steps:
 
 Lightpad and Control Blocks can be connected together in any number of combinations via their DNA edge connectors, sharing a common connection to your computer.
 To do this, simply snap your devices together and the magnetic connectors will handle the rest.
+
+Learn how to discover BLOCKS in your applications in the @ref discovering_blocks section.
 */

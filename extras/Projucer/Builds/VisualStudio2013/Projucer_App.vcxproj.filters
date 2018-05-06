@@ -1594,6 +1594,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\properties\juce_ChoicePropertyComponent.cpp">
       <Filter>JUCE Modules\juce_gui_basics\properties</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\properties\juce_MultiChoicePropertyComponent.cpp">
+      <Filter>JUCE Modules\juce_gui_basics\properties</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\properties\juce_PropertyComponent.cpp">
       <Filter>JUCE Modules\juce_gui_basics\properties</Filter>
     </ClCompile>
@@ -1824,6 +1827,9 @@
     <ClInclude Include="..\..\Source\Application\Windows\jucer_GlobalPathsWindowComponent.h">
       <Filter>Projucer\Application\Windows</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Application\Windows\jucer_PIPCreatorWindowComponent.h">
+      <Filter>Projucer\Application\Windows</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Application\Windows\jucer_SVGPathDataWindowComponent.h">
       <Filter>Projucer\Application\Windows</Filter>
     </ClInclude>
@@ -1900,6 +1906,12 @@
       <Filter>Projucer\BinaryData\Templates</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_OpenGLComponentTemplate.h">
+      <Filter>Projucer\BinaryData\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_PIPAudioProcessorTemplate.h">
+      <Filter>Projucer\BinaryData\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_PIPTemplate.h">
       <Filter>Projucer\BinaryData\Templates</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\CodeEditor\jucer_DocumentEditorComponent.h">
@@ -2146,6 +2158,9 @@
       <Filter>Projucer\LiveBuildEngine</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_CompileEngineServer.h">
+      <Filter>Projucer\LiveBuildEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_CompileEngineSettings.h">
       <Filter>Projucer\LiveBuildEngine</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_CppHelpers.h">
@@ -3388,6 +3403,9 @@
       <Filter>JUCE Modules\juce_gui_basics\properties</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\properties\juce_ChoicePropertyComponent.h">
+      <Filter>JUCE Modules\juce_gui_basics\properties</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\properties\juce_MultiChoicePropertyComponent.h">
       <Filter>JUCE Modules\juce_gui_basics\properties</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\properties\juce_PropertyComponent.h">

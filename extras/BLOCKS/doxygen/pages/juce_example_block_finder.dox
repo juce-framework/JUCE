@@ -1,0 +1,29 @@
+/**
+@page example_block_finder BlockFinder
+
+In order to compile and run this application you need to first download and compile the BLOCKS-SDK, which can be obtained from GitHub @blocksgithub{here}. If you need help with this step, please refer to @ref the_standalone_blocks_sdk section.
+
+@section standalone_example An example application
+
+The source code for this example can be found in the @blocksgithub{BLOCKS-SDK repository} at @s_file{examples/BlockFinder/}, with the parts that are specific to different operating systems in the corresponding subdirectories.
+
+The main functionality of the application is contained within the following class:
+
+@s_file{BlockFinder/BlockFinder.h}:
+@include BlockFinder/BlockFinder.h
+
+@s_file{BlockFinder/BlockFinder.cpp}:
+@include BlockFinder/BlockFinder.cpp
+
+All this class does is create a PhysicalTopologySource and register for TopologySource::Listener::topologyChanged() callbacks --- for more information about how this works you should see the @ref discovering_blocks section.
+When the topology changes we print some information about the available BLOCKS.
+
+The @s_projcode{main} function of the macOS application is the easiest to understand.
+
+@s_file{BlockFinder/MacOS/main.mm}:
+@include BlockFinder/MacOS/main.mm
+
+Here we simply perform some JUCE initialisation, instantiate a BlockFinder class, then run the event loop.
+Whilst in the event loop, the @s_projcode{finder} object receives TopologySource::Listener::topologyChanged() callbacks and we see output printed to @s_code{stdout} when BLOCKS are connected or disconnected.
+
+*/

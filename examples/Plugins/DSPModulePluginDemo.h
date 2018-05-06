@@ -25,7 +25,7 @@
 
  name:             DSPModulePluginDemo
  version:          1.0.0
- vendor:           juce
+ vendor:           JUCE
  website:          http://juce.com
  description:      Audio plugin using the DSP module.
 

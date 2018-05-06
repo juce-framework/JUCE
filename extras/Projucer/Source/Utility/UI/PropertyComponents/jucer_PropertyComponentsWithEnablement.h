@@ -32,7 +32,7 @@ class TextPropertyComponentWithEnablement    : public TextPropertyComponent,
                                                private Value::Listener
 {
 public:
-    TextPropertyComponentWithEnablement (const ValueWithDefault& valueToControl,
+    TextPropertyComponentWithEnablement (ValueWithDefault& valueToControl,
                                          ValueWithDefault valueToListenTo,
                                          const String& propertyName,
                                          int maxNumChars,
@@ -59,7 +59,7 @@ class ChoicePropertyComponentWithEnablement    : public ChoicePropertyComponent,
                                                  private Value::Listener
 {
 public:
-    ChoicePropertyComponentWithEnablement (const ValueWithDefault& valueToControl,
+    ChoicePropertyComponentWithEnablement (ValueWithDefault& valueToControl,
                                            ValueWithDefault valueToListenTo,
                                            const String& propertyName,
                                            const StringArray& choices,

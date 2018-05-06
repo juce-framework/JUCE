@@ -7051,8 +7051,120 @@ static const unsigned char temp_binary_data_51[] =
 
 const char* jucer_OpenGLComponentTemplate_h = (const char*) temp_binary_data_51;
 
-//================== jucer_PIPMain.cpp ==================
+//================== jucer_PIPAudioProcessorTemplate.h ==================
 static const unsigned char temp_binary_data_52[] =
+"class %%class_name%%  : public AudioProcessor\r\n"
+"{\r\n"
+"public:\r\n"
+"    //==============================================================================\r\n"
+"    %%class_name%%()\r\n"
+"        : AudioProcessor (BusesProperties().withInput  (\"Input\",  AudioChannelSet::stereo())\r\n"
+"                                           .withOutput (\"Output\", AudioChannelSet::stereo()))\r\n"
+"    {\r\n"
+"    }\r\n"
+"\r\n"
+"    ~%%class_name%%()\r\n"
+"    {\r\n"
+"    }\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    void prepareToPlay (double, int) override\r\n"
+"    {\r\n"
+"        // Use this method as the place to do any pre-playback\r\n"
+"        // initialisation that you need..\r\n"
+"    }\r\n"
+"\r\n"
+"    void releaseResources() override\r\n"
+"    {\r\n"
+"        // When playback stops, you can use this as an opportunity to free up any\r\n"
+"        // spare memory, etc.\r\n"
+"    }\r\n"
+"\r\n"
+"    void processBlock (AudioBuffer<float>& buffer, MidiBuffer&) override\r\n"
+"    {\r\n"
+"        ScopedNoDenormals noDenormals;\r\n"
+"        auto totalNumInputChannels  = getTotalNumInputChannels();\r\n"
+"        auto totalNumOutputChannels = getTotalNumOutputChannels();\r\n"
+"\r\n"
+"        // In case we have more outputs than inputs, this code clears any output\r\n"
+"        // channels that didn't contain input data, (because these aren't\r\n"
+"        // guaranteed to be empty - they may contain garbage).\r\n"
+"        // This is here to avoid people getting screaming feedback\r\n"
+"        // when they first compile a plugin, but obviously you don't need to keep\r\n"
+"        // this code if your algorithm always overwrites all the output channels.\r\n"
+"        for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)\r\n"
+"            buffer.clear (i, 0, buffer.getNumSamples());\r\n"
+"\r\n"
+"        // This is the place where you'd normally do the guts of your plugin's\r\n"
+"        // audio processing...\r\n"
+"        // Make sure to reset the state if your inner loop is processing\r\n"
+"        // the samples and the outer loop is handling the channels.\r\n"
+"        // Alternatively, you can process the samples with the channels\r\n"
+"        // interleaved by keeping the same state.\r\n"
+"        for (int channel = 0; channel < totalNumInputChannels; ++channel)\r\n"
+"        {\r\n"
+"            auto* channelData = buffer.getWritePointer (channel);\r\n"
+"\r\n"
+"            // ..do something to the data...\r\n"
+"        }\r\n"
+"    }\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    AudioProcessorEditor* createEditor() override          { return nullptr; }\r\n"
+"    bool hasEditor() const override                        { return false;   }\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    const String getName() const override                  { return \"%%name%%\"; }\r\n"
+"    bool acceptsMidi() const override                      { return false; }\r\n"
+"    bool producesMidi() const override                     { return false; }\r\n"
+"    double getTailLengthSeconds() const override           { return 0; }\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    int getNumPrograms() override                          { return 1; }\r\n"
+"    int getCurrentProgram() override                       { return 0; }\r\n"
+"    void setCurrentProgram (int) override                  {}\r\n"
+"    const String getProgramName (int) override             { return {}; }\r\n"
+"    void changeProgramName (int, const String&) override   {}\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    void getStateInformation (MemoryBlock& destData) override\r\n"
+"    {\r\n"
+"        // You should use this method to store your parameters in the memory block.\r\n"
+"        // You could do that either as raw data, or use the XML or ValueTree classes\r\n"
+"        // as intermediaries to make it easy to save and load complex data.\r\n"
+"    }\r\n"
+"\r\n"
+"    void setStateInformation (const void* data, int sizeInBytes) override\r\n"
+"    {\r\n"
+"        // You should use this method to restore your parameters from this memory block,\r\n"
+"        // whose contents will have been created by the getStateInformation() call.\r\n"
+"    }\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    bool isBusesLayoutSupported (const BusesLayout& layouts) const override\r\n"
+"    {\r\n"
+"        // This is the place where you check if the layout is supported.\r\n"
+"        // In this template code we only support mono or stereo.\r\n"
+"        if (layouts.getMainOutputChannelSet() != AudioChannelSet::mono()\r\n"
+"            && layouts.getMainOutputChannelSet() != AudioChannelSet::stereo())\r\n"
+"            return false;\r\n"
+"\r\n"
+"        // This checks if the input layout matches the output layout\r\n"
+"        if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())\r\n"
+"            return false;\r\n"
+"\r\n"
+"        return true;\r\n"
+"    }\r\n"
+"\r\n"
+"private:\r\n"
+"    //==============================================================================\r\n"
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%class_name%%)\r\n"
+"};\r\n";
+
+const char* jucer_PIPAudioProcessorTemplate_h = (const char*) temp_binary_data_52;
+
+//================== jucer_PIPMain.cpp ==================
+static const unsigned char temp_binary_data_53[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -7126,10 +7238,32 @@ static const unsigned char temp_binary_data_52[] =
 "%%console_begin%%\r\n"
 "%%console_end%%\r\n";
 
-const char* jucer_PIPMain_cpp = (const char*) temp_binary_data_52;
+const char* jucer_PIPMain_cpp = (const char*) temp_binary_data_53;
+
+//================== jucer_PIPTemplate.h ==================
+static const unsigned char temp_binary_data_54[] =
+"/*******************************************************************************\r\n"
+" The block below describes the properties of this PIP. A PIP is a short snippet\r\n"
+" of code that can be read by the Projucer and used to generate a JUCE project.\r\n"
+"\r\n"
+" BEGIN_JUCE_PIP_METADATA\r\n"
+"\r\n"
+"%%pip_metadata%%\r\n"
+"\r\n"
+" END_JUCE_PIP_METADATA\r\n"
+"\r\n"
+"*******************************************************************************/\r\n"
+"\r\n"
+"#pragma once\r\n"
+"\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"%%pip_code%%\r\n";
+
+const char* jucer_PIPTemplate_h = (const char*) temp_binary_data_54;
 
 //================== colourscheme_dark.xml ==================
-static const unsigned char temp_binary_data_53[] =
+static const unsigned char temp_binary_data_55[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
 "\r\n"
 "<COLOUR_SCHEME font=\"&lt;Monospaced&gt;; 13.0\">\r\n"
@@ -7154,10 +7288,10 @@ static const unsigned char temp_binary_data_53[] =
 "  <COLOUR name=\"Error\" colour=\"FFE60000\"/>\r\n"
 "</COLOUR_SCHEME>\r\n";
 
-const char* colourscheme_dark_xml = (const char*) temp_binary_data_53;
+const char* colourscheme_dark_xml = (const char*) temp_binary_data_55;
 
 //================== colourscheme_light.xml ==================
-static const unsigned char temp_binary_data_54[] =
+static const unsigned char temp_binary_data_56[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
 "\r\n"
 "<COLOUR_SCHEME font=\"&lt;Monospaced&gt;; 13.0\">\r\n"
@@ -7182,16 +7316,16 @@ static const unsigned char temp_binary_data_54[] =
 "  <COLOUR name=\"Error\" colour=\"ffcc0000\"/>\r\n"
 "</COLOUR_SCHEME>\r\n";
 
-const char* colourscheme_light_xml = (const char*) temp_binary_data_54;
+const char* colourscheme_light_xml = (const char*) temp_binary_data_56;
 
 //================== nothingtoseehere.txt ==================
-static const unsigned char temp_binary_data_55[] =
+static const unsigned char temp_binary_data_57[] =
 "VUEtMTk3NTkzMTgtNA==";
 
-const char* nothingtoseehere_txt = (const char*) temp_binary_data_55;
+const char* nothingtoseehere_txt = (const char*) temp_binary_data_57;
 
 //================== offlinepage.html ==================
-static const unsigned char temp_binary_data_56[] =
+static const unsigned char temp_binary_data_58[] =
 "<html>\n"
 "  <head>\n"
 "    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=11\">\n"
@@ -7235,10 +7369,10 @@ static const unsigned char temp_binary_data_56[] =
 "  </body>\n"
 "</html>";
 
-const char* offlinepage_html = (const char*) temp_binary_data_56;
+const char* offlinepage_html = (const char*) temp_binary_data_58;
 
 //================== projucer_EULA.txt ==================
-static const unsigned char temp_binary_data_57[] =
+static const unsigned char temp_binary_data_59[] =
 "\r\n"
 "IMPORTANT NOTICE: PLEASE READ CAREFULLY BEFORE INSTALLING THE SOFTWARE:\r\n"
 "\r\n"
@@ -7402,10 +7536,10 @@ static const unsigned char temp_binary_data_57[] =
 "\r\n"
 "10.6. Please note that this License, its subject matter and its formation, are governed by English law. You and we both agree to that the courts of England and Wales will have exclusive jurisdiction.\r\n";
 
-const char* projucer_EULA_txt = (const char*) temp_binary_data_57;
+const char* projucer_EULA_txt = (const char*) temp_binary_data_59;
 
 //================== RecentFilesMenuTemplate.nib ==================
-static const unsigned char temp_binary_data_58[] =
+static const unsigned char temp_binary_data_60[] =
 { 98,112,108,105,115,116,48,48,212,0,1,0,2,0,3,0,4,0,5,0,6,1,53,1,54,88,36,118,101,114,115,105,111,110,88,36,111,98,106,101,99,116,115,89,36,97,114,99,104,105,118,101,114,84,36,116,111,112,18,0,1,134,160,175,16,74,0,7,0,8,0,31,0,35,0,36,0,42,0,46,0,50,
 0,53,0,57,0,74,0,77,0,78,0,86,0,87,0,97,0,112,0,113,0,114,0,119,0,120,0,121,0,124,0,128,0,129,0,132,0,143,0,144,0,145,0,149,0,153,0,162,0,163,0,164,0,169,0,173,0,180,0,181,0,182,0,185,0,192,0,193,0,200,0,201,0,208,0,209,0,216,0,217,0,224,0,225,0,226,
 0,229,0,230,0,232,0,249,1,11,1,29,1,30,1,31,1,32,1,33,1,34,1,35,1,36,1,37,1,38,1,39,1,40,1,41,1,42,1,43,1,44,1,47,1,50,85,36,110,117,108,108,219,0,9,0,10,0,11,0,12,0,13,0,14,0,15,0,16,0,17,0,18,0,19,0,20,0,21,0,22,0,23,0,24,0,25,0,26,0,27,0,28,0,29,0,
@@ -7442,7 +7576,7 @@ static const unsigned char temp_binary_data_58[] =
 7,157,7,159,7,161,7,163,7,165,7,167,7,169,7,171,7,173,7,175,7,177,7,179,7,181,7,190,7,192,7,225,7,227,7,229,7,231,7,233,7,235,7,237,7,239,7,241,7,243,7,245,7,247,7,249,7,251,7,253,7,255,8,2,8,5,8,8,8,11,8,14,8,17,8,20,8,23,8,26,8,29,8,32,8,35,8,38,8,
 41,8,44,8,53,8,55,8,56,8,65,8,67,8,68,8,77,8,92,8,97,8,115,8,120,8,134,0,0,0,0,0,0,2,2,0,0,0,0,0,0,1,57,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,136,0,0 };
 
-const char* RecentFilesMenuTemplate_nib = (const char*) temp_binary_data_58;
+const char* RecentFilesMenuTemplate_nib = (const char*) temp_binary_data_60;
 
 
 const char* getNamedResource (const char*, int&) throw();
@@ -7507,7 +7641,9 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x6bdeb129:  numBytes = 2174; return jucer_OpenGLComponentSimpleTemplate_h;
         case 0x7fbac252:  numBytes = 1665; return jucer_OpenGLComponentTemplate_cpp;
         case 0x491fa0d7:  numBytes = 1263; return jucer_OpenGLComponentTemplate_h;
+        case 0xbc050edc:  numBytes = 4926; return jucer_PIPAudioProcessorTemplate_h;
         case 0xf4ca9e9a:  numBytes = 2446; return jucer_PIPMain_cpp;
+        case 0x0b16e320:  numBytes = 517; return jucer_PIPTemplate_h;
         case 0x763d39dc:  numBytes = 1050; return colourscheme_dark_xml;
         case 0xe8b08520:  numBytes = 1050; return colourscheme_light_xml;
         case 0x938e96ec:  numBytes = 20; return nothingtoseehere_txt;
@@ -7575,7 +7711,9 @@ const char* namedResourceList[] =
     "jucer_OpenGLComponentSimpleTemplate_h",
     "jucer_OpenGLComponentTemplate_cpp",
     "jucer_OpenGLComponentTemplate_h",
+    "jucer_PIPAudioProcessorTemplate_h",
     "jucer_PIPMain_cpp",
+    "jucer_PIPTemplate_h",
     "colourscheme_dark_xml",
     "colourscheme_light_xml",
     "nothingtoseehere_txt",

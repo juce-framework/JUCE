@@ -89,7 +89,7 @@ public:
     {
         name = iOS ? getNameiOS() : getNameMac();
 
-        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + (iOS ? "iOS" : "MacOSX"));
+        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderForExporter (getValueTreeTypeName (isIOS)));
     }
 
     static XcodeProjectExporter* createForSettings (Project& project, const ValueTree& settings)
@@ -129,6 +129,9 @@ public:
     bool isPushNotificationsEnabled() const          { return iosPushNotificationsValue.get(); }
     bool isAppGroupsEnabled() const                  { return iosAppGroupsValue.get(); }
     bool isiCloudPermissionsEnabled() const          { return iCloudPermissionsValue.get(); }
+    bool isFileSharingEnabled() const                { return uiFileSharingEnabledValue.get(); }
+    bool isDocumentBrowserEnabled() const            { return uiSupportsDocumentBrowserValue.get(); }
+    bool isStatusBarHidden() const                   { return uiStatusBarHiddenValue.get(); }
 
     String getIosDevelopmentTeamIDString() const     { return iosDevelopmentTeamIDValue.get(); }
     String getAppGroupIdString() const               { return iosAppGroupsIDValue.get(); }
@@ -1345,13 +1348,13 @@ public:
                 }
             }
 
-            if (owner.settings [Ids::UIFileSharingEnabled] && type != AudioUnitv3PlugIn)
+            if (owner.isFileSharingEnabled() && type != AudioUnitv3PlugIn)
                 addPlistDictionaryKeyBool (dict, "UIFileSharingEnabled", true);
 
-            if (owner.settings [Ids::UISupportsDocumentBrowser])
+            if (owner.isDocumentBrowserEnabled())
                 addPlistDictionaryKeyBool (dict, "UISupportsDocumentBrowser", true);
 
-            if (owner.settings [Ids::UIStatusBarHidden] && type != AudioUnitv3PlugIn)
+            if (owner.isStatusBarHidden() && type != AudioUnitv3PlugIn)
                 addPlistDictionaryKeyBool (dict, "UIStatusBarHidden", true);
 
             if (owner.iOS)
@@ -1854,8 +1857,15 @@ private:
             topLevelGroupIDs.add (addEntitlementsFile (entitlements));
 
         for (auto& group : getAllGroups())
+        {
             if (group.getNumChildren() > 0)
-                topLevelGroupIDs.add (addProjectItem (group));
+            {
+                auto groupID = addProjectItem (group);
+
+                if (groupID.isNotEmpty())
+                    topLevelGroupIDs.add (groupID);
+            }
+        }
     }
 
     void addExtraGroupsToProject (StringArray& topLevelGroupIDs) const
@@ -2678,11 +2688,16 @@ private:
             StringArray childIDs;
             for (int i = 0; i < projectItem.getNumChildren(); ++i)
             {
-                auto childID = addProjectItem (projectItem.getChild(i));
+                auto child = projectItem.getChild (i);
 
-                if (childID.isNotEmpty())
+                auto childID = addProjectItem (child);
+
+                if (childID.isNotEmpty() && ! child.shouldBeAddedToXcodeResources())
                     childIDs.add (childID);
             }
+
+            if (childIDs.isEmpty())
+                return {};
 
             return addGroup (projectItem, childIDs);
         }

@@ -25,7 +25,7 @@
 
  name:             PushNotificationsDemo
  version:          2.0.0
- vendor:           juce
+ vendor:           JUCE
  website:          http://juce.com
  description:      Showcases push notifications features. To run this demo you must enable the
                    "Push Notifications Capability" option in the Projucer exporter.

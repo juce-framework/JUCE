@@ -25,7 +25,7 @@
 
  name:             BlocksMonitorDemo
  version:          1.0.0
- vendor:           juce
+ vendor:           JUCE
  website:          http://juce.com
  description:      Application to monitor Blocks devices.
 
@@ -136,15 +136,15 @@ public:
 
         static Array<ControlButton::ButtonFunction> map[] =
         {
-            { CB::mode,     CB::button0 },
-            { CB::volume,   CB::button1 },
-            { CB::scale,    CB::button2,    CB::click },
-            { CB::chord,    CB::button3,    CB::snap },
-            { CB::arp,      CB::button4,    CB::back },
-            { CB::sustain,  CB::button5,    CB::playOrPause },
-            { CB::octave,   CB::button6,    CB::record },
-            { CB::love,     CB::button7,    CB::learn },
-            { CB::up },
+            { CB::mode,     CB::button0,  CB::velocitySensitivity },
+            { CB::volume,   CB::button1,  CB::glideSensitivity    },
+            { CB::scale,    CB::button2,  CB::slideSensitivity,  CB::click       },
+            { CB::chord,    CB::button3,  CB::pressSensitivity,  CB::snap        },
+            { CB::arp,      CB::button4,  CB::liftSensitivity,   CB::back        },
+            { CB::sustain,  CB::button5,  CB::fixedVelocity,     CB::playOrPause },
+            { CB::octave,   CB::button6,  CB::glideLock,         CB::record      },
+            { CB::love,     CB::button7,  CB::pianoMode,         CB::learn       },
+            { CB::up   },
             { CB::down }
         };
 
@@ -748,7 +748,8 @@ private:
         if (type == Block::lightPadBlock)
             return new LightpadComponent (newBlock);
 
-        if (type == Block::loopBlock || type == Block::liveBlock)
+        if (type == Block::loopBlock || type == Block::liveBlock
+            || type == Block::touchBlock || type == Block::developerControlBlock)
             return new ControlBlockComponent (newBlock);
 
         // Should only be connecting a Lightpad or Control Block!

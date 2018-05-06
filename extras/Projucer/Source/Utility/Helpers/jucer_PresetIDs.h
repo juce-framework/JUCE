@@ -149,7 +149,6 @@ namespace Ids
     DECLARE_ID (enableIncrementalLinking);
     DECLARE_ID (bundleIdentifier);
     DECLARE_ID (aaxIdentifier);
-    DECLARE_ID (aaxCategory);
     DECLARE_ID (aaxFolder);
     DECLARE_ID (compile);
     DECLARE_ID (noWarnings);
@@ -289,6 +288,7 @@ namespace Ids
     DECLARE_ID (classDecl);
     DECLARE_ID (initialisers);
     DECLARE_ID (destructors);
+    DECLARE_ID (pluginFormats);
     DECLARE_ID (buildVST);
     DECLARE_ID (buildVST3);
     DECLARE_ID (buildAU);
@@ -303,12 +303,14 @@ namespace Ids
     DECLARE_ID (pluginManufacturerCode);
     DECLARE_ID (pluginCode);
     DECLARE_ID (pluginChannelConfigs);
+    DECLARE_ID (pluginCharacteristicsValue);
     DECLARE_ID (pluginIsSynth);
     DECLARE_ID (pluginWantsMidiIn);
     DECLARE_ID (pluginProducesMidiOut);
     DECLARE_ID (pluginIsMidiEffectPlugin);
     DECLARE_ID (pluginEditorRequiresKeys);
     DECLARE_ID (pluginVSTCategory);
+    DECLARE_ID (pluginVST3Category);
     DECLARE_ID (pluginAUExportPrefix);
     DECLARE_ID (pluginAUMainType);
     DECLARE_ID (pluginAUIsSandboxSafe);
@@ -322,6 +324,9 @@ namespace Ids
     DECLARE_ID (website);
     DECLARE_ID (mainClass);
     DECLARE_ID (moduleFlags);
+    DECLARE_ID (buildEnabled);
+    DECLARE_ID (continuousRebuildEnabled);
+    DECLARE_ID (warningsEnabled);
 
     const Identifier ID ("id");
     const Identifier ID_uppercase ("ID");

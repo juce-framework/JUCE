@@ -202,8 +202,8 @@ void StoredSettings::checkJUCEPaths()
     auto moduleFolder = projectDefaults.getProperty (Ids::defaultJuceModulePath).toString();
     auto juceFolder = projectDefaults.getProperty (Ids::jucePath).toString();
 
-    auto validModuleFolder = isGlobalPathValid ({}, Ids::defaultJuceModulePath, moduleFolder);
-    auto validJuceFolder = isGlobalPathValid ({}, Ids::jucePath, juceFolder);
+    auto validModuleFolder = moduleFolder.isNotEmpty() && isGlobalPathValid ({}, Ids::defaultJuceModulePath, moduleFolder);
+    auto validJuceFolder = juceFolder.isNotEmpty() && isGlobalPathValid ({}, Ids::jucePath, juceFolder);
 
     if (validModuleFolder && ! validJuceFolder)
         projectDefaults.getPropertyAsValue (Ids::jucePath, nullptr) = File (moduleFolder).getParentDirectory().getFullPathName();

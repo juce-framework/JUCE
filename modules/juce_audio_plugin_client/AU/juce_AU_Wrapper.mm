@@ -131,6 +131,8 @@ public:
           isBypassed (false),
           mapper (*juceFilter)
     {
+        inParameterChangedCallback = false;
+
        #ifdef JucePlugin_PreferredChannelConfigurations
         short configs[][2] = {JucePlugin_PreferredChannelConfigurations};
         const int numConfigs = sizeof (configs) / sizeof (short[2]);
@@ -964,6 +966,8 @@ public:
             if (auto* param = juceFilter->getParameters()[index])
             {
                 param->setValue (value);
+
+                inParameterChangedCallback = true;
                 param->sendValueChangedMessageToListeners (value);
             }
             else
@@ -1092,6 +1096,12 @@ public:
 
     void audioProcessorParameterChanged (AudioProcessor*, int index, float /*newValue*/) override
     {
+        if (inParameterChangedCallback.get())
+        {
+            inParameterChangedCallback = false;
+            return;
+        }
+
         sendAUEvent (kAudioUnitEvent_ParameterValueChange, index);
     }
 
@@ -1671,6 +1681,8 @@ private:
     AudioTimeStamp lastTimeStamp;
     int totalInChannels, totalOutChannels;
     HeapBlock<bool> pulledSucceeded;
+
+    ThreadLocalValue<bool> inParameterChangedCallback;
 
     //==============================================================================
     Array<AUChannelInfo> channelInfo;

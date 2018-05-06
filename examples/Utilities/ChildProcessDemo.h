@@ -25,7 +25,7 @@
 
  name:             ChildProcessDemo
  version:          1.0.0
- vendor:           juce
+ vendor:           JUCE
  website:          http://juce.com
  description:      Launches applications as child processes.
 

@@ -31,7 +31,7 @@
 class MSVCProjectExporterBase   : public ProjectExporter
 {
 public:
-    MSVCProjectExporterBase (Project& p, const ValueTree& t, const char* const folderName)
+    MSVCProjectExporterBase (Project& p, const ValueTree& t, String folderName)
         : ProjectExporter (p, t),
           IPPLibraryValue       (settings, Ids::IPPLibrary,                   getUndoManager()),
           platformToolsetValue  (settings, Ids::toolset,                      getUndoManager()),
@@ -1058,16 +1058,14 @@ public:
                 RelativePath bundleScript  = aaxSDK.getChildFile ("Utilities").getChildFile ("CreatePackage.bat");
                 RelativePath iconFilePath  = getAAXIconFile();
 
-                auto is64Bit = (config.config [Ids::winArchitecture] == "x64");
-
                 auto outputFilename = config.getOutputFilename (".aaxplugin", true);
                 auto bundleDir      = getOwner().getOutDirFile (config, outputFilename);
                 auto bundleContents = bundleDir + "\\Contents";
-                auto macOSDir       = bundleContents + String ("\\") + (is64Bit ? "x64" : "Win32");
-                auto executable     = macOSDir + String ("\\") + outputFilename;
+                auto archDir        = bundleContents + String ("\\") + (config.is64Bit() ? "x64" : "Win32");
+                auto executable     = archDir + String ("\\") + outputFilename;
 
                 auto pkgScript = String ("copy /Y ") + getOutputFilePath (config).quoted() + String (" ") + executable.quoted() + String ("\r\ncall ")
-                                     + createRebasedPath (bundleScript) + String (" ") + macOSDir.quoted() + String (" ") + createRebasedPath (iconFilePath);
+                                     + createRebasedPath (bundleScript) + String (" ") + archDir.quoted() + String (" ") + createRebasedPath (iconFilePath);
 
                 if (config.isPluginBinaryCopyStepEnabled())
                     return pkgScript + "\r\n" + "xcopy " + bundleDir.quoted() + " "
@@ -1093,12 +1091,11 @@ public:
             {
                 String script;
 
-                bool is64Bit = (config.config [Ids::winArchitecture] == "x64");
                 auto bundleDir      = getOwner().getOutDirFile (config, config.getOutputFilename (".aaxplugin", false));
                 auto bundleContents = bundleDir + "\\Contents";
-                auto macOSDir       = bundleContents + String ("\\") + (is64Bit ? "x64" : "Win32");
+                auto archDir        = bundleContents + String ("\\") + (config.is64Bit() ? "x64" : "Win32");
 
-                for (auto& folder : StringArray { bundleDir, bundleContents, macOSDir })
+                for (auto& folder : StringArray { bundleDir, bundleContents, archDir })
                     script += String ("if not exist \"") + folder + String ("\" mkdir \"") + folder + String ("\"\r\n");
 
                 return script;
@@ -1810,7 +1807,7 @@ class MSVCProjectExporterVC2013  : public MSVCProjectExporterBase
 {
 public:
     MSVCProjectExporterVC2013 (Project& p, const ValueTree& t)
-        : MSVCProjectExporterBase (p, t, "VisualStudio2013")
+        : MSVCProjectExporterBase (p, t, getTargetFolderForExporter (getValueTreeTypeName()))
     {
         name = getName();
 
@@ -1856,7 +1853,7 @@ class MSVCProjectExporterVC2015  : public MSVCProjectExporterBase
 {
 public:
     MSVCProjectExporterVC2015 (Project& p, const ValueTree& t)
-        : MSVCProjectExporterBase (p, t, "VisualStudio2015")
+        : MSVCProjectExporterBase (p, t, getTargetFolderForExporter (getValueTreeTypeName()))
     {
         name = getName();
 
@@ -1901,7 +1898,7 @@ class MSVCProjectExporterVC2017  : public MSVCProjectExporterBase
 {
 public:
     MSVCProjectExporterVC2017 (Project& p, const ValueTree& t)
-        : MSVCProjectExporterBase (p, t, "VisualStudio2017")
+        : MSVCProjectExporterBase (p, t, getTargetFolderForExporter (getValueTreeTypeName()))
     {
         name = getName();
 

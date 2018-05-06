@@ -25,7 +25,7 @@
 
  name:             AUv3SynthPlugin
  version:          1.0.0
- vendor:           juce
+ vendor:           JUCE
  website:          http://juce.com
  description:      AUv3 synthesiser audio plugin.
 
@@ -323,7 +323,7 @@ public:
     //==============================================================================
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override
     {
-        return (layouts.getMainOutputChannels() == 2);
+        return (layouts.getMainOutputChannels() <= 2);
     }
 
     void prepareToPlay (double sampleRate, int estimatedMaxSizeOfBuffer) override

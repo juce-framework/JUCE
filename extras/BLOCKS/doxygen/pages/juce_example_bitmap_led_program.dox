@@ -1,0 +1,19 @@
+/**
+@page example_bitmap_led_program The %BitmapLEDProgram class
+
+@section littlefoot_example A LittleFoot example
+
+The %BitmapLEDProgram class is a simple example of a LittleFoot program.
+
+@s_file{%juce_blocks_basics/visualisers/juce_BitmapLEDProgram.h}
+@include juce_blocks_basics/visualisers/juce_BitmapLEDProgram.h
+
+@s_file{juce_blocks_basics/visualisers/juce_BitmapLEDProgram.cpp}
+@include juce_blocks_basics/visualisers/juce_BitmapLEDProgram.cpp
+
+The repaint() method of the LittleFoot program is called at approximately 25 Hz, and each time it simply inspects the heap (the shared area of memory used to communicate between your application code and your LittleFoot program) and sets the LEDs based on the heap's content.
+To update the heap, and hence the LEDs, your application code calls BitmapLEDProgram::setLED().
+
+A more advanced example can be found in the source code of the DrumPadGridProgram class or in the @ref example_blocks_synth example.
+
+*/

@@ -1,0 +1,115 @@
+/**
+@page example_colour_pressure_map Colour Pressure Map
+
+@section colour_pressure_map_introduction Introduction
+
+Learn how to display coloured pressure maps on the Lightpad Block.
+
+Launch the BLOCKS CODE application and open the script called @s_file{ColourPressureMap.littlefoot}. You can find the script in the Littlefoot-Examples repository, which you can download from GitHub @littlefootgithub{here}. If you don't have the BLOCKS CODE IDE installed on your system, please refer to the section @ref getting_started_with_blocks_code for help.
+
+@section colour_pressure_map_drawing_pressure_maps Drawing Pressure Maps
+
+Let's start by drawing white pressure map points onto the screen whenever pressure is applied onto the touch surface of a Lightpad.
+
+We start by clearing the display in the repaint() function using the clearDisplay() function to reset the state of our LEDs. We than call two handy functions that are defined in the littlefoot language that allow us to draw and fade pressure points automatically. These are respectively the drawPressureMap() and fadePressureMap() functions.
+
+@code{.cpp}
+void repaint()
+{
+    clearDisplay();
+    drawPressureMap();
+    fadePressureMap();
+}
+@endcode
+
+However, if we run the script at the moment no pressure points are shown on the screen because we need to tell the program where to draw them by calling the addPressurePoint() function with the colour and coordinates of the point.
+
+The littlefoot language has several callback functions that are called when a special event happens. In our case we are interested in the start and movement of a touch gesture and therefore we can implement these as follows:
+
+@code{.cpp}
+void touchStart (int index, float x, float y, float z, float vz)
+{
+   addPressurePoint (0xffffff, x, y, z * 100.0);
+}
+@endcode
+
+When the callback functions are called, we add a pressure point to the pressure map by specifying a colour in hexadecimal (in this case white is 0xffffff) and the coordinates of the touch event.
+
+@code{.cpp}
+void touchMove (int index, float x, float y, float z, float vz)
+{
+   addPressurePoint (0xffffff, x, y, z * 20.0);
+}
+@endcode
+
+Notice here that we multiply the depth z by a scaler in order to make the surface of the pressure point bigger and easier to see.
+
+@section colour_pressure_map_adding_colours Adding Colours
+
+Now let's try to add different colours to the pressure points depending on the number of fingers on the screen. To make these variables accessible in realtime to the Parameters tab of the IDE, we create some variables in the metadata section of the code.
+
+@code{.xml}
+<metadata description="Colour Pressure Map">
+    <variables>
+        <variable name="pressureColour0" displayName="Heat Colour 0" type="colour" value="0xFF0000" />
+        <variable name="pressureColour1" displayName="Heat Colour 1" type="colour" value="0x00FF00" />
+        <variable name="pressureColour2" displayName="Heat Colour 2" type="colour" value="0x0000FF" />
+        <variable name="pressureColour3" displayName="Heat Colour 3" type="colour" value="0xFF00FF" />
+        <variable name="scaling"         displayName="How hot!"      type="float"  value="1" min="1" max="200" />
+    </variables>
+</metadata>
+@endcode
+
+We also implement a helper function called getPressureColour() that takes an index of the finger from the touch event and returns the desired colour as shown below:
+
+@code{.cpp}
+int getPressureColour (int index)
+{
+    int col = pressureColour3;
+
+    if (index == 1)
+    {
+        col = pressureColour0;
+    }
+    else if (index == 2)
+    {
+        col = pressureColour1;
+    }
+    else if (index == 3)
+    {
+        col = pressureColour2;
+    }
+
+    return col;
+}
+@endcode
+
+Finally we need to modify the callbacks to incorporate this helper function instead of hardcoding the colour white.
+
+@code{.cpp}
+void touchStart (int index, float x, float y, float z, float vz)
+{
+   addPressurePoint (getPressureColour (index), x, y, z * float (scaling));
+}
+@endcode
+
+Notice we also allow the scaling of the pressure point to be controlled by a slider in the Parameters tab in order to change its size in realtime.
+
+@code{.cpp}
+void touchMove (int index, float x, float y, float z, float vz)
+{
+   addPressurePoint (getPressureColour (index), x, y, z * float (scaling));
+}
+@endcode
+
+@section colour_pressure_map_summary Summary
+
+In this example, we learnt how to display pressure maps onto the Lightpad and add colours depending on the number of fingers pressed onto the touch surface.
+
+@section colour_pressure_map_see_also See also
+
+- @ref example_dynamic_parameters
+- @ref example_tic_tac_toe
+- @ref example_music_gen
+
+*/

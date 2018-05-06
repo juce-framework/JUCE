@@ -584,12 +584,12 @@ bool MainWindow::perform (const InvocationInfo& info)
     return true;
 }
 
-void MainWindow::valueChanged (Value& v)
+void MainWindow::valueChanged (Value&)
 {
-    if (v == Value())
-        setName ("Projucer");
+    if (currentProject != nullptr)
+        setName (currentProject->getProjectNameString() + " - Projucer");
     else
-        setName (projectNameValue.toString() + " - Projucer");
+        setName ("Projucer");
 }
 
 //==============================================================================

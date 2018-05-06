@@ -280,6 +280,7 @@ namespace juce
 #include "properties/juce_PropertyPanel.h"
 #include "properties/juce_SliderPropertyComponent.h"
 #include "properties/juce_TextPropertyComponent.h"
+#include "properties/juce_MultiChoicePropertyComponent.h"
 #include "application/juce_Application.h"
 #include "misc/juce_BubbleComponent.h"
 #include "lookandfeel/juce_LookAndFeel.h"

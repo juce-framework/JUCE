@@ -25,6 +25,7 @@
 */
 
 #include "../../Application/jucer_Headers.h"
+#include "../../ProjectSaving/jucer_ProjectExporter.h"
 #include "jucer_PIPGenerator.h"
 
 //==============================================================================
@@ -62,7 +63,7 @@ static void ensureSingleNewLineAfterIncludes (StringArray& lines)
     }
 }
 
-static String ensureCorrectWhitespace (const String& input)
+static String ensureCorrectWhitespace (StringRef input)
 {
     auto lines = StringArray::fromLines (input);
     ensureSingleNewLineAfterIncludes (lines);
@@ -83,6 +84,16 @@ static bool isJUCEExample (const File& pipFile)
     }
 
     return false;
+}
+
+static bool isValidExporterName (StringRef exporterName)
+{
+    return ProjectExporter::getExporterValueTreeNames().contains (exporterName, true);
+}
+
+static bool isMobileExporter (const String& exporterName)
+{
+    return exporterName == "XCODE_IPHONE" || exporterName == "ANDROIDSTUDIO";
 }
 
 //==============================================================================
@@ -297,7 +308,26 @@ ValueTree PIPGenerator::createExporterChild (const String& exporterName)
 {
     ValueTree exporter (exporterName);
 
-    exporter.setProperty (Ids::targetFolder, "Builds/" + getTargetFolderForExporter (exporterName), nullptr);
+    exporter.setProperty (Ids::targetFolder, "Builds/" + ProjectExporter::getTargetFolderForExporter (exporterName), nullptr);
+
+    if (isMobileExporter (exporterName))
+    {
+        auto juceDir = getAppSettings().getStoredPath (Ids::jucePath).toString();
+
+        if (juceDir.isNotEmpty() && isValidJUCEExamplesDirectory (File (juceDir).getChildFile ("examples")))
+        {
+            auto assetsDirectoryPath = File (juceDir).getChildFile ("examples").getChildFile ("Assets").getFullPathName();
+
+            exporter.setProperty (exporterName == "XCODE_IPHONE" ? Ids::customXcodeResourceFolders
+                                                                 : Ids::androidExtraAssetsFolder,
+                                  assetsDirectoryPath, nullptr);
+        }
+        else
+        {
+            // invalid JUCE path
+            jassertfalse;
+        }
+    }
 
     {
         ValueTree configs (Ids::CONFIGURATIONS);

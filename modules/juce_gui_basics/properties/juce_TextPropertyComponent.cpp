@@ -151,11 +151,12 @@ private:
 //==============================================================================
 TextPropertyComponent::TextPropertyComponent (const String& name,
                                               int maxNumChars,
-                                              bool isMultiLine,
+                                              bool multiLine,
                                               bool isEditable)
-    : PropertyComponent (name)
+    : PropertyComponent (name),
+      isMultiLine (multiLine)
 {
-    createEditor (maxNumChars, isMultiLine, isEditable);
+    createEditor (maxNumChars, isEditable);
 }
 
 TextPropertyComponent::TextPropertyComponent (const Value& valueToControl,
@@ -168,7 +169,7 @@ TextPropertyComponent::TextPropertyComponent (const Value& valueToControl,
     textEditor->getTextValue().referTo (valueToControl);
 }
 
-TextPropertyComponent::TextPropertyComponent (const ValueWithDefault& valueToControl,
+TextPropertyComponent::TextPropertyComponent (ValueWithDefault& valueToControl,
                                               const String& name,
                                               int maxNumChars,
                                               bool isMultiLine,
@@ -177,6 +178,12 @@ TextPropertyComponent::TextPropertyComponent (const ValueWithDefault& valueToCon
 {
     textEditor->getTextValue().referTo (Value (new RemapperValueSourceWithDefault (valueToControl)));
     textEditor->setTextToDisplayWhenEmpty (valueToControl.getDefault(), 0.5f);
+
+    valueToControl.onDefaultChange = [this, &valueToControl]
+    {
+        textEditor->setTextToDisplayWhenEmpty (valueToControl.getDefault(), 0.5f);
+        repaint();
+    };
 }
 
 TextPropertyComponent::~TextPropertyComponent()
@@ -198,7 +205,7 @@ Value& TextPropertyComponent::getValue() const
     return textEditor->getTextValue();
 }
 
-void TextPropertyComponent::createEditor (int maxNumChars, bool isMultiLine, bool isEditable)
+void TextPropertyComponent::createEditor (int maxNumChars, bool isEditable)
 {
     textEditor.reset (new LabelComp (*this, maxNumChars, isMultiLine, isEditable));
     addAndMakeVisible (textEditor.get());

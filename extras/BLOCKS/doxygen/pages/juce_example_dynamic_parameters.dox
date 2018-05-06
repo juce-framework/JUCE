@@ -1,0 +1,65 @@
+/**
+@page example_dynamic_parameters Dynamic Parameters
+
+@section dynamic_parameters_introduction Introduction
+
+Learn how to use BLOCKS CODE metadata to interact with your BLOCKS using dynamic parameters.
+
+Launch the BLOCKS CODE application and open the script called @s_file{DynamicParameters.littlefoot}. You can find the script in the Littlefoot-Examples repository, which you can download from GitHub @littlefootgithub{here}. If you don't have the BLOCKS CODE IDE installed on your system, please refer to the section @ref getting_started_with_blocks_code for help.
+
+@section dynamic_parameters_adding_parameters Adding Parameters
+
+Let's start by adding parameters to the side panel of BLOCKS CODE that will appear under the Parameters tab.
+
+These are created using an XML format enclosed between multiline comment blocks and @s_code{\<metadata\>} tags at the top of the file. Variables are created between @s_code{\<variables\>} tags and they can also be grouped using @s_code{\<groups\>} tags as follows:
+
+@code{.xml}
+<metadata description="Dynamic Parameters">
+    <groups>
+        <group name="pos"    displayName="Position" />
+        <group name="size"   displayName="Size"     />
+        <group name="colour" displayName="Colour"   />
+    </groups>
+    <variables>
+        <variable group="pos"    name="xPos"   type="int"   min="0" max="15"  value="6"   />
+        <variable group="pos"    name="yPos"   type="int"   min="0" max="15"  value="6"   />
+        <variable group="size"   name="width"  type="int"   min="1" max="15"  value="3"   />
+        <variable group="size"   name="height" type="int"   min="1" max="15"  value="3"   />
+        <variable group="colour" name="alpha"  type="float" min="0" max="255" value="255" />
+        <variable group="colour" name="red"    type="int"   min="0" max="255" value="255" />
+        <variable group="colour" name="green"  type="int"   min="0" max="255" value="0"   />
+        <variable group="colour" name="blue"   type="int"   min="0" max="255" value="0"   />
+        <variable name="draw"    type="bool"   value="true" />
+    </variables>
+</metadata>
+@endcode
+
+Within the variable declaration, the string given to the "name" attribute becomes the variable name in the subsequent littlefoot code.
+
+Let's now implement the repaint() function of the littlefoot program. This function is called periodically at approximately 25Hz on the device and is used to control the LEDs on a Lightpad.
+
+In the following piece of code, we first call the clearDisplay() function which will reset the screen to a blank state so that any LEDs that were turned on in the previous iteration of the repaint() function are turned off.
+
+@code{.cpp}
+void repaint()
+{
+    clearDisplay();
+
+    if (draw)
+        fillRect (makeARGB (int (alpha), red, green, blue), xPos, yPos, width, height);
+}
+@endcode
+
+Then we use the fillRect() function to draw a rectangle on the screen using the variables defined before, only if the draw button is checked. The fillRect() function takes as argument the colour retrieved by the makeARGB() helper function and the position and size of the rectangle we wish to draw.
+
+@section dynamic_parameters_summary Summary
+
+In this example, we learnt how to add parameters that can be tweaked at runtime to control the behaviour of a program in realtime.
+
+@section dynamic_parameters_see_also See also
+
+- @ref example_colour_pressure_map
+- @ref example_tic_tac_toe
+- @ref example_music_gen
+
+*/
