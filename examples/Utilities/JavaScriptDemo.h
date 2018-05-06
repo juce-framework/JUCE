@@ -154,7 +154,7 @@ public:
 
 private:
     CodeDocument codeDocument;
-    ScopedPointer<CodeEditorComponent> editor;
+    std::unique_ptr<CodeEditorComponent> editor;
     TextEditor outputDisplay;
 
     void codeDocumentTextInserted (const String&, int) override    { startTimer (300); }

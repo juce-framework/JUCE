@@ -67,7 +67,7 @@ public:
                       int64 startSampleInFile, int numSamples) override;
 
 private:
-    ScopedPointer<AudioFormatReader> source;
+    std::unique_ptr<AudioFormatReader> source;
     TimeSliceThread& thread;
     int64 nextReadPosition;
     const int numBlocks;

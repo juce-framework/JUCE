@@ -113,8 +113,8 @@ public:
 
 private:
     //==============================================================================
-    ScopedPointer<CameraDevice> cameraDevice;
-    ScopedPointer<Component> cameraPreviewComp;
+    std::unique_ptr<CameraDevice> cameraDevice;
+    std::unique_ptr<Component> cameraPreviewComp;
     ImageComponent lastSnapshot;
 
     ComboBox cameraSelectorComboBox  { "Camera" };

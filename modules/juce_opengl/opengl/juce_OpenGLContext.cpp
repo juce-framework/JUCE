@@ -346,7 +346,7 @@ public:
             clearRegionInFrameBuffer (invalid);
 
             {
-                ScopedPointer<LowLevelGraphicsContext> g (createOpenGLGraphicsContext (context, cachedImageFrameBuffer));
+                std::unique_ptr<LowLevelGraphicsContext> g (createOpenGLGraphicsContext (context, cachedImageFrameBuffer));
                 g->clipToRectangleList (invalid);
                 g->addTransform (transform);
 
@@ -638,7 +638,7 @@ public:
 
     //==============================================================================
     friend class NativeContext;
-    ScopedPointer<NativeContext> nativeContext;
+    std::unique_ptr<NativeContext> nativeContext;
 
     OpenGLContext& context;
     Component& component;
@@ -668,7 +668,7 @@ public:
    #if JUCE_MAC
     CVDisplayLinkRef displayLink;
    #endif
-    ScopedPointer<ThreadPool> renderThread;
+    std::unique_ptr<ThreadPool> renderThread;
     ReferenceCountedArray<OpenGLContext::AsyncWorker, CriticalSection> workQueue;
     MessageManager::Lock messageManagerLock;
 

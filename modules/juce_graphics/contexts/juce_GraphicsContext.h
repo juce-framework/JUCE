@@ -739,7 +739,7 @@ public:
 private:
     //==============================================================================
     LowLevelGraphicsContext& context;
-    ScopedPointer<LowLevelGraphicsContext> contextToDelete;
+    std::unique_ptr<LowLevelGraphicsContext> contextToDelete;
 
     bool saveStatePending = false;
     void saveStateIfPending();

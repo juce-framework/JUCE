@@ -291,7 +291,7 @@ private:
     //==============================================================================
     LayoutMode mode = MaximisedWindowsWithTabs;
     Array<Component*> components;
-    ScopedPointer<TabbedComponent> tabComponent;
+    std::unique_ptr<TabbedComponent> tabComponent;
     Colour backgroundColour { Colours::lightblue };
     int maximumNumDocuments = 0, numDocsBeforeTabsUsed = 0;
 

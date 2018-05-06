@@ -66,18 +66,10 @@ protected:
     /** Constructor for AudioProcessors which use layout maps
         If your AudioProcessor uses layout maps then use this constructor.
     */
-   #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
     AudioProcessor (const std::initializer_list<const short[2]>& channelLayoutList)
         : AudioProcessor (busesPropertiesFromLayoutArray (layoutListToArray (channelLayoutList)))
     {
     }
-   #else
-    template <int numLayouts>
-    AudioProcessor (const short (&channelLayoutList) [numLayouts][2])
-        : AudioProcessor (busesPropertiesFromLayoutArray (layoutListToArray (channelLayoutList)))
-    {
-    }
-   #endif
 
 public:
     //==============================================================================
@@ -766,12 +758,10 @@ public:
         }
         @endcode
     */
-   #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
     static bool containsLayout (const BusesLayout& layouts, const std::initializer_list<const short[2]>& channelLayoutList)
     {
         return containsLayout (layouts, layoutListToArray (channelLayoutList));
     }
-   #endif
 
     template <int numLayouts>
     static bool containsLayout (const BusesLayout& layouts, const short (&channelLayoutList) [numLayouts][2])
@@ -1601,7 +1591,6 @@ private:
         return layouts;
     }
 
-   #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
     static Array<InOutChannelPair> layoutListToArray (const std::initializer_list<const short[2]>& configuration)
     {
         Array<InOutChannelPair> layouts;
@@ -1611,7 +1600,6 @@ private:
 
         return layouts;
     }
-   #endif
 
     //==============================================================================
     static BusesProperties busesPropertiesFromLayoutArray (const Array<InOutChannelPair>&);

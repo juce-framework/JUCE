@@ -919,7 +919,7 @@ void ColouredElement::convertToNewPathElement (const Path& path)
         newElement.setStrokeType (getStrokeType().stroke, false);
         newElement.setStrokeFill (getStrokeType().fill, false);
 
-        ScopedPointer<XmlElement> xml (newElement.createXml());
+        std::unique_ptr<XmlElement> xml (newElement.createXml());
 
         PaintElement* e = getOwner()->addElementFromXml (*xml, getOwner()->indexOfElement (this), true);
 

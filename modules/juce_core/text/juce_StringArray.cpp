@@ -67,12 +67,10 @@ StringArray::StringArray (const wchar_t* const* initialStrings, int numberOfStri
     strings.addArray (initialStrings, numberOfStrings);
 }
 
-#if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
 StringArray::StringArray (const std::initializer_list<const char*>& stringList)
 {
     strings.addArray (stringList);
 }
-#endif
 
 StringArray& StringArray::operator= (const StringArray& other)
 {

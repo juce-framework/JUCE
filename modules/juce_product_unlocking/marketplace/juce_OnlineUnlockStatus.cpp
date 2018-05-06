@@ -114,7 +114,7 @@ struct KeyFileUtils
         RSAKey key (rsaPublicKey);
         jassert (key.isValid());
 
-        ScopedPointer<XmlElement> xml;
+        std::unique_ptr<XmlElement> xml;
 
         if (! val.isZero())
         {
@@ -378,7 +378,7 @@ bool OnlineUnlockStatus::applyKeyFile (String keyFileContent)
 
 static bool canConnectToWebsite (const URL& url)
 {
-    ScopedPointer<InputStream> in (url.createInputStream (false, nullptr, nullptr, String(), 2000, nullptr));
+    std::unique_ptr<InputStream> in (url.createInputStream (false, nullptr, nullptr, String(), 2000, nullptr));
     return in != nullptr;
 }
 
@@ -454,7 +454,7 @@ OnlineUnlockStatus::UnlockResult OnlineUnlockStatus::attemptWebserverUnlock (con
 
     DBG ("Reply from server: " << reply);
 
-    ScopedPointer<XmlElement> xml (XmlDocument::parse (reply));
+    std::unique_ptr<XmlElement> xml (XmlDocument::parse (reply));
 
     if (xml != nullptr)
         return handleXmlReply (*xml);

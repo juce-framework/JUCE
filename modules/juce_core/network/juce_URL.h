@@ -532,7 +532,7 @@ private:
         Upload (const String&, const String&, const String&, const File&, MemoryBlock*);
         String parameterName, filename, mimeType;
         File file;
-        ScopedPointer<MemoryBlock> data;
+        std::unique_ptr<MemoryBlock> data;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Upload)
     };

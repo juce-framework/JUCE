@@ -1211,7 +1211,7 @@ public:
          #error // some crazy 3rd party headers (e.g. zlib) define this function as NULL!
         #endif
 
-        if (childPID != 0)
+        if (readHandle == nullptr && childPID != 0)
             readHandle = fdopen (pipeHandle, "r");
 
         if (readHandle != nullptr)

@@ -154,7 +154,7 @@ protected:
 private:
     struct HintingParams;
     friend struct ContainerDeletePolicy<HintingParams>;
-    ScopedPointer<HintingParams> hintingParams;
+    std::unique_ptr<HintingParams> hintingParams;
     CriticalSection hintingLock;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Typeface)

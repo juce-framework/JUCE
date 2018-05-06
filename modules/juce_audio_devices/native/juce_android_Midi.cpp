@@ -202,7 +202,7 @@ public:
     {
         if (jobject dm = deviceManager.get())
         {
-            ScopedPointer<AndroidMidiInput> androidMidiInput (new AndroidMidiInput (juceMidiInput, idx, callback, dm));
+            std::unique_ptr<AndroidMidiInput> androidMidiInput (new AndroidMidiInput (juceMidiInput, idx, callback, dm));
 
             if (androidMidiInput->isOpen())
                 return androidMidiInput.release();
@@ -327,7 +327,7 @@ MidiInput* MidiInput::openDevice (int index, juce::MidiInputCallback* callback)
 
     AndroidMidiDeviceManager manager;
 
-    String midiInputName = manager.getInputPortNameForJuceIndex (index);
+    String midiInputName (manager.getInputPortNameForJuceIndex (index));
 
     if (midiInputName.isEmpty())
     {
@@ -336,9 +336,9 @@ MidiInput* MidiInput::openDevice (int index, juce::MidiInputCallback* callback)
         return nullptr;
     }
 
-    ScopedPointer<MidiInput> midiInput (new MidiInput (midiInputName));
+    std::unique_ptr<MidiInput> midiInput (new MidiInput (midiInputName));
 
-    midiInput->internal = manager.openMidiInputPortWithIndex (index, midiInput, callback);
+    midiInput->internal = manager.openMidiInputPortWithIndex (index, midiInput.get(), callback);
 
     return midiInput->internal != nullptr ? midiInput.release()
                                           : nullptr;

@@ -536,7 +536,7 @@ public:
 private:
     int result;
     bool resultReceived;
-    ScopedPointer<ModalComponentManager::Callback> callback;
+    std::unique_ptr<ModalComponentManager::Callback> callback;
     const bool isAsync;
 
    #if JUCE_USE_NEW_IOS_ALERTWINDOW
@@ -605,8 +605,8 @@ bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType
 {
     NSString* button1NSStr = (NSString*) button1Text.toCFString();
     NSString* button2NSStr = (NSString*) button2Text.toCFString();
-    ScopedPointer<iOSMessageBox> mb (new iOSMessageBox (title, message, button2NSStr, button1NSStr,
-                                                        nil, callback, callback != nullptr));
+    std::unique_ptr<iOSMessageBox> mb (new iOSMessageBox (title, message, button2NSStr, button1NSStr,
+                                                          nil, callback, callback != nullptr));
     [button1NSStr release];
     [button2NSStr release];
 
@@ -622,7 +622,7 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconTy
                                                         Component* /*associatedComponent*/,
                                                         ModalComponentManager::Callback* callback)
 {
-    ScopedPointer<iOSMessageBox> mb (new iOSMessageBox (title, message, @"Cancel", @"Yes", @"No", callback, callback != nullptr));
+    std::unique_ptr<iOSMessageBox> mb (new iOSMessageBox (title, message, @"Cancel", @"Yes", @"No", callback, callback != nullptr));
 
     if (callback == nullptr)
         return mb->getResult();
@@ -636,7 +636,7 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoBox (AlertWindow::AlertIconType /*i
                                                   Component* /*associatedComponent*/,
                                                   ModalComponentManager::Callback* callback)
 {
-    ScopedPointer<iOSMessageBox> mb (new iOSMessageBox (title, message, @"No", @"Yes", nil, callback, callback != nullptr));
+    std::unique_ptr<iOSMessageBox> mb (new iOSMessageBox (title, message, @"No", @"Yes", nil, callback, callback != nullptr));
 
     if (callback == nullptr)
         return mb->getResult();

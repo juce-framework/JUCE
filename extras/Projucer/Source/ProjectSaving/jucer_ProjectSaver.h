@@ -93,12 +93,14 @@ public:
 
             auto projectRootHash = project.getProjectRoot().toXmlString().hashCode();
 
+            if (project.getProjectType().isAudioPlugin())
+                writePluginCharacteristicsFile();
+
             writeAppConfigFile (modules, appConfigUserContent);
             writeBinaryDataFiles();
             writeAppHeader (modules);
             writeModuleCppWrappers (modules);
             writeProjects (modules, specifiedExporterToSave, ! showProgressBox);
-            writeAppConfigFile (modules, appConfigUserContent); // (this is repeated in case the projects added anything to it)
 
             // if the project root has changed after writing the other files then re-save it
             if (project.getProjectRoot().toXmlString().hashCode() != projectRootHash)
@@ -147,16 +149,13 @@ public:
 
         if (errors.size() == 0)
         {
+            if (project.getProjectType().isAudioPlugin())
+                writePluginCharacteristicsFile();
+
             writeAppConfigFile (modules, loadUserContentFromAppConfig());
             writeBinaryDataFiles();
             writeAppHeader (modules);
             writeModuleCppWrappers (modules);
-
-            if (project.getProjectType().isAudioPlugin())
-            {
-                writePluginCharacteristicsFile();
-                writeAppConfigFile (modules, loadUserContentFromAppConfig());
-            }
 
             return Result::ok();
         }
@@ -315,7 +314,7 @@ private:
 
     void writeMainProjectFile()
     {
-        ScopedPointer<XmlElement> xml (project.getProjectRoot().createXml());
+        std::unique_ptr<XmlElement> xml (project.getProjectRoot().createXml());
         jassert (xml != nullptr);
 
         if (xml != nullptr)
@@ -705,7 +704,7 @@ private:
 
     private:
         ProjectSaver& owner;
-        ScopedPointer<ProjectExporter> exporter;
+        std::unique_ptr<ProjectExporter> exporter;
         const OwnedArray<LibraryModule>& modules;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ExporterJob)

@@ -215,7 +215,7 @@ private:
     struct Pimpl;
     friend struct Pimpl;
     friend struct ContainerDeletePolicy<Pimpl>;
-    ScopedPointer<Pimpl> pimpl;
+    std::unique_ptr<Pimpl> pimpl;
     friend struct OSCReceiverCallbackMessage;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OSCReceiver)

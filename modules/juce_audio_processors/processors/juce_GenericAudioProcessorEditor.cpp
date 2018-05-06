@@ -28,20 +28,27 @@ namespace juce
 {
 
 class ParameterListener   : private AudioProcessorParameter::Listener,
+                            private AudioProcessorListener,
                             private Timer
 {
 public:
-    ParameterListener (AudioProcessorParameter& param)
-        : parameter (param)
+    ParameterListener (AudioProcessor& p, AudioProcessorParameter& param)
+        : processor (p), parameter (param)
     {
-        parameter.addListener (this);
+        if (LegacyAudioParameter::isLegacy (&parameter))
+            processor.addListener (this);
+        else
+            parameter.addListener (this);
 
         startTimer (100);
     }
 
     virtual ~ParameterListener()
     {
-        parameter.removeListener (this);
+        if (LegacyAudioParameter::isLegacy (&parameter))
+            processor.removeListener (this);
+        else
+            parameter.removeListener (this);
     }
 
     AudioProcessorParameter& getParameter() noexcept
@@ -52,6 +59,7 @@ public:
     virtual void handleNewParameterValue() = 0;
 
 private:
+    //==============================================================================
     void parameterValueChanged (int, float) override
     {
         parameterValueHasChanged = 1;
@@ -59,6 +67,16 @@ private:
 
     void parameterGestureChanged (int, bool) override {}
 
+    //==============================================================================
+    void audioProcessorParameterChanged (AudioProcessor*, int index, float) override
+    {
+        if (index == parameter.getParameterIndex())
+            parameterValueHasChanged = 1;
+    }
+
+    void audioProcessorChanged (AudioProcessor*) override {}
+
+    //==============================================================================
     void timerCallback() override
     {
         if (parameterValueHasChanged.compareAndSetBool (0, 1))
@@ -72,6 +90,7 @@ private:
         }
     }
 
+    AudioProcessor& processor;
     AudioProcessorParameter& parameter;
     Atomic<int> parameterValueHasChanged { 0 };
 
@@ -82,8 +101,8 @@ class BooleanParameterComponent final   : public Component,
                                           private ParameterListener
 {
 public:
-    BooleanParameterComponent (AudioProcessorParameter& param)
-        : ParameterListener (param)
+    BooleanParameterComponent (AudioProcessor& processor, AudioProcessorParameter& param)
+        : ParameterListener (processor, param)
     {
         // Set the initial value.
         handleNewParameterValue();
@@ -135,8 +154,8 @@ class SwitchParameterComponent final   : public Component,
                                          private ParameterListener
 {
 public:
-    SwitchParameterComponent (AudioProcessorParameter& param)
-        : ParameterListener (param)
+    SwitchParameterComponent (AudioProcessor& processor, AudioProcessorParameter& param)
+        : ParameterListener (processor, param)
     {
         auto* leftButton  = buttons.add (new TextButton());
         auto* rightButton = buttons.add (new TextButton());
@@ -240,8 +259,8 @@ class ChoiceParameterComponent final   : public Component,
                                          private ParameterListener
 {
 public:
-    ChoiceParameterComponent (AudioProcessorParameter& param)
-        : ParameterListener (param),
+    ChoiceParameterComponent (AudioProcessor& processor, AudioProcessorParameter& param)
+        : ParameterListener (processor, param),
           parameterValues (getParameter().getAllValueStrings())
     {
         box.addItemList (parameterValues, 1);
@@ -302,8 +321,8 @@ class SliderParameterComponent final   : public Component,
                                          private ParameterListener
 {
 public:
-    SliderParameterComponent (AudioProcessorParameter& param)
-        : ParameterListener (param)
+    SliderParameterComponent (AudioProcessor& processor, AudioProcessorParameter& param)
+        : ParameterListener (processor, param)
     {
         if (getParameter().getNumSteps() != AudioProcessor::getDefaultNumParameterSteps())
             slider.setRange (0.0, 1.0, 1.0 / (getParameter().getNumSteps() - 1.0));
@@ -392,7 +411,7 @@ private:
 class ParameterDisplayComponent   : public Component
 {
 public:
-    ParameterDisplayComponent (AudioProcessorParameter& param)
+    ParameterDisplayComponent (AudioProcessor& processor, AudioProcessorParameter& param)
         : parameter (param)
     {
         parameterName.setText (parameter.getName (128), dontSendNotification);
@@ -408,24 +427,24 @@ public:
             // marking a parameter as boolean. If you want consistency across
             // all  formats then it might be best to use a
             // SwitchParameterComponent instead.
-            parameterComp.reset (new BooleanParameterComponent (param));
+            parameterComp.reset (new BooleanParameterComponent (processor, param));
         }
         else if (param.getNumSteps() == 2)
         {
             // Most hosts display any parameter with just two steps as a switch.
-            parameterComp.reset (new SwitchParameterComponent (param));
+            parameterComp.reset (new SwitchParameterComponent (processor, param));
         }
         else if (! param.getAllValueStrings().isEmpty())
         {
             // If we have a list of strings to represent the different states a
             // parameter can be in then we should present a dropdown allowing a
             // user to pick one of them.
-            parameterComp.reset (new ChoiceParameterComponent (param));
+            parameterComp.reset (new ChoiceParameterComponent (processor, param));
         }
         else
         {
             // Everything else can be represented as a slider.
-            parameterComp.reset (new SliderParameterComponent (param));
+            parameterComp.reset (new SliderParameterComponent (processor, param));
         }
 
         addAndMakeVisible (parameterComp.get());
@@ -447,7 +466,7 @@ public:
 private:
     AudioProcessorParameter& parameter;
     Label parameterName, parameterLabel;
-    ScopedPointer<Component> parameterComp;
+    std::unique_ptr<Component> parameterComp;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParameterDisplayComponent)
 };
@@ -455,11 +474,11 @@ private:
 class ParametersPanel   : public Component
 {
 public:
-    ParametersPanel (const Array<AudioProcessorParameter*>& parameters)
+    ParametersPanel (AudioProcessor& processor, const Array<AudioProcessorParameter*>& parameters)
     {
         for (auto* param : parameters)
             if (param->isAutomatable())
-                addAndMakeVisible (paramComponents.add (new ParameterDisplayComponent (*param)));
+                addAndMakeVisible (paramComponents.add (new ParameterDisplayComponent (processor, *param)));
 
         if (auto* comp = paramComponents[0])
             setSize (comp->getWidth(), comp->getHeight() * paramComponents.size());
@@ -499,7 +518,7 @@ struct  GenericAudioProcessorEditor::Pimpl
 
         owner.setOpaque (true);
 
-        view.setViewedComponent (new ParametersPanel (juceParameters.params));
+        view.setViewedComponent (new ParametersPanel (*p, juceParameters.params));
         owner.addAndMakeVisible (view);
 
         view.setScrollBarsShown (true, false);

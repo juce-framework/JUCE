@@ -490,7 +490,7 @@ public:
         ZipFile icons (createAssetInputStream ("icons.zip"), true);
 
         // Load a random SVG file from our embedded icons.zip file.
-        const ScopedPointer<InputStream> svgFileStream (icons.createStreamForEntry (Random::getSystemRandom().nextInt (icons.getNumEntries())));
+        const std::unique_ptr<InputStream> svgFileStream (icons.createStreamForEntry (Random::getSystemRandom().nextInt (icons.getNumEntries())));
 
         if (svgFileStream.get() != nullptr)
         {
@@ -505,7 +505,7 @@ public:
     }
 
     Time lastSVGLoadTime;
-    ScopedPointer<DrawableComposite> svgDrawable;
+    std::unique_ptr<DrawableComposite> svgDrawable;
 };
 
 //==============================================================================

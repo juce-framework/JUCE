@@ -178,7 +178,7 @@ struct SynthAudioSource  : public AudioSource
     {
         WavAudioFormat wavFormat;
 
-        ScopedPointer<AudioFormatReader> audioReader (wavFormat.createReaderFor (createAssetInputStream ("cello.wav"), true));
+        std::unique_ptr<AudioFormatReader> audioReader (wavFormat.createReaderFor (createAssetInputStream ("cello.wav"), true));
 
         BigInteger allNotes;
         allNotes.setRange (0, 128, true);

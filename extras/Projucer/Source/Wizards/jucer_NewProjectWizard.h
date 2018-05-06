@@ -129,7 +129,7 @@ struct NewProjectWizard
         projectFile = targetFolder.getChildFile (File::createLegalFileName (appTitle))
                                   .withFileExtension (Project::projectFileExtension);
 
-        ScopedPointer<Project> project (new Project (projectFile));
+        std::unique_ptr<Project> project (new Project (projectFile));
 
         if (failedFiles.size() == 0)
         {

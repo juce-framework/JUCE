@@ -348,7 +348,7 @@ private:
         updateCanvasInfo (currentCanvas);
 
         {
-            ScopedPointer<CanvasGeneratingContext> context (new CanvasGeneratingContext (currentCanvas));
+            std::unique_ptr<CanvasGeneratingContext> context (new CanvasGeneratingContext (currentCanvas));
             Graphics g (*context);
 
             if (content != nullptr)

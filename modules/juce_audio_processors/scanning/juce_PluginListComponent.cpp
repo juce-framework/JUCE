@@ -393,14 +393,14 @@ private:
     AudioPluginFormat& formatToScan;
     StringArray filesOrIdentifiersToScan;
     PropertiesFile* propertiesToUse;
-    ScopedPointer<PluginDirectoryScanner> scanner;
+    std::unique_ptr<PluginDirectoryScanner> scanner;
     AlertWindow pathChooserWindow, progressWindow;
     FileSearchPathListComponent pathList;
     String pluginBeingScanned;
     double progress;
     int numThreads;
     bool allowAsync, finished;
-    ScopedPointer<ThreadPool> pool;
+    std::unique_ptr<ThreadPool> pool;
 
     static void startScanCallback (int result, AlertWindow* alert, Scanner* scanner)
     {

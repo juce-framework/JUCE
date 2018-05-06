@@ -466,7 +466,7 @@ void LibraryModule::getConfigFlags (Project& project, OwnedArray<Project::Config
 
         if (line.startsWith ("/**") && line.containsIgnoreCase ("Config:"))
         {
-            ScopedPointer<Project::ConfigFlag> config (new Project::ConfigFlag());
+            std::unique_ptr<Project::ConfigFlag> config (new Project::ConfigFlag());
             config->sourceModuleID = getID();
             config->symbol = line.fromFirstOccurrenceOf (":", false, false).trim();
 

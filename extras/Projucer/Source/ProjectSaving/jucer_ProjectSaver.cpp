@@ -191,9 +191,6 @@ void ProjectSaver::writeProjects (const OwnedArray<LibraryModule>& modules, cons
                     for (auto& module: modules)
                         module->addSettingsForModuleToExporter (*exporter, *this);
 
-                    if (project.getProjectType().isAudioPlugin())
-                        writePluginCharacteristicsFile();
-
                     generatedFilesGroup.sortAlphabetically (true, true);
                     exporter->getAllGroups().add (generatedFilesGroup);
                 }

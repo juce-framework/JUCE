@@ -212,7 +212,7 @@ void FilterGraph::newDocument()
 Result FilterGraph::loadDocument (const File& file)
 {
     XmlDocument doc (file);
-    ScopedPointer<XmlElement> xml (doc.getDocumentElement());
+    std::unique_ptr<XmlElement> xml (doc.getDocumentElement());
 
     if (xml == nullptr || ! xml->hasTagName ("FILTERGRAPH"))
         return Result::fail ("Not a valid filter graph file");
@@ -223,7 +223,7 @@ Result FilterGraph::loadDocument (const File& file)
 
 Result FilterGraph::saveDocument (const File& file)
 {
-    ScopedPointer<XmlElement> xml (createXml());
+    std::unique_ptr<XmlElement> xml (createXml());
 
     if (! xml->writeToFile (file, {}))
         return Result::fail ("Couldn't write to the file");

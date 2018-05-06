@@ -65,7 +65,7 @@ private:
     bool hitTest (int, int) override;
     void mouseUp (const MouseEvent&) override;
 
-    ScopedPointer<Drawable> content;
+    std::unique_ptr<Drawable> content;
     CriticalSection appUsageReporting;
     ComponentAnimator fader;
     bool hasStartedFading = false;

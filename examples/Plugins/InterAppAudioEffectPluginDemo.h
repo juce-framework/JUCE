@@ -236,13 +236,13 @@ public:
     //==============================================================================
     void getStateInformation (MemoryBlock& destData) override
     {
-        auto xml = ScopedPointer<XmlElement> (parameters.state.createXml());
+        auto xml = std::unique_ptr<XmlElement> (parameters.state.createXml());
         copyXmlToBinary (*xml, destData);
     }
 
     void setStateInformation (const void* data, int sizeInBytes) override
     {
-        auto xmlState = ScopedPointer<XmlElement> (getXmlFromBinary (data, sizeInBytes));
+        auto xmlState = std::unique_ptr<XmlElement> (getXmlFromBinary (data, sizeInBytes));
 
         if (xmlState.get() != nullptr)
             if (xmlState->hasTagName (parameters.state.getType()))

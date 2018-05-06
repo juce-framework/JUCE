@@ -152,8 +152,8 @@ public:
             const String userCodeComment ("UserComboBoxCode_" + memberVariableName);
 
             callback
-                << "if (comboBoxThatHasChanged == " << memberVariableName
-                << ")\n{\n    //[" << userCodeComment << "] -- add your combo box handling code here..\n    //[/" << userCodeComment << "]\n}\n";
+                << "if (comboBoxThatHasChanged == " << memberVariableName << ".get())\n"
+                << "{\n    //[" << userCodeComment << "] -- add your combo box handling code here..\n    //[/" << userCodeComment << "]\n}\n";
         }
     }
 

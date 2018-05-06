@@ -360,7 +360,7 @@ bool ActiveXControlComponent::createControl (const void* controlIID)
         auto controlBounds = peer->getAreaCoveredBy (*this);
         auto hwnd = (HWND) peer->getNativeHandle();
 
-        ScopedPointer<Pimpl> newControl (new Pimpl (hwnd, *this));
+        std::unique_ptr<Pimpl> newControl (new Pimpl (hwnd, *this));
 
         HRESULT hr = OleCreate (*(const IID*) controlIID, __uuidof (IOleObject), 1 /*OLERENDER_DRAW*/, 0,
                                 newControl->clientSite, newControl->storage,

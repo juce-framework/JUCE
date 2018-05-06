@@ -303,7 +303,7 @@ public:
         if (selectedNodes.size() > 0)
         {
             auto* tree = getOwnerView();
-            ScopedPointer<XmlElement> oldOpenness (tree->getOpennessState (false));
+            std::unique_ptr<XmlElement> oldOpenness (tree->getOpennessState (false));
 
             moveSelectedItemsTo (selectedNodes, insertIndex);
 

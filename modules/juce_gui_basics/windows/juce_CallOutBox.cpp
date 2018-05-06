@@ -78,7 +78,7 @@ public:
             callout.dismiss();
     }
 
-    ScopedPointer<Component> content;
+    std::unique_ptr<Component> content;
     CallOutBox callout;
 
     JUCE_DECLARE_NON_COPYABLE (CallOutBoxCallback)

@@ -43,12 +43,10 @@
 #include "../../../GUI/ComponentDemo.h"
 #include "../../../GUI/ComponentTransformsDemo.h"
 #include "../../../GUI/DialogsDemo.h"
-#if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
- #include "../../../GUI/FlexBoxDemo.h"
-#endif
+#include "../../../GUI/FlexBoxDemo.h"
 #include "../../../GUI/FontsDemo.h"
 #include "../../../GUI/GraphicsDemo.h"
-#if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS && JUCE_HAS_CONSTEXPR
+#if JUCE_HAS_CONSTEXPR
  #include "../../../GUI/GridDemo.h"
 #endif
 #include "../../../GUI/ImagesDemo.h"
@@ -84,12 +82,10 @@ void registerDemos_Two() noexcept
     REGISTER_DEMO (ComponentDemo,             GUI,       false)
     REGISTER_DEMO (ComponentTransformsDemo,   GUI,       false)
     REGISTER_DEMO (DialogsDemo,               GUI,       false)
-   #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
     REGISTER_DEMO (FlexBoxDemo,               GUI,       false)
-   #endif
     REGISTER_DEMO (FontsDemo,                 GUI,       false)
     REGISTER_DEMO (GraphicsDemo,              GUI,       false)
-   #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS && JUCE_HAS_CONSTEXPR
+   #if JUCE_HAS_CONSTEXPR
     REGISTER_DEMO (GridDemo,                  GUI,       false)
    #endif
     REGISTER_DEMO (ImagesDemo,                GUI,       false)

@@ -46,7 +46,7 @@ private:
 
     AudioProcessor::BusesLayout currentLayout;
     Label title;
-    ScopedPointer<InputOutputConfig> inConfig, outConfig;
+    std::unique_ptr<InputOutputConfig> inConfig, outConfig;
 
     InputOutputConfig* getConfig (bool isInput) noexcept    { return isInput ? inConfig.get() : outConfig.get(); }
     void update();

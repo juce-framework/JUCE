@@ -112,8 +112,11 @@ PIPGenerator::PIPGenerator (const File& pip, const File& output)
         isTemp = true;
     }
 
+    auto isClipboard = (pip.getParentDirectory().getFileName() == "Clipboard"
+                        && pip.getParentDirectory().getParentDirectory().getFileName() == "PIPs");
+
     outputDirectory = outputDirectory.getChildFile (metadata[Ids::name].toString());
-    useLocalCopy = metadata[Ids::useLocalCopy].toString().isNotEmpty();
+    useLocalCopy = metadata[Ids::useLocalCopy].toString().isNotEmpty() || isClipboard;
 }
 
 //==============================================================================
@@ -135,7 +138,7 @@ Result PIPGenerator::createJucerFile()
 
     auto outputFile = outputDirectory.getChildFile (metadata[Ids::name].toString() + ".jucer");
 
-    ScopedPointer<XmlElement> xml (root.createXml());
+    std::unique_ptr<XmlElement> xml (root.createXml());
 
     if (xml->writeToFile (outputFile, {}))
         return Result::ok();
@@ -458,13 +461,8 @@ Result PIPGenerator::setProjectSettings (ValueTree& jucerTree)
         jucerTree.setProperty (Ids::projectType, "audioplug", nullptr);
         jucerTree.setProperty (Ids::pluginManufacturer, metadata[Ids::vendor], nullptr);
 
-        jucerTree.setProperty (Ids::buildVST,        true, nullptr);
-        jucerTree.setProperty (Ids::buildVST3,       false, nullptr);
-        jucerTree.setProperty (Ids::buildAU,         true, nullptr);
-        jucerTree.setProperty (Ids::buildAUv3,       false, nullptr);
-        jucerTree.setProperty (Ids::buildRTAS,       false, nullptr);
-        jucerTree.setProperty (Ids::buildAAX,        false, nullptr);
-        jucerTree.setProperty (Ids::buildStandalone, true,  nullptr);
+        StringArray pluginFormatsToBuild (Ids::buildVST.toString(), Ids::buildAU.toString(), Ids::buildStandalone.toString());
+        jucerTree.setProperty (Ids::pluginFormats, pluginFormatsToBuild.joinIntoString (","), nullptr);
     }
 
     return Result::ok();
@@ -511,8 +509,8 @@ String PIPGenerator::getMainFileTextForType()
         mainTemplate = mainTemplate.replace ("%%project_name%%",    metadata[Ids::name].toString());
         mainTemplate = mainTemplate.replace ("%%project_version%%", metadata[Ids::version].toString());
 
-        return ensureCorrectWhitespace (mainTemplate.replace ("%%startup%%", "mainWindow = new MainWindow (" + metadata[Ids::name].toString().quoted()
-                                                            + ", new " + metadata[Ids::mainClass].toString() + "(), *this);")
+        return ensureCorrectWhitespace (mainTemplate.replace ("%%startup%%", "mainWindow.reset (new MainWindow (" + metadata[Ids::name].toString().quoted()
+                                                            + ", new " + metadata[Ids::mainClass].toString() + "(), *this));")
                                                     .replace ("%%shutdown%%", "mainWindow = nullptr;"));
     }
     else if (type == "AudioProcessor")

@@ -91,12 +91,10 @@ public:
     Result saveDocument (const File& file) override
     {
         // attempt to save the contents into the given file
-        FileOutputStream os (file);
+        if (file.replaceWithText (editor.getText()))
+            return Result::ok();
 
-        if (os.openedOk())
-            os.writeText (editor.getText(), false, false);
-
-        return Result::ok();
+        return Result::fail ("Can't write to file");
     }
 
     File getLastDocumentOpened() override
@@ -113,7 +111,9 @@ public:
    #if JUCE_MODAL_LOOPS_PERMITTED
     File getSuggestedSaveAsFile (const File&) override
     {
-        return File::getSpecialLocation (File::userDesktopDirectory).getChildFile (getName()).withFileExtension ("jnote");
+        return File::getSpecialLocation (File::userDesktopDirectory)
+                    .getChildFile (getName())
+                    .withFileExtension ("jnote");
     }
    #endif
 

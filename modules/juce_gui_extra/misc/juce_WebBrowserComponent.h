@@ -138,7 +138,7 @@ public:
 private:
     //==============================================================================
     class Pimpl;
-    ScopedPointer<Pimpl> browser;
+    std::unique_ptr<Pimpl> browser;
     bool blankPageShown = false, unloadPageWhenBrowserIsHidden;
     String lastURL;
     StringArray lastHeaders;

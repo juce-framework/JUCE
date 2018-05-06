@@ -165,10 +165,10 @@ public:
 private:
     OwnedArray<ConcertinaHeader> headers;
     ConcertinaPanel concertinaPanel;
-    ScopedPointer<IconButton> settingsButton;
+    std::unique_ptr<IconButton> settingsButton;
 
-    ScopedPointer<TextButton> downloadButton, enableButton;
-    ScopedPointer<Label> errorMessageLabel;
+    std::unique_ptr<TextButton> downloadButton, enableButton;
+    std::unique_ptr<Label> errorMessageLabel;
     bool showDownloadButton;
     bool showEnableButton;
 

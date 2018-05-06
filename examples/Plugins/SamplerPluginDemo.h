@@ -2065,7 +2065,7 @@ public:
     {
         if (auto* asset = createAssetInputStream ("cello.wav"))
         {
-            ScopedPointer<InputStream> inputStream (asset);
+            std::unique_ptr<InputStream> inputStream (asset);
             inputStream->readIntoMemoryBlock (mb);
 
             readerFactory.reset (new MemoryAudioFormatReaderFactory (mb.getData(), mb.getSize()));

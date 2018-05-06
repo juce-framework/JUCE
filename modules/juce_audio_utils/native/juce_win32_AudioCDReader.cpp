@@ -292,7 +292,7 @@ public:
     BYTE readType;
 
 private:
-    ScopedPointer<CDController> controller;
+    std::unique_ptr<CDController> controller;
 
     bool testController (int readType, CDController* newController, CDReadBuffer& bufferToUse);
 };
@@ -893,7 +893,7 @@ void CDDeviceHandle::openDrawer (bool shouldBeOpen)
 
 bool CDDeviceHandle::testController (const int type, CDController* const newController, CDReadBuffer& rb)
 {
-    controller = newController;
+    controller.reset (newController);
     readType = (BYTE) type;
 
     controller->deviceInfo = this;
@@ -998,7 +998,7 @@ AudioCDReader* AudioCDReader::createReaderForCD (const int deviceIndex)
 
         if (h != INVALID_HANDLE_VALUE)
         {
-            ScopedPointer<AudioCDReader> cd (new AudioCDReader (new CDDeviceWrapper (list [deviceIndex], h)));
+            std::unique_ptr<AudioCDReader> cd (new AudioCDReader (new CDDeviceWrapper (list [deviceIndex], h)));
 
             if (cd->lengthInSamples > 0)
                 return cd.release();

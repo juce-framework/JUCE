@@ -317,7 +317,7 @@ private:
         virtual void runModally() = 0;
     };
 
-    ScopedPointer<Pimpl> pimpl;
+    std::unique_ptr<Pimpl> pimpl;
 
     //==============================================================================
     Pimpl* createPimpl (int, FilePreviewComponent*);

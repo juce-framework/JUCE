@@ -104,8 +104,8 @@ private:
     Label configLabel  { "Config Label", "Selected exporter" },
     projectNameLabel;
 
-    ScopedPointer<ImageComponent> juceIcon;
-    ScopedPointer<IconButton> projectSettingsButton, saveAndOpenInIDEButton, userSettingsButton, runAppButton;
+    std::unique_ptr<ImageComponent> juceIcon;
+    std::unique_ptr<IconButton> projectSettingsButton, saveAndOpenInIDEButton, userSettingsButton, runAppButton;
 
     SafePointer<CallOutBox> userSettingsWindow;
 

@@ -250,7 +250,7 @@ private:
         if (faceGroup.size() == 0)
             return nullptr;
 
-        ScopedPointer<Shape> shape (new Shape());
+        std::unique_ptr<Shape> shape (new Shape());
         shape->name = name;
         shape->material = material;
 

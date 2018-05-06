@@ -155,7 +155,7 @@ private:
     File volumeDir;
     Array<File> tracks;
     int currentReaderTrack;
-    ScopedPointer<AudioFormatReader> reader;
+    std::unique_ptr<AudioFormatReader> reader;
     AudioCDReader (const File& volume);
 
    #elif JUCE_WINDOWS

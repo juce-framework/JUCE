@@ -82,7 +82,7 @@ public:
 
 private:
     OnlineUnlockStatus& status;
-    ScopedPointer<BubbleMessageComponent> bubble;
+    std::unique_ptr<BubbleMessageComponent> bubble;
 
     bool showOverlayCancelButton;
 

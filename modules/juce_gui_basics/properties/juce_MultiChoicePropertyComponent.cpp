@@ -273,7 +273,7 @@ void MultiChoicePropertyComponent::paint (Graphics& g)
 
     if (! expanded)
     {
-        g.setColour (findColour (PropertyComponent::labelTextColourId).withAlpha (0.4f));
+        g.setColour (findColour (TextEditor::backgroundColourId).contrasting().withAlpha (0.4f));
         g.drawFittedText ("+ " + String (numHidden) + " more", getLookAndFeel().getPropertyComponentContentPosition (*this)
                                                                                .removeFromBottom (20).withTrimmedLeft (10),
                           Justification::centredLeft, 1);
@@ -333,7 +333,7 @@ void MultiChoicePropertyComponent::setExpanded (bool isExpanded) noexcept
 //==============================================================================
 void MultiChoicePropertyComponent::lookAndFeelChanged()
 {
-    auto iconColour = findColour (PropertyComponent::labelTextColourId);
+    auto iconColour = findColour (TextEditor::backgroundColourId).contrasting();
     expandButton.setColours (iconColour, iconColour.darker(), iconColour.darker());
 }
 

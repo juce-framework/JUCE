@@ -725,7 +725,7 @@ struct CameraDevice::ViewerComponent  : public Component,
                                         public ChangeListener
 {
     ViewerComponent (CameraDevice& d)
-       : owner (d.pimpl), maxFPS (15), lastRepaintTime (0)
+       : owner (d.pimpl.get()), maxFPS (15), lastRepaintTime (0)
     {
         setOpaque (true);
         owner->addChangeListener (this);

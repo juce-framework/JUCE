@@ -179,7 +179,7 @@ public:
             {
                 File jucerCpp = code.document->getCppFile().getSiblingFile (getTabJucerFile (t, i));
 
-                ScopedPointer<JucerDocument> doc (JucerDocument::createForCppFile (nullptr, jucerCpp));
+                std::unique_ptr<JucerDocument> doc (JucerDocument::createForCppFile (nullptr, jucerCpp));
 
                 if (doc != nullptr)
                 {
@@ -403,7 +403,7 @@ private:
         bool isUsingJucerComp;
         String contentClassName, constructorParams;
         String jucerComponentFile;
-        ScopedPointer<TestComponent> jucerComp;
+        std::unique_ptr<TestComponent> jucerComp;
     };
 
     //==============================================================================
@@ -723,7 +723,7 @@ private:
 
         private:
             int indexToRemove;
-            ScopedPointer<XmlElement> previousState;
+            std::unique_ptr<XmlElement> previousState;
         };
     };
 
@@ -1164,7 +1164,7 @@ private:
             {
                 showCorrectTab();
 
-                ScopedPointer<XmlElement> state (getTabState (getComponent(), from));
+                std::unique_ptr<XmlElement> state (getTabState (getComponent(), from));
 
                 getComponent()->removeTab (from);
                 addNewTab (getComponent(), to);

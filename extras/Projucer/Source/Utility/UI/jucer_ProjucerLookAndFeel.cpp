@@ -161,7 +161,8 @@ void ProjucerLookAndFeel::drawToggleButton (Graphics& g, ToggleButton& button, b
         g.setOpacity (0.5f);
 
     bool isTextEmpty = button.getButtonText().isEmpty();
-    bool isPropertyComponentChild = (dynamic_cast<BooleanPropertyComponent*> (button.getParentComponent()) != nullptr);
+    bool isPropertyComponentChild = (dynamic_cast<BooleanPropertyComponent*> (button.getParentComponent()) != nullptr
+                                     || dynamic_cast<MultiChoicePropertyComponent*> (button.getParentComponent()) != nullptr);
 
     auto bounds = button.getLocalBounds();
 

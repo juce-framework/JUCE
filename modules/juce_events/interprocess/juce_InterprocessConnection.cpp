@@ -73,7 +73,7 @@ bool InterprocessConnection::connectToPipe (const String& pipeName, const int ti
 {
     disconnect();
 
-    ScopedPointer<NamedPipe> newPipe (new NamedPipe());
+    std::unique_ptr<NamedPipe> newPipe (new NamedPipe());
 
     if (newPipe->openExisting (pipeName))
     {
@@ -90,7 +90,7 @@ bool InterprocessConnection::createPipe (const String& pipeName, const int timeo
 {
     disconnect();
 
-    ScopedPointer<NamedPipe> newPipe (new NamedPipe());
+    std::unique_ptr<NamedPipe> newPipe (new NamedPipe());
 
     if (newPipe->createNewPipe (pipeName, mustNotExist))
     {

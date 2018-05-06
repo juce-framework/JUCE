@@ -27,12 +27,12 @@
 #pragma once
 
 #include "jucer_ProjectType.h"
-#include "../LiveBuildEngine/jucer_CompileEngineSettings.h"
 
 class ProjectExporter;
 class LibraryModule;
 class EnabledModuleList;
 class ProjectContentComponent;
+class CompileEngineSettings;
 
 //==============================================================================
 class Project  : public FileBasedDocument,
@@ -320,7 +320,7 @@ public:
         ProjectExporter& operator*() const       { return *exporter; }
         ProjectExporter* operator->() const      { return exporter.get(); }
 
-        ScopedPointer<ProjectExporter> exporter;
+        std::unique_ptr<ProjectExporter> exporter;
         int index;
 
     private:
@@ -385,7 +385,7 @@ public:
     bool shouldSendGUIBuilderAnalyticsEvent() noexcept;
 
     //==============================================================================
-    CompileEngineSettings& getCompileEngineSettings()    { return compileEngineSettings; }
+    CompileEngineSettings& getCompileEngineSettings()    { return *compileEngineSettings; }
 
 private:
     ValueTree projectRoot  { Ids::JUCERPROJECT };
@@ -399,7 +399,7 @@ private:
                      pluginAUMainTypeValue, pluginAUIsSandboxSafeValue, pluginRTASCategoryValue, pluginVSTCategoryValue, pluginVST3CategoryValue, pluginAAXCategoryValue;
 
     //==============================================================================
-    CompileEngineSettings compileEngineSettings  { projectRoot };
+    std::unique_ptr<CompileEngineSettings> compileEngineSettings;
 
     //==============================================================================
     bool shouldWriteLegacyPluginFormatSettings = false;
@@ -428,7 +428,7 @@ private:
 
     //==============================================================================
     friend class Item;
-    ScopedPointer<EnabledModuleList> enabledModulesList;
+    std::unique_ptr<EnabledModuleList> enabledModulesList;
     bool isSaving = false;
     Time modificationTime;
     StringPairArray parsedPreprocessorDefs;

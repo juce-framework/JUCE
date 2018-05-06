@@ -42,26 +42,28 @@ class LegacyAudioParameter :   public AudioProcessorParameter
 {
 public:
     LegacyAudioParameter (AudioProcessor& audioProcessorToUse, int audioParameterIndex)
-        : audioProcessor (audioProcessorToUse), idx (audioParameterIndex)
     {
-        jassert (idx < audioProcessor.getNumParameters());
+        processor = &audioProcessorToUse;
+
+        parameterIndex = audioParameterIndex;
+        jassert (parameterIndex < processor->getNumParameters());
     }
 
     //==============================================================================
-    float getValue() const override                    { return audioProcessor.getParameter (idx); }
-    void setValue (float newValue) override            { audioProcessor.setParameter (idx, newValue); }
-    float getDefaultValue() const override             { return audioProcessor.getParameterDefaultValue (idx); }
-    String getName (int maxLen) const override         { return audioProcessor.getParameterName (idx, maxLen); }
-    String getLabel() const override                   { return audioProcessor.getParameterLabel (idx); }
-    int getNumSteps() const override                   { return audioProcessor.getParameterNumSteps (idx); }
-    bool isDiscrete() const override                   { return audioProcessor.isParameterDiscrete (idx); }
+    float getValue() const override                    { return processor->getParameter (parameterIndex); }
+    void setValue (float newValue) override            { processor->setParameter (parameterIndex, newValue); }
+    float getDefaultValue() const override             { return processor->getParameterDefaultValue (parameterIndex); }
+    String getName (int maxLen) const override         { return processor->getParameterName (parameterIndex, maxLen); }
+    String getLabel() const override                   { return processor->getParameterLabel (parameterIndex); }
+    int getNumSteps() const override                   { return processor->getParameterNumSteps (parameterIndex); }
+    bool isDiscrete() const override                   { return processor->isParameterDiscrete (parameterIndex); }
     bool isBoolean() const override                    { return false; }
-    bool isOrientationInverted() const override        { return audioProcessor.isParameterOrientationInverted (idx); }
-    bool isAutomatable() const override                { return audioProcessor.isParameterAutomatable (idx); }
-    bool isMetaParameter() const override              { return audioProcessor.isMetaParameter (idx); }
-    Category getCategory() const override              { return audioProcessor.getParameterCategory (idx); }
-    String getCurrentValueAsText() const override      { return audioProcessor.getParameterText (idx); }
-    String getParamID() const                          { return audioProcessor.getParameterID (idx); }
+    bool isOrientationInverted() const override        { return processor->isParameterOrientationInverted (parameterIndex); }
+    bool isAutomatable() const override                { return processor->isParameterAutomatable (parameterIndex); }
+    bool isMetaParameter() const override              { return processor->isMetaParameter (parameterIndex); }
+    Category getCategory() const override              { return processor->getParameterCategory (parameterIndex); }
+    String getCurrentValueAsText() const override      { return processor->getParameterText (parameterIndex); }
+    String getParamID() const                          { return processor->getParameterID (parameterIndex); }
 
     //==============================================================================
     float getValueForText (const String&) const override
@@ -88,7 +90,7 @@ public:
     {
         if (auto* legacy = dynamic_cast<LegacyAudioParameter*> (param))
         {
-            return legacy->idx;
+            return legacy->parameterIndex;
         }
         else
         {
@@ -119,9 +121,6 @@ public:
 
         return String (param->getParameterIndex());
     }
-private:
-    AudioProcessor& audioProcessor;
-    int idx;
 };
 
 //==============================================================================

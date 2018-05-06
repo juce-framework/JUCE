@@ -182,7 +182,7 @@ public:
 private:
     //==============================================================================
     ButtonStyle style;
-    ScopedPointer<Drawable> normalImage, overImage, downImage, disabledImage,
+    std::unique_ptr<Drawable> normalImage, overImage, downImage, disabledImage,
                             normalImageOn, overImageOn, downImageOn, disabledImageOn;
     Drawable* currentImage = nullptr;
     int edgeIndent = 3;

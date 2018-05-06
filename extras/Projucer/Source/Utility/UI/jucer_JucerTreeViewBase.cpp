@@ -37,7 +37,7 @@ void TreePanelBase::setRoot (JucerTreeViewBase* root)
 
     if (project != nullptr)
     {
-        const ScopedPointer<XmlElement> treeOpenness (project->getStoredProperties()
+        const std::unique_ptr<XmlElement> treeOpenness (project->getStoredProperties()
                                                           .getXmlValue (opennessStateKey));
         if (treeOpenness != nullptr)
         {
@@ -54,7 +54,7 @@ void TreePanelBase::saveOpenness()
 {
     if (project != nullptr)
     {
-        ScopedPointer<XmlElement> opennessState (tree.getOpennessState (true));
+        std::unique_ptr<XmlElement> opennessState (tree.getOpennessState (true));
 
         if (opennessState != nullptr)
             project->getStoredProperties().setValue (opennessStateKey, opennessState.get());

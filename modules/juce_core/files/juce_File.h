@@ -681,13 +681,15 @@ public:
         It can also write the 'ff fe' unicode header bytes before the text to indicate
         the endianness of the file.
 
-        Any single \\n characters in the string are replaced with \\r\\n before it is written.
+        If lineEndings is nullptr, then line endings in the text won't be modified. If you
+        pass "\\n" or "\\r\\n" then this function will replace any existing line feeds.
 
         @see replaceWithText
     */
     bool appendText (const String& textToAppend,
                      bool asUnicode = false,
-                     bool writeUnicodeHeaderBytes = false) const;
+                     bool writeUnicodeHeaderBytes = false,
+                     const char* lineEndings = "\r\n") const;
 
     /** Replaces this file's contents with a given text string.
 
@@ -707,7 +709,8 @@ public:
     */
     bool replaceWithText (const String& textToWrite,
                           bool asUnicode = false,
-                          bool writeUnicodeHeaderBytes = false) const;
+                          bool writeUnicodeHeaderBytes = false,
+                          const char* lineEndings = "\r\n") const;
 
     /** Attempts to scan the contents of this file and compare it to another file, returning
         true if this is possible and they match byte-for-byte.

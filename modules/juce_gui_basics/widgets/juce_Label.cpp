@@ -266,7 +266,7 @@ void Label::hideEditor (bool discardCurrentEditorContents)
     if (editor != nullptr)
     {
         WeakReference<Component> deletionChecker (this);
-        ScopedPointer<TextEditor> outgoingEditor;
+        std::unique_ptr<TextEditor> outgoingEditor;
         std::swap (outgoingEditor, editor);
 
         editorAboutToBeHidden (outgoingEditor.get());

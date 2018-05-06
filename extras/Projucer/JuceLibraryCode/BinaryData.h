@@ -135,10 +135,10 @@ namespace BinaryData
     const int            jucer_MainTemplate_NoWindow_cppSize = 2021;
 
     extern const char*   jucer_MainTemplate_SimpleWindow_cpp;
-    const int            jucer_MainTemplate_SimpleWindow_cppSize = 4004;
+    const int            jucer_MainTemplate_SimpleWindow_cppSize = 4012;
 
     extern const char*   jucer_MainTemplate_Window_cpp;
-    const int            jucer_MainTemplate_Window_cppSize = 3964;
+    const int            jucer_MainTemplate_Window_cppSize = 3972;
 
     extern const char*   jucer_NewComponentTemplate_cpp;
     const int            jucer_NewComponentTemplate_cppSize = 1491;
@@ -168,7 +168,7 @@ namespace BinaryData
     const int            jucer_PIPAudioProcessorTemplate_hSize = 4926;
 
     extern const char*   jucer_PIPMain_cpp;
-    const int            jucer_PIPMain_cppSize = 2443;
+    const int            jucer_PIPMain_cppSize = 2447;
 
     extern const char*   jucer_PIPTemplate_h;
     const int            jucer_PIPTemplate_hSize = 517;
@@ -202,9 +202,9 @@ namespace BinaryData
 
     // If you provide the name of one of the binary resource variables above, this function will
     // return the corresponding data and its size (or a null pointer if the name isn't found).
-    const char* getNamedResource (const char* resourceNameUTF8, int& dataSizeInBytes) noexcept;
+    const char* getNamedResource (const char* resourceNameUTF8, int& dataSizeInBytes);
 
     // If you provide the name of one of the binary resource variables above, this function will
     // return the corresponding original, non-mangled filename (or a null pointer if the name isn't found).
-    const char* getNamedResourceOriginalFilename (const char* resourceNameUTF8) noexcept;
+    const char* getNamedResourceOriginalFilename (const char* resourceNameUTF8);
 }

@@ -104,15 +104,14 @@ public:
     JUCE_DECLARE_VST3_COM_REF_METHODS
 
     //==============================================================================
-    #if JUCE_FORCE_USE_LEGACY_PARAM_IDS
-    inline Vst::ParamID getVSTParamIDForIndex (int paramIndex) const noexcept   { return static_cast<Vst::ParamID> (paramIndex); }
-   #else
     inline Vst::ParamID getVSTParamIDForIndex (int paramIndex) const noexcept
     {
-        return isUsingManagedParameters() ? vstParamIDs.getReference (paramIndex)
-                                          : static_cast<Vst::ParamID> (paramIndex);
+       #if JUCE_FORCE_USE_LEGACY_PARAM_IDS
+        return static_cast<Vst::ParamID> (paramIndex);
+       #else
+        return vstParamIDs.getReference (paramIndex);
+       #endif
     }
-   #endif
 
     AudioProcessorParameter* getParamForVSTParamID (Vst::ParamID paramID) const noexcept
     {
@@ -205,6 +204,10 @@ private:
     Vst::ParamID generateVSTParamIDForParam (AudioProcessorParameter* param)
     {
         auto juceParamID = LegacyAudioParameter::getParamID (param, false);
+
+      #if JUCE_FORCE_USE_LEGACY_PARAM_IDS
+        return static_cast<Vst::ParamID> (juceParamID.getIntValue());
+      #else
         auto paramHash = static_cast<Vst::ParamID> (juceParamID.hashCode());
 
        #if JUCE_USE_STUDIO_ONE_COMPATIBLE_PARAMETERS
@@ -212,19 +215,19 @@ private:
         paramHash &= ~(1 << (sizeof (Vst::ParamID) * 8 - 1));
        #endif
 
-        return isUsingManagedParameters() ? paramHash
-                                          : static_cast<Vst::ParamID> (juceParamID.getIntValue());
+        return paramHash;
+      #endif
     }
 
     //==============================================================================
     Atomic<int> refCount;
-    ScopedPointer<AudioProcessor> audioProcessor;
+    std::unique_ptr<AudioProcessor> audioProcessor;
     ScopedJuceInitialiser_GUI libraryInitialiser;
 
     //==============================================================================
     LegacyAudioParametersWrapper juceParameters;
     HashMap<int32, AudioProcessorParameter*> paramMap;
-    ScopedPointer<AudioProcessorParameter> ownedBypassParameter;
+    std::unique_ptr<AudioProcessorParameter> ownedBypassParameter;
 
     JuceAudioProcessor() = delete;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceAudioProcessor)
@@ -389,7 +392,11 @@ public:
 
         void toString (Vst::ParamValue value, Vst::String128 result) const override
         {
-            toString128 (result, param.getText ((float) value, 128));
+            if (LegacyAudioParameter::isLegacy (&param))
+                // remain backward-compatible with old JUCE code
+                toString128 (result, param.getCurrentValueAsText());
+            else
+                toString128 (result, param.getText ((float) value, 128));
         }
 
         bool fromString (const Vst::TChar* text, Vst::ParamValue& outValueNormalized) const override
@@ -718,7 +725,7 @@ private:
 
             if (parameters.getParameterCount() <= 0)
             {
-                #if JUCE_FORCE_USE_LEGACY_PARAM_IDS
+               #if JUCE_FORCE_USE_LEGACY_PARAM_IDS
                 const bool forceLegacyParamIDs = true;
                #else
                 const bool forceLegacyParamIDs = false;
@@ -1089,7 +1096,7 @@ private:
                 }
             }
 
-            ScopedPointer<AudioProcessorEditor> pluginEditor;
+            std::unique_ptr<AudioProcessorEditor> pluginEditor;
 
         private:
             JuceVST3Editor& owner;
@@ -1105,7 +1112,7 @@ private:
         ComSmartPtr<JuceVST3EditController> owner;
         AudioProcessor& pluginInstance;
 
-        ScopedPointer<ContentWrapperComponent> component;
+        std::unique_ptr<ContentWrapperComponent> component;
         friend struct ContentWrapperComponent;
 
        #if JUCE_MAC

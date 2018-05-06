@@ -17,7 +17,7 @@
 */
 
 #include "b2BroadPhase.h"
-#include <cstring>
+
 using namespace std;
 
 b2BroadPhase::b2BroadPhase()

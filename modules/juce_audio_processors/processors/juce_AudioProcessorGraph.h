@@ -131,7 +131,7 @@ public:
             bool operator== (const Connection&) const noexcept;
         };
 
-        const ScopedPointer<AudioProcessor> processor;
+        const std::unique_ptr<AudioProcessor> processor;
         Array<Connection> inputs, outputs;
         bool isPrepared = false, bypassed = false;
 
@@ -380,8 +380,8 @@ private:
 
     struct RenderSequenceFloat;
     struct RenderSequenceDouble;
-    ScopedPointer<RenderSequenceFloat> renderSequenceFloat;
-    ScopedPointer<RenderSequenceDouble> renderSequenceDouble;
+    std::unique_ptr<RenderSequenceFloat> renderSequenceFloat;
+    std::unique_ptr<RenderSequenceDouble> renderSequenceDouble;
 
     friend class AudioGraphIOProcessor;
 

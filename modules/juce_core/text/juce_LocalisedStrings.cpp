@@ -81,7 +81,7 @@ namespace
     {
         LeakAvoidanceTrick()
         {
-            const ScopedPointer<LocalisedStrings> dummy (new LocalisedStrings (String(), false));
+            const std::unique_ptr<LocalisedStrings> dummy (new LocalisedStrings (String(), false));
         }
     };
 
@@ -89,7 +89,7 @@ namespace
    #endif
 
     SpinLock currentMappingsLock;
-    ScopedPointer<LocalisedStrings> currentMappings;
+    std::unique_ptr<LocalisedStrings> currentMappings;
 
     static int findCloseQuote (const String& text, int startPos)
     {

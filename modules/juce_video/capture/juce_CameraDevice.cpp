@@ -94,8 +94,8 @@ CameraDevice* CameraDevice::openDevice (int index,
                                         int maxWidth, int maxHeight,
                                         bool useHighQuality)
 {
-    ScopedPointer<CameraDevice> d (new CameraDevice (getAvailableDevices() [index], index,
-                                                     minWidth, minHeight, maxWidth, maxHeight, useHighQuality));
+    std::unique_ptr<CameraDevice> d (new CameraDevice (getAvailableDevices() [index], index,
+                                                       minWidth, minHeight, maxWidth, maxHeight, useHighQuality));
     if (d != nullptr && d->pimpl->openedOk())
         return d.release();
 

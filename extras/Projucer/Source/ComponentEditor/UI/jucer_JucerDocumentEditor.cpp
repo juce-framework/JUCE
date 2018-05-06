@@ -127,7 +127,7 @@ public:
 
 private:
     JucerDocument& document;
-    ScopedPointer<ListBox> listBox;
+    std::unique_ptr<ListBox> listBox;
 
     StringArray baseClasses, returnValues, methods, initialContents;
 };
@@ -609,7 +609,7 @@ void JucerDocumentEditor::saveLastSelectedTab() const
         {
             auto& projectProps = project->getStoredProperties();
 
-            ScopedPointer<XmlElement> root (projectProps.getXmlValue ("GUIComponentsLastTab"));
+            std::unique_ptr<XmlElement> root (projectProps.getXmlValue ("GUIComponentsLastTab"));
 
             if (root == nullptr)
                 root.reset (new XmlElement ("FILES"));
@@ -634,7 +634,7 @@ void JucerDocumentEditor::restoreLastSelectedTab()
     {
         if (auto* project = document->getCppDocument().getProject())
         {
-            ScopedPointer<XmlElement> root (project->getStoredProperties().getXmlValue ("GUIComponentsLastTab"));
+            std::unique_ptr<XmlElement> root (project->getStoredProperties().getXmlValue ("GUIComponentsLastTab"));
 
             if (root != nullptr)
             {
@@ -938,7 +938,7 @@ void JucerDocumentEditor::getCommandInfo (const CommandID commandID, Application
 
             bool canPaste = false;
 
-            ScopedPointer<XmlElement> doc (XmlDocument::parse (SystemClipboard::getTextFromClipboard()));
+            std::unique_ptr<XmlElement> doc (XmlDocument::parse (SystemClipboard::getTextFromClipboard()));
 
             if (doc != nullptr)
             {
@@ -1156,7 +1156,7 @@ bool JucerDocumentEditor::perform (const InvocationInfo& info)
 
         case StandardApplicationCommandIDs::paste:
             {
-                ScopedPointer<XmlElement> doc (XmlDocument::parse (SystemClipboard::getTextFromClipboard()));
+                std::unique_ptr<XmlElement> doc (XmlDocument::parse (SystemClipboard::getTextFromClipboard()));
 
                 if (doc != nullptr)
                 {

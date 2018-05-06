@@ -131,7 +131,7 @@ private:
     struct SharedObjectHolder
     {
         SpinLock lock;
-        ScopedPointer<SharedObjectType> sharedInstance;
+        std::unique_ptr<SharedObjectType> sharedInstance;
         int refCount;
     };
 

@@ -100,7 +100,7 @@ inline Image getImageFromAssets (const char* assetName)
 
     if (img.isNull())
     {
-        ScopedPointer<InputStream> juceIconStream (createAssetInputStream (assetName));
+        std::unique_ptr<InputStream> juceIconStream (createAssetInputStream (assetName));
 
         if (juceIconStream == nullptr)
             return {};
@@ -115,7 +115,7 @@ inline Image getImageFromAssets (const char* assetName)
 
 inline String loadEntireAssetIntoString (const char* assetName)
 {
-    ScopedPointer<InputStream> input (createAssetInputStream (assetName));
+    std::unique_ptr<InputStream> input (createAssetInputStream (assetName));
 
     if (input == nullptr)
         return {};

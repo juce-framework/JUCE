@@ -137,10 +137,10 @@ public:
     bool moreThanOneInstanceAllowed() override       { return true; }
 
     ApplicationCommandManager commandManager;
-    ScopedPointer<ApplicationProperties> appProperties;
+    std::unique_ptr<ApplicationProperties> appProperties;
 
 private:
-    ScopedPointer<MainHostWindow> mainWindow;
+    std::unique_ptr<MainHostWindow> mainWindow;
 };
 
 static PluginHostApp& getApp()                    { return *dynamic_cast<PluginHostApp*>(JUCEApplication::getInstance()); }

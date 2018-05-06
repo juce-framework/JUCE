@@ -54,19 +54,19 @@ struct NewProjectWizardClasses
         return 9;
     }
 
-    static ScopedPointer<NewProjectWizard> createWizardType (int index)
+    static std::unique_ptr<NewProjectWizard> createWizardType (int index)
     {
         switch (index)
         {
-            case 0:     return ScopedPointer<NewProjectWizard> (new NewProjectWizardClasses::GUIAppWizard());
-            case 1:     return ScopedPointer<NewProjectWizard> (new NewProjectWizardClasses::AnimatedAppWizard());
-            case 2:     return ScopedPointer<NewProjectWizard> (new NewProjectWizardClasses::OpenGLAppWizard());
-            case 3:     return ScopedPointer<NewProjectWizard> (new NewProjectWizardClasses::ConsoleAppWizard());
-            case 4:     return ScopedPointer<NewProjectWizard> (new NewProjectWizardClasses::AudioAppWizard());
-            case 5:     return ScopedPointer<NewProjectWizard> (new NewProjectWizardClasses::AudioPluginAppWizard());
-            case 6:     return ScopedPointer<NewProjectWizard> (new NewProjectWizardClasses::StaticLibraryWizard());
-            case 7:     return ScopedPointer<NewProjectWizard> (new NewProjectWizardClasses::DynamicLibraryWizard());
-            case 8:     return ScopedPointer<NewProjectWizard> (new NewProjectWizardClasses::BlankAppWizard());
+            case 0:     return std::unique_ptr<NewProjectWizard> (new NewProjectWizardClasses::GUIAppWizard());
+            case 1:     return std::unique_ptr<NewProjectWizard> (new NewProjectWizardClasses::AnimatedAppWizard());
+            case 2:     return std::unique_ptr<NewProjectWizard> (new NewProjectWizardClasses::OpenGLAppWizard());
+            case 3:     return std::unique_ptr<NewProjectWizard> (new NewProjectWizardClasses::ConsoleAppWizard());
+            case 4:     return std::unique_ptr<NewProjectWizard> (new NewProjectWizardClasses::AudioAppWizard());
+            case 5:     return std::unique_ptr<NewProjectWizard> (new NewProjectWizardClasses::AudioPluginAppWizard());
+            case 6:     return std::unique_ptr<NewProjectWizard> (new NewProjectWizardClasses::StaticLibraryWizard());
+            case 7:     return std::unique_ptr<NewProjectWizard> (new NewProjectWizardClasses::DynamicLibraryWizard());
+            case 8:     return std::unique_ptr<NewProjectWizard> (new NewProjectWizardClasses::BlankAppWizard());
             default:    jassertfalse; break;
         }
 

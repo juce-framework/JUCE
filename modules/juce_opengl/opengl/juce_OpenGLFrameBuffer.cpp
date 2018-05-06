@@ -251,7 +251,7 @@ bool OpenGLFrameBuffer::reloadSavedCopy (OpenGLContext& context)
 {
     if (savedState != nullptr)
     {
-        ScopedPointer<SavedState> state;
+        std::unique_ptr<SavedState> state;
         std::swap (state, savedState);
 
         if (state->restore (context, *this))

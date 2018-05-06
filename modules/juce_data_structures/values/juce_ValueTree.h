@@ -88,7 +88,6 @@ public:
     */
     explicit ValueTree (const Identifier& type);
 
-   #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
     /** Creates a value tree from nested lists of properties and ValueTrees.
 
         This code,
@@ -131,7 +130,6 @@ public:
     ValueTree (const Identifier& type,
                std::initializer_list<std::pair<Identifier, var>> properties,
                std::initializer_list<ValueTree> subTrees = {});
-   #endif
 
     /** Creates a reference to another ValueTree. */
     ValueTree (const ValueTree&) noexcept;

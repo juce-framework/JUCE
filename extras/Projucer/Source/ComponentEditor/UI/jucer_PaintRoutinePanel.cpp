@@ -109,7 +109,7 @@ public:
 
     void updateList()
     {
-        ScopedPointer<XmlElement> state (propsPanel->getOpennessState());
+        std::unique_ptr<XmlElement> state (propsPanel->getOpennessState());
 
         clear();
 

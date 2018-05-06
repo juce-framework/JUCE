@@ -76,7 +76,7 @@ public:
 private:
     //==========================================================================
     struct Internal;
-    juce::ScopedPointer<Internal> internal;
+    std::unique_ptr<Internal> internal;
 };
 
 } // namespace juce

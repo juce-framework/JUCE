@@ -448,7 +448,7 @@ bool OggVorbisAudioFormat::isCompressed()   { return true; }
 
 AudioFormatReader* OggVorbisAudioFormat::createReaderFor (InputStream* in, bool deleteStreamIfOpeningFails)
 {
-    ScopedPointer<OggReader> r (new OggReader (in));
+    std::unique_ptr<OggReader> r (new OggReader (in));
 
     if (r->sampleRate > 0)
         return r.release();
@@ -469,9 +469,9 @@ AudioFormatWriter* OggVorbisAudioFormat::createWriterFor (OutputStream* out,
     if (out == nullptr)
         return nullptr;
 
-    ScopedPointer<OggWriter> w (new OggWriter (out, sampleRate, numChannels,
-                                               (unsigned int) bitsPerSample,
-                                               qualityOptionIndex, metadataValues));
+    std::unique_ptr<OggWriter> w (new OggWriter (out, sampleRate, numChannels,
+                                                 (unsigned int) bitsPerSample,
+                                                 qualityOptionIndex, metadataValues));
 
     return w->ok ? w.release() : nullptr;
 }
@@ -486,7 +486,7 @@ int OggVorbisAudioFormat::estimateOggFileQuality (const File& source)
 {
     if (auto* in = source.createInputStream())
     {
-        ScopedPointer<AudioFormatReader> r (createReaderFor (in, true));
+        std::unique_ptr<AudioFormatReader> r (createReaderFor (in, true));
 
         if (r != nullptr)
         {

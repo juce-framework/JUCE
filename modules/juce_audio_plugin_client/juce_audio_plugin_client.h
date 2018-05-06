@@ -72,7 +72,7 @@
     DAW projects with automation data written by an AudioUnit, VST3 or
     AAX plug-in built with JUCE version 5.1.1 or earlier may load
     incorrectly when opened by an AudioUnit, VST3 or AAX plug-in built
-    with JUCE version 5.3.0 and later.
+    with JUCE version 5.2.0 and later.
 */
 #ifndef JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE
  #define JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE 0

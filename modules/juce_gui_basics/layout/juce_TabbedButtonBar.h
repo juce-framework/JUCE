@@ -124,7 +124,7 @@ protected:
     TabbedButtonBar& owner;
     int overlapPixels = 0;
 
-    ScopedPointer<Component> extraComponent;
+    std::unique_ptr<Component> extraComponent;
     ExtraComponentPlacement extraCompPlacement = afterText;
 
 private:
@@ -347,7 +347,7 @@ protected:
 private:
     struct TabInfo
     {
-        ScopedPointer<TabBarButton> button;
+        std::unique_ptr<TabBarButton> button;
         String name;
         Colour colour;
     };
@@ -361,8 +361,8 @@ private:
     class BehindFrontTabComp;
     friend class BehindFrontTabComp;
     friend struct ContainerDeletePolicy<BehindFrontTabComp>;
-    ScopedPointer<BehindFrontTabComp> behindFrontTab;
-    ScopedPointer<Button> extraTabsButton;
+    std::unique_ptr<BehindFrontTabComp> behindFrontTab;
+    std::unique_ptr<Button> extraTabsButton;
 
     void showExtraItemsMenu();
     static void extraItemsMenuCallback (int, TabbedButtonBar*);

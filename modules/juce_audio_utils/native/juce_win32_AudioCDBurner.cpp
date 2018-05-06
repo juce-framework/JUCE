@@ -254,7 +254,7 @@ StringArray AudioCDBurner::findAvailableDevices()
 
 AudioCDBurner* AudioCDBurner::openDevice (const int deviceIndex)
 {
-    ScopedPointer<AudioCDBurner> b (new AudioCDBurner (deviceIndex));
+    std::unique_ptr<AudioCDBurner> b (new AudioCDBurner (deviceIndex));
 
     if (b->pimpl == 0)
         b = nullptr;
@@ -333,7 +333,7 @@ String AudioCDBurner::burn (AudioCDBurner::BurnProgressListener* listener, bool 
     pimpl->shouldCancel = false;
 
     UINT_PTR cookie;
-    HRESULT hr = pimpl->discMaster->ProgressAdvise ((AudioCDBurner::Pimpl*) pimpl, &cookie);
+    HRESULT hr = pimpl->discMaster->ProgressAdvise ((AudioCDBurner::Pimpl*) pimpl.get(), &cookie);
 
     hr = pimpl->discMaster->RecordDisc (performFakeBurnForTesting,
                                         ejectDiscAfterwards);
@@ -362,7 +362,7 @@ bool AudioCDBurner::addAudioTrack (AudioSource* audioSource, int numSamples)
     if (audioSource == 0)
         return false;
 
-    ScopedPointer<AudioSource> source (audioSource);
+    std::unique_ptr<AudioSource> source (audioSource);
 
     long bytesPerBlock;
     HRESULT hr = pimpl->redbook->GetAudioBlockSize (&bytesPerBlock);

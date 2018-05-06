@@ -786,8 +786,8 @@ Image ProjectExporter::getBestIconForSize (int size, bool returnNullIfNothingBig
 {
     Drawable* im = nullptr;
 
-    ScopedPointer<Drawable> im1 (getSmallIcon());
-    ScopedPointer<Drawable> im2 (getBigIcon());
+    std::unique_ptr<Drawable> im1 (getSmallIcon());
+    std::unique_ptr<Drawable> im2 (getBigIcon());
 
     if (im1 != nullptr && im2 != nullptr)
     {

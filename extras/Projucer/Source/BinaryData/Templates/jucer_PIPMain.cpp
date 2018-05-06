@@ -57,7 +57,8 @@ private:
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)
     };
-    ScopedPointer<MainWindow> mainWindow;
+
+    std::unique_ptr<MainWindow> mainWindow;
 };
 
 //==============================================================================

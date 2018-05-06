@@ -153,7 +153,7 @@ private:
     //==============================================================================
     Component::SafePointer<Component> owner;
     String title, filtersString;
-    ScopedPointer<CustomComponentHolder> customComponent;
+    std::unique_ptr<CustomComponentHolder> customComponent;
     String initialPath, returnedString, defaultExtension;
 
     WaitableEvent threadHasReference;

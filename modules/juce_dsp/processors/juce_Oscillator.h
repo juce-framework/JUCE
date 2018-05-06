@@ -72,7 +72,7 @@ public:
                                                                  MathConstants<NumericType>::pi,
                                                                  lookupTableNumPoints);
 
-            lookupTable = table;
+            lookupTable.reset (table);
             generator = [table] (NumericType x) { return (*table) (x); };
         }
         else
@@ -233,7 +233,7 @@ public:
 private:
     //==============================================================================
     std::function<NumericType (NumericType)> generator;
-    ScopedPointer<LookupTableTransform<NumericType>> lookupTable;
+    std::unique_ptr<LookupTableTransform<NumericType>> lookupTable;
     Array<NumericType> rampBuffer;
     LinearSmoothedValue<NumericType> frequency { static_cast<NumericType> (440.0) };
     NumericType sampleRate = 48000.0;

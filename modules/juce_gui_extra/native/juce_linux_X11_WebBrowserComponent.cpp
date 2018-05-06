@@ -697,10 +697,10 @@ private:
 
 private:
     WebBrowserComponent& owner;
-    ScopedPointer<CommandReceiver> receiver;
+    std::unique_ptr<CommandReceiver> receiver;
     int childProcess = 0, inChannel = 0, outChannel = 0;
     int threadControl[2];
-    ScopedPointer<XEmbedComponent> xembed;
+    std::unique_ptr<XEmbedComponent> xembed;
     WaitableEvent threadBlocker;
 };
 

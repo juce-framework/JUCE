@@ -127,10 +127,10 @@ public:
 
 protected:
     FileModificationDetector modDetector;
-    ScopedPointer<CodeDocument> codeDoc;
+    std::unique_ptr<CodeDocument> codeDoc;
     Project* project;
 
-    ScopedPointer<CodeEditorComponent::State> lastState;
+    std::unique_ptr<CodeEditorComponent::State> lastState;
 
     void reloadInternal();
 };
@@ -150,7 +150,7 @@ public:
     void scrollToKeepRangeOnScreen (Range<int> range);
     void highlight (Range<int> range, bool cursorAtStart);
 
-    ScopedPointer<GenericCodeEditorComponent> editor;
+    std::unique_ptr<GenericCodeEditorComponent> editor;
 
 private:
     void resized() override;
@@ -214,7 +214,7 @@ public:
 private:
     File file;
     class FindPanel;
-    ScopedPointer<FindPanel> findPanel;
+    std::unique_ptr<FindPanel> findPanel;
     ListenerList<Listener> listeners;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GenericCodeEditorComponent)

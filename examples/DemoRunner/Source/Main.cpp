@@ -141,12 +141,12 @@ private:
         MainComponent& getMainComponent()    { return *dynamic_cast<MainComponent*> (getContentComponent()); }
 
     private:
-        ScopedPointer<Component> taskbarIcon;
+        std::unique_ptr<Component> taskbarIcon;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainAppWindow)
     };
 
-    ScopedPointer<MainAppWindow> mainWindow;
+    std::unique_ptr<MainAppWindow> mainWindow;
 };
 
 //==============================================================================

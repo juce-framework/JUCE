@@ -598,7 +598,7 @@ void PaintElementPath::restorePathFromString (const String& s)
 
     for (int i = 0; i < tokens.size(); ++i)
     {
-        ScopedPointer<PathPoint> p (new PathPoint (this));
+        std::unique_ptr<PathPoint> p (new PathPoint (this));
 
         if (tokens[i] == "s")
         {
@@ -653,7 +653,7 @@ void PaintElementPath::setToPath (const Path& newPath)
 
     while (i.next())
     {
-        ScopedPointer<PathPoint> p (new PathPoint (this));
+        std::unique_ptr<PathPoint> p (new PathPoint (this));
         p->type = i.elementType;
 
         if (i.elementType == Path::Iterator::startNewSubPath)

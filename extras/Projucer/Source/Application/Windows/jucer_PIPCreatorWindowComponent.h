@@ -307,7 +307,7 @@ private:
     }
 
     //==============================================================================
-    ScopedPointer<LookAndFeel> lf;
+    std::unique_ptr<LookAndFeel> lf;
 
     Viewport propertyViewport;
     PropertyGroupComponent propertyGroup  { "PIP Creator", { getIcons().juceLogo, Colours::transparentBlack } };

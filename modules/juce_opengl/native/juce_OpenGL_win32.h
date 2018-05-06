@@ -145,8 +145,8 @@ private:
         NativeContext& context;
     };
 
-    ScopedPointer<DummyComponent> dummyComponent;
-    ScopedPointer<ComponentPeer> nativeWindow;
+    std::unique_ptr<DummyComponent> dummyComponent;
+    std::unique_ptr<ComponentPeer> nativeWindow;
     HGLRC renderContext;
     HDC dc;
     OpenGLContext* context = {};

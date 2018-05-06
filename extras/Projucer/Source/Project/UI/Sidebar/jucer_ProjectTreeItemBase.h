@@ -37,7 +37,7 @@ struct ProjectTreeItemBase  : public JucerTreeViewBase,
     {
         content->setComponentID (getUniqueName());
 
-        ScopedPointer<Component> comp (content);
+        std::unique_ptr<Component> comp (content);
 
         if (ProjectContentComponent* pcc = getProjectContentComponent())
             pcc->setEditorComponent (comp.release(), nullptr);

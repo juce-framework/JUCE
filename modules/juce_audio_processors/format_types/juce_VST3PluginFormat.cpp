@@ -897,8 +897,8 @@ struct DescriptionFactory
             if (foundNames.contains (name, true))
                 continue;
 
-            ScopedPointer<PClassInfo2> info2;
-            ScopedPointer<PClassInfoW> infoW;
+            std::unique_ptr<PClassInfo2> info2;
+            std::unique_ptr<PClassInfoW> infoW;
 
             {
                 ComSmartPtr<IPluginFactory2> pf2;
@@ -1243,7 +1243,7 @@ struct VST3ModuleHandle  : public ReferenceCountedObject
     String name;
 
 private:
-    ScopedPointer<DLLHandle> dllHandle;
+    std::unique_ptr<DLLHandle> dllHandle;
 
     //==============================================================================
     static Array<VST3ModuleHandle*>& getActiveModules()
@@ -1450,7 +1450,7 @@ private:
     };
 
     ChildComponent embeddedComponent;
-    ScopedPointer<ComponentPeer> peer;
+    std::unique_ptr<ComponentPeer> peer;
     typedef HWND HandleFormat;
    #elif JUCE_MAC
     AutoResizingNSViewComponentWithParent embeddedComponent;
@@ -1576,8 +1576,8 @@ struct VST3ComponentHolder
             ComSmartPtr<IPluginFactory2> pf2;
             ComSmartPtr<IPluginFactory3> pf3;
 
-            ScopedPointer<PClassInfo2> info2;
-            ScopedPointer<PClassInfoW> infoW;
+            std::unique_ptr<PClassInfo2> info2;
+            std::unique_ptr<PClassInfoW> infoW;
 
             if (pf2.loadFrom (factory))
             {
@@ -2385,7 +2385,7 @@ struct VST3PluginInstance : public AudioPluginInstance
 
     void setStateInformation (const void* data, int sizeInBytes) override
     {
-        ScopedPointer<XmlElement> head (AudioProcessor::getXmlFromBinary (data, sizeInBytes));
+        std::unique_ptr<XmlElement> head (AudioProcessor::getXmlFromBinary (data, sizeInBytes));
 
         if (head != nullptr)
         {
@@ -2558,15 +2558,15 @@ struct VST3PluginInstance : public AudioPluginInstance
 
 private:
     //==============================================================================
-    ScopedPointer<VST3ComponentHolder> holder;
+    std::unique_ptr<VST3ComponentHolder> holder;
 
     friend VST3HostContext;
 
     // Information objects:
     String company;
-    ScopedPointer<PClassInfo> info;
-    ScopedPointer<PClassInfo2> info2;
-    ScopedPointer<PClassInfoW> infoW;
+    std::unique_ptr<PClassInfo> info;
+    std::unique_ptr<PClassInfo2> info2;
+    std::unique_ptr<PClassInfoW> infoW;
 
     // Rudimentary interfaces:
     ComSmartPtr<Vst::IEditController> editController;
@@ -2945,7 +2945,7 @@ void VST3PluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& resul
 void VST3PluginFormat::createPluginInstance (const PluginDescription& description, double, int, void* userData,
                                              void (*callback) (void*, AudioPluginInstance*, const String&))
 {
-    ScopedPointer<VST3Classes::VST3PluginInstance> result;
+    std::unique_ptr<VST3Classes::VST3PluginInstance> result;
 
     if (fileMightContainThisPluginType (description.fileOrIdentifier))
     {
@@ -2956,7 +2956,7 @@ void VST3PluginFormat::createPluginInstance (const PluginDescription& descriptio
 
         if (const VST3Classes::VST3ModuleHandle::Ptr module = VST3Classes::VST3ModuleHandle::findOrCreateModule (file, description))
         {
-            ScopedPointer<VST3Classes::VST3ComponentHolder> holder (new VST3Classes::VST3ComponentHolder (module));
+            std::unique_ptr<VST3Classes::VST3ComponentHolder> holder (new VST3Classes::VST3ComponentHolder (module));
 
             if (holder->initialise())
             {

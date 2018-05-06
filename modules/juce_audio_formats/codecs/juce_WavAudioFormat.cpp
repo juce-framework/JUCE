@@ -849,7 +849,7 @@ namespace WavFileHelpers
     {
         static void addToMetadata (StringPairArray& destValues, const String& source)
         {
-            ScopedPointer<XmlElement> xml (XmlDocument::parse (source));
+            std::unique_ptr<XmlElement> xml (XmlDocument::parse (source));
 
             if (xml != nullptr && xml->hasTagName ("ebucore:ebuCoreMain"))
             {
@@ -1134,10 +1134,10 @@ public:
                                 auto identifier     = (uint32) input->readInt();
                                 auto sampleLength   = (uint32) input->readInt();
                                 auto purpose        = (uint32) input->readInt();
-                                auto country        = (uint16) input->readInt();
-                                auto language       = (uint16) input->readInt();
-                                auto dialect        = (uint16) input->readInt();
-                                auto codePage       = (uint16) input->readInt();
+                                auto country        = (uint16) input->readShort();
+                                auto language       = (uint16) input->readShort();
+                                auto dialect        = (uint16) input->readShort();
+                                auto codePage       = (uint16) input->readShort();
                                 auto stringLength   = adtlLength - 20;
 
                                 MemoryBlock textBlock;
@@ -1672,7 +1672,7 @@ bool WavAudioFormat::isChannelLayoutSupported (const AudioChannelSet& channelSet
 
 AudioFormatReader* WavAudioFormat::createReaderFor (InputStream* sourceStream, bool deleteStreamIfOpeningFails)
 {
-    ScopedPointer<WavAudioFormatReader> r (new WavAudioFormatReader (sourceStream));
+    std::unique_ptr<WavAudioFormatReader> r (new WavAudioFormatReader (sourceStream));
 
    #if JUCE_USE_OGGVORBIS
     if (r->isSubformatOggVorbis)
@@ -1738,17 +1738,17 @@ namespace WavFileHelpers
         TemporaryFile tempFile (file);
         WavAudioFormat wav;
 
-        ScopedPointer<AudioFormatReader> reader (wav.createReaderFor (file.createInputStream(), true));
+        std::unique_ptr<AudioFormatReader> reader (wav.createReaderFor (file.createInputStream(), true));
 
         if (reader != nullptr)
         {
-            ScopedPointer<OutputStream> outStream (tempFile.getFile().createOutputStream());
+            std::unique_ptr<OutputStream> outStream (tempFile.getFile().createOutputStream());
 
             if (outStream != nullptr)
             {
-                ScopedPointer<AudioFormatWriter> writer (wav.createWriterFor (outStream.get(), reader->sampleRate,
-                                                                              reader->numChannels, (int) reader->bitsPerSample,
-                                                                              metadata, 0));
+                std::unique_ptr<AudioFormatWriter> writer (wav.createWriterFor (outStream.get(), reader->sampleRate,
+                                                                                reader->numChannels, (int) reader->bitsPerSample,
+                                                                                metadata, 0));
 
                 if (writer != nullptr)
                 {
@@ -1771,7 +1771,7 @@ bool WavAudioFormat::replaceMetadataInFile (const File& wavFile, const StringPai
 {
     using namespace WavFileHelpers;
 
-    ScopedPointer<WavAudioFormatReader> reader (static_cast<WavAudioFormatReader*> (createReaderFor (wavFile.createInputStream(), true)));
+    std::unique_ptr<WavAudioFormatReader> reader (static_cast<WavAudioFormatReader*> (createReaderFor (wavFile.createInputStream(), true)));
 
     if (reader != nullptr)
     {
@@ -1841,9 +1841,9 @@ struct WaveAudioFormatTests : public UnitTest
         {
             beginTest ("Creating a basic wave writer");
 
-            ScopedPointer<AudioFormatWriter> writer (format.createWriterFor (new MemoryOutputStream (memoryBlock, false),
-                                                                             44100.0, numTestAudioBufferChannels,
-                                                                             32, metadataValues, 0));
+            std::unique_ptr<AudioFormatWriter> writer (format.createWriterFor (new MemoryOutputStream (memoryBlock, false),
+                                                                               44100.0, numTestAudioBufferChannels,
+                                                                               32, metadataValues, 0));
             expect (writer != nullptr);
 
             AudioBuffer<float> buffer (numTestAudioBufferChannels, numTestAudioBufferSamples);
@@ -1856,7 +1856,7 @@ struct WaveAudioFormatTests : public UnitTest
         {
             beginTest ("Creating a basic wave reader");
 
-            ScopedPointer<AudioFormatReader> reader (format.createReaderFor (new MemoryInputStream (memoryBlock, false), false));
+            std::unique_ptr<AudioFormatReader> reader (format.createReaderFor (new MemoryInputStream (memoryBlock, false), false));
             expect (reader != nullptr);
             expect (reader->metadataValues == metadataValues, "Somehow, the metadata is different!");
         }

@@ -148,11 +148,11 @@ private:
    #endif
 
     //==============================================================================
-    ScopedPointer<Label> loggedInUsernameLabel;
+    std::unique_ptr<Label> loggedInUsernameLabel;
 
    #if ! JUCER_ENABLE_GPL_MODE
-    ScopedPointer<Label> licenseTypeLabel;
-    ScopedPointer<TextButton> logoutButton, switchLicenseButton;
+    std::unique_ptr<Label> licenseTypeLabel;
+    std::unique_ptr<TextButton> logoutButton, switchLicenseButton;
     bool hasLicenseType = false;
     bool isInsideWebview;
    #endif

@@ -307,7 +307,7 @@ public:
         // whose contents will have been created by the getStateInformation() call.
 
         // This getXmlFromBinary() helper function retrieves our XML from the binary blob..
-        ScopedPointer<XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
+        std::unique_ptr<XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
 
         if (xmlState.get() != nullptr)
         {
@@ -499,7 +499,7 @@ private:
               gainLabel  { {}, "Throughput level:" },
               delayLabel { {}, "Delay:" };
 
-        ScopedPointer<ParameterSlider> gainSlider, delaySlider;
+        std::unique_ptr<ParameterSlider> gainSlider, delaySlider;
         Colour backgroundColour;
 
         //==============================================================================

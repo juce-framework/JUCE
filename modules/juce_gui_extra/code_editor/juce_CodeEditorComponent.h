@@ -377,19 +377,19 @@ private:
     double xOffset = 0;
     CodeDocument::Position caretPos, selectionStart, selectionEnd;
 
-    ScopedPointer<CaretComponent> caret;
+    std::unique_ptr<CaretComponent> caret;
     ScrollBar verticalScrollBar { true }, horizontalScrollBar { false };
     ApplicationCommandManager* appCommandManager = nullptr;
 
     class Pimpl;
     friend class Pimpl;
     friend struct ContainerDeletePolicy<Pimpl>;
-    ScopedPointer<Pimpl> pimpl;
+    std::unique_ptr<Pimpl> pimpl;
 
     class GutterComponent;
     friend class GutterComponent;
     friend struct ContainerDeletePolicy<GutterComponent>;
-    ScopedPointer<GutterComponent> gutter;
+    std::unique_ptr<GutterComponent> gutter;
 
     enum DragType
     {

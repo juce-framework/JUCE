@@ -109,7 +109,7 @@ protected:
 private:
     class ItemSelectionTimer;
     friend class ItemSelectionTimer;
-    ScopedPointer<Timer> delayedSelectionTimer;
+    std::unique_ptr<Timer> delayedSelectionTimer;
 
     void invokeShowDocument();
 
@@ -195,7 +195,7 @@ public:
 
     const Project* project;
     TreeView tree;
-    ScopedPointer<JucerTreeViewBase> rootItem;
+    std::unique_ptr<JucerTreeViewBase> rootItem;
 
 private:
     String opennessStateKey, emptyTreeMessage;

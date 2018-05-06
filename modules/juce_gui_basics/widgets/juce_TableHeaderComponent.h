@@ -433,7 +433,7 @@ private:
 
     OwnedArray<ColumnInfo> columns;
     Array<Listener*> listeners;
-    ScopedPointer<Component> dragOverlayComp;
+    std::unique_ptr<Component> dragOverlayComp;
     class DragOverlayComp;
 
     bool columnsChanged = false, columnsResized = false, sortChanged = false;

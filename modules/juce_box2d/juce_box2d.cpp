@@ -45,6 +45,8 @@
 
 #include "juce_box2d.h"
 
+#include <cstdarg>
+
 typedef juce::int8   int8;
 typedef juce::int16  int16;
 typedef juce::int32  int32;

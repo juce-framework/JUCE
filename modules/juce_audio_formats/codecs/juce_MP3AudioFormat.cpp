@@ -3132,7 +3132,7 @@ StringArray MP3AudioFormat::getQualityOptions()     { return {}; }
 
 AudioFormatReader* MP3AudioFormat::createReaderFor (InputStream* sourceStream, const bool deleteStreamIfOpeningFails)
 {
-    ScopedPointer<MP3Decoder::MP3Reader> r (new MP3Decoder::MP3Reader (sourceStream));
+    std::unique_ptr<MP3Decoder::MP3Reader> r (new MP3Decoder::MP3Reader (sourceStream));
 
     if (r->lengthInSamples > 0)
         return r.release();

@@ -1169,7 +1169,7 @@ private:
             {
                 XRandrWrapper& xrandr = XRandrWrapper::getInstance();
 
-                ScopedPointer<XRRScreenResources> screens;
+                std::unique_ptr<XRRScreenResources> screens;
 
                 const int numMonitors = ScreenCount (display);
                 RROutput mainDisplay = xrandr.getOutputPrimary (display, RootWindow (display, 0));
@@ -1190,14 +1190,14 @@ private:
                             if (! mainDisplay)
                                 mainDisplay = screens->outputs[j];
 
-                            ScopedPointer<XRROutputInfo> output (xrandr.getOutputInfo (display, screens.get(), screens->outputs[j]));
+                            std::unique_ptr<XRROutputInfo> output (xrandr.getOutputInfo (display, screens.get(), screens->outputs[j]));
 
                             if (output != nullptr)
                             {
                                 if (! output->crtc)
                                     continue;
 
-                                ScopedPointer<XRRCrtcInfo> crtc (xrandr.getCrtcInfo (display, screens.get(), output->crtc));
+                                std::unique_ptr<XRRCrtcInfo> crtc (xrandr.getCrtcInfo (display, screens.get(), output->crtc));
 
                                 if (crtc != nullptr)
                                 {
@@ -2691,8 +2691,8 @@ private:
                         image.clear (i - totalArea.getPosition());
 
                 {
-                    ScopedPointer<LowLevelGraphicsContext> context (peer.getComponent().getLookAndFeel()
-                                                                      .createGraphicsContext (image, -totalArea.getPosition(), adjustedList));
+                    std::unique_ptr<LowLevelGraphicsContext> context (peer.getComponent().getLookAndFeel()
+                                                                          .createGraphicsContext (image, -totalArea.getPosition(), adjustedList));
                     context->addTransform (AffineTransform::scale ((float) peer.currentScaleFactor));
                     peer.handlePaint (*context);
                 }
@@ -2739,8 +2739,8 @@ private:
         JUCE_DECLARE_NON_COPYABLE (LinuxRepaintManager)
     };
 
-    ScopedPointer<Atoms> atoms;
-    ScopedPointer<LinuxRepaintManager> repainter;
+    std::unique_ptr<Atoms> atoms;
+    std::unique_ptr<LinuxRepaintManager> repainter;
 
     friend class LinuxRepaintManager;
     Window windowH = {}, parentWindow = {}, keyProxy = {};
@@ -3687,7 +3687,7 @@ private:
         resetExternalDragState();
     }
 
-    ScopedPointer<DragState> dragState;
+    std::unique_ptr<DragState> dragState;
     DragInfo dragInfo;
     Atom dragAndDropCurrentMimeType;
     Window dragAndDropSourceWindow;

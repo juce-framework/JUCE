@@ -438,7 +438,7 @@ void AudioProcessor::setParameterNotifyingHost (int parameterIndex, float newVal
     {
         param->setValueNotifyingHost (newValue);
     }
-    else
+    else if (isPositiveAndBelow (parameterIndex, getNumParameters()))
     {
         setParameter (parameterIndex, newValue);
         sendParamChangeMessageToListeners (parameterIndex, newValue);
@@ -528,7 +528,8 @@ String AudioProcessor::getParameterName (int index, int maximumStringLength)
     if (auto* p = managedParameters[index])
         return p->getName (maximumStringLength);
 
-    return getParameterName (index).substring (0, maximumStringLength);
+    return isPositiveAndBelow (index, getNumParameters()) ? getParameterName (index).substring (0, maximumStringLength)
+                                                          : String();
 }
 
 const String AudioProcessor::getParameterText (int index)
@@ -540,7 +541,8 @@ const String AudioProcessor::getParameterText (int index)
     ScopedValueSetter<bool> sv (textRecursionCheck, true, false);
    #endif
 
-    return getParameterText (index, 1024);
+    return isPositiveAndBelow (index, getNumParameters()) ? getParameterText (index, 1024)
+                                                          : String();
 }
 
 String AudioProcessor::getParameterText (int index, int maximumStringLength)
@@ -548,7 +550,8 @@ String AudioProcessor::getParameterText (int index, int maximumStringLength)
     if (auto* p = managedParameters[index])
         return p->getText (p->getValue(), maximumStringLength);
 
-    return getParameterText (index).substring (0, maximumStringLength);
+    return isPositiveAndBelow (index, getNumParameters()) ? getParameterText (index).substring (0, maximumStringLength)
+                                                          : String();
 }
 
 #if JUCE_GCC

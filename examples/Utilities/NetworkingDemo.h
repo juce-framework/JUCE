@@ -101,7 +101,7 @@ public:
         StringPairArray responseHeaders;
         int statusCode = 0;
 
-        ScopedPointer<InputStream> stream (url.createInputStream (false, nullptr, nullptr, {},
+        std::unique_ptr<InputStream> stream (url.createInputStream (false, nullptr, nullptr, {},
                                                                     10000, // timeout in millisecs
                                                                     &responseHeaders, &statusCode));
         if (stream.get() != nullptr)

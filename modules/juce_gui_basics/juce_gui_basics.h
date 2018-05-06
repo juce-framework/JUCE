@@ -149,12 +149,10 @@ namespace juce
     class ApplicationCommandManagerListener;
     class DrawableButton;
 
-   #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
     class FlexBox;
     #if JUCE_HAS_CONSTEXPR
      class Grid;
     #endif
-   #endif
 }
 
 #include "mouse/juce_MouseCursor.h"
@@ -294,13 +292,10 @@ namespace juce
  #include "native/juce_linux_X11.h"
 #endif
 
-// these classes are C++11-only
-#if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
- #include "layout/juce_FlexItem.h"
- #include "layout/juce_FlexBox.h"
+#include "layout/juce_FlexItem.h"
+#include "layout/juce_FlexBox.h"
 
- #if JUCE_HAS_CONSTEXPR
-  #include "layout/juce_GridItem.h"
-  #include "layout/juce_Grid.h"
- #endif
+#if JUCE_HAS_CONSTEXPR
+ #include "layout/juce_GridItem.h"
+ #include "layout/juce_Grid.h"
 #endif

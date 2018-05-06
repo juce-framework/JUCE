@@ -436,7 +436,7 @@ String TableHeaderComponent::toString() const
 
 void TableHeaderComponent::restoreFromString (const String& storedVersion)
 {
-    ScopedPointer<XmlElement> storedXml (XmlDocument::parse (storedVersion));
+    std::unique_ptr<XmlElement> storedXml (XmlDocument::parse (storedVersion));
     int index = 0;
 
     if (storedXml != nullptr && storedXml->hasTagName ("TABLELAYOUT"))

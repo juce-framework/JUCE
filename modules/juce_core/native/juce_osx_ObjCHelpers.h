@@ -237,6 +237,15 @@ struct NSObjectRetainer
 };
 
 //==============================================================================
+struct NSObjectDeleter
+{
+    void operator()(NSObject* object) const
+    {
+        [object release];
+    }
+};
+
+//==============================================================================
 template <typename SuperclassType>
 struct ObjCClass
 {

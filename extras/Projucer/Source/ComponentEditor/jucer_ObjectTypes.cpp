@@ -106,7 +106,7 @@ PaintElement* createElementForXml (const XmlElement* const e, PaintRoutine* cons
 {
     jassert (e != nullptr);
 
-    ScopedPointer<PaintElement> pe;
+    std::unique_ptr<PaintElement> pe;
 
     if (e->hasTagName (PaintElementRectangle::getTagName()))                pe.reset (new PaintElementRectangle (owner));
     else if (e->hasTagName (PaintElementRoundedRectangle::getTagName()))    pe.reset (new PaintElementRoundedRectangle (owner));

@@ -113,7 +113,7 @@ struct AudioProcessorHolder
         juceFilter->enableAllBuses();
     }
 
-    ScopedPointer<AudioProcessor> juceFilter;
+    std::unique_ptr<AudioProcessor> juceFilter;
 };
 
 //==============================================================================
@@ -1450,7 +1450,7 @@ public:
 
         ~EditorCompHolder()
         {
-            deleteAllChildren(); // note that we can't use a ScopedPointer because the editor may
+            deleteAllChildren(); // note that we can't use a std::unique_ptr because the editor may
                                  // have been transferred to another parent which takes over ownership.
         }
 
@@ -1566,7 +1566,7 @@ public:
 
         static void deleteEditor (id self)
         {
-            ScopedPointer<EditorCompHolder> editorComp (getEditor (self));
+            std::unique_ptr<EditorCompHolder> editorComp (getEditor (self));
 
             if (editorComp != nullptr)
             {
@@ -1847,28 +1847,27 @@ private:
     void addParameters()
     {
         juceParameters.update (*juceFilter, forceUseLegacyParamIDs);
-
-        // check if all parameters are managed?
         const int numParams = juceParameters.getNumParameters();
 
-        for (auto* param : juceParameters.params)
+        if (forceUseLegacyParamIDs)
         {
-            const AudioUnitParameterID auParamID = generateAUParameterID (param);
-
-            // Consider yourself very unlucky if you hit this assertion. The hash code of your
-            // parameter ids are not unique.
-            jassert (! paramMap.contains (static_cast<int32> (auParamID)));
-
-            auParamIDs.add (auParamID);
-            paramMap.set (static_cast<int32> (auParamID), param);
-
-            if (juceParameters.isUsingManagedParameters())
-                Globals()->SetParameter (auParamID, param->getValue());
-        }
-
-        if (! juceParameters.isUsingManagedParameters())
             Globals()->UseIndexedParameters (numParams);
+        }
+        else
+        {
+            for (auto* param : juceParameters.params)
+            {
+                const AudioUnitParameterID auParamID = generateAUParameterID (param);
 
+                // Consider yourself very unlucky if you hit this assertion. The hash code of your
+                // parameter ids are not unique.
+                jassert (! paramMap.contains (static_cast<int32> (auParamID)));
+
+                auParamIDs.add (auParamID);
+                paramMap.set (static_cast<int32> (auParamID), param);
+                Globals()->SetParameter (auParamID, param->getValue());
+            }
+        }
 
        #if JUCE_DEBUG
         // Some hosts can't handle the huge numbers of discrete parameter values created when
@@ -1924,14 +1923,14 @@ private:
         paramHash &= ~(1 << (sizeof (AudioUnitParameterID) * 8 - 1));
        #endif
 
-        return juceParameters.isUsingManagedParameters() ? paramHash
-                                                         : static_cast<AudioUnitParameterID> (juceParamID.getIntValue());
+        return forceUseLegacyParamIDs ? static_cast<AudioUnitParameterID> (juceParamID.getIntValue())
+                                      : paramHash;
     }
 
     inline AudioUnitParameterID getAUParameterIDForIndex (int paramIndex) const noexcept
     {
-        return juceParameters.isUsingManagedParameters() ? auParamIDs.getReference (paramIndex)
-                                                         : static_cast<AudioUnitParameterID> (paramIndex);
+        return forceUseLegacyParamIDs ? static_cast<AudioUnitParameterID> (paramIndex)
+                                      : auParamIDs.getReference (paramIndex);
     }
 
     AudioProcessorParameter* getParameterForAUParameterID (AudioUnitParameterID address) const noexcept
@@ -2193,7 +2192,7 @@ public:
                 if (AudioProcessorEditor* editorComp = juceFilter->createEditorIfNeeded())
                 {
                     editorComp->setOpaque (true);
-                    windowComp = new ComponentInHIView (editorComp, mCarbonPane);
+                    windowComp.reset (new ComponentInHIView (editorComp, mCarbonPane));
                 }
             }
             else
@@ -2211,7 +2210,7 @@ public:
 private:
     //==============================================================================
     AudioProcessor* juceFilter;
-    ScopedPointer<Component> windowComp;
+    std::unique_ptr<Component> windowComp;
     FakeMouseMoveGenerator fakeMouseGenerator;
 
     void deleteUI()

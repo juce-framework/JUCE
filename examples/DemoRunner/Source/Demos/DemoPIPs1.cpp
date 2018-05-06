@@ -42,7 +42,7 @@
 #include "../../../Audio/MPEDemo.h"
 #include "../../../Audio/PluckedStringsDemo.h"
 
-#if (defined (JUCE_STDLIB_HAS_STD_FUNCTION_SUPPORT)) && (defined (JUCE_HAS_CONSTEXPR))
+#if JUCE_HAS_CONSTEXPR
  #include "../../../Audio/SimpleFFTDemo.h"
  #include "../../../BLOCKS/BlocksDrawingDemo.h"
  #include "../../../BLOCKS/BlocksMonitorDemo.h"
@@ -71,9 +71,7 @@
 #include "../../../Utilities/LiveConstantDemo.h"
 #include "../../../Utilities/MultithreadingDemo.h"
 #include "../../../Utilities/NetworkingDemo.h"
-#if defined (JUCE_STDLIB_HAS_STD_FUNCTION_SUPPORT)
- #include "../../../Utilities/OSCDemo.h"
-#endif
+#include "../../../Utilities/OSCDemo.h"
 #include "../../../Utilities/SystemInfoDemo.h"
 #include "../../../Utilities/TimersAndEventsDemo.h"
 #include "../../../Utilities/UnitTestsDemo.h"
@@ -92,7 +90,7 @@ void registerDemos_One() noexcept
     REGISTER_DEMO (MPEDemo,                   Audio,     false)
     REGISTER_DEMO (PluckedStringsDemo,        Audio,     false)
 
-   #if (defined (JUCE_STDLIB_HAS_STD_FUNCTION_SUPPORT)) && (defined (JUCE_HAS_CONSTEXPR))
+   #if JUCE_HAS_CONSTEXPR
     REGISTER_DEMO (SimpleFFTDemo,             Audio,     false)
     REGISTER_DEMO (BlocksDrawingDemo,         BLOCKS,    false)
     REGISTER_DEMO (BlocksMonitorDemo,         BLOCKS,    false)
@@ -120,9 +118,7 @@ void registerDemos_One() noexcept
     REGISTER_DEMO (LiveConstantDemo,          Utilities, false)
     REGISTER_DEMO (MultithreadingDemo,        Utilities, false)
     REGISTER_DEMO (NetworkingDemo,            Utilities, false)
-   #if defined (JUCE_STDLIB_HAS_STD_FUNCTION_SUPPORT)
     REGISTER_DEMO (OSCDemo,                   Utilities, false)
-   #endif
     REGISTER_DEMO (SystemInfoDemo,            Utilities, false)
     REGISTER_DEMO (TimersAndEventsDemo,       Utilities, false)
     REGISTER_DEMO_WITH_FILENAME (UnitTestClasses::UnitTestsDemo, Utilities, UnitTestsDemo, false)

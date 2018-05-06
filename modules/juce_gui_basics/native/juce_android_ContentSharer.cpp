@@ -420,7 +420,7 @@ public:
             owner.sharingFinished (false, {});
         }
 
-        prepareFilesThread = new AndroidContentSharerPrepareFilesThread (*this, files, packageName, uriBase);
+        prepareFilesThread.reset (new AndroidContentSharerPrepareFilesThread (*this, files, packageName, uriBase));
     }
 
     void shareText (const String& text) override
@@ -774,7 +774,7 @@ private:
     String packageName;
     String uriBase;
 
-    ScopedPointer<AndroidContentSharerPrepareFilesThread> prepareFilesThread;
+    std::unique_ptr<AndroidContentSharerPrepareFilesThread> prepareFilesThread;
 
     bool succeeded = false;
     String errorDescription;

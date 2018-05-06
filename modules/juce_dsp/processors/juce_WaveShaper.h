@@ -72,8 +72,13 @@ struct WaveShaper
 };
 
 //==============================================================================
+#if JUCE_CXX17_IS_AVAILABLE
+template <typename Functor>
+static WaveShaper<typename std::invoke_result<Functor>, Functor> CreateWaveShaper (Functor functionToUse)   { return {functionToUse}; }
+#else
 template <typename Functor>
 static WaveShaper<typename std::result_of<Functor>, Functor> CreateWaveShaper (Functor functionToUse)   { return {functionToUse}; }
+#endif
 
 } // namespace dsp
 } // namespace juce

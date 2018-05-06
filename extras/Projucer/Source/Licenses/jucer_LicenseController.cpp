@@ -293,7 +293,7 @@ LicenseState LicenseController::licenseStateFromOldSettings (XmlElement* license
 
 LicenseState LicenseController::licenseStateFromSettings (PropertiesFile& props)
 {
-    ScopedPointer<XmlElement> licenseXml (props.getXmlValue ("license"));
+    std::unique_ptr<XmlElement> licenseXml (props.getXmlValue ("license"));
 
     if (licenseXml != nullptr)
     {

@@ -404,7 +404,7 @@ struct PluginTreeUtils
                                      const KnownPluginList::SortMethod sortMethod)
     {
         String lastType;
-        ScopedPointer<KnownPluginList::PluginTree> current (new KnownPluginList::PluginTree());
+        std::unique_ptr<KnownPluginList::PluginTree> current (new KnownPluginList::PluginTree());
 
         for (auto* pd : sorted)
         {
@@ -548,7 +548,7 @@ KnownPluginList::PluginTree* KnownPluginList::createTree (const SortMethod sortM
 void KnownPluginList::addToMenu (PopupMenu& menu, const SortMethod sortMethod,
                                  const String& currentlyTickedPluginID) const
 {
-    ScopedPointer<PluginTree> tree (createTree (sortMethod));
+    std::unique_ptr<PluginTree> tree (createTree (sortMethod));
     PluginTreeUtils::addToMenu (*tree, menu, types, currentlyTickedPluginID);
 }
 

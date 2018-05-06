@@ -156,7 +156,7 @@ private:
         StringArray lookAndFeelNames;
         OwnedArray<LookAndFeel> lookAndFeels;
 
-        ScopedPointer<AudioDeviceSelectorComponent> audioSettings;
+        std::unique_ptr<AudioDeviceSelectorComponent> audioSettings;
 
         //==============================================================================
         void refreshRenderingEngineSelector()

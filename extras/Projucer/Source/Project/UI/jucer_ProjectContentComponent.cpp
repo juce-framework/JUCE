@@ -27,6 +27,7 @@
 #include "../../Application/jucer_Headers.h"
 #include "jucer_ProjectContentComponent.h"
 #include "../../LiveBuildEngine/jucer_DownloadCompileEngineThread.h"
+#include "../../LiveBuildEngine/jucer_CompileEngineSettings.h"
 
 #include "jucer_HeaderComponent.h"
 #include "Sidebar/jucer_TabComponents.h"
@@ -38,7 +39,7 @@ struct LogoComponent  : public Component
 {
     LogoComponent()
     {
-        ScopedPointer<XmlElement> svg (XmlDocument::parse (BinaryData::background_logo_svg));
+        std::unique_ptr<XmlElement> svg (XmlDocument::parse (BinaryData::background_logo_svg));
         logo.reset (Drawable::createFromSVG (*svg));
     }
 
@@ -62,7 +63,7 @@ struct LogoComponent  : public Component
                 + ProjucerApplication::getApp().getVersionDescription();
     }
 
-    ScopedPointer<Drawable> logo;
+    std::unique_ptr<Drawable> logo;
 };
 
 //==============================================================================
@@ -301,7 +302,7 @@ void ProjectContentComponent::saveOpenDocumentList()
 {
     if (project != nullptr)
     {
-        ScopedPointer<XmlElement> xml (recentDocumentList.createXML());
+        std::unique_ptr<XmlElement> xml (recentDocumentList.createXML());
 
         if (xml != nullptr)
             project->getStoredProperties().setValue ("lastDocs", xml.get());
@@ -312,7 +313,7 @@ void ProjectContentComponent::reloadLastOpenDocuments()
 {
     if (project != nullptr)
     {
-        ScopedPointer<XmlElement> xml (project->getStoredProperties().getXmlValue ("lastDocs"));
+        std::unique_ptr<XmlElement> xml (project->getStoredProperties().getXmlValue ("lastDocs"));
 
         if (xml != nullptr)
         {

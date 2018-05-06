@@ -27,8 +27,6 @@
 namespace juce
 {
 
-template <> struct ContainerDeletePolicy<NSObject<NSApplicationDelegate, NSUserNotificationCenterDelegate>> { static void destroy (NSObject* o) { [o release]; } };
-
 namespace PushNotificationsDelegateDetailsOsx
 {
     using Action = PushNotifications::Notification::Action;
@@ -267,16 +265,16 @@ struct PushNotificationsDelegate
 {
     PushNotificationsDelegate() : delegate ([getClass().createInstance() init])
     {
-        Class::setThis (delegate, this);
+        Class::setThis (delegate.get(), this);
 
         id<NSApplicationDelegate> appDelegate = [[NSApplication sharedApplication] delegate];
 
         SEL selector = NSSelectorFromString (@"setPushNotificationsDelegate:");
 
         if ([appDelegate respondsToSelector: selector])
-            [appDelegate performSelector: selector withObject: delegate];
+            [appDelegate performSelector: selector withObject: delegate.get()];
 
-        [NSUserNotificationCenter defaultUserNotificationCenter].delegate = delegate;
+        [NSUserNotificationCenter defaultUserNotificationCenter].delegate = delegate.get();
     }
 
     virtual ~PushNotificationsDelegate()
@@ -297,7 +295,7 @@ struct PushNotificationsDelegate
     virtual bool shouldPresentNotification (NSUserNotification* notification) = 0;
 
 protected:
-    ScopedPointer<NSObject<NSApplicationDelegate, NSUserNotificationCenterDelegate>> delegate;
+    std::unique_ptr<NSObject<NSApplicationDelegate, NSUserNotificationCenterDelegate>, NSObjectDeleter> delegate;
 
 private:
     struct Class    : public ObjCClass<NSObject<NSApplicationDelegate, NSUserNotificationCenterDelegate>>

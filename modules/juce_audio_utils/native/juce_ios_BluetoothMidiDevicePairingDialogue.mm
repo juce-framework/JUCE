@@ -39,7 +39,7 @@ public:
                                   const Rectangle<int>& boundsToUse)
         : bounds (boundsToUse)
     {
-        ScopedPointer<ModalComponentManager::Callback> exitCallback (exitCallbackToUse);
+        std::unique_ptr<ModalComponentManager::Callback> exitCallback (exitCallbackToUse);
 
         setAlwaysOnTop (true);
         setVisible (true);
@@ -112,7 +112,7 @@ private:
 bool BluetoothMidiDevicePairingDialogue::open (ModalComponentManager::Callback* exitCallback,
                                                Rectangle<int>* btBounds)
 {
-    ScopedPointer<ModalComponentManager::Callback> cb (exitCallback);
+    std::unique_ptr<ModalComponentManager::Callback> cb (exitCallback);
     auto boundsToUse = (btBounds != nullptr ? *btBounds : Rectangle<int> {});
 
     if (isAvailable())
@@ -139,7 +139,7 @@ namespace juce
     bool BluetoothMidiDevicePairingDialogue::open (ModalComponentManager::Callback* exitCallback,
                                                    Rectangle<int>*)
     {
-        ScopedPointer<ModalComponentManager::Callback> cb (exitCallback);
+        std::unique_ptr<ModalComponentManager::Callback> cb (exitCallback);
         return false;
     }
 

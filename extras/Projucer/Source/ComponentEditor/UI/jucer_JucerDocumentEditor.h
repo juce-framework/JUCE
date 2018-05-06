@@ -69,7 +69,7 @@ public:
     static JucerDocumentEditor* getActiveDocumentHolder();
 
 private:
-    ScopedPointer<JucerDocument> document;
+    std::unique_ptr<JucerDocument> document;
     ComponentLayoutPanel* compLayoutPanel = nullptr;
 
     struct JucerDocumentTabs  : public TabbedComponent

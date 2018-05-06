@@ -85,7 +85,7 @@ public:
 protected:
     File file;
     Range<int64> mappedSection;
-    ScopedPointer<MemoryMappedFile> map;
+    std::unique_ptr<MemoryMappedFile> map;
     int64 dataChunkStart, dataLength;
     int bytesPerFrame;
 

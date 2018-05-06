@@ -424,7 +424,7 @@ private:
     int rangeStart = 0, rangeEnd = 127;
     float firstKey = 12 * 4.0f;
     bool canScroll = true, useMousePositionForVelocity = true, shouldCheckMousePos = false;
-    ScopedPointer<Button> scrollDown, scrollUp;
+    std::unique_ptr<Button> scrollDown, scrollUp;
 
     Array<KeyPress> keyPresses;
     Array<int> keyPressNotes;

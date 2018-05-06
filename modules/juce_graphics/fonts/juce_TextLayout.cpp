@@ -350,8 +350,8 @@ namespace TextLayoutHelpers
             int lineStartPosition = 0;
             int runStartPosition = 0;
 
-            ScopedPointer<TextLayout::Line> currentLine;
-            ScopedPointer<TextLayout::Run> currentRun;
+            std::unique_ptr<TextLayout::Line> currentLine;
+            std::unique_ptr<TextLayout::Run> currentRun;
 
             bool needToSetLineOrigin = true;
 

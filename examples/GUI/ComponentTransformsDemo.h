@@ -94,7 +94,7 @@ public:
     }
 
 private:
-    ScopedPointer<Component> content;
+    std::unique_ptr<Component> content;
 
     struct CornerDragger  : public Component
     {

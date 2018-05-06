@@ -84,8 +84,8 @@ MainHostWindow::MainHostWindow()
     RuntimePermissions::request (RuntimePermissions::recordAudio,
                                  [safeThis = SafePointer<MainHostWindow> (this)] (bool granted) mutable
                                  {
-                                     ScopedPointer<XmlElement> savedAudioState (getAppProperties().getUserSettings()
-                                                                                ->getXmlValue ("audioDeviceState"));
+                                     std::unique_ptr<XmlElement> savedAudioState (getAppProperties().getUserSettings()
+                                                                                  ->getXmlValue ("audioDeviceState"));
 
                                      safeThis->deviceManager.initialise (granted ? 256 : 0, 256, savedAudioState.get(), true);
                                  });
@@ -109,7 +109,7 @@ MainHostWindow::MainHostWindow()
     InternalPluginFormat internalFormat;
     internalFormat.getAllTypes (internalTypes);
 
-    ScopedPointer<XmlElement> savedPluginList (getAppProperties().getUserSettings()->getXmlValue ("pluginList"));
+    std::unique_ptr<XmlElement> savedPluginList (getAppProperties().getUserSettings()->getXmlValue ("pluginList"));
 
     if (savedPluginList != nullptr)
         knownPluginList.recreateFromXml (*savedPluginList);
@@ -220,7 +220,7 @@ void MainHostWindow::changeListenerCallback (ChangeBroadcaster* changed)
 
         // save the plugin list every time it gets changed, so that if we're scanning
         // and it crashes, we've still saved the previous ones
-        ScopedPointer<XmlElement> savedPluginList (knownPluginList.createXml());
+        std::unique_ptr<XmlElement> savedPluginList (knownPluginList.createXml());
 
         if (savedPluginList != nullptr)
         {
@@ -577,7 +577,7 @@ void MainHostWindow::showAudioSettings()
                          ModalCallbackFunction::create
                          ([safeThis = SafePointer<MainHostWindow> (this)] (int)
                          {
-                             ScopedPointer<XmlElement> audioState (safeThis->deviceManager.createStateXml());
+                             std::unique_ptr<XmlElement> audioState (safeThis->deviceManager.createStateXml());
 
                              getAppProperties().getUserSettings()->setValue ("audioDeviceState", audioState.get());
                              getAppProperties().getUserSettings()->saveIfNeeded();

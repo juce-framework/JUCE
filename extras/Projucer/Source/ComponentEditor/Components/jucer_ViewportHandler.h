@@ -148,7 +148,7 @@ public:
                 if (filename.isNotEmpty())
                     file = code.document->getCppFile().getSiblingFile (filename);
 
-                ScopedPointer<JucerDocument> doc (JucerDocument::createForCppFile (nullptr, file));
+                std::unique_ptr<JucerDocument> doc (JucerDocument::createForCppFile (nullptr, file));
 
                 if (doc != nullptr)
                 {

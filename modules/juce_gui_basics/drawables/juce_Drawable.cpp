@@ -183,11 +183,11 @@ Drawable* Drawable::createFromImageData (const void* data, const size_t numBytes
         auto asString = String::createStringFromData (data, (int) numBytes);
 
         XmlDocument doc (asString);
-        ScopedPointer<XmlElement> outer (doc.getDocumentElement (true));
+        std::unique_ptr<XmlElement> outer (doc.getDocumentElement (true));
 
         if (outer != nullptr && outer->hasTagName ("svg"))
         {
-            ScopedPointer<XmlElement> svg (doc.getDocumentElement());
+            std::unique_ptr<XmlElement> svg (doc.getDocumentElement());
 
             if (svg != nullptr)
                 result = Drawable::createFromSVG (*svg);

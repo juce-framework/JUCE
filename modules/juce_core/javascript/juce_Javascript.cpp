@@ -81,7 +81,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
     void execute (const String& code)
     {
         ExpressionTreeBuilder tb (code);
-        ScopedPointer<BlockStatement> (tb.parseStatementList())->perform (Scope (nullptr, this, this), nullptr);
+        std::unique_ptr<BlockStatement> (tb.parseStatementList())->perform (Scope (nullptr, this, this), nullptr);
     }
 
     var evaluate (const String& code)
@@ -263,7 +263,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         ResultCode perform (const Scope& s, var*) const override  { getResult (s); return ok; }
     };
 
-    typedef ScopedPointer<Expression> ExpPtr;
+    typedef std::unique_ptr<Expression> ExpPtr;
 
     struct BlockStatement  : public Statement
     {
@@ -291,7 +291,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         }
 
         ExpPtr condition;
-        ScopedPointer<Statement> trueBranch, falseBranch;
+        std::unique_ptr<Statement> trueBranch, falseBranch;
     };
 
     struct VarStatement  : public Statement
@@ -333,7 +333,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             return ok;
         }
 
-        ScopedPointer<Statement> initialiser, iterator, body;
+        std::unique_ptr<Statement> initialiser, iterator, body;
         ExpPtr condition;
         bool isDoLoop;
     };
@@ -853,7 +853,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
         String functionCode;
         Array<Identifier> parameters;
-        ScopedPointer<Statement> body;
+        std::unique_ptr<Statement> body;
     };
 
     //==============================================================================
@@ -1057,7 +1057,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
         BlockStatement* parseStatementList()
         {
-            ScopedPointer<BlockStatement> b (new BlockStatement (location));
+            std::unique_ptr<BlockStatement> b (new BlockStatement (location));
 
             while (currentType != TokenTypes::closeBrace && currentType != TokenTypes::eof)
                 b->statements.add (parseStatement());
@@ -1111,7 +1111,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         BlockStatement* parseBlock()
         {
             match (TokenTypes::openBrace);
-            ScopedPointer<BlockStatement> b (parseStatementList());
+            std::unique_ptr<BlockStatement> b (parseStatementList());
             match (TokenTypes::closeBrace);
             return b.release();
         }
@@ -1147,7 +1147,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
         Statement* parseIf()
         {
-            ScopedPointer<IfStatement> s (new IfStatement (location));
+            std::unique_ptr<IfStatement> s (new IfStatement (location));
             match (TokenTypes::openParen);
             s->condition.reset (parseExpression());
             match (TokenTypes::closeParen);
@@ -1168,13 +1168,13 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
         Statement* parseVar()
         {
-            ScopedPointer<VarStatement> s (new VarStatement (location));
+            std::unique_ptr<VarStatement> s (new VarStatement (location));
             s->name = parseIdentifier();
             s->initialiser.reset (matchIf (TokenTypes::assign) ? parseExpression() : new Expression (location));
 
             if (matchIf (TokenTypes::comma))
             {
-                ScopedPointer<BlockStatement> block (new BlockStatement (location));
+                std::unique_ptr<BlockStatement> block (new BlockStatement (location));
                 block->statements.add (s.release());
                 block->statements.add (parseVar());
                 return block.release();
@@ -1198,7 +1198,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
         Statement* parseForLoop()
         {
-            ScopedPointer<LoopStatement> s (new LoopStatement (location, false));
+            std::unique_ptr<LoopStatement> s (new LoopStatement (location, false));
             match (TokenTypes::openParen);
             s->initialiser.reset (parseStatement());
 
@@ -1224,7 +1224,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
         Statement* parseDoOrWhileLoop (bool isDoLoop)
         {
-            ScopedPointer<LoopStatement> s (new LoopStatement (location, isDoLoop));
+            std::unique_ptr<LoopStatement> s (new LoopStatement (location, isDoLoop));
             s->initialiser.reset (new Statement (location));
             s->iterator.reset (new Statement (location));
 
@@ -1261,7 +1261,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             if (currentType == TokenTypes::identifier)
                 functionName = parseIdentifier();
 
-            ScopedPointer<FunctionObject> fo (new FunctionObject());
+            std::unique_ptr<FunctionObject> fo (new FunctionObject());
             parseFunctionParamsAndBody (*fo);
             fo->functionCode = String (functionStart, location.location);
             return var (fo.release());
@@ -1269,7 +1269,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
         Expression* parseFunctionCall (FunctionCall* call, ExpPtr& function)
         {
-            ScopedPointer<FunctionCall> s (call);
+            std::unique_ptr<FunctionCall> s (call);
             s->object.reset (function.release());
             match (TokenTypes::openParen);
 
@@ -1295,7 +1295,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
             if (matchIf (TokenTypes::openBracket))
             {
-                ScopedPointer<ArraySubscript> s (new ArraySubscript (location));
+                std::unique_ptr<ArraySubscript> s (new ArraySubscript (location));
                 s->object.reset (input.release());
                 s->index.reset (parseExpression());
                 match (TokenTypes::closeBracket);
@@ -1325,7 +1325,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
             if (matchIf (TokenTypes::openBrace))
             {
-                ScopedPointer<ObjectDeclaration> e (new ObjectDeclaration (location));
+                std::unique_ptr<ObjectDeclaration> e (new ObjectDeclaration (location));
 
                 while (currentType != TokenTypes::closeBrace)
                 {
@@ -1347,7 +1347,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
             if (matchIf (TokenTypes::openBracket))
             {
-                ScopedPointer<ArrayDeclaration> e (new ArrayDeclaration (location));
+                std::unique_ptr<ArrayDeclaration> e (new ArrayDeclaration (location));
 
                 while (currentType != TokenTypes::closeBracket)
                 {
@@ -1404,7 +1404,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
         Expression* parseTypeof()
         {
-            ScopedPointer<FunctionCall> f (new FunctionCall (location));
+            std::unique_ptr<FunctionCall> f (new FunctionCall (location));
             f->object.reset (new UnqualifiedName (location, "typeof"));
             f->arguments.add (parseUnary());
             return f.release();
@@ -1504,7 +1504,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
         Expression* parseTernaryOperator (ExpPtr& condition)
         {
-            ScopedPointer<ConditionalOp> e (new ConditionalOp (location));
+            std::unique_ptr<ConditionalOp> e (new ConditionalOp (location));
             e->condition.reset (condition.release());
             e->trueBranch.reset (parseExpression());
             match (TokenTypes::colon);

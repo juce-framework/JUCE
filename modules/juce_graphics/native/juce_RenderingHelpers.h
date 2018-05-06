@@ -309,7 +309,7 @@ public:
     }
 
     Font font;
-    ScopedPointer<EdgeTable> edgeTable;
+    std::unique_ptr<EdgeTable> edgeTable;
     int glyph = 0, lastAccessCount = 0;
     bool snapToIntegerCoordinate = false;
 
@@ -2558,7 +2558,7 @@ public:
         {
             auto layerBounds = clip->getClipBounds();
 
-            const ScopedPointer<LowLevelGraphicsContext> g (image.createLowLevelContext());
+            const std::unique_ptr<LowLevelGraphicsContext> g (image.createLowLevelContext());
             g->setOpacity (finishedLayerState.transparencyLayerAlpha);
             g->drawImage (finishedLayerState.image, AffineTransform::translation (layerBounds.getPosition()));
         }
@@ -2607,7 +2607,7 @@ public:
                 auto t = transform.getTransformWith (AffineTransform::scale (fontHeight * font.getHorizontalScale(), fontHeight)
                                                                      .followedBy (trans));
 
-                ScopedPointer<EdgeTable> et (font.getTypeface()->getEdgeTableForGlyph (glyphNumber, t, fontHeight));
+                std::unique_ptr<EdgeTable> et (font.getTypeface()->getEdgeTableForGlyph (glyphNumber, t, fontHeight));
 
                 if (et != nullptr)
                     fillShape (new EdgeTableRegionType (*et), false);
@@ -2717,13 +2717,13 @@ public:
 
     void endTransparencyLayer()
     {
-        ScopedPointer<StateObjectType> finishedTransparencyLayer (currentState.release());
+        std::unique_ptr<StateObjectType> finishedTransparencyLayer (currentState.release());
         restore();
         currentState->endTransparencyLayer (*finishedTransparencyLayer);
     }
 
 private:
-    ScopedPointer<StateObjectType> currentState;
+    std::unique_ptr<StateObjectType> currentState;
     OwnedArray<StateObjectType> stack;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SavedStateStack)
