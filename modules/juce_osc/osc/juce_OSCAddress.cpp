@@ -33,7 +33,7 @@ namespace
     template <typename CharPointerType>
     class OSCPatternMatcherImpl
     {
-        typedef CharPointerType CharPtr;
+        using CharPtr = CharPointerType;
 
     public:
         //==============================================================================
@@ -266,7 +266,7 @@ namespace
     template <typename OSCAddressType>
     struct OSCAddressTokeniser
     {
-        typedef OSCAddressTokeniserTraits<OSCAddressType> Traits;
+        using Traits = OSCAddressTokeniserTraits<OSCAddressType>;
 
         //==============================================================================
         static bool isPrintableASCIIChar (juce_wchar c) noexcept

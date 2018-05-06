@@ -89,20 +89,24 @@ void ThreadedAnalyticsDestination::EventDispatcher::run()
 
     while (! threadShouldExit())
     {
-        auto eventsToSendCapacity = maxBatchSize - eventsToSend.size();
-
-        if (eventsToSendCapacity > 0)
         {
-            const ScopedLock lock (queueAccess);
+            const auto numEventsInBatch = eventsToSend.size();
+            const auto freeBatchCapacity = maxBatchSize - numEventsInBatch;
 
-            const auto numEventsInQueue = (int) eventQueue.size();
-
-            if (numEventsInQueue > 0)
+            if (freeBatchCapacity > 0)
             {
-                const auto numEventsToAdd = jmin (eventsToSendCapacity, numEventsInQueue);
+                const auto numNewEvents = (int) eventQueue.size() - numEventsInBatch;
 
-                for (size_t i = 0; i < (size_t) numEventsToAdd; ++i)
-                    eventsToSend.add (eventQueue[i]);
+                if (numNewEvents > 0)
+                {
+                    const ScopedLock lock (queueAccess);
+
+                    const auto numEventsToAdd = jmin (numNewEvents, freeBatchCapacity);
+                    const auto newBatchSize = numEventsInBatch + numEventsToAdd;
+
+                    for (auto i = numEventsInBatch; i < newBatchSize; ++i)
+                        eventsToSend.add (eventQueue[(size_t) i]);
+                }
             }
         }
 

@@ -178,6 +178,8 @@ namespace Ids
     DECLARE_ID (overwriteOnSave);
     DECLARE_ID (microphonePermissionNeeded);
     DECLARE_ID (microphonePermissionsText);
+    DECLARE_ID (cameraPermissionNeeded);
+    DECLARE_ID (cameraPermissionText);
     DECLARE_ID (androidJavaLibs);
     DECLARE_ID (androidRepositories);
     DECLARE_ID (androidDependencies);
@@ -227,7 +229,7 @@ namespace Ids
     DECLARE_ID (iCloudPermissions);
     DECLARE_ID (iosDevelopmentTeamID);
     DECLARE_ID (iosAppGroupsId);
-    DECLARE_ID (iosAppExtensionDuplicateResourcesFolder);
+    DECLARE_ID (duplicateAppExResourcesFolder);
     DECLARE_ID (buildToolsVersion);
     DECLARE_ID (gradleVersion);
     const Identifier androidPluginVersion ("gradleWrapperVersion"); // old name is very confusing, but we need to remain backward compatible

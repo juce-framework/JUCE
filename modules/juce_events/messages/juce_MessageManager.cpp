@@ -155,7 +155,7 @@ public:
     }
 
     WaitableEvent finished;
-    void* volatile result = nullptr;
+    std::atomic<void*> result { nullptr };
 
 private:
     MessageCallbackFunction* const func;
@@ -177,7 +177,7 @@ void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* cons
     if (message->post())
     {
         message->finished.wait();
-        return message->result;
+        return message->result.load();
     }
 
     jassertfalse; // the OS message queue failed to send the message!

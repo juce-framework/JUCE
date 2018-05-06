@@ -120,7 +120,7 @@ public:
 
     bool isRecording() const
     {
-        return activeWriter != nullptr;
+        return activeWriter.load() != nullptr;
     }
 
     //==============================================================================
@@ -140,9 +140,9 @@ public:
     {
         const ScopedLock sl (writerLock);
 
-        if (activeWriter != nullptr && numInputChannels >= thumbnail.getNumChannels())
+        if (activeWriter.load() != nullptr && numInputChannels >= thumbnail.getNumChannels())
         {
-            activeWriter->write (inputChannelData, numSamples);
+            activeWriter.load()->write (inputChannelData, numSamples);
 
             // Create an AudioBuffer to wrap our incoming data, note that this does no allocations or copies, it simply references our input data
             AudioBuffer<float> buffer (const_cast<float**> (inputChannelData), thumbnail.getNumChannels(), numSamples);
@@ -158,13 +158,13 @@ public:
 
 private:
     AudioThumbnail& thumbnail;
-    TimeSliceThread backgroundThread  { "Audio Recorder Thread" }; // the thread that will write our audio data to disk
+    TimeSliceThread backgroundThread { "Audio Recorder Thread" }; // the thread that will write our audio data to disk
     std::unique_ptr<AudioFormatWriter::ThreadedWriter> threadedWriter; // the FIFO used to buffer the incoming data
-    double sampleRate   = 0.0;
+    double sampleRate = 0.0;
     int64 nextSampleNum = 0;
 
     CriticalSection writerLock;
-    AudioFormatWriter::ThreadedWriter* volatile activeWriter = nullptr;
+    std::atomic<AudioFormatWriter::ThreadedWriter*> activeWriter { nullptr };
 };
 
 //==============================================================================

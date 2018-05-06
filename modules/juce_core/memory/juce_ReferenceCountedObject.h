@@ -37,7 +37,7 @@ namespace juce
 
         // This is a neat way of declaring a typedef for a pointer class,
         // rather than typing out the full templated name each time..
-        typedef ReferenceCountedObjectPtr<MyClass> Ptr;
+        using Ptr = ReferenceCountedObjectPtr<MyClass>;
     };
 
     MyClass::Ptr p = new MyClass();
@@ -228,7 +228,7 @@ private:
     @code
     struct MyClass  : public ReferenceCountedObject
     {
-        typedef ReferenceCountedObjectPtr<MyClass> Ptr;
+        using Ptr = ReferenceCountedObjectPtr<MyClass>;
         ...
     }
     @endcode
@@ -242,7 +242,7 @@ class ReferenceCountedObjectPtr
 {
 public:
     /** The class being referenced by this pointer. */
-    typedef ObjectType ReferencedType;
+    using ReferencedType = ObjectType;
 
     //==============================================================================
     /** Creates a pointer to a null object. */

@@ -448,7 +448,7 @@ public:
     ImagePixelData (Image::PixelFormat, int width, int height);
     ~ImagePixelData();
 
-    typedef ReferenceCountedObjectPtr<ImagePixelData> Ptr;
+    using Ptr = ReferenceCountedObjectPtr<ImagePixelData>;
 
     /** Creates a context that will draw into this image. */
     virtual LowLevelGraphicsContext* createLowLevelContext() = 0;

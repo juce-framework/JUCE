@@ -46,7 +46,9 @@ struct DefaultHashFunctions
     /** Generates a simple hash from a variant. */
     static int generateHash (const var& key, int upperLimit) noexcept       { return generateHash (key.toString(), upperLimit); }
     /** Generates a simple hash from a void ptr. */
-    static int generateHash (const void* key, int upperLimit) noexcept      { return generateHash ((pointer_sized_uint) key, upperLimit); }
+    static int generateHash (const void* key, int upperLimit) noexcept      { return generateHash ((uint64) (pointer_sized_uint) key, upperLimit); }
+    /** Generates a simple hash from a UUID. */
+    static int generateHash (const Uuid& key, int upperLimit) noexcept      { return generateHash (key.hash(), upperLimit); }
 };
 
 
@@ -101,8 +103,8 @@ template <typename KeyType,
 class HashMap
 {
 private:
-    typedef typename TypeHelpers::ParameterType<KeyType>::type   KeyTypeParameter;
-    typedef typename TypeHelpers::ParameterType<ValueType>::type ValueTypeParameter;
+    using KeyTypeParameter   = typename TypeHelpers::ParameterType<KeyType>::type;
+    using ValueTypeParameter = typename TypeHelpers::ParameterType<ValueType>::type;
 
 public:
     //==============================================================================

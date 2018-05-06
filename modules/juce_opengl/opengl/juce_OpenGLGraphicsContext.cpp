@@ -140,7 +140,7 @@ struct CachedImageList  : public ReferenceCountedObject,
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CachedImage)
     };
 
-    typedef ReferenceCountedObjectPtr<CachedImageList> Ptr;
+    using Ptr = ReferenceCountedObjectPtr<CachedImageList>;
 
 private:
     OpenGLContext& context;
@@ -375,7 +375,7 @@ struct ShaderPrograms  : public ReferenceCountedObject
           maskTexture (context)
     {}
 
-    typedef ReferenceCountedObjectPtr<ShaderPrograms> Ptr;
+    using Ptr = ReferenceCountedObjectPtr<ShaderPrograms>;
 
     //==============================================================================
     struct ShaderProgramHolder
@@ -1579,7 +1579,7 @@ private:
 //==============================================================================
 struct SavedState  : public RenderingHelpers::SavedStateBase<SavedState>
 {
-    typedef RenderingHelpers::SavedStateBase<SavedState> BaseClass;
+    using BaseClass = RenderingHelpers::SavedStateBase<SavedState>;
 
     SavedState (GLState* s)  : BaseClass (s->target.bounds), state (s)
     {}
@@ -1630,7 +1630,7 @@ struct SavedState  : public RenderingHelpers::SavedStateBase<SavedState>
         }
     }
 
-    typedef RenderingHelpers::GlyphCache<RenderingHelpers::CachedGlyphEdgeTable<SavedState>, SavedState> GlyphCacheType;
+    using GlyphCacheType = RenderingHelpers::GlyphCache<RenderingHelpers::CachedGlyphEdgeTable<SavedState>, SavedState>;
 
     void drawGlyph (int glyphNumber, const AffineTransform& trans)
     {

@@ -305,7 +305,7 @@ public:
 
        #if JUCE_IOS
         connectButton.setButtonText ("Connect");
-        connectButton.onClick = [this] { BluetoothMidiDevicePairingDialogue::open(); };
+        connectButton.onClick = [] { BluetoothMidiDevicePairingDialogue::open(); };
         connectButton.setAlwaysOnTop (true);
         addAndMakeVisible (connectButton);
        #endif

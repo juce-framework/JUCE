@@ -182,7 +182,7 @@ public:
         virtual void messageCallback() = 0;
         bool post();
 
-        typedef ReferenceCountedObjectPtr<MessageBase> Ptr;
+        using Ptr = ReferenceCountedObjectPtr<MessageBase>;
 
         JUCE_DECLARE_NON_COPYABLE (MessageBase)
     };

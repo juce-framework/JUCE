@@ -47,13 +47,12 @@
 
 #include <cstdarg>
 
-typedef juce::int8   int8;
-typedef juce::int16  int16;
-typedef juce::int32  int32;
-typedef juce::uint8  uint8;
-typedef juce::uint16 uint16;
-typedef juce::uint32 uint32;
-
+using int8   = juce::int8;
+using int16  = juce::int16;
+using int32  = juce::int32;
+using uint8  = juce::uint8;
+using uint16 = juce::uint16;
+using uint32 = juce::uint32;
 
 #include "box2d/Collision/b2BroadPhase.cpp"
 #include "box2d/Collision/b2CollideCircle.cpp"

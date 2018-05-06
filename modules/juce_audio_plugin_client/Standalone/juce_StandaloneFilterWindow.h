@@ -123,7 +123,7 @@ public:
         processor.reset (::createPluginFilterOfType (AudioProcessor::wrapperType_Standalone));
       #else
         AudioProcessor::setTypeOfNextNewPlugin (AudioProcessor::wrapperType_Standalone);
-        processor = createPluginFilter();
+        processor.reset (createPluginFilter());
         AudioProcessor::setTypeOfNextNewPlugin (AudioProcessor::wrapperType_Undefined);
       #endif
         jassert (processor != nullptr); // Your createPluginFilter() function must return a valid object!

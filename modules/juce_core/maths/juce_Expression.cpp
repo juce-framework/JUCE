@@ -80,9 +80,9 @@ private:
 //==============================================================================
 struct Expression::Helpers
 {
-    typedef ReferenceCountedObjectPtr<Term> TermPtr;
+    using TermPtr = ReferenceCountedObjectPtr<Term>;
 
-    static void checkRecursionDepth (const int depth)
+    static void checkRecursionDepth (int depth)
     {
         if (depth > 256)
             throw EvaluationError ("Recursive symbol references");

@@ -560,6 +560,8 @@ public:
         Component::unfocusAllComponents();
     }
 
+    void handleAppPausedCallback() {}
+
     void handleAppResumedCallback()
     {
         if (Component* kiosk = Desktop::getInstance().getKioskModeComponent())
@@ -630,10 +632,10 @@ public:
     void handlePaintCallback (JNIEnv* env, jobject canvas, jobject paint)
     {
         jobject rect = env->CallObjectMethod (canvas, CanvasMinimal.getClipBounds);
-        const int left   = env->GetIntField (rect, AndroidRectClass.left);
-        const int top    = env->GetIntField (rect, AndroidRectClass.top);
-        const int right  = env->GetIntField (rect, AndroidRectClass.right);
-        const int bottom = env->GetIntField (rect, AndroidRectClass.bottom);
+        const int left   = env->GetIntField (rect, AndroidRect.left);
+        const int top    = env->GetIntField (rect, AndroidRect.top);
+        const int right  = env->GetIntField (rect, AndroidRect.right);
+        const int bottom = env->GetIntField (rect, AndroidRect.bottom);
         env->DeleteLocalRef (rect);
 
         const Rectangle<int> clip (left, top, right - left, bottom - top);
@@ -810,6 +812,7 @@ JUCE_VIEW_CALLBACK (void, handleKeyDown,        (JNIEnv* env, jobject /*view*/, 
 JUCE_VIEW_CALLBACK (void, handleKeyUp,          (JNIEnv* env, jobject /*view*/, jlong host, jint k, jint kc),                         handleKeyUpCallback ((int) k, (int) kc))
 JUCE_VIEW_CALLBACK (void, handleBackButton,     (JNIEnv* env, jobject /*view*/, jlong host),                                          handleBackButtonCallback())
 JUCE_VIEW_CALLBACK (void, handleKeyboardHidden, (JNIEnv* env, jobject /*view*/, jlong host),                                          handleKeyboardHiddenCallback())
+JUCE_VIEW_CALLBACK (void, handleAppPaused,      (JNIEnv* env, jobject /*view*/, jlong host),                                          handleAppPausedCallback())
 JUCE_VIEW_CALLBACK (void, handleAppResumed,     (JNIEnv* env, jobject /*view*/, jlong host),                                          handleAppResumedCallback())
 
 //==============================================================================
@@ -819,18 +822,6 @@ ComponentPeer* Component::createNewPeer (int styleFlags, void*)
 }
 
 //==============================================================================
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
- METHOD (getRotation, "getRotation", "()I")
-
-DECLARE_JNI_CLASS (Display, "android/view/Display");
-#undef JNI_CLASS_MEMBERS
-
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
- METHOD (getDefaultDisplay, "getDefaultDisplay", "()Landroid/view/Display;")
-
-DECLARE_JNI_CLASS (WindowManager, "android/view/WindowManager");
-#undef JNI_CLASS_MEMBERS
-
 bool Desktop::canUseSemiTransparentWindows() noexcept
 {
     return true;
@@ -857,11 +848,11 @@ Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
 
     if (windowManager.get() != 0)
     {
-        LocalRef<jobject> display = LocalRef<jobject> (env->CallObjectMethod (windowManager, WindowManager.getDefaultDisplay));
+        LocalRef<jobject> display = LocalRef<jobject> (env->CallObjectMethod (windowManager, AndroidWindowManager.getDefaultDisplay));
 
         if (display.get() != 0)
         {
-            int rotation = env->CallIntMethod (display, Display.getRotation);
+            int rotation = env->CallIntMethod (display, AndroidDisplay.getRotation);
 
             switch (rotation)
             {

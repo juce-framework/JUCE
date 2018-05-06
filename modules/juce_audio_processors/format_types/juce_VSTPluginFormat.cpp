@@ -580,7 +580,7 @@ struct ModuleHandle    : public ReferenceCountedObject
     String pluginName;
     std::unique_ptr<XmlElement> vstXml;
 
-    typedef ReferenceCountedObjectPtr<ModuleHandle> Ptr;
+    using Ptr = ReferenceCountedObjectPtr<ModuleHandle>;
 
     static Array<ModuleHandle*>& getActiveModules()
     {
@@ -916,6 +916,10 @@ struct VSTPluginInstance     : public AudioPluginInstance,
 
         String getName (int maximumStringLength) const override
         {
+            if (name.isEmpty())
+                return pluginInstance.getTextForOpcode (getParameterIndex(),
+                                                        plugInOpcodeGetParameterName);
+
             if (name.length() <= maximumStringLength)
                 return name;
 
@@ -933,7 +937,9 @@ struct VSTPluginInstance     : public AudioPluginInstance,
 
         String getLabel() const override
         {
-            return label;
+            return label.isEmpty() ? pluginInstance.getTextForOpcode (getParameterIndex(),
+                                                                      plugInOpcodeGetParameterLabel)
+                                   : label;
         }
 
         bool isAutomatable() const override
@@ -989,10 +995,10 @@ struct VSTPluginInstance     : public AudioPluginInstance,
 
         for (int i = 0; i < vstEffect->numParameters; ++i)
         {
-            String paramName (getTextForOpcode (i, plugInOpcodeGetParameterName));
+            String paramName;
             Array<String> shortParamNames;
             float defaultValue = 0;
-            String label (getTextForOpcode (i, plugInOpcodeGetParameterLabel));
+            String label;
             bool isAutomatable = dispatch (plugInOpcodeIsParameterAutomatable, i, 0, 0, 0) != 0;
             bool isDiscrete = false;
             int numSteps = AudioProcessor::getDefaultNumParameterSteps();
@@ -1064,7 +1070,7 @@ struct VSTPluginInstance     : public AudioPluginInstance,
                                             valueType));
         }
 
-        vstSupportsBypass = pluginCanDo ("bypass");
+        vstSupportsBypass = (pluginCanDo ("bypass") > 0);
         setRateAndBufferSizeDetails (sampleRateToUse, blockSizeToUse);
     }
 
@@ -1953,7 +1959,13 @@ private:
     //==============================================================================
     struct VST2BypassParameter    : Parameter
     {
-        VST2BypassParameter (VSTPluginInstance& effectToUse)   : parent (effectToUse) {}
+        VST2BypassParameter (VSTPluginInstance& effectToUse)
+            : parent (effectToUse),
+              onStrings (TRANS("on"), TRANS("yes"), TRANS("true")),
+              offStrings (TRANS("off"), TRANS("no"), TRANS("false")),
+              values (TRANS("Off"), TRANS("On"))
+        {
+        }
 
         void setValue (float newValue) override
         {
@@ -1991,9 +2003,7 @@ private:
 
         VSTPluginInstance& parent;
         bool currentValue = false;
-        StringArray onStrings  { TRANS("on"),  TRANS("yes"), TRANS("true") };
-        StringArray offStrings { TRANS("off"), TRANS("no"),  TRANS("false") };
-        StringArray values { TRANS("Off"), TRANS("On") };
+        StringArray onStrings, offStrings, values;
     };
 
     //==============================================================================

@@ -166,11 +166,11 @@ private:
     AudioSource* masterSource = nullptr;
 
     CriticalSection callbackLock;
-    float volatile gain = 1.0f, lastGain = 1.0f;
-    bool volatile playing = false, stopped = true;
+    float gain = 1.0f, lastGain = 1.0f;
+    bool playing = false, stopped = true;
     double sampleRate = 44100.0, sourceSampleRate = 0;
     int blockSize = 128, readAheadBufferSize = 0;
-    bool volatile isPrepared = false, inputStreamEOF = false;
+    bool isPrepared = false, inputStreamEOF = false;
 
     void releaseMasterResources();
 

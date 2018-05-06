@@ -969,6 +969,18 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
                                             dispatchAudioUnitPropertyChange,
                                             this);
         jassert (err == noErr);
+
+        AudioOutputUnitMIDICallbacks midiCallbacks;
+        midiCallbacks.userData = this;
+        midiCallbacks.MIDIEventProc = midiEventCallback;
+        midiCallbacks.MIDISysExProc = midiSysExCallback;
+        err = AudioUnitSetProperty (audioUnit,
+                                    kAudioOutputUnitProperty_MIDICallbacks,
+                                    kAudioUnitScope_Global,
+                                    0,
+                                    &midiCallbacks,
+                                    sizeof (midiCallbacks));
+        jassert (err == noErr);
        #endif
 
         if (channelData.areInputChannelsAvailable())
@@ -1125,10 +1137,9 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
         static_cast<Pimpl*> (data)->handleAudioUnitPropertyChange (unit, propertyID, scope, element);
     }
 
-    void handleMidiMessage (MidiMessage msg)
+    static double getTimestampForMIDI()
     {
-        if (messageCollector != nullptr)
-            messageCollector->addMessageToQueue (msg);
+        return Time::getMillisecondCounter() / 1000.0;
     }
 
     static void midiEventCallback (void *client, UInt32 status, UInt32 data1, UInt32 data2, UInt32)
@@ -1136,7 +1147,18 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
         return static_cast<Pimpl*> (client)->handleMidiMessage (MidiMessage ((int) status,
                                                                              (int) data1,
                                                                              (int) data2,
-                                                                             Time::getMillisecondCounter() / 1000.0));
+                                                                             getTimestampForMIDI()));
+    }
+
+    static void midiSysExCallback (void *client, const UInt8 *data, UInt32 length)
+    {
+        return static_cast<Pimpl*> (client)->handleMidiMessage (MidiMessage (data, (int) length, getTimestampForMIDI()));
+    }
+
+    void handleMidiMessage (MidiMessage msg)
+    {
+        if (messageCollector != nullptr)
+            messageCollector->addMessageToQueue (msg);
     }
 
     struct IOChannelData

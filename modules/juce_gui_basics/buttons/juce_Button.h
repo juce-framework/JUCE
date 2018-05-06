@@ -509,11 +509,12 @@ private:
     ButtonState updateState();
     ButtonState updateState (bool isOver, bool isDown);
     bool isShortcutPressed() const;
-    void turnOffOtherButtonsInGroup (NotificationType);
+    void turnOffOtherButtonsInGroup (NotificationType click, NotificationType state);
 
     void flashButtonState();
     void sendClickMessage (const ModifierKeys&);
     void sendStateMessage();
+    void setToggleState (bool shouldBeOn, NotificationType click, NotificationType state);
 
     bool isMouseOrTouchOver (const MouseEvent& e);
 

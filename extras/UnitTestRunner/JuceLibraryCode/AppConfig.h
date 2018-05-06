@@ -155,6 +155,10 @@
  //#define JUCE_PLUGINHOST_AU 0
 #endif
 
+#ifndef    JUCE_PLUGINHOST_LADSPA
+ //#define JUCE_PLUGINHOST_LADSPA 0
+#endif
+
 //==============================================================================
 // juce_audio_utils flags:
 

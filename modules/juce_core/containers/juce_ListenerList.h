@@ -182,8 +182,8 @@ public:
         bool shouldBailOut() const noexcept                 { return false; }
     };
 
-    typedef ListenerList<ListenerClass, ArrayType> ThisType;
-    typedef ListenerClass ListenerType;
+    using ThisType      = ListenerList<ListenerClass, ArrayType>;
+    using ListenerType  = ListenerClass;
 
     //==============================================================================
     /** Iterates the listeners in a ListenerList. */

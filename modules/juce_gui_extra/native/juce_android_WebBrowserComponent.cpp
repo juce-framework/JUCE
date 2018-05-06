@@ -101,7 +101,8 @@ class WebBrowserComponent::Pimpl    : public AndroidViewComponent,
 {
 public:
     Pimpl (WebBrowserComponent& o)
-        : owner (o)
+        : AndroidViewComponent (true),
+          owner (o)
     {
         auto* env = getEnv();
 

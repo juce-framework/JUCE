@@ -23,9 +23,8 @@
 namespace juce
 {
 
-class ThreadPool::ThreadPoolThread  : public Thread
+struct ThreadPool::ThreadPoolThread  : public Thread
 {
-public:
     ThreadPoolThread (ThreadPool& p, size_t stackSize)
        : Thread ("Pool", stackSize), pool (p)
     {
@@ -38,7 +37,7 @@ public:
                 wait (500);
     }
 
-    ThreadPoolJob* volatile currentJob = nullptr;
+    std::atomic<ThreadPoolJob*> currentJob { nullptr };
     ThreadPool& pool;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThreadPoolThread)
@@ -85,7 +84,7 @@ void ThreadPoolJob::removeListener (Thread::Listener* listener)
 ThreadPoolJob* ThreadPoolJob::getCurrentThreadPoolJob()
 {
     if (auto* t = dynamic_cast<ThreadPool::ThreadPoolThread*> (Thread::getCurrentThread()))
-        return t->currentJob;
+        return t->currentJob.load();
 
     return nullptr;
 }

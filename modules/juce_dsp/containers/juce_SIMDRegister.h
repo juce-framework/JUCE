@@ -64,36 +64,40 @@ struct SIMDRegister
 {
     //==============================================================================
     /** The type that represents the individual constituents of the SIMD Register */
-    typedef Type ElementType;
+    using ElementType = Type;
 
     /** STL compatible value_type definition (same as ElementType). */
-    typedef ElementType value_type;
+    using value_type = ElementType;
 
     /** The corresponding primitive integer type, for example, this will be int32_t
         if type is a float. */
-    typedef typename SIMDInternal::MaskTypeFor<ElementType>::type MaskType;
+    using MaskType = typename SIMDInternal::MaskTypeFor<ElementType>::type;
 
     //==============================================================================
     // Here are some types which are needed internally
 
     /** The native primitive type (used internally). */
-    typedef typename SIMDInternal::PrimitiveType<ElementType>::type PrimitiveType;
+    using PrimitiveType = typename SIMDInternal::PrimitiveType<ElementType>::type;
 
     /** The native operations for this platform and type combination (used internally) */
-    typedef SIMDNativeOps<PrimitiveType> NativeOps;
+    using NativeOps = SIMDNativeOps<PrimitiveType>;
 
     /** The native type (used internally). */
-    typedef typename NativeOps::vSIMDType vSIMDType;
+    using vSIMDType = typename NativeOps::vSIMDType;
 
     /** The corresponding integer SIMDRegister type (used internally). */
-    typedef SIMDRegister<MaskType> vMaskType;
+    using vMaskType = SIMDRegister<MaskType>;
 
     /** The internal native type for the corresponding mask type (used internally). */
-    typedef typename vMaskType::vSIMDType vMaskSIMDType;
+    using vMaskSIMDType = typename vMaskType::vSIMDType;
 
     /** Wrapper for operations which need to be handled differently for complex
         and scalar types (used internally). */
-    typedef CmplxSIMDOps<ElementType> CmplxOps;
+    using CmplxOps = CmplxSIMDOps<ElementType>;
+
+    /** Type which is returned when using the subscript operator. The returned type
+        should be used just like the type ElementType. */
+    struct ElementAccess;
 
     //==============================================================================
     /** The size in bytes of this register. */
@@ -146,18 +150,34 @@ struct SIMDRegister
     //==============================================================================
     /** Returns the idx-th element of the receiver. Note that this does not check if idx
         is larger than the native register size. */
-    inline ElementType JUCE_VECTOR_CALLTYPE operator[] (size_t idx) const noexcept
+    inline ElementType JUCE_VECTOR_CALLTYPE get (size_t idx) const noexcept
     {
         jassert (idx < SIMDNumElements);
-        return reinterpret_cast<const ElementType*> (&value) [idx];
+        return CmplxOps::get (value, idx);
+    }
+
+    /** Sets the idx-th element of the receiver. Note that this does not check if idx
+        is larger than the native register size. */
+    inline void JUCE_VECTOR_CALLTYPE set (size_t idx, ElementType v) noexcept
+    {
+        jassert (idx < SIMDNumElements);
+        value = CmplxOps::set (value, idx, v);
+    }
+
+    //==============================================================================
+    /** Returns the idx-th element of the receiver. Note that this does not check if idx
+        is larger than the native register size. */
+    inline ElementType JUCE_VECTOR_CALLTYPE operator[] (size_t idx) const noexcept
+    {
+        return get (idx);
     }
 
     /** Returns the idx-th element of the receiver. Note that this does not check if idx
         is larger than the native register size. */
-    inline ElementType& JUCE_VECTOR_CALLTYPE operator[] (size_t idx) noexcept
+    inline ElementAccess JUCE_VECTOR_CALLTYPE operator[] (size_t idx) noexcept
     {
         jassert (idx < SIMDNumElements);
-        return reinterpret_cast<ElementType*> (&value) [idx];
+        return ElementAccess (*this, idx);
     }
 
     //==============================================================================
@@ -371,114 +391,9 @@ private:
     }
 };
 
-#ifndef DOXYGEN
-//==============================================================================
-/* This class is used internally by SIMDRegister to abstract away differences
-   in operations which are different for complex and pure floating point types. */
-
-// the pure floating-point version
-template <typename Scalar>
-struct CmplxSIMDOps
-{
-    typedef typename SIMDNativeOps<Scalar>::vSIMDType vSIMDType;
-
-    static inline vSIMDType JUCE_VECTOR_CALLTYPE load (const Scalar* a) noexcept
-    {
-        return SIMDNativeOps<Scalar>::load (a);
-    }
-
-    static inline void JUCE_VECTOR_CALLTYPE store (vSIMDType value, Scalar* dest) noexcept
-    {
-        SIMDNativeOps<Scalar>::store (value, dest);
-    }
-
-    static inline vSIMDType JUCE_VECTOR_CALLTYPE expand (Scalar s) noexcept
-    {
-        return SIMDNativeOps<Scalar>::expand (s);
-    }
-
-    static inline Scalar JUCE_VECTOR_CALLTYPE sum (vSIMDType a)  noexcept
-    {
-        return SIMDNativeOps<Scalar>::sum (a);
-    }
-
-    static inline vSIMDType JUCE_VECTOR_CALLTYPE mul (vSIMDType a, vSIMDType b) noexcept
-    {
-        return SIMDNativeOps<Scalar>::mul (a, b);
-    }
-
-    static inline vSIMDType JUCE_VECTOR_CALLTYPE muladd (vSIMDType a, vSIMDType b, vSIMDType c) noexcept
-    {
-        return SIMDNativeOps<Scalar>::multiplyAdd (a, b, c);
-    }
-};
-
-// The pure complex version
-template <typename Scalar>
-struct CmplxSIMDOps<std::complex<Scalar>>
-{
-    typedef typename SIMDNativeOps<Scalar>::vSIMDType vSIMDType;
-
-    static inline vSIMDType JUCE_VECTOR_CALLTYPE load (const std::complex<Scalar>* a) noexcept
-    {
-        return SIMDNativeOps<Scalar>::load (reinterpret_cast<const Scalar*> (a));
-    }
-
-    static inline void JUCE_VECTOR_CALLTYPE store (vSIMDType value, std::complex<Scalar>* dest) noexcept
-    {
-        SIMDNativeOps<Scalar>::store (value, reinterpret_cast<Scalar*> (dest));
-    }
-
-    static inline vSIMDType JUCE_VECTOR_CALLTYPE expand (std::complex<Scalar> s) noexcept
-    {
-        const int n = sizeof (vSIMDType) / sizeof (Scalar);
-
-        union
-        {
-            vSIMDType v;
-            Scalar floats[n];
-        } u;
-
-        for (int i = 0; i < n; ++i)
-            u.floats[i] = (i & 1) == 0 ? s.real() : s.imag();
-
-        return u.v;
-    }
-
-    static inline std::complex<Scalar> JUCE_VECTOR_CALLTYPE sum (vSIMDType a)  noexcept
-    {
-        vSIMDType result = SIMDNativeOps<Scalar>::oddevensum (a);
-        auto* ptr = reinterpret_cast<const Scalar*> (&result);
-        return std::complex<Scalar> (ptr[0], ptr[1]);
-    }
-
-    static inline vSIMDType JUCE_VECTOR_CALLTYPE mul (vSIMDType a, vSIMDType b)  noexcept
-    {
-        return SIMDNativeOps<Scalar>::cmplxmul (a, b);
-    }
-
-    static inline vSIMDType JUCE_VECTOR_CALLTYPE muladd (vSIMDType a, vSIMDType b, vSIMDType c) noexcept
-    {
-        return SIMDNativeOps<Scalar>::add (a, SIMDNativeOps<Scalar>::cmplxmul (b, c));
-    }
-};
-#endif
-
-//==============================================================================
-#ifndef DOXYGEN
- namespace util
- {
-     template <typename Type>
-     inline void snapToZero (SIMDRegister<Type>&) noexcept      {}
- }
-#endif
-
 } // namespace dsp
-
-// Extend some common used global functions to SIMDRegister types
-template <typename Type>
-inline dsp::SIMDRegister<Type> JUCE_VECTOR_CALLTYPE jmin (dsp::SIMDRegister<Type> a, dsp::SIMDRegister<Type> b) { return dsp::SIMDRegister<Type>::min (a, b); }
-template <typename Type>
-inline dsp::SIMDRegister<Type> JUCE_VECTOR_CALLTYPE jmax (dsp::SIMDRegister<Type> a, dsp::SIMDRegister<Type> b) { return dsp::SIMDRegister<Type>::max (a, b); }
-
 } // namespace juce
+
+#ifndef DOXYGEN
+ #include "juce_SIMDRegister_Impl.h"
+#endif

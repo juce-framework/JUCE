@@ -1304,6 +1304,8 @@ JUCE_API String JUCE_CALLTYPE operator+ (String string1, const char* string2);
 /** Concatenates two strings. */
 JUCE_API String JUCE_CALLTYPE operator+ (String string1, const wchar_t* string2);
 /** Concatenates two strings. */
+JUCE_API String JUCE_CALLTYPE operator+ (String string1, const std::string& string2);
+/** Concatenates two strings. */
 JUCE_API String JUCE_CALLTYPE operator+ (String string1, char characterToAppend);
 /** Concatenates two strings. */
 JUCE_API String JUCE_CALLTYPE operator+ (String string1, wchar_t characterToAppend);
@@ -1330,6 +1332,8 @@ JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, const wchar_t* strin
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, const String& string2);
 /** Appends a string to the end of the first one. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, StringRef string2);
+/** Appends a string to the end of the first one. */
+JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, const std::string& string2);
 
 /** Appends a decimal number to the end of a string. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, uint8 number);

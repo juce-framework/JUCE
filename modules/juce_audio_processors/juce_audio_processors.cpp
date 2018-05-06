@@ -82,10 +82,10 @@ static inline bool arrayContainsPlugin (const OwnedArray<PluginDescription>& lis
 
 #if JUCE_IOS
  #define JUCE_IOS_MAC_VIEW  UIView
- typedef UIViewComponent  ViewComponentBaseClass;
+ using ViewComponentBaseClass = UIViewComponent;
 #else
  #define JUCE_IOS_MAC_VIEW  NSView
- typedef NSViewComponent  ViewComponentBaseClass;
+ using ViewComponentBaseClass = NSViewComponent;
 #endif
 
 //==============================================================================

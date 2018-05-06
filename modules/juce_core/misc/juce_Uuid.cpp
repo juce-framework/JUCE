@@ -134,4 +134,24 @@ uint8  Uuid::getClockSeqAndReserved() const noexcept      { return uuid[8]; }
 uint8  Uuid::getClockSeqLow() const noexcept              { return uuid[9]; }
 uint64 Uuid::getNode() const noexcept                     { return (((uint64) ByteOrder::bigEndianShort (uuid + 10)) << 32) + ByteOrder::bigEndianInt (uuid + 12); }
 
+uint64 Uuid::hash() const noexcept
+{
+    uint64 result = 0;
+
+    for (auto n : uuid)
+        result = ((uint64) 101) * result + n;
+
+    return result;
+}
+
 } // namespace juce
+
+#if ! DOXYGEN
+namespace std
+{
+    template <> struct hash<juce::Uuid>
+    {
+        size_t operator() (const juce::Uuid& u) const noexcept   { return (size_t) u.hash(); }
+    };
+}
+#endif

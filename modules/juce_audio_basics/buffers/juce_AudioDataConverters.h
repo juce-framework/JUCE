@@ -308,7 +308,7 @@ public:
     class NonConst
     {
     public:
-        typedef void VoidType;
+        using VoidType = void;
         static inline void* toVoidPtr (VoidType* v) noexcept { return v; }
         enum { isConst = 0 };
     };
@@ -316,7 +316,7 @@ public:
     class Const
     {
     public:
-        typedef const void VoidType;
+        using VoidType = const void;
         static inline void* toVoidPtr (VoidType* v) noexcept { return const_cast<void*> (v); }
         enum { isConst = 1 };
     };

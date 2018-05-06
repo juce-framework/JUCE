@@ -54,12 +54,12 @@ public:
 
     //==============================================================================
     /** Tries to load a video from a local file.
-        @returns am error if the file failed to be loaded correctly
+        @returns an error if the file failed to be loaded correctly
     */
     Result load (const File& file);
 
     /** Tries to load a video from a URL.
-        @returns am error if the file failed to be loaded correctly
+        @returns an error if the file failed to be loaded correctly
     */
     Result load (const URL& url);
 
@@ -75,7 +75,7 @@ public:
     File getCurrentVideoFile() const;
 
     /** Returns the last URL that was loaded.
-        If nothing is open, or if it was a file rather than a URL, this will return File().
+        If nothing is open, or if it was a file rather than a URL, this will return URL().
     */
     URL getCurrentVideoURL() const;
 

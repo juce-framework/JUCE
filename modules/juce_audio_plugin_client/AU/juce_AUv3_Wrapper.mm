@@ -99,7 +99,7 @@ struct AudioProcessorHolder  : public ReferenceCountedObject
 
     std::unique_ptr<ViewConfig> viewConfiguration;
 
-    typedef ReferenceCountedObjectPtr<AudioProcessorHolder> Ptr;
+    using Ptr = ReferenceCountedObjectPtr<AudioProcessorHolder>;
 
 private:
     std::unique_ptr<AudioProcessor> processor;
@@ -908,7 +908,7 @@ public:
 
     void selectViewConfiguration (AUAudioUnitViewConfiguration* config) override
     {
-        processorHolder->viewConfiguration = new AudioProcessorHolder::ViewConfig { [config width], [config height], [config hostHasController] == YES };
+        processorHolder->viewConfiguration.reset (new AudioProcessorHolder::ViewConfig { [config width], [config height], [config hostHasController] == YES });
     }
    #endif
 

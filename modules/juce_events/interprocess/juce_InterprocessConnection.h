@@ -193,7 +193,8 @@ private:
     void connectionMadeInt();
     void connectionLostInt();
     void deliverDataInt (const MemoryBlock&);
-    bool readNextMessageInt();
+    bool readNextMessage();
+    int readData (void*, int);
 
     struct ConnectionThread;
     friend struct ConnectionThread;

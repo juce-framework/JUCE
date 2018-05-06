@@ -39,7 +39,7 @@ class Win32NativeFileChooser  : public ReferenceCountedObject,
                                 private Thread
 {
 public:
-    typedef ReferenceCountedObjectPtr<Win32NativeFileChooser> Ptr;
+    using Ptr = ReferenceCountedObjectPtr<Win32NativeFileChooser>;
 
     enum { charsAvailableForResult = 32768 };
 

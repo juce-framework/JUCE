@@ -82,6 +82,12 @@ inline InputStream* createAssetInputStream (const char* resourcePath)
    #if JUCE_IOS
     auto assetsDir = File::getSpecialLocation (File::currentExecutableFile)
                           .getParentDirectory().getChildFile ("Assets");
+   #elif JUCE_MAC
+    auto assetsDir = File::getSpecialLocation (File::currentExecutableFile)
+                          .getParentDirectory().getParentDirectory().getChildFile ("Resources").getChildFile ("Assets");
+
+    if (! assetsDir.exists())
+        assetsDir = getExamplesDirectory().getChildFile ("Assets");
    #else
     auto assetsDir = getExamplesDirectory().getChildFile ("Assets");
    #endif

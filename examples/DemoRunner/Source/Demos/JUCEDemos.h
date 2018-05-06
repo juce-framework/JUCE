@@ -36,7 +36,6 @@
 #define REGISTER_DEMO(DemoName, category, heavyweight) JUCEDemos::registerDemo ([] { return new DemoName(); }, CREATE_FILEPATH(DemoName, category), JUCE_STRINGIFY (category), heavyweight);
 #define REGISTER_DEMO_WITH_FILENAME(DemoName, category, fileName, heavyweight) JUCEDemos::registerDemo ([] { return new DemoName(); }, CREATE_FILEPATH(fileName, category), JUCE_STRINGIFY (category), heavyweight);
 
-
 //==============================================================================
 struct JUCEDemos
 {

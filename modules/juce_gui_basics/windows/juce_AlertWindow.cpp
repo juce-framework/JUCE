@@ -523,7 +523,7 @@ bool AlertWindow::keyPressed (const KeyPress& key)
         }
     }
 
-    if (key.isKeyCode (KeyPress::escapeKey) && escapeKeyCancels && buttons.size() == 0)
+    if (key.isKeyCode (KeyPress::escapeKey) && escapeKeyCancels)
     {
         exitModalState (0);
         return true;

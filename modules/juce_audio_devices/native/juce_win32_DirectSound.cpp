@@ -23,7 +23,7 @@
 extern "C"
 {
     // Declare just the minimum number of interfaces for the DSound objects that we need..
-    typedef struct typeDSBUFFERDESC
+    struct DSBUFFERDESC
     {
         DWORD dwSize;
         DWORD dwFlags;
@@ -31,7 +31,7 @@ extern "C"
         DWORD dwReserved;
         LPWAVEFORMATEX lpwfxFormat;
         GUID guid3DAlgorithm;
-    } DSBUFFERDESC;
+    };
 
     struct IDirectSoundBuffer;
 
@@ -80,14 +80,14 @@ extern "C"
     };
 
     //==============================================================================
-    typedef struct typeDSCBUFFERDESC
+    struct DSCBUFFERDESC
     {
         DWORD dwSize;
         DWORD dwFlags;
         DWORD dwBufferBytes;
         DWORD dwReserved;
         LPWAVEFORMATEX lpwfxFormat;
-    } DSCBUFFERDESC;
+    };
 
     struct IDirectSoundCaptureBuffer;
 

@@ -267,14 +267,15 @@ private:
     {
         auto clampedValue = jlimit (static_cast<ValueType> (0), static_cast<ValueType> (1), value);
 
-        // If you his this assertion then either your normalisation function is not working
+        // If you hit this assertion then either your normalisation function is not working
         // correctly or your input is out of the expected bounds.
         jassert (clampedValue == value);
 
         return clampedValue;
     }
 
-    typedef std::function<ValueType(ValueType, ValueType, ValueType)> ConverstionFunction;
+    using ConverstionFunction = std::function<ValueType(ValueType, ValueType, ValueType)>;
+
     ConverstionFunction convertFrom0To1Function  = {},
                         convertTo0To1Function    = {},
                         snapToLegalValueFunction = {};

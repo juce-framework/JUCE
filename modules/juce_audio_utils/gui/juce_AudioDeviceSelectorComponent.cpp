@@ -116,7 +116,7 @@ public:
 
             g.setFont (height * 0.6f);
             g.setColour (findColour (ListBox::textColourId, true).withMultipliedAlpha (enabled ? 1.0f : 0.6f));
-            g.drawText (item, x, 0, width - x - 2, height, Justification::centredLeft, true);
+            g.drawText (item, x + 5, 0, width - x - 5, height, Justification::centredLeft, true);
         }
     }
 
@@ -178,7 +178,7 @@ private:
 
     int getTickX() const
     {
-        return getRowHeight() + 5;
+        return getRowHeight();
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiInputSelectorComponentListBox)

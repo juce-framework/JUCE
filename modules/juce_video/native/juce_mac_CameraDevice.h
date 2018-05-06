@@ -26,8 +26,9 @@
 
 struct CameraDevice::Pimpl
 {
-    Pimpl (const String&, int /*index*/, int /*minWidth*/, int /*minHeight*/,
+    Pimpl (CameraDevice& ownerToUse, const String&, int /*index*/, int /*minWidth*/, int /*minHeight*/,
            int /*maxWidth*/, int /*maxHeight*/, bool useHighQuality)
+        : owner (ownerToUse)
     {
         JUCE_AUTORELEASEPOOL
         {
@@ -42,11 +43,20 @@ struct CameraDevice::Pimpl
             static DelegateClass cls;
             callbackDelegate = (id<AVCaptureFileOutputRecordingDelegate>) [cls.createInstance() init];
             DelegateClass::setOwner (callbackDelegate, this);
+
+            SEL runtimeErrorSel = NSSelectorFromString (nsStringLiteral ("captureSessionRuntimeError:"));
+
+            [[NSNotificationCenter defaultCenter] addObserver: callbackDelegate
+                                                     selector: runtimeErrorSel
+                                                         name: AVCaptureSessionRuntimeErrorNotification
+                                                       object: session];
         }
     }
 
     ~Pimpl()
     {
+        [[NSNotificationCenter defaultCenter] removeObserver: callbackDelegate];
+
         [session stopRunning];
         removeImageCapture();
         removeMovieCapture();
@@ -113,6 +123,19 @@ struct CameraDevice::Pimpl
             refreshConnections();
     }
 
+    void takeStillPicture (std::function<void (const Image&)> pictureTakenCallbackToUse)
+    {
+        if (pictureTakenCallbackToUse == nullptr)
+        {
+            jassertfalse;
+            return;
+        }
+
+        pictureTakenCallback = static_cast<std::function<void (const Image&)>&&> (pictureTakenCallbackToUse);
+
+        triggerImageCapture();
+    }
+
     void startRecordingToFile (const File& file, int /*quality*/)
     {
         stopRecording();
@@ -150,21 +173,10 @@ struct CameraDevice::Pimpl
         return nil;
     }
 
-    void handleImageCapture (const void* data, size_t size)
+    void handleImageCapture (const Image& image)
     {
-        auto image = ImageFileFormat::loadFrom (data, size);
-
         const ScopedLock sl (listenerLock);
-
-        if (! listeners.isEmpty())
-        {
-            for (int i = listeners.size(); --i >= 0;)
-                if (auto* l = listeners[i])
-                    l->imageReceived (image);
-
-            if (! listeners.isEmpty())
-                triggerImageCapture();
-        }
+        listeners.call ([=] (Listener& l) { l.imageReceived (image); });
     }
 
     void triggerImageCapture()
@@ -174,14 +186,27 @@ struct CameraDevice::Pimpl
         if (auto* videoConnection = getVideoConnection())
         {
             [imageOutput captureStillImageAsynchronouslyFromConnection: videoConnection
-                                                     completionHandler: ^(CMSampleBufferRef sampleBuffer, NSError*)
+                                                     completionHandler: ^(CMSampleBufferRef sampleBuffer, NSError* error)
             {
-                auto buffer = CMSampleBufferGetDataBuffer (sampleBuffer);
-                size_t size = CMBlockBufferGetDataLength (buffer);
-                jassert (CMBlockBufferIsRangeContiguous (buffer, 0, size)); // TODO: need to add code to handle this if it happens
-                char* data = nullptr;
-                CMBlockBufferGetDataPointer (buffer, 0, &size, nullptr, &data);
-                handleImageCapture (data, size);
+                if (error != nil)
+                {
+                    JUCE_CAMERA_LOG ("Still picture capture failed, error: " + nsStringToJuce (error.localizedDescription));
+                    jassertfalse;
+                    return;
+                }
+
+                NSData* imageData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation: sampleBuffer];
+
+                auto image = ImageFileFormat::loadFrom (imageData.bytes, (size_t) imageData.length);
+
+                handleImageCapture (image);
+
+                WeakReference<Pimpl> weakRef (this);
+                MessageManager::callAsync ([weakRef, image]() mutable
+                {
+                    if (weakRef != nullptr && weakRef->pictureTakenCallback != nullptr)
+                        weakRef->pictureTakenCallback (image);
+                });
             }];
         }
     }
@@ -189,7 +214,7 @@ struct CameraDevice::Pimpl
     void addListener (CameraDevice::Listener* listenerToAdd)
     {
         const ScopedLock sl (listenerLock);
-        listeners.addIfNotAlreadyThere (listenerToAdd);
+        listeners.add (listenerToAdd);
 
         if (listeners.size() == 1)
             triggerImageCapture();
@@ -198,7 +223,7 @@ struct CameraDevice::Pimpl
     void removeListener (CameraDevice::Listener* listenerToRemove)
     {
         const ScopedLock sl (listenerLock);
-        listeners.removeFirstMatchingValue (listenerToRemove);
+        listeners.remove (listenerToRemove);
     }
 
     static StringArray getAvailableDevices()
@@ -208,6 +233,15 @@ struct CameraDevice::Pimpl
         return results;
     }
 
+    void cameraSessionRuntimeError (const String& error)
+    {
+        JUCE_CAMERA_LOG ("cameraSessionRuntimeError(), error = " + error);
+
+        if (owner.onErrorOccurred != nullptr)
+            owner.onErrorOccurred (error);
+    }
+
+    CameraDevice& owner;
     AVCaptureView* captureView = nil;
     AVCaptureSession* session = nil;
     AVCaptureMovieFileOutput* fileOutput = nil;
@@ -218,8 +252,12 @@ struct CameraDevice::Pimpl
     Time firstPresentationTime;
     bool isRecording = false;
 
-    Array<CameraDevice::Listener*> listeners;
     CriticalSection listenerLock;
+    ListenerList<Listener> listeners;
+
+    std::function<void (const Image&)> pictureTakenCallback;
+
+    JUCE_DECLARE_WEAK_REFERENCEABLE (Pimpl)
 
 private:
     //==============================================================================
@@ -235,17 +273,29 @@ private:
             addMethod (@selector (captureOutput:didResumeRecordingToOutputFileAtURL: fromConnections:),       didResumeRecordingToOutputFileAtURL,  "v@:@@@");
             addMethod (@selector (captureOutput:willFinishRecordingToOutputFileAtURL:fromConnections:error:), willFinishRecordingToOutputFileAtURL, "v@:@@@@");
 
+            SEL runtimeErrorSel = NSSelectorFromString (nsStringLiteral ("captureSessionRuntimeError:"));
+            addMethod (runtimeErrorSel, sessionRuntimeError, "v@:@");
+
             registerClass();
         }
 
         static void setOwner (id self, Pimpl* owner)   { object_setInstanceVariable (self, "owner", owner); }
-        static Pimpl* getOwner (id self)               { return getIvar<Pimpl*> (self, "owner"); }
+        static Pimpl& getOwner (id self)               { return *getIvar<Pimpl*> (self, "owner"); }
 
     private:
         static void didStartRecordingToOutputFileAtURL (id, SEL, AVCaptureFileOutput*, NSURL*, NSArray*) {}
         static void didPauseRecordingToOutputFileAtURL (id, SEL, AVCaptureFileOutput*, NSURL*, NSArray*) {}
         static void didResumeRecordingToOutputFileAtURL (id, SEL, AVCaptureFileOutput*, NSURL*, NSArray*) {}
         static void willFinishRecordingToOutputFileAtURL (id, SEL, AVCaptureFileOutput*, NSURL*, NSArray*, NSError*) {}
+
+        static void sessionRuntimeError (id self, SEL, NSNotification* notification)
+        {
+            JUCE_CAMERA_LOG (nsStringToJuce ([notification description]));
+
+            NSError* error = notification.userInfo[AVCaptureSessionErrorKey];
+            auto errorString = error != nil ? nsStringToJuce (error.localizedDescription) : String();
+            getOwner (self).cameraSessionRuntimeError (errorString);
+        }
     };
 
     JUCE_DECLARE_NON_COPYABLE (Pimpl)

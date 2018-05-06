@@ -32,28 +32,28 @@ namespace juce
 // Definitions for the int8, int16, int32, int64 and pointer_sized_int types.
 
 /** A platform-independent 8-bit signed integer type. */
-typedef signed char                 int8;
+using int8      = signed char;
 /** A platform-independent 8-bit unsigned integer type. */
-typedef unsigned char               uint8;
+using uint8     = unsigned char;
 /** A platform-independent 16-bit signed integer type. */
-typedef signed short                int16;
+using int16     = signed short;
 /** A platform-independent 16-bit unsigned integer type. */
-typedef unsigned short              uint16;
+using uint16    = unsigned short;
 /** A platform-independent 32-bit signed integer type. */
-typedef signed int                  int32;
+using int32     = signed int;
 /** A platform-independent 32-bit unsigned integer type. */
 typedef unsigned int                uint32;
 
 #if JUCE_MSVC
   /** A platform-independent 64-bit integer type. */
-  typedef __int64                   int64;
+  using int64  = __int64;
   /** A platform-independent 64-bit unsigned integer type. */
-  typedef unsigned __int64          uint64;
+  using uint64 = unsigned __int64;
 #else
   /** A platform-independent 64-bit integer type. */
-  typedef long long                 int64;
+  using int64  = long long;
   /** A platform-independent 64-bit unsigned integer type. */
-  typedef unsigned long long        uint64;
+  using uint64 = unsigned long long;
 #endif
 
 #ifndef DOXYGEN
@@ -67,23 +67,23 @@ typedef unsigned int                uint32;
 
 #if JUCE_64BIT
   /** A signed integer type that's guaranteed to be large enough to hold a pointer without truncating it. */
-  typedef int64                     pointer_sized_int;
+  using pointer_sized_int  = int64;
   /** An unsigned integer type that's guaranteed to be large enough to hold a pointer without truncating it. */
-  typedef uint64                    pointer_sized_uint;
+  using pointer_sized_uint = uint64;
 #elif JUCE_MSVC
   /** A signed integer type that's guaranteed to be large enough to hold a pointer without truncating it. */
-  typedef _W64 int                  pointer_sized_int;
+  using pointer_sized_int  = _W64 int;
   /** An unsigned integer type that's guaranteed to be large enough to hold a pointer without truncating it. */
-  typedef _W64 unsigned int         pointer_sized_uint;
+  using pointer_sized_uint = _W64 unsigned int;
 #else
   /** A signed integer type that's guaranteed to be large enough to hold a pointer without truncating it. */
-  typedef int                       pointer_sized_int;
+  using pointer_sized_int  = int;
   /** An unsigned integer type that's guaranteed to be large enough to hold a pointer without truncating it. */
-  typedef unsigned int              pointer_sized_uint;
+  using pointer_sized_uint = unsigned int;
 #endif
 
 #if JUCE_WINDOWS && ! JUCE_MINGW
-  typedef pointer_sized_int ssize_t;
+  using ssize_t = pointer_sized_int;
 #endif
 
 //==============================================================================
@@ -627,24 +627,24 @@ namespace TypeHelpers
 
         @tags{Core}
     */
-    template <typename Type> struct ParameterType                   { typedef const Type& type; };
+    template <typename Type> struct ParameterType                   { using type = const Type&; };
 
    #if ! DOXYGEN
-    template <typename Type> struct ParameterType <Type&>           { typedef Type& type; };
-    template <typename Type> struct ParameterType <Type*>           { typedef Type* type; };
-    template <>              struct ParameterType <char>            { typedef char type; };
-    template <>              struct ParameterType <unsigned char>   { typedef unsigned char type; };
-    template <>              struct ParameterType <short>           { typedef short type; };
-    template <>              struct ParameterType <unsigned short>  { typedef unsigned short type; };
-    template <>              struct ParameterType <int>             { typedef int type; };
-    template <>              struct ParameterType <unsigned int>    { typedef unsigned int type; };
-    template <>              struct ParameterType <long>            { typedef long type; };
-    template <>              struct ParameterType <unsigned long>   { typedef unsigned long type; };
-    template <>              struct ParameterType <int64>           { typedef int64 type; };
-    template <>              struct ParameterType <uint64>          { typedef uint64 type; };
-    template <>              struct ParameterType <bool>            { typedef bool type; };
-    template <>              struct ParameterType <float>           { typedef float type; };
-    template <>              struct ParameterType <double>          { typedef double type; };
+    template <typename Type> struct ParameterType <Type&>           { using type = Type&; };
+    template <typename Type> struct ParameterType <Type*>           { using type = Type*; };
+    template <>              struct ParameterType <char>            { using type = char; };
+    template <>              struct ParameterType <unsigned char>   { using type = unsigned char; };
+    template <>              struct ParameterType <short>           { using type = short; };
+    template <>              struct ParameterType <unsigned short>  { using type = unsigned short; };
+    template <>              struct ParameterType <int>             { using type = int; };
+    template <>              struct ParameterType <unsigned int>    { using type = unsigned int; };
+    template <>              struct ParameterType <long>            { using type = long; };
+    template <>              struct ParameterType <unsigned long>   { using type = unsigned long; };
+    template <>              struct ParameterType <int64>           { using type = int64; };
+    template <>              struct ParameterType <uint64>          { using type = uint64; };
+    template <>              struct ParameterType <bool>            { using type = bool; };
+    template <>              struct ParameterType <float>           { using type = float; };
+    template <>              struct ParameterType <double>          { using type = double; };
    #endif
 
     /** These templates are designed to take a type, and if it's a double, they return a double
@@ -652,10 +652,10 @@ namespace TypeHelpers
 
         @tags{Core}
     */
-    template <typename Type> struct SmallestFloatType               { typedef float  type; };
+    template <typename Type> struct SmallestFloatType               { using type = float; };
 
    #if ! DOXYGEN
-    template <>              struct SmallestFloatType <double>      { typedef double type; };
+    template <>              struct SmallestFloatType <double>      { using type = double; };
    #endif
 
     /** These templates are designed to take an integer type, and return an unsigned int
@@ -666,10 +666,10 @@ namespace TypeHelpers
     template <int bytes>     struct UnsignedTypeWithSize            {};
 
    #if ! DOXYGEN
-    template <>              struct UnsignedTypeWithSize<1>         { typedef uint8  type; };
-    template <>              struct UnsignedTypeWithSize<2>         { typedef uint16 type; };
-    template <>              struct UnsignedTypeWithSize<4>         { typedef uint32 type; };
-    template <>              struct UnsignedTypeWithSize<8>         { typedef uint64 type; };
+    template <>              struct UnsignedTypeWithSize<1>         { using type = uint8; };
+    template <>              struct UnsignedTypeWithSize<2>         { using type = uint16; };
+    template <>              struct UnsignedTypeWithSize<4>         { using type = uint32; };
+    template <>              struct UnsignedTypeWithSize<8>         { using type = uint64; };
    #endif
 }
 

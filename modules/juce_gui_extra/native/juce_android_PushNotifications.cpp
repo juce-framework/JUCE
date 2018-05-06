@@ -1427,31 +1427,14 @@ struct PushNotifications::Pimpl
             propertiesDynamicObject->setProperty ("clickAction",           juceString (clickAction.get()));
             propertiesDynamicObject->setProperty ("bodyLocalizationKey",   juceString (bodyLocalizationKey.get()));
             propertiesDynamicObject->setProperty ("titleLocalizationKey",  juceString (titleLocalizationKey.get()));
-            propertiesDynamicObject->setProperty ("bodyLocalizationArgs",  jobjectArrayToStringArray (bodyLocalizationArgs));
-            propertiesDynamicObject->setProperty ("titleLocalizationArgs", jobjectArrayToStringArray (titleLocalizationArgs));
+            propertiesDynamicObject->setProperty ("bodyLocalizationArgs",  javaStringArrayToJuce (bodyLocalizationArgs));
+            propertiesDynamicObject->setProperty ("titleLocalizationArgs", javaStringArrayToJuce (titleLocalizationArgs));
             propertiesDynamicObject->setProperty ("link",                  link.get() != 0 ? juceString ((jstring) env->CallObjectMethod (link, AndroidUri.toString)) : String());
         }
 
         n.properties = var (propertiesDynamicObject);
 
         return n;
-    }
-
-    static StringArray jobjectArrayToStringArray (const LocalRef<jobjectArray>& array)
-    {
-        if (array == 0)
-            return {};
-
-        auto* env = getEnv();
-
-        const int size = env->GetArrayLength (array.get());
-
-        StringArray stringArray;
-
-        for (int i = 0; i < size; ++i)
-            stringArray.add (juceString ((jstring) env->GetObjectArrayElement (array.get(), (jsize) i)));
-
-        return stringArray;
     }
   #endif
 

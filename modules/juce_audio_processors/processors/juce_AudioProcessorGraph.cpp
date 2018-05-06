@@ -348,7 +348,7 @@ struct RenderSequenceBuilder
     }
 
     //==============================================================================
-    typedef AudioProcessorGraph::NodeID NodeID;
+    using NodeID = AudioProcessorGraph::NodeID;
 
     AudioProcessorGraph& graph;
     RenderSequence& sequence;

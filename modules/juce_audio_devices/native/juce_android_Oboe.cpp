@@ -48,8 +48,8 @@ struct OboeAudioIODeviceBufferHelpers<int16>
     {
         for (int i = 0; i < audioBuffer.getNumChannels(); ++i)
         {
-            typedef AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::NonConst> DstSampleType;
-            typedef AudioData::Pointer<AudioData::Int16,   AudioData::NativeEndian, AudioData::Interleaved,    AudioData::Const>    SrcSampleType;
+            using DstSampleType = AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::NonConst>;
+            using SrcSampleType = AudioData::Pointer<AudioData::Int16,   AudioData::NativeEndian, AudioData::Interleaved,    AudioData::Const>;
 
             DstSampleType dstData (audioBuffer.getWritePointer (i));
             SrcSampleType srcData (srcInterleaved + i, audioBuffer.getNumChannels());
@@ -61,8 +61,8 @@ struct OboeAudioIODeviceBufferHelpers<int16>
     {
         for (int i = 0; i < audioBuffer.getNumChannels(); ++i)
         {
-            typedef AudioData::Pointer<AudioData::Int16,   AudioData::NativeEndian, AudioData::Interleaved,    AudioData::NonConst> DstSampleType;
-            typedef AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const>    SrcSampleType;
+            using DstSampleType = AudioData::Pointer<AudioData::Int16,   AudioData::NativeEndian, AudioData::Interleaved,    AudioData::NonConst>;
+            using SrcSampleType = AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const>;
 
             DstSampleType dstData (dstInterleaved + i, audioBuffer.getNumChannels());
             SrcSampleType srcData (audioBuffer.getReadPointer (i));
@@ -95,8 +95,8 @@ struct OboeAudioIODeviceBufferHelpers<float>
 
         for (int i = 0; i < audioBuffer.getNumChannels(); ++i)
         {
-            typedef AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::NonConst> DstSampleType;
-            typedef AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::Interleaved,    AudioData::Const>    SrcSampleType;
+            using DstSampleType = AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::NonConst>;
+            using SrcSampleType = AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::Interleaved,    AudioData::Const>;
 
             DstSampleType dstData (audioBuffer.getWritePointer (i));
             SrcSampleType srcData (srcInterleaved + i, audioBuffer.getNumChannels());
@@ -115,8 +115,8 @@ struct OboeAudioIODeviceBufferHelpers<float>
 
         for (int i = 0; i < audioBuffer.getNumChannels(); ++i)
         {
-            typedef AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::Interleaved,    AudioData::NonConst> DstSampleType;
-            typedef AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const>    SrcSampleType;
+            using DstSampleType = AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::Interleaved,    AudioData::NonConst>;
+            using SrcSampleType = AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const>;
 
             DstSampleType dstData (dstInterleaved + i, audioBuffer.getNumChannels());
             SrcSampleType srcData (audioBuffer.getReadPointer (i));

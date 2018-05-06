@@ -79,7 +79,7 @@ template <class ObjectType, class ReferenceCountingType = ReferenceCountedObject
 class WeakReference
 {
 public:
-    /** Creates a null SafePointer. */
+    /** Creates a null WeakReference. */
     inline WeakReference() noexcept {}
 
     /** Creates a WeakReference that points at the given object. */

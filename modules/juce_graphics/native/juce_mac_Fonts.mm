@@ -469,7 +469,7 @@ class OSXTypeface  : public Typeface
 {
 public:
     OSXTypeface (const Font& font)
-        : Typeface (font.getTypefaceName(), font.getTypefaceStyle()), isMemoryFont (false)
+        : Typeface (font.getTypefaceName(), font.getTypefaceStyle()), canBeUsedForLayout (true)
     {
         ctFontRef = CoreTextTypeLayout::createCTFont (font, referenceFontSize, renderingTransform);
 
@@ -481,7 +481,7 @@ public:
     }
 
     OSXTypeface (const void* data, size_t dataSize)
-        : Typeface ({}, {}), isMemoryFont (true), dataCopy (data, dataSize)
+        : Typeface ({}, {}), canBeUsedForLayout (false), dataCopy (data, dataSize)
     {
         // We can't use CFDataCreate here as this triggers a false positive in ASAN
         // so copy the data manually and use CFDataCreateWithBytesNoCopy
@@ -502,6 +502,10 @@ public:
 
         if (fontRef != nullptr)
         {
+           #if JUCE_MAC && defined (MAC_OS_X_VERSION_10_8) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_8
+            canBeUsedForLayout = CTFontManagerRegisterGraphicsFont (fontRef, nullptr);
+           #endif
+
             ctFontRef = CTFontCreateWithGraphicsFont (fontRef, referenceFontSize, nullptr, nullptr);
 
             if (ctFontRef != nullptr)
@@ -540,16 +544,28 @@ public:
 
         CFStringRef keys[] = { kCTFontAttributeName, kCTLigatureAttributeName };
         CFTypeRef values[] = { ctFontRef, numberRef };
-        attributedStringAtts = CFDictionaryCreate (nullptr, (const void**) &keys, (const void**) &values, numElementsInArray (keys),
+        attributedStringAtts = CFDictionaryCreate (nullptr, (const void**) &keys,
+                                                   (const void**) &values, numElementsInArray (keys),
                                                    &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
         CFRelease (numberRef);
     }
 
     ~OSXTypeface()
     {
-        if (attributedStringAtts != nullptr)    CFRelease (attributedStringAtts);
-        if (fontRef != nullptr)                 CGFontRelease (fontRef);
-        if (ctFontRef != nullptr)               CFRelease (ctFontRef);
+        if (attributedStringAtts != nullptr)
+            CFRelease (attributedStringAtts);
+
+        if (fontRef != nullptr)
+        {
+           #if JUCE_MAC && defined (MAC_OS_X_VERSION_10_8) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_8
+            CTFontManagerUnregisterGraphicsFont (fontRef, nullptr);
+           #endif
+
+            CGFontRelease (fontRef);
+        }
+
+        if (ctFontRef != nullptr)
+            CFRelease (ctFontRef);
     }
 
     float getAscent() const override                 { return ascent; }
@@ -650,7 +666,7 @@ public:
     float fontHeightToPointsFactor = 1.0f;
     CGAffineTransform renderingTransform = CGAffineTransformIdentity;
 
-    const bool isMemoryFont;
+    bool canBeUsedForLayout;
 
 private:
     MemoryBlock dataCopy;
@@ -810,40 +826,20 @@ Typeface::Ptr Font::getDefaultTypefaceForFont (const Font& font)
     return Typeface::createSystemTypefaceFor (newFont);
 }
 
-// Due to an old and unfathomable bug in CoreText which prevents the layout working with
-// typefaces that were loaded from memory, this function checks whether we need to use a
-// fallback layout algorithm.
 static bool canAllTypefacesBeUsedInLayout (const AttributedString& text)
 {
-   #if JUCE_MAC && defined (MAC_OS_X_VERSION_10_11) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_11
-    ignoreUnused (text);
-    return true;
-   #else
-
-   #if JUCE_MAC
-    if (SystemStats::getOperatingSystemType() >= SystemStats::OperatingSystemType::MacOSX_10_11)
-        return true;
-   #endif
-
     auto numCharacterAttributes = text.getNumAttributes();
 
     for (int i = 0; i < numCharacterAttributes; ++i)
     {
-        auto* t = text.getAttribute(i).font.getTypeface();
+        if (auto tf = dynamic_cast<OSXTypeface*> (text.getAttribute(i).font.getTypeface()))
+            if (tf->canBeUsedForLayout)
+                continue;
 
-        if (auto tf = dynamic_cast<OSXTypeface*> (t))
-        {
-            if (tf->isMemoryFont)
-                return false;
-        }
-        else if (dynamic_cast<CustomTypeface*> (t) != nullptr)
-        {
-            return false;
-        }
+        return false;
     }
 
     return true;
-   #endif
 }
 
 bool TextLayout::createNativeLayout (const AttributedString& text)
@@ -854,7 +850,6 @@ bool TextLayout::createNativeLayout (const AttributedString& text)
         return true;
     }
 
-    ignoreUnused (text);
     return false;
 }
 

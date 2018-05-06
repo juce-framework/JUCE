@@ -172,8 +172,8 @@ struct BufferHelpers<int16>
     {
         for (int i = 0; i < audioBuffer.getNumChannels(); ++i)
         {
-            typedef AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::NonConst> DstSampleType;
-            typedef AudioData::Pointer<AudioData::Int16,   AudioData::LittleEndian, AudioData::Interleaved,    AudioData::Const>    SrcSampleType;
+            using DstSampleType = AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::NonConst>;
+            using SrcSampleType = AudioData::Pointer<AudioData::Int16,   AudioData::LittleEndian, AudioData::Interleaved,    AudioData::Const>;
 
             DstSampleType dstData (audioBuffer.getWritePointer (i));
             SrcSampleType srcData (srcInterleaved + i, audioBuffer.getNumChannels());
@@ -185,8 +185,8 @@ struct BufferHelpers<int16>
     {
         for (int i = 0; i < audioBuffer.getNumChannels(); ++i)
         {
-            typedef AudioData::Pointer<AudioData::Int16,   AudioData::LittleEndian, AudioData::Interleaved, AudioData::NonConst> DstSampleType;
-            typedef AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const> SrcSampleType;
+            using DstSampleType = AudioData::Pointer<AudioData::Int16,   AudioData::LittleEndian, AudioData::Interleaved, AudioData::NonConst>;
+            using SrcSampleType = AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const>;
 
             DstSampleType dstData (dstInterleaved + i, audioBuffer.getNumChannels());
             SrcSampleType srcData (audioBuffer.getReadPointer (i));
@@ -231,8 +231,8 @@ struct BufferHelpers<float>
 
         for (int i = 0; i < audioBuffer.getNumChannels(); ++i)
         {
-            typedef AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::NonConst> DstSampleType;
-            typedef AudioData::Pointer<AudioData::Float32, AudioData::LittleEndian, AudioData::Interleaved,    AudioData::Const>    SrcSampleType;
+            using DstSampleType = AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::NonConst>;
+            using SrcSampleType = AudioData::Pointer<AudioData::Float32, AudioData::LittleEndian, AudioData::Interleaved,    AudioData::Const>;
 
             DstSampleType dstData (audioBuffer.getWritePointer (i));
             SrcSampleType srcData (srcInterleaved + i, audioBuffer.getNumChannels());
@@ -250,8 +250,8 @@ struct BufferHelpers<float>
 
         for (int i = 0; i < audioBuffer.getNumChannels(); ++i)
         {
-            typedef AudioData::Pointer<AudioData::Float32, AudioData::LittleEndian, AudioData::Interleaved,    AudioData::NonConst> DstSampleType;
-            typedef AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const>    SrcSampleType;
+            using DstSampleType = AudioData::Pointer<AudioData::Float32, AudioData::LittleEndian, AudioData::Interleaved,    AudioData::NonConst>;
+            using SrcSampleType = AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const>;
 
             DstSampleType dstData (dstInterleaved + i, audioBuffer.getNumChannels());
             SrcSampleType srcData (audioBuffer.getReadPointer (i));
@@ -383,7 +383,7 @@ public:
     template <typename T>
     struct OpenSLQueueRunnerPlayer      : OpenSLQueueRunner<T, OpenSLQueueRunnerPlayer<T>, SLPlayItf_>
     {
-        typedef OpenSLQueueRunner<T, OpenSLQueueRunnerPlayer<T>, SLPlayItf_> Base;
+        using Base = OpenSLQueueRunner<T, OpenSLQueueRunnerPlayer<T>, SLPlayItf_>;
 
         enum { isPlayer = 1 };
 
@@ -425,7 +425,7 @@ public:
     template <typename T>
     struct OpenSLQueueRunnerRecorder      : OpenSLQueueRunner<T, OpenSLQueueRunnerRecorder<T>, SLRecordItf_>
     {
-        typedef OpenSLQueueRunner<T, OpenSLQueueRunnerRecorder<T>, SLRecordItf_> Base;
+        using Base = OpenSLQueueRunner<T, OpenSLQueueRunnerRecorder<T>, SLRecordItf_>;
 
         enum { isPlayer = 0 };
 
@@ -586,7 +586,7 @@ public:
                                       int numBuffersToUse);
 
         //==============================================================================
-        typedef SLresult (*CreateEngineFunc)(SLObjectItf*,SLuint32,const SLEngineOption*,SLuint32,const SLInterfaceID*,const SLboolean*);
+        typedef SLresult (*CreateEngineFunc)(SLObjectItf*, SLuint32, const SLEngineOption*, SLuint32, const SLInterfaceID*, const SLboolean*);
 
         //==============================================================================
         int inputChannels, outputChannels;

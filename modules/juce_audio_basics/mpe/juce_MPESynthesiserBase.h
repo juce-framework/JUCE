@@ -165,7 +165,7 @@ public:
     void setLegacyModePitchbendRange (int pitchbendRange);
 
     //==============================================================================
-    typedef MPEInstrument::TrackingMode TrackingMode;
+    using TrackingMode = MPEInstrument::TrackingMode;
 
     /** Set the MPE tracking mode for the pressure dimension. */
     void setPressureTrackingMode (TrackingMode modeToUse);

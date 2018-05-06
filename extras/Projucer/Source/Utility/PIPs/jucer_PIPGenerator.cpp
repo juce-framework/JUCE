@@ -313,7 +313,7 @@ ValueTree PIPGenerator::createExporterChild (const String& exporterName)
 
     exporter.setProperty (Ids::targetFolder, "Builds/" + ProjectExporter::getTargetFolderForExporter (exporterName), nullptr);
 
-    if (isMobileExporter (exporterName))
+    if (isMobileExporter (exporterName) || (metadata[Ids::name] == "AUv3SynthPlugin" && exporterName == "XCODE_MAC"))
     {
         auto juceDir = getAppSettings().getStoredPath (Ids::jucePath).toString();
 
@@ -321,8 +321,8 @@ ValueTree PIPGenerator::createExporterChild (const String& exporterName)
         {
             auto assetsDirectoryPath = File (juceDir).getChildFile ("examples").getChildFile ("Assets").getFullPathName();
 
-            exporter.setProperty (exporterName == "XCODE_IPHONE" ? Ids::customXcodeResourceFolders
-                                                                 : Ids::androidExtraAssetsFolder,
+            exporter.setProperty (exporterName == "ANDROIDSTUDIO" ? Ids::androidExtraAssetsFolder
+                                                                  : Ids::customXcodeResourceFolders,
                                   assetsDirectoryPath, nullptr);
         }
         else
@@ -462,7 +462,12 @@ Result PIPGenerator::setProjectSettings (ValueTree& jucerTree)
         jucerTree.setProperty (Ids::pluginManufacturer, metadata[Ids::vendor], nullptr);
 
         StringArray pluginFormatsToBuild (Ids::buildVST.toString(), Ids::buildAU.toString(), Ids::buildStandalone.toString());
+        pluginFormatsToBuild.addArray (getExtraPluginFormatsToBuild());
+
         jucerTree.setProperty (Ids::pluginFormats, pluginFormatsToBuild.joinIntoString (","), nullptr);
+
+        if (! getPluginCharacteristics().isEmpty())
+            jucerTree.setProperty (Ids::pluginCharacteristicsValue, getPluginCharacteristics().joinIntoString (","), nullptr);
     }
 
     return Result::ok();
@@ -560,4 +565,33 @@ bool PIPGenerator::copyRelativeFileToLocalSourceDirectory (const File& fileToCop
 {
     return fileToCopy.copyFileTo (outputDirectory.getChildFile ("Source")
                                                  .getChildFile (fileToCopy.getFileName()));
+}
+
+StringArray PIPGenerator::getExtraPluginFormatsToBuild() const
+{
+    auto name = metadata[Ids::name].toString();
+
+    if (name == "AUv3SynthPlugin" || name == "AudioPluginDemo")
+        return { Ids::buildAUv3.toString() };
+    else if (name == "InterAppAudioEffectPlugin")
+        return { Ids::enableIAA.toString() };
+
+    return {};
+}
+
+StringArray PIPGenerator::getPluginCharacteristics() const
+{
+    auto name = metadata[Ids::name].toString();
+
+    if (name == "AudioPluginDemo")
+        return { Ids::pluginWantsMidiIn.toString(),
+                 Ids::pluginProducesMidiOut.toString(),
+                 Ids::pluginEditorRequiresKeys.toString() };
+    else if (name == "AUv3SynthPlugin" || name == "MultiOutSynthPlugin")
+        return { Ids::pluginWantsMidiIn.toString(),
+                 Ids::pluginIsSynth.toString() };
+    else if (name == "ArpeggiatorPlugin")
+        return { Ids::pluginIsMidiEffectPlugin.toString() };
+
+    return {};
 }

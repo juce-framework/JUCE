@@ -46,7 +46,7 @@ struct FTLibWrapper     : public ReferenceCountedObject
 
     FT_Library library;
 
-    typedef ReferenceCountedObjectPtr<FTLibWrapper> Ptr;
+    using Ptr = ReferenceCountedObjectPtr<FTLibWrapper>;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FTLibWrapper)
 };
@@ -79,7 +79,7 @@ struct FTFaceWrapper     : public ReferenceCountedObject
     FTLibWrapper::Ptr library;
     MemoryBlock savedFaceData;
 
-    typedef ReferenceCountedObjectPtr<FTFaceWrapper> Ptr;
+    using Ptr = ReferenceCountedObjectPtr<FTFaceWrapper>;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FTFaceWrapper)
 };

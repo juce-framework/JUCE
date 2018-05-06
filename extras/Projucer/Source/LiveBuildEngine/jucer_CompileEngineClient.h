@@ -91,7 +91,7 @@ public:
     void handleRedoInEditor (const String& className);
     void handleMissingSystemHeaders();
 
-    typedef ReferenceCountedObjectPtr<CompileEngineChildProcess> Ptr;
+    using Ptr = ReferenceCountedObjectPtr<CompileEngineChildProcess>;
 
 private:
     //==============================================================================

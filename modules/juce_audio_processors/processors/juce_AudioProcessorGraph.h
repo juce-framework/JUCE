@@ -58,7 +58,7 @@ public:
     ~AudioProcessorGraph();
 
     /** Each node in the graph has a UID of this type. */
-    typedef uint32 NodeID;
+    using NodeID = uint32;
 
     //==============================================================================
     /** A special index that represents the midi channel of a node.
@@ -117,7 +117,7 @@ public:
 
         //==============================================================================
         /** A convenient typedef for referring to a pointer to a node object. */
-        typedef ReferenceCountedObjectPtr<Node> Ptr;
+        using Ptr = ReferenceCountedObjectPtr<Node>;
 
     private:
         //==============================================================================

@@ -257,7 +257,7 @@ JUCESplashScreen::~JUCESplashScreen()
 {
 }
 
-Drawable* JUCESplashScreen::getSplashScreenLogo()
+std::unique_ptr<Drawable> JUCESplashScreen::getSplashScreenLogo()
 {
     const char* svgData = R"JUCESPLASHSCREEN(
       <?xml version="1.0" encoding="UTF-8"?>
@@ -295,7 +295,7 @@ Drawable* JUCESplashScreen::getSplashScreenLogo()
     )JUCESPLASHSCREEN";
 
     std::unique_ptr<XmlElement> svgXml (XmlDocument::parse (svgData));
-    return Drawable::createFromSVG (*svgXml);
+    return std::unique_ptr<Drawable> (Drawable::createFromSVG (*svgXml));
 }
 
 void JUCESplashScreen::paint (Graphics& g)

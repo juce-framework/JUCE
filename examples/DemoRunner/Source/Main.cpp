@@ -93,6 +93,8 @@ public:
         // (This function call is for one of the demos, which involves launching a child process)
         if (invokeChildProcessDemo (commandLine))
             return;
+      #else
+        ignoreUnused (commandLine);
       #endif
 
         mainWindow.reset (new MainAppWindow (getApplicationName()));
@@ -120,6 +122,7 @@ private:
 
            #if JUCE_IOS || JUCE_ANDROID
             setFullScreen (true);
+            Desktop::getInstance().setOrientationsEnabled (Desktop::rotatedClockwise | Desktop::rotatedAntiClockwise);
            #else
             setBounds ((int) (0.1f * getParentWidth()),
                        (int) (0.1f * getParentHeight()),

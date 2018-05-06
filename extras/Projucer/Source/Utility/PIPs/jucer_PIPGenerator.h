@@ -74,6 +74,9 @@ private:
     Array<File> replaceRelativeIncludesAndGetFilesToMove();
     bool copyRelativeFileToLocalSourceDirectory (const File&) const noexcept;
 
+    StringArray getExtraPluginFormatsToBuild() const;
+    StringArray getPluginCharacteristics() const;
+
     //==============================================================================
     File pipFile, outputDirectory;
     var metadata;

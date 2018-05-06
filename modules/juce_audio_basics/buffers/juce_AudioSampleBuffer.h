@@ -1062,7 +1062,7 @@ public:
 
     //==============================================================================
     /** This allows templated code that takes an AudioBuffer to access its sample type. */
-    typedef Type SampleType;
+    using SampleType = Type;
 
 private:
     //==============================================================================
@@ -1125,12 +1125,12 @@ private:
 /**
     A multi-channel buffer of 32-bit floating point audio samples.
 
-    This typedef is here for backwards compatibility with the older AudioSampleBuffer
+    This type is here for backwards compatibility with the older AudioSampleBuffer
     class, which was fixed for 32-bit data, but is otherwise the same as the new
     templated AudioBuffer class.
 
     @see AudioBuffer
 */
-typedef AudioBuffer<float> AudioSampleBuffer;
+using AudioSampleBuffer = AudioBuffer<float>;
 
 } // namespace juce

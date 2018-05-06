@@ -52,7 +52,7 @@ struct CurrentThreadHolder   : public ReferenceCountedObject
 {
     CurrentThreadHolder() noexcept {}
 
-    typedef ReferenceCountedObjectPtr<CurrentThreadHolder> Ptr;
+    using Ptr = ReferenceCountedObjectPtr<CurrentThreadHolder>;
     ThreadLocalValue<Thread*> value;
 
     JUCE_DECLARE_NON_COPYABLE (CurrentThreadHolder)

@@ -64,7 +64,7 @@ public:
     virtual bool appliesToChannel (int midiChannel) = 0;
 
     /** The class is reference-counted, so this is a handy pointer class for it. */
-    typedef ReferenceCountedObjectPtr<SynthesiserSound> Ptr;
+    using Ptr = ReferenceCountedObjectPtr<SynthesiserSound>;
 
 
 private:

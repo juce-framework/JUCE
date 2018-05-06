@@ -75,8 +75,8 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
     Time timeout;
 
-    typedef const var::NativeFunctionArgs& Args;
-    typedef const char* TokenType;
+    using Args = const var::NativeFunctionArgs&;
+    using TokenType = const char*;
 
     void execute (const String& code)
     {
@@ -263,7 +263,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         ResultCode perform (const Scope& s, var*) const override  { getResult (s); return ok; }
     };
 
-    typedef std::unique_ptr<Expression> ExpPtr;
+    using ExpPtr = std::unique_ptr<Expression>;
 
     struct BlockStatement  : public Statement
     {
@@ -592,14 +592,15 @@ struct JavascriptEngine::RootObject   : public DynamicObject
     struct DivideOp  : public BinaryOperator
     {
         DivideOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::divide) {}
-        var getWithDoubles (double a, double b) const override  { return b != 0.0 ? a / b : std::numeric_limits<double>::infinity(); }
-        var getWithInts (int64 a, int64 b) const override       { return b != 0   ? var (a / (double) b) : var (std::numeric_limits<double>::infinity()); }
+        var getWithDoubles (double a, double b) const override  { return b != 0 ? a / b : std::numeric_limits<double>::infinity(); }
+        var getWithInts (int64 a, int64 b) const override       { return b != 0 ? var (a / (double) b) : var (std::numeric_limits<double>::infinity()); }
     };
 
     struct ModuloOp  : public BinaryOperator
     {
         ModuloOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::modulo) {}
-        var getWithInts (int64 a, int64 b) const override   { return b != 0 ? var (a % b) : var (std::numeric_limits<double>::infinity()); }
+        var getWithDoubles (double a, double b) const override  { return b != 0 ? fmod (a, b) : std::numeric_limits<double>::infinity(); }
+        var getWithInts (int64 a, int64 b) const override       { return b != 0 ? var (a % b) : var (std::numeric_limits<double>::infinity()); }
     };
 
     struct BitwiseOrOp  : public BinaryOperator

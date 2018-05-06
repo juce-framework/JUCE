@@ -64,14 +64,18 @@ public:
           extraFrameworksValue                         (settings, Ids::extraFrameworks,                         getUndoManager()),
           postbuildCommandValue                        (settings, Ids::postbuildCommand,                        getUndoManager()),
           prebuildCommandValue                         (settings, Ids::prebuildCommand,                         getUndoManager()),
-          iosAppExtensionDuplicateResourcesFolderValue (settings, Ids::iosAppExtensionDuplicateResourcesFolder, getUndoManager()),
+          duplicateAppExResourcesFolderValue           (settings, Ids::duplicateAppExResourcesFolder,           getUndoManager(), true),
           iosDeviceFamilyValue                         (settings, Ids::iosDeviceFamily,                         getUndoManager(), "1,2"),
           iPhoneScreenOrientationValue                 (settings, Ids::iPhoneScreenOrientation,                 getUndoManager(), "portraitlandscape"),
           iPadScreenOrientationValue                   (settings, Ids::iPadScreenOrientation,                   getUndoManager(), "portraitlandscape"),
           customXcodeResourceFoldersValue              (settings, Ids::customXcodeResourceFolders,              getUndoManager()),
           customXcassetsFolderValue                    (settings, Ids::customXcassetsFolder,                    getUndoManager()),
           microphonePermissionNeededValue              (settings, Ids::microphonePermissionNeeded,              getUndoManager()),
-          microphonePermissionsTextValue               (settings, Ids::microphonePermissionsText,               getUndoManager(), "This is an audio app which requires audio input. If you do not have a USB audio interface connected it will use the microphone."),
+          microphonePermissionsTextValue               (settings, Ids::microphonePermissionsText,               getUndoManager(),
+                                                        "This is an audio app which requires audio input. If you do not have a USB audio interface connected it will use the microphone."),
+          cameraPermissionNeededValue                  (settings, Ids::cameraPermissionNeeded,                  getUndoManager()),
+          cameraPermissionTextValue                    (settings, Ids::cameraPermissionText,                    getUndoManager(),
+                                                        "This app requires camera usage to function properly."),
           uiFileSharingEnabledValue                    (settings, Ids::UIFileSharingEnabled,                    getUndoManager()),
           uiSupportsDocumentBrowserValue               (settings, Ids::UISupportsDocumentBrowser,               getUndoManager()),
           uiStatusBarHiddenValue                       (settings, Ids::UIStatusBarHidden,                       getUndoManager()),
@@ -110,7 +114,7 @@ public:
     String getPostBuildScript() const                { return postbuildCommandValue.get(); }
     String getPreBuildScript() const                 { return prebuildCommandValue.get(); }
 
-    bool shouldDuplicateResourcesFolderForAppExtension() const { return iosAppExtensionDuplicateResourcesFolderValue.get(); }
+    bool shouldDuplicateAppExResourcesFolder() const { return duplicateAppExResourcesFolderValue.get(); }
 
     String getDeviceFamilyString() const             { return iosDeviceFamilyValue.get(); }
 
@@ -122,6 +126,9 @@ public:
 
     bool isMicrophonePermissionEnabled() const         { return microphonePermissionNeededValue.get(); }
     String getMicrophonePermissionsTextString() const  { return microphonePermissionsTextValue.get(); }
+
+    bool isCameraPermissionEnabled() const           { return cameraPermissionNeededValue.get(); }
+    String getCameraPermissionTextString() const     { return cameraPermissionTextValue.get(); }
 
     bool isInAppPurchasesEnabled() const             { return iosInAppPurchasesValue.get(); }
     bool isBackgroundAudioEnabled() const            { return iosBackgroundAudioValue.get(); }
@@ -195,14 +202,12 @@ public:
                    "This way you can specify them for OS X and iOS separately, and modify the content of the resource folders "
                    "without re-saving the Projucer project.");
 
+        if (getProject().getProjectType().isAudioPlugin())
+            props.add (new ChoicePropertyComponent (duplicateAppExResourcesFolderValue, "Add Duplicate Resources Folder to App Extension"),
+                       "Disable this to prevent the Projucer from creating a duplicate resources folder for AUv3 app extensions.");
+
         if (iOS)
         {
-            if (getProject().getProjectType().isAudioPlugin())
-                props.add (new ChoicePropertyComponent (iosAppExtensionDuplicateResourcesFolderValue,
-                                                        "Don't Add Resources Folder to App Extension"),
-                           "Enable this to prevent the Projucer from creating a resources folder for AUv3 app extensions.");
-
-
             props.add (new ChoicePropertyComponent (iosDeviceFamilyValue, "Device Family",
                                                     { "iPhone", "iPad", "Universal" },
                                                     { "1",      "2",    "1,2" }),
@@ -237,6 +242,14 @@ public:
             props.add (new TextPropertyComponentWithEnablement (microphonePermissionsTextValue, microphonePermissionNeededValue,
                                                                 "Microphone Access Text", 1024, false),
                        "A short description of why your app requires microphone access.");
+
+            props.add (new ChoicePropertyComponent (cameraPermissionNeededValue, "Camera Access"),
+                       "Enable this to allow your app to use the camera. "
+                       "The user of your app will be prompted to grant camera access permissions.");
+
+            props.add (new TextPropertyComponentWithEnablement (cameraPermissionTextValue, cameraPermissionNeededValue,
+                                                                "Camera Access Text", 1024, false),
+                       "A short description of why your app requires camera access.");
         }
         else if (projectType.isGUIApplication())
         {
@@ -1285,8 +1298,12 @@ public:
             if (owner.iOS)
             {
                 addPlistDictionaryKeyBool (dict, "LSRequiresIPhoneOS", true);
+
                 if (owner.isMicrophonePermissionEnabled())
                     addPlistDictionaryKey (dict, "NSMicrophoneUsageDescription", owner.getMicrophonePermissionsTextString());
+
+                if (owner.isCameraPermissionEnabled())
+                    addPlistDictionaryKey (dict, "NSCameraUsageDescription", owner.getCameraPermissionTextString());
 
                 if (type != AudioUnitv3PlugIn)
                     addPlistDictionaryKeyBool (dict, "UIViewControllerBasedStatusBarAppearance", false);
@@ -1691,8 +1708,9 @@ private:
     const bool iOS;
 
     ValueWithDefault customPListValue, pListPrefixHeaderValue, pListPreprocessValue, extraFrameworksValue, postbuildCommandValue,
-                     prebuildCommandValue, iosAppExtensionDuplicateResourcesFolderValue, iosDeviceFamilyValue, iPhoneScreenOrientationValue,
-                     iPadScreenOrientationValue, customXcodeResourceFoldersValue, customXcassetsFolderValue, microphonePermissionNeededValue, microphonePermissionsTextValue,
+                     prebuildCommandValue, duplicateAppExResourcesFolderValue, iosDeviceFamilyValue, iPhoneScreenOrientationValue,
+                     iPadScreenOrientationValue, customXcodeResourceFoldersValue, customXcassetsFolderValue,
+                     microphonePermissionNeededValue, microphonePermissionsTextValue, cameraPermissionNeededValue, cameraPermissionTextValue,
                      uiFileSharingEnabledValue, uiSupportsDocumentBrowserValue, uiStatusBarHiddenValue, documentExtensionsValue, iosInAppPurchasesValue,
                      iosBackgroundAudioValue, iosBackgroundBleValue, iosPushNotificationsValue, iosAppGroupsValue, iCloudPermissionsValue,
                      iosDevelopmentTeamIDValue, iosAppGroupsIDValue, keepCustomXcodeSchemesValue, useHeaderMapValue;
@@ -1889,8 +1907,7 @@ private:
 
             if (target->type != XcodeTarget::AggregateTarget)
             {
-                auto skipAUv3 = (target->type == XcodeTarget::AudioUnitv3PlugIn
-                                 && ! shouldDuplicateResourcesFolderForAppExtension());
+                auto skipAUv3 = (target->type == XcodeTarget::AudioUnitv3PlugIn && ! shouldDuplicateAppExResourcesFolder());
 
                 if (! projectType.isStaticLibrary() && target->type != XcodeTarget::SharedCodeTarget && ! skipAUv3)
                     target->addBuildPhase ("PBXResourcesBuildPhase", resourceIDs);
@@ -2309,6 +2326,9 @@ private:
 
             if (iOS && isPushNotificationsEnabled())
                 xcodeFrameworks.addIfNotAlreadyThere ("UserNotifications");
+
+            if (isiOS() && project.getConfigFlag ("JUCE_USE_CAMERA").get())
+                xcodeFrameworks.addIfNotAlreadyThere ("ImageIO");
 
             xcodeFrameworks.addTokens (getExtraFrameworksString(), ",;", "\"'");
             xcodeFrameworks.trim();

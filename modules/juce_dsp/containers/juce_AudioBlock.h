@@ -261,6 +261,49 @@ public:
         return *this;
     }
 
+    /** Copy the values from a JUCE's AudioBuffer to the receiver.
+
+        All indices and sizes are in the receiver's units, i.e. if SampleType is a
+        SIMDRegister then incrementing srcPos by one will increase the sample position
+        in the AudioBuffer's units by a factor of SIMDRegister<SampleType>::SIMDNumElements.
+    */
+    forcedinline AudioBlock& copyFrom (const AudioBuffer<NumericType>& src, size_t srcPos = 0, size_t dstPos = 0,
+                                       size_t numElements = std::numeric_limits<size_t>::max())
+    {
+        auto srclen = static_cast<size_t> (src.getNumSamples()) / sizeFactor;
+        auto n = static_cast<int> (jmin (srclen - srcPos, numSamples - dstPos, numElements) * sizeFactor);
+        auto maxChannels = jmin (static_cast<size_t> (src.getNumChannels()), static_cast<size_t> (numChannels));
+
+        for (size_t ch = 0; ch < maxChannels; ++ch)
+            FloatVectorOperations::copy (channelPtr (ch),
+                                         src.getReadPointer (static_cast<int> (ch),
+                                                             static_cast<int> (srcPos * sizeFactor)),
+                                         n);
+
+        return *this;
+    }
+
+    /** Copy the values from the receiver to a JUCE's AudioBuffer.
+
+        All indices and sizes are in the receiver's units, i.e. if SampleType is a
+        SIMDRegister then incrementing dstPos by one will increase the sample position
+        in the AudioBuffer's units by a factor of SIMDRegister<SampleType>::SIMDNumElements.
+    */
+    forcedinline const AudioBlock& copyTo (AudioBuffer<NumericType>& dst, size_t srcPos = 0, size_t dstPos = 0,
+                                           size_t numElements = std::numeric_limits<size_t>::max()) const
+    {
+        auto dstlen = static_cast<size_t> (dst.getNumSamples()) / sizeFactor;
+        auto n = static_cast<int> (jmin (numSamples - srcPos, dstlen - dstPos, numElements) * sizeFactor);
+        auto maxChannels = jmin (static_cast<size_t> (dst.getNumChannels()), static_cast<size_t> (numChannels));
+
+        for (size_t ch = 0; ch < maxChannels; ++ch)
+            FloatVectorOperations::copy (dst.getWritePointer (static_cast<int> (ch),
+                                                              static_cast<int> (dstPos * sizeFactor)),
+                                         channelPtr (ch), n);
+
+        return *this;
+    }
+
     /** Move memory within the receiver from the position srcPos to the position dstPos.
         If numElements is not specified then move will move the maximum amount of memory.
     */

@@ -56,7 +56,7 @@ struct MidiDeviceListEntry : ReferenceCountedObject
     std::unique_ptr<MidiInput> inDevice;
     std::unique_ptr<MidiOutput> outDevice;
 
-    typedef ReferenceCountedObjectPtr<MidiDeviceListEntry> Ptr;
+    using Ptr = ReferenceCountedObjectPtr<MidiDeviceListEntry>;
 };
 
 //==============================================================================

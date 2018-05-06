@@ -44,7 +44,7 @@ public:
     DynamicObject (const DynamicObject&);
     ~DynamicObject();
 
-    typedef ReferenceCountedObjectPtr<DynamicObject> Ptr;
+    using Ptr = ReferenceCountedObjectPtr<DynamicObject>;
 
     //==============================================================================
     /** Returns true if the object has a property with this name.

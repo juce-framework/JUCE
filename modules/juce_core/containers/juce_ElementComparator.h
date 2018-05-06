@@ -185,7 +185,7 @@ template <class ElementType>
 class DefaultElementComparator
 {
 private:
-    typedef typename TypeHelpers::ParameterType<ElementType>::type ParameterType;
+    using ParameterType = typename TypeHelpers::ParameterType<ElementType>::type;
 
 public:
     static int compareElements (ParameterType first, ParameterType second)
