@@ -68,6 +68,9 @@
     <Filter Include="Projucer\Utility\Helpers">
       <UniqueIdentifier>{A353D068-8C43-A573-8460-59B6BA167F83}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Projucer\Utility\PIPs">
+      <UniqueIdentifier>{A4B9C07E-05B1-BCE9-E075-7E573FFD23B0}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Projucer\Utility\UI\PropertyComponents">
       <UniqueIdentifier>{ACCBC32A-58D5-1EC6-FC4D-B3B32CB6588E}</UniqueIdentifier>
     </Filter>
@@ -82,6 +85,15 @@
     </Filter>
     <Filter Include="Projucer">
       <UniqueIdentifier>{7DBEF27C-2AFE-DA02-1DBF-E80FAAC99EA7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_analytics\analytics">
+      <UniqueIdentifier>{E3CEC08A-FA14-D343-5BFF-3D6A4A4FD713}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_analytics\destinations">
+      <UniqueIdentifier>{B3BC836A-3932-C1E4-CA3C-A1C0D83281BA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_analytics">
+      <UniqueIdentifier>{97F7F593-75F8-D6B2-DC96-C946C3976226}</UniqueIdentifier>
     </Filter>
     <Filter Include="JUCE Modules\juce_core\containers">
       <UniqueIdentifier>{42F7BE9D-3C8A-AE26-289B-8F355C068036}</UniqueIdentifier>
@@ -310,6 +322,9 @@
     <ClCompile Include="..\..\Source\Application\jucer_MainWindow.cpp">
       <Filter>Projucer\Application</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Application\jucer_ProjucerAnalytics.cpp">
+      <Filter>Projucer\Application</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\Templates\jucer_AnimatedComponentTemplate.cpp">
       <Filter>Projucer\BinaryData\Templates</Filter>
     </ClCompile>
@@ -347,6 +362,9 @@
       <Filter>Projucer\BinaryData\Templates</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\Templates\jucer_OpenGLComponentTemplate.cpp">
+      <Filter>Projucer\BinaryData\Templates</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\BinaryData\Templates\jucer_PIPMain.cpp">
       <Filter>Projucer\BinaryData\Templates</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\CodeEditor\jucer_DocumentEditorComponent.cpp">
@@ -436,6 +454,9 @@
     <ClCompile Include="..\..\Source\LiveBuildEngine\jucer_DownloadCompileEngineThread.cpp">
       <Filter>Projucer\LiveBuildEngine</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Project\UI\jucer_HeaderComponent.cpp">
+      <Filter>Projucer\Project\UI</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Project\UI\jucer_ProjectContentComponent.cpp">
       <Filter>Projucer\Project\UI</Filter>
     </ClCompile>
@@ -469,6 +490,9 @@
     <ClCompile Include="..\..\Source\Utility\Helpers\jucer_MiscUtilities.cpp">
       <Filter>Projucer\Utility\Helpers</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Utility\PIPs\jucer_PIPGenerator.cpp">
+      <Filter>Projucer\Utility\PIPs</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Utility\UI\PropertyComponents\jucer_DependencyPathPropertyComponent.cpp">
       <Filter>Projucer\Utility\UI\PropertyComponents</Filter>
     </ClCompile>
@@ -489,6 +513,18 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Wizards\jucer_NewProjectWizardClasses.cpp">
       <Filter>Projucer\Wizards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_analytics\analytics\juce_Analytics.cpp">
+      <Filter>JUCE Modules\juce_analytics\analytics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_analytics\analytics\juce_ButtonTracker.cpp">
+      <Filter>JUCE Modules\juce_analytics\analytics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_analytics\destinations\juce_ThreadedAnalyticsDestination.cpp">
+      <Filter>JUCE Modules\juce_analytics\destinations</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_analytics\juce_analytics.cpp">
+      <Filter>JUCE Modules\juce_analytics</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_AbstractFifo.cpp">
       <Filter>JUCE Modules\juce_core\containers</Filter>
@@ -674,6 +710,9 @@
       <Filter>JUCE Modules\juce_core\streams</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\streams\juce_SubregionStream.cpp">
+      <Filter>JUCE Modules\juce_core\streams</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\streams\juce_URLInputSource.cpp">
       <Filter>JUCE Modules\juce_core\streams</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\system\juce_SystemStats.cpp">
@@ -1744,6 +1783,9 @@
     <ClCompile Include="..\..\JuceLibraryCode\BinaryData.cpp">
       <Filter>JUCE Library Code</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_analytics.cpp">
+      <Filter>JUCE Library Code</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_core.cpp">
       <Filter>JUCE Library Code</Filter>
     </ClCompile>
@@ -1779,7 +1821,7 @@
     <ClInclude Include="..\..\Source\Application\Windows\jucer_FloatingToolWindow.h">
       <Filter>Projucer\Application\Windows</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Application\Windows\jucer_GlobalSearchPathsWindowComponent.h">
+    <ClInclude Include="..\..\Source\Application\Windows\jucer_GlobalPathsWindowComponent.h">
       <Filter>Projucer\Application\Windows</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Application\Windows\jucer_SVGPathDataWindowComponent.h">
@@ -1810,6 +1852,9 @@
       <Filter>Projucer\Application</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Application\jucer_MainWindow.h">
+      <Filter>Projucer\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Application\jucer_ProjucerAnalytics.h">
       <Filter>Projucer\Application</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_AnimatedComponentSimpleTemplate.h">
@@ -2232,6 +2277,9 @@
     <ClInclude Include="..\..\Source\Utility\Helpers\jucer_ValueSourceHelpers.h">
       <Filter>Projucer\Utility\Helpers</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\PIPs\jucer_PIPGenerator.h">
+      <Filter>Projucer\Utility\PIPs</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Utility\UI\PropertyComponents\jucer_ColourPropertyComponent.h">
       <Filter>Projucer\Utility\UI\PropertyComponents</Filter>
     </ClInclude>
@@ -2306,6 +2354,21 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Wizards\jucer_TemplateThumbnailsComponent.h">
       <Filter>Projucer\Wizards</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_analytics\analytics\juce_Analytics.h">
+      <Filter>JUCE Modules\juce_analytics\analytics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_analytics\analytics\juce_ButtonTracker.h">
+      <Filter>JUCE Modules\juce_analytics\analytics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_analytics\destinations\juce_AnalyticsDestination.h">
+      <Filter>JUCE Modules\juce_analytics\destinations</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_analytics\destinations\juce_ThreadedAnalyticsDestination.h">
+      <Filter>JUCE Modules\juce_analytics\destinations</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_analytics\juce_analytics.h">
+      <Filter>JUCE Modules\juce_analytics</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_AbstractFifo.h">
       <Filter>JUCE Modules\juce_core\containers</Filter>
@@ -2527,6 +2590,9 @@
       <Filter>JUCE Modules\juce_core\streams</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\streams\juce_SubregionStream.h">
+      <Filter>JUCE Modules\juce_core\streams</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\streams\juce_URLInputSource.h">
       <Filter>JUCE Modules\juce_core\streams</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\system\juce_CompilerSupport.h">
@@ -3579,6 +3645,9 @@
       <Filter>Projucer\BinaryData</Filter>
     </None>
     <None Include="..\..\Source\BinaryData\colourscheme_light.xml">
+      <Filter>Projucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\nothingtoseehere.txt">
       <Filter>Projucer\BinaryData</Filter>
     </None>
     <None Include="..\..\Source\BinaryData\offlinepage.html">

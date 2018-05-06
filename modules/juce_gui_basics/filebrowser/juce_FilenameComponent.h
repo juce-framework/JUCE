@@ -35,6 +35,8 @@ namespace juce
     register one of these objects for event callbacks when the filename is changed.
 
     @see FilenameComponent
+
+    @tags{GUI}
 */
 class JUCE_API  FilenameComponentListener
 {
@@ -60,6 +62,8 @@ public:
     and clicking 'ok', or by typing a new filename into the box and pressing return.
 
     @see FileChooser, ComboBox
+
+    @tags{GUI}
 */
 class JUCE_API  FilenameComponent  : public Component,
                                      public SettableTooltipClient,

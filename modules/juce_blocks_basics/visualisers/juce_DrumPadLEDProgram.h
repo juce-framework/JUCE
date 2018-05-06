@@ -24,6 +24,7 @@ namespace juce
 {
 
 /**
+    @tags{Blocks}
 */
 struct DrumPadGridProgram  : public Block::Program
 {

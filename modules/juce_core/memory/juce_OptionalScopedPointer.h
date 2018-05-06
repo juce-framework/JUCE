@@ -32,6 +32,8 @@ namespace juce
     not the object is deleted.
 
     @see ScopedPointer
+
+    @tags{Core}
 */
 template <class ObjectType>
 class OptionalScopedPointer

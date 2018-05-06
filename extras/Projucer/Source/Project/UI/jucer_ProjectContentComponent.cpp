@@ -478,7 +478,9 @@ void ProjectContentComponent::saveDocument()
             showSaveWarning (currentDocument);
     }
     else
+    {
         saveProject();
+    }
 }
 
 void ProjectContentComponent::saveAs()
@@ -521,11 +523,13 @@ bool ProjectContentComponent::goToCounterpart()
     return false;
 }
 
-bool ProjectContentComponent::saveProject (bool shouldWait)
+bool ProjectContentComponent::saveProject (bool shouldWait, bool openInIDE)
 {
     if (project != nullptr)
     {
         const ScopedValueSetter<bool> valueSetter (project->shouldWaitAfterSaving, shouldWait, false);
+        project->setOpenInIDEAfterSaving (openInIDE);
+
         return (project->save (true, true) == FileBasedDocument::savedOk);
     }
 
@@ -637,11 +641,16 @@ void ProjectContentComponent::openInSelectedIDE (bool saveFirst)
             {
                 if (exporter->canLaunchProject() && exporter->getName() == selectedIDE)
                 {
-                    if (saveFirst && ! saveProject (exporter->isXcode()))
+                    auto tempProject = project->isTemporaryProject(); // store this before saving as it will always be false after
+
+                    if (saveFirst && ! saveProject (exporter->isXcode(), true))
+                        return;
+
+                    if (tempProject)
                         return;
 
                     exporter->launchProject();
-                    break;
+                    return;
                 }
             }
         }
@@ -657,7 +666,14 @@ static void newExporterMenuCallback (int result, ProjectContentComponent* comp)
             auto exporterName= ProjectExporter::getExporterNames() [result - 1];
 
             if (exporterName.isNotEmpty())
+            {
                 p->addNewExporter (exporterName);
+
+                StringPairArray data;
+                data.set ("label", exporterName);
+
+                Analytics::getInstance()->logEvent ("Exporter Added", data, ProjucerAnalyticsEvent::projectEvent);
+            }
         }
     }
 }
@@ -1156,8 +1172,10 @@ void ProjectContentComponent::setBuildEnabled (bool isEnabled, bool displayError
         killChildProcess();
         refreshTabsIfBuildStatusChanged();
 
-        if (auto* h = dynamic_cast<HeaderComponent*> (header.get()))
-            h->updateBuildButtons (isEnabled, isContinuousRebuildEnabled());
+        StringPairArray data;
+        data.set ("label", isEnabled ? "Enabled" : "Disabled");
+
+        Analytics::getInstance()->logEvent ("Live-Build", data, ProjucerAnalyticsEvent::projectEvent);
     }
 }
 
@@ -1181,6 +1199,11 @@ void ProjectContentComponent::handleCrash (const String& message)
         setBuildEnabled (false, true);
         showBuildTab();
     }
+
+    StringPairArray data;
+    data.set ("label", "Crash");
+
+    Analytics::getInstance()->logEvent ("Live-Build", data, ProjucerAnalyticsEvent::projectEvent);
 }
 
 bool ProjectContentComponent::isBuildEnabled() const
@@ -1300,11 +1323,7 @@ void ProjectContentComponent::setContinuousRebuildEnabled (bool b)
     {
         childProcess->setContinuousRebuild (b);
 
-        if (auto* h = dynamic_cast<HeaderComponent*> (header.get()))
-            h->updateBuildButtons (isBuildEnabled(), b);
-
         getAppSettings().getGlobalProperties().setValue ("continuousRebuild", b);
-
         ProjucerApplication::getCommandManager().commandStatusChanged();
     }
 }

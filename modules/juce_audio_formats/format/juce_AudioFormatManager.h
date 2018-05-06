@@ -36,6 +36,8 @@ namespace juce
     or registerBasicFormats() to give it a list of format types that it can use.
 
     @see AudioFormat
+
+    @tags{Audio}
 */
 class JUCE_API  AudioFormatManager
 {

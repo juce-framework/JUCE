@@ -37,6 +37,8 @@ namespace juce
     Be sure to deregister listeners before you delete them!
 
     @see Component::addComponentListener, Component::removeComponentListener
+
+    @tags{GUI}
 */
 class JUCE_API  ComponentListener
 {

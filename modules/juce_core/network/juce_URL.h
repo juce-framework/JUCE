@@ -31,6 +31,8 @@ class WebInputStream;
 
     This class can be used to launch URLs in browsers, and also to create
     InputStreams that can read from remote http or ftp sources.
+
+    @tags{Core}
 */
 class JUCE_API  URL
 {
@@ -350,6 +352,7 @@ public:
     class DownloadTask
     {
     public:
+        /** Used to receive callbacks for download progress */
         struct Listener
         {
             virtual ~Listener();

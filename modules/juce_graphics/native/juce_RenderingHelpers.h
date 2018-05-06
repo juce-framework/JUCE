@@ -37,6 +37,8 @@ namespace RenderingHelpers
 
 //==============================================================================
 /** Holds either a simple integer translation, or an affine transform.
+
+    @tags{Graphics}
 */
 class TranslationOrTransform
 {
@@ -141,7 +143,10 @@ public:
 };
 
 //==============================================================================
-/** Holds a cache of recently-used glyph objects of some type. */
+/** Holds a cache of recently-used glyph objects of some type.
+
+    @tags{Graphics}
+*/
 template <class CachedGlyphType, class RenderTargetType>
 class GlyphCache  : private DeletedAtShutdown
 {
@@ -271,7 +276,10 @@ private:
 };
 
 //==============================================================================
-/** Caches a glyph as an edge-table. */
+/** Caches a glyph as an edge-table.
+
+    @tags{Graphics}
+*/
 template <class RendererType>
 class CachedGlyphEdgeTable  : public ReferenceCountedObject
 {
@@ -311,6 +319,8 @@ public:
 //==============================================================================
 /** Calculates the alpha values and positions for rendering the edges of a
     non-pixel-aligned rectangle.
+
+    @tags{Graphics}
 */
 struct FloatRectangleRasterisingInfo
 {

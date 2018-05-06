@@ -30,6 +30,8 @@ namespace juce
     A thread can call wait() on a WaitableObject, and this will suspend the
     calling thread until another thread wakes it up by calling the signal()
     method.
+
+    @tags{Core}
 */
 class JUCE_API  WaitableEvent
 {

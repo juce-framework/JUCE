@@ -44,6 +44,8 @@ namespace juce
 
 /**
     The standard JUCE splash screen component.
+
+    @tags{GUI}
 */
 class JUCE_API  JUCESplashScreen  : public Component,
                                     private Timer,

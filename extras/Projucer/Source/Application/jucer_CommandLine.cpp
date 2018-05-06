@@ -27,6 +27,7 @@
 #include "jucer_Headers.h"
 #include "../Project/jucer_Module.h"
 #include "../Utility/Helpers/jucer_TranslationHelpers.h"
+#include "../Utility/PIPs/jucer_PIPGenerator.h"
 
 #include "jucer_CommandLine.h"
 
@@ -34,8 +35,6 @@
 //==============================================================================
 namespace
 {
-    static const char* getLineEnding()  { return "\r\n"; }
-
     struct CommandLineError
     {
         CommandLineError (const String& s) : message (s) {}
@@ -97,14 +96,6 @@ namespace
                 files.add (di.getFile());
 
         return files;
-    }
-
-    static String joinLinesIntoSourceFile (StringArray& lines)
-    {
-        while (lines.size() > 10 && lines [lines.size() - 1].isEmpty())
-            lines.remove (lines.size() - 1);
-
-        return lines.joinIntoString (getLineEnding()) + getLineEnding();
     }
 
     static void replaceFile (const File& file, const String& newText, const String& message)
@@ -371,7 +362,7 @@ namespace
 
         for (int i = 0; i < lines.size(); ++i)
         {
-            String& line = lines.getReference(i);
+            String& line = lines.getReference (i);
 
             if (options.removeTabs && line.containsChar ('\t'))
             {
@@ -380,6 +371,7 @@ namespace
                 for (;;)
                 {
                     const int tabPos = line.indexOfChar ('\t');
+
                     if (tabPos < 0)
                         break;
 
@@ -725,10 +717,6 @@ namespace
        #endif
 
         auto settingsFile = userAppData.getChildFile ("Projucer").getChildFile ("Projucer.settings");
-
-        if (! settingsFile.existsAsFile())
-            throw CommandLineError ("Expected settings file at " + settingsFile.getFullPathName() + " not found!");
-
         ScopedPointer<XmlElement> xml (XmlDocument::parse (settingsFile));
         auto settingsTree = ValueTree::fromXml (*xml);
 
@@ -751,9 +739,33 @@ namespace
         if (! childToSet.isValid())
             throw CommandLineError ("Failed to set the requested setting!");
 
-        childToSet.setProperty (args[2], args[3], nullptr);
+        childToSet.setProperty (args[2], File::getCurrentWorkingDirectory().getChildFile (args[3]).getFullPathName(), nullptr);
 
         settingsFile.replaceWithText (settingsTree.toXmlString());
+    }
+
+    static void createProjectFromPIP (const StringArray& args)
+    {
+        checkArgumentCount (args, 3);
+
+        auto pipFile = File::getCurrentWorkingDirectory().getChildFile (args[1].unquoted());
+        if (! pipFile.existsAsFile())
+            throw CommandLineError ("PIP file doesn't exist.");
+
+        auto outputDir = File::getCurrentWorkingDirectory().getChildFile (args[2].unquoted());
+        if (! outputDir.exists())
+        {
+            auto res = outputDir.createDirectory();
+            std::cout << "Creating directory " << outputDir.getFullPathName() << std::endl;
+        }
+
+        PIPGenerator generator (pipFile, outputDir);
+
+        if (! generator.createJucerFile())
+            throw CommandLineError ("Failed to create .jucer file in " + outputDir.getFullPathName()+ ".");
+
+        if (! generator.createMainCpp())
+            throw CommandLineError ("Failed to create Main.cpp.");
     }
 
     //==============================================================================
@@ -761,7 +773,7 @@ namespace
     {
         hideDockIcon();
 
-        const String appName (JUCEApplication::getInstance()->getApplicationName());
+        auto appName = JUCEApplication::getInstance()->getApplicationName();
 
         std::cout << appName << std::endl
                   << std::endl
@@ -819,8 +831,11 @@ namespace
                   << "    Creates a completed translations mapping file, that can be used to initialise a LocalisedStrings object. This allows you to localise the strings in your project" << std::endl
                   << std::endl
                   << " " << appName << " --set-global-search-path os identifier_to_set new_path" << std::endl
-                  << "    Sets the global search path for a specified os and identifier. The os should be either osx, windows or linux and the identifiers can be any of the following: "
+                  << "    Sets the global path for a specified os and identifier. The os should be either osx, windows or linux and the identifiers can be any of the following: "
                   << "defaultJuceModulePath, defaultUserModulePath, vst3path, aaxPath (not valid on linux), rtasPath (not valid on linux), androidSDKPath or androidNDKPath." << std::endl
+                  << std::endl
+                  << " " << appName << " --create-project-from-pip path/to/PIP path/to/output" << std::endl
+                  << "    Generates a JUCE project from a PIP file." << std::endl
                   << std::endl;
     }
 }
@@ -856,6 +871,7 @@ int performCommandLine (const String& commandLine)
         if (matchArgument (command, "trans"))                    { scanFoldersForTranslationFiles (args); return 0; }
         if (matchArgument (command, "trans-finish"))             { createFinishedTranslationFile (args);  return 0; }
         if (matchArgument (command, "set-global-search-path"))   { setGlobalPath (args);                  return 0; }
+        if (matchArgument (command, "create-project-from-pip"))  { createProjectFromPIP (args);           return 0; }
     }
     catch (const CommandLineError& error)
     {

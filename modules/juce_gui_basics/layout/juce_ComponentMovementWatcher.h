@@ -41,6 +41,8 @@ namespace juce
     This class is used by specialised components like WebBrowserComponent
     because they need to keep their custom windows in the right place and respond to
     changes in the peer.
+
+    @tags{GUI}
 */
 class JUCE_API  ComponentMovementWatcher    : public ComponentListener
 {

@@ -30,6 +30,8 @@ class IIRFilter;
     A set of coefficients for use in an IIRFilter object.
 
     @see IIRFilter
+
+    @tags{Audio}
 */
 class JUCE_API  IIRCoefficients
 {
@@ -148,6 +150,8 @@ public:
     audio signal.
 
     @see IIRCoefficient, IIRFilterAudioSource
+
+    @tags{Audio}
 */
 class JUCE_API  IIRFilter
 {

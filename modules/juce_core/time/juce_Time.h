@@ -30,6 +30,8 @@ namespace juce
     Internally, the time is stored at millisecond precision.
 
     @see RelativeTime
+
+    @tags{Core}
 */
 class JUCE_API  Time
 {

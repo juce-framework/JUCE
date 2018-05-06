@@ -37,12 +37,12 @@ OwnedArray<AnalyticsDestination>& Analytics::getDestinations()
     return destinations;
 }
 
-void Analytics::setUserId (const String& newUserId)
+void Analytics::setUserId (String newUserId)
 {
     userId = newUserId;
 }
 
-void Analytics::setUserProperties (const StringPairArray& properties)
+void Analytics::setUserProperties (StringPairArray properties)
 {
     userProperties = properties;
 }

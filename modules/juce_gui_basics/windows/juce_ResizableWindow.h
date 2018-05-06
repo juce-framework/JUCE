@@ -46,6 +46,8 @@ namespace juce
     to choose the style of resizing to use.
 
     @see TopLevelWindow
+
+    @tags{GUI}
 */
 class JUCE_API  ResizableWindow  : public TopLevelWindow
 {

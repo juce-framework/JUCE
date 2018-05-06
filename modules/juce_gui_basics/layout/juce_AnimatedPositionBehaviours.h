@@ -41,6 +41,8 @@ namespace AnimatedPositionBehaviours
         AnimatedPosition class.
 
         @see AnimatedPosition
+
+        @tags{GUI}
     */
     struct ContinuousWithMomentum
     {
@@ -107,6 +109,8 @@ namespace AnimatedPositionBehaviours
         released, snaps back to show a whole page.
 
         @see AnimatedPosition
+
+        @tags{GUI}
     */
     struct SnapToPageBoundaries
     {

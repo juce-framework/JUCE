@@ -4,6 +4,41 @@ JUCE breaking changes
 Develop
 =======
 
+Version 5.3.0
+=============
+
+Change
+------
+The JUCE examples have been cleaned up, modernised and converted into 
+PIPs (Projucer Instant Projects). The JUCE Demo has been removed and replaced by the 
+DemoRunner application and larger projects such as the Audio Plugin Host and the 
+Network Graphics Demo have been moved into the extras directory.
+
+Possible Issues
+---------------
+1. Due to the large number of changes that have occured in the JUCE Git repository, 
+pulling this version may result in a messy folder structure with empty directories 
+that have been removed.
+2. The JUCE Demo project is no longer in the JUCE repository.
+3. The Audio Plugin Host project has moved from the examples directory to the extras
+directory.
+
+Workaround
+----------
+1. Run a Git clean command (git clean -xdf) in your JUCE directory to remove all untracked 
+files, directories and build products.
+2. The new DemoRunner application, located in extras/DemoRunner, can be used to preview
+all the JUCE examples and see the code side-by-side.
+3. Change any file paths that depended on the plugin host project being located in the examples
+directory to use the extras directory instead.
+
+Rationale
+---------
+The JUCE examples had inconsistent naming, coding styles and the projects and build products
+took up a large amount of space in the repository. Replacing them with PIPs reduces the file size
+and allows us to categorise the examples better, as well as cleaning up the code.
+
+
 Change
 ------
 When hosting plug-ins all AudioProcessor methods of managing parameters that

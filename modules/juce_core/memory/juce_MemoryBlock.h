@@ -27,6 +27,8 @@ namespace juce
 /**
     A class to hold a resizable block of raw data.
 
+
+    @tags{Core}
 */
 class JUCE_API  MemoryBlock
 {

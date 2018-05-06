@@ -6,10 +6,10 @@
   ==============================================================================
 */
 
-INCLUDE_CORRESPONDING_HEADER
+%%include_corresponding_header%%
 
 //==============================================================================
-CONTENTCOMPCLASS::CONTENTCOMPCLASS()
+%%content_component_class%%::%%content_component_class%%()
 {
     // Make sure you set the size of the component after
     // you add any child components.
@@ -19,14 +19,14 @@ CONTENTCOMPCLASS::CONTENTCOMPCLASS()
     setAudioChannels (2, 2);
 }
 
-CONTENTCOMPCLASS::~CONTENTCOMPCLASS()
+%%content_component_class%%::~%%content_component_class%%()
 {
     // This shuts down the audio device and clears the audio source.
     shutdownAudio();
 }
 
 //==============================================================================
-void CONTENTCOMPCLASS::prepareToPlay (int samplesPerBlockExpected, double sampleRate)
+void %%content_component_class%%::prepareToPlay (int samplesPerBlockExpected, double sampleRate)
 {
     // This function will be called when the audio device is started, or when
     // its settings (i.e. sample rate, block size, etc) are changed.
@@ -37,7 +37,7 @@ void CONTENTCOMPCLASS::prepareToPlay (int samplesPerBlockExpected, double sample
     // For more details, see the help for AudioProcessor::prepareToPlay()
 }
 
-void CONTENTCOMPCLASS::getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill)
+void %%content_component_class%%::getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill)
 {
     // Your audio-processing code goes here!
 
@@ -48,7 +48,7 @@ void CONTENTCOMPCLASS::getNextAudioBlock (const AudioSourceChannelInfo& bufferTo
     bufferToFill.clearActiveBufferRegion();
 }
 
-void CONTENTCOMPCLASS::releaseResources()
+void %%content_component_class%%::releaseResources()
 {
     // This will be called when the audio device stops, or when it is being
     // restarted due to a setting change.
@@ -57,7 +57,7 @@ void CONTENTCOMPCLASS::releaseResources()
 }
 
 //==============================================================================
-void CONTENTCOMPCLASS::paint (Graphics& g)
+void %%content_component_class%%::paint (Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
@@ -65,7 +65,7 @@ void CONTENTCOMPCLASS::paint (Graphics& g)
     // You can add your drawing code here!
 }
 
-void CONTENTCOMPCLASS::resized()
+void %%content_component_class%%::resized()
 {
     // This is called when the MainContentComponent is resized.
     // If you add any child components, this is where you should

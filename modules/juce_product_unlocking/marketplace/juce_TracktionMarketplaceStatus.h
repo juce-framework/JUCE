@@ -36,6 +36,8 @@ namespace juce
     implement all the pure virtual methods to tell it about your product.
 
     @see OnlineUnlockStatus, OnlineUnlockForm, KeyGeneration
+
+    @tags{ProductUnlocking}
 */
 class JUCE_API  TracktionMarketplaceStatus   : public OnlineUnlockStatus
 {

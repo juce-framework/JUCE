@@ -47,6 +47,8 @@ namespace juce
     you should use to terminate the currently running logBatchedEvents call.
 
     @see Analytics, AnalyticsDestination, AnalyticsDestination::AnalyticsEvent
+
+    @tags{Analytics}
 */
 class JUCE_API  ThreadedAnalyticsDestination   : public AnalyticsDestination
 {

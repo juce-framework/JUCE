@@ -36,6 +36,8 @@ namespace juce
     and radio groups, etc.
 
     @see TextButton, DrawableButton, ToggleButton
+
+    @tags{GUI}
 */
 class JUCE_API  Button  : public Component,
                           public SettableTooltipClient

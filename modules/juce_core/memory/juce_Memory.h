@@ -88,6 +88,8 @@ inline void writeUnaligned (void* dstPtr, Type value) noexcept
 
  /** A handy C++ wrapper that creates and deletes an NSAutoreleasePool object using RAII.
      You should use the JUCE_AUTORELEASEPOOL macro to create a local auto-release pool on the stack.
+
+     @tags{Core}
  */
  class JUCE_API  ScopedAutoReleasePool
  {

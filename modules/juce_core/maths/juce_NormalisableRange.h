@@ -32,6 +32,8 @@ namespace juce
     and skew-factor.
 
     @see Range
+
+    @tags{Core}
 */
 template <typename ValueType>
 class NormalisableRange

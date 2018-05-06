@@ -516,8 +516,8 @@ String ProjectExporter::getPathForModuleString (const String& moduleID) const
 
     if (exporterPath.isEmpty() || project.getModules().shouldUseGlobalPath (moduleID))
     {
-        auto id = EnabledModuleList::isJuceModule (moduleID) ? Ids::defaultJuceModulePath
-                                                             : Ids::defaultUserModulePath;
+        auto id = isJUCEModule (moduleID) ? Ids::defaultJuceModulePath
+                                          : Ids::defaultUserModulePath;
 
         if (TargetOS::getThisOS() != getTargetOSForExporter())
             return getAppSettings().getFallbackPathForOS (id, getTargetOSForExporter()).toString();

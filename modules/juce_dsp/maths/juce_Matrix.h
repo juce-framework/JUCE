@@ -34,6 +34,8 @@ namespace dsp
     additions, multiplications, and linear systems of equations solving.
 
     @see LinearAlgebra
+
+    @tags{DSP}
 */
 template<typename ElementType>
 class Matrix

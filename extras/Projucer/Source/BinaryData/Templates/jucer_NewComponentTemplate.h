@@ -1,29 +1,29 @@
 /*
   ==============================================================================
 
-    FILENAME
-    Created: DATE
-    Author:  AUTHOR
+    %%filename%%
+    Created: %%date%%
+    Author:  %%author%%
 
   ==============================================================================
 */
 
 #pragma once
 
-INCLUDE_JUCE
+%%include_juce%%
 
 //==============================================================================
 /*
 */
-class COMPONENTCLASS    : public Component
+class %%component_class%%    : public Component
 {
 public:
-    COMPONENTCLASS();
-    ~COMPONENTCLASS();
+    %%component_class%%();
+    ~%%component_class%%();
 
     void paint (Graphics&) override;
     void resized() override;
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (COMPONENTCLASS)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%component_class%%)
 };

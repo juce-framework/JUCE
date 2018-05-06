@@ -63,6 +63,8 @@ class UnitTestRunner;
     To run a test, use the UnitTestRunner class.
 
     @see UnitTestRunner
+
+    @tags{Core}
 */
 class JUCE_API  UnitTest
 {
@@ -316,6 +318,8 @@ private:
     perform custom behaviour when each test completes.
 
     @see UnitTest
+
+    @tags{Core}
 */
 class JUCE_API  UnitTestRunner
 {

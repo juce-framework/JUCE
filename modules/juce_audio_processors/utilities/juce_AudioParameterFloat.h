@@ -32,6 +32,8 @@ namespace juce
     parameter which maps onto a given NormalisableRange.
 
     @see AudioParameterInt, AudioParameterBool, AudioParameterChoice
+
+    @tags{Audio}
 */
 class JUCE_API  AudioParameterFloat  : public AudioProcessorParameterWithID
 {

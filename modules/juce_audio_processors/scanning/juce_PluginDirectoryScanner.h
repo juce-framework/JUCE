@@ -33,6 +33,8 @@ namespace juce
 
     To use one of these, create it and call scanNextFile() repeatedly, until
     it returns false.
+
+    @tags{Audio}
 */
 class JUCE_API  PluginDirectoryScanner
 {

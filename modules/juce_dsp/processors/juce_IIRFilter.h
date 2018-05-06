@@ -24,13 +24,14 @@
   ==============================================================================
 */
 
-/**
-    Classes for IIR filter processing.
-*/
 namespace juce
 {
 namespace dsp
 {
+
+/**
+    Classes for IIR filter processing.
+*/
 namespace IIR
 {
     template <typename NumericType>
@@ -46,6 +47,8 @@ namespace IIR
         class Filter.
 
         @see Filter::Coefficients, FilterAudioSource, StateVariableFilter
+
+        @tags{DSP}
     */
     template <typename SampleType>
     class Filter
@@ -144,6 +147,8 @@ namespace IIR
     //==============================================================================
     /** A set of coefficients for use in an Filter object.
         @see IIR::Filter
+
+        @tags{DSP}
     */
     template <typename NumericType>
     struct Coefficients  : public ProcessorState

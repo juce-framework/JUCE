@@ -60,6 +60,8 @@ namespace juce
     listeners whenever one of its settings is changed.
 
     @see AudioDeviceSelectorComponent, AudioIODevice, AudioIODeviceType
+
+    @tags{Audio}
 */
 class JUCE_API  AudioDeviceManager  : public ChangeBroadcaster
 {

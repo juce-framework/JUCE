@@ -32,6 +32,8 @@ namespace juce
          BufferedInputStream, so that it has to read larger blocks less often.
 
     @see GZIPCompressorOutputStream
+
+    @tags{Core}
 */
 class JUCE_API  GZIPDecompressorInputStream  : public InputStream
 {

@@ -30,6 +30,8 @@ namespace juce
 //==============================================================================
 /**
     Creates an openGL texture from an Image.
+
+    @tags{OpenGL}
 */
 class JUCE_API  OpenGLTexture
 {

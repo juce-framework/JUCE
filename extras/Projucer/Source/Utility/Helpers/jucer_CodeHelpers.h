@@ -36,7 +36,6 @@ namespace CodeHelpers
                                 bool allowTemplates, bool allowAsterisks = false);
     String createIncludeStatement (const File& includedFile, const File& targetFile);
     String createIncludeStatement (const String& includePath);
-    String makeHeaderGuardName (const File& file);
     String makeBinaryDataIdentifierName (const File& file);
 
     String stringLiteral (const String& text, int maxLineLength = -1);

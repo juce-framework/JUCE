@@ -35,6 +35,8 @@ namespace juce
     toggle on/off.
 
     @see PropertyComponent
+
+    @tags{GUI}
 */
 class JUCE_API  BooleanPropertyComponent  : public PropertyComponent
 {

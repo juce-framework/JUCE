@@ -35,6 +35,8 @@ namespace juce
     to a menu being selected.
 
     @see MenuBarModel::Listener, MenuBarComponent, PopupMenu
+
+    @tags{GUI}
 */
 class JUCE_API  MenuBarModel      : private AsyncUpdater,
                                     private ApplicationCommandManagerListener

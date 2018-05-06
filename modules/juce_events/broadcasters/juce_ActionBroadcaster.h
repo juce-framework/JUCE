@@ -30,6 +30,8 @@ namespace juce
     listeners and broadcast to them, you can derive from this.
 
     @see ActionListener, ChangeListener
+
+    @tags{Events}
 */
 class JUCE_API  ActionBroadcaster
 {

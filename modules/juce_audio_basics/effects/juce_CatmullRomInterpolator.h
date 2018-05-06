@@ -33,6 +33,8 @@ namespace juce
     object.
 
     @see LagrangeInterpolator
+
+    @tags{Audio}
 */
 class JUCE_API  CatmullRomInterpolator
 {

@@ -36,7 +36,7 @@
 
   ID:                 juce_dsp
   vendor:             juce
-  version:            5.2.1
+  version:            5.3.0
   name:               JUCE DSP classes
   description:        Classes for audio buffer manipulation, digital audio processing, filtering, oversampling, fast math functions etc.
   website:            http://www.juce.com/juce
@@ -53,10 +53,17 @@
 
 
 #pragma once
+
 #define JUCE_DSP_H_INCLUDED
 
 #include <juce_audio_basics/juce_audio_basics.h>
 #include <juce_audio_formats/juce_audio_formats.h>
+
+#if (! defined (JUCE_STDLIB_HAS_STD_FUNCTION_SUPPORT)) || (! defined (JUCE_HAS_CONSTEXPR))
+ #ifndef JUCE_DEMO_RUNNER
+  #error "juce_dsp module requires your compiler to have a newer version of the standard library"
+ #endif
+#else
 
 #if defined(_M_X64) || defined(__amd64__) || defined(__SSE2__) || (defined(_M_IX86_FP) && _M_IX86_FP == 2)
 
@@ -264,3 +271,5 @@ namespace juce
 #include "frequency/juce_Convolution.h"
 #include "frequency/juce_Windowing.h"
 #include "filter_design/juce_FilterDesign.h"
+
+#endif

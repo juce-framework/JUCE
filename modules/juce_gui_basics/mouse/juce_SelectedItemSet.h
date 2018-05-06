@@ -39,6 +39,8 @@ namespace juce
 
     To be informed when items are selected/deselected, register a ChangeListener with
     this object.
+
+    @tags{GUI}
 */
 template <class SelectableItemType>
 class SelectedItemSet   : public ChangeBroadcaster

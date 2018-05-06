@@ -28,6 +28,8 @@ namespace BlocksProtocol
 /**
     Parses data packets from a BLOCKS device, and translates them into callbacks
     on a handler object
+
+    @tags{Blocks}
 */
 template <typename Handler>
 struct HostPacketDecoder

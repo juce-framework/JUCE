@@ -32,23 +32,23 @@ struct b2DistanceProxy
 
 	/// Initialize the proxy using the given shape. The shape
 	/// must remain in scope while the proxy is in use.
-	void Set(const b2Shape* shape, int32 index);
+	void Set(const b2Shape* shape, juce::int32 index);
 
 	/// Get the supporting vertex index in the given direction.
-	int32 GetSupport(const b2Vec2& d) const;
+	juce::int32 GetSupport(const b2Vec2& d) const;
 
 	/// Get the supporting vertex in the given direction.
 	const b2Vec2& GetSupportVertex(const b2Vec2& d) const;
 
 	/// Get the vertex count.
-	int32 GetVertexCount() const;
+	juce::int32 GetVertexCount() const;
 
 	/// Get a vertex by index. Used by b2Distance.
-	const b2Vec2& GetVertex(int32 index) const;
+	const b2Vec2& GetVertex(juce::int32 index) const;
 
 	b2Vec2 m_buffer[2];
 	const b2Vec2* m_vertices;
-	int32 m_count;
+	juce::int32 m_count;
 	float32 m_radius;
 };
 
@@ -57,9 +57,9 @@ struct b2DistanceProxy
 struct b2SimplexCache
 {
 	float32 metric;		///< length or area
-	uint16 count;
-	uint8 indexA[3];	///< vertices on shape A
-	uint8 indexB[3];	///< vertices on shape B
+	juce::uint16 count;
+	juce::uint8 indexA[3];	///< vertices on shape A
+	juce::uint8 indexB[3];	///< vertices on shape B
 };
 
 /// Input for b2Distance.
@@ -80,7 +80,7 @@ struct b2DistanceOutput
 	b2Vec2 pointA;		///< closest point on shapeA
 	b2Vec2 pointB;		///< closest point on shapeB
 	float32 distance;
-	int32 iterations;	///< number of GJK iterations used
+	juce::int32 iterations;	///< number of GJK iterations used
 };
 
 /// Compute the closest points between two shapes. Supports any combination of:
@@ -93,22 +93,22 @@ void b2Distance(b2DistanceOutput* output,
 
 //////////////////////////////////////////////////////////////////////////
 
-inline int32 b2DistanceProxy::GetVertexCount() const
+inline juce::int32 b2DistanceProxy::GetVertexCount() const
 {
 	return m_count;
 }
 
-inline const b2Vec2& b2DistanceProxy::GetVertex(int32 index) const
+inline const b2Vec2& b2DistanceProxy::GetVertex(juce::int32 index) const
 {
 	b2Assert(0 <= index && index < m_count);
 	return m_vertices[index];
 }
 
-inline int32 b2DistanceProxy::GetSupport(const b2Vec2& d) const
+inline juce::int32 b2DistanceProxy::GetSupport(const b2Vec2& d) const
 {
-	int32 bestIndex = 0;
+	juce::int32 bestIndex = 0;
 	float32 bestValue = b2Dot(m_vertices[0], d);
-	for (int32 i = 1; i < m_count; ++i)
+	for (juce::int32 i = 1; i < m_count; ++i)
 	{
 		float32 value = b2Dot(m_vertices[i], d);
 		if (value > bestValue)
@@ -123,9 +123,9 @@ inline int32 b2DistanceProxy::GetSupport(const b2Vec2& d) const
 
 inline const b2Vec2& b2DistanceProxy::GetSupportVertex(const b2Vec2& d) const
 {
-	int32 bestIndex = 0;
+	juce::int32 bestIndex = 0;
 	float32 bestValue = b2Dot(m_vertices[0], d);
-	for (int32 i = 1; i < m_count; ++i)
+	for (juce::int32 i = 1; i < m_count; ++i)
 	{
 		float32 value = b2Dot(m_vertices[i], d);
 		if (value > bestValue)

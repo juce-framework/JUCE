@@ -30,6 +30,8 @@ namespace juce
 
     The Type template is a user-defined type of object that will be stored for
     each touch element. The type must be default-constructable and copyable.
+
+    @tags{Blocks}
 */
 template <typename Type>
 class TouchList

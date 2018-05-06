@@ -36,6 +36,8 @@ namespace juce
     its own custom editor.
 
     @see AudioProcessor
+
+    @tags{Audio}
 */
 class JUCE_API  GenericAudioProcessorEditor      : public AudioProcessorEditor
 {

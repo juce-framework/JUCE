@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="M70qfTRRk" name="Projucer" projectType="guiapp" juceFolder="../../juce"
-              jucerVersion="5.2.1" version="5.2.1" bundleIdentifier="com.juce.theprojucer"
+              jucerVersion="5.3.0" version="5.3.0" bundleIdentifier="com.juce.theprojucer"
               defines="" splashScreenColour="Dark" displaySplashScreen="0"
               reportAppUsage="0" companyName="ROLI Ltd." companyCopyright="ROLI Ltd."
               cppLanguageStandard="11">
@@ -25,6 +25,7 @@
         <MODULEPATH id="juce_data_structures" path="../../modules"/>
         <MODULEPATH id="juce_cryptography" path="../../modules"/>
         <MODULEPATH id="juce_core" path="../../modules"/>
+        <MODULEPATH id="juce_analytics" path="../../modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
     <VS2013 targetFolder="Builds/VisualStudio2013" externalLibraries="" extraLinkerFlags=""
@@ -44,6 +45,7 @@
         <MODULEPATH id="juce_data_structures" path="../../modules"/>
         <MODULEPATH id="juce_cryptography" path="../../modules"/>
         <MODULEPATH id="juce_core" path="../../modules"/>
+        <MODULEPATH id="juce_analytics" path="../../modules"/>
       </MODULEPATHS>
     </VS2013>
     <VS2015 targetFolder="Builds/VisualStudio2015" externalLibraries="" bigIcon="rv1F4h"
@@ -62,6 +64,7 @@
         <MODULEPATH id="juce_data_structures" path="../../modules"/>
         <MODULEPATH id="juce_cryptography" path="../../modules"/>
         <MODULEPATH id="juce_core" path="../../modules"/>
+        <MODULEPATH id="juce_analytics" path="../../modules"/>
       </MODULEPATHS>
     </VS2015>
     <VS2017 targetFolder="Builds/VisualStudio2017" bigIcon="rv1F4h">
@@ -78,6 +81,7 @@
         <MODULEPATH id="juce_data_structures" path="../../modules"/>
         <MODULEPATH id="juce_cryptography" path="../../modules"/>
         <MODULEPATH id="juce_core" path="../../modules"/>
+        <MODULEPATH id="juce_analytics" path="../../modules"/>
       </MODULEPATHS>
     </VS2017>
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile" extraCompilerFlags="" extraLinkerFlags=""
@@ -96,6 +100,7 @@
         <MODULEPATH id="juce_data_structures" path="../../modules"/>
         <MODULEPATH id="juce_cryptography" path="../../modules"/>
         <MODULEPATH id="juce_core" path="../../modules"/>
+        <MODULEPATH id="juce_analytics" path="../../modules"/>
       </MODULEPATHS>
     </LINUX_MAKE>
   </EXPORTFORMATS>
@@ -110,8 +115,8 @@
               compile="0" resource="0" file="Source/Application/Windows/jucer_EditorColourSchemeWindowComponent.h"/>
         <FILE id="YO9U3v" name="jucer_FloatingToolWindow.h" compile="0" resource="0"
               file="Source/Application/Windows/jucer_FloatingToolWindow.h"/>
-        <FILE id="oUA0Ls" name="jucer_GlobalSearchPathsWindowComponent.h" compile="0"
-              resource="0" file="Source/Application/Windows/jucer_GlobalSearchPathsWindowComponent.h"/>
+        <FILE id="dqgeFF" name="jucer_GlobalPathsWindowComponent.h" compile="0"
+              resource="0" file="Source/Application/Windows/jucer_GlobalPathsWindowComponent.h"/>
         <FILE id="RyqPBc" name="jucer_SVGPathDataWindowComponent.h" compile="0"
               resource="0" file="Source/Application/Windows/jucer_SVGPathDataWindowComponent.h"/>
         <FILE id="ideTas" name="jucer_TranslationToolWindowComponent.h" compile="0"
@@ -141,6 +146,10 @@
             file="Source/Application/jucer_MainWindow.cpp"/>
       <FILE id="HmkREh" name="jucer_MainWindow.h" compile="0" resource="0"
             file="Source/Application/jucer_MainWindow.h"/>
+      <FILE id="HcONni" name="jucer_ProjucerAnalytics.cpp" compile="1" resource="0"
+            file="Source/Application/jucer_ProjucerAnalytics.cpp"/>
+      <FILE id="spHBY0" name="jucer_ProjucerAnalytics.h" compile="0" resource="0"
+            file="Source/Application/jucer_ProjucerAnalytics.h"/>
     </GROUP>
     <GROUP id="{8853BD6C-8307-BCF8-65BE-6A2F57093B40}" name="BinaryData">
       <GROUP id="{1A183456-21D3-225D-99E4-93B1A8E8C43A}" name="gradle">
@@ -246,11 +255,15 @@
               resource="1" file="Source/BinaryData/Templates/jucer_OpenGLComponentTemplate.cpp"/>
         <FILE id="Edyh5d" name="jucer_OpenGLComponentTemplate.h" compile="0"
               resource="1" file="Source/BinaryData/Templates/jucer_OpenGLComponentTemplate.h"/>
+        <FILE id="aUkNL5" name="jucer_PIPMain.cpp" compile="0" resource="1"
+              file="Source/BinaryData/Templates/jucer_PIPMain.cpp"/>
       </GROUP>
       <FILE id="oXM3fR" name="colourscheme_dark.xml" compile="0" resource="1"
             file="Source/BinaryData/colourscheme_dark.xml"/>
       <FILE id="ZZ5K4s" name="colourscheme_light.xml" compile="0" resource="1"
             file="Source/BinaryData/colourscheme_light.xml"/>
+      <FILE id="gjEdBX" name="nothingtoseehere.txt" compile="0" resource="1"
+            file="Source/BinaryData/nothingtoseehere.txt"/>
       <FILE id="ckpkjs" name="offlinepage.html" compile="0" resource="1"
             file="Source/BinaryData/offlinepage.html"/>
       <FILE id="kT5f0b" name="projucer_EULA.txt" compile="0" resource="1"
@@ -540,6 +553,8 @@
               resource="0" file="Source/Project/UI/jucer_ContentViewComponents.h"/>
         <FILE id="wFypDd" name="jucer_FileGroupInformationComponent.h" compile="0"
               resource="0" file="Source/Project/UI/jucer_FileGroupInformationComponent.h"/>
+        <FILE id="CSQKUL" name="jucer_HeaderComponent.cpp" compile="1" resource="0"
+              file="Source/Project/UI/jucer_HeaderComponent.cpp"/>
         <FILE id="QVjJdU" name="jucer_HeaderComponent.h" compile="0" resource="0"
               file="Source/Project/UI/jucer_HeaderComponent.h"/>
         <FILE id="dN0Xzo" name="jucer_ModulesInformationComponent.h" compile="0"
@@ -618,6 +633,12 @@
         <FILE id="EuC4K4" name="jucer_ValueSourceHelpers.h" compile="0" resource="0"
               file="Source/Utility/Helpers/jucer_ValueSourceHelpers.h"/>
       </GROUP>
+      <GROUP id="{A07C4A97-0855-5346-CAF2-A005580B6773}" name="PIPs">
+        <FILE id="joAnDa" name="jucer_PIPGenerator.cpp" compile="1" resource="0"
+              file="Source/Utility/PIPs/jucer_PIPGenerator.cpp"/>
+        <FILE id="GnbSDi" name="jucer_PIPGenerator.h" compile="0" resource="0"
+              file="Source/Utility/PIPs/jucer_PIPGenerator.h"/>
+      </GROUP>
       <GROUP id="{35F9B4BB-E683-1394-4BF2-C8F0C772168F}" name="UI">
         <GROUP id="{FE8C76CF-7C05-EC86-8997-C9941B88670B}" name="PropertyComponents">
           <FILE id="eleFsw" name="jucer_ColourPropertyComponent.h" compile="0"
@@ -690,6 +711,7 @@
   </MAINGROUP>
   <JUCEOPTIONS JUCE_LOG_ASSERTIONS="1" JUCE_USE_CURL="1"/>
   <MODULES>
+    <MODULE id="juce_analytics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_core" showAllCode="1"/>
     <MODULE id="juce_cryptography" showAllCode="1"/>
     <MODULE id="juce_data_structures" showAllCode="1"/>

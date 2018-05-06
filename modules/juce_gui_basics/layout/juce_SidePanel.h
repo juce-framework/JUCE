@@ -36,8 +36,9 @@ namespace juce
     When triggered with the showOrHide() method, the SidePanel will animate itself to its
     new position. This component also contains some logic to reactively resize and dismiss
     itself when the user drags it.
- */
-//==============================================================================
+
+    @tags{GUI}
+*/
 class SidePanel    : public Component,
                      private ComponentListener
 {

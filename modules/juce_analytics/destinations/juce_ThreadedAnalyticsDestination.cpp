@@ -216,7 +216,7 @@ struct ThreadedAnalyticsDestinationTests   : public UnitTest
                              const std::deque<AnalyticsDestination::AnalyticsEvent>& b)
     {
         const auto numEntries = a.size();
-        expectEquals (b.size(), numEntries);
+        expectEquals ((int) b.size(), (int) numEntries);
 
         for (size_t i = 0; i < numEntries; ++i)
         {

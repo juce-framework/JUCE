@@ -51,7 +51,10 @@ template <typename type>
 struct SIMDNativeOps;
 
 //==============================================================================
-/** Unsigned 32-bit integer NEON intrinsics. */
+/** Unsigned 32-bit integer NEON intrinsics.
+
+    @tags{DSP}
+*/
 template <>
 struct SIMDNativeOps<uint32_t>
 {
@@ -90,7 +93,10 @@ struct SIMDNativeOps<uint32_t>
 };
 
 //==============================================================================
-/** Signed 32-bit integer NEON intrinsics. */
+/** Signed 32-bit integer NEON intrinsics.
+
+    @tags{DSP}
+*/
 template <>
 struct SIMDNativeOps<int32_t>
 {
@@ -130,7 +136,10 @@ struct SIMDNativeOps<int32_t>
 };
 
 //==============================================================================
-/** Signed 8-bit integer NEON intrinsics. */
+/** Signed 8-bit integer NEON intrinsics.
+
+    @tags{DSP}
+*/
 template <>
 struct SIMDNativeOps<int8_t>
 {
@@ -165,7 +174,10 @@ struct SIMDNativeOps<int8_t>
 };
 
 //==============================================================================
-/** Unsigned 8-bit integer NEON intrinsics. */
+/** Unsigned 8-bit integer NEON intrinsics.
+
+    @tags{DSP}
+*/
 template <>
 struct SIMDNativeOps<uint8_t>
 {
@@ -200,7 +212,10 @@ struct SIMDNativeOps<uint8_t>
 };
 
 //==============================================================================
-/** Signed 16-bit integer NEON intrinsics. */
+/** Signed 16-bit integer NEON intrinsics.
+
+    @tags{DSP}
+*/
 template <>
 struct SIMDNativeOps<int16_t>
 {
@@ -236,7 +251,10 @@ struct SIMDNativeOps<int16_t>
 
 
 //==============================================================================
-/** Unsigned 16-bit integer NEON intrinsics. */
+/** Unsigned 16-bit integer NEON intrinsics.
+
+    @tags{DSP}
+*/
 template <>
 struct SIMDNativeOps<uint16_t>
 {
@@ -271,7 +289,10 @@ struct SIMDNativeOps<uint16_t>
 };
 
 //==============================================================================
-/** Signed 64-bit integer NEON intrinsics. */
+/** Signed 64-bit integer NEON intrinsics.
+
+    @tags{DSP}
+*/
 template <>
 struct SIMDNativeOps<int64_t>
 {
@@ -307,7 +328,10 @@ struct SIMDNativeOps<int64_t>
 
 
 //==============================================================================
-/** Unsigned 64-bit integer NEON intrinsics. */
+/** Unsigned 64-bit integer NEON intrinsics.
+
+    @tags{DSP}
+*/
 template <>
 struct SIMDNativeOps<uint64_t>
 {
@@ -342,7 +366,10 @@ struct SIMDNativeOps<uint64_t>
 };
 
     //==============================================================================
-/** Single-precision floating point NEON intrinsics. */
+/** Single-precision floating point NEON intrinsics.
+
+    @tags{DSP}
+*/
 template <>
 struct SIMDNativeOps<float>
 {
@@ -399,6 +426,8 @@ struct SIMDNativeOps<float>
 //==============================================================================
 /** Double-precision floating point NEON intrinsics does not exist in NEON
     so we need to emulate this.
+
+    @tags{DSP}
 */
 template <>
 struct SIMDNativeOps<double>

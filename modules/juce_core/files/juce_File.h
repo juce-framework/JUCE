@@ -34,6 +34,8 @@ namespace juce
     output stream.
 
     @see FileInputStream, FileOutputStream
+
+    @tags{Core}
 */
 class JUCE_API  File final
 {
@@ -1008,6 +1010,7 @@ public:
    #endif
 
     //==============================================================================
+    /** Comparator for files */
     struct NaturalFileComparator
     {
         NaturalFileComparator (bool shouldPutFoldersFirst) noexcept : foldersFirst (shouldPutFoldersFirst) {}

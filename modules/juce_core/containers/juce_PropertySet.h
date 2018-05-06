@@ -32,6 +32,8 @@ namespace juce
 
     See the PropertiesFile class for a subclass of this, which automatically broadcasts change
     messages and saves/loads the list from a file.
+
+    @tags{Core}
 */
 class JUCE_API  PropertySet
 {

@@ -32,11 +32,14 @@ namespace juce
     The base class for a type of plugin format, such as VST, AudioUnit, LADSPA, etc.
 
     @see AudioPluginFormatManager
+
+    @tags{Audio}
 */
 class JUCE_API  AudioPluginFormat
 {
 public:
     //==============================================================================
+    /** Structure used for callbacks when instantiation is completed. */
     struct JUCE_API  InstantiationCompletionCallback
     {
         virtual ~InstantiationCompletionCallback() {}

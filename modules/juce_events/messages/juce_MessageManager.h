@@ -43,6 +43,8 @@ typedef void* (MessageCallbackFunction) (void* userData);
     This class is in charge of the application's event-dispatch loop.
 
     @see Message, CallbackMessage, MessageManagerLock, JUCEApplication, JUCEApplicationBase
+
+    @tags{Events}
 */
 class JUCE_API  MessageManager  final
 {
@@ -376,6 +378,8 @@ private:
     you'll get an (occasional) deadlock..
 
     @see MessageManager, MessageManager::currentThreadHasLockedMessageManager
+
+    @tags{Events}
 */
 class JUCE_API MessageManagerLock      : private Thread::Listener
 {

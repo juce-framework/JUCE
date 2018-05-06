@@ -39,6 +39,8 @@ namespace juce
     with web servers and other time consuming destinations.
 
     @see Analytics, ThreadedAnalyticsDestination
+
+    @tags{Analytics}
 */
 struct JUCE_API  AnalyticsDestination
 {

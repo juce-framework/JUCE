@@ -36,6 +36,8 @@ namespace juce
 
     @see CriticalSection, WaitableEvent, Process, ThreadWithProgressWindow,
          MessageManagerLock
+
+    @tags{Core}
 */
 class JUCE_API  Thread
 {
@@ -173,6 +175,7 @@ public:
     bool waitForThreadToExit (int timeOutMilliseconds) const;
 
     //==============================================================================
+    /** Used to receive callbacks for thread exit calls */
     class Listener
     {
     public:

@@ -28,6 +28,8 @@ namespace juce
     A simple class to generate hash functions for some primitive types, intended for
     use with the HashMap class.
     @see HashMap
+
+    @tags{Core}
 */
 struct DefaultHashFunctions
 {
@@ -89,6 +91,8 @@ struct DefaultHashFunctions
 
     @tparam HashFunctionType The class of hash function, which must be copy-constructible.
     @see CriticalSection, DefaultHashFunctions, NamedValueSet, SortedSet
+
+    @tags{Core}
 */
 template <typename KeyType,
           typename ValueType,

@@ -8,25 +8,25 @@
 
 #pragma once
 
-INCLUDE_JUCE
+%%include_juce%%
 
 //==============================================================================
 /*
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class CONTENTCOMPCLASS   : public OpenGLAppComponent
+class %%content_component_class%%   : public OpenGLAppComponent
 {
 public:
     //==============================================================================
-    CONTENTCOMPCLASS()
+    %%content_component_class%%()
     {
         // Make sure you set the size of the component after
         // you add any child components.
         setSize (800, 600);
     }
 
-    ~CONTENTCOMPCLASS()
+    ~%%content_component_class%%()
     {
         // This shuts down the GL system and stops the rendering calls.
         shutdownOpenGL();
@@ -71,5 +71,5 @@ private:
     // Your private member variables go here...
 
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CONTENTCOMPCLASS)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)
 };

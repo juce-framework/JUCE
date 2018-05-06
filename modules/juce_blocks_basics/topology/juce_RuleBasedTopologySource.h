@@ -29,6 +29,8 @@ namespace juce
 
     Given an input PhysicalTopologySource and a set of Rule objects, this class
      will apply the rules and present the resulting topology to clients.
+
+    @tags{Blocks}
 */
 class RuleBasedTopologySource  : public TopologySource
 {

@@ -33,6 +33,8 @@ namespace juce
 
     The type used as a template parameter must be an integer type, such as int, short,
     int64, etc.
+
+    @tags{Core}
 */
 template <class Type>
 class SparseSet

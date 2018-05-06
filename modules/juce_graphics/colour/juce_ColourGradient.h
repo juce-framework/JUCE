@@ -32,6 +32,8 @@ namespace juce
     Describes the layout and colours that should be used to paint a colour gradient.
 
     @see Graphics::setGradientFill
+
+    @tags{Graphics}
 */
 class JUCE_API  ColourGradient  final
 {

@@ -21,10 +21,10 @@
 
 #include "b2Settings.h"
 
-const int32 b2_chunkSize = 16 * 1024;
-const int32 b2_maxBlockSize = 640;
-const int32 b2_blockSizes = 14;
-const int32 b2_chunkArrayIncrement = 128;
+const juce::int32 b2_chunkSize = 16 * 1024;
+const juce::int32 b2_maxBlockSize = 640;
+const juce::int32 b2_blockSizes = 14;
+const juce::int32 b2_chunkArrayIncrement = 128;
 
 struct b2Block;
 struct b2Chunk;
@@ -39,23 +39,23 @@ public:
 	~b2BlockAllocator();
 
 	/// Allocate memory. This will use b2Alloc if the size is larger than b2_maxBlockSize.
-	void* Allocate(int32 size);
+	void* Allocate(juce::int32 size);
 
 	/// Free memory. This will use b2Free if the size is larger than b2_maxBlockSize.
-	void Free(void* p, int32 size);
+	void Free(void* p, juce::int32 size);
 
 	void Clear();
 
 private:
 
 	b2Chunk* m_chunks;
-	int32 m_chunkCount;
-	int32 m_chunkSpace;
+	juce::int32 m_chunkCount;
+	juce::int32 m_chunkSpace;
 
 	b2Block* m_freeLists[b2_blockSizes];
 
-	static int32 s_blockSizes[b2_blockSizes];
-	static uint8 s_blockSizeLookup[b2_maxBlockSize + 1];
+	static juce::int32 s_blockSizes[b2_blockSizes];
+	static juce::uint8 s_blockSizeLookup[b2_maxBlockSize + 1];
 	static bool s_blockSizeLookupInitialized;
 };
 

@@ -38,6 +38,8 @@ namespace juce
     give it some SampledSound objects to play.
 
     @see SamplerVoice, Synthesiser, SynthesiserSound
+
+    @tags{Audio}
 */
 class JUCE_API  SamplerSound    : public SynthesiserSound
 {
@@ -110,6 +112,8 @@ private:
     give it some SampledSound objects to play.
 
     @see SamplerSound, Synthesiser, SynthesiserVoice
+
+    @tags{Audio}
 */
 class JUCE_API  SamplerVoice    : public SynthesiserVoice
 {

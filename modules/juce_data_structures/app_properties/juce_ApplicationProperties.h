@@ -45,6 +45,8 @@ namespace juce
     its files.
 
     @see PropertiesFile
+
+    @tags{DataStructures}
 */
 class JUCE_API  ApplicationProperties
 {

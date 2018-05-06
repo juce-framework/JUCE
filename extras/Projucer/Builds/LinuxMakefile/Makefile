@@ -35,7 +35,7 @@ ifeq ($(CONFIG),Debug)
     TARGET_ARCH := -march=native
   endif
 
-  JUCE_CPPFLAGS := $(DEPFLAGS) -DLINUX=1 -DDEBUG=1 -D_DEBUG=1 -DJUCER_LINUX_MAKE_6D53C8B4=1 -DJUCE_APP_VERSION=5.2.1 -DJUCE_APP_VERSION_HEX=0x50201 $(shell pkg-config --cflags freetype2 libcurl x11 xext xinerama webkit2gtk-4.0 gtk+-x11-3.0) -pthread -I../../JuceLibraryCode -I../../../../modules $(CPPFLAGS)
+  JUCE_CPPFLAGS := $(DEPFLAGS) -DLINUX=1 -DDEBUG=1 -D_DEBUG=1 -DJUCER_LINUX_MAKE_6D53C8B4=1 -DJUCE_APP_VERSION=5.3.0 -DJUCE_APP_VERSION_HEX=0x50300 $(shell pkg-config --cflags freetype2 libcurl x11 xext xinerama webkit2gtk-4.0 gtk+-x11-3.0) -pthread -I../../JuceLibraryCode -I../../../../modules $(CPPFLAGS)
   JUCE_CPPFLAGS_APP := -DJucePlugin_Build_VST=0 -DJucePlugin_Build_VST3=0 -DJucePlugin_Build_AU=0 -DJucePlugin_Build_AUv3=0 -DJucePlugin_Build_RTAS=0 -DJucePlugin_Build_AAX=0 -DJucePlugin_Build_Standalone=0
   JUCE_TARGET_APP := Projucer
 
@@ -56,7 +56,7 @@ ifeq ($(CONFIG),Release)
     TARGET_ARCH := -march=native
   endif
 
-  JUCE_CPPFLAGS := $(DEPFLAGS) -DLINUX=1 -DNDEBUG=1 -DJUCER_LINUX_MAKE_6D53C8B4=1 -DJUCE_APP_VERSION=5.2.1 -DJUCE_APP_VERSION_HEX=0x50201 $(shell pkg-config --cflags freetype2 libcurl x11 xext xinerama webkit2gtk-4.0 gtk+-x11-3.0) -pthread -I../../JuceLibraryCode -I../../../../modules $(CPPFLAGS)
+  JUCE_CPPFLAGS := $(DEPFLAGS) -DLINUX=1 -DNDEBUG=1 -DJUCER_LINUX_MAKE_6D53C8B4=1 -DJUCE_APP_VERSION=5.3.0 -DJUCE_APP_VERSION_HEX=0x50300 $(shell pkg-config --cflags freetype2 libcurl x11 xext xinerama webkit2gtk-4.0 gtk+-x11-3.0) -pthread -I../../JuceLibraryCode -I../../../../modules $(CPPFLAGS)
   JUCE_CPPFLAGS_APP := -DJucePlugin_Build_VST=0 -DJucePlugin_Build_VST3=0 -DJucePlugin_Build_AU=0 -DJucePlugin_Build_AUv3=0 -DJucePlugin_Build_RTAS=0 -DJucePlugin_Build_AAX=0 -DJucePlugin_Build_Standalone=0
   JUCE_TARGET_APP := Projucer
 
@@ -72,6 +72,7 @@ OBJECTS_APP := \
   $(JUCE_OBJDIR)/jucer_CommandLine_f35de107.o \
   $(JUCE_OBJDIR)/jucer_Main_f8488f5b.o \
   $(JUCE_OBJDIR)/jucer_MainWindow_1e163aeb.o \
+  $(JUCE_OBJDIR)/jucer_ProjucerAnalytics_5740f336.o \
   $(JUCE_OBJDIR)/jucer_DocumentEditorComponent_bc853a2f.o \
   $(JUCE_OBJDIR)/jucer_OpenDocumentManager_ba866622.o \
   $(JUCE_OBJDIR)/jucer_SourceCodeEditor_55965985.o \
@@ -101,6 +102,7 @@ OBJECTS_APP := \
   $(JUCE_OBJDIR)/jucer_CompileEngineClient_aee8c99c.o \
   $(JUCE_OBJDIR)/jucer_CompileEngineServer_5d8914.o \
   $(JUCE_OBJDIR)/jucer_DownloadCompileEngineThread_19bb4bb3.o \
+  $(JUCE_OBJDIR)/jucer_HeaderComponent_1ebf72ba.o \
   $(JUCE_OBJDIR)/jucer_Module_3f7666a5.o \
   $(JUCE_OBJDIR)/jucer_Project_c131864a.o \
   $(JUCE_OBJDIR)/jucer_ProjectExporter_cf377b25.o \
@@ -111,6 +113,7 @@ OBJECTS_APP := \
   $(JUCE_OBJDIR)/jucer_CodeHelpers_1e797672.o \
   $(JUCE_OBJDIR)/jucer_FileHelpers_54f12f83.o \
   $(JUCE_OBJDIR)/jucer_MiscUtilities_31fc8dd8.o \
+  $(JUCE_OBJDIR)/jucer_PIPGenerator_fd3402c7.o \
   $(JUCE_OBJDIR)/jucer_DependencyPathPropertyComponent_5d68c773.o \
   $(JUCE_OBJDIR)/jucer_Icons_d02d18f1.o \
   $(JUCE_OBJDIR)/jucer_JucerTreeViewBase_9b9f2ff0.o \
@@ -119,6 +122,7 @@ OBJECTS_APP := \
   $(JUCE_OBJDIR)/jucer_NewFileWizard_fac97f47.o \
   $(JUCE_OBJDIR)/jucer_NewProjectWizardClasses_891f6fa2.o \
   $(JUCE_OBJDIR)/BinaryData_ce4232d4.o \
+  $(JUCE_OBJDIR)/include_juce_analytics_f8e9fa94.o \
   $(JUCE_OBJDIR)/include_juce_core_f26d17db.o \
   $(JUCE_OBJDIR)/include_juce_cryptography_8cb807a8.o \
   $(JUCE_OBJDIR)/include_juce_data_structures_7471b1e3.o \
@@ -156,6 +160,11 @@ $(JUCE_OBJDIR)/jucer_Main_f8488f5b.o: ../../Source/Application/jucer_Main.cpp
 $(JUCE_OBJDIR)/jucer_MainWindow_1e163aeb.o: ../../Source/Application/jucer_MainWindow.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling jucer_MainWindow.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/jucer_ProjucerAnalytics_5740f336.o: ../../Source/Application/jucer_ProjucerAnalytics.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling jucer_ProjucerAnalytics.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/jucer_DocumentEditorComponent_bc853a2f.o: ../../Source/CodeEditor/jucer_DocumentEditorComponent.cpp
@@ -303,6 +312,11 @@ $(JUCE_OBJDIR)/jucer_DownloadCompileEngineThread_19bb4bb3.o: ../../Source/LiveBu
 	@echo "Compiling jucer_DownloadCompileEngineThread.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
+$(JUCE_OBJDIR)/jucer_HeaderComponent_1ebf72ba.o: ../../Source/Project/UI/jucer_HeaderComponent.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling jucer_HeaderComponent.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
 $(JUCE_OBJDIR)/jucer_Module_3f7666a5.o: ../../Source/Project/jucer_Module.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling jucer_Module.cpp"
@@ -353,6 +367,11 @@ $(JUCE_OBJDIR)/jucer_MiscUtilities_31fc8dd8.o: ../../Source/Utility/Helpers/juce
 	@echo "Compiling jucer_MiscUtilities.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
+$(JUCE_OBJDIR)/jucer_PIPGenerator_fd3402c7.o: ../../Source/Utility/PIPs/jucer_PIPGenerator.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling jucer_PIPGenerator.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
 $(JUCE_OBJDIR)/jucer_DependencyPathPropertyComponent_5d68c773.o: ../../Source/Utility/UI/PropertyComponents/jucer_DependencyPathPropertyComponent.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling jucer_DependencyPathPropertyComponent.cpp"
@@ -391,6 +410,11 @@ $(JUCE_OBJDIR)/jucer_NewProjectWizardClasses_891f6fa2.o: ../../Source/Wizards/ju
 $(JUCE_OBJDIR)/BinaryData_ce4232d4.o: ../../JuceLibraryCode/BinaryData.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling BinaryData.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/include_juce_analytics_f8e9fa94.o: ../../JuceLibraryCode/include_juce_analytics.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling include_juce_analytics.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/include_juce_core_f26d17db.o: ../../JuceLibraryCode/include_juce_core.cpp

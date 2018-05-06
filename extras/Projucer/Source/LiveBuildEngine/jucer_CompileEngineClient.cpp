@@ -378,17 +378,36 @@ private:
 
     static String getGlobalDefs (Project& proj)
     {
-        String defs (ProjectProperties::getExtraPreprocessorDefsValue (proj).get().toString());
+        StringArray defs;
+
+        defs.add (ProjectProperties::getExtraPreprocessorDefsValue (proj).get().toString());
+
+        {
+            auto projectDefines = proj.getPreprocessorDefs();
+            StringArray result;
+
+            for (int i = 0; i < projectDefines.size(); ++i)
+            {
+                auto def = projectDefines.getAllKeys()[i];
+                auto value = projectDefines.getAllValues()[i];
+
+                if (value.isNotEmpty())
+                    def << "=" << value;
+
+                 defs.add (def);
+            }
+        }
 
         for (Project::ExporterIterator exporter (proj); exporter.next();)
             if (exporter->canLaunchProject())
-                defs << " " << exporter->getExporterIdentifierMacro() << "=1";
+                defs.add (exporter->getExporterIdentifierMacro() + "=1");
 
         // Use the JUCE implementation of std::function until the live build
         // engine can compile the one from the standard library
-        defs << " _LIBCPP_FUNCTIONAL=1";
+        defs.add (" _LIBCPP_FUNCTIONAL=1");
+        defs.removeEmptyStrings();
 
-        return defs;
+        return defs.joinIntoString (" ");
     }
 
     static void scanProjectItem (const Project::Item& projectItem, Array<File>& compileUnits, Array<File>& userFiles)
@@ -663,6 +682,11 @@ void CompileEngineChildProcess::handleAppQuit()
 {
     DBG ("handleAppQuit");
     runningAppProcess.reset();
+}
+
+bool CompileEngineChildProcess::isAppRunning() const noexcept
+{
+    return runningAppProcess != nullptr && runningAppProcess->isRunningApp;
 }
 
 //==============================================================================

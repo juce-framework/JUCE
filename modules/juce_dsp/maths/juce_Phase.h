@@ -34,6 +34,8 @@ namespace dsp
 
     This represents a value which can be incremented, and which wraps back to 0 when it
     goes past 2 * pi.
+
+    @tags{DSP}
 */
 template <typename Type>
 struct Phase

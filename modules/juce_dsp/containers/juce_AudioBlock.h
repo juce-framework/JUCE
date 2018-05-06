@@ -50,6 +50,8 @@ namespace SampleTypeHelpers // Internal classes needed for handling sample type 
     an AudioBuffer which it can refer to, but in all cases the user is
     responsible for making sure that the data doesn't get deleted while there's
     still an AudioBlock using it.
+
+    @tags{DSP}
 */
 template <typename SampleType>
 class AudioBlock

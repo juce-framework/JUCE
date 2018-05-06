@@ -33,6 +33,8 @@ namespace juce
     about mouse events that happen to that component.
 
     @see Component::addMouseListener, Component::removeMouseListener
+
+    @tags{GUI}
 */
 class JUCE_API  MouseListener
 {

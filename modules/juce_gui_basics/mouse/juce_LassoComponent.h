@@ -35,6 +35,8 @@ namespace juce
     and to change the list of selected items.
 
     @see LassoComponent, SelectedItemSet
+
+    @tags{GUI}
 */
 template <class SelectableItemType>
 class LassoSource
@@ -92,6 +94,8 @@ public:
     xor'ed with any previously selected items.
 
     @see LassoSource, SelectedItemSet
+
+    @tags{GUI}
 */
 template <class SelectableItemType>
 class LassoComponent  : public Component

@@ -2787,15 +2787,7 @@ Justification LookAndFeel_V2::getSidePanelTitleJustification (SidePanel& panel)
 
 Path LookAndFeel_V2::getSidePanelDismissButtonShape (SidePanel& panel)
 {
-    Path p;
-    const float size = 10.0f;
-
-    if (panel.isPanelOnLeft())
-        p.addTriangle (size, 0.0f, 0.0f, size * 0.5f, size, size);
-    else
-        p.addTriangle (0.0f, 0.0f, size, size * 0.5f, 0.0f, size);
-
-    return p;
+    return getCrossShape ((float) panel.getTitleBarHeight());
 }
 
 //==============================================================================

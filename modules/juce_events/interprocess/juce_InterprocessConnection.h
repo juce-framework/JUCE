@@ -44,6 +44,8 @@ class MemoryBlock;
     InterprocessConnectionServer class.
 
     @see InterprocessConnectionServer, Socket, NamedPipe
+
+    @tags{Events}
 */
 class JUCE_API  InterprocessConnection
 {

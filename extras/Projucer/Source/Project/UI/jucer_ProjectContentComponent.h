@@ -75,7 +75,7 @@ public:
     bool canGoToCounterpart() const;
     bool goToCounterpart();
 
-    bool saveProject (bool shouldWait = false);
+    bool saveProject (bool shouldWait = false, bool openInIDE = false);
     void closeProject();
     void openInSelectedIDE (bool saveFirst);
     void showNewExporterMenu();

@@ -158,13 +158,15 @@ public:
         // Handle Open Project button functionality
         ApplicationCommandManager& commandManager = ProjucerApplication::getCommandManager();
 
-        addAndMakeVisible (blankProjectButton   = new TemplateOptionButton ("Create Blank Project",  TemplateOptionButton::ImageOnButtonBackground, BinaryData::wizard_Openfile_svg));
-        addAndMakeVisible (exampleProjectButton = new TemplateOptionButton ("Open Example Project",  TemplateOptionButton::ImageOnButtonBackground, BinaryData::wizard_Openfile_svg));
-        addAndMakeVisible (openProjectButton    = new TemplateOptionButton ("Open Existing Project", TemplateOptionButton::ImageOnButtonBackground, BinaryData::wizard_Openfile_svg));
+        addAndMakeVisible (blankProjectButton);
+        addAndMakeVisible (openProjectButton);
+        addAndMakeVisible (browseDemosButton);
+        addAndMakeVisible (viewTutorialsButton);
 
-        blankProjectButton->onClick   = [this] { createBlankProject(); };
-        exampleProjectButton->onClick = [this] { openExampleProject(); };
-        openProjectButton->setCommandToTrigger (&commandManager, CommandIDs::open, true);
+        blankProjectButton.onClick   = [this] { createBlankProject(); };
+        openProjectButton.setCommandToTrigger (&commandManager, CommandIDs::open, true);
+        browseDemosButton.setCommandToTrigger (&commandManager, CommandIDs::launchDemoRunner, true);
+        viewTutorialsButton.setCommandToTrigger (&commandManager, CommandIDs::showTutorials, true);
 
         newProjectWizard = projectWizard;
     }
@@ -185,35 +187,41 @@ public:
 
         for (int i = 0; i < optionButtons.size(); ++i)
             if (optionButtons.getUnchecked(i)->isOver())
-                g.drawFittedText (optionButtons.getUnchecked(i)->getDescription(), descriptionBox, Justification::centred, 5, 1.0f);
+                g.drawFittedText (optionButtons.getUnchecked(i)->getDescription(), descriptionBox, Justification::centredBottom, 5, 1.0f);
     }
 
     void resized() override
     {
-        auto allOpts = getLocalBounds().reduced (40, 60);
-        allOpts.removeFromBottom (allOpts.getHeight() / 4);
+        auto bounds = getLocalBounds().reduced (40, 0);
+        bounds.removeFromTop (60);
 
-        const auto numHorizIcons = 4;
-        const auto optStep = allOpts.getWidth() / numHorizIcons;
-
-        for (int i = 0; i < optionButtons.size(); ++i)
         {
-            const auto yShift = i < numHorizIcons ? 0 : 1;
+            auto optionBounds = bounds.removeFromTop (roundToInt (bounds.getHeight() * 0.65f));
 
-            optionButtons.getUnchecked(i)->setBounds (Rectangle<int> (allOpts.getX() + (i % numHorizIcons) * optStep,
-                                                                      allOpts.getY() + yShift * allOpts.getHeight() / 2,
-                                                                      optStep, allOpts.getHeight() / 2)
-                                                        .reduced (10, 10));
+            auto topSlice = optionBounds.removeFromTop (optionBounds.getHeight() / 2).reduced (0, 10);
+            auto bottomSlice = optionBounds.reduced (0, 10);
+
+            const int numHorizontal = 4;
+
+            for (int i = 0; i < optionButtons.size(); ++i)
+            {
+                auto& sliceToUse = (i < numHorizontal ? topSlice : bottomSlice);
+
+                optionButtons.getUnchecked (i)->setBounds (sliceToUse.removeFromLeft (sliceToUse.getWidth() / (4 - (i % 4))).reduced (10, 0));
+            }
         }
 
-        auto openButtonBounds = getLocalBounds();
-        openButtonBounds.removeFromBottom (proportionOfHeight (0.12f));
-        openButtonBounds = openButtonBounds.removeFromBottom (120);
-        openButtonBounds.reduce (50, 40);
+        bounds.removeFromTop (20);
+        auto topButtonBounds = bounds.removeFromTop (50);
 
-        blankProjectButton->setBounds (openButtonBounds.removeFromLeft (optStep - 20));
-        exampleProjectButton->setBounds (openButtonBounds.removeFromRight (optStep - 20));
-        openProjectButton->setBounds (openButtonBounds.reduced (18, 0));
+        openProjectButton.setBounds (topButtonBounds.reduced (80, 0));
+
+        bounds.removeFromTop (10);
+        auto bottomButtonBounds = bounds.removeFromTop (35);
+
+        blankProjectButton.setBounds  (bottomButtonBounds.removeFromLeft (bottomButtonBounds.getWidth() / 3).reduced (10, 0));
+        browseDemosButton.setBounds   (bottomButtonBounds.removeFromLeft (bottomButtonBounds.getWidth() / 2).reduced (10, 0));
+        viewTutorialsButton.setBounds (bottomButtonBounds.removeFromLeft (bottomButtonBounds.getWidth()).reduced (10, 0));
     }
 
     void showWizard (const String& name)
@@ -231,36 +239,14 @@ public:
         showWizard (BlankAppWizard().getName());
     }
 
-    void openExampleProject()
-    {
-        FileChooser fc ("Open File", findExamplesFolder());
-
-        if (fc.browseForFileToOpen())
-            ProjucerApplication::getApp().openFile (fc.getResult());
-    }
-
-    static File findExamplesFolder()
-    {
-        File appFolder (File::getSpecialLocation (File::currentApplicationFile));
-
-        while (appFolder.exists()
-                && appFolder.getParentDirectory() != appFolder)
-        {
-            File examples (appFolder.getSiblingFile ("examples"));
-
-            if (examples.exists())
-                return examples;
-
-            appFolder = appFolder.getParentDirectory();
-        }
-
-        return {};
-    }
-
 private:
     OwnedArray<TemplateOptionButton> optionButtons;
     NewProjectWizardClasses::WizardComp* newProjectWizard;
-    ScopedPointer<TemplateOptionButton> blankProjectButton, openProjectButton, exampleProjectButton;
+
+    TemplateOptionButton blankProjectButton   { "Create Blank Project",  TemplateOptionButton::ImageOnButtonBackground, BinaryData::wizard_Openfile_svg },
+                         openProjectButton    { "Open Existing Project", TemplateOptionButton::ImageOnButtonBackground, BinaryData::wizard_Openfile_svg },
+                         browseDemosButton    { "Browse JUCE Demos",     TemplateOptionButton::ImageOnButtonBackground, BinaryData::wizard_Openfile_svg },
+                         viewTutorialsButton  { "View JUCE Tutorials",   TemplateOptionButton::ImageOnButtonBackground, BinaryData::wizard_Openfile_svg };
 
     void showWizardButton (Button* b)
     {

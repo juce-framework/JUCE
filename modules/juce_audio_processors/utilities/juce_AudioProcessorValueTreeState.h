@@ -42,6 +42,8 @@ namespace juce
     To use:
     1) Create an AudioProcessorValueTreeState, and give it some parameters using createAndAddParameter().
     2) Initialise the state member variable with a type name.
+
+    @tags{Audio}
 */
 class JUCE_API  AudioProcessorValueTreeState  : private Timer,
                                                 private ValueTree::Listener

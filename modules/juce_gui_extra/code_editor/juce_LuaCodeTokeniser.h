@@ -29,6 +29,8 @@ namespace juce
 
 //==============================================================================
 /**
+
+    @tags{GUI}
 */
 class JUCE_API  LuaTokeniser   : public CodeTokeniser
 {

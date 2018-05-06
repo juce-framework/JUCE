@@ -31,6 +31,8 @@ namespace juce
     allows all directories through.
 
     @see FileFilter, DirectoryContentsList, FileListComponent, FileBrowserComponent
+
+    @tags{Core}
 */
 class JUCE_API  WildcardFileFilter  : public FileFilter
 {

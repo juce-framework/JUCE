@@ -32,6 +32,7 @@ namespace juce
     An implementation of LowLevelGraphicsContext that turns the drawing operations
     into a PostScript document.
 
+    @tags{Graphics}
 */
 class JUCE_API  LowLevelGraphicsPostScriptRenderer    : public LowLevelGraphicsContext
 {
@@ -91,6 +92,7 @@ protected:
     bool needToClip;
     Colour lastColour;
 
+    /** Describes a saved state */
     struct SavedState
     {
         SavedState();

@@ -78,6 +78,8 @@ namespace juce
     @endcode
 
     @see Thread, AlertWindow
+
+    @tags{GUI}
 */
 class JUCE_API  ThreadWithProgressWindow  : public Thread,
                                             private Timer

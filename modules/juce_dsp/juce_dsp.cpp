@@ -35,6 +35,12 @@
 
 #include "juce_dsp.h"
 
+#if (! defined (JUCE_STDLIB_HAS_STD_FUNCTION_SUPPORT)) || (! defined (JUCE_HAS_CONSTEXPR))
+ #ifndef JUCE_DEMO_RUNNER
+  #error "juce_dsp module requires your compiler to have a newer version of the standard library"
+ #endif
+#else
+
 #ifndef JUCE_USE_VDSP_FRAMEWORK
  #define JUCE_USE_VDSP_FRAMEWORK 1
 #endif
@@ -82,4 +88,5 @@
 #endif
 #include "frequency/juce_FFT_test.cpp"
 #include "processors/juce_FIRFilter_test.cpp"
+#endif
 #endif

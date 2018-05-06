@@ -52,6 +52,7 @@ public:
     void launchApp();
     bool canKillApp() const;
     void killApp();
+    bool isAppRunning() const noexcept;
 
     const ClassDatabase::ClassList& getComponentList() const        { return lastComponentList; }
 

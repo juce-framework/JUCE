@@ -36,6 +36,8 @@ namespace dsp
     When the prepare method is called, it uses the specified number of channels to
     instantiate the appropriate number of instances, which it then uses in its
     process() method.
+
+    @tags{DSP}
 */
 template <typename MonoProcessorType, typename StateType>
 struct ProcessorDuplicator

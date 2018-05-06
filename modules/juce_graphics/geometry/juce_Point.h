@@ -35,6 +35,8 @@ namespace juce
     rather than a class.
 
     @see Line, Path, AffineTransform
+
+    @tags{Graphics}
 */
 template <typename ValueType>
 class Point

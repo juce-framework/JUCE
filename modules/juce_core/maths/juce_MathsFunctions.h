@@ -322,7 +322,10 @@ inline float juce_hypot (float a, float b) noexcept
 //==============================================================================
 #if JUCE_HAS_CONSTEXPR
 
-/** Commonly used mathematical constants */
+/** Commonly used mathematical constants
+
+    @tags{Core}
+*/
 template <typename FloatType>
 struct MathConstants
 {
@@ -344,7 +347,10 @@ struct MathConstants
 
 #else
 
-/** Commonly used mathematical constants */
+/** Commonly used mathematical constants
+
+    @tags{Core}
+*/
 template <typename FloatType>
 struct MathConstants
 {
@@ -618,6 +624,8 @@ namespace TypeHelpers
         E.g. "myFunction (typename TypeHelpers::ParameterType<int>::type, typename TypeHelpers::ParameterType<MyObject>::type)"
         would evaluate to "myfunction (int, const MyObject&)", keeping any primitive types as
         pass-by-value, but passing objects as a const reference, to avoid copying.
+
+        @tags{Core}
     */
     template <typename Type> struct ParameterType                   { typedef const Type& type; };
 
@@ -641,19 +649,28 @@ namespace TypeHelpers
 
     /** These templates are designed to take a type, and if it's a double, they return a double
         type; for anything else, they return a float type.
+
+        @tags{Core}
     */
     template <typename Type> struct SmallestFloatType               { typedef float  type; };
-    template <>              struct SmallestFloatType <double>      { typedef double type; };
 
+   #if ! DOXYGEN
+    template <>              struct SmallestFloatType <double>      { typedef double type; };
+   #endif
 
     /** These templates are designed to take an integer type, and return an unsigned int
         version with the same size.
+
+        @tags{Core}
     */
     template <int bytes>     struct UnsignedTypeWithSize            {};
+
+   #if ! DOXYGEN
     template <>              struct UnsignedTypeWithSize<1>         { typedef uint8  type; };
     template <>              struct UnsignedTypeWithSize<2>         { typedef uint16 type; };
     template <>              struct UnsignedTypeWithSize<4>         { typedef uint32 type; };
     template <>              struct UnsignedTypeWithSize<8>         { typedef uint64 type; };
+   #endif
 }
 
 //==============================================================================

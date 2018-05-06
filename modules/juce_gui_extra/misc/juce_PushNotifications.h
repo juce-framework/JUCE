@@ -40,6 +40,8 @@ namespace juce
     remote notifications, inspect the Notification's fields for notification details.
     Bear in mind that some fields will not be available when receiving a remote
     notification.
+
+    @tags{GUI}
 */
 class JUCE_API PushNotifications    : private DeletedAtShutdown
 {
@@ -60,7 +62,7 @@ public:
 
         /** Represents an action on a notification that can be presented as a button or a text input.
             On Android, each notification has its action specified explicitly, on iOS you configure an
-            allowed set of actions on startup and pack them into categories (see @class Settings).
+            allowed set of actions on startup and pack them into categories (see Settings).
         */
         struct Action
         {
@@ -179,7 +181,7 @@ public:
                                      number of actions to be presented, so always present most important actions first.
                                      Available from Android API 16 or above. */
 
-        /**< Used to represent a progress of some operation. */
+        /** Used to represent a progress of some operation. */
         struct Progress
         {
             int  max = 0;               /**< Max possible value of a progress. A typical usecase is to set max to 100 and increment
@@ -253,7 +255,7 @@ public:
         Colour ledColour;     /**< Optional: Sets the led colour. The hardware will do its best to approximate the colour.
                                    The default colour will be used if ledColour is not set. */
 
-        /**< Allows to control the time the device's led is on and off. */
+        /** Allows to control the time the device's led is on and off. */
         struct LedBlinkPattern
         {
             int msToBeOn  = 0;   /**< The led will be on for the given number of milliseconds, after which it will turn off. */
@@ -282,7 +284,7 @@ public:
         bool alertOnlyOnce = false; /**< Optional: Set this flag if you would only like the sound, vibrate and ticker to be played if the notification
                                          is not already showing. */
 
-        /**< Controls timestamp visibility and format. */
+        /** Controls timestamp visibility and format. */
         enum TimestampVisibility
         {
             off,                    /**< Do not show timestamp. */
@@ -293,7 +295,7 @@ public:
 
         TimestampVisibility timestampVisibility = normal;  /**< Optional. */
 
-        /**< Controls badge icon type to use if a notification is shown as a badge. Available from Android API 26 or above. */
+        /** Controls badge icon type to use if a notification is shown as a badge. Available from Android API 26 or above. */
         enum BadgeIconType
         {
             none,
@@ -462,7 +464,7 @@ public:
         Notification::LockScreenAppearance lockScreenAppearance = Notification::showPartially;  /**< Optional. */
 
         String description;                 /**< Optional: user visible description of the channel. */
-        String groupId;                     /**< Required: group this channel belongs to (see @class ChannelGroup). */
+        String groupId;                     /**< Required: group this channel belongs to (see ChannelGroup). */
         Colour ledColour;                   /**< Optional: sets the led colour for notifications in this channel. */
         bool bypassDoNotDisturb = false;    /**< Optional: true if notifications in this channel can bypass do not disturb setting. */
         bool canShowBadge = false;          /**< Optional: true if notifications in this channel can show badges in a Launcher application. */

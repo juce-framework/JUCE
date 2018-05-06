@@ -38,6 +38,8 @@ namespace juce
     system, then call openDevice to open one for use. Once you have a CameraDevice
     object, you can get a viewer component from it, and use its methods to
     stream to a file or capture still-frames.
+
+    @tags{Video}
 */
 class JUCE_API  CameraDevice
 {

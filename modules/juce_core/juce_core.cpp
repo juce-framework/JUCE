@@ -226,6 +226,7 @@
 #include "threads/juce_HighResolutionTimer.cpp"
 #include "network/juce_URL.cpp"
 #include "network/juce_WebInputStream.cpp"
+#include "streams/juce_URLInputSource.cpp"
 
 //==============================================================================
 #if JUCE_UNIT_TESTS

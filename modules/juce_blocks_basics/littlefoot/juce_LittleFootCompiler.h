@@ -31,6 +31,8 @@ namespace littlefoot
 /**
     This class compiles littlefoot source code into a littlefoot::Program object
     which can be executed by a littlefoot::Runner.
+
+    @tags{Blocks}
 */
 struct Compiler
 {
@@ -91,6 +93,9 @@ struct Compiler
     Array<uint8> compiledObjectCode;
 
 private:
+
+   #ifndef DOXYGEN
+
     struct Statement;
     struct Expression;
     struct BlockStatement;
@@ -2192,6 +2197,8 @@ private:
         if (v.isBool())                 return Type::bool_;
         return Type::void_;
     }
+
+   #endif // ! DOXYGEN
 };
 
 }

@@ -39,6 +39,8 @@ namespace juce
     that image.
 
     @see Component::paint
+
+    @tags{Graphics}
 */
 class JUCE_API  Graphics  final
 {

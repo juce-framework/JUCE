@@ -28,8 +28,13 @@ namespace juce
 {
 
 //==============================================================================
+/** Structure for VST speaker mappings
+
+    @tags{Audio}
+*/
 struct SpeakerMappings  : private AudioChannelSet // (inheritance only to give easier access to items in the namespace)
 {
+    /** Structure describing a mapping */
     struct Mapping
     {
         int32 vst2;
@@ -125,6 +130,7 @@ struct SpeakerMappings  : private AudioChannelSet // (inheritance only to give e
         return vstSpeakerConfigTypeUser;
     }
 
+    /** Class to hold a speaker configuration */
     class VstSpeakerConfigurationHolder
     {
     public:

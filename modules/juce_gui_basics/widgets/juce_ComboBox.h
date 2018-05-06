@@ -40,6 +40,8 @@ namespace juce
     To find out when the user selects a different item or edits the text, you
     can assign a lambda to the onChange member, or register a ComboBox::Listener
     to receive callbacks.
+
+    @tags{GUI}
 */
 class JUCE_API  ComboBox  : public Component,
                             public SettableTooltipClient,

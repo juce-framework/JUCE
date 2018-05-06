@@ -32,6 +32,8 @@ namespace juce
     formatted to meet the RFC 4122 version 4 standard.
 
     The class includes methods for saving the ID as a string or as raw binary data.
+
+    @tags{Core}
 */
 class JUCE_API  Uuid
 {

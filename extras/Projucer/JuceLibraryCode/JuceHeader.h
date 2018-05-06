@@ -14,6 +14,7 @@
 
 #include "AppConfig.h"
 
+#include <juce_analytics/juce_analytics.h>
 #include <juce_core/juce_core.h>
 #include <juce_cryptography/juce_cryptography.h>
 #include <juce_data_structures/juce_data_structures.h>
@@ -34,7 +35,7 @@
 namespace ProjectInfo
 {
     const char* const  projectName    = "Projucer";
-    const char* const  versionString  = "5.2.1";
-    const int          versionNumber  = 0x50201;
+    const char* const  versionString  = "5.3.0";
+    const int          versionNumber  = 0x50300;
 }
 #endif

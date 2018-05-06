@@ -38,6 +38,8 @@ namespace juce
     input to send both streams through the processor.
 
     @see AudioProcessor, AudioProcessorGraph
+
+    @tags{Audio}
 */
 class JUCE_API  AudioProcessorPlayer    : public AudioIODeviceCallback,
                                           public MidiInputCallback

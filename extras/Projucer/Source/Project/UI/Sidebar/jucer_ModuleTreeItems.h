@@ -111,7 +111,7 @@ public:
 
     void refreshModuleInfoIfCurrentlyShowing (bool juceModulePathChanged)
     {
-        auto isJuceModule = EnabledModuleList::isJuceModule (moduleID);
+        auto isJuceModule = isJUCEModule (moduleID);
         auto shouldRefresh = (juceModulePathChanged && isJuceModule) || (! juceModulePathChanged && ! isJuceModule);
 
         if (! shouldRefresh)
@@ -170,8 +170,8 @@ private:
                 if (exporter->isCLion())
                     continue;
 
-                auto key = modules.isJuceModule (moduleID) ? Ids::defaultJuceModulePath
-                                                           : Ids::defaultUserModulePath;
+                auto key = isJUCEModule (moduleID) ? Ids::defaultJuceModulePath
+                                                   : Ids::defaultUserModulePath;
 
                 Value src (modulePathValueSources.add (new DependencyPathValueSource (exporter->getPathForModuleValue (moduleID),
                                                                                       key, exporter->getTargetOSForExporter())));
@@ -192,8 +192,8 @@ private:
 
             globalPathValue.referTo (modules.getShouldUseGlobalPathValue (moduleID));
 
-            auto menuItemString = (TargetOS::getThisOS() == TargetOS::osx ? "\"Projucer->Global Search Paths...\""
-                                                                          : "\"File->Global Search Paths...\"");
+            auto menuItemString = (TargetOS::getThisOS() == TargetOS::osx ? "\"Projucer->Global Paths...\""
+                                                                          : "\"File->Global Paths...\"");
 
             props.add (new BooleanPropertyComponent (globalPathValue,
                                                      "Use global path", "Use global path for this module"),
@@ -585,6 +585,7 @@ public:
     void handlePopupMenuResult (int resultCode) override
     {
         auto& modules = project.getModules();
+        auto numModulesBefore = modules.getNumModules();
 
         if (resultCode == 1001)
         {
@@ -598,6 +599,14 @@ public:
                 modules.addModuleInteractive (getAvailableModulesInGlobalUserPath() [resultCode - 200]);
             else if (resultCode < 400)
                 modules.addModuleInteractive (getAvailableModulesInExporterPaths() [resultCode - 300]);
+        }
+
+        if (modules.getNumModules() == numModulesBefore + 1)
+        {
+            StringPairArray data;
+            data.set ("label",  modules.getModuleID (modules.getNumModules() - 1));
+
+            Analytics::getInstance()->logEvent ("Module Added", data, ProjucerAnalyticsEvent::projectEvent);
         }
     }
 

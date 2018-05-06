@@ -31,6 +31,8 @@ namespace juce
     Provides a class of AudioProcessorParameter that can be used as a boolean value.
 
     @see AudioParameterFloat, AudioParameterInt, AudioParameterChoice
+
+    @tags{Audio}
 */
 class JUCE_API AudioParameterBool  : public AudioProcessorParameterWithID
 {

@@ -395,6 +395,13 @@ static void registerRecentFile (const File& file)
     getAppSettings().flush();
 }
 
+static void forgetRecentFile (const File& file)
+{
+    RecentlyOpenedFilesList::forgetRecentFileNatively (file);
+    getAppSettings().recentFiles.removeFile (file);
+    getAppSettings().flush();
+}
+
 //==============================================================================
 Result Project::loadDocument (const File& file)
 {
@@ -409,6 +416,7 @@ Result Project::loadDocument (const File& file)
         return Result::fail ("The document contains errors and couldn't be parsed!");
 
     registerRecentFile (file);
+
     enabledModulesList.reset();
     projectRoot = newTree;
 
@@ -438,9 +446,15 @@ Result Project::saveProject (const File& file, bool isCommandLineApp)
     if (isSaving)
         return Result::ok();
 
+    if (isTemporaryProject())
+    {
+        askUserWhereToSaveProject();
+        return Result::ok();
+    }
+
     updateProjectSettings();
 
-    if (! isCommandLineApp)
+    if (! isCommandLineApp && ! isTemporaryProject())
         registerRecentFile (file);
 
     const ScopedValueSetter<bool> vs (isSaving, true, false);
@@ -456,16 +470,94 @@ Result Project::saveResourcesOnly (const File& file)
 }
 
 //==============================================================================
+void Project::setTemporaryDirectory (const File& dir) noexcept
+{
+    tempDirectory = dir;
+
+     // remove this file from the recent documents list as it is a temporary project
+    forgetRecentFile (getFile());
+}
+
+void Project::askUserWhereToSaveProject()
+{
+    FileChooser fc ("Save Project");
+    fc.browseForDirectory();
+
+    if (fc.getResult().exists())
+        moveTemporaryDirectory (fc.getResult());
+}
+
+void Project::moveTemporaryDirectory (const File& newParentDirectory)
+{
+    auto newDirectory = newParentDirectory.getChildFile (tempDirectory.getFileName());
+    auto oldJucerFileName = getFile().getFileName();
+
+    saveProjectRootToFile();
+
+    tempDirectory.copyDirectoryTo (newDirectory);
+    tempDirectory.deleteRecursively();
+    tempDirectory = File();
+
+    // reload project from new location
+    if (auto* window = ProjucerApplication::getApp().mainWindowList.getMainWindowForFile (getFile()))
+    {
+        Component::SafePointer<MainWindow> safeWindow (window);
+
+        MessageManager::callAsync ([safeWindow, newDirectory, oldJucerFileName]
+        {
+            if (safeWindow != nullptr)
+                safeWindow.getComponent()->moveProject (newDirectory.getChildFile (oldJucerFileName));
+        });
+    }
+}
+
+bool Project::saveProjectRootToFile()
+{
+    ScopedPointer<XmlElement> xml (projectRoot.createXml());
+
+    if (xml == nullptr)
+    {
+        jassertfalse;
+        return false;
+    }
+
+    MemoryOutputStream mo;
+    xml->writeToStream (mo, {});
+
+    return FileHelpers::overwriteFileWithNewDataIfDifferent (getFile(), mo);
+}
+
+//==============================================================================
+static void sendProjectSettingAnalyticsEvent (StringRef label)
+{
+    StringPairArray data;
+    data.set ("label", label);
+
+    Analytics::getInstance()->logEvent ("Project Setting",  data, ProjucerAnalyticsEvent::projectEvent);
+}
+
 void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& property)
 {
     if (tree.getRoot() == tree)
     {
         if (property == Ids::projectType)
+        {
             sendChangeMessage();
+
+            sendProjectSettingAnalyticsEvent ("Project Type = " + projectTypeValue.get().toString());
+        }
         else if (property == Ids::name)
+        {
             setTitle (projectRoot [Ids::name]);
+        }
         else if (property == Ids::defines)
+        {
             parsedPreprocessorDefs = parsePreprocessorDefs (preprocessorDefsValue.get());
+        }
+        else if (property == Ids::cppLanguageStandard)
+        {
+            sendProjectSettingAnalyticsEvent ("C++ Standard = " + cppStandardValue.get().toString());
+        }
 
         changed();
     }
@@ -1511,6 +1603,18 @@ String Project::getUniqueTargetFolderSuffixForExporter (const String& exporterNa
     }
 
     return "_" + String (num);
+}
+
+//==============================================================================
+bool Project::shouldSendGUIBuilderAnalyticsEvent() noexcept
+{
+    if (! hasSentGUIBuilderAnalyticsEvent)
+    {
+        hasSentGUIBuilderAnalyticsEvent = true;
+        return true;
+    }
+
+    return false;
 }
 
 //==============================================================================

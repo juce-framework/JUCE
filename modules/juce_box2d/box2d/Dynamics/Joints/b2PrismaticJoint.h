@@ -173,8 +173,8 @@ protected:
 	b2LimitState m_limitState;
 
 	// Solver temp
-	int32 m_indexA;
-	int32 m_indexB;
+	juce::int32 m_indexA;
+	juce::int32 m_indexB;
 	b2Vec2 m_localCenterA;
 	b2Vec2 m_localCenterB;
 	float32 m_invMassA;

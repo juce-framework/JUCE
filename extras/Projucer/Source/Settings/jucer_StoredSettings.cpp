@@ -47,6 +47,8 @@ StoredSettings::StoredSettings()
 {
     updateOldProjectSettingsFiles();
     reload();
+    checkJUCEPaths();
+
     projectDefaults.addListener (this);
     fallbackPaths.addListener (this);
 }
@@ -195,6 +197,34 @@ void StoredSettings::updateOldProjectSettingsFiles()
     }
 }
 
+void StoredSettings::checkJUCEPaths()
+{
+    auto moduleFolder = projectDefaults.getProperty (Ids::defaultJuceModulePath).toString();
+    auto juceFolder = projectDefaults.getProperty (Ids::jucePath).toString();
+
+    auto validModuleFolder = isGlobalPathValid ({}, Ids::defaultJuceModulePath, moduleFolder);
+    auto validJuceFolder = isGlobalPathValid ({}, Ids::jucePath, juceFolder);
+
+    if (validModuleFolder && ! validJuceFolder)
+        projectDefaults.getPropertyAsValue (Ids::jucePath, nullptr) = File (moduleFolder).getParentDirectory().getFullPathName();
+    else if (! validModuleFolder && validJuceFolder)
+        projectDefaults.getPropertyAsValue (Ids::defaultJuceModulePath, nullptr) = File (juceFolder).getChildFile ("modules").getFullPathName();
+}
+
+bool StoredSettings::shouldAskUserToSetJUCEPath() noexcept
+{
+    if (! isGlobalPathValid ({}, Ids::jucePath, projectDefaults.getProperty (Ids::jucePath).toString())
+        && getGlobalProperties().getValue ("dontAskAboutJUCEPath", {}).isEmpty())
+        return true;
+
+    return false;
+}
+
+void StoredSettings::setDontAskAboutJUCEPathAgain() noexcept
+{
+    getGlobalProperties().setValue ("dontAskAboutJUCEPath", 1);
+}
+
 //==============================================================================
 void StoredSettings::loadSwatchColours()
 {
@@ -271,7 +301,12 @@ Value StoredSettings::getFallbackPathForOS (const Identifier& key, DependencyPat
 
     if (v.toString().isEmpty())
     {
-        if (key == Ids::defaultJuceModulePath)
+        if (key == Ids::jucePath)
+        {
+            v = (os == TargetOS::windows ? "C:\\JUCE"
+                                         : "~/JUCE");
+        }
+        else if (key == Ids::defaultJuceModulePath)
         {
             v = (os == TargetOS::windows ? "C:\\JUCE\\modules"
                                          : "~/JUCE/modules");
@@ -334,13 +369,13 @@ Value StoredSettings::getFallbackPathForOS (const Identifier& key, DependencyPat
     return v;
 }
 
-static bool doesSDKPathContainFile (const File& relativeTo, const String& path, const String& fileToCheckFor)
+static bool doesSDKPathContainFile (const File& relativeTo, const String& path, const String& fileToCheckFor) noexcept
 {
     auto actualPath = path.replace ("${user.home}", File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
     return relativeTo.getChildFile (actualPath + "/" + fileToCheckFor).exists();
 }
 
-bool StoredSettings::isGlobalPathValid (const File& relativeTo, const Identifier& key, const String& path)
+bool StoredSettings::isGlobalPathValid (const File& relativeTo, const Identifier& key, const String& path) const noexcept
 {
     String fileToCheckFor;
 
@@ -389,6 +424,10 @@ bool StoredSettings::isGlobalPathValid (const File& relativeTo, const Identifier
        #else
         fileToCheckFor = "../clion.sh";
        #endif
+    }
+    else if (key == Ids::jucePath)
+    {
+        fileToCheckFor = "ChangeList.txt";
     }
     else
     {

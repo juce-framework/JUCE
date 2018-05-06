@@ -40,6 +40,8 @@ namespace juce
     with it, and these will be signalled when a value changes.
 
     @see PropertySet
+
+    @tags{DataStructures}
 */
 class JUCE_API  PropertiesFile  : public PropertySet,
                                   public ChangeBroadcaster,
@@ -55,6 +57,7 @@ public:
     };
 
     //==============================================================================
+    /** Structure describing properties file options */
     struct JUCE_API  Options
     {
         /** Creates an empty Options structure.

@@ -35,6 +35,8 @@ namespace juce
 
     This class is also a ChangeBroadcaster, so listeners can register to be told
     when the colour changes.
+
+    @tags{GUI}
 */
 class JUCE_API  ColourSelector  : public Component,
                                   public ChangeBroadcaster

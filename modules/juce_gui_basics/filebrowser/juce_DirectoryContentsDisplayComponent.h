@@ -32,6 +32,8 @@ namespace juce
     A base class for components that display a list of the files in a directory.
 
     @see DirectoryContentsList
+
+    @tags{GUI}
 */
 class JUCE_API  DirectoryContentsDisplayComponent
 {

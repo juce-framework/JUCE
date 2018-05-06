@@ -32,6 +32,8 @@ namespace dsp
 /**
     A class which provides multiple windowing functions useful for filter design
     and spectrum analyzers
+
+    @tags{DSP}
 */
 template <typename FloatType>
 struct WindowingFunction

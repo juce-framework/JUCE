@@ -33,6 +33,8 @@ namespace juce
     An instance of a DynamicObject can be used to store named properties, and
     by subclassing hasMethod() and invokeMethod(), you can give your object
     methods.
+
+    @tags{Core}
 */
 class JUCE_API  DynamicObject  : public ReferenceCountedObject
 {

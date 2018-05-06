@@ -25,6 +25,8 @@ namespace juce
 
 /**
     Represents a button on a block device.
+
+    @tags{Blocks}
 */
 class ControlButton
 {

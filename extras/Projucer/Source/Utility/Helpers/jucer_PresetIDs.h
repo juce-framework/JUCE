@@ -65,6 +65,7 @@ namespace Ids
     DECLARE_ID (osxFallback);
     DECLARE_ID (windowsFallback);
     DECLARE_ID (linuxFallback);
+    DECLARE_ID (jucePath);
     DECLARE_ID (defaultJuceModulePath);
     DECLARE_ID (defaultUserModulePath);
     DECLARE_ID (vst3Folder);
@@ -317,10 +318,15 @@ namespace Ids
     DECLARE_ID (pluginAAXCategory);
     DECLARE_ID (pluginAAXDisableBypass);
     DECLARE_ID (pluginAAXDisableMultiMono);
+    DECLARE_ID (exporters);
+    DECLARE_ID (website);
+    DECLARE_ID (mainClass);
+    DECLARE_ID (moduleFlags);
 
     const Identifier ID ("id");
     const Identifier ID_uppercase ("ID");
     const Identifier class_ ("class");
+    const Identifier dependencies_ ("dependencies");
 
     #undef DECLARE_ID
 }

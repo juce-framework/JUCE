@@ -27,6 +27,21 @@
 #include "../../Application/jucer_Headers.h"
 
 //==============================================================================
+const char* getLineEnding()  { return "\r\n"; }
+
+String joinLinesIntoSourceFile (StringArray& lines)
+{
+    while (lines.size() > 10 && lines [lines.size() - 1].isEmpty())
+        lines.remove (lines.size() - 1);
+
+    return lines.joinIntoString (getLineEnding()) + getLineEnding();
+}
+
+String trimCommentCharsFromStartOfLine (const String& line)
+{
+    return line.trimStart().trimCharactersAtStart ("*/").trimStart();
+}
+
 String createAlphaNumericUID()
 {
     String uid;
@@ -274,4 +289,134 @@ bool fileNeedsCppSyntaxHighlighting (const File& file)
 
     return CharPointer_UTF8::isValidString (fileStart, sizeof (fileStart))
              && String (fileStart).trimStart().startsWith ("// -*- C++ -*-");
+}
+
+//==============================================================================
+bool isJUCEModule (const String& moduleID) noexcept
+{
+    static StringArray juceModuleIds =
+    {
+        "juce_analytics",
+        "juce_audio_basics",
+        "juce_audio_devices",
+        "juce_audio_formats",
+        "juce_audio_plugin_client",
+        "juce_audio_processors",
+        "juce_audio_utils",
+        "juce_blocks_basics",
+        "juce_box2d",
+        "juce_core",
+        "juce_cryptography",
+        "juce_data_structures",
+        "juce_dsp",
+        "juce_events",
+        "juce_graphics",
+        "juce_gui_basics",
+        "juce_gui_extra",
+        "juce_opengl",
+        "juce_osc",
+        "juce_product_unlocking",
+        "juce_video"
+    };
+
+    return juceModuleIds.contains (moduleID);
+}
+
+bool isValidExporterName (const String& exporterName) noexcept
+{
+    static StringArray validExporters =
+    {
+        "XCODE_MAC",
+        "XCODE_IPHONE",
+        "VS2013",
+        "VS2015",
+        "VS2017",
+        "LINUX_MAKE",
+        "ANDROIDSTUDIO",
+        "CODEBLOCKS_WINDOWS",
+        "CODEBLOCKS_LINUX"
+    };
+
+    return validExporters.contains (exporterName);
+}
+
+String getTargetFolderForExporter (const String& exporterName) noexcept
+{
+    if (exporterName == "XCODE_MAC")             return "MacOSX";
+    if (exporterName == "XCODE_IPHONE")          return "iOS";
+    if (exporterName == "VS2017")                return "VisualStudio2017";
+    if (exporterName == "VS2015")                return "VisualStudio2015";
+    if (exporterName == "VS2013")                return "MacOVisualStudio2015SX";
+    if (exporterName == "LINUX_MAKE")            return "LinuxMakefile";
+    if (exporterName == "ANDROIDSTUDIO")         return "Android";
+    if (exporterName == "CODEBLOCKS_WINDOWS")    return "CodeBlocksWindows";
+    if (exporterName == "CODEBLOCKS_LINUX")      return "CodeBlocksLinux";
+
+    return {};
+}
+
+StringArray getModulesRequiredForConsole() noexcept
+{
+    return { "juce_core",
+             "juce_data_structures",
+             "juce_events"
+           };
+}
+
+StringArray getModulesRequiredForComponent() noexcept
+{
+    return { "juce_core",
+             "juce_data_structures",
+             "juce_events",
+             "juce_graphics",
+             "juce_gui_basics"
+           };
+}
+
+StringArray getModulesRequiredForAudioProcessor() noexcept
+{
+    return { "juce_audio_basics",
+             "juce_audio_devices",
+             "juce_audio_formats",
+             "juce_audio_plugin_client",
+             "juce_audio_processors",
+             "juce_audio_utils",
+             "juce_core",
+             "juce_data_structures",
+             "juce_events",
+             "juce_graphics",
+             "juce_gui_basics",
+             "juce_gui_extra"
+           };
+}
+
+bool isPIPFile (const File& file) noexcept
+{
+    for (auto line : StringArray::fromLines (file.loadFileAsString()))
+    {
+        auto trimmedLine = trimCommentCharsFromStartOfLine (line);
+
+        if (trimmedLine.startsWith ("BEGIN_JUCE_PIP_METADATA"))
+            return true;
+    }
+
+    return false;
+}
+
+File getJUCEExamplesDirectoryPathFromGlobal() noexcept
+{
+    auto globalPath = getAppSettings().getStoredPath (Ids::jucePath).toString();
+
+    if (globalPath.isNotEmpty())
+        return File (getAppSettings().getStoredPath (Ids::jucePath).toString()).getChildFile ("examples");
+
+    return {};
+}
+
+bool isValidJUCEExamplesDirectory (const File& directory) noexcept
+{
+    if (! directory.exists() || ! directory.isDirectory() || ! directory.containsSubDirectories())
+        return false;
+
+    return directory.getChildFile ("Assets").getChildFile ("juce_icon.png").existsAsFile();
 }

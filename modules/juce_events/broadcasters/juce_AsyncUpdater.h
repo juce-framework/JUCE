@@ -32,6 +32,8 @@ namespace juce
 
     Basically, one or more calls to the triggerAsyncUpdate() will result in the
     message thread calling handleAsyncUpdate() as soon as it can.
+
+    @tags{Events}
 */
 class JUCE_API  AsyncUpdater
 {

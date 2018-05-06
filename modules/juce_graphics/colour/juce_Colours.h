@@ -32,6 +32,8 @@ namespace juce
     Contains a set of predefined named colours (mostly standard HTML colours)
 
     @see Colour
+
+    @tags{Graphics}
 */
 class Colours
 {

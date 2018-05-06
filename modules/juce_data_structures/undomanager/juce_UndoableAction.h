@@ -33,6 +33,8 @@ namespace juce
     and undone.
 
     @see UndoManager
+
+    @tags{DataStructures}
 */
 class JUCE_API  UndoableAction
 {

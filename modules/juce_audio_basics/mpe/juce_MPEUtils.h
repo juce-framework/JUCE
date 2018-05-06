@@ -31,6 +31,8 @@ namespace juce
     To use it, create an instance passing in the MPE zone that it should operate on
     and then call use the findMidiChannelForNewNote() method for all note-on messages
     and the noteOff() method for all note-off messages.
+
+    @tags{Audio}
 */
 class MPEChannelAssigner
 {
@@ -91,6 +93,8 @@ private:
 /**
     This class handles the logic for remapping MIDI note messages from multiple MPE
     sources onto a specified MPE zone.
+
+    @tags{Audio}
 */
 class MPEChannelRemapper
 {

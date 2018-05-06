@@ -25,6 +25,8 @@ namespace juce
 
 /**
     Represents an individual BLOCKS device.
+
+    @tags{Blocks}
 */
 class Block   : public juce::ReferenceCountedObject
 {

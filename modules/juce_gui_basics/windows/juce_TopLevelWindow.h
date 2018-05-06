@@ -48,6 +48,8 @@ namespace juce
     A top-level window also has an optional drop-shadow.
 
     @see ResizableWindow, DocumentWindow, DialogWindow
+
+    @tags{GUI}
 */
 class JUCE_API  TopLevelWindow  : public Component
 {

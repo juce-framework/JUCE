@@ -34,6 +34,8 @@ namespace juce
     https://css-tricks.com/snippets/css/complete-guide-grid/
 
     @see GridItem
+
+    @tags{GUI}
 */
 class JUCE_API  Grid  final
 {

@@ -32,6 +32,8 @@ namespace juce
     This LookAndFeel subclass implements the juce style from around 2008-12.
 
     @see LookAndFeel, LookAndFeel_V1, LookAndFeel_V3
+
+    @tags{GUI}
 */
 class JUCE_API  LookAndFeel_V2  : public LookAndFeel
 {

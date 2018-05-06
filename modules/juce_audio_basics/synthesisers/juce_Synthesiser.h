@@ -35,6 +35,8 @@ namespace juce
     more than one SynthesiserVoice to play the same sound at the same time.
 
     @see Synthesiser, SynthesiserVoice
+
+    @tags{Audio}
 */
 class JUCE_API  SynthesiserSound    : public ReferenceCountedObject
 {
@@ -79,6 +81,8 @@ private:
     voices so that it can play polyphonically.
 
     @see Synthesiser, SynthesiserSound
+
+    @tags{Audio}
 */
 class JUCE_API  SynthesiserVoice
 {
@@ -302,6 +306,8 @@ private:
     Before rendering, be sure to call the setCurrentPlaybackSampleRate() to tell it
     what the target playback rate is. This value is passed on to the voices so that
     they can pitch their output correctly.
+
+    @tags{Audio}
 */
 class JUCE_API  Synthesiser
 {

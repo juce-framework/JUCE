@@ -1539,6 +1539,9 @@ String Slider::getTextValueSuffix() const
 
 String Slider::getTextFromValue (double v)
 {
+    if (textFromValueFunction != nullptr)
+        return textFromValueFunction (v);
+
     if (getNumDecimalPlacesToDisplay() > 0)
         return String (v, getNumDecimalPlacesToDisplay()) + getTextValueSuffix();
 
@@ -1547,6 +1550,9 @@ String Slider::getTextFromValue (double v)
 
 double Slider::getValueFromText (const String& text)
 {
+    if (valueFromTextFunction != nullptr)
+        return valueFromTextFunction (text);
+
     auto t = text.trimStart();
 
     if (t.endsWith (getTextValueSuffix()))

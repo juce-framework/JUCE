@@ -34,6 +34,8 @@ namespace juce
 
     To use it, just create a subclass of this class, implementing the buttonPressed()
     callback, then call start() and stop() to start or stop receiving events.
+
+    @tags{GUI}
 */
 class JUCE_API  AppleRemoteDevice
 {

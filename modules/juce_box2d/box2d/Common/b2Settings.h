@@ -25,12 +25,6 @@
 #define B2_NOT_USED(x) ((void)(x))
 #define b2Assert(A) assert(A)
 
-typedef signed char	int8;
-typedef signed short int16;
-typedef signed int int32;
-typedef unsigned char uint8;
-typedef unsigned short uint16;
-typedef unsigned int uint32;
 typedef float float32;
 typedef double float64;
 
@@ -127,7 +121,7 @@ typedef double float64;
 // Memory Allocation
 
 /// Implement this function to use your own memory allocator.
-void* b2Alloc(int32 size);
+void* b2Alloc(juce::int32 size);
 
 /// If you implement b2Alloc, you should also implement this function.
 void b2Free(void* mem);
@@ -139,9 +133,9 @@ void b2Log(const char* string, ...);
 /// See http://en.wikipedia.org/wiki/Software_versioning
 struct b2Version
 {
-	int32 major;		///< significant changes
-	int32 minor;		///< incremental changes
-	int32 revision;		///< bug fixes
+	juce::int32 major;		///< significant changes
+	juce::int32 minor;		///< incremental changes
+	juce::int32 revision;		///< bug fixes
 };
 
 /// Current version.

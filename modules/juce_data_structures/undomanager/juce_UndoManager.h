@@ -46,6 +46,8 @@ namespace juce
     when actions are performed or undone.
 
     @see UndoableAction
+
+    @tags{DataStructures}
 */
 class JUCE_API  UndoManager  : public ChangeBroadcaster
 {
