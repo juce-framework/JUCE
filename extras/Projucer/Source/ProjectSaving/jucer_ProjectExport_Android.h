@@ -1332,7 +1332,7 @@ private:
             customStringsXmlContent << cfg.getCustomStringsXml();
             customStringsXmlContent << "\n</resources>";
 
-            ScopedPointer<XmlElement> strings = XmlDocument::parse (customStringsXmlContent);
+            ScopedPointer<XmlElement> strings (XmlDocument::parse (customStringsXmlContent));
 
             String dir     = cfg.isDebug() ? "debug" : "release";
             String subPath = "app/src/" + dir + "/res/values/string.xml";

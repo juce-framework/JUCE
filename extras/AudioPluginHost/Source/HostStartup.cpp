@@ -49,14 +49,14 @@ public:
         options.filenameSuffix      = "settings";
         options.osxLibrarySubFolder = "Preferences";
 
-        appProperties = new ApplicationProperties();
+        appProperties.reset (new ApplicationProperties());
         appProperties->setStorageParameters (options);
 
-        mainWindow = new MainHostWindow();
+        mainWindow.reset (new MainHostWindow());
         mainWindow->setUsingNativeTitleBar (true);
 
         commandManager.registerAllCommandsForTarget (this);
-        commandManager.registerAllCommandsForTarget (mainWindow);
+        commandManager.registerAllCommandsForTarget (mainWindow.get());
 
         mainWindow->menuItemsChanged();
 

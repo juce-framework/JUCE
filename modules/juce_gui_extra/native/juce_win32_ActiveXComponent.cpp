@@ -380,7 +380,7 @@ bool ActiveXControlComponent::createControl (const void* controlIID)
 
                 if (newControl->control->DoVerb (OLEIVERB_SHOW, 0, newControl->clientSite, 0, hwnd, &rect) == S_OK)
                 {
-                    control = newControl;
+                    control.reset (newControl.release());
                     control->controlHWND = ActiveXHelpers::getHWND (this);
 
                     if (control->controlHWND != 0)

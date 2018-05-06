@@ -448,10 +448,16 @@ FilterIOConfigurationWindow::FilterIOConfigurationWindow (AudioProcessor& p)
     }
 
     if (p.getBusCount (true)  > 0 || p.canAddBus (true))
-        addAndMakeVisible (inConfig = new InputOutputConfig (*this, true));
+    {
+        inConfig.reset (new InputOutputConfig (*this, true));
+        addAndMakeVisible (inConfig.get());
+    }
 
     if (p.getBusCount (false) > 0 || p.canAddBus (false))
-        addAndMakeVisible (outConfig = new InputOutputConfig (*this, false));
+    {
+        outConfig.reset (new InputOutputConfig (*this, false));
+        addAndMakeVisible (outConfig.get());
+    }
 
     currentLayout = p.getBusesLayout();
     setSize (400, (inConfig != nullptr && outConfig != nullptr ? 160 : 0) + 200);

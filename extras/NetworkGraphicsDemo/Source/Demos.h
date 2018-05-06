@@ -85,7 +85,7 @@ struct BackgroundLogo  : public AnimatedContent
             )blahblah";
 
         ScopedPointer<XmlElement> svg (XmlDocument::parse (logoData));
-        logo = Drawable::createFromSVG (*svg);
+        logo.reset (Drawable::createFromSVG (*svg));
     }
 
     String getName() const override      { return "Background Image"; }
@@ -205,18 +205,18 @@ struct FlockDemo  : public BackgroundLogo
     {
         Bird()
         {
-            Random rng;
-            pos.x = rng.nextFloat() * 10.0f - 5.0f;
-            pos.y = rng.nextFloat() * 10.0f - 5.0f;
-            velocity.x = rng.nextFloat() * 0.001f;
-            velocity.y = rng.nextFloat() * 0.001f;
+            Random randGen;
+            pos.x = randGen.nextFloat() * 10.0f - 5.0f;
+            pos.y = randGen.nextFloat() * 10.0f - 5.0f;
+            velocity.x = randGen.nextFloat() * 0.001f;
+            velocity.y = randGen.nextFloat() * 0.001f;
 
-            colour = Colour::fromHSV (rng.nextFloat(), 0.2f, 0.9f, rng.nextFloat() * 0.4f + 0.2f);
+            colour = Colour::fromHSV (randGen.nextFloat(), 0.2f, 0.9f, randGen.nextFloat() * 0.4f + 0.2f);
 
             shape.addTriangle (0.0f, 0.0f, -0.3f, 1.0f, 0.3f, 1.0f);
             shape = shape.createPathWithRoundedCorners (0.2f);
 
-            shape.applyTransform (AffineTransform::scale (rng.nextFloat() + 1.0f));
+            shape.applyTransform (AffineTransform::scale (randGen.nextFloat() + 1.0f));
         }
 
         Point<float> pos, velocity, acc;
@@ -410,8 +410,8 @@ struct FlockWithText  : public FlockDemo
         as.append (text, Font (textSize * scale), Colour (0x80ffffff).withMultipliedAlpha (alpha));
 
         as.setJustification (Justification::centred);
-        auto centre = canvas.clients[clientIndex % canvas.clients.size()].centre * scale;
-        as.draw (g, Rectangle<float> (textBlockWidth * scale, textBlockWidth * scale).withCentre (centre));
+        auto middle = canvas.clients[clientIndex % canvas.clients.size()].centre * scale;
+        as.draw (g, Rectangle<float> (textBlockWidth * scale, textBlockWidth * scale).withCentre (middle));
     }
 
     void tick()

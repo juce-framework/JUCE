@@ -79,7 +79,8 @@ ResourceEditorPanel::ResourceEditorPanel (JucerDocument& doc)
     delButton.setEnabled (false);
     delButton.onClick = [this] { document.getResources().remove (listBox->getSelectedRow (0)); };
 
-    addAndMakeVisible (listBox = new TableListBox (String(), this));
+    listBox.reset (new TableListBox (String(), this));
+    addAndMakeVisible (listBox.get());
     listBox->getHeader().addColumn ("name", 1, 150, 80, 400);
     listBox->getHeader().addColumn ("original file", 2, 350, 80, 800);
     listBox->getHeader().addColumn ("size", 3, 100, 40, 150);

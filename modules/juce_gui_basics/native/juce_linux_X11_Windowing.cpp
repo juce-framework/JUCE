@@ -1176,7 +1176,9 @@ private:
 
                 for (int i = 0; i < numMonitors; ++i)
                 {
-                    if ((screens = xrandr.getScreenResources (display, RootWindow (display, i))).get())
+                    screens.reset (xrandr.getScreenResources (display, RootWindow (display, i)));
+
+                    if (screens != nullptr)
                     {
                         for (int j = 0; j < screens->noutput; ++j)
                         {
@@ -1188,16 +1190,16 @@ private:
                             if (! mainDisplay)
                                 mainDisplay = screens->outputs[j];
 
-                            ScopedPointer<XRROutputInfo> output;
+                            ScopedPointer<XRROutputInfo> output (xrandr.getOutputInfo (display, screens.get(), screens->outputs[j]));
 
-                            if ((output = xrandr.getOutputInfo (display, screens.get(), screens->outputs[j])).get())
+                            if (output != nullptr)
                             {
                                 if (! output->crtc)
                                     continue;
 
-                                ScopedPointer<XRRCrtcInfo> crtc;
+                                ScopedPointer<XRRCrtcInfo> crtc (xrandr.getCrtcInfo (display, screens.get(), output->crtc));
 
-                                if ((crtc = xrandr.getCrtcInfo (display, screens.get(), output->crtc)).get())
+                                if (crtc != nullptr)
                                 {
                                     ExtendedInfo e;
                                     e.totalBounds = Rectangle<int> (crtc->x, crtc->y,
@@ -1471,9 +1473,9 @@ public:
 
         display = XWindowSystem::getInstance()->displayRef();
 
-        atoms = new Atoms (display);
-        dragState = new DragState (display);
-        repainter = new LinuxRepaintManager (*this, display);
+        atoms.reset (new Atoms (display));
+        dragState.reset (new DragState (display));
+        repainter.reset (new LinuxRepaintManager (*this, display));
 
         if (isAlwaysOnTop)
             ++numAlwaysOnTopPeers;
@@ -3216,7 +3218,7 @@ private:
 
     void resetExternalDragState()
     {
-        dragState = new DragState (display);
+        dragState.reset (new DragState (display));
     }
 
     void sendDragAndDropMessage (XClientMessageEvent& msg)

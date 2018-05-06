@@ -699,7 +699,7 @@ private:
 
         JobStatus runJob() override
         {
-            owner.saveExporter (exporter, modules);
+            owner.saveExporter (exporter.get(), modules);
             return jobHasFinished;
         }
 

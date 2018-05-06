@@ -266,7 +266,7 @@ private:
                 deviceId = index;
             }
 
-            collector = new MidiInCollector (parentService, input, *callback);
+            collector.reset (new MidiInCollector (parentService, input, *callback));
 
             HMIDIIN h;
             MMRESULT err = midiInOpen (&h, deviceId,
@@ -1134,7 +1134,7 @@ MidiService::MidiService()
    #if JUCE_USE_WINRT_MIDI
     try
     {
-        internal = new WinRTMidiService();
+        internal.reset (new WinRTMidiService());
         return;
     }
     catch (std::runtime_error&)
@@ -1142,7 +1142,7 @@ MidiService::MidiService()
     }
    #endif
 
-    internal = new WindowsMidiService();
+    internal.reset (new WindowsMidiService());
 }
 
 //==============================================================================
@@ -1171,7 +1171,7 @@ MidiInput* MidiInput::openDevice (const int index, MidiInputCallback* const call
 
     try
     {
-        wrapper = MidiService::getInstance()->getService()->createInputWrapper (in, index, callback);
+        wrapper.reset (MidiService::getInstance()->getService()->createInputWrapper (in.get(), index, callback));
     }
     catch (std::runtime_error&)
     {
@@ -1208,7 +1208,7 @@ MidiOutput* MidiOutput::openDevice (const int index)
 
     try
     {
-        wrapper = MidiService::getInstance()->getService()->createOutputWrapper (index);
+        wrapper.reset (MidiService::getInstance()->getService()->createOutputWrapper (index));
     }
     catch (std::runtime_error&)
     {

@@ -1477,7 +1477,7 @@ private:
         {
            #if JUCE_WINDOWS
             if (auto* topComp = getTopLevelComponent())
-                peer = embeddedComponent.createNewPeer (0, topComp->getWindowHandle());
+                peer.reset (embeddedComponent.createNewPeer (0, topComp->getWindowHandle()));
             else
                 peer = nullptr;
 

@@ -43,7 +43,7 @@ public:
     //==============================================================================
     void initialise (const String&) override
     {
-        mainWindow = new MainWindow (getApplicationName());
+        mainWindow.reset (new MainWindow (getApplicationName()));
     }
 
     void shutdown() override

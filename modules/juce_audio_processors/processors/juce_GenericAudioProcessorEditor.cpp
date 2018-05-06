@@ -428,7 +428,7 @@ public:
             parameterComp.reset (new SliderParameterComponent (param));
         }
 
-        addAndMakeVisible (parameterComp);
+        addAndMakeVisible (parameterComp.get());
 
         setSize (400, 40);
     }

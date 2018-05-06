@@ -533,7 +533,8 @@ namespace AAXClasses
                 setOpaque (true);
                 setBroughtToFrontOnMouseClick (true);
 
-                addAndMakeVisible (pluginEditor = plugin.createEditorIfNeeded());
+                pluginEditor.reset (plugin.createEditorIfNeeded());
+                addAndMakeVisible (pluginEditor.get());
 
                 if (pluginEditor != nullptr)
                 {
@@ -551,7 +552,7 @@ namespace AAXClasses
                 {
                     PopupMenu::dismissAllActiveMenus();
                     pluginEditor->removeMouseListener (this);
-                    pluginEditor->processor.editorBeingDeleted (pluginEditor);
+                    pluginEditor->processor.editorBeingDeleted (pluginEditor.get());
                 }
             }
 
@@ -1425,9 +1426,8 @@ namespace AAXClasses
             {
                 aaxWrapperProvidedBypassParam = true;
 
-                ownedBypassParameter = new AudioParameterBool (cDefaultMasterBypassID, "Master Bypass", false, {}, {}, {});
-
-                bypassParameter = ownedBypassParameter;
+                ownedBypassParameter.reset (new AudioParameterBool (cDefaultMasterBypassID, "Master Bypass", false, {}, {}, {}));
+                bypassParameter = ownedBypassParameter.get();
             }
 
             if (! bypassPartOfRegularParams)
@@ -1808,7 +1808,7 @@ namespace AAXClasses
         if (component == nullptr)
         {
             if (auto* params = dynamic_cast<JuceAAX_Processor*> (GetEffectParameters()))
-                component = new ContentWrapperComponent (*this, params->getPluginInstance());
+                component.reset (new ContentWrapperComponent (*this, params->getPluginInstance()));
             else
                 jassertfalse;
         }
@@ -2051,7 +2051,7 @@ namespace AAXClasses
     static void getPlugInDescription (AAX_IEffectDescriptor& descriptor, const AAX_IFeatureInfo* featureInfo)
     {
         PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_AAX;
-        ScopedPointer<AudioProcessor> plugin = createPluginFilterOfType (AudioProcessor::wrapperType_AAX);
+        ScopedPointer<AudioProcessor> plugin (createPluginFilterOfType (AudioProcessor::wrapperType_AAX));
         auto numInputBuses  = plugin->getBusCount (true);
         auto numOutputBuses = plugin->getBusCount (false);
 
@@ -2141,11 +2141,11 @@ AAX_Result JUCE_CDECL GetEffectDescriptions (AAX_ICollection* collection)
     ScopedPointer<const AAX_IFeatureInfo> stemFormatFeatureInfo;
 
     if (const auto* hostDescription = collection->DescriptionHost())
-        stemFormatFeatureInfo = hostDescription->AcquireFeatureProperties (AAXATTR_ClientFeature_StemFormat);
+        stemFormatFeatureInfo.reset (hostDescription->AcquireFeatureProperties (AAXATTR_ClientFeature_StemFormat));
 
     if (auto* descriptor = collection->NewDescriptor())
     {
-        AAXClasses::getPlugInDescription (*descriptor, stemFormatFeatureInfo);
+        AAXClasses::getPlugInDescription (*descriptor, stemFormatFeatureInfo.get());
         collection->AddEffect (JUCE_STRINGIFY (JucePlugin_AAXIdentifier), descriptor);
 
         collection->SetManufacturerName (JucePlugin_Manufacturer);

@@ -90,7 +90,7 @@ struct RuleBasedTopologySource::Internal  : public TopologySource::Listener,
 
 RuleBasedTopologySource::RuleBasedTopologySource (TopologySource& d)
 {
-    internal = new Internal (*this, d);
+    internal.reset (new Internal (*this, d));
 }
 
 RuleBasedTopologySource::~RuleBasedTopologySource()

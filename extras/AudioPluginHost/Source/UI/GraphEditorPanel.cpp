@@ -57,8 +57,8 @@
          auto deadMansPedalFile = getAppProperties().getUserSettings()
                                      ->getFile().getSiblingFile ("RecentlyCrashedPluginsList");
 
-         scanner = new PluginDirectoryScanner (knownPluginList, formatToScan, paths,
-                                               true, deadMansPedalFile, true);
+         scanner.reset (new PluginDirectoryScanner (knownPluginList, formatToScan, paths,
+                                                    true, deadMansPedalFile, true));
 
          for (int i = 5; --i >= 0;)
              pool.addJob (new ScanJob (*this), true);
@@ -399,7 +399,7 @@ struct GraphEditorPanel::FilterComponent   : public Component,
 
     void showPopupMenu()
     {
-        menu = new PopupMenu;
+        menu.reset (new PopupMenu);
         menu->addItem (1, "Delete this filter");
         menu->addItem (2, "Disconnect all pins");
         menu->addItem (3, "Toggle Bypass");
@@ -820,7 +820,7 @@ void GraphEditorPanel::updateComponents()
 
 void GraphEditorPanel::showPopupMenu (Point<int> mousePos)
 {
-    menu = new PopupMenu;
+    menu.reset (new PopupMenu);
 
     if (auto* mainWindow = findParentComponentOfClass<MainHostWindow>())
     {
@@ -842,15 +842,15 @@ void GraphEditorPanel::beginConnectorDrag (AudioProcessorGraph::NodeAndChannel s
 {
     auto* c = dynamic_cast<ConnectorComponent*> (e.originalComponent);
     connectors.removeObject (c, false);
-    draggingConnector = c;
+    draggingConnector.reset (c);
 
     if (draggingConnector == nullptr)
-        draggingConnector = new ConnectorComponent (*this);
+        draggingConnector.reset (new ConnectorComponent (*this));
 
     draggingConnector->setInput (source);
     draggingConnector->setOutput (dest);
 
-    addAndMakeVisible (draggingConnector);
+    addAndMakeVisible (draggingConnector.get());
     draggingConnector->toFront (false);
 
     dragConnector (e);
@@ -1148,31 +1148,37 @@ GraphDocumentComponent::GraphDocumentComponent (AudioPluginFormatManager& fm,
 {
     init();
 
-    deviceManager.addChangeListener (graphPanel);
+    deviceManager.addChangeListener (graphPanel.get());
     deviceManager.addAudioCallback (&graphPlayer);
     deviceManager.addMidiInputCallback (String(), &graphPlayer.getMidiMessageCollector());
 }
 
 void GraphDocumentComponent::init()
 {
-    addAndMakeVisible (graphPanel = new GraphEditorPanel (*graph));
+    graphPanel.reset (new GraphEditorPanel (*graph));
+    addAndMakeVisible (graphPanel.get());
     graphPlayer.setProcessor (&graph->graph);
 
     keyState.addListener (&graphPlayer.getMidiMessageCollector());
 
-    addAndMakeVisible (keyboardComp = new MidiKeyboardComponent (keyState, MidiKeyboardComponent::horizontalKeyboard));
-    addAndMakeVisible (statusBar = new TooltipBar());
+    keyboardComp.reset (new MidiKeyboardComponent (keyState, MidiKeyboardComponent::horizontalKeyboard));
+    addAndMakeVisible (keyboardComp.get());
+    statusBar.reset (new TooltipBar());
+    addAndMakeVisible (statusBar.get());
 
     graphPanel->updateComponents();
 
     if (isOnTouchDevice())
     {
         if (isOnTouchDevice())
-            addAndMakeVisible (titleBarComponent = new TitleBarComponent (*this));
+        {
+            titleBarComponent.reset (new TitleBarComponent (*this));
+            addAndMakeVisible (titleBarComponent.get());
+        }
 
-        pluginListBoxModel = new PluginListBoxModel (pluginListBox, pluginList);
+        pluginListBoxModel.reset (new PluginListBoxModel (pluginListBox, pluginList));
 
-        pluginListBox.setModel (pluginListBoxModel);
+        pluginListBox.setModel (pluginListBoxModel.get());
         pluginListBox.setRowHeight (40);
 
         pluginListSidePanel.setContent (&pluginListBox, false);
@@ -1230,7 +1236,7 @@ void GraphDocumentComponent::releaseGraph()
 
     if (graphPanel != nullptr)
     {
-        deviceManager.removeChangeListener (graphPanel);
+        deviceManager.removeChangeListener (graphPanel.get());
         graphPanel = nullptr;
     }
 

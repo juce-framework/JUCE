@@ -129,7 +129,7 @@ public:
          oldIndex (-1)
     {
         if (ComponentTypeHandler* const h = ComponentTypeHandler::getHandlerFor (*comp))
-            xml = h->createXmlFor (comp, &layout);
+            xml.reset (h->createXmlFor (comp, &layout));
         else
             jassertfalse;
 
@@ -415,18 +415,17 @@ Component* ComponentLayout::addNewComponent (ComponentTypeHandler* const type, i
     {
         c->setSize (type->getDefaultWidth(), type->getDefaultHeight());
         c->setCentrePosition (x, y);
-        updateStoredComponentPosition (c, false);
+        updateStoredComponentPosition (c.get(), false);
 
         c->getProperties().set ("id", nextCompUID++);
 
-        ScopedPointer<XmlElement> xml (type->createXmlFor (c, this));
-        c.reset();
-        c = addComponentFromXml (*xml, true);
+        ScopedPointer<XmlElement> xml (type->createXmlFor (c.get(), this));
+        c.reset (addComponentFromXml (*xml, true));
 
-        String memberName (CodeHelpers::makeValidIdentifier (type->getClassName (c), true, true, false));
-        setComponentMemberVariableName (c, memberName);
+        String memberName (CodeHelpers::makeValidIdentifier (type->getClassName (c.get()), true, true, false));
+        setComponentMemberVariableName (c.get(), memberName);
 
-        selected.selectOnly (c);
+        selected.selectOnly (c.get());
     }
 
     return c.release();
@@ -447,16 +446,16 @@ Component* ComponentLayout::addComponentFromXml (const XmlElement& xml, const bo
     {
         ScopedPointer<Component> newComp (type->createNewComponent (getDocument()));
 
-        if (type->restoreFromXml (xml, newComp, this))
+        if (type->restoreFromXml (xml, newComp.get(), this))
         {
             // ensure that the new comp's name is unique
-            setComponentMemberVariableName (newComp, getComponentMemberVariableName (newComp));
+            setComponentMemberVariableName (newComp.get(), getComponentMemberVariableName (newComp.get()));
 
             // check for duped IDs..
-            while (findComponentWithId (ComponentTypeHandler::getComponentId (newComp)) != nullptr)
-                ComponentTypeHandler::setComponentId (newComp, Random::getSystemRandom().nextInt64());
+            while (findComponentWithId (ComponentTypeHandler::getComponentId (newComp.get())) != nullptr)
+                ComponentTypeHandler::setComponentId (newComp.get(), Random::getSystemRandom().nextInt64());
 
-            components.add (newComp);
+            components.add (newComp.get());
             changed();
             return newComp.release();
         }

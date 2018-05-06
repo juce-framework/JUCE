@@ -36,7 +36,7 @@ public:
         : PropertyComponent (name)
     {
         colourPropEditor.reset (new ColourPropEditorComponent (this, canReset));
-        addAndMakeVisible (colourPropEditor);
+        addAndMakeVisible (colourPropEditor.get());
     }
 
     virtual void setColour (Colour newColour) = 0;

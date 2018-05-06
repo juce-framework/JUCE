@@ -43,7 +43,8 @@ HeaderComponent::HeaderComponent()
 
     exporterBox.onChange = [this] { updateExporterButton(); };
 
-    addAndMakeVisible  (juceIcon = new ImageComponent ("icon"));
+    juceIcon.reset (new ImageComponent ("icon"));
+    addAndMakeVisible (juceIcon.get());
     juceIcon->setImage (ImageCache::getFromMemory (BinaryData::juce_icon_png, BinaryData::juce_icon_pngSize),
                         RectanglePlacement::centred);
 
@@ -260,7 +261,8 @@ void HeaderComponent::initialiseButtons() noexcept
 {
     auto& icons = getIcons();
 
-    addAndMakeVisible (projectSettingsButton = new IconButton ("Project Settings", &icons.settings));
+    projectSettingsButton.reset (new IconButton ("Project Settings", &icons.settings));
+    addAndMakeVisible (projectSettingsButton.get());
     projectSettingsButton->onClick = [this]
     {
         sendProjectButtonAnalyticsEvent ("Project Settings");
@@ -269,7 +271,8 @@ void HeaderComponent::initialiseButtons() noexcept
             pcc->showProjectSettings();
     };
 
-    addAndMakeVisible (saveAndOpenInIDEButton = new IconButton ("Save and Open in IDE", nullptr));
+    saveAndOpenInIDEButton.reset (new IconButton ("Save and Open in IDE", nullptr));
+    addAndMakeVisible (saveAndOpenInIDEButton.get());
     saveAndOpenInIDEButton->isIDEButton = true;
     saveAndOpenInIDEButton->onClick = [this]
     {
@@ -279,7 +282,8 @@ void HeaderComponent::initialiseButtons() noexcept
             pcc->openInSelectedIDE (true);
     };
 
-    addAndMakeVisible (userSettingsButton = new IconButton ("User Settings", &icons.user));
+    userSettingsButton.reset (new IconButton ("User Settings", &icons.user));
+    addAndMakeVisible (userSettingsButton.get());
     userSettingsButton->isUserButton = true;
     userSettingsButton->onClick = [this]
     {
@@ -289,7 +293,8 @@ void HeaderComponent::initialiseButtons() noexcept
             showUserSettings();
     };
 
-    addAndMakeVisible (runAppButton = new IconButton ("Run Application", &icons.play));
+    runAppButton.reset (new IconButton ("Run Application", &icons.play));
+    addAndMakeVisible (runAppButton.get());
     runAppButton->onClick = [this]
     {
         sendProjectButtonAnalyticsEvent ("Run Application");

@@ -63,7 +63,8 @@ class PIPCreatorWindowComponent    : public Component,
 public:
     PIPCreatorWindowComponent()
     {
-        setLookAndFeel (lf = new PIPCreatorLookAndFeel());
+        lf.reset (new PIPCreatorLookAndFeel());
+        setLookAndFeel (lf.get());
 
         addAndMakeVisible (propertyViewport);
         propertyViewport.setViewedComponent (&propertyGroup, false);

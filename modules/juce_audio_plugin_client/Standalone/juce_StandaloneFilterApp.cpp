@@ -99,7 +99,7 @@ public:
     //==============================================================================
     void initialise (const String&) override
     {
-        mainWindow = createWindow();
+        mainWindow.reset (createWindow());
 
        #if JUCE_STANDALONE_FILTER_WINDOW_USE_KIOSK_MODE
         Desktop::getInstance().setKioskModeComponent (mainWindow, false);

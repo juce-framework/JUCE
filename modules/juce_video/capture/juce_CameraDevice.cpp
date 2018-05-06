@@ -94,10 +94,10 @@ CameraDevice* CameraDevice::openDevice (int index,
                                         int maxWidth, int maxHeight,
                                         bool useHighQuality)
 {
-    if (ScopedPointer<CameraDevice> d = new CameraDevice (getAvailableDevices() [index], index,
-                                                          minWidth, minHeight, maxWidth, maxHeight, useHighQuality))
-        if (d->pimpl->openedOk())
-            return d.release();
+    ScopedPointer<CameraDevice> d (new CameraDevice (getAvailableDevices() [index], index,
+                                                     minWidth, minHeight, maxWidth, maxHeight, useHighQuality));
+    if (d != nullptr && d->pimpl->openedOk())
+        return d.release();
 
     return nullptr;
 }

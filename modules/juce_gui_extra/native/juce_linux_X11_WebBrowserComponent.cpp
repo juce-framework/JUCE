@@ -449,17 +449,18 @@ public:
 
         unsigned long windowHandle;
         ssize_t actual = read (inChannel, &windowHandle, sizeof (windowHandle));
+
         if (actual != sizeof (windowHandle))
         {
             killChild();
             return;
         }
 
-        receiver = new CommandReceiver (this, inChannel);
+        receiver.reset (new CommandReceiver (this, inChannel));
         startThread();
 
-        xembed = new XEmbedComponent (windowHandle);
-        owner.addAndMakeVisible (xembed);
+        xembed.reset (new XEmbedComponent (windowHandle));
+        owner.addAndMakeVisible (xembed.get());
     }
 
     void quit()

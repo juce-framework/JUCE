@@ -210,7 +210,7 @@ public:
     void registerCallback()
     {
         if (inputThread == nullptr)
-            inputThread = new MidiInputThread (*this);
+            inputThread.reset (new MidiInputThread (*this));
 
         if (++activeCallbacks - 1 == 0)
             inputThread->startThread();

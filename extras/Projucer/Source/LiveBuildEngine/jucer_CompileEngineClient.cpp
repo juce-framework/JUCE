@@ -213,8 +213,7 @@ public:
 
     void restartServer()
     {
-        server.reset();
-        server = new ClientIPC (owner);
+        server.reset (new ClientIPC (owner));
         sendRebuild();
     }
 
@@ -516,7 +515,7 @@ CompileEngineChildProcess::~CompileEngineChildProcess()
 void CompileEngineChildProcess::createProcess()
 {
     jassert (process == nullptr);
-    process = new ChildProcess (*this, project);
+    process.reset (new ChildProcess (*this, project));
 
     if (! process->openedOk)
         process.reset();
@@ -598,7 +597,7 @@ void CompileEngineChildProcess::killApp()
 
 void CompileEngineChildProcess::handleAppLaunched()
 {
-    runningAppProcess = process;
+    runningAppProcess.reset (process.release());
     runningAppProcess->isRunningApp = true;
     createProcess();
 }

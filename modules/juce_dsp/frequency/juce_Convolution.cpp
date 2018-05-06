@@ -119,7 +119,7 @@ struct ConvolutionEngine
             buffersImpulseSegments.add (newImpulseSegment);
         }
 
-        ScopedPointer<FFT> FFTTempObject = new FFT (roundToInt (std::log2 (FFTSize)));
+        ScopedPointer<FFT> FFTTempObject (new FFT (roundToInt (std::log2 (FFTSize))));
 
         auto* channelData = info.buffer->getWritePointer (channel);
 
@@ -829,8 +829,9 @@ private:
     {
         AudioFormatManager manager;
         manager.registerBasicFormats();
+        ScopedPointer<AudioFormatReader> formatReader (manager.createReaderFor (stream));
 
-        if (ScopedPointer<AudioFormatReader> formatReader = manager.createReaderFor (stream))
+        if (formatReader != nullptr)
         {
             currentInfo.originalNumChannels = formatReader->numChannels > 1 ? 2 : 1;
             currentInfo.originalSampleRate = formatReader->sampleRate;

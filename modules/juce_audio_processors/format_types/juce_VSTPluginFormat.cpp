@@ -659,11 +659,11 @@ struct ModuleHandle    : public ReferenceCountedObject
 
         if (moduleMain != nullptr)
         {
-            vstXml = XmlDocument::parse (file.withFileExtension ("vstxml"));
+            vstXml.reset (XmlDocument::parse (file.withFileExtension ("vstxml")));
 
            #if JUCE_WINDOWS
             if (vstXml == nullptr)
-                vstXml = XmlDocument::parse (getDLLResource (file, "VSTXML", 1));
+                vstXml.reset (XmlDocument::parse (getDLLResource (file, "VSTXML", 1)));
            #endif
         }
 

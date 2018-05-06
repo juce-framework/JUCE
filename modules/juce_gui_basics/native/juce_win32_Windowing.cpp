@@ -1003,7 +1003,7 @@ public:
         if ((windowStyleFlags & windowHasDropShadow) != 0
              && ((! hasTitleBar()) || SystemStats::getOperatingSystemType() < SystemStats::WinVista))
         {
-            shadower = component.getLookAndFeel().createDropShadowerForComponent (&component);
+            shadower.reset (component.getLookAndFeel().createDropShadowerForComponent (&component));
 
             if (shadower != nullptr)
                 shadower->setOwner (&component);
@@ -3939,7 +3939,7 @@ void Desktop::setScreenSaverEnabled (const bool isEnabled)
     if (isEnabled)
         screenSaverDefeater = nullptr;
     else if (screenSaverDefeater == nullptr)
-        screenSaverDefeater = new ScreenSaverDefeater();
+        screenSaverDefeater.reset (new ScreenSaverDefeater());
 }
 
 bool Desktop::isScreenSaverEnabled()

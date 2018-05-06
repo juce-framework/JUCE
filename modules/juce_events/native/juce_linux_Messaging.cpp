@@ -57,7 +57,7 @@ public:
 
         pfds[INTERNAL_QUEUE_FD].fd = getReadHandle();
         pfds[INTERNAL_QUEUE_FD].events = POLLIN;
-        readCallback[INTERNAL_QUEUE_FD] = new LinuxEventLoop::CallbackFunction<decltype(internalQueueCb)> (internalQueueCb);
+        readCallback[INTERNAL_QUEUE_FD].reset (new LinuxEventLoop::CallbackFunction<decltype(internalQueueCb)> (internalQueueCb));
     }
 
     ~InternalMessageQueue()
@@ -96,7 +96,7 @@ public:
         fdCount = 2;
         pfds[WINDOW_SYSTEM_FD].fd = _fd;
         pfds[WINDOW_SYSTEM_FD].events = POLLIN;
-        readCallback[WINDOW_SYSTEM_FD] = _readCallback;
+        readCallback[WINDOW_SYSTEM_FD].reset (_readCallback);
         readCallback[WINDOW_SYSTEM_FD]->active = true;
     }
 

@@ -384,7 +384,7 @@ private:
                     jucerComp->setFilename (jucerComponentFile);
                     jucerComp->setToInitialSize();
 
-                    addAndMakeVisible (jucerComp);
+                    addAndMakeVisible (jucerComp.get());
                 }
             }
             else
@@ -698,7 +698,7 @@ private:
                 : ComponentUndoableAction<TabbedComponent> (comp, l),
                   indexToRemove (indexToRemove_)
             {
-                previousState = getTabState (comp, indexToRemove);
+                previousState.reset (getTabState (comp, indexToRemove));
             }
 
             bool perform()

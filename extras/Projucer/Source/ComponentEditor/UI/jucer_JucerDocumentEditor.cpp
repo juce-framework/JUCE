@@ -47,7 +47,8 @@ public:
         : PropertyComponent ("extra callbacks", 250),
           document (doc)
     {
-        addAndMakeVisible (listBox = new ListBox (String(), this));
+        listBox.reset (new ListBox (String(), this));
+        addAndMakeVisible (listBox.get());
         listBox->setRowHeight (22);
 
         document.addChangeListener (this);
@@ -611,7 +612,7 @@ void JucerDocumentEditor::saveLastSelectedTab() const
             ScopedPointer<XmlElement> root (projectProps.getXmlValue ("GUIComponentsLastTab"));
 
             if (root == nullptr)
-                root = new XmlElement ("FILES");
+                root.reset (new XmlElement ("FILES"));
 
             auto fileName = document->getCppFile().getFileName();
 
@@ -1155,7 +1156,9 @@ bool JucerDocumentEditor::perform (const InvocationInfo& info)
 
         case StandardApplicationCommandIDs::paste:
             {
-                if (ScopedPointer<XmlElement> doc = XmlDocument::parse (SystemClipboard::getTextFromClipboard()))
+                ScopedPointer<XmlElement> doc (XmlDocument::parse (SystemClipboard::getTextFromClipboard()));
+
+                if (doc != nullptr)
                 {
                     if (doc->hasTagName (ComponentLayout::clipboardXmlTag))
                     {

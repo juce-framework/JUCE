@@ -98,7 +98,7 @@ public:
 
     virtual ~JuceAudioProcessor() {}
 
-    AudioProcessor* get() const noexcept      { return audioProcessor; }
+    AudioProcessor* get() const noexcept      { return audioProcessor.get(); }
 
     JUCE_DECLARE_VST3_COM_QUERY_METHODS
     JUCE_DECLARE_VST3_COM_REF_METHODS
@@ -169,7 +169,8 @@ private:
         if (bypassParameter == nullptr)
         {
             vst3WrapperProvidedBypassParam = true;
-            bypassParameter = ownedBypassParameter = new AudioParameterBool ("byps", "Bypass", false, {}, {}, {});
+            ownedBypassParameter.reset (new AudioParameterBool ("byps", "Bypass", false, {}, {}, {}));
+            bypassParameter = ownedBypassParameter.get();
         }
 
         // if the bypass parameter is not part of the exported parameters that the plug-in supports
@@ -789,7 +790,7 @@ private:
           : Vst::EditorView (&ec, nullptr),
             owner (&ec), pluginInstance (p)
         {
-            component = new ContentWrapperComponent (*this, p);
+            component.reset (new ContentWrapperComponent (*this, p));
         }
 
         tresult PLUGIN_API queryInterface (const TUID targetIID, void** obj) override
@@ -822,7 +823,7 @@ private:
                 return kResultFalse;
 
             if (component == nullptr)
-                component = new ContentWrapperComponent (*this, pluginInstance);
+                component.reset (new ContentWrapperComponent (*this, pluginInstance));
 
            #if JUCE_WINDOWS
             component->addToDesktop (0, parent);
@@ -830,7 +831,7 @@ private:
             component->setVisible (true);
            #else
             isNSView = (strcmp (type, kPlatformTypeNSView) == 0);
-            macHostWindow = juce::attachComponentToWindowRefVST (component, parent, isNSView);
+            macHostWindow = juce::attachComponentToWindowRefVST (component.get(), parent, isNSView);
            #endif
 
             component->resizeHostWindow();
@@ -853,7 +854,7 @@ private:
                #else
                 if (macHostWindow != nullptr)
                 {
-                    juce::detachComponentFromWindowRefVST (component, macHostWindow, isNSView);
+                    juce::detachComponentFromWindowRefVST (component.get(), macHostWindow, isNSView);
                     macHostWindow = nullptr;
                 }
                #endif
@@ -912,8 +913,8 @@ private:
                 if (auto* editor = component->pluginEditor.get())
                 {
                     // checkSizeConstraint
-                    auto juceRect = editor->getLocalArea (component, Rectangle<int>::leftTopRightBottom (rectToCheck->left, rectToCheck->top,
-                                                                                                         rectToCheck->right, rectToCheck->bottom));
+                    auto juceRect = editor->getLocalArea (component.get(), Rectangle<int>::leftTopRightBottom (rectToCheck->left, rectToCheck->top,
+                                                                                                               rectToCheck->right, rectToCheck->bottom));
                     if (auto* constrainer = editor->getConstrainer())
                     {
                         Rectangle<int> limits (0, 0, constrainer->getMaximumWidth(), constrainer->getMaximumHeight());
@@ -972,7 +973,7 @@ private:
 
                 if (pluginEditor != nullptr)
                 {
-                    addAndMakeVisible (pluginEditor);
+                    addAndMakeVisible (pluginEditor.get());
 
                     pluginEditor->setTopLeftPosition (0, 0);
                     lastBounds = getSizeToContainChild();
@@ -991,7 +992,7 @@ private:
                 if (pluginEditor != nullptr)
                 {
                     PopupMenu::dismissAllActiveMenus();
-                    pluginEditor->processor.editorBeingDeleted (pluginEditor);
+                    pluginEditor->processor.editorBeingDeleted (pluginEditor.get());
                 }
             }
 
@@ -1003,7 +1004,7 @@ private:
             juce::Rectangle<int> getSizeToContainChild()
             {
                 if (pluginEditor != nullptr)
-                    return getLocalArea (pluginEditor, pluginEditor->getLocalBounds());
+                    return getLocalArea (pluginEditor.get(), pluginEditor->getLocalBounds());
 
                 return {};
             }
