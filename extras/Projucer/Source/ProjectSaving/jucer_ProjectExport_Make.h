@@ -180,7 +180,6 @@ public:
             {
                 case VSTPlugIn:
                 case DynamicLibrary:        return ".so";
-                case VST3PlugIn:            return ".vst3";
                 case SharedCodeTarget:
                 case StaticLibrary:         return ".a";
                 default:                    break;
@@ -421,12 +420,7 @@ public:
     }
 
     //==============================================================================
-    void initialiseDependencyPathValues() override
-    {
-        vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder),
-                                                                Ids::vst3Path,
-                                                                TargetOS::linux)));
-    }
+    void initialiseDependencyPathValues() override  {}
 
 private:
     ValueWithDefault extraPkgConfigValue;

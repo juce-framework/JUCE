@@ -92,7 +92,7 @@ void JucerTreeViewBase::paintOpenCloseButton (Graphics& g, const Rectangle<float
     TreeViewItem::paintOpenCloseButton (g, area, getOwnerView()->findColour (defaultIconColourId), isMouseOver);
 }
 
-void JucerTreeViewBase::paintIcon (Graphics &g, Rectangle<float> area)
+void JucerTreeViewBase::paintIcon (Graphics& g, Rectangle<float> area)
 {
     g.setColour (getContentColour (true));
     getIcon().draw (g, area, isIconCrossedOut());

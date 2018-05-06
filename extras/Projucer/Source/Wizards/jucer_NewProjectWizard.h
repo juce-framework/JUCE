@@ -187,7 +187,7 @@ struct NewProjectWizard
 
         for (int i = 0; i < mods.size(); ++i)
             if (const ModuleDescription* info = list.getModuleWithID (mods[i]))
-                project.getModules().addModule (info->moduleFolder, false, useGlobalPath);
+                project.getModules().addModule (info->moduleFolder, false, useGlobalPath, false);
     }
 
     void addExporters (Project& project, WizardComp& wizardComp)

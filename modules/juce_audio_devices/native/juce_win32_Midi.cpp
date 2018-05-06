@@ -321,13 +321,29 @@ private:
     //==============================================================================
     struct WindowsOutputWrapper  : public OutputWrapper
     {
-        struct MidiOutHandle
+        struct MidiOutHandle    : public ReferenceCountedObject
         {
-            int refCount;
+            using Ptr = ReferenceCountedObjectPtr<MidiOutHandle>;
+
+            MidiOutHandle (WindowsMidiService& parent, UINT id, HMIDIOUT h)
+                : owner (parent), deviceId (id), handle (h)
+            {
+                owner.activeOutputHandles.add (this);
+            }
+
+            ~MidiOutHandle()
+            {
+                if (handle != nullptr)
+                    midiOutClose (handle);
+
+                owner.activeOutputHandles.removeFirstMatchingValue (this);
+            }
+
+            WindowsMidiService& owner;
             UINT deviceId;
             HMIDIOUT handle;
 
-            JUCE_LEAK_DETECTOR (MidiOutHandle)
+            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiOutHandle)
         };
 
         WindowsOutputWrapper (WindowsMidiService& p, int index) : parent (p)
@@ -356,7 +372,6 @@ private:
 
                 if (activeHandle->deviceId == deviceId)
                 {
-                    activeHandle->refCount++;
                     han = activeHandle;
                     return;
                 }
@@ -369,11 +384,7 @@ private:
 
                 if (res == MMSYSERR_NOERROR)
                 {
-                    han = new MidiOutHandle();
-                    han->deviceId = deviceId;
-                    han->refCount = 1;
-                    han->handle = h;
-                    parent.activeOutputHandles.add (han);
+                    han = new MidiOutHandle (parent, deviceId, h);
                     return;
                 }
 
@@ -384,15 +395,6 @@ private:
             }
 
             throw std::runtime_error ("Failed to create Windows output device wrapper");
-        }
-
-        ~WindowsOutputWrapper()
-        {
-            if (parent.activeOutputHandles.contains (han.get()) && --(han->refCount) == 0)
-            {
-                midiOutClose (han->handle);
-                parent.activeOutputHandles.removeFirstMatchingValue (han.get());
-            }
         }
 
         void sendMessageNow (const MidiMessage& message) override
@@ -489,7 +491,7 @@ private:
         WindowsMidiService& parent;
         String deviceName;
 
-        ScopedPointer<MidiOutHandle> han;
+        MidiOutHandle::Ptr han;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowsOutputWrapper)
     };

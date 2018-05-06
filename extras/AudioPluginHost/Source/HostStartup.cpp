@@ -25,8 +25,8 @@
 */
 
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "MainHostWindow.h"
-#include "InternalFilters.h"
+#include "UI/MainHostWindow.h"
+#include "Filters/InternalFilters.h"
 
 #if ! (JUCE_PLUGINHOST_VST || JUCE_PLUGINHOST_VST3 || JUCE_PLUGINHOST_AU)
  #error "If you're building the audio plugin host, you probably want to enable VST and/or AU support"
@@ -75,6 +75,9 @@ public:
     {
         File fileToOpen;
 
+       #if JUCE_ANDROID || JUCE_IOS
+        fileToOpen = FilterGraph::getDefaultGraphDocumentOnMobile();
+       #else
         for (int i = 0; i < getCommandLineParameterArray().size(); ++i)
         {
             fileToOpen = File::getCurrentWorkingDirectory().getChildFile (getCommandLineParameterArray()[i]);
@@ -82,6 +85,7 @@ public:
             if (fileToOpen.existsAsFile())
                 break;
         }
+       #endif
 
         if (! fileToOpen.existsAsFile())
         {
@@ -105,12 +109,27 @@ public:
         LookAndFeel::setDefaultLookAndFeel (nullptr);
     }
 
+    void suspended() override
+    {
+       #if JUCE_ANDROID || JUCE_IOS
+        if (GraphDocumentComponent* graph = mainWindow->graphHolder.get())
+            if (FilterGraph* ioGraph = graph->graph.get())
+                ioGraph->saveDocument (FilterGraph::getDefaultGraphDocumentOnMobile());
+       #endif
+    }
+
     void systemRequestedQuit() override
     {
         if (mainWindow != nullptr)
             mainWindow->tryToQuitApplication();
         else
             JUCEApplicationBase::quit();
+    }
+
+    void backButtonPressed() override
+    {
+        if (mainWindow->graphHolder != nullptr)
+            mainWindow->graphHolder->hideLastSidePanel();
     }
 
     const String getApplicationName() override       { return "Juce Plug-In Host"; }
@@ -124,10 +143,12 @@ private:
     ScopedPointer<MainHostWindow> mainWindow;
 };
 
-static PluginHostApp& getApp()                      { return *dynamic_cast<PluginHostApp*>(JUCEApplication::getInstance()); }
-ApplicationCommandManager& getCommandManager()      { return getApp().commandManager; }
-ApplicationProperties& getAppProperties()           { return *getApp().appProperties; }
+static PluginHostApp& getApp()                    { return *dynamic_cast<PluginHostApp*>(JUCEApplication::getInstance()); }
 
+ApplicationProperties& getAppProperties()         { return *getApp().appProperties; }
+ApplicationCommandManager& getCommandManager()    { return getApp().commandManager; }
+
+bool isOnTouchDevice()                            { return Desktop::getInstance().getMainMouseSource().isTouch(); }
 
 // This kicks the whole thing off..
 START_JUCE_APPLICATION (PluginHostApp)

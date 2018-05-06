@@ -119,6 +119,11 @@ public:
         return paramMap[static_cast<int32> (paramID)];
     }
 
+    AudioProcessorParameter* getBypassParameter() const noexcept
+    {
+        return getParamForVSTParamID (bypassParamID);
+    }
+
     int getNumParameters() const noexcept             { return vstParamIDs.size(); }
     bool isUsingManagedParameters() const noexcept    { return juceParameters.isUsingManagedParameters(); }
 
@@ -126,7 +131,7 @@ public:
     static const FUID iid;
     Array<Vst::ParamID> vstParamIDs;
     Vst::ParamID bypassParamID = 0;
-    bool isBypassed = false;
+    bool bypassIsRegularParameter = false;
 
 private:
     enum InternalParameters
@@ -135,6 +140,18 @@ private:
     };
 
     //==============================================================================
+    bool isBypassPartOfRegularParemeters() const
+    {
+        int n = juceParameters.getNumParameters();
+
+        if (auto* bypassParam = audioProcessor->getBypassParameter())
+            for (int i = 0; i < n; ++i)
+                if (juceParameters.getParamForIndex (i) == bypassParam)
+                    return true;
+
+        return false;
+    }
+
     void setupParameters()
     {
        #if JUCE_FORCE_USE_LEGACY_PARAM_IDS
@@ -146,17 +163,42 @@ private:
         juceParameters.update (*audioProcessor, forceLegacyParamIDs);
         auto numParameters = juceParameters.getNumParameters();
 
+        bool vst3WrapperProvidedBypassParam = false;
+        auto* bypassParameter = audioProcessor->getBypassParameter();
+
+        if (bypassParameter == nullptr)
+        {
+            vst3WrapperProvidedBypassParam = true;
+            bypassParameter = ownedBypassParameter = new AudioParameterBool ("byps", "Bypass", false, {}, {}, {});
+        }
+
+        // if the bypass parameter is not part of the exported parameters that the plug-in supports
+        // then add it to the end of the list as VST3 requires the bypass parameter to be exported!
+        bypassIsRegularParameter = isBypassPartOfRegularParemeters();
+
+        if (! bypassIsRegularParameter)
+            juceParameters.params.add (bypassParameter);
+
         int i = 0;
         for (auto* juceParam : juceParameters.params)
         {
+            bool isBypassParameter = (juceParam == bypassParameter);
+
             Vst::ParamID vstParamID = forceLegacyParamIDs ? static_cast<Vst::ParamID> (i++)
                                                           : generateVSTParamIDForParam (juceParam);
+
+            if (isBypassParameter)
+            {
+                // we need to remain backward compatible with the old bypass id
+                if (vst3WrapperProvidedBypassParam)
+                    vstParamID = static_cast<Vst::ParamID> (isUsingManagedParameters() ? paramBypass : numParameters);
+
+                bypassParamID = vstParamID;
+            }
 
             vstParamIDs.add (vstParamID);
             paramMap.set (static_cast<int32> (vstParamID), juceParam);
         }
-
-        bypassParamID = static_cast<Vst::ParamID> (isUsingManagedParameters() ? paramBypass : numParameters);
     }
 
     Vst::ParamID generateVSTParamIDForParam (AudioProcessorParameter* param)
@@ -181,6 +223,7 @@ private:
     //==============================================================================
     LegacyAudioParametersWrapper juceParameters;
     HashMap<int32, AudioProcessorParameter*> paramMap;
+    ScopedPointer<AudioProcessorParameter> ownedBypassParameter;
 
     JuceAudioProcessor() = delete;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceAudioProcessor)
@@ -194,7 +237,8 @@ static ThreadLocalValue<bool> inParameterChangedCallback;
 class JuceVST3EditController : public Vst::EditController,
                                public Vst::IMidiMapping,
                                public Vst::ChannelContext::IInfoListener,
-                               public AudioProcessorListener
+                               public AudioProcessorListener,
+                               private AudioProcessorParameter::Listener
 {
 public:
     JuceVST3EditController (Vst::IHostApplication* host)
@@ -279,7 +323,7 @@ public:
     struct Param  : public Vst::Parameter
     {
         Param (JuceVST3EditController& editController, AudioProcessorParameter& p,
-               Vst::ParamID vstParamID, bool forceLegacyParamIDs)
+               Vst::ParamID vstParamID, bool isBypassParameter, bool forceLegacyParamIDs)
             : owner (editController), param (p)
         {
             info.id = vstParamID;
@@ -305,6 +349,9 @@ public:
                 info.flags = Vst::ParameterInfo::kIsReadOnly;
             else
                 info.flags = param.isAutomatable() ? Vst::ParameterInfo::kCanAutomate : 0;
+
+            if (isBypassParameter)
+                info.flags |= Vst::ParameterInfo::kIsBypass;
 
             valueNormalized = info.defaultNormalizedValue;
         }
@@ -368,88 +415,6 @@ public:
         AudioProcessorParameter& param;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Param)
-    };
-
-    //==============================================================================
-    struct BypassParam  : public Vst::Parameter
-    {
-        BypassParam (Vst::ParamID vstParamID)
-        {
-            info.id = vstParamID;
-            toString128 (info.title, "Bypass");
-            toString128 (info.shortTitle, "Bypass");
-            toString128 (info.units, "");
-            info.stepCount = 1;
-            info.defaultNormalizedValue = 0.0f;
-            info.unitId = Vst::kRootUnitId;
-            info.flags = Vst::ParameterInfo::kIsBypass | Vst::ParameterInfo::kCanAutomate;
-        }
-
-        virtual ~BypassParam() {}
-
-        bool setNormalized (Vst::ParamValue v) override
-        {
-            bool bypass = (v != 0.0f);
-            v = (bypass ? 1.0f : 0.0f);
-
-            if (valueNormalized != v)
-            {
-                valueNormalized = v;
-                changed();
-                return true;
-            }
-
-            return false;
-        }
-
-        void toString (Vst::ParamValue value, Vst::String128 result) const override
-        {
-            bool bypass = (value != 0.0f);
-            toString128 (result, bypass ? "On" : "Off");
-        }
-
-        bool fromString (const Vst::TChar* text, Vst::ParamValue& outValueNormalized) const override
-        {
-            auto paramValueString = getStringFromVstTChars (text);
-
-            if (paramValueString.equalsIgnoreCase ("on")
-                 || paramValueString.equalsIgnoreCase ("yes")
-                 || paramValueString.equalsIgnoreCase ("true"))
-            {
-                outValueNormalized = 1.0f;
-                return true;
-            }
-
-            if (paramValueString.equalsIgnoreCase ("off")
-                 || paramValueString.equalsIgnoreCase ("no")
-                 || paramValueString.equalsIgnoreCase ("false"))
-            {
-                outValueNormalized = 0.0f;
-                return true;
-            }
-
-            var varValue = JSON::fromString (paramValueString);
-
-            if (varValue.isDouble() || varValue.isInt()
-                 || varValue.isInt64() || varValue.isBool())
-            {
-                double value = varValue;
-                outValueNormalized = (value != 0.0) ? 1.0f : 0.0f;
-                return true;
-            }
-
-            return false;
-        }
-
-        static String getStringFromVstTChars (const Vst::TChar* text)
-        {
-            return juce::String (juce::CharPointer_UTF16 (reinterpret_cast<const juce::CharPointer_UTF16::CharType*> (text)));
-        }
-
-        Vst::ParamValue toPlain (Vst::ParamValue v) const override       { return v; }
-        Vst::ParamValue toNormalized (Vst::ParamValue v) const override  { return v; }
-
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BypassParam)
     };
 
     //==============================================================================
@@ -696,6 +661,19 @@ public:
             componentHandler->restartComponent (Vst::kLatencyChanged | Vst::kParamValuesChanged);
     }
 
+    void parameterValueChanged (int, float newValue) override
+    {
+        // this can only come from the bypass parameter
+        paramChanged (audioProcessor->bypassParamID, newValue);
+    }
+
+    void parameterGestureChanged (int, bool gestureIsStarting) override
+    {
+        // this can only come from the bypass parameter
+        if (gestureIsStarting) beginEdit (audioProcessor->bypassParamID);
+        else endEdit (audioProcessor->bypassParamID);
+    }
+
     //==============================================================================
     AudioProcessor* getPluginInstance() const noexcept
     {
@@ -732,6 +710,11 @@ private:
         {
             pluginInstance->addListener (this);
 
+            // as the bypass is not part of the regular parameters
+            // we need to listen for it explicitly
+            if (! audioProcessor->bypassIsRegularParameter)
+                audioProcessor->getBypassParameter()->addListener (this);
+
             if (parameters.getParameterCount() <= 0)
             {
                 #if JUCE_FORCE_USE_LEGACY_PARAM_IDS
@@ -747,10 +730,9 @@ private:
                     auto vstParamID = audioProcessor->getVSTParamIDForIndex (i);
                     auto* juceParam = audioProcessor->getParamForVSTParamID (vstParamID);
 
-                    parameters.addParameter (new Param (*this, *juceParam, vstParamID, forceLegacyParamIDs));
+                    parameters.addParameter (new Param (*this, *juceParam, vstParamID,
+                                                        (vstParamID == audioProcessor->bypassParamID), forceLegacyParamIDs));
                 }
-
-                parameters.addParameter (new BypassParam (audioProcessor->bypassParamID));
 
                 if (pluginInstance->getNumPrograms() > 1)
                     parameters.addParameter (new ProgramChangeParameter (*pluginInstance));
@@ -1331,24 +1313,50 @@ public:
     tresult PLUGIN_API setIoMode (Vst::IoMode) override                                 { return kNotImplemented; }
     tresult PLUGIN_API getRoutingInfo (Vst::RoutingInfo&, Vst::RoutingInfo&) override   { return kNotImplemented; }
 
-    bool isBypassed()                   { return comPluginInstance->isBypassed; }
-    void setBypassed (bool bypassed)    { comPluginInstance->isBypassed = bypassed; }
+    //==============================================================================
+    bool isBypassed()
+    {
+        if (auto* bypassParam = comPluginInstance->getBypassParameter())
+            return (bypassParam->getValue() != 0.0f);
+
+        return false;
+    }
+
+    void setBypassed (bool shouldBeBypassed)
+    {
+        if (auto* bypassParam = comPluginInstance->getBypassParameter())
+        {
+            auto floatValue = (shouldBeBypassed ? 1.0f : 0.0f);
+            bypassParam->setValue (floatValue);
+
+            inParameterChangedCallback = true;
+            bypassParam->sendValueChangedMessageToListeners (floatValue);
+        }
+    }
 
     //==============================================================================
     void writeJucePrivateStateInformation (MemoryOutputStream& out)
     {
-        ValueTree privateData (kJucePrivateDataIdentifier);
+        if (pluginInstance->getBypassParameter() == nullptr)
+        {
+            ValueTree privateData (kJucePrivateDataIdentifier);
 
-        // for now we only store the bypass value
-        privateData.setProperty ("Bypass", var (isBypassed()), nullptr);
-
-        privateData.writeToStream (out);
+            // for now we only store the bypass value
+            privateData.setProperty ("Bypass", var (isBypassed()), nullptr);
+            privateData.writeToStream (out);
+        }
     }
 
     void setJucePrivateStateInformation (const void* data, int sizeInBytes)
     {
-        auto privateData = ValueTree::readFromData (data, static_cast<size_t> (sizeInBytes));
-        setBypassed (static_cast<bool> (privateData.getProperty ("Bypass", var (false))));
+        if (pluginInstance->getBypassParameter() == nullptr)
+        {
+            if (auto* bypassParam = comPluginInstance->getBypassParameter())
+            {
+                auto privateData = ValueTree::readFromData (data, static_cast<size_t> (sizeInBytes));
+                setBypassed (static_cast<bool> (privateData.getProperty ("Bypass", var (false))));
+            }
+        }
     }
 
     void getStateInformation (MemoryBlock& destData)
@@ -2041,13 +2049,7 @@ public:
                 {
                     auto vstParamID = paramQueue->getParameterId();
 
-                    if (vstParamID == comPluginInstance->bypassParamID)
-                        setBypassed (static_cast<float> (value) != 0.0f);
-                   #if JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS
-                    else if (juceVST3EditController->isMidiControllerParamID (vstParamID))
-                        addParameterChangeToMidiBuffer (offsetSamples, vstParamID, value);
-                   #endif
-                    else if (vstParamID == JuceVST3EditController::paramPreset)
+                    if (vstParamID == JuceVST3EditController::paramPreset)
                     {
                         auto numPrograms  = pluginInstance->getNumPrograms();
                         auto programValue = roundToInt (value * (jmax (0, numPrograms - 1)));
@@ -2056,6 +2058,10 @@ public:
                              && programValue != pluginInstance->getCurrentProgram())
                             pluginInstance->setCurrentProgram (programValue);
                     }
+                   #if JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS
+                    else if (juceVST3EditController->isMidiControllerParamID (vstParamID))
+                        addParameterChangeToMidiBuffer (offsetSamples, vstParamID, value);
+                   #endif
                     else
                     {
                         auto floatValue = static_cast<float> (value);

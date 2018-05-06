@@ -141,10 +141,10 @@ public:
           androidKeyStorePass                  (settings, Ids::androidKeyStorePass,                  getUndoManager(), "android"),
           androidKeyAlias                      (settings, Ids::androidKeyAlias,                      getUndoManager(), "androiddebugkey"),
           androidKeyAliasPass                  (settings, Ids::androidKeyAliasPass,                  getUndoManager(), "android"),
-          gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "4.1"),
+          gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "4.4"),
           gradleToolchain                      (settings, Ids::gradleToolchain,                      getUndoManager(), "clang"),
-          androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "3.0.1"),
-          buildToolsVersion                    (settings, Ids::buildToolsVersion,                    getUndoManager(), "27.0.0"),
+          androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "3.1.1"),
+          buildToolsVersion                    (settings, Ids::buildToolsVersion,                    getUndoManager(), "27.0.3"),
           AndroidExecutable (findAndroidExecutable())
     {
         name = getName();
@@ -156,7 +156,7 @@ public:
     void createToolchainExporterProperties (PropertyListBuilder& props)
     {
         props.add (new TextPropertyComponent (gradleVersion, "gradle version", 32, false),
-                   "The version of gradle that is used to build this app (3.3 is fine for JUCE)");
+                   "The version of gradle that is used to build this app (4.4 is fine for JUCE)");
 
         props.add (new TextPropertyComponent (androidPluginVersion, "android plug-in version", 32, false),
                    "The version of the android build plugin for gradle that is used to build this app");
@@ -577,8 +577,8 @@ private:
 
         mo << "buildscript {"                                                                              << newLine;
         mo << "   repositories {"                                                                          << newLine;
-        mo << "       jcenter()"                                                                           << newLine;
         mo << "       google()"                                                                            << newLine;
+        mo << "       jcenter()"                                                                           << newLine;
         mo << "   }"                                                                                       << newLine;
         mo << "   dependencies {"                                                                          << newLine;
         mo << "       classpath 'com.android.tools.build:gradle:" << androidPluginVersion.get().toString() << "'" << newLine;
@@ -591,6 +591,7 @@ private:
         mo << ""                                                                                       << newLine;
         mo << "allprojects {"                                                                          << newLine;
         mo << "   repositories {"                                                                      << newLine;
+        mo << "       google()"                                                                        << newLine;
         mo << "       jcenter()"                                                                       << newLine;
 
         if (androidEnableRemoteNotifications.get())

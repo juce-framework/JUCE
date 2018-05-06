@@ -223,7 +223,8 @@ struct AbletonLiveHostSpecific
 class JuceVSTWrapper  : public AudioProcessorListener,
                         public AudioPlayHead,
                         private Timer,
-                        private AsyncUpdater
+                        private AsyncUpdater,
+                        private AudioProcessorParameter::Listener
 {
 private:
     //==============================================================================
@@ -281,6 +282,9 @@ public:
         processor->setRateAndBufferSizeDetails (0, 0);
         processor->setPlayHead (this);
         processor->addListener (this);
+
+        if (auto* juceParam = processor->getBypassParameter())
+            juceParam->addListener (this);
 
         juceParameters.update (*processor, false);
 
@@ -759,6 +763,14 @@ public:
         if (hostCallback != nullptr)
             hostCallback (&vstEffect, hostOpcodeParameterChangeGestureEnd, index, 0, 0, 0);
     }
+
+    void parameterValueChanged (int, float newValue) override
+    {
+        // this can only come from the bypass parameter
+        isBypassed = (newValue != 0.0f);
+    }
+
+    void parameterGestureChanged (int, bool) override {}
 
     void audioProcessorChanged (AudioProcessor*) override
     {
@@ -1276,10 +1288,12 @@ public:
             if (auto* ed = getEditorComp())
             {
                 ed->setTopLeftPosition (0, 0);
-                ed->setBounds (ed->getLocalArea (this, getLocalBounds()));
+
+                if (shouldResizeEditor)
+                    ed->setBounds (ed->getLocalArea (this, getLocalBounds()));
 
                 if (! getHostType().isBitwigStudio())
-                    updateWindowSize();
+                    updateWindowSize (false);
             }
 
            #if JUCE_MAC && ! JUCE_64BIT
@@ -1290,7 +1304,7 @@ public:
 
         void childBoundsChanged (Component*) override
         {
-            updateWindowSize();
+            updateWindowSize (false);
         }
 
         juce::Rectangle<int> getSizeToContainChild()
@@ -1301,7 +1315,7 @@ public:
             return {};
         }
 
-        void updateWindowSize()
+        void updateWindowSize (bool resizeEditor)
         {
             if (! isInSizeWindow)
             {
@@ -1318,8 +1332,14 @@ public:
                     resizeHostWindow (pos.getWidth(), pos.getHeight());
 
                    #if ! JUCE_LINUX // setSize() on linux causes renoise and energyxt to fail.
+                    if (! resizeEditor) // this is needed to prevent an infinite resizing loop due to coordinate rounding
+                        shouldResizeEditor = false;
+
                     setSize (pos.getWidth(), pos.getHeight());
+
+                    shouldResizeEditor = true;
                    #else
+                    ignoreUnused (resizeEditor);
                     XResizeWindow (display.display, (Window) getWindowHandle(), pos.getWidth(), pos.getHeight());
                    #endif
 
@@ -1437,6 +1457,7 @@ public:
         JuceVSTWrapper& wrapper;
         FakeMouseMoveGenerator fakeMouseGenerator;
         bool isInSizeWindow = false;
+        bool shouldResizeEditor = true;
 
        #if JUCE_MAC
         void* hostWindow = {};
@@ -1921,6 +1942,10 @@ private:
     pointer_sized_int handleSetBypass (VstOpCodeArguments args)
     {
         isBypassed = (args.value != 0);
+
+        if (auto* bypass = processor->getBypassParameter())
+            bypass->setValueNotifyingHost (isBypassed ? 1.0f : 0.0f);
+
         return 1;
     }
 
@@ -2099,7 +2124,7 @@ private:
                     ed->setScaleFactor (editorScaleFactor);
 
                 if (editorComp != nullptr)
-                    editorComp->updateWindowSize();
+                    editorComp->updateWindowSize (true);
             }
            #endif
         }

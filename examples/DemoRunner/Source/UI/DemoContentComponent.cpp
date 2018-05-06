@@ -69,7 +69,7 @@ struct CodeContent    : public Component
         codeEditor.setScrollbarThickness (8);
 
         lookAndFeelChanged();
-    };
+    }
 
     void resized() override
     {
@@ -111,7 +111,7 @@ DemoContentComponent::DemoContentComponent (Component& mainComponent, std::funct
     addTab ("Code",     Colours::transparentBlack, codeContent = new CodeContent(), false);
    #endif
 
-    addTab ("Settings", Colours::transparentBlack, new SettingsContent (dynamic_cast<MainComponent&> (mainComponent)),           true);
+    addTab ("Settings", Colours::transparentBlack, new SettingsContent (dynamic_cast<MainComponent&> (mainComponent)), true);
 
     setTabBarDepth (40);
     lookAndFeelChanged();
@@ -135,7 +135,7 @@ void DemoContentComponent::setDemo (const String& category, int selectedDemoInde
         && (currentDemoIndex == selectedDemoIndex))
         return;
 
-    auto demo = JUCEDemos::getCategory (category).demos[selectedDemoIndex];
+    auto demo = JUCEDemos::getCategory (category).demos[(size_t) selectedDemoIndex];
 
    #if ! (JUCE_ANDROID || JUCE_IOS)
     codeContent->document.replaceAllContent (trimPIP (demo.demoFile.loadFileAsString()));

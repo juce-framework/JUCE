@@ -61,10 +61,6 @@ Project::Project (const File& f)
     initialiseMainGroup();
     initialiseAudioPluginValues();
 
-    coalescePluginFormatValues();
-    coalescePluginCharacteristicsValues();
-    updatePluginCategories();
-
     parsedPreprocessorDefs = parsePreprocessorDefs (preprocessorDefsValue.get());
 
     getModules().sortAlphabetically();
@@ -218,9 +214,15 @@ void Project::initialiseProjectValues()
     preprocessorDefsValue.referTo              (projectRoot, Ids::defines,    getUndoManager());
     userNotesValue.referTo                     (projectRoot, Ids::userNotes,  getUndoManager());
 
-    maxBinaryFileSizeValue.referTo             (projectRoot, Ids::maxBinaryFileSize,        getUndoManager(), 10240 * 1024);
-    includeBinaryDataInAppConfigValue.referTo  (projectRoot, Ids::includeBinaryInAppConfig, getUndoManager(), true);
-    binaryDataNamespaceValue.referTo           (projectRoot, Ids::binaryDataNamespace,      getUndoManager(), "BinaryData");
+    maxBinaryFileSizeValue.referTo             (projectRoot, Ids::maxBinaryFileSize,         getUndoManager(), 10240 * 1024);
+
+    // this is here for backwards compatibility with old projects using the incorrect id
+    if (projectRoot.hasProperty ("includeBinaryInAppConfig"))
+         includeBinaryDataInJuceHeaderValue.referTo (projectRoot, "includeBinaryInAppConfig", getUndoManager(), true);
+    else
+        includeBinaryDataInJuceHeaderValue.referTo (projectRoot, Ids::includeBinaryInJuceHeader, getUndoManager(), true);
+
+    binaryDataNamespaceValue.referTo           (projectRoot, Ids::binaryDataNamespace,       getUndoManager(), "BinaryData");
 }
 
 void Project::initialiseAudioPluginValues()
@@ -375,15 +377,23 @@ void Project::updatePluginCategories()
     {
         auto aaxCategory = projectRoot.getProperty (Ids::pluginAAXCategory, {}).toString();
 
-        if (aaxCategory.isNotEmpty())
+        if (getAllAAXCategoryVars().contains (aaxCategory))
+            pluginAAXCategoryValue = aaxCategory;
+        else if (getAllAAXCategoryStrings().contains (aaxCategory))
             pluginAAXCategoryValue = Array<var> (getAllAAXCategoryVars()[getAllAAXCategoryStrings().indexOf (aaxCategory)]);
+        else
+            pluginAAXCategoryValue.resetToDefault();
     }
 
     {
         auto rtasCategory = projectRoot.getProperty (Ids::pluginRTASCategory, {}).toString();
 
-        if (rtasCategory.isNotEmpty())
+        if (getAllRTASCategoryVars().contains (rtasCategory))
+            pluginRTASCategoryValue = rtasCategory;
+        else if (getAllRTASCategoryStrings().contains (rtasCategory))
             pluginRTASCategoryValue = Array<var> (getAllRTASCategoryVars()[getAllRTASCategoryStrings().indexOf (rtasCategory)]);
+        else
+            pluginRTASCategoryValue.resetToDefault();
     }
 
     {
@@ -391,6 +401,8 @@ void Project::updatePluginCategories()
 
         if (vstCategory.isNotEmpty() && getAllVSTCategoryStrings().contains (vstCategory))
             pluginVSTCategoryValue = Array<var> (vstCategory);
+        else
+            pluginVSTCategoryValue.resetToDefault();
     }
 
     {
@@ -404,6 +416,10 @@ void Project::updatePluginCategories()
                 pluginAUMainTypeValue = Array<var> (auMainType.quoted ('\''));
             else if (getAllAUMainTypeStrings().contains (auMainType))
                 pluginAUMainTypeValue = Array<var> (getAllAUMainTypeVars()[getAllAUMainTypeStrings().indexOf (auMainType)]);
+        }
+        else
+        {
+            pluginAUMainTypeValue.resetToDefault();
         }
     }
 }
@@ -971,8 +987,8 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
                    "(Note that individual resource files which are larger than this size cannot be split across multiple cpp files).");
     }
 
-    props.add (new ChoicePropertyComponent (includeBinaryDataInAppConfigValue, "Include BinaryData in AppConfig"),
-                                             "Include BinaryData.h in the AppConfig.h file");
+    props.add (new ChoicePropertyComponent (includeBinaryDataInJuceHeaderValue, "Include BinaryData in JuceHeader"),
+                                             "Include BinaryData.h in the JuceHeader.h file");
 
     props.add (new TextPropertyComponent (binaryDataNamespaceValue, "BinaryData Namespace", 256, false),
                                           "The namespace containing the binary assests.");

@@ -415,7 +415,7 @@ protected:
         XcodeBuildConfiguration (Project& p, const ValueTree& t, const bool isIOS, const ProjectExporter& e)
             : BuildConfiguration (p, t, e),
               iOS (isIOS),
-              osxSDKVersion                (config, Ids::osxSDK,                       getUndoManager(), String (osxVersionDefault) + " SDK"),
+              osxSDKVersion                (config, Ids::osxSDK,                       getUndoManager()),
               osxDeploymentTarget          (config, Ids::osxCompatibility,             getUndoManager(), String (osxVersionDefault) + " SDK"),
               iosDeploymentTarget          (config, Ids::iosCompatibility,             getUndoManager(), iosVersionDefault),
               osxArchitecture              (config, Ids::osxArchitecture,              getUndoManager(), osxArch_Default),
@@ -468,7 +468,8 @@ protected:
                 }
 
                 props.add (new ChoicePropertyComponent (osxSDKVersion, "OSX Base SDK Version", sdkVersionNames, versionValues),
-                           "The version of OSX to link against in the Xcode build.");
+                           "The version of OSX to link against in the Xcode build. If \"Default\" is selected then the field will be left "
+                           "empty and the Xcode default will be used.");
 
                 props.add (new ChoicePropertyComponent (osxDeploymentTarget, "OSX Deployment Target", osxVersionNames, versionValues),
                            "The minimum version of OSX that the target binary will be compatible with.");
@@ -1668,7 +1669,7 @@ public:
 
         String getOSXDeploymentTarget (const XcodeBuildConfiguration& config, String* sdkRoot = nullptr) const
         {
-            auto sdk = config.getOSXSDKVersionString() + " SDK";
+            auto sdk = config.getOSXSDKVersionString();
             auto sdkCompat = config.getOSXDeploymentTargetString();
 
             // The AUv3 target always needs to be at least 10.11
@@ -1680,8 +1681,8 @@ public:
 
             for (int ver = oldestAllowedDeploymentTarget; ver <= currentSDKVersion; ++ver)
             {
-                if (sdk == getSDKName (ver) && sdkRoot != nullptr) *sdkRoot = String ("macosx10." + String (ver));
-                if (sdkCompat == getSDKName (ver))   deploymentTarget = "10." + String (ver);
+                if (sdk.isNotEmpty() && (sdk == getSDKName (ver) && sdkRoot != nullptr)) *sdkRoot = String ("macosx10." + String (ver));
+                if (sdkCompat == getSDKName (ver))                                       deploymentTarget = "10." + String (ver);
             }
 
             return deploymentTarget;

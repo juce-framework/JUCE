@@ -2387,7 +2387,7 @@ void Component::internalMouseUp (MouseInputSource source, Point<float> relativeP
                          getLocalPoint (nullptr, source.getLastMouseDownPosition()),
                          source.getLastMouseDownTime(),
                          source.getNumberOfMultipleClicks(),
-                         source.hasMouseMovedSignificantlySincePressed());
+                         source.isLongPressOrDrag());
     mouseUp (me);
 
     if (checker.shouldBailOut())
@@ -2426,7 +2426,7 @@ void Component::internalMouseDrag (MouseInputSource source, Point<float> relativ
                              getLocalPoint (nullptr, source.getLastMouseDownPosition()),
                              source.getLastMouseDownTime(),
                              source.getNumberOfMultipleClicks(),
-                             source.hasMouseMovedSignificantlySincePressed());
+                             source.isLongPressOrDrag());
         mouseDrag (me);
 
         if (checker.shouldBailOut())

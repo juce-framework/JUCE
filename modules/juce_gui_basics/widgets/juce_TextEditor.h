@@ -777,6 +777,7 @@ private:
     float getWordWrapWidth() const;
     float getJustificationWidth() const;
     void timerCallbackInt();
+    void checkFocus();
     void repaintText (Range<int>);
     void scrollByLines (int deltaLines);
     bool undoOrRedo (bool shouldUndo);

@@ -52,10 +52,10 @@ class SimpleFFTDemo   : public AudioAppComponent,
                         private Timer
 {
 public:
-    SimpleFFTDemo()
-       #ifdef JUCE_DEMO_RUNNER
-        : AudioAppComponent (getSharedAudioDeviceManager (1, 0)),
-       #endif
+    SimpleFFTDemo() :
+         #ifdef JUCE_DEMO_RUNNER
+          AudioAppComponent (getSharedAudioDeviceManager (1, 0)),
+         #endif
           forwardFFT (fftOrder),
           spectrogramImage (Image::RGB, 512, 512, true)
     {

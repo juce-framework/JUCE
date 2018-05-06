@@ -84,6 +84,9 @@ public:
                                         @see AudioProcessorParameter::isDiscrete
         @param category                 Which category the parameter should use.
                                         @see AudioProcessorParameter::Category
+        @param isBoolean                Set this value to true to make this parameter appear as a boolean toggle in
+                                        a hosts view of your plug-ins parameters
+                                        @see AudioProcessorParameter::isBoolean
 
         @returns the parameter object that was created
     */
@@ -98,7 +101,8 @@ public:
                                                           bool isAutomatableParameter = true,
                                                           bool isDiscrete = false,
                                                           AudioProcessorParameter::Category category
-                                                             = AudioProcessorParameter::genericParameter);
+                                                             = AudioProcessorParameter::genericParameter,
+                                                          bool isBoolean = false);
 
     /** Returns a parameter by its ID string. */
     AudioProcessorParameterWithID* getParameter (StringRef parameterID) const noexcept;

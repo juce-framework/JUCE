@@ -121,6 +121,14 @@ public:
     }
 
 private:
+    void clicked() override
+    {
+        StringPairArray data;
+        data.set ("label", getName());
+
+        Analytics::getInstance()->logEvent ("Start Page Button", data, ProjucerAnalyticsEvent::startPageEvent);
+    }
+
     ScopedPointer<Drawable> thumb, hoverBackground;
     String name, description;
 

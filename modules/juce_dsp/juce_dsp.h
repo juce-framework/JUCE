@@ -36,7 +36,7 @@
 
   ID:                 juce_dsp
   vendor:             juce
-  version:            5.3.0
+  version:            5.3.1
   name:               JUCE DSP classes
   description:        Classes for audio buffer manipulation, digital audio processing, filtering, oversampling, fast math functions etc.
   website:            http://www.juce.com/juce
@@ -198,15 +198,13 @@ namespace juce
 {
     namespace dsp
     {
-
         template <typename Type>
-        using Complex = ::std::complex<Type>;
+        using Complex = std::complex<Type>;
 
         //==============================================================================
         namespace util
         {
             /** Use this function to prevent denormals on intel CPUs.
-
                 This function will work with both primitives and simple containers.
             */
           #if JUCE_DSP_ENABLE_SNAP_TO_ZERO

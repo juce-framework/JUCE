@@ -380,13 +380,11 @@ public:
 
                 setInterceptsMouseClicks (! hasBeenPurchased, ! hasBeenPurchased);
 
-                auto imageFile = getAssetsDirectory().getChildFile ("Purchases").getChildFile (imageResourceName);
-
+                if (auto* assetStream = createAssetInputStream (String ("Purchases/" + String (imageResourceName)).toRawUTF8()))
                 {
-                    ScopedPointer<FileInputStream> imageData (imageFile.createInputStream());
+                    ScopedPointer<InputStream> fileStream (assetStream);
 
-                    if (imageData.get() != nullptr)
-                        avatar = PNGImageFormat().decodeImage (*imageData);
+                    avatar = PNGImageFormat().decodeImage (*fileStream);
                 }
             }
         }
@@ -552,17 +550,20 @@ private:
     //==============================================================================
     void playStopPhrase()
     {
-        MemoryOutputStream resourceName;
-
         auto idx = voiceListBox.getSelectedRow();
         if (isPositiveAndBelow (idx, soundNames.size()))
         {
-            resourceName << soundNames[idx] << phraseListBox.getSelectedRow() << ".ogg";
+            auto assetName = "Purchases/" + soundNames[idx] + String (phraseListBox.getSelectedRow()) + ".ogg";
 
-            auto file = getAssetsDirectory().getChildFile ("Purchases").getChildFile (resourceName.toString().toRawUTF8());
+            if (auto* assetStream = createAssetInputStream (assetName.toRawUTF8()))
+            {
+                ScopedPointer<InputStream> fileStream (assetStream);
 
-            if (file.exists())
-                player.play (file);
+                currentPhraseData.reset();
+                fileStream->readIntoMemoryBlock (currentPhraseData);
+
+                player.play (currentPhraseData.getData(), currentPhraseData.getSize());
+            }
         }
     }
 
@@ -571,7 +572,7 @@ private:
 
     Label phraseLabel                          { "phraseLabel", NEEDS_TRANS ("Phrases:") };
     ListBox phraseListBox                      { "phraseListBox" };
-    ScopedPointer<ListBoxModel> phraseModel  { new PhraseModel() };
+    ScopedPointer<ListBoxModel> phraseModel    { new PhraseModel() };
     TextButton playStopButton                  { "Play" };
 
     SoundPlayer player;
@@ -580,7 +581,9 @@ private:
 
     Label voiceLabel                           { "voiceLabel", NEEDS_TRANS ("Voices:") };
     ListBox voiceListBox                       { "voiceListBox" };
-    ScopedPointer<VoiceModel> voiceModel     { new VoiceModel (purchases) };
+    ScopedPointer<VoiceModel> voiceModel       { new VoiceModel (purchases) };
+
+    MemoryBlock currentPhraseData;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InAppPurchasesDemo)
 };

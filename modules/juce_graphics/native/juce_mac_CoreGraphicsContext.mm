@@ -665,13 +665,8 @@ void CoreGraphicsContext::drawGlyph (int glyphNumber, const AffineTransform& tra
 
 bool CoreGraphicsContext::drawTextLayout (const AttributedString& text, const Rectangle<float>& area)
 {
-   #if JUCE_CORETEXT_AVAILABLE
     CoreTextTypeLayout::drawToCGContext (text, area, context, (float) flipHeight);
     return true;
-   #else
-    ignoreUnused (text, area);
-    return false;
-   #endif
 }
 
 CoreGraphicsContext::SavedState::SavedState()

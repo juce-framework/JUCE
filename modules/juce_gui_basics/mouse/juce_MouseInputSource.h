@@ -172,10 +172,12 @@ public:
     /** Returns the screen position at which the last mouse-down occurred. */
     Point<float> getLastMouseDownPosition() const noexcept;
 
-    /** Returns true if this mouse is currently down, and if it has been dragged more
-        than a couple of pixels from the place it was pressed.
-    */
-    bool hasMouseMovedSignificantlySincePressed() const noexcept;
+    /** Returns true if this input source represents a long-press or drag interaction i.e. it has been held down for a significant
+        amount of time or it has been dragged more than a couple of pixels from the place it was pressed. */
+    bool isLongPressOrDrag() const noexcept;
+
+    /** Returns true if this input source has been dragged more than a couple of pixels from the place it was pressed. */
+    bool hasMovedSignificantlySincePressed() const noexcept;
 
     /** Returns true if this input source uses a visible mouse cursor. */
     bool hasMouseCursor() const noexcept;
@@ -235,6 +237,13 @@ public:
     static const float invalidTiltX;
     static const float invalidTiltY;
 
+   #if ! DOXYGEN
+    // This method has been deprecated and replaced with the isLongPressOrDrag() and hasMovedSignificantlySincePressed()
+    // methods. If you want the same behaviour you should use isLongPressOrDrag() which accounts for the amount of time
+    // that the input source has been held down for, but if you only want to know whether it has been moved use
+    // hasMovedSignificantlySincePressed() instead.
+    JUCE_DEPRECATED (bool hasMouseMovedSignificantlySincePressed() const noexcept);
+   #endif
 private:
     //==============================================================================
     friend class ComponentPeer;

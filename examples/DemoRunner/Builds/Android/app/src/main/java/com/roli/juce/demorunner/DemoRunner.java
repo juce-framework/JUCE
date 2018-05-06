@@ -1823,19 +1823,37 @@ public class DemoRunner   extends Activity
 
             private class TreeObserver implements ViewTreeObserver.OnGlobalLayoutListener
             {
+                TreeObserver()
+                {
+                    keyboardShown = false;
+                }
+
                 @Override
                 public void onGlobalLayout()
                 {
                     Rect r = new Rect();
 
-                    view.getWindowVisibleDisplayFrame(r);
+                    ViewGroup parentView = (ViewGroup) getParent();
 
-                    int diff = view.getHeight() - (r.bottom - r.top);
+                    if (parentView == null)
+                        return;
+
+                    parentView.getWindowVisibleDisplayFrame (r);
+
+                    int diff = parentView.getHeight() - (r.bottom - r.top);
 
                     // Arbitrary threshold, surely keyboard would take more than 20 pix.
-                    if (diff < 20)
+                    if (diff < 20 && keyboardShown)
+                    {
+                        keyboardShown = false;
                         handleKeyboardHidden (view.host);
+                    }
+
+                    if (! keyboardShown && diff > 20)
+                        keyboardShown = true;
                 };
+
+                private boolean keyboardShown;
             };
 
             private ComponentPeerView view;

@@ -101,7 +101,7 @@ public:
             pairButton.setEnabled (false);
 
         addAndMakeVisible (pairButton);
-        pairButton.onClick = [this]
+        pairButton.onClick = []
         {
             RuntimePermissions::request (RuntimePermissions::bluetoothMidi,
                                          [] (bool wasGranted)
@@ -285,7 +285,7 @@ private:
         }
 
         //==============================================================================
-        void paintListBoxItem (int rowNumber, Graphics &g,
+        void paintListBoxItem (int rowNumber, Graphics& g,
                                int width, int height, bool rowIsSelected) override
         {
             auto textColour = getLookAndFeel().findColour (ListBox::textColourId);
@@ -356,7 +356,7 @@ private:
     };
 
     //==============================================================================
-    void handleIncomingMidiMessage (MidiInput* /*source*/, const MidiMessage &message) override
+    void handleIncomingMidiMessage (MidiInput* /*source*/, const MidiMessage& message) override
     {
         // This is called on the MIDI thread
 

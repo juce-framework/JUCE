@@ -6,9 +6,9 @@
     <key>CFBundleExecutable</key>
     <string>${EXECUTABLE_NAME}</string>
     <key>CFBundleIconFile</key>
-    <string></string>
+    <string>Icon.icns</string>
     <key>CFBundleIdentifier</key>
-    <string>com.roli.pluginhost</string>
+    <string>com.roli.juce.pluginhost</string>
     <key>CFBundleName</key>
     <string>AudioPluginHost</string>
     <key>CFBundleDisplayName</key>

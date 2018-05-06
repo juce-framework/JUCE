@@ -2,6 +2,15 @@
 
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="AudioPluginHost\Source\Filters">
+      <UniqueIdentifier>{01436C03-42F4-5952-30EF-7F9E81D997C6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AudioPluginHost\Source\UI">
+      <UniqueIdentifier>{8C61EB30-11E6-7029-4CC8-56C52EB1F1C3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AudioPluginHost\Source">
+      <UniqueIdentifier>{57E59C1B-8971-243F-9A1A-8EABFD456232}</UniqueIdentifier>
+    </Filter>
     <Filter Include="AudioPluginHost">
       <UniqueIdentifier>{297DEAC9-184C-CA1D-D75C-DAA34116691C}</UniqueIdentifier>
     </Filter>
@@ -370,23 +379,23 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Source\FilterGraph.cpp">
-      <Filter>AudioPluginHost</Filter>
+    <ClCompile Include="..\..\Source\Filters\FilterGraph.cpp">
+      <Filter>AudioPluginHost\Source\Filters</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\FilterIOConfiguration.cpp">
-      <Filter>AudioPluginHost</Filter>
+    <ClCompile Include="..\..\Source\Filters\FilterIOConfiguration.cpp">
+      <Filter>AudioPluginHost\Source\Filters</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\GraphEditorPanel.cpp">
-      <Filter>AudioPluginHost</Filter>
+    <ClCompile Include="..\..\Source\Filters\InternalFilters.cpp">
+      <Filter>AudioPluginHost\Source\Filters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\UI\GraphEditorPanel.cpp">
+      <Filter>AudioPluginHost\Source\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\UI\MainHostWindow.cpp">
+      <Filter>AudioPluginHost\Source\UI</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\HostStartup.cpp">
-      <Filter>AudioPluginHost</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\InternalFilters.cpp">
-      <Filter>AudioPluginHost</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\MainHostWindow.cpp">
-      <Filter>AudioPluginHost</Filter>
+      <Filter>AudioPluginHost\Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioChannelSet.cpp">
       <Filter>JUCE Modules\juce_audio_basics\buffers</Filter>
@@ -737,6 +746,9 @@
       <Filter>JUCE Modules\juce_audio_processors\format_types</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_processors\format_types\juce_LADSPAPluginFormat.cpp">
+      <Filter>JUCE Modules\juce_audio_processors\format_types</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors\format_types\juce_LegacyAudioParameter.cpp">
       <Filter>JUCE Modules\juce_audio_processors\format_types</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_processors\format_types\juce_VST3PluginFormat.cpp">
@@ -2149,6 +2161,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_video\juce_video.mm">
       <Filter>JUCE Modules\juce_video</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\BinaryData.cpp">
+      <Filter>JUCE Library Code</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_basics.cpp">
       <Filter>JUCE Library Code</Filter>
     </ClCompile>
@@ -2193,23 +2208,23 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Source\FilterGraph.h">
-      <Filter>AudioPluginHost</Filter>
+    <ClInclude Include="..\..\Source\Filters\FilterGraph.h">
+      <Filter>AudioPluginHost\Source\Filters</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\FilterIOConfiguration.h">
-      <Filter>AudioPluginHost</Filter>
+    <ClInclude Include="..\..\Source\Filters\FilterIOConfiguration.h">
+      <Filter>AudioPluginHost\Source\Filters</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\GraphEditorPanel.h">
-      <Filter>AudioPluginHost</Filter>
+    <ClInclude Include="..\..\Source\Filters\InternalFilters.h">
+      <Filter>AudioPluginHost\Source\Filters</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\InternalFilters.h">
-      <Filter>AudioPluginHost</Filter>
+    <ClInclude Include="..\..\Source\UI\GraphEditorPanel.h">
+      <Filter>AudioPluginHost\Source\UI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\MainHostWindow.h">
-      <Filter>AudioPluginHost</Filter>
+    <ClInclude Include="..\..\Source\UI\MainHostWindow.h">
+      <Filter>AudioPluginHost\Source\UI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\PluginWindow.h">
-      <Filter>AudioPluginHost</Filter>
+    <ClInclude Include="..\..\Source\UI\PluginWindow.h">
+      <Filter>AudioPluginHost\Source\UI</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\audio_play_head\juce_AudioPlayHead.h">
       <Filter>JUCE Modules\juce_audio_basics\audio_play_head</Filter>
@@ -4068,11 +4083,17 @@
     <ClInclude Include="..\..\JuceLibraryCode\AppConfig.h">
       <Filter>JUCE Library Code</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\JuceLibraryCode\BinaryData.h">
+      <Filter>JUCE Library Code</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\JuceLibraryCode\JuceHeader.h">
       <Filter>JUCE Library Code</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\Source\JUCEAppIcon.png">
+      <Filter>AudioPluginHost\Source</Filter>
+    </None>
     <None Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\Flac Licence.txt">
       <Filter>JUCE Modules\juce_audio_formats\codecs\flac</Filter>
     </None>
@@ -4084,6 +4105,9 @@
     </None>
     <None Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\libpng_readme.txt">
       <Filter>JUCE Modules\juce_graphics\image_formats\pnglib</Filter>
+    </None>
+    <None Include=".\icon.ico">
+      <Filter>JUCE Library Code</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

@@ -286,7 +286,7 @@ bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& fi
                     auto eventPos = [event locationInWindow];
                     auto dragRect = [view convertRect: NSMakeRect (eventPos.x - 16.0f, eventPos.y - 16.0f, 32.0f, 32.0f)
                                              fromView: nil];
-                    auto *dragImage = [[NSWorkspace sharedWorkspace] iconForFile: nsFilename];
+                    auto* dragImage = [[NSWorkspace sharedWorkspace] iconForFile: nsFilename];
                     [dragItem setDraggingFrame: dragRect
                                       contents: dragImage];
 

@@ -465,18 +465,18 @@ private:
     /** This function calculates the equivalent high order IIR filter of a given
         polyphase cascaded allpass filters structure.
     */
-    const dsp::IIR::Coefficients<SampleType> getCoefficients (typename dsp::FilterDesign<SampleType>::IIRPolyphaseAllpassStructure &structure) const
+    const dsp::IIR::Coefficients<SampleType> getCoefficients (typename dsp::FilterDesign<SampleType>::IIRPolyphaseAllpassStructure& structure) const
     {
-        dsp::Polynomial<SampleType> numerator1 ({ static_cast<SampleType> (1.0) });
+        dsp::Polynomial<SampleType> numerator1   ({ static_cast<SampleType> (1.0) });
         dsp::Polynomial<SampleType> denominator1 ({ static_cast<SampleType> (1.0) });
-        dsp::Polynomial<SampleType> numerator2 ({ static_cast<SampleType> (1.0) });
+        dsp::Polynomial<SampleType> numerator2   ({ static_cast<SampleType> (1.0) });
         dsp::Polynomial<SampleType> denominator2 ({ static_cast<SampleType> (1.0) });
 
         dsp::Polynomial<SampleType> temp;
 
         for (auto n = 0; n < structure.directPath.size(); n++)
         {
-            auto *coeffs = structure.directPath.getReference (n).getRawCoefficients();
+            auto* coeffs = structure.directPath.getReference (n).getRawCoefficients();
 
             if (structure.directPath[n].getFilterOrder() == 1)
             {
@@ -498,7 +498,7 @@ private:
 
         for (auto n = 0; n < structure.delayedPath.size(); n++)
         {
-            auto *coeffs = structure.delayedPath.getReference (n).getRawCoefficients();
+            auto* coeffs = structure.delayedPath.getReference (n).getRawCoefficients();
 
             if (structure.delayedPath[n].getFilterOrder() == 1)
             {
@@ -520,7 +520,7 @@ private:
 
         dsp::Polynomial<SampleType> numeratorf1 = numerator1.getProductWith (denominator2);
         dsp::Polynomial<SampleType> numeratorf2 = numerator2.getProductWith (denominator1);
-        dsp::Polynomial<SampleType> numerator = numeratorf1.getSumWith (numeratorf2);
+        dsp::Polynomial<SampleType> numerator   = numeratorf1.getSumWith (numeratorf2);
         dsp::Polynomial<SampleType> denominator = denominator1.getProductWith (denominator2);
 
         dsp::IIR::Coefficients<SampleType> coeffs;
@@ -639,8 +639,7 @@ size_t Oversampling<SampleType>::getOversamplingFactor() noexcept
 template <typename SampleType>
 void Oversampling<SampleType>::initProcessing (size_t maximumNumberOfSamplesBeforeOversampling)
 {
-    jassert (engines.size() > 0);
-
+    jassert (! engines.isEmpty());
     auto currentNumSamples = maximumNumberOfSamplesBeforeOversampling;
 
     for (size_t n = 0; n < numStages; n++)
@@ -650,15 +649,15 @@ void Oversampling<SampleType>::initProcessing (size_t maximumNumberOfSamplesBefo
         engine.initProcessing (currentNumSamples);
         currentNumSamples *= engine.getFactor();
     }
-    isReady = true;
 
+    isReady = true;
     reset();
 }
 
 template <typename SampleType>
 void Oversampling<SampleType>::reset() noexcept
 {
-    jassert (engines.size() > 0);
+    jassert (! engines.isEmpty());
 
     if (isReady)
         for (auto n = 0; n < engines.size(); n++)
@@ -668,7 +667,7 @@ void Oversampling<SampleType>::reset() noexcept
 template <typename SampleType>
 typename dsp::AudioBlock<SampleType> Oversampling<SampleType>::processSamplesUp (const dsp::AudioBlock<SampleType> &inputBlock) noexcept
 {
-    jassert (engines.size() > 0);
+    jassert (! engines.isEmpty());
 
     if (! isReady)
         return dsp::AudioBlock<SampleType>();
@@ -688,7 +687,7 @@ typename dsp::AudioBlock<SampleType> Oversampling<SampleType>::processSamplesUp 
 template <typename SampleType>
 void Oversampling<SampleType>::processSamplesDown (dsp::AudioBlock<SampleType> &outputBlock) noexcept
 {
-    jassert (engines.size() > 0);
+    jassert (! engines.isEmpty());
 
     if (! isReady)
         return;

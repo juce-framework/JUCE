@@ -979,7 +979,8 @@ struct VSTPluginInstance     : public AudioPluginInstance,
         : AudioPluginInstance (ioConfig),
           vstEffect (effect),
           vstModule (mh),
-          name (mh->pluginName)
+          name (mh->pluginName),
+          bypassParam (new VST2BypassParameter (*this))
     {
         jassert (vstEffect != nullptr);
 
@@ -1063,6 +1064,7 @@ struct VSTPluginInstance     : public AudioPluginInstance,
                                             valueType));
         }
 
+        vstSupportsBypass = pluginCanDo ("bypass");
         setRateAndBufferSizeDetails (sampleRateToUse, blockSizeToUse);
     }
 
@@ -1399,23 +1401,39 @@ struct VSTPluginInstance     : public AudioPluginInstance,
         }
     }
 
+    //==============================================================================
     void processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages) override
     {
         jassert (! isUsingDoublePrecision());
-        processAudio (buffer, midiMessages, tmpBufferFloat, channelBufferFloat);
+        processAudio (buffer, midiMessages, tmpBufferFloat, channelBufferFloat, false);
     }
 
     void processBlock (AudioBuffer<double>& buffer, MidiBuffer& midiMessages) override
     {
         jassert (isUsingDoublePrecision());
-        processAudio (buffer, midiMessages, tmpBufferDouble, channelBufferDouble);
+        processAudio (buffer, midiMessages, tmpBufferDouble, channelBufferDouble, false);
     }
 
+    void processBlockBypassed (AudioBuffer<float>& buffer, MidiBuffer& midiMessages) override
+    {
+        jassert (! isUsingDoublePrecision());
+        processAudio (buffer, midiMessages, tmpBufferFloat, channelBufferFloat, true);
+    }
+
+    void processBlockBypassed (AudioBuffer<double>& buffer, MidiBuffer& midiMessages) override
+    {
+        jassert (isUsingDoublePrecision());
+        processAudio (buffer, midiMessages, tmpBufferDouble, channelBufferDouble, true);
+    }
+
+    //==============================================================================
     bool supportsDoublePrecisionProcessing() const override
     {
         return ((vstEffect->flags & vstEffectFlagInplaceAudio) != 0
              && (vstEffect->flags & vstEffectFlagInplaceDoubleAudio) != 0);
     }
+
+    AudioProcessorParameter* getBypassParameter() const override               { return vstSupportsBypass ? bypassParam.get() : nullptr; }
 
     //==============================================================================
     bool canAddBus (bool) const override                                       { return false; }
@@ -1932,9 +1950,57 @@ struct VSTPluginInstance     : public AudioPluginInstance,
     bool usesCocoaNSView = false;
 
 private:
+    //==============================================================================
+    struct VST2BypassParameter    : Parameter
+    {
+        VST2BypassParameter (VSTPluginInstance& effectToUse)   : parent (effectToUse) {}
+
+        void setValue (float newValue) override
+        {
+            currentValue = (newValue != 0.0f);
+
+            if (parent.vstSupportsBypass)
+                parent.dispatch (plugInOpcodeSetBypass, 0, currentValue ? 1 : 0, nullptr, 0.0f);
+        }
+
+        float getValueForText (const String& text) const override
+        {
+            String lowercaseText (text.toLowerCase());
+
+            for (auto& testText : onStrings)
+                if (lowercaseText == testText)
+                    return 1.0f;
+
+            for (auto& testText : offStrings)
+                if (lowercaseText == testText)
+                    return 0.0f;
+
+            return text.getIntValue() != 0 ? 1.0f : 0.0f;
+        }
+
+        float getValue() const override                                     { return currentValue; }
+        float getDefaultValue() const override                              { return 0.0f; }
+        String getName (int /*maximumStringLength*/) const override         { return "Bypass"; }
+        String getText (float value, int) const override                    { return (value != 0.0f ? TRANS("On") : TRANS("Off")); }
+        bool isAutomatable() const override                                 { return true; }
+        bool isDiscrete() const override                                    { return true; }
+        bool isBoolean() const override                                     { return true; }
+        int getNumSteps() const override                                    { return 2; }
+        StringArray getAllValueStrings() const override                     { return values; }
+        String getLabel() const override                                    { return {}; }
+
+        VSTPluginInstance& parent;
+        bool currentValue = false;
+        StringArray onStrings  { TRANS("on"),  TRANS("yes"), TRANS("true") };
+        StringArray offStrings { TRANS("off"), TRANS("no"),  TRANS("false") };
+        StringArray values { TRANS("Off"), TRANS("On") };
+    };
+
+    //==============================================================================
     String name;
     CriticalSection lock;
     bool wantsMidiMessages = false, initialised = false, isPowerOn = false;
+    bool lastProcessBlockCallWasBypass = false, vstSupportsBypass = false;
     mutable StringArray programNames;
     AudioBuffer<float> outOfPlaceBuffer;
 
@@ -1948,6 +2014,7 @@ private:
 
     AudioBuffer<double> tmpBufferDouble;
     HeapBlock<double*> channelBufferDouble;
+    ScopedPointer<VST2BypassParameter> bypassParam;
 
     ScopedPointer<VSTXMLInfo> xmlInfo;
 
@@ -2202,8 +2269,20 @@ private:
     template <typename FloatType>
     void processAudio (AudioBuffer<FloatType>& buffer, MidiBuffer& midiMessages,
                        AudioBuffer<FloatType>& tmpBuffer,
-                       HeapBlock<FloatType*>& channelBuffer)
+                       HeapBlock<FloatType*>& channelBuffer,
+                       bool processBlockBypassedCalled)
     {
+        if (vstSupportsBypass)
+        {
+            updateBypass (processBlockBypassedCalled);
+        }
+        else if (processBlockBypassedCalled)
+        {
+            // if this vst does not support bypass then we will have to do this ourselves
+            AudioProcessor::processBlockBypassed (buffer, midiMessages);
+            return;
+        }
+
         auto numSamples  = buffer.getNumSamples();
         auto numChannels = buffer.getNumChannels();
 
@@ -2586,6 +2665,23 @@ private:
     {
         dispatch (plugInOpcodeResumeSuspend, 0, on ? 1 : 0, 0, 0);
         isPowerOn = on;
+    }
+
+    //==============================================================================
+    void updateBypass (bool processBlockBypassedCalled)
+    {
+        if (processBlockBypassedCalled)
+        {
+            if (bypassParam->getValue() == 0.0f || ! lastProcessBlockCallWasBypass)
+                bypassParam->setValue (1.0f);
+        }
+        else
+        {
+            if (lastProcessBlockCallWasBypass)
+                bypassParam->setValue (0.0f);
+        }
+
+        lastProcessBlockCallWasBypass = processBlockBypassedCalled;
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VSTPluginInstance)

@@ -7193,10 +7193,11 @@ static const unsigned char temp_binary_data_53[] =
 "    class MainWindow    : public DocumentWindow\r\n"
 "    {\r\n"
 "    public:\r\n"
-"        MainWindow (const String& name, Component* c)  : DocumentWindow (name,\r\n"
-"                                                                         Desktop::getInstance().getDefaultLookAndFeel()\r\n"
-"                                                                                               .findColour (ResizableWindow::backgroundColourId),\r\n"
-"                                                                         DocumentWindow::allButtons)\r\n"
+"        MainWindow (const String& name, Component* c, JUCEApplication& a)\r\n"
+"            : DocumentWindow (name, Desktop::getInstance().getDefaultLookAndFeel()\r\n"
+"                                                          .findColour (ResizableWindow::backgroundColourId),\r\n"
+"                              DocumentWindow::allButtons),\r\n"
+"              app (a)\r\n"
 "        {\r\n"
 "            setUsingNativeTitleBar (true);\r\n"
 "            setContentOwned (c, true);\r\n"
@@ -7214,10 +7215,13 @@ static const unsigned char temp_binary_data_53[] =
 "\r\n"
 "        void closeButtonPressed() override\r\n"
 "        {\r\n"
-"            JUCEApplication::getInstance()->systemRequestedQuit();\r\n"
+"            app.systemRequestedQuit();\r\n"
 "        }\r\n"
 "\r\n"
 "    private:\r\n"
+"        JUCEApplication& app;\r\n"
+"\r\n"
+"        //==============================================================================\r\n"
 "        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)\r\n"
 "    };\r\n"
 "    ScopedPointer<MainWindow> mainWindow;\r\n"
@@ -7641,7 +7645,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) noexc
         case 0x7fbac252:  numBytes = 1665; return jucer_OpenGLComponentTemplate_cpp;
         case 0x491fa0d7:  numBytes = 1263; return jucer_OpenGLComponentTemplate_h;
         case 0xbc050edc:  numBytes = 4926; return jucer_PIPAudioProcessorTemplate_h;
-        case 0xf4ca9e9a:  numBytes = 2446; return jucer_PIPMain_cpp;
+        case 0xf4ca9e9a:  numBytes = 2443; return jucer_PIPMain_cpp;
         case 0x0b16e320:  numBytes = 517; return jucer_PIPTemplate_h;
         case 0x763d39dc:  numBytes = 1050; return colourscheme_dark_xml;
         case 0xe8b08520:  numBytes = 1050; return colourscheme_light_xml;

@@ -109,7 +109,7 @@ public:
         // cycle through the delay line and apply a simple averaging filter
         for (auto i = 0; i < numSamples; ++i)
         {
-            auto nextPos = (int) ((pos + 1) % delayLine.size());
+            auto nextPos = (pos + 1) % delayLine.size();
 
             delayLine[nextPos] = (float) (decay * 0.5 * (delayLine[nextPos] + delayLine[pos]));
             outBuffer[i] += delayLine[pos];
@@ -151,7 +151,7 @@ private:
                         excitationSample.end(),
                         delayLine.begin(),
                         [this] (double sample) { return static_cast<float> (amplitude * sample); } );
-    };
+    }
 
     //==============================================================================
     const double decay = 0.998;
@@ -160,7 +160,7 @@ private:
     Atomic<int> doPluckForNextBuffer;
 
     std::vector<float> excitationSample, delayLine;
-    int pos = 0;
+    size_t pos = 0;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StringSynthesiser)
 };
@@ -294,7 +294,7 @@ public:
             {
                 memcpy (channelData,
                         bufferToFill.buffer->getReadPointer (0),
-                        bufferToFill.numSamples * sizeof (float));
+                        ((size_t) bufferToFill.numSamples) * sizeof (float));
             }
         }
     }

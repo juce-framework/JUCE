@@ -436,11 +436,11 @@ Result ZipFile::uncompressEntry (int index, const File& targetDirectory, bool sh
 
     if (zei->entry.isSymbolicLink)
     {
-        String relativePath (in->readEntireStreamAsString());
-        auto originalFilePath = targetFile.getParentDirectory().getChildFile (relativePath);
+        String originalFilePath (in->readEntireStreamAsString()
+                                    .replaceCharacter (L'/', File::getSeparatorChar()));
 
-        if (! originalFilePath.createSymbolicLink (targetFile, true))
-            return Result::fail ("Failed to create symbolic link: " + targetFile.getFullPathName());
+        if (! File::createSymbolicLink (targetFile, originalFilePath, true))
+            return Result::fail ("Failed to create symbolic link: " + originalFilePath);
     }
     else
     {
@@ -466,9 +466,7 @@ struct ZipFile::Builder::Item
     Item (const File& f, InputStream* s, int compression, const String& storedPath, Time time)
         : file (f), stream (s), storedPathname (storedPath), fileTime (time), compressionLevel (compression)
     {
-       #if (defined (JUCE_MAC) || defined (JUCE_LINUX) || defined (JUCE_BSD))
         symbolicLink = (file.exists() && file.isSymbolicLink());
-       #endif
     }
 
     bool writeData (OutputStream& target, const int64 overallStartPosition)
@@ -477,7 +475,8 @@ struct ZipFile::Builder::Item
 
         if (symbolicLink)
         {
-            auto relativePath = file.getLinkedTarget().getRelativePathFrom (file);
+            auto relativePath = file.getNativeLinkedTarget().replaceCharacter (File::getSeparatorChar(), L'/');
+
             uncompressedSize = relativePath.length();
 
             checksum = zlibNamespace::crc32 (0, (uint8_t*) relativePath.toRawUTF8(), (unsigned int) uncompressedSize);

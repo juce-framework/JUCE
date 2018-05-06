@@ -34,7 +34,8 @@ enum ProjucerAnalyticsEvent
     appEvent,
     projectEvent,
     userEvent,
-    exampleEvent
+    exampleEvent,
+    startPageEvent
 };
 
 //==============================================================================
