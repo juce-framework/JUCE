@@ -56,6 +56,7 @@
 #include <iomanip>
 #include <sstream>
 #include <functional>
+#include <mutex>
 
 namespace IDs
 {
@@ -183,7 +184,7 @@ private:
 class MPESamplerSound final
 {
 public:
-    void setSample (ScopedPointer<Sample> value)
+    void setSample (std::unique_ptr<Sample> value)
     {
         sample = move (value);
         setLoopPointsInSeconds (loopPoints);
@@ -227,7 +228,7 @@ public:
     }
 
 private:
-    ScopedPointer<Sample> sample;
+    std::unique_ptr<Sample> sample;
     double centreFrequencyInHz { 440.0 };
     Range<double> loopPoints;
     LoopMode loopMode { LoopMode::none };
@@ -350,9 +351,9 @@ private:
         auto invAlpha = 1.0f - alpha;
 
         // just using a very simple linear interpolation here..
-        auto l = currentLevel * (inL[pos] * invAlpha + inL[nextPos] * alpha);
-        auto r = (inR != nullptr) ? currentLevel * (inR[pos] * invAlpha + inR[nextPos] * alpha)
-                                  : l;
+        auto l = static_cast<float> (currentLevel * (inL[pos] * invAlpha + inL[nextPos] * alpha));
+        auto r = static_cast<float> ((inR != nullptr) ? currentLevel * (inR[pos] * invAlpha + inR[nextPos] * alpha)
+                                                      : l);
 
         if (outR != nullptr)
         {
@@ -360,7 +361,9 @@ private:
             outR[writePos] += r;
         }
         else
+        {
             outL[writePos] += (l + r) * 0.5f;
+        }
 
         std::tie (currentSamplePos, currentDirection) = getNextState (currentFrequency,
                                                                       currentLoopBegin,
@@ -394,11 +397,11 @@ private:
         backward
     };
 
-    std::tuple<double, Direction> getNextState (double frequency,
-                                                double loopBegin,
-                                                double loopEnd) const
+    std::tuple<double, Direction> getNextState (double freq,
+                                                double begin,
+                                                double end) const
     {
-        auto nextPitchRatio = frequency / samplerSound->getCentreFrequencyInHz();
+        auto nextPitchRatio = freq / samplerSound->getCentreFrequencyInHz();
 
         auto nextSamplePos = currentSamplePos;
         auto nextDirection = currentDirection;
@@ -418,9 +421,9 @@ private:
         // Update current sample position, taking loop mode into account
         // If the loop mode was changed while we were travelling backwards, deal
         // with it gracefully.
-        if (nextDirection == Direction::backward && nextSamplePos < loopBegin)
+        if (nextDirection == Direction::backward && nextSamplePos < begin)
         {
-            nextSamplePos = loopBegin;
+            nextSamplePos = begin;
             nextDirection = Direction::forward;
 
             return { nextSamplePos, nextDirection };
@@ -429,13 +432,13 @@ private:
         if (samplerSound->getLoopMode() == LoopMode::none)
             return { nextSamplePos, nextDirection };
 
-        if (nextDirection == Direction::forward && loopEnd < nextSamplePos && !isTailingOff())
+        if (nextDirection == Direction::forward && end < nextSamplePos && !isTailingOff())
         {
             if (samplerSound->getLoopMode() == LoopMode::forward)
-                nextSamplePos = loopBegin;
+                nextSamplePos = begin;
             else if (samplerSound->getLoopMode() == LoopMode::pingpong)
             {
-                nextSamplePos = loopEnd;
+                nextSamplePos = end;
                 nextDirection = Direction::backward;
             }
         }
@@ -477,27 +480,27 @@ private:
 };
 
 template <typename Contents, typename... Args>
-ScopedPointer<ReferenceCountingAdapter<Contents>>
+std::unique_ptr<ReferenceCountingAdapter<Contents>>
 make_reference_counted (Args&&... args)
 {
     auto adapter = new ReferenceCountingAdapter<Contents> (std::forward<Args> (args)...);
-    return ScopedPointer<ReferenceCountingAdapter<Contents>> (adapter);
+    return std::unique_ptr<ReferenceCountingAdapter<Contents>> (adapter);
 }
 
 //==============================================================================
-inline ScopedPointer<AudioFormatReader> makeAudioFormatReader (AudioFormatManager& manager,
+inline std::unique_ptr<AudioFormatReader> makeAudioFormatReader (AudioFormatManager& manager,
                                                                  const void* sampleData,
                                                                  size_t dataSize)
 {
-    return ScopedPointer<AudioFormatReader> (manager.createReaderFor (new MemoryInputStream (sampleData,
+    return std::unique_ptr<AudioFormatReader> (manager.createReaderFor (new MemoryInputStream (sampleData,
                                                                                                dataSize,
                                                                                                false)));
 }
 
-inline ScopedPointer<AudioFormatReader> makeAudioFormatReader (AudioFormatManager& manager,
+inline std::unique_ptr<AudioFormatReader> makeAudioFormatReader (AudioFormatManager& manager,
                                                                  const File& file)
 {
-    return ScopedPointer<AudioFormatReader> (manager.createReaderFor (file));
+    return std::unique_ptr<AudioFormatReader> (manager.createReaderFor (file));
 }
 
 //==============================================================================
@@ -505,8 +508,8 @@ class AudioFormatReaderFactory
 {
 public:
     virtual ~AudioFormatReaderFactory() noexcept = default;
-    virtual ScopedPointer<AudioFormatReader> make (AudioFormatManager&) const = 0;
-    virtual ScopedPointer<AudioFormatReaderFactory> clone() const = 0;
+    virtual std::unique_ptr<AudioFormatReader> make (AudioFormatManager&) const = 0;
+    virtual std::unique_ptr<AudioFormatReaderFactory> clone() const = 0;
 };
 
 //==============================================================================
@@ -518,14 +521,14 @@ public:
           dataSize (dataSize)
     {}
 
-    ScopedPointer<AudioFormatReader> make (AudioFormatManager&manager ) const override
+    std::unique_ptr<AudioFormatReader> make (AudioFormatManager&manager ) const override
     {
         return makeAudioFormatReader (manager, sampleData, dataSize);
     }
 
-    ScopedPointer<AudioFormatReaderFactory> clone() const override
+    std::unique_ptr<AudioFormatReaderFactory> clone() const override
     {
-        return ScopedPointer<AudioFormatReaderFactory> (new MemoryAudioFormatReaderFactory (*this));
+        return std::unique_ptr<AudioFormatReaderFactory> (new MemoryAudioFormatReaderFactory (*this));
     }
 
 private:
@@ -541,14 +544,14 @@ public:
         : file (std::move (file))
     {}
 
-    ScopedPointer<AudioFormatReader> make (AudioFormatManager& manager) const override
+    std::unique_ptr<AudioFormatReader> make (AudioFormatManager& manager) const override
     {
         return makeAudioFormatReader (manager, file);
     }
 
-    ScopedPointer<AudioFormatReaderFactory> clone() const override
+    std::unique_ptr<AudioFormatReaderFactory> clone() const override
     {
-        return ScopedPointer<AudioFormatReaderFactory> (new FileAudioFormatReaderFactory (*this));
+        return std::unique_ptr<AudioFormatReaderFactory> (new FileAudioFormatReaderFactory (*this));
     }
 
 private:
@@ -625,8 +628,8 @@ public:
     {
     public:
         virtual ~Listener() noexcept = default;
-        virtual void totalRangeChanged   (Range<double> value) {}
-        virtual void visibleRangeChanged (Range<double> value) {}
+        virtual void totalRangeChanged   (Range<double>) {}
+        virtual void visibleRangeChanged (Range<double>) {}
     };
 
     VisibleRangeDataModel()
@@ -691,8 +694,7 @@ public:
     }
 
 private:
-    void valueTreePropertyChanged (ValueTree &treeWhosePropertyHasChanged,
-                                   const Identifier &property) override
+    void valueTreePropertyChanged (ValueTree &, const Identifier &property) override
     {
         if (property == IDs::totalRange)
         {
@@ -727,13 +729,13 @@ public:
     {
     public:
         virtual ~Listener() noexcept = default;
-        virtual void synthVoicesChanged (int value) {}
-        virtual void voiceStealingEnabledChanged (bool value) {}
-        virtual void legacyModeEnabledChanged (bool value) {}
-        virtual void mpeZoneLayoutChanged (const MPEZoneLayout& value) {}
-        virtual void legacyFirstChannelChanged (int value) {}
-        virtual void legacyLastChannelChanged (int value) {}
-        virtual void legacyPitchbendRangeChanged (int value) {}
+        virtual void synthVoicesChanged (int) {}
+        virtual void voiceStealingEnabledChanged (bool) {}
+        virtual void legacyModeEnabledChanged (bool) {}
+        virtual void mpeZoneLayoutChanged (const MPEZoneLayout&) {}
+        virtual void legacyFirstChannelChanged (int) {}
+        virtual void legacyLastChannelChanged (int) {}
+        virtual void legacyPitchbendRangeChanged (int) {}
     };
 
     MPESettingsDataModel()
@@ -852,8 +854,7 @@ public:
     }
 
 private:
-    void valueTreePropertyChanged (ValueTree &treeWhosePropertyHasChanged,
-                                   const Identifier &property) override
+    void valueTreePropertyChanged (ValueTree&, const Identifier &property) override
     {
         if (property == IDs::synthVoices)
         {
@@ -918,10 +919,10 @@ public:
     {
     public:
         virtual ~Listener() noexcept = default;
-        virtual void sampleReaderChanged (std::shared_ptr<AudioFormatReaderFactory> value) {}
-        virtual void centreFrequencyHzChanged (double value) {}
-        virtual void loopModeChanged (LoopMode value) {}
-        virtual void loopPointsSecondsChanged (Range<double> value) {}
+        virtual void sampleReaderChanged (std::shared_ptr<AudioFormatReaderFactory>) {}
+        virtual void centreFrequencyHzChanged (double) {}
+        virtual void loopModeChanged (LoopMode) {}
+        virtual void loopPointsSecondsChanged (Range<double>) {}
     };
 
     explicit DataModel (AudioFormatManager& audioFormatManager)
@@ -951,12 +952,12 @@ public:
         return *this;
     }
 
-    ScopedPointer<AudioFormatReader> getSampleReader() const
+    std::unique_ptr<AudioFormatReader> getSampleReader() const
     {
         return sampleReader != nullptr ? sampleReader.get()->make (*audioFormatManager) : nullptr;
     }
 
-    void setSampleReader (ScopedPointer<AudioFormatReaderFactory> readerFactory,
+    void setSampleReader (std::unique_ptr<AudioFormatReaderFactory> readerFactory,
                           UndoManager* undoManager)
     {
         sampleReader.setValue (move (readerFactory), undoManager);
@@ -966,8 +967,8 @@ public:
 
     double getSampleLengthSeconds() const
     {
-        if (auto sampleReader = getSampleReader())
-            return sampleReader->lengthInSamples / sampleReader->sampleRate;
+        if (auto r = getSampleReader())
+            return r->lengthInSamples / r->sampleRate;
 
         return 1.0;
     }
@@ -1031,8 +1032,7 @@ public:
     }
 
 private:
-    void valueTreePropertyChanged (ValueTree &treeWhosePropertyHasChanged,
-                                   const Identifier &property) override
+    void valueTreePropertyChanged (ValueTree&, const Identifier& property) override
     {
         if (property == IDs::sampleReader)
         {
@@ -1438,7 +1438,8 @@ private:
 
         newPath.startNewSubPath (bounds.getBottomLeft().toFloat());
         newPath.lineTo (bounds.getBottomRight().toFloat());
-        Point<float> apex (bounds.getX() + (bounds.getWidth() / 2), bounds.getBottom() - triHeight);
+        Point<float> apex (static_cast<float> (bounds.getX() + (bounds.getWidth() / 2)),
+                           static_cast<float> (bounds.getBottom() - triHeight));
         newPath.lineTo (apex);
         newPath.closeSubPath();
 
@@ -1459,7 +1460,7 @@ private:
 
     bool hitTest (int x, int y) override
     {
-        return path.contains (x, y);
+        return path.contains ((float) x, (float) y);
     }
 
     void mouseDown (const MouseEvent& e) override
@@ -1511,14 +1512,14 @@ private:
                                            0,
                                            bg.darker(),
                                            0,
-                                           getHeight(),
+                                           (float) getHeight(),
                                            false));
 
         g.fillAll();
         g.setColour (bg.brighter());
-        g.drawHorizontalLine (0, 0, getWidth());
+        g.drawHorizontalLine (0, 0.0f, (float) getWidth());
         g.setColour (bg.darker());
-        g.drawHorizontalLine (1, 0, getWidth());
+        g.drawHorizontalLine (1, 0.0f, (float) getWidth());
         g.setColour (Colours::lightgrey);
 
         auto minLog = std::ceil (std::log10 (visibleRange.getVisibleRange().getLength() / maxDivisions));
@@ -1533,15 +1534,15 @@ private:
                               / visibleRange.getVisibleRange().getLength();
 
             std::ostringstream out_stream;
-            out_stream << std::setprecision (precision) << time;
+            out_stream << std::setprecision (roundToInt (precision)) << roundToInt (time);
 
             g.drawText (out_stream.str(),
-                        Rectangle<int> (Point<int> (xPos + 3, 0),
-                                        Point<int> (xPos + minDivisionWidth, getHeight())),
+                        Rectangle<int> (Point<int> (roundToInt (xPos) + 3, 0),
+                                        Point<int> (roundToInt (xPos + minDivisionWidth), getHeight())),
                         Justification::centredLeft,
                         false);
 
-            g.drawVerticalLine (xPos, 2, getHeight());
+            g.drawVerticalLine (roundToInt (xPos), 2.0f, (float) getHeight());
         }
     }
 
@@ -1566,7 +1567,7 @@ private:
         visibleRange.setVisibleRange (range, nullptr);
     }
 
-    void visibleRangeChanged (Range<double> value) override
+    void visibleRangeChanged (Range<double>) override
     {
         repaint();
     }
@@ -1610,7 +1611,7 @@ private:
         positionLoopPointMarkers();
     }
 
-    void loopPointMouseDown (LoopPointMarker& marker, const MouseEvent& e)
+    void loopPointMouseDown (LoopPointMarker&, const MouseEvent&)
     {
         loopPointsOnMouseDown = dataModel.getLoopPointsSeconds();
         undoManager->beginNewTransaction();
@@ -1634,12 +1635,12 @@ private:
         dataModel.setLoopPointsSeconds (newLoopRange, undoManager);
     }
 
-    void loopPointsSecondsChanged (Range<double> value) override
+    void loopPointsSecondsChanged (Range<double>) override
     {
         positionLoopPointMarkers();
     }
 
-    void visibleRangeChanged      (Range<double> value) override
+    void visibleRangeChanged (Range<double>) override
     {
         positionLoopPointMarkers();
     }
@@ -1666,7 +1667,7 @@ private:
             auto ptr  = std::get<0> (tup);
             auto time = std::get<1> (tup);
             ptr->setSize (halfMarkerWidth * 2, getHeight());
-            ptr->setTopLeftPosition (timeToXPosition (time) - halfMarkerWidth, 0);
+            ptr->setTopLeftPosition (roundToInt (timeToXPosition (time) - halfMarkerWidth), 0);
         }
     }
 
@@ -1700,7 +1701,7 @@ private:
 
         for (auto position : provider())
         {
-            g.drawVerticalLine (timeToXPosition (position), 0, getHeight());
+            g.drawVerticalLine (roundToInt (timeToXPosition (position)), 0.0f, (float) getHeight());
         }
     }
 
@@ -1753,7 +1754,7 @@ private:
         if (numChannels == 0)
         {
             g.setColour (Colours::white);
-            g.drawFittedText ("No File Loaded", getLocalBounds(), Justification::centred, 1.0f);
+            g.drawFittedText ("No File Loaded", getLocalBounds(), Justification::centred, 1);
             return;
         }
 
@@ -1888,7 +1889,7 @@ public:
         {
             undoManager->beginNewTransaction();
             auto readerFactory = new FileAudioFormatReaderFactory (fc.getResult());
-            dataModel.setSampleReader (ScopedPointer<AudioFormatReaderFactory> (readerFactory),
+            dataModel.setSampleReader (std::unique_ptr<AudioFormatReaderFactory> (readerFactory),
                                        undoManager);
         };
 
@@ -2021,7 +2022,7 @@ struct ProcessorState
     int legacyPitchbendRange;
     bool voiceStealingEnabled;
     MPEZoneLayout mpeZoneLayout;
-    ScopedPointer<AudioFormatReaderFactory> readerFactory;
+    std::unique_ptr<AudioFormatReaderFactory> readerFactory;
     Range<double> loopPointsSeconds;
     double centreFrequencyHz;
     LoopMode loopMode;
@@ -2062,12 +2063,20 @@ public:
     SamplerAudioProcessor()
         : AudioProcessor (BusesProperties().withOutput ("Output", AudioChannelSet::stereo(), true))
     {
+        if (auto* asset = createAssetInputStream ("cello.wav"))
+        {
+            ScopedPointer<InputStream> inputStream (asset);
+            inputStream->readIntoMemoryBlock (mb);
+
+            readerFactory.reset (new MemoryAudioFormatReaderFactory (mb.getData(), mb.getSize()));
+        }
+
         // Set up initial sample, which we load from a binary resource
         AudioFormatManager manager;
         manager.registerBasicFormats();
         auto reader = readerFactory->make (manager);
         auto sound = samplerSound.load();
-        auto sample = ScopedPointer<Sample> (new Sample (*reader, 10.0));
+        auto sample = std::unique_ptr<Sample> (new Sample (*reader, 10.0));
         auto lengthInSeconds = sample->getLength() / sample->getSampleRate();
         sound->setLoopPointsInSeconds ({lengthInSeconds * 0.1, lengthInSeconds * 0.9 });
         sound->setSample (move (sample));
@@ -2077,7 +2086,7 @@ public:
             synthesiser.addVoice (new MPESamplerVoice (sound));
     }
 
-    void prepareToPlay (double sampleRate, int samplesPerBlock) override
+    void prepareToPlay (double sampleRate, int) override
     {
         synthesiser.setCurrentPlaybackSampleRate (sampleRate);
     }
@@ -2172,25 +2181,26 @@ public:
         // Update the current playback positions
         for (auto i = 0; i != maxVoices; ++i)
         {
-            MPESamplerVoice* voicePtr = nullptr;
-            playbackPositions[i] = (i < numVoices && (voicePtr = dynamic_cast<MPESamplerVoice*> (synthesiser.getVoice (i))))
-                                    ? voicePtr->getCurrentSamplePosition() / loadedSamplerSound->getSample()->getSampleRate()
-                                    : 0;
+            auto* voicePtr = dynamic_cast<MPESamplerVoice*> (synthesiser.getVoice (i));
+
+            if (i < numVoices && voicePtr != nullptr)
+                playbackPositions[i] = static_cast<float> (voicePtr->getCurrentSamplePosition() / loadedSamplerSound->getSample()->getSampleRate());
+            else
+                playbackPositions[i] = 0.0f;
         }
     }
 
     // These should be called from the GUI thread, and will block until the
     // command buffer has enough room to accept a command.
-    void setSample (ScopedPointer<AudioFormatReaderFactory> readerFactory,
-                                           AudioFormatManager& formatManager)
+    void setSample (std::unique_ptr<AudioFormatReaderFactory> fact, AudioFormatManager& formatManager)
     {
         class SetSampleCommand
         {
         public:
-            SetSampleCommand (ScopedPointer<AudioFormatReaderFactory> readerFactory,
-                              ScopedPointer<Sample> sample,
-                              std::vector<ScopedPointer<MPESamplerVoice>> newVoices)
-                : readerFactory (move (readerFactory)),
+            SetSampleCommand (std::unique_ptr<AudioFormatReaderFactory> r,
+                              std::unique_ptr<Sample> sample,
+                              std::vector<std::unique_ptr<MPESamplerVoice>> newVoices)
+                : readerFactory (move (r)),
                   sample (move (sample)),
                   newVoices (move (newVoices))
             {}
@@ -2210,31 +2220,31 @@ public:
             }
 
         private:
-            ScopedPointer<AudioFormatReaderFactory> readerFactory;
-            ScopedPointer<Sample> sample;
-            std::vector<ScopedPointer<MPESamplerVoice>> newVoices;
+            std::unique_ptr<AudioFormatReaderFactory> readerFactory;
+            std::unique_ptr<Sample> sample;
+            std::vector<std::unique_ptr<MPESamplerVoice>> newVoices;
         };
 
         // Note that all allocation happens here, on the main message thread. Then,
         // we transfer ownership across to the audio thread.
         auto loadedSamplerSound = samplerSound.load();
-        std::vector<ScopedPointer<MPESamplerVoice>> newSamplerVoices;
+        std::vector<std::unique_ptr<MPESamplerVoice>> newSamplerVoices;
         newSamplerVoices.reserve (maxVoices);
 
         for (auto i = 0; i != maxVoices; ++i)
             newSamplerVoices.emplace_back (new MPESamplerVoice (loadedSamplerSound));
 
-        if (readerFactory == nullptr)
+        if (fact == nullptr)
         {
-            pushCommand (SetSampleCommand (move (readerFactory),
+            pushCommand (SetSampleCommand (move (fact),
                                            nullptr,
                                            move (newSamplerVoices)));
         }
         else
         {
-            auto reader = readerFactory->make (formatManager);
-            pushCommand (SetSampleCommand (move (readerFactory),
-                                           ScopedPointer<Sample> (new Sample (*reader, 10.0)),
+            auto reader = fact->make (formatManager);
+            pushCommand (SetSampleCommand (move (fact),
+                                           std::unique_ptr<Sample> (new Sample (*reader, 10.0)),
                                            move (newSamplerVoices)));
         }
     }
@@ -2307,7 +2317,7 @@ public:
         class SetNumVoicesCommand
         {
         public:
-            SetNumVoicesCommand (std::vector<ScopedPointer<MPESamplerVoice>> newVoices)
+            SetNumVoicesCommand (std::vector<std::unique_ptr<MPESamplerVoice>> newVoices)
                 : newVoices (move (newVoices))
             {}
 
@@ -2325,12 +2335,12 @@ public:
             }
 
         private:
-            std::vector<ScopedPointer<MPESamplerVoice>> newVoices;
+            std::vector<std::unique_ptr<MPESamplerVoice>> newVoices;
         };
 
         numberOfVoices = std::min (maxVoices, numberOfVoices);
         auto loadedSamplerSound = samplerSound.load();
-        std::vector<ScopedPointer<MPESamplerVoice>> newSamplerVoices;
+        std::vector<std::unique_ptr<MPESamplerVoice>> newSamplerVoices;
         newSamplerVoices.reserve (numberOfVoices);
 
         for (auto i = 0; i != numberOfVoices; ++i)
@@ -2440,8 +2450,8 @@ private:
         {
             jassert (files.size() == 1);
             undoManager.beginNewTransaction();
-            auto readerFactory = new FileAudioFormatReaderFactory (files[0]);
-            dataModel.setSampleReader (ScopedPointer<AudioFormatReaderFactory> (readerFactory),
+            auto r = new FileAudioFormatReaderFactory (files[0]);
+            dataModel.setSampleReader (std::unique_ptr<AudioFormatReaderFactory> (r),
                                        &undoManager);
 
         }
@@ -2485,22 +2495,22 @@ private:
                 setProcessorMPEMode();
         }
 
-        void mpeZoneLayoutChanged (const MPEZoneLayout& value) override
+        void mpeZoneLayoutChanged (const MPEZoneLayout&) override
         {
             setProcessorMPEMode();
         }
 
-        void legacyFirstChannelChanged (int value) override
+        void legacyFirstChannelChanged (int) override
         {
             setProcessorLegacyMode();
         }
 
-        void legacyLastChannelChanged (int value) override
+        void legacyLastChannelChanged (int) override
         {
             setProcessorLegacyMode();
         }
 
-        void legacyPitchbendRangeChanged (int value) override
+        void legacyPitchbendRangeChanged (int) override
         {
             setProcessorLegacyMode();
         }
@@ -2559,12 +2569,12 @@ private:
     };
 
     template <typename Func>
-    static ScopedPointer<Command> make_command (Func&& func)
+    static std::unique_ptr<Command> make_command (Func&& func)
     {
-        return ScopedPointer<TemplateCommand<Func>> (new TemplateCommand<Func> (std::forward<Func> (func)));
+        return std::unique_ptr<TemplateCommand<Func>> (new TemplateCommand<Func> (std::forward<Func> (func)));
     }
 
-    using CommandFifo = MoveOnlyFifo<ScopedPointer<Command>>;
+    using CommandFifo = MoveOnlyFifo<std::unique_ptr<Command>>;
 
     class OutgoingBufferCleaner  : public Timer
     {
@@ -2604,7 +2614,8 @@ private:
     CommandFifo outgoingCommands;
     OutgoingBufferCleaner outgoingBufferCleaner { outgoingCommands };
 
-    ScopedPointer<AudioFormatReaderFactory> readerFactory { new FileAudioFormatReaderFactory (getAssetsDirectory().getChildFile ("cello.wav")) };
+    MemoryBlock mb;
+    std::unique_ptr<AudioFormatReaderFactory> readerFactory;
     AtomicSharedPtr<MPESamplerSound> samplerSound { std::make_shared<MPESamplerSound>() };
     MPESynthesiser synthesiser;
 

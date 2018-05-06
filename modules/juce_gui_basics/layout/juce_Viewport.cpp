@@ -360,6 +360,12 @@ void Viewport::updateVisibleArea()
         if (vBarVisible)  contentArea.setWidth  (getWidth()  - scrollbarWidth);
         if (hBarVisible)  contentArea.setHeight (getHeight() - scrollbarWidth);
 
+        if (! vScrollbarRight  && vBarVisible)
+            contentArea.setX (scrollbarWidth);
+
+        if (! hScrollbarBottom && hBarVisible)
+            contentArea.setY (scrollbarWidth);
+
         if (contentComp == nullptr)
         {
             contentHolder.setBounds (contentArea);
@@ -383,7 +389,7 @@ void Viewport::updateVisibleArea()
     auto& hbar = getHorizontalScrollBar();
     auto& vbar = getVerticalScrollBar();
 
-    hbar.setBounds (0, contentArea.getHeight(), contentArea.getWidth(), scrollbarWidth);
+    hbar.setBounds (contentArea.getX(), hScrollbarBottom ? contentArea.getHeight() : 0, contentArea.getWidth(), scrollbarWidth);
     hbar.setRangeLimits (0.0, contentBounds.getWidth());
     hbar.setCurrentRange (visibleOrigin.x, contentArea.getWidth());
     hbar.setSingleStepSize (singleStepX);
@@ -392,7 +398,7 @@ void Viewport::updateVisibleArea()
     if (canShowHBar && ! hBarVisible)
         visibleOrigin.setX (0);
 
-    vbar.setBounds (contentArea.getWidth(), 0, scrollbarWidth, contentArea.getHeight());
+    vbar.setBounds (vScrollbarRight ? contentArea.getWidth() : 0, contentArea.getY(), scrollbarWidth, contentArea.getHeight());
     vbar.setRangeLimits (0.0, contentBounds.getHeight());
     vbar.setCurrentRange (visibleOrigin.y, contentArea.getHeight());
     vbar.setSingleStepSize (singleStepY);
@@ -597,6 +603,15 @@ bool Viewport::respondsToKey (const KeyPress& key)
 ScrollBar* Viewport::createScrollBarComponent (bool isVertical)
 {
     return new ScrollBar (isVertical);
+}
+
+void Viewport::setScrollBarPosition (bool verticalScrollbarOnRight,
+                                     bool horizontalScrollbarAtBottom)
+{
+    vScrollbarRight  = verticalScrollbarOnRight;
+    hScrollbarBottom = horizontalScrollbarAtBottom;
+
+    resized();
 }
 
 } // namespace juce

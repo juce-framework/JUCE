@@ -395,12 +395,12 @@ Result PIPGenerator::setProjectSettings (ValueTree& jucerTree)
 
     if (useLocalCopy && isJUCEExample (pipFile))
     {
-        auto examplesDirectory = getJUCEExamplesDirectoryPathFromGlobal();
+        auto juceDir = getAppSettings().getStoredPath (Ids::jucePath).toString();
 
-        if (isValidJUCEExamplesDirectory (examplesDirectory))
+        if (juceDir.isNotEmpty() && isValidJUCEExamplesDirectory (File (juceDir).getChildFile ("examples")))
         {
              defines += ((defines.isEmpty() ? "" : " ") + String ("PIP_JUCE_EXAMPLES_DIRECTORY=")
-                         + Base64::toBase64 (examplesDirectory.getFullPathName()));
+                         + Base64::toBase64 (File (juceDir).getChildFile ("examples").getFullPathName()));
         }
         else
         {
@@ -426,10 +426,11 @@ Result PIPGenerator::setProjectSettings (ValueTree& jucerTree)
     else if (type == "AudioProcessor")
     {
         jucerTree.setProperty (Ids::projectType, "audioplug", nullptr);
+        jucerTree.setProperty (Ids::pluginManufacturer, metadata[Ids::vendor], nullptr);
 
-        jucerTree.setProperty (Ids::buildVST,        false, nullptr);
+        jucerTree.setProperty (Ids::buildVST,        true, nullptr);
         jucerTree.setProperty (Ids::buildVST3,       false, nullptr);
-        jucerTree.setProperty (Ids::buildAU,         false, nullptr);
+        jucerTree.setProperty (Ids::buildAU,         true, nullptr);
         jucerTree.setProperty (Ids::buildAUv3,       false, nullptr);
         jucerTree.setProperty (Ids::buildRTAS,       false, nullptr);
         jucerTree.setProperty (Ids::buildAAX,        false, nullptr);
@@ -509,6 +510,9 @@ Array<File> PIPGenerator::replaceRelativeIncludesAndGetFilesToMove()
         {
             auto path = line.fromFirstOccurrenceOf ("#include", false, false);
             path = path.removeCharacters ("\"").trim();
+
+            if (path.startsWith ("<") && path.endsWith (">"))
+                continue;
 
             auto file = pipFile.getParentDirectory().getChildFile (path);
             files.add (file);

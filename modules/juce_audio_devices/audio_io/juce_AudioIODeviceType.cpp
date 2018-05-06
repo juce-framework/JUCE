@@ -70,6 +70,10 @@ AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_ALSA()            
 AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_JACK()            { return nullptr; }
 #endif
 
+#if ! (JUCE_LINUX && JUCE_BELA)
+AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_Bela()            { return nullptr; }
+#endif
+
 #if ! JUCE_ANDROID
 AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_Android()         { return nullptr; }
 #endif

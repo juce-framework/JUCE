@@ -142,6 +142,15 @@
   */
   #include <jack/jack.h>
  #endif
+
+ #if JUCE_BELA
+  /* Got an include error here? If so, you've either not got the bela headers
+     installed, or you've not got your paths set up correctly to find its header
+     files.
+  */
+  #include <Bela.h>
+ #endif
+
  #undef SIZEOF
 
 //==============================================================================
@@ -205,6 +214,10 @@
 
  #if JUCE_JACK
   #include "native/juce_linux_JackAudio.cpp"
+ #endif
+
+ #if JUCE_BELA
+  #include "native/juce_linux_Bela.cpp"
  #endif
 
 //==============================================================================

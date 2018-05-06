@@ -32,7 +32,10 @@
 #include "../CodeEditor/jucer_SourceCodeEditor.h"
 #include "../Utility/UI/jucer_ProjucerLookAndFeel.h"
 #include "../Licenses/jucer_LicenseController.h"
-#include "jucer_ProjucerAnalytics.h"
+
+#if JUCE_MODULE_AVAILABLE_juce_analytics
+ #include "jucer_ProjucerAnalytics.h"
+#endif
 
 struct ChildProcessCache;
 
@@ -174,14 +177,15 @@ private:
     void deleteTemporaryFiles() const noexcept;
 
     void createExamplesPopupMenu (PopupMenu&) noexcept;
-    Array<File> getSortedExampleDirectories() const noexcept;
+    Array<File> getSortedExampleDirectories() noexcept;
     Array<File> getSortedExampleFilesInDirectory (const File&) const noexcept;
 
     bool findWindowAndOpenPIP (const File&);
 
+    File getJUCEExamplesDirectoryPathFromGlobal() noexcept;
     void findAndLaunchExample (int);
-    File findDemoRunnerExecutable() const noexcept;
-    File findDemoRunnerProject() const noexcept;
+    File findDemoRunnerExecutable() noexcept;
+    File findDemoRunnerProject() noexcept;
     void launchDemoRunner();
 
     int numExamples = 0;

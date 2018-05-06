@@ -147,7 +147,7 @@ public:
         vertexShader =
             "attribute vec4 position;\n"
             "attribute vec4 sourceColour;\n"
-            "attribute vec2 texureCoordIn;\n"
+            "attribute vec2 textureCoordIn;\n"
             "\n"
             "uniform mat4 projectionMatrix;\n"
             "uniform mat4 viewMatrix;\n"
@@ -158,7 +158,7 @@ public:
             "void main()\n"
             "{\n"
             "    destinationColour = sourceColour;\n"
-            "    textureCoordOut = texureCoordIn;\n"
+            "    textureCoordOut = textureCoordIn;\n"
             "    gl_Position = projectionMatrix * viewMatrix * position;\n"
             "}\n";
 
@@ -224,10 +224,10 @@ private:
     {
         Attributes (OpenGLContext& openGLContext, OpenGLShaderProgram& shaderProgram)
         {
-            position     .reset (createAttribute (openGLContext, shaderProgram, "position"));
-            normal       .reset (createAttribute (openGLContext, shaderProgram, "normal"));
-            sourceColour .reset (createAttribute (openGLContext, shaderProgram, "sourceColour"));
-            texureCoordIn.reset (createAttribute (openGLContext, shaderProgram, "texureCoordIn"));
+            position      .reset (createAttribute (openGLContext, shaderProgram, "position"));
+            normal        .reset (createAttribute (openGLContext, shaderProgram, "normal"));
+            sourceColour  .reset (createAttribute (openGLContext, shaderProgram, "sourceColour"));
+            textureCoordIn.reset (createAttribute (openGLContext, shaderProgram, "textureCoordIn"));
         }
 
         void enable (OpenGLContext& glContext)
@@ -250,10 +250,10 @@ private:
                 glContext.extensions.glEnableVertexAttribArray (sourceColour->attributeID);
             }
 
-            if (texureCoordIn.get() != nullptr)
+            if (textureCoordIn.get() != nullptr)
             {
-                glContext.extensions.glVertexAttribPointer (texureCoordIn->attributeID, 2, GL_FLOAT, GL_FALSE, sizeof (Vertex), (GLvoid*) (sizeof (float) * 10));
-                glContext.extensions.glEnableVertexAttribArray (texureCoordIn->attributeID);
+                glContext.extensions.glVertexAttribPointer (textureCoordIn->attributeID, 2, GL_FLOAT, GL_FALSE, sizeof (Vertex), (GLvoid*) (sizeof (float) * 10));
+                glContext.extensions.glEnableVertexAttribArray (textureCoordIn->attributeID);
             }
         }
 
@@ -262,10 +262,10 @@ private:
             if (position.get() != nullptr)       glContext.extensions.glDisableVertexAttribArray (position->attributeID);
             if (normal.get() != nullptr)         glContext.extensions.glDisableVertexAttribArray (normal->attributeID);
             if (sourceColour.get() != nullptr)   glContext.extensions.glDisableVertexAttribArray (sourceColour->attributeID);
-            if (texureCoordIn.get() != nullptr)  glContext.extensions.glDisableVertexAttribArray (texureCoordIn->attributeID);
+            if (textureCoordIn.get() != nullptr) glContext.extensions.glDisableVertexAttribArray (textureCoordIn->attributeID);
         }
 
-        ScopedPointer<OpenGLShaderProgram::Attribute> position, normal, sourceColour, texureCoordIn;
+        ScopedPointer<OpenGLShaderProgram::Attribute> position, normal, sourceColour, textureCoordIn;
 
     private:
         static OpenGLShaderProgram::Attribute* createAttribute (OpenGLContext& openGLContext,

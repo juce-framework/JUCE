@@ -65,8 +65,9 @@ public:
         }
     }
 
+    template <typename ...Params>
     static void sendMouseEvent (Component& comp, Component::BailOutChecker& checker,
-                                void (MouseListener::*eventMethod) (const MouseEvent&), const MouseEvent& e)
+                                void (MouseListener::*eventMethod) (Params...), Params... params)
     {
         if (checker.shouldBailOut())
             return;
@@ -75,7 +76,7 @@ public:
         {
             for (int i = list->listeners.size(); --i >= 0;)
             {
-                (list->listeners.getUnchecked(i)->*eventMethod) (e);
+                (list->listeners.getUnchecked(i)->*eventMethod) (params...);
 
                 if (checker.shouldBailOut())
                     return;
@@ -94,45 +95,7 @@ public:
 
                     for (int i = list->numDeepMouseListeners; --i >= 0;)
                     {
-                        (list->listeners.getUnchecked(i)->*eventMethod) (e);
-
-                        if (checker2.shouldBailOut())
-                            return;
-
-                        i = jmin (i, list->numDeepMouseListeners);
-                    }
-                }
-            }
-        }
-    }
-
-    static void sendWheelEvent (Component& comp, Component::BailOutChecker& checker,
-                                const MouseEvent& e, const MouseWheelDetails& wheel)
-    {
-        if (auto* list = comp.mouseListeners.get())
-        {
-            for (int i = list->listeners.size(); --i >= 0;)
-            {
-                list->listeners.getUnchecked(i)->mouseWheelMove (e, wheel);
-
-                if (checker.shouldBailOut())
-                    return;
-
-                i = jmin (i, list->listeners.size());
-            }
-        }
-
-        for (Component* p = comp.parentComponent; p != nullptr; p = p->parentComponent)
-        {
-            if (auto* list = p->mouseListeners.get())
-            {
-                if (list->numDeepMouseListeners > 0)
-                {
-                    BailOutChecker2 checker2 (checker, p);
-
-                    for (int i = list->numDeepMouseListeners; --i >= 0;)
-                    {
-                        list->listeners.getUnchecked(i)->mouseWheelMove (e, wheel);
+                        (list->listeners.getUnchecked(i)->*eventMethod) (params...);
 
                         if (checker2.shouldBailOut())
                             return;
@@ -2303,7 +2266,7 @@ void Component::internalMouseEnter (MouseInputSource source, Point<float> relati
 
     Desktop::getInstance().getMouseListeners().callChecked (checker, [&] (MouseListener& l) { l.mouseEnter (me); });
 
-    MouseListenerList::sendMouseEvent (*this, checker, &MouseListener::mouseEnter, me);
+    MouseListenerList::template sendMouseEvent<const MouseEvent&> (*this, checker, &MouseListener::mouseEnter, me);
 }
 
 void Component::internalMouseExit (MouseInputSource source, Point<float> relativePos, Time time)
@@ -2332,7 +2295,7 @@ void Component::internalMouseExit (MouseInputSource source, Point<float> relativ
 
     Desktop::getInstance().getMouseListeners().callChecked (checker, [&] (MouseListener& l) { l.mouseExit (me); });
 
-    MouseListenerList::sendMouseEvent (*this, checker, &MouseListener::mouseExit, me);
+    MouseListenerList::template sendMouseEvent<const MouseEvent&> (*this, checker, &MouseListener::mouseExit, me);
 }
 
 void Component::internalMouseDown (MouseInputSource source, Point<float> relativePos, Time time,
@@ -2397,7 +2360,7 @@ void Component::internalMouseDown (MouseInputSource source, Point<float> relativ
 
     desktop.getMouseListeners().callChecked (checker, [&] (MouseListener& l) { l.mouseDown (me); });
 
-    MouseListenerList::sendMouseEvent (*this, checker, &MouseListener::mouseDown, me);
+    MouseListenerList::template sendMouseEvent<const MouseEvent&> (*this, checker, &MouseListener::mouseDown, me);
 }
 
 void Component::internalMouseUp (MouseInputSource source, Point<float> relativePos, Time time,
@@ -2433,7 +2396,7 @@ void Component::internalMouseUp (MouseInputSource source, Point<float> relativeP
     auto& desktop = Desktop::getInstance();
     desktop.getMouseListeners().callChecked (checker, [&] (MouseListener& l) { l.mouseUp (me); });
 
-    MouseListenerList::sendMouseEvent (*this, checker, &MouseListener::mouseUp, me);
+    MouseListenerList::template sendMouseEvent<const MouseEvent&> (*this, checker, &MouseListener::mouseUp, me);
 
     if (checker.shouldBailOut())
         return;
@@ -2447,7 +2410,7 @@ void Component::internalMouseUp (MouseInputSource source, Point<float> relativeP
             return;
 
         desktop.mouseListeners.callChecked (checker, [&] (MouseListener& l) { l.mouseDoubleClick (me); });
-        MouseListenerList::sendMouseEvent (*this, checker, &MouseListener::mouseDoubleClick, me);
+        MouseListenerList::template sendMouseEvent<const MouseEvent&> (*this, checker, &MouseListener::mouseDoubleClick, me);
     }
 }
 
@@ -2471,7 +2434,7 @@ void Component::internalMouseDrag (MouseInputSource source, Point<float> relativ
 
         Desktop::getInstance().getMouseListeners().callChecked (checker, [&] (MouseListener& l) { l.mouseDrag (me); });
 
-        MouseListenerList::sendMouseEvent (*this, checker, &MouseListener::mouseDrag, me);
+        MouseListenerList::template sendMouseEvent<const MouseEvent&> (*this, checker, &MouseListener::mouseDrag, me);
     }
 }
 
@@ -2499,7 +2462,7 @@ void Component::internalMouseMove (MouseInputSource source, Point<float> relativ
 
         desktop.getMouseListeners().callChecked (checker, [&] (MouseListener& l) { l.mouseMove (me); });
 
-        MouseListenerList::sendMouseEvent (*this, checker, &MouseListener::mouseMove, me);
+        MouseListenerList::template sendMouseEvent<const MouseEvent&> (*this, checker, &MouseListener::mouseMove, me);
     }
 }
 
@@ -2529,21 +2492,37 @@ void Component::internalMouseWheel (MouseInputSource source, Point<float> relati
         desktop.mouseListeners.callChecked (checker, [&] (MouseListener& l) { l.mouseWheelMove (me, wheel); });
 
         if (! checker.shouldBailOut())
-            MouseListenerList::sendWheelEvent (*this, checker, me, wheel);
+            MouseListenerList::template sendMouseEvent<const MouseEvent&, const MouseWheelDetails&> (*this, checker, &MouseListener::mouseWheelMove, me, wheel);
     }
 }
 
 void Component::internalMagnifyGesture (MouseInputSource source, Point<float> relativePos,
                                         Time time, float amount)
 {
-    if (! isCurrentlyBlockedByAnotherModalComponent())
-    {
-        const MouseEvent me (source, relativePos, source.getCurrentModifiers(), MouseInputSource::invalidPressure,
+    auto& desktop = Desktop::getInstance();
+    BailOutChecker checker (this);
+
+    const MouseEvent me (source, relativePos, source.getCurrentModifiers(), MouseInputSource::invalidPressure,
                              MouseInputSource::invalidOrientation, MouseInputSource::invalidRotation,
                              MouseInputSource::invalidTiltX, MouseInputSource::invalidTiltY,
                              this, this, time, relativePos, time, 0, false);
 
+    if (isCurrentlyBlockedByAnotherModalComponent())
+    {
+        // allow blocked mouse-events to go to global listeners..
+        desktop.mouseListeners.callChecked (checker, [&] (MouseListener& l) { l.mouseMagnify (me, amount); });
+    }
+    else
+    {
         mouseMagnify (me, amount);
+
+        if (checker.shouldBailOut())
+            return;
+
+        desktop.mouseListeners.callChecked (checker, [&] (MouseListener& l) { l.mouseMagnify (me, amount); });
+
+        if (! checker.shouldBailOut())
+            MouseListenerList::template sendMouseEvent<const MouseEvent&, float> (*this, checker, &MouseListener::mouseMagnify, me, amount);
     }
 }
 

@@ -85,7 +85,7 @@ private:
     void createProjectContentCompIfNeeded();
     void setTitleBarIcon();
 
-    void openPIP (PIPGenerator&, StringRef fileName);
+    void openPIP (PIPGenerator&);
 
     void valueChanged (Value&) override;
 

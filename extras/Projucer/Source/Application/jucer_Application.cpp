@@ -603,7 +603,7 @@ void ProjucerApplication::createExamplesPopupMenu (PopupMenu& menu) noexcept
     }
 }
 
-Array<File> ProjucerApplication::getSortedExampleDirectories() const noexcept
+Array<File> ProjucerApplication::getSortedExampleDirectories() noexcept
 {
     Array<File> exampleDirectories;
 
@@ -617,7 +617,8 @@ Array<File> ProjucerApplication::getSortedExampleDirectories() const noexcept
     {
         auto exampleDirectory = iter.getFile();
 
-        if (exampleDirectory.getFileName() != "DemoRunner" && exampleDirectory.getFileName() != "Assets")
+        if (exampleDirectory.getNumberOfChildFiles (File::findFiles | File::ignoreHiddenFiles) > 0
+            && exampleDirectory.getFileName() != "DemoRunner" && exampleDirectory.getFileName() != "Assets")
             exampleDirectories.add (exampleDirectory);
     }
 
@@ -659,6 +660,16 @@ bool ProjucerApplication::findWindowAndOpenPIP (const File& pip)
     return false;
 }
 
+File ProjucerApplication::getJUCEExamplesDirectoryPathFromGlobal() noexcept
+{
+    auto globalPath = getAppSettings().getStoredPath (Ids::jucePath).toString();
+
+    if (globalPath.isNotEmpty())
+        return File (globalPath).getChildFile ("examples");
+
+    return {};
+}
+
 void ProjucerApplication::findAndLaunchExample (int selectedIndex)
 {
     File example;
@@ -686,7 +697,7 @@ void ProjucerApplication::findAndLaunchExample (int selectedIndex)
     Analytics::getInstance()->logEvent ("Example Opened", data, ProjucerAnalyticsEvent::exampleEvent);
 }
 
-File ProjucerApplication::findDemoRunnerExecutable() const noexcept
+File ProjucerApplication::findDemoRunnerExecutable() noexcept
 {
     auto buildsPath = getJUCEExamplesDirectoryPathFromGlobal().getChildFile ("DemoRunner").getChildFile ("Builds");
 
@@ -730,19 +741,25 @@ File ProjucerApplication::findDemoRunnerExecutable() const noexcept
     extension = {};
    #endif
 
-    auto precompiledFile = getJUCEExamplesDirectoryPathFromGlobal().getChildFile ("DemoRunner" + extension);
+    auto juceDir = getAppSettings().getStoredPath (Ids::jucePath).toString();
 
-   #if JUCE_MAC
-    if (precompiledFile.exists())
-   #else
-    if (precompiledFile.existsAsFile())
-   #endif
-        return precompiledFile;
+    if (juceDir.isNotEmpty())
+    {
+        auto precompiledFile = File (juceDir).getChildFile ("DemoRunner" + extension);
+
+       #if JUCE_MAC
+        if (precompiledFile.exists())
+       #else
+        if (precompiledFile.existsAsFile())
+       #endif
+            return precompiledFile;
+    }
+
 
     return {};
 }
 
-File ProjucerApplication::findDemoRunnerProject() const noexcept
+File ProjucerApplication::findDemoRunnerProject() noexcept
 {
     auto buildsPath = getJUCEExamplesDirectoryPathFromGlobal().getChildFile ("DemoRunner").getChildFile ("Builds");
 
@@ -1212,7 +1229,7 @@ void ProjucerApplication::launchForumBrowser()
 
 void ProjucerApplication::launchModulesBrowser()
 {
-    URL modulesLink ("https://juce.com/doc/modules");
+    URL modulesLink ("https://docs.juce.com/master/modules.html");
 
     if (modulesLink.isWellFormed())
         modulesLink.launchInDefaultBrowser();
@@ -1220,7 +1237,7 @@ void ProjucerApplication::launchModulesBrowser()
 
 void ProjucerApplication::launchClassesBrowser()
 {
-    URL classesLink ("https://juce.com/doc/classes");
+    URL classesLink ("https://docs.juce.com/master/classes.html");
 
     if (classesLink.isWellFormed())
         classesLink.launchInDefaultBrowser();
@@ -1228,7 +1245,7 @@ void ProjucerApplication::launchClassesBrowser()
 
 void ProjucerApplication::launchTutorialsBrowser()
 {
-    URL tutorialsLink ("https://juce.com/tutorials");
+    URL tutorialsLink ("https://juce.com/learn/tutorials");
 
     if (tutorialsLink.isWellFormed())
         tutorialsLink.launchInDefaultBrowser();

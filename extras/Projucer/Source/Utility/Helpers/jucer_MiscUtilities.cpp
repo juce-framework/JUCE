@@ -403,16 +403,6 @@ bool isPIPFile (const File& file) noexcept
     return false;
 }
 
-File getJUCEExamplesDirectoryPathFromGlobal() noexcept
-{
-    auto globalPath = getAppSettings().getStoredPath (Ids::jucePath).toString();
-
-    if (globalPath.isNotEmpty())
-        return File (getAppSettings().getStoredPath (Ids::jucePath).toString()).getChildFile ("examples");
-
-    return {};
-}
-
 bool isValidJUCEExamplesDirectory (const File& directory) noexcept
 {
     if (! directory.exists() || ! directory.isDirectory() || ! directory.containsSubDirectories())
