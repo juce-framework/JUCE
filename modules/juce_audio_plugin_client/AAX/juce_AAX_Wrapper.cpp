@@ -935,13 +935,6 @@ namespace AAXClasses
             if (type == AAX_eNotificationEvent_EnteringOfflineMode)  pluginInstance->setNonRealtime (true);
             if (type == AAX_eNotificationEvent_ExitingOfflineMode)   pluginInstance->setNonRealtime (false);
 
-            if (type == AAX_eNotificationEvent_SideChainBeingConnected || type == AAX_eNotificationEvent_SideChainBeingDisconnected)
-            {
-                sidechainDesired.set(type == AAX_eNotificationEvent_SideChainBeingConnected);
-                processingSidechainChange.set (1);
-                triggerAsyncUpdate();
-            }
-
             if (type == AAX_eNotificationEvent_TrackNameChanged)
             {
                 jassert (data);
@@ -969,7 +962,23 @@ namespace AAXClasses
             const int numIns    = pluginInstance->getTotalNumInputChannels();
             const int numOuts   = pluginInstance->getTotalNumOutputChannels();
             const int numMeters = aaxMeters.size();
-            bool isSuspended = pluginInstance->isSuspended() || processingSidechainChange.get() == 1;
+
+            const bool processWantsSidechain = (sideChainBufferIdx != -1);
+            bool isSuspended = pluginInstance->isSuspended();
+
+            if (processingSidechainChange.get() == 0)
+            {
+                if (hasSidechain && canDisableSidechain
+                 && (sidechainDesired.get() != 0) != processWantsSidechain)
+                {
+                    isSuspended = true;
+                    sidechainDesired.set (processWantsSidechain ? 1 : 0);
+                    processingSidechainChange.set (1);
+                    triggerAsyncUpdate();
+                }
+            }
+            else
+                isSuspended = true;
 
             if (isSuspended)
             {
