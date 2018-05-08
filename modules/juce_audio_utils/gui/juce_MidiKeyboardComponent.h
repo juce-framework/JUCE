@@ -133,7 +133,7 @@ public:
     void setScrollButtonWidth (int widthInPixels);
 
     /** Returns the width that was set by setScrollButtonWidth(). */
-    int getScrollButtonWidth() const noexcept                       { return scrollButtonWidth; };
+    int getScrollButtonWidth() const noexcept                       { return scrollButtonWidth; }
 
     /** Changes the keyboard's current direction. */
     void setOrientation (Orientation newOrientation);
