@@ -1602,7 +1602,7 @@ public:
                         .getChildFile ("MacBag").getChildFile ("Libs");
 
                 String libraryPath (config.isDebug() ? "Debug/libPluginLibrary" : "Release/libPluginLibrary");
-                libraryPath += (isUsingClangCppLibrary (config) ? "_libcpp.a" : ".a");
+                libraryPath += "_libcpp.a";
 
                 extraLibs.add (rtasFolder.getChildFile (libraryPath));
             }
