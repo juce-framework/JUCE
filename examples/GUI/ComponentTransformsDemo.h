@@ -53,7 +53,7 @@ class ComponentTransformsDemo  : public Component
 public:
     ComponentTransformsDemo()
     {
-        content.reset (new WidgetsDemo());
+        content.reset (new WidgetsDemo (true));
         addAndMakeVisible (content.get());
         content->setSize (750, 500);
 
