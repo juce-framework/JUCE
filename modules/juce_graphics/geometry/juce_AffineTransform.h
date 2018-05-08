@@ -270,12 +270,10 @@ public:
     */
     float getScaleFactor() const noexcept;
 
-   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
-    /** A ready-to-use identity transform - now depracated.
-        @deprecated If you need an identity transform, just use AffineTransform() or {}.
+    /* A ready-to-use identity transform - now depracated.
+       @deprecated If you need an identity transform, just use AffineTransform() or {}.
     */
-    static const AffineTransform identity;
-   #endif
+    JUCE_DEPRECATED_STATIC (static const AffineTransform identity);
 
     //==============================================================================
     /* The transform matrix is:

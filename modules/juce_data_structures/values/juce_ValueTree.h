@@ -589,12 +589,10 @@ public:
     */
     int getReferenceCount() const noexcept;
 
-   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
-    /** An invalid ValueTree that can be used if you need to return one as an error condition, etc.
+    /* An invalid ValueTree that can be used if you need to return one as an error condition, etc.
         @deprecated If you need an empty ValueTree object, just use ValueTree() or {}.
     */
-    static const ValueTree invalid;
-   #endif
+    JUCE_DEPRECATED_STATIC (static const ValueTree invalid);
 
 private:
     //==============================================================================

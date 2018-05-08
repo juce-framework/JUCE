@@ -235,9 +235,7 @@ private:
     }
 };
 
-#if JUCE_ALLOW_STATIC_NULL_VARIABLES
-const String String::empty;
-#endif
+JUCE_DECLARE_DEPRECATED_STATIC (const String String::empty);
 
 //==============================================================================
 String::String() noexcept  : text (&(emptyString.text))

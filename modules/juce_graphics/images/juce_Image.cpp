@@ -262,9 +262,7 @@ Image::~Image()
 {
 }
 
-#if JUCE_ALLOW_STATIC_NULL_VARIABLES
-const Image Image::null;
-#endif
+JUCE_DECLARE_DEPRECATED_STATIC (const Image Image::null);
 
 int Image::getReferenceCount() const noexcept           { return image == nullptr ? 0 : image->getSharedCount(); }
 int Image::getWidth() const noexcept                    { return image == nullptr ? 0 : image->width; }
