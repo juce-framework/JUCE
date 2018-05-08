@@ -41,6 +41,25 @@ public:
         startTimer (1000 / 30);
     }
 
+    static bool componentContainsAudioProcessorEditor (Component* comp) noexcept
+    {
+        if (dynamic_cast<AudioProcessorEditor*> (comp) != nullptr)
+            return true;
+
+        auto n = comp->getNumChildComponents();
+
+        for (int i = 0; i < n; ++i)
+        {
+            if (auto* child = comp->getChildComponent (i))
+            {
+                if (componentContainsAudioProcessorEditor (child))
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
     void timerCallback() override
     {
         // Workaround for windows not getting mouse-moves...
@@ -55,30 +74,33 @@ public:
             {
                 if (auto* comp = Desktop::getInstance().findComponentAt (screenPos.roundToInt()))
                 {
-                    safeOldComponent = comp;
-
-                    if (auto* peer = comp->getPeer())
+                    if (componentContainsAudioProcessorEditor (comp->getTopLevelComponent()))
                     {
-                        if (! peer->isFocused())
+                        safeOldComponent = comp;
+
+                        if (auto* peer = comp->getPeer())
                         {
-                            peer->handleMouseEvent (MouseInputSource::InputSourceType::mouse, peer->globalToLocal (screenPos), mods,
-                                                    MouseInputSource::invalidPressure, MouseInputSource::invalidOrientation, Time::currentTimeMillis());
+                            if (! peer->isFocused())
+                            {
+                                peer->handleMouseEvent (MouseInputSource::InputSourceType::mouse, peer->globalToLocal (screenPos), mods,
+                                                        MouseInputSource::invalidPressure, MouseInputSource::invalidOrientation, Time::currentTimeMillis());
+                            }
                         }
+
+                        return;
                     }
                 }
-                else
+
+                if (safeOldComponent != nullptr)
                 {
-                    if (safeOldComponent != nullptr)
+                    if (auto* peer = safeOldComponent->getPeer())
                     {
-                        if (auto* peer = safeOldComponent->getPeer())
-                        {
-                            peer->handleMouseEvent (MouseInputSource::InputSourceType::mouse, { -1.0f, -1.0f }, mods,
-                                                    MouseInputSource::invalidPressure, MouseInputSource::invalidOrientation, Time::currentTimeMillis());
-                        }
+                        peer->handleMouseEvent (MouseInputSource::InputSourceType::mouse, { -1.0f, -1.0f }, mods,
+                                                MouseInputSource::invalidPressure, MouseInputSource::invalidOrientation, Time::currentTimeMillis());
                     }
-
-                    safeOldComponent = nullptr;
                 }
+
+                safeOldComponent = nullptr;
             }
         }
     }
