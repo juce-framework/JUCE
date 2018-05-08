@@ -108,6 +108,17 @@ void MidiKeyboardComponent::setKeyWidth (float widthInPixels)
     }
 }
 
+void MidiKeyboardComponent::setScrollButtonWidth (int widthInPixels)
+{
+    jassert (widthInPixels > 0);
+
+    if (scrollButtonWidth != widthInPixels)
+    {
+        scrollButtonWidth = widthInPixels;
+        resized();
+    }
+}
+
 void MidiKeyboardComponent::setOrientation (Orientation newOrientation)
 {
     if (orientation != newOrientation)
@@ -610,7 +621,7 @@ void MidiKeyboardComponent::resized()
 
         if (canScroll)
         {
-            auto scrollButtonW = jmin (12, w / 2);
+            auto scrollButtonW = jmin (scrollButtonWidth, w / 2);
             auto r = getLocalBounds();
 
             if (orientation == horizontalKeyboard)

@@ -135,7 +135,8 @@ public:
     }
 
     //==============================================================================
-    class MSVCBuildConfiguration  : public BuildConfiguration
+    class MSVCBuildConfiguration  : public BuildConfiguration,
+                                    private Value::Listener
     {
     public:
         MSVCBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
@@ -153,14 +154,20 @@ public:
               architectureTypeValue         (config, Ids::winArchitecture,            getUndoManager(), get64BitArchName()),
               fastMathValue                 (config, Ids::fastMath,                   getUndoManager()),
               debugInformationFormatValue   (config, Ids::debugInformationFormat,     getUndoManager(), isDebug() ? "ProgramDatabase" : "None"),
-              pluginBinaryCopyStepValue     (config, Ids::enablePluginBinaryCopyStep, getUndoManager(), false)
+              pluginBinaryCopyStepValue     (config, Ids::enablePluginBinaryCopyStep, getUndoManager(), false),
+              vstBinaryLocation             (config, Ids::vstBinaryLocation,          getUndoManager()),
+              vst3BinaryLocation            (config, Ids::vst3BinaryLocation,         getUndoManager()),
+              rtasBinaryLocation            (config, Ids::rtasBinaryLocation,         getUndoManager()),
+              aaxBinaryLocation             (config, Ids::aaxBinaryLocation,          getUndoManager())
         {
             if (! isDebug())
                 updateOldLTOSetting();
 
-            initialisePluginDefaultValues();
-
+            setPluginBinaryCopyLocationDefaults();
             optimisationLevelValue.setDefault (isDebug() ? optimisationOff : optimiseFull);
+
+            architectureValueToListenTo = architectureTypeValue.getPropertyAsValue();
+            architectureValueToListenTo.addListener (this);
         }
 
         //==============================================================================
@@ -303,6 +310,8 @@ public:
 
         ValueWithDefault vstBinaryLocation, vst3BinaryLocation, rtasBinaryLocation, aaxBinaryLocation;
 
+        Value architectureValueToListenTo;
+
         //==============================================================================
         void updateOldLTOSetting()
         {
@@ -341,17 +350,21 @@ public:
 
         }
 
-        void initialisePluginDefaultValues()
+        void setPluginBinaryCopyLocationDefaults()
         {
-            vstBinaryLocation.referTo  (config, Ids::vstBinaryLocation,  getUndoManager(), ((is64Bit() ? "%ProgramW6432%"
-                                                                                                       : "%programfiles(x86)%") + String ("\\Steinberg\\Vstplugins")));
+            vstBinaryLocation.setDefault  ((is64Bit() ? "%ProgramW6432%" : "%programfiles(x86)%") + String ("\\Steinberg\\Vstplugins"));
 
             auto prefix = is64Bit() ? "%CommonProgramW6432%"
                                     : "%CommonProgramFiles(x86)%";
 
-            vst3BinaryLocation.referTo (config, Ids::vst3BinaryLocation, getUndoManager(), prefix + String ("\\VST3"));
-            rtasBinaryLocation.referTo (config, Ids::rtasBinaryLocation, getUndoManager(), prefix + String ("\\Digidesign\\DAE\\Plug-Ins"));
-            aaxBinaryLocation.referTo  (config, Ids::aaxBinaryLocation,  getUndoManager(), prefix + String ("\\Avid\\Audio\\Plug-Ins"));
+            vst3BinaryLocation.setDefault (prefix + String ("\\VST3"));
+            rtasBinaryLocation.setDefault (prefix + String ("\\Digidesign\\DAE\\Plug-Ins"));
+            aaxBinaryLocation.setDefault  (prefix + String ("\\Avid\\Audio\\Plug-Ins"));
+        }
+
+        void valueChanged (Value&) override
+        {
+            setPluginBinaryCopyLocationDefaults();
         }
     };
 

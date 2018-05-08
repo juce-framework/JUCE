@@ -50,26 +50,8 @@
 
 //==============================================================================
 static void showBubbleMessage (Component& targetComponent, const String& textToShow,
-                               std::unique_ptr<BubbleMessageComponent>& bmc)
-{
-    bmc.reset (new BubbleMessageComponent());
-
-    if (Desktop::canUseSemiTransparentWindows())
-    {
-        bmc->setAlwaysOnTop (true);
-        bmc->addToDesktop (0);
-    }
-    else
-    {
-        targetComponent.getTopLevelComponent()->addChildComponent (bmc.get());
-    }
-
-    AttributedString text (textToShow);
-    text.setJustification (Justification::centred);
-    text.setColour (targetComponent.findColour (TextButton::textColourOffId));
-
-    bmc->showAt (&targetComponent, text, 2000, true, false);
-}
+                               std::unique_ptr<BubbleMessageComponent>& bmc,
+                               bool isRunningComponentTransformDemo);
 
 //==============================================================================
 /** To demonstrate how sliders can have custom snapping applied to their values,
@@ -272,7 +254,7 @@ private:
 //==============================================================================
 struct ButtonsPage   : public Component
 {
-    ButtonsPage()
+    ButtonsPage (bool isRunningComponentTransformDemo)
     {
         {
             auto* group = addToList (new GroupComponent ("group", "Radio buttons"));
@@ -374,14 +356,15 @@ struct ButtonsPage   : public Component
         down.setImage (getImageFromAssets ("juce_icon.png"));
         down.setOverlayColour (Colours::black.withAlpha (0.3f));
 
-        auto popupMessageCallback = [this]
+        auto popupMessageCallback = [this, isRunningComponentTransformDemo]
         {
             if (auto* focused = Component::getCurrentlyFocusedComponent())
                 showBubbleMessage (*focused,
                                    "This is a demo of the BubbleMessageComponent, which lets you pop up a message pointing "
                                    "at a component or somewhere on the screen.\n\n"
                                    "The message bubbles will disappear after a timeout period, or when the mouse is clicked.",
-                                   this->bubbleMessage);
+                                   this->bubbleMessage,
+                                   isRunningComponentTransformDemo);
         };
 
         {
@@ -1277,19 +1260,20 @@ private:
 //==============================================================================
 struct DemoTabbedComponent  : public TabbedComponent
 {
-    DemoTabbedComponent()
+    DemoTabbedComponent (bool isRunningComponenTransformsDemo)
         : TabbedComponent (TabbedButtonBar::TabsAtTop)
     {
         auto colour = findColour (ResizableWindow::backgroundColourId);
 
-        addTab ("Buttons",     colour, new ButtonsPage(),        true);
-        addTab ("Sliders",     colour, new SlidersPage(),        true);
-        addTab ("Toolbars",    colour, new ToolbarDemoComp(),    true);
-        addTab ("Misc",        colour, new MiscPage(),           true);
-        addTab ("Tables",      colour, new TableDemoComponent(), true);
-        addTab ("Drag & Drop", colour, new DragAndDropDemo(),    true);
+        addTab ("Buttons",     colour, new ButtonsPage (isRunningComponenTransformsDemo), true);
+        addTab ("Sliders",     colour, new SlidersPage(),                                 true);
+        addTab ("Toolbars",    colour, new ToolbarDemoComp(),                             true);
+        addTab ("Misc",        colour, new MiscPage(),                                    true);
+        addTab ("Tables",      colour, new TableDemoComponent(),                          true);
+        addTab ("Drag & Drop", colour, new DragAndDropDemo(),                             true);
 
-        getTabbedButtonBar().getTabButton (5)->setExtraComponent (new CustomTabButton(), TabBarButton::afterText);
+        getTabbedButtonBar().getTabButton (5)->setExtraComponent (new CustomTabButton (isRunningComponenTransformsDemo),
+                                                                  TabBarButton::afterText);
     }
 
     // This is a small star button that is put inside one of the tabs. You can
@@ -1297,7 +1281,8 @@ struct DemoTabbedComponent  : public TabbedComponent
     class CustomTabButton  : public Component
     {
     public:
-        CustomTabButton()
+        CustomTabButton (bool isRunningComponenTransformsDemo)
+            : runningComponenTransformsDemo (isRunningComponenTransformsDemo)
         {
             setSize (20, 20);
         }
@@ -1318,9 +1303,11 @@ struct DemoTabbedComponent  : public TabbedComponent
                                "\n"
                                "You can use these to implement things like close-buttons "
                                "or status displays for your tabs.",
-                               bubbleMessage);
+                               bubbleMessage,
+                               runningComponenTransformsDemo);
         }
     private:
+        bool runningComponenTransformsDemo;
         std::unique_ptr<BubbleMessageComponent> bubbleMessage;
     };
 
@@ -1330,7 +1317,8 @@ struct DemoTabbedComponent  : public TabbedComponent
 //==============================================================================
 struct WidgetsDemo   : public Component
 {
-    WidgetsDemo()
+    WidgetsDemo (bool isRunningComponenTransformsDemo = false)
+        : tabs (isRunningComponenTransformsDemo)
     {
         setOpaque (true);
         addAndMakeVisible (tabs);
@@ -1352,3 +1340,31 @@ struct WidgetsDemo   : public Component
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WidgetsDemo)
 };
+
+//==============================================================================
+void showBubbleMessage (Component& targetComponent, const String& textToShow,
+                        std::unique_ptr<BubbleMessageComponent>& bmc,
+                        bool isRunningComponentTransformDemo)
+{
+    bmc.reset (new BubbleMessageComponent());
+
+    if (isRunningComponentTransformDemo)
+    {
+        targetComponent.findParentComponentOfClass<WidgetsDemo>()->addChildComponent (bmc.get());
+    }
+    else if (Desktop::canUseSemiTransparentWindows())
+    {
+        bmc->setAlwaysOnTop (true);
+        bmc->addToDesktop (0);
+    }
+    else
+    {
+        targetComponent.getTopLevelComponent()->addChildComponent (bmc.get());
+    }
+
+    AttributedString text (textToShow);
+    text.setJustification (Justification::centred);
+    text.setColour (targetComponent.findColour (TextButton::textColourOffId));
+
+    bmc->showAt (&targetComponent, text, 2000, true, false);
+}

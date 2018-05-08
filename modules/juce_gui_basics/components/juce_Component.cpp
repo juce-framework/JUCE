@@ -325,7 +325,7 @@ struct Component::ComponentHelpers
     }
 
     template <typename PointOrRect>
-    static PointOrRect convertFromDistantParentSpace (const Component* parent, const Component& target, const PointOrRect& coordInParent)
+    static PointOrRect convertFromDistantParentSpace (const Component* parent, const Component& target, PointOrRect coordInParent)
     {
         auto* directParent = target.getParentComponent();
         jassert (directParent != nullptr);
@@ -2503,9 +2503,9 @@ void Component::internalMagnifyGesture (MouseInputSource source, Point<float> re
     BailOutChecker checker (this);
 
     const MouseEvent me (source, relativePos, source.getCurrentModifiers(), MouseInputSource::invalidPressure,
-                             MouseInputSource::invalidOrientation, MouseInputSource::invalidRotation,
-                             MouseInputSource::invalidTiltX, MouseInputSource::invalidTiltY,
-                             this, this, time, relativePos, time, 0, false);
+                         MouseInputSource::invalidOrientation, MouseInputSource::invalidRotation,
+                         MouseInputSource::invalidTiltX, MouseInputSource::invalidTiltY,
+                         this, this, time, relativePos, time, 0, false);
 
     if (isCurrentlyBlockedByAnotherModalComponent())
     {
@@ -2528,7 +2528,7 @@ void Component::internalMagnifyGesture (MouseInputSource source, Point<float> re
 
 void Component::sendFakeMouseMove() const
 {
-    MouseInputSource mainMouse = Desktop::getInstance().getMainMouseSource();
+    auto mainMouse = Desktop::getInstance().getMainMouseSource();
 
     if (! mainMouse.isDragging())
         mainMouse.triggerFakeMove();
@@ -2870,20 +2870,25 @@ bool Component::isMouseOver (bool includeChildren) const
     {
         auto* c = ms.getComponentUnderMouse();
 
-        if ((c == this || (includeChildren && isParentOf (c)))
-             && c->reallyContains (c->getLocalPoint (nullptr, ms.getScreenPosition().roundToInt()), false)
-             && ((! ms.isTouch()) || ms.isDragging()))
-            return true;
+        if (c == this || (includeChildren && isParentOf (c)))
+            if (ms.isDragging() || ! ms.isTouch())
+                if (c->reallyContains (c->getLocalPoint (nullptr, ms.getScreenPosition()).roundToInt(), false))
+                    return true;
     }
 
     return false;
 }
 
-bool Component::isMouseButtonDown() const
+bool Component::isMouseButtonDown (bool includeChildren) const
 {
     for (auto& ms : Desktop::getInstance().getMouseSources())
-        if (ms.isDragging() && ms.getComponentUnderMouse() == this)
-            return true;
+    {
+        auto* c = ms.getComponentUnderMouse();
+
+        if (c == this || (includeChildren && isParentOf (c)))
+            if (ms.isDragging())
+                return true;
+    }
 
     return false;
 }
@@ -2894,9 +2899,9 @@ bool Component::isMouseOverOrDragging (bool includeChildren) const
     {
         auto* c = ms.getComponentUnderMouse();
 
-        if ((c == this || (includeChildren && isParentOf (c)))
-              && ((! ms.isTouch()) || ms.isDragging()))
-            return true;
+        if (c == this || (includeChildren && isParentOf (c)))
+            if (ms.isDragging() || ! ms.isTouch())
+                return true;
     }
 
     return false;
@@ -2927,8 +2932,8 @@ void Component::removeKeyListener (KeyListener* listenerToRemove)
         keyListeners->removeFirstMatchingValue (listenerToRemove);
 }
 
-bool Component::keyPressed (const KeyPress&)                { return false; }
-bool Component::keyStateChanged (const bool /*isKeyDown*/)  { return false; }
+bool Component::keyPressed (const KeyPress&)            { return false; }
+bool Component::keyStateChanged (bool /*isKeyDown*/)    { return false; }
 
 void Component::modifierKeysChanged (const ModifierKeys& modifiers)
 {
