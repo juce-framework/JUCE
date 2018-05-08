@@ -129,6 +129,12 @@ public:
     /** Returns the width that was set by setKeyWidth(). */
     float getKeyWidth() const noexcept                              { return keyWidth; }
 
+    /** Changes the width used to draw the buttons that scroll the keyboard up/down in octaves. */
+    void setScrollButtonWidth (int widthInPixels);
+
+    /** Returns the width that was set by setScrollButtonWidth(). */
+    int getScrollButtonWidth() const noexcept                       { return scrollButtonWidth; };
+
     /** Changes the keyboard's current direction. */
     void setOrientation (Orientation newOrientation);
 
@@ -396,6 +402,7 @@ private:
     float blackNoteWidthRatio = 0.7f;
     float xOffset = 0;
     float keyWidth = 16.0f;
+    int scrollButtonWidth = 12;
     Orientation orientation;
 
     int midiChannel = 1, midiInChannelMask = 0xffff;
