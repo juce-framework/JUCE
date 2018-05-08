@@ -30,19 +30,18 @@ namespace juce
 /** Creates a graphics context object that will render into the given OpenGL target.
     The caller is responsible for deleting this object when no longer needed.
 */
-LowLevelGraphicsContext* createOpenGLGraphicsContext (OpenGLContext& target,
-                                                      int width, int height);
+LowLevelGraphicsContext* createOpenGLGraphicsContext (OpenGLContext&, int width, int height);
 
-/** Creates a graphics context object that will render into the given OpenGL target.
+/** Creates a graphics context object that will render into the given OpenGL framebuffer.
     The caller is responsible for deleting this object when no longer needed.
 */
-LowLevelGraphicsContext* createOpenGLGraphicsContext (OpenGLContext& context,
-                                                      OpenGLFrameBuffer& target);
+LowLevelGraphicsContext* createOpenGLGraphicsContext (OpenGLContext&, OpenGLFrameBuffer&);
 
-/** Creates a graphics context object that will render into the given OpenGL target.
+/** Creates a graphics context object that will render into the given OpenGL framebuffer,
+    with the given size.
     The caller is responsible for deleting this object when no longer needed.
 */
-LowLevelGraphicsContext* createOpenGLGraphicsContext (OpenGLContext& context,
+LowLevelGraphicsContext* createOpenGLGraphicsContext (OpenGLContext&,
                                                       unsigned int frameBufferID,
                                                       int width, int height);
 
@@ -88,6 +87,11 @@ struct JUCE_API  OpenGLGraphicsContextCustomShader
 
     /** Returns the code that was used to create this object. */
     const String& getFragmentShaderCode() const noexcept           { return code; }
+
+    /** Optional lambda that will be called when the shader is activated, to allow
+        user code to do setup tasks.
+    */
+    std::function<void(OpenGLShaderProgram&)> onShaderActivated;
 
 private:
     String code, hashName;
