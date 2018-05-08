@@ -445,7 +445,9 @@ struct ShaderPrograms  : public ReferenceCountedObject
         }
 
         OpenGLShaderProgram::Attribute positionAttribute, colourAttribute;
-
+        
+        std::function<void(OpenGLShaderProgram*)> onSetUniforms;
+        
     private:
         OpenGLShaderProgram::Uniform screenBounds;
     };
@@ -1329,7 +1331,10 @@ struct StateHelpers
                 activeShader = &shader;
                 shader.program.use();
                 shader.bindAttributes (context);
-
+                
+                if (shader.onSetUniforms)
+                    shader.onSetUniforms (&shader.program);
+                
                 currentBounds = bounds;
                 shader.set2DBounds (bounds.toFloat());
 
@@ -1916,7 +1921,10 @@ void OpenGLGraphicsContextCustomShader::fillRect (LowLevelGraphicsContext& gc, R
 
     if (OpenGLRendering::ShaderContext* sc = dynamic_cast<OpenGLRendering::ShaderContext*> (&gc))
         if (CustomProgram* c = CustomProgram::getOrCreate (gc, hashName, code, errorMessage))
+        {
+            c->onSetUniforms = onSetUniforms;
             sc->fillRectWithCustomShader (*c, area);
+        }
 }
 
 Result OpenGLGraphicsContextCustomShader::checkCompilation (LowLevelGraphicsContext& gc)

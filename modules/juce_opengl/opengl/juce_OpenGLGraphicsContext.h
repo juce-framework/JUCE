@@ -24,6 +24,8 @@
   ==============================================================================
 */
 
+#include <functional>
+
 namespace juce
 {
 
@@ -89,6 +91,8 @@ struct JUCE_API  OpenGLGraphicsContextCustomShader
     /** Returns the code that was used to create this object. */
     const String& getFragmentShaderCode() const noexcept           { return code; }
 
+    std::function<void(OpenGLShaderProgram*)> onSetUniforms;
+    
 private:
     String code, hashName;
 
