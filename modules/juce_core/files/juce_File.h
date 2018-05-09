@@ -1053,9 +1053,9 @@ public:
        Use File::getSeparatorChar() and File::getSeparatorString(), and instead of File::nonexistent,
        just use File() or {}.
     */
-    JUCE_DEPRECATED_STATIC (static const juce_wchar separator);
-    JUCE_DEPRECATED_STATIC (static const StringRef separatorString);
-    JUCE_DEPRECATED_STATIC (static const File nonexistent);
+    JUCE_DEPRECATED_STATIC (static const juce_wchar separator;)
+    JUCE_DEPRECATED_STATIC (static const StringRef separatorString;)
+    JUCE_DEPRECATED_STATIC (static const File nonexistent;)
 
 private:
     //==============================================================================

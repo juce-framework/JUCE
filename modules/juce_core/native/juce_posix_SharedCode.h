@@ -188,10 +188,8 @@ static MaxNumFileHandlesInitialiser maxNumFileHandlesInitialiser;
 #endif
 
 //==============================================================================
-#ifndef JUCE_GCC
- const juce_wchar File::separator = '/';
- const StringRef File::separatorString ("/");
-#endif
+JUCE_DECLARE_DEPRECATED_STATIC (const juce_wchar File::separator = '/';)
+JUCE_DECLARE_DEPRECATED_STATIC (const StringRef File::separatorString ("/");)
 
 juce_wchar File::getSeparatorChar()    { return '/'; }
 StringRef File::getSeparatorString()   { return "/"; }

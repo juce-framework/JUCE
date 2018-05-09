@@ -592,7 +592,7 @@ public:
     /* An invalid ValueTree that can be used if you need to return one as an error condition, etc.
         @deprecated If you need an empty ValueTree object, just use ValueTree() or {}.
     */
-    JUCE_DEPRECATED_STATIC (static const ValueTree invalid);
+    JUCE_DEPRECATED_STATIC (static const ValueTree invalid;)
 
 private:
     //==============================================================================

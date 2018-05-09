@@ -1247,7 +1247,7 @@ public:
         empty string from a function by reference, but if you need to do that, it's easy enough to use
         a function-local static String object and return that, avoiding any order-of-initialisation issues.
     */
-    JUCE_DEPRECATED_STATIC (static const String empty);
+    JUCE_DEPRECATED_STATIC (static const String empty;)
 
 private:
     //==============================================================================
