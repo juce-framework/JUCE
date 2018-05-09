@@ -4,6 +4,10 @@ JUCE breaking changes
 Develop
 =======
 
+
+Version 5.3.2
+=============
+
 Change
 ------
 The behaviour of an UndoManager used by an AudioProcessorValueTreeState has
