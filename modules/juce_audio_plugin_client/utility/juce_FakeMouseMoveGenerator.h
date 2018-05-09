@@ -46,16 +46,9 @@ public:
         if (dynamic_cast<AudioProcessorEditor*> (comp) != nullptr)
             return true;
 
-        auto n = comp->getNumChildComponents();
-
-        for (int i = 0; i < n; ++i)
-        {
-            if (auto* child = comp->getChildComponent (i))
-            {
-                if (componentContainsAudioProcessorEditor (child))
-                    return true;
-            }
-        }
+        for (auto* child : comp->getChildren())
+            if (componentContainsAudioProcessorEditor (child))
+                return true;
 
         return false;
     }
