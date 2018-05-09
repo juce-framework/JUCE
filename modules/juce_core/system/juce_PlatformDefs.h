@@ -275,7 +275,7 @@ namespace juce
 
 #if JUCE_ALLOW_STATIC_NULL_VARIABLES
  #if ! (defined (DOXYGEN) || defined (JUCE_GCC) || (JUCE_MSVC && _MSC_VER <= 1900))
-  #define JUCE_DEPRECATED_STATIC(valueDef)       JUCE_DEPRECATED (valueDef)
+  #define JUCE_DEPRECATED_STATIC(valueDef)       JUCE_DEPRECATED_ATTRIBUTE valueDef
 
   #if JUCE_MSVC
    #define JUCE_DECLARE_DEPRECATED_STATIC(valueDef) \

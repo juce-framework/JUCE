@@ -282,7 +282,7 @@ public:
        empty var from a function by reference, but if you need to do that, it's easy enough to use
        a function-local static var and return that, avoiding any order-of-initialisation issues.
     */
-    JUCE_DEPRECATED_STATIC (static const var null);
+    JUCE_DEPRECATED_STATIC (static const var null;)
 
 private:
     //==============================================================================

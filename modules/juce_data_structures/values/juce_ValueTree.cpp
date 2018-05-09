@@ -579,7 +579,7 @@ ValueTree::ValueTree() noexcept
 {
 }
 
-JUCE_DECLARE_DEPRECATED_STATIC (const ValueTree ValueTree::invalid);
+JUCE_DECLARE_DEPRECATED_STATIC (const ValueTree ValueTree::invalid;)
 
 ValueTree::ValueTree (const Identifier& type)  : object (new ValueTree::SharedObject (type))
 {

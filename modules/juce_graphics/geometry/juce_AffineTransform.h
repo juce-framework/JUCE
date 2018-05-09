@@ -273,7 +273,7 @@ public:
     /* A ready-to-use identity transform - now depracated.
        @deprecated If you need an identity transform, just use AffineTransform() or {}.
     */
-    JUCE_DEPRECATED_STATIC (static const AffineTransform identity);
+    JUCE_DEPRECATED_STATIC (static const AffineTransform identity;)
 
     //==============================================================================
     /* The transform matrix is:

@@ -417,7 +417,7 @@ public:
     /* A null Image object that can be used when you need to return an invalid image.
         @deprecated If you need a default-constructed var, just use Image() or {}.
     */
-    JUCE_DEPRECATED_STATIC (static const Image null);
+    JUCE_DEPRECATED_STATIC (static const Image null;)
 
 private:
     //==============================================================================
