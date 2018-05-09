@@ -3519,6 +3519,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_dsp\containers\juce_SIMDRegister.h">
       <Filter>JUCE Modules\juce_dsp\containers</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\containers\juce_SIMDRegister_Impl.h">
+      <Filter>JUCE Modules\juce_dsp\containers</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_dsp\filter_design\juce_FilterDesign.h">
       <Filter>JUCE Modules\juce_dsp\filter_design</Filter>
     </ClInclude>

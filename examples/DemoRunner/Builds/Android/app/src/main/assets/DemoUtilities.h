@@ -54,6 +54,7 @@ inline File getExamplesDirectory() noexcept
     MemoryOutputStream mo;
 
     auto success = Base64::convertFromBase64 (mo, JUCE_STRINGIFY (PIP_JUCE_EXAMPLES_DIRECTORY));
+    ignoreUnused (success);
     jassert (success);
 
     return mo.toString();
