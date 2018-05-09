@@ -217,7 +217,7 @@ void JucerDocument::setInitialSize (int w, int h)
 //==============================================================================
 bool JucerDocument::isSnapActive (const bool disableIfCtrlKeyDown) const noexcept
 {
-    return snapActive != (disableIfCtrlKeyDown && ModifierKeys::getCurrentModifiers().isCtrlDown());
+    return snapActive != (disableIfCtrlKeyDown && ModifierKeys::currentModifiers.isCtrlDown());
 }
 
 int JucerDocument::snapPosition (int pos) const noexcept

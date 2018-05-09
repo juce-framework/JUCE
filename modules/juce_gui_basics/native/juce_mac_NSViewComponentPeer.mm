@@ -175,6 +175,16 @@ public:
             setAlpha (alpha);
 
         setTitle (component.getName());
+
+        getNativeRealtimeModifiers = []
+        {
+           #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+            if ([NSEvent respondsToSelector: @selector (modifierFlags)])
+                NSViewComponentPeer::updateModifiers ([NSEvent modifierFlags]);
+           #endif
+
+            return ModifierKeys::currentModifiers;
+        };
     }
 
     ~NSViewComponentPeer()
@@ -569,26 +579,26 @@ public:
         if (! Process::isForegroundProcess())
             Process::makeForegroundProcess();
 
-        currentModifiers = currentModifiers.withFlags (getModifierForButtonNumber ([ev buttonNumber]));
+        ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withFlags (getModifierForButtonNumber ([ev buttonNumber]));
         sendMouseEvent (ev);
     }
 
     void redirectMouseUp (NSEvent* ev)
     {
-        currentModifiers = currentModifiers.withoutFlags (getModifierForButtonNumber ([ev buttonNumber]));
+        ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutFlags (getModifierForButtonNumber ([ev buttonNumber]));
         sendMouseEvent (ev);
         showArrowCursorIfNeeded();
     }
 
     void redirectMouseDrag (NSEvent* ev)
     {
-        currentModifiers = currentModifiers.withFlags (getModifierForButtonNumber ([ev buttonNumber]));
+        ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withFlags (getModifierForButtonNumber ([ev buttonNumber]));
         sendMouseEvent (ev);
     }
 
     void redirectMouseMove (NSEvent* ev)
     {
-        currentModifiers = currentModifiers.withoutMouseButtons();
+        ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons();
 
         NSPoint windowPos = [ev locationInWindow];
 
@@ -602,7 +612,7 @@ public:
             sendMouseEvent (ev);
         else
             // moved into another window which overlaps this one, so trigger an exit
-            handleMouseEvent (MouseInputSource::InputSourceType::mouse, { -1.0f, -1.0f }, currentModifiers,
+            handleMouseEvent (MouseInputSource::InputSourceType::mouse, { -1.0f, -1.0f }, ModifierKeys::currentModifiers,
                               getMousePressure (ev), MouseInputSource::invalidOrientation, getMouseTime (ev));
 
         showArrowCursorIfNeeded();
@@ -611,13 +621,13 @@ public:
     void redirectMouseEnter (NSEvent* ev)
     {
         Desktop::getInstance().getMainMouseSource().forceMouseCursorUpdate();
-        currentModifiers = currentModifiers.withoutMouseButtons();
+        ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons();
         sendMouseEvent (ev);
     }
 
     void redirectMouseExit (NSEvent* ev)
     {
-        currentModifiers = currentModifiers.withoutMouseButtons();
+        ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons();
         sendMouseEvent (ev);
     }
 
@@ -706,7 +716,7 @@ public:
     void sendMouseEvent (NSEvent* ev)
     {
         updateModifiers (ev);
-        handleMouseEvent (MouseInputSource::InputSourceType::mouse, getMousePos (ev, view), currentModifiers,
+        handleMouseEvent (MouseInputSource::InputSourceType::mouse, getMousePos (ev, view), ModifierKeys::currentModifiers,
                           getMousePressure (ev), MouseInputSource::invalidOrientation, getMouseTime (ev));
     }
 
@@ -1118,7 +1128,7 @@ public:
         if ((flags & NSEventModifierFlagOption) != 0)       m |= ModifierKeys::altModifier;
         if ((flags & NSEventModifierFlagCommand) != 0)      m |= ModifierKeys::commandModifier;
 
-        currentModifiers = currentModifiers.withOnlyMouseButtons().withFlags (m);
+        ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withOnlyMouseButtons().withFlags (m);
     }
 
     static void updateKeysDown (NSEvent* ev, bool isKeyDown)
@@ -1388,7 +1398,6 @@ public:
     RectangleList<float> deferredRepaints;
     uint32 lastRepaintTime;
 
-    static ModifierKeys currentModifiers;
     static ComponentPeer* currentlyFocusedPeer;
     static Array<int> keysCurrentlyDown;
     static int insideToFrontCall;
@@ -2042,7 +2051,6 @@ NSWindow* NSViewComponentPeer::createWindowInstance()
 
 
 //==============================================================================
-ModifierKeys NSViewComponentPeer::currentModifiers;
 ComponentPeer* NSViewComponentPeer::currentlyFocusedPeer = nullptr;
 Array<int> NSViewComponentPeer::keysCurrentlyDown;
 
@@ -2062,23 +2070,6 @@ bool KeyPress::isKeyCurrentlyDown (int keyCode)
 
     return false;
 }
-
-
-ModifierKeys ModifierKeys::getCurrentModifiersRealtime() noexcept
-{
-   #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
-    if ([NSEvent respondsToSelector: @selector (modifierFlags)])
-        NSViewComponentPeer::updateModifiers ((NSUInteger) [NSEvent modifierFlags]);
-   #endif
-
-    return NSViewComponentPeer::currentModifiers;
-}
-
-void ModifierKeys::updateCurrentModifiers() noexcept
-{
-    currentModifiers = NSViewComponentPeer::currentModifiers;
-}
-
 
 //==============================================================================
 bool MouseInputSource::SourceList::addSource()

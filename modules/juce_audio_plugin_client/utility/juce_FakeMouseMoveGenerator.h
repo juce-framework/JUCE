@@ -68,7 +68,7 @@ public:
         if (screenPos != lastScreenPos)
         {
             lastScreenPos = screenPos;
-            auto mods = ModifierKeys::getCurrentModifiers();
+            auto mods = ModifierKeys::currentModifiers;
 
             if (! mods.isAnyMouseButtonDown())
             {

@@ -77,7 +77,7 @@ bool KeyPress::operator!= (int otherKeyCode) const noexcept         { return ! o
 bool KeyPress::isCurrentlyDown() const
 {
     return isKeyCurrentlyDown (keyCode)
-            && (ModifierKeys::getCurrentModifiers().getRawFlags() & ModifierKeys::allKeyboardModifiers)
+            && (ModifierKeys::currentModifiers.getRawFlags() & ModifierKeys::allKeyboardModifiers)
                   == (mods.getRawFlags() & ModifierKeys::allKeyboardModifiers);
 }
 

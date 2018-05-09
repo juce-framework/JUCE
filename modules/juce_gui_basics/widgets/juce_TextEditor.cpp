@@ -2057,7 +2057,7 @@ bool TextEditor::keyStateChanged (const bool isKeyDown)
         return false;
 
     // (overridden to avoid forwarding key events to the parent)
-    return ! ModifierKeys::getCurrentModifiers().isCommandDown();
+    return ! ModifierKeys::currentModifiers.isCommandDown();
 }
 
 //==============================================================================

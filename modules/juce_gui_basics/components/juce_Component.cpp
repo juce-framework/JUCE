@@ -2901,7 +2901,7 @@ bool Component::isMouseOverOrDragging (bool includeChildren) const
 
 bool JUCE_CALLTYPE Component::isMouseButtonDownAnywhere() noexcept
 {
-    return ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown();
+    return ModifierKeys::currentModifiers.isAnyMouseButtonDown();
 }
 
 Point<int> Component::getMouseXYRelative() const
@@ -2936,7 +2936,7 @@ void Component::modifierKeysChanged (const ModifierKeys& modifiers)
 void Component::internalModifierKeysChanged()
 {
     sendFakeMouseMove();
-    modifierKeysChanged (ModifierKeys::getCurrentModifiers());
+    modifierKeysChanged (ModifierKeys::currentModifiers);
 }
 
 //==============================================================================

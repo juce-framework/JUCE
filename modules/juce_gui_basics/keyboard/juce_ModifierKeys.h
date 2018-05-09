@@ -186,40 +186,27 @@ public:
     int getNumMouseButtonsDown() const noexcept;
 
     //==============================================================================
+    /** This object represents the last-known state of the keyboard and mouse buttons. */
+    static ModifierKeys currentModifiers;
+
     /** Creates a ModifierKeys object to represent the last-known state of the
         keyboard and mouse buttons.
 
-        @see getCurrentModifiersRealtime
-    */
-    static ModifierKeys getCurrentModifiers() noexcept;
+        This method is here for backwards compatibility and there's no need to call it anymore,
+        you should use the public currentModifiers member directly.
+     */
+    static ModifierKeys getCurrentModifiers() noexcept                  { return currentModifiers; }
 
     /** Creates a ModifierKeys object to represent the current state of the
         keyboard and mouse buttons.
 
-        This isn't often needed and isn't recommended, but will actively check all the
-        mouse and key states rather than just returning their last-known state like
-        getCurrentModifiers() does.
-
-        This is only needed in special circumstances for up-to-date modifier information
-        at times when the app's event loop isn't running normally.
-
-        Another reason to avoid this method is that it's not stateless, and calling it may
-        update the value returned by getCurrentModifiers(), which could cause subtle changes
-        in the behaviour of some components.
+        This method is here for backwards compatibility and you should call ComponentPeer::getCurrentModifiersRealtime()
+        instead (which is what this method now does).
     */
     static ModifierKeys getCurrentModifiersRealtime() noexcept;
 
-
 private:
-    //==============================================================================
     int flags;
-
-    friend class ComponentPeer;
-    friend class MouseInputSource;
-    friend class MouseInputSourceInternal;
-
-    static ModifierKeys currentModifiers;
-    static void updateCurrentModifiers() noexcept;
 };
 
 } // namespace juce

@@ -502,7 +502,7 @@ public:
         lastMousePos = localToGlobal (pos);
 
         // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before.
-        handleMouseEvent (MouseInputSource::InputSourceType::touch, pos, currentModifiers.withoutMouseButtons(),
+        handleMouseEvent (MouseInputSource::InputSourceType::touch, pos, ModifierKeys::currentModifiers.withoutMouseButtons(),
                           MouseInputSource::invalidPressure, MouseInputSource::invalidOrientation, time, {}, index);
 
         if (isValidPeer (this))
@@ -516,8 +516,8 @@ public:
 
         jassert (index < 64);
         touchesDown = (touchesDown | (1 << (index & 63)));
-        currentModifiers = currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
-        handleMouseEvent (MouseInputSource::InputSourceType::touch, pos, currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier),
+        ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
+        handleMouseEvent (MouseInputSource::InputSourceType::touch, pos, ModifierKeys::currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier),
                           MouseInputSource::invalidPressure, MouseInputSource::invalidOrientation, time, {}, index);
     }
 
@@ -530,9 +530,9 @@ public:
         touchesDown = (touchesDown & ~(1 << (index & 63)));
 
         if (touchesDown == 0)
-            currentModifiers = currentModifiers.withoutMouseButtons();
+            ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons();
 
-        handleMouseEvent (MouseInputSource::InputSourceType::touch, pos, currentModifiers.withoutMouseButtons(), MouseInputSource::invalidPressure,
+        handleMouseEvent (MouseInputSource::InputSourceType::touch, pos, ModifierKeys::currentModifiers.withoutMouseButtons(), MouseInputSource::invalidPressure,
                           MouseInputSource::invalidOrientation, time, {}, index);
     }
 
@@ -720,7 +720,6 @@ public:
     }
 
     //==============================================================================
-    static ModifierKeys currentModifiers;
     static Point<float> lastMousePos;
     static int64 touchesDown;
 
@@ -788,7 +787,6 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AndroidComponentPeer)
 };
 
-ModifierKeys AndroidComponentPeer::currentModifiers = 0;
 Point<float> AndroidComponentPeer::lastMousePos;
 int64 AndroidComponentPeer::touchesDown = 0;
 AndroidComponentPeer* AndroidComponentPeer::frontWindow = nullptr;
@@ -894,16 +892,6 @@ bool KeyPress::isKeyCurrentlyDown (const int /*keyCode*/)
 {
     // TODO
     return false;
-}
-
-void ModifierKeys::updateCurrentModifiers() noexcept
-{
-    currentModifiers = AndroidComponentPeer::currentModifiers;
-}
-
-ModifierKeys ModifierKeys::getCurrentModifiersRealtime() noexcept
-{
-    return AndroidComponentPeer::currentModifiers;
 }
 
 JUCE_API void JUCE_CALLTYPE Process::hide()

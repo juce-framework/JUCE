@@ -47,7 +47,7 @@ public:
 
     ModifierKeys getCurrentModifiers() const noexcept
     {
-        return ModifierKeys::getCurrentModifiers().withoutMouseButtons().withFlags (buttonState.getRawFlags());
+        return ModifierKeys::currentModifiers.withoutMouseButtons().withFlags (buttonState.getRawFlags());
     }
 
     ComponentPeer* getPeer() noexcept
@@ -255,8 +255,6 @@ public:
 
     void setPeer (ComponentPeer& newPeer, Point<float> screenPos, Time time)
     {
-        ModifierKeys::updateCurrentModifiers();
-
         if (&newPeer != lastPeer)
         {
             setComponentUnderMouse (nullptr, screenPos, time);
@@ -760,7 +758,7 @@ struct MouseInputSource::SourceList  : public Timer
         {
             // NB: when doing auto-repeat, we need to force an update of the current position and button state,
             // because on some OSes the queue can get overloaded with messages so that mouse-events don't get through..
-            if (s->isDragging() && ModifierKeys::getCurrentModifiersRealtime().isAnyMouseButtonDown())
+            if (s->isDragging() && ComponentPeer::getCurrentModifiersRealtime().isAnyMouseButtonDown())
             {
                 s->lastScreenPos = s->getRawScreenPosition();
                 s->triggerFakeMove();

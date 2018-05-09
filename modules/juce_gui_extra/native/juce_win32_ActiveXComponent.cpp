@@ -216,7 +216,7 @@ namespace ActiveXHelpers
                 peer->handleMouseEvent (MouseInputSource::InputSourceType::mouse,
                                         { (float) (GET_X_LPARAM (lParam) + activeXRect.left - peerRect.left),
                                           (float) (GET_Y_LPARAM (lParam) + activeXRect.top  - peerRect.top) },
-                                        ModifierKeys::getCurrentModifiersRealtime(),
+                                        ComponentPeer::getCurrentModifiersRealtime(),
                                         MouseInputSource::invalidPressure,
                                         MouseInputSource::invalidOrientation,
                                         getMouseEventTime());

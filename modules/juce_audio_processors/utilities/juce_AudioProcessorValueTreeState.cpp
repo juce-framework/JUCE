@@ -528,7 +528,7 @@ struct AudioProcessorValueTreeState::SliderAttachment::Pimpl  : private Attached
     {
         const ScopedLock selfCallbackLock (selfCallbackMutex);
 
-        if ((! ignoreCallbacks) && (! ModifierKeys::getCurrentModifiers().isRightButtonDown()))
+        if ((! ignoreCallbacks) && (! ModifierKeys::currentModifiers.isRightButtonDown()))
             setNewUnnormalisedValue ((float) s->getValue());
     }
 

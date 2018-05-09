@@ -247,7 +247,7 @@ void Desktop::sendMouseMove()
             auto pos = target->getLocalPoint (nullptr, lastFakeMouseMove);
             auto now = Time::getCurrentTime();
 
-            const MouseEvent me (getMainMouseSource(), pos, ModifierKeys::getCurrentModifiers(), MouseInputSource::invalidPressure,
+            const MouseEvent me (getMainMouseSource(), pos, ModifierKeys::currentModifiers, MouseInputSource::invalidPressure,
                                  MouseInputSource::invalidOrientation, MouseInputSource::invalidRotation,
                                  MouseInputSource::invalidTiltX, MouseInputSource::invalidTiltY,
                                  target, target, now, pos, now, 0, false);
