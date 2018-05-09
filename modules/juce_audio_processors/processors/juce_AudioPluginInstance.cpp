@@ -38,6 +38,15 @@ String AudioPluginInstance::getParameterID (int parameterIndex)
 {
     assertOnceOnDeprecatedMethodUse();
 
+    // Currently there is no corresponding method available in the
+    // AudioProcessorParameter class, and the previous behaviour of JUCE's
+    // plug-in hosting code simply returns a string version of the index; to
+    // maintain backwards compatibilty you should perform the operation below
+    // this comment. However the caveat is that for plug-ins which change their
+    // number of parameters dynamically at runtime you cannot rely upon the
+    // returned parameter ID mapping to the correct parameter. A comprehensive
+    // solution to this problem requires some additional work in JUCE's hosting
+    // code.
     return String (parameterIndex);
 }
 
