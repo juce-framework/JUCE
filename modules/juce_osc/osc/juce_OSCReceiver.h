@@ -42,8 +42,11 @@ class JUCE_API  OSCReceiver
 {
 public:
     //==============================================================================
-    /** Constructs a new OSCReceiver. */
+    /** Creates an OSCReceiver. */
     OSCReceiver();
+
+    /** Creates an OSCReceiver with a specific name for its thread. */
+    OSCReceiver (const String& threadName);
 
     /** Destructor. */
     ~OSCReceiver();
