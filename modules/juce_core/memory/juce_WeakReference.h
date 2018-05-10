@@ -143,7 +143,7 @@ public:
         JUCE_DECLARE_NON_COPYABLE (SharedPointer)
     };
 
-    typedef ReferenceCountedObjectPtr<SharedPointer> SharedRef;
+    using SharedRef = ReferenceCountedObjectPtr<SharedPointer>;
 
     //==============================================================================
     /**

@@ -90,13 +90,13 @@ public:
 
     //==============================================================================
     /** Provides the type of scoped lock to use with a CriticalSection. */
-    typedef GenericScopedLock <CriticalSection>       ScopedLockType;
+    using ScopedLockType = GenericScopedLock<CriticalSection>;
 
     /** Provides the type of scoped unlocker to use with a CriticalSection. */
-    typedef GenericScopedUnlock <CriticalSection>     ScopedUnlockType;
+    using ScopedUnlockType = GenericScopedUnlock<CriticalSection>;
 
     /** Provides the type of scoped try-locker to use with a CriticalSection. */
-    typedef GenericScopedTryLock <CriticalSection>    ScopedTryLockType;
+    using ScopedTryLockType = GenericScopedTryLock<CriticalSection>;
 
 
 private:
@@ -148,7 +148,7 @@ public:
     };
 
     /** A dummy scoped-unlocker type to use with a dummy critical section. */
-    typedef ScopedLockType ScopedUnlockType;
+    using ScopedUnlockType = ScopedLockType;
 
 private:
     JUCE_DECLARE_NON_COPYABLE (DummyCriticalSection)

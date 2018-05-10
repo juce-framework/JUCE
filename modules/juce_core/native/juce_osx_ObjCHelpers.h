@@ -211,7 +211,7 @@ static NSRect makeNSRect (const RectangleType& r) noexcept
 template <typename ReturnValue, typename... Params>
 static inline ReturnValue ObjCMsgSendSuper (struct objc_super* s, SEL sel, Params... params)
 {
-    typedef ReturnValue (*SuperFn)(struct objc_super*, SEL, Params...);
+    using SuperFn = ReturnValue (*)(struct objc_super*, SEL, Params...);
     SuperFn fn = reinterpret_cast<SuperFn> (objc_msgSendSuper);
     return fn (s, sel, params...);
 }

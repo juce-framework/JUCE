@@ -761,7 +761,7 @@ void Direct2DLowLevelGraphicsContext::drawImage (const Image& image, const Affin
     pimpl->renderingTarget->SetTransform (D2D1::IdentityMatrix());
 }
 
-void Direct2DLowLevelGraphicsContext::drawLine (const Line <float>& line)
+void Direct2DLowLevelGraphicsContext::drawLine (const Line<float>& line)
 {
     // xxx doesn't seem to be correctly aligned, may need nudging by 0.5 to match the software renderer's behaviour
     pimpl->renderingTarget->SetTransform (transformToMatrix (currentState->transform));

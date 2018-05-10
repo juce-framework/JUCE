@@ -141,7 +141,7 @@ public:
 
     //==============================================================================
     /** This type will be double if the Point's type is double, otherwise it will be float. */
-    typedef typename TypeHelpers::SmallestFloatType<ValueType>::type FloatType;
+    using FloatType = typename TypeHelpers::SmallestFloatType<ValueType>::type;
 
     //==============================================================================
     /** Returns the straight-line distance between this point and the origin. */

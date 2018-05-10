@@ -202,7 +202,7 @@ public:
     /** A function type for use in setApplicationCrashHandler(). The parameter will contain
         platform-specific data about the crash.
     */
-    typedef void (*CrashHandlerFunction) (void*);
+    using CrashHandlerFunction = void (*) (void*);
 
     /** Sets up a global callback function that will be called if the application
         executes some kind of illegal instruction.

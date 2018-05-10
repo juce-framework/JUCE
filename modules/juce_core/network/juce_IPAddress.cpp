@@ -260,11 +260,11 @@ static void addAddress (const sockaddr_in6* addr_in, Array<IPAddress>& result)
 {
     in6_addr addr = addr_in->sin6_addr;
 
-    typedef union
+    union ByteUnion
     {
         uint16 combined;
         uint8 split[2];
-    } ByteUnion;
+    };
 
     ByteUnion temp;
     uint16 arr[8];

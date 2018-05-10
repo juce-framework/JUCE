@@ -97,14 +97,14 @@ public:
 
 private:
     /** Union used to split a 16-bit unsigned integer into 2 8-bit unsigned integers or vice-versa */
-    typedef union
+    union ByteUnion
     {
         uint16 combined;
         uint8 split[2];
-    } ByteUnion;
+    };
 
     /** Method used to zero the remaining bytes of the address array when creating IPv4 addresses */
-    void zeroUnusedBytes()
+    void zeroUnusedBytes() noexcept
     {
         for (int i = 4; i < 16; ++i)
             address[i] = 0;

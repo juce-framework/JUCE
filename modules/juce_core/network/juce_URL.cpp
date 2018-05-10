@@ -61,10 +61,10 @@ struct FallbackDownloadTask  : public URL::DownloadTask,
             if (listener != nullptr)
                 listener->progress (this, downloaded, contentLength);
 
-            const int max = jmin ((int) bufferSize, contentLength < 0 ? std::numeric_limits<int>::max()
-                                                                      : static_cast<int> (contentLength - downloaded));
+            auto max = jmin ((int) bufferSize, contentLength < 0 ? std::numeric_limits<int>::max()
+                                                                 : static_cast<int> (contentLength - downloaded));
 
-            const int actual = stream->read (buffer.get(), max);
+            auto actual = stream->read (buffer.get(), max);
 
             if (actual < 0 || threadShouldExit() || stream->isError())
                 break;
@@ -186,8 +186,8 @@ void URL::init()
     {
         do
         {
-            const int nextAmp   = url.indexOfChar (i + 1, '&');
-            const int equalsPos = url.indexOfChar (i + 1, '=');
+            auto nextAmp   = url.indexOfChar (i + 1, '&');
+            auto equalsPos = url.indexOfChar (i + 1, '=');
 
             if (nextAmp < 0)
             {
@@ -324,7 +324,7 @@ void URL::addParameter (const String& name, const String& value)
     parameterValues.add (value);
 }
 
-String URL::toString (const bool includeGetParameters) const
+String URL::toString (bool includeGetParameters) const
 {
     if (includeGetParameters && parameterNames.size() > 0)
         return url + "?" + URLHelpers::getMangledParameters (*this);
@@ -653,14 +653,14 @@ private:
 #endif
 
 //==============================================================================
-InputStream* URL::createInputStream (const bool usePostCommand,
-                                     OpenStreamProgressCallback* const progressCallback,
-                                     void* const progressCallbackContext,
+InputStream* URL::createInputStream (bool usePostCommand,
+                                     OpenStreamProgressCallback* progressCallback,
+                                     void* progressCallbackContext,
                                      String headers,
-                                     const int timeOutMs,
-                                     StringPairArray* const responseHeaders,
+                                     int timeOutMs,
+                                     StringPairArray* responseHeaders,
                                      int* statusCode,
-                                     const int numRedirectsToFollow,
+                                     int numRedirectsToFollow,
                                      String httpRequestCmd) const
 {
     if (isLocalFile())
@@ -684,10 +684,10 @@ InputStream* URL::createInputStream (const bool usePostCommand,
 
         bool postDataSendProgress (WebInputStream&, int bytesSent, int totalBytes) override
         {
-            return callback(data, bytesSent, totalBytes);
+            return callback (data, bytesSent, totalBytes);
         }
 
-        OpenStreamProgressCallback* const callback;
+        OpenStreamProgressCallback* callback;
         void* const data;
 
         // workaround a MSVC 2013 compiler warning
@@ -858,8 +858,8 @@ String URL::removeEscapeChars (const String& s)
     {
         if (utf8.getUnchecked(i) == '%')
         {
-            const int hexDigit1 = CharacterFunctions::getHexDigitValue ((juce_wchar) (uint8) utf8 [i + 1]);
-            const int hexDigit2 = CharacterFunctions::getHexDigitValue ((juce_wchar) (uint8) utf8 [i + 2]);
+            auto hexDigit1 = CharacterFunctions::getHexDigitValue ((juce_wchar) (uint8) utf8 [i + 1]);
+            auto hexDigit2 = CharacterFunctions::getHexDigitValue ((juce_wchar) (uint8) utf8 [i + 2]);
 
             if (hexDigit1 >= 0 && hexDigit2 >= 0)
             {
