@@ -179,6 +179,7 @@ public:
             case ProjectType::Target::RTASPlugIn:
             case ProjectType::Target::AudioUnitPlugIn:
             case ProjectType::Target::DynamicLibrary:
+            case ProjectType::Target::UnityPlugIn:
                 return ! iOS;
             default:
                 break;
@@ -442,7 +443,8 @@ protected:
               vst3BinaryLocation           (config, Ids::vst3BinaryLocation,           getUndoManager(), "$(HOME)/Library/Audio/Plug-Ins/VST3/"),
               auBinaryLocation             (config, Ids::auBinaryLocation,             getUndoManager(), "$(HOME)/Library/Audio/Plug-Ins/Components/"),
               rtasBinaryLocation           (config, Ids::rtasBinaryLocation,           getUndoManager(), "/Library/Application Support/Digidesign/Plug-Ins/"),
-              aaxBinaryLocation            (config, Ids::aaxBinaryLocation,            getUndoManager(), "/Library/Application Support/Avid/Audio/Plug-Ins/")
+              aaxBinaryLocation            (config, Ids::aaxBinaryLocation,            getUndoManager(), "/Library/Application Support/Avid/Audio/Plug-Ins/"),
+              unityPluginBinaryLocation    (config, Ids::unityPluginBinaryLocation,    getUndoManager())
         {
             updateOldPluginBinaryLocations();
             updateOldSDKDefaults();
@@ -539,6 +541,7 @@ protected:
         String getAUBinaryLocationString() const                { return auBinaryLocation.get(); }
         String getRTASBinaryLocationString() const              { return rtasBinaryLocation.get();}
         String getAAXBinaryLocationString() const               { return aaxBinaryLocation.get();}
+        String getUnityPluginBinaryLocationString() const       { return unityPluginBinaryLocation.get(); }
 
     private:
         //==========================================================================
@@ -547,7 +550,8 @@ protected:
         ValueWithDefault osxSDKVersion, osxDeploymentTarget, iosDeploymentTarget, osxArchitecture,
                          customXcodeFlags, plistPreprocessorDefinitions, codeSignIdentity,
                          fastMathEnabled, stripLocalSymbolsEnabled, pluginBinaryCopyStepEnabled,
-                         vstBinaryLocation, vst3BinaryLocation, auBinaryLocation, rtasBinaryLocation, aaxBinaryLocation;
+                         vstBinaryLocation, vst3BinaryLocation, auBinaryLocation, rtasBinaryLocation,
+                         aaxBinaryLocation, unityPluginBinaryLocation;
 
         //==========================================================================
         void addXcodePluginInstallPathProperties (PropertyListBuilder& props)
@@ -583,6 +587,11 @@ protected:
                 props.add (new TextPropertyComponentWithEnablement (aaxBinaryLocation, pluginBinaryCopyStepEnabled, "AAX Binary Location",
                                                                     1024, false),
                            "The folder in which the compiled AAX binary should be placed.");
+
+            if (project.shouldBuildUnityPlugin())
+                props.add (new TextPropertyComponentWithEnablement (unityPluginBinaryLocation, pluginBinaryCopyStepEnabled, "Unity Binary Location",
+                                                                    1024, false),
+                           "The folder in which the compiled Unity plugin binary and associated C# GUI script should be placed.");
         }
 
         void updateOldPluginBinaryLocations()
@@ -734,6 +743,15 @@ public:
                     xcodeCopyToProductInstallPathAfterBuild = true;
                     break;
 
+                case UnityPlugIn:
+                    xcodePackageType = "BNDL";
+                    xcodeBundleSignature = "????";
+                    xcodeFileType = "wrapper.cfbundle";
+                    xcodeBundleExtension = ".bundle";
+                    xcodeProductType = "com.apple.product-type.bundle";
+                    xcodeCopyToProductInstallPathAfterBuild = true;
+                    break;
+
                 case SharedCodeTarget:
                     xcodeFileType = "archive.ar";
                     xcodeBundleExtension = ".a";
@@ -822,7 +840,7 @@ public:
 
             if (ProjectExporter::BuildConfiguration::Ptr config = owner.getConfiguration(0))
             {
-                auto productName = owner.replacePreprocessorTokens (*config, config->getTargetBinaryNameString());
+                auto productName = owner.replacePreprocessorTokens (*config, config->getTargetBinaryNameString (type == UnityPlugIn));
 
                 if (xcodeFileType == "archive.ar")
                     productName = getStaticLibbedFilename (productName);
@@ -995,6 +1013,7 @@ public:
                 return s;
             }
 
+            s.set ("PRODUCT_NAME", owner.replacePreprocessorTokens (config, config.getTargetBinaryNameString (type == UnityPlugIn)).quoted());
             s.set ("PRODUCT_BUNDLE_IDENTIFIER", getBundleIdentifier());
 
             auto arch = (! owner.isiOS() && type == Target::AudioUnitv3PlugIn) ? osxArch_64Bit
@@ -1231,6 +1250,7 @@ public:
                 case AudioUnitPlugIn:   return config.isPluginBinaryCopyStepEnabled() ? config.getAUBinaryLocationString() : String();
                 case RTASPlugIn:        return config.isPluginBinaryCopyStepEnabled() ? config.getRTASBinaryLocationString() : String();
                 case AAXPlugIn:         return config.isPluginBinaryCopyStepEnabled() ? config.getAAXBinaryLocationString() : String();
+                case UnityPlugIn:       return config.isPluginBinaryCopyStepEnabled() ? config.getUnityPluginBinaryLocationString() : String();
                 case SharedCodeTarget:  return owner.isiOS() ? "@executable_path/Frameworks" : "@executable_path/../Frameworks";
                 default:                return {};
             }
@@ -1927,6 +1947,10 @@ private:
                 && project.shouldBuildStandalonePlugin() && target->type == XcodeTarget::StandalonePlugIn)
                 embedAppExtension();
 
+            if (project.getProjectType().isAudioPlugin() && project.shouldBuildUnityPlugin()
+                && target->type == XcodeTarget::UnityPlugIn)
+                embedUnityScript();
+
             addTargetObject (*target);
         }
     }
@@ -1941,6 +1965,25 @@ private:
                 files.add (auv3Target->mainBuildProductID);
                 standaloneTarget->addCopyFilesPhase ("Embed App Extensions", files, kPluginsFolder);
             }
+        }
+    }
+
+    void embedUnityScript() const
+    {
+        if (auto* unityTarget = getTargetOfType (XcodeTarget::UnityPlugIn))
+        {
+            RelativePath scriptPath (getProject().getGeneratedCodeFolder().getChildFile (getProject().getUnityScriptName()),
+                                     getTargetFolder(),
+                                     RelativePath::buildTargetFolder);
+
+            auto path = scriptPath.toUnixStyle();
+            auto refID = addFileReference (path);
+            auto fileID = addBuildFile (path, refID, false, false);
+
+            resourceIDs.add (fileID);
+            resourceFileRefs.add (refID);
+
+            unityTarget->addCopyFilesPhase ("Embed Unity Script", fileID, kWrapperFolder);
         }
     }
 
@@ -1992,6 +2035,7 @@ private:
 
         v->setProperty ("dependencies", indentParenthesisedList (getTargetDependencies (target)), nullptr);
         v->setProperty (Ids::name, target.getXcodeSchemeName(), nullptr);
+
         v->setProperty ("productName", projectName, nullptr);
 
         if (target.type != XcodeTarget::AggregateTarget)

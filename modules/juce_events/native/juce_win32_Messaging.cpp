@@ -31,6 +31,10 @@ CheckEventBlockedByModalComps isEventBlockedByModalComps = nullptr;
 typedef void (*SettingChangeCallbackFunc) (void);
 SettingChangeCallbackFunc settingChangeCallback = nullptr;
 
+#if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client && JucePlugin_Build_Unity
+ bool juce_isRunningInUnity();
+#endif
+
 //==============================================================================
 namespace WindowsMessageHelpers
 {
@@ -168,6 +172,12 @@ bool MessageManager::dispatchNextMessageOnSystemQueue (const bool returnIfNoPend
 bool MessageManager::postMessageToSystemQueue (MessageManager::MessageBase* const message)
 {
     message->incReferenceCount();
+
+   #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client && JucePlugin_Build_Unity
+    if (juce_isRunningInUnity())
+        return SendNotifyMessage (juce_messageWindowHandle, WindowsMessageHelpers::customMessageID, 0, (LPARAM) message) != 0;
+    else
+   #endif
     return PostMessage (juce_messageWindowHandle, WindowsMessageHelpers::customMessageID, 0, (LPARAM) message) != 0;
 }
 

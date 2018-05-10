@@ -244,8 +244,12 @@ public:
         String getName() const                                 { return configNameValue.get(); }
         bool isDebug() const                                   { return isDebugValue.get(); }
 
-        String getTargetBinaryNameString() const               { return targetNameValue.get(); }
         String getTargetBinaryRelativePathString() const       { return targetBinaryPathValue.get(); }
+        String getTargetBinaryNameString (bool isUnityPlugin = false) const
+        {
+            return (isUnityPlugin ? Project::addUnityPluginPrefixIfNecessary (targetNameValue.get().toString())
+                                  : targetNameValue.get().toString());
+        }
 
         int getOptimisationLevelInt() const                    { return optimisationLevelValue.get(); }
         String getGCCOptimisationFlag() const;

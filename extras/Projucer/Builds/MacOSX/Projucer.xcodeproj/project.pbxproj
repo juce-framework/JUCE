@@ -233,6 +233,7 @@
 		72ED72174F9DBD0ABD8AFCED = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "jucer_PaintElementImage.cpp"; path = "../../Source/ComponentEditor/PaintElements/jucer_PaintElementImage.cpp"; sourceTree = "SOURCE_ROOT"; };
 		73DE14CEAD25D3445457013E = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_SliderHandler.h"; path = "../../Source/ComponentEditor/Components/jucer_SliderHandler.h"; sourceTree = "SOURCE_ROOT"; };
 		75BE2887C6F324B818D80A21 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_SnapGridPainter.h"; path = "../../Source/ComponentEditor/UI/jucer_SnapGridPainter.h"; sourceTree = "SOURCE_ROOT"; };
+		763A63E75AC802F17D11FE8B = {isa = PBXFileReference; lastKnownFileType = file.cs; name = "jucer_UnityPluginGUIScript.cs"; path = "../../Source/BinaryData/Templates/jucer_UnityPluginGUIScript.cs"; sourceTree = "SOURCE_ROOT"; };
 		7687A1374C60A025BDBE98DE = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_PointComponent.h"; path = "../../Source/ComponentEditor/PaintElements/jucer_PointComponent.h"; sourceTree = "SOURCE_ROOT"; };
 		77EA01E7D04BF889930BFF54 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_PaintElementRoundedRectangle.h"; path = "../../Source/ComponentEditor/PaintElements/jucer_PaintElementRoundedRectangle.h"; sourceTree = "SOURCE_ROOT"; };
 		78D0DBC4798FF040FDB90F6D = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "jucer_GeneratedCode.cpp"; path = "../../Source/ComponentEditor/jucer_GeneratedCode.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -493,7 +494,8 @@
 					3F7C5B53347A487C7FBD2223,
 					4ECF029E3A69BF42FED1503D,
 					3DC2ED15A9DFAAEF3D2ACDDF,
-					E67999BF57B139E00207A374, ); name = Templates; sourceTree = "<group>"; };
+					E67999BF57B139E00207A374,
+					763A63E75AC802F17D11FE8B, ); name = Templates; sourceTree = "<group>"; };
 		A9399733CAA07BDAB958242C = {isa = PBXGroup; children = (
 					8CF70DA9AB4725126B9F55BE,
 					F0F189518721D46C0F94FD56,
@@ -822,7 +824,8 @@
 					"JucePlugin_Build_AUv3=0",
 					"JucePlugin_Build_RTAS=0",
 					"JucePlugin_Build_AAX=0",
-					"JucePlugin_Build_Standalone=0", );
+					"JucePlugin_Build_Standalone=0",
+					"JucePlugin_Build_Unity=0", );
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = ("../../JuceLibraryCode", "../../../../modules", "$(inherited)");
 				INFOPLIST_FILE = Info-App.plist;
@@ -832,6 +835,7 @@
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				OTHER_CPLUSPLUSFLAGS = "-Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Wconditional-uninitialized -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion  -Wunused-private-field -Wbool-conversion -Wextra-semi -Wno-ignored-qualifiers -Wunreachable-code";
 				PRODUCT_BUNDLE_IDENTIFIER = com.juce.theprojucer;
+				PRODUCT_NAME = "Projucer";
 				SDKROOT_ppc = macosx10.5;
 				USE_HEADERMAP = NO; }; name = Debug; };
 		0BC15DC2E5FE5ECFFB398D49 = {isa = XCBuildConfiguration; buildSettings = {
@@ -855,7 +859,8 @@
 					"JucePlugin_Build_AUv3=0",
 					"JucePlugin_Build_RTAS=0",
 					"JucePlugin_Build_AAX=0",
-					"JucePlugin_Build_Standalone=0", );
+					"JucePlugin_Build_Standalone=0",
+					"JucePlugin_Build_Unity=0", );
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = ("../../JuceLibraryCode", "../../../../modules", "$(inherited)");
@@ -867,6 +872,7 @@
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				OTHER_CPLUSPLUSFLAGS = "-Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Wconditional-uninitialized -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion  -Wunused-private-field -Wbool-conversion -Wextra-semi -Wno-ignored-qualifiers -Wunreachable-code";
 				PRODUCT_BUNDLE_IDENTIFIER = com.juce.theprojucer;
+				PRODUCT_NAME = "Projucer";
 				SDKROOT_ppc = macosx10.5;
 				USE_HEADERMAP = NO; }; name = Release; };
 		C42924A24AB55E6A940423EA = {isa = XCBuildConfiguration; buildSettings = {

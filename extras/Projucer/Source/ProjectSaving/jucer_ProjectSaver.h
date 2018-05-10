@@ -94,7 +94,12 @@ public:
             auto projectRootHash = project.getProjectRoot().toXmlString().hashCode();
 
             if (project.getProjectType().isAudioPlugin())
+            {
                 writePluginCharacteristicsFile();
+
+                if (project.shouldBuildUnityPlugin())
+                    writeUnityScriptFile();
+            }
 
             writeAppConfigFile (modules, appConfigUserContent);
             writeBinaryDataFiles();
@@ -668,6 +673,24 @@ private:
     }
 
     void writePluginCharacteristicsFile();
+
+    void writeUnityScriptFile()
+    {
+        String unityScriptContents (BinaryData::jucer_UnityPluginGUIScript_cs);
+
+        auto projectName = Project::addUnityPluginPrefixIfNecessary (project.getProjectNameString());
+
+        unityScriptContents = unityScriptContents.replace ("%%plugin_name%%",        projectName)
+                                                 .replace ("%%plugin_vendor%%",      project.getPluginManufacturerString())
+                                                 .replace ("%%plugin_description%%", project.getPluginDescriptionString());
+
+        auto f = getGeneratedCodeFolder().getChildFile (project.getUnityScriptName());
+
+        MemoryOutputStream out;
+        out << unityScriptContents;
+
+        replaceFileIfDifferent (f, out);
+    }
 
     void writeProjects (const OwnedArray<LibraryModule>&, const String&, bool);
 

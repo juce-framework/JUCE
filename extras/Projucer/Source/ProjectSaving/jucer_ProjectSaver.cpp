@@ -83,6 +83,7 @@ void ProjectSaver::writePluginCharacteristicsFile()
     flags.set ("JucePlugin_Build_RTAS",                  boolToString (project.shouldBuildRTAS()));
     flags.set ("JucePlugin_Build_AAX",                   boolToString (project.shouldBuildAAX()));
     flags.set ("JucePlugin_Build_Standalone",            boolToString (project.shouldBuildStandalonePlugin()));
+    flags.set ("JucePlugin_Build_Unity",                 boolToString (project.shouldBuildUnityPlugin()));
     flags.set ("JucePlugin_Enable_IAA",                  boolToString (project.shouldEnableIAA()));
     flags.set ("JucePlugin_Name",                        toStringLiteral (project.getPluginNameString()));
     flags.set ("JucePlugin_Desc",                        toStringLiteral (project.getPluginDescriptionString()));
