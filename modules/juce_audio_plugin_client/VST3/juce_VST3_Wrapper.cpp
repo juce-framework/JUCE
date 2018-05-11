@@ -2531,7 +2531,7 @@ bool shutdownModule()
 
 //==============================================================================
 /** This typedef represents VST3's createInstance() function signature */
-typedef FUnknown* (*CreateFunction) (Vst::IHostApplication*);
+using CreateFunction = FUnknown* (*)(Vst::IHostApplication*);
 
 static FUnknown* createComponentInstance (Vst::IHostApplication* host)
 {

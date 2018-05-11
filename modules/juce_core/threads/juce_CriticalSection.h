@@ -183,7 +183,7 @@ private:
 
     @see CriticalSection, ScopedUnlock
 */
-typedef CriticalSection::ScopedLockType  ScopedLock;
+using ScopedLock = CriticalSection::ScopedLockType;
 
 //==============================================================================
 /**
@@ -223,7 +223,7 @@ typedef CriticalSection::ScopedLockType  ScopedLock;
 
     @see CriticalSection, ScopedLock
 */
-typedef CriticalSection::ScopedUnlockType  ScopedUnlock;
+using ScopedUnlock = CriticalSection::ScopedUnlockType;
 
 //==============================================================================
 /**
@@ -257,6 +257,6 @@ typedef CriticalSection::ScopedUnlockType  ScopedUnlock;
 
     @see CriticalSection::tryEnter, ScopedLock, ScopedUnlock, ScopedReadLock
 */
-typedef CriticalSection::ScopedTryLockType  ScopedTryLock;
+using ScopedTryLock = CriticalSection::ScopedTryLockType;
 
 } // namespace juce

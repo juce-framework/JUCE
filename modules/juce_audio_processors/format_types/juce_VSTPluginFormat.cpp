@@ -226,7 +226,7 @@ static pointer_sized_int VSTINTERFACECALL audioMaster (VstEffectInterface*, int3
 
 namespace
 {
-    typedef void (*EventProcPtr) (XEvent* ev);
+    using EventProcPtr = void (*)(XEvent*);
 
     Window getChildWindow (Window windowToCheck)
     {

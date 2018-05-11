@@ -40,7 +40,7 @@ namespace juce
 template <typename Type>
 struct Atomic  final
 {
-    typedef typename AtomicHelpers::DiffTypeHelper<Type>::Type DiffType;
+    using DiffType = typename AtomicHelpers::DiffTypeHelper<Type>::Type;
 
     /** Creates a new value, initialised to zero. */
     Atomic() noexcept  : value (0) {}

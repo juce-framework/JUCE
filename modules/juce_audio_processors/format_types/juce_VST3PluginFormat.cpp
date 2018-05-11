@@ -1142,7 +1142,7 @@ private:
 
                 if (CFBundleLoadExecutableAndReturnError (bundleRef, &error))
                 {
-                    typedef bool (*BundleEntryProc)(CFBundleRef);
+                    using BundleEntryProc = bool (*)(CFBundleRef);
 
                     if (auto proc = (BundleEntryProc) getFunction ("bundleEntry"))
                     {
