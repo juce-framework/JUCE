@@ -2922,8 +2922,8 @@ void VST3PluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& resul
         VST3Classes::VST3ModuleHandle::getAllDescriptionsForFile (results, fileOrIdentifier);
 }
 
-void VST3PluginFormat::createPluginInstance (const PluginDescription& description, double, int, void* userData,
-                                             void (*callback) (void*, AudioPluginInstance*, const String&))
+void VST3PluginFormat::createPluginInstance (const PluginDescription& description, double, int,
+                                             void* userData, PluginCreationCallback callback)
 {
     std::unique_ptr<VST3Classes::VST3PluginInstance> result;
 

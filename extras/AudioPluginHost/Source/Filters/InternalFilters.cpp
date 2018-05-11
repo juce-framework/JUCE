@@ -377,7 +377,7 @@ void InternalPluginFormat::createPluginInstance (const PluginDescription& desc,
                                                  double /*initialSampleRate*/,
                                                  int /*initialBufferSize*/,
                                                  void* userData,
-                                                 void (*callback) (void*, AudioPluginInstance*, const String&))
+                                                 PluginCreationCallback callback)
 {
     auto* p = createInstance (desc.name);
 
