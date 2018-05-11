@@ -80,5 +80,24 @@
 #endif
 
 //=============================================================================
+/** Config: JUCE_SYNC_VIDEO_VOLUME_WITH_OS_MEDIA_VOLUME
+    Enables synchronisation between video playback volume and OS media volume.
+    Currently supported on Android only.
+ */
+#ifndef JUCE_SYNC_VIDEO_VOLUME_WITH_OS_MEDIA_VOLUME
+ #define JUCE_SYNC_VIDEO_VOLUME_WITH_OS_MEDIA_VOLUME 1
+#endif
+
+#ifndef JUCE_VIDEO_LOG_ENABLED
+ #define JUCE_VIDEO_LOG_ENABLED 1
+#endif
+
+#if JUCE_VIDEO_LOG_ENABLED
+ #define JUCE_VIDEO_LOG(x) DBG(x)
+#else
+ #define JUCE_VIDEO_LOG(x) {}
+#endif
+
+//=============================================================================
 #include "playback/juce_VideoComponent.h"
 #include "capture/juce_CameraDevice.h"

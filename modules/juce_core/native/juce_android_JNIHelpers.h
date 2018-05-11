@@ -250,60 +250,79 @@ extern AndroidSystem android;
 
 //==============================================================================
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
- METHOD (createNewView,                   "createNewView",                   "(ZJ)L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$ComponentPeerView;") \
- METHOD (deleteView,                      "deleteView",                      "(L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$ComponentPeerView;)V") \
- METHOD (createNativeSurfaceView,         "createNativeSurfaceView",         "(J)L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$NativeSurfaceView;") \
- METHOD (finish,                          "finish",                          "()V") \
- METHOD (getWindowManager,                "getWindowManager",                "()Landroid/view/WindowManager;") \
- METHOD (setRequestedOrientation,         "setRequestedOrientation",         "(I)V") \
- METHOD (getClipboardContent,             "getClipboardContent",             "()Ljava/lang/String;") \
- METHOD (setClipboardContent,             "setClipboardContent",             "(Ljava/lang/String;)V") \
- METHOD (excludeClipRegion,               "excludeClipRegion",               "(Landroid/graphics/Canvas;FFFF)V") \
- METHOD (renderGlyph,                     "renderGlyph",                     "(CCLandroid/graphics/Paint;Landroid/graphics/Matrix;Landroid/graphics/Rect;)[I") \
- STATICMETHOD (createHTTPStream,          "createHTTPStream",                "(Ljava/lang/String;Z[BLjava/lang/String;I[ILjava/lang/StringBuffer;ILjava/lang/String;)L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$HTTPStream;") \
- METHOD (launchURL,                       "launchURL",                       "(Ljava/lang/String;)V") \
- METHOD (showMessageBox,                  "showMessageBox",                  "(Ljava/lang/String;Ljava/lang/String;J)V") \
- METHOD (showOkCancelBox,                 "showOkCancelBox",                 "(Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;)V") \
- METHOD (showYesNoCancelBox,              "showYesNoCancelBox",              "(Ljava/lang/String;Ljava/lang/String;J)V") \
- STATICMETHOD (getLocaleValue,            "getLocaleValue",                  "(Z)Ljava/lang/String;") \
- STATICMETHOD (getDocumentsFolder,        "getDocumentsFolder",              "()Ljava/lang/String;") \
- STATICMETHOD (getPicturesFolder,         "getPicturesFolder",               "()Ljava/lang/String;") \
- STATICMETHOD (getMusicFolder,            "getMusicFolder",                  "()Ljava/lang/String;") \
- STATICMETHOD (getDownloadsFolder,        "getDownloadsFolder",              "()Ljava/lang/String;") \
- STATICMETHOD (getMoviesFolder,           "getMoviesFolder",                 "()Ljava/lang/String;") \
- METHOD (getTypeFaceFromAsset,            "getTypeFaceFromAsset",            "(Ljava/lang/String;)Landroid/graphics/Typeface;") \
- METHOD (getTypeFaceFromByteArray,        "getTypeFaceFromByteArray",        "([B)Landroid/graphics/Typeface;") \
- METHOD (setScreenSaver,                  "setScreenSaver",                  "(Z)V") \
- METHOD (getScreenSaver,                  "getScreenSaver",                  "()Z") \
- METHOD (getAndroidMidiDeviceManager,     "getAndroidMidiDeviceManager",     "()L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$MidiDeviceManager;") \
- METHOD (getAndroidBluetoothManager,      "getAndroidBluetoothManager",      "()L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$BluetoothManager;") \
- STATICMETHOD (getAndroidSDKVersion,      "getAndroidSDKVersion",            "()I") \
- METHOD (audioManagerGetProperty,         "audioManagerGetProperty",         "(Ljava/lang/String;)Ljava/lang/String;") \
- METHOD (hasSystemFeature,                "hasSystemFeature",                "(Ljava/lang/String;)Z" ) \
- METHOD (requestRuntimePermission,        "requestRuntimePermission",        "(IJ)V" ) \
- METHOD (isPermissionGranted,             "isPermissionGranted",             "(I)Z" ) \
- METHOD (isPermissionDeclaredInManifest,  "isPermissionDeclaredInManifest",  "(I)Z" ) \
- METHOD (getAssets,                       "getAssets",                       "()Landroid/content/res/AssetManager;") \
- METHOD (getSystemService,                "getSystemService",                "(Ljava/lang/String;)Ljava/lang/Object;") \
- METHOD (getPackageManager,               "getPackageManager",               "()Landroid/content/pm/PackageManager;") \
- METHOD (getPackageName,                  "getPackageName",                  "()Ljava/lang/String;") \
- METHOD (getResources,                    "getResources",                    "()Landroid/content/res/Resources;") \
- METHOD (createInvocationHandler,         "createInvocationHandler",         "(J)Ljava/lang/reflect/InvocationHandler;") \
- METHOD (invocationHandlerContextDeleted, "invocationHandlerContextDeleted", "(Ljava/lang/reflect/InvocationHandler;)V") \
- METHOD (bindService,                     "bindService",                     "(Landroid/content/Intent;Landroid/content/ServiceConnection;I)Z") \
- METHOD (unbindService,                   "unbindService",                   "(Landroid/content/ServiceConnection;)V") \
- METHOD (startIntentSenderForResult,      "startIntentSenderForResult",      "(Landroid/content/IntentSender;ILandroid/content/Intent;III)V") \
- METHOD (moveTaskToBack,                  "moveTaskToBack",                  "(Z)Z") \
- METHOD (startActivity,                   "startActivity",                   "(Landroid/content/Intent;)V") \
- METHOD (startActivityForResult,          "startActivityForResult",          "(Landroid/content/Intent;I)V") \
- METHOD (getContentResolver,              "getContentResolver",              "()Landroid/content/ContentResolver;") \
- METHOD (addAppPausedResumedListener,     "addAppPausedResumedListener",     "(L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$AppPausedResumedListener;J)V") \
- METHOD (removeAppPausedResumedListener,  "removeAppPausedResumedListener",  "(L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$AppPausedResumedListener;J)V")
+ METHOD (createNewView,                        "createNewView",                   "(ZJ)L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$ComponentPeerView;") \
+ METHOD (deleteView,                           "deleteView",                      "(L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$ComponentPeerView;)V") \
+ METHOD (createNativeSurfaceView,              "createNativeSurfaceView",         "(JZ)L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$NativeSurfaceView;") \
+ METHOD (finish,                               "finish",                          "()V") \
+ METHOD (getWindowManager,                     "getWindowManager",                "()Landroid/view/WindowManager;") \
+ METHOD (setRequestedOrientation,              "setRequestedOrientation",         "(I)V") \
+ METHOD (getClipboardContent,                  "getClipboardContent",             "()Ljava/lang/String;") \
+ METHOD (setClipboardContent,                  "setClipboardContent",             "(Ljava/lang/String;)V") \
+ METHOD (excludeClipRegion,                    "excludeClipRegion",               "(Landroid/graphics/Canvas;FFFF)V") \
+ METHOD (renderGlyph,                          "renderGlyph",                     "(CCLandroid/graphics/Paint;Landroid/graphics/Matrix;Landroid/graphics/Rect;)[I") \
+ STATICMETHOD (createHTTPStream,               "createHTTPStream",                "(Ljava/lang/String;Z[BLjava/lang/String;I[ILjava/lang/StringBuffer;ILjava/lang/String;)L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$HTTPStream;") \
+ METHOD (launchURL,                            "launchURL",                       "(Ljava/lang/String;)V") \
+ METHOD (showMessageBox,                       "showMessageBox",                  "(Ljava/lang/String;Ljava/lang/String;J)V") \
+ METHOD (showOkCancelBox,                      "showOkCancelBox",                 "(Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;)V") \
+ METHOD (showYesNoCancelBox,                   "showYesNoCancelBox",              "(Ljava/lang/String;Ljava/lang/String;J)V") \
+ STATICMETHOD (getLocaleValue,                 "getLocaleValue",                  "(Z)Ljava/lang/String;") \
+ STATICMETHOD (getDocumentsFolder,             "getDocumentsFolder",              "()Ljava/lang/String;") \
+ STATICMETHOD (getPicturesFolder,              "getPicturesFolder",               "()Ljava/lang/String;") \
+ STATICMETHOD (getMusicFolder,                 "getMusicFolder",                  "()Ljava/lang/String;") \
+ STATICMETHOD (getDownloadsFolder,             "getDownloadsFolder",              "()Ljava/lang/String;") \
+ STATICMETHOD (getMoviesFolder,                "getMoviesFolder",                 "()Ljava/lang/String;") \
+ METHOD (getTypeFaceFromAsset,                 "getTypeFaceFromAsset",            "(Ljava/lang/String;)Landroid/graphics/Typeface;") \
+ METHOD (getTypeFaceFromByteArray,             "getTypeFaceFromByteArray",        "([B)Landroid/graphics/Typeface;") \
+ METHOD (setScreenSaver,                       "setScreenSaver",                  "(Z)V") \
+ METHOD (getScreenSaver,                       "getScreenSaver",                  "()Z") \
+ METHOD (getAndroidMidiDeviceManager,          "getAndroidMidiDeviceManager",     "()L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$MidiDeviceManager;") \
+ METHOD (getAndroidBluetoothManager,           "getAndroidBluetoothManager",      "()L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$BluetoothManager;") \
+ STATICMETHOD (getAndroidSDKVersion,           "getAndroidSDKVersion",            "()I") \
+ METHOD (audioManagerGetProperty,              "audioManagerGetProperty",         "(Ljava/lang/String;)Ljava/lang/String;") \
+ METHOD (hasSystemFeature,                     "hasSystemFeature",                "(Ljava/lang/String;)Z" ) \
+ METHOD (requestRuntimePermission,             "requestRuntimePermission",        "(IJ)V" ) \
+ METHOD (isPermissionGranted,                  "isPermissionGranted",             "(I)Z" ) \
+ METHOD (isPermissionDeclaredInManifest,       "isPermissionDeclaredInManifest",  "(I)Z" ) \
+ METHOD (isPermissionDeclaredInManifestString, "isPermissionDeclaredInManifest",  "(Ljava/lang/String;)Z") \
+ METHOD (getAssets,                            "getAssets",                       "()Landroid/content/res/AssetManager;") \
+ METHOD (getSystemService,                     "getSystemService",                "(Ljava/lang/String;)Ljava/lang/Object;") \
+ METHOD (getPackageManager,                    "getPackageManager",               "()Landroid/content/pm/PackageManager;") \
+ METHOD (getPackageName,                       "getPackageName",                  "()Ljava/lang/String;") \
+ METHOD (getResources,                         "getResources",                    "()Landroid/content/res/Resources;") \
+ METHOD (createInvocationHandler,              "createInvocationHandler",         "(J)Ljava/lang/reflect/InvocationHandler;") \
+ METHOD (invocationHandlerContextDeleted,      "invocationHandlerContextDeleted", "(Ljava/lang/reflect/InvocationHandler;)V") \
+ METHOD (bindService,                          "bindService",                     "(Landroid/content/Intent;Landroid/content/ServiceConnection;I)Z") \
+ METHOD (unbindService,                        "unbindService",                   "(Landroid/content/ServiceConnection;)V") \
+ METHOD (startIntentSenderForResult,           "startIntentSenderForResult",      "(Landroid/content/IntentSender;ILandroid/content/Intent;III)V") \
+ METHOD (moveTaskToBack,                       "moveTaskToBack",                  "(Z)Z") \
+ METHOD (startActivity,                        "startActivity",                   "(Landroid/content/Intent;)V") \
+ METHOD (startActivityForResult,               "startActivityForResult",          "(Landroid/content/Intent;I)V") \
+ METHOD (getContentResolver,                   "getContentResolver",              "()Landroid/content/ContentResolver;") \
+ METHOD (addAppPausedResumedListener,          "addAppPausedResumedListener",     "(L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$AppPausedResumedListener;J)V") \
+ METHOD (removeAppPausedResumedListener,       "removeAppPausedResumedListener",  "(L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$AppPausedResumedListener;J)V")
 
 DECLARE_JNI_CLASS (JuceAppActivity, JUCE_ANDROID_ACTIVITY_CLASSPATH);
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================
+#if __ANDROID_API__ >= 21
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+  METHOD (build,          "build",          "()Landroid/media/AudioAttributes;") \
+  METHOD (constructor,    "<init>",         "()V") \
+  METHOD (setContentType, "setContentType", "(I)Landroid/media/AudioAttributes$Builder;") \
+  METHOD (setUsage,       "setUsage",       "(I)Landroid/media/AudioAttributes$Builder;")
+
+DECLARE_JNI_CLASS (AndroidAudioAttributesBuilder, "android/media/AudioAttributes$Builder")
+#undef JNI_CLASS_MEMBERS
+#endif
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+  METHOD (abandonAudioFocus, "abandonAudioFocus", "(Landroid/media/AudioManager$OnAudioFocusChangeListener;)I") \
+  METHOD (requestAudioFocus, "requestAudioFocus", "(Landroid/media/AudioManager$OnAudioFocusChangeListener;II)I")
+
+DECLARE_JNI_CLASS (AndroidAudioManager, "android/media/AudioManager");
+#undef JNI_CLASS_MEMBERS
+
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
   STATICMETHOD (createBitmap,     "createBitmap", "(IILandroid/graphics/Bitmap$Config;)Landroid/graphics/Bitmap;") \
   STATICMETHOD (createBitmapFrom, "createBitmap", "(Landroid/graphics/Bitmap;IIIILandroid/graphics/Matrix;Z)Landroid/graphics/Bitmap;") \
@@ -741,6 +760,21 @@ namespace
 
         return result;
     }
+
+    inline bool jniCheckHasExceptionOccurredAndClear()
+    {
+        auto* env = getEnv();
+
+        LocalRef<jobject> exception (env->ExceptionOccurred());
+
+        if (exception != nullptr)
+        {
+            env->ExceptionClear();
+            return true;
+        }
+
+        return false;
+    }
 }
 
 //==============================================================================
@@ -777,5 +811,25 @@ LocalRef<jobject> CreateJavaInterface (AndroidInterfaceImplementer* implementer,
                                        const StringArray& interfaceNames);
 LocalRef<jobject> CreateJavaInterface (AndroidInterfaceImplementer* implementer,
                                        const String& interfaceName);
+
+//==============================================================================
+class AppPausedResumedListener     : public AndroidInterfaceImplementer
+{
+public:
+    struct Owner
+    {
+        virtual ~Owner() {}
+
+        virtual void appPaused() = 0;
+        virtual void appResumed() = 0;
+    };
+
+    AppPausedResumedListener (Owner&);
+
+    jobject invoke (jobject proxy, jobject method, jobjectArray args) override;
+
+private:
+    Owner& owner;
+};
 
 } // namespace juce

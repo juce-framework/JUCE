@@ -264,6 +264,10 @@
 #ifndef    JUCE_USE_CAMERA
  #define   JUCE_USE_CAMERA 0
 #endif
+
+#ifndef    JUCE_SYNC_VIDEO_VOLUME_WITH_OS_MEDIA_VOLUME
+ //#define JUCE_SYNC_VIDEO_VOLUME_WITH_OS_MEDIA_VOLUME 1
+#endif
 //==============================================================================
 #ifndef    JUCE_STANDALONE_APPLICATION
  #if defined(JucePlugin_Name) && defined(JucePlugin_Build_Standalone)

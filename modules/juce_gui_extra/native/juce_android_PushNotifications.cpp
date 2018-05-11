@@ -27,17 +27,6 @@
 namespace juce
 {
 
-#if __ANDROID_API__ >= 21
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
-  METHOD (build,          "build",          "()Landroid/media/AudioAttributes;") \
-  METHOD (constructor,    "<init>",         "()V") \
-  METHOD (setContentType, "setContentType", "(I)Landroid/media/AudioAttributes$Builder;") \
-  METHOD (setUsage,       "setUsage",       "(I)Landroid/media/AudioAttributes$Builder;")
-
-DECLARE_JNI_CLASS (AudioAttributesBuilder, "android/media/AudioAttributes$Builder")
-#undef JNI_CLASS_MEMBERS
-#endif
-
 #if __ANDROID_API__ >= 26
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
   METHOD (constructor,             "<init>",                  "(Ljava/lang/String;Ljava/lang/CharSequence;I)V") \
@@ -1504,12 +1493,12 @@ struct PushNotifications::Pimpl
                 env->CallVoidMethod (channel, NotificationChannel.enableVibration, c.enableVibration);
             }
 
-            auto audioAttributesBuilder = LocalRef<jobject> (env->NewObject (AudioAttributesBuilder, AudioAttributesBuilder.constructor));
+            auto AndroidAudioAttributesBuilder = LocalRef<jobject> (env->NewObject (AndroidAudioAttributesBuilder, AndroidAudioAttributesBuilder.constructor));
             const int contentTypeSonification = 4;
             const int usageNotification = 5;
-            env->CallObjectMethod (audioAttributesBuilder, AudioAttributesBuilder.setContentType, contentTypeSonification);
-            env->CallObjectMethod (audioAttributesBuilder, AudioAttributesBuilder.setUsage, usageNotification);
-            auto audioAttributes = LocalRef<jobject> (env->CallObjectMethod (audioAttributesBuilder, AudioAttributesBuilder.build));
+            env->CallObjectMethod (AndroidAudioAttributesBuilder, AndroidAudioAttributesBuilder.setContentType, contentTypeSonification);
+            env->CallObjectMethod (AndroidAudioAttributesBuilder, AndroidAudioAttributesBuilder.setUsage, usageNotification);
+            auto audioAttributes = LocalRef<jobject> (env->CallObjectMethod (AndroidAudioAttributesBuilder, AndroidAudioAttributesBuilder.build));
             env->CallVoidMethod (channel, NotificationChannel.setSound, juceUrlToAndroidUri (c.soundToPlay).get(), audioAttributes.get());
 
             env->CallVoidMethod (notificationManager, NotificationManagerApi26.createNotificationChannel, channel.get());

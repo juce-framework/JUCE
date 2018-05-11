@@ -188,6 +188,13 @@ private:
                                                              uri.get(), projection.get(), jSelection.get(),
                                                              args.get(), nullptr));
 
+            if (jniCheckHasExceptionOccurredAndClear())
+            {
+                // An exception has occurred, have you acquired RuntimePermission::readExternalStorage permission?
+                jassertfalse;
+                return {};
+            }
+
             if (cursor)
             {
                 if (env->CallBooleanMethod (cursor.get(), AndroidCursor.moveToFirst) != 0)
@@ -379,6 +386,13 @@ private:
         LocalRef<jobject> cursor (env->CallObjectMethod (contentResolver.get(), ContentResolver.query,
                                                          uri.get(), projection.get(), nullptr,
                                                          nullptr, nullptr));
+
+        if (jniCheckHasExceptionOccurredAndClear())
+        {
+            // An exception has occurred, have you acquired RuntimePermission::readExternalStorage permission?
+            jassertfalse;
+            return {};
+        }
 
         if (cursor == 0)
             return {};
