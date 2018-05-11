@@ -168,8 +168,8 @@ public:
             const String userCodeComment ("UserLabelCode_" + memberVariableName);
 
             callback
-                << "if (labelThatHasChanged == " << memberVariableName
-                << ")\n{\n    //[" << userCodeComment << "] -- add your label text handling code here..\n    //[/" << userCodeComment << "]\n}\n";
+                << "if (labelThatHasChanged == " << memberVariableName << ".get())\n"
+                << "{\n    //[" << userCodeComment << "] -- add your label text handling code here..\n    //[/" << userCodeComment << "]\n}\n";
         }
     }
 
