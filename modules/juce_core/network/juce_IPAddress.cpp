@@ -23,7 +23,7 @@
 namespace juce
 {
 
-IPAddress::IPAddress (bool IPv6) noexcept : isIPv6 (IPv6)
+IPAddress::IPAddress() noexcept
 {
     for (int i = 0; i < 16; ++i)
         address[i] = 0;
