@@ -145,29 +145,14 @@ static NSArray* varArrayToNSArray (const var& varToParse)
     return array;
 }
 
-static var nsArrayToVar (NSArray* array);
+static var nsObjectToVar (NSObject* array);
 
 static var nsDictionaryToVar (NSDictionary* dictionary)
 {
     DynamicObject::Ptr dynamicObject = new DynamicObject();
 
     for (NSString* key in dictionary)
-    {
-        const auto keyString = nsStringToJuce (key);
-
-        id value = dictionary[key];
-
-        if ([value isKindOfClass: [NSString class]])
-            dynamicObject->setProperty (keyString, nsStringToJuce ((NSString*) value));
-        else if ([value isKindOfClass: [NSNumber class]])
-            dynamicObject->setProperty (keyString, nsStringToJuce ([(NSNumber*) value stringValue]));
-        else if ([value isKindOfClass: [NSDictionary class]])
-            dynamicObject->setProperty (keyString, nsDictionaryToVar ((NSDictionary*) value));
-        else if ([value isKindOfClass: [NSArray class]])
-            dynamicObject->setProperty (keyString, nsArrayToVar ((NSArray*) value));
-        else
-            jassertfalse; // Unsupported yet, add here!
-    }
+        dynamicObject->setProperty (nsStringToJuce (key), nsObjectToVar (dictionary[key]));
 
     return var (dynamicObject.get());
 }
@@ -177,20 +162,24 @@ static var nsArrayToVar (NSArray* array)
     Array<var> resultArray;
 
     for (id value in array)
-    {
-        if ([value isKindOfClass: [NSString class]])
-            resultArray.add (var (nsStringToJuce ((NSString*) value)));
-        else if ([value isKindOfClass: [NSNumber class]])
-            resultArray.add (var (nsStringToJuce ([(NSNumber*) value stringValue])));
-        else if ([value isKindOfClass: [NSDictionary class]])
-            resultArray.add (nsDictionaryToVar ((NSDictionary*) value));
-        else if ([value isKindOfClass: [NSArray class]])
-            resultArray.add (nsArrayToVar ((NSArray*) value));
-        else
-            jassertfalse; // Unsupported yet, add here!
-    }
+        resultArray.add (nsObjectToVar (value));
 
     return var (resultArray);
+}
+
+static var nsObjectToVar (NSObject* obj)
+{
+    if ([obj isKindOfClass: [NSString class]])          return nsStringToJuce ((NSString*) obj);
+    else if ([obj isKindOfClass: [NSNumber class]])     return nsStringToJuce ([(NSNumber*) obj stringValue]);
+    else if ([obj isKindOfClass: [NSDictionary class]]) return nsDictionaryToVar ((NSDictionary*) obj);
+    else if ([obj isKindOfClass: [NSArray class]])      return nsArrayToVar ((NSArray*) obj);
+    else
+    {
+        // Unsupported yet, add here!
+        jassertfalse;
+    }
+
+    return {};
 }
 
 #if JUCE_MAC
@@ -225,16 +214,6 @@ typedef double (*MsgSendFPRetFn) (id, SEL op, ...);
 static inline MsgSendFPRetFn getMsgSendFPRetFn() noexcept   { return (MsgSendFPRetFn) (void*) objc_msgSend_fpret; }
 #endif
 #endif
-
-//==============================================================================
-template <typename ObjectType>
-struct NSObjectRetainer
-{
-    inline NSObjectRetainer (ObjectType* o) : object (o)  { [object retain]; }
-    inline ~NSObjectRetainer()                            { [object release]; }
-
-    ObjectType* object;
-};
 
 //==============================================================================
 struct NSObjectDeleter

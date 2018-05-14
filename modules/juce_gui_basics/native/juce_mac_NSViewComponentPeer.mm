@@ -780,7 +780,7 @@ public:
     {
         // (need to retain this in case a modal loop runs in handleKeyEvent and
         // our event object gets lost)
-        const NSObjectRetainer<NSEvent> r (ev);
+        const std::unique_ptr<NSEvent, NSObjectDeleter> r ([ev retain]);
 
         updateKeysDown (ev, true);
         bool used = handleKeyEvent (ev, true);
@@ -810,7 +810,7 @@ public:
     void redirectModKeyChange (NSEvent* ev)
     {
         // (need to retain this in case a modal loop runs and our event object gets lost)
-        const NSObjectRetainer<NSEvent> r (ev);
+        const std::unique_ptr<NSEvent, NSObjectDeleter> r ([ev retain]);
 
         keysCurrentlyDown.clear();
         handleKeyUpOrDown (true);
