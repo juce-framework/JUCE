@@ -513,7 +513,7 @@ public:
 
         if (! value.isSmoothing())
         {
-            copy (src);
+            multiply (src, value.getTargetValue());
         }
         else
         {
