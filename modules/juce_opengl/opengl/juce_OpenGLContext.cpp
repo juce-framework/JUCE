@@ -1055,17 +1055,6 @@ void OpenGLContext::execute (OpenGLContext::AsyncWorker::Ptr workerToUse, bool s
         jassertfalse; // You must have attached the context to a component
 }
 
-void OpenGLContext::overrideCanBeAttached (bool newCanAttach)
-{
-    if (overrideCanAttach != newCanAttach)
-    {
-        overrideCanAttach = newCanAttach;
-
-        if (auto* a = attachment.get())
-            a->update();
-    }
-}
-
 //==============================================================================
 struct DepthTestDisabler
 {

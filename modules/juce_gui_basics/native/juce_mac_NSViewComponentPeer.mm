@@ -64,10 +64,6 @@ static NSRect flippedScreenRect (NSRect r) noexcept
     return r;
 }
 
-#if JUCE_MODULE_AVAILABLE_juce_opengl
-void componentPeerAboutToChange (Component&, bool);
-#endif
-
 //==============================================================================
 class NSViewComponentPeer  : public ComponentPeer,
                              private Timer
@@ -705,12 +701,8 @@ public:
 
     void redirectWillMoveToWindow (NSWindow* newWindow)
     {
-       #if JUCE_MODULE_AVAILABLE_juce_opengl
-        if ([view window] == window)
-            componentPeerAboutToChange (getComponent(), newWindow == nullptr);
-       #else
-        ignoreUnused (newWindow);
-       #endif
+        if ([view window] == window && newWindow == nullptr)
+            getComponent().setVisible (false);
     }
 
     void sendMouseEvent (NSEvent* ev)
@@ -1046,7 +1038,15 @@ public:
     void viewMovedToWindow()
     {
         if (isSharedWindow)
-            window = [view window];
+        {
+            auto* newWindow = [view window];
+            bool shouldSetVisible = (window == nullptr && newWindow != nullptr);
+
+            window = newWindow;
+
+            if (shouldSetVisible)
+                getComponent().setVisible (true);
+        }
     }
 
     void liveResizingStart()

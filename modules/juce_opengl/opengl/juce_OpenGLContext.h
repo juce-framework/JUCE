@@ -350,10 +350,6 @@ private:
     };
 
     //==============================================================================
-    friend void componentPeerAboutToChange (Component&, bool);
-    void overrideCanBeAttached (bool);
-
-    //==============================================================================
     CachedImage* getCachedImage() const noexcept;
     void execute (AsyncWorker::Ptr, bool);
 
