@@ -156,6 +156,7 @@ public:
         terms of midi ticks. To convert them to seconds, use the convertTimestampTicksToSeconds()
         method.
 
+        @param sourceStream              the source stream
         @param createMatchingNoteOffs    if true, any missing note-offs for previous note-ons will
                                          be automatically added at the end of the file by calling
                                          MidiMessageSequence::updateMatchedPairs on each track.
@@ -167,6 +168,10 @@ public:
     /** Writes the midi tracks as a standard midi file.
         The midiFileType value is written as the file's format type, which can be 0, 1
         or 2 - see the midi file spec for more info about that.
+
+        @param destStream        the destination stream
+        @param midiFileType      the type of midi file
+
         @returns true if the operation succeeded.
     */
     bool writeTo (OutputStream& destStream, int midiFileType = 1);
