@@ -71,6 +71,7 @@ class NSViewComponentPeer  : public ComponentPeer,
 public:
     NSViewComponentPeer (Component& comp, const int windowStyleFlags, NSView* viewToAttachTo)
         : ComponentPeer (comp, windowStyleFlags),
+          safeComponent (&comp),
           isSharedWindow (viewToAttachTo != nil),
           lastRepaintTime (Time::getMillisecondCounter())
     {
@@ -702,7 +703,10 @@ public:
     void redirectWillMoveToWindow (NSWindow* newWindow)
     {
         if ([view window] == window && newWindow == nullptr)
-            getComponent().setVisible (false);
+        {
+            if (auto* comp = safeComponent.get())
+                comp->setVisible (false);
+        }
     }
 
     void sendMouseEvent (NSEvent* ev)
@@ -1382,6 +1386,7 @@ public:
     //==============================================================================
     NSWindow* window = nil;
     NSView* view = nil;
+    WeakReference<Component> safeComponent;
     bool isSharedWindow = false, fullScreen = false;
     bool isWindowInKioskMode = false;
    #if USE_COREGRAPHICS_RENDERING
