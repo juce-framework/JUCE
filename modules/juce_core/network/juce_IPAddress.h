@@ -70,7 +70,7 @@ public:
     String toString() const;
 
     /** Returns an IPv4 or IPv6 address meaning "any", equivalent to 0.0.0.0 (IPv4) or ::, (IPv6)  */
-    static IPAddress any (bool IPv6 = false) noexcept;
+    static IPAddress any() noexcept;
 
     /** Returns an IPv4 address meaning "broadcast" (255.255.255.255) */
     static IPAddress broadcast() noexcept;
