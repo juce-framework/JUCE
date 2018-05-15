@@ -166,7 +166,7 @@ public:
         {
             // You're trying to reset this ScopedPointer to itself! This will work here as ScopedPointer does an equality check
             // but be aware that std::unique_ptr won't do this and you could end up with some nasty, subtle bugs!
-            jassertfalse;
+            jassert (newObject == nullptr);
         }
     }
 
