@@ -702,7 +702,7 @@ public:
 
     void redirectWillMoveToWindow (NSWindow* newWindow)
     {
-        if ([view window] == window && newWindow == nullptr)
+        if (isSharedWindow && [view window] == window && newWindow == nullptr)
         {
             if (auto* comp = safeComponent.get())
                 comp->setVisible (false);
