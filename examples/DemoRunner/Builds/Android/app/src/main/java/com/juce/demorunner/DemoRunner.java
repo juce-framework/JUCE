@@ -1494,7 +1494,9 @@ public class DemoRunner   extends Activity
     public final String getClipboardContent()
     {
         ClipboardManager clipboard = (ClipboardManager) getSystemService (CLIPBOARD_SERVICE);
-        return clipboard.getText().toString();
+
+        CharSequence content = clipboard.getText();
+        return content != null ? content.toString() : new String();
     }
 
     public final void setClipboardContent (String newText)
