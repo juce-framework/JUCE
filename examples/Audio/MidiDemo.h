@@ -157,14 +157,7 @@ public:
         // This is called on the message loop
 
         auto& mm = dynamic_cast<const MidiCallbackMessage&> (msg).message;
-        String midiString;
-        midiString << (mm.isNoteOn() ? String ("Note on: ") : String ("Note off: "));
-        midiString << (MidiMessage::getMidiNoteName (mm.getNoteNumber(), true, true, true));
-        midiString << (String (" vel = "));
-        midiString << static_cast<int> (mm.getVelocity());
-        midiString << "\n";
-
-        midiMonitor.insertTextAtCaret (midiString);
+        midiMonitor.insertTextAtCaret (mm.getDescription() + "\n");
     }
 
     void paint (Graphics&) override {}
