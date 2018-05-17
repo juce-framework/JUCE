@@ -107,6 +107,8 @@ IPAddress::IPAddress (const String& adr)
 
         for (int i = 0; i < 4; ++i)
             address[i] = (uint8) tokens[i].getIntValue();
+
+        zeroUnusedBytes();
     }
     else
     {
