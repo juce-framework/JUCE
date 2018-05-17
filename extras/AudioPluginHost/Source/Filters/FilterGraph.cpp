@@ -40,11 +40,7 @@ FilterGraph::FilterGraph (AudioPluginFormatManager& fm)
       formatManager (fm)
 {
     newDocument();
-
     graph.addListener (this);
-    graph.addChangeListener (this);
-
-    setChangedFlag (false);
 }
 
 FilterGraph::~FilterGraph()
@@ -200,13 +196,18 @@ void FilterGraph::newDocument()
     clear();
     setFile ({});
 
+    graph.removeChangeListener (this);
+
     InternalPluginFormat internalFormat;
 
     addPlugin (internalFormat.audioInDesc,  { 0.5,  0.1 });
     addPlugin (internalFormat.midiInDesc,   { 0.25, 0.1 });
     addPlugin (internalFormat.audioOutDesc, { 0.5,  0.9 });
 
-    setChangedFlag (false);
+    MessageManager::callAsync ([this] () {
+        setChangedFlag (false);
+        graph.addChangeListener (this);
+    } );
 }
 
 Result FilterGraph::loadDocument (const File& file)
@@ -217,7 +218,14 @@ Result FilterGraph::loadDocument (const File& file)
     if (xml == nullptr || ! xml->hasTagName ("FILTERGRAPH"))
         return Result::fail ("Not a valid filter graph file");
 
+    graph.removeChangeListener (this);
     restoreFromXml (*xml);
+
+    MessageManager::callAsync ([this] () {
+        setChangedFlag (false);
+        graph.addChangeListener (this);
+    } );
+
     return Result::ok();
 }
 
