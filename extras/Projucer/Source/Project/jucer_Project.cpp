@@ -606,8 +606,13 @@ Result Project::saveProject (const File& file, bool isCommandLineApp)
 
     updateProjectSettings();
 
-    if (! isCommandLineApp && ! isTemporaryProject())
-        registerRecentFile (file);
+    if (! isCommandLineApp)
+    {
+        ProjucerApplication::getApp().openDocumentManager.saveAll();
+
+        if (! isTemporaryProject())
+            registerRecentFile (file);
+    }
 
     const ScopedValueSetter<bool> vs (isSaving, true, false);
 
