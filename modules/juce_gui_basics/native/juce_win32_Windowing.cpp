@@ -1967,6 +1967,7 @@ private:
                 direct2DContext->clipToRectangle (rectangleFromRECT (r));
                 handlePaint (*direct2DContext);
                 direct2DContext->end();
+                ValidateRect (hwnd, &r);
             }
         }
         else
