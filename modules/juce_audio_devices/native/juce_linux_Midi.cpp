@@ -158,7 +158,7 @@ public:
             {
                 const unsigned int caps =
                     isInput ? (SND_SEQ_PORT_CAP_WRITE | (enableSubscription ? SND_SEQ_PORT_CAP_SUBS_WRITE : 0))
-                            : (SND_SEQ_PORT_CAP_WRITE | (enableSubscription ? SND_SEQ_PORT_CAP_SUBS_READ : 0));
+                            : (SND_SEQ_PORT_CAP_READ  | (enableSubscription ? SND_SEQ_PORT_CAP_SUBS_READ : 0));
 
                 portId = snd_seq_create_simple_port (seqHandle, name.toUTF8(), caps,
                                                      SND_SEQ_PORT_TYPE_MIDI_GENERIC |
