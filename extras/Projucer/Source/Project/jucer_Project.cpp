@@ -1574,6 +1574,23 @@ bool Project::Item::isIconCrossedOut() const
                    || getFile().hasFileExtension (headerFileExtensions));
 }
 
+bool Project::Item::needsSaving() const noexcept
+{
+    auto& odm = ProjucerApplication::getApp().openDocumentManager;
+
+    if (odm.anyFilesNeedSaving())
+    {
+        for (int i = 0; i < odm.getNumOpenDocuments(); ++i)
+        {
+            auto* doc = odm.getOpenDocument (i);
+            if (doc->needsSaving() && doc->getFile() == getFile())
+                return true;
+        }
+    }
+
+    return false;
+}
+
 //==============================================================================
 ValueTree Project::getConfigNode()
 {

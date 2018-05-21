@@ -1055,7 +1055,7 @@ bool ProjucerApplication::perform (const InvocationInfo& info)
         case CommandIDs::newPIP:                    createNewPIP(); break;
         case CommandIDs::open:                      askUserToOpenFile(); break;
         case CommandIDs::launchDemoRunner:          launchDemoRunner(); break;
-        case CommandIDs::saveAll:                   openDocumentManager.saveAll(); break;
+        case CommandIDs::saveAll:                   saveAllDocuments(); break;
         case CommandIDs::closeAllWindows:           closeAllMainWindowsAndQuitIfNeeded(); break;
         case CommandIDs::closeAllDocuments:         closeAllDocuments (true); break;
         case CommandIDs::clearRecentFiles:          clearRecentFiles(); break;
@@ -1118,6 +1118,15 @@ void ProjucerApplication::askUserToOpenFile()
 bool ProjucerApplication::openFile (const File& file)
 {
     return mainWindowList.openFile (file);
+}
+
+void ProjucerApplication::saveAllDocuments()
+{
+    openDocumentManager.saveAll();
+
+    for (int i = 0; i < mainWindowList.windows.size(); ++i)
+        if (auto* pcc = mainWindowList.windows.getUnchecked(i)->getProjectContentComponent())
+            pcc->refreshProjectTreeFileStatuses();
 }
 
 bool ProjucerApplication::closeAllDocuments (bool askUserToSave)

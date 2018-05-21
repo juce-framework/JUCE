@@ -96,6 +96,7 @@ public:
     void createNewPIP();
     void askUserToOpenFile();
     bool openFile (const File&);
+    void saveAllDocuments();
     bool closeAllDocuments (bool askUserToSave);
     bool closeAllMainWindows();
     void closeAllMainWindowsAndQuitIfNeeded();

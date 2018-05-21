@@ -300,6 +300,8 @@ public:
         Icon getIcon (bool isOpen = false) const;
         bool isIconCrossedOut() const;
 
+        bool needsSaving() const noexcept;
+
         Project& project;
         ValueTree state;
 
