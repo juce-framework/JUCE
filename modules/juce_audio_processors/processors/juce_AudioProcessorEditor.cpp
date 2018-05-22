@@ -44,6 +44,7 @@ AudioProcessorEditor::~AudioProcessorEditor()
 
 void AudioProcessorEditor::setControlHighlight (ParameterControlHighlightInfo) {}
 int AudioProcessorEditor::getControlParameterIndex (Component&)  { return -1; }
+String AudioProcessorEditor::getCustomLabel (CustomHostLabel) { return String(); }
 
 void AudioProcessorEditor::initialise()
 {

@@ -272,6 +272,38 @@ public:
     virtual void processBlockBypassed (AudioBuffer<double>& buffer,
                                        MidiBuffer& midiMessages);
 
+    /** Analyses the next block before actual process.
+
+        For offline processing (currently Pro Tools AudioSuite) this basically pass input buffers.
+        You can use those buffers to do analysis before doing the actual process.
+     */
+    virtual void analyseBlock (const AudioBuffer<const float>& buffer);
+
+    /** Analyses the next block before actual process.
+
+        For offline processing (currently Pro Tools AudioSuite) this basically pass input buffers.
+        You can use those buffers to do analysis before doing the actual process.
+     */
+    virtual void analyseBlock (const AudioBuffer<const double>& buffer);
+
+    /** Notifies AudioProcessor that analysis is about to start.
+
+        For offline processing (currently Pro Tools AudioSuite), being called before analysis.
+        Note: when side-chain is connected this would be the maximum number of supported tracks.
+     */
+    virtual void prepareToAnalyse (double sampleRate, int samplesPerBlock, int numOfExpectedInputs);
+
+    /** Notifies AudioProcessor that analysis has finished.
+
+        For offline processing (currently Pro Tools AudioSuite), being called after analyse stage finished.
+     */
+    virtual void analysisFinished ();
+
+    /** Called by AudioSuite to add offsets to processed clip.
+
+        For example, if your process adds tail explicitly or start before actual position.
+     */
+    virtual void getOfflineRenderOffset (int& startOffset, int& endOffset);
 
     //==============================================================================
     /**
@@ -1307,6 +1339,7 @@ public:
         wrapperType_AudioUnitv3,
         wrapperType_RTAS,
         wrapperType_AAX,
+        wrapperType_AudioSuite,
         wrapperType_Standalone
     };
 
