@@ -1705,6 +1705,103 @@ namespace AAXClasses
         }
 
         //==============================================================================
+        static AudioProcessor::CurveData::Type aaxCurveTypeToJUCE (AAX_CTypeID type) noexcept
+        {
+            switch (type)
+            {
+            case AAX_eCurveType_EQ:              return AudioProcessor::CurveData::Type::EQ;
+            case AAX_eCurveType_Dynamics:        return AudioProcessor::CurveData::Type::Dynamics;
+            case AAX_eCurveType_Reduction:       return AudioProcessor::CurveData::Type::GainReduction;
+            default:  break;
+            }
+
+            return AudioProcessor::CurveData::Type::Unknown;
+        }
+
+        uint32_t getAAXMeterIdForParamId (const String& paramID) const noexcept
+        {
+            int idx;
+
+            for (idx = 0; idx < aaxMeters.size(); ++idx)
+                if (LegacyAudioParameter::getParamID (aaxMeters[idx], false) == paramID)
+                    break;
+
+            // you sepecified a parameter id in your curve but the parameter does not have the meter
+            // category
+            jassert (idx < aaxMeters.size());
+            return 'Metr' + static_cast<AAX_CTypeID> (idx);
+        }
+
+        //==============================================================================
+        AAX_Result GetCurveData (AAX_CTypeID iCurveType, const float * iValues, uint32_t iNumValues, float * oValues ) const override
+        {
+            auto curveType = aaxCurveTypeToJUCE (iCurveType);
+
+            if (curveType != AudioProcessor::CurveData::Type::Unknown)
+            {
+                auto& audioProcessor = getPluginInstance();
+                auto curve = audioProcessor.getAAXCurve (curveType);
+
+                if (curve.curve)
+                {
+                    if (oValues != nullptr && iValues != nullptr)
+                    {
+                        for (int i = 0; i < iNumValues; ++i)
+                            oValues[i] = curve.curve (iValues[i]);
+                    }
+
+                    return AAX_SUCCESS;
+                }
+            }
+
+            return AAX_ERROR_UNIMPLEMENTED;
+        }
+
+        AAX_Result GetCurveDataMeterIds (AAX_CTypeID iCurveType, uint32_t *oXMeterId, uint32_t *oYMeterId)  const override
+        {
+            auto curveType = aaxCurveTypeToJUCE (iCurveType);
+
+            if (curveType != AudioProcessor::CurveData::Type::Unknown)
+            {
+                auto& audioProcessor = getPluginInstance();
+                auto curve = audioProcessor.getAAXCurve (curveType);
+
+                if (curve.curve && curve.xMeterID.isNotEmpty() && curve.yMeterID.isNotEmpty())
+                {
+                    if (oXMeterId != nullptr) *oXMeterId = getAAXMeterIdForParamId (curve.xMeterID);
+                    if (oYMeterId != nullptr) *oYMeterId = getAAXMeterIdForParamId (curve.yMeterID);
+
+                    return AAX_SUCCESS;
+                }
+            }
+
+            return AAX_ERROR_UNIMPLEMENTED;
+        }
+
+        AAX_Result GetCurveDataDisplayRange (AAX_CTypeID iCurveType, float *oXMin, float *oXMax, float *oYMin, float *oYMax) const override
+        {
+            auto curveType = aaxCurveTypeToJUCE (iCurveType);
+
+            if (curveType != AudioProcessor::CurveData::Type::Unknown)
+            {
+                auto& audioProcessor = getPluginInstance();
+                auto curve = audioProcessor.getAAXCurve (curveType);
+
+                if (curve.curve)
+                {
+                    if (oXMin != nullptr) *oXMin = curve.xRange.getStart();
+                    if (oXMax != nullptr) *oXMax = curve.xRange.getEnd();
+                    if (oYMin != nullptr) *oYMin = curve.yRange.getStart();
+                    if (oYMax != nullptr) *oYMax = curve.yRange.getEnd();
+
+                    return AAX_SUCCESS;
+                }
+            }
+
+            return AAX_ERROR_UNIMPLEMENTED;
+        }
+
+        //==============================================================================
         inline int getParamIndexFromID (AAX_CParamID paramID) const noexcept
         {
             if (auto* param = getParameterFromID (paramID))
