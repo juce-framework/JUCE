@@ -1740,13 +1740,13 @@ namespace AAXClasses
             if (curveType != AudioProcessor::CurveData::Type::Unknown)
             {
                 auto& audioProcessor = getPluginInstance();
-                auto curve = audioProcessor.getAAXCurve (curveType);
+                auto curve = audioProcessor.getResponseCurve (curveType);
 
                 if (curve.curve)
                 {
                     if (oValues != nullptr && iValues != nullptr)
                     {
-                        for (int i = 0; i < iNumValues; ++i)
+                        for (uint32_t i = 0; i < iNumValues; ++i)
                             oValues[i] = curve.curve (iValues[i]);
                     }
 
@@ -1764,7 +1764,7 @@ namespace AAXClasses
             if (curveType != AudioProcessor::CurveData::Type::Unknown)
             {
                 auto& audioProcessor = getPluginInstance();
-                auto curve = audioProcessor.getAAXCurve (curveType);
+                auto curve = audioProcessor.getResponseCurve (curveType);
 
                 if (curve.curve && curve.xMeterID.isNotEmpty() && curve.yMeterID.isNotEmpty())
                 {
@@ -1785,7 +1785,7 @@ namespace AAXClasses
             if (curveType != AudioProcessor::CurveData::Type::Unknown)
             {
                 auto& audioProcessor = getPluginInstance();
-                auto curve = audioProcessor.getAAXCurve (curveType);
+                auto curve = audioProcessor.getResponseCurve (curveType);
 
                 if (curve.curve)
                 {
