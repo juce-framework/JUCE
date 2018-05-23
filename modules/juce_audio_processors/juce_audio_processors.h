@@ -54,6 +54,12 @@
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <juce_audio_basics/juce_audio_basics.h>
 
+#if JucePlugin_EnhancedAudioSuite
+#if ! JUCE_MODULE_AVAILABLE_juce_audio_formats
+#error To compile random access support plug-in formats, you need to add the juce_audio_formats module!
+#endif
+#include <juce_audio_formats/juce_audio_formats.h>
+#endif
 
 //==============================================================================
 /** Config: JUCE_PLUGINHOST_VST

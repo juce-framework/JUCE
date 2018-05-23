@@ -587,9 +587,12 @@ namespace AAXClasses
     {
     public:
 #if JucePlugin_EnhancedAudioSuite
-        class JUCE_EnhancedAudioSuite : public AAX_CHostProcessor
+        class JUCE_EnhancedAudioSuite : public AAX_CHostProcessor,
+                                        public juce::AudioFormatReader
         {
         public:
+            JUCE_EnhancedAudioSuite() : juce::AudioFormatReader (nullptr, "AudioSuiteReader") {}
+
             AAX_Result AnalyzeAudio (const float * const iAudioIns [], int32_t iAudioInCount, int32_t * ioWindowSize) override
             {
                 Array<const float*> inputChannelList;
@@ -608,6 +611,7 @@ namespace AAXClasses
                 if (mIsFirstPass)
                 {
                     UpdateMainInputBus(numOfMainInputs);
+                    initRandomAccessReader(iAudioIns, numOfMainInputs, iAudioInCount);
                     mIsFirstPass = false;
                 }
 
@@ -635,7 +639,7 @@ namespace AAXClasses
                 if (mIsFirstPass)
                 {
                     UpdateMainInputBus(numOfMainInputs);
-
+                    initRandomAccessReader(inAudioIns, numOfMainInputs, inAudioInCount);
                     float* tempOutBuffer[AAX_eMaxAudioSuiteTracks];
                     for (decltype(inAudioOutCount) ch = 0; ch < inAudioOutCount; ++ch)
                         tempOutBuffer[ch] = new float[*ioWindowSize];
@@ -645,7 +649,7 @@ namespace AAXClasses
                     {
                         int32_t numSamplesToPrime = std::min(*ioWindowSize, remainingDelaySamplesToPrime);
                         const int64_t firstSampleLocation = GetLocation() + (latencyOffset - remainingDelaySamplesToPrime);
-                        GetAudio(inAudioIns, inAudioInCount, firstSampleLocation, ioWindowSize);
+                        GetAudio (inAudioIns, inAudioInCount, firstSampleLocation, ioWindowSize);
                         getAAXProcessor().process (inAudioIns, tempOutBuffer, sideChainBufferIdx, numSamplesToPrime, false, nullptr, nullptr, nullptr);
                         remainingDelaySamplesToPrime -= numSamplesToPrime;
                     }
@@ -660,7 +664,7 @@ namespace AAXClasses
 
                 // Look ahead in the input audio by latencyOffset. After this call to GetAudio(),
                 // inAudioIns will be populated with the randomly-accessed lookahead samples.
-                GetAudio(inAudioIns, inAudioInCount, GetLocation()+latencyOffset, ioWindowSize);
+                GetAudio (inAudioIns, inAudioInCount, GetLocation()+latencyOffset, ioWindowSize);
                 getAAXProcessor().process (inAudioIns, inAudioOuts, sideChainBufferIdx, *ioWindowSize, false, nullptr, nullptr, nullptr);
 
                 return AAX_SUCCESS;
@@ -695,7 +699,56 @@ namespace AAXClasses
                 return AAX_SUCCESS;
             }
 
+            AAX_Result PostRender () override
+            {
+                getAAXProcessor().getPluginInstance().setRandomAudioReader(nullptr);
+                return AAX_SUCCESS;
+            }
+
+            bool readSamples (int** destSamples,
+                                      int numDestChannels,
+                                      int startOffsetInDestBuffer,
+                                      int64 startSampleInFile,
+                                      int numSamples) override
+            {
+                if ( (lengthInSamples - startSampleInFile <= 0) || (numSamples > lengthInSamples - startSampleInFile) )
+                    return false;
+
+                int32_t numSamplesToCopy = numSamples;
+                auto readWindow = lastValidRandomInput;
+                auto channelsToCopy = jmin ((int)numChannels, numDestChannels);
+
+                if (GetAudio (readWindow, numOfReportedInputs, GetSrcStart()+startSampleInFile, &numSamplesToCopy) != AAX_SUCCESS)
+                    return false;
+
+                int validIn = -1;
+                for (int i = 0; i < channelsToCopy; ++i)
+                {
+                    // should forward with i (unless needs to skip)
+                    validIn++;
+                    while ( (readWindow[validIn] == nullptr) && (validIn < numOfReportedInputs) )
+                        validIn++;
+
+                    if (destSamples[i] == nullptr)
+                        continue;
+
+                    memcpy (destSamples[i]+startOffsetInDestBuffer, readWindow[validIn], (size_t) numSamples * sizeof (float));
+                }
+                return true;
+            }
+
         private:
+            void initRandomAccessReader(const float * const inAudioIns[], int numOfActualInputs, int numOfInputsInBuffer)
+            {
+                sampleRate = getAAXProcessor().sampleRate;
+                usesFloatingPointData = true;
+                lastValidRandomInput = inAudioIns;
+                numChannels = numOfActualInputs + (GetSideChainInputNum() > 0 ? 1 : 0);
+                numOfReportedInputs = numOfInputsInBuffer;
+                lengthInSamples = GetInputRange();
+                getAAXProcessor().getPluginInstance().setRandomAudioReader(this);
+            }
+
             void UpdateMainInputBus(int numOfMainInputs)
             {
                 // update plug-in on number of inputs
@@ -707,6 +760,8 @@ namespace AAXClasses
                 return static_cast<JuceAAX_Processor&> (*GetEffectParameters());
             }
 
+            const float* const* lastValidRandomInput;
+            unsigned int numOfReportedInputs;
             bool mIsFirstPass {true};
         };
 #endif
