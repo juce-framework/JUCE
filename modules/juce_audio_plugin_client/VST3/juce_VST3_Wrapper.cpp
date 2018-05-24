@@ -2410,6 +2410,9 @@ private:
 
         p.setRateAndBufferSizeDetails (sampleRate, bufferSize);
         p.prepareToPlay (sampleRate, bufferSize);
+
+        midiBuffer.ensureSize (2048);
+        midiBuffer.clear();
     }
 
     //==============================================================================

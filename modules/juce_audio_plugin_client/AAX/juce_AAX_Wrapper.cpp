@@ -1607,6 +1607,9 @@ namespace AAXClasses
                 audioProcessor.prepareToPlay (sampleRate, lastBufferSize);
                 maxBufferSize = lastBufferSize;
 
+                midiBuffer.ensureSize (2048);
+                midiBuffer.clear();
+
                 sideChainBuffer.calloc (static_cast<size_t> (maxBufferSize));
             }
 
