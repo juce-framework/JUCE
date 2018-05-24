@@ -62,9 +62,9 @@ namespace StateVariableFilter
 
         //==============================================================================
         /** Creates a filter with default parameters. */
-        Filter()                            : parameters (new Parameters<NumericType>) { reset(); }
+        Filter()                              : parameters (new Parameters<NumericType>) { reset(); }
 
-        Filter (Parameters<NumericType>* paramtersToUse) : parameters (paramtersToUse) { reset(); }
+        Filter (Parameters<NumericType>* parametersToUse) : parameters (parametersToUse) { reset(); }
 
         /** Creates a copy of another filter. */
         Filter (const Filter&) = default;
@@ -86,7 +86,7 @@ namespace StateVariableFilter
         void snapToZero() noexcept                     { util::snapToZero (s1); util::snapToZero (s2); }
 
         //==============================================================================
-        /** The parameters of the state variable filter. It's up to the called to ensure
+        /** The parameters of the state variable filter. It's up to the caller to ensure
             that these parameters are modified in a thread-safe way. */
         typename Parameters<NumericType>::Ptr parameters;
 
