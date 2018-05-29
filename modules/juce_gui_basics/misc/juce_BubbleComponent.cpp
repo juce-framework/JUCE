@@ -145,7 +145,8 @@ void BubbleComponent::setPosition (Rectangle<int> rectangleToPointTo,
         }
     }
 
-    setBounds (targetX - arrowTip.x, targetY - arrowTip.y, totalW, totalH);
+    auto origin = Point<int> (targetX - arrowTip.x, targetY - arrowTip.y).transformedBy (getTransform().inverted());
+    setBounds (origin.getX(), origin.getY(), totalW, totalH);
 }
 
 } // namespace juce
