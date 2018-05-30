@@ -995,7 +995,9 @@ public:
             if (parentForPopupDisplay != nullptr)
                 parentForPopupDisplay->addChildComponent (popupDisplay.get());
             else
-                popupDisplay->addToDesktop (ComponentPeer::windowIsTemporary);
+                popupDisplay->addToDesktop (ComponentPeer::windowIsTemporary
+                                            | ComponentPeer::windowIgnoresKeyPresses
+                                            | ComponentPeer::windowIgnoresMouseClicks);
 
             if (style == SliderStyle::TwoValueHorizontal
                 || style == SliderStyle::TwoValueVertical)
