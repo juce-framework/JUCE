@@ -845,6 +845,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
                         "Saves the current project",
                         CommandCategories::general, 0);
         result.setActive (project != nullptr && ! project->isCurrentlySaving());
+		result.defaultKeypresses.add ({ 'p', ModifierKeys::commandModifier, 0 });
         break;
 
     case CommandIDs::closeProject:
