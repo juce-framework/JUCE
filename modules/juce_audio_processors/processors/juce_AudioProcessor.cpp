@@ -47,7 +47,9 @@ void AudioProcessor::initialise (const BusesProperties& ioConfig)
 
     wrapperType = wrapperTypeBeingCreated.get();
     playHead = nullptr;
-    randomAudioReader = nullptr;
+    #if RANDOM_AUDIO_ACCESS_SUPPORTED
+        randomAudioReader = nullptr;
+    #endif
     currentSampleRate = 0;
     blockSize = 0;
     latencySamples = 0;
@@ -361,10 +363,12 @@ void AudioProcessor::setPlayHead (AudioPlayHead* const newPlayHead)
     playHead = newPlayHead;
 }
 
+#if RANDOM_AUDIO_ACCESS_SUPPORTED
 void AudioProcessor::setRandomAudioReader (AudioFormatReader* const newAudioFormatReader)
 {
     randomAudioReader = newAudioFormatReader;
 }
+#endif
 
 void AudioProcessor::addListener (AudioProcessorListener* const newListener)
 {
