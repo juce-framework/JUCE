@@ -4,6 +4,25 @@ JUCE breaking changes
 Develop
 =======
 
+Change
+------
+AudioProcessor::getTailLengthSeconds can now return infinity for VST/VST3/AU/AUv3
+
+Possible Issues
+---------------
+If you are using the result of getTailLengthSeconds to allocate a buffer in your host,
+then your host will now likely crash when loading a plug-in with an infinite tail time.
+
+Workaround
+----------
+Re-write your code to not use the result of getTailLengthSeconds directly to allocate
+a buffer.
+
+Rationale
+---------
+
+Before this change there was no way for a JUCE plug-in to report an infinite tail time. 
+
 
 Version 5.3.2
 =============

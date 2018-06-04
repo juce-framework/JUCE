@@ -2296,7 +2296,14 @@ struct VST3PluginInstance : public AudioPluginInstance
             auto sampleRate = getSampleRate();
 
             if (sampleRate > 0.0)
+            {
+                auto tailSamples = processor->getTailSamples();
+
+                if (tailSamples == Vst::kInfiniteTail)
+                    return std::numeric_limits<double>::infinity();
+
                 return jlimit (0, 0x7fffffff, (int) processor->getTailSamples()) / sampleRate;
+            }
         }
 
         return 0.0;
