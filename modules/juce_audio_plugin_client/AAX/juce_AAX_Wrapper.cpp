@@ -610,7 +610,7 @@ namespace AAXClasses
                 const AudioBuffer<const float> buffer (channels, inputChannelList.size(), *ioWindowSize);
                 if (mIsFirstPass)
                 {
-                    UpdateMainInputBus(numOfMainInputs);
+                    UpdateBusLayout(numOfMainInputs, -1, GetSideChainInputNum() > 0);
                     initRandomAccessReader(iAudioIns, numOfMainInputs, iAudioInCount);
                     mIsFirstPass = false;
                 }
@@ -638,7 +638,7 @@ namespace AAXClasses
                 auto latencyOffset = getAAXProcessor().getPluginInstance().getLatencySamples();
                 if (mIsFirstPass)
                 {
-                    UpdateMainInputBus(numOfMainInputs);
+                    UpdateBusLayout(numOfMainInputs, inAudioOutCount, GetSideChainInputNum() > 0);
                     initRandomAccessReader(inAudioIns, numOfMainInputs, inAudioInCount);
                     float* tempOutBuffer[AAX_eMaxAudioSuiteTracks];
                     for (decltype(inAudioOutCount) ch = 0; ch < inAudioOutCount; ++ch)
@@ -751,10 +751,20 @@ namespace AAXClasses
                 getAAXProcessor().getPluginInstance().setRandomAudioReader(this);
             }
 
-            void UpdateMainInputBus(int numOfMainInputs)
+            void UpdateBusLayout(int numOfIns, int numOfOuts, bool hasSideChain)
             {
-                // update plug-in on number of inputs
-                getAAXProcessor().getPluginInstance().getBus(true, 0)->setNumberOfChannels(numOfMainInputs);
+                auto currentLayout = getAAXProcessor().getPluginInstance().getBusesLayout();
+                currentLayout.inputBuses.set(0, AudioChannelSet::namedChannelSet(numOfIns));
+                if (currentLayout.inputBuses.size() > 1)
+                {
+                    currentLayout.inputBuses.set(1, hasSideChain ? AudioChannelSet::mono() : AudioChannelSet::disabled());
+                }
+                // for analysis output should change...
+                if (numOfOuts > 0)
+                {
+                    currentLayout.outputBuses.set(0, AudioChannelSet::namedChannelSet(numOfOuts));
+                }
+                getAAXProcessor().getPluginInstance().setBusesLayout(currentLayout);
             }
 
             JuceAAX_Processor& getAAXProcessor()
