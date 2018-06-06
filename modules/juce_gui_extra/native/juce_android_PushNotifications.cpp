@@ -1493,12 +1493,12 @@ struct PushNotifications::Pimpl
                 env->CallVoidMethod (channel, NotificationChannel.enableVibration, c.enableVibration);
             }
 
-            auto AndroidAudioAttributesBuilder = LocalRef<jobject> (env->NewObject (AndroidAudioAttributesBuilder, AndroidAudioAttributesBuilder.constructor));
+            LocalRef<jobject> builder (env->NewObject (AndroidAudioAttributesBuilder, AndroidAudioAttributesBuilder.constructor));
             const int contentTypeSonification = 4;
             const int usageNotification = 5;
-            env->CallObjectMethod (AndroidAudioAttributesBuilder, AndroidAudioAttributesBuilder.setContentType, contentTypeSonification);
-            env->CallObjectMethod (AndroidAudioAttributesBuilder, AndroidAudioAttributesBuilder.setUsage, usageNotification);
-            auto audioAttributes = LocalRef<jobject> (env->CallObjectMethod (AndroidAudioAttributesBuilder, AndroidAudioAttributesBuilder.build));
+            env->CallObjectMethod (builder.get(), AndroidAudioAttributesBuilder.setContentType, contentTypeSonification);
+            env->CallObjectMethod (builder.get(), AndroidAudioAttributesBuilder.setUsage, usageNotification);
+            auto audioAttributes = LocalRef<jobject> (env->CallObjectMethod (builder.get(), AndroidAudioAttributesBuilder.build));
             env->CallVoidMethod (channel, NotificationChannel.setSound, juceUrlToAndroidUri (c.soundToPlay).get(), audioAttributes.get());
 
             env->CallVoidMethod (notificationManager, NotificationManagerApi26.createNotificationChannel, channel.get());
