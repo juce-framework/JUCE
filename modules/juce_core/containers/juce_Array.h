@@ -981,7 +981,7 @@ public:
         @see remove, removeRange, removeAllInstancesOf
     */
     template <typename PredicateType>
-    int removeIf (PredicateType predicate)
+    int removeIf (PredicateType&& predicate)
     {
         int numRemoved = 0;
         const ScopedLockType lock (getLock());
@@ -1041,16 +1041,21 @@ public:
     */
     void removeLast (int howManyToRemove = 1)
     {
-        const ScopedLockType lock (getLock());
+        jassert (howManyToRemove >= 0);
 
-        if (howManyToRemove > numUsed)
-            howManyToRemove = numUsed;
+        if (howManyToRemove > 0)
+        {
+            const ScopedLockType lock (getLock());
 
-        for (int i = 1; i <= howManyToRemove; ++i)
-            data.elements[numUsed - i].~ElementType();
+            if (howManyToRemove > numUsed)
+                howManyToRemove = numUsed;
 
-        numUsed -= howManyToRemove;
-        minimiseStorageAfterRemoval();
+            for (int i = 1; i <= howManyToRemove; ++i)
+                data.elements[numUsed - i].~ElementType();
+
+            numUsed -= howManyToRemove;
+            minimiseStorageAfterRemoval();
+        }
     }
 
     /** Removes any elements which are also in another array.
