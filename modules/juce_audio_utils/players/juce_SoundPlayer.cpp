@@ -41,7 +41,7 @@ struct AudioSourceOwningTransportSource  : public AudioTransportSource
     }
 
 private:
-    ScopedPointer<PositionableAudioSource> source;
+    std::unique_ptr<PositionableAudioSource> source;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioSourceOwningTransportSource)
 };

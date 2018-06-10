@@ -27,6 +27,7 @@
 #include "../../Application/jucer_Headers.h"
 #include "jucer_ProjectContentComponent.h"
 #include "../../LiveBuildEngine/jucer_DownloadCompileEngineThread.h"
+#include "../../LiveBuildEngine/jucer_CompileEngineSettings.h"
 
 #include "jucer_HeaderComponent.h"
 #include "Sidebar/jucer_TabComponents.h"
@@ -38,8 +39,8 @@ struct LogoComponent  : public Component
 {
     LogoComponent()
     {
-        ScopedPointer<XmlElement> svg (XmlDocument::parse (BinaryData::background_logo_svg));
-        logo = Drawable::createFromSVG (*svg);
+        std::unique_ptr<XmlElement> svg (XmlDocument::parse (BinaryData::background_logo_svg));
+        logo.reset (Drawable::createFromSVG (*svg));
     }
 
     void paint (Graphics& g) override
@@ -62,7 +63,7 @@ struct LogoComponent  : public Component
                 + ProjucerApplication::getApp().getVersionDescription();
     }
 
-    ScopedPointer<Drawable> logo;
+    std::unique_ptr<Drawable> logo;
 };
 
 //==============================================================================
@@ -71,10 +72,14 @@ ProjectContentComponent::ProjectContentComponent()
     setOpaque (true);
     setWantsKeyboardFocus (true);
 
-    addAndMakeVisible (logo = new LogoComponent());
-    addAndMakeVisible (header = new HeaderComponent());
+    logo.reset (new LogoComponent());
+    addAndMakeVisible (logo.get());
 
-    addAndMakeVisible (fileNameLabel = new Label());
+    header.reset (new HeaderComponent());
+    addAndMakeVisible (header.get());
+
+    fileNameLabel.reset (new Label());
+    addAndMakeVisible (fileNameLabel.get());
     fileNameLabel->setJustificationType (Justification::centred);
 
     sidebarSizeConstrainer.setMinimumWidth (200);
@@ -265,8 +270,9 @@ void ProjectContentComponent::rebuildProjectTabs()
                                                              .getFloatValue());
 
         //======================================================================
-        addAndMakeVisible (resizerBar = new ResizableEdgeComponent (&sidebarTabs, &sidebarSizeConstrainer,
-                                                                    ResizableEdgeComponent::rightEdge));
+        resizerBar.reset (new ResizableEdgeComponent (&sidebarTabs, &sidebarSizeConstrainer,
+                                                      ResizableEdgeComponent::rightEdge));
+        addAndMakeVisible (resizerBar.get());
         resizerBar->setAlwaysOnTop (true);
 
         project->addChangeListener (this);
@@ -296,10 +302,10 @@ void ProjectContentComponent::saveOpenDocumentList()
 {
     if (project != nullptr)
     {
-        ScopedPointer<XmlElement> xml (recentDocumentList.createXML());
+        std::unique_ptr<XmlElement> xml (recentDocumentList.createXML());
 
         if (xml != nullptr)
-            project->getStoredProperties().setValue ("lastDocs", xml);
+            project->getStoredProperties().setValue ("lastDocs", xml.get());
     }
 }
 
@@ -307,7 +313,7 @@ void ProjectContentComponent::reloadLastOpenDocuments()
 {
     if (project != nullptr)
     {
-        ScopedPointer<XmlElement> xml (project->getStoredProperties().getXmlValue ("lastDocs"));
+        std::unique_ptr<XmlElement> xml (project->getStoredProperties().getXmlValue ("lastDocs"));
 
         if (xml != nullptr)
         {
@@ -326,6 +332,13 @@ bool ProjectContentComponent::documentAboutToClose (OpenDocumentManager::Documen
 void ProjectContentComponent::changeListenerCallback (ChangeBroadcaster*)
 {
     updateMissingFileStatuses();
+}
+
+void ProjectContentComponent::refreshProjectTreeFileStatuses()
+{
+    if (auto* projectTab = getProjectTab())
+        if (auto* fileTree = projectTab->getFileTreePanel())
+            fileTree->repaint();
 }
 
 void ProjectContentComponent::updateMissingFileStatuses()
@@ -419,7 +432,7 @@ bool ProjectContentComponent::setEditorComponent (Component* editor,
         {
             auto* viewport = new ContentViewport (editor);
 
-            contentView = viewport;
+            contentView.reset (viewport);
             currentDocument = nullptr;
             fileNameLabel->setVisible (false);
 
@@ -427,7 +440,7 @@ bool ProjectContentComponent::setEditorComponent (Component* editor,
         }
         else
         {
-            contentView = editor;
+            contentView.reset (editor);
             currentDocument = doc;
             fileNameLabel->setText (doc->getFile().getFileName(), dontSendNotification);
             fileNameLabel->setVisible (true);
@@ -476,15 +489,24 @@ void ProjectContentComponent::saveDocument()
     {
         if (! currentDocument->save())
             showSaveWarning (currentDocument);
+
+        refreshProjectTreeFileStatuses();
     }
     else
+    {
         saveProject();
+    }
 }
 
 void ProjectContentComponent::saveAs()
 {
-    if (currentDocument != nullptr && ! currentDocument->saveAs())
-        showSaveWarning (currentDocument);
+    if (currentDocument != nullptr)
+    {
+        if (! currentDocument->saveAs())
+            showSaveWarning (currentDocument);
+
+        refreshProjectTreeFileStatuses();
+    }
 }
 
 bool ProjectContentComponent::goToPreviousFile()
@@ -521,11 +543,13 @@ bool ProjectContentComponent::goToCounterpart()
     return false;
 }
 
-bool ProjectContentComponent::saveProject (bool shouldWait)
+bool ProjectContentComponent::saveProject (bool shouldWait, bool openInIDE)
 {
     if (project != nullptr)
     {
         const ScopedValueSetter<bool> valueSetter (project->shouldWaitAfterSaving, shouldWait, false);
+        project->setOpenInIDEAfterSaving (openInIDE);
+
         return (project->save (true, true) == FileBasedDocument::savedOk);
     }
 
@@ -637,11 +661,16 @@ void ProjectContentComponent::openInSelectedIDE (bool saveFirst)
             {
                 if (exporter->canLaunchProject() && exporter->getName() == selectedIDE)
                 {
-                    if (saveFirst && ! saveProject (exporter->isXcode()))
+                    auto tempProject = project->isTemporaryProject(); // store this before saving as it will always be false after
+
+                    if (saveFirst && ! saveProject (exporter->isXcode(), true))
+                        return;
+
+                    if (tempProject)
                         return;
 
                     exporter->launchProject();
-                    break;
+                    return;
                 }
             }
         }
@@ -657,7 +686,14 @@ static void newExporterMenuCallback (int result, ProjectContentComponent* comp)
             auto exporterName= ProjectExporter::getExporterNames() [result - 1];
 
             if (exporterName.isNotEmpty())
+            {
                 p->addNewExporter (exporterName);
+
+                StringPairArray data;
+                data.set ("label", exporterName);
+
+                Analytics::getInstance()->logEvent ("Exporter Added", data, ProjucerAnalyticsEvent::projectEvent);
+            }
         }
     }
 }
@@ -809,6 +845,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
                         "Saves the current project",
                         CommandCategories::general, 0);
         result.setActive (project != nullptr && ! project->isCurrentlySaving());
+        result.defaultKeypresses.add ({ 'p', ModifierKeys::commandModifier, 0 });
         break;
 
     case CommandIDs::closeProject:
@@ -1152,12 +1189,14 @@ void ProjectContentComponent::setBuildEnabled (bool isEnabled, bool displayError
         if (! displayError)
             lastCrashMessage = {};
 
-        LiveBuildProjectSettings::setBuildDisabled (*project, ! isEnabled);
+        project->getCompileEngineSettings().setBuildEnabled (isEnabled);
         killChildProcess();
         refreshTabsIfBuildStatusChanged();
 
-        if (auto* h = dynamic_cast<HeaderComponent*> (header.get()))
-            h->updateBuildButtons (isEnabled, isContinuousRebuildEnabled());
+        StringPairArray data;
+        data.set ("label", isEnabled ? "Enabled" : "Disabled");
+
+        Analytics::getInstance()->logEvent ("Live-Build", data, ProjucerAnalyticsEvent::projectEvent);
     }
 }
 
@@ -1181,11 +1220,16 @@ void ProjectContentComponent::handleCrash (const String& message)
         setBuildEnabled (false, true);
         showBuildTab();
     }
+
+    StringPairArray data;
+    data.set ("label", "Crash");
+
+    Analytics::getInstance()->logEvent ("Live-Build", data, ProjucerAnalyticsEvent::projectEvent);
 }
 
 bool ProjectContentComponent::isBuildEnabled() const
 {
-    return project != nullptr && ! LiveBuildProjectSettings::isBuildDisabled (*project)
+    return project != nullptr && project->getCompileEngineSettings().isBuildEnabled()
             && CompileEngineDLL::getInstance()->isLoaded();
 }
 
@@ -1199,7 +1243,7 @@ void ProjectContentComponent::refreshTabsIfBuildStatusChanged()
 
 bool ProjectContentComponent::areWarningsEnabled() const
 {
-    return project != nullptr && ! LiveBuildProjectSettings::areWarningsDisabled (*project);
+    return project != nullptr && project->getCompileEngineSettings().areWarningsEnabled();
 }
 
 void ProjectContentComponent::updateWarningState()
@@ -1212,7 +1256,7 @@ void ProjectContentComponent::toggleWarnings()
 {
     if (project != nullptr)
     {
-        LiveBuildProjectSettings::setWarningsDisabled (*project, areWarningsEnabled());
+        project->getCompileEngineSettings().setWarningsEnabled (! areWarningsEnabled());
         updateWarningState();
     }
 }
@@ -1291,20 +1335,14 @@ void ProjectContentComponent::timerCallback()
 
 bool ProjectContentComponent::isContinuousRebuildEnabled()
 {
-    return getAppSettings().getGlobalProperties().getBoolValue ("continuousRebuild", true);
+    return project != nullptr && project->getCompileEngineSettings().isContinuousRebuildEnabled();
 }
 
 void ProjectContentComponent::setContinuousRebuildEnabled (bool b)
 {
-    if (childProcess != nullptr)
+    if (project != nullptr && childProcess != nullptr)
     {
-        childProcess->setContinuousRebuild (b);
-
-        if (auto* h = dynamic_cast<HeaderComponent*> (header.get()))
-            h->updateBuildButtons (isBuildEnabled(), b);
-
-        getAppSettings().getGlobalProperties().setValue ("continuousRebuild", b);
-
+        project->getCompileEngineSettings().setContinuousRebuildEnabled (b);
         ProjucerApplication::getCommandManager().commandStatusChanged();
     }
 }
@@ -1312,12 +1350,7 @@ void ProjectContentComponent::setContinuousRebuildEnabled (bool b)
 ReferenceCountedObjectPtr<CompileEngineChildProcess> ProjectContentComponent::getChildProcess()
 {
     if (childProcess == nullptr && isBuildEnabled())
-    {
         childProcess = ProjucerApplication::getApp().childProcessCache->getOrCreate (*project);
-
-        if (childProcess != nullptr)
-            childProcess->setContinuousRebuild (isContinuousRebuildEnabled());
-    }
 
     return childProcess;
 }

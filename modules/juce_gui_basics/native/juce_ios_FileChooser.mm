@@ -27,10 +27,6 @@
 namespace juce
 {
 
-//==============================================================================
-template <> struct ContainerDeletePolicy<UIDocumentPickerViewController>     { static void destroy (NSObject* o) { [o release]; } };
-template <> struct ContainerDeletePolicy<NSObject<UIDocumentPickerDelegate>> { static void destroy (NSObject* o) { [o release]; } };
-
 class FileChooser::Native    : private Component,
                                public FileChooser::Pimpl
 {
@@ -41,8 +37,8 @@ public:
         String firstFileExtension;
 
         static FileChooserDelegateClass cls;
-        delegate = [cls.createInstance() init];
-        FileChooserDelegateClass::setOwner (delegate, this);
+        delegate.reset ([cls.createInstance() init]);
+        FileChooserDelegateClass::setOwner (delegate.get(), this);
 
         auto utTypeArray = createNSArrayFromStringArray (getUTTypesForWildcards (owner.filters, firstFileExtension));
 
@@ -74,18 +70,18 @@ public:
             }
 
             auto url = [[NSURL alloc] initFileURLWithPath: juceStringToNS (currentFileOrDirectory.getFullPathName())];
-            controller = [[UIDocumentPickerViewController alloc] initWithURL: url
-                                                                      inMode: pickerMode];
+            controller.reset ([[UIDocumentPickerViewController alloc] initWithURL: url
+                                                                           inMode: pickerMode]);
             [url release];
         }
         else
         {
-            controller = [[UIDocumentPickerViewController alloc] initWithDocumentTypes: utTypeArray
-                                                                                inMode: UIDocumentPickerModeOpen];
+            controller.reset ([[UIDocumentPickerViewController alloc] initWithDocumentTypes: utTypeArray
+                                                                                      inMode: UIDocumentPickerModeOpen]);
         }
 
-        [controller setDelegate: delegate];
-        [controller setModalTransitionStyle: UIModalTransitionStyleCrossDissolve];
+        [controller.get() setDelegate: delegate.get()];
+        [controller.get() setModalTransitionStyle: UIModalTransitionStyleCrossDissolve];
 
         setOpaque (false);
 
@@ -124,7 +120,7 @@ private:
             peer = newPeer;
 
             if (auto* parentController = peer->controller)
-                [parentController showViewController: controller sender: parentController];
+                [parentController showViewController: controller.get() sender: parentController];
 
             if (peer->view.window != nil)
                 peer->view.window.autoresizesSubviews = YES;
@@ -296,8 +292,8 @@ private:
 
     //==============================================================================
     FileChooser& owner;
-    ScopedPointer<NSObject<UIDocumentPickerDelegate>> delegate;
-    ScopedPointer<UIDocumentPickerViewController> controller;
+    std::unique_ptr<NSObject<UIDocumentPickerDelegate>, NSObjectDeleter> delegate;
+    std::unique_ptr<UIDocumentPickerViewController,     NSObjectDeleter> controller;
     UIViewComponentPeer* peer = nullptr;
 
     static FileChooserDelegateClass fileChooserDelegateClass;

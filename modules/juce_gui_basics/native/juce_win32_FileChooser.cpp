@@ -39,7 +39,7 @@ class Win32NativeFileChooser  : public ReferenceCountedObject,
                                 private Thread
 {
 public:
-    typedef ReferenceCountedObjectPtr<Win32NativeFileChooser> Ptr;
+    using Ptr = ReferenceCountedObjectPtr<Win32NativeFileChooser>;
 
     enum { charsAvailableForResult = 32768 };
 
@@ -74,7 +74,7 @@ public:
         if (! selectsDirectories)
         {
             if (previewComp != nullptr)
-                customComponent = new CustomComponentHolder (previewComp);
+                customComponent.reset (new CustomComponentHolder (previewComp));
 
             setupFilters();
         }
@@ -153,7 +153,7 @@ private:
     //==============================================================================
     Component::SafePointer<Component> owner;
     String title, filtersString;
-    ScopedPointer<CustomComponentHolder> customComponent;
+    std::unique_ptr<CustomComponentHolder> customComponent;
     String initialPath, returnedString, defaultExtension;
 
     WaitableEvent threadHasReference;
@@ -357,7 +357,7 @@ private:
 
             if (customComponent)
             {
-                Component::SafePointer<Component> custom (customComponent);
+                Component::SafePointer<Component> custom (customComponent.get());
 
                 RECT r, cr;
                 GetWindowRect (hdlg, &r);

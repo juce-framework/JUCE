@@ -163,11 +163,13 @@ public:
         dragOver = false;
         repaint();
 
-        if (ScopedPointer<XmlElement> e = XmlDocument::parse (File (files[0])))
+        std::unique_ptr<XmlElement> element (XmlDocument::parse (File (files[0])));
+
+        if (element != nullptr)
         {
-            if (auto* ePath = e->getChildByName ("path"))
+            if (auto* ePath = element->getChildByName ("path"))
                 userText.setText (ePath->getStringAttribute ("d"), true);
-            else if (auto* ePolygon = e->getChildByName ("polygon"))
+            else if (auto* ePolygon = element->getChildByName ("polygon"))
                 userText.setText (ePolygon->getStringAttribute ("points"), true);
         }
     }

@@ -241,10 +241,10 @@ public:
 
         LockScreenAppearance lockScreenAppearance = showPartially;  /**< Optional. */
 
-        ScopedPointer<Notification> publicVersion; /**< Optional: if you set lockScreenAppearance to showPartially,
-                                                        then you can provide "public version" of your notification
-                                                        that will be displayed on the lock screen. This way you can
-                                                        control what information is visible when the screen is locked. */
+        std::unique_ptr<Notification> publicVersion; /**< Optional: if you set lockScreenAppearance to showPartially,
+                                                          then you can provide "public version" of your notification
+                                                          that will be displayed on the lock screen. This way you can
+                                                          control what information is visible when the screen is locked. */
 
         String groupSortKey;         /**< Optional: Used to order notifications within the same group. Available from Android API 20 or above. */
         bool groupSummary = false;   /**< Optional: if true, then this notification will be a group summary of the group set with groupId.
@@ -711,7 +711,7 @@ private:
     struct Pimpl;
     friend struct Pimpl;
 
-    ScopedPointer<Pimpl> pimpl;
+    std::unique_ptr<Pimpl> pimpl;
   #endif
 };
 

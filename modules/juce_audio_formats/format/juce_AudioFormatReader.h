@@ -256,8 +256,8 @@ protected:
     template <class DestSampleType, class SourceSampleType, class SourceEndianness>
     struct ReadHelper
     {
-        typedef AudioData::Pointer<DestSampleType, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::NonConst>    DestType;
-        typedef AudioData::Pointer<SourceSampleType, SourceEndianness, AudioData::Interleaved, AudioData::Const>               SourceType;
+        using DestType   = AudioData::Pointer<DestSampleType,   AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::NonConst>;
+        using SourceType = AudioData::Pointer<SourceSampleType, SourceEndianness, AudioData::Interleaved, AudioData::Const>;
 
         template <typename TargetType>
         static void read (TargetType* const* destData, int destOffset, int numDestChannels,

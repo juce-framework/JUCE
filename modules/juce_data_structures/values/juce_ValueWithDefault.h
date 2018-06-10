@@ -44,8 +44,7 @@ public:
     ValueWithDefault()    : undoManager (nullptr) {}
 
     /** Creates an ValueWithDefault object. The default value will be an empty var. */
-    ValueWithDefault (ValueTree& tree, const Identifier& propertyID,
-                      UndoManager* um)
+    ValueWithDefault (ValueTree& tree, const Identifier& propertyID, UndoManager* um)
         : targetTree (tree),
           targetProperty (propertyID),
           undoManager (um),
@@ -54,12 +53,28 @@ public:
     }
 
     /** Creates an ValueWithDefault object. The default value will be defaultToUse. */
-    ValueWithDefault (ValueTree& tree, const Identifier& propertyID,
-                      UndoManager* um, const var& defaultToUse)
+    ValueWithDefault (ValueTree& tree, const Identifier& propertyID, UndoManager* um,
+                      const var& defaultToUse)
         : targetTree (tree),
           targetProperty (propertyID),
           undoManager (um),
           defaultValue (defaultToUse)
+    {
+    }
+
+    /** Creates an ValueWithDefault object. The default value will be defaultToUse.
+
+        Use this constructor if the underlying var object being controlled is an array and
+        it will handle the conversion to/from a delimited String that can be written to
+        XML format.
+    */
+    ValueWithDefault (ValueTree& tree, const Identifier& propertyID, UndoManager* um,
+                      const var& defaultToUse, StringRef arrayDelimiter)
+        : targetTree (tree),
+          targetProperty (propertyID),
+          undoManager (um),
+          defaultValue (defaultToUse),
+          delimiter (arrayDelimiter)
     {
     }
 
@@ -68,7 +83,8 @@ public:
         : targetTree (other.targetTree),
           targetProperty (other.targetProperty),
           undoManager (other.undoManager),
-          defaultValue (other.defaultValue)
+          defaultValue (other.defaultValue),
+          delimiter (other.delimiter)
     {
     }
 
@@ -80,6 +96,9 @@ public:
     {
         if (isUsingDefault())
             return defaultValue;
+
+        if (delimiter.isNotEmpty())
+            return delimitedStringToVarArray (targetTree[targetProperty].toString());
 
         return targetTree[targetProperty];
     }
@@ -94,7 +113,12 @@ public:
     void setDefault (const var& newDefault)
     {
         if (defaultValue != newDefault)
+        {
             defaultValue = newDefault;
+
+            if (onDefaultChange != nullptr)
+                onDefaultChange();
+        }
     }
 
     /** Returns true if the property does not exist or is empty. */
@@ -109,6 +133,9 @@ public:
         targetTree.removeProperty (targetProperty, nullptr);
     }
 
+    /** You can assign a lambda to this callback object to have it called when the default value is changed. */
+    std::function<void()> onDefaultChange;
+
     //==============================================================================
     /** Sets the property and returns the new ValueWithDefault. This will modify the property in the referenced ValueTree. */
     ValueWithDefault& operator= (const var& newValue)
@@ -120,14 +147,17 @@ public:
     /** Sets the property. This will actually modify the property in the referenced ValueTree. */
     void setValue (const var& newValue, UndoManager* undoManagerToUse)
     {
-        targetTree.setProperty (targetProperty, newValue, undoManagerToUse);
+        if (auto* array = newValue.getArray())
+            targetTree.setProperty (targetProperty, varArrayToDelimitedString (*array), undoManagerToUse);
+        else
+            targetTree.setProperty (targetProperty, newValue, undoManagerToUse);
     }
 
     //==============================================================================
     /** Makes the ValueWithDefault refer to the specified property inside the given ValueTree. */
     void referTo (ValueTree& tree, const Identifier& property, UndoManager* um)
     {
-        referToWithDefault (tree, property, um, var());
+        referToWithDefault (tree, property, um, var(), {});
     }
 
     /** Makes the ValueWithDefault refer to the specified property inside the given ValueTree,
@@ -135,7 +165,13 @@ public:
      */
     void referTo (ValueTree& tree, const Identifier& property, UndoManager* um, const var& defaultVal)
     {
-        referToWithDefault (tree, property, um, defaultVal);
+        referToWithDefault (tree, property, um, defaultVal, {});
+    }
+
+    void referTo (ValueTree& tree, const Identifier& property, UndoManager* um,
+                  const var& defaultVal, StringRef arrayDelimiter)
+    {
+        referToWithDefault (tree, property, um, defaultVal, arrayDelimiter);
     }
 
     //==============================================================================
@@ -152,13 +188,41 @@ private:
     UndoManager* undoManager;
     var defaultValue;
 
+    String delimiter;
+
     //==============================================================================
-    void referToWithDefault (ValueTree& v, const Identifier& i, UndoManager* um, const var& defaultVal)
+    void referToWithDefault (ValueTree& v, const Identifier& i, UndoManager* um,
+                             const var& defaultVal, StringRef del)
     {
         targetTree = v;
         targetProperty = i;
         undoManager = um;
         defaultValue = defaultVal;
+        delimiter = del;
+    }
+
+    //==============================================================================
+    String varArrayToDelimitedString (const Array<var>& input) const noexcept
+    {
+        // if you are trying to control a var that is an array then you need to
+        // set a delimiter string that will be used when writing to XML!
+        jassert (delimiter.isNotEmpty());
+
+        StringArray elements;
+        for (auto& v : input)
+            elements.add (v.toString());
+
+        return elements.joinIntoString (delimiter);
+    }
+
+    Array<var> delimitedStringToVarArray (StringRef input) const noexcept
+    {
+        Array<var> arr;
+
+        for (auto t : StringArray::fromTokens (input, delimiter, {}))
+            arr.add (t);
+
+        return arr;
     }
 };
 

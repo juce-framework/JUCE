@@ -6,6 +6,107 @@ Develop
 
 Change
 ------
+AudioProcessor::getTailLengthSeconds can now return infinity for VST/VST3/AU/AUv3
+
+Possible Issues
+---------------
+If you are using the result of getTailLengthSeconds to allocate a buffer in your host,
+then your host will now likely crash when loading a plug-in with an infinite tail time.
+
+Workaround
+----------
+Re-write your code to not use the result of getTailLengthSeconds directly to allocate
+a buffer.
+
+Rationale
+---------
+
+Before this change there was no way for a JUCE plug-in to report an infinite tail time. 
+
+
+Version 5.3.2
+=============
+
+Change
+------
+The behaviour of an UndoManager used by an AudioProcessorValueTreeState has
+been improved.
+
+Possible Issues
+---------------
+If your plug-in contains an UndoManager used by an AudioProcessorValueTreeState
+and relies upon the old behaviour of the UndoManager then it is possible that
+the new behaviour is no longer appropriate for your use case.
+
+Workaround
+----------
+Use an external UndoManager to reproduce the old behaviour manually.
+
+Rationale
+---------
+This change fixes a few bugs in the behaviour of an UndoManager used by an
+AudioProcessorValueTreeState.
+
+
+Change
+------
+JUCE no longer supports OS X deployment targets earlier than 10.7.
+
+Possible Issues
+---------------
+If you were previously targeting OS X 10.5 or 10.6 you will no longer be able
+to build JUCE-based products compatible with those platforms.
+
+Workaround
+----------
+None. With the appropriate JUCE licence you may be able to backport new JUCE
+features, but there will be no official support for this.
+
+Rationale
+---------
+Increasing the minimum supported OS X version allows the JUCE codebase to make
+use of the more modern C++ features found in the 10.7 standard library, which
+in turn will increase thread and memory safety.
+
+
+Version 5.3.0
+=============
+
+Change
+------
+The JUCE examples have been cleaned up, modernised and converted into PIPs
+(Projucer Instant Projects). The JUCE Demo has been removed and replaced by the
+DemoRunner application and larger projects such as the Audio Plugin Host and
+the Network Graphics Demo have been moved into the extras directory.
+
+Possible Issues
+---------------
+1. Due to the large number of changes that have occured in the JUCE Git
+   repository, pulling this version may result in a messy folder structure with
+   empty directories that have been removed.
+2. The JUCE Demo project is no longer in the JUCE repository.
+3. The Audio Plugin Host project has moved from the examples directory to the
+   extras directory.
+
+Workaround
+----------
+1. Run a Git clean command (git clean -xdf) in your JUCE directory to remove
+   all untracked files, directories and build products.
+2. The new DemoRunner application, located in extras/DemoRunner, can be used to
+   preview all the JUCE examples and see the code side-by-side.
+3. Change any file paths that depended on the plugin host project being located
+   in the examples directory to use the extras directory instead.
+
+Rationale
+---------
+The JUCE examples had inconsistent naming, coding styles and the projects and
+build products took up a large amount of space in the repository. Replacing
+them with PIPs reduces the file size and allows us to categorise the examples
+better, as well as cleaning up the code.
+
+
+Change
+------
 When hosting plug-ins all AudioProcessor methods of managing parameters that
 take a parameter index as an argument have been deprecated.
 
@@ -39,8 +140,8 @@ InAppPurchases object yourself.
 
 Possible Issues
 ---------------
-Any code using InAppPurchases needs to be updated to retrieve a singleton pointer
-to InAppPurchases.
+Any code using InAppPurchases needs to be updated to retrieve a singleton
+pointer to InAppPurchases.
 
 Workaround
 ----------

@@ -74,7 +74,7 @@ public:
 private:
     StringArray facts;
     File file;
-    ScopedPointer<Drawable> drawable;
+    std::unique_ptr<Drawable> drawable;
 
     void tryToLoadImage()
     {
@@ -83,7 +83,7 @@ private:
         drawable.reset();
 
         {
-            ScopedPointer<InputStream> input (file.createInputStream());
+            std::unique_ptr<InputStream> input (file.createInputStream());
 
             if (input != nullptr)
             {
@@ -113,7 +113,7 @@ private:
 
         if (drawable == nullptr)
         {
-            ScopedPointer<XmlElement> svg (XmlDocument::parse (file));
+            std::unique_ptr<XmlElement> svg (XmlDocument::parse (file));
 
             if (svg != nullptr)
                 drawable.reset (Drawable::createFromSVG (*svg));

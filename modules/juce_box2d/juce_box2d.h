@@ -35,7 +35,7 @@
 
   ID:               juce_box2d
   vendor:           juce
-  version:          5.2.1
+  version:          5.3.2
   name:             JUCE wrapper for the Box2D physics engine
   description:      The Box2D physics engine and some utility classes.
   website:          http://www.juce.com/juce
@@ -58,6 +58,9 @@
  #pragma GCC diagnostic push
  #pragma GCC diagnostic ignored "-Wconversion"
 #endif
+
+#include <climits>
+#include <cfloat>
 
 #include "box2d/Box2D.h"
 

@@ -108,7 +108,7 @@ namespace FIR
         }
 
         //==============================================================================
-        /** The coefficients of the FIR filter. It's up to the called to ensure that
+        /** The coefficients of the FIR filter. It's up to the caller to ensure that
             these coefficients are modified in a thread-safe way.
 
             If you change the order of the coefficients then you must call reset after

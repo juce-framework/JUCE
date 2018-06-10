@@ -390,7 +390,9 @@ public:
         auto* mw = Component::findParentComponentOfClass<MainWindow>();
         jassert (mw != nullptr);
 
-        if (ScopedPointer<NewProjectWizardClasses::NewProjectWizard> wizard = createWizard())
+        std::unique_ptr<NewProjectWizardClasses::NewProjectWizard> wizard = createWizard();
+
+        if (wizard != nullptr)
         {
             Result result (wizard->processResultsFromSetupItems (*this));
 
@@ -421,10 +423,11 @@ public:
             }
 
             auto projectDir = fileBrowser.getSelectedFile (0);
+            std::unique_ptr<Project> project (wizard->runWizard (*this, projectName.getText(),
+                                                               projectDir,
+                                                               modulesPathBox.isUsingGlobalPaths));
 
-            if (ScopedPointer<Project> project = wizard->runWizard (*this, projectName.getText(),
-                                                                    projectDir,
-                                                                    modulesPathBox.isUsingGlobalPaths))
+            if (project != nullptr)
             {
                 mw->setProject (project.release());
                 getAppSettings().lastWizardFolder = projectDir.getParentDirectory();
@@ -436,7 +439,9 @@ public:
     {
         StringArray items;
 
-        if (ScopedPointer<NewProjectWizardClasses::NewProjectWizard> wizard = createWizard())
+        std::unique_ptr<NewProjectWizardClasses::NewProjectWizard> wizard = createWizard();
+
+        if (wizard != nullptr)
             items = wizard->getFileCreationOptions();
 
         filesToCreate.clear();
@@ -481,7 +486,7 @@ private:
     TextButton cancelButton { TRANS("Cancel") };
     ModulesFolderPathBox modulesPathBox;
 
-    ScopedPointer<NewProjectWizardClasses::NewProjectWizard> createWizard()
+    std::unique_ptr<NewProjectWizardClasses::NewProjectWizard> createWizard()
     {
         return createWizardType (projectType.getSelectedItemIndex());
     }

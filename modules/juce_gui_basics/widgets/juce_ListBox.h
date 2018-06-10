@@ -580,9 +580,9 @@ private:
     friend class ListViewport;
     friend class TableListBox;
     ListBoxModel* model;
-    ScopedPointer<ListViewport> viewport;
-    ScopedPointer<Component> headerComponent;
-    ScopedPointer<MouseListener> mouseMoveSelector;
+    std::unique_ptr<ListViewport> viewport;
+    std::unique_ptr<Component> headerComponent;
+    std::unique_ptr<MouseListener> mouseMoveSelector;
     SparseSet<int> selected;
     int totalItems = 0, rowHeight = 22, minimumRowWidth = 0;
     int outlineThickness = 0;

@@ -24,10 +24,13 @@
   ==============================================================================
 */
 
+#pragma once
+
 #include "jucer_ProjectExport_CodeBlocks.h"
 #include "jucer_ProjectExport_Make.h"
 #include "jucer_ProjectExport_Xcode.h"
 
+//==============================================================================
 class CLionProjectExporter  : public ProjectExporter
 {
 protected:
@@ -74,7 +77,7 @@ public:
     {
         name = getName();
 
-        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + "CLion");
+        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderForExporter (getValueTreeTypeName()));
     }
 
     //==============================================================================
@@ -137,7 +140,7 @@ public:
 
         for (auto& exporterName : getExporterNames())
         {
-            ScopedPointer<ProjectExporter> exporter = createNewExporter (getProject(), exporterName);
+            std::unique_ptr<ProjectExporter> exporter (createNewExporter (getProject(), exporterName));
 
             if (isExporterSupported (*exporter))
                 description << exporter->getName() << newLine;
@@ -938,7 +941,7 @@ private:
                 {
                     auto plistFile = exporter.getTargetFolder().getChildFile (targetAttributes["INFOPLIST_FILE"]);
                     XmlDocument infoPlistData (plistFile);
-                    ScopedPointer<XmlElement> plist = infoPlistData.getDocumentElement();
+                    std::unique_ptr<XmlElement> plist (infoPlistData.getDocumentElement());
 
                     if (plist != nullptr)
                     {

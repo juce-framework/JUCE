@@ -68,7 +68,7 @@ namespace Keys
     static const int extendedKeyModifier = 0x10000000;
 }
 
-bool KeyPress::isKeyCurrentlyDown (const int keyCode)
+bool KeyPress::isKeyCurrentlyDown (int keyCode)
 {
     ScopedXDisplay xDisplay;
 
@@ -96,9 +96,9 @@ bool KeyPress::isKeyCurrentlyDown (const int keyCode)
         ScopedXLock xlock (display);
 
         const int keycode = XKeysymToKeycode (display, (KeySym) keysym);
-
         const int keybyte = keycode >> 3;
         const int keybit = (1 << (keycode & 7));
+
         return (Keys::keyStates [keybyte] & keybit) != 0;
     }
 
@@ -366,7 +366,7 @@ namespace XRender
 
 namespace Visuals
 {
-    static Visual* findVisualWithDepth (::Display* display, const int desiredDepth) noexcept
+    static Visual* findVisualWithDepth (::Display* display, int desiredDepth) noexcept
     {
         ScopedXLock xlock (display);
 
@@ -395,10 +395,7 @@ namespace Visuals
             desiredMask |= VisualBitsPerRGBMask;
         }
 
-        if (XVisualInfo* xvinfos = XGetVisualInfo (display,
-                                                   desiredMask,
-                                                   &desiredVisual,
-                                                   &numVisuals))
+        if (auto* xvinfos = XGetVisualInfo (display, desiredMask, &desiredVisual, &numVisuals))
         {
             for (int i = 0; i < numVisuals; i++)
             {
@@ -415,7 +412,7 @@ namespace Visuals
         return visual;
     }
 
-    static Visual* findVisualFormat (::Display* display, const int desiredDepth, int& matchedDepth) noexcept
+    static Visual* findVisualFormat (::Display* display, int desiredDepth, int& matchedDepth) noexcept
     {
         Visual* visual = nullptr;
 
@@ -427,7 +424,7 @@ namespace Visuals
                #if JUCE_USE_XRENDER
                 if (XRender::isAvailable (display))
                 {
-                    if (XRenderPictFormat* pictFormat = XRender::findPictureFormat (display))
+                    if (auto pictFormat = XRender::findPictureFormat (display))
                     {
                         int numVisuals = 0;
                         XVisualInfo desiredVisual;
@@ -435,13 +432,13 @@ namespace Visuals
                         desiredVisual.depth = 32;
                         desiredVisual.bits_per_rgb = 8;
 
-                        if (XVisualInfo* xvinfos = XGetVisualInfo (display,
-                                                                   VisualScreenMask | VisualDepthMask | VisualBitsPerRGBMask,
-                                                                   &desiredVisual, &numVisuals))
+                        if (auto xvinfos = XGetVisualInfo (display,
+                                                           VisualScreenMask | VisualDepthMask | VisualBitsPerRGBMask,
+                                                           &desiredVisual, &numVisuals))
                         {
                             for (int i = 0; i < numVisuals; ++i)
                             {
-                                XRenderPictFormat* pictVisualFormat = XRender::xRenderFindVisualFormat (display, xvinfos[i].visual);
+                                auto pictVisualFormat = XRender::xRenderFindVisualFormat (display, xvinfos[i].visual);
 
                                 if (pictVisualFormat != nullptr
                                      && pictVisualFormat->type == PictTypeDirect
@@ -461,6 +458,7 @@ namespace Visuals
                 if (visual == nullptr)
                 {
                     visual = findVisualWithDepth (display, 32);
+
                     if (visual != nullptr)
                         matchedDepth = 32;
                 }
@@ -471,6 +469,7 @@ namespace Visuals
         if (visual == nullptr && desiredDepth >= 24)
         {
             visual = findVisualWithDepth (display, 24);
+
             if (visual != nullptr)
                 matchedDepth = 24;
         }
@@ -478,6 +477,7 @@ namespace Visuals
         if (visual == nullptr && desiredDepth >= 16)
         {
             visual = findVisualWithDepth (display, 16);
+
             if (visual != nullptr)
                 matchedDepth = 16;
         }
@@ -626,7 +626,8 @@ public:
         return new LowLevelGraphicsSoftwareRenderer (Image (this));
     }
 
-    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode) override
+    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y,
+                               Image::BitmapData::ReadWriteMode mode) override
     {
         bitmap.data = imageData + x * pixelStride + y * lineStride;
         bitmap.pixelFormat = pixelFormat;
@@ -645,7 +646,8 @@ public:
 
     ImageType* createType() const override     { return new NativeImageType(); }
 
-    void blitToWindow (Window window, int dx, int dy, unsigned int dw, unsigned int dh, int sx, int sy)
+    void blitToWindow (Window window, int dx, int dy,
+                       unsigned int dw, unsigned int dh, int sx, int sy)
     {
         ScopedXLock xlock (display);
 
@@ -666,15 +668,15 @@ public:
 
         if (imageDepth == 16)
         {
-            const uint32 rMask   = (uint32) xImage->red_mask;
-            const uint32 gMask   = (uint32) xImage->green_mask;
-            const uint32 bMask   = (uint32) xImage->blue_mask;
-            const uint32 rShiftL = (uint32) jmax (0,  getShiftNeeded (rMask));
-            const uint32 rShiftR = (uint32) jmax (0, -getShiftNeeded (rMask));
-            const uint32 gShiftL = (uint32) jmax (0,  getShiftNeeded (gMask));
-            const uint32 gShiftR = (uint32) jmax (0, -getShiftNeeded (gMask));
-            const uint32 bShiftL = (uint32) jmax (0,  getShiftNeeded (bMask));
-            const uint32 bShiftR = (uint32) jmax (0, -getShiftNeeded (bMask));
+            auto rMask   = (uint32) xImage->red_mask;
+            auto gMask   = (uint32) xImage->green_mask;
+            auto bMask   = (uint32) xImage->blue_mask;
+            auto rShiftL = (uint32) jmax (0,  getShiftNeeded (rMask));
+            auto rShiftR = (uint32) jmax (0, -getShiftNeeded (rMask));
+            auto gShiftL = (uint32) jmax (0,  getShiftNeeded (gMask));
+            auto gShiftR = (uint32) jmax (0, -getShiftNeeded (gMask));
+            auto bShiftL = (uint32) jmax (0,  getShiftNeeded (bMask));
+            auto bShiftR = (uint32) jmax (0, -getShiftNeeded (bMask));
 
             const Image::BitmapData srcData (Image (this), Image::BitmapData::readOnly);
 
@@ -736,28 +738,6 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (XBitmapImage)
 };
-
-//==============================================================================
-
-#if JUCE_USE_XRANDR
-template <>
-struct ContainerDeletePolicy<XRRScreenResources>
-{
-    static void destroy (XRRScreenResources* object);
-};
-
-template <>
-struct ContainerDeletePolicy<XRROutputInfo>
-{
-    static void destroy (XRROutputInfo* object);
-};
-
-template <>
-struct ContainerDeletePolicy<XRRCrtcInfo>
-{
-    static void destroy (XRRCrtcInfo* object);
-};
-#endif
 
 //================================ X11 - DisplayGeometry =======================
 
@@ -967,10 +947,6 @@ private:
 
     //==============================================================================
    #if JUCE_USE_XRANDR
-    friend struct ContainerDeletePolicy<XRRScreenResources>;
-    friend struct ContainerDeletePolicy<XRROutputInfo>;
-    friend struct ContainerDeletePolicy<XRRCrtcInfo>;
-
     class XRandrWrapper
     {
     private:
@@ -1041,12 +1017,7 @@ private:
             return 0;
         }
 
-    private:
         //==============================================================================
-        friend struct ContainerDeletePolicy<XRRScreenResources>;
-        friend struct ContainerDeletePolicy<XRROutputInfo>;
-        friend struct ContainerDeletePolicy<XRRCrtcInfo>;
-
         void freeScreenResources (XRRScreenResources* ptr)
         {
             if (freeScreenResourcesPtr != nullptr)
@@ -1064,16 +1035,17 @@ private:
             if (freeCrtcInfoPtr != nullptr)
                 freeCrtcInfoPtr (ptr);
         }
+
     private:
         static XRandrWrapper* instance;
 
-        typedef XRRScreenResources* (*tXRRGetScreenResources) (::Display*, ::Window);
-        typedef void (*tXRRFreeScreenResources) (XRRScreenResources*);
-        typedef XRROutputInfo* (*tXRRGetOutputInfo) (::Display*, XRRScreenResources*, RROutput);
-        typedef void (*tXRRFreeOutputInfo) (XRROutputInfo*);
-        typedef XRRCrtcInfo* (*tXRRGetCrtcInfo) (::Display*, XRRScreenResources*, RRCrtc);
-        typedef void (*tXRRFreeCrtcInfo) (XRRCrtcInfo*);
-        typedef RROutput (*tXRRGetOutputPrimary) (::Display*, ::Window);
+        using tXRRGetScreenResources   = XRRScreenResources* (*) (::Display*, ::Window);
+        using tXRRFreeScreenResources  = void (*) (XRRScreenResources*);
+        using tXRRGetOutputInfo        = XRROutputInfo* (*) (::Display*, XRRScreenResources*, RROutput);
+        using tXRRFreeOutputInfo       = void (*) (XRROutputInfo*);
+        using tXRRGetCrtcInfo          = XRRCrtcInfo* (*) (::Display*, XRRScreenResources*, RRCrtc);
+        using tXRRFreeCrtcInfo         = void (*) (XRRCrtcInfo*);
+        using tXRRGetOutputPrimary     = RROutput (*) (::Display*, ::Window);
 
         void* libXrandr = nullptr;
         tXRRGetScreenResources getScreenResourcesPtr = nullptr;
@@ -1096,28 +1068,30 @@ private:
 
     static double getScaleForDisplay (const String& name, const ExtendedInfo& info)
     {
-        if (! name.isEmpty())
+        if (name.isNotEmpty())
         {
             // Ubuntu and derived distributions now save a per-display scale factor as a configuration
             // variable. This can be changed in the Monitor system settings panel.
             ChildProcess dconf;
-            if (File ("/usr/bin/dconf").existsAsFile() &&
-                dconf.start ("/usr/bin/dconf read /com/ubuntu/user-interface/scale-factor", ChildProcess::wantStdOut))
+
+            if (File ("/usr/bin/dconf").existsAsFile()
+                 && dconf.start ("/usr/bin/dconf read /com/ubuntu/user-interface/scale-factor", ChildProcess::wantStdOut))
             {
                 if (dconf.waitForProcessToFinish (200))
                 {
-                    String jsonOutput = dconf.readAllProcessOutput().replaceCharacter ('\'', '"');
+                    auto jsonOutput = dconf.readAllProcessOutput().replaceCharacter ('\'', '"');
 
                     if (dconf.getExitCode() == 0 && jsonOutput.isNotEmpty())
                     {
-                        var jsonVar = JSON::parse (jsonOutput);
+                        auto jsonVar = JSON::parse (jsonOutput);
 
-                        if (DynamicObject* object = jsonVar.getDynamicObject())
+                        if (auto* object = jsonVar.getDynamicObject())
                         {
-                            var scaleFactorVar = object->getProperty (name);
+                            auto scaleFactorVar = object->getProperty (name);
+
                             if (! scaleFactorVar.isVoid())
                             {
-                                double scaleFactor = ((double) scaleFactorVar) / 8.0;
+                                auto scaleFactor = ((double) scaleFactorVar) / 8.0;
 
                                 if (scaleFactor > 0.0)
                                     return scaleFactor;
@@ -1167,69 +1141,70 @@ private:
 
             if (XQueryExtension (display, "RANDR", &major_opcode, &first_event, &first_error))
             {
-                XRandrWrapper& xrandr = XRandrWrapper::getInstance();
+                auto& xrandr = XRandrWrapper::getInstance();
 
-                ScopedPointer<XRRScreenResources> screens;
-
-                const int numMonitors = ScreenCount (display);
-                RROutput mainDisplay = xrandr.getOutputPrimary (display, RootWindow (display, 0));
+                auto numMonitors = ScreenCount (display);
+                auto mainDisplay = xrandr.getOutputPrimary (display, RootWindow (display, 0));
 
                 for (int i = 0; i < numMonitors; ++i)
                 {
-                    if ((screens = xrandr.getScreenResources (display, RootWindow (display, i))).get())
+                    if (auto* screens = xrandr.getScreenResources (display, RootWindow (display, i)))
                     {
                         for (int j = 0; j < screens->noutput; ++j)
                         {
-                            if (! screens->outputs[j])
-                                continue;
-
-                            // Xrandr on the raspberry pi fails to determine the main display (mainDisplay == 0)!
-                            // Detect this edge case and make the first found display the main display
-                            if (! mainDisplay)
-                                mainDisplay = screens->outputs[j];
-
-                            ScopedPointer<XRROutputInfo> output;
-
-                            if ((output = xrandr.getOutputInfo (display, screens.get(), screens->outputs[j])).get())
+                            if (screens->outputs[j])
                             {
-                                if (! output->crtc)
-                                    continue;
+                                // Xrandr on the raspberry pi fails to determine the main display (mainDisplay == 0)!
+                                // Detect this edge case and make the first found display the main display
+                                if (! mainDisplay)
+                                    mainDisplay = screens->outputs[j];
 
-                                ScopedPointer<XRRCrtcInfo> crtc;
-
-                                if ((crtc = xrandr.getCrtcInfo (display, screens.get(), output->crtc)).get())
+                                if (auto* output = xrandr.getOutputInfo (display, screens, screens->outputs[j]))
                                 {
-                                    ExtendedInfo e;
-                                    e.totalBounds = Rectangle<int> (crtc->x, crtc->y,
-                                                                    (int) crtc->width, (int) crtc->height);
-                                    e.usableBounds = e.totalBounds.withZeroOrigin(); // Support for usable area is not implemented in JUCE yet
-                                    e.topLeftScaled = e.totalBounds.getTopLeft();
-                                    e.isMain = (mainDisplay == screens->outputs[j]) && (i == 0);
-                                    e.dpi = getDisplayDPI (display, 0);
+                                    if (output->crtc)
+                                    {
+                                        if (auto* crtc = xrandr.getCrtcInfo (display, screens, output->crtc))
+                                        {
+                                            ExtendedInfo e;
+                                            e.totalBounds = Rectangle<int> (crtc->x, crtc->y,
+                                                                            (int) crtc->width, (int) crtc->height);
+                                            e.usableBounds = e.totalBounds.withZeroOrigin(); // Support for usable area is not implemented in JUCE yet
+                                            e.topLeftScaled = e.totalBounds.getTopLeft();
+                                            e.isMain = (mainDisplay == screens->outputs[j]) && (i == 0);
+                                            e.dpi = getDisplayDPI (display, 0);
 
-                                    // The raspberry pi returns a zero sized display, so we need to guard for divide-by-zero
-                                    if (output->mm_width > 0 && output->mm_height > 0)
-                                        e.dpi = ((static_cast<double> (crtc->width) * 25.4 * 0.5) / static_cast<double> (output->mm_width))
-                                            + ((static_cast<double> (crtc->height) * 25.4 * 0.5) / static_cast<double> (output->mm_height));
+                                            // The raspberry pi returns a zero sized display, so we need to guard for divide-by-zero
+                                            if (output->mm_width > 0 && output->mm_height > 0)
+                                                e.dpi = ((static_cast<double> (crtc->width) * 25.4 * 0.5) / static_cast<double> (output->mm_width))
+                                                    + ((static_cast<double> (crtc->height) * 25.4 * 0.5) / static_cast<double> (output->mm_height));
 
-                                    double scale = getScaleForDisplay (output->name, e);
-                                    scale = (scale <= 0.1 ? 1.0 : scale);
+                                            double scale = getScaleForDisplay (output->name, e);
+                                            scale = (scale <= 0.1 ? 1.0 : scale);
 
-                                    e.scale = masterScale * scale;
+                                            e.scale = masterScale * scale;
 
-                                    infos.add (e);
+                                            infos.add (e);
+
+                                            xrandr.freeCrtcInfo (crtc);
+                                        }
+                                    }
+
+                                    xrandr.freeOutputInfo (output);
                                 }
                             }
                         }
+
+                        xrandr.freeScreenResources (screens);
                     }
                 }
             }
         }
-        if (infos.size() == 0)
+
+        if (infos.isEmpty())
        #endif
        #if JUCE_USE_XINERAMA
         {
-            Array<XineramaScreenInfo> screens = XineramaQueryDisplays (display);
+            auto screens = XineramaQueryDisplays (display);
             int numMonitors = screens.size();
 
             for (int index = 0; index < numMonitors; ++index)
@@ -1255,14 +1230,14 @@ private:
             }
         }
 
-        if (infos.size() == 0)
+        if (infos.isEmpty())
        #endif
         {
             Atom hints = Atoms::getIfExists (display, "_NET_WORKAREA");
 
             if (hints != None)
             {
-                const int numMonitors = ScreenCount (display);
+                auto numMonitors = ScreenCount (display);
 
                 for (int i = 0; i < numMonitors; ++i)
                 {
@@ -1270,14 +1245,14 @@ private:
 
                     if (prop.success && prop.actualType == XA_CARDINAL && prop.actualFormat == 32 && prop.numItems == 4)
                     {
-                        const long* const position = (const long*) prop.data;
+                        auto position = (const long*) prop.data;
 
                         ExtendedInfo e;
                         e.totalBounds = Rectangle<int> ((int) position[0], (int) position[1],
                                                         (int) position[2], (int) position[3]);
                         e.usableBounds = e.totalBounds.withZeroOrigin(); // Support for usable area is not implemented in JUCE yet
                         e.topLeftScaled = e.totalBounds.getTopLeft(); // this will be overwritten by updatePositions later
-                        e.isMain = (infos.size() == 0);
+                        e.isMain = infos.isEmpty();
                         e.scale = masterScale;
                         e.dpi = getDisplayDPI (display, i);
 
@@ -1286,7 +1261,7 @@ private:
                 }
             }
 
-            if (infos.size() == 0)
+            if (infos.isEmpty())
             {
                 ExtendedInfo e;
                 e.totalBounds = Rectangle<int> (DisplayWidth  (display, DefaultScreen (display)),
@@ -1361,24 +1336,6 @@ DisplayGeometry* DisplayGeometry::instance = nullptr;
 
 #if JUCE_USE_XRANDR
 DisplayGeometry::XRandrWrapper* DisplayGeometry::XRandrWrapper::instance = nullptr;
-
-void ContainerDeletePolicy<XRRScreenResources>::destroy (XRRScreenResources* ptr)
-{
-    if (ptr != nullptr)
-        DisplayGeometry::XRandrWrapper::getInstance().freeScreenResources (ptr);
-}
-
-void ContainerDeletePolicy<XRROutputInfo>::destroy (XRROutputInfo* ptr)
-{
-    if (ptr != nullptr)
-        DisplayGeometry::XRandrWrapper::getInstance().freeOutputInfo (ptr);
-}
-
-void ContainerDeletePolicy<XRRCrtcInfo>::destroy (XRRCrtcInfo* ptr)
-{
-    if (ptr != nullptr)
-        DisplayGeometry::XRandrWrapper::getInstance().freeCrtcInfo (ptr);
-}
 #endif
 
 //=============================== X11 - Pixmap =================================
@@ -1389,8 +1346,8 @@ namespace PixmapHelpers
     {
         ScopedXLock xlock (display);
 
-        const unsigned int width = (unsigned int) image.getWidth();
-        const unsigned int height = (unsigned int) image.getHeight();
+        auto width = (unsigned int) image.getWidth();
+        auto height = (unsigned int) image.getHeight();
         HeapBlock<uint32> colour (width * height);
         int index = 0;
 
@@ -1416,9 +1373,9 @@ namespace PixmapHelpers
     {
         ScopedXLock xlock (display);
 
-        const unsigned int width = (unsigned int) image.getWidth();
-        const unsigned int height = (unsigned int) image.getHeight();
-        const unsigned int stride = (width + 7) >> 3;
+        auto width = (unsigned int) image.getWidth();
+        auto height = (unsigned int) image.getHeight();
+        auto stride = (width + 7) >> 3;
         HeapBlock<char> mask;
         mask.calloc (stride * height);
         const bool msbfirst = (BitmapBitOrder (display) == MSBFirst);
@@ -1427,7 +1384,7 @@ namespace PixmapHelpers
         {
             for (unsigned int x = 0; x < width; ++x)
             {
-                const char bit = (char) (1 << (msbfirst ? (7 - (x & 7)) : (x & 7)));
+                auto bit = (char) (1 << (msbfirst ? (7 - (x & 7)) : (x & 7)));
                 const unsigned int offset = y * stride + (x >> 3);
 
                 if (image.getPixelAt ((int) x, (int) y).getAlpha() >= 128)
@@ -1462,7 +1419,7 @@ bool juce_areThereAnyAlwaysOnTopWindows()
 class LinuxComponentPeer  : public ComponentPeer
 {
 public:
-    LinuxComponentPeer (Component& comp, const int windowStyleFlags, Window parentToAddTo)
+    LinuxComponentPeer (Component& comp, int windowStyleFlags, Window parentToAddTo)
         : ComponentPeer (comp, windowStyleFlags),
           isAlwaysOnTop (comp.isAlwaysOnTop())
     {
@@ -1471,9 +1428,9 @@ public:
 
         display = XWindowSystem::getInstance()->displayRef();
 
-        atoms = new Atoms (display);
-        dragState = new DragState (display);
-        repainter = new LinuxRepaintManager (*this, display);
+        atoms.reset (new Atoms (display));
+        dragState.reset (new DragState (display));
+        repainter.reset (new LinuxRepaintManager (*this, display));
 
         if (isAlwaysOnTop)
             ++numAlwaysOnTopPeers;
@@ -1481,6 +1438,33 @@ public:
         createWindow (parentToAddTo);
 
         setTitle (component.getName());
+
+        getNativeRealtimeModifiers = []
+        {
+            ScopedXDisplay xDisplay;
+
+            if (auto display = xDisplay.display)
+            {
+                Window root, child;
+                int x, y, winx, winy;
+                unsigned int mask;
+                int mouseMods = 0;
+
+                ScopedXLock xlock (display);
+
+                if (XQueryPointer (display, RootWindow (display, DefaultScreen (display)),
+                                   &root, &child, &x, &y, &winx, &winy, &mask) != False)
+                {
+                    if ((mask & Button1Mask) != 0)  mouseMods |= ModifierKeys::leftButtonModifier;
+                    if ((mask & Button2Mask) != 0)  mouseMods |= ModifierKeys::middleButtonModifier;
+                    if ((mask & Button3Mask) != 0)  mouseMods |= ModifierKeys::rightButtonModifier;
+                }
+
+                ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons().withFlags (mouseMods);
+            }
+
+            return ModifierKeys::currentModifiers;
+        };
     }
 
     ~LinuxComponentPeer()
@@ -1596,7 +1580,7 @@ public:
             WeakReference<Component> deletionChecker (&component);
             ScopedXLock xlock (display);
 
-            XSizeHints* const hints = XAllocSizeHints();
+            auto* hints = XAllocSizeHints();
             hints->flags  = USSize | USPosition;
             hints->x      = physicalBounds.getX();
             hints->y      = physicalBounds.getY();
@@ -1684,7 +1668,7 @@ public:
                 && ((unsigned long*) prop.data)[0] == IconicState;
     }
 
-    void setFullScreen (const bool shouldBeFullScreen) override
+    void setFullScreen (bool shouldBeFullScreen) override
     {
         auto r = lastNonFullscreenBounds; // (get a copy of this before de-minimising)
 
@@ -1765,7 +1749,7 @@ public:
         {
             for (int i = (int) windowListSize; --i >= 0;)
             {
-                if (LinuxComponentPeer* const peer = LinuxComponentPeer::getPeerFor (windowList[i]))
+                if (auto* peer = LinuxComponentPeer::getPeerFor (windowList[i]))
                 {
                     result = (peer == this);
                     break;
@@ -2032,7 +2016,7 @@ public:
 
     void handleKeyPressEvent (XKeyEvent& keyEvent)
     {
-        auto oldMods = currentModifiers;
+        auto oldMods = ModifierKeys::currentModifiers;
 
         char utf8 [64] = { 0 };
         juce_wchar unicodeChar = 0;
@@ -2055,7 +2039,7 @@ public:
             keyCode = (int) unicodeChar;
 
             if (keyCode < 0x20)
-                keyCode = (int) XkbKeycodeToKeysym (display, (::KeyCode) keyEvent.keycode, 0, currentModifiers.isShiftDown() ? 1 : 0);
+                keyCode = (int) XkbKeycodeToKeysym (display, (::KeyCode) keyEvent.keycode, 0, ModifierKeys::currentModifiers.isShiftDown() ? 1 : 0);
 
             keyDownChange = (sym != NoSymbol) && ! updateKeyModifiersFromSym (sym, true);
         }
@@ -2139,7 +2123,7 @@ public:
         if (utf8[0] != 0 || ((sym & 0xff00) == 0 && sym >= 8))
             keyPressed = true;
 
-        if (oldMods != currentModifiers)
+        if (oldMods != ModifierKeys::currentModifiers)
             handleModifierKeysChange();
 
         if (keyDownChange)
@@ -2177,10 +2161,10 @@ public:
                 sym = XkbKeycodeToKeysym (display, (::KeyCode) keyEvent.keycode, 0, 0);
             }
 
-            auto oldMods = currentModifiers;
+            auto oldMods = ModifierKeys::currentModifiers;
             const bool keyDownChange = (sym != NoSymbol) && ! updateKeyModifiersFromSym (sym, false);
 
-            if (oldMods != currentModifiers)
+            if (oldMods != ModifierKeys::currentModifiers)
                 handleModifierKeysChange();
 
             if (keyDownChange)
@@ -2194,7 +2178,7 @@ public:
         return Point<float> ((float) e.x, (float) e.y) / currentScaleFactor;
     }
 
-    void handleWheelEvent (const XButtonPressedEvent& buttonPressEvent, const float amount)
+    void handleWheelEvent (const XButtonPressedEvent& buttonPressEvent, float amount)
     {
         MouseWheelDetails wheel;
         wheel.deltaX = 0.0f;
@@ -2209,9 +2193,9 @@ public:
 
     void handleButtonPressEvent (const XButtonPressedEvent& buttonPressEvent, int buttonModifierFlag)
     {
-        currentModifiers = currentModifiers.withFlags (buttonModifierFlag);
+        ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withFlags (buttonModifierFlag);
         toFront (true);
-        handleMouseEvent (MouseInputSource::InputSourceType::mouse, getMousePos (buttonPressEvent), currentModifiers,
+        handleMouseEvent (MouseInputSource::InputSourceType::mouse, getMousePos (buttonPressEvent), ModifierKeys::currentModifiers,
                           MouseInputSource::invalidPressure, MouseInputSource::invalidOrientation, getEventTime (buttonPressEvent), {});
     }
 
@@ -2250,9 +2234,9 @@ public:
         {
             switch (pointerMap[mapIndex])
             {
-                case Keys::LeftButton:      currentModifiers = currentModifiers.withoutFlags (ModifierKeys::leftButtonModifier); break;
-                case Keys::RightButton:     currentModifiers = currentModifiers.withoutFlags (ModifierKeys::rightButtonModifier); break;
-                case Keys::MiddleButton:    currentModifiers = currentModifiers.withoutFlags (ModifierKeys::middleButtonModifier); break;
+                case Keys::LeftButton:      ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutFlags (ModifierKeys::leftButtonModifier); break;
+                case Keys::RightButton:     ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutFlags (ModifierKeys::rightButtonModifier); break;
+                case Keys::MiddleButton:    ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutFlags (ModifierKeys::middleButtonModifier); break;
                 default: break;
             }
         }
@@ -2260,7 +2244,7 @@ public:
         if (dragState->dragging)
             handleExternalDragButtonReleaseEvent();
 
-        handleMouseEvent (MouseInputSource::InputSourceType::mouse, getMousePos (buttonRelEvent), currentModifiers,
+        handleMouseEvent (MouseInputSource::InputSourceType::mouse, getMousePos (buttonRelEvent), ModifierKeys::currentModifiers,
                           MouseInputSource::invalidPressure, MouseInputSource::invalidOrientation, getEventTime (buttonRelEvent));
 
         clearLastMousePos();
@@ -2275,7 +2259,7 @@ public:
         if (dragState->dragging)
             handleExternalDragMotionNotify();
 
-        handleMouseEvent (MouseInputSource::InputSourceType::mouse, getMousePos (movedEvent), currentModifiers,
+        handleMouseEvent (MouseInputSource::InputSourceType::mouse, getMousePos (movedEvent), ModifierKeys::currentModifiers,
                           MouseInputSource::invalidPressure, MouseInputSource::invalidOrientation, getEventTime (movedEvent));
     }
 
@@ -2286,10 +2270,10 @@ public:
 
         clearLastMousePos();
 
-        if (! currentModifiers.isAnyMouseButtonDown())
+        if (! ModifierKeys::currentModifiers.isAnyMouseButtonDown())
         {
             updateKeyModifiers ((int) enterEvent.state);
-            handleMouseEvent (MouseInputSource::InputSourceType::mouse, getMousePos (enterEvent), currentModifiers,
+            handleMouseEvent (MouseInputSource::InputSourceType::mouse, getMousePos (enterEvent), ModifierKeys::currentModifiers,
                               MouseInputSource::invalidPressure, MouseInputSource::invalidOrientation, getEventTime (enterEvent));
         }
     }
@@ -2299,11 +2283,11 @@ public:
         // Suppress the normal leave if we've got a pointer grab, or if
         // it's a bogus one caused by clicking a mouse button when running
         // in a Window manager
-        if (((! currentModifiers.isAnyMouseButtonDown()) && leaveEvent.mode == NotifyNormal)
+        if (((! ModifierKeys::currentModifiers.isAnyMouseButtonDown()) && leaveEvent.mode == NotifyNormal)
              || leaveEvent.mode == NotifyUngrab)
         {
             updateKeyModifiers ((int) leaveEvent.state);
-            handleMouseEvent (MouseInputSource::InputSourceType::mouse, getMousePos (leaveEvent), currentModifiers,
+            handleMouseEvent (MouseInputSource::InputSourceType::mouse, getMousePos (leaveEvent), ModifierKeys::currentModifiers,
                               MouseInputSource::invalidPressure, MouseInputSource::invalidOrientation, getEventTime (leaveEvent));
         }
     }
@@ -2356,11 +2340,12 @@ public:
         while (XEventsQueued (display, QueuedAfterFlush) > 0)
         {
             XPeekEvent (display, &nextEvent);
+
             if (nextEvent.type != Expose || nextEvent.xany.window != exposeEvent.window)
                 break;
 
             XNextEvent (display, &nextEvent);
-            const XExposeEvent& nextExposeEvent = (const XExposeEvent&) nextEvent.xexpose;
+            auto& nextExposeEvent = (const XExposeEvent&) nextEvent.xexpose;
             repaint (Rectangle<int> (nextExposeEvent.x, nextExposeEvent.y,
                                      nextExposeEvent.width, nextExposeEvent.height) / currentScaleFactor);
         }
@@ -2424,7 +2409,7 @@ public:
     {
         if (clientMsg.message_type == atoms->protocols && clientMsg.format == 32)
         {
-            const Atom atom = (Atom) clientMsg.data.l[0];
+            auto atom = (Atom) clientMsg.data.l[0];
 
             if (atom == atoms->protocolList [Atoms::PING])
             {
@@ -2592,8 +2577,6 @@ public:
 
     //==============================================================================
     bool dontRepaint;
-
-    static ModifierKeys currentModifiers;
     static bool isActiveApplication;
 
 private:
@@ -2612,9 +2595,8 @@ private:
                 ScopedXLock xlock (display);
                 XShmSegmentInfo segmentinfo;
 
-                XImage* const testImage
-                    = XShmCreateImage (display, DefaultVisual (display, DefaultScreen (display)),
-                                       24, ZPixmap, 0, &segmentinfo, 64, 64);
+                auto testImage = XShmCreateImage (display, DefaultVisual (display, DefaultScreen (display)),
+                                                  24, ZPixmap, 0, &segmentinfo, 64, 64);
 
                 useARGBImagesForRendering = (testImage->bits_per_pixel == 32);
                 XDestroyImage (testImage);
@@ -2659,9 +2641,9 @@ private:
             }
            #endif
 
-            RectangleList<int>  originalRepaintRegion (regionsNeedingRepaint);
+            auto originalRepaintRegion = regionsNeedingRepaint;
             regionsNeedingRepaint.clear();
-            const Rectangle<int> totalArea (originalRepaintRegion.getBounds());
+            auto totalArea = originalRepaintRegion.getBounds();
 
             if (! totalArea.isEmpty())
             {
@@ -2689,8 +2671,8 @@ private:
                         image.clear (i - totalArea.getPosition());
 
                 {
-                    ScopedPointer<LowLevelGraphicsContext> context (peer.getComponent().getLookAndFeel()
-                                                                      .createGraphicsContext (image, -totalArea.getPosition(), adjustedList));
+                    std::unique_ptr<LowLevelGraphicsContext> context (peer.getComponent().getLookAndFeel()
+                                                                          .createGraphicsContext (image, -totalArea.getPosition(), adjustedList));
                     context->addTransform (AffineTransform::scale ((float) peer.currentScaleFactor));
                     peer.handlePaint (*context);
                 }
@@ -2737,8 +2719,8 @@ private:
         JUCE_DECLARE_NON_COPYABLE (LinuxRepaintManager)
     };
 
-    ScopedPointer<Atoms> atoms;
-    ScopedPointer<LinuxRepaintManager> repainter;
+    std::unique_ptr<Atoms> atoms;
+    std::unique_ptr<LinuxRepaintManager> repainter;
 
     friend class LinuxRepaintManager;
     Window windowH = {}, parentWindow = {}, keyProxy = {};
@@ -2763,7 +2745,7 @@ private:
         unsigned long status;
     };
 
-    static void updateKeyStates (const int keycode, const bool press) noexcept
+    static void updateKeyStates (int keycode, bool press) noexcept
     {
         const int keybyte = keycode >> 3;
         const int keybit = (1 << (keycode & 7));
@@ -2774,7 +2756,7 @@ private:
             Keys::keyStates [keybyte] &= ~keybit;
     }
 
-    static void updateKeyModifiers (const int status) noexcept
+    static void updateKeyModifiers (int status) noexcept
     {
         int keyMods = 0;
 
@@ -2782,13 +2764,13 @@ private:
         if ((status & ControlMask) != 0)   keyMods |= ModifierKeys::ctrlModifier;
         if ((status & Keys::AltMask) != 0) keyMods |= ModifierKeys::altModifier;
 
-        currentModifiers = currentModifiers.withOnlyMouseButtons().withFlags (keyMods);
+        ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withOnlyMouseButtons().withFlags (keyMods);
 
         Keys::numLock  = ((status & Keys::NumLockMask) != 0);
         Keys::capsLock = ((status & LockMask) != 0);
     }
 
-    static bool updateKeyModifiersFromSym (KeySym sym, const bool press) noexcept
+    static bool updateKeyModifiersFromSym (KeySym sym, bool press) noexcept
     {
         int modifier = 0;
         bool isModifier = true;
@@ -2824,8 +2806,8 @@ private:
                 break;
         }
 
-        currentModifiers = press ? currentModifiers.withFlags (modifier)
-                                 : currentModifiers.withoutFlags (modifier);
+        ModifierKeys::currentModifiers = press ? ModifierKeys::currentModifiers.withFlags (modifier)
+                                               : ModifierKeys::currentModifiers.withoutFlags (modifier);
 
         return isModifier;
     }
@@ -2835,13 +2817,13 @@ private:
     static void updateModifierMappings() noexcept
     {
         ScopedXLock xlock (display);
-        const int altLeftCode = XKeysymToKeycode (display, XK_Alt_L);
-        const int numLockCode = XKeysymToKeycode (display, XK_Num_Lock);
+        int altLeftCode = XKeysymToKeycode (display, XK_Alt_L);
+        int numLockCode = XKeysymToKeycode (display, XK_Num_Lock);
 
         Keys::AltMask = 0;
         Keys::NumLockMask = 0;
 
-        if (XModifierKeymap* const mapping = XGetModifierMapping (display))
+        if (auto* mapping = XGetModifierMapping (display))
         {
             for (int i = 0; i < 8; i++)
             {
@@ -3117,7 +3099,7 @@ private:
     static int64 getEventTime (::Time t)
     {
         static int64 eventTimeOffset = 0x12345678;
-        const int64 thisMessageTime = (int64) t;
+        auto thisMessageTime = (int64) t;
 
         if (eventTimeOffset == 0x12345678)
             eventTimeOffset = Time::currentTimeMillis() - thisMessageTime;
@@ -3148,7 +3130,7 @@ private:
 
                 if (prop.success && prop.actualFormat == 32)
                 {
-                    const unsigned long* const sizes = (const unsigned long*) prop.data;
+                    auto* sizes = (const unsigned long*) prop.data;
 
                     windowBorder = BorderSize<int> ((int) sizes[2], (int) sizes[0],
                                                     (int) sizes[3], (int) sizes[1]);
@@ -3216,7 +3198,7 @@ private:
 
     void resetExternalDragState()
     {
-        dragState = new DragState (display);
+        dragState.reset (new DragState (display));
     }
 
     void sendDragAndDropMessage (XClientMessageEvent& msg)
@@ -3231,7 +3213,7 @@ private:
         XSendEvent (display, dragAndDropSourceWindow, False, 0, (XEvent*) &msg);
     }
 
-    bool sendExternalDragAndDropMessage (XClientMessageEvent& msg, const Window targetWindow)
+    bool sendExternalDragAndDropMessage (XClientMessageEvent& msg, Window targetWindow)
     {
         msg.type      = ClientMessage;
         msg.display   = display;
@@ -3243,7 +3225,7 @@ private:
         return XSendEvent (display, targetWindow, False, 0, (XEvent*) &msg) != 0;
     }
 
-    void sendExternalDragAndDropDrop (const Window targetWindow)
+    void sendExternalDragAndDropDrop (Window targetWindow)
     {
         XClientMessageEvent msg;
         zerostruct (msg);
@@ -3254,7 +3236,7 @@ private:
         sendExternalDragAndDropMessage (msg, targetWindow);
     }
 
-    void sendExternalDragAndDropEnter (const Window targetWindow)
+    void sendExternalDragAndDropEnter (Window targetWindow)
     {
         XClientMessageEvent msg;
         zerostruct (msg);
@@ -3268,7 +3250,7 @@ private:
         sendExternalDragAndDropMessage (msg, targetWindow);
     }
 
-    void sendExternalDragAndDropPosition (const Window targetWindow)
+    void sendExternalDragAndDropPosition (Window targetWindow)
     {
         XClientMessageEvent msg;
         zerostruct (msg);
@@ -3289,7 +3271,7 @@ private:
         dragState->expectingStatus = sendExternalDragAndDropMessage (msg, targetWindow);
     }
 
-    void sendDragAndDropStatus (const bool acceptDrop, Atom dropAction)
+    void sendDragAndDropStatus (bool acceptDrop, Atom dropAction)
     {
         XClientMessageEvent msg;
         zerostruct (msg);
@@ -3301,7 +3283,7 @@ private:
         sendDragAndDropMessage (msg);
     }
 
-    void sendExternalDragAndDropLeave (const Window targetWindow)
+    void sendExternalDragAndDropLeave (Window targetWindow)
     {
         XClientMessageEvent msg;
         zerostruct (msg);
@@ -3496,7 +3478,7 @@ private:
         srcMimeTypeAtomList.clear();
 
         dragAndDropCurrentMimeType = 0;
-        const unsigned long dndCurrentVersion = static_cast<unsigned long> (clientMsg.data.l[1] & 0xff000000) >> 24;
+        auto dndCurrentVersion = static_cast<unsigned long> (clientMsg.data.l[1] & 0xff000000) >> 24;
 
         if (dndCurrentVersion < 3 || dndCurrentVersion > Atoms::DndVersion)
         {
@@ -3516,7 +3498,7 @@ private:
                  && prop.actualFormat == 32
                  && prop.numItems != 0)
             {
-                const unsigned long* const types = (const unsigned long*) prop.data;
+                auto* types = (const unsigned long*) prop.data;
 
                 for (unsigned long i = 0; i < prop.numItems; ++i)
                     if (types[i] != None)
@@ -3524,13 +3506,13 @@ private:
             }
         }
 
-        if (srcMimeTypeAtomList.size() == 0)
+        if (srcMimeTypeAtomList.isEmpty())
         {
             for (int i = 2; i < 5; ++i)
                 if (clientMsg.data.l[i] != None)
                     srcMimeTypeAtomList.add ((unsigned long) clientMsg.data.l[i]);
 
-            if (srcMimeTypeAtomList.size() == 0)
+            if (srcMimeTypeAtomList.isEmpty())
             {
                 dragAndDropSourceWindow = 0;
                 return;
@@ -3611,9 +3593,9 @@ private:
     bool isWindowDnDAware (Window w) const
     {
         int numProperties = 0;
-        Atom* const properties = XListProperties (display, w, &numProperties);
-
+        auto* properties = XListProperties (display, w, &numProperties);
         bool dndAwarePropFound = false;
+
         for (int i = 0; i < numProperties; ++i)
             if (properties[i] == atoms->XdndAware)
                 dndAwarePropFound = true;
@@ -3685,7 +3667,7 @@ private:
         resetExternalDragState();
     }
 
-    ScopedPointer<DragState> dragState;
+    std::unique_ptr<DragState> dragState;
     DragInfo dragInfo;
     Atom dragAndDropCurrentMimeType;
     Window dragAndDropSourceWindow;
@@ -3729,7 +3711,6 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LinuxComponentPeer)
 };
 
-ModifierKeys LinuxComponentPeer::currentModifiers;
 bool LinuxComponentPeer::isActiveApplication = false;
 Point<int> LinuxComponentPeer::lastMousePos;
 ::Display* LinuxComponentPeer::display = nullptr;
@@ -3776,40 +3757,6 @@ JUCE_API bool JUCE_CALLTYPE Process::isForegroundProcess()
 // N/A on Linux as far as I know.
 JUCE_API void JUCE_CALLTYPE Process::makeForegroundProcess() {}
 JUCE_API void JUCE_CALLTYPE Process::hide() {}
-
-//==============================================================================
-void ModifierKeys::updateCurrentModifiers() noexcept
-{
-    currentModifiers = LinuxComponentPeer::currentModifiers;
-}
-
-ModifierKeys ModifierKeys::getCurrentModifiersRealtime() noexcept
-{
-    ScopedXDisplay xDisplay;
-
-    if (auto display = xDisplay.display)
-    {
-        Window root, child;
-        int x, y, winx, winy;
-        unsigned int mask;
-        int mouseMods = 0;
-
-        ScopedXLock xlock (display);
-
-        if (XQueryPointer (display, RootWindow (display, DefaultScreen (display)),
-                           &root, &child, &x, &y, &winx, &winy, &mask) != False)
-        {
-            if ((mask & Button1Mask) != 0)  mouseMods |= ModifierKeys::leftButtonModifier;
-            if ((mask & Button2Mask) != 0)  mouseMods |= ModifierKeys::middleButtonModifier;
-            if ((mask & Button3Mask) != 0)  mouseMods |= ModifierKeys::rightButtonModifier;
-        }
-
-        LinuxComponentPeer::currentModifiers = LinuxComponentPeer::currentModifiers.withoutMouseButtons().withFlags (mouseMods);
-    }
-
-    return LinuxComponentPeer::currentModifiers;
-}
-
 
 //==============================================================================
 void Desktop::setKioskComponent (Component* comp, bool enableOrDisable, bool /* allowMenusAndBars */)
@@ -3887,7 +3834,7 @@ void Desktop::Displays::findDisplays (float masterScale)
 //==============================================================================
 bool MouseInputSource::SourceList::addSource()
 {
-    if (sources.size() == 0)
+    if (sources.isEmpty())
     {
         addSource (0, MouseInputSource::InputSourceType::mouse);
         return true;
@@ -3968,7 +3915,7 @@ Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
 //==============================================================================
 static bool screenSaverAllowed = true;
 
-void Desktop::setScreenSaverEnabled (const bool isEnabled)
+void Desktop::setScreenSaverEnabled (bool isEnabled)
 {
     if (screenSaverAllowed != isEnabled)
     {
@@ -4101,17 +4048,17 @@ void* CustomMouseCursorInfo::create() const
         return nullptr;
 
     ScopedXLock xlock (display);
-    const unsigned int imageW = (unsigned int) image.getWidth();
-    const unsigned int imageH = (unsigned int) image.getHeight();
+    auto imageW = (unsigned int) image.getWidth();
+    auto imageH = (unsigned int) image.getHeight();
     int hotspotX = hotspot.x;
     int hotspotY = hotspot.y;
 
   #if JUCE_USE_XCURSOR
     {
-        typedef XcursorBool (*tXcursorSupportsARGB) (Display*);
-        typedef XcursorImage* (*tXcursorImageCreate) (int, int);
-        typedef void (*tXcursorImageDestroy) (XcursorImage*);
-        typedef Cursor (*tXcursorImageLoadCursor) (Display*, const XcursorImage*);
+        using tXcursorSupportsARGB    = XcursorBool (*) (Display*);
+        using tXcursorImageCreate     = XcursorImage* (*) (int, int);
+        using tXcursorImageDestroy    = void (*) (XcursorImage*);
+        using tXcursorImageLoadCursor = Cursor (*) (Display*, const XcursorImage*);
 
         static tXcursorSupportsARGB    xcursorSupportsARGB    = nullptr;
         static tXcursorImageCreate     xcursorImageCreate     = nullptr;
@@ -4194,10 +4141,10 @@ void* CustomMouseCursorInfo::create() const
     {
         for (int x = (int) cursorW; --x >= 0;)
         {
-            const char mask = (char) (1 << (msbfirst ? (7 - (x & 7)) : (x & 7)));
-            const unsigned int offset = (unsigned int) y * stride + ((unsigned int) x >> 3);
+            auto mask = (char) (1 << (msbfirst ? (7 - (x & 7)) : (x & 7)));
+            auto offset = (unsigned int) y * stride + ((unsigned int) x >> 3);
 
-            const Colour c (im.getPixelAt (x, y));
+            auto c = im.getPixelAt (x, y);
 
             if (c.getAlpha() >= 128)        maskPlane[offset]   |= mask;
             if (c.getBrightness() >= 0.5f)  sourcePlane[offset] |= mask;
@@ -4220,7 +4167,7 @@ void* CustomMouseCursorInfo::create() const
     return result;
 }
 
-void MouseCursor::deleteMouseCursor (void* const cursorHandle, const bool)
+void MouseCursor::deleteMouseCursor (void* cursorHandle, bool)
 {
     if (cursorHandle != nullptr)
     {
@@ -4314,10 +4261,10 @@ static LinuxComponentPeer* getPeerForDragEvent (Component* sourceComp)
     return nullptr;
 }
 
-bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& files, const bool canMoveFiles,
+bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& files, bool canMoveFiles,
                                                            Component* sourceComp)
 {
-    if (files.size() == 0)
+    if (files.isEmpty())
         return false;
 
     if (auto* lp = getPeerForDragEvent (sourceComp))

@@ -120,6 +120,7 @@
 #include "containers/juce_AbstractFifo.cpp"
 #include "containers/juce_NamedValueSet.cpp"
 #include "containers/juce_PropertySet.cpp"
+#include "containers/juce_SparseSet.cpp"
 #include "containers/juce_Variant.cpp"
 #include "files/juce_DirectoryIterator.cpp"
 #include "files/juce_File.cpp"

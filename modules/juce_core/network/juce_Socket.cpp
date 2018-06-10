@@ -94,10 +94,10 @@ namespace SocketHelpers
                                : setOption (handle, IPPROTO_TCP, TCP_NODELAY, (int) 1));
     }
 
-    static void closeSocket (volatile int& handle, CriticalSection& readLock,
-                             bool isListener, int portNumber, bool& connected) noexcept
+    static void closeSocket (std::atomic<int>& handle, CriticalSection& readLock,
+                             bool isListener, int portNumber, std::atomic<bool>& connected) noexcept
     {
-        const SocketHandle h = handle;
+        const SocketHandle h = handle.load();
         handle = -1;
 
        #if JUCE_WINDOWS
@@ -187,8 +187,8 @@ namespace SocketHelpers
     }
 
     static int readSocket (SocketHandle handle,
-                           void* const destBuffer, const int maxBytesToRead,
-                           bool volatile& connected,
+                           void* destBuffer, int maxBytesToRead,
+                           std::atomic<bool>& connected,
                            bool blockUntilSpecifiedAmountHasArrived,
                            CriticalSection& readLock,
                            String* senderIP = nullptr,
@@ -242,8 +242,8 @@ namespace SocketHelpers
         return (int) bytesRead;
     }
 
-    static int waitForReadiness (const volatile int& handle, CriticalSection& readLock,
-                                 const bool forReading, const int timeoutMsecs) noexcept
+    static int waitForReadiness (std::atomic<int>& handle, CriticalSection& readLock,
+                                 bool forReading, int timeoutMsecs) noexcept
     {
         // avoid race-condition
         CriticalSection::ScopedTryLockType lock (readLock);
@@ -251,7 +251,7 @@ namespace SocketHelpers
         if (! lock.isLocked())
             return -1;
 
-        int h = handle;
+        int h = handle.load();
 
         struct timeval timeout;
         struct timeval* timeoutp;
@@ -293,7 +293,7 @@ namespace SocketHelpers
        #endif
 
         // we are closing
-        if (handle < 0)
+        if (handle.load() < 0)
             return -1;
 
         {
@@ -308,7 +308,7 @@ namespace SocketHelpers
         return FD_ISSET (h, forReading ? &rset : &wset) ? 1 : 0;
     }
 
-    static bool setSocketBlockingState (SocketHandle handle, const bool shouldBlock) noexcept
+    static bool setSocketBlockingState (SocketHandle handle, bool shouldBlock) noexcept
     {
        #if JUCE_WINDOWS
         u_long nonBlocking = shouldBlock ? 0 : (u_long) 1;
@@ -328,7 +328,7 @@ namespace SocketHelpers
        #endif
     }
 
-    static addrinfo* getAddressInfo (const bool isDatagram, const String& hostName, int portNumber)
+    static addrinfo* getAddressInfo (bool isDatagram, const String& hostName, int portNumber)
     {
         struct addrinfo hints;
         zerostruct (hints);
@@ -345,11 +345,11 @@ namespace SocketHelpers
         return nullptr;
     }
 
-    static bool connectSocket (int volatile& handle,
+    static bool connectSocket (std::atomic<int>& handle,
                                CriticalSection& readLock,
                                const String& hostName,
-                               const int portNumber,
-                               const int timeOutMillisecs) noexcept
+                               int portNumber,
+                               int timeOutMillisecs) noexcept
     {
         bool success = false;
 
@@ -373,7 +373,7 @@ namespace SocketHelpers
                         if (errno == EINPROGRESS)
                        #endif
                         {
-                            const volatile int cvHandle = (int) newHandle;
+                            std::atomic<int> cvHandle { (int) newHandle };
 
                             if (waitForReadiness (cvHandle, readLock, false, timeOutMillisecs) == 1)
                                 success = true;
@@ -454,14 +454,14 @@ StreamingSocket::~StreamingSocket()
 }
 
 //==============================================================================
-int StreamingSocket::read (void* destBuffer, const int maxBytesToRead, bool shouldBlock)
+int StreamingSocket::read (void* destBuffer, int maxBytesToRead, bool shouldBlock)
 {
     return (connected && ! isListener) ? SocketHelpers::readSocket (handle, destBuffer, maxBytesToRead,
                                                                     connected, shouldBlock, readLock)
                                        : -1;
 }
 
-int StreamingSocket::write (const void* sourceBuffer, const int numBytesToWrite)
+int StreamingSocket::write (const void* sourceBuffer, int numBytesToWrite)
 {
     if (isListener || ! connected)
         return -1;
@@ -470,20 +470,19 @@ int StreamingSocket::write (const void* sourceBuffer, const int numBytesToWrite)
 }
 
 //==============================================================================
-int StreamingSocket::waitUntilReady (const bool readyForReading,
-                                     const int timeoutMsecs) const
+int StreamingSocket::waitUntilReady (bool readyForReading, int timeoutMsecs)
 {
     return connected ? SocketHelpers::waitForReadiness (handle, readLock, readyForReading, timeoutMsecs)
                      : -1;
 }
 
 //==============================================================================
-bool StreamingSocket::bindToPort (const int port)
+bool StreamingSocket::bindToPort (int port)
 {
     return bindToPort (port, String());
 }
 
-bool StreamingSocket::bindToPort (const int port, const String& addr)
+bool StreamingSocket::bindToPort (int port, const String& addr)
 {
     jassert (SocketHelpers::isValidPortNumber (port));
 
@@ -495,9 +494,7 @@ int StreamingSocket::getBoundPort() const noexcept
     return SocketHelpers::getBoundPort (handle);
 }
 
-bool StreamingSocket::connect (const String& remoteHostName,
-                               const int remotePortNumber,
-                               const int timeOutMillisecs)
+bool StreamingSocket::connect (const String& remoteHostName, int remotePortNumber, int timeOutMillisecs)
 {
     jassert (SocketHelpers::isValidPortNumber (remotePortNumber));
 
@@ -537,7 +534,7 @@ void StreamingSocket::close()
 }
 
 //==============================================================================
-bool StreamingSocket::createListener (const int newPortNumber, const String& localHostName)
+bool StreamingSocket::createListener (int newPortNumber, const String& localHostName)
 {
     jassert (SocketHelpers::isValidPortNumber (newPortNumber));
 
@@ -633,18 +630,18 @@ void DatagramSocket::shutdown()
     if (handle < 0)
         return;
 
-    auto copyOfHandle = handle;
+    std::atomic<int> handleCopy { handle.load() };
     handle = -1;
-    bool connected = false;
-    SocketHelpers::closeSocket (copyOfHandle, readLock, false, 0, connected);
+    std::atomic<bool> connected { false };
+    SocketHelpers::closeSocket (handleCopy, readLock, false, 0, connected);
 }
 
-bool DatagramSocket::bindToPort (const int port)
+bool DatagramSocket::bindToPort (int port)
 {
     return bindToPort (port, String());
 }
 
-bool DatagramSocket::bindToPort (const int port, const String& addr)
+bool DatagramSocket::bindToPort (int port, const String& addr)
 {
     jassert (SocketHelpers::isValidPortNumber (port));
 
@@ -664,8 +661,7 @@ int DatagramSocket::getBoundPort() const noexcept
 }
 
 //==============================================================================
-int DatagramSocket::waitUntilReady (const bool readyForReading,
-                                    const int timeoutMsecs) const
+int DatagramSocket::waitUntilReady (bool readyForReading, int timeoutMsecs)
 {
     if (handle < 0)
         return -1;
@@ -678,7 +674,7 @@ int DatagramSocket::read (void* destBuffer, int maxBytesToRead, bool shouldBlock
     if (handle < 0 || ! isBound)
         return -1;
 
-    bool connected = true;
+    std::atomic<bool> connected { true };
 
     SocketHelpers::setSocketBlockingState (handle, shouldBlock);
     return SocketHelpers::readSocket (handle, destBuffer, maxBytesToRead,
@@ -690,7 +686,7 @@ int DatagramSocket::read (void* destBuffer, int maxBytesToRead, bool shouldBlock
     if (handle < 0 || ! isBound)
         return -1;
 
-    bool connected = true;
+    std::atomic<bool> connected { true };
 
     SocketHelpers::setSocketBlockingState (handle, shouldBlock);
     return SocketHelpers::readSocket (handle, destBuffer, maxBytesToRead, connected,

@@ -47,7 +47,8 @@ public:
         : PropertyComponent ("extra callbacks", 250),
           document (doc)
     {
-        addAndMakeVisible (listBox = new ListBox (String(), this));
+        listBox.reset (new ListBox (String(), this));
+        addAndMakeVisible (listBox.get());
         listBox->setRowHeight (22);
 
         document.addChangeListener (this);
@@ -126,7 +127,7 @@ public:
 
 private:
     JucerDocument& document;
-    ScopedPointer<ListBox> listBox;
+    std::unique_ptr<ListBox> listBox;
 
     StringArray baseClasses, returnValues, methods, initialContents;
 };
@@ -354,6 +355,12 @@ JucerDocumentEditor::JucerDocumentEditor (JucerDocument* const doc)
         refreshPropertiesPanel();
 
         changeListenerCallback (nullptr);
+
+        if (auto* project = document->getCppDocument().getProject())
+        {
+            if (project->shouldSendGUIBuilderAnalyticsEvent())
+                Analytics::getInstance()->logEvent ("GUI Builder", {}, ProjucerAnalyticsEvent::projectEvent);
+        }
     }
 }
 
@@ -602,10 +609,10 @@ void JucerDocumentEditor::saveLastSelectedTab() const
         {
             auto& projectProps = project->getStoredProperties();
 
-            ScopedPointer<XmlElement> root (projectProps.getXmlValue ("GUIComponentsLastTab"));
+            std::unique_ptr<XmlElement> root (projectProps.getXmlValue ("GUIComponentsLastTab"));
 
             if (root == nullptr)
-                root = new XmlElement ("FILES");
+                root.reset (new XmlElement ("FILES"));
 
             auto fileName = document->getCppFile().getFileName();
 
@@ -627,7 +634,7 @@ void JucerDocumentEditor::restoreLastSelectedTab()
     {
         if (auto* project = document->getCppDocument().getProject())
         {
-            ScopedPointer<XmlElement> root (project->getStoredProperties().getXmlValue ("GUIComponentsLastTab"));
+            std::unique_ptr<XmlElement> root (project->getStoredProperties().getXmlValue ("GUIComponentsLastTab"));
 
             if (root != nullptr)
             {
@@ -931,7 +938,7 @@ void JucerDocumentEditor::getCommandInfo (const CommandID commandID, Application
 
             bool canPaste = false;
 
-            ScopedPointer<XmlElement> doc (XmlDocument::parse (SystemClipboard::getTextFromClipboard()));
+            std::unique_ptr<XmlElement> doc (XmlDocument::parse (SystemClipboard::getTextFromClipboard()));
 
             if (doc != nullptr)
             {
@@ -1149,7 +1156,9 @@ bool JucerDocumentEditor::perform (const InvocationInfo& info)
 
         case StandardApplicationCommandIDs::paste:
             {
-                if (ScopedPointer<XmlElement> doc = XmlDocument::parse (SystemClipboard::getTextFromClipboard()))
+                std::unique_ptr<XmlElement> doc (XmlDocument::parse (SystemClipboard::getTextFromClipboard()));
+
+                if (doc != nullptr)
                 {
                     if (doc->hasTagName (ComponentLayout::clipboardXmlTag))
                     {

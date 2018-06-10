@@ -249,14 +249,4 @@ bool OpenGLHelpers::isContextActive()
     return CGLGetCurrentContext() != 0;
 }
 
-//==============================================================================
-void componentPeerAboutToChange (Component& comp, bool shouldSuspend)
-{
-    if (auto* context = OpenGLContext::getContextAttachedTo (comp))
-        context->overrideCanBeAttached (shouldSuspend);
-
-    for (auto* child : comp.getChildren())
-        componentPeerAboutToChange (*child, shouldSuspend);
-}
-
 } // namespace juce

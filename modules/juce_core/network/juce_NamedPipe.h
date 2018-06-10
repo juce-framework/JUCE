@@ -88,7 +88,7 @@ public:
 private:
     //==============================================================================
     JUCE_PUBLIC_IN_DLL_BUILD (class Pimpl)
-    ScopedPointer<Pimpl> pimpl;
+    std::unique_ptr<Pimpl> pimpl;
     String currentPipeName;
     ReadWriteLock lock;
 

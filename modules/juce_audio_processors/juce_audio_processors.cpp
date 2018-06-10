@@ -82,10 +82,10 @@ static inline bool arrayContainsPlugin (const OwnedArray<PluginDescription>& lis
 
 #if JUCE_IOS
  #define JUCE_IOS_MAC_VIEW  UIView
- typedef UIViewComponent  ViewComponentBaseClass;
+ using ViewComponentBaseClass = UIViewComponent;
 #else
  #define JUCE_IOS_MAC_VIEW  NSView
- typedef NSViewComponent  ViewComponentBaseClass;
+ using ViewComponentBaseClass = NSViewComponent;
 #endif
 
 //==============================================================================
@@ -154,6 +154,7 @@ struct AutoResizingNSViewComponentWithParent  : public AutoResizingNSViewCompone
 
 #include "format/juce_AudioPluginFormat.cpp"
 #include "format/juce_AudioPluginFormatManager.cpp"
+#include "format_types/juce_LegacyAudioParameter.cpp"
 #include "processors/juce_AudioProcessor.cpp"
 #include "processors/juce_AudioPluginInstance.cpp"
 #include "processors/juce_AudioProcessorEditor.cpp"

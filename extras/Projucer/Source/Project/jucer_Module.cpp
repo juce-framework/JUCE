@@ -28,6 +28,7 @@
 #include "jucer_Module.h"
 #include "../ProjectSaving/jucer_ProjectSaver.h"
 #include "../ProjectSaving/jucer_ProjectExport_Xcode.h"
+#include "../Application/jucer_ProjucerAnalytics.h"
 
 //==============================================================================
 static var parseModuleDesc (const StringArray& lines)
@@ -465,7 +466,7 @@ void LibraryModule::getConfigFlags (Project& project, OwnedArray<Project::Config
 
         if (line.startsWith ("/**") && line.containsIgnoreCase ("Config:"))
         {
-            ScopedPointer<Project::ConfigFlag> config (new Project::ConfigFlag());
+            std::unique_ptr<Project::ConfigFlag> config (new Project::ConfigFlag());
             config->sourceModuleID = getID();
             config->symbol = line.fromFirstOccurrenceOf (":", false, false).trim();
 
@@ -774,7 +775,7 @@ Value EnabledModuleList::shouldCopyModuleFilesLocally (const String& moduleID) c
                 .getPropertyAsValue (Ids::useLocalCopy, getUndoManager());
 }
 
-void EnabledModuleList::addModule (const File& moduleFolder, bool copyLocally, bool useGlobalPath)
+void EnabledModuleList::addModule (const File& moduleFolder, bool copyLocally, bool useGlobalPath, bool sendAnalyticsEvent)
 {
     ModuleDescription info (moduleFolder);
 
@@ -799,6 +800,14 @@ void EnabledModuleList::addModule (const File& moduleFolder, bool copyLocally, b
 
             for (Project::ExporterIterator exporter (project); exporter.next();)
                 exporter->getPathForModuleValue (moduleID) = path.toUnixStyle();
+
+            if (sendAnalyticsEvent)
+            {
+                StringPairArray data;
+                data.set ("label", moduleID);
+
+                Analytics::getInstance()->logEvent ("Module Added", data, ProjucerAnalyticsEvent::projectEvent);
+            }
         }
     }
 }
@@ -955,20 +964,20 @@ void EnabledModuleList::addModuleInteractive (const String& moduleID)
     list.scanGlobalJuceModulePath();
     if (auto* info = list.getModuleWithID (moduleID))
     {
-        addModule (info->moduleFolder, areMostModulesCopiedLocally(), areMostModulesUsingGlobalPath());
+        addModule (info->moduleFolder, areMostModulesCopiedLocally(), areMostModulesUsingGlobalPath(), true);
         return;
     }
 
     list.scanGlobalUserModulePath();
     if (auto* info = list.getModuleWithID (moduleID))
     {
-        addModule (info->moduleFolder, areMostModulesCopiedLocally(), areMostModulesUsingGlobalPath());
+        addModule (info->moduleFolder, areMostModulesCopiedLocally(), areMostModulesUsingGlobalPath(), true);
         return;
     }
 
     list.scanProjectExporterModulePaths (project);
     if (auto* info = list.getModuleWithID (moduleID))
-        addModule (info->moduleFolder, areMostModulesCopiedLocally(), false);
+        addModule (info->moduleFolder, areMostModulesCopiedLocally(), false, true);
     else
         addModuleFromUserSelectedFile();
 }
@@ -991,8 +1000,9 @@ void EnabledModuleList::addModuleOfferingToCopy (const File& f, bool isFromUserS
         return;
     }
 
-    addModule (m.moduleFolder, areMostModulesCopiedLocally(), isFromUserSpecifiedFolder ? false
-                                                                                        : areMostModulesUsingGlobalPath());
+    addModule (m.moduleFolder, areMostModulesCopiedLocally(),
+               isFromUserSpecifiedFolder ? false : areMostModulesUsingGlobalPath(),
+               true);
 }
 
 bool isJUCEFolder (const File& f)

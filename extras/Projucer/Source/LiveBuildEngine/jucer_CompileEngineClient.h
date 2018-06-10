@@ -38,32 +38,38 @@ public:
     CompileEngineChildProcess (Project&);
     ~CompileEngineChildProcess();
 
+    //==============================================================================
     bool openedOk() const       { return process != nullptr; }
 
     void editorOpened (const File& file, CodeDocument& document);
     bool documentAboutToClose (OpenDocumentManager::Document*) override;
 
+    //==============================================================================
     void cleanAll();
     void openPreview (const ClassDatabase::Class&);
     void reinstantiatePreviews();
     void processActivationChanged (bool isForeground);
 
+    //==============================================================================
     bool canLaunchApp() const;
     void launchApp();
     bool canKillApp() const;
     void killApp();
+    bool isAppRunning() const noexcept;
 
+    //==============================================================================
     const ClassDatabase::ClassList& getComponentList() const        { return lastComponentList; }
 
-    void setContinuousRebuild (bool continuousBuild);
+    //==============================================================================
     void flushEditorChanges();
-
     static void cleanAllCachedFilesForProject (Project&);
 
+    //==============================================================================
     Project& project;
     ActivityList activityList;
     ErrorList errorList;
 
+    //==============================================================================
     std::function<void (const String&)> crashHandler;
 
     //==============================================================================
@@ -85,14 +91,13 @@ public:
     void handleRedoInEditor (const String& className);
     void handleMissingSystemHeaders();
 
-    typedef ReferenceCountedObjectPtr<CompileEngineChildProcess> Ptr;
+    using Ptr = ReferenceCountedObjectPtr<CompileEngineChildProcess>;
 
 private:
     //==============================================================================
     class ChildProcess;
-    ScopedPointer<ChildProcess> process, runningAppProcess;
+    std::unique_ptr<ChildProcess> process, runningAppProcess;
     ClassDatabase::ClassList lastComponentList;
-    bool continuousRebuild;
 
     struct Editor;
     OwnedArray<Editor> editors;
@@ -151,17 +156,4 @@ private:
     ReferenceCountedArray<CompileEngineChildProcess> processes;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChildProcessCache)
-};
-
-//==============================================================================
-struct LiveBuildProjectSettings
-{
-    static void getLiveSettings (Project&, PropertyListBuilder&);
-    static void updateNewlyOpenedProject (Project& p);
-
-    static bool isBuildDisabled (Project&);
-    static void setBuildDisabled (Project&, bool);
-
-    static bool areWarningsDisabled (Project&);
-    static void setWarningsDisabled (Project&, bool);
 };

@@ -127,6 +127,9 @@ public:
     */
     virtual void userCancelled();
 
+    virtual String getMessageForConnectionFailure (bool isInternetConnectionWorking);
+    virtual String getMessageForUnexpectedReply();
+
     //==============================================================================
     // The following methods can be called by your app:
 

@@ -209,7 +209,7 @@ protected:
     virtual TabBarButton* createTabButton (const String& tabName, int tabIndex);
 
     /** @internal */
-    ScopedPointer<TabbedButtonBar> tabs;
+    std::unique_ptr<TabbedButtonBar> tabs;
 
 private:
     //==============================================================================

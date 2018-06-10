@@ -27,17 +27,11 @@
 namespace juce
 {
 
-template <> struct ContainerDeletePolicy<SKProductsRequest>                                                { static void destroy (NSObject* o) { [o release]; } };
-template <> struct ContainerDeletePolicy<SKReceiptRefreshRequest>                                          { static void destroy (NSObject* o) { [o release]; } };
-template <> struct ContainerDeletePolicy<NSObject<SKProductsRequestDelegate,SKPaymentTransactionObserver>> { static void destroy (NSObject* o) { [o release]; } };
-
-
-//==============================================================================
 struct SKDelegateAndPaymentObserver
 {
     SKDelegateAndPaymentObserver()  : delegate ([getClass().createInstance() init])
     {
-        Class::setThis (delegate, this);
+        Class::setThis (delegate.get(), this);
     }
 
     virtual ~SKDelegateAndPaymentObserver() {}
@@ -51,7 +45,7 @@ struct SKDelegateAndPaymentObserver
     virtual void updatedDownloads (SKPaymentQueue*, NSArray<SKDownload*>*) = 0;
 
 protected:
-    ScopedPointer<NSObject<SKProductsRequestDelegate, SKPaymentTransactionObserver>> delegate;
+    std::unique_ptr<NSObject<SKProductsRequestDelegate, SKPaymentTransactionObserver>, NSObjectDeleter> delegate;
 
 private:
     struct Class   : public ObjCClass<NSObject<SKProductsRequestDelegate, SKPaymentTransactionObserver>>
@@ -126,14 +120,14 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
         };
 
         Type type;
-        ScopedPointer<SKProductsRequest> request;
+        std::unique_ptr<SKProductsRequest, NSObjectDeleter> request;
     };
 
     /** Represents a pending request started from [SKReceiptRefreshRequest start]. */
     struct PendingReceiptRefreshRequest
     {
         String subscriptionsSharedSecret;
-        ScopedPointer<SKReceiptRefreshRequest> request;
+        std::unique_ptr<SKReceiptRefreshRequest, NSObjectDeleter> request;
     };
 
     /** Represents a transaction with pending downloads. Only after all downloads
@@ -176,8 +170,8 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
     };
 
     //==============================================================================
-    Pimpl (InAppPurchases& p) : owner (p)  { [[SKPaymentQueue defaultQueue] addTransactionObserver:    delegate]; }
-    ~Pimpl() noexcept                      { [[SKPaymentQueue defaultQueue] removeTransactionObserver: delegate]; }
+    Pimpl (InAppPurchases& p) : owner (p)  { [[SKPaymentQueue defaultQueue] addTransactionObserver:    delegate.get()]; }
+    ~Pimpl() noexcept                      { [[SKPaymentQueue defaultQueue] removeTransactionObserver: delegate.get()]; }
 
     //==============================================================================
     bool isInAppPurchasesSupported() const     { return true; }
@@ -186,9 +180,10 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
     {
         auto* productsRequest = [[SKProductsRequest alloc] initWithProductIdentifiers: [NSSet setWithArray: createNSArrayFromStringArray (productIdentifiers)]];
 
-        pendingProductInfoRequests.add (new PendingProductInfoRequest {PendingProductInfoRequest::Type::query, productsRequest});
+        pendingProductInfoRequests.add (new PendingProductInfoRequest { PendingProductInfoRequest::Type::query,
+                                                                        std::unique_ptr<SKProductsRequest, NSObjectDeleter> (productsRequest) });
 
-        productsRequest.delegate = delegate;
+        productsRequest.delegate = delegate.get();
         [productsRequest start];
     }
 
@@ -203,9 +198,10 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
         auto* productIdentifiers = [NSArray arrayWithObject: juceStringToNS (productIdentifier)];
         auto* productsRequest    = [[SKProductsRequest alloc] initWithProductIdentifiers:[NSSet setWithArray:productIdentifiers]];
 
-        pendingProductInfoRequests.add (new PendingProductInfoRequest {PendingProductInfoRequest::Type::purchase, productsRequest});
+        pendingProductInfoRequests.add (new PendingProductInfoRequest { PendingProductInfoRequest::Type::purchase,
+                                                                        std::unique_ptr<SKProductsRequest, NSObjectDeleter> (productsRequest) });
 
-        productsRequest.delegate = delegate;
+        productsRequest.delegate = delegate.get();
         [productsRequest start];
     }
 
@@ -219,9 +215,9 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
         {
             auto* receiptRequest = [[SKReceiptRefreshRequest alloc] init];
 
-            pendingReceiptRefreshRequests.add (new PendingReceiptRefreshRequest {subscriptionsSharedSecret,
-                                                                                 [receiptRequest retain]});
-            receiptRequest.delegate = delegate;
+            pendingReceiptRefreshRequests.add (new PendingReceiptRefreshRequest { subscriptionsSharedSecret,
+                                                                                  std::unique_ptr<SKReceiptRefreshRequest, NSObjectDeleter> ([receiptRequest retain]) });
+            receiptRequest.delegate = delegate.get();
             [receiptRequest start];
         }
     }
@@ -256,7 +252,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
         {
             auto& pendingRequest = *pendingProductInfoRequests[i];
 
-            if (pendingRequest.request == request)
+            if (pendingRequest.request.get() == request)
             {
                 if      (pendingRequest.type == PendingProductInfoRequest::Type::query)    notifyProductsInfoReceived (response.products);
                 else if (pendingRequest.type == PendingProductInfoRequest::Type::purchase) startPurchase (response.products);
@@ -279,7 +275,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
             {
                 auto& pendingRequest = *pendingReceiptRefreshRequests[i];
 
-                if (pendingRequest.request == receiptRefreshRequest)
+                if (pendingRequest.request.get() == receiptRefreshRequest)
                 {
                     processReceiptRefreshResponseWithSubscriptionsSharedSecret (pendingRequest.subscriptionsSharedSecret);
                     pendingReceiptRefreshRequests.remove (i);
@@ -297,7 +293,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
             {
                 auto& pendingRequest = *pendingReceiptRefreshRequests[i];
 
-                if (pendingRequest.request == receiptRefreshRequest)
+                if (pendingRequest.request.get() == receiptRefreshRequest)
                 {
                     auto errorDetails = error != nil ? (", " + nsStringToJuce ([error localizedDescription])) : String();
                     owner.listeners.call ([&] (Listener& l) { l.purchasesListRestored ({}, false, NEEDS_TRANS ("Receipt fetch failed") + errorDetails); });

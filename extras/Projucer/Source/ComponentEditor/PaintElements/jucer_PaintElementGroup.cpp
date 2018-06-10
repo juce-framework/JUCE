@@ -43,7 +43,7 @@ void PaintElementGroup::ungroup (const bool undoable)
 
     for (int i = 0; i < subElements.size(); ++i)
     {
-        ScopedPointer<XmlElement> xml (subElements.getUnchecked(i)->createXml());
+        std::unique_ptr<XmlElement> xml (subElements.getUnchecked(i)->createXml());
 
         PaintElement* newOne = getOwner()->addElementFromXml (*xml, index, undoable);
         getOwner()->getSelectedElements().addToSelection (newOne);
@@ -63,9 +63,9 @@ void PaintElementGroup::groupSelected (PaintRoutine* routine)
         {
             if (routine->getSelectedElements().isSelected (routine->getElement (i)))
             {
-                ScopedPointer<XmlElement> xml (routine->getElement(i)->createXml());
+                std::unique_ptr<XmlElement> xml (routine->getElement(i)->createXml());
 
-                if (auto* newOne = ObjectTypes::createElementForXml (xml, routine))
+                if (auto* newOne = ObjectTypes::createElementForXml (xml.get(), routine))
                     newGroup->subElements.add (newOne);
 
                 if (i > frontIndex)

@@ -105,6 +105,9 @@ public:
     /** Returns the node section of the UUID. */
     uint64 getNode() const noexcept;
 
+    /** Returns a hash of the UUID. */
+    uint64 hash() const noexcept;
+
     //==============================================================================
     /** Returns a pointer to the internal binary representation of the ID.
 

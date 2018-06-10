@@ -407,7 +407,7 @@ void ComboBox::lookAndFeelChanged()
     repaint();
 
     {
-        ScopedPointer<Label> newLabel (getLookAndFeel().createComboBoxTextBox (*this));
+        std::unique_ptr<Label> newLabel (getLookAndFeel().createComboBoxTextBox (*this));
         jassert (newLabel != nullptr);
 
         if (label != nullptr)
@@ -523,6 +523,9 @@ static void comboBoxPopupMenuFinishedCallback (int result, ComboBox* combo)
 
 void ComboBox::showPopup()
 {
+    if (! menuActive)
+        menuActive = true;
+
     auto menu = currentMenu;
 
     if (menu.getNumItems() > 0)

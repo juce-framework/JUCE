@@ -2358,7 +2358,8 @@ const char* const* PhysicalTopologySource::getStandardLittleFootFunctions() noex
     return BlocksProtocol::ledProgramLittleFootFunctions;
 }
 
-static bool blocksMatch (const Block::Array& list1, const Block::Array& list2) noexcept
+template <typename ListType>
+static bool collectionsMatch (const ListType& list1, const ListType& list2) noexcept
 {
     if (list1.size() != list2.size())
         return false;
@@ -2372,7 +2373,7 @@ static bool blocksMatch (const Block::Array& list1, const Block::Array& list2) n
 
 bool BlockTopology::operator== (const BlockTopology& other) const noexcept
 {
-    return connections == other.connections && blocksMatch (blocks, other.blocks);
+    return collectionsMatch (connections, other.connections) && collectionsMatch (blocks, other.blocks);
 }
 
 bool BlockTopology::operator!= (const BlockTopology& other) const noexcept

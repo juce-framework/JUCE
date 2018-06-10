@@ -80,9 +80,9 @@ private:
 //==============================================================================
 struct Expression::Helpers
 {
-    typedef ReferenceCountedObjectPtr<Term> TermPtr;
+    using TermPtr = ReferenceCountedObjectPtr<Term>;
 
-    static void checkRecursionDepth (const int depth)
+    static void checkRecursionDepth (int depth)
     {
         if (depth > 256)
             throw EvaluationError ("Recursive symbol references");
@@ -857,7 +857,7 @@ struct Expression::Helpers
                 if (readOperator ("(")) // method call...
                 {
                     Function* const f = new Function (identifier);
-                    ScopedPointer<Term> func (f);  // (can't use ScopedPointer<Function> in MSVC)
+                    std::unique_ptr<Term> func (f);  // (can't use std::unique_ptr<Function> in MSVC)
 
                     TermPtr param (readExpression());
 
@@ -1021,7 +1021,7 @@ Expression Expression::function (const String& functionName, const Array<Express
 
 Expression Expression::adjustedToGiveNewResult (const double targetValue, const Expression::Scope& scope) const
 {
-    ScopedPointer<Term> newTerm (term->clone());
+    std::unique_ptr<Term> newTerm (term->clone());
 
     Helpers::Constant* termToAdjust = Helpers::findTermToAdjust (newTerm.get(), true);
 

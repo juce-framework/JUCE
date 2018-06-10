@@ -69,7 +69,7 @@ void InterprocessConnectionServer::run()
 {
     while ((! threadShouldExit()) && socket != nullptr)
     {
-        ScopedPointer<StreamingSocket> clientSocket (socket->waitForNextConnection());
+        std::unique_ptr<StreamingSocket> clientSocket (socket->waitForNextConnection());
 
         if (clientSocket != nullptr)
             if (auto* newConnection = createConnectionObject())

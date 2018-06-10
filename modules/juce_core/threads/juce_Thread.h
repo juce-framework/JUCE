@@ -176,7 +176,7 @@ public:
 
     //==============================================================================
     /** Used to receive callbacks for thread exit calls */
-    class Listener
+    class JUCE_API Listener
     {
     public:
         virtual ~Listener() {}
@@ -288,7 +288,7 @@ public:
     /** A value type used for thread IDs.
         @see getCurrentThreadId(), getThreadId()
     */
-    typedef void* ThreadID;
+    using ThreadID = void*;
 
     /** Returns an id that identifies the caller thread.
 

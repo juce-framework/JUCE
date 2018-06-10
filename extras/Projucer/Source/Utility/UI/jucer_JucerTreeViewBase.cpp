@@ -31,13 +31,13 @@
 //==============================================================================
 void TreePanelBase::setRoot (JucerTreeViewBase* root)
 {
-    rootItem = root;
+    rootItem.reset (root);
     tree.setRootItem (root);
     tree.getRootItem()->setOpen (true);
 
     if (project != nullptr)
     {
-        const ScopedPointer<XmlElement> treeOpenness (project->getStoredProperties()
+        const std::unique_ptr<XmlElement> treeOpenness (project->getStoredProperties()
                                                           .getXmlValue (opennessStateKey));
         if (treeOpenness != nullptr)
         {
@@ -54,7 +54,7 @@ void TreePanelBase::saveOpenness()
 {
     if (project != nullptr)
     {
-        ScopedPointer<XmlElement> opennessState (tree.getOpennessState (true));
+        std::unique_ptr<XmlElement> opennessState (tree.getOpennessState (true));
 
         if (opennessState != nullptr)
             project->getStoredProperties().setValue (opennessStateKey, opennessState.get());
@@ -92,7 +92,7 @@ void JucerTreeViewBase::paintOpenCloseButton (Graphics& g, const Rectangle<float
     TreeViewItem::paintOpenCloseButton (g, area, getOwnerView()->findColour (defaultIconColourId), isMouseOver);
 }
 
-void JucerTreeViewBase::paintIcon (Graphics &g, Rectangle<float> area)
+void JucerTreeViewBase::paintIcon (Graphics& g, Rectangle<float> area)
 {
     g.setColour (getContentColour (true));
     getIcon().draw (g, area, isIconCrossedOut());
@@ -243,7 +243,7 @@ void JucerTreeViewBase::itemSelectionChanged (bool isNowSelected)
 {
     if (isNowSelected)
     {
-        delayedSelectionTimer = new ItemSelectionTimer (*this);
+        delayedSelectionTimer.reset (new ItemSelectionTimer (*this));
         delayedSelectionTimer->startTimer (getMillisecsAllowedForDragGesture());
     }
     else

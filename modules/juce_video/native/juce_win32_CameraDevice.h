@@ -49,10 +49,11 @@ static const CLSID CLSID_NullRenderer  = { 0xC1F400A4, 0x3F08, 0x11d3, { 0x9F, 0
 
 struct CameraDevice::Pimpl  : public ChangeBroadcaster
 {
-    Pimpl (const String&, int index,
-           int minWidth, int minHeight,
-           int maxWidth, int maxHeight, bool /*highQuality*/)
-       : isRecording (false),
+    Pimpl (CameraDevice& ownerToUse, const String&, int index,
+           int minWidth, int minHeight, int maxWidth, int maxHeight,
+           bool /*highQuality*/)
+       : owner (ownerToUse),
+         isRecording (false),
          openedSuccessfully (false),
          imageNeedsFlipping (false),
          width (0), height (0),
@@ -191,6 +192,22 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
 
     bool openedOk() const noexcept       { return openedSuccessfully; }
 
+    void takeStillPicture (std::function<void (const Image&)> pictureTakenCallbackToUse)
+    {
+        {
+            const ScopedLock sl (pictureTakenCallbackLock);
+
+            jassert (pictureTakenCallbackToUse != nullptr);
+
+            if (pictureTakenCallbackToUse == nullptr)
+                return;
+
+            pictureTakenCallback = static_cast<std::function<void (const Image&)>&&> (pictureTakenCallbackToUse);
+        }
+
+        addUser();
+    }
+
     void startRecordingToFile (const File& file, int quality)
     {
         addUser();
@@ -219,13 +236,13 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
         if (listeners.size() == 0)
             addUser();
 
-        listeners.addIfNotAlreadyThere (listenerToAdd);
+        listeners.add (listenerToAdd);
     }
 
     void removeListener (CameraDevice::Listener* listenerToRemove)
     {
         const ScopedLock sl (listenerLock);
-        listeners.removeAllInstancesOf (listenerToRemove);
+        listeners.remove (listenerToRemove);
 
         if (listeners.size() == 0)
             removeUser();
@@ -234,10 +251,29 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
     void callListeners (const Image& image)
     {
         const ScopedLock sl (listenerLock);
+        listeners.call ([=] (Listener& l) { l.imageReceived (image); });
+    }
 
-        for (int i = listeners.size(); --i >= 0;)
-            if (CameraDevice::Listener* const l = listeners[i])
-                l->imageReceived (image);
+    void notifyPictureTakenIfNeeded (const Image& image)
+    {
+        {
+            const ScopedLock sl (pictureTakenCallbackLock);
+
+            if (pictureTakenCallback == nullptr)
+                return;
+        }
+
+        WeakReference<Pimpl> weakRef (this);
+        MessageManager::callAsync ([weakRef, image]() mutable
+                                   {
+                                       if (weakRef == nullptr)
+                                           return;
+
+                                       if (weakRef->pictureTakenCallback != nullptr)
+                                           weakRef->pictureTakenCallback (image);
+
+                                       weakRef->pictureTakenCallback = nullptr;
+                                   });
     }
 
     void addUser()
@@ -296,6 +332,8 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
 
         if (listeners.size() > 0)
             callListeners (loadingImage);
+
+        notifyPictureTakenIfNeeded (loadingImage);
 
         sendChangeMessage();
     }
@@ -520,9 +558,15 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
         JUCE_DECLARE_NON_COPYABLE (GrabberCallback)
     };
 
+    CameraDevice& owner;
+
     ComSmartPtr<GrabberCallback> callback;
-    Array<CameraDevice::Listener*> listeners;
+
     CriticalSection listenerLock;
+    ListenerList<Listener> listeners;
+
+    CriticalSection pictureTakenCallbackLock;
+    std::function<void (const Image&)> pictureTakenCallback;
 
     bool isRecording, openedSuccessfully;
     int width, height;
@@ -546,6 +590,8 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
 
     bool recordNextFrameTime;
     int previewMaxFPS;
+
+    JUCE_DECLARE_WEAK_REFERENCEABLE (Pimpl)
 
 private:
     void getVideoSizes (IAMStreamConfig* const streamConfig)
@@ -725,7 +771,7 @@ struct CameraDevice::ViewerComponent  : public Component,
                                         public ChangeListener
 {
     ViewerComponent (CameraDevice& d)
-       : owner (d.pimpl), maxFPS (15), lastRepaintTime (0)
+       : owner (d.pimpl.get()), maxFPS (15), lastRepaintTime (0)
     {
         setOpaque (true);
         owner->addChangeListener (this);

@@ -98,7 +98,7 @@ void UndoManager::setMaxNumberOfStoredUnits (int maxUnits, int minTransactions)
 }
 
 //==============================================================================
-bool UndoManager::perform (UndoableAction* const newAction, const String& actionName)
+bool UndoManager::perform (UndoableAction* newAction, const String& actionName)
 {
     if (perform (newAction))
     {
@@ -115,7 +115,7 @@ bool UndoManager::perform (UndoableAction* newAction)
 {
     if (newAction != nullptr)
     {
-        ScopedPointer<UndoableAction> action (newAction);
+        std::unique_ptr<UndoableAction> action (newAction);
 
         if (reentrancyCheck)
         {
@@ -237,8 +237,8 @@ String UndoManager::getCurrentTransactionName() const noexcept
 }
 
 //==============================================================================
-UndoManager::ActionSet* UndoManager::getCurrentSet() const noexcept     { return transactions [nextIndex - 1]; }
-UndoManager::ActionSet* UndoManager::getNextSet() const noexcept        { return transactions [nextIndex]; }
+UndoManager::ActionSet* UndoManager::getCurrentSet() const noexcept     { return transactions[nextIndex - 1]; }
+UndoManager::ActionSet* UndoManager::getNextSet() const noexcept        { return transactions[nextIndex]; }
 
 bool UndoManager::canUndo() const noexcept   { return getCurrentSet() != nullptr; }
 bool UndoManager::canRedo() const noexcept   { return getNextSet()    != nullptr; }
@@ -295,6 +295,32 @@ String UndoManager::getRedoDescription() const
         return s->name;
 
     return {};
+}
+
+StringArray UndoManager::getUndoDescriptions() const
+{
+    StringArray descriptions;
+
+    for (int i = nextIndex;;)
+    {
+        if (auto* t = transactions[--i])
+            descriptions.add (t->name);
+        else
+            return descriptions;
+    }
+}
+
+StringArray UndoManager::getRedoDescriptions() const
+{
+    StringArray descriptions;
+
+    for (int i = nextIndex;;)
+    {
+        if (auto* t = transactions[i++])
+            descriptions.add (t->name);
+        else
+            return descriptions;
+    }
 }
 
 Time UndoManager::getTimeOfUndoTransaction() const

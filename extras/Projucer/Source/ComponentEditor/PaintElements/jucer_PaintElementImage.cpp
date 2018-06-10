@@ -91,7 +91,7 @@ void PaintElementImage::fillInGeneratedCode (GeneratedCode& code, String& paintM
           << customPaintCode
           << "    //[/UserPaintCustomArguments]\n";
 
-        if (dynamic_cast<const DrawableImage*> (getDrawable()) != 0)
+        if (dynamic_cast<const DrawableImage*> (getDrawable()))
         {
             const String imageVariable ("cachedImage_" + resourceName.replace ("::", "_") + "_" + String (code.getUniqueSuffix()));
 
@@ -101,7 +101,6 @@ void PaintElementImage::fillInGeneratedCode (GeneratedCode& code, String& paintM
                 r << "    g.setColour (Colours::black);\n";
             else
                 r << "    g.setColour (Colours::black.withAlpha (" << CodeHelpers::floatLiteral (opacity, 3) << "));\n";
-
 
             if (mode == stretched)
             {
@@ -132,11 +131,11 @@ void PaintElementImage::fillInGeneratedCode (GeneratedCode& code, String& paintM
                 const String imageVariable ("drawable" + String (code.getUniqueSuffix()));
 
                 code.privateMemberDeclarations
-                    << "ScopedPointer<Drawable> " << imageVariable << ";\n";
+                    << "std::unique_ptr<Drawable> " << imageVariable << ";\n";
 
                 code.constructorCode
-                    << imageVariable << " = Drawable::createFromImageData ("
-                    << resourceName << ", " << resourceName << "Size);\n";
+                    << imageVariable << ".reset (Drawable::createFromImageData ("
+                    << resourceName << ", " << resourceName << "Size));\n";
 
                 code.destructorCode
                     << imageVariable << " = nullptr;\n";

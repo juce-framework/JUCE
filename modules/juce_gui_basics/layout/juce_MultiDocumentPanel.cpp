@@ -240,7 +240,7 @@ bool MultiDocumentPanel::closeDocument (Component* component,
                 {
                     if (dw->getContentComponent() == component)
                     {
-                        ScopedPointer<MultiDocumentPanelWindow> (dw)->clearContentComponent();
+                        std::unique_ptr<MultiDocumentPanelWindow> (dw)->clearContentComponent();
                         break;
                     }
                 }
@@ -255,7 +255,7 @@ bool MultiDocumentPanel::closeDocument (Component* component,
             {
                 for (int i = getNumChildComponents(); --i >= 0;)
                 {
-                    ScopedPointer<MultiDocumentPanelWindow> dw (dynamic_cast<MultiDocumentPanelWindow*> (getChildComponent (i)));
+                    std::unique_ptr<MultiDocumentPanelWindow> dw (dynamic_cast<MultiDocumentPanelWindow*> (getChildComponent (i)));
 
                     if (dw != nullptr)
                         dw->clearContentComponent();
@@ -394,7 +394,7 @@ void MultiDocumentPanel::setLayoutMode (const LayoutMode newLayoutMode)
         {
             for (int i = getNumChildComponents(); --i >= 0;)
             {
-                ScopedPointer<MultiDocumentPanelWindow> dw (dynamic_cast<MultiDocumentPanelWindow*> (getChildComponent (i)));
+                std::unique_ptr<MultiDocumentPanelWindow> dw (dynamic_cast<MultiDocumentPanelWindow*> (getChildComponent (i)));
 
                 if (dw != nullptr)
                 {

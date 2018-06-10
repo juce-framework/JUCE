@@ -103,7 +103,7 @@ public:
     ValueWithDefault androidJavaLibs, androidRepositories, androidDependencies, androidScreenOrientation, androidActivityClass,
                      androidActivitySubClassName, androidActivityBaseClassName, androidManifestCustomXmlElements, androidVersionCode,
                      androidMinimumSDK, androidTheme, androidSharedLibraries, androidStaticLibraries, androidExtraAssetsFolder,
-                     androidOboeRepositoryPath, androidInternetNeeded, androidMicNeeded, androidBluetoothNeeded, androidExternalReadPermission,
+                     androidOboeRepositoryPath, androidInternetNeeded, androidMicNeeded, androidCameraNeeded, androidBluetoothNeeded, androidExternalReadPermission,
                      androidExternalWritePermission, androidInAppBillingPermission, androidVibratePermission,androidOtherPermissions,
                      androidEnableRemoteNotifications, androidRemoteNotificationsConfigFile, androidEnableContentSharing, androidKeyStore,
                      androidKeyStorePass, androidKeyAlias, androidKeyAliasPass, gradleVersion, gradleToolchain, androidPluginVersion, buildToolsVersion;
@@ -128,6 +128,7 @@ public:
           androidOboeRepositoryPath            (settings, Ids::androidOboeRepositoryPath,            getUndoManager()),
           androidInternetNeeded                (settings, Ids::androidInternetNeeded,                getUndoManager(), true),
           androidMicNeeded                     (settings, Ids::microphonePermissionNeeded,           getUndoManager(), false),
+          androidCameraNeeded                  (settings, Ids::cameraPermissionNeeded,               getUndoManager(), false),
           androidBluetoothNeeded               (settings, Ids::androidBluetoothNeeded,               getUndoManager(), true),
           androidExternalReadPermission        (settings, Ids::androidExternalReadNeeded,            getUndoManager(), true),
           androidExternalWritePermission       (settings, Ids::androidExternalWriteNeeded,           getUndoManager(), true),
@@ -141,22 +142,22 @@ public:
           androidKeyStorePass                  (settings, Ids::androidKeyStorePass,                  getUndoManager(), "android"),
           androidKeyAlias                      (settings, Ids::androidKeyAlias,                      getUndoManager(), "androiddebugkey"),
           androidKeyAliasPass                  (settings, Ids::androidKeyAliasPass,                  getUndoManager(), "android"),
-          gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "4.1"),
+          gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "4.4"),
           gradleToolchain                      (settings, Ids::gradleToolchain,                      getUndoManager(), "clang"),
-          androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "3.0.1"),
-          buildToolsVersion                    (settings, Ids::buildToolsVersion,                    getUndoManager(), "27.0.0"),
+          androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "3.1.2"),
+          buildToolsVersion                    (settings, Ids::buildToolsVersion,                    getUndoManager(), "27.0.3"),
           AndroidExecutable (findAndroidExecutable())
     {
         name = getName();
 
-        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + "Android");
+        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderForExporter (getValueTreeTypeName()));
     }
 
     //==============================================================================
     void createToolchainExporterProperties (PropertyListBuilder& props)
     {
         props.add (new TextPropertyComponent (gradleVersion, "gradle version", 32, false),
-                   "The version of gradle that is used to build this app (3.3 is fine for JUCE)");
+                   "The version of gradle that is used to build this app (4.4 is fine for JUCE)");
 
         props.add (new TextPropertyComponent (androidPluginVersion, "android plug-in version", 32, false),
                    "The version of the android build plugin for gradle that is used to build this app");
@@ -314,7 +315,7 @@ protected:
     public:
         AndroidBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
             : BuildConfiguration (p, settings, e),
-              androidArchitectures               (config, Ids::androidArchitectures,               getUndoManager(), isDebug() ? "armeabi x86" : ""),
+              androidArchitectures               (config, Ids::androidArchitectures,               getUndoManager(), isDebug() ? "armeabi-v7a x86" : ""),
               androidBuildConfigRemoteNotifsConfigFile (config, Ids::androidBuildConfigRemoteNotifsConfigFile, getUndoManager()),
               androidAdditionalXmlValueResources (config, Ids::androidAdditionalXmlValueResources, getUndoManager()),
               androidAdditionalDrawableResources (config, Ids::androidAdditionalDrawableResources, getUndoManager()),
@@ -577,8 +578,8 @@ private:
 
         mo << "buildscript {"                                                                              << newLine;
         mo << "   repositories {"                                                                          << newLine;
-        mo << "       jcenter()"                                                                           << newLine;
         mo << "       google()"                                                                            << newLine;
+        mo << "       jcenter()"                                                                           << newLine;
         mo << "   }"                                                                                       << newLine;
         mo << "   dependencies {"                                                                          << newLine;
         mo << "       classpath 'com.android.tools.build:gradle:" << androidPluginVersion.get().toString() << "'" << newLine;
@@ -591,6 +592,7 @@ private:
         mo << ""                                                                                       << newLine;
         mo << "allprojects {"                                                                          << newLine;
         mo << "   repositories {"                                                                      << newLine;
+        mo << "       google()"                                                                        << newLine;
         mo << "       jcenter()"                                                                       << newLine;
 
         if (androidEnableRemoteNotifications.get())
@@ -919,6 +921,9 @@ private:
         props.add (new ChoicePropertyComponent (androidMicNeeded, "Audio Input Required"),
                    "If enabled, this will set the android.permission.RECORD_AUDIO flag in the manifest.");
 
+        props.add (new ChoicePropertyComponent (androidCameraNeeded, "Camera Required"),
+                   "If enabled, this will set the android.permission.CAMERA flag in the manifest.");
+
         props.add (new ChoicePropertyComponent (androidBluetoothNeeded, "Bluetooth permissions Required"),
                    "If enabled, this will set the android.permission.BLUETOOTH and  android.permission.BLUETOOTH_ADMIN flag in the manifest. This is required for Bluetooth MIDI on Android.");
 
@@ -1033,25 +1038,97 @@ private:
 
         createDirectoryOrThrow (targetFolder);
 
+        auto activityCode = getActivityCode (javaSourceFolder, className, package);
+
         auto javaDestFile = targetFolder.getChildFile (className + ".java");
+        overwriteFileIfDifferentOrThrow (javaDestFile, activityCode);
+    }
 
+    String getActivityCode (const File& javaSourceFolder, const String& className, const String& package) const
+    {
+        auto runtimePermissionsCode = getRuntimePermissionsCode (javaSourceFolder, className);
+        auto midiCode = getMidiCode (javaSourceFolder, className);
+        auto webViewCode = getWebViewCode (javaSourceFolder);
+        auto cameraCode = getCameraCode (javaSourceFolder);
+        auto videoCode = getVideoCode (javaSourceFolder);
 
-        String juceMidiCode, juceMidiImports, juceRuntimePermissionsCode;
+        auto javaSourceFile = javaSourceFolder.getChildFile ("JuceAppActivity.java");
+        auto javaSourceLines = StringArray::fromLines (javaSourceFile.loadFileAsString());
+
+        {
+            MemoryOutputStream newFile;
+
+            for (auto& line : javaSourceLines)
+            {
+                if (line.contains ("$$JuceAndroidMidiImports$$"))
+                    newFile << midiCode.imports;
+                else if (line.contains ("$$JuceAndroidMidiCode$$"))
+                    newFile << midiCode.main;
+                else if (line.contains ("$$JuceAndroidRuntimePermissionsCode$$"))
+                    newFile << runtimePermissionsCode;
+                else if (line.contains ("$$JuceAndroidWebViewImports$$"))
+                    newFile << webViewCode.imports;
+                else if (line.contains ("$$JuceAndroidWebViewNativeCode$$"))
+                    newFile << webViewCode.native;
+                else if (line.contains ("$$JuceAndroidWebViewCode$$"))
+                    newFile << webViewCode.main;
+                else if (line.contains ("$$JuceAndroidCameraImports$$"))
+                    newFile << cameraCode.imports;
+                else if (line.contains ("$$JuceAndroidCameraCode$$"))
+                    newFile << cameraCode.main;
+                else if (line.contains ("$$JuceAndroidVideoImports$$"))
+                    newFile << videoCode.imports;
+                else if (line.contains ("$$JuceAndroidVideoCode$$"))
+                    newFile << videoCode.main;
+                else
+                    newFile << line.replace ("$$JuceAppActivityBaseClass$$", androidActivityBaseClassName.get().toString())
+                                   .replace ("JuceAppActivity", className)
+                                   .replace ("package com.juce;", "package " + package + ";") << newLine;
+            }
+
+            javaSourceLines = StringArray::fromLines (newFile.toString());
+        }
+
+        while (javaSourceLines.size() > 2
+                && javaSourceLines[javaSourceLines.size() - 1].trim().isEmpty()
+                && javaSourceLines[javaSourceLines.size() - 2].trim().isEmpty())
+            javaSourceLines.remove (javaSourceLines.size() - 1);
+
+        return javaSourceLines.joinIntoString (newLine);
+    }
+
+    String getRuntimePermissionsCode (const File& javaSourceFolder, const String& className) const
+    {
+        if (static_cast<int> (androidMinimumSDK.get()) >= 23)
+        {
+            auto javaRuntimePermissions = javaSourceFolder.getChildFile ("AndroidRuntimePermissions.java");
+            return javaRuntimePermissions.loadFileAsString().replace ("JuceAppActivity", className);
+        }
+
+        return {};
+    }
+
+    struct MidiCode
+    {
+        String imports;
+        String main;
+    };
+
+    MidiCode getMidiCode (const File& javaSourceFolder, const String& className) const
+    {
+        String juceMidiCode, juceMidiImports;
 
         juceMidiImports << newLine;
 
         if (static_cast<int> (androidMinimumSDK.get()) >= 23)
         {
             auto javaAndroidMidi = javaSourceFolder.getChildFile ("AndroidMidi.java");
-            auto javaRuntimePermissions = javaSourceFolder.getChildFile ("AndroidRuntimePermissions.java");
 
             juceMidiImports << "import android.media.midi.*;" << newLine
                             << "import android.bluetooth.*;" << newLine
                             << "import android.bluetooth.le.*;" << newLine;
 
             juceMidiCode = javaAndroidMidi.loadFileAsString().replace ("JuceAppActivity", className);
-
-            juceRuntimePermissionsCode = javaRuntimePermissions.loadFileAsString().replace ("JuceAppActivity", className);
         }
         else
         {
@@ -1060,6 +1137,18 @@ private:
                                            .replace ("JuceAppActivity", className);
         }
 
+        return { juceMidiImports, juceMidiCode };
+    }
+
+    struct WebViewCode
+    {
+        String imports;
+        String native;
+        String main;
+    };
+
+    WebViewCode getWebViewCode (const File& javaSourceFolder) const
+    {
         String juceWebViewImports, juceWebViewCodeNative, juceWebViewCode;
 
         if (static_cast<int> (androidMinimumSDK.get()) >= 23)
@@ -1105,41 +1194,57 @@ private:
             }
         }
 
-        auto javaSourceFile = javaSourceFolder.getChildFile ("JuceAppActivity.java");
-        auto javaSourceLines = StringArray::fromLines (javaSourceFile.loadFileAsString());
+        return { juceWebViewImports, juceWebViewCodeNative, juceWebViewCode };
+    }
 
+    struct CameraCode
+    {
+        String imports;
+        String main;
+    };
+
+    CameraCode getCameraCode (const File& javaSourceFolder) const
+    {
+        String juceCameraImports, juceCameraCode;
+
+        if (static_cast<int> (androidMinimumSDK.get()) >= 21)
         {
-            MemoryOutputStream newFile;
+            juceCameraImports << "import android.hardware.camera2.*;" << newLine;
 
-            for (auto& line : javaSourceLines)
-            {
-                if (line.contains ("$$JuceAndroidMidiImports$$"))
-                    newFile << juceMidiImports;
-                else if (line.contains ("$$JuceAndroidMidiCode$$"))
-                    newFile << juceMidiCode;
-                else if (line.contains ("$$JuceAndroidRuntimePermissionsCode$$"))
-                    newFile << juceRuntimePermissionsCode;
-                else if (line.contains ("$$JuceAndroidWebViewImports$$"))
-                    newFile << juceWebViewImports;
-                else if (line.contains ("$$JuceAndroidWebViewNativeCode$$"))
-                    newFile << juceWebViewCodeNative;
-                else if (line.contains ("$$JuceAndroidWebViewCode$$"))
-                    newFile << juceWebViewCode;
-                else
-                    newFile << line.replace ("$$JuceAppActivityBaseClass$$", androidActivityBaseClassName.get().toString())
-                                   .replace ("JuceAppActivity", className)
-                                   .replace ("package com.juce;", "package " + package + ";") << newLine;
-            }
+            auto javaCameraFile = javaSourceFolder.getChildFile ("AndroidCamera.java");
+            auto juceCameraCodeAll = javaCameraFile.loadFileAsString();
 
-            javaSourceLines = StringArray::fromLines (newFile.toString());
+            juceCameraCode << juceCameraCodeAll.fromFirstOccurrenceOf ("$$CameraApi21", false, false)
+                                               .upToFirstOccurrenceOf ("CameraApi21$$", false, false);
         }
 
-        while (javaSourceLines.size() > 2
-                && javaSourceLines[javaSourceLines.size() - 1].trim().isEmpty()
-                && javaSourceLines[javaSourceLines.size() - 2].trim().isEmpty())
-            javaSourceLines.remove (javaSourceLines.size() - 1);
+        return { juceCameraImports, juceCameraCode };
+    }
 
-        overwriteFileIfDifferentOrThrow (javaDestFile, javaSourceLines.joinIntoString (newLine));
+    struct VideoCode
+    {
+        String imports;
+        String main;
+    };
+
+    VideoCode getVideoCode (const File& javaSourceFolder) const
+    {
+        String juceVideoImports, juceVideoCode;
+
+        if (static_cast<int> (androidMinimumSDK.get()) >= 21)
+        {
+            juceVideoImports << "import android.database.ContentObserver;" << newLine;
+            juceVideoImports << "import android.media.session.*;" << newLine;
+            juceVideoImports << "import android.media.MediaMetadata;" << newLine;
+
+            auto javaVideoFile = javaSourceFolder.getChildFile ("AndroidVideo.java");
+            auto juceVideoCodeAll = javaVideoFile.loadFileAsString();
+
+            juceVideoCode << juceVideoCodeAll.fromFirstOccurrenceOf ("$$VideoApi21", false, false)
+                                             .upToFirstOccurrenceOf ("VideoApi21$$", false, false);
+        }
+
+        return { juceVideoImports, juceVideoCode };
     }
 
     void copyAdditionalJavaFiles (const File& sourceFolder, const File& targetFolder) const
@@ -1331,7 +1436,7 @@ private:
             customStringsXmlContent << cfg.getCustomStringsXml();
             customStringsXmlContent << "\n</resources>";
 
-            ScopedPointer<XmlElement> strings = XmlDocument::parse (customStringsXmlContent);
+            std::unique_ptr<XmlElement> strings (XmlDocument::parse (customStringsXmlContent));
 
             String dir     = cfg.isDebug() ? "debug" : "release";
             String subPath = "app/src/" + dir + "/res/values/string.xml";
@@ -1342,7 +1447,7 @@ private:
 
     void writeAndroidManifest (const File& folder) const
     {
-        ScopedPointer<XmlElement> manifest (createManifestXML());
+        std::unique_ptr<XmlElement> manifest (createManifestXML());
 
         writeXmlOrThrow (*manifest, folder.getChildFile ("src/main/AndroidManifest.xml"), "utf-8", 100, true);
     }
@@ -1365,8 +1470,8 @@ private:
 
     void writeIcons (const File& folder) const
     {
-        ScopedPointer<Drawable> bigIcon (getBigIcon());
-        ScopedPointer<Drawable> smallIcon (getSmallIcon());
+        std::unique_ptr<Drawable> bigIcon (getBigIcon());
+        std::unique_ptr<Drawable> smallIcon (getSmallIcon());
 
         if (bigIcon != nullptr && smallIcon != nullptr)
         {
@@ -1733,7 +1838,7 @@ private:
 
         if (! app->hasAttribute ("android:icon"))
         {
-            ScopedPointer<Drawable> bigIcon (getBigIcon()), smallIcon (getSmallIcon());
+            std::unique_ptr<Drawable> bigIcon (getBigIcon()), smallIcon (getSmallIcon());
 
             if (bigIcon != nullptr || smallIcon != nullptr)
                 app->setAttribute ("android:icon", "@drawable/icon");
@@ -1880,6 +1985,9 @@ private:
 
         if (androidMicNeeded.get())
             s.add ("android.permission.RECORD_AUDIO");
+
+        if (androidCameraNeeded.get())
+            s.add ("android.permission.CAMERA");
 
         if (androidBluetoothNeeded.get())
         {

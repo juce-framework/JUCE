@@ -60,8 +60,8 @@ public:
                      ModalComponentManager::Callback* callback, const char* b1, const char* b2, const char* b3,
                      bool runAsync)
     {
-        ScopedPointer<OSXMessageBox> mb (new OSXMessageBox (iconType, title, message, b1, b2, b3,
-                                                            callback, runAsync));
+        std::unique_ptr<OSXMessageBox> mb (new OSXMessageBox (iconType, title, message, b1, b2, b3,
+                                                              callback, runAsync));
         if (! runAsync)
             return mb->getResult();
 
@@ -72,7 +72,7 @@ public:
 private:
     AlertWindow::AlertIconType iconType;
     String title, message;
-    ScopedPointer<ModalComponentManager::Callback> callback;
+    std::unique_ptr<ModalComponentManager::Callback> callback;
     const char* button1;
     const char* button2;
     const char* button3;
@@ -286,7 +286,7 @@ bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& fi
                     auto eventPos = [event locationInWindow];
                     auto dragRect = [view convertRect: NSMakeRect (eventPos.x - 16.0f, eventPos.y - 16.0f, 32.0f, 32.0f)
                                              fromView: nil];
-                    auto *dragImage = [[NSWorkspace sharedWorkspace] iconForFile: nsFilename];
+                    auto* dragImage = [[NSWorkspace sharedWorkspace] iconForFile: nsFilename];
                     [dragItem setDraggingFrame: dragRect
                                       contents: dragImage];
 
@@ -392,7 +392,7 @@ public:
         IOPMAssertionID assertionID;
     };
 
-    ScopedPointer<PMAssertion> assertion;
+    std::unique_ptr<PMAssertion> assertion;
    #else
     ScreenSaverDefeater()
     {
@@ -408,7 +408,7 @@ public:
    #endif
 };
 
-static ScopedPointer<ScreenSaverDefeater> screenSaverDefeater;
+static std::unique_ptr<ScreenSaverDefeater> screenSaverDefeater;
 
 void Desktop::setScreenSaverEnabled (const bool isEnabled)
 {

@@ -53,7 +53,7 @@ void JUCEApplicationBase::appWillTerminateByForce()
     JUCE_AUTORELEASEPOOL
     {
         {
-            const ScopedPointer<JUCEApplicationBase> app (appInstance);
+            const std::unique_ptr<JUCEApplicationBase> app (appInstance);
 
             if (app != nullptr)
                 app->shutdownApp();
@@ -250,7 +250,7 @@ int JUCEApplicationBase::main()
     ScopedJuceInitialiser_GUI libraryInitialiser;
     jassert (createInstance != nullptr);
 
-    const ScopedPointer<JUCEApplicationBase> app (createInstance());
+    const std::unique_ptr<JUCEApplicationBase> app (createInstance());
     jassert (app != nullptr);
 
     if (! app->initialiseApp())

@@ -73,7 +73,7 @@ class ChoicePropertyComponent::RemapperValueSourceWithDefault    : public Value:
                                                                    private Value::Listener
 {
 public:
-    RemapperValueSourceWithDefault (const ValueWithDefault& vwd, const Array<var>& map)
+    RemapperValueSourceWithDefault (ValueWithDefault& vwd, const Array<var>& map)
         : valueWithDefault (vwd),
           sourceValue (valueWithDefault.getPropertyAsValue()),
           mappings (map)
@@ -113,7 +113,7 @@ public:
     }
 
 private:
-    ValueWithDefault valueWithDefault;
+    ValueWithDefault& valueWithDefault;
     Value sourceValue;
     Array<var> mappings;
 
@@ -155,7 +155,7 @@ ChoicePropertyComponent::ChoicePropertyComponent (const Value& valueToControl,
                                                                              correspondingValues)));
 }
 
-ChoicePropertyComponent::ChoicePropertyComponent (ValueWithDefault valueToControl,
+ChoicePropertyComponent::ChoicePropertyComponent (ValueWithDefault& valueToControl,
                                                   const String& name,
                                                   const StringArray& choiceList,
                                                   const Array<var>& correspondingValues)
@@ -165,9 +165,19 @@ ChoicePropertyComponent::ChoicePropertyComponent (ValueWithDefault valueToContro
 
     comboBox.getSelectedIdAsValue().referTo (Value (new RemapperValueSourceWithDefault (valueToControl,
                                                                                         correspondingValues)));
+
+    valueToControl.onDefaultChange = [this, &valueToControl, choiceList, correspondingValues]
+    {
+        auto selectedId = comboBox.getSelectedId();
+
+        comboBox.clear();
+        createComboBoxWithDefault (choiceList [correspondingValues.indexOf (valueToControl.getDefault())]);
+
+        comboBox.setSelectedId (selectedId);
+    };
 }
 
-ChoicePropertyComponent::ChoicePropertyComponent (ValueWithDefault valueToControl,
+ChoicePropertyComponent::ChoicePropertyComponent (ValueWithDefault& valueToControl,
                                                   const String& name)
     : PropertyComponent (name),
       choices ({ "Enabled", "Disabled" })
@@ -176,6 +186,16 @@ ChoicePropertyComponent::ChoicePropertyComponent (ValueWithDefault valueToContro
 
     comboBox.getSelectedIdAsValue().referTo (Value (new RemapperValueSourceWithDefault (valueToControl,
                                                                                        { true, false })));
+
+    valueToControl.onDefaultChange = [this, &valueToControl]
+    {
+        auto selectedId = comboBox.getSelectedId();
+
+        comboBox.clear();
+        createComboBoxWithDefault (valueToControl.getDefault() ? "Enabled" : "Disabled");
+
+        comboBox.setSelectedId (selectedId);
+    };
 }
 
 ChoicePropertyComponent::~ChoicePropertyComponent()

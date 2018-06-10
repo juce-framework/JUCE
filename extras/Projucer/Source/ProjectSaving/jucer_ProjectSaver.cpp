@@ -83,6 +83,7 @@ void ProjectSaver::writePluginCharacteristicsFile()
     flags.set ("JucePlugin_Build_RTAS",                  boolToString (project.shouldBuildRTAS()));
     flags.set ("JucePlugin_Build_AAX",                   boolToString (project.shouldBuildAAX()));
     flags.set ("JucePlugin_Build_Standalone",            boolToString (project.shouldBuildStandalonePlugin()));
+    flags.set ("JucePlugin_Build_Unity",                 boolToString (project.shouldBuildUnityPlugin()));
     flags.set ("JucePlugin_Enable_IAA",                  boolToString (project.shouldEnableIAA()));
     flags.set ("JucePlugin_Name",                        toStringLiteral (project.getPluginNameString()));
     flags.set ("JucePlugin_Desc",                        toStringLiteral (project.getPluginDescriptionString()));
@@ -100,14 +101,15 @@ void ProjectSaver::writePluginCharacteristicsFile()
     flags.set ("JucePlugin_VersionCode",                 project.getVersionAsHex());
     flags.set ("JucePlugin_VersionString",               toStringLiteral (project.getVersionString()));
     flags.set ("JucePlugin_VSTUniqueID",                 "JucePlugin_PluginCode");
-    flags.set ("JucePlugin_VSTCategory",                 project.getPluginVSTCategoryString());
+    flags.set ("JucePlugin_VSTCategory",                 project.getVSTCategoryString());
+    flags.set ("JucePlugin_Vst3Category",                toStringLiteral (project.getVST3CategoryString()));
     flags.set ("JucePlugin_AUMainType",                  project.getAUMainTypeString());
     flags.set ("JucePlugin_AUSubType",                   "JucePlugin_PluginCode");
     flags.set ("JucePlugin_AUExportPrefix",              project.getPluginAUExportPrefixString());
     flags.set ("JucePlugin_AUExportPrefixQuoted",        toStringLiteral (project.getPluginAUExportPrefixString()));
     flags.set ("JucePlugin_AUManufacturerCode",          "JucePlugin_ManufacturerCode");
     flags.set ("JucePlugin_CFBundleIdentifier",          project.getBundleIdentifierString());
-    flags.set ("JucePlugin_RTASCategory",                project.getPluginRTASCategoryCode());
+    flags.set ("JucePlugin_RTASCategory",                String (project.getRTASCategory()));
     flags.set ("JucePlugin_RTASManufacturerCode",        "JucePlugin_ManufacturerCode");
     flags.set ("JucePlugin_RTASProductId",               "JucePlugin_PluginCode");
     flags.set ("JucePlugin_RTASDisableBypass",           boolToString (project.isPluginRTASBypassDisabled()));
@@ -115,7 +117,7 @@ void ProjectSaver::writePluginCharacteristicsFile()
     flags.set ("JucePlugin_AAXIdentifier",               project.getAAXIdentifierString());
     flags.set ("JucePlugin_AAXManufacturerCode",         "JucePlugin_ManufacturerCode");
     flags.set ("JucePlugin_AAXProductId",                "JucePlugin_PluginCode");
-    flags.set ("JucePlugin_AAXCategory",                 project.getPluginAAXCategoryString());
+    flags.set ("JucePlugin_AAXCategory",                 String (project.getAAXCategory()));
     flags.set ("JucePlugin_AAXDisableBypass",            boolToString (project.isPluginAAXBypassDisabled()));
     flags.set ("JucePlugin_AAXDisableMultiMono",         boolToString (project.isPluginAAXMultiMonoDisabled()));
     flags.set ("JucePlugin_IAAType",                     toCharLiteral (project.getIAATypeCode()));
@@ -127,8 +129,8 @@ void ProjectSaver::writePluginCharacteristicsFile()
 
         if (plugInChannelConfig.isNotEmpty())
         {
-            flags.set ("JucePlugin_MaxNumInputChannels",         String (countMaxPluginChannels (plugInChannelConfig, true)));
-            flags.set ("JucePlugin_MaxNumOutputChannels",        String (countMaxPluginChannels (plugInChannelConfig, false)));
+            flags.set ("JucePlugin_MaxNumInputChannels",            String (countMaxPluginChannels (plugInChannelConfig, true)));
+            flags.set ("JucePlugin_MaxNumOutputChannels",           String (countMaxPluginChannels (plugInChannelConfig, false)));
             flags.set ("JucePlugin_PreferredChannelConfigurations", plugInChannelConfig);
         }
     }
@@ -189,9 +191,6 @@ void ProjectSaver::writeProjects (const OwnedArray<LibraryModule>& modules, cons
 
                     for (auto& module: modules)
                         module->addSettingsForModuleToExporter (*exporter, *this);
-
-                    if (project.getProjectType().isAudioPlugin())
-                        writePluginCharacteristicsFile();
 
                     generatedFilesGroup.sortAlphabetically (true, true);
                     exporter->getAllGroups().add (generatedFilesGroup);

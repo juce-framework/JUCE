@@ -30,6 +30,36 @@ namespace juce
 //==============================================================================
 namespace WindowsFileHelpers
 {
+    //==============================================================================
+   #if JUCE_WINDOWS
+    typedef struct _REPARSE_DATA_BUFFER {
+      ULONG  ReparseTag;
+      USHORT ReparseDataLength;
+      USHORT Reserved;
+      union {
+        struct {
+          USHORT SubstituteNameOffset;
+          USHORT SubstituteNameLength;
+          USHORT PrintNameOffset;
+          USHORT PrintNameLength;
+          ULONG  Flags;
+          WCHAR  PathBuffer[1];
+        } SymbolicLinkReparseBuffer;
+        struct {
+          USHORT SubstituteNameOffset;
+          USHORT SubstituteNameLength;
+          USHORT PrintNameOffset;
+          USHORT PrintNameLength;
+          WCHAR  PathBuffer[1];
+        } MountPointReparseBuffer;
+        struct {
+          UCHAR DataBuffer[1];
+        } GenericReparseBuffer;
+      } DUMMYUNIONNAME;
+    } *PREPARSE_DATA_BUFFER, REPARSE_DATA_BUFFER;
+   #endif
+
+    //==============================================================================
     DWORD getAtts (const String& path) noexcept
     {
         return GetFileAttributes (path.toWideCharPointer());
@@ -128,10 +158,8 @@ namespace WindowsFileHelpers
 }
 
 //==============================================================================
-#ifndef JUCE_GCC
- const juce_wchar File::separator = '\\';
- const StringRef File::separatorString ("\\");
-#endif
+JUCE_DECLARE_DEPRECATED_STATIC (const juce_wchar File::separator = '\\';)
+JUCE_DECLARE_DEPRECATED_STATIC (const StringRef File::separatorString ("\\");)
 
 juce_wchar File::getSeparatorChar()    { return '\\'; }
 StringRef File::getSeparatorString()   { return "\\"; }
@@ -236,7 +264,8 @@ bool File::replaceInternal (const File& dest) const
     void* lpReserved = 0;
 
     return ReplaceFile (dest.getFullPathName().toWideCharPointer(), fullPath.toWideCharPointer(),
-                        0, REPLACEFILE_IGNORE_MERGE_ERRORS, lpExclude, lpReserved) != 0;
+                        0, REPLACEFILE_IGNORE_MERGE_ERRORS | REPLACEFILE_IGNORE_ACL_ERRORS,
+                        lpExclude, lpReserved) != 0;
 }
 
 Result File::createDirectoryInternal (const String& fileName) const
@@ -665,9 +694,104 @@ bool File::isShortcut() const
     return hasFileExtension (".lnk");
 }
 
-File File::getLinkedTarget() const
+static String readWindowsLnkFile (File lnkFile, bool wantsAbsolutePath)
+{
+    if (! lnkFile.exists())
+        lnkFile = File (lnkFile.getFullPathName() + ".lnk");
+
+    if (lnkFile.exists())
+    {
+        ComSmartPtr<IShellLink> shellLink;
+        ComSmartPtr<IPersistFile> persistFile;
+
+        if (SUCCEEDED (shellLink.CoCreateInstance (CLSID_ShellLink))
+             && SUCCEEDED (shellLink.QueryInterface (persistFile))
+             && SUCCEEDED (persistFile->Load (lnkFile.getFullPathName().toWideCharPointer(), STGM_READ))
+             && (! wantsAbsolutePath || SUCCEEDED (shellLink->Resolve (0, SLR_ANY_MATCH | SLR_NO_UI))))
+        {
+            WIN32_FIND_DATA winFindData;
+            WCHAR resolvedPath [MAX_PATH];
+
+            DWORD flags = SLGP_UNCPRIORITY;
+
+            if (! wantsAbsolutePath)
+                flags |= SLGP_RAWPATH;
+
+            if (SUCCEEDED (shellLink->GetPath (resolvedPath, MAX_PATH, &winFindData, flags)))
+                return resolvedPath;
+        }
+    }
+
+    return {};
+}
+
+static String readWindowsShortcutOrLink (const File& shortcut, bool wantsAbsolutePath)
 {
    #if JUCE_WINDOWS
+    if (! wantsAbsolutePath)
+    {
+        HANDLE h = CreateFile (shortcut.getFullPathName().toWideCharPointer(),
+                               GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
+                               FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT,
+                               0);
+
+        if (h != INVALID_HANDLE_VALUE)
+        {
+            HeapBlock<WindowsFileHelpers::REPARSE_DATA_BUFFER> reparseData;
+
+            reparseData.calloc (1, MAXIMUM_REPARSE_DATA_BUFFER_SIZE);
+            DWORD bytesReturned = 0;
+
+            bool success = DeviceIoControl (h, FSCTL_GET_REPARSE_POINT, nullptr, 0,
+                                            reparseData.getData(), MAXIMUM_REPARSE_DATA_BUFFER_SIZE,
+                                            &bytesReturned, nullptr) != 0;
+             CloseHandle (h);
+
+            if (success)
+            {
+                if (IsReparseTagMicrosoft (reparseData->ReparseTag))
+                {
+                    String targetPath;
+
+                    switch (reparseData->ReparseTag)
+                    {
+                        case IO_REPARSE_TAG_SYMLINK:
+                        {
+                            auto& symlinkData = reparseData->SymbolicLinkReparseBuffer;
+                            targetPath = {symlinkData.PathBuffer + (symlinkData.SubstituteNameOffset / sizeof (WCHAR)),
+                                          symlinkData.SubstituteNameLength / sizeof (WCHAR)};
+                        }
+                        break;
+
+                        case IO_REPARSE_TAG_MOUNT_POINT:
+                        {
+                            auto& mountData = reparseData->MountPointReparseBuffer;
+                            targetPath = {mountData.PathBuffer + (mountData.SubstituteNameOffset / sizeof (WCHAR)),
+                                          mountData.SubstituteNameLength / sizeof (WCHAR)};
+                        }
+                        break;
+
+                        default:
+                            break;
+                    }
+
+                    if (targetPath.isNotEmpty())
+                    {
+                        const StringRef prefix ("\\??\\");
+
+                        if (targetPath.startsWith (prefix))
+                            targetPath = targetPath.substring (prefix.length());
+
+                        return targetPath;
+                    }
+                }
+            }
+        }
+    }
+
+    if (! wantsAbsolutePath)
+        return readWindowsLnkFile (shortcut, false);
+
     typedef DWORD (WINAPI* GetFinalPathNameByHandleFunc) (HANDLE, LPTSTR, DWORD, DWORD);
 
     static GetFinalPathNameByHandleFunc getFinalPathNameByHandle
@@ -675,7 +799,7 @@ File File::getLinkedTarget() const
 
     if (getFinalPathNameByHandle != nullptr)
     {
-        HANDLE h = CreateFile (getFullPathName().toWideCharPointer(),
+        HANDLE h = CreateFile (shortcut.getFullPathName().toWideCharPointer(),
                                GENERIC_READ, FILE_SHARE_READ, nullptr,
                                OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, 0);
 
@@ -694,8 +818,7 @@ File File::getLinkedTarget() const
 
                     // It turns out that GetFinalPathNameByHandleW prepends \\?\ to the path.
                     // This is not a bug, it's feature. See MSDN for more information.
-                    return File (path.startsWith (prefix) ? path.substring (prefix.length())
-                                                          : path);
+                    return path.startsWith (prefix) ? path.substring (prefix.length()) : path;
                 }
             }
 
@@ -704,30 +827,23 @@ File File::getLinkedTarget() const
     }
    #endif
 
-    File result (*this);
-    String p (getFullPathName());
+    // as last resort try the resolve method of the ShellLink
+    return readWindowsLnkFile (shortcut, true);
+}
 
-    if (! exists())
-        p += ".lnk";
-    else if (! hasFileExtension (".lnk"))
-        return result;
+String File::getNativeLinkedTarget() const
+{
+    return readWindowsShortcutOrLink (*this, false);
+}
 
-    ComSmartPtr<IShellLink> shellLink;
-    ComSmartPtr<IPersistFile> persistFile;
+File File::getLinkedTarget() const
+{
+    auto target = readWindowsShortcutOrLink (*this, true);
 
-    if (SUCCEEDED (shellLink.CoCreateInstance (CLSID_ShellLink))
-         && SUCCEEDED (shellLink.QueryInterface (persistFile))
-         && SUCCEEDED (persistFile->Load (p.toWideCharPointer(), STGM_READ))
-         && SUCCEEDED (shellLink->Resolve (0, SLR_ANY_MATCH | SLR_NO_UI)))
-    {
-        WIN32_FIND_DATA winFindData;
-        WCHAR resolvedPath [MAX_PATH];
+    if (target.isNotEmpty() && File::isAbsolutePath (target))
+        return File (target);
 
-        if (SUCCEEDED (shellLink->GetPath (resolvedPath, MAX_PATH, &winFindData, SLGP_UNCPRIORITY)))
-            result = File (resolvedPath);
-    }
-
-    return result;
+    return *this;
 }
 
 bool File::createShortcut (const String& description, const File& linkFileToCreate) const

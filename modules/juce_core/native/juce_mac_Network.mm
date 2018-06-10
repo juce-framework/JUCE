@@ -331,7 +331,8 @@ public:
     NSMutableData* data = nil;
     NSDictionary* headers = nil;
     int statusCode = 0;
-    bool initialised = false, hasFailed = false, hasFinished = false, isBeingDeleted = false;
+    std::atomic<bool> initialised { false };
+    bool hasFailed = false, hasFinished = false, isBeingDeleted = false;
     const int numRedirectsToFollow;
     int numRedirects = 0;
     int64 latestTotalBytes = 0;
@@ -448,6 +449,9 @@ struct BackgroundDownloadTask  : public URL::DownloadTask
 
         if (session != nullptr)
             downloadTask = [session downloadTaskWithRequest:request];
+
+        // Workaround for an Apple bug. See https://github.com/AFNetworking/AFNetworking/issues/2334
+        [request HTTPBody];
 
         [request release];
     }
@@ -644,7 +648,7 @@ HashMap<String, BackgroundDownloadTask*, DefaultHashFunctions, CriticalSection> 
 
 URL::DownloadTask* URL::downloadToFile (const File& targetLocation, String extraHeaders, DownloadTask::Listener* listener, bool usePostRequest)
 {
-    ScopedPointer<BackgroundDownloadTask> downloadTask = new BackgroundDownloadTask (*this, targetLocation, extraHeaders, listener, usePostRequest);
+    std::unique_ptr<BackgroundDownloadTask> downloadTask (new BackgroundDownloadTask (*this, targetLocation, extraHeaders, listener, usePostRequest));
 
     if (downloadTask->initOK() && downloadTask->connect())
         return downloadTask.release();
@@ -1073,7 +1077,7 @@ public:
 private:
     WebInputStream& owner;
     URL url;
-    ScopedPointer<URLConnectionState> connection;
+    std::unique_ptr<URLConnectionState> connection;
     String headers;
     MemoryBlock postData;
     int64 position = 0;
@@ -1117,6 +1121,9 @@ private:
                 if (key.isNotEmpty() && value.isNotEmpty())
                     [req addValue: juceStringToNS (value) forHTTPHeaderField: juceStringToNS (key)];
             }
+
+            // Workaround for an Apple bug. See https://github.com/AFNetworking/AFNetworking/issues/2334
+            [req HTTPBody];
 
             connection.reset (new URLConnectionState (req, numRedirectsToFollow));
         }

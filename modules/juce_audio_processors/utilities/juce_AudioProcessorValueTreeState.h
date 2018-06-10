@@ -84,6 +84,9 @@ public:
                                         @see AudioProcessorParameter::isDiscrete
         @param category                 Which category the parameter should use.
                                         @see AudioProcessorParameter::Category
+        @param isBoolean                Set this value to true to make this parameter appear as a boolean toggle in
+                                        a hosts view of your plug-ins parameters
+                                        @see AudioProcessorParameter::isBoolean
 
         @returns the parameter object that was created
     */
@@ -98,7 +101,8 @@ public:
                                                           bool isAutomatableParameter = true,
                                                           bool isDiscrete = false,
                                                           AudioProcessorParameter::Category category
-                                                             = AudioProcessorParameter::genericParameter);
+                                                             = AudioProcessorParameter::genericParameter,
+                                                          bool isBoolean = false);
 
     /** Returns a parameter by its ID string. */
     AudioProcessorParameterWithID* getParameter (StringRef parameterID) const noexcept;
@@ -194,13 +198,18 @@ public:
     private:
         struct Pimpl;
         friend struct ContainerDeletePolicy<Pimpl>;
-        ScopedPointer<Pimpl> pimpl;
+        std::unique_ptr<Pimpl> pimpl;
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SliderAttachment)
     };
 
     //==============================================================================
     /** An object of this class maintains a connection between a ComboBox and a parameter
         in an AudioProcessorValueTreeState.
+
+        Combobox items will be spaced linearly across the range of the parameter. For
+        example if the range is specified by NormalisableRange<float> (-0.5f, 0.5f, 0.5f)
+        and you add three items then the first will be mapped to a value of -0.5, the
+        second to 0, and the third to 0.5.
 
         During the lifetime of this ComboBoxAttachment object, it keeps the two things in
         sync, making it easy to connect a combo box to a parameter. When this object is
@@ -218,7 +227,7 @@ public:
     private:
         struct Pimpl;
         friend struct ContainerDeletePolicy<Pimpl>;
-        ScopedPointer<Pimpl> pimpl;
+        std::unique_ptr<Pimpl> pimpl;
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComboBoxAttachment)
     };
 
@@ -242,7 +251,7 @@ public:
     private:
         struct Pimpl;
         friend struct ContainerDeletePolicy<Pimpl>;
-        ScopedPointer<Pimpl> pimpl;
+        std::unique_ptr<Pimpl> pimpl;
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ButtonAttachment)
     };
 

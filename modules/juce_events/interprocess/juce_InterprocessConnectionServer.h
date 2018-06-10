@@ -96,7 +96,7 @@ protected:
 
 private:
     //==============================================================================
-    ScopedPointer<StreamingSocket> socket;
+    std::unique_ptr<StreamingSocket> socket;
 
     void run() override;
 

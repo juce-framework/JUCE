@@ -55,6 +55,6 @@ public:
     void applyCustomPaintSnippets (StringArray&);
 
 private:
-    ScopedPointer<ComponentLayout> components;
-    ScopedPointer<PaintRoutine> backgroundGraphics;
+    std::unique_ptr<ComponentLayout> components;
+    std::unique_ptr<PaintRoutine> backgroundGraphics;
 };

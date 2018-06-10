@@ -95,7 +95,7 @@ public:
         }
         else
         {
-            auto eventMods = ModifierKeys::getCurrentModifiersRealtime();
+            auto eventMods = ComponentPeer::getCurrentModifiersRealtime();
 
             if (([e modifierFlags] & NSEventModifierFlagCommand) != 0)
                 eventMods = eventMods.withFlags (ModifierKeys::commandModifier);

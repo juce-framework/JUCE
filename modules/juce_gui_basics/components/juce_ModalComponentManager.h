@@ -161,7 +161,7 @@ private:
 
     @tags{GUI}
 */
-class ModalCallbackFunction
+class JUCE_API ModalCallbackFunction
 {
 public:
     /** This is a utility function to create a ModalComponentManager::Callback that will

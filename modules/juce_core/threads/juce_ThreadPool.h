@@ -24,8 +24,6 @@ namespace juce
 {
 
 class ThreadPool;
-class ThreadPoolThread;
-
 
 //==============================================================================
 /**
@@ -134,7 +132,6 @@ public:
     //==============================================================================
 private:
     friend class ThreadPool;
-    friend class ThreadPoolThread;
     String jobName;
     ThreadPool* pool = nullptr;
     bool shouldStop = false, isActive = false, shouldBeDeleted = false;
@@ -323,9 +320,9 @@ private:
     //==============================================================================
     Array<ThreadPoolJob*> jobs;
 
-    class ThreadPoolThread;
+    struct ThreadPoolThread;
     friend class ThreadPoolJob;
-    friend class ThreadPoolThread;
+    friend struct ThreadPoolThread;
     friend struct ContainerDeletePolicy<ThreadPoolThread>;
     OwnedArray<ThreadPoolThread> threads;
 

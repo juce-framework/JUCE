@@ -362,7 +362,7 @@ private:
                 String text = getTextInRange (selection).toLowerCase();
 
                 if (isIntegerLiteral (text) || isFloatLiteral (text))
-                    overlay = new LiteralHighlightOverlay (*this, selection, mightBeColourValue (text));
+                    overlay.reset (new LiteralHighlightOverlay (*this, selection, mightBeColourValue (text)));
             }
         }
 
@@ -677,7 +677,7 @@ private:
         static Colour getBackgroundColour() { return Colour (0xcb5c7879); }
     };
 
-    ScopedPointer<LiteralHighlightOverlay> overlay;
+    std::unique_ptr<LiteralHighlightOverlay> overlay;
 };
 
 //==============================================================================

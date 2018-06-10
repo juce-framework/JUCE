@@ -25,7 +25,7 @@ namespace juce
 
 struct MidiOutput::PendingMessage
 {
-    PendingMessage (const void* const data, const int len, const double timeStamp)
+    PendingMessage (const void* data, int len, double timeStamp)
         : message (data, len, timeStamp)
     {}
 
@@ -33,11 +33,8 @@ struct MidiOutput::PendingMessage
     PendingMessage* next;
 };
 
-MidiOutput::MidiOutput (const String& midiName)
-    : Thread ("midi out"),
-      internal (nullptr),
-      firstMessage (nullptr),
-      name (midiName)
+MidiOutput::MidiOutput (const String& deviceName)
+    : Thread ("midi out"), name (deviceName)
 {
 }
 
@@ -52,7 +49,7 @@ void MidiOutput::sendBlockOfMessagesNow (const MidiBuffer& buffer)
 }
 
 void MidiOutput::sendBlockOfMessages (const MidiBuffer& buffer,
-                                      const double millisecondCounterToStartAt,
+                                      double millisecondCounterToStartAt,
                                       double samplesPerSecondForBuffer)
 {
     // You've got to call startBackgroundThread() for this to actually work..
@@ -61,18 +58,15 @@ void MidiOutput::sendBlockOfMessages (const MidiBuffer& buffer,
     // this needs to be a value in the future - RTFM for this method!
     jassert (millisecondCounterToStartAt > 0);
 
-    const double timeScaleFactor = 1000.0 / samplesPerSecondForBuffer;
-
-    MidiBuffer::Iterator i (buffer);
+    auto timeScaleFactor = 1000.0 / samplesPerSecondForBuffer;
 
     const uint8* data;
     int len, time;
 
-    while (i.getNextEvent (data, len, time))
+    for (MidiBuffer::Iterator i (buffer); i.getNextEvent (data, len, time);)
     {
-        const double eventTime = millisecondCounterToStartAt + timeScaleFactor * time;
-
-        PendingMessage* const m = new PendingMessage (data, len, eventTime);
+        auto eventTime = millisecondCounterToStartAt + timeScaleFactor * time;
+        auto* m = new PendingMessage (data, len, eventTime);
 
         const ScopedLock sl (lock);
 
@@ -83,7 +77,7 @@ void MidiOutput::sendBlockOfMessages (const MidiBuffer& buffer,
         }
         else
         {
-            PendingMessage* mm = firstMessage;
+            auto* mm = firstMessage;
 
             while (mm->next != nullptr && mm->next->message.getTimeStamp() <= eventTime)
                 mm = mm->next;
@@ -102,7 +96,7 @@ void MidiOutput::clearAllPendingMessages()
 
     while (firstMessage != nullptr)
     {
-        PendingMessage* const m = firstMessage;
+        auto* m = firstMessage;
         firstMessage = firstMessage->next;
         delete m;
     }
@@ -150,7 +144,7 @@ void MidiOutput::run()
 
         if (message != nullptr)
         {
-            const ScopedPointer<PendingMessage> messageDeleter (message);
+            std::unique_ptr<PendingMessage> messageDeleter (message);
 
             if (eventTime > now)
             {

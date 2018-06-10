@@ -6498,7 +6498,7 @@ static const unsigned char temp_binary_data_42[] =
 "    {\r\n"
 "        // This method is where you should put your application's initialisation code..\r\n"
 "\r\n"
-"        mainWindow = new MainWindow (getApplicationName());\r\n"
+"        mainWindow.reset (new MainWindow (getApplicationName()));\r\n"
 "    }\r\n"
 "\r\n"
 "    void shutdown() override\r\n"
@@ -6564,7 +6564,7 @@ static const unsigned char temp_binary_data_42[] =
 "    };\r\n"
 "\r\n"
 "private:\r\n"
-"    ScopedPointer<MainWindow> mainWindow;\r\n"
+"    std::unique_ptr<MainWindow> mainWindow;\r\n"
 "};\r\n"
 "\r\n"
 "//==============================================================================\r\n"
@@ -6603,7 +6603,7 @@ static const unsigned char temp_binary_data_43[] =
 "    {\r\n"
 "        // This method is where you should put your application's initialisation code..\r\n"
 "\r\n"
-"        mainWindow = new MainWindow (getApplicationName());\r\n"
+"        mainWindow.reset (new MainWindow (getApplicationName()));\r\n"
 "    }\r\n"
 "\r\n"
 "    void shutdown() override\r\n"
@@ -6668,7 +6668,7 @@ static const unsigned char temp_binary_data_43[] =
 "    };\r\n"
 "\r\n"
 "private:\r\n"
-"    ScopedPointer<MainWindow> mainWindow;\r\n"
+"    std::unique_ptr<MainWindow> mainWindow;\r\n"
 "};\r\n"
 "\r\n"
 "//==============================================================================\r\n"
@@ -7051,8 +7051,410 @@ static const unsigned char temp_binary_data_51[] =
 
 const char* jucer_OpenGLComponentTemplate_h = (const char*) temp_binary_data_51;
 
-//================== colourscheme_dark.xml ==================
+//================== jucer_PIPAudioProcessorTemplate.h ==================
 static const unsigned char temp_binary_data_52[] =
+"class %%class_name%%  : public AudioProcessor\r\n"
+"{\r\n"
+"public:\r\n"
+"    //==============================================================================\r\n"
+"    %%class_name%%()\r\n"
+"        : AudioProcessor (BusesProperties().withInput  (\"Input\",  AudioChannelSet::stereo())\r\n"
+"                                           .withOutput (\"Output\", AudioChannelSet::stereo()))\r\n"
+"    {\r\n"
+"    }\r\n"
+"\r\n"
+"    ~%%class_name%%()\r\n"
+"    {\r\n"
+"    }\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    void prepareToPlay (double, int) override\r\n"
+"    {\r\n"
+"        // Use this method as the place to do any pre-playback\r\n"
+"        // initialisation that you need..\r\n"
+"    }\r\n"
+"\r\n"
+"    void releaseResources() override\r\n"
+"    {\r\n"
+"        // When playback stops, you can use this as an opportunity to free up any\r\n"
+"        // spare memory, etc.\r\n"
+"    }\r\n"
+"\r\n"
+"    void processBlock (AudioBuffer<float>& buffer, MidiBuffer&) override\r\n"
+"    {\r\n"
+"        ScopedNoDenormals noDenormals;\r\n"
+"        auto totalNumInputChannels  = getTotalNumInputChannels();\r\n"
+"        auto totalNumOutputChannels = getTotalNumOutputChannels();\r\n"
+"\r\n"
+"        // In case we have more outputs than inputs, this code clears any output\r\n"
+"        // channels that didn't contain input data, (because these aren't\r\n"
+"        // guaranteed to be empty - they may contain garbage).\r\n"
+"        // This is here to avoid people getting screaming feedback\r\n"
+"        // when they first compile a plugin, but obviously you don't need to keep\r\n"
+"        // this code if your algorithm always overwrites all the output channels.\r\n"
+"        for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)\r\n"
+"            buffer.clear (i, 0, buffer.getNumSamples());\r\n"
+"\r\n"
+"        // This is the place where you'd normally do the guts of your plugin's\r\n"
+"        // audio processing...\r\n"
+"        // Make sure to reset the state if your inner loop is processing\r\n"
+"        // the samples and the outer loop is handling the channels.\r\n"
+"        // Alternatively, you can process the samples with the channels\r\n"
+"        // interleaved by keeping the same state.\r\n"
+"        for (int channel = 0; channel < totalNumInputChannels; ++channel)\r\n"
+"        {\r\n"
+"            auto* channelData = buffer.getWritePointer (channel);\r\n"
+"\r\n"
+"            // ..do something to the data...\r\n"
+"        }\r\n"
+"    }\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    AudioProcessorEditor* createEditor() override          { return nullptr; }\r\n"
+"    bool hasEditor() const override                        { return false;   }\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    const String getName() const override                  { return \"%%name%%\"; }\r\n"
+"    bool acceptsMidi() const override                      { return false; }\r\n"
+"    bool producesMidi() const override                     { return false; }\r\n"
+"    double getTailLengthSeconds() const override           { return 0; }\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    int getNumPrograms() override                          { return 1; }\r\n"
+"    int getCurrentProgram() override                       { return 0; }\r\n"
+"    void setCurrentProgram (int) override                  {}\r\n"
+"    const String getProgramName (int) override             { return {}; }\r\n"
+"    void changeProgramName (int, const String&) override   {}\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    void getStateInformation (MemoryBlock& destData) override\r\n"
+"    {\r\n"
+"        // You should use this method to store your parameters in the memory block.\r\n"
+"        // You could do that either as raw data, or use the XML or ValueTree classes\r\n"
+"        // as intermediaries to make it easy to save and load complex data.\r\n"
+"    }\r\n"
+"\r\n"
+"    void setStateInformation (const void* data, int sizeInBytes) override\r\n"
+"    {\r\n"
+"        // You should use this method to restore your parameters from this memory block,\r\n"
+"        // whose contents will have been created by the getStateInformation() call.\r\n"
+"    }\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    bool isBusesLayoutSupported (const BusesLayout& layouts) const override\r\n"
+"    {\r\n"
+"        // This is the place where you check if the layout is supported.\r\n"
+"        // In this template code we only support mono or stereo.\r\n"
+"        if (layouts.getMainOutputChannelSet() != AudioChannelSet::mono()\r\n"
+"            && layouts.getMainOutputChannelSet() != AudioChannelSet::stereo())\r\n"
+"            return false;\r\n"
+"\r\n"
+"        // This checks if the input layout matches the output layout\r\n"
+"        if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())\r\n"
+"            return false;\r\n"
+"\r\n"
+"        return true;\r\n"
+"    }\r\n"
+"\r\n"
+"private:\r\n"
+"    //==============================================================================\r\n"
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%class_name%%)\r\n"
+"};\r\n";
+
+const char* jucer_PIPAudioProcessorTemplate_h = (const char*) temp_binary_data_52;
+
+//================== jucer_PIPMain.cpp ==================
+static const unsigned char temp_binary_data_53[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    This file was auto-generated and contains the startup code for a PIP.\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"#include \"../JuceLibraryCode/JuceHeader.h\"\r\n"
+"#include \"%%filename%%\"\r\n"
+"\r\n"
+"%%component_begin%%\r\n"
+"class Application    : public JUCEApplication\r\n"
+"{\r\n"
+"public:\r\n"
+"    //==============================================================================\r\n"
+"    Application() {}\r\n"
+"\r\n"
+"    const String getApplicationName() override       { return \"%%project_name%%\"; }\r\n"
+"    const String getApplicationVersion() override    { return \"%%project_version%%\"; }\r\n"
+"\r\n"
+"    void initialise (const String&) override         { %%startup%% }\r\n"
+"    void shutdown() override                         { %%shutdown%% }\r\n"
+"\r\n"
+"private:\r\n"
+"    class MainWindow    : public DocumentWindow\r\n"
+"    {\r\n"
+"    public:\r\n"
+"        MainWindow (const String& name, Component* c, JUCEApplication& a)\r\n"
+"            : DocumentWindow (name, Desktop::getInstance().getDefaultLookAndFeel()\r\n"
+"                                                          .findColour (ResizableWindow::backgroundColourId),\r\n"
+"                              DocumentWindow::allButtons),\r\n"
+"              app (a)\r\n"
+"        {\r\n"
+"            setUsingNativeTitleBar (true);\r\n"
+"            setContentOwned (c, true);\r\n"
+"\r\n"
+"           #if JUCE_ANDROID || JUCE_IOS\r\n"
+"            setFullScreen (true);\r\n"
+"           #else\r\n"
+"            setResizable (true, false);\r\n"
+"            setResizeLimits (300, 250, 10000, 10000);\r\n"
+"            centreWithSize (getWidth(), getHeight());\r\n"
+"           #endif\r\n"
+"\r\n"
+"            setVisible (true);\r\n"
+"        }\r\n"
+"\r\n"
+"        void closeButtonPressed() override\r\n"
+"        {\r\n"
+"            app.systemRequestedQuit();\r\n"
+"        }\r\n"
+"\r\n"
+"    private:\r\n"
+"        JUCEApplication& app;\r\n"
+"\r\n"
+"        //==============================================================================\r\n"
+"        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)\r\n"
+"    };\r\n"
+"\r\n"
+"    std::unique_ptr<MainWindow> mainWindow;\r\n"
+"};\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"START_JUCE_APPLICATION (Application)\r\n"
+"%%component_end%%\r\n"
+"\r\n"
+"%%audioprocessor_begin%%\r\n"
+"//==============================================================================\r\n"
+"AudioProcessor* JUCE_CALLTYPE createPluginFilter()\r\n"
+"{\r\n"
+"    return new %%class_name%%();\r\n"
+"}\r\n"
+"%%audioprocessor_end%%\r\n"
+"\r\n"
+"%%console_begin%%\r\n"
+"%%console_end%%\r\n";
+
+const char* jucer_PIPMain_cpp = (const char*) temp_binary_data_53;
+
+//================== jucer_PIPTemplate.h ==================
+static const unsigned char temp_binary_data_54[] =
+"/*******************************************************************************\r\n"
+" The block below describes the properties of this PIP. A PIP is a short snippet\r\n"
+" of code that can be read by the Projucer and used to generate a JUCE project.\r\n"
+"\r\n"
+" BEGIN_JUCE_PIP_METADATA\r\n"
+"\r\n"
+"%%pip_metadata%%\r\n"
+"\r\n"
+" END_JUCE_PIP_METADATA\r\n"
+"\r\n"
+"*******************************************************************************/\r\n"
+"\r\n"
+"#pragma once\r\n"
+"\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"%%pip_code%%\r\n";
+
+const char* jucer_PIPTemplate_h = (const char*) temp_binary_data_54;
+
+//================== jucer_UnityPluginGUIScript.cs ==================
+static const unsigned char temp_binary_data_55[] =
+"#if UNITY_EDITOR\n"
+"\n"
+"using UnityEditor;\n"
+"using UnityEngine;\n"
+"\n"
+"using System.Collections.Generic;\n"
+"using System.Runtime.InteropServices;\n"
+"\n"
+"public class %%plugin_name%%GUI : IAudioEffectPluginGUI\n"
+"{\n"
+"    public override string Name           { get { return \"%%plugin_name%%\"; } }\n"
+"    public override string Description    { get { return \"%%plugin_description%%\"; } }\n"
+"    public override string Vendor         { get { return \"%%plugin_vendor%%\"; } }\n"
+"\n"
+"    //==============================================================================\n"
+"\t[DllImport(\"%%plugin_name%%\")] static extern System.IntPtr getRenderCallback();\n"
+"\n"
+"    [DllImport(\"%%plugin_name%%\")] static extern void unityInitialiseTexture (int id, System.IntPtr texture, int width, int height);\n"
+"\n"
+"    [DllImport(\"%%plugin_name%%\")] static extern void unityMouseDown (int id, float x, float y, EventModifiers mods, int button);\n"
+"    [DllImport(\"%%plugin_name%%\")] static extern void unityMouseDrag (int id, float x, float y, EventModifiers mods, int button);\n"
+"    [DllImport(\"%%plugin_name%%\")] static extern void unityMouseUp   (int id, float x, float y, EventModifiers mods);\n"
+"\n"
+"    [DllImport(\"%%plugin_name%%\")] static extern void unityKeyEvent (int id, KeyCode code, EventModifiers mods, string name);\n"
+"\n"
+"    [DllImport(\"%%plugin_name%%\")] static extern void unitySetScreenBounds (int id, float x, float y, float w, float h);\n"
+"\n"
+"    //==============================================================================\n"
+"    private class PluginGUIInstance\n"
+"    {\n"
+"        public PluginGUIInstance (ref IAudioEffectPlugin plugin, int id)\n"
+"        {\n"
+"            instanceID = id;\n"
+"\n"
+"            float[] arr;\n"
+"            plugin.GetFloatBuffer (\"Editor\", out arr, 1);\n"
+"            hasEditor = (arr[0] > 0.0f);\n"
+"        }\n"
+"\n"
+"        public void repaint (Rect r)\n"
+"        { \n"
+"            Vector2 newScreenPosition = GUIUtility.GUIToScreenPoint (r.position);\n"
+"\n"
+"            if (bounds != r \n"
+"                || screenPosition != newScreenPosition)\n"
+"            {\n"
+"                screenPosition = newScreenPosition;\n"
+"                bounds = r;\n"
+"\n"
+"                unitySetScreenBounds (instanceID, screenPosition.x, screenPosition.y, bounds.width, bounds.height);\n"
+"                setupTexture();\n"
+"            }\n"
+"\n"
+"\t\t\tGL.IssuePluginEvent (getRenderCallback(), instanceID);\n"
+"\n"
+"            texture.SetPixels32 (pixels);\n"
+"            texture.Apply();\n"
+"\n"
+"            EditorGUI.DrawPreviewTexture (bounds, texture);\n"
+"        }\n"
+"\n"
+"        public bool handleMouseEvent (EventType eventType)\n"
+"        {\n"
+"            Vector2 mousePos = Event.current.mousePosition;\n"
+"            EventModifiers mods = Event.current.modifiers;\n"
+"\n"
+"            if (! bounds.Contains (mousePos))\n"
+"                return false;\n"
+"\n"
+"            Vector2 relativePos = new Vector2 (mousePos.x - bounds.x, mousePos.y - bounds.y);\n"
+"\n"
+"            if (eventType == EventType.MouseDown)    \n"
+"            {\n"
+"                unityMouseDown (instanceID, relativePos.x, relativePos.y, mods, Event.current.button);\n"
+"                GUIUtility.hotControl = GUIUtility.GetControlID (FocusType.Passive);\n"
+"            }\n"
+"            else if (eventType == EventType.MouseUp)\n"
+"            {\n"
+"                unityMouseUp (instanceID, relativePos.x, relativePos.y, mods);\n"
+"                GUIUtility.hotControl = 0;\n"
+"            }\n"
+"            else if (eventType == EventType.MouseDrag)    \n"
+"            {\n"
+"                unityMouseDrag (instanceID, relativePos.x, relativePos.y, mods, Event.current.button);\n"
+"            }\n"
+"\n"
+"            Event.current.Use();\n"
+"\n"
+"            return true;\n"
+"        }\n"
+"\n"
+"        public void handleKeyEvent (EventType eventType)\n"
+"        {\n"
+"            if (eventType == EventType.KeyDown)\n"
+"            {\n"
+"                KeyCode code = Event.current.keyCode;\n"
+"\n"
+"                if (code == KeyCode.None)\n"
+"                    return;\n"
+"\n"
+"                EventModifiers mods = Event.current.modifiers;\n"
+"\n"
+"                unityKeyEvent (instanceID, code, mods, code.ToString());\n"
+"            }\n"
+"        }\n"
+"\n"
+"        private void setupTexture()\n"
+"        {\n"
+"            if (pixelHandle.IsAllocated)\n"
+"                pixelHandle.Free();\n"
+"\n"
+"            texture = new Texture2D ((int) bounds.width, (int) bounds.height, TextureFormat.ARGB32, false);\n"
+"\n"
+"            pixels = texture.GetPixels32();\n"
+"            pixelHandle = GCHandle.Alloc (pixels, GCHandleType.Pinned);\n"
+"\n"
+"            unityInitialiseTexture (instanceID, pixelHandle.AddrOfPinnedObject(), texture.width, texture.height);\n"
+"        }\n"
+"\n"
+"        public int instanceID = -1;\n"
+"        public bool hasEditor;\n"
+"\n"
+"        private Vector2 screenPosition;\n"
+"        private Rect bounds;\n"
+"\n"
+"        private Texture2D texture;\n"
+"        private Color32[] pixels;\n"
+"        private GCHandle pixelHandle;\n"
+"    }\n"
+"    List<PluginGUIInstance> guis = new List<PluginGUIInstance>();\n"
+"\n"
+"    private PluginGUIInstance getGUIInstanceForPlugin (ref IAudioEffectPlugin plugin)\n"
+"    {\n"
+"        float[] idArray;\n"
+"        plugin.GetFloatBuffer (\"ID\", out idArray, 1);\n"
+"\n"
+"        int id = (int) idArray[0];\n"
+"\n"
+"        for (int i = 0; i < guis.Count; ++i)\n"
+"        {\n"
+"            if (guis[i].instanceID == id)\n"
+"                return guis[i];\n"
+"        }\n"
+"\n"
+"        PluginGUIInstance newInstance = new PluginGUIInstance (ref plugin, id);\n"
+"        guis.Add (newInstance);\n"
+"\n"
+"        return guis[guis.Count - 1];\n"
+"    }\n"
+"\n"
+"    //==============================================================================\n"
+"    public override bool OnGUI (IAudioEffectPlugin plugin)\n"
+"    {\n"
+"        PluginGUIInstance guiInstance = getGUIInstanceForPlugin (ref plugin);\n"
+"\n"
+"        if (! guiInstance.hasEditor)\n"
+"            return true;\n"
+"\n"
+"        float[] arr;\n"
+"        plugin.GetFloatBuffer (\"Size\", out arr, 6);\n"
+"\n"
+"        Rect r = GUILayoutUtility.GetRect (arr[0], arr[1],\n"
+"                                           new GUILayoutOption[] { GUILayout.MinWidth (arr[2]), GUILayout.MinHeight (arr[3]),\n"
+"                                                                   GUILayout.MaxWidth (arr[4]), GUILayout.MaxHeight (arr[5]) });\n"
+"\n"
+"        int controlID = GUIUtility.GetControlID (FocusType.Passive);\n"
+"        Event currentEvent = Event.current;\n"
+"        EventType currentEventType = currentEvent.GetTypeForControl (controlID);\n"
+"\n"
+"        if (currentEventType == EventType.Repaint)\n"
+"            guiInstance.repaint (r);\n"
+"        else if (currentEvent.isMouse)\n"
+"            guiInstance.handleMouseEvent (currentEventType);\n"
+"        else if (currentEvent.isKey)\n"
+"            guiInstance.handleKeyEvent (currentEventType);\n"
+"\n"
+"        return false;\n"
+"    }\n"
+"}\n"
+"\n"
+"#endif";
+
+const char* jucer_UnityPluginGUIScript_cs = (const char*) temp_binary_data_55;
+
+//================== colourscheme_dark.xml ==================
+static const unsigned char temp_binary_data_56[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
 "\r\n"
 "<COLOUR_SCHEME font=\"&lt;Monospaced&gt;; 13.0\">\r\n"
@@ -7077,10 +7479,10 @@ static const unsigned char temp_binary_data_52[] =
 "  <COLOUR name=\"Error\" colour=\"FFE60000\"/>\r\n"
 "</COLOUR_SCHEME>\r\n";
 
-const char* colourscheme_dark_xml = (const char*) temp_binary_data_52;
+const char* colourscheme_dark_xml = (const char*) temp_binary_data_56;
 
 //================== colourscheme_light.xml ==================
-static const unsigned char temp_binary_data_53[] =
+static const unsigned char temp_binary_data_57[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
 "\r\n"
 "<COLOUR_SCHEME font=\"&lt;Monospaced&gt;; 13.0\">\r\n"
@@ -7105,10 +7507,16 @@ static const unsigned char temp_binary_data_53[] =
 "  <COLOUR name=\"Error\" colour=\"ffcc0000\"/>\r\n"
 "</COLOUR_SCHEME>\r\n";
 
-const char* colourscheme_light_xml = (const char*) temp_binary_data_53;
+const char* colourscheme_light_xml = (const char*) temp_binary_data_57;
+
+//================== nothingtoseehere.txt ==================
+static const unsigned char temp_binary_data_58[] =
+"VUEtMTk3NTkzMTgtNA==";
+
+const char* nothingtoseehere_txt = (const char*) temp_binary_data_58;
 
 //================== offlinepage.html ==================
-static const unsigned char temp_binary_data_54[] =
+static const unsigned char temp_binary_data_59[] =
 "<html>\n"
 "  <head>\n"
 "    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=11\">\n"
@@ -7152,10 +7560,10 @@ static const unsigned char temp_binary_data_54[] =
 "  </body>\n"
 "</html>";
 
-const char* offlinepage_html = (const char*) temp_binary_data_54;
+const char* offlinepage_html = (const char*) temp_binary_data_59;
 
 //================== projucer_EULA.txt ==================
-static const unsigned char temp_binary_data_55[] =
+static const unsigned char temp_binary_data_60[] =
 "\r\n"
 "IMPORTANT NOTICE: PLEASE READ CAREFULLY BEFORE INSTALLING THE SOFTWARE:\r\n"
 "\r\n"
@@ -7319,10 +7727,10 @@ static const unsigned char temp_binary_data_55[] =
 "\r\n"
 "10.6. Please note that this License, its subject matter and its formation, are governed by English law. You and we both agree to that the courts of England and Wales will have exclusive jurisdiction.\r\n";
 
-const char* projucer_EULA_txt = (const char*) temp_binary_data_55;
+const char* projucer_EULA_txt = (const char*) temp_binary_data_60;
 
 //================== RecentFilesMenuTemplate.nib ==================
-static const unsigned char temp_binary_data_56[] =
+static const unsigned char temp_binary_data_61[] =
 { 98,112,108,105,115,116,48,48,212,0,1,0,2,0,3,0,4,0,5,0,6,1,53,1,54,88,36,118,101,114,115,105,111,110,88,36,111,98,106,101,99,116,115,89,36,97,114,99,104,105,118,101,114,84,36,116,111,112,18,0,1,134,160,175,16,74,0,7,0,8,0,31,0,35,0,36,0,42,0,46,0,50,
 0,53,0,57,0,74,0,77,0,78,0,86,0,87,0,97,0,112,0,113,0,114,0,119,0,120,0,121,0,124,0,128,0,129,0,132,0,143,0,144,0,145,0,149,0,153,0,162,0,163,0,164,0,169,0,173,0,180,0,181,0,182,0,185,0,192,0,193,0,200,0,201,0,208,0,209,0,216,0,217,0,224,0,225,0,226,
 0,229,0,230,0,232,0,249,1,11,1,29,1,30,1,31,1,32,1,33,1,34,1,35,1,36,1,37,1,38,1,39,1,40,1,41,1,42,1,43,1,44,1,47,1,50,85,36,110,117,108,108,219,0,9,0,10,0,11,0,12,0,13,0,14,0,15,0,16,0,17,0,18,0,19,0,20,0,21,0,22,0,23,0,24,0,25,0,26,0,27,0,28,0,29,0,
@@ -7359,11 +7767,10 @@ static const unsigned char temp_binary_data_56[] =
 7,157,7,159,7,161,7,163,7,165,7,167,7,169,7,171,7,173,7,175,7,177,7,179,7,181,7,190,7,192,7,225,7,227,7,229,7,231,7,233,7,235,7,237,7,239,7,241,7,243,7,245,7,247,7,249,7,251,7,253,7,255,8,2,8,5,8,8,8,11,8,14,8,17,8,20,8,23,8,26,8,29,8,32,8,35,8,38,8,
 41,8,44,8,53,8,55,8,56,8,65,8,67,8,68,8,77,8,92,8,97,8,115,8,120,8,134,0,0,0,0,0,0,2,2,0,0,0,0,0,0,1,57,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,136,0,0 };
 
-const char* RecentFilesMenuTemplate_nib = (const char*) temp_binary_data_56;
+const char* RecentFilesMenuTemplate_nib = (const char*) temp_binary_data_61;
 
 
-const char* getNamedResource (const char*, int&) throw();
-const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw()
+const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
 {
     unsigned int hash = 0;
     if (resourceNameUTF8 != 0)
@@ -7414,8 +7821,8 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x28d496ad:  numBytes = 1233; return jucer_InlineComponentTemplate_h;
         case 0x8905395b:  numBytes = 473; return jucer_MainConsoleAppTemplate_cpp;
         case 0x5e5ea047:  numBytes = 2021; return jucer_MainTemplate_NoWindow_cpp;
-        case 0xda2391f8:  numBytes = 4004; return jucer_MainTemplate_SimpleWindow_cpp;
-        case 0x400bc026:  numBytes = 3964; return jucer_MainTemplate_Window_cpp;
+        case 0xda2391f8:  numBytes = 4012; return jucer_MainTemplate_SimpleWindow_cpp;
+        case 0x400bc026:  numBytes = 3972; return jucer_MainTemplate_Window_cpp;
         case 0xf4842835:  numBytes = 1491; return jucer_NewComponentTemplate_cpp;
         case 0xe7bf237a:  numBytes = 646; return jucer_NewComponentTemplate_h;
         case 0x02a2a077:  numBytes = 278; return jucer_NewCppFileTemplate_cpp;
@@ -7424,8 +7831,13 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x6bdeb129:  numBytes = 2174; return jucer_OpenGLComponentSimpleTemplate_h;
         case 0x7fbac252:  numBytes = 1665; return jucer_OpenGLComponentTemplate_cpp;
         case 0x491fa0d7:  numBytes = 1263; return jucer_OpenGLComponentTemplate_h;
+        case 0xbc050edc:  numBytes = 4926; return jucer_PIPAudioProcessorTemplate_h;
+        case 0xf4ca9e9a:  numBytes = 2447; return jucer_PIPMain_cpp;
+        case 0x0b16e320:  numBytes = 517; return jucer_PIPTemplate_h;
+        case 0xcd472557:  numBytes = 6426; return jucer_UnityPluginGUIScript_cs;
         case 0x763d39dc:  numBytes = 1050; return colourscheme_dark_xml;
         case 0xe8b08520:  numBytes = 1050; return colourscheme_light_xml;
+        case 0x938e96ec:  numBytes = 20; return nothingtoseehere_txt;
         case 0xf11580d8:  numBytes = 1155; return offlinepage_html;
         case 0xd6bb7d1d:  numBytes = 14361; return projucer_EULA_txt;
         case 0xa41e649d:  numBytes = 2842; return RecentFilesMenuTemplate_nib;
@@ -7433,7 +7845,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
     }
 
     numBytes = 0;
-    return 0;
+    return nullptr;
 }
 
 const char* namedResourceList[] =
@@ -7490,11 +7902,93 @@ const char* namedResourceList[] =
     "jucer_OpenGLComponentSimpleTemplate_h",
     "jucer_OpenGLComponentTemplate_cpp",
     "jucer_OpenGLComponentTemplate_h",
+    "jucer_PIPAudioProcessorTemplate_h",
+    "jucer_PIPMain_cpp",
+    "jucer_PIPTemplate_h",
+    "jucer_UnityPluginGUIScript_cs",
     "colourscheme_dark_xml",
     "colourscheme_light_xml",
+    "nothingtoseehere_txt",
     "offlinepage_html",
     "projucer_EULA_txt",
     "RecentFilesMenuTemplate_nib"
 };
+
+const char* originalFilenames[] =
+{
+    "gradle-wrapper.jar",
+    "gradlew",
+    "gradlew.bat",
+    "LICENSE",
+    "background_logo.svg",
+    "export_android.svg",
+    "export_clion.svg",
+    "export_codeBlocks.svg",
+    "export_linux.svg",
+    "export_visualStudio.svg",
+    "export_xcode.svg",
+    "huckleberry_icon.svg",
+    "juce-logo-with-text.svg",
+    "juce_icon.png",
+    "wizard_AnimatedApp.svg",
+    "wizard_AudioApp.svg",
+    "wizard_AudioPlugin.svg",
+    "wizard_ConsoleApp.svg",
+    "wizard_DLL.svg",
+    "wizard_GUI.svg",
+    "wizard_Highlight.svg",
+    "wizard_Openfile.svg",
+    "wizard_OpenGL.svg",
+    "wizard_StaticLibrary.svg",
+    "jucer_AnimatedComponentSimpleTemplate.h",
+    "jucer_AnimatedComponentTemplate.cpp",
+    "jucer_AnimatedComponentTemplate.h",
+    "jucer_AudioComponentSimpleTemplate.h",
+    "jucer_AudioComponentTemplate.cpp",
+    "jucer_AudioComponentTemplate.h",
+    "jucer_AudioPluginEditorTemplate.cpp",
+    "jucer_AudioPluginEditorTemplate.h",
+    "jucer_AudioPluginFilterTemplate.cpp",
+    "jucer_AudioPluginFilterTemplate.h",
+    "jucer_ComponentTemplate.cpp",
+    "jucer_ComponentTemplate.h",
+    "jucer_ContentCompSimpleTemplate.h",
+    "jucer_ContentCompTemplate.cpp",
+    "jucer_ContentCompTemplate.h",
+    "jucer_InlineComponentTemplate.h",
+    "jucer_MainConsoleAppTemplate.cpp",
+    "jucer_MainTemplate_NoWindow.cpp",
+    "jucer_MainTemplate_SimpleWindow.cpp",
+    "jucer_MainTemplate_Window.cpp",
+    "jucer_NewComponentTemplate.cpp",
+    "jucer_NewComponentTemplate.h",
+    "jucer_NewCppFileTemplate.cpp",
+    "jucer_NewCppFileTemplate.h",
+    "jucer_NewInlineComponentTemplate.h",
+    "jucer_OpenGLComponentSimpleTemplate.h",
+    "jucer_OpenGLComponentTemplate.cpp",
+    "jucer_OpenGLComponentTemplate.h",
+    "jucer_PIPAudioProcessorTemplate.h",
+    "jucer_PIPMain.cpp",
+    "jucer_PIPTemplate.h",
+    "jucer_UnityPluginGUIScript.cs",
+    "colourscheme_dark.xml",
+    "colourscheme_light.xml",
+    "nothingtoseehere.txt",
+    "offlinepage.html",
+    "projucer_EULA.txt",
+    "RecentFilesMenuTemplate.nib"
+};
+
+const char* getNamedResourceOriginalFilename (const char* resourceNameUTF8)
+{
+    for (unsigned int i = 0; i < (sizeof (namedResourceList) / sizeof (namedResourceList[0])); ++i)
+    {
+        if (namedResourceList[i] == resourceNameUTF8)
+            return originalFilenames[i];
+    }
+
+    return nullptr;
+}
 
 }

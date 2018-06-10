@@ -101,7 +101,7 @@ private:
 
     class GZIPCompressorHelper;
     friend struct ContainerDeletePolicy<GZIPCompressorHelper>;
-    ScopedPointer<GZIPCompressorHelper> helper;
+    std::unique_ptr<GZIPCompressorHelper> helper;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GZIPCompressorOutputStream)
 };

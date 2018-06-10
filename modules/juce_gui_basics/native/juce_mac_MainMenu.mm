@@ -143,14 +143,17 @@ public:
         auto menuNames = currentModel->getMenuBarNames();
         auto indexOfMenu = (int) [superMenu indexOfItemWithSubmenu: menu] - 1;
 
-        removeItemRecursive (menu);
+        if (indexOfMenu >= 0)
+        {
+            removeItemRecursive (menu);
 
-        auto updatedPopup = currentModel->getMenuForIndex (indexOfMenu, menuNames[indexOfMenu]);
+            auto updatedPopup = currentModel->getMenuForIndex (indexOfMenu, menuNames[indexOfMenu]);
 
-        for (PopupMenu::MenuItemIterator iter (updatedPopup); iter.next();)
-            addMenuItem (iter, menu, 1, indexOfMenu);
+            for (PopupMenu::MenuItemIterator iter (updatedPopup); iter.next();)
+                addMenuItem (iter, menu, 1, indexOfMenu);
 
-        [menu update];
+            [menu update];
+        }
     }
 
     void menuBarItemsChanged (MenuBarModel*) override
@@ -342,7 +345,7 @@ public:
     static JuceMainMenuHandler* instance;
 
     MenuBarModel* currentModel = nullptr;
-    ScopedPointer<PopupMenu> extraAppleMenuItems;
+    std::unique_ptr<PopupMenu> extraAppleMenuItems;
     uint32 lastUpdateTime = 0;
     NSObject* callback = nil;
     String recentItemsMenuName;
@@ -400,7 +403,7 @@ private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RecentFilesMenuItem)
     };
 
-    ScopedPointer<RecentFilesMenuItem> recent;
+    std::unique_ptr<RecentFilesMenuItem> recent;
 
     //==============================================================================
     static NSMenuItem* findMenuItemWithCommandID (NSMenu* const menu, int commandID)
@@ -622,7 +625,7 @@ public:
 
 private:
     MenuBarModel* const oldMenu;
-    ScopedPointer<PopupMenu> oldAppleMenu;
+    std::unique_ptr<PopupMenu> oldAppleMenu;
     String oldRecentItems;
     NSInteger editMenuIndex;
 
@@ -762,7 +765,7 @@ const PopupMenu* MenuBarModel::getMacExtraAppleItemsMenu()
     return nullptr;
 }
 
-typedef void (*MenuTrackingChangedCallback) (bool);
+using MenuTrackingChangedCallback = void (*)(bool);
 extern MenuTrackingChangedCallback menuTrackingChangedCallback;
 
 static void mainMenuTrackingChanged (bool isTracking)

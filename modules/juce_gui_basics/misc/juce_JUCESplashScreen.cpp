@@ -79,7 +79,7 @@ struct ReportingThreadContainer  : public ChangeListener,
     void sendReport (String, String&, StringPairArray&);
     void changeListenerCallback (ChangeBroadcaster*) override;
 
-    ScopedPointer<ReportingThread> reportingThread;
+    std::unique_ptr<ReportingThread> reportingThread;
 
     JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (ReportingThreadContainer)
 };
@@ -132,7 +132,7 @@ private:
     ReportingThreadContainer& threadContainer;
     URL url;
     String headers;
-    ScopedPointer<WebInputStream> webStream;
+    std::unique_ptr<WebInputStream> webStream;
 };
 
 //==============================================================================
@@ -257,7 +257,7 @@ JUCESplashScreen::~JUCESplashScreen()
 {
 }
 
-Drawable* JUCESplashScreen::getSplashScreenLogo()
+std::unique_ptr<Drawable> JUCESplashScreen::getSplashScreenLogo()
 {
     const char* svgData = R"JUCESPLASHSCREEN(
       <?xml version="1.0" encoding="UTF-8"?>
@@ -294,8 +294,8 @@ Drawable* JUCESplashScreen::getSplashScreenLogo()
     </svg>
     )JUCESPLASHSCREEN";
 
-    ScopedPointer<XmlElement> svgXml (XmlDocument::parse (svgData));
-    return Drawable::createFromSVG (*svgXml);
+    std::unique_ptr<XmlElement> svgXml (XmlDocument::parse (svgData));
+    return std::unique_ptr<Drawable> (Drawable::createFromSVG (*svgXml));
 }
 
 void JUCESplashScreen::paint (Graphics& g)

@@ -31,7 +31,7 @@
 
   ID:               juce_audio_devices
   vendor:           juce
-  version:          5.2.1
+  version:          5.3.2
   name:             JUCE audio and MIDI I/O device classes
   description:      Classes to play and record from audio and MIDI I/O devices
   website:          http://www.juce.com/juce
@@ -106,6 +106,13 @@
 */
 #ifndef JUCE_JACK
  #define JUCE_JACK 0
+#endif
+
+/** Config: JUCE_BELA
+    Enables Bela audio devices on Bela boards.
+*/
+#ifndef JUCE_BELA
+ #define JUCE_BELA 0
 #endif
 
 /** Config: JUCE_USE_ANDROID_OBOE

@@ -36,7 +36,7 @@
 
   ID:               juce_video
   vendor:           juce
-  version:          5.2.1
+  version:          5.3.2
   name:             JUCE video playback and capture classes
   description:      Classes for playing video and capturing camera input.
   website:          http://www.juce.com/juce
@@ -59,14 +59,43 @@
 
 //=============================================================================
 /** Config: JUCE_USE_CAMERA
-    Enables web-cam support using the CameraDevice class (Mac and Windows).
+    Enables camera support using the CameraDevice class (Mac, Windows, iOS, Android).
 */
 #ifndef JUCE_USE_CAMERA
  #define JUCE_USE_CAMERA 0
 #endif
 
-#if ! (JUCE_MAC || JUCE_WINDOWS)
+#ifndef JUCE_CAMERA_LOG_ENABLED
+ #define JUCE_CAMERA_LOG_ENABLED 0
+#endif
+
+#if JUCE_CAMERA_LOG_ENABLED
+ #define JUCE_CAMERA_LOG(x) DBG(x)
+#else
+ #define JUCE_CAMERA_LOG(x) {}
+#endif
+
+#if ! (JUCE_MAC || JUCE_WINDOWS || JUCE_IOS || JUCE_ANDROID)
  #undef JUCE_USE_CAMERA
+#endif
+
+//=============================================================================
+/** Config: JUCE_SYNC_VIDEO_VOLUME_WITH_OS_MEDIA_VOLUME
+    Enables synchronisation between video playback volume and OS media volume.
+    Currently supported on Android only.
+ */
+#ifndef JUCE_SYNC_VIDEO_VOLUME_WITH_OS_MEDIA_VOLUME
+ #define JUCE_SYNC_VIDEO_VOLUME_WITH_OS_MEDIA_VOLUME 1
+#endif
+
+#ifndef JUCE_VIDEO_LOG_ENABLED
+ #define JUCE_VIDEO_LOG_ENABLED 1
+#endif
+
+#if JUCE_VIDEO_LOG_ENABLED
+ #define JUCE_VIDEO_LOG(x) DBG(x)
+#else
+ #define JUCE_VIDEO_LOG(x) {}
 #endif
 
 //=============================================================================

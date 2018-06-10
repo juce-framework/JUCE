@@ -88,9 +88,9 @@ Result DownloadCompileEngineThread::download (MemoryBlock& dest)
     StringPairArray responseHeaders;
 
     URL url = getDownloadUrl();
-    ScopedPointer<InputStream> in = url.createInputStream (false, nullptr, nullptr,
-                                                           String(), timeoutMs, &responseHeaders,
-                                                           &statusCode, 0);
+    std::unique_ptr<InputStream> in (url.createInputStream (false, nullptr, nullptr,
+                                                            String(), timeoutMs, &responseHeaders,
+                                                            &statusCode, 0));
 
     if (in == nullptr || statusCode != 200)
         return Result::fail ("Download error: cannot establish connection");

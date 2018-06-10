@@ -55,7 +55,7 @@ JucerDocument* ComponentDocument::createCopy()
 
     newOne->resources = resources;
 
-    ScopedPointer<XmlElement> xml (createXml());
+    std::unique_ptr<XmlElement> xml (createXml());
     newOne->loadFromXml (*xml);
 
     return newOne;

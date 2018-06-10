@@ -1,0 +1,50 @@
+<tree>
+    <item1>
+        <subnode colour="ffff0000" width="800" />
+        <subnode colour="ff33bb00" width="50" />
+        <subnode colour="33000000" />
+        <subnode width="100" />
+        <subnode colour="ff8866ee" />
+        <subnode/>
+        <subnode colour="33000000" />
+        <subnode/>
+        <subnode/>
+    </item1>
+
+    <item2 colour="ff777777">
+        <subnode/>
+        <subnode/>
+        <subnode/>
+        <subnode/>
+        <subnode width="800"/>
+        <subnode width="800"/>
+        <subnode/>
+        <subnode/>
+        <subnode/>
+        <item3>
+            <subnode>
+                <subnode width="50"/>
+            </subnode>
+            <subnode/>
+            <subnode/>
+            <subnode/>
+            <subnode/>
+            <subnode/>
+            <subnode/>
+            <subnode/>
+            <subnode/>
+        </item3>
+    </item2>
+
+    <item4>
+        <subnode/>
+        <subnode/>
+        <subnode/>
+        <subnode/>
+        <subnode/>
+        <subnode/>
+        <subnode/>
+        <subnode/>
+        <subnode/>
+    </item4>
+</tree>

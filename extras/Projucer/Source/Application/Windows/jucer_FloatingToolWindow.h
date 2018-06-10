@@ -33,7 +33,7 @@ struct FloatingToolWindow  : public DialogWindow
     FloatingToolWindow (const String& title,
                         const String& windowPosPropertyName,
                         Component* content,
-                        ScopedPointer<Component>& ownerPointer,
+                        std::unique_ptr<Component>& ownerPointer,
                         bool shouldBeResizable,
                         int defaultW, int defaultH,
                         int minW, int minH,
@@ -84,7 +84,7 @@ struct FloatingToolWindow  : public DialogWindow
 
 private:
     String windowPosProperty;
-    ScopedPointer<Component>& owner;
+    std::unique_ptr<Component>& owner;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FloatingToolWindow)
 };

@@ -70,7 +70,11 @@ public:
     Value getStoredPath (const Identifier& key);
     Value getFallbackPathForOS (const Identifier& key, DependencyPathOS);
 
-    bool isGlobalPathValid (const File& relativeTo, const Identifier& key, const String& path);
+    bool isGlobalPathValid (const File& relativeTo, const Identifier& key, const String& path) const noexcept;
+
+    //==============================================================================
+    bool shouldAskUserToSetJUCEPath() noexcept;
+    void setDontAskAboutJUCEPathAgain() noexcept;
 
 private:
     OwnedArray<PropertiesFile> propertyFiles;
@@ -79,8 +83,8 @@ private:
 
     void changed (bool isProjectDefaults)
     {
-        ScopedPointer<XmlElement> data (isProjectDefaults ? projectDefaults.createXml()
-                                                          : fallbackPaths.createXml());
+        std::unique_ptr<XmlElement> data (isProjectDefaults ? projectDefaults.createXml()
+                                                            : fallbackPaths.createXml());
 
         propertyFiles.getUnchecked (0)->setValue (isProjectDefaults ? "PROJECT_DEFAULT_SETTINGS"
                                                                     : "FALLBACK_PATHS",
@@ -96,6 +100,7 @@ private:
     void saveSwatchColours();
 
     void updateOldProjectSettingsFiles();
+    void checkJUCEPaths();
 
     //==============================================================================
     void valueTreePropertyChanged (ValueTree& vt, const Identifier&) override  { changed (vt == projectDefaults); }

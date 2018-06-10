@@ -105,9 +105,9 @@ private:
     AudioBuffer<float> buffer;
     CriticalSection bufferStartPosLock;
     WaitableEvent bufferReadyEvent;
-    int64 volatile bufferValidStart, bufferValidEnd, nextPlayPos;
-    double volatile sampleRate;
-    bool wasSourceLooping, isPrepared, prefillBuffer;
+    std::atomic<int64> bufferValidStart { 0 }, bufferValidEnd { 0 }, nextPlayPos { 0 };
+    double sampleRate = 0;
+    bool wasSourceLooping = false, isPrepared = false, prefillBuffer;
 
     bool readNextBufferChunk();
     void readBufferSection (int64 start, int length, int bufferOffset);

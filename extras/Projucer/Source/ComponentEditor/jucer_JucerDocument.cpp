@@ -76,7 +76,7 @@ struct UserDocChangeTimer  : public Timer
 void JucerDocument::userEditedCpp()
 {
     if (userDocChangeTimer == nullptr)
-        userDocChangeTimer = new UserDocChangeTimer (*this);
+        userDocChangeTimer.reset (new UserDocChangeTimer (*this));
 
     userDocChangeTimer->startTimer (500);
 }
@@ -217,7 +217,7 @@ void JucerDocument::setInitialSize (int w, int h)
 //==============================================================================
 bool JucerDocument::isSnapActive (const bool disableIfCtrlKeyDown) const noexcept
 {
-    return snapActive != (disableIfCtrlKeyDown && ModifierKeys::getCurrentModifiers().isCtrlDown());
+    return snapActive != (disableIfCtrlKeyDown && ModifierKeys::currentModifiers.isCtrlDown());
 }
 
 int JucerDocument::snapPosition (int pos) const noexcept
@@ -424,7 +424,7 @@ void JucerDocument::fillInGeneratedCode (GeneratedCode& code) const
 
     fillInPaintCode (code);
 
-    ScopedPointer<XmlElement> e (createXml());
+    std::unique_ptr<XmlElement> e (createXml());
     jassert (e != nullptr);
     code.jucerMetadata = e->createDocument ("", false, false);
 
@@ -572,15 +572,15 @@ bool JucerDocument::reloadFromDocument()
 {
     const String cppContent (cpp->getCodeDocument().getAllContent());
 
-    ScopedPointer<XmlElement> newXML (pullMetaDataFromCppFile (cppContent));
+    std::unique_ptr<XmlElement> newXML (pullMetaDataFromCppFile (cppContent));
 
     if (newXML == nullptr || ! newXML->hasTagName (jucerCompXmlTag))
         return false;
 
-    if (currentXML != nullptr && currentXML->isEquivalentTo (newXML, true))
+    if (currentXML != nullptr && currentXML->isEquivalentTo (newXML.get(), true))
         return true;
 
-    currentXML = newXML;
+    currentXML.reset (newXML.release());
     stopTimer();
 
     resources.loadFromCpp (getCppFile(), cppContent);
@@ -645,9 +645,13 @@ XmlElement* JucerDocument::pullMetaDataFromCppFile (const String& cpp)
 
 bool JucerDocument::isValidJucerCppFile (const File& f)
 {
-    if (f.hasFileExtension (".cpp"))
-        if (ScopedPointer<XmlElement> xml = pullMetaDataFromCppFile (f.loadFileAsString()))
+    if (f.hasFileExtension (cppFileExtensions))
+    {
+        std::unique_ptr<XmlElement> xml (pullMetaDataFromCppFile (f.loadFileAsString()));
+
+        if (xml != nullptr)
             return xml->hasTagName (jucerCompXmlTag);
+    }
 
     return false;
 }
@@ -656,20 +660,20 @@ static JucerDocument* createDocument (SourceCodeDocument* cpp)
 {
     auto& codeDoc = cpp->getCodeDocument();
 
-    ScopedPointer<XmlElement> xml (JucerDocument::pullMetaDataFromCppFile (codeDoc.getAllContent()));
+    std::unique_ptr<XmlElement> xml (JucerDocument::pullMetaDataFromCppFile (codeDoc.getAllContent()));
 
     if (xml == nullptr || ! xml->hasTagName (JucerDocument::jucerCompXmlTag))
         return nullptr;
 
     const String docType (xml->getStringAttribute ("documentType"));
 
-    ScopedPointer<JucerDocument> newDoc;
+    std::unique_ptr<JucerDocument> newDoc;
 
     if (docType.equalsIgnoreCase ("Button"))
-        newDoc = new ButtonDocument (cpp);
+        newDoc.reset (new ButtonDocument (cpp));
 
     if (docType.equalsIgnoreCase ("Component") || docType.isEmpty())
-        newDoc = new ComponentDocument (cpp);
+        newDoc.reset (new ComponentDocument (cpp));
 
     if (newDoc != nullptr && newDoc->reloadFromDocument())
         return newDoc.release();
@@ -720,7 +724,9 @@ public:
 
     Component* createEditor() override
     {
-        if (ScopedPointer<JucerDocument> jucerDoc = JucerDocument::createForCppFile (getProject(), getFile()))
+        std::unique_ptr<JucerDocument> jucerDoc (JucerDocument::createForCppFile (getProject(), getFile()));
+
+        if (jucerDoc != nullptr)
             return new JucerDocumentEditor (jucerDoc.release());
 
         return SourceCodeDocument::createEditor();
@@ -766,7 +772,9 @@ struct NewGUIComponentWizard  : public NewFileWizard::Type
             {
                 if (auto* header = dynamic_cast<SourceCodeDocument*> (odm.openFile (nullptr, headerFile)))
                 {
-                    if (ScopedPointer<JucerDocument> jucerDoc = new ComponentDocument (cpp))
+                    std::unique_ptr<JucerDocument> jucerDoc (new ComponentDocument (cpp));
+
+                    if (jucerDoc != nullptr)
                     {
                         jucerDoc->setClassName (newFile.getFileNameWithoutExtension());
 

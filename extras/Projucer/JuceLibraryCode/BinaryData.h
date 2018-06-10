@@ -135,10 +135,10 @@ namespace BinaryData
     const int            jucer_MainTemplate_NoWindow_cppSize = 2021;
 
     extern const char*   jucer_MainTemplate_SimpleWindow_cpp;
-    const int            jucer_MainTemplate_SimpleWindow_cppSize = 4004;
+    const int            jucer_MainTemplate_SimpleWindow_cppSize = 4012;
 
     extern const char*   jucer_MainTemplate_Window_cpp;
-    const int            jucer_MainTemplate_Window_cppSize = 3964;
+    const int            jucer_MainTemplate_Window_cppSize = 3972;
 
     extern const char*   jucer_NewComponentTemplate_cpp;
     const int            jucer_NewComponentTemplate_cppSize = 1491;
@@ -164,11 +164,26 @@ namespace BinaryData
     extern const char*   jucer_OpenGLComponentTemplate_h;
     const int            jucer_OpenGLComponentTemplate_hSize = 1263;
 
+    extern const char*   jucer_PIPAudioProcessorTemplate_h;
+    const int            jucer_PIPAudioProcessorTemplate_hSize = 4926;
+
+    extern const char*   jucer_PIPMain_cpp;
+    const int            jucer_PIPMain_cppSize = 2447;
+
+    extern const char*   jucer_PIPTemplate_h;
+    const int            jucer_PIPTemplate_hSize = 517;
+
+    extern const char*   jucer_UnityPluginGUIScript_cs;
+    const int            jucer_UnityPluginGUIScript_csSize = 6426;
+
     extern const char*   colourscheme_dark_xml;
     const int            colourscheme_dark_xmlSize = 1050;
 
     extern const char*   colourscheme_light_xml;
     const int            colourscheme_light_xmlSize = 1050;
+
+    extern const char*   nothingtoseehere_txt;
+    const int            nothingtoseehere_txtSize = 20;
 
     extern const char*   offlinepage_html;
     const int            offlinepage_htmlSize = 1155;
@@ -179,13 +194,20 @@ namespace BinaryData
     extern const char*   RecentFilesMenuTemplate_nib;
     const int            RecentFilesMenuTemplate_nibSize = 2842;
 
+    // Number of elements in the namedResourceList and originalFileNames arrays.
+    const int namedResourceListSize = 62;
+
     // Points to the start of a list of resource names.
     extern const char* namedResourceList[];
 
-    // Number of elements in the namedResourceList array.
-    const int namedResourceListSize = 57;
+    // Points to the start of a list of resource filenames.
+    extern const char* originalFilenames[];
 
     // If you provide the name of one of the binary resource variables above, this function will
     // return the corresponding data and its size (or a null pointer if the name isn't found).
-    const char* getNamedResource (const char* resourceNameUTF8, int& dataSizeInBytes) throw();
+    const char* getNamedResource (const char* resourceNameUTF8, int& dataSizeInBytes);
+
+    // If you provide the name of one of the binary resource variables above, this function will
+    // return the corresponding original, non-mangled filename (or a null pointer if the name isn't found).
+    const char* getNamedResourceOriginalFilename (const char* resourceNameUTF8);
 }

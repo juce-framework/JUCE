@@ -50,8 +50,7 @@ InterprocessConnection::~InterprocessConnection()
 
 //==============================================================================
 bool InterprocessConnection::connectToSocket (const String& hostName,
-                                              const int portNumber,
-                                              const int timeOutMillisecs)
+                                              int portNumber, int timeOutMillisecs)
 {
     disconnect();
 
@@ -69,11 +68,11 @@ bool InterprocessConnection::connectToSocket (const String& hostName,
     return false;
 }
 
-bool InterprocessConnection::connectToPipe (const String& pipeName, const int timeoutMs)
+bool InterprocessConnection::connectToPipe (const String& pipeName, int timeoutMs)
 {
     disconnect();
 
-    ScopedPointer<NamedPipe> newPipe (new NamedPipe());
+    std::unique_ptr<NamedPipe> newPipe (new NamedPipe());
 
     if (newPipe->openExisting (pipeName))
     {
@@ -86,11 +85,11 @@ bool InterprocessConnection::connectToPipe (const String& pipeName, const int ti
     return false;
 }
 
-bool InterprocessConnection::createPipe (const String& pipeName, const int timeoutMs, bool mustNotExist)
+bool InterprocessConnection::createPipe (const String& pipeName, int timeoutMs, bool mustNotExist)
 {
     disconnect();
 
-    ScopedPointer<NamedPipe> newPipe (new NamedPipe());
+    std::unique_ptr<NamedPipe> newPipe (new NamedPipe());
 
     if (newPipe->createNewPipe (pipeName, mustNotExist))
     {
@@ -269,16 +268,27 @@ void InterprocessConnection::deliverDataInt (const MemoryBlock& data)
 }
 
 //==============================================================================
-bool InterprocessConnection::readNextMessageInt()
+int InterprocessConnection::readData (void* data, int num)
+{
+    if (socket != nullptr)
+        return socket->read (data, num, true);
+
+    if (pipe != nullptr)
+        return pipe->read (data, num, pipeReceiveMessageTimeout);
+
+    jassertfalse;
+    return -1;
+}
+
+bool InterprocessConnection::readNextMessage()
 {
     uint32 messageHeader[2];
-    const int bytes = socket != nullptr ? socket->read (messageHeader, sizeof (messageHeader), true)
-                                        : pipe  ->read (messageHeader, sizeof (messageHeader), -1);
+    auto bytes = readData (messageHeader, sizeof (messageHeader));
 
     if (bytes == sizeof (messageHeader)
          && ByteOrder::swapIfBigEndian (messageHeader[0]) == magicMessageHeader)
     {
-        int bytesInMessage = (int) ByteOrder::swapIfBigEndian (messageHeader[1]);
+        auto bytesInMessage = (int) ByteOrder::swapIfBigEndian (messageHeader[1]);
 
         if (bytesInMessage > 0)
         {
@@ -290,11 +300,8 @@ bool InterprocessConnection::readNextMessageInt()
                 if (thread->threadShouldExit())
                     return false;
 
-                const int numThisTime = jmin (bytesInMessage, 65536);
-                void* const data = addBytesToPointer (messageData.getData(), bytesRead);
-
-                const int bytesIn = socket != nullptr ? socket->read (data, numThisTime, true)
-                                                      : pipe  ->read (data, numThisTime, -1);
+                auto numThisTime = jmin (bytesInMessage, 65536);
+                auto bytesIn = readData (addBytesToPointer (messageData.getData(), bytesRead), numThisTime);
 
                 if (bytesIn <= 0)
                     break;
@@ -306,17 +313,19 @@ bool InterprocessConnection::readNextMessageInt()
             if (bytesRead >= 0)
                 deliverDataInt (messageData);
         }
+
+        return true;
     }
-    else if (bytes < 0)
+
+    if (bytes < 0)
     {
         if (socket != nullptr)
             deletePipeAndSocket();
 
         connectionLostInt();
-        return false;
     }
 
-    return true;
+    return false;
 }
 
 void InterprocessConnection::runThread()
@@ -354,7 +363,7 @@ void InterprocessConnection::runThread()
             break;
         }
 
-        if (thread->threadShouldExit() || ! readNextMessageInt())
+        if (thread->threadShouldExit() || ! readNextMessage())
             break;
     }
 }

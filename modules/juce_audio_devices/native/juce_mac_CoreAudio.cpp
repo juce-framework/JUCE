@@ -1145,7 +1145,7 @@ public:
     int inputIndex, outputIndex;
 
 private:
-    ScopedPointer<CoreAudioInternal> internal;
+    std::unique_ptr<CoreAudioInternal> internal;
     bool isOpen_, isStarted;
     String lastError;
     AudioIODeviceCallback* previousCallback = nullptr;
@@ -1972,7 +1972,7 @@ private:
         void audioDeviceError (const String& errorMessage) override   { owner.handleAudioDeviceError (errorMessage); }
 
         AudioIODeviceCombiner& owner;
-        ScopedPointer<CoreAudioIODevice> device;
+        std::unique_ptr<CoreAudioIODevice> device;
         int inputIndex = 0, numInputChans = 0, outputIndex = 0, numOutputChans = 0;
         bool useInputs = false, useOutputs = false;
         AbstractFifo inputFifo { 32 }, outputFifo { 32 };
@@ -2157,7 +2157,7 @@ public:
         if (inputDeviceID == outputDeviceID)
             return new CoreAudioIODevice (*this, combinedName, inputDeviceID, inputIndex, outputDeviceID, outputIndex);
 
-        ScopedPointer<CoreAudioIODevice> in, out;
+        std::unique_ptr<CoreAudioIODevice> in, out;
 
         if (inputDeviceID != 0)
             in.reset (new CoreAudioIODevice (*this, inputDeviceName, inputDeviceID, inputIndex, 0, -1));
@@ -2168,7 +2168,7 @@ public:
         if (in == nullptr)   return out.release();
         if (out == nullptr)  return in.release();
 
-        ScopedPointer<AudioIODeviceCombiner> combo (new AudioIODeviceCombiner (combinedName, *this));
+        std::unique_ptr<AudioIODeviceCombiner> combo (new AudioIODeviceCombiner (combinedName, *this));
         combo->addDevice (in.release(),  true, false);
         combo->addDevice (out.release(), false, true);
         return combo.release();

@@ -101,9 +101,9 @@ namespace
             if (input.getNumBytesRemaining() < 4)
                 throw OSCFormatError ("OSC input stream exhausted while reading string");
 
-            const size_t posBegin = (size_t) getPosition();
-            String s (input.readString());
-            const size_t posEnd = (size_t) getPosition();
+            auto posBegin = (size_t) getPosition();
+            auto s = input.readString();
+            auto posEnd = (size_t) getPosition();
 
             if (static_cast<const char*> (getData()) [posEnd - 1] != '\0')
                 throw OSCFormatError ("OSC input stream exhausted before finding null terminator of string");
@@ -119,14 +119,14 @@ namespace
             if (input.getNumBytesRemaining() < 4)
                 throw OSCFormatError ("OSC input stream exhausted while reading blob");
 
-            const size_t blobDataSize = (size_t) input.readIntBigEndian();
+            auto blobDataSize = (size_t) input.readIntBigEndian();
 
             if ((size_t) input.getNumBytesRemaining() < (blobDataSize + 3) % 4)
                 throw OSCFormatError ("OSC input stream exhausted before reaching end of blob");
 
             MemoryBlock blob;
 
-            const size_t bytesRead = input.readIntoMemoryBlock (blob, (ssize_t) blobDataSize);
+            auto bytesRead = input.readIntoMemoryBlock (blob, (ssize_t) blobDataSize);
             readPaddingZeros (bytesRead);
 
             return blob;
@@ -203,8 +203,8 @@ namespace
         //==============================================================================
         OSCMessage readMessage()
         {
-            OSCAddressPattern ap = readAddressPattern();
-            OSCTypeList types = readTypeTagString();
+            auto ap = readAddressPattern();
+            auto types = readTypeTagString();
 
             OSCMessage msg (ap);
 
@@ -321,7 +321,7 @@ namespace
 struct OSCReceiver::Pimpl   : private Thread,
                               private MessageListener
 {
-    Pimpl()  : Thread ("JUCE OSC server")
+    Pimpl (const String& threadName)  : Thread (threadName)
     {
     }
 
@@ -387,8 +387,7 @@ struct OSCReceiver::Pimpl   : private Thread,
         addListenerWithAddress (listenerToAdd, addressToMatch, listenersWithAddress);
     }
 
-    void addListener (ListenerWithOSCAddress<RealtimeCallback>* listenerToAdd,
-                      OSCAddress addressToMatch)
+    void addListener (ListenerWithOSCAddress<RealtimeCallback>* listenerToAdd, OSCAddress addressToMatch)
     {
         addListenerWithAddress (listenerToAdd, addressToMatch, realtimeListenersWithAddress);
     }
@@ -429,7 +428,7 @@ struct OSCReceiver::Pimpl   : private Thread,
 
         try
         {
-            OSCBundle::Element content = inStream.readElementWithKnownSize (dataSize);
+            auto content = inStream.readElementWithKnownSize (dataSize);
 
             // realtime listeners should receive the OSC content first - and immediately
             // on this thread:
@@ -525,7 +524,7 @@ private:
     //==============================================================================
     void callListeners (const OSCBundle::Element& content)
     {
-        typedef OSCReceiver::Listener<OSCReceiver::MessageLoopCallback> Listener;
+        using Listener = OSCReceiver::Listener<OSCReceiver::MessageLoopCallback>;
 
         if (content.isMessage())
         {
@@ -541,7 +540,7 @@ private:
 
     void callRealtimeListeners (const OSCBundle::Element& content)
     {
-        typedef OSCReceiver::Listener<OSCReceiver::RealtimeCallback> Listener;
+        using Listener = OSCReceiver::Listener<OSCReceiver::RealtimeCallback>;
 
         if (content.isMessage())
         {
@@ -587,7 +586,11 @@ private:
 };
 
 //==============================================================================
-OSCReceiver::OSCReceiver()   : pimpl (new Pimpl())
+OSCReceiver::OSCReceiver (const String& threadName)   : pimpl (new Pimpl (threadName))
+{
+}
+
+OSCReceiver::OSCReceiver()  : OSCReceiver ("JUCE OSC server")
 {
 }
 

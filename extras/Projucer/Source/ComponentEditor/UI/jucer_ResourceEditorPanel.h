@@ -55,6 +55,6 @@ private:
     void reloadAll();
 
     JucerDocument& document;
-    ScopedPointer<TableListBox> listBox;
+    std::unique_ptr<TableListBox> listBox;
     TextButton addButton, reloadAllButton, delButton;
 };

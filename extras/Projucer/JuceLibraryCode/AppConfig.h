@@ -65,6 +65,7 @@
 #define JUCE_USE_DARK_SPLASH_SCREEN 1
 
 //==============================================================================
+#define JUCE_MODULE_AVAILABLE_juce_analytics            1
 #define JUCE_MODULE_AVAILABLE_juce_core                 1
 #define JUCE_MODULE_AVAILABLE_juce_cryptography         1
 #define JUCE_MODULE_AVAILABLE_juce_data_structures      1
@@ -107,7 +108,7 @@
 #endif
 
 #ifndef    JUCE_ALLOW_STATIC_NULL_VARIABLES
- //#define JUCE_ALLOW_STATIC_NULL_VARIABLES 1
+ #define   JUCE_ALLOW_STATIC_NULL_VARIABLES 0
 #endif
 
 //==============================================================================

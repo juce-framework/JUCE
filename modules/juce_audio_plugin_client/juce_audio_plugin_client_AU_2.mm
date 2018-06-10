@@ -33,6 +33,8 @@
  #pragma clang diagnostic ignored "-Wunused-parameter"
  #pragma clang diagnostic ignored "-Wunused"
  #pragma clang diagnostic ignored "-Wextra-semi"
+ #pragma clang diagnostic ignored "-Wformat-pedantic"
+ #pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
 #endif
 
 // From MacOS 10.13 and iOS 11 Apple has (sensibly!) stopped defining a whole

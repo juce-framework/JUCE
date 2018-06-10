@@ -53,7 +53,8 @@ PaintElement::PaintElement (PaintRoutine* owner_,
     setMinimumOnscreenAmounts (0, 0, 0, 0);
     setSizeLimits (borderThickness * 2 + 1, borderThickness * 2 + 1, 8192, 8192);
 
-    addChildComponent (border = new ResizableBorderComponent (this, this));
+    border.reset (new ResizableBorderComponent (this, this));
+    addChildComponent (border.get());
 
     border->setBorderThickness (BorderSize<int> (borderThickness));
 
@@ -514,7 +515,7 @@ void PaintElement::checkBounds (Rectangle<int>& b,
                                 const bool isStretchingBottom,
                                 const bool isStretchingRight)
 {
-    if (ModifierKeys::getCurrentModifiers().isShiftDown())
+    if (ModifierKeys::currentModifiers.isShiftDown())
         setFixedAspectRatio (originalAspectRatio);
     else
         setFixedAspectRatio (0.0);

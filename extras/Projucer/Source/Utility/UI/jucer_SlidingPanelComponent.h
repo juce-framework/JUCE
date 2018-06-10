@@ -67,7 +67,7 @@ private:
         ~PageInfo();
 
         Component::SafePointer<Component> content;
-        ScopedPointer<DotButton> dotButton;
+        std::unique_ptr<DotButton> dotButton;
         String name;
         bool shouldDelete;
     };

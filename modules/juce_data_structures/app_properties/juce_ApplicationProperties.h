@@ -123,7 +123,7 @@ public:
 private:
     //==============================================================================
     PropertiesFile::Options options;
-    ScopedPointer<PropertiesFile> userProps, commonProps;
+    std::unique_ptr<PropertiesFile> userProps, commonProps;
     int commonSettingsAreReadOnly = 0;
 
     void openFiles();

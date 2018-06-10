@@ -58,9 +58,9 @@ OSCBundle::Element::Element (const Element& other)
         bundle = nullptr;
 
         if (other.isMessage())
-            message = new OSCMessage (other.getMessage());
+            message.reset (new OSCMessage (other.getMessage()));
         else
-            bundle = new OSCBundle (other.getBundle());
+            bundle.reset (new OSCBundle (other.getBundle()));
     }
 }
 

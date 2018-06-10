@@ -18,8 +18,7 @@
 
 #include "b2ChainShape.h"
 #include "b2EdgeShape.h"
-#include <new>
-#include <cstring>
+
 using namespace std;
 
 b2ChainShape::~b2ChainShape()

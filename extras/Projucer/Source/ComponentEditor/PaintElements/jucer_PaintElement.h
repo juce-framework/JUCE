@@ -130,7 +130,7 @@ protected:
     void updateSiblingComps();
 
 private:
-    ScopedPointer<ResizableBorderComponent> border;
+    std::unique_ptr<ResizableBorderComponent> border;
     String typeName;
     bool selected, dragging, mouseDownSelectStatus;
     double originalAspectRatio;

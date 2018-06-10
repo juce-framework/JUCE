@@ -56,8 +56,6 @@ static NSMutableArray* createAllowedTypesArray (const StringArray& filters)
 }
 
 //==============================================================================
-template <> struct ContainerDeletePolicy<NSSavePanel>    { static void destroy (NSObject* o) { [o release]; } };
-
 class FileChooser::Native     : public Component,
                                 public FileChooser::Pimpl
 {
@@ -174,7 +172,7 @@ public:
 
     void runModally() override
     {
-        ScopedPointer<TemporaryMainMenuWithStandardCommands> tempMenu;
+        std::unique_ptr<TemporaryMainMenuWithStandardCommands> tempMenu;
 
         if (JUCEApplicationBase::isStandaloneApp())
             tempMenu.reset (new TemporaryMainMenuWithStandardCommands());
@@ -184,7 +182,7 @@ public:
         auto result = [panel runModal];
        #else
         auto result = [panel runModalForDirectory: juceStringToNS (startingDirectory)
-                                              file: juceStringToNS (filename)];
+                                             file: juceStringToNS (filename)];
        #endif
 
         finished (result);

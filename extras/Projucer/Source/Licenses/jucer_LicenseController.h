@@ -115,7 +115,7 @@ private:
     void queryWebview (const String&, const String&, HashMap<String, String>&);
 
     //==============================================================================
-    ScopedPointer<LicenseThread> thread;
+    std::unique_ptr<LicenseThread> thread;
     LicenseWebview* licenseWebview = nullptr;
    #endif
 

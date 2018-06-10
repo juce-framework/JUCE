@@ -59,7 +59,7 @@ void ComponentLayout::perform (UndoableAction* action, const String& actionName)
     }
     else
     {
-        ScopedPointer<UndoableAction> deleter (action);
+        std::unique_ptr<UndoableAction> deleter (action);
         action->perform();
     }
 }
@@ -107,7 +107,7 @@ public:
     int indexAdded;
 
 private:
-    ScopedPointer<XmlElement> xml;
+    std::unique_ptr<XmlElement> xml;
     ComponentLayout& layout;
 
     static void showCorrectTab()
@@ -129,7 +129,7 @@ public:
          oldIndex (-1)
     {
         if (ComponentTypeHandler* const h = ComponentTypeHandler::getHandlerFor (*comp))
-            xml = h->createXmlFor (comp, &layout);
+            xml.reset (h->createXmlFor (comp, &layout));
         else
             jassertfalse;
 
@@ -155,7 +155,7 @@ public:
     }
 
 private:
-    ScopedPointer<XmlElement> xml;
+    std::unique_ptr<XmlElement> xml;
     int oldIndex;
 };
 
@@ -272,7 +272,7 @@ void ComponentLayout::copySelectedToClipboard()
 void ComponentLayout::paste()
 {
     XmlDocument clip (SystemClipboard::getTextFromClipboard());
-    ScopedPointer<XmlElement> doc (clip.getDocumentElement());
+    std::unique_ptr<XmlElement> doc (clip.getDocumentElement());
 
     if (doc != nullptr && doc->hasTagName (clipboardXmlTag))
     {
@@ -408,25 +408,24 @@ void ComponentLayout::bringLostItemsBackOnScreen (int width, int height)
 
 Component* ComponentLayout::addNewComponent (ComponentTypeHandler* const type, int x, int y)
 {
-    ScopedPointer<Component> c (type->createNewComponent (getDocument()));
+    std::unique_ptr<Component> c (type->createNewComponent (getDocument()));
     jassert (c != nullptr);
 
     if (c != nullptr)
     {
         c->setSize (type->getDefaultWidth(), type->getDefaultHeight());
         c->setCentrePosition (x, y);
-        updateStoredComponentPosition (c, false);
+        updateStoredComponentPosition (c.get(), false);
 
         c->getProperties().set ("id", nextCompUID++);
 
-        ScopedPointer<XmlElement> xml (type->createXmlFor (c, this));
-        c.reset();
-        c = addComponentFromXml (*xml, true);
+        std::unique_ptr<XmlElement> xml (type->createXmlFor (c.get(), this));
+        c.reset (addComponentFromXml (*xml, true));
 
-        String memberName (CodeHelpers::makeValidIdentifier (type->getClassName (c), true, true, false));
-        setComponentMemberVariableName (c, memberName);
+        String memberName (CodeHelpers::makeValidIdentifier (type->getClassName (c.get()), true, true, false));
+        setComponentMemberVariableName (c.get(), memberName);
 
-        selected.selectOnly (c);
+        selected.selectOnly (c.get());
     }
 
     return c.release();
@@ -445,18 +444,18 @@ Component* ComponentLayout::addComponentFromXml (const XmlElement& xml, const bo
     if (ComponentTypeHandler* const type
            = ComponentTypeHandler::getHandlerForXmlTag (xml.getTagName()))
     {
-        ScopedPointer<Component> newComp (type->createNewComponent (getDocument()));
+        std::unique_ptr<Component> newComp (type->createNewComponent (getDocument()));
 
-        if (type->restoreFromXml (xml, newComp, this))
+        if (type->restoreFromXml (xml, newComp.get(), this))
         {
             // ensure that the new comp's name is unique
-            setComponentMemberVariableName (newComp, getComponentMemberVariableName (newComp));
+            setComponentMemberVariableName (newComp.get(), getComponentMemberVariableName (newComp.get()));
 
             // check for duped IDs..
-            while (findComponentWithId (ComponentTypeHandler::getComponentId (newComp)) != nullptr)
-                ComponentTypeHandler::setComponentId (newComp, Random::getSystemRandom().nextInt64());
+            while (findComponentWithId (ComponentTypeHandler::getComponentId (newComp.get())) != nullptr)
+                ComponentTypeHandler::setComponentId (newComp.get(), Random::getSystemRandom().nextInt64());
 
-            components.add (newComp);
+            components.add (newComp.get());
             changed();
             return newComp.release();
         }

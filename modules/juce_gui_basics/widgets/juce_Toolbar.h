@@ -312,7 +312,7 @@ public:
 
 private:
     //==============================================================================
-    ScopedPointer<Button> missingItemsButton;
+    std::unique_ptr<Button> missingItemsButton;
     bool vertical = false, isEditingActive = false;
     ToolbarItemStyle toolbarStyle = iconsOnly;
     class MissingItemsComponent;

@@ -23,7 +23,7 @@
 namespace juce
 {
 
-IPAddress::IPAddress (bool IPv6) noexcept : isIPv6 (IPv6)
+IPAddress::IPAddress() noexcept
 {
     for (int i = 0; i < 16; ++i)
         address[i] = 0;
@@ -85,27 +85,44 @@ IPAddress::IPAddress (uint32 n) noexcept : isIPv6 (false)
     zeroUnusedBytes();
 }
 
+static String removePort (const String& adr)
+{
+    if (adr.containsAnyOf ("[]"))
+        return adr.fromFirstOccurrenceOf ("[", false, true).upToLastOccurrenceOf ("]", false, true);
+    else if (adr.indexOf (":") == adr.lastIndexOf (":"))
+        return adr.upToLastOccurrenceOf (":", false, true);
+
+    return adr;
+}
+
 IPAddress::IPAddress (const String& adr)
 {
-    isIPv6 = adr.contains (":");
+    auto ipAddress = removePort (adr);
+
+    isIPv6 = ipAddress.contains (":");
 
     if (! isIPv6)
     {
-        StringArray tokens;
-        tokens.addTokens (adr, ".", String());
+        auto tokens = StringArray::fromTokens (ipAddress, ".", {});
 
         for (int i = 0; i < 4; ++i)
             address[i] = (uint8) tokens[i].getIntValue();
+
+        zeroUnusedBytes();
     }
     else
     {
-        StringArray tokens;
-        tokens.addTokens (adr.removeCharacters ("[]"), ":", String());
+        auto tokens = StringArray::fromTokens (ipAddress, ":", {});
 
-        if (tokens.contains (StringRef())) // if :: shorthand has been used
+        if (tokens.contains ({})) // if :: shorthand has been used
         {
-            int idx = tokens.indexOf (StringRef());
+            auto idx = tokens.indexOf ({});
             tokens.set (idx, "0");
+            tokens.removeEmptyStrings();
+
+            // mapped IPv4 address will be treated as a single token, so pad the end of the StringArray
+            if (tokens[tokens.size() - 1].containsChar ('.'))
+                tokens.add ({});
 
             while (tokens.size() < 8)
                 tokens.insert (idx, "0");
@@ -113,6 +130,18 @@ IPAddress::IPAddress (const String& adr)
 
         for (int i = 0; i < 8; ++i)
         {
+            if (i == 6 && isIPv4MappedAddress (IPAddress (address, true)))
+            {
+                IPAddress v4Address (tokens[i]);
+
+                address[12] = v4Address.address[0];
+                address[13] = v4Address.address[1];
+                address[14] = v4Address.address[2];
+                address[15] = v4Address.address[3];
+
+                break;
+            }
+
             ByteUnion temp;
             temp.combined = (uint16) CharacterFunctions::HexParser<int>::parse (tokens[i].getCharPointer());
 
@@ -134,26 +163,63 @@ String IPAddress::toString() const
         return s;
     }
 
-    String addressString;
     ByteUnion temp;
 
     temp.split[0] = address[0];
     temp.split[1] = address[1];
 
-    addressString = String (String::toHexString (temp.combined));
+    auto addressString = String::toHexString (temp.combined);
 
     for (int i = 1; i < 8; ++i)
     {
         temp.split[0] = address[i * 2];
         temp.split[1] = address[i * 2 + 1];
 
-        addressString << ':' << String (String::toHexString (temp.combined));
+        addressString << ':' << String::toHexString (temp.combined);
     }
 
     return getFormattedAddress (addressString);
 }
 
-IPAddress IPAddress::any (bool IPv6) noexcept           { return IPAddress (IPv6); }
+bool IPAddress::operator== (const IPAddress& other) const noexcept    { return compare (other) == 0; }
+bool IPAddress::operator!= (const IPAddress& other) const noexcept    { return compare (other) != 0; }
+bool IPAddress::operator<  (const IPAddress& other) const noexcept    { return compare (other) <  0; }
+bool IPAddress::operator<= (const IPAddress& other) const noexcept    { return compare (other) <= 0; }
+bool IPAddress::operator>  (const IPAddress& other) const noexcept    { return compare (other) >  0; }
+bool IPAddress::operator>= (const IPAddress& other) const noexcept    { return compare (other) >= 0; }
+
+int IPAddress::compare (const IPAddress& other) const noexcept
+{
+    if (isIPv6 != other.isIPv6)
+    {
+        if (isIPv6)
+        {
+            if (isIPv4MappedAddress (*this))
+                return convertIPv4MappedAddressToIPv4 (*this).compare (other);
+
+            return 1;
+        }
+        else
+        {
+            if (isIPv4MappedAddress (other))
+                return compare (convertIPv4MappedAddressToIPv4 (other));
+
+            return -1;
+        }
+    }
+
+    for (int i = 0; i < (isIPv6 ? 16 : 4); ++i)
+    {
+        if (address[i] > other.address[i])
+            return 1;
+        else if (address[i] < other.address[i])
+            return -1;
+    }
+
+    return 0;
+}
+
+IPAddress IPAddress::any() noexcept                     { return IPAddress(); }
 IPAddress IPAddress::broadcast() noexcept               { return IPAddress (255, 255, 255, 255); }
 IPAddress IPAddress::local (bool IPv6) noexcept         { return IPv6 ? IPAddress (0, 0, 0, 0, 0, 0, 0, 1)
                                                                       : IPAddress (127, 0, 0, 1); }
@@ -174,7 +240,7 @@ String IPAddress::getFormattedAddress (const String& unformattedAddress)
 
     for (int i = 0; i < tokens.size(); ++i)
     {
-        const auto& t = tokens.getReference (i);
+        auto& t = tokens.getReference (i);
 
         if (t.getHexValue32() == 0x0000)
         {
@@ -232,20 +298,45 @@ String IPAddress::getFormattedAddress (const String& unformattedAddress)
     return addressString;
 }
 
-bool IPAddress::operator== (const IPAddress& other) const noexcept
+bool IPAddress::isIPv4MappedAddress (const IPAddress& mappedAddress)
 {
-    for (int i = 0; i < (isIPv6 ? 16 : 4); ++i)
-        if (address[i] != other.address[i])
+    if (! mappedAddress.isIPv6)
+        return false;
+
+    for (int i = 0; i < 10; ++i)
+    {
+        if (mappedAddress.address[i] != 0)
             return false;
+    }
+
+    if (mappedAddress.address[10] != 255 || mappedAddress.address[11] != 255)
+        return false;
 
     return true;
-
 }
 
-bool IPAddress::operator!= (const IPAddress& other) const noexcept
+IPAddress IPAddress::convertIPv4MappedAddressToIPv4 (const IPAddress& mappedAddress)
 {
-    return ! operator== (other);
+    // The address that you're converting needs to be IPv6!
+    jassert (mappedAddress.isIPv6);
+
+    if (isIPv4MappedAddress (mappedAddress))
+        return { mappedAddress.address[12], mappedAddress.address[13],
+                 mappedAddress.address[14], mappedAddress.address[15] };
+
+    return {};
 }
+
+IPAddress IPAddress::convertIPv4AddressToIPv4Mapped (const IPAddress& addressToMap)
+{
+    // The address that you're converting needs to be IPv4!
+    jassert (! addressToMap.isIPv6);
+
+    return { 0x0, 0x0, 0x0, 0x0, 0x0, 0xffff,
+            static_cast<uint16> ((addressToMap.address[0] << 8) | addressToMap.address[1]),
+            static_cast<uint16> ((addressToMap.address[2] << 8) | addressToMap.address[3]) };
+}
+
 
 #if (! JUCE_WINDOWS) && (! JUCE_ANDROID)
 static void addAddress (const sockaddr_in* addr_in, Array<IPAddress>& result)
@@ -260,11 +351,11 @@ static void addAddress (const sockaddr_in6* addr_in, Array<IPAddress>& result)
 {
     in6_addr addr = addr_in->sin6_addr;
 
-    typedef union
+    union ByteUnion
     {
         uint16 combined;
         uint8 split[2];
-    } ByteUnion;
+    };
 
     ByteUnion temp;
     uint16 arr[8];
@@ -277,8 +368,7 @@ static void addAddress (const sockaddr_in6* addr_in, Array<IPAddress>& result)
         arr[i] = temp.combined;
     }
 
-    IPAddress ip (arr);
-    result.addIfNotAlreadyThere (ip);
+    result.addIfNotAlreadyThere (IPAddress (arr));
 }
 
 void IPAddress::findAllAddresses (Array<IPAddress>& result, bool includeIPv6)

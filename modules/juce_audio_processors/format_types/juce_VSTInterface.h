@@ -83,11 +83,12 @@ typedef pointer_sized_int (VSTINTERFACECALL* VstHostCallback) (VstEffectInterfac
 
 enum VstEffectInterfaceFlags
 {
-    vstEffectFlagHasEditor          = 1,
-    vstEffectFlagInplaceAudio       = 16,
-    vstEffectFlagDataInChunks       = 32,
-    vstEffectFlagIsSynth            = 256,
-    vstEffectFlagInplaceDoubleAudio = 4096
+    vstEffectFlagHasEditor                   = 1,
+    vstEffectFlagInplaceAudio                = 16,
+    vstEffectFlagDataInChunks                = 32,
+    vstEffectFlagIsSynth                     = 256,
+    vstEffectFlagSilenceInProducesSilenceOut = 512,
+    vstEffectFlagInplaceDoubleAudio          = 4096
 };
 
 //==============================================================================

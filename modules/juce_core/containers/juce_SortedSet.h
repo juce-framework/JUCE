@@ -473,7 +473,7 @@ public:
     inline const TypeOfCriticalSectionToUse& getLock() const noexcept      { return data.getLock(); }
 
     /** Returns the type of scoped lock to use for locking this array */
-    typedef typename TypeOfCriticalSectionToUse::ScopedLockType ScopedLockType;
+    using ScopedLockType = typename TypeOfCriticalSectionToUse::ScopedLockType;
 
 
 private:

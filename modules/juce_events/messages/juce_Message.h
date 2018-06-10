@@ -48,7 +48,7 @@ public:
     Message() noexcept;
     ~Message();
 
-    typedef ReferenceCountedObjectPtr<Message> Ptr;
+    using Ptr = ReferenceCountedObjectPtr<Message>;
 
     //==============================================================================
 private:

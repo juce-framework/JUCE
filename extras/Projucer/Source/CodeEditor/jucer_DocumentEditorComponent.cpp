@@ -47,13 +47,20 @@ bool DocumentEditorComponent::documentAboutToClose (OpenDocumentManager::Documen
     {
         jassert (document != nullptr);
 
-        if (ProjectContentComponent* pcc = findParentComponentOfClass<ProjectContentComponent>())
+        if (auto* pcc = findParentComponentOfClass<ProjectContentComponent>())
             pcc->hideDocument (document);
     }
 
     return true;
 }
 
-void DocumentEditorComponent::setEditedState (bool /*hasBeenEdited*/)
+void DocumentEditorComponent::setEditedState (bool hasBeenEdited)
 {
+    if (hasBeenEdited != lastEditedState)
+    {
+        if (auto* pcc = findParentComponentOfClass<ProjectContentComponent>())
+            pcc->refreshProjectTreeFileStatuses();
+
+        lastEditedState = hasBeenEdited;
+    }
 }

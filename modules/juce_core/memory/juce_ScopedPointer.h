@@ -25,8 +25,11 @@ namespace juce
 
 //==============================================================================
 /**
-    This class holds a pointer which is automatically deleted when this object goes
-    out of scope.
+    This class is deprecated. You should use std::unique_ptr instead.
+
+
+    A ScopedPointer holds a pointer that is automatically deleted when the ScopedPointer
+    goes out of scope.
 
     Once a pointer has been passed to a ScopedPointer, it will make sure that the pointer
     gets deleted when the ScopedPointer is deleted. Using the ScopedPointer on the stack or
@@ -48,17 +51,6 @@ namespace juce
 
     If you need to get a pointer out of a ScopedPointer without it being deleted, you
     can use the release() method.
-
-    Something to note is the main difference between this class and the std::auto_ptr class,
-    which is that ScopedPointer provides a cast-to-object operator, whereas std::auto_ptr
-    requires that you always call get() to retrieve the pointer. The advantages of providing
-    the cast is that you don't need to call get(), so can use the ScopedPointer in pretty much
-    exactly the same way as a raw pointer. The disadvantage is that the compiler is free to
-    use the cast in unexpected and sometimes dangerous ways - in particular, it becomes difficult
-    to return a ScopedPointer as the result of a function. To avoid this causing errors,
-    ScopedPointer contains an overloaded constructor that should cause a syntax error in these
-    circumstances, but it does mean that instead of returning a ScopedPointer from a function,
-    you'd need to return a raw pointer (or use a std::auto_ptr instead).
 
     @tags{Core}
 */
@@ -169,6 +161,12 @@ public:
             auto* oldObject = object;
             object = newObject;
             ContainerDeletePolicy<ObjectType>::destroy (oldObject);
+        }
+        else
+        {
+            // You're trying to reset this ScopedPointer to itself! This will work here as ScopedPointer does an equality check
+            // but be aware that std::unique_ptr won't do this and you could end up with some nasty, subtle bugs!
+            jassert (newObject == nullptr);
         }
     }
 

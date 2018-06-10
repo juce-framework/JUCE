@@ -219,7 +219,7 @@ private:
     //==============================================================================
     ComboBox filenameBox;
     String lastFilename;
-    ScopedPointer<Button> browseButton;
+    std::unique_ptr<Button> browseButton;
     int maxRecentFiles = 30;
     bool isDir, isSaving, isFileDragOver = false;
     String wildcard, enforcedSuffix, browseButtonText;

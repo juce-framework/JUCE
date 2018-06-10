@@ -168,7 +168,7 @@ JucerDocument* ButtonDocument::createCopy()
     ButtonDocument* newOne = new ButtonDocument (cpp);
     newOne->resources = resources;
 
-    ScopedPointer<XmlElement> xml (createXml());
+    std::unique_ptr<XmlElement> xml (createXml());
     newOne->loadFromXml (*xml);
 
     return newOne;

@@ -136,6 +136,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
+				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -154,18 +155,21 @@
 					"JucePlugin_Build_AUv3=0",
 					"JucePlugin_Build_RTAS=0",
 					"JucePlugin_Build_AAX=0",
-					"JucePlugin_Build_Standalone=0", );
+					"JucePlugin_Build_Standalone=0",
+					"JucePlugin_Build_Unity=0", );
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = ("../../JuceLibraryCode", "../../../../modules", "$(inherited)");
 				INFOPLIST_FILE = Info-App.plist;
 				INFOPLIST_PREPROCESS = NO;
 				INSTALL_PATH = "$(HOME)/Applications";
 				PRODUCT_BUNDLE_IDENTIFIER = com.juce.AudioPerformanceTest;
+				PRODUCT_NAME = "AudioPerformanceTest";
 				USE_HEADERMAP = NO; }; name = Debug; };
 		B7A6988E30C0A68B01EDC53B = {isa = XCBuildConfiguration; buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
+				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -184,7 +188,8 @@
 					"JucePlugin_Build_AUv3=0",
 					"JucePlugin_Build_RTAS=0",
 					"JucePlugin_Build_AAX=0",
-					"JucePlugin_Build_Standalone=0", );
+					"JucePlugin_Build_Standalone=0",
+					"JucePlugin_Build_Unity=0", );
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = ("../../JuceLibraryCode", "../../../../modules", "$(inherited)");
@@ -193,6 +198,7 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				LLVM_LTO = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.juce.AudioPerformanceTest;
+				PRODUCT_NAME = "AudioPerformanceTest";
 				USE_HEADERMAP = NO; }; name = Release; };
 		B907CDF95622107F20CD7617 = {isa = XCBuildConfiguration; buildSettings = {
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -316,7 +322,7 @@
 					C86DD529EC94922C2AB61742,
 					6C2BE2DE2ECC96615ED827AB,
 					409D569C572B6EF7F4F1702D, ); buildRules = ( ); dependencies = (  ); name = "AudioPerformanceTest - App"; productName = AudioPerformanceTest; productReference = 614F2084407B35D62101F69F; productType = "com.apple.product-type.application"; };
-		9CE2A44801B5B4BE7A9667DA = {isa = PBXProject; buildConfigurationList = 7097CF6AC086DAC346ACCCD9; attributes = { LastUpgradeCheck = 0830; ORGANIZATIONNAME = "ROLI Ltd."; TargetAttributes = { E9FD2656EC625C9C8DE30219 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 3BA1BA0CAFE969E99950C06B; projectDirPath = ""; projectRoot = ""; targets = (E9FD2656EC625C9C8DE30219); };
+		9CE2A44801B5B4BE7A9667DA = {isa = PBXProject; buildConfigurationList = 7097CF6AC086DAC346ACCCD9; attributes = { LastUpgradeCheck = 0930; ORGANIZATIONNAME = "ROLI Ltd."; TargetAttributes = { E9FD2656EC625C9C8DE30219 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 3BA1BA0CAFE969E99950C06B; projectDirPath = ""; projectRoot = ""; targets = (E9FD2656EC625C9C8DE30219); };
 	};
 	rootObject = 9CE2A44801B5B4BE7A9667DA;
 }

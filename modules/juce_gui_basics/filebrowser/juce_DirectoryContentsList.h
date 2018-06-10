@@ -208,8 +208,8 @@ private:
     CriticalSection fileListLock;
     OwnedArray<FileInfo> files;
 
-    ScopedPointer<DirectoryIterator> fileFindHandle;
-    bool volatile shouldStop;
+    std::unique_ptr<DirectoryIterator> fileFindHandle;
+    std::atomic<bool> shouldStop { true };
 
     int useTimeSlice() override;
     void stopSearching();

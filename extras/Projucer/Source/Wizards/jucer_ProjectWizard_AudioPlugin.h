@@ -59,7 +59,6 @@ struct AudioPluginAppWizard   : public NewProjectWizard
         File editorHFile   = editorCppFile.withFileExtension (".h");
 
         project.setProjectType (ProjectType_AudioPlugin::getTypeName());
-        project.getProjectValue (Ids::buildStandalone) = true;
 
         setExecutableNameForAllTargets (project, File::createLegalFileName (appTitle));
 

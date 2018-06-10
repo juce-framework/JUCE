@@ -4,6 +4,53 @@
 This file just lists the more notable headline features. For more detailed info
 about minor changes and bugfixes, please see the git log!
 
+Version 5.3.2
+  - Removed the OSX 10.5 and 10.6 deployment target options from the Projucer and enabled more C++11 features across all platforms
+  - Replaced all usage of ScopedPointer with std::unique_ptr
+  - Added camera support for iOS and Android
+  - Fixed some issues using an UndoManager with an AudioProcessorValueTreeState
+  - Added MIDI input to IAA plug-ins
+  - Made multiple calls to MidiInput::openDevice share the same underlying win32 MIDI handle
+  - Added a config flag to juce_audio_processors for enabling LADSPA plugin hosting and enabled it in the AudioPluginHost
+  - Added a "plug-in can do" callback to the VSTCallbackHandler interface
+  - Fixed various undefined behavior in SIMDRegister
+  - Added the methods AudioBlock::copyTo/AudioBlock::copyFrom which facilitate copying to/from an AudioBuffer
+  - Added a lambda callback to OpenGLGraphicsContextCustomShader to allow custom set-up when the shader is activated
+  - Fixed a bug causing an unintentional menu item highlight disco party when using a popup menu in a plug-in's UI
+  - Marked as deprecated: String::empty, var::null, File::nonexistent, ValueTree::invalid and other problematic statically-initialised null values
+
+Version 5.3.1
+  - Add Android and iOS support to AudioPluginHost
+  - Added support for Bela in the form of an AudioIODeviceType
+  - Add bypass support to both hosting and plug-in client code
+  - Added an isBoolean flag to APVTS parameters
+  - Re-worked plug-in wrappers to all use new parameter system via LegacyAudioParameter wrapper class
+  - Fixed an issue where opening the same midi device twice would cause a crash on Windows
+  - Deprecated MouseInputSource::hasMouseMovedSignificantlySincePressed() and replaced with more descriptive methods
+  - Added support for relative or special path symbolic links when compressing/uncompressing zip archives and creating/reading files
+  - Ensured that File::replaceInternal does not fail with ACL errors on Windows
+  - Merged-in some Ogg-Vorbis security fixes
+  - Fixed a bug which would prevent a SystemTrayIconComponent from creating a native popup window on macOS
+  - Various Android and iOS fixes
+  - Added a "PIP Creator" utility tool to the Projucer
+  - Added options for setting plugin categories and characteristics with MultiChoicePropertyComponent in the Projucer
+  - Fixed a Projucer bug where the OSX base SDK version was not being set
+  - Added a command-line option to use LF as linefeeds rather than CRLF in the Projucer cleanup tools
+  - Multiple documentation updates
+
+Version 5.3.0
+  - Added support for Android OBOE (developer preview)
+  - Updated JUCE's MPE classes to comply with the new MMA-adopted specification
+  - Multiple documentation updates
+  - Restructured the examples and extras directories and updated all JUCE examples
+  - Multiple hosted parameter improvements
+  - Overhauled the GenericAudioProcessorEditor
+  - Added support for a subset of the Cockos VST extensions
+  - Added support for loading VST3 preset files
+  - Added boolean AudioProcessorParameters
+  - Added thread safe methods for getting and setting the AudioProcessorValueTreeState state
+  - Added customisable MacOS icons
+
 Version 5.2.1
   - Added native content sharing support for iOS and Android
   - Added iOS and Android native file chooser support

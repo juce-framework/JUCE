@@ -337,7 +337,7 @@ public:
             clearRegionInFrameBuffer (invalid);
 
             {
-                ScopedPointer<LowLevelGraphicsContext> g (createOpenGLGraphicsContext (context, cachedImageFrameBuffer));
+                std::unique_ptr<LowLevelGraphicsContext> g (createOpenGLGraphicsContext (context, cachedImageFrameBuffer));
                 g->clipToRectangleList (invalid);
                 g->addTransform (transform);
 
@@ -614,7 +614,7 @@ public:
 
     //==============================================================================
     friend class NativeContext;
-    ScopedPointer<NativeContext> nativeContext;
+    std::unique_ptr<NativeContext> nativeContext;
 
     OpenGLContext& context;
     Component& component;
@@ -641,7 +641,7 @@ public:
     Atomic<int> needsUpdate { 1 }, destroying;
     uint32 lastMMLockReleaseTime = 0;
 
-    ScopedPointer<ThreadPool> renderThread;
+    std::unique_ptr<ThreadPool> renderThread;
     ReferenceCountedArray<OpenGLContext::AsyncWorker, CriticalSection> workQueue;
     MessageManager::Lock messageManagerLock;
 
@@ -1053,17 +1053,6 @@ void OpenGLContext::execute (OpenGLContext::AsyncWorker::Ptr workerToUse, bool s
         c->execute (static_cast<OpenGLContext::AsyncWorker::Ptr&&> (workerToUse), shouldBlock);
     else
         jassertfalse; // You must have attached the context to a component
-}
-
-void OpenGLContext::overrideCanBeAttached (bool newCanAttach)
-{
-    if (overrideCanAttach != newCanAttach)
-    {
-        overrideCanAttach = newCanAttach;
-
-        if (auto* a = attachment.get())
-            a->update();
-    }
 }
 
 //==============================================================================

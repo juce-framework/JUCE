@@ -101,7 +101,8 @@ class WebBrowserComponent::Pimpl    : public AndroidViewComponent,
 {
 public:
     Pimpl (WebBrowserComponent& o)
-        : owner (o)
+        : AndroidViewComponent (true),
+          owner (o)
     {
         auto* env = getEnv();
 
@@ -193,9 +194,7 @@ public:
             // we need to open URL manually.
 
             URL urlToUse = URL (url).withPOSTData (*postData);
-
-            connectionThread = nullptr;
-            connectionThread = new ConnectionThread (*this, urlToUse, *headers);
+            connectionThread.reset (new ConnectionThread (*this, urlToUse, *headers));
         }
     }
 
@@ -358,7 +357,7 @@ private:
         }
 
         Pimpl& owner;
-        ScopedPointer<WebInputStream> webInputStream;
+        std::unique_ptr<WebInputStream> webInputStream;
         Result result;
     };
 
@@ -366,7 +365,7 @@ private:
     WebBrowserComponent& owner;
     GlobalRef juceWebChromeClient;
     GlobalRef juceWebViewClient;
-    ScopedPointer<ConnectionThread> connectionThread;
+    std::unique_ptr<ConnectionThread> connectionThread;
     WaitableEvent responseReadyEvent;
 
     WeakReference<Pimpl>::Master masterReference;
@@ -380,7 +379,8 @@ WebBrowserComponent::WebBrowserComponent (const bool unloadWhenHidden)
 {
     setOpaque (true);
 
-    addAndMakeVisible (browser = new Pimpl (*this));
+    browser.reset (new Pimpl (*this));
+    addAndMakeVisible (browser.get());
 }
 
 WebBrowserComponent::~WebBrowserComponent()

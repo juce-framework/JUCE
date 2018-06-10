@@ -137,9 +137,8 @@ private:
             }
 
             const uint32 backgroundColour = 0xff414141;
-            ScopedPointer<Drawable> juceLogo
-                = Drawable::createFromImageData (BinaryData::jucelogowithtext_svg,
-                                                 BinaryData::jucelogowithtext_svgSize);
+            std::unique_ptr<Drawable> juceLogo { Drawable::createFromImageData (BinaryData::jucelogowithtext_svg,
+                                                                                BinaryData::jucelogowithtext_svgSize) };
             IconButton avatarButton;
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Header)
@@ -270,7 +269,7 @@ private:
 
         //==============================================================================
         LicenseWebview& parentWindow;
-        ScopedPointer<ModalComponentManager::Callback> modalCallback;
+        std::unique_ptr<ModalComponentManager::Callback> modalCallback;
         Header header;
         RedirectWebBrowserComponent webview;
         std::function<void (const String&, const HashMap<String, String>&)> pageCallback;

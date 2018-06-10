@@ -216,7 +216,7 @@ namespace ActiveXHelpers
                 peer->handleMouseEvent (MouseInputSource::InputSourceType::mouse,
                                         { (float) (GET_X_LPARAM (lParam) + activeXRect.left - peerRect.left),
                                           (float) (GET_Y_LPARAM (lParam) + activeXRect.top  - peerRect.top) },
-                                        ModifierKeys::getCurrentModifiersRealtime(),
+                                        ComponentPeer::getCurrentModifiersRealtime(),
                                         MouseInputSource::invalidPressure,
                                         MouseInputSource::invalidOrientation,
                                         getMouseEventTime());
@@ -360,7 +360,7 @@ bool ActiveXControlComponent::createControl (const void* controlIID)
         auto controlBounds = peer->getAreaCoveredBy (*this);
         auto hwnd = (HWND) peer->getNativeHandle();
 
-        ScopedPointer<Pimpl> newControl (new Pimpl (hwnd, *this));
+        std::unique_ptr<Pimpl> newControl (new Pimpl (hwnd, *this));
 
         HRESULT hr = OleCreate (*(const IID*) controlIID, __uuidof (IOleObject), 1 /*OLERENDER_DRAW*/, 0,
                                 newControl->clientSite, newControl->storage,
@@ -380,7 +380,7 @@ bool ActiveXControlComponent::createControl (const void* controlIID)
 
                 if (newControl->control->DoVerb (OLEIVERB_SHOW, 0, newControl->clientSite, 0, hwnd, &rect) == S_OK)
                 {
-                    control = newControl;
+                    control.reset (newControl.release());
                     control->controlHWND = ActiveXHelpers::getHWND (this);
 
                     if (control->controlHWND != 0)

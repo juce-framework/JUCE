@@ -220,7 +220,7 @@ private:
     //==============================================================================
     OwnedArray<PluginDescription> types;
     StringArray blacklist;
-    ScopedPointer<CustomScanner> scanner;
+    std::unique_ptr<CustomScanner> scanner;
     CriticalSection scanLock, typesArrayLock;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KnownPluginList)

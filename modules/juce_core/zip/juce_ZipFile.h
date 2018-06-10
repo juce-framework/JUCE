@@ -79,6 +79,9 @@ public:
 
         /** The last time the file was modified. */
         Time fileTime;
+
+        /** True if the zip entry is a symbolic link. */
+        bool isSymbolicLink;
     };
 
     //==============================================================================
@@ -235,8 +238,8 @@ private:
     OwnedArray<ZipEntryHolder> entries;
     CriticalSection lock;
     InputStream* inputStream = nullptr;
-    ScopedPointer<InputStream> streamToDelete;
-    ScopedPointer<InputSource> inputSource;
+    std::unique_ptr<InputStream> streamToDelete;
+    std::unique_ptr<InputSource> inputSource;
 
    #if JUCE_DEBUG
     struct OpenStreamCounter

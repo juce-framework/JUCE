@@ -26,15 +26,17 @@
 
 #include "../../Application/jucer_Headers.h"
 
-//==============================================================================
-const char* getLineEnding()  { return "\r\n"; }
+#ifdef BUILDING_JUCE_COMPILEENGINE
+ const char* getPreferredLinefeed() { return "\r\n"; }
+#endif
 
+//==============================================================================
 String joinLinesIntoSourceFile (StringArray& lines)
 {
     while (lines.size() > 10 && lines [lines.size() - 1].isEmpty())
         lines.remove (lines.size() - 1);
 
-    return lines.joinIntoString (getLineEnding()) + getLineEnding();
+    return lines.joinIntoString (getPreferredLinefeed()) + getPreferredLinefeed();
 }
 
 String trimCommentCharsFromStartOfLine (const String& line)
@@ -48,7 +50,7 @@ String createAlphaNumericUID()
     const char chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     Random r;
 
-    uid << chars [r.nextInt (52)]; // make sure the first character is always a letter
+    uid << chars[r.nextInt (52)]; // make sure the first character is always a letter
 
     for (int i = 5; --i >= 0;)
     {
@@ -66,7 +68,7 @@ String hexString8Digits (int value)
 
 String createGUID (const String& seed)
 {
-    const String hex (MD5 ((seed + "_guidsalt").toUTF8()).toHexString().toUpperCase());
+    auto hex = MD5 ((seed + "_guidsalt").toUTF8()).toHexString().toUpperCase();
 
     return "{" + hex.substring (0, 8)
          + "-" + hex.substring (8, 12)
@@ -292,7 +294,7 @@ bool fileNeedsCppSyntaxHighlighting (const File& file)
 }
 
 //==============================================================================
-bool isJUCEModule (const String& moduleID) noexcept
+StringArray getJUCEModules() noexcept
 {
     static StringArray juceModuleIds =
     {
@@ -319,5 +321,66 @@ bool isJUCEModule (const String& moduleID) noexcept
         "juce_video"
     };
 
-    return juceModuleIds.contains (moduleID);
+    return juceModuleIds;
+}
+
+bool isJUCEModule (const String& moduleID) noexcept
+{
+    return getJUCEModules().contains (moduleID);
+}
+
+StringArray getModulesRequiredForConsole() noexcept
+{
+    return { "juce_core",
+             "juce_data_structures",
+             "juce_events"
+           };
+}
+
+StringArray getModulesRequiredForComponent() noexcept
+{
+    return { "juce_core",
+             "juce_data_structures",
+             "juce_events",
+             "juce_graphics",
+             "juce_gui_basics"
+           };
+}
+
+StringArray getModulesRequiredForAudioProcessor() noexcept
+{
+    return { "juce_audio_basics",
+             "juce_audio_devices",
+             "juce_audio_formats",
+             "juce_audio_plugin_client",
+             "juce_audio_processors",
+             "juce_audio_utils",
+             "juce_core",
+             "juce_data_structures",
+             "juce_events",
+             "juce_graphics",
+             "juce_gui_basics",
+             "juce_gui_extra"
+           };
+}
+
+bool isPIPFile (const File& file) noexcept
+{
+    for (auto line : StringArray::fromLines (file.loadFileAsString()))
+    {
+        auto trimmedLine = trimCommentCharsFromStartOfLine (line);
+
+        if (trimmedLine.startsWith ("BEGIN_JUCE_PIP_METADATA"))
+            return true;
+    }
+
+    return false;
+}
+
+bool isValidJUCEExamplesDirectory (const File& directory) noexcept
+{
+    if (! directory.exists() || ! directory.isDirectory() || ! directory.containsSubDirectories())
+        return false;
+
+    return directory.getChildFile ("Assets").getChildFile ("juce_icon.png").existsAsFile();
 }

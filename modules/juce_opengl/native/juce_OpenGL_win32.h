@@ -39,7 +39,7 @@ public:
                    bool /*useMultisampling*/,
                    OpenGLVersion)
     {
-        dummyComponent = new DummyComponent (*this);
+        dummyComponent.reset (new DummyComponent (*this));
         createNativeWindow (component);
 
         PIXELFORMATDESCRIPTOR pfd;
@@ -145,8 +145,8 @@ private:
         NativeContext& context;
     };
 
-    ScopedPointer<DummyComponent> dummyComponent;
-    ScopedPointer<ComponentPeer> nativeWindow;
+    std::unique_ptr<DummyComponent> dummyComponent;
+    std::unique_ptr<ComponentPeer> nativeWindow;
     HGLRC renderContext;
     HDC dc;
     OpenGLContext* context = {};
@@ -171,7 +171,7 @@ private:
     void createNativeWindow (Component& component)
     {
         auto* topComp = component.getTopLevelComponent();
-        nativeWindow = createNonRepaintingEmbeddedWindowsPeer (*dummyComponent, topComp->getWindowHandle());
+        nativeWindow.reset (createNonRepaintingEmbeddedWindowsPeer (*dummyComponent, topComp->getWindowHandle()));
 
         if (auto* peer = topComp->getPeer())
             updateWindowPosition (peer->getAreaCoveredBy (component));

@@ -40,7 +40,7 @@ namespace FontValues
     String fallbackFontStyle;
 }
 
-typedef Typeface::Ptr (*GetTypefaceForFont) (const Font&);
+using GetTypefaceForFont = Typeface::Ptr (*)(const Font&);
 GetTypefaceForFont juce_getTypefaceForFont = nullptr;
 
 float Font::getDefaultMinimumHorizontalScaleFactor() noexcept                { return FontValues::minimumHorizontalScale; }

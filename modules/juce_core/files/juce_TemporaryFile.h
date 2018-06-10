@@ -41,7 +41,7 @@ namespace juce
         TemporaryFile temp (myTargetFile);
 
         // create a stream to the temporary file, and write some data to it...
-        ScopedPointer<FileOutputStream> out (temp.getFile().createOutputStream());
+        std::unique_ptr<FileOutputStream> out (temp.getFile().createOutputStream());
 
         if (out != nullptr)
         {

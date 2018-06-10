@@ -201,6 +201,35 @@ JUCE_JNI_CALLBACK (JUCE_JOIN_MACRO (JUCE_ANDROID_ACTIVITY_CLASSNAME, _00024Nativ
 }
 
 //==============================================================================
+AppPausedResumedListener::AppPausedResumedListener (Owner& ownerToUse)
+    : owner (ownerToUse)
+{
+}
+
+jobject AppPausedResumedListener::invoke (jobject proxy, jobject method, jobjectArray args)
+{
+    auto* env = getEnv();
+
+    auto methodName = juceString ((jstring) env->CallObjectMethod (method, JavaMethod.getName));
+
+    int numArgs = args != nullptr ? env->GetArrayLength (args) : 0;
+
+    if (methodName == "appPaused" && numArgs == 0)
+    {
+        owner.appPaused();
+        return nullptr;
+    }
+
+    if (methodName == "appResumed" && numArgs == 0)
+    {
+        owner.appResumed();
+        return nullptr;
+    }
+
+    return AndroidInterfaceImplementer::invoke (proxy, method, args);
+}
+
+//==============================================================================
 JavaVM* androidJNIJavaVM = nullptr;
 
 class JniEnvThreadHolder

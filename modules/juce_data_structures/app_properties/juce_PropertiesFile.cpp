@@ -29,8 +29,8 @@ namespace juce
 
 namespace PropertyFileConstants
 {
-    JUCE_CONSTEXPR static const int magicNumber            = (int) ByteOrder::littleEndianInt ('P', 'R', 'O', 'P');
-    JUCE_CONSTEXPR static const int magicNumberCompressed  = (int) ByteOrder::littleEndianInt ('C', 'P', 'R', 'P');
+    JUCE_CONSTEXPR static const int magicNumber            = (int) ByteOrder::makeInt ('P', 'R', 'O', 'P');
+    JUCE_CONSTEXPR static const int magicNumberCompressed  = (int) ByteOrder::makeInt ('C', 'P', 'R', 'P');
 
     JUCE_CONSTEXPR static const char* const fileTag        = "PROPERTIES";
     JUCE_CONSTEXPR static const char* const valueTag       = "VALUE";
@@ -184,7 +184,7 @@ bool PropertiesFile::save()
 bool PropertiesFile::loadAsXml()
 {
     XmlDocument parser (file);
-    ScopedPointer<XmlElement> doc (parser.getDocumentElement (true));
+    std::unique_ptr<XmlElement> doc (parser.getDocumentElement (true));
 
     if (doc != nullptr && doc->hasTagName (PropertyFileConstants::fileTag))
     {

@@ -64,7 +64,7 @@ namespace FileHelpers
 
     int64 calculateFileHashCode (const File& file)
     {
-        ScopedPointer<FileInputStream> stream (file.createInputStream());
+        std::unique_ptr<FileInputStream> stream (file.createInputStream());
         return stream != nullptr ? calculateStreamHashCode (*stream) : 0;
     }
 

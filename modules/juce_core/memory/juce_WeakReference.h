@@ -79,7 +79,7 @@ template <class ObjectType, class ReferenceCountingType = ReferenceCountedObject
 class WeakReference
 {
 public:
-    /** Creates a null SafePointer. */
+    /** Creates a null WeakReference. */
     inline WeakReference() noexcept {}
 
     /** Creates a WeakReference that points at the given object. */
@@ -143,7 +143,7 @@ public:
         JUCE_DECLARE_NON_COPYABLE (SharedPointer)
     };
 
-    typedef ReferenceCountedObjectPtr<SharedPointer> SharedRef;
+    using SharedRef = ReferenceCountedObjectPtr<SharedPointer>;
 
     //==============================================================================
     /**
@@ -234,9 +234,9 @@ private:
      @see WeakReference, WeakReference::Master
 */
 #define JUCE_DECLARE_WEAK_REFERENCEABLE(Class) \
-    struct WeakRefMaster  : public WeakReference<Class>::Master { ~WeakRefMaster() { this->clear(); } }; \
+    struct WeakRefMaster  : public juce::WeakReference<Class>::Master { ~WeakRefMaster() { this->clear(); } }; \
     WeakRefMaster masterReference; \
-    friend class WeakReference<Class>; \
+    friend class juce::WeakReference<Class>; \
 
 
 } // namespace juce

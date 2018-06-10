@@ -27,15 +27,17 @@
 #include "jucer_Headers.h"
 #include "../Project/jucer_Module.h"
 #include "../Utility/Helpers/jucer_TranslationHelpers.h"
+#include "../Utility/PIPs/jucer_PIPGenerator.h"
 
 #include "jucer_CommandLine.h"
 
+//==============================================================================
+const char* preferredLinefeed = "\r\n";
+const char* getPreferredLinefeed()     { return preferredLinefeed; }
 
 //==============================================================================
 namespace
 {
-    static const char* getLineEnding()  { return "\r\n"; }
-
     struct CommandLineError
     {
         CommandLineError (const String& s) : message (s) {}
@@ -61,6 +63,20 @@ namespace
     {
         if (args.size() < minNumArgs)
             throw CommandLineError ("Not enough arguments!");
+    }
+
+    static bool findArgument (StringArray& args, const String& target)
+    {
+        for (int i = 0; i < args.size(); ++i)
+        {
+            if (args[i].trim() == target)
+            {
+                args.remove (i);
+                return true;
+            }
+        }
+
+        return false;
     }
 
     static File getFile (const String& filename)
@@ -105,7 +121,7 @@ namespace
 
         TemporaryFile temp (file);
 
-        if (! temp.getFile().replaceWithText (newText, false, false))
+        if (! temp.getFile().replaceWithText (newText, false, false, nullptr))
             throw CommandLineError ("!!! ERROR Couldn't write to temp file!");
 
         if (! temp.overwriteTargetFileWithTemporary())
@@ -147,7 +163,7 @@ namespace
             }
         }
 
-        ScopedPointer<Project> project;
+        std::unique_ptr<Project> project;
     };
 
     //==============================================================================
@@ -291,7 +307,7 @@ namespace
         std::cout << "Writing: " << targetFile.getFullPathName() << std::endl;
 
         TemporaryFile temp (targetFile);
-        ScopedPointer<FileOutputStream> out (temp.getFile().createOutputStream());
+        std::unique_ptr<FileOutputStream> out (temp.getFile().createOutputStream());
 
         bool ok = out != nullptr && zip.writeToStream (*out, nullptr);
         out.reset();
@@ -352,7 +368,7 @@ namespace
 
     static void cleanWhitespace (const File& file, CleanupOptions options)
     {
-        const String content (file.loadFileAsString());
+        auto content = file.loadFileAsString();
 
         if (content.contains ("%""%") && content.contains ("//["))
             return; // ignore projucer GUI template files
@@ -384,7 +400,7 @@ namespace
 
             if (options.fixDividerComments)
             {
-                String afterIndent (line.trim());
+                auto afterIndent = line.trim();
 
                 if (afterIndent.startsWith ("//") && afterIndent.length() > 20)
                 {
@@ -406,9 +422,9 @@ namespace
         if (options.removeTabs && ! anyTabsRemoved)
             return;
 
-        const String newText = joinLinesIntoSourceFile (lines);
+        auto newText = joinLinesIntoSourceFile (lines);
 
-        if (newText != content && newText != content + getLineEnding())
+        if (newText != content && newText != content + getPreferredLinefeed())
             replaceFile (file, newText, options.removeTabs ? "Removing tabs in: "
                                                            : "Cleaning file: ");
     }
@@ -419,7 +435,7 @@ namespace
 
         for (auto it = args.begin() + 1; it < args.end(); ++it)
         {
-            const File target (getFileCheckingForExistence (*it));
+            auto target = getFileCheckingForExistence (*it);
 
             Array<File> files;
 
@@ -472,29 +488,28 @@ namespace
         lines.addLines (content);
         bool hasChanged = false;
 
-        for (int i = 0; i < lines.size(); ++i)
+        for (auto& line : lines)
         {
-            String line = lines[i];
-
             if (line.trimStart().startsWith ("#include \""))
             {
-                const String includedFile (line.fromFirstOccurrenceOf ("\"", true, false)
-                                               .upToLastOccurrenceOf ("\"", true, false)
-                                               .trim()
-                                               .unquoted());
+                auto includedFile = line.fromFirstOccurrenceOf ("\"", true, false)
+                                        .upToLastOccurrenceOf ("\"", true, false)
+                                        .trim()
+                                        .unquoted();
 
-                const File target (file.getSiblingFile (includedFile));
+                auto target = file.getSiblingFile (includedFile);
 
                 if (! target.exists())
                 {
-                    File header = findSimilarlyNamedHeader (allFiles, target.getFileName(), file);
+                    auto header = findSimilarlyNamedHeader (allFiles, target.getFileName(), file);
 
                     if (header.exists())
                     {
-                        lines.set (i, line.upToFirstOccurrenceOf ("#include \"", true, false)
-                                        + header.getRelativePathFrom (file.getParentDirectory())
-                                            .replaceCharacter ('\\', '/')
-                                        + "\"");
+                        line = line.upToFirstOccurrenceOf ("#include \"", true, false)
+                                  + header.getRelativePathFrom (file.getParentDirectory())
+                                          .replaceCharacter ('\\', '/')
+                                  + "\"";
+
                         hasChanged = true;
                     }
                 }
@@ -503,9 +518,9 @@ namespace
 
         if (hasChanged)
         {
-            const String newText = joinLinesIntoSourceFile (lines);
+            auto newText = joinLinesIntoSourceFile (lines);
 
-            if (newText != content && newText != content + getLineEnding())
+            if (newText != content && newText != content + getPreferredLinefeed())
                 replaceFile (file, newText, "Fixing includes in: ");
         }
     }
@@ -513,9 +528,8 @@ namespace
     static void fixRelativeIncludePaths (const StringArray& args)
     {
         checkArgumentCount (args, 2);
-        const File target (getDirectoryCheckingForExistence (args[1]));
-
-        Array<File> files = findAllSourceFiles (target);
+        auto target = getDirectoryCheckingForExistence (args[1]);
+        auto files = findAllSourceFiles (target);
 
         for (int i = 0; i < files.size(); ++i)
             fixIncludes (files.getReference(i), files);
@@ -554,7 +568,7 @@ namespace
                 for (int i = 0; i < text.length(); ++i)
                     out << " << '" << String::charToString (text[i]) << "'";
 
-                out << ";" << newLine;
+                out << ";" << preferredLinefeed;
             }
         };
 
@@ -578,18 +592,18 @@ namespace
 
         MemoryOutputStream out;
 
-        out << "String createString()" << newLine
-            << "{" << newLine;
+        out << "String createString()" << preferredLinefeed
+            << "{" << preferredLinefeed;
 
         for (int i = 0; i < sections.size(); ++i)
             sections.getReference(i).writeGenerator (out);
 
-        out << newLine
-            << "    String result = " << getStringConcatenationExpression (rng, 0, sections.size()) << ";" << newLine
-            << newLine
-            << "    jassert (result == " << originalText.quoted() << ");" << newLine
-            << "    return result;" << newLine
-            << "}" << newLine;
+        out << preferredLinefeed
+            << "    String result = " << getStringConcatenationExpression (rng, 0, sections.size()) << ";" << preferredLinefeed
+            << preferredLinefeed
+            << "    jassert (result == " << originalText.quoted() << ");" << preferredLinefeed
+            << "    return result;" << preferredLinefeed
+            << "}" << preferredLinefeed;
 
         std::cout << out.toString() << std::endl;
     }
@@ -647,32 +661,32 @@ namespace
 
         MemoryOutputStream header, cpp;
 
-        header << "// Auto-generated binary data by the Projucer" << newLine
-               << "// Source file: " << source.getRelativePathFrom (target.getParentDirectory()) << newLine
-               << newLine;
+        header << "// Auto-generated binary data by the Projucer" << preferredLinefeed
+               << "// Source file: " << source.getRelativePathFrom (target.getParentDirectory()) << preferredLinefeed
+               << preferredLinefeed;
 
         cpp << header.toString();
 
         if (target.hasFileExtension (headerFileExtensions))
         {
-            header << "static constexpr unsigned char " << variableName << "[] =" << newLine
-                   << literal.toString() << newLine
-                   << newLine;
+            header << "static constexpr unsigned char " << variableName << "[] =" << preferredLinefeed
+                   << literal.toString() << preferredLinefeed
+                   << preferredLinefeed;
 
             replaceFile (target, header.toString(), "Writing: ");
         }
         else if (target.hasFileExtension (cppFileExtensions))
         {
-            header << "extern const char*  " << variableName << ";" << newLine
-                   << "const unsigned int  " << variableName << "Size = " << (int) dataSize << ";" << newLine
-                   << newLine;
+            header << "extern const char*  " << variableName << ";" << preferredLinefeed
+                   << "const unsigned int  " << variableName << "Size = " << (int) dataSize << ";" << preferredLinefeed
+                   << preferredLinefeed;
 
-            cpp << CodeHelpers::createIncludeStatement (target.withFileExtension (".h").getFileName()) << newLine
-                << newLine
-                << "static constexpr unsigned char " << variableName << "_local[] =" << newLine
-                << literal.toString() << newLine
-                << newLine
-                << "const char* " << variableName << " = (const char*) " << variableName << "_local;" << newLine;
+            cpp << CodeHelpers::createIncludeStatement (target.withFileExtension (".h").getFileName()) << preferredLinefeed
+                << preferredLinefeed
+                << "static constexpr unsigned char " << variableName << "_local[] =" << preferredLinefeed
+                << literal.toString() << preferredLinefeed
+                << preferredLinefeed
+                << "const char* " << variableName << " = (const char*) " << variableName << "_local;" << preferredLinefeed;
 
             replaceFile (target, cpp.toString(), "Writing: ");
             replaceFile (target.withFileExtension (".h"), header.toString(), "Writing: ");
@@ -718,11 +732,7 @@ namespace
        #endif
 
         auto settingsFile = userAppData.getChildFile ("Projucer").getChildFile ("Projucer.settings");
-
-        if (! settingsFile.existsAsFile())
-            throw CommandLineError ("Expected settings file at " + settingsFile.getFullPathName() + " not found!");
-
-        ScopedPointer<XmlElement> xml (XmlDocument::parse (settingsFile));
+        std::unique_ptr<XmlElement> xml (XmlDocument::parse (settingsFile));
         auto settingsTree = ValueTree::fromXml (*xml);
 
         if (! settingsTree.isValid())
@@ -744,9 +754,33 @@ namespace
         if (! childToSet.isValid())
             throw CommandLineError ("Failed to set the requested setting!");
 
-        childToSet.setProperty (args[2], args[3], nullptr);
+        childToSet.setProperty (args[2], File::getCurrentWorkingDirectory().getChildFile (args[3].unquoted()).getFullPathName(), nullptr);
 
         settingsFile.replaceWithText (settingsTree.toXmlString());
+    }
+
+    static void createProjectFromPIP (const StringArray& args)
+    {
+        checkArgumentCount (args, 3);
+
+        auto pipFile = File::getCurrentWorkingDirectory().getChildFile (args[1].unquoted());
+        if (! pipFile.existsAsFile())
+            throw CommandLineError ("PIP file doesn't exist.");
+
+        auto outputDir = File::getCurrentWorkingDirectory().getChildFile (args[2].unquoted());
+        if (! outputDir.exists())
+        {
+            auto res = outputDir.createDirectory();
+            std::cout << "Creating directory " << outputDir.getFullPathName() << std::endl;
+        }
+
+        PIPGenerator generator (pipFile, outputDir);
+
+        if (! generator.createJucerFile())
+            throw CommandLineError ("Failed to create .jucer file in " + outputDir.getFullPathName()+ ".");
+
+        if (! generator.createMainCpp())
+            throw CommandLineError ("Failed to create Main.cpp.");
     }
 
     //==============================================================================
@@ -812,8 +846,13 @@ namespace
                   << "    Creates a completed translations mapping file, that can be used to initialise a LocalisedStrings object. This allows you to localise the strings in your project" << std::endl
                   << std::endl
                   << " " << appName << " --set-global-search-path os identifier_to_set new_path" << std::endl
-                  << "    Sets the global search path for a specified os and identifier. The os should be either osx, windows or linux and the identifiers can be any of the following: "
-                  << "defaultJuceModulePath, defaultUserModulePath, vst3path, aaxPath (not valid on linux), rtasPath (not valid on linux), androidSDKPath or androidNDKPath." << std::endl
+                  << "    Sets the global path for a specified os and identifier. The os should be either osx, windows or linux and the identifiers can be any of the following: "
+                  << "defaultJuceModulePath, defaultUserModulePath, vst3Path, aaxPath (not valid on linux), rtasPath (not valid on linux), androidSDKPath or androidNDKPath." << std::endl
+                  << std::endl
+                  << " " << appName << " --create-project-from-pip path/to/PIP path/to/output" << std::endl
+                  << "    Generates a JUCE project from a PIP file." << std::endl
+                  << std::endl
+                  << "Note that for any of the file-rewriting commands, add the option \"--lf\" if you want it to use LF linefeeds instead of CRLF" << std::endl
                   << std::endl;
     }
 }
@@ -824,6 +863,9 @@ int performCommandLine (const String& commandLine)
     StringArray args;
     args.addTokens (commandLine, true);
     args.trim();
+
+    if (findArgument (args, "--lf") || findArgument (args, "-lf"))
+       preferredLinefeed = "\n";
 
     String command (args[0]);
 
@@ -849,6 +891,7 @@ int performCommandLine (const String& commandLine)
         if (matchArgument (command, "trans"))                    { scanFoldersForTranslationFiles (args); return 0; }
         if (matchArgument (command, "trans-finish"))             { createFinishedTranslationFile (args);  return 0; }
         if (matchArgument (command, "set-global-search-path"))   { setGlobalPath (args);                  return 0; }
+        if (matchArgument (command, "create-project-from-pip"))  { createProjectFromPIP (args);           return 0; }
     }
     catch (const CommandLineError& error)
     {

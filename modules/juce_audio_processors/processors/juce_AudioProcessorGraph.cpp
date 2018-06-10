@@ -270,12 +270,20 @@ private:
             if (processor.isUsingDoublePrecision())
             {
                 tempBufferDouble.makeCopyOf (buffer, true);
-                processor.processBlock (tempBufferDouble, midiMessages);
+
+                if (node->isBypassed())
+                    processor.processBlockBypassed (tempBufferDouble, midiMessages);
+                else
+                    processor.processBlock (tempBufferDouble, midiMessages);
+
                 buffer.makeCopyOf (tempBufferDouble, true);
             }
             else
             {
-                processor.processBlock (buffer, midiMessages);
+                if (node->isBypassed())
+                    processor.processBlockBypassed (buffer, midiMessages);
+                else
+                    processor.processBlock (buffer, midiMessages);
             }
         }
 
@@ -283,12 +291,20 @@ private:
         {
             if (processor.isUsingDoublePrecision())
             {
-                processor.processBlock (buffer, midiMessages);
+                if (node->isBypassed())
+                    processor.processBlockBypassed (buffer, midiMessages);
+                else
+                    processor.processBlock (buffer, midiMessages);
             }
             else
             {
                 tempBufferFloat.makeCopyOf (buffer, true);
-                processor.processBlock (tempBufferFloat, midiMessages);
+
+                if (node->isBypassed())
+                    processor.processBlockBypassed (tempBufferFloat, midiMessages);
+                else
+                    processor.processBlock (tempBufferFloat, midiMessages);
+
                 buffer.makeCopyOf (tempBufferFloat, true);
             }
         }
@@ -332,7 +348,7 @@ struct RenderSequenceBuilder
     }
 
     //==============================================================================
-    typedef AudioProcessorGraph::NodeID NodeID;
+    using NodeID = AudioProcessorGraph::NodeID;
 
     AudioProcessorGraph& graph;
     RenderSequence& sequence;
@@ -827,6 +843,29 @@ bool AudioProcessorGraph::Node::Connection::operator== (const Connection& other)
 }
 
 //==============================================================================
+bool AudioProcessorGraph::Node::isBypassed() const noexcept
+{
+    if (processor != nullptr)
+    {
+        if (auto* bypassParam = processor->getBypassParameter())
+            return (bypassParam->getValue() != 0.0f);
+    }
+
+    return bypassed;
+}
+
+void AudioProcessorGraph::Node::setBypassed (bool shouldBeBypassed) noexcept
+{
+    if (processor != nullptr)
+    {
+        if (auto* bypassParam = processor->getBypassParameter())
+            bypassParam->setValueNotifyingHost (shouldBeBypassed ? 1.0f : 0.0f);
+    }
+
+    bypassed = shouldBeBypassed;
+}
+
+//==============================================================================
 struct AudioProcessorGraph::RenderSequenceFloat   : public GraphRenderSequence<float> {};
 struct AudioProcessorGraph::RenderSequenceDouble  : public GraphRenderSequence<double> {};
 
@@ -1006,7 +1045,6 @@ bool AudioProcessorGraph::isAnInputTo (Node& src, Node& dst, int recursionCheck)
     return false;
 }
 
-
 bool AudioProcessorGraph::canConnect (Node* source, int sourceChannel, Node* dest, int destChannel) const noexcept
 {
     bool sourceIsMIDI = sourceChannel == midiChannelIndex;
@@ -1142,8 +1180,8 @@ bool AudioProcessorGraph::removeIllegalConnections()
 //==============================================================================
 void AudioProcessorGraph::clearRenderingSequence()
 {
-    ScopedPointer<RenderSequenceFloat> oldSequenceF;
-    ScopedPointer<RenderSequenceDouble> oldSequenceD;
+    std::unique_ptr<RenderSequenceFloat> oldSequenceF;
+    std::unique_ptr<RenderSequenceDouble> oldSequenceD;
 
     {
         const ScopedLock sl (getCallbackLock());
@@ -1163,8 +1201,8 @@ bool AudioProcessorGraph::anyNodesNeedPreparing() const noexcept
 
 void AudioProcessorGraph::buildRenderingSequence()
 {
-    ScopedPointer<RenderSequenceFloat>  newSequenceF (new RenderSequenceFloat());
-    ScopedPointer<RenderSequenceDouble> newSequenceD (new RenderSequenceDouble());
+    std::unique_ptr<RenderSequenceFloat>  newSequenceF (new RenderSequenceFloat());
+    std::unique_ptr<RenderSequenceDouble> newSequenceD (new RenderSequenceDouble());
 
     {
         MessageManagerLock mml;
@@ -1173,8 +1211,11 @@ void AudioProcessorGraph::buildRenderingSequence()
         RenderSequenceBuilder<RenderSequenceDouble> builderD (*this, *newSequenceD);
     }
 
-    newSequenceF->prepareBuffers (getBlockSize());
-    newSequenceD->prepareBuffers (getBlockSize());
+    {
+        const ScopedLock sl (getCallbackLock());
+        newSequenceF->prepareBuffers (getBlockSize());
+        newSequenceD->prepareBuffers (getBlockSize());
+    }
 
     if (anyNodesNeedPreparing())
     {
@@ -1256,10 +1297,10 @@ bool AudioProcessorGraph::producesMidi() const                      { return tru
 void AudioProcessorGraph::getStateInformation (juce::MemoryBlock&)  {}
 void AudioProcessorGraph::setStateInformation (const void*, int)    {}
 
-template <typename Type>
-static void processBlockForBuffer (AudioBuffer<Type>& buffer, MidiBuffer& midiMessages,
+template <typename FloatType, typename SequenceType>
+static void processBlockForBuffer (AudioBuffer<FloatType>& buffer, MidiBuffer& midiMessages,
                                    AudioProcessorGraph& graph,
-                                   GraphRenderSequence<Type>* renderSequence,
+                                   std::unique_ptr<SequenceType>& renderSequence,
                                    Atomic<int>& isPrepared)
 {
     if (graph.isNonRealtime())

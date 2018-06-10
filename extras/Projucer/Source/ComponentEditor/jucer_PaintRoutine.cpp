@@ -61,7 +61,7 @@ bool PaintRoutine::perform (UndoableAction* action, const String& actionName)
     if (document != nullptr)
         return document->getUndoManager().perform (action, actionName);
 
-    ScopedPointer<UndoableAction> deleter (action);
+    std::unique_ptr<UndoableAction> deleter (action);
     action->perform();
     return false;
 }
@@ -114,7 +114,7 @@ public:
 
 private:
     PaintRoutine& routine;
-    ScopedPointer<XmlElement> xml;
+    std::unique_ptr<XmlElement> xml;
 
     void showCorrectTab() const
     {
@@ -152,8 +152,8 @@ PaintElement* PaintRoutine::addNewElement (PaintElement* e, const int index, con
 {
     if (e != nullptr)
     {
-        ScopedPointer<PaintElement> deleter (e);
-        ScopedPointer<XmlElement> xml (e->createXml());
+        std::unique_ptr<PaintElement> deleter (e);
+        std::unique_ptr<XmlElement> xml (e->createXml());
 
         e = addElementFromXml (*xml, index, undoable);
     }
@@ -169,7 +169,7 @@ public:
         : PaintElementUndoableAction <PaintElement> (element),
           oldIndex (-1)
     {
-        xml = element->createXml();
+        xml.reset (element->createXml());
         oldIndex = routine.indexOfElement (element);
     }
 
@@ -190,7 +190,7 @@ public:
     int getSizeInUnits()    { return 10; }
 
 private:
-    ScopedPointer<XmlElement> xml;
+    std::unique_ptr<XmlElement> xml;
     int oldIndex;
 };
 
@@ -303,7 +303,7 @@ void PaintRoutine::copySelectedToClipboard()
 void PaintRoutine::paste()
 {
     XmlDocument clip (SystemClipboard::getTextFromClipboard());
-    ScopedPointer<XmlElement> doc (clip.getDocumentElement());
+    std::unique_ptr<XmlElement> doc (clip.getDocumentElement());
 
     if (doc != nullptr && doc->hasTagName (clipboardXmlTag))
     {
@@ -549,7 +549,7 @@ void PaintRoutine::drawElements (Graphics& g, const Rectangle<int>& relativeTo)
 //==============================================================================
 void PaintRoutine::dropImageAt (const File& f, int x, int y)
 {
-    ScopedPointer<Drawable> d (Drawable::createFromImageFile (f));
+    std::unique_ptr<Drawable> d (Drawable::createFromImageFile (f));
 
     if (d != nullptr)
     {

@@ -278,7 +278,7 @@ private:
     struct Pimpl;
     friend struct Pimpl;
 
-    ScopedPointer<Pimpl> pimpl;
+    std::unique_ptr<Pimpl> pimpl;
    #endif
 };
 

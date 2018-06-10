@@ -230,7 +230,7 @@ public:
 private:
     //==============================================================================
     OwnedArray<TypeHandler> types;
-    ScopedPointer<Component> component;
+    std::unique_ptr<Component> component;
     ImageProvider* imageProvider;
    #if JUCE_DEBUG
     WeakReference<Component> componentRef;

@@ -21,7 +21,6 @@
 
 #include "../Common/b2Math.h"
 #include "../Collision/Shapes/b2Shape.h"
-#include <memory>
 
 class b2Fixture;
 class b2Joint;

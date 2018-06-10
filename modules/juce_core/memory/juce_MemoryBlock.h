@@ -252,7 +252,7 @@ public:
 
 private:
     //==============================================================================
-    typedef HeapBlock<char, true> HeapBlockType;
+    using HeapBlockType = HeapBlock<char, true>;
     HeapBlockType data;
     size_t size = 0;
 

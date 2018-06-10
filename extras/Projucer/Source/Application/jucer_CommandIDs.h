@@ -34,10 +34,14 @@ namespace CommandIDs
     enum
     {
         newProject              = 0x300000,
-        open                    = 0x300001,
-        closeDocument           = 0x300002,
-        saveDocument            = 0x300003,
-        saveDocumentAs          = 0x300004,
+        newProjectFromClipboard = 0x300001,
+        newPIP                  = 0x300002,
+        open                    = 0x300003,
+        closeDocument           = 0x300004,
+        saveDocument            = 0x300005,
+        saveDocumentAs          = 0x300006,
+
+        launchDemoRunner        = 0x300007,
 
         closeProject            = 0x300010,
         saveProject             = 0x300011,

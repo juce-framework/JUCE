@@ -48,7 +48,9 @@ StringArray FTTypefaceList::getDefaultFontDirectories()
 
     if (fontDirs.isEmpty())
     {
-        if (ScopedPointer<XmlElement> fontsInfo = findFontsConfFile())
+        std::unique_ptr<XmlElement> fontsInfo (findFontsConfFile());
+
+        if (fontsInfo != nullptr)
         {
             forEachXmlChildElementWithTagName (*fontsInfo, e, "dir")
             {

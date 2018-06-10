@@ -176,7 +176,7 @@ public:
 
     void initialise (JNIEnv* const env)
     {
-        rect = GlobalRef (env->NewObject (AndroidRectClass, AndroidRectClass.constructor, 0, 0, 0, 0));
+        rect = GlobalRef (env->NewObject (AndroidRect, AndroidRect.constructor, 0, 0, 0, 0));
 
         paint = GlobalRef (GraphicsHelpers::createPaint (Graphics::highResamplingQuality));
         const LocalRef<jobject> ignored (paint.callObjectMethod (AndroidPaint.setTypeface, typeface.get()));
@@ -199,7 +199,7 @@ public:
     float getStringWidth (const String& text) override
     {
         JNIEnv* env = getEnv();
-        const int numChars = text.length();
+        const int numChars = CharPointer_UTF16::getBytesRequiredFor (text.getCharPointer());
         jfloatArray widths = env->NewFloatArray (numChars);
 
         const int numDone = paint.callIntMethod (AndroidPaint.getTextWidths, javaString (text).get(), widths);
@@ -218,7 +218,7 @@ public:
     void getGlyphPositions (const String& text, Array<int>& glyphs, Array<float>& xOffsets) override
     {
         JNIEnv* env = getEnv();
-        const int numChars = text.length();
+        const int numChars = CharPointer_UTF16::getBytesRequiredFor (text.getCharPointer());
         jfloatArray widths = env->NewFloatArray (numChars);
 
         const int numDone = paint.callIntMethod (AndroidPaint.getTextWidths, javaString (text).get(), widths);
@@ -298,10 +298,10 @@ public:
 
         env->DeleteLocalRef (matrix);
 
-        const int left   = env->GetIntField (rect.get(), AndroidRectClass.left);
-        const int top    = env->GetIntField (rect.get(), AndroidRectClass.top);
-        const int right  = env->GetIntField (rect.get(), AndroidRectClass.right);
-        const int bottom = env->GetIntField (rect.get(), AndroidRectClass.bottom);
+        const int left   = env->GetIntField (rect.get(), AndroidRect.left);
+        const int top    = env->GetIntField (rect.get(), AndroidRect.top);
+        const int right  = env->GetIntField (rect.get(), AndroidRect.right);
+        const int bottom = env->GetIntField (rect.get(), AndroidRect.bottom);
 
         const Rectangle<int> bounds (left, top, right - left, bottom - top);
 

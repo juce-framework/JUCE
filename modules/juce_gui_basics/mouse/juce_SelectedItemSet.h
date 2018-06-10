@@ -47,9 +47,9 @@ class SelectedItemSet   : public ChangeBroadcaster
 {
 public:
     //==============================================================================
-    typedef SelectableItemType ItemType;
-    typedef Array<SelectableItemType> ItemArray;
-    typedef typename TypeHelpers::ParameterType<SelectableItemType>::type ParameterType;
+    using ItemType = SelectableItemType;
+    using ItemArray = Array<SelectableItemType>;
+    using ParameterType = typename TypeHelpers::ParameterType<SelectableItemType>::type;
 
     //==============================================================================
     /** Creates an empty set. */

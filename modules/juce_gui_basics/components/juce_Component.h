@@ -56,7 +56,7 @@ public:
         Note that when a component is deleted, any child components it contains are NOT
         automatically deleted. It's your responsibilty to manage their lifespan - you
         may want to use helper methods like deleteAllChildren(), or less haphazard
-        approaches like using ScopedPointers or normal object aggregation to manage them.
+        approaches like using std::unique_ptrs or normal object aggregation to manage them.
 
         If the component being deleted is currently the child of another one, then during
         deletion, it will be removed from its parent, and the parent will receive a childrenChanged()
@@ -763,8 +763,8 @@ public:
         backwards-compatibility with legacy code, and should be viewed with extreme
         suspicion by anyone attempting to write modern C++. In almost all cases, it's much
         smarter to manage the lifetimes of your child components via modern RAII techniques
-        such as simply making them member variables, or using ScopedPointer, OwnedArray, etc
-        to manage their lifetimes appropriately.
+        such as simply making them member variables, or using std::unique_ptr, OwnedArray,
+        etc to manage their lifetimes appropriately.
         @see removeAllChildren
     */
     void deleteAllChildren();
@@ -1596,7 +1596,7 @@ public:
                             should be changed. A value of 1.0 would indicate no change,
                             values greater than 1.0 mean it should be enlarged.
     */
-    virtual void mouseMagnify (const MouseEvent& event, float scaleFactor);
+    virtual void mouseMagnify (const MouseEvent& event, float scaleFactor) override;
 
     //==============================================================================
     /** Ensures that a non-stop stream of mouse-drag events will be sent during the
@@ -1791,7 +1791,7 @@ public:
 
         @see isMouseButtonDownAnywhere, isMouseOver, isMouseOverOrDragging
     */
-    bool isMouseButtonDown() const;
+    bool isMouseButtonDown (bool includeChildren = false) const;
 
     /** True if the mouse is over this component, or if it's being dragged in this component.
         This is a handy equivalent to (isMouseOver() || isMouseButtonDown()).
@@ -2123,7 +2123,7 @@ public:
         and you can test whether it's null before using it to see if something has deleted
         it.
 
-        The ComponentType typedef must be Component, or some subclass of Component.
+        The ComponentType template parameter must be Component, or some subclass of Component.
 
         You may also want to use a WeakReference<Component> object for the same purpose.
     */
@@ -2271,19 +2271,19 @@ private:
     String componentName, componentID;
     Component* parentComponent = nullptr;
     Rectangle<int> boundsRelativeToParent;
-    ScopedPointer<Positioner> positioner;
-    ScopedPointer<AffineTransform> affineTransform;
+    std::unique_ptr<Positioner> positioner;
+    std::unique_ptr<AffineTransform> affineTransform;
     Array<Component*> childComponentList;
     WeakReference<LookAndFeel> lookAndFeel;
     MouseCursor cursor;
     ImageEffectFilter* effect = nullptr;
-    ScopedPointer<CachedComponentImage> cachedImage;
+    std::unique_ptr<CachedComponentImage> cachedImage;
 
     class MouseListenerList;
     friend class MouseListenerList;
     friend struct ContainerDeletePolicy<MouseListenerList>;
-    ScopedPointer<MouseListenerList> mouseListeners;
-    ScopedPointer<Array<KeyListener*>> keyListeners;
+    std::unique_ptr<MouseListenerList> mouseListeners;
+    std::unique_ptr<Array<KeyListener*>> keyListeners;
     ListenerList<ComponentListener> componentListeners;
     NamedValueSet properties;
 

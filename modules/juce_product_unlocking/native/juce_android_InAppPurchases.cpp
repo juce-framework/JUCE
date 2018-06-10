@@ -89,7 +89,7 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
                                             serviceConnection.get(), 1 /*BIND_AUTO_CREATE*/);
 
         if (threadPool == nullptr)
-            threadPool = new ThreadPool (1);
+            threadPool.reset (new ThreadPool (1));
     }
 
     ~Pimpl()
@@ -834,7 +834,7 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
     //==============================================================================
     InAppPurchases& owner;
     GlobalRef inAppBillingService, serviceConnection;
-    ScopedPointer<ThreadPool> threadPool;
+    std::unique_ptr<ThreadPool> threadPool;
 
     CriticalSection getProductsInformationJobResultsLock,
                     getProductsBoughtJobResultsLock,

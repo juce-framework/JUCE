@@ -49,7 +49,7 @@ namespace juce
 
             void initialise (const String& commandLine) override
             {
-                myMainWindow = new MyApplicationWindow();
+                myMainWindow.reset (new MyApplicationWindow());
                 myMainWindow->setBounds (100, 100, 400, 500);
                 myMainWindow->setVisible (true);
             }
@@ -70,7 +70,7 @@ namespace juce
             }
 
         private:
-            ScopedPointer<MyApplicationWindow> myMainWindow;
+            std::unique_ptr<MyApplicationWindow> myMainWindow;
         };
 
         // this generates boilerplate code to launch our app class:
@@ -104,7 +104,7 @@ public:
 
     /** Checks whether multiple instances of the app are allowed.
 
-        If you application class returns true for this, more than one instance is
+        If your application class returns true for this, more than one instance is
         permitted to run (except on the Mac where this isn't possible).
 
         If it's false, the second instance won't start, but it you will still get a
@@ -270,7 +270,7 @@ public:
     static int main (int argc, const char* argv[]);
 
     static void appWillTerminateByForce();
-    typedef JUCEApplicationBase* (*CreateInstanceFunction)();
+    using CreateInstanceFunction = JUCEApplicationBase* (*)();
     static CreateInstanceFunction createInstance;
 
    #if JUCE_IOS
@@ -292,7 +292,7 @@ private:
     struct MultipleInstanceHandler;
     friend struct MultipleInstanceHandler;
     friend struct ContainerDeletePolicy<MultipleInstanceHandler>;
-    ScopedPointer<MultipleInstanceHandler> multipleInstanceHandler;
+    std::unique_ptr<MultipleInstanceHandler> multipleInstanceHandler;
 
     JUCE_DECLARE_NON_COPYABLE (JUCEApplicationBase)
 };

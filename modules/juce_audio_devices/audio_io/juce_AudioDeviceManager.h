@@ -416,11 +416,10 @@ public:
     */
     struct LevelMeter    : public ReferenceCountedObject
     {
-        typedef ReferenceCountedObjectPtr<LevelMeter> Ptr;
-
         LevelMeter() noexcept;
-
         double getCurrentLevel() const noexcept;
+
+        using Ptr = ReferenceCountedObjectPtr<LevelMeter>;
 
     private:
         friend class AudioDeviceManager;
@@ -471,12 +470,12 @@ private:
     OwnedArray<AudioDeviceSetup> lastDeviceTypeConfigs;
 
     AudioDeviceSetup currentSetup;
-    ScopedPointer<AudioIODevice> currentAudioDevice;
+    std::unique_ptr<AudioIODevice> currentAudioDevice;
     Array<AudioIODeviceCallback*> callbacks;
     int numInputChansNeeded = 0, numOutputChansNeeded = 2;
     String currentDeviceType;
     BigInteger inputChannels, outputChannels;
-    ScopedPointer<XmlElement> lastExplicitSettings;
+    std::unique_ptr<XmlElement> lastExplicitSettings;
     mutable bool listNeedsScanning = true;
     AudioBuffer<float> tempBuffer;
 
@@ -491,10 +490,10 @@ private:
     Array<MidiCallbackInfo> midiCallbacks;
 
     String defaultMidiOutputName;
-    ScopedPointer<MidiOutput> defaultMidiOutput;
+    std::unique_ptr<MidiOutput> defaultMidiOutput;
     CriticalSection audioCallbackLock, midiCallbackLock;
 
-    ScopedPointer<AudioBuffer<float>> testSound;
+    std::unique_ptr<AudioBuffer<float>> testSound;
     int testSoundPosition = 0;
 
     double cpuUsageMs = 0, timeToCpuScale = 0, msPerBlock = 0;
@@ -507,7 +506,7 @@ private:
     class CallbackHandler;
     friend class CallbackHandler;
     friend struct ContainerDeletePolicy<CallbackHandler>;
-    ScopedPointer<CallbackHandler> callbackHandler;
+    std::unique_ptr<CallbackHandler> callbackHandler;
 
     void audioDeviceIOCallbackInt (const float** inputChannelData, int totalNumInputChannels,
                                    float** outputChannelData, int totalNumOutputChannels, int numSamples);

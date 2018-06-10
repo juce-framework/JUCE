@@ -395,7 +395,7 @@ public:
                                   const Rectangle<int>& boundsToUse)
         : bounds (boundsToUse)
     {
-        ScopedPointer<ModalComponentManager::Callback> exitCallback (exitCallbackToUse);
+        std::unique_ptr<ModalComponentManager::Callback> exitCallback (exitCallbackToUse);
 
         AndroidBluetoothMidiInterface::startStopScan (true);
 
@@ -484,7 +484,7 @@ private:
 bool BluetoothMidiDevicePairingDialogue::open (ModalComponentManager::Callback* exitCallbackPtr,
                                                Rectangle<int>* btBounds)
 {
-    ScopedPointer<ModalComponentManager::Callback> exitCallback (exitCallbackPtr);
+    std::unique_ptr<ModalComponentManager::Callback> exitCallback (exitCallbackPtr);
     auto boundsToUse = (btBounds != nullptr ? *btBounds : Rectangle<int> {});
 
     if (! RuntimePermissions::isGranted (RuntimePermissions::bluetoothMidi))

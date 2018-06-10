@@ -28,6 +28,7 @@
 #include "jucer_Project.h"
 #include "../ProjectSaving/jucer_ProjectSaver.h"
 #include "../Application/jucer_Application.h"
+#include "../LiveBuildEngine/jucer_CompileEngineSettings.h"
 
 namespace
 {
@@ -67,6 +68,8 @@ Project::Project (const File& f)
 
     projectRoot.addListener (this);
 
+    compileEngineSettings.reset (new CompileEngineSettings (projectRoot));
+
     setChangedFlag (false);
     modificationTime = getFile().getLastModificationTime();
 }
@@ -82,10 +85,21 @@ const char* Project::projectFileExtension = ".jucer";
 //==============================================================================
 void Project::setTitle (const String& newTitle)
 {
-    projectRoot.setProperty (Ids::name, newTitle, getUndoManager());
-    getMainGroup().getNameValue() = newTitle;
+    projectNameValue = newTitle;
 
+    updateTitle();
+}
+
+void Project::updateTitle()
+{
+    auto projectName = getProjectNameString();
+
+    getMainGroup().getNameValue() = projectName;
+
+    pluginNameValue.setDefault (projectName);
+    pluginDescriptionValue.setDefault (projectName);
     bundleIdentifierValue.setDefault (getDefaultBundleIdentifierString());
+    pluginAUExportPrefixValue.setDefault (CodeHelpers::makeValidIdentifier (projectName, false, true, false) + "AU");
     pluginAAXIdentifierValue.setDefault (getDefaultAAXIdentifierString());
 }
 
@@ -174,6 +188,10 @@ void Project::initialiseProjectValues()
 {
     projectNameValue.referTo         (projectRoot, Ids::name,             getUndoManager(), "JUCE Project");
     projectUIDValue.referTo          (projectRoot, Ids::ID,               getUndoManager(), createAlphaNumericUID());
+
+    if (projectUIDValue.isUsingDefault())
+        projectUIDValue = projectUIDValue.getDefault();
+
     projectTypeValue.referTo         (projectRoot, Ids::projectType,      getUndoManager(), ProjectType_GUIApp::getTypeName());
     versionValue.referTo             (projectRoot, Ids::version,          getUndoManager(), "1.0.0");
     bundleIdentifierValue.referTo    (projectRoot, Ids::bundleIdentifier, getUndoManager(), getDefaultBundleIdentifierString());
@@ -203,46 +221,38 @@ void Project::initialiseProjectValues()
     preprocessorDefsValue.referTo              (projectRoot, Ids::defines,    getUndoManager());
     userNotesValue.referTo                     (projectRoot, Ids::userNotes,  getUndoManager());
 
-    maxBinaryFileSizeValue.referTo             (projectRoot, Ids::maxBinaryFileSize,        getUndoManager(), 10240 * 1024);
-    includeBinaryDataInAppConfigValue.referTo  (projectRoot, Ids::includeBinaryInAppConfig, getUndoManager(), true);
-    binaryDataNamespaceValue.referTo           (projectRoot, Ids::binaryDataNamespace,      getUndoManager(), "BinaryData");
+    maxBinaryFileSizeValue.referTo             (projectRoot, Ids::maxBinaryFileSize,         getUndoManager(), 10240 * 1024);
+
+    // this is here for backwards compatibility with old projects using the incorrect id
+    if (projectRoot.hasProperty ("includeBinaryInAppConfig"))
+         includeBinaryDataInJuceHeaderValue.referTo (projectRoot, "includeBinaryInAppConfig", getUndoManager(), true);
+    else
+        includeBinaryDataInJuceHeaderValue.referTo (projectRoot, Ids::includeBinaryInJuceHeader, getUndoManager(), true);
+
+    binaryDataNamespaceValue.referTo           (projectRoot, Ids::binaryDataNamespace,       getUndoManager(), "BinaryData");
 }
 
 void Project::initialiseAudioPluginValues()
 {
-    buildVSTValue.referTo                    (projectRoot, Ids::buildVST,        getUndoManager(), true);
-    buildVST3Value.referTo                   (projectRoot, Ids::buildVST3,       getUndoManager(), false);
-    buildAUValue.referTo                     (projectRoot, Ids::buildAU,         getUndoManager(), true);
-    buildAUv3Value.referTo                   (projectRoot, Ids::buildAUv3,       getUndoManager(), false);
-    buildRTASValue.referTo                   (projectRoot, Ids::buildRTAS,       getUndoManager(), false);
-    buildAAXValue.referTo                    (projectRoot, Ids::buildAAX,        getUndoManager(), false);
-    buildStandaloneValue.referTo             (projectRoot, Ids::buildStandalone, getUndoManager(), false);
-    enableIAAValue.referTo                   (projectRoot, Ids::enableIAA,       getUndoManager(), false);
+    pluginFormatsValue.referTo               (projectRoot, Ids::pluginFormats,              getUndoManager(),
+                                              Array<var> (Ids::buildVST.toString(), Ids::buildAU.toString(), Ids::buildStandalone.toString()), ",");
+    pluginCharacteristicsValue.referTo       (projectRoot, Ids::pluginCharacteristicsValue, getUndoManager(), Array<var> (), ",");
 
-    pluginNameValue.referTo                  (projectRoot, Ids::pluginName,             getUndoManager(), getProjectNameString());
-    pluginDescriptionValue.referTo           (projectRoot, Ids::pluginDesc,             getUndoManager(), getProjectNameString());
-    pluginManufacturerValue.referTo          (projectRoot, Ids::pluginManufacturer,     getUndoManager(), "yourcompany");
-    pluginManufacturerCodeValue.referTo      (projectRoot, Ids::pluginManufacturerCode, getUndoManager(), "Manu");
-    pluginCodeValue.referTo                  (projectRoot, Ids::pluginCode,             getUndoManager(), makeValid4CC (getProjectUIDString() + getProjectUIDString()));
-    pluginChannelConfigsValue.referTo        (projectRoot, Ids::pluginChannelConfigs,   getUndoManager());
-
-    pluginIsSynthValue.referTo               (projectRoot, Ids::pluginIsSynth,            getUndoManager(), false);
-    pluginWantsMidiInputValue.referTo        (projectRoot, Ids::pluginWantsMidiIn,        getUndoManager(), false);
-    pluginProducesMidiOutValue.referTo       (projectRoot, Ids::pluginProducesMidiOut,    getUndoManager(), false);
-    pluginIsMidiEffectPluginValue.referTo    (projectRoot, Ids::pluginIsMidiEffectPlugin, getUndoManager(), false);
-    pluginEditorNeedsKeyFocusValue.referTo   (projectRoot, Ids::pluginEditorRequiresKeys, getUndoManager(), false);
-
-    pluginVSTCategoryValue.referTo           (projectRoot, Ids::pluginVSTCategory,          getUndoManager());
+    pluginNameValue.referTo                  (projectRoot, Ids::pluginName,                 getUndoManager(), getProjectNameString());
+    pluginDescriptionValue.referTo           (projectRoot, Ids::pluginDesc,                 getUndoManager(), getProjectNameString());
+    pluginManufacturerValue.referTo          (projectRoot, Ids::pluginManufacturer,         getUndoManager(), "yourcompany");
+    pluginManufacturerCodeValue.referTo      (projectRoot, Ids::pluginManufacturerCode,     getUndoManager(), "Manu");
+    pluginCodeValue.referTo                  (projectRoot, Ids::pluginCode,                 getUndoManager(), makeValid4CC (getProjectUIDString() + getProjectUIDString()));
+    pluginChannelConfigsValue.referTo        (projectRoot, Ids::pluginChannelConfigs,       getUndoManager());
+    pluginAAXIdentifierValue.referTo         (projectRoot, Ids::aaxIdentifier,              getUndoManager(), getDefaultAAXIdentifierString());
     pluginAUExportPrefixValue.referTo        (projectRoot, Ids::pluginAUExportPrefix,       getUndoManager(),
                                               CodeHelpers::makeValidIdentifier (getProjectNameString(), false, true, false) + "AU");
-    pluginAUMainTypeValue.referTo            (projectRoot, Ids::pluginAUMainType,           getUndoManager());
-    pluginRTASCategoryValue.referTo          (projectRoot, Ids::pluginRTASCategory,         getUndoManager());
-    pluginRTASBypassDisabledValue.referTo    (projectRoot, Ids::pluginRTASDisableBypass,    getUndoManager());
-    pluginRTASMultiMonoDisabledValue.referTo (projectRoot, Ids::pluginRTASDisableMultiMono, getUndoManager());
-    pluginAAXIdentifierValue.referTo         (projectRoot, Ids::aaxIdentifier,              getUndoManager(), getDefaultAAXIdentifierString());
-    pluginAAXCategoryValue.referTo           (projectRoot, Ids::pluginAAXCategory,          getUndoManager(), "AAX_ePlugInCategory_Dynamics");
-    pluginAAXBypassDisabledValue.referTo     (projectRoot, Ids::pluginAAXDisableBypass,     getUndoManager());
-    pluginAAXMultiMonoDisabledValue.referTo  (projectRoot, Ids::pluginAAXDisableMultiMono,  getUndoManager());
+
+    pluginAUMainTypeValue.referTo            (projectRoot, Ids::pluginAUMainType,           getUndoManager(), getDefaultAUMainTypes(),    ",");
+    pluginVSTCategoryValue.referTo           (projectRoot, Ids::pluginVSTCategory,          getUndoManager(), getDefaultVSTCategories(),  ",");
+    pluginVST3CategoryValue.referTo          (projectRoot, Ids::pluginVST3Category,         getUndoManager(), getDefaultVST3Categories(), ",");
+    pluginRTASCategoryValue.referTo          (projectRoot, Ids::pluginRTASCategory,         getUndoManager(), getDefaultRTASCategories(), ",");
+    pluginAAXCategoryValue.referTo           (projectRoot, Ids::pluginAAXCategory,          getUndoManager(), getDefaultAAXCategories(),  ",");
 }
 
 void Project::updateOldStyleConfigList()
@@ -316,6 +326,143 @@ void Project::updateOldModulePaths()
 {
     for (Project::ExporterIterator exporter (*this); exporter.next();)
         exporter->updateOldModulePaths();
+}
+
+Array<Identifier> Project::getLegacyPluginFormatIdentifiers() noexcept
+{
+    static Array<Identifier> legacyPluginFormatIdentifiers { Ids::buildVST, Ids::buildVST3, Ids::buildAU, Ids::buildAUv3,
+                                                             Ids::buildRTAS, Ids::buildAAX, Ids::buildStandalone, Ids::enableIAA };
+
+    return legacyPluginFormatIdentifiers;
+}
+
+Array<Identifier> Project::getLegacyPluginCharacteristicsIdentifiers() noexcept
+{
+    static Array<Identifier> legacyPluginCharacteristicsIdentifiers { Ids::pluginIsSynth, Ids::pluginWantsMidiIn, Ids::pluginProducesMidiOut,
+                                                                      Ids::pluginIsMidiEffectPlugin, Ids::pluginEditorRequiresKeys, Ids::pluginRTASDisableBypass,
+                                                                      Ids::pluginRTASDisableMultiMono, Ids::pluginAAXDisableBypass, Ids::pluginAAXDisableMultiMono };
+
+    return legacyPluginCharacteristicsIdentifiers;
+}
+
+void Project::coalescePluginFormatValues()
+{
+    Array<var> formatsToBuild;
+
+    for (auto& formatIdentifier : getLegacyPluginFormatIdentifiers())
+    {
+        if (projectRoot.getProperty (formatIdentifier, false))
+            formatsToBuild.add (formatIdentifier.toString());
+    }
+
+    if (formatsToBuild.size() > 0)
+    {
+        pluginFormatsValue = formatsToBuild;
+        shouldWriteLegacyPluginFormatSettings = true;
+    }
+}
+
+void Project::coalescePluginCharacteristicsValues()
+{
+    Array<var> pluginCharacteristics;
+
+    for (auto& characteristicIdentifier : getLegacyPluginCharacteristicsIdentifiers())
+    {
+        if (projectRoot.getProperty (characteristicIdentifier, false))
+            pluginCharacteristics.add (characteristicIdentifier.toString());
+    }
+
+    if (pluginCharacteristics.size() > 0)
+    {
+        pluginCharacteristicsValue = pluginCharacteristics;
+        shouldWriteLegacyPluginCharacteristicsSettings = true;
+    }
+}
+
+void Project::updatePluginCategories()
+{
+    {
+        auto aaxCategory = projectRoot.getProperty (Ids::pluginAAXCategory, {}).toString();
+
+        if (getAllAAXCategoryVars().contains (aaxCategory))
+            pluginAAXCategoryValue = aaxCategory;
+        else if (getAllAAXCategoryStrings().contains (aaxCategory))
+            pluginAAXCategoryValue = Array<var> (getAllAAXCategoryVars()[getAllAAXCategoryStrings().indexOf (aaxCategory)]);
+    }
+
+    {
+        auto rtasCategory = projectRoot.getProperty (Ids::pluginRTASCategory, {}).toString();
+
+        if (getAllRTASCategoryVars().contains (rtasCategory))
+            pluginRTASCategoryValue = rtasCategory;
+        else if (getAllRTASCategoryStrings().contains (rtasCategory))
+            pluginRTASCategoryValue = Array<var> (getAllRTASCategoryVars()[getAllRTASCategoryStrings().indexOf (rtasCategory)]);
+    }
+
+    {
+        auto vstCategory = projectRoot.getProperty (Ids::pluginVSTCategory, {}).toString();
+
+        if (vstCategory.isNotEmpty() && getAllVSTCategoryStrings().contains (vstCategory))
+            pluginVSTCategoryValue = Array<var> (vstCategory);
+        else
+            pluginVSTCategoryValue.resetToDefault();
+    }
+
+    {
+        auto auMainType = projectRoot.getProperty (Ids::pluginAUMainType, {}).toString();
+
+        if (auMainType.isNotEmpty())
+        {
+            if (getAllAUMainTypeVars().contains (auMainType))
+                pluginAUMainTypeValue = Array<var> (auMainType);
+            else if (getAllAUMainTypeVars().contains (auMainType.quoted ('\'')))
+                pluginAUMainTypeValue = Array<var> (auMainType.quoted ('\''));
+            else if (getAllAUMainTypeStrings().contains (auMainType))
+                pluginAUMainTypeValue = Array<var> (getAllAUMainTypeVars()[getAllAUMainTypeStrings().indexOf (auMainType)]);
+        }
+        else
+        {
+            pluginAUMainTypeValue.resetToDefault();
+        }
+    }
+}
+
+void Project::writeLegacyPluginFormatSettings()
+{
+    if (pluginFormatsValue.isUsingDefault())
+    {
+        for (auto& formatIdentifier : getLegacyPluginFormatIdentifiers())
+            projectRoot.removeProperty (formatIdentifier, nullptr);
+    }
+    else
+    {
+        auto formatVar = pluginFormatsValue.get();
+
+        if (auto* arr = formatVar.getArray())
+        {
+            for (auto& formatIdentifier : getLegacyPluginFormatIdentifiers())
+                projectRoot.setProperty (formatIdentifier, arr->contains (formatIdentifier.toString()), nullptr);
+        }
+    }
+}
+
+void Project::writeLegacyPluginCharacteristicsSettings()
+{
+    if (pluginFormatsValue.isUsingDefault())
+    {
+        for (auto& characteristicIdentifier : getLegacyPluginCharacteristicsIdentifiers())
+            projectRoot.removeProperty (characteristicIdentifier, nullptr);
+    }
+    else
+    {
+        auto characteristicsVar = pluginCharacteristicsValue.get();
+
+        if (auto* arr = characteristicsVar.getArray())
+        {
+            for (auto& characteristicIdentifier : getLegacyPluginCharacteristicsIdentifiers())
+                projectRoot.setProperty (characteristicIdentifier, arr->contains (characteristicIdentifier.toString()), nullptr);
+        }
+    }
 }
 
 //==============================================================================
@@ -394,10 +541,17 @@ static void registerRecentFile (const File& file)
     getAppSettings().flush();
 }
 
+static void forgetRecentFile (const File& file)
+{
+    RecentlyOpenedFilesList::forgetRecentFileNatively (file);
+    getAppSettings().recentFiles.removeFile (file);
+    getAppSettings().flush();
+}
+
 //==============================================================================
 Result Project::loadDocument (const File& file)
 {
-    ScopedPointer<XmlElement> xml (XmlDocument::parse (file));
+    std::unique_ptr<XmlElement> xml (XmlDocument::parse (file));
 
     if (xml == nullptr || ! xml->hasTagName (Ids::JUCERPROJECT.toString()))
         return Result::fail ("Not a valid Jucer project!");
@@ -408,12 +562,17 @@ Result Project::loadDocument (const File& file)
         return Result::fail ("The document contains errors and couldn't be parsed!");
 
     registerRecentFile (file);
+
     enabledModulesList.reset();
     projectRoot = newTree;
 
     initialiseProjectValues();
     initialiseMainGroup();
     initialiseAudioPluginValues();
+
+    coalescePluginFormatValues();
+    coalescePluginCharacteristicsValues();
+    updatePluginCategories();
 
     parsedPreprocessorDefs = parsePreprocessorDefs (preprocessorDefsValue.get());
 
@@ -423,6 +582,8 @@ Result Project::loadDocument (const File& file)
 
     if (! ProjucerApplication::getApp().isRunningCommandLine)
         warnAboutOldProjucerVersion();
+
+    compileEngineSettings.reset (new CompileEngineSettings (projectRoot));
 
     return Result::ok();
 }
@@ -437,10 +598,21 @@ Result Project::saveProject (const File& file, bool isCommandLineApp)
     if (isSaving)
         return Result::ok();
 
+    if (isTemporaryProject())
+    {
+        askUserWhereToSaveProject();
+        return Result::ok();
+    }
+
     updateProjectSettings();
 
     if (! isCommandLineApp)
-        registerRecentFile (file);
+    {
+        ProjucerApplication::getApp().openDocumentManager.saveAll();
+
+        if (! isTemporaryProject())
+            registerRecentFile (file);
+    }
 
     const ScopedValueSetter<bool> vs (isSaving, true, false);
 
@@ -455,16 +627,110 @@ Result Project::saveResourcesOnly (const File& file)
 }
 
 //==============================================================================
+void Project::setTemporaryDirectory (const File& dir) noexcept
+{
+    tempDirectory = dir;
+
+     // remove this file from the recent documents list as it is a temporary project
+    forgetRecentFile (getFile());
+}
+
+void Project::askUserWhereToSaveProject()
+{
+    FileChooser fc ("Save Project");
+    fc.browseForDirectory();
+
+    if (fc.getResult().exists())
+        moveTemporaryDirectory (fc.getResult());
+}
+
+void Project::moveTemporaryDirectory (const File& newParentDirectory)
+{
+    auto newDirectory = newParentDirectory.getChildFile (tempDirectory.getFileName());
+    auto oldJucerFileName = getFile().getFileName();
+
+    saveProjectRootToFile();
+
+    tempDirectory.copyDirectoryTo (newDirectory);
+    tempDirectory.deleteRecursively();
+    tempDirectory = File();
+
+    // reload project from new location
+    if (auto* window = ProjucerApplication::getApp().mainWindowList.getMainWindowForFile (getFile()))
+    {
+        Component::SafePointer<MainWindow> safeWindow (window);
+
+        MessageManager::callAsync ([safeWindow, newDirectory, oldJucerFileName]
+        {
+            if (safeWindow != nullptr)
+                safeWindow.getComponent()->moveProject (newDirectory.getChildFile (oldJucerFileName));
+        });
+    }
+}
+
+bool Project::saveProjectRootToFile()
+{
+    std::unique_ptr<XmlElement> xml (projectRoot.createXml());
+
+    if (xml == nullptr)
+    {
+        jassertfalse;
+        return false;
+    }
+
+    MemoryOutputStream mo;
+    xml->writeToStream (mo, {});
+
+    return FileHelpers::overwriteFileWithNewDataIfDifferent (getFile(), mo);
+}
+
+//==============================================================================
+static void sendProjectSettingAnalyticsEvent (StringRef label)
+{
+    StringPairArray data;
+    data.set ("label", label);
+
+    Analytics::getInstance()->logEvent ("Project Setting",  data, ProjucerAnalyticsEvent::projectEvent);
+}
+
 void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& property)
 {
     if (tree.getRoot() == tree)
     {
         if (property == Ids::projectType)
+        {
             sendChangeMessage();
+
+            sendProjectSettingAnalyticsEvent ("Project Type = " + projectTypeValue.get().toString());
+        }
         else if (property == Ids::name)
-            setTitle (projectRoot [Ids::name]);
+        {
+            updateTitle();
+        }
         else if (property == Ids::defines)
+        {
             parsedPreprocessorDefs = parsePreprocessorDefs (preprocessorDefsValue.get());
+        }
+        else if (property == Ids::cppLanguageStandard)
+        {
+            sendProjectSettingAnalyticsEvent ("C++ Standard = " + cppStandardValue.get().toString());
+        }
+        else if (property == Ids::pluginFormats)
+        {
+            if (shouldWriteLegacyPluginFormatSettings)
+                writeLegacyPluginFormatSettings();
+        }
+        else if (property == Ids::pluginCharacteristicsValue)
+        {
+            pluginAUMainTypeValue.setDefault   (getDefaultAUMainTypes());
+            pluginVSTCategoryValue.setDefault  (getDefaultVSTCategories());
+            pluginVST3CategoryValue.setDefault (getDefaultVST3Categories());
+            pluginRTASCategoryValue.setDefault (getDefaultRTASCategories());
+            pluginAAXCategoryValue.setDefault  (getDefaultAAXCategories());
+
+            if (shouldWriteLegacyPluginCharacteristicsSettings)
+                writeLegacyPluginCharacteristicsSettings();
+        }
 
         changed();
     }
@@ -561,6 +827,8 @@ bool Project::shouldBuildTargetType (ProjectType::Target::Type targetType) const
             return shouldBuildAUv3();
         case ProjectType::Target::StandalonePlugIn:
             return shouldBuildStandalonePlugin();
+        case ProjectType::Target::UnityPlugIn:
+            return shouldBuildUnityPlugin();
         case ProjectType::Target::AggregateTarget:
         case ProjectType::Target::SharedCodeTarget:
             return projectType.isAudioPlugin();
@@ -582,6 +850,7 @@ ProjectType::Target::Type Project::getTargetTypeFromFilePath (const File& file, 
     else if (LibraryModule::CompileUnit::hasSuffix (file, "_VST2"))       return ProjectType::Target::VSTPlugIn;
     else if (LibraryModule::CompileUnit::hasSuffix (file, "_VST3"))       return ProjectType::Target::VST3PlugIn;
     else if (LibraryModule::CompileUnit::hasSuffix (file, "_Standalone")) return ProjectType::Target::StandalonePlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_Unity"))      return ProjectType::Target::UnityPlugIn;
 
     return (returnSharedTargetIfNoValidSuffix ? ProjectType::Target::SharedCodeTarget : ProjectType::Target::unspecified);
 }
@@ -601,6 +870,7 @@ const char* ProjectType::Target::getName() const noexcept
         case AudioUnitv3PlugIn: return "AUv3 AppExtension";
         case AAXPlugIn:         return "AAX";
         case RTASPlugIn:        return "RTAS";
+        case UnityPlugIn:       return "Unity Plugin";
         case SharedCodeTarget:  return "Shared Code";
         case AggregateTarget:   return "All";
         default:                return "undefined";
@@ -622,6 +892,7 @@ ProjectType::Target::TargetFileType ProjectType::Target::getTargetFileType() con
         case AudioUnitv3PlugIn: return macOSAppex;
         case AAXPlugIn:         return pluginBundle;
         case RTASPlugIn:        return pluginBundle;
+        case UnityPlugIn:       return pluginBundle;
         case SharedCodeTarget:  return staticLibrary;
         default:
             break;
@@ -731,8 +1002,8 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
                    "(Note that individual resource files which are larger than this size cannot be split across multiple cpp files).");
     }
 
-    props.add (new ChoicePropertyComponent (includeBinaryDataInAppConfigValue, "Include BinaryData in AppConfig"),
-                                             "Include BinaryData.h in the AppConfig.h file");
+    props.add (new ChoicePropertyComponent (includeBinaryDataInJuceHeaderValue, "Include BinaryData in JuceHeader"),
+                                             "Include BinaryData.h in the JuceHeader.h file");
 
     props.add (new TextPropertyComponent (binaryDataNamespaceValue, "BinaryData Namespace", 256, false),
                                           "The namespace containing the binary assests.");
@@ -754,77 +1025,65 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
 
 void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
 {
-    props.add (new ChoicePropertyComponent (buildVSTValue, "Build VST"),
-               "Whether the project should produce a VST plugin.");
-    props.add (new ChoicePropertyComponent (buildVST3Value, "Build VST3"),
-               "Whether the project should produce a VST3 plugin.");
-    props.add (new ChoicePropertyComponent (buildAUValue, "Build AudioUnit"),
-               "Whether the project should produce an AudioUnit plugin.");
-    props.add (new ChoicePropertyComponent (buildAUv3Value, "Build AudioUnit v3"),
-               "Whether the project should produce an AudioUnit version 3 plugin.");
-    props.add (new ChoicePropertyComponent (buildRTASValue, "Build RTAS"),
-               "Whether the project should produce an RTAS plugin.");
-    props.add (new ChoicePropertyComponent (buildAAXValue, "Build AAX"),
-               "Whether the project should produce an AAX plugin.");
-    props.add (new ChoicePropertyComponent (buildStandaloneValue, "Build Standalone Plug-In"),
-               "Whether the project should produce a standalone version of your plugin.");
-    props.add (new ChoicePropertyComponent (enableIAAValue, "Enable Inter-App Audio"),
-               "Whether a standalone plug-in should be an Inter-App Audio app. You should also enable the audio "
-               "background capability in the iOS exporter.");
+    props.add (new MultiChoicePropertyComponent (pluginFormatsValue, "Plugin Formats",
+                                                 { "VST", "VST3", "AU", "AUv3", "RTAS", "AAX", "Standalone", "Unity", "Enable IAA" },
+                                                 { Ids::buildVST.toString(), Ids::buildVST3.toString(), Ids::buildAU.toString(), Ids::buildAUv3.toString(),
+                                                   Ids::buildRTAS.toString(), Ids::buildAAX.toString(), Ids::buildStandalone.toString(), Ids::buildUnity.toString(),
+                                                   Ids::enableIAA.toString() }),
+               "Plugin formats to build.");
+    props.add (new MultiChoicePropertyComponent (pluginCharacteristicsValue, "Plugin Characteristics",
+                                                 { "Plugin is a Synth", "Plugin MIDI Input", "Plugin MIDI Output", "MIDI Effect Plugin", "Plugin Editor Requires Keyboard Focus",
+                                                   "Disable RTAS Bypass", "Disable AAX Bypass", "Disable RTAS Multi-Mono", "Disable AAX Multi-Mono" },
+                                                 { Ids::pluginIsSynth.toString(), Ids::pluginWantsMidiIn.toString(), Ids::pluginProducesMidiOut.toString(),
+                                                   Ids::pluginIsMidiEffectPlugin.toString(), Ids::pluginEditorRequiresKeys.toString(), Ids::pluginRTASDisableBypass.toString(),
+                                                   Ids::pluginAAXDisableBypass.toString(), Ids::pluginRTASDisableMultiMono.toString(), Ids::pluginAAXDisableMultiMono.toString() }),
+              "Some characteristics of your plugin such as whether it is a synth, produces MIDI messages, accepts MIDI messages etc.");
 
     props.add (new TextPropertyComponent (pluginNameValue, "Plugin Name", 128, false),
                "The name of your plugin (keep it short!)");
     props.add (new TextPropertyComponent (pluginDescriptionValue, "Plugin Description", 256, false),
                "A short description of your plugin.");
-
     props.add (new TextPropertyComponent (pluginManufacturerValue, "Plugin Manufacturer", 256, false),
                "The name of your company (cannot be blank).");
     props.add (new TextPropertyComponent (pluginManufacturerCodeValue, "Plugin Manufacturer Code", 4, false),
                "A four-character unique ID for your company. Note that for AU compatibility, this must contain at least one upper-case letter!");
     props.add (new TextPropertyComponent (pluginCodeValue, "Plugin Code", 4, false),
                "A four-character unique ID for your plugin. Note that for AU compatibility, this must contain at least one upper-case letter!");
-
     props.add (new TextPropertyComponent (pluginChannelConfigsValue, "Plugin Channel Configurations", 1024, false),
                "This list is a comma-separated set list in the form {numIns, numOuts} and each pair indicates a valid plug-in "
                "configuration. For example {1, 1}, {2, 2} means that the plugin can be used either with 1 input and 1 output, "
                "or with 2 inputs and 2 outputs. If your plug-in requires side-chains, aux output buses etc., then you must leave "
                "this field empty and override the isBusesLayoutSupported callback in your AudioProcessor.");
-
-    props.add (new ChoicePropertyComponent (pluginIsSynthValue, "Plugin is a Synth"),
-               "Enable this if you want your plugin to be treated as a synth or generator. It doesn't make much difference to the plugin itself, but some hosts treat synths differently to other plugins.");
-
-    props.add (new ChoicePropertyComponent (pluginWantsMidiInputValue, "Plugin Midi Input"),
-               "Enable this if you want your plugin to accept midi messages.");
-
-    props.add (new ChoicePropertyComponent (pluginProducesMidiOutValue, "Plugin Midi Output"),
-               "Enable this if your plugin is going to produce midi messages.");
-
-    props.add (new ChoicePropertyComponent (pluginIsMidiEffectPluginValue, "Midi Effect Plugin"),
-               "Enable this if your plugin only processes midi and no audio.");
-
-    props.add (new ChoicePropertyComponent (pluginEditorNeedsKeyFocusValue, "Plugin Editor Requires Keyboard Focus"),
-               "Enable this if your plugin needs keyboard input - some hosts can be a bit funny about keyboard focus..");
-
+    props.add (new TextPropertyComponent (pluginAAXIdentifierValue, "Plugin AAX Identifier", 256, false),
+               "The value to use for the JucePlugin_AAXIdentifier setting");
     props.add (new TextPropertyComponent (pluginAUExportPrefixValue, "Plugin AU Export Prefix", 128, false),
                "A prefix for the names of exported entry-point functions that the component exposes - typically this will be a version of your plugin's name that can be used as part of a C++ token.");
 
-    props.add (new TextPropertyComponent (pluginAUMainTypeValue, "Plugin AU Main Type", 128, false),
-               "In an AU, this is the value that is set as JucePlugin_AUMainType. Leave it blank unless you want to use a custom value.");
+    props.add (new MultiChoicePropertyComponent (pluginAUMainTypeValue, "Plugin AU Main Type", getAllAUMainTypeStrings(), getAllAUMainTypeVars(), 1),
+               "AU main type.");
 
-    props.add (new TextPropertyComponent (pluginVSTCategoryValue, "VST Category", 128, false),
-               "In a VST, this is the value that is set as JucePlugin_VSTCategory. Leave it blank unless you want to use a custom value.");
+    {
+        Array<var> vstCategoryVars;
+        for (auto s : getAllVSTCategoryStrings())
+            vstCategoryVars.add (s);
 
-    props.add (new TextPropertyComponent (pluginRTASCategoryValue, "Plugin RTAS Category", 128, false),
-               "(Leave this blank if your plugin is a synth). This is one of the RTAS categories from FicPluginEnums.h, such as: ePlugInCategory_None, ePlugInCategory_EQ, ePlugInCategory_Dynamics, "
-               "ePlugInCategory_PitchShift, ePlugInCategory_Reverb, ePlugInCategory_Delay, "
-               "ePlugInCategory_Modulation, ePlugInCategory_Harmonic, ePlugInCategory_NoiseReduction, "
-               "ePlugInCategory_Dither, ePlugInCategory_SoundField");
+        props.add (new MultiChoicePropertyComponent (pluginVSTCategoryValue, "Plugin VST Category", getAllVSTCategoryStrings(), vstCategoryVars, 1),
+                   "VST category.");
+    }
 
-    props.add (new TextPropertyComponent (pluginAAXCategoryValue, "Plugin AAX Category", 128, false),
-               "This is one of the categories from the AAX_EPlugInCategory enum");
+    {
+        Array<var> vst3CategoryVars;
+        for (auto s : getAllVST3CategoryStrings())
+            vst3CategoryVars.add (s);
 
-    props.add (new TextPropertyComponent (pluginAAXIdentifierValue, "Plugin AAX Identifier", 256, false),
-               "The value to use for the JucePlugin_AAXIdentifier setting");
+        props.add (new MultiChoicePropertyComponent (pluginVST3CategoryValue, "Plugin VST3 Category", getAllVST3CategoryStrings(), vst3CategoryVars),
+                   "VST3 category.");
+    }
+
+    props.add (new MultiChoicePropertyComponent (pluginRTASCategoryValue, "Plugin RTAS Category", getAllRTASCategoryStrings(), getAllRTASCategoryVars()),
+               "RTAS category.");
+    props.add (new MultiChoicePropertyComponent (pluginAAXCategoryValue, "Plugin AAX Category", getAllAAXCategoryStrings(), getAllAAXCategoryVars()),
+               "AAX category.");
 }
 
 //==============================================================================
@@ -1315,6 +1574,23 @@ bool Project::Item::isIconCrossedOut() const
                    || getFile().hasFileExtension (headerFileExtensions));
 }
 
+bool Project::Item::needsSaving() const noexcept
+{
+    auto& odm = ProjucerApplication::getApp().openDocumentManager;
+
+    if (odm.anyFilesNeedSaving())
+    {
+        for (int i = 0; i < odm.getNumOpenDocuments(); ++i)
+        {
+            auto* doc = odm.getOpenDocument (i);
+            if (doc->needsSaving() && doc->getFile() == getFile())
+                return true;
+        }
+    }
+
+    return false;
+}
+
 //==============================================================================
 ValueTree Project::getConfigNode()
 {
@@ -1339,48 +1615,84 @@ bool Project::isConfigFlagEnabled (const String& name, bool defaultIsEnabled) co
 }
 
 //==============================================================================
-String Project::getPluginRTASCategoryCode()
+String Project::getAUMainTypeString() const noexcept
 {
-    if (static_cast<bool> (isPluginSynth()))
-        return "ePlugInCategory_SWGenerators";
+    auto v = pluginAUMainTypeValue.get();
 
-    auto s = getPluginRTASCategoryString();
-    if (s.isEmpty())
-        s = "ePlugInCategory_None";
+    if (auto* arr = v.getArray())
+        return arr->getFirst().toString();
 
-    return s;
+    jassertfalse;
+    return {};
 }
 
-String Project::getAUMainTypeString()
+String Project::getVSTCategoryString() const noexcept
 {
-    auto s = getPluginAUMainTypeString();
+    auto v = pluginVSTCategoryValue.get();
 
-    if (s.isEmpty())
-    {
-        // Unfortunately, Rez uses a header where kAudioUnitType_MIDIProcessor is undefined
-        // Use aumi instead.
-        if      (isPluginMidiEffect())      s = "'aumi'";
-        else if (isPluginSynth())           s = "kAudioUnitType_MusicDevice";
-        else if (pluginWantsMidiInput())    s = "kAudioUnitType_MusicEffect";
-        else                                s = "kAudioUnitType_Effect";
-    }
+    if (auto* arr = v.getArray())
+        return arr->getFirst().toString();
 
-    return s;
+    jassertfalse;
+    return {};
 }
 
-String Project::getAUMainTypeCode()
+static String getVST3CategoryStringFromSelection (Array<var> selected) noexcept
 {
-    auto s = getPluginAUMainTypeString();
+    StringArray categories;
 
-    if (s.isEmpty())
+    for (auto& category : selected)
+        categories.add (category);
+
+    // "Fx" and "Instrument" should come first and if both are present prioritise "Fx"
+    if (categories.contains ("Instrument"))
+        categories.move (categories.indexOf ("Instrument"), 0);
+
+    if (categories.contains ("Fx"))
+        categories.move (categories.indexOf ("Fx"), 0);
+
+    return categories.joinIntoString ("|");
+}
+
+String Project::getVST3CategoryString() const noexcept
+{
+    auto v = pluginVST3CategoryValue.get();
+
+    if (auto* arr = v.getArray())
+        return getVST3CategoryStringFromSelection (*arr);
+
+    jassertfalse;
+    return {};
+}
+
+int Project::getAAXCategory() const noexcept
+{
+    int res = 0;
+
+    auto v = pluginAAXCategoryValue.get();
+
+    if (auto* arr = v.getArray())
     {
-        if      (isPluginMidiEffect())      s = "aumi";
-        else if (isPluginSynth())           s = "aumu";
-        else if (pluginWantsMidiInput())    s = "aumf";
-        else                                s = "aufx";
+        for (auto c : *arr)
+            res |= static_cast<int> (c);
     }
 
-    return s;
+    return res;
+}
+
+int Project::getRTASCategory() const noexcept
+{
+    int res = 0;
+
+    auto v = pluginRTASCategoryValue.get();
+
+    if (auto* arr = v.getArray())
+    {
+        for (auto c : *arr)
+            res |= static_cast<int> (c);
+    }
+
+    return res;
 }
 
 String Project::getIAATypeCode()
@@ -1411,15 +1723,7 @@ String Project::getIAAPluginName()
     return s;
 }
 
-String Project::getPluginVSTCategoryString()
-{
-    auto s = pluginVSTCategoryValue.get().toString().trim();
-
-    if (s.isEmpty())
-        s = isPluginSynth() ? "kPlugCategSynth" : "kPlugCategEffect";
-    return s;
-}
-
+//==============================================================================
 bool Project::isAUPluginHost()
 {
     return getModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_AU");
@@ -1436,10 +1740,127 @@ bool Project::isVST3PluginHost()
 }
 
 //==============================================================================
+StringArray Project::getAllAUMainTypeStrings() noexcept
+{
+    static StringArray auMainTypeStrings { "kAudioUnitType_Effect", "kAudioUnitType_FormatConverter", "kAudioUnitType_Generator", "kAudioUnitType_MIDIProcessor",
+                                           "kAudioUnitType_Mixer", "kAudioUnitType_MusicDevice", "kAudioUnitType_MusicEffect", "kAudioUnitType_OfflineEffect",
+                                           "kAudioUnitType_Output", "kAudioUnitType_Panner" };
+
+    return auMainTypeStrings;
+}
+
+Array<var> Project::getAllAUMainTypeVars() noexcept
+{
+    static Array<var> auMainTypeVars { "'aufx'", "'aufc'", "'augn'", "'aumi'",
+                                       "'aumx'", "'aumu'", "'aumf'", "'auol'",
+                                       "'auou'", "'aupn'" };
+
+    return auMainTypeVars;
+}
+
+Array<var> Project::getDefaultAUMainTypes() const noexcept
+{
+    if (isPluginMidiEffect())      return { "'aumi'" };
+    if (isPluginSynth())           return { "'aumu'" };
+    if (pluginWantsMidiInput())    return { "'aumf'" };
+
+    return { "'aufx'" };
+}
+
+StringArray Project::getAllVSTCategoryStrings() noexcept
+{
+    static StringArray vstCategoryStrings { "kPlugCategUnknown", "kPlugCategEffect", "kPlugCategSynth", "kPlugCategAnalysis", "kPlugCategMastering",
+                                            "kPlugCategSpacializer", "kPlugCategRoomFx", "kPlugSurroundFx", "kPlugCategRestoration", "kPlugCategOfflineProcess",
+                                            "kPlugCategShell", "kPlugCategGenerator" };
+    return vstCategoryStrings;
+}
+
+Array<var> Project::getDefaultVSTCategories() const noexcept
+{
+    if (isPluginSynth())
+        return  { "kPlugCategSynth" };
+
+    return { "kPlugCategEffect" };
+}
+
+StringArray Project::getAllVST3CategoryStrings() noexcept
+{
+    static StringArray vst3CategoryStrings { "Fx", "Instrument", "Analyzer", "Delay", "Distortion", "Drum", "Dynamics", "EQ", "External", "Filter",
+                                             "Generator", "Mastering", "Modulation", "Mono", "Network", "NoOfflineProcess", "OnlyOfflineProcess", "OnlyRT",
+                                             "Pitch Shift", "Restoration", "Reverb", "Sampler", "Spatial", "Stereo", "Surround", "Synth", "Tools", "Up-Downmix" };
+
+    return vst3CategoryStrings;
+}
+
+Array<var> Project::getDefaultVST3Categories() const noexcept
+{
+    if (isPluginSynth())
+        return  { "Instrument", "Synth" };
+
+    return { "Fx" };
+}
+
+StringArray Project::getAllAAXCategoryStrings() noexcept
+{
+    static StringArray aaxCategoryStrings { "AAX_ePlugInCategory_None", "AAX_ePlugInCategory_EQ", "AAX_ePlugInCategory_Dynamics", "AAX_ePlugInCategory_PitchShift",
+                                            "AAX_ePlugInCategory_Reverb", "AAX_ePlugInCategory_Delay", "AAX_ePlugInCategory_Modulation", "AAX_ePlugInCategory_Harmonic",
+                                            "AAX_ePlugInCategory_NoiseReduction", "AAX_ePlugInCategory_Dither", "AAX_ePlugInCategory_SoundField", "AAX_ePlugInCategory_HWGenerators",
+                                            "AAX_ePlugInCategory_SWGenerators", "AAX_ePlugInCategory_WrappedPlugin", "AAX_EPlugInCategory_Effect" };
+
+    return aaxCategoryStrings;
+}
+
+Array<var> Project::getAllAAXCategoryVars() noexcept
+{
+    static Array<var> aaxCategoryVars { 0x00000000, 0x00000001, 0x00000002, 0x00000004,
+                                        0x00000008, 0x00000010, 0x00000020, 0x00000040,
+                                        0x00000080, 0x00000100, 0x00000200, 0x00000400,
+                                        0x00000800, 0x00001000, 0x00002000 };
+
+    return aaxCategoryVars;
+}
+
+Array<var> Project::getDefaultAAXCategories() const noexcept
+{
+    if (isPluginSynth())
+        return getAllAAXCategoryVars()[getAllAAXCategoryStrings().indexOf ("AAX_ePlugInCategory_SWGenerators")];
+
+    return getAllAAXCategoryVars()[getAllAAXCategoryStrings().indexOf ("AAX_ePlugInCategory_None")];
+}
+
+StringArray Project::getAllRTASCategoryStrings() noexcept
+{
+    static StringArray rtasCategoryStrings { "ePlugInCategory_None", "ePlugInCategory_EQ", "ePlugInCategory_Dynamics", "ePlugInCategory_PitchShift",
+                                             "ePlugInCategory_Reverb", "ePlugInCategory_Delay", "ePlugInCategory_Modulation", "ePlugInCategory_Harmonic",
+                                             "ePlugInCategory_NoiseReduction", "ePlugInCategory_Dither", "ePlugInCategory_SoundField", "ePlugInCategory_HWGenerators",
+                                             "ePlugInCategory_SWGenerators", "ePlugInCategory_WrappedPlugin", "ePlugInCategory_Effect" };
+
+    return rtasCategoryStrings;
+}
+
+Array<var> Project::getAllRTASCategoryVars() noexcept
+{
+    static Array<var> rtasCategoryVars { 0x00000000, 0x00000001, 0x00000002, 0x00000004,
+                                         0x00000008, 0x00000010, 0x00000020, 0x00000040,
+                                         0x00000080, 0x00000100, 0x00000200, 0x00000400,
+                                         0x00000800, 0x00001000, 0x00002000 };
+
+    return rtasCategoryVars;
+}
+
+Array<var> Project::getDefaultRTASCategories() const noexcept
+{
+    if (isPluginSynth())
+        return getAllRTASCategoryVars()[getAllRTASCategoryStrings().indexOf ("ePlugInCategory_SWGenerators")];
+
+    return getAllRTASCategoryVars()[getAllRTASCategoryStrings().indexOf ("ePlugInCategory_None")];
+}
+
+//==============================================================================
 EnabledModuleList& Project::getModules()
 {
     if (enabledModulesList == nullptr)
-        enabledModulesList = new EnabledModuleList (*this, projectRoot.getOrCreateChildWithName (Ids::MODULES, nullptr));
+        enabledModulesList.reset (new EnabledModuleList (*this, projectRoot.getOrCreateChildWithName (Ids::MODULES, nullptr)));
 
     return *enabledModulesList;
 }
@@ -1463,7 +1884,7 @@ ProjectExporter* Project::createExporter (int index)
 
 void Project::addNewExporter (const String& exporterName)
 {
-    ScopedPointer<ProjectExporter> exp (ProjectExporter::createNewExporter (*this, exporterName));
+    std::unique_ptr<ProjectExporter> exp (ProjectExporter::createNewExporter (*this, exporterName));
 
     exp->getTargetLocationValue() = exp->getTargetLocationString()
                                        + getUniqueTargetFolderSuffixForExporter (exp->getName(), exp->getTargetLocationString());
@@ -1510,6 +1931,18 @@ String Project::getUniqueTargetFolderSuffixForExporter (const String& exporterNa
 }
 
 //==============================================================================
+bool Project::shouldSendGUIBuilderAnalyticsEvent() noexcept
+{
+    if (! hasSentGUIBuilderAnalyticsEvent)
+    {
+        hasSentGUIBuilderAnalyticsEvent = true;
+        return true;
+    }
+
+    return false;
+}
+
+//==============================================================================
 String Project::getFileTemplate (const String& templateName)
 {
     int dataSize;
@@ -1531,7 +1964,7 @@ bool Project::ExporterIterator::next()
     if (++index >= project.getNumExporters())
         return false;
 
-    exporter = project.createExporter (index);
+    exporter.reset (project.createExporter (index));
 
     if (exporter == nullptr)
     {

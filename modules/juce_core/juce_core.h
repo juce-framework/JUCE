@@ -32,7 +32,7 @@
 
   ID:               juce_core
   vendor:           juce
-  version:          5.2.1
+  version:          5.3.2
   name:             JUCE core classes
   description:      The essential set of basic JUCE classes, as required by all the other JUCE modules. Includes text, container, memory, threading and i/o functionality.
   website:          http://www.juce.com/juce
@@ -250,6 +250,7 @@ namespace juce
 #include "text/juce_LocalisedStrings.h"
 #include "text/juce_Base64.h"
 #include "misc/juce_Result.h"
+#include "misc/juce_Uuid.h"
 #include "containers/juce_Variant.h"
 #include "containers/juce_NamedValueSet.h"
 #include "containers/juce_DynamicObject.h"
@@ -280,7 +281,6 @@ namespace juce
 #include "maths/juce_Expression.h"
 #include "maths/juce_Random.h"
 #include "misc/juce_RuntimePermissions.h"
-#include "misc/juce_Uuid.h"
 #include "misc/juce_WindowsRegistry.h"
 #include "threads/juce_ChildProcess.h"
 #include "threads/juce_DynamicLibrary.h"

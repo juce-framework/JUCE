@@ -789,7 +789,7 @@ public:
                                                     windowPos.getHeight() - (PopupMenuSettings::scrollZone + m->getHeight())),
                                               currentY);
 
-                        auto parentArea = getParentArea (windowPos.getPosition());
+                        auto parentArea = getParentArea (windowPos.getPosition()) / scaleFactor;
                         auto deltaY = wantedY - currentY;
 
                         windowPos.setSize (jmin (windowPos.getWidth(), parentArea.getWidth()),
@@ -993,7 +993,7 @@ public:
     bool dismissOnMouseUp, hideOnExit = false, disableMouseMoves = false, hasAnyJuceCompHadFocus = false;
     int numColumns = 0, contentHeight = 0, childYOffset = 0;
     Component::SafePointer<ItemComponent> currentChild;
-    ScopedPointer<MenuWindow> activeSubMenu;
+    std::unique_ptr<MenuWindow> activeSubMenu;
     Array<int> columnWidths;
     uint32 windowCreationTime, lastFocusedTime, timeEnteredCurrentChildComp;
     OwnedArray<MouseSourceState> mouseSourceStates;
@@ -1076,8 +1076,8 @@ private:
                            const bool wasDown, const bool overScrollArea, const bool isOverAny)
     {
         isDown = window.hasBeenOver
-                    && (ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown()
-                         || ModifierKeys::getCurrentModifiersRealtime().isAnyMouseButtonDown());
+                    && (ModifierKeys::currentModifiers.isAnyMouseButtonDown()
+                         || ComponentPeer::getCurrentModifiersRealtime().isAnyMouseButtonDown());
 
         if (! window.doesAnyJuceCompHaveFocus())
         {
@@ -1593,7 +1593,7 @@ Component* PopupMenu::createWindow (const Options& options,
     return items.isEmpty() ? nullptr
                            : new HelperClasses::MenuWindow (*this, nullptr, options,
                                                             ! options.getTargetScreenArea().isEmpty(),
-                                                            ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown(),
+                                                            ModifierKeys::currentModifiers.isAnyMouseButtonDown(),
                                                             managerOfChosenCommand);
 }
 
@@ -1632,7 +1632,7 @@ struct PopupMenuCompletionCallback  : public ModalComponentManager::Callback
     }
 
     ApplicationCommandManager* managerOfChosenCommand = nullptr;
-    ScopedPointer<Component> component;
+    std::unique_ptr<Component> component;
     WeakReference<Component> prevFocused, prevTopLevel;
 
     JUCE_DECLARE_NON_COPYABLE (PopupMenuCompletionCallback)
@@ -1641,8 +1641,8 @@ struct PopupMenuCompletionCallback  : public ModalComponentManager::Callback
 int PopupMenu::showWithOptionalCallback (const Options& options, ModalComponentManager::Callback* const userCallback,
                                          const bool canBeModal)
 {
-    ScopedPointer<ModalComponentManager::Callback> userCallbackDeleter (userCallback);
-    ScopedPointer<PopupMenuCompletionCallback> callback (new PopupMenuCompletionCallback());
+    std::unique_ptr<ModalComponentManager::Callback> userCallbackDeleter (userCallback);
+    std::unique_ptr<PopupMenuCompletionCallback> callback (new PopupMenuCompletionCallback());
 
     if (auto* window = createWindow (options, &(callback->managerOfChosenCommand)))
     {

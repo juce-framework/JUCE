@@ -158,8 +158,8 @@ public:
             const String userCodeComment ("UserButtonCode_" + memberVariableName);
 
             callback
-                << "if (buttonThatWasClicked == " << memberVariableName
-                << ")\n{\n    //[" << userCodeComment << "] -- add your button handler code here..\n    //[/" << userCodeComment << "]\n}\n";
+                << "if (buttonThatWasClicked == " << memberVariableName << ".get())\n"
+                << "{\n    //[" << userCodeComment << "] -- add your button handler code here..\n    //[/" << userCodeComment << "]\n}\n";
         }
     }
 

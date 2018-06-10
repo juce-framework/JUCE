@@ -307,14 +307,10 @@ private:
         auto inputStream = StreamCloser (LocalRef<jobject> (env->CallObjectMethod (assetFd,
                                                                                    AssetFileDescriptor.createInputStream)));
 
-        auto exception = LocalRef<jobject> (env->ExceptionOccurred());
-
-        if (exception != 0)
+        if (jniCheckHasExceptionOccurredAndClear())
         {
             // Failed to open file stream for resource
             jassertfalse;
-
-            env->ExceptionClear();
             return {};
         }
 
@@ -326,14 +322,10 @@ private:
                                                                              JavaFileOutputStream.constructor,
                                                                              javaString (tempFile.getFullPathName()).get())));
 
-        exception = LocalRef<jobject> (env->ExceptionOccurred());
-
-        if (exception != 0)
+        if (jniCheckHasExceptionOccurredAndClear())
         {
             // Failed to open file stream for temporary file
             jassertfalse;
-
-            env->ExceptionClear();
             return {};
         }
 
@@ -347,14 +339,10 @@ private:
 
             bytesRead = env->CallIntMethod (inputStream.stream, JavaFileInputStream.read, buffer.get());
 
-            exception = LocalRef<jobject> (env->ExceptionOccurred());
-
-            if (exception != 0)
+            if (jniCheckHasExceptionOccurredAndClear())
             {
                 // Failed to read from resource file.
                 jassertfalse;
-
-                env->ExceptionClear();
                 return {};
             }
 
@@ -363,12 +351,10 @@ private:
 
             env->CallVoidMethod (outputStream.stream, JavaFileOutputStream.write, buffer.get(), 0, bytesRead);
 
-            if (exception != 0)
+            if (jniCheckHasExceptionOccurredAndClear())
             {
                 // Failed to write to temporary file.
                 jassertfalse;
-
-                env->ExceptionClear();
                 return {};
             }
         }
@@ -420,7 +406,7 @@ public:
             owner.sharingFinished (false, {});
         }
 
-        prepareFilesThread = new AndroidContentSharerPrepareFilesThread (*this, files, packageName, uriBase);
+        prepareFilesThread.reset (new AndroidContentSharerPrepareFilesThread (*this, files, packageName, uriBase));
     }
 
     void shareText (const String& text) override
@@ -486,7 +472,7 @@ public:
     {
         ignoreUnused (selection, selectionArgs, sortOrder);
 
-        StringArray requestedColumns = javaStringArrayToJuceStringArray (projection);
+        StringArray requestedColumns = javaStringArrayToJuce (projection);
         StringArray supportedColumns = getSupportedColumns();
 
         StringArray resultColumns;
@@ -501,7 +487,7 @@ public:
         if (resultColumns.isEmpty())
             return nullptr;
 
-        auto resultJavaColumns = juceStringArrayToJavaStringArray (resultColumns);
+        auto resultJavaColumns = juceStringArrayToJava (resultColumns);
 
         auto* env = getEnv();
 
@@ -550,7 +536,7 @@ public:
         if (extension.isEmpty())
             return nullptr;
 
-        return juceStringArrayToJavaStringArray (filterMimeTypes (getMimeTypesForFileExtension (extension),
+        return juceStringArrayToJava (filterMimeTypes (getMimeTypesForFileExtension (extension),
                                                                   juceString (mimeTypeFilter.get())));
     }
 
@@ -683,40 +669,6 @@ private:
         return { index, filename, prepareFilesThread->getFilePaths()[index.getIntValue()] };
     }
 
-    static LocalRef<jobjectArray> juceStringArrayToJavaStringArray (const StringArray& juceArray)
-    {
-        auto* env = getEnv();
-
-        auto javaArray = LocalRef<jobjectArray> (env->NewObjectArray ((jsize) juceArray.size(),
-                                                                      JavaString,
-                                                                      javaString ("").get()));
-
-        for (int i = 0; i < juceArray.size(); ++i)
-            env->SetObjectArrayElement (javaArray, i, javaString (juceArray [i]).get());
-
-        return javaArray;
-    }
-
-    static StringArray javaStringArrayToJuceStringArray (const LocalRef<jobjectArray>& javaArray)
-    {
-        if (javaArray.get() == 0)
-            return {};
-
-        auto* env = getEnv();
-
-        const int size = env->GetArrayLength (javaArray.get());
-
-        StringArray juceArray;
-
-        for (int i = 0; i < size; ++i)
-        {
-            auto javaString = LocalRef<jstring> ((jstring) env->GetObjectArrayElement (javaArray.get(), i));
-            juceArray.add (juceString (javaString.get()));
-        }
-
-        return juceArray;
-    }
-
     static StringArray getSupportedColumns()
     {
         return StringArray ("_display_name", "_size");
@@ -748,14 +700,10 @@ private:
                                                                                     ParcelFileDescriptor.open,
                                                                                     javaFile.get(), modeReadOnly));
 
-        auto exception = LocalRef<jobject> (env->ExceptionOccurred());
-
-        if (exception != 0)
+        if (jniCheckHasExceptionOccurredAndClear())
         {
             // Failed to create file descriptor. Have you provided a valid file path/resource name?
             jassertfalse;
-
-            env->ExceptionClear();
             return nullptr;
         }
 
@@ -774,7 +722,7 @@ private:
     String packageName;
     String uriBase;
 
-    ScopedPointer<AndroidContentSharerPrepareFilesThread> prepareFilesThread;
+    std::unique_ptr<AndroidContentSharerPrepareFilesThread> prepareFilesThread;
 
     bool succeeded = false;
     String errorDescription;

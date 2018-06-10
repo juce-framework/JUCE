@@ -145,7 +145,7 @@ struct OnlineUnlockForm::OverlayComp  : public Component,
     OnlineUnlockStatus::UnlockResult result;
     String email, password;
 
-    ScopedPointer<TextButton> cancelButton;
+    std::unique_ptr<TextButton> cancelButton;
 
     JUCE_LEAK_DETECTOR (OnlineUnlockForm::OverlayComp)
 };

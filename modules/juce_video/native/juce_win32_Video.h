@@ -160,11 +160,13 @@ namespace VideoRenderers
 //==============================================================================
 struct VideoComponent::Pimpl  : public Component
 {
-    Pimpl()  : videoLoaded (false)
+    Pimpl (VideoComponent& ownerToUse, bool)
+        : owner (ownerToUse),
+          videoLoaded (false)
     {
         setOpaque (true);
-        context = new DirectShowContext (*this);
-        componentWatcher = new ComponentWatcher (*this);
+        context.reset (new DirectShowContext (*this));
+        componentWatcher.reset (new ComponentWatcher (*this));
     }
 
     ~Pimpl()
@@ -257,6 +259,11 @@ struct VideoComponent::Pimpl  : public Component
             context->setSpeed (newSpeed);
     }
 
+    double getSpeed() const
+    {
+        return videoLoaded ? context->getSpeed() : 0.0;
+    }
+
     Rectangle<int> getNativeSize() const
     {
         return videoLoaded ? context->getVideoSize()
@@ -307,10 +314,30 @@ struct VideoComponent::Pimpl  : public Component
         repaint();
     }
 
+    void playbackStarted()
+    {
+        if (owner.onPlaybackStarted != nullptr)
+            owner.onPlaybackStarted();
+    }
+
+    void playbackStopped()
+    {
+        if (owner.onPlaybackStopped != nullptr)
+            owner.onPlaybackStopped();
+    }
+
+    void errorOccurred (const String& errorMessage)
+    {
+        if (owner.onErrorOccurred != nullptr)
+            owner.onErrorOccurred (errorMessage);
+    }
+
     File currentFile;
     URL currentURL;
 
 private:
+    VideoComponent& owner;
+
     bool videoLoaded;
 
     //==============================================================================
@@ -343,7 +370,7 @@ private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentWatcher)
     };
 
-    ScopedPointer<ComponentWatcher> componentWatcher;
+    std::unique_ptr<ComponentWatcher> componentWatcher;
 
     //======================================================================
     struct DirectShowContext    : public AsyncUpdater
@@ -395,12 +422,15 @@ private:
             deleteNativeWindow();
 
             mediaEvent->SetNotifyWindow (0, 0, 0);
+
             if (videoRenderer != nullptr)
                 videoRenderer->setVideoWindow (nullptr);
 
             createNativeWindow();
 
+            mediaEvent->CancelDefaultHandling (EC_STATE_CHANGE);
             mediaEvent->SetNotifyWindow ((OAHWND) hwnd, graphEventID, 0);
+
             if (videoRenderer != nullptr)
                 videoRenderer->setVideoWindow (hwnd);
         }
@@ -462,7 +492,7 @@ private:
             {
                 if (SystemStats::getOperatingSystemType() >= SystemStats::WinVista)
                 {
-                    videoRenderer = new VideoRenderers::EVR();
+                    videoRenderer.reset (new VideoRenderers::EVR());
                     hr = videoRenderer->create (graphBuilder, baseFilter, hwnd);
 
                     if (FAILED (hr))
@@ -471,7 +501,7 @@ private:
 
                 if (videoRenderer == nullptr)
                 {
-                    videoRenderer = new VideoRenderers::VMR7();
+                    videoRenderer.reset (new VideoRenderers::VMR7());
                     hr = videoRenderer->create (graphBuilder, baseFilter, hwnd);
                 }
             }
@@ -510,7 +540,10 @@ private:
 
             // set window to receive events
             if (SUCCEEDED (hr))
+            {
+                mediaEvent->CancelDefaultHandling (EC_STATE_CHANGE);
                 hr = mediaEvent->SetNotifyWindow ((OAHWND) hwnd, graphEventID, 0);
+            }
 
             if (SUCCEEDED (hr))
             {
@@ -586,22 +619,33 @@ private:
 
                 switch (ec)
                 {
-                case EC_REPAINT:
-                    component.repaint();
-                    break;
+                    case EC_REPAINT:
+                        component.repaint();
+                        break;
 
-                case EC_COMPLETE:
-                    component.stop();
-                    break;
+                    case EC_COMPLETE:
+                        component.stop();
+                        component.setPosition (0.0);
+                        break;
 
-                case EC_USERABORT:
-                case EC_ERRORABORT:
-                case EC_ERRORABORTEX:
-                    component.close();
-                    break;
+                    case EC_ERRORABORT:
+                    case EC_ERRORABORTEX:
+                        component.errorOccurred (getErrorMessageFromResult ((HRESULT) p1).getErrorMessage());
+                        // intentional fallthrough
+                    case EC_USERABORT:
+                        component.close();
+                        break;
 
-                default:
-                    break;
+                    case EC_STATE_CHANGE:
+                        switch (p1)
+                        {
+                            case State_Paused:  component.playbackStopped(); break;
+                            case State_Running: component.playbackStarted(); break;
+                            default: break;
+                        }
+
+                    default:
+                        break;
                 }
             }
         }
@@ -642,6 +686,13 @@ private:
             REFTIME duration;
             mediaPosition->get_Duration (&duration);
             return duration;
+        }
+
+        double getSpeed() const
+        {
+            double speed;
+            mediaPosition->get_Rate (&speed);
+            return speed;
         }
 
         double getPosition() const
@@ -689,7 +740,7 @@ private:
         ComSmartPtr<IBasicAudio> basicAudio;
         ComSmartPtr<IBaseFilter> baseFilter;
 
-        ScopedPointer<VideoRenderers::Base> videoRenderer;
+        std::unique_ptr<VideoRenderers::Base> videoRenderer;
 
         bool hasVideo = false, needToUpdateViewport = true, needToRecreateNativeWindow = false;
 
@@ -700,7 +751,7 @@ private:
 
             if (auto* topLevelPeer = component.getTopLevelComponent()->getPeer())
             {
-                nativeWindow = new NativeWindow ((HWND) topLevelPeer->getNativeHandle(), this);
+                nativeWindow.reset (new NativeWindow ((HWND) topLevelPeer->getNativeHandle(), this));
 
                 hwnd = nativeWindow->hwnd;
 
@@ -879,12 +930,12 @@ private:
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeWindow)
         };
 
-        ScopedPointer<NativeWindow> nativeWindow;
+        std::unique_ptr<NativeWindow> nativeWindow;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DirectShowContext)
     };
 
-    ScopedPointer<DirectShowContext> context;
+    std::unique_ptr<DirectShowContext> context;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
 };

@@ -73,7 +73,7 @@ public:
 
 private:
     bool isLegacy = false;
-    ScopedPointer<MPEZoneLayout::Zone> zone;
+    std::unique_ptr<MPEZoneLayout::Zone> zone;
     int channelIncrement, numChannels, firstChannel, lastChannel, midiChannelLastAssigned;
 
     //==============================================================================

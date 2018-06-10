@@ -226,7 +226,7 @@ static pointer_sized_int VSTINTERFACECALL audioMaster (VstEffectInterface*, int3
 
 namespace
 {
-    typedef void (*EventProcPtr) (XEvent* ev);
+    using EventProcPtr = void (*)(XEvent*);
 
     Window getChildWindow (Window windowToCheck)
     {
@@ -578,9 +578,9 @@ struct ModuleHandle    : public ReferenceCountedObject
     File file;
     MainCall moduleMain, customMain = {};
     String pluginName;
-    ScopedPointer<XmlElement> vstXml;
+    std::unique_ptr<XmlElement> vstXml;
 
-    typedef ReferenceCountedObjectPtr<ModuleHandle> Ptr;
+    using Ptr = ReferenceCountedObjectPtr<ModuleHandle>;
 
     static Array<ModuleHandle*>& getActiveModules()
     {
@@ -659,11 +659,11 @@ struct ModuleHandle    : public ReferenceCountedObject
 
         if (moduleMain != nullptr)
         {
-            vstXml = XmlDocument::parse (file.withFileExtension ("vstxml"));
+            vstXml.reset (XmlDocument::parse (file.withFileExtension ("vstxml")));
 
            #if JUCE_WINDOWS
             if (vstXml == nullptr)
-                vstXml = XmlDocument::parse (getDLLResource (file, "VSTXML", 1));
+                vstXml.reset (XmlDocument::parse (getDLLResource (file, "VSTXML", 1)));
            #endif
         }
 
@@ -916,6 +916,10 @@ struct VSTPluginInstance     : public AudioPluginInstance,
 
         String getName (int maximumStringLength) const override
         {
+            if (name.isEmpty())
+                return pluginInstance.getTextForOpcode (getParameterIndex(),
+                                                        plugInOpcodeGetParameterName);
+
             if (name.length() <= maximumStringLength)
                 return name;
 
@@ -933,7 +937,9 @@ struct VSTPluginInstance     : public AudioPluginInstance,
 
         String getLabel() const override
         {
-            return label;
+            return label.isEmpty() ? pluginInstance.getTextForOpcode (getParameterIndex(),
+                                                                      plugInOpcodeGetParameterLabel)
+                                   : label;
         }
 
         bool isAutomatable() const override
@@ -979,7 +985,8 @@ struct VSTPluginInstance     : public AudioPluginInstance,
         : AudioPluginInstance (ioConfig),
           vstEffect (effect),
           vstModule (mh),
-          name (mh->pluginName)
+          name (mh->pluginName),
+          bypassParam (new VST2BypassParameter (*this))
     {
         jassert (vstEffect != nullptr);
 
@@ -988,10 +995,10 @@ struct VSTPluginInstance     : public AudioPluginInstance,
 
         for (int i = 0; i < vstEffect->numParameters; ++i)
         {
-            String paramName (getTextForOpcode (i, plugInOpcodeGetParameterName));
+            String paramName;
             Array<String> shortParamNames;
             float defaultValue = 0;
-            String label (getTextForOpcode (i, plugInOpcodeGetParameterLabel));
+            String label;
             bool isAutomatable = dispatch (plugInOpcodeIsParameterAutomatable, i, 0, 0, 0) != 0;
             bool isDiscrete = false;
             int numSteps = AudioProcessor::getDefaultNumParameterSteps();
@@ -1063,6 +1070,7 @@ struct VSTPluginInstance     : public AudioPluginInstance,
                                             valueType));
         }
 
+        vstSupportsBypass = (pluginCanDo ("bypass") > 0);
         setRateAndBufferSizeDetails (sampleRateToUse, blockSizeToUse);
     }
 
@@ -1275,12 +1283,23 @@ struct VSTPluginInstance     : public AudioPluginInstance,
         if (vstEffect == nullptr)
             return 0.0;
 
-        auto sampleRate = getSampleRate();
-
-        if (sampleRate <= 0)
+        if ((vstEffect->flags & vstEffectFlagSilenceInProducesSilenceOut) != 0)
             return 0.0;
 
-        return dispatch (plugInOpcodeGetTailSize, 0, 0, 0, 0) / sampleRate;
+        auto tailSize = dispatch (plugInOpcodeGetTailSize, 0, 0, 0, 0);
+        auto sampleRate = getSampleRate();
+
+        // remain backward compatible with old JUCE plug-ins: anything larger
+        // than INT32_MAX is an invalid tail time but old JUCE 64-bit plug-ins
+        // would return INT64_MAX for infinite tail time. So treat anything
+        // equal or greater than INT32_MAX as infinite tail time.
+        if (tailSize >= std::numeric_limits<int32>::max())
+            return std::numeric_limits<double>::infinity();
+
+        if (tailSize >= 0 && sampleRate > 0)
+            return static_cast<double> (tailSize) / sampleRate;
+
+        return 0.0;
     }
 
     bool acceptsMidi() const override    { return wantsMidiMessages; }
@@ -1399,23 +1418,39 @@ struct VSTPluginInstance     : public AudioPluginInstance,
         }
     }
 
+    //==============================================================================
     void processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages) override
     {
         jassert (! isUsingDoublePrecision());
-        processAudio (buffer, midiMessages, tmpBufferFloat, channelBufferFloat);
+        processAudio (buffer, midiMessages, tmpBufferFloat, channelBufferFloat, false);
     }
 
     void processBlock (AudioBuffer<double>& buffer, MidiBuffer& midiMessages) override
     {
         jassert (isUsingDoublePrecision());
-        processAudio (buffer, midiMessages, tmpBufferDouble, channelBufferDouble);
+        processAudio (buffer, midiMessages, tmpBufferDouble, channelBufferDouble, false);
     }
 
+    void processBlockBypassed (AudioBuffer<float>& buffer, MidiBuffer& midiMessages) override
+    {
+        jassert (! isUsingDoublePrecision());
+        processAudio (buffer, midiMessages, tmpBufferFloat, channelBufferFloat, true);
+    }
+
+    void processBlockBypassed (AudioBuffer<double>& buffer, MidiBuffer& midiMessages) override
+    {
+        jassert (isUsingDoublePrecision());
+        processAudio (buffer, midiMessages, tmpBufferDouble, channelBufferDouble, true);
+    }
+
+    //==============================================================================
     bool supportsDoublePrecisionProcessing() const override
     {
         return ((vstEffect->flags & vstEffectFlagInplaceAudio) != 0
              && (vstEffect->flags & vstEffectFlagInplaceDoubleAudio) != 0);
     }
+
+    AudioProcessorParameter* getBypassParameter() const override               { return vstSupportsBypass ? bypassParam.get() : nullptr; }
 
     //==============================================================================
     bool canAddBus (bool) const override                                       { return false; }
@@ -1928,13 +1963,65 @@ struct VSTPluginInstance     : public AudioPluginInstance,
     VstEffectInterface* vstEffect;
     ModuleHandle::Ptr vstModule;
 
-    ScopedPointer<VSTPluginFormat::ExtraFunctions> extraFunctions;
+    std::unique_ptr<VSTPluginFormat::ExtraFunctions> extraFunctions;
     bool usesCocoaNSView = false;
 
 private:
+    //==============================================================================
+    struct VST2BypassParameter    : Parameter
+    {
+        VST2BypassParameter (VSTPluginInstance& effectToUse)
+            : parent (effectToUse),
+              onStrings (TRANS("on"), TRANS("yes"), TRANS("true")),
+              offStrings (TRANS("off"), TRANS("no"), TRANS("false")),
+              values (TRANS("Off"), TRANS("On"))
+        {
+        }
+
+        void setValue (float newValue) override
+        {
+            currentValue = (newValue != 0.0f);
+
+            if (parent.vstSupportsBypass)
+                parent.dispatch (plugInOpcodeSetBypass, 0, currentValue ? 1 : 0, nullptr, 0.0f);
+        }
+
+        float getValueForText (const String& text) const override
+        {
+            String lowercaseText (text.toLowerCase());
+
+            for (auto& testText : onStrings)
+                if (lowercaseText == testText)
+                    return 1.0f;
+
+            for (auto& testText : offStrings)
+                if (lowercaseText == testText)
+                    return 0.0f;
+
+            return text.getIntValue() != 0 ? 1.0f : 0.0f;
+        }
+
+        float getValue() const override                                     { return currentValue; }
+        float getDefaultValue() const override                              { return 0.0f; }
+        String getName (int /*maximumStringLength*/) const override         { return "Bypass"; }
+        String getText (float value, int) const override                    { return (value != 0.0f ? TRANS("On") : TRANS("Off")); }
+        bool isAutomatable() const override                                 { return true; }
+        bool isDiscrete() const override                                    { return true; }
+        bool isBoolean() const override                                     { return true; }
+        int getNumSteps() const override                                    { return 2; }
+        StringArray getAllValueStrings() const override                     { return values; }
+        String getLabel() const override                                    { return {}; }
+
+        VSTPluginInstance& parent;
+        bool currentValue = false;
+        StringArray onStrings, offStrings, values;
+    };
+
+    //==============================================================================
     String name;
     CriticalSection lock;
     bool wantsMidiMessages = false, initialised = false, isPowerOn = false;
+    bool lastProcessBlockCallWasBypass = false, vstSupportsBypass = false;
     mutable StringArray programNames;
     AudioBuffer<float> outOfPlaceBuffer;
 
@@ -1948,8 +2035,9 @@ private:
 
     AudioBuffer<double> tmpBufferDouble;
     HeapBlock<double*> channelBufferDouble;
+    std::unique_ptr<VST2BypassParameter> bypassParam;
 
-    ScopedPointer<VSTXMLInfo> xmlInfo;
+    std::unique_ptr<VSTXMLInfo> xmlInfo;
 
     static pointer_sized_int handleCanDo (const char* name)
     {
@@ -2202,8 +2290,20 @@ private:
     template <typename FloatType>
     void processAudio (AudioBuffer<FloatType>& buffer, MidiBuffer& midiMessages,
                        AudioBuffer<FloatType>& tmpBuffer,
-                       HeapBlock<FloatType*>& channelBuffer)
+                       HeapBlock<FloatType*>& channelBuffer,
+                       bool processBlockBypassedCalled)
     {
+        if (vstSupportsBypass)
+        {
+            updateBypass (processBlockBypassedCalled);
+        }
+        else if (processBlockBypassedCalled)
+        {
+            // if this vst does not support bypass then we will have to do this ourselves
+            AudioProcessor::processBlockBypassed (buffer, midiMessages);
+            return;
+        }
+
         auto numSamples  = buffer.getNumSamples();
         auto numChannels = buffer.getNumChannels();
 
@@ -2586,6 +2686,23 @@ private:
     {
         dispatch (plugInOpcodeResumeSuspend, 0, on ? 1 : 0, 0, 0);
         isPowerOn = on;
+    }
+
+    //==============================================================================
+    void updateBypass (bool processBlockBypassedCalled)
+    {
+        if (processBlockBypassedCalled)
+        {
+            if (bypassParam->getValue() == 0.0f || ! lastProcessBlockCallWasBypass)
+                bypassParam->setValue (1.0f);
+        }
+        else
+        {
+            if (lastProcessBlockCallWasBypass)
+                bypassParam->setValue (0.0f);
+        }
+
+        lastProcessBlockCallWasBypass = processBlockBypassedCalled;
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VSTPluginInstance)
@@ -3197,10 +3314,10 @@ private:
     };
 
     friend struct CarbonWrapperComponent;
-    ScopedPointer<CarbonWrapperComponent> carbonWrapper;
+    std::unique_ptr<CarbonWrapperComponent> carbonWrapper;
    #endif
 
-    ScopedPointer<AutoResizingNSViewComponentWithParent> cocoaWrapper;
+    std::unique_ptr<AutoResizingNSViewComponentWithParent> cocoaWrapper;
 
     void resized() override
     {
@@ -3278,7 +3395,7 @@ void VSTPluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& result
     desc.fileOrIdentifier = fileOrIdentifier;
     desc.uid = 0;
 
-    ScopedPointer<VSTPluginInstance> instance (createAndUpdateDesc (*this, desc));
+    std::unique_ptr<VSTPluginInstance> instance (createAndUpdateDesc (*this, desc));
 
     if (instance == nullptr)
         return;
@@ -3306,7 +3423,7 @@ void VSTPluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& result
 
             aboutToScanVSTShellPlugin (desc);
 
-            ScopedPointer<VSTPluginInstance> shellInstance (createAndUpdateDesc (*this, desc));
+            std::unique_ptr<VSTPluginInstance> shellInstance (createAndUpdateDesc (*this, desc));
 
             if (shellInstance != nullptr)
             {
@@ -3322,12 +3439,10 @@ void VSTPluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& result
 }
 
 void VSTPluginFormat::createPluginInstance (const PluginDescription& desc,
-                                            double sampleRate,
-                                            int blockSize,
-                                            void* userData,
-                                            void (*callback) (void*, AudioPluginInstance*, const String&))
+                                            double sampleRate, int blockSize,
+                                            void* userData, PluginCreationCallback callback)
 {
-    ScopedPointer<VSTPluginInstance> result;
+    std::unique_ptr<VSTPluginInstance> result;
 
     if (fileMightContainThisPluginType (desc.fileOrIdentifier))
     {
@@ -3504,7 +3619,7 @@ AudioPluginInstance* VSTPluginFormat::createCustomVSTFromMainCall (void* entryPo
 
     if (module->open())
     {
-        ScopedPointer<VSTPluginInstance> result (VSTPluginInstance::create (module, initialSampleRate, initialBufferSize));
+        std::unique_ptr<VSTPluginInstance> result (VSTPluginInstance::create (module, initialSampleRate, initialBufferSize));
 
         if (result != nullptr)
             if (result->initialiseEffect (initialSampleRate, initialBufferSize))
@@ -3516,7 +3631,7 @@ AudioPluginInstance* VSTPluginFormat::createCustomVSTFromMainCall (void* entryPo
 
 void VSTPluginFormat::setExtraFunctions (AudioPluginInstance* plugin, ExtraFunctions* functions)
 {
-    ScopedPointer<ExtraFunctions> f (functions);
+    std::unique_ptr<ExtraFunctions> f (functions);
 
     if (auto* vst = dynamic_cast<VSTPluginInstance*> (plugin))
         std::swap (vst->extraFunctions, f);

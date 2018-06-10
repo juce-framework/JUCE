@@ -245,7 +245,7 @@ double MidiFile::getLastTimestamp() const
 }
 
 //==============================================================================
-bool MidiFile::readFrom (InputStream& sourceStream)
+bool MidiFile::readFrom (InputStream& sourceStream, bool createMatchingNoteOffs)
 {
     clear();
     MemoryBlock data;
@@ -276,7 +276,7 @@ bool MidiFile::readFrom (InputStream& sourceStream)
                     break;
 
                 if (chunkType == (int) ByteOrder::bigEndianInt ("MTrk"))
-                    readNextTrack (d, chunkSize);
+                    readNextTrack (d, chunkSize, createMatchingNoteOffs);
 
                 size -= (size_t) chunkSize + 8;
                 d += chunkSize;
@@ -290,7 +290,7 @@ bool MidiFile::readFrom (InputStream& sourceStream)
     return false;
 }
 
-void MidiFile::readNextTrack (const uint8* data, int size)
+void MidiFile::readNextTrack (const uint8* data, int size, bool createMatchingNoteOffs)
 {
     double time = 0;
     uint8 lastStatusByte = 0;
@@ -337,7 +337,9 @@ void MidiFile::readNextTrack (const uint8* data, int size)
     });
 
     addTrack (result);
-    tracks.getLast()->updateMatchedPairs();
+
+    if (createMatchingNoteOffs)
+        tracks.getLast()->updateMatchedPairs();
 }
 
 //==============================================================================

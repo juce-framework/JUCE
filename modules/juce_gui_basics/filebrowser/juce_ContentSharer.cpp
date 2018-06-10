@@ -63,7 +63,7 @@ private:
             if (! tempFile.create().wasOk())
                 break;
 
-            ScopedPointer<FileOutputStream> outputStream = tempFile.createOutputStream();
+            std::unique_ptr<FileOutputStream> outputStream (tempFile.createOutputStream());
 
             if (outputStream == nullptr)
                 break;
@@ -82,7 +82,7 @@ private:
 
     ContentSharer& owner;
     const Array<Image> images;
-    ScopedPointer<ImageFileFormat> imageFileFormat;
+    std::unique_ptr<ImageFileFormat> imageFileFormat;
     String extension;
 };
 
@@ -111,7 +111,7 @@ private:
 
         if (tempFile.create().wasOk())
         {
-            ScopedPointer<FileOutputStream> outputStream = tempFile.createOutputStream();
+            std::unique_ptr<FileOutputStream> outputStream (tempFile.createOutputStream());
 
             if (outputStream != nullptr)
             {
@@ -214,7 +214,7 @@ void ContentSharer::shareImages (const Array<Image>& images,
 {
   #if JUCE_IOS || JUCE_ANDROID
     startNewShare (callbackToUse);
-    prepareImagesThread = new PrepareImagesThread (*this, images, imageFileFormatToUse);
+    prepareImagesThread.reset (new PrepareImagesThread (*this, images, imageFileFormatToUse));
   #else
     ignoreUnused (images, imageFileFormatToUse);
 
@@ -246,7 +246,7 @@ void ContentSharer::shareData (const MemoryBlock& mb,
 {
   #if JUCE_IOS || JUCE_ANDROID
     startNewShare (callbackToUse);
-    prepareDataThread = new PrepareDataThread (*this, mb);
+    prepareDataThread.reset (new PrepareDataThread (*this, mb));
   #else
     ignoreUnused (mb);
 
@@ -262,12 +262,14 @@ void ContentSharer::sharingFinished (bool succeeded, const String& errorDescript
     std::function<void (bool, String)> cb;
     std::swap (cb, callback);
 
+    String error (errorDescription);
+
   #if JUCE_IOS || JUCE_ANDROID
     pimpl.reset();
   #endif
 
     if (cb)
-        cb (succeeded, errorDescription);
+        cb (succeeded, error);
 }
 
 void ContentSharer::deleteTemporaryFiles()

@@ -153,11 +153,11 @@ public:
         toUTF32() methods let you access the string's content in any of the other formats.
     */
    #if (JUCE_STRING_UTF_TYPE == 32)
-    typedef CharPointer_UTF32 CharPointerType;
+    using CharPointerType = CharPointer_UTF32;
    #elif (JUCE_STRING_UTF_TYPE == 16)
-    typedef CharPointer_UTF16 CharPointerType;
+    using CharPointerType = CharPointer_UTF16;
    #elif (DOXYGEN || JUCE_STRING_UTF_TYPE == 8)
-    typedef CharPointer_UTF8  CharPointerType;
+    using CharPointerType = CharPointer_UTF8;
    #else
     #error "You must set the value of JUCE_STRING_UTF_TYPE to be either 8, 16, or 32!"
    #endif
@@ -1239,8 +1239,7 @@ public:
     int getReferenceCount() const noexcept;
 
     //==============================================================================
-   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
-    /** This was a static empty string object, but is now deprecated as it's too easy to accidentally
+    /*  This was a static empty string object, but is now deprecated as it's too easy to accidentally
         use it indirectly during a static constructor, leading to hard-to-find order-of-initialisation
         problems.
         @deprecated If you need an empty String object, just use String() or {}.
@@ -1248,8 +1247,7 @@ public:
         empty string from a function by reference, but if you need to do that, it's easy enough to use
         a function-local static String object and return that, avoiding any order-of-initialisation issues.
     */
-    static const String empty;
-   #endif
+    JUCE_DEPRECATED_STATIC (static const String empty;)
 
 private:
     //==============================================================================
@@ -1304,6 +1302,8 @@ JUCE_API String JUCE_CALLTYPE operator+ (String string1, const char* string2);
 /** Concatenates two strings. */
 JUCE_API String JUCE_CALLTYPE operator+ (String string1, const wchar_t* string2);
 /** Concatenates two strings. */
+JUCE_API String JUCE_CALLTYPE operator+ (String string1, const std::string& string2);
+/** Concatenates two strings. */
 JUCE_API String JUCE_CALLTYPE operator+ (String string1, char characterToAppend);
 /** Concatenates two strings. */
 JUCE_API String JUCE_CALLTYPE operator+ (String string1, wchar_t characterToAppend);
@@ -1330,6 +1330,8 @@ JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, const wchar_t* strin
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, const String& string2);
 /** Appends a string to the end of the first one. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, StringRef string2);
+/** Appends a string to the end of the first one. */
+JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, const std::string& string2);
 
 /** Appends a decimal number to the end of a string. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, uint8 number);
@@ -1417,7 +1419,7 @@ JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, StringRef
 
 } // namespace juce
 
-#if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS && ! DOXYGEN // just used to avoid compiling this under compilers that lack libc++
+#if ! DOXYGEN
 namespace std
 {
     template <> struct hash<juce::String>

@@ -35,11 +35,11 @@ NewLine newLine;
 #endif
 
 #if JUCE_NATIVE_WCHAR_IS_UTF8
- typedef CharPointer_UTF8          CharPointer_wchar_t;
+ using CharPointer_wchar_t = CharPointer_UTF8;
 #elif JUCE_NATIVE_WCHAR_IS_UTF16
- typedef CharPointer_UTF16         CharPointer_wchar_t;
+ using CharPointer_wchar_t = CharPointer_UTF16;
 #else
- typedef CharPointer_UTF32         CharPointer_wchar_t;
+ using CharPointer_wchar_t = CharPointer_UTF32;
 #endif
 
 static inline CharPointer_wchar_t castToCharPointer_wchar_t (const void* t) noexcept
@@ -64,8 +64,8 @@ class StringHolder
 public:
     StringHolder() = delete;
 
-    typedef String::CharPointerType CharPointerType;
-    typedef String::CharPointerType::CharType CharType;
+    using CharPointerType  = String::CharPointerType;
+    using CharType         = String::CharPointerType::CharType;
 
     //==============================================================================
     static CharPointerType createUninitialisedBytes (size_t numBytes)
@@ -235,9 +235,7 @@ private:
     }
 };
 
-#if JUCE_ALLOW_STATIC_NULL_VARIABLES
-const String String::empty;
-#endif
+JUCE_DECLARE_DEPRECATED_STATIC (const String String::empty;)
 
 //==============================================================================
 String::String() noexcept  : text (&(emptyString.text))
@@ -768,13 +766,13 @@ void String::appendCharPointer (const CharPointerType startOfTextToAppend,
     }
 }
 
-String& String::operator+= (const wchar_t* const t)
+String& String::operator+= (const wchar_t* t)
 {
     appendCharPointer (castToCharPointer_wchar_t (t));
     return *this;
 }
 
-String& String::operator+= (const char* const t)
+String& String::operator+= (const char* t)
 {
     appendCharPointer (CharPointer_UTF8 (t)); // (using UTF8 here triggers a faster code-path than ascii)
     return *this;
@@ -797,20 +795,20 @@ String& String::operator+= (StringRef other)
     return operator+= (String (other));
 }
 
-String& String::operator+= (const char ch)
+String& String::operator+= (char ch)
 {
     const char asString[] = { ch, 0 };
     return operator+= (asString);
 }
 
-String& String::operator+= (const wchar_t ch)
+String& String::operator+= (wchar_t ch)
 {
     const wchar_t asString[] = { ch, 0 };
     return operator+= (asString);
 }
 
 #if ! JUCE_NATIVE_WCHAR_IS_UTF32
-String& String::operator+= (const juce_wchar ch)
+String& String::operator+= (juce_wchar ch)
 {
     const juce_wchar asString[] = { ch, 0 };
     appendCharPointer (CharPointer_UTF32 (asString));
@@ -842,42 +840,44 @@ String& String::operator+= (const int64 number)        { return StringHelpers::o
 String& String::operator+= (const uint64 number)       { return StringHelpers::operationAddAssign<uint64>       (*this, number); }
 
 //==============================================================================
-JUCE_API String JUCE_CALLTYPE operator+ (const char* const s1, const String& s2)    { String s (s1); return s += s2; }
-JUCE_API String JUCE_CALLTYPE operator+ (const wchar_t* const s1, const String& s2) { String s (s1); return s += s2; }
+JUCE_API String JUCE_CALLTYPE operator+ (const char* s1, const String& s2)    { String s (s1); return s += s2; }
+JUCE_API String JUCE_CALLTYPE operator+ (const wchar_t* s1, const String& s2) { String s (s1); return s += s2; }
 
-JUCE_API String JUCE_CALLTYPE operator+ (const char s1, const String& s2)           { return String::charToString ((juce_wchar) (uint8) s1) + s2; }
-JUCE_API String JUCE_CALLTYPE operator+ (const wchar_t s1, const String& s2)        { return String::charToString (s1) + s2; }
+JUCE_API String JUCE_CALLTYPE operator+ (char s1, const String& s2)           { return String::charToString ((juce_wchar) (uint8) s1) + s2; }
+JUCE_API String JUCE_CALLTYPE operator+ (wchar_t s1, const String& s2)        { return String::charToString (s1) + s2; }
 
-JUCE_API String JUCE_CALLTYPE operator+ (String s1, const String& s2)               { return s1 += s2; }
-JUCE_API String JUCE_CALLTYPE operator+ (String s1, const char* const s2)           { return s1 += s2; }
-JUCE_API String JUCE_CALLTYPE operator+ (String s1, const wchar_t* s2)              { return s1 += s2; }
+JUCE_API String JUCE_CALLTYPE operator+ (String s1, const String& s2)         { return s1 += s2; }
+JUCE_API String JUCE_CALLTYPE operator+ (String s1, const char* s2)           { return s1 += s2; }
+JUCE_API String JUCE_CALLTYPE operator+ (String s1, const wchar_t* s2)        { return s1 += s2; }
+JUCE_API String JUCE_CALLTYPE operator+ (String s1, const std::string& s2)    { return s1 += s2.c_str(); }
 
-JUCE_API String JUCE_CALLTYPE operator+ (String s1, const char s2)                  { return s1 += s2; }
-JUCE_API String JUCE_CALLTYPE operator+ (String s1, const wchar_t s2)               { return s1 += s2; }
+JUCE_API String JUCE_CALLTYPE operator+ (String s1, char s2)                  { return s1 += s2; }
+JUCE_API String JUCE_CALLTYPE operator+ (String s1, wchar_t s2)               { return s1 += s2; }
 
 #if ! JUCE_NATIVE_WCHAR_IS_UTF32
-JUCE_API String JUCE_CALLTYPE operator+ (const juce_wchar s1, const String& s2)     { return String::charToString (s1) + s2; }
-JUCE_API String JUCE_CALLTYPE operator+ (String s1, const juce_wchar s2)            { return s1 += s2; }
-JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const juce_wchar s2)         { return s1 += s2; }
+JUCE_API String JUCE_CALLTYPE operator+ (juce_wchar s1, const String& s2)     { return String::charToString (s1) + s2; }
+JUCE_API String JUCE_CALLTYPE operator+ (String s1, juce_wchar s2)            { return s1 += s2; }
+JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, juce_wchar s2)         { return s1 += s2; }
 #endif
 
-JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const char s2)               { return s1 += s2; }
-JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const wchar_t s2)            { return s1 += s2; }
+JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, char s2)               { return s1 += s2; }
+JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, wchar_t s2)            { return s1 += s2; }
 
-JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const char* const s2)        { return s1 += s2; }
-JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const wchar_t* const s2)     { return s1 += s2; }
-JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const String& s2)            { return s1 += s2; }
-JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, StringRef s2)                { return s1 += s2; }
+JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const char* s2)        { return s1 += s2; }
+JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const wchar_t* s2)     { return s1 += s2; }
+JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const String& s2)      { return s1 += s2; }
+JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, StringRef s2)          { return s1 += s2; }
+JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const std::string& s2) { return s1 += s2.c_str(); }
 
-JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, uint8 number)                { return s1 += (int) number; }
-JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const short number)          { return s1 += (int) number; }
-JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const int number)            { return s1 += number; }
-JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const long number)           { return s1 += String (number); }
-JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const unsigned long number)  { return s1 += String (number); }
-JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const int64 number)          { return s1 += String (number); }
-JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const uint64 number)         { return s1 += String (number); }
-JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const float number)          { return s1 += String (number); }
-JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const double number)         { return s1 += String (number); }
+JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, uint8  number)         { return s1 += (int) number; }
+JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, short  number)         { return s1 += (int) number; }
+JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, int    number)         { return s1 += number; }
+JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, long   number)         { return s1 += String (number); }
+JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, unsigned long number)  { return s1 += String (number); }
+JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, int64  number)         { return s1 += String (number); }
+JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, uint64 number)         { return s1 += String (number); }
+JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, float  number)         { return s1 += String (number); }
+JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, double number)         { return s1 += String (number); }
 
 JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const String& text)
 {
@@ -902,12 +902,12 @@ JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, StringRef
 }
 
 //==============================================================================
-int String::indexOfChar (const juce_wchar character) const noexcept
+int String::indexOfChar (juce_wchar character) const noexcept
 {
     return text.indexOf (character);
 }
 
-int String::indexOfChar (const int startIndex, const juce_wchar character) const noexcept
+int String::indexOfChar (int startIndex, juce_wchar character) const noexcept
 {
     auto t = text;
 
@@ -927,7 +927,7 @@ int String::indexOfChar (const int startIndex, const juce_wchar character) const
     return -1;
 }
 
-int String::lastIndexOfChar (const juce_wchar character) const noexcept
+int String::lastIndexOfChar (juce_wchar character) const noexcept
 {
     auto t = text;
     int last = -1;
@@ -939,7 +939,7 @@ int String::lastIndexOfChar (const juce_wchar character) const noexcept
     return last;
 }
 
-int String::indexOfAnyOf (StringRef charactersToLookFor, const int startIndex, const bool ignoreCase) const noexcept
+int String::indexOfAnyOf (StringRef charactersToLookFor, int startIndex, bool ignoreCase) const noexcept
 {
     auto t = text;
 
@@ -969,7 +969,7 @@ int String::indexOfIgnoreCase (StringRef other) const noexcept
     return other.isEmpty() ? 0 : CharacterFunctions::indexOfIgnoreCase (text, other.text);
 }
 
-int String::indexOf (const int startIndex, StringRef other) const noexcept
+int String::indexOf (int startIndex, StringRef other) const noexcept
 {
     if (other.isEmpty())
         return -1;
@@ -2047,7 +2047,7 @@ struct StringEncodingConverter
     {
         auto& source = const_cast<String&> (s);
 
-        typedef typename CharPointerType_Dest::CharType DestChar;
+        using DestChar = typename CharPointerType_Dest::CharType;
 
         if (source.isEmpty())
             return CharPointerType_Dest (reinterpret_cast<const DestChar*> (&emptyChar));
@@ -2207,7 +2207,8 @@ StringRef::StringRef (String::CharPointerType stringLiteral) noexcept  : text (s
     jassert (stringLiteral.getAddress() != nullptr); // This must be a valid string literal, not a null pointer!!
 }
 
-StringRef::StringRef (const String& string) noexcept  : text (string.getCharPointer()) {}
+StringRef::StringRef (const String& string) noexcept   : text (string.getCharPointer()) {}
+StringRef::StringRef (const std::string& string)       : StringRef (string.c_str()) {}
 
 
 //==============================================================================

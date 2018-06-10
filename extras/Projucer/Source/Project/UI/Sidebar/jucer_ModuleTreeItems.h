@@ -192,8 +192,8 @@ private:
 
             globalPathValue.referTo (modules.getShouldUseGlobalPathValue (moduleID));
 
-            auto menuItemString = (TargetOS::getThisOS() == TargetOS::osx ? "\"Projucer->Global Search Paths...\""
-                                                                          : "\"File->Global Search Paths...\"");
+            auto menuItemString = (TargetOS::getThisOS() == TargetOS::osx ? "\"Projucer->Global Paths...\""
+                                                                          : "\"File->Global Paths...\"");
 
             props.add (new BooleanPropertyComponent (globalPathValue,
                                                      "Use global path", "Use global path for this module"),
@@ -218,7 +218,7 @@ private:
 
             if (info.isValid())
             {
-                OwnedArray <Project::ConfigFlag> configFlags;
+                configFlags.clear();
                 LibraryModule (info).getConfigFlags (project, configFlags);
 
                 for (auto* flag : configFlags)
@@ -245,6 +245,7 @@ private:
         String moduleID;
         Value globalPathValue;
         Value defaultJuceModulePathValue, defaultUserModulePathValue;
+        OwnedArray <Project::ConfigFlag> configFlags;
 
         ReferenceCountedArray<Value::ValueSource> modulePathValueSources;
 
@@ -407,7 +408,7 @@ private:
                 for (auto missingModule : missingDependencies)
                 {
                     if (auto* info = list.getModuleWithID (missingModule))
-                        modules.addModule (info->moduleFolder, copyLocally, useGlobalPath);
+                        modules.addModule (info->moduleFolder, copyLocally, useGlobalPath, false);
                     else
                         missing.add (missingModule);
                 }
@@ -542,7 +543,8 @@ public:
         for (int i = 0; i < modules.size(); ++i)
             project.getModules().addModule (modules.getReference(i).moduleFolder,
                                             project.getModules().areMostModulesCopiedLocally(),
-                                            project.getModules().areMostModulesUsingGlobalPath());
+                                            project.getModules().areMostModulesUsingGlobalPath(),
+                                            true);
     }
 
     void addSubItems() override
@@ -616,6 +618,8 @@ public:
 
         for (auto p : paths)
         {
+            p = p.replace ("~", File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
+
             auto f = File::createFileWithoutCheckingPath (p.trim());
             if (f.exists())
                 list.addAllModulesInFolder (f);

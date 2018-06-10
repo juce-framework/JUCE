@@ -50,7 +50,7 @@ public:
         String name;
         String originalFilename;
         MemoryBlock data;
-        ScopedPointer<Drawable> drawable;
+        std::unique_ptr<Drawable> drawable;
     };
 
     void clear();

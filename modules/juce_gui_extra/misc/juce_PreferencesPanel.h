@@ -136,7 +136,7 @@ public:
 private:
     //==============================================================================
     String currentPageName;
-    ScopedPointer<Component> currentPage;
+    std::unique_ptr<Component> currentPage;
     OwnedArray<DrawableButton> buttons;
     int buttonSize;
 

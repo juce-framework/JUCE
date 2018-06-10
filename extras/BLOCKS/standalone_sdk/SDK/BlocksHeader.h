@@ -1,11 +1,11 @@
 #pragma once
 
 #ifndef JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED
-#define JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED 1
+ #define JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED 1
 #endif
 
 #ifndef JUCE_DONT_DECLARE_PROJECTINFO
-#define JUCE_DONT_DECLARE_PROJECTINFO 1
+ #define JUCE_DONT_DECLARE_PROJECTINFO 1
 #endif
 
 #include <juce_audio_basics/juce_audio_basics.h>

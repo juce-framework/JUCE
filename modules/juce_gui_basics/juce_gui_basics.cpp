@@ -235,6 +235,7 @@ namespace juce
 #include "properties/juce_PropertyPanel.cpp"
 #include "properties/juce_SliderPropertyComponent.cpp"
 #include "properties/juce_TextPropertyComponent.cpp"
+#include "properties/juce_MultiChoicePropertyComponent.cpp"
 #include "widgets/juce_ComboBox.cpp"
 #include "widgets/juce_ImageComponent.cpp"
 #include "widgets/juce_Label.cpp"
@@ -266,15 +267,12 @@ namespace juce
 #include "misc/juce_DropShadower.cpp"
 #include "misc/juce_JUCESplashScreen.cpp"
 
-// these classes are C++11-only
-#if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
- #include "layout/juce_FlexBox.cpp"
- #if JUCE_HAS_CONSTEXPR
-  #include "layout/juce_GridItem.cpp"
-  #include "layout/juce_Grid.cpp"
-  #if JUCE_UNIT_TESTS
-   #include "layout/juce_GridUnitTests.cpp"
-  #endif
+#include "layout/juce_FlexBox.cpp"
+#if JUCE_HAS_CONSTEXPR
+ #include "layout/juce_GridItem.cpp"
+ #include "layout/juce_Grid.cpp"
+ #if JUCE_UNIT_TESTS
+  #include "layout/juce_GridUnitTests.cpp"
  #endif
 #endif
 

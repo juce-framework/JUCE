@@ -147,7 +147,7 @@ void LicenseController::startWebviewIfNeeded()
 
    #if ! JUCER_ENABLE_GPL_MODE
     if (thread == nullptr)
-        thread = new LicenseThread (*this, false);
+        thread.reset (new LicenseThread (*this, false));
    #endif
 }
 
@@ -163,7 +163,7 @@ void LicenseController::logout()
     WebBrowserComponent::clearCookies();
    #endif
 
-    thread = new LicenseThread (*this, false);
+    thread.reset (new LicenseThread (*this, false));
    #endif
 }
 
@@ -173,7 +173,7 @@ void LicenseController::chooseNewLicense()
 
    #if ! JUCER_ENABLE_GPL_MODE
     thread.reset();
-    thread = new LicenseThread (*this, true);
+    thread.reset (new LicenseThread (*this, true));
    #endif
 }
 
@@ -182,6 +182,8 @@ void LicenseController::setApplicationUsageDataState (LicenseState::ApplicationU
     if (state.applicationUsageDataState != newState)
     {
         state.applicationUsageDataState = newState;
+        ProjucerApplication::getApp().setAnalyticsEnabled (newState == LicenseState::ApplicationUsageData::enabled);
+
         updateState (state);
     }
 }
@@ -257,10 +259,20 @@ void LicenseController::updateState (const LicenseState& newState)
 {
     auto& props = ProjucerApplication::getApp().settings->getGlobalProperties();
 
+    auto oldLicenseType = state.type;
+
     state = newState;
     licenseStateToSettings (state, props);
     auto stateParam = getState();
     listeners.call ([&] (StateChangedCallback& l) { l.licenseStateChanged (stateParam); });
+
+    if (oldLicenseType != state.type)
+    {
+        StringPairArray data;
+        data.set ("label", state.licenseTypeToString (state.type));
+
+        Analytics::getInstance()->logEvent ("License Type", data, ProjucerAnalyticsEvent::userEvent);
+    }
 }
 
 LicenseState LicenseController::licenseStateFromOldSettings (XmlElement* licenseXml)
@@ -281,14 +293,14 @@ LicenseState LicenseController::licenseStateFromOldSettings (XmlElement* license
 
 LicenseState LicenseController::licenseStateFromSettings (PropertiesFile& props)
 {
-    ScopedPointer<XmlElement> licenseXml = props.getXmlValue ("license");
+    std::unique_ptr<XmlElement> licenseXml (props.getXmlValue ("license"));
 
     if (licenseXml != nullptr)
     {
         // this is here for backwards compatibility with old-style settings files using XML text elements
         if (licenseXml->getChildElementAllSubText ("type", {}) != String())
         {
-            auto stateFromOldSettings = licenseStateFromOldSettings (licenseXml);
+            auto stateFromOldSettings = licenseStateFromOldSettings (licenseXml.get());
 
             licenseStateToSettings (stateFromOldSettings, props);
 

@@ -87,7 +87,7 @@ public:
 private:
 
     //==============================================================================
-    struct ControlBlock : ReferenceCountedObject { ScopedPointer<const SLObjectItf_* const> ptr; ControlBlock() {} ControlBlock (SLObjectItf o) : ptr (o) {} };
+    struct ControlBlock : ReferenceCountedObject { std::unique_ptr<const SLObjectItf_* const> ptr; ControlBlock() {} ControlBlock (SLObjectItf o) : ptr (o) {} };
     ReferenceCountedObjectPtr<ControlBlock> cb;
 };
 
@@ -172,8 +172,8 @@ struct BufferHelpers<int16>
     {
         for (int i = 0; i < audioBuffer.getNumChannels(); ++i)
         {
-            typedef AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::NonConst> DstSampleType;
-            typedef AudioData::Pointer<AudioData::Int16,   AudioData::LittleEndian, AudioData::Interleaved,    AudioData::Const>    SrcSampleType;
+            using DstSampleType = AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::NonConst>;
+            using SrcSampleType = AudioData::Pointer<AudioData::Int16,   AudioData::LittleEndian, AudioData::Interleaved,    AudioData::Const>;
 
             DstSampleType dstData (audioBuffer.getWritePointer (i));
             SrcSampleType srcData (srcInterleaved + i, audioBuffer.getNumChannels());
@@ -185,8 +185,8 @@ struct BufferHelpers<int16>
     {
         for (int i = 0; i < audioBuffer.getNumChannels(); ++i)
         {
-            typedef AudioData::Pointer<AudioData::Int16,   AudioData::LittleEndian, AudioData::Interleaved, AudioData::NonConst> DstSampleType;
-            typedef AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const> SrcSampleType;
+            using DstSampleType = AudioData::Pointer<AudioData::Int16,   AudioData::LittleEndian, AudioData::Interleaved, AudioData::NonConst>;
+            using SrcSampleType = AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const>;
 
             DstSampleType dstData (dstInterleaved + i, audioBuffer.getNumChannels());
             SrcSampleType srcData (audioBuffer.getReadPointer (i));
@@ -231,8 +231,8 @@ struct BufferHelpers<float>
 
         for (int i = 0; i < audioBuffer.getNumChannels(); ++i)
         {
-            typedef AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::NonConst> DstSampleType;
-            typedef AudioData::Pointer<AudioData::Float32, AudioData::LittleEndian, AudioData::Interleaved,    AudioData::Const>    SrcSampleType;
+            using DstSampleType = AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::NonConst>;
+            using SrcSampleType = AudioData::Pointer<AudioData::Float32, AudioData::LittleEndian, AudioData::Interleaved,    AudioData::Const>;
 
             DstSampleType dstData (audioBuffer.getWritePointer (i));
             SrcSampleType srcData (srcInterleaved + i, audioBuffer.getNumChannels());
@@ -250,8 +250,8 @@ struct BufferHelpers<float>
 
         for (int i = 0; i < audioBuffer.getNumChannels(); ++i)
         {
-            typedef AudioData::Pointer<AudioData::Float32, AudioData::LittleEndian, AudioData::Interleaved,    AudioData::NonConst> DstSampleType;
-            typedef AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const>    SrcSampleType;
+            using DstSampleType = AudioData::Pointer<AudioData::Float32, AudioData::LittleEndian, AudioData::Interleaved,    AudioData::NonConst>;
+            using SrcSampleType = AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const>;
 
             DstSampleType dstData (dstInterleaved + i, audioBuffer.getNumChannels());
             SrcSampleType srcData (audioBuffer.getReadPointer (i));
@@ -383,7 +383,7 @@ public:
     template <typename T>
     struct OpenSLQueueRunnerPlayer      : OpenSLQueueRunner<T, OpenSLQueueRunnerPlayer<T>, SLPlayItf_>
     {
-        typedef OpenSLQueueRunner<T, OpenSLQueueRunnerPlayer<T>, SLPlayItf_> Base;
+        using Base = OpenSLQueueRunner<T, OpenSLQueueRunnerPlayer<T>, SLPlayItf_>;
 
         enum { isPlayer = 1 };
 
@@ -425,7 +425,7 @@ public:
     template <typename T>
     struct OpenSLQueueRunnerRecorder      : OpenSLQueueRunner<T, OpenSLQueueRunnerRecorder<T>, SLRecordItf_>
     {
-        typedef OpenSLQueueRunner<T, OpenSLQueueRunnerRecorder<T>, SLRecordItf_> Base;
+        using Base = OpenSLQueueRunner<T, OpenSLQueueRunnerRecorder<T>, SLRecordItf_>;
 
         enum { isPlayer = 0 };
 
@@ -586,7 +586,7 @@ public:
                                       int numBuffersToUse);
 
         //==============================================================================
-        typedef SLresult (*CreateEngineFunc)(SLObjectItf*,SLuint32,const SLEngineOption*,SLuint32,const SLInterfaceID*,const SLboolean*);
+        typedef SLresult (*CreateEngineFunc)(SLObjectItf*, SLuint32, const SLEngineOption*, SLuint32, const SLInterfaceID*, const SLboolean*);
 
         //==============================================================================
         int inputChannels, outputChannels;
@@ -617,7 +617,7 @@ public:
             {
                 if (inputChannels > 0)
                 {
-                    recorder = new OpenSLQueueRunnerRecorder<T>(*this, inputChannels);
+                    recorder.reset (new OpenSLQueueRunnerRecorder<T> (*this, inputChannels));
 
                     if (! recorder->init())
                     {
@@ -628,7 +628,7 @@ public:
 
                 if (outputChannels > 0)
                 {
-                    player = new OpenSLQueueRunnerPlayer<T>(*this, outputChannels);
+                    player.reset (new OpenSLQueueRunnerPlayer<T> (*this, outputChannels));
 
                     if (! player->init())
                     {
@@ -755,8 +755,8 @@ public:
         }
 
         //==============================================================================
-        ScopedPointer<OpenSLQueueRunnerPlayer<T>> player;
-        ScopedPointer<OpenSLQueueRunnerRecorder<T>> recorder;
+        std::unique_ptr<OpenSLQueueRunnerPlayer<T>> player;
+        std::unique_ptr<OpenSLQueueRunnerRecorder<T>> recorder;
         Atomic<int> guard;
         jmethodID getUnderrunCount = 0;
     };
@@ -876,8 +876,8 @@ public:
             lastError = "Error opening OpenSL input device: the app was not granted android.permission.RECORD_AUDIO";
         }
 
-        session = OpenSLSession::create (slLibrary, numInputChannels, numOutputChannels,
-                                         sampleRate, actualBufferSize, audioBuffersToEnqueue);
+        session.reset (OpenSLSession::create (slLibrary, numInputChannels, numOutputChannels,
+                                              sampleRate, actualBufferSize, audioBuffersToEnqueue));
         if (session != nullptr)
             session->setAudioPreprocessingEnabled (audioProcessingEnabled);
         else
@@ -888,8 +888,8 @@ public:
                 activeInputChans = BigInteger(0);
                 numInputChannels = 0;
 
-                session = OpenSLSession::create(slLibrary, numInputChannels, numOutputChannels,
-                                                sampleRate, actualBufferSize, audioBuffersToEnqueue);
+                session.reset (OpenSLSession::create (slLibrary, numInputChannels, numOutputChannels,
+                                                      sampleRate, actualBufferSize, audioBuffersToEnqueue));
             }
         }
 
@@ -1008,7 +1008,7 @@ private:
     BigInteger activeOutputChans, activeInputChans;
     AudioIODeviceCallback* callback;
 
-    ScopedPointer<OpenSLSession> session;
+    std::unique_ptr<OpenSLSession> session;
 
     enum
     {
@@ -1122,14 +1122,14 @@ OpenSLAudioIODevice::OpenSLSession* OpenSLAudioIODevice::OpenSLSession::create (
                                                                                 double samleRateToUse, int bufferSizeToUse,
                                                                                 int numBuffersToUse)
 {
-    ScopedPointer<OpenSLSession> retval;
+    std::unique_ptr<OpenSLSession> retval;
     auto sdkVersion = getEnv()->GetStaticIntField (AndroidBuildVersion, AndroidBuildVersion.SDK_INT);
 
     // SDK versions 21 and higher should natively support floating point...
     if (sdkVersion >= 21)
     {
-        retval = new OpenSLSessionT<float> (slLibrary, numInputChannels, numOutputChannels, samleRateToUse,
-                                            bufferSizeToUse, numBuffersToUse);
+        retval.reset (new OpenSLSessionT<float> (slLibrary, numInputChannels, numOutputChannels, samleRateToUse,
+                                                 bufferSizeToUse, numBuffersToUse));
 
         // ...however, some devices lie so re-try without floating point
         if (retval != nullptr && (! retval->openedOK()))
@@ -1138,8 +1138,8 @@ OpenSLAudioIODevice::OpenSLSession* OpenSLAudioIODevice::OpenSLSession::create (
 
     if (retval == nullptr)
     {
-        retval = new OpenSLSessionT<int16> (slLibrary, numInputChannels, numOutputChannels, samleRateToUse,
-                                            bufferSizeToUse, numBuffersToUse);
+        retval.reset (new OpenSLSessionT<int16> (slLibrary, numInputChannels, numOutputChannels, samleRateToUse,
+                                                 bufferSizeToUse, numBuffersToUse));
 
         if (retval != nullptr && (! retval->openedOK()))
             retval = nullptr;
@@ -1165,11 +1165,11 @@ public:
     AudioIODevice* createDevice (const String& outputDeviceName,
                                  const String& inputDeviceName) override
     {
-        ScopedPointer<OpenSLAudioIODevice> dev;
+        std::unique_ptr<OpenSLAudioIODevice> dev;
 
         if (outputDeviceName.isNotEmpty() || inputDeviceName.isNotEmpty())
-            dev = new OpenSLAudioIODevice (outputDeviceName.isNotEmpty() ? outputDeviceName
-                                                                         : inputDeviceName);
+            dev.reset (new OpenSLAudioIODevice (outputDeviceName.isNotEmpty() ? outputDeviceName
+                                                                              : inputDeviceName));
 
         return dev.release();
     }
@@ -1363,7 +1363,7 @@ private:
 
 pthread_t juce_createRealtimeAudioThread (void* (*entry) (void*), void* userPtr)
 {
-    ScopedPointer<SLRealtimeThread> thread (new SLRealtimeThread);
+    std::unique_ptr<SLRealtimeThread> thread (new SLRealtimeThread);
 
     if (! thread->isOK())
         return 0;

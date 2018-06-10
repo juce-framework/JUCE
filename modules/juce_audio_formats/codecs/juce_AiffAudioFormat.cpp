@@ -960,7 +960,7 @@ bool AiffAudioFormat::canHandleFile (const File& f)
 
 AudioFormatReader* AiffAudioFormat::createReaderFor (InputStream* sourceStream, bool deleteStreamIfOpeningFails)
 {
-    ScopedPointer<AiffAudioFormatReader> w (new AiffAudioFormatReader (sourceStream));
+    std::unique_ptr<AiffAudioFormatReader> w (new AiffAudioFormatReader (sourceStream));
 
     if (w->sampleRate > 0 && w->numChannels > 0)
         return w.release();

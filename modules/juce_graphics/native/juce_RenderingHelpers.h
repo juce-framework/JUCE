@@ -309,7 +309,7 @@ public:
     }
 
     Font font;
-    ScopedPointer<EdgeTable> edgeTable;
+    std::unique_ptr<EdgeTable> edgeTable;
     int glyph = 0, lastAccessCount = 0;
     bool snapToIntegerCoordinate = false;
 
@@ -1632,7 +1632,7 @@ struct ClipRegions
         Base() {}
         virtual ~Base() {}
 
-        typedef ReferenceCountedObjectPtr<Base> Ptr;
+        using Ptr = ReferenceCountedObjectPtr<Base>;
 
         virtual Ptr clone() const = 0;
         virtual Ptr applyClipTo (const Ptr& target) const = 0;
@@ -1669,7 +1669,7 @@ struct ClipRegions
         EdgeTableRegion (const EdgeTableRegion& other)  : Base(), edgeTable (other.edgeTable) {}
         EdgeTableRegion& operator= (const EdgeTableRegion&) = delete;
 
-        typedef typename Base::Ptr Ptr;
+        using Ptr = typename Base::Ptr;
 
         Ptr clone() const override                           { return new EdgeTableRegion (*this); }
         Ptr applyClipTo (const Ptr& target) const override   { return target->clipToEdgeTable (edgeTable); }
@@ -1850,7 +1850,7 @@ struct ClipRegions
         RectangleListRegion (const RectangleList<int>& r)  : clip (r) {}
         RectangleListRegion (const RectangleListRegion& other) : Base(), clip (other.clip) {}
 
-        typedef typename Base::Ptr Ptr;
+        using Ptr = typename Base::Ptr;
 
         Ptr clone() const override                           { return new RectangleListRegion (*this); }
         Ptr applyClipTo (const Ptr& target) const override   { return target->clipToRectangleList (clip); }
@@ -2080,9 +2080,9 @@ template <class SavedStateType>
 class SavedStateBase
 {
 public:
-    typedef typename ClipRegions<SavedStateType>::Base                   BaseRegionType;
-    typedef typename ClipRegions<SavedStateType>::EdgeTableRegion        EdgeTableRegionType;
-    typedef typename ClipRegions<SavedStateType>::RectangleListRegion    RectangleListRegionType;
+    using BaseRegionType           = typename ClipRegions<SavedStateType>::Base;
+    using EdgeTableRegionType      = typename ClipRegions<SavedStateType>::EdgeTableRegion;
+    using RectangleListRegionType  = typename ClipRegions<SavedStateType>::RectangleListRegion;
 
     SavedStateBase (Rectangle<int> initialClip)
         : clip (new RectangleListRegionType (initialClip)),
@@ -2516,7 +2516,7 @@ public:
 //==============================================================================
 class SoftwareRendererSavedState  : public SavedStateBase<SoftwareRendererSavedState>
 {
-    typedef SavedStateBase<SoftwareRendererSavedState> BaseClass;
+    using BaseClass = SavedStateBase<SoftwareRendererSavedState>;
 
 public:
     SoftwareRendererSavedState (const Image& im, Rectangle<int> clipBounds)
@@ -2558,13 +2558,13 @@ public:
         {
             auto layerBounds = clip->getClipBounds();
 
-            const ScopedPointer<LowLevelGraphicsContext> g (image.createLowLevelContext());
+            const std::unique_ptr<LowLevelGraphicsContext> g (image.createLowLevelContext());
             g->setOpacity (finishedLayerState.transparencyLayerAlpha);
             g->drawImage (finishedLayerState.image, AffineTransform::translation (layerBounds.getPosition()));
         }
     }
 
-    typedef GlyphCache<CachedGlyphEdgeTable<SoftwareRendererSavedState>, SoftwareRendererSavedState> GlyphCacheType;
+    using GlyphCacheType = GlyphCache<CachedGlyphEdgeTable<SoftwareRendererSavedState>, SoftwareRendererSavedState>;
 
     static void clearGlyphCache()
     {
@@ -2607,7 +2607,7 @@ public:
                 auto t = transform.getTransformWith (AffineTransform::scale (fontHeight * font.getHorizontalScale(), fontHeight)
                                                                      .followedBy (trans));
 
-                ScopedPointer<EdgeTable> et (font.getTypeface()->getEdgeTableForGlyph (glyphNumber, t, fontHeight));
+                std::unique_ptr<EdgeTable> et (font.getTypeface()->getEdgeTableForGlyph (glyphNumber, t, fontHeight));
 
                 if (et != nullptr)
                     fillShape (new EdgeTableRegionType (*et), false);
@@ -2717,13 +2717,13 @@ public:
 
     void endTransparencyLayer()
     {
-        ScopedPointer<StateObjectType> finishedTransparencyLayer (currentState.release());
+        std::unique_ptr<StateObjectType> finishedTransparencyLayer (currentState.release());
         restore();
         currentState->endTransparencyLayer (*finishedTransparencyLayer);
     }
 
 private:
-    ScopedPointer<StateObjectType> currentState;
+    std::unique_ptr<StateObjectType> currentState;
     OwnedArray<StateObjectType> stack;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SavedStateStack)

@@ -61,10 +61,10 @@ struct FallbackDownloadTask  : public URL::DownloadTask,
             if (listener != nullptr)
                 listener->progress (this, downloaded, contentLength);
 
-            const int max = jmin ((int) bufferSize, contentLength < 0 ? std::numeric_limits<int>::max()
-                                                                      : static_cast<int> (contentLength - downloaded));
+            auto max = jmin ((int) bufferSize, contentLength < 0 ? std::numeric_limits<int>::max()
+                                                                 : static_cast<int> (contentLength - downloaded));
 
-            const int actual = stream->read (buffer.get(), max);
+            auto actual = stream->read (buffer.get(), max);
 
             if (actual < 0 || threadShouldExit() || stream->isError())
                 break;
@@ -96,8 +96,8 @@ struct FallbackDownloadTask  : public URL::DownloadTask,
     }
 
     //==============================================================================
-    const ScopedPointer<FileOutputStream> fileStream;
-    const ScopedPointer<WebInputStream> stream;
+    const std::unique_ptr<FileOutputStream> fileStream;
+    const std::unique_ptr<WebInputStream> stream;
     const size_t bufferSize;
     HeapBlock<char> buffer;
     URL::DownloadTask::Listener* const listener;
@@ -118,11 +118,11 @@ URL::DownloadTask* URL::DownloadTask::createFallbackDownloader (const URL& urlTo
     const size_t bufferSize = 0x8000;
     targetFileToUse.deleteFile();
 
-    ScopedPointer<FileOutputStream> outputStream (targetFileToUse.createOutputStream (bufferSize));
+    std::unique_ptr<FileOutputStream> outputStream (targetFileToUse.createOutputStream (bufferSize));
 
     if (outputStream != nullptr)
     {
-        ScopedPointer<WebInputStream> stream (new WebInputStream (urlToUse, usePostRequest));
+        std::unique_ptr<WebInputStream> stream (new WebInputStream (urlToUse, usePostRequest));
         stream->withExtraHeaders (extraHeadersToUse);
 
         if (stream->connect (nullptr))
@@ -148,6 +148,10 @@ URL::URL (File localFile)
     if (localFile == File())
         return;
 
+   #if JUCE_WINDOWS
+    bool isUncPath = localFile.getFullPathName().startsWith ("\\\\");
+   #endif
+
     while (! localFile.isRoot())
     {
         url = "/" + addEscapeChars (localFile.getFileName(), false) + url;
@@ -156,8 +160,18 @@ URL::URL (File localFile)
 
     url = addEscapeChars (localFile.getFileName(), false) + url;
 
-    if (! url.startsWithChar (L'/'))
-        url = "/" + url;
+   #if JUCE_WINDOWS
+    if (isUncPath)
+    {
+        url = url.fromFirstOccurrenceOf ("/", false, false);
+    }
+    else
+   #endif
+    {
+        if (! url.startsWithChar (L'/'))
+            url = "/" + url;
+    }
+
 
     url = "file://" + url;
 
@@ -172,8 +186,8 @@ void URL::init()
     {
         do
         {
-            const int nextAmp   = url.indexOfChar (i + 1, '&');
-            const int equalsPos = url.indexOfChar (i + 1, '=');
+            auto nextAmp   = url.indexOfChar (i + 1, '&');
+            auto equalsPos = url.indexOfChar (i + 1, '=');
 
             if (nextAmp < 0)
             {
@@ -310,7 +324,7 @@ void URL::addParameter (const String& name, const String& value)
     parameterValues.add (value);
 }
 
-String URL::toString (const bool includeGetParameters) const
+String URL::toString (bool includeGetParameters) const
 {
     if (includeGetParameters && parameterNames.size() > 0)
         return url + "?" + URLHelpers::getMangledParameters (*this);
@@ -381,7 +395,9 @@ File URL::fileFromFileSchemeURL (const URL& fileURL)
 
     auto path = removeEscapeChars (fileURL.getDomain()).replace ("+", "%2B");
 
-   #ifndef JUCE_WINDOWS
+   #ifdef JUCE_WINDOWS
+    bool isUncPath = (! fileURL.url.startsWith ("file:///"));
+   #else
     path = File::getSeparatorString() + path;
    #endif
 
@@ -389,6 +405,11 @@ File URL::fileFromFileSchemeURL (const URL& fileURL)
 
     for (auto urlElement : urlElements)
         path += File::getSeparatorString() + removeEscapeChars (urlElement.replace ("+", "%2B"));
+
+   #ifdef JUCE_WINDOWS
+    if (isUncPath)
+        path = "\\\\" + path;
+   #endif
 
     return path;
 }
@@ -632,14 +653,14 @@ private:
 #endif
 
 //==============================================================================
-InputStream* URL::createInputStream (const bool usePostCommand,
-                                     OpenStreamProgressCallback* const progressCallback,
-                                     void* const progressCallbackContext,
+InputStream* URL::createInputStream (bool usePostCommand,
+                                     OpenStreamProgressCallback* progressCallback,
+                                     void* progressCallbackContext,
                                      String headers,
-                                     const int timeOutMs,
-                                     StringPairArray* const responseHeaders,
+                                     int timeOutMs,
+                                     StringPairArray* responseHeaders,
                                      int* statusCode,
-                                     const int numRedirectsToFollow,
+                                     int numRedirectsToFollow,
                                      String httpRequestCmd) const
 {
     if (isLocalFile())
@@ -653,7 +674,7 @@ InputStream* URL::createInputStream (const bool usePostCommand,
 
     }
 
-    ScopedPointer<WebInputStream> wi (new WebInputStream (*this, usePostCommand));
+    std::unique_ptr<WebInputStream> wi (new WebInputStream (*this, usePostCommand));
 
     struct ProgressCallbackCaller  : public WebInputStream::Listener
     {
@@ -663,10 +684,10 @@ InputStream* URL::createInputStream (const bool usePostCommand,
 
         bool postDataSendProgress (WebInputStream&, int bytesSent, int totalBytes) override
         {
-            return callback(data, bytesSent, totalBytes);
+            return callback (data, bytesSent, totalBytes);
         }
 
-        OpenStreamProgressCallback* const callback;
+        OpenStreamProgressCallback* callback;
         void* const data;
 
         // workaround a MSVC 2013 compiler warning
@@ -674,7 +695,7 @@ InputStream* URL::createInputStream (const bool usePostCommand,
         ProgressCallbackCaller& operator= (const ProgressCallbackCaller&) { jassertfalse; return *this; }
     };
 
-    ScopedPointer<ProgressCallbackCaller> callbackCaller
+    std::unique_ptr<ProgressCallbackCaller> callbackCaller
         (progressCallback != nullptr ? new ProgressCallbackCaller (progressCallback, progressCallbackContext) : nullptr);
 
     if (headers.isNotEmpty())
@@ -730,8 +751,8 @@ OutputStream* URL::createOutputStream() const
 //==============================================================================
 bool URL::readEntireBinaryStream (MemoryBlock& destData, bool usePostCommand) const
 {
-    const ScopedPointer<InputStream> in (isLocalFile() ? getLocalFile().createInputStream()
-                                                       : static_cast<InputStream*> (createInputStream (usePostCommand)));
+    const std::unique_ptr<InputStream> in (isLocalFile() ? getLocalFile().createInputStream()
+                                                         : static_cast<InputStream*> (createInputStream (usePostCommand)));
 
     if (in != nullptr)
     {
@@ -744,8 +765,8 @@ bool URL::readEntireBinaryStream (MemoryBlock& destData, bool usePostCommand) co
 
 String URL::readEntireTextStream (bool usePostCommand) const
 {
-    const ScopedPointer<InputStream> in (isLocalFile() ? getLocalFile().createInputStream()
-                                                       : static_cast<InputStream*> (createInputStream (usePostCommand)));
+    const std::unique_ptr<InputStream> in (isLocalFile() ? getLocalFile().createInputStream()
+                                                         : static_cast<InputStream*> (createInputStream (usePostCommand)));
 
     if (in != nullptr)
         return in->readEntireStreamAsString();
@@ -839,8 +860,8 @@ String URL::removeEscapeChars (const String& s)
     {
         if (utf8.getUnchecked(i) == '%')
         {
-            const int hexDigit1 = CharacterFunctions::getHexDigitValue ((juce_wchar) (uint8) utf8 [i + 1]);
-            const int hexDigit2 = CharacterFunctions::getHexDigitValue ((juce_wchar) (uint8) utf8 [i + 2]);
+            auto hexDigit1 = CharacterFunctions::getHexDigitValue ((juce_wchar) (uint8) utf8 [i + 1]);
+            auto hexDigit2 = CharacterFunctions::getHexDigitValue ((juce_wchar) (uint8) utf8 [i + 2]);
 
             if (hexDigit1 >= 0 && hexDigit2 >= 0)
             {

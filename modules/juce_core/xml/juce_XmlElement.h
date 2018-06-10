@@ -278,6 +278,11 @@ public:
     */
     bool hasTagNameIgnoringNamespace (StringRef possibleTagName) const;
 
+    /** Changes this elements tag name.
+        @see getTagName
+     */
+    void setTagName (StringRef newTagName);
+
     //==============================================================================
     /** Returns the number of XML attributes this element contains.
 

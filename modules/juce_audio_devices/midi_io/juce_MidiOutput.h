@@ -133,7 +133,7 @@ private:
     void* internal = nullptr;
     CriticalSection lock;
     struct PendingMessage;
-    PendingMessage* firstMessage;
+    PendingMessage* firstMessage = nullptr;
     String name;
 
     MidiOutput (const String& midiName); // These objects are created with the openDevice() method.

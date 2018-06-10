@@ -31,6 +31,11 @@ namespace dsp
 
 #ifndef DOXYGEN
 
+#if JUCE_GCC && (__GNUC__ >= 6)
+ #pragma GCC diagnostic push
+ #pragma GCC diagnostic ignored "-Wignored-attributes"
+#endif
+
 #ifdef _MSC_VER
  #define DECLARE_SSE_SIMD_CONST(type, name) \
     static __declspec(align(16)) const type name [16 / sizeof (type)]
@@ -59,7 +64,7 @@ template <>
 struct SIMDNativeOps<float>
 {
     //==============================================================================
-    typedef __m128 vSIMDType;
+    using vSIMDType = __m128;
 
     //==============================================================================
     DECLARE_SSE_SIMD_CONST (int32_t, kAllBitsSet);
@@ -90,6 +95,8 @@ struct SIMDNativeOps<float>
     static forcedinline __m128 JUCE_VECTOR_CALLTYPE dupodd (__m128 a) noexcept                           { return _mm_shuffle_ps (a, a, _MM_SHUFFLE (3, 3, 1, 1)); }
     static forcedinline __m128 JUCE_VECTOR_CALLTYPE swapevenodd (__m128 a) noexcept                      { return _mm_shuffle_ps (a, a, _MM_SHUFFLE (2, 3, 0, 1)); }
     static forcedinline __m128 JUCE_VECTOR_CALLTYPE oddevensum (__m128 a) noexcept                       { return _mm_add_ps (_mm_shuffle_ps (a, a, _MM_SHUFFLE (1, 0, 3, 2)), a); }
+    static forcedinline float  JUCE_VECTOR_CALLTYPE get (__m128 v, size_t i) noexcept                    { return SIMDFallbackOps<float, __m128>::get (v, i); }
+    static forcedinline __m128 JUCE_VECTOR_CALLTYPE set (__m128 v, size_t i, float s) noexcept           { return SIMDFallbackOps<float, __m128>::set (v, i, s); }
 
     //==============================================================================
     static forcedinline __m128 JUCE_VECTOR_CALLTYPE cmplxmul (__m128 a, __m128 b) noexcept
@@ -109,7 +116,7 @@ struct SIMDNativeOps<float>
         __m128 retval = _mm_add_ps (_mm_shuffle_ps (a, a, 0x4e), a);
         retval = _mm_add_ps (retval, _mm_shuffle_ps (retval, retval, 0xb1));
        #endif
-        return ((float*) &retval) [0];
+        return _mm_cvtss_f32 (retval);
     }
 };
 
@@ -122,7 +129,7 @@ template <>
 struct SIMDNativeOps<double>
 {
     //==============================================================================
-    typedef __m128d vSIMDType;
+    using vSIMDType = __m128d;
 
     //==============================================================================
     DECLARE_SSE_SIMD_CONST (int64_t, kAllBitsSet);
@@ -130,8 +137,8 @@ struct SIMDNativeOps<double>
     DECLARE_SSE_SIMD_CONST (double, kOne);
 
     //==============================================================================
-    static forcedinline __m128d JUCE_VECTOR_CALLTYPE vconst (const double* a) noexcept                       { return *reinterpret_cast<const __m128d*> (a); }
-    static forcedinline __m128d JUCE_VECTOR_CALLTYPE vconst (const int64_t* a) noexcept                      { return *reinterpret_cast<const __m128d*> (a); }
+    static forcedinline __m128d JUCE_VECTOR_CALLTYPE vconst (const double* a) noexcept                       { return load (a); }
+    static forcedinline __m128d JUCE_VECTOR_CALLTYPE vconst (const int64_t* a) noexcept                      { return _mm_castsi128_pd (_mm_load_si128 ((const __m128i*) a)); }
     static forcedinline __m128d JUCE_VECTOR_CALLTYPE expand (double s) noexcept                              { return _mm_load1_pd (&s); }
     static forcedinline __m128d JUCE_VECTOR_CALLTYPE load (const double* a) noexcept                         { return _mm_load_pd (a); }
     static forcedinline void JUCE_VECTOR_CALLTYPE store (__m128d value, double* dest) noexcept               { _mm_store_pd (dest, value); }
@@ -154,7 +161,9 @@ struct SIMDNativeOps<double>
     static forcedinline __m128d JUCE_VECTOR_CALLTYPE dupeven (__m128d a) noexcept                            { return _mm_shuffle_pd (a, a, _MM_SHUFFLE2 (0, 0)); }
     static forcedinline __m128d JUCE_VECTOR_CALLTYPE dupodd (__m128d a) noexcept                             { return _mm_shuffle_pd (a, a, _MM_SHUFFLE2 (1, 1)); }
     static forcedinline __m128d JUCE_VECTOR_CALLTYPE swapevenodd (__m128d a) noexcept                        { return _mm_shuffle_pd (a, a, _MM_SHUFFLE2 (0, 1)); }
-    static forcedinline __m128d oddevensum (__m128d a) noexcept                         { return a; }
+    static forcedinline __m128d JUCE_VECTOR_CALLTYPE oddevensum (__m128d a) noexcept                         { return a; }
+    static forcedinline double  JUCE_VECTOR_CALLTYPE get (__m128d v, size_t i) noexcept                      { return SIMDFallbackOps<double, __m128d>::get (v, i); }
+    static forcedinline __m128d JUCE_VECTOR_CALLTYPE set (__m128d v, size_t i, double s) noexcept            { return SIMDFallbackOps<double, __m128d>::set (v, i, s); }
 
     //==============================================================================
     static forcedinline __m128d JUCE_VECTOR_CALLTYPE cmplxmul (__m128d a, __m128d b) noexcept
@@ -173,7 +182,7 @@ struct SIMDNativeOps<double>
        #else
         __m128d retval = _mm_add_pd (_mm_shuffle_pd (a, a, 0x01), a);
        #endif
-        return ((double*) &retval) [0];
+        return _mm_cvtsd_f64 (retval);
     }
 };
 
@@ -186,12 +195,14 @@ template <>
 struct SIMDNativeOps<int8_t>
 {
     //==============================================================================
-    typedef __m128i vSIMDType;
+    using vSIMDType = __m128i;
 
     //==============================================================================
     DECLARE_SSE_SIMD_CONST (int8_t, kAllBitsSet);
 
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE vconst (const int8_t* a) noexcept                       { return *reinterpret_cast<const __m128i*> (a); }
+    static forcedinline __m128i JUCE_VECTOR_CALLTYPE vconst (const int8_t* a) noexcept                       { return load (a); }
+    static forcedinline __m128i JUCE_VECTOR_CALLTYPE load (const int8_t* a) noexcept                         { return _mm_load_si128 ((const __m128i*) a); }
+    static forcedinline void    JUCE_VECTOR_CALLTYPE store (__m128i v, int8_t* p) noexcept                   { _mm_store_si128 ((__m128i*) p, v); }
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE expand (int8_t s) noexcept                              { return _mm_set1_epi8 (s); }
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE add (__m128i a, __m128i b) noexcept                     { return _mm_add_epi8 (a, b); }
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE sub (__m128i a, __m128i b) noexcept                     { return _mm_sub_epi8 (a, b); }
@@ -213,20 +224,10 @@ struct SIMDNativeOps<int8_t>
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE multiplyAdd (__m128i a, __m128i b, __m128i c) noexcept  { return add (a, mul (b, c)); }
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE notEqual (__m128i a, __m128i b) noexcept                { return bit_not (equal (a, b)); }
     static forcedinline bool    JUCE_VECTOR_CALLTYPE allEqual (__m128i a, __m128i b) noexcept                { return (_mm_movemask_epi8 (equal (a, b)) == 0xffff); }
+    static forcedinline int8_t  JUCE_VECTOR_CALLTYPE get (__m128i v, size_t i) noexcept                      { return SIMDFallbackOps<int8_t, __m128i>::get (v, i); }
+    static forcedinline __m128i JUCE_VECTOR_CALLTYPE set (__m128i v, size_t i, int8_t s) noexcept            { return SIMDFallbackOps<int8_t, __m128i>::set (v, i, s); }
 
     //==============================================================================
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE load (const int8_t* a) noexcept
-    {
-        const auto* b = reinterpret_cast<const char*> (a);
-        return _mm_set_epi8 (b[15], b[14], b[13], b[12], b[11], b[10], b[9], b[8],
-                             b[7],  b[6],  b[5],  b[4],  b[3],  b[2],  b[1], b[0]);
-    }
-
-    static forcedinline void JUCE_VECTOR_CALLTYPE store (__m128i value, int8_t* dest) noexcept
-    {
-        SIMDFallbackOps<int8_t, __m128i>::store (value, dest);
-    }
-
     static forcedinline int8_t JUCE_VECTOR_CALLTYPE sum (__m128i a) noexcept
     {
        #ifdef __SSSE3__
@@ -239,18 +240,9 @@ struct SIMDNativeOps<int8_t>
             hi = _mm_hadd_epi16 (hi, hi);
         }
 
-        const int8_t* lo_ptr = reinterpret_cast<const int8_t*> (&lo);
-        const int8_t* hi_ptr = reinterpret_cast<const int8_t*> (&hi);
-
-        return lo_ptr[0] + hi_ptr[0];
+        return static_cast<int8_t> ((_mm_cvtsi128_si32 (lo) & 0xff) + (_mm_cvtsi128_si32 (hi) & 0xff));
        #else
-        int8_t sum = 0;
-        const int8_t* src = reinterpret_cast<const int8_t*> (&a);
-
-        for (std::size_t i = 0; i < (sizeof (vSIMDType) / sizeof(int8_t)); ++i)
-            sum += src [i];
-
-        return sum;
+        return SIMDFallbackOps<int8_t, __m128i>::sum (a);
        #endif
     }
 
@@ -274,14 +266,16 @@ template <>
 struct SIMDNativeOps<uint8_t>
 {
     //==============================================================================
-    typedef __m128i vSIMDType;
+    using vSIMDType = __m128i;
 
     //==============================================================================
     DECLARE_SSE_SIMD_CONST (uint8_t, kHighBit);
     DECLARE_SSE_SIMD_CONST (uint8_t, kAllBitsSet);
 
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE vconst (const uint8_t* a) noexcept                      { return *reinterpret_cast<const __m128i*> (a); }
+    static forcedinline __m128i JUCE_VECTOR_CALLTYPE vconst (const uint8_t* a) noexcept                      { return load (a); }
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE ssign (__m128i a) noexcept                              { return _mm_xor_si128 (a, vconst (kHighBit)); }
+    static forcedinline __m128i JUCE_VECTOR_CALLTYPE load (const uint8_t* a) noexcept                        { return _mm_load_si128 ((const __m128i*) a); }
+    static forcedinline void JUCE_VECTOR_CALLTYPE store (__m128i v, uint8_t* p) noexcept                     { _mm_store_si128 ((__m128i*) p, v); }
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE expand (uint8_t s) noexcept                             { return _mm_set1_epi8 ((int8_t) s); }
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE add (__m128i a, __m128i b) noexcept                     { return _mm_add_epi8 (a, b); }
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE sub (__m128i a, __m128i b) noexcept                     { return _mm_sub_epi8 (a, b); }
@@ -298,20 +292,10 @@ struct SIMDNativeOps<uint8_t>
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE multiplyAdd (__m128i a, __m128i b, __m128i c) noexcept  { return add (a, mul (b, c)); }
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE notEqual (__m128i a, __m128i b) noexcept                { return bit_not (equal (a, b)); }
     static forcedinline bool    JUCE_VECTOR_CALLTYPE allEqual (__m128i a, __m128i b) noexcept                { return (_mm_movemask_epi8 (equal (a, b)) == 0xffff); }
+    static forcedinline uint8_t JUCE_VECTOR_CALLTYPE get (__m128i v, size_t i) noexcept                      { return SIMDFallbackOps<uint8_t, __m128i>::get (v, i); }
+    static forcedinline __m128i JUCE_VECTOR_CALLTYPE set (__m128i v, size_t i, uint8_t s) noexcept           { return SIMDFallbackOps<uint8_t, __m128i>::set (v, i, s); }
 
     //==============================================================================
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE load (const uint8_t* a) noexcept
-    {
-        const auto* b = reinterpret_cast<const char*> (a);
-        return _mm_set_epi8 (b[15], b[14], b[13], b[12], b[11], b[10], b[9], b[8],
-                             b[7],  b[6],  b[5],  b[4],  b[3],  b[2],  b[1], b[0]);
-    }
-
-    static forcedinline void JUCE_VECTOR_CALLTYPE store (__m128i value, uint8_t* dest) noexcept
-    {
-        SIMDFallbackOps<uint8_t, __m128i>::store (value, dest);
-    }
-
     static forcedinline uint8_t JUCE_VECTOR_CALLTYPE sum (__m128i a) noexcept
     {
        #ifdef __SSSE3__
@@ -324,18 +308,10 @@ struct SIMDNativeOps<uint8_t>
             hi = _mm_hadd_epi16 (hi, hi);
         }
 
-        const uint8_t* lo_ptr = reinterpret_cast<const uint8_t*> (&lo);
-        const uint8_t* hi_ptr = reinterpret_cast<const uint8_t*> (&hi);
-
-        return lo_ptr[0] + hi_ptr[0];
+        return static_cast<uint8_t> ((static_cast<uint32_t> (_mm_cvtsi128_si32 (lo)) & 0xffu)
+                                   + (static_cast<uint32_t> (_mm_cvtsi128_si32 (hi)) & 0xffu));
        #else
-        uint8_t sum = 0;
-        const uint8_t* src = reinterpret_cast<const uint8_t*> (&a);
-
-        for (std::size_t i = 0; i < (sizeof (vSIMDType) / sizeof(int8_t)); ++i)
-            sum += src [i];
-
-        return sum;
+        return SIMDFallbackOps<uint8_t, __m128i>::sum (a);
        #endif
     }
 
@@ -359,13 +335,15 @@ template <>
 struct SIMDNativeOps<int16_t>
 {
     //==============================================================================
-    typedef __m128i vSIMDType;
+    using vSIMDType = __m128i;
 
     //==============================================================================
     DECLARE_SSE_SIMD_CONST (int16_t, kAllBitsSet);
 
     //==============================================================================
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE vconst (const int16_t* a) noexcept                      { return *reinterpret_cast<const __m128i*> (a); }
+    static forcedinline __m128i JUCE_VECTOR_CALLTYPE vconst (const int16_t* a) noexcept                      { return load (a); }
+    static forcedinline __m128i JUCE_VECTOR_CALLTYPE load (const int16_t* a) noexcept                        { return _mm_load_si128 ((const __m128i*) a); }
+    static forcedinline void    JUCE_VECTOR_CALLTYPE store (__m128i v, int16_t* p) noexcept                  { _mm_store_si128 ((__m128i*) p, v); }
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE expand (int16_t s) noexcept                             { return _mm_set1_epi16 (s); }
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE add (__m128i a, __m128i b) noexcept                     { return _mm_add_epi16 (a, b); }
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE sub (__m128i a, __m128i b) noexcept                     { return _mm_sub_epi16 (a, b); }
@@ -383,34 +361,20 @@ struct SIMDNativeOps<int16_t>
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE multiplyAdd (__m128i a, __m128i b, __m128i c) noexcept  { return add (a, mul (b, c)); }
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE notEqual (__m128i a, __m128i b) noexcept                { return bit_not (equal (a, b)); }
     static forcedinline bool    JUCE_VECTOR_CALLTYPE allEqual (__m128i a, __m128i b) noexcept                { return (_mm_movemask_epi8 (equal (a, b)) == 0xffff); }
+    static forcedinline int16_t JUCE_VECTOR_CALLTYPE get (__m128i v, size_t i) noexcept                      { return SIMDFallbackOps<int16_t, __m128i>::get (v, i); }
+    static forcedinline __m128i JUCE_VECTOR_CALLTYPE set (__m128i v, size_t i, int16_t s) noexcept           { return SIMDFallbackOps<int16_t, __m128i>::set (v, i, s); }
 
     //==============================================================================
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE load (const int16_t* a) noexcept
-    {
-        return _mm_set_epi16 (a[7], a[6], a[5], a[4], a[3], a[2], a[1], a[0]);
-    }
-
-    static forcedinline void JUCE_VECTOR_CALLTYPE store (__m128i value, int16_t* dest) noexcept
-    {
-        SIMDFallbackOps<int16_t, __m128i>::store (value, dest);
-    }
-
     static forcedinline int16_t JUCE_VECTOR_CALLTYPE sum (__m128i a) noexcept
     {
        #ifdef __SSSE3__
         __m128i tmp = _mm_hadd_epi16 (a, a);
         tmp = _mm_hadd_epi16 (tmp, tmp);
         tmp = _mm_hadd_epi16 (tmp, tmp);
-        return *reinterpret_cast<int16_t*> (&tmp);
 
+        return static_cast<int16_t> (_mm_cvtsi128_si32 (tmp) & 0xffff);
        #else
-        int16_t sum = 0;
-        const int16_t* src = reinterpret_cast<const int16_t*> (&a);
-
-        for (std::size_t i = 0; i < (sizeof (vSIMDType) / sizeof(int16_t)); ++i)
-            sum += src [i];
-
-        return sum;
+        return SIMDFallbackOps<int16_t, __m128i>::sum (a);
        #endif
     }
 };
@@ -424,65 +388,53 @@ template <>
 struct SIMDNativeOps<uint16_t>
 {
     //==============================================================================
-    typedef __m128i vSIMDType;
+    using vSIMDType = __m128i;
 
     //==============================================================================
     DECLARE_SSE_SIMD_CONST (uint16_t, kHighBit);
     DECLARE_SSE_SIMD_CONST (uint16_t, kAllBitsSet);
 
     //==============================================================================
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE vconst (const uint16_t* a) noexcept                     { return *reinterpret_cast<const __m128i*> (a); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE ssign (__m128i a) noexcept                              { return _mm_xor_si128 (a, vconst (kHighBit)); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE expand (uint16_t s) noexcept                            { return _mm_set1_epi16 ((int16_t) s); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE add (__m128i a, __m128i b) noexcept                     { return _mm_add_epi16 (a, b); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE sub (__m128i a, __m128i b) noexcept                     { return _mm_sub_epi16 (a, b); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE mul (__m128i a, __m128i b) noexcept                     { return _mm_mullo_epi16 (a, b); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE bit_and (__m128i a, __m128i b) noexcept                 { return _mm_and_si128 (a, b); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE bit_or  (__m128i a, __m128i b) noexcept                 { return _mm_or_si128  (a, b); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE bit_xor (__m128i a, __m128i b) noexcept                 { return _mm_xor_si128 (a, b); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE bit_andnot (__m128i a, __m128i b) noexcept              { return _mm_andnot_si128 (a, b); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE bit_not (__m128i a) noexcept                            { return _mm_andnot_si128 (a, vconst (kAllBitsSet)); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE vconst (const uint16_t* a) noexcept                     { return load (a); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE ssign (__m128i a) noexcept                              { return _mm_xor_si128 (a, vconst (kHighBit)); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE load (const uint16_t* a) noexcept                       { return _mm_load_si128 ((const __m128i*) a); }
+    static forcedinline void     JUCE_VECTOR_CALLTYPE store (__m128i v, uint16_t* p) noexcept                    { _mm_store_si128 ((__m128i*) p, v); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE expand (uint16_t s) noexcept                            { return _mm_set1_epi16 ((int16_t) s); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE add (__m128i a, __m128i b) noexcept                     { return _mm_add_epi16 (a, b); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE sub (__m128i a, __m128i b) noexcept                     { return _mm_sub_epi16 (a, b); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE mul (__m128i a, __m128i b) noexcept                     { return _mm_mullo_epi16 (a, b); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE bit_and (__m128i a, __m128i b) noexcept                 { return _mm_and_si128 (a, b); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE bit_or  (__m128i a, __m128i b) noexcept                 { return _mm_or_si128  (a, b); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE bit_xor (__m128i a, __m128i b) noexcept                 { return _mm_xor_si128 (a, b); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE bit_andnot (__m128i a, __m128i b) noexcept              { return _mm_andnot_si128 (a, b); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE bit_not (__m128i a) noexcept                            { return _mm_andnot_si128 (a, vconst (kAllBitsSet)); }
    #if defined(__SSE4__)
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE min (__m128i a, __m128i b) noexcept                     { return _mm_min_epu16 (a, b); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE max (__m128i a, __m128i b) noexcept                     { return _mm_max_epu16 (a, b); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE min (__m128i a, __m128i b) noexcept                     { return _mm_min_epu16 (a, b); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE max (__m128i a, __m128i b) noexcept                     { return _mm_max_epu16 (a, b); }
    #else
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE min (__m128i a, __m128i b) noexcept                     { __m128i lt = greaterThan (b, a); return bit_or (bit_and (lt, a), bit_andnot (lt, b)); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE max (__m128i a, __m128i b) noexcept                     { __m128i gt = greaterThan (a, b); return bit_or (bit_and (gt, a), bit_andnot (gt, b)); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE min (__m128i a, __m128i b) noexcept                     { __m128i lt = greaterThan (b, a); return bit_or (bit_and (lt, a), bit_andnot (lt, b)); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE max (__m128i a, __m128i b) noexcept                     { __m128i gt = greaterThan (a, b); return bit_or (bit_and (gt, a), bit_andnot (gt, b)); }
    #endif
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE equal (__m128i a, __m128i b) noexcept                   { return _mm_cmpeq_epi16 (a, b); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE greaterThan (__m128i a, __m128i b) noexcept             { return _mm_cmpgt_epi16 (ssign (a), ssign (b)); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE greaterThanOrEqual (__m128i a, __m128i b) noexcept      { return bit_or (greaterThan (a, b), equal (a,b)); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE multiplyAdd (__m128i a, __m128i b, __m128i c) noexcept  { return add (a, mul (b, c)); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE notEqual (__m128i a, __m128i b) noexcept                { return bit_not (equal (a, b)); }
-    static forcedinline bool    JUCE_VECTOR_CALLTYPE allEqual (__m128i a, __m128i b) noexcept                { return (_mm_movemask_epi8 (equal (a, b)) == 0xffff); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE equal (__m128i a, __m128i b) noexcept                   { return _mm_cmpeq_epi16 (a, b); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE greaterThan (__m128i a, __m128i b) noexcept             { return _mm_cmpgt_epi16 (ssign (a), ssign (b)); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE greaterThanOrEqual (__m128i a, __m128i b) noexcept      { return bit_or (greaterThan (a, b), equal (a,b)); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE multiplyAdd (__m128i a, __m128i b, __m128i c) noexcept  { return add (a, mul (b, c)); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE notEqual (__m128i a, __m128i b) noexcept                { return bit_not (equal (a, b)); }
+    static forcedinline bool     JUCE_VECTOR_CALLTYPE allEqual (__m128i a, __m128i b) noexcept                { return (_mm_movemask_epi8 (equal (a, b)) == 0xffff); }
+    static forcedinline uint16_t JUCE_VECTOR_CALLTYPE get (__m128i v, size_t i) noexcept                      { return SIMDFallbackOps<uint16_t, __m128i>::get (v, i); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE set (__m128i v, size_t i, uint16_t s) noexcept          { return SIMDFallbackOps<uint16_t, __m128i>::set (v, i, s); }
 
     //==============================================================================
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE load (const uint16_t* a) noexcept
-    {
-        const auto* b = reinterpret_cast<const int16_t*> (a);
-        return _mm_set_epi16 (b[7], b[6], b[5], b[4], b[3], b[2], b[1], b[0]);
-    }
-
-    static forcedinline void JUCE_VECTOR_CALLTYPE store (__m128i value, uint16_t* dest) noexcept
-    {
-        SIMDFallbackOps<uint16_t, __m128i>::store (value, dest);
-    }
-
     static forcedinline uint16_t JUCE_VECTOR_CALLTYPE sum (__m128i a) noexcept
     {
        #ifdef __SSSE3__
         __m128i tmp = _mm_hadd_epi16 (a, a);
         tmp = _mm_hadd_epi16 (tmp, tmp);
         tmp = _mm_hadd_epi16 (tmp, tmp);
-        return *reinterpret_cast<uint16_t*> (&tmp);
+
+        return static_cast<uint16_t> (static_cast<uint32_t> (_mm_cvtsi128_si32 (tmp)) & 0xffffu);
        #else
-        uint16_t sum = 0;
-        const uint16_t* src = reinterpret_cast<const uint16_t*> (&a);
-
-        for (std::size_t i = 0; i < (sizeof (vSIMDType) / sizeof(uint16_t)); ++i)
-            sum += src [i];
-
-        return sum;
+        return SIMDFallbackOps<uint16_t, __m128i>::sum (a);
        #endif
     }
 };
@@ -496,15 +448,16 @@ template <>
 struct SIMDNativeOps<int32_t>
 {
     //==============================================================================
-    typedef __m128i vSIMDType;
+    using vSIMDType = __m128i;
 
     //==============================================================================
     DECLARE_SSE_SIMD_CONST (int32_t, kAllBitsSet);
 
     //==============================================================================
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE vconst (const int32_t* a) noexcept                      { return *reinterpret_cast<const __m128i*> (a); }
+    static forcedinline __m128i JUCE_VECTOR_CALLTYPE vconst (const int32_t* a) noexcept                      { return load (a); }
+    static forcedinline __m128i JUCE_VECTOR_CALLTYPE load (const int32_t* a) noexcept                        { return _mm_load_si128 ((const __m128i*) a); }
+    static forcedinline void    JUCE_VECTOR_CALLTYPE store (__m128i v, int32_t* p) noexcept                  { _mm_store_si128 ((__m128i*) p, v); }
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE expand (int32_t s) noexcept                             { return _mm_set1_epi32 (s); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE load (const int32_t* a) noexcept                        { return _mm_set_epi32 (a[3], a[2], a[1], a[0]); }
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE add (__m128i a, __m128i b) noexcept                     { return _mm_add_epi32 (a, b); }
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE sub (__m128i a, __m128i b) noexcept                     { return _mm_sub_epi32 (a, b); }
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE bit_and (__m128i a, __m128i b) noexcept                 { return _mm_and_si128 (a, b); }
@@ -518,27 +471,17 @@ struct SIMDNativeOps<int32_t>
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE multiplyAdd (__m128i a, __m128i b, __m128i c) noexcept  { return add (a, mul (b, c)); }
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE notEqual (__m128i a, __m128i b) noexcept                { return bit_not (equal (a, b)); }
     static forcedinline bool    JUCE_VECTOR_CALLTYPE allEqual (__m128i a, __m128i b) noexcept                { return (_mm_movemask_epi8 (equal (a, b)) == 0xffff); }
+    static forcedinline int32_t JUCE_VECTOR_CALLTYPE get (__m128i v, size_t i) noexcept                      { return SIMDFallbackOps<int32_t, __m128i>::get (v, i); }
+    static forcedinline __m128i JUCE_VECTOR_CALLTYPE set (__m128i v, size_t i, int32_t s) noexcept           { return SIMDFallbackOps<int32_t, __m128i>::set (v, i, s); }
 
     //==============================================================================
-    static forcedinline void JUCE_VECTOR_CALLTYPE store (__m128i value, int32_t* dest) noexcept
-    {
-        SIMDFallbackOps<int32_t, __m128i>::store (value, dest);
-    }
-
     static forcedinline int32_t JUCE_VECTOR_CALLTYPE sum (__m128i a) noexcept
     {
        #ifdef __SSSE3__
         __m128i tmp = _mm_hadd_epi32 (a, a);
-        tmp = _mm_hadd_epi32 (tmp, tmp);
-        return *reinterpret_cast<int32_t*> (&tmp);
+        return _mm_cvtsi128_si32 (_mm_hadd_epi32 (tmp, tmp));
        #else
-        int32_t sum = 0;
-        const int32_t* src = reinterpret_cast<const int32_t*> (&a);
-
-        for (std::size_t i = 0; i < (sizeof (vSIMDType) / sizeof(int32_t)); ++i)
-            sum += src [i];
-
-        return sum;
+        return SIMDFallbackOps<int32_t, __m128i>::sum (a);
        #endif
     }
 
@@ -584,56 +527,42 @@ template <>
 struct SIMDNativeOps<uint32_t>
 {
     //==============================================================================
-    typedef __m128i vSIMDType;
+    using vSIMDType = __m128i;
 
     //==============================================================================
     DECLARE_SSE_SIMD_CONST (uint32_t, kAllBitsSet);
     DECLARE_SSE_SIMD_CONST (uint32_t, kHighBit);
 
     //==============================================================================
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE vconst (const uint32_t* a) noexcept                     { return *reinterpret_cast<const __m128i*> (a); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE ssign (__m128i a) noexcept                              { return _mm_xor_si128 (a, vconst (kHighBit)); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE expand (uint32_t s) noexcept                            { return _mm_set1_epi32 ((int32_t) s); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE add (__m128i a, __m128i b) noexcept                     { return _mm_add_epi32 (a, b); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE sub (__m128i a, __m128i b) noexcept                     { return _mm_sub_epi32 (a, b); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE bit_and (__m128i a, __m128i b) noexcept                 { return _mm_and_si128 (a, b); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE bit_or  (__m128i a, __m128i b) noexcept                 { return _mm_or_si128  (a, b); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE bit_xor (__m128i a, __m128i b) noexcept                 { return _mm_xor_si128 (a, b); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE bit_andnot (__m128i a, __m128i b) noexcept              { return _mm_andnot_si128 (a, b); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE bit_not (__m128i a) noexcept                            { return _mm_andnot_si128 (a, vconst (kAllBitsSet)); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE equal (__m128i a, __m128i b) noexcept                   { return _mm_cmpeq_epi32 (a, b); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE greaterThan (__m128i a, __m128i b) noexcept             { return _mm_cmpgt_epi32 (ssign (a), ssign (b)); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE greaterThanOrEqual (__m128i a, __m128i b) noexcept      { return bit_or (greaterThan (a, b), equal (a,b)); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE multiplyAdd (__m128i a, __m128i b, __m128i c) noexcept  { return add (a, mul (b, c)); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE notEqual (__m128i a, __m128i b) noexcept                { return bit_not (equal (a, b)); }
-    static forcedinline bool    JUCE_VECTOR_CALLTYPE allEqual (__m128i a, __m128i b) noexcept                { return (_mm_movemask_epi8 (equal (a, b)) == 0xffff); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE vconst (const uint32_t* a) noexcept                     { return load (a); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE ssign (__m128i a) noexcept                              { return _mm_xor_si128 (a, vconst (kHighBit)); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE load (const uint32_t* a) noexcept                       { return _mm_load_si128 ((const __m128i*) a); }
+    static forcedinline void     JUCE_VECTOR_CALLTYPE store (__m128i v, uint32_t* p) noexcept                    { _mm_store_si128 ((__m128i*) p, v); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE expand (uint32_t s) noexcept                            { return _mm_set1_epi32 ((int32_t) s); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE add (__m128i a, __m128i b) noexcept                     { return _mm_add_epi32 (a, b); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE sub (__m128i a, __m128i b) noexcept                     { return _mm_sub_epi32 (a, b); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE bit_and (__m128i a, __m128i b) noexcept                 { return _mm_and_si128 (a, b); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE bit_or  (__m128i a, __m128i b) noexcept                 { return _mm_or_si128  (a, b); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE bit_xor (__m128i a, __m128i b) noexcept                 { return _mm_xor_si128 (a, b); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE bit_andnot (__m128i a, __m128i b) noexcept              { return _mm_andnot_si128 (a, b); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE bit_not (__m128i a) noexcept                            { return _mm_andnot_si128 (a, vconst (kAllBitsSet)); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE equal (__m128i a, __m128i b) noexcept                   { return _mm_cmpeq_epi32 (a, b); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE greaterThan (__m128i a, __m128i b) noexcept             { return _mm_cmpgt_epi32 (ssign (a), ssign (b)); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE greaterThanOrEqual (__m128i a, __m128i b) noexcept      { return bit_or (greaterThan (a, b), equal (a,b)); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE multiplyAdd (__m128i a, __m128i b, __m128i c) noexcept  { return add (a, mul (b, c)); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE notEqual (__m128i a, __m128i b) noexcept                { return bit_not (equal (a, b)); }
+    static forcedinline bool     JUCE_VECTOR_CALLTYPE allEqual (__m128i a, __m128i b) noexcept                { return (_mm_movemask_epi8 (equal (a, b)) == 0xffff); }
+    static forcedinline uint32_t JUCE_VECTOR_CALLTYPE get (__m128i v, size_t i) noexcept                      { return SIMDFallbackOps<uint32_t, __m128i>::get (v, i); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE set (__m128i v, size_t i, uint32_t s) noexcept          { return SIMDFallbackOps<uint32_t, __m128i>::set (v, i, s); }
 
     //==============================================================================
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE load (const uint32_t* a) noexcept
-    {
-        const auto* b = reinterpret_cast<const int32_t*> (a);
-        return _mm_set_epi32 (b[3], b[2], b[1], b[0]);
-    }
-
-    static forcedinline void JUCE_VECTOR_CALLTYPE store (__m128i value, uint32_t* dest) noexcept
-    {
-        SIMDFallbackOps<uint32_t, __m128i>::store (value, dest);
-    }
-
     static forcedinline uint32_t JUCE_VECTOR_CALLTYPE sum (__m128i a) noexcept
     {
        #ifdef __SSSE3__
         __m128i tmp = _mm_hadd_epi32 (a, a);
-        tmp = _mm_hadd_epi32 (tmp, tmp);
-        return *reinterpret_cast<uint32_t*> (&tmp);
+        return static_cast<uint32_t> (_mm_cvtsi128_si32 (_mm_hadd_epi32 (tmp, tmp)));
        #else
-        uint32_t sum = 0;
-        const uint32_t* src = reinterpret_cast<const uint32_t*> (&a);
-
-        for (std::size_t i = 0; i < (sizeof (vSIMDType) / sizeof(uint32_t)); ++i)
-            sum += src [i];
-
-        return sum;
+        return SIMDFallbackOps<uint32_t, __m128i>::sum (a);
        #endif
     }
 
@@ -679,116 +608,15 @@ template <>
 struct SIMDNativeOps<int64_t>
 {
     //==============================================================================
-    typedef __m128i vSIMDType;
+    using vSIMDType = __m128i;
 
     //==============================================================================
     DECLARE_SSE_SIMD_CONST (int64_t, kAllBitsSet);
 
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE expand (int64_t s) noexcept
-    {
-        __m128i retval;
-        int64_t* ptr = reinterpret_cast<int64_t*> (&retval);
-        ptr[0] = ptr[1] = s;
-        return retval;
-    }
-
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE load (const int64_t* a) noexcept                        { return _mm_set_epi64x (a[1], a[0]); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE vconst (const int64_t* a) noexcept                      { return *reinterpret_cast<const __m128i*> (a); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE add (__m128i a, __m128i b) noexcept                     { return _mm_add_epi64 (a, b); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE sub (__m128i a, __m128i b) noexcept                     { return _mm_sub_epi64 (a, b); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE bit_and (__m128i a, __m128i b) noexcept                 { return _mm_and_si128 (a, b); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE bit_or  (__m128i a, __m128i b) noexcept                 { return _mm_or_si128  (a, b); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE bit_xor (__m128i a, __m128i b) noexcept                 { return _mm_xor_si128 (a, b); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE bit_andnot (__m128i a, __m128i b) noexcept              { return _mm_andnot_si128 (a, b); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE bit_not (__m128i a) noexcept                            { return _mm_andnot_si128 (a, vconst (kAllBitsSet)); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE min (__m128i a, __m128i b) noexcept                     { __m128i lt = greaterThan (b, a); return bit_or (bit_and (lt, a), bit_andnot (lt, b)); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE max (__m128i a, __m128i b) noexcept                     { __m128i gt = greaterThan (a, b); return bit_or (bit_and (gt, a), bit_andnot (gt, b)); }
-    static forcedinline __m128i greaterThanOrEqual (__m128i a, __m128i b) noexcept      { return bit_or (greaterThan (a, b), equal (a,b)); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE multiplyAdd (__m128i a, __m128i b, __m128i c) noexcept  { return add (a, mul (b, c)); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE notEqual (__m128i a, __m128i b) noexcept                { return bit_not (equal (a, b)); }
-    static forcedinline bool    JUCE_VECTOR_CALLTYPE allEqual (__m128i a, __m128i b) noexcept                { return (_mm_movemask_epi8 (equal (a, b)) == 0xffff); }
-
-    //==============================================================================
-    static forcedinline void JUCE_VECTOR_CALLTYPE store (__m128i value, int64_t* dest) noexcept
-    {
-        SIMDFallbackOps<int64_t, __m128i>::store (value, dest);
-    }
-
-    static forcedinline int64_t JUCE_VECTOR_CALLTYPE sum (__m128i a) noexcept
-    {
-        const int64_t* ptr = reinterpret_cast<const int64_t*> (&a);
-        return ptr[0] + ptr[1];
-    }
-
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE mul (__m128i a, __m128i b) noexcept
-    {
-        __m128i retval;
-
-        const int64_t* aptr = reinterpret_cast<const int64_t*> (&a);
-        const int64_t* bptr = reinterpret_cast<const int64_t*> (&b);
-        int64_t* dst =  reinterpret_cast<int64_t*> (&retval);
-
-        dst[0] = aptr[0] * bptr[0];
-        dst[1] = aptr[1] * bptr[1];
-
-        return retval;
-    }
-
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE equal (__m128i a, __m128i b) noexcept
-    {
-       #if defined(__SSE4_1__)
-        return _mm_cmpeq_epi64 (a, b);
-       #else
-        __m128i bitmask = _mm_cmpeq_epi32 (a, b);
-        bitmask = _mm_and_si128 (bitmask, _mm_shuffle_epi32 (bitmask, _MM_SHUFFLE (2, 3, 0, 1)));
-        return _mm_shuffle_epi32 (bitmask, _MM_SHUFFLE (2, 2, 0, 0));
-       #endif
-    }
-
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE greaterThan (__m128i a, __m128i b) noexcept
-    {
-       #if defined(__SSE4_1__) && !defined(__clang__)
-        return _mm_cmpgt_epi64 (a, b);
-       #else
-        __m128i retval;
-
-        const int64_t* aptr = reinterpret_cast<const int64_t*> (&a);
-        const int64_t* bptr = reinterpret_cast<const int64_t*> (&b);
-        int64_t* dst =  reinterpret_cast<int64_t*> (&retval);
-
-        dst[0] = aptr[0] > bptr[0] ? -1LL : 0;
-        dst[1] = aptr[1] > bptr[1] ? -1LL : 0;
-
-        return retval;
-       #endif
-    }
-};
-
-//==============================================================================
-/** Unsigned 64-bit integer SSE intrinsics.
-
-    @tags{DSP}
-*/
-template <>
-struct SIMDNativeOps<uint64_t>
-{
-    //==============================================================================
-    typedef __m128i vSIMDType;
-
-    //==============================================================================
-    DECLARE_SSE_SIMD_CONST (uint64_t, kAllBitsSet);
-    DECLARE_SSE_SIMD_CONST (uint64_t, kHighBit);
-
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE expand (uint64_t s) noexcept
-    {
-         __m128i retval;
-        uint64_t* ptr = reinterpret_cast<uint64_t*> (&retval);
-        ptr[0] = ptr[1] = s;
-        return retval;
-    }
-
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE vconst (const uint64_t* a) noexcept                     { return *reinterpret_cast<const __m128i*> (a); }
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE ssign (__m128i a) noexcept                              { return _mm_xor_si128 (a, vconst (kHighBit)); }
+    static forcedinline __m128i JUCE_VECTOR_CALLTYPE vconst (const int64_t* a) noexcept                      { return load (a); }
+    static forcedinline __m128i JUCE_VECTOR_CALLTYPE expand (int64_t s) noexcept                             { return _mm_set1_epi64x (s); }
+    static forcedinline __m128i JUCE_VECTOR_CALLTYPE load (const int64_t* a) noexcept                        { return _mm_load_si128 ((const __m128i*) a); }
+    static forcedinline void    JUCE_VECTOR_CALLTYPE store (__m128i v, int64_t* p) noexcept                  { _mm_store_si128 ((__m128i*) p, v); }
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE add (__m128i a, __m128i b) noexcept                     { return _mm_add_epi64 (a, b); }
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE sub (__m128i a, __m128i b) noexcept                     { return _mm_sub_epi64 (a, b); }
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE bit_and (__m128i a, __m128i b) noexcept                 { return _mm_and_si128 (a, b); }
@@ -802,38 +630,10 @@ struct SIMDNativeOps<uint64_t>
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE multiplyAdd (__m128i a, __m128i b, __m128i c) noexcept  { return add (a, mul (b, c)); }
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE notEqual (__m128i a, __m128i b) noexcept                { return bit_not (equal (a, b)); }
     static forcedinline bool    JUCE_VECTOR_CALLTYPE allEqual (__m128i a, __m128i b) noexcept                { return (_mm_movemask_epi8 (equal (a, b)) == 0xffff); }
-
-    //==============================================================================
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE load (const uint64_t* a) noexcept
-    {
-        const auto* b = reinterpret_cast<const int64_t*> (a);
-        return _mm_set_epi64x (b[1], b[0]);
-    }
-
-    static forcedinline void JUCE_VECTOR_CALLTYPE store (__m128i value, uint64_t* dest) noexcept
-    {
-        SIMDFallbackOps<uint64_t, __m128i>::store (value, dest);
-    }
-
-    static forcedinline uint64_t JUCE_VECTOR_CALLTYPE sum (__m128i a) noexcept
-    {
-        const uint64_t* ptr = reinterpret_cast<const uint64_t*> (&a);
-        return ptr[0] + ptr[1];
-    }
-
-    static forcedinline __m128i JUCE_VECTOR_CALLTYPE mul (__m128i a, __m128i b) noexcept
-    {
-        __m128i retval;
-
-        const uint64_t* aptr = reinterpret_cast<const uint64_t*> (&a);
-        const uint64_t* bptr = reinterpret_cast<const uint64_t*> (&b);
-        uint64_t* dst =  reinterpret_cast<uint64_t*> (&retval);
-
-        dst[0] = aptr[0] * bptr[0];
-        dst[1] = aptr[1] * bptr[1];
-
-        return retval;
-    }
+    static forcedinline int64_t JUCE_VECTOR_CALLTYPE get (__m128i v, size_t i) noexcept                      { return SIMDFallbackOps<int64_t, __m128i>::get (v, i); }
+    static forcedinline __m128i JUCE_VECTOR_CALLTYPE set (__m128i v, size_t i, int64_t s) noexcept           { return SIMDFallbackOps<int64_t, __m128i>::set (v, i, s); }
+    static forcedinline int64_t JUCE_VECTOR_CALLTYPE sum (__m128i a) noexcept                                { return SIMDFallbackOps<int64_t, __m128i>::sum (a); }
+    static forcedinline __m128i JUCE_VECTOR_CALLTYPE mul (__m128i a, __m128i b) noexcept                     { return SIMDFallbackOps<int64_t, __m128i>::mul (a, b); }
 
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE equal (__m128i a, __m128i b) noexcept
     {
@@ -848,23 +648,77 @@ struct SIMDNativeOps<uint64_t>
 
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE greaterThan (__m128i a, __m128i b) noexcept
     {
-       #if defined(__SSE4_1__) && !defined(__clang__)
+       #if defined(__SSE4_1__)
         return _mm_cmpgt_epi64 (a, b);
        #else
-        __m128i retval;
-
-        const uint64_t* aptr = reinterpret_cast<const uint64_t*> (&a);
-        const uint64_t* bptr = reinterpret_cast<const uint64_t*> (&b);
-        uint64_t* dst =  reinterpret_cast<uint64_t*> (&retval);
-
-        dst[0] = aptr[0] > bptr[0] ? (uint64_t) -1LL : 0;
-        dst[1] = aptr[1] > bptr[1] ? (uint64_t) -1LL : 0;
-
-        return retval;
+        return SIMDFallbackOps<int64_t, __m128i>::greaterThan (a, b);
        #endif
     }
 };
 
+//==============================================================================
+/** Unsigned 64-bit integer SSE intrinsics.
+
+    @tags{DSP}
+*/
+template <>
+struct SIMDNativeOps<uint64_t>
+{
+    //==============================================================================
+    using vSIMDType = __m128i;
+
+    //==============================================================================
+    DECLARE_SSE_SIMD_CONST (uint64_t, kAllBitsSet);
+    DECLARE_SSE_SIMD_CONST (uint64_t, kHighBit);
+
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE vconst (const uint64_t* a) noexcept                     { return load (a); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE expand (uint64_t s) noexcept                            { return _mm_set1_epi64x ((int64_t) s); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE ssign (__m128i a) noexcept                              { return _mm_xor_si128 (a, vconst (kHighBit)); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE load (const uint64_t* a) noexcept                       { return _mm_load_si128 ((const __m128i*) a); }
+    static forcedinline void     JUCE_VECTOR_CALLTYPE store (__m128i v, uint64_t* p) noexcept                 { _mm_store_si128 ((__m128i*) p, v); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE add (__m128i a, __m128i b) noexcept                     { return _mm_add_epi64 (a, b); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE sub (__m128i a, __m128i b) noexcept                     { return _mm_sub_epi64 (a, b); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE bit_and (__m128i a, __m128i b) noexcept                 { return _mm_and_si128 (a, b); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE bit_or  (__m128i a, __m128i b) noexcept                 { return _mm_or_si128  (a, b); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE bit_xor (__m128i a, __m128i b) noexcept                 { return _mm_xor_si128 (a, b); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE bit_andnot (__m128i a, __m128i b) noexcept              { return _mm_andnot_si128 (a, b); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE bit_not (__m128i a) noexcept                            { return _mm_andnot_si128 (a, vconst (kAllBitsSet)); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE min (__m128i a, __m128i b) noexcept                     { __m128i lt = greaterThan (b, a); return bit_or (bit_and (lt, a), bit_andnot (lt, b)); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE max (__m128i a, __m128i b) noexcept                     { __m128i gt = greaterThan (a, b); return bit_or (bit_and (gt, a), bit_andnot (gt, b)); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE greaterThanOrEqual (__m128i a, __m128i b) noexcept      { return bit_or (greaterThan (a, b), equal (a,b)); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE multiplyAdd (__m128i a, __m128i b, __m128i c) noexcept  { return add (a, mul (b, c)); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE notEqual (__m128i a, __m128i b) noexcept                { return bit_not (equal (a, b)); }
+    static forcedinline bool     JUCE_VECTOR_CALLTYPE allEqual (__m128i a, __m128i b) noexcept                { return (_mm_movemask_epi8 (equal (a, b)) == 0xffff); }
+    static forcedinline uint64_t JUCE_VECTOR_CALLTYPE get (__m128i v, size_t i) noexcept                      { return SIMDFallbackOps<uint64_t, __m128i>::get (v, i); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE set (__m128i v, size_t i, uint64_t s) noexcept          { return SIMDFallbackOps<uint64_t, __m128i>::set (v, i, s); }
+    static forcedinline uint64_t JUCE_VECTOR_CALLTYPE sum (__m128i a) noexcept                                { return SIMDFallbackOps<uint64_t, __m128i>::sum (a); }
+    static forcedinline __m128i  JUCE_VECTOR_CALLTYPE mul (__m128i a, __m128i b) noexcept                     { return SIMDFallbackOps<uint64_t, __m128i>::mul (a, b); }
+
+    static forcedinline __m128i JUCE_VECTOR_CALLTYPE equal (__m128i a, __m128i b) noexcept
+    {
+       #if defined(__SSE4_1__)
+        return _mm_cmpeq_epi64 (a, b);
+       #else
+        __m128i bitmask = _mm_cmpeq_epi32 (a, b);
+        bitmask = _mm_and_si128 (bitmask, _mm_shuffle_epi32 (bitmask, _MM_SHUFFLE (2, 3, 0, 1)));
+        return _mm_shuffle_epi32 (bitmask, _MM_SHUFFLE (2, 2, 0, 0));
+       #endif
+    }
+
+    static forcedinline __m128i JUCE_VECTOR_CALLTYPE greaterThan (__m128i a, __m128i b) noexcept
+    {
+       #if defined(__SSE4_1__)
+        return _mm_cmpgt_epi64 (ssign (a), ssign (b));
+       #else
+        return SIMDFallbackOps<uint64_t, __m128i>::greaterThan (a, b);
+       #endif
+    }
+};
+
+#endif
+
+#if JUCE_GCC && (__GNUC__ >= 6)
+ #pragma GCC diagnostic pop
 #endif
 
 } // namespace dsp

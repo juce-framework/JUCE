@@ -365,7 +365,7 @@ public:
             virtual ~BitmapDataReleaser() {}
         };
 
-        ScopedPointer<BitmapDataReleaser> dataReleaser;
+        std::unique_ptr<BitmapDataReleaser> dataReleaser;
 
     private:
         JUCE_DECLARE_NON_COPYABLE (BitmapData)
@@ -414,12 +414,10 @@ public:
     /** @internal */
     explicit Image (ImagePixelData*) noexcept;
 
-   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
-    /** A null Image object that can be used when you need to return an invalid image.
+    /* A null Image object that can be used when you need to return an invalid image.
         @deprecated If you need a default-constructed var, just use Image() or {}.
     */
-    static const Image null;
-   #endif
+    JUCE_DEPRECATED_STATIC (static const Image null;)
 
 private:
     //==============================================================================
@@ -448,7 +446,7 @@ public:
     ImagePixelData (Image::PixelFormat, int width, int height);
     ~ImagePixelData();
 
-    typedef ReferenceCountedObjectPtr<ImagePixelData> Ptr;
+    using Ptr = ReferenceCountedObjectPtr<ImagePixelData>;
 
     /** Creates a context that will draw into this image. */
     virtual LowLevelGraphicsContext* createLowLevelContext() = 0;

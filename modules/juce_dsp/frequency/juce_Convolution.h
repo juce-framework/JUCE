@@ -153,7 +153,7 @@ public:
 private:
     //==============================================================================
     struct Pimpl;
-    ScopedPointer<Pimpl> pimpl;
+    std::unique_ptr<Pimpl> pimpl;
 
     //==============================================================================
     void processSamples (const AudioBlock<float>&, AudioBlock<float>&, bool isBypassed) noexcept;

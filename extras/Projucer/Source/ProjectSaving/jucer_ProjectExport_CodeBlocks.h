@@ -63,17 +63,6 @@ public:
     }
 
     //==============================================================================
-    static String getTargetFolderName (CodeBlocksOS os)
-    {
-        if (os == windowsTarget)  return "CodeBlocksWindows";
-        if (os == linuxTarget)    return "CodeBlocksLinux";
-
-        // currently no other OSes supported by Codeblocks exporter!
-        jassertfalse;
-        return "CodeBlocksUnknownOS";
-    }
-
-    //==============================================================================
     static CodeBlocksProjectExporter* createForSettings (Project& project, const ValueTree& settings)
     {
         // this will also import legacy jucer files where CodeBlocks only worked for Windows,
@@ -93,7 +82,7 @@ public:
     {
         name = getName (os);
 
-        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderName (os));
+        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderForExporter (getValueTreeTypeName (os)));
 
         if (isWindows())
             targetPlatformValue.referTo (settings, Ids::codeBlocksWindowsTarget, getUndoManager());
@@ -192,19 +181,7 @@ public:
     }
 
     //==============================================================================
-    void initialiseDependencyPathValues() override
-    {
-        auto pathOS = isLinux() ? TargetOS::linux
-                                : TargetOS::windows;
-
-        vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder), Ids::vst3Path, pathOS)));
-
-        if (! isLinux())
-        {
-            aaxPath.referTo  (Value (new DependencyPathValueSource (getSetting (Ids::aaxFolder), Ids::aaxPath, pathOS)));
-            rtasPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::rtasFolder), Ids::rtasPath, pathOS)));
-        }
-    }
+    void initialiseDependencyPathValues() override  {}
 
 private:
     ValueWithDefault targetPlatformValue;
@@ -305,7 +282,6 @@ private:
                     case pluginBundle:
                         switch (type)
                         {
-                            case VST3PlugIn:    return ".vst3";
                             case VSTPlugIn:     return ".so";
                             default:            break;
                         }
@@ -322,8 +298,7 @@ private:
 
         bool isDynamicLibrary() const
         {
-            return (type == DynamicLibrary || type == VST3PlugIn
-                     || type == VSTPlugIn || type == AAXPlugIn);
+            return (type == DynamicLibrary || type == VSTPlugIn);
         }
 
         const CodeBlocksProjectExporter& exporter;
@@ -546,7 +521,6 @@ private:
                 return 2;
             case ProjectType::Target::DynamicLibrary:
             case ProjectType::Target::VSTPlugIn:
-            case ProjectType::Target::VST3PlugIn:
                 return 3;
             default:
                 break;
@@ -595,8 +569,7 @@ private:
 
             if (isLinux())
             {
-                bool keepPrefix = (target.type == ProjectType::Target::VSTPlugIn || target.type == ProjectType::Target::VST3PlugIn
-                                || target.type == ProjectType::Target::AAXPlugIn || target.type == ProjectType::Target::RTASPlugIn);
+                bool keepPrefix = (target.type == ProjectType::Target::VSTPlugIn);
 
                 output->setAttribute ("prefix_auto", keepPrefix ? 0 : 1);
             }

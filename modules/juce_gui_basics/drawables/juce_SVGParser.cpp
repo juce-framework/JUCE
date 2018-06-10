@@ -802,7 +802,7 @@ private:
     {
         if (xmlPath->hasTagNameIgnoringNamespace ("clipPath"))
         {
-            ScopedPointer<DrawableComposite> drawableClipPath (new DrawableComposite());
+            std::unique_ptr<DrawableComposite> drawableClipPath (new DrawableComposite());
 
             parseSubElements (xmlPath, *drawableClipPath, false);
 
@@ -1163,7 +1163,7 @@ private:
 
         auto link = xml->getStringAttribute ("xlink:href");
 
-        ScopedPointer<InputStream> inputStream;
+        std::unique_ptr<InputStream> inputStream;
         MemoryOutputStream imageStream;
 
         if (link.startsWith ("data:"))
@@ -1703,11 +1703,11 @@ Drawable* Drawable::createFromSVG (const XmlElement& svgDocument)
 Drawable* Drawable::createFromSVGFile (const File& svgFile)
 {
     XmlDocument doc (svgFile);
-    ScopedPointer<XmlElement> outer (doc.getDocumentElement (true));
+    std::unique_ptr<XmlElement> outer (doc.getDocumentElement (true));
 
     if (outer != nullptr && outer->hasTagName ("svg"))
     {
-        ScopedPointer<XmlElement> svgDocument (doc.getDocumentElement());
+        std::unique_ptr<XmlElement> svgDocument (doc.getDocumentElement());
 
         if (svgDocument != nullptr)
         {

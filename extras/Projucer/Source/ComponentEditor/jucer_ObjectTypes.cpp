@@ -106,15 +106,15 @@ PaintElement* createElementForXml (const XmlElement* const e, PaintRoutine* cons
 {
     jassert (e != nullptr);
 
-    ScopedPointer<PaintElement> pe;
+    std::unique_ptr<PaintElement> pe;
 
-    if (e->hasTagName (PaintElementRectangle::getTagName()))                pe = new PaintElementRectangle (owner);
-    else if (e->hasTagName (PaintElementRoundedRectangle::getTagName()))    pe = new PaintElementRoundedRectangle (owner);
-    else if (e->hasTagName (PaintElementEllipse::getTagName()))             pe = new PaintElementEllipse (owner);
-    else if (e->hasTagName (PaintElementImage::getTagName()))               pe = new PaintElementImage (owner);
-    else if (e->hasTagName (PaintElementPath::getTagName()))                pe = new PaintElementPath (owner);
-    else if (e->hasTagName (PaintElementText::getTagName()))                pe = new PaintElementText (owner);
-    else if (e->hasTagName (PaintElementGroup::getTagName()))               pe = new PaintElementGroup (owner);
+    if (e->hasTagName (PaintElementRectangle::getTagName()))                pe.reset (new PaintElementRectangle (owner));
+    else if (e->hasTagName (PaintElementRoundedRectangle::getTagName()))    pe.reset (new PaintElementRoundedRectangle (owner));
+    else if (e->hasTagName (PaintElementEllipse::getTagName()))             pe.reset (new PaintElementEllipse (owner));
+    else if (e->hasTagName (PaintElementImage::getTagName()))               pe.reset (new PaintElementImage (owner));
+    else if (e->hasTagName (PaintElementPath::getTagName()))                pe.reset (new PaintElementPath (owner));
+    else if (e->hasTagName (PaintElementText::getTagName()))                pe.reset (new PaintElementText (owner));
+    else if (e->hasTagName (PaintElementGroup::getTagName()))               pe.reset (new PaintElementGroup (owner));
 
     if (pe != nullptr && pe->loadFromXml (*e))
         return pe.release();

@@ -66,7 +66,7 @@ private:
     CriticalSection lock;
     OptionalScopedPointer<AudioSource> input;
     Reverb reverb;
-    volatile bool bypass;
+    std::atomic<bool> bypass;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ReverbAudioSource)
 };

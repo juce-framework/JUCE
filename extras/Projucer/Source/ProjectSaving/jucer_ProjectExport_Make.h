@@ -179,8 +179,8 @@ public:
             switch (type)
             {
                 case VSTPlugIn:
+                case UnityPlugIn:
                 case DynamicLibrary:        return ".so";
-                case VST3PlugIn:            return ".vst3";
                 case SharedCodeTarget:
                 case StaticLibrary:         return ".a";
                 default:                    break;
@@ -328,7 +328,7 @@ public:
     {
         name = getNameLinux();
 
-        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + "LinuxMakefile");
+        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderForExporter (getValueTreeTypeName()));
     }
 
     //==============================================================================
@@ -363,6 +363,7 @@ public:
             case ProjectType::Target::VSTPlugIn:
             case ProjectType::Target::StandalonePlugIn:
             case ProjectType::Target::DynamicLibrary:
+            case ProjectType::Target::UnityPlugIn:
                 return true;
             default:
                 break;
@@ -421,12 +422,7 @@ public:
     }
 
     //==============================================================================
-    void initialiseDependencyPathValues() override
-    {
-        vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder),
-                                                                Ids::vst3Path,
-                                                                TargetOS::linux)));
-    }
+    void initialiseDependencyPathValues() override  {}
 
 private:
     ValueWithDefault extraPkgConfigValue;

@@ -143,6 +143,7 @@
  #include <shlobj.h>
  #include <shlwapi.h>
  #include <mmsystem.h>
+ #include <winioctl.h>
 
  #if JUCE_MINGW
   #include <basetyps.h>

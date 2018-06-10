@@ -165,9 +165,9 @@ struct LicenseThread : NetWorkerThread
         jassert (stateToUpdate.authToken.isNotEmpty());
 
         auto accessTokenHeader = "x-access-token: " + stateToUpdate.authToken;
+        std::unique_ptr<WebInputStream> shared (getSharedWebInputStream (URL ("https://api.roli.com/api/v1/user"), false));
 
-        if (ScopedPointer<WebInputStream> shared
-              = getSharedWebInputStream (URL ("https://api.roli.com/api/v1/user"), false))
+        if (shared != nullptr)
         {
             const int statusCode = shared->withExtraHeaders (accessTokenHeader).getStatusCode();
 
@@ -215,8 +215,8 @@ struct LicenseThread : NetWorkerThread
 
             if (! selectNewLicense)
             {
-                ScopedPointer<WebInputStream> shared = getSharedWebInputStream (URL ("https://api.roli.com/api/v1/user/licences?search_internal_id=com.roli.projucer&version=5"),
-                                                                                false);
+                std::unique_ptr<WebInputStream> shared (getSharedWebInputStream (URL ("https://api.roli.com/api/v1/user/licences?search_internal_id=com.roli.projucer&version=5"),
+                                                                                 false));
                 if (shared == nullptr)
                     break;
 
@@ -274,8 +274,8 @@ struct LicenseThread : NetWorkerThread
 
                 String postData (JSON::toString (var (redeamObject.get())));
 
-                ScopedPointer<WebInputStream> shared = getSharedWebInputStream (URL ("https://api.roli.com/api/v1/user/products").withPOSTData (postData),
-                                                                                true);
+                std::unique_ptr<WebInputStream> shared (getSharedWebInputStream (URL ("https://api.roli.com/api/v1/user/products").withPOSTData (postData),
+                                                                                 true));
                 if (shared == nullptr)
                     break;
 
@@ -306,8 +306,9 @@ struct LicenseThread : NetWorkerThread
                 jsonLicenseRequest->setProperty (licenseTypeIdentifier, "software");
 
                 String postData (JSON::toString (var (jsonLicenseRequest.get())));
-                ScopedPointer<WebInputStream> shared
-                    = getSharedWebInputStream (URL ("https://api.roli.com/api/v1/user/products/redeem").withPOSTData (postData), true);
+                std::unique_ptr<WebInputStream> shared (getSharedWebInputStream (URL ("https://api.roli.com/api/v1/user/products/redeem")
+                                                                                     .withPOSTData (postData),
+                                                                                 true));
 
                 if (shared != nullptr)
                 {
@@ -390,7 +391,9 @@ struct LicenseThread : NetWorkerThread
 
             if (avatarURL.isNotEmpty())
             {
-                if (ScopedPointer<WebInputStream> shared = getSharedWebInputStream (URL (avatarURL), false))
+                std::unique_ptr<WebInputStream> shared (getSharedWebInputStream (URL (avatarURL), false));
+
+                if (shared != nullptr)
                 {
                     MemoryBlock mb;
                     shared->readIntoMemoryBlock (mb);

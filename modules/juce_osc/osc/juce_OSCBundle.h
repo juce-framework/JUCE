@@ -98,8 +98,8 @@ public:
 
     private:
         //==============================================================================
-        ScopedPointer<OSCMessage> message;
-        ScopedPointer<OSCBundle> bundle;
+        std::unique_ptr<OSCMessage> message;
+        std::unique_ptr<OSCBundle> bundle;
     };
 
     //==============================================================================
