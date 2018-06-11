@@ -93,7 +93,7 @@
                    androidEnableContentSharing="1" androidExtraAssetsFolder="../Assets"
                    smallIcon="YyqWd2" bigIcon="YyqWd2" cameraPermissionNeeded="1">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="1" name="Debug" androidArchitectures="armeabi x86"/>
+        <CONFIGURATION isDebug="1" name="Debug" androidArchitectures="armeabi-v7a x86"/>
         <CONFIGURATION isDebug="0" name="Release"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
