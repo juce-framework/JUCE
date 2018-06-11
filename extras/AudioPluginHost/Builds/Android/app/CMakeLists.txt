@@ -327,7 +327,6 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_processors/format_types/juce_VST3PluginFormat.cpp"
     "../../../../../modules/juce_audio_processors/format_types/juce_VST3PluginFormat.h"
     "../../../../../modules/juce_audio_processors/format_types/juce_VSTCommon.h"
-    "../../../../../modules/juce_audio_processors/format_types/juce_VSTInterface.h"
     "../../../../../modules/juce_audio_processors/format_types/juce_VSTMidiEventList.h"
     "../../../../../modules/juce_audio_processors/format_types/juce_VSTPluginFormat.cpp"
     "../../../../../modules/juce_audio_processors/format_types/juce_VSTPluginFormat.h"
@@ -1568,7 +1567,6 @@ set_source_files_properties("../../../../../modules/juce_audio_processors/format
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/juce_VST3PluginFormat.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/juce_VST3PluginFormat.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/juce_VSTCommon.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/juce_VSTInterface.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/juce_VSTMidiEventList.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/juce_VSTPluginFormat.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/juce_VSTPluginFormat.h" PROPERTIES HEADER_FILE_ONLY TRUE)

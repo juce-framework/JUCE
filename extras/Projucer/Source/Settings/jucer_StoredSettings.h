@@ -89,7 +89,24 @@ private:
         propertyFiles.getUnchecked (0)->setValue (isProjectDefaults ? "PROJECT_DEFAULT_SETTINGS"
                                                                     : "FALLBACK_PATHS",
                                                   data.get());
+
+        // also override the fallback settings if we are editing the project defaults
+        if (isProjectDefaults)
+        {
+            auto v = fallbackPaths.getOrCreateChildWithName (identifierForOS (TargetOS::getThisOS()), nullptr);
+            auto n = projectDefaults.getNumProperties();
+
+            for (int i = 0; i < n; ++i)
+            {
+                auto name = projectDefaults.getPropertyName (i);
+                v.setProperty (name, projectDefaults.getProperty(name), nullptr);
+            }
+
+            changed (false);
+        }
     }
+
+    static Identifier identifierForOS (DependencyPathOS os) noexcept;
 
     void updateGlobalPreferences();
     void updateRecentFiles();

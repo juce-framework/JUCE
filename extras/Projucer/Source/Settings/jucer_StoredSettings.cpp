@@ -297,17 +297,9 @@ Value StoredSettings::getStoredPath (const Identifier& key)
 
 Value StoredSettings::getFallbackPathForOS (const Identifier& key, DependencyPathOS os)
 {
-    auto id = Identifier();
-
-    if      (os == TargetOS::osx)     id = Ids::osxFallback;
-    else if (os == TargetOS::windows) id = Ids::windowsFallback;
-    else if (os == TargetOS::linux)   id = Ids::linuxFallback;
-
-    if (id == Identifier())
-        jassertfalse;
-
-    auto v = fallbackPaths.getOrCreateChildWithName (id, nullptr)
-                          .getPropertyAsValue (key, nullptr);
+    auto id = identifierForOS (os);
+    auto osFallback = fallbackPaths.getOrCreateChildWithName (id, nullptr);
+    auto v = osFallback.getPropertyAsValue (key, nullptr);
 
     if (v.toString().isEmpty())
     {
@@ -328,8 +320,7 @@ Value StoredSettings::getFallbackPathForOS (const Identifier& key, DependencyPat
         }
         else if (key == Ids::vst3Path)
         {
-            v = (os == TargetOS::windows ? "C:\\SDKs\\VST_SDK\\VST3_SDK"
-                                         : "~/SDKs/VST_SDK/VST3_SDK");
+            v = "";
         }
         else if (key == Ids::rtasPath)
         {
@@ -377,6 +368,16 @@ Value StoredSettings::getFallbackPathForOS (const Identifier& key, DependencyPat
     }
 
     return v;
+}
+
+Identifier StoredSettings::identifierForOS (DependencyPathOS os) noexcept
+{
+    if      (os == TargetOS::osx)     return Ids::osxFallback;
+    else if (os == TargetOS::windows) return Ids::windowsFallback;
+    else if (os == TargetOS::linux)   return Ids::linuxFallback;
+
+    jassertfalse;
+    return {};
 }
 
 static bool doesSDKPathContainFile (const File& relativeTo, const String& path, const String& fileToCheckFor) noexcept

@@ -329,13 +329,6 @@ void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
 
 void ProjectExporter::createDependencyPathProperties (PropertyListBuilder& props)
 {
-    if (shouldBuildTargetType (ProjectType::Target::VST3PlugIn) || project.isVST3PluginHost())
-    {
-        if (dynamic_cast<DependencyPathValueSource*> (&getVST3PathValue().getValueSource()) != nullptr)
-            props.add (new DependencyPathPropertyComponent (project.getFile().getParentDirectory(), getVST3PathValue(), "VST3 SDK Folder"),
-                       "If you're building a VST3 plugin or host, this must be the folder containing the VST3 SDK. This can be an absolute path, or a path relative to the Projucer project file.");
-    }
-
     if (shouldBuildTargetType (ProjectType::Target::AAXPlugIn) && project.shouldBuildAAX())
     {
         if (dynamic_cast<DependencyPathValueSource*> (&getAAXPathValue().getValueSource()) != nullptr)
@@ -388,7 +381,8 @@ void ProjectExporter::addSettingsForProjectType (const ProjectType& type)
 
 void ProjectExporter::addVSTPathsIfPluginOrHost()
 {
-    if (shouldBuildTargetType (ProjectType::Target::VST3PlugIn) || project.isVST3PluginHost())
+    if (shouldBuildTargetType (ProjectType::Target::VST3PlugIn) || project.isVST3PluginHost()
+         || shouldBuildTargetType (ProjectType::Target::VSTPlugIn) || project.isVSTPluginHost())
         addVST3FolderToPath();
 }
 
@@ -400,12 +394,21 @@ void ProjectExporter::addCommonAudioPluginSettings()
     // Note: RTAS paths are platform-dependent, impl -> addPlatformSpecificSettingsForProjectType
  }
 
+RelativePath ProjectExporter::getInternalVST3SDKPath()
+{
+    return getModuleFolderRelativeToProject ("juce_audio_processors")
+                           .getChildFile ("format_types")
+                           .getChildFile ("VST3_SDK");
+}
+
 void ProjectExporter::addVST3FolderToPath()
 {
     auto vst3Folder = getVST3PathValue().toString();
 
     if (vst3Folder.isNotEmpty())
         addToExtraSearchPaths (RelativePath (vst3Folder, RelativePath::projectFolder), 0);
+    else
+        addToExtraSearchPaths (getInternalVST3SDKPath(), 0);
 }
 
 void ProjectExporter::addAAXFoldersToPath()

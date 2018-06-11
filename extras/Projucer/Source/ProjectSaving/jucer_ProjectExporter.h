@@ -445,6 +445,7 @@ private:
     void createIconProperties (PropertyListBuilder&);
     void addVSTPathsIfPluginOrHost();
     void addCommonAudioPluginSettings();
+    RelativePath getInternalVST3SDKPath();
     void addVST3FolderToPath();
     void addAAXFoldersToPath();
 
