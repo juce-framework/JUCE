@@ -767,6 +767,10 @@ struct PhysicalTopologySource::Internal
                 BlockDeviceConnection dc;
                 dc.device1 = getDeviceIDFromIndex (c.device1);
                 dc.device2 = getDeviceIDFromIndex (c.device2);
+
+                if (dc.device1 <= 0 || dc.device2 <= 0)
+                    continue;
+
                 dc.connectionPortOnDevice1 = convertConnectionPort (dc.device1, c.port1);
                 dc.connectionPortOnDevice2 = convertConnectionPort (dc.device2, c.port2);
 
