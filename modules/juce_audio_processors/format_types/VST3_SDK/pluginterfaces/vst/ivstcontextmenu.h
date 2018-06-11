@@ -9,7 +9,7 @@
 //-----------------------------------------------------------------------------
 // This file is part of a Steinberg SDK. It is subject to the license terms
 // in the LICENSE file found in the top-level directory of this distribution
-// and at www.steinberg.net/sdklicenses. 
+// and at www.steinberg.net/sdklicenses.
 // No part of the SDK, including this file, may be copied, modified, propagated,
 // or distributed except according to the terms contained in the LICENSE file.
 //-----------------------------------------------------------------------------
@@ -30,7 +30,7 @@ namespace Vst {
 class IContextMenu;
 
 //------------------------------------------------------------------------
-/** Extended Host callback interface IComponentHandler3 for an edit controller. 
+/** Extended Host callback interface IComponentHandler3 for an edit controller.
 \ingroup vstIHost vst350
 - [host imp]
 - [extends IComponentHandler]
@@ -90,7 +90,7 @@ void popupContextMenu (IComponentHandler* componentHandler, IPlugView* view, con
 	{
 		// here you can add your entries (optional)
 		PluginContextMenuTarget* target = new PluginContextMenuTarget ();
-		
+
 		IContextMenu::Item item = {0};
 		UString128 ("My Item 1").copyTo (item.name, 128);
 		item.tag = 1;
@@ -101,7 +101,7 @@ void popupContextMenu (IComponentHandler* componentHandler, IPlugView* view, con
 		menu->addItem (item, target);
 		target->release ();
 		//--end of adding new entries
-		
+
 		// here the the context menu will be pop-up (and it waits a user interaction)
 		menu->popup (x, y);
 		menu->release ();
@@ -124,7 +124,7 @@ public:
 };
 
 DECLARE_CLASS_IID (IComponentHandler3, 0x69F11617, 0xD26B400D, 0xA4B6B964, 0x7B6EBBAB)
-	
+
 //------------------------------------------------------------------------
 /** Context Menu Item Target Interface.
 \ingroup vstIHost vstIPlug vst350
@@ -157,7 +157,7 @@ DECLARE_CLASS_IID (IContextMenuTarget, 0x3CDF2E75, 0x85D34144, 0xBF86D36B, 0xD7C
 - [released: 3.5.0]
 
 A context menu is composed of Item (entry). A Item is defined by a name, a tag, a flag
-and a associated target (called when this item will be selected/executed). 
+and a associated target (called when this item will be selected/executed).
 With IContextMenu the Plug-in can retrieve a Item, add a Item, remove a Item and pop-up the menu.
 
 See IComponentHandler3 for more.

@@ -6,28 +6,28 @@
 // Filename    : pluginterfaces/vst2.x/aeffectx.h
 // Created by  : Steinberg, 01/2004
 // Description : Definition of auxiliary structures, extensions from VST 1.0 to VST 2.4
-// 
+//
 //-----------------------------------------------------------------------------
 // LICENSE
 // (c) 2018, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
-// This Software Development Kit may not be distributed in parts or its entirety  
-// without prior written agreement by Steinberg Media Technologies GmbH. 
-// This SDK must not be used to re-engineer or manipulate any technology used  
-// in any Steinberg or Third-party application or software module, 
+// This Software Development Kit may not be distributed in parts or its entirety
+// without prior written agreement by Steinberg Media Technologies GmbH.
+// This SDK must not be used to re-engineer or manipulate any technology used
+// in any Steinberg or Third-party application or software module,
 // unless permitted by law.
 // Neither the name of the Steinberg Media Technologies nor the names of its
-// contributors may be used to endorse or promote products derived from this 
+// contributors may be used to endorse or promote products derived from this
 // software without specific prior written permission.
-// 
+//
 // THIS SDK IS PROVIDED BY STEINBERG MEDIA TECHNOLOGIES GMBH "AS IS" AND
-// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-// IN NO EVENT SHALL STEINBERG MEDIA TECHNOLOGIES GMBH BE LIABLE FOR ANY DIRECT, 
-// INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
-// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF 
-// LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE 
+// IN NO EVENT SHALL STEINBERG MEDIA TECHNOLOGIES GMBH BE LIABLE FOR ANY DIRECT,
+// INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+// LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
 // OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------------------------
@@ -168,12 +168,12 @@ struct VstMidiSysexEvent
 // VstTimeInfo
 //-------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------
-/** VstTimeInfo requested via #audioMasterGetTime.  @see AudioEffectX::getTimeInfo 
+/** VstTimeInfo requested via #audioMasterGetTime.  @see AudioEffectX::getTimeInfo
 
 \note VstTimeInfo::samplePos :Current Position. It must always be valid, and should not cost a lot to ask for. The sample position is ahead of the time displayed to the user. In sequencer stop mode, its value does not change. A 32 bit integer is too small for sample positions, and it's a double to make it easier to convert between ppq and samples.
 \note VstTimeInfo::ppqPos : At tempo 120, 1 quarter makes 1/2 second, so 2.0 ppq translates to 48000 samples at 48kHz sample rate.
 .25 ppq is one sixteenth note then. if you need something like 480ppq, you simply multiply ppq by that scaler.
-\note VstTimeInfo::barStartPos : Say we're at bars/beats readout 3.3.3. That's 2 bars + 2 q + 2 sixteenth, makes 2 * 4 + 2 + .25 = 10.25 ppq. at tempo 120, that's 10.25 * .5 = 5.125 seconds, times 48000 = 246000 samples (if my calculator servers me well :-). 
+\note VstTimeInfo::barStartPos : Say we're at bars/beats readout 3.3.3. That's 2 bars + 2 q + 2 sixteenth, makes 2 * 4 + 2 + .25 = 10.25 ppq. at tempo 120, that's 10.25 * .5 = 5.125 seconds, times 48000 = 246000 samples (if my calculator servers me well :-).
 \note VstTimeInfo::samplesToNextClock : MIDI Clock Resolution (24 per Quarter Note), can be negative the distance to the next midi clock (24 ppq, pulses per quarter) in samples. unless samplePos falls precicely on a midi clock, this will either be negative such that the previous MIDI clock is addressed, or positive when referencing the following (future) MIDI clock.
 */
 //-------------------------------------------------------------------------------------------------------
@@ -291,7 +291,7 @@ enum AudioMasterOpcodesX
 	audioMasterIOChanged,			///< [return value]: 1 if supported  @see AudioEffectX::ioChanged
 
 	DECLARE_VST_DEPRECATED (audioMasterNeedIdle),	///< \deprecated deprecated in VST 2.4
-	
+
 	audioMasterSizeWindow,			///< [index]: new width [value]: new height [return value]: 1 if supported  @see AudioEffectX::sizeWindow
 	audioMasterGetSampleRate,		///< [return value]: current sample rate  @see AudioEffectX::updateSampleRate
 	audioMasterGetBlockSize,		///< [return value]: current block size  @see AudioEffectX::updateBlockSize
@@ -318,9 +318,9 @@ enum AudioMasterOpcodesX
 	audioMasterGetProductString,		///< [ptr]: char buffer for vendor string, limited to #kVstMaxProductStrLen  @see AudioEffectX::getHostProductString
 	audioMasterGetVendorVersion,		///< [return value]: vendor-specific version  @see AudioEffectX::getHostVendorVersion
 	audioMasterVendorSpecific,			///< no definition, vendor specific handling  @see AudioEffectX::hostVendorSpecific
-	
+
 	DECLARE_VST_DEPRECATED (audioMasterSetIcon),		///< \deprecated deprecated in VST 2.4
-	
+
 	audioMasterCanDo,					///< [ptr]: "can do" string [return value]: 1 for supported
 	audioMasterGetLanguage,				///< [return value]: language code  @see VstHostLanguage
 
@@ -328,14 +328,14 @@ enum AudioMasterOpcodesX
 	DECLARE_VST_DEPRECATED (audioMasterCloseWindow),	///< \deprecated deprecated in VST 2.4
 
 	audioMasterGetDirectory,			///< [return value]: FSSpec on MAC, else char*  @see AudioEffectX::getDirectory
-	audioMasterUpdateDisplay,			///< no arguments	
+	audioMasterUpdateDisplay,			///< no arguments
 	audioMasterBeginEdit,               ///< [index]: parameter index  @see AudioEffectX::beginEdit
 	audioMasterEndEdit,                 ///< [index]: parameter index  @see AudioEffectX::endEdit
 	audioMasterOpenFileSelector,		///< [ptr]: VstFileSelect* [return value]: 1 if supported  @see AudioEffectX::openFileSelector
 	audioMasterCloseFileSelector,		///< [ptr]: VstFileSelect*  @see AudioEffectX::closeFileSelector
-	
+
 	DECLARE_VST_DEPRECATED (audioMasterEditFile),		///< \deprecated deprecated in VST 2.4
-	
+
 	DECLARE_VST_DEPRECATED (audioMasterGetChunkFile),	///< \deprecated deprecated in VST 2.4 [ptr]: char[2048] or sizeof (FSSpec) [return value]: 1 if supported  @see AudioEffectX::getChunkFile
 
 	DECLARE_VST_DEPRECATED (audioMasterGetInputSpeakerArrangement)	///< \deprecated deprecated in VST 2.4
@@ -355,11 +355,11 @@ enum AEffectXOpcodes
 	, DECLARE_VST_DEPRECATED (effGetNumProgramCategories)	///< \deprecated deprecated in VST 2.4
 
 	, effGetProgramNameIndexed				///< [index]: program index [ptr]: buffer for program name, limited to #kVstMaxProgNameLen [return value]: true for success  @see AudioEffectX::getProgramNameIndexed
-	
+
 	, DECLARE_VST_DEPRECATED (effCopyProgram)	///< \deprecated deprecated in VST 2.4
 	, DECLARE_VST_DEPRECATED (effConnectInput)	///< \deprecated deprecated in VST 2.4
 	, DECLARE_VST_DEPRECATED (effConnectOutput)	///< \deprecated deprecated in VST 2.4
-	
+
 	, effGetInputProperties					///< [index]: input index [ptr]: #VstPinProperties* [return value]: 1 if supported  @see AudioEffectX::getInputProperties
 	, effGetOutputProperties				///< [index]: output index [ptr]: #VstPinProperties* [return value]: 1 if supported  @see AudioEffectX::getOutputProperties
 	, effGetPlugCategory					///< [return value]: category  @see VstPlugCategory @see AudioEffectX::getPlugCategory
@@ -408,7 +408,7 @@ enum AEffectXOpcodes
 	, effGetMidiProgramCategory				///< [index]: MIDI channel [ptr]: #MidiProgramCategory* [return value]: number of used categories, 0 if unsupported  @see AudioEffectX::getMidiProgramCategory
 	, effHasMidiProgramsChanged				///< [index]: MIDI channel [return value]: 1 if the #MidiProgramName(s) or #MidiKeyName(s) have changed  @see AudioEffectX::hasMidiProgramsChanged
 	, effGetMidiKeyName						///< [index]: MIDI channel [ptr]: #MidiKeyName* [return value]: true if supported, false otherwise  @see AudioEffectX::getMidiKeyName
-	
+
 	, effBeginSetProgram					///< no arguments  @see AudioEffectX::beginSetProgram
 	, effEndSetProgram						///< no arguments  @see AudioEffectX::endSetProgram
 #endif // VST_2_1_EXTENSIONS
@@ -421,7 +421,7 @@ enum AEffectXOpcodes
 	, effStopProcess						///< no arguments  @see AudioEffectX::stopProcess
 	, effSetTotalSampleToProcess		    ///< [value]: number of samples to process, offline only!  @see AudioEffectX::setTotalSampleToProcess
 	, effSetPanLaw							///< [value]: pan law [opt]: gain  @see VstPanLawType @see AudioEffectX::setPanLaw
-	
+
 	, effBeginLoadBank						///< [ptr]: #VstPatchChunkInfo* [return value]: -1: bank can't be loaded, 1: bank can be loaded, 0: unsupported  @see AudioEffectX::beginLoadBank
 	, effBeginLoadProgram					///< [ptr]: #VstPatchChunkInfo* [return value]: -1: prog can't be loaded, 1: prog can be loaded, 0: unsupported  @see AudioEffectX::beginLoadProgram
 #endif // VST_2_3_EXTENSIONS
@@ -477,7 +477,7 @@ struct VstParameterProperties
 	VstInt16 category;			///< 0: no category, else group index + 1
 	VstInt16 numParametersInCategory;			///< number of parameters in category
 	VstInt16 reserved;			///< zero
-	char categoryLabel[kVstMaxCategLabelLen];	///< category label, e.g. "Osc 1" 
+	char categoryLabel[kVstMaxCategLabelLen];	///< category label, e.g. "Osc 1"
 
 	char future[16];			///< reserved for future use
 //-------------------------------------------------------------------------------------------------------
@@ -555,7 +555,7 @@ enum VstPlugCategory
 //-------------------------------------------------------------------------------------------------------
 /** MIDI Program Description. */
 //-------------------------------------------------------------------------------------------------------
-struct MidiProgramName 
+struct MidiProgramName
 {
 //-------------------------------------------------------------------------------------------------------
 	VstInt32 thisProgramIndex;		///< 0 or greater: fill struct for this program index
@@ -582,7 +582,7 @@ enum VstMidiProgramNameFlags
 //-------------------------------------------------------------------------------------------------------
 /** MIDI Program Category. */
 //-------------------------------------------------------------------------------------------------------
-struct MidiProgramCategory 
+struct MidiProgramCategory
 {
 //-------------------------------------------------------------------------------------------------------
 	VstInt32 thisCategoryIndex;		///< 0 or greater:  fill struct for this category index.
@@ -595,7 +595,7 @@ struct MidiProgramCategory
 //-------------------------------------------------------------------------------------------------------
 /** MIDI Key Description. */
 //-------------------------------------------------------------------------------------------------------
-struct MidiKeyName 
+struct MidiKeyName
 {
 //-------------------------------------------------------------------------------------------------------
 	VstInt32 thisProgramIndex;		///< 0 or greater:  fill struct for this program index.
@@ -637,7 +637,7 @@ typedef struct VstSpeakerProperties
 /** Speaker Arrangement. */
 //-------------------------------------------------------------------------------------------------------
 struct VstSpeakerArrangement
-{	
+{
 //-------------------------------------------------------------------------------------------------------
 	VstInt32 type;						///< e.g. #kSpeakerArr51 for 5.1  @see VstSpeakerArrangementType
 	VstInt32 numChannels;				///< number of channels in this speaker arrangement
@@ -684,18 +684,18 @@ enum VstSpeakerType
 enum VstUserSpeakerType
 {
 //-------------------------------------------------------------------------------------------------------
-	kSpeakerU32 = -32,	
-	kSpeakerU31,			
-	kSpeakerU30,			
-	kSpeakerU29,			
-	kSpeakerU28,			
-	kSpeakerU27,			
-	kSpeakerU26,			
-	kSpeakerU25,			
-	kSpeakerU24,			
-	kSpeakerU23,			
-	kSpeakerU22,			
-	kSpeakerU21,			
+	kSpeakerU32 = -32,
+	kSpeakerU31,
+	kSpeakerU30,
+	kSpeakerU29,
+	kSpeakerU28,
+	kSpeakerU27,
+	kSpeakerU26,
+	kSpeakerU25,
+	kSpeakerU24,
+	kSpeakerU23,
+	kSpeakerU22,
+	kSpeakerU21,
 	kSpeakerU20,			///< == #kSpeakerLfe2
 	kSpeakerU19,			///< == #kSpeakerTrr
 	kSpeakerU18,			///< == #kSpeakerTrc
@@ -741,20 +741,20 @@ enum VstSpeakerArrangementType
 	kSpeakerArr40Music,			///< L R Ls  Rs (Quadro)
 	kSpeakerArr41Cine,			///< L R C   Lfe S (LCRS+Lfe)
 	kSpeakerArr41Music,			///< L R Lfe Ls Rs (Quadro+Lfe)
-	kSpeakerArr50,				///< L R C Ls  Rs 
+	kSpeakerArr50,				///< L R C Ls  Rs
 	kSpeakerArr51,				///< L R C Lfe Ls Rs
 	kSpeakerArr60Cine,			///< L R C   Ls  Rs Cs
-	kSpeakerArr60Music,			///< L R Ls  Rs  Sl Sr 
+	kSpeakerArr60Music,			///< L R Ls  Rs  Sl Sr
 	kSpeakerArr61Cine,			///< L R C   Lfe Ls Rs Cs
-	kSpeakerArr61Music,			///< L R Lfe Ls  Rs Sl Sr 
-	kSpeakerArr70Cine,			///< L R C Ls  Rs Lc Rc 
+	kSpeakerArr61Music,			///< L R Lfe Ls  Rs Sl Sr
+	kSpeakerArr70Cine,			///< L R C Ls  Rs Lc Rc
 	kSpeakerArr70Music,			///< L R C Ls  Rs Sl Sr
 	kSpeakerArr71Cine,			///< L R C Lfe Ls Rs Lc Rc
 	kSpeakerArr71Music,			///< L R C Lfe Ls Rs Sl Sr
 	kSpeakerArr80Cine,			///< L R C Ls  Rs Lc Rc Cs
 	kSpeakerArr80Music,			///< L R C Ls  Rs Cs Sl Sr
 	kSpeakerArr81Cine,			///< L R C Lfe Ls Rs Lc Rc Cs
-	kSpeakerArr81Music,			///< L R C Lfe Ls Rs Cs Sl Sr 
+	kSpeakerArr81Music,			///< L R C Lfe Ls Rs Cs Sl Sr
 	kSpeakerArr102,				///< L R C Lfe Ls Rs Tfl Tfc Tfr Trl Trr Lfe2
 	kNumSpeakerArr
 //-------------------------------------------------------------------------------------------------------
@@ -953,61 +953,61 @@ struct VstKeyCode
 //-------------------------------------------------------------------------------------------------------
 /** Platform-independent definition of Virtual Keys (used in #VstKeyCode). */
 //-------------------------------------------------------------------------------------------------------
-enum VstVirtualKey 
+enum VstVirtualKey
 {
 //-------------------------------------------------------------------------------------------------------
-	VKEY_BACK = 1, 
-	VKEY_TAB, 
-	VKEY_CLEAR, 
-	VKEY_RETURN, 
-	VKEY_PAUSE, 
-	VKEY_ESCAPE, 
-	VKEY_SPACE, 
-	VKEY_NEXT, 
-	VKEY_END, 
-	VKEY_HOME, 
-	VKEY_LEFT, 
-	VKEY_UP, 
-	VKEY_RIGHT, 
-	VKEY_DOWN, 
-	VKEY_PAGEUP, 
-	VKEY_PAGEDOWN, 
-	VKEY_SELECT, 
-	VKEY_PRINT, 
-	VKEY_ENTER, 
-	VKEY_SNAPSHOT, 
-	VKEY_INSERT, 
-	VKEY_DELETE, 
-	VKEY_HELP, 
-	VKEY_NUMPAD0, 
-	VKEY_NUMPAD1, 
-	VKEY_NUMPAD2, 
-	VKEY_NUMPAD3, 
-	VKEY_NUMPAD4, 
-	VKEY_NUMPAD5, 
-	VKEY_NUMPAD6, 
-	VKEY_NUMPAD7, 
-	VKEY_NUMPAD8, 
-	VKEY_NUMPAD9, 
-	VKEY_MULTIPLY, 
-	VKEY_ADD, 
-	VKEY_SEPARATOR, 
-	VKEY_SUBTRACT, 
-	VKEY_DECIMAL, 
-	VKEY_DIVIDE, 
-	VKEY_F1, 
-	VKEY_F2, 
-	VKEY_F3, 
-	VKEY_F4, 
-	VKEY_F5, 
-	VKEY_F6, 
-	VKEY_F7, 
-	VKEY_F8, 
-	VKEY_F9, 
-	VKEY_F10, 
-	VKEY_F11, 
-	VKEY_F12, 
-	VKEY_NUMLOCK, 
+	VKEY_BACK = 1,
+	VKEY_TAB,
+	VKEY_CLEAR,
+	VKEY_RETURN,
+	VKEY_PAUSE,
+	VKEY_ESCAPE,
+	VKEY_SPACE,
+	VKEY_NEXT,
+	VKEY_END,
+	VKEY_HOME,
+	VKEY_LEFT,
+	VKEY_UP,
+	VKEY_RIGHT,
+	VKEY_DOWN,
+	VKEY_PAGEUP,
+	VKEY_PAGEDOWN,
+	VKEY_SELECT,
+	VKEY_PRINT,
+	VKEY_ENTER,
+	VKEY_SNAPSHOT,
+	VKEY_INSERT,
+	VKEY_DELETE,
+	VKEY_HELP,
+	VKEY_NUMPAD0,
+	VKEY_NUMPAD1,
+	VKEY_NUMPAD2,
+	VKEY_NUMPAD3,
+	VKEY_NUMPAD4,
+	VKEY_NUMPAD5,
+	VKEY_NUMPAD6,
+	VKEY_NUMPAD7,
+	VKEY_NUMPAD8,
+	VKEY_NUMPAD9,
+	VKEY_MULTIPLY,
+	VKEY_ADD,
+	VKEY_SEPARATOR,
+	VKEY_SUBTRACT,
+	VKEY_DECIMAL,
+	VKEY_DIVIDE,
+	VKEY_F1,
+	VKEY_F2,
+	VKEY_F3,
+	VKEY_F4,
+	VKEY_F5,
+	VKEY_F6,
+	VKEY_F7,
+	VKEY_F8,
+	VKEY_F9,
+	VKEY_F10,
+	VKEY_F11,
+	VKEY_F12,
+	VKEY_NUMLOCK,
 	VKEY_SCROLL,
 	VKEY_SHIFT,
 	VKEY_CONTROL,

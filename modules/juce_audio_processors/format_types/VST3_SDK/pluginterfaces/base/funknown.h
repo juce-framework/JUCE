@@ -9,7 +9,7 @@
 //-----------------------------------------------------------------------------
 // This file is part of a Steinberg SDK. It is subject to the license terms
 // in the LICENSE file found in the top-level directory of this distribution
-// and at www.steinberg.net/sdklicenses. 
+// and at www.steinberg.net/sdklicenses.
 // No part of the SDK, including this file, may be copied, modified, propagated,
 // or distributed except according to the terms contained in the LICENSE file.
 //-----------------------------------------------------------------------------
@@ -228,7 +228,7 @@ public:
 	FUID (uint32 l1, uint32 l2, uint32 l3, uint32 l4);
 	FUID (const FUID&);
 	virtual ~FUID () {}
-	
+
 #if SMTG_CPP11_STDLIBSUPPORT
 	FUID (FUID&& other);
 	FUID& operator= (FUID&& other);
@@ -261,8 +261,8 @@ public:
 
 	/** Converts UID to a string.
 		The string will be 32 characters long, representing the hexadecimal values
-		of each data byte (e.g. "9127BE30160E4BB69966670AA6087880"). 
-		
+		of each data byte (e.g. "9127BE30160E4BB69966670AA6087880").
+
 		Typical use-case is:
 		\code
 		char8[33] strUID = {0};
@@ -308,7 +308,7 @@ public:
 	inline void toTUID (TUID result) const { memcpy (result, data, sizeof (TUID)); }
 	inline operator const TUID& () const { return data; }
 	inline const TUID& toTUID () const { return data; }
-	
+
 	static FUID fromTUID (const TUID uid)
 	{
 		FUID res;
@@ -332,7 +332,7 @@ inline bool operator== (const FUID& f1, T f2)
 	return f1.operator== (f2);
 }
 #endif
-	
+
 //------------------------------------------------------------------------
 // FUnknown
 //------------------------------------------------------------------------

@@ -9,7 +9,7 @@
 //-----------------------------------------------------------------------------
 // This file is part of a Steinberg SDK. It is subject to the license terms
 // in the LICENSE file found in the top-level directory of this distribution
-// and at www.steinberg.net/sdklicenses. 
+// and at www.steinberg.net/sdklicenses.
 // No part of the SDK, including this file, may be copied, modified, propagated,
 // or distributed except according to the terms contained in the LICENSE file.
 //-----------------------------------------------------------------------------
@@ -47,7 +47,7 @@ struct ParameterInfo
 	String128 title;		///< parameter title (e.g. "Volume")
 	String128 shortTitle;	///< parameter shortTitle (e.g. "Vol")
 	String128 units;		///< parameter unit (e.g. "dB")
-	int32 stepCount;		///< number of discrete steps (0: continuous, 1: toggle, discrete value otherwise 
+	int32 stepCount;		///< number of discrete steps (0: continuous, 1: toggle, discrete value otherwise
 							///< (corresponding to max - min, for example: 127 for a min = 0 and a max = 127) - see \ref vst3parameterIntro)
 	ParamValue defaultNormalizedValue;	///< default normalized value [0,1] (in case of discrete value: defaultNormalizedValue = defDiscreteValue / stepCount)
 	UnitID unitId;			///< id of unit this parameter belongs to (see \ref vst3UnitsIntro)
@@ -60,7 +60,7 @@ struct ParameterInfo
 		kIsWrapAround	 = 1 << 2,	///< attempts to set the parameter value out of the limits will result in a wrap around [SDK 3.0.2]
 		kIsList			 = 1 << 3,	///< parameter should be displayed as list in generic editor or automation editing [SDK 3.1.0]
 
-		kIsProgramChange = 1 << 15,	///< parameter is a program change (unitId gives info about associated unit 
+		kIsProgramChange = 1 << 15,	///< parameter is a program change (unitId gives info about associated unit
 									///< - see \ref vst3UnitPrograms)
 		kIsBypass		 = 1 << 16	///< special bypass parameter (only one allowed): Plug-in can handle bypass
 									///< (highly recommended to export a bypass parameter for effect Plug-in)
@@ -82,7 +82,7 @@ enum RestartFlags
 {
 	kReloadComponent			= 1 << 0,	///< The Component should be reloaded             [SDK 3.0.0]
 	kIoChanged					= 1 << 1,	///< Input and/or Output Bus configuration has changed        [SDK 3.0.0]
-	kParamValuesChanged			= 1 << 2,	///< Multiple parameter values have changed 
+	kParamValuesChanged			= 1 << 2,	///< Multiple parameter values have changed
 											///< (as result of a program change for example)  [SDK 3.0.0]
 	kLatencyChanged				= 1 << 3,	///< Latency has changed (IAudioProcessor.getLatencySamples)  [SDK 3.0.0]
 	kParamTitlesChanged			= 1 << 4,	///< Parameter titles or default values or flags have changed [SDK 3.0.0]
@@ -217,8 +217,8 @@ DECLARE_CLASS_IID (IComponentHandler2, 0xF040B4B3, 0xA36045EC, 0xABCDC045, 0xB4D
 - [extends IComponentHandler]
 - [released: 3.6.8]
 
-Allows the Plug-in to request the host to activate or deactivate a specific bus, 
-if the host accepts it will call later on IComponent::activateBus (see \ref IComponent::activateBus). 
+Allows the Plug-in to request the host to activate or deactivate a specific bus,
+if the host accepts it will call later on IComponent::activateBus (see \ref IComponent::activateBus).
 Useful especially for Instrument with more than 1 outputs, where the user could request
 from the Plug-in UI a given output bus activation.
 
@@ -330,12 +330,12 @@ public:
 	virtual tresult PLUGIN_API setKnobMode (KnobMode mode) = 0;
 
 	/** Host could ask to open the Plug-in help (could be: opening a PDF document or link to a web page).
-	    The host could call it with onlyCheck set to true for testing support of open Help. 
+	    The host could call it with onlyCheck set to true for testing support of open Help.
 		Return kResultFalse means not supported function. */
 	virtual tresult PLUGIN_API openHelp (TBool onlyCheck) = 0;
 
 	/** Host could ask to open the Plug-in about box.
-	    The host could call it with onlyCheck set to true for testing support of open AboutBox. 
+	    The host could call it with onlyCheck set to true for testing support of open AboutBox.
 		Return kResultFalse means not supported function. */
 	virtual tresult PLUGIN_API openAboutBox (TBool onlyCheck) = 0;
 

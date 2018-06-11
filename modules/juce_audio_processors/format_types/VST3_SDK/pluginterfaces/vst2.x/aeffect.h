@@ -6,28 +6,28 @@
 // Filename    : pluginterfaces/vst2.x/aeffect.h
 // Created by  : Steinberg, 01/2004
 // Description : Definition of AEffect structure (VST 1.0)
-// 
+//
 //-----------------------------------------------------------------------------
 // LICENSE
 // (c) 2018, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
-// This Software Development Kit may not be distributed in parts or its entirety  
-// without prior written agreement by Steinberg Media Technologies GmbH. 
-// This SDK must not be used to re-engineer or manipulate any technology used  
-// in any Steinberg or Third-party application or software module, 
+// This Software Development Kit may not be distributed in parts or its entirety
+// without prior written agreement by Steinberg Media Technologies GmbH.
+// This SDK must not be used to re-engineer or manipulate any technology used
+// in any Steinberg or Third-party application or software module,
 // unless permitted by law.
 // Neither the name of the Steinberg Media Technologies nor the names of its
-// contributors may be used to endorse or promote products derived from this 
+// contributors may be used to endorse or promote products derived from this
 // software without specific prior written permission.
-// 
+//
 // THIS SDK IS PROVIDED BY STEINBERG MEDIA TECHNOLOGIES GMBH "AS IS" AND
-// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-// IN NO EVENT SHALL STEINBERG MEDIA TECHNOLOGIES GMBH BE LIABLE FOR ANY DIRECT, 
-// INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
-// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF 
-// LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE 
+// IN NO EVENT SHALL STEINBERG MEDIA TECHNOLOGIES GMBH BE LIABLE FOR ANY DIRECT,
+// INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+// LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
 // OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 //----------------------------------------------------------------------------------
@@ -105,7 +105,7 @@
 
 /** Disable for Hosts to serve Plug-ins below VST 2.4 */
 #ifndef VST_FORCE_DEPRECATED
-#define VST_FORCE_DEPRECATED VST_2_4_EXTENSIONS 
+#define VST_FORCE_DEPRECATED VST_2_4_EXTENSIONS
 #endif
 
 /** Declares identifier as deprecated. */
@@ -180,10 +180,10 @@ struct AEffect
 
 	/** Host to Plug-in dispatcher @see AudioEffect::dispatcher */
 	AEffectDispatcherProc dispatcher;
-	
+
 	/** \deprecated Accumulating process mode is deprecated in VST 2.4! Use AEffect::processReplacing instead! */
 	AEffectProcessProc DECLARE_VST_DEPRECATED (process);
-	
+
 	/** Set new value of automatable parameter @see AudioEffect::setParameter */
 	AEffectSetParameterProc setParameter;
 
@@ -196,12 +196,12 @@ struct AEffect
 	VstInt32 numOutputs;	///< number of audio outputs
 
 	VstInt32 flags;			///< @see VstAEffectFlags
-	
+
 	VstIntPtr resvd1;		///< reserved for Host, must be 0
 	VstIntPtr resvd2;		///< reserved for Host, must be 0
-	
+
 	VstInt32 initialDelay;	///< for algorithms which need input in the first place (Group delay or latency in Samples). This value should be initialized in a resume state.
-	
+
 	VstInt32 DECLARE_VST_DEPRECATED (realQualities);	///< \deprecated unused member
 	VstInt32 DECLARE_VST_DEPRECATED (offQualities);		///< \deprecated unused member
 	float    DECLARE_VST_DEPRECATED (ioRatio);			///< \deprecated unused member
@@ -218,7 +218,7 @@ struct AEffect
 #if VST_2_4_EXTENSIONS
 	/** Process double-precision audio samples in replacing mode @see AudioEffect::processDoubleReplacing */
 	AEffectProcessDoubleProc processDoubleReplacing;
-	
+
 	char future[56];		///< reserved for future use (please zero)
 #else
 	char future[60];		///< reserved for future use (please zero)
@@ -262,11 +262,11 @@ enum AEffectOpcodes
 	effGetProgram,		///< [return value]: current program number  @see AudioEffect::getProgram
 	effSetProgramName,	///< [ptr]: char* with new program name, limited to #kVstMaxProgNameLen  @see AudioEffect::setProgramName
 	effGetProgramName,	///< [ptr]: char buffer for current program name, limited to #kVstMaxProgNameLen  @see AudioEffect::getProgramName
-	
+
 	effGetParamLabel,	///< [ptr]: char buffer for parameter label, limited to #kVstMaxParamStrLen  @see AudioEffect::getParameterLabel
 	effGetParamDisplay,	///< [ptr]: char buffer for parameter display, limited to #kVstMaxParamStrLen  @see AudioEffect::getParameterDisplay
 	effGetParamName,	///< [ptr]: char buffer for parameter name, limited to #kVstMaxParamStrLen  @see AudioEffect::getParameterName
-	
+
 	DECLARE_VST_DEPRECATED (effGetVu),	///< \deprecated deprecated in VST 2.4
 
 	effSetSampleRate,	///< [opt]: new sample rate for audio processing  @see AudioEffect::setSampleRate
@@ -282,15 +282,15 @@ enum AEffectOpcodes
 	DECLARE_VST_DEPRECATED (effEditKey),	///< \deprecated deprecated in VST 2.4
 
 	effEditIdle,		///< no arguments @see AEffEditor::idle
-	
+
 	DECLARE_VST_DEPRECATED (effEditTop),	///< \deprecated deprecated in VST 2.4
 	DECLARE_VST_DEPRECATED (effEditSleep),	///< \deprecated deprecated in VST 2.4
 	DECLARE_VST_DEPRECATED (effIdentify),	///< \deprecated deprecated in VST 2.4
-	
+
 	effGetChunk,		///< [ptr]: void** for chunk data address [index]: 0 for bank, 1 for program  @see AudioEffect::getChunk
 	effSetChunk,		///< [ptr]: chunk data [value]: byte size [index]: 0 for bank, 1 for program  @see AudioEffect::setChunk
- 
-	effNumOpcodes		
+
+	effNumOpcodes
 };
 
 //-------------------------------------------------------------------------------------------------------
@@ -324,7 +324,7 @@ enum VstStringConstants
 #ifdef  __cplusplus
 #define VST_INLINE inline
 #else
-#define VST_INLINE 
+#define VST_INLINE
 #endif
 
 //-------------------------------------------------------------------------------------------------------
