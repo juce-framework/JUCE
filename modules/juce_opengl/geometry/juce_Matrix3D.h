@@ -97,7 +97,7 @@ public:
         mat[12] = vector.x; mat[13] = vector.y; mat[14] = vector.z;  mat[15] = Type (1);
     }
 
-    /** Returns a new matrix from the given frustrum values. */
+    /** Returns a new matrix from the given frustum values. */
     static Matrix3D fromFrustum (Type left, Type right, Type bottom, Type top, Type nearDistance, Type farDistance) noexcept
     {
         return { (Type (2) * nearDistance) / (right - left), 0, 0, 0,
