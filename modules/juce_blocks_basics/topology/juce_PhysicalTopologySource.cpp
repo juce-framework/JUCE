@@ -535,7 +535,6 @@ struct PhysicalTopologySource::Internal
             currentDeviceInfo = getArrayOfDeviceInfo (incomingTopologyDevices);
             currentDeviceConnections = getArrayOfConnections (incomingTopologyConnections);
             currentTopologyDevices = incomingTopologyDevices;
-            currentTopologyConnections = incomingTopologyConnections;
             detector.handleTopologyChange();
 
             lastTopologyReceiveTime = juce::Time::getCurrentTime();
@@ -708,7 +707,7 @@ struct PhysicalTopologySource::Internal
         std::unique_ptr<DeviceConnection> deviceConnection;
 
         juce::Array<BlocksProtocol::DeviceStatus> incomingTopologyDevices, currentTopologyDevices;
-        juce::Array<BlocksProtocol::DeviceConnection> incomingTopologyConnections, currentTopologyConnections;
+        juce::Array<BlocksProtocol::DeviceConnection> incomingTopologyConnections;
 
         juce::CriticalSection incomingPacketLock;
         juce::Array<juce::MemoryBlock> incomingPackets;
