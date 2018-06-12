@@ -743,6 +743,7 @@ namespace AAXClasses
             void initRandomAccessReader(const float * const inAudioIns[], int numOfActualInputs, int numOfInputsInBuffer)
             {
                 sampleRate = getAAXProcessor().sampleRate;
+                bitsPerSample = 32;
                 usesFloatingPointData = true;
                 lastValidRandomInput = inAudioIns;
                 numChannels = numOfActualInputs + (GetSideChainInputNum() > 0 ? 1 : 0);
