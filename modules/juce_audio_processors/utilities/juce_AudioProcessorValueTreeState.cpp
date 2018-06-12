@@ -72,7 +72,7 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
     {
         auto v = range.convertFrom0to1 (normalisedValue);
         return valueToTextFunction != nullptr ? valueToTextFunction (v)
-                                              : AudioProcessorParameter::getText (v, length);
+                                              : String (value, 2);
     }
 
     int getNumSteps() const override
