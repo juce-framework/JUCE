@@ -467,7 +467,20 @@ private:
                 mo << (first ? "IF" : "ELSEIF") << "(JUCE_BUILD_CONFIGURATION MATCHES \"" << cfg.getProductFlavourCMakeIdentifier() <<"\")" << newLine;
 
                 if (isLibrary())
+                {
                     mo << "    SET(BINARY_NAME \"" << getNativeModuleBinaryName (cfg) << "\")" << newLine;
+
+                    auto binaryLocation = cfg.getTargetBinaryRelativePathString();
+
+                    if (binaryLocation.isNotEmpty())
+                    {
+                        auto locationRelativeToCmake = RelativePath (binaryLocation, RelativePath::projectFolder)
+                                                        .rebased (getProject().getFile().getParentDirectory(),
+                                                                  file.getParentDirectory(), RelativePath::buildTargetFolder);
+
+                        mo << "    SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY \"" << "../../../../" << locationRelativeToCmake.toUnixStyle() << "\")" << newLine;
+                    }
+                }
 
                 writeCmakePathLines (mo, "    ", "link_directories(", libSearchPaths);
 
