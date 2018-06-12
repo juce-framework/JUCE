@@ -1375,6 +1375,23 @@ int32 AudioProcessor::getAAXPluginIDForMainBusConfig (const AudioChannelSet& mai
 }
 
 //==============================================================================
+const char* AudioProcessor::getWrapperTypeDescription (AudioProcessor::WrapperType type) noexcept
+{
+    switch (type)
+    {
+        case AudioProcessor::wrapperType_Undefined:     return "Undefined";
+        case AudioProcessor::wrapperType_VST:           return "VST";
+        case AudioProcessor::wrapperType_VST3:          return "VST3";
+        case AudioProcessor::wrapperType_AudioUnit:     return "AU";
+        case AudioProcessor::wrapperType_AudioUnitv3:   return "AUv3";
+        case AudioProcessor::wrapperType_RTAS:          return "RTAS";
+        case AudioProcessor::wrapperType_AAX:           return "AAX";
+        case AudioProcessor::wrapperType_Standalone:    return "Standalone";
+        default:                                        jassertfalse; return {};
+    }
+}
+
+//==============================================================================
 void AudioProcessorListener::audioProcessorParameterChangeGestureBegin (AudioProcessor*, int) {}
 void AudioProcessorListener::audioProcessorParameterChangeGestureEnd   (AudioProcessor*, int) {}
 

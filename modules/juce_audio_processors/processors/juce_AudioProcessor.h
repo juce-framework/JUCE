@@ -1389,6 +1389,10 @@ public:
     */
     WrapperType wrapperType;
 
+    /** Returns a textual description of a WrapperType value */
+    static const char* getWrapperTypeDescription (AudioProcessor::WrapperType) noexcept;
+
+
     /** A struct containing information about the DAW track inside which your
         AudioProcessor is loaded. */
     struct TrackProperties
