@@ -535,7 +535,6 @@ struct PhysicalTopologySource::Internal
             currentDeviceInfo = getArrayOfDeviceInfo (incomingTopologyDevices);
             currentDeviceConnections = getArrayOfConnections (incomingTopologyConnections);
             currentTopologyDevices = incomingTopologyDevices;
-            detector.handleTopologyChange();
 
             lastTopologyReceiveTime = juce::Time::getCurrentTime();
             blockPings.clear();
@@ -550,10 +549,14 @@ struct PhysicalTopologySource::Internal
                     if (memcmp (currentDeviceInfo.getReference (i).version.version, version.version.version, sizeof (version.version)))
                     {
                         currentDeviceInfo.getReference(i).version = version.version;
-                        detector.handleTopologyChange();
                     }
                 }
             }
+        }
+
+        void notifyDetectorTopologyChanged()
+        {
+            detector.handleTopologyChange();
         }
 
         void handleName (BlocksProtocol::DeviceName name)
@@ -565,7 +568,6 @@ struct PhysicalTopologySource::Internal
                     if (memcmp (currentDeviceInfo.getReference (i).name.name, name.name.name, sizeof (name.name)))
                     {
                         currentDeviceInfo.getReference (i).name = name.name;
-                        detector.handleTopologyChange();
                     }
                 }
             }

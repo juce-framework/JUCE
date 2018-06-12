@@ -51,8 +51,8 @@ enum class MessageFromDevice
     firmwareUpdateACK       = 0x03,
     deviceTopologyExtend    = 0x04,
     deviceTopologyEnd       = 0x05,
-    deviceVersionList       = 0x06,
-    deviceNameList          = 0x07,
+    deviceVersion           = 0x06,
+    deviceName              = 0x07,
 
     touchStart              = 0x10,
     touchMove               = 0x11,
