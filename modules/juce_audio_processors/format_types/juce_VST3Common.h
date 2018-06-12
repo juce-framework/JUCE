@@ -492,7 +492,9 @@ public:
         }
     }
 
-    static void toEventList (Steinberg::Vst::IEventList& result, MidiBuffer& midiBuffer)
+    static void toEventList (Steinberg::Vst::IEventList& result, MidiBuffer& midiBuffer,
+                             Steinberg::Vst::IParameterChanges* parameterChanges = nullptr,
+                             Steinberg::Vst::IMidiMapping* midiMapping = nullptr)
     {
         MidiBuffer::Iterator iterator (midiBuffer);
         MidiMessage msg;
@@ -505,6 +507,28 @@ public:
         {
             if (++numEvents > maxNumEvents)
                 break;
+
+            if (midiMapping != nullptr && parameterChanges != nullptr)
+            {
+                Vst3MidiControlEvent controlEvent;
+
+                if (toVst3ControlEvent (msg, controlEvent))
+                {
+                    Steinberg::Vst::ParamID controlParamID;
+
+                    if (midiMapping->getMidiControllerAssignment (0, createSafeChannel (msg.getChannel()),
+                                                                  controlEvent.controllerNumber,
+                                                                  controlParamID) == Steinberg::kResultOk)
+                    {
+                        Steinberg::int32 ignore;
+
+                        if (auto* queue = parameterChanges->addParameterData (controlParamID, ignore))
+                            queue->addPoint (midiEventPosition, controlEvent.paramValue, ignore);
+                    }
+
+                    continue;
+                }
+            }
 
             Steinberg::Vst::Event e = { 0 };
 
@@ -534,12 +558,12 @@ public:
                 e.data.size     = (uint32) msg.getSysExDataSize();
                 e.data.type     = Steinberg::Vst::DataEvent::kMidiSysEx;
             }
-            else if (msg.isAftertouch())
+            else if (msg.isChannelPressure())
             {
                 e.type                   = Steinberg::Vst::Event::kPolyPressureEvent;
                 e.polyPressure.channel   = createSafeChannel (msg.getChannel());
                 e.polyPressure.pitch     = createSafeNote (msg.getNoteNumber());
-                e.polyPressure.pressure  = normaliseMidiValue (msg.getAfterTouchValue());
+                e.polyPressure.pressure  = normaliseMidiValue (msg.getChannelPressureValue());
             }
             else
             {
@@ -565,6 +589,24 @@ private:
 
     static float normaliseMidiValue (int value) noexcept              { return jlimit (0.0f, 1.0f, (float) value / 127.0f); }
     static int denormaliseToMidiValue (float value) noexcept          { return roundToInt (jlimit (0.0f, 127.0f, value * 127.0f)); }
+
+    //==============================================================================
+    struct Vst3MidiControlEvent
+    {
+        Steinberg::Vst::CtrlNumber controllerNumber;
+        Steinberg::Vst::ParamValue paramValue;
+    };
+
+    static bool toVst3ControlEvent (const MidiMessage& msg, Vst3MidiControlEvent& result)
+    {
+        result.controllerNumber = -1;
+
+        if      (msg.isController())        result = { (Steinberg::Vst::CtrlNumber) msg.getControllerNumber(), msg.getControllerValue() / 127.0};
+        else if (msg.isPitchWheel())        result = { Steinberg::Vst::kPitchBend, msg.getPitchWheelValue() / 16383.0};
+        else if (msg.isAftertouch())        result = { Steinberg::Vst::kAfterTouch, msg.getAfterTouchValue() / 127.0};
+
+        return (result.controllerNumber != -1);
+    }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiEventList)
 };
