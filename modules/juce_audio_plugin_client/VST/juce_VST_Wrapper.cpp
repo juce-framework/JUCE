@@ -336,7 +336,7 @@ public:
         vstEffect.flags |= Vst2::effFlagsProgramChunks;
 
        #if JucePlugin_IsSynth
-        vstEffect.flags |= effFlagsIsSynth;
+        vstEffect.flags |= Vst2::effFlagsIsSynth;
        #else
         if (processor->getTailLengthSeconds() == 0.0)
             vstEffect.flags |= Vst2::effFlagsNoSoundInStop;
