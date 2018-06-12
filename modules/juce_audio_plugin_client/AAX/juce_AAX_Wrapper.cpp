@@ -1642,6 +1642,7 @@ namespace AAXClasses
                 // no algorithm or multiple instances.
                 isPrepared = true;
                 sideChainBuffer.calloc (static_cast<size_t> (maxBufferSize));
+                hasSidechain = audioProcessor.getBusCount(true) > 1;
                 return AAX_SUCCESS;
             }
 #endif
