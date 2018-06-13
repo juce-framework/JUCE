@@ -142,10 +142,6 @@ private:
     class ColourComponentSlider;
     class ColourSpaceMarker;
     class HueSelectorMarker;
-    friend class ColourSpaceView;
-    friend struct ContainerDeletePolicy<ColourSpaceView>;
-    friend class HueSelectorComp;
-    friend struct ContainerDeletePolicy<HueSelectorComp>;
 
     Colour colour;
     float h, s, v;

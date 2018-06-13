@@ -504,8 +504,6 @@ private:
 
     //==============================================================================
     class CallbackHandler;
-    friend class CallbackHandler;
-    friend struct ContainerDeletePolicy<CallbackHandler>;
     std::unique_ptr<CallbackHandler> callbackHandler;
 
     void audioDeviceIOCallbackInt (const float** inputChannelData, int totalNumInputChannels,

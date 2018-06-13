@@ -103,9 +103,6 @@ private:
    #if ! JUCER_ENABLE_GPL_MODE
     //==============================================================================
     struct ModalCompletionCallback;
-    friend struct ModalCompletionCallback;
-
-    friend struct ContainerDeletePolicy<LicenseThread>;
     friend struct LicenseThread;
 
     //==============================================================================

@@ -141,8 +141,6 @@ public:
 private:
     //==============================================================================
     struct Pimpl;
-    friend struct Pimpl;
-    friend struct ContainerDeletePolicy<Pimpl>;
     std::unique_ptr<Pimpl> pimpl;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OSCSender)

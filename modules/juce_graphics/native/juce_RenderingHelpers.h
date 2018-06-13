@@ -208,7 +208,6 @@ public:
     }
 
 private:
-    friend struct ContainerDeletePolicy<CachedGlyphType>;
     ReferenceCountedArray<CachedGlyphType> glyphs;
     Atomic<int> accessCounter, hits, misses;
     CriticalSection lock;

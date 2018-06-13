@@ -172,8 +172,6 @@ public:
 private:
     //==============================================================================
     struct Pimpl;
-    friend struct Pimpl;
-    friend struct ContainerDeletePolicy<Pimpl>;
     std::unique_ptr<Pimpl> pimpl;
 
     void resized() override;
