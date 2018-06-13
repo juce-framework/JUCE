@@ -256,13 +256,13 @@ bool File::setExecutePermission (bool shouldBeExecutable) const
     return setFileExecutableInternal (shouldBeExecutable);
 }
 
-bool File::deleteRecursively() const
+bool File::deleteRecursively (bool followSymlinks) const
 {
     bool worked = true;
 
-    if (isDirectory())
+    if (isDirectory() && (followSymlinks || ! isSymbolicLink()))
         for (auto& f : findChildFiles (File::findFilesAndDirectories, false))
-            worked = f.deleteRecursively() && worked;
+            worked = f.deleteRecursively (followSymlinks) && worked;
 
     return deleteFile() && worked;
 }
