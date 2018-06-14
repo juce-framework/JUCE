@@ -33,7 +33,10 @@ public:
         Bela_defaultSettings (&defaultSettings);
     }
 
-    ~BelaAudioIODevice() {}
+    ~BelaAudioIODevice()
+    {
+        close();
+    }
 
     //==============================================================================
     StringArray getOutputChannelNames() override           { return { "Out #1", "Out #2" }; }
