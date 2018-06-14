@@ -574,11 +574,6 @@ protected:
                 props.add (new ChoicePropertyComponent (pluginBinaryCopyStepEnabled, "Enable Plugin Copy Step"),
                            "Enable this to copy plugin binaries to the specified folder after building.");
 
-            if (project.shouldBuildVST())
-                props.add (new TextPropertyComponentWithEnablement (vstBinaryLocation, pluginBinaryCopyStepEnabled, "VST Binary Location",
-                                                                    1024, false),
-                           "The folder in which the compiled VST binary should be placed.");
-
             if (project.shouldBuildVST3())
                 props.add (new TextPropertyComponentWithEnablement (vst3BinaryLocation, pluginBinaryCopyStepEnabled, "VST3 Binary Location",
                                                                     1024, false),
@@ -603,6 +598,11 @@ protected:
                 props.add (new TextPropertyComponentWithEnablement (unityPluginBinaryLocation, pluginBinaryCopyStepEnabled, "Unity Binary Location",
                                                                     1024, false),
                            "The folder in which the compiled Unity plugin binary and associated C# GUI script should be placed.");
+
+            if (project.shouldBuildVST())
+                props.add (new TextPropertyComponentWithEnablement (vstBinaryLocation, pluginBinaryCopyStepEnabled, "VST Binary Location",
+                                                                    1024, false),
+                           "The folder in which the compiled legacy VST binary should be placed.");
         }
 
         void updateOldPluginBinaryLocations()

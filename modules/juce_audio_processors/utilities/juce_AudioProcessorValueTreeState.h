@@ -197,7 +197,6 @@ public:
 
     private:
         struct Pimpl;
-        friend struct ContainerDeletePolicy<Pimpl>;
         std::unique_ptr<Pimpl> pimpl;
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SliderAttachment)
     };
@@ -226,7 +225,6 @@ public:
 
     private:
         struct Pimpl;
-        friend struct ContainerDeletePolicy<Pimpl>;
         std::unique_ptr<Pimpl> pimpl;
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComboBoxAttachment)
     };
@@ -250,7 +248,6 @@ public:
 
     private:
         struct Pimpl;
-        friend struct ContainerDeletePolicy<Pimpl>;
         std::unique_ptr<Pimpl> pimpl;
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ButtonAttachment)
     };

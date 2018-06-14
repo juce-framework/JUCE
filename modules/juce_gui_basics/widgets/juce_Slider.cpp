@@ -88,6 +88,18 @@ public:
             || style == LinearBarVertical;
     }
 
+    bool isTwoValue() const noexcept
+    {
+        return style == TwoValueHorizontal
+            || style == TwoValueVertical;
+    }
+
+    bool isThreeValue() const noexcept
+    {
+        return style == ThreeValueHorizontal
+            || style == ThreeValueVertical;
+    }
+
     bool incDecDragDirectionIsHorizontal() const noexcept
     {
         return incDecButtonMode == incDecButtonsDraggable_Horizontal
@@ -650,10 +662,7 @@ public:
 
     int getThumbIndexAt (const MouseEvent& e)
     {
-        bool isTwoValue   = (style == TwoValueHorizontal   || style == TwoValueVertical);
-        bool isThreeValue = (style == ThreeValueHorizontal || style == ThreeValueVertical);
-
-        if (isTwoValue || isThreeValue)
+        if (isTwoValue() || isThreeValue())
         {
             auto mousePos = isVertical() ? e.position.y : e.position.x;
 
@@ -661,7 +670,7 @@ public:
             auto minPosDistance    = std::abs (getLinearSliderPos (valueMin.getValue()) + (isVertical() ? 0.1f : -0.1f) - mousePos);
             auto maxPosDistance    = std::abs (getLinearSliderPos (valueMax.getValue()) + (isVertical() ? -0.1f : 0.1f) - mousePos);
 
-            if (isTwoValue)
+            if (isTwoValue())
                 return maxPosDistance <= minPosDistance ? 2 : 1;
 
             if (normalPosDistance >= minPosDistance && maxPosDistance >= minPosDistance)
@@ -834,9 +843,10 @@ public:
 
                 minMaxDiff = static_cast<double> (valueMax.getValue()) - static_cast<double> (valueMin.getValue());
 
-                lastAngle = rotaryParams.startAngleRadians
-                                + (rotaryParams.endAngleRadians - rotaryParams.startAngleRadians)
-                                     * owner.valueToProportionOfLength (currentValue.getValue());
+                if (! isTwoValue())
+                    lastAngle = rotaryParams.startAngleRadians
+                                    + (rotaryParams.endAngleRadians - rotaryParams.startAngleRadians)
+                                         * owner.valueToProportionOfLength (currentValue.getValue());
 
                 valueWhenLastDragged = (sliderBeingDragged == 2 ? valueMax
                                                                 : (sliderBeingDragged == 1 ? valueMin
@@ -955,17 +965,14 @@ public:
 
     void mouseMove()
     {
-        auto isTwoValue   = (style == TwoValueHorizontal   || style == TwoValueVertical);
-        auto isThreeValue = (style == ThreeValueHorizontal || style == ThreeValueVertical);
-
         // this is a workaround for a bug where the popup display being dismissed triggers
         // a mouse move causing it to never be hidden
         auto shouldShowPopup = showPopupOnHover
                                 && (Time::getMillisecondCounterHiRes() - lastPopupDismissal) > 250;
 
         if (shouldShowPopup
-             && ! isTwoValue
-             && ! isThreeValue)
+             && ! isTwoValue()
+             && ! isThreeValue())
         {
             if (owner.isMouseOver (true))
             {
@@ -1624,6 +1631,8 @@ bool Slider::isHorizontal() const noexcept                  { return pimpl->isHo
 bool Slider::isVertical() const noexcept                    { return pimpl->isVertical(); }
 bool Slider::isRotary() const noexcept                      { return pimpl->isRotary(); }
 bool Slider::isBar() const noexcept                         { return pimpl->isBar(); }
+bool Slider::isTwoValue() const noexcept                    { return pimpl->isTwoValue(); }
+bool Slider::isThreeValue() const noexcept                  { return pimpl->isThreeValue(); }
 
 float Slider::getPositionOfValue (double value) const       { return pimpl->getPositionOfValue (value); }
 

@@ -843,6 +843,10 @@ public:
     bool isRotary() const noexcept;
     /** True if the slider is in a linear bar mode. */
     bool isBar() const noexcept;
+    /** True if the slider has two thumbs. */
+    bool isTwoValue() const noexcept;
+    /** True if the slider has three thumbs. */
+    bool isThreeValue() const noexcept;
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the slider.
@@ -973,8 +977,6 @@ public:
 private:
     //==============================================================================
     JUCE_PUBLIC_IN_DLL_BUILD (class Pimpl)
-    friend class Pimpl;
-    friend struct ContainerDeletePolicy<Pimpl>;
     std::unique_ptr<Pimpl> pimpl;
 
     void init (SliderStyle, TextEntryBoxPosition);

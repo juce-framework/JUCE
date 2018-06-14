@@ -130,7 +130,7 @@
                    androidCpp11="1" targetFolder="Builds/Android" androidSDKPath=""
                    androidNDKPath="" bigIcon="Ww6bQw" gradleToolchainVersion="3.6">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" androidArchitectures="armeabi armeabi-v7a x86" isDebug="1"
+        <CONFIGURATION name="Debug" androidArchitectures="armeabi-v7a x86" isDebug="1"
                        optimisation="6" targetName="JUCE Network Graphics Demo" defines="JUCE_DEBUG=0"/>
         <CONFIGURATION name="Release" androidArchitectures="" isDebug="0" targetName="JUCE Network Graphics Demo"/>
       </CONFIGURATIONS>

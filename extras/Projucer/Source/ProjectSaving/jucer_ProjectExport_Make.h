@@ -422,7 +422,12 @@ public:
     }
 
     //==============================================================================
-    void initialiseDependencyPathValues() override  {}
+    void initialiseDependencyPathValues() override
+    {
+        vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder),
+                                                                Ids::vst3Path,
+                                                                TargetOS::linux)));
+    }
 
 private:
     ValueWithDefault extraPkgConfigValue;

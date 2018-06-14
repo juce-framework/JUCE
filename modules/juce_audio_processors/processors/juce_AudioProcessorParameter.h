@@ -147,12 +147,12 @@ public:
     */
     virtual bool isBoolean() const;
 
-    /** Returns a textual version of the supplied parameter value.
+    /** Returns a textual version of the supplied normalised parameter value.
         The default implementation just returns the floating point value
         as a string, but this could do anything you need for a custom type
         of value.
     */
-    virtual String getText (float value, int /*maximumStringLength*/) const;
+    virtual String getText (float normalisedValue, int /*maximumStringLength*/) const;
 
     /** Should parse a string and return the appropriate value for it. */
     virtual float getValueForText (const String& text) const = 0;

@@ -190,9 +190,6 @@ private:
 
             pathPropertyComponents.add (nullptr);
 
-            addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (settings.getStoredPath (Ids::vst3Path),
-                                                                                          "VST3 SDK", true)));
-
             if (getSelectedOS() == TargetOS::linux)
             {
                 addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent ({}, "RTAS SDK", true)));
@@ -213,6 +210,9 @@ private:
                                                                                           "Android SDK", true)));
             addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (settings.getStoredPath (Ids::androidNDKPath),
                                                                                           "Android NDK", true)));
+
+            addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (settings.getStoredPath (Ids::vst3Path),
+                                                                                          "Custom VST3 SDK", true)));
 
             pathPropertyComponents.add (nullptr);
 
@@ -240,9 +240,6 @@ private:
 
             pathPropertyComponents.add (nullptr);
 
-            addAndMakeVisible (pathPropertyComponents.add (new TextPropertyComponent (settings.getFallbackPathForOS (Ids::vst3Path, selectedOS),
-                                                                                      "VST3 SDK", maxChars, false)));
-
             if (selectedOS == TargetOS::linux)
             {
                 addAndMakeVisible (pathPropertyComponents.add (new TextPropertyComponent (Value(), "RTAS SDK", maxChars, false)));
@@ -259,10 +256,14 @@ private:
                                                                                           "AAX SDK", maxChars, false)));
             }
 
+
             addAndMakeVisible (pathPropertyComponents.add (new TextPropertyComponent (settings.getFallbackPathForOS (Ids::androidSDKPath, selectedOS),
                                                                                       "Android SDK", maxChars, false)));
             addAndMakeVisible (pathPropertyComponents.add (new TextPropertyComponent (settings.getFallbackPathForOS (Ids::androidNDKPath, selectedOS),
                                                                                       "Android NDK", maxChars, false)));
+
+            addAndMakeVisible (pathPropertyComponents.add (new TextPropertyComponent (settings.getFallbackPathForOS (Ids::vst3Path, selectedOS),
+                                                                                      "Custom VST3 SDK", maxChars, false)));
         }
 
         resized();

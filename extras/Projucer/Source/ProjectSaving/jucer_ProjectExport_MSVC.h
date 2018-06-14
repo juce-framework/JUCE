@@ -330,11 +330,6 @@ public:
                 props.add (new ChoicePropertyComponent (pluginBinaryCopyStepValue, "Enable Plugin Copy Step"),
                            "Enable this to copy plugin binaries to a specified folder after building.");
 
-            if (project.shouldBuildVST())
-                props.add (new TextPropertyComponentWithEnablement (vstBinaryLocation, pluginBinaryCopyStepValue, "VST Binary Location",
-                                                                    1024, false),
-                           "The folder in which the compiled VST binary should be placed.");
-
             if (project.shouldBuildVST3())
                 props.add (new TextPropertyComponentWithEnablement (vst3BinaryLocation, pluginBinaryCopyStepValue, "VST3 Binary Location",
                                                                     1024, false),
@@ -354,6 +349,11 @@ public:
                 props.add (new TextPropertyComponentWithEnablement (unityPluginBinaryLocation, pluginBinaryCopyStepValue, "Unity Binary Location",
                                                                     1024, false),
                            "The folder in which the compiled Unity plugin binary and associated C# GUI script should be placed.");
+
+            if (project.shouldBuildVST())
+                props.add (new TextPropertyComponentWithEnablement (vstBinaryLocation, pluginBinaryCopyStepValue, "VST (legacy) Binary Location",
+                                                                    1024, false),
+                           "The folder in which the compiled lehacy VST binary should be placed.");
 
         }
 
@@ -1830,7 +1830,7 @@ protected:
 
     static bool shouldUseStdCall (const RelativePath& path)
     {
-        return path.getFileNameWithoutExtension().startsWithIgnoreCase ("juce_audio_plugin_client_RTAS_");
+        return path.getFileNameWithoutExtension().startsWithIgnoreCase ("include_juce_audio_plugin_client_RTAS_");
     }
 
     StringArray getModuleLibs() const

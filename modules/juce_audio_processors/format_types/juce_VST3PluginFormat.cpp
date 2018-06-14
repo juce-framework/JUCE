@@ -1835,6 +1835,7 @@ struct VST3PluginInstance : public AudioPluginInstance
         componentHandler2 = nullptr;
         componentHandler = nullptr;
         processor = nullptr;
+        midiMapping = nullptr;
         editController2 = nullptr;
         editController = nullptr;
     }
@@ -2558,6 +2559,7 @@ private:
     // Rudimentary interfaces:
     ComSmartPtr<Vst::IEditController> editController;
     ComSmartPtr<Vst::IEditController2> editController2;
+    ComSmartPtr<Vst::IMidiMapping> midiMapping;
     ComSmartPtr<Vst::IAudioProcessor> processor;
     ComSmartPtr<Vst::IComponentHandler> componentHandler;
     ComSmartPtr<Vst::IComponentHandler2> componentHandler2;
@@ -2649,6 +2651,7 @@ private:
         programListData.loadFrom (holder->component);
         unitData.loadFrom (holder->component);
         editController2.loadFrom (holder->component);
+        midiMapping.loadFrom (holder->component);
         componentHandler.loadFrom (holder->component);
         componentHandler2.loadFrom (holder->component);
         trackInfoListener.loadFrom (holder->component);
@@ -2658,6 +2661,7 @@ private:
         if (programListData == nullptr)     programListData.loadFrom (editController);
         if (unitData == nullptr)            unitData.loadFrom (editController);
         if (editController2 == nullptr)     editController2.loadFrom (editController);
+        if (midiMapping == nullptr)         midiMapping.loadFrom (editController);
         if (componentHandler == nullptr)    componentHandler.loadFrom (editController);
         if (componentHandler2 == nullptr)   componentHandler2.loadFrom (editController);
         if (trackInfoListener == nullptr)   trackInfoListener.loadFrom (editController);
@@ -2784,7 +2788,9 @@ private:
         midiInputs->clear();
         midiOutputs->clear();
 
-        MidiEventList::toEventList (*midiInputs, midiBuffer);
+        MidiEventList::toEventList (*midiInputs, midiBuffer,
+                                    destination.inputParameterChanges,
+                                    midiMapping);
 
         destination.inputEvents = midiInputs;
         destination.outputEvents = midiOutputs;

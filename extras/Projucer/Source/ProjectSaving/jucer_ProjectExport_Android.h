@@ -144,8 +144,8 @@ public:
           androidKeyAliasPass                  (settings, Ids::androidKeyAliasPass,                  getUndoManager(), "android"),
           gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "4.4"),
           gradleToolchain                      (settings, Ids::gradleToolchain,                      getUndoManager(), "clang"),
-          androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "3.1.2"),
-          buildToolsVersion                    (settings, Ids::buildToolsVersion,                    getUndoManager(), "27.0.3"),
+          androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "3.1.3"),
+          buildToolsVersion                    (settings, Ids::buildToolsVersion,                    getUndoManager(), "28.0.0"),
           AndroidExecutable (findAndroidExecutable())
     {
         name = getName();
@@ -467,7 +467,20 @@ private:
                 mo << (first ? "IF" : "ELSEIF") << "(JUCE_BUILD_CONFIGURATION MATCHES \"" << cfg.getProductFlavourCMakeIdentifier() <<"\")" << newLine;
 
                 if (isLibrary())
+                {
                     mo << "    SET(BINARY_NAME \"" << getNativeModuleBinaryName (cfg) << "\")" << newLine;
+
+                    auto binaryLocation = cfg.getTargetBinaryRelativePathString();
+
+                    if (binaryLocation.isNotEmpty())
+                    {
+                        auto locationRelativeToCmake = RelativePath (binaryLocation, RelativePath::projectFolder)
+                                                        .rebased (getProject().getFile().getParentDirectory(),
+                                                                  file.getParentDirectory(), RelativePath::buildTargetFolder);
+
+                        mo << "    SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY \"" << "../../../../" << locationRelativeToCmake.toUnixStyle() << "\")" << newLine;
+                    }
+                }
 
                 writeCmakePathLines (mo, "    ", "link_directories(", libSearchPaths);
 

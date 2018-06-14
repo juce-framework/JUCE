@@ -457,6 +457,9 @@ public:
         If this file is actually a directory, it may not be deleted correctly if it
         contains files. See deleteRecursively() as a better way of deleting directories.
 
+        If this file is a symlink, then the symlink will be deleted and not the target
+        of the symlink.
+
         @returns    true if the file has been successfully deleted (or if it didn't exist to
                     begin with).
         @see deleteRecursively
@@ -468,11 +471,14 @@ public:
         If this file is a directory, this will try to delete it and all its subfolders. If
         it's just a file, it will just try to delete the file.
 
-        @returns    true if the file and all its subfolders have been successfully deleted
-                    (or if it didn't exist to begin with).
+
+        @param followSymlinks If true, then any symlink pointing to a directory will also
+                              recursively delete the contents of that directory
+        @returns              true if the file and all its subfolders have been successfully
+                              deleted (or if it didn't exist to begin with).
         @see deleteFile
     */
-    bool deleteRecursively() const;
+    bool deleteRecursively (bool followSymlinks = false) const;
 
     /** Moves this file or folder to the trash.
 

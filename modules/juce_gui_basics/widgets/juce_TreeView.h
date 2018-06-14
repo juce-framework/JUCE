@@ -900,15 +900,12 @@ public:
     void itemDropped (const SourceDetails&) override;
 
 private:
+    friend class TreeViewItem;
+
     class ContentComponent;
     class TreeViewport;
     class InsertPointHighlight;
     class TargetGroupHighlight;
-    friend class TreeViewItem;
-    friend class ContentComponent;
-    friend struct ContainerDeletePolicy<TreeViewport>;
-    friend struct ContainerDeletePolicy<InsertPointHighlight>;
-    friend struct ContainerDeletePolicy<TargetGroupHighlight>;
 
     std::unique_ptr<TreeViewport> viewport;
     CriticalSection nodeAlterationLock;

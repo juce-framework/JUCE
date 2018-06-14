@@ -322,8 +322,6 @@ private:
     bool vScrollbarRight = true, hScrollbarBottom = true;
 
     struct DragToScrollListener;
-    friend struct DragToScrollListener;
-    friend struct ContainerDeletePolicy<DragToScrollListener>;
     std::unique_ptr<DragToScrollListener> dragToScrollListener;
 
     Point<int> viewportPosToCompPos (Point<int>) const;

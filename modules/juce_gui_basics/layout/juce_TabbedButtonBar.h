@@ -359,8 +359,6 @@ private:
     int currentTabIndex = -1;
 
     class BehindFrontTabComp;
-    friend class BehindFrontTabComp;
-    friend struct ContainerDeletePolicy<BehindFrontTabComp>;
     std::unique_ptr<BehindFrontTabComp> behindFrontTab;
     std::unique_ptr<Button> extraTabsButton;
 

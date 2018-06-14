@@ -290,8 +290,6 @@ private:
     bool stillInitialising = true;
 
     struct MultipleInstanceHandler;
-    friend struct MultipleInstanceHandler;
-    friend struct ContainerDeletePolicy<MultipleInstanceHandler>;
     std::unique_ptr<MultipleInstanceHandler> multipleInstanceHandler;
 
     JUCE_DECLARE_NON_COPYABLE (JUCEApplicationBase)

@@ -461,7 +461,7 @@ Result PIPGenerator::setProjectSettings (ValueTree& jucerTree)
         jucerTree.setProperty (Ids::projectType, "audioplug", nullptr);
         jucerTree.setProperty (Ids::pluginManufacturer, metadata[Ids::vendor], nullptr);
 
-        StringArray pluginFormatsToBuild (Ids::buildVST.toString(), Ids::buildAU.toString(), Ids::buildStandalone.toString());
+        StringArray pluginFormatsToBuild (Ids::buildVST3.toString(), Ids::buildAU.toString(), Ids::buildStandalone.toString());
         pluginFormatsToBuild.addArray (getExtraPluginFormatsToBuild());
 
         jucerTree.setProperty (Ids::pluginFormats, pluginFormatsToBuild.joinIntoString (","), nullptr);
