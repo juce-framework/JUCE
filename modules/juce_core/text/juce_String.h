@@ -962,21 +962,23 @@ public:
 
     /** Creates a string representing this floating-point number.
         @param floatValue               the value to convert to a string
-        @param numberOfDecimalPlaces    if this is > 0, it will format the number using that many
-                                        decimal places, and will not use exponent notation. If 0 or
-                                        less, it will use exponent notation if necessary.
+        @param maxNumberOfDecimalPlaces if this is > 0, it will format the number using no more
+                                        decimal places than this amount, and will not use exponent
+                                        notation. If 0 or less, it will use a default format, and
+                                        exponent notation if necessary.
         @see getDoubleValue, getIntValue
     */
-    String (float floatValue, int numberOfDecimalPlaces);
+    String (float floatValue, int maxNumberOfDecimalPlaces);
 
     /** Creates a string representing this floating-point number.
         @param doubleValue              the value to convert to a string
-        @param numberOfDecimalPlaces    if this is > 0, it will format the number using that many
-                                        decimal places, and will not use exponent notation. If 0 or
-                                        less, it will use exponent notation if necessary.
+        @param maxNumberOfDecimalPlaces if this is > 0, it will format the number using no more
+                                        decimal places than this amount, and will not use exponent
+                                        notation. If 0 or less, it will use a default format, and
+                                        exponent notation if necessary.
         @see getFloatValue, getIntValue
     */
-    String (double doubleValue, int numberOfDecimalPlaces);
+    String (double doubleValue, int maxNumberOfDecimalPlaces);
 
     // Automatically creating a String from a bool opens up lots of nasty type conversion edge cases.
     // If you want a String representation of a bool you can cast the bool to an int first.

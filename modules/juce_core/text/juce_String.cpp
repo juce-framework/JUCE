@@ -351,19 +351,19 @@ String::String (const CharPointer_UTF16 t)   : text (StringHolder::createFromCha
 String::String (const CharPointer_UTF32 t)   : text (StringHolder::createFromCharPointer (t)) {}
 String::String (const CharPointer_ASCII t)   : text (StringHolder::createFromCharPointer (t)) {}
 
-String::String (const CharPointer_UTF8  t, const size_t maxChars)   : text (StringHolder::createFromCharPointer (t, maxChars)) {}
-String::String (const CharPointer_UTF16 t, const size_t maxChars)   : text (StringHolder::createFromCharPointer (t, maxChars)) {}
-String::String (const CharPointer_UTF32 t, const size_t maxChars)   : text (StringHolder::createFromCharPointer (t, maxChars)) {}
-String::String (const wchar_t* const t, size_t maxChars)            : text (StringHolder::createFromCharPointer (castToCharPointer_wchar_t (t), maxChars)) {}
+String::String (CharPointer_UTF8  t, size_t maxChars)   : text (StringHolder::createFromCharPointer (t, maxChars)) {}
+String::String (CharPointer_UTF16 t, size_t maxChars)   : text (StringHolder::createFromCharPointer (t, maxChars)) {}
+String::String (CharPointer_UTF32 t, size_t maxChars)   : text (StringHolder::createFromCharPointer (t, maxChars)) {}
+String::String (const wchar_t* t, size_t maxChars)      : text (StringHolder::createFromCharPointer (castToCharPointer_wchar_t (t), maxChars)) {}
 
-String::String (const CharPointer_UTF8  start, const CharPointer_UTF8  end)  : text (StringHolder::createFromCharPointer (start, end)) {}
-String::String (const CharPointer_UTF16 start, const CharPointer_UTF16 end)  : text (StringHolder::createFromCharPointer (start, end)) {}
-String::String (const CharPointer_UTF32 start, const CharPointer_UTF32 end)  : text (StringHolder::createFromCharPointer (start, end)) {}
+String::String (CharPointer_UTF8  start, CharPointer_UTF8  end)  : text (StringHolder::createFromCharPointer (start, end)) {}
+String::String (CharPointer_UTF16 start, CharPointer_UTF16 end)  : text (StringHolder::createFromCharPointer (start, end)) {}
+String::String (CharPointer_UTF32 start, CharPointer_UTF32 end)  : text (StringHolder::createFromCharPointer (start, end)) {}
 
 String::String (const std::string& s) : text (StringHolder::createFromFixedLength (s.data(), s.size())) {}
 String::String (StringRef s)          : text (StringHolder::createFromCharPointer (s.text)) {}
 
-String String::charToString (const juce_wchar character)
+String String::charToString (juce_wchar character)
 {
     String result (PreallocationBytes (CharPointerType::getBytesRequiredFor (character)));
     CharPointerType t (result.text);
@@ -397,7 +397,7 @@ namespace NumberToStringConverters
     }
 
     // pass in a pointer to the END of a buffer..
-    static char* numberToString (char* t, const int64 n) noexcept
+    static char* numberToString (char* t, int64 n) noexcept
     {
         if (n >= 0)
             return printDigits (t, static_cast<uint64> (n));
@@ -414,7 +414,7 @@ namespace NumberToStringConverters
         return printDigits (t, v);
     }
 
-    static char* numberToString (char* t, const int n) noexcept
+    static char* numberToString (char* t, int n) noexcept
     {
         if (n >= 0)
             return printDigits (t, static_cast<unsigned int> (n));
@@ -426,12 +426,12 @@ namespace NumberToStringConverters
         return t;
     }
 
-    static char* numberToString (char* t, const unsigned int v) noexcept
+    static char* numberToString (char* t, unsigned int v) noexcept
     {
         return printDigits (t, v);
     }
 
-    static char* numberToString (char* t, const long n) noexcept
+    static char* numberToString (char* t, long n) noexcept
     {
         if (n >= 0)
             return printDigits (t, static_cast<unsigned long> (n));
@@ -441,7 +441,7 @@ namespace NumberToStringConverters
         return t;
     }
 
-    static char* numberToString (char* t, const unsigned long v) noexcept
+    static char* numberToString (char* t, unsigned long v) noexcept
     {
         return printDigits (t, v);
     }
@@ -469,11 +469,34 @@ namespace NumberToStringConverters
                 o << n;
             }
 
-            return (size_t) (pptr() - pbase());
+            return findLengthWithoutTrailingZeros (pbase(), pptr());
+        }
+
+        static size_t findLengthWithoutTrailingZeros (const char* const start,
+                                                      const char* const end)
+        {
+            for (auto e = end; e > start + 1; --e)
+            {
+                auto lastChar = *(e - 1);
+
+                if (lastChar != '0')
+                {
+                    if (lastChar == '.')
+                        return (size_t) (e + 1 - start);
+
+                    for (auto s = start; s < e; ++s)
+                        if (*s == '.')
+                            return (size_t) (e - start);
+
+                    break;
+                }
+            }
+
+            return (size_t) (end - start);
         }
     };
 
-    static char* doubleToString (char* buffer, const int numChars, double n, int numDecPlaces, size_t& len) noexcept
+    static char* doubleToString (char* buffer, int numChars, double n, int numDecPlaces, size_t& len) noexcept
     {
         if (numDecPlaces > 0 && numDecPlaces < 7 && n > -1.0e20 && n < 1.0e20)
         {
@@ -482,7 +505,14 @@ namespace NumberToStringConverters
             auto v = (int64) (std::pow (10.0, numDecPlaces) * std::abs (n) + 0.5);
             *--t = (char) 0;
 
-            while (numDecPlaces >= 0 || v > 0)
+            // skip trailing zeros
+            while (numDecPlaces > 1 && (v % 10) == 0)
+            {
+                v /= 10;
+                --numDecPlaces;
+            }
+
+            while (v > 0 || numDecPlaces >= 0)
             {
                 if (numDecPlaces == 0)
                     *--t = '.';
@@ -507,7 +537,7 @@ namespace NumberToStringConverters
     }
 
     template <typename IntegerType>
-    static String::CharPointerType createFromInteger (const IntegerType number)
+    static String::CharPointerType createFromInteger (IntegerType number)
     {
         char buffer [charsNeededForInt];
         auto* end = buffer + numElementsInArray (buffer);
@@ -515,7 +545,7 @@ namespace NumberToStringConverters
         return StringHolder::createFromFixedLength (start, (size_t) (end - start - 1));
     }
 
-    static String::CharPointerType createFromDouble (const double number, const int numberOfDecimalPlaces)
+    static String::CharPointerType createFromDouble (double number, int numberOfDecimalPlaces)
     {
         char buffer [charsNeededForDouble];
         size_t len;
@@ -2491,7 +2521,14 @@ public:
             expect (String::toHexString (data, 8, 1).equalsIgnoreCase ("01 02 03 04 0a 0b 0c 0d"));
             expect (String::toHexString (data, 8, 2).equalsIgnoreCase ("0102 0304 0a0b 0c0d"));
 
-            expectEquals (String (2589410.5894, 7), String ("2589410.5894000"));
+            expectEquals (String (2589410.5894, 7), String ("2589410.5894"));
+            expectEquals (String (2589410.5894, 4), String ("2589410.5894"));
+            expectEquals (String (100000.0, 1), String ("100000.0"));
+            expectEquals (String (100000.0, 10), String ("100000.0"));
+            expectEquals (String (100000.001, 8), String ("100000.001"));
+            expectEquals (String (100000.001, 4), String ("100000.001"));
+            expectEquals (String (100000.001, 3), String ("100000.001"));
+            expectEquals (String (100000.001, 2), String ("100000.0"));
 
             beginTest ("Subsections");
             String s3;
