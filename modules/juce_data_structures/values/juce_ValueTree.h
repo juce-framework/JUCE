@@ -128,7 +128,7 @@ public:
         @endverbatim
     */
     ValueTree (const Identifier& type,
-               std::initializer_list<std::pair<Identifier, var>> properties,
+               std::initializer_list<NamedValueSet::NamedValue> properties,
                std::initializer_list<ValueTree> subTrees = {});
 
     /** Creates a reference to another ValueTree. */

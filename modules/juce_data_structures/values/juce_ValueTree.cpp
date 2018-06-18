@@ -587,12 +587,11 @@ ValueTree::ValueTree (const Identifier& type)  : object (new ValueTree::SharedOb
 }
 
 ValueTree::ValueTree (const Identifier& type,
-                      std::initializer_list<std::pair<Identifier, var>> properties,
+                      std::initializer_list<NamedValueSet::NamedValue> properties,
                       std::initializer_list<ValueTree> subTrees)
     : ValueTree (type)
 {
-    for (auto& prop : properties)
-        setProperty (prop.first, prop.second, nullptr);
+    object->properties = NamedValueSet (std::move (properties));
 
     for (auto& tree : subTrees)
         addChild (tree, -1, nullptr);
