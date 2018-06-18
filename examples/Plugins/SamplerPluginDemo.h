@@ -163,16 +163,14 @@ public:
         source.read (&data, 0, length + 4, 0, true, true);
     }
 
-    double getSampleRate() const { return sourceSampleRate; }
-
-    int getLength() const { return length; }
-
-    const AudioSampleBuffer& getBuffer() const { return data; }
+    double getSampleRate() const                    { return sourceSampleRate; }
+    int getLength() const                           { return length; }
+    const AudioBuffer<float>& getBuffer() const     { return data; }
 
 private:
     double sourceSampleRate;
     int length;
-    AudioSampleBuffer data;
+    AudioBuffer<float> data;
 };
 
 //==============================================================================

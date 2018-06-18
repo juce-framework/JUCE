@@ -433,7 +433,7 @@ String SystemStats::getCpuModel()
     return readPosixConfigFileValue ("/proc/cpuinfo", "Hardware");
 }
 
-int SystemStats::getCpuSpeedInMegaherz()
+int SystemStats::getCpuSpeedInMegahertz()
 {
     int maxFreqKHz = 0;
 

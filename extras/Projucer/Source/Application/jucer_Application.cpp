@@ -77,7 +77,7 @@ void ProjucerApplication::initialise (const String& commandLine)
     {
         initialiseLogger ("IDE_Log_");
         Logger::writeToLog (SystemStats::getOperatingSystemName());
-        Logger::writeToLog ("CPU: " + String (SystemStats::getCpuSpeedInMegaherz())
+        Logger::writeToLog ("CPU: " + String (SystemStats::getCpuSpeedInMegahertz())
                               + "MHz  Cores: " + String (SystemStats::getNumCpus())
                               + "  " + String (SystemStats::getMemorySizeInMegabytes()) + "MB");
 
