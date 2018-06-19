@@ -94,11 +94,16 @@ public:
    #endif
 
     //==============================================================================
-    /** Asynchronously invokes a function or C++11 lambda on the message thread. */
+    /** Asynchronously invokes a function or C++11 lambda on the message thread. 
+    
+        Returns false if invocation fails.
+    */
     template <typename FunctionType>
-    static void callAsync (FunctionType functionToCall)
+    static bool callAsync (FunctionType functionToCall)
     {
-        new AsyncCallInvoker<FunctionType> (functionToCall);
+        bool success = true;
+        new AsyncCallInvoker<FunctionType> (functionToCall, success);
+        return success;
     }
 
     /** Calls a function using the message-thread.
@@ -333,7 +338,7 @@ private:
     template <typename FunctionType>
     struct AsyncCallInvoker  : public MessageBase
     {
-        AsyncCallInvoker (FunctionType f) : callback (f)  { post(); }
+        AsyncCallInvoker (FunctionType f, bool& success) : callback (f)  { success = post(); }
         void messageCallback() override                   { callback(); }
         FunctionType callback;
 
