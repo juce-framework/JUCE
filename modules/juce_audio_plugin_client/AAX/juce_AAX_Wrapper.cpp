@@ -734,7 +734,7 @@ namespace AAXClasses
                     if (destSamples[i] == nullptr)
                         continue;
 
-                    memcpy (destSamples[i]+startOffsetInDestBuffer, readWindow[validIn], (size_t) numSamples * sizeof (float));
+                    juce::FloatVectorOperations::copy((float*)&destSamples[i][startOffsetInDestBuffer], readWindow[validIn], numSamples);
                 }
                 return true;
             }
