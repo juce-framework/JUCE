@@ -146,7 +146,7 @@ public:
           gradleToolchain                      (settings, Ids::gradleToolchain,                      getUndoManager(), "clang"),
           androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "3.1.3"),
           buildToolsVersion                    (settings, Ids::buildToolsVersion,                    getUndoManager(), "28.0.0"),
-          AndroidExecutable (findAndroidExecutable())
+          AndroidExecutable                    (getAppSettings().getStoredPath (Ids::androidStudioExePath).toString())
     {
         name = getName();
 
@@ -274,38 +274,6 @@ public:
         MemoryOutputStream outStream;
         outStream.write (binaryData, static_cast<size_t> (binarySize));
         overwriteFileIfDifferentOrThrow (gradleProjectFolder.getChildFile (filePath), outStream);
-    }
-
-    //==============================================================================
-    static File findAndroidExecutable()
-    {
-       #if JUCE_WINDOWS
-        File defaultInstallation ("C:\\Program Files\\Android\\Android Studio\\bin");
-
-        if (defaultInstallation.exists())
-        {
-            {
-                auto studio64 = defaultInstallation.getChildFile ("studio64.exe");
-
-                if (studio64.existsAsFile())
-                    return studio64;
-            }
-
-            {
-                auto studio = defaultInstallation.getChildFile ("studio.exe");
-
-                if (studio.existsAsFile())
-                    return studio;
-            }
-        }
-      #elif JUCE_MAC
-       File defaultInstallation ("/Applications/Android Studio.app");
-
-       if (defaultInstallation.exists())
-           return defaultInstallation;
-      #endif
-
-        return {};
     }
 
 protected:

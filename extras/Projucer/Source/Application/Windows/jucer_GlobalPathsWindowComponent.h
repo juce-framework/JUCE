@@ -225,6 +225,9 @@ private:
            #endif
             addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (settings.getStoredPath (Ids::clionExePath),
                                                                                           "CLion " + exeLabel, false)));
+
+            addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (settings.getStoredPath (Ids::androidStudioExePath),
+                                                           "Android Studio " + exeLabel, false)));
         }
         else
         {

@@ -365,6 +365,28 @@ Value StoredSettings::getFallbackPathForOS (const Identifier& key, DependencyPat
                 v = "${user.home}/clion/bin/clion.sh";
             }
         }
+        else if (key == Ids::androidStudioExePath)
+        {
+            if (os == TargetOS::windows)
+            {
+               #if JUCE_WINDOWS
+                auto path = WindowsRegistry::getValue ("HKEY_LOCAL_MACHINE\\SOFTWARE\\Android Studio\\Path", {}, {});
+
+                if (! path.isEmpty())
+                    return Value (path.unquoted() + "\\bin\\studio64.exe");
+               #endif
+
+                v = "C:\\Program Files\\Android\\Android Studio\\bin\\studio64.exe";
+            }
+            else if (os == TargetOS::osx)
+            {
+                v = "/Applications/Android Studio.app";
+            }
+            else
+            {
+                jassertfalse; // no Android Studio on this OS!
+            }
+        }
     }
 
     return v;
@@ -434,6 +456,14 @@ bool StoredSettings::isGlobalPathValid (const File& relativeTo, const Identifier
         fileToCheckFor = "../clion64.exe";
        #else
         fileToCheckFor = "../clion.sh";
+       #endif
+    }
+    else if (key == Ids::androidStudioExePath)
+    {
+       #if JUCE_MAC
+        fileToCheckFor = "Android Studio.app";
+       #elif JUCE_WINDOWS
+        fileToCheckFor = "studio64.exe";
        #endif
     }
     else if (key == Ids::jucePath)

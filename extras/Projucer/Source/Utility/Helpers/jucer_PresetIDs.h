@@ -220,6 +220,7 @@ namespace Ids
     DECLARE_ID (androidSharedLibraries);
     DECLARE_ID (androidScreenOrientation);
     DECLARE_ID (androidExtraAssetsFolder);
+    DECLARE_ID (androidStudioExePath);
     DECLARE_ID (iosDeviceFamily);
     const Identifier iPhoneScreenOrientation ("iosScreenOrientation"); // old name is confusing
     DECLARE_ID (iPadScreenOrientation);
