@@ -317,6 +317,18 @@ struct PhysicalTopologySource::Internal
         bool isMaster;
     };
 
+    static juce::String getVersionString (const BlocksProtocol::VersionNumber& v)
+    {
+        return juce::String (reinterpret_cast<const char*> (v.version),
+                             std::min (sizeof (v.version), static_cast<size_t> (v.length)));
+    }
+
+    static juce::String getNameString (const BlocksProtocol::BlockName& n)
+    {
+        return juce::String (reinterpret_cast<const char*> (n.name),
+                             std::min (sizeof (n.name), static_cast<size_t> (n.length)));
+    }
+
     static Block::Timestamp deviceTimestampToHost (uint32 timestamp) noexcept
     {
         return static_cast<Block::Timestamp> (timestamp);
@@ -363,41 +375,49 @@ struct PhysicalTopologySource::Internal
         return false;
     }
 
-    static bool versionNumberAddedToBlock (const juce::Array<DeviceInfo>& devices, Block::UID uid, juce::String version) noexcept
+    static bool versionNumberChanged (const DeviceInfo& device, juce::String version) noexcept
     {
-        for (auto&& d : devices)
-        {
-            String deviceVersion (reinterpret_cast<const char*> (d.version.version),
-                                  jmin (static_cast<size_t> (d.version.length), sizeof (d.version.version)));
+        auto deviceVersion = getVersionString (device.version);
+        return deviceVersion != version && deviceVersion.isNotEmpty();
+    }
 
-            if (d.uid == uid && deviceVersion != version && deviceVersion.isNotEmpty())
-                return true;
+    static bool nameIsValid (const DeviceInfo& device)
+    {
+        return device.name.length > 0;
+    }
+
+    static void setVersionNumberForBlock (const DeviceInfo& deviceInfo, Block& block) noexcept
+    {
+        if (deviceInfo.uid != block.uid)
+        {
+            jassertfalse;
+            return;
         }
 
-        return false;
-    }
-
-    static bool nameAddedToBlock (const juce::Array<DeviceInfo>& devices, Block::UID uid) noexcept
-    {
-        for (auto&& d : devices)
-            if (d.uid == uid && d.name.length)
-                return true;
-
-        return false;
-    }
-
-    static void setVersionNumberForBlock (const juce::Array<DeviceInfo>& devices, Block& block) noexcept
-    {
-        for (auto&& d : devices)
-            if (d.uid == block.uid)
-                block.versionNumber = juce::String ((const char*) d.version.version, d.version.length);
+        block.versionNumber = getVersionString (deviceInfo.version);
     }
 
     static void setNameForBlock (const juce::Array<DeviceInfo>& devices, Block& block) noexcept
     {
         for (auto&& d : devices)
+        {
             if (d.uid == block.uid)
-                block.name = juce::String ((const char*) d.name.name, d.name.length);
+            {
+                setNameForBlock (d, block);
+                return;
+            }
+        }
+    }
+
+    static void setNameForBlock (const DeviceInfo& deviceInfo, Block& block)
+    {
+        if (deviceInfo.uid != block.uid)
+        {
+            jassertfalse;
+            return;
+        }
+
+        block.name = getNameString (deviceInfo.name);
     }
 
     //==============================================================================
@@ -542,16 +562,9 @@ struct PhysicalTopologySource::Internal
 
         void handleVersion (BlocksProtocol::DeviceVersion version)
         {
-            for (auto i = 0; i < currentDeviceInfo.size(); ++i)
-            {
-                if (currentDeviceInfo[i].index == version.index && version.version.length > 1)
-                {
-                    if (memcmp (currentDeviceInfo.getReference (i).version.version, version.version.version, sizeof (version.version)))
-                    {
-                        currentDeviceInfo.getReference(i).version = version.version;
-                    }
-                }
-            }
+            for (auto& d : currentDeviceInfo)
+                if (d.index == version.index && version.version.length > 1)
+                    d.version = version.version;
         }
 
         void notifyDetectorTopologyChanged()
@@ -561,16 +574,9 @@ struct PhysicalTopologySource::Internal
 
         void handleName (BlocksProtocol::DeviceName name)
         {
-            for (auto i = 0; i < currentDeviceInfo.size(); ++i)
-            {
-                if (currentDeviceInfo[i].index == name.index && name.name.length > 1)
-                {
-                    if (memcmp (currentDeviceInfo.getReference (i).name.name, name.name.name, sizeof (name.name)))
-                    {
-                        currentDeviceInfo.getReference (i).name = name.name;
-                    }
-                }
-            }
+            for (auto& d : currentDeviceInfo)
+                if (d.index == name.index && name.name.length > 1)
+                    d.name = name.name;
         }
 
         void handleControlButtonUpDown (BlocksProtocol::TopologyIndex deviceIndex, uint32 timestamp,
@@ -928,29 +934,32 @@ struct PhysicalTopologySource::Internal
 
                 for (int i = currentTopology.blocks.size(); --i >= 0;)
                 {
-                    auto block = currentTopology.blocks.getUnchecked (i);
+                    auto currentBlock = currentTopology.blocks.getUnchecked (i);
 
-                    if (! containsBlockWithUID (newDeviceInfo, block->uid))
+                    auto newDeviceIter = std::find_if (newDeviceInfo.begin(), newDeviceInfo.end(),
+                                                       [&] (DeviceInfo& info) { return info.uid == currentBlock->uid; });
+
+                    if (newDeviceIter == newDeviceInfo.end())
                     {
-                        if (auto bi = BlockImplementation::getFrom (*block))
+                        if (auto bi = BlockImplementation::getFrom (*currentBlock))
                             bi->invalidate();
 
-                        currentTopology.blocks.remove (i);
+                        disconnectedBlocks.addIfNotAlreadyThere (currentTopology.blocks.removeAndReturn (i));
                     }
                     else
                     {
-                        if (versionNumberAddedToBlock (newDeviceInfo, block->uid, block->versionNumber))
-                            setVersionNumberForBlock (newDeviceInfo, *block);
-
-                        if (nameAddedToBlock (newDeviceInfo, block->uid))
-                            setNameForBlock (newDeviceInfo, *block);
+                        updateCurrentBlockInfo (currentBlock, *newDeviceIter);
                     }
                 }
 
+                static const int maxBlocksToSave = 100;
+
+                if (disconnectedBlocks.size() > maxBlocksToSave)
+                    disconnectedBlocks.removeRange (0, 2 * (disconnectedBlocks.size() - maxBlocksToSave));
+
                 for (auto& info : newDeviceInfo)
-                    if (info.serial.isValid())
-                        if (! containsBlockWithUID (currentTopology.blocks, getBlockUIDFromSerialNumber (info.serial)))
-                            currentTopology.blocks.add (new BlockImplementation (info.serial, *this, info.version, info.name, info.isMaster));
+                    if (info.serial.isValid() && ! containsBlockWithUID (currentTopology.blocks, getBlockUIDFromSerialNumber (info.serial)))
+                        addBlock (info);
 
                 currentTopology.connections.swapWith (newDeviceConnections);
             }
@@ -1136,6 +1145,7 @@ struct PhysicalTopologySource::Internal
         juce::Array<TouchSurfaceImplementation*> activeTouchSurfaces;
 
         BlockTopology currentTopology;
+        juce::ReferenceCountedArray<Block, CriticalSection> disconnectedBlocks;
 
     private:
         void timerCallback() override
@@ -1192,6 +1202,52 @@ struct PhysicalTopologySource::Internal
                     return true;
 
             return false;
+        }
+
+        void addBlock (DeviceInfo info)
+        {
+            if (! reactivateBlockIfKnown (info))
+                addNewBlock (info);
+        }
+
+        bool reactivateBlockIfKnown (DeviceInfo info)
+        {
+            auto uid = getBlockUIDFromSerialNumber (info.serial);
+
+            for (int i = 0; i < disconnectedBlocks.size(); ++i)
+            {
+                if (disconnectedBlocks.getUnchecked (i)->uid == uid)
+                {
+                    auto block = disconnectedBlocks.removeAndReturn (i);
+
+                    if (auto blockImpl = BlockImplementation::getFrom (*block))
+                    {
+                        blockImpl->revalidate (info.version, info.name, info.isMaster);
+                        currentTopology.blocks.add (block);
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        void addNewBlock (DeviceInfo info)
+        {
+            currentTopology.blocks.add (new BlockImplementation (info.serial, *this, info.version,
+                                                                 info.name, info.isMaster));
+        }
+
+        void updateCurrentBlockInfo (Block::Ptr blockToUpdate, DeviceInfo& updatedInfo)
+        {
+            if (versionNumberChanged (updatedInfo, blockToUpdate->versionNumber))
+                setVersionNumberForBlock (updatedInfo, *blockToUpdate);
+
+            if (nameIsValid (updatedInfo))
+                setNameForBlock (updatedInfo, *blockToUpdate);
+
+            if (updatedInfo.isMaster != blockToUpdate->isMasterBlock())
+                BlockImplementation::getFrom (*blockToUpdate)->setToMaster (updatedInfo.isMaster);
         }
 
         juce::OwnedArray<ConnectedDeviceGroup> connectedDeviceGroups;
@@ -1291,6 +1347,19 @@ struct PhysicalTopologySource::Internal
         void invalidate()
         {
             isStillConnected = false;
+        }
+
+        void revalidate (BlocksProtocol::VersionNumber newVersion, BlocksProtocol::BlockName newName, bool master)
+        {
+            versionNumber = getVersionString (newVersion);
+            name = getNameString (newName);
+            isMaster = master;
+            isStillConnected = true;
+        }
+
+        void setToMaster (bool shouldBeMaster)
+        {
+            isMaster = shouldBeMaster;
         }
 
         Type getType() const override                                   { return modelData.apiType; }
