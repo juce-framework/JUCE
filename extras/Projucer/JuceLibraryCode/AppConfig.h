@@ -30,9 +30,8 @@
 */
 
 // BEGIN SECTION A
-#ifndef JUCER_ENABLE_GPL_MODE
- #define JUCER_ENABLE_GPL_MODE 0
-#endif
+
+#define JUCER_ENABLE_GPL_MODE 0
 
 // END SECTION A
 
