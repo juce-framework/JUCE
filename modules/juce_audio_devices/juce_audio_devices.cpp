@@ -148,7 +148,9 @@
      installed, or you've not got your paths set up correctly to find its header
      files.
   */
+  #include <rtdk.h>
   #include <Bela.h>
+  #include <Midi.h>
  #endif
 
  #undef SIZEOF
@@ -210,14 +212,14 @@
   #include "native/juce_linux_ALSA.cpp"
  #endif
 
- #include "native/juce_linux_Midi.cpp"
-
  #if JUCE_JACK
   #include "native/juce_linux_JackAudio.cpp"
  #endif
 
  #if JUCE_BELA
   #include "native/juce_linux_Bela.cpp"
+ #else
+  #include "native/juce_linux_Midi.cpp"
  #endif
 
 //==============================================================================

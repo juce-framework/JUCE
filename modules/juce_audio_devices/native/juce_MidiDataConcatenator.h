@@ -171,7 +171,7 @@ private:
         }
     }
 
-    uint8 currentMessage[3] = {};
+    uint8 currentMessage[3];
     int currentMessageLen = 0;
 
     MemoryBlock pendingSysexData;
