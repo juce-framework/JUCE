@@ -1368,6 +1368,9 @@ struct PhysicalTopologySource::Internal
                 case Block::ConnectionPort::DeviceEdge::south:  return 2;
                 case Block::ConnectionPort::DeviceEdge::west:   return 3;
             }
+
+            jassertfalse;
+            return 0;
         }
 
         void layoutNeighbours (Block::Ptr block, const BlockTopology& topology,
