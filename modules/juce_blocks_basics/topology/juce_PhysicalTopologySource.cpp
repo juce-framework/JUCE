@@ -1275,6 +1275,9 @@ struct PhysicalTopologySource::Internal
                 {
                     lastTopology = detector->currentTopology;
 
+                    BlocksTraverser traverser;
+                    traverser.traverseBlockArray (detector->currentTopology);
+
                     for (auto* d : detector->activeTopologySources)
                         d->listeners.call ([] (TopologySource::Listener& l) { l.topologyChanged(); });
 
@@ -1293,6 +1296,131 @@ struct PhysicalTopologySource::Internal
         TopologyBroadcastThrottle topologyBroadcastThrottle;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Detector)
+    };
+
+    //==============================================================================
+    /** This is a friend of the BlocksImplementation that will scan and set the
+        physical positions of the blocks */
+    struct BlocksTraverser
+    {
+        void traverseBlockArray (const BlockTopology& topology)
+        {
+            juce::Array<Block::UID> visited;
+
+            for (auto& block : topology.blocks)
+            {
+                if (block->isMasterBlock() && ! visited.contains (block->uid))
+                {
+                    if (auto* bi = dynamic_cast<BlockImplementation*> (block))
+                    {
+                        bi->masterUID = {};
+                        bi->position = {};
+                        bi->rotation = 0;
+                    }
+
+                    layoutNeighbours (block, topology, block->uid, visited);
+                }
+            }
+        }
+
+        Block::Ptr findBlockWithUid (const BlockTopology& topology, Block::UID uid)
+        {
+            for (auto& block : topology.blocks)
+                if (block->uid == uid)
+                    return block;
+
+            return {};
+        }
+
+        // returns the distance from corner clockwise
+        int getUnitForIndex (Block::Ptr block, Block::ConnectionPort::DeviceEdge edge, int index)
+        {
+            if (block->getType() == Block::seaboardBlock)
+            {
+                if (edge == Block::ConnectionPort::DeviceEdge::north)
+                {
+                    if (index == 0) return 1;
+                    if (index == 1) return 4;
+                }
+                else if (edge == Block::ConnectionPort::DeviceEdge::east
+                         || edge == Block::ConnectionPort::DeviceEdge::west)
+                {
+                    return 1;
+                }
+            }
+
+            if (edge == Block::ConnectionPort::DeviceEdge::south)
+                return block->getWidth() - (index + 1);
+
+            if (edge == Block::ConnectionPort::DeviceEdge::west)
+                return block->getHeight() - (index + 1);
+
+            return index;
+        }
+
+        // returns how often north needs to rotate by 90 degrees
+        int getRotationForEdge (Block::ConnectionPort::DeviceEdge edge)
+        {
+            switch (edge)
+            {
+                case Block::ConnectionPort::DeviceEdge::north:  return 0;
+                case Block::ConnectionPort::DeviceEdge::east:   return 1;
+                case Block::ConnectionPort::DeviceEdge::south:  return 2;
+                case Block::ConnectionPort::DeviceEdge::west:   return 3;
+            }
+        }
+
+        void layoutNeighbours (Block::Ptr block, const BlockTopology& topology,
+                               Block::UID masterUid, juce::Array<Block::UID>& visited)
+        {
+            visited.add (block->uid);
+
+            for (auto& connection : topology.connections)
+            {
+                if ((connection.device1 == block->uid && ! visited.contains (connection.device2))
+                     || (connection.device2 == block->uid && ! visited.contains (connection.device1)))
+                {
+                    const auto theirUid = connection.device1 == block->uid ? connection.device2 : connection.device1;
+                    const auto neighbourPtr = findBlockWithUid (topology, theirUid);
+
+                    if (auto* neighbour = dynamic_cast<BlockImplementation*> (neighbourPtr.get()))
+                    {
+                        const auto  myBounds    = block->getBlockAreaWithinLayout();
+                        const auto& myPort      = connection.device1 == block->uid ? connection.connectionPortOnDevice1 : connection.connectionPortOnDevice2;
+                        const auto& theirPort   = connection.device1 == block->uid ? connection.connectionPortOnDevice2 : connection.connectionPortOnDevice1;
+                        const auto  myOffset    = getUnitForIndex (block, myPort.edge, myPort.index);
+                        const auto  theirOffset = getUnitForIndex (neighbourPtr, theirPort.edge, theirPort.index);
+
+                        neighbour->rotation = (2 + block->getRotation()
+                                                 + getRotationForEdge (myPort.edge)
+                                                 - getRotationForEdge (theirPort.edge)) % 4;
+
+                        Point<int> delta;
+                        const auto theirBounds = neighbour->getBlockAreaWithinLayout();
+
+                        switch ((block->getRotation() + getRotationForEdge (myPort.edge)) % 4)
+                        {
+                            case 0: // over me
+                                delta = { myOffset - (theirBounds.getWidth() - (theirOffset + 1)), -theirBounds.getHeight() };
+                                break;
+                            case 1: // right of me
+                                delta = { myBounds.getWidth(), myOffset - (theirBounds.getHeight() - (theirOffset + 1)) };
+                                break;
+                            case 2: // under me
+                                delta = { (myBounds.getWidth() - (myOffset + 1)) - theirOffset, myBounds.getHeight() };
+                                break;
+                            case 3: // left of me
+                                delta = { -theirBounds.getWidth(), (myBounds.getHeight() - (myOffset + 1)) - theirOffset };
+                                break;
+                        }
+
+                        neighbour->position = myBounds.getPosition() + delta;
+                    }
+
+                    layoutNeighbours (neighbourPtr, topology, masterUid, visited);
+                }
+            }
+        }
     };
 
     //==============================================================================
@@ -1315,6 +1443,7 @@ struct PhysicalTopologySource::Internal
                 touchSurface.reset (new TouchSurfaceImplementation (*this));
 
             int i = 0;
+
             for (auto&& b : modelData.buttons)
                 controlButtons.add (new ControlButtonImplementation (*this, i++, b));
 
@@ -1371,6 +1500,16 @@ struct PhysicalTopologySource::Internal
         juce::Array<Block::ConnectionPort> getPorts() const override    { return modelData.ports; }
         bool isConnected() const override                               { return isStillConnected && detector.isConnected (uid); }
         bool isMasterBlock() const override                             { return isMaster; }
+        Block::UID getConnectedMasterUID() const override               { return masterUID; }
+        int getRotation() const override                                { return rotation; }
+
+        Rectangle<int> getBlockAreaWithinLayout() const override
+        {
+            if (rotation % 2 == 0)
+                return { position.getX(), position.getY(), modelData.widthUnits, modelData.heightUnits };
+
+            return { position.getX(), position.getY(), modelData.heightUnits, modelData.widthUnits };
+        }
 
         TouchSurface* getTouchSurface() const override                  { return touchSurface.get(); }
         LEDGrid* getLEDGrid() const override                            { return ledGrid.get(); }
@@ -1876,6 +2015,11 @@ struct PhysicalTopologySource::Internal
         uint32 resetMessagesSent = 0;
         bool isStillConnected = true;
         bool isMaster = false;
+        Block::UID masterUID = {};
+
+        Point<int> position;
+        int rotation = 0;
+        friend BlocksTraverser;
 
         void initialiseDeviceIndexAndConnection()
         {
