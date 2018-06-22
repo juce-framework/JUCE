@@ -93,7 +93,7 @@ public:
 
             if (expectedLength == currentMessageLen)
             {
-                callback.handleIncomingMidiMessage (input, MidiMessage (currentMessage, expectedLength));
+                callback.handleIncomingMidiMessage (input, MidiMessage (currentMessage, expectedLength, time));
                 currentMessageLen = 1; // reset, but leave the first byte to use as the running status byte
             }
         }
