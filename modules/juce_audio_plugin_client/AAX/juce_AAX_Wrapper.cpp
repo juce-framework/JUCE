@@ -728,11 +728,12 @@ namespace AAXClasses
                 if ( (lengthInSamples - startSampleInFile <= 0) || (numSamples > lengthInSamples - startSampleInFile) )
                     return false;
 
-                int32_t numSamplesToCopy = numSamples;
+                int32_t numSamplesCopied = numSamples;
                 auto readWindow = lastValidRandomInput;
                 auto channelsToCopy = jmin ((int)numChannels, numDestChannels);
 
-                if (GetAudio (readWindow, numOfReportedInputs, GetSrcStart()+startSampleInFile, &numSamplesToCopy) != AAX_SUCCESS)
+                // GetAudio will read numSamplesCopied and returns actual read samples.
+                if (GetAudio (readWindow, numOfReportedInputs, GetSrcStart()+startSampleInFile, &numSamplesCopied) != AAX_SUCCESS)
                     return false;
 
                 int validIn = -1;
@@ -746,7 +747,10 @@ namespace AAXClasses
                     if (destSamples[i] == nullptr)
                         continue;
 
-                    juce::FloatVectorOperations::copy((float*)&destSamples[i][startOffsetInDestBuffer], readWindow[validIn], numSamples);
+                    juce::FloatVectorOperations::copy ((float*)&destSamples[i][startOffsetInDestBuffer], readWindow[validIn], numSamplesCopied);
+
+                    // zero out of bounds samples.
+                    juce::FloatVectorOperations::clear ((float*)&destSamples[i][startOffsetInDestBuffer+numSamplesCopied], numSamples - numSamplesCopied);
                 }
                 return true;
             }
