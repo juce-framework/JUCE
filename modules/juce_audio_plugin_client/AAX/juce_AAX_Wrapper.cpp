@@ -62,6 +62,7 @@
 
 #if JucePlugin_EnhancedAudioSuite
 #include <AAX_CHostProcessor.h>
+#include <AAX_VHostProcessorDelegate.h>
 #endif
 
 #ifdef _MSC_VER
@@ -588,10 +589,21 @@ namespace AAXClasses
     public:
 #if JucePlugin_EnhancedAudioSuite
         class JUCE_EnhancedAudioSuite : public AAX_CHostProcessor,
-                                        public juce::AudioFormatReader
+                                        public juce::AudioFormatReader,
+                                        public juce::AudioProcessor::EnhancedAudioSuiteInterface
         {
         public:
             JUCE_EnhancedAudioSuite() : juce::AudioFormatReader (nullptr, "AudioSuiteReader") {}
+
+            void requestAnalysis() override
+            {
+                (static_cast<AAX_VHostProcessorDelegate*>(GetHostProcessorDelegate()))->ForceAnalyze();
+            }
+
+            void requestRender() override
+            {
+                (static_cast<AAX_VHostProcessorDelegate*>(GetHostProcessorDelegate()))->ForceProcess();
+            }
 
             AAX_Result AnalyzeAudio (const float * const iAudioIns [], int32_t iAudioInCount, int32_t * ioWindowSize) override
             {
@@ -750,6 +762,7 @@ namespace AAXClasses
                 numOfReportedInputs = numOfInputsInBuffer;
                 lengthInSamples = GetInputRange();
                 getAAXProcessor().getPluginInstance().setRandomAudioReader(this);
+                getAAXProcessor().getPluginInstance().enhancedAudioSuiteInterface = this;
             }
 
             void UpdateBusLayout(int numOfIns, int numOfOuts, bool hasSideChain)

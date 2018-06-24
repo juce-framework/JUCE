@@ -305,6 +305,15 @@ public:
      */
     virtual void getOfflineRenderOffset (int& startOffset, int& endOffset);
 
+    struct EnhancedAudioSuiteInterface
+    {
+        virtual ~EnhancedAudioSuiteInterface() {};
+        virtual void requestAnalysis() = 0;
+        virtual void requestRender() = 0;
+    };
+
+    EnhancedAudioSuiteInterface* enhancedAudioSuiteInterface {nullptr};
+
     //==============================================================================
     /**
         Represents the bus layout state of a plug-in
