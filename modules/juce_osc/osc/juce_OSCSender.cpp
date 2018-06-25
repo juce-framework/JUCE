@@ -74,6 +74,11 @@ namespace
             return output.writeRepeatedByte ('\0', numPaddingZeros);
         }
 
+		bool writeColor(uint32 value)
+		{
+			return output.writeIntBigEndian(value);
+		}
+
         bool writeBlob (const MemoryBlock& blob)
         {
             if (! (output.writeIntBigEndian ((int) blob.getSize())
@@ -123,7 +128,7 @@ namespace
                 case OSCTypes::float32:     return writeFloat32 (arg.getFloat32());
                 case OSCTypes::string:      return writeString (arg.getString());
                 case OSCTypes::blob:        return writeBlob (arg.getBlob());
-
+				case OSCTypes::color:		return writeColor(arg.getColor());
                 default:
                     // In this very unlikely case you supplied an invalid OSCType!
                     jassertfalse;

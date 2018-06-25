@@ -27,9 +27,11 @@
 namespace juce
 {
 
-OSCArgument::OSCArgument (int32 value) noexcept
-    : type (OSCTypes::int32), intValue (value)
+OSCArgument::OSCArgument (int32 value, bool asColor) noexcept
+    : type (asColor?OSCTypes::color:OSCTypes::int32)
 {
+	if (asColor) colorValue = value;
+	else intValue = value;
 }
 
 OSCArgument::OSCArgument (float value) noexcept
@@ -46,6 +48,7 @@ OSCArgument::OSCArgument (const MemoryBlock& b)
     : type (OSCTypes::blob), blob (b)
 {
 }
+
 
 //==============================================================================
 String OSCArgument::getString() const noexcept
@@ -82,6 +85,17 @@ const MemoryBlock& OSCArgument::getBlob() const noexcept
 
     return blob;
 }
+
+
+uint32 OSCArgument::getColor() const noexcept
+{
+	if (isColor())
+		return colorValue;
+
+	jassertfalse; // you must check the type of an argument before attempting to get its value!
+	return 0;
+}
+
 
 
 //==============================================================================

@@ -114,6 +114,14 @@ namespace
             return s;
         }
 
+		uint32 readColor()
+		{
+			if (input.getNumBytesRemaining() < 4)
+				throw OSCFormatError("OSC input stream exhausted while reading color");
+
+			return (uint32)input.readIntBigEndian();
+		}
+
         MemoryBlock readBlob()
         {
             if (input.getNumBytesRemaining() < 4)
@@ -191,7 +199,8 @@ namespace
                 case OSCTypes::int32:       return OSCArgument (readInt32());
                 case OSCTypes::float32:     return OSCArgument (readFloat32());
                 case OSCTypes::string:      return OSCArgument (readString());
-                case OSCTypes::blob:        return OSCArgument (readBlob());
+				case OSCTypes::blob:        return OSCArgument(readBlob());
+				case OSCTypes::color:        return OSCArgument (readColor(), true);
 
                 default:
                     // You supplied an invalid OSCType when calling readArgument! This should never happen.

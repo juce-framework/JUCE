@@ -24,6 +24,7 @@
   ==============================================================================
 */
 
+
 namespace juce
 {
 
@@ -42,7 +43,7 @@ class JUCE_API  OSCArgument
 {
 public:
     /** Constructs an OSCArgument with type int32 and a given value. */
-    OSCArgument (int32 value) noexcept;
+    OSCArgument (int32 value, bool asColor = false) noexcept;
 
     /** Constructs an OSCArgument with type float32 and a given value. */
     OSCArgument (float value) noexcept;
@@ -58,6 +59,9 @@ public:
     */
     OSCArgument (const MemoryBlock& blob);
 
+
+
+
     /** Returns the type of the OSCArgument as an OSCType.
         OSCType is a char type, and its value will be the OSC type tag of the type.
     */
@@ -66,14 +70,17 @@ public:
     /** Returns whether the type of the OSCArgument is int32. */
     bool isInt32() const noexcept           { return type == OSCTypes::int32; }
 
-    /** Returns whether the type of the OSCArgument is int32. */
+    /** Returns whether the type of the OSCArgument is float. */
     bool isFloat32() const noexcept         { return type == OSCTypes::float32; }
 
-    /** Returns whether the type of the OSCArgument is int32. */
+    /** Returns whether the type of the OSCArgument is string. */
     bool isString() const noexcept          { return type == OSCTypes::string; }
 
-    /** Returns whether the type of the OSCArgument is int32. */
+    /** Returns whether the type of the OSCArgument is blob. */
     bool isBlob() const noexcept            { return type == OSCTypes::blob; }
+
+	/** Returns whether the type of the OSCArgument is color. */
+	bool isColor() const noexcept			{ return type == OSCTypes::color; }
 
     /** Returns the value of the OSCArgument as an int32.
         If the type of the OSCArgument is not int32, the behaviour is undefined.
@@ -97,6 +104,11 @@ public:
      */
     const MemoryBlock& getBlob() const noexcept;
 
+	/** Returns the value of the OSCArgument as a colour.
+	If the type of the OSCArgument is not a color, the behaviour is undefined.
+	*/
+	uint32 getColor() const noexcept;
+
 
 private:
     //==============================================================================
@@ -106,6 +118,7 @@ private:
     {
         int32 intValue;
         float floatValue;
+		uint32 colorValue;
     };
 
     String stringValue;
