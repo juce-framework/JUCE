@@ -66,13 +66,13 @@ public:
     /** Returns whether the type of the OSCArgument is int32. */
     bool isInt32() const noexcept           { return type == OSCTypes::int32; }
 
-    /** Returns whether the type of the OSCArgument is int32. */
+    /** Returns whether the type of the OSCArgument is float. */
     bool isFloat32() const noexcept         { return type == OSCTypes::float32; }
 
-    /** Returns whether the type of the OSCArgument is int32. */
+    /** Returns whether the type of the OSCArgument is string. */
     bool isString() const noexcept          { return type == OSCTypes::string; }
 
-    /** Returns whether the type of the OSCArgument is int32. */
+    /** Returns whether the type of the OSCArgument is blob. */
     bool isBlob() const noexcept            { return type == OSCTypes::blob; }
 
     /** Returns the value of the OSCArgument as an int32.
