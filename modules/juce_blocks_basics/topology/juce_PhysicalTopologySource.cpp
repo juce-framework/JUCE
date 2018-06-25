@@ -1394,6 +1394,7 @@ struct PhysicalTopologySource::Internal
                         const auto  myOffset    = getUnitForIndex (block, myPort.edge, myPort.index);
                         const auto  theirOffset = getUnitForIndex (neighbourPtr, theirPort.edge, theirPort.index);
 
+                        neighbour->masterUID = masterUid;
                         neighbour->rotation = (2 + block->getRotation()
                                                  + getRotationForEdge (myPort.edge)
                                                  - getRotationForEdge (theirPort.edge)) % 4;
