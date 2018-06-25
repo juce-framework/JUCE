@@ -728,29 +728,40 @@ namespace AAXClasses
                 if ( (lengthInSamples - startSampleInFile <= 0) || (numSamples > lengthInSamples - startSampleInFile) )
                     return false;
 
-                int32_t numSamplesCopied = numSamples;
-                auto readWindow = lastValidRandomInput;
-                auto channelsToCopy = jmin ((int)numChannels, numDestChannels);
-
-                // GetAudio will read numSamplesCopied and returns actual read samples.
-                if (GetAudio (readWindow, numOfReportedInputs, GetSrcStart()+startSampleInFile, &numSamplesCopied) != AAX_SUCCESS)
-                    return false;
-
-                int validIn = -1;
-                for (int i = 0; i < channelsToCopy; ++i)
+                int32_t numSamplesRead = numSamples;
+                int32_t numSamplesCopied = 0;
+                while (numSamplesCopied < numSamples)
                 {
-                    // should forward with i (unless needs to skip)
-                    validIn++;
-                    while ( (readWindow[validIn] == nullptr) && (validIn < numOfReportedInputs) )
+                    numSamplesRead = numSamples - numSamplesCopied;
+                    auto readWindow = lastValidRandomInput;
+                    auto channelsToCopy = jmin ((int)numChannels, numDestChannels);
+
+                    // GetAudio will read numSamplesRead and sets it to read samples.
+                    GetAudio (readWindow, numOfReportedInputs, GetSrcStart()+startSampleInFile+numSamplesCopied, &numSamplesRead);
+
+                    int validIn = -1;
+                    for (int i = 0; i < channelsToCopy; ++i)
+                    {
+                        // should forward with i (unless needs to skip)
                         validIn++;
+                        while ( (readWindow[validIn] == nullptr) && (validIn < numOfReportedInputs) )
+                            validIn++;
 
-                    if (destSamples[i] == nullptr)
-                        continue;
+                        if (destSamples[i] == nullptr)
+                            continue;
 
-                    juce::FloatVectorOperations::copy ((float*)&destSamples[i][startOffsetInDestBuffer], readWindow[validIn], numSamplesCopied);
-
-                    // zero out of bounds samples.
-                    juce::FloatVectorOperations::clear ((float*)&destSamples[i][startOffsetInDestBuffer+numSamplesCopied], numSamples - numSamplesCopied);
+                        if (numSamplesRead > 0)
+                        {
+                        juce::FloatVectorOperations::copy ((float*)&destSamples[i][startOffsetInDestBuffer+numSamplesCopied], readWindow[validIn], numSamplesRead);
+                        }
+                        else
+                        {
+                            // zero out of bounds samples.
+                            juce::FloatVectorOperations::clear ((float*)&destSamples[i][startOffsetInDestBuffer+numSamplesCopied], numSamples - numSamplesCopied);
+                            return true;
+                        }
+                    }
+                    numSamplesCopied += numSamplesRead;
                 }
                 return true;
             }
