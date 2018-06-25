@@ -245,6 +245,11 @@ uint32 Colour::getARGB() const noexcept
     return argb.getInARGBMaskOrder();
 }
 
+uint32 Colour::getRGBA() const noexcept
+{
+	return (getARGB() & 0xFFFFFF) << 8 | getAlpha();
+}
+
 //==============================================================================
 bool Colour::isTransparent() const noexcept
 {
