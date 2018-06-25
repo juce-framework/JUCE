@@ -191,9 +191,16 @@ public:
     /** Returns a 32-bit integer that represents this colour.
 
         The format of this number is:
-            ((alpha << 24) | (red << 16) | (green << 16) | blue).
+            ((alpha << 24) | (red << 16) | (green << 8) | blue).
     */
-    uint32 getARGB() const noexcept;
+	uint32 getARGB() const noexcept;
+
+	/** Returns a 32-bit integer that represents this colour in the RGBA format.
+
+	The format of this number is:
+	((red << 24) | (green << 16) | (blue << 8) | alpha).
+	*/
+	uint32 getRGBA() const noexcept;
 
     //==============================================================================
     /** Returns the colour's alpha (opacity).
