@@ -665,6 +665,28 @@ ValueTree ValueTree::createCopy() const
     return ValueTree (createCopyIfNotNull (object.get()));
 }
 
+void ValueTree::copyPropertiesFrom (const ValueTree& source, UndoManager* undoManager)
+{
+    jassert (object != nullptr || source.object == nullptr); // Trying to add properties to a null ValueTree will fail!
+
+    if (source.object == nullptr)
+        removeAllProperties (undoManager);
+    else if (object != nullptr)
+        object->copyPropertiesFrom (*(source.object), undoManager);
+}
+
+void ValueTree::copyPropertiesAndChildrenFrom (const ValueTree& source, UndoManager* undoManager)
+{
+    jassert (object != nullptr || source.object == nullptr); // Trying to copy to a null ValueTree will fail!
+
+    copyPropertiesFrom (source, undoManager);
+    removeAllChildren (undoManager);
+
+    if (object != nullptr && source.object != nullptr)
+        for (auto& child : source.object->children)
+            object->addChild (createCopyIfNotNull (child), -1, undoManager);
+}
+
 bool ValueTree::hasType (const Identifier& typeName) const noexcept
 {
     return object != nullptr && object->type == typeName;
@@ -767,16 +789,6 @@ Identifier ValueTree::getPropertyName (int index) const noexcept
 {
     return object == nullptr ? Identifier()
                              : object->properties.getName (index);
-}
-
-void ValueTree::copyPropertiesFrom (const ValueTree& source, UndoManager* undoManager)
-{
-    jassert (object != nullptr || source.object == nullptr); // Trying to add properties to a null ValueTree will fail!
-
-    if (source.object == nullptr)
-        removeAllProperties (undoManager);
-    else if (object != nullptr)
-        object->copyPropertiesFrom (*(source.object), undoManager);
 }
 
 int ValueTree::getReferenceCount() const noexcept
