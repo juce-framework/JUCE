@@ -320,6 +320,7 @@ namespace Ids
     DECLARE_ID (pluginVST3Category);
     DECLARE_ID (pluginAUExportPrefix);
     DECLARE_ID (pluginAUMainType);
+    DECLARE_ID (pluginAUIsSandboxSafe);
     DECLARE_ID (pluginRTASCategory);
     DECLARE_ID (pluginRTASDisableBypass);
     DECLARE_ID (pluginRTASDisableMultiMono);

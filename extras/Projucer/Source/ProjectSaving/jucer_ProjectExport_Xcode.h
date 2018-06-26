@@ -1565,6 +1565,9 @@ public:
             addPlistDictionaryKey (dict, "subtype", pluginSubType);
             addPlistDictionaryKeyInt (dict, "version", owner.project.getVersionAsHexInteger());
 
+            if (owner.project.isAUSandBoxSafe())
+                addPlistDictionaryKeyBool (dict, "sandboxSafe", true);
+
             xcodeExtraPListEntries.add (plistKey);
             xcodeExtraPListEntries.add (plistEntry);
         }

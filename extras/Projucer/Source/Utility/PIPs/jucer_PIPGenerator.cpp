@@ -460,6 +460,7 @@ Result PIPGenerator::setProjectSettings (ValueTree& jucerTree)
     {
         jucerTree.setProperty (Ids::projectType, "audioplug", nullptr);
         jucerTree.setProperty (Ids::pluginManufacturer, metadata[Ids::vendor], nullptr);
+        jucerTree.setProperty (Ids::pluginAUIsSandboxSafe, "1", nullptr);
 
         StringArray pluginFormatsToBuild (Ids::buildVST3.toString(), Ids::buildAU.toString(), Ids::buildStandalone.toString());
         pluginFormatsToBuild.addArray (getExtraPluginFormatsToBuild());

@@ -249,6 +249,7 @@ void Project::initialiseAudioPluginValues()
                                               CodeHelpers::makeValidIdentifier (getProjectNameString(), false, true, false) + "AU");
 
     pluginAUMainTypeValue.referTo            (projectRoot, Ids::pluginAUMainType,           getUndoManager(), getDefaultAUMainTypes(),    ",");
+    pluginAUSandboxSafe.referTo              (projectRoot, Ids::pluginAUIsSandboxSafe,      getUndoManager(), false);
     pluginVSTCategoryValue.referTo           (projectRoot, Ids::pluginVSTCategory,          getUndoManager(), getDefaultVSTCategories(),  ",");
     pluginVST3CategoryValue.referTo          (projectRoot, Ids::pluginVST3Category,         getUndoManager(), getDefaultVST3Categories(), ",");
     pluginRTASCategoryValue.referTo          (projectRoot, Ids::pluginRTASCategory,         getUndoManager(), getDefaultRTASCategories(), ",");
@@ -1062,6 +1063,10 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
     props.add (new MultiChoicePropertyComponent (pluginAUMainTypeValue, "Plugin AU Main Type", getAllAUMainTypeStrings(), getAllAUMainTypeVars(), 1),
                "AU main type.");
 
+    props.add (new ChoicePropertyComponent (pluginAUSandboxSafe, "Plugin AU is sandbox safe"),
+                  "Check this box if your plug-in is sandbox safe. A sand-box safe plug-in is loaded in a restricted path and can only access it's own bundle resources and "
+                  "the Music folder. Your plug-in must be able to deal with this. Newer versions of GarageBand require this to be enabled.");
+
     {
         Array<var> vst3CategoryVars;
         for (auto s : getAllVST3CategoryStrings())
@@ -1624,6 +1629,11 @@ String Project::getAUMainTypeString() const noexcept
 
     jassertfalse;
     return {};
+}
+
+bool Project::isAUSandBoxSafe() const noexcept
+{
+    return pluginAUSandboxSafe.get();
 }
 
 String Project::getVSTCategoryString() const noexcept
