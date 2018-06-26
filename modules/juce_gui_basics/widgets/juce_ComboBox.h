@@ -376,6 +376,8 @@ public:
         virtual Label* createComboBoxTextBox (ComboBox&) = 0;
 
         virtual void positionComboBoxText (ComboBox&, Label& labelToPosition) = 0;
+
+        virtual PopupMenu::Options getOptionsForComboBoxPopupMenu (ComboBox&, Label&) = 0;
     };
 
     //==============================================================================

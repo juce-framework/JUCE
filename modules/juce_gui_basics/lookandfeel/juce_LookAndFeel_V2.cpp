@@ -1199,6 +1199,15 @@ void LookAndFeel_V2::positionComboBoxText (ComboBox& box, Label& label)
     label.setFont (getComboBoxFont (box));
 }
 
+PopupMenu::Options LookAndFeel_V2::getOptionsForComboBoxPopupMenu (ComboBox& box, Label& label)
+{
+    return PopupMenu::Options().withTargetComponent (&box)
+                               .withItemThatMustBeVisible (box.getSelectedId())
+                               .withMinimumWidth (box.getWidth())
+                               .withMaximumNumColumns (1)
+                               .withStandardItemHeight (label.getHeight());
+}
+
 //==============================================================================
 Font LookAndFeel_V2::getLabelFont (Label& label)
 {

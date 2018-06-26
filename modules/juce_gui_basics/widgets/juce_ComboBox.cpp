@@ -545,12 +545,10 @@ void ComboBox::showPopup()
         menu.addItem (1, noChoicesMessage, false, false);
     }
 
-    menu.setLookAndFeel (&getLookAndFeel());
-    menu.showMenuAsync (PopupMenu::Options().withTargetComponent (this)
-                                            .withItemThatMustBeVisible (getSelectedId())
-                                            .withMinimumWidth (getWidth())
-                                            .withMaximumNumColumns (1)
-                                            .withStandardItemHeight (label->getHeight()),
+    auto& lookAndFeel = getLookAndFeel();
+
+    menu.setLookAndFeel (&lookAndFeel);
+    menu.showMenuAsync (lookAndFeel.getOptionsForComboBoxPopupMenu (*this, *label),
                         ModalCallbackFunction::forComponent (comboBoxPopupMenuFinishedCallback, this));
 }
 
