@@ -103,7 +103,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
     static bool isNumericOrUndefined (const var& v) noexcept  { return isNumeric (v) || v.isUndefined(); }
     static int64 getOctalValue (const String& s)              { BigInteger b; b.parseString (s.initialSectionContainingOnly ("01234567"), 8); return b.toInt64(); }
     static Identifier getPrototypeIdentifier()                { static const Identifier i ("prototype"); return i; }
-    static var* getPropertyPointer (DynamicObject* o, const Identifier& i) noexcept   { return o->getProperties().getVarPointer (i); }
+    static var* getPropertyPointer (DynamicObject& o, const Identifier& i) noexcept   { return o.getProperties().getVarPointer (i); }
 
     //==============================================================================
     struct CodeLocation
@@ -131,9 +131,11 @@ struct JavascriptEngine::RootObject   : public DynamicObject
     //==============================================================================
     struct Scope
     {
-        Scope (const Scope* p, RootObject* r, DynamicObject* s) noexcept : parent (p), root (r), scope (s) {}
+        Scope (const Scope* p, ReferenceCountedObjectPtr<RootObject> rt, DynamicObject::Ptr scp) noexcept
+            : parent (p), root (static_cast<ReferenceCountedObjectPtr<RootObject>&&> (rt)),
+              scope (static_cast<DynamicObject::Ptr&&> (scp)) {}
 
-        const Scope* parent;
+        const Scope* const parent;
         ReferenceCountedObjectPtr<RootObject> root;
         DynamicObject::Ptr scope;
 
@@ -141,13 +143,13 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         {
             if (auto* o = targetObject.getDynamicObject())
             {
-                if (auto* prop = getPropertyPointer (o, functionName))
+                if (auto* prop = getPropertyPointer (*o, functionName))
                     return *prop;
 
                 for (auto* p = o->getProperty (getPrototypeIdentifier()).getDynamicObject(); p != nullptr;
                      p = p->getProperty (getPrototypeIdentifier()).getDynamicObject())
                 {
-                    if (auto* prop = getPropertyPointer (p, functionName))
+                    if (auto* prop = getPropertyPointer (*p, functionName))
                         return *prop;
                 }
 
@@ -174,14 +176,14 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         var* findRootClassProperty (const Identifier& className, const Identifier& propName) const
         {
             if (auto* cls = root->getProperty (className).getDynamicObject())
-                return getPropertyPointer (cls, propName);
+                return getPropertyPointer (*cls, propName);
 
             return nullptr;
         }
 
         var findSymbolInParentScopes (const Identifier& name) const
         {
-            if (auto* v = getPropertyPointer (scope, name))
+            if (auto v = getPropertyPointer (*scope, name))
                 return *v;
 
             return parent != nullptr ? parent->findSymbolInParentScopes (name)
@@ -192,9 +194,9 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         {
             auto* target = args.thisObject.getDynamicObject();
 
-            if (target == nullptr || target == scope)
+            if (target == nullptr || target == scope.get())
             {
-                if (auto* m = getPropertyPointer (scope, function))
+                if (auto* m = getPropertyPointer (*scope, function))
                 {
                     if (auto fo = dynamic_cast<FunctionObject*> (m->getObject()))
                     {
@@ -220,7 +222,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             {
                 auto* target = args.thisObject.getDynamicObject();
 
-                if (target == nullptr || target == scope)
+                if (target == nullptr || target == scope.get())
                 {
                     if (auto fo = dynamic_cast<FunctionObject*> (m.getObject()))
                     {
@@ -238,6 +240,8 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             if (Time::getCurrentTime() > root->timeout)
                 location.throwError (root->timeout == Time() ? "Interrupted" : "Execution timed-out");
         }
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Scope)
     };
 
     //==============================================================================
@@ -378,7 +382,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
         void assign (const Scope& s, const var& newValue) const override
         {
-            if (auto* v = getPropertyPointer (s.scope, name))
+            if (auto* v = getPropertyPointer (*s.scope, name))
                 *v = newValue;
             else
                 s.root->setProperty (name, newValue);
@@ -403,7 +407,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             }
 
             if (auto* o = p.getDynamicObject())
-                if (auto* v = getPropertyPointer (o, child))
+                if (auto* v = getPropertyPointer (*o, child))
                     return *v;
 
             return var::undefined();
@@ -436,7 +440,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
             if (auto* o = arrayVar.getDynamicObject())
                 if (key.isString())
-                    if (auto* v = getPropertyPointer (o, Identifier (key)))
+                    if (auto* v = getPropertyPointer (*o, Identifier (key)))
                         return *v;
 
             return var::undefined();
@@ -1865,13 +1869,13 @@ var JavascriptEngine::evaluate (const String& code, Result* result)
 
 var JavascriptEngine::callFunction (const Identifier& function, const var::NativeFunctionArgs& args, Result* result)
 {
-    var returnVal (var::undefined());
+    auto returnVal = var::undefined();
 
     try
     {
         prepareTimeout();
         if (result != nullptr) *result = Result::ok();
-        RootObject::Scope (nullptr, root, root).findAndInvokeMethod (function, args, returnVal);
+        RootObject::Scope ({}, root, root).findAndInvokeMethod (function, args, returnVal);
     }
     catch (String& error)
     {
@@ -1884,13 +1888,13 @@ var JavascriptEngine::callFunction (const Identifier& function, const var::Nativ
 var JavascriptEngine::callFunctionObject (DynamicObject* objectScope, const var& functionObject,
                                           const var::NativeFunctionArgs& args, Result* result)
 {
-    var returnVal (var::undefined());
+    auto returnVal = var::undefined();
 
     try
     {
         prepareTimeout();
         if (result != nullptr) *result = Result::ok();
-        RootObject::Scope rootScope (nullptr, root, root);
+        RootObject::Scope rootScope ({}, root, root);
         RootObject::Scope (&rootScope, root, objectScope).invokeMethod (functionObject, args, returnVal);
     }
     catch (String& error)

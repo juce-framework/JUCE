@@ -185,7 +185,7 @@ public:
         This will return nullptr if the index is out of range.
         @see getNodeForId
     */
-    Node* getNode (int index) const noexcept                        { return nodes [index]; }
+    Node::Ptr getNode (int index) const noexcept                    { return nodes[index]; }
 
     /** Searches the graph for a node with the given ID number and returns it.
         If no such node was found, this returns nullptr.

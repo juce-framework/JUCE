@@ -79,7 +79,8 @@ struct ItemComponent  : public Component
         if (item.isSectionHeader)
             customComp = new HeaderItemComponent (item.text);
 
-        addAndMakeVisible (customComp);
+        if (customComp != nullptr)
+            addAndMakeVisible (*customComp);
 
         parent.addAndMakeVisible (this);
 
@@ -95,7 +96,7 @@ struct ItemComponent  : public Component
 
     ~ItemComponent()
     {
-        removeChildComponent (customComp);
+        removeChildComponent (customComp.get());
     }
 
     void getIdealSize (int& idealWidth, int& idealHeight, const int standardItemHeight)
@@ -1853,7 +1854,9 @@ bool PopupMenu::MenuItemIterator::next()
         menus.add (currentItem->subMenu.get());
     }
     else
+    {
         index.setUnchecked (index.size() - 1, index.getLast() + 1);
+    }
 
     while (index.size() > 0 && index.getLast() >= menus.getLast()->items.size())
     {

@@ -394,7 +394,7 @@ public:
             writeObjectToStream (output, children.getObjectPointerUnchecked(i));
     }
 
-    static void writeObjectToStream (OutputStream& output, const SharedObject* object)
+    static void writeObjectToStream (OutputStream& output, const Ptr& object)
     {
         if (object != nullptr)
         {
@@ -411,10 +411,11 @@ public:
     //==============================================================================
     struct SetPropertyAction  : public UndoableAction
     {
-        SetPropertyAction (SharedObject* so, const Identifier& propertyName,
+        SetPropertyAction (Ptr targetObject, const Identifier& propertyName,
                            const var& newVal, const var& oldVal, bool isAdding, bool isDeleting,
                            ValueTree::Listener* listenerToExclude = nullptr)
-            : target (so), name (propertyName), newValue (newVal), oldValue (oldVal),
+            : target (static_cast<Ptr&&> (targetObject)),
+              name (propertyName), newValue (newVal), oldValue (oldVal),
               isAddingNewProperty (isAdding), isDeletingProperty (isDeleting),
               excludeListener (listenerToExclude)
         {
@@ -474,8 +475,8 @@ public:
     //==============================================================================
     struct AddOrRemoveChildAction  : public UndoableAction
     {
-        AddOrRemoveChildAction (SharedObject* parentObject, int index, SharedObject* newChild)
-            : target (parentObject),
+        AddOrRemoveChildAction (Ptr parentObject, int index, SharedObject* newChild)
+            : target (static_cast<Ptr&&> (parentObject)),
               child (newChild != nullptr ? newChild : parentObject->children.getObjectPointer (index)),
               childIndex (index),
               isDeleting (newChild == nullptr)
@@ -488,7 +489,7 @@ public:
             if (isDeleting)
                 target->removeChild (childIndex, nullptr);
             else
-                target->addChild (child, childIndex, nullptr);
+                target->addChild (child.get(), childIndex, nullptr);
 
             return true;
         }
@@ -497,7 +498,7 @@ public:
         {
             if (isDeleting)
             {
-                target->addChild (child, childIndex, nullptr);
+                target->addChild (child.get(), childIndex, nullptr);
             }
             else
             {
@@ -526,8 +527,8 @@ public:
     //==============================================================================
     struct MoveChildAction  : public UndoableAction
     {
-        MoveChildAction (SharedObject* parentObject, int fromIndex, int toIndex) noexcept
-            : parent (parentObject), startIndex (fromIndex), endIndex (toIndex)
+        MoveChildAction (Ptr parentObject, int fromIndex, int toIndex) noexcept
+            : parent (static_cast<Ptr&&> (parentObject)), startIndex (fromIndex), endIndex (toIndex)
         {
         }
 
@@ -597,7 +598,8 @@ ValueTree::ValueTree (const Identifier& type,
         addChild (tree, -1, nullptr);
 }
 
-ValueTree::ValueTree (SharedObject* so) noexcept  : object (so)
+ValueTree::ValueTree (ReferenceCountedObjectPtr<SharedObject> so) noexcept
+    : object (static_cast<ReferenceCountedObjectPtr<SharedObject>&&> (so))
 {
 }
 
@@ -892,7 +894,7 @@ ValueTree ValueTree::getChildWithProperty (const Identifier& propertyName, const
 
 bool ValueTree::isAChildOf (const ValueTree& possibleParent) const noexcept
 {
-    return object != nullptr && object->isAChildOf (possibleParent.object);
+    return object != nullptr && object->isAChildOf (possibleParent.object.get());
 }
 
 int ValueTree::indexOf (const ValueTree& child) const noexcept
@@ -905,7 +907,7 @@ void ValueTree::addChild (const ValueTree& child, int index, UndoManager* undoMa
     jassert (object != nullptr); // Trying to add a child to a null ValueTree!
 
     if (object != nullptr)
-        object->addChild (child.object, index, undoManager);
+        object->addChild (child.object.get(), index, undoManager);
 }
 
 void ValueTree::appendChild (const ValueTree& child, UndoManager* undoManager)
@@ -1056,7 +1058,7 @@ ValueTree ValueTree::readFromStream (InputStream& input)
             return v;
 
         v.object->children.add (child.object);
-        child.object->parent = v.object;
+        child.object->parent = v.object.get();
     }
 
     return v;

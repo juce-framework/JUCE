@@ -944,7 +944,7 @@ struct PhysicalTopologySource::Internal
                         if (auto bi = BlockImplementation::getFrom (*currentBlock))
                             bi->invalidate();
 
-                        disconnectedBlocks.addIfNotAlreadyThere (currentTopology.blocks.removeAndReturn (i));
+                        disconnectedBlocks.addIfNotAlreadyThere (currentTopology.blocks.removeAndReturn (i).get());
                     }
                     else
                     {

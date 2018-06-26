@@ -938,7 +938,7 @@ AudioProcessorGraph::Node::Ptr AudioProcessorGraph::addNode (AudioProcessor* new
     newProcessor->setPlayHead (getPlayHead());
 
     Node::Ptr n (new Node (nodeID, newProcessor));
-    nodes.add (n);
+    nodes.add (n.get());
     n->setParentGraph (this);
     topologyChanged();
     return n;

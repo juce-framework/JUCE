@@ -719,7 +719,8 @@
             resource="0" file="Source/Wizards/jucer_TemplateThumbnailsComponent.h"/>
     </GROUP>
   </MAINGROUP>
-  <JUCEOPTIONS JUCE_LOG_ASSERTIONS="1" JUCE_USE_CURL="1" JUCE_ALLOW_STATIC_NULL_VARIABLES="0"/>
+  <JUCEOPTIONS JUCE_LOG_ASSERTIONS="1" JUCE_USE_CURL="1" JUCE_ALLOW_STATIC_NULL_VARIABLES="0"
+               JUCE_STRICT_REFCOUNTEDPOINTER="1"/>
   <MODULES>
     <MODULE id="juce_analytics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_core" showAllCode="1"/>

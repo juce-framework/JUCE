@@ -60,11 +60,14 @@ namespace StateVariableFilter
         */
         using NumericType = typename SampleTypeHelpers::ElementType<SampleType>::Type;
 
+        /** A typedef for a ref-counted pointer to the coefficients object */
+        using ParametersPtr = typename Parameters<NumericType>::Ptr;
+
         //==============================================================================
         /** Creates a filter with default parameters. */
-        Filter()                              : parameters (new Parameters<NumericType>) { reset(); }
+        Filter()                               : parameters (new Parameters<NumericType>) { reset(); }
 
-        Filter (Parameters<NumericType>* parametersToUse) : parameters (parametersToUse) { reset(); }
+        Filter (ParametersPtr parametersToUse) : parameters (static_cast<ParametersPtr&&> (parametersToUse)) { reset(); }
 
         /** Creates a copy of another filter. */
         Filter (const Filter&) = default;

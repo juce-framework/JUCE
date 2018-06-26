@@ -409,10 +409,10 @@ public:
 
     //==============================================================================
     /** @internal */
-    ImagePixelData* getPixelData() const noexcept       { return image; }
+    ImagePixelData* getPixelData() const noexcept       { return image.get(); }
 
     /** @internal */
-    explicit Image (ImagePixelData*) noexcept;
+    explicit Image (ReferenceCountedObjectPtr<ImagePixelData>) noexcept;
 
     /* A null Image object that can be used when you need to return an invalid image.
         @deprecated If you need a default-constructed var, just use Image() or {}.

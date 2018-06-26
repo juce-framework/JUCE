@@ -152,7 +152,7 @@ PluginWindow* FilterGraph::getOrCreateWindowFor (AudioProcessorGraph::Node* node
     closeAnyOpenPluginWindows();
    #else
     for (auto* w : activePluginWindows)
-        if (w->node == node && w->type == type)
+        if (w->node.get() == node && w->type == type)
             return w;
    #endif
 

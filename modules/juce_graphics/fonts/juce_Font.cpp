@@ -392,7 +392,7 @@ Typeface* Font::getTypeface() const
         jassert (font->typeface != nullptr);
     }
 
-    return font->typeface;
+    return font->typeface.get();
 }
 
 //==============================================================================

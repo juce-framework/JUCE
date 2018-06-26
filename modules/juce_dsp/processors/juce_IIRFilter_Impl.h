@@ -42,8 +42,7 @@ Filter<SampleType>::Filter()
 }
 
 template <typename SampleType>
-Filter<SampleType>::Filter (Coefficients<typename Filter<SampleType>::NumericType>* c)
-    : coefficients (c)
+Filter<SampleType>::Filter (CoefficientsPtr c)  : coefficients (static_cast<CoefficientsPtr&&> (c))
 {
     reset();
 }

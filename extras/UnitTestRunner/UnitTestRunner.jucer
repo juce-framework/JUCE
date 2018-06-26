@@ -117,7 +117,7 @@
             useGlobalPath="0"/>
     <MODULES id="juce_video" showAllCode="1" useLocalCopy="0"/>
   </MODULES>
-  <JUCEOPTIONS/>
+  <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1"/>
   <LIVE_SETTINGS>
     <OSX enableCxx11="1"/>
   </LIVE_SETTINGS>

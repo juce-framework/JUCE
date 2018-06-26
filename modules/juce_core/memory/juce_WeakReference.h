@@ -166,7 +166,7 @@ public:
         /** The first call to this method will create an internal object that is shared by all weak
             references to the object.
         */
-        SharedPointer* getSharedPointer (ObjectType* object)
+        SharedRef getSharedPointer (ObjectType* object)
         {
             if (sharedPointer == nullptr)
             {
@@ -206,9 +206,12 @@ public:
 private:
     SharedRef holder;
 
-    static inline SharedPointer* getRef (ObjectType* o)
+    static inline SharedRef getRef (ObjectType* o)
     {
-        return (o != nullptr) ? o->masterReference.getSharedPointer (o) : nullptr;
+        if (o != nullptr)
+            return o->masterReference.getSharedPointer (o);
+
+        return {};
     }
 };
 

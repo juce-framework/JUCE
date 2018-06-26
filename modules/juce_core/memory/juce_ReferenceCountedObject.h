@@ -269,6 +269,13 @@ public:
         incIfNotNull (referencedObject);
     }
 
+    /** Takes-over the object from another pointer. */
+    ReferenceCountedObjectPtr (ReferenceCountedObjectPtr&& other) noexcept
+        : referencedObject (other.referencedObject)
+    {
+        other.referencedObject = nullptr;
+    }
+
     /** Copies another pointer.
         This will increment the object's reference-count (if it is non-null).
     */
@@ -317,14 +324,7 @@ public:
     }
 
     /** Takes-over the object from another pointer. */
-    ReferenceCountedObjectPtr (ReferenceCountedObjectPtr&& other) noexcept
-        : referencedObject (other.referencedObject)
-    {
-        other.referencedObject = nullptr;
-    }
-
-    /** Takes-over the object from another pointer. */
-    ReferenceCountedObjectPtr& operator= (ReferenceCountedObjectPtr&& other)
+    ReferenceCountedObjectPtr& operator= (ReferenceCountedObjectPtr&& other) noexcept
     {
         std::swap (referencedObject, other.referencedObject);
         return *this;
@@ -343,17 +343,7 @@ public:
     /** Returns the object that this pointer references.
         The pointer returned may be null, of course.
     */
-    operator ReferencedType*() const noexcept       { return referencedObject; }
-
-    /** Returns the object that this pointer references.
-        The pointer returned may be null, of course.
-    */
-    ReferencedType* get() const noexcept            { return referencedObject; }
-
-    /** Returns the object that this pointer references.
-        The pointer returned may be null, of course.
-    */
-    ReferencedType* getObject() const noexcept      { return referencedObject; }
+    ReferencedType* get() const noexcept                    { return referencedObject; }
 
     // the -> operator is called on the referenced object
     ReferencedType* operator->() const noexcept
@@ -361,6 +351,34 @@ public:
         jassert (referencedObject != nullptr); // null pointer method call!
         return referencedObject;
     }
+
+    /** Dereferences the object that this pointer references.
+        The pointer returned may be null, of course.
+    */
+    ReferencedType& operator*() const noexcept              { jassert (referencedObject != nullptr); return *referencedObject; }
+
+    /** Checks whether this pointer is null */
+    bool operator== (decltype (nullptr)) const noexcept     { return referencedObject == nullptr; }
+    /** Checks whether this pointer is null */
+    bool operator!= (decltype (nullptr)) const noexcept     { return referencedObject != nullptr; }
+
+   #if JUCE_STRICT_REFCOUNTEDPOINTER
+    /** Checks whether this pointer is null */
+    operator bool() const noexcept                          { return referencedObject != nullptr; }
+
+   #else
+    /** Returns the object that this pointer references.
+        The pointer returned may be null, of course.
+        Note that this methods allows the compiler to be very lenient with what it allows you to do
+        with the pointer, it's safer to disable this by setting JUCE_STRICT_REFCOUNTEDPOINTER=1, which
+        increased type safety and can prevent some common slip-ups.
+    */
+    operator ReferencedType*() const noexcept               { return referencedObject; }
+   #endif
+
+
+    // This old method is deprecated in favour of the shorter and more standard get() method.
+    JUCE_DEPRECATED_WITH_BODY (ReferencedType* getObject() const, { return get(); })
 
 private:
     //==============================================================================
@@ -382,43 +400,43 @@ private:
 
 //==============================================================================
 /** Compares two ReferenceCountedObjectPtrs. */
-template <typename ObjectType>
-bool operator== (const ReferenceCountedObjectPtr<ObjectType>& object1, ObjectType* const object2) noexcept
+template <typename Type>
+bool operator== (const ReferenceCountedObjectPtr<Type>& object1, const Type* object2) noexcept
 {
     return object1.get() == object2;
 }
 
 /** Compares two ReferenceCountedObjectPtrs. */
-template <typename ObjectType>
-bool operator== (const ReferenceCountedObjectPtr<ObjectType>& object1, const ReferenceCountedObjectPtr<ObjectType>& object2) noexcept
+template <typename Type>
+bool operator== (const ReferenceCountedObjectPtr<Type>& object1, const ReferenceCountedObjectPtr<Type>& object2) noexcept
 {
     return object1.get() == object2.get();
 }
 
 /** Compares two ReferenceCountedObjectPtrs. */
-template <typename ObjectType>
-bool operator== (ObjectType* object1, const ReferenceCountedObjectPtr<ObjectType>& object2) noexcept
+template <typename Type>
+bool operator== (const Type* object1, const ReferenceCountedObjectPtr<Type>& object2) noexcept
 {
     return object1 == object2.get();
 }
 
 /** Compares two ReferenceCountedObjectPtrs. */
-template <typename ObjectType>
-bool operator!= (const ReferenceCountedObjectPtr<ObjectType>& object1, const ObjectType* object2) noexcept
+template <typename Type>
+bool operator!= (const ReferenceCountedObjectPtr<Type>& object1, const Type* object2) noexcept
 {
     return object1.get() != object2;
 }
 
 /** Compares two ReferenceCountedObjectPtrs. */
-template <typename ObjectType>
-bool operator!= (const ReferenceCountedObjectPtr<ObjectType>& object1, const ReferenceCountedObjectPtr<ObjectType>& object2) noexcept
+template <typename Type>
+bool operator!= (const ReferenceCountedObjectPtr<Type>& object1, const ReferenceCountedObjectPtr<Type>& object2) noexcept
 {
     return object1.get() != object2.get();
 }
 
 /** Compares two ReferenceCountedObjectPtrs. */
-template <typename ObjectType>
-bool operator!= (ObjectType* object1, const ReferenceCountedObjectPtr<ObjectType>& object2) noexcept
+template <typename Type>
+bool operator!= (const Type* object1, const ReferenceCountedObjectPtr<Type>& object2) noexcept
 {
     return object1 != object2.get();
 }

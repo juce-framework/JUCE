@@ -173,6 +173,15 @@
  #define JUCE_ALLOW_STATIC_NULL_VARIABLES 1
 #endif
 
+/** Config: JUCE_STRICT_REFCOUNTEDPOINTER
+    If enabled, this will make the ReferenceCountedObjectPtr class stricter about allowing
+    itself to be cast directly to a raw pointer. By default this is disabled, for compatibility
+    with old code, but if possible, you should always enable it to improve code safety!
+*/
+#ifndef JUCE_STRICT_REFCOUNTEDPOINTER
+ #define JUCE_STRICT_REFCOUNTEDPOINTER 0
+#endif
+
 
 #ifndef JUCE_STRING_UTF_TYPE
  #define JUCE_STRING_UTF_TYPE 8

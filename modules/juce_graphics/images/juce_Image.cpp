@@ -156,9 +156,9 @@ ImagePixelData::Ptr NativeImageType::create (Image::PixelFormat format, int widt
 class SubsectionPixelData  : public ImagePixelData
 {
 public:
-    SubsectionPixelData (ImagePixelData* im, Rectangle<int> r)
-        : ImagePixelData (im->pixelFormat, r.getWidth(), r.getHeight()),
-          sourceImage (im), area (r)
+    SubsectionPixelData (ImagePixelData::Ptr source, Rectangle<int> r)
+        : ImagePixelData (source->pixelFormat, r.getWidth(), r.getHeight()),
+          sourceImage (static_cast<ImagePixelData::Ptr&&> (source)), area (r)
     {
     }
 
@@ -225,8 +225,8 @@ Image::Image() noexcept
 {
 }
 
-Image::Image (ImagePixelData* instance) noexcept
-    : image (instance)
+Image::Image (ReferenceCountedObjectPtr<ImagePixelData> instance) noexcept
+    : image (static_cast<ReferenceCountedObjectPtr<ImagePixelData>&&> (instance))
 {
 }
 

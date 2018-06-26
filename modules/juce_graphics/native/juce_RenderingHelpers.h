@@ -194,14 +194,14 @@ public:
     {
         const ScopedLock sl (lock);
 
-        if (auto* g = findExistingGlyph (font, glyphNumber))
+        if (auto g = findExistingGlyph (font, glyphNumber))
         {
             ++hits;
             return g;
         }
 
         ++misses;
-        auto* g = getGlyphForReuse();
+        auto g = getGlyphForReuse();
         jassert (g != nullptr);
         g->generate (font, glyphNumber);
         return g;
@@ -212,16 +212,16 @@ private:
     Atomic<int> accessCounter, hits, misses;
     CriticalSection lock;
 
-    CachedGlyphType* findExistingGlyph (const Font& font, int glyphNumber) const noexcept
+    ReferenceCountedObjectPtr<CachedGlyphType> findExistingGlyph (const Font& font, int glyphNumber) const noexcept
     {
-        for (auto* g : glyphs)
+        for (auto g : glyphs)
             if (g->glyph == glyphNumber && g->font == font)
                 return g;
 
-        return nullptr;
+        return {};
     }
 
-    CachedGlyphType* getGlyphForReuse()
+    ReferenceCountedObjectPtr<CachedGlyphType> getGlyphForReuse()
     {
         if (hits.get() + misses.get() > glyphs.size() * 16)
         {
@@ -2397,7 +2397,7 @@ public:
     void drawImage (const Image& sourceImage, const AffineTransform& trans)
     {
         if (clip != nullptr && ! fillType.colour.isTransparent())
-            renderImage (sourceImage, trans, nullptr);
+            renderImage (sourceImage, trans, {});
     }
 
     static bool isOnlyTranslationAllowingError (const AffineTransform& t, float tolerence) noexcept
@@ -2490,7 +2490,7 @@ public:
             }
             else if (fillType.isTiledImage())
             {
-                renderImage (fillType.image, fillType.transform, shapeToFill);
+                renderImage (fillType.image, fillType.transform, shapeToFill.get());
             }
             else
             {

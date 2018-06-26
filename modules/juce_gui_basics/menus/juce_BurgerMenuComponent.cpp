@@ -46,7 +46,7 @@ struct CustomMenuBarItemHolder    : public Component
                 removeChildComponent (custom);
 
             custom = newComponent;
-            addAndMakeVisible (custom);
+            addAndMakeVisible (*custom);
             resized();
         }
     }
