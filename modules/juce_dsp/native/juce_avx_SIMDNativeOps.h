@@ -496,7 +496,7 @@ struct SIMDNativeOps<int32_t>
         tmp = _mm256_hadd_epi32 (tmp, tmp);
 
        #if JUCE_GCC
-        return tmp[0] + tmp[2];
+        return (int32_t) (tmp[0] + tmp[2]);
        #else
         constexpr int mask = (2 << 0) | (3 << 2) | (0 << 4) | (1 << 6);
 

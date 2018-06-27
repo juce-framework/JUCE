@@ -1432,10 +1432,10 @@ struct PhysicalTopologySource::Internal
                                   private MIDIDeviceConnection::Listener,
                                   private Timer
     {
-        BlockImplementation (const BlocksProtocol::BlockSerialNumber& serial, Detector& detectorToUse, BlocksProtocol::VersionNumber version, BlocksProtocol::BlockName name, bool master)
-            : Block (juce::String ((const char*) serial.serial, sizeof (serial.serial)),
+        BlockImplementation (const BlocksProtocol::BlockSerialNumber& serial, Detector& detectorToUse, BlocksProtocol::VersionNumber version, BlocksProtocol::BlockName blockName, bool master)
+            : Block (juce::String ((const char*) serial.serial,   sizeof (serial.serial)),
                      juce::String ((const char*) version.version, version.length),
-                     juce::String ((const char*) name.name, name.length)),
+                     juce::String ((const char*) blockName.name,  blockName.length)),
               modelData (serial),
               remoteHeap (modelData.programAndHeapSize),
               detector (detectorToUse),

@@ -231,7 +231,7 @@ struct Program
     uint16 calculateChecksum() const noexcept
     {
         auto size = getProgramSize();
-        uint16 n = (uint16) size;
+        auto n = (uint16) size;
 
         for (uint32 i = 2; i < size; ++i)
             n += (n * 2) + programStart[i];

@@ -1280,7 +1280,7 @@ private:
     static String createHex (uint64);
 
     template <typename Type>
-    static String createHex (Type n)  { return createHex (static_cast<typename TypeHelpers::UnsignedTypeWithSize<sizeof (n)>::type> (n)); }
+    static String createHex (Type n)  { return createHex (static_cast<typename TypeHelpers::UnsignedTypeWithSize<(int) sizeof (n)>::type> (n)); }
 };
 
 //==============================================================================

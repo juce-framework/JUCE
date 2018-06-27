@@ -580,7 +580,7 @@ namespace EdgeTableFillers
         SolidColour (const Image::BitmapData& image, PixelARGB colour)
             : destData (image), sourceColour (colour)
         {
-            if (sizeof (PixelType) == 3 && destData.pixelStride == sizeof (PixelType))
+            if (sizeof (PixelType) == 3 && (size_t) destData.pixelStride == sizeof (PixelType))
             {
                 areRGBComponentsEqual = sourceColour.getRed() == sourceColour.getGreen()
                                             && sourceColour.getGreen() == sourceColour.getBlue();
@@ -689,7 +689,7 @@ namespace EdgeTableFillers
 
         forcedinline void replaceLine (PixelRGB* dest, PixelARGB colour, int width) const noexcept
         {
-            if (destData.pixelStride == sizeof (*dest))
+            if ((size_t) destData.pixelStride == sizeof (*dest))
             {
                 if (areRGBComponentsEqual)  // if all the component values are the same, we can cheat..
                 {
@@ -734,7 +734,7 @@ namespace EdgeTableFillers
 
         forcedinline void replaceLine (PixelAlpha* dest, const PixelARGB colour, int width) const noexcept
         {
-            if (destData.pixelStride == sizeof (*dest))
+            if ((size_t) destData.pixelStride == sizeof (*dest))
                 memset (dest, colour.getAlpha(), (size_t) width);
             else
                 JUCE_PERFORM_PIXEL_OP_LOOP (setAlpha (colour.getAlpha()))

@@ -321,7 +321,7 @@ namespace
 struct OSCReceiver::Pimpl   : private Thread,
                               private MessageListener
 {
-    Pimpl (const String& threadName)  : Thread (threadName)
+    Pimpl (const String& oscThreadName)  : Thread (oscThreadName)
     {
     }
 

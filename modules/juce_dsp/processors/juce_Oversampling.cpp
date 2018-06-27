@@ -38,9 +38,8 @@ class OversamplingEngine
 public:
     //===============================================================================
     OversamplingEngine (size_t newNumChannels, size_t newFactor)
+        : numChannels (newNumChannels), factor (newFactor)
     {
-        numChannels = newNumChannels;
-        factor = newFactor;
     }
 
     virtual ~OversamplingEngine() {}
@@ -70,8 +69,7 @@ public:
 protected:
     //===============================================================================
     AudioBuffer<SampleType> buffer;
-    size_t factor;
-    size_t numChannels;
+    size_t numChannels, factor;
 };
 
 
@@ -80,11 +78,11 @@ protected:
     signal, which could be equivalent to a "one time" oversampling processing.
 */
 template <typename SampleType>
-class OversamplingDummy : public OversamplingEngine<SampleType>
+class OversamplingDummy   : public OversamplingEngine<SampleType>
 {
 public:
     //===============================================================================
-    OversamplingDummy (size_t numChannels) : OversamplingEngine<SampleType> (numChannels, 1) {}
+    OversamplingDummy (size_t numChans) : OversamplingEngine<SampleType> (numChans, 1) {}
     ~OversamplingDummy() {}
 
     //===============================================================================
@@ -98,7 +96,7 @@ public:
         jassert (inputBlock.getNumChannels() <= static_cast<size_t> (OversamplingEngine<SampleType>::buffer.getNumChannels()));
         jassert (inputBlock.getNumSamples() * OversamplingEngine<SampleType>::factor <= static_cast<size_t> (OversamplingEngine<SampleType>::buffer.getNumSamples()));
 
-        for (size_t channel = 0; channel < inputBlock.getNumChannels(); channel++)
+        for (size_t channel = 0; channel < inputBlock.getNumChannels(); ++channel)
             OversamplingEngine<SampleType>::buffer.copyFrom (static_cast<int> (channel), 0,
                 inputBlock.getChannelPointer (channel), static_cast<int> (inputBlock.getNumSamples()));
     }
@@ -127,26 +125,27 @@ class Oversampling2TimesEquirippleFIR : public OversamplingEngine<SampleType>
 {
 public:
     //===============================================================================
-    Oversampling2TimesEquirippleFIR (size_t numChannels,
+    Oversampling2TimesEquirippleFIR (size_t numChans,
                                      SampleType normalizedTransitionWidthUp,
                                      SampleType stopbandAttenuationdBUp,
                                      SampleType normalizedTransitionWidthDown,
-                                     SampleType stopbandAttenuationdBDown) : OversamplingEngine<SampleType> (numChannels, 2)
+                                     SampleType stopbandAttenuationdBDown)
+        : OversamplingEngine<SampleType> (numChans, 2)
     {
         coefficientsUp = *dsp::FilterDesign<SampleType>::designFIRLowpassHalfBandEquirippleMethod (normalizedTransitionWidthUp, stopbandAttenuationdBUp);
         coefficientsDown = *dsp::FilterDesign<SampleType>::designFIRLowpassHalfBandEquirippleMethod (normalizedTransitionWidthDown, stopbandAttenuationdBDown);
 
         auto N = coefficientsUp.getFilterOrder() + 1;
-        stateUp.setSize (static_cast<int> (numChannels), static_cast<int> (N));
+        stateUp.setSize (static_cast<int> (this->numChannels), static_cast<int> (N));
 
         N = coefficientsDown.getFilterOrder() + 1;
         auto Ndiv2 = N / 2;
         auto Ndiv4 = Ndiv2 / 2;
 
-        stateDown.setSize (static_cast<int> (numChannels), static_cast<int> (N));
-        stateDown2.setSize (static_cast<int> (numChannels), static_cast<int> (Ndiv4 + 1));
+        stateDown.setSize  (static_cast<int> (this->numChannels), static_cast<int> (N));
+        stateDown2.setSize (static_cast<int> (this->numChannels), static_cast<int> (Ndiv4 + 1));
 
-        position.resize (static_cast<int> (numChannels));
+        position.resize (static_cast<int> (this->numChannels));
     }
 
     ~Oversampling2TimesEquirippleFIR() {}
@@ -180,13 +179,13 @@ public:
         auto numSamples = inputBlock.getNumSamples();
 
         // Processing
-        for (size_t channel = 0; channel < inputBlock.getNumChannels(); channel++)
+        for (size_t channel = 0; channel < inputBlock.getNumChannels(); ++channel)
         {
             auto bufferSamples = OversamplingEngine<SampleType>::buffer.getWritePointer (static_cast<int> (channel));
             auto buf = stateUp.getWritePointer (static_cast<int> (channel));
             auto samples = inputBlock.getChannelPointer (channel);
 
-            for (size_t i = 0; i < numSamples; i++)
+            for (size_t i = 0; i < numSamples; ++i)
             {
                 // Input
                 buf[N - 1] = 2 * samples[i];
@@ -220,7 +219,7 @@ public:
         auto numSamples = outputBlock.getNumSamples();
 
         // Processing
-        for (size_t channel = 0; channel < outputBlock.getNumChannels(); channel++)
+        for (size_t channel = 0; channel < outputBlock.getNumChannels(); ++channel)
         {
             auto bufferSamples = OversamplingEngine<SampleType>::buffer.getWritePointer (static_cast<int> (channel));
             auto buf = stateDown.getWritePointer (static_cast<int> (channel));
@@ -228,7 +227,7 @@ public:
             auto samples = outputBlock.getChannelPointer (channel);
             auto pos = position.getUnchecked (static_cast<int> (channel));
 
-            for (size_t i = 0; i < numSamples; i++)
+            for (size_t i = 0; i < numSamples; ++i)
             {
                 // Input
                 buf[N - 1] = bufferSamples[i << 1];
@@ -245,7 +244,7 @@ public:
                 samples[i] = out;
 
                 // Shift data
-                for (size_t k = 0; k < N - 2; k++)
+                for (size_t k = 0; k < N - 2; ++k)
                     buf[k] = buf[k + 2];
 
                 // Circular buffer
@@ -278,11 +277,12 @@ class Oversampling2TimesPolyphaseIIR : public OversamplingEngine<SampleType>
 {
 public:
     //===============================================================================
-    Oversampling2TimesPolyphaseIIR (size_t numChannels,
+    Oversampling2TimesPolyphaseIIR (size_t numChans,
                                     SampleType normalizedTransitionWidthUp,
                                     SampleType stopbandAttenuationdBUp,
                                     SampleType normalizedTransitionWidthDown,
-                                    SampleType stopbandAttenuationdBDown) : OversamplingEngine<SampleType> (numChannels, 2)
+                                    SampleType stopbandAttenuationdBDown)
+        : OversamplingEngine<SampleType> (numChans, 2)
     {
         auto structureUp = dsp::FilterDesign<SampleType>::designIIRLowpassHalfBandPolyphaseAllpassMethod (normalizedTransitionWidthUp, stopbandAttenuationdBUp);
         dsp::IIR::Coefficients<SampleType> coeffsUp = getCoefficients (structureUp);
@@ -292,21 +292,21 @@ public:
         dsp::IIR::Coefficients<SampleType> coeffsDown = getCoefficients (structureDown);
         latency += static_cast<SampleType> (-(coeffsDown.getPhaseForFrequency (0.0001, 1.0)) / (0.0001 * MathConstants<double>::twoPi));
 
-        for (auto i = 0; i < structureUp.directPath.size(); i++)
+        for (auto i = 0; i < structureUp.directPath.size(); ++i)
             coefficientsUp.add (structureUp.directPath[i].coefficients[0]);
 
-        for (auto i = 1; i < structureUp.delayedPath.size(); i++)
+        for (auto i = 1; i < structureUp.delayedPath.size(); ++i)
             coefficientsUp.add (structureUp.delayedPath[i].coefficients[0]);
 
-        for (auto i = 0; i < structureDown.directPath.size(); i++)
+        for (auto i = 0; i < structureDown.directPath.size(); ++i)
             coefficientsDown.add (structureDown.directPath[i].coefficients[0]);
 
-        for (auto i = 1; i < structureDown.delayedPath.size(); i++)
+        for (auto i = 1; i < structureDown.delayedPath.size(); ++i)
             coefficientsDown.add (structureDown.delayedPath[i].coefficients[0]);
 
-        v1Up.setSize (static_cast<int> (numChannels), coefficientsUp.size());
-        v1Down.setSize (static_cast<int> (numChannels), coefficientsDown.size());
-        delayDown.resize (static_cast<int> (numChannels));
+        v1Up.setSize   (static_cast<int> (this->numChannels), coefficientsUp.size());
+        v1Down.setSize (static_cast<int> (this->numChannels), coefficientsDown.size());
+        delayDown.resize (static_cast<int> (this->numChannels));
     }
 
     ~Oversampling2TimesPolyphaseIIR() {}
@@ -339,17 +339,17 @@ public:
         auto numSamples = inputBlock.getNumSamples();
 
         // Processing
-        for (size_t channel = 0; channel < inputBlock.getNumChannels(); channel++)
+        for (size_t channel = 0; channel < inputBlock.getNumChannels(); ++channel)
         {
             auto bufferSamples = OversamplingEngine<SampleType>::buffer.getWritePointer (static_cast<int> (channel));
             auto lv1 = v1Up.getWritePointer (static_cast<int> (channel));
             auto samples = inputBlock.getChannelPointer (channel);
 
-            for (size_t i = 0; i < numSamples; i++)
+            for (size_t i = 0; i < numSamples; ++i)
             {
                 // Direct path cascaded allpass filters
                 auto input = samples[i];
-                for (auto n = 0; n < directStages; n++)
+                for (auto n = 0; n < directStages; ++n)
                 {
                     auto alpha = coeffs[n];
                     auto output = alpha * input + lv1[n];
@@ -362,7 +362,7 @@ public:
 
                 // Delayed path cascaded allpass filters
                 input = samples[i];
-                for (auto n = directStages; n < numStages; n++)
+                for (auto n = directStages; n < numStages; ++n)
                 {
                     auto alpha = coeffs[n];
                     auto output = alpha * input + lv1[n];
@@ -392,18 +392,18 @@ public:
         auto numSamples = outputBlock.getNumSamples();
 
         // Processing
-        for (size_t channel = 0; channel < outputBlock.getNumChannels(); channel++)
+        for (size_t channel = 0; channel < outputBlock.getNumChannels(); ++channel)
         {
             auto bufferSamples = OversamplingEngine<SampleType>::buffer.getWritePointer (static_cast<int> (channel));
             auto lv1 = v1Down.getWritePointer (static_cast<int> (channel));
             auto samples = outputBlock.getChannelPointer (channel);
             auto delay = delayDown.getUnchecked (static_cast<int> (channel));
 
-            for (size_t i = 0; i < numSamples; i++)
+            for (size_t i = 0; i < numSamples; ++i)
             {
                 // Direct path cascaded allpass filters
                 auto input = bufferSamples[i << 1];
-                for (auto n = 0; n < directStages; n++)
+                for (auto n = 0; n < directStages; ++n)
                 {
                     auto alpha = coeffs[n];
                     auto output = alpha * input + lv1[n];
@@ -414,7 +414,7 @@ public:
 
                 // Delayed path cascaded allpass filters
                 input = bufferSamples[(i << 1) + 1];
-                for (auto n = directStages; n < numStages; n++)
+                for (auto n = directStages; n < numStages; ++n)
                 {
                     auto alpha = coeffs[n];
                     auto output = alpha * input + lv1[n];
@@ -438,23 +438,23 @@ public:
     {
         if (snapUpProcessing)
         {
-            for (auto channel = 0; channel < OversamplingEngine<SampleType>::buffer.getNumChannels(); channel++)
+            for (auto channel = 0; channel < OversamplingEngine<SampleType>::buffer.getNumChannels(); ++channel)
             {
                 auto lv1 = v1Up.getWritePointer (channel);
                 auto numStages = coefficientsUp.size();
 
-                for (auto n = 0; n < numStages; n++)
+                for (auto n = 0; n < numStages; ++n)
                     util::snapToZero (lv1[n]);
             }
         }
         else
         {
-            for (auto channel = 0; channel < OversamplingEngine<SampleType>::buffer.getNumChannels(); channel++)
+            for (auto channel = 0; channel < OversamplingEngine<SampleType>::buffer.getNumChannels(); ++channel)
             {
                 auto lv1 = v1Down.getWritePointer (channel);
                 auto numStages = coefficientsDown.size();
 
-                for (auto n = 0; n < numStages; n++)
+                for (auto n = 0; n < numStages; ++n)
                     util::snapToZero (lv1[n]);
             }
         }
@@ -474,7 +474,7 @@ private:
 
         dsp::Polynomial<SampleType> temp;
 
-        for (auto n = 0; n < structure.directPath.size(); n++)
+        for (auto n = 0; n < structure.directPath.size(); ++n)
         {
             auto* coeffs = structure.directPath.getReference (n).getRawCoefficients();
 
@@ -496,7 +496,7 @@ private:
             }
         }
 
-        for (auto n = 0; n < structure.delayedPath.size(); n++)
+        for (auto n = 0; n < structure.delayedPath.size(); ++n)
         {
             auto* coeffs = structure.delayedPath.getReference (n).getRawCoefficients();
 
@@ -528,10 +528,10 @@ private:
         coeffs.coefficients.clear();
         auto inversion = static_cast<SampleType> (1.0) / denominator[0];
 
-        for (auto i = 0; i <= numerator.getOrder(); i++)
+        for (auto i = 0; i <= numerator.getOrder(); ++i)
             coeffs.coefficients.add (numerator[i] * inversion);
 
-        for (auto i = 1; i <= denominator.getOrder(); i++)
+        for (auto i = 1; i <= denominator.getOrder(); ++i)
             coeffs.coefficients.add (denominator[i] * inversion);
 
         return coeffs;
@@ -569,15 +569,15 @@ Oversampling<SampleType>::Oversampling (size_t newNumChannels, size_t newFactor,
     {
         numStages = newFactor;
 
-        for (size_t n = 0; n < numStages; n++)
+        for (size_t n = 0; n < numStages; ++n)
         {
-            auto twUp = (isMaximumQuality ? 0.10f : 0.12f) * (n == 0 ? 0.5f : 1.f);
+            auto twUp   = (isMaximumQuality ? 0.10f : 0.12f) * (n == 0 ? 0.5f : 1.f);
             auto twDown = (isMaximumQuality ? 0.12f : 0.15f) * (n == 0 ? 0.5f : 1.f);
 
-            auto gaindBStartUp = (isMaximumQuality ? -75.f : -65.f);
-            auto gaindBStartDown = (isMaximumQuality ? -70.f : -60.f);
-            auto gaindBFactorUp = (isMaximumQuality ? 10.f : 8.f);
-            auto gaindBFactorDown = (isMaximumQuality ? 10.f : 8.f);
+            auto gaindBStartUp    = (isMaximumQuality ? -75.f : -65.f);
+            auto gaindBStartDown  = (isMaximumQuality ? -70.f : -60.f);
+            auto gaindBFactorUp   = (isMaximumQuality ? 10.f  : 8.f);
+            auto gaindBFactorDown = (isMaximumQuality ? 10.f  : 8.f);
 
             engines.add (new Oversampling2TimesPolyphaseIIR<SampleType> (numChannels,
                                                                          twUp, gaindBStartUp + gaindBFactorUp * n,
@@ -588,7 +588,7 @@ Oversampling<SampleType>::Oversampling (size_t newNumChannels, size_t newFactor,
     {
         numStages = newFactor;
 
-        for (size_t n = 0; n < numStages; n++)
+        for (size_t n = 0; n < numStages; ++n)
         {
             auto twUp = (isMaximumQuality ? 0.10f : 0.12f) * (n == 0 ? 0.5f : 1.f);
             auto twDown = (isMaximumQuality ? 0.12f : 0.15f) * (n == 0 ? 0.5f : 1.f);
@@ -618,7 +618,7 @@ SampleType Oversampling<SampleType>::getLatencyInSamples() noexcept
     auto latency = static_cast<SampleType> (0);
     size_t order = 1;
 
-    for (size_t n = 0; n < numStages; n++)
+    for (size_t n = 0; n < numStages; ++n)
     {
         auto& engine = *engines[static_cast<int> (n)];
 
@@ -642,7 +642,7 @@ void Oversampling<SampleType>::initProcessing (size_t maximumNumberOfSamplesBefo
     jassert (! engines.isEmpty());
     auto currentNumSamples = maximumNumberOfSamplesBeforeOversampling;
 
-    for (size_t n = 0; n < numStages; n++)
+    for (size_t n = 0; n < numStages; ++n)
     {
         auto& engine = *engines[static_cast<int> (n)];
 
@@ -660,7 +660,7 @@ void Oversampling<SampleType>::reset() noexcept
     jassert (! engines.isEmpty());
 
     if (isReady)
-        for (auto n = 0; n < engines.size(); n++)
+        for (auto n = 0; n < engines.size(); ++n)
             engines[n]->reset();
 }
 
@@ -674,7 +674,7 @@ typename dsp::AudioBlock<SampleType> Oversampling<SampleType>::processSamplesUp 
 
     dsp::AudioBlock<SampleType> audioBlock = inputBlock;
 
-    for (size_t n = 0; n < numStages; n++)
+    for (size_t n = 0; n < numStages; ++n)
     {
         auto& engine = *engines[static_cast<int> (n)];
         engine.processSamplesUp (audioBlock);
@@ -694,10 +694,10 @@ void Oversampling<SampleType>::processSamplesDown (dsp::AudioBlock<SampleType> &
 
     auto currentNumSamples = outputBlock.getNumSamples();
 
-    for (size_t n = 0; n < numStages - 1; n++)
+    for (size_t n = 0; n < numStages - 1; ++n)
         currentNumSamples *= engines[static_cast<int> (n)]->getFactor();
 
-    for (size_t n = numStages - 1; n > 0; n--)
+    for (size_t n = numStages - 1; n > 0; --n)
     {
         auto& engine = *engines[static_cast<int> (n)];
 
