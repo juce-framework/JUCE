@@ -211,6 +211,7 @@ void ProjucerApplication::shutdown()
     aboutWindow.reset();
     pathsWindow.reset();
     editorColourSchemeWindow.reset();
+    pipCreatorWindow.reset();
 
     if (licenseController != nullptr)
     {

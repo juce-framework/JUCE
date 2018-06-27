@@ -153,7 +153,7 @@ public:
     std::unique_ptr<ApplicationCommandManager> commandManager;
 
     std::unique_ptr<Component> utf8Window, svgPathWindow, aboutWindow, applicationUsageDataWindow,
-                             pathsWindow, editorColourSchemeWindow, pipCreatorWindow;
+                               pathsWindow, editorColourSchemeWindow, pipCreatorWindow;
 
     std::unique_ptr<FileLogger> logger;
 
