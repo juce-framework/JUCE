@@ -725,8 +725,8 @@ namespace AAXClasses
                                       int64 startSampleInFile,
                                       int numSamples) override
             {
-                if ( (lengthInSamples - startSampleInFile <= 0) || (numSamples > lengthInSamples - startSampleInFile) )
-                    return false;
+                if (numSamples <= 0)
+                    return true;
 
                 int32_t numSamplesRead = numSamples;
                 int32_t numSamplesCopied = 0;
