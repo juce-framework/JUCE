@@ -1566,7 +1566,17 @@ public:
             addPlistDictionaryKeyInt (dict, "version", owner.project.getVersionAsHexInteger());
 
             if (owner.project.isAUSandBoxSafe())
+            {
                 addPlistDictionaryKeyBool (dict, "sandboxSafe", true);
+            }
+            else
+            {
+                dict->createNewChildElement ("key")->addTextElement ("resourceUsage");
+                auto* resourceUsageDict = dict->createNewChildElement ("dict");
+
+                addPlistDictionaryKeyBool (resourceUsageDict, "network.client", true);
+                addPlistDictionaryKeyBool (resourceUsageDict, "temporary-exception.files.all.read-write", true);
+            }
 
             xcodeExtraPListEntries.add (plistKey);
             xcodeExtraPListEntries.add (plistEntry);
