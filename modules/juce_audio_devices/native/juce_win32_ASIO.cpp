@@ -787,9 +787,14 @@ private:
 
     void reloadChannelNames()
     {
+        long totalInChannels = 0, totalOutChannels = 0;
+
         if (asioObject != nullptr
-             && asioObject->getChannels (&totalNumInputChans, &totalNumOutputChans) == ASE_OK)
+             && asioObject->getChannels (&totalInChannels, &totalOutChannels) == ASE_OK)
         {
+            totalNumInputChans  = totalInChannels;
+            totalNumOutputChans = totalOutChannels;
+
             inputChannelNames.clear();
             outputChannelNames.clear();
 
