@@ -33,7 +33,7 @@
                    juce_graphics, juce_gui_basics, juce_gui_extra, juce_video
  exporters:        xcode_mac, vs2017, androidstudio, xcode_iphone
 
- moduleFlags:      JUCE_USE_CAMERA=1
+ moduleFlags:      JUCE_USE_CAMERA=1, JUCE_STRICT_REFCOUNTEDPOINTER=1
 
  type:             Component
  mainClass:        CameraDemo

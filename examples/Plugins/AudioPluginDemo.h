@@ -35,6 +35,8 @@
                    juce_events, juce_graphics, juce_gui_basics, juce_gui_extra
  exporters:        xcode_mac, vs2017, linux_make, xcode_iphone, androidstudio
 
+ moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
+
  type:             AudioProcessor
  mainClass:        JuceDemoPluginAudioProcessor
 
