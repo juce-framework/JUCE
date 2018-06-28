@@ -40,7 +40,7 @@ struct PopupMenu::HelperClasses
 {
 
 class MouseSourceState;
-class MenuWindow;
+struct MenuWindow;
 
 static bool canBeTriggered (const PopupMenu::Item& item) noexcept        { return item.isEnabled && item.itemID != 0 && ! item.isSectionHeader; }
 static bool hasActiveSubMenu (const PopupMenu::Item& item) noexcept      { return item.isEnabled && item.subMenu != nullptr && item.subMenu->items.size() > 0; }
@@ -189,9 +189,8 @@ private:
 };
 
 //==============================================================================
-class MenuWindow  : public Component
+struct MenuWindow  : public Component
 {
-public:
     MenuWindow (const PopupMenu& menu, MenuWindow* parentWindow,
                 const Options& opts, bool alignToRectangle, bool shouldDismissOnMouseUp,
                 ApplicationCommandManager** manager, float parentScaleFactor = 1.0f)
@@ -1739,8 +1738,13 @@ bool JUCE_CALLTYPE PopupMenu::dismissAllActiveMenus()
     auto numWindows = windows.size();
 
     for (int i = numWindows; --i >= 0;)
+    {
         if (auto* pmw = windows[i])
+        {
             pmw->dismissMenu (nullptr);
+            pmw->setLookAndFeel (nullptr);
+        }
+    }
 
     return numWindows > 0;
 }
