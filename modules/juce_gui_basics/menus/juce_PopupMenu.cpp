@@ -1741,8 +1741,8 @@ bool JUCE_CALLTYPE PopupMenu::dismissAllActiveMenus()
     {
         if (auto* pmw = windows[i])
         {
-            pmw->dismissMenu (nullptr);
             pmw->setLookAndFeel (nullptr);
+            pmw->dismissMenu (nullptr);
         }
     }
 
