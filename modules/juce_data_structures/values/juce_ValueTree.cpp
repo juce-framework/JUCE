@@ -477,7 +477,7 @@ public:
     {
         AddOrRemoveChildAction (Ptr parentObject, int index, SharedObject* newChild)
             : target (static_cast<Ptr&&> (parentObject)),
-              child (newChild != nullptr ? newChild : parentObject->children.getObjectPointer (index)),
+              child (newChild != nullptr ? newChild : target->children.getObjectPointer (index)),
               childIndex (index),
               isDeleting (newChild == nullptr)
         {
