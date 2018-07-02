@@ -3264,17 +3264,17 @@ private:
             if (owner.isOpen)
             {
                 owner.isOpen = false;
-                owner.dispatch (effEditClose, 0, 0, 0, 0);
-                owner.dispatch (effEditSleep, 0, 0, 0, 0);
+                owner.dispatch (Vst2::effEditClose, 0, 0, 0, 0);
+                owner.dispatch (Vst2::effEditSleep, 0, 0, 0, 0);
             }
         }
 
         bool getEmbeddedViewSize (int& w, int& h) override
         {
-            VstEditorBounds* rect = nullptr;
-            owner.dispatch (effEditGetRect, 0, 0, &rect, 0);
-            w = rect->rightmost - rect->leftmost;
-            h = rect->lower - rect->upper;
+            Vst2::ERect* rect = nullptr;
+            owner.dispatch (Vst2::effEditGetRect, 0, 0, &rect, 0);
+            w = rect->right - rect->left;
+            h = rect->bottom - rect->top;
             return true;
         }
 
@@ -3284,7 +3284,7 @@ private:
             {
                 alreadyInside = true;
                 getTopLevelComponent()->toFront (true);
-                owner.dispatch (effEditMouse, x, y, 0, 0);
+                owner.dispatch (Vst2::effEditMouse, x, y, 0, 0);
                 alreadyInside = false;
             }
             else
@@ -3298,13 +3298,13 @@ private:
             if (auto* peer = getPeer())
             {
                 auto pos = peer->globalToLocal (getScreenPosition());
-                VstEditorBounds r;
-                r.leftmost  = (int16) pos.getX();
-                r.upper     = (int16) pos.getY();
-                r.rightmost = (int16) (r.leftmost + getWidth());
-                r.lower     = (int16) (r.upper + getHeight());
+                Vst2::ERect r;
+                r.left   = (int16) pos.getX();
+                r.top    = (int16) pos.getY();
+                r.right  = (int16) (r.left + getWidth());
+                r.bottom = (int16) (r.top + getHeight());
 
-                owner.dispatch (effEditDraw, 0, 0, &r, 0);
+                owner.dispatch (Vst2::effEditDraw, 0, 0, &r, 0);
             }
         }
 
