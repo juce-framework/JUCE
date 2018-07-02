@@ -362,6 +362,15 @@ public:
     /** Checks whether this pointer is null */
     bool operator!= (decltype (nullptr)) const noexcept     { return referencedObject != nullptr; }
 
+    /** Compares two ReferenceCountedObjectPtrs. */
+    bool operator== (const ObjectType* other) const noexcept                 { return referencedObject == other; }
+    /** Compares two ReferenceCountedObjectPtrs. */
+    bool operator== (const ReferenceCountedObjectPtr& other) const noexcept  { return referencedObject == other.get(); }
+    /** Compares two ReferenceCountedObjectPtrs. */
+    bool operator!= (const ObjectType* other) const noexcept                 { return referencedObject != other; }
+    /** Compares two ReferenceCountedObjectPtrs. */
+    bool operator!= (const ReferenceCountedObjectPtr& other) const noexcept  { return referencedObject != other.get(); }
+
    #if JUCE_STRICT_REFCOUNTEDPOINTER
     /** Checks whether this pointer is null */
     operator bool() const noexcept                          { return referencedObject != nullptr; }
@@ -401,37 +410,9 @@ private:
 //==============================================================================
 /** Compares two ReferenceCountedObjectPtrs. */
 template <typename Type>
-bool operator== (const ReferenceCountedObjectPtr<Type>& object1, const Type* object2) noexcept
-{
-    return object1.get() == object2;
-}
-
-/** Compares two ReferenceCountedObjectPtrs. */
-template <typename Type>
-bool operator== (const ReferenceCountedObjectPtr<Type>& object1, const ReferenceCountedObjectPtr<Type>& object2) noexcept
-{
-    return object1.get() == object2.get();
-}
-
-/** Compares two ReferenceCountedObjectPtrs. */
-template <typename Type>
 bool operator== (const Type* object1, const ReferenceCountedObjectPtr<Type>& object2) noexcept
 {
     return object1 == object2.get();
-}
-
-/** Compares two ReferenceCountedObjectPtrs. */
-template <typename Type>
-bool operator!= (const ReferenceCountedObjectPtr<Type>& object1, const Type* object2) noexcept
-{
-    return object1.get() != object2;
-}
-
-/** Compares two ReferenceCountedObjectPtrs. */
-template <typename Type>
-bool operator!= (const ReferenceCountedObjectPtr<Type>& object1, const ReferenceCountedObjectPtr<Type>& object2) noexcept
-{
-    return object1.get() != object2.get();
 }
 
 /** Compares two ReferenceCountedObjectPtrs. */
