@@ -686,7 +686,7 @@ struct RenderSequenceBuilder
         if (numOuts == 0)
             totalLatency = maxLatency;
 
-        sequence.addProcessOp (&node, audioChannelsToUse, totalChans, midiBufferToUse);
+        sequence.addProcessOp (node, audioChannelsToUse, totalChans, midiBufferToUse);
     }
 
     //==============================================================================

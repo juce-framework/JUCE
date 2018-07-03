@@ -170,7 +170,7 @@ public:
         {
             if (sharedPointer == nullptr)
             {
-                sharedPointer = new SharedPointer (object);
+                sharedPointer = *new SharedPointer (object);
             }
             else
             {

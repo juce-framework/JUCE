@@ -81,13 +81,13 @@ struct JavascriptEngine::RootObject   : public DynamicObject
     void execute (const String& code)
     {
         ExpressionTreeBuilder tb (code);
-        std::unique_ptr<BlockStatement> (tb.parseStatementList())->perform (Scope (nullptr, this, this), nullptr);
+        std::unique_ptr<BlockStatement> (tb.parseStatementList())->perform (Scope ({}, *this, *this), nullptr);
     }
 
     var evaluate (const String& code)
     {
         ExpressionTreeBuilder tb (code);
-        return ExpPtr (tb.parseExpression())->getResult (Scope (nullptr, this, this));
+        return ExpPtr (tb.parseExpression())->getResult (Scope ({}, *this, *this));
     }
 
     //==============================================================================
@@ -210,7 +210,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
             for (int i = 0; i < props.size(); ++i)
                 if (auto* o = props.getValueAt (i).getDynamicObject())
-                    if (Scope (this, root, o).findAndInvokeMethod (function, args, result))
+                    if (Scope (this, *root, *o).findAndInvokeMethod (function, args, result))
                         return true;
 
             return false;
@@ -833,7 +833,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             tb.parseFunctionParamsAndBody (*this);
         }
 
-        DynamicObject::Ptr clone() override    { return new FunctionObject (*this); }
+        DynamicObject::Ptr clone() override    { return *new FunctionObject (*this); }
 
         void writeAsJSON (OutputStream& out, int /*indentLevel*/, bool /*allOnOneLine*/, int /*maximumDecimalPlaces*/) override
         {
@@ -1875,7 +1875,7 @@ var JavascriptEngine::callFunction (const Identifier& function, const var::Nativ
     {
         prepareTimeout();
         if (result != nullptr) *result = Result::ok();
-        RootObject::Scope ({}, root, root).findAndInvokeMethod (function, args, returnVal);
+        RootObject::Scope ({}, *root, *root).findAndInvokeMethod (function, args, returnVal);
     }
     catch (String& error)
     {
@@ -1894,8 +1894,9 @@ var JavascriptEngine::callFunctionObject (DynamicObject* objectScope, const var&
     {
         prepareTimeout();
         if (result != nullptr) *result = Result::ok();
-        RootObject::Scope rootScope ({}, root, root);
-        RootObject::Scope (&rootScope, root, objectScope).invokeMethod (functionObject, args, returnVal);
+        RootObject::Scope rootScope ({}, *root, *root);
+        RootObject::Scope (&rootScope, *root, DynamicObject::Ptr (objectScope))
+            .invokeMethod (functionObject, args, returnVal);
     }
     catch (String& error)
     {

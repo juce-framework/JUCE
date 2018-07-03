@@ -625,7 +625,7 @@ protected:
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const override
     {
-        return new XcodeBuildConfiguration (project, v, iOS, *this);
+        return *new XcodeBuildConfiguration (project, v, iOS, *this);
     }
 
 public:
@@ -3078,7 +3078,7 @@ private:
 
         for (auto& type : getiOSAppIconTypes())
         {
-            DynamicObject::Ptr d = new DynamicObject();
+            DynamicObject::Ptr d (new DynamicObject());
             d->setProperty ("idiom",    type.idiom);
             d->setProperty ("size",     type.sizeString);
             d->setProperty ("filename", type.filename);
@@ -3146,7 +3146,7 @@ private:
 
         for (auto& type : getiOSLaunchImageTypes())
         {
-            DynamicObject::Ptr d = new DynamicObject();
+            DynamicObject::Ptr d (new DynamicObject());
             d->setProperty ("orientation", type.orientation);
             d->setProperty ("idiom", type.idiom);
             d->setProperty ("extent",  type.extent);

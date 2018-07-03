@@ -1517,7 +1517,7 @@ protected:
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const override
     {
-        return new MSVCBuildConfiguration (project, v, *this);
+        return *new MSVCBuildConfiguration (project, v, *this);
     }
 
     StringArray getHeaderSearchPaths (const BuildConfiguration& config) const

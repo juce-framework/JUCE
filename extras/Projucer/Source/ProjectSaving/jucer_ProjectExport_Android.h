@@ -355,7 +355,7 @@ protected:
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const override
     {
-        return new AndroidBuildConfiguration (project, v, *this);
+        return *new AndroidBuildConfiguration (project, v, *this);
     }
 
 private:

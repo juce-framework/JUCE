@@ -178,7 +178,7 @@ public:
     */
     inline ObjectClassPtr operator[] (int index) const noexcept
     {
-        return getObjectPointer (index);
+        return ObjectClassPtr (getObjectPointer (index));
     }
 
     /** Returns a pointer to the object at this index in the array, without checking
@@ -189,7 +189,7 @@ public:
     */
     inline ObjectClassPtr getUnchecked (int index) const noexcept
     {
-        return getObjectPointerUnchecked (index);
+        return ObjectClassPtr (getObjectPointerUnchecked (index));
     }
 
     /** Returns a raw pointer to the object at this index in the array.
@@ -253,7 +253,7 @@ public:
         if (numUsed > 0)
         {
             jassert (data.elements != nullptr);
-            return data.elements[numUsed - 1];
+            return ObjectClassPtr (data.elements[numUsed - 1]);
         }
 
         return {};

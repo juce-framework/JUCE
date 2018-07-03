@@ -633,6 +633,7 @@ private:
     void reorderChildren (const OwnedArray<ValueTree>&, UndoManager*);
 
     explicit ValueTree (ReferenceCountedObjectPtr<SharedObject>) noexcept;
+    explicit ValueTree (SharedObject&) noexcept;
 };
 
 } // namespace juce

@@ -1318,7 +1318,7 @@ struct PhysicalTopologySource::Internal
                         bi->rotation = 0;
                     }
 
-                    layoutNeighbours (block, topology, block->uid, visited);
+                    layoutNeighbours (*block, topology, block->uid, visited);
                 }
             }
         }
@@ -1327,7 +1327,7 @@ struct PhysicalTopologySource::Internal
         {
             for (auto& block : topology.blocks)
                 if (block->uid == uid)
-                    return block;
+                    return *block;
 
             return {};
         }

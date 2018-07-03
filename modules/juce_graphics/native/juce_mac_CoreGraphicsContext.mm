@@ -78,7 +78,7 @@ public:
     {
         auto im = new CoreGraphicsImage (pixelFormat, width, height, false);
         memcpy (im->imageData, imageData, (size_t) (lineStride * height));
-        return im;
+        return *im;
     }
 
     ImageType* createType() const override    { return new NativeImageType(); }
@@ -162,7 +162,7 @@ private:
 
 ImagePixelData::Ptr NativeImageType::create (Image::PixelFormat format, int width, int height, bool clearImage) const
 {
-    return new CoreGraphicsImage (format == Image::RGB ? Image::ARGB : format, width, height, clearImage);
+    return *new CoreGraphicsImage (format == Image::RGB ? Image::ARGB : format, width, height, clearImage);
 }
 
 //==============================================================================
@@ -896,7 +896,7 @@ Image juce_createImageFromCIImage (CIImage* im, int w, int h)
     [cic drawImage: im inRect: CGRectMake (0, 0, w, h) fromRect: CGRectMake (0, 0, w, h)];
     CGContextFlush (cgImage->context);
 
-    return Image (cgImage);
+    return Image (*cgImage);
 }
 
 CGImageRef juce_createCoreGraphicsImage (const Image& juceImage, CGColorSpaceRef colourSpace,

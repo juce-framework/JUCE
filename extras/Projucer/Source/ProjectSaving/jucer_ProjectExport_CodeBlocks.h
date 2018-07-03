@@ -235,7 +235,7 @@ private:
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& tree) const override
     {
-        return new CodeBlocksBuildConfiguration (project, tree, *this);
+        return *new CodeBlocksBuildConfiguration (project, tree, *this);
     }
 
     //==============================================================================

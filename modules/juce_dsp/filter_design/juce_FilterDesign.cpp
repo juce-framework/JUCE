@@ -60,7 +60,7 @@ typename FIR::Coefficients<FloatType>::Ptr
     WindowingFunction<FloatType> theWindow (order + 1, type, false, beta);
     theWindow.multiplyWithWindowingTable (c, order + 1);
 
-    return result;
+    return *result;
 }
 
 template <typename FloatType>
@@ -121,7 +121,7 @@ typename FIR::Coefficients<FloatType>::Ptr
         }
     }
 
-    return result;
+    return *result;
 }
 
 template <typename FloatType>
@@ -231,7 +231,7 @@ typename FIR::Coefficients<FloatType>::Ptr
         }
     }
 
-    return result;
+    return *result;
 }
 
 template <typename FloatType>
@@ -290,7 +290,7 @@ typename FIR::Coefficients<FloatType>::Ptr
 
     c[2 * n + 1] = static_cast<FloatType> (0.5);
 
-    return result;
+    return *result;
 }
 
 template <typename FloatType>

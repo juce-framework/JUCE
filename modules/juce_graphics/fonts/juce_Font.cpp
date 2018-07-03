@@ -308,7 +308,7 @@ bool Font::operator!= (const Font& other) const noexcept
 void Font::dupeInternalIfShared()
 {
     if (font->getReferenceCount() > 1)
-        font = new SharedFontInternal (*font);
+        font = *new SharedFontInternal (*font);
 }
 
 void Font::checkTypefaceSuitability()

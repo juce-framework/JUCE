@@ -294,7 +294,7 @@ bool MessageManager::Lock::tryAcquire (bool lockIsMandatory) const noexcept
 
     try
     {
-        blockingMessage = new BlockingMessage (this);
+        blockingMessage = *new BlockingMessage (this);
     }
     catch (...)
     {

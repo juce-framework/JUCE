@@ -590,15 +590,24 @@ public:
     {
         if (calledFromDestructor || destroying.get() == 0)
         {
-            BlockingWorker* blocker = (shouldBlock ? new BlockingWorker (static_cast<OpenGLContext::AsyncWorker::Ptr&&> (workerToUse)) : nullptr);
-            OpenGLContext::AsyncWorker::Ptr worker = (blocker != nullptr ? blocker : static_cast<OpenGLContext::AsyncWorker::Ptr&&> (workerToUse));
-            workQueue.add (worker);
+            if (shouldBlock)
+            {
+                auto blocker = new BlockingWorker (static_cast<OpenGLContext::AsyncWorker::Ptr&&> (workerToUse));
+                OpenGLContext::AsyncWorker::Ptr worker (*blocker);
+                workQueue.add (worker);
 
-            messageManagerLock.abort();
-            context.triggerRepaint();
+                messageManagerLock.abort();
+                context.triggerRepaint();
 
-            if (blocker != nullptr)
                 blocker->block();
+            }
+            else
+            {
+                workQueue.add (static_cast<OpenGLContext::AsyncWorker::Ptr&&> (workerToUse));
+
+                messageManagerLock.abort();
+                context.triggerRepaint();
+            }
         }
         else
         {

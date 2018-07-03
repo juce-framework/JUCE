@@ -216,7 +216,7 @@ private:
     {
         for (auto g : glyphs)
             if (g->glyph == glyphNumber && g->font == font)
-                return g;
+                return *g;
 
         return {};
     }
@@ -232,8 +232,8 @@ private:
             misses = 0;
         }
 
-        if (auto* g = findLeastRecentlyUsedGlyph())
-            return g;
+        if (auto g = findLeastRecentlyUsedGlyph())
+            return *g;
 
         addNewGlyphSlots (32);
         return glyphs.getLast();
@@ -1670,13 +1670,13 @@ struct ClipRegions
 
         using Ptr = typename Base::Ptr;
 
-        Ptr clone() const override                           { return new EdgeTableRegion (*this); }
+        Ptr clone() const override                           { return *new EdgeTableRegion (*this); }
         Ptr applyClipTo (const Ptr& target) const override   { return target->clipToEdgeTable (edgeTable); }
 
         Ptr clipToRectangle (Rectangle<int> r) override
         {
             edgeTable.clipToRectangle (r);
-            return edgeTable.isEmpty() ? nullptr : this;
+            return edgeTable.isEmpty() ? Ptr() : Ptr (*this);
         }
 
         Ptr clipToRectangleList (const RectangleList<int>& r) override
@@ -1687,26 +1687,26 @@ struct ClipRegions
                 for (auto& i : inverse)
                     edgeTable.excludeRectangle (i);
 
-            return edgeTable.isEmpty() ? nullptr : this;
+            return edgeTable.isEmpty() ? Ptr() : Ptr (*this);
         }
 
         Ptr excludeClipRectangle (Rectangle<int> r) override
         {
             edgeTable.excludeRectangle (r);
-            return edgeTable.isEmpty() ? nullptr : this;
+            return edgeTable.isEmpty() ? Ptr() : Ptr (*this);
         }
 
         Ptr clipToPath (const Path& p, const AffineTransform& transform) override
         {
             EdgeTable et (edgeTable.getMaximumBounds(), p, transform);
             edgeTable.clipToEdgeTable (et);
-            return edgeTable.isEmpty() ? nullptr : this;
+            return edgeTable.isEmpty() ? Ptr() : Ptr (*this);
         }
 
         Ptr clipToEdgeTable (const EdgeTable& et) override
         {
             edgeTable.clipToEdgeTable (et);
-            return edgeTable.isEmpty() ? nullptr : this;
+            return edgeTable.isEmpty() ? Ptr() : Ptr (*this);
         }
 
         Ptr clipToImageAlpha (const Image& image, const AffineTransform& transform, Graphics::ResamplingQuality quality) override
@@ -1729,7 +1729,7 @@ struct ClipRegions
                     else
                         straightClipImage (srcData, imageX, imageY, (PixelAlpha*) 0);
 
-                    return edgeTable.isEmpty() ? nullptr : this;
+                    return edgeTable.isEmpty() ? Ptr() : Ptr (*this);
                 }
             }
 
@@ -1751,7 +1751,7 @@ struct ClipRegions
                     transformedClipImage (srcData, transform, quality, (PixelAlpha*) 0);
             }
 
-            return edgeTable.isEmpty() ? nullptr : this;
+            return edgeTable.isEmpty() ? Ptr() : Ptr (*this);
         }
 
         void translate (Point<int> delta) override
@@ -1851,25 +1851,25 @@ struct ClipRegions
 
         using Ptr = typename Base::Ptr;
 
-        Ptr clone() const override                           { return new RectangleListRegion (*this); }
+        Ptr clone() const override                           { return *new RectangleListRegion (*this); }
         Ptr applyClipTo (const Ptr& target) const override   { return target->clipToRectangleList (clip); }
 
         Ptr clipToRectangle (Rectangle<int> r) override
         {
             clip.clipTo (r);
-            return clip.isEmpty() ? nullptr : this;
+            return clip.isEmpty() ? Ptr() : Ptr (*this);
         }
 
         Ptr clipToRectangleList (const RectangleList<int>& r) override
         {
             clip.clipTo (r);
-            return clip.isEmpty() ? nullptr : this;
+            return clip.isEmpty() ? Ptr() : Ptr (*this);
         }
 
         Ptr excludeClipRectangle (Rectangle<int> r) override
         {
             clip.subtract (r);
-            return clip.isEmpty() ? nullptr : this;
+            return clip.isEmpty() ? Ptr() : Ptr (*this);
         }
 
         Ptr clipToPath (const Path& p, const AffineTransform& transform) override  { return toEdgeTable()->clipToPath (p, transform); }
@@ -2068,7 +2068,7 @@ struct ClipRegions
             JUCE_DECLARE_NON_COPYABLE (SubRectangleIteratorFloat)
         };
 
-        Ptr toEdgeTable() const   { return new EdgeTableRegion (clip); }
+        Ptr toEdgeTable() const   { return *new EdgeTableRegion (clip); }
 
         RectangleListRegion& operator= (const RectangleListRegion&);
     };
@@ -2267,7 +2267,7 @@ public:
             auto clipped = clip->getClipBounds().getIntersection (r);
 
             if (! clipped.isEmpty())
-                fillShape (new RectangleListRegionType (clipped), false);
+                fillShape (*new RectangleListRegionType (clipped), false);
         }
     }
 
@@ -2282,7 +2282,7 @@ public:
             auto clipped = clip->getClipBounds().toFloat().getIntersection (r);
 
             if (! clipped.isEmpty())
-                fillShape (new EdgeTableRegionType (clipped), false);
+                fillShape (*new EdgeTableRegionType (clipped), false);
         }
     }
 
@@ -2336,7 +2336,7 @@ public:
 
             if (transform.isIdentity())
             {
-                fillShape (new EdgeTableRegionType (list), false);
+                fillShape (*new EdgeTableRegionType (list), false);
             }
             else if (! transform.isRotated)
             {
@@ -2347,7 +2347,7 @@ public:
                 else
                     transformed.transformAll (transform.getTransform());
 
-                fillShape (new EdgeTableRegionType (transformed), false);
+                fillShape (*new EdgeTableRegionType (transformed), false);
             }
             else
             {
@@ -2364,7 +2364,7 @@ public:
             auto clipRect = clip->getClipBounds();
 
             if (path.getBoundsTransformed (trans).getSmallestIntegerContainer().intersects (clipRect))
-                fillShape (new EdgeTableRegionType (clipRect, path, trans), false);
+                fillShape (*new EdgeTableRegionType (clipRect, path, trans), false);
         }
     }
 
@@ -2383,7 +2383,7 @@ public:
                     edgeTableClip->edgeTable.multiplyLevels (1.0f + 1.6f * brightness);
             }
 
-            fillShape (edgeTableClip, false);
+            fillShape (*edgeTableClip, false);
         }
     }
 
@@ -2434,7 +2434,7 @@ public:
                     area = area.getIntersection (getThis().getMaximumBounds());
 
                     if (! area.isEmpty())
-                        if (auto c = clip->applyClipTo (new EdgeTableRegionType (area)))
+                        if (auto c = clip->applyClipTo (*new EdgeTableRegionType (area)))
                             c->renderImageUntransformed (getThis(), sourceImage, alpha, tx, ty, false);
                 }
 
@@ -2609,7 +2609,7 @@ public:
                 std::unique_ptr<EdgeTable> et (font.getTypeface()->getEdgeTableForGlyph (glyphNumber, t, fontHeight));
 
                 if (et != nullptr)
-                    fillShape (new EdgeTableRegionType (*et), false);
+                    fillShape (*new EdgeTableRegionType (*et), false);
             }
         }
     }

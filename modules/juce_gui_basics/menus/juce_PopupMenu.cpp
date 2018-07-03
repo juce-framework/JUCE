@@ -77,7 +77,7 @@ struct ItemComponent  : public Component
       : item (i), customComp (i.customComponent)
     {
         if (item.isSectionHeader)
-            customComp = new HeaderItemComponent (item.text);
+            customComp = *new HeaderItemComponent (item.text);
 
         if (customComp != nullptr)
             addAndMakeVisible (*customComp);

@@ -111,10 +111,10 @@ struct CachedImageList  : public ReferenceCountedObject,
         {
             TextureInfo t;
 
-            if (textureNeedsReloading)
+            if (textureNeedsReloading && pixelData != nullptr)
             {
                 textureNeedsReloading = false;
-                texture.loadImage (Image (pixelData));
+                texture.loadImage (Image (*pixelData));
             }
 
             t.textureID = texture.getTextureID();
@@ -1660,7 +1660,7 @@ struct SavedState  : public RenderingHelpers::SavedStateBase<SavedState>
                 const std::unique_ptr<EdgeTable> et (font.getTypeface()->getEdgeTableForGlyph (glyphNumber, t, fontHeight));
 
                 if (et != nullptr)
-                    fillShape (new EdgeTableRegionType (*et), false);
+                    fillShape (*new EdgeTableRegionType (*et), false);
             }
         }
     }
@@ -1845,7 +1845,8 @@ struct CustomProgram  : public ReferenceCountedObject,
     static ReferenceCountedObjectPtr<CustomProgram> get (const String& hashName)
     {
         if (auto* c = OpenGLContext::getCurrentContext())
-            return static_cast<CustomProgram*> (c->getAssociatedObject (hashName.toRawUTF8()));
+            if (auto* o = c->getAssociatedObject (hashName.toRawUTF8()))
+                return *static_cast<CustomProgram*> (o);
 
         return {};
     }

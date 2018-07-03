@@ -119,7 +119,7 @@ struct ChildProcessCache
     {
         for (auto& p : processes)
             if (&(p->project) == &project)
-                return p;
+                return *p;
 
         return {};
     }
@@ -132,7 +132,7 @@ struct ChildProcessCache
         auto p = new CompileEngineChildProcess (project);
         tellNewProcessAboutExistingEditors (*p);
         processes.add (p);
-        return p;
+        return *p;
     }
 
     static void tellNewProcessAboutExistingEditors (CompileEngineChildProcess& process)
