@@ -264,8 +264,11 @@ public:
     virtual void removeProgramEventListener (ProgramEventListener*);
 
     //==============================================================================
-    /** Returns the size of the data block that setDataByte and other functions can write to. */
+    /** Returns the overall memory of the block. */
     virtual uint32 getMemorySize() = 0;
+
+    /** Returns the size of the data block that setDataByte and other functions can write to. */
+    virtual uint32 getHeapMemorySize() = 0;
 
     /** Sets a single byte on the littlefoot heap. */
     virtual void setDataByte (size_t offset, uint8 value) = 0;

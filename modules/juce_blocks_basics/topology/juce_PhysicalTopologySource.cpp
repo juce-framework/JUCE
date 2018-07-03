@@ -1741,6 +1741,12 @@ struct PhysicalTopologySource::Internal
             return modelData.programAndHeapSize;
         }
 
+        uint32 getHeapMemorySize() override
+        {
+            jassert (isPositiveAndNotGreaterThan (programSize, modelData.programAndHeapSize));
+            return modelData.programAndHeapSize - programSize;
+        }
+
         void setDataByte (size_t offset, uint8 value) override
         {
             remoteHeap.setByte (programSize + offset, value);
