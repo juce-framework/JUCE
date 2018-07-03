@@ -892,6 +892,8 @@ int performCommandLine (const String& commandLine)
         if (matchArgument (command, "trans-finish"))             { createFinishedTranslationFile (args);  return 0; }
         if (matchArgument (command, "set-global-search-path"))   { setGlobalPath (args);                  return 0; }
         if (matchArgument (command, "create-project-from-pip"))  { createProjectFromPIP (args);           return 0; }
+
+        if (command.startsWith ("-")) { throw CommandLineError ("Unrecognised command: " + command.quoted()); }
     }
     catch (const CommandLineError& error)
     {
