@@ -1007,16 +1007,16 @@ struct StateHelpers
 
             if (currentActiveTexture == 0)
             {
-                bindTexture (texture1);
+                bindTexture (quadQueue, texture1);
                 setActiveTexture (1);
-                bindTexture (texture2);
+                bindTexture (quadQueue, texture2);
             }
             else
             {
                 setActiveTexture (1);
-                bindTexture (texture2);
+                bindTexture (quadQueue, texture2);
                 setActiveTexture (0);
-                bindTexture (texture1);
+                bindTexture (quadQueue, texture1);
             }
             JUCE_CHECK_OPENGL_ERROR
         }
@@ -1031,12 +1031,14 @@ struct StateHelpers
             }
         }
 
-        void bindTexture (const GLuint textureID) noexcept
+        template <typename QuadQueueType>
+        void bindTexture (QuadQueueType& quadQueue, const GLuint textureID) noexcept
         {
             jassert (currentActiveTexture >= 0);
 
             if (currentTextureID [currentActiveTexture] != textureID)
             {
+                quadQueue.flush();
                 currentTextureID [currentActiveTexture] = textureID;
                 glBindTexture (GL_TEXTURE_2D, textureID);
                 JUCE_CHECK_OPENGL_ERROR
@@ -1089,10 +1091,12 @@ struct StateHelpers
             gradientNeedsRefresh = true;
         }
 
-        void bindTextureForGradient (ActiveTextures& activeTextures, const ColourGradient& gradient)
+        template <typename QuadQueueType>
+        void bindTextureForGradient (QuadQueueType& quadQueue, ActiveTextures& activeTextures, const ColourGradient& gradient)
         {
             if (gradientNeedsRefresh)
             {
+                quadQueue.flush();
                 gradientNeedsRefresh = false;
 
                 if (gradientTextures.size() < numGradientTexturesToCache)
@@ -1112,7 +1116,7 @@ struct StateHelpers
                 gradientTextures.getUnchecked (activeGradientIndex)->loadARGB (lookup, gradientTextureSize, 1);
             }
 
-            activeTextures.bindTexture (gradientTextures.getUnchecked (activeGradientIndex)->getTextureID());
+            activeTextures.bindTexture (quadQueue, gradientTextures.getUnchecked (activeGradientIndex)->getTextureID());
         }
 
         enum { gradientTextureSize = 256 };
@@ -1373,7 +1377,6 @@ public:
                                    const int maskTextureID, const Rectangle<int>* const maskArea)
     {
         JUCE_CHECK_OPENGL_ERROR
-        activeTextures.disableTextures (shaderQuadQueue);
         blendMode.setPremultipliedBlendingMode (shaderQuadQueue);
         JUCE_CHECK_OPENGL_ERROR
 
@@ -1381,14 +1384,14 @@ public:
         {
             activeTextures.setTexturesEnabled (shaderQuadQueue, 3);
             activeTextures.setActiveTexture (1);
-            activeTextures.bindTexture ((GLuint) maskTextureID);
+            activeTextures.bindTexture (shaderQuadQueue, (GLuint) maskTextureID);
             activeTextures.setActiveTexture (0);
-            textureCache.bindTextureForGradient (activeTextures, g);
+            textureCache.bindTextureForGradient (shaderQuadQueue, activeTextures, g);
         }
         else
         {
             activeTextures.setSingleTextureMode (shaderQuadQueue);
-            textureCache.bindTextureForGradient (activeTextures, g);
+            textureCache.bindTextureForGradient (shaderQuadQueue, activeTextures, g);
         }
 
         const AffineTransform t (transform.translated (0.5f - target.bounds.getX(),
@@ -1500,7 +1503,7 @@ public:
         else
         {
             activeTextures.setSingleTextureMode (shaderQuadQueue);
-            activeTextures.bindTexture (textureInfo.textureID);
+            activeTextures.bindTexture (shaderQuadQueue, textureInfo.textureID);
 
             if (isTiledFill)
             {
