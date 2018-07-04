@@ -83,7 +83,8 @@ void ProjucerApplication::initialise (const String& commandLine)
 
         initialiseBasics();
 
-        isRunningCommandLine = commandLine.isNotEmpty();
+        isRunningCommandLine = commandLine.isNotEmpty()
+                                && ! commandLine.startsWith ("-NSDocumentRevisionsDebugMode");
 
         licenseController.reset (new LicenseController);
         licenseController->addLicenseStatusChangedCallback (this);
