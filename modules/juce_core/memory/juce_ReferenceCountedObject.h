@@ -366,7 +366,7 @@ public:
     */
     ~ReferenceCountedObjectPtr()
     {
-        reset();
+        decIfNotNull (referencedObject);
     }
 
     //==============================================================================
@@ -379,6 +379,7 @@ public:
     void reset() noexcept
     {
         decIfNotNull (referencedObject);
+        referencedObject = nullptr;
     }
 
     // the -> operator is called on the referenced object
