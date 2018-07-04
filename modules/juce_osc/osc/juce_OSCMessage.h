@@ -137,7 +137,7 @@ public:
 
 		Note : the value must be in the format RGBA (not ARGB).
 	*/
-	void addColor(uint32 value);
+	void addColor(const OSCColor &value);
 
     /** Adds the OSCArgument argument to the OSCMessage object.
 

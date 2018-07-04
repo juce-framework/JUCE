@@ -30,6 +30,24 @@ namespace juce
 
 //==============================================================================
 /**
+	A small struct holding the r, g, b, a values of an OSC Color argument
+	@tags{OSC}
+*/
+struct OSCColor
+{
+	OSCColor(uint8 _r, uint8 _g, uint8 _b, uint8 _a) :
+		r(_r), g(_g), b(_b), a(_a)
+	{
+	}
+
+	uint8 r;
+	uint8 g;
+	uint8 b;
+	uint8 a;
+};
+
+//==============================================================================
+/**
     An OSC argument.
 
     An OSC argument is a value of one of the following types: int32, float32, string,
@@ -42,14 +60,18 @@ namespace juce
 class JUCE_API  OSCArgument
 {
 public:
+	
     /** Constructs an OSCArgument with type int32 and a given value. */
-    OSCArgument (int32 value, bool asColor = false) noexcept;
+    OSCArgument (int32 value) noexcept;
 
     /** Constructs an OSCArgument with type float32 and a given value. */
     OSCArgument (float value) noexcept;
 
     /** Constructs an OSCArgument with type string and a given value */
     OSCArgument (const String& value) noexcept;
+
+	/** Constructs an OSCArgument with type string and a given value */
+	OSCArgument(const OSCColor& value) noexcept;
 
     /** Constructs an OSCArgument with type blob and copies dataSize bytes
         from the memory pointed to by data into the blob.
@@ -107,7 +129,7 @@ public:
 	/** Returns the value of the OSCArgument as a colour.
 	If the type of the OSCArgument is not a color, the behaviour is undefined.
 	*/
-	uint32 getColor() const noexcept;
+	OSCColor getColor() const noexcept;
 
 
 private:
@@ -118,8 +140,9 @@ private:
     {
         int32 intValue;
         float floatValue;
-		uint32 colorValue;
+		OSCColor colorValue;
     };
+
 
     String stringValue;
     MemoryBlock blob;

@@ -74,9 +74,9 @@ namespace
             return output.writeRepeatedByte ('\0', numPaddingZeros);
         }
 
-		bool writeColor(uint32 value)
+		bool writeColor(const OSCColor &value)
 		{
-			return output.writeIntBigEndian(value);
+			return output.writeIntBigEndian(value.r << 24 | value.g << 16 | value.b << 8 | value.a);
 		}
 
         bool writeBlob (const MemoryBlock& blob)
