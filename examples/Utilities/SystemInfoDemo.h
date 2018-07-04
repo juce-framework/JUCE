@@ -51,11 +51,9 @@
 //==============================================================================
 static String getMacAddressList()
 {
-    Array<MACAddress> macAddresses;
-    MACAddress::findAllAddresses (macAddresses);
-
     String addressList;
-    for (auto& addr : macAddresses)
+
+    for (auto& addr : MACAddress::getAllAddresses())
         addressList << addr.toString() << newLine;
 
     return addressList;
@@ -75,12 +73,9 @@ static String getFileSystemRoots()
 
 static String getIPAddressList()
 {
-    Array<IPAddress> addresses;
-    IPAddress::findAllAddresses (addresses);
-
     String addressList;
 
-    for (auto& addr : addresses)
+    for (auto& addr : IPAddress::getAllAddresses())
         addressList << "   " << addr.toString() << newLine;
 
     return addressList;

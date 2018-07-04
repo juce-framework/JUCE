@@ -33,9 +33,6 @@ class JUCE_API  IPAddress  final
 {
 public:
     //==============================================================================
-    /** Populates a list of all the IP addresses that this machine is using. */
-    static void findAllAddresses (Array<IPAddress>& results, bool includeIPv6 = false);
-
     /** Returns an IP address meaning "any", equivalent to 0.0.0.0 (IPv4) or ::, (IPv6)  */
     static IPAddress any() noexcept;
 
@@ -44,6 +41,21 @@ public:
 
     /** Returns an IPv4 or IPv6 address meaning "localhost", equivalent to 127.0.0.1 (IPv4) or ::1 (IPv6) */
     static IPAddress local (bool IPv6 = false) noexcept;
+
+    //==============================================================================
+    /** Populates a list of all the IP addresses that this machine is using. */
+    static void findAllAddresses (Array<IPAddress>& results, bool includeIPv6 = false);
+
+    /** Populates a list of all the IP addresses that this machine is using. */
+    static Array<IPAddress> getAllAddresses (bool includeIPv6 = false);
+
+    /** Returns the first 'real' address for the local machine.
+        Unlike local(), this will attempt to find the machine's actual assigned
+        address rather than "127.0.0.1". If there are multiple network cards, this
+        may return any of their addresses. If it doesn't find any, then it'll return
+        local() as a fallback.
+    */
+    static IPAddress getLocalAddress (bool includeIPv6 = false);
 
     //==============================================================================
     /** Creates a null address - 0.0.0.0 (IPv4) or ::, (IPv6) */

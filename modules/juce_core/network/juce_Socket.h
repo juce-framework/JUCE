@@ -68,7 +68,7 @@ public:
         network address otherwise this function will fail.
         @returns    true on success; false may indicate that another socket is already bound
                     on the same port
-        @see bindToPort(int localPortNumber), IPAddress::findAllAddresses
+        @see bindToPort(int localPortNumber), IPAddress::getAllAddresses
     */
     bool bindToPort (int localPortNumber, const String& localAddress);
 
@@ -236,7 +236,7 @@ public:
         network address otherwise this function will fail.
         @returns    true on success; false may indicate that another socket is already bound
                     on the same port
-        @see bindToPort(int localPortNumber), IPAddress::findAllAddresses
+        @see bindToPort(int localPortNumber), IPAddress::getAllAddresses
     */
     bool bindToPort (int localPortNumber, const String& localAddress);
 

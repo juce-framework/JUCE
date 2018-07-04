@@ -73,13 +73,11 @@ StringArray SystemStats::getDeviceIdentifiers()
     }
     else
     {
-        Array<MACAddress> addresses;
-        MACAddress::findAllAddresses (addresses);
-        for (auto& address : addresses)
+        for (auto& address : MACAddress::getAllAddresses())
             ids.add (address.toString());
     }
 
-    jassert (ids.size() > 0); // Failed to create any IDs!
+    jassert (! ids.isEmpty()); // Failed to create any IDs!
     return ids;
 }
 
