@@ -61,7 +61,7 @@ public:
     struct NodeID
     {
         constexpr NodeID() {}
-        constexpr NodeID (uint32 i) : uid (i) {}
+        constexpr explicit NodeID (uint32 i) : uid (i) {}
 
         uint32 uid = 0;
 

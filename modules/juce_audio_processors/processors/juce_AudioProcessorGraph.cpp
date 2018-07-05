@@ -399,7 +399,7 @@ struct RenderSequenceBuilder
 
         for (auto&& c : graph.getConnections())
             if (c.destination.nodeID == nodeID)
-                maxLatency = jmax (maxLatency, getNodeDelay (c.source.nodeID.uid));
+                maxLatency = jmax (maxLatency, getNodeDelay (c.source.nodeID));
 
         return maxLatency;
     }

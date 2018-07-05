@@ -146,7 +146,7 @@ struct GraphEditorPanel::PinComponent   : public Component,
 
     void mouseDown (const MouseEvent& e) override
     {
-        AudioProcessorGraph::NodeAndChannel dummy { 0, 0 };
+        AudioProcessorGraph::NodeAndChannel dummy { {}, 0 };
 
         panel.beginConnectorDrag (isInput ? dummy : pin,
                                   isInput ? pin : dummy,
@@ -177,7 +177,7 @@ struct GraphEditorPanel::FilterComponent   : public Component,
                                              public Timer,
                                              private AudioProcessorParameter::Listener
 {
-    FilterComponent (GraphEditorPanel& p, uint32 id)  : panel (p), graph (p.graph), pluginID (id)
+    FilterComponent (GraphEditorPanel& p, AudioProcessorGraph::NodeID id)  : panel (p), graph (p.graph), pluginID (id)
     {
         shadow.setShadowProperties (DropShadow (Colours::black.withAlpha (0.5f), 3, { 0, 1 }));
         setComponentEffect (&shadow);
@@ -611,7 +611,7 @@ struct GraphEditorPanel::ConnectorComponent   : public Component,
             getDistancesFromEnds (getPosition().toFloat() + e.position, distanceFromStart, distanceFromEnd);
             const bool isNearerSource = (distanceFromStart < distanceFromEnd);
 
-            AudioProcessorGraph::NodeAndChannel dummy { 0, 0 };
+            AudioProcessorGraph::NodeAndChannel dummy { {}, 0 };
 
             panel.beginConnectorDrag (isNearerSource ? dummy : connection.source,
                                       isNearerSource ? connection.destination : dummy,
@@ -675,7 +675,7 @@ struct GraphEditorPanel::ConnectorComponent   : public Component,
 
     GraphEditorPanel& panel;
     FilterGraph& graph;
-    AudioProcessorGraph::Connection connection { { 0, 0 }, { 0, 0 } };
+    AudioProcessorGraph::Connection connection { { {}, 0 }, { {}, 0 } };
     Point<float> lastInputPos, lastOutputPos;
     Path linePath, hitPath;
     bool dragging = false;
@@ -736,10 +736,10 @@ void GraphEditorPanel::createNewPlugin (const PluginDescription& desc, Point<int
     graph.addPlugin (desc, position.toDouble() / Point<double> ((double) getWidth(), (double) getHeight()));
 }
 
-GraphEditorPanel::FilterComponent* GraphEditorPanel::getComponentForFilter (const uint32 filterID) const
+GraphEditorPanel::FilterComponent* GraphEditorPanel::getComponentForFilter (AudioProcessorGraph::NodeID nodeID) const
 {
     for (auto* fc : nodes)
-       if (fc->pluginID == filterID)
+       if (fc->pluginID == nodeID)
             return fc;
 
     return nullptr;
@@ -870,11 +870,11 @@ void GraphEditorPanel::dragConnector (const MouseEvent& e)
         {
             auto connection = draggingConnector->connection;
 
-            if (connection.source.nodeID == 0 && ! pin->isInput)
+            if (connection.source.nodeID == AudioProcessorGraph::NodeID() && ! pin->isInput)
             {
                 connection.source = pin->pin;
             }
-            else if (connection.destination.nodeID == 0 && pin->isInput)
+            else if (connection.destination.nodeID == AudioProcessorGraph::NodeID() && pin->isInput)
             {
                 connection.destination = pin->pin;
             }
@@ -886,7 +886,7 @@ void GraphEditorPanel::dragConnector (const MouseEvent& e)
             }
         }
 
-        if (draggingConnector->connection.source.nodeID == 0)
+        if (draggingConnector->connection.source.nodeID == AudioProcessorGraph::NodeID())
             draggingConnector->dragStart (pos);
         else
             draggingConnector->dragEnd (pos);
@@ -907,7 +907,7 @@ void GraphEditorPanel::endDraggingConnector (const MouseEvent& e)
 
     if (auto* pin = findPinAt (e2.position))
     {
-        if (connection.source.nodeID == 0)
+        if (connection.source.nodeID == AudioProcessorGraph::NodeID())
         {
             if (pin->isInput)
                 return;
