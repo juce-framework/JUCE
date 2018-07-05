@@ -378,8 +378,9 @@ public:
     /** Resets this object to a null pointer. */
     void reset() noexcept
     {
-        decIfNotNull (referencedObject);
-        referencedObject = nullptr;
+        auto oldObject = referencedObject;  // need to null the pointer before deleting the object
+        referencedObject = nullptr;         // in case this ptr is itself deleted as a side-effect
+        decIfNotNull (oldObject);           // of the destructor
     }
 
     // the -> operator is called on the referenced object
