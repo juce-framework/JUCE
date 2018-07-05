@@ -85,11 +85,27 @@ public:
 
         setOpaque (false);
 
-        auto chooserBounds = Desktop::getInstance().getDisplays().getMainDisplay().userArea;
-        setBounds (chooserBounds);
+        if (SystemStats::isRunningInAppExtensionSandbox())
+        {
+            [controller.get() setModalPresentationStyle:UIModalPresentationFullScreen];
 
-        setAlwaysOnTop (true);
-        addToDesktop (0);
+            if (auto* editorPeer = ComponentPeer::getPeer (0))
+            {
+                auto chooserBounds = editorPeer->getComponent().getLocalBounds();
+                setBounds (chooserBounds);
+
+                setAlwaysOnTop (true);
+                editorPeer->getComponent().addAndMakeVisible (this);
+            }
+        }
+        else
+        {
+            auto chooserBounds = Desktop::getInstance().getDisplays().getMainDisplay().userArea;
+            setBounds (chooserBounds);
+
+            setAlwaysOnTop (true);
+            addToDesktop (0);
+        }
     }
 
     ~Native()
@@ -308,7 +324,7 @@ bool FileChooser::isPlatformDialogAvailable()
    #if JUCE_DISABLE_NATIVE_FILECHOOSERS
     return false;
    #else
-    return [[NSFileManager defaultManager] ubiquityIdentityToken] != nil;
+    return true;
    #endif
 }
 

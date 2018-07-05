@@ -1657,6 +1657,17 @@ JuceAudioUnitv3Base* JuceAudioUnitv3Base::create (AUAudioUnit* audioUnit, AudioC
     return new JuceAudioUnitv3 (audioUnit, descr, options, error);
 }
 
+#if JUCE_IOS
+namespace juce
+{
+struct UIViewPeerControllerReceiver
+{
+    virtual ~UIViewPeerControllerReceiver();
+    virtual void setViewController (UIViewController*) = 0;
+};
+}
+#endif
+
 //==============================================================================
 class JuceAUViewController
 {
@@ -1708,6 +1719,9 @@ public:
                    #if JUCE_IOS
                     if (JUCE_IOS_MAC_VIEW* peerView = [[[myself view] subviews] objectAtIndex: 0])
                         [peerView setContentMode: UIViewContentModeTop];
+
+                    if (auto* peer = dynamic_cast<UIViewPeerControllerReceiver*> (editor->getPeer()))
+                        peer->setViewController (myself);
                    #endif
                 }
             }
