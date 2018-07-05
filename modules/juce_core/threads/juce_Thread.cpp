@@ -272,7 +272,7 @@ bool Thread::setPriority (int newPriority)
    #if JUCE_ANDROID
     // you cannot switch from or to an Android realtime thread once the
     // thread is already running!
-    jassert (isThreadRunning() && (isRealtime == isAndroidRealtimeThread));
+    jassert (!isThreadRunning() || (isRealtime == isAndroidRealtimeThread));
 
     isAndroidRealtimeThread = isRealtime;
    #endif

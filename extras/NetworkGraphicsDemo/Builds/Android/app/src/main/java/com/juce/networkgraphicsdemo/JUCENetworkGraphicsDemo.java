@@ -325,6 +325,10 @@ public class JUCENetworkGraphicsDemo   extends Activity
     public void onConfigurationChanged (Configuration cfg)
     {
         super.onConfigurationChanged (cfg);
+        ViewGroup parent = (ViewGroup) viewHolder.getParent();
+        if (parent != null) {
+            parent.removeView(viewHolder);
+        }
         setContentView (viewHolder);
     }
 
@@ -435,7 +439,7 @@ public class JUCENetworkGraphicsDemo   extends Activity
     private native void appNewIntent (Intent intent);
 
     //==============================================================================
-    private ViewHolder viewHolder;
+    public ViewHolder viewHolder;
     private MidiDeviceManager midiDeviceManager = null;
     private BluetoothManager bluetoothManager = null;
     private boolean isScreenSaverEnabled;
