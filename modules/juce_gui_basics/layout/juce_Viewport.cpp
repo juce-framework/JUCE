@@ -264,7 +264,7 @@ struct Viewport::DragToScrollListener   : private MouseListener,
         }
     }
 
-    void mouseUp (const MouseEvent&) override
+    void mouseUp (const MouseEvent& e) override
     {
         if (isGlobalMouseListener && Desktop::getInstance().getNumDraggingMouseSources() == 0)
             endDragAndClearGlobalMouseListener();

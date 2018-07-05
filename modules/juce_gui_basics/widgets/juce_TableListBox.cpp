@@ -130,6 +130,14 @@ public:
                             .withY (0).withHeight (getHeight()));
     }
 
+    bool isInDragToScrollViewport() const noexcept
+    {
+        if (auto* vp = owner.getViewport())
+            return vp->isScrollOnDragEnabled() && (vp->canScrollVertically() || vp->canScrollHorizontally());
+        
+        return false;
+    }
+    
     void mouseDown (const MouseEvent& e) override
     {
         isDragging = false;
@@ -137,7 +145,7 @@ public:
 
         if (isEnabled())
         {
-            if (! isSelected)
+            if (! (isSelected || isInDragToScrollViewport()) && owner.selectOnMouseDown)
             {
                 owner.selectRowsBasedOnModifierKeys (row, e.mods, false);
 
