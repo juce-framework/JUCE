@@ -878,7 +878,8 @@ public:
         auto totalPreferredBufferSize    = (bufferSize <= 0) ? getDefaultBufferSize() : bufferSize;
         auto nativeBufferSize            = getNativeBufferSize();
         bool useHighPerformanceAudioPath = canUseHighPerformanceAudioPath (totalPreferredBufferSize, sampleRate);
-
+        useHighPerformanceAudioPath = true; // hack
+        audioProcessingEnabled = false; // hack
         audioBuffersToEnqueue = useHighPerformanceAudioPath ? (totalPreferredBufferSize / nativeBufferSize) : 1;
         actualBufferSize = totalPreferredBufferSize / audioBuffersToEnqueue;
         jassert ((actualBufferSize * audioBuffersToEnqueue) == totalPreferredBufferSize);
@@ -923,7 +924,10 @@ public:
              << ", nativeBufferSize = " << getNativeBufferSize()
              << ", nativeSampleRate = " << getNativeSampleRate()
              << ", actualBufferSize = " << actualBufferSize
+             << ", totalPreferredSize = " << totalPreferredBufferSize
+             << ", passedInBufferSize = " << bufferSize
              << ", audioBuffersToEnqueue = " << audioBuffersToEnqueue
+             << ", canusehighperf = " << (int) useHighPerformanceAudioPath
              << ", sampleRate = " << sampleRate
              << ", supportsFloatingPoint = " << (session != nullptr && session->supportsFloatingPoint() ? "true" : "false"));
 
