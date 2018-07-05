@@ -370,9 +370,9 @@ struct RenderSequenceBuilder
         void setAssignedToNonExistentNode() noexcept            { channel = { anonNodeID(), 0 }; }
 
     private:
-        static constexpr NodeID anonNodeID() { return NodeID (0x7ffffffd); }
-        static constexpr NodeID zeroNodeID() { return NodeID (0x7ffffffe); }
-        static constexpr NodeID freeNodeID() { return NodeID (0x7fffffff); }
+        static NodeID anonNodeID() { return NodeID (0x7ffffffd); }
+        static NodeID zeroNodeID() { return NodeID (0x7ffffffe); }
+        static NodeID freeNodeID() { return NodeID (0x7fffffff); }
     };
 
     Array<AssignedBuffer> audioBuffers, midiBuffers;
