@@ -359,23 +359,20 @@ struct RenderSequenceBuilder
     {
         AudioProcessorGraph::NodeAndChannel channel;
 
-        static AssignedBuffer createReadOnlyEmpty() noexcept    { return { { (NodeID) zeroNodeID, 0 } }; }
-        static AssignedBuffer createFree() noexcept             { return { { (NodeID) freeNodeID, 0 } }; }
+        static AssignedBuffer createReadOnlyEmpty() noexcept    { return { { zeroNodeID(), 0 } }; }
+        static AssignedBuffer createFree() noexcept             { return { { freeNodeID(), 0 } }; }
 
-        bool isReadOnlyEmpty() const noexcept                   { return channel.nodeID == (NodeID) zeroNodeID; }
-        bool isFree() const noexcept                            { return channel.nodeID == (NodeID) freeNodeID; }
+        bool isReadOnlyEmpty() const noexcept                   { return channel.nodeID == zeroNodeID(); }
+        bool isFree() const noexcept                            { return channel.nodeID == freeNodeID(); }
         bool isAssigned() const noexcept                        { return ! (isReadOnlyEmpty() || isFree()); }
 
-        void setFree() noexcept                                 { channel = { (NodeID) freeNodeID, 0 }; }
-        void setAssignedToNonExistentNode() noexcept            { channel = { (NodeID) anonNodeID, 0 }; }
+        void setFree() noexcept                                 { channel = { freeNodeID(), 0 }; }
+        void setAssignedToNonExistentNode() noexcept            { channel = { anonNodeID(), 0 }; }
 
     private:
-        enum
-        {
-            anonNodeID = 0x7ffffffd,
-            zeroNodeID = 0x7ffffffe,
-            freeNodeID = 0x7fffffff
-        };
+        static constexpr NodeID anonNodeID() { return NodeID (0x7ffffffd); }
+        static constexpr NodeID zeroNodeID() { return NodeID (0x7ffffffe); }
+        static constexpr NodeID freeNodeID() { return NodeID (0x7fffffff); }
     };
 
     Array<AssignedBuffer> audioBuffers, midiBuffers;
@@ -388,12 +385,12 @@ struct RenderSequenceBuilder
         int delay;
     };
 
-    HashMap<NodeID, int> delays;
+    HashMap<uint32, int> delays;
     int totalLatency = 0;
 
     int getNodeDelay (NodeID nodeID) const noexcept
     {
-        return delays[nodeID];
+        return delays[nodeID.uid];
     }
 
     int getInputLatencyForNode (NodeID nodeID) const
@@ -402,7 +399,7 @@ struct RenderSequenceBuilder
 
         for (auto&& c : graph.getConnections())
             if (c.destination.nodeID == nodeID)
-                maxLatency = jmax (maxLatency, getNodeDelay (c.source.nodeID));
+                maxLatency = jmax (maxLatency, getNodeDelay (c.source.nodeID.uid));
 
         return maxLatency;
     }
@@ -681,7 +678,7 @@ struct RenderSequenceBuilder
         if (processor.producesMidi())
             midiBuffers.getReference (midiBufferToUse).channel = { node.nodeID, AudioProcessorGraph::midiChannelIndex };
 
-        delays.set (node.nodeID, maxLatency + processor.getLatencySamples());
+        delays.set (node.nodeID.uid, maxLatency + processor.getLatencySamples());
 
         if (numOuts == 0)
             totalLatency = maxLatency;
@@ -920,8 +917,8 @@ AudioProcessorGraph::Node::Ptr AudioProcessorGraph::addNode (AudioProcessor* new
         return {};
     }
 
-    if (nodeID == 0)
-        nodeID = ++lastNodeID;
+    if (nodeID == NodeID())
+        nodeID.uid = ++(lastNodeID.uid);
 
     for (auto* n : nodes)
     {
@@ -932,7 +929,7 @@ AudioProcessorGraph::Node::Ptr AudioProcessorGraph::addNode (AudioProcessor* new
         }
     }
 
-    if (nodeID > lastNodeID)
+    if (lastNodeID < nodeID)
         lastNodeID = nodeID;
 
     newProcessor->setPlayHead (getPlayHead());
