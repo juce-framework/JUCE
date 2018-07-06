@@ -2323,15 +2323,18 @@ private:
         s.set ("GCC_WARN_UNDECLARED_SELECTOR", "YES");
         s.set ("GCC_WARN_UNINITIALIZED_AUTOS", "YES");
         s.set ("GCC_WARN_UNUSED_FUNCTION", "YES");
+        s.set ("CLANG_ENABLE_OBJC_WEAK", "YES");
         s.set ("CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING", "YES");
         s.set ("CLANG_WARN_BOOL_CONVERSION", "YES");
         s.set ("CLANG_WARN_COMMA", "YES");
         s.set ("CLANG_WARN_CONSTANT_CONVERSION", "YES");
+        s.set ("CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS", "YES");
         s.set ("CLANG_WARN_EMPTY_BODY", "YES");
         s.set ("CLANG_WARN_ENUM_CONVERSION", "YES");
         s.set ("CLANG_WARN_INFINITE_RECURSION", "YES");
         s.set ("CLANG_WARN_INT_CONVERSION", "YES");
         s.set ("CLANG_WARN_NON_LITERAL_NULL_CONVERSION", "YES");
+        s.set ("CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF", "YES");
         s.set ("CLANG_WARN_OBJC_LITERAL_CONVERSION", "YES");
         s.set ("CLANG_WARN_RANGE_LOOP_ANALYSIS", "YES");
         s.set ("CLANG_WARN_STRICT_PROTOTYPES", "YES");
