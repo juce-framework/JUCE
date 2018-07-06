@@ -201,7 +201,7 @@ private:
 
     void timerCallback() override
     {
-        send (newClientOSCAddress, clientName + ":" + getIPAddress()
+        send (newClientOSCAddress, clientName + ":" + IPAddress::getLocalAddress().toString()
                                               + ":" + getScreenAreaInGlobalSpace().toString());
     }
 
