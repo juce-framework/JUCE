@@ -907,8 +907,7 @@ void JUCE_API juce_threadEntryPoint (void*);
 extern JavaVM* androidJNIJavaVM;
 #endif
 
-extern "C" void* threadEntryProc (void*);
-extern "C" void* threadEntryProc (void* userData)
+static void* threadEntryProc (void* userData)
 {
    #if JUCE_ANDROID
     // JNI_OnLoad was not called - make sure you load the JUCE shared library
