@@ -24,8 +24,27 @@
   ==============================================================================
 */
 
+
 namespace juce
 {
+
+//==============================================================================
+/**
+	A small struct holding the r, g, b, a values of an OSC Color argument
+	@tags{OSC}
+*/
+struct OSCColor
+{
+	OSCColor(uint8 _r, uint8 _g, uint8 _b, uint8 _a) :
+		r(_r), g(_g), b(_b), a(_a)
+	{
+	}
+
+	uint8 r;
+	uint8 g;
+	uint8 b;
+	uint8 a;
+};
 
 //==============================================================================
 /**
@@ -41,6 +60,7 @@ namespace juce
 class JUCE_API  OSCArgument
 {
 public:
+	
     /** Constructs an OSCArgument with type int32 and a given value. */
     OSCArgument (int32 value) noexcept;
 
@@ -50,6 +70,9 @@ public:
     /** Constructs an OSCArgument with type string and a given value */
     OSCArgument (const String& value) noexcept;
 
+	/** Constructs an OSCArgument with type string and a given value */
+	OSCArgument(const OSCColor& value) noexcept;
+
     /** Constructs an OSCArgument with type blob and copies dataSize bytes
         from the memory pointed to by data into the blob.
 
@@ -57,6 +80,9 @@ public:
         gets destructed.
     */
     OSCArgument (const MemoryBlock& blob);
+
+
+
 
     /** Returns the type of the OSCArgument as an OSCType.
         OSCType is a char type, and its value will be the OSC type tag of the type.
@@ -74,6 +100,9 @@ public:
 
     /** Returns whether the type of the OSCArgument is blob. */
     bool isBlob() const noexcept            { return type == OSCTypes::blob; }
+
+	/** Returns whether the type of the OSCArgument is color. */
+	bool isColor() const noexcept			{ return type == OSCTypes::color; }
 
     /** Returns the value of the OSCArgument as an int32.
         If the type of the OSCArgument is not int32, the behaviour is undefined.
@@ -97,6 +126,11 @@ public:
      */
     const MemoryBlock& getBlob() const noexcept;
 
+	/** Returns the value of the OSCArgument as a colour.
+	If the type of the OSCArgument is not a color, the behaviour is undefined.
+	*/
+	OSCColor getColor() const noexcept;
+
 
 private:
     //==============================================================================
@@ -106,7 +140,9 @@ private:
     {
         int32 intValue;
         float floatValue;
+		OSCColor colorValue;
     };
+
 
     String stringValue;
     MemoryBlock blob;

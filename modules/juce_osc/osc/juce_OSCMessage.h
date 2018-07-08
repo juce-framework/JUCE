@@ -132,6 +132,13 @@ public:
     */
     void addBlob (const MemoryBlock& blob);
 
+	/** Creates a new OSCArgument of type color with a given value
+	and adds it to the OSCMessage object.
+
+		Note : the value must be in the format RGBA (not ARGB).
+	*/
+	void addColor(const OSCColor &value);
+
     /** Adds the OSCArgument argument to the OSCMessage object.
 
         Note: This method will result in a copy of the OSCArgument object if it is passed

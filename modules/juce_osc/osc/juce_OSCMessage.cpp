@@ -83,6 +83,8 @@ void OSCMessage::addInt32 (int32 value)             { arguments.add (OSCArgument
 void OSCMessage::addFloat32 (float value)           { arguments.add (OSCArgument (value)); }
 void OSCMessage::addString (const String& value)    { arguments.add (OSCArgument (value)); }
 void OSCMessage::addBlob (const MemoryBlock& blob)  { arguments.add (OSCArgument (blob)); }
+void OSCMessage::addColor(const OSCColor &color)	{ arguments.add (OSCArgument(color)); }
+
 void OSCMessage::addArgument (OSCArgument arg)      { arguments.add (arg); }
 
 //==============================================================================

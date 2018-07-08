@@ -52,14 +52,16 @@ public:
     static const OSCType int32;
     static const OSCType float32;
     static const OSCType string;
-    static const OSCType blob;
+	static const OSCType blob;
+	static const OSCType color;
 
     static bool isSupportedType (OSCType type) noexcept
     {
         return type == OSCTypes::int32
             || type == OSCTypes::float32
             || type == OSCTypes::string
-            || type == OSCTypes::blob;
+			|| type == OSCTypes::blob
+			|| type == OSCTypes::color;
     }
 };
 
