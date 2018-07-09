@@ -28,7 +28,6 @@ namespace juce
 {
 
 //==============================================================================
-
 /** The type used for OSC type tags. */
 using OSCType = char;
 
@@ -37,7 +36,6 @@ using OSCType = char;
 using OSCTypeList = Array<OSCType>;
 
 //==============================================================================
-
 /** The definitions of supported OSC types and their associated OSC type tags,
     as defined in the OpenSoundControl 1.0 specification.
 
@@ -53,15 +51,33 @@ public:
     static const OSCType float32;
     static const OSCType string;
     static const OSCType blob;
+    static const OSCType colour;
 
     static bool isSupportedType (OSCType type) noexcept
     {
         return type == OSCTypes::int32
             || type == OSCTypes::float32
             || type == OSCTypes::string
-            || type == OSCTypes::blob;
+            || type == OSCTypes::blob
+            || type == OSCTypes::colour;
     }
 };
+
+
+//==============================================================================
+/**
+    Holds a 32-bit RGBA colour for passing to and from an OSCArgument.
+    @see OSCArgument, OSCTypes::colour
+    @tags{OSC}
+*/
+struct OSCColour
+{
+    uint8 red, green, blue, alpha;
+
+    uint32 toInt32() const;
+    static OSCColour fromInt32 (uint32);
+};
+
 
 //==============================================================================
 /** Base class for exceptions that can be thrown by methods in the OSC module.

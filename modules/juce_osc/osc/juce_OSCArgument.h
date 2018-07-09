@@ -42,13 +42,13 @@ class JUCE_API  OSCArgument
 {
 public:
     /** Constructs an OSCArgument with type int32 and a given value. */
-    OSCArgument (int32 value) noexcept;
+    OSCArgument (int32 value);
 
     /** Constructs an OSCArgument with type float32 and a given value. */
-    OSCArgument (float value) noexcept;
+    OSCArgument (float value);
 
     /** Constructs an OSCArgument with type string and a given value */
-    OSCArgument (const String& value) noexcept;
+    OSCArgument (const String& value);
 
     /** Constructs an OSCArgument with type blob and copies dataSize bytes
         from the memory pointed to by data into the blob.
@@ -56,7 +56,10 @@ public:
         The data owned by the blob will be released when the OSCArgument object
         gets destructed.
     */
-    OSCArgument (const MemoryBlock& blob);
+    OSCArgument (MemoryBlock blob);
+
+    /** Constructs an OSCArgument with type colour and a given colour value */
+    OSCArgument (OSCColour colour);
 
     /** Returns the type of the OSCArgument as an OSCType.
         OSCType is a char type, and its value will be the OSC type tag of the type.
@@ -75,28 +78,35 @@ public:
     /** Returns whether the type of the OSCArgument is blob. */
     bool isBlob() const noexcept            { return type == OSCTypes::blob; }
 
+    /** Returns whether the type of the OSCArgument is blob. */
+    bool isColour() const noexcept          { return type == OSCTypes::colour; }
+
     /** Returns the value of the OSCArgument as an int32.
         If the type of the OSCArgument is not int32, the behaviour is undefined.
-     */
+    */
     int32 getInt32() const noexcept;
 
     /** Returns the value of the OSCArgument as a float32.
         If the type of the OSCArgument is not float32, the behaviour is undefined.
-     */
+    */
     float getFloat32() const noexcept;
 
     /** Returns the value of the OSCArgument as a string.
         If the type of the OSCArgument is not string, the behaviour is undefined.
-     */
+    */
     String getString() const noexcept;
 
     /** Returns the binary data contained in the blob and owned by the OSCArgument,
         as a reference to a JUCE MemoryBlock object.
 
         If the type of the OSCArgument is not blob, the behaviour is undefined.
-     */
+    */
     const MemoryBlock& getBlob() const noexcept;
 
+    /** Returns the value of the OSCArgument as an OSCColour.
+        If the type of the OSCArgument is not a colour, the behaviour is undefined.
+    */
+    OSCColour getColour() const noexcept;
 
 private:
     //==============================================================================
