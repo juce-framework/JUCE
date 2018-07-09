@@ -314,12 +314,6 @@ public:
         virtual ~EnhancedAudioSuiteInterface() {};
         virtual void requestAnalysis() = 0;
         virtual void requestRender() = 0;
-
-        /** Avalible under processBlock/analyseBlock
-            Allows custom return values (instead of initialized AAX_SUCCESS).
-         */
-        int analysisReturnValue;;
-        int renderReturnValue;;
     };
 
     EnhancedAudioSuiteInterface* enhancedAudioSuiteInterface {nullptr};

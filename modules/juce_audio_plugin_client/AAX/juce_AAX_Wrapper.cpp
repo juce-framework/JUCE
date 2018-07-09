@@ -607,7 +607,6 @@ namespace AAXClasses
 
             AAX_Result AnalyzeAudio (const float * const iAudioIns [], int32_t iAudioInCount, int32_t * ioWindowSize) override
             {
-                analysisReturnValue = AAX_SUCCESS;
                 Array<const float*> inputChannelList;
                 for (decltype(iAudioInCount) i = 0; i < iAudioInCount; ++i)
                 {
@@ -631,12 +630,11 @@ namespace AAXClasses
                 jassert(getAAXProcessor().getPluginInstance().getMainBusNumInputChannels() == numOfMainInputs);
                 getAAXProcessor().getPluginInstance().analyseBlock(buffer);
 
-                return analysisReturnValue;
+                return AAX_SUCCESS;
             }
 
             AAX_Result RenderAudio (const float * const inAudioIns [], int32_t inAudioInCount, float * const inAudioOuts [], int32_t inAudioOutCount, int32_t * ioWindowSize) override
             {
-                renderReturnValue = AAX_SUCCESS;
                 // AAX currently provides only mono side-chain.
                 auto sideChainBufferIdx = getAAXProcessor().hasSidechain && GetSideChainInputNum() > 0 ? GetSideChainInputNum() : -1;
                 auto numOfMainInputs = 0;
@@ -681,7 +679,7 @@ namespace AAXClasses
                 GetAudio (inAudioIns, inAudioInCount, GetLocation()+latencyOffset, ioWindowSize);
                 getAAXProcessor().process (inAudioIns, inAudioOuts, sideChainBufferIdx, *ioWindowSize, false, nullptr, nullptr, nullptr);
 
-                return renderReturnValue;
+                return AAX_SUCCESS;
             }
 
             AAX_Result TranslateOutputBounds (int64_t iSrcStart, int64_t iSrcEnd, int64_t& oDstStart, int64_t& oDstEnd) override
