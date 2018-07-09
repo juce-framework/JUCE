@@ -131,16 +131,17 @@ void Label::setBorderSize (BorderSize<int> newBorder)
 //==============================================================================
 Component* Label::getAttachedComponent() const
 {
-    return static_cast<Component*> (ownerComponent);
+    return ownerComponent.get();
 }
 
 void Label::attachToComponent (Component* owner, bool onLeft)
 {
+    jassert (owner != this); // Not a great idea to try to attach it to itself!
+
     if (ownerComponent != nullptr)
         ownerComponent->removeComponentListener (this);
 
     ownerComponent = owner;
-
     leftOfOwnerComp = onLeft;
 
     if (ownerComponent != nullptr)
