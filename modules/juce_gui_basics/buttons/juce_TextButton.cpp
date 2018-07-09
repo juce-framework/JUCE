@@ -46,7 +46,7 @@ TextButton::~TextButton()
 
 void TextButton::paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown)
 {
-    LookAndFeel& lf = getLookAndFeel();
+    auto& lf = getLookAndFeel();
 
     lf.drawButtonBackground (g, *this,
                              findColour (getToggleState() ? buttonOnColourId : buttonColourId),

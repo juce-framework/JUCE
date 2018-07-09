@@ -81,7 +81,7 @@ public:
 
         @see setViewedComponent
     */
-    Component* getViewedComponent() const noexcept                  { return contentComp; }
+    Component* getViewedComponent() const noexcept                  { return contentComp.get(); }
 
     //==============================================================================
     /** Changes the position of the viewed component.

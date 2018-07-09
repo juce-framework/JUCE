@@ -35,7 +35,7 @@ public:
 
     void messageCallback() override
     {
-        if (const ActionBroadcaster* const b = broadcaster)
+        if (auto b = broadcaster.get())
             if (b->actionListeners.contains (listener))
                 listener->actionListenerCallback (message);
     }

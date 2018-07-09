@@ -674,8 +674,8 @@ void Path::addBubble (Rectangle<float> bodyArea,
 
     startNewSubPath (bodyArea.getX() + cornerSizeW, bodyArea.getY());
 
-    const Rectangle<float> targetLimit (bodyArea.reduced (jmin (halfW - 1.0f, cornerSizeW + arrowBaseWidth),
-                                                          jmin (halfH - 1.0f, cornerSizeH + arrowBaseWidth)));
+    auto targetLimit = bodyArea.reduced (jmin (halfW - 1.0f, cornerSizeW + arrowBaseWidth),
+                                         jmin (halfH - 1.0f, cornerSizeH + arrowBaseWidth));
 
     if (Rectangle<float> (targetLimit.getX(), maximumArea.getY(),
                           targetLimit.getWidth(), bodyArea.getY() - maximumArea.getY()).contains (arrowTip))

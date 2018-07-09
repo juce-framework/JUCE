@@ -158,7 +158,7 @@ void LookAndFeel_V3::drawButtonBackground (Graphics& g, Button& button, const Co
 
 void LookAndFeel_V3::drawTableHeaderBackground (Graphics& g, TableHeaderComponent& header)
 {
-    Rectangle<int> r (header.getLocalBounds());
+    auto r = header.getLocalBounds();
     auto outlineColour = header.findColour (TableHeaderComponent::outlineColourId);
 
     g.setColour (outlineColour);

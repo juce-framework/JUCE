@@ -2013,8 +2013,8 @@ void Component::setComponentEffect (ImageEffectFilter* newEffect)
 LookAndFeel& Component::getLookAndFeel() const noexcept
 {
     for (auto* c = this; c != nullptr; c = c->parentComponent)
-        if (c->lookAndFeel != nullptr)
-            return *(c->lookAndFeel);
+        if (auto lf = c->lookAndFeel.get())
+            return *lf;
 
     return LookAndFeel::getDefaultLookAndFeel();
 }

@@ -82,7 +82,7 @@ void ShapeButton::setShape (const Path& newShape,
 
     if (resizeNowToFitThisShape)
     {
-        Rectangle<float> newBounds (shape.getBounds());
+        auto newBounds = shape.getBounds();
 
         if (hasShadow)
             newBounds = newBounds.expanded (4.0f);
@@ -105,7 +105,9 @@ void ShapeButton::paintButton (Graphics& g, bool isMouseOverButton, bool isButto
         isButtonDown = false;
     }
 
-    Rectangle<float> r (border.subtractedFrom (getLocalBounds()).toFloat().reduced (outlineWidth * 0.5f));
+    auto r = border.subtractedFrom (getLocalBounds())
+                   .toFloat()
+                   .reduced (outlineWidth * 0.5f);
 
     if (getComponentEffect() != nullptr)
         r = r.reduced (2.0f);
@@ -118,7 +120,7 @@ void ShapeButton::paintButton (Graphics& g, bool isMouseOverButton, bool isButto
                        sizeReductionWhenPressed * r.getHeight());
     }
 
-    const AffineTransform trans (shape.getTransformToScaleToFit (r, maintainShapeProportions));
+    auto trans = shape.getTransformToScaleToFit (r, maintainShapeProportions);
 
     if      (isButtonDown)      g.setColour (getToggleState() && useOnColours ? downColourOn   : downColour);
     else if (isMouseOverButton) g.setColour (getToggleState() && useOnColours ? overColourOn   : overColour);
