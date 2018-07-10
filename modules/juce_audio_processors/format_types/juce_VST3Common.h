@@ -163,8 +163,8 @@ static inline Steinberg::Vst::Speaker getSpeakerType (const AudioChannelSet& set
         case AudioChannelSet::leftCentre:        return Steinberg::Vst::kSpeakerLc;
         case AudioChannelSet::rightCentre:       return Steinberg::Vst::kSpeakerRc;
         case AudioChannelSet::centreSurround:    return Steinberg::Vst::kSpeakerCs;
-        case AudioChannelSet::leftSurroundSide:  return (1ull << 26); /* kSpeakerLcs */
-        case AudioChannelSet::rightSurroundSide: return (1ull << 27); /* kSpeakerRcs */
+        case AudioChannelSet::leftSurroundSide:  return Steinberg::Vst::kSpeakerSl;
+        case AudioChannelSet::rightSurroundSide: return Steinberg::Vst::kSpeakerSr;
         case AudioChannelSet::topMiddle:         return (1ull << 11); /* kSpeakerTm */
         case AudioChannelSet::topFrontLeft:      return Steinberg::Vst::kSpeakerTfl;
         case AudioChannelSet::topFrontCentre:    return Steinberg::Vst::kSpeakerTfc;
@@ -173,8 +173,8 @@ static inline Steinberg::Vst::Speaker getSpeakerType (const AudioChannelSet& set
         case AudioChannelSet::topRearCentre:     return Steinberg::Vst::kSpeakerTrc;
         case AudioChannelSet::topRearRight:      return Steinberg::Vst::kSpeakerTrr;
         case AudioChannelSet::LFE2:              return Steinberg::Vst::kSpeakerLfe2;
-        case AudioChannelSet::leftSurroundRear:  return Steinberg::Vst::kSpeakerSl;
-        case AudioChannelSet::rightSurroundRear: return Steinberg::Vst::kSpeakerSr;
+        case AudioChannelSet::leftSurroundRear:  return (1ull << 26); /* kSpeakerLcs */
+        case AudioChannelSet::rightSurroundRear: return (1ull << 27); /* kSpeakerRcs */;
         case AudioChannelSet::wideLeft:          return Steinberg::Vst::kSpeakerPl;
         case AudioChannelSet::wideRight:         return Steinberg::Vst::kSpeakerPr;
         case AudioChannelSet::ambisonicACN0:     return (1ull << 20); /* kSpeakerACN0 */
@@ -228,8 +228,8 @@ static inline AudioChannelSet::ChannelType getChannelType (Steinberg::Vst::Speak
         case Steinberg::Vst::kSpeakerLc:    return AudioChannelSet::leftCentre;
         case Steinberg::Vst::kSpeakerRc:    return AudioChannelSet::rightCentre;
         case Steinberg::Vst::kSpeakerCs:    return AudioChannelSet::centreSurround;
-        case Steinberg::Vst::kSpeakerSl:    return AudioChannelSet::leftSurroundRear;
-        case Steinberg::Vst::kSpeakerSr:    return AudioChannelSet::rightSurroundRear;
+        case Steinberg::Vst::kSpeakerSl:    return AudioChannelSet::leftSurroundSide;
+        case Steinberg::Vst::kSpeakerSr:    return AudioChannelSet::rightSurroundSide;
         case (1ull << 11):  return AudioChannelSet::topMiddle;  /* kSpeakerTm */
         case Steinberg::Vst::kSpeakerTfl:   return AudioChannelSet::topFrontLeft;
         case Steinberg::Vst::kSpeakerTfc:   return AudioChannelSet::topFrontCentre;
@@ -257,8 +257,8 @@ static inline AudioChannelSet::ChannelType getChannelType (Steinberg::Vst::Speak
         case (1ull << 49):                  return AudioChannelSet::ambisonicACN15; /* kSpeakerACN15 */
         case (1ull << 24):                  return AudioChannelSet::topSideLeft;  /* kSpeakerTsl */
         case (1ull << 25):                  return AudioChannelSet::topSideRight; /* kSpeakerTsr */
-        case (1ull << 26):                  return AudioChannelSet::leftSurroundSide;  /* kSpeakerLcs */
-        case (1ull << 27):                  return AudioChannelSet::rightSurroundSide; /* kSpeakerRcs */
+        case (1ull << 26):                  return AudioChannelSet::leftSurroundRear;  /* kSpeakerLcs */
+        case (1ull << 27):                  return AudioChannelSet::rightSurroundRear; /* kSpeakerRcs */
         case (1ull << 28):                  return static_cast<AudioChannelSet::ChannelType> ((int)AudioChannelSet::discreteChannel0 + 3); /* kSpeakerBfl */
         case (1ull << 29):                  return static_cast<AudioChannelSet::ChannelType> ((int)AudioChannelSet::discreteChannel0 + 4); /* kSpeakerBfc */
         case (1ull << 30):                  return static_cast<AudioChannelSet::ChannelType> ((int)AudioChannelSet::discreteChannel0 + 5); /* kSpeakerBfr */
