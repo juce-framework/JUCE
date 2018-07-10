@@ -60,7 +60,7 @@ namespace
         size_t getDataSize() const noexcept         { return input.getDataSize(); }
 
         /** Returns the current position of the stream. */
-        uint64 getPosition()                        { return uint64 (input.getPosition()); }
+        uint64 getPosition()                        { return (uint64) input.getPosition(); }
 
         /** Attempts to set the current position of the stream. Returns true if this was successful. */
         bool setPosition (int64 pos)                { return input.setPosition (pos); }
@@ -295,7 +295,7 @@ namespace
         OSCMessage readMessageWithCheckedSize (size_t size)
         {
             auto begin = (size_t) getPosition();
-            OSCMessage message (readMessage());
+            auto message = readMessage();
 
             if (getPosition() - begin != size)
                 throw OSCFormatError ("OSC input stream format error: wrong element content size encountered while reading");
@@ -363,6 +363,7 @@ struct OSCReceiver::Pimpl   : private Thread,
             waitForThreadToExit (10000);
             socket.reset();
         }
+
         return true;
     }
 
@@ -458,12 +459,15 @@ private:
         while (! threadShouldExit())
         {
             jassert (socket != nullptr);
-            char buffer[oscBufferSize];
-            socket->waitUntilReady (true, -1);
+            auto ready = socket->waitUntilReady (true, 100);
 
-            if (threadShouldExit())
+            if (ready < 0 || threadShouldExit())
                 return;
 
+            if (ready == 0)
+                continue;
+
+            char buffer[oscBufferSize];
             auto bytesRead = (size_t) socket->read (buffer, (int) sizeof (buffer), false);
 
             if (bytesRead >= 4)
@@ -880,7 +884,7 @@ public:
 
                 OSCInputStream inStream (data, sizeof (data));
 
-                OSCMessage msg = inStream.readMessage();
+                auto msg = inStream.readMessage();
                 expect (msg.getAddressPattern().toString() == "/test");
                 expect (msg.size() == 0);
             }
@@ -954,7 +958,7 @@ public:
 
                 OSCInputStream inStream (data, sizeof (data));
 
-                OSCMessage msg = inStream.readMessage();
+                auto msg = inStream.readMessage();
 
                 expectEquals (msg.getAddressPattern().toString(), String ("/test"));
                 expectEquals (msg.size(), 4);
