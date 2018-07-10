@@ -87,15 +87,22 @@ public:
 
         if (SystemStats::isRunningInAppExtensionSandbox())
         {
-            [controller.get() setModalPresentationStyle:UIModalPresentationFullScreen];
-
-            if (auto* editorPeer = ComponentPeer::getPeer (0))
+            if (fileChooser.parent != nullptr)
             {
-                auto chooserBounds = editorPeer->getComponent().getLocalBounds();
+                [controller.get() setModalPresentationStyle:UIModalPresentationFullScreen];
+
+                auto chooserBounds = fileChooser.parent->getBounds();
                 setBounds (chooserBounds);
 
                 setAlwaysOnTop (true);
-                editorPeer->getComponent().addAndMakeVisible (this);
+                fileChooser.parent->addAndMakeVisible (this);
+            }
+            else
+            {
+                // Opening a native top-level window in an AUv3 is not allowed (sandboxing). You need to specify a
+                // parent component (for example your editor) to parent the native file chooser window. To do this
+                // specify a parent component in the FileChooser's constructor!
+                jassert (fileChooser.parent != nullptr);
             }
         }
         else
