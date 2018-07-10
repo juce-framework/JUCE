@@ -159,6 +159,9 @@ private:
             {
                 auto pathToCheck = editor.getTextValue().toString();
 
+                if (pathToCheck.isEmpty())
+                    return;
+
                 //android SDK/NDK paths
                 if (pathToCheck.contains ("${user.home}"))
                     pathToCheck = pathToCheck.replace ("${user.home}", File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
