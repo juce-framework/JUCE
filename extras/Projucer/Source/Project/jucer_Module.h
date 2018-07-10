@@ -75,11 +75,12 @@ struct ModuleList
     StringArray getIDs() const;
     void sort();
 
-    Result tryToAddModuleFromFolder (const File&);
+    bool tryToAddModuleFromFolder (const File&);
 
-    Result addAllModulesInFolder (const File&);
-    Result addAllModulesInSubfoldersRecursively (const File&, int depth);
-    Result scanProjectExporterModulePaths (Project&);
+    void addAllModulesInFolder (const File&);
+    void addAllModulesInSubfoldersRecursively (const File&, int depth);
+
+    void scanProjectExporterModulePaths (Project&);
     void scanGlobalJuceModulePath();
     void scanGlobalUserModulePath();
 
@@ -138,7 +139,6 @@ class EnabledModuleList
 public:
     EnabledModuleList (Project&, const ValueTree&);
 
-    static File findGlobalModulesFolder();
     static File findDefaultModulesFolder (Project&);
 
     bool isModuleEnabled (const String& moduleID) const;
@@ -153,7 +153,6 @@ public:
     bool isAudioPluginModuleMissing() const;
 
     ModuleDescription getModuleInfo (const String& moduleID);
-    File getModuleFolder (const String& moduleID);
 
     void addModule (const File& moduleManifestFile, bool copyLocally, bool useGlobalPath, bool sendAnalyticsEvent);
     void addModuleInteractive (const String& moduleID);
@@ -181,7 +180,7 @@ public:
 private:
     UndoManager* getUndoManager() const     { return project.getUndoManagerFor (state); }
 
-    File findUserModuleFolder (const String& possiblePaths, const String& moduleID);
+    File findFolderForModule (const String& moduleID);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EnabledModuleList)
 };
