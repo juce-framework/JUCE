@@ -174,7 +174,7 @@ Result ModuleList::addAllModulesInFolder (const File& path)
 {
     if (! tryToAddModuleFromFolder (path))
     {
-        int subfolders = 2;
+        int subfolders = 5;
         return addAllModulesInSubfoldersRecursively (path, subfolders);
     }
 
@@ -324,6 +324,8 @@ void ModuleList::scanGlobalUserModulePath()
 
     for (auto p : paths)
     {
+        p = p.replace ("~", File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
+
         auto f = File::createFileWithoutCheckingPath (p.trim());
         if (f.exists())
             addAllModulesInFolder (f);
@@ -715,6 +717,8 @@ File EnabledModuleList::findUserModuleFolder (const String& possiblePaths, const
 
     for (auto p : paths)
     {
+        p = p.replace ("~", File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
+
         auto f = File::createFileWithoutCheckingPath (p.trim());
         if (f.exists())
         {
