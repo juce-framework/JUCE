@@ -693,7 +693,7 @@ namespace EdgeTableFillers
             {
                 if (areRGBComponentsEqual)  // if all the component values are the same, we can cheat..
                 {
-                    memset (dest, colour.getRed(), (size_t) width * 3);
+                    memset ((void*) dest, colour.getRed(), (size_t) width * 3);
                 }
                 else
                 {
@@ -735,7 +735,7 @@ namespace EdgeTableFillers
         forcedinline void replaceLine (PixelAlpha* dest, const PixelARGB colour, int width) const noexcept
         {
             if ((size_t) destData.pixelStride == sizeof (*dest))
-                memset (dest, colour.getAlpha(), (size_t) width);
+                memset ((void*) dest, colour.getAlpha(), (size_t) width);
             else
                 JUCE_PERFORM_PIXEL_OP_LOOP (setAlpha (colour.getAlpha()))
         }
@@ -965,7 +965,7 @@ namespace EdgeTableFillers
                  && srcData.pixelFormat  == Image::RGB
                  && destData.pixelFormat == Image::RGB)
             {
-                memcpy (dest, src, (size_t) (width * srcStride));
+                memcpy ((void*) dest, src, (size_t) (width * srcStride));
             }
             else
             {

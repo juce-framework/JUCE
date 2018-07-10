@@ -1152,8 +1152,6 @@ void LookAndFeel_V4::drawConcertinaPanelHeader (Graphics& g, const Rectangle<int
     p.addRoundedRectangle (bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(),
                            cornerSize, cornerSize, isTopPanel, isTopPanel, false, false);
 
-    auto bkg = Colours::grey;
-
     g.setGradientFill (ColourGradient::vertical (Colours::white.withAlpha (isMouseOver ? 0.4f : 0.2f), static_cast<float> (area.getY()),
                                                  Colours::darkgrey.withAlpha (0.1f), static_cast<float> (area.getBottom())));
     g.fillPath (p);

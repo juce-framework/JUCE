@@ -1587,19 +1587,17 @@ private:
     //==============================================================================
     struct InOutChannelPair
     {
-        int16 inChannels = 0, outChannels = 0;
+        InOutChannelPair() = default;
 
-        InOutChannelPair() noexcept {}
-        InOutChannelPair (const InOutChannelPair& o) noexcept  : inChannels (o.inChannels), outChannels (o.outChannels) {}
         InOutChannelPair (int16 inCh, int16 outCh) noexcept    : inChannels (inCh), outChannels (outCh) {}
         InOutChannelPair (const int16 (&config)[2]) noexcept   : inChannels (config[0]), outChannels (config[1]) {}
-
-        InOutChannelPair& operator= (const InOutChannelPair& o) noexcept    { inChannels = o.inChannels; outChannels = o.outChannels; return *this; }
 
         bool operator== (const InOutChannelPair& other) const noexcept
         {
             return other.inChannels == inChannels && other.outChannels == outChannels;
         }
+
+        int16 inChannels = 0, outChannels = 0;
     };
 
     template <int numLayouts>
