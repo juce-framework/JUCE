@@ -626,6 +626,7 @@ public:
         }
 
         auto ids = list.getIDs();
+        ids.removeDuplicates (false);
 
         for (auto m : getAvailableModulesInGlobalJucePath())
             ids.removeString (m);
