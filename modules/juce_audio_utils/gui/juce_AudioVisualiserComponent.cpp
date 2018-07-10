@@ -37,8 +37,9 @@ struct AudioVisualiserComponent::ChannelInfo
 
     void clear() noexcept
     {
+        // VS2013 doesn't like {} here...
         for (auto& l : levels)
-            l = {};
+            l = Range<float>();
 
         value = {};
         subSample = 0;
