@@ -66,7 +66,6 @@ void Filter<SampleType>::reset (SampleType resetToValue)
 template <typename SampleType>
 void Filter<SampleType>::prepare (const ProcessSpec&) noexcept     { reset(); }
 
-
 template <typename SampleType>
 template <typename ProcessContext, bool bypassed>
 void Filter<SampleType>::processInternal (const ProcessContext& context) noexcept
@@ -88,11 +87,6 @@ void Filter<SampleType>::processInternal (const ProcessContext& context) noexcep
     auto* dst = outputBlock.getChannelPointer (0);
     auto* coeffs = coefficients->getRawCoefficients();
 
-    // we need to copy this template parameter into a constexpr
-    // otherwise MSVC will moan that the tenary expressions below
-    // are constant conditional expressions
-    constexpr bool isBypassed = bypassed;
-
     switch (order)
     {
         case 1:
@@ -105,12 +99,12 @@ void Filter<SampleType>::processInternal (const ProcessContext& context) noexcep
 
             for (size_t i = 0; i < numSamples; ++i)
             {
-                auto in = src[i];
-                auto out = in * b0 + lv1;
+                auto input = src[i];
+                auto output = input * b0 + lv1;
 
-                dst[i] = isBypassed ? in : out;
+                dst[i] = bypassed ? input : output;
 
-                lv1 = (in * b1) - (out * a1);
+                lv1 = (input * b1) - (output * a1);
             }
 
             util::snapToZero (lv1); state[0] = lv1;
@@ -130,12 +124,12 @@ void Filter<SampleType>::processInternal (const ProcessContext& context) noexcep
 
             for (size_t i = 0; i < numSamples; ++i)
             {
-                auto in = src[i];
-                auto out = (in * b0) + lv1;
-                dst[i] = isBypassed ? in : out;
+                auto input = src[i];
+                auto output = (input * b0) + lv1;
+                dst[i] = bypassed ? input : output;
 
-                lv1 = (in * b1) - (out * a1) + lv2;
-                lv2 = (in * b2) - (out * a2);
+                lv1 = (input * b1) - (output* a1) + lv2;
+                lv2 = (input * b2) - (output* a2);
             }
 
             util::snapToZero (lv1); state[0] = lv1;
@@ -159,13 +153,13 @@ void Filter<SampleType>::processInternal (const ProcessContext& context) noexcep
 
             for (size_t i = 0; i < numSamples; ++i)
             {
-                auto in = src[i];
-                auto out = (in * b0) + lv1;
-                dst[i] = isBypassed ? in : out;
+                auto input = src[i];
+                auto output = (input * b0) + lv1;
+                dst[i] = bypassed ? input : output;
 
-                lv1 = (in * b1) - (out * a1) + lv2;
-                lv2 = (in * b2) - (out * a2) + lv3;
-                lv3 = (in * b3) - (out * a3);
+                lv1 = (input * b1) - (output* a1) + lv2;
+                lv2 = (input * b2) - (output* a2) + lv3;
+                lv3 = (input * b3) - (output* a3);
             }
 
             util::snapToZero (lv1); state[0] = lv1;
@@ -178,14 +172,14 @@ void Filter<SampleType>::processInternal (const ProcessContext& context) noexcep
         {
             for (size_t i = 0; i < numSamples; ++i)
             {
-                auto in = src[i];
-                auto out = (in * coeffs[0]) + state[0];
-                dst[i] = isBypassed ? in : out;
+                auto input = src[i];
+                auto output= (input * coeffs[0]) + state[0];
+                dst[i] = bypassed ? input : output;
 
                 for (size_t j = 0; j < order - 1; ++j)
-                    state[j] = (in * coeffs[j + 1]) - (out * coeffs[order + j + 1]) + state[j + 1];
+                    state[j] = (input * coeffs[j + 1]) - (output* coeffs[order + j + 1]) + state[j + 1];
 
-                state[order - 1] = (in * coeffs[order]) - (out * coeffs[order * 2]);
+                state[order - 1] = (input * coeffs[order]) - (output* coeffs[order * 2]);
             }
 
             snapToZero();
@@ -199,14 +193,14 @@ SampleType JUCE_VECTOR_CALLTYPE Filter<SampleType>::processSample (SampleType sa
     check();
     auto* c = coefficients->getRawCoefficients();
 
-    auto out = (c[0] * sample) + state[0];
+    auto output= (c[0] * sample) + state[0];
 
     for (size_t j = 0; j < order - 1; ++j)
-        state[j] = (c[j + 1] * sample) - (c[order + j + 1] * out) + state[j + 1];
+        state[j] = (c[j + 1] * sample) - (c[order + j + 1] * output) + state[j + 1];
 
-    state[order - 1] = (c[order] * sample) - (c[order * 2] * out);
+    state[order - 1] = (c[order] * sample) - (c[order * 2] * output);
 
-    return out;
+    return output;
 }
 
 template <typename SampleType>

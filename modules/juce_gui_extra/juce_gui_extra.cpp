@@ -100,7 +100,18 @@
   #include <unistd.h>
   #include <fcntl.h>
   #include <sys/wait.h>
+
+  #if JUCE_GCC && __GNUC__ > 7
+   #pragma GCC diagnostic push
+   #pragma GCC diagnostic ignored "-Wparentheses"
+  #endif
+
   #include <gtk/gtk.h>
+
+  #if JUCE_GCC && __GNUC__ > 7
+   #pragma GCC diagnostic pop
+  #endif
+
   #include <gtk/gtkx.h>
   #include <glib-unix.h>
   #include <webkit2/webkit2.h>

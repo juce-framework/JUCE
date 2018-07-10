@@ -516,7 +516,7 @@ private:
             if (useLog && low > 0 && high > 0)
                 return expf (logf (low) * (1.0f - alpha) + logf (high) * alpha);
 
-                return low + (high - low) * alpha;
+            return low + (high - low) * alpha;
         }
 
         static float toIntIfNecessary (const LADSPA_PortRangeHintDescriptor& desc, float value)
