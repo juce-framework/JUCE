@@ -45,10 +45,10 @@ class JUCE_API  AffineTransform  final
 public:
     //==============================================================================
     /** Creates an identity transform. */
-    AffineTransform() noexcept;
+    AffineTransform() = default;
 
     /** Creates a copy of another transform. */
-    AffineTransform (const AffineTransform& other) noexcept;
+    AffineTransform (const AffineTransform&) = default;
 
     /** Creates a transform from a set of raw matrix values.
 
@@ -62,7 +62,7 @@ public:
                      float mat10, float mat11, float mat12) noexcept;
 
     /** Copies from another AffineTransform object */
-    AffineTransform& operator= (const AffineTransform& other) noexcept;
+    AffineTransform& operator= (const AffineTransform&) = default;
 
     /** Compares two transforms. */
     bool operator== (const AffineTransform& other) const noexcept;
@@ -282,8 +282,8 @@ public:
         (mat10 mat11 mat12)
         (  0     0     1  )
     */
-    float mat00, mat01, mat02;
-    float mat10, mat11, mat12;
+    float mat00 { 1.0f }, mat01 { 0.0f }, mat02 { 0.0f };
+    float mat10 { 0.0f }, mat11 { 1.0f }, mat12 { 0.0f };
 };
 
 } // namespace juce

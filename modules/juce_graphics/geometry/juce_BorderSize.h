@@ -46,16 +46,10 @@ public:
     /** Creates a null border.
         All sizes are left as 0.
     */
-    BorderSize() noexcept
-        : top(), left(), bottom(), right()
-    {
-    }
+    BorderSize() = default;
 
     /** Creates a copy of another border. */
-    BorderSize (const BorderSize& other) noexcept
-        : top (other.top), left (other.left), bottom (other.bottom), right (other.right)
-    {
-    }
+    BorderSize (const BorderSize&) = default;
 
     /** Creates a border with the given gaps. */
     BorderSize (ValueType topGap, ValueType leftGap, ValueType bottomGap, ValueType rightGap) noexcept
@@ -149,7 +143,7 @@ public:
 
 private:
     //==============================================================================
-    ValueType top, left, bottom, right;
+    ValueType top{}, left{}, bottom{}, right{};
 };
 
 } // namespace juce

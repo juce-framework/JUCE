@@ -68,11 +68,6 @@ static void blurSingleChannelImage (Image& image, int radius)
 }
 
 //==============================================================================
-DropShadow::DropShadow() noexcept
-    : colour (0x90000000), radius (4)
-{
-}
-
 DropShadow::DropShadow (Colour shadowColour, const int r, Point<int> o) noexcept
     : colour (shadowColour), radius (r), offset (o)
 {
