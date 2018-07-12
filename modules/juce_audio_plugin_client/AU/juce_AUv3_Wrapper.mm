@@ -1227,7 +1227,7 @@ private:
 
             AUParameterAddress address = generateAUParameterAddress (juceParam);
 
-           #if ! JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE
+           #if ! JUCE_FORCE_USE_LEGACY_PARAM_IDS
             // Consider yourself very unlucky if you hit this assertion. The hash codes of your
             // parameter ids are not unique.
             jassert (! paramMap.contains (static_cast<int64> (address)));
