@@ -142,20 +142,20 @@ Result PIPGenerator::createJucerFile()
 
     if (xml->writeToFile (outputFile, {}))
         return Result::ok();
-    else
-        return Result::fail ("Failed to create .jucer file in " + outputDirectory.getFullPathName()+ ".");
+
+    return Result::fail ("Failed to create .jucer file in " + outputDirectory.getFullPathName());
 }
 
-bool PIPGenerator::createMainCpp()
+Result PIPGenerator::createMainCpp()
 {
     auto outputFile = outputDirectory.getChildFile ("Source").getChildFile ("Main.cpp");
 
     if (! outputFile.existsAsFile() && (outputFile.create() != Result::ok()))
-        return false;
+        return Result::fail ("Failed to create Main.cpp - " + outputFile.getFullPathName());
 
     outputFile.replaceWithText (getMainFileTextForType());
 
-    return true;
+    return Result::ok();
 }
 
 //==============================================================================

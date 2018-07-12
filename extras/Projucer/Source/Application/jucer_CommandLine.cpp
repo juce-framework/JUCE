@@ -776,11 +776,15 @@ namespace
 
         PIPGenerator generator (pipFile, outputDir);
 
-        if (! generator.createJucerFile())
-            throw CommandLineError ("Failed to create .jucer file in " + outputDir.getFullPathName()+ ".");
+        auto createJucerFileResult = generator.createJucerFile();
 
-        if (! generator.createMainCpp())
-            throw CommandLineError ("Failed to create Main.cpp.");
+        if (! createJucerFileResult)
+            throw CommandLineError (createJucerFileResult.getErrorMessage());
+
+        auto createMainCppResult = generator.createMainCpp();
+
+        if (! createMainCppResult)
+            throw CommandLineError (createMainCppResult.getErrorMessage());
     }
 
     //==============================================================================
