@@ -2708,10 +2708,8 @@ private:
                 if (component->getBusInfo (Vst::kAudio, dir, (Steinberg::int32) i, info) != kResultOk)
                     continue;
 
-                if (info.channelCount == 0)
-                    continue;
-
-                AudioChannelSet layout = AudioChannelSet::discreteChannels (info.channelCount);
+                AudioChannelSet layout = (info.channelCount == 0 ? AudioChannelSet::disabled()
+                                                                 : AudioChannelSet::discreteChannels (info.channelCount));
 
                 Vst::SpeakerArrangement arr;
                 if (processor != nullptr && processor->getBusArrangement (dir, i, arr) == kResultOk)
