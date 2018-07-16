@@ -76,7 +76,12 @@ private:
    #if JUCE_LOAD_CURL_SYMBOLS_LAZILY
     static DynamicLibrary& getLibcurl()
     {
-        static DynamicLibrary libcurl { "libcurl.so" };
+        static DynamicLibrary libcurl;
+
+        for (auto libName : { "libcurl.so", "libcurl.so.4", "libcurl.so.3" })
+            if (libcurl.open (libName))
+                break;
+
         return libcurl;
     }
 
