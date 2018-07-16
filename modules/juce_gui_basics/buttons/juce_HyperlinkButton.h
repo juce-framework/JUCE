@@ -109,7 +109,7 @@ protected:
     /** @internal */
     void colourChanged() override;
     /** @internal */
-    void paintButton (Graphics&, bool isMouseOver, bool isButtonDown) override;
+    void paintButton (Graphics&, bool, bool) override;
 
 private:
     //==============================================================================

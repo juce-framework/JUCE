@@ -115,7 +115,7 @@ public:
     {
     }
 
-    void paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown) override
+    void paintButton (Graphics& g, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override
     {
         auto background = Colours::grey;
 
@@ -125,10 +125,10 @@ public:
 
         g.fillAll (background);
 
-        g.setColour ((! isEnabled() || isButtonDown) ? colour.withAlpha (0.6f)
+        g.setColour ((! isEnabled() || shouldDrawButtonAsDown) ? colour.withAlpha (0.6f)
                                                      : colour);
 
-        if (isMouseOverButton)
+        if (shouldDrawButtonAsHighlighted)
         {
             g.fillAll();
             g.setColour (background);
@@ -284,8 +284,8 @@ Font LookAndFeel_V4::getTextButtonFont (TextButton&, int buttonHeight)
 void LookAndFeel_V4::drawButtonBackground (Graphics& g,
                                            Button& button,
                                            const Colour& backgroundColour,
-                                           bool isMouseOverButton,
-                                           bool isButtonDown)
+                                           bool shouldDrawButtonAsHighlighted,
+                                           bool shouldDrawButtonAsDown)
 {
     auto cornerSize = 6.0f;
     auto bounds = button.getLocalBounds().toFloat().reduced (0.5f, 0.5f);
@@ -293,8 +293,8 @@ void LookAndFeel_V4::drawButtonBackground (Graphics& g,
     auto baseColour = backgroundColour.withMultipliedSaturation (button.hasKeyboardFocus (true) ? 1.3f : 0.9f)
                                       .withMultipliedAlpha (button.isEnabled() ? 1.0f : 0.5f);
 
-    if (isButtonDown || isMouseOverButton)
-        baseColour = baseColour.contrasting (isButtonDown ? 0.2f : 0.05f);
+    if (shouldDrawButtonAsDown || shouldDrawButtonAsHighlighted)
+        baseColour = baseColour.contrasting (shouldDrawButtonAsDown ? 0.2f : 0.05f);
 
     g.setColour (baseColour);
 
@@ -324,7 +324,7 @@ void LookAndFeel_V4::drawButtonBackground (Graphics& g,
 }
 
 void LookAndFeel_V4::drawToggleButton (Graphics& g, ToggleButton& button,
-                                       bool isMouseOverButton, bool isButtonDown)
+                                       bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown)
 {
     auto fontSize = jmin (15.0f, button.getHeight() * 0.75f);
     auto tickWidth = fontSize * 1.1f;
@@ -333,8 +333,8 @@ void LookAndFeel_V4::drawToggleButton (Graphics& g, ToggleButton& button,
                  tickWidth, tickWidth,
                  button.getToggleState(),
                  button.isEnabled(),
-                 isMouseOverButton,
-                 isButtonDown);
+                 shouldDrawButtonAsHighlighted,
+                 shouldDrawButtonAsDown);
 
     g.setColour (button.findColour (ToggleButton::textColourId));
     g.setFont (fontSize);
@@ -352,10 +352,10 @@ void LookAndFeel_V4::drawTickBox (Graphics& g, Component& component,
                                   float x, float y, float w, float h,
                                   const bool ticked,
                                   const bool isEnabled,
-                                  const bool isMouseOverButton,
-                                  const bool isButtonDown)
+                                  const bool shouldDrawButtonAsHighlighted,
+                                  const bool shouldDrawButtonAsDown)
 {
-    ignoreUnused (isEnabled, isMouseOverButton, isButtonDown);
+    ignoreUnused (isEnabled, shouldDrawButtonAsHighlighted, shouldDrawButtonAsDown);
 
     Rectangle<float> tickBounds (x, y, w, h);
 

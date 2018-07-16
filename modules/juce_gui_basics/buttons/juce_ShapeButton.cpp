@@ -97,12 +97,12 @@ void ShapeButton::setShape (const Path& newShape,
     repaint();
 }
 
-void ShapeButton::paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown)
+void ShapeButton::paintButton (Graphics& g, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown)
 {
     if (! isEnabled())
     {
-        isMouseOverButton = false;
-        isButtonDown = false;
+        shouldDrawButtonAsHighlighted = false;
+        shouldDrawButtonAsDown = false;
     }
 
     auto r = border.subtractedFrom (getLocalBounds())
@@ -112,7 +112,7 @@ void ShapeButton::paintButton (Graphics& g, bool isMouseOverButton, bool isButto
     if (getComponentEffect() != nullptr)
         r = r.reduced (2.0f);
 
-    if (isButtonDown)
+    if (shouldDrawButtonAsDown)
     {
         const float sizeReductionWhenPressed = 0.04f;
 
@@ -122,9 +122,9 @@ void ShapeButton::paintButton (Graphics& g, bool isMouseOverButton, bool isButto
 
     auto trans = shape.getTransformToScaleToFit (r, maintainShapeProportions);
 
-    if      (isButtonDown)      g.setColour (getToggleState() && useOnColours ? downColourOn   : downColour);
-    else if (isMouseOverButton) g.setColour (getToggleState() && useOnColours ? overColourOn   : overColour);
-    else                        g.setColour (getToggleState() && useOnColours ? normalColourOn : normalColour);
+    if      (shouldDrawButtonAsDown)        g.setColour (getToggleState() && useOnColours ? downColourOn   : downColour);
+    else if (shouldDrawButtonAsHighlighted) g.setColour (getToggleState() && useOnColours ? overColourOn   : overColour);
+    else                                    g.setColour (getToggleState() && useOnColours ? normalColourOn : normalColour);
 
     g.fillPath (shape, trans);
 
