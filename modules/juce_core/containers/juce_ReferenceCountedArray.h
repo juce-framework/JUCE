@@ -81,7 +81,7 @@ public:
     {
         const typename ReferenceCountedArray<OtherObjectClass, OtherCriticalSection>::ScopedLockType lock (other.getLock());
 
-        values.addArray (other.values.begin(), other.values.size());
+        values.addArray (other.begin(), other.size());
 
         for (auto* o : *this)
             if (o != nullptr)
