@@ -1332,7 +1332,7 @@ struct PushNotifications::Pimpl
                 }
             }
 
-            return var (dynamicObject);
+            return var (dynamicObject.get());
         }
 
         return {};

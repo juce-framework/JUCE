@@ -229,7 +229,7 @@ namespace PushNotificationsDelegateDetails
             propsVarObject->setProperty (propertyName, properties.getValueAt (i));
         }
 
-        return var (propsVarObject);
+        return var (propsVarObject.get());
     }
 
     //==============================================================================

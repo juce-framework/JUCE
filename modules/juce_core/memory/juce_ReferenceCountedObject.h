@@ -442,6 +442,12 @@ private:
         if (o != nullptr && o->decReferenceCountWithoutDeleting())
             ContainerDeletePolicy<ReferencedType>::destroy (o);
     }
+
+   #if JUCE_STRICT_REFCOUNTEDPOINTER
+    // Unimplemented. This declaration prevents an unintended cast by making
+    // operator bool() ambiguous.
+    operator ReferencedType*() const noexcept;
+   #endif
 };
 
 

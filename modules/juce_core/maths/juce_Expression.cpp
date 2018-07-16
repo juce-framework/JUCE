@@ -863,7 +863,7 @@ struct Expression::Helpers
                         return parseError ("Expected parameters after \"" + identifier + " (\"");
                     }
 
-                    f->parameters.add (Expression (param));
+                    f->parameters.add (Expression (param.get()));
 
                     while (readOperator (","))
                     {
@@ -872,7 +872,7 @@ struct Expression::Helpers
                         if (param == nullptr)
                             return parseError ("Expected expression after \",\"");
 
-                        f->parameters.add (Expression (param));
+                        f->parameters.add (Expression (param.get()));
                     }
 
                     if (readOperator (")"))
@@ -972,7 +972,7 @@ Expression::Expression (const String& stringToParse, String& parseError)
 Expression Expression::parse (String::CharPointerType& stringToParse, String& parseError)
 {
     Helpers::Parser parser (stringToParse);
-    Expression e (parser.readUpToComma());
+    Expression e (parser.readUpToComma().get());
     parseError = parser.error;
     return e;
 }
@@ -1006,7 +1006,7 @@ Expression Expression::operator+ (const Expression& other) const  { return Expre
 Expression Expression::operator- (const Expression& other) const  { return Expression (new Helpers::Subtract (term, other.term)); }
 Expression Expression::operator* (const Expression& other) const  { return Expression (new Helpers::Multiply (term, other.term)); }
 Expression Expression::operator/ (const Expression& other) const  { return Expression (new Helpers::Divide (term, other.term)); }
-Expression Expression::operator-() const                          { return Expression (term->negated()); }
+Expression Expression::operator-() const                          { return Expression (term->negated().get()); }
 Expression Expression::symbol (const String& symbol)              { return Expression (new Helpers::SymbolTerm (symbol)); }
 
 Expression Expression::function (const String& functionName, const Array<Expression>& parameters)
@@ -1034,7 +1034,7 @@ Expression Expression::adjustedToGiveNewResult (const double targetValue, const 
     if (const Term* parent = Helpers::findDestinationFor (newTerm.get(), termToAdjust))
     {
         if (Helpers::TermPtr reverseTerm = parent->createTermToEvaluateInput (scope, termToAdjust, targetValue, newTerm.get()))
-            termToAdjust->value = Expression (reverseTerm).evaluate (scope);
+            termToAdjust->value = Expression (reverseTerm.get()).evaluate (scope);
         else
             return Expression (targetValue);
     }
