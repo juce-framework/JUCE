@@ -592,8 +592,11 @@ struct MenuWindow  : public Component
     }
 
     //==============================================================================
-    Rectangle<int> getParentArea (Point<int> targetPoint)
+    Rectangle<int> getParentArea (Point<int> targetPoint, Component* relativeTo = nullptr)
     {
+        if (relativeTo != nullptr)
+            targetPoint = relativeTo->localPointToGlobal (targetPoint);
+
         auto parentArea = Desktop::getInstance().getDisplays().getDisplayContaining (targetPoint)
                               #if JUCE_MAC
                                .userArea;
@@ -789,7 +792,7 @@ struct MenuWindow  : public Component
                                                     windowPos.getHeight() - (PopupMenuSettings::scrollZone + m->getHeight())),
                                               currentY);
 
-                        auto parentArea = getParentArea (windowPos.getPosition()) / scaleFactor;
+                        auto parentArea = getParentArea (windowPos.getPosition(), parentComponent) / scaleFactor;
                         auto deltaY = wantedY - currentY;
 
                         windowPos.setSize (jmin (windowPos.getWidth(), parentArea.getWidth()),
