@@ -202,7 +202,7 @@ struct VideoComponent::Pimpl  : public Component
 
     Result load (const URL& url)
     {
-        auto r = loadFromString (url.toString (true));
+        auto r = loadFromString (URL::removeEscapeChars (url.toString (true)));
 
         if (r.wasOk())
             currentURL = url;
