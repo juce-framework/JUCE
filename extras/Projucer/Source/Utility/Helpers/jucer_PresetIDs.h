@@ -155,6 +155,8 @@ namespace Ids
     DECLARE_ID (enableIncrementalLinking);
     DECLARE_ID (bundleIdentifier);
     DECLARE_ID (aaxIdentifier);
+	DECLARE_ID (araFactoryID);
+	DECLARE_ID (araDocumentArchiveID);
     DECLARE_ID (aaxFolder);
 	DECLARE_ID (araFolder);
     DECLARE_ID (compile);
@@ -331,6 +333,8 @@ namespace Ids
     DECLARE_ID (pluginAAXCategory);
     DECLARE_ID (pluginAAXDisableBypass);
     DECLARE_ID (pluginAAXDisableMultiMono);
+	DECLARE_ID (pluginARAContentType);
+	DECLARE_ID (pluginARATransformFlags);
     DECLARE_ID (exporters);
     DECLARE_ID (website);
     DECLARE_ID (mainClass);

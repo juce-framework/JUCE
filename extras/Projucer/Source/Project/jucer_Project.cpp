@@ -102,6 +102,8 @@ void Project::updateTitle()
     bundleIdentifierValue.setDefault (getDefaultBundleIdentifierString());
     pluginAUExportPrefixValue.setDefault (CodeHelpers::makeValidIdentifier (projectName, false, true, false) + "AU");
     pluginAAXIdentifierValue.setDefault (getDefaultAAXIdentifierString());
+	pluginARAFactoryIDValue.setDefault(getDefaultARAFactoryIDString());
+	pluginARAArchiveIDValue.setDefault(getDefaultARADocumentArchiveID());
 }
 
 String Project::getDocumentTitle()
@@ -246,6 +248,8 @@ void Project::initialiseAudioPluginValues()
     pluginCodeValue.referTo                  (projectRoot, Ids::pluginCode,                 getUndoManager(), makeValid4CC (getProjectUIDString() + getProjectUIDString()));
     pluginChannelConfigsValue.referTo        (projectRoot, Ids::pluginChannelConfigs,       getUndoManager());
     pluginAAXIdentifierValue.referTo         (projectRoot, Ids::aaxIdentifier,              getUndoManager(), getDefaultAAXIdentifierString());
+	pluginARAFactoryIDValue.referTo          (projectRoot, Ids::araFactoryID,               getUndoManager(), getDefaultARAFactoryIDString());
+	pluginARAArchiveIDValue.referTo          (projectRoot, Ids::araDocumentArchiveID,       getUndoManager(), getDefaultARADocumentArchiveID());
     pluginAUExportPrefixValue.referTo        (projectRoot, Ids::pluginAUExportPrefix,       getUndoManager(),
                                               CodeHelpers::makeValidIdentifier (getProjectNameString(), false, true, false) + "AU");
 
@@ -255,6 +259,8 @@ void Project::initialiseAudioPluginValues()
     pluginVST3CategoryValue.referTo          (projectRoot, Ids::pluginVST3Category,         getUndoManager(), getDefaultVST3Categories(), ",");
     pluginRTASCategoryValue.referTo          (projectRoot, Ids::pluginRTASCategory,         getUndoManager(), getDefaultRTASCategories(), ",");
     pluginAAXCategoryValue.referTo           (projectRoot, Ids::pluginAAXCategory,          getUndoManager(), getDefaultAAXCategories(),  ",");
+	pluginARAContentTypeValue.referTo        (projectRoot, Ids::pluginARAContentType,       getUndoManager(), getDefaultARAContentTypes(), ",");
+	pluginARATransformFlagsValue.referTo     (projectRoot, Ids::pluginARATransformFlags,    getUndoManager(), getDefaultARAContentTypes(), ",");
 }
 
 void Project::updateOldStyleConfigList()
@@ -420,6 +426,24 @@ void Project::updatePluginCategories()
         else
             pluginVSTCategoryValue.resetToDefault();
     }
+
+	{
+		auto araContentTypes = projectRoot.getProperty (Ids::pluginARAContentType, {}).toString();
+
+		if (getAllARAContentTypeVars().contains (araContentTypes))
+			pluginARAContentTypeValue = araContentTypes;
+		else if (getAllARAContentTypeStrings().contains (araContentTypes))
+			pluginARAContentTypeValue = Array<var> (getAllARAContentTypeVars()[getAllARAContentTypeStrings().indexOf (araContentTypes)]);
+	}
+
+	{
+		auto araTransformationFlags = projectRoot.getProperty (Ids::pluginARATransformFlags, {}).toString();
+
+		if (getAllARATransformationFlagVars().contains (araTransformationFlags))
+			pluginARATransformFlagsValue = araTransformationFlags;
+		else if (getAllARATransformationFlagStrings().contains (araTransformationFlags))
+			pluginARATransformFlagsValue = Array<var> (getAllARATransformationFlagVars()[getAllARATransformationFlagStrings().indexOf (araTransformationFlags)]);
+	}
 
     {
         auto auMainType = projectRoot.getProperty (Ids::pluginAUMainType, {}).toString();
@@ -726,11 +750,13 @@ void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& prope
         }
         else if (property == Ids::pluginCharacteristicsValue)
         {
-            pluginAUMainTypeValue.setDefault   (getDefaultAUMainTypes());
-            pluginVSTCategoryValue.setDefault  (getDefaultVSTCategories());
-            pluginVST3CategoryValue.setDefault (getDefaultVST3Categories());
-            pluginRTASCategoryValue.setDefault (getDefaultRTASCategories());
-            pluginAAXCategoryValue.setDefault  (getDefaultAAXCategories());
+            pluginAUMainTypeValue.setDefault        (getDefaultAUMainTypes());
+            pluginVSTCategoryValue.setDefault       (getDefaultVSTCategories());
+            pluginVST3CategoryValue.setDefault      (getDefaultVST3Categories());
+            pluginRTASCategoryValue.setDefault      (getDefaultRTASCategories());
+            pluginAAXCategoryValue.setDefault       (getDefaultAAXCategories());
+			pluginARAContentTypeValue.setDefault    (getDefaultARAContentTypes());
+			pluginARATransformFlagsValue.setDefault (getDefaultARATransformationFlags());
 
             if (shouldWriteLegacyPluginCharacteristicsSettings)
                 writeLegacyPluginCharacteristicsSettings();
@@ -1091,6 +1117,20 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
         props.add (new MultiChoicePropertyComponent (pluginVSTCategoryValue, "Plugin VST (legacy) Category", getAllVSTCategoryStrings(), vstCategoryVars, 1),
                    "VST category.");
     }
+
+	if (shouldEnableARA())
+	{
+		props.add (new MultiChoicePropertyComponent (pluginARAContentTypeValue, "Plugin ARA Content Types", getAllARAContentTypeStrings(), getAllARAContentTypeVars()),
+				   "ARA Content Types.");
+
+		props.add (new MultiChoicePropertyComponent (pluginARATransformFlagsValue, "Plugin ARA Transformation Flags", getAllARATransformationFlagStrings(), getAllARATransformationFlagVars()),
+				   "ARA Transformation Flags.");
+
+		props.add (new TextPropertyComponent (pluginARAFactoryIDValue, "Plugin ARA Factory ID", 256, false),
+				   "ARA Factory ID.");
+		props.add (new TextPropertyComponent (pluginARAArchiveIDValue, "Plugin ARA Document Archive ID", 256, false),
+				   "ARA Document Archive ID.");
+	}
 }
 
 //==============================================================================
@@ -1744,6 +1784,36 @@ String Project::getIAAPluginName()
     return s;
 }
 
+int Project::getARAContentTypes() const noexcept
+{
+	int res = 0;
+
+	auto v = pluginARAContentTypeValue.get();
+
+	if (auto* arr = v.getArray())
+	{
+		for (auto c : *arr)
+			res |= static_cast<int> (c);
+	}
+
+	return res;
+}
+
+int Project::getARATransformationFlags() const noexcept
+{
+	int res = 0;
+
+	auto v = pluginARATransformFlagsValue.get();
+
+	if (auto* arr = v.getArray())
+	{
+		for (auto c : *arr)
+			res |= static_cast<int> (c);
+	}
+
+	return res;
+}
+
 //==============================================================================
 bool Project::isAUPluginHost()
 {
@@ -1875,6 +1945,64 @@ Array<var> Project::getDefaultRTASCategories() const noexcept
         return getAllRTASCategoryVars()[getAllRTASCategoryStrings().indexOf ("ePlugInCategory_SWGenerators")];
 
     return getAllRTASCategoryVars()[getAllRTASCategoryStrings().indexOf ("ePlugInCategory_None")];
+}
+
+StringArray Project::getAllARAContentTypeStrings() noexcept
+{
+	static StringArray araContentTypes{
+		"Notes",
+		"Tempo Entries",
+		"Bar Signatures",
+		"Signatures",
+		"Static Tuning",
+		"Dynamic Tuning Offsets",
+		"Key Signatures",
+		"Sheet Chords",
+	};
+	return araContentTypes;
+}
+Array<var> Project::getAllARAContentTypeVars() noexcept
+{
+	static Array<var> araContentVars{
+		/*kARAContentTypeNotes =*/                1 << 0,
+		/*kARAContentTypeTempoEntries =*/         1 << 1,
+		/*kARAContentTypeBarSignatures =*/        1 << 2,
+		/*kARAContentTypeSignatures =*/           1 << 3,
+		/*kARAContentTypeStaticTuning =*/         1 << 4,
+		/*kARAContentTypeDynamicTuningOffsets =*/ 1 << 5,
+		/*kARAContentTypeKeySignatures =*/        1 << 6,
+		/*kARAContentTypeSheetChords =*/          1 << 7,
+	};
+	return araContentVars;
+}
+Array<var> Project::getDefaultARAContentTypes() const noexcept
+{
+	return{};
+}
+
+StringArray Project::getAllARATransformationFlagStrings() noexcept
+{
+	static StringArray araTransformationFlags{
+		"Time Stretch",
+		"Time Stretch (reflecting tempo)",
+		"Content Based Fades At Tail",
+		"Content Based Fades At Head"
+	};
+	return araTransformationFlags;
+}
+Array<var> Project::getAllARATransformationFlagVars() noexcept
+{
+	static Array<var> araContentVars{
+		/*kARAPlaybackTransformationTimestretch =*/                1 << 0,
+		/*kARAPlaybackTransformationTimestretchReflectingTempo =*/ 1 << 1,
+		/*kARAPlaybackTransformationContentBasedFadesAtTail =*/    1 << 2,
+		/*kARAPlaybackTransformationContentBasedFadesAtHead =*/    1 << 3
+	};
+	return araContentVars;
+}
+Array<var> Project::getDefaultARATransformationFlags() const noexcept
+{
+	return{};
 }
 
 //==============================================================================
