@@ -35,38 +35,79 @@ public:
     {
         beginTest ("Add derived objects");
         {
-            derivedObjects.add (static_cast<TestDerivedObj*> (new TestBaseObj()));
-            expectEquals (derivedObjects.size(), 1);
-            expectEquals (derivedObjects.getObjectPointer (0)->getReferenceCount(), 1);
-            expectEquals (derivedObjects[0]->getReferenceCount(), 2);
+            ReferenceCountedArray<TestDerivedObj> derivedArray;
+            derivedArray.add (static_cast<TestDerivedObj*> (new TestBaseObj()));
+            expectEquals (derivedArray.size(), 1);
+            expectEquals (derivedArray.getObjectPointer (0)->getReferenceCount(), 1);
+            expectEquals (derivedArray[0]->getReferenceCount(), 2);
 
-            for (auto o : derivedObjects)
+            for (auto o : derivedArray)
                 expectEquals (o->getReferenceCount(), 1);
 
-            for (auto o : getObjects())
+            ReferenceCountedArray<TestBaseObj> baseArray;
+            baseArray.addArray (derivedArray);
+
+            for (auto o : baseArray)
                 expectEquals (o->getReferenceCount(), 2);
+
+            derivedArray.clearQuick();
+            baseArray.clearQuick();
+
+            auto* baseObject = new TestBaseObj();
+            TestBaseObj::Ptr baseObjectPtr = baseObject;
+            expectEquals (baseObject->getReferenceCount(), 1);
+
+            auto* derivedObject = new TestDerivedObj();
+            TestDerivedObj::Ptr derivedObjectPtr = derivedObject;
+            expectEquals (derivedObject->getReferenceCount(), 1);
+
+            baseArray.add (baseObject);
+            baseArray.add (derivedObject);
+
+            for (auto o : baseArray)
+                expectEquals (o->getReferenceCount(), 2);
+
+            expectEquals (baseObject->getReferenceCount(),    2);
+            expectEquals (derivedObject->getReferenceCount(), 2);
+
+            derivedArray.add (derivedObject);
+
+            for (auto o : derivedArray)
+                expectEquals (o->getReferenceCount(), 3);
+
+            derivedArray.clearQuick();
+            baseArray.clearQuick();
+
+            expectEquals (baseObject->getReferenceCount(),    1);
+            expectEquals (derivedObject->getReferenceCount(), 1);
+
+            baseArray.add (baseObjectPtr);
+            baseArray.add (derivedObjectPtr);
+
+            for (auto o : baseArray)
+                expectEquals (o->getReferenceCount(), 2);
+
+            derivedArray.add (derivedObjectPtr);
+
+            for (auto o : derivedArray)
+                expectEquals (o->getReferenceCount(), 3);
         }
     }
 
 private:
     struct TestBaseObj : public ReferenceCountedObject
     {
+        using Ptr = ReferenceCountedObjectPtr<TestBaseObj>;
+
         TestBaseObj() = default;
     };
 
     struct TestDerivedObj : public TestBaseObj
     {
+        using Ptr = ReferenceCountedObjectPtr<TestDerivedObj>;
+
         TestDerivedObj() = default;
     };
-
-    ReferenceCountedArray<TestDerivedObj> derivedObjects;
-
-    ReferenceCountedArray<TestBaseObj> getObjects() const
-    {
-        ReferenceCountedArray<TestBaseObj> objects;
-        objects.addArray (derivedObjects);
-        return objects;
-    }
 };
 
 static ReferenceCountedArrayTests referenceCountedArrayTests;
