@@ -65,6 +65,18 @@ AudioProcessor::~AudioProcessor()
     // to keep the managedParameters array populated to maintain backwards
     // compatibility.
     managedParameters.clearQuick (false);
+
+#if JucePlugin_Enable_ARA
+	if (araPlugInExtension)
+	{
+		delete araPlugInExtension->getEditorView ();
+		delete araPlugInExtension->getPlaybackRenderer ();
+		delete araPlugInExtension->getEditorRenderer ();
+
+		delete araPlugInExtension;
+		araPlugInExtension = nullptr;
+	}
+#endif // JucePlugin_Enable_ARA
 }
 
 //==============================================================================
@@ -1586,5 +1598,35 @@ void AudioPlayHead::CurrentPositionInfo::resetToDefault()
     timeSigDenominator = 4;
     bpm = 120;
 }
+
+//==============================================================================
+#if JucePlugin_Enable_ARA
+
+const ARA::PlugIn::PlugInExtension* AudioProcessor::createARAPlugInExtension(ARA::PlugIn::DocumentController* documentController, bool isPlaybackRenderer, bool isEditorRenderer, bool isEditorView)
+{
+	araPlugInExtension = new ARA::PlugIn::PlugInExtension (documentController,
+														   isPlaybackRenderer ? new ARA::PlugIn::PlaybackRenderer (documentController) : nullptr,
+														   isEditorRenderer ? new ARA::PlugIn::EditorRenderer (documentController) : nullptr,
+														   isEditorView ? new ARA::PlugIn::EditorView (documentController) : nullptr);
+	return araPlugInExtension;
+}
+
+const ARA::PlugIn::PlugInExtension* AudioProcessor::_createARAPlugInExtension(ARA::PlugIn::DocumentController* documentController, bool isPlaybackRenderer, bool isEditorRenderer, bool isEditorView)
+{
+	araPlugInExtension = createARAPlugInExtension(documentController, isPlaybackRenderer, isEditorRenderer, isEditorView);
+	return araPlugInExtension;
+}
+
+const ARA::PlugIn::PlugInExtension* AudioProcessor::getARAPlugInExtension() const
+{
+	return araPlugInExtension;
+}
+
+const ARA::PlugIn::DocumentController* AudioProcessor::getARADocumentController() const
+{
+	return araPlugInExtension ? araPlugInExtension->getDocumentController() : nullptr;
+}
+
+#endif // JucePlugin_Enable_ARA
 
 } // namespace juce

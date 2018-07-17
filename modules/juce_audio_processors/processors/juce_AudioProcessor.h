@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+#if JucePlugin_Enable_ARA
+ #include <ARA_Library/PlugIn/AraPlug.h>
+#endif
+
 namespace juce
 {
 
@@ -1696,6 +1700,20 @@ private:
     // This method is no longer used - you can delete it from your AudioProcessor classes.
     JUCE_DEPRECATED_WITH_BODY (virtual bool silenceInProducesSilenceOut() const, { return false; })
 
+
+	//==============================================================================
+#if JucePlugin_Enable_ARA
+public:
+	// This should be in the plugin processor template so that they can see an example implementation
+	virtual const ARA::PlugIn::PlugInExtension* createARAPlugInExtension(ARA::PlugIn::DocumentController* documentController, bool isPlaybackRenderer, bool isEditorRenderer, bool isEditorView);
+	const ARA::PlugIn::PlugInExtension* _createARAPlugInExtension(ARA::PlugIn::DocumentController* documentController, bool isPlaybackRenderer, bool isEditorRenderer, bool isEditorView);
+	const ARA::PlugIn::PlugInExtension* getARAPlugInExtension() const;
+	const ARA::PlugIn::DocumentController* getARADocumentController() const;
+private:
+	const ARA::PlugIn::PlugInExtension* araPlugInExtension{ nullptr };
+#endif
+	//==============================================================================
+    
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessor)
 };
 
