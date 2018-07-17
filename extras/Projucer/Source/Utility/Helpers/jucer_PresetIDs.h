@@ -74,6 +74,7 @@ namespace Ids
     DECLARE_ID (vst3Path);
     DECLARE_ID (rtasPath);
     DECLARE_ID (aaxPath);
+	DECLARE_ID (araPath);
     DECLARE_ID (flags);
     DECLARE_ID (line);
     DECLARE_ID (index);
