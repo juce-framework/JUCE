@@ -62,7 +62,7 @@ public:
     ReferenceCountedArray (const ReferenceCountedArray& other) noexcept
     {
         const ScopedLockType lock (other.getLock());
-        values.addArray (other.values.begin(), other.values.size());
+        values.addArray (other.begin(), other.size());
 
         for (auto* o : *this)
             if (o != nullptr)
@@ -80,7 +80,6 @@ public:
     ReferenceCountedArray (const ReferenceCountedArray<OtherObjectClass, OtherCriticalSection>& other) noexcept
     {
         const typename ReferenceCountedArray<OtherObjectClass, OtherCriticalSection>::ScopedLockType lock (other.getLock());
-
         values.addArray (other.begin(), other.size());
 
         for (auto* o : *this)
@@ -466,11 +465,11 @@ public:
         {
             const ScopedLockType lock2 (getLock());
 
-            values.addArray (arrayToAddFrom.values, startIndex, numElementsToAdd);
-            auto newSize = values.size();
+            auto numElementsAdded = values.addArray (arrayToAddFrom.values, startIndex, numElementsToAdd);
+            auto** e = values.end();
 
-            for (int i = newSize - numElementsToAdd; i < newSize; ++i)
-                values[i]->incReferenceCount();
+            for (int i = 0; i < numElementsAdded; ++i)
+                (*(--e))->incReferenceCount();
         }
     }
 

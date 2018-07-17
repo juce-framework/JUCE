@@ -230,7 +230,7 @@ public:
     }
 
     template <class OtherArrayType>
-    typename std::enable_if<! std::is_pointer<OtherArrayType>::value, void>::type
+    typename std::enable_if<! std::is_pointer<OtherArrayType>::value, int>::type
     addArray (const OtherArrayType& arrayToAddFrom,
               int startIndex, int numElementsToAdd = -1)
     {
@@ -244,6 +244,8 @@ public:
             numElementsToAdd = (int) arrayToAddFrom.size() - startIndex;
 
         addArray (arrayToAddFrom.data() + startIndex, numElementsToAdd);
+
+        return numElementsToAdd;
     }
 
     //==============================================================================
