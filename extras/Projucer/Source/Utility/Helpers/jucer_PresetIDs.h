@@ -156,6 +156,7 @@ namespace Ids
     DECLARE_ID (bundleIdentifier);
     DECLARE_ID (aaxIdentifier);
 	DECLARE_ID (araFactoryID);
+	DECLARE_ID (araVST3FactoryUUID);
 	DECLARE_ID (araDocumentArchiveID);
     DECLARE_ID (aaxFolder);
 	DECLARE_ID (araFolder);

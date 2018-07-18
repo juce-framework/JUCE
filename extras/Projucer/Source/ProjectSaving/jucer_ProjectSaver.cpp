@@ -117,6 +117,7 @@ void ProjectSaver::writePluginCharacteristicsFile()
     flags.set ("JucePlugin_RTASDisableMultiMono",        boolToString (project.isPluginRTASMultiMonoDisabled()));
     flags.set ("JucePlugin_AAXIdentifier",               project.getAAXIdentifierString());
 	flags.set ("JucePlugin_ARAFactoryID",                toStringLiteral(project.getARAFactoryIDString()));
+	flags.set ("JucePlugin_ARAVST3FactoryUUID",          project.getARAVST3FactoryUUIDString());
 	flags.set ("JucePlugin_ARADocumentArchiveID",        toStringLiteral(project.getARADocumentArchiveIDString()));
     flags.set ("JucePlugin_AAXManufacturerCode",         "JucePlugin_ManufacturerCode");
     flags.set ("JucePlugin_AAXProductId",                "JucePlugin_PluginCode");

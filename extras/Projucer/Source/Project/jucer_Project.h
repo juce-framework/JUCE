@@ -108,6 +108,7 @@ public:
     String getDefaultAAXIdentifierString()               { return getDefaultBundleIdentifierString(); }
 	String getDefaultARAFactoryIDString()                { return "com.yourcompany." + CodeHelpers::makeValidIdentifier (getProjectNameString(), false, true, false) + ".factory"; }
 	String getDefaultARADocumentArchiveID()              { return "com.yourcompany." + CodeHelpers::makeValidIdentifier (getProjectNameString(), false, true, false) + ".aradocumentarchive." + getVersionString(); }
+	String getDefaultARAFactoryUUIDString ()             { return Uuid().toArrayString(); }
 
     String getCompanyNameString() const                  { return companyNameValue.get(); }
     String getCompanyCopyrightString() const             { return companyCopyrightValue.get(); }
@@ -137,6 +138,7 @@ public:
     String getPluginChannelConfigsString() const      { return pluginChannelConfigsValue.get(); }
     String getAAXIdentifierString() const             { return pluginAAXIdentifierValue.get(); }
 	String getARAFactoryIDString() const              { return pluginARAFactoryIDValue.get(); }
+	String getARAVST3FactoryUUIDString() const        { return pluginARAVST3FactoryUUIDValue.toString(); }
 	String getARADocumentArchiveIDString() const      { return pluginARAArchiveIDValue.get(); }
     String getPluginAUExportPrefixString() const      { return pluginAUExportPrefixValue.get(); }
     String getPluginAUMainTypeString() const          { return pluginAUMainTypeValue.get(); }
@@ -431,6 +433,8 @@ private:
                      pluginCodeValue, pluginChannelConfigsValue, pluginCharacteristicsValue, pluginAUExportPrefixValue, pluginAAXIdentifierValue,
                      pluginAUMainTypeValue, pluginAUSandboxSafeValue, pluginRTASCategoryValue, pluginVSTCategoryValue, pluginVST3CategoryValue, pluginAAXCategoryValue,
                      pluginARAContentTypeValue, pluginARAFactoryIDValue, pluginARAArchiveIDValue, pluginARATransformFlagsValue;
+
+    Value pluginARAVST3FactoryUUIDValue;
 
     //==============================================================================
     std::unique_ptr<CompileEngineSettings> compileEngineSettings;

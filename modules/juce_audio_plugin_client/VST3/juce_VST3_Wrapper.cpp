@@ -1275,14 +1275,23 @@ public:
 protected:
 };
 
+static const ::Steinberg::TUID JuceARAFactory_IID = JucePlugin_ARAVST3FactoryUUID;
+
 IMPLEMENT_REFCOUNT(JuceARAFactory);
 
 ::Steinberg::tresult PLUGIN_API JuceARAFactory::queryInterface (const ::Steinberg::TUID targetIID, void** obj)
 {
 	TEST_FOR_AND_RETURN_IF_VALID (targetIID, FObject)
-		TEST_FOR_AND_RETURN_IF_VALID (targetIID, ARA::IMainFactory)
+	TEST_FOR_AND_RETURN_IF_VALID (targetIID, ARA::IMainFactory)
 
-		*obj = nullptr;
+	if (doUIDsMatch (targetIID, JuceARAFactory_IID))
+	{
+		addRef();
+		*obj = this;
+		return kResultOk;
+	}
+
+	*obj = nullptr;
 	return kNoInterface;
 }
 
@@ -3037,7 +3046,7 @@ JUCE_EXPORTED_FUNCTION IPluginFactory* PLUGIN_API GetPluginFactory()
         globalFactory->registerClass (controllerClass, createControllerInstance);
 
 #if JucePlugin_Enable_ARA
-		static const PClassInfo2 araFactoryClass (JuceARAFactory::iid,
+		static const PClassInfo2 araFactoryClass (JuceARAFactory_IID,
 												  PClassInfo::kManyInstances,
 												  kARAMainFactoryClass,
 												  JucePlugin_Name "ARAFactory",
