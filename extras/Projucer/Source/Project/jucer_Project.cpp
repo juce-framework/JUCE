@@ -249,7 +249,7 @@ void Project::initialiseAudioPluginValues()
                                               CodeHelpers::makeValidIdentifier (getProjectNameString(), false, true, false) + "AU");
 
     pluginAUMainTypeValue.referTo            (projectRoot, Ids::pluginAUMainType,           getUndoManager(), getDefaultAUMainTypes(),    ",");
-    pluginAUSandboxSafe.referTo              (projectRoot, Ids::pluginAUIsSandboxSafe,      getUndoManager(), false);
+    pluginAUSandboxSafeValue.referTo         (projectRoot, Ids::pluginAUIsSandboxSafe,      getUndoManager(), false);
     pluginVSTCategoryValue.referTo           (projectRoot, Ids::pluginVSTCategory,          getUndoManager(), getDefaultVSTCategories(),  ",");
     pluginVST3CategoryValue.referTo          (projectRoot, Ids::pluginVST3Category,         getUndoManager(), getDefaultVST3Categories(), ",");
     pluginRTASCategoryValue.referTo          (projectRoot, Ids::pluginRTASCategory,         getUndoManager(), getDefaultRTASCategories(), ",");
@@ -1039,7 +1039,6 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
                                                    Ids::pluginIsMidiEffectPlugin.toString(), Ids::pluginEditorRequiresKeys.toString(), Ids::pluginRTASDisableBypass.toString(),
                                                    Ids::pluginAAXDisableBypass.toString(), Ids::pluginRTASDisableMultiMono.toString(), Ids::pluginAAXDisableMultiMono.toString() }),
               "Some characteristics of your plugin such as whether it is a synth, produces MIDI messages, accepts MIDI messages etc.");
-
     props.add (new TextPropertyComponent (pluginNameValue, "Plugin Name", 128, false),
                "The name of your plugin (keep it short!)");
     props.add (new TextPropertyComponent (pluginDescriptionValue, "Plugin Description", 256, false),
@@ -1059,13 +1058,11 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
                "The value to use for the JucePlugin_AAXIdentifier setting");
     props.add (new TextPropertyComponent (pluginAUExportPrefixValue, "Plugin AU Export Prefix", 128, false),
                "A prefix for the names of exported entry-point functions that the component exposes - typically this will be a version of your plugin's name that can be used as part of a C++ token.");
-
     props.add (new MultiChoicePropertyComponent (pluginAUMainTypeValue, "Plugin AU Main Type", getAllAUMainTypeStrings(), getAllAUMainTypeVars(), 1),
                "AU main type.");
-
-    props.add (new ChoicePropertyComponent (pluginAUSandboxSafe, "Plugin AU is sandbox safe"),
-                  "Check this box if your plug-in is sandbox safe. A sand-box safe plug-in is loaded in a restricted path and can only access it's own bundle resources and "
-                  "the Music folder. Your plug-in must be able to deal with this. Newer versions of GarageBand require this to be enabled.");
+    props.add (new ChoicePropertyComponent (pluginAUSandboxSafeValue, "Plugin AU is sandbox safe"),
+               "Check this box if your plug-in is sandbox safe. A sand-box safe plug-in is loaded in a restricted path and can only access it's own bundle resources and "
+               "the Music folder. Your plug-in must be able to deal with this. Newer versions of GarageBand require this to be enabled.");
 
     {
         Array<var> vst3CategoryVars;
@@ -1633,7 +1630,7 @@ String Project::getAUMainTypeString() const noexcept
 
 bool Project::isAUSandBoxSafe() const noexcept
 {
-    return pluginAUSandboxSafe.get();
+    return pluginAUSandboxSafeValue.get();
 }
 
 String Project::getVSTCategoryString() const noexcept
