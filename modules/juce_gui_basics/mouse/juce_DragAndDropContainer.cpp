@@ -249,10 +249,12 @@ private:
 
         for (auto i = desktop.getNumComponents(); --i >= 0;)
         {
-            auto* c = desktop.getComponent(i);
+            auto* desktopComponent = desktop.getComponent (i);
+            auto localPoint = desktopComponent->getLocalPoint (nullptr, screenPos);
 
-            if (auto* hit = c->getComponentAt (c->getLocalPoint (nullptr, screenPos)))
-                return hit;
+            if (auto* c = desktopComponent->getComponentAt (localPoint))
+                if (c->hitTest (localPoint.getX(), localPoint.getY()))
+                    return c;
         }
 
         return nullptr;
