@@ -167,7 +167,7 @@ static NSRect getDragRect (NSView* view, NSEvent* event)
 static NSView* getNSViewForDragEvent (Component* sourceComp)
 {
     if (sourceComp == nullptr)
-        if (auto* draggingSource = Desktop::getInstance().getDraggingMouseSource(0))
+        if (auto* draggingSource = Desktop::getInstance().getDraggingMouseSource (0))
             sourceComp = draggingSource->getComponentUnderMouse();
 
     if (sourceComp != nullptr)
@@ -234,8 +234,15 @@ private:
         return *getIvar<NSDragOperation*> (self, "operation");
     }
 
-    static void draggingSessionEnded (id self, SEL, NSDraggingSession*, NSPoint, NSDragOperation)
+    static void draggingSessionEnded (id self, SEL, NSDraggingSession*, NSPoint p, NSDragOperation)
     {
+        // Our view doesn't receive a mouse up when the drag ends so we need to generate one here and send it...
+        if (auto* view = getNSViewForDragEvent (nullptr))
+        {
+            auto* cgEvent = CGEventCreateMouseEvent (nullptr, kCGEventLeftMouseUp, p, kCGMouseButtonLeft);
+            [view mouseUp: [NSEvent eventWithCGEvent:cgEvent]];
+        }
+
         if (auto* cb = getIvar<std::function<void()>*> (self, "callback"))
             cb->operator()();
     }
