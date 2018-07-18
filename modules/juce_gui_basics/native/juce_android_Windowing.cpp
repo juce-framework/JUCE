@@ -1077,13 +1077,16 @@ void MouseCursor::showInAllWindows() const  {}
 
 //==============================================================================
 bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& /*files*/, const bool /*canMove*/,
-                                                           Component* /*srcComp*/)
+                                                           Component* /*srcComp*/, std::function<void()> /*callback*/)
 {
+    jassertfalse;    // no such thing on Android!
     return false;
 }
 
-bool DragAndDropContainer::performExternalDragDropOfText (const String& /*text*/, Component* /*srcComp*/)
+bool DragAndDropContainer::performExternalDragDropOfText (const String& /*text*/, Component* /*srcComp*/,
+                                                          std::function<void()> /*callback*/)
 {
+    jassertfalse;    // no such thing on Android!
     return false;
 }
 

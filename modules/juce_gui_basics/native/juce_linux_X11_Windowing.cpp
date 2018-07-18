@@ -2471,15 +2471,15 @@ public:
         }
     }
 
-    bool externalDragTextInit (const String& text)
+    bool externalDragTextInit (const String& text, std::function<void()> cb)
     {
         if (dragState->dragging)
             return false;
 
-        return externalDragInit (true, text);
+        return externalDragInit (true, text, cb);
     }
 
-    bool externalDragFileInit (const StringArray& files, bool /*canMoveFiles*/)
+    bool externalDragFileInit (const StringArray& files, bool /*canMoveFiles*/, std::function<void()> cb)
     {
         if (dragState->dragging)
             return false;
@@ -2494,7 +2494,7 @@ public:
                 uriList.add ("file://" + f);
         }
 
-        return externalDragInit (false, uriList.joinIntoString ("\r\n"));
+        return externalDragInit (false, uriList.joinIntoString ("\r\n"), cb);
     }
 
     //==============================================================================
@@ -3183,6 +3183,7 @@ private:
         Rectangle<int> silentRect;
         String textOrFiles;
         Array<Atom> allowedTypes;
+        std::function<void()> completionCallback;
     };
 
     //==============================================================================
@@ -3624,7 +3625,7 @@ private:
         return externalFindDragTargetWindow (child);
     }
 
-    bool externalDragInit (bool isText, const String& textOrFiles)
+    bool externalDragInit (bool isText, const String& textOrFiles, std::function<void()> cb)
     {
         ScopedXLock xlock (display);
 
@@ -3632,6 +3633,7 @@ private:
         dragState->isText = isText;
         dragState->textOrFiles = textOrFiles;
         dragState->targetWindow = windowH;
+        dragState->completionCallback = cb;
 
         const int pointerGrabMask = Button1MotionMask | ButtonReleaseMask;
 
@@ -3663,6 +3665,9 @@ private:
             ScopedXLock xlock (display);
             XUngrabPointer (display, CurrentTime);
         }
+
+        if (dragState->completionCallback != nullptr)
+            dragState->completionCallback();
 
         resetExternalDragState();
     }
@@ -4262,26 +4267,27 @@ static LinuxComponentPeer* getPeerForDragEvent (Component* sourceComp)
 }
 
 bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& files, bool canMoveFiles,
-                                                           Component* sourceComp)
+                                                           Component* sourceComp, std::function<void()> callback)
 {
     if (files.isEmpty())
         return false;
 
     if (auto* lp = getPeerForDragEvent (sourceComp))
-        return lp->externalDragFileInit (files, canMoveFiles);
+        return lp->externalDragFileInit (files, canMoveFiles, callback);
 
     // This method must be called in response to a component's mouseDown or mouseDrag event!
     jassertfalse;
     return false;
 }
 
-bool DragAndDropContainer::performExternalDragDropOfText (const String& text, Component* sourceComp)
+bool DragAndDropContainer::performExternalDragDropOfText (const String& text, Component* sourceComp,
+                                                          std::function<void()> callback)
 {
     if (text.isEmpty())
         return false;
 
     if (auto* lp = getPeerForDragEvent (sourceComp))
-        return lp->externalDragTextInit (text);
+        return lp->externalDragTextInit (text, callback);
 
     // This method must be called in response to a component's mouseDown or mouseDrag event!
     jassertfalse;
