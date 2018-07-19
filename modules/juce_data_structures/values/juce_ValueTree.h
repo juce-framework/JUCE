@@ -400,10 +400,11 @@ public:
     */
     struct Iterator
     {
-        Iterator (const ValueTree&, bool isEnd) noexcept;
-        Iterator& operator++() noexcept;
+        Iterator (const ValueTree&, bool isEnd);
+        Iterator& operator++();
 
-        bool operator!= (const Iterator&) const noexcept;
+        bool operator== (const Iterator&) const;
+        bool operator!= (const Iterator&) const;
         ValueTree operator*() const;
 
         using difference_type    = std::ptrdiff_t;
