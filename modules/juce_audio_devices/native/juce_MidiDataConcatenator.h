@@ -174,7 +174,7 @@ private:
     static bool isRealtimeMessage (uint8 byte)  { return byte >= 0xf8 && byte <= 0xfe; }
     static bool isInitialByte (uint8 byte)      { return byte >= 0x80; }
 
-    uint8 currentMessage[3] = {};
+    uint8 currentMessage[3];
     int currentMessageLen = 0;
 
     MemoryBlock pendingSysexData;
