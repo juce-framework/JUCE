@@ -65,7 +65,7 @@ public:
             ++d;
             --numBytes;
 
-            if (nextByte >= 0xf8 && nextByte <= 0xfe) // realtime message
+            if (isRealtimeMessage (nextByte))
             {
                 callback.handleIncomingMidiMessage (input, MidiMessage (nextByte, time));
                 // These can be embedded in the middle of a normal message, so we won't
@@ -73,20 +73,20 @@ public:
                 continue;
             }
 
-            if (nextByte < 0x80)
+            if (isInitialByte (nextByte))
             {
-                if (currentMessageLen == 3)
-                {
-                    currentMessageLen = 0;  // message is too long - abandon it and start again with the next byte
-                    continue;
-                }
-
+                currentMessage[0] = nextByte;
+                currentMessageLen = 1;
+            }
+            else if (currentMessageLen > 0 && currentMessageLen < 3)
+            {
                 currentMessage[currentMessageLen++] = nextByte;
             }
             else
             {
-                currentMessage[0] = nextByte;
-                currentMessageLen = 1;
+                // message is too long or invalid MIDI - abandon it and start again with the next byte
+                currentMessageLen = 0;
+                continue;
             }
 
             auto expectedLength = MidiMessage::getMessageLengthFromFirstByte (currentMessage[0]);
@@ -116,7 +116,7 @@ private:
 
         do
         {
-            if (pendingSysexSize > 0 && *d >= 0x80)
+            if (pendingSysexSize > 0 && isInitialByte (*d))
             {
                 if (*d == 0xf7)
                 {
@@ -171,7 +171,10 @@ private:
         }
     }
 
-    uint8 currentMessage[3];
+    static bool isRealtimeMessage (uint8 byte)  { return byte >= 0xf8 && byte <= 0xfe; }
+    static bool isInitialByte (uint8 byte)      { return byte >= 0x80; }
+
+    uint8 currentMessage[3] = {};
     int currentMessageLen = 0;
 
     MemoryBlock pendingSysexData;
