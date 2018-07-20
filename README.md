@@ -1,3 +1,39 @@
+# JUCE and the ARA API
+
+This repository is a fork of the [JUCE 5 master branch]('https://github.com/WeAreROLI/JUCE') with with additions that enable it to generate ARA plugins in the VST3 format (AU coming soon.)
+
+### Getting started:
+
+We've made modifications to the Projucer to enable it to work with the ARA 2.0 SDK. As of now the Projucer can be used to generate VST3 plugins that can be used as ARA plugins in a supporting host. 
+
+To create an ARA plugin, clone the [ARA branch]('https://github.com/mynameisjohn/JUCE_ARA/tree/ARA') of this repository and build the [Projucer]('https://github.com/mynameisjohn/JUCE_ARA/tree/ARA/extras/Projucer')(projects for Visual Studio and Xcode exist within the repository.)
+
+Once you have the ARA version of the Projucer built you can use it to specify your global ARA path like so:
+
+<img src="https://i.imgur.com/fRjU8kB.png"/>
+
+This ARA SDK path will be used for new ARA plugin projects, but can also be configured per project. 
+
+Once the SDK has been located we can create a new Audio Plug-In project like so
+
+<img src="https://i.imgur.com/cqsEA18.png"/>
+
+We specifically want to create an ARA plugin. This is not one of the main types in the template window but can be selected like so:
+
+<img src="https://i.imgur.com/mY6Z1XL.png"/>
+
+The generated plugin will have, in addition to the standard PluginProcessor and PluginEditor classes, a PluginARADocumentController file containing a class that overrides the ARA::PlugIn::DocumentController type. 
+
+<img src="https://i.imgur.com/JqNIe2b.png"/>
+
+This version of the Projucer only supports VST3, so make sure that format is checked in the settings
+<img src="https://i.imgur.com/7wWWPuK.png"/>
+
+We can also edit other ARA plugin factory properties such as available content types and transformation flags as well as the plugin factory identifier. 
+
+<img src="https://i.imgur.com/mJoXIxG.png"/>
+
+This should be enough to generate an empty ARA plugin. For a more complete example see the [.jucer file located here]('https://github.com/mynameisjohn/JUCE_ARA/tree/ARA/examples/ARA'). 
 # The JUCE 5 Library
 
 **BY DOWNLOADING, INSTALLING OR USING ANY PART OF THE JUCE LIBRARY, YOU AGREE
