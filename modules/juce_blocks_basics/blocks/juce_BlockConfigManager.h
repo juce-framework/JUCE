@@ -36,6 +36,8 @@ namespace juce
 
 using namespace BlocksProtocol;
 
+using ConfigType = Block::ConfigMetaData::ConfigType;
+
 /** Manages the configuration of blocks
 
     @tags{Blocks}
@@ -44,15 +46,6 @@ struct BlockConfigManager
 {
     void setDeviceIndex (TopologyIndex newDeviceIndex)                       { deviceIndex = newDeviceIndex; }
     void setDeviceComms (PhysicalTopologySource::DeviceConnection* newConn)  { deviceConnection = newConn; }
-
-    enum ConfigType
-    {
-        integer,
-        floating,
-        boolean,
-        colour,
-        options
-    };
 
     static constexpr uint32 numConfigItems = 61;
 
@@ -73,7 +66,7 @@ struct BlockConfigManager
 
         Block::ConfigMetaData toConfigMetaData() const
         {
-            return Block::ConfigMetaData ((uint32) item, value, { min, max }, isActive, name, (uint32) type, (const char**) optionNames, group);
+            return Block::ConfigMetaData ((uint32) item, value, { min, max }, isActive, name, type, (const char**) optionNames, group);
         }
     };
 

@@ -291,6 +291,15 @@ public:
     {
         static constexpr int32 numOptionNames = 8;
 
+        enum class ConfigType
+        {
+            integer,
+            floating,
+            boolean,
+            colour,
+            options
+        };
+
         ConfigMetaData() {}
 
         // Constructor to work around VS2015 bugs...
@@ -299,7 +308,7 @@ public:
                         juce::Range<int32> rangeToUse,
                         bool active,
                         const char* itemName,
-                        uint32 itemType,
+                        ConfigType itemType,
                         const char* options[ConfigMetaData::numOptionNames],
                         const char* groupName)
           : item (itemIndex),
@@ -362,7 +371,7 @@ public:
         juce::Range<int32> range;
         bool isActive = false;
         juce::String name;
-        uint32 type = 0;
+        ConfigType type = ConfigType::integer;
         juce::String optionNames[numOptionNames] = {};
         juce::String group;
     };
