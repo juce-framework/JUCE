@@ -92,24 +92,6 @@ public:
                                     name: NSViewFrameDidChangeNotification
                                   object: view];
 
-        if (! isSharedWindow)
-        {
-            [notificationCenter  addObserver: view
-                                    selector: @selector (frameChanged:)
-                                        name: NSWindowDidMoveNotification
-                                      object: window];
-
-            [notificationCenter  addObserver: view
-                                    selector: @selector (frameChanged:)
-                                        name: NSWindowDidMiniaturizeNotification
-                                      object: window];
-
-            [notificationCenter  addObserver: view
-                                    selector: @selector (frameChanged:)
-                                        name: NSWindowDidDeminiaturizeNotification
-                                      object: window];
-        }
-
         [view setPostsFrameChangedNotifications: YES];
 
         if (isSharedWindow)
@@ -164,6 +146,21 @@ public:
             if ([window respondsToSelector: @selector (setTabbingMode:)])
                 [window setTabbingMode:NSWindowTabbingModeDisallowed];
            #endif
+
+            [notificationCenter  addObserver: view
+                                    selector: @selector (frameChanged:)
+                                        name: NSWindowDidMoveNotification
+                                      object: window];
+
+            [notificationCenter  addObserver: view
+                                    selector: @selector (frameChanged:)
+                                        name: NSWindowDidMiniaturizeNotification
+                                      object: window];
+
+            [notificationCenter  addObserver: view
+                                    selector: @selector (frameChanged:)
+                                        name: NSWindowDidDeminiaturizeNotification
+                                      object: window];
         }
 
         auto alpha = component.getAlpha();
