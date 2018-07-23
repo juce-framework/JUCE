@@ -27,7 +27,7 @@
 namespace juce
 {
 
-/** An interface to allow an AudioProcessor to receive VST specific calls from
+/** An interface to allow an AudioProcessor to send and receive VST specific calls from
     the host.
 
     @tags{Audio}
@@ -55,6 +55,21 @@ struct VSTCallbackHandler
                                                              pointer_sized_int value,
                                                              void* ptr,
                                                              float opt) = 0;
+
+    /** The host callback function type. */
+    using VstHostCallbackType = pointer_sized_int (int32 opcode,
+                                                   int32 index,
+                                                   pointer_sized_int value,
+                                                   void* ptr,
+                                                   float opt);
+
+    /** This is called once by the VST plug-in wrapper after its constructor.
+        You can use the supplied function to query the VST host.
+    */
+    virtual void handleVstHostCallbackAvailable (std::function<VstHostCallbackType>&& callback)
+    {
+        ignoreUnused (callback);
+    }
 };
 
 } // namespace juce

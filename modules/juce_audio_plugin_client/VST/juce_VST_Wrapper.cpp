@@ -647,10 +647,10 @@ public:
 
         if (hostCallback != nullptr)
         {
-            int32 flags = Vst2::kVstPpqPosValid | Vst2::kVstTempoValid
-                              | Vst2::kVstBarsValid | Vst2::kVstCyclePosValid
-                              | Vst2::kVstTimeSigValid | Vst2::kVstSmpteValid
-                              | Vst2::kVstClockValid;
+            int32 flags = Vst2::kVstPpqPosValid  | Vst2::kVstTempoValid
+                        | Vst2::kVstBarsValid    | Vst2::kVstCyclePosValid
+                        | Vst2::kVstTimeSigValid | Vst2::kVstSmpteValid
+                        | Vst2::kVstClockValid;
 
             auto result = hostCallback (&vstEffect, Vst2::audioMasterGetTime, 0, flags, 0, 0);
             ti = reinterpret_cast<Vst2::VstTimeInfo*> (result);
@@ -1493,38 +1493,6 @@ public:
 
     //==============================================================================
 private:
-    Vst2::audioMasterCallback hostCallback;
-    AudioProcessor* processor = {};
-    double sampleRate = 44100.0;
-    int32 blockSize = 1024;
-    Vst2::AEffect vstEffect;
-    juce::MemoryBlock chunkMemory;
-    juce::uint32 chunkMemoryTime = 0;
-    std::unique_ptr<EditorCompWrapper> editorComp;
-    Vst2::ERect editorBounds;
-    MidiBuffer midiEvents;
-    VSTMidiEventList outgoingEvents;
-    float editorScaleFactor = 1.0f;
-
-    LegacyAudioParametersWrapper juceParameters;
-
-    bool isProcessing = false, isBypassed = false, hasShutdown = false;
-    bool firstProcessCallback = true, shouldDeleteEditor = false;
-
-   #if JUCE_64BIT
-    bool useNSView = true;
-   #else
-    bool useNSView = false;
-   #endif
-
-    VstTempBuffers<float> floatTempBuffers;
-    VstTempBuffers<double> doubleTempBuffers;
-    int maxNumInChannels = 0, maxNumOutChannels = 0;
-
-    HeapBlock<Vst2::VstSpeakerArrangement> cachedInArrangement, cachedOutArrangement;
-
-    ThreadLocalValue<bool> inParameterChangedCallback;
-
     static JuceVSTWrapper* getWrapper (Vst2::AEffect* v) noexcept  { return static_cast<JuceVSTWrapper*> (v->object); }
 
     bool isProcessLevelOffline()
@@ -2009,8 +1977,8 @@ private:
         auto matches = [=](const char* s) { return strcmp (text, s) == 0; };
 
         if (matches ("receiveVstEvents")
-             || matches ("receiveVstMidiEvent")
-             || matches ("receiveVstMidiEvents"))
+         || matches ("receiveVstMidiEvent")
+         || matches ("receiveVstMidiEvents"))
         {
            #if JucePlugin_WantsMidiInput || JucePlugin_IsMidiEffect
             return 1;
@@ -2020,8 +1988,8 @@ private:
         }
 
         if (matches ("sendVstEvents")
-             || matches ("sendVstMidiEvent")
-             || matches ("sendVstMidiEvents"))
+         || matches ("sendVstMidiEvent")
+         || matches ("sendVstMidiEvents"))
         {
            #if JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect
             return 1;
@@ -2031,9 +1999,9 @@ private:
         }
 
         if (matches ("receiveVstTimeInfo")
-             || matches ("conformsToWindowRules")
-             || matches ("supportsViewDpiScaling")
-             || matches ("bypass"))
+         || matches ("conformsToWindowRules")
+         || matches ("supportsViewDpiScaling")
+         || matches ("bypass"))
         {
             return 1;
         }
@@ -2206,6 +2174,39 @@ private:
     }
 
     //==============================================================================
+    Vst2::audioMasterCallback hostCallback;
+    AudioProcessor* processor = {};
+    double sampleRate = 44100.0;
+    int32 blockSize = 1024;
+    Vst2::AEffect vstEffect;
+    juce::MemoryBlock chunkMemory;
+    juce::uint32 chunkMemoryTime = 0;
+    std::unique_ptr<EditorCompWrapper> editorComp;
+    Vst2::ERect editorBounds;
+    MidiBuffer midiEvents;
+    VSTMidiEventList outgoingEvents;
+    float editorScaleFactor = 1.0f;
+
+    LegacyAudioParametersWrapper juceParameters;
+
+    bool isProcessing = false, isBypassed = false, hasShutdown = false;
+    bool firstProcessCallback = true, shouldDeleteEditor = false;
+
+   #if JUCE_64BIT
+    bool useNSView = true;
+   #else
+    bool useNSView = false;
+   #endif
+
+    VstTempBuffers<float> floatTempBuffers;
+    VstTempBuffers<double> doubleTempBuffers;
+    int maxNumInChannels = 0, maxNumOutChannels = 0;
+
+    HeapBlock<Vst2::VstSpeakerArrangement> cachedInArrangement, cachedOutArrangement;
+
+    ThreadLocalValue<bool> inParameterChangedCallback;
+
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceVSTWrapper)
 };
 
@@ -2229,7 +2230,17 @@ namespace
 
                     auto* processor = createPluginFilterOfType (AudioProcessor::wrapperType_VST);
                     auto* wrapper = new JuceVSTWrapper (audioMaster, processor);
-                    return wrapper->getAEffect();
+                    auto* aEffect = wrapper->getAEffect();
+
+                    if (auto* callbackHandler = dynamic_cast<VSTCallbackHandler*> (processor))
+                    {
+                        callbackHandler->handleVstHostCallbackAvailable ([audioMaster, aEffect](int32 opcode, int32 index, pointer_sized_int value, void* ptr, float opt)
+                        {
+                            return audioMaster (aEffect, opcode, index, value, ptr, opt);
+                        });
+                    }
+
+                    return aEffect;
                 }
             }
             catch (...)
