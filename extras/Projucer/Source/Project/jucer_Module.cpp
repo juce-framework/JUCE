@@ -174,7 +174,7 @@ void ModuleList::addAllModulesInFolder (const File& path)
 {
     if (! tryToAddModuleFromFolder (path))
     {
-        int subfolders = 5;
+        int subfolders = 3;
         addAllModulesInSubfoldersRecursively (path, subfolders);
     }
 }
