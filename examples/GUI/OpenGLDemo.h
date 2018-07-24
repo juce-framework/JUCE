@@ -282,6 +282,11 @@ struct OpenGLDemoClasses
 
                 g.setColour (Colours::black);
                 g.setFont (40);
+
+                const MessageManagerLock mml (ThreadPoolJob::getCurrentThreadPoolJob());
+                if (! mml.lockWasGained())
+                    return false;
+
                 g.drawFittedText (String (Time::getCurrentTime().getMilliseconds()), image.getBounds(), Justification::centred, 1);
             }
 
