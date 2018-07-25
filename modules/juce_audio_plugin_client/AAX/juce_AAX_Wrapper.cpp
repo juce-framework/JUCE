@@ -1665,6 +1665,11 @@ namespace AAXClasses
 #if JucePlugin_EnhancedAudioSuite
             if (audioProcessor.wrapperType == AudioProcessor::wrapperType_AudioSuite)
             {
+                if (!audioProcessor.isAuthorized())
+                {
+                    return AAX_ERROR_PLUGIN_NOT_AUTHORIZED;
+                }
+
                 // AudioSuite don't need additional calls.
                 // Unlike AAX it's much more simplified, no stems needs to be prepared,
                 // no algorithm or multiple instances.

@@ -299,6 +299,10 @@ public:
      */
     virtual void analysisFinished ();
 
+#if JucePlugin_EnhancedAudioSuite
+    /** Allows aborting plug-in load due to license failure instead of crashing. */
+    virtual bool isAuthorized() = 0;
+
     /** Called by AudioSuite to add offsets to processed clip.
 
         For example, if your process adds tail explicitly or start before actual position.
@@ -317,6 +321,7 @@ public:
     };
 
     EnhancedAudioSuiteInterface* enhancedAudioSuiteInterface {nullptr};
+#endif
 
     //==============================================================================
     /**
