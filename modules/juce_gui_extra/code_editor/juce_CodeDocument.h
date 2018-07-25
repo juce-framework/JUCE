@@ -340,12 +340,12 @@ public:
         If the listener is already registered, this method has no effect.
         @see removeListener
     */
-    void addListener (Listener* listener) noexcept;
+    void addListener (Listener* listener);
 
     /** Deregisters a listener.
         @see addListener
     */
-    void removeListener (Listener* listener) noexcept;
+    void removeListener (Listener* listener);
 
     //==============================================================================
     /** Iterates the text in a CodeDocument.
