@@ -1460,12 +1460,7 @@ struct PhysicalTopologySource::Internal
             if (modelData.numLEDRowLEDs > 0)
                 ledRow.reset (new LEDRowImplementation (*this));
 
-            listenerToMidiConnection = dynamic_cast<MIDIDeviceConnection*> (detector.getDeviceConnectionFor (*this));
-
-            if (listenerToMidiConnection != nullptr)
-                listenerToMidiConnection->addListener (this);
-
-            config.setDeviceComms (listenerToMidiConnection);
+            updateMidiConnectionListener();
         }
 
         ~BlockImplementation()
@@ -1480,6 +1475,13 @@ struct PhysicalTopologySource::Internal
         void invalidate()
         {
             isStillConnected = false;
+
+            if (auto surface = dynamic_cast<TouchSurfaceImplementation*> (touchSurface.get()))
+                surface->disableTouchSurface();
+
+            for (auto* b : controlButtons)
+                if (auto controlButton = dynamic_cast<ControlButtonImplementation*> (b))
+                    controlButton->disableControlButton();
         }
 
         void revalidate (BlocksProtocol::VersionNumber newVersion, BlocksProtocol::BlockName newName, bool master)
@@ -1488,11 +1490,30 @@ struct PhysicalTopologySource::Internal
             name = getNameString (newName);
             isMaster = master;
             isStillConnected = true;
+
+            if (auto surface = dynamic_cast<TouchSurfaceImplementation*> (touchSurface.get()))
+                surface->activateTouchSurface();
+
+            for (auto* b : controlButtons)
+                if (auto controlButton = dynamic_cast<ControlButtonImplementation*> (b))
+                    controlButton->activateControlButton();
+
+            updateMidiConnectionListener();
         }
 
         void setToMaster (bool shouldBeMaster)
         {
             isMaster = shouldBeMaster;
+        }
+
+        void updateMidiConnectionListener()
+        {
+            listenerToMidiConnection = dynamic_cast<MIDIDeviceConnection*> (detector.getDeviceConnectionFor (*this));
+
+            if (listenerToMidiConnection != nullptr)
+                listenerToMidiConnection->addListener (this);
+
+            config.setDeviceComms (listenerToMidiConnection);
         }
 
         Type getType() const override                                   { return modelData.apiType; }
@@ -2225,14 +2246,26 @@ struct PhysicalTopologySource::Internal
     {
         TouchSurfaceImplementation (BlockImplementation& b)  : TouchSurface (b), blockImpl (b)
         {
+            activateTouchSurface();
+        }
+
+        ~TouchSurfaceImplementation()
+        {
+            disableTouchSurface();
+        }
+
+        void activateTouchSurface()
+        {
             if (auto det = Detector::getFrom (block))
                 det->activeTouchSurfaces.add (this);
 
             startTimer (500);
         }
 
-        ~TouchSurfaceImplementation()
+        void disableTouchSurface()
         {
+            stopTimer();
+
             if (auto det = Detector::getFrom (block))
                 det->activeTouchSurfaces.removeFirstMatchingValue (this);
         }
@@ -2338,11 +2371,21 @@ struct PhysicalTopologySource::Internal
         ControlButtonImplementation (BlockImplementation& b, int index, BlocksProtocol::BlockDataSheet::ButtonInfo info)
             : ControlButton (b), blockImpl (b), buttonInfo (info), buttonIndex (index)
         {
+            activateControlButton();
+        }
+
+        ~ControlButtonImplementation()
+        {
+            disableControlButton();
+        }
+
+        void activateControlButton()
+        {
             if (auto det = Detector::getFrom (block))
                 det->activeControlButtons.add (this);
         }
 
-        ~ControlButtonImplementation()
+        void disableControlButton()
         {
             if (auto det = Detector::getFrom (block))
                 det->activeControlButtons.removeFirstMatchingValue (this);
