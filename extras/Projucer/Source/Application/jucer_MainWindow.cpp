@@ -628,7 +628,7 @@ void MainWindowList::closeWindow (MainWindow* w)
     jassert (windows.contains (w));
 
    #if ! JUCE_MAC
-    if (windows.size() == 1)
+    if (windows.size() == 1 && ! isInReopenLastProjects)
     {
         JUCEApplicationBase::getInstance()->systemRequestedQuit();
     }
@@ -829,6 +829,8 @@ void MainWindowList::saveCurrentlyOpenProjectList()
 
 void MainWindowList::reopenLastProjects()
 {
+    const ScopedValueSetter<bool> setter (isInReopenLastProjects, true);
+
     for (auto& p : getAppSettings().getLastProjects())
         openFile (p, true);
 }
