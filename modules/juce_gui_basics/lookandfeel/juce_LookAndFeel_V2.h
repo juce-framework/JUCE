@@ -198,6 +198,7 @@ public:
     Label* createComboBoxTextBox (ComboBox&) override;
     void positionComboBoxText (ComboBox&, Label&) override;
     PopupMenu::Options getOptionsForComboBoxPopupMenu (ComboBox&, Label&) override;
+    void drawComboBoxTextWhenNothingSelected (Graphics&, ComboBox&, Label&) override;
 
     //==============================================================================
     void drawLabel (Graphics&, Label&) override;

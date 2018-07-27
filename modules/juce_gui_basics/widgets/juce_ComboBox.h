@@ -378,6 +378,8 @@ public:
         virtual void positionComboBoxText (ComboBox&, Label& labelToPosition) = 0;
 
         virtual PopupMenu::Options getOptionsForComboBoxPopupMenu (ComboBox&, Label&) = 0;
+
+        virtual void drawComboBoxTextWhenNothingSelected (Graphics&, ComboBox&, Label&) = 0;
     };
 
     //==============================================================================

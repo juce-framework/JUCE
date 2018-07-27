@@ -1210,6 +1210,21 @@ PopupMenu::Options LookAndFeel_V2::getOptionsForComboBoxPopupMenu (ComboBox& box
                                .withStandardItemHeight (label.getHeight());
 }
 
+void LookAndFeel_V2::drawComboBoxTextWhenNothingSelected (Graphics& g, ComboBox& box, Label& label)
+{
+    g.setColour (findColour (ComboBox::textColourId).withMultipliedAlpha (0.5f));
+
+    auto font = label.getLookAndFeel().getLabelFont (label);
+
+    g.setFont (font);
+
+    auto textArea = label.getBorderSize().subtractedFrom (label.getLocalBounds());
+
+    g.drawFittedText (box.getTextWhenNothingSelected(), textArea, label.getJustificationType(),
+                      jmax (1, (int) (textArea.getHeight() / font.getHeight())),
+                      label.getMinimumHorizontalScale());
+}
+
 //==============================================================================
 Font LookAndFeel_V2::getLabelFont (Label& label)
 {
