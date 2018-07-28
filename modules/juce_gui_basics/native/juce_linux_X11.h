@@ -42,11 +42,17 @@ public:
     XDisplay displayRef() noexcept;
     XDisplay displayUnref() noexcept;
 
+    bool hasDetectableAutoRepeat() const noexcept
+    {
+        return detectableAutoRepeat;
+    }
+
     JUCE_DECLARE_SINGLETON (XWindowSystem, false)
 
 private:
     XDisplay display = {};
     Atomic<int> displayCount;
+    bool detectableAutoRepeat = false;
 
     XWindowSystem() noexcept;
     ~XWindowSystem() noexcept;

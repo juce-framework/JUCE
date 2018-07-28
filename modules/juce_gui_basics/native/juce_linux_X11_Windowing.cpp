@@ -1426,7 +1426,9 @@ public:
         // it's dangerous to create a window on a thread other than the message thread..
         jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
 
-        display = XWindowSystem::getInstance()->displayRef();
+        XWindowSystem* xWindowSystem = XWindowSystem::getInstance();
+        display = xWindowSystem->displayRef();
+        hasDetectableAutoRepeat = xWindowSystem->hasDetectableAutoRepeat();
 
         atoms.reset (new Atoms (display));
         dragState.reset (new DragState (display));
@@ -2026,7 +2028,10 @@ public:
 
         {
             ScopedXLock xlock (display);
-            updateKeyStates ((int) keyEvent.keycode, true);
+            bool keyUpdate = updateKeyStates ((int) keyEvent.keycode, true);
+
+            if (! keyUpdate && hasDetectableAutoRepeat)
+                return;
 
             String oldLocale (::setlocale (LC_ALL, 0));
             ::setlocale (LC_ALL, "");
@@ -2151,7 +2156,8 @@ public:
 
     void handleKeyReleaseEvent (const XKeyEvent& keyEvent)
     {
-        if (! isKeyReleasePartOfAutoRepeat (keyEvent))
+        if (hasDetectableAutoRepeat
+            || ! isKeyReleasePartOfAutoRepeat (keyEvent))
         {
             updateKeyStates ((int) keyEvent.keycode, false);
             KeySym sym;
@@ -2735,6 +2741,7 @@ private:
     Array<Component*> glRepaintListeners;
     enum { KeyPressEventType = 2 };
     static ::Display* display;
+    static bool hasDetectableAutoRepeat;
 
     struct MotifWmHints
     {
@@ -2745,15 +2752,22 @@ private:
         unsigned long status;
     };
 
-    static void updateKeyStates (int keycode, bool press) noexcept
+    static bool updateKeyStates (int keycode, bool press) noexcept
     {
         const int keybyte = keycode >> 3;
         const int keybit = (1 << (keycode & 7));
 
-        if (press)
-            Keys::keyStates [keybyte] |= keybit;
-        else
-            Keys::keyStates [keybyte] &= ~keybit;
+        bool keyUpdate = press != ((Keys::keyStates [keybyte] & keybit) != 0);
+
+        if (keyUpdate)
+        {
+            if (press)
+                Keys::keyStates [keybyte] |= keybit;
+            else
+                Keys::keyStates [keybyte] &= ~keybit;
+        }
+
+        return keyUpdate;
     }
 
     static void updateKeyModifiers (int status) noexcept
@@ -3719,6 +3733,7 @@ private:
 bool LinuxComponentPeer::isActiveApplication = false;
 Point<int> LinuxComponentPeer::lastMousePos;
 ::Display* LinuxComponentPeer::display = nullptr;
+bool LinuxComponentPeer::hasDetectableAutoRepeat = false;
 
 //==============================================================================
 namespace WindowingHelpers

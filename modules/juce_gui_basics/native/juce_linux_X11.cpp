@@ -171,6 +171,10 @@ void XWindowSystem::initialiseXDisplay() noexcept
         Process::terminate();
     }
 
+    Bool detectableAutoRepeat = True;
+    XkbSetDetectableAutoRepeat (display, detectableAutoRepeat, &detectableAutoRepeat);
+    this->detectableAutoRepeat = detectableAutoRepeat == True;
+
     // Create a context to store user data associated with Windows we create
     windowHandleXContext = XUniqueContext();
 
