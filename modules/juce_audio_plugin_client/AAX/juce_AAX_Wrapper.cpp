@@ -635,23 +635,14 @@ namespace AAXClasses
 
             AAX_Result RenderAudio (const float * const inAudioIns [], int32_t inAudioInCount, float * const inAudioOuts [], int32_t inAudioOutCount, int32_t * ioWindowSize) override
             {
-                // AAX currently provides only mono side-chain.
-                auto sideChainBufferIdx = getAAXProcessor().hasSidechain && GetSideChainInputNum() > 0 ? GetSideChainInputNum() : -1;
-                auto numOfMainInputs = 0;
-                for (decltype(inAudioInCount) i = 0; i < inAudioInCount; ++i)
-                {
-                    if (inAudioIns[i] != nullptr)
-                        numOfMainInputs++;
-                }
-                numOfMainInputs += GetSideChainInputNum() > 0 ? -1 : 0;
+                jassert (inAudioInCount >= inAudioOutCount);
+                auto emptyMidiBuffer = MidiBuffer();
 
                 // handles internal processor latency (if needed)
                 // for more details see Avid's SDK - DemoDelay_HostProcessor_Comp.h
                 auto latencyOffset = getAAXProcessor().getPluginInstance().getLatencySamples();
                 if (mIsFirstPass)
                 {
-                    UpdateBusLayout(numOfMainInputs, inAudioOutCount, GetSideChainInputNum() > 0);
-                    initRandomAccessReader(inAudioIns, numOfMainInputs, inAudioInCount);
                     float* tempOutBuffer[AAX_eMaxAudioSuiteTracks];
                     for (decltype(inAudioOutCount) ch = 0; ch < inAudioOutCount; ++ch)
                         tempOutBuffer[ch] = new float[*ioWindowSize];
@@ -659,10 +650,11 @@ namespace AAXClasses
                     int32_t remainingDelaySamplesToPrime = latencyOffset;
                     while (remainingDelaySamplesToPrime > 0)
                     {
-                        int32_t numSamplesToPrime = std::min(*ioWindowSize, remainingDelaySamplesToPrime);
+                        int32_t numSamplesToPrime = std::min (*ioWindowSize, remainingDelaySamplesToPrime);
                         const int64_t firstSampleLocation = GetLocation() + (latencyOffset - remainingDelaySamplesToPrime);
                         GetAudio (inAudioIns, inAudioInCount, firstSampleLocation, ioWindowSize);
-                        getAAXProcessor().process (inAudioIns, tempOutBuffer, sideChainBufferIdx, numSamplesToPrime, false, nullptr, nullptr, nullptr);
+                        auto firstBuffer = getRenderAudioBuffer (inAudioIns, inAudioInCount, tempOutBuffer, inAudioOutCount, ioWindowSize, true);
+                        getAAXProcessor().getPluginInstance().processBlock (firstBuffer, emptyMidiBuffer);
                         remainingDelaySamplesToPrime -= numSamplesToPrime;
                     }
 
@@ -672,12 +664,12 @@ namespace AAXClasses
                     }
                     mIsFirstPass = false;
                 }
-                jassert(getAAXProcessor().getPluginInstance().getMainBusNumInputChannels() == numOfMainInputs);
 
                 // Look ahead in the input audio by latencyOffset. After this call to GetAudio(),
                 // inAudioIns will be populated with the randomly-accessed lookahead samples.
                 GetAudio (inAudioIns, inAudioInCount, GetLocation()+latencyOffset, ioWindowSize);
-                getAAXProcessor().process (inAudioIns, inAudioOuts, sideChainBufferIdx, *ioWindowSize, false, nullptr, nullptr, nullptr);
+                auto buffer = getRenderAudioBuffer (inAudioIns, inAudioInCount, inAudioOuts, inAudioOutCount, ioWindowSize);
+                getAAXProcessor().getPluginInstance().processBlock (buffer, emptyMidiBuffer);
 
                 return AAX_SUCCESS;
             }
@@ -701,9 +693,10 @@ namespace AAXClasses
 
              AAX_Result PreRender (int32_t /*iAudioInCount*/, int32_t /*iAudioOutCount*/, int32_t iWindowSize) override
             {
+                jassert (iWindowSize <= 65536);
                 mIsFirstPass = true;
                 getAAXProcessor().getPluginInstance().setRateAndBufferSizeDetails (getAAXProcessor().sampleRate, iWindowSize);
-                getAAXProcessor().getPluginInstance().prepareToPlay(getAAXProcessor().sampleRate, iWindowSize);
+                getAAXProcessor().getPluginInstance().prepareToPlay (getAAXProcessor().sampleRate, iWindowSize);
                 return AAX_SUCCESS;
             }
 
@@ -780,6 +773,54 @@ namespace AAXClasses
                 getAAXProcessor().getPluginInstance().enhancedAudioSuiteInterface = this;
             }
 
+            AudioSampleBuffer getRenderAudioBuffer (const float * const inAudioIns [], int32_t inAudioInCount, float * const inAudioOuts [], int32_t inAudioOutCount, int32_t * ioWindowSize, const bool isFirstTime = false)
+            {
+                Array<const float*> inputChannelList;
+                Array<float*> outputChannelList;
+
+                for (decltype(inAudioInCount) i = 0; i < inAudioInCount; ++i)
+                {
+                    // when sidechain connected, iAudioInCount could be maximum support channels reported + sidechain (mono).
+                    if (inAudioIns[i] != nullptr)
+                    {
+                        inputChannelList.add(inAudioIns[i]);
+                    }
+                }
+
+                for (decltype(inAudioOutCount) i = 0; i < inAudioOutCount; ++i)
+                {
+                    if (inAudioOuts[i] != nullptr)
+                    {
+                        outputChannelList.add(inAudioOuts[i]);
+                    }
+                }
+                if (GetSideChainInputNum() > 0)
+                {
+                    // Pro Tools Output buffer excludes side-chain...
+                    outputChannelList.add(getAAXProcessor().sideChainBuffer.getData());
+                }
+
+                // GetSideChainInputNum would produce 0 when Side-Chain isn't connected (tested with PT 12.8).
+                const auto numOfMainInputs = inputChannelList.size() + (GetSideChainInputNum() > 0 ? -1 : 0);
+
+                if (isFirstTime)
+                {
+                    UpdateBusLayout(numOfMainInputs, inAudioOutCount, GetSideChainInputNum() > 0);
+                    initRandomAccessReader(inAudioIns, numOfMainInputs, inAudioInCount);
+                }
+                jassert(getAAXProcessor().getPluginInstance().getMainBusNumInputChannels() == numOfMainInputs);
+
+                // clear output buffers
+                for (decltype(inAudioOutCount) i = 0; i < inAudioOutCount; ++i)
+                    FloatVectorOperations::clear (inAudioOuts[i], *ioWindowSize);
+                // copy input buffers
+                for (int i = 0; i < inputChannelList.size(); ++i)
+                    FloatVectorOperations::copy (outputChannelList.getRawDataPointer()[i], inputChannelList.getRawDataPointer()[i], *ioWindowSize);
+
+                AudioSampleBuffer buffer (outputChannelList.getRawDataPointer(), outputChannelList.size(), *ioWindowSize);
+                return buffer;
+            }
+
             void UpdateBusLayout(int numOfIns, int numOfOuts, bool hasSideChain)
             {
                 auto currentLayout = getAAXProcessor().getPluginInstance().getBusesLayout();
@@ -791,7 +832,7 @@ namespace AAXClasses
                 // for analysis output should change...
                 if (numOfOuts > 0)
                 {
-                    currentLayout.outputBuses.set(0, AudioChannelSet::namedChannelSet(numOfOuts));
+                    currentLayout.outputBuses.set(0, AudioChannelSet::canonicalChannelSet(numOfOuts));
                 }
                 getAAXProcessor().getPluginInstance().setBusesLayout(currentLayout);
             }
@@ -1673,6 +1714,7 @@ namespace AAXClasses
                 // AudioSuite don't need additional calls.
                 // Unlike AAX it's much more simplified, no stems needs to be prepared,
                 // no algorithm or multiple instances.
+                maxBufferSize = 65536;
                 isPrepared = true;
                 sideChainBuffer.calloc (static_cast<size_t> (maxBufferSize));
                 hasSidechain = audioProcessor.getBusCount(true) > 1;
