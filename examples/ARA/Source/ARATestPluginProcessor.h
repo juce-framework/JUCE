@@ -15,12 +15,12 @@
 //==============================================================================
 /**
 */
-class Juce_fakeAraanalysisAudioProcessor  : public AudioProcessor
+class ARATestPluginProcessor  : public AudioProcessor
 {
 public:
     //==============================================================================
-    Juce_fakeAraanalysisAudioProcessor();
-    ~Juce_fakeAraanalysisAudioProcessor();
+    ARATestPluginProcessor();
+    ~ARATestPluginProcessor();
 
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
@@ -60,5 +60,5 @@ public:
 
 private:
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Juce_fakeAraanalysisAudioProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARATestPluginProcessor)
 };

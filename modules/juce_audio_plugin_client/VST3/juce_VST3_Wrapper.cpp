@@ -833,8 +833,9 @@ private:
 
         tresult PLUGIN_API queryInterface (const TUID targetIID, void** obj) override
         {
-            TEST_FOR_AND_RETURN_IF_VALID (targetIID, Steinberg::IPlugViewContentScaleSupport)
-            return Vst::EditorView::queryInterface (targetIID, obj);
+			return kResultFalse;
+            //TEST_FOR_AND_RETURN_IF_VALID (targetIID, Steinberg::IPlugViewContentScaleSupport)
+            //return Vst::EditorView::queryInterface (targetIID, obj);
         }
 
         REFCOUNT_METHODS (Vst::EditorView)
@@ -1269,7 +1270,7 @@ public:
 	//---from ARA::IMainFactory-------
 	const ARA::ARAFactory* PLUGIN_API getFactory () SMTG_OVERRIDE
 	{
-		return ARA::PlugIn::DocumentController::getAraFactory();
+		return ARA::PlugIn::DocumentController::getARAFactory();
 	}
 
 protected:
@@ -2573,7 +2574,7 @@ private:
 	const ARA::ARAFactory* PLUGIN_API getFactory() SMTG_OVERRIDE
 	{
 		// TODO there should be some per-project customization here
-		return ARA::PlugIn::DocumentController::getAraFactory();
+		return ARA::PlugIn::DocumentController::getARAFactory();
 	}
 
 	const ARA::ARAPlugInExtensionInstance* PLUGIN_API bindToDocumentController (ARA::ARADocumentControllerRef controllerRef) SMTG_OVERRIDE
@@ -2583,7 +2584,7 @@ private:
 		ARA::ARAPlugInInstanceRoleFlags allRoles = ARA::kARAPlaybackRendererRole | ARA::kARAEditorRendererRole | ARA::kARAEditorViewRole;
 		return bindToDocumentControllerWithRoles(controllerRef, allRoles, allRoles);
 #else
-		ARA_VALIDATE_STATE(false && "call is deprecated in ARA 2, host must not call this");
+		ARA_VALIDATE_API_STATE(false && "call is deprecated in ARA 2, host must not call this");
 		return nullptr;
 #endif
 	}
@@ -2592,12 +2593,12 @@ private:
 																						 ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles) SMTG_OVERRIDE
 	{
 		ARA::PlugIn::DocumentController * documentController = (ARA::PlugIn::DocumentController *)documentControllerRef;
-		ARA_VALIDATE_ARGUMENT(documentControllerRef, ARA::PlugIn::DocumentController::isValidDocumentController (documentController));
+		ARA_VALIDATE_API_ARGUMENT(documentControllerRef, ARA::PlugIn::DocumentController::isValidDocumentController (documentController));
 
 		// verify this is only called once
 		if (pluginInstance->getARAPlugInExtension())
 		{
-			ARA_VALIDATE_STATE(false && "binding already established");
+			ARA_VALIDATE_API_STATE(false && "binding already established");
 			return nullptr;
 		}
 
@@ -2605,7 +2606,7 @@ private:
 		bool isEditorRenderer = ((knownRoles & ARA::kARAEditorRendererRole) == 0) || ((assignedRoles & ARA::kARAEditorRendererRole) != 0);
 		bool isEditorView = ((knownRoles & ARA::kARAEditorViewRole) == 0) || ((assignedRoles & ARA::kARAEditorViewRole) != 0);
 
-		return pluginInstance->_createARAPlugInExtension(documentController, isPlaybackRenderer, isEditorRenderer, isEditorView)->getAraPlugInExtensionInstance();
+		return pluginInstance->_createARAPlugInExtension(documentController, isPlaybackRenderer, isEditorRenderer, isEditorView)->getInstance();
 	}
 
 #endif // JucePlugin_Enable_ARA

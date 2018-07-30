@@ -8,13 +8,13 @@
   ==============================================================================
 */
 
-#include "PluginProcessor.h"
-#include "PluginEditor.h"
+#include "ARATestPluginProcessor.h"
+#include "ARATestPluginEditor.h"
 #include "ARA/AraTestDocumentController.h"
 #include "ARA/AraTestPlaybackRenderer.h"
 
 //==============================================================================
-Juce_fakeAraanalysisAudioProcessor::Juce_fakeAraanalysisAudioProcessor()
+ARATestPluginProcessor::ARATestPluginProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
      : AudioProcessor (BusesProperties()
                      #if ! JucePlugin_IsMidiEffect
@@ -28,17 +28,17 @@ Juce_fakeAraanalysisAudioProcessor::Juce_fakeAraanalysisAudioProcessor()
 {
 }
 
-Juce_fakeAraanalysisAudioProcessor::~Juce_fakeAraanalysisAudioProcessor()
+ARATestPluginProcessor::~ARATestPluginProcessor()
 {
 }
 
 //==============================================================================
-const String Juce_fakeAraanalysisAudioProcessor::getName() const
+const String ARATestPluginProcessor::getName() const
 {
     return JucePlugin_Name;
 }
 
-bool Juce_fakeAraanalysisAudioProcessor::acceptsMidi() const
+bool ARATestPluginProcessor::acceptsMidi() const
 {
    #if JucePlugin_WantsMidiInput
     return true;
@@ -47,7 +47,7 @@ bool Juce_fakeAraanalysisAudioProcessor::acceptsMidi() const
    #endif
 }
 
-bool Juce_fakeAraanalysisAudioProcessor::producesMidi() const
+bool ARATestPluginProcessor::producesMidi() const
 {
    #if JucePlugin_ProducesMidiOutput
     return true;
@@ -56,7 +56,7 @@ bool Juce_fakeAraanalysisAudioProcessor::producesMidi() const
    #endif
 }
 
-bool Juce_fakeAraanalysisAudioProcessor::isMidiEffect() const
+bool ARATestPluginProcessor::isMidiEffect() const
 {
    #if JucePlugin_IsMidiEffect
     return true;
@@ -65,50 +65,50 @@ bool Juce_fakeAraanalysisAudioProcessor::isMidiEffect() const
    #endif
 }
 
-double Juce_fakeAraanalysisAudioProcessor::getTailLengthSeconds() const
+double ARATestPluginProcessor::getTailLengthSeconds() const
 {
     return 0.0;
 }
 
-int Juce_fakeAraanalysisAudioProcessor::getNumPrograms()
+int ARATestPluginProcessor::getNumPrograms()
 {
     return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
                 // so this should be at least 1, even if you're not really implementing programs.
 }
 
-int Juce_fakeAraanalysisAudioProcessor::getCurrentProgram()
+int ARATestPluginProcessor::getCurrentProgram()
 {
     return 0;
 }
 
-void Juce_fakeAraanalysisAudioProcessor::setCurrentProgram (int index)
+void ARATestPluginProcessor::setCurrentProgram (int index)
 {
 }
 
-const String Juce_fakeAraanalysisAudioProcessor::getProgramName (int index)
+const String ARATestPluginProcessor::getProgramName (int index)
 {
     return {};
 }
 
-void Juce_fakeAraanalysisAudioProcessor::changeProgramName (int index, const String& newName)
+void ARATestPluginProcessor::changeProgramName (int index, const String& newName)
 {
 }
 
 //==============================================================================
-void Juce_fakeAraanalysisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
+void ARATestPluginProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
 }
 
-void Juce_fakeAraanalysisAudioProcessor::releaseResources()
+void ARATestPluginProcessor::releaseResources()
 {
     // When playback stops, you can use this as an opportunity to free up any
     // spare memory, etc.
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
-bool Juce_fakeAraanalysisAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
+bool ARATestPluginProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
   #if JucePlugin_IsMidiEffect
     ignoreUnused (layouts);
@@ -131,7 +131,7 @@ bool Juce_fakeAraanalysisAudioProcessor::isBusesLayoutSupported (const BusesLayo
 }
 #endif
 
-void Juce_fakeAraanalysisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages)
+void ARATestPluginProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages)
 {
     ScopedNoDenormals noDenormals;
     auto totalNumInputChannels  = getTotalNumInputChannels();
@@ -154,7 +154,7 @@ void Juce_fakeAraanalysisAudioProcessor::processBlock (AudioBuffer<float>& buffe
 	if (!getPlayHead()->getCurrentPosition(currentPosition))
 		return;
 
-	ARA::PlugIn::AraTestPlaybackRenderer * playbackRenderer = (ARA::PlugIn::AraTestPlaybackRenderer*) getARAPlugInExtension()->getPlaybackRenderer();
+	ARA::PlugIn::ARATestPlaybackRenderer * playbackRenderer = (ARA::PlugIn::ARATestPlaybackRenderer*) getARAPlugInExtension()->getPlaybackRenderer();
 	if (playbackRenderer)
 	{
 		playbackRenderer->renderPlaybackRegions(buffer.getArrayOfWritePointers(), getTotalNumInputChannels(), getSampleRate(), currentPosition.timeInSamples, buffer.getNumSamples(), currentPosition.isPlaying);
@@ -162,25 +162,25 @@ void Juce_fakeAraanalysisAudioProcessor::processBlock (AudioBuffer<float>& buffe
 }
 
 //==============================================================================
-bool Juce_fakeAraanalysisAudioProcessor::hasEditor() const
+bool ARATestPluginProcessor::hasEditor() const
 {
     return true; // (change this to false if you choose to not supply an editor)
 }
 
-AudioProcessorEditor* Juce_fakeAraanalysisAudioProcessor::createEditor()
+AudioProcessorEditor* ARATestPluginProcessor::createEditor()
 {
-    return new Juce_fakeAraanalysisAudioProcessorEditor (*this);
+    return new ARATestPluginEditor (*this);
 }
 
 //==============================================================================
-void Juce_fakeAraanalysisAudioProcessor::getStateInformation (MemoryBlock& destData)
+void ARATestPluginProcessor::getStateInformation (MemoryBlock& destData)
 {
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
 }
 
-void Juce_fakeAraanalysisAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
+void ARATestPluginProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
@@ -190,15 +190,15 @@ void Juce_fakeAraanalysisAudioProcessor::setStateInformation (const void* data, 
 // This creates new instances of the plugin..
 AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
-    return new Juce_fakeAraanalysisAudioProcessor();
+    return new ARATestPluginProcessor();
 }
 
 //==============================================================================
-const ARA::PlugIn::PlugInExtension* Juce_fakeAraanalysisAudioProcessor::createARAPlugInExtension(ARA::PlugIn::DocumentController* documentController, bool isPlaybackRenderer, bool isEditorRenderer, bool isEditorView)
+const ARA::PlugIn::PlugInExtension* ARATestPluginProcessor::createARAPlugInExtension(ARA::PlugIn::DocumentController* documentController, bool isPlaybackRenderer, bool isEditorRenderer, bool isEditorView)
 {
 	// Construct a plugin extension instance with our own playback renderer type
 	return new ARA::PlugIn::PlugInExtension (documentController,
-											 isPlaybackRenderer ? new ARA::PlugIn::AraTestPlaybackRenderer (documentController) : nullptr,
+											 isPlaybackRenderer ? new ARA::PlugIn::ARATestPlaybackRenderer (documentController) : nullptr,
 											 isEditorRenderer ? new ARA::PlugIn::EditorRenderer (documentController) : nullptr,
 											 isEditorView ? new ARA::PlugIn::EditorView (documentController) : nullptr);
 }

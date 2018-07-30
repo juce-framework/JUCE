@@ -4,7 +4,7 @@
 
 #include "JuceHeader.h"
 
-const ARA::ARAFactory* ARA::PlugIn::DocumentController::getAraFactory ()
+const ARA::ARAFactory* ARA::PlugIn::DocumentController::getARAFactory ()
 {
 	using namespace ARA;
 	using namespace ARA;

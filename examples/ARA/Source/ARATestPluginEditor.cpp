@@ -8,11 +8,11 @@
   ==============================================================================
 */
 
-#include "PluginProcessor.h"
-#include "PluginEditor.h"
+#include "ARATestPluginProcessor.h"
+#include "ARATestPluginEditor.h"
 
 //==============================================================================
-Juce_fakeAraanalysisAudioProcessorEditor::Juce_fakeAraanalysisAudioProcessorEditor (Juce_fakeAraanalysisAudioProcessor& p)
+ARATestPluginEditor::ARATestPluginEditor (ARATestPluginProcessor& p)
     : AudioProcessorEditor (&p), processor (p)
 {
     // Make sure that before the constructor has finished, you've set the
@@ -20,12 +20,12 @@ Juce_fakeAraanalysisAudioProcessorEditor::Juce_fakeAraanalysisAudioProcessorEdit
     setSize (400, 300);
 }
 
-Juce_fakeAraanalysisAudioProcessorEditor::~Juce_fakeAraanalysisAudioProcessorEditor()
+ARATestPluginEditor::~ARATestPluginEditor()
 {
 }
 
 //==============================================================================
-void Juce_fakeAraanalysisAudioProcessorEditor::paint (Graphics& g)
+void ARATestPluginEditor::paint (Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
@@ -35,7 +35,7 @@ void Juce_fakeAraanalysisAudioProcessorEditor::paint (Graphics& g)
     g.drawFittedText ("Hello World!", getLocalBounds(), Justification::centred, 1);
 }
 
-void Juce_fakeAraanalysisAudioProcessorEditor::resized()
+void ARATestPluginEditor::resized()
 {
     // This is generally where you'll want to lay out the positions of any
     // subcomponents in your editor..

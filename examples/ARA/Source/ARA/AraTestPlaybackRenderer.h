@@ -1,6 +1,7 @@
 //------------------------------------------------------------------------------
-//! \file        AraTestPlaybackRenderer.h
-//! \description PlaybackRenderer implementation for ARA sample plug-in,
+//! \file        ARATestPlaybackRenderer.h
+//! \description playback renderer implementation for the ARA sample plug-in
+//!              customizes the playback renderer class of the ARA library
 //! \project     ARA SDK, examples
 //------------------------------------------------------------------------------
 // Copyright (c) 2012-2018, Celemony Software GmbH, All Rights Reserved.
@@ -42,23 +43,24 @@
 
 #pragma once
 
-#include <ARA_Library/PlugIn/AraPlug.h>
+#include "ARA_Library/PlugIn/ARAPlug.h"
 
 namespace ARA
 {
 namespace PlugIn
 {
 
-class AraTestPlaybackRenderer : public PlaybackRenderer
+/*******************************************************************************/
+class ARATestPlaybackRenderer : public PlaybackRenderer
 {
 public:
-	AraTestPlaybackRenderer(DocumentController* documentController) 
-	: PlaybackRenderer(documentController)
+	ARATestPlaybackRenderer (DocumentController* documentController)
+	: PlaybackRenderer (documentController)
 	{}
 
-	void renderPlaybackRegions(float** ppOutput, int channelCount, ARASampleRate sampleRate,
+	void renderPlaybackRegions (float** ppOutput, ARAChannelCount channelCount, ARASampleRate sampleRate,
 						ARASamplePosition samplePosition, ARASampleCount samplesToRender, bool isPlayingBack);
 };
 
 }	// namespace PlugIn
-}	// namespace Ara
+}	// namespace ARA

@@ -11,16 +11,16 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "PluginProcessor.h"
+#include "ARATestPluginProcessor.h"
 
 //==============================================================================
 /**
 */
-class Juce_fakeAraanalysisAudioProcessorEditor  : public AudioProcessorEditor
+class ARATestPluginEditor  : public AudioProcessorEditor
 {
 public:
-    Juce_fakeAraanalysisAudioProcessorEditor (Juce_fakeAraanalysisAudioProcessor&);
-    ~Juce_fakeAraanalysisAudioProcessorEditor();
+    ARATestPluginEditor (ARATestPluginProcessor&);
+    ~ARATestPluginEditor();
 
     //==============================================================================
     void paint (Graphics&) override;
@@ -29,7 +29,7 @@ public:
 private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
-    Juce_fakeAraanalysisAudioProcessor& processor;
+    ARATestPluginProcessor& processor;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Juce_fakeAraanalysisAudioProcessorEditor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARATestPluginEditor)
 };

@@ -1,6 +1,7 @@
 //------------------------------------------------------------------------------
-//! \file        ARATestAudioSource.h
-//! \description audio source implementation for the ARA sample plug-in
+//! \file        TestAnalysis.h
+//! \description dummy implementation of audio source analysis for the ARA sample plug-in
+//!              actual plug-ins will have an analysis implementation that is independent of ARA
 //! \project     ARA SDK, examples
 //------------------------------------------------------------------------------
 // Copyright (c) 2012-2018, Celemony Software GmbH, All Rights Reserved.
@@ -42,47 +43,76 @@
 
 #pragma once
 
-#include "ARA_Library/PlugIn/ARAPlug.h"
-
+#include <atomic>
+#include <future>
 #include <vector>
-
-class TestAnalysisResult;
 
 namespace ARA
 {
 namespace PlugIn
 {
 
-/*******************************************************************************/
-class ARATestAudioSource : public AudioSource
-{
-public:
-	ARATestAudioSource (Document* document, ARAAudioSourceHostRef hostRef)
-	: AudioSource (document, hostRef),
-	  _analysisResult (nullptr)
-	{}
-
-	~ARATestAudioSource ();
-
-	// may return nullptr if analysis has not completed yet
-	const TestAnalysisResult* getAnalysisResult () const { return _analysisResult; }
-	void setAnalysisResult (const TestAnalysisResult* analysisResult);
-
-	// render thread sample access:
-	// in order to keep this test code as simple as possible, our test audio source uses brute
-	// force and caches all samples in-memory so that renderers can access it without threading issues
-	// the document controller triggers filling this cache on the main thread, immediately after access is enabled.
-	// actual plug-ins will use a multi-threaded setup to only cache sections of the audio source on demand -
-	// a sophisticated file I/O threading implementation is needed for file-based processing regardless of ARA.
-	void updateRenderSampleCache ();
-	const float* getRenderSampleCacheForChannel (ARAChannelCount channel) const;
-	void destroyRenderSampleCache ();
-
-protected:
-	const TestAnalysisResult* _analysisResult;
-
-	std::vector<float> _sampleCache;
-};
+class ARATestAudioSource;
+class HostAudioReader;
 
 }	// namespace PlugIn
 }	// namespace ARA
+
+/*******************************************************************************/
+// The results of our fake analysis are found "notes" detected in the audio source data
+class TestAnalysisNote
+{
+public:
+	float getFrequency () const { return _frequency; }
+	void setFrequency (float frequency) { _frequency = frequency; }
+
+	float getVolume () const { return _volume; }
+	void setVolume (float volume) { _volume = volume; }
+
+	double getStartTime () const { return _startTime; }
+	void setStartTime (double startTime) { _startTime = startTime; }
+
+	double getDuration () const { return _duration; }
+	void setDuration (double duration) { _duration = duration; }
+
+private:
+	float _frequency;
+	float _volume;
+	double _startTime;
+	double _duration;
+};
+
+/*******************************************************************************/
+class TestAnalysisResult
+{
+public:
+	const std::vector<TestAnalysisNote>& getNotes () const { return _notes; }
+	void setNotes (std::vector<TestAnalysisNote> notes) { _notes = notes; }
+
+private:
+	std::vector<TestAnalysisNote> _notes;
+};
+
+/*******************************************************************************/
+class TestAnalysisTask
+{
+public:
+	explicit TestAnalysisTask (ARA::PlugIn::ARATestAudioSource* audioSource);
+	~TestAnalysisTask ();
+
+	ARA::PlugIn::ARATestAudioSource* getAudioSource () const { return _audioSource; }
+
+	float getProgress () const { return _progress; }
+	bool isDone () const;
+	void cancelSynchronously ();
+
+	const TestAnalysisResult* getAnalysisResult ();
+
+private:
+	ARA::PlugIn::ARATestAudioSource* const _audioSource;
+	ARA::PlugIn::HostAudioReader* const _hostAudioReader;
+	TestAnalysisResult* _analysisResult;
+	std::future<void> _future;
+	std::atomic<float> _progress;
+	std::atomic<bool> _shouldCancel;
+};
