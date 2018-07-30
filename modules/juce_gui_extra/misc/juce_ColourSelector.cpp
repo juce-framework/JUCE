@@ -328,7 +328,9 @@ ColourSelector::ColourSelector (int sectionsToShow, int edge, int gapAroundColou
         sliders[3]->setVisible ((flags & showAlphaChannel) != 0);
 
         for (auto& slider : sliders)
+        { // braces needed here to avoid a VS2013 compiler bug
             slider->onValueChange = [this] { changeColour(); };
+        }
     }
 
     if ((flags & showColourspace) != 0)
