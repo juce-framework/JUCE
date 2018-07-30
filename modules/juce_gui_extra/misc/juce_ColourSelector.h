@@ -139,9 +139,6 @@ private:
     class ColourSpaceView;
     class HueSelectorComp;
     class SwatchComponent;
-    class ColourComponentSlider;
-    class ColourSpaceMarker;
-    class HueSelectorMarker;
 
     Colour colour;
     float h, s, v;
