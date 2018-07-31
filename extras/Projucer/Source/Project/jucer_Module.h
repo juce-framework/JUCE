@@ -78,7 +78,9 @@ struct ModuleList
     bool tryToAddModuleFromFolder (const File&);
 
     void addAllModulesInFolder (const File&);
-    void addAllModulesInSubfoldersRecursively (const File&, int depth);
+
+    static Array<File>& getPreviousModuleDirectories();
+    static File tryToFindModulePathFromPrevious (const String&);
 
     void scanProjectExporterModulePaths (Project&);
     void scanGlobalJuceModulePath();

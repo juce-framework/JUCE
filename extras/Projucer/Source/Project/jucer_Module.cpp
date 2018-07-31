@@ -163,6 +163,7 @@ bool ModuleList::tryToAddModuleFromFolder (const File& path)
 
     if (m.isValid())
     {
+        getPreviousModuleDirectories().addIfNotAlreadyThere (path.getParentDirectory());
         modules.add (new ModuleDescription (m));
         return true;
     }
@@ -174,23 +175,27 @@ void ModuleList::addAllModulesInFolder (const File& path)
 {
     if (! tryToAddModuleFromFolder (path))
     {
-        int subfolders = 3;
-        addAllModulesInSubfoldersRecursively (path, subfolders);
+        for (DirectoryIterator iter (path, false, "*", File::findDirectories); iter.next();)
+            tryToAddModuleFromFolder (iter.getFile().getLinkedTarget());
     }
 }
 
-void ModuleList::addAllModulesInSubfoldersRecursively (const File& path, int depth)
+Array<File>& ModuleList::getPreviousModuleDirectories()
 {
-    if (depth > 0)
-    {
-        for (DirectoryIterator iter (path, false, "*", File::findDirectories); iter.next();)
-        {
-            auto childPath = iter.getFile().getLinkedTarget();
+    static Array<File> previous;
+    return previous;
+}
 
-            if (! tryToAddModuleFromFolder (childPath))
-                addAllModulesInSubfoldersRecursively (childPath, depth - 1);
-        }
+File ModuleList::tryToFindModulePathFromPrevious (const String& id)
+{
+    for (auto& f : getPreviousModuleDirectories())
+    {
+        auto modulePath = f.getChildFile (id);
+        if (ModuleDescription (modulePath).isValid())
+            return modulePath;
     }
+
+    return {};
 }
 
 //==============================================================================
@@ -682,6 +687,13 @@ File EnabledModuleList::findFolderForModule (const String& moduleID)
     {
         if (isJUCEModule (moduleID))
             return File (getAppSettings().getStoredPath (Ids::defaultJuceModulePath).toString()).getChildFile (moduleID);
+
+        {
+            auto previous = ModuleList::tryToFindModulePathFromPrevious (moduleID);
+
+            if (previous != File())
+                return previous;
+        }
 
         ModuleList list;
         list.scanGlobalUserModulePath();
