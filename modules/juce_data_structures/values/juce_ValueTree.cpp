@@ -39,7 +39,7 @@ public:
     {
         for (auto* c : other.children)
         {
-            auto child = new SharedObject (*c);
+            auto* child = new SharedObject (*c);
             child->parent = this;
             children.add (child);
         }
@@ -51,9 +51,9 @@ public:
     {
         jassert (parent == nullptr); // this should never happen unless something isn't obeying the ref-counting!
 
-        for (int i = children.size(); --i >= 0;)
+        for (auto i = children.size(); --i >= 0;)
         {
-            const Ptr c (children.getObjectPointerUnchecked(i));
+            const Ptr c (children.getObjectPointerUnchecked (i));
             c->parent = nullptr;
             children.remove (i);
             c->sendParentChangeMessage();
@@ -72,7 +72,7 @@ public:
 
         if (numListeners == 1)
         {
-            valueTreesWithListeners.getUnchecked(0)->listeners.callExcluding (listenerToExclude, fn);
+            valueTreesWithListeners.getUnchecked (0)->listeners.callExcluding (listenerToExclude, fn);
         }
         else if (numListeners > 0)
         {
@@ -80,7 +80,7 @@ public:
 
             for (int i = 0; i < numListeners; ++i)
             {
-                auto* v = listenersCopy.getUnchecked(i);
+                auto* v = listenersCopy.getUnchecked (i);
 
                 if (i == 0 || valueTreesWithListeners.contains (v))
                     v->listeners.callExcluding (listenerToExclude, fn);
@@ -123,7 +123,7 @@ public:
     {
         ValueTree tree (*this);
 
-        for (int j = children.size(); --j >= 0;)
+        for (auto j = children.size(); --j >= 0;)
             if (auto* child = children.getObjectPointer (j))
                 child->sendParentChangeMessage();
 
@@ -169,7 +169,7 @@ public:
         else
         {
             if (properties.contains (name))
-                undoManager->perform (new SetPropertyAction (*this, name, {}, properties [name], false, true));
+                undoManager->perform (new SetPropertyAction (*this, name, {}, properties[name], false, true));
         }
     }
 
@@ -186,20 +186,20 @@ public:
         }
         else
         {
-            for (int i = properties.size(); --i >= 0;)
-                undoManager->perform (new SetPropertyAction (*this, properties.getName(i), {},
-                                                             properties.getValueAt(i), false, true));
+            for (auto i = properties.size(); --i >= 0;)
+                undoManager->perform (new SetPropertyAction (*this, properties.getName (i), {},
+                                                             properties.getValueAt (i), false, true));
         }
     }
 
     void copyPropertiesFrom (const SharedObject& source, UndoManager* undoManager)
     {
-        for (int i = properties.size(); --i >= 0;)
+        for (auto i = properties.size(); --i >= 0;)
             if (! source.properties.contains (properties.getName (i)))
                 removeProperty (properties.getName (i), undoManager);
 
         for (int i = 0; i < source.properties.size(); ++i)
-            setProperty (source.properties.getName(i), source.properties.getValueAt(i), undoManager);
+            setProperty (source.properties.getName (i), source.properties.getValueAt (i), undoManager);
     }
 
     ValueTree getChildWithName (const Identifier& typeToMatch) const
@@ -339,7 +339,7 @@ public:
 
         for (int i = 0; i < children.size(); ++i)
         {
-            auto* child = newOrder.getUnchecked(i)->object.get();
+            auto* child = newOrder.getUnchecked (i)->object.get();
 
             if (children.getObjectPointerUnchecked (i) != child)
             {
@@ -359,7 +359,7 @@ public:
             return false;
 
         for (int i = 0; i < children.size(); ++i)
-            if (! children.getObjectPointerUnchecked(i)->isEquivalentTo (*other.children.getObjectPointerUnchecked(i)))
+            if (! children.getObjectPointerUnchecked (i)->isEquivalentTo (*other.children.getObjectPointerUnchecked (i)))
                 return false;
 
         return true;
@@ -367,12 +367,12 @@ public:
 
     XmlElement* createXml() const
     {
-        auto xml = new XmlElement (type);
+        auto* xml = new XmlElement (type);
         properties.copyToXmlAttributes (*xml);
 
         // (NB: it's faster to add nodes to XML elements in reverse order)
-        for (int i = children.size(); --i >= 0;)
-            xml->prependChildElement (children.getObjectPointerUnchecked(i)->createXml());
+        for (auto i = children.size(); --i >= 0;)
+            xml->prependChildElement (children.getObjectPointerUnchecked (i)->createXml());
 
         return xml;
     }
@@ -385,7 +385,7 @@ public:
         for (int j = 0; j < properties.size(); ++j)
         {
             output.writeString (properties.getName (j).toString());
-            properties.getValueAt(j).writeToStream (output);
+            properties.getValueAt (j).writeToStream (output);
         }
 
         output.writeCompressedInt (children.size());
@@ -719,9 +719,9 @@ ValueTree ValueTree::getRoot() const noexcept
 
 ValueTree ValueTree::getSibling (int delta) const noexcept
 {
-    if (object == nullptr)
-        if (auto p = object->parent)
-            if (auto c = p->children.getObjectPointer (p->indexOf (*this) + delta))
+    if (object != nullptr)
+        if (auto* p = object->parent)
+            if (auto* c = p->children.getObjectPointer (p->indexOf (*this) + delta))
                 return ValueTree (*c);
 
     return {};
@@ -820,7 +820,7 @@ struct ValueTreePropertyValueSource  : public Value::ValueSource,
         tree.removeListener (this);
     }
 
-    var getValue() const override                 { return tree [property]; }
+    var getValue() const override                 { return tree[property]; }
     void setValue (const var& newValue) override  { tree.setProperty (property, newValue, undoManager); }
 
 private:
@@ -857,7 +857,7 @@ int ValueTree::getNumChildren() const noexcept
 ValueTree ValueTree::getChild (int index) const
 {
     if (object != nullptr)
-        if (auto c = object->children.getObjectPointer (index))
+        if (auto* c = object->children.getObjectPointer (index))
             return ValueTree (*c);
 
     return {};
@@ -1104,7 +1104,7 @@ public:
         const char chars[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-:";
 
         for (int i = 1 + r.nextInt (numElementsInArray (buffer) - 2); --i >= 0;)
-            buffer[i] = chars [r.nextInt (sizeof (chars) - 1)];
+            buffer[i] = chars[r.nextInt (sizeof (chars) - 1)];
 
         String result (buffer);
 
