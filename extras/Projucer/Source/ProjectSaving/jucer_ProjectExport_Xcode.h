@@ -2478,6 +2478,7 @@ private:
 
         folders.addTokens (getCustomResourceFoldersString(), ":", "");
         folders.trim();
+        folders.removeEmptyStrings();
 
         for (auto& crf : folders)
             addCustomResourceFolder (crf);
