@@ -1070,7 +1070,8 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
             vst3CategoryVars.add (s);
 
         props.add (new MultiChoicePropertyComponent (pluginVST3CategoryValue, "Plugin VST3 Category", getAllVST3CategoryStrings(), vst3CategoryVars),
-                   "VST3 category.");
+                   "VST3 category. Most hosts require either \"Fx\" or \"Instrument\" to be selected in order for the plugin to be recognised. "
+                   "If neither of these are selected, the appropriate one will be automatically added based on the \"Plugin is a synth\" option.");
     }
 
     props.add (new MultiChoicePropertyComponent (pluginRTASCategoryValue, "Plugin RTAS Category", getAllRTASCategoryStrings(), getAllRTASCategoryVars()),
@@ -1644,19 +1645,28 @@ String Project::getVSTCategoryString() const noexcept
     return {};
 }
 
-static String getVST3CategoryStringFromSelection (Array<var> selected) noexcept
+static String getVST3CategoryStringFromSelection (Array<var> selected, const Project& p) noexcept
 {
     StringArray categories;
 
     for (auto& category : selected)
         categories.add (category);
 
-    // "Fx" and "Instrument" should come first and if both are present prioritise "Fx"
-    if (categories.contains ("Instrument"))
-        categories.move (categories.indexOf ("Instrument"), 0);
+    // One of these needs to be selected in order for the plug-in to be recognised in Cubase
+    if (! categories.contains ("Fx") && ! categories.contains ("Instrument"))
+    {
+        categories.insert (0, p.isPluginSynth() ? "Instrument"
+                                                : "Fx");
+    }
+    else
+    {
+        // "Fx" and "Instrument" should come first and if both are present prioritise "Fx"
+        if (categories.contains ("Instrument"))
+            categories.move (categories.indexOf ("Instrument"), 0);
 
-    if (categories.contains ("Fx"))
-        categories.move (categories.indexOf ("Fx"), 0);
+        if (categories.contains ("Fx"))
+            categories.move (categories.indexOf ("Fx"), 0);
+    }
 
     return categories.joinIntoString ("|");
 }
@@ -1666,7 +1676,7 @@ String Project::getVST3CategoryString() const noexcept
     auto v = pluginVST3CategoryValue.get();
 
     if (auto* arr = v.getArray())
-        return getVST3CategoryStringFromSelection (*arr);
+        return getVST3CategoryStringFromSelection (*arr, *this);
 
     jassertfalse;
     return {};
