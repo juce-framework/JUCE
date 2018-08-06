@@ -933,10 +933,12 @@ public:
             return;
         }
 
-        if (isPositiveAndBelow (idx, juceParameters.getNumParameters()))
+        if (auto* juceParam = juceParameters.getParamForIndex (idx))
         {
             if (AUParameter* param = [paramTree.get() parameterWithAddress: getAUParameterAddressForIndex (idx)])
             {
+                newValue *= getMaximumParameterValue (juceParam);
+
                 if (editorObserverToken != nullptr)
                     [param setValue: newValue  originator: editorObserverToken];
                 else

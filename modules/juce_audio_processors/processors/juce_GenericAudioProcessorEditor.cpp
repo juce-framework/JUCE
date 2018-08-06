@@ -506,7 +506,7 @@ private:
 };
 
 //==============================================================================
-struct  GenericAudioProcessorEditor::Pimpl
+struct GenericAudioProcessorEditor::Pimpl
 {
     Pimpl (GenericAudioProcessorEditor& parent)
         : owner (parent)
