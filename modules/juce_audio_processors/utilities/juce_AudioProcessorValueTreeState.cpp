@@ -454,7 +454,7 @@ struct AudioProcessorValueTreeState::SliderAttachment::Pimpl  : private Attached
     {
         NormalisableRange<float> range (state.getParameterRange (paramID));
 
-        if (range.interval != 0 || range.skew != 0)
+        if (range.interval != 0.0f || range.skew != 1.0f)
         {
             slider.setRange (range.start, range.end, range.interval);
             slider.setSkewFactor (range.skew, range.symmetricSkew);
