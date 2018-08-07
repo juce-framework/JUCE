@@ -1877,6 +1877,7 @@ private:
             OwnedArray<const __CFString>* stringValues = nullptr;
 
             auto initialValue = param->getValue();
+            bool paramIsLegacy = dynamic_cast<LegacyAudioParameter*> (param) != nullptr;
 
             if (param->isDiscrete() && (! forceUseLegacyParamIDs))
             {
@@ -1886,17 +1887,26 @@ private:
 
                 const auto maxValue = getMaximumParameterValue (param);
 
+                auto getTextValue = [param, paramIsLegacy] (float value)
+                {
+                    if (paramIsLegacy)
+                    {
+                        param->setValue (value);
+                        return param->getCurrentValueAsText();
+                    }
+
+                    return param->getText (value, 256);
+                };
+
                 for (int i = 0; i < numSteps; ++i)
                 {
                     auto value = (float) i / maxValue;
-
-                    // Once legacy parameters are deprecated this can be replaced by getText
-                    param->setValue (value);
-                    stringValues->add (CFStringCreateCopy (nullptr, (param->getCurrentValueAsText().toCFString())));
+                    stringValues->add (CFStringCreateCopy (nullptr, (getTextValue (value).toCFString())));
                 }
             }
 
-            param->setValue (initialValue);
+            if (paramIsLegacy)
+                param->setValue (initialValue);
 
             parameterValueStringArrays.add (stringValues);
         }
