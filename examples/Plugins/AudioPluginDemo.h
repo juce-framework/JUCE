@@ -338,7 +338,8 @@ private:
     //==============================================================================
     /** This is the editor component that our filter will display. */
     class JuceDemoPluginAudioProcessorEditor  : public AudioProcessorEditor,
-                                                private Timer, private Value::Listener
+                                                private Timer,
+                                                private Value::Listener
     {
     public:
         JuceDemoPluginAudioProcessorEditor (JuceDemoPluginAudioProcessor& owner)
@@ -421,6 +422,17 @@ private:
         void hostMIDIControllerIsAvailable (bool controllerIsAvailable) override
         {
             midiKeyboard.setVisible (! controllerIsAvailable);
+        }
+
+        int getControlParameterIndex (Component& control) override
+        {
+            if (&control == &gainSlider)
+                return 0;
+
+            if (&control == &delaySlider)
+                return 1;
+
+            return -1;
         }
 
         void updateTrackProperties()
