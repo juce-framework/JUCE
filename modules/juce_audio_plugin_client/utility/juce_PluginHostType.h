@@ -313,6 +313,7 @@ private:
         if (hostFilename.containsIgnoreCase   ("Renoise"))           return Renoise;
         if (hostFilename.containsIgnoreCase   ("Resolve"))           return DaVinciResolve;
         if (hostFilename.startsWith           ("Bitwig"))            return BitwigStudio;
+        if (hostFilename.containsIgnoreCase   ("OsxFL"))             return FruityLoops;
 
        #elif JUCE_WINDOWS
         if (hostFilename.containsIgnoreCase   ("Live 6."))           return AbletonLive6;
