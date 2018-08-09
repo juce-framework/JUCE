@@ -286,6 +286,10 @@
  //#define JUCE_USE_XCURSOR 1
 #endif
 
+#ifndef    JUCE_WIN_PER_MONITOR_DPI_AWARE
+ //#define JUCE_WIN_PER_MONITOR_DPI_AWARE 1
+#endif
+
 //==============================================================================
 // juce_gui_extra flags:
 

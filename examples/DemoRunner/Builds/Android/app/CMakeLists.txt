@@ -378,6 +378,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/ivstprocesscontext.h"
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/ivstrepresentation.h"
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/ivstunits.h"
+    "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/vstpshpack4.h"
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/vstspeaker.h"
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/vsttypes.h"
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst2.x/aeffect.h"
@@ -617,6 +618,8 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_core/containers/juce_AbstractFifo.h"
     "../../../../../modules/juce_core/containers/juce_Array.h"
     "../../../../../modules/juce_core/containers/juce_ArrayAllocationBase.h"
+    "../../../../../modules/juce_core/containers/juce_ArrayBase.cpp"
+    "../../../../../modules/juce_core/containers/juce_ArrayBase.h"
     "../../../../../modules/juce_core/containers/juce_DynamicObject.cpp"
     "../../../../../modules/juce_core/containers/juce_DynamicObject.h"
     "../../../../../modules/juce_core/containers/juce_ElementComparator.h"
@@ -629,6 +632,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_core/containers/juce_OwnedArray.h"
     "../../../../../modules/juce_core/containers/juce_PropertySet.cpp"
     "../../../../../modules/juce_core/containers/juce_PropertySet.h"
+    "../../../../../modules/juce_core/containers/juce_ReferenceCountedArray.cpp"
     "../../../../../modules/juce_core/containers/juce_ReferenceCountedArray.h"
     "../../../../../modules/juce_core/containers/juce_ScopedValueSetter.h"
     "../../../../../modules/juce_core/containers/juce_SortedSet.h"
@@ -1177,10 +1181,12 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_gui_basics/components/juce_Component.h"
     "../../../../../modules/juce_gui_basics/components/juce_ComponentListener.cpp"
     "../../../../../modules/juce_gui_basics/components/juce_ComponentListener.h"
-    "../../../../../modules/juce_gui_basics/components/juce_Desktop.cpp"
-    "../../../../../modules/juce_gui_basics/components/juce_Desktop.h"
     "../../../../../modules/juce_gui_basics/components/juce_ModalComponentManager.cpp"
     "../../../../../modules/juce_gui_basics/components/juce_ModalComponentManager.h"
+    "../../../../../modules/juce_gui_basics/desktop/juce_Desktop.cpp"
+    "../../../../../modules/juce_gui_basics/desktop/juce_Desktop.h"
+    "../../../../../modules/juce_gui_basics/desktop/juce_Displays.cpp"
+    "../../../../../modules/juce_gui_basics/desktop/juce_Displays.h"
     "../../../../../modules/juce_gui_basics/drawables/juce_Drawable.cpp"
     "../../../../../modules/juce_gui_basics/drawables/juce_Drawable.h"
     "../../../../../modules/juce_gui_basics/drawables/juce_DrawableComposite.cpp"
@@ -1441,6 +1447,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_gui_extra/embedding/juce_ActiveXControlComponent.h"
     "../../../../../modules/juce_gui_extra/embedding/juce_AndroidViewComponent.h"
     "../../../../../modules/juce_gui_extra/embedding/juce_NSViewComponent.h"
+    "../../../../../modules/juce_gui_extra/embedding/juce_ScopedDPIAwarenessDisabler.h"
     "../../../../../modules/juce_gui_extra/embedding/juce_UIViewComponent.h"
     "../../../../../modules/juce_gui_extra/embedding/juce_XEmbedComponent.h"
     "../../../../../modules/juce_gui_extra/misc/juce_AnimatedAppComponent.cpp"
@@ -1930,6 +1937,7 @@ set_source_files_properties("../../../../../modules/juce_audio_processors/format
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/ivstprocesscontext.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/ivstrepresentation.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/ivstunits.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/vstpshpack4.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/vstspeaker.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/vsttypes.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst2.x/aeffect.h" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2169,6 +2177,8 @@ set_source_files_properties("../../../../../modules/juce_core/containers/juce_Ab
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_AbstractFifo.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_Array.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_ArrayAllocationBase.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_core/containers/juce_ArrayBase.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_core/containers/juce_ArrayBase.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_DynamicObject.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_DynamicObject.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_ElementComparator.h" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2181,6 +2191,7 @@ set_source_files_properties("../../../../../modules/juce_core/containers/juce_Na
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_OwnedArray.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_PropertySet.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_PropertySet.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_core/containers/juce_ReferenceCountedArray.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_ReferenceCountedArray.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_ScopedValueSetter.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_SortedSet.h" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2729,10 +2740,12 @@ set_source_files_properties("../../../../../modules/juce_gui_basics/components/j
 set_source_files_properties("../../../../../modules/juce_gui_basics/components/juce_Component.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/components/juce_ComponentListener.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/components/juce_ComponentListener.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_gui_basics/components/juce_Desktop.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_gui_basics/components/juce_Desktop.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/components/juce_ModalComponentManager.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/components/juce_ModalComponentManager.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_basics/desktop/juce_Desktop.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_basics/desktop/juce_Desktop.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_basics/desktop/juce_Displays.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_basics/desktop/juce_Displays.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/drawables/juce_Drawable.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/drawables/juce_Drawable.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/drawables/juce_DrawableComposite.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2993,6 +3006,7 @@ set_source_files_properties("../../../../../modules/juce_gui_extra/documents/juc
 set_source_files_properties("../../../../../modules/juce_gui_extra/embedding/juce_ActiveXControlComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/embedding/juce_AndroidViewComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/embedding/juce_NSViewComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_extra/embedding/juce_ScopedDPIAwarenessDisabler.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/embedding/juce_UIViewComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/embedding/juce_XEmbedComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/misc/juce_AnimatedAppComponent.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
