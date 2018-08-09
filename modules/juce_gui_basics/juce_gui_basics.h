@@ -111,6 +111,13 @@
  #define JUCE_USE_XCURSOR 1
 #endif
 
+/** Config: JUCE_WIN_PER_MONITOR_DPI_AWARE
+    Enables per-monitor DPI awareness on Windows 8.1 and above.
+*/
+#ifndef JUCE_WIN_PER_MONITOR_DPI_AWARE
+ #define JUCE_WIN_PER_MONITOR_DPI_AWARE 1
+#endif
+
 //==============================================================================
 namespace juce
 {

@@ -31,6 +31,9 @@ extern ComponentPeer* createNonRepaintingEmbeddedWindowsPeer (Component&, void* 
 
 //==============================================================================
 class OpenGLContext::NativeContext
+   #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+    : public ComponentPeer::ScaleFactorListener
+   #endif
 {
 public:
     NativeContext (Component& component,
@@ -87,6 +90,12 @@ public:
     {
         deleteRenderContext();
         releaseDC();
+
+       #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+        for (int i = 0; i < ComponentPeer::getNumPeers(); ++i)
+            if (auto* peer = ComponentPeer::getPeer (i))
+                peer->removeScaleFactorListener (this);
+       #endif
     }
 
     bool initialiseOnRenderThread (OpenGLContext& c)
@@ -117,9 +126,17 @@ public:
     void updateWindowPosition (Rectangle<int> bounds)
     {
         if (nativeWindow != nullptr)
+        {
+           #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+            if (safeComponent != nullptr)
+                if (auto* peer = safeComponent->getTopLevelComponent()->getPeer())
+                    bounds = (bounds.toDouble() * peer->getPlatformScaleFactor()).toNearestInt();
+           #endif
+
             SetWindowPos ((HWND) nativeWindow->getNativeHandle(), 0,
                           bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(),
                           SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER);
+        }
     }
 
     bool createdOk() const noexcept                 { return getRawContext() != nullptr; }
@@ -133,6 +150,15 @@ public:
     }
 
     struct Locker { Locker (NativeContext&) {} };
+
+   #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+    void nativeScaleFactorChanged (double /*newScaleFactor*/) override
+    {
+        if (safeComponent != nullptr)
+            if (auto peer = safeComponent->getTopLevelComponent()->getPeer())
+                updateWindowPosition (peer->getAreaCoveredBy (*safeComponent));
+    }
+   #endif
 
 private:
     struct DummyComponent  : public Component
@@ -150,6 +176,9 @@ private:
     HGLRC renderContext;
     HDC dc;
     OpenGLContext* context = {};
+   #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+    Component::SafePointer<Component> safeComponent;
+   #endif
 
     #define JUCE_DECLARE_WGL_EXTENSION_FUNCTION(name, returnType, params) \
         typedef returnType (__stdcall *type_ ## name) params; type_ ## name name;
@@ -174,7 +203,14 @@ private:
         nativeWindow.reset (createNonRepaintingEmbeddedWindowsPeer (*dummyComponent, topComp->getWindowHandle()));
 
         if (auto* peer = topComp->getPeer())
+        {
             updateWindowPosition (peer->getAreaCoveredBy (component));
+
+           #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+            peer->addScaleFactorListener (this);
+            safeComponent = Component::SafePointer<Component> (&component);
+           #endif
+        }
 
         nativeWindow->setVisible (true);
         dc = GetDC ((HWND) nativeWindow->getNativeHandle());
