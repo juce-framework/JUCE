@@ -421,8 +421,8 @@ private:
             // on which screen it might appear to get a scaling factor :-(
             auto& displays = Desktop::getInstance().getDisplays();
             auto* peer = owner.getPeer();
-            const double scale = (peer != nullptr ? displays.getDisplayContaining (peer->getBounds().getCentre())
-                                  : displays.getMainDisplay()).scale;
+            const double scale = (peer != nullptr ? peer->getPlatformScaleFactor()
+                                                  : displays.getMainDisplay().scale);
 
             Point<int> topLeftInPeer
                 = (peer != nullptr ? peer->getComponent().getLocalPoint (&owner, Point<int> (0, 0))
@@ -591,9 +591,7 @@ private:
         if (auto* peer = owner.getPeer())
         {
             auto r = peer->getComponent().getLocalArea (&owner, owner.getLocalBounds());
-            auto scale = Desktop::getInstance().getDisplays().getDisplayContaining (peer->localToGlobal (r.getCentre())).scale;
-
-            return r * scale;
+            return r * peer->getPlatformScaleFactor();
         }
 
         return owner.getLocalBounds();
