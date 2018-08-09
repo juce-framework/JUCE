@@ -883,7 +883,10 @@ private:
 
                 if (component != nullptr)
                 {
-                    component->setSize (rect.getWidth(), rect.getHeight());
+                    auto scale = component->getNativeEditorScaleFactor();
+
+                    component->setSize (roundToInt (rect.getWidth()  / scale),
+                                        roundToInt (rect.getHeight() / scale));
 
                     if (auto* peer = component->getPeer())
                         peer->updateBounds();
@@ -900,7 +903,12 @@ private:
         {
             if (size != nullptr && component != nullptr)
             {
-                *size = ViewRect (0, 0, component->getWidth(), component->getHeight());
+                auto scale = component->getNativeEditorScaleFactor();
+
+                *size = ViewRect (0, 0,
+                                  roundToInt (component->getWidth()  * scale),
+                                  roundToInt (component->getHeight() * scale));
+
                 return kResultTrue;
             }
 
@@ -923,16 +931,21 @@ private:
                 if (auto* editor = component->pluginEditor.get())
                 {
                     // checkSizeConstraint
-                    auto juceRect = editor->getLocalArea (component.get(), Rectangle<int>::leftTopRightBottom (rectToCheck->left, rectToCheck->top,
-                                                                                                               rectToCheck->right, rectToCheck->bottom));
+                    auto scale = component->getNativeEditorScaleFactor();
+                    auto scaledRect = (Rectangle<int>::leftTopRightBottom (rectToCheck->left, rectToCheck->top,
+                                                                           rectToCheck->right, rectToCheck->bottom).toFloat() / scale).toNearestInt();
+
+                    auto juceRect = editor->getLocalArea (component.get(), scaledRect);
+
                     if (auto* constrainer = editor->getConstrainer())
                     {
                         Rectangle<int> limits (0, 0, constrainer->getMaximumWidth(), constrainer->getMaximumHeight());
                         constrainer->checkBounds (juceRect, editor->getBounds(), limits, false, false, false, false);
 
                         juceRect = component->getLocalArea (editor, juceRect);
-                        rectToCheck->right  = rectToCheck->left + juceRect.getWidth();
-                        rectToCheck->bottom = rectToCheck->top  + juceRect.getHeight();
+
+                        rectToCheck->right  = rectToCheck->left + roundToInt (juceRect.getWidth()  * scale);
+                        rectToCheck->bottom = rectToCheck->top  + roundToInt (juceRect.getHeight() * scale);
                     }
                 }
 
@@ -945,17 +958,22 @@ private:
 
         tresult PLUGIN_API setContentScaleFactor (Steinberg::IPlugViewContentScaleSupport::ScaleFactor factor) override
         {
-           #if (JUCE_MAC || JUCE_IOS)
-            ignoreUnused (factor);
-           #else
-            if (auto* editor = component->pluginEditor.get())
-            {
-                editor->setScaleFactor (factor);
-                return kResultTrue;
-            }
-           #endif
+           #if ! JUCE_MAC
+            #if JUCE_WINDOWS && ! JUCE_WIN_PER_MONITOR_DPI_AWARE
+             if (auto* ed = component->pluginEditor.get())
+                 ed->setScaleFactor ((float) factor);
+            #else
+            if (! approximatelyEqual (component->getNativeEditorScaleFactor(), (float) factor))
+                component->nativeScaleFactorChanged ((double) factor);
+            #endif
 
+            component->resizeHostWindow();
+
+            return kResultTrue;
+           #else
+            ignoreUnused (factor);
             return kResultFalse;
+           #endif
         }
 
     private:
@@ -970,10 +988,18 @@ private:
 
         //==============================================================================
         struct ContentWrapperComponent  : public Component
+                                       #if ! JUCE_MAC
+                                        , public ComponentPeer::ScaleFactorListener,
+                                          public ComponentMovementWatcher
+                                       #endif
         {
             ContentWrapperComponent (JuceVST3Editor& editor, AudioProcessor& plugin)
-               : pluginEditor (plugin.createEditorIfNeeded()),
-                 owner (editor)
+                :
+                  #if ! JUCE_MAC
+                   ComponentMovementWatcher (this),
+                  #endif
+                   pluginEditor (plugin.createEditorIfNeeded()),
+                   owner (editor)
             {
                 setOpaque (true);
                 setBroughtToFrontOnMouseClick (true);
@@ -1004,6 +1030,12 @@ private:
                     PopupMenu::dismissAllActiveMenus();
                     pluginEditor->processor.editorBeingDeleted (pluginEditor.get());
                 }
+
+               #if ! JUCE_MAC
+                for (int i = 0; i < ComponentPeer::getNumPeers(); ++i)
+                    if (auto* p = ComponentPeer::getPeer (i))
+                        p->removeScaleFactorListener (this);
+               #endif
             }
 
             void paint (Graphics& g) override
@@ -1084,7 +1116,7 @@ private:
 
                     if (owner.plugFrame != nullptr)
                     {
-                        ViewRect newSize (0, 0, w, h);
+                        ViewRect newSize (0, 0, roundToInt (w * nativeScaleFactor), roundToInt (h * nativeScaleFactor));
                         isResizingParentToFitChild = true;
                         owner.plugFrame->resizeView (&owner, &newSize);
                         isResizingParentToFitChild = false;
@@ -1099,6 +1131,49 @@ private:
                 }
             }
 
+            float getNativeEditorScaleFactor() const noexcept    { return nativeScaleFactor; }
+
+           #if ! JUCE_MAC
+            void componentMovedOrResized (bool, bool) override {}
+
+            void componentPeerChanged() override
+            {
+                if (auto* peer = getTopLevelComponent()->getPeer())
+                    peer->addScaleFactorListener (this);
+            }
+
+            void componentVisibilityChanged() override
+            {
+                if (auto* peer = getTopLevelComponent()->getPeer())
+                    nativeScaleFactor = (float) peer->getPlatformScaleFactor();
+            }
+
+            void nativeScaleFactorChanged (double newScaleFactor) override
+            {
+                nativeScaleFactor = (float) newScaleFactor;
+
+                auto host = getHostType();
+
+                if (host.isWavelab())
+                {
+                    Timer::callAfterDelay (250, [this] {
+                        if (auto* peer = getPeer())
+                        {
+                            peer->updateBounds();
+                            repaint();
+                        }
+
+                        resizeHostWindow();
+                    });
+                }
+                else if (host.isBitwigStudio())
+                {
+                    resizeHostWindow();
+                    setTopLeftPosition (0, 0);
+                }
+            }
+          #endif
+
             std::unique_ptr<AudioProcessorEditor> pluginEditor;
 
         private:
@@ -1107,6 +1182,8 @@ private:
             Rectangle<int> lastBounds;
             bool isResizingChildToFitParent = false;
             bool isResizingParentToFitChild = false;
+
+            float nativeScaleFactor = 1.0f;
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentWrapperComponent)
         };
