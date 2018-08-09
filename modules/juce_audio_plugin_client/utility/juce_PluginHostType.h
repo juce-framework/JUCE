@@ -67,6 +67,7 @@ public:
         DigitalPerformer,           /**< Represents Digital Performer. */
         FinalCut,                   /**< Represents Apple Final Cut Pro. */
         FruityLoops,                /**< Represents Fruity Loops. */
+        JUCEPluginHost,             /**< Represents the JUCE AudioPluginHost */
         MagixSamplitude,            /**< Represents Magix Samplitude. */
         MagixSequoia,               /**< Represents Magix Sequoia. */
         MergingPyramix,             /**< Represents Merging Pyramix. */
@@ -128,6 +129,8 @@ public:
     bool isFruityLoops() const noexcept       { return type == FruityLoops; }
     /** Returns true if the host is Apple GarageBand. */
     bool isGarageBand() const noexcept        { return type == AppleGarageBand; }
+    /** Returns true if the host is the JUCE AudioPluginHost */
+    bool isJUCEPluginHost() const noexcept    { return type == JUCEPluginHost; }
     /** Returns true if the host is Apple Logic Pro. */
     bool isLogic() const noexcept             { return type == AppleLogic; }
     /** Returns true if the host is Apple MainStage. */
@@ -197,6 +200,7 @@ public:
             case DigitalPerformer:         return "DigitalPerformer";
             case FinalCut:                 return "Final Cut";
             case FruityLoops:              return "FruityLoops";
+            case JUCEPluginHost:           return "JUCE AudioPluginHost";
             case MagixSamplitude:          return "Magix Samplitude";
             case MagixSequoia:             return "Magix Sequoia";
             case MergingPyramix:           return "Pyramix";
@@ -314,6 +318,7 @@ private:
         if (hostFilename.containsIgnoreCase   ("Resolve"))           return DaVinciResolve;
         if (hostFilename.startsWith           ("Bitwig"))            return BitwigStudio;
         if (hostFilename.containsIgnoreCase   ("OsxFL"))             return FruityLoops;
+        if (hostFilename.containsIgnoreCase   ("AudioPluginHost"))   return JUCEPluginHost;
 
        #elif JUCE_WINDOWS
         if (hostFilename.containsIgnoreCase   ("Live 6."))           return AbletonLive6;
@@ -363,12 +368,14 @@ private:
         if (hostFilename.containsIgnoreCase   ("Resolve"))           return DaVinciResolve;
         if (hostPath.containsIgnoreCase       ("Bitwig Studio"))     return BitwigStudio;
         if (hostFilename.containsIgnoreCase   ("Sadie"))             return SADiE;
+        if (hostFilename.containsIgnoreCase   ("AudioPluginHost"))   return JUCEPluginHost;
 
        #elif JUCE_LINUX
         if (hostFilename.containsIgnoreCase   ("Ardour"))            return Ardour;
         if (hostFilename.startsWithIgnoreCase ("Waveform"))          return TracktionWaveform;
         if (hostFilename.containsIgnoreCase   ("Tracktion"))         return TracktionGeneric;
         if (hostFilename.startsWith           ("Bitwig"))            return BitwigStudio;
+        if (hostFilename.containsIgnoreCase   ("AudioPluginHost"))   return JUCEPluginHost;
 
        #elif JUCE_IOS
        #elif JUCE_ANDROID
