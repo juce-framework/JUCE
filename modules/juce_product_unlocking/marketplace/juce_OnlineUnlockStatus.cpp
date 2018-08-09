@@ -207,6 +207,9 @@ static var machineNumberAllowed (StringArray numbersFromKeyFile,
                 if (result)
                     break;
             }
+
+            if (result)
+                break;
         }
     }
 
