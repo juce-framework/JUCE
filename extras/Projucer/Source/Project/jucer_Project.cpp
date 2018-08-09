@@ -909,7 +909,8 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
                "The name of the project.");
 
     props.add (new TextPropertyComponent (versionValue, "Project Version", 16, false),
-               "The project's version number, This should be in the format major.minor.point[.point]");
+               "The project's version number. This should be in the format major.minor.point[.point] where you should omit the final "
+               "(optional) [.point] if you are targetting AU and AUv3 plug-ins as they only support three number versions.");
 
     props.add (new TextPropertyComponent (companyNameValue, "Company Name", 256, false),
                "Your company name, which will be added to the properties of the binary where possible");
@@ -1106,7 +1107,7 @@ int Project::getVersionAsHexInteger() const
                + (segments[1].getIntValue() << 8)
                +  segments[2].getIntValue();
 
-    if (segments.size() >= 4)
+    if (segments.size() > 3)
         value = (value << 8) + segments[3].getIntValue();
 
     return value;
