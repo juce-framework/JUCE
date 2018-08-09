@@ -51,7 +51,6 @@ public:
 /**
     Describes and controls aspects of the computer's desktop.
 
-
     @tags{GUI}
 */
 class JUCE_API  Desktop  : private DeletedAtShutdown,
@@ -327,69 +326,6 @@ public:
     bool isOrientationEnabled (DisplayOrientation orientation) const noexcept;
 
     //==============================================================================
-    /** Manages details about connected display devices */
-    class JUCE_API  Displays
-    {
-    public:
-        /** Contains details about a display device. */
-        struct Display
-        {
-            /** This is the bounds of the area of this display which isn't covered by
-                OS-dependent objects like the taskbar, menu bar, etc. */
-            Rectangle<int> userArea;
-
-            /** This is the total physical area of this display, including any taskbars, etc */
-            Rectangle<int> totalArea;
-
-            /** This is the scale-factor of this display.
-                If you create a component with size 1x1, this scale factor indicates the actual
-                size of the component in terms of physical pixels.
-                For higher-resolution displays, it may be a value greater than 1.0
-            */
-            double scale;
-
-            /** The DPI of the display.
-                This is the number of physical pixels per inch. To get the number of logical
-                pixels per inch, divide this by the Display::scale value.
-            */
-            double dpi;
-
-            /** This will be true if this is the user's main screen. */
-            bool isMain;
-        };
-
-        /** Returns the display which acts as user's main screen. */
-        const Display& getMainDisplay() const noexcept;
-
-        /** Returns the display which contains a particular point.
-            If the point lies outside all the displays, the nearest one will be returned.
-        */
-        const Display& getDisplayContaining (Point<int> position) const noexcept;
-
-        /** Returns a RectangleList made up of all the displays. */
-        RectangleList<int> getRectangleList (bool userAreasOnly) const;
-
-        /** Returns the smallest bounding box which contains all the displays. */
-        Rectangle<int> getTotalBounds (bool userAreasOnly) const;
-
-        /** The list of displays. */
-        Array<Display> displays;
-
-       #ifndef DOXYGEN
-        /** @internal */
-        void refresh();
-        /** @internal */
-        ~Displays();
-       #endif
-
-    private:
-        friend class Desktop;
-        Displays (Desktop&);
-
-        void init (Desktop&);
-        void findDisplays (float masterScale);
-    };
-
     const Displays& getDisplays() const noexcept        { return *displays; }
 
     //==============================================================================

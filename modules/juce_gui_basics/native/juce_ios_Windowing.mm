@@ -730,7 +730,7 @@ Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
     return Orientations::convertToJuce (orientation);
 }
 
-void Desktop::Displays::findDisplays (float masterScale)
+void Displays::findDisplays (float masterScale)
 {
     JUCE_AUTORELEASEPOOL
     {

@@ -758,7 +758,7 @@ public:
     //==============================================================================
     struct ExtendedInfo
     {
-        // Unlike Desktop::Displays::Display, the following is in
+        // Unlike Displays::Display, the following is in
         // physical pixels, i.e. the area is not scaled
         Rectangle<int> totalBounds;
         // Usable bounds is the usable area in local coordinates
@@ -3779,7 +3779,7 @@ ComponentPeer* Component::createNewPeer (int styleFlags, void* nativeWindowToAtt
 }
 
 //==============================================================================
-void Desktop::Displays::findDisplays (float masterScale)
+void Displays::findDisplays (float masterScale)
 {
     ScopedXDisplay xDisplay;
 
@@ -3806,7 +3806,7 @@ void Desktop::Displays::findDisplays (float masterScale)
         {
             auto& info = geometry.infos.getReference (mainDisplayIdx);
 
-            Desktop::Displays::Display d;
+            Displays::Display d;
             d.isMain = true;
             d.scale = masterScale * info.scale;
             d.dpi = info.dpi;
@@ -3824,7 +3824,7 @@ void Desktop::Displays::findDisplays (float masterScale)
 
             auto& info = geometry.infos.getReference (i);
 
-            Desktop::Displays::Display d;
+            Displays::Display d;
             d.isMain = false;
             d.scale = masterScale * info.scale;
             d.dpi = info.dpi;

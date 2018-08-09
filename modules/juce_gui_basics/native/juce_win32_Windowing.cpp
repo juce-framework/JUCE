@@ -2998,7 +2998,7 @@ private:
 
     static void forceDisplayUpdate()
     {
-        const_cast<Desktop::Displays&> (Desktop::getInstance().getDisplays()).refresh();
+        const_cast<Displays&> (Desktop::getInstance().getDisplays()).refresh();
     }
 
     void handleDPIChange() // happens when a window moves to a screen with a different DPI.
@@ -4033,7 +4033,7 @@ static BOOL CALLBACK enumMonitorsProc (HMONITOR hm, HDC, LPRECT r, LPARAM userIn
     return TRUE;
 }
 
-void Desktop::Displays::findDisplays (float masterScale)
+void Displays::findDisplays (float masterScale)
 {
     setDPIAwareness();
 

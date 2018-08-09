@@ -92,8 +92,7 @@ void TooltipWindow::displayTip (Point<int> screenPos, const String& tip)
         }
         else
         {
-            updatePosition (tip, screenPos, Desktop::getInstance().getDisplays()
-                                                .getDisplayContaining (screenPos).userArea);
+            updatePosition (tip, screenPos, Desktop::getInstance().getDisplays().findDisplayForPoint (screenPos).userArea);
 
             addToDesktop (ComponentPeer::windowHasDropShadow
                             | ComponentPeer::windowIsTemporary

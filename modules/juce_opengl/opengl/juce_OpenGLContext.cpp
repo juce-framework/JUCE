@@ -282,8 +282,7 @@ public:
         {
             lastScreenBounds = component.getTopLevelComponent()->getScreenBounds();
 
-            auto newScale = Desktop::getInstance().getDisplays()
-                              .getDisplayContaining (lastScreenBounds.getCentre()).scale;
+            auto newScale = Desktop::getInstance().getDisplays().findDisplayForRect (lastScreenBounds).scale;
 
             auto localBounds = component.getLocalBounds();
 

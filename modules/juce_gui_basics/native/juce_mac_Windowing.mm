@@ -477,7 +477,7 @@ struct DisplaySettingsChangeCallback  : private DeletedAtShutdown
 
     static void displayReconfigurationCallBack (CGDirectDisplayID, CGDisplayChangeSummaryFlags, void*)
     {
-        const_cast<Desktop::Displays&> (Desktop::getInstance().getDisplays()).refresh();
+        const_cast<Displays&> (Desktop::getInstance().getDisplays()).refresh();
     }
 
     JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (DisplaySettingsChangeCallback)
@@ -493,9 +493,9 @@ static Rectangle<int> convertDisplayRect (NSRect r, CGFloat mainScreenBottom)
     return convertToRectInt (r);
 }
 
-static Desktop::Displays::Display getDisplayFromScreen (NSScreen* s, CGFloat& mainScreenBottom, const float masterScale)
+static Displays::Display getDisplayFromScreen (NSScreen* s, CGFloat& mainScreenBottom, const float masterScale)
 {
-    Desktop::Displays::Display d;
+    Displays::Display d;
 
     d.isMain = (mainScreenBottom == 0);
 
@@ -517,7 +517,7 @@ static Desktop::Displays::Display getDisplayFromScreen (NSScreen* s, CGFloat& ma
     return d;
 }
 
-void Desktop::Displays::findDisplays (const float masterScale)
+void Displays::findDisplays (const float masterScale)
 {
     JUCE_AUTORELEASEPOOL
     {

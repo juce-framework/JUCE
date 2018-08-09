@@ -1034,7 +1034,7 @@ bool juce_areThereAnyAlwaysOnTopWindows()
 }
 
 //==============================================================================
-void Desktop::Displays::findDisplays (float masterScale)
+void Displays::findDisplays (float masterScale)
 {
     Display d;
 
@@ -1057,7 +1057,7 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, setScreenSize, void, (JNIEnv
     android.screenHeight = screenHeight;
     android.dpi = dpi;
 
-    const_cast<Desktop::Displays&> (Desktop::getInstance().getDisplays()).refresh();
+    const_cast<Displays&> (Desktop::getInstance().getDisplays()).refresh();
 }
 
 //==============================================================================

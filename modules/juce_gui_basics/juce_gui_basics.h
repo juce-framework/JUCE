@@ -148,6 +148,7 @@ namespace juce
     class KeyPressMappingSet;
     class ApplicationCommandManagerListener;
     class DrawableButton;
+    class Displays;
 
     class FlexBox;
     #if JUCE_HAS_CONSTEXPR
@@ -168,7 +169,8 @@ namespace juce
 #include "components/juce_CachedComponentImage.h"
 #include "components/juce_Component.h"
 #include "layout/juce_ComponentAnimator.h"
-#include "components/juce_Desktop.h"
+#include "desktop/juce_Desktop.h"
+#include "desktop/juce_Displays.h"
 #include "layout/juce_ComponentBoundsConstrainer.h"
 #include "mouse/juce_ComponentDragger.h"
 #include "mouse/juce_DragAndDropTarget.h"
