@@ -410,6 +410,13 @@ struct GraphEditorPanel::FilterComponent   : public Component,
             menu->addItem (10, "Show plugin GUI");
             menu->addItem (11, "Show all programs");
             menu->addItem (12, "Show all parameters");
+           #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+            auto isTicked = false;
+            if (auto* node = graph.graph.getNodeForId (pluginID))
+                isTicked = node->properties["DPIAware"];
+
+            menu->addItem (13, "Enable DPI awareness", true, isTicked);
+           #endif
         }
 
         menu->addSeparator();
@@ -433,7 +440,13 @@ struct GraphEditorPanel::FilterComponent   : public Component,
             }
             case 10:  showWindow (PluginWindow::Type::normal); break;
             case 11:  showWindow (PluginWindow::Type::programs); break;
-            case 12:  showWindow (PluginWindow::Type::generic); break;
+            case 12:  showWindow (PluginWindow::Type::generic)  ; break;
+            case 13:
+            {
+                if (auto* node = graph.graph.getNodeForId (pluginID))
+                    node->properties.set ("DPIAware", ! node->properties ["DPIAware"]);
+                break;
+            }
             case 20:  showWindow (PluginWindow::Type::audioIO); break;
             case 21:  testStateSaveLoad(); break;
 
