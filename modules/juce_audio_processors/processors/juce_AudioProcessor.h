@@ -898,7 +898,7 @@ public:
     /** Returns the parameter that controls the AudioProcessor's bypass state.
 
         If this method returns a nullptr then you can still control the bypass by
-        calling processBlockBypassed instaed of processBlock. On the other hand,
+        calling processBlockBypassed instead of processBlock. On the other hand,
         if this method returns a non-null value, you should never call
         processBlockBypassed but use the returned parameter to conrol the bypass
         state instead.
