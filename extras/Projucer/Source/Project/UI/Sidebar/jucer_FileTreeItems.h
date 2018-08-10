@@ -730,7 +730,7 @@ public:
 
     static void setFilesToCompile (Project::Item item, const bool shouldCompile)
     {
-        if (item.isFile())
+        if (item.isFile() && (item.getFile().hasFileExtension (fileTypesToCompileByDefault)))
             item.getShouldCompileValue() = shouldCompile;
 
         for (auto i = item.getNumChildren(); --i >= 0;)
