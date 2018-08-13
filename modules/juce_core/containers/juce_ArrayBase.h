@@ -178,12 +178,14 @@ public:
     //==============================================================================
     void add (const ElementType& newElement)
     {
+        checkSourceIsNotAMember (&newElement);
         ensureAllocatedSize (numUsed + 1);
         addAssumingCapacityIsReady (newElement);
     }
 
     void add (ElementType&& newElement)
     {
+        checkSourceIsNotAMember (&newElement);
         ensureAllocatedSize (numUsed + 1);
         addAssumingCapacityIsReady (std::move (newElement));
     }
@@ -191,6 +193,7 @@ public:
     template <typename... OtherElements>
     void add (const ElementType& firstNewElement, OtherElements... otherElements)
     {
+        checkSourceIsNotAMember (&firstNewElement);
         ensureAllocatedSize (numUsed + 1 + (int) sizeof... (otherElements));
         addAssumingCapacityIsReady (firstNewElement, otherElements...);
     }
@@ -198,6 +201,7 @@ public:
     template <typename... OtherElements>
     void add (ElementType&& firstNewElement, OtherElements... otherElements)
     {
+        checkSourceIsNotAMember (&firstNewElement);
         ensureAllocatedSize (numUsed + 1 + (int) sizeof... (otherElements));
         addAssumingCapacityIsReady (std::move (firstNewElement), otherElements...);
     }
@@ -223,6 +227,7 @@ public:
     template <class OtherArrayType>
     void addArray (const OtherArrayType& arrayToAddFrom)
     {
+        jassert ((const void*) this != (const void*) &arrayToAddFrom); // can't add from our own elements!
         ensureAllocatedSize (numUsed + (int) arrayToAddFrom.size());
 
         for (auto& e : arrayToAddFrom)
@@ -234,6 +239,8 @@ public:
     addArray (const OtherArrayType& arrayToAddFrom,
               int startIndex, int numElementsToAdd = -1)
     {
+        jassert ((const void*) this != (const void*) &arrayToAddFrom); // can't add from our own elements!
+
         if (startIndex < 0)
         {
             jassertfalse;
@@ -251,6 +258,7 @@ public:
     //==============================================================================
     void insert (int indexToInsertAt, ParameterType newElement, int numberOfTimesToInsertIt)
     {
+        checkSourceIsNotAMember (&newElement);
         auto* space = createInsertSpace (indexToInsertAt, numberOfTimesToInsertIt);
 
         for (int i = 0; i < numberOfTimesToInsertIt; ++i)
@@ -500,6 +508,17 @@ private:
     {
         destination->~ElementType();
         new (destination) ElementType (std::move (source));
+    }
+
+    void checkSourceIsNotAMember (const ElementType* element)
+    {
+        // when you pass a reference to an existing element into a method like add() which
+        // may need to reallocate the array to make more space, the incoming reference may
+        // be deleted indirectly during the reallocation operation! To work around this,
+        // make a local copy of the item you're trying to add (and maybe use std::move to
+        // move it into the add() method to avoid any extra overhead)
+        jassert (element < begin() || element >= end());
+        ignoreUnused (element);
     }
 
     //==============================================================================

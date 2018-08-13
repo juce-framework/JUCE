@@ -187,10 +187,7 @@ public:
 
     //==============================================================================
     /** Appends a string at the end of the array. */
-    void add (const String& stringToAdd);
-
-    /** Appends a string at the end of the array. */
-    void add (String&& stringToAdd);
+    void add (String stringToAdd);
 
     /** Inserts a string into the array.
 
@@ -199,7 +196,7 @@ public:
         If the index is less than zero or greater than the size of the array,
         the new string will be added to the end of the array.
     */
-    void insert (int index, const String& stringToAdd);
+    void insert (int index, String stringToAdd);
 
     /** Adds a string to the array as long as it's not already in there.
         The search can optionally be case-insensitive.
@@ -213,7 +210,7 @@ public:
         If the index is higher than the array's size, the new string will be
         added to the end of the array; if it's less than zero nothing happens.
     */
-    void set (int index, const String& newString);
+    void set (int index, String newString);
 
     /** Appends some strings from another array to the end of this one.
 
