@@ -405,27 +405,25 @@ static void setDPIAwareness()
         setProcessDPIAware();
 }
 
-static bool isPerMonitorDPIAwareProcess()
-{
-    static bool dpiAware = []() -> bool
-    {
-       #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-        setDPIAwareness();
+#if JUCE_WIN_PER_MONITOR_DPI_AWARE
+ static bool isPerMonitorDPIAwareProcess()
+ {
+     static bool dpiAware = []() -> bool
+     {
+         setDPIAwareness();
 
-        if (getProcessDPIAwareness == nullptr)
-            return false;
+         if (getProcessDPIAwareness == nullptr)
+             return false;
 
-        DPI_Awareness context;
-        getProcessDPIAwareness (0, &context);
+         DPI_Awareness context;
+         getProcessDPIAwareness (0, &context);
 
-        return context == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware;
-       #else
-        return false;
-       #endif
-    }();
+         return context == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware;
+     }();
 
-    return dpiAware;
-}
+     return dpiAware;
+ }
+#endif
 
 static bool isPerMonitorDPIAwareWindow (HWND h)
 {
