@@ -244,12 +244,15 @@ extern void* getUser32Function (const char*);
      MDT_Raw_DPI       = 2,
      MDT_Default       = MDT_Effective_DPI
  };
+#endif
 
- enum Process_DPI_Awareness
+#ifndef DPI_AWARENESS
+ enum DPI_Awareness
  {
-     Process_DPI_Unaware           = 0,
-     Process_System_DPI_Aware      = 1,
-     Process_Per_Monitor_DPI_Aware = 2
+     DPI_Awareness_Invalid           = -1,
+     DPI_Awareness_Unaware           = 0,
+     DPI_Awareness_System_Aware      = 1,
+     DPI_Awareness_Per_Monitor_Aware = 2
  };
 #endif
 
@@ -319,14 +322,14 @@ static void checkForPointerAPI()
 //==============================================================================
 typedef BOOL                  (WINAPI* SetProcessDPIAwareFunc)                  ();
 typedef BOOL                  (WINAPI* SetProcessDPIAwarenessContextFunc)       (DPI_AWARENESS_CONTEXT);
-typedef BOOL                  (WINAPI* SetProcessDPIAwarenessFunc)              (Process_DPI_Awareness);
+typedef BOOL                  (WINAPI* SetProcessDPIAwarenessFunc)              (DPI_Awareness);
 typedef DPI_AWARENESS_CONTEXT (WINAPI* SetThreadDPIAwarenessContextFunc)        (DPI_AWARENESS_CONTEXT);
 typedef HRESULT               (WINAPI* GetDPIForMonitorFunc)                    (HMONITOR, Monitor_DPI_Type, UINT*, UINT*);
 typedef UINT                  (WINAPI* GetDPIForWindowFunc)                     (HWND);
-typedef HRESULT               (WINAPI* GetProcessDPIAwarenessFunc)              (HANDLE, Process_DPI_Awareness*);
+typedef HRESULT               (WINAPI* GetProcessDPIAwarenessFunc)              (HANDLE, DPI_Awareness*);
 typedef DPI_AWARENESS_CONTEXT (WINAPI* GetWindowDPIAwarenessContextFunc)        (HWND);
 typedef DPI_AWARENESS_CONTEXT (WINAPI* GetThreadDPIAwarenessContextFunc)        ();
-typedef Process_DPI_Awareness (WINAPI* GetAwarenessFromDpiAwarenessContextFunc) (DPI_AWARENESS_CONTEXT);
+typedef DPI_Awareness         (WINAPI* GetAwarenessFromDpiAwarenessContextFunc) (DPI_AWARENESS_CONTEXT);
 typedef BOOL                  (WINAPI* EnableNonClientDPIScalingFunc)           (HWND);
 
 static SetProcessDPIAwareFunc                  setProcessDPIAware                  = nullptr;
@@ -362,64 +365,67 @@ static void setDPIAwareness()
         getDPIForMonitor = (GetDPIForMonitorFunc) GetProcAddress (shcoreModule, "GetDpiForMonitor");
 
        #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-        getDPIForWindow = (GetDPIForWindowFunc) getUser32Function ("GetDpiForWindow");
-        getProcessDPIAwareness = (GetProcessDPIAwarenessFunc) GetProcAddress (shcoreModule, "GetProcessDpiAwareness");
-        getWindowDPIAwarenessContext = (GetWindowDPIAwarenessContextFunc) getUser32Function ("GetWindowDpiAwarenessContext");
-        getThreadDPIAwarenessContext = (GetThreadDPIAwarenessContextFunc) getUser32Function ("GetThreadDpiAwarenessContext");
+        getDPIForWindow                     = (GetDPIForWindowFunc) getUser32Function ("GetDpiForWindow");
+        getProcessDPIAwareness              = (GetProcessDPIAwarenessFunc) GetProcAddress (shcoreModule, "GetProcessDpiAwareness");
+        getWindowDPIAwarenessContext        = (GetWindowDPIAwarenessContextFunc) getUser32Function ("GetWindowDpiAwarenessContext");
+        getThreadDPIAwarenessContext        = (GetThreadDPIAwarenessContextFunc) getUser32Function ("GetThreadDpiAwarenessContext");
         getAwarenessFromDPIAwarenessContext = (GetAwarenessFromDpiAwarenessContextFunc) getUser32Function ("GetAwarenessFromDpiAwarenessContext");
-        setThreadDPIAwarenessContext = (SetThreadDPIAwarenessContextFunc)getUser32Function ("SetThreadDpiAwarenessContext");
+        setThreadDPIAwarenessContext        = (SetThreadDPIAwarenessContextFunc) getUser32Function ("SetThreadDpiAwarenessContext");
 
         // Only set the DPI awareness context of the process if we are a standalone app
         if (! JUCEApplicationBase::isStandaloneApp())
             return;
 
-        if (getDPIForWindow != nullptr && getProcessDPIAwareness != nullptr)
-        {
-            setProcessDPIAwarenessContext = (SetProcessDPIAwarenessContextFunc) getUser32Function ("SetProcessDpiAwarenessContext");
+        setProcessDPIAwarenessContext = (SetProcessDPIAwarenessContextFunc) getUser32Function ("SetProcessDpiAwarenessContext");
 
-            if (setProcessDPIAwarenessContext != nullptr
-                 && SUCCEEDED (setProcessDPIAwarenessContext (DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2)))
-                return;
+        if (setProcessDPIAwarenessContext != nullptr
+            && SUCCEEDED (setProcessDPIAwarenessContext (DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2)))
+            return;
 
-            setProcessDPIAwareness = (SetProcessDPIAwarenessFunc) GetProcAddress (shcoreModule, "SetProcessDpiAwareness");
-            enableNonClientDPIScaling = (EnableNonClientDPIScalingFunc) getUser32Function ("EnableNonClientDpiScaling");
+        setProcessDPIAwareness    = (SetProcessDPIAwarenessFunc) GetProcAddress (shcoreModule, "SetProcessDpiAwareness");
+        enableNonClientDPIScaling = (EnableNonClientDPIScalingFunc) getUser32Function ("EnableNonClientDpiScaling");
 
-            if (setProcessDPIAwareness != nullptr && enableNonClientDPIScaling != nullptr
-                 && SUCCEEDED (setProcessDPIAwareness (Process_Per_Monitor_DPI_Aware)))
-                    return;
-        }
+        if (setProcessDPIAwareness != nullptr && enableNonClientDPIScaling != nullptr
+            && SUCCEEDED (setProcessDPIAwareness (DPI_Awareness::DPI_Awareness_Per_Monitor_Aware)))
+            return;
        #endif
 
         if (setProcessDPIAwareness == nullptr)
             setProcessDPIAwareness = (SetProcessDPIAwarenessFunc) GetProcAddress (shcoreModule, "SetProcessDpiAwareness");
 
         if (setProcessDPIAwareness != nullptr && getDPIForMonitor != nullptr
-             && SUCCEEDED (setProcessDPIAwareness (Process_System_DPI_Aware)))
+             && SUCCEEDED (setProcessDPIAwareness (DPI_Awareness::DPI_Awareness_System_Aware)))
             return;
     }
 
     // fallback for pre Windows 8.1 - equivalent to Process_System_DPI_Aware
     setProcessDPIAware = (SetProcessDPIAwareFunc) getUser32Function ("SetProcessDPIAware");
 
-    if (setProcessDPIAware != nullptr && JUCEApplicationBase::isStandaloneApp())
+    if (setProcessDPIAware != nullptr)
         setProcessDPIAware();
 }
 
-#if JUCE_WIN_PER_MONITOR_DPI_AWARE && JUCE_MODULE_AVAILABLE_juce_gui_extra
- ScopedDPIAwarenessDisabler::ScopedDPIAwarenessDisabler()
- {
-     jassert (setThreadDPIAwarenessContext != nullptr);
+static bool isPerMonitorDPIAwareProcess()
+{
+    static bool dpiAware = []() -> bool
+    {
+       #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+        setDPIAwareness();
 
-     previousContext = setThreadDPIAwarenessContext (DPI_AWARENESS_CONTEXT_UNAWARE);
- }
+        if (getProcessDPIAwareness == nullptr)
+            return false;
 
- ScopedDPIAwarenessDisabler::~ScopedDPIAwarenessDisabler()
- {
-     jassert (previousContext != nullptr);
+        DPI_Awareness context;
+        getProcessDPIAwareness (0, &context);
 
-     setThreadDPIAwarenessContext ((DPI_AWARENESS_CONTEXT) previousContext);
- }
-#endif
+        return context == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware;
+       #else
+        return false;
+       #endif
+    }();
+
+    return dpiAware;
+}
 
 static bool isPerMonitorDPIAwareWindow (HWND h)
 {
@@ -429,9 +435,9 @@ static bool isPerMonitorDPIAwareWindow (HWND h)
     setDPIAwareness();
 
     if (getWindowDPIAwarenessContext != nullptr && getAwarenessFromDPIAwarenessContext != nullptr)
-        return getAwarenessFromDPIAwarenessContext (getWindowDPIAwarenessContext (h)) == Process_DPI_Awareness::Process_Per_Monitor_DPI_Aware;
+        return getAwarenessFromDPIAwarenessContext (getWindowDPIAwarenessContext (h)) == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware;
 
-    return false;
+    return isPerMonitorDPIAwareProcess();
    #else
     ignoreUnused (h);
     return false;
@@ -444,9 +450,9 @@ static bool isPerMonitorDPIAwareWindow (HWND h)
      setDPIAwareness();
 
      if (getThreadDPIAwarenessContext != nullptr && getAwarenessFromDPIAwarenessContext != nullptr)
-         return getAwarenessFromDPIAwarenessContext (getThreadDPIAwarenessContext()) == Process_DPI_Awareness::Process_Per_Monitor_DPI_Aware;
+         return getAwarenessFromDPIAwarenessContext (getThreadDPIAwarenessContext()) == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware;
 
-     return false;
+     return isPerMonitorDPIAwareProcess();
  }
 #endif
 
@@ -459,6 +465,24 @@ static double getGlobalDPI()
     ReleaseDC (0, dc);
     return dpi;
 }
+
+//==============================================================================
+#if JUCE_WIN_PER_MONITOR_DPI_AWARE && JUCE_MODULE_AVAILABLE_juce_gui_extra
+ ScopedDPIAwarenessDisabler::ScopedDPIAwarenessDisabler()
+ {
+     if (! isPerMonitorDPIAwareThread())
+         return;
+
+     if (setThreadDPIAwarenessContext != nullptr)
+         previousContext = setThreadDPIAwarenessContext (DPI_AWARENESS_CONTEXT_UNAWARE);
+ }
+
+ ScopedDPIAwarenessDisabler::~ScopedDPIAwarenessDisabler()
+ {
+     if (previousContext != nullptr)
+         setThreadDPIAwarenessContext ((DPI_AWARENESS_CONTEXT)previousContext);
+ }
+#endif
 
 //==============================================================================
 typedef void (*SettingChangeCallbackFunc) (void);
@@ -1321,6 +1345,7 @@ public:
         if (! hasMoved)    flags |= SWP_NOMOVE;
         if (! hasResized)  flags |= SWP_NOSIZE;
 
+       #if JUCE_WIN_PER_MONITOR_DPI_AWARE
         if (isPerMonitorDPIAwareWindow (hwnd))
         {
             auto newScaleFactor = getScaleFactorForNewBounds (newBounds);
@@ -1332,6 +1357,7 @@ public:
                 handleScaleFactorChange();
             }
         }
+       #endif
 
         setWindowPos (hwnd, newBounds, flags);
 
@@ -1352,8 +1378,10 @@ public:
             auto localBounds = Rectangle<int>::leftTopRightBottom (bounds.left, bounds.top,
                                                                    bounds.right, bounds.bottom).translated (-r.left, -r.top);
 
+           #if JUCE_WIN_PER_MONITOR_DPI_AWARE
             if (isPerMonitorDPIAwareWindow (hwnd))
                 localBounds = (localBounds.toDouble() / getScaleFactorForWindow (hwnd)).toNearestInt();
+           #endif
 
             return windowBorder.subtractedFrom (localBounds);
         }
@@ -1803,6 +1831,7 @@ public:
 
     double getPlatformScaleFactor() const noexcept override
     {
+       #if JUCE_WIN_PER_MONITOR_DPI_AWARE
         if (! isPerMonitorDPIAwareWindow (hwnd))
             return 1.0;
 
@@ -1811,10 +1840,14 @@ public:
             if (auto* parentPeer = getOwnerOfWindow (parentHWND))
                 return parentPeer->getPlatformScaleFactor();
 
-            return (double) getDPIForWindow (parentHWND) / USER_DEFAULT_SCREEN_DPI;
+            if (getDPIForWindow != nullptr)
+                return (double) getDPIForWindow (parentHWND) / USER_DEFAULT_SCREEN_DPI;
         }
 
         return scaleFactor;
+       #else
+        return 1.0;
+       #endif
     }
 
 private:
@@ -3198,6 +3231,7 @@ private:
                 return true;
         }
 
+       #if JUCE_WIN_PER_MONITOR_DPI_AWARE
         if (isPerMonitorDPIAwareWindow (hwnd))
         {
             auto newScaleFactor = getScaleFactorForNewBounds (convertPhysicalScreenRectangleToLogical (rectangleFromRECT (getWindowRect (hwnd)), hwnd));
@@ -3212,6 +3246,7 @@ private:
                 handleScaleFactorChange();
             }
         }
+       #endif
 
         handleMovedOrResized();
 
@@ -3433,6 +3468,7 @@ private:
 
     Point<float> getPointFromLocalLParam (LPARAM lParam) noexcept
     {
+       #if JUCE_WIN_PER_MONITOR_DPI_AWARE
         if (isPerMonitorDPIAwareWindow (hwnd))
         {
             // LPARAM is relative to this window's top-left but may be on a different monitor so we need to calculate the
@@ -3443,6 +3479,7 @@ private:
             return globalToLocal (convertPhysicalScreenPointToLogical (pointFromPOINT ({ r.left + localPos.x + roundToInt (windowBorder.getLeft() * scaleFactor),
                                                                                          r.top  + localPos.y + roundToInt (windowBorder.getTop()  * scaleFactor) }), hwnd).toFloat());
         }
+       #endif
 
         return { static_cast<float> (GET_X_LPARAM (lParam)), static_cast<float> (GET_Y_LPARAM (lParam)) };
     }
@@ -4448,8 +4485,8 @@ void Displays::findDisplays (float masterScale)
     // this will be reset to the previous context at the end.
     DPI_AWARENESS_CONTEXT prevContext = nullptr;
 
-    if (getAwarenessFromDPIAwarenessContext (getThreadDPIAwarenessContext()) != Process_DPI_Awareness::Process_Per_Monitor_DPI_Aware
-        && setThreadDPIAwarenessContext != nullptr)
+    if (setThreadDPIAwarenessContext != nullptr && getAwarenessFromDPIAwarenessContext != nullptr && getThreadDPIAwarenessContext != nullptr
+        && getAwarenessFromDPIAwarenessContext (getThreadDPIAwarenessContext()) != DPI_Awareness::DPI_Awareness_Per_Monitor_Aware)
         prevContext = setThreadDPIAwarenessContext (DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
    #endif
 
