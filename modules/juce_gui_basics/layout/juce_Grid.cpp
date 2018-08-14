@@ -533,9 +533,9 @@ struct Grid::AutoPlacement
     {
         struct Cell { int column, row; };
 
-        OccupancyPlane (int highestColumnToUse, int highestRowToUse, bool isColoumnFirst)
-            : highestCrossDimension (isColoumnFirst ? highestRowToUse : highestColumnToUse),
-              columnFirst (isColoumnFirst)
+        OccupancyPlane (int highestColumnToUse, int highestRowToUse, bool isColumnFirst)
+            : highestCrossDimension (isColumnFirst ? highestRowToUse : highestColumnToUse),
+              columnFirst (isColumnFirst)
         {}
 
         Grid::PlacementHelpers::LineArea setCell (Cell cell, int columnSpan, int rowSpan)
