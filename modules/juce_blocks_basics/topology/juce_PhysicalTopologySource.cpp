@@ -662,6 +662,12 @@ struct PhysicalTopologySource::Internal
                 detector.handleConfigFactorySyncEndMessage (deviceID);
         }
 
+        void handleConfigFactorySyncResetMessage (BlocksProtocol::TopologyIndex deviceIndex)
+        {
+            if (auto deviceID = getDeviceIDFromMessageIndex (deviceIndex))
+                detector.handleConfigFactorySyncResetMessage (deviceID);
+        }
+
         void handleLogMessage (BlocksProtocol::TopologyIndex deviceIndex, const String& message)
         {
             if (auto deviceID = getDeviceIDFromMessageIndex (deviceIndex))
@@ -1025,6 +1031,14 @@ struct PhysicalTopologySource::Internal
                 if (b->uid == deviceID)
                     if (auto bi = BlockImplementation::getFrom (*b))
                         notifyBlockOfConfigChange (*bi, bi->getMaxConfigIndex());
+        }
+
+        void handleConfigFactorySyncResetMessage (Block::UID deviceID)
+        {
+            for (auto&& b : currentTopology.blocks)
+                if (b->uid == deviceID)
+                    if (auto bi = BlockImplementation::getFrom (*b))
+                        bi->resetConfigListActiveStatus();
         }
 
         void handleLogMessage (Block::UID deviceID, const String& message) const
