@@ -6,6 +6,29 @@ Develop
 
 Change
 ------
+SystemStats::getDeviceDescription() will now return the device code on iOS e.g. 
+"iPhone7, 2" for an iPhone 6 instead of just "iPhone".
+
+Possible Issues
+---------------
+Code that previously relied on this method returning either explicitly "iPhone" 
+or "iPad" may no longer work.
+
+Workaround
+----------
+Modify this code to handle the new device code string e.g. by changing:
+SystemStats::getDeviceDescription() == "iPhone"; 
+to 
+SystemStats::getDeviceDescription().contains ("iPhone");.
+
+Rationale
+---------
+The exact device model can now be deduced from this information instead of just 
+the device family.
+
+
+Change
+------
 DragAndDropContainer::performExternalDragDropOfFiles() and ::performExternalDragDropOfText() 
 are now asynchronous on Windows.
 
