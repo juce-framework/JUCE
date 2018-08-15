@@ -1209,6 +1209,9 @@ private:
                 else
                     di->setTransform (transform);
 
+                di->setBoundingBox ({ (float) xml->getDoubleAttribute ("x", 0.0),     (float) xml->getDoubleAttribute ("y", 0.0),
+                                      (float) xml->getDoubleAttribute ("width", 0.0), (float) xml->getDoubleAttribute ("height", 0.0) });
+
                 return di;
             }
         }
