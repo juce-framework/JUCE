@@ -937,8 +937,7 @@ private:
 
         FillType type (gradient);
 
-        auto gradientTransform = parseTransform (fillXml->getStringAttribute ("gradientTransform"))
-                                   .followedBy (transform);
+        auto gradientTransform = parseTransform (fillXml->getStringAttribute ("gradientTransform"));
 
         if (gradient.isRadial)
         {
