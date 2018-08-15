@@ -140,17 +140,20 @@ String SystemStats::getOperatingSystemName()
 String SystemStats::getDeviceDescription()
 {
    #if JUCE_IOS
-    return nsStringToJuce ([[UIDevice currentDevice] model]);
+    const char* name = "hw.machine";
    #else
+    const char* name = "hw.model";
+   #endif
+
     size_t size;
-    if (sysctlbyname ("hw.model", nullptr, &size, nullptr, 0) >= 0)
+    if (sysctlbyname (name, nullptr, &size, nullptr, 0) >= 0)
     {
         HeapBlock<char> model (size);
-        if (sysctlbyname ("hw.model", model,   &size, nullptr, 0) >= 0)
+        if (sysctlbyname (name, model,   &size, nullptr, 0) >= 0)
             return model.get();
     }
+
     return {};
-   #endif
 }
 
 String SystemStats::getDeviceManufacturer()
