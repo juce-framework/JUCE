@@ -47,15 +47,6 @@ struct BlockConfigManager
     void setDeviceIndex (TopologyIndex newDeviceIndex)                       { deviceIndex = newDeviceIndex; }
     void setDeviceComms (PhysicalTopologySource::DeviceConnection* newConn)  { deviceConnection = newConn; }
 
-    enum ConfigType
-    {
-        integer,
-        floating,
-        boolean,
-        colour,
-        options
-    };
-
     static constexpr uint32 numConfigItems = 64;
 
     /** Structure describing a configuration */
