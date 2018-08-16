@@ -1201,11 +1201,13 @@ private:
                 auto* di = new DrawableImage();
 
                 setCommonAttributes (*di, xml);
-                di->setImage (image);
 
-                di->setTransformToFit ({ (float) xml->getDoubleAttribute ("x", 0.0),     (float) xml->getDoubleAttribute ("y", 0.0),
-                                         (float) xml->getDoubleAttribute ("width", 0.0), (float) xml->getDoubleAttribute ("height", 0.0) },
-                                       RectanglePlacement (parsePlacementFlags (xml->getStringAttribute ("preserveAspectRatio").trim())));
+                Rectangle<float> imageBounds ((float) xml->getDoubleAttribute ("x", 0.0),                  (float) xml->getDoubleAttribute ("y", 0.0),
+                                              (float) xml->getDoubleAttribute ("width", image.getWidth()), (float) xml->getDoubleAttribute ("height", image.getHeight()));
+
+                di->setImage (image.rescaled ((int) imageBounds.getWidth(), (int) imageBounds.getHeight()));
+
+                di->setTransformToFit (imageBounds, RectanglePlacement (parsePlacementFlags (xml->getStringAttribute ("preserveAspectRatio").trim())));
 
                 if (additionalTransform != nullptr)
                     di->setTransform (di->getTransform().followedBy (transform).followedBy (*additionalTransform));
