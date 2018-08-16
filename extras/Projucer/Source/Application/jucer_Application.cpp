@@ -91,7 +91,7 @@ void ProjucerApplication::initialise (const String& commandLine)
 
         if (isRunningCommandLine)
         {
-            const int appReturnCode = performCommandLine (commandLine);
+            auto appReturnCode = performCommandLine (ArgumentList ("Projucer", commandLine));
 
             if (appReturnCode != commandLineNotPerformed)
             {
