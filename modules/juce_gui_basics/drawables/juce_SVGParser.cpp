@@ -1203,13 +1203,14 @@ private:
                 setCommonAttributes (*di, xml);
                 di->setImage (image);
 
-                if (additionalTransform != nullptr)
-                    di->setTransform (transform.followedBy (*additionalTransform));
-                else
-                    di->setTransform (transform);
+                di->setTransformToFit ({ (float) xml->getDoubleAttribute ("x", 0.0),     (float) xml->getDoubleAttribute ("y", 0.0),
+                                         (float) xml->getDoubleAttribute ("width", 0.0), (float) xml->getDoubleAttribute ("height", 0.0) },
+                                       RectanglePlacement (parsePlacementFlags (xml->getStringAttribute ("preserveAspectRatio").trim())));
 
-                di->setBoundingBox ({ (float) xml->getDoubleAttribute ("x", 0.0),     (float) xml->getDoubleAttribute ("y", 0.0),
-                                      (float) xml->getDoubleAttribute ("width", 0.0), (float) xml->getDoubleAttribute ("height", 0.0) });
+                if (additionalTransform != nullptr)
+                    di->setTransform (di->getTransform().followedBy (transform).followedBy (*additionalTransform));
+                else
+                    di->setTransform (di->getTransform().followedBy (transform));
 
                 return di;
             }
