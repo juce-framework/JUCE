@@ -376,7 +376,7 @@ namespace
 
         for (auto it = args.arguments.begin() + 1; it < args.arguments.end(); ++it)
         {
-            auto target = it->resolveAsExistingFile();
+            auto target = it->resolveAsFile();
 
             Array<File> files;
 

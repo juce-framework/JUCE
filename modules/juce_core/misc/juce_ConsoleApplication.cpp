@@ -73,8 +73,11 @@ static bool compareOptionStrings (StringRef s1, StringRef s2)
     if (s1 == s2)
         return true;
 
-    for (auto& part1 : StringArray::fromTokens (s1, "|", {}))
-        for (auto& part2 : StringArray::fromTokens (s2, "|", {}))
+    auto toks1 = StringArray::fromTokens (s1, "|", {});
+    auto toks2 = StringArray::fromTokens (s2, "|", {});
+
+    for (auto& part1 : toks1)
+        for (auto& part2 : toks2)
             if (part1.trim() == part2.trim())
                 return true;
 
