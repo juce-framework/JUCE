@@ -117,14 +117,14 @@ public:
        #endif
 
         if (getProject().getExporters().getChildWithName (exporterName).isValid())
-            return getCLionExecutable().existsAsFile();
+            return getCLionExecutableOrApp().exists();
 
         return false;
     }
 
     bool launchProject() override
     {
-        return getCLionExecutable().startAsProcess (getTargetFolder().getFullPathName().quoted());
+        return getCLionExecutableOrApp().startAsProcess (getTargetFolder().getFullPathName().quoted());
     }
 
     String getDescription() override
@@ -224,19 +224,21 @@ public:
 
 private:
     //==============================================================================
-    static File getCLionExecutable()
+    static File getCLionExecutableOrApp()
     {
-        File clionExe (getAppSettings()
-                       .getStoredPath (Ids::clionExePath)
-                       .toString()
-                       .replace ("${user.home}", File::getSpecialLocation (File::userHomeDirectory).getFullPathName()));
+        File clionExeOrApp (getAppSettings()
+                            .getStoredPath (Ids::clionExePath)
+                            .toString()
+                            .replace ("${user.home}", File::getSpecialLocation (File::userHomeDirectory).getFullPathName()));
 
        #if JUCE_MAC
-        if (clionExe.getFileName().endsWith (".app"))
-            clionExe = clionExe.getChildFile ("Contents/MacOS/clion");
+        if (clionExeOrApp.getFullPathName().endsWith ("/Contents/MacOS/clion"))
+            clionExeOrApp = clionExeOrApp.getParentDirectory()
+                                         .getParentDirectory()
+                                         .getParentDirectory();
        #endif
 
-        return clionExe;
+        return clionExeOrApp;
     }
 
     //==============================================================================
