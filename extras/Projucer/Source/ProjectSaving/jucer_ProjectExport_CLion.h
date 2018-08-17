@@ -185,6 +185,11 @@ public:
 
         // We'll append to this later.
         overwriteFileIfDifferentOrThrow (getTargetFolder().getChildFile ("CMakeLists.txt"), out);
+
+        // CMake has stopped adding PkgInfo files to bundles, so we need to do it manually
+        MemoryOutputStream pkgInfoOut;
+        pkgInfoOut << "BNDL????";
+        overwriteFileIfDifferentOrThrow (getTargetFolder().getChildFile ("PkgInfo"), out);
     }
 
     void writeCMakeListsExporterSection (ProjectExporter* exporter) const
@@ -364,7 +369,16 @@ private:
             for (auto& fileInfo : fileInfoList)
                 out << "    " << fileInfo.first.quoted() << newLine;
 
+            auto isCMakeBundle = exporter.isXcode() && target->getTargetFileType() == ProjectType::Target::TargetFileType::pluginBundle;
+            String pkgInfoPath  = File (getTargetFolder().getChildFile ("pkgInfo")).getFullPathName().quoted();
+
+            if (isCMakeBundle)
+                out << "    " << pkgInfoPath << newLine;
+
             out << ")" << newLine << newLine;
+
+            if (isCMakeBundle)
+                out << "set_source_files_properties (" << pkgInfoPath << " PROPERTIES MACOSX_PACKAGE_LOCATION .)" << newLine;
 
             for (auto& fileInfo : fileInfoList)
                 if (! fileInfo.second)
