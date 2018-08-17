@@ -476,7 +476,8 @@ private:
 
 //==============================================================================
 class EnabledModulesItem   : public ProjectTreeItemBase,
-                             private Value::Listener
+                             private Value::Listener,
+                             private Timer
 {
 public:
     EnabledModulesItem (Project& p)
@@ -667,8 +668,16 @@ private:
                 if (auto* moduleItem = dynamic_cast<ModuleItem*> (getSubItem (i)))
                     moduleItem->refreshModuleInfoIfCurrentlyShowing (juceModulePathChanged);
 
-            refreshSubItems();
+            // coalesce changes using a timer in case the value is changing rapidly
+            startTimer (750);
         }
+    }
+
+    //==============================================================================
+    void timerCallback() override
+    {
+        stopTimer();
+        refreshSubItems();
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EnabledModulesItem)
