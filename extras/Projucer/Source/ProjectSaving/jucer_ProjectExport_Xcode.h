@@ -1518,6 +1518,8 @@ public:
 
             for (auto& s : paths)
             {
+                // Xcode 10 can't deal with search paths starting with "~" so we need to replace them here...
+                s = sanitisePath (s);
                 s = owner.replacePreprocessorTokens (config, s);
 
                 if (s.containsChar (' '))
