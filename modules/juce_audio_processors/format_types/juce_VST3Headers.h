@@ -47,7 +47,9 @@
  #pragma clang diagnostic ignored "-Wdeprecated-declarations"
  #pragma clang diagnostic ignored "-Wextra-semi"
  #pragma clang diagnostic ignored "-Wmissing-braces"
- #pragma clang diagnostic ignored "-Wpragma-pack"
+ #if __has_warning("-Wpragma-pack")
+  #pragma clang diagnostic ignored "-Wpragma-pack"
+ #endif
  #if __has_warning("-Wcomma")
   #pragma clang diagnostic ignored "-Wcomma"
  #endif
