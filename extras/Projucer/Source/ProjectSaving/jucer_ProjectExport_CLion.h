@@ -370,7 +370,7 @@ private:
                 out << "    " << fileInfo.first.quoted() << newLine;
 
             auto isCMakeBundle = exporter.isXcode() && target->getTargetFileType() == ProjectType::Target::TargetFileType::pluginBundle;
-            String pkgInfoPath  = File (getTargetFolder().getChildFile ("pkgInfo")).getFullPathName().quoted();
+            String pkgInfoPath  = File (getTargetFolder().getChildFile ("PkgInfo")).getFullPathName().quoted();
 
             if (isCMakeBundle)
                 out << "    " << pkgInfoPath << newLine;
