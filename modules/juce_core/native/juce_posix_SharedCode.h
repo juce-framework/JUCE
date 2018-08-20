@@ -910,13 +910,19 @@ extern JavaVM* androidJNIJavaVM;
 static void* threadEntryProc (void* userData)
 {
    #if JUCE_ANDROID
-    // JNI_OnLoad was not called - make sure you load the JUCE shared library
-    // using System.load inside of Java
-    jassert (androidJNIJavaVM != nullptr);
 
-    JNIEnv* env;
-    androidJNIJavaVM->AttachCurrentThread (&env, nullptr);
-    setEnv (env);
+    if (androidJNIJavaVM != nullptr)
+    {
+        JNIEnv* env;
+        androidJNIJavaVM->AttachCurrentThread (&env, nullptr);
+        setEnv (env);
+    }
+    else
+    {
+        // JNI_OnLoad was not called - make sure you load the JUCE shared library
+        // using System.load inside of Java
+        jassertfalse;
+    }
    #endif
 
     JUCE_AUTORELEASEPOOL
