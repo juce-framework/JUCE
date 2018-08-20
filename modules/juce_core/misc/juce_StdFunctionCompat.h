@@ -192,11 +192,7 @@ namespace std
         {
             if (functorHolderHelper != nullptr)
             {
-                if (functorHolderHelper->getSize() > functorHolderStackSize)
-                    delete[] reinterpret_cast<char*> (functorHolderHelper);
-                else
-                    functorHolderHelper->~FunctorHolderBase<Result, Arguments...>();
-
+                functorHolderHelper->~FunctorHolderBase<Result, Arguments...>();
                 functorHolderHelper = nullptr;
             }
         }
