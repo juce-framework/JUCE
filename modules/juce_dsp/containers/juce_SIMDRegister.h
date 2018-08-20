@@ -39,7 +39,7 @@ namespace dsp
 /**
     A wrapper around the platform's native SIMD register type.
 
-    This class is only availabe on SIMD machines. Use JUCE_USE_SIMD to query
+    This class is only available on SIMD machines. Use JUCE_USE_SIMD to query
     if SIMD is avaialble for your system.
 
     SIMDRegister<Type> is a templated class representing the native

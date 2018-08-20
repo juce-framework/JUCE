@@ -6,66 +6,69 @@ Develop
 
 Change
 ------
-SystemStats::getDeviceDescription() will now return the device code on iOS e.g. 
+SystemStats::getDeviceDescription() will now return the device code on iOS e.g.
 "iPhone7, 2" for an iPhone 6 instead of just "iPhone".
 
 Possible Issues
 ---------------
-Code that previously relied on this method returning either explicitly "iPhone" 
+Code that previously relied on this method returning either explicitly "iPhone"
 or "iPad" may no longer work.
 
 Workaround
 ----------
 Modify this code to handle the new device code string e.g. by changing:
-SystemStats::getDeviceDescription() == "iPhone"; 
-to 
+SystemStats::getDeviceDescription() == "iPhone";
+to
 SystemStats::getDeviceDescription().contains ("iPhone");.
 
 Rationale
 ---------
-The exact device model can now be deduced from this information instead of just 
+The exact device model can now be deduced from this information instead of just
 the device family.
 
 
 Change
 ------
-DragAndDropContainer::performExternalDragDropOfFiles() and ::performExternalDragDropOfText() 
-are now asynchronous on Windows.
+DragAndDropContainer::performExternalDragDropOfFiles() and
+::performExternalDragDropOfText() are now asynchronous on Windows.
 
 Possible Issues
 ---------------
-Code that previously relied on these operations being synchronous and blocking until 
-completion will no longer work as the methods will return immediately and run 
-asynchronously.
+Code that previously relied on these operations being synchronous and blocking
+until completion will no longer work as the methods will return immediately and
+run asynchronously.
 
 Workaround
 ----------
-Use the callback argument that has been added to these methods to register a lambda 
-that will be called when the operation has been completed.
+Use the callback argument that has been added to these methods to register a
+lambda that will be called when the operation has been completed.
 
 Rationale
 ---------
-The behaviour of these methods is now consistent across all platforms and the method
-no longer blocks the message thread on Windows.
+The behaviour of these methods is now consistent across all platforms and the
+method no longer blocks the message thread on Windows.
 
 
 Change
 ------
-AudioProcessor::getTailLengthSeconds can now return infinity for VST/VST3/AU/AUv3.
+AudioProcessor::getTailLengthSeconds can now return infinity for
+VST/VST3/AU/AUv3.
 
 Possible Issues
 ---------------
-If you are using the result of getTailLengthSeconds to allocate a buffer in your host,
-then your host will now likely crash when loading a plug-in with an infinite tail time.
+If you are using the result of getTailLengthSeconds to allocate a buffer in
+your host, then your host will now likely crash when loading a plug-in with an
+infinite tail time.
 
 Workaround
 ----------
-Re-write your code to not use the result of getTailLengthSeconds directly to allocate
-a buffer.
+Re-write your code to not use the result of getTailLengthSeconds directly to
+allocate a buffer.
 
 Rationale
 ---------
-Before this change there was no way for a JUCE plug-in to report an infinite tail time. 
+Before this change there was no way for a JUCE plug-in to report an infinite
+tail time.
 
 
 Version 5.3.2
@@ -125,7 +128,7 @@ the Network Graphics Demo have been moved into the extras directory.
 
 Possible Issues
 ---------------
-1. Due to the large number of changes that have occured in the JUCE Git
+1. Due to the large number of changes that have occurred in the JUCE Git
    repository, pulling this version may result in a messy folder structure with
    empty directories that have been removed.
 2. The JUCE Demo project is no longer in the JUCE repository.
@@ -521,7 +524,7 @@ settings instead of the build configuration settings.
 
 Possible Issues
 ---------------
-Projects that had a specific verison of the C++ language standard set for
+Projects that had a specific version of the C++ language standard set for
 exporter build configurations will instead use the default (C++11) when
 re-saving with the new Projucer.
 

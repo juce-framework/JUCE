@@ -347,7 +347,7 @@ public:
 
     //==============================================================================
     /** Represents a download task.
-        Returned by downloadToFile to allow querying and controling the download task.
+        Returned by downloadToFile to allow querying and controlling the download task.
     */
     class DownloadTask
     {
@@ -464,7 +464,7 @@ public:
         If it fails, or if the text that it reads can't be parsed as XML, this will
         return nullptr.
 
-        When it returns a valid XmlElement object, the caller is responsibile for deleting
+        When it returns a valid XmlElement object, the caller is responsible for deleting
         this object when no longer needed.
 
         Note that on some platforms (Android, for example) it's not permitted to do any network

@@ -294,7 +294,7 @@ private:
                                          javaString ("raw").get(), javaString (packageName).get());
 
         // Raw resource not found. Please make sure that you include your file as a raw resource
-        // and that you specify just the file name, without an extention.
+        // and that you specify just the file name, without an extension.
         jassert (fileId != 0);
 
         if (fileId == 0)

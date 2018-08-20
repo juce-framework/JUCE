@@ -412,8 +412,8 @@ public:
             @param currentLayout If non-null, pretend that the current layout of the AudioProcessor is
                                  currentLayout. On exit, currentLayout will be modified to
                                  to represent the buses layouts of the AudioProcessor as if the layout
-                                 of the reciever had been succesfully changed. This is useful as changing
-                                 the layout of the reciever may change the bus layout of other buses.
+                                 of the receiver had been successfully changed. This is useful as changing
+                                 the layout of the receiver may change the bus layout of other buses.
 
             @see AudioChannelSet
         */
@@ -1559,7 +1559,7 @@ protected:
 
         When adding a bus, isAddingBuses will be true and the plug-in is
         expected to fill out outNewBusProperties with the properties of the
-        bus which will be created just after the succesful return of this callback.
+        bus which will be created just after the successful return of this callback.
 
         Implementations of AudioProcessor will rarely need to override this
         method. Only override this method if your processor supports adding

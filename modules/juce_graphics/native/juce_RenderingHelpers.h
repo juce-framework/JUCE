@@ -2400,12 +2400,12 @@ public:
             renderImage (sourceImage, trans, {});
     }
 
-    static bool isOnlyTranslationAllowingError (const AffineTransform& t, float tolerence) noexcept
+    static bool isOnlyTranslationAllowingError (const AffineTransform& t, float tolerance) noexcept
     {
-        return std::abs (t.mat01) < tolerence
-            && std::abs (t.mat10) < tolerence
-            && std::abs (t.mat00 - 1.0f) < tolerence
-            && std::abs (t.mat11 - 1.0f) < tolerence;
+        return std::abs (t.mat01) < tolerance
+            && std::abs (t.mat10) < tolerance
+            && std::abs (t.mat00 - 1.0f) < tolerance
+            && std::abs (t.mat11 - 1.0f) < tolerance;
     }
 
     void renderImage (const Image& sourceImage, const AffineTransform& trans, const BaseRegionType* tiledFillClipRegion)
