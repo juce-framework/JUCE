@@ -4211,6 +4211,11 @@ private:
     {
         UINT flags = MB_TASKMODAL | MB_SETFOREGROUND;
 
+        // this window can get lost behind JUCE windows which are set to be alwaysOnTop
+        // so if there are any set it to be topmost
+        if (juce_areThereAnyAlwaysOnTopWindows())
+            flags |= MB_TOPMOST;
+
         switch (iconType)
         {
             case AlertWindow::QuestionIcon:  flags |= MB_ICONQUESTION; break;
