@@ -1239,14 +1239,9 @@ void AudioProcessorGraph::handleAsyncUpdate()
 }
 
 //==============================================================================
-void AudioProcessorGraph::prepareToPlay (double /*sampleRate*/, int estimatedSamplesPerBlock)
+void AudioProcessorGraph::prepareToPlay (double sampleRate, int estimatedSamplesPerBlock)
 {
-    if (renderSequenceFloat != nullptr)
-        renderSequenceFloat->prepareBuffers (estimatedSamplesPerBlock);
-
-    if (renderSequenceDouble != nullptr)
-        renderSequenceDouble->prepareBuffers (estimatedSamplesPerBlock);
-
+    setRateAndBufferSizeDetails (sampleRate, estimatedSamplesPerBlock);
     clearRenderingSequence();
     triggerAsyncUpdate();
 }
