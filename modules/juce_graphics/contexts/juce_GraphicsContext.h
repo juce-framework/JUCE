@@ -145,7 +145,8 @@ public:
     */
     void drawMultiLineText (const String& text,
                             int startX, int baselineY,
-                            int maximumLineWidth) const;
+                            int maximumLineWidth,
+                            Justification justification = Justification::left) const;
 
     /** Draws a line of text within a specified rectangle.
 
