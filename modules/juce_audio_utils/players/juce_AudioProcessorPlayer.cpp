@@ -88,6 +88,15 @@ void AudioProcessorPlayer::setDoublePrecisionProcessing (bool doublePrecision)
     }
 }
 
+void AudioProcessorPlayer::setMidiOutput (MidiOutput* midiOutputToUse)
+{
+    if (midiOutput != midiOutputToUse)
+    {
+        const ScopedLock sl (lock);
+        midiOutput = midiOutputToUse;
+    }
+}
+
 //==============================================================================
 void AudioProcessorPlayer::audioDeviceIOCallback (const float** const inputChannelData,
                                                   const int numInputChannels,
@@ -162,6 +171,9 @@ void AudioProcessorPlayer::audioDeviceIOCallback (const float** const inputChann
                 {
                     processor->processBlock (buffer, incomingMidi);
                 }
+
+                if (midiOutput != nullptr)
+                    midiOutput->sendBlockOfMessagesNow (incomingMidi);
 
                 return;
             }
