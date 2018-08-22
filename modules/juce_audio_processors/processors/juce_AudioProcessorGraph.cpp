@@ -893,6 +893,8 @@ void AudioProcessorGraph::topologyChanged()
 
 void AudioProcessorGraph::clear()
 {
+    const ScopedLock sl (getCallbackLock());
+
     if (nodes.isEmpty())
         return;
 
@@ -1253,6 +1255,8 @@ bool AudioProcessorGraph::supportsDoublePrecisionProcessing() const
 
 void AudioProcessorGraph::releaseResources()
 {
+    const ScopedLock sl (getCallbackLock());
+
     isPrepared = 0;
 
     for (auto* n : nodes)
