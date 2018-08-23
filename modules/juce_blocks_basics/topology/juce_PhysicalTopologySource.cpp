@@ -2599,38 +2599,72 @@ struct PhysicalTopologySource::DetectorHolder  : private juce::Timer
 };
 
 //==============================================================================
-PhysicalTopologySource::PhysicalTopologySource()
-    : detector (new DetectorHolder (*this))
+PhysicalTopologySource::PhysicalTopologySource (bool startDetached)
 {
-    detector->detector->activeTopologySources.add (this);
+    if (! startDetached)
+        setActive (true);
 }
 
-PhysicalTopologySource::PhysicalTopologySource (DeviceDetector& detectorToUse)
-    : detector (new DetectorHolder (*this, detectorToUse))
+PhysicalTopologySource::PhysicalTopologySource (DeviceDetector& detectorToUse, bool startDetached)
+    : customDetector (&detectorToUse)
 {
-    detector->detector->activeTopologySources.add (this);
+    if (! startDetached)
+        setActive (true);
 }
 
 PhysicalTopologySource::~PhysicalTopologySource()
 {
-    detector->detector->detach (this);
-    detector = nullptr;
+    setActive (false);
+}
+
+void PhysicalTopologySource::setActive (bool shouldBeActive)
+{
+    if (isActive() == shouldBeActive)
+        return;
+
+    if (shouldBeActive)
+    {
+        if (customDetector == nullptr)
+            detector = std::make_unique<DetectorHolder>(*this);
+        else
+            detector = std::make_unique<DetectorHolder>(*this, *customDetector);
+
+        detector->detector->activeTopologySources.add (this);
+    }
+    else
+    {
+        detector->detector->detach (this);
+        detector.reset();
+    }
+}
+
+bool PhysicalTopologySource::isActive() const
+{
+    return detector != nullptr;
 }
 
 BlockTopology PhysicalTopologySource::getCurrentTopology() const
 {
     JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED // This method must only be called from the message thread!
 
-    return detector->detector->currentTopology;
+    if (detector != nullptr)
+        return detector->detector->currentTopology;
+
+    return {};
 }
 
 void PhysicalTopologySource::cancelAllActiveTouches() noexcept
 {
-    detector->detector->cancelAllActiveTouches();
+    if (detector != nullptr)
+        detector->detector->cancelAllActiveTouches();
 }
 
 bool PhysicalTopologySource::hasOwnServiceTimer() const     { return false; }
-void PhysicalTopologySource::handleTimerTick()              { detector->handleTimerTick(); }
+void PhysicalTopologySource::handleTimerTick()
+{
+    if (detector != nullptr)
+        detector->handleTimerTick();
+}
 
 PhysicalTopologySource::DeviceConnection::DeviceConnection() {}
 PhysicalTopologySource::DeviceConnection::~DeviceConnection() {}
