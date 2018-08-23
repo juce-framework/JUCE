@@ -4452,9 +4452,9 @@ struct MonitorInfo
     MonitorInfo (bool main, const RECT& rect, double d) noexcept
         : isMain (main), bounds (rect), dpi (d) {}
 
+    bool isMain;
     RECT bounds;
     double dpi;
-    bool isMain;
 };
 
 static BOOL CALLBACK enumMonitorsProc (HMONITOR hm, HDC, LPRECT r, LPARAM userInfo)
