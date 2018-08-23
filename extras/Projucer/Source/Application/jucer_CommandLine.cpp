@@ -718,7 +718,17 @@ namespace
             std::cout << "Creating directory " << outputDir.getFullPathName() << std::endl;
         }
 
-        PIPGenerator generator (pipFile, outputDir);
+        File juceDir;
+
+        if (args.size() > 3)
+        {
+            juceDir = args[3].resolveAsFile();
+
+            if (! juceDir.exists())
+                ConsoleApplication::fail ("Specified JUCE modules directory doesn't exist.");
+        }
+
+        PIPGenerator generator (pipFile, outputDir, juceDir);
 
         auto createJucerFileResult = generator.createJucerFile();
 
@@ -797,7 +807,7 @@ namespace
                   << "    Sets the global path for a specified os and identifier. The os should be either osx, windows or linux and the identifiers can be any of the following: "
                   << "defaultJuceModulePath, defaultUserModulePath, vst3Path, aaxPath (not valid on linux), rtasPath (not valid on linux), androidSDKPath or androidNDKPath." << std::endl
                   << std::endl
-                  << " " << appName << " --create-project-from-pip path/to/PIP path/to/output" << std::endl
+                  << " " << appName << " --create-project-from-pip path/to/PIP path/to/output path/to/JUCE/modules (optional)" << std::endl
                   << "    Generates a JUCE project from a PIP file." << std::endl
                   << std::endl
                   << "Note that for any of the file-rewriting commands, add the option \"--lf\" if you want it to use LF linefeeds instead of CRLF" << std::endl

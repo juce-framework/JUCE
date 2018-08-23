@@ -32,7 +32,7 @@
 class PIPGenerator
 {
 public:
-    PIPGenerator (const File& pipFile, const File& outputDirectory = {});
+    PIPGenerator (const File& pipFile, const File& outputDirectory = {}, const File& juceDirectory = {});
 
     //==============================================================================
     bool hasValidPIP() const noexcept                   { return ! metadata[Ids::name].toString().isEmpty(); }
@@ -78,7 +78,7 @@ private:
     StringArray getPluginCharacteristics() const;
 
     //==============================================================================
-    File pipFile, outputDirectory;
+    File pipFile, outputDirectory, juceDirectory;
     var metadata;
 
     bool isTemp = false;
