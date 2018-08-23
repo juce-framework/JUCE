@@ -193,6 +193,7 @@
 //==============================================================================
 #undef Complex  // apparently some C libraries actually define these symbols (!)
 #undef Factor
+#undef check
 
 namespace juce
 {
