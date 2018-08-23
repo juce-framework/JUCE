@@ -544,7 +544,7 @@ String ProjectExporter::getPathForModuleString (const String& moduleID) const
     auto exporterPath = settings.getChildWithName (Ids::MODULEPATHS)
                                 .getChildWithProperty (Ids::ID, moduleID) [Ids::path].toString();
 
-    if (exporterPath.isEmpty() || project.getModules().shouldUseGlobalPath (moduleID))
+    if (exporterPath.isEmpty() || project.getEnabledModules().shouldUseGlobalPath (moduleID))
     {
         auto id = isJUCEModule (moduleID) ? Ids::defaultJuceModulePath
                                           : Ids::defaultUserModulePath;
@@ -573,17 +573,17 @@ TargetOS::OS ProjectExporter::getTargetOSForExporter() const
 {
     auto targetOS = TargetOS::unknown;
 
-    if      (isWindows())            targetOS = TargetOS::windows;
-    else if (isOSX() || isiOS())     targetOS = TargetOS::osx;
-    else if (isLinux())              targetOS = TargetOS::linux;
-    else if (isAndroid())            targetOS = TargetOS::getThisOS();
+    if      (isWindows())                 targetOS = TargetOS::windows;
+    else if (isOSX() || isiOS())          targetOS = TargetOS::osx;
+    else if (isLinux())                   targetOS = TargetOS::linux;
+    else if (isAndroid() || isCLion())    targetOS = TargetOS::getThisOS();
 
     return targetOS;
 }
 
 RelativePath ProjectExporter::getModuleFolderRelativeToProject (const String& moduleID) const
 {
-    if (project.getModules().shouldCopyModuleFilesLocally (moduleID).getValue())
+    if (project.getEnabledModules().shouldCopyModuleFilesLocally (moduleID).getValue())
         return RelativePath (project.getRelativePathForFile (project.getLocalModuleFolder (moduleID)),
                              RelativePath::projectFolder);
 
@@ -602,7 +602,7 @@ String ProjectExporter::getLegacyModulePath() const
 
 RelativePath ProjectExporter::getLegacyModulePath (const String& moduleID) const
 {
-    if (project.getModules().state.getChildWithProperty (Ids::ID, moduleID) ["useLocalCopy"])
+    if (project.getEnabledModules().state.getChildWithProperty (Ids::ID, moduleID) ["useLocalCopy"])
         return RelativePath (project.getRelativePathForFile (project.getGeneratedCodeFolder()
                                                                 .getChildFile ("modules")
                                                                 .getChildFile (moduleID)), RelativePath::projectFolder);
@@ -625,9 +625,9 @@ void ProjectExporter::updateOldModulePaths()
 
     if (oldPath.isNotEmpty())
     {
-        for (int i = project.getModules().getNumModules(); --i >= 0;)
+        for (int i = project.getEnabledModules().getNumModules(); --i >= 0;)
         {
-            auto modID = project.getModules().getModuleID(i);
+            auto modID = project.getEnabledModules().getModuleID(i);
             getPathForModuleValue (modID) = getLegacyModulePath (modID).getParentDirectory().toUnixStyle();
         }
 
@@ -650,9 +650,9 @@ void ProjectExporter::createDefaultModulePaths()
     {
         if (areCompatibleExporters (*this, *exporter))
         {
-            for (int i = project.getModules().getNumModules(); --i >= 0;)
+            for (int i = project.getEnabledModules().getNumModules(); --i >= 0;)
             {
-                auto modID = project.getModules().getModuleID (i);
+                auto modID = project.getEnabledModules().getModuleID (i);
                 getPathForModuleValue (modID) = exporter->getPathForModuleValue (modID).getValue();
             }
 
@@ -664,9 +664,9 @@ void ProjectExporter::createDefaultModulePaths()
     {
         if (exporter->canLaunchProject())
         {
-            for (int i = project.getModules().getNumModules(); --i >= 0;)
+            for (int i = project.getEnabledModules().getNumModules(); --i >= 0;)
             {
-                auto modID = project.getModules().getModuleID (i);
+                auto modID = project.getEnabledModules().getModuleID (i);
                 getPathForModuleValue (modID) = exporter->getPathForModuleValue (modID).getValue();
             }
 
@@ -674,9 +674,9 @@ void ProjectExporter::createDefaultModulePaths()
         }
     }
 
-    for (int i = project.getModules().getNumModules(); --i >= 0;)
+    for (int i = project.getEnabledModules().getNumModules(); --i >= 0;)
     {
-        auto modID = project.getModules().getModuleID (i);
+        auto modID = project.getEnabledModules().getModuleID (i);
         getPathForModuleValue (modID) = "../../juce";
     }
 }

@@ -206,7 +206,7 @@ namespace
                   << "Name: " << proj.project->getProjectNameString() << std::endl
                   << "UID: " << proj.project->getProjectUIDString() << std::endl;
 
-        EnabledModuleList& modules = proj.project->getModules();
+        EnabledModuleList& modules = proj.project->getEnabledModules();
 
         if (int numModules = modules.getNumModules())
         {

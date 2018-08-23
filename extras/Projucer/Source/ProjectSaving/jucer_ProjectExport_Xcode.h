@@ -1506,7 +1506,7 @@ public:
             paths.addArray (config.getHeaderSearchPaths());
             paths.addArray (getTargetExtraHeaderSearchPaths());
 
-            if (owner.project.getModules().isModuleEnabled ("juce_audio_plugin_client"))
+            if (owner.project.getEnabledModules().isModuleEnabled ("juce_audio_plugin_client"))
             {
                 // Needed to compile .r files
                 paths.add (owner.getModuleFolderRelativeToProject ("juce_audio_plugin_client")

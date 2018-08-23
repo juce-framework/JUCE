@@ -183,7 +183,7 @@ struct TranslationHelpers
         scanFilesForTranslations (strings, project.getMainGroup());
 
         OwnedArray<LibraryModule> modules;
-        project.getModules().createRequiredModules (modules);
+        project.getEnabledModules().createRequiredModules (modules);
 
         for (int j = 0; j < modules.size(); ++j)
         {

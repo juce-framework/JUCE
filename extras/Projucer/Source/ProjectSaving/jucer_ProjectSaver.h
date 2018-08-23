@@ -82,7 +82,7 @@ public:
         project.setFile (projectFile);
 
         OwnedArray<LibraryModule> modules;
-        project.getModules().createRequiredModules (modules);
+        project.getEnabledModules().createRequiredModules (modules);
 
         checkModuleValidity (modules);
 
@@ -148,7 +148,7 @@ public:
     Result saveContentNeededForLiveBuild()
     {
         OwnedArray<LibraryModule> modules;
-        project.getModules().createRequiredModules (modules);
+        project.getEnabledModules().createRequiredModules (modules);
 
         checkModuleValidity (modules);
 
@@ -390,7 +390,7 @@ private:
                     return;
                 }
 
-                if (project.getModules().getExtraDependenciesNeeded (module->getID()).size() > 0)
+                if (project.getEnabledModules().getExtraDependenciesNeeded (module->getID()).size() > 0)
                 {
                     addError ("At least one of your modules has missing dependencies!\n"
                               "Please go to the settings page of the highlighted modules and add the required dependencies.");

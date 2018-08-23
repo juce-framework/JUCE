@@ -608,7 +608,7 @@ private:
     {
         static String guiExtrasModule ("juce_gui_extra");
 
-        return (project.getModules().isModuleEnabled (guiExtrasModule)
+        return (project.getEnabledModules().isModuleEnabled (guiExtrasModule)
                 && project.isConfigFlagEnabled ("JUCE_WEB_BROWSER", true));
     }
 
@@ -616,7 +616,7 @@ private:
     {
         static String juceCoreModule ("juce_core");
 
-        return (project.getModules().isModuleEnabled (juceCoreModule)
+        return (project.getEnabledModules().isModuleEnabled (juceCoreModule)
                 && project.isConfigFlagEnabled ("JUCE_LOAD_CURL_SYMBOLS_LAZILY", false));
     }
 

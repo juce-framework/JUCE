@@ -59,6 +59,12 @@ public:
         else if (os == TargetOS::windows) osSelector.setSelectedId (2);
         else if (os == TargetOS::linux)   osSelector.setSelectedId (3);
 
+        addChildComponent (rescanJUCEPathButton);
+        rescanJUCEPathButton.onClick = [] { ProjucerApplication::getApp().rescanJUCEPathModules(); };
+
+        addChildComponent (rescanUserPathButton);
+        rescanUserPathButton.onClick = [] { ProjucerApplication::getApp().rescanUserPathModules(); };
+
         updateFilePathPropertyComponents();
     }
 
@@ -85,6 +91,7 @@ public:
 
         int labelIndex = 0;
         bool isFirst = true;
+        bool showRescanButtons = (rescanJUCEPathButton.isVisible() && rescanUserPathButton.isVisible());
 
         for (auto* pathComp : pathPropertyComponents)
         {
@@ -99,7 +106,20 @@ public:
                 if (isFirst)
                     b.removeFromTop (20);
 
-                pathComp->setBounds (b.removeFromTop (pathComp->getPreferredHeight()));
+                auto compBounds = b.removeFromTop (pathComp->getPreferredHeight());
+
+                if (showRescanButtons)
+                {
+                    auto propName = pathComp->getName();
+
+                    if (propName == "JUCE Modules")
+                        rescanJUCEPathButton.setBounds (compBounds.removeFromRight (75).reduced (5, 0));
+                    else if (propName == "User Modules")
+                        rescanUserPathButton.setBounds (compBounds.removeFromRight (75).reduced (5, 0));
+                }
+
+
+                pathComp->setBounds (compBounds);
                 b.removeFromTop (5);
             }
 
@@ -124,6 +144,8 @@ public:
 private:
     OwnedArray<Label> pathPropertyLabels;
     OwnedArray<PropertyComponent> pathPropertyComponents;
+    TextButton rescanJUCEPathButton { "Re-scan" },
+               rescanUserPathButton { "Re-scan" };
 
     ComboBox osSelector;
     InfoButton info;
@@ -228,6 +250,9 @@ private:
 
             addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (settings.getStoredPath (Ids::androidStudioExePath),
                                                            "Android Studio " + exeLabel, false)));
+
+            rescanJUCEPathButton.setVisible (true);
+            rescanUserPathButton.setVisible (true);
         }
         else
         {
@@ -267,6 +292,9 @@ private:
 
             addAndMakeVisible (pathPropertyComponents.add (new TextPropertyComponent (settings.getFallbackPathForOS (Ids::vst3Path, selectedOS),
                                                                                       "Custom VST3 SDK", maxChars, false)));
+
+            rescanJUCEPathButton.setVisible (false);
+            rescanUserPathButton.setVisible (false);
         }
 
         resized();

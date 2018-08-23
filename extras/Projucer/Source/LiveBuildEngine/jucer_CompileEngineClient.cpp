@@ -370,13 +370,13 @@ private:
         scanProjectItem (proj.getMainGroup(), compileUnits, userFiles);
 
         {
-            auto isVSTHost = project.getModules().isModuleEnabled ("juce_audio_processors")
+            auto isVSTHost = project.getEnabledModules().isModuleEnabled ("juce_audio_processors")
                    && (project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3") || project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST"));
 
             auto isPluginProject = proj.getProjectType().isAudioPlugin();
 
             OwnedArray<LibraryModule> modules;
-            proj.getModules().createRequiredModules (modules);
+            proj.getEnabledModules().createRequiredModules (modules);
 
             for (Project::ExporterIterator exporter (proj); exporter.next();)
             {
@@ -384,7 +384,7 @@ private:
                 {
                     for (auto* m : modules)
                     {
-                        auto localModuleFolder = proj.getModules().shouldCopyModuleFilesLocally (m->moduleInfo.getID()).getValue()
+                        auto localModuleFolder = proj.getEnabledModules().shouldCopyModuleFilesLocally (m->moduleInfo.getID()).getValue()
                                                         ? proj.getLocalModuleFolder (m->moduleInfo.getID())
                                                         : m->moduleInfo.getFolder();
 
@@ -435,7 +435,7 @@ private:
     static bool areAnyModulesMissing (Project& project)
     {
         OwnedArray<LibraryModule> modules;
-        project.getModules().createRequiredModules (modules);
+        project.getEnabledModules().createRequiredModules (modules);
 
         for (auto* module : modules)
             if (! module->getFolder().isDirectory())
@@ -458,7 +458,7 @@ private:
         StringArray paths;
         paths.addArray (getSearchPathsFromString (project.getCompileEngineSettings().getSystemHeaderPathString()));
 
-        auto isVSTHost = project.getModules().isModuleEnabled ("juce_audio_processors")
+        auto isVSTHost = project.getEnabledModules().isModuleEnabled ("juce_audio_processors")
                        && (project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3")
                              || project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST"));
 
@@ -468,7 +468,7 @@ private:
             paths.add (customVst3Path);
 
         OwnedArray<LibraryModule> modules;
-        project.getModules().createRequiredModules (modules);
+        project.getEnabledModules().createRequiredModules (modules);
 
         for (auto* module : modules)
         {

@@ -81,10 +81,10 @@ void ProjucerApplication::initialise (const String& commandLine)
                               + "MHz  Cores: " + String (SystemStats::getNumCpus())
                               + "  " + String (SystemStats::getMemorySizeInMegabytes()) + "MB");
 
-        initialiseBasics();
-
         isRunningCommandLine = commandLine.isNotEmpty()
                                 && ! commandLine.startsWith ("-NSDocumentRevisionsDebugMode");
+
+        initialiseBasics();
 
         licenseController.reset (new LicenseController);
         licenseController->addLicenseStatusChangedCallback (this);
@@ -136,6 +136,9 @@ void ProjucerApplication::initialiseBasics()
     ImageCache::setCacheTimeout (30 * 1000);
     icons.reset (new Icons());
     tooltipWindow.setMillisecondsBeforeTipAppears (1200);
+
+    rescanJUCEPathModules();
+    rescanUserPathModules();
 }
 
 bool ProjucerApplication::initialiseLogger (const char* filePrefix)
@@ -1413,6 +1416,37 @@ void ProjucerApplication::showSetJUCEPathAlert()
                                                                             settings->setDontAskAboutJUCEPathAgain();
                                                                     }));
 
+}
+
+void ProjucerApplication::rescanJUCEPathModules()
+{
+    File jucePath (getAppSettings().getStoredPath (Ids::defaultJuceModulePath).toString());
+
+    if (isRunningCommandLine)
+        jucePathModuleList.scanPaths ({ jucePath });
+    else
+        jucePathModuleList.scanPathsAsync ({ jucePath });
+}
+
+static Array<File> getSanitisedUserModulePaths()
+{
+    Array<File> paths;
+
+    for (auto p : StringArray::fromTokens (getAppSettings().getStoredPath (Ids::defaultUserModulePath).toString(), ";", {}))
+    {
+        p = p.replace ("~", File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
+        paths.add (File::createFileWithoutCheckingPath (p.trim()));
+    }
+
+    return paths;
+}
+
+void ProjucerApplication::rescanUserPathModules()
+{
+    if (isRunningCommandLine)
+        userPathsModuleList.scanPaths (getSanitisedUserModulePaths());
+    else
+        userPathsModuleList.scanPathsAsync (getSanitisedUserModulePaths());
 }
 
 void ProjucerApplication::selectEditorColourSchemeWithName (const String& schemeName)

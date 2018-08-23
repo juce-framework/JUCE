@@ -182,14 +182,14 @@ struct NewProjectWizard
 
     void addDefaultModules (Project& project, bool useGlobalPath)
     {
-        StringArray mods (getDefaultModules());
+        auto defaultModules = getDefaultModules();
 
-        ModuleList list;
-        list.addAllModulesInFolder (modulesFolder);
+        AvailableModuleList list;
+        list.scanPaths ({ modulesFolder });
 
-        for (int i = 0; i < mods.size(); ++i)
-            if (const ModuleDescription* info = list.getModuleWithID (mods[i]))
-                project.getModules().addModule (info->moduleFolder, false, useGlobalPath, false);
+        for (auto& mod : list.getAllModules())
+            if (defaultModules.contains (mod.first))
+                project.getEnabledModules().addModule (mod.second, false, useGlobalPath, false);
     }
 
     void addExporters (Project& project, WizardComp& wizardComp)
