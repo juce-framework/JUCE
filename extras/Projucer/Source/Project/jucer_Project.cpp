@@ -1935,6 +1935,14 @@ void Project::rescanExporterPathModules (bool async)
 
 ModuleIDAndFolder Project::getModuleWithID (const String& id)
 {
+    if (! getEnabledModules().shouldUseGlobalPath (id))
+    {
+        const auto& mod = exporterPathsModuleList->getModuleWithID (id);
+
+        if (mod.second != File())
+            return mod;
+    }
+
     const auto& list = (isJUCEModule (id) ? ProjucerApplication::getApp().getJUCEPathModuleList().getAllModules()
                                           : ProjucerApplication::getApp().getUserPathsModuleList().getAllModules());
 
