@@ -44,6 +44,7 @@
 #include "../utility/juce_FakeMouseMoveGenerator.h"
 #include "../../juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp"
 #include "../../juce_audio_processors/format_types/juce_VST3Common.h"
+#include "../../juce_audio_processors/format_types/juce_VST3PreSonusExtensions.h"
 
 #ifndef JUCE_VST3_CAN_REPLACE_VST2
  #define JUCE_VST3_CAN_REPLACE_VST2 1
@@ -129,6 +130,7 @@ public:
     //==============================================================================
     static const FUID iid;
     Array<Vst::ParamID> vstParamIDs;
+    Array<int> metersParamIDs;
     Vst::ParamID bypassParamID = 0;
     bool bypassIsRegularParameter = false;
 
@@ -242,7 +244,8 @@ class JuceVST3EditController : public Vst::EditController,
                                public Vst::IMidiMapping,
                                public Vst::ChannelContext::IInfoListener,
                                public AudioProcessorListener,
-                               private AudioProcessorParameter::Listener
+                               private AudioProcessorParameter::Listener,
+                               public Presonus::IGainReductionInfo
 {
 public:
     JuceVST3EditController (Vst::IHostApplication* host)
@@ -278,6 +281,11 @@ public:
         TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (targetIID, IPluginBase, Vst::IEditController)
         TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (targetIID, IDependent, Vst::IEditController)
         TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (targetIID, FUnknown, Vst::IEditController)
+
+        if (metersParamIDs.size() > 0)
+        {
+            TEST_FOR_AND_RETURN_IF_VALID (targetIID, Presonus::IGainReductionInfo)
+        }
 
         if (doUIDsMatch (targetIID, JuceAudioProcessor::iid))
         {
@@ -315,6 +323,23 @@ public:
         audioProcessor = nullptr;
 
         return EditController::terminate();
+    }
+
+    double PLUGIN_API getGainReductionValueInDb() override
+    {
+        double gainReduction = 1.0;
+        bool hasGRMeter = false;
+        for (int i = 0; i < metersParamIDs.size(); ++i)
+        {
+            // sum gain reduction meters only
+            auto category = getPluginInstance()->getParameterCategory(i);
+            if (category == AudioProcessorParameter::Category::compressorLimiterGainReductionMeter || category == AudioProcessorParameter::Category::expanderGateGainReductionMeter)
+            {
+                gainReduction *= getPluginInstance()->getParameter(metersParamIDs[i]);
+                hasGRMeter = true;
+            }
+        }
+        return hasGRMeter ? Decibels::gainToDecibels(1.0 - jmin(1.0,gainReduction)) : 0;
     }
 
     //==============================================================================
@@ -740,6 +765,12 @@ private:
 
                     parameters.addParameter (new Param (*this, *juceParam, vstParamID,
                                                         (vstParamID == audioProcessor->bypassParamID), forceLegacyParamIDs));
+
+                    // is this a meter?
+                    if (((pluginInstance->getParameterCategory(i) & 0xffff0000) >> 16) == 2)
+                    {
+                        metersParamIDs.add (i);
+                    }
                 }
 
                 if (pluginInstance->getNumPrograms() > 1)
