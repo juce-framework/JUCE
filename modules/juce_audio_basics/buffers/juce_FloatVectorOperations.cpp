@@ -1017,7 +1017,7 @@ void JUCE_CALLTYPE FloatVectorOperations::disableDenormalisedNumberSupport() noe
    #endif
 }
 
-FloatVectorOperations::ScopedNoDenormals::ScopedNoDenormals()
+ScopedNoDenormals::ScopedNoDenormals()
 {
     // There is also C99 way of doing this,
     // but its not widely supported:
@@ -1029,7 +1029,7 @@ FloatVectorOperations::ScopedNoDenormals::ScopedNoDenormals()
    #endif
 }
 
-FloatVectorOperations::ScopedNoDenormals::~ScopedNoDenormals()
+ScopedNoDenormals::~ScopedNoDenormals()
 {
    #if JUCE_USE_SSE_INTRINSICS
     _mm_setcsr (oldMXCSR);
