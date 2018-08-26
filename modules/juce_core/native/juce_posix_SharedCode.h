@@ -428,11 +428,14 @@ bool File::setFileTimesInternal (int64 modificationTime, int64 accessTime, int64
 
 bool File::deleteFile() const
 {
-    if (! exists() && ! isSymbolicLink())
-        return true;
+    if (! isSymbolicLink())
+    {
+        if (! exists())
+            return true;
 
-    if (isDirectory())
-        return rmdir (fullPath.toUTF8()) == 0;
+        if (isDirectory())
+            return rmdir (fullPath.toUTF8()) == 0;
+    }
 
     return remove (fullPath.toUTF8()) == 0;
 }
@@ -904,8 +907,7 @@ void JUCE_API juce_threadEntryPoint (void*);
 extern JavaVM* androidJNIJavaVM;
 #endif
 
-extern "C" void* threadEntryProc (void*);
-extern "C" void* threadEntryProc (void* userData)
+static void* threadEntryProc (void* userData)
 {
    #if JUCE_ANDROID
     // JNI_OnLoad was not called - make sure you load the JUCE shared library

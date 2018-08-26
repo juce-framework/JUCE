@@ -73,12 +73,19 @@
  };
 #endif
 
+std::unique_ptr<AudioDeviceManager> sharedAudioDeviceManager;
+
 //==============================================================================
 class DemoRunnerApplication  : public JUCEApplication
 {
 public:
     //==============================================================================
     DemoRunnerApplication() {}
+
+    ~DemoRunnerApplication()
+    {
+        sharedAudioDeviceManager.reset();
+    }
 
     const String getApplicationName() override       { return ProjectInfo::projectName; }
     const String getApplicationVersion() override    { return ProjectInfo::versionString; }

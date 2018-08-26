@@ -561,6 +561,7 @@ private:
             << "namespace ProjectInfo" << newLine
             << "{" << newLine
             << "    const char* const  projectName    = " << CppTokeniserFunctions::addEscapeChars (project.getProjectNameString()).quoted() << ";" << newLine
+            << "    const char* const  companyName    = " << CppTokeniserFunctions::addEscapeChars (project.getCompanyNameString()).quoted() << ";" << newLine
             << "    const char* const  versionString  = " << CppTokeniserFunctions::addEscapeChars (project.getVersionString()).quoted() << ";" << newLine
             << "    const int          versionNumber  = " << project.getVersionAsHex() << ";" << newLine
             << "}" << newLine

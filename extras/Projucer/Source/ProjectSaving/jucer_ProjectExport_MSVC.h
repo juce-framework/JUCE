@@ -330,11 +330,6 @@ public:
                 props.add (new ChoicePropertyComponent (pluginBinaryCopyStepValue, "Enable Plugin Copy Step"),
                            "Enable this to copy plugin binaries to a specified folder after building.");
 
-            if (project.shouldBuildVST())
-                props.add (new TextPropertyComponentWithEnablement (vstBinaryLocation, pluginBinaryCopyStepValue, "VST Binary Location",
-                                                                    1024, false),
-                           "The folder in which the compiled VST binary should be placed.");
-
             if (project.shouldBuildVST3())
                 props.add (new TextPropertyComponentWithEnablement (vst3BinaryLocation, pluginBinaryCopyStepValue, "VST3 Binary Location",
                                                                     1024, false),
@@ -354,6 +349,11 @@ public:
                 props.add (new TextPropertyComponentWithEnablement (unityPluginBinaryLocation, pluginBinaryCopyStepValue, "Unity Binary Location",
                                                                     1024, false),
                            "The folder in which the compiled Unity plugin binary and associated C# GUI script should be placed.");
+
+            if (project.shouldBuildVST())
+                props.add (new TextPropertyComponentWithEnablement (vstBinaryLocation, pluginBinaryCopyStepValue, "VST (legacy) Binary Location",
+                                                                    1024, false),
+                           "The folder in which the compiled lehacy VST binary should be placed.");
 
         }
 
@@ -1517,7 +1517,7 @@ protected:
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const override
     {
-        return new MSVCBuildConfiguration (project, v, *this);
+        return *new MSVCBuildConfiguration (project, v, *this);
     }
 
     StringArray getHeaderSearchPaths (const BuildConfiguration& config) const

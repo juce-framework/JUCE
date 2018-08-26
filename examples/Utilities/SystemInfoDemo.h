@@ -33,6 +33,8 @@
                    juce_gui_basics
  exporters:        xcode_mac, vs2017, linux_make, androidstudio, xcode_iphone
 
+ moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
+
  type:             Component
  mainClass:        SystemInfoDemo
 
@@ -49,11 +51,9 @@
 //==============================================================================
 static String getMacAddressList()
 {
-    Array<MACAddress> macAddresses;
-    MACAddress::findAllAddresses (macAddresses);
-
     String addressList;
-    for (auto& addr : macAddresses)
+
+    for (auto& addr : MACAddress::getAllAddresses())
         addressList << addr.toString() << newLine;
 
     return addressList;
@@ -73,12 +73,9 @@ static String getFileSystemRoots()
 
 static String getIPAddressList()
 {
-    Array<IPAddress> addresses;
-    IPAddress::findAllAddresses (addresses);
-
     String addressList;
 
-    for (auto& addr : addresses)
+    for (auto& addr : IPAddress::getAllAddresses())
         addressList << "   " << addr.toString() << newLine;
 
     return addressList;
@@ -150,7 +147,7 @@ static String getAllSystemInfo()
       << "Memory size:     " << SystemStats::getMemorySizeInMegabytes() << " MB" << newLine
       << "CPU vendor:      " << SystemStats::getCpuVendor() << newLine
       << "CPU model:       " << SystemStats::getCpuModel()  << newLine
-      << "CPU speed:       " << SystemStats::getCpuSpeedInMegaherz() << " MHz" << newLine
+      << "CPU speed:       " << SystemStats::getCpuSpeedInMegahertz() << " MHz" << newLine
       << "CPU has MMX:     " << (SystemStats::hasMMX()    ? "yes" : "no") << newLine
       << "CPU has SSE:     " << (SystemStats::hasSSE()    ? "yes" : "no") << newLine
       << "CPU has SSE2:    " << (SystemStats::hasSSE2()   ? "yes" : "no") << newLine

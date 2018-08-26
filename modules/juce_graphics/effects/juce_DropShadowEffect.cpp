@@ -68,11 +68,6 @@ static void blurSingleChannelImage (Image& image, int radius)
 }
 
 //==============================================================================
-DropShadow::DropShadow() noexcept
-    : colour (0x90000000), radius (4)
-{
-}
-
 DropShadow::DropShadow (Colour shadowColour, const int r, Point<int> o) noexcept
     : colour (shadowColour), radius (r), offset (o)
 {
@@ -99,9 +94,9 @@ void DropShadow::drawForPath (Graphics& g, const Path& path) const
 {
     jassert (radius > 0);
 
-    const Rectangle<int> area ((path.getBounds().getSmallestIntegerContainer() + offset)
-                                   .expanded (radius + 1)
-                                   .getIntersection (g.getClipBounds().expanded (radius + 1)));
+    auto area = (path.getBounds().getSmallestIntegerContainer() + offset)
+                  .expanded (radius + 1)
+                  .getIntersection (g.getClipBounds().expanded (radius + 1));
 
     if (area.getWidth() > 2 && area.getHeight() > 2)
     {
@@ -142,11 +137,11 @@ void DropShadow::drawForRectangle (Graphics& g, const Rectangle<int>& targetArea
     const float radiusInset = (radius + 1) / 2.0f;
     const float expandedRadius = radius + radiusInset;
 
-    const Rectangle<float> area (targetArea.toFloat().reduced (radiusInset) + offset.toFloat());
+    auto area = targetArea.toFloat().reduced (radiusInset) + offset.toFloat();
 
-    Rectangle<float> r (area.expanded (expandedRadius));
-    Rectangle<float> top (r.removeFromTop (expandedRadius));
-    Rectangle<float> bottom (r.removeFromBottom (expandedRadius));
+    auto r = area.expanded (expandedRadius);
+    auto top = r.removeFromTop (expandedRadius);
+    auto bottom = r.removeFromBottom (expandedRadius);
 
     drawShadowSection (g, cg, top.removeFromLeft  (expandedRadius), true, 1.0f, 1.0f, 0, 1.0f);
     drawShadowSection (g, cg, top.removeFromRight (expandedRadius), true, 0, 1.0f, 1.0f, 1.0f);

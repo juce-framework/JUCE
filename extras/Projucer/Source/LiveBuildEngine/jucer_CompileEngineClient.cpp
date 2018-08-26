@@ -370,8 +370,8 @@ private:
         scanProjectItem (proj.getMainGroup(), compileUnits, userFiles);
 
         {
-            auto isVST3Host = project.getModules().isModuleEnabled ("juce_audio_processors")
-                           && project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3");
+            auto isVSTHost = project.getModules().isModuleEnabled ("juce_audio_processors")
+                   && (project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3") || project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST"));
 
             auto isPluginProject = proj.getProjectType().isAudioPlugin();
 
@@ -390,10 +390,10 @@ private:
 
 
                         m->findAndAddCompiledUnits (*exporter, nullptr, compileUnits,
-                                                    isPluginProject || isVST3Host ? ProjectType::Target::SharedCodeTarget
-                                                                                  : ProjectType::Target::unspecified);
+                                                    isPluginProject || isVSTHost ? ProjectType::Target::SharedCodeTarget
+                                                                                 : ProjectType::Target::unspecified);
 
-                        if (isPluginProject || isVST3Host)
+                        if (isPluginProject || isVSTHost)
                             m->findAndAddCompiledUnits (*exporter, nullptr, compileUnits, ProjectType::Target::StandalonePlugIn);
                     }
 
@@ -458,17 +458,26 @@ private:
         StringArray paths;
         paths.addArray (getSearchPathsFromString (project.getCompileEngineSettings().getSystemHeaderPathString()));
 
-        auto isVST3Host = project.getModules().isModuleEnabled ("juce_audio_processors")
-                       && project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3");
+        auto isVSTHost = project.getModules().isModuleEnabled ("juce_audio_processors")
+                       && (project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3")
+                             || project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST"));
 
-        if (project.getProjectType().isAudioPlugin() || isVST3Host)
-            paths.add (getAppSettings().getStoredPath (Ids::vst3Path).toString());
+        auto customVst3Path = getAppSettings().getStoredPath (Ids::vst3Path).toString();
+
+        if (customVst3Path.isNotEmpty() && (project.getProjectType().isAudioPlugin() || isVSTHost))
+            paths.add (customVst3Path);
 
         OwnedArray<LibraryModule> modules;
         project.getModules().createRequiredModules (modules);
 
         for (auto* module : modules)
+        {
             paths.addIfNotAlreadyThere (module->getFolder().getParentDirectory().getFullPathName());
+
+            if (customVst3Path.isEmpty() && (project.getProjectType().isAudioPlugin() || isVSTHost))
+                if (module->getID() == "juce_audio_processors")
+                    paths.addIfNotAlreadyThere (module->getFolder().getChildFile ("format_types").getChildFile ("VST3_SDK").getFullPathName());
+        }
 
         return convertSearchPathsToAbsolute (paths);
     }

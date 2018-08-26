@@ -49,13 +49,10 @@ class Line
 public:
     //==============================================================================
     /** Creates a line, using (0, 0) as its start and end points. */
-    Line() noexcept {}
+    Line() = default;
 
     /** Creates a copy of another line. */
-    Line (const Line& other) noexcept
-        : start (other.start), end (other.end)
-    {
-    }
+    Line (const Line&) = default;
 
     /** Creates a line based on the coordinates of its start and end points. */
     Line (ValueType startX, ValueType startY, ValueType endX, ValueType endY) noexcept
@@ -70,15 +67,10 @@ public:
     }
 
     /** Copies a line from another one. */
-    Line& operator= (const Line& other) noexcept
-    {
-        start = other.start;
-        end = other.end;
-        return *this;
-    }
+    Line& operator= (const Line&) = default;
 
     /** Destructor. */
-    ~Line() noexcept {}
+    ~Line() = default;
 
     //==============================================================================
     /** Returns the x coordinate of the line's start point. */

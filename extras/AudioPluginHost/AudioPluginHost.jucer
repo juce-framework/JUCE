@@ -156,8 +156,8 @@
                    androidMinimumSDK="23" androidInternetNeeded="1" microphonePermissionNeeded="1"
                    androidBluetoothNeeded="1" smallIcon="c97aUr" bigIcon="c97aUr">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" androidArchitectures="armeabi-v7a x86" isDebug="1" optimisation="1"
-                       linkTimeOptimisation="0" targetName="Plugin Host"/>
+        <CONFIGURATION name="Debug" androidArchitectures="armeabi-v7a x86" isDebug="1"
+                       optimisation="1" linkTimeOptimisation="0" targetName="Plugin Host"/>
         <CONFIGURATION name="Release" androidArchitectures="" isDebug="0" optimisation="3"
                        linkTimeOptimisation="1" targetName="Plugin Host"/>
       </CONFIGURATIONS>

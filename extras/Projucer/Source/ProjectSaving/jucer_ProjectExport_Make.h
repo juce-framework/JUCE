@@ -78,7 +78,7 @@ protected:
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& tree) const override
     {
-        return new MakeBuildConfiguration (project, tree, *this);
+        return *new MakeBuildConfiguration (project, tree, *this);
     }
 
 public:
@@ -422,7 +422,12 @@ public:
     }
 
     //==============================================================================
-    void initialiseDependencyPathValues() override  {}
+    void initialiseDependencyPathValues() override
+    {
+        vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder),
+                                                                Ids::vst3Path,
+                                                                TargetOS::linux)));
+    }
 
 private:
     ValueWithDefault extraPkgConfigValue;
@@ -462,6 +467,10 @@ private:
             packages.add ("webkit2gtk-4.0");
             packages.add ("gtk+-x11-3.0");
         }
+
+        // don't add libcurl if curl symbols are loaded at runtime
+        if (! isLoadCurlSymbolsLazilyEnabled())
+            packages.add ("libcurl");
 
         packages.removeDuplicates (false);
 
@@ -601,6 +610,14 @@ private:
 
         return (project.getModules().isModuleEnabled (guiExtrasModule)
                 && project.isConfigFlagEnabled ("JUCE_WEB_BROWSER", true));
+    }
+
+    bool isLoadCurlSymbolsLazilyEnabled() const
+    {
+        static String juceCoreModule ("juce_core");
+
+        return (project.getModules().isModuleEnabled (juceCoreModule)
+                && project.isConfigFlagEnabled ("JUCE_LOAD_CURL_SYMBOLS_LAZILY", false));
     }
 
     //==============================================================================

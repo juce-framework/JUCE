@@ -93,7 +93,7 @@ public:
     LowLevelGraphicsContext* createLowLevelContext() override
     {
         sendDataChangeMessage();
-        return new LowLevelGraphicsSoftwareRenderer (Image (this));
+        return new LowLevelGraphicsSoftwareRenderer (Image (*this));
     }
 
     void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode) override
@@ -109,9 +109,9 @@ public:
 
     ImagePixelData::Ptr clone() override
     {
-        SoftwarePixelData* s = new SoftwarePixelData (pixelFormat, width, height, false);
+        auto s = new SoftwarePixelData (pixelFormat, width, height, false);
         memcpy (s->imageData, imageData, (size_t) lineStride * (size_t) height);
-        return s;
+        return *s;
     }
 
     ImageType* createType() const override    { return new SoftwareImageType(); }
@@ -128,7 +128,7 @@ SoftwareImageType::~SoftwareImageType() {}
 
 ImagePixelData::Ptr SoftwareImageType::create (Image::PixelFormat format, int width, int height, bool clearImage) const
 {
-    return new SoftwarePixelData (format, width, height, clearImage);
+    return *new SoftwarePixelData (format, width, height, clearImage);
 }
 
 int SoftwareImageType::getTypeID() const
@@ -156,9 +156,9 @@ ImagePixelData::Ptr NativeImageType::create (Image::PixelFormat format, int widt
 class SubsectionPixelData  : public ImagePixelData
 {
 public:
-    SubsectionPixelData (ImagePixelData* im, Rectangle<int> r)
-        : ImagePixelData (im->pixelFormat, r.getWidth(), r.getHeight()),
-          sourceImage (im), area (r)
+    SubsectionPixelData (ImagePixelData::Ptr source, Rectangle<int> r)
+        : ImagePixelData (source->pixelFormat, r.getWidth(), r.getHeight()),
+          sourceImage (static_cast<ImagePixelData::Ptr&&> (source)), area (r)
     {
     }
 
@@ -187,10 +187,10 @@ public:
 
         {
             Graphics g (newImage);
-            g.drawImageAt (Image (this), 0, 0);
+            g.drawImageAt (Image (*this), 0, 0);
         }
 
-        return newImage.getPixelData();
+        return *newImage.getPixelData();
     }
 
     ImageType* createType() const override          { return sourceImage->createType(); }
@@ -216,7 +216,7 @@ Image Image::getClippedImage (const Rectangle<int>& area) const
     if (validArea.isEmpty())
         return {};
 
-    return Image (new SubsectionPixelData (image, validArea));
+    return Image (*new SubsectionPixelData (image, validArea));
 }
 
 
@@ -225,8 +225,8 @@ Image::Image() noexcept
 {
 }
 
-Image::Image (ImagePixelData* instance) noexcept
-    : image (instance)
+Image::Image (ReferenceCountedObjectPtr<ImagePixelData> instance) noexcept
+    : image (static_cast<ReferenceCountedObjectPtr<ImagePixelData>&&> (instance))
 {
 }
 

@@ -558,20 +558,28 @@ public:
         auto& modules = project.getModules();
         PopupMenu knownModules, jucePathModules, userPathModules, exporterPathsModules;
 
+        ModuleList list;
+
+        list.scanGlobalJuceModulePath();
+
         int index = 100;
-        for (auto m : getAvailableModulesInGlobalJucePath())
+        for (auto m : list.getIDs())
             jucePathModules.addItem (index++, m, ! modules.isModuleEnabled (m));
 
         knownModules.addSubMenu ("Global JUCE modules path", jucePathModules);
 
+        list.scanGlobalUserModulePath();
+
         index = 200;
-        for (auto m : getAvailableModulesInGlobalUserPath())
+        for (auto m : list.getIDs())
             userPathModules.addItem (index++, m, ! modules.isModuleEnabled (m));
 
         knownModules.addSubMenu ("Global user modules path", userPathModules);
 
+        list.scanProjectExporterModulePaths (project);
+
         index = 300;
-        for (auto m : getAvailableModulesInExporterPaths())
+        for (auto m : list.getIDs())
             exporterPathsModules.addItem (index++, m, ! modules.isModuleEnabled (m));
 
         knownModules.addSubMenu ("Exporter paths", exporterPathsModules);
@@ -594,59 +602,28 @@ public:
         }
         else if (resultCode > 0)
         {
+            ModuleList list;
+            int offset = -1;
+
             if (resultCode < 200)
-                modules.addModuleInteractive (getAvailableModulesInGlobalJucePath() [resultCode - 100]);
+            {
+                list.scanGlobalJuceModulePath();
+                offset = 100;
+            }
             else if (resultCode < 300)
-                modules.addModuleInteractive (getAvailableModulesInGlobalUserPath() [resultCode - 200]);
+            {
+                list.scanGlobalUserModulePath();
+                offset = 200;
+            }
             else if (resultCode < 400)
-                modules.addModuleInteractive (getAvailableModulesInExporterPaths() [resultCode - 300]);
+            {
+                list.scanProjectExporterModulePaths (project);
+                offset = 300;
+            }
+
+            if (offset != -1)
+                modules.addModuleInteractive (list.getIDs() [resultCode - offset]);
         }
-    }
-
-    StringArray getAvailableModulesInGlobalJucePath()
-    {
-        ModuleList list;
-        list.addAllModulesInFolder ({ getAppSettings().getStoredPath (Ids::defaultJuceModulePath).toString() });
-
-        return list.getIDs();
-    }
-
-    StringArray getAvailableModulesInGlobalUserPath()
-    {
-        ModuleList list;
-        auto paths = StringArray::fromTokens (getAppSettings().getStoredPath (Ids::defaultUserModulePath).toString(), ";", {});
-
-        for (auto p : paths)
-        {
-            p = p.replace ("~", File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
-
-            auto f = File::createFileWithoutCheckingPath (p.trim());
-            if (f.exists())
-                list.addAllModulesInFolder (f);
-        }
-
-        auto ids = list.getIDs();
-
-        for (auto m : getAvailableModulesInGlobalJucePath())
-            ids.removeString (m);
-
-        return ids;
-    }
-
-    StringArray getAvailableModulesInExporterPaths()
-    {
-        ModuleList list;
-        list.scanProjectExporterModulePaths (project);
-
-        auto ids = list.getIDs();
-
-        for (auto m : getAvailableModulesInGlobalJucePath())
-            ids.removeString (m);
-
-        for (auto m : getAvailableModulesInGlobalUserPath())
-            ids.removeString (m);
-
-        return ids;
     }
 
     //==============================================================================

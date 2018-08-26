@@ -499,11 +499,11 @@ void TableHeaderComponent::reactToMenuItem (const int menuReturnId, const int /*
 
 void TableHeaderComponent::paint (Graphics& g)
 {
-    LookAndFeel& lf = getLookAndFeel();
+    auto& lf = getLookAndFeel();
 
     lf.drawTableHeaderBackground (g, *this);
 
-    const Rectangle<int> clip (g.getClipBounds());
+    auto clip = g.getClipBounds();
 
     int x = 0;
 

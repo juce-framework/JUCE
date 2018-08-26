@@ -119,8 +119,8 @@ public:
         /** Given a point within a rectangle with a resizable border, this returns the
             zone that the point lies within.
         */
-        static Zone fromPositionOnBorder (const Rectangle<int>& totalSize,
-                                          const BorderSize<int>& border,
+        static Zone fromPositionOnBorder (Rectangle<int> totalSize,
+                                          BorderSize<int> border,
                                           Point<int> position);
 
         /** Returns an appropriate mouse-cursor for this resize zone. */
@@ -160,7 +160,7 @@ public:
 
     private:
         //==============================================================================
-        int zone;
+        int zone = centre;
     };
 
     /** Returns the zone in which the mouse was last seen. */

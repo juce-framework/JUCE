@@ -195,7 +195,7 @@ static var machineNumberAllowed (StringArray numbersFromKeyFile,
 
     for (int i = 0; i < localMachineNumbers.size(); ++i)
     {
-        String localNumber (localMachineNumbers[i].trim());
+        auto localNumber = localMachineNumbers[i].trim();
 
         if (localNumber.isNotEmpty())
         {
@@ -287,7 +287,7 @@ char OnlineUnlockStatus::MachineIDUtilities::getPlatformPrefix()
 
 String OnlineUnlockStatus::MachineIDUtilities::getEncodedIDString (const String& input)
 {
-    const String platform (String::charToString (static_cast<juce_wchar> (getPlatformPrefix())));
+    auto platform = String::charToString (static_cast<juce_wchar> (getPlatformPrefix()));
 
     return platform + MD5 ((input + "salt_1" + platform).toUTF8())
                         .toHexString().substring (0, 9).toUpperCase();
@@ -295,7 +295,7 @@ String OnlineUnlockStatus::MachineIDUtilities::getEncodedIDString (const String&
 
 bool OnlineUnlockStatus::MachineIDUtilities::addFileIDToList (StringArray& ids, const File& f)
 {
-    if (uint64 num = f.getFileIdentifier())
+    if (auto num = f.getFileIdentifier())
     {
         ids.add (getEncodedIDString (String::toHexString ((int64) num)));
         return true;
@@ -306,16 +306,14 @@ bool OnlineUnlockStatus::MachineIDUtilities::addFileIDToList (StringArray& ids, 
 
 void OnlineUnlockStatus::MachineIDUtilities::addMACAddressesToList (StringArray& ids)
 {
-    Array<MACAddress> addresses;
-    MACAddress::findAllAddresses (addresses);
-
-    for (int i = 0; i < addresses.size(); ++i)
-        ids.add (getEncodedIDString (addresses.getReference(i).toString()));
+    for (auto& address : MACAddress::getAllAddresses())
+        ids.add (getEncodedIDString (address.toString()));
 }
 
 StringArray OnlineUnlockStatus::MachineIDUtilities::getLocalMachineIDs()
 {
     auto identifiers = SystemStats::getDeviceIdentifiers();
+
     for (auto& identifier : identifiers)
         identifier = getEncodedIDString (identifier);
 
@@ -398,7 +396,7 @@ OnlineUnlockStatus::UnlockResult OnlineUnlockStatus::handleXmlReply (XmlElement 
 {
     UnlockResult r;
 
-    if (const XmlElement* keyNode = xml.getChildByName ("KEY"))
+    if (auto keyNode = xml.getChildByName ("KEY"))
     {
         const String keyText (keyNode->getAllSubText().trim());
         r.succeeded = keyText.length() > 10 && applyKeyFile (keyText);
@@ -460,7 +458,7 @@ OnlineUnlockStatus::UnlockResult OnlineUnlockStatus::attemptWebserverUnlock (con
     // This method will block while it contacts the server, so you must run it on a background thread!
     jassert (! MessageManager::getInstance()->isThisTheMessageThread());
 
-    String reply (readReplyFromWebserver (email, password));
+    auto reply = readReplyFromWebserver (email, password);
 
     DBG ("Reply from server: " << reply);
 
@@ -481,8 +479,8 @@ String KeyGeneration::generateKeyFile (const String& appName,
                                        const String& machineNumbers,
                                        const RSAKey& privateKey)
 {
-    XmlElement xml (KeyFileUtils::createKeyFileContent (appName, userEmail, userName, machineNumbers, "mach"));
-    const String comment (KeyFileUtils::createKeyFileComment (appName, userEmail, userName, machineNumbers));
+    auto xml = KeyFileUtils::createKeyFileContent (appName, userEmail, userName, machineNumbers, "mach");
+    auto comment = KeyFileUtils::createKeyFileComment (appName, userEmail, userName, machineNumbers);
 
     return KeyFileUtils::createKeyFile (comment, xml, privateKey);
 }
@@ -494,10 +492,10 @@ String KeyGeneration::generateExpiringKeyFile (const String& appName,
                                                const Time expiryTime,
                                                const RSAKey& privateKey)
 {
-    XmlElement xml (KeyFileUtils::createKeyFileContent (appName, userEmail, userName, machineNumbers, "expiring_mach"));
+    auto xml = KeyFileUtils::createKeyFileContent (appName, userEmail, userName, machineNumbers, "expiring_mach");
     xml.setAttribute ("expiryTime", String::toHexString (expiryTime.toMilliseconds()));
 
-    String comment (KeyFileUtils::createKeyFileComment (appName, userEmail, userName, machineNumbers));
+    auto comment = KeyFileUtils::createKeyFileComment (appName, userEmail, userName, machineNumbers);
     comment << newLine << "Expires: " << expiryTime.toString (true, true);
 
     return KeyFileUtils::createKeyFile (comment, xml, privateKey);

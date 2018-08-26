@@ -189,6 +189,7 @@ struct LittleFootRemoteHeap
                     for (uint32 j = 0; j < blockSize; ++j)
                         deviceState[j] = m.resultDataState[j];
 
+                    programStateKnown = false;
                     messagesSent.removeRange (0, i + 1);
                     dumpStatus();
                     sendChanges (bi, false);

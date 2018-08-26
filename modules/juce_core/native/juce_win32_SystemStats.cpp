@@ -386,7 +386,7 @@ static int64 juce_getClockCycleCounter() noexcept
    #endif
 }
 
-int SystemStats::getCpuSpeedInMegaherz()
+int SystemStats::getCpuSpeedInMegahertz()
 {
     const int64 cycles = juce_getClockCycleCounter();
     const uint32 millis = Time::getMillisecondCounter();

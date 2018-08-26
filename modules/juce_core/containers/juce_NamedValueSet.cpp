@@ -59,7 +59,14 @@ NamedValueSet::NamedValueSet() noexcept {}
 NamedValueSet::~NamedValueSet() noexcept {}
 
 NamedValueSet::NamedValueSet (const NamedValueSet& other)  : values (other.values) {}
-NamedValueSet::NamedValueSet (NamedValueSet&& other) noexcept  : values (static_cast<Array<NamedValue>&&> (other.values)) {}
+
+NamedValueSet::NamedValueSet (NamedValueSet&& other) noexcept
+   : values (static_cast<Array<NamedValue>&&> (other.values)) {}
+
+NamedValueSet::NamedValueSet (std::initializer_list<NamedValue> list)
+   : values (static_cast<std::initializer_list<NamedValue>&&> (list))
+{
+}
 
 NamedValueSet& NamedValueSet::operator= (const NamedValueSet& other)
 {

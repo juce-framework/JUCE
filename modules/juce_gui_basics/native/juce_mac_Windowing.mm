@@ -167,7 +167,7 @@ static NSRect getDragRect (NSView* view, NSEvent* event)
 static NSView* getNSViewForDragEvent (Component* sourceComp)
 {
     if (sourceComp == nullptr)
-        if (auto* draggingSource = Desktop::getInstance().getDraggingMouseSource(0))
+        if (auto* draggingSource = Desktop::getInstance().getDraggingMouseSource (0))
             sourceComp = draggingSource->getComponentUnderMouse();
 
     if (sourceComp != nullptr)
@@ -177,14 +177,22 @@ static NSView* getNSViewForDragEvent (Component* sourceComp)
     return nil;
 }
 
-struct TextDragDataProviderClass   : public ObjCClass<NSObject>
+struct NSDraggingSourceHelper   : public ObjCClass<NSObject<NSDraggingSource>>
 {
-    TextDragDataProviderClass()  : ObjCClass<NSObject> ("JUCE_NSTextDragDataProvider_")
+    NSDraggingSourceHelper() : ObjCClass<NSObject<NSDraggingSource>> ("JUCENSDraggingSourceHelper_")
     {
+        addIvar<std::function<void()>*> ("callback");
         addIvar<String*> ("text");
+        addIvar<NSDragOperation*> ("operation");
+
         addMethod (@selector (dealloc), dealloc, "v@:");
         addMethod (@selector (pasteboard:item:provideDataForType:), provideDataForType, "v@:@@@");
+
+        addMethod (@selector (draggingSession:sourceOperationMaskForDraggingContext:), sourceOperationMaskForDraggingContext, "c@:@@");
+        addMethod (@selector (draggingSession:endedAtPoint:operation:), draggingSessionEnded, "v@:@@@");
+
         addProtocol (@protocol (NSPasteboardItemDataProvider));
+
         registerClass();
     }
 
@@ -193,10 +201,23 @@ struct TextDragDataProviderClass   : public ObjCClass<NSObject>
         object_setInstanceVariable (self, "text", new String (text));
     }
 
+    static void setCompletionCallback (id self, std::function<void()> cb)
+    {
+        object_setInstanceVariable (self, "callback", new std::function<void()> (cb));
+    }
+
+    static void setDragOperation (id self, NSDragOperation op)
+    {
+        object_setInstanceVariable (self, "operation", new NSDragOperation (op));
+    }
+
 private:
     static void dealloc (id self, SEL)
     {
         delete getIvar<String*> (self, "text");
+        delete getIvar<std::function<void()>*> (self, "callback");
+        delete getIvar<NSDragOperation*> (self, "operation");
+
         sendSuperclassMessage (self, @selector (dealloc));
     }
 
@@ -207,9 +228,30 @@ private:
                 [sender setData: [juceStringToNS (*text) dataUsingEncoding: NSUTF8StringEncoding]
                         forType: NSPasteboardTypeString];
     }
+
+    static NSDragOperation sourceOperationMaskForDraggingContext (id self, SEL, NSDraggingSession*, NSDraggingContext)
+    {
+        return *getIvar<NSDragOperation*> (self, "operation");
+    }
+
+    static void draggingSessionEnded (id self, SEL, NSDraggingSession*, NSPoint p, NSDragOperation)
+    {
+        // Our view doesn't receive a mouse up when the drag ends so we need to generate one here and send it...
+        if (auto* view = getNSViewForDragEvent (nullptr))
+        {
+            auto* cgEvent = CGEventCreateMouseEvent (nullptr, kCGEventLeftMouseUp, CGPointMake (p.x, p.y), kCGMouseButtonLeft);
+            [view mouseUp: [NSEvent eventWithCGEvent:cgEvent]];
+        }
+
+        if (auto* cb = getIvar<std::function<void()>*> (self, "callback"))
+            cb->operator()();
+    }
 };
 
-bool DragAndDropContainer::performExternalDragDropOfText (const String& text, Component* sourceComponent)
+static NSDraggingSourceHelper draggingSourceHelper;
+
+bool DragAndDropContainer::performExternalDragDropOfText (const String& text, Component* sourceComponent,
+                                                          std::function<void()> callback)
 {
     if (text.isEmpty())
         return false;
@@ -220,12 +262,15 @@ bool DragAndDropContainer::performExternalDragDropOfText (const String& text, Co
         {
             if (auto* event = [[view window] currentEvent])
             {
-                static TextDragDataProviderClass dataProviderClass;
-                id delegate = [dataProviderClass.createInstance() init];
-                TextDragDataProviderClass::setText (delegate, text);
+                id helper = [draggingSourceHelper.createInstance() init];
+                NSDraggingSourceHelper::setText (helper, text);
+                NSDraggingSourceHelper::setDragOperation (helper, NSDragOperationCopy);
+
+                if (callback != nullptr)
+                    NSDraggingSourceHelper::setCompletionCallback (helper, callback);
 
                 auto* pasteboardItem = [[NSPasteboardItem new] autorelease];
-                [pasteboardItem setDataProvider: delegate
+                [pasteboardItem setDataProvider: helper
                                        forTypes: [NSArray arrayWithObjects: NSPasteboardTypeString, nil]];
 
                 auto* dragItem = [[[NSDraggingItem alloc] initWithPasteboardWriter: pasteboardItem] autorelease];
@@ -233,13 +278,15 @@ bool DragAndDropContainer::performExternalDragDropOfText (const String& text, Co
                 NSImage* image = [[NSWorkspace sharedWorkspace] iconForFile: nsEmptyString()];
                 [dragItem setDraggingFrame: getDragRect (view, event) contents: image];
 
-                auto* draggingSession = [view beginDraggingSessionWithItems: [NSArray arrayWithObject: dragItem]
-                                                                      event: event
-                                                                     source: delegate];
+                if (auto* session = [view beginDraggingSessionWithItems: [NSArray arrayWithObject: dragItem]
+                                                                  event: event
+                                                                 source: helper])
+                {
+                    session.animatesToStartingPositionsOnCancelOrFail = YES;
+                    session.draggingFormation = NSDraggingFormationNone;
 
-                draggingSession.animatesToStartingPositionsOnCancelOrFail = YES;
-                draggingSession.draggingFormation = NSDraggingFormationNone;
-                return true;
+                    return true;
+                }
             }
         }
     }
@@ -247,24 +294,8 @@ bool DragAndDropContainer::performExternalDragDropOfText (const String& text, Co
     return false;
 }
 
-struct NSDraggingSourceHelper   : public ObjCClass<NSObject<NSDraggingSource>>
-{
-    NSDraggingSourceHelper() : ObjCClass<NSObject<NSDraggingSource>> ("JUCENSDraggingSourceHelper_")
-    {
-        addMethod (@selector (draggingSession:sourceOperationMaskForDraggingContext:), sourceOperationMaskForDraggingContext, "c@:@@");
-        registerClass();
-    }
-
-    static NSDragOperation sourceOperationMaskForDraggingContext (id, SEL, NSDraggingSession*, NSDraggingContext)
-    {
-        return NSDragOperationCopy;
-    }
-};
-
-static NSDraggingSourceHelper draggingSourceHelper;
-
-bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& files, bool /*canMoveFiles*/,
-                                                           Component* sourceComponent)
+bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& files, bool canMoveFiles,
+                                                           Component* sourceComponent, std::function<void()> callback)
 {
     if (files.isEmpty())
         return false;
@@ -296,9 +327,16 @@ bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& fi
 
                 auto* helper = [draggingSourceHelper.createInstance() autorelease];
 
-                return [view beginDraggingSessionWithItems: dragItems
-                                                     event: event
-                                                    source: helper];
+                if (callback != nullptr)
+                    NSDraggingSourceHelper::setCompletionCallback (helper, callback);
+
+                NSDraggingSourceHelper::setDragOperation (helper, canMoveFiles ? NSDragOperationMove
+                                                                               : NSDragOperationCopy);
+
+                if (auto* session = [view beginDraggingSessionWithItems: dragItems
+                                                                  event: event
+                                                                 source: helper])
+                    return true;
             }
         }
     }

@@ -38,9 +38,9 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
                bool meta,
                bool automatable,
                bool discrete,
-               AudioProcessorParameter::Category category,
+               AudioProcessorParameter::Category paramCategory,
                bool boolean)
-        : AudioProcessorParameterWithID (parameterID, paramName, labelText, category),
+        : AudioProcessorParameterWithID (parameterID, paramName, labelText, paramCategory),
           owner (s), valueToTextFunction (valueToText), textToValueFunction (textToValue),
           range (r), value (defaultVal), defaultValue (defaultVal),
           listenersNeedCalling (true),

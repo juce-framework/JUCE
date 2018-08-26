@@ -49,7 +49,7 @@ protected:
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& tree) const override
     {
-        return new CLionBuildConfiguration (project, tree, *this);
+        return *new CLionBuildConfiguration (project, tree, *this);
     }
 
 public:

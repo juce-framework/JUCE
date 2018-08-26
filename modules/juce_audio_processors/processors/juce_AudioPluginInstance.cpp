@@ -175,7 +175,7 @@ bool AudioPluginInstance::isMetaParameter (int parameterIndex) const
     if (auto* param = getParameters()[parameterIndex])
         return param->isMetaParameter();
 
-        return false;
+    return false;
 }
 
 AudioProcessorParameter::Category AudioPluginInstance::getParameterCategory (int parameterIndex) const

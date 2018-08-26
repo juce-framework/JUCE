@@ -31,14 +31,14 @@
 class ModulesFolderPathBox  : public Component
 {
 public:
-    ModulesFolderPathBox (File initialFileOrDirectory)
+    ModulesFolderPathBox (String initialFileOrDirectory)
         : currentPathBox ("currentPathBox"),
           openFolderButton (TRANS("...")),
           modulesLabel (String(), TRANS("Modules Folder") + ":"),
           useGlobalPathsToggle ("Use global module path")
     {
-        if (initialFileOrDirectory == File())
-            initialFileOrDirectory = EnabledModuleList::findGlobalModulesFolder();
+        if (initialFileOrDirectory.isEmpty())
+            initialFileOrDirectory = getAppSettings().getStoredPath (Ids::defaultJuceModulePath).toString();
 
         setModulesFolder (initialFileOrDirectory);
 
@@ -85,7 +85,7 @@ public:
         for (;;)
         {
             FileChooser fc ("Select your JUCE modules folder...",
-                            EnabledModuleList::findGlobalModulesFolder(),
+                            { getAppSettings().getStoredPath (Ids::defaultJuceModulePath).toString() },
                             "*");
 
             if (! fc.browseForDirectory())
@@ -286,7 +286,7 @@ public:
     WizardComp()
         : platformTargets(),
           projectName (TRANS("Project name")),
-          modulesPathBox (EnabledModuleList::findGlobalModulesFolder())
+          modulesPathBox (getAppSettings().getStoredPath (Ids::defaultJuceModulePath).toString())
     {
         setOpaque (false);
 

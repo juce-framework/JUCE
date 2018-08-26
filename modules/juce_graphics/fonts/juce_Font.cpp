@@ -308,7 +308,7 @@ bool Font::operator!= (const Font& other) const noexcept
 void Font::dupeInternalIfShared()
 {
     if (font->getReferenceCount() > 1)
-        font = new SharedFontInternal (*font);
+        font = *new SharedFontInternal (*font);
 }
 
 void Font::checkTypefaceSuitability()
@@ -392,7 +392,7 @@ Typeface* Font::getTypeface() const
         jassert (font->typeface != nullptr);
     }
 
-    return font->typeface;
+    return font->typeface.get();
 }
 
 //==============================================================================

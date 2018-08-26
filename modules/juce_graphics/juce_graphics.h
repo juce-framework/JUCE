@@ -77,6 +77,15 @@
  #define JUCE_USE_DIRECTWRITE 1
 #endif
 
+/** Config: JUCE_DISABLE_COREGRAPHICS_FONT_SMOOTHING
+
+    Setting this flag will turn off CoreGraphics font smoothing, which some people
+    find makes the text too 'fat' for their taste.
+*/
+#ifndef JUCE_DISABLE_COREGRAPHICS_FONT_SMOOTHING
+ #define JUCE_DISABLE_COREGRAPHICS_FONT_SMOOTHING 0
+#endif
+
 #ifndef JUCE_INCLUDE_PNGLIB_CODE
  #define JUCE_INCLUDE_PNGLIB_CODE 1
 #endif

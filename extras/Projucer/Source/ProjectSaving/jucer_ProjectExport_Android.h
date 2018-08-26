@@ -146,7 +146,7 @@ public:
           gradleToolchain                      (settings, Ids::gradleToolchain,                      getUndoManager(), "clang"),
           androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "3.1.3"),
           buildToolsVersion                    (settings, Ids::buildToolsVersion,                    getUndoManager(), "28.0.0"),
-          AndroidExecutable (findAndroidExecutable())
+          AndroidExecutable                    (getAppSettings().getStoredPath (Ids::androidStudioExePath).toString())
     {
         name = getName();
 
@@ -276,38 +276,6 @@ public:
         overwriteFileIfDifferentOrThrow (gradleProjectFolder.getChildFile (filePath), outStream);
     }
 
-    //==============================================================================
-    static File findAndroidExecutable()
-    {
-       #if JUCE_WINDOWS
-        File defaultInstallation ("C:\\Program Files\\Android\\Android Studio\\bin");
-
-        if (defaultInstallation.exists())
-        {
-            {
-                auto studio64 = defaultInstallation.getChildFile ("studio64.exe");
-
-                if (studio64.existsAsFile())
-                    return studio64;
-            }
-
-            {
-                auto studio = defaultInstallation.getChildFile ("studio.exe");
-
-                if (studio.existsAsFile())
-                    return studio;
-            }
-        }
-      #elif JUCE_MAC
-       File defaultInstallation ("/Applications/Android Studio.app");
-
-       if (defaultInstallation.exists())
-           return defaultInstallation;
-      #endif
-
-        return {};
-    }
-
 protected:
     //==============================================================================
     class AndroidBuildConfiguration  : public BuildConfiguration
@@ -387,7 +355,7 @@ protected:
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const override
     {
-        return new AndroidBuildConfiguration (project, v, *this);
+        return *new AndroidBuildConfiguration (project, v, *this);
     }
 
 private:
@@ -467,7 +435,20 @@ private:
                 mo << (first ? "IF" : "ELSEIF") << "(JUCE_BUILD_CONFIGURATION MATCHES \"" << cfg.getProductFlavourCMakeIdentifier() <<"\")" << newLine;
 
                 if (isLibrary())
+                {
                     mo << "    SET(BINARY_NAME \"" << getNativeModuleBinaryName (cfg) << "\")" << newLine;
+
+                    auto binaryLocation = cfg.getTargetBinaryRelativePathString();
+
+                    if (binaryLocation.isNotEmpty())
+                    {
+                        auto locationRelativeToCmake = RelativePath (binaryLocation, RelativePath::projectFolder)
+                                                        .rebased (getProject().getFile().getParentDirectory(),
+                                                                  file.getParentDirectory(), RelativePath::buildTargetFolder);
+
+                        mo << "    SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY \"" << "../../../../" << locationRelativeToCmake.toUnixStyle() << "\")" << newLine;
+                    }
+                }
 
                 writeCmakePathLines (mo, "    ", "link_directories(", libSearchPaths);
 

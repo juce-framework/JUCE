@@ -40,7 +40,7 @@ struct PopupMenu::HelperClasses
 {
 
 class MouseSourceState;
-class MenuWindow;
+struct MenuWindow;
 
 static bool canBeTriggered (const PopupMenu::Item& item) noexcept        { return item.isEnabled && item.itemID != 0 && ! item.isSectionHeader; }
 static bool hasActiveSubMenu (const PopupMenu::Item& item) noexcept      { return item.isEnabled && item.subMenu != nullptr && item.subMenu->items.size() > 0; }
@@ -77,9 +77,10 @@ struct ItemComponent  : public Component
       : item (i), customComp (i.customComponent)
     {
         if (item.isSectionHeader)
-            customComp = new HeaderItemComponent (item.text);
+            customComp = *new HeaderItemComponent (item.text);
 
-        addAndMakeVisible (customComp);
+        if (customComp != nullptr)
+            addAndMakeVisible (*customComp);
 
         parent.addAndMakeVisible (this);
 
@@ -95,7 +96,7 @@ struct ItemComponent  : public Component
 
     ~ItemComponent()
     {
-        removeChildComponent (customComp);
+        removeChildComponent (customComp.get());
     }
 
     void getIdealSize (int& idealWidth, int& idealHeight, const int standardItemHeight)
@@ -188,9 +189,8 @@ private:
 };
 
 //==============================================================================
-class MenuWindow  : public Component
+struct MenuWindow  : public Component
 {
-public:
     MenuWindow (const PopupMenu& menu, MenuWindow* parentWindow,
                 const Options& opts, bool alignToRectangle, bool shouldDismissOnMouseUp,
                 ApplicationCommandManager** manager, float parentScaleFactor = 1.0f)
@@ -592,8 +592,11 @@ public:
     }
 
     //==============================================================================
-    Rectangle<int> getParentArea (Point<int> targetPoint)
+    Rectangle<int> getParentArea (Point<int> targetPoint, Component* relativeTo = nullptr)
     {
+        if (relativeTo != nullptr)
+            targetPoint = relativeTo->localPointToGlobal (targetPoint);
+
         auto parentArea = Desktop::getInstance().getDisplays().getDisplayContaining (targetPoint)
                               #if JUCE_MAC
                                .userArea;
@@ -789,7 +792,7 @@ public:
                                                     windowPos.getHeight() - (PopupMenuSettings::scrollZone + m->getHeight())),
                                               currentY);
 
-                        auto parentArea = getParentArea (windowPos.getPosition()) / scaleFactor;
+                        auto parentArea = getParentArea (windowPos.getPosition(), parentComponent) / scaleFactor;
                         auto deltaY = wantedY - currentY;
 
                         windowPos.setSize (jmin (windowPos.getWidth(), parentArea.getWidth()),
@@ -1738,8 +1741,13 @@ bool JUCE_CALLTYPE PopupMenu::dismissAllActiveMenus()
     auto numWindows = windows.size();
 
     for (int i = numWindows; --i >= 0;)
+    {
         if (auto* pmw = windows[i])
+        {
+            pmw->setLookAndFeel (nullptr);
             pmw->dismissMenu (nullptr);
+        }
+    }
 
     return numWindows > 0;
 }
@@ -1853,7 +1861,9 @@ bool PopupMenu::MenuItemIterator::next()
         menus.add (currentItem->subMenu.get());
     }
     else
+    {
         index.setUnchecked (index.size() - 1, index.getLast() + 1);
+    }
 
     while (index.size() > 0 && index.getLast() >= menus.getLast()->items.size())
     {

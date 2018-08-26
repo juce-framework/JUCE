@@ -91,15 +91,16 @@ Component* Desktop::findComponentAt (Point<int> screenPosition) const
 //==============================================================================
 LookAndFeel& Desktop::getDefaultLookAndFeel() noexcept
 {
-    if (currentLookAndFeel == nullptr)
-    {
-        if (defaultLookAndFeel == nullptr)
-            defaultLookAndFeel.reset (new LookAndFeel_V4());
+    if (auto lf = currentLookAndFeel.get())
+        return *lf;
 
-        currentLookAndFeel = defaultLookAndFeel.get();
-    }
+    if (defaultLookAndFeel == nullptr)
+        defaultLookAndFeel.reset (new LookAndFeel_V4());
 
-    return *currentLookAndFeel;
+    auto lf = defaultLookAndFeel.get();
+    jassert (lf != nullptr);
+    currentLookAndFeel = lf;
+    return *lf;
 }
 
 void Desktop::setDefaultLookAndFeel (LookAndFeel* newDefaultLookAndFeel)
@@ -193,7 +194,7 @@ void Desktop::handleAsyncUpdate()
     // The component may be deleted during this operation, but we'll use a SafePointer rather than a
     // BailOutChecker so that any remaining listeners will still get a callback (with a null pointer).
     WeakReference<Component> currentFocus (Component::getCurrentlyFocusedComponent());
-    focusListeners.call ([&] (FocusChangeListener& l) { l.globalFocusChanged (currentFocus); });
+    focusListeners.call ([&] (FocusChangeListener& l) { l.globalFocusChanged (currentFocus.get()); });
 }
 
 //==============================================================================

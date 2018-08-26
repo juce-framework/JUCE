@@ -139,6 +139,8 @@ struct NewProjectWizard
             if (! initialiseProject (*project))
                 return nullptr;
 
+            project->getConfigFlag ("JUCE_STRICT_REFCOUNTEDPOINTER") = true;
+
             addExporters (*project, wc);
             addDefaultModules (*project, useGlobalPath);
 

@@ -590,11 +590,9 @@ bool StreamingSocket::isLocal() const noexcept
     if (! isConnected())
         return false;
 
-    Array<IPAddress> localAddresses;
-    IPAddress::findAllAddresses (localAddresses);
     IPAddress currentIP (SocketHelpers::getConnectedAddress (handle));
 
-    for (auto& a : localAddresses)
+    for (auto& a : IPAddress::getAllAddresses())
         if (a == currentIP)
             return true;
 

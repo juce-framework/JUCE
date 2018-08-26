@@ -140,22 +140,6 @@ namespace ColourHelpers
 }
 
 //==============================================================================
-Colour::Colour() noexcept
-    : argb (0, 0, 0, 0)
-{
-}
-
-Colour::Colour (const Colour& other) noexcept
-    : argb (other.argb)
-{
-}
-
-Colour& Colour::operator= (const Colour& other) noexcept
-{
-    argb = other.argb;
-    return *this;
-}
-
 bool Colour::operator== (const Colour& other) const noexcept    { return argb.getNativeARGB() == other.argb.getNativeARGB(); }
 bool Colour::operator!= (const Colour& other) const noexcept    { return argb.getNativeARGB() != other.argb.getNativeARGB(); }
 
@@ -226,11 +210,6 @@ Colour::Colour (PixelAlpha alpha) noexcept
     : argb (Colour (alpha.getInARGBMaskOrder()).argb)
 {
 }
-
-Colour::~Colour() noexcept
-{
-}
-
 
 //==============================================================================
 const PixelARGB Colour::getPixelARGB() const noexcept

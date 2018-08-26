@@ -1307,9 +1307,10 @@ private:
             if (! isMainBlockOfFunction)
                 return parentBlock->getVariableDepth (name, locationForError);
 
-            for (int i = function->arguments.size(); --i >= 0;)
-                if (function->arguments.getReference(i).name == name)
-                    return i + 1 + function->getNumLocals();
+            if (function != nullptr)
+                for (int i = function->arguments.size(); --i >= 0;)
+                    if (function->arguments.getReference(i).name == name)
+                        return i + 1 + function->getNumLocals();
 
             index = indexOf (getGlobalVariables(), name);
             if (index >= 0)
@@ -1338,12 +1339,13 @@ private:
                 if (v.name == name)
                     return v;
 
-            if (! isMainBlockOfFunction)
+            if (! isMainBlockOfFunction && parentBlock != nullptr)
                 return parentBlock->getVariable (name, locationForError);
 
-            for (auto& v : function->arguments)
-                if (v.name == name)
-                    return v;
+            if (function != nullptr)
+                for (auto& v : function->arguments)
+                    if (v.name == name)
+                        return v;
 
             for (auto& v : getGlobalConstants())
                 if (v.name == name)

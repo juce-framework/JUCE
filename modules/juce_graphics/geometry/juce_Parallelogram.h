@@ -41,15 +41,10 @@ public:
     //==============================================================================
     /** Creates a parallelogram with zero size at the origin.
     */
-    Parallelogram() noexcept
-    {
-    }
+    Parallelogram() = default;
 
     /** Creates a copy of another parallelogram. */
-    Parallelogram (const Parallelogram& other) noexcept
-       : topLeft (other.topLeft), topRight (other.topRight), bottomLeft (other.bottomLeft)
-    {
-    }
+    Parallelogram (const Parallelogram&) = default;
 
     /** Creates a parallelogram based on 3 points. */
     Parallelogram (Point<ValueType> topLeftPosition,
@@ -67,16 +62,10 @@ public:
     {
     }
 
-    Parallelogram& operator= (const Parallelogram& other) noexcept
-    {
-        topLeft = other.topLeft;
-        topRight = other.topRight;
-        bottomLeft = other.bottomLeft;
-        return *this;
-    }
+    Parallelogram& operator= (const Parallelogram&) = default;
 
     /** Destructor. */
-    ~Parallelogram() noexcept {}
+    ~Parallelogram() = default;
 
     //==============================================================================
     /** Returns true if the parallelogram has a width or height of more than zero. */

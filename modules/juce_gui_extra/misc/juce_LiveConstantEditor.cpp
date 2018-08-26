@@ -280,7 +280,7 @@ public:
 
     void resized() override
     {
-        Rectangle<int> r (getLocalBounds().reduced (2, 0));
+        auto r = getLocalBounds().reduced (2, 0);
 
         for (int i = 0; i < editors.size(); ++i)
             editors.getUnchecked(i)->setBounds (r.removeFromTop (itemHeight));

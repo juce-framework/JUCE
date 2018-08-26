@@ -52,7 +52,7 @@ LookAndFeel_V1::~LookAndFeel_V1()
 
 //==============================================================================
 void LookAndFeel_V1::drawButtonBackground (Graphics& g, Button& button, const Colour& backgroundColour,
-                                           bool isMouseOverButton, bool isButtonDown)
+                                           bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown)
 {
     const int width = button.getWidth();
     const int height = button.getHeight();
@@ -69,9 +69,9 @@ void LookAndFeel_V1::drawButtonBackground (Graphics& g, Button& button, const Co
 
     Colour bc (backgroundColour.withMultipliedSaturation (0.3f));
 
-    if (isMouseOverButton)
+    if (shouldDrawButtonAsHighlighted)
     {
-        if (isButtonDown)
+        if (shouldDrawButtonAsDown)
             bc = bc.brighter();
         else if (bc.getBrightness() > 0.5f)
             bc = bc.darker (0.1f);
@@ -82,21 +82,21 @@ void LookAndFeel_V1::drawButtonBackground (Graphics& g, Button& button, const Co
     g.setColour (bc);
     g.fillPath (p);
 
-    g.setColour (bc.contrasting().withAlpha ((isMouseOverButton) ? 0.6f : 0.4f));
-    g.strokePath (p, PathStrokeType ((isMouseOverButton) ? 2.0f : 1.4f));
+    g.setColour (bc.contrasting().withAlpha ((shouldDrawButtonAsHighlighted) ? 0.6f : 0.4f));
+    g.strokePath (p, PathStrokeType ((shouldDrawButtonAsHighlighted) ? 2.0f : 1.4f));
 }
 
 void LookAndFeel_V1::drawTickBox (Graphics& g, Component& /*component*/,
                                   float x, float y, float w, float h,
                                   const bool ticked,
                                   const bool isEnabled,
-                                  const bool /*isMouseOverButton*/,
-                                  const bool isButtonDown)
+                                  const bool /*shouldDrawButtonAsHighlighted*/,
+                                  const bool shouldDrawButtonAsDown)
 {
     Path box;
     box.addRoundedRectangle (0.0f, 2.0f, 6.0f, 6.0f, 1.0f);
 
-    g.setColour (isEnabled ? Colours::blue.withAlpha (isButtonDown ? 0.3f : 0.1f)
+    g.setColour (isEnabled ? Colours::blue.withAlpha (shouldDrawButtonAsDown ? 0.3f : 0.1f)
                            : Colours::lightgrey.withAlpha (0.1f));
 
     AffineTransform trans (AffineTransform::scale (w / 9.0f, h / 9.0f).translated (x, y));
@@ -118,7 +118,7 @@ void LookAndFeel_V1::drawTickBox (Graphics& g, Component& /*component*/,
     }
 }
 
-void LookAndFeel_V1::drawToggleButton (Graphics& g, ToggleButton& button, bool isMouseOverButton, bool isButtonDown)
+void LookAndFeel_V1::drawToggleButton (Graphics& g, ToggleButton& button, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown)
 {
     if (button.hasKeyboardFocus (true))
     {
@@ -132,8 +132,8 @@ void LookAndFeel_V1::drawToggleButton (Graphics& g, ToggleButton& button, bool i
                  (float) tickWidth, (float) tickWidth,
                  button.getToggleState(),
                  button.isEnabled(),
-                 isMouseOverButton,
-                 isButtonDown);
+                 shouldDrawButtonAsHighlighted,
+                 shouldDrawButtonAsDown);
 
     g.setColour (button.findColour (ToggleButton::textColourId));
     g.setFont (jmin (15.0f, button.getHeight() * 0.6f));
@@ -182,8 +182,8 @@ void LookAndFeel_V1::drawProgressBar (Graphics& g, ProgressBar& progressBar,
 void LookAndFeel_V1::drawScrollbarButton (Graphics& g, ScrollBar& bar,
                                           int width, int height, int buttonDirection,
                                           bool isScrollbarVertical,
-                                          bool isMouseOverButton,
-                                          bool isButtonDown)
+                                          bool shouldDrawButtonAsHighlighted,
+                                          bool shouldDrawButtonAsDown)
 {
     if (isScrollbarVertical)
         width -= 2;
@@ -209,9 +209,9 @@ void LookAndFeel_V1::drawScrollbarButton (Graphics& g, ScrollBar& bar,
                        width * 0.7f, height * 0.1f,
                        width * 0.7f, height * 0.9f);
 
-    if (isButtonDown)
+    if (shouldDrawButtonAsDown)
         g.setColour (Colours::white);
-    else if (isMouseOverButton)
+    else if (shouldDrawButtonAsHighlighted)
         g.setColour (Colours::white.withAlpha (0.7f));
     else
         g.setColour (bar.findColour (ScrollBar::thumbColourId).withAlpha (0.5f));

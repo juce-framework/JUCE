@@ -1298,7 +1298,8 @@ public:
 
         ~PopupDisplayComponent()
         {
-            owner.pimpl->lastPopupDismissal = Time::getMillisecondCounterHiRes();
+            if (owner.pimpl != nullptr)
+                owner.pimpl->lastPopupDismissal = Time::getMillisecondCounterHiRes();
         }
 
         void paintContent (Graphics& g, int w, int h) override

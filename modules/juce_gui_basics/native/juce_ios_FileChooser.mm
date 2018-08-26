@@ -85,11 +85,34 @@ public:
 
         setOpaque (false);
 
-        auto chooserBounds = Desktop::getInstance().getDisplays().getMainDisplay().userArea;
-        setBounds (chooserBounds);
+        if (SystemStats::isRunningInAppExtensionSandbox())
+        {
+            if (fileChooser.parent != nullptr)
+            {
+                [controller.get() setModalPresentationStyle:UIModalPresentationFullScreen];
 
-        setAlwaysOnTop (true);
-        addToDesktop (0);
+                auto chooserBounds = fileChooser.parent->getBounds();
+                setBounds (chooserBounds);
+
+                setAlwaysOnTop (true);
+                fileChooser.parent->addAndMakeVisible (this);
+            }
+            else
+            {
+                // Opening a native top-level window in an AUv3 is not allowed (sandboxing). You need to specify a
+                // parent component (for example your editor) to parent the native file chooser window. To do this
+                // specify a parent component in the FileChooser's constructor!
+                jassert (fileChooser.parent != nullptr);
+            }
+        }
+        else
+        {
+            auto chooserBounds = Desktop::getInstance().getDisplays().getMainDisplay().userArea;
+            setBounds (chooserBounds);
+
+            setAlwaysOnTop (true);
+            addToDesktop (0);
+        }
     }
 
     ~Native()
@@ -308,7 +331,7 @@ bool FileChooser::isPlatformDialogAvailable()
    #if JUCE_DISABLE_NATIVE_FILECHOOSERS
     return false;
    #else
-    return [[NSFileManager defaultManager] ubiquityIdentityToken] != nil;
+    return true;
    #endif
 }
 

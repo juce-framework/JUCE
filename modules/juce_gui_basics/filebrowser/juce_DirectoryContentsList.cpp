@@ -102,7 +102,8 @@ void DirectoryContentsList::clear()
 
 void DirectoryContentsList::refresh()
 {
-    clear();
+    stopSearching();
+    files.clear();
 
     if (root.isDirectory())
     {

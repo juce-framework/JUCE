@@ -235,7 +235,7 @@ void Project::initialiseProjectValues()
 void Project::initialiseAudioPluginValues()
 {
     pluginFormatsValue.referTo               (projectRoot, Ids::pluginFormats,              getUndoManager(),
-                                              Array<var> (Ids::buildVST.toString(), Ids::buildAU.toString(), Ids::buildStandalone.toString()), ",");
+                                              Array<var> (Ids::buildVST3.toString(), Ids::buildAU.toString(), Ids::buildStandalone.toString()), ",");
     pluginCharacteristicsValue.referTo       (projectRoot, Ids::pluginCharacteristicsValue, getUndoManager(), Array<var> (), ",");
 
     pluginNameValue.referTo                  (projectRoot, Ids::pluginName,                 getUndoManager(), getProjectNameString());
@@ -250,6 +250,7 @@ void Project::initialiseAudioPluginValues()
     pluginAUIsSandboxSafeValue.referTo       (projectRoot, Ids::pluginAUIsSandboxSafe,      getUndoManager());
 
     pluginAUMainTypeValue.referTo            (projectRoot, Ids::pluginAUMainType,           getUndoManager(), getDefaultAUMainTypes(),    ",");
+    pluginAUSandboxSafeValue.referTo         (projectRoot, Ids::pluginAUIsSandboxSafe,      getUndoManager(), false);
     pluginVSTCategoryValue.referTo           (projectRoot, Ids::pluginVSTCategory,          getUndoManager(), getDefaultVSTCategories(),  ",");
     pluginVST3CategoryValue.referTo          (projectRoot, Ids::pluginVST3Category,         getUndoManager(), getDefaultVST3Categories(), ",");
     pluginRTASCategoryValue.referTo          (projectRoot, Ids::pluginRTASCategory,         getUndoManager(), getDefaultRTASCategories(), ",");
@@ -1027,10 +1028,10 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
 void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
 {
     props.add (new MultiChoicePropertyComponent (pluginFormatsValue, "Plugin Formats",
-                                                 { "VST", "VST3", "AU", "AUv3", "RTAS", "AAX", "Standalone", "Unity", "Enable IAA" },
-                                                 { Ids::buildVST.toString(), Ids::buildVST3.toString(), Ids::buildAU.toString(), Ids::buildAUv3.toString(),
+                                                 { "VST3", "AU", "AUv3", "RTAS", "AAX", "Standalone", "Unity", "Enable IAA", "VST (legacy)" },
+                                                 { Ids::buildVST3.toString(), Ids::buildAU.toString(), Ids::buildAUv3.toString(),
                                                    Ids::buildRTAS.toString(), Ids::buildAAX.toString(), Ids::buildStandalone.toString(), Ids::buildUnity.toString(),
-                                                   Ids::enableIAA.toString() }),
+                                                   Ids::enableIAA.toString(), Ids::buildVST.toString() }),
                "Plugin formats to build.");
     props.add (new MultiChoicePropertyComponent (pluginCharacteristicsValue, "Plugin Characteristics",
                                                  { "Plugin is a Synth", "Plugin MIDI Input", "Plugin MIDI Output", "MIDI Effect Plugin", "Plugin Editor Requires Keyboard Focus",
@@ -1039,7 +1040,6 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
                                                    Ids::pluginIsMidiEffectPlugin.toString(), Ids::pluginEditorRequiresKeys.toString(), Ids::pluginRTASDisableBypass.toString(),
                                                    Ids::pluginAAXDisableBypass.toString(), Ids::pluginRTASDisableMultiMono.toString(), Ids::pluginAAXDisableMultiMono.toString() }),
               "Some characteristics of your plugin such as whether it is a synth, produces MIDI messages, accepts MIDI messages etc.");
-
     props.add (new TextPropertyComponent (pluginNameValue, "Plugin Name", 128, false),
                "The name of your plugin (keep it short!)");
     props.add (new TextPropertyComponent (pluginDescriptionValue, "Plugin Description", 256, false),
@@ -1059,21 +1059,11 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
                "The value to use for the JucePlugin_AAXIdentifier setting");
     props.add (new TextPropertyComponent (pluginAUExportPrefixValue, "Plugin AU Export Prefix", 128, false),
                "A prefix for the names of exported entry-point functions that the component exposes - typically this will be a version of your plugin's name that can be used as part of a C++ token.");
-
     props.add (new MultiChoicePropertyComponent (pluginAUMainTypeValue, "Plugin AU Main Type", getAllAUMainTypeStrings(), getAllAUMainTypeVars(), 1),
                "AU main type.");
-
-    props.add (new ChoicePropertyComponent (pluginAUIsSandboxSafeValue, "AU is compatible with Sandboxed Hosts"),
-               "Enable if your plugin is compatible with Sandboxing, for hosts such as GarageBand.");
-
-    {
-        Array<var> vstCategoryVars;
-        for (auto s : getAllVSTCategoryStrings())
-            vstCategoryVars.add (s);
-
-        props.add (new MultiChoicePropertyComponent (pluginVSTCategoryValue, "Plugin VST Category", getAllVSTCategoryStrings(), vstCategoryVars, 1),
-                   "VST category.");
-    }
+    props.add (new ChoicePropertyComponent (pluginAUSandboxSafeValue, "Plugin AU is sandbox safe"),
+               "Check this box if your plug-in is sandbox safe. A sand-box safe plug-in is loaded in a restricted path and can only access it's own bundle resources and "
+               "the Music folder. Your plug-in must be able to deal with this. Newer versions of GarageBand require this to be enabled.");
 
     {
         Array<var> vst3CategoryVars;
@@ -1081,13 +1071,23 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
             vst3CategoryVars.add (s);
 
         props.add (new MultiChoicePropertyComponent (pluginVST3CategoryValue, "Plugin VST3 Category", getAllVST3CategoryStrings(), vst3CategoryVars),
-                   "VST3 category.");
+                   "VST3 category. Most hosts require either \"Fx\" or \"Instrument\" to be selected in order for the plugin to be recognised. "
+                   "If neither of these are selected, the appropriate one will be automatically added based on the \"Plugin is a synth\" option.");
     }
 
     props.add (new MultiChoicePropertyComponent (pluginRTASCategoryValue, "Plugin RTAS Category", getAllRTASCategoryStrings(), getAllRTASCategoryVars()),
                "RTAS category.");
     props.add (new MultiChoicePropertyComponent (pluginAAXCategoryValue, "Plugin AAX Category", getAllAAXCategoryStrings(), getAllAAXCategoryVars()),
                "AAX category.");
+
+    {
+        Array<var> vstCategoryVars;
+        for (auto s : getAllVSTCategoryStrings())
+            vstCategoryVars.add (s);
+
+        props.add (new MultiChoicePropertyComponent (pluginVSTCategoryValue, "Plugin VST (legacy) Category", getAllVSTCategoryStrings(), vstCategoryVars, 1),
+                   "VST category.");
+    }
 }
 
 //==============================================================================
@@ -1630,6 +1630,11 @@ String Project::getAUMainTypeString() const noexcept
     return {};
 }
 
+bool Project::isAUSandBoxSafe() const noexcept
+{
+    return pluginAUSandboxSafeValue.get();
+}
+
 String Project::getVSTCategoryString() const noexcept
 {
     auto v = pluginVSTCategoryValue.get();
@@ -1641,19 +1646,28 @@ String Project::getVSTCategoryString() const noexcept
     return {};
 }
 
-static String getVST3CategoryStringFromSelection (Array<var> selected) noexcept
+static String getVST3CategoryStringFromSelection (Array<var> selected, const Project& p) noexcept
 {
     StringArray categories;
 
     for (auto& category : selected)
         categories.add (category);
 
-    // "Fx" and "Instrument" should come first and if both are present prioritise "Fx"
-    if (categories.contains ("Instrument"))
-        categories.move (categories.indexOf ("Instrument"), 0);
+    // One of these needs to be selected in order for the plug-in to be recognised in Cubase
+    if (! categories.contains ("Fx") && ! categories.contains ("Instrument"))
+    {
+        categories.insert (0, p.isPluginSynth() ? "Instrument"
+                                                : "Fx");
+    }
+    else
+    {
+        // "Fx" and "Instrument" should come first and if both are present prioritise "Fx"
+        if (categories.contains ("Instrument"))
+            categories.move (categories.indexOf ("Instrument"), 0);
 
-    if (categories.contains ("Fx"))
-        categories.move (categories.indexOf ("Fx"), 0);
+        if (categories.contains ("Fx"))
+            categories.move (categories.indexOf ("Fx"), 0);
+    }
 
     return categories.joinIntoString ("|");
 }
@@ -1663,7 +1677,7 @@ String Project::getVST3CategoryString() const noexcept
     auto v = pluginVST3CategoryValue.get();
 
     if (auto* arr = v.getArray())
-        return getVST3CategoryStringFromSelection (*arr);
+        return getVST3CategoryStringFromSelection (*arr, *this);
 
     jassertfalse;
     return {};

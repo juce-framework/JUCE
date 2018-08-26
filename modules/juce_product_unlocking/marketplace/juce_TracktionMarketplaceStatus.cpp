@@ -92,7 +92,7 @@ String TracktionMarketplaceStatus::readReplyFromWebserver (const String& email, 
         if (thread->threadShouldExit() || stream->isError() || (contentLength > 0 && downloaded < contentLength))
             return {};
 
-        return { CharPointer_UTF8 (buffer.get()) };
+        return { CharPointer_UTF8 (buffer.get()), static_cast<size_t> (downloaded) };
     }
 
     return {};

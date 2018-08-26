@@ -80,7 +80,7 @@ String SystemStats::getCpuModel()
     return getCpuInfo ("model name");
 }
 
-int SystemStats::getCpuSpeedInMegaherz()
+int SystemStats::getCpuSpeedInMegahertz()
 {
     return roundToInt (getCpuInfo ("cpu MHz").getFloatValue());
 }

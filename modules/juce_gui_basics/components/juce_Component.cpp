@@ -1346,6 +1346,8 @@ void Component::addChildComponent (Component& child, int zOrder)
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
     ASSERT_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN
 
+    jassert (this != &child); // adding a component to itself!?
+
     if (child.parentComponent != this)
     {
         if (child.parentComponent != nullptr)
@@ -2013,8 +2015,8 @@ void Component::setComponentEffect (ImageEffectFilter* newEffect)
 LookAndFeel& Component::getLookAndFeel() const noexcept
 {
     for (auto* c = this; c != nullptr; c = c->parentComponent)
-        if (c->lookAndFeel != nullptr)
-            return *(c->lookAndFeel);
+        if (auto lf = c->lookAndFeel.get())
+            return *lf;
 
     return LookAndFeel::getDefaultLookAndFeel();
 }

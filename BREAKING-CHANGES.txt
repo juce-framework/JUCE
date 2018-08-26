@@ -6,7 +6,29 @@ Develop
 
 Change
 ------
-AudioProcessor::getTailLengthSeconds can now return infinity for VST/VST3/AU/AUv3
+DragAndDropContainer::performExternalDragDropOfFiles() and ::performExternalDragDropOfText() 
+are now asynchronous on Windows.
+
+Possible Issues
+---------------
+Code that previously relied on these operations being synchronous and blocking until 
+completion will no longer work as the methods will return immediately and run 
+asynchronously.
+
+Workaround
+----------
+Use the callback argument that has been added to these methods to register a lambda 
+that will be called when the operation has been completed.
+
+Rationale
+---------
+The behaviour of these methods is now consistent across all platforms and the method
+no longer blocks the message thread on Windows.
+
+
+Change
+------
+AudioProcessor::getTailLengthSeconds can now return infinity for VST/VST3/AU/AUv3.
 
 Possible Issues
 ---------------
@@ -20,7 +42,6 @@ a buffer.
 
 Rationale
 ---------
-
 Before this change there was no way for a JUCE plug-in to report an infinite tail time. 
 
 

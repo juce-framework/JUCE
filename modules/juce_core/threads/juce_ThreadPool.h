@@ -322,8 +322,6 @@ private:
 
     struct ThreadPoolThread;
     friend class ThreadPoolJob;
-    friend struct ThreadPoolThread;
-    friend struct ContainerDeletePolicy<ThreadPoolThread>;
     OwnedArray<ThreadPoolThread> threads;
 
     CriticalSection lock;

@@ -977,8 +977,6 @@ public:
 private:
     //==============================================================================
     JUCE_PUBLIC_IN_DLL_BUILD (class Pimpl)
-    friend class Pimpl;
-    friend struct ContainerDeletePolicy<Pimpl>;
     std::unique_ptr<Pimpl> pimpl;
 
     void init (SliderStyle, TextEntryBoxPosition);

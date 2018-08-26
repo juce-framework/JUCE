@@ -203,7 +203,7 @@ String SystemStats::getCpuModel()
     return {};
 }
 
-int SystemStats::getCpuSpeedInMegaherz()
+int SystemStats::getCpuSpeedInMegahertz()
 {
     uint64 speedHz = 0;
     size_t speedSize = sizeof (speedHz);

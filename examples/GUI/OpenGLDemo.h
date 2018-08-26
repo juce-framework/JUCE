@@ -33,6 +33,8 @@
                    juce_gui_basics, juce_gui_extra, juce_opengl
  exporters:        xcode_mac, vs2017, linux_make, androidstudio, xcode_iphone
 
+ moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
+
  type:             Component
  mainClass:        OpenGLDemoClasses::OpenGLDemo
 
@@ -280,6 +282,11 @@ struct OpenGLDemoClasses
 
                 g.setColour (Colours::black);
                 g.setFont (40);
+
+                const MessageManagerLock mml (ThreadPoolJob::getCurrentThreadPoolJob());
+                if (! mml.lockWasGained())
+                    return false;
+
                 g.drawFittedText (String (Time::getCurrentTime().getMilliseconds()), image.getBounds(), Justification::centred, 1);
             }
 

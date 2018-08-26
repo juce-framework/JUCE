@@ -43,17 +43,17 @@ class Point
 {
 public:
     /** Creates a point at the origin */
-    JUCE_CONSTEXPR Point() noexcept : x(), y() {}
+    JUCE_CONSTEXPR Point() = default;
 
     /** Creates a copy of another point. */
-    JUCE_CONSTEXPR Point (const Point& other) noexcept : x (other.x), y (other.y)  {}
+    JUCE_CONSTEXPR Point (const Point&) = default;
 
     /** Creates a point from an (x, y) position. */
     JUCE_CONSTEXPR Point (ValueType initialX, ValueType initialY) noexcept : x (initialX), y (initialY) {}
 
     //==============================================================================
     /** Copies this point from another one. */
-    Point& operator= (const Point& other) noexcept                          { x = other.x; y = other.y; return *this; }
+    Point& operator= (const Point&) = default;
 
     JUCE_CONSTEXPR inline bool operator== (Point other) const noexcept      { return x == other.x && y == other.y; }
     JUCE_CONSTEXPR inline bool operator!= (Point other) const noexcept      { return x != other.x || y != other.y; }
@@ -234,8 +234,8 @@ public:
     String toString() const                                       { return String (x) + ", " + String (y); }
 
     //==============================================================================
-    ValueType x; /**< The point's X coordinate. */
-    ValueType y; /**< The point's Y coordinate. */
+    ValueType x{}; /**< The point's X coordinate. */
+    ValueType y{}; /**< The point's Y coordinate. */
 };
 
 /** Multiplies the point's coordinates by a scalar value. */

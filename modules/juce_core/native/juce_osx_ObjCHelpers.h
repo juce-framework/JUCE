@@ -149,7 +149,7 @@ static var nsObjectToVar (NSObject* array);
 
 static var nsDictionaryToVar (NSDictionary* dictionary)
 {
-    DynamicObject::Ptr dynamicObject = new DynamicObject();
+    DynamicObject::Ptr dynamicObject (new DynamicObject());
 
     for (NSString* key in dictionary)
         dynamicObject->setProperty (nsStringToJuce (key), nsObjectToVar (dictionary[key]));

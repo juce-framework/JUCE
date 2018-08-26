@@ -574,11 +574,6 @@ protected:
                 props.add (new ChoicePropertyComponent (pluginBinaryCopyStepEnabled, "Enable Plugin Copy Step"),
                            "Enable this to copy plugin binaries to the specified folder after building.");
 
-            if (project.shouldBuildVST())
-                props.add (new TextPropertyComponentWithEnablement (vstBinaryLocation, pluginBinaryCopyStepEnabled, "VST Binary Location",
-                                                                    1024, false),
-                           "The folder in which the compiled VST binary should be placed.");
-
             if (project.shouldBuildVST3())
                 props.add (new TextPropertyComponentWithEnablement (vst3BinaryLocation, pluginBinaryCopyStepEnabled, "VST3 Binary Location",
                                                                     1024, false),
@@ -603,6 +598,11 @@ protected:
                 props.add (new TextPropertyComponentWithEnablement (unityPluginBinaryLocation, pluginBinaryCopyStepEnabled, "Unity Binary Location",
                                                                     1024, false),
                            "The folder in which the compiled Unity plugin binary and associated C# GUI script should be placed.");
+
+            if (project.shouldBuildVST())
+                props.add (new TextPropertyComponentWithEnablement (vstBinaryLocation, pluginBinaryCopyStepEnabled, "VST Binary Location",
+                                                                    1024, false),
+                           "The folder in which the compiled legacy VST binary should be placed.");
         }
 
         void updateOldPluginBinaryLocations()
@@ -625,7 +625,7 @@ protected:
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const override
     {
-        return new XcodeBuildConfiguration (project, v, iOS, *this);
+        return *new XcodeBuildConfiguration (project, v, iOS, *this);
     }
 
 public:
@@ -1568,8 +1568,20 @@ public:
             addPlistDictionaryKey (dict, "type", owner.project.getAUMainTypeString().removeCharacters ("'"));
             addPlistDictionaryKey (dict, "subtype", pluginSubType);
             addPlistDictionaryKeyInt (dict, "version", owner.project.getVersionAsHexInteger());
-            if (owner.project.isPluginAUIsSandboxSafe())
+
+            if (owner.project.isAUSandBoxSafe())
+            {
                 addPlistDictionaryKeyBool (dict, "sandboxSafe", true);
+            }
+            else
+            {
+                dict->createNewChildElement ("key")->addTextElement ("resourceUsage");
+                auto* resourceUsageDict = dict->createNewChildElement ("dict");
+
+                addPlistDictionaryKeyBool (resourceUsageDict, "network.client", true);
+                addPlistDictionaryKeyBool (resourceUsageDict, "temporary-exception.files.all.read-write", true);
+            }
+
             xcodeExtraPListEntries.add (plistKey);
             xcodeExtraPListEntries.add (plistEntry);
         }
@@ -2319,15 +2331,18 @@ private:
         s.set ("GCC_WARN_UNDECLARED_SELECTOR", "YES");
         s.set ("GCC_WARN_UNINITIALIZED_AUTOS", "YES");
         s.set ("GCC_WARN_UNUSED_FUNCTION", "YES");
+        s.set ("CLANG_ENABLE_OBJC_WEAK", "YES");
         s.set ("CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING", "YES");
         s.set ("CLANG_WARN_BOOL_CONVERSION", "YES");
         s.set ("CLANG_WARN_COMMA", "YES");
         s.set ("CLANG_WARN_CONSTANT_CONVERSION", "YES");
+        s.set ("CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS", "YES");
         s.set ("CLANG_WARN_EMPTY_BODY", "YES");
         s.set ("CLANG_WARN_ENUM_CONVERSION", "YES");
         s.set ("CLANG_WARN_INFINITE_RECURSION", "YES");
         s.set ("CLANG_WARN_INT_CONVERSION", "YES");
         s.set ("CLANG_WARN_NON_LITERAL_NULL_CONVERSION", "YES");
+        s.set ("CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF", "YES");
         s.set ("CLANG_WARN_OBJC_LITERAL_CONVERSION", "YES");
         s.set ("CLANG_WARN_RANGE_LOOP_ANALYSIS", "YES");
         s.set ("CLANG_WARN_STRICT_PROTOTYPES", "YES");
@@ -2471,6 +2486,7 @@ private:
 
         folders.addTokens (getCustomResourceFoldersString(), ":", "");
         folders.trim();
+        folders.removeEmptyStrings();
 
         for (auto& crf : folders)
             addCustomResourceFolder (crf);
@@ -3074,7 +3090,7 @@ private:
 
         for (auto& type : getiOSAppIconTypes())
         {
-            DynamicObject::Ptr d = new DynamicObject();
+            DynamicObject::Ptr d (new DynamicObject());
             d->setProperty ("idiom",    type.idiom);
             d->setProperty ("size",     type.sizeString);
             d->setProperty ("filename", type.filename);
@@ -3142,7 +3158,7 @@ private:
 
         for (auto& type : getiOSLaunchImageTypes())
         {
-            DynamicObject::Ptr d = new DynamicObject();
+            DynamicObject::Ptr d (new DynamicObject());
             d->setProperty ("orientation", type.orientation);
             d->setProperty ("idiom", type.idiom);
             d->setProperty ("extent",  type.extent);

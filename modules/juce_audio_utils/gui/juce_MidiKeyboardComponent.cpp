@@ -50,10 +50,10 @@ struct MidiKeyboardComponent::UpDownButton  : public Button
         owner.setLowestVisibleKey (note * 12);
     }
 
-    void paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown) override
+    void paintButton (Graphics& g, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override
     {
         owner.drawUpDownButton (g, getWidth(), getHeight(),
-                                isMouseOverButton, isButtonDown,
+                                shouldDrawButtonAsHighlighted, shouldDrawButtonAsDown,
                                 delta > 0);
     }
 

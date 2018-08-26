@@ -85,8 +85,6 @@ File JUCEDemos::findExamplesDirectoryFromExecutable (File exec)
 }
 
 //==============================================================================
-std::unique_ptr<AudioDeviceManager> sharedAudioDeviceManager;
-
 static String getCurrentDefaultAudioDeviceName (AudioDeviceManager& deviceManager, bool isInput)
 {
     auto* deviceType = deviceManager.getCurrentDeviceTypeObject();

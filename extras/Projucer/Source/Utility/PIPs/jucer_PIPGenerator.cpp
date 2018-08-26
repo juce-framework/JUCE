@@ -142,20 +142,20 @@ Result PIPGenerator::createJucerFile()
 
     if (xml->writeToFile (outputFile, {}))
         return Result::ok();
-    else
-        return Result::fail ("Failed to create .jucer file in " + outputDirectory.getFullPathName()+ ".");
+
+    return Result::fail ("Failed to create .jucer file in " + outputDirectory.getFullPathName());
 }
 
-bool PIPGenerator::createMainCpp()
+Result PIPGenerator::createMainCpp()
 {
     auto outputFile = outputDirectory.getChildFile ("Source").getChildFile ("Main.cpp");
 
     if (! outputFile.existsAsFile() && (outputFile.create() != Result::ok()))
-        return false;
+        return Result::fail ("Failed to create Main.cpp - " + outputFile.getFullPathName());
 
     outputFile.replaceWithText (getMainFileTextForType());
 
-    return true;
+    return Result::ok();
 }
 
 //==============================================================================
@@ -460,8 +460,9 @@ Result PIPGenerator::setProjectSettings (ValueTree& jucerTree)
     {
         jucerTree.setProperty (Ids::projectType, "audioplug", nullptr);
         jucerTree.setProperty (Ids::pluginManufacturer, metadata[Ids::vendor], nullptr);
+        jucerTree.setProperty (Ids::pluginAUIsSandboxSafe, "1", nullptr);
 
-        StringArray pluginFormatsToBuild (Ids::buildVST.toString(), Ids::buildAU.toString(), Ids::buildStandalone.toString());
+        StringArray pluginFormatsToBuild (Ids::buildVST3.toString(), Ids::buildAU.toString(), Ids::buildStandalone.toString());
         pluginFormatsToBuild.addArray (getExtraPluginFormatsToBuild());
 
         jucerTree.setProperty (Ids::pluginFormats, pluginFormatsToBuild.joinIntoString (","), nullptr);

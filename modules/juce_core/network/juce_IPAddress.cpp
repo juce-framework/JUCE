@@ -89,7 +89,8 @@ static String removePort (const String& adr)
 {
     if (adr.containsAnyOf ("[]"))
         return adr.fromFirstOccurrenceOf ("[", false, true).upToLastOccurrenceOf ("]", false, true);
-    else if (adr.indexOf (":") == adr.lastIndexOf (":"))
+
+    if (adr.indexOf (":") == adr.lastIndexOf (":"))
         return adr.upToLastOccurrenceOf (":", false, true);
 
     return adr;
@@ -199,30 +200,26 @@ int IPAddress::compare (const IPAddress& other) const noexcept
 
             return 1;
         }
-        else
-        {
-            if (isIPv4MappedAddress (other))
-                return compare (convertIPv4MappedAddressToIPv4 (other));
 
-            return -1;
-        }
+        if (isIPv4MappedAddress (other))
+            return compare (convertIPv4MappedAddressToIPv4 (other));
+
+        return -1;
     }
 
     for (int i = 0; i < (isIPv6 ? 16 : 4); ++i)
     {
-        if (address[i] > other.address[i])
-            return 1;
-        else if (address[i] < other.address[i])
-            return -1;
+        if (address[i] > other.address[i])  return 1;
+        if (address[i] < other.address[i])  return -1;
     }
 
     return 0;
 }
 
-IPAddress IPAddress::any() noexcept                     { return IPAddress(); }
-IPAddress IPAddress::broadcast() noexcept               { return IPAddress (255, 255, 255, 255); }
-IPAddress IPAddress::local (bool IPv6) noexcept         { return IPv6 ? IPAddress (0, 0, 0, 0, 0, 0, 0, 1)
-                                                                      : IPAddress (127, 0, 0, 1); }
+IPAddress IPAddress::any() noexcept               { return IPAddress(); }
+IPAddress IPAddress::broadcast() noexcept         { return IPAddress (255, 255, 255, 255); }
+IPAddress IPAddress::local (bool IPv6) noexcept   { return IPv6 ? IPAddress (0, 0, 0, 0, 0, 0, 0, 1)
+                                                                : IPAddress (127, 0, 0, 1); }
 
 String IPAddress::getFormattedAddress (const String& unformattedAddress)
 {
@@ -304,10 +301,8 @@ bool IPAddress::isIPv4MappedAddress (const IPAddress& mappedAddress)
         return false;
 
     for (int i = 0; i < 10; ++i)
-    {
         if (mappedAddress.address[i] != 0)
             return false;
-    }
 
     if (mappedAddress.address[10] != 255 || mappedAddress.address[11] != 255)
         return false;
@@ -337,6 +332,23 @@ IPAddress IPAddress::convertIPv4AddressToIPv4Mapped (const IPAddress& addressToM
             static_cast<uint16> ((addressToMap.address[2] << 8) | addressToMap.address[3]) };
 }
 
+IPAddress IPAddress::getLocalAddress (bool includeIPv6)
+{
+    auto addresses = getAllAddresses (includeIPv6);
+
+    for (auto& a : addresses)
+        if (a != local())
+            return a;
+
+    return local();
+}
+
+Array<IPAddress> IPAddress::getAllAddresses (bool includeIPv6)
+{
+    Array<IPAddress> addresses;
+    findAllAddresses (addresses, includeIPv6);
+    return addresses;
+}
 
 #if (! JUCE_WINDOWS) && (! JUCE_ANDROID)
 static void addAddress (const sockaddr_in* addr_in, Array<IPAddress>& result)
@@ -373,12 +385,12 @@ static void addAddress (const sockaddr_in6* addr_in, Array<IPAddress>& result)
 
 void IPAddress::findAllAddresses (Array<IPAddress>& result, bool includeIPv6)
 {
-    struct ifaddrs *ifaddr, *ifa;
+    struct ifaddrs* ifaddr = nullptr;
 
     if (getifaddrs (&ifaddr) == -1)
         return;
 
-    for (ifa = ifaddr; ifa != nullptr; ifa = ifa->ifa_next)
+    for (auto* ifa = ifaddr; ifa != nullptr; ifa = ifa->ifa_next)
     {
         if (ifa->ifa_addr == nullptr)
             continue;

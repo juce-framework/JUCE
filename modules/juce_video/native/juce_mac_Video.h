@@ -118,7 +118,7 @@ struct VideoComponent::Pimpl   : public Base
         if (auto* p = playerController.getPlayer())
         {
             CMTime t = { (CMTimeValue) (100000.0 * newPosition),
-                         (CMTimeScale) 100000, kCMTimeFlags_Valid };
+                         (CMTimeScale) 100000, kCMTimeFlags_Valid, {} };
 
             [p seekToTime: t
           toleranceBefore: kCMTimeZero

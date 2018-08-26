@@ -129,12 +129,12 @@ void MPEInstrument::setTimbreTrackingMode (TrackingMode modeToUse)
 }
 
 //==============================================================================
-void MPEInstrument::addListener (Listener* const listenerToAdd) noexcept
+void MPEInstrument::addListener (Listener* listenerToAdd)
 {
     listeners.add (listenerToAdd);
 }
 
-void MPEInstrument::removeListener (Listener* const listenerToRemove) noexcept
+void MPEInstrument::removeListener (Listener* listenerToRemove)
 {
     listeners.remove (listenerToRemove);
 }

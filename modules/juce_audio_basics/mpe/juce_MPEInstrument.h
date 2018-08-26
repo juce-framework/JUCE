@@ -286,10 +286,10 @@ public:
 
     //==============================================================================
     /** Adds a listener. */
-    void addListener (Listener* listenerToAdd) noexcept;
+    void addListener (Listener* listenerToAdd);
 
     /** Removes a listener. */
-    void removeListener (Listener* listenerToRemove) noexcept;
+    void removeListener (Listener* listenerToRemove);
 
     //==============================================================================
     /** Puts the instrument into legacy mode.

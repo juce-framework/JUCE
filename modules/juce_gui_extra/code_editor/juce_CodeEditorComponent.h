@@ -382,13 +382,9 @@ private:
     ApplicationCommandManager* appCommandManager = nullptr;
 
     class Pimpl;
-    friend class Pimpl;
-    friend struct ContainerDeletePolicy<Pimpl>;
     std::unique_ptr<Pimpl> pimpl;
 
     class GutterComponent;
-    friend class GutterComponent;
-    friend struct ContainerDeletePolicy<GutterComponent>;
     std::unique_ptr<GutterComponent> gutter;
 
     enum DragType

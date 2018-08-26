@@ -220,8 +220,6 @@ private:
     String name;
 
     struct Pimpl;
-    friend struct Pimpl;
-    friend struct ContainerDeletePolicy<Pimpl>;
     std::unique_ptr<Pimpl> pimpl;
 
     struct ViewerComponent;

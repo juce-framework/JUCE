@@ -107,6 +107,11 @@ public:
                                               selection of files inside packages when
                                               invoked on OS X and when using native dialog
                                               boxes.
+        @param parentComponent                An optional component which should be the parent
+                                              for the file chooser. If this is a nullptr then the
+                                              FileChooser will be a top-level window. AUv3s on iOS
+                                              must specify this parameter as opening a top-level window
+                                              in an AUv3 is forbidden due to sandbox restrictions.
 
         @see browseForFileToOpen, browseForFileToSave, browseForDirectory
     */
@@ -114,7 +119,8 @@ public:
                  const File& initialFileOrDirectory = File(),
                  const String& filePatternsAllowed = String(),
                  bool useOSNativeDialogBox = true,
-                 bool treatFilePackagesAsDirectories = false);
+                 bool treatFilePackagesAsDirectories = false,
+                 Component* parentComponent = nullptr);
 
     /** Destructor. */
     ~FileChooser();
@@ -300,6 +306,7 @@ private:
     //==============================================================================
     String title, filters;
     File startingFile;
+    Component* parent;
     Array<URL> results;
     const bool useNativeDialogBox;
     const bool treatFilePackagesAsDirs;

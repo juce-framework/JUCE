@@ -317,6 +317,18 @@ struct PhysicalTopologySource::Internal
         bool isMaster;
     };
 
+    static juce::String getVersionString (const BlocksProtocol::VersionNumber& v)
+    {
+        return juce::String (reinterpret_cast<const char*> (v.version),
+                             std::min (sizeof (v.version), static_cast<size_t> (v.length)));
+    }
+
+    static juce::String getNameString (const BlocksProtocol::BlockName& n)
+    {
+        return juce::String (reinterpret_cast<const char*> (n.name),
+                             std::min (sizeof (n.name), static_cast<size_t> (n.length)));
+    }
+
     static Block::Timestamp deviceTimestampToHost (uint32 timestamp) noexcept
     {
         return static_cast<Block::Timestamp> (timestamp);
@@ -363,41 +375,49 @@ struct PhysicalTopologySource::Internal
         return false;
     }
 
-    static bool versionNumberAddedToBlock (const juce::Array<DeviceInfo>& devices, Block::UID uid, juce::String version) noexcept
+    static bool versionNumberChanged (const DeviceInfo& device, juce::String version) noexcept
     {
-        for (auto&& d : devices)
-        {
-            String deviceVersion (reinterpret_cast<const char*> (d.version.version),
-                                  jmin (static_cast<size_t> (d.version.length), sizeof (d.version.version)));
+        auto deviceVersion = getVersionString (device.version);
+        return deviceVersion != version && deviceVersion.isNotEmpty();
+    }
 
-            if (d.uid == uid && deviceVersion != version && deviceVersion.isNotEmpty())
-                return true;
+    static bool nameIsValid (const DeviceInfo& device)
+    {
+        return device.name.length > 0;
+    }
+
+    static void setVersionNumberForBlock (const DeviceInfo& deviceInfo, Block& block) noexcept
+    {
+        if (deviceInfo.uid != block.uid)
+        {
+            jassertfalse;
+            return;
         }
 
-        return false;
-    }
-
-    static bool nameAddedToBlock (const juce::Array<DeviceInfo>& devices, Block::UID uid) noexcept
-    {
-        for (auto&& d : devices)
-            if (d.uid == uid && d.name.length)
-                return true;
-
-        return false;
-    }
-
-    static void setVersionNumberForBlock (const juce::Array<DeviceInfo>& devices, Block& block) noexcept
-    {
-        for (auto&& d : devices)
-            if (d.uid == block.uid)
-                block.versionNumber = juce::String ((const char*) d.version.version, d.version.length);
+        block.versionNumber = getVersionString (deviceInfo.version);
     }
 
     static void setNameForBlock (const juce::Array<DeviceInfo>& devices, Block& block) noexcept
     {
         for (auto&& d : devices)
+        {
             if (d.uid == block.uid)
-                block.name = juce::String ((const char*) d.name.name, d.name.length);
+            {
+                setNameForBlock (d, block);
+                return;
+            }
+        }
+    }
+
+    static void setNameForBlock (const DeviceInfo& deviceInfo, Block& block)
+    {
+        if (deviceInfo.uid != block.uid)
+        {
+            jassertfalse;
+            return;
+        }
+
+        block.name = getNameString (deviceInfo.name);
     }
 
     //==============================================================================
@@ -535,7 +555,6 @@ struct PhysicalTopologySource::Internal
             currentDeviceInfo = getArrayOfDeviceInfo (incomingTopologyDevices);
             currentDeviceConnections = getArrayOfConnections (incomingTopologyConnections);
             currentTopologyDevices = incomingTopologyDevices;
-            detector.handleTopologyChange();
 
             lastTopologyReceiveTime = juce::Time::getCurrentTime();
             blockPings.clear();
@@ -543,32 +562,21 @@ struct PhysicalTopologySource::Internal
 
         void handleVersion (BlocksProtocol::DeviceVersion version)
         {
-            for (auto i = 0; i < currentDeviceInfo.size(); ++i)
-            {
-                if (currentDeviceInfo[i].index == version.index && version.version.length > 1)
-                {
-                    if (memcmp (currentDeviceInfo.getReference (i).version.version, version.version.version, sizeof (version.version)))
-                    {
-                        currentDeviceInfo.getReference(i).version = version.version;
-                        detector.handleTopologyChange();
-                    }
-                }
-            }
+            for (auto& d : currentDeviceInfo)
+                if (d.index == version.index && version.version.length > 1)
+                    d.version = version.version;
+        }
+
+        void notifyDetectorTopologyChanged()
+        {
+            detector.handleTopologyChange();
         }
 
         void handleName (BlocksProtocol::DeviceName name)
         {
-            for (auto i = 0; i < currentDeviceInfo.size(); ++i)
-            {
-                if (currentDeviceInfo[i].index == name.index && name.name.length > 1)
-                {
-                    if (memcmp (currentDeviceInfo.getReference (i).name.name, name.name.name, sizeof (name.name)))
-                    {
-                        currentDeviceInfo.getReference (i).name = name.name;
-                        detector.handleTopologyChange();
-                    }
-                }
-            }
+            for (auto& d : currentDeviceInfo)
+                if (d.index == name.index && name.name.length > 1)
+                    d.name = name.name;
         }
 
         void handleControlButtonUpDown (BlocksProtocol::TopologyIndex deviceIndex, uint32 timestamp,
@@ -926,29 +934,32 @@ struct PhysicalTopologySource::Internal
 
                 for (int i = currentTopology.blocks.size(); --i >= 0;)
                 {
-                    auto block = currentTopology.blocks.getUnchecked (i);
+                    auto currentBlock = currentTopology.blocks.getUnchecked (i);
 
-                    if (! containsBlockWithUID (newDeviceInfo, block->uid))
+                    auto newDeviceIter = std::find_if (newDeviceInfo.begin(), newDeviceInfo.end(),
+                                                       [&] (DeviceInfo& info) { return info.uid == currentBlock->uid; });
+
+                    if (newDeviceIter == newDeviceInfo.end())
                     {
-                        if (auto bi = BlockImplementation::getFrom (*block))
+                        if (auto bi = BlockImplementation::getFrom (*currentBlock))
                             bi->invalidate();
 
-                        currentTopology.blocks.remove (i);
+                        disconnectedBlocks.addIfNotAlreadyThere (currentTopology.blocks.removeAndReturn (i).get());
                     }
                     else
                     {
-                        if (versionNumberAddedToBlock (newDeviceInfo, block->uid, block->versionNumber))
-                            setVersionNumberForBlock (newDeviceInfo, *block);
-
-                        if (nameAddedToBlock (newDeviceInfo, block->uid))
-                            setNameForBlock (newDeviceInfo, *block);
+                        updateCurrentBlockInfo (currentBlock, *newDeviceIter);
                     }
                 }
 
+                static const int maxBlocksToSave = 100;
+
+                if (disconnectedBlocks.size() > maxBlocksToSave)
+                    disconnectedBlocks.removeRange (0, 2 * (disconnectedBlocks.size() - maxBlocksToSave));
+
                 for (auto& info : newDeviceInfo)
-                    if (info.serial.isValid())
-                        if (! containsBlockWithUID (currentTopology.blocks, getBlockUIDFromSerialNumber (info.serial)))
-                            currentTopology.blocks.add (new BlockImplementation (info.serial, *this, info.version, info.name, info.isMaster));
+                    if (info.serial.isValid() && ! containsBlockWithUID (currentTopology.blocks, getBlockUIDFromSerialNumber (info.serial)))
+                        addBlock (info);
 
                 currentTopology.connections.swapWith (newDeviceConnections);
             }
@@ -1134,6 +1145,7 @@ struct PhysicalTopologySource::Internal
         juce::Array<TouchSurfaceImplementation*> activeTouchSurfaces;
 
         BlockTopology currentTopology;
+        juce::ReferenceCountedArray<Block, CriticalSection> disconnectedBlocks;
 
     private:
         void timerCallback() override
@@ -1192,6 +1204,52 @@ struct PhysicalTopologySource::Internal
             return false;
         }
 
+        void addBlock (DeviceInfo info)
+        {
+            if (! reactivateBlockIfKnown (info))
+                addNewBlock (info);
+        }
+
+        bool reactivateBlockIfKnown (DeviceInfo info)
+        {
+            auto uid = getBlockUIDFromSerialNumber (info.serial);
+
+            for (int i = 0; i < disconnectedBlocks.size(); ++i)
+            {
+                if (disconnectedBlocks.getUnchecked (i)->uid == uid)
+                {
+                    auto block = disconnectedBlocks.removeAndReturn (i);
+
+                    if (auto blockImpl = BlockImplementation::getFrom (*block))
+                    {
+                        blockImpl->revalidate (info.version, info.name, info.isMaster);
+                        currentTopology.blocks.add (block);
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        void addNewBlock (DeviceInfo info)
+        {
+            currentTopology.blocks.add (new BlockImplementation (info.serial, *this, info.version,
+                                                                 info.name, info.isMaster));
+        }
+
+        void updateCurrentBlockInfo (Block::Ptr blockToUpdate, DeviceInfo& updatedInfo)
+        {
+            if (versionNumberChanged (updatedInfo, blockToUpdate->versionNumber))
+                setVersionNumberForBlock (updatedInfo, *blockToUpdate);
+
+            if (nameIsValid (updatedInfo))
+                setNameForBlock (updatedInfo, *blockToUpdate);
+
+            if (updatedInfo.isMaster != blockToUpdate->isMasterBlock())
+                BlockImplementation::getFrom (*blockToUpdate)->setToMaster (updatedInfo.isMaster);
+        }
+
         juce::OwnedArray<ConnectedDeviceGroup> connectedDeviceGroups;
 
         //==============================================================================
@@ -1217,6 +1275,9 @@ struct PhysicalTopologySource::Internal
                 {
                     lastTopology = detector->currentTopology;
 
+                    BlocksTraverser traverser;
+                    traverser.traverseBlockArray (detector->currentTopology);
+
                     for (auto* d : detector->activeTopologySources)
                         d->listeners.call ([] (TopologySource::Listener& l) { l.topologyChanged(); });
 
@@ -1238,14 +1299,143 @@ struct PhysicalTopologySource::Internal
     };
 
     //==============================================================================
+    /** This is a friend of the BlocksImplementation that will scan and set the
+        physical positions of the blocks */
+    struct BlocksTraverser
+    {
+        void traverseBlockArray (const BlockTopology& topology)
+        {
+            juce::Array<Block::UID> visited;
+
+            for (auto& block : topology.blocks)
+            {
+                if (block->isMasterBlock() && ! visited.contains (block->uid))
+                {
+                    if (auto* bi = dynamic_cast<BlockImplementation*> (block))
+                    {
+                        bi->masterUID = {};
+                        bi->position = {};
+                        bi->rotation = 0;
+                    }
+
+                    layoutNeighbours (*block, topology, block->uid, visited);
+                }
+            }
+        }
+
+        Block::Ptr findBlockWithUid (const BlockTopology& topology, Block::UID uid)
+        {
+            for (auto& block : topology.blocks)
+                if (block->uid == uid)
+                    return *block;
+
+            return {};
+        }
+
+        // returns the distance from corner clockwise
+        int getUnitForIndex (Block::Ptr block, Block::ConnectionPort::DeviceEdge edge, int index)
+        {
+            if (block->getType() == Block::seaboardBlock)
+            {
+                if (edge == Block::ConnectionPort::DeviceEdge::north)
+                {
+                    if (index == 0) return 1;
+                    if (index == 1) return 4;
+                }
+                else if (edge == Block::ConnectionPort::DeviceEdge::east
+                         || edge == Block::ConnectionPort::DeviceEdge::west)
+                {
+                    return 1;
+                }
+            }
+
+            if (edge == Block::ConnectionPort::DeviceEdge::south)
+                return block->getWidth() - (index + 1);
+
+            if (edge == Block::ConnectionPort::DeviceEdge::west)
+                return block->getHeight() - (index + 1);
+
+            return index;
+        }
+
+        // returns how often north needs to rotate by 90 degrees
+        int getRotationForEdge (Block::ConnectionPort::DeviceEdge edge)
+        {
+            switch (edge)
+            {
+                case Block::ConnectionPort::DeviceEdge::north:  return 0;
+                case Block::ConnectionPort::DeviceEdge::east:   return 1;
+                case Block::ConnectionPort::DeviceEdge::south:  return 2;
+                case Block::ConnectionPort::DeviceEdge::west:   return 3;
+            }
+
+            jassertfalse;
+            return 0;
+        }
+
+        void layoutNeighbours (Block::Ptr block, const BlockTopology& topology,
+                               Block::UID masterUid, juce::Array<Block::UID>& visited)
+        {
+            visited.add (block->uid);
+
+            for (auto& connection : topology.connections)
+            {
+                if ((connection.device1 == block->uid && ! visited.contains (connection.device2))
+                     || (connection.device2 == block->uid && ! visited.contains (connection.device1)))
+                {
+                    const auto theirUid = connection.device1 == block->uid ? connection.device2 : connection.device1;
+                    const auto neighbourPtr = findBlockWithUid (topology, theirUid);
+
+                    if (auto* neighbour = dynamic_cast<BlockImplementation*> (neighbourPtr.get()))
+                    {
+                        const auto  myBounds    = block->getBlockAreaWithinLayout();
+                        const auto& myPort      = connection.device1 == block->uid ? connection.connectionPortOnDevice1 : connection.connectionPortOnDevice2;
+                        const auto& theirPort   = connection.device1 == block->uid ? connection.connectionPortOnDevice2 : connection.connectionPortOnDevice1;
+                        const auto  myOffset    = getUnitForIndex (block, myPort.edge, myPort.index);
+                        const auto  theirOffset = getUnitForIndex (neighbourPtr, theirPort.edge, theirPort.index);
+
+                        neighbour->masterUID = masterUid;
+                        neighbour->rotation = (2 + block->getRotation()
+                                                 + getRotationForEdge (myPort.edge)
+                                                 - getRotationForEdge (theirPort.edge)) % 4;
+
+                        Point<int> delta;
+                        const auto theirBounds = neighbour->getBlockAreaWithinLayout();
+
+                        switch ((block->getRotation() + getRotationForEdge (myPort.edge)) % 4)
+                        {
+                            case 0: // over me
+                                delta = { myOffset - (theirBounds.getWidth() - (theirOffset + 1)), -theirBounds.getHeight() };
+                                break;
+                            case 1: // right of me
+                                delta = { myBounds.getWidth(), myOffset - (theirBounds.getHeight() - (theirOffset + 1)) };
+                                break;
+                            case 2: // under me
+                                delta = { (myBounds.getWidth() - (myOffset + 1)) - theirOffset, myBounds.getHeight() };
+                                break;
+                            case 3: // left of me
+                                delta = { -theirBounds.getWidth(), (myBounds.getHeight() - (myOffset + 1)) - theirOffset };
+                                break;
+                        }
+
+                        neighbour->position = myBounds.getPosition() + delta;
+                    }
+
+                    layoutNeighbours (neighbourPtr, topology, masterUid, visited);
+                }
+            }
+        }
+    };
+
+    //==============================================================================
     struct BlockImplementation  : public Block,
                                   private MIDIDeviceConnection::Listener,
                                   private Timer
     {
-        BlockImplementation (const BlocksProtocol::BlockSerialNumber& serial, Detector& detectorToUse, BlocksProtocol::VersionNumber version, BlocksProtocol::BlockName name, bool master)
-            : Block (juce::String ((const char*) serial.serial, sizeof (serial.serial)),
+        BlockImplementation (const BlocksProtocol::BlockSerialNumber& serial, Detector& detectorToUse, BlocksProtocol::VersionNumber version, BlocksProtocol::BlockName blockName, bool master)
+            : Block (juce::String ((const char*) serial.serial,   sizeof (serial.serial)),
                      juce::String ((const char*) version.version, version.length),
-                     juce::String ((const char*) name.name, name.length)),
+                     juce::String ((const char*) blockName.name,  blockName.length)),
               modelData (serial),
               remoteHeap (modelData.programAndHeapSize),
               detector (detectorToUse),
@@ -1257,6 +1447,7 @@ struct PhysicalTopologySource::Internal
                 touchSurface.reset (new TouchSurfaceImplementation (*this));
 
             int i = 0;
+
             for (auto&& b : modelData.buttons)
                 controlButtons.add (new ControlButtonImplementation (*this, i++, b));
 
@@ -1269,12 +1460,7 @@ struct PhysicalTopologySource::Internal
             if (modelData.numLEDRowLEDs > 0)
                 ledRow.reset (new LEDRowImplementation (*this));
 
-            listenerToMidiConnection = dynamic_cast<MIDIDeviceConnection*> (detector.getDeviceConnectionFor (*this));
-
-            if (listenerToMidiConnection != nullptr)
-                listenerToMidiConnection->addListener (this);
-
-            config.setDeviceComms (listenerToMidiConnection);
+            updateMidiConnectionListener();
         }
 
         ~BlockImplementation()
@@ -1289,6 +1475,45 @@ struct PhysicalTopologySource::Internal
         void invalidate()
         {
             isStillConnected = false;
+
+            if (auto surface = dynamic_cast<TouchSurfaceImplementation*> (touchSurface.get()))
+                surface->disableTouchSurface();
+
+            for (auto* b : controlButtons)
+                if (auto controlButton = dynamic_cast<ControlButtonImplementation*> (b))
+                    controlButton->disableControlButton();
+        }
+
+        void revalidate (BlocksProtocol::VersionNumber newVersion, BlocksProtocol::BlockName newName, bool master)
+        {
+            versionNumber = getVersionString (newVersion);
+            name = getNameString (newName);
+            isMaster = master;
+            isStillConnected = true;
+
+            if (auto surface = dynamic_cast<TouchSurfaceImplementation*> (touchSurface.get()))
+                surface->activateTouchSurface();
+
+            for (auto* b : controlButtons)
+                if (auto controlButton = dynamic_cast<ControlButtonImplementation*> (b))
+                    controlButton->activateControlButton();
+
+            updateMidiConnectionListener();
+        }
+
+        void setToMaster (bool shouldBeMaster)
+        {
+            isMaster = shouldBeMaster;
+        }
+
+        void updateMidiConnectionListener()
+        {
+            listenerToMidiConnection = dynamic_cast<MIDIDeviceConnection*> (detector.getDeviceConnectionFor (*this));
+
+            if (listenerToMidiConnection != nullptr)
+                listenerToMidiConnection->addListener (this);
+
+            config.setDeviceComms (listenerToMidiConnection);
         }
 
         Type getType() const override                                   { return modelData.apiType; }
@@ -1300,6 +1525,16 @@ struct PhysicalTopologySource::Internal
         juce::Array<Block::ConnectionPort> getPorts() const override    { return modelData.ports; }
         bool isConnected() const override                               { return isStillConnected && detector.isConnected (uid); }
         bool isMasterBlock() const override                             { return isMaster; }
+        Block::UID getConnectedMasterUID() const override               { return masterUID; }
+        int getRotation() const override                                { return rotation; }
+
+        Rectangle<int> getBlockAreaWithinLayout() const override
+        {
+            if (rotation % 2 == 0)
+                return { position.getX(), position.getY(), modelData.widthUnits, modelData.heightUnits };
+
+            return { position.getX(), position.getY(), modelData.heightUnits, modelData.widthUnits };
+        }
 
         TouchSurface* getTouchSurface() const override                  { return touchSurface.get(); }
         LEDGrid* getLEDGrid() const override                            { return ledGrid.get(); }
@@ -1525,6 +1760,12 @@ struct PhysicalTopologySource::Internal
         uint32 getMemorySize() override
         {
             return modelData.programAndHeapSize;
+        }
+
+        uint32 getHeapMemorySize() override
+        {
+            jassert (isPositiveAndNotGreaterThan (programSize, modelData.programAndHeapSize));
+            return modelData.programAndHeapSize - programSize;
         }
 
         void setDataByte (size_t offset, uint8 value) override
@@ -1805,6 +2046,11 @@ struct PhysicalTopologySource::Internal
         uint32 resetMessagesSent = 0;
         bool isStillConnected = true;
         bool isMaster = false;
+        Block::UID masterUID = {};
+
+        Point<int> position;
+        int rotation = 0;
+        friend BlocksTraverser;
 
         void initialiseDeviceIndexAndConnection()
         {
@@ -2000,14 +2246,26 @@ struct PhysicalTopologySource::Internal
     {
         TouchSurfaceImplementation (BlockImplementation& b)  : TouchSurface (b), blockImpl (b)
         {
+            activateTouchSurface();
+        }
+
+        ~TouchSurfaceImplementation()
+        {
+            disableTouchSurface();
+        }
+
+        void activateTouchSurface()
+        {
             if (auto det = Detector::getFrom (block))
                 det->activeTouchSurfaces.add (this);
 
             startTimer (500);
         }
 
-        ~TouchSurfaceImplementation()
+        void disableTouchSurface()
         {
+            stopTimer();
+
             if (auto det = Detector::getFrom (block))
                 det->activeTouchSurfaces.removeFirstMatchingValue (this);
         }
@@ -2113,11 +2371,21 @@ struct PhysicalTopologySource::Internal
         ControlButtonImplementation (BlockImplementation& b, int index, BlocksProtocol::BlockDataSheet::ButtonInfo info)
             : ControlButton (b), blockImpl (b), buttonInfo (info), buttonIndex (index)
         {
+            activateControlButton();
+        }
+
+        ~ControlButtonImplementation()
+        {
+            disableControlButton();
+        }
+
+        void activateControlButton()
+        {
             if (auto det = Detector::getFrom (block))
                 det->activeControlButtons.add (this);
         }
 
-        ~ControlButtonImplementation()
+        void disableControlButton()
         {
             if (auto det = Detector::getFrom (block))
                 det->activeControlButtons.removeFirstMatchingValue (this);

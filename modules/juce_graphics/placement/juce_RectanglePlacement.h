@@ -45,13 +45,13 @@ public:
     inline RectanglePlacement (int placementFlags) noexcept  : flags (placementFlags) {}
 
     /** Creates a default RectanglePlacement object, which is equivalent to using the 'centred' flag. */
-    inline RectanglePlacement() noexcept                     : flags (centred) {}
+    inline RectanglePlacement() = default;
 
     /** Creates a copy of another RectanglePlacement object. */
-    RectanglePlacement (const RectanglePlacement&) noexcept;
+    RectanglePlacement (const RectanglePlacement&) = default;
 
     /** Copies another RectanglePlacement object. */
-    RectanglePlacement& operator= (const RectanglePlacement&) noexcept;
+    RectanglePlacement& operator= (const RectanglePlacement&) = default;
 
     bool operator== (const RectanglePlacement&) const noexcept;
     bool operator!= (const RectanglePlacement&) const noexcept;
@@ -169,7 +169,7 @@ public:
 
 private:
     //==============================================================================
-    int flags;
+    int flags { centred };
 };
 
 } // namespace juce

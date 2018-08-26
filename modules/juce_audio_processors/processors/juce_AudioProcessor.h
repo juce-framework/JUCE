@@ -1476,6 +1476,10 @@ public:
     */
     WrapperType wrapperType;
 
+    /** Returns a textual description of a WrapperType value */
+    static const char* getWrapperTypeDescription (AudioProcessor::WrapperType) noexcept;
+
+
     /** A struct containing information about the DAW track inside which your
         AudioProcessor is loaded. */
     struct TrackProperties
@@ -1675,19 +1679,17 @@ private:
     //==============================================================================
     struct InOutChannelPair
     {
-        int16 inChannels = 0, outChannels = 0;
+        InOutChannelPair() = default;
 
-        InOutChannelPair() noexcept {}
-        InOutChannelPair (const InOutChannelPair& o) noexcept  : inChannels (o.inChannels), outChannels (o.outChannels) {}
         InOutChannelPair (int16 inCh, int16 outCh) noexcept    : inChannels (inCh), outChannels (outCh) {}
         InOutChannelPair (const int16 (&config)[2]) noexcept   : inChannels (config[0]), outChannels (config[1]) {}
-
-        InOutChannelPair& operator= (const InOutChannelPair& o) noexcept    { inChannels = o.inChannels; outChannels = o.outChannels; return *this; }
 
         bool operator== (const InOutChannelPair& other) const noexcept
         {
             return other.inChannels == inChannels && other.outChannels == outChannels;
         }
+
+        int16 inChannels = 0, outChannels = 0;
     };
 
     template <int numLayouts>

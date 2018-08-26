@@ -190,9 +190,6 @@ private:
 
             pathPropertyComponents.add (nullptr);
 
-            addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (settings.getStoredPath (Ids::vst3Path),
-                                                                                          "VST3 SDK", true)));
-
             if (getSelectedOS() == TargetOS::linux)
             {
                 addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent ({}, "RTAS SDK", true)));
@@ -214,6 +211,9 @@ private:
             addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (settings.getStoredPath (Ids::androidNDKPath),
                                                                                           "Android NDK", true)));
 
+            addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (settings.getStoredPath (Ids::vst3Path),
+                                                                                          "Custom VST3 SDK", true)));
+
             pathPropertyComponents.add (nullptr);
 
            #if JUCE_MAC
@@ -225,6 +225,9 @@ private:
            #endif
             addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (settings.getStoredPath (Ids::clionExePath),
                                                                                           "CLion " + exeLabel, false)));
+
+            addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (settings.getStoredPath (Ids::androidStudioExePath),
+                                                           "Android Studio " + exeLabel, false)));
         }
         else
         {
@@ -239,9 +242,6 @@ private:
                                                                                       "User Modules", maxChars, false)));
 
             pathPropertyComponents.add (nullptr);
-
-            addAndMakeVisible (pathPropertyComponents.add (new TextPropertyComponent (settings.getFallbackPathForOS (Ids::vst3Path, selectedOS),
-                                                                                      "VST3 SDK", maxChars, false)));
 
             if (selectedOS == TargetOS::linux)
             {
@@ -259,10 +259,14 @@ private:
                                                                                           "AAX SDK", maxChars, false)));
             }
 
+
             addAndMakeVisible (pathPropertyComponents.add (new TextPropertyComponent (settings.getFallbackPathForOS (Ids::androidSDKPath, selectedOS),
                                                                                       "Android SDK", maxChars, false)));
             addAndMakeVisible (pathPropertyComponents.add (new TextPropertyComponent (settings.getFallbackPathForOS (Ids::androidNDKPath, selectedOS),
                                                                                       "Android NDK", maxChars, false)));
+
+            addAndMakeVisible (pathPropertyComponents.add (new TextPropertyComponent (settings.getFallbackPathForOS (Ids::vst3Path, selectedOS),
+                                                                                      "Custom VST3 SDK", maxChars, false)));
         }
 
         resized();

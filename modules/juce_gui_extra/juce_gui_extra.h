@@ -64,11 +64,12 @@
 #endif
 
 /** Config: JUCE_ENABLE_LIVE_CONSTANT_EDITOR
-    This lets you turn on the JUCE_ENABLE_LIVE_CONSTANT_EDITOR support. See the documentation
+    This lets you turn on the JUCE_ENABLE_LIVE_CONSTANT_EDITOR support (desktop only). By default
+    this will be enabled for debug builds and disabled for release builds. See the documentation
     for that macro for more details.
 */
 #ifndef JUCE_ENABLE_LIVE_CONSTANT_EDITOR
- #if JUCE_DEBUG
+ #if JUCE_DEBUG && ! (JUCE_IOS || JUCE_ANDROID)
   #define JUCE_ENABLE_LIVE_CONSTANT_EDITOR 1
  #endif
 #endif

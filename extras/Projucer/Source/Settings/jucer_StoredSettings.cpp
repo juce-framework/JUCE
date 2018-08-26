@@ -297,17 +297,9 @@ Value StoredSettings::getStoredPath (const Identifier& key)
 
 Value StoredSettings::getFallbackPathForOS (const Identifier& key, DependencyPathOS os)
 {
-    auto id = Identifier();
-
-    if      (os == TargetOS::osx)     id = Ids::osxFallback;
-    else if (os == TargetOS::windows) id = Ids::windowsFallback;
-    else if (os == TargetOS::linux)   id = Ids::linuxFallback;
-
-    if (id == Identifier())
-        jassertfalse;
-
-    auto v = fallbackPaths.getOrCreateChildWithName (id, nullptr)
-                          .getPropertyAsValue (key, nullptr);
+    auto id = identifierForOS (os);
+    auto osFallback = fallbackPaths.getOrCreateChildWithName (id, nullptr);
+    auto v = osFallback.getPropertyAsValue (key, nullptr);
 
     if (v.toString().isEmpty())
     {
@@ -328,20 +320,19 @@ Value StoredSettings::getFallbackPathForOS (const Identifier& key, DependencyPat
         }
         else if (key == Ids::vst3Path)
         {
-            v = (os == TargetOS::windows ? "C:\\SDKs\\VST_SDK\\VST3_SDK"
-                                         : "~/SDKs/VST_SDK/VST3_SDK");
+            v = "";
         }
         else if (key == Ids::rtasPath)
         {
             if      (os == TargetOS::windows)  v = "C:\\SDKs\\PT_90_SDK";
             else if (os == TargetOS::osx)      v = "~/SDKs/PT_90_SDK";
-            else                               jassertfalse; // no RTAS on this OS!
+            else                               return {}; // no RTAS on this OS!
         }
         else if (key == Ids::aaxPath)
         {
             if      (os == TargetOS::windows)  v = "C:\\SDKs\\AAX";
             else if (os == TargetOS::osx)      v = "~/SDKs/AAX";
-            else                               jassertfalse; // no AAX on this OS!
+            else                               return {}; // no AAX on this OS!
         }
         else if (key == Ids::androidSDKPath)
         {
@@ -374,9 +365,41 @@ Value StoredSettings::getFallbackPathForOS (const Identifier& key, DependencyPat
                 v = "${user.home}/clion/bin/clion.sh";
             }
         }
+        else if (key == Ids::androidStudioExePath)
+        {
+            if (os == TargetOS::windows)
+            {
+               #if JUCE_WINDOWS
+                auto path = WindowsRegistry::getValue ("HKEY_LOCAL_MACHINE\\SOFTWARE\\Android Studio\\Path", {}, {});
+
+                if (! path.isEmpty())
+                    return Value (path.unquoted() + "\\bin\\studio64.exe");
+               #endif
+
+                v = "C:\\Program Files\\Android\\Android Studio\\bin\\studio64.exe";
+            }
+            else if (os == TargetOS::osx)
+            {
+                v = "/Applications/Android Studio.app";
+            }
+            else
+            {
+                return {}; // no Android Studio on this OS!
+            }
+        }
     }
 
     return v;
+}
+
+Identifier StoredSettings::identifierForOS (DependencyPathOS os) noexcept
+{
+    if      (os == TargetOS::osx)     return Ids::osxFallback;
+    else if (os == TargetOS::windows) return Ids::windowsFallback;
+    else if (os == TargetOS::linux)   return Ids::linuxFallback;
+
+    jassertfalse;
+    return {};
 }
 
 static bool doesSDKPathContainFile (const File& relativeTo, const String& path, const String& fileToCheckFor) noexcept
@@ -433,6 +456,14 @@ bool StoredSettings::isGlobalPathValid (const File& relativeTo, const Identifier
         fileToCheckFor = "../clion64.exe";
        #else
         fileToCheckFor = "../clion.sh";
+       #endif
+    }
+    else if (key == Ids::androidStudioExePath)
+    {
+       #if JUCE_MAC
+        fileToCheckFor = "Android Studio.app";
+       #elif JUCE_WINDOWS
+        fileToCheckFor = "studio64.exe";
        #endif
     }
     else if (key == Ids::jucePath)

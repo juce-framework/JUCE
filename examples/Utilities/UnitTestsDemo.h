@@ -36,6 +36,7 @@
                    juce_opengl, juce_osc, juce_product_unlocking, juce_video
  exporters:        xcode_mac, vs2017, linux_make, androidstudio, xcode_iphone
 
+ moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
  defines:          JUCE_UNIT_TESTS=1
 
  type:             Component

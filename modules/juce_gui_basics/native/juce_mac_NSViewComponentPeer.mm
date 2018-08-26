@@ -92,24 +92,6 @@ public:
                                     name: NSViewFrameDidChangeNotification
                                   object: view];
 
-        if (! isSharedWindow)
-        {
-            [notificationCenter  addObserver: view
-                                    selector: @selector (frameChanged:)
-                                        name: NSWindowDidMoveNotification
-                                      object: window];
-
-            [notificationCenter  addObserver: view
-                                    selector: @selector (frameChanged:)
-                                        name: NSWindowDidMiniaturizeNotification
-                                      object: window];
-
-            [notificationCenter  addObserver: view
-                                    selector: @selector (frameChanged:)
-                                        name: NSWindowDidDeminiaturizeNotification
-                                      object: window];
-        }
-
         [view setPostsFrameChangedNotifications: YES];
 
         if (isSharedWindow)
@@ -164,6 +146,26 @@ public:
             if ([window respondsToSelector: @selector (setTabbingMode:)])
                 [window setTabbingMode:NSWindowTabbingModeDisallowed];
            #endif
+
+            [notificationCenter  addObserver: view
+                                    selector: @selector (frameChanged:)
+                                        name: NSWindowDidMoveNotification
+                                      object: window];
+
+            [notificationCenter  addObserver: view
+                                    selector: @selector (frameChanged:)
+                                        name: NSWindowDidMiniaturizeNotification
+                                      object: window];
+
+            [notificationCenter  addObserver: view
+                                    selector: @selector (windowWillMiniaturize:)
+                                        name: NSWindowWillMiniaturizeNotification
+                                      object: window];
+
+            [notificationCenter  addObserver: view
+                                    selector: @selector (windowDidDeminiaturize:)
+                                        name: NSWindowDidDeminiaturizeNotification
+                                      object: window];
         }
 
         auto alpha = component.getAlpha();
@@ -472,9 +474,13 @@ public:
     bool setAlwaysOnTop (bool alwaysOnTop) override
     {
         if (! isSharedWindow)
+        {
             [window setLevel: alwaysOnTop ? ((getStyleFlags() & windowIsTemporary) != 0 ? NSPopUpMenuWindowLevel
                                                                                         : NSFloatingWindowLevel)
                                           : NSNormalWindowLevel];
+
+            isAlwaysOnTop = alwaysOnTop;
+        }
 
         return true;
     }
@@ -1385,6 +1391,7 @@ public:
     bool isZooming = false, isFirstLiveResize = false, textWasInserted = false;
     bool isStretchingTop = false, isStretchingLeft = false, isStretchingBottom = false, isStretchingRight = false;
     bool windowRepresentsFile = false;
+    bool isAlwaysOnTop = false, wasAlwaysOnTop = false;
     String stringBeingComposed;
     NSNotificationCenter* notificationCenter = nil;
 
@@ -1554,6 +1561,8 @@ struct JuceNSViewClass   : public ObjCClass<NSView>
         addMethod (@selector (magnifyWithEvent:),             magnify,                    "v@:@");
         addMethod (@selector (acceptsFirstMouse:),            acceptsFirstMouse,          "c@:@");
         addMethod (@selector (frameChanged:),                 frameChanged,               "v@:@");
+        addMethod (@selector (windowWillMiniaturize:),        windowWillMiniaturize,      "v@:@");
+        addMethod (@selector (windowDidDeminiaturize:),       windowDidDeminiaturize,     "v@:@");
         addMethod (@selector (wantsDefaultClipping:),         wantsDefaultClipping,       "c@:");
         addMethod (@selector (worksWhenModal),                worksWhenModal,             "c@:");
         addMethod (@selector (viewDidMoveToWindow),           viewDidMoveToWindow,        "v@:");
@@ -1645,6 +1654,32 @@ private:
     static void drawRect (id self, SEL, NSRect r)              { if (auto* p = getOwner (self)) p->drawRect (r); }
     static void frameChanged (id self, SEL, NSNotification*)   { if (auto* p = getOwner (self)) p->redirectMovedOrResized(); }
     static void viewDidMoveToWindow (id self, SEL)             { if (auto* p = getOwner (self)) p->viewMovedToWindow(); }
+
+    static void windowWillMiniaturize (id self, SEL, NSNotification*)
+    {
+        if (auto* p = getOwner (self))
+        {
+            if (p->isAlwaysOnTop)
+            {
+                // there is a bug when restoring minimised always on top windows so we need
+                // to remove this behaviour before minimising and restore it afterwards
+                p->setAlwaysOnTop (false);
+                p->wasAlwaysOnTop = true;
+            }
+        }
+    }
+
+    static void windowDidDeminiaturize (id self, SEL, NSNotification*)
+    {
+        if (auto* p = getOwner (self))
+        {
+            if (p->wasAlwaysOnTop)
+            {
+                p->setAlwaysOnTop (true);
+                p->redirectMovedOrResized();
+            }
+        }
+    }
 
     static BOOL isOpaque (id self, SEL)
     {

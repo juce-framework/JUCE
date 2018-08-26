@@ -755,8 +755,8 @@ void CodeDocument::checkLastLineStatus()
 }
 
 //==============================================================================
-void CodeDocument::addListener    (CodeDocument::Listener* l) noexcept   { listeners.add (l); }
-void CodeDocument::removeListener (CodeDocument::Listener* l) noexcept   { listeners.remove (l); }
+void CodeDocument::addListener    (CodeDocument::Listener* l)   { listeners.add (l); }
+void CodeDocument::removeListener (CodeDocument::Listener* l)   { listeners.remove (l); }
 
 //==============================================================================
 struct CodeDocument::InsertAction   : public UndoableAction

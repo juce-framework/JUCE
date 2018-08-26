@@ -751,10 +751,7 @@ void LatestVersionChecker::modalStateFinished (int result,
 
 void LatestVersionChecker::askUserForLocationToDownload (URL& newVersionToDownload, const String& extraHeaders)
 {
-    File targetFolder (EnabledModuleList::findGlobalModulesFolder());
-
-    if (isJUCEModulesFolder (targetFolder))
-        targetFolder = targetFolder.getParentDirectory();
+    File targetFolder (getAppSettings().getStoredPath (Ids::jucePath).toString());
 
     FileChooser chooser (TRANS("Please select the location into which you'd like to install the new version"),
         targetFolder);

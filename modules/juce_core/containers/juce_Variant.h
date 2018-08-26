@@ -286,18 +286,18 @@ public:
 
 private:
     //==============================================================================
-    class VariantType;            friend class VariantType;
-    class VariantType_Void;       friend class VariantType_Void;
-    class VariantType_Undefined;  friend class VariantType_Undefined;
-    class VariantType_Int;        friend class VariantType_Int;
-    class VariantType_Int64;      friend class VariantType_Int64;
-    class VariantType_Double;     friend class VariantType_Double;
-    class VariantType_Bool;       friend class VariantType_Bool;
-    class VariantType_String;     friend class VariantType_String;
-    class VariantType_Object;     friend class VariantType_Object;
-    class VariantType_Array;      friend class VariantType_Array;
-    class VariantType_Binary;     friend class VariantType_Binary;
-    class VariantType_Method;     friend class VariantType_Method;
+    class VariantType;
+    class VariantType_Void;
+    class VariantType_Undefined;
+    class VariantType_Int;
+    class VariantType_Int64;
+    class VariantType_Double;
+    class VariantType_Bool;
+    class VariantType_String;
+    class VariantType_Object;
+    class VariantType_Array;
+    class VariantType_Binary;
+    class VariantType_Method;
 
     union ValueUnion
     {

@@ -61,7 +61,7 @@ struct SIMDFallbackOps
 {
     static constexpr size_t n    =  sizeof (vSIMDType) / sizeof (ScalarType);
     static constexpr size_t mask = (sizeof (vSIMDType) / sizeof (ScalarType)) - 1;
-    static constexpr size_t bits = SIMDInternal::Log2Helper<n>::value;
+    static constexpr size_t bits = SIMDInternal::Log2Helper<(int) n>::value;
 
     // helper types
     using MaskType = typename SIMDInternal::MaskTypeFor<ScalarType>::type;

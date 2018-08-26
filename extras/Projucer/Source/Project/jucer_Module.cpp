@@ -157,94 +157,71 @@ StringArray ModuleList::getIDs() const
     return results;
 }
 
-Result ModuleList::tryToAddModuleFromFolder (const File& path)
+bool ModuleList::tryToAddModuleFromFolder (const File& path)
 {
     ModuleDescription m (path);
 
     if (m.isValid())
     {
+        getPreviousModuleDirectories().addIfNotAlreadyThere (path.getParentDirectory());
         modules.add (new ModuleDescription (m));
-        return Result::ok();
+        return true;
     }
 
-    return Result::fail (path.getFullPathName() + " is not a valid module");
+    return false;
 }
 
-Result ModuleList::addAllModulesInFolder (const File& path)
+void ModuleList::addAllModulesInFolder (const File& path)
 {
     if (! tryToAddModuleFromFolder (path))
     {
-        int subfolders = 2;
-        return addAllModulesInSubfoldersRecursively (path, subfolders);
-    }
-
-    return Result::ok();
-}
-
-Result ModuleList::addAllModulesInSubfoldersRecursively (const File& path, int depth)
-{
-    if (depth > 0)
-    {
         for (DirectoryIterator iter (path, false, "*", File::findDirectories); iter.next();)
-        {
-            auto childPath = iter.getFile().getLinkedTarget();
-
-            if (! tryToAddModuleFromFolder (childPath))
-                addAllModulesInSubfoldersRecursively (childPath, depth - 1);
-        }
+            tryToAddModuleFromFolder (iter.getFile().getLinkedTarget());
     }
-
-    return Result::ok();
 }
 
-static File getModuleFolderFromPathIfItExists (const String& path, const String& moduleID, const Project& project)
+Array<File>& ModuleList::getPreviousModuleDirectories()
+{
+    static Array<File> previous;
+    return previous;
+}
+
+File ModuleList::tryToFindModulePathFromPrevious (const String& id)
+{
+    for (auto& f : getPreviousModuleDirectories())
+    {
+        auto modulePath = f.getChildFile (id);
+        if (ModuleDescription (modulePath).isValid())
+            return modulePath;
+    }
+
+    return {};
+}
+
+//==============================================================================
+static File getModuleFolderFromPathIfItExists (const String& path, const String& moduleID)
 {
     if (path.isNotEmpty())
     {
-        auto moduleFolder = project.resolveFilename (path);
+        ModuleList list;
+        list.addAllModulesInFolder (path);
 
-        if (moduleFolder.exists())
-        {
-            if (ModuleDescription (moduleFolder).getID() == moduleID)
-                return moduleFolder;
-
-            auto f = moduleFolder.getChildFile (moduleID);
-
-            if (ModuleDescription (f).getID() == moduleID)
-                return f;
-        }
+        if (auto* desc = list.getModuleWithID (moduleID))
+            return desc->getFolder();
     }
 
     return {};
 }
 
-static File getPathToSpecifiedModule (Project& project, StringRef moduleID)
-{
-    auto& modules = project.getModules();
-
-    if (! modules.shouldUseGlobalPath (moduleID))
-    {
-        for (Project::ExporterIterator exporter (project); exporter.next();)
-        {
-            if (! exporter->mayCompileOnCurrentOS())
-                continue;
-
-            auto path = getModuleFolderFromPathIfItExists (exporter->getPathForModuleString (moduleID), moduleID, project);
-
-            if (path != File())
-                return path;
-        }
-    }
-
-    return {};
-}
-
-static Array<File> getAllPossibleModulePathsFromExporters (Project& project)
+static Array<File> getAllPossibleModulePathsFromExporters (Project& project, bool onlyThisOS)
 {
     StringArray paths;
 
     for (Project::ExporterIterator exporter (project); exporter.next();)
     {
+        if (onlyThisOS && ! exporter->mayCompileOnCurrentOS())
+            continue;
+
         auto& modules = project.getModules();
         auto n = modules.getNumModules();
 
@@ -285,21 +262,14 @@ static Array<File> getAllPossibleModulePathsFromExporters (Project& project)
     return files;
 }
 
-Result ModuleList::scanProjectExporterModulePaths (Project& project)
+void ModuleList::scanProjectExporterModulePaths (Project& project)
 {
     modules.clear();
-    Result result (Result::ok());
 
-    for (auto& m : getAllPossibleModulePathsFromExporters (project))
-    {
-        result = addAllModulesInFolder (m);
-
-        if (result.failed())
-            break;
-    }
+    for (auto& m : getAllPossibleModulePathsFromExporters (project, false))
+        addAllModulesInFolder (m);
 
     sort();
-    return result;
 }
 
 void ModuleList::scanGlobalJuceModulePath()
@@ -324,6 +294,8 @@ void ModuleList::scanGlobalUserModulePath()
 
     for (auto p : paths)
     {
+        p = p.replace ("~", File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
+
         auto f = File::createFileWithoutCheckingPath (p.trim());
         if (f.exists())
             addAllModulesInFolder (f);
@@ -677,7 +649,7 @@ EnabledModuleList::EnabledModuleList (Project& p, const ValueTree& s)
 
 ModuleDescription EnabledModuleList::getModuleInfo (const String& moduleID)
 {
-    return ModuleDescription (getModuleFolder (moduleID));
+    return ModuleDescription (findFolderForModule (moduleID));
 }
 
 bool EnabledModuleList::isModuleEnabled (const String& moduleID) const
@@ -709,47 +681,43 @@ Value EnabledModuleList::shouldShowAllModuleFilesInProject (const String& module
                 .getPropertyAsValue (Ids::showAllCode, getUndoManager());
 }
 
-File EnabledModuleList::findUserModuleFolder (const String& possiblePaths, const String& moduleID)
-{
-    auto paths = StringArray::fromTokens (possiblePaths, ";", {});
-
-    for (auto p : paths)
-    {
-        auto f = File::createFileWithoutCheckingPath (p.trim());
-        if (f.exists())
-        {
-            auto moduleFolder = getModuleFolderFromPathIfItExists (f.getFullPathName(), moduleID, project);
-            if (moduleFolder != File())
-                return moduleFolder;
-        }
-    }
-
-    return {};
-}
-
-File EnabledModuleList::getModuleFolder (const String& moduleID)
+File EnabledModuleList::findFolderForModule (const String& moduleID)
 {
     if (shouldUseGlobalPath (moduleID))
     {
         if (isJUCEModule (moduleID))
-            return getModuleFolderFromPathIfItExists (getAppSettings().getStoredPath (Ids::defaultJuceModulePath).toString(), moduleID, project);
+            return File (getAppSettings().getStoredPath (Ids::defaultJuceModulePath).toString()).getChildFile (moduleID);
 
-        return findUserModuleFolder (getAppSettings().getStoredPath (Ids::defaultUserModulePath).toString(), moduleID);
+        {
+            auto previous = ModuleList::tryToFindModulePathFromPrevious (moduleID);
+
+            if (previous != File())
+                return previous;
+        }
+
+        ModuleList list;
+        list.scanGlobalUserModulePath();
+
+        if (auto* desc = list.getModuleWithID (moduleID))
+            return desc->getFolder();
     }
-
+    else
     {
-        auto path = getPathToSpecifiedModule (project, moduleID);
+        for (auto p : getAllPossibleModulePathsFromExporters (project, true))
+        {
+            auto f = getModuleFolderFromPathIfItExists (p.getFullPathName(), moduleID);
 
-        if (path != File())
-            return path;
-    }
+            if (f != File())
+                return f;
+        }
 
-    auto paths = getAllPossibleModulePathsFromExporters (project);
-    for (auto p : paths)
-    {
-        auto f = getModuleFolderFromPathIfItExists (p.getFullPathName(), moduleID, project);
-        if (f != File())
-            return f;
+        for (auto p : getAllPossibleModulePathsFromExporters (project, false))
+        {
+            auto f = getModuleFolderFromPathIfItExists (p.getFullPathName(), moduleID);
+
+            if (f != File())
+                return f;
+        }
     }
 
     return {};
@@ -912,20 +880,9 @@ void EnabledModuleList::setLocalCopyModeForAllModules (bool copyLocally)
         shouldCopyModuleFilesLocally (project.getModules().getModuleID (i)) = copyLocally;
 }
 
-File EnabledModuleList::findGlobalModulesFolder()
-{
-    auto& settings = getAppSettings();
-    auto path = settings.getStoredPath (Ids::defaultJuceModulePath).toString();
-
-    if (settings.isGlobalPathValid ({}, Ids::defaultJuceModulePath, path))
-        return { path };
-
-    return {};
-}
-
 File EnabledModuleList::findDefaultModulesFolder (Project& project)
 {
-    auto globalPath = findGlobalModulesFolder();
+    File globalPath (getAppSettings().getStoredPath (Ids::defaultJuceModulePath).toString());
 
     if (globalPath != File())
         return globalPath;

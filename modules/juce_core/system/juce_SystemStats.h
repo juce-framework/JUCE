@@ -156,7 +156,7 @@ public:
         @returns    the speed in megahertz, e.g. 1500, 2500, 32000 (depending on
                     what year you're reading this...)
     */
-    static int getCpuSpeedInMegaherz();
+    static int getCpuSpeedInMegahertz();
 
     /** Returns a string to indicate the CPU vendor.
         Might not be known on some systems.
@@ -199,10 +199,10 @@ public:
     */
     static String getStackBacktrace();
 
-    /** A function type for use in setApplicationCrashHandler(). The parameter will contain
-        platform-specific data about the crash.
+    /** A function type for use in setApplicationCrashHandler().
+        When called, its void* argument will contain platform-specific data about the crash.
     */
-    using CrashHandlerFunction = void (*) (void*);
+    using CrashHandlerFunction = void(*)(void*);
 
     /** Sets up a global callback function that will be called if the application
         executes some kind of illegal instruction.
@@ -213,15 +213,17 @@ public:
     static void setApplicationCrashHandler (CrashHandlerFunction);
 
     /** Returns true if this code is running inside an app extension sandbox.
-
         This function will always return false on windows, linux and android.
     */
     static bool isRunningInAppExtensionSandbox() noexcept;
 
-private:
-    //==============================================================================
-    SystemStats();
 
+    //==============================================================================
+    // This method was spelt wrong! Please change your code to use getCpuSpeedInMegahertz() instead
+    JUCE_DEPRECATED_WITH_BODY (static int getCpuSpeedInMegaherz(), { return getCpuSpeedInMegahertz(); })
+
+private:
+    SystemStats() = delete; // uses only static methods
     JUCE_DECLARE_NON_COPYABLE (SystemStats)
 };
 

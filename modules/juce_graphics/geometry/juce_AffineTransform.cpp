@@ -27,35 +27,11 @@
 namespace juce
 {
 
-AffineTransform::AffineTransform() noexcept
-    : mat00 (1.0f), mat01 (0), mat02 (0),
-      mat10 (0), mat11 (1.0f), mat12 (0)
-{
-}
-
-AffineTransform::AffineTransform (const AffineTransform& other) noexcept
-  : mat00 (other.mat00), mat01 (other.mat01), mat02 (other.mat02),
-    mat10 (other.mat10), mat11 (other.mat11), mat12 (other.mat12)
-{
-}
-
 AffineTransform::AffineTransform (float m00, float m01, float m02,
                                   float m10, float m11, float m12) noexcept
  :  mat00 (m00), mat01 (m01), mat02 (m02),
     mat10 (m10), mat11 (m11), mat12 (m12)
 {
-}
-
-AffineTransform& AffineTransform::operator= (const AffineTransform& other) noexcept
-{
-    mat00 = other.mat00;
-    mat01 = other.mat01;
-    mat02 = other.mat02;
-    mat10 = other.mat10;
-    mat11 = other.mat11;
-    mat12 = other.mat12;
-
-    return *this;
 }
 
 bool AffineTransform::operator== (const AffineTransform& other) const noexcept

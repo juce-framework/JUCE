@@ -60,12 +60,15 @@ namespace FIR
         */
         using NumericType = typename SampleTypeHelpers::ElementType<SampleType>::Type;
 
+        /** A typedef for a ref-counted pointer to the coefficients object */
+        using CoefficientsPtr = typename Coefficients<NumericType>::Ptr;
+
         //==============================================================================
         /** This will create a filter which will produce silence. */
         Filter() : coefficients (new Coefficients<NumericType>)                                     { reset(); }
 
         /** Creates a filter with a given set of coefficients. */
-        Filter (Coefficients<NumericType>* coefficientsToUse)  : coefficients (coefficientsToUse)   { reset(); }
+        Filter (CoefficientsPtr coefficientsToUse)  : coefficients (static_cast<CoefficientsPtr&&> (coefficientsToUse))   { reset(); }
 
         Filter (const Filter&) = default;
         Filter (Filter&&) = default;

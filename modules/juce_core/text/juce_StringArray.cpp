@@ -37,6 +37,11 @@ StringArray::StringArray (StringArray&& other) noexcept
 {
 }
 
+StringArray::StringArray (Array<String>&& other) noexcept
+    : strings (static_cast<Array<String>&&> (other))
+{
+}
+
 StringArray::StringArray (const String& firstValue)
 {
     strings.add (firstValue);

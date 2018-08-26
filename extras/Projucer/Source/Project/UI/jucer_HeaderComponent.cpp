@@ -289,7 +289,7 @@ void HeaderComponent::initialiseButtons() noexcept
     {
         sendProjectButtonAnalyticsEvent ("User Settings");
 
-        if (auto* pcc = findParentComponentOfClass<ProjectContentComponent>())
+        if (findParentComponentOfClass<ProjectContentComponent>() != nullptr)
             showUserSettings();
     };
 

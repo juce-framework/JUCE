@@ -111,10 +111,10 @@ struct CachedImageList  : public ReferenceCountedObject,
         {
             TextureInfo t;
 
-            if (textureNeedsReloading)
+            if (textureNeedsReloading && pixelData != nullptr)
             {
                 textureNeedsReloading = false;
-                texture.loadImage (Image (pixelData));
+                texture.loadImage (Image (*pixelData));
             }
 
             t.textureID = texture.getTextureID();
@@ -1309,7 +1309,7 @@ struct StateHelpers
             if (programs == nullptr)
             {
                 programs = new ShaderPrograms (context);
-                context.setAssociatedObject (programValueID, programs);
+                context.setAssociatedObject (programValueID, programs.get());
             }
         }
 
@@ -1440,7 +1440,7 @@ struct GLState
         auto p3 = Point<float> (g.point1.x + (g.point2.y - g.point1.y),
                                 g.point1.y - (g.point2.x - g.point1.x)).transformedBy (t);
 
-        ShaderPrograms* const programs = currentShader.programs;
+        auto programs = currentShader.programs;
         const ShaderPrograms::MaskedShaderParams* maskParams = nullptr;
 
         if (g.isRadial)
@@ -1517,7 +1517,7 @@ struct GLState
     {
         blendMode.setPremultipliedBlendingMode (shaderQuadQueue);
 
-        ShaderPrograms* const programs = currentShader.programs;
+        auto programs = currentShader.programs;
 
         const ShaderPrograms::MaskedShaderParams* maskParams = nullptr;
         const ShaderPrograms::ImageParams* imageParams;
@@ -1670,7 +1670,7 @@ struct SavedState  : public RenderingHelpers::SavedStateBase<SavedState>
                 const std::unique_ptr<EdgeTable> et (font.getTypeface()->getEdgeTableForGlyph (glyphNumber, t, fontHeight));
 
                 if (et != nullptr)
-                    fillShape (new EdgeTableRegionType (*et), false);
+                    fillShape (*new EdgeTableRegionType (*et), false);
             }
         }
     }
@@ -1852,18 +1852,19 @@ struct CustomProgram  : public ReferenceCountedObject,
     {
     }
 
-    static CustomProgram* get (const String& hashName)
+    static ReferenceCountedObjectPtr<CustomProgram> get (const String& hashName)
     {
         if (auto* c = OpenGLContext::getCurrentContext())
-            return static_cast<CustomProgram*> (c->getAssociatedObject (hashName.toRawUTF8()));
+            if (auto* o = c->getAssociatedObject (hashName.toRawUTF8()))
+                return *static_cast<CustomProgram*> (o);
 
-        return nullptr;
+        return {};
     }
 
-    static CustomProgram* getOrCreate (LowLevelGraphicsContext& gc, const String& hashName,
-                                       const String& code, String& errorMessage)
+    static ReferenceCountedObjectPtr<CustomProgram> getOrCreate (LowLevelGraphicsContext& gc, const String& hashName,
+                                                                 const String& code, String& errorMessage)
     {
-        if (auto* c = get (hashName))
+        if (auto c = get (hashName))
             return c;
 
         if (auto* sc = dynamic_cast<OpenGLRendering::ShaderContext*> (&gc))
@@ -1875,7 +1876,7 @@ struct CustomProgram  : public ReferenceCountedObject,
             {
                 if (auto context = OpenGLContext::getCurrentContext())
                 {
-                    context->setAssociatedObject (hashName.toRawUTF8(), c);
+                    context->setAssociatedObject (hashName.toRawUTF8(), c.get());
                     return c;
                 }
             }

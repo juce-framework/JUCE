@@ -776,11 +776,15 @@ namespace
 
         PIPGenerator generator (pipFile, outputDir);
 
-        if (! generator.createJucerFile())
-            throw CommandLineError ("Failed to create .jucer file in " + outputDir.getFullPathName()+ ".");
+        auto createJucerFileResult = generator.createJucerFile();
 
-        if (! generator.createMainCpp())
-            throw CommandLineError ("Failed to create Main.cpp.");
+        if (! createJucerFileResult)
+            throw CommandLineError (createJucerFileResult.getErrorMessage());
+
+        auto createMainCppResult = generator.createMainCpp();
+
+        if (! createMainCppResult)
+            throw CommandLineError (createMainCppResult.getErrorMessage());
     }
 
     //==============================================================================
@@ -892,6 +896,8 @@ int performCommandLine (const String& commandLine)
         if (matchArgument (command, "trans-finish"))             { createFinishedTranslationFile (args);  return 0; }
         if (matchArgument (command, "set-global-search-path"))   { setGlobalPath (args);                  return 0; }
         if (matchArgument (command, "create-project-from-pip"))  { createProjectFromPIP (args);           return 0; }
+
+        if (command.startsWith ("-")) { throw CommandLineError ("Unrecognised command: " + command.quoted()); }
     }
     catch (const CommandLineError& error)
     {

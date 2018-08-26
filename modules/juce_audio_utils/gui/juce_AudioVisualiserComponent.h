@@ -121,8 +121,6 @@ public:
 
 private:
     struct ChannelInfo;
-    friend struct ChannelInfo;
-    friend struct ContainerDeletePolicy<ChannelInfo>;
 
     OwnedArray<ChannelInfo> channels;
     int numSamples, inputSamplesPerBlock;

@@ -77,13 +77,14 @@ void ProjucerApplication::initialise (const String& commandLine)
     {
         initialiseLogger ("IDE_Log_");
         Logger::writeToLog (SystemStats::getOperatingSystemName());
-        Logger::writeToLog ("CPU: " + String (SystemStats::getCpuSpeedInMegaherz())
+        Logger::writeToLog ("CPU: " + String (SystemStats::getCpuSpeedInMegahertz())
                               + "MHz  Cores: " + String (SystemStats::getNumCpus())
                               + "  " + String (SystemStats::getMemorySizeInMegabytes()) + "MB");
 
         initialiseBasics();
 
-        isRunningCommandLine = commandLine.isNotEmpty();
+        isRunningCommandLine = commandLine.isNotEmpty()
+                                && ! commandLine.startsWith ("-NSDocumentRevisionsDebugMode");
 
         licenseController.reset (new LicenseController);
         licenseController->addLicenseStatusChangedCallback (this);
@@ -209,6 +210,7 @@ void ProjucerApplication::shutdown()
     aboutWindow.reset();
     pathsWindow.reset();
     editorColourSchemeWindow.reset();
+    pipCreatorWindow.reset();
 
     if (licenseController != nullptr)
     {

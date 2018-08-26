@@ -43,7 +43,7 @@ public:
 //==============================================================================
 AsyncUpdater::AsyncUpdater()
 {
-    activeMessage = new AsyncUpdaterMessage (*this);
+    activeMessage = *new AsyncUpdaterMessage (*this);
 }
 
 AsyncUpdater::~AsyncUpdater()
