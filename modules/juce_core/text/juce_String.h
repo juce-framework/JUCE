@@ -1239,8 +1239,7 @@ public:
     int getReferenceCount() const noexcept;
 
     //==============================================================================
-   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
-    /** This was a static empty string object, but is now deprecated as it's too easy to accidentally
+    /*  This was a static empty string object, but is now deprecated as it's too easy to accidentally
         use it indirectly during a static constructor, leading to hard-to-find order-of-initialisation
         problems.
         @deprecated If you need an empty String object, just use String() or {}.
@@ -1248,8 +1247,7 @@ public:
         empty string from a function by reference, but if you need to do that, it's easy enough to use
         a function-local static String object and return that, avoiding any order-of-initialisation issues.
     */
-    static const String empty;
-   #endif
+    JUCE_DEPRECATED_STATIC (static const String empty;)
 
 private:
     //==============================================================================

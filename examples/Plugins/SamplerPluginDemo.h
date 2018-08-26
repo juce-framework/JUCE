@@ -2006,8 +2006,7 @@ private:
           loopKindLabel            { {}, "Looping Mode" };
 
 
-    FileChooser fileChooser { "Select a file to load...",
-                              File::nonexistent,
+    FileChooser fileChooser { "Select a file to load...", File(),
                               dataModel.getAudioFormatManager().getWildcardForAllFormats() };
 
     UndoManager* undoManager;

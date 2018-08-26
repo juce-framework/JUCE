@@ -2324,6 +2324,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_data_structures\juce_data_structures.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_dsp\containers\juce_AudioBlock.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_dsp\containers\juce_SIMDRegister.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\containers\juce_SIMDRegister_Impl.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_dsp\filter_design\juce_FilterDesign.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_dsp\frequency\juce_Convolution.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_dsp\frequency\juce_FFT.h"/>

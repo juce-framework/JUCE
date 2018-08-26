@@ -179,7 +179,7 @@ void Button::setToggleState (bool shouldBeOn, NotificationType clickNotification
             // async callbacks aren't possible here
             jassert (clickNotification != sendNotificationAsync);
 
-            sendClickMessage (ModifierKeys::getCurrentModifiers());
+            sendClickMessage (ModifierKeys::currentModifiers);
 
             if (deletionWatcher == nullptr)
                 return;
@@ -368,7 +368,7 @@ void Button::handleCommandMessage (int commandId)
         if (isEnabled())
         {
             flashButtonState();
-            internalClickCallback (ModifierKeys::getCurrentModifiers());
+            internalClickCallback (ModifierKeys::currentModifiers);
         }
     }
     else
@@ -624,7 +624,7 @@ bool Button::keyStateChangedCallback()
 
     if (isEnabled() && wasDown && ! isKeyDown)
     {
-        internalClickCallback (ModifierKeys::getCurrentModifiers());
+        internalClickCallback (ModifierKeys::currentModifiers);
 
         // (return immediately - this button may now have been deleted)
         return true;
@@ -685,7 +685,7 @@ void Button::repeatTimerCallback()
         lastRepeatTime = now;
         callbackHelper->startTimer (repeatSpeed);
 
-        internalClickCallback (ModifierKeys::getCurrentModifiers());
+        internalClickCallback (ModifierKeys::currentModifiers);
     }
     else if (! needsToRelease)
     {

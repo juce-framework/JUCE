@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="M70qfTRRk" name="Projucer" projectType="guiapp" juceFolder="../../juce"
-              jucerVersion="5.3.1" version="5.3.1" bundleIdentifier="com.juce.theprojucer"
+              jucerVersion="5.3.2" version="5.3.2" bundleIdentifier="com.juce.theprojucer"
               defines="" splashScreenColour="Dark" displaySplashScreen="0"
               reportAppUsage="0" companyName="ROLI Ltd." companyCopyright="ROLI Ltd."
               cppLanguageStandard="11">
@@ -717,7 +717,7 @@
             resource="0" file="Source/Wizards/jucer_TemplateThumbnailsComponent.h"/>
     </GROUP>
   </MAINGROUP>
-  <JUCEOPTIONS JUCE_LOG_ASSERTIONS="1" JUCE_USE_CURL="1"/>
+  <JUCEOPTIONS JUCE_LOG_ASSERTIONS="1" JUCE_USE_CURL="1" JUCE_ALLOW_STATIC_NULL_VARIABLES="0"/>
   <MODULES>
     <MODULE id="juce_analytics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_core" showAllCode="1"/>

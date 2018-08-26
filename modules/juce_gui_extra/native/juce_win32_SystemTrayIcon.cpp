@@ -104,7 +104,7 @@ public:
         }
         else
         {
-            ModifierKeys eventMods (ModifierKeys::getCurrentModifiersRealtime());
+            ModifierKeys eventMods (ComponentPeer::getCurrentModifiersRealtime());
 
             if (lParam == WM_LBUTTONDOWN || lParam == WM_LBUTTONDBLCLK)
                 eventMods = eventMods.withFlags (ModifierKeys::leftButtonModifier);

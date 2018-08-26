@@ -920,21 +920,21 @@ void ProjectExporter::BuildConfiguration::createPropertyEditors (PropertyListBui
         props.add (new TextPropertyComponent (configNameValue, "Name", 96, false),
                    "The name of this configuration.");
 
-    props.add (new ChoicePropertyComponent (isDebugValue, "Debug mode"),
+    props.add (new ChoicePropertyComponent (isDebugValue, "Debug Mode"),
                "If enabled, this means that the configuration should be built with debug symbols.");
 
-    props.add (new TextPropertyComponent (targetNameValue, "Binary name", 256, false),
+    props.add (new TextPropertyComponent (targetNameValue, "Binary Name", 256, false),
                "The filename to use for the destination binary executable file. If you don't add a suffix to this name, "
                "a suitable platform-specific suffix will be added automatically.");
 
-    props.add (new TextPropertyComponent (targetBinaryPathValue, "Binary location", 1024, false),
+    props.add (new TextPropertyComponent (targetBinaryPathValue, "Binary Location", 1024, false),
                "The folder in which the finished binary should be placed. Leave this blank to cause the binary to be placed "
                "in its default location in the build folder.");
 
-    props.addSearchPathProperty (headerSearchPathValue, "Header search paths", "Extra header search paths.");
-    props.addSearchPathProperty (librarySearchPathValue, "Extra library search paths", "Extra library search paths.");
+    props.addSearchPathProperty (headerSearchPathValue, "Header Search Paths", "Extra header search paths.");
+    props.addSearchPathProperty (librarySearchPathValue, "Extra Library Search Paths", "Extra library search paths.");
 
-    props.add (new TextPropertyComponent (ppDefinesValue, "Preprocessor definitions", 32768, true),
+    props.add (new TextPropertyComponent (ppDefinesValue, "Preprocessor Definitions", 32768, true),
                "Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace, commas, or "
                "new-lines to separate the items - to include a space or comma in a definition, precede it with a backslash.");
 

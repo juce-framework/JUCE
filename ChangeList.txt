@@ -4,6 +4,21 @@
 This file just lists the more notable headline features. For more detailed info
 about minor changes and bugfixes, please see the git log!
 
+Version 5.3.2
+  - Removed the OSX 10.5 and 10.6 deployment target options from the Projucer and enabled more C++11 features across all platforms
+  - Replaced all usage of ScopedPointer with std::unique_ptr
+  - Added camera support for iOS and Android
+  - Fixed some issues using an UndoManager with an AudioProcessorValueTreeState
+  - Added MIDI input to IAA plug-ins
+  - Made multiple calls to MidiInput::openDevice share the same underlying win32 MIDI handle
+  - Added a config flag to juce_audio_processors for enabling LADSPA plugin hosting and enabled it in the AudioPluginHost
+  - Added a "plug-in can do" callback to the VSTCallbackHandler interface
+  - Fixed various undefined behavior in SIMDRegister
+  - Added the methods AudioBlock::copyTo/AudioBlock::copyFrom which facilitate copying to/from an AudioBuffer
+  - Added a lambda callback to OpenGLGraphicsContextCustomShader to allow custom set-up when the shader is activated
+  - Fixed a bug causing an unintentional menu item highlight disco party when using a popup menu in a plug-in's UI
+  - Marked as deprecated: String::empty, var::null, File::nonexistent, ValueTree::invalid and other problematic statically-initialised null values
+
 Version 5.3.1
   - Add Android and iOS support to AudioPluginHost
   - Added support for Bela in the form of an AudioIODeviceType

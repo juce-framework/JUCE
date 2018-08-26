@@ -1935,7 +1935,9 @@ private:
 
     AudioProcessorParameter* getParameterForAUParameterID (AudioUnitParameterID address) const noexcept
     {
-        return paramMap[static_cast<int32> (address)];
+        auto index = static_cast<int32> (address);
+        return forceUseLegacyParamIDs ? juceParameters.getParamForIndex (index)
+                                      : paramMap[index];
     }
 
     //==============================================================================

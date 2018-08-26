@@ -316,7 +316,7 @@ private:
             {
                 hasCheckedForExternalDrag = true;
 
-                if (ModifierKeys::getCurrentModifiersRealtime().isAnyMouseButtonDown())
+                if (ComponentPeer::getCurrentModifiersRealtime().isAnyMouseButtonDown())
                 {
                     StringArray files;
                     auto canMoveFiles = false;

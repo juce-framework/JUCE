@@ -930,10 +930,12 @@ public:
             return;
         }
 
-        if (isPositiveAndBelow (idx, juceParameters.getNumParameters()))
+        if (auto* juceParam = juceParameters.getParamForIndex (idx))
         {
             if (AUParameter* param = [paramTree.get() parameterWithAddress: getAUParameterAddressForIndex (idx)])
             {
+                newValue *= getMaximumParameterValue (juceParam);
+
                 if (editorObserverToken != nullptr)
                     [param setValue: newValue  originator: editorObserverToken];
                 else
@@ -1224,7 +1226,7 @@ private:
 
             AUParameterAddress address = generateAUParameterAddress (juceParam);
 
-           #if ! JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE
+           #if ! JUCE_FORCE_USE_LEGACY_PARAM_IDS
             // Consider yourself very unlucky if you hit this assertion. The hash codes of your
             // parameter ids are not unique.
             jassert (! paramMap.contains (static_cast<int64> (address)));

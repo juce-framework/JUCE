@@ -177,6 +177,9 @@ struct CameraDevice::Pimpl
     {
         const ScopedLock sl (listenerLock);
         listeners.call ([=] (Listener& l) { l.imageReceived (image); });
+
+        if (! listeners.isEmpty())
+            triggerImageCapture();
     }
 
     void triggerImageCapture()

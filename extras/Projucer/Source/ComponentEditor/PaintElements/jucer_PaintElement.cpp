@@ -515,7 +515,7 @@ void PaintElement::checkBounds (Rectangle<int>& b,
                                 const bool isStretchingBottom,
                                 const bool isStretchingRight)
 {
-    if (ModifierKeys::getCurrentModifiers().isShiftDown())
+    if (ModifierKeys::currentModifiers.isShiftDown())
         setFixedAspectRatio (originalAspectRatio);
     else
         setFixedAspectRatio (0.0);

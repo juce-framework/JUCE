@@ -8,7 +8,7 @@ SET(BINARY_NAME "juce_jni")
 add_library("cpufeatures" STATIC "${ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c")
 set_source_files_properties("${ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c" PROPERTIES COMPILE_FLAGS "-Wno-sign-conversion -Wno-gnu-statement-expression")
 
-add_definitions("-DJUCE_ANDROID=1" "-DJUCE_ANDROID_API_VERSION=23" "-DJUCE_ANDROID_ACTIVITY_CLASSNAME=com_juce_demorunner_DemoRunner" "-DJUCE_ANDROID_ACTIVITY_CLASSPATH=\"com/juce/demorunner/DemoRunner\"" "-DJUCE_ANDROID_SHARING_CONTENT_PROVIDER_CLASSNAME=com_juce_demorunner_SharingContentProvider" "-DJUCE_ANDROID_SHARING_CONTENT_PROVIDER_CLASSPATH=\"com/juce/demorunner/SharingContentProvider\"" "-DJUCE_PUSH_NOTIFICATIONS=1" "-DJUCE_ANDROID_GL_ES_VERSION_3_0=1" "-DJUCE_DEMO_RUNNER=1" "-DJUCE_UNIT_TESTS=1" "-DJUCER_ANDROIDSTUDIO_7F0E4A25=1" "-DJUCE_APP_VERSION=5.3.1" "-DJUCE_APP_VERSION_HEX=0x50301")
+add_definitions("-DJUCE_ANDROID=1" "-DJUCE_ANDROID_API_VERSION=23" "-DJUCE_ANDROID_ACTIVITY_CLASSNAME=com_juce_demorunner_DemoRunner" "-DJUCE_ANDROID_ACTIVITY_CLASSPATH=\"com/juce/demorunner/DemoRunner\"" "-DJUCE_ANDROID_SHARING_CONTENT_PROVIDER_CLASSNAME=com_juce_demorunner_SharingContentProvider" "-DJUCE_ANDROID_SHARING_CONTENT_PROVIDER_CLASSPATH=\"com/juce/demorunner/SharingContentProvider\"" "-DJUCE_PUSH_NOTIFICATIONS=1" "-DJUCE_ANDROID_GL_ES_VERSION_3_0=1" "-DJUCE_DEMO_RUNNER=1" "-DJUCE_UNIT_TESTS=1" "-DJUCER_ANDROIDSTUDIO_7F0E4A25=1" "-DJUCE_APP_VERSION=5.3.2" "-DJUCE_APP_VERSION_HEX=0x50302")
 
 include_directories( AFTER
     "../../../JuceLibraryCode"
@@ -797,6 +797,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_data_structures/juce_data_structures.h"
     "../../../../../modules/juce_dsp/containers/juce_AudioBlock.h"
     "../../../../../modules/juce_dsp/containers/juce_SIMDRegister.h"
+    "../../../../../modules/juce_dsp/containers/juce_SIMDRegister_Impl.h"
     "../../../../../modules/juce_dsp/containers/juce_SIMDRegister_test.cpp"
     "../../../../../modules/juce_dsp/filter_design/juce_FilterDesign.cpp"
     "../../../../../modules/juce_dsp/filter_design/juce_FilterDesign.h"
@@ -2261,6 +2262,7 @@ set_source_files_properties("../../../../../modules/juce_data_structures/juce_da
 set_source_files_properties("../../../../../modules/juce_data_structures/juce_data_structures.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/containers/juce_AudioBlock.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/containers/juce_SIMDRegister.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_dsp/containers/juce_SIMDRegister_Impl.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/containers/juce_SIMDRegister_test.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/filter_design/juce_FilterDesign.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/filter_design/juce_FilterDesign.h" PROPERTIES HEADER_FILE_ONLY TRUE)

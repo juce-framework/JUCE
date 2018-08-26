@@ -49,8 +49,8 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
           isDiscreteParam (discrete),
           isBooleanParam (boolean)
     {
+        value = defaultValue;
         state.addListener (this);
-        needsUpdate.set (1);
     }
 
     ~Parameter()
@@ -68,10 +68,11 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
                                                                    : text.getFloatValue());
     }
 
-    String getText (float v, int length) const override
+    String getText (float normalisedValue, int /*length*/) const override
     {
-        return valueToTextFunction != nullptr ? valueToTextFunction (range.convertFrom0to1 (v))
-                                              : AudioProcessorParameter::getText (v, length);
+        auto v = range.convertFrom0to1 (normalisedValue);
+        return valueToTextFunction != nullptr ? valueToTextFunction (v)
+                                              : String (v, 2);
     }
 
     int getNumSteps() const override
@@ -93,7 +94,7 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
             listeners.call ([=] (AudioProcessorValueTreeState::Listener& l) { l.parameterChanged (paramID, value); });
             listenersNeedCalling = false;
 
-            needsUpdate.set (1);
+            needsUpdate = true;
         }
     }
 
@@ -119,12 +120,25 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
 
     void copyValueToValueTree()
     {
-        if (state.isValid())
-            state.setPropertyExcludingListener (this, owner.valuePropertyID, value, owner.undoManager);
+        if (auto* valueProperty = state.getPropertyPointer (owner.valuePropertyID))
+        {
+            if ((float) *valueProperty != value)
+            {
+                ScopedValueSetter<bool> svs (ignoreParameterChangedCallbacks, true);
+                state.setProperty (owner.valuePropertyID, value, owner.undoManager);
+            }
+        }
+        else
+        {
+            state.setProperty (owner.valuePropertyID, value, nullptr);
+        }
     }
 
     void valueTreePropertyChanged (ValueTree&, const Identifier& property) override
     {
+        if (ignoreParameterChangedCallbacks)
+            return;
+
         if (property == owner.valuePropertyID)
             updateFromValueTree();
     }
@@ -163,9 +177,10 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
     std::function<float (const String&)> textToValueFunction;
     NormalisableRange<float> range;
     float value, defaultValue;
-    Atomic<int> needsUpdate;
+    std::atomic<bool> needsUpdate { true };
     bool listenersNeedCalling;
     const bool isMetaParam, isAutomatableParam, isDiscreteParam, isBooleanParam;
+    bool ignoreParameterChangedCallbacks = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Parameter)
 };
@@ -218,7 +233,7 @@ Value AudioProcessorValueTreeState::getParameterAsValue (StringRef paramID) cons
     if (Parameter* p = Parameter::getParameterForID (processor, paramID))
         return p->state.getPropertyAsValue (valuePropertyID, undoManager);
 
-    return Value();
+    return {};
 }
 
 NormalisableRange<float> AudioProcessorValueTreeState::getParameterRange (StringRef paramID) const noexcept
@@ -246,6 +261,8 @@ ValueTree AudioProcessorValueTreeState::copyState()
 {
     ScopedLock lock (valueTreeChanging);
 
+    flushParameterValuesToValueTree();
+
     return state.createCopy();
 }
 
@@ -254,6 +271,9 @@ void AudioProcessorValueTreeState::replaceState (const ValueTree& newState)
     ScopedLock lock (valueTreeChanging);
 
     state = newState;
+
+    if (undoManager != nullptr)
+        undoManager->clearUndoHistory();
 }
 
 ValueTree AudioProcessorValueTreeState::getOrCreateChildValueTree (const String& paramID)
@@ -263,8 +283,8 @@ ValueTree AudioProcessorValueTreeState::getOrCreateChildValueTree (const String&
     if (! v.isValid())
     {
         v = ValueTree (valueType);
-        v.setProperty (idPropertyID, paramID, undoManager);
-        state.appendChild (v, undoManager);
+        v.setProperty (idPropertyID, paramID, nullptr);
+        state.appendChild (v, nullptr);
     }
 
     return v;
@@ -316,14 +336,16 @@ bool AudioProcessorValueTreeState::flushParameterValuesToValueTree()
 {
     ScopedLock lock (valueTreeChanging);
 
-    auto anythingUpdated = false;
+    bool anythingUpdated = false;
 
     for (auto* ap : processor.getParameters())
     {
         jassert (dynamic_cast<Parameter*> (ap) != nullptr);
         auto* p = static_cast<Parameter*> (ap);
 
-        if (p->needsUpdate.compareAndSetBool (0, 1))
+        bool needsUpdateTestValue = true;
+
+        if (p->needsUpdate.compare_exchange_strong (needsUpdateTestValue, false))
         {
             p->copyValueToValueTree();
             anythingUpdated = true;
@@ -395,7 +417,12 @@ struct AttachedControlBase  : public AudioProcessorValueTreeState::Listener,
     void beginParameterChange()
     {
         if (AudioProcessorParameter* p = state.getParameter (paramID))
+        {
+            if (state.undoManager != nullptr)
+                state.undoManager->beginNewTransaction();
+
             p->beginChangeGesture();
+        }
     }
 
     void endParameterChange()
@@ -427,7 +454,7 @@ struct AudioProcessorValueTreeState::SliderAttachment::Pimpl  : private Attached
     {
         NormalisableRange<float> range (state.getParameterRange (paramID));
 
-        if (range.interval != 0 || range.skew != 0)
+        if (range.interval != 0.0f || range.skew != 1.0f)
         {
             slider.setRange (range.start, range.end, range.interval);
             slider.setSkewFactor (range.skew, range.symmetricSkew);
@@ -502,7 +529,7 @@ struct AudioProcessorValueTreeState::SliderAttachment::Pimpl  : private Attached
     {
         const ScopedLock selfCallbackLock (selfCallbackMutex);
 
-        if ((! ignoreCallbacks) && (! ModifierKeys::getCurrentModifiers().isRightButtonDown()))
+        if ((! ignoreCallbacks) && (! ModifierKeys::currentModifiers.isRightButtonDown()))
             setNewUnnormalisedValue ((float) s->getValue());
     }
 

@@ -273,6 +273,28 @@ namespace juce
  #define JUCE_DEPRECATED_WITH_BODY(functionDef, body)   functionDef body
 #endif
 
+#if JUCE_ALLOW_STATIC_NULL_VARIABLES
+ #if ! (defined (DOXYGEN) || defined (JUCE_GCC) || (JUCE_MSVC && _MSC_VER <= 1900))
+  #define JUCE_DEPRECATED_STATIC(valueDef)       JUCE_DEPRECATED_ATTRIBUTE valueDef
+
+  #if JUCE_MSVC
+   #define JUCE_DECLARE_DEPRECATED_STATIC(valueDef) \
+        __pragma(warning(push)) \
+        __pragma(warning(disable:4996)) \
+         valueDef \
+        __pragma(warning(pop))
+  #else
+   #define JUCE_DECLARE_DEPRECATED_STATIC(valueDef)   valueDef
+  #endif
+ #else
+  #define JUCE_DEPRECATED_STATIC(valueDef)           valueDef
+  #define JUCE_DECLARE_DEPRECATED_STATIC(valueDef)   valueDef
+ #endif
+#else
+ #define JUCE_DEPRECATED_STATIC(valueDef)
+ #define JUCE_DECLARE_DEPRECATED_STATIC(valueDef)
+#endif
+
 //==============================================================================
 #if JUCE_ANDROID && ! DOXYGEN
  #define JUCE_MODAL_LOOPS_PERMITTED 0
