@@ -67,7 +67,7 @@ struct NewProjectWizardClasses
             case 6:     return std::unique_ptr<NewProjectWizard> (new NewProjectWizardClasses::StaticLibraryWizard());
             case 7:     return std::unique_ptr<NewProjectWizard> (new NewProjectWizardClasses::DynamicLibraryWizard());
             case 8:     return std::unique_ptr<NewProjectWizard> (new NewProjectWizardClasses::BlankAppWizard());
-			case 9:     return std::unique_ptr<NewProjectWizard> (new NewProjectWizardClasses::ARAAudioPluginAppWizard());
+            case 9:     return std::unique_ptr<NewProjectWizard> (new NewProjectWizardClasses::ARAAudioPluginAppWizard());
             default:    jassertfalse; break;
         }
 

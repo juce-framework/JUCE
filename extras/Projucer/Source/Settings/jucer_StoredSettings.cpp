@@ -338,12 +338,12 @@ Value StoredSettings::getFallbackPathForOS (const Identifier& key, DependencyPat
             else if (os == TargetOS::osx)      v = "~/SDKs/AAX";
             else                               return {}; // no AAX on this OS!
         }
-		else if (key == Ids::araPath)
-		{
-			if (os == TargetOS::windows)  v = "C:\\SDKs\\ARA";
-			else if (os == TargetOS::osx)      v = "~/SDKs/ARA";
-			else                               jassertfalse; // no ARA on this OS!
-		}
+        else if (key == Ids::araPath)
+        {
+            if (os == TargetOS::windows)  v = "C:\\SDKs\\ARA";
+            else if (os == TargetOS::osx)      v = "~/SDKs/ARA";
+            else                               jassertfalse; // no ARA on this OS!
+        }
         else if (key == Ids::androidSDKPath)
         {
             v = "${user.home}/Library/Android/sdk";
@@ -434,10 +434,10 @@ bool StoredSettings::isGlobalPathValid (const File& relativeTo, const Identifier
     {
         fileToCheckFor = "Interfaces/AAX_Exports.cpp";
     }
-	else if (key == Ids::araPath)
-	{
-		fileToCheckFor = "ARA_API/ARAInterface.h";
-	}
+    else if (key == Ids::araPath)
+    {
+        fileToCheckFor = "ARA_API/ARAInterface.h";
+    }
     else if (key == Ids::androidSDKPath)
     {
        #if JUCE_WINDOWS

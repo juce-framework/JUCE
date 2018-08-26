@@ -688,9 +688,9 @@ namespace
 
     static bool isValidPathIdentifier (const String& id, const String& os)
     {
-		return id == "vst3Path" || (id == "aaxPath" && os != "linux") || (id == "rtasPath" && os != "linux")
-			|| id == "androidSDKPath" || id == "androidNDKPath" || id == "defaultJuceModulePath" || id == "defaultUserModulePath"
-			|| id == "araPath";
+        return id == "vst3Path" || (id == "aaxPath" && os != "linux") || (id == "rtasPath" && os != "linux")
+            || id == "androidSDKPath" || id == "androidNDKPath" || id == "defaultJuceModulePath" || id == "defaultUserModulePath"
+            || id == "araPath";
     }
 
     static void checkIfUserModulesPathsAreValid (const String& list)

@@ -438,7 +438,7 @@ public:
         vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder), Ids::vst3Path, TargetOS::osx)));
         aaxPath. referTo (Value (new DependencyPathValueSource (getSetting (Ids::aaxFolder),  Ids::aaxPath,  TargetOS::osx)));
         rtasPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::rtasFolder), Ids::rtasPath, TargetOS::osx)));
-		araPath. referTo (Value (new DependencyPathValueSource (getSetting (Ids::araFolder), Ids::araPath, TargetOS::osx)));
+        araPath. referTo (Value (new DependencyPathValueSource (getSetting (Ids::araFolder), Ids::araPath, TargetOS::osx)));
     }
 
 protected:

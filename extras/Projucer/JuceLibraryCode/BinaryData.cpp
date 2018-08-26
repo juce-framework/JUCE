@@ -7880,8 +7880,8 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0x4d0721bf:  numBytes = 977; return jucer_AudioPluginEditorTemplate_h;
         case 0x51b49ac5:  numBytes = 6036; return jucer_AudioPluginFilterTemplate_cpp;
         case 0x488afa0a:  numBytes = 2272; return jucer_AudioPluginFilterTemplate_h;
-		case 0x744d44d6:  numBytes = sizeof(jucer_AudioPluginARADocumentControllerTemplate_cpp); return jucer_AudioPluginARADocumentControllerTemplate_cpp;
-		case 0x3eb8f45b:  numBytes = sizeof(jucer_AudioPluginARADocumentControllerTemplate_h); return jucer_AudioPluginARADocumentControllerTemplate_h;
+        case 0x744d44d6:  numBytes = sizeof(jucer_AudioPluginARADocumentControllerTemplate_cpp); return jucer_AudioPluginARADocumentControllerTemplate_cpp;
+        case 0x3eb8f45b:  numBytes = sizeof(jucer_AudioPluginARADocumentControllerTemplate_h); return jucer_AudioPluginARADocumentControllerTemplate_h;
         case 0xabad7041:  numBytes = 2126; return jucer_ComponentTemplate_cpp;
         case 0xfc72fe86:  numBytes = 2042; return jucer_ComponentTemplate_h;
         case 0x1657b643:  numBytes = 1693; return jucer_ContentCompSimpleTemplate_h;
@@ -7953,8 +7953,8 @@ const char* namedResourceList[] =
     "jucer_AudioPluginEditorTemplate_h",
     "jucer_AudioPluginFilterTemplate_cpp",
     "jucer_AudioPluginFilterTemplate_h",
-	"jucer_AudioPluginARADocumentControllerTemplate_cpp",
-	"jucer_AudioPluginARADocumentControllerTemplate_h",
+    "jucer_AudioPluginARADocumentControllerTemplate_cpp",
+    "jucer_AudioPluginARADocumentControllerTemplate_h",
     "jucer_ComponentTemplate_cpp",
     "jucer_ComponentTemplate_h",
     "jucer_ContentCompSimpleTemplate_h",
@@ -8021,8 +8021,8 @@ const char* originalFilenames[] =
     "jucer_AudioPluginEditorTemplate.h",
     "jucer_AudioPluginFilterTemplate.cpp",
     "jucer_AudioPluginFilterTemplate.h",
-	"jucer_AudioPluginARADocumentControllerTemplate.cpp",
-	"jucer_AudioPluginARADocumentControllerTemplate.h",
+    "jucer_AudioPluginARADocumentControllerTemplate.cpp",
+    "jucer_AudioPluginARADocumentControllerTemplate.h",
     "jucer_ComponentTemplate.cpp",
     "jucer_ComponentTemplate.h",
     "jucer_ContentCompSimpleTemplate.h",

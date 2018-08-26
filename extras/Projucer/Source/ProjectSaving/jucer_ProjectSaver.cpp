@@ -85,7 +85,7 @@ void ProjectSaver::writePluginCharacteristicsFile()
     flags.set ("JucePlugin_Build_Standalone",            boolToString (project.shouldBuildStandalonePlugin()));
     flags.set ("JucePlugin_Build_Unity",                 boolToString (project.shouldBuildUnityPlugin()));
     flags.set ("JucePlugin_Enable_IAA",                  boolToString (project.shouldEnableIAA()));
-	flags.set ("JucePlugin_Enable_ARA",                  boolToString (project.shouldEnableARA()));
+    flags.set ("JucePlugin_Enable_ARA",                  boolToString (project.shouldEnableARA()));
     flags.set ("JucePlugin_Name",                        toStringLiteral (project.getPluginNameString()));
     flags.set ("JucePlugin_Desc",                        toStringLiteral (project.getPluginDescriptionString()));
     flags.set ("JucePlugin_Manufacturer",                toStringLiteral (project.getPluginManufacturerString()));
@@ -116,14 +116,14 @@ void ProjectSaver::writePluginCharacteristicsFile()
     flags.set ("JucePlugin_RTASDisableBypass",           boolToString (project.isPluginRTASBypassDisabled()));
     flags.set ("JucePlugin_RTASDisableMultiMono",        boolToString (project.isPluginRTASMultiMonoDisabled()));
     flags.set ("JucePlugin_AAXIdentifier",               project.getAAXIdentifierString());
-	flags.set ("JucePlugin_ARAFactoryID",                toStringLiteral(project.getARAFactoryIDString()));
-	flags.set ("JucePlugin_ARAVST3FactoryUUID",          project.getARAVST3FactoryUUIDString());
-	flags.set ("JucePlugin_ARADocumentArchiveID",        toStringLiteral(project.getARADocumentArchiveIDString()));
+    flags.set ("JucePlugin_ARAFactoryID",                toStringLiteral(project.getARAFactoryIDString()));
+    flags.set ("JucePlugin_ARAVST3FactoryUUID",          project.getARAVST3FactoryUUIDString());
+    flags.set ("JucePlugin_ARADocumentArchiveID",        toStringLiteral(project.getARADocumentArchiveIDString()));
     flags.set ("JucePlugin_AAXManufacturerCode",         "JucePlugin_ManufacturerCode");
     flags.set ("JucePlugin_AAXProductId",                "JucePlugin_PluginCode");
     flags.set ("JucePlugin_AAXCategory",                 String (project.getAAXCategory()));
-	flags.set ("JucePlugin_ARAContentTypes",             String (project.getARAContentTypes()));
-	flags.set ("JucePlugin_ARATransformationFlags",      String (project.getARATransformationFlags()));
+    flags.set ("JucePlugin_ARAContentTypes",             String (project.getARAContentTypes()));
+    flags.set ("JucePlugin_ARATransformationFlags",      String (project.getARATransformationFlags()));
     flags.set ("JucePlugin_AAXDisableBypass",            boolToString (project.isPluginAAXBypassDisabled()));
     flags.set ("JucePlugin_AAXDisableMultiMono",         boolToString (project.isPluginAAXMultiMonoDisabled()));
     flags.set ("JucePlugin_IAAType",                     toCharLiteral (project.getIAATypeCode()));

@@ -45,9 +45,9 @@ struct AudioPluginAppWizard   : public NewProjectWizard
         return s;
     }
 
-	virtual bool shouldAddARAFiles() const { return false; }
+    virtual bool shouldAddARAFiles() const { return false; }
 
-	virtual String getProjectTypeName() const { return ProjectType_AudioPlugin::getTypeName(); }
+    virtual String getProjectTypeName() const { return ProjectType_AudioPlugin::getTypeName(); }
 
     bool initialiseProject (Project& project) override
     {
@@ -108,31 +108,31 @@ struct AudioPluginAppWizard   : public NewProjectWizard
         sourceGroup.addFileAtIndex (editorCppFile, -1, true);
         sourceGroup.addFileAtIndex (editorHFile,   -1, false);
 
-		if (shouldAddARAFiles())
-		{
-			String documentControllerClassName = CodeHelpers::makeValidIdentifier (appTitle, true, true, false) + "DocumentController";
-			documentControllerClassName = documentControllerClassName.substring (0, 1).toUpperCase() + documentControllerClassName.substring (1);
+        if (shouldAddARAFiles())
+        {
+            String documentControllerClassName = CodeHelpers::makeValidIdentifier (appTitle, true, true, false) + "DocumentController";
+            documentControllerClassName = documentControllerClassName.substring (0, 1).toUpperCase() + documentControllerClassName.substring (1);
 
-			File documentControllerCppFile = getSourceFilesFolder().getChildFile ("PluginARADocumentController.cpp");
-			File documentControllerHFile = documentControllerCppFile.withFileExtension(".h");
+            File documentControllerCppFile = getSourceFilesFolder().getChildFile ("PluginARADocumentController.cpp");
+            File documentControllerHFile = documentControllerCppFile.withFileExtension(".h");
 
-			String ARADocControllerCpp = project.getFileTemplate ("jucer_AudioPluginARADocumentControllerTemplate_cpp")
-				.replace ("%%aradocumentcontroller_headers%%", CodeHelpers::createIncludeStatement (documentControllerHFile, documentControllerCppFile), false)
-				.replace ("%%aradocumentcontroller_class_name%%", documentControllerClassName, false);
+            String ARADocControllerCpp = project.getFileTemplate ("jucer_AudioPluginARADocumentControllerTemplate_cpp")
+                .replace ("%%aradocumentcontroller_headers%%", CodeHelpers::createIncludeStatement (documentControllerHFile, documentControllerCppFile), false)
+                .replace ("%%aradocumentcontroller_class_name%%", documentControllerClassName, false);
 
-			String ARADocControllerH = project.getFileTemplate ("jucer_AudioPluginARADocumentControllerTemplate_h")
-				.replace ("%%app_headers%%", appHeaders, false)
-				.replace ("%%aradocumentcontroller_class_name%%", documentControllerClassName, false);
+            String ARADocControllerH = project.getFileTemplate ("jucer_AudioPluginARADocumentControllerTemplate_h")
+                .replace ("%%app_headers%%", appHeaders, false)
+                .replace ("%%aradocumentcontroller_class_name%%", documentControllerClassName, false);
 
-			if (!FileHelpers::overwriteFileWithNewDataIfDifferent (documentControllerCppFile, ARADocControllerCpp))
-				failedFiles.add (documentControllerCppFile.getFullPathName());
+            if (!FileHelpers::overwriteFileWithNewDataIfDifferent (documentControllerCppFile, ARADocControllerCpp))
+                failedFiles.add (documentControllerCppFile.getFullPathName());
 
-			if (!FileHelpers::overwriteFileWithNewDataIfDifferent (documentControllerHFile, ARADocControllerH))
-				failedFiles.add (documentControllerHFile.getFullPathName());
+            if (!FileHelpers::overwriteFileWithNewDataIfDifferent (documentControllerHFile, ARADocControllerH))
+                failedFiles.add (documentControllerHFile.getFullPathName());
 
-			sourceGroup.addFileAtIndex (documentControllerCppFile, -1, true);
-			sourceGroup.addFileAtIndex (documentControllerHFile, -1, false);
-		}
+            sourceGroup.addFileAtIndex (documentControllerCppFile, -1, true);
+            sourceGroup.addFileAtIndex (documentControllerHFile, -1, false);
+        }
 
         return true;
     }
@@ -143,9 +143,9 @@ struct AudioPluginAppWizard   : public NewProjectWizard
 // ARA subclass of AudioPluginAppWizard
 struct ARAAudioPluginAppWizard : public AudioPluginAppWizard
 {
-	String getName() const override { return TRANS("ARA Audio Plug-In"); }
-	String getDescription() const override { return TRANS("Creates a VST/AU ARA plug-in. "); }
+    String getName() const override { return TRANS("ARA Audio Plug-In"); }
+    String getDescription() const override { return TRANS("Creates a VST/AU ARA plug-in. "); }
 
-	bool shouldAddARAFiles() const override { return true; }
-	virtual String getProjectTypeName() const override { return ProjectType_ARAAudioPlugin::getTypeName(); }
+    bool shouldAddARAFiles() const override { return true; }
+    virtual String getProjectTypeName() const override { return ProjectType_ARAAudioPlugin::getTypeName(); }
 };

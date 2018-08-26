@@ -236,8 +236,8 @@ private:
             addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (settings.getStoredPath (Ids::vst3Path),
                                                                                           "Custom VST3 SDK", true)));
 
-			addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (settings.getStoredPath (Ids::araPath),
-																						  "ARA SDK", true)));
+            addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (settings.getStoredPath (Ids::araPath),
+                                                                                          "ARA SDK", true)));
 
             pathPropertyComponents.add (nullptr);
 

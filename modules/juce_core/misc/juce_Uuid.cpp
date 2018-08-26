@@ -100,10 +100,10 @@ String Uuid::toDashedString() const
 
 String Uuid::toArrayString() const
 {
-	String arrayUUID = "{ ";
-	for (int i = 0; i < 16; i++)
-		arrayUUID += "0x" + getHexRegion(i, 1) + (i < 15 ? ", " : "");
-	return arrayUUID + " }";
+    String arrayUUID = "{ ";
+    for (int i = 0; i < 16; i++)
+        arrayUUID += "0x" + getHexRegion(i, 1) + (i < 15 ? ", " : "");
+    return arrayUUID + " }";
 }
 
 Uuid::Uuid (const String& uuidString)

@@ -49,7 +49,7 @@ public:
     virtual bool isGUIApplication() const       { return false; }
     virtual bool isCommandLineApp() const       { return false; }
     virtual bool isAudioPlugin() const          { return false; }
-	virtual bool isARAAudioPlugin() const       { return false; }
+    virtual bool isARAAudioPlugin() const       { return false; }
 
     //==============================================================================
     struct Target
@@ -202,31 +202,31 @@ struct ProjectType_AudioPlugin  : public ProjectType
 
 struct ProjectType_ARAAudioPlugin : public ProjectType
 {
-	ProjectType_ARAAudioPlugin() : ProjectType (getTypeName(), "ARA Audio Plug-in") {}
+    ProjectType_ARAAudioPlugin() : ProjectType (getTypeName(), "ARA Audio Plug-in") {}
 
-	static const char* getTypeName() noexcept { return "araaudioplug"; }
-	bool isAudioPlugin() const override { return true; }
-	bool isARAAudioPlugin() const override { return true; }
+    static const char* getTypeName() noexcept { return "araaudioplug"; }
+    bool isAudioPlugin() const override { return true; }
+    bool isARAAudioPlugin() const override { return true; }
 
-	bool supportsTargetType (Target::Type targetType) const override
-	{
-		switch (targetType)
-		{
-			case Target::VST3PlugIn:
-			case Target::AAXPlugIn:
-			case Target::RTASPlugIn:
-			case Target::AudioUnitPlugIn:
-			case Target::AudioUnitv3PlugIn:
-			case Target::StandalonePlugIn:
-			case Target::SharedCodeTarget:
-			case Target::AggregateTarget:
-				return true;
-			default:
-				break;
-		}
+    bool supportsTargetType (Target::Type targetType) const override
+    {
+        switch (targetType)
+        {
+            case Target::VST3PlugIn:
+            case Target::AAXPlugIn:
+            case Target::RTASPlugIn:
+            case Target::AudioUnitPlugIn:
+            case Target::AudioUnitv3PlugIn:
+            case Target::StandalonePlugIn:
+            case Target::SharedCodeTarget:
+            case Target::AggregateTarget:
+                return true;
+            default:
+                break;
+        }
 
-		return false;
-	}
+        return false;
+    }
 };
 
 //==============================================================================
@@ -237,7 +237,7 @@ inline Array<ProjectType*> ProjectType::getAllTypes()
     static ProjectType_StaticLibrary staticLib;
     static ProjectType_DLL dll;
     static ProjectType_AudioPlugin plugin;
-	static ProjectType_ARAAudioPlugin araplugin;
+    static ProjectType_ARAAudioPlugin araplugin;
 
     return Array<ProjectType*>(&guiApp, &consoleApp, &staticLib, &dll, &plugin, &araplugin);
 }
