@@ -1765,7 +1765,7 @@ namespace AAXClasses
 
                 canDisableSidechain = audioProcessor.checkBusesLayoutSupported (disabledSidechainLayout);
 
-                if (canDisableSidechain && ! lastSideChainState)
+                if (canDisableSidechain && ! lastSideChainState && !audioProcessor.getBus(true, 1)->isEnabled())
                 {
                     sidechainDesired.set (0);
                     newLayout = disabledSidechainLayout;
