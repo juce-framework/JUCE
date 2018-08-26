@@ -2047,7 +2047,7 @@ struct StringEncodingConverter
     {
         auto& source = const_cast<String&> (s);
 
-        typedef typename CharPointerType_Dest::CharType DestChar;
+        using DestChar = typename CharPointerType_Dest::CharType;
 
         if (source.isEmpty())
             return CharPointerType_Dest (reinterpret_cast<const DestChar*> (&emptyChar));

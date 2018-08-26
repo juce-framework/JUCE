@@ -94,11 +94,11 @@ namespace TimeHelpers
     static inline String formatString (const String& format, const std::tm* const tm)
     {
        #if JUCE_ANDROID
-        typedef CharPointer_UTF8  StringType;
+        using StringType = CharPointer_UTF8;
        #elif JUCE_WINDOWS
-        typedef CharPointer_UTF16 StringType;
+        using StringType = CharPointer_UTF16;
        #else
-        typedef CharPointer_UTF32 StringType;
+        using StringType = CharPointer_UTF32;
        #endif
 
        #ifdef JUCE_MSVC

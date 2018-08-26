@@ -765,7 +765,7 @@ const PopupMenu* MenuBarModel::getMacExtraAppleItemsMenu()
     return nullptr;
 }
 
-typedef void (*MenuTrackingChangedCallback) (bool);
+using MenuTrackingChangedCallback = void (*)(bool);
 extern MenuTrackingChangedCallback menuTrackingChangedCallback;
 
 static void mainMenuTrackingChanged (bool isTracking)

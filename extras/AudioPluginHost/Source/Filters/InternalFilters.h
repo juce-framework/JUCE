@@ -59,7 +59,7 @@ public:
 private:
     //==============================================================================
     void createPluginInstance (const PluginDescription&, double initialSampleRate, int initialBufferSize,
-                               void* userData, void (*callback) (void*, AudioPluginInstance*, const String&)) override;
+                               void* userData, PluginCreationCallback) override;
     AudioPluginInstance* createInstance (const String& name);
 
     bool requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const noexcept override;

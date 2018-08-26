@@ -27,13 +27,13 @@
 namespace juce
 {
 
-struct FTLibWrapper     : public ReferenceCountedObject
+struct FTLibWrapper  : public ReferenceCountedObject
 {
-    FTLibWrapper() : library (0)
+    FTLibWrapper()
     {
         if (FT_Init_FreeType (&library) != 0)
         {
-            library = 0;
+            library = {};
             DBG ("Failed to initialize FreeType");
         }
     }
@@ -44,7 +44,7 @@ struct FTLibWrapper     : public ReferenceCountedObject
             FT_Done_FreeType (library);
     }
 
-    FT_Library library;
+    FT_Library library = {};
 
     using Ptr = ReferenceCountedObjectPtr<FTLibWrapper>;
 
@@ -55,18 +55,18 @@ struct FTLibWrapper     : public ReferenceCountedObject
 struct FTFaceWrapper     : public ReferenceCountedObject
 {
     FTFaceWrapper (const FTLibWrapper::Ptr& ftLib, const File& file, int faceIndex)
-        : face (0), library (ftLib)
+        : library (ftLib)
     {
         if (FT_New_Face (ftLib->library, file.getFullPathName().toUTF8(), faceIndex, &face) != 0)
-            face = 0;
+            face = {};
     }
 
     FTFaceWrapper (const FTLibWrapper::Ptr& ftLib, const void* data, size_t dataSize, int faceIndex)
-        : face (0), library (ftLib), savedFaceData (data, dataSize)
+        : library (ftLib), savedFaceData (data, dataSize)
     {
         if (FT_New_Memory_Face (ftLib->library, (const FT_Byte*) savedFaceData.getData(),
                                 (FT_Long) savedFaceData.getSize(), faceIndex, &face) != 0)
-            face = 0;
+            face = {};
     }
 
     ~FTFaceWrapper()
@@ -75,7 +75,7 @@ struct FTFaceWrapper     : public ReferenceCountedObject
             FT_Done_Face (face);
     }
 
-    FT_Face face;
+    FT_Face face = {};
     FTLibWrapper::Ptr library;
     MemoryBlock savedFaceData;
 
@@ -101,7 +101,7 @@ public:
     //==============================================================================
     struct KnownTypeface
     {
-        KnownTypeface (const File& f, const int index, const FTFaceWrapper& face)
+        KnownTypeface (const File& f, int index, const FTFaceWrapper& face)
            : file (f),
              family (face.face->family_name),
              style (face.face->style_name),
@@ -141,10 +141,10 @@ public:
 
     FTFaceWrapper::Ptr createFace (const String& fontName, const String& fontStyle)
     {
-        const KnownTypeface* ftFace = matchTypeface (fontName, fontStyle);
+        auto ftFace = matchTypeface (fontName, fontStyle);
 
         if (ftFace == nullptr)  ftFace = matchTypeface (fontName, "Regular");
-        if (ftFace == nullptr)  ftFace = matchTypeface (fontName, String());
+        if (ftFace == nullptr)  ftFace = matchTypeface (fontName, {});
 
         if (ftFace != nullptr)
             return createFace (ftFace->file, ftFace->faceIndex);
@@ -157,8 +157,8 @@ public:
     {
         StringArray s;
 
-        for (int i = 0; i < faces.size(); ++i)
-            s.addIfNotAlreadyThere (faces.getUnchecked(i)->family);
+        for (auto* face : faces)
+            s.addIfNotAlreadyThere (face->family);
 
         return s;
     }
@@ -167,28 +167,27 @@ public:
     {
         int i = styles.indexOf ("Regular", true);
 
-        if (i < 0)
-            for (i = 0; i < styles.size(); ++i)
-                if (! (styles[i].containsIgnoreCase ("Bold") || styles[i].containsIgnoreCase ("Italic")))
-                    break;
+        if (i >= 0)
+            return i;
 
-        return i;
+        for (i = 0; i < styles.size(); ++i)
+            if (! (styles[i].containsIgnoreCase ("Bold") || styles[i].containsIgnoreCase ("Italic")))
+                return i;
+
+        return -1;
     }
 
     StringArray findAllTypefaceStyles (const String& family) const
     {
         StringArray s;
 
-        for (int i = 0; i < faces.size(); ++i)
-        {
-            const KnownTypeface* const face = faces.getUnchecked(i);
-
+        for (auto* face : faces)
             if (face->family == family)
                 s.addIfNotAlreadyThere (face->style);
-        }
 
         // try to get a regular style to be first in the list
-        const int regular = indexOfRegularStyle (s);
+        auto regular = indexOfRegularStyle (s);
+
         if (regular > 0)
             s.strings.swap (0, regular);
 
@@ -197,10 +196,9 @@ public:
 
     void scanFontPaths (const StringArray& paths)
     {
-        for (int i = 0; i < paths.size(); ++i)
+        for (auto& path : paths)
         {
-            DirectoryIterator iter (File::getCurrentWorkingDirectory()
-                                       .getChildFile (paths[i]), true);
+            DirectoryIterator iter (File::getCurrentWorkingDirectory().getChildFile (path), true);
 
             while (iter.next())
                 if (iter.getFile().hasFileExtension ("ttf;pfb;pcf;otf"))
@@ -210,23 +208,23 @@ public:
 
     void getMonospacedNames (StringArray& monoSpaced) const
     {
-        for (int i = 0; i < faces.size(); ++i)
-            if (faces.getUnchecked(i)->isMonospaced)
-                monoSpaced.addIfNotAlreadyThere (faces.getUnchecked(i)->family);
+        for (auto* face : faces)
+            if (face->isMonospaced)
+                monoSpaced.addIfNotAlreadyThere (face->family);
     }
 
     void getSerifNames (StringArray& serif) const
     {
-        for (int i = 0; i < faces.size(); ++i)
-            if (! faces.getUnchecked(i)->isSansSerif)
-                serif.addIfNotAlreadyThere (faces.getUnchecked(i)->family);
+        for (auto* face : faces)
+            if (! (face->isSansSerif || face->isMonospaced))
+                serif.addIfNotAlreadyThere (face->family);
     }
 
     void getSansSerifNames (StringArray& sansSerif) const
     {
-        for (int i = 0; i < faces.size(); ++i)
-            if (faces.getUnchecked(i)->isSansSerif)
-                sansSerif.addIfNotAlreadyThere (faces.getUnchecked(i)->family);
+        for (auto* face : faces)
+            if (face->isSansSerif)
+                sansSerif.addIfNotAlreadyThere (face->family);
     }
 
     JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (FTTypefaceList)
@@ -262,14 +260,10 @@ private:
 
     const KnownTypeface* matchTypeface (const String& familyName, const String& style) const noexcept
     {
-        for (int i = 0; i < faces.size(); ++i)
-        {
-            const KnownTypeface* const face = faces.getUnchecked(i);
-
+        for (auto* face : faces)
             if (face->family == familyName
                   && (face->style.equalsIgnoreCase (style) || style.isEmpty()))
                 return face;
-        }
 
         return nullptr;
     }
@@ -278,8 +272,8 @@ private:
     {
         static const char* sansNames[] = { "Sans", "Verdana", "Arial", "Ubuntu" };
 
-        for (int i = 0; i < numElementsInArray (sansNames); ++i)
-            if (family.containsIgnoreCase (sansNames[i]))
+        for (auto* name : sansNames)
+            if (family.containsIgnoreCase (name))
                 return true;
 
         return false;
@@ -323,13 +317,13 @@ public:
     {
         if (faceWrapper != nullptr)
         {
-            FT_Face face = faceWrapper->face;
-            const unsigned int glyphIndex = FT_Get_Char_Index (face, (FT_ULong) character);
+            auto face = faceWrapper->face;
+            auto glyphIndex = FT_Get_Char_Index (face, (FT_ULong) character);
 
             if (FT_Load_Glyph (face, glyphIndex, FT_LOAD_NO_SCALE | FT_LOAD_NO_BITMAP | FT_LOAD_IGNORE_TRANSFORM | FT_LOAD_NO_HINTING) == 0
                   && face->glyph->format == ft_glyph_format_outline)
             {
-                const float scale = 1.0f / (float) (face->ascender - face->descender);
+                auto scale = 1.0f / (float) (face->ascender - face->descender);
                 Path destShape;
 
                 if (getGlyphShape (destShape, face->glyph->outline, scale))
@@ -350,12 +344,12 @@ public:
 private:
     FTFaceWrapper::Ptr faceWrapper;
 
-    bool getGlyphShape (Path& destShape, const FT_Outline& outline, const float scaleX)
+    bool getGlyphShape (Path& destShape, const FT_Outline& outline, float scaleX)
     {
-        const float scaleY = -scaleX;
-        const short* const contours = outline.contours;
-        const char* const tags = outline.tags;
-        const FT_Vector* const points = outline.points;
+        auto scaleY = -scaleX;
+        auto* contours = outline.contours;
+        auto* tags = outline.tags;
+        auto* points = outline.points;
 
         for (int c = 0; c < outline.n_contours; ++c)
         {
@@ -364,15 +358,15 @@ private:
 
             for (int p = startPoint; p <= endPoint; ++p)
             {
-                const float x = scaleX * points[p].x;
-                const float y = scaleY * points[p].y;
+                auto x = scaleX * points[p].x;
+                auto y = scaleY * points[p].y;
 
                 if (p == startPoint)
                 {
                     if (FT_CURVE_TAG (tags[p]) == FT_Curve_Tag_Conic)
                     {
-                        float x2 = scaleX * points [endPoint].x;
-                        float y2 = scaleY * points [endPoint].y;
+                        auto x2 = scaleX * points [endPoint].x;
+                        auto y2 = scaleY * points [endPoint].y;
 
                         if (FT_CURVE_TAG (tags[endPoint]) != FT_Curve_Tag_On)
                         {
@@ -396,8 +390,8 @@ private:
                 else if (FT_CURVE_TAG (tags[p]) == FT_Curve_Tag_Conic)
                 {
                     const int nextIndex = (p == endPoint) ? startPoint : p + 1;
-                    float x2 = scaleX * points [nextIndex].x;
-                    float y2 = scaleY * points [nextIndex].y;
+                    auto x2 = scaleX * points [nextIndex].x;
+                    auto y2 = scaleY * points [nextIndex].y;
 
                     if (FT_CURVE_TAG (tags [nextIndex]) == FT_Curve_Tag_Conic)
                     {
@@ -421,10 +415,10 @@ private:
                          || FT_CURVE_TAG (tags[next2]) != FT_Curve_Tag_On)
                         return false;
 
-                    const float x2 = scaleX * points [next1].x;
-                    const float y2 = scaleY * points [next1].y;
-                    const float x3 = scaleX * points [next2].x;
-                    const float y3 = scaleY * points [next2].y;
+                    auto x2 = scaleX * points [next1].x;
+                    auto y2 = scaleY * points [next1].y;
+                    auto x3 = scaleX * points [next2].x;
+                    auto y3 = scaleY * points [next2].y;
 
                     destShape.cubicTo (x, y, x2, y2, x3, y3);
                     p += 2;
@@ -439,10 +433,10 @@ private:
 
     void addKerning (FT_Face face, const uint32 character, const uint32 glyphIndex)
     {
-        const float height = (float) (face->ascender - face->descender);
+        auto height = (float) (face->ascender - face->descender);
 
         uint32 rightGlyphIndex;
-        FT_ULong rightCharCode = FT_Get_First_Char (face, &rightGlyphIndex);
+        auto rightCharCode = FT_Get_First_Char (face, &rightGlyphIndex);
 
         while (rightGlyphIndex != 0)
         {

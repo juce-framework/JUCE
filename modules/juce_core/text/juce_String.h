@@ -153,11 +153,11 @@ public:
         toUTF32() methods let you access the string's content in any of the other formats.
     */
    #if (JUCE_STRING_UTF_TYPE == 32)
-    typedef CharPointer_UTF32 CharPointerType;
+    using CharPointerType = CharPointer_UTF32;
    #elif (JUCE_STRING_UTF_TYPE == 16)
-    typedef CharPointer_UTF16 CharPointerType;
+    using CharPointerType = CharPointer_UTF16;
    #elif (DOXYGEN || JUCE_STRING_UTF_TYPE == 8)
-    typedef CharPointer_UTF8  CharPointerType;
+    using CharPointerType = CharPointer_UTF8;
    #else
     #error "You must set the value of JUCE_STRING_UTF_TYPE to be either 8, 16, or 32!"
    #endif

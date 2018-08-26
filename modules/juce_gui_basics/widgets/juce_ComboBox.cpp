@@ -523,6 +523,9 @@ static void comboBoxPopupMenuFinishedCallback (int result, ComboBox* combo)
 
 void ComboBox::showPopup()
 {
+    if (! menuActive)
+        menuActive = true;
+
     auto menu = currentMenu;
 
     if (menu.getNumItems() > 0)

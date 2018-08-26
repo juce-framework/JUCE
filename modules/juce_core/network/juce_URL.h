@@ -284,7 +284,7 @@ public:
         It allows your app to receive progress updates during a lengthy POST operation. If you
         want to continue the operation, this should return true, or false to abort.
     */
-    typedef bool (OpenStreamProgressCallback) (void* context, int bytesSent, int totalBytes);
+    using OpenStreamProgressCallback = bool (void* context, int bytesSent, int totalBytes);
 
     /** Attempts to open a stream that can read from this URL.
 

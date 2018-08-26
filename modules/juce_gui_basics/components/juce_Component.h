@@ -2123,7 +2123,7 @@ public:
         and you can test whether it's null before using it to see if something has deleted
         it.
 
-        The ComponentType typedef must be Component, or some subclass of Component.
+        The ComponentType template parameter must be Component, or some subclass of Component.
 
         You may also want to use a WeakReference<Component> object for the same purpose.
     */

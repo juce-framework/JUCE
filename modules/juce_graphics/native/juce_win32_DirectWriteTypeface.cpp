@@ -36,7 +36,8 @@ namespace
 
         uint32 index = 0;
         BOOL exists = false;
-        HRESULT hr = names->FindLocaleName (L"en-us", &index, &exists);
+        auto hr = names->FindLocaleName (L"en-us", &index, &exists);
+
         if (! exists)
             index = 0;
 
@@ -53,7 +54,7 @@ namespace
     {
         jassert (family != nullptr);
         ComSmartPtr<IDWriteLocalizedStrings> familyNames;
-        HRESULT hr = family->GetFamilyNames (familyNames.resetAndGetPointerAddress());
+        auto hr = family->GetFamilyNames (familyNames.resetAndGetPointerAddress());
         jassert (SUCCEEDED (hr)); ignoreUnused (hr);
         return getLocalisedName (familyNames);
     }
@@ -62,7 +63,7 @@ namespace
     {
         jassert (font != nullptr);
         ComSmartPtr<IDWriteLocalizedStrings> faceNames;
-        HRESULT hr = font->GetFaceNames (faceNames.resetAndGetPointerAddress());
+        auto hr = font->GetFaceNames (faceNames.resetAndGetPointerAddress());
         jassert (SUCCEEDED (hr)); ignoreUnused (hr);
         return getLocalisedName (faceNames);
     }
@@ -106,12 +107,12 @@ public:
 
             if (d2dFactory != nullptr)
             {
-                D2D1_RENDER_TARGET_PROPERTIES d2dRTProp = D2D1::RenderTargetProperties (D2D1_RENDER_TARGET_TYPE_SOFTWARE,
-                                                                                        D2D1::PixelFormat (DXGI_FORMAT_B8G8R8A8_UNORM,
-                                                                                                           D2D1_ALPHA_MODE_IGNORE),
-                                                                                        0, 0,
-                                                                                        D2D1_RENDER_TARGET_USAGE_GDI_COMPATIBLE,
-                                                                                        D2D1_FEATURE_LEVEL_DEFAULT);
+                auto d2dRTProp = D2D1::RenderTargetProperties (D2D1_RENDER_TARGET_TYPE_SOFTWARE,
+                                                               D2D1::PixelFormat (DXGI_FORMAT_B8G8R8A8_UNORM,
+                                                                                  D2D1_ALPHA_MODE_IGNORE),
+                                                               0, 0,
+                                                               D2D1_RENDER_TARGET_USAGE_GDI_COMPATIBLE,
+                                                               D2D1_FEATURE_LEVEL_DEFAULT);
 
                 d2dFactory->CreateDCRenderTarget (&d2dRTProp, directWriteRenderTarget.resetAndGetPointerAddress());
             }
@@ -142,14 +143,14 @@ class WindowsDirectWriteTypeface  : public Typeface
 {
 public:
     WindowsDirectWriteTypeface (const Font& font, IDWriteFontCollection* fontCollection)
-        : Typeface (font.getTypefaceName(), font.getTypefaceStyle()),
-          unitsToHeightScaleFactor (1.0f), heightToPointsFactor (1.0f), ascent (0.0f)
+        : Typeface (font.getTypefaceName(), font.getTypefaceStyle())
     {
         jassert (fontCollection != nullptr);
 
         BOOL fontFound = false;
         uint32 fontIndex = 0;
-        HRESULT hr = fontCollection->FindFamilyName (font.getTypefaceName().toWideCharPointer(), &fontIndex, &fontFound);
+        auto hr = fontCollection->FindFamilyName (font.getTypefaceName().toWideCharPointer(), &fontIndex, &fontFound);
+
         if (! fontFound)
             fontIndex = 0;
 
@@ -190,18 +191,18 @@ public:
             designUnitsPerEm = dwFontMetrics.designUnitsPerEm;
 
             ascent = std::abs ((float) dwFontMetrics.ascent);
-            const float totalSize = ascent + std::abs ((float) dwFontMetrics.descent);
+            auto totalSize = ascent + std::abs ((float) dwFontMetrics.descent);
             ascent /= totalSize;
             unitsToHeightScaleFactor = designUnitsPerEm / totalSize;
 
-            HDC tempDC = GetDC (0);
-            float dpi = (GetDeviceCaps (tempDC, LOGPIXELSX) + GetDeviceCaps (tempDC, LOGPIXELSY)) / 2.0f;
+            auto tempDC = GetDC (0);
+            auto dpi = (GetDeviceCaps (tempDC, LOGPIXELSX) + GetDeviceCaps (tempDC, LOGPIXELSY)) / 2.0f;
             heightToPointsFactor = (dpi / GetDeviceCaps (tempDC, LOGPIXELSY)) * unitsToHeightScaleFactor;
             ReleaseDC (0, tempDC);
 
-            const float pathAscent  = (1024.0f * dwFontMetrics.ascent)  / designUnitsPerEm;
-            const float pathDescent = (1024.0f * dwFontMetrics.descent) / designUnitsPerEm;
-            const float pathScale   = 1.0f / (std::abs (pathAscent) + std::abs (pathDescent));
+            auto pathAscent  = (1024.0f * dwFontMetrics.ascent)  / designUnitsPerEm;
+            auto pathDescent = (1024.0f * dwFontMetrics.descent) / designUnitsPerEm;
+            auto pathScale   = 1.0f / (std::abs (pathAscent) + std::abs (pathDescent));
             pathTransform = AffineTransform::scale (pathScale);
         }
     }
@@ -214,8 +215,8 @@ public:
 
     float getStringWidth (const String& text)
     {
-        const CharPointer_UTF32 textUTF32 (text.toUTF32());
-        const size_t len = textUTF32.length();
+        auto textUTF32 = text.toUTF32();
+        auto len = textUTF32.length();
 
         HeapBlock<UINT16> glyphIndices (len);
         dwFontFace->GetGlyphIndices (textUTF32, (UINT32) len, glyphIndices);
@@ -224,6 +225,7 @@ public:
         dwFontFace->GetDesignGlyphMetrics (glyphIndices, (UINT32) len, dwGlyphMetrics, false);
 
         float x = 0;
+
         for (size_t i = 0; i < len; ++i)
             x += (float) dwGlyphMetrics[i].advanceWidth / designUnitsPerEm;
 
@@ -234,8 +236,8 @@ public:
     {
         xOffsets.add (0);
 
-        const CharPointer_UTF32 textUTF32 (text.toUTF32());
-        const size_t len = textUTF32.length();
+        auto textUTF32 = text.toUTF32();
+        auto len = textUTF32.length();
 
         HeapBlock<UINT16> glyphIndices (len);
         dwFontFace->GetGlyphIndices (textUTF32, (UINT32) len, glyphIndices);
@@ -243,6 +245,7 @@ public:
         dwFontFace->GetDesignGlyphMetrics (glyphIndices, (UINT32) len, dwGlyphMetrics, false);
 
         float x = 0;
+
         for (size_t i = 0; i < len; ++i)
         {
             x += (float) dwGlyphMetrics[i].advanceWidth / designUnitsPerEm;
@@ -254,10 +257,11 @@ public:
     bool getOutlineForGlyph (int glyphNumber, Path& path)
     {
         jassert (path.isEmpty());  // we might need to apply a transform to the path, so this must be empty
-        UINT16 glyphIndex = (UINT16) glyphNumber;
+        auto glyphIndex = (UINT16) glyphNumber;
         ComSmartPtr<PathGeometrySink> pathGeometrySink (new PathGeometrySink());
 
-        dwFontFace->GetGlyphRunOutline (1024.0f, &glyphIndex, nullptr, nullptr, 1, false, false, pathGeometrySink);
+        dwFontFace->GetGlyphRunOutline (1024.0f, &glyphIndex, nullptr, nullptr,
+                                        1, false, false, pathGeometrySink);
         path = pathGeometrySink->path;
 
         if (! pathTransform.isIdentity())
@@ -273,8 +277,8 @@ public:
 private:
     SharedResourcePointer<Direct2DFactories> factories;
     ComSmartPtr<IDWriteFontFace> dwFontFace;
-    float unitsToHeightScaleFactor, heightToPointsFactor, ascent;
-    int designUnitsPerEm;
+    float unitsToHeightScaleFactor = 1.0f, heightToPointsFactor = 1.0f, ascent = 0;
+    int designUnitsPerEm = 0;
     AffineTransform pathTransform;
 
     struct PathGeometrySink  : public ComBaseClassHelper<IDWriteGeometrySink>

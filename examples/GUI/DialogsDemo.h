@@ -159,6 +159,18 @@ public:
         }
 
         setSize (500, 500);
+
+        RuntimePermissions::request (RuntimePermissions::readExternalStorage,
+                                     [] (bool granted)
+                                     {
+                                         if (! granted)
+                                         {
+                                             AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                                                               "Permissions warning",
+                                                                               "External storage access permission not granted, some files"
+                                                                               " may be inaccessible.");
+                                         }
+                                     });
     }
 
     //==============================================================================

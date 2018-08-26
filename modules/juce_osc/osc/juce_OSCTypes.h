@@ -30,11 +30,11 @@ namespace juce
 //==============================================================================
 
 /** The type used for OSC type tags. */
-typedef char OSCType;
+using OSCType = char;
 
 
 /** The type used for OSC type tag strings. */
-typedef Array<OSCType> OSCTypeList;
+using OSCTypeList = Array<OSCType>;
 
 //==============================================================================
 

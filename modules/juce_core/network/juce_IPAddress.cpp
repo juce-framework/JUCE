@@ -23,7 +23,7 @@
 namespace juce
 {
 
-IPAddress::IPAddress (bool IPv6) noexcept : isIPv6 (IPv6)
+IPAddress::IPAddress() noexcept
 {
     for (int i = 0; i < 16; ++i)
         address[i] = 0;
@@ -153,7 +153,7 @@ String IPAddress::toString() const
     return getFormattedAddress (addressString);
 }
 
-IPAddress IPAddress::any (bool IPv6) noexcept           { return IPAddress (IPv6); }
+IPAddress IPAddress::any() noexcept                     { return IPAddress(); }
 IPAddress IPAddress::broadcast() noexcept               { return IPAddress (255, 255, 255, 255); }
 IPAddress IPAddress::local (bool IPv6) noexcept         { return IPv6 ? IPAddress (0, 0, 0, 0, 0, 0, 0, 1)
                                                                       : IPAddress (127, 0, 0, 1); }
@@ -260,11 +260,11 @@ static void addAddress (const sockaddr_in6* addr_in, Array<IPAddress>& result)
 {
     in6_addr addr = addr_in->sin6_addr;
 
-    typedef union
+    union ByteUnion
     {
         uint16 combined;
         uint8 split[2];
-    } ByteUnion;
+    };
 
     ByteUnion temp;
     uint16 arr[8];

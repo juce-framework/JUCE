@@ -156,9 +156,13 @@ public:
         terms of midi ticks. To convert them to seconds, use the convertTimestampTicksToSeconds()
         method.
 
+        @param createMatchingNoteOffs    if true, any missing note-offs for previous note-ons will
+                                         be automatically added at the end of the file by calling
+                                         MidiMessageSequence::updateMatchedPairs on each track.
+
         @returns true if the stream was read successfully
     */
-    bool readFrom (InputStream& sourceStream);
+    bool readFrom (InputStream& sourceStream, bool createMatchingNoteOffs = true);
 
     /** Writes the midi tracks as a standard midi file.
         The midiFileType value is written as the file's format type, which can be 0, 1
@@ -180,7 +184,7 @@ private:
     OwnedArray<MidiMessageSequence> tracks;
     short timeFormat;
 
-    void readNextTrack (const uint8*, int size);
+    void readNextTrack (const uint8*, int, bool);
     bool writeTrack (OutputStream&, const MidiMessageSequence&);
 
     JUCE_LEAK_DETECTOR (MidiFile)

@@ -162,6 +162,12 @@ public:
             object = newObject;
             ContainerDeletePolicy<ObjectType>::destroy (oldObject);
         }
+        else
+        {
+            // You're trying to reset this ScopedPointer to itself! This will work here as ScopedPointer does an equality check
+            // but be aware that std::unique_ptr won't do this and you could end up with some nasty, subtle bugs!
+            jassert (newObject == nullptr);
+        }
     }
 
     /** Sets this pointer to a new object, deleting the old object that it was previously pointing to if there was one. */

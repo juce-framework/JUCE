@@ -35,7 +35,7 @@ class OpenGLContext;
 
 //==============================================================================
 /** See MessageManager::callFunctionOnMessageThread() for use of this function type. */
-typedef void* (MessageCallbackFunction) (void* userData);
+using MessageCallbackFunction = void* (void* userData);
 
 
 //==============================================================================
@@ -280,13 +280,13 @@ public:
 
         //==============================================================================
         /** Provides the type of scoped lock to use with a CriticalSection. */
-        typedef GenericScopedLock<Lock>       ScopedLockType;
+        using ScopedLockType = GenericScopedLock<Lock>;
 
         /** Provides the type of scoped unlocker to use with a CriticalSection. */
-        typedef GenericScopedUnlock<Lock>     ScopedUnlockType;
+        using ScopedUnlockType = GenericScopedUnlock<Lock>;
 
         /** Provides the type of scoped try-locker to use with a CriticalSection. */
-        typedef GenericScopedTryLock<Lock>    ScopedTryLockType;
+        using ScopedTryLockType = GenericScopedTryLock<Lock>;
 
     private:
         struct BlockingMessage;

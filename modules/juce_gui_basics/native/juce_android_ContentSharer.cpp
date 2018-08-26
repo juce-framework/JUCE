@@ -307,14 +307,10 @@ private:
         auto inputStream = StreamCloser (LocalRef<jobject> (env->CallObjectMethod (assetFd,
                                                                                    AssetFileDescriptor.createInputStream)));
 
-        auto exception = LocalRef<jobject> (env->ExceptionOccurred());
-
-        if (exception != 0)
+        if (jniCheckHasExceptionOccurredAndClear())
         {
             // Failed to open file stream for resource
             jassertfalse;
-
-            env->ExceptionClear();
             return {};
         }
 
@@ -326,14 +322,10 @@ private:
                                                                              JavaFileOutputStream.constructor,
                                                                              javaString (tempFile.getFullPathName()).get())));
 
-        exception = LocalRef<jobject> (env->ExceptionOccurred());
-
-        if (exception != 0)
+        if (jniCheckHasExceptionOccurredAndClear())
         {
             // Failed to open file stream for temporary file
             jassertfalse;
-
-            env->ExceptionClear();
             return {};
         }
 
@@ -347,14 +339,10 @@ private:
 
             bytesRead = env->CallIntMethod (inputStream.stream, JavaFileInputStream.read, buffer.get());
 
-            exception = LocalRef<jobject> (env->ExceptionOccurred());
-
-            if (exception != 0)
+            if (jniCheckHasExceptionOccurredAndClear())
             {
                 // Failed to read from resource file.
                 jassertfalse;
-
-                env->ExceptionClear();
                 return {};
             }
 
@@ -363,12 +351,10 @@ private:
 
             env->CallVoidMethod (outputStream.stream, JavaFileOutputStream.write, buffer.get(), 0, bytesRead);
 
-            if (exception != 0)
+            if (jniCheckHasExceptionOccurredAndClear())
             {
                 // Failed to write to temporary file.
                 jassertfalse;
-
-                env->ExceptionClear();
                 return {};
             }
         }
@@ -714,14 +700,10 @@ private:
                                                                                     ParcelFileDescriptor.open,
                                                                                     javaFile.get(), modeReadOnly));
 
-        auto exception = LocalRef<jobject> (env->ExceptionOccurred());
-
-        if (exception != 0)
+        if (jniCheckHasExceptionOccurredAndClear())
         {
             // Failed to create file descriptor. Have you provided a valid file path/resource name?
             jassertfalse;
-
-            env->ExceptionClear();
             return nullptr;
         }
 

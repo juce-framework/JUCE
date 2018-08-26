@@ -1050,6 +1050,7 @@ private:
         auto midiCode = getMidiCode (javaSourceFolder, className);
         auto webViewCode = getWebViewCode (javaSourceFolder);
         auto cameraCode = getCameraCode (javaSourceFolder);
+        auto videoCode = getVideoCode (javaSourceFolder);
 
         auto javaSourceFile = javaSourceFolder.getChildFile ("JuceAppActivity.java");
         auto javaSourceLines = StringArray::fromLines (javaSourceFile.loadFileAsString());
@@ -1075,6 +1076,10 @@ private:
                     newFile << cameraCode.imports;
                 else if (line.contains ("$$JuceAndroidCameraCode$$"))
                     newFile << cameraCode.main;
+                else if (line.contains ("$$JuceAndroidVideoImports$$"))
+                    newFile << videoCode.imports;
+                else if (line.contains ("$$JuceAndroidVideoCode$$"))
+                    newFile << videoCode.main;
                 else
                     newFile << line.replace ("$$JuceAppActivityBaseClass$$", androidActivityBaseClassName.get().toString())
                                    .replace ("JuceAppActivity", className)
@@ -1203,18 +1208,43 @@ private:
         String juceCameraImports, juceCameraCode;
 
         if (static_cast<int> (androidMinimumSDK.get()) >= 21)
+        {
             juceCameraImports << "import android.hardware.camera2.*;" << newLine;
 
-        auto javaCameraFile = javaSourceFolder.getChildFile ("AndroidCamera.java");
-        auto juceCameraCodeAll = javaCameraFile.loadFileAsString();
+            auto javaCameraFile = javaSourceFolder.getChildFile ("AndroidCamera.java");
+            auto juceCameraCodeAll = javaCameraFile.loadFileAsString();
 
-        if (static_cast<int> (androidMinimumSDK.get()) >= 21)
-        {
             juceCameraCode << juceCameraCodeAll.fromFirstOccurrenceOf ("$$CameraApi21", false, false)
                                                .upToFirstOccurrenceOf ("CameraApi21$$", false, false);
         }
 
         return { juceCameraImports, juceCameraCode };
+    }
+
+    struct VideoCode
+    {
+        String imports;
+        String main;
+    };
+
+    VideoCode getVideoCode (const File& javaSourceFolder) const
+    {
+        String juceVideoImports, juceVideoCode;
+
+        if (static_cast<int> (androidMinimumSDK.get()) >= 21)
+        {
+            juceVideoImports << "import android.database.ContentObserver;" << newLine;
+            juceVideoImports << "import android.media.session.*;" << newLine;
+            juceVideoImports << "import android.media.MediaMetadata;" << newLine;
+
+            auto javaVideoFile = javaSourceFolder.getChildFile ("AndroidVideo.java");
+            auto juceVideoCodeAll = javaVideoFile.loadFileAsString();
+
+            juceVideoCode << juceVideoCodeAll.fromFirstOccurrenceOf ("$$VideoApi21", false, false)
+                                             .upToFirstOccurrenceOf ("VideoApi21$$", false, false);
+        }
+
+        return { juceVideoImports, juceVideoCode };
     }
 
     void copyAdditionalJavaFiles (const File& sourceFolder, const File& targetFolder) const

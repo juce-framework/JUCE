@@ -61,7 +61,8 @@ public:
         // create a native surface view
         surfaceView = GlobalRef (env->CallObjectMethod (android.activity.get(),
                                                         JuceAppActivity.createNativeSurfaceView,
-                                                        reinterpret_cast<jlong> (this)));
+                                                        reinterpret_cast<jlong> (this),
+                                                        false));
         if (surfaceView.get() == nullptr)
             return;
 

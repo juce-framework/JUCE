@@ -23,13 +23,13 @@
 namespace juce
 {
 
-typedef void (*AppFocusChangeCallback)();
+using AppFocusChangeCallback = void (*)();
 AppFocusChangeCallback appFocusChangeCallback = nullptr;
 
-typedef bool (*CheckEventBlockedByModalComps) (NSEvent*);
+using CheckEventBlockedByModalComps = bool (*)(NSEvent*);
 CheckEventBlockedByModalComps isEventBlockedByModalComps = nullptr;
 
-typedef void (*MenuTrackingChangedCallback)(bool);
+using MenuTrackingChangedCallback = void (*)(bool);
 MenuTrackingChangedCallback menuTrackingChangedCallback = nullptr;
 
 //==============================================================================

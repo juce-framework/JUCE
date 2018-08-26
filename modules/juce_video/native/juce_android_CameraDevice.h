@@ -443,49 +443,6 @@ private:
 };
 
 //==============================================================================
-class AppPausedResumedListener     : public AndroidInterfaceImplementer
-{
-public:
-    struct Owner
-    {
-        virtual ~Owner() {}
-
-        virtual void appPaused() = 0;
-        virtual void appResumed() = 0;
-    };
-
-    AppPausedResumedListener (Owner& ownerToUse)
-        : owner (ownerToUse)
-    {}
-
-    jobject invoke (jobject proxy, jobject method, jobjectArray args) override
-    {
-        auto* env = getEnv();
-
-        auto methodName = juceString ((jstring) env->CallObjectMethod (method, JavaMethod.getName));
-
-        int numArgs = args != nullptr ? env->GetArrayLength (args) : 0;
-
-        if (methodName == "appPaused" && numArgs == 0)
-        {
-            owner.appPaused();
-            return nullptr;
-        }
-
-        if (methodName == "appResumed" && numArgs == 0)
-        {
-            owner.appResumed();
-            return nullptr;
-        }
-
-        return AndroidInterfaceImplementer::invoke (proxy, method, args);
-    }
-
-private:
-    Owner& owner;
-};
-
-//==============================================================================
 struct CameraDevice::Pimpl
 #if __ANDROID_API__ >= 21
     : private AppPausedResumedListener::Owner
@@ -506,7 +463,6 @@ struct CameraDevice::Pimpl
           appPausedResumedListener (*this),
           appPausedResumedListenerNative (CreateJavaInterface (&appPausedResumedListener,
                                                                JUCE_ANDROID_ACTIVITY_CLASSPATH "$AppPausedResumedListener").get()),
-
           cameraManager (initialiseCameraManager()),
           cameraCharacteristics (initialiseCameraCharacteristics (cameraManager, cameraId)),
           streamConfigurationMap (cameraCharacteristics),
@@ -869,7 +825,7 @@ private:
 
         bool isOutputSupportedForSurface (const LocalRef<jobject>& surface) const
         {
-            return getEnv()->CallBooleanMethod (scalerStreamConfigurationMap, AndroidStreamConfigurationMap.isOutputSupportedForSurface, surface.get());
+            return getEnv()->CallBooleanMethod (scalerStreamConfigurationMap, AndroidStreamConfigurationMap.isOutputSupportedForSurface, surface.get()) != 0;
         }
 
         static constexpr int jpegImageFormat = 256;
@@ -1460,10 +1416,7 @@ private:
 
             // ... ignore RuntimeException that can be thrown if stop() was called after recording
             // has started but before any frame was written to a file. This is not an error.
-            auto exception = LocalRef<jobject> (env->ExceptionOccurred());
-
-            if (exception != 0)
-                env->ExceptionClear();
+            jniCheckHasExceptionOccurredAndClear();
 
             unlockScreenOrientation();
         }
@@ -1630,16 +1583,12 @@ private:
                     }
                 }
 
-                auto exception = LocalRef<jobject> (env->ExceptionOccurred());
-
                 // When exception occurs, CameraCaptureSession.close will never finish, so
                 // we should not wait for it. For fatal error an exception does occur, but
                 // it is catched internally in Java...
-                if (exception != 0 || scopedCameraDevice.fatalErrorOccurred.get())
+                if (jniCheckHasExceptionOccurredAndClear() || scopedCameraDevice.fatalErrorOccurred.get())
                 {
                     JUCE_CAMERA_LOG ("Exception or fatal error occurred while closing Capture Session, closing by force");
-
-                    env->ExceptionClear();
                 }
                 else if (calledClose)
                 {
@@ -1768,7 +1717,7 @@ private:
 
                 void lockFocus()
                 {
-                    if (Pimpl::checkHasExceptionOccurred())
+                    if (jniCheckHasExceptionOccurredAndClear())
                         return;
 
                     JUCE_CAMERA_LOG ("Performing auto-focus if possible...");
@@ -1796,7 +1745,7 @@ private:
                     // IllegalStateException can be thrown when accessing CaptureSession,
                     // claiming that capture session was already closed but we may not
                     // get relevant callback yet, so check for this and bailout when needed.
-                    if (Pimpl::checkHasExceptionOccurred())
+                    if (jniCheckHasExceptionOccurredAndClear())
                         return;
 
                     auto* env = getEnv();
@@ -1902,7 +1851,7 @@ private:
 
                 void captureStillPictureDelayed()
                 {
-                    if (Pimpl::checkHasExceptionOccurred())
+                    if (jniCheckHasExceptionOccurredAndClear())
                         return;
 
                     JUCE_CAMERA_LOG ("Still picture capture, device ready, capturing now...");
@@ -1911,12 +1860,12 @@ private:
 
                     env->CallVoidMethod (captureSession, CameraCaptureSession.stopRepeating);
 
-                    if (Pimpl::checkHasExceptionOccurred())
+                    if (jniCheckHasExceptionOccurredAndClear())
                         return;
 
                     env->CallVoidMethod (captureSession, CameraCaptureSession.abortCaptures);
 
-                    if (Pimpl::checkHasExceptionOccurred())
+                    if (jniCheckHasExceptionOccurredAndClear())
                         return;
 
                     // Delay still picture capture for devices that can't handle it right after
@@ -1929,7 +1878,7 @@ private:
 
                 void runPrecaptureSequence()
                 {
-                    if (Pimpl::checkHasExceptionOccurred())
+                    if (jniCheckHasExceptionOccurredAndClear())
                         return;
 
                     auto* env = getEnv();
@@ -1950,7 +1899,7 @@ private:
 
                 void unlockFocus()
                 {
-                    if (Pimpl::checkHasExceptionOccurred())
+                    if (jniCheckHasExceptionOccurredAndClear())
                         return;
 
                     JUCE_CAMERA_LOG ("Unlocking focus...");
@@ -1970,7 +1919,7 @@ private:
                     env->CallIntMethod (captureSession, CameraCaptureSession.capture, resetAutoFocusRequest.get(),
                                         nullptr, handler.get());
 
-                    if (Pimpl::checkHasExceptionOccurred())
+                    if (jniCheckHasExceptionOccurredAndClear())
                         return;
 
                     // NB: for preview, using preview capture request again
@@ -2233,10 +2182,7 @@ private:
 
             // If something went wrong we will be pinged in cameraDeviceStateError()
             // callback, silence the redundant exception.
-            auto exception = LocalRef<jobject> (env->ExceptionOccurred());
-
-            if (exception != 0)
-                env->ExceptionClear();
+            jniCheckHasExceptionOccurredAndClear();
         }
 
         void close()
@@ -2500,12 +2446,12 @@ private:
 
                 env->CallVoidMethod (session, CameraCaptureSession.stopRepeating);
 
-                if (Pimpl::checkHasExceptionOccurred())
+                if (jniCheckHasExceptionOccurredAndClear())
                     return;
 
                 env->CallVoidMethod (session, CameraCaptureSession.abortCaptures);
 
-                Pimpl::checkHasExceptionOccurred();
+                jniCheckHasExceptionOccurredAndClear();
             }
         }
 
@@ -3064,28 +3010,10 @@ private:
         env->CallBooleanMethod (handlerThread, AndroidHandlerThread.quitSafely);
         env->CallVoidMethod (handlerThread, AndroidHandlerThread.join);
 
-        auto exception = LocalRef<jobject> (env->ExceptionOccurred());
-
-        if (exception != 0)
-            env->ExceptionClear();
+        jniCheckHasExceptionOccurredAndClear();
 
         handlerThread.clear();
         handler.clear();
-    }
-
-    static bool checkHasExceptionOccurred()
-    {
-        auto* env = getEnv();
-
-        auto exception = LocalRef<jobject> (env->ExceptionOccurred());
-
-        if (exception != 0)
-        {
-            env->ExceptionClear();
-            return true;
-        }
-
-        return false;
     }
 #endif
 

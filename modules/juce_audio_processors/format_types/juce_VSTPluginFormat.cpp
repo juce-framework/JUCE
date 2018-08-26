@@ -226,7 +226,7 @@ static pointer_sized_int VSTINTERFACECALL audioMaster (VstEffectInterface*, int3
 
 namespace
 {
-    typedef void (*EventProcPtr) (XEvent* ev);
+    using EventProcPtr = void (*)(XEvent*);
 
     Window getChildWindow (Window windowToCheck)
     {
@@ -3428,10 +3428,8 @@ void VSTPluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& result
 }
 
 void VSTPluginFormat::createPluginInstance (const PluginDescription& desc,
-                                            double sampleRate,
-                                            int blockSize,
-                                            void* userData,
-                                            void (*callback) (void*, AudioPluginInstance*, const String&))
+                                            double sampleRate, int blockSize,
+                                            void* userData, PluginCreationCallback callback)
 {
     std::unique_ptr<VSTPluginInstance> result;
 

@@ -37,10 +37,8 @@ public:
     static void findAllAddresses (Array<IPAddress>& results, bool includeIPv6 = false);
 
     //==============================================================================
-    /** Creates a null address - 0.0.0.0 (IPv4) or ::, (IPv6)
-        @param IPv6 if true indicates that this is an IPv6 address
-    */
-    IPAddress (bool IPv6 = false) noexcept;
+    /** Creates a null address - 0.0.0.0 (IPv4) or ::, (IPv6) */
+    IPAddress() noexcept;
 
     /** Creates an IPv4 or IPv6 address by reading 4 or 16 bytes from an array.
         @param bytes The array containing the bytes to read.
@@ -72,7 +70,7 @@ public:
     String toString() const;
 
     /** Returns an IPv4 or IPv6 address meaning "any", equivalent to 0.0.0.0 (IPv4) or ::, (IPv6)  */
-    static IPAddress any (bool IPv6 = false) noexcept;
+    static IPAddress any() noexcept;
 
     /** Returns an IPv4 address meaning "broadcast" (255.255.255.255) */
     static IPAddress broadcast() noexcept;
@@ -93,18 +91,18 @@ public:
     /** The elements of the IP address. */
     uint8 address[16];
 
-    bool isIPv6;
+    bool isIPv6 = false;
 
 private:
     /** Union used to split a 16-bit unsigned integer into 2 8-bit unsigned integers or vice-versa */
-    typedef union
+    union ByteUnion
     {
         uint16 combined;
         uint8 split[2];
-    } ByteUnion;
+    };
 
     /** Method used to zero the remaining bytes of the address array when creating IPv4 addresses */
-    void zeroUnusedBytes()
+    void zeroUnusedBytes() noexcept
     {
         for (int i = 4; i < 16; ++i)
             address[i] = 0;

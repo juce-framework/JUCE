@@ -42,7 +42,7 @@ using uint16    = unsigned short;
 /** A platform-independent 32-bit signed integer type. */
 using int32     = signed int;
 /** A platform-independent 32-bit unsigned integer type. */
-typedef unsigned int                uint32;
+using uint32    = unsigned int;
 
 #if JUCE_MSVC
   /** A platform-independent 64-bit integer type. */
