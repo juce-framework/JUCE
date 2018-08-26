@@ -54,6 +54,7 @@ int AudioProcessorEditor::getControlParameterIndex (Component&)                {
 
 bool AudioProcessorEditor::supportsHostMIDIControllerPresence (bool)           { return true; }
 void AudioProcessorEditor::hostMIDIControllerIsAvailable (bool)                {}
+String AudioProcessorEditor::getCustomLabel (CustomHostLabel) { return String(); }
 
 void AudioProcessorEditor::initialise()
 {
