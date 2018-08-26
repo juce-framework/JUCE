@@ -450,7 +450,8 @@ void ProjectExporter::addTargetSpecificPreprocessorDefs (StringPairArray& defs, 
         {"JucePlugin_Build_AUv3",       ProjectType::Target::AudioUnitv3PlugIn},
         {"JucePlugin_Build_RTAS",       ProjectType::Target::RTASPlugIn},
         {"JucePlugin_Build_AAX",        ProjectType::Target::AAXPlugIn},
-        {"JucePlugin_Build_Standalone", ProjectType::Target::StandalonePlugIn}
+        {"JucePlugin_Build_Standalone", ProjectType::Target::StandalonePlugIn},
+        {"JucePlugin_Build_Unity",      ProjectType::Target::UnityPlugIn}
     };
 
     if (targetType == ProjectType::Target::SharedCodeTarget)

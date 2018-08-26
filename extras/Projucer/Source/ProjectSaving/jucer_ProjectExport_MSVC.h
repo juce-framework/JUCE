@@ -158,7 +158,8 @@ public:
               vstBinaryLocation             (config, Ids::vstBinaryLocation,          getUndoManager()),
               vst3BinaryLocation            (config, Ids::vst3BinaryLocation,         getUndoManager()),
               rtasBinaryLocation            (config, Ids::rtasBinaryLocation,         getUndoManager()),
-              aaxBinaryLocation             (config, Ids::aaxBinaryLocation,          getUndoManager())
+              aaxBinaryLocation             (config, Ids::aaxBinaryLocation,          getUndoManager()),
+              unityPluginBinaryLocation     (config, Ids::unityPluginBinaryLocation,  getUndoManager(), {})
         {
             if (! isDebug())
                 updateOldLTOSetting();
@@ -203,6 +204,7 @@ public:
         String getVST3BinaryLocationString() const        { return vst3BinaryLocation.get(); }
         String getRTASBinaryLocationString() const        { return rtasBinaryLocation.get();}
         String getAAXBinaryLocationString() const         { return aaxBinaryLocation.get();}
+        String getUnityPluginBinaryLocationString() const { return unityPluginBinaryLocation.get(); }
 
         //==============================================================================
         String createMSVCConfigName() const
@@ -210,9 +212,9 @@ public:
             return getName() + "|" + (is64Bit() ? "x64" : "Win32");
         }
 
-        String getOutputFilename (const String& suffix, bool forceSuffix) const
+        String getOutputFilename (const String& suffix, bool forceSuffix, bool forceUnityPrefix) const
         {
-            auto target = File::createLegalFileName (getTargetBinaryNameString().trim());
+            auto target = File::createLegalFileName (getTargetBinaryNameString (forceUnityPrefix).trim());
 
             if (forceSuffix || ! target.containsChar ('.'))
                 return target.upToLastOccurrenceOf (".", false, false) + suffix;
@@ -308,7 +310,7 @@ public:
                          generateManifestValue, enableIncrementalLinkingValue, useRuntimeLibDLLValue, intermediatesPathValue,
                          characterSetValue, architectureTypeValue, fastMathValue, debugInformationFormatValue, pluginBinaryCopyStepValue;
 
-        ValueWithDefault vstBinaryLocation, vst3BinaryLocation, rtasBinaryLocation, aaxBinaryLocation;
+        ValueWithDefault vstBinaryLocation, vst3BinaryLocation, rtasBinaryLocation, aaxBinaryLocation, unityPluginBinaryLocation;
 
         Value architectureValueToListenTo;
 
@@ -321,8 +323,8 @@ public:
 
         void addVisualStudioPluginInstallPathProperties (PropertyListBuilder& props)
         {
-            auto isBuildingAnyPlugins = (project.shouldBuildVST()  || project.shouldBuildVST3()
-                                      || project.shouldBuildRTAS() || project.shouldBuildAAX());
+            auto isBuildingAnyPlugins = (project.shouldBuildVST()  || project.shouldBuildVST3() || project.shouldBuildRTAS()
+                                          || project.shouldBuildAAX() || project.shouldBuildUnityPlugin());
 
             if (isBuildingAnyPlugins)
                 props.add (new ChoicePropertyComponent (pluginBinaryCopyStepValue, "Enable Plugin Copy Step"),
@@ -347,6 +349,11 @@ public:
                 props.add (new TextPropertyComponentWithEnablement (aaxBinaryLocation, pluginBinaryCopyStepValue, "AAX Binary Location",
                                                                     1024, false),
                            "The folder in which the compiled AAX binary should be placed.");
+
+            if (project.shouldBuildUnityPlugin())
+                props.add (new TextPropertyComponentWithEnablement (unityPluginBinaryLocation, pluginBinaryCopyStepValue, "Unity Binary Location",
+                                                                    1024, false),
+                           "The folder in which the compiled Unity plugin binary and associated C# GUI script should be placed.");
 
         }
 
@@ -497,7 +504,7 @@ public:
                     {
                         auto* targetName = props->createNewChildElement ("TargetName");
                         setConditionAttribute (*targetName, config);
-                        targetName->addTextElement (config.getOutputFilename ("", false));
+                        targetName->addTextElement (config.getOutputFilename ("", false, type == UnityPlugIn));
                     }
 
                     {
@@ -608,12 +615,12 @@ public:
 
                 {
                     auto* link = group->createNewChildElement ("Link");
-                    link->createNewChildElement ("OutputFile")->addTextElement (getOutputFilePath (config));
+                    link->createNewChildElement ("OutputFile")->addTextElement (getOutputFilePath (config, type == UnityPlugIn));
                     link->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
                     link->createNewChildElement ("IgnoreSpecificDefaultLibraries")->addTextElement (isDebug ? "libcmt.lib; msvcrt.lib;;%(IgnoreSpecificDefaultLibraries)"
                                                                                                             : "%(IgnoreSpecificDefaultLibraries)");
                     link->createNewChildElement ("GenerateDebugInformation")->addTextElement ((isDebug || config.shouldGenerateDebugSymbols()) ? "true" : "false");
-                    link->createNewChildElement ("ProgramDatabaseFile")->addTextElement (getOwner().getIntDirFile (config, config.getOutputFilename (".pdb", true)));
+                    link->createNewChildElement ("ProgramDatabaseFile")->addTextElement (getOwner().getIntDirFile (config, config.getOutputFilename (".pdb", true, type == UnityPlugIn)));
                     link->createNewChildElement ("SubSystem")->addTextElement (type == ConsoleApp ? "Console" : "Windows");
 
                     if (! config.is64Bit())
@@ -654,7 +661,7 @@ public:
                 {
                     auto* bsc = group->createNewChildElement ("Bscmake");
                     bsc->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
-                    bsc->createNewChildElement ("OutputFile")->addTextElement (getOwner().getIntDirFile (config, config.getOutputFilename (".bsc", true)));
+                    bsc->createNewChildElement ("OutputFile")->addTextElement (getOwner().getIntDirFile (config, config.getOutputFilename (".bsc", true, type == UnityPlugIn)));
                 }
 
                 if (type != SharedCodeTarget)
@@ -1078,18 +1085,36 @@ public:
                 RelativePath bundleScript  = aaxSDK.getChildFile ("Utilities").getChildFile ("CreatePackage.bat");
                 RelativePath iconFilePath  = getAAXIconFile();
 
-                auto outputFilename = config.getOutputFilename (".aaxplugin", true);
+                auto outputFilename = config.getOutputFilename (".aaxplugin", true, false);
                 auto bundleDir      = getOwner().getOutDirFile (config, outputFilename);
                 auto bundleContents = bundleDir + "\\Contents";
                 auto archDir        = bundleContents + String ("\\") + (config.is64Bit() ? "x64" : "Win32");
                 auto executable     = archDir + String ("\\") + outputFilename;
 
-                auto pkgScript = String ("copy /Y ") + getOutputFilePath (config).quoted() + String (" ") + executable.quoted() + String ("\r\ncall ")
+                auto pkgScript = String ("copy /Y ") + getOutputFilePath (config, false).quoted() + String (" ") + executable.quoted() + String ("\r\ncall ")
                                      + createRebasedPath (bundleScript) + String (" ") + archDir.quoted() + String (" ") + createRebasedPath (iconFilePath);
 
                 if (config.isPluginBinaryCopyStepEnabled())
                     return pkgScript + "\r\n" + "xcopy " + bundleDir.quoted() + " "
                                + String (config.getAAXBinaryLocationString() + "\\" + outputFilename + "\\").quoted() + " /E /H /K /R /Y";
+
+                return pkgScript;
+            }
+            else if (type == UnityPlugIn)
+            {
+                RelativePath scriptPath (config.project.getGeneratedCodeFolder().getChildFile (config.project.getUnityScriptName()),
+                                         getOwner().getTargetFolder(),
+                                         RelativePath::projectFolder);
+
+                auto pkgScript = String ("copy /Y ") + scriptPath.toWindowsStyle().quoted() + " \"$(OutDir)\"";
+
+                if (config.isPluginBinaryCopyStepEnabled())
+                {
+                    auto copyLocation = config.getUnityPluginBinaryLocationString();
+
+                    pkgScript += "\r\ncopy /Y \"$(OutDir)$(TargetFileName)\" " +  String (copyLocation + "\\$(TargetFileName)").quoted();
+                    pkgScript += "\r\ncopy /Y " + String ("$(OutDir)" + config.project.getUnityScriptName()).quoted() + " " + String (copyLocation + "\\" + config.project.getUnityScriptName()).quoted();
+                }
 
                 return pkgScript;
             }
@@ -1111,7 +1136,7 @@ public:
             {
                 String script;
 
-                auto bundleDir      = getOwner().getOutDirFile (config, config.getOutputFilename (".aaxplugin", false));
+                auto bundleDir      = getOwner().getOutDirFile (config, config.getOutputFilename (".aaxplugin", false, false));
                 auto bundleContents = bundleDir + "\\Contents";
                 auto archDir        = bundleContents + String ("\\") + (config.is64Bit() ? "x64" : "Win32");
 
@@ -1210,14 +1235,14 @@ public:
             return searchPaths;
         }
 
-        String getBinaryNameWithSuffix (const MSVCBuildConfiguration& config) const
+        String getBinaryNameWithSuffix (const MSVCBuildConfiguration& config, bool forceUnityPrefix) const
         {
-            return config.getOutputFilename (getTargetSuffix(), true);
+            return config.getOutputFilename (getTargetSuffix(), true, forceUnityPrefix);
         }
 
-        String getOutputFilePath (const MSVCBuildConfiguration& config) const
+        String getOutputFilePath (const MSVCBuildConfiguration& config, bool forceUnityPrefix) const
         {
-            return getOwner().getOutDirFile (config, getBinaryNameWithSuffix (config));
+            return getOwner().getOutDirFile (config, getBinaryNameWithSuffix (config, forceUnityPrefix));
         }
 
         StringArray getLibrarySearchPaths (const BuildConfiguration& config) const
@@ -1244,7 +1269,7 @@ public:
 
             if (type != SharedCodeTarget)
                 if (auto* shared = getOwner().getSharedCodeTarget())
-                    libraries.add (shared->getBinaryNameWithSuffix (config));
+                    libraries.add (shared->getBinaryNameWithSuffix (config, false));
 
             return libraries.joinIntoString (";");
         }
@@ -1325,6 +1350,7 @@ public:
         case ProjectType::Target::VST3PlugIn:
         case ProjectType::Target::AAXPlugIn:
         case ProjectType::Target::RTASPlugIn:
+        case ProjectType::Target::UnityPlugIn:
         case ProjectType::Target::DynamicLibrary:
             return true;
         default:
@@ -1344,8 +1370,6 @@ public:
     }
 
     //==============================================================================
-    const String& getProjectName() const         { return projectName; }
-
     bool launchProject() override
     {
        #if JUCE_WINDOWS

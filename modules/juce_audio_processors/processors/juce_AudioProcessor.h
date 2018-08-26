@@ -1439,7 +1439,8 @@ public:
         wrapperType_RTAS,
         wrapperType_AAX,
         wrapperType_AudioSuite,
-        wrapperType_Standalone
+        wrapperType_Standalone,
+        wrapperType_Unity
     };
 
     /** When loaded by a plugin wrapper, this flag will be set to indicate the type

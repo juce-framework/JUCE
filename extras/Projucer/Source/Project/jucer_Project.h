@@ -158,6 +158,7 @@ public:
     bool shouldBuildRTAS() const                      { return checkMultiChoiceVar (pluginFormatsValue, Ids::buildRTAS); }
     bool shouldBuildAAX() const                       { return checkMultiChoiceVar (pluginFormatsValue, Ids::buildAAX); }
     bool shouldBuildStandalonePlugin() const          { return checkMultiChoiceVar (pluginFormatsValue, Ids::buildStandalone); }
+    bool shouldBuildUnityPlugin() const               { return checkMultiChoiceVar (pluginFormatsValue, Ids::buildUnity); }
     bool shouldEnableIAA() const                      { return checkMultiChoiceVar (pluginFormatsValue, Ids::enableIAA); }
 
     //==============================================================================
@@ -199,6 +200,15 @@ public:
 
     String getIAATypeCode();
     String getIAAPluginName();
+
+    String getUnityScriptName() const    { return addUnityPluginPrefixIfNecessary (getProjectNameString()) + "_UnityScript.cs"; }
+    static String addUnityPluginPrefixIfNecessary (const String& name)
+    {
+        if (! name.startsWithIgnoreCase ("audioplugin"))
+            return "audioplugin_" + name;
+
+        return name;
+    }
 
     //==============================================================================
     bool isAUPluginHost();

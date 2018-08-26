@@ -179,6 +179,7 @@ public:
             switch (type)
             {
                 case VSTPlugIn:
+                case UnityPlugIn:
                 case DynamicLibrary:        return ".so";
                 case SharedCodeTarget:
                 case StaticLibrary:         return ".a";
@@ -362,6 +363,7 @@ public:
             case ProjectType::Target::VSTPlugIn:
             case ProjectType::Target::StandalonePlugIn:
             case ProjectType::Target::DynamicLibrary:
+            case ProjectType::Target::UnityPlugIn:
                 return true;
             default:
                 break;

@@ -823,6 +823,8 @@ bool Project::shouldBuildTargetType (ProjectType::Target::Type targetType) const
             return shouldBuildAUv3();
         case ProjectType::Target::StandalonePlugIn:
             return shouldBuildStandalonePlugin();
+        case ProjectType::Target::UnityPlugIn:
+            return shouldBuildUnityPlugin();
         case ProjectType::Target::AggregateTarget:
         case ProjectType::Target::SharedCodeTarget:
             return projectType.isAudioPlugin();
@@ -844,6 +846,7 @@ ProjectType::Target::Type Project::getTargetTypeFromFilePath (const File& file, 
     else if (LibraryModule::CompileUnit::hasSuffix (file, "_VST2"))       return ProjectType::Target::VSTPlugIn;
     else if (LibraryModule::CompileUnit::hasSuffix (file, "_VST3"))       return ProjectType::Target::VST3PlugIn;
     else if (LibraryModule::CompileUnit::hasSuffix (file, "_Standalone")) return ProjectType::Target::StandalonePlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_Unity"))      return ProjectType::Target::UnityPlugIn;
 
     return (returnSharedTargetIfNoValidSuffix ? ProjectType::Target::SharedCodeTarget : ProjectType::Target::unspecified);
 }
@@ -863,6 +866,7 @@ const char* ProjectType::Target::getName() const noexcept
         case AudioUnitv3PlugIn: return "AUv3 AppExtension";
         case AAXPlugIn:         return "AAX";
         case RTASPlugIn:        return "RTAS";
+        case UnityPlugIn:       return "Unity Plugin";
         case SharedCodeTarget:  return "Shared Code";
         case AggregateTarget:   return "All";
         default:                return "undefined";
@@ -884,6 +888,7 @@ ProjectType::Target::TargetFileType ProjectType::Target::getTargetFileType() con
         case AudioUnitv3PlugIn: return macOSAppex;
         case AAXPlugIn:         return pluginBundle;
         case RTASPlugIn:        return pluginBundle;
+        case UnityPlugIn:       return pluginBundle;
         case SharedCodeTarget:  return staticLibrary;
         default:
             break;
@@ -1017,9 +1022,10 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
 void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
 {
     props.add (new MultiChoicePropertyComponent (pluginFormatsValue, "Plugin Formats",
-                                                 { "VST", "VST3", "AU", "AUv3", "RTAS", "AAX", "Standalone", "Enable IAA" },
+                                                 { "VST", "VST3", "AU", "AUv3", "RTAS", "AAX", "Standalone", "Unity", "Enable IAA" },
                                                  { Ids::buildVST.toString(), Ids::buildVST3.toString(), Ids::buildAU.toString(), Ids::buildAUv3.toString(),
-                                                   Ids::buildRTAS.toString(), Ids::buildAAX.toString(), Ids::buildStandalone.toString(), Ids::enableIAA.toString() }),
+                                                   Ids::buildRTAS.toString(), Ids::buildAAX.toString(), Ids::buildStandalone.toString(), Ids::buildUnity.toString(),
+                                                   Ids::enableIAA.toString() }),
                "Plugin formats to build.");
     props.add (new MultiChoicePropertyComponent (pluginCharacteristicsValue, "Plugin Characteristics",
                                                  { "Plugin is a Synth", "Plugin MIDI Input", "Plugin MIDI Output", "MIDI Effect Plugin", "Plugin Editor Requires Keyboard Focus",
