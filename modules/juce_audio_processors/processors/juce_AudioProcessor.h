@@ -322,11 +322,29 @@ public:
      */
     virtual void analysisFinished ();
 
+#if JucePlugin_EnhancedAudioSuite
+    /** Allows aborting plug-in load due to license failure instead of crashing. */
+    virtual bool isAuthorized() = 0;
+
     /** Called by AudioSuite to add offsets to processed clip.
 
         For example, if your process adds tail explicitly or start before actual position.
+        This method is also called in a few different scenarios:
+            - Before an analyze, process or preview of data begins.
+            - At the end of every preview loop.
+            - After the user makes a new data selection on the timeline.
      */
     virtual void getOfflineRenderOffset (int& startOffset, int& endOffset);
+
+    struct EnhancedAudioSuiteInterface
+    {
+        virtual ~EnhancedAudioSuiteInterface() {};
+        virtual void requestAnalysis() = 0;
+        virtual void requestRender() = 0;
+    };
+
+    EnhancedAudioSuiteInterface* enhancedAudioSuiteInterface {nullptr};
+#endif
 
     //==============================================================================
     /**

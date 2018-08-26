@@ -564,8 +564,15 @@ struct ShaderPrograms  : public ReferenceCountedObject
     #define JUCE_DECLARE_LINEAR_UNIFORMS  "uniform sampler2D gradientTexture;" \
                                           "uniform " JUCE_MEDIUMP " vec4 gradientInfo;" \
                                           JUCE_DECLARE_VARYING_COLOUR JUCE_DECLARE_VARYING_PIXELPOS
-    #define JUCE_CALC_LINEAR_GRAD_POS1    JUCE_MEDIUMP " float gradientPos = (pixelPos.y - (gradientInfo.y + (gradientInfo.z * (pixelPos.x - gradientInfo.x)))) / gradientInfo.w;"
-    #define JUCE_CALC_LINEAR_GRAD_POS2    JUCE_MEDIUMP " float gradientPos = (pixelPos.x - (gradientInfo.x + (gradientInfo.z * (pixelPos.y - gradientInfo.y)))) / gradientInfo.w;"
+    #define JUCE_DITHER \
+        JUCE_MEDIUMP " float dither = (mod(3.1415 * pixelPos.x + 2.71828 * pixelPos.y, 8.0)-4.0)/1400.0;"
+
+    #define JUCE_CALC_LINEAR_GRAD_POS1 \
+        JUCE_DITHER \
+        JUCE_MEDIUMP " float gradientPos = (pixelPos.y - (gradientInfo.y + (gradientInfo.z * (pixelPos.x - gradientInfo.x)))) / gradientInfo.w;"
+    #define JUCE_CALC_LINEAR_GRAD_POS2 \
+        JUCE_DITHER \
+        JUCE_MEDIUMP " float gradientPos = (pixelPos.x - (gradientInfo.x + (gradientInfo.z * (pixelPos.y - gradientInfo.y)))) / gradientInfo.w;"
 
     struct LinearGradient1Program  : public ShaderBase
     {
@@ -574,7 +581,7 @@ struct ShaderPrograms  : public ReferenceCountedObject
                           "void main()"
                           "{"
                             JUCE_CALC_LINEAR_GRAD_POS1
-                            "gl_FragColor = " JUCE_GET_TEXTURE_COLOUR ";"
+                            "gl_FragColor = " JUCE_GET_TEXTURE_COLOUR " + dither;"
                           "}"),
               gradientParams (program)
         {}
@@ -590,7 +597,7 @@ struct ShaderPrograms  : public ReferenceCountedObject
                           "void main()"
                           "{"
                             JUCE_CALC_LINEAR_GRAD_POS1
-                            "gl_FragColor = " JUCE_GET_TEXTURE_COLOUR " * " JUCE_GET_MASK_ALPHA ";"
+                            "gl_FragColor = (" JUCE_GET_TEXTURE_COLOUR " + dither) * " JUCE_GET_MASK_ALPHA ";"
                           "}"),
               gradientParams (program),
               maskParams (program)
@@ -607,7 +614,7 @@ struct ShaderPrograms  : public ReferenceCountedObject
                           "void main()"
                           "{"
                             JUCE_CALC_LINEAR_GRAD_POS2
-                            "gl_FragColor = " JUCE_GET_TEXTURE_COLOUR ";"
+                            "gl_FragColor = " JUCE_GET_TEXTURE_COLOUR " + dither;"
                           "}"),
               gradientParams (program)
         {}
@@ -623,7 +630,7 @@ struct ShaderPrograms  : public ReferenceCountedObject
                           "void main()"
                           "{"
                             JUCE_CALC_LINEAR_GRAD_POS2
-                            "gl_FragColor = " JUCE_GET_TEXTURE_COLOUR " * " JUCE_GET_MASK_ALPHA ";"
+                            "gl_FragColor = (" JUCE_GET_TEXTURE_COLOUR " + dither) * " JUCE_GET_MASK_ALPHA ";"
                           "}"),
               gradientParams (program),
               maskParams (program)
@@ -1135,7 +1142,7 @@ struct StateHelpers
             activeTextures.bindTexture (quadQueue, gradientTextures.getUnchecked (activeGradientIndex)->getTextureID());
         }
 
-        enum { gradientTextureSize = 256 };
+        enum { gradientTextureSize = 8 };
 
     private:
         enum { numTexturesToCache = 8, numGradientTexturesToCache = 10 };

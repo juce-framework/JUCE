@@ -781,10 +781,12 @@ void AudioProcessor::prepareToAnalyse (double sampleRate, int maximumExpectedSam
     jassertfalse;
 };
 
+#if JucePlugin_EnhancedAudioSuite
 void AudioProcessor::getOfflineRenderOffset (int& startOffset, int& endOffset)
 {
     startOffset = endOffset = 0;
 }
+#endif
 
 void AudioProcessor::analysisFinished ()
 {

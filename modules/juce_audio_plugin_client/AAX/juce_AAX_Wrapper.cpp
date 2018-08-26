@@ -82,6 +82,7 @@ static_assert (AAX_SDK_CURRENT_REVISION >= AAX_SDK_2p3p0_REVISION, "JUCE require
 
 #if JucePlugin_EnhancedAudioSuite
 #include <AAX_CHostProcessor.h>
+#include <AAX_VHostProcessorDelegate.h>
 #endif
 
 #ifdef _MSC_VER
@@ -678,10 +679,21 @@ namespace AAXClasses
     public:
 #if JucePlugin_EnhancedAudioSuite
         class JUCE_EnhancedAudioSuite : public AAX_CHostProcessor,
-                                        public juce::AudioFormatReader
+                                        public juce::AudioFormatReader,
+                                        public juce::AudioProcessor::EnhancedAudioSuiteInterface
         {
         public:
             JUCE_EnhancedAudioSuite() : juce::AudioFormatReader (nullptr, "AudioSuiteReader") {}
+
+            void requestAnalysis() override
+            {
+                (static_cast<AAX_VHostProcessorDelegate*>(GetHostProcessorDelegate()))->ForceAnalyze();
+            }
+
+            void requestRender() override
+            {
+                (static_cast<AAX_VHostProcessorDelegate*>(GetHostProcessorDelegate()))->ForceProcess();
+            }
 
             AAX_Result AnalyzeAudio (const float * const iAudioIns [], int32_t iAudioInCount, int32_t * ioWindowSize) override
             {
@@ -700,7 +712,7 @@ namespace AAXClasses
                 const AudioBuffer<const float> buffer (channels, inputChannelList.size(), *ioWindowSize);
                 if (mIsFirstPass)
                 {
-                    UpdateMainInputBus(numOfMainInputs);
+                    UpdateBusLayout(numOfMainInputs, -1, GetSideChainInputNum() > 0);
                     initRandomAccessReader(iAudioIns, numOfMainInputs, iAudioInCount);
                     mIsFirstPass = false;
                 }
@@ -713,23 +725,14 @@ namespace AAXClasses
 
             AAX_Result RenderAudio (const float * const inAudioIns [], int32_t inAudioInCount, float * const inAudioOuts [], int32_t inAudioOutCount, int32_t * ioWindowSize) override
             {
-                // AAX currently provides only mono side-chain.
-                auto sideChainBufferIdx = getAAXProcessor().hasSidechain && GetSideChainInputNum() > 0 ? GetSideChainInputNum() : -1;
-                auto numOfMainInputs = 0;
-                for (decltype(inAudioInCount) i = 0; i < inAudioInCount; ++i)
-                {
-                    if (inAudioIns[i] != nullptr)
-                        numOfMainInputs++;
-                }
-                numOfMainInputs += GetSideChainInputNum() > 0 ? -1 : 0;
+                jassert (inAudioInCount >= inAudioOutCount);
+                auto emptyMidiBuffer = MidiBuffer();
 
                 // handles internal processor latency (if needed)
                 // for more details see Avid's SDK - DemoDelay_HostProcessor_Comp.h
                 auto latencyOffset = getAAXProcessor().getPluginInstance().getLatencySamples();
                 if (mIsFirstPass)
                 {
-                    UpdateMainInputBus(numOfMainInputs);
-                    initRandomAccessReader(inAudioIns, numOfMainInputs, inAudioInCount);
                     float* tempOutBuffer[AAX_eMaxAudioSuiteTracks];
                     for (decltype(inAudioOutCount) ch = 0; ch < inAudioOutCount; ++ch)
                         tempOutBuffer[ch] = new float[*ioWindowSize];
@@ -737,10 +740,11 @@ namespace AAXClasses
                     int32_t remainingDelaySamplesToPrime = latencyOffset;
                     while (remainingDelaySamplesToPrime > 0)
                     {
-                        int32_t numSamplesToPrime = std::min(*ioWindowSize, remainingDelaySamplesToPrime);
+                        int32_t numSamplesToPrime = std::min (*ioWindowSize, remainingDelaySamplesToPrime);
                         const int64_t firstSampleLocation = GetLocation() + (latencyOffset - remainingDelaySamplesToPrime);
                         GetAudio (inAudioIns, inAudioInCount, firstSampleLocation, ioWindowSize);
-                        getAAXProcessor().process (inAudioIns, tempOutBuffer, sideChainBufferIdx, numSamplesToPrime, false, nullptr, nullptr, nullptr);
+                        auto firstBuffer = getRenderAudioBuffer (inAudioIns, inAudioInCount, tempOutBuffer, inAudioOutCount, ioWindowSize, true);
+                        getAAXProcessor().getPluginInstance().processBlock (firstBuffer, emptyMidiBuffer);
                         remainingDelaySamplesToPrime -= numSamplesToPrime;
                     }
 
@@ -750,12 +754,12 @@ namespace AAXClasses
                     }
                     mIsFirstPass = false;
                 }
-                jassert(getAAXProcessor().getPluginInstance().getMainBusNumInputChannels() == numOfMainInputs);
 
                 // Look ahead in the input audio by latencyOffset. After this call to GetAudio(),
                 // inAudioIns will be populated with the randomly-accessed lookahead samples.
                 GetAudio (inAudioIns, inAudioInCount, GetLocation()+latencyOffset, ioWindowSize);
-                getAAXProcessor().process (inAudioIns, inAudioOuts, sideChainBufferIdx, *ioWindowSize, false, nullptr, nullptr, nullptr);
+                auto buffer = getRenderAudioBuffer (inAudioIns, inAudioInCount, inAudioOuts, inAudioOutCount, ioWindowSize);
+                getAAXProcessor().getPluginInstance().processBlock (buffer, emptyMidiBuffer);
 
                 return AAX_SUCCESS;
             }
@@ -779,9 +783,10 @@ namespace AAXClasses
 
              AAX_Result PreRender (int32_t /*iAudioInCount*/, int32_t /*iAudioOutCount*/, int32_t iWindowSize) override
             {
+                jassert (iWindowSize <= 65536);
                 mIsFirstPass = true;
                 getAAXProcessor().getPluginInstance().setRateAndBufferSizeDetails (getAAXProcessor().sampleRate, iWindowSize);
-                getAAXProcessor().getPluginInstance().prepareToPlay(getAAXProcessor().sampleRate, iWindowSize);
+                getAAXProcessor().getPluginInstance().prepareToPlay (getAAXProcessor().sampleRate, iWindowSize);
                 return AAX_SUCCESS;
             }
 
@@ -803,28 +808,43 @@ namespace AAXClasses
                                       int64 startSampleInFile,
                                       int numSamples) override
             {
-                if ( (lengthInSamples - startSampleInFile <= 0) || (numSamples > lengthInSamples - startSampleInFile) )
-                    return false;
+                if (numSamples <= 0)
+                    return true;
 
-                int32_t numSamplesToCopy = numSamples;
-                auto readWindow = lastValidRandomInput;
-                auto channelsToCopy = jmin ((int)numChannels, numDestChannels);
-
-                if (GetAudio (readWindow, numOfReportedInputs, GetSrcStart()+startSampleInFile, &numSamplesToCopy) != AAX_SUCCESS)
-                    return false;
-
-                int validIn = -1;
-                for (int i = 0; i < channelsToCopy; ++i)
+                int32_t numSamplesRead = numSamples;
+                int32_t numSamplesCopied = 0;
+                while (numSamplesCopied < numSamples)
                 {
-                    // should forward with i (unless needs to skip)
-                    validIn++;
-                    while ( (readWindow[validIn] == nullptr) && (validIn < numOfReportedInputs) )
+                    numSamplesRead = numSamples - numSamplesCopied;
+                    auto readWindow = lastValidRandomInput;
+                    auto channelsToCopy = jmin ((int)numChannels, numDestChannels);
+
+                    // GetAudio will read numSamplesRead and sets it to read samples.
+                    GetAudio (readWindow, numOfReportedInputs, GetSrcStart()+startSampleInFile+numSamplesCopied, &numSamplesRead);
+
+                    int validIn = -1;
+                    for (int i = 0; i < channelsToCopy; ++i)
+                    {
+                        // should forward with i (unless needs to skip)
                         validIn++;
+                        while ( (readWindow[validIn] == nullptr) && (validIn < numOfReportedInputs) )
+                            validIn++;
 
-                    if (destSamples[i] == nullptr)
-                        continue;
+                        if (destSamples[i] == nullptr)
+                            continue;
 
-                    memcpy (destSamples[i]+startOffsetInDestBuffer, readWindow[validIn], (size_t) numSamples * sizeof (float));
+                        if (numSamplesRead > 0)
+                        {
+                        juce::FloatVectorOperations::copy ((float*)&destSamples[i][startOffsetInDestBuffer+numSamplesCopied], readWindow[validIn], numSamplesRead);
+                        }
+                        else
+                        {
+                            // zero out of bounds samples.
+                            juce::FloatVectorOperations::clear ((float*)&destSamples[i][startOffsetInDestBuffer+numSamplesCopied], numSamples - numSamplesCopied);
+                            return true;
+                        }
+                    }
+                    numSamplesCopied += numSamplesRead;
                 }
                 return true;
             }
@@ -833,18 +853,78 @@ namespace AAXClasses
             void initRandomAccessReader(const float * const inAudioIns[], int numOfActualInputs, int numOfInputsInBuffer)
             {
                 sampleRate = getAAXProcessor().sampleRate;
+                bitsPerSample = 32;
                 usesFloatingPointData = true;
                 lastValidRandomInput = inAudioIns;
                 numChannels = numOfActualInputs + (GetSideChainInputNum() > 0 ? 1 : 0);
                 numOfReportedInputs = numOfInputsInBuffer;
                 lengthInSamples = GetInputRange();
                 getAAXProcessor().getPluginInstance().setRandomAudioReader(this);
+                getAAXProcessor().getPluginInstance().enhancedAudioSuiteInterface = this;
             }
 
-            void UpdateMainInputBus(int numOfMainInputs)
+            AudioSampleBuffer getRenderAudioBuffer (const float * const inAudioIns [], int32_t inAudioInCount, float * const inAudioOuts [], int32_t inAudioOutCount, int32_t * ioWindowSize, const bool isFirstTime = false)
             {
-                // update plug-in on number of inputs
-                getAAXProcessor().getPluginInstance().getBus(true, 0)->setNumberOfChannels(numOfMainInputs);
+                Array<const float*> inputChannelList;
+                Array<float*> outputChannelList;
+
+                for (decltype(inAudioInCount) i = 0; i < inAudioInCount; ++i)
+                {
+                    // when sidechain connected, iAudioInCount could be maximum support channels reported + sidechain (mono).
+                    if (inAudioIns[i] != nullptr)
+                    {
+                        inputChannelList.add(inAudioIns[i]);
+                    }
+                }
+
+                for (decltype(inAudioOutCount) i = 0; i < inAudioOutCount; ++i)
+                {
+                    if (inAudioOuts[i] != nullptr)
+                    {
+                        outputChannelList.add(inAudioOuts[i]);
+                    }
+                }
+                if (GetSideChainInputNum() > 0)
+                {
+                    // Pro Tools Output buffer excludes side-chain...
+                    outputChannelList.add(getAAXProcessor().sideChainBuffer.getData());
+                }
+
+                // GetSideChainInputNum would produce 0 when Side-Chain isn't connected (tested with PT 12.8).
+                const auto numOfMainInputs = inputChannelList.size() + (GetSideChainInputNum() > 0 ? -1 : 0);
+
+                if (isFirstTime)
+                {
+                    UpdateBusLayout(numOfMainInputs, inAudioOutCount, GetSideChainInputNum() > 0);
+                    initRandomAccessReader(inAudioIns, numOfMainInputs, inAudioInCount);
+                }
+                jassert(getAAXProcessor().getPluginInstance().getMainBusNumInputChannels() == numOfMainInputs);
+
+                // clear output buffers
+                for (decltype(inAudioOutCount) i = 0; i < inAudioOutCount; ++i)
+                    FloatVectorOperations::clear (inAudioOuts[i], *ioWindowSize);
+                // copy input buffers
+                for (int i = 0; i < inputChannelList.size(); ++i)
+                    FloatVectorOperations::copy (outputChannelList.getRawDataPointer()[i], inputChannelList.getRawDataPointer()[i], *ioWindowSize);
+
+                AudioSampleBuffer buffer (outputChannelList.getRawDataPointer(), outputChannelList.size(), *ioWindowSize);
+                return buffer;
+            }
+
+            void UpdateBusLayout(int numOfIns, int numOfOuts, bool hasSideChain)
+            {
+                auto currentLayout = getAAXProcessor().getPluginInstance().getBusesLayout();
+                currentLayout.inputBuses.set(0, AudioChannelSet::namedChannelSet(numOfIns));
+                if (currentLayout.inputBuses.size() > 1)
+                {
+                    currentLayout.inputBuses.set(1, hasSideChain ? AudioChannelSet::mono() : AudioChannelSet::disabled());
+                }
+                // for analysis output should change...
+                if (numOfOuts > 0)
+                {
+                    currentLayout.outputBuses.set(0, AudioChannelSet::canonicalChannelSet(numOfOuts));
+                }
+                getAAXProcessor().getPluginInstance().setBusesLayout(currentLayout);
             }
 
             JuceAAX_Processor& getAAXProcessor()
@@ -1776,11 +1856,18 @@ namespace AAXClasses
 #if JucePlugin_EnhancedAudioSuite
             if (audioProcessor.wrapperType == AudioProcessor::wrapperType_AudioSuite)
             {
+                if (!audioProcessor.isAuthorized())
+                {
+                    return AAX_ERROR_PLUGIN_NOT_AUTHORIZED;
+                }
+
                 // AudioSuite don't need additional calls.
                 // Unlike AAX it's much more simplified, no stems needs to be prepared,
                 // no algorithm or multiple instances.
+                maxBufferSize = 65536;
                 isPrepared = true;
                 sideChainBuffer.calloc (static_cast<size_t> (maxBufferSize));
+                hasSidechain = audioProcessor.getBusCount(true) > 1;
                 return AAX_SUCCESS;
             }
 #endif
