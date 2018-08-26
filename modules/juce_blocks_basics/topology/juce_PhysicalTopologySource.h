@@ -34,7 +34,7 @@ class PhysicalTopologySource  : public TopologySource
 {
 public:
     /** Constructor. */
-    PhysicalTopologySource();
+    PhysicalTopologySource (bool startDetached = false);
 
     /** Destructor. */
     ~PhysicalTopologySource();
@@ -44,6 +44,12 @@ public:
 
     /** Reset all touches */
     void cancelAllActiveTouches() noexcept override;
+
+    /** Sets the TopologySource as active, occupying the midi port and trying to connect to the block devices */
+    void setActive (bool shouldBeActive) override;
+
+    /** Returns true, if the TopologySource is currently trying to connect the block devices */
+    bool isActive() const override;
 
 
     //==========================================================================
@@ -68,7 +74,7 @@ public:
     };
 
     /** Constructor for custom transport systems. */
-    PhysicalTopologySource (DeviceDetector& detectorToUse);
+    PhysicalTopologySource (DeviceDetector& detectorToUse, bool startDetached = false);
 
     static const char* const* getStandardLittleFootFunctions() noexcept;
 
@@ -78,6 +84,7 @@ protected:
 
 private:
     //==========================================================================
+    DeviceDetector* customDetector = nullptr;
     struct Internal;
     struct DetectorHolder;
     std::unique_ptr<DetectorHolder> detector;

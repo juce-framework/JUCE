@@ -444,9 +444,6 @@ public:
 
                 if (config.shouldLinkIncremental())
                     e->createNewChildElement ("LinkIncremental")->addTextElement ("true");
-
-                if (config.is64Bit())
-                    e->createNewChildElement ("PlatformToolset")->addTextElement (getOwner().getPlatformToolset());
             }
 
             {

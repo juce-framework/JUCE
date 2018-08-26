@@ -1788,7 +1788,7 @@ private:
 
     void createOpenGlFeatureElement (XmlElement& manifest) const
     {
-        if (project.getModules().isModuleEnabled ("juce_opengl"))
+        if (project.getEnabledModules().isModuleEnabled ("juce_opengl"))
         {
             XmlElement* glVersion = nullptr;
 

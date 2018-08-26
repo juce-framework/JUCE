@@ -2244,8 +2244,10 @@ StringRef::StringRef (const std::string& string)       : StringRef (string.c_str
 //==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
- #define STRINGIFY2(X) #X
- #define STRINGIFY(X) STRINGIFY2(X)
+
+#define STRINGIFY2(X) #X
+#define STRINGIFY(X) STRINGIFY2(X)
+
 class StringTests  : public UnitTest
 {
 public:
@@ -2717,6 +2719,49 @@ public:
             expect (v4.equals (v5));
             expect (! v2.equals (v4));
             expect (! v4.equals (v2));
+        }
+
+        {
+            beginTest ("Significant figures");
+
+            // Integers
+
+            expectEquals (String::toDecimalStringWithSignificantFigures (13, 1), String ("10"));
+            expectEquals (String::toDecimalStringWithSignificantFigures (13, 2), String ("13"));
+            expectEquals (String::toDecimalStringWithSignificantFigures (13, 3), String ("13.0"));
+            expectEquals (String::toDecimalStringWithSignificantFigures (13, 4), String ("13.00"));
+
+            expectEquals (String::toDecimalStringWithSignificantFigures (19368, 1), String ("20000"));
+            expectEquals (String::toDecimalStringWithSignificantFigures (19348, 3), String ("19300"));
+
+            expectEquals (String::toDecimalStringWithSignificantFigures (-5, 1), String ("-5"));
+            expectEquals (String::toDecimalStringWithSignificantFigures (-5, 3), String ("-5.00"));
+
+            // Zero
+
+            expectEquals (String::toDecimalStringWithSignificantFigures (0, 1), String ("0"));
+            expectEquals (String::toDecimalStringWithSignificantFigures (0, 2), String ("0.0"));
+            expectEquals (String::toDecimalStringWithSignificantFigures (0, 3), String ("0.00"));
+
+            // Floating point
+
+            expectEquals (String::toDecimalStringWithSignificantFigures (19.0, 1), String ("20"));
+            expectEquals (String::toDecimalStringWithSignificantFigures (19.0, 2), String ("19"));
+            expectEquals (String::toDecimalStringWithSignificantFigures (19.0, 3), String ("19.0"));
+            expectEquals (String::toDecimalStringWithSignificantFigures (19.0, 4), String ("19.00"));
+
+            expectEquals (String::toDecimalStringWithSignificantFigures (-5.45, 1), String ("-5"));
+            expectEquals (String::toDecimalStringWithSignificantFigures (-5.45, 3), String ("-5.45"));
+
+            expectEquals (String::toDecimalStringWithSignificantFigures (12345.6789, 9), String ("12345.6789"));
+            expectEquals (String::toDecimalStringWithSignificantFigures (12345.6789, 8), String ("12345.679"));
+            expectEquals (String::toDecimalStringWithSignificantFigures (12345.6789, 5), String ("12346"));
+
+            expectEquals (String::toDecimalStringWithSignificantFigures (0.00028647, 6), String ("0.000286470"));
+            expectEquals (String::toDecimalStringWithSignificantFigures (0.0028647,  6), String ("0.00286470"));
+            expectEquals (String::toDecimalStringWithSignificantFigures (2.8647,     6), String ("2.86470"));
+
+            expectEquals (String::toDecimalStringWithSignificantFigures (-0.0000000000019, 1), String ("-0.000000000002"));
         }
     }
 };

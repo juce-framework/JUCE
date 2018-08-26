@@ -312,7 +312,7 @@ private:
 
         static String guiExtrasModule ("juce_gui_extra");
 
-        if (project.getModules().isModuleEnabled (guiExtrasModule)
+        if (project.getEnabledModules().isModuleEnabled (guiExtrasModule)
             && project.isConfigFlagEnabled ("JUCE_WEB_BROWSER", true))
         {
             result.add ("webkit2gtk-4.0");

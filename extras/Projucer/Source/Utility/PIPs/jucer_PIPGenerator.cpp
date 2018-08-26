@@ -97,8 +97,9 @@ static bool isMobileExporter (const String& exporterName)
 }
 
 //==============================================================================
-PIPGenerator::PIPGenerator (const File& pip, const File& output)
+PIPGenerator::PIPGenerator (const File& pip, const File& output, const File& juceDir)
     : pipFile (pip),
+      juceDirectory (juceDir),
       metadata (parsePIPMetadata())
 {
     if (output != File())
@@ -290,7 +291,7 @@ ValueTree PIPGenerator::createModulePathChild (const String& moduleID)
     ValueTree modulePath (Ids::MODULEPATH);
 
     modulePath.setProperty (Ids::ID, moduleID, nullptr);
-    modulePath.setProperty (Ids::path, {}, nullptr);
+    modulePath.setProperty (Ids::path, juceDirectory.getFullPathName(), nullptr);
 
     return modulePath;
 }
@@ -367,7 +368,7 @@ ValueTree PIPGenerator::createModuleChild (const String& moduleID)
     module.setProperty (Ids::ID, moduleID, nullptr);
     module.setProperty (Ids::showAllCode, 1, nullptr);
     module.setProperty (Ids::useLocalCopy, 0, nullptr);
-    module.setProperty (Ids::useGlobalPath, 1, nullptr);
+    module.setProperty (Ids::useGlobalPath, (juceDirectory == File() ? 1 : 0), nullptr);
 
     return module;
 }

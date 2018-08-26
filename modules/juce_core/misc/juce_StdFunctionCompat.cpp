@@ -62,7 +62,7 @@ namespace FunctionTestsHelpers
 
     struct FunctionObject
     {
-        FunctionObject() {}
+        FunctionObject() = default;
 
         FunctionObject (const FunctionObject& other)
         {
@@ -72,6 +72,26 @@ namespace FunctionTestsHelpers
         int operator()(int i) const { return bigData->sum() + i; }
 
         std::unique_ptr<BigData> bigData { new BigData() };
+
+        JUCE_LEAK_DETECTOR (FunctionObject)
+    };
+
+    struct BigFunctionObject
+    {
+        BigFunctionObject() = default;
+
+        BigFunctionObject (const BigFunctionObject& other)
+        {
+            bigData.reset (new BigData (*other.bigData));
+        }
+
+        int operator()(int i) const { return bigData->sum() + i; }
+
+        std::unique_ptr<BigData> bigData { new BigData() };
+
+        int stackUsage[32];
+
+        JUCE_LEAK_DETECTOR (BigFunctionObject)
     };
 }
 
@@ -95,13 +115,16 @@ public:
 
             std::function<double(double, double)> f2 (FunctionTestsHelpers::multiply);
             expectEquals (6.0, f2 (2.0, 3.0));
-
         }
 
         {
             beginTest ("Function objects");
+
             std::function<int(int)> f1 = FunctionTestsHelpers::FunctionObject();
             expectEquals (f1 (5), FunctionTestsHelpers::BigData::bigDataSum + 5);
+
+            std::function<int(int)> f2 { FunctionTestsHelpers::BigFunctionObject() };
+            expectEquals (f2 (5), FunctionTestsHelpers::BigData::bigDataSum + 5);
         }
 
         {

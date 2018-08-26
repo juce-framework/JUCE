@@ -178,7 +178,7 @@ public:
                                 the intersection (if the lines intersect). If the lines
                                 are parallel, this will just be set to the position
                                 of one of the line's endpoints.
-        @returns    true if the line segments intersect; false if they dont. Even if they
+        @returns    true if the line segments intersect; false if they don't. Even if they
                     don't intersect, the intersection coordinates returned will still
                     be valid
     */

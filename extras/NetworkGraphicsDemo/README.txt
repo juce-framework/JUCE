@@ -5,7 +5,7 @@
 This example is an app that we threw together to run as a demo of JUCE on our
 booth at CES 2016.
 
-It allows a collection of heterogenous devices on a local network to collectively
+It allows a collection of heterogeneous devices on a local network to collectively
 draw parts of a large animated vector graphic image that is being generated and
 broadcast by one of the machines (the 'master').
 

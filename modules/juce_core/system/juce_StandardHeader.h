@@ -51,6 +51,8 @@
 #include <algorithm>
 #include <limits>
 #include <atomic>
+#include <sstream>
+#include <iomanip>
 
 //==============================================================================
 #include "juce_CompilerSupport.h"

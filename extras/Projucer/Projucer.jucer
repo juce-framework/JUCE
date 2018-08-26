@@ -67,7 +67,7 @@
         <MODULEPATH id="juce_analytics" path="../../modules"/>
       </MODULEPATHS>
     </VS2015>
-    <VS2017 targetFolder="Builds/VisualStudio2017" bigIcon="rv1F4h">
+    <VS2017 targetFolder="Builds/VisualStudio2017" bigIcon="rv1F4h" extraCompilerFlags="/w44265 /w45038 /w44062">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="Projucer" useRuntimeLibDLL="0"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Projucer"

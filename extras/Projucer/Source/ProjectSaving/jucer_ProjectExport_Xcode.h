@@ -1510,7 +1510,7 @@ public:
             paths.addArray (config.getHeaderSearchPaths());
             paths.addArray (getTargetExtraHeaderSearchPaths());
 
-            if (owner.project.getModules().isModuleEnabled ("juce_audio_plugin_client"))
+            if (owner.project.getEnabledModules().isModuleEnabled ("juce_audio_plugin_client"))
             {
                 // Needed to compile .r files
                 paths.add (owner.getModuleFolderRelativeToProject ("juce_audio_plugin_client")
@@ -1522,6 +1522,8 @@ public:
 
             for (auto& s : paths)
             {
+                // Xcode 10 can't deal with search paths starting with "~" so we need to replace them here...
+                s = sanitisePath (s);
                 s = owner.replacePreprocessorTokens (config, s);
 
                 if (s.containsChar (' '))

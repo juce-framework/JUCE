@@ -197,7 +197,6 @@ void findMinAndMax (const Type* values, int numValues, Type& lowest, Type& highe
     }
 }
 
-
 //==============================================================================
 /** Constrains a value to keep it within a given range.
 
@@ -263,6 +262,25 @@ bool isPositiveAndNotGreaterThan (int valueToTest, Type upperLimit) noexcept
 {
     jassert (upperLimit >= 0); // makes no sense to call this if the upper limit is itself below zero..
     return static_cast<unsigned int> (valueToTest) <= static_cast<unsigned int> (upperLimit);
+}
+
+/** Computes the absolute difference between two values and returns true if it is less than or equal
+    to a given tolerance, otherwise it returns false.
+*/
+template <typename Type>
+bool isWithin (Type a, Type b, Type tolerance) noexcept
+{
+    return std::abs (a - b) <= tolerance;
+}
+
+/** Returns true if the two numbers are approximately equal. This is useful for floating-point
+    and double comparisons.
+*/
+template <typename Type>
+bool approximatelyEqual (Type a, Type b) noexcept
+{
+    return std::abs (a - b) <= (std::numeric_limits<Type>::epsilon() * std::max (a, b))
+            || std::abs (a - b) < std::numeric_limits<Type>::min();
 }
 
 //==============================================================================

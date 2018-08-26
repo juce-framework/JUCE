@@ -108,7 +108,7 @@ public:
         verticalDividerBar.reset (new StretchableLayoutResizerBar (&verticalLayout, 1, true));
         addAndMakeVisible (verticalDividerBar.get());
 
-        // ..and pick a random font to select intially
+        // ..and pick a random font to select initially
         listBox.selectRow (Random::getSystemRandom().nextInt (fonts.size()));
 
         demoTextBox.setMultiLine (true);

@@ -1083,7 +1083,7 @@ public:
 
 private:
     //==============================================================================
-    ArrayBase <ElementType, TypeOfCriticalSectionToUse> values;
+    ArrayBase<ElementType, TypeOfCriticalSectionToUse> values;
 
     void removeInternal (int indexToRemove)
     {

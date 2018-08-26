@@ -275,6 +275,7 @@ namespace juce
 #include "text/juce_Base64.h"
 #include "misc/juce_Result.h"
 #include "misc/juce_Uuid.h"
+#include "misc/juce_ConsoleApplication.h"
 #include "containers/juce_Variant.h"
 #include "containers/juce_NamedValueSet.h"
 #include "containers/juce_DynamicObject.h"

@@ -893,6 +893,8 @@ void AudioProcessorGraph::topologyChanged()
 
 void AudioProcessorGraph::clear()
 {
+    const ScopedLock sl (getCallbackLock());
+
     if (nodes.isEmpty())
         return;
 
@@ -1239,14 +1241,9 @@ void AudioProcessorGraph::handleAsyncUpdate()
 }
 
 //==============================================================================
-void AudioProcessorGraph::prepareToPlay (double /*sampleRate*/, int estimatedSamplesPerBlock)
+void AudioProcessorGraph::prepareToPlay (double sampleRate, int estimatedSamplesPerBlock)
 {
-    if (renderSequenceFloat != nullptr)
-        renderSequenceFloat->prepareBuffers (estimatedSamplesPerBlock);
-
-    if (renderSequenceDouble != nullptr)
-        renderSequenceDouble->prepareBuffers (estimatedSamplesPerBlock);
-
+    setRateAndBufferSizeDetails (sampleRate, estimatedSamplesPerBlock);
     clearRenderingSequence();
     triggerAsyncUpdate();
 }
@@ -1258,6 +1255,8 @@ bool AudioProcessorGraph::supportsDoublePrecisionProcessing() const
 
 void AudioProcessorGraph::releaseResources()
 {
+    const ScopedLock sl (getCallbackLock());
+
     isPrepared = 0;
 
     for (auto* n : nodes)

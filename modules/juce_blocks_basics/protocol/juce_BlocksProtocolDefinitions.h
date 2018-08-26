@@ -232,6 +232,8 @@ enum ConfigItemId
     slideCC             = 6,
     slideMode           = 7,
     octaveTopology      = 8,
+    midiChannelRange    = 9,
+    MPEZone             = 40,
     // Touch
     velocitySensitivity = 10,
     glideSensitivity    = 11,
@@ -363,7 +365,8 @@ enum ConfigCommands
     updateUserConfig            = 0x05, // As above but contains user config metadata
     setConfigState              = 0x06, // Set config activation state and whether it is saved in flash
     factorySyncEnd              = 0x07,
-    clusterConfigSync           = 0x08
+    clusterConfigSync           = 0x08,
+    factorySyncReset            = 0x09
 };
 
 using ConfigCommand = IntegerWithBitSize<4>;

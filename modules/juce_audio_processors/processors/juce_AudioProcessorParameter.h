@@ -216,7 +216,7 @@ public:
     /** Returns the set of strings which represent the possible states a parameter
         can be in.
 
-        If you are hosting a plug-in you can use the result of this funtion to
+        If you are hosting a plug-in you can use the result of this function to
         populate a ComboBox listing the allowed values.
 
         If you are implementing a plug-in then you do not need to override this.

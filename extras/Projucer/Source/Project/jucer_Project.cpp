@@ -64,7 +64,7 @@ Project::Project (const File& f)
 
     parsedPreprocessorDefs = parsePreprocessorDefs (preprocessorDefsValue.get());
 
-    getModules().sortAlphabetically();
+    getEnabledModules().sortAlphabetically();
 
     projectRoot.addListener (this);
 
@@ -489,45 +489,33 @@ static int getBuiltJuceVersion()
          + JUCE_BUILDNUMBER;
 }
 
-static bool isAnyModuleNewerThanProjucer (const OwnedArray<ModuleDescription>& modules)
+static bool isModuleNewerThanProjucer (const ModuleDescription& module)
 {
-    for (auto i = modules.size(); --i >= 0;)
-    {
-        auto* m = modules.getUnchecked(i);
-
-        if (m->getID().startsWith ("juce_")
-              && getJuceVersion (m->getVersion()) > getBuiltJuceVersion())
-            return true;
-    }
+    if (module.getID().startsWith ("juce_")
+        && getJuceVersion (module.getVersion()) > getBuiltJuceVersion())
+        return true;
 
     return false;
 }
 
 void Project::warnAboutOldProjucerVersion()
 {
-    ModuleList available;
-
-    available.scanGlobalJuceModulePath();
-
-    if (! isAnyModuleNewerThanProjucer (available.modules))
-        available.scanGlobalUserModulePath();
-
-    if (! isAnyModuleNewerThanProjucer (available.modules))
-        available.scanProjectExporterModulePaths (*this);
-
-    if (! isAnyModuleNewerThanProjucer (available.modules))
-        return;
-
-    // Projucer is out of date!
-    if (ProjucerApplication::getApp().isRunningCommandLine)
-        std::cout <<  "WARNING! This version of the Projucer is out-of-date!" << std::endl;
-    else
-        AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
-                                          "Projucer",
-                                          "This version of the Projucer is out-of-date!"
-                                          "\n\n"
-                                          "Always make sure that you're running the very latest version, "
-                                          "preferably compiled directly from the JUCE repository that you're working with!");
+    for (auto& juceModule : ProjucerApplication::getApp().getJUCEPathModuleList().getAllModules())
+    {
+        if (isModuleNewerThanProjucer ({ juceModule.second }))
+        {
+            // Projucer is out of date!
+            if (ProjucerApplication::getApp().isRunningCommandLine)
+                std::cout <<  "WARNING! This version of the Projucer is out-of-date!" << std::endl;
+            else
+                AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                                  "Projucer",
+                                                  "This version of the Projucer is out-of-date!"
+                                                  "\n\n"
+                                                  "Always make sure that you're running the very latest version, "
+                                                  "preferably compiled directly from the JUCE repository that you're working with!");
+        }
+    }
 }
 
 //==============================================================================
@@ -565,7 +553,7 @@ Result Project::loadDocument (const File& file)
 
     registerRecentFile (file);
 
-    enabledModulesList.reset();
+    enabledModuleList.reset();
     projectRoot = newTree;
 
     initialiseProjectValues();
@@ -586,6 +574,9 @@ Result Project::loadDocument (const File& file)
         warnAboutOldProjucerVersion();
 
     compileEngineSettings.reset (new CompileEngineSettings (projectRoot));
+
+    exporterPathsModuleList.reset (new AvailableModuleList());
+    rescanExporterPathModules (! ProjucerApplication::getApp().isRunningCommandLine);
 
     return Result::ok();
 }
@@ -910,7 +901,8 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
                "The name of the project.");
 
     props.add (new TextPropertyComponent (versionValue, "Project Version", 16, false),
-               "The project's version number, This should be in the format major.minor.point[.point]");
+               "The project's version number. This should be in the format major.minor.point[.point] where you should omit the final "
+               "(optional) [.point] if you are targeting AU and AUv3 plug-ins as they only support three number versions.");
 
     props.add (new TextPropertyComponent (companyNameValue, "Company Name", 256, false),
                "Your company name, which will be added to the properties of the binary where possible");
@@ -1107,7 +1099,7 @@ int Project::getVersionAsHexInteger() const
                + (segments[1].getIntValue() << 8)
                +  segments[2].getIntValue();
 
-    if (segments.size() >= 4)
+    if (segments.size() > 3)
         value = (value << 8) + segments[3].getIntValue();
 
     return value;
@@ -1744,17 +1736,17 @@ String Project::getIAAPluginName()
 //==============================================================================
 bool Project::isAUPluginHost()
 {
-    return getModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_AU");
+    return getEnabledModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_AU");
 }
 
 bool Project::isVSTPluginHost()
 {
-    return getModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_VST");
+    return getEnabledModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_VST");
 }
 
 bool Project::isVST3PluginHost()
 {
-    return getModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3");
+    return getEnabledModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3");
 }
 
 //==============================================================================
@@ -1875,12 +1867,91 @@ Array<var> Project::getDefaultRTASCategories() const noexcept
 }
 
 //==============================================================================
-EnabledModuleList& Project::getModules()
+EnabledModuleList& Project::getEnabledModules()
 {
-    if (enabledModulesList == nullptr)
-        enabledModulesList.reset (new EnabledModuleList (*this, projectRoot.getOrCreateChildWithName (Ids::MODULES, nullptr)));
+    if (enabledModuleList == nullptr)
+        enabledModuleList.reset (new EnabledModuleList (*this, projectRoot.getOrCreateChildWithName (Ids::MODULES, nullptr)));
 
-    return *enabledModulesList;
+    return *enabledModuleList;
+}
+
+static Array<File> getAllPossibleModulePathsFromExporters (Project& project)
+{
+    StringArray paths;
+
+    for (Project::ExporterIterator exporter (project); exporter.next();)
+    {
+        auto& modules = project.getEnabledModules();
+        auto n = modules.getNumModules();
+
+        for (int i = 0; i < n; ++i)
+        {
+            auto id = modules.getModuleID (i);
+
+            if (modules.shouldUseGlobalPath (id))
+                continue;
+
+            auto path = exporter->getPathForModuleString (id);
+
+            if (path.isNotEmpty())
+                paths.addIfNotAlreadyThere (path);
+        }
+
+        auto oldPath = exporter->getLegacyModulePath();
+
+        if (oldPath.isNotEmpty())
+            paths.addIfNotAlreadyThere (oldPath);
+    }
+
+    Array<File> files;
+
+    for (auto& path : paths)
+    {
+        auto f = project.resolveFilename (path);
+
+        if (f.isDirectory())
+        {
+            files.addIfNotAlreadyThere (f);
+
+            if (f.getChildFile ("modules").isDirectory())
+                files.addIfNotAlreadyThere (f.getChildFile ("modules"));
+        }
+    }
+
+    return files;
+}
+
+AvailableModuleList& Project::getExporterPathsModuleList()
+{
+    return *exporterPathsModuleList;
+}
+
+void Project::rescanExporterPathModules (bool async)
+{
+    if (async)
+        exporterPathsModuleList->scanPathsAsync (getAllPossibleModulePathsFromExporters (*this));
+    else
+        exporterPathsModuleList->scanPaths (getAllPossibleModulePathsFromExporters (*this));
+}
+
+ModuleIDAndFolder Project::getModuleWithID (const String& id)
+{
+    if (! getEnabledModules().shouldUseGlobalPath (id))
+    {
+        const auto& mod = exporterPathsModuleList->getModuleWithID (id);
+
+        if (mod.second != File())
+            return mod;
+    }
+
+    const auto& list = (isJUCEModule (id) ? ProjucerApplication::getApp().getJUCEPathModuleList().getAllModules()
+                                          : ProjucerApplication::getApp().getUserPathsModuleList().getAllModules());
+
+    for (auto& m : list)
+        if (m.first == id)
+            return m;
+
+    return exporterPathsModuleList->getModuleWithID (id);
 }
 
 //==============================================================================

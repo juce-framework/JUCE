@@ -101,7 +101,7 @@ class JUCE_API WebInputStream : public InputStream
 
         If getResponseHeaders is called without an established connection, then
         getResponseHeaders will call connect internally and block until connect
-        returns - either due to a succesful connection or a connection
+        returns - either due to a successful connection or a connection
         error.
 
         @see connect
@@ -112,7 +112,7 @@ class JUCE_API WebInputStream : public InputStream
 
         If getStatusCode is called without an established connection, then
         getStatusCode will call connect internally and block until connect
-        returns - either due to a succesful connection or a connection
+        returns - either due to a successful connection or a connection
         error.
 
         @see connect
@@ -153,7 +153,7 @@ class JUCE_API WebInputStream : public InputStream
 
         If getTotalLength is called without an established connection, then
         getTotalLength will call connect internally and block until connect
-        returns - either due to a succesful connection or a connection
+        returns - either due to a successful connection or a connection
         error.
 
         If the size of the stream isn't actually known, this will return -1.

@@ -414,7 +414,7 @@ private:
     {
         AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
                                           "Unknown error",
-                                          "An unknown error occured while trying to disconnect from UDP port.",
+                                          "An unknown error occurred while trying to disconnect from UDP port.",
                                           "OK");
     }
 

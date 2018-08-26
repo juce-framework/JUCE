@@ -376,6 +376,11 @@ struct HostPacketDecoder
             handler.handleConfigFactorySyncEndMessage (deviceIndex);
         }
 
+        if (type == factorySyncReset)
+        {
+            handler.handleConfigFactorySyncResetMessage (deviceIndex);
+        }
+
         return true;
     }
 

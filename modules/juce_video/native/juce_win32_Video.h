@@ -159,6 +159,9 @@ namespace VideoRenderers
 
 //==============================================================================
 struct VideoComponent::Pimpl  : public Component
+                             #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+                              , public ComponentPeer::ScaleFactorListener
+                             #endif
 {
     Pimpl (VideoComponent& ownerToUse, bool)
         : owner (ownerToUse),
@@ -174,6 +177,12 @@ struct VideoComponent::Pimpl  : public Component
         close();
         context = nullptr;
         componentWatcher = nullptr;
+
+       #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+        for (int i = 0; i < ComponentPeer::getNumPeers(); ++i)
+            if (auto* peer = ComponentPeer::getPeer (i))
+                peer->removeScaleFactorListener (this);
+       #endif
     }
 
     Result loadFromString (const String& fileOrURLPath)
@@ -300,7 +309,7 @@ struct VideoComponent::Pimpl  : public Component
 
         if (getWidth() > 0 && getHeight() > 0)
             if (auto* peer = getTopLevelComponent()->getPeer())
-                context->updateWindowPosition (peer->getAreaCoveredBy (*this));
+                context->updateWindowPosition ((peer->getAreaCoveredBy (*this).toDouble() * peer->getPlatformScaleFactor()).toNearestInt());
     }
 
     void updateContextVisibility()
@@ -331,6 +340,14 @@ struct VideoComponent::Pimpl  : public Component
         if (owner.onErrorOccurred != nullptr)
             owner.onErrorOccurred (errorMessage);
     }
+
+   #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+    void nativeScaleFactorChanged (double /*newScaleFactor*/) override
+    {
+        if (videoLoaded)
+            updateContextPosition();
+    }
+   #endif
 
     File currentFile;
     URL currentURL;
@@ -754,6 +771,10 @@ private:
                 nativeWindow.reset (new NativeWindow ((HWND) topLevelPeer->getNativeHandle(), this));
 
                 hwnd = nativeWindow->hwnd;
+
+               #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+                topLevelPeer->addScaleFactorListener (&component);
+               #endif
 
                 if (hwnd != 0)
                 {

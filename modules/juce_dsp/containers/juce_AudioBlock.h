@@ -327,7 +327,7 @@ public:
         pointed to by the receiver remains valid through-out the life-time of the
         returned sub-block.
 
-        @param newOffset   The index of an element inside the reciever which will
+        @param newOffset   The index of an element inside the receiver which will
                            will become the first element of the return value.
         @param newLength   The number of elements of the newly created sub-block.
     */
@@ -344,7 +344,7 @@ public:
         pointed to by the receiver remains valid through-out the life-time of the
         returned sub-block.
 
-        @param newOffset   The index of an element inside the reciever which will
+        @param newOffset   The index of an element inside the receiver which will
                            will become the first element of the return value.
                            The return value will include all subsequent elements
                            of the receiver.

@@ -597,7 +597,7 @@ struct MenuWindow  : public Component
         if (relativeTo != nullptr)
             targetPoint = relativeTo->localPointToGlobal (targetPoint);
 
-        auto parentArea = Desktop::getInstance().getDisplays().getDisplayContaining (targetPoint)
+        auto parentArea = Desktop::getInstance().getDisplays().findDisplayForPoint (targetPoint)
                               #if JUCE_MAC
                                .userArea;
                               #else
@@ -912,7 +912,8 @@ struct MenuWindow  : public Component
             activeSubMenu.reset (new HelperClasses::MenuWindow (*(childComp->item.subMenu), this,
                                                                 options.withTargetScreenArea (childComp->getScreenBounds())
                                                                        .withMinimumWidth (0)
-                                                                       .withTargetComponent (nullptr),
+                                                                       .withTargetComponent (nullptr)
+                                                                       .withParentComponent (parentComponent),
                                                                 false, dismissOnMouseUp, managerOfChosenCommand, scaleFactor));
 
             activeSubMenu->setVisible (true); // (must be called before enterModalState on Windows to avoid DropShadower confusion)

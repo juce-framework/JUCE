@@ -250,11 +250,15 @@ private:
         for (auto i = desktop.getNumComponents(); --i >= 0;)
         {
             auto* desktopComponent = desktop.getComponent (i);
-            auto localPoint = desktopComponent->getLocalPoint (nullptr, screenPos);
+            auto dPoint = desktopComponent->getLocalPoint (nullptr, screenPos);
 
-            if (auto* c = desktopComponent->getComponentAt (localPoint))
-                if (c->hitTest (localPoint.getX(), localPoint.getY()))
+            if (auto* c = desktopComponent->getComponentAt (dPoint))
+            {
+                auto cPoint = c->getLocalPoint (desktopComponent, dPoint);
+
+                if (c->hitTest (cPoint.getX(), cPoint.getY()))
                     return c;
+            }
         }
 
         return nullptr;

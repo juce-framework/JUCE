@@ -665,7 +665,7 @@ public:
             for (auto tagEntry : knownTags)
                 expect (AudioChannelSet::channelSetWithChannels (CoreAudioLayouts::getSpeakerLayoutForCoreAudioTag (tagEntry.tag))
                             == CoreAudioLayouts::fromCoreAudio (tagEntry.tag),
-                        "Tag \"" + String (tagEntry.name) + "\" is not converted consistantly by JUCE");
+                        "Tag \"" + String (tagEntry.name) + "\" is not converted consistently by JUCE");
         }
 
         {

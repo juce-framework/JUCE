@@ -82,7 +82,12 @@ public:
             expectEquals (derivedObject->getReferenceCount(), 1);
 
             baseArray.add (baseObjectPtr);
+
+           #if JUCE_STRICT_REFCOUNTEDPOINTER
             baseArray.add (derivedObjectPtr);
+           #else
+            baseArray.add (derivedObjectPtr.get());
+           #endif
 
             for (auto o : baseArray)
                 expectEquals (o->getReferenceCount(), 2);

@@ -169,6 +169,15 @@ PluginWindow* FilterGraph::getOrCreateWindowFor (AudioProcessorGraph::Node* node
             }
         }
 
+       #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+        if (! node->properties["DPIAware"]
+            && ! node->getProcessor()->getName().contains ("Kontakt")) // Kontakt doesn't behave correctly in DPI unaware mode...
+        {
+            ScopedDPIAwarenessDisabler disableDPIAwareness;
+            return activePluginWindows.add (new PluginWindow (node, type, activePluginWindows));
+        }
+       #endif
+
         return activePluginWindows.add (new PluginWindow (node, type, activePluginWindows));
     }
 

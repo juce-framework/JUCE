@@ -31,6 +31,7 @@
 class ProjectExporter;
 class LibraryModule;
 class EnabledModuleList;
+class AvailableModuleList;
 class ProjectContentComponent;
 class CompileEngineSettings;
 
@@ -352,7 +353,12 @@ public:
     bool isConfigFlagEnabled (const String& name, bool defaultIsEnabled = false) const;
 
     //==============================================================================
-    EnabledModuleList& getModules();
+    EnabledModuleList& getEnabledModules();
+
+    AvailableModuleList& getExporterPathsModuleList();
+    void rescanExporterPathModules (bool async = false);
+
+    std::pair<String, File> getModuleWithID (const String&);
 
     //==============================================================================
     String getFileTemplate (const String& templateName);
@@ -413,6 +419,8 @@ private:
 
     //==============================================================================
     std::unique_ptr<CompileEngineSettings> compileEngineSettings;
+    std::unique_ptr<EnabledModuleList> enabledModuleList;
+    std::unique_ptr<AvailableModuleList> exporterPathsModuleList;
 
     //==============================================================================
     bool shouldWriteLegacyPluginFormatSettings = false;
@@ -441,7 +449,6 @@ private:
 
     //==============================================================================
     friend class Item;
-    std::unique_ptr<EnabledModuleList> enabledModulesList;
     bool isSaving = false;
     Time modificationTime;
     StringPairArray parsedPreprocessorDefs;

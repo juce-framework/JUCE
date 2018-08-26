@@ -122,7 +122,7 @@ private:
             if (embedAsSiblingRatherThanChild)
             {
                 // This is a workaround for a bug in a web browser component where
-                // scrolling would be very slow and occassionally would scroll in
+                // scrolling would be very slow and occasionally would scroll in
                 // opposite direction to dragging direction. In normal circumstances,
                 // the native view should be a child of peerView instead.
                 auto parentView = LocalRef<jobject> (env->CallObjectMethod (peerView, AndroidView.getParent));

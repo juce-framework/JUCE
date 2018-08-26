@@ -140,6 +140,13 @@ public:
     void setAnalyticsEnabled (bool);
 
     //==============================================================================
+    void rescanJUCEPathModules();
+    void rescanUserPathModules();
+
+    AvailableModuleList& getJUCEPathModuleList()     { return jucePathModuleList; }
+    AvailableModuleList& getUserPathsModuleList()    { return userPathsModuleList; }
+
+    //==============================================================================
     ProjucerLookAndFeel lookAndFeel;
 
     std::unique_ptr<StoredSettings> settings;
@@ -203,6 +210,8 @@ private:
 
     void showSetJUCEPathAlert();
     std::unique_ptr<AlertWindow> pathAlert;
+
+    AvailableModuleList jucePathModuleList, userPathsModuleList;
 
     //==============================================================================
     void setColourScheme (int index, bool saveSetting);

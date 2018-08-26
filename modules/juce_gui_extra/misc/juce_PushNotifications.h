@@ -142,7 +142,7 @@ public:
                                   file, then the URL should be "sounds/my_sound.caf".
 
                                   For a custom sound on Android, set URL to the name of a raw resource file
-                                  (without an extention) that was included when exporting an Android project in
+                                  (without an extension) that was included when exporting an Android project in
                                   Projucer (see "Extra Android Raw Resources" setting). */
 
         var properties;      /**< Optional: collection of additional properties that may be passed as a dictionary. */
@@ -396,7 +396,7 @@ public:
         */
         struct Category
         {
-            juce::String identifier;         /**< unique indentifier */
+            juce::String identifier;         /**< unique identifier */
             juce::Array<Action> actions;     /**< optional list of actions within this category */
             bool sendDismissAction = false;  /**< whether dismiss action will be sent to the app (from iOS 10 only) */
         };
