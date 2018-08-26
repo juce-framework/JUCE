@@ -152,10 +152,9 @@ public:
 
                 if (doc != nullptr)
                 {
-                    code.includeFilesCPP.add (doc->getHeaderFile()
-                                                .getRelativePathFrom (code.document->getCppFile().getParentDirectory())
-                                                .replaceCharacter ('\\', '/'));
-
+                    code.includeFilesCPP.add (File::createFileWithoutCheckingPath (doc->getHeaderFile()
+                                                                                       .getRelativePathFrom (code.document->getCppFile().getParentDirectory())
+                                                                                       .replaceCharacter ('\\', '/')));
                     classNm = doc->getClassName();
                 }
                 else

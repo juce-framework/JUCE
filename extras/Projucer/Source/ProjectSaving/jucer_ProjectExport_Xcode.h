@@ -62,6 +62,8 @@ public:
           pListPrefixHeaderValue                       (settings, Ids::pListPrefixHeader,                       getUndoManager()),
           pListPreprocessValue                         (settings, Ids::pListPreprocess,                         getUndoManager()),
           extraFrameworksValue                         (settings, Ids::extraFrameworks,                         getUndoManager()),
+          extraCustomFrameworksValue                   (settings, Ids::extraCustomFrameworks,                   getUndoManager()),
+          embeddedFrameworksValue                      (settings, Ids::embeddedFrameworks,                      getUndoManager()),
           postbuildCommandValue                        (settings, Ids::postbuildCommand,                        getUndoManager()),
           prebuildCommandValue                         (settings, Ids::prebuildCommand,                         getUndoManager()),
           duplicateAppExResourcesFolderValue           (settings, Ids::duplicateAppExResourcesFolder,           getUndoManager(), true),
@@ -110,6 +112,8 @@ public:
     bool isPListPreprocessEnabled() const            { return pListPreprocessValue.get(); }
 
     String getExtraFrameworksString() const          { return extraFrameworksValue.get(); }
+    String getExtraCustomFrameworksString() const    { return extraCustomFrameworksValue.get(); }
+    String getEmbeddedFrameworksString() const       { return embeddedFrameworksValue.get(); }
 
     String getPostBuildScript() const                { return postbuildCommandValue.get(); }
     String getPreBuildScript() const                 { return prebuildCommandValue.get(); }
@@ -294,9 +298,16 @@ public:
         props.add (new TextPropertyComponent (pListPrefixHeaderValue, "PList Prefix Header", 512, false),
                    "Header file containing definitions used in plist file (see PList Preprocess).");
 
-        props.add (new TextPropertyComponent (extraFrameworksValue, "Extra Frameworks", 2048, false),
-                   "A comma-separated list of extra frameworks that should be added to the build. "
-                   "(Don't include the .framework extension in the name)");
+        props.add (new TextPropertyComponent (extraFrameworksValue, "Extra System Frameworks", 2048, false),
+                   "A comma-separated list of extra system frameworks that should be added to the build. "
+                   "(Don't include the .framework extension in the name)"
+                   " The frameworks are expected to be located in /System/Library/Frameworks");
+
+        props.add (new TextPropertyComponent (extraCustomFrameworksValue, "Extra Custom Frameworks", 8192, false),
+                   "Paths to custom frameworks that should be added to the build (one per line).");
+
+        props.add (new TextPropertyComponent (embeddedFrameworksValue, "Embedded Frameworks", 8192, true),
+                   "Paths to frameworks to be embedded with the app (one per line).");
 
         props.add (new TextPropertyComponent (prebuildCommandValue, "Pre-Build Shell Script", 32768, true),
                    "Some shell-script that will be run before a build starts.");
@@ -1076,6 +1087,9 @@ public:
             {
                 s.set ("INSTALL_PATH", installPath.quoted());
 
+                if (! owner.getEmbeddedFrameworks().isEmpty())
+                    s.set ("LD_RUNPATH_SEARCH_PATHS", "\"$(inherited) @executable_path/Frameworks\"");
+
                 if (xcodeCopyToProductInstallPathAfterBuild)
                 {
                     s.set ("DEPLOYMENT_LOCATION", "YES");
@@ -1727,7 +1741,7 @@ private:
 
     const bool iOS;
 
-    ValueWithDefault customPListValue, pListPrefixHeaderValue, pListPreprocessValue, extraFrameworksValue, postbuildCommandValue,
+    ValueWithDefault customPListValue, pListPrefixHeaderValue, pListPreprocessValue, extraFrameworksValue, extraCustomFrameworksValue, embeddedFrameworksValue, postbuildCommandValue,
                      prebuildCommandValue, duplicateAppExResourcesFolderValue, iosDeviceFamilyValue, iPhoneScreenOrientationValue,
                      iPadScreenOrientationValue, customXcodeResourceFoldersValue, customXcassetsFolderValue,
                      microphonePermissionNeededValue, microphonePermissionsTextValue, cameraPermissionNeededValue, cameraPermissionTextValue,
@@ -1756,6 +1770,8 @@ private:
         prepareTargets();
 
         addFrameworks();
+        addCustomFrameworks();
+        addEmbeddedFrameworks();
         addCustomResourceFolders();
         addPlistFileReferences();
 
@@ -2406,6 +2422,49 @@ private:
         }
     }
 
+    void addCustomFrameworks() const
+    {
+        StringArray customFrameworks;
+        customFrameworks.addTokens (getExtraCustomFrameworksString(), true);
+        customFrameworks.trim();
+
+        for (auto& framework : customFrameworks)
+        {
+            auto frameworkID = addCustomFramework (framework);
+
+            for (auto& target : targets)
+            {
+                target->frameworkIDs.add (frameworkID);
+                target->frameworkNames.add (framework);
+            }
+        }
+    }
+
+    void addEmbeddedFrameworks() const
+    {
+        auto frameworks = getEmbeddedFrameworks();
+
+        if (frameworks.isEmpty())
+            return;
+
+        StringArray frameworkIDs;
+
+        for (auto& f : frameworks)
+            frameworkIDs.add (addEmbeddedFramework (f));
+
+        for (auto& target : targets)
+            target->addCopyFilesPhase ("Embed Frameworks", frameworkIDs, kFrameworksFolder);
+    }
+
+    StringArray getEmbeddedFrameworks() const
+    {
+        StringArray frameworks;
+        frameworks.addTokens (getEmbeddedFrameworksString(), true);
+        frameworks.trim();
+
+        return frameworks;
+    }
+
     void addCustomResourceFolders() const
     {
         StringArray folders;
@@ -2785,6 +2844,35 @@ private:
         frameworkFileIDs.add (fileRefID);
 
         return addBuildFile (path, fileRefID, false, false);
+    }
+
+    String addCustomFramework (String frameworkPath) const
+    {
+        if (! frameworkPath.endsWithIgnoreCase (".framework"))
+            frameworkPath << ".framework";
+
+        auto fileRefID = createFileRefID (frameworkPath);
+
+        auto fileType = getFileType (RelativePath (frameworkPath, RelativePath::projectFolder));
+        addFileOrFolderReference (frameworkPath, "<group>", fileType);
+
+        frameworkFileIDs.add (fileRefID);
+
+        return addBuildFile (frameworkPath, fileRefID, false, false);
+    }
+
+    String addEmbeddedFramework (const String& path) const
+    {
+        auto fileRefID = createFileRefID (path);
+        auto fileID = createID (path + "buildref");
+
+        auto* v = new ValueTree (fileID);
+        v->setProperty ("isa", "PBXBuildFile", nullptr);
+        v->setProperty ("fileRef", fileRefID, nullptr);
+        v->setProperty ("settings", "{ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }", nullptr);
+        pbxBuildFiles.add (v);
+
+        return fileID;
     }
 
     void addGroup (const String& groupID, const String& groupName, const StringArray& childIDs) const

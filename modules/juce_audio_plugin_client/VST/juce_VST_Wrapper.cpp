@@ -317,11 +317,14 @@ public:
         if (processor->supportsDoublePrecisionProcessing())
             vstEffect.flags |= vstEffectFlagInplaceDoubleAudio;
 
+        vstEffect.flags |= vstEffectFlagDataInChunks;
+
        #if JucePlugin_IsSynth
         vstEffect.flags |= vstEffectFlagIsSynth;
+       #else
+        if (processor->getTailLengthSeconds() == 0.0)
+            vstEffect.flags |= vstEffectFlagSilenceInProducesSilenceOut;
        #endif
-
-        vstEffect.flags |= vstEffectFlagDataInChunks;
 
         activePlugins.add (this);
     }
@@ -588,7 +591,7 @@ public:
 
             if (getHostType().isAbletonLive()
                  && hostCallback != nullptr
-                 && processor->getTailLengthSeconds() == std::numeric_limits<double>::max())
+                 && processor->getTailLengthSeconds() == std::numeric_limits<double>::infinity())
             {
                 AbletonLiveHostSpecific hostCmd;
 
@@ -2046,7 +2049,18 @@ private:
     pointer_sized_int handleGetTailSize (VstOpCodeArguments)
     {
         if (processor != nullptr)
-            return (pointer_sized_int) (processor->getTailLengthSeconds() * sampleRate);
+        {
+            int32 result;
+
+            auto tailSeconds = processor->getTailLengthSeconds();
+
+            if (tailSeconds == std::numeric_limits<double>::infinity())
+                result = std::numeric_limits<int32>::max();
+            else
+                result = static_cast<int32> (tailSeconds * sampleRate);
+
+            return result; // Vst2 expects an int32 upcasted to a intptr_t here
+        }
 
         return 0;
     }

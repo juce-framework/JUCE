@@ -847,6 +847,9 @@ public:
         processor.setRateAndBufferSizeDetails (sampleRate, static_cast<int> (maxFrames));
         processor.prepareToPlay (sampleRate, static_cast<int> (maxFrames));
 
+        midiMessages.ensureSize (2048);
+        midiMessages.clear();
+
         zeromem (&lastAudioHead, sizeof (lastAudioHead));
         hostMusicalContextCallback = [getAudioUnit() musicalContextBlock];
         hostTransportStateCallback = [getAudioUnit() transportStateBlock];

@@ -309,7 +309,7 @@ public:
     {
         // only supported in Unity plugin API > 1.0
         if (state->structSize >= sizeof (UnityAudioEffectState))
-            samplesPerBlock = state->dspBufferSize;
+            samplesPerBlock = static_cast<int> (state->dspBufferSize);
 
         pluginInstance->setRateAndBufferSizeDetails (state->sampleRate, samplesPerBlock);
         pluginInstance->prepareToPlay (state->sampleRate, samplesPerBlock);
@@ -327,11 +327,11 @@ public:
         pluginInstance->reset();
     }
 
-    void process (float* inBuffer, float* outBuffer, unsigned int bufferSize, int numInChannels, int numOutChannels, bool isBypassed)
+    void process (float* inBuffer, float* outBuffer, int bufferSize, int numInChannels, int numOutChannels, bool isBypassed)
     {
-        for (int pos = 0; pos < static_cast<int> (bufferSize);)
+        for (int pos = 0; pos < bufferSize;)
         {
-            auto max = jmin (static_cast<int> (bufferSize) - pos, samplesPerBlock);
+            auto max = jmin (bufferSize - pos, samplesPerBlock);
             processBuffers (inBuffer + (pos * numInChannels), outBuffer + (pos * numOutChannels), max, numInChannels, numOutChannels, isBypassed);
 
             pos += max;
@@ -395,7 +395,7 @@ public:
             }
         }
 
-        definition.numParameters = numParams;
+        definition.numParameters = static_cast<uint32> (numParams);
         definition.parameterDefintions = parametersPtr.get();
     }
 
@@ -423,7 +423,7 @@ public:
 
 private:
     //==============================================================================
-    void processBuffers (float* inBuffer, float* outBuffer, unsigned int bufferSize, int numInChannels, int numOutChannels, bool isBypassed)
+    void processBuffers (float* inBuffer, float* outBuffer, int bufferSize, int numInChannels, int numOutChannels, bool isBypassed)
     {
         int ch;
         for (ch = 0; ch < numInChannels; ++ch)
@@ -622,11 +622,11 @@ namespace UnityCallbacks
 
             auto bypassed = ! isPlaying || (isMuted || isPaused);
 
-            pluginInstance->process (inBuffer, outBuffer, bufferSize, numInChannels, numOutChannels, bypassed);
+            pluginInstance->process (inBuffer, outBuffer, static_cast<int> (bufferSize), numInChannels, numOutChannels, bypassed);
         }
         else
         {
-            FloatVectorOperations::clear (outBuffer, bufferSize * numOutChannels);
+            FloatVectorOperations::clear (outBuffer, static_cast<int> (bufferSize) * numOutChannels);
         }
 
         return 0;
@@ -653,7 +653,7 @@ static void declareEffect (UnityAudioEffectDefinition& definition)
     definition.pluginVersion = JucePlugin_VersionCode;
 
     // effects must set this to 0, generators > 0
-    definition.channels = (wrapper->getNumInputChannels() != 0 ? 0 : wrapper->getNumOutputChannels());
+    definition.channels = (wrapper->getNumInputChannels() != 0 ? 0 : static_cast<uint32> (wrapper->getNumOutputChannels()));
 
     wrapper->declareParameters (definition);
 

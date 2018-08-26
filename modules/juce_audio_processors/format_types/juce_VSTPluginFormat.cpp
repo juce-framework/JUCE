@@ -1283,12 +1283,23 @@ struct VSTPluginInstance     : public AudioPluginInstance,
         if (vstEffect == nullptr)
             return 0.0;
 
-        auto sampleRate = getSampleRate();
-
-        if (sampleRate <= 0)
+        if ((vstEffect->flags & vstEffectFlagSilenceInProducesSilenceOut) != 0)
             return 0.0;
 
-        return dispatch (plugInOpcodeGetTailSize, 0, 0, 0, 0) / sampleRate;
+        auto tailSize = dispatch (plugInOpcodeGetTailSize, 0, 0, 0, 0);
+        auto sampleRate = getSampleRate();
+
+        // remain backward compatible with old JUCE plug-ins: anything larger
+        // than INT32_MAX is an invalid tail time but old JUCE 64-bit plug-ins
+        // would return INT64_MAX for infinite tail time. So treat anything
+        // equal or greater than INT32_MAX as infinite tail time.
+        if (tailSize >= std::numeric_limits<int32>::max())
+            return std::numeric_limits<double>::infinity();
+
+        if (tailSize >= 0 && sampleRate > 0)
+            return static_cast<double> (tailSize) / sampleRate;
+
+        return 0.0;
     }
 
     bool acceptsMidi() const override    { return wantsMidiMessages; }

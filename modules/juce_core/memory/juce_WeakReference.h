@@ -234,9 +234,9 @@ private:
      @see WeakReference, WeakReference::Master
 */
 #define JUCE_DECLARE_WEAK_REFERENCEABLE(Class) \
-    struct WeakRefMaster  : public WeakReference<Class>::Master { ~WeakRefMaster() { this->clear(); } }; \
+    struct WeakRefMaster  : public juce::WeakReference<Class>::Master { ~WeakRefMaster() { this->clear(); } }; \
     WeakRefMaster masterReference; \
-    friend class WeakReference<Class>; \
+    friend class juce::WeakReference<Class>; \
 
 
 } // namespace juce

@@ -1830,7 +1830,7 @@ protected:
 
     static bool shouldUseStdCall (const RelativePath& path)
     {
-        return path.getFileNameWithoutExtension().startsWithIgnoreCase ("juce_audio_plugin_client_RTAS_");
+        return path.getFileNameWithoutExtension().startsWithIgnoreCase ("include_juce_audio_plugin_client_RTAS_");
     }
 
     StringArray getModuleLibs() const

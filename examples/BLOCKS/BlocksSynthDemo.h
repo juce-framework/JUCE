@@ -352,7 +352,11 @@ public:
     }
 
 private:
+   #ifndef JUCE_DEMO_RUNNER
     AudioDeviceManager audioDeviceManager;
+   #else
+    AudioDeviceManager& audioDeviceManager { getSharedAudioDeviceManager (0, 2) };
+   #endif
     Synthesiser synthesiser;
 
     //==============================================================================

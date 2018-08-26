@@ -218,19 +218,19 @@ AudioProcessorParameterWithID* AudioProcessorValueTreeState::createAndAddParamet
 
 void AudioProcessorValueTreeState::addParameterListener (StringRef paramID, Listener* listener)
 {
-    if (Parameter* p = Parameter::getParameterForID (processor, paramID))
+    if (auto* p = Parameter::getParameterForID (processor, paramID))
         p->listeners.add (listener);
 }
 
 void AudioProcessorValueTreeState::removeParameterListener (StringRef paramID, Listener* listener)
 {
-    if (Parameter* p = Parameter::getParameterForID (processor, paramID))
+    if (auto* p = Parameter::getParameterForID (processor, paramID))
         p->listeners.remove (listener);
 }
 
 Value AudioProcessorValueTreeState::getParameterAsValue (StringRef paramID) const
 {
-    if (Parameter* p = Parameter::getParameterForID (processor, paramID))
+    if (auto* p = Parameter::getParameterForID (processor, paramID))
         return p->state.getPropertyAsValue (valuePropertyID, undoManager);
 
     return {};
@@ -238,7 +238,7 @@ Value AudioProcessorValueTreeState::getParameterAsValue (StringRef paramID) cons
 
 NormalisableRange<float> AudioProcessorValueTreeState::getParameterRange (StringRef paramID) const noexcept
 {
-    if (Parameter* p = Parameter::getParameterForID (processor, paramID))
+    if (auto* p = Parameter::getParameterForID (processor, paramID))
         return p->range;
 
     return NormalisableRange<float>();
@@ -251,7 +251,7 @@ AudioProcessorParameterWithID* AudioProcessorValueTreeState::getParameter (Strin
 
 float* AudioProcessorValueTreeState::getRawParameterValue (StringRef paramID) const noexcept
 {
-    if (Parameter* p = Parameter::getParameterForID (processor, paramID))
+    if (auto* p = Parameter::getParameterForID (processor, paramID))
         return &(p->value);
 
     return nullptr;
@@ -383,7 +383,7 @@ struct AttachedControlBase  : public AudioProcessorValueTreeState::Listener,
 
     void setNewUnnormalisedValue (float newUnnormalisedValue)
     {
-        if (AudioProcessorParameter* p = state.getParameter (paramID))
+        if (auto* p = state.getParameter (paramID))
         {
             const float newValue = state.getParameterRange (paramID)
                                         .convertTo0to1 (newUnnormalisedValue);
@@ -395,7 +395,7 @@ struct AttachedControlBase  : public AudioProcessorValueTreeState::Listener,
 
     void sendInitialUpdate()
     {
-        if (float* v = state.getRawParameterValue (paramID))
+        if (auto* v = state.getRawParameterValue (paramID))
             parameterChanged (paramID, *v);
     }
 
@@ -416,7 +416,7 @@ struct AttachedControlBase  : public AudioProcessorValueTreeState::Listener,
 
     void beginParameterChange()
     {
-        if (AudioProcessorParameter* p = state.getParameter (paramID))
+        if (auto* p = state.getParameter (paramID))
         {
             if (state.undoManager != nullptr)
                 state.undoManager->beginNewTransaction();
@@ -571,21 +571,37 @@ struct AudioProcessorValueTreeState::ComboBoxAttachment::Pimpl  : private Attach
     {
         const ScopedLock selfCallbackLock (selfCallbackMutex);
 
+        if (state.getParameter (paramID) != nullptr)
         {
-            ScopedValueSetter<bool> svs (ignoreCallbacks, true);
-            combo.setSelectedItemIndex (roundToInt (newValue), sendNotificationSync);
+            auto normValue = state.getParameterRange (paramID)
+                                  .convertTo0to1 (newValue);
+            auto index = roundToInt (normValue * (combo.getNumItems() - 1));
+
+            if (index != combo.getSelectedItemIndex())
+            {
+                ScopedValueSetter<bool> svs (ignoreCallbacks, true);
+                combo.setSelectedItemIndex (index, sendNotificationSync);
+            }
         }
     }
 
-    void comboBoxChanged (ComboBox* comboBox) override
+    void comboBoxChanged (ComboBox*) override
     {
         const ScopedLock selfCallbackLock (selfCallbackMutex);
 
         if (! ignoreCallbacks)
         {
-            beginParameterChange();
-            setNewUnnormalisedValue ((float) comboBox->getSelectedId() - 1.0f);
-            endParameterChange();
+            if (auto* p = state.getParameter (paramID))
+            {
+                auto newValue = (float) combo.getSelectedItemIndex() / (combo.getNumItems() - 1);
+
+                if (p->getValue() != newValue)
+                {
+                    beginParameterChange();
+                    p->setValueNotifyingHost (newValue);
+                    endParameterChange();
+                }
+            }
         }
     }
 

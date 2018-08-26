@@ -68,6 +68,7 @@ public:
         FinalCut,                   /**< Represents Apple Final Cut Pro. */
         FruityLoops,                /**< Represents Fruity Loops. */
         MagixSamplitude,            /**< Represents Magix Samplitude. */
+        MagixSequoia,               /**< Represents Magix Sequoia. */
         MergingPyramix,             /**< Represents Merging Pyramix. */
         MuseReceptorGeneric,        /**< Represents Muse Receptor. */
         Reaper,                     /**< Represents Cockos Reaper. */
@@ -149,6 +150,8 @@ public:
     bool isSADiE() const noexcept             { return type == SADiE; }
     /** Returns true if the host is Magix Samplitude. */
     bool isSamplitude() const noexcept        { return type == MagixSamplitude; }
+    /** Returns true if the host is Magix Sequoia. */
+    bool isSequoia() const noexcept           { return type == MagixSequoia; }
     /** Returns true if the host is any version of Cakewalk Sonar. */
     bool isSonar() const noexcept             { return type == CakewalkSonar8 || type == CakewalkSonarGeneric; }
     /** Returns true if the host is Steinberg's VST3 Test Host. */
@@ -195,6 +198,7 @@ public:
             case FinalCut:                 return "Final Cut";
             case FruityLoops:              return "FruityLoops";
             case MagixSamplitude:          return "Magix Samplitude";
+            case MagixSequoia:             return "Magix Sequoia";
             case MergingPyramix:           return "Pyramix";
             case MuseReceptorGeneric:      return "Muse Receptor";
             case Reaper:                   return "Reaper";
@@ -354,6 +358,7 @@ private:
         if (hostFilename.containsIgnoreCase   ("VST_Scanner"))       return VBVSTScanner;
         if (hostPath.containsIgnoreCase       ("Merging Technologies")) return MergingPyramix;
         if (hostFilename.startsWithIgnoreCase ("Sam"))               return MagixSamplitude;
+        if (hostFilename.startsWithIgnoreCase ("Sequoia"))           return MagixSequoia;
         if (hostFilename.containsIgnoreCase   ("Renoise"))           return Renoise;
         if (hostFilename.containsIgnoreCase   ("Resolve"))           return DaVinciResolve;
         if (hostPath.containsIgnoreCase       ("Bitwig Studio"))     return BitwigStudio;

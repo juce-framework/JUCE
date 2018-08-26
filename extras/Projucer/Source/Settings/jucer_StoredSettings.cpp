@@ -192,9 +192,17 @@ void StoredSettings::updateOldProjectSettingsFiles()
             auto newFileName = oldFileName.replace ("Introjucer", "Projucer");
 
             if (oldFileName.contains ("_Project"))
+            {
                 f.moveFileTo (f.getSiblingFile (newProjectSettingsDir.getFileName()).getChildFile (newFileName));
+            }
             else
-                f.moveFileTo (f.getSiblingFile (newFileName));
+            {
+                auto newFile = f.getSiblingFile (newFileName);
+
+                // don't overwrite newer settings file
+                if (! newFile.existsAsFile())
+                    f.moveFileTo (f.getSiblingFile (newFileName));
+            }
         }
     }
 }

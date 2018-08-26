@@ -607,8 +607,13 @@ Result Project::saveProject (const File& file, bool isCommandLineApp)
 
     updateProjectSettings();
 
-    if (! isCommandLineApp && ! isTemporaryProject())
-        registerRecentFile (file);
+    if (! isCommandLineApp)
+    {
+        ProjucerApplication::getApp().openDocumentManager.saveAll();
+
+        if (! isTemporaryProject())
+            registerRecentFile (file);
+    }
 
     const ScopedValueSetter<bool> vs (isSaving, true, false);
 
@@ -1571,6 +1576,23 @@ bool Project::Item::isIconCrossedOut() const
             && ! (shouldBeCompiled()
                    || shouldBeAddedToBinaryResources()
                    || getFile().hasFileExtension (headerFileExtensions));
+}
+
+bool Project::Item::needsSaving() const noexcept
+{
+    auto& odm = ProjucerApplication::getApp().openDocumentManager;
+
+    if (odm.anyFilesNeedSaving())
+    {
+        for (int i = 0; i < odm.getNumOpenDocuments(); ++i)
+        {
+            auto* doc = odm.getOpenDocument (i);
+            if (doc->needsSaving() && doc->getFile() == getFile())
+                return true;
+        }
+    }
+
+    return false;
 }
 
 //==============================================================================

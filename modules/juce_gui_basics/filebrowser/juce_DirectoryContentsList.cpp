@@ -29,8 +29,7 @@ namespace juce
 
 DirectoryContentsList::DirectoryContentsList (const FileFilter* f, TimeSliceThread& t)
    : fileFilter (f), thread (t),
-     fileTypeFlags (File::ignoreHiddenFiles | File::findFiles),
-     shouldStop (true)
+     fileTypeFlags (File::ignoreHiddenFiles | File::findFiles)
 {
 }
 

@@ -2065,6 +2065,9 @@ public:
         if (tailLengthSeconds <= 0.0 || processSetup.sampleRate <= 0.0)
             return Vst::kNoTail;
 
+        if (tailLengthSeconds == std::numeric_limits<double>::infinity())
+            return Vst::kInfiniteTail;
+
         return (Steinberg::uint32) roundToIntAccurate (tailLengthSeconds * processSetup.sampleRate);
     }
 
@@ -2442,6 +2445,9 @@ private:
 
         p.setRateAndBufferSizeDetails (sampleRate, bufferSize);
         p.prepareToPlay (sampleRate, bufferSize);
+
+        midiBuffer.ensureSize (2048);
+        midiBuffer.clear();
     }
 
     //==============================================================================

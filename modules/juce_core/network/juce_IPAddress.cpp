@@ -107,6 +107,8 @@ IPAddress::IPAddress (const String& adr)
 
         for (int i = 0; i < 4; ++i)
             address[i] = (uint8) tokens[i].getIntValue();
+
+        zeroUnusedBytes();
     }
     else
     {
@@ -114,14 +116,17 @@ IPAddress::IPAddress (const String& adr)
 
         if (tokens.contains ({})) // if :: shorthand has been used
         {
-            int idx = tokens.indexOf (StringRef());
+            auto idx = tokens.indexOf ({});
             tokens.set (idx, "0");
+            tokens.removeEmptyStrings();
+
+            // mapped IPv4 address will be treated as a single token, so pad the end of the StringArray
+            if (tokens[tokens.size() - 1].containsChar ('.'))
+                tokens.add ({});
 
             while (tokens.size() < 8)
                 tokens.insert (idx, "0");
         }
-
-        tokens.removeEmptyStrings();
 
         for (int i = 0; i < 8; ++i)
         {

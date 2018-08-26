@@ -149,6 +149,12 @@ public:
     */
     const float tiltY;
 
+    /** The coordinates of the last place that a mouse button was pressed.
+        The coordinates are relative to the component specified in MouseEvent::component.
+        @see getDistanceFromDragStart, getDistanceFromDragStartX, mouseWasDraggedSinceMouseDown
+    */
+    const Point<float> mouseDownPosition;
+
     /** The component that this event applies to.
 
         This is usually the component that the mouse was over at the time, but for mouse-drag
@@ -197,7 +203,8 @@ public:
 
     /** Returns the coordinates of the last place that a mouse was pressed.
         The coordinates are relative to the component specified in MouseEvent::component.
-        @see getDistanceFromDragStart, getDistanceFromDragStartX, mouseWasDraggedSinceMouseDown
+        For a floating point version of this value, see mouseDownPosition.
+        @see mouseDownPosition, getDistanceFromDragStart, getDistanceFromDragStartX, mouseWasDraggedSinceMouseDown
     */
     Point<int> getMouseDownPosition() const noexcept;
 
@@ -367,7 +374,6 @@ public:
 
 private:
     //==============================================================================
-    const Point<float> mouseDownPos;
     const uint8 numberOfClicks, wasMovedSinceMouseDown;
 
     MouseEvent& operator= (const MouseEvent&);

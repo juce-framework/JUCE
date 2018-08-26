@@ -1092,6 +1092,9 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             if (matchIf (TokenTypes::assign))            { ExpPtr rhs (parseExpression()); return new Assignment (location, lhs, rhs); }
             if (matchIf (TokenTypes::plusEquals))        return parseInPlaceOpExpression<AdditionOp> (lhs);
             if (matchIf (TokenTypes::minusEquals))       return parseInPlaceOpExpression<SubtractionOp> (lhs);
+            if (matchIf (TokenTypes::timesEquals))       return parseInPlaceOpExpression<MultiplyOp> (lhs);
+            if (matchIf (TokenTypes::divideEquals))      return parseInPlaceOpExpression<DivideOp> (lhs);
+            if (matchIf (TokenTypes::moduloEquals))      return parseInPlaceOpExpression<ModuloOp> (lhs);
             if (matchIf (TokenTypes::leftShiftEquals))   return parseInPlaceOpExpression<LeftShiftOp> (lhs);
             if (matchIf (TokenTypes::rightShiftEquals))  return parseInPlaceOpExpression<RightShiftOp> (lhs);
 
@@ -1105,7 +1108,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         Expression* parseInPlaceOpExpression (ExpPtr& lhs)
         {
             ExpPtr rhs (parseExpression());
-            Expression* bareLHS = lhs.get(); // careful - bare pointer is deliberately alised
+            Expression* bareLHS = lhs.get(); // careful - bare pointer is deliberately aliased
             return new SelfAssignment (location, bareLHS, new OpType (location, lhs, rhs));
         }
 

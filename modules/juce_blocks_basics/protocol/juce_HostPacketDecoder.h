@@ -308,7 +308,10 @@ struct HostPacketDecoder
             return false;
         }
 
-        handler.handleFirmwareUpdateACK (deviceIndex, reader.read<FirmwareUpdateACKCode>(), reader.read<FirmwareUpdateACKDetail>());
+        auto ackCode   = reader.read<FirmwareUpdateACKCode>();
+        auto ackDetail = reader.read<FirmwareUpdateACKDetail>();
+
+        handler.handleFirmwareUpdateACK (deviceIndex, ackCode, ackDetail);
         return true;
     }
 

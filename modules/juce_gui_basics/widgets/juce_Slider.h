@@ -843,6 +843,10 @@ public:
     bool isRotary() const noexcept;
     /** True if the slider is in a linear bar mode. */
     bool isBar() const noexcept;
+    /** True if the slider has two thumbs. */
+    bool isTwoValue() const noexcept;
+    /** True if the slider has three thumbs. */
+    bool isThreeValue() const noexcept;
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the slider.
