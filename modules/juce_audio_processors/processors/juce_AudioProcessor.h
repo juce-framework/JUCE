@@ -754,7 +754,9 @@ public:
 
      If the host can't or won't provide any time info, this will return nullptr.
      */
+#if RANDOM_AUDIO_ACCESS_SUPPORTED
     AudioFormatReader* getRandomAudioReader() const noexcept { return randomAudioReader; }
+#endif
 
     //==============================================================================
     /** Returns the total number of input channels.
@@ -1372,7 +1374,9 @@ public:
      The processor will not take ownership of the object, so the caller must delete it when
      it is no longer being used.
      */
+#if RANDOM_AUDIO_ACCESS_SUPPORTED
     virtual void setRandomAudioReader (AudioFormatReader* newRandomAudioMapper);
+#endif
 
     //==============================================================================
     /** This is called by the processor to specify its details before being played. Use this
@@ -1612,8 +1616,10 @@ protected:
     /** @internal */
     AudioPlayHead* playHead = nullptr;
 
+#if RANDOM_AUDIO_ACCESS_SUPPORTED
     /** @internal */
     AudioFormatReader* randomAudioReader = nullptr;
+#endif
 
     /** @internal */
     void sendParamChangeMessageToListeners (int parameterIndex, float newValue);

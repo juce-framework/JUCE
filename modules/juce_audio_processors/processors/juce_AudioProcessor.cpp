@@ -324,10 +324,12 @@ void AudioProcessor::setPlayHead (AudioPlayHead* newPlayHead)
     playHead = newPlayHead;
 }
 
+#if RANDOM_AUDIO_ACCESS_SUPPORTED
 void AudioProcessor::setRandomAudioReader (AudioFormatReader* const newAudioFormatReader)
 {
     randomAudioReader = newAudioFormatReader;
 }
+#endif
 
 void AudioProcessor::addListener (AudioProcessorListener* newListener)
 {
