@@ -772,6 +772,7 @@ namespace AAXClasses
              AAX_Result PreAnalyze ( int32_t iAudioInCount, int32_t iWindowSize ) override
             {
                 mIsFirstPass = true;
+                getAAXProcessor().getPluginInstance().setRateAndBufferSizeDetails (getAAXProcessor().sampleRate, iWindowSize);
                 getAAXProcessor().getPluginInstance().prepareToAnalyse(getAAXProcessor().sampleRate, iWindowSize, iAudioInCount);
                 return AAX_SUCCESS;
             }
@@ -779,6 +780,7 @@ namespace AAXClasses
              AAX_Result PreRender (int32_t /*iAudioInCount*/, int32_t /*iAudioOutCount*/, int32_t iWindowSize) override
             {
                 mIsFirstPass = true;
+                getAAXProcessor().getPluginInstance().setRateAndBufferSizeDetails (getAAXProcessor().sampleRate, iWindowSize);
                 getAAXProcessor().getPluginInstance().prepareToPlay(getAAXProcessor().sampleRate, iWindowSize);
                 return AAX_SUCCESS;
             }
