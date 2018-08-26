@@ -71,6 +71,7 @@ class NSViewComponentPeer  : public ComponentPeer,
 public:
     NSViewComponentPeer (Component& comp, const int windowStyleFlags, NSView* viewToAttachTo)
         : ComponentPeer (comp, windowStyleFlags),
+          safeComponent (&comp),
           isSharedWindow (viewToAttachTo != nil),
           lastRepaintTime (Time::getMillisecondCounter())
     {
@@ -1373,6 +1374,7 @@ public:
     //==============================================================================
     NSWindow* window = nil;
     NSView* view = nil;
+    WeakReference<Component> safeComponent;
     bool isSharedWindow = false, fullScreen = false;
     bool isWindowInKioskMode = false;
    #if USE_COREGRAPHICS_RENDERING
