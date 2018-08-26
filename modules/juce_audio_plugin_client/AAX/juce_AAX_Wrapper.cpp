@@ -2595,7 +2595,7 @@ AAX_Result JUCE_CDECL GetEffectDescriptions (AAX_ICollection* collection)
 #if JucePlugin_EnhancedAudioSuite
         if (AAX_IEffectDescriptor* const asDescriptor = collection->NewDescriptor())
         {
-            AAXClasses::getPlugInDescription (*asDescriptor, true);
+            AAXClasses::getPlugInDescription (*asDescriptor, nullptr, true);
             result = collection->AddEffect (JUCE_STRINGIFY (JucePlugin_AAXIdentifier ".hostprocessor"), asDescriptor);
         }
         else
