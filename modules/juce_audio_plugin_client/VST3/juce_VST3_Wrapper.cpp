@@ -133,7 +133,7 @@ public:
     //==============================================================================
     static const FUID iid;
     Array<Vst::ParamID> vstParamIDs;
-    Array<int> metersParamIDs;
+    Array<Vst::ParamID> metersParamIDs;
     Vst::ParamID bypassParamID = 0;
     bool bypassIsRegularParameter = false;
 
@@ -285,7 +285,7 @@ public:
         TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (targetIID, IDependent, Vst::IEditController)
         TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (targetIID, FUnknown, Vst::IEditController)
 
-        if (metersParamIDs.size() > 0)
+        if (audioProcessor->metersParamIDs.size() > 0)
         {
             TEST_FOR_AND_RETURN_IF_VALID (targetIID, Presonus::IGainReductionInfo)
         }
@@ -332,13 +332,15 @@ public:
     {
         double gainReduction = 1.0;
         bool hasGRMeter = false;
-        for (int i = 0; i < metersParamIDs.size(); ++i)
+
+        for (int i = 0; i < audioProcessor->metersParamIDs.size(); ++i)
         {
             // sum gain reduction meters only
-            auto category = getPluginInstance()->getParameterCategory(i);
+            const auto param = audioProcessor->getParamForVSTParamID(audioProcessor->metersParamIDs[i]);
+            const auto category = param->getCategory();
             if (category == AudioProcessorParameter::Category::compressorLimiterGainReductionMeter || category == AudioProcessorParameter::Category::expanderGateGainReductionMeter)
             {
-                gainReduction *= getPluginInstance()->getParameter(metersParamIDs[i]);
+                gainReduction *= param->getValue();
                 hasGRMeter = true;
             }
         }
@@ -770,9 +772,9 @@ private:
                                                         (vstParamID == audioProcessor->bypassParamID), forceLegacyParamIDs));
 
                     // is this a meter?
-                    if (((pluginInstance->getParameterCategory(i) & 0xffff0000) >> 16) == 2)
+                    if (((juceParam->getCategory() & 0xffff0000) >> 16) == 2)
                     {
-                        metersParamIDs.add (i);
+                        audioProcessor->metersParamIDs.add (vstParamID);
                     }
                 }
 
