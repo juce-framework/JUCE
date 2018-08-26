@@ -743,6 +743,20 @@ public:
     AudioPlayHead* getPlayHead() const noexcept                 { return playHead; }
 
     //==============================================================================
+    /** Returns the current AudioFormatReader object that should allow random access
+        to processed audio (if supported).
+
+     You can ONLY call this from your analyseBlock() / processBlock() method!
+     Calling it at other times will produce undefined behaviour.
+
+     The AudioFormatReader object that is returned can be used to get current
+     audio in a random access manner.
+
+     If the host can't or won't provide any time info, this will return nullptr.
+     */
+    AudioFormatReader* getRandomAudioReader() const noexcept { return randomAudioReader; }
+
+    //==============================================================================
     /** Returns the total number of input channels.
 
         This method will return the total number of input channels by accumulating
@@ -1354,6 +1368,13 @@ public:
     virtual void setPlayHead (AudioPlayHead* newPlayHead);
 
     //==============================================================================
+    /** Tells the processor to use this AudioFormatReader object.
+     The processor will not take ownership of the object, so the caller must delete it when
+     it is no longer being used.
+     */
+    virtual void setRandomAudioReader (AudioFormatReader* newRandomAudioMapper);
+
+    //==============================================================================
     /** This is called by the processor to specify its details before being played. Use this
         version of the function if you are not interested in any sidechain and/or aux buses
         and do not care about the layout of channels. Otherwise use setRateAndBufferSizeDetails.*/
@@ -1590,6 +1611,9 @@ protected:
     //==============================================================================
     /** @internal */
     AudioPlayHead* playHead = nullptr;
+
+    /** @internal */
+    AudioFormatReader* randomAudioReader = nullptr;
 
     /** @internal */
     void sendParamChangeMessageToListeners (int parameterIndex, float newValue);
