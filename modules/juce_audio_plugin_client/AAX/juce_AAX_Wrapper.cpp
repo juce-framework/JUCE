@@ -2483,35 +2483,35 @@ namespace AAXClasses
             check (descriptor.AddProcPtr ((void*) JuceAAX_Processor::CreateAudioSuiteParameters,  kAAX_ProcPtrID_Create_EffectParameters));
             check (descriptor.AddProcPtr ((void*) JuceAAX_Processor::CreateAudioSuite,  kAAX_ProcPtrID_Create_HostProcessor));
 
-            auto pluginId = plugin->getAAXPluginIDForMainBusConfig(
-                plugin->getBusesLayout().getMainInputChannelSet(),
-                plugin->getBusesLayout().getMainOutputChannelSet(),
-                true);
-
             if (AAX_IComponentDescriptor* const desc = descriptor.NewComponentDescriptor())
             {
                 plugin->enableAllBuses();
                 auto layoutToTest = plugin->getBusesLayout();
                 jassert(layoutToTest.inputBuses.size() > 0 && layoutToTest.outputBuses.size() > 0);
 
-                // less efficient, but more readable code.
+                int maxInputs = 0, maxOutputs = 0;
+                bool supportsSidechain = false;
                 for (int inIdx = 1; inIdx <= AAX_eMaxAudioSuiteTracks; ++inIdx)
                 {
+                    layoutToTest.inputBuses.set (0, AudioChannelSet::canonicalChannelSet (inIdx));
                     for (int outIdx = 1; outIdx <= AAX_eMaxAudioSuiteTracks; ++outIdx)
                     {
-                        layoutToTest.inputBuses.set(0, AudioChannelSet::canonicalChannelSet(inIdx));
-                        layoutToTest.outputBuses.set(0, AudioChannelSet::canonicalChannelSet(outIdx));
-                        if (plugin->checkBusesLayoutSupported(layoutToTest))
+                        layoutToTest.outputBuses.set (0, AudioChannelSet::canonicalChannelSet (outIdx));
+                        if (! plugin->checkBusesLayoutSupported (layoutToTest))
+                            continue;
+                        if (numInputBuses > 1 && plugin->getBusesLayout().getChannelSet (true, 1) != AudioChannelSet::disabled())
                         {
-                            const bool hasSidechain = (numInputBuses > 1 && plugin->getBusesLayout().getChannelSet(true, 1) != AudioChannelSet::disabled());
+                            supportsSidechain = true;
                             // Pro Tools only has mono sidechain!
-                            jassert(!hasSidechain || plugin->getBusesLayout().getChannelSet(true, 1) == AudioChannelSet::mono());
-                            auto properties = createAudioSuitePropertiesForLayout(descriptor, pluginId, inIdx, outIdx, hasSidechain);
-                            check(descriptor.SetProperties(properties));
-                            check(descriptor.AddComponent(desc));
+                            jassert (plugin->getBusesLayout().getChannelSet (true, 1) == AudioChannelSet::mono());
                         }
+                        maxInputs = std::max (maxInputs, inIdx);
+                        maxOutputs = std::max (maxOutputs, outIdx);
                     }
                 }
+                auto properties = createAudioSuitePropertiesForLayout (descriptor, JucePlugin_PluginCode, maxInputs, maxOutputs, supportsSidechain);
+                check(descriptor.SetProperties (properties));
+                check(descriptor.AddComponent (desc));
             }
             return;
         }
