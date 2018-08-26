@@ -2236,7 +2236,7 @@ namespace AAXClasses
 
         properties->AddProperty(AAX_eProperty_ManufacturerID, JucePlugin_AAXManufacturerCode);
         properties->AddProperty(AAX_eProperty_ProductID, JucePlugin_AAXProductId);
-        properties->AddProperty(AAX_eProperty_PlugInID_AudioSuite, pluginId+maxInputs+maxOutputs);
+        properties->AddProperty(AAX_eProperty_PlugInID_AudioSuite, pluginId);
 
         properties->AddProperty(AAX_eProperty_NumberOfInputs, maxInputs);
         properties->AddProperty(AAX_eProperty_NumberOfOutputs, maxOutputs);
