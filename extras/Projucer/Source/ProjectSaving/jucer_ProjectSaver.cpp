@@ -116,19 +116,19 @@ void ProjectSaver::writePluginCharacteristicsFile()
     flags.set ("JucePlugin_RTASDisableBypass",           boolToString (project.isPluginRTASBypassDisabled()));
     flags.set ("JucePlugin_RTASDisableMultiMono",        boolToString (project.isPluginRTASMultiMonoDisabled()));
     flags.set ("JucePlugin_AAXIdentifier",               project.getAAXIdentifierString());
-    flags.set ("JucePlugin_ARAFactoryID",                toStringLiteral(project.getARAFactoryIDString()));
-    flags.set ("JucePlugin_ARAVST3FactoryUUID",          project.getARAVST3FactoryUUIDString());
-    flags.set ("JucePlugin_ARADocumentArchiveID",        toStringLiteral(project.getARADocumentArchiveIDString()));
     flags.set ("JucePlugin_AAXManufacturerCode",         "JucePlugin_ManufacturerCode");
     flags.set ("JucePlugin_AAXProductId",                "JucePlugin_PluginCode");
     flags.set ("JucePlugin_AAXCategory",                 String (project.getAAXCategory()));
-    flags.set ("JucePlugin_ARAContentTypes",             String (project.getARAContentTypes()));
-    flags.set ("JucePlugin_ARATransformationFlags",      String (project.getARATransformationFlags()));
     flags.set ("JucePlugin_AAXDisableBypass",            boolToString (project.isPluginAAXBypassDisabled()));
     flags.set ("JucePlugin_AAXDisableMultiMono",         boolToString (project.isPluginAAXMultiMonoDisabled()));
     flags.set ("JucePlugin_IAAType",                     toCharLiteral (project.getIAATypeCode()));
     flags.set ("JucePlugin_IAASubType",                  "JucePlugin_PluginCode");
     flags.set ("JucePlugin_IAAName",                     project.getIAAPluginName().quoted());
+    flags.set ("JucePlugin_ARAContentTypes",             String (project.getARAContentTypes()));
+    flags.set ("JucePlugin_ARATransformationFlags",      String (project.getARATransformationFlags()));
+    flags.set ("JucePlugin_ARAFactoryID",                toStringLiteral(project.getARAFactoryIDString()));
+    flags.set ("JucePlugin_ARADocumentArchiveID",        toStringLiteral(project.getARADocumentArchiveIDString()));
+    flags.set ("JucePlugin_ARAVST3FactoryUUID",          project.getARAVST3FactoryUUIDString());
 
     {
         String plugInChannelConfig = project.getPluginChannelConfigsString();
