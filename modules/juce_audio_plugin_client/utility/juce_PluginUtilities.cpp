@@ -28,6 +28,10 @@
  #include <windows.h>
 #endif
 
+#if JucePlugin_Enable_ARA
+ #include "../ARA/juce_audio_plugin_client_ARA.cpp"
+#endif
+
 #include "../../juce_core/system/juce_TargetPlatform.h"
 #include "../utility/juce_CheckSettingMacros.h"
 #include "juce_IncludeModuleHeaders.h"
