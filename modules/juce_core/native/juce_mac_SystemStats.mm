@@ -51,14 +51,17 @@ namespace SystemStatsHelpers
     {
         uint32 la = a, lb = b, lc = c, ld = d;
 
-        asm ("mov %%ebx, %%esi \n\t"
-             "cpuid \n\t"
-             "xchg %%esi, %%ebx"
-               : "=a" (la), "=S" (lb), "=c" (lc), "=d" (ld) : "a" (type)
-           #if JUCE_64BIT
-                  , "b" (lb), "c" (lc), "d" (ld)
-           #endif
-        );
+       #if JUCE_32BIT && defined (__pic__)
+        asm ("mov %%ebx, %%edi\n"
+             "cpuid\n"
+             "xchg %%edi, %%ebx\n"
+               : "=a" (la), "=D" (lb), "=c" (lc), "=d" (ld)
+               : "a" (type), "c" (0));
+       #else
+        asm ("cpuid\n"
+               : "=a" (la), "=b" (lb), "=c" (lc), "=d" (ld)
+               : "a" (type), "c" (0));
+       #endif
 
         a = la; b = lb; c = lc; d = ld;
     }
