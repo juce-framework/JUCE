@@ -333,10 +333,9 @@ bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& fi
                 NSDraggingSourceHelper::setDragOperation (helper, canMoveFiles ? NSDragOperationMove
                                                                                : NSDragOperationCopy);
 
-                if (auto* session = [view beginDraggingSessionWithItems: dragItems
-                                                                  event: event
-                                                                 source: helper])
-                    return true;
+                return [view beginDraggingSessionWithItems: dragItems
+                                                     event: event
+                                                    source: helper] != nullptr;
             }
         }
     }
