@@ -173,9 +173,6 @@ namespace BinaryData
     extern const char*   jucer_PIPTemplate_h;
     const int            jucer_PIPTemplate_hSize = 517;
 
-    extern const char*   jucer_UnityPluginGUIScript_cs;
-    const int            jucer_UnityPluginGUIScript_csSize = 6426;
-
     extern const char*   colourscheme_dark_xml;
     const int            colourscheme_dark_xmlSize = 1050;
 
@@ -195,7 +192,7 @@ namespace BinaryData
     const int            RecentFilesMenuTemplate_nibSize = 2842;
 
     // Number of elements in the namedResourceList and originalFileNames arrays.
-    const int namedResourceListSize = 62;
+    const int namedResourceListSize = 61;
 
     // Points to the start of a list of resource names.
     extern const char* namedResourceList[];
