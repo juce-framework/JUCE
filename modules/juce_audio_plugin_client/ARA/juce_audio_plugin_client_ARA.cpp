@@ -1,6 +1,6 @@
-#include <ARA_Library/PlugIn/AraPlug.cpp>
-#include <ARA_Library/Debug/AraDebug.c>
-#include <ARA_Library/Dispatch/AraPlugInDispatch.cpp>
+#include <ARA_Library/PlugIn/ARAPlug.cpp>
+#include <ARA_Library/Debug/ARADebug.c>
+#include <ARA_Library/Dispatch/ARAPlugInDispatch.cpp>
 
 #include "JuceHeader.h"
 

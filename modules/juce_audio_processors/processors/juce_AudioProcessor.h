@@ -25,7 +25,7 @@
 */
 
 #if JucePlugin_Enable_ARA
- #include <ARA_Library/PlugIn/AraPlug.h>
+ #include <ARA_Library/PlugIn/ARAPlug.h>
 #endif
 
 namespace juce
