@@ -71,8 +71,8 @@ const ARA::ARAFactory* ARA::PlugIn::DocumentController::getARAFactory ()
 		static ARAPlaybackTransformationFlags araPlaybackTransformations[]{
 			kARAPlaybackTransformationTimestretch,
 			kARAPlaybackTransformationTimestretchReflectingTempo,
-			kARAPlaybackTransformationContentBasedFadesAtTail,
-			kARAPlaybackTransformationContentBasedFadesAtHead
+            kARAPlaybackTransformationContentBasedFadeAtTail,
+            kARAPlaybackTransformationContentBasedFadeAtHead
 		};
 
 		factory->supportedPlaybackTransformationFlags = 0;
