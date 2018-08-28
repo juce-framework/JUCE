@@ -2924,8 +2924,10 @@ public:
         nativeScaleFactor = (float) newScaleFactor;
 
         if (pluginRespondsToDPIChanges)
-            dispatch (Vst2::effVendorSpecific, JUCE_MULTICHAR_CONSTANT ('P', 'r', 'e', 'S'),
-                      JUCE_MULTICHAR_CONSTANT ('A', 'e', 'C', 's'), nullptr, nativeScaleFactor);
+            dispatch (Vst2::effVendorSpecific,
+                      JUCE_MULTICHAR_CONSTANT ('P', 'r', 'e', 'S'),
+                      JUCE_MULTICHAR_CONSTANT ('A', 'e', 'C', 's'),
+                      nullptr, nativeScaleFactor);
     }
    #endif
 
@@ -3075,8 +3077,7 @@ private:
         JUCE_VST_LOG ("Opening VST UI: " + plugin.getName());
         isOpen = true;
 
-        // DPI awareness
-        pluginRespondsToDPIChanges = plugin.pluginCanDo ("supportsViewDpiScaling");
+        pluginRespondsToDPIChanges = plugin.pluginCanDo ("supportsViewDpiScaling") > 0;
 
        #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
         std::unique_ptr<ScopedDPIAwarenessDisabler> dpiDisabler;
