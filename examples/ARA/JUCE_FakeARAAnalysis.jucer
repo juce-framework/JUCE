@@ -44,21 +44,21 @@
         <CONFIGURATION isDebug="0" name="Release"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
-        <MODULEPATH id="juce_core" path="../../../JUCE_ARA/modules"/>
-        <MODULEPATH id="juce_events" path="../../../JUCE_ARA/modules"/>
-        <MODULEPATH id="juce_graphics" path="../../../JUCE_ARA/modules"/>
-        <MODULEPATH id="juce_data_structures" path="../../../JUCE_ARA/modules"/>
-        <MODULEPATH id="juce_gui_basics" path="../../../JUCE_ARA/modules"/>
-        <MODULEPATH id="juce_gui_extra" path="../../../JUCE_ARA/modules"/>
-        <MODULEPATH id="juce_cryptography" path="../../../JUCE_ARA/modules"/>
-        <MODULEPATH id="juce_video" path="../../../JUCE_ARA/modules"/>
-        <MODULEPATH id="juce_opengl" path="../../../JUCE_ARA/modules"/>
-        <MODULEPATH id="juce_audio_basics" path="../../../JUCE_ARA/modules"/>
-        <MODULEPATH id="juce_audio_devices" path="../../../JUCE_ARA/modules"/>
-        <MODULEPATH id="juce_audio_formats" path="../../../JUCE_ARA/modules"/>
-        <MODULEPATH id="juce_audio_processors" path="../../../JUCE_ARA/modules"/>
-        <MODULEPATH id="juce_audio_plugin_client" path="../../../JUCE_ARA/modules"/>
-        <MODULEPATH id="juce_audio_utils" path="../../../JUCE_ARA/modules"/>
+        <MODULEPATH id="juce_core" path="../../modules"/>
+        <MODULEPATH id="juce_events" path="../../modules"/>
+        <MODULEPATH id="juce_graphics" path="../../modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../modules"/>
+        <MODULEPATH id="juce_video" path="../../modules"/>
+        <MODULEPATH id="juce_opengl" path="../../modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../modules"/>
       </MODULEPATHS>
     </VS2015>
   </EXPORTFORMATS>
