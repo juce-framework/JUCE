@@ -203,12 +203,12 @@ ThreadPoolJob* AvailableModuleList::createScannerJob (const Array<File>& paths)
 {
     return new ModuleScannerJob (paths, [this] (ModuleIDAndFolderList scannedModuleList)
                                         {
-                                             {
-                                                 const ScopedLock swapLock (lock);
-                                                 moduleList.swap (scannedModuleList);
-                                             }
+                                            {
+                                                const ScopedLock swapLock (lock);
+                                                moduleList.swap (scannedModuleList);
+                                            }
 
-                                            MessageManager::callAsync ([this] { listeners.call ([] (Listener& l) { l.availableModulesChanged(); }); });
+                                            listeners.call ([] (Listener& l) { MessageManager::callAsync ([&] { l.availableModulesChanged(); }); });
                                         });
 }
 
