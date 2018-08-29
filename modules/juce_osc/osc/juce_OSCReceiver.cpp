@@ -37,7 +37,7 @@ namespace
         This class is implementing the Open Sound Control 1.0 Specification for
         interpreting the data.
 
-        Note: some older implementations of OSC may omit the OSC Type Tag string
+        Note: Some older implementations of OSC may omit the OSC Type Tag string
         in OSC messages. This class will treat such OSC messages as format errors.
     */
     class OSCInputStream

@@ -215,7 +215,7 @@ private:
         std::size_t pos = 0;
         MidiBuffer::Iterator iter (midiBuffer);
         MidiMessage midiMessage;
-        int samplePosition; // Note: not actually used, so no need to initialise.
+        int samplePosition; // Note: Not actually used, so no need to initialise.
 
         while (iter.getNextEvent (midiMessage, samplePosition))
         {

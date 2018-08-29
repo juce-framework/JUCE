@@ -27,7 +27,7 @@
 namespace juce
 {
 
-/* Note: there's a bit of light obfuscation in this code, just to make things
+/* Note: There's a bit of light obfuscation in this code, just to make things
    a bit more annoying for crackers who try to reverse-engineer your binaries, but
    nothing particularly foolproof.
 */

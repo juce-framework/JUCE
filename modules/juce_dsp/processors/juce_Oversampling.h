@@ -75,7 +75,7 @@ public:
         Constructor of the oversampling class. All the processing parameters must be
         provided at the creation of the oversampling object.
 
-        Note : you might want to create a class heriting from Oversampling with a
+        Note: You might want to create a class inheriting from Oversampling with a
         different constructor if you need more control on what happens in the process.
 
         @param numChannels      the number of channels to process with this object
@@ -97,7 +97,7 @@ public:
         the oversampling, for example with a dry / wet functionality, and to report
         the latency to the DAW.
 
-        Note : the latency might not be integer, so you might need to round its value
+        Note: The latency might not be integer, so you might need to round its value
         or to compensate it properly in your processing code.
     */
     SampleType getLatencyInSamples() noexcept;

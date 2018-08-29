@@ -505,7 +505,7 @@ private:
 
             static int defaultFramesPerBurst = getDefaultFramesPerBurst();
 
-            // Note: letting OS to choose the buffer capacity & frames per callback.
+            // Note: Letting OS to choose the buffer capacity & frames per callback.
             builder.setDirection (direction);
             builder.setSharingMode (sharingMode);
             builder.setChannelCount (channelCount);

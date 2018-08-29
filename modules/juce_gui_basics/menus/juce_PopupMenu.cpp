@@ -1089,7 +1089,7 @@ private:
             {
                 PopupMenuSettings::menuWasHiddenBecauseOfAppChange = true;
                 window.dismissMenu (nullptr);
-                // Note: this object may have been deleted by the previous call..
+                // Note: This object may have been deleted by the previous call.
             }
         }
         else if (wasDown && timeNow > window.windowCreationTime + 250
@@ -1100,7 +1100,7 @@ private:
             else if ((window.hasBeenOver || ! window.dismissOnMouseUp) && ! isOverAny)
                 window.dismissMenu (nullptr);
 
-            // Note: this object may have been deleted by the previous call..
+            // Note: This object may have been deleted by the previous call.
         }
         else
         {

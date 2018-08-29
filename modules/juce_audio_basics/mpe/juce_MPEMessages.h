@@ -35,7 +35,7 @@ namespace juce
     class instead. You just need to take care to send them to the appropriate
     per-note MIDI channel.
 
-    Note: if you are working with an MPEZoneLayout object inside your app,
+    Note: If you are working with an MPEZoneLayout object inside your app,
     you should not use the message sequences provided here. Instead, you should
     change the zone layout programmatically with the member functions provided in the
     MPEZoneLayout class itself. You should also make sure that the Expressive

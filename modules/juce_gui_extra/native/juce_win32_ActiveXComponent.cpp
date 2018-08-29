@@ -108,7 +108,7 @@ namespace ActiveXHelpers
 
         JUCE_COMRESULT GetWindowContext (LPOLEINPLACEFRAME* lplpFrame, LPOLEINPLACEUIWINDOW* lplpDoc, LPRECT, LPRECT, LPOLEINPLACEFRAMEINFO lpFrameInfo)
         {
-            /* Note: if you call AddRef on the frame here, then some types of object (e.g. web browser control) cause leaks..
+            /* Note: If you call AddRef on the frame here, then some types of object (e.g. web browser control) cause leaks..
                If you don't call AddRef then others crash (e.g. QuickTime).. Bit of a catch-22, so letting it leak is probably preferable.
             */
             if (lplpFrame != nullptr) { frame->AddRef(); *lplpFrame = frame; }

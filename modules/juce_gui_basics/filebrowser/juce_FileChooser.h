@@ -75,7 +75,7 @@ public:
                                               initialFileOrDirectory will be used as the initial
                                               directory of the native file chooser.
 
-                                              Note: on iOS when saving a file, a user will not
+                                              Note: On iOS when saving a file, a user will not
                                               be able to change a file name, so it may be a good
                                               idea to include at least a valid file name in
                                               initialFileOrDirectory. When no filename is found,
@@ -251,7 +251,7 @@ public:
         may return a URL to a remote document. If a local file is chosen then you can
         convert this file to a JUCE File class via the URL::getLocalFile method.
 
-        Note: on iOS you must use the returned URL object directly (you are also
+        Note: On iOS you must use the returned URL object directly (you are also
         allowed to copy- or move-construct another URL from the returned URL), rather
         than just storing the path as a String and then creating a new URL from that
         String. This is because the returned URL contains internally a security
@@ -274,7 +274,7 @@ public:
         This array may be empty if no files were chosen, or can contain multiple entries
         if multiple files were chosen.
 
-        Note: on iOS you must use the returned URL object directly (you are also
+        Note: On iOS you must use the returned URL object directly (you are also
         allowed to copy- or move-construct another URL from the returned URL), rather
         than just storing the path as a String and then creating a new URL from that
         String. This is because the returned URL contains internally a security

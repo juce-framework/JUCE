@@ -39,7 +39,7 @@ using OSCTypeList = Array<OSCType>;
 /** The definitions of supported OSC types and their associated OSC type tags,
     as defined in the OpenSoundControl 1.0 specification.
 
-    Note: this implementation does not support any additional type tags that
+    Note: This implementation does not support any additional type tags that
     are not part of the specification.
 
     @tags{OSC}
@@ -111,7 +111,7 @@ struct OSCFormatError : public OSCException
 //==============================================================================
 /** Exception type thrown in cases of unexpected errors in the OSC module.
 
-    Note: this should never happen, and all the places where this is thrown
+    Note: This should never happen, and all the places where this is thrown
     should have a preceding jassertfalse to facilitate debugging.
 
     @tags{OSC}

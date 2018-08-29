@@ -55,7 +55,7 @@ struct FilterDesign
 
         It generates linear phase filters coefficients.
 
-        Note : the flatTop WindowingMethod generates an impulse response with a
+        Note: The flatTop WindowingMethod generates an impulse response with a
         maximum amplitude higher than one, and might be normalized if necessary
         depending on the applications.
 

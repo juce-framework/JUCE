@@ -44,7 +44,7 @@ namespace StateVariableFilter
         structures for more information). Its behaviour is based on the analog
         state variable filter circuit.
 
-        Note : the bandpass here is not the one in the RBJ CookBook, its gain can be
+        Note: The bandpass here is not the one in the RBJ CookBook, its gain can be
         higher than 0 dB. For the classic 0 dB bandpass, we need to multiply the
         result with R2
 
@@ -203,7 +203,8 @@ namespace StateVariableFilter
         Type type = Type::lowPass;
 
         /** Sets the cutoff frequency and resonance of the IIR filter.
-            Note : the bandwidth of the resonance increases with the value of the
+
+            Note: The bandwidth of the resonance increases with the value of the
             parameter. To have a standard 12 dB/octave filter, the value must be set
             at 1 / sqrt(2).
         */
