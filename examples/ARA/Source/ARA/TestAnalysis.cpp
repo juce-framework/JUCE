@@ -56,20 +56,20 @@
 // down by ARA_FAKE_NOTE_ANALYSIS_SPEED_FACTOR.
 // if this is set to 0, the artificial delays are supressed.
 #if !defined(ARA_FAKE_NOTE_ANALYSIS_SPEED_FACTOR)
-	#define ARA_FAKE_NOTE_ANALYSIS_SPEED_FACTOR 20
+    #define ARA_FAKE_NOTE_ANALYSIS_SPEED_FACTOR 20
 #endif
 
 // if desired, a custom timer for calculating the analysis delay can be injected by defining ARA_GET_CURRENT_TIME accordingly.
 #if ARA_FAKE_NOTE_ANALYSIS_SPEED_FACTOR != 0
-	#if defined(ARA_GET_CURRENT_TIME)
-		double ARA_GET_CURRENT_TIME ();	/* declare custom time getter function */
-	#else
-		#define ARA_GET_CURRENT_TIME() (0.000001 * std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now ().time_since_epoch ()).count ())
-	#endif
+    #if defined(ARA_GET_CURRENT_TIME)
+        double ARA_GET_CURRENT_TIME ();    /* declare custom time getter function */
+    #else
+        #define ARA_GET_CURRENT_TIME() (0.000001 * std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now ().time_since_epoch ()).count ())
+    #endif
 #endif
 
 #if !defined(ARA_FAKE_NOTE_MAX_COUNT)
-	#define ARA_FAKE_NOTE_MAX_COUNT 100
+    #define ARA_FAKE_NOTE_MAX_COUNT 100
 #endif
 
 
@@ -81,139 +81,139 @@ using namespace PlugIn;
 
 TestAnalysisTask::TestAnalysisTask (ARATestAudioSource* audioSource)
 : _audioSource (audioSource),
-  _hostAudioReader (new HostAudioReader (audioSource)),		// create audio reader on the main thread, before dispatching to analysis thread
+  _hostAudioReader (new HostAudioReader (audioSource)),        // create audio reader on the main thread, before dispatching to analysis thread
   _analysisResult (nullptr),
   _progress (0),
   _shouldCancel (false)
 {
-	_future = std::async (std::launch::async, [this] ()
-	{
-		// helper variables to artificially slow down analysis as indicated by ARA_FAKE_NOTE_ANALYSIS_SPEED_FACTOR
+    _future = std::async (std::launch::async, [this] ()
+    {
+        // helper variables to artificially slow down analysis as indicated by ARA_FAKE_NOTE_ANALYSIS_SPEED_FACTOR
 #if ARA_FAKE_NOTE_ANALYSIS_SPEED_FACTOR != 0
-		ARATimePosition analysisStartTime = ARA_GET_CURRENT_TIME ();
-		ARATimeDuration analysisTargetDuration = _audioSource->getDuration () / ARA_FAKE_NOTE_ANALYSIS_SPEED_FACTOR;
+        ARATimePosition analysisStartTime = ARA_GET_CURRENT_TIME ();
+        ARATimeDuration analysisTargetDuration = _audioSource->getDuration () / ARA_FAKE_NOTE_ANALYSIS_SPEED_FACTOR;
 #endif
 
-		// setup buffers and audio reader for reading samples
-		const size_t blockSize = 64;
-		const ARAChannelCount channelCount = _audioSource->getChannelCount ();
-		std::vector<float> buffer (channelCount * blockSize);
-		std::vector<void*> dataPointers (channelCount);
-		for (ARAChannelCount c = 0; c < channelCount; ++c)
-			dataPointers[c] = &buffer[c * blockSize];
+        // setup buffers and audio reader for reading samples
+        const size_t blockSize = 64;
+        const ARAChannelCount channelCount = _audioSource->getChannelCount ();
+        std::vector<float> buffer (channelCount * blockSize);
+        std::vector<void*> dataPointers (channelCount);
+        for (ARAChannelCount c = 0; c < channelCount; ++c)
+            dataPointers[c] = &buffer[c * blockSize];
 
-		// search the audio for silence and treat each region between silence as a note
-		ARASamplePosition blockStartIndex = 0;
-		ARASamplePosition lastNoteStartIndex = 0;
-		bool wasZero = true;	// samples before the start of the file are 0
-		std::vector<TestAnalysisNote> foundNotes;
-		while (true)
-		{
-			// check cancel
-			if (_shouldCancel)
-				return;
+        // search the audio for silence and treat each region between silence as a note
+        ARASamplePosition blockStartIndex = 0;
+        ARASamplePosition lastNoteStartIndex = 0;
+        bool wasZero = true;    // samples before the start of the file are 0
+        std::vector<TestAnalysisNote> foundNotes;
+        while (true)
+        {
+            // check cancel
+            if (_shouldCancel)
+                return;
 
-			// calculate size of current block and check if done
-			ARASampleCount count = std::min ((ARASampleCount) blockSize, _audioSource->getSampleCount () - blockStartIndex);
-			if (count <= 0)
-				break;
+            // calculate size of current block and check if done
+            ARASampleCount count = std::min ((ARASampleCount) blockSize, _audioSource->getSampleCount () - blockStartIndex);
+            if (count <= 0)
+                break;
 
-			// read samples - note that this test code ignores any errors that the reader might return here!
-			_hostAudioReader->readAudioSamples (blockStartIndex, count, dataPointers.data ());
+            // read samples - note that this test code ignores any errors that the reader might return here!
+            _hostAudioReader->readAudioSamples (blockStartIndex, count, dataPointers.data ());
 
-			// analyze current block
-			for (ARASamplePosition i = 0; i < count && foundNotes.size () < ARA_FAKE_NOTE_MAX_COUNT; ++i)
-			{
-				// check if current sample is zero on all channels
-				bool isZero = true;
-				for (ARAChannelCount c = 0; c < _audioSource->getChannelCount (); ++c)
-					isZero &= (buffer[(size_t) i + c * blockSize] == 0.0f);
+            // analyze current block
+            for (ARASamplePosition i = 0; i < count && foundNotes.size () < ARA_FAKE_NOTE_MAX_COUNT; ++i)
+            {
+                // check if current sample is zero on all channels
+                bool isZero = true;
+                for (ARAChannelCount c = 0; c < _audioSource->getChannelCount (); ++c)
+                    isZero &= (buffer[(size_t) i + c * blockSize] == 0.0f);
 
-				// check if consecutive range of (non)zero samples ends
-				if (isZero != wasZero)
-				{
-					wasZero = isZero;
-					ARASamplePosition index = blockStartIndex + i;
-					if (isZero)
-					{
-						// found end of note - construct note
-						double noteStartTime = lastNoteStartIndex / _audioSource->getSampleRate ();
-						double noteDuration = (index - lastNoteStartIndex) / _audioSource->getSampleRate ();
+                // check if consecutive range of (non)zero samples ends
+                if (isZero != wasZero)
+                {
+                    wasZero = isZero;
+                    ARASamplePosition index = blockStartIndex + i;
+                    if (isZero)
+                    {
+                        // found end of note - construct note
+                        double noteStartTime = lastNoteStartIndex / _audioSource->getSampleRate ();
+                        double noteDuration = (index - lastNoteStartIndex) / _audioSource->getSampleRate ();
 
-						// construct note
-						TestAnalysisNote foundNote;
-						foundNote.setFrequency (kARAInvalidFrequency);
-						foundNote.setVolume (1.0f);
-						foundNote.setStartTime (noteStartTime);
-						foundNote.setDuration (noteDuration);
-						foundNotes.push_back (foundNote);
-					}
-					else
-					{
-						// found start of note - store start index
-						lastNoteStartIndex = index;
-					}
-				}
-			}
+                        // construct note
+                        TestAnalysisNote foundNote;
+                        foundNote.setFrequency (kARAInvalidFrequency);
+                        foundNote.setVolume (1.0f);
+                        foundNote.setStartTime (noteStartTime);
+                        foundNote.setDuration (noteDuration);
+                        foundNotes.push_back (foundNote);
+                    }
+                    else
+                    {
+                        // found start of note - store start index
+                        lastNoteStartIndex = index;
+                    }
+                }
+            }
 
-			// go to next block and set progress
-			// (in the progress calculation, we're scaling by 0.999 to account for the time needed
-			// to store the result after this loop has completed)
-			blockStartIndex += count;
-			float progress = 0.999f * (float) blockStartIndex / (float) _audioSource->getSampleCount ();
-			_progress = progress;
+            // go to next block and set progress
+            // (in the progress calculation, we're scaling by 0.999 to account for the time needed
+            // to store the result after this loop has completed)
+            blockStartIndex += count;
+            float progress = 0.999f * (float) blockStartIndex / (float) _audioSource->getSampleCount ();
+            _progress = progress;
 
-			// for testing purposes only, sleep here until dummy analysis time has elapsed -
-			// actual plug-ins will process as fast as possible, without arbitrary sleeping
+            // for testing purposes only, sleep here until dummy analysis time has elapsed -
+            // actual plug-ins will process as fast as possible, without arbitrary sleeping
 #if ARA_FAKE_NOTE_ANALYSIS_SPEED_FACTOR != 0
-			ARATimeDuration analysisTargetTime = analysisStartTime + progress * analysisTargetDuration;
-			ARATimeDuration timeToSleep = analysisTargetTime - ARA_GET_CURRENT_TIME ();
-			if (timeToSleep > 0.0)
-				std::this_thread::sleep_for (std::chrono::milliseconds ((long long) (timeToSleep * 1000000 + 0.5)));
+            ARATimeDuration analysisTargetTime = analysisStartTime + progress * analysisTargetDuration;
+            ARATimeDuration timeToSleep = analysisTargetTime - ARA_GET_CURRENT_TIME ();
+            if (timeToSleep > 0.0)
+                std::this_thread::sleep_for (std::chrono::milliseconds ((long long) (timeToSleep * 1000000 + 0.5)));
 #endif
-		}
+        }
 
-		if (!wasZero)
-		{
-			// last note continued until the end of the audio source - construct last note
-			double noteStartTime = lastNoteStartIndex / _audioSource->getSampleRate ();
-			double noteDuration = (_audioSource->getSampleCount () - lastNoteStartIndex) / _audioSource->getSampleRate ();
+        if (!wasZero)
+        {
+            // last note continued until the end of the audio source - construct last note
+            double noteStartTime = lastNoteStartIndex / _audioSource->getSampleRate ();
+            double noteDuration = (_audioSource->getSampleCount () - lastNoteStartIndex) / _audioSource->getSampleRate ();
 
-			// construct note
-			TestAnalysisNote foundNote;
-			foundNote.setFrequency (kARAInvalidFrequency);
-			foundNote.setVolume (1.0f);
-			foundNote.setStartTime (noteStartTime);
-			foundNote.setDuration (noteDuration);
-			foundNotes.push_back (foundNote);
-		}
+            // construct note
+            TestAnalysisNote foundNote;
+            foundNote.setFrequency (kARAInvalidFrequency);
+            foundNote.setVolume (1.0f);
+            foundNote.setStartTime (noteStartTime);
+            foundNote.setDuration (noteDuration);
+            foundNotes.push_back (foundNote);
+        }
 
-		// store result
-		_analysisResult = new TestAnalysisResult ();
-		_analysisResult->setNotes (foundNotes);
-		_progress = 1.0f;
-	});
+        // store result
+        _analysisResult = new TestAnalysisResult ();
+        _analysisResult->setNotes (foundNotes);
+        _progress = 1.0f;
+    });
 }
 
 TestAnalysisTask::~TestAnalysisTask ()
 {
-	delete _hostAudioReader;
+    delete _hostAudioReader;
 }
 
 bool TestAnalysisTask::isDone () const
 {
-	return _future.wait_for (std::chrono::milliseconds (0)) == std::future_status::ready;
+    return _future.wait_for (std::chrono::milliseconds (0)) == std::future_status::ready;
 }
 
 void TestAnalysisTask::cancelSynchronously ()
 {
-	_shouldCancel = true;
-	_future.wait ();
-	delete _analysisResult;	// delete here in case our future completed before recognizing the cancel
+    _shouldCancel = true;
+    _future.wait ();
+    delete _analysisResult;    // delete here in case our future completed before recognizing the cancel
 }
 
 const TestAnalysisResult* TestAnalysisTask::getAnalysisResult ()
 {
-	ARA_INTERNAL_ASSERT (isDone ());
-	return _analysisResult;
+    ARA_INTERNAL_ASSERT (isDone ());
+    return _analysisResult;
 }

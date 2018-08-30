@@ -63,89 +63,89 @@ class ARATestPlaybackRenderer;
 class NoteContentReader: public ContentReader
 {
 public:
-	explicit NoteContentReader (const AudioSource* audioSource, const ARAContentTimeRange* range = nullptr);
-	explicit NoteContentReader (const AudioModification* audioModification, const ARAContentTimeRange* range = nullptr);
-	explicit NoteContentReader (const PlaybackRegion* playbackRegion, const ARAContentTimeRange* range = nullptr);
+    explicit NoteContentReader (const AudioSource* audioSource, const ARAContentTimeRange* range = nullptr);
+    explicit NoteContentReader (const AudioModification* audioModification, const ARAContentTimeRange* range = nullptr);
+    explicit NoteContentReader (const PlaybackRegion* playbackRegion, const ARAContentTimeRange* range = nullptr);
 
-	ARAInt32 getEventCount () override;
-	const void* getDataForEvent (ARAInt32 eventIndex) override;
-
-private:
-	NoteContentReader (const AudioSource* audioSource, const ARAContentTimeRange& range, double timeOffset = 0.0);
+    ARAInt32 getEventCount () override;
+    const void* getDataForEvent (ARAInt32 eventIndex) override;
 
 private:
-	std::vector<ARAContentNote> _exportedNotes;
+    NoteContentReader (const AudioSource* audioSource, const ARAContentTimeRange& range, double timeOffset = 0.0);
+
+private:
+    std::vector<ARAContentNote> _exportedNotes;
 };
 
 /*******************************************************************************/
 class ARATestDocumentController : public DocumentController
 {
 public:
-	ARATestDocumentController ()
-	: DocumentController (),
-	  _renderersCanAccessModelGraph (true),
-	  _countOfRenderersCurrentlyAccessingModelGraph (0)
-	{}
+    ARATestDocumentController ()
+    : DocumentController (),
+      _renderersCanAccessModelGraph (true),
+      _countOfRenderersCurrentlyAccessingModelGraph (0)
+    {}
 
 protected:
-	// Document Management
-	void doNotifyModelUpdates () override;
+    // Document Management
+    void doNotifyModelUpdates () override;
 
-	virtual void doBeginEditing () override;
-	virtual void doEndEditing () override;
+    virtual void doBeginEditing () override;
+    virtual void doEndEditing () override;
 
-	virtual bool doRestoreObjectsFromArchive (HostArchiveReader* archiveReader, RestoreObjectsFilter* filter) override;
-	virtual bool doStoreObjectsToArchive (HostArchiveWriter* archiveWriter, StoreObjectsFilter* filter) override;
+    virtual bool doRestoreObjectsFromArchive (HostArchiveReader* archiveReader, RestoreObjectsFilter* filter) override;
+    virtual bool doStoreObjectsToArchive (HostArchiveWriter* archiveWriter, StoreObjectsFilter* filter) override;
 
-	// Musical Context Management
-	virtual void doUpdateMusicalContextContent (MusicalContext* musicalContext, const ARAContentTimeRange* range, ARAContentUpdateFlags flags) override;
+    // Musical Context Management
+    virtual void doUpdateMusicalContextContent (MusicalContext* musicalContext, const ARAContentTimeRange* range, ARAContentUpdateFlags flags) override;
 
-	// Audio Source Management
-	virtual AudioSource* doCreateAudioSource (Document* document, ARAAudioSourceHostRef hostRef) override;
-	virtual void willUpdateAudioSourceProperties (AudioSource* audioSource, PropertiesPtr<ARAAudioSourceProperties> newProperties) override;
-	virtual void doUpdateAudioSourceContent (AudioSource* audioSource, const ARAContentTimeRange* range, ARAContentUpdateFlags flags) override;
-	virtual void willEnableAudioSourceSamplesAccess (AudioSource* audioSource, bool enable) override;
-	virtual void didEnableAudioSourceSamplesAccess (AudioSource* audioSource, bool enable) override;
-	virtual void doDeactivateAudioSourceForUndoHistory (AudioSource* audioSource, bool deactivate) override;
-	virtual void willDestroyAudioSource (AudioSource* audioSource) override;
+    // Audio Source Management
+    virtual AudioSource* doCreateAudioSource (Document* document, ARAAudioSourceHostRef hostRef) override;
+    virtual void willUpdateAudioSourceProperties (AudioSource* audioSource, PropertiesPtr<ARAAudioSourceProperties> newProperties) override;
+    virtual void doUpdateAudioSourceContent (AudioSource* audioSource, const ARAContentTimeRange* range, ARAContentUpdateFlags flags) override;
+    virtual void willEnableAudioSourceSamplesAccess (AudioSource* audioSource, bool enable) override;
+    virtual void didEnableAudioSourceSamplesAccess (AudioSource* audioSource, bool enable) override;
+    virtual void doDeactivateAudioSourceForUndoHistory (AudioSource* audioSource, bool deactivate) override;
+    virtual void willDestroyAudioSource (AudioSource* audioSource) override;
 
-	// Content Reader Management
-	virtual bool doIsAudioSourceContentAvailable (AudioSource* audioSource, ARAContentType type) override;
-	virtual bool doIsAudioSourceContentAnalysisIncomplete (AudioSource* audioSource, ARAContentType type) override;
-	virtual void doRequestAudioSourceContentAnalysisWithAlgorithm (AudioSource* audioSource, std::vector<ARAContentType> const& contentTypes, ARAInt32 analysisAlgorithmIndex) override;
-	virtual ARAContentGrade doGetAudioSourceContentGrade (AudioSource* audioSource, ARAContentType type) override;
-	virtual ContentReader* doCreateAudioSourceContentReader (AudioSource* audioSource, ARAContentType type, const ARAContentTimeRange* range) override;
-	virtual ContentReader* doCreateAudioModificationContentReader (AudioModification* audioModification, ARAContentType type, const ARAContentTimeRange* range) override;
-	virtual ContentReader* doCreatePlaybackRegionContentReader (PlaybackRegion* playbackRegion, ARAContentType type, const ARAContentTimeRange* range) override;
+    // Content Reader Management
+    virtual bool doIsAudioSourceContentAvailable (AudioSource* audioSource, ARAContentType type) override;
+    virtual bool doIsAudioSourceContentAnalysisIncomplete (AudioSource* audioSource, ARAContentType type) override;
+    virtual void doRequestAudioSourceContentAnalysisWithAlgorithm (AudioSource* audioSource, std::vector<ARAContentType> const& contentTypes, ARAInt32 analysisAlgorithmIndex) override;
+    virtual ARAContentGrade doGetAudioSourceContentGrade (AudioSource* audioSource, ARAContentType type) override;
+    virtual ContentReader* doCreateAudioSourceContentReader (AudioSource* audioSource, ARAContentType type, const ARAContentTimeRange* range) override;
+    virtual ContentReader* doCreateAudioModificationContentReader (AudioModification* audioModification, ARAContentType type, const ARAContentTimeRange* range) override;
+    virtual ContentReader* doCreatePlaybackRegionContentReader (PlaybackRegion* playbackRegion, ARAContentType type, const ARAContentTimeRange* range) override;
 
 public:
-	// render thread synchronization:
-	// this is just a test code implementation of handling the threading - proper code will use a
-	// more sophisticated threading implementation, which is needed regardless of ARA.
-	// the test code simply blocks renderer access to the model while it is being modified.
-	// this includes waiting until concurrent renderer model access has completed before starting modifications.
-	bool rendererWillAccessModelGraph (ARATestPlaybackRenderer* playbackRenderer);
-	void rendererDidAccessModelGraph (ARATestPlaybackRenderer* playbackRenderer);
+    // render thread synchronization:
+    // this is just a test code implementation of handling the threading - proper code will use a
+    // more sophisticated threading implementation, which is needed regardless of ARA.
+    // the test code simply blocks renderer access to the model while it is being modified.
+    // this includes waiting until concurrent renderer model access has completed before starting modifications.
+    bool rendererWillAccessModelGraph (ARATestPlaybackRenderer* playbackRenderer);
+    void rendererDidAccessModelGraph (ARATestPlaybackRenderer* playbackRenderer);
 
 private:
-	void _disableRendererModelGraphAccess ();
-	void _enableRendererModelGraphAccess ();
+    void _disableRendererModelGraphAccess ();
+    void _enableRendererModelGraphAccess ();
 
-	void _startOrScheduleAnalysisOfAudioSource (ARATestAudioSource* audioSource);
-	void _startAnalysisOfAudioSource (ARATestAudioSource* audioSource);
-	void _processCompletedAnalysisTasks ();
-	TestAnalysisTask* _getActiveAnalysisTaskForAudioSource (ARATestAudioSource* audioSource);	// returns nullptr if no active analysis for given audio source
+    void _startOrScheduleAnalysisOfAudioSource (ARATestAudioSource* audioSource);
+    void _startAnalysisOfAudioSource (ARATestAudioSource* audioSource);
+    void _processCompletedAnalysisTasks ();
+    TestAnalysisTask* _getActiveAnalysisTaskForAudioSource (ARATestAudioSource* audioSource);    // returns nullptr if no active analysis for given audio source
 
 private:
-	std::unordered_set<ARATestAudioSource*> _audioSourcesScheduledForAnalysis;
-	std::unordered_set<ARATestAudioSource*> _audioSourcesToNotifyContentChanged;
-	std::vector<ARATestAudioSource*> _audioSourcesToNotifyAnalysisStart;
-	std::vector<ARATestAudioSource*> _audioSourcesToNotifyAnalysisCompletion;
-	std::vector<TestAnalysisTask*> _activeAnalysisTasks;
+    std::unordered_set<ARATestAudioSource*> _audioSourcesScheduledForAnalysis;
+    std::unordered_set<ARATestAudioSource*> _audioSourcesToNotifyContentChanged;
+    std::vector<ARATestAudioSource*> _audioSourcesToNotifyAnalysisStart;
+    std::vector<ARATestAudioSource*> _audioSourcesToNotifyAnalysisCompletion;
+    std::vector<TestAnalysisTask*> _activeAnalysisTasks;
 
-	std::atomic<bool> _renderersCanAccessModelGraph;
-	std::atomic<unsigned int> _countOfRenderersCurrentlyAccessingModelGraph;
+    std::atomic<bool> _renderersCanAccessModelGraph;
+    std::atomic<unsigned int> _countOfRenderersCurrentlyAccessingModelGraph;
 };
 
-}	// namespace PlugIn
-}	// namespace ARA
+}    // namespace PlugIn
+}    // namespace ARA

@@ -146,19 +146,19 @@ void ARATestPluginProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffe
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-	// Attempt to delegate processing to our playback renderer implementation
-	if (getARAPlugInExtension() == nullptr)
-		return;
+    // Attempt to delegate processing to our playback renderer implementation
+    if (getARAPlugInExtension() == nullptr)
+        return;
 
-	AudioPlayHead::CurrentPositionInfo currentPosition;
-	if (!getPlayHead()->getCurrentPosition(currentPosition))
-		return;
+    AudioPlayHead::CurrentPositionInfo currentPosition;
+    if (!getPlayHead()->getCurrentPosition(currentPosition))
+        return;
 
-	ARA::PlugIn::ARATestPlaybackRenderer * playbackRenderer = (ARA::PlugIn::ARATestPlaybackRenderer*) getARAPlugInExtension()->getPlaybackRenderer();
-	if (playbackRenderer)
-	{
-		playbackRenderer->renderPlaybackRegions(buffer.getArrayOfWritePointers(), getTotalNumInputChannels(), getSampleRate(), currentPosition.timeInSamples, buffer.getNumSamples(), currentPosition.isPlaying);
-	}
+    ARA::PlugIn::ARATestPlaybackRenderer * playbackRenderer = (ARA::PlugIn::ARATestPlaybackRenderer*) getARAPlugInExtension()->getPlaybackRenderer();
+    if (playbackRenderer)
+    {
+        playbackRenderer->renderPlaybackRegions(buffer.getArrayOfWritePointers(), getTotalNumInputChannels(), getSampleRate(), currentPosition.timeInSamples, buffer.getNumSamples(), currentPosition.isPlaying);
+    }
 }
 
 //==============================================================================
@@ -196,9 +196,9 @@ AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 //==============================================================================
 const ARA::PlugIn::PlugInExtension* ARATestPluginProcessor::createARAPlugInExtension(ARA::PlugIn::DocumentController* documentController, bool isPlaybackRenderer, bool isEditorRenderer, bool isEditorView)
 {
-	// Construct a plugin extension instance with our own playback renderer type
-	return new ARA::PlugIn::PlugInExtension (documentController,
-											 isPlaybackRenderer ? new ARA::PlugIn::ARATestPlaybackRenderer (documentController) : nullptr,
-											 isEditorRenderer ? new ARA::PlugIn::EditorRenderer (documentController) : nullptr,
-											 isEditorView ? new ARA::PlugIn::EditorView (documentController) : nullptr);
+    // Construct a plugin extension instance with our own playback renderer type
+    return new ARA::PlugIn::PlugInExtension (documentController,
+                                             isPlaybackRenderer ? new ARA::PlugIn::ARATestPlaybackRenderer (documentController) : nullptr,
+                                             isEditorRenderer ? new ARA::PlugIn::EditorRenderer (documentController) : nullptr,
+                                             isEditorView ? new ARA::PlugIn::EditorView (documentController) : nullptr);
 }

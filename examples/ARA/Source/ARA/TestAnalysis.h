@@ -55,64 +55,64 @@ namespace PlugIn
 class ARATestAudioSource;
 class HostAudioReader;
 
-}	// namespace PlugIn
-}	// namespace ARA
+}    // namespace PlugIn
+}    // namespace ARA
 
 /*******************************************************************************/
 // The results of our fake analysis are found "notes" detected in the audio source data
 class TestAnalysisNote
 {
 public:
-	float getFrequency () const { return _frequency; }
-	void setFrequency (float frequency) { _frequency = frequency; }
+    float getFrequency () const { return _frequency; }
+    void setFrequency (float frequency) { _frequency = frequency; }
 
-	float getVolume () const { return _volume; }
-	void setVolume (float volume) { _volume = volume; }
+    float getVolume () const { return _volume; }
+    void setVolume (float volume) { _volume = volume; }
 
-	double getStartTime () const { return _startTime; }
-	void setStartTime (double startTime) { _startTime = startTime; }
+    double getStartTime () const { return _startTime; }
+    void setStartTime (double startTime) { _startTime = startTime; }
 
-	double getDuration () const { return _duration; }
-	void setDuration (double duration) { _duration = duration; }
+    double getDuration () const { return _duration; }
+    void setDuration (double duration) { _duration = duration; }
 
 private:
-	float _frequency;
-	float _volume;
-	double _startTime;
-	double _duration;
+    float _frequency;
+    float _volume;
+    double _startTime;
+    double _duration;
 };
 
 /*******************************************************************************/
 class TestAnalysisResult
 {
 public:
-	const std::vector<TestAnalysisNote>& getNotes () const { return _notes; }
-	void setNotes (std::vector<TestAnalysisNote> notes) { _notes = notes; }
+    const std::vector<TestAnalysisNote>& getNotes () const { return _notes; }
+    void setNotes (std::vector<TestAnalysisNote> notes) { _notes = notes; }
 
 private:
-	std::vector<TestAnalysisNote> _notes;
+    std::vector<TestAnalysisNote> _notes;
 };
 
 /*******************************************************************************/
 class TestAnalysisTask
 {
 public:
-	explicit TestAnalysisTask (ARA::PlugIn::ARATestAudioSource* audioSource);
-	~TestAnalysisTask ();
+    explicit TestAnalysisTask (ARA::PlugIn::ARATestAudioSource* audioSource);
+    ~TestAnalysisTask ();
 
-	ARA::PlugIn::ARATestAudioSource* getAudioSource () const { return _audioSource; }
+    ARA::PlugIn::ARATestAudioSource* getAudioSource () const { return _audioSource; }
 
-	float getProgress () const { return _progress; }
-	bool isDone () const;
-	void cancelSynchronously ();
+    float getProgress () const { return _progress; }
+    bool isDone () const;
+    void cancelSynchronously ();
 
-	const TestAnalysisResult* getAnalysisResult ();
+    const TestAnalysisResult* getAnalysisResult ();
 
 private:
-	ARA::PlugIn::ARATestAudioSource* const _audioSource;
-	ARA::PlugIn::HostAudioReader* const _hostAudioReader;
-	TestAnalysisResult* _analysisResult;
-	std::future<void> _future;
-	std::atomic<float> _progress;
-	std::atomic<bool> _shouldCancel;
+    ARA::PlugIn::ARATestAudioSource* const _audioSource;
+    ARA::PlugIn::HostAudioReader* const _hostAudioReader;
+    TestAnalysisResult* _analysisResult;
+    std::future<void> _future;
+    std::atomic<float> _progress;
+    std::atomic<bool> _shouldCancel;
 };

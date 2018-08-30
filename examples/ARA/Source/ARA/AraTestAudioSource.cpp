@@ -50,46 +50,46 @@ namespace PlugIn
 
 ARATestAudioSource::~ARATestAudioSource ()
 {
-	setAnalysisResult (nullptr);
+    setAnalysisResult (nullptr);
 }
 
 void ARATestAudioSource::setAnalysisResult (const TestAnalysisResult* analysisResult)
 {
-	if (analysisResult != _analysisResult)
-	{
-		delete _analysisResult;
-		_analysisResult = analysisResult;
-	}
+    if (analysisResult != _analysisResult)
+    {
+        delete _analysisResult;
+        _analysisResult = analysisResult;
+    }
 }
 
 void ARATestAudioSource::updateRenderSampleCache ()
 {
-	ARA_INTERNAL_ASSERT(isSampleAccessEnabled ());
+    ARA_INTERNAL_ASSERT(isSampleAccessEnabled ());
 
-	// set up cache (this is a hack, so we're ignoring potential overflow of 32 bit with long files here...)
-	size_t totalSamples = getChannelCount () * (size_t)getSampleCount ();
-	_sampleCache.resize (totalSamples);
+    // set up cache (this is a hack, so we're ignoring potential overflow of 32 bit with long files here...)
+    size_t totalSamples = getChannelCount () * (size_t)getSampleCount ();
+    _sampleCache.resize (totalSamples);
 
-	// create temporary host audio reader and let it fill the cache
-	// (we can safely ignore any errors while reading since host must clear buffers in that case,
-	// as well as report the error to the user)
-	HostAudioReader audioReader (this);
-	std::vector<void*> dataPointers (getChannelCount ());
-	for (ARAChannelCount c = 0; c < getChannelCount (); ++c)
-		dataPointers[c] = &_sampleCache[c * (size_t)getSampleCount ()];
-	audioReader.readAudioSamples (0, getSampleCount (), dataPointers.data ());
+    // create temporary host audio reader and let it fill the cache
+    // (we can safely ignore any errors while reading since host must clear buffers in that case,
+    // as well as report the error to the user)
+    HostAudioReader audioReader (this);
+    std::vector<void*> dataPointers (getChannelCount ());
+    for (ARAChannelCount c = 0; c < getChannelCount (); ++c)
+        dataPointers[c] = &_sampleCache[c * (size_t)getSampleCount ()];
+    audioReader.readAudioSamples (0, getSampleCount (), dataPointers.data ());
 }
 
 const float* ARATestAudioSource::getRenderSampleCacheForChannel (ARAChannelCount channel) const
 {
-	return &_sampleCache[channel * (size_t)getSampleCount ()];
+    return &_sampleCache[channel * (size_t)getSampleCount ()];
 }
 
 void ARATestAudioSource::destroyRenderSampleCache ()
 {
-	_sampleCache.clear ();
-	_sampleCache.resize (0);
+    _sampleCache.clear ();
+    _sampleCache.resize (0);
 }
 
-}	// namespace PlugIn
-}	// namespace ARA
+}    // namespace PlugIn
+}    // namespace ARA

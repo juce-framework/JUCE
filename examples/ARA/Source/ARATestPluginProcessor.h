@@ -55,8 +55,8 @@ public:
     void getStateInformation (MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
-	//==============================================================================
-	const ARA::PlugIn::PlugInExtension* createARAPlugInExtension(ARA::PlugIn::DocumentController* documentController, bool isPlaybackRenderer, bool isEditorRenderer, bool isEditorView) override;
+    //==============================================================================
+    const ARA::PlugIn::PlugInExtension* createARAPlugInExtension(ARA::PlugIn::DocumentController* documentController, bool isPlaybackRenderer, bool isEditorRenderer, bool isEditorView) override;
 
 private:
     //==============================================================================

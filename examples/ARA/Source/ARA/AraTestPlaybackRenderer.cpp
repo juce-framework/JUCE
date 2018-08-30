@@ -50,72 +50,72 @@ namespace PlugIn
 {
 
 void ARATestPlaybackRenderer::renderPlaybackRegions (float** ppOutput, ARAChannelCount channelCount, ARASampleRate sampleRate,
-							ARASamplePosition samplePosition, ARASampleCount samplesToRender, bool isPlayingBack)
+                            ARASamplePosition samplePosition, ARASampleCount samplesToRender, bool isPlayingBack)
 {
-	ARATestDocumentController* docController = (ARATestDocumentController*)getDocumentController ();
+    ARATestDocumentController* docController = (ARATestDocumentController*)getDocumentController ();
 
-	// initialize output buffers with silence, in case no viable playback region intersects with the
-	// current buffer, or if the model is currently not accessible due to being edited.
-	for (ARAChannelCount c = 0; c < channelCount; ++c)
-		memset (ppOutput[c], 0, sizeof(float) * (size_t)samplesToRender);
+    // initialize output buffers with silence, in case no viable playback region intersects with the
+    // current buffer, or if the model is currently not accessible due to being edited.
+    for (ARAChannelCount c = 0; c < channelCount; ++c)
+        memset (ppOutput[c], 0, sizeof(float) * (size_t)samplesToRender);
 
-	// only output samples while host is playing back
-	if (!isPlayingBack)
-		return;
+    // only output samples while host is playing back
+    if (!isPlayingBack)
+        return;
 
-	// flag that we've started rendering to prevent the document from being edited while in this callback
-	// see TestDocumentController for details.
-	if (docController->rendererWillAccessModelGraph (this))
-	{
-		ARASamplePosition sampleEnd = samplePosition + samplesToRender;
-		for (auto playbackRegion : getPlaybackRegions ())
-		{
-			ARATestAudioSource* audioSource = (ARATestAudioSource*)playbackRegion->getAudioModification ()->getAudioSource ();
+    // flag that we've started rendering to prevent the document from being edited while in this callback
+    // see TestDocumentController for details.
+    if (docController->rendererWillAccessModelGraph (this))
+    {
+        ARASamplePosition sampleEnd = samplePosition + samplesToRender;
+        for (auto playbackRegion : getPlaybackRegions ())
+        {
+            ARATestAudioSource* audioSource = (ARATestAudioSource*)playbackRegion->getAudioModification ()->getAudioSource ();
 
-			// render silence if access is currently disabled
-			if (!audioSource->isSampleAccessEnabled ())
-				continue;
+            // render silence if access is currently disabled
+            if (!audioSource->isSampleAccessEnabled ())
+                continue;
 
-			// this simplified test code "rendering" only produces audio if sample rate and channel count match
-			if ((audioSource->getChannelCount () != channelCount) || (audioSource->getSampleRate () != sampleRate))
-				continue;
+            // this simplified test code "rendering" only produces audio if sample rate and channel count match
+            if ((audioSource->getChannelCount () != channelCount) || (audioSource->getSampleRate () != sampleRate))
+                continue;
 
-			// evaluate region borders in song time, calculate sample range to copy in song time
-			ARASamplePosition regionStartSample = playbackRegion->getStartInPlaybackSamples (sampleRate);
-			if (sampleEnd < regionStartSample)
-				continue; 
+            // evaluate region borders in song time, calculate sample range to copy in song time
+            ARASamplePosition regionStartSample = playbackRegion->getStartInPlaybackSamples (sampleRate);
+            if (sampleEnd < regionStartSample)
+                continue; 
 
-			ARASamplePosition regionEndSample = playbackRegion->getEndInPlaybackSamples (sampleRate);
-			if (regionEndSample < samplePosition)
-				continue;
+            ARASamplePosition regionEndSample = playbackRegion->getEndInPlaybackSamples (sampleRate);
+            if (regionEndSample < samplePosition)
+                continue;
 
-			ARASamplePosition startSongSample = std::max (regionStartSample, samplePosition);
-			ARASamplePosition endSongSample = std::min (regionEndSample, sampleEnd);
+            ARASamplePosition startSongSample = std::max (regionStartSample, samplePosition);
+            ARASamplePosition endSongSample = std::min (regionEndSample, sampleEnd);
 
-			// calculate offset between song and audio source samples, clip at region borders in audio source samples
-			// (if a plug-in supports time stretching, it will also need to reflect the stretch factor here)
-			ARASamplePosition offsetToPlaybackRegionSamples = playbackRegion->getStartInAudioModificationSamples () - regionStartSample;
+            // calculate offset between song and audio source samples, clip at region borders in audio source samples
+            // (if a plug-in supports time stretching, it will also need to reflect the stretch factor here)
+            ARASamplePosition offsetToPlaybackRegionSamples = playbackRegion->getStartInAudioModificationSamples () - regionStartSample;
 
-			ARASamplePosition startAvailableSourceSamples = std::max ((ARASamplePosition)0, playbackRegion->getStartInAudioModificationSamples ());
-			ARASamplePosition endAvailableSourceSamples = std::min (audioSource->getSampleCount (), playbackRegion->getEndInAudioModificationSamples ());
+            ARASamplePosition startAvailableSourceSamples = std::max ((ARASamplePosition)0, playbackRegion->getStartInAudioModificationSamples ());
+            ARASamplePosition endAvailableSourceSamples = std::min (audioSource->getSampleCount (), playbackRegion->getEndInAudioModificationSamples ());
 
-			startSongSample = std::max (startSongSample, startAvailableSourceSamples - offsetToPlaybackRegionSamples);
-			endSongSample = std::min (endSongSample, endAvailableSourceSamples - offsetToPlaybackRegionSamples);
+            startSongSample = std::max (startSongSample, startAvailableSourceSamples - offsetToPlaybackRegionSamples);
+            endSongSample = std::min (endSongSample, endAvailableSourceSamples - offsetToPlaybackRegionSamples);
 
-			// add samples from audio source
-			for (ARASamplePosition posInSong = startSongSample; posInSong < endSongSample; ++posInSong)
-			{
-				ARASamplePosition posInBuffer = posInSong - samplePosition;
-				ARASamplePosition posInSource = posInSong + offsetToPlaybackRegionSamples;
-				for (ARAChannelCount c = 0; c < audioSource->getChannelCount (); ++c)
-					ppOutput[c][posInBuffer] += audioSource->getRenderSampleCacheForChannel (c)[posInSource];
-			}
-		}
+            // add samples from audio source
+            for (ARASamplePosition posInSong = startSongSample; posInSong < endSongSample; ++posInSong)
+            {
+                ARASamplePosition posInBuffer = posInSong - samplePosition;
+                ARASamplePosition posInSource = posInSong + offsetToPlaybackRegionSamples;
+                for (ARAChannelCount c = 0; c < audioSource->getChannelCount (); ++c)
+                    ppOutput[c][posInBuffer] += audioSource->getRenderSampleCacheForChannel (c)[posInSource];
+            }
+        }
 
-		// let the document controller know we're done
-		docController->rendererDidAccessModelGraph (this);
-	}
+        // let the document controller know we're done
+        docController->rendererDidAccessModelGraph (this);
+    }
 }
 
-}	// namespace PlugIn
-}	// namespace ARA
+}    // namespace PlugIn
+}    // namespace ARA

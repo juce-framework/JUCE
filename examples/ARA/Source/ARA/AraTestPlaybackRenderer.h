@@ -54,13 +54,13 @@ namespace PlugIn
 class ARATestPlaybackRenderer : public PlaybackRenderer
 {
 public:
-	ARATestPlaybackRenderer (DocumentController* documentController)
-	: PlaybackRenderer (documentController)
-	{}
+    ARATestPlaybackRenderer (DocumentController* documentController)
+    : PlaybackRenderer (documentController)
+    {}
 
-	void renderPlaybackRegions (float** ppOutput, ARAChannelCount channelCount, ARASampleRate sampleRate,
-						ARASamplePosition samplePosition, ARASampleCount samplesToRender, bool isPlayingBack);
+    void renderPlaybackRegions (float** ppOutput, ARAChannelCount channelCount, ARASampleRate sampleRate,
+                        ARASamplePosition samplePosition, ARASampleCount samplesToRender, bool isPlayingBack);
 };
 
-}	// namespace PlugIn
-}	// namespace ARA
+}    // namespace PlugIn
+}    // namespace ARA
