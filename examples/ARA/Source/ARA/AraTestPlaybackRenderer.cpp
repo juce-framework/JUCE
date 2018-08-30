@@ -81,11 +81,11 @@ void ARATestPlaybackRenderer::renderPlaybackRegions (float** ppOutput, ARAChanne
 				continue;
 
 			// evaluate region borders in song time, calculate sample range to copy in song time
-			ARASamplePosition regionStartSample = playbackRegion->getStartInSongInSamples (sampleRate);
+			ARASamplePosition regionStartSample = playbackRegion->getStartInPlaybackSamples (sampleRate);
 			if (sampleEnd < regionStartSample)
 				continue; 
 
-			ARASamplePosition regionEndSample = playbackRegion->getEndInSongInSamples (sampleRate);
+			ARASamplePosition regionEndSample = playbackRegion->getEndInPlaybackSamples (sampleRate);
 			if (regionEndSample < samplePosition)
 				continue;
 
@@ -94,10 +94,10 @@ void ARATestPlaybackRenderer::renderPlaybackRegions (float** ppOutput, ARAChanne
 
 			// calculate offset between song and audio source samples, clip at region borders in audio source samples
 			// (if a plug-in supports time stretching, it will also need to reflect the stretch factor here)
-			ARASamplePosition offsetToPlaybackRegionSamples = playbackRegion->getStartInAudioModificationInSamples () - regionStartSample;
+			ARASamplePosition offsetToPlaybackRegionSamples = playbackRegion->getStartInAudioModificationSamples () - regionStartSample;
 
-			ARASamplePosition startAvailableSourceSamples = std::max ((ARASamplePosition)0, playbackRegion->getStartInAudioModificationInSamples ());
-			ARASamplePosition endAvailableSourceSamples = std::min (audioSource->getSampleCount (), playbackRegion->getEndInAudioModificationInSamples ());
+			ARASamplePosition startAvailableSourceSamples = std::max ((ARASamplePosition)0, playbackRegion->getStartInAudioModificationSamples ());
+			ARASamplePosition endAvailableSourceSamples = std::min (audioSource->getSampleCount (), playbackRegion->getEndInAudioModificationSamples ());
 
 			startSongSample = std::max (startSongSample, startAvailableSourceSamples - offsetToPlaybackRegionSamples);
 			endSongSample = std::min (endSongSample, endAvailableSourceSamples - offsetToPlaybackRegionSamples);

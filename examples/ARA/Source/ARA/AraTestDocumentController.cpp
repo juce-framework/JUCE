@@ -77,8 +77,8 @@ NoteContentReader::NoteContentReader (const AudioModification* audioModification
 NoteContentReader::NoteContentReader (const PlaybackRegion* playbackRegion, const ARAContentTimeRange* range)
 	// actual plug-ins will take the modification data and the full region transformation into account instead of simply forwarding to the audio source detection data
 	: NoteContentReader (playbackRegion->getAudioModification ()->getAudioSource (),
-	(range) ? *range : ARAContentTimeRange {playbackRegion->getStartInSong (), playbackRegion->getDurationInSong ()},
-	playbackRegion->getStartInSong () - playbackRegion->getStartInAudioModification ())
+	(range) ? *range : ARAContentTimeRange {playbackRegion->getStartInPlaybackTime (), playbackRegion->getDurationInPlaybackTime ()},
+	playbackRegion->getStartInPlaybackTime () - playbackRegion->getStartInAudioModificationTime ())
 {}
 
 NoteContentReader::NoteContentReader (const AudioSource* audioSource, const ARAContentTimeRange& range, double timeOffset)
