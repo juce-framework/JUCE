@@ -1271,27 +1271,25 @@ public:
 	{
 		return ARA::PlugIn::DocumentController::getARAFactory();
 	}
-
+    static const FUID iid;
 protected:
 };
-
-static const ::Steinberg::TUID JuceARAFactory_IID = JucePlugin_ARAVST3FactoryUUID;
 
 IMPLEMENT_REFCOUNT(JuceARAFactory);
 
 ::Steinberg::tresult PLUGIN_API JuceARAFactory::queryInterface (const ::Steinberg::TUID targetIID, void** obj)
 {
 	TEST_FOR_AND_RETURN_IF_VALID (targetIID, FObject)
-	TEST_FOR_AND_RETURN_IF_VALID (targetIID, ARA::IMainFactory)
+    TEST_FOR_AND_RETURN_IF_VALID (targetIID, ARA::IMainFactory)
 
-	if (doUIDsMatch (targetIID, JuceARAFactory_IID))
-	{
-		addRef();
-		*obj = this;
-		return kResultOk;
-	}
+    if (doUIDsMatch (targetIID, JuceARAFactory::iid))
+    {
+        addRef ();
+        *obj = this;
+        return kResultOk;
+    }
 
-	*obj = nullptr;
+    *obj = nullptr;
 	return kNoInterface;
 }
 
@@ -2685,6 +2683,9 @@ DEF_CLASS_IID (JuceAudioProcessor)
  DEF_CLASS_IID (JuceVST3Component)
 #endif
 
+ DECLARE_CLASS_IID (JuceARAFactory, 0xABCDEF01, 0xA1B2C3D4, JucePlugin_ManufacturerCode, JucePlugin_PluginCode)
+ DEF_CLASS_IID (JuceARAFactory)
+
 #if JUCE_MSVC
  #pragma warning (pop)
 #elif JUCE_CLANG
@@ -3046,7 +3047,7 @@ JUCE_EXPORTED_FUNCTION IPluginFactory* PLUGIN_API GetPluginFactory()
         globalFactory->registerClass (controllerClass, createControllerInstance);
 
 #if JucePlugin_Enable_ARA
-		static const PClassInfo2 araFactoryClass (JuceARAFactory_IID,
+		static const PClassInfo2 araFactoryClass (JuceARAFactory::iid,
 												  PClassInfo::kManyInstances,
 												  kARAMainFactoryClass,
 												  JucePlugin_Name "ARAFactory",

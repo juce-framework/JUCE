@@ -259,17 +259,8 @@ void Project::initialiseAudioPluginValues()
     pluginVST3CategoryValue.referTo          (projectRoot, Ids::pluginVST3Category,         getUndoManager(), getDefaultVST3Categories(), ",");
     pluginRTASCategoryValue.referTo          (projectRoot, Ids::pluginRTASCategory,         getUndoManager(), getDefaultRTASCategories(), ",");
     pluginAAXCategoryValue.referTo           (projectRoot, Ids::pluginAAXCategory,          getUndoManager(), getDefaultAAXCategories(),  ",");
-    pluginARAContentTypeValue.referTo        (projectRoot, Ids::pluginARAContentType,       getUndoManager(), getDefaultARAContentTypes(), ",");
-    pluginARATransformFlagsValue.referTo     (projectRoot, Ids::pluginARATransformFlags,    getUndoManager(), getDefaultARAContentTypes(), ",");
-
-    // If the ARA factory ID has not yet been set for this project set it now and cache the string value
-    if (!projectRoot.hasProperty(Ids::araVST3FactoryUUID))
-    {
-        projectRoot.setProperty(Ids::araVST3FactoryUUID, getDefaultARAFactoryUUIDString(), getUndoManager());
-    }
-
-    jassert(projectRoot.hasProperty(Ids::araVST3FactoryUUID));
-    pluginARAVST3FactoryUUIDValue.setValue(projectRoot.getProperty(Ids::araVST3FactoryUUID));
+    pluginARAContentTypeValue.referTo (projectRoot, Ids::pluginARAContentType, getUndoManager (), getDefaultARAContentTypes (), ",");
+    pluginARATransformFlagsValue.referTo (projectRoot, Ids::pluginARATransformFlags, getUndoManager (), getDefaultARAContentTypes (), ",");
 }
 
 void Project::updateOldStyleConfigList()
