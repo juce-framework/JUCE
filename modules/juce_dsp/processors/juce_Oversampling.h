@@ -86,7 +86,10 @@ public:
                                 the filters will be more efficient, but the CPU load will
                                 increase as well
     */
-    Oversampling (size_t numChannels, size_t factor, FilterType type, bool isMaxQuality = true);
+    Oversampling (size_t numChannels,
+                  size_t factor,
+                  FilterType type,
+                  bool isMaxQuality = true);
 
     /** Destructor. */
     ~Oversampling();
@@ -121,14 +124,14 @@ public:
         Don't forget to set the sample rate of that processing to N times the original
         sample rate.
     */
-    dsp::AudioBlock<SampleType> processSamplesUp (const dsp::AudioBlock<SampleType> &inputBlock) noexcept;
+    dsp::AudioBlock<SampleType> processSamplesUp (const dsp::AudioBlock<SampleType>& inputBlock) noexcept;
 
     /** Must be called to perform the downsampling, after the upsampling and the
         non-linear processing. The output signal is probably delayed by the internal
         latency of the whole oversampling behaviour, so don't forget to take this
         into account.
     */
-    void processSamplesDown (dsp::AudioBlock<SampleType> &outputBlock) noexcept;
+    void processSamplesDown (dsp::AudioBlock<SampleType>& outputBlock) noexcept;
 
 private:
     //===============================================================================
