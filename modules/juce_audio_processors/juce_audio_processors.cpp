@@ -92,8 +92,6 @@ static inline bool arrayContainsPlugin (const OwnedArray<PluginDescription>& lis
 struct AutoResizingNSViewComponent  : public ViewComponentBaseClass,
                                       private AsyncUpdater
 {
-    AutoResizingNSViewComponent() : recursive (false) {}
-
     void childBoundsChanged (Component*) override
     {
         if (recursive)
@@ -104,13 +102,13 @@ struct AutoResizingNSViewComponent  : public ViewComponentBaseClass,
         {
             recursive = true;
             resizeToFitView();
-            recursive = true;
+            recursive = false;
         }
     }
 
-    void handleAsyncUpdate() override               { resizeToFitView(); }
+    void handleAsyncUpdate() override  { resizeToFitView(); }
 
-    bool recursive;
+    bool recursive = false;
 };
 
 //==============================================================================
