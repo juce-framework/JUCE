@@ -66,7 +66,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    void refresh();
+    void refresh() override;
 
 private:
     TextButton button;
