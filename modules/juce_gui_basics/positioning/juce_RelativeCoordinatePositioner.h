@@ -45,8 +45,8 @@ public:
     void componentParentHierarchyChanged (Component&) override;
     void componentChildrenChanged (Component&) override;
     void componentBeingDeleted (Component&) override;
-    void markersChanged (MarkerList*);
-    void markerListBeingDeleted (MarkerList*);
+    void markersChanged (MarkerList*) override;
+    void markerListBeingDeleted (MarkerList*) override;
 
     void apply();
 
