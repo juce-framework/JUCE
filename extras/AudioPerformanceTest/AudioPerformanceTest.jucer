@@ -11,7 +11,7 @@
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
-    <XCODE_MAC targetFolder="Builds/MacOSX" extraCompilerFlags="">
+    <XCODE_MAC targetFolder="Builds/MacOSX" extraCompilerFlags="-Winconsistent-missing-override &#10;-Werror">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="AudioPerformanceTest"/>
         <CONFIGURATION name="Release" isDebug="0" targetName="AudioPerformanceTest"/>
