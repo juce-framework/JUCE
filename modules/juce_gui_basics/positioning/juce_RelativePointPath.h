@@ -129,9 +129,9 @@ public:
     {
     public:
         LineTo (const RelativePoint& endPoint);
-        void addToPath (Path& path, Expression::Scope*) const;
-        RelativePoint* getControlPoints (int& numPoints);
-        ElementBase* clone() const;
+        void addToPath (Path& path, Expression::Scope*) const override;
+        RelativePoint* getControlPoints (int& numPoints) override;
+        ElementBase* clone() const override;
 
         RelativePoint endPoint;
 
