@@ -41,10 +41,10 @@ public:
     RelativeCoordinatePositionerBase (Component&);
     ~RelativeCoordinatePositionerBase();
 
-    void componentMovedOrResized (Component&, bool, bool);
-    void componentParentHierarchyChanged (Component&);
-    void componentChildrenChanged (Component&);
-    void componentBeingDeleted (Component&);
+    void componentMovedOrResized (Component&, bool, bool) override;
+    void componentParentHierarchyChanged (Component&) override;
+    void componentChildrenChanged (Component&) override;
+    void componentBeingDeleted (Component&) override;
     void markersChanged (MarkerList*);
     void markerListBeingDeleted (MarkerList*);
 
