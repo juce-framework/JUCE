@@ -63,9 +63,9 @@ public:
         // Suppress a VS2013 compiler warning
         ComponentScope& operator= (const ComponentScope&) = delete;
 
-        Expression getSymbolValue (const String& symbol) const;
-        void visitRelativeScope (const String& scopeName, Visitor&) const;
-        String getScopeUID() const;
+        Expression getSymbolValue (const String& symbol) const override;
+        void visitRelativeScope (const String& scopeName, Visitor&) const override;
+        String getScopeUID() const override;
 
     protected:
         Component& component;
