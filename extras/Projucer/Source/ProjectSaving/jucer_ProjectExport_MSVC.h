@@ -141,25 +141,26 @@ public:
     public:
         MSVCBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
             : BuildConfiguration (p, settings, e),
-              warningLevelValue             (config, Ids::winWarningLevel,            getUndoManager(), 4),
-              warningsAreErrorsValue        (config, Ids::warningsAreErrors,          getUndoManager(), false),
-              prebuildCommandValue          (config, Ids::prebuildCommand,            getUndoManager()),
-              postbuildCommandValue         (config, Ids::postbuildCommand,           getUndoManager()),
-              generateDebugSymbolsValue     (config, Ids::alwaysGenerateDebugSymbols, getUndoManager(), false),
-              generateManifestValue         (config, Ids::generateManifest,           getUndoManager(), true),
-              enableIncrementalLinkingValue (config, Ids::enableIncrementalLinking,   getUndoManager(), false),
-              useRuntimeLibDLLValue         (config, Ids::useRuntimeLibDLL,           getUndoManager(), true),
-              intermediatesPathValue        (config, Ids::intermediatesPath,          getUndoManager()),
-              characterSetValue             (config, Ids::characterSet,               getUndoManager()),
-              architectureTypeValue         (config, Ids::winArchitecture,            getUndoManager(), get64BitArchName()),
-              fastMathValue                 (config, Ids::fastMath,                   getUndoManager()),
-              debugInformationFormatValue   (config, Ids::debugInformationFormat,     getUndoManager(), isDebug() ? "ProgramDatabase" : "None"),
-              pluginBinaryCopyStepValue     (config, Ids::enablePluginBinaryCopyStep, getUndoManager(), false),
-              vstBinaryLocation             (config, Ids::vstBinaryLocation,          getUndoManager()),
-              vst3BinaryLocation            (config, Ids::vst3BinaryLocation,         getUndoManager()),
-              rtasBinaryLocation            (config, Ids::rtasBinaryLocation,         getUndoManager()),
-              aaxBinaryLocation             (config, Ids::aaxBinaryLocation,          getUndoManager()),
-              unityPluginBinaryLocation     (config, Ids::unityPluginBinaryLocation,  getUndoManager(), {})
+              warningLevelValue              (config, Ids::winWarningLevel,            getUndoManager(), 4),
+              warningsAreErrorsValue         (config, Ids::warningsAreErrors,          getUndoManager(), false),
+              prebuildCommandValue           (config, Ids::prebuildCommand,            getUndoManager()),
+              postbuildCommandValue          (config, Ids::postbuildCommand,           getUndoManager()),
+              generateDebugSymbolsValue      (config, Ids::alwaysGenerateDebugSymbols, getUndoManager(), false),
+              generateManifestValue          (config, Ids::generateManifest,           getUndoManager(), true),
+              enableIncrementalLinkingValue  (config, Ids::enableIncrementalLinking,   getUndoManager(), false),
+              useRuntimeLibDLLValue          (config, Ids::useRuntimeLibDLL,           getUndoManager(), true),
+              multiProcessorCompilationValue (config, Ids::multiProcessorCompilation,  getUndoManager(), true),
+              intermediatesPathValue         (config, Ids::intermediatesPath,          getUndoManager()),
+              characterSetValue              (config, Ids::characterSet,               getUndoManager()),
+              architectureTypeValue          (config, Ids::winArchitecture,            getUndoManager(), get64BitArchName()),
+              fastMathValue                  (config, Ids::fastMath,                   getUndoManager()),
+              debugInformationFormatValue    (config, Ids::debugInformationFormat,     getUndoManager(), isDebug() ? "ProgramDatabase" : "None"),
+              pluginBinaryCopyStepValue      (config, Ids::enablePluginBinaryCopyStep, getUndoManager(), false),
+              vstBinaryLocation              (config, Ids::vstBinaryLocation,          getUndoManager()),
+              vst3BinaryLocation             (config, Ids::vst3BinaryLocation,         getUndoManager()),
+              rtasBinaryLocation             (config, Ids::rtasBinaryLocation,         getUndoManager()),
+              aaxBinaryLocation              (config, Ids::aaxBinaryLocation,          getUndoManager()),
+              unityPluginBinaryLocation      (config, Ids::unityPluginBinaryLocation,  getUndoManager(), {})
         {
             if (! isDebug())
                 updateOldLTOSetting();
@@ -177,34 +178,26 @@ public:
 
         String getPrebuildCommandString() const           { return prebuildCommandValue.get(); }
         String getPostbuildCommandString() const          { return postbuildCommandValue.get(); }
-
-        bool shouldGenerateDebugSymbols() const           { return generateDebugSymbolsValue.get(); }
-        bool shouldGenerateManifest() const               { return generateManifestValue.get(); }
-
-        bool shouldLinkIncremental() const                { return enableIncrementalLinkingValue.get(); }
-
-        bool isUsingRuntimeLibDLL() const                 { return useRuntimeLibDLLValue.get(); }
-
-        String getIntermediatesPathString() const         { return intermediatesPathValue.get(); }
-
-        String getCharacterSetString() const              { return characterSetValue.get(); }
-
-        String get64BitArchName() const                   { return "x64"; }
-        String get32BitArchName() const                   { return "Win32"; }
-        String getArchitectureString() const              { return architectureTypeValue.get(); }
-        bool is64Bit() const                              { return getArchitectureString() == get64BitArchName(); }
-
-        bool isFastMathEnabled() const                    { return fastMathValue.get(); }
-
-        String getDebugInformationFormatString() const    { return debugInformationFormatValue.get(); }
-
-        bool isPluginBinaryCopyStepEnabled() const        { return pluginBinaryCopyStepValue.get(); }
-
         String getVSTBinaryLocationString() const         { return vstBinaryLocation.get(); }
         String getVST3BinaryLocationString() const        { return vst3BinaryLocation.get(); }
         String getRTASBinaryLocationString() const        { return rtasBinaryLocation.get();}
         String getAAXBinaryLocationString() const         { return aaxBinaryLocation.get();}
         String getUnityPluginBinaryLocationString() const { return unityPluginBinaryLocation.get(); }
+        String getIntermediatesPathString() const         { return intermediatesPathValue.get(); }
+        String getCharacterSetString() const              { return characterSetValue.get(); }
+        String get64BitArchName() const                   { return "x64"; }
+        String get32BitArchName() const                   { return "Win32"; }
+        String getArchitectureString() const              { return architectureTypeValue.get(); }
+        String getDebugInformationFormatString() const    { return debugInformationFormatValue.get(); }
+
+        bool shouldGenerateDebugSymbols() const           { return generateDebugSymbolsValue.get(); }
+        bool shouldGenerateManifest() const               { return generateManifestValue.get(); }
+        bool shouldLinkIncremental() const                { return enableIncrementalLinkingValue.get(); }
+        bool isUsingRuntimeLibDLL() const                 { return useRuntimeLibDLLValue.get(); }
+        bool shouldUseMultiProcessorCompilation() const   { return multiProcessorCompilationValue.get(); }
+        bool is64Bit() const                              { return getArchitectureString() == get64BitArchName(); }
+        bool isFastMathEnabled() const                    { return fastMathValue.get(); }
+        bool isPluginBinaryCopyStepEnabled() const        { return pluginBinaryCopyStepValue.get(); }
 
         //==============================================================================
         String createMSVCConfigName() const
@@ -269,6 +262,12 @@ public:
                        "C++ runtime installed. However, if you are linking libraries from different sources you must select the same type of runtime "
                        "used by the libraries.");
 
+            props.add (new ChoicePropertyComponent (multiProcessorCompilationValue, "Multi-Processor Compilation",
+                                                    { "Enabled", "Disabled" },
+                                                    { true,      false }),
+                       "Allows the compiler to use of all the available processors, which can reduce compilation time. "
+                       "This is enabled by default and should only be disabled if you know what you are doing.");
+
             props.add (new ChoicePropertyComponent (enableIncrementalLinkingValue, "Incremental Linking"),
                        "Enable to avoid linking from scratch for every new build. "
                        "Disable to ensure that your final release build does not contain padding or thunks.");
@@ -307,8 +306,9 @@ public:
 
     private:
         ValueWithDefault warningLevelValue, warningsAreErrorsValue, prebuildCommandValue, postbuildCommandValue, generateDebugSymbolsValue,
-                         generateManifestValue, enableIncrementalLinkingValue, useRuntimeLibDLLValue, intermediatesPathValue,
-                         characterSetValue, architectureTypeValue, fastMathValue, debugInformationFormatValue, pluginBinaryCopyStepValue;
+                         generateManifestValue, enableIncrementalLinkingValue, useRuntimeLibDLLValue, multiProcessorCompilationValue,
+                         intermediatesPathValue, characterSetValue, architectureTypeValue, fastMathValue, debugInformationFormatValue,
+                         pluginBinaryCopyStepValue;
 
         ValueWithDefault vstBinaryLocation, vst3BinaryLocation, rtasBinaryLocation, aaxBinaryLocation, unityPluginBinaryLocation;
 
@@ -562,9 +562,8 @@ public:
                     cl->createNewChildElement ("AdditionalIncludeDirectories")->addTextElement (includePaths.joinIntoString (";"));
                     cl->createNewChildElement ("PreprocessorDefinitions")->addTextElement (getPreprocessorDefs (config, ";") + ";%(PreprocessorDefinitions)");
 
-                    bool runtimeDLL = config.isUsingRuntimeLibDLL();
-                    cl->createNewChildElement ("RuntimeLibrary")->addTextElement (runtimeDLL ? (isDebug ? "MultiThreadedDebugDLL" : "MultiThreadedDLL")
-                                                                                  : (isDebug ? "MultiThreadedDebug"    : "MultiThreaded"));
+                    cl->createNewChildElement ("RuntimeLibrary")->addTextElement (config.isUsingRuntimeLibDLL() ? (isDebug ? "MultiThreadedDebugDLL" : "MultiThreadedDLL")
+                                                                                                                : (isDebug ? "MultiThreadedDebug"    : "MultiThreaded"));
                     cl->createNewChildElement ("RuntimeTypeInfo")->addTextElement ("true");
                     cl->createNewChildElement ("PrecompiledHeader");
                     cl->createNewChildElement ("AssemblerListingLocation")->addTextElement ("$(IntDir)\\");
@@ -572,7 +571,7 @@ public:
                     cl->createNewChildElement ("ProgramDataBaseFileName")->addTextElement ("$(IntDir)\\");
                     cl->createNewChildElement ("WarningLevel")->addTextElement ("Level" + String (config.getWarningLevel()));
                     cl->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
-                    cl->createNewChildElement ("MultiProcessorCompilation")->addTextElement ("true");
+                    cl->createNewChildElement ("MultiProcessorCompilation")->addTextElement (config.shouldUseMultiProcessorCompilation() ? "true" : "false");
 
                     if (config.isFastMathEnabled())
                         cl->createNewChildElement ("FloatingPointModel")->addTextElement ("Fast");
