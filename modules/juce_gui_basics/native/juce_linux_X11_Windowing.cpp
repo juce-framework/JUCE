@@ -2459,12 +2459,17 @@ private:
 
         if (auto* mapping = XGetModifierMapping (display))
         {
-            for (int i = 0; i < 8; i++)
+            for (int modifierIdx = 0; modifierIdx < 8; ++modifierIdx)
             {
-                if (mapping->modifiermap [i << 1] == altLeftCode)
-                    Keys::AltMask = 1 << i;
-                else if (mapping->modifiermap [i << 1] == numLockCode)
-                    Keys::NumLockMask = 1 << i;
+                for (int keyIndex = 0; keyIndex < mapping->max_keypermod; ++keyIndex)
+                {
+                    auto key = mapping->modifiermap[(modifierIdx * mapping->max_keypermod) + keyIndex];
+
+                    if (key == altLeftCode)
+                        Keys::AltMask = 1 << modifierIdx;
+                    else if (key == numLockCode)
+                        Keys::NumLockMask = 1 << modifierIdx;
+                }
             }
 
             XFreeModifiermap (mapping);
