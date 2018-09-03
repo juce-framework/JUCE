@@ -275,7 +275,7 @@ public:
         auto maxChannels = jmin (static_cast<size_t> (src.getNumChannels()), static_cast<size_t> (numChannels));
 
         for (size_t ch = 0; ch < maxChannels; ++ch)
-            FloatVectorOperations::copy (channelPtr (ch),
+            FloatVectorOperations::copy (channelPtr (ch) + dstPos,
                                          src.getReadPointer (static_cast<int> (ch),
                                                              static_cast<int> (srcPos * sizeFactor)),
                                          n);
@@ -299,7 +299,7 @@ public:
         for (size_t ch = 0; ch < maxChannels; ++ch)
             FloatVectorOperations::copy (dst.getWritePointer (static_cast<int> (ch),
                                                               static_cast<int> (dstPos * sizeFactor)),
-                                         channelPtr (ch), n);
+                                         channelPtr (ch) + srcPos, n);
 
         return *this;
     }

@@ -128,7 +128,7 @@ public:
     /** Creates a new OSCArgument of type blob with binary data content copied from
         the given MemoryBlock.
 
-        Note: if the argument passed is an lvalue, this may copy the binary data.
+        Note: If the argument passed is an lvalue, this may copy the binary data.
     */
     void addBlob (MemoryBlock blob);
 

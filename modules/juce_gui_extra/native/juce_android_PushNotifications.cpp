@@ -1128,7 +1128,7 @@ struct PushNotifications::Pimpl
         var resultVar;
         JSON::parse (juceString (varString.get()), resultVar);
 
-        // Note: we are not checking if result of parsing was okay, because there may be no properties set at all.
+        // Note: We are not checking if result of parsing was okay, because there may be no properties set at all.
         return resultVar;
     }
 
@@ -1321,8 +1321,8 @@ struct PushNotifications::Pimpl
                     auto objectClass    = LocalRef<jobject> (env->CallObjectMethod (object, JavaObject.getClass));
                     auto classAsString  = LocalRef<jstring> ((jstring) env->CallObjectMethod (objectClass, JavaClass.getName));
 
-                    // Note: seems that Firebase delivers values as strings always, so this check is rather unnecessary,
-                    //       at least till they change the behaviour.
+                    // Note: It seems that Firebase delivers values as strings always, so this check is rather unnecessary,
+                    //       at least untill they change the behaviour.
                     var value = juceString (classAsString) == "java.lang.Bundle" ? bundleToVar (object) : var (juceString (objectAsString.get()));
                     dynamicObject->setProperty (juceString (key.get()), value);
                 }
@@ -1411,7 +1411,7 @@ struct PushNotifications::Pimpl
             const uint8 b = (uint8) colourString.substring (4, 6).getIntValue();
             n.accentColour = Colour (r, g, b);
 
-            // Note: ignoring icon, because Firebase passes it as a string.
+            // Note: Ignoring the icon, because Firebase passes it as a string.
 
             propertiesDynamicObject->setProperty ("clickAction",           juceString (clickAction.get()));
             propertiesDynamicObject->setProperty ("bodyLocalizationKey",   juceString (bodyLocalizationKey.get()));

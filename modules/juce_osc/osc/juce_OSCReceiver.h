@@ -140,7 +140,7 @@ public:
         and has to be either MessageLoopCallback or RealtimeCallback. If not specified,
         MessageLoopCallback will be used by default.
 
-        Note: this type of listener will ignore OSC bundles.
+        Note: This type of listener will ignore OSC bundles.
 
         @see OSCReceiver::addListener, OSCReceiver::Listener,
              OSCReceiver::MessageLoopCallback, OSCReceiver::RealtimeCallback

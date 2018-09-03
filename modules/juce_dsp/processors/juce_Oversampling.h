@@ -75,7 +75,7 @@ public:
         Constructor of the oversampling class. All the processing parameters must be
         provided at the creation of the oversampling object.
 
-        Note : you might want to create a class heriting from Oversampling with a
+        Note: You might want to create a class inheriting from Oversampling with a
         different constructor if you need more control on what happens in the process.
 
         @param numChannels      the number of channels to process with this object
@@ -86,7 +86,10 @@ public:
                                 the filters will be more efficient, but the CPU load will
                                 increase as well
     */
-    Oversampling (size_t numChannels, size_t factor, FilterType type, bool isMaxQuality = true);
+    Oversampling (size_t numChannels,
+                  size_t factor,
+                  FilterType type,
+                  bool isMaxQuality = true);
 
     /** Destructor. */
     ~Oversampling();
@@ -97,7 +100,7 @@ public:
         the oversampling, for example with a dry / wet functionality, and to report
         the latency to the DAW.
 
-        Note : the latency might not be integer, so you might need to round its value
+        Note: The latency might not be integer, so you might need to round its value
         or to compensate it properly in your processing code.
     */
     SampleType getLatencyInSamples() noexcept;
@@ -121,14 +124,14 @@ public:
         Don't forget to set the sample rate of that processing to N times the original
         sample rate.
     */
-    dsp::AudioBlock<SampleType> processSamplesUp (const dsp::AudioBlock<SampleType> &inputBlock) noexcept;
+    dsp::AudioBlock<SampleType> processSamplesUp (const dsp::AudioBlock<SampleType>& inputBlock) noexcept;
 
     /** Must be called to perform the downsampling, after the upsampling and the
         non-linear processing. The output signal is probably delayed by the internal
         latency of the whole oversampling behaviour, so don't forget to take this
         into account.
     */
-    void processSamplesDown (dsp::AudioBlock<SampleType> &outputBlock) noexcept;
+    void processSamplesDown (dsp::AudioBlock<SampleType>& outputBlock) noexcept;
 
 private:
     //===============================================================================

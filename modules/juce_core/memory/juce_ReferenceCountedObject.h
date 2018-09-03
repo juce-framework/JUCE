@@ -49,7 +49,7 @@ namespace juce
     Once a new ReferenceCountedObject has been assigned to a pointer, be
     careful not to delete the object manually.
 
-    This class uses an Atomic<int> value to hold the reference count, so that it
+    This class uses an Atomic<int> value to hold the reference count, so that
     the pointers can be passed between threads safely. For a faster but non-thread-safe
     version, use SingleThreadedReferenceCountedObject instead.
 

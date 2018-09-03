@@ -52,6 +52,7 @@ Project::Project (const File& f)
     setFile (f);
 
     removeDefunctExporters();
+    exporterPathsModuleList.reset (new AvailableModuleList());
     updateOldModulePaths();
     updateOldStyleConfigList();
     setCppVersionFromOldExporterSettings();

@@ -241,7 +241,7 @@ namespace XmlOutputFunctions
                             outputStream << (char) character;
                             break;
                         }
-                        // Note: deliberate fall-through here!
+                        // Note: Deliberate fall-through here!
                     default:
                         outputStream << "&#" << ((int) character) << ';';
                         break;

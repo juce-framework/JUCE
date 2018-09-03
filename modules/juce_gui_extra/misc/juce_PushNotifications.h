@@ -615,7 +615,7 @@ public:
             notification was received when the app was in the foreground already. On iOS 10 it will be
             called when a user presses on a notification
 
-            Note: on Android, if remote notification was received while the app was in the background and
+            Note: On Android, if remote notification was received while the app was in the background and
             then user pressed on it, the notification object received in this callback will contain only
             "properties" member set. Hence, if you want to know what was the notification title, content
             etc, you need to set them as additional properties, so that you will be able to restore them

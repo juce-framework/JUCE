@@ -271,7 +271,7 @@ public:
             MPE note's key state (whether the key is down and/or the note is
             sustained) has changed.
 
-            Note: if the key state changes to MPENote::off, noteReleased is
+            Note: If the key state changes to MPENote::off, noteReleased is
             called instead.
         */
         virtual void noteKeyStateChanged (MPENote changedNote) = 0;

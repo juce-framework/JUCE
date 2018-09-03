@@ -142,7 +142,7 @@ public:
 
             InAppPurchases class will own downloads and will delete them as soon as they are finished.
 
-            NOTE: it is possible to receive this callback for the same purchase multiple times. If that happens,
+            NOTE: It is possible to receive this callback for the same purchase multiple times. If that happens,
             only the newest set of downloads and the newest orderId will be valid, the old ones should be not used anymore!
         */
         virtual void productPurchaseFinished (const PurchaseInfo&, bool /*success*/, const String& /*statusDescription*/) {}
@@ -150,7 +150,7 @@ public:
         /** Called when a list of all purchases is restored. This can be used to figure out to
             which products a user is entitled to.
 
-            NOTE: it is possible to receive this callback for the same purchase multiple times. If that happens,
+            NOTE: It is possible to receive this callback for the same purchase multiple times. If that happens,
             only the newest set of downloads and the newest orderId will be valid, the old ones should be not used anymore!
         */
         virtual void purchasesListRestored (const Array<PurchaseInfo>&, bool /*success*/, const String& /*statusDescription*/) {}

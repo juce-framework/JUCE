@@ -218,10 +218,6 @@ void InputStream::skipNextBytes (int64 numBytesToSkip)
 {
     if (numBytesToSkip > 0)
     {
-        // try to just set the position first as this will be much faster than reading each byte
-        if (setPosition (getPosition() + numBytesToSkip))
-            return;
-
         auto skipBufferSize = (int) jmin (numBytesToSkip, (int64) 16384);
         HeapBlock<char> temp (skipBufferSize);
 
