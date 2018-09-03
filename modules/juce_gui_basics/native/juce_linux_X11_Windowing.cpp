@@ -318,7 +318,7 @@ namespace XRender
     static bool hasCompositingWindowManager (::Display* display) noexcept
     {
         return display != nullptr
-                && XGetSelectionOwner (display, Atoms::getCreating ("_NET_WM_CM_S0")) != 0;
+                && XGetSelectionOwner (display, Atoms::getCreating (display, "_NET_WM_CM_S0")) != 0;
     }
 
     static XRenderPictFormat* findPictureFormat (::Display* display)
@@ -326,7 +326,7 @@ namespace XRender
         ScopedXLock xlock (display);
         XRenderPictFormat* pictFormat = nullptr;
 
-        if (isAvailable())
+        if (isAvailable (display))
         {
             pictFormat = xRenderFindStandardFormat (display, PictStandardARGB32);
 
@@ -3594,12 +3594,14 @@ bool MouseInputSource::SourceList::canUseTouch()
 bool Desktop::canUseSemiTransparentWindows() noexcept
 {
    #if JUCE_USE_XRENDER
-    if (XRender::hasCompositingWindowManager())
+    auto display = XWindowSystem::getInstance()->displayRef();
+
+    if (XRender::hasCompositingWindowManager (display))
     {
         int matchedDepth = 0, desiredDepth = 32;
 
         return Visuals::findVisualFormat (display, desiredDepth, matchedDepth) != 0
-                 && matchedDepth == desiredDepth;
+                && matchedDepth == desiredDepth;
     }
    #endif
 
