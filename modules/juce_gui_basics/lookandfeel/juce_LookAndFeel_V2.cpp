@@ -1218,7 +1218,7 @@ void LookAndFeel_V2::drawComboBoxTextWhenNothingSelected (Graphics& g, ComboBox&
 
     g.setFont (font);
 
-    auto textArea = label.getBorderSize().subtractedFrom (label.getLocalBounds());
+    auto textArea = getLabelBorderSize (label).subtractedFrom (label.getLocalBounds());
 
     g.drawFittedText (box.getTextWhenNothingSelected(), textArea, label.getJustificationType(),
                       jmax (1, (int) (textArea.getHeight() / font.getHeight())),
