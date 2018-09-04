@@ -1243,7 +1243,7 @@ void LookAndFeel_V2::drawLabel (Graphics& g, Label& label)
         g.setColour (label.findColour (Label::textColourId).withMultipliedAlpha (alpha));
         g.setFont (font);
 
-        auto textArea = label.getBorderSize().subtractedFrom (label.getLocalBounds());
+        auto textArea = getLabelBorderSize (label).subtractedFrom (label.getLocalBounds());
 
         g.drawFittedText (label.getText(), textArea, label.getJustificationType(),
                           jmax (1, (int) (textArea.getHeight() / font.getHeight())),
@@ -1257,6 +1257,11 @@ void LookAndFeel_V2::drawLabel (Graphics& g, Label& label)
     }
 
     g.drawRect (label.getLocalBounds());
+}
+
+BorderSize<int> LookAndFeel_V2::getLabelBorderSize (Label& label)
+{
+    return label.getBorderSize();
 }
 
 //==============================================================================

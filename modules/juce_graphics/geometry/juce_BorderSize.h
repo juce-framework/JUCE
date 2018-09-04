@@ -67,13 +67,13 @@ public:
     /** Returns the gap that should be left at the top of the region. */
     ValueType getTop() const noexcept                   { return top; }
 
-    /** Returns the gap that should be left at the top of the region. */
+    /** Returns the gap that should be left at the left of the region. */
     ValueType getLeft() const noexcept                  { return left; }
 
-    /** Returns the gap that should be left at the top of the region. */
+    /** Returns the gap that should be left at the bottom of the region. */
     ValueType getBottom() const noexcept                { return bottom; }
 
-    /** Returns the gap that should be left at the top of the region. */
+    /** Returns the gap that should be left at the right of the region. */
     ValueType getRight() const noexcept                 { return right; }
 
     /** Returns the sum of the top and bottom gaps. */
