@@ -2,6 +2,8 @@
 
 This repository is a fork of the [JUCE 5 master branch]('https://github.com/WeAreROLI/JUCE') with with additions that enable it to generate ARA plugins in the VST3 format (AU coming soon.)
 
+Current ARA SDK compatibility version: 1.9.5.007
+
 ### Getting started:
 
 We've made modifications to the Projucer to enable it to work with the ARA 2.0 SDK. As of now the Projucer can be used to generate VST3 plugins that can be used as ARA plugins in a supporting host. 
