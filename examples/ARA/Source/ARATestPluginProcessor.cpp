@@ -194,11 +194,8 @@ AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 }
 
 //==============================================================================
-const ARA::PlugIn::PlugInExtension* ARATestPluginProcessor::createARAPlugInExtension(ARA::PlugIn::DocumentController* documentController, bool isPlaybackRenderer, bool isEditorRenderer, bool isEditorView)
+const ARA::PlugIn::PlugInExtension* ARATestPluginProcessor::createARAPlugInExtension(ARA::PlugIn::DocumentController* documentController, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles)
 {
     // Construct a plugin extension instance with our own playback renderer type
-    return new ARA::PlugIn::PlugInExtension (documentController,
-                                             isPlaybackRenderer ? new ARA::PlugIn::ARATestPlaybackRenderer (documentController) : nullptr,
-                                             isEditorRenderer ? new ARA::PlugIn::EditorRenderer (documentController) : nullptr,
-                                             isEditorView ? new ARA::PlugIn::EditorView (documentController) : nullptr);
+    return ARA::PlugIn::PlugInExtension::createWithRoles<ARA::PlugIn::ARATestPlaybackRenderer> (documentController, knownRoles, assignedRoles);
 }

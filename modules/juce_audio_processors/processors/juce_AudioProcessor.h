@@ -1705,8 +1705,8 @@ private:
 #if JucePlugin_Enable_ARA
 public:
 	// This should be in the plugin processor template so that they can see an example implementation
-	virtual const ARA::PlugIn::PlugInExtension* createARAPlugInExtension(ARA::PlugIn::DocumentController* documentController, bool isPlaybackRenderer, bool isEditorRenderer, bool isEditorView);
-	const ARA::PlugIn::PlugInExtension* _createARAPlugInExtension(ARA::PlugIn::DocumentController* documentController, bool isPlaybackRenderer, bool isEditorRenderer, bool isEditorView);
+	virtual const ARA::PlugIn::PlugInExtension* createARAPlugInExtension(ARA::PlugIn::DocumentController* documentController, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles);
+	const ARA::PlugIn::PlugInExtension* _createARAPlugInExtension(ARA::PlugIn::DocumentController* documentController, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles);
 	const ARA::PlugIn::PlugInExtension* getARAPlugInExtension() const;
 	const ARA::PlugIn::DocumentController* getARADocumentController() const;
 private:

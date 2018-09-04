@@ -2599,11 +2599,7 @@ private:
             return nullptr;
         }
 
-        bool isPlaybackRenderer = ((knownRoles & ARA::kARAPlaybackRendererRole) == 0) || ((assignedRoles & ARA::kARAPlaybackRendererRole) != 0);
-        bool isEditorRenderer = ((knownRoles & ARA::kARAEditorRendererRole) == 0) || ((assignedRoles & ARA::kARAEditorRendererRole) != 0);
-        bool isEditorView = ((knownRoles & ARA::kARAEditorViewRole) == 0) || ((assignedRoles & ARA::kARAEditorViewRole) != 0);
-
-        return pluginInstance->_createARAPlugInExtension(documentController, isPlaybackRenderer, isEditorRenderer, isEditorView)->getInstance();
+        return pluginInstance->_createARAPlugInExtension (documentController, knownRoles, assignedRoles)->getInstance ();
     }
 
 #endif // JucePlugin_Enable_ARA
