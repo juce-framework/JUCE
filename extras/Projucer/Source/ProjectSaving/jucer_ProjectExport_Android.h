@@ -93,13 +93,6 @@ public:
     }
 
     //==============================================================================
-    void initialiseDependencyPathValues() override
-    {
-        sdkPath.referTo  (Value (new DependencyPathValueSource (getSetting (Ids::androidSDKPath), Ids::androidSDKPath, TargetOS::getThisOS())));
-        ndkPath.referTo  (Value (new DependencyPathValueSource (getSetting (Ids::androidNDKPath), Ids::androidNDKPath, TargetOS::getThisOS())));
-    }
-
-    //==============================================================================
     ValueWithDefault androidJavaLibs, androidRepositories, androidDependencies, androidScreenOrientation, androidActivityClass,
                      androidActivitySubClassName, androidActivityBaseClassName, androidManifestCustomXmlElements, androidVersionCode,
                      androidMinimumSDK, androidTheme, androidSharedLibraries, androidStaticLibraries, androidExtraAssetsFolder,
@@ -823,8 +816,8 @@ private:
     {
         String props;
 
-        props << "ndk.dir=" << sanitisePath (ndkPath.toString()) << newLine
-              << "sdk.dir=" << sanitisePath (sdkPath.toString()) << newLine;
+        props << "ndk.dir=" << sanitisePath (getAppSettings().getStoredPath (Ids::androidNDKPath).toString()) << newLine
+              << "sdk.dir=" << sanitisePath (getAppSettings().getStoredPath (Ids::androidSDKPath).toString()) << newLine;
 
         return props;
     }
@@ -875,12 +868,6 @@ private:
 
         props.add (new TextPropertyComponent (androidVersionCode, "Android Version Code", 32, false),
                    "An integer value that represents the version of the application code, relative to other versions.");
-
-        props.add (new DependencyPathPropertyComponent (project.getFile().getParentDirectory(), sdkPath, "Android SDK Path"),
-                   "The path to the Android SDK folder on the target build machine");
-
-        props.add (new DependencyPathPropertyComponent (project.getFile().getParentDirectory(), ndkPath, "Android NDK Path"),
-                   "The path to the Android NDK folder on the target build machine");
 
         props.add (new TextPropertyComponent (androidMinimumSDK, "Minimum SDK version", 32, false),
                    "The number of the minimum version of the Android SDK that the app requires");
@@ -2015,7 +2002,6 @@ private:
     }
 
     //==============================================================================
-    Value sdkPath, ndkPath;
     const File AndroidExecutable;
 
     JUCE_DECLARE_NON_COPYABLE (AndroidProjectExporter)

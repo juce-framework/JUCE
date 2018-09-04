@@ -119,22 +119,6 @@ public:
     }
 
     //==============================================================================
-    void initialiseDependencyPathValues() override
-    {
-        vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder),
-                                                                Ids::vst3Path,
-                                                                TargetOS::windows)));
-
-        aaxPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::aaxFolder),
-                                                               Ids::aaxPath,
-                                                               TargetOS::windows)));
-
-        rtasPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::rtasFolder),
-                                                                Ids::rtasPath,
-                                                                TargetOS::windows)));
-    }
-
-    //==============================================================================
     class MSVCBuildConfiguration  : public BuildConfiguration,
                                     private Value::Listener
     {
@@ -1061,7 +1045,7 @@ public:
         //==============================================================================
         RelativePath getAAXIconFile() const
         {
-            RelativePath aaxSDK (getOwner().getAAXPathValue().toString(), RelativePath::projectFolder);
+            RelativePath aaxSDK (owner.getGlobalAAXPathString(), RelativePath::projectFolder);
             RelativePath projectIcon ("icon.ico", RelativePath::buildTargetFolder);
 
             if (getOwner().getTargetFolder().getChildFile ("icon.ico").existsAsFile())
@@ -1076,7 +1060,7 @@ public:
         {
             if (type == AAXPlugIn)
             {
-                RelativePath aaxSDK (getOwner().getAAXPathValue().toString(), RelativePath::projectFolder);
+                RelativePath aaxSDK (owner.getGlobalAAXPathString(), RelativePath::projectFolder);
                 RelativePath aaxLibsFolder = aaxSDK.getChildFile ("Libs");
                 RelativePath bundleScript  = aaxSDK.getChildFile ("Utilities").getChildFile ("CreatePackage.bat");
                 RelativePath iconFilePath  = getAAXIconFile();
@@ -1167,13 +1151,13 @@ public:
             {
             case AAXPlugIn:
                 {
-                    auto aaxLibsFolder = RelativePath (getOwner().getAAXPathValue().toString(), RelativePath::projectFolder).getChildFile ("Libs");
+                    auto aaxLibsFolder = RelativePath (owner.getGlobalAAXPathString(), RelativePath::projectFolder).getChildFile ("Libs");
                     defines.set ("JucePlugin_AAXLibs_path", createRebasedPath (aaxLibsFolder));
                 }
                 break;
             case RTASPlugIn:
                 {
-                    RelativePath rtasFolder (getOwner().getRTASPathValue().toString(), RelativePath::projectFolder);
+                    RelativePath rtasFolder (owner.getGlobalRTASPathString(), RelativePath::projectFolder);
                     defines.set ("JucePlugin_WinBag_path", createRebasedPath (rtasFolder.getChildFile ("WinBag")));
                 }
                 break;
@@ -1195,7 +1179,7 @@ public:
             StringArray searchPaths;
             if (type == RTASPlugIn)
             {
-                RelativePath rtasFolder (getOwner().getRTASPathValue().toString(), RelativePath::projectFolder);
+                RelativePath rtasFolder (owner.getGlobalRTASPathString(), RelativePath::projectFolder);
 
                 static const char* p[] = { "AlturaPorts/TDMPlugins/PluginLibrary/EffectClasses",
                                            "AlturaPorts/TDMPlugins/PluginLibrary/ProcessClasses",

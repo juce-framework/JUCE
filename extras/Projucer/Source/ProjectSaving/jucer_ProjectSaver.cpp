@@ -171,8 +171,6 @@ void ProjectSaver::writeProjects (const OwnedArray<LibraryModule>& modules, cons
 
             auto* exporter = exporters.add (exp.exporter.release());
 
-            exporter->initialiseDependencyPathValues();
-
             if (exporter->getTargetFolder().createDirectory())
             {
                 if (exporter->isCLion())
