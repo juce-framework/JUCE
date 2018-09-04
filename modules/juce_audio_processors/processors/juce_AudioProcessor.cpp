@@ -69,10 +69,6 @@ AudioProcessor::~AudioProcessor()
 #if JucePlugin_Enable_ARA
 	if (ARAPlugInExtension)
 	{
-		delete ARAPlugInExtension->getEditorView ();
-		delete ARAPlugInExtension->getPlaybackRenderer ();
-		delete ARAPlugInExtension->getEditorRenderer ();
-
 		delete ARAPlugInExtension;
 		ARAPlugInExtension = nullptr;
 	}
