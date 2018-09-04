@@ -767,7 +767,7 @@ public:
         is larger than the target rectangle in either dimension, then that dimension
         will be reduced to fit within the target.
     */
-    Rectangle constrainedWithin (Rectangle areaToFitWithin) const noexcept
+    Rectangle constrainedWithin (const Rectangle& areaToFitWithin) const noexcept
     {
         auto newW = jmin (w, areaToFitWithin.getWidth());
         auto newH = jmin (h, areaToFitWithin.getHeight());
