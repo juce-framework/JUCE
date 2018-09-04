@@ -253,14 +253,14 @@ void Project::initialiseAudioPluginValues()
     pluginAUExportPrefixValue.referTo        (projectRoot, Ids::pluginAUExportPrefix,       getUndoManager(),
                                               CodeHelpers::makeValidIdentifier (getProjectNameString(), false, true, false) + "AU");
 
-    pluginAUMainTypeValue.referTo            (projectRoot, Ids::pluginAUMainType,           getUndoManager(), getDefaultAUMainTypes(),    ",");
-    pluginAUSandboxSafeValue.referTo         (projectRoot, Ids::pluginAUIsSandboxSafe,      getUndoManager(), false);
-    pluginVSTCategoryValue.referTo           (projectRoot, Ids::pluginVSTCategory,          getUndoManager(), getDefaultVSTCategories(),  ",");
-    pluginVST3CategoryValue.referTo          (projectRoot, Ids::pluginVST3Category,         getUndoManager(), getDefaultVST3Categories(), ",");
-    pluginRTASCategoryValue.referTo          (projectRoot, Ids::pluginRTASCategory,         getUndoManager(), getDefaultRTASCategories(), ",");
-    pluginAAXCategoryValue.referTo           (projectRoot, Ids::pluginAAXCategory,          getUndoManager(), getDefaultAAXCategories(),  ",");
-    pluginARAContentTypeValue.referTo (projectRoot, Ids::pluginARAContentType, getUndoManager (), getDefaultARAContentTypes (), ",");
-    pluginARATransformFlagsValue.referTo (projectRoot, Ids::pluginARATransformFlags, getUndoManager (), getDefaultARAContentTypes (), ",");
+    pluginAUMainTypeValue.referTo            (projectRoot, Ids::pluginAUMainType,           getUndoManager(),  getDefaultAUMainTypes(), ",");
+    pluginAUSandboxSafeValue.referTo         (projectRoot, Ids::pluginAUIsSandboxSafe,      getUndoManager(),  false);
+    pluginVSTCategoryValue.referTo           (projectRoot, Ids::pluginVSTCategory,          getUndoManager(),  getDefaultVSTCategories(), ",");
+    pluginVST3CategoryValue.referTo          (projectRoot, Ids::pluginVST3Category,         getUndoManager(),  getDefaultVST3Categories(), ",");
+    pluginRTASCategoryValue.referTo          (projectRoot, Ids::pluginRTASCategory,         getUndoManager(),  getDefaultRTASCategories(), ",");
+    pluginAAXCategoryValue.referTo           (projectRoot, Ids::pluginAAXCategory,          getUndoManager(),  getDefaultAAXCategories(), ",");
+    pluginARAContentTypeValue.referTo        (projectRoot, Ids::pluginARAContentType,       getUndoManager (), getDefaultARAContentTypes (), ",");
+    pluginARATransformFlagsValue.referTo     (projectRoot, Ids::pluginARATransformFlags,    getUndoManager (), getDefaultARAContentTypes (), ",");
 }
 
 void Project::updateOldStyleConfigList()
