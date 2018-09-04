@@ -944,7 +944,14 @@ private:
                     if (auto* constrainer = editor->getConstrainer())
                     {
                         Rectangle<int> limits (0, 0, constrainer->getMaximumWidth(), constrainer->getMaximumHeight());
-                        constrainer->checkBounds (juceRect, editor->getBounds(), limits, false, false, false, false);
+
+                        auto currentRect = editor->getBounds();
+
+                        constrainer->checkBounds (juceRect, currentRect, limits,
+                                                  juceRect.getY() != currentRect.getY() && juceRect.getBottom() == currentRect.getBottom(),
+                                                  juceRect.getX() != currentRect.getX() && juceRect.getRight()  == currentRect.getRight(),
+                                                  juceRect.getY() == currentRect.getY() && juceRect.getBottom() != currentRect.getBottom(),
+                                                  juceRect.getX() == currentRect.getX() && juceRect.getRight()  != currentRect.getRight());
 
                         juceRect = component->getLocalArea (editor, juceRect);
 
