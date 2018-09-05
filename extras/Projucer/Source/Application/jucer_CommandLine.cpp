@@ -696,7 +696,10 @@ namespace
         if (! childToSet.isValid())
             ConsoleApplication::fail ("Failed to set the requested setting!");
 
-        childToSet.setProperty (args[2].text, args[3].resolveAsFile().getFullPathName(), nullptr);
+        if (args[2].text == Ids::defaultUserModulePath.toString())
+            childToSet.setProperty (args[2].text, args[3].text.removeCharacters ("\""), nullptr);
+        else
+            childToSet.setProperty (args[2].text, args[3].resolveAsFile().getFullPathName(), nullptr);
 
         settingsFile.replaceWithText (settingsTree.toXmlString());
     }
@@ -805,7 +808,8 @@ namespace
                   << std::endl
                   << " " << appName << " --set-global-search-path os identifier_to_set new_path" << std::endl
                   << "    Sets the global path for a specified os and identifier. The os should be either osx, windows or linux and the identifiers can be any of the following: "
-                  << "defaultJuceModulePath, defaultUserModulePath, vst3Path, aaxPath (not valid on linux), rtasPath (not valid on linux), androidSDKPath or androidNDKPath." << std::endl
+                  << "defaultJuceModulePath, defaultUserModulePath, vst3Path, aaxPath (not valid on linux), rtasPath (not valid on linux), androidSDKPath or androidNDKPath. "
+                     "When setting defaultUserModulePath you can specify multiple paths by surrounding a semicolon-separated list of paths with double quotes \"like;so\"" << std::endl
                   << std::endl
                   << " " << appName << " --create-project-from-pip path/to/PIP path/to/output path/to/JUCE/modules (optional)" << std::endl
                   << "    Generates a JUCE project from a PIP file." << std::endl
