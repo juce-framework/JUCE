@@ -6,24 +6,22 @@ Develop
 
 Change
 ------
-The per-exporter AAX/RTAS/VST3 SDK and Android SDK/NDK path options have been 
-removed.
+The Projucer's per-exporter Android SDK/NDK path options have been removed.
 
 Possible Issues
 ---------------
-Projects that previously used these fields to set the paths to the above SDKs 
-may no longer build.
+Projects that previously used these fields may no longer build.
 
 Workaround
 ----------
-Use the Projucer's global paths settings to point to the location of these
-SDKs, either by opening the "Projucer/File->Global Paths..." menu item or using
-the "--set-global-search-path" command-line option.
+Use the Projucer's global paths settings to point to these directories, either
+by opening the "Projucer/File->Global Paths..." menu item or using the 
+"--set-global-search-path" command-line option.
 
 Rationale
 ---------
-Having multiple places where SDK paths could be set was confusing and
-could interfere with the embedded VST3 SDK path in some cases.
+Having multiple places where the paths could be set was confusing and could
+cause unexpected mismatches.
 
 
 Change
