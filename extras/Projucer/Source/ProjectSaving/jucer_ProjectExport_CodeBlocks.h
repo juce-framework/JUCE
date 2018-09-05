@@ -180,9 +180,6 @@ public:
         jassert (targets.size() > 0);
     }
 
-    //==============================================================================
-    void initialiseDependencyPathValues() override  {}
-
 private:
     ValueWithDefault targetPlatformValue;
 

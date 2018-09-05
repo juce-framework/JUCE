@@ -211,10 +211,10 @@ struct MenuWindow  : public Component
 
         setLookAndFeel (parent != nullptr ? &(parent->getLookAndFeel())
                                           : menu.lookAndFeel.get());
-
         auto& lf = getLookAndFeel();
 
         parentComponent = lf.getParentComponentForMenuOptions (options);
+        const_cast<Options&>(options) = options.withParentComponent (parentComponent);
 
         if (parentComponent == nullptr && parentWindow == nullptr && lf.shouldPopupMenuScaleWithTargetComponent (options))
             if (auto* targetComponent = options.getTargetComponent())

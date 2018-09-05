@@ -203,6 +203,7 @@ public:
     //==============================================================================
     void drawLabel (Graphics&, Label&) override;
     Font getLabelFont (Label&) override;
+    BorderSize<int> getLabelBorderSize (Label&) override;
 
     //==============================================================================
     void drawLinearSlider (Graphics&, int x, int y, int width, int height,

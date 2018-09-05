@@ -137,8 +137,11 @@ void ProjucerApplication::initialiseBasics()
     icons.reset (new Icons());
     tooltipWindow.setMillisecondsBeforeTipAppears (1200);
 
-    rescanJUCEPathModules();
-    rescanUserPathModules();
+    if (isRunningCommandLine)
+    {
+        rescanJUCEPathModules();
+        rescanUserPathModules();
+    }
 }
 
 bool ProjucerApplication::initialiseLogger (const char* filePrefix)
@@ -164,6 +167,9 @@ void ProjucerApplication::handleAsyncUpdate()
 {
     if (licenseController != nullptr)
         licenseController->startWebviewIfNeeded();
+
+    rescanJUCEPathModules();
+    rescanUserPathModules();
 
    #if JUCE_MAC
     PopupMenu extraAppleMenuItems;

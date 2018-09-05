@@ -877,6 +877,10 @@ private:
             macHostWindow = juce::attachComponentToWindowRefVST (component.get(), parent, isNSView);
            #endif
 
+           #if ! JUCE_MAC
+            setContentScaleFactor ((Steinberg::IPlugViewContentScaleSupport::ScaleFactor) scaleFactor);
+           #endif
+
             component->resizeHostWindow();
             systemWindow = parent;
             attachedToParent();
@@ -973,7 +977,14 @@ private:
                     if (auto* constrainer = editor->getConstrainer())
                     {
                         Rectangle<int> limits (0, 0, constrainer->getMaximumWidth(), constrainer->getMaximumHeight());
-                        constrainer->checkBounds (juceRect, editor->getBounds(), limits, false, false, false, false);
+
+                        auto currentRect = editor->getBounds();
+
+                        constrainer->checkBounds (juceRect, currentRect, limits,
+                                                  juceRect.getY() != currentRect.getY() && juceRect.getBottom() == currentRect.getBottom(),
+                                                  juceRect.getX() != currentRect.getX() && juceRect.getRight()  == currentRect.getRight(),
+                                                  juceRect.getY() == currentRect.getY() && juceRect.getBottom() != currentRect.getBottom(),
+                                                  juceRect.getX() == currentRect.getX() && juceRect.getRight()  != currentRect.getRight());
 
                         juceRect = component->getLocalArea (editor, juceRect);
 
@@ -992,12 +1003,17 @@ private:
         tresult PLUGIN_API setContentScaleFactor (Steinberg::IPlugViewContentScaleSupport::ScaleFactor factor) override
         {
            #if ! JUCE_MAC
+            scaleFactor = static_cast<float> (factor);
+
+            if (component == nullptr)
+                return kResultFalse;
+
             #if JUCE_WINDOWS && ! JUCE_WIN_PER_MONITOR_DPI_AWARE
              if (auto* ed = component->pluginEditor.get())
-                 ed->setScaleFactor ((float) factor);
+                 ed->setScaleFactor (scaleFactor);
             #else
-            if (! approximatelyEqual (component->getNativeEditorScaleFactor(), (float) factor))
-                component->nativeScaleFactorChanged ((double) factor);
+            if (! approximatelyEqual (component->getNativeEditorScaleFactor(), scaleFactor))
+                component->nativeScaleFactorChanged ((double) scaleFactor);
             #endif
 
             component->resizeHostWindow();
@@ -1231,6 +1247,8 @@ private:
        #if JUCE_MAC
         void* macHostWindow = nullptr;
         bool isNSView = false;
+       #else
+        float scaleFactor = 1.0f;
        #endif
 
        #if JUCE_WINDOWS

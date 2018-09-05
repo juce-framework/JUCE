@@ -155,19 +155,21 @@ void Label::attachToComponent (Component* owner, bool onLeft)
 
 void Label::componentMovedOrResized (Component& component, bool /*wasMoved*/, bool /*wasResized*/)
 {
-    auto f = getLookAndFeel().getLabelFont (*this);
+    auto& lf = getLookAndFeel();
+    auto f = lf.getLabelFont (*this);
+    auto borderSize = lf.getLabelBorderSize (*this);
 
     if (leftOfOwnerComp)
     {
         auto width = jmin (roundToInt (f.getStringWidthFloat (textValue.toString()) + 0.5f)
-                             + getBorderSize().getLeftAndRight(),
+                             + borderSize.getLeftAndRight(),
                            component.getX());
 
         setBounds (component.getX() - width, component.getY(), width, component.getHeight());
     }
     else
     {
-        auto height = getBorderSize().getTopAndBottom() + 6 + roundToInt (f.getHeight() + 0.5f);
+        auto height = borderSize.getTopAndBottom() + 6 + roundToInt (f.getHeight() + 0.5f);
 
         setBounds (component.getX(), component.getY() - height, component.getWidth(), height);
     }

@@ -318,7 +318,7 @@ namespace XRender
     static bool hasCompositingWindowManager (::Display* display) noexcept
     {
         return display != nullptr
-                && XGetSelectionOwner (display, Atoms::getCreating ("_NET_WM_CM_S0")) != 0;
+                && XGetSelectionOwner (display, Atoms::getCreating (display, "_NET_WM_CM_S0")) != 0;
     }
 
     static XRenderPictFormat* findPictureFormat (::Display* display)
@@ -326,7 +326,7 @@ namespace XRender
         ScopedXLock xlock (display);
         XRenderPictFormat* pictFormat = nullptr;
 
-        if (isAvailable())
+        if (isAvailable (display))
         {
             pictFormat = xRenderFindStandardFormat (display, PictStandardARGB32);
 
@@ -2459,12 +2459,17 @@ private:
 
         if (auto* mapping = XGetModifierMapping (display))
         {
-            for (int i = 0; i < 8; i++)
+            for (int modifierIdx = 0; modifierIdx < 8; ++modifierIdx)
             {
-                if (mapping->modifiermap [i << 1] == altLeftCode)
-                    Keys::AltMask = 1 << i;
-                else if (mapping->modifiermap [i << 1] == numLockCode)
-                    Keys::NumLockMask = 1 << i;
+                for (int keyIndex = 0; keyIndex < mapping->max_keypermod; ++keyIndex)
+                {
+                    auto key = mapping->modifiermap[(modifierIdx * mapping->max_keypermod) + keyIndex];
+
+                    if (key == altLeftCode)
+                        Keys::AltMask = 1 << modifierIdx;
+                    else if (key == numLockCode)
+                        Keys::NumLockMask = 1 << modifierIdx;
+                }
             }
 
             XFreeModifiermap (mapping);
@@ -3589,12 +3594,14 @@ bool MouseInputSource::SourceList::canUseTouch()
 bool Desktop::canUseSemiTransparentWindows() noexcept
 {
    #if JUCE_USE_XRENDER
-    if (XRender::hasCompositingWindowManager())
+    auto display = XWindowSystem::getInstance()->displayRef();
+
+    if (XRender::hasCompositingWindowManager (display))
     {
         int matchedDepth = 0, desiredDepth = 32;
 
         return Visuals::findVisualFormat (display, desiredDepth, matchedDepth) != 0
-                 && matchedDepth == desiredDepth;
+                && matchedDepth == desiredDepth;
     }
    #endif
 

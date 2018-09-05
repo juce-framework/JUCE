@@ -62,7 +62,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    Drawable* createCopy() const;
+    Drawable* createCopy() const override;
 
 private:
     Parallelogram<float> bounds;

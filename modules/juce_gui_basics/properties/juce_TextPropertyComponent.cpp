@@ -96,8 +96,9 @@ public:
     {
         if (getText().isEmpty() && ! isBeingEdited())
         {
-            auto textArea = getBorderSize().subtractedFrom (getLocalBounds());
-            auto labelFont = owner.getLookAndFeel().getLabelFont (*this);
+            auto& lf = owner.getLookAndFeel();
+            auto textArea = lf.getLabelBorderSize (*this).subtractedFrom (getLocalBounds());
+            auto labelFont = lf.getLabelFont (*this);
 
             g.setColour (owner.findColour (TextPropertyComponent::textColourId).withAlpha (alphaToUseForEmptyText));
             g.setFont (labelFont);

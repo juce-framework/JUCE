@@ -149,6 +149,7 @@ namespace Ids
     DECLARE_ID (postbuildCommand);
     DECLARE_ID (generateManifest);
     DECLARE_ID (useRuntimeLibDLL);
+    DECLARE_ID (multiProcessorCompilation);
     DECLARE_ID (enableIncrementalLinking);
     DECLARE_ID (bundleIdentifier);
     DECLARE_ID (aaxIdentifier);

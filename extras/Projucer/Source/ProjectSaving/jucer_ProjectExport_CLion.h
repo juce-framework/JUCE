@@ -101,7 +101,6 @@ public:
     bool supportsTargetType (ProjectType::Target::Type) const override   { return true; }
 
     void addPlatformSpecificSettingsForProjectType (const ProjectType&) override {}
-    void initialiseDependencyPathValues() override {}
 
     //==============================================================================
     bool canLaunchProject() override
