@@ -23,6 +23,19 @@
 namespace juce
 {
 
+/**
+    A basic object container.
+
+    This class isn't really for public use - it's used by the other
+    array classes, but might come in handy for some purposes.
+
+    It inherits from a critical section class to allow the arrays to use
+    the "empty base class optimisation" pattern to reduce their footprint.
+
+    @see Array, OwnedArray, ReferenceCountedArray
+
+    @tags{Core}
+*/
 template <class ElementType, class TypeOfCriticalSectionToUse>
 class ArrayBase  : public TypeOfCriticalSectionToUse
 {

@@ -622,7 +622,6 @@ private:
 
                     if (! duplicate)
                     {
-                        DBG ("Camera capture size: " + String (w) + ", " + String (h));
                         widths.add (w);
                         heights.add (h);
                     }

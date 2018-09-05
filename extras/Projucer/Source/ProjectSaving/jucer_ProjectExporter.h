@@ -83,6 +83,7 @@ public:
     virtual bool canCopeWithDuplicateFiles() = 0;
     virtual bool supportsUserDefinedConfigurations() const = 0; // false if exporter only supports two configs Debug and Release
     virtual void updateDeprecatedProjectSettingsInteractively();
+    virtual void initialiseDependencyPathValues() {}
 
     // IDE targeted by exporter
     virtual bool isXcode() const         = 0;
@@ -153,9 +154,9 @@ public:
 
     bool shouldUseGNUExtensions() const                   { return gnuExtensionsValue.get();}
 
-    String getGlobalVST3PathString() const                { return getAppSettings().getStoredPath (Ids::vst3Path).toString(); }
-    String getGlobalRTASPathString() const                { return getAppSettings().getStoredPath (Ids::rtasPath).toString(); }
-    String getGlobalAAXPathString() const                 { return getAppSettings().getStoredPath (Ids::aaxPath).toString(); }
+    Value getVST3PathValue() const                        { return vst3Path; }
+    Value getRTASPathValue() const                        { return rtasPath; }
+    Value getAAXPathValue() const                         { return aaxPath; }
 
     // NB: this is the path to the parent "modules" folder that contains the named module, not the
     // module folder itself.
@@ -369,6 +370,8 @@ protected:
     const String projectName;
     const File projectFolder;
 
+    Value vst3Path, rtasPath, aaxPath; // these must be initialised in the specific exporter c'tors!
+
     ValueWithDefault targetLocationValue, extraCompilerFlagsValue, extraLinkerFlagsValue, externalLibrariesValue,
                      userNotesValue, gnuExtensionsValue, bigIconValue, smallIconValue, extraPPDefsValue;
 
@@ -439,6 +442,7 @@ private:
                                                 : name + suffix;
     }
 
+    void createDependencyPathProperties (PropertyListBuilder&);
     void createIconProperties (PropertyListBuilder&);
     void addVSTPathsIfPluginOrHost();
     void addCommonAudioPluginSettings();
