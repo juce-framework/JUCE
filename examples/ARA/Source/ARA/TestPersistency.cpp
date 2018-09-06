@@ -48,9 +48,9 @@
 #include <vector>
 
 // host-network byte ordering include
-#if defined(_WIN32)
+#if defined (_WIN32)
     #include <winsock2.h>
-#elif defined(__APPLE__)
+#elif defined (__APPLE__)
     #include <arpa/inet.h>
 #endif
 

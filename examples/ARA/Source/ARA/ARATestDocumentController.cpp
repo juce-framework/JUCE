@@ -54,7 +54,7 @@
 // the define below allows to always trigger audio source analysis when a new audio source instance
 // is created, which allows for testing analysis and related notifications in hosts that never
 // request audio source analysis.
-#if !defined(ARA_ALWAYS_PERFORM_ANALYSIS)
+#if !defined (ARA_ALWAYS_PERFORM_ANALYSIS)
     #define ARA_ALWAYS_PERFORM_ANALYSIS 0
 #endif
 
@@ -86,7 +86,7 @@ NoteContentReader::NoteContentReader (const AudioSource* audioSource, const ARAC
 {
     //! \todo is there any elegant way to avoid all those up-casts from AudioSource* to ARATestAudioSource* in this file?
     ARATestAudioSource* testAudioSource = (ARATestAudioSource*)audioSource;
-    ARA_INTERNAL_ASSERT(testAudioSource->getAnalysisResult ());
+    ARA_INTERNAL_ASSERT (testAudioSource->getAnalysisResult ());
     for (auto note : testAudioSource->getAnalysisResult ()->getNotes ())
     {
         if ((range.start - timeOffset < note.getStartTime () + note.getDuration ()) &&
@@ -120,7 +120,7 @@ const void* NoteContentReader::getDataForEvent (ARAInt32 eventIndex)
 void ARATestDocumentController::_startOrScheduleAnalysisOfAudioSource (ARATestAudioSource* audioSource)
 {
     // test if already analyzing
-    if (_getActiveAnalysisTaskForAudioSource(audioSource) != nullptr)
+    if (_getActiveAnalysisTaskForAudioSource (audioSource) != nullptr)
         return;
 
     // postpone if host is currently editing or access is not enabled yet, otherwise start immediately
@@ -132,7 +132,7 @@ void ARATestDocumentController::_startOrScheduleAnalysisOfAudioSource (ARATestAu
 
 void ARATestDocumentController::_startAnalysisOfAudioSource (ARATestAudioSource* audioSource)
 {
-    ARA_INTERNAL_ASSERT(audioSource->isSampleAccessEnabled ());
+    ARA_INTERNAL_ASSERT (audioSource->isSampleAccessEnabled ());
 
     if (getHostInstance ()->getModelUpdateController ())
         _audioSourcesToNotifyAnalysisStart.push_back (audioSource);
@@ -283,8 +283,11 @@ bool ARATestDocumentController::doRestoreObjectsFromArchive (HostArchiveReader* 
         if (mappedID != persistentID.c_str ())    
             persistentID = mappedID;
 
+        // find matching audio source in model graph
         if (audioSourcesByID.count (persistentID.c_str ()) == 0)
             continue;
+
+        ARATestAudioSource* testAudioSource = (ARATestAudioSource*) audioSourcesByID[persistentID.c_str ()];
 
         // read analysis result
         size_t numNotes = unarchiver.readSize ();
@@ -298,10 +301,14 @@ bool ARATestDocumentController::doRestoreObjectsFromArchive (HostArchiveReader* 
         }
 
         if (!unarchiver.didSucceed ())
+        {
+            // on failure, notify content change since the host expects the content to be properly restored
+            if (getHostInstance ()->getModelUpdateController ())
+                _audioSourcesToNotifyContentChanged.insert (testAudioSource);
             break;
+        }
 
         // abort any currently running or scheduled analysis of the audio source
-        ARATestAudioSource* testAudioSource = (ARATestAudioSource*) audioSourcesByID[persistentID.c_str()];
         if (TestAnalysisTask* analysisTask = _getActiveAnalysisTaskForAudioSource (testAudioSource))
             analysisTask->cancelSynchronously ();
         _audioSourcesScheduledForAnalysis.erase (testAudioSource);
@@ -310,10 +317,10 @@ bool ARATestDocumentController::doRestoreObjectsFromArchive (HostArchiveReader* 
         TestAnalysisResult* analysisResult = new TestAnalysisResult ();
         analysisResult->setNotes (persistedNotes);
         testAudioSource->setAnalysisResult (analysisResult);
-        //! \todo we are not notifying the host here because it explicitly asked us to restore the state -
-        //!       ARA API must be clarified here for partial persistency!
-//        if (getHostInstance ()->getModelUpdateController ())
-//            _audioSourcesToNotifyContentChanged.insert (testAudioSource);
+
+        // clear any pending content change notification, since the host expects content to match the restored state
+        if (getHostInstance ()->getModelUpdateController ())
+            _audioSourcesToNotifyContentChanged.erase (testAudioSource);
     }
     archiveReader->notifyDocumentUnarchivingProgress (1.0f);
 
@@ -328,7 +335,7 @@ bool ARATestDocumentController::doStoreObjectsToArchive (HostArchiveWriter* arch
     if (filter->shouldStoreAnyAudioSourceToArchive ())
     {
         // make sure to capture any pending analysis result
-        _processCompletedAnalysisTasks();
+        _processCompletedAnalysisTasks ();
 
         // collect all audio sources with actual data (i.e audio source analysis results) to store
         audioSourcesToPersist.reserve (getDocument ()->getAudioSources ().size ());
@@ -365,7 +372,7 @@ bool ARATestDocumentController::doStoreObjectsToArchive (HostArchiveWriter* arch
 
         size_t numNotes = analysisResult->getNotes ().size ();
         archiver.writeSize (numNotes);
-        for (const TestAnalysisNote& noteToPersist : analysisResult->getNotes ())
+        for (auto noteToPersist : analysisResult->getNotes ())
         {
             archiver.writeDouble (noteToPersist.getFrequency ());
             archiver.writeDouble (noteToPersist.getVolume ());
@@ -383,22 +390,22 @@ bool ARATestDocumentController::doStoreObjectsToArchive (HostArchiveWriter* arch
 void ARATestDocumentController::doUpdateMusicalContextContent (MusicalContext* musicalContext, const ARAContentTimeRange* range, ARAContentUpdateFlags flags)
 {
 #if ARA_ENABLE_DEBUG_OUTPUT
-    ARA_LOG("musical context updated");
+    ARA_LOG ("musical context updated");
     if ((flags & kARAContentUpdateTimingScopeRemainsUnchanged) == 0)
     {
         HostContentReader<kARAContentTypeTempoEntries> tempoReader (musicalContext);
         if (tempoReader)
         {
-            ARA_LOG("tempo map with grade %i:", tempoReader.getGrade ());
+            ARA_LOG ("tempo map with grade %i:", tempoReader.getGrade ());
             for (ARAInt32 i = 0; i < tempoReader.getEventCount (); ++i)
             {
                 const ARAContentTempoEntry * entry = tempoReader.getDataForEvent (i);
-                ARA_LOG("quarter %.3f is at second %.3f", entry->quarterPosition, entry->timePosition);
+                ARA_LOG ("quarter %.3f is at second %.3f", entry->quarterPosition, entry->timePosition);
             }
         }
         else
         {
-            ARA_LOG("no tempo map provided");
+            ARA_LOG ("no tempo map provided");
         }
     }
 #endif
@@ -557,7 +564,7 @@ bool ARATestDocumentController::doIsAudioSourceContentAvailable (AudioSource* au
 
 bool ARATestDocumentController::doIsAudioSourceContentAnalysisIncomplete (AudioSource* audioSource, ARAContentType type)
 {
-    ARA_INTERNAL_ASSERT(type == kARAContentTypeNotes);
+    ARA_INTERNAL_ASSERT (type == kARAContentTypeNotes);
 
     _processCompletedAnalysisTasks ();
 
@@ -566,8 +573,8 @@ bool ARATestDocumentController::doIsAudioSourceContentAnalysisIncomplete (AudioS
 
 void ARATestDocumentController::doRequestAudioSourceContentAnalysisWithAlgorithm (AudioSource* audioSource, std::vector<ARAContentType> const& contentTypes, ARAInt32 analysisAlgorithmIndex)
 {
-    ARA_INTERNAL_ASSERT(contentTypes.size () == 1);
-    ARA_INTERNAL_ASSERT(contentTypes[0] == kARAContentTypeNotes);
+    ARA_INTERNAL_ASSERT (contentTypes.size () == 1);
+    ARA_INTERNAL_ASSERT (contentTypes[0] == kARAContentTypeNotes);
 
     _processCompletedAnalysisTasks ();
 
@@ -622,13 +629,13 @@ bool ARATestDocumentController::rendererWillAccessModelGraph (ARATestPlaybackRen
 
 void ARATestDocumentController::rendererDidAccessModelGraph (ARATestPlaybackRenderer* playbackRenderer)
 {
-    ARA_INTERNAL_ASSERT(_countOfRenderersCurrentlyAccessingModelGraph > 0);
+    ARA_INTERNAL_ASSERT (_countOfRenderersCurrentlyAccessingModelGraph > 0);
     --_countOfRenderersCurrentlyAccessingModelGraph;
 }
 
 void ARATestDocumentController::_disableRendererModelGraphAccess ()
 {
-    ARA_INTERNAL_ASSERT(_renderersCanAccessModelGraph);
+    ARA_INTERNAL_ASSERT (_renderersCanAccessModelGraph);
     _renderersCanAccessModelGraph = false;
 
     while (_countOfRenderersCurrentlyAccessingModelGraph)
@@ -637,7 +644,7 @@ void ARATestDocumentController::_disableRendererModelGraphAccess ()
 
 void ARATestDocumentController::_enableRendererModelGraphAccess ()
 {
-    ARA_INTERNAL_ASSERT(!_renderersCanAccessModelGraph);
+    ARA_INTERNAL_ASSERT (!_renderersCanAccessModelGraph);
     _renderersCanAccessModelGraph = true;
 }
 
@@ -653,7 +660,7 @@ const ARAFactory* DocumentController::getARAFactory ()
 {
     static const ARAContentType analyzeableContentTypes[] = { kARAContentTypeNotes };
 
-#if defined(__cpp_template_auto)
+#if defined (__cpp_template_auto)
     static const SizedStruct<&ARAFactory::supportedPlaybackTransformationFlags> factory =
 #else
     static const SizedStruct<ARA_MEMBER_PTR_ARGS (ARAFactory, supportedPlaybackTransformationFlags)> factory =
@@ -671,7 +678,7 @@ const ARAFactory* DocumentController::getARAFactory ()
         "ARATestPlugIn", "ARA Demo Company", "http://www.arademocompany.com", "1.0.0",
         &ARACreateDocumentControllerWithDocumentInstance,
         "com.arademocompany.testplugin.aradocumentarchive.version1", (ARASize)0, nullptr,
-        sizeof(analyzeableContentTypes)/sizeof(ARAContentType), analyzeableContentTypes,
+        sizeof (analyzeableContentTypes)/sizeof (ARAContentType), analyzeableContentTypes,
         kARAPlaybackTransformationNoChanges
     };
     return &factory;

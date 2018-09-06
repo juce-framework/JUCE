@@ -64,7 +64,7 @@ void ARATestAudioSource::setAnalysisResult (const TestAnalysisResult* analysisRe
 
 void ARATestAudioSource::updateRenderSampleCache ()
 {
-    ARA_INTERNAL_ASSERT(isSampleAccessEnabled ());
+    ARA_INTERNAL_ASSERT (isSampleAccessEnabled ());
 
     // set up cache (this is a hack, so we're ignoring potential overflow of 32 bit with long files here...)
     size_t totalSamples = getChannelCount () * (size_t)getSampleCount ();

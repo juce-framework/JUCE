@@ -54,8 +54,8 @@ namespace PlugIn
 class HostArchiveWriter;
 class HostArchiveReader;
 
-}	// namespace PlugIn
-}	// namespace ARA
+}    // namespace PlugIn
+}    // namespace ARA
 
 // Archiver/Unarchiver
 // actual plug-ins will already feature some persistency implementation which is independent of ARA.
@@ -64,14 +64,14 @@ class HostArchiveReader;
 
 enum class TestArchiveState
 {
-	noError = 0,
-	iOError,                // could not read or write bytes
-	                        // in ARA, host handles I/O and will display proper error message in this case
-	unkownFormatError,      // archive was written by future version of the program
-	                        // in ARA, actual plug-ins will display a proper error message in this case
-	incompatibleDataError   // archive contains numbers that cannot be represented on the current architecture
-	                        // (e.g. 64 bit archive with size_t that exceeds 32 bit architecture)
-	                        // in ARA, actual plug-ins will display a proper error message in this case
+    noError = 0,
+    iOError,                // could not read or write bytes
+                            // in ARA, host handles I/O and will display proper error message in this case
+    unkownFormatError,      // archive was written by future version of the program
+                            // in ARA, actual plug-ins will display a proper error message in this case
+    incompatibleDataError   // archive contains numbers that cannot be represented on the current architecture
+                            // (e.g. 64 bit archive with size_t that exceeds 32 bit architecture)
+                            // in ARA, actual plug-ins will display a proper error message in this case
 };
 
 /*******************************************************************************/
@@ -79,23 +79,23 @@ enum class TestArchiveState
 class TestArchiver
 {
 public:
-	TestArchiver (ARA::PlugIn::HostArchiveWriter* archiveWriter);
+    TestArchiver (ARA::PlugIn::HostArchiveWriter* archiveWriter);
 
-	void writeDouble (double data);
-	void writeInt64 (int64_t data);
-	void writeSize (size_t data);
-	void writeString (std::string data);
+    void writeDouble (double data);
+    void writeInt64 (int64_t data);
+    void writeSize (size_t data);
+    void writeString (std::string data);
 
-	TestArchiveState getState () const { return _state; }
-	bool didSucceed () const { return (_state == TestArchiveState::noError); }
-
-private:
-	void write8ByteData (uint64_t data);
+    TestArchiveState getState () const { return _state; }
+    bool didSucceed () const { return (_state == TestArchiveState::noError); }
 
 private:
-	ARA::PlugIn::HostArchiveWriter* const _archiveWriter;
-	size_t _location;
-	TestArchiveState _state;
+    void write8ByteData (uint64_t data);
+
+private:
+    ARA::PlugIn::HostArchiveWriter* const _archiveWriter;
+    size_t _location;
+    TestArchiveState _state;
 };
 
 /*******************************************************************************/
@@ -103,21 +103,21 @@ private:
 class TestUnarchiver
 {
 public:
-	TestUnarchiver (ARA::PlugIn::HostArchiveReader* archiveReader);
+    TestUnarchiver (ARA::PlugIn::HostArchiveReader* archiveReader);
 
-	double readDouble ();
-	int64_t readInt64 ();
-	size_t readSize ();
-	std::string readString ();
+    double readDouble ();
+    int64_t readInt64 ();
+    size_t readSize ();
+    std::string readString ();
 
-	TestArchiveState getState () const { return _state; }
-	bool didSucceed () const { return (_state == TestArchiveState::noError); }
-
-private:
-	uint64_t read8ByteData ();
+    TestArchiveState getState () const { return _state; }
+    bool didSucceed () const { return (_state == TestArchiveState::noError); }
 
 private:
-	ARA::PlugIn::HostArchiveReader* const _archiveReader;
-	size_t _location;
-	TestArchiveState _state;
+    uint64_t read8ByteData ();
+
+private:
+    ARA::PlugIn::HostArchiveReader* const _archiveReader;
+    size_t _location;
+    TestArchiveState _state;
 };

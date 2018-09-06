@@ -54,9 +54,13 @@ namespace PlugIn
 class ARATestPlaybackRenderer : public PlaybackRenderer
 {
 public:
+#if defined (MSC_VER) && (MSC_VER <= 1800)
     ARATestPlaybackRenderer (DocumentController* documentController)
     : PlaybackRenderer (documentController)
     {}
+#else
+    using PlaybackRenderer::PlaybackRenderer;
+#endif
 
     void renderPlaybackRegions (float** ppOutput, ARAChannelCount channelCount, ARASampleRate sampleRate,
                         ARASamplePosition samplePosition, ARASampleCount samplesToRender, bool isPlayingBack);

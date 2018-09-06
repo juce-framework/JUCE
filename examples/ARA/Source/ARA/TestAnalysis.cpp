@@ -55,20 +55,20 @@
 // the time consumed by the fake analysis is the duration of the audio source scaled
 // down by ARA_FAKE_NOTE_ANALYSIS_SPEED_FACTOR.
 // if this is set to 0, the artificial delays are supressed.
-#if !defined(ARA_FAKE_NOTE_ANALYSIS_SPEED_FACTOR)
+#if !defined (ARA_FAKE_NOTE_ANALYSIS_SPEED_FACTOR)
     #define ARA_FAKE_NOTE_ANALYSIS_SPEED_FACTOR 20
 #endif
 
 // if desired, a custom timer for calculating the analysis delay can be injected by defining ARA_GET_CURRENT_TIME accordingly.
 #if ARA_FAKE_NOTE_ANALYSIS_SPEED_FACTOR != 0
-    #if defined(ARA_GET_CURRENT_TIME)
+    #if defined (ARA_GET_CURRENT_TIME)
         double ARA_GET_CURRENT_TIME ();    /* declare custom time getter function */
     #else
         #define ARA_GET_CURRENT_TIME() (0.000001 * std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now ().time_since_epoch ()).count ())
     #endif
 #endif
 
-#if !defined(ARA_FAKE_NOTE_MAX_COUNT)
+#if !defined (ARA_FAKE_NOTE_MAX_COUNT)
     #define ARA_FAKE_NOTE_MAX_COUNT 100
 #endif
 
