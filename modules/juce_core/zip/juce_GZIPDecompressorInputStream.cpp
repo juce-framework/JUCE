@@ -270,7 +270,7 @@ int GZIPDecompressorInputStream::read (void* destBuffer, int howMany)
 
 bool GZIPDecompressorInputStream::isExhausted()
 {
-    return helper->error || isEof;
+    return helper->error || helper->finished || isEof;
 }
 
 int64 GZIPDecompressorInputStream::getPosition()
