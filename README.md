@@ -2,7 +2,7 @@
 
 This repository is a fork of the [JUCE 5 master branch]('https://github.com/WeAreROLI/JUCE') with with additions that enable it to generate ARA plugins in the VST3 format (AU coming soon.)
 
-Current ARA SDK compatibility version: 1.9.5.007
+Current ARA SDK compatibility version: 1.9.5.008
 
 ### Getting started:
 
