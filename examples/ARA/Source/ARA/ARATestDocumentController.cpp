@@ -43,6 +43,7 @@
 
 #include "ARATestDocumentController.h"
 #include "ARATestAudioSource.h"
+#include "ARATestPlaybackRenderer.h"
 #include "TestAnalysis.h"
 #include "TestPersistency.h"
 
@@ -601,6 +602,11 @@ ContentReader* ARATestDocumentController::doCreatePlaybackRegionContentReader (P
     if (type == kARAContentTypeNotes)
         return new NoteContentReader (playbackRegion, range);
     return nullptr;
+}
+
+PlaybackRenderer* ARATestDocumentController::doCreatePlaybackRenderer ()
+{
+    return new ARATestPlaybackRenderer (this);
 }
 
 /*******************************************************************************/

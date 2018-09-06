@@ -118,6 +118,9 @@ protected:
     virtual ContentReader* doCreateAudioModificationContentReader (AudioModification* audioModification, ARAContentType type, const ARAContentTimeRange* range) override;
     virtual ContentReader* doCreatePlaybackRegionContentReader (PlaybackRegion* playbackRegion, ARAContentType type, const ARAContentTimeRange* range) override;
 
+    // Plug-In Instance Management
+    virtual PlaybackRenderer* doCreatePlaybackRenderer () override;
+
 public:
     // render thread synchronization:
     // this is just a test code implementation of handling the threading - proper code will use a
