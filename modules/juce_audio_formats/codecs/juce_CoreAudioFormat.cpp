@@ -314,7 +314,7 @@ struct CoreAudioFormatMetatdata
                     if (chunkHeader.chunkSize == -1)
                         break;
 
-                    input.skipNextBytes (chunkHeader.chunkSize);
+                    input.setPosition (input.getPosition() + chunkHeader.chunkSize);
                 }
                 else if (chunkHeader.chunkType == chunkName ("midi"))
                 {
