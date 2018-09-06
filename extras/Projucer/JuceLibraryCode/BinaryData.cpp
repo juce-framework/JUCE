@@ -5371,7 +5371,7 @@ static const unsigned char temp_binary_data_25[] =
 "\n"
 "%%app_headers%%\n"
 "\n"
-"#include \"ARA_Library/PlugIn/AraPlug.h\"\n"
+"#include \"ARA_Library/PlugIn/ARAPlug.h\"\n"
 "\n"
 "//==============================================================================\n"
 "/**\n"

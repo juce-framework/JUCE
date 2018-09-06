@@ -10,8 +10,8 @@
 
 #include "ARATestPluginProcessor.h"
 #include "ARATestPluginEditor.h"
-#include "ARA/AraTestDocumentController.h"
-#include "ARA/AraTestPlaybackRenderer.h"
+#include "ARA/ARATestDocumentController.h"
+#include "ARA/ARATestPlaybackRenderer.h"
 
 //==============================================================================
 ARATestPluginProcessor::ARATestPluginProcessor()

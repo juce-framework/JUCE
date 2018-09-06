@@ -12,7 +12,7 @@
 
 %%app_headers%%
 
-#include "ARA_Library/PlugIn/AraPlug.h"
+#include "ARA_Library/PlugIn/ARAPlug.h"
 
 //==============================================================================
 /**
