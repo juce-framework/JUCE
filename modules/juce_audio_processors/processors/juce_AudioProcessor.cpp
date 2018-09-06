@@ -1615,9 +1615,19 @@ const ARA::PlugIn::PlugInExtension* AudioProcessor::getARAPlugInExtension() cons
 	return araPlugInExtension;
 }
 
-const ARA::PlugIn::DocumentController* AudioProcessor::getARADocumentController() const
+const ARA::PlugIn::PlaybackRenderer* AudioProcessor::getARAPlaybackRenderer() const
 {
-	return ARAPlugInExtension ? ARAPlugInExtension->getDocumentController() : nullptr;
+	return araPlugInExtension ? araPlugInExtension->getPlaybackRenderer() : nullptr;
+}
+
+const ARA::PlugIn::EditorRenderer* AudioProcessor::getARAEditorRenderer () const
+{
+    return araPlugInExtension ? araPlugInExtension->getEditorRenderer () : nullptr;
+}
+
+const ARA::PlugIn::EditorView* AudioProcessor::getARAEditorView () const
+{
+    return araPlugInExtension ? araPlugInExtension->getEditorView () : nullptr;
 }
 
 #endif // JucePlugin_Enable_ARA

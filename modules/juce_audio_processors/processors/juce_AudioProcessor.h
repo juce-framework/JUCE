@@ -1708,7 +1708,14 @@ public:
 	virtual const ARA::PlugIn::PlugInExtension* createARAPlugInExtension(ARA::PlugIn::DocumentController* documentController, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles);
 	const ARA::PlugIn::PlugInExtension* _createARAPlugInExtension(ARA::PlugIn::DocumentController* documentController, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles);
 	const ARA::PlugIn::PlugInExtension* getARAPlugInExtension() const;
-	const ARA::PlugIn::DocumentController* getARADocumentController() const;
+
+	const ARA::PlugIn::PlaybackRenderer* getARAPlaybackRenderer() const;
+    const ARA::PlugIn::EditorRenderer* getARAEditorRenderer() const;
+    const ARA::PlugIn::EditorView* getARAEditorView() const;
+
+    inline bool hasARAPlaybackRenderer() const { return getARAPlaybackRenderer() != nullptr; }
+    inline bool hasARAEditorRenderer() const { return getARAEditorRenderer() != nullptr; }
+    inline bool hasARAEditorView() const { return getARAEditorView() != nullptr; }
 private:
 	const ARA::PlugIn::PlugInExtension* araPlugInExtension{ nullptr };
 #endif
