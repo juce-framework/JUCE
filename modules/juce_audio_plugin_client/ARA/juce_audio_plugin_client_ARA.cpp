@@ -7,7 +7,6 @@
 const ARA::ARAFactory* ARA::PlugIn::DocumentController::getARAFactory ()
 {
     using namespace ARA;
-    using namespace ARA;
 
     static ARAFactory* factory = nullptr;
     if (!factory)
