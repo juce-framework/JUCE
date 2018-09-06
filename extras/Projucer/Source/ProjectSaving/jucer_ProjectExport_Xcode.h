@@ -62,6 +62,7 @@ public:
           pListPrefixHeaderValue                       (settings, Ids::pListPrefixHeader,                       getUndoManager()),
           pListPreprocessValue                         (settings, Ids::pListPreprocess,                         getUndoManager()),
           extraFrameworksValue                         (settings, Ids::extraFrameworks,                         getUndoManager()),
+          frameworkSearchPathsValue                    (settings, Ids::frameworkSearchPaths,                    getUndoManager()),
           extraCustomFrameworksValue                   (settings, Ids::extraCustomFrameworks,                   getUndoManager()),
           embeddedFrameworksValue                      (settings, Ids::embeddedFrameworks,                      getUndoManager()),
           postbuildCommandValue                        (settings, Ids::postbuildCommand,                        getUndoManager()),
@@ -112,6 +113,7 @@ public:
     bool isPListPreprocessEnabled() const            { return pListPreprocessValue.get(); }
 
     String getExtraFrameworksString() const          { return extraFrameworksValue.get(); }
+    String getFrameworkSearchPathsString() const     { return frameworkSearchPathsValue.get(); }
     String getExtraCustomFrameworksString() const    { return extraCustomFrameworksValue.get(); }
     String getEmbeddedFrameworksString() const       { return embeddedFrameworksValue.get(); }
 
@@ -303,11 +305,17 @@ public:
                    "(Don't include the .framework extension in the name)"
                    " The frameworks are expected to be located in /System/Library/Frameworks");
 
-        props.add (new TextPropertyComponent (extraCustomFrameworksValue, "Extra Custom Frameworks", 8192, false),
-                   "Paths to custom frameworks that should be added to the build (one per line).");
+        props.add (new TextPropertyComponent (frameworkSearchPathsValue, "Framework Search Paths", 8192, true),
+                   "A set of paths to search for custom frameworks (one per line).");
+
+        props.add (new TextPropertyComponent (extraCustomFrameworksValue, "Extra Custom Frameworks", 8192, true),
+                   "Paths to custom frameworks that should be added to the build (one per line). "
+                   "You will probably need to add an entry to the Framework Search Paths for each unique directory.");
 
         props.add (new TextPropertyComponent (embeddedFrameworksValue, "Embedded Frameworks", 8192, true),
-                   "Paths to frameworks to be embedded with the app (one per line).");
+                   "Paths to frameworks to be embedded with the app (one per line). "
+                   "If you are adding a framework here then you do not need to specify it in Extra Custom Frameworks too. "
+                   "You will probably need to add an entry to the Framework Search Paths for each unique directory.");
 
         props.add (new TextPropertyComponent (prebuildCommandValue, "Pre-Build Shell Script", 32768, true),
                    "Some shell-script that will be run before a build starts.");
@@ -1038,6 +1046,11 @@ public:
             s.set ("HEADER_SEARCH_PATHS", String ("(") + getHeaderSearchPaths (config).joinIntoString (", ") + ", \"$(inherited)\")");
             s.set ("USE_HEADERMAP", String (static_cast<bool> (config.exporter.settings.getProperty ("useHeaderMap")) ? "YES" : "NO"));
 
+            auto frameworkSearchPaths = getFrameworkSearchPaths (config);
+
+            if (! frameworkSearchPaths.isEmpty())
+                s.set ("FRAMEWORK_SEARCH_PATHS", String ("(") + frameworkSearchPaths.joinIntoString (", ") + ", \"$(inherited)\")");
+
             s.set ("GCC_OPTIMIZATION_LEVEL", config.getGCCOptimisationFlag());
 
             if (shouldCreatePList())
@@ -1500,6 +1513,22 @@ public:
         }
 
         //==============================================================================
+        void sanitiseAndEscapeSearchPaths (const BuildConfiguration& config, StringArray& paths) const
+        {
+            paths = getCleanedStringArray (paths);
+
+            for (auto& path : paths)
+            {
+                // Xcode 10 can't deal with search paths starting with "~" so we need to replace them here...
+                path = owner.replacePreprocessorTokens (config, sanitisePath (path));
+
+                if (path.containsChar (' '))
+                    path = "\"\\\"" + path + "\\\"\""; // crazy double quotes required when there are spaces..
+                else
+                    path = "\"" + path + "\"";
+            }
+        }
+
         StringArray getHeaderSearchPaths (const BuildConfiguration& config) const
         {
             StringArray paths (owner.extraSearchPaths);
@@ -1514,20 +1543,14 @@ public:
                                 .toUnixStyle());
             }
 
-            paths = getCleanedStringArray (paths);
+            sanitiseAndEscapeSearchPaths (config, paths);
+            return paths;
+        }
 
-            for (auto& s : paths)
-            {
-                // Xcode 10 can't deal with search paths starting with "~" so we need to replace them here...
-                s = sanitisePath (s);
-                s = owner.replacePreprocessorTokens (config, s);
-
-                if (s.containsChar (' '))
-                    s = "\"\\\"" + s + "\\\"\""; // crazy double quotes required when there are spaces..
-                else
-                    s = "\"" + s + "\"";
-            }
-
+        StringArray getFrameworkSearchPaths (const BuildConfiguration& config) const
+        {
+            auto paths = getSearchPathsFromString (owner.getFrameworkSearchPathsString());
+            sanitiseAndEscapeSearchPaths (config, paths);
             return paths;
         }
 
@@ -1745,8 +1768,8 @@ private:
 
     const bool iOS;
 
-    ValueWithDefault customPListValue, pListPrefixHeaderValue, pListPreprocessValue, extraFrameworksValue, extraCustomFrameworksValue, embeddedFrameworksValue, postbuildCommandValue,
-                     prebuildCommandValue, duplicateAppExResourcesFolderValue, iosDeviceFamilyValue, iPhoneScreenOrientationValue,
+    ValueWithDefault customPListValue, pListPrefixHeaderValue, pListPreprocessValue, extraFrameworksValue, frameworkSearchPathsValue, extraCustomFrameworksValue, embeddedFrameworksValue,
+                     postbuildCommandValue, prebuildCommandValue, duplicateAppExResourcesFolderValue, iosDeviceFamilyValue, iPhoneScreenOrientationValue,
                      iPadScreenOrientationValue, customXcodeResourceFoldersValue, customXcassetsFolderValue,
                      microphonePermissionNeededValue, microphonePermissionsTextValue, cameraPermissionNeededValue, cameraPermissionTextValue,
                      uiFileSharingEnabledValue, uiSupportsDocumentBrowserValue, uiStatusBarHiddenValue, documentExtensionsValue, iosInAppPurchasesValue,
@@ -2454,13 +2477,22 @@ private:
         if (frameworks.isEmpty())
             return;
 
-        StringArray frameworkIDs;
+        StringArray embeddedFrameworkIDs;
 
-        for (auto& f : frameworks)
-            frameworkIDs.add (addEmbeddedFramework (f));
+        for (auto& framework : frameworks)
+        {
+            auto frameworkID = addEmbeddedFramework (framework);
+            embeddedFrameworkIDs.add (frameworkID);
+
+            for (auto& target : targets)
+            {
+                target->frameworkIDs.add (frameworkID);
+                target->frameworkNames.add (framework);
+            }
+        }
 
         for (auto& target : targets)
-            target->addCopyFilesPhase ("Embed Frameworks", frameworkIDs, kFrameworksFolder);
+            target->addCopyFilesPhase ("Embed Frameworks", embeddedFrameworkIDs, kFrameworksFolder);
     }
 
     StringArray getEmbeddedFrameworks() const
@@ -2872,6 +2904,10 @@ private:
     String addEmbeddedFramework (const String& path) const
     {
         auto fileRefID = createFileRefID (path);
+
+        auto fileType = getFileType (RelativePath (path, RelativePath::projectFolder));
+        addFileOrFolderReference (path, "<group>", fileType);
+
         auto fileID = createID (path + "buildref");
 
         auto* v = new ValueTree (fileID);
@@ -2879,6 +2915,8 @@ private:
         v->setProperty ("fileRef", fileRefID, nullptr);
         v->setProperty ("settings", "{ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }", nullptr);
         pbxBuildFiles.add (v);
+
+        frameworkFileIDs.add (fileRefID);
 
         return fileID;
     }
