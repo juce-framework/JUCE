@@ -4,6 +4,8 @@ This repository is a fork of the [JUCE 5 master branch]('https://github.com/WeAr
 
 Current ARA SDK compatibility version: 1.9.5.008
 
+For feedback and questions, please contact Celemony via [ara@celemony.com]('mailto:ara@celemony.com?Subject=JUCE%20ARA%20integration').
+
 ### Getting started:
 
 We've made modifications to the Projucer to enable it to work with the ARA 2.0 SDK. As of now the Projucer can be used to generate VST3 plugins that can be used as ARA plugins in a supporting host. 
