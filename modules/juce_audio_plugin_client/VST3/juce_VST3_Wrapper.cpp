@@ -2589,17 +2589,7 @@ private:
     const ARA::ARAPlugInExtensionInstance* PLUGIN_API bindToDocumentControllerWithRoles (ARA::ARADocumentControllerRef documentControllerRef,
                                                                                          ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles) SMTG_OVERRIDE
     {
-        ARA::PlugIn::DocumentController * documentController = (ARA::PlugIn::DocumentController *)documentControllerRef;
-        ARA_VALIDATE_API_ARGUMENT(documentControllerRef, ARA::PlugIn::DocumentController::isValidDocumentController (documentController));
-
-        // verify this is only called once
-        if (pluginInstance->getARAPlugInExtension())
-        {
-            ARA_VALIDATE_API_STATE(false && "binding already established");
-            return nullptr;
-        }
-
-        return pluginInstance->_createARAPlugInExtension (documentController, knownRoles, assignedRoles)->getInstance ();
+        return pluginInstance->_createARAPlugInExtension (documentControllerRef, knownRoles, assignedRoles);
     }
 
 #endif // JucePlugin_Enable_ARA

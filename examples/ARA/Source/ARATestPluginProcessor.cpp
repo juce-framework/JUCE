@@ -146,16 +146,12 @@ void ARATestPluginProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffe
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    // Attempt to delegate processing to our playback renderer implementation
-    if (getARAPlugInExtension() == nullptr)
-        return;
-
     AudioPlayHead::CurrentPositionInfo currentPosition;
     if (!getPlayHead()->getCurrentPosition(currentPosition))
         return;
 
-    ARA::PlugIn::ARATestPlaybackRenderer * playbackRenderer = (ARA::PlugIn::ARATestPlaybackRenderer*) getARAPlugInExtension()->getPlaybackRenderer();
-    if (playbackRenderer)
+    // Delegate processing to our playback renderer implementation
+    if (auto playbackRenderer = (ARA::PlugIn::ARATestPlaybackRenderer*) getARAPlaybackRenderer())
     {
         playbackRenderer->renderPlaybackRegions(buffer.getArrayOfWritePointers(), getTotalNumInputChannels(), getSampleRate(), currentPosition.timeInSamples, buffer.getNumSamples(), currentPosition.isPlaying);
     }
@@ -191,11 +187,4 @@ void ARATestPluginProcessor::setStateInformation (const void* data, int sizeInBy
 AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new ARATestPluginProcessor();
-}
-
-//==============================================================================
-const ARA::PlugIn::PlugInExtension* ARATestPluginProcessor::createARAPlugInExtension(ARA::PlugIn::DocumentController* documentController, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles)
-{
-    // Construct a plugin extension instance with our own playback renderer type
-    return ARA::PlugIn::PlugInExtension::createWithRoles<ARA::PlugIn::ARATestPlaybackRenderer> (documentController, knownRoles, assignedRoles);
 }

@@ -1598,21 +1598,20 @@ void AudioPlayHead::CurrentPositionInfo::resetToDefault()
 //==============================================================================
 #if JucePlugin_Enable_ARA
 
-const ARA::PlugIn::PlugInExtension* AudioProcessor::createARAPlugInExtension(ARA::PlugIn::DocumentController* documentController, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles)
+const ARA::ARAPlugInExtensionInstance* AudioProcessor::_createARAPlugInExtension(ARA::ARADocumentControllerRef documentControllerRef, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles)
 {
-	araPlugInExtension = ARA::PlugIn::PlugInExtension::createWithRoles (documentController, knownRoles, assignedRoles);
-	return araPlugInExtension;
-}
+	ARA::PlugIn::DocumentController * documentController = (ARA::PlugIn::DocumentController *)documentControllerRef;
+	ARA_VALIDATE_API_ARGUMENT(documentControllerRef, ARA::PlugIn::DocumentController::isValidDocumentController (documentController));
 
-const ARA::PlugIn::PlugInExtension* AudioProcessor::_createARAPlugInExtension(ARA::PlugIn::DocumentController* documentController, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles)
-{
-	araPlugInExtension = createARAPlugInExtension(documentController, knownRoles, assignedRoles);
-	return araPlugInExtension;
-}
+	// verify this is only called once
+	if (araPlugInExtension)
+	{
+		ARA_VALIDATE_API_STATE(false && "binding already established");
+		return nullptr;
+	}
 
-const ARA::PlugIn::PlugInExtension* AudioProcessor::getARAPlugInExtension() const
-{
-	return araPlugInExtension;
+	araPlugInExtension = documentController->createPlugInExtensionWithRoles(knownRoles, assignedRoles);
+	return araPlugInExtension->getInstance();
 }
 
 const ARA::PlugIn::PlaybackRenderer* AudioProcessor::getARAPlaybackRenderer() const
