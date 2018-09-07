@@ -216,7 +216,7 @@ private:
 	//==============================================================================
 #if JucePlugin_Enable_ARA
 public:
-    const ARA::PlugIn::EditorView* getARAEditorView() const;
+    ARA::PlugIn::EditorView* getARAEditorView() const;
 
     inline bool isARAEditorView() const { return getARAEditorView() != nullptr; }
 #endif

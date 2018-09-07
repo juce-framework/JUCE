@@ -229,7 +229,7 @@ ComponentPeer* AudioProcessorEditor::createNewPeer (int styleFlags, void* native
 //==============================================================================
 #if JucePlugin_Enable_ARA
 
-const ARA::PlugIn::EditorView* AudioProcessorEditor::getARAEditorView () const
+ARA::PlugIn::EditorView* AudioProcessorEditor::getARAEditorView () const
 {
     return processor.getARAEditorView ();
 }

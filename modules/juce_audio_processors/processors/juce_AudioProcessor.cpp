@@ -1614,17 +1614,17 @@ const ARA::ARAPlugInExtensionInstance* AudioProcessor::_createARAPlugInExtension
 	return araPlugInExtension->getInstance ();
 }
 
-const ARA::PlugIn::PlaybackRenderer* AudioProcessor::getARAPlaybackRenderer () const
+ARA::PlugIn::PlaybackRenderer* AudioProcessor::getARAPlaybackRenderer () const
 {
 	return araPlugInExtension ? araPlugInExtension->getPlaybackRenderer () : nullptr;
 }
 
-const ARA::PlugIn::EditorRenderer* AudioProcessor::getARAEditorRenderer () const
+ARA::PlugIn::EditorRenderer* AudioProcessor::getARAEditorRenderer () const
 {
     return araPlugInExtension ? araPlugInExtension->getEditorRenderer () : nullptr;
 }
 
-const ARA::PlugIn::EditorView* AudioProcessor::getARAEditorView () const
+ARA::PlugIn::EditorView* AudioProcessor::getARAEditorView () const
 {
     return araPlugInExtension ? araPlugInExtension->getEditorView () : nullptr;
 }

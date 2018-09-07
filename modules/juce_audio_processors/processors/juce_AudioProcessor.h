@@ -1706,9 +1706,9 @@ private:
 public:
 	const ARA::ARAPlugInExtensionInstance* _createARAPlugInExtension (ARA::ARADocumentControllerRef documentControllerRef, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles);
 
-	const ARA::PlugIn::PlaybackRenderer* getARAPlaybackRenderer () const;
-    const ARA::PlugIn::EditorRenderer* getARAEditorRenderer () const;
-    const ARA::PlugIn::EditorView* getARAEditorView () const;
+	ARA::PlugIn::PlaybackRenderer* getARAPlaybackRenderer () const;
+    ARA::PlugIn::EditorRenderer* getARAEditorRenderer () const;
+    ARA::PlugIn::EditorView* getARAEditorView () const;
 
     inline bool isARAPlaybackRenderer () const { return getARAPlaybackRenderer () != nullptr; }
     inline bool isARAEditorRenderer () const { return getARAEditorRenderer () != nullptr; }
