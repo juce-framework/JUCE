@@ -1,16 +1,16 @@
 # JUCE and the ARA API
 
-This repository is a fork of the [JUCE 5 master branch]('https://github.com/WeAreROLI/JUCE') with with additions that enable it to generate ARA plugins in the VST3 format (AU coming soon.)
+This repository is a fork of the [JUCE 5 master branch](https://github.com/WeAreROLI/JUCE) with with additions that enable it to generate ARA plugins in the VST3 format (AU coming soon.)
 
 Current ARA SDK compatibility version: 1.9.5.008
 
-For feedback and questions, please contact Celemony via [ara@celemony.com]('mailto:ara@celemony.com?Subject=JUCE%20ARA%20integration').
+For feedback and questions, please contact Celemony via [ara@celemony.com](mailto:ara@celemony.com?Subject=JUCE%20ARA%20integration).
 
 ### Getting started:
 
 We've made modifications to the Projucer to enable it to work with the ARA 2.0 SDK. As of now the Projucer can be used to generate VST3 plugins that can be used as ARA plugins in a supporting host. 
 
-To create an ARA plugin, clone the [ARA branch]('https://github.com/mynameisjohn/JUCE_ARA/tree/ARA') of this repository and build the [Projucer]('https://github.com/mynameisjohn/JUCE_ARA/tree/ARA/extras/Projucer')(projects for Visual Studio and Xcode exist within the repository.)
+To create an ARA plugin, clone the [ARA branch](https://github.com/Celemony/JUCE_ARA/tree/ARA) of this repository and build the [Projucer](https://github.com/Celemony/JUCE_ARA/tree/ARA/extras/Projucer)(projects for Visual Studio and Xcode exist within the repository.)
 
 Once you have the ARA version of the Projucer built you can use it to specify your global ARA path like so:
 
@@ -37,7 +37,7 @@ We can also edit other ARA plugin factory properties such as available content t
 
 <img src="https://i.imgur.com/mJoXIxG.png"/>
 
-This should be enough to generate an empty ARA plugin. For a more complete example see the [.jucer file located here]('https://github.com/mynameisjohn/JUCE_ARA/tree/ARA/examples/ARA'). 
+This should be enough to generate an empty ARA plugin. For a more complete example see the [.jucer file located here](https://github.com/Celemony/JUCE_ARA/tree/ARA/examples/ARA). 
 # The JUCE 5 Library
 
 **BY DOWNLOADING, INSTALLING OR USING ANY PART OF THE JUCE LIBRARY, YOU AGREE
