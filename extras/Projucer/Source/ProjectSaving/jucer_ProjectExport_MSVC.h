@@ -77,8 +77,8 @@ public:
 
         props.add (new TextPropertyComponent (targetPlatformVersion, "Windows Target Platform", 20, false),
                    String ("Specifies the version of the Windows SDK that will be used when building this project. ")
-                   + (isWindows10SDK ? "You can see which SDKs you have installed on your machine by going to \"Program Files (x86)\\Windows Kits\\10\\Lib\". " : "")
-                   + "The default value for this exporter is " + getDefaultWindowsTargetPlatformVersion());
+                   + (isWindows10SDK ? "Leave this field empty to use the latest Windows 10 SDK installed on the build machine."
+                                     : "The default value for this exporter is " + getDefaultWindowsTargetPlatformVersion()));
     }
 
     void addPlatformToolsetToPropertyGroup (XmlElement& p) const
@@ -89,8 +89,23 @@ public:
 
     void addWindowsTargetPlatformVersionToPropertyGroup (XmlElement& p) const
     {
-        forEachXmlChildElementWithTagName (p, e, "PropertyGroup")
-        e->createNewChildElement ("WindowsTargetPlatformVersion")->addTextElement (getWindowsTargetPlatformVersion());
+        auto target = getWindowsTargetPlatformVersion();
+
+        if (target == "Latest")
+        {
+            forEachXmlChildElementWithTagName (p, e, "PropertyGroup")
+            {
+                auto* child = e->createNewChildElement ("WindowsTargetPlatformVersion");
+
+                child->setAttribute ("Condition", "'$(WindowsTargetPlatformVersion)' == ''");
+                child->addTextElement ("$([Microsoft.Build.Utilities.ToolLocationHelper]::GetLatestSDKTargetPlatformVersion('Windows', '10.0'))");
+            }
+        }
+        else
+        {
+            forEachXmlChildElementWithTagName (p, e, "PropertyGroup")
+            e->createNewChildElement ("WindowsTargetPlatformVersion")->addTextElement (target);
+        }
     }
 
     void addIPPSettingToPropertyGroup (XmlElement& p) const
@@ -1944,7 +1959,7 @@ public:
     String getSolutionComment() const override                       { return "# Visual Studio 2017"; }
     String getToolsVersion() const override                          { return "15.0"; }
     String getDefaultToolset() const override                        { return "v141"; }
-    String getDefaultWindowsTargetPlatformVersion() const override   { return "10.0.16299.0"; }
+    String getDefaultWindowsTargetPlatformVersion() const override   { return "Latest"; }
 
     static MSVCProjectExporterVC2017* createForSettings (Project& project, const ValueTree& settings)
     {
