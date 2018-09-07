@@ -1704,15 +1704,15 @@ private:
 	//==============================================================================
 #if JucePlugin_Enable_ARA
 public:
-	const ARA::ARAPlugInExtensionInstance* _createARAPlugInExtension(ARA::ARADocumentControllerRef documentControllerRef, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles);
+	const ARA::ARAPlugInExtensionInstance* _createARAPlugInExtension (ARA::ARADocumentControllerRef documentControllerRef, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles);
 
-	const ARA::PlugIn::PlaybackRenderer* getARAPlaybackRenderer() const;
-    const ARA::PlugIn::EditorRenderer* getARAEditorRenderer() const;
-    const ARA::PlugIn::EditorView* getARAEditorView() const;
+	const ARA::PlugIn::PlaybackRenderer* getARAPlaybackRenderer () const;
+    const ARA::PlugIn::EditorRenderer* getARAEditorRenderer () const;
+    const ARA::PlugIn::EditorView* getARAEditorView () const;
 
-    inline bool isARAPlaybackRenderer() const { return getARAPlaybackRenderer() != nullptr; }
-    inline bool isARAEditorRenderer() const { return getARAEditorRenderer() != nullptr; }
-    inline bool isARAEditorView() const { return getARAEditorView() != nullptr; }
+    inline bool isARAPlaybackRenderer () const { return getARAPlaybackRenderer () != nullptr; }
+    inline bool isARAEditorRenderer () const { return getARAEditorRenderer () != nullptr; }
+    inline bool isARAEditorView () const { return getARAEditorView () != nullptr; }
 private:
 	const ARA::PlugIn::PlugInExtension* araPlugInExtension{ nullptr };
 #endif

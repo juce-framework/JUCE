@@ -1598,10 +1598,10 @@ void AudioPlayHead::CurrentPositionInfo::resetToDefault()
 //==============================================================================
 #if JucePlugin_Enable_ARA
 
-const ARA::ARAPlugInExtensionInstance* AudioProcessor::_createARAPlugInExtension(ARA::ARADocumentControllerRef documentControllerRef, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles)
+const ARA::ARAPlugInExtensionInstance* AudioProcessor::_createARAPlugInExtension (ARA::ARADocumentControllerRef documentControllerRef, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles)
 {
 	ARA::PlugIn::DocumentController * documentController = (ARA::PlugIn::DocumentController *)documentControllerRef;
-	ARA_VALIDATE_API_ARGUMENT(documentControllerRef, ARA::PlugIn::DocumentController::isValidDocumentController (documentController));
+	ARA_VALIDATE_API_ARGUMENT (documentControllerRef, ARA::PlugIn::DocumentController::isValidDocumentController (documentController));
 
 	// verify this is only called once
 	if (araPlugInExtension)
@@ -1610,13 +1610,13 @@ const ARA::ARAPlugInExtensionInstance* AudioProcessor::_createARAPlugInExtension
 		return nullptr;
 	}
 
-	araPlugInExtension = documentController->createPlugInExtensionWithRoles(knownRoles, assignedRoles);
-	return araPlugInExtension->getInstance();
+	araPlugInExtension = documentController->createPlugInExtensionWithRoles (knownRoles, assignedRoles);
+	return araPlugInExtension->getInstance ();
 }
 
-const ARA::PlugIn::PlaybackRenderer* AudioProcessor::getARAPlaybackRenderer() const
+const ARA::PlugIn::PlaybackRenderer* AudioProcessor::getARAPlaybackRenderer () const
 {
-	return araPlugInExtension ? araPlugInExtension->getPlaybackRenderer() : nullptr;
+	return araPlugInExtension ? araPlugInExtension->getPlaybackRenderer () : nullptr;
 }
 
 const ARA::PlugIn::EditorRenderer* AudioProcessor::getARAEditorRenderer () const
