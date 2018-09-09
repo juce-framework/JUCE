@@ -327,7 +327,7 @@ struct CoreAudioFormatMetatdata
                 else
                 {
                     // we aren't decoding this chunk yet so just skip over it
-                    input.skipNextBytes (chunkHeader.chunkSize);
+                    input.setPosition (input.getPosition() + chunkHeader.chunkSize);
                 }
             }
         }
