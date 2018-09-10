@@ -23,14 +23,6 @@
 namespace juce
 {
 
-AudioDeviceManager::AudioDeviceSetup::AudioDeviceSetup()
-    : sampleRate (0),
-      bufferSize (0),
-      useDefaultInputChannels (true),
-      useDefaultOutputChannels (true)
-{
-}
-
 bool AudioDeviceManager::AudioDeviceSetup::operator== (const AudioDeviceManager::AudioDeviceSetup& other) const
 {
     return outputDeviceName == other.outputDeviceName
@@ -367,6 +359,11 @@ AudioIODeviceType* AudioDeviceManager::findType (const String& inputName, const 
     return {};
 }
 
+AudioDeviceManager::AudioDeviceSetup AudioDeviceManager::getAudioDeviceSetup() const
+{
+    return currentSetup;
+}
+
 void AudioDeviceManager::getAudioDeviceSetup (AudioDeviceSetup& setup) const
 {
     setup = currentSetup;
@@ -582,7 +579,7 @@ void AudioDeviceManager::closeAudioDevice()
 {
     stopDevice();
     currentAudioDevice.reset();
-    cpuUsageMs = 0;
+    loadMeasurer.reset();
 }
 
 void AudioDeviceManager::restartLastAudioDevice()
@@ -694,7 +691,7 @@ void AudioDeviceManager::audioDeviceIOCallbackInt (const float** inputChannelDat
 
     if (callbacks.size() > 0)
     {
-        auto callbackStartTime = Time::getMillisecondCounterHiRes();
+        AudioProcessLoadMeasurer::ScopedTimer timer (loadMeasurer);
 
         tempBuffer.setSize (jmax (1, numOutputChannels), jmax (1, numSamples), false, false, true);
 
@@ -716,13 +713,6 @@ void AudioDeviceManager::audioDeviceIOCallbackInt (const float** inputChannelDat
                             dst[j] += src[j];
             }
         }
-
-        auto msTaken = Time::getMillisecondCounterHiRes() - callbackStartTime;
-        const double filterAmount = 0.2;
-        cpuUsageMs += filterAmount * (msTaken - cpuUsageMs);
-
-        if (msTaken > msPerBlock)
-            ++xruns;
     }
     else
     {
@@ -748,17 +738,8 @@ void AudioDeviceManager::audioDeviceIOCallbackInt (const float** inputChannelDat
 
 void AudioDeviceManager::audioDeviceAboutToStartInt (AudioIODevice* const device)
 {
-    cpuUsageMs = 0;
-    xruns = 0;
-
-    auto sampleRate = device->getCurrentSampleRate();
-    auto blockSize = device->getCurrentBufferSizeSamples();
-
-    if (sampleRate > 0.0 && blockSize > 0)
-    {
-        msPerBlock = 1000.0 * blockSize / sampleRate;
-        timeToCpuScale = (msPerBlock > 0.0) ? (1.0 / msPerBlock) : 0.0;
-    }
+    loadMeasurer.reset (device->getCurrentSampleRate(),
+                        device->getCurrentBufferSizeSamples());
 
     {
         const ScopedLock sl (audioCallbackLock);
@@ -772,12 +753,11 @@ void AudioDeviceManager::audioDeviceAboutToStartInt (AudioIODevice* const device
 
 void AudioDeviceManager::audioDeviceStoppedInt()
 {
-    cpuUsageMs = 0;
-    timeToCpuScale = 0;
-    xruns = 0;
     sendChangeMessage();
 
     const ScopedLock sl (audioCallbackLock);
+
+    loadMeasurer.reset();
 
     for (int i = callbacks.size(); --i >= 0;)
         callbacks.getUnchecked(i)->audioDeviceStopped();
@@ -793,7 +773,7 @@ void AudioDeviceManager::audioDeviceErrorInt (const String& message)
 
 double AudioDeviceManager::getCpuUsage() const
 {
-    return jlimit (0.0, 1.0, timeToCpuScale * cpuUsageMs);
+    return loadMeasurer.getLoadAsProportion();
 }
 
 //==============================================================================
@@ -980,7 +960,7 @@ void AudioDeviceManager::playTestSound()
 
         auto phasePerSample = MathConstants<double>::twoPi / (sampleRate / frequency);
 
-        auto* newSound = new AudioBuffer<float> (1, soundLength);
+        std::unique_ptr<AudioBuffer<float>> newSound (new AudioBuffer<float> (1, soundLength));
 
         for (int i = 0; i < soundLength; ++i)
             newSound->setSample (0, i, amplitude * (float) std::sin (i * phasePerSample));
@@ -988,15 +968,17 @@ void AudioDeviceManager::playTestSound()
         newSound->applyGainRamp (0, 0, soundLength / 10, 0.0f, 1.0f);
         newSound->applyGainRamp (0, soundLength - soundLength / 4, soundLength / 4, 1.0f, 0.0f);
 
-        const ScopedLock sl (audioCallbackLock);
-        testSound.reset (newSound);
+        {
+            const ScopedLock sl (audioCallbackLock);
+            std::swap (testSound, newSound);
+        }
     }
 }
 
 int AudioDeviceManager::getXRunCount() const noexcept
 {
     auto deviceXRuns = (currentAudioDevice != nullptr ? currentAudioDevice->getXRunCount() : -1);
-    return jmax (0, deviceXRuns) + xruns;
+    return jmax (0, deviceXRuns) + loadMeasurer.getXRunCount();
 }
 
 } // namespace juce

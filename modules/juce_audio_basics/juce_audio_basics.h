@@ -84,6 +84,7 @@
 #include "buffers/juce_FloatVectorOperations.h"
 #include "buffers/juce_AudioSampleBuffer.h"
 #include "buffers/juce_AudioChannelSet.h"
+#include "buffers/juce_AudioProcessLoadMeasurer.h"
 #include "effects/juce_Decibels.h"
 #include "effects/juce_IIRFilter.h"
 #include "effects/juce_LagrangeInterpolator.h"
