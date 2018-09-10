@@ -25,9 +25,8 @@
 */
 
 #include "jucer_Headers.h"
-#include "../Project/jucer_Module.h"
+#include "jucer_Application.h"
 #include "../Utility/Helpers/jucer_TranslationHelpers.h"
-#include "../Utility/PIPs/jucer_PIPGenerator.h"
 
 #include "jucer_CommandLine.h"
 
@@ -94,6 +93,9 @@ namespace
         {
             if (project != nullptr)
             {
+                if (! justSaveResources)
+                    rescanModulePathsIfNecessary();
+
                 auto error = justSaveResources ? project->saveResourcesOnly (project->getFile())
                                                : project->saveProject (project->getFile(), true);
 
@@ -102,6 +104,35 @@ namespace
                 if (error.failed())
                     ConsoleApplication::fail ("Error when saving: " + error.getErrorMessage());
             }
+        }
+
+        void rescanModulePathsIfNecessary()
+        {
+            bool scanJUCEPath = false, scanUserPaths = false;
+
+            const auto& modules = project->getEnabledModules();
+
+            for (auto i = modules.getNumModules(); --i >= 0;)
+            {
+                const auto& id = modules.getModuleID (i);
+
+                if (isJUCEModule (id) && ! scanJUCEPath)
+                {
+                    if (modules.shouldUseGlobalPath (id))
+                        scanJUCEPath = true;
+                }
+                else if (! scanUserPaths)
+                {
+                    if (modules.shouldUseGlobalPath (id))
+                        scanUserPaths = true;
+                }
+            }
+
+            if (scanJUCEPath)
+                ProjucerApplication::getApp().rescanJUCEPathModules();
+
+            if (scanUserPaths)
+                ProjucerApplication::getApp().rescanUserPathModules();
         }
 
         std::unique_ptr<Project> project;
