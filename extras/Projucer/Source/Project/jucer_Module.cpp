@@ -125,7 +125,7 @@ static bool tryToAddModuleFromFolder (const File& path, ModuleIDAndFolderList& l
     return false;
 }
 
-static bool addAllModulesInSubfoldersRecursively (const File& path, int depth, ModuleIDAndFolderList& list)
+static void addAllModulesInSubfoldersRecursively (const File& path, int depth, ModuleIDAndFolderList& list)
 {
     if (depth > 0)
     {
@@ -133,30 +133,23 @@ static bool addAllModulesInSubfoldersRecursively (const File& path, int depth, M
         {
             if (auto* job = ThreadPoolJob::getCurrentThreadPoolJob())
                 if (job->shouldExit())
-                    return false;
+                    return;
 
             auto childPath = iter.getFile().getLinkedTarget();
 
             if (! tryToAddModuleFromFolder (childPath, list))
-                if (! addAllModulesInSubfoldersRecursively (childPath, depth - 1, list))
-                    return false;
+                addAllModulesInSubfoldersRecursively (childPath, depth - 1, list);
         }
     }
-
-    return true;
 }
 
-static bool addAllModulesInFolder (const File& path, ModuleIDAndFolderList& list)
+static void addAllModulesInFolder (const File& path, ModuleIDAndFolderList& list)
 {
-    bool exitedBeforeCompletion = false;
-
     if (! tryToAddModuleFromFolder (path, list))
     {
         int subfolders = 3;
-        exitedBeforeCompletion = addAllModulesInSubfoldersRecursively (path, subfolders, list);
+        addAllModulesInSubfoldersRecursively (path, subfolders, list);
     }
-
-    return exitedBeforeCompletion;
 }
 
 static void sort (ModuleIDAndFolderList& listToSort)
@@ -182,11 +175,13 @@ struct ModuleScannerJob    : public ThreadPoolJob
         ModuleIDAndFolderList list;
 
         for (auto& p : pathsToScan)
-            if (! addAllModulesInFolder (p, list))
-                return jobNeedsRunningAgain;
+            addAllModulesInFolder (p, list);
 
-        sort (list);
-        completionCallback (list);
+        if (! shouldExit())
+        {
+            sort (list);
+            completionCallback (list);
+        }
 
         return jobHasFinished;
     }
