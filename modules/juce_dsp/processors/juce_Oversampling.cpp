@@ -291,16 +291,16 @@ public:
         latency += static_cast<SampleType> (-(coeffsDown.getPhaseForFrequency (0.0001, 1.0)) / (0.0001 * MathConstants<double>::twoPi));
 
         for (auto i = 0; i < structureUp.directPath.size(); ++i)
-            coefficientsUp.add (structureUp.delayedPath.getObjectPointer (i)->coefficients[0]);
+            coefficientsUp.add (structureUp.directPath.getObjectPointer (i)->coefficients[0]);
 
         for (auto i = 1; i < structureUp.delayedPath.size(); ++i)
             coefficientsUp.add (structureUp.delayedPath.getObjectPointer (i)->coefficients[0]);
 
         for (auto i = 0; i < structureDown.directPath.size(); ++i)
-            coefficientsDown.add (structureUp.delayedPath.getObjectPointer (i)->coefficients[0]);
+            coefficientsDown.add (structureDown.directPath.getObjectPointer (i)->coefficients[0]);
 
         for (auto i = 1; i < structureDown.delayedPath.size(); ++i)
-            coefficientsDown.add (structureUp.delayedPath.getObjectPointer (i)->coefficients[0]);
+            coefficientsDown.add (structureDown.delayedPath.getObjectPointer (i)->coefficients[0]);
 
         v1Up.setSize   (static_cast<int> (this->numChannels), coefficientsUp.size());
         v1Down.setSize (static_cast<int> (this->numChannels), coefficientsDown.size());
