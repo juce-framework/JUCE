@@ -104,6 +104,7 @@ struct ConvolutionEngine
 
         buffersInputSegments.clear();
         buffersImpulseSegments.clear();
+        bufferOutput.clear();
 
         for (size_t i = 0; i < numInputSegments; ++i)
         {
