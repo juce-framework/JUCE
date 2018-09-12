@@ -2631,6 +2631,8 @@ void PhysicalTopologySource::setActive (bool shouldBeActive)
         detector->detector->detach (this);
         detector.reset();
     }
+
+    listeners.call ([](TopologySource::Listener& l){ l.topologyChanged(); });
 }
 
 bool PhysicalTopologySource::isActive() const
