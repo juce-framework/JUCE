@@ -136,12 +136,6 @@ void ProjucerApplication::initialiseBasics()
     ImageCache::setCacheTimeout (30 * 1000);
     icons.reset (new Icons());
     tooltipWindow.setMillisecondsBeforeTipAppears (1200);
-
-    if (isRunningCommandLine)
-    {
-        rescanJUCEPathModules();
-        rescanUserPathModules();
-    }
 }
 
 bool ProjucerApplication::initialiseLogger (const char* filePrefix)

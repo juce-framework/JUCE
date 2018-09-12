@@ -337,7 +337,7 @@ Array<double> FilterDesign<FloatType>::getPartialImpulseResponseHn (int n, doubl
 }
 
 template <typename FloatType>
-Array<IIR::Coefficients<FloatType>>
+ReferenceCountedArray<IIR::Coefficients<FloatType>>
     FilterDesign<FloatType>::designIIRLowpassHighOrderButterworthMethod (FloatType frequency, double sampleRate,
                                                                          FloatType normalizedTransitionWidth,
                                                                          FloatType passbandAttenuationdB,
@@ -348,7 +348,7 @@ Array<IIR::Coefficients<FloatType>>
 }
 
 template <typename FloatType>
-Array<IIR::Coefficients<FloatType>>
+ReferenceCountedArray<IIR::Coefficients<FloatType>>
     FilterDesign<FloatType>::designIIRLowpassHighOrderChebyshev1Method (FloatType frequency, double sampleRate,
                                                                         FloatType normalizedTransitionWidth,
                                                                         FloatType passbandAttenuationdB,
@@ -359,7 +359,7 @@ Array<IIR::Coefficients<FloatType>>
 }
 
 template <typename FloatType>
-Array<IIR::Coefficients<FloatType>>
+ReferenceCountedArray<IIR::Coefficients<FloatType>>
     FilterDesign<FloatType>::designIIRLowpassHighOrderChebyshev2Method (FloatType frequency, double sampleRate,
                                                                         FloatType normalizedTransitionWidth,
                                                                         FloatType passbandAttenuationdB,
@@ -370,7 +370,7 @@ Array<IIR::Coefficients<FloatType>>
 }
 
 template <typename FloatType>
-Array<IIR::Coefficients<FloatType>>
+ReferenceCountedArray<IIR::Coefficients<FloatType>>
     FilterDesign<FloatType>::designIIRLowpassHighOrderEllipticMethod (FloatType frequency, double sampleRate,
                                                                       FloatType normalizedTransitionWidth,
                                                                       FloatType passbandAttenuationdB,
@@ -381,7 +381,7 @@ Array<IIR::Coefficients<FloatType>>
 }
 
 template <typename FloatType>
-Array<IIR::Coefficients<FloatType>>
+ReferenceCountedArray<IIR::Coefficients<FloatType>>
     FilterDesign<FloatType>::designIIRLowpassHighOrderGeneralMethod (int type, FloatType frequency, double sampleRate,
                                                                      FloatType normalizedTransitionWidth,
                                                                      FloatType passbandAttenuationdB,
@@ -510,7 +510,7 @@ Array<IIR::Coefficients<FloatType>>
         g.add ((1.0 - p[i + r]) / (1.0 - z[i]));
     }
 
-    Array<IIR::Coefficients<FloatType>> cascadedCoefficients;
+    ReferenceCountedArray<IIR::Coefficients<FloatType>> cascadedCoefficients;
 
     if (r == 1)
     {
@@ -518,7 +518,7 @@ Array<IIR::Coefficients<FloatType>>
         auto b1 = b0;
         auto a1 = static_cast<FloatType> (-std::real (p[0]));
 
-        cascadedCoefficients.add ({ b0, b1, 1.0f, a1 });
+        cascadedCoefficients.add (new IIR::Coefficients<FloatType> (b0, b1, 1.0f, a1));
     }
 
     for (int i = 0; i < L; ++i)
@@ -532,14 +532,14 @@ Array<IIR::Coefficients<FloatType>>
         auto a1 = static_cast<FloatType> (std::real (-p[i+r] - std::conj (p[i + r])));
         auto a2 = static_cast<FloatType> (std::real ( p[i+r] * std::conj (p[i + r])));
 
-        cascadedCoefficients.add ({ b0, b1, b2, 1, a1, a2 });
+        cascadedCoefficients.add (new IIR::Coefficients<FloatType> (b0, b1, b2, 1, a1, a2));
     }
 
     return cascadedCoefficients;
 }
 
 template <typename FloatType>
-Array<IIR::Coefficients<FloatType>>
+ReferenceCountedArray<IIR::Coefficients<FloatType>>
     FilterDesign<FloatType>::designIIRLowpassHighOrderButterworthMethod (FloatType frequency,
                                                                          double sampleRate, int order)
 {
@@ -547,7 +547,7 @@ Array<IIR::Coefficients<FloatType>>
     jassert (frequency > 0 && frequency <= sampleRate * 0.5);
     jassert (order > 0);
 
-    Array<IIR::Coefficients<FloatType>> arrayFilters;
+    ReferenceCountedArray<IIR::Coefficients<FloatType>> arrayFilters;
 
     if (order % 2 == 1)
     {
@@ -574,7 +574,7 @@ Array<IIR::Coefficients<FloatType>>
 }
 
 template <typename FloatType>
-Array<IIR::Coefficients<FloatType>>
+ReferenceCountedArray<IIR::Coefficients<FloatType>>
     FilterDesign<FloatType>::designIIRHighpassHighOrderButterworthMethod (FloatType frequency,
                                                                           double sampleRate, int order)
 {
@@ -582,7 +582,7 @@ Array<IIR::Coefficients<FloatType>>
     jassert (frequency > 0 && frequency <= sampleRate * 0.5);
     jassert (order > 0);
 
-    Array<IIR::Coefficients<FloatType>> arrayFilters;
+    ReferenceCountedArray<IIR::Coefficients<FloatType>> arrayFilters;
 
     if (order % 2 == 1)
     {
@@ -678,14 +678,14 @@ typename FilterDesign<FloatType>::IIRPolyphaseAllpassStructure
     IIRPolyphaseAllpassStructure structure;
 
     for (int i = 0; i < N; i += 2)
-        structure.directPath.add (IIR::Coefficients<FloatType> (static_cast<FloatType> (ai[i]),
-                                                                0, 1, 1, 0, static_cast<FloatType> (ai[i])));
+        structure.directPath.add (new IIR::Coefficients<FloatType> (static_cast<FloatType> (ai[i]),
+                                                                    0, 1, 1, 0, static_cast<FloatType> (ai[i])));
 
-    structure.delayedPath.add (IIR::Coefficients<FloatType> (0, 1, 1, 0));
+    structure.delayedPath.add (new IIR::Coefficients<FloatType> (0, 1, 1, 0));
 
     for (int i = 1; i < N; i += 2)
-        structure.delayedPath.add (IIR::Coefficients<FloatType> (static_cast<FloatType> (ai[i]),
-                                                                 0, 1, 1, 0, static_cast<FloatType> (ai[i])));
+        structure.delayedPath.add (new IIR::Coefficients<FloatType> (static_cast<FloatType> (ai[i]),
+                                                                     0, 1, 1, 0, static_cast<FloatType> (ai[i])));
 
     return structure;
 }
