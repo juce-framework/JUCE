@@ -24,6 +24,8 @@
   ==============================================================================
 */
 
+#include <mshtml.h>
+
 namespace juce
 {
 
@@ -44,7 +46,7 @@ JUCE_DECLARE_UUID_GETTER (WebBrowser,                "8856F961-340A-11D0-A96B-00
 class WebBrowserComponent::Pimpl   : public ActiveXControlComponent
 {
 public:
-    Pimpl() {}
+    Pimpl() : htmlSource(nullptr) {}
 
     ~Pimpl()
     {
@@ -74,11 +76,66 @@ public:
                 auto* owner = dynamic_cast<WebBrowserComponent*> (getParentComponent());
                 jassert (owner != nullptr);
 
-                auto handler = new EventHandler (*owner);
+                auto handler = new EventHandler (*owner, *this);
                 connectionPoint->Advise (handler, &adviseCookie);
                 handler->Release();
             }
         }
+    }
+
+    void loadHTMLString(const String& htmlString, const String& /*baseURLString*/)
+    {
+        if (htmlSource)
+        {
+            delete[] htmlSource;
+        }
+        htmlSource = new wchar_t[htmlString.length() + 1];
+        wcscpy(htmlSource, htmlString.toWideCharPointer());
+        if (browser != nullptr)
+        {
+            VARIANT vURL;
+            vURL.vt = VT_BSTR;
+            vURL.bstrVal = ::SysAllocString(L"about:blank");
+            VARIANT vEmpty;
+            vEmpty.vt = VT_EMPTY;
+            browser->Navigate2(&vURL, &vEmpty, &vEmpty, &vEmpty, &vEmpty);
+        }
+    }
+
+    void loadHTMLSource()
+    {
+        // https://stackoverflow.com/questions/45103166/how-to-load-html-string-to-embedded-webbrowser-control
+
+        if (browser == nullptr) return;
+
+        IHTMLDocument2 *pHtmlDoc2 = 0;
+        IPersistStreamInit *pPSI = 0;
+        IDispatch *pDispatch = 0;
+        IStream *pStream = 0;
+        HRESULT hr = browser->get_Document(&pDispatch);
+        if (SUCCEEDED(hr) && pDispatch) hr = pDispatch->QueryInterface(IID_IHTMLDocument2, (void**)&pHtmlDoc2);
+        if (SUCCEEDED(hr) && pHtmlDoc2) hr = pHtmlDoc2->QueryInterface(IID_IPersistStreamInit, (void **)&pPSI);
+
+        // allocate global memoery to copy the HTML content to
+        HGLOBAL hHTMLContent = ::GlobalAlloc(GMEM_MOVEABLE, (::wcslen(htmlSource) + 1) * sizeof(TCHAR));
+        if (hHTMLContent)
+        {
+            wchar_t * p_content(static_cast<wchar_t *>(GlobalLock(hHTMLContent)));
+            ::wcscpy(p_content, htmlSource);
+            GlobalUnlock(hHTMLContent);
+
+            // create a stream object based on the HTML content
+            if (SUCCEEDED(hr) && pPSI) hr = ::CreateStreamOnHGlobal(hHTMLContent, TRUE, &pStream);
+
+            if (SUCCEEDED(hr) && pStream) hr = pPSI->InitNew();
+            if (SUCCEEDED(hr) && pPSI) hr = pPSI->Load(pStream);
+        }
+        if (pStream) pStream->Release();
+        if (pPSI) pPSI->Release();
+        if (pHtmlDoc2) pHtmlDoc2->Release();
+        if (pDispatch) pDispatch->Release();
+        delete[] htmlSource;
+        htmlSource = nullptr;
     }
 
     void goToURL (const String& url,
@@ -142,16 +199,17 @@ public:
 
     //==============================================================================
     IWebBrowser2* browser = nullptr;
+	wchar_t* htmlSource;
 
 private:
     IConnectionPoint* connectionPoint = nullptr;
     DWORD adviseCookie = 0;
-
+	
     //==============================================================================
     struct EventHandler  : public ComBaseClassHelper<IDispatch>,
                            public ComponentMovementWatcher
     {
-        EventHandler (WebBrowserComponent& w)  : ComponentMovementWatcher (&w), owner (w) {}
+        EventHandler (WebBrowserComponent& w, Pimpl& p)  : ComponentMovementWatcher (&w), owner (w), pimpl(p) {}
 
         JUCE_COMRESULT GetTypeInfoCount (UINT*)                                  { return E_NOTIMPL; }
         JUCE_COMRESULT GetTypeInfo (UINT, LCID, ITypeInfo**)                     { return E_NOTIMPL; }
@@ -177,6 +235,11 @@ private:
 
             if (dispIdMember == DISPID_DOCUMENTCOMPLETE)
             {
+                if (pimpl.htmlSource)
+                {
+                    pimpl.loadHTMLSource();
+                }
+
                 owner.pageFinishedLoading (getStringFromVariant (pDispParams->rgvarg[0].pvarVal));
                 return S_OK;
             }
@@ -225,6 +288,7 @@ private:
 
     private:
         WebBrowserComponent& owner;
+		Pimpl& pimpl;
 
         static String getStringFromVariant (VARIANT* v)
         {
@@ -254,6 +318,13 @@ WebBrowserComponent::~WebBrowserComponent()
 }
 
 //==============================================================================
+
+void WebBrowserComponent::loadHTMLString(const String& htmlString, 
+										 const String& baseURLString)
+{
+	browser->loadHTMLString (htmlString, baseURLString);
+}
+
 void WebBrowserComponent::goToURL (const String& url,
                                    const StringArray* headers,
                                    const MemoryBlock* postData)

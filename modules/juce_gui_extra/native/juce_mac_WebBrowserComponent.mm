@@ -268,6 +268,18 @@ public:
         setView (nil);
     }
 
+    void loadHTMLString (const String& htmlString, const String& baseURLString)
+    {
+        NSString* nsHTMLString = juceStringToNS (htmlString);
+        NSString* urlString = juceStringToNS (baseURLString);
+    
+        #if JUCE_MAC
+         [[webView mainFrame] loadHTMLString: nsHTMLString baseURL: [NSURL URLWithString: urlString]];
+        #else
+         [webView loadHTMLString: nsHTMLString baseURL: [NSURL URLWithString: urlString]];
+        #endif
+    }
+    
     void goToURL (const String& url,
                   const StringArray* headers,
                   const MemoryBlock* postData)
@@ -369,6 +381,11 @@ WebBrowserComponent::~WebBrowserComponent()
 }
 
 //==============================================================================
+void WebBrowserComponent::loadHTMLString (const String& htmlString, const String& baseURLString)
+{
+    browser->loadHTMLString (htmlString, baseURLString);
+}
+
 void WebBrowserComponent::goToURL (const String& url,
                                    const StringArray* headers,
                                    const MemoryBlock* postData)
