@@ -474,6 +474,31 @@ public:
         {
             switch (inID)
             {
+                case kAudioUnitProperty_ParameterClumpName:
+
+                    if (auto* clumpNameInfo = (AudioUnitParameterNameInfo*) outData)
+                    {
+                        if (juceFilter != nullptr)
+                        {
+                            auto clumpIndex = clumpNameInfo->inID - 1;
+                            const auto* group = parameterGroups[(int) clumpIndex];
+                            auto name = group->getName();
+
+                            while (group->getParent() != &juceFilter->getParameterTree())
+                            {
+                                group = group->getParent();
+                                name = group->getName() + group->getSeparator() + name;
+                            }
+
+                            clumpNameInfo->outName = name.toCFString();
+                            return noErr;
+                        }
+                    }
+
+                    // Failed to find a group corresponding to the clump ID.
+                    jassertfalse;
+                    break;
+
                 case juceFilterObjectPropertyID:
                     ((void**) outData)[0] = (void*) static_cast<AudioProcessor*> (juceFilter.get());
                     ((void**) outData)[1] = (void*) this;
@@ -878,6 +903,14 @@ public:
 
                 if (param->isMetaParameter())
                     outParameterInfo.flags |= kAudioUnitParameterFlag_IsGlobalMeta;
+
+                auto parameterGroupHierarchy = juceFilter->getParameterTree().getGroupsForParameter (param);
+
+                if (! parameterGroupHierarchy.isEmpty())
+                {
+                    outParameterInfo.flags |= kAudioUnitParameterFlag_HasClump;
+                    outParameterInfo.clumpID = (UInt32) parameterGroups.indexOf (parameterGroupHierarchy.getLast()) + 1;
+                }
 
                 // Is this a meter?
                 if (((param->getCategory() & 0xffff0000) >> 16) == 2)
@@ -1687,6 +1720,7 @@ private:
     LegacyAudioParametersWrapper juceParameters;
     HashMap<int32, AudioProcessorParameter*> paramMap;
     Array<AudioUnitParameterID> auParamIDs;
+    Array<const AudioProcessorParameterGroup*> parameterGroups;
 
     //==============================================================================
     AudioUnitEvent auEvent;
@@ -1839,6 +1873,8 @@ private:
     //==============================================================================
     void addParameters()
     {
+        parameterGroups = juceFilter->getParameterTree().getSubgroups (true);
+
         juceParameters.update (*juceFilter, forceUseLegacyParamIDs);
         const int numParams = juceParameters.getNumParameters();
 

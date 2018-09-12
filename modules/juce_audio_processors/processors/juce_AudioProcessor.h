@@ -1205,11 +1205,24 @@ public:
     void updateHostDisplay();
 
     //==============================================================================
-    /** Adds a parameter to the list.
-        The parameter object will be managed and deleted automatically by the list
-        when no longer needed.
+    /** Adds a parameter to the AudioProcessor.
+
+        The parameter object will be managed and deleted automatically by the
+        AudioProcessor when no longer needed.
     */
     void addParameter (AudioProcessorParameter*);
+
+    /** Adds a group of parameters to the AudioProcessor.
+
+        All the parameter objects contained within the group will be managed and
+        deleted automatically by the AudioProcessor when no longer needed.
+
+        @see addParameter
+     */
+    void addParameterGroup (std::unique_ptr<AudioProcessorParameterGroup>);
+
+    /** Returns the group of parameters managed by this AudioProcessor. */
+    const AudioProcessorParameterGroup& getParameterTree();
 
     /** Returns the current list of parameters. */
     const OwnedArray<AudioProcessorParameter>& getParameters() const noexcept;
@@ -1585,6 +1598,9 @@ protected:
 
 private:
     //==============================================================================
+    void addParameterInternal (AudioProcessorParameter*);
+
+    //==============================================================================
     struct InOutChannelPair
     {
         InOutChannelPair() = default;
@@ -1648,6 +1664,8 @@ private:
     OwnedArray<AudioProcessorParameter> managedParameters;
     AudioProcessorParameter* getParamChecked (int) const noexcept;
 
+    AudioProcessorParameterGroup parameterTree { {}, {}, {} };
+
    #if JUCE_DEBUG && ! JUCE_DISABLE_AUDIOPROCESSOR_BEGIN_END_GESTURE_CHECKING
     BigInteger changingParams;
    #endif
@@ -1671,6 +1689,7 @@ private:
 
     friend class JuceVST3EditController;
     friend class JuceVST3Component;
+    friend class VST3PluginInstance;
     friend class AudioUnitPluginInstance;
     friend class LADSPAPluginInstance;
 

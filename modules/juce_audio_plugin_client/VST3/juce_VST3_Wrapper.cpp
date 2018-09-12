@@ -126,6 +126,11 @@ public:
         return getParamForVSTParamID (bypassParamID);
     }
 
+    static Vst::UnitID getUnitID (const AudioProcessorParameterGroup* group)
+    {
+        return group == nullptr ? Vst::kRootUnitId : group->getID().hashCode();
+    }
+
     int getNumParameters() const noexcept             { return vstParamIDs.size(); }
     bool isUsingManagedParameters() const noexcept    { return juceParameters.isUsingManagedParameters(); }
 
@@ -330,10 +335,12 @@ public:
     struct Param  : public Vst::Parameter
     {
         Param (JuceVST3EditController& editController, AudioProcessorParameter& p,
-               Vst::ParamID vstParamID, bool isBypassParameter, bool forceLegacyParamIDs)
+               Vst::ParamID vstParamID, Vst::UnitID vstUnitID,
+               bool isBypassParameter, bool forceLegacyParamIDs)
             : owner (editController), param (p)
         {
             info.id = vstParamID;
+            info.unitId = vstUnitID;
 
             toString128 (info.title,      param.getName (128));
             toString128 (info.shortTitle, param.getName (8));
@@ -349,7 +356,6 @@ public:
 
             info.defaultNormalizedValue = param.getDefaultValue();
             jassert (info.defaultNormalizedValue >= 0 && info.defaultNormalizedValue <= 1.0f);
-            info.unitId = Vst::kRootUnitId;
 
             // Is this a meter?
             if (((param.getCategory() & 0xffff0000) >> 16) == 2)
@@ -740,8 +746,10 @@ private:
                 {
                     auto vstParamID = audioProcessor->getVSTParamIDForIndex (i);
                     auto* juceParam = audioProcessor->getParamForVSTParamID (vstParamID);
+                    auto* parameterGroup = pluginInstance->parameterTree.getGroupsForParameter (juceParam).getLast();
+                    auto unitID = JuceAudioProcessor::getUnitID (parameterGroup);
 
-                    parameters.addParameter (new Param (*this, *juceParam, vstParamID,
+                    parameters.addParameter (new Param (*this, *juceParam, vstParamID, unitID,
                                                         (vstParamID == audioProcessor->bypassParamID), forceLegacyParamIDs));
                 }
 
@@ -1271,6 +1279,8 @@ public:
         // and not AudioChannelSet::discreteChannels (2) etc.
         jassert (checkBusFormatsAreNotDiscrete());
 
+        parameterGroups = pluginInstance->parameterTree.getSubgroups (true);
+
         comPluginInstance = new JuceAudioProcessor (pluginInstance);
 
         zerostruct (processContext);
@@ -1763,7 +1773,7 @@ public:
     //==============================================================================
     Steinberg::int32 PLUGIN_API getUnitCount() override
     {
-        return 1;
+        return parameterGroups.size() + 1;
     }
 
     tresult PLUGIN_API getUnitInfo (Steinberg::int32 unitIndex, Vst::UnitInfo& info) override
@@ -1779,7 +1789,17 @@ public:
             return kResultTrue;
         }
 
-        zerostruct (info);
+        if (auto* group = parameterGroups[unitIndex - 1])
+        {
+            info.id             = JuceAudioProcessor::getUnitID (group);
+            info.parentUnitId   = JuceAudioProcessor::getUnitID (group->getParent());
+            info.programListId  = Vst::kNoProgramListId;
+
+            toString128 (info.name, group->getName());
+
+            return kResultTrue;
+        }
+
         return kResultFalse;
     }
 
@@ -2264,43 +2284,6 @@ public:
 
 private:
     //==============================================================================
-    Atomic<int> refCount { 1 };
-
-    AudioProcessor* pluginInstance;
-    ComSmartPtr<Vst::IHostApplication> host;
-    ComSmartPtr<JuceAudioProcessor> comPluginInstance;
-    ComSmartPtr<JuceVST3EditController> juceVST3EditController;
-
-    /**
-        Since VST3 does not provide a way of knowing the buffer size and sample rate at any point,
-        this object needs to be copied on every call to process() to be up-to-date...
-    */
-    Vst::ProcessContext processContext;
-    Vst::ProcessSetup processSetup;
-
-    MidiBuffer midiBuffer;
-    Array<float*> channelListFloat;
-    Array<double*> channelListDouble;
-
-    AudioBuffer<float>  emptyBufferFloat;
-    AudioBuffer<double> emptyBufferDouble;
-
-   #if JucePlugin_WantsMidiInput
-    bool isMidiInputBusEnabled = true;
-   #else
-    bool isMidiInputBusEnabled = false;
-   #endif
-
-   #if JucePlugin_ProducesMidiOutput
-    bool isMidiOutputBusEnabled = true;
-   #else
-    bool isMidiOutputBusEnabled = false;
-   #endif
-
-    ScopedJuceInitialiser_GUI libraryInitialiser;
-    static const char* kJucePrivateDataIdentifier;
-
-    //==============================================================================
     template <typename FloatType>
     void processAudio (Vst::ProcessData& data, Array<FloatType*>& channelList)
     {
@@ -2517,6 +2500,45 @@ private:
     }
 
     //==============================================================================
+    Atomic<int> refCount { 1 };
+
+    AudioProcessor* pluginInstance;
+    ComSmartPtr<Vst::IHostApplication> host;
+    ComSmartPtr<JuceAudioProcessor> comPluginInstance;
+    ComSmartPtr<JuceVST3EditController> juceVST3EditController;
+
+    /**
+        Since VST3 does not provide a way of knowing the buffer size and sample rate at any point,
+        this object needs to be copied on every call to process() to be up-to-date...
+    */
+    Vst::ProcessContext processContext;
+
+    Vst::ProcessSetup processSetup;
+
+    MidiBuffer midiBuffer;
+    Array<float*> channelListFloat;
+    Array<double*> channelListDouble;
+
+    AudioBuffer<float>  emptyBufferFloat;
+    AudioBuffer<double> emptyBufferDouble;
+
+   #if JucePlugin_WantsMidiInput
+    bool isMidiInputBusEnabled = true;
+   #else
+    bool isMidiInputBusEnabled = false;
+   #endif
+
+   #if JucePlugin_ProducesMidiOutput
+    bool isMidiOutputBusEnabled = true;
+   #else
+    bool isMidiOutputBusEnabled = false;
+   #endif
+
+    ScopedJuceInitialiser_GUI libraryInitialiser;
+    static const char* kJucePrivateDataIdentifier;
+
+    Array<const AudioProcessorParameterGroup*> parameterGroups;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceVST3Component)
 };
 
