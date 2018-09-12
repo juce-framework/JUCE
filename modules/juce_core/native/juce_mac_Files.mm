@@ -412,8 +412,8 @@ bool JUCE_CALLTYPE Process::openDocument (const String& fileName, const String& 
     JUCE_AUTORELEASEPOOL
     {
         NSString* fileNameAsNS (juceStringToNS (fileName));
-        NSURL* filenameAsURL = File (fileName).exists() ? [NSURL fileURLWithPath: fileNameAsNS]
-                                                        : [NSURL URLWithString: fileNameAsNS];
+        NSURL* filenameAsURL = File::createFileWithoutCheckingPath (fileName).exists() ? [NSURL fileURLWithPath: fileNameAsNS]
+                                                                                       : [NSURL URLWithString: fileNameAsNS];
 
       #if JUCE_IOS
         ignoreUnused (parameters);
