@@ -2132,10 +2132,22 @@ private:
         }
     }
 
+    static BOOL CALLBACK revokeChildDragDropCallback (HWND hwnd, LPARAM)    { RevokeDragDrop (hwnd); return TRUE; }
+
     static void* destroyWindowCallback (void* handle)
     {
-        RevokeDragDrop ((HWND) handle);
-        DestroyWindow ((HWND) handle);
+        auto hwnd = reinterpret_cast<HWND> (handle);
+
+        if (IsWindow (hwnd))
+        {
+            RevokeDragDrop (hwnd);
+
+            // NB: we need to do this before DestroyWindow() as child HWNDs will be invalid after
+            EnumChildWindows (hwnd, revokeChildDragDropCallback, 0);
+
+            DestroyWindow (hwnd);
+        }
+
         return nullptr;
     }
 
