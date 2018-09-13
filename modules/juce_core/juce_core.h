@@ -338,6 +338,7 @@ namespace juce
 #include "zip/juce_ZipFile.h"
 #include "containers/juce_PropertySet.h"
 #include "memory/juce_SharedResourcePointer.h"
+#include "memory/juce_HeavyweightLeakedObjectDetector.h"
 
 #if JUCE_CORE_INCLUDE_OBJC_HELPERS && (JUCE_MAC || JUCE_IOS)
  #include "native/juce_osx_ObjCHelpers.h"
