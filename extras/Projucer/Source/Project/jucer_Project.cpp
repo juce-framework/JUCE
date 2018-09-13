@@ -359,10 +359,17 @@ void Project::coalescePluginFormatValues()
 
     if (formatsToBuild.size() > 0)
     {
-        auto formatVar = pluginFormatsValue.get();
+        if (pluginFormatsValue.isUsingDefault())
+        {
+            pluginFormatsValue = formatsToBuild;
+        }
+        else
+        {
+            auto formatVar = pluginFormatsValue.get();
 
-        if (auto* arr = formatVar.getArray())
-            arr->addArray (formatsToBuild);
+            if (auto* arr = formatVar.getArray())
+                arr->addArray (formatsToBuild);
+        }
 
         shouldWriteLegacyPluginFormatSettings = true;
     }
