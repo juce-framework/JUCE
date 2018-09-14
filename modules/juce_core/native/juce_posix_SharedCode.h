@@ -718,23 +718,7 @@ String File::getVolumeLabel() const
 
 int File::getVolumeSerialNumber() const
 {
-    int result = 0;
-/*    int fd = open (getFullPathName().toUTF8(), O_RDONLY | O_NONBLOCK);
-
-    char info[512];
-
-    #ifndef HDIO_GET_IDENTITY
-     #define HDIO_GET_IDENTITY 0x030d
-    #endif
-
-    if (ioctl (fd, HDIO_GET_IDENTITY, info) == 0)
-    {
-        DBG (String (info + 20, 20));
-        result = String (info + 20, 20).trim().getIntValue();
-    }
-
-    close (fd);*/
-    return result;
+    return 0;
 }
 
 //==============================================================================
