@@ -63,6 +63,47 @@ public:
     /** Destructor. */
     ~AudioProcessorValueTreeState();
 
+    /** Creates a new parameter object for controlling a parameter with the given ID.
+
+        The parameter returned by this function should be added to the AudioProcessor
+        managed by this AudioProcessorValueTreeState via AudioProcessor::addParameter
+        or AudioProcessor::addParameterGroup.
+
+        @param parameterID              A unique string ID for the new parameter
+        @param parameterName            The name that the parameter will return from AudioProcessorParameter::getName()
+        @param labelText                The label that the parameter will return from AudioProcessorParameter::getLabel()
+        @param valueRange               A mapping that will be used to determine the value range which this parameter uses
+        @param defaultValue             A default value for the parameter (in non-normalised units)
+        @param valueToTextFunction      A function that will convert a non-normalised value to a string for the
+                                        AudioProcessorParameter::getText() method. This can be nullptr to use the
+                                        default implementation
+        @param textToValueFunction      The inverse of valueToTextFunction
+        @param isMetaParameter          Set this value to true if this should be a meta parameter
+        @param isAutomatableParameter   Set this value to false if this parameter should not be automatable
+        @param isDiscrete               Set this value to true to make this parameter take discrete values in a host.
+                                        @see AudioProcessorParameter::isDiscrete
+        @param category                 Which category the parameter should use.
+                                        @see AudioProcessorParameter::Category
+        @param isBoolean                Set this value to true to make this parameter appear as a boolean toggle in
+                                        a hosts view of your plug-ins parameters
+                                        @see AudioProcessorParameter::isBoolean
+
+        @returns the parameter object that was created
+    */
+    std::unique_ptr<AudioProcessorParameterWithID> createParameter (const String& parameterID,
+                                                                    const String& parameterName,
+                                                                    const String& labelText,
+                                                                    NormalisableRange<float> valueRange,
+                                                                    float defaultValue,
+                                                                    std::function<String (float)> valueToTextFunction,
+                                                                    std::function<float (const String&)> textToValueFunction,
+                                                                    bool isMetaParameter = false,
+                                                                    bool isAutomatableParameter = true,
+                                                                    bool isDiscrete = false,
+                                                                    AudioProcessorParameter::Category category
+                                                                       = AudioProcessorParameter::genericParameter,
+                                                                    bool isBoolean = false);
+
     /** Creates and returns a new parameter object for controlling a parameter
         with the given ID.
 

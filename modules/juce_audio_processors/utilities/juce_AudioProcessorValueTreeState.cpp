@@ -195,6 +195,25 @@ AudioProcessorValueTreeState::AudioProcessorValueTreeState (AudioProcessor& p, U
 
 AudioProcessorValueTreeState::~AudioProcessorValueTreeState() {}
 
+std::unique_ptr<AudioProcessorParameterWithID> AudioProcessorValueTreeState::createParameter (const String& paramID, const String& paramName,
+                                                                                              const String& labelText, NormalisableRange<float> r,
+                                                                                              float defaultVal, std::function<String (float)> valueToTextFunction,
+                                                                                              std::function<float (const String&)> textToValueFunction,
+                                                                                              bool isMetaParameter,
+                                                                                              bool isAutomatableParameter,
+                                                                                              bool isDiscreteParameter,
+                                                                                              AudioProcessorParameter::Category category,
+                                                                                              bool isBooleanParameter)
+{
+    // All parameters must be created before giving this manager a ValueTree state!
+    jassert (! state.isValid());
+
+    return std::unique_ptr<AudioProcessorParameterWithID> (new Parameter (*this, paramID, paramName, labelText, r,
+                                                                          defaultVal, valueToTextFunction, textToValueFunction,
+                                                                          isMetaParameter, isAutomatableParameter,
+                                                                          isDiscreteParameter, category, isBooleanParameter));
+}
+
 AudioProcessorParameterWithID* AudioProcessorValueTreeState::createAndAddParameter (const String& paramID, const String& paramName,
                                                                                     const String& labelText, NormalisableRange<float> r,
                                                                                     float defaultVal, std::function<String (float)> valueToTextFunction,
@@ -205,13 +224,10 @@ AudioProcessorParameterWithID* AudioProcessorValueTreeState::createAndAddParamet
                                                                                     AudioProcessorParameter::Category category,
                                                                                     bool isBooleanParameter)
 {
-    // All parameters must be created before giving this manager a ValueTree state!
-    jassert (! state.isValid());
-
-    Parameter* p = new Parameter (*this, paramID, paramName, labelText, r,
-                                  defaultVal, valueToTextFunction, textToValueFunction,
-                                  isMetaParameter, isAutomatableParameter,
-                                  isDiscreteParameter, category, isBooleanParameter);
+    auto* p = createParameter (paramID, paramName, labelText, r, defaultVal,
+                               valueToTextFunction, textToValueFunction,
+                               isMetaParameter, isAutomatableParameter, isDiscreteParameter,
+                               category, isBooleanParameter).release();
     processor.addParameter (p);
     return p;
 }
