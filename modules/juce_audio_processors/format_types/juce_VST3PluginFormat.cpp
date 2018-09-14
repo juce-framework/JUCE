@@ -2554,7 +2554,7 @@ private:
             auto* param = new VST3Parameter (*this,
                                              paramInfo.id,
                                              (paramInfo.flags & Vst::ParameterInfo::kCanAutomate) != 0);
-            addParameter (param);
+            addParameterInternal (param);
 
             if ((paramInfo.flags & Vst::ParameterInfo::kIsBypass) != 0)
                 bypassParam = param;

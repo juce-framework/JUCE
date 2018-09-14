@@ -1415,6 +1415,7 @@ public:
                                                                    isBoolean,
                                                                    label,
                                                                    (info.flags & kAudioUnitParameterFlag_ValuesHaveStrings) != 0);
+                        addParameterInternal (parameter);
 
                         if (info.flags & kAudioUnitParameterFlag_HasClump)
                         {
@@ -1456,8 +1457,6 @@ public:
                         {
                             parameterGroups.addChild (std::unique_ptr<AudioProcessorParameter> (parameter));
                         }
-
-                        addParameter (parameter);
                     }
                 }
             }
