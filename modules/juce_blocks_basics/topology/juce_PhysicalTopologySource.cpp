@@ -1695,7 +1695,7 @@ struct PhysicalTopologySource::Internal
                     littlefoot::Compiler compiler;
                     compiler.addNativeFunctions (PhysicalTopologySource::getStandardLittleFootFunctions());
 
-                    auto err = compiler.compile (program->getLittleFootProgram(), 512);
+                    auto err = compiler.compile (program->getLittleFootProgram(), 512, program->getSearchPaths());
 
                     if (err.failed())
                         return err;
