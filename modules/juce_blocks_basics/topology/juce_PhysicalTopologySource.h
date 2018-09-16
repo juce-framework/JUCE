@@ -51,6 +51,8 @@ public:
     /** Returns true, if the TopologySource is currently trying to connect the block devices */
     bool isActive() const override;
 
+    /** This method will tell, if an other PhysicalTopologySource has locked the Midi connection */
+    bool isLockedFromOutside() const;
 
     //==========================================================================
     /** For custom transport systems, this represents a connected device */
@@ -71,6 +73,7 @@ public:
 
         virtual juce::StringArray scanForDevices() = 0;
         virtual DeviceConnection* openDevice (int index) = 0;
+        virtual bool isLockedFromOutside() const { return false; }
     };
 
     /** Constructor for custom transport systems. */

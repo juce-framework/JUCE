@@ -400,4 +400,10 @@ void IPAddress::findAllAddresses (Array<IPAddress>& result, bool /*includeIPv6*/
     }
 }
 
+IPAddress IPAddress::getInterfaceBroadcastAddress (const IPAddress&)
+{
+    return {}; // TODO
+}
+
+
 } // namespace juce

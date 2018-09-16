@@ -618,6 +618,13 @@ void IPAddress::findAllAddresses (Array<IPAddress>& result, bool includeIPv6)
     }
 }
 
+IPAddress IPAddress::getInterfaceBroadcastAddress (const IPAddress&)
+{
+    // TODO
+    return IPAddress {};
+}
+
+
 //==============================================================================
 bool JUCE_CALLTYPE Process::openEmailWithAttachments (const String& targetEmailAddress,
                                                       const String& emailSubject,

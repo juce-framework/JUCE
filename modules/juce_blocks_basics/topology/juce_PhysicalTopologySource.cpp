@@ -228,6 +228,8 @@ struct PhysicalTopologySource::Internal
 
                 if (dev->lockAgainstOtherProcesses (pair.inputName, pair.outputName))
                 {
+                    lockedFromOutside = false;
+
                     dev->midiInput.reset (juce::MidiInput::openDevice (pair.inputIndex, dev.get()));
                     dev->midiOutput.reset (juce::MidiOutput::openDevice (pair.outputIndex));
 
@@ -237,9 +239,18 @@ struct PhysicalTopologySource::Internal
                         return dev.release();
                     }
                 }
+                else
+                {
+                    lockedFromOutside = true;
+                }
             }
 
             return nullptr;
+        }
+
+        bool isLockedFromOutside() const override
+        {
+            return lockedFromOutside;
         }
 
         static bool isBlocksMidiDeviceName (const juce::String& name)
@@ -302,6 +313,9 @@ struct PhysicalTopologySource::Internal
 
             return result;
         }
+
+    private:
+        bool lockedFromOutside = true;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MIDIDeviceDetector)
     };
@@ -2598,6 +2612,8 @@ PhysicalTopologySource::~PhysicalTopologySource()
 
 void PhysicalTopologySource::setActive (bool shouldBeActive)
 {
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
+
     if (isActive() == shouldBeActive)
         return;
 
@@ -2615,11 +2631,21 @@ void PhysicalTopologySource::setActive (bool shouldBeActive)
         detector->detector->detach (this);
         detector.reset();
     }
+
+    listeners.call ([](TopologySource::Listener& l){ l.topologyChanged(); });
 }
 
 bool PhysicalTopologySource::isActive() const
 {
     return detector != nullptr;
+}
+
+bool PhysicalTopologySource::isLockedFromOutside() const
+{
+    if (detector != nullptr && detector->detector != nullptr)
+        return detector->detector->deviceDetector.isLockedFromOutside();
+
+    return false;
 }
 
 BlockTopology PhysicalTopologySource::getCurrentTopology() const
