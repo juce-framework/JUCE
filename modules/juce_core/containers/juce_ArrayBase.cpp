@@ -111,9 +111,9 @@ public:
 
     void runTest() override
     {
-        static_assert (std::is_trivially_copyable<CopyableType>::value,
+        static_assert (IsTriviallyCopyable<CopyableType>::value,
                        "Test TriviallyCopyableType is not trivially copyable");
-        static_assert (! std::is_trivially_copyable<NoncopyableType>::value,
+        static_assert (! IsTriviallyCopyable<NoncopyableType>::value,
                        "Test NonTriviallyCopyableType is trivially copyable");
 
         beginTest ("grow capacity");

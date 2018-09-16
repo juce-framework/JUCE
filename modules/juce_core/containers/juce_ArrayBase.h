@@ -329,11 +329,19 @@ public:
 
 private:
     //==============================================================================
+#if defined(__GNUC__) && !defined(__clang__) && __GNUC__ < 5
     template <typename T>
-    using TriviallyCopyableVoid = typename std::enable_if<std::is_trivially_copyable<T>::value, void>::type;
+    struct IsTriviallyCopyable : std::integral_constant<bool, false> {};
+#else
+    template <typename T>
+    using IsTriviallyCopyable = std::is_trivially_copyable<T>;
+#endif
 
     template <typename T>
-    using NonTriviallyCopyableVoid = typename std::enable_if<! std::is_trivially_copyable<T>::value, void>::type;
+    using TriviallyCopyableVoid = typename std::enable_if<IsTriviallyCopyable<T>::value, void>::type;
+
+    template <typename T>
+    using NonTriviallyCopyableVoid = typename std::enable_if<! IsTriviallyCopyable<T>::value, void>::type;
 
     //==============================================================================
     template <typename T = ElementType>
