@@ -71,6 +71,8 @@
   #include <cstdio>
  #endif
 
+ #include <unordered_map>
+
  #ifdef JUCE_MSVC
   #pragma warning (pop)
  #endif
