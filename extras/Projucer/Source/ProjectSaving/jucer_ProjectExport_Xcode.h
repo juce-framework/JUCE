@@ -1100,6 +1100,9 @@ public:
             {
                 s.set ("INSTALL_PATH", installPath.quoted());
 
+                if (type == Target::SharedCodeTarget)
+                    s.set ("SKIP_INSTALL", "YES");
+
                 if (! owner.getEmbeddedFrameworks().isEmpty())
                     s.set ("LD_RUNPATH_SEARCH_PATHS", "\"$(inherited) @executable_path/Frameworks\"");
 
