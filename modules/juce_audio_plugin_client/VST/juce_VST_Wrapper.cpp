@@ -1100,15 +1100,7 @@ public:
         }
 
         if (editorComp != nullptr)
-        {
             editorComp->checkVisibility();
-
-           #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-            if (getHostType().isWavelab())
-                if (auto* peer = editorComp->getTopLevelComponent()->getPeer())
-                    handleSetContentScaleFactor ((float) peer->getPlatformScaleFactor());
-           #endif
-        }
     }
 
     void createEditorComp()
@@ -1241,17 +1233,9 @@ public:
     // A component to hold the AudioProcessorEditor, and cope with some housekeeping
     // chores when it changes or repaints.
     struct EditorCompWrapper  : public Component
-                             #if ! JUCE_MAC
-                              , public ComponentPeer::ScaleFactorListener,
-                                public ComponentMovementWatcher
-                             #endif
     {
         EditorCompWrapper (JuceVSTWrapper& w, AudioProcessorEditor& editor)
-            :
-             #if ! JUCE_MAC
-              ComponentMovementWatcher (this),
-             #endif
-              wrapper (w)
+            : wrapper (w)
         {
             editor.setOpaque (true);
             editor.setVisible (true);
@@ -1276,11 +1260,6 @@ public:
         {
             deleteAllChildren(); // note that we can't use a std::unique_ptr because the editor may
                                  // have been transferred to another parent which takes over ownership.
-           #if ! JUCE_MAC
-            for (int i = 0; i < ComponentPeer::getNumPeers(); ++i)
-                if (auto* peer = ComponentPeer::getPeer (i))
-                    peer->removeScaleFactorListener (this);
-           #endif
         }
 
         void paint (Graphics&) override {}
@@ -1293,6 +1272,11 @@ public:
             bounds.left   = 0;
             bounds.bottom = (int16) b.getHeight();
             bounds.right  = (int16) b.getWidth();
+
+           #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+            bounds.bottom = (int16) roundToInt (bounds.bottom * wrapper.editorScaleFactor);
+            bounds.right  = (int16) roundToInt (bounds.right  * wrapper.editorScaleFactor);
+           #endif
         }
 
         void attachToHost (VstOpCodeArguments args)
@@ -1303,10 +1287,14 @@ public:
            #if JUCE_WINDOWS
             addToDesktop (0, args.ptr);
             hostWindow = (HWND) args.ptr;
-            #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-             // workaround for plug-ins opening on an auxiliary monitor
-             Timer::callAfterDelay (250, [this] { updateWindowSize (false); });
-            #endif
+
+            if (auto* ed = getEditorComp())
+               #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+                if (auto* peer = ed->getPeer())
+                    wrapper.editorScaleFactor = (float) peer->getPlatformScaleFactor();
+               #else
+                ed->setScaleFactor (wrapper.editorScaleFactor);
+               #endif
            #elif JUCE_LINUX
             addToDesktop (0, args.ptr);
             hostWindow = (Window) args.ptr;
@@ -1346,29 +1334,16 @@ public:
             return dynamic_cast<AudioProcessorEditor*> (getChildComponent(0));
         }
 
-        float getNativeEditorScaleFactor() const noexcept    { return nativeScaleFactor; }
-
-       #if ! JUCE_MAC
-        void componentMovedOrResized (bool, bool) override {}
-
-        void componentPeerChanged() override
+       #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+        void checkScaleFactorIsCorrect()
         {
-            if (auto* peer = getTopLevelComponent()->getPeer())
-                peer->addScaleFactorListener (this);
-        }
+            if (auto* peer = getEditorComp()->getPeer())
+            {
+                auto peerScaleFactor = (float) peer->getPlatformScaleFactor();
 
-        void componentVisibilityChanged() override
-        {
-            if (auto* peer = getTopLevelComponent()->getPeer())
-                nativeScaleFactorChanged (peer->getPlatformScaleFactor());
-        }
-
-        void nativeScaleFactorChanged (double newScaleFactor) override
-        {
-            nativeScaleFactor = (float) newScaleFactor;
-
-            if (getHostType().isBitwigStudio())
-                updateWindowSize (true);
+                if (! approximatelyEqual (peerScaleFactor, wrapper.editorScaleFactor))
+                    wrapper.handleSetContentScaleFactor (peerScaleFactor);
+            }
         }
        #endif
 
@@ -1376,13 +1351,16 @@ public:
         {
             if (auto* ed = getEditorComp())
             {
+               #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+                checkScaleFactorIsCorrect();
+               #endif
+
                 ed->setTopLeftPosition (0, 0);
 
                 if (shouldResizeEditor)
                     ed->setBounds (ed->getLocalArea (this, getLocalBounds()));
 
-                if (! getHostType().isBitwigStudio())
-                    updateWindowSize (false);
+                updateWindowSize (false);
             }
 
            #if JUCE_MAC && ! JUCE_64BIT
@@ -1430,8 +1408,8 @@ public:
                    #else
                     ignoreUnused (resizeEditor);
                     XResizeWindow (display.display, (Window) getWindowHandle(),
-                                   static_cast<unsigned int> (roundToInt (pos.getWidth()  * nativeScaleFactor)),
-                                   static_cast<unsigned int> (roundToInt (pos.getHeight() * nativeScaleFactor)));
+                                   static_cast<unsigned int> (roundToInt (pos.getWidth()  * wrapper.editorScaleFactor)),
+                                   static_cast<unsigned int> (roundToInt (pos.getHeight() * wrapper.editorScaleFactor)));
                    #endif
 
                    #if JUCE_MAC
@@ -1451,11 +1429,15 @@ public:
 
                 if (status == (pointer_sized_int) 1 || getHostType().isAbletonLive())
                 {
-                    isInSizeWindow = true;
+                   #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+                    newWidth  = roundToInt (newWidth  * wrapper.editorScaleFactor);
+                    newHeight = roundToInt (newHeight * wrapper.editorScaleFactor);
+                   #endif
+
+                    const ScopedValueSetter<bool> inSizeWindowSetter (isInSizeWindow, true);
+
                     sizeWasSuccessful = (host (wrapper.getAEffect(), Vst2::audioMasterSizeWindow,
-                                               roundToInt (newWidth  * nativeScaleFactor),
-                                               roundToInt (newHeight * nativeScaleFactor), 0, 0) != 0);
-                    isInSizeWindow = false;
+                                               newWidth, newHeight, 0, 0) != 0);
                 }
             }
 
@@ -1551,8 +1533,6 @@ public:
         FakeMouseMoveGenerator fakeMouseGenerator;
         bool isInSizeWindow = false;
         bool shouldResizeEditor = true;
-
-        float nativeScaleFactor = 1.0f;
 
        #if JUCE_MAC
         void* hostWindow = {};
@@ -2192,31 +2172,17 @@ private:
     pointer_sized_int handleSetContentScaleFactor (float scale)
     {
        #if ! JUCE_MAC
-        if (editorComp != nullptr)
+        if (! approximatelyEqual (scale, editorScaleFactor))
         {
-           #if JUCE_WINDOWS && ! JUCE_WIN_PER_MONITOR_DPI_AWARE
-            if (auto* ed = editorComp->getEditorComp())
-            {
-                ed->setScaleFactor (scale);
-                editorComp->updateWindowSize (true);
-            }
-           #else
-            if (! approximatelyEqual (scale, (float) editorComp->getNativeEditorScaleFactor()))
-            {
-                editorComp->nativeScaleFactorChanged ((double) scale);
+            editorScaleFactor = scale;
 
-               #if JUCE_LINUX
-                MessageManager::callAsync ([this] { if (editorComp != nullptr)  editorComp->updateWindowSize (true); });
+            if (editorComp != nullptr)
+               #if JUCE_WINDOWS && ! JUCE_WIN_PER_MONITOR_DPI_AWARE
+                if (auto* ed = editorComp->getEditorComp())
+                    ed->setScaleFactor (scale);
                #else
                 editorComp->updateWindowSize (true);
                #endif
-
-               #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-                if (getHostType().isStudioOne())
-                    Timer::callAfterDelay (100, [this] { if (editorComp != nullptr) editorComp->updateWindowSize (false); });
-               #endif
-            }
-           #endif
         }
        #else
         ignoreUnused (scale);
@@ -2276,6 +2242,10 @@ private:
     Vst2::ERect editorBounds;
     MidiBuffer midiEvents;
     VSTMidiEventList outgoingEvents;
+
+   #if ! JUCE_MAC
+    float editorScaleFactor = 1.0f;
+   #endif
 
     LegacyAudioParametersWrapper juceParameters;
 

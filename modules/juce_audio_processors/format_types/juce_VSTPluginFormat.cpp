@@ -3079,6 +3079,10 @@ private:
 
         pluginRespondsToDPIChanges = plugin.pluginCanDo ("supportsViewDpiScaling") > 0;
 
+        if (pluginRespondsToDPIChanges)
+            if (auto* peer = getTopLevelComponent()->getPeer())
+                setScaleFactorAndDispatchMessage (peer->getPlatformScaleFactor());
+
        #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
         std::unique_ptr<ScopedDPIAwarenessDisabler> dpiDisabler;
 
@@ -3107,9 +3111,6 @@ private:
 
         // Install keyboard hooks
         pluginWantsKeys = (dispatch (Vst2::effKeysRequired, 0, 0, 0, 0) == 0);
-
-        if (auto* peer = getTopLevelComponent()->getPeer())
-            setScaleFactorAndDispatchMessage (peer->getPlatformScaleFactor());
 
        #if JUCE_WINDOWS
         originalWndProc = 0;
@@ -3146,12 +3147,6 @@ private:
         {
             auto rw = rect->right - rect->left;
             auto rh = rect->bottom - rect->top;
-
-            if (pluginRespondsToDPIChanges)
-            {
-                rw = roundToInt (rw * nativeScaleFactor);
-                rh = roundToInt (rh * nativeScaleFactor);
-            }
 
             if ((rw > 50 && rh > 50 && rw < 2000 && rh < 2000 && (! isWithin (w, rw, 2) || ! isWithin (h, rh, 2)))
                 || ((w == 0 && rw > 0) || (h == 0 && rh > 0)))
