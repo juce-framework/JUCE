@@ -3508,9 +3508,9 @@ private:
                 break;
 
             //==============================================================================
-            case WM_SIZING:                return handleSizeConstraining (*(RECT*) lParam, wParam);
-            case WM_WINDOWPOSCHANGING:     return handlePositionChanging (*(WINDOWPOS*) lParam);
-            case WM_DPICHANGED:            return handleDPIChanging ((int) HIWORD (wParam), *(RECT*) lParam);
+            case WM_SIZING:                  return handleSizeConstraining (*(RECT*) lParam, wParam);
+            case WM_WINDOWPOSCHANGING:       return handlePositionChanging (*(WINDOWPOS*) lParam);
+            case 0x2e0: /* WM_DPICHANGED */  return handleDPIChanging ((int) HIWORD (wParam), *(RECT*) lParam);
 
             case WM_WINDOWPOSCHANGED:
             {
