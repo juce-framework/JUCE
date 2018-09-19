@@ -1180,7 +1180,15 @@ bool NamedPipe::openInternal (const String& pipeName, const bool createPipe, boo
 {
     pimpl.reset (new Pimpl (pipeName, createPipe, mustNotExist));
 
-    if (createPipe && pimpl->pipeH == INVALID_HANDLE_VALUE)
+    if (createPipe)
+    {
+        if (pimpl->pipeH == INVALID_HANDLE_VALUE)
+        {
+            pimpl.reset();
+            return false;
+        }
+    }
+    else if (! pimpl->connect (200))
     {
         pimpl.reset();
         return false;
