@@ -311,6 +311,8 @@ private:
         NativeFunction* methodValue;
     };
 
+    friend bool canCompare (const var&, const var&);
+
     const VariantType* type;
     ValueUnion value;
 
@@ -319,9 +321,18 @@ private:
 };
 
 /** Compares the values of two var objects, using the var::equals() comparison. */
-JUCE_API bool operator== (const var&, const var&) noexcept;
+JUCE_API bool operator== (const var&, const var&);
 /** Compares the values of two var objects, using the var::equals() comparison. */
-JUCE_API bool operator!= (const var&, const var&) noexcept;
+JUCE_API bool operator!= (const var&, const var&);
+/** Compares the values of two var objects, using the var::equals() comparison. */
+JUCE_API bool operator<  (const var&, const var&);
+/** Compares the values of two var objects, using the var::equals() comparison. */
+JUCE_API bool operator<= (const var&, const var&);
+/** Compares the values of two var objects, using the var::equals() comparison. */
+JUCE_API bool operator>  (const var&, const var&);
+/** Compares the values of two var objects, using the var::equals() comparison. */
+JUCE_API bool operator>= (const var&, const var&);
+
 JUCE_API bool operator== (const var&, const String&);
 JUCE_API bool operator!= (const var&, const String&);
 JUCE_API bool operator== (const var&, const char*);
