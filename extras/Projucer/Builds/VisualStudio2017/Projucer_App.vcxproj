@@ -1692,6 +1692,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_ByteOrder.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_ContainerDeletePolicy.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_HeapBlock.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_HeavyweightLeakedObjectDetector.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_LeakedObjectDetector.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_Memory.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_MemoryBlock.h"/>
@@ -1710,6 +1711,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_android_JNIHelpers.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_BasicNativeHeaders.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_mac_ClangBugWorkaround.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_mac_linux_IPAddress.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_osx_ObjCHelpers.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_posix_SharedCode.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_win32_ComSmartPtr.h"/>

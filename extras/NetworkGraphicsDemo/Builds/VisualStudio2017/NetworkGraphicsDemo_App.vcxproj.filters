@@ -427,6 +427,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioDataConverters.cpp">
       <Filter>JUCE Modules\juce_audio_basics\buffers</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioProcessLoadMeasurer.cpp">
+      <Filter>JUCE Modules\juce_audio_basics\buffers</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\buffers\juce_FloatVectorOperations.cpp">
       <Filter>JUCE Modules\juce_audio_basics\buffers</Filter>
     </ClCompile>
@@ -857,6 +860,9 @@
       <Filter>JUCE Modules\juce_audio_processors\processors</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_processors\processors\juce_AudioProcessorGraph.cpp">
+      <Filter>JUCE Modules\juce_audio_processors\processors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors\processors\juce_AudioProcessorParameterGroup.cpp">
       <Filter>JUCE Modules\juce_audio_processors\processors</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_processors\processors\juce_GenericAudioProcessorEditor.cpp">
@@ -2349,6 +2355,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioDataConverters.h">
       <Filter>JUCE Modules\juce_audio_basics\buffers</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioProcessLoadMeasurer.h">
+      <Filter>JUCE Modules\juce_audio_basics\buffers</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioSampleBuffer.h">
       <Filter>JUCE Modules\juce_audio_basics\buffers</Filter>
     </ClInclude>
@@ -3018,6 +3027,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\processors\juce_AudioProcessorParameter.h">
       <Filter>JUCE Modules\juce_audio_processors\processors</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors\processors\juce_AudioProcessorParameterGroup.h">
+      <Filter>JUCE Modules\juce_audio_processors\processors</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\processors\juce_GenericAudioProcessorEditor.h">
       <Filter>JUCE Modules\juce_audio_processors\processors</Filter>
     </ClInclude>
@@ -3216,6 +3228,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_HeapBlock.h">
       <Filter>JUCE Modules\juce_core\memory</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_HeavyweightLeakedObjectDetector.h">
+      <Filter>JUCE Modules\juce_core\memory</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_LeakedObjectDetector.h">
       <Filter>JUCE Modules\juce_core\memory</Filter>
     </ClInclude>
@@ -3268,6 +3283,9 @@
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_mac_ClangBugWorkaround.h">
+      <Filter>JUCE Modules\juce_core\native</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_mac_linux_IPAddress.h">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_osx_ObjCHelpers.h">
