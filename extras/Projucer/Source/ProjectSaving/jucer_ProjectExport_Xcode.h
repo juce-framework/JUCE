@@ -1043,7 +1043,9 @@ public:
             else if (arch == osxArch_64BitUniversal)   s.set ("ARCHS", "\"$(ARCHS_STANDARD_32_64_BIT)\"");
             else if (arch == osxArch_64Bit)            s.set ("ARCHS", "\"$(ARCHS_STANDARD_64_BIT)\"");
 
-            s.set ("HEADER_SEARCH_PATHS", String ("(") + getHeaderSearchPaths (config).joinIntoString (", ") + ", \"$(inherited)\")");
+            StringArray headerPaths (getHeaderSearchPaths (config));
+            headerPaths.add ("\"$(inherited)\"");
+            s.set ("HEADER_SEARCH_PATHS", indentParenthesisedList (headerPaths, 1));
             s.set ("USE_HEADERMAP", String (static_cast<bool> (config.exporter.settings.getProperty ("useHeaderMap")) ? "YES" : "NO"));
 
             auto frameworkSearchPaths = getFrameworkSearchPaths (config);
@@ -1077,7 +1079,7 @@ public:
                 }
 
                 if (defsList.size() > 0)
-                    s.set ("INFOPLIST_PREPROCESSOR_DEFINITIONS", indentParenthesisedList (defsList));
+                    s.set ("INFOPLIST_PREPROCESSOR_DEFINITIONS", indentParenthesisedList (defsList, 1));
             }
 
             if (config.isLinkTimeOptimisationEnabled())
@@ -1199,12 +1201,14 @@ public:
 
                 if (librarySearchPaths.size() > 0)
                 {
-                    String libPaths ("(\"$(inherited)\"");
+                    StringArray libPaths;
+                    libPaths.add ("\"$(inherited)\"");
 
                     for (auto& p : librarySearchPaths)
-                        libPaths += ", \"\\\"" + p + "\\\"\"";
+                        libPaths.add ("\"\\\"" + p + "\\\"\"");
 
-                    s.set ("LIBRARY_SEARCH_PATHS", libPaths + ")");
+                    s.set ("LIBRARY_SEARCH_PATHS", indentParenthesisedList (libPaths, 1));
+
                 }
             }
 
@@ -1254,7 +1258,7 @@ public:
                 defsList.add ("\"" + def + "\"");
             }
 
-            s.set ("GCC_PREPROCESSOR_DEFINITIONS", indentParenthesisedList (defsList));
+            s.set ("GCC_PREPROCESSOR_DEFINITIONS", indentParenthesisedList (defsList, 1));
 
             StringArray customFlags;
             customFlags.addTokens (config.getCustomXcodeFlagsString(), ",", "\"'");
@@ -1927,19 +1931,19 @@ private:
 
     void addExtraGroupsToProject (StringArray& topLevelGroupIDs) const
     {
-        { // Add 'resources' group
+        {
             auto resourcesGroupID = createID ("__resources");
             addGroup (resourcesGroupID, "Resources", resourceFileRefs);
             topLevelGroupIDs.add (resourcesGroupID);
         }
 
-        { // Add 'frameworks' group
+        {
             auto frameworksGroupID = createID ("__frameworks");
             addGroup (frameworksGroupID, "Frameworks", frameworkFileIDs);
             topLevelGroupIDs.add (frameworksGroupID);
         }
 
-        { // Add 'products' group
+        {
             auto productsGroupID = createID ("__products");
             addGroup (productsGroupID, "Products", buildProducts);
             topLevelGroupIDs.add (productsGroupID);
@@ -2550,7 +2554,7 @@ private:
                   "\tarchiveVersion = 1;\n"
                   "\tclasses = {\n\t};\n"
                   "\tobjectVersion = 46;\n"
-                  "\tobjects = {\n\n";
+                  "\tobjects = {\n";
 
         Array<ValueTree*> objects;
         objects.addArray (pbxBuildFiles);
@@ -2562,7 +2566,7 @@ private:
 
         for (auto* o : objects)
         {
-            output << "\t\t" << o->getType().toString() << " = {";
+            output << "\t\t" << o->getType().toString() << " = {\n";
 
             for (int j = 0; j < o->getNumProperties(); ++j)
             {
@@ -2574,10 +2578,10 @@ private:
                                                 || val.trimStart().startsWithChar ('{'))))
                     val = "\"" + val + "\"";
 
-                output << propertyName.toString() << " = " << val << "; ";
+                output << "\t\t\t" << propertyName.toString() << " = " << val << ";\n";
             }
 
-            output << "};\n";
+            output << "\t\t};\n";
         }
 
         output << "\t};\n\trootObject = " << createID ("__root") << ";\n}\n";
@@ -2600,7 +2604,7 @@ private:
         v->setProperty ("fileRef", fileRefID, nullptr);
 
         if (inhibitWarnings)
-            v->setProperty ("settings", "{COMPILER_FLAGS = \"-w\"; }", nullptr);
+            v->setProperty ("settings", "{ COMPILER_FLAGS = \"-w\"; }", nullptr);
 
         pbxBuildFiles.add (v);
         return fileID;
@@ -2916,7 +2920,7 @@ private:
         auto* v = new ValueTree (fileID);
         v->setProperty ("isa", "PBXBuildFile", nullptr);
         v->setProperty ("fileRef", fileRefID, nullptr);
-        v->setProperty ("settings", "{ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }", nullptr);
+        v->setProperty ("settings", "{ ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }", nullptr);
         pbxBuildFiles.add (v);
 
         frameworkFileIDs.add (fileRefID);
@@ -3257,25 +3261,21 @@ private:
     }
 
     //==============================================================================
-    static String indentBracedList (const StringArray& list)        { return "{" + indentList (list, ";", 0, true) + " }"; }
-    static String indentParenthesisedList (const StringArray& list) { return "(" + indentList (list, ",", 1, false) + " )"; }
+    static String indentBracedList        (const StringArray& list, int depth = 0) { return indentList (list, '{', '}', ";", depth, true); }
+    static String indentParenthesisedList (const StringArray& list, int depth = 0) { return indentList (list, '(', ')', ",", depth, false); }
 
-    static String indentList (const StringArray& list, const String& separator, int extraTabs, bool shouldSort)
+    static String indentList (StringArray list, char openBracket, char closeBracket, const String& separator, int extraTabs, bool shouldSort)
     {
         if (list.size() == 0)
-            return " ";
+            return openBracket + String (" ") + closeBracket;
 
         auto tabs = "\n" + String::repeatedString ("\t", extraTabs + 4);
 
         if (shouldSort)
-        {
-            auto sorted = list;
-            sorted.sort (true);
+            list.sort (true);
 
-            return tabs + sorted.joinIntoString (separator + tabs) + separator;
-        }
-
-        return tabs + list.joinIntoString (separator + tabs) + separator;
+        return openBracket + tabs + list.joinIntoString (separator + tabs) + separator
+                   + "\n" + String::repeatedString ("\t", extraTabs + 3) + closeBracket;
     }
 
     String createID (String rootString) const
