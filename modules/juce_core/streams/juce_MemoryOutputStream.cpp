@@ -101,10 +101,10 @@ char* MemoryOutputStream::prepareToWrite (size_t numBytes)
 
 bool MemoryOutputStream::write (const void* const buffer, size_t howMany)
 {
-    jassert (buffer != nullptr);
-
     if (howMany == 0)
         return true;
+
+    jassert (buffer != nullptr);
 
     if (auto* dest = prepareToWrite (howMany))
     {

@@ -126,6 +126,7 @@ namespace Ids
     DECLARE_ID (osxArchitecture);
     DECLARE_ID (iosCompatibility);
     DECLARE_ID (extraFrameworks);
+    DECLARE_ID (frameworkSearchPaths);
     DECLARE_ID (extraCustomFrameworks);
     DECLARE_ID (embeddedFrameworks);
     DECLARE_ID (extraDLLs);

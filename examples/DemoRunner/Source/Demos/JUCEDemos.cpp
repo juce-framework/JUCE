@@ -127,8 +127,7 @@ AudioDeviceManager& getSharedAudioDeviceManager (int numInputChannels, int numOu
 
     if (sharedAudioDeviceManager->getCurrentAudioDevice() != nullptr)
     {
-        AudioDeviceManager::AudioDeviceSetup setup;
-        sharedAudioDeviceManager->getAudioDeviceSetup (setup);
+        auto setup = sharedAudioDeviceManager->getAudioDeviceSetup();
 
         auto numInputs  = jmax (numInputChannels,  setup.inputChannels.countNumberOfSetBits());
         auto numOutputs = jmax (numOutputChannels, setup.outputChannels.countNumberOfSetBits());

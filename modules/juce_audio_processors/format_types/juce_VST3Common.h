@@ -497,16 +497,19 @@ public:
                              Steinberg::Vst::IMidiMapping* midiMapping = nullptr)
     {
         MidiBuffer::Iterator iterator (midiBuffer);
-        MidiMessage msg;
+        const uint8* midiEventData = nullptr;
+        int midiEventSize = 0;
         int midiEventPosition = 0;
 
         enum { maxNumEvents = 2048 }; // Steinberg's Host Checker states that no more than 2048 events are allowed at once
         int numEvents = 0;
 
-        while (iterator.getNextEvent (msg, midiEventPosition))
+        while (iterator.getNextEvent (midiEventData, midiEventSize, midiEventPosition))
         {
             if (++numEvents > maxNumEvents)
                 break;
+
+            MidiMessage msg (midiEventData, midiEventSize);
 
             if (midiMapping != nullptr && parameterChanges != nullptr)
             {
@@ -554,7 +557,7 @@ public:
             else if (msg.isSysEx())
             {
                 e.type          = Steinberg::Vst::Event::kDataEvent;
-                e.data.bytes    = msg.getSysExData();
+                e.data.bytes    = midiEventData + 1;
                 e.data.size     = (uint32) msg.getSysExDataSize();
                 e.data.type     = Steinberg::Vst::DataEvent::kMidiSysEx;
             }

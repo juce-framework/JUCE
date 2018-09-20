@@ -141,7 +141,7 @@ public:
         Note that calling this just points this at the new object and invokes the
         Listener::valueTreeRedirected callback, but it's not an undoable operation. If
         you're trying to replace an entire tree in an undoable way, you probably want
-        to use copyPropertiesAndChildren() instead.
+        to use copyPropertiesAndChildrenFrom() instead.
     */
     ValueTree& operator= (const ValueTree&);
 

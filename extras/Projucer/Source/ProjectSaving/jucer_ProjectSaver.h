@@ -115,13 +115,12 @@ public:
             }
 
             if (generatedCodeFolder.exists())
+            {
                 writeReadmeFile();
+                deleteUnwantedFilesIn (generatedCodeFolder);
+            }
         }
-
-        if (generatedCodeFolder.exists())
-            deleteUnwantedFilesIn (generatedCodeFolder);
-
-        if (errors.size() > 0)
+        else
         {
             project.setFile (oldFile);
             return Result::fail (errors[0]);

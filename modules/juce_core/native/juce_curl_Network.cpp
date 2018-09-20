@@ -85,11 +85,13 @@ private:
    #if JUCE_LOAD_CURL_SYMBOLS_LAZILY
     static DynamicLibrary& getLibcurl()
     {
+        const ScopedLock sl (getLibcurlLock());
         static DynamicLibrary libcurl;
 
-        for (auto libName : { "libcurl.so", "libcurl.so.4", "libcurl.so.3" })
-            if (libcurl.open (libName))
-                break;
+        if (libcurl.getNativeHandle() == nullptr)
+            for (auto libName : { "libcurl.so", "libcurl.so.4", "libcurl.so.3" })
+                if (libcurl.open (libName))
+                    break;
 
         return libcurl;
     }

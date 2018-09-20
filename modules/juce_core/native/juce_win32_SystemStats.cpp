@@ -288,8 +288,9 @@ int SystemStats::getMemorySizeInMegabytes()
 //==============================================================================
 String SystemStats::getEnvironmentVariable (const String& name, const String& defaultValue)
 {
-    DWORD len = GetEnvironmentVariableW (name.toWideCharPointer(), nullptr, 0);
-    if (GetLastError() == ERROR_ENVVAR_NOT_FOUND)
+    auto len = GetEnvironmentVariableW (name.toWideCharPointer(), nullptr, 0);
+
+    if (len == 0)
         return String (defaultValue);
 
     HeapBlock<WCHAR> buffer (len);
@@ -325,7 +326,7 @@ public:
        #endif
 
        #if JUCE_WIN32_TIMER_PERIOD > 0
-        const MMRESULT res = timeBeginPeriod (JUCE_WIN32_TIMER_PERIOD);
+        auto res = timeBeginPeriod (JUCE_WIN32_TIMER_PERIOD);
         ignoreUnused (res);
         jassert (res == TIMERR_NOERROR);
        #endif
@@ -388,8 +389,8 @@ static int64 juce_getClockCycleCounter() noexcept
 
 int SystemStats::getCpuSpeedInMegahertz()
 {
-    const int64 cycles = juce_getClockCycleCounter();
-    const uint32 millis = Time::getMillisecondCounter();
+    auto cycles = juce_getClockCycleCounter();
+    auto millis = Time::getMillisecondCounter();
     int lastResult = 0;
 
     for (;;)
@@ -397,12 +398,12 @@ int SystemStats::getCpuSpeedInMegahertz()
         int n = 1000000;
         while (--n > 0) {}
 
-        const uint32 millisElapsed = Time::getMillisecondCounter() - millis;
-        const int64 cyclesNow = juce_getClockCycleCounter();
+        auto millisElapsed = Time::getMillisecondCounter() - millis;
+        auto cyclesNow = juce_getClockCycleCounter();
 
         if (millisElapsed > 80)
         {
-            const int newResult = (int) (((cyclesNow - cycles) / millisElapsed) / 1000);
+            auto newResult = (int) (((cyclesNow - cycles) / millisElapsed) / 1000);
 
             if (millisElapsed > 500 || (lastResult == newResult && newResult > 100))
                 return newResult;
@@ -431,7 +432,7 @@ bool Time::setSystemTimeToThisTime() const
     // first one sets it up, the second one kicks it in.
     // NB: the local variable is here to avoid analysers warning about having
     // two identical sub-expressions in the return statement
-    bool firstCallToSetTimezone = SetLocalTime (&st) != 0;
+    auto firstCallToSetTimezone = SetLocalTime (&st) != 0;
     return firstCallToSetTimezone && SetLocalTime (&st) != 0;
 }
 
@@ -447,7 +448,7 @@ int SystemStats::getPageSize()
 String SystemStats::getLogonName()
 {
     TCHAR text [256] = { 0 };
-    DWORD len = (DWORD) numElementsInArray (text) - 1;
+    auto len = (DWORD) numElementsInArray (text) - 1;
     GetUserName (text, &len);
     return String (text, len);
 }
@@ -460,7 +461,7 @@ String SystemStats::getFullUserName()
 String SystemStats::getComputerName()
 {
     TCHAR text[128] = { 0 };
-    DWORD len = (DWORD) numElementsInArray (text) - 1;
+    auto len = (DWORD) numElementsInArray (text) - 1;
     GetComputerName (text, &len);
     return String (text, len);
 }
@@ -485,10 +486,10 @@ String SystemStats::getDisplayLanguage()
     if (getUserDefaultUILanguage == nullptr)
         return "en";
 
-    const DWORD langID = MAKELCID (getUserDefaultUILanguage(), SORT_DEFAULT);
+    auto langID = MAKELCID (getUserDefaultUILanguage(), SORT_DEFAULT);
 
-    String mainLang (getLocaleValue (langID, LOCALE_SISO639LANGNAME, "en"));
-    String region   (getLocaleValue (langID, LOCALE_SISO3166CTRYNAME, nullptr));
+    auto mainLang = getLocaleValue (langID, LOCALE_SISO639LANGNAME, "en");
+    auto region   = getLocaleValue (langID, LOCALE_SISO3166CTRYNAME, nullptr);
 
     if (region.isNotEmpty())
         mainLang << '-' << region;

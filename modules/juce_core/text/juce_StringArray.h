@@ -420,7 +420,7 @@ public:
 
     //==============================================================================
     /** Sorts the array into alphabetical order.
-        @param ignoreCase       if true, the comparisons used will be case-sensitive.
+        @param ignoreCase       if true, the comparisons used will not be case-sensitive.
     */
     void sort (bool ignoreCase);
 

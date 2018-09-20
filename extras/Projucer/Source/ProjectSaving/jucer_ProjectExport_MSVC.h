@@ -77,8 +77,8 @@ public:
 
         props.add (new TextPropertyComponent (targetPlatformVersion, "Windows Target Platform", 20, false),
                    String ("Specifies the version of the Windows SDK that will be used when building this project. ")
-                   + (isWindows10SDK ? "You can see which SDKs you have installed on your machine by going to \"Program Files (x86)\\Windows Kits\\10\\Lib\". " : "")
-                   + "The default value for this exporter is " + getDefaultWindowsTargetPlatformVersion());
+                   + (isWindows10SDK ? "Leave this field empty to use the latest Windows 10 SDK installed on the build machine."
+                                     : "The default value for this exporter is " + getDefaultWindowsTargetPlatformVersion()));
     }
 
     void addPlatformToolsetToPropertyGroup (XmlElement& p) const
@@ -89,8 +89,23 @@ public:
 
     void addWindowsTargetPlatformVersionToPropertyGroup (XmlElement& p) const
     {
-        forEachXmlChildElementWithTagName (p, e, "PropertyGroup")
-        e->createNewChildElement ("WindowsTargetPlatformVersion")->addTextElement (getWindowsTargetPlatformVersion());
+        auto target = getWindowsTargetPlatformVersion();
+
+        if (target == "Latest")
+        {
+            forEachXmlChildElementWithTagName (p, e, "PropertyGroup")
+            {
+                auto* child = e->createNewChildElement ("WindowsTargetPlatformVersion");
+
+                child->setAttribute ("Condition", "'$(WindowsTargetPlatformVersion)' == ''");
+                child->addTextElement ("$([Microsoft.Build.Utilities.ToolLocationHelper]::GetLatestSDKTargetPlatformVersion('Windows', '10.0'))");
+            }
+        }
+        else
+        {
+            forEachXmlChildElementWithTagName (p, e, "PropertyGroup")
+            e->createNewChildElement ("WindowsTargetPlatformVersion")->addTextElement (target);
+        }
     }
 
     void addIPPSettingToPropertyGroup (XmlElement& p) const
@@ -116,6 +131,14 @@ public:
 
             overwriteFileIfDifferentOrThrow (getSLNFile(), mo);
         }
+    }
+
+    //==============================================================================
+    void initialiseDependencyPathValues() override
+    {
+        vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder), Ids::vst3Path, TargetOS::windows)));
+        aaxPath.referTo  (Value (new DependencyPathValueSource (getSetting (Ids::aaxFolder),  Ids::aaxPath,  TargetOS::windows)));
+        rtasPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::rtasFolder), Ids::rtasPath, TargetOS::windows)));
     }
 
     //==============================================================================
@@ -1045,7 +1068,7 @@ public:
         //==============================================================================
         RelativePath getAAXIconFile() const
         {
-            RelativePath aaxSDK (owner.getGlobalAAXPathString(), RelativePath::projectFolder);
+            RelativePath aaxSDK (owner.getAAXPathValue().toString(), RelativePath::projectFolder);
             RelativePath projectIcon ("icon.ico", RelativePath::buildTargetFolder);
 
             if (getOwner().getTargetFolder().getChildFile ("icon.ico").existsAsFile())
@@ -1060,7 +1083,7 @@ public:
         {
             if (type == AAXPlugIn)
             {
-                RelativePath aaxSDK (owner.getGlobalAAXPathString(), RelativePath::projectFolder);
+                RelativePath aaxSDK (owner.getAAXPathValue().toString(), RelativePath::projectFolder);
                 RelativePath aaxLibsFolder = aaxSDK.getChildFile ("Libs");
                 RelativePath bundleScript  = aaxSDK.getChildFile ("Utilities").getChildFile ("CreatePackage.bat");
                 RelativePath iconFilePath  = getAAXIconFile();
@@ -1151,13 +1174,13 @@ public:
             {
             case AAXPlugIn:
                 {
-                    auto aaxLibsFolder = RelativePath (owner.getGlobalAAXPathString(), RelativePath::projectFolder).getChildFile ("Libs");
+                    auto aaxLibsFolder = RelativePath (owner.getAAXPathValue().toString(), RelativePath::projectFolder).getChildFile ("Libs");
                     defines.set ("JucePlugin_AAXLibs_path", createRebasedPath (aaxLibsFolder));
                 }
                 break;
             case RTASPlugIn:
                 {
-                    RelativePath rtasFolder (owner.getGlobalRTASPathString(), RelativePath::projectFolder);
+                    RelativePath rtasFolder (owner.getRTASPathValue().toString(), RelativePath::projectFolder);
                     defines.set ("JucePlugin_WinBag_path", createRebasedPath (rtasFolder.getChildFile ("WinBag")));
                 }
                 break;
@@ -1179,7 +1202,7 @@ public:
             StringArray searchPaths;
             if (type == RTASPlugIn)
             {
-                RelativePath rtasFolder (owner.getGlobalRTASPathString(), RelativePath::projectFolder);
+                RelativePath rtasFolder (owner.getRTASPathValue().toString(), RelativePath::projectFolder);
 
                 static const char* p[] = { "AlturaPorts/TDMPlugins/PluginLibrary/EffectClasses",
                                            "AlturaPorts/TDMPlugins/PluginLibrary/ProcessClasses",
@@ -1936,7 +1959,7 @@ public:
     String getSolutionComment() const override                       { return "# Visual Studio 2017"; }
     String getToolsVersion() const override                          { return "15.0"; }
     String getDefaultToolset() const override                        { return "v141"; }
-    String getDefaultWindowsTargetPlatformVersion() const override   { return "10.0.16299.0"; }
+    String getDefaultWindowsTargetPlatformVersion() const override   { return "Latest"; }
 
     static MSVCProjectExporterVC2017* createForSettings (Project& project, const ValueTree& settings)
     {

@@ -215,6 +215,9 @@ public:
         /** Returns the LittleFoot program to execute on the BLOCKS device. */
         virtual juce::String getLittleFootProgram() = 0;
 
+        /** Returns an array of search paths to use when resolving includes. **/
+        virtual juce::Array<juce::File> getSearchPaths() { return {}; }
+
         Block& block;
     };
 

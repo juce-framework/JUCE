@@ -290,17 +290,17 @@ public:
         dsp::IIR::Coefficients<SampleType> coeffsDown = getCoefficients (structureDown);
         latency += static_cast<SampleType> (-(coeffsDown.getPhaseForFrequency (0.0001, 1.0)) / (0.0001 * MathConstants<double>::twoPi));
 
-        for (auto& i : structureUp.directPath)
-            coefficientsUp.add (i.coefficients[0]);
+        for (auto i = 0; i < structureUp.directPath.size(); ++i)
+            coefficientsUp.add (structureUp.directPath.getObjectPointer (i)->coefficients[0]);
 
         for (auto i = 1; i < structureUp.delayedPath.size(); ++i)
-            coefficientsUp.add (structureUp.delayedPath[i].coefficients[0]);
+            coefficientsUp.add (structureUp.delayedPath.getObjectPointer (i)->coefficients[0]);
 
-        for (auto& i : structureDown.directPath)
-            coefficientsDown.add (i.coefficients[0]);
+        for (auto i = 0; i < structureDown.directPath.size(); ++i)
+            coefficientsDown.add (structureDown.directPath.getObjectPointer (i)->coefficients[0]);
 
         for (auto i = 1; i < structureDown.delayedPath.size(); ++i)
-            coefficientsDown.add (structureDown.delayedPath[i].coefficients[0]);
+            coefficientsDown.add (structureDown.delayedPath.getObjectPointer (i)->coefficients[0]);
 
         v1Up.setSize   (static_cast<int> (this->numChannels), coefficientsUp.size());
         v1Down.setSize (static_cast<int> (this->numChannels), coefficientsDown.size());
@@ -478,9 +478,9 @@ private:
 
         for (auto n = 0; n < structure.directPath.size(); ++n)
         {
-            auto* coeffs = structure.directPath.getReference (n).getRawCoefficients();
+            auto* coeffs = structure.directPath.getObjectPointer (n)->getRawCoefficients();
 
-            if (structure.directPath[n].getFilterOrder() == 1)
+            if (structure.directPath.getObjectPointer (n)->getFilterOrder() == 1)
             {
                 numerator1 = numerator1.getProductWith (dsp::Polynomial<SampleType> ({ coeffs[0], coeffs[1] }));
                 denominator1 = denominator1.getProductWith (dsp::Polynomial<SampleType> ({ one, coeffs[2] }));
@@ -494,9 +494,9 @@ private:
 
         for (auto n = 0; n < structure.delayedPath.size(); ++n)
         {
-            auto* coeffs = structure.delayedPath.getReference (n).getRawCoefficients();
+            auto* coeffs = structure.delayedPath.getObjectPointer (n)->getRawCoefficients();
 
-            if (structure.delayedPath[n].getFilterOrder() == 1)
+            if (structure.delayedPath.getObjectPointer (n)->getFilterOrder() == 1)
             {
                 numerator2 = numerator2.getProductWith (dsp::Polynomial<SampleType> ({ coeffs[0], coeffs[1] }));
                 denominator2 = denominator2.getProductWith (dsp::Polynomial<SampleType> ({ one, coeffs[2] }));

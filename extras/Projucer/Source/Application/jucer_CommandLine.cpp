@@ -25,9 +25,8 @@
 */
 
 #include "jucer_Headers.h"
-#include "../Project/jucer_Module.h"
+#include "jucer_Application.h"
 #include "../Utility/Helpers/jucer_TranslationHelpers.h"
-#include "../Utility/PIPs/jucer_PIPGenerator.h"
 
 #include "jucer_CommandLine.h"
 
@@ -94,6 +93,9 @@ namespace
         {
             if (project != nullptr)
             {
+                if (! justSaveResources)
+                    rescanModulePathsIfNecessary();
+
                 auto error = justSaveResources ? project->saveResourcesOnly (project->getFile())
                                                : project->saveProject (project->getFile(), true);
 
@@ -102,6 +104,35 @@ namespace
                 if (error.failed())
                     ConsoleApplication::fail ("Error when saving: " + error.getErrorMessage());
             }
+        }
+
+        void rescanModulePathsIfNecessary()
+        {
+            bool scanJUCEPath = false, scanUserPaths = false;
+
+            const auto& modules = project->getEnabledModules();
+
+            for (auto i = modules.getNumModules(); --i >= 0;)
+            {
+                const auto& id = modules.getModuleID (i);
+
+                if (isJUCEModule (id) && ! scanJUCEPath)
+                {
+                    if (modules.shouldUseGlobalPath (id))
+                        scanJUCEPath = true;
+                }
+                else if (! scanUserPaths)
+                {
+                    if (modules.shouldUseGlobalPath (id))
+                        scanUserPaths = true;
+                }
+            }
+
+            if (scanJUCEPath)
+                ProjucerApplication::getApp().rescanJUCEPathModules();
+
+            if (scanUserPaths)
+                ProjucerApplication::getApp().rescanUserPathModules();
         }
 
         std::unique_ptr<Project> project;
@@ -659,6 +690,13 @@ namespace
             || id == "androidSDKPath" || id == "androidNDKPath" || id == "defaultJuceModulePath" || id == "defaultUserModulePath";
     }
 
+    static void checkIfUserModulesPathsAreValid (const String& list)
+    {
+        for (auto& p : StringArray::fromTokens (list, ";", {}))
+            if (! File (p.trim()).exists())
+                ConsoleApplication::fail (p + " doesn't exist!");
+    }
+
     static void setGlobalPath (const ArgumentList& args)
     {
         args.checkMinNumArguments (3);
@@ -696,7 +734,17 @@ namespace
         if (! childToSet.isValid())
             ConsoleApplication::fail ("Failed to set the requested setting!");
 
-        childToSet.setProperty (args[2].text, args[3].resolveAsFile().getFullPathName(), nullptr);
+        if (args[2].text == Ids::defaultUserModulePath.toString())
+        {
+            auto pathList = args[3].text.removeCharacters ("\"");
+            checkIfUserModulesPathsAreValid (pathList);
+
+            childToSet.setProperty (args[2].text, pathList, nullptr);
+        }
+        else
+        {
+            childToSet.setProperty (args[2].text, args[3].resolveAsFile().getFullPathName(), nullptr);
+        }
 
         settingsFile.replaceWithText (settingsTree.toXmlString());
     }
@@ -718,17 +766,27 @@ namespace
             std::cout << "Creating directory " << outputDir.getFullPathName() << std::endl;
         }
 
-        File juceDir;
+        File juceModulesPath;
+        Array<File> userModulesPaths;
 
         if (args.size() > 3)
         {
-            juceDir = args[3].resolveAsFile();
+            juceModulesPath = args[3].resolveAsFile();
 
-            if (! juceDir.exists())
+            if (! juceModulesPath.exists())
                 ConsoleApplication::fail ("Specified JUCE modules directory doesn't exist.");
+
+            if (args.size() == 5)
+            {
+                auto pathList = args[4].text.removeCharacters ("\"");
+                checkIfUserModulesPathsAreValid (pathList);
+
+                for (auto& p : StringArray::fromTokens (pathList, ";", {}))
+                    userModulesPaths.add ({ p });
+            }
         }
 
-        PIPGenerator generator (pipFile, outputDir, juceDir);
+        PIPGenerator generator (pipFile, outputDir, juceModulesPath, userModulesPaths);
 
         auto createJucerFileResult = generator.createJucerFile();
 
@@ -805,10 +863,12 @@ namespace
                   << std::endl
                   << " " << appName << " --set-global-search-path os identifier_to_set new_path" << std::endl
                   << "    Sets the global path for a specified os and identifier. The os should be either osx, windows or linux and the identifiers can be any of the following: "
-                  << "defaultJuceModulePath, defaultUserModulePath, vst3Path, aaxPath (not valid on linux), rtasPath (not valid on linux), androidSDKPath or androidNDKPath." << std::endl
+                  << "defaultJuceModulePath, defaultUserModulePath, vst3Path, aaxPath (not valid on linux), rtasPath (not valid on linux), androidSDKPath or androidNDKPath. "
+                     "When setting defaultUserModulePath you can specify multiple paths by surrounding a semicolon-separated list of paths with double quotes \"like;so\"" << std::endl
                   << std::endl
-                  << " " << appName << " --create-project-from-pip path/to/PIP path/to/output path/to/JUCE/modules (optional)" << std::endl
-                  << "    Generates a JUCE project from a PIP file." << std::endl
+                  << " " << appName << " --create-project-from-pip path/to/PIP path/to/output path/to/JUCE/modules (optional) path/to/user/modules (optional)" << std::endl
+                  << "    Generates a folder containing a JUCE project in the specified output path using the specified PIP file. Use the optional JUCE and user module paths to override "
+                     "the global module paths (you can specify multiple user module paths by using a semicolon-separated list)." << std::endl
                   << std::endl
                   << "Note that for any of the file-rewriting commands, add the option \"--lf\" if you want it to use LF linefeeds instead of CRLF" << std::endl
                   << std::endl;

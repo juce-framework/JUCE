@@ -87,6 +87,9 @@ public:
     /** Parses a string IP address of the form "1.2.3.4" (IPv4) or "1:2:3:4:5:6:7:8" (IPv6). */
     explicit IPAddress (const String& address);
 
+    /** Returns whether the address contains the null address (e.g. 0.0.0.0). */
+    bool isNull() const;
+
     //==============================================================================
     /** Returns a dot- or colon-separated string in the form "1.2.3.4" (IPv4) or "1:2:3:4:5:6:7:8" (IPv6). */
     String toString() const;
@@ -129,6 +132,11 @@ public:
 
     /** Converts an IPv4 address to an IPv4-mapped IPv6 address. */
     static IPAddress convertIPv4AddressToIPv4Mapped (const IPAddress& addressToMap);
+
+    /** If the IPAdress is the address of an interface on the machine, returns the associated broadcast address.
+        If the address is not an interface, it will return a null address.
+     */
+    static IPAddress getInterfaceBroadcastAddress (const IPAddress& interfaceAddress);
 
 private:
     /** Union used to split a 16-bit unsigned integer into 2 8-bit unsigned integers or vice-versa */

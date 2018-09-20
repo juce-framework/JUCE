@@ -77,7 +77,7 @@ public:
     }
 
     /** Initalises from a null-terminated raw array of values.
-        @param values   the array to copy from
+        @param data   the data to copy from
     */
     template <typename TypeToCreateFrom>
     explicit Array (const TypeToCreateFrom* data)
@@ -87,7 +87,7 @@ public:
     }
 
     /** Initalises from a raw array of values.
-        @param values       the array to copy from
+        @param data         the data to copy from
         @param numValues    the number of values in the array
     */
     template <typename TypeToCreateFrom>

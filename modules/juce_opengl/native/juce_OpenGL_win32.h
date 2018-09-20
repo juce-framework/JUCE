@@ -204,12 +204,12 @@ private:
 
         if (auto* peer = topComp->getPeer())
         {
-            updateWindowPosition (peer->getAreaCoveredBy (component));
-
            #if JUCE_WIN_PER_MONITOR_DPI_AWARE
             peer->addScaleFactorListener (this);
             safeComponent = Component::SafePointer<Component> (&component);
            #endif
+
+            updateWindowPosition (peer->getAreaCoveredBy (component));
         }
 
         nativeWindow->setVisible (true);
