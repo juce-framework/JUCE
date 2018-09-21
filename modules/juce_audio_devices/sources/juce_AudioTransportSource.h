@@ -39,7 +39,8 @@ namespace juce
     @tags{Audio}
 */
 class JUCE_API  AudioTransportSource  : public PositionableAudioSource,
-                                        public ChangeBroadcaster
+                                        public ChangeBroadcaster,
+                                        private MultiTimer
 {
 public:
     //==============================================================================
@@ -171,8 +172,10 @@ private:
     double sampleRate = 44100.0, sourceSampleRate = 0;
     int blockSize = 128, readAheadBufferSize = 0;
     bool isPrepared = false, inputStreamEOF = false;
+    int stopTimeOut = 500;
 
     void releaseMasterResources();
+    void timerCallback(int timerID) override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioTransportSource)
 };
