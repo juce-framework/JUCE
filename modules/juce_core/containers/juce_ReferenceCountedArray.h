@@ -650,12 +650,13 @@ public:
                       int numberToRemove)
     {
         const ScopedLockType lock (getLock());
-        auto start    = jlimit (0, values.size(), startIndex);
+        startIndex    = jlimit (0, values.size(), startIndex);
         auto endIndex = jlimit (0, values.size(), startIndex + numberToRemove);
+        numberToRemove = endIndex - startIndex;
 
-        if (endIndex > start)
+        if (numberToRemove > 0)
         {
-            for (int i = start; i < endIndex; ++i)
+            for (int i = startIndex; i < endIndex; ++i)
             {
                 releaseObject (values[i]);
                 values[i] = nullptr; // (in case one of the destructors accesses this array and hits a dangling pointer)

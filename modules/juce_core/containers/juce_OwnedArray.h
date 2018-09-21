@@ -606,7 +606,7 @@ public:
         startIndex = jlimit (0, values.size(), startIndex);
         numberToRemove = endIndex - startIndex;
 
-        if (endIndex > startIndex)
+        if (numberToRemove > 0)
         {
             if (deleteObjects)
             {
