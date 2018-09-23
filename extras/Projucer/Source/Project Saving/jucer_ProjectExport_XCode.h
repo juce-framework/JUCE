@@ -798,7 +798,11 @@ public:
 
             if (arch == osxArch_Native)                s.add ("ARCHS = \"$(NATIVE_ARCH_ACTUAL)\"");
             else if (arch == osxArch_32BitUniversal)   s.add ("ARCHS = \"$(ARCHS_STANDARD_32_BIT)\"");
-            else if (arch == osxArch_64BitUniversal)   s.add ("ARCHS = \"$(ARCHS_STANDARD_32_64_BIT)\"");
+            else if (arch == osxArch_64BitUniversal)
+            {
+                s.add ("ARCHS = \"$(ARCHS_STANDARD_32_64_BIT)\"");
+                s.add ("\"ARCHS[sdk=macosx10.14]\" = \"$(ARCHS_STANDARD)\"");
+            }
             else if (arch == osxArch_64Bit)            s.add ("ARCHS = \"$(ARCHS_STANDARD_64_BIT)\"");
 
             s.add ("HEADER_SEARCH_PATHS = " + getHeaderSearchPaths (config));
