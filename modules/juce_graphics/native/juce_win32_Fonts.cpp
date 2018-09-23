@@ -469,25 +469,12 @@ private:
     HANDLE memoryFont = {};
     float ascent = 1.0f, heightToPointsFactor = 1.0f;
     int defaultGlyph = -1, heightInPoints = 0;
+    std::unordered_map<uint64, float> kerningPairs;
 
-    struct KerningPair
+    static uint64 kerningPairIndex (int glyph1, int glyph2)
     {
-        int glyph1, glyph2;
-        float kerning;
-
-        bool operator== (const KerningPair& other) const noexcept
-        {
-            return glyph1 == other.glyph1 && glyph2 == other.glyph2;
-        }
-
-        bool operator< (const KerningPair& other) const noexcept
-        {
-            return glyph1 < other.glyph1
-                    || (glyph1 == other.glyph1 && glyph2 < other.glyph2);
-        }
-    };
-
-    SortedSet<KerningPair> kerningPairs;
+        return (((uint64) (uint32) glyph1) << 32) | (uint64) (uint32) glyph2;
+    }
 
     void loadFont()
     {
@@ -531,38 +518,39 @@ private:
             auto dpi = (GetDeviceCaps (dc, LOGPIXELSX) + GetDeviceCaps (dc, LOGPIXELSY)) / 2.0f;
             heightToPointsFactor = (dpi / GetDeviceCaps (dc, LOGPIXELSY)) * heightInPoints / (float) tm.tmHeight;
             ascent = tm.tmAscent / (float) tm.tmHeight;
-            defaultGlyph = getGlyphForChar (dc, tm.tmDefaultChar);
-            createKerningPairs (dc, (float) tm.tmHeight);
+            std::unordered_map<int, int> glyphsForChars;
+            defaultGlyph = getGlyphForChar (dc, glyphsForChars, tm.tmDefaultChar);
+            createKerningPairs (dc, glyphsForChars, (float) tm.tmHeight);
         }
     }
 
-    void createKerningPairs (HDC hdc, float height)
+    void createKerningPairs (HDC hdc, std::unordered_map<int, int>& glyphsForChars, float height)
     {
         HeapBlock<KERNINGPAIR> rawKerning;
         auto numKPs = GetKerningPairs (hdc, 0, 0);
         rawKerning.calloc (numKPs);
         GetKerningPairs (hdc, numKPs, rawKerning);
 
-        kerningPairs.ensureStorageAllocated ((int) numKPs);
+        std::unordered_map<int, int> widthsForGlyphs;
 
         for (DWORD i = 0; i < numKPs; ++i)
         {
-            KerningPair kp;
-            kp.glyph1 = getGlyphForChar (hdc, rawKerning[i].wFirst);
-            kp.glyph2 = getGlyphForChar (hdc, rawKerning[i].wSecond);
+            auto glyph1 = getGlyphForChar (hdc, glyphsForChars, rawKerning[i].wFirst);
+            auto glyph2 = getGlyphForChar (hdc, glyphsForChars, rawKerning[i].wSecond);
+            auto standardWidth = getGlyphWidth (hdc, widthsForGlyphs, glyph1);
 
-            auto standardWidth = getGlyphWidth (hdc, kp.glyph1);
-            kp.kerning = (standardWidth + rawKerning[i].iKernAmount) / height;
-            kerningPairs.add (kp);
-
-            kp.glyph2 = -1;  // add another entry for the standard width version..
-            kp.kerning = standardWidth / height;
-            kerningPairs.add (kp);
+            kerningPairs[kerningPairIndex (glyph1, glyph2)] = (standardWidth + rawKerning[i].iKernAmount) / height;
+            kerningPairs[kerningPairIndex (glyph1, -1)]     = standardWidth / height;
         }
     }
 
-    static int getGlyphForChar (HDC dc, juce_wchar character)
+    static int getGlyphForChar (HDC dc, std::unordered_map<int, int>& cache, juce_wchar character)
     {
+        auto existing = cache.find ((int) character);
+
+        if (existing != cache.end())
+            return existing->second;
+
         const WCHAR charToTest[] = { (WCHAR) character, 0 };
         WORD index = 0;
 
@@ -570,7 +558,20 @@ private:
               || index == 0xffff)
             return -1;
 
+        cache[(int) character] = index;
         return index;
+    }
+
+    static int getGlyphWidth (HDC dc, std::unordered_map<int, int>& cache, int glyphNumber)
+    {
+        auto existing = cache.find (glyphNumber);
+
+        if (existing != cache.end())
+            return existing->second;
+
+        auto width = getGlyphWidth (dc, glyphNumber);
+        cache[glyphNumber] = width;
+        return width;
     }
 
     static int getGlyphWidth (HDC dc, int glyphNumber)
@@ -583,26 +584,19 @@ private:
 
     float getKerning (HDC hdc, int glyph1, int glyph2)
     {
-        KerningPair kp;
-        kp.glyph1 = glyph1;
-        kp.glyph2 = glyph2;
-        auto index = kerningPairs.indexOf (kp);
+        auto pair = kerningPairs.find (kerningPairIndex (glyph1, glyph2));
 
-        if (index < 0)
-        {
-            kp.glyph2 = -1;
-            index = kerningPairs.indexOf (kp);
+        if (pair != kerningPairs.end())
+            return pair->second;
 
-            if (index < 0)
-            {
-                kp.glyph2 = -1;
-                kp.kerning = getGlyphWidth (hdc, kp.glyph1) / (float) tm.tmHeight;
-                kerningPairs.add (kp);
-                return kp.kerning;
-            }
-        }
+        auto single = kerningPairs.find (kerningPairIndex (glyph1, -1));
 
-        return kerningPairs.getReference (index).kerning;
+        if (single != kerningPairs.end())
+            return single->second;
+
+        auto width = getGlyphWidth (hdc, glyph1) / (float) tm.tmHeight;
+        kerningPairs[kerningPairIndex (glyph1, -1)] = width;
+        return width;
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowsTypeface)

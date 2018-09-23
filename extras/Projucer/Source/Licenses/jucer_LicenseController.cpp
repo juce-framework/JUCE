@@ -90,7 +90,7 @@ static LicenseState::ApplicationUsageData getApplicationUsageDataTypeFromValue (
     return LicenseState::ApplicationUsageData::notChosenYet;
 }
 
-#if !JUCER_ENABLE_GPL_MODE
+#if ! JUCER_ENABLE_GPL_MODE
 struct LicenseController::ModalCompletionCallback : ModalComponentManager::Callback
 {
     ModalCompletionCallback (LicenseController& controller) : owner (controller) {}

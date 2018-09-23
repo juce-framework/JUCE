@@ -81,10 +81,10 @@ void ProjucerApplication::initialise (const String& commandLine)
                               + "MHz  Cores: " + String (SystemStats::getNumCpus())
                               + "  " + String (SystemStats::getMemorySizeInMegabytes()) + "MB");
 
+        initialiseBasics();
+
         isRunningCommandLine = commandLine.isNotEmpty()
                                 && ! commandLine.startsWith ("-NSDocumentRevisionsDebugMode");
-
-        initialiseBasics();
 
         licenseController.reset (new LicenseController);
         licenseController->addLicenseStatusChangedCallback (this);
