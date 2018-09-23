@@ -61,11 +61,11 @@ struct Compiler
         If there's an error, this returns it, otherwise the compiled bytecode is
         placed in the compiledObjectCode member.
     */
-    Result compile (const String& sourceCode, uint32 defaultHeapSize)
+    Result compile (const String& sourceCode, uint32 defaultHeapSize, const Array<File>& searchPaths = {})
     {
         try
         {
-            SyntaxTreeBuilder stb (sourceCode, nativeFunctions, defaultHeapSize);
+            SyntaxTreeBuilder stb (sourceCode, nativeFunctions, defaultHeapSize, searchPaths);
             stb.compile();
             stb.simplify();
 
@@ -141,8 +141,8 @@ private:
     //==============================================================================
     struct CodeLocation
     {
-        CodeLocation (const String& code) noexcept        : program (code), location (program.getCharPointer()) {}
-        CodeLocation (const CodeLocation& other) noexcept : program (other.program), location (other.location) {}
+        CodeLocation (const String& code, const File& srcFile) noexcept : program (code), location (program.getCharPointer()), sourceFile (srcFile) {}
+        CodeLocation (const CodeLocation& other) noexcept : program (other.program), location (other.location), sourceFile (other.sourceFile) {}
 
         [[noreturn]] void throwError (const String& message) const
         {
@@ -154,17 +154,19 @@ private:
                 if (*i == '\n')  { col = 1; ++line; }
             }
 
-            throw "Line " + String (line) + ", column " + String (col) + " : " + message;
+            auto filePath = sourceFile == File() ? String() : (sourceFile.getFullPathName() + ": ");
+            throw filePath + "Line " + String (line) + ", column " + String (col) + " : " + message;
         }
 
         String program;
         String::CharPointerType location;
+        File sourceFile;
     };
 
     //==============================================================================
     struct TokenIterator
     {
-        TokenIterator (const String& code) : location (code), p (code.getCharPointer()) { skip(); }
+        TokenIterator (const String& code) : location (code, {}), p (code.getCharPointer()) { skip(); }
 
         TokenType skip()
         {
@@ -189,15 +191,16 @@ private:
         bool matchesAny (TokenType t1, Args... others) const noexcept   { return currentType == t1 || matchesAny (others...); }
         bool matchesAny (TokenType t1) const noexcept                   { return currentType == t1; }
 
+        void throwErrorExpecting (const String& expected)    { location.throwError ("Found " + getTokenDescription (currentType) + " when expecting " + expected); }
+
         CodeLocation location;
         TokenType currentType;
         var currentValue;
 
-        void throwErrorExpecting (const String& expected)    { location.throwError ("Found " + getTokenDescription (currentType) + " when expecting " + expected); }
-
-    private:
+    protected:
         String::CharPointerType p;
 
+    private:
         static bool isIdentifierStart (juce_wchar c) noexcept   { return CharacterFunctions::isLetter (c)        || c == '_'; }
         static bool isIdentifierBody  (juce_wchar c) noexcept   { return CharacterFunctions::isLetterOrDigit (c) || c == '_'; }
 
@@ -365,12 +368,23 @@ private:
     //==============================================================================
     struct SyntaxTreeBuilder  : private TokenIterator
     {
-        SyntaxTreeBuilder (const String& code, const Array<NativeFunction>& nativeFns, uint32 defaultHeapSize)
-            : TokenIterator (code), nativeFunctions (nativeFns), heapSizeRequired (defaultHeapSize) {}
+        SyntaxTreeBuilder (const String& code, const Array<NativeFunction>& nativeFns, uint32 defaultHeapSize, const Array<File>& searchPathsToUse)
+            : TokenIterator (code), searchPaths (searchPathsToUse), nativeFunctions (nativeFns), heapSizeRequired (defaultHeapSize) {}
 
         void compile()
         {
             blockBeingParsed = allocate<BlockStatement> (location, nullptr, nullptr, false);
+            parseCode();
+        }
+
+        void parseCode()
+        {
+            const auto programHash = location.program.hashCode64();
+
+            if (includedSourceCode.contains (programHash))
+                return;
+
+            includedSourceCode.add (programHash);
 
             while (currentType != Token::eof)
             {
@@ -431,6 +445,8 @@ private:
         //==============================================================================
         BlockPtr blockBeingParsed = nullptr;
         Array<Function*> functions;
+        Array<File> searchPaths;
+        Array<int64> includedSourceCode;
         const Array<NativeFunction>& nativeFunctions;
         uint32 heapSizeRequired;
 
@@ -449,10 +465,81 @@ private:
             {
                 match (Token::colon);
                 heapSizeRequired = (((uint32) parseIntegerLiteral()) + 3) & ~3u;
+            }
+            else if (name == "include")
+            {
+                parseIncludeDirective();
+            }
+            else
+            {
+                location.throwError ("Unknown compiler directive");
+            }
+        }
+
+        void parseIncludeDirective()
+        {
+            match (Token::literal);
+
+            if (! currentValue.isString())
+            {
+                location.throwError ("Expected file path");
                 return;
             }
 
-            location.throwError ("Unknown compiler directive");
+            juce::File fileToInclude = resolveIncludePath (currentValue.toString());
+
+            if (fileToInclude == File())
+                return;
+
+            searchPaths.add (fileToInclude);
+            auto codeToInclude = fileToInclude.loadFileAsString();
+
+            auto locationToRestore = location;
+            auto currentTypeToRestore = currentType;
+            auto currentValueToRestore = currentValue;
+            auto pToRestore = p;
+
+            location = CodeLocation (codeToInclude, fileToInclude);
+            p = codeToInclude.getCharPointer();
+            skip();
+
+            parseCode();
+
+            location = locationToRestore;
+            currentType = currentTypeToRestore;
+            currentValue = currentValueToRestore;
+            p = pToRestore;
+        }
+
+        File resolveIncludePath (String include)
+        {
+            if (include.substring (include.length() - 11) != ".littlefoot")
+            {
+                location.throwError ("File extension must be .littlefoot");
+                return {};
+            }
+
+            if (File::isAbsolutePath (include) && File (include).existsAsFile())
+                return { include };
+
+            auto fileName = include.fromLastOccurrenceOf ("/", false, false);
+
+            for (auto path : searchPaths)
+            {
+                if (path == File())
+                    continue;
+
+                if (! path.isDirectory())
+                    path = path.getParentDirectory();
+
+                if (path.getChildFile (include).existsAsFile())
+                    return path.getChildFile (include);
+
+                if (path.getChildFile (fileName).existsAsFile())
+                    return path.getChildFile (fileName);
+            }
+
+            location.throwError ("File not found: " + include);
         }
 
         void parseGlobalVariableDeclaraion (bool isConst, Type type, String name)

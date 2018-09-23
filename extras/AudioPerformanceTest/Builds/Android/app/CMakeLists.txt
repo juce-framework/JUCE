@@ -37,6 +37,8 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_basics/buffers/juce_AudioChannelSet.h"
     "../../../../../modules/juce_audio_basics/buffers/juce_AudioDataConverters.cpp"
     "../../../../../modules/juce_audio_basics/buffers/juce_AudioDataConverters.h"
+    "../../../../../modules/juce_audio_basics/buffers/juce_AudioProcessLoadMeasurer.cpp"
+    "../../../../../modules/juce_audio_basics/buffers/juce_AudioProcessLoadMeasurer.h"
     "../../../../../modules/juce_audio_basics/buffers/juce_AudioSampleBuffer.h"
     "../../../../../modules/juce_audio_basics/buffers/juce_FloatVectorOperations.cpp"
     "../../../../../modules/juce_audio_basics/buffers/juce_FloatVectorOperations.h"
@@ -412,6 +414,8 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_processors/processors/juce_AudioProcessorGraph.h"
     "../../../../../modules/juce_audio_processors/processors/juce_AudioProcessorListener.h"
     "../../../../../modules/juce_audio_processors/processors/juce_AudioProcessorParameter.h"
+    "../../../../../modules/juce_audio_processors/processors/juce_AudioProcessorParameterGroup.cpp"
+    "../../../../../modules/juce_audio_processors/processors/juce_AudioProcessorParameterGroup.h"
     "../../../../../modules/juce_audio_processors/processors/juce_GenericAudioProcessorEditor.cpp"
     "../../../../../modules/juce_audio_processors/processors/juce_GenericAudioProcessorEditor.h"
     "../../../../../modules/juce_audio_processors/processors/juce_PluginDescription.cpp"
@@ -532,6 +536,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_core/memory/juce_ByteOrder.h"
     "../../../../../modules/juce_core/memory/juce_ContainerDeletePolicy.h"
     "../../../../../modules/juce_core/memory/juce_HeapBlock.h"
+    "../../../../../modules/juce_core/memory/juce_HeavyweightLeakedObjectDetector.h"
     "../../../../../modules/juce_core/memory/juce_LeakedObjectDetector.h"
     "../../../../../modules/juce_core/memory/juce_Memory.h"
     "../../../../../modules/juce_core/memory/juce_MemoryBlock.cpp"
@@ -569,6 +574,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_core/native/juce_linux_Threads.cpp"
     "../../../../../modules/juce_core/native/juce_mac_ClangBugWorkaround.h"
     "../../../../../modules/juce_core/native/juce_mac_Files.mm"
+    "../../../../../modules/juce_core/native/juce_mac_linux_IPAddress.h"
     "../../../../../modules/juce_core/native/juce_mac_Network.mm"
     "../../../../../modules/juce_core/native/juce_mac_Strings.mm"
     "../../../../../modules/juce_core/native/juce_mac_SystemStats.mm"
@@ -1300,6 +1306,8 @@ set_source_files_properties("../../../../../modules/juce_audio_basics/buffers/ju
 set_source_files_properties("../../../../../modules/juce_audio_basics/buffers/juce_AudioChannelSet.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/buffers/juce_AudioDataConverters.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/buffers/juce_AudioDataConverters.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/buffers/juce_AudioProcessLoadMeasurer.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/buffers/juce_AudioProcessLoadMeasurer.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/buffers/juce_AudioSampleBuffer.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/buffers/juce_FloatVectorOperations.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/buffers/juce_FloatVectorOperations.h" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -1675,6 +1683,8 @@ set_source_files_properties("../../../../../modules/juce_audio_processors/proces
 set_source_files_properties("../../../../../modules/juce_audio_processors/processors/juce_AudioProcessorGraph.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/processors/juce_AudioProcessorListener.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/processors/juce_AudioProcessorParameter.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_processors/processors/juce_AudioProcessorParameterGroup.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_processors/processors/juce_AudioProcessorParameterGroup.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/processors/juce_GenericAudioProcessorEditor.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/processors/juce_GenericAudioProcessorEditor.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/processors/juce_PluginDescription.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -1795,6 +1805,7 @@ set_source_files_properties("../../../../../modules/juce_core/memory/juce_Atomic
 set_source_files_properties("../../../../../modules/juce_core/memory/juce_ByteOrder.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/memory/juce_ContainerDeletePolicy.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/memory/juce_HeapBlock.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_core/memory/juce_HeavyweightLeakedObjectDetector.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/memory/juce_LeakedObjectDetector.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/memory/juce_Memory.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/memory/juce_MemoryBlock.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -1832,6 +1843,7 @@ set_source_files_properties("../../../../../modules/juce_core/native/juce_linux_
 set_source_files_properties("../../../../../modules/juce_core/native/juce_linux_Threads.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/native/juce_mac_ClangBugWorkaround.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/native/juce_mac_Files.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_core/native/juce_mac_linux_IPAddress.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/native/juce_mac_Network.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/native/juce_mac_Strings.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/native/juce_mac_SystemStats.mm" PROPERTIES HEADER_FILE_ONLY TRUE)

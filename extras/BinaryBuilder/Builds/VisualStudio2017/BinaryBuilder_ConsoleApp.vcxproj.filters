@@ -519,6 +519,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_HeapBlock.h">
       <Filter>JUCE Modules\juce_core\memory</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_HeavyweightLeakedObjectDetector.h">
+      <Filter>JUCE Modules\juce_core\memory</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_LeakedObjectDetector.h">
       <Filter>JUCE Modules\juce_core\memory</Filter>
     </ClInclude>
@@ -571,6 +574,9 @@
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_mac_ClangBugWorkaround.h">
+      <Filter>JUCE Modules\juce_core\native</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_mac_linux_IPAddress.h">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_osx_ObjCHelpers.h">
