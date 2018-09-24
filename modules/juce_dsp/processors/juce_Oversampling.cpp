@@ -29,28 +29,23 @@ namespace juce
 namespace dsp
 {
 
-/** Abstract class for the provided oversampling engines used internally in
+/** Abstract class for the provided oversampling stages used internally in
     the Oversampling class.
 */
 template <typename SampleType>
-class OversamplingEngine
+struct Oversampling<SampleType>::OversamplingStage
 {
-public:
-    //===============================================================================
-    OversamplingEngine (size_t newNumChannels, size_t newFactor)
-        : numChannels (newNumChannels), factor (newFactor)
-    {
-    }
-
-    virtual ~OversamplingEngine() {}
+    OversamplingStage (size_t numChans, size_t newFactor)  : numChannels (numChans), factor (newFactor) {}
+    virtual ~OversamplingStage() {}
 
     //===============================================================================
     virtual SampleType getLatencyInSamples() = 0;
-    size_t getFactor() { return factor; }
 
     virtual void initProcessing (size_t maximumNumberOfSamplesBeforeOversampling)
     {
-        buffer.setSize (static_cast<int> (numChannels), static_cast<int> (maximumNumberOfSamplesBeforeOversampling * factor), false, false, true);
+        buffer.setSize (static_cast<int> (numChannels),
+                        static_cast<int> (maximumNumberOfSamplesBeforeOversampling * factor),
+                        false, false, true);
     }
 
     virtual void reset()
@@ -66,24 +61,21 @@ public:
     virtual void processSamplesUp (dsp::AudioBlock<SampleType>&) = 0;
     virtual void processSamplesDown (dsp::AudioBlock<SampleType>&) = 0;
 
-protected:
-    //===============================================================================
     AudioBuffer<SampleType> buffer;
     size_t numChannels, factor;
 };
 
 
 //===============================================================================
-/** Dummy oversampling engine class which simply copies and pastes the input
+/** Dummy oversampling stage class which simply copies and pastes the input
     signal, which could be equivalent to a "one time" oversampling processing.
 */
 template <typename SampleType>
-class OversamplingDummy   : public OversamplingEngine<SampleType>
+struct OversamplingDummy   : public Oversampling<SampleType>::OversamplingStage
 {
-public:
-    //===============================================================================
-    OversamplingDummy (size_t numChans) : OversamplingEngine<SampleType> (numChans, 1) {}
-    ~OversamplingDummy() {}
+    using ParentType = typename Oversampling<SampleType>::OversamplingStage;
+
+    OversamplingDummy (size_t numChans) : ParentType (numChans, 1) {}
 
     //===============================================================================
     SampleType getLatencyInSamples() override
@@ -93,41 +85,42 @@ public:
 
     void processSamplesUp (dsp::AudioBlock<SampleType>& inputBlock) override
     {
-        jassert (inputBlock.getNumChannels() <= static_cast<size_t> (OversamplingEngine<SampleType>::buffer.getNumChannels()));
-        jassert (inputBlock.getNumSamples() * OversamplingEngine<SampleType>::factor <= static_cast<size_t> (OversamplingEngine<SampleType>::buffer.getNumSamples()));
+        jassert (inputBlock.getNumChannels() <= static_cast<size_t> (ParentType::buffer.getNumChannels()));
+        jassert (inputBlock.getNumSamples() * ParentType::factor <= static_cast<size_t> (ParentType::buffer.getNumSamples()));
 
         for (size_t channel = 0; channel < inputBlock.getNumChannels(); ++channel)
-            OversamplingEngine<SampleType>::buffer.copyFrom (static_cast<int> (channel), 0,
+            ParentType::buffer.copyFrom (static_cast<int> (channel), 0,
                 inputBlock.getChannelPointer (channel), static_cast<int> (inputBlock.getNumSamples()));
     }
 
     void processSamplesDown (dsp::AudioBlock<SampleType>& outputBlock) override
     {
-        jassert (outputBlock.getNumChannels() <= static_cast<size_t> (OversamplingEngine<SampleType>::buffer.getNumChannels()));
-        jassert (outputBlock.getNumSamples() * OversamplingEngine<SampleType>::factor <= static_cast<size_t> (OversamplingEngine<SampleType>::buffer.getNumSamples()));
+        jassert (outputBlock.getNumChannels() <= static_cast<size_t> (ParentType::buffer.getNumChannels()));
+        jassert (outputBlock.getNumSamples() * ParentType::factor <= static_cast<size_t> (ParentType::buffer.getNumSamples()));
 
-        outputBlock.copy (OversamplingEngine<SampleType>::getProcessedSamples (outputBlock.getNumSamples()));
+        outputBlock.copy (ParentType::getProcessedSamples (outputBlock.getNumSamples()));
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OversamplingDummy)
 };
 
 //===============================================================================
-/** Oversampling engine class performing 2 times oversampling using the Filter
+/** Oversampling stage class performing 2 times oversampling using the Filter
     Design FIR Equiripple method. The resulting filter is linear phase,
     symmetric, and has every two samples but the middle one equal to zero,
     leading to specific processing optimizations.
 */
 template <typename SampleType>
-class Oversampling2TimesEquirippleFIR  : public OversamplingEngine<SampleType>
+struct Oversampling2TimesEquirippleFIR  : public Oversampling<SampleType>::OversamplingStage
 {
-public:
+    using ParentType = typename Oversampling<SampleType>::OversamplingStage;
+
     Oversampling2TimesEquirippleFIR (size_t numChans,
                                      SampleType normalizedTransitionWidthUp,
                                      SampleType stopbandAttenuationdBUp,
                                      SampleType normalizedTransitionWidthDown,
                                      SampleType stopbandAttenuationdBDown)
-        : OversamplingEngine<SampleType> (numChans, 2)
+        : ParentType (numChans, 2)
     {
         coefficientsUp   = *dsp::FilterDesign<SampleType>::designFIRLowpassHalfBandEquirippleMethod (normalizedTransitionWidthUp,   stopbandAttenuationdBUp);
         coefficientsDown = *dsp::FilterDesign<SampleType>::designFIRLowpassHalfBandEquirippleMethod (normalizedTransitionWidthDown, stopbandAttenuationdBDown);
@@ -145,8 +138,6 @@ public:
         position.resize (static_cast<int> (this->numChannels));
     }
 
-    ~Oversampling2TimesEquirippleFIR() {}
-
     //===============================================================================
     SampleType getLatencyInSamples() override
     {
@@ -155,7 +146,7 @@ public:
 
     void reset() override
     {
-        OversamplingEngine<SampleType>::reset();
+        ParentType::reset();
 
         stateUp.clear();
         stateDown.clear();
@@ -166,8 +157,8 @@ public:
 
     void processSamplesUp (dsp::AudioBlock<SampleType>& inputBlock) override
     {
-        jassert (inputBlock.getNumChannels() <= static_cast<size_t> (OversamplingEngine<SampleType>::buffer.getNumChannels()));
-        jassert (inputBlock.getNumSamples() * OversamplingEngine<SampleType>::factor <= static_cast<size_t> (OversamplingEngine<SampleType>::buffer.getNumSamples()));
+        jassert (inputBlock.getNumChannels() <= static_cast<size_t> (ParentType::buffer.getNumChannels()));
+        jassert (inputBlock.getNumSamples() * ParentType::factor <= static_cast<size_t> (ParentType::buffer.getNumSamples()));
 
         // Initialization
         auto fir = coefficientsUp.getRawCoefficients();
@@ -178,7 +169,7 @@ public:
         // Processing
         for (size_t channel = 0; channel < inputBlock.getNumChannels(); ++channel)
         {
-            auto bufferSamples = OversamplingEngine<SampleType>::buffer.getWritePointer (static_cast<int> (channel));
+            auto bufferSamples = ParentType::buffer.getWritePointer (static_cast<int> (channel));
             auto buf = stateUp.getWritePointer (static_cast<int> (channel));
             auto samples = inputBlock.getChannelPointer (channel);
 
@@ -206,8 +197,8 @@ public:
 
     void processSamplesDown (dsp::AudioBlock<SampleType>& outputBlock) override
     {
-        jassert (outputBlock.getNumChannels() <= static_cast<size_t> (OversamplingEngine<SampleType>::buffer.getNumChannels()));
-        jassert (outputBlock.getNumSamples() * OversamplingEngine<SampleType>::factor <= static_cast<size_t> (OversamplingEngine<SampleType>::buffer.getNumSamples()));
+        jassert (outputBlock.getNumChannels() <= static_cast<size_t> (ParentType::buffer.getNumChannels()));
+        jassert (outputBlock.getNumSamples() * ParentType::factor <= static_cast<size_t> (ParentType::buffer.getNumSamples()));
 
         // Initialization
         auto fir = coefficientsDown.getRawCoefficients();
@@ -219,7 +210,7 @@ public:
         // Processing
         for (size_t channel = 0; channel < outputBlock.getNumChannels(); ++channel)
         {
-            auto bufferSamples = OversamplingEngine<SampleType>::buffer.getWritePointer (static_cast<int> (channel));
+            auto bufferSamples = ParentType::buffer.getWritePointer (static_cast<int> (channel));
             auto buf = stateDown.getWritePointer (static_cast<int> (channel));
             auto buf2 = stateDown2.getWritePointer (static_cast<int> (channel));
             auto samples = outputBlock.getChannelPointer (channel);
@@ -267,27 +258,28 @@ private:
 
 
 //===============================================================================
-/** Oversampling engine class performing 2 times oversampling using the Filter
+/** Oversampling stage class performing 2 times oversampling using the Filter
     Design IIR Polyphase Allpass Cascaded method. The resulting filter is minimum
     phase, and provided with a method to get the exact resulting latency.
 */
 template <typename SampleType>
-class Oversampling2TimesPolyphaseIIR  : public OversamplingEngine<SampleType>
+struct Oversampling2TimesPolyphaseIIR  : public Oversampling<SampleType>::OversamplingStage
 {
-public:
+    using ParentType = typename Oversampling<SampleType>::OversamplingStage;
+
     Oversampling2TimesPolyphaseIIR (size_t numChans,
                                     SampleType normalizedTransitionWidthUp,
                                     SampleType stopbandAttenuationdBUp,
                                     SampleType normalizedTransitionWidthDown,
                                     SampleType stopbandAttenuationdBDown)
-        : OversamplingEngine<SampleType> (numChans, 2)
+        : ParentType (numChans, 2)
     {
         auto structureUp = dsp::FilterDesign<SampleType>::designIIRLowpassHalfBandPolyphaseAllpassMethod (normalizedTransitionWidthUp, stopbandAttenuationdBUp);
-        dsp::IIR::Coefficients<SampleType> coeffsUp = getCoefficients (structureUp);
+        auto coeffsUp = getCoefficients (structureUp);
         latency = static_cast<SampleType> (-(coeffsUp.getPhaseForFrequency (0.0001, 1.0)) / (0.0001 * MathConstants<double>::twoPi));
 
         auto structureDown = dsp::FilterDesign<SampleType>::designIIRLowpassHalfBandPolyphaseAllpassMethod (normalizedTransitionWidthDown, stopbandAttenuationdBDown);
-        dsp::IIR::Coefficients<SampleType> coeffsDown = getCoefficients (structureDown);
+        auto coeffsDown = getCoefficients (structureDown);
         latency += static_cast<SampleType> (-(coeffsDown.getPhaseForFrequency (0.0001, 1.0)) / (0.0001 * MathConstants<double>::twoPi));
 
         for (auto i = 0; i < structureUp.directPath.size(); ++i)
@@ -307,8 +299,6 @@ public:
         delayDown.resize (static_cast<int> (this->numChannels));
     }
 
-    ~Oversampling2TimesPolyphaseIIR() {}
-
     //===============================================================================
     SampleType getLatencyInSamples() override
     {
@@ -317,7 +307,7 @@ public:
 
     void reset() override
     {
-        OversamplingEngine<SampleType>::reset();
+        ParentType::reset();
         v1Up.clear();
         v1Down.clear();
         delayDown.fill (0);
@@ -325,8 +315,8 @@ public:
 
     void processSamplesUp (dsp::AudioBlock<SampleType>& inputBlock) override
     {
-        jassert (inputBlock.getNumChannels() <= static_cast<size_t> (OversamplingEngine<SampleType>::buffer.getNumChannels()));
-        jassert (inputBlock.getNumSamples() * OversamplingEngine<SampleType>::factor <= static_cast<size_t> (OversamplingEngine<SampleType>::buffer.getNumSamples()));
+        jassert (inputBlock.getNumChannels() <= static_cast<size_t> (ParentType::buffer.getNumChannels()));
+        jassert (inputBlock.getNumSamples() * ParentType::factor <= static_cast<size_t> (ParentType::buffer.getNumSamples()));
 
         // Initialization
         auto coeffs = coefficientsUp.getRawDataPointer();
@@ -338,7 +328,7 @@ public:
         // Processing
         for (size_t channel = 0; channel < inputBlock.getNumChannels(); ++channel)
         {
-            auto bufferSamples = OversamplingEngine<SampleType>::buffer.getWritePointer (static_cast<int> (channel));
+            auto bufferSamples = ParentType::buffer.getWritePointer (static_cast<int> (channel));
             auto lv1 = v1Up.getWritePointer (static_cast<int> (channel));
             auto samples = inputBlock.getChannelPointer (channel);
 
@@ -380,8 +370,8 @@ public:
 
     void processSamplesDown (dsp::AudioBlock<SampleType>& outputBlock) override
     {
-        jassert (outputBlock.getNumChannels() <= static_cast<size_t> (OversamplingEngine<SampleType>::buffer.getNumChannels()));
-        jassert (outputBlock.getNumSamples() * OversamplingEngine<SampleType>::factor <= static_cast<size_t> (OversamplingEngine<SampleType>::buffer.getNumSamples()));
+        jassert (outputBlock.getNumChannels() <= static_cast<size_t> (ParentType::buffer.getNumChannels()));
+        jassert (outputBlock.getNumSamples() * ParentType::factor <= static_cast<size_t> (ParentType::buffer.getNumSamples()));
 
         // Initialization
         auto coeffs = coefficientsDown.getRawDataPointer();
@@ -393,7 +383,7 @@ public:
         // Processing
         for (size_t channel = 0; channel < outputBlock.getNumChannels(); ++channel)
         {
-            auto bufferSamples = OversamplingEngine<SampleType>::buffer.getWritePointer (static_cast<int> (channel));
+            auto bufferSamples = ParentType::buffer.getWritePointer (static_cast<int> (channel));
             auto lv1 = v1Down.getWritePointer (static_cast<int> (channel));
             auto samples = outputBlock.getChannelPointer (channel);
             auto delay = delayDown.getUnchecked (static_cast<int> (channel));
@@ -440,7 +430,7 @@ public:
     {
         if (snapUpProcessing)
         {
-            for (auto channel = 0; channel < OversamplingEngine<SampleType>::buffer.getNumChannels(); ++channel)
+            for (auto channel = 0; channel < ParentType::buffer.getNumChannels(); ++channel)
             {
                 auto lv1 = v1Up.getWritePointer (channel);
                 auto numStages = coefficientsUp.size();
@@ -451,7 +441,7 @@ public:
         }
         else
         {
-            for (auto channel = 0; channel < OversamplingEngine<SampleType>::buffer.getNumChannels(); ++channel)
+            for (auto channel = 0; channel < ParentType::buffer.getNumChannels(); ++channel)
             {
                 auto lv1 = v1Down.getWritePointer (channel);
                 auto numStages = coefficientsDown.size();
@@ -467,20 +457,18 @@ private:
     /** This function calculates the equivalent high order IIR filter of a given
         polyphase cascaded allpass filters structure.
     */
-    const dsp::IIR::Coefficients<SampleType> getCoefficients (typename dsp::FilterDesign<SampleType>::IIRPolyphaseAllpassStructure& structure) const
+    dsp::IIR::Coefficients<SampleType> getCoefficients (typename dsp::FilterDesign<SampleType>::IIRPolyphaseAllpassStructure& structure) const
     {
         constexpr auto one = static_cast<SampleType> (1.0);
 
-        dsp::Polynomial<SampleType> numerator1   ({ one });
-        dsp::Polynomial<SampleType> denominator1 ({ one });
-        dsp::Polynomial<SampleType> numerator2   ({ one });
-        dsp::Polynomial<SampleType> denominator2 ({ one });
+        dsp::Polynomial<SampleType> numerator1 ({ one }), denominator1 ({ one }),
+                                    numerator2 ({ one }), denominator2 ({ one });
 
-        for (auto n = 0; n < structure.directPath.size(); ++n)
+        for (auto* i : structure.directPath)
         {
-            auto* coeffs = structure.directPath.getObjectPointer (n)->getRawCoefficients();
+            auto coeffs = i->getRawCoefficients();
 
-            if (structure.directPath.getObjectPointer (n)->getFilterOrder() == 1)
+            if (i->getFilterOrder() == 1)
             {
                 numerator1 = numerator1.getProductWith (dsp::Polynomial<SampleType> ({ coeffs[0], coeffs[1] }));
                 denominator1 = denominator1.getProductWith (dsp::Polynomial<SampleType> ({ one, coeffs[2] }));
@@ -492,11 +480,11 @@ private:
             }
         }
 
-        for (auto n = 0; n < structure.delayedPath.size(); ++n)
+        for (auto* i : structure.delayedPath)
         {
-            auto* coeffs = structure.delayedPath.getObjectPointer (n)->getRawCoefficients();
+            auto coeffs = i->getRawCoefficients();
 
-            if (structure.delayedPath.getObjectPointer (n)->getFilterOrder() == 1)
+            if (i->getFilterOrder() == 1)
             {
                 numerator2 = numerator2.getProductWith (dsp::Polynomial<SampleType> ({ coeffs[0], coeffs[1] }));
                 denominator2 = denominator2.getProductWith (dsp::Polynomial<SampleType> ({ one, coeffs[2] }));
@@ -541,57 +529,56 @@ private:
 
 //===============================================================================
 template <typename SampleType>
+Oversampling<SampleType>::Oversampling()
+{
+    addDummyOversamplingStage();
+}
+
+template <typename SampleType>
 Oversampling<SampleType>::Oversampling (size_t newNumChannels, size_t newFactor,
-                                        FilterType newType, bool newMaxQuality)
+                                        FilterType newType, bool isMaximumQuality)
 {
     jassert (newFactor >= 0 && newFactor <= 4 && newNumChannels > 0);
 
     factorOversampling = static_cast<size_t> (1) << newFactor;
-    isMaximumQuality = newMaxQuality;
-    type = newType;
     numChannels = newNumChannels;
 
     if (newFactor == 0)
     {
-        numStages = 1;
-        engines.add (new OversamplingDummy<SampleType> (numChannels));
+        addDummyOversamplingStage();
     }
-    else if (type == FilterType::filterHalfBandPolyphaseIIR)
+    else if (newType == FilterType::filterHalfBandPolyphaseIIR)
     {
-        numStages = newFactor;
-
-        for (size_t n = 0; n < numStages; ++n)
+        for (size_t n = 0; n < newFactor; ++n)
         {
             auto twUp   = (isMaximumQuality ? 0.10f : 0.12f) * (n == 0 ? 0.5f : 1.0f);
             auto twDown = (isMaximumQuality ? 0.12f : 0.15f) * (n == 0 ? 0.5f : 1.0f);
 
-            auto gaindBStartUp    = (isMaximumQuality ? -75.0f : -65.0f);
-            auto gaindBStartDown  = (isMaximumQuality ? -70.0f : -60.0f);
+            auto gaindBStartUp    = (isMaximumQuality ? -90.0f : -70.0f);
+            auto gaindBStartDown  = (isMaximumQuality ? -75.0f : -60.0f);
             auto gaindBFactorUp   = (isMaximumQuality ? 10.0f  : 8.0f);
             auto gaindBFactorDown = (isMaximumQuality ? 10.0f  : 8.0f);
 
-            engines.add (new Oversampling2TimesPolyphaseIIR<SampleType> (numChannels,
-                                                                         twUp, gaindBStartUp + gaindBFactorUp * n,
-                                                                         twDown, gaindBStartDown + gaindBFactorDown * n));
+            addOversamplingStage (FilterType::filterHalfBandPolyphaseIIR,
+                                  twUp, gaindBStartUp + gaindBFactorUp * n,
+                                  twDown, gaindBStartDown + gaindBFactorDown * n);
         }
     }
-    else if (type == FilterType::filterHalfBandFIREquiripple)
+    else if (newType == FilterType::filterHalfBandFIREquiripple)
     {
-        numStages = newFactor;
-
-        for (size_t n = 0; n < numStages; ++n)
+        for (size_t n = 0; n < newFactor; ++n)
         {
-            auto twUp = (isMaximumQuality ? 0.10f : 0.12f) * (n == 0 ? 0.5f : 1.0f);
+            auto twUp   = (isMaximumQuality ? 0.10f : 0.12f) * (n == 0 ? 0.5f : 1.0f);
             auto twDown = (isMaximumQuality ? 0.12f : 0.15f) * (n == 0 ? 0.5f : 1.0f);
 
-            auto gaindBStartUp = (isMaximumQuality ? -90.0f : -70.0f);
-            auto gaindBStartDown = (isMaximumQuality ? -70.0f : -60.0f);
-            auto gaindBFactorUp = (isMaximumQuality ? 10.0f : 8.0f);
-            auto gaindBFactorDown = (isMaximumQuality ? 10.0f : 8.0f);
+            auto gaindBStartUp    = (isMaximumQuality ? -90.0f : -70.0f);
+            auto gaindBStartDown  = (isMaximumQuality ? -75.0f : -60.0f);
+            auto gaindBFactorUp   = (isMaximumQuality ? 10.0f  : 8.0f);
+            auto gaindBFactorDown = (isMaximumQuality ? 10.0f  : 8.0f);
 
-            engines.add (new Oversampling2TimesEquirippleFIR<SampleType> (numChannels,
-                                                                          twUp, gaindBStartUp + gaindBFactorUp * n,
-                                                                          twDown, gaindBStartDown + gaindBFactorDown * n));
+            addOversamplingStage (FilterType::filterHalfBandFIREquiripple,
+                                  twUp, gaindBStartUp + gaindBFactorUp * n,
+                                  twDown, gaindBStartDown + gaindBFactorDown * n);
         }
     }
 }
@@ -599,7 +586,41 @@ Oversampling<SampleType>::Oversampling (size_t newNumChannels, size_t newFactor,
 template <typename SampleType>
 Oversampling<SampleType>::~Oversampling()
 {
-    engines.clear();
+    stages.clear();
+}
+
+//===============================================================================
+template <typename SampleType>
+void Oversampling<SampleType>::addDummyOversamplingStage()
+{
+    stages.add (new OversamplingDummy<SampleType> (numChannels));
+}
+
+template <typename SampleType>
+void Oversampling<SampleType>::addOversamplingStage (FilterType type,
+                                                     float normalizedTransitionWidthUp,
+                                                     float stopbandAttenuationdBUp,
+                                                     float normalizedTransitionWidthDown,
+                                                     float stopbandAttenuationdBDown)
+{
+    if (type == FilterType::filterHalfBandPolyphaseIIR)
+    {
+        stages.add (new Oversampling2TimesPolyphaseIIR<SampleType> (numChannels,
+                                                                    normalizedTransitionWidthUp, stopbandAttenuationdBUp,
+                                                                    normalizedTransitionWidthDown, stopbandAttenuationdBDown));
+    }
+    else
+    {
+        stages.add (new Oversampling2TimesEquirippleFIR<SampleType> (numChannels,
+                                                                     normalizedTransitionWidthUp, stopbandAttenuationdBUp,
+                                                                     normalizedTransitionWidthDown, stopbandAttenuationdBDown));
+    }
+}
+
+template <typename SampleType>
+void Oversampling<SampleType>::clearOversamplingStages()
+{
+    stages.clear();
 }
 
 //===============================================================================
@@ -609,12 +630,10 @@ SampleType Oversampling<SampleType>::getLatencyInSamples() noexcept
     auto latency = static_cast<SampleType> (0);
     size_t order = 1;
 
-    for (size_t n = 0; n < numStages; ++n)
+    for (auto* stage : stages)
     {
-        auto& engine = *engines[static_cast<int> (n)];
-
-        order *= engine.getFactor();
-        latency += engine.getLatencyInSamples() / static_cast<SampleType> (order);
+        order *= stage->factor;
+        latency += stage->getLatencyInSamples() / static_cast<SampleType> (order);
     }
 
     return latency;
@@ -630,15 +649,13 @@ size_t Oversampling<SampleType>::getOversamplingFactor() noexcept
 template <typename SampleType>
 void Oversampling<SampleType>::initProcessing (size_t maximumNumberOfSamplesBeforeOversampling)
 {
-    jassert (! engines.isEmpty());
+    jassert (! stages.isEmpty());
     auto currentNumSamples = maximumNumberOfSamplesBeforeOversampling;
 
-    for (size_t n = 0; n < numStages; ++n)
+    for (auto* stage : stages)
     {
-        auto& engine = *engines[static_cast<int> (n)];
-
-        engine.initProcessing (currentNumSamples);
-        currentNumSamples *= engine.getFactor();
+        stage->initProcessing (currentNumSamples);
+        currentNumSamples *= stage->factor;
     }
 
     isReady = true;
@@ -648,28 +665,27 @@ void Oversampling<SampleType>::initProcessing (size_t maximumNumberOfSamplesBefo
 template <typename SampleType>
 void Oversampling<SampleType>::reset() noexcept
 {
-    jassert (! engines.isEmpty());
+    jassert (! stages.isEmpty());
 
     if (isReady)
-        for (auto n = 0; n < engines.size(); ++n)
-            engines[n]->reset();
+        for (auto* stage : stages)
+           stage->reset();
 }
 
 template <typename SampleType>
 typename dsp::AudioBlock<SampleType> Oversampling<SampleType>::processSamplesUp (const dsp::AudioBlock<SampleType>& inputBlock) noexcept
 {
-    jassert (! engines.isEmpty());
+    jassert (! stages.isEmpty());
 
     if (! isReady)
-        return dsp::AudioBlock<SampleType>();
+        return {};
 
-    dsp::AudioBlock<SampleType> audioBlock = inputBlock;
+    auto audioBlock = inputBlock;
 
-    for (size_t n = 0; n < numStages; ++n)
+    for (auto* stage : stages)
     {
-        auto& engine = *engines[static_cast<int> (n)];
-        engine.processSamplesUp (audioBlock);
-        audioBlock = engine.getProcessedSamples (audioBlock.getNumSamples() * engine.getFactor());
+        stage->processSamplesUp (audioBlock);
+        audioBlock = stage->getProcessedSamples (audioBlock.getNumSamples() * stage->factor);
     }
 
     return audioBlock;
@@ -678,27 +694,26 @@ typename dsp::AudioBlock<SampleType> Oversampling<SampleType>::processSamplesUp 
 template <typename SampleType>
 void Oversampling<SampleType>::processSamplesDown (dsp::AudioBlock<SampleType>& outputBlock) noexcept
 {
-    jassert (! engines.isEmpty());
+    jassert (! stages.isEmpty());
 
     if (! isReady)
         return;
 
     auto currentNumSamples = outputBlock.getNumSamples();
 
-    for (size_t n = 0; n < numStages - 1; ++n)
-        currentNumSamples *= engines[static_cast<int> (n)]->getFactor();
+    for (int n = 0; n < stages.size() - 1; ++n)
+        currentNumSamples *= stages.getUnchecked(n)->factor;
 
-    for (size_t n = numStages - 1; n > 0; --n)
+    for (int n = stages.size() - 1; n > 0; --n)
     {
-        auto& engine = *engines[static_cast<int> (n)];
+        auto& stage = *stages.getUnchecked(n);
+        auto audioBlock = stages.getUnchecked (n - 1)->getProcessedSamples (currentNumSamples);
+        stage.processSamplesDown (audioBlock);
 
-        auto audioBlock = engines[static_cast<int> (n - 1)]->getProcessedSamples (currentNumSamples);
-        engine.processSamplesDown (audioBlock);
-
-        currentNumSamples /= engine.getFactor();
+        currentNumSamples /= stage.factor;
     }
 
-    engines[static_cast<int> (0)]->processSamplesDown (outputBlock);
+    stages.getFirst()->processSamplesDown (outputBlock);
 }
 
 template class Oversampling<float>;
