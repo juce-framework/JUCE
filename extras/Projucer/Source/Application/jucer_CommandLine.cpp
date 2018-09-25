@@ -712,6 +712,10 @@ namespace
 
         auto settingsFile = userAppData.getChildFile ("Projucer").getChildFile ("Projucer.settings");
         std::unique_ptr<XmlElement> xml (XmlDocument::parse (settingsFile));
+
+        if (xml == nullptr)
+            ConsoleApplication::fail ("Settings file not valid!");
+
         auto settingsTree = ValueTree::fromXml (*xml);
 
         if (! settingsTree.isValid())
@@ -722,13 +726,13 @@ namespace
         if (isThisOS (args[1].text))
         {
             childToSet = settingsTree.getChildWithProperty (Ids::name, "PROJECT_DEFAULT_SETTINGS")
-                                     .getChildWithName ("PROJECT_DEFAULT_SETTINGS");
+                                     .getOrCreateChildWithName ("PROJECT_DEFAULT_SETTINGS", nullptr);
         }
         else
         {
             childToSet = settingsTree.getChildWithProperty (Ids::name, "FALLBACK_PATHS")
-                                     .getChildWithName ("FALLBACK_PATHS")
-                                     .getChildWithName (args[1].text + "Fallback");
+                                     .getOrCreateChildWithName ("FALLBACK_PATHS", nullptr)
+                                     .getOrCreateChildWithName (args[1].text + "Fallback", nullptr);
         }
 
         if (! childToSet.isValid())
@@ -737,7 +741,9 @@ namespace
         if (args[2].text == Ids::defaultUserModulePath.toString())
         {
             auto pathList = args[3].text.removeCharacters ("\"");
-            checkIfUserModulesPathsAreValid (pathList);
+
+            if (isThisOS (args[1].text))
+                checkIfUserModulesPathsAreValid (pathList);
 
             childToSet.setProperty (args[2].text, pathList, nullptr);
         }
