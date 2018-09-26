@@ -46,7 +46,11 @@ StoredSettings::StoredSettings()
       fallbackPaths ("FALLBACK_PATHS")
 {
     updateOldProjectSettingsFiles();
+
     reload();
+    changed (true);
+    flush();
+
     checkJUCEPaths();
 
     projectDefaults.addListener (this);

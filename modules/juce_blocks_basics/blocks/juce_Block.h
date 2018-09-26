@@ -429,6 +429,9 @@ public:
     /** Provides a callback that will be called when a config changes. */
     virtual void setConfigChangedCallback (std::function<void(Block&, const ConfigMetaData&, uint32)>) = 0;
 
+    /** Provides a callback that will be called when a prgoram has been loaded. */
+    virtual void setProgramLoadedCallback (std::function<void(Block&)> programLoaded) = 0;
+
     //==============================================================================
     /** Interface for objects listening to input data port. */
     struct DataInputPortListener

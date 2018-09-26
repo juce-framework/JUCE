@@ -1689,6 +1689,7 @@ struct PhysicalTopologySource::Internal
 
                 stopTimer();
                 programSize = 0;
+                isProgramLoaded = shouldSaveProgramAsDefault = false;
 
                 if (program != nullptr)
                 {
@@ -1721,6 +1722,8 @@ struct PhysicalTopologySource::Internal
 
                     if (auto changeCallback = this->configChangedCallback)
                         changeCallback (*this, {}, this->getMaxConfigIndex());
+
+                    startTimer (20);
                 }
                 else
                 {
@@ -1768,8 +1771,14 @@ struct PhysicalTopologySource::Internal
         {
             if (remoteHeap.isFullySynced() && remoteHeap.isProgramLoaded())
             {
+                isProgramLoaded = true;
                 stopTimer();
-                sendCommandMessage (BlocksProtocol::saveProgramAsDefault);
+
+                if (shouldSaveProgramAsDefault)
+                    doSaveProgramAsDefault();
+
+                if (programLoadedCallback != nullptr)
+                    programLoadedCallback (*this);
             }
             else
             {
@@ -1779,7 +1788,10 @@ struct PhysicalTopologySource::Internal
 
         void saveProgramAsDefault() override
         {
-            startTimer (10);
+            shouldSaveProgramAsDefault = true;
+
+            if (! isTimerRunning() && isProgramLoaded)
+                doSaveProgramAsDefault();
         }
 
         uint32 getMemorySize() override
@@ -1970,7 +1982,12 @@ struct PhysicalTopologySource::Internal
 
         void setConfigChangedCallback (std::function<void(Block&, const ConfigMetaData&, uint32)> configChanged) override
         {
-            configChangedCallback = configChanged;
+            configChangedCallback = std::move (configChanged);
+        }
+
+        void setProgramLoadedCallback (std::function<void(Block&)> programLoaded) override
+        {
+            programLoadedCallback = std::move (programLoaded);
         }
 
         void factoryReset() override
@@ -2062,6 +2079,8 @@ struct PhysicalTopologySource::Internal
         BlockConfigManager config;
         std::function<void(Block&, const ConfigMetaData&, uint32)> configChangedCallback;
 
+        std::function<void(Block&)> programLoadedCallback;
+
     private:
         std::unique_ptr<Program> program;
         uint32 programSize = 0;
@@ -2076,6 +2095,9 @@ struct PhysicalTopologySource::Internal
         Point<int> position;
         int rotation = 0;
         friend BlocksTraverser;
+
+        bool isProgramLoaded = false;
+        bool shouldSaveProgramAsDefault = false;
 
         void initialiseDeviceIndexAndConnection()
         {
@@ -2126,6 +2148,11 @@ struct PhysicalTopologySource::Internal
             listenerToMidiConnection->removeListener (this);
             listenerToMidiConnection = nullptr;
             config.setDeviceComms (nullptr);
+        }
+
+        void doSaveProgramAsDefault()
+        {
+            sendCommandMessage (BlocksProtocol::saveProgramAsDefault);
         }
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BlockImplementation)
