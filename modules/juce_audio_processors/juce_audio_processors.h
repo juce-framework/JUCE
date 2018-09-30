@@ -58,7 +58,7 @@
 
 //==============================================================================
 /** Config: JUCE_PLUGINHOST_VST
-    Enables the VST audio plugin hosting classes.
+    Enables the VST audio plugin hosting classes. You will need to have the VST2 SDK files in your header search paths. You can obtain the VST2 SDK files from on older version of the VST3 SDK.
 
     @see VSTPluginFormat, VST3PluginFormat, AudioPluginFormat, AudioPluginFormatManager, JUCE_PLUGINHOST_AU, JUCE_PLUGINHOST_VST3, JUCE_PLUGINHOST_LADSPA
 */
@@ -67,8 +67,7 @@
 #endif
 
 /** Config: JUCE_PLUGINHOST_VST3
-    Enables the VST3 audio plugin hosting classes. This requires the Steinberg VST3 SDK to be
-    installed on your machine.
+    Enables the VST3 audio plugin hosting classes.
 
     @see VSTPluginFormat, VST3PluginFormat, AudioPluginFormat, AudioPluginFormatManager, JUCE_PLUGINHOST_VST, JUCE_PLUGINHOST_AU, JUCE_PLUGINHOST_LADSPA
 */

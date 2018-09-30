@@ -416,6 +416,10 @@ void PIPGenerator::setModuleFlags (ValueTree& jucerTree)
         options.setProperty (name, (value == "1" ? 1 : 0), nullptr);
     }
 
+    if (metadata[Ids::type].toString() == "AudioProcessor"
+          && options.getPropertyPointer ("JUCE_VST3_CAN_REPLACE_VST2") == nullptr)
+        options.setProperty ("JUCE_VST3_CAN_REPLACE_VST2", 0, nullptr);
+
     jucerTree.addChild (options, -1, nullptr);
 }
 
