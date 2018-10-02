@@ -340,7 +340,7 @@ void Project::updateOldModulePaths()
 Array<Identifier> Project::getLegacyPluginFormatIdentifiers() noexcept
 {
     static Array<Identifier> legacyPluginFormatIdentifiers { Ids::buildVST, Ids::buildVST3, Ids::buildAU, Ids::buildAUv3,
-                                                             Ids::buildRTAS, Ids::buildAAX, Ids::buildStandalone, Ids::enableIAA, Ids::enableARA };
+                                                             Ids::buildRTAS, Ids::buildAAX, Ids::buildStandalone, Ids::enableIAA };
 
     return legacyPluginFormatIdentifiers;
 }
