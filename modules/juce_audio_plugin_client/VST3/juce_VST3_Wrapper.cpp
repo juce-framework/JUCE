@@ -2669,8 +2669,10 @@ DEF_CLASS_IID (JuceAudioProcessor)
  DEF_CLASS_IID (JuceVST3Component)
 #endif
 
+#if JucePlugin_Enable_ARA
  DECLARE_CLASS_IID (JuceARAFactory, 0xABCDEF01, 0xA1B2C3D4, JucePlugin_ManufacturerCode, JucePlugin_PluginCode)
  DEF_CLASS_IID (JuceARAFactory)
+#endif // JucePlugin_Enable_ARA
 
 #if JUCE_MSVC
  #pragma warning (pop)
