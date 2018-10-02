@@ -34,7 +34,7 @@ namespace
     const char* const iosVersionDefault         = "9.3";
 
     const int oldestSDKVersion  = 7;
-    const int currentSDKVersion = 13;
+    const int currentSDKVersion = 14;
     const int minimumAUv3SDKVersion = 11;
 
     const char* const osxArch_Default           = "default";
@@ -482,10 +482,10 @@ protected:
                 props.add (new ChoicePropertyComponent (iosDeploymentTarget, "iOS Deployment Target",
                                                         { "7.0", "7.1", "8.0", "8.1", "8.2", "8.3", "8.4",
                                                           "9.0", "9.1", "9.2", "9.3", "10.0", "10.1", "10.2", "10.3",
-                                                          "11.0" },
+                                                          "11.0", "12.0" },
                                                         { "7.0", "7.1", "8.0", "8.1", "8.2", "8.3", "8.4",
                                                           "9.0", "9.1", "9.2", "9.3", "10.0", "10.1", "10.2", "10.3",
-                                                          "11.0" }),
+                                                          "11.0", "12.0" }),
                            "The minimum version of iOS that the target binary will run on.");
             }
             else
