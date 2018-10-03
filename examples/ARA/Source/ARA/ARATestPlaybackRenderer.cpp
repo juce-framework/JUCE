@@ -81,11 +81,11 @@ void ARATestPlaybackRenderer::renderPlaybackRegions (float** ppOutput, ARAChanne
 
             // evaluate region borders in song time, calculate sample range to copy in song time
             ARASamplePosition regionStartSample = playbackRegion->getStartInPlaybackSamples (sampleRate);
-            if (sampleEnd < regionStartSample)
+            if (sampleEnd <= regionStartSample)
                 continue; 
 
             ARASamplePosition regionEndSample = playbackRegion->getEndInPlaybackSamples (sampleRate);
-            if (regionEndSample < samplePosition)
+            if (regionEndSample <= samplePosition)
                 continue;
 
             ARASamplePosition startSongSample = std::max (regionStartSample, samplePosition);
