@@ -616,8 +616,13 @@ public:
     /** Creates a stream to write to this file.
 
         If the file exists, the stream that is returned will be positioned ready for
-        writing at the end of the file, so you might want to use deleteFile() first
-        to write to an empty file.
+        writing at the end of the file. If you want to write to the start of the file,
+        replacing the existing content, then you can do the following:
+        @code
+        auto* stream = file.createOutputStream();
+        stream->setPosition (0);
+        stream->truncate();
+        @endcode
 
         @returns    a stream that will write to this file (initially positioned at the
                     end of the file), or nullptr if the file can't be opened for some reason
