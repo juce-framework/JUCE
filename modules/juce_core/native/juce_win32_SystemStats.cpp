@@ -151,7 +151,17 @@ void CPUInformation::initialise() noexcept
 
     callCPUID (info, 7);
 
-    hasAVX2 = (info[1] & (1 << 5)) != 0;
+    hasAVX2            = (info[1] & (1 << 5))   != 0;
+    hasAVX512F         = (info[1] & (1u << 16)) != 0;
+    hasAVX512DQ        = (info[1] & (1u << 17)) != 0;
+    hasAVX512IFMA      = (info[1] & (1u << 21)) != 0;
+    hasAVX512PF        = (info[1] & (1u << 26)) != 0;
+    hasAVX512ER        = (info[1] & (1u << 27)) != 0;
+    hasAVX512CD        = (info[1] & (1u << 28)) != 0;
+    hasAVX512BW        = (info[1] & (1u << 30)) != 0;
+    hasAVX512VL        = (info[1] & (1u << 31)) != 0;
+    hasAVX512VBMI      = (info[2] & (1u <<  1)) != 0;
+    hasAVX512VPOPCNTDQ = (info[2] & (1u << 14)) != 0;
 
     SYSTEM_INFO systemInfo;
     GetNativeSystemInfo (&systemInfo);
