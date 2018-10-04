@@ -335,9 +335,11 @@ private:
                     fileToSave = fileToSave.getChildFile ("JUCE.png");
                     fileToSave.deleteFile();
 
-                    std::unique_ptr<OutputStream> outStream (fileToSave.createOutputStream());
-                    std::unique_ptr<InputStream> inStream (createAssetInputStream ("juce_icon.png"));
-                    outStream->writeFromInputStream (*inStream, -1);
+                    FileOutputStream outStream (fileToSave);
+
+                    if (outStream.openedOk())
+                        if (auto inStream = std::unique_ptr<InputStream> (createAssetInputStream ("juce_icon.png")))
+                            outStream.writeFromInputStream (*inStream, -1);
                 }
 
                 fc.reset (new FileChooser ("Choose a file to save...",

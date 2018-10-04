@@ -279,13 +279,15 @@ namespace
         std::cout << "Writing: " << targetFile.getFullPathName() << std::endl;
 
         TemporaryFile temp (targetFile);
-        std::unique_ptr<FileOutputStream> out (temp.getFile().createOutputStream());
 
-        bool ok = out != nullptr && zip.writeToStream (*out, nullptr);
-        out.reset();
-        ok = ok && temp.overwriteTargetFileWithTemporary();
+        {
+            FileOutputStream out (temp.getFile());
 
-        if (! ok)
+            if (! (out.openedOk() && zip.writeToStream (out, nullptr)))
+                ConsoleApplication::fail ("Failed to write to the target file: " + targetFile.getFullPathName());
+        }
+
+        if (! temp.overwriteTargetFileWithTemporary())
             ConsoleApplication::fail ("Failed to write to the target file: " + targetFile.getFullPathName());
     }
 

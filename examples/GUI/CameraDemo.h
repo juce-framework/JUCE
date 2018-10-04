@@ -340,25 +340,25 @@ private:
        #if JUCE_ANDROID || JUCE_IOS
         auto imageFile = File::getSpecialLocation (File::tempDirectory).getNonexistentChildFile ("JuceCameraPhotoDemo", ".jpg");
 
-        if (auto stream = std::unique_ptr<OutputStream> (imageFile.createOutputStream()))
+        FileOutputStream stream (imageFile);
+
+        if (stream.openedOk()
+             && JPEGImageFormat().writeImageToStream (image, stream))
         {
-            if (JPEGImageFormat().writeImageToStream (image, *stream))
-            {
-                URL url (imageFile);
+            URL url (imageFile);
 
-                snapshotButton   .setEnabled (false);
-                recordMovieButton.setEnabled (false);
-                contentSharingPending = true;
+            snapshotButton   .setEnabled (false);
+            recordMovieButton.setEnabled (false);
+            contentSharingPending = true;
 
-                SafePointer<CameraDemo> safeThis (this);
+            SafePointer<CameraDemo> safeThis (this);
 
-                juce::ContentSharer::getInstance()->shareFiles ({url},
-                                                                [safeThis] (bool success, const String&) mutable
-                                                                {
-                                                                    if (safeThis)
-                                                                        safeThis->sharingFinished (success, true);
-                                                                });
-            }
+            juce::ContentSharer::getInstance()->shareFiles ({url},
+                                                            [safeThis] (bool success, const String&) mutable
+                                                            {
+                                                                if (safeThis)
+                                                                    safeThis->sharingFinished (success, true);
+                                                            });
         }
        #endif
     }

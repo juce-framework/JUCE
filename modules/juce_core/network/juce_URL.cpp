@@ -118,9 +118,7 @@ URL::DownloadTask* URL::DownloadTask::createFallbackDownloader (const URL& urlTo
     const size_t bufferSize = 0x8000;
     targetFileToUse.deleteFile();
 
-    std::unique_ptr<FileOutputStream> outputStream (targetFileToUse.createOutputStream (bufferSize));
-
-    if (outputStream != nullptr)
+    if (auto outputStream = std::unique_ptr<FileOutputStream> (targetFileToUse.createOutputStream (bufferSize)))
     {
         std::unique_ptr<WebInputStream> stream (new WebInputStream (urlToUse, usePostRequest));
         stream->withExtraHeaders (extraHeadersToUse);
