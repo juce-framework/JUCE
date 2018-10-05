@@ -743,7 +743,7 @@ void ProjectExporter::addNewConfigurationFromExisting (const BuildConfiguration&
     ValueTree newConfig (Ids::CONFIGURATION);
     newConfig = configToCopy.config.createCopy();
 
-    newConfig.setProperty (Ids::name, configToCopy.getName(), 0);
+    newConfig.setProperty (Ids::name, configToCopy.getName(), nullptr);
 
     configs.appendChild (newConfig, project.getUndoManagerFor (configs));
 }

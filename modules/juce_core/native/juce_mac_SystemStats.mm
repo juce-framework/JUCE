@@ -190,7 +190,7 @@ int SystemStats::getMemorySizeInMegabytes()
     uint64 mem = 0;
     size_t memSize = sizeof (mem);
     int mib[] = { CTL_HW, HW_MEMSIZE };
-    sysctl (mib, 2, &mem, &memSize, 0, 0);
+    sysctl (mib, 2, &mem, &memSize, nullptr, 0);
     return (int) (mem / (1024 * 1024));
 }
 
@@ -224,7 +224,7 @@ int SystemStats::getCpuSpeedInMegahertz()
     uint64 speedHz = 0;
     size_t speedSize = sizeof (speedHz);
     int mib[] = { CTL_HW, HW_CPU_FREQ };
-    sysctl (mib, 2, &speedHz, &speedSize, 0, 0);
+    sysctl (mib, 2, &speedHz, &speedSize, nullptr, 0);
 
    #if JUCE_BIG_ENDIAN
     if (speedSize == 4)

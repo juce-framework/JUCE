@@ -436,7 +436,7 @@ void WebBrowserComponent::checkWindowAssociation()
             // page to avoid this, (and send it back when it's made visible again).
 
             blankPageShown = true;
-            browser->goToURL ("about:blank", 0, 0);
+            browser->goToURL ("about:blank", nullptr, nullptr);
         }
     }
 }

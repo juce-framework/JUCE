@@ -179,7 +179,7 @@ void Project::initialiseMainGroup()
     if (! projectRoot.getChildWithName (Ids::MAINGROUP).isValid())
     {
         Item mainGroup (*this, ValueTree (Ids::MAINGROUP), false);
-        projectRoot.addChild (mainGroup.state, 0, 0);
+        projectRoot.addChild (mainGroup.state, 0, nullptr);
     }
 
     getMainGroup().initialiseMissingProperties();

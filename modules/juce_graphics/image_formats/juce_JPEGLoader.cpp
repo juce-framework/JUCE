@@ -43,6 +43,9 @@ namespace jpeglibNamespace
      #pragma clang diagnostic push
      #pragma clang diagnostic ignored "-Wconversion"
      #pragma clang diagnostic ignored "-Wdeprecated-register"
+     #if __has_warning("-Wzero-as-null-pointer-constant")
+      #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
+     #endif
      #if __has_warning("-Wcomma")
       #pragma clang diagnostic ignored "-Wcomma"
      #endif

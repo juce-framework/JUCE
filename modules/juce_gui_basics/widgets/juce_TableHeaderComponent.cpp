@@ -156,7 +156,7 @@ void TableHeaderComponent::moveColumn (const int columnId, int newIndex)
     auto currentIndex = getIndexOfColumnId (columnId, false);
     newIndex = visibleIndexToTotalIndex (newIndex);
 
-    if (columns [currentIndex] != 0 && currentIndex != newIndex)
+    if (columns[currentIndex] != nullptr && currentIndex != newIndex)
     {
         columns.move (currentIndex, newIndex);
         sendColumnsChanged();

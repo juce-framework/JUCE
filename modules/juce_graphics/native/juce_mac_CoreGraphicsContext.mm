@@ -86,7 +86,7 @@ class CoreGraphicsImage   : public ImagePixelData
 {
 public:
     CoreGraphicsImage (const Image::PixelFormat format, int w, int h, bool clearImage)
-        : ImagePixelData (format, w, h), cachedImageRef (0)
+        : ImagePixelData (format, w, h)
     {
         pixelStride = format == Image::RGB ? 3 : ((format == Image::ARGB) ? 4 : 1);
         lineStride = (pixelStride * jmax (1, width) + 3) & ~3;
@@ -156,7 +156,7 @@ public:
     {
         auto cgim = dynamic_cast<CoreGraphicsImage*> (juceImage.getPixelData());
 
-        if (cgim != nullptr && cgim->cachedImageRef != 0)
+        if (cgim != nullptr && cgim->cachedImageRef != nullptr)
         {
             CGImageRetain (cgim->cachedImageRef);
             return cgim->cachedImageRef;
@@ -180,13 +180,13 @@ public:
 
         if (mustOutliveSource)
         {
-            CFDataRef data = CFDataCreate (0, (const UInt8*) srcData.data, (CFIndex) ((size_t) srcData.lineStride * (size_t) srcData.height));
+            CFDataRef data = CFDataCreate (nullptr, (const UInt8*) srcData.data, (CFIndex) ((size_t) srcData.lineStride * (size_t) srcData.height));
             provider = CGDataProviderCreateWithCFData (data);
             CFRelease (data);
         }
         else
         {
-            provider = CGDataProviderCreateWithData (0, srcData.data, (size_t) srcData.lineStride * (size_t) srcData.height, 0);
+            provider = CGDataProviderCreateWithData (nullptr, srcData.data, (size_t) srcData.lineStride * (size_t) srcData.height, nullptr);
         }
 
         CGImageRef imageRef = CGImageCreate ((size_t) srcData.width,
@@ -195,7 +195,7 @@ public:
                                              (size_t) srcData.pixelStride * 8,
                                              (size_t) srcData.lineStride,
                                              colourSpace, getCGImageFlags (juceImage.getFormat()), provider,
-                                             0, true, kCGRenderingIntentDefault);
+                                             nullptr, true, kCGRenderingIntentDefault);
 
         CGDataProviderRelease (provider);
         return imageRef;
@@ -203,17 +203,17 @@ public:
 
     //==============================================================================
     CGContextRef context;
-    CGImageRef cachedImageRef;
+    CGImageRef cachedImageRef = {};
     HeapBlock<uint8> imageData;
     int pixelStride, lineStride;
 
 private:
     void freeCachedImageRef()
     {
-        if (cachedImageRef != 0)
+        if (cachedImageRef != CGImageRef())
         {
             CGImageRelease (cachedImageRef);
-            cachedImageRef = 0;
+            cachedImageRef = {};
         }
     }
 
@@ -439,7 +439,7 @@ void CoreGraphicsContext::beginTransparencyLayer (float opacity)
 {
     saveState();
     CGContextSetAlpha (context, opacity);
-    CGContextBeginTransparencyLayer (context, 0);
+    CGContextBeginTransparencyLayer (context, nullptr);
 }
 
 void CoreGraphicsContext::endTransparencyLayer()
@@ -581,7 +581,7 @@ void CoreGraphicsContext::drawImage (const Image& sourceImage, const AffineTrans
       #else
         // There's a bug in CGContextDrawTiledImage that makes it incredibly slow
         // if it's doing a transformation - it's quicker to just draw lots of images manually
-        if (&CGContextDrawTiledImage != 0 && transform.isOnlyTranslation())
+        if (&CGContextDrawTiledImage != nullptr && transform.isOnlyTranslation())
         {
             CGContextDrawTiledImage (context, imageRect, image);
         }
@@ -657,7 +657,7 @@ void CoreGraphicsContext::setFont (const Font& newFont)
 {
     if (state->font != newFont)
     {
-        state->fontRef = 0;
+        state->fontRef = nullptr;
         state->font = newFont;
 
         if (auto osxTypeface = dynamic_cast<OSXTypeface*> (state->font.getTypeface()))
@@ -680,7 +680,7 @@ const Font& CoreGraphicsContext::getFont()
 
 void CoreGraphicsContext::drawGlyph (int glyphNumber, const AffineTransform& transform)
 {
-    if (state->fontRef != 0 && state->fillType.isColour())
+    if (state->fontRef != nullptr && state->fillType.isColour())
     {
        #if JUCE_CLANG
         #pragma clang diagnostic push
@@ -741,13 +741,13 @@ CoreGraphicsContext::SavedState::SavedState (const SavedState& other)
     : fillType (other.fillType), font (other.font), fontRef (other.fontRef),
       fontTransform (other.fontTransform), gradient (other.gradient)
 {
-    if (gradient != 0)
+    if (gradient != nullptr)
         CGGradientRetain (gradient);
 }
 
 CoreGraphicsContext::SavedState::~SavedState()
 {
-    if (gradient != 0)
+    if (gradient != nullptr)
         CGGradientRelease (gradient);
 }
 
@@ -755,10 +755,10 @@ void CoreGraphicsContext::SavedState::setFill (const FillType& newFill)
 {
     fillType = newFill;
 
-    if (gradient != 0)
+    if (gradient != nullptr)
     {
         CGGradientRelease (gradient);
-        gradient = 0;
+        gradient = nullptr;
     }
 }
 
@@ -800,7 +800,7 @@ void CoreGraphicsContext::drawGradient()
 
     state->fillType.transform.transformPoints (p1.x, p1.y, p2.x, p2.y);
 
-    if (state->gradient == 0)
+    if (state->gradient == nullptr)
         state->gradient = createGradient (g, rgbColourSpace);
 
     if (g.isRadial)
@@ -898,19 +898,19 @@ Image juce_loadWithCoreImage (InputStream& input)
             CGImageRef loadedImage = uiImage.CGImage;
 
       #else
-        CGDataProviderRef provider = CGDataProviderCreateWithData (0, data.getData(), data.getSize(), 0);
-        CGImageSourceRef imageSource = CGImageSourceCreateWithDataProvider (provider, 0);
+        auto provider = CGDataProviderCreateWithData (nullptr, data.getData(), data.getSize(), nullptr);
+        auto imageSource = CGImageSourceCreateWithDataProvider (provider, nullptr);
         CGDataProviderRelease (provider);
 
-        if (imageSource != 0)
+        if (imageSource != nullptr)
         {
-            CGImageRef loadedImage = CGImageSourceCreateImageAtIndex (imageSource, 0, 0);
+            auto loadedImage = CGImageSourceCreateImageAtIndex (imageSource, 0, nullptr);
             CFRelease (imageSource);
       #endif
 
-            if (loadedImage != 0)
+            if (loadedImage != nullptr)
             {
-                CGImageAlphaInfo alphaInfo = CGImageGetAlphaInfo (loadedImage);
+                auto alphaInfo = CGImageGetAlphaInfo (loadedImage);
                 const bool hasAlphaChan = (alphaInfo != kCGImageAlphaNone
                                              && alphaInfo != kCGImageAlphaNoneSkipLast
                                              && alphaInfo != kCGImageAlphaNoneSkipFirst);
@@ -992,8 +992,8 @@ CGContextRef juce_getImageContext (const Image& image)
          auto requiredSize = NSMakeSize (image.getWidth() / scaleFactor, image.getHeight() / scaleFactor);
 
          [im setSize: requiredSize];
-         CGColorSpaceRef colourSpace = CGColorSpaceCreateDeviceRGB();
-         CGImageRef imageRef = juce_createCoreGraphicsImage (image, colourSpace, true);
+         auto colourSpace = CGColorSpaceCreateDeviceRGB();
+         auto imageRef = juce_createCoreGraphicsImage (image, colourSpace, true);
          CGColorSpaceRelease (colourSpace);
 
          NSBitmapImageRep* imageRep = [[NSBitmapImageRep alloc] initWithCGImage: imageRef];

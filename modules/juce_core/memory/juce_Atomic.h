@@ -43,7 +43,7 @@ struct Atomic  final
     using DiffType = typename AtomicHelpers::DiffTypeHelper<Type>::Type;
 
     /** Creates a new value, initialised to zero. */
-    Atomic() noexcept  : value (0) {}
+    Atomic() noexcept  : value (Type()) {}
 
     /** Creates a new value, with a given initial value. */
     Atomic (Type initialValue) noexcept  : value (initialValue) {}
