@@ -500,9 +500,53 @@ public:
                 checkEqual (copyableContainer, noncopyableContainer, referenceContainer);
             }
         }
+
+        beginTest ("After converting move construction, ownership is transferred");
+        {
+            Derived obj;
+            ArrayBase<Derived*, DummyCriticalSection> derived;
+            derived.setAllocatedSize (5);
+            derived.add (&obj);
+
+            ArrayBase<Base*, DummyCriticalSection> base { std::move (derived) };
+
+            expectEquals (base.capacity(), 5);
+            expectEquals (base.size(), 1);
+            expect (base.getFirst() == &obj);
+            expectEquals (derived.capacity(), 0);
+            expectEquals (derived.size(), 0);
+            expect (derived.data() == nullptr);
+        }
+
+        beginTest ("After converting move assignment, ownership is transferred");
+        {
+            Derived obj;
+            ArrayBase<Derived*, DummyCriticalSection> derived;
+            derived.setAllocatedSize (5);
+            derived.add (&obj);
+            ArrayBase<Base*, DummyCriticalSection> base;
+
+            base = std::move (derived);
+
+            expectEquals (base.capacity(), 5);
+            expectEquals (base.size(), 1);
+            expect (base.getFirst() == &obj);
+            expectEquals (derived.capacity(), 0);
+            expectEquals (derived.size(), 0);
+            expect (derived.data() == nullptr);
+        }
     }
 
 private:
+    struct Base
+    {
+        virtual ~Base() = default;
+    };
+
+    struct Derived : Base
+    {
+    };
+
     static void addData (std::vector<CopyableType>& referenceContainer,
                          ArrayBase<CopyableType,    DummyCriticalSection>& copyableContainer,
                          ArrayBase<NoncopyableType, DummyCriticalSection>& NoncopyableContainer,

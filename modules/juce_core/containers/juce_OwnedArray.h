@@ -85,6 +85,23 @@ public:
         return *this;
     }
 
+    /** Converting move constructor. */
+    template <class OtherObjectClass, class OtherCriticalSection>
+    OwnedArray (OwnedArray<OtherObjectClass, OtherCriticalSection>&& other) noexcept
+        : values (std::move (other.values))
+    {
+    }
+
+    /** Converting move assignment operator. */
+    template <class OtherObjectClass, class OtherCriticalSection>
+    OwnedArray& operator= (OwnedArray<OtherObjectClass, OtherCriticalSection>&& other) noexcept
+    {
+        const ScopedLockType lock (getLock());
+        deleteAllObjects();
+        values = std::move (other.values);
+        return *this;
+    }
+
     //==============================================================================
     /** Clears the array, optionally deleting the objects inside it first. */
     void clear (bool deleteObjects = true)
@@ -780,6 +797,9 @@ private:
 
         values.clear();
     }
+
+    template <class OtherObjectClass, class OtherCriticalSection>
+    friend class OwnedArray;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OwnedArray)
 };

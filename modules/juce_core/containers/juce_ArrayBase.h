@@ -42,6 +42,10 @@ class ArrayBase  : public TypeOfCriticalSectionToUse
 private:
     using ParameterType = typename TypeHelpers::ParameterType<ElementType>::type;
 
+    template <class OtherElementType, class OtherCriticalSection>
+    using AllowConversion = typename std::enable_if<! std::is_same<std::tuple<ElementType, TypeOfCriticalSectionToUse>,
+                                                                   std::tuple<OtherElementType, OtherCriticalSection>>::value>::type;
+
 public:
     //==============================================================================
     ArrayBase() = default;
@@ -67,6 +71,44 @@ public:
             auto tmp (std::move (other));
             swapWith (tmp);
         }
+
+        return *this;
+    }
+
+    /** Converting move constructor.
+        Only enabled when the other array has a different type to this one.
+        If you see a compile error here, it's probably because you're attempting a conversion that
+        HeapBlock won't allow.
+    */
+    template <class OtherElementType,
+              class OtherCriticalSection,
+              typename = AllowConversion<OtherElementType, OtherCriticalSection>>
+    ArrayBase (ArrayBase<OtherElementType, OtherCriticalSection>&& other) noexcept
+        : elements (std::move (other.elements)),
+          numAllocated (other.numAllocated),
+          numUsed (other.numUsed)
+    {
+        other.numAllocated = 0;
+        other.numUsed = 0;
+    }
+
+    /** Converting move assignment operator.
+        Only enabled when the other array has a different type to this one.
+        If you see a compile error here, it's probably because you're attempting a conversion that
+        HeapBlock won't allow.
+    */
+    template <class OtherElementType,
+              class OtherCriticalSection,
+              typename = AllowConversion<OtherElementType, OtherCriticalSection>>
+    ArrayBase& operator= (ArrayBase<OtherElementType, OtherCriticalSection>&& other) noexcept
+    {
+        // No need to worry about assignment to *this, because 'other' must be of a different type.
+        elements = std::move (other.elements);
+        numAllocated = other.numAllocated;
+        numUsed = other.numUsed;
+
+        other.numAllocated = 0;
+        other.numUsed = 0;
 
         return *this;
     }
@@ -537,6 +579,9 @@ private:
     //==============================================================================
     HeapBlock<ElementType> elements;
     int numAllocated = 0, numUsed = 0;
+
+    template <class OtherElementType, class OtherCriticalSection>
+    friend class ArrayBase;
 
     JUCE_DECLARE_NON_COPYABLE (ArrayBase)
 };
