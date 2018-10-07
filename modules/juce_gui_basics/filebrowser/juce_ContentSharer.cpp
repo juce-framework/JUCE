@@ -111,9 +111,7 @@ private:
 
         if (tempFile.create().wasOk())
         {
-            std::unique_ptr<FileOutputStream> outputStream (tempFile.createOutputStream());
-
-            if (outputStream != nullptr)
+            if (auto outputStream = std::unique_ptr<FileOutputStream> (tempFile.createOutputStream()))
             {
                 size_t pos = 0;
                 size_t totalSize = data.getSize();

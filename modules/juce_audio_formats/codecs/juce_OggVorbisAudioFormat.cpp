@@ -486,9 +486,7 @@ int OggVorbisAudioFormat::estimateOggFileQuality (const File& source)
 {
     if (auto* in = source.createInputStream())
     {
-        std::unique_ptr<AudioFormatReader> r (createReaderFor (in, true));
-
-        if (r != nullptr)
+        if (auto r = std::unique_ptr<AudioFormatReader> (createReaderFor (in, true)))
         {
             auto lengthSecs = r->lengthInSamples / r->sampleRate;
             auto approxBitsPerSecond = (int) (source.getSize() * 8 / lengthSecs);

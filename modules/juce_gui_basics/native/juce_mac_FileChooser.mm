@@ -207,8 +207,12 @@ private:
             auto addURLResult = [&chooserResults] (NSURL* urlToAdd)
             {
                 auto scheme = nsStringToJuce ([urlToAdd scheme]);
-                auto path = nsStringToJuce ([urlToAdd path]);
-                chooserResults.add (URL (scheme + "://" + path));
+                auto pathComponents = StringArray::fromTokens (nsStringToJuce ([urlToAdd path]), "/", {});
+
+                for (auto& component : pathComponents)
+                    component = URL::addEscapeChars (component, false);
+
+                chooserResults.add (URL (scheme + "://" + pathComponents.joinIntoString ("/")));
             };
 
             if (isSave)

@@ -32,10 +32,10 @@ void MACAddress::findAllAddresses (Array<MACAddress>& result)
         for (const ifaddrs* cursor = addrs; cursor != nullptr; cursor = cursor->ifa_next)
         {
             // Required to avoid misaligned pointer access
-            sockaddr_storage sto;
-            std::memcpy (&sto, cursor->ifa_addr, sizeof (sockaddr_storage));
+            sockaddr sto;
+            std::memcpy (&sto, cursor->ifa_addr, sizeof (sockaddr));
 
-            if (sto.ss_family == AF_LINK)
+            if (sto.sa_family == AF_LINK)
             {
                 auto sadd = (const sockaddr_dl*) cursor->ifa_addr;
 
