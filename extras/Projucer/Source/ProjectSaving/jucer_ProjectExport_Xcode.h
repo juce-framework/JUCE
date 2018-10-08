@@ -75,10 +75,10 @@ public:
           customXcassetsFolderValue                    (settings, Ids::customXcassetsFolder,                    getUndoManager()),
           microphonePermissionNeededValue              (settings, Ids::microphonePermissionNeeded,              getUndoManager()),
           microphonePermissionsTextValue               (settings, Ids::microphonePermissionsText,               getUndoManager(),
-                                                        "This is an audio app which requires audio input. If you do not have a USB audio interface connected it will use the microphone."),
+                                                        "This app requires requires audio input. If you do not have an audio interface connected it will use the built-in microphone."),
           cameraPermissionNeededValue                  (settings, Ids::cameraPermissionNeeded,                  getUndoManager()),
           cameraPermissionTextValue                    (settings, Ids::cameraPermissionText,                    getUndoManager(),
-                                                        "This app requires camera usage to function properly."),
+                                                        "This app requires access to the camera function correctly."),
           uiFileSharingEnabledValue                    (settings, Ids::UIFileSharingEnabled,                    getUndoManager()),
           uiSupportsDocumentBrowserValue               (settings, Ids::UISupportsDocumentBrowser,               getUndoManager()),
           uiStatusBarHiddenValue                       (settings, Ids::UIStatusBarHidden,                       getUndoManager()),
@@ -241,22 +241,6 @@ public:
 
             props.add (new ChoicePropertyComponent (uiStatusBarHiddenValue, "Status Bar Hidden"),
                        "Enable this to disable the status bar in your app.");
-
-            props.add (new ChoicePropertyComponent (microphonePermissionNeededValue, "Microphone Access"),
-                       "Enable this to allow your app to use the microphone. "
-                       "The user of your app will be prompted to grant microphone access permissions.");
-
-            props.add (new TextPropertyComponentWithEnablement (microphonePermissionsTextValue, microphonePermissionNeededValue,
-                                                                "Microphone Access Text", 1024, false),
-                       "A short description of why your app requires microphone access.");
-
-            props.add (new ChoicePropertyComponent (cameraPermissionNeededValue, "Camera Access"),
-                       "Enable this to allow your app to use the camera. "
-                       "The user of your app will be prompted to grant camera access permissions.");
-
-            props.add (new TextPropertyComponentWithEnablement (cameraPermissionTextValue, cameraPermissionNeededValue,
-                                                                "Camera Access Text", 1024, false),
-                       "A short description of why your app requires camera access.");
         }
         else if (projectType.isGUIApplication())
         {
@@ -264,6 +248,22 @@ public:
                        "A comma-separated list of file extensions for documents that your app can open. "
                        "Using a leading '.' is optional, and the extensions are not case-sensitive.");
         }
+
+        props.add (new ChoicePropertyComponent (microphonePermissionNeededValue, "Microphone Access"),
+                   "Enable this to allow your app to use the microphone. "
+                   "The user of your app will be prompted to grant microphone access permissions.");
+
+        props.add (new TextPropertyComponentWithEnablement (microphonePermissionsTextValue, microphonePermissionNeededValue,
+                                                            "Microphone Access Text", 1024, false),
+                   "A short description of why your app requires microphone access.");
+
+        props.add (new ChoicePropertyComponent (cameraPermissionNeededValue, "Camera Access"),
+                   "Enable this to allow your app to use the camera. "
+                   "The user of your app will be prompted to grant camera access permissions.");
+
+        props.add (new TextPropertyComponentWithEnablement (cameraPermissionTextValue, cameraPermissionNeededValue,
+                                                            "Camera Access Text", 1024, false),
+                   "A short description of why your app requires camera access.");
 
         props.add (new ChoicePropertyComponent (iosInAppPurchasesValue, "In-App Purchases Capability"),
                    "Enable this to grant your app the capability for in-app purchases. "
@@ -1345,15 +1345,15 @@ public:
             if (dict == nullptr)
                 dict = plist->createNewChildElement ("dict");
 
+            if (owner.isMicrophonePermissionEnabled())
+                addPlistDictionaryKey (dict, "NSMicrophoneUsageDescription", owner.getMicrophonePermissionsTextString());
+
+            if (owner.isCameraPermissionEnabled())
+                addPlistDictionaryKey (dict, "NSCameraUsageDescription", owner.getCameraPermissionTextString());
+
             if (owner.iOS)
             {
                 addPlistDictionaryKeyBool (dict, "LSRequiresIPhoneOS", true);
-
-                if (owner.isMicrophonePermissionEnabled())
-                    addPlistDictionaryKey (dict, "NSMicrophoneUsageDescription", owner.getMicrophonePermissionsTextString());
-
-                if (owner.isCameraPermissionEnabled())
-                    addPlistDictionaryKey (dict, "NSCameraUsageDescription", owner.getCameraPermissionTextString());
 
                 if (type != AudioUnitv3PlugIn)
                     addPlistDictionaryKeyBool (dict, "UIViewControllerBasedStatusBarAppearance", false);
