@@ -1705,7 +1705,6 @@ private:
         auto* manifest = createManifestElement();
 
         createSupportsScreensElement (*manifest);
-        createUsesSdkElement         (*manifest);
         createPermissionElements     (*manifest);
         createOpenGlFeatureElement   (*manifest);
 
@@ -1751,13 +1750,6 @@ private:
                 screens->setAttribute ("android:anyDensity", "true");
             }
         }
-    }
-
-    void createUsesSdkElement (XmlElement& manifest) const
-    {
-        auto* sdk = getOrCreateChildWithName (manifest, "uses-sdk");
-        setAttributeIfNotPresent (*sdk, "android:minSdkVersion", androidMinimumSDK.get());
-        setAttributeIfNotPresent (*sdk, "android:targetSdkVersion", androidMinimumSDK.get());
     }
 
     void createPermissionElements (XmlElement& manifest) const
