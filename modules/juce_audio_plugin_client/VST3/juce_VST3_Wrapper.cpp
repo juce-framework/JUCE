@@ -1261,11 +1261,6 @@ public:
 
     DECLARE_FUNKNOWN_METHODS
 
-    static FUnknown* createInstance (void*)
-    {
-        return (FUnknown*)new JuceARAFactory ();
-    }
-
     //---from ARA::IMainFactory-------
     const ARA::ARAFactory* PLUGIN_API getFactory () SMTG_OVERRIDE
     {
@@ -2766,7 +2761,7 @@ static FUnknown* createControllerInstance (Vst::IHostApplication* host)
 #if JucePlugin_Enable_ARA
 static FUnknown* createARAFactoryInstance (Vst::IHostApplication* host)
 {
-    return (FUnknown*) JuceARAFactory::createInstance(host);
+    return static_cast<ARA::IMainFactory*> (new JuceARAFactory ());
 }
 #endif
 
