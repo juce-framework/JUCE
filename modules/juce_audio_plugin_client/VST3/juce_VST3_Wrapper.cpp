@@ -2576,14 +2576,8 @@ private:
 
     const ARA::ARAPlugInExtensionInstance* PLUGIN_API bindToDocumentController (ARA::ARADocumentControllerRef controllerRef) SMTG_OVERRIDE
     {
-#if ARA_SUPPORT_VERSION_1
-        ARA_VALIDATE_STATE(ARA::PlugIn::DocumentController::getUsedApiGeneration() < ARA::kARAAPIGeneration_2_0_Draft);
-        ARA::ARAPlugInInstanceRoleFlags allRoles = ARA::kARAPlaybackRendererRole | ARA::kARAEditorRendererRole | ARA::kARAEditorViewRole;
-        return bindToDocumentControllerWithRoles(controllerRef, allRoles, allRoles);
-#else
         ARA_VALIDATE_API_STATE(false && "call is deprecated in ARA 2, host must not call this");
         return nullptr;
-#endif
     }
 
     const ARA::ARAPlugInExtensionInstance* PLUGIN_API bindToDocumentControllerWithRoles (ARA::ARADocumentControllerRef documentControllerRef,
