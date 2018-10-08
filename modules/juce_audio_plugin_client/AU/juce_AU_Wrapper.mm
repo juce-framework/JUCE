@@ -84,6 +84,14 @@
 #include "../../juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp"
 #include "../../juce_audio_processors/format_types/juce_AU_Shared.h"
 
+#if JucePlugin_Enable_ARA
+ // AudioUnit ARA implementation kindly provided by SoundRadix
+ #include <ARA_API/ARAAudioUnit.h>
+ #if ARA_SUPPORT_VERSION_1
+  #error "Unsupported ARA version - ARA version 2 and onward are JUCE compatible"
+ #endif
+#endif // JucePlugin_Enable_ARA
+
 //==============================================================================
 using namespace juce;
 
@@ -458,6 +466,20 @@ public:
                     outWritable = false;
                     return noErr;
 
+#if JucePlugin_Enable_ARA
+                case ARA::kAudioUnitProperty_ARAFactory:
+                    outWritable = false;
+                    outDataSize = sizeof (ARA::ARAAudioUnitFactory);
+                    return noErr;
+#if ARA_SUPPORT_VERSION_1
+                case ARA::kAudioUnitProperty_ARAPlugInExtensionBinding:
+#endif
+                case ARA::kAudioUnitProperty_ARAPlugInExtensionBindingWithRoles:
+                    outWritable = false;
+                    outDataSize = sizeof (ARA::ARAAudioUnitPlugInExtensionBinding);
+                    return noErr;
+#endif // JucePlugin_Enable_ARA
+
                 default: break;
             }
         }
@@ -498,6 +520,53 @@ public:
                     // Failed to find a group corresponding to the clump ID.
                     jassertfalse;
                     break;
+
+                    //==============================================================================
+#if JucePlugin_Enable_ARA
+                case ARA::kAudioUnitProperty_ARAFactory:
+                {
+                    if (((ARA::ARAAudioUnitFactory *)outData)->inOutMagicNumber != ARA::kARAAudioUnitMagic)
+                        return kAudioUnitErr_InvalidProperty;
+
+                    ((ARA::ARAAudioUnitFactory *)outData)->outFactory = ARA::PlugIn::DocumentController::getARAFactory();
+                    return noErr;
+                }
+
+                case ARA::kAudioUnitProperty_ARAPlugInExtensionBindingWithRoles:
+                {
+                    if (((ARA::ARAAudioUnitPlugInExtensionBinding *)outData)->inOutMagicNumber != ARA::kARAAudioUnitMagic)
+                        return kAudioUnitErr_InvalidProperty;
+
+                    ARA::PlugIn::DocumentController * documentController = (ARA::PlugIn::DocumentController *)((ARA::ARAAudioUnitPlugInExtensionBinding *)outData)->inDocumentControllerRef;
+                    ARA_VALIDATE_API_ARGUMENT(documentController, ARA::PlugIn::DocumentController::isValidDocumentController (documentController));
+
+                    ARA::ARAPlugInInstanceRoleFlags knownRoles;
+                    ARA::ARAPlugInInstanceRoleFlags assignedRoles;
+#if ARA_SUPPORT_VERSION_1
+                    if (inID == ARA::kAudioUnitProperty_ARAPlugInExtensionBinding)
+                    {
+                        ARA_VALIDATE_API_STATE(ARA::PlugIn::DocumentController::getUsedApiGeneration() < ARA::kARAAPIGeneration_2_0_Draft);
+                        knownRoles = ARA::kARAPlaybackRendererRole | ARA::kARAEditorRendererRole | ARA::kARAEditorViewRole;
+                        assignedRoles = ARA::kARAPlaybackRendererRole | ARA::kARAEditorRendererRole | ARA::kARAEditorViewRole;
+                    }
+                    else
+#endif
+                    {
+                        knownRoles = ((ARA::ARAAudioUnitPlugInExtensionBinding *)outData)->knownRoles;
+                        assignedRoles = ((ARA::ARAAudioUnitPlugInExtensionBinding *)outData)->assignedRoles;
+                    }
+
+                    ((ARA::ARAAudioUnitPlugInExtensionBinding *)outData)->outPlugInExtension = juceFilter->_createARAPlugInExtension (((ARA::ARAAudioUnitPlugInExtensionBinding *)outData)->inDocumentControllerRef, knownRoles, assignedRoles);
+
+                    if (((ARA::ARAAudioUnitPlugInExtensionBinding *)outData)->outPlugInExtension == NULL)
+                    {
+                        // binding already established? - this is tested within _createARAPlugInExtension
+                        return kAudioUnitErr_CannotDoInCurrentContext;
+                    }
+
+                    return noErr;
+                }
+#endif // JucePlugin_Enable_ARA
 
                 case juceFilterObjectPropertyID:
                     ((void**) outData)[0] = (void*) static_cast<AudioProcessor*> (juceFilter.get());
