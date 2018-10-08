@@ -522,31 +522,29 @@ public:
 #if JucePlugin_Enable_ARA
                 case ARA::kAudioUnitProperty_ARAFactory:
                 {
-                    if (((ARA::ARAAudioUnitFactory *)outData)->inOutMagicNumber != ARA::kARAAudioUnitMagic)
+                    ARA::ARAAudioUnitFactory * auFactory = static_cast<ARA::ARAAudioUnitFactory *>(outData);
+                    
+                    if (auFactory->inOutMagicNumber != ARA::kARAAudioUnitMagic)
                         return kAudioUnitErr_InvalidProperty;
 
-                    ((ARA::ARAAudioUnitFactory *)outData)->outFactory = ARA::PlugIn::DocumentController::getARAFactory();
+                    auFactory->outFactory = ARA::PlugIn::DocumentController::getARAFactory();
                     return noErr;
                 }
 
                 case ARA::kAudioUnitProperty_ARAPlugInExtensionBindingWithRoles:
                 {
-                    if (((ARA::ARAAudioUnitPlugInExtensionBinding *)outData)->inOutMagicNumber != ARA::kARAAudioUnitMagic)
+                    ARA::ARAAudioUnitPlugInExtensionBinding * binding = static_cast<ARA::ARAAudioUnitPlugInExtensionBinding *>(outData);
+                    
+                    if (binding->inOutMagicNumber != ARA::kARAAudioUnitMagic)
                         return kAudioUnitErr_InvalidProperty;
 
-                    ARA::PlugIn::DocumentController * documentController = (ARA::PlugIn::DocumentController *)((ARA::ARAAudioUnitPlugInExtensionBinding *)outData)->inDocumentControllerRef;
+                    ARA::PlugIn::DocumentController * documentController = reinterpret_cast<ARA::PlugIn::DocumentController *>(binding->inDocumentControllerRef);
+                    
                     ARA_VALIDATE_API_ARGUMENT(documentController, ARA::PlugIn::DocumentController::isValidDocumentController (documentController));
 
-                    ARA::ARAPlugInInstanceRoleFlags knownRoles;
-                    ARA::ARAPlugInInstanceRoleFlags assignedRoles;
-                    {
-                        knownRoles = ((ARA::ARAAudioUnitPlugInExtensionBinding *)outData)->knownRoles;
-                        assignedRoles = ((ARA::ARAAudioUnitPlugInExtensionBinding *)outData)->assignedRoles;
-                    }
+                    binding->outPlugInExtension = juceFilter->_createARAPlugInExtension(binding->inDocumentControllerRef, binding->knownRoles, binding->assignedRoles);
 
-                    ((ARA::ARAAudioUnitPlugInExtensionBinding *)outData)->outPlugInExtension = juceFilter->_createARAPlugInExtension (((ARA::ARAAudioUnitPlugInExtensionBinding *)outData)->inDocumentControllerRef, knownRoles, assignedRoles);
-
-                    if (((ARA::ARAAudioUnitPlugInExtensionBinding *)outData)->outPlugInExtension == NULL)
+                    if (binding->outPlugInExtension == NULL)
                     {
                         // binding already established? - this is tested within _createARAPlugInExtension
                         return kAudioUnitErr_CannotDoInCurrentContext;
