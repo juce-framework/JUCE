@@ -471,9 +471,6 @@ public:
                     outWritable = false;
                     outDataSize = sizeof (ARA::ARAAudioUnitFactory);
                     return noErr;
-#if ARA_SUPPORT_VERSION_1
-                case ARA::kAudioUnitProperty_ARAPlugInExtensionBinding:
-#endif
                 case ARA::kAudioUnitProperty_ARAPlugInExtensionBindingWithRoles:
                     outWritable = false;
                     outDataSize = sizeof (ARA::ARAAudioUnitPlugInExtensionBinding);
@@ -542,15 +539,6 @@ public:
 
                     ARA::ARAPlugInInstanceRoleFlags knownRoles;
                     ARA::ARAPlugInInstanceRoleFlags assignedRoles;
-#if ARA_SUPPORT_VERSION_1
-                    if (inID == ARA::kAudioUnitProperty_ARAPlugInExtensionBinding)
-                    {
-                        ARA_VALIDATE_API_STATE(ARA::PlugIn::DocumentController::getUsedApiGeneration() < ARA::kARAAPIGeneration_2_0_Draft);
-                        knownRoles = ARA::kARAPlaybackRendererRole | ARA::kARAEditorRendererRole | ARA::kARAEditorViewRole;
-                        assignedRoles = ARA::kARAPlaybackRendererRole | ARA::kARAEditorRendererRole | ARA::kARAEditorViewRole;
-                    }
-                    else
-#endif
                     {
                         knownRoles = ((ARA::ARAAudioUnitPlugInExtensionBinding *)outData)->knownRoles;
                         assignedRoles = ((ARA::ARAAudioUnitPlugInExtensionBinding *)outData)->assignedRoles;
