@@ -1601,7 +1601,7 @@ const ARA::ARAPlugInExtensionInstance* AudioProcessor::createARAPlugInExtension 
         return nullptr;
     }
 
-    araPlugInExtension = documentController->createPlugInExtensionWithRoles (knownRoles, assignedRoles);
+    araPlugInExtension.reset(documentController->createPlugInExtensionWithRoles (knownRoles, assignedRoles));
     return araPlugInExtension->getInstance ();
 }
 

@@ -185,7 +185,7 @@ public:
 
 	//==============================================================================
 #if JucePlugin_Enable_ARA
-    ARA::PlugIn::EditorView* getARAEditorView() const       { return processor.getARAEditorView(); }
+    ARA::PlugIn::EditorView* getARAEditorView() const;
 
     bool isARAEditorView() const                            { return getARAEditorView() != nullptr; }
 #endif

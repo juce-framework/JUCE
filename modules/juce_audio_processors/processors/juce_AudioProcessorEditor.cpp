@@ -168,6 +168,13 @@ void AudioProcessorEditor::setBoundsConstrained (Rectangle<int> newBounds)
         setBounds (newBounds);
 }
 
+#if JucePlugin_Enable_ARA
+ ARA::PlugIn::EditorView* AudioProcessorEditor::getARAEditorView() const
+ {
+     return processor.getARAEditorView();
+ }
+#endif
+
 void AudioProcessorEditor::editorResized (bool wasResized)
 {
     if (wasResized)

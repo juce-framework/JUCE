@@ -1615,7 +1615,7 @@ public:
     bool isARAEditorView() const           { return getARAEditorView() != nullptr; }
 
 private:
-	std::unique_ptr<const ARA::PlugIn::PlugInExtension*> araPlugInExtension;
+	std::unique_ptr<const ARA::PlugIn::PlugInExtension> araPlugInExtension;
 
 #endif
 
