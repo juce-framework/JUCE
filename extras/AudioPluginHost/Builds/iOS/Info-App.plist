@@ -4,7 +4,7 @@
 <plist>
   <dict>
     <key>NSMicrophoneUsageDescription</key>
-    <string>This app requires requires audio input. If you do not have an audio interface connected it will use the built-in microphone.</string>
+    <string>This app requires audio input. If you do not have an audio interface connected it will use the built-in microphone.</string>
     <key>LSRequiresIPhoneOS</key>
     <true/>
     <key>UIViewControllerBasedStatusBarAppearance</key>

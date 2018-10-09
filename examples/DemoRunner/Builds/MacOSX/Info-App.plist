@@ -4,9 +4,9 @@
 <plist>
   <dict>
     <key>NSMicrophoneUsageDescription</key>
-    <string>This app requires requires audio input. If you do not have an audio interface connected it will use the built-in microphone.</string>
+    <string>This app requires audio input. If you do not have an audio interface connected it will use the built-in microphone.</string>
     <key>NSCameraUsageDescription</key>
-    <string>This app requires access to the camera function correctly.</string>
+    <string>This app requires access to the camera to function correctly.</string>
     <key>CFBundleExecutable</key>
     <string>${EXECUTABLE_NAME}</string>
     <key>CFBundleIconFile</key>
