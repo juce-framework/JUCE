@@ -66,3 +66,7 @@ profile
 **/doxygen/doc
 **/doxygen/build
 extras/Projucer/JUCECompileEngine.dylib
+
+# ARA sample project build output
+examples/ARA/Builds*
+examples/ARA/JuceLibraryCode*
