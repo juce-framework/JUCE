@@ -117,6 +117,9 @@ namespace FlacNamespace
   #pragma clang diagnostic ignored "-Wconversion"
   #pragma clang diagnostic ignored "-Wshadow"
   #pragma clang diagnostic ignored "-Wdeprecated-register"
+  #if __has_warning("-Wzero-as-null-pointer-constant")
+   #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
+  #endif
  #endif
 
  #if JUCE_INTEL
@@ -298,7 +301,7 @@ public:
                 auto* src = buffer[i];
                 int n = i;
 
-                while (src == 0 && n > 0)
+                while (src == nullptr && n > 0)
                     src = buffer [--n];
 
                 if (src != nullptr)
