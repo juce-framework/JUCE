@@ -108,7 +108,7 @@ typename FIR::Coefficients<FloatType>::Ptr
 
     for (size_t i = 0; i <= order; ++i)
     {
-        if (i == order / 2)
+        if (i == order / 2 && order % 2 == 0)
         {
             c[i] = static_cast<FloatType> (2 * normalizedFrequency);
         }
@@ -686,6 +686,8 @@ typename FilterDesign<FloatType>::IIRPolyphaseAllpassStructure
     for (int i = 1; i < N; i += 2)
         structure.delayedPath.add (new IIR::Coefficients<FloatType> (static_cast<FloatType> (ai[i]),
                                                                      0, 1, 1, 0, static_cast<FloatType> (ai[i])));
+
+    structure.alpha.addArray (ai);
 
     return structure;
 }
