@@ -655,7 +655,7 @@ DocumentController* DocumentController::doCreateDocumentController ()
     return new ARATestDocumentController ();
 }
 
-#if !defined(JucePlugin_Enable_ARA)
+#if !JucePlugin_Enable_ARA
 const ARAFactory* DocumentController::getARAFactory ()
 {
     static const ARAContentType analyzeableContentTypes[] = { kARAContentTypeNotes };
