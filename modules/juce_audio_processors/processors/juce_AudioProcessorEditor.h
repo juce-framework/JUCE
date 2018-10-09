@@ -183,6 +183,13 @@ public:
 
     std::unique_ptr<ResizableCornerComponent> resizableCorner;
 
+	//==============================================================================
+#if JucePlugin_Enable_ARA
+    ARA::PlugIn::EditorView* getARAEditorView() const       { return processor.getARAEditorView(); }
+
+    bool isARAEditorView() const                            { return getARAEditorView() != nullptr; }
+#endif
+
 private:
     //==============================================================================
     struct AudioProcessorEditorListener : ComponentListener
@@ -212,16 +219,7 @@ private:
     ComponentBoundsConstrainer* constrainer = {};
     Component::SafePointer<Component> splashScreen;
 
-
 	//==============================================================================
-#if JucePlugin_Enable_ARA
-public:
-    ARA::PlugIn::EditorView* getARAEditorView() const;
-
-    inline bool isARAEditorView() const { return getARAEditorView() != nullptr; }
-#endif
-	//==============================================================================
-
     JUCE_DECLARE_NON_COPYABLE (AudioProcessorEditor)
 };
 

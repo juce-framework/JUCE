@@ -1600,6 +1600,25 @@ protected:
     /** @internal */
     void sendParamChangeMessageToListeners (int parameterIndex, float newValue);
 
+	//==============================================================================
+#if JucePlugin_Enable_ARA
+
+public:
+	const ARA::ARAPlugInExtensionInstance* createARAPlugInExtension (ARA::ARADocumentControllerRef documentControllerRef, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles);
+
+	ARA::PlugIn::PlaybackRenderer* getARAPlaybackRenderer() const;
+    ARA::PlugIn::EditorRenderer* getARAEditorRenderer() const;
+    ARA::PlugIn::EditorView* getARAEditorView() const;
+
+    bool isARAPlaybackRenderer() const     { return getARAPlaybackRenderer() != nullptr; }
+    bool isARAEditorRenderer() const       { return getARAEditorRenderer() != nullptr; }
+    bool isARAEditorView() const           { return getARAEditorView() != nullptr; }
+
+private:
+	std::unique_ptr<const ARA::PlugIn::PlugInExtension*> araPlugInExtension;
+
+#endif
+
 private:
     //==============================================================================
     void addParameterInternal (AudioProcessorParameter*);
@@ -1700,22 +1719,6 @@ private:
     // This method is no longer used - you can delete it from your AudioProcessor classes.
     JUCE_DEPRECATED_WITH_BODY (virtual bool silenceInProducesSilenceOut() const, { return false; })
 
-
-	//==============================================================================
-#if JucePlugin_Enable_ARA
-public:
-	const ARA::ARAPlugInExtensionInstance* _createARAPlugInExtension (ARA::ARADocumentControllerRef documentControllerRef, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles);
-
-	ARA::PlugIn::PlaybackRenderer* getARAPlaybackRenderer () const;
-    ARA::PlugIn::EditorRenderer* getARAEditorRenderer () const;
-    ARA::PlugIn::EditorView* getARAEditorView () const;
-
-    inline bool isARAPlaybackRenderer () const { return getARAPlaybackRenderer () != nullptr; }
-    inline bool isARAEditorRenderer () const { return getARAEditorRenderer () != nullptr; }
-    inline bool isARAEditorView () const { return getARAEditorView () != nullptr; }
-private:
-	const ARA::PlugIn::PlugInExtension* araPlugInExtension{ nullptr };
-#endif
 	//==============================================================================
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessor)

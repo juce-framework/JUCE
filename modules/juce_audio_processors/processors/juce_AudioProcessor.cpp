@@ -60,19 +60,10 @@ AudioProcessor::~AudioProcessor()
     // or more parameters without having made a corresponding call to endParameterChangeGesture...
     jassert (changingParams.countNumberOfSetBits() == 0);
    #endif
-
     // The parameters are owned by an AudioProcessorParameterGroup, but we need
     // to keep the managedParameters array populated to maintain backwards
     // compatibility.
     managedParameters.clearQuick (false);
-
-#if JucePlugin_Enable_ARA
-	if (araPlugInExtension)
-	{
-		delete araPlugInExtension;
-		araPlugInExtension = nullptr;
-	}
-#endif // JucePlugin_Enable_ARA
 }
 
 //==============================================================================
@@ -1598,25 +1589,25 @@ void AudioPlayHead::CurrentPositionInfo::resetToDefault()
 //==============================================================================
 #if JucePlugin_Enable_ARA
 
-const ARA::ARAPlugInExtensionInstance* AudioProcessor::_createARAPlugInExtension (ARA::ARADocumentControllerRef documentControllerRef, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles)
+const ARA::ARAPlugInExtensionInstance* AudioProcessor::createARAPlugInExtension (ARA::ARADocumentControllerRef documentControllerRef, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles)
 {
-	ARA::PlugIn::DocumentController * documentController = (ARA::PlugIn::DocumentController *)documentControllerRef;
-	ARA_VALIDATE_API_ARGUMENT (documentControllerRef, ARA::PlugIn::DocumentController::isValidDocumentController (documentController));
+    ARA::PlugIn::DocumentController* documentController = reinterpret_cast<ARA::PlugIn::DocumentController*> (documentControllerRef);
+    ARA_VALIDATE_API_ARGUMENT (documentControllerRef, ARA::PlugIn::DocumentController::isValidDocumentController (documentController));
 
-	// verify this is only called once
-	if (araPlugInExtension)
-	{
-		ARA_VALIDATE_API_STATE(false && "binding already established");
-		return nullptr;
-	}
+    // verify this is only called once
+    if (araPlugInExtension != nullptr)
+    {
+        ARA_VALIDATE_API_STATE (false && "binding already established");
+        return nullptr;
+    }
 
-	araPlugInExtension = documentController->createPlugInExtensionWithRoles (knownRoles, assignedRoles);
-	return araPlugInExtension->getInstance ();
+    araPlugInExtension = documentController->createPlugInExtensionWithRoles (knownRoles, assignedRoles);
+    return araPlugInExtension->getInstance ();
 }
 
 ARA::PlugIn::PlaybackRenderer* AudioProcessor::getARAPlaybackRenderer () const
 {
-	return araPlugInExtension ? araPlugInExtension->getPlaybackRenderer () : nullptr;
+    return araPlugInExtension ? araPlugInExtension->getPlaybackRenderer () : nullptr;
 }
 
 ARA::PlugIn::EditorRenderer* AudioProcessor::getARAEditorRenderer () const

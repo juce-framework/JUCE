@@ -84,7 +84,7 @@ namespace Vst2
  DEF_CLASS_IID(ARA::IPlugInEntryPoint2)
  DEF_CLASS_IID(ARA::IMainFactory)
 
-#endif // JucePlugin_Enable_ARA
+#endif
 
 
 namespace juce
@@ -1288,7 +1288,7 @@ IMPLEMENT_REFCOUNT(JuceARAFactory);
     return kNoInterface;
 }
 
-#endif // JucePlugin_Enable_ARA
+#endif
 
 //==============================================================================
 
@@ -1311,7 +1311,8 @@ class JuceVST3Component : public Vst::IComponent,
                           public Vst::IConnectionPoint,
                           public AudioPlayHead
 #if JucePlugin_Enable_ARA
-    , public ARA::IPlugInEntryPoint, public ARA::IPlugInEntryPoint2
+                        , public ARA::IPlugInEntryPoint,
+                          public ARA::IPlugInEntryPoint2
 #endif
 {
 public:
@@ -2571,17 +2572,17 @@ private:
 
     const ARA::ARAPlugInExtensionInstance* PLUGIN_API bindToDocumentController (ARA::ARADocumentControllerRef controllerRef) SMTG_OVERRIDE
     {
-        ARA_VALIDATE_API_STATE(false && "call is deprecated in ARA 2, host must not call this");
+        ARA_VALIDATE_API_STATE (false && "call is deprecated in ARA 2, host must not call this");
         return nullptr;
     }
 
     const ARA::ARAPlugInExtensionInstance* PLUGIN_API bindToDocumentControllerWithRoles (ARA::ARADocumentControllerRef documentControllerRef,
                                                                                          ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles) SMTG_OVERRIDE
     {
-        return pluginInstance->_createARAPlugInExtension (documentControllerRef, knownRoles, assignedRoles);
+        return pluginInstance->createARAPlugInExtension (documentControllerRef, knownRoles, assignedRoles);
     }
 
-#endif // JucePlugin_Enable_ARA
+#endif
 
     //==============================================================================
     Atomic<int> refCount { 1 };
@@ -2661,7 +2662,7 @@ DEF_CLASS_IID (JuceAudioProcessor)
 #if JucePlugin_Enable_ARA
  DECLARE_CLASS_IID (JuceARAFactory, 0xABCDEF01, 0xA1B2C3D4, JucePlugin_ManufacturerCode, JucePlugin_PluginCode)
  DEF_CLASS_IID (JuceARAFactory)
-#endif // JucePlugin_Enable_ARA
+#endif
 
 #if JUCE_MSVC
  #pragma warning (pop)
@@ -3035,7 +3036,7 @@ JUCE_EXPORTED_FUNCTION IPluginFactory* PLUGIN_API GetPluginFactory()
                                                   kVstVersionString);
 
         globalFactory->registerClass (araFactoryClass, createARAFactoryInstance);
-#endif // JucePlugin_Enable_ARA
+#endif
     }
     else
     {
