@@ -432,10 +432,10 @@ public:
     */
     LevelMeter::Ptr getInputLevelGetter() noexcept          { return inputLevelGetter; }
 
-    /** Returns a reference-counted object that can be used to get the current input level.
+    /** Returns a reference-counted object that can be used to get the current output level.
 
         You need to store this object locally to ensure that the reference count is incremented
-        and decremented properly. The current input level value can be read using getCurrentLevel().
+        and decremented properly. The current output level value can be read using getCurrentLevel().
     */
     LevelMeter::Ptr getOutputLevelGetter() noexcept         { return outputLevelGetter; }
 
