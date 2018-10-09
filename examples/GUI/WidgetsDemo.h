@@ -292,7 +292,7 @@ struct ButtonsPage   : public Component
             over.setStrokeThickness (4.0f);
 
             auto* db = addToList (new DrawableButton (String (i + 5) + " points", DrawableButton::ImageAboveTextLabel));
-            db->setImages (&normal, &over, 0);
+            db->setImages (&normal, &over, nullptr);
             db->setClickingTogglesState (true);
             db->setRadioGroupId (23456);
 
@@ -391,7 +391,7 @@ struct ButtonsPage   : public Component
         {
             // create an image-on-button-shape button from the same drawables..
             auto db = addToList (new DrawableButton ("Button 3", DrawableButton::ImageOnButtonBackground));
-            db->setImages (&normal, 0, 0);
+            db->setImages (&normal, nullptr, nullptr);
             db->setBounds (260, 160, 110, 25);
             db->setTooltip ("This is a DrawableButton on a standard button background");
             db->onClick = popupMessageCallback;
@@ -636,7 +636,7 @@ private:
                 {
                     auto* drawable = new DrawableImage();
                     drawable->setImage (getImageFromAssets ("juce_icon.png"));
-                    return new ToolbarButton (itemId, "juce!", drawable, 0);
+                    return new ToolbarButton (itemId, "juce!", drawable, nullptr);
                 }
                 case customComboBox:    return new CustomToolbarComboBox (itemId);
                 default:                break;
@@ -671,7 +671,7 @@ private:
             }
 
             auto* image = iconsFromZipFile[iconNames.indexOf (filename)]->createCopy();
-            return new ToolbarButton (itemId, text, image, 0);
+            return new ToolbarButton (itemId, text, image, nullptr);
         }
 
         // Demonstrates how to put a custom component into a toolbar - this one contains

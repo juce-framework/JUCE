@@ -236,7 +236,7 @@ private:
         {
             if (position.get() != nullptr)
             {
-                glContext.extensions.glVertexAttribPointer (position->attributeID, 3, GL_FLOAT, GL_FALSE, sizeof (Vertex), 0);
+                glContext.extensions.glVertexAttribPointer (position->attributeID, 3, GL_FLOAT, GL_FALSE, sizeof (Vertex), nullptr);
                 glContext.extensions.glEnableVertexAttribArray (position->attributeID);
             }
 
@@ -325,7 +325,7 @@ private:
                 vertexBuffer->bind();
 
                 glAttributes.enable (glContext);
-                glDrawElements (GL_TRIANGLES, vertexBuffer->numIndices, GL_UNSIGNED_INT, 0);
+                glDrawElements (GL_TRIANGLES, vertexBuffer->numIndices, GL_UNSIGNED_INT, nullptr);
                 glAttributes.disable (glContext);
             }
         }

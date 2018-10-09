@@ -382,7 +382,7 @@ struct Program
 
     //==============================================================================
     static constexpr uint32 programHeaderSize = 10;
-    const uint8* programStart = 0;
+    const uint8* programStart = nullptr;
     const uint32 maxProgramSize;
 
 private:

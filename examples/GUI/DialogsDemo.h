@@ -235,7 +235,8 @@ private:
         {
             AlertWindow::showOkCancelBox (AlertWindow::QuestionIcon, "This is an ok/cancel AlertWindow",
                                           "And this is the AlertWindow's message. Blah blah blah blah blah blah blah blah blah blah blah blah blah.",
-                                          {}, {}, 0, ModalCallbackFunction::forComponent (alertBoxResultChosen, this));
+                                          {}, {}, {},
+                                          ModalCallbackFunction::forComponent (alertBoxResultChosen, this));
         }
         else if (type == calloutBoxWindow)
         {
