@@ -1,6 +1,13 @@
+// TODO formalize ARA includes
+
 #include <ARA_Library/PlugIn/ARAPlug.cpp>
 #include <ARA_Library/Debug/ARADebug.c>
 #include <ARA_Library/Dispatch/ARAPlugInDispatch.cpp>
+
+// Include these source files directly for now
+#include "ARADocumentController.cpp"
+#include "ARARegionSequence.cpp"
+#include "ARAAudioSource.cpp"
 
 #include "JuceHeader.h"
 
