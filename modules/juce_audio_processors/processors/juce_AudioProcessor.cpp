@@ -60,6 +60,7 @@ AudioProcessor::~AudioProcessor()
     // or more parameters without having made a corresponding call to endParameterChangeGesture...
     jassert (changingParams.countNumberOfSetBits() == 0);
    #endif
+
     // The parameters are owned by an AudioProcessorParameterGroup, but we need
     // to keep the managedParameters array populated to maintain backwards
     // compatibility.
