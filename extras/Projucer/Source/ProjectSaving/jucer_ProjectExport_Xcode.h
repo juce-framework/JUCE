@@ -26,6 +26,7 @@
 
 #pragma once
 
+#include "jucer_XcodeProjectParser.h"
 
 //==============================================================================
 namespace
@@ -61,6 +62,7 @@ public:
           customPListValue                             (settings, Ids::customPList,                             getUndoManager()),
           pListPrefixHeaderValue                       (settings, Ids::pListPrefixHeader,                       getUndoManager()),
           pListPreprocessValue                         (settings, Ids::pListPreprocess,                         getUndoManager()),
+          subprojectsValue                             (settings, Ids::xcodeSubprojects,                        getUndoManager()),
           extraFrameworksValue                         (settings, Ids::extraFrameworks,                         getUndoManager()),
           frameworkSearchPathsValue                    (settings, Ids::frameworkSearchPaths,                    getUndoManager()),
           extraCustomFrameworksValue                   (settings, Ids::extraCustomFrameworks,                   getUndoManager()),
@@ -111,6 +113,8 @@ public:
     String getPListToMergeString() const             { return customPListValue.get(); }
     String getPListPrefixHeaderString() const        { return pListPrefixHeaderValue.get(); }
     bool isPListPreprocessEnabled() const            { return pListPreprocessValue.get(); }
+
+    String getSubprojectsString() const              { return subprojectsValue.get(); }
 
     String getExtraFrameworksString() const          { return extraFrameworksValue.get(); }
     String getFrameworkSearchPathsString() const     { return frameworkSearchPathsValue.get(); }
@@ -316,6 +320,12 @@ public:
                    "Paths to frameworks to be embedded with the app (one per line). "
                    "If you are adding a framework here then you do not need to specify it in Extra Custom Frameworks too. "
                    "You will probably need to add an entry to the Framework Search Paths for each unique directory.");
+
+        props.add (new TextPropertyComponent (subprojectsValue, "Xcode Subprojects", 8192, true),
+                   "Paths to Xcode projects that should be added to the build (one per line). "
+                   "The names of the required build products can be specified after a colon, comma seperated, "
+                   "e.g. \"path/to/MySubProject.xcodeproj: MySubProject, OtherTarget\". "
+                   "If no build products are specified, all build products associated with a subproject will be added.");
 
         props.add (new TextPropertyComponent (prebuildCommandValue, "Pre-Build Shell Script", 32768, true),
                    "Some shell-script that will be run before a build starts.");
@@ -1105,8 +1115,8 @@ public:
                 if (type == Target::SharedCodeTarget)
                     s.set ("SKIP_INSTALL", "YES");
 
-                if (! owner.getEmbeddedFrameworks().isEmpty())
-                    s.set ("LD_RUNPATH_SEARCH_PATHS", "\"$(inherited) @executable_path/Frameworks\"");
+                if (! owner.embeddedFrameworkIDs.isEmpty())
+                    s.set ("LD_RUNPATH_SEARCH_PATHS", "\"$(inherited) @executable_path/Frameworks @executable_path/../Frameworks\"");
 
                 if (xcodeCopyToProductInstallPathAfterBuild)
                 {
@@ -1769,14 +1779,18 @@ private:
 
     mutable OwnedArray<ValueTree> pbxBuildFiles, pbxFileReferences, pbxGroups, misc, projectConfigs, targetConfigs;
     mutable StringArray resourceIDs, sourceIDs, targetIDs;
-    mutable StringArray frameworkFileIDs, rezFileIDs, resourceFileRefs;
+    mutable StringArray frameworkFileIDs, embeddedFrameworkIDs, rezFileIDs, resourceFileRefs, subprojectFileIDs;
+    mutable Array<std::pair<String, String>> subprojectReferences;
     mutable File menuNibFile, iconFile;
     mutable StringArray buildProducts;
 
     const bool iOS;
 
-    ValueWithDefault customPListValue, pListPrefixHeaderValue, pListPreprocessValue, extraFrameworksValue, frameworkSearchPathsValue, extraCustomFrameworksValue, embeddedFrameworksValue,
-                     postbuildCommandValue, prebuildCommandValue, duplicateAppExResourcesFolderValue, iosDeviceFamilyValue, iPhoneScreenOrientationValue,
+    ValueWithDefault customPListValue, pListPrefixHeaderValue, pListPreprocessValue,
+                     subprojectsValue,
+                     extraFrameworksValue, frameworkSearchPathsValue, extraCustomFrameworksValue, embeddedFrameworksValue,
+                     postbuildCommandValue, prebuildCommandValue,
+                     duplicateAppExResourcesFolderValue, iosDeviceFamilyValue, iPhoneScreenOrientationValue,
                      iPadScreenOrientationValue, customXcodeResourceFoldersValue, customXcassetsFolderValue,
                      microphonePermissionNeededValue, microphonePermissionsTextValue, cameraPermissionNeededValue, cameraPermissionTextValue,
                      uiFileSharingEnabledValue, uiSupportsDocumentBrowserValue, uiStatusBarHiddenValue, documentExtensionsValue, iosInAppPurchasesValue,
@@ -1803,9 +1817,14 @@ private:
     {
         prepareTargets();
 
+        // Must be called before adding embedded frameworks, as we want to
+        // embed any frameworks found in subprojects.
+        addSubprojects();
+
         addFrameworks();
         addCustomFrameworks();
         addEmbeddedFrameworks();
+
         addCustomResourceFolders();
         addPlistFileReferences();
 
@@ -1947,6 +1966,13 @@ private:
             auto productsGroupID = createID ("__products");
             addGroup (productsGroupID, "Products", buildProducts);
             topLevelGroupIDs.add (productsGroupID);
+        }
+
+        if (! subprojectFileIDs.isEmpty())
+        {
+            auto subprojectLibrariesGroupID = createID ("__subprojects");
+            addGroup (subprojectLibrariesGroupID, "Subprojects", subprojectFileIDs);
+            topLevelGroupIDs.add (subprojectLibrariesGroupID);
         }
     }
 
@@ -2479,12 +2505,9 @@ private:
 
     void addEmbeddedFrameworks() const
     {
-        auto frameworks = getEmbeddedFrameworks();
-
-        if (frameworks.isEmpty())
-            return;
-
-        StringArray embeddedFrameworkIDs;
+        StringArray frameworks;
+        frameworks.addTokens (getEmbeddedFrameworksString(), true);
+        frameworks.trim();
 
         for (auto& framework : frameworks)
         {
@@ -2498,17 +2521,9 @@ private:
             }
         }
 
-        for (auto& target : targets)
-            target->addCopyFilesPhase ("Embed Frameworks", embeddedFrameworkIDs, kFrameworksFolder);
-    }
-
-    StringArray getEmbeddedFrameworks() const
-    {
-        StringArray frameworks;
-        frameworks.addTokens (getEmbeddedFrameworksString(), true);
-        frameworks.trim();
-
-        return frameworks;
+        if (! embeddedFrameworkIDs.isEmpty())
+            for (auto& target : targets)
+                target->addCopyFilesPhase ("Embed Frameworks", embeddedFrameworkIDs, kFrameworksFolder);
     }
 
     void addCustomResourceFolders() const
@@ -2521,6 +2536,104 @@ private:
 
         for (auto& crf : folders)
             addCustomResourceFolder (crf);
+    }
+
+    void addSubprojects() const
+    {
+        auto subprojectLines = StringArray::fromLines (getSubprojectsString());
+        subprojectLines.removeEmptyStrings (true);
+
+        Array<std::pair<String, StringArray>> subprojects;
+
+        for (auto& line : subprojectLines)
+        {
+            String subprojectName (line.upToFirstOccurrenceOf (":", false, false));
+            StringArray requestedBuildProducts (StringArray::fromTokens (line.fromFirstOccurrenceOf (":", false, false), ",;|", "\"'"));
+            requestedBuildProducts.trim();
+            subprojects.add ({ subprojectName, requestedBuildProducts });
+        }
+
+        for (const auto& subprojectInfo : subprojects)
+        {
+            String subprojectPath (subprojectInfo.first);
+
+            if (! subprojectPath.endsWith (".xcodeproj"))
+                subprojectPath += ".xcodeproj";
+
+            File subprojectFile;
+
+            if (File::isAbsolutePath (subprojectPath))
+            {
+                subprojectFile = subprojectPath;
+            }
+            else
+            {
+                subprojectFile = getProject().getProjectFolder().getChildFile (subprojectPath);
+
+                RelativePath p (subprojectPath, RelativePath::projectFolder);
+                subprojectPath = p.rebased (getProject().getProjectFolder(), getTargetFolder(), RelativePath::buildTargetFolder).toUnixStyle();
+            }
+
+            if (! subprojectFile.isDirectory())
+                continue;
+
+            auto availableBuildProducts = XcodeProjectParser::parseBuildProducts (subprojectFile);
+
+            // If no build products have been specified then we'll take everything
+            if (! subprojectInfo.second.isEmpty())
+            {
+                auto newEnd = std::remove_if (availableBuildProducts.begin(), availableBuildProducts.end(),
+                                              [&subprojectInfo](const std::pair<String, String> &item)
+                                              {
+                                                  return ! subprojectInfo.second.contains (item.first);
+                                              });
+                availableBuildProducts.erase (newEnd, availableBuildProducts.end());
+            }
+
+            if (availableBuildProducts.empty())
+                continue;
+
+            auto subprojectFileType = getFileType (RelativePath (subprojectPath, RelativePath::projectFolder));
+            auto subprojectFileID = addFileOrFolderReference (subprojectPath, "<group>", subprojectFileType);
+            subprojectFileIDs.add (subprojectFileID);
+
+            StringArray proxyIDs;
+
+            for (auto& buildProduct : availableBuildProducts)
+            {
+                auto buildProductFileType = getFileType (RelativePath (buildProduct.second, RelativePath::projectFolder));
+
+                auto containerID = addContainerItemProxy (subprojectFileID, buildProduct.first);
+                auto proxyID = addReferenceProxy (containerID, buildProduct.second, buildProductFileType);
+                proxyIDs.add (proxyID);
+
+                if (buildProductFileType == "archive.ar" || buildProductFileType == "wrapper.framework")
+                {
+                    auto buildFileID = addBuildFile (buildProduct.second, proxyID, false, true);
+
+                    for (auto& target : targets)
+                        target->frameworkIDs.add (buildFileID);
+
+                    if (buildProductFileType == "wrapper.framework")
+                    {
+                        auto fileID = createID (buildProduct.second + "buildref");
+
+                        auto* v = new ValueTree (fileID);
+                        v->setProperty ("isa", "PBXBuildFile", nullptr);
+                        v->setProperty ("fileRef", proxyID, nullptr);
+                        v->setProperty ("settings", "{ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }", nullptr);
+                        pbxBuildFiles.add (v);
+
+                        embeddedFrameworkIDs.add (fileID);
+                    }
+                }
+            }
+
+            auto productGroupID = createFileRefID (subprojectPath + "_products");
+            addGroup (productGroupID, "Products", proxyIDs);
+
+            subprojectReferences.add ({ productGroupID, subprojectFileID });
+        }
     }
 
     void addXcassets() const
@@ -2635,17 +2748,8 @@ private:
         return addFileOrFolderReference (pathString, sourceTree, fileType);
     }
 
-    String addFileOrFolderReference (String pathString, String sourceTree, String fileType) const
+    void checkAndAddFileReference (std::unique_ptr<ValueTree> v) const
     {
-        auto fileRefID = createFileRefID (pathString);
-
-        std::unique_ptr<ValueTree> v (new ValueTree (fileRefID));
-        v->setProperty ("isa", "PBXFileReference", nullptr);
-        v->setProperty ("lastKnownFileType", fileType, nullptr);
-        v->setProperty (Ids::name, pathString.fromLastOccurrenceOf ("/", false, false), nullptr);
-        v->setProperty ("path", pathString, nullptr);
-        v->setProperty ("sourceTree", sourceTree, nullptr);
-
         auto existing = pbxFileReferences.indexOfSorted (*this, v.get());
 
         if (existing >= 0)
@@ -2657,6 +2761,53 @@ private:
         {
             pbxFileReferences.addSorted (*this, v.release());
         }
+    }
+
+    String addFileOrFolderReference (const String& pathString, String sourceTree, String fileType) const
+    {
+        auto fileRefID = createFileRefID (pathString);
+
+        std::unique_ptr<ValueTree> v (new ValueTree (fileRefID));
+        v->setProperty ("isa", "PBXFileReference", nullptr);
+        v->setProperty ("lastKnownFileType", fileType, nullptr);
+        v->setProperty (Ids::name, pathString.fromLastOccurrenceOf ("/", false, false), nullptr);
+        v->setProperty ("path", pathString, nullptr);
+        v->setProperty ("sourceTree", sourceTree, nullptr);
+
+        checkAndAddFileReference (std::move (v));
+
+        return fileRefID;
+    }
+
+    String addContainerItemProxy (const String& subprojectID, const String& itemName) const
+    {
+        auto uniqueString = subprojectID + "_" + itemName;
+        auto fileRefID = createFileRefID (uniqueString);
+
+        std::unique_ptr<ValueTree> v (new ValueTree (fileRefID));
+        v->setProperty ("isa", "PBXContainerItemProxy", nullptr);
+        v->setProperty ("containerPortal", subprojectID, nullptr);
+        v->setProperty ("proxyType", 2, nullptr);
+        v->setProperty ("remoteGlobalIDString", createFileRefID (uniqueString + "_global"), nullptr);
+        v->setProperty ("remoteInfo", itemName, nullptr);
+
+        checkAndAddFileReference (std::move (v));
+
+        return fileRefID;
+    }
+
+    String addReferenceProxy (const String& containerItemID, const String& proxyPath, const String& fileType) const
+    {
+        auto fileRefID = createFileRefID (containerItemID + "_" + proxyPath);
+
+        std::unique_ptr<ValueTree> v (new ValueTree (fileRefID));
+        v->setProperty ("isa", "PBXReferenceProxy", nullptr);
+        v->setProperty ("fileType", fileType, nullptr);
+        v->setProperty ("path", proxyPath, nullptr);
+        v->setProperty ("remoteRef", containerItemID, nullptr);
+        v->setProperty ("sourceTree", "BUILT_PRODUCTS_DIR", nullptr);
+
+        checkAndAddFileReference (std::move (v));
 
         return fileRefID;
     }
@@ -2996,6 +3147,17 @@ private:
         v->setProperty ("hasScannedForEncodings", (int) 0, nullptr);
         v->setProperty ("mainGroup", createID ("__mainsourcegroup"), nullptr);
         v->setProperty ("projectDirPath", "\"\"", nullptr);
+
+        if (! subprojectReferences.isEmpty())
+        {
+            StringArray projectReferences;
+
+            for (auto& reference : subprojectReferences)
+                projectReferences.add (indentBracedList ({ "ProductGroup = " + reference.first, "ProjectRef = " + reference.second }, 1));
+
+            v->setProperty ("projectReferences", indentParenthesisedList (projectReferences), nullptr);
+        }
+
         v->setProperty ("projectRoot", "\"\"", nullptr);
 
         auto targetString = "(" + targetIDs.joinIntoString (", ") + ")";

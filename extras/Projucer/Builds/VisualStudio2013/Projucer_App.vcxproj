@@ -1611,6 +1611,7 @@
     <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExporter.h"/>
     <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectSaver.h"/>
     <ClInclude Include="..\..\Source\ProjectSaving\jucer_ResourceFile.h"/>
+    <ClInclude Include="..\..\Source\ProjectSaving\jucer_XcodeProjectParser.h"/>
     <ClInclude Include="..\..\Source\Settings\jucer_AppearanceSettings.h"/>
     <ClInclude Include="..\..\Source\Settings\jucer_StoredSettings.h"/>
     <ClInclude Include="..\..\Source\Utility\Helpers\jucer_CodeHelpers.h"/>

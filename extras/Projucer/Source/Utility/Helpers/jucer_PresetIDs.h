@@ -125,6 +125,7 @@ namespace Ids
     DECLARE_ID (osxCompatibility);
     DECLARE_ID (osxArchitecture);
     DECLARE_ID (iosCompatibility);
+    DECLARE_ID (xcodeSubprojects);
     DECLARE_ID (extraFrameworks);
     DECLARE_ID (frameworkSearchPaths);
     DECLARE_ID (extraCustomFrameworks);

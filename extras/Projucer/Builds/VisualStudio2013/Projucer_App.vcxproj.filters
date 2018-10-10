@@ -2283,6 +2283,9 @@
     <ClInclude Include="..\..\Source\ProjectSaving\jucer_ResourceFile.h">
       <Filter>Projucer\ProjectSaving</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\ProjectSaving\jucer_XcodeProjectParser.h">
+      <Filter>Projucer\ProjectSaving</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Settings\jucer_AppearanceSettings.h">
       <Filter>Projucer\Settings</Filter>
     </ClInclude>

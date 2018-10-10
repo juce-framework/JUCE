@@ -608,6 +608,8 @@
             file="Source/ProjectSaving/jucer_ResourceFile.cpp"/>
       <FILE id="d4INvx" name="jucer_ResourceFile.h" compile="0" resource="0"
             file="Source/ProjectSaving/jucer_ResourceFile.h"/>
+      <FILE id="kw0nyx" name="jucer_XcodeProjectParser.h" compile="0" resource="0"
+            file="Source/ProjectSaving/jucer_XcodeProjectParser.h"/>
     </GROUP>
     <GROUP id="{DC7C1395-DD88-0C6C-2D8A-EC48A63D31E8}" name="Settings">
       <FILE id="DsopUB" name="jucer_AppearanceSettings.cpp" compile="1" resource="0"

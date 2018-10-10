@@ -374,6 +374,13 @@
 			path = "../../Source/Application/jucer_CommandLine.cpp";
 			sourceTree = "SOURCE_ROOT";
 		};
+		044478BB994878E35D30154A = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			name = "jucer_XcodeProjectParser.h";
+			path = "../../Source/ProjectSaving/jucer_XcodeProjectParser.h";
+			sourceTree = "SOURCE_ROOT";
+		};
 		0462692BAA9CD1BE6DFBCC33 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.objcpp;
@@ -2985,6 +2992,7 @@
 				9EE3141E20C9CE3EA182FA04,
 				E13A54A6D3A1895EACE53E51,
 				25BE1265FE6C6EA3473A3A0A,
+				044478BB994878E35D30154A,
 			);
 			name = ProjectSaving;
 			sourceTree = "<group>";
