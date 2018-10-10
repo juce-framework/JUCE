@@ -22,7 +22,7 @@ class %%aradocumentcontroller_class_name%%  : public ARA::PlugIn::DocumentContro
 public:
     %%aradocumentcontroller_class_name%%();
     ~%%aradocumentcontroller_class_name%%();
-	
+
 //==============================================================================
 // Override document controller methods here
 protected:

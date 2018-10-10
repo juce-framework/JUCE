@@ -1600,13 +1600,13 @@ protected:
     /** @internal */
     void sendParamChangeMessageToListeners (int parameterIndex, float newValue);
 
-	//==============================================================================
+    //==============================================================================
 #if JucePlugin_Enable_ARA
 
 public:
-	const ARA::ARAPlugInExtensionInstance* createARAPlugInExtension (ARA::ARADocumentControllerRef documentControllerRef, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles);
+    const ARA::ARAPlugInExtensionInstance* createARAPlugInExtension (ARA::ARADocumentControllerRef documentControllerRef, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles);
 
-	ARA::PlugIn::PlaybackRenderer* getARAPlaybackRenderer() const;
+    ARA::PlugIn::PlaybackRenderer* getARAPlaybackRenderer() const;
     ARA::PlugIn::EditorRenderer* getARAEditorRenderer() const;
     ARA::PlugIn::EditorView* getARAEditorView() const;
 
@@ -1615,7 +1615,7 @@ public:
     bool isARAEditorView() const           { return getARAEditorView() != nullptr; }
 
 private:
-	std::unique_ptr<const ARA::PlugIn::PlugInExtension> araPlugInExtension;
+    std::unique_ptr<const ARA::PlugIn::PlugInExtension> araPlugInExtension;
 
 #endif
 
