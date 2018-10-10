@@ -84,6 +84,13 @@
 #include "../../juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp"
 #include "../../juce_audio_processors/format_types/juce_AU_Shared.h"
 
+#if JucePlugin_Enable_ARA
+ #include <ARA_API/ARAAudioUnit.h>
+ #if ARA_SUPPORT_VERSION_1
+  #error "Unsupported ARA version - ARA version 2 and onward are JUCE compatible"
+ #endif
+#endif
+
 //==============================================================================
 using namespace juce;
 
@@ -458,6 +465,17 @@ public:
                     outWritable = false;
                     return noErr;
 
+#if JucePlugin_Enable_ARA
+                case ARA::kAudioUnitProperty_ARAFactory:
+                    outWritable = false;
+                    outDataSize = sizeof (ARA::ARAAudioUnitFactory);
+                    return noErr;
+                case ARA::kAudioUnitProperty_ARAPlugInExtensionBindingWithRoles:
+                    outWritable = false;
+                    outDataSize = sizeof (ARA::ARAAudioUnitPlugInExtensionBinding);
+                    return noErr;
+#endif
+
                 default: break;
             }
         }
@@ -498,6 +516,35 @@ public:
                     // Failed to find a group corresponding to the clump ID.
                     jassertfalse;
                     break;
+
+                    //==============================================================================
+#if JucePlugin_Enable_ARA
+                case ARA::kAudioUnitProperty_ARAFactory:
+                {
+                    ARA::ARAAudioUnitFactory* auFactory = static_cast<ARA::ARAAudioUnitFactory*> (outData);
+                    if (auFactory->inOutMagicNumber != ARA::kARAAudioUnitMagic)
+                        return kAudioUnitErr_InvalidProperty;   // if the magic value isn't found, the property ID is re-used outside the ARA context with different, unsupported sematics
+
+                    auFactory->outFactory = ARA::PlugIn::DocumentController::getARAFactory();
+                    return noErr;
+                }
+
+                case ARA::kAudioUnitProperty_ARAPlugInExtensionBindingWithRoles:
+                {
+                    ARA::ARAAudioUnitPlugInExtensionBinding* binding = static_cast<ARA::ARAAudioUnitPlugInExtensionBinding*> (outData);
+                    if (binding->inOutMagicNumber != ARA::kARAAudioUnitMagic)
+                        return kAudioUnitErr_InvalidProperty;   // if the magic value isn't found, the property ID is re-used outside the ARA context with different, unsupported sematics
+
+                    ARA::PlugIn::DocumentController* documentController = reinterpret_cast<ARA::PlugIn::DocumentController*> (binding->inDocumentControllerRef);
+                    ARA_VALIDATE_API_ARGUMENT(documentController, ARA::PlugIn::DocumentController::isValidDocumentController (documentController));
+
+                    binding->outPlugInExtension = juceFilter->createARAPlugInExtension (binding->inDocumentControllerRef, binding->knownRoles, binding->assignedRoles);
+                    if (binding->outPlugInExtension == NULL)
+                        return kAudioUnitErr_CannotDoInCurrentContext;  // _createARAPlugInExtension() returns null if binding is already established
+
+                    return noErr;
+                }
+#endif
 
                 case juceFilterObjectPropertyID:
                     ((void**) outData)[0] = (void*) static_cast<AudioProcessor*> (juceFilter.get());

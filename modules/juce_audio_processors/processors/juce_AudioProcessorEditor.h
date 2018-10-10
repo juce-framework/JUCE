@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+#if JucePlugin_Enable_ARA
+ #include <ARA_Library/PlugIn/ARAPlug.h>
+#endif
+
 namespace juce
 {
 
@@ -178,6 +182,13 @@ public:
     void setBoundsConstrained (Rectangle<int> newBounds);
 
     std::unique_ptr<ResizableCornerComponent> resizableCorner;
+
+	//==============================================================================
+#if JucePlugin_Enable_ARA
+    ARA::PlugIn::EditorView* getARAEditorView() const;
+
+    bool isARAEditorView() const                            { return getARAEditorView() != nullptr; }
+#endif
 
 private:
     //==============================================================================

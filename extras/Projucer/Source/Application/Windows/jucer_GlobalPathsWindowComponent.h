@@ -236,6 +236,9 @@ private:
             addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (settings.getStoredPath (Ids::vst3Path),
                                                                                           "Custom VST3 SDK", true)));
 
+            addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (settings.getStoredPath (Ids::araPath),
+                                                                                          "ARA SDK", true)));
+
             pathPropertyComponents.add (nullptr);
 
            #if JUCE_MAC
@@ -293,6 +296,9 @@ private:
             addAndMakeVisible (pathPropertyComponents.add (new TextPropertyComponent (settings.getFallbackPathForOS (Ids::vst3Path, selectedOS),
                                                                                       "Custom VST3 SDK", maxChars, false)));
 
+            addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (settings.getStoredPath (Ids::araPath),
+                                                                                          "ARA SDK", true))); 
+            
             rescanJUCEPathButton.setVisible (false);
             rescanUserPathButton.setVisible (false);
         }

@@ -139,6 +139,7 @@ public:
         vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder), Ids::vst3Path, TargetOS::windows)));
         aaxPath.referTo  (Value (new DependencyPathValueSource (getSetting (Ids::aaxFolder),  Ids::aaxPath,  TargetOS::windows)));
         rtasPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::rtasFolder), Ids::rtasPath, TargetOS::windows)));
+        araPath.referTo  (Value (new DependencyPathValueSource (getSetting (Ids::araFolder),  Ids::araPath,  TargetOS::windows)));
     }
 
     //==============================================================================

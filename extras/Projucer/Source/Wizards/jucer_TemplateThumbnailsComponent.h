@@ -147,7 +147,7 @@ class TemplateTileBrowser   : public Component
 public:
     TemplateTileBrowser (WizardComp* projectWizard)
     {
-        const int numWizardButtons = getNumWizards() - 1; // ( - 1 because the last one is blank)
+        const int numWizardButtons = getNumWizards() - 2; // ( - 2 because of the blank template and the ARA audio plugin template )
 
         for (int i = 0; i < numWizardButtons; ++i)
         {

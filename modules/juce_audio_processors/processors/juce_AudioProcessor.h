@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+#if JucePlugin_Enable_ARA
+ #include <ARA_Library/PlugIn/ARAPlug.h>
+#endif
+
 namespace juce
 {
 
@@ -1595,6 +1599,25 @@ protected:
 
     /** @internal */
     void sendParamChangeMessageToListeners (int parameterIndex, float newValue);
+
+    //==============================================================================
+#if JucePlugin_Enable_ARA
+
+public:
+    const ARA::ARAPlugInExtensionInstance* createARAPlugInExtension (ARA::ARADocumentControllerRef documentControllerRef, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles);
+
+    ARA::PlugIn::PlaybackRenderer* getARAPlaybackRenderer() const;
+    ARA::PlugIn::EditorRenderer* getARAEditorRenderer() const;
+    ARA::PlugIn::EditorView* getARAEditorView() const;
+
+    bool isARAPlaybackRenderer() const     { return getARAPlaybackRenderer() != nullptr; }
+    bool isARAEditorRenderer() const       { return getARAEditorRenderer() != nullptr; }
+    bool isARAEditorView() const           { return getARAEditorView() != nullptr; }
+
+private:
+    std::unique_ptr<const ARA::PlugIn::PlugInExtension> araPlugInExtension;
+
+#endif
 
 private:
     //==============================================================================
