@@ -64,9 +64,13 @@ public:
             return owner_;
         }
 
-        operator bool() const
+        bool operator==(T* other) const
         {
-            return owner_ != nullptr;
+            return owner_ == other;
+        }
+        bool operator!=(T* other) const
+        {
+            return owner_ != other;
         }
 
     private:

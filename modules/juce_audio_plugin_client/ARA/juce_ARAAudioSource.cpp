@@ -121,7 +121,8 @@ ARAAudioSource::Reader::Reader (ARAAudioSource* source)
 
 ARAAudioSource::Reader::~Reader()
 {
-    if (Ref::ScopedAccess source{ ref_ })
+    Ref::ScopedAccess source(ref_);
+    if (source != nullptr)
     {
         ScopedWriteLock l (ref_->lock);
         source->readers_.erase (std::find (source->readers_.begin(), source->readers_.end(), this));
@@ -136,7 +137,7 @@ bool ARAAudioSource::Reader::readSamples (
     int numSamples)
 {
     Ref::ScopedAccess source (ref_, true);
-    if (!source || araHostReader == nullptr)
+    if (source == nullptr || araHostReader == nullptr)
         return false;
     for (int chan_i = 0; chan_i < tmpPtrs_.size(); ++chan_i)
         if (chan_i < numDestChannels && destSamples[chan_i] != nullptr)
