@@ -547,9 +547,10 @@ private:
         synth.renderNextBlock (buffer, midiMessages, 0, numSamples);
 
         // Apply our delay effect to the new output..
-        applyDelay (buffer, delayBuffer, gainParamValue);
+        applyDelay (buffer, delayBuffer, delayParamValue);
 
-        applyGain (buffer, delayBuffer, delayParamValue); // apply our gain-change to the outgoing data..
+        // Apply our gain change to the outgoing data..
+        applyGain (buffer, delayBuffer, gainParamValue);
 
         // Now ask the host for the current time so we can store it to be displayed later...
         updateCurrentTimeInfoFromHost();
