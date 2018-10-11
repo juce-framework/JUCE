@@ -344,8 +344,8 @@ namespace CoreMidiHelpers
 
                 for (unsigned int i = 0; i < pktlist->numPackets; ++i)
                 {
-                    concatenator.pushMidiData (packet->data, (int) packet->length, time,
-                                               input, callback);
+                    auto len = readUnaligned<decltype (packet->length)> (&(packet->length));
+                    concatenator.pushMidiData (packet->data, (int) len, time, input, callback);
 
                     packet = MIDIPacketNext (packet);
                 }
