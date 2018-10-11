@@ -4,12 +4,12 @@
 void AudioView::paint (Graphics& g)
 {
     g.fillAll (trackColour);
-    g.setColour (_isSelected ? juce::Colours::yellow : juce::Colours::black);
+    g.setColour (isSelected ? juce::Colours::yellow : juce::Colours::black);
     g.drawRect (getLocalBounds());
     g.setColour (trackColour.contrasting (0.7f));
-    if (_audioThumb.getTotalLength())
+    if (audioThumb.getTotalLength())
     {
-        _audioThumb.drawChannels (g, getLocalBounds(), _startInSecs, _audioThumb.getTotalLength(), 1.0);
+        audioThumb.drawChannels (g, getLocalBounds(), startInSecs, audioThumb.getTotalLength(), 1.0);
     }
     g.setColour (trackColour.contrasting (1.0f));
     g.setFont (Font (12.0));
@@ -17,10 +17,10 @@ void AudioView::paint (Graphics& g)
 }
 
 AudioView::AudioView() :
- _isSelected (false)
-,_startInSecs (0.0)
-,_audioThumbCache (1)
-,_audioThumb (128, _audioFormatManger, _audioThumbCache)
+ isSelected (false)
+,startInSecs (0.0)
+,audioThumbCache (1)
+,audioThumb (128, audioFormatManger, audioThumbCache)
 {
     trackColour = Colours::beige;
 }
@@ -30,13 +30,13 @@ AudioView::AudioView (ARA::PlugIn::RegionSequence& sequence)
 {
     name = String (sequence.getName());
     order = String (sequence.getOrderIndex());
-    _audioThumb.setReader ((dynamic_cast<ARARegionSequence&>(sequence)).newReader(), 1);
-    _startInSecs = _audioThumb.getTotalLength();
+    audioThumb.setReader ((dynamic_cast<ARARegionSequence&>(sequence)).newReader(), 1);
+    startInSecs = audioThumb.getTotalLength();
     for (auto region : sequence.getPlaybackRegions())
     {
-        _startInSecs = std::min (_startInSecs, region->getStartInPlaybackTime());
+        startInSecs = std::min (startInSecs, region->getStartInPlaybackTime());
     }
-    _audioThumb.addChangeListener (this);
+    audioThumb.addChangeListener (this);
 
     if (const ARA::ARAColor* colour = sequence.getColor())
     {
@@ -46,8 +46,8 @@ AudioView::AudioView (ARA::PlugIn::RegionSequence& sequence)
 
 AudioView::~AudioView()
 {
-    _audioThumb.clear();
-    _audioThumb.removeChangeListener (this);
+    audioThumb.clear();
+    audioThumb.removeChangeListener (this);
 }
 
 void AudioView::changeListenerCallback (juce::ChangeBroadcaster* broadcaster)
@@ -57,15 +57,15 @@ void AudioView::changeListenerCallback (juce::ChangeBroadcaster* broadcaster)
 
 double AudioView::getStartInSecs()
 {
-    return _startInSecs;
+    return startInSecs;
 }
 
 double AudioView::getLengthInSecs()
 {
-    return _audioThumb.getTotalLength() - _startInSecs;
+    return audioThumb.getTotalLength() - startInSecs;
 }
 
-void AudioView::isSelected(bool value)
+void AudioView::setIsSelected(bool value)
 {
-    _isSelected = value;
+    isSelected = value;
 }

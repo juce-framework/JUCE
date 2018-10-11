@@ -35,8 +35,8 @@ void ARASampleProjectEditor::doNotifySelection (const ARA::PlugIn::ViewSelection
     const ScopedLock lock (selectionLock);
 
     removeAllChildren();
-    _maxRegionSequenceLength = 0.0;
-    _regionSequenceViews.clear();
+    maxRegionSequenceLength = 0.0;
+    regionSequenceViews.clear();
     for (auto regionSequence : getDocumentController()->getDocument()->getRegionSequences())
     {
         auto regSeqView = new AudioView (*regionSequence);
@@ -45,13 +45,13 @@ void ARASampleProjectEditor::doNotifySelection (const ARA::PlugIn::ViewSelection
         {
             if (regionSequence == selectedRegionSequence)
             {
-                regSeqView->isSelected (true);
+                regSeqView->setIsSelected (true);
                 break;
             }
         }
         addAndMakeVisible (regSeqView);
-        _regionSequenceViews.add (regSeqView);
-        _maxRegionSequenceLength = std::max (_maxRegionSequenceLength, regSeqView->getStartInSecs() + regSeqView->getLengthInSecs());
+        regionSequenceViews.add (regSeqView);
+        maxRegionSequenceLength = std::max (maxRegionSequenceLength, regSeqView->getStartInSecs() + regSeqView->getLengthInSecs());
     }
     resized();
 }
@@ -61,10 +61,10 @@ void ARASampleProjectEditor::resized()
     int i = 0;
     const int width = getParentWidth();
     const int height = 80;
-    for (auto v : _regionSequenceViews)
+    for (auto v : regionSequenceViews)
     {
-        double normalizedStartPos = v->getStartInSecs() / _maxRegionSequenceLength;
-        double normalizedLength = v->getLengthInSecs() / _maxRegionSequenceLength;
+        double normalizedStartPos = v->getStartInSecs() / maxRegionSequenceLength;
+        double normalizedLength = v->getLengthInSecs() / maxRegionSequenceLength;
         jassert(normalizedStartPos+normalizedLength <= 1.0);
         v->setBounds (width * normalizedStartPos, height * i, width * normalizedLength, height);
         i++;

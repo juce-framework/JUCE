@@ -35,7 +35,7 @@ public:
     void resized () override;
 
 private:
-    double _maxRegionSequenceLength;
+    double maxRegionSequenceLength;
     juce::CriticalSection selectionLock;
-    juce::OwnedArray <AudioView> _regionSequenceViews;
+    juce::OwnedArray <AudioView> regionSequenceViews;
 };

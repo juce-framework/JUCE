@@ -18,14 +18,14 @@ static const int kHeight = 400;
 ArasampleProjectAudioProcessorEditor::ArasampleProjectAudioProcessorEditor (ArasampleProjectAudioProcessor& p)
     : AudioProcessorEditor (&p), processor (p)
 {
-    _tracksViewport.setScrollBarsShown(true, true);
+    tracksViewport.setScrollBarsShown(true, true);
     if (auto e = getARAEditorView())
     {
         editor = static_cast<ARASampleProjectEditor*>(e);
-        editor->setBounds(0, 0, kWidth - _tracksViewport.getScrollBarThickness(), kHeight);
-        _tracksViewport.setViewedComponent (editor, false);
+        editor->setBounds(0, 0, kWidth - tracksViewport.getScrollBarThickness(), kHeight);
+        tracksViewport.setViewedComponent (editor, false);
     }
-    addAndMakeVisible (_tracksViewport);
+    addAndMakeVisible (tracksViewport);
     setSize (kWidth, kHeight);
 }
 
@@ -48,5 +48,5 @@ void ArasampleProjectAudioProcessorEditor::paint (Graphics& g)
 
 void ArasampleProjectAudioProcessorEditor::resized()
 {
-    _tracksViewport.setBounds (0, 0, getWidth(), getHeight());
+    tracksViewport.setBounds (0, 0, getWidth(), getHeight());
 }

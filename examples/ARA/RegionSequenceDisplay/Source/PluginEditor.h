@@ -36,7 +36,7 @@ private:
     ARASampleProjectEditor* editor {nullptr};
 
     std::vector <AudioView*> dummyView;
-    Viewport _tracksViewport;
+    Viewport tracksViewport;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ArasampleProjectAudioProcessorEditor)
 };

@@ -14,19 +14,19 @@ public:
     void paint (Graphics&) override;
     void changeListenerCallback (ChangeBroadcaster*) override;
 
-    void isSelected (bool value);
+    void setIsSelected (bool value);
     double getStartInSecs ();
     double getLengthInSecs ();
 
 private:
     String name, order;
     Colour trackColour;
-    bool _isSelected;
-    double _startInSecs;
+    bool isSelected;
+    double startInSecs;
 
-    juce::AudioFormatManager _audioFormatManger;
-    juce::AudioThumbnailCache _audioThumbCache;
-    juce::AudioThumbnail _audioThumb;
+    juce::AudioFormatManager audioFormatManger;
+    juce::AudioThumbnailCache audioThumbCache;
+    juce::AudioThumbnail audioThumb;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioView)
 };
