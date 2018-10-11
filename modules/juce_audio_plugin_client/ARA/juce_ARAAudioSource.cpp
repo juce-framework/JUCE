@@ -13,14 +13,15 @@ public:
     Reader (ARAAudioSource*);
     ~Reader();
 
+    void setAudioSource(ARA::PlugIn::AudioSource* audioSource);
+    const ARA::PlugIn::HostAudioReader* getHostAudioReader() const;
+
     bool readSamples (
         int** destSamples,
         int numDestChannels,
         int startOffsetInDestBuffer,
         int64 startSampleInFile,
         int numSamples) override;
-
-    std::unique_ptr<ARA::PlugIn::HostAudioReader> araHostReader;
 
 private:
     Ref::Ptr ref;
@@ -30,6 +31,8 @@ private:
     // we still need to provide pointers to all channels to the ARA read call.
     // So we'll read the other channels into this dummy buffer.
     std::vector<float> dummyBuffer;
+
+    std::unique_ptr<ARA::PlugIn::HostAudioReader> araHostReader;
 };
 
 ARAAudioSource::ARAAudioSource (ARA::PlugIn::Document* document, ARA::ARAAudioSourceHostRef hostRef)
@@ -47,7 +50,7 @@ void ARAAudioSource::invalidateReaders()
 {
     ScopedWriteLock l (ref->lock);
     for (auto& reader : readers)
-        reader->araHostReader.reset();
+        reader->setAudioSource(nullptr);
     readers.clear();
     ref->reset();
 }
@@ -87,7 +90,7 @@ void ARAAudioSource::willEnableSamplesAccess (bool enable)
     ref->lock.enterWrite();
     if (! enable)
         for (auto& reader : readers)
-            reader->araHostReader.reset();
+            reader->setAudioSource(nullptr);
 }
 
 void ARAAudioSource::didEnableSamplesAccess (bool enable)
@@ -99,7 +102,7 @@ void ARAAudioSource::didEnableSamplesAccess (bool enable)
 
     if (enable)
         for (auto& reader : readers)
-            reader->araHostReader.reset (new ARA::PlugIn::HostAudioReader (this));
+            reader->setAudioSource(this);
     ref->lock.exitWrite();
 }
 
@@ -127,6 +130,19 @@ ARAAudioSource::Reader::~Reader()
         ScopedWriteLock l (ref->lock);
         source->readers.erase (std::find (source->readers.begin(), source->readers.end(), this));
     }
+}
+
+void ARAAudioSource::Reader::setAudioSource(ARA::PlugIn::AudioSource* audioSource)
+{
+    if (audioSource == nullptr || audioSource->isSampleAccessEnabled() == false)
+        araHostReader.reset();
+    else
+        araHostReader.reset(new ARA::PlugIn::HostAudioReader(audioSource));
+}
+
+const ARA::PlugIn::HostAudioReader* ARAAudioSource::Reader::getHostAudioReader() const
+{
+    return araHostReader.get();
 }
 
 bool ARAAudioSource::Reader::readSamples (
