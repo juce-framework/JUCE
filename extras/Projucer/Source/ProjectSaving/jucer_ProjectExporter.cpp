@@ -830,7 +830,7 @@ Image ProjectExporter::rescaleImageForIcon (Drawable& d, const int size)
     {
         auto im = SoftwareImageType().convert (drawableImage->getImage());
 
-        if (size == im.getWidth() && size == im.getHeight())
+        if (im.getWidth() == size && im.getHeight() == size)
             return im;
 
         // (scale it down in stages for better resampling)

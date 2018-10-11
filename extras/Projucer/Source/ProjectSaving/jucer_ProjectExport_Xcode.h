@@ -2074,7 +2074,7 @@ private:
 
     static Image fixMacIconImageSize (Drawable& image)
     {
-        const int validSizes[] = { 16, 32, 48, 128, 256, 512, 1024 };
+        const int validSizes[] = { 16, 32, 64, 128, 256, 512, 1024 };
 
         auto w = image.getWidth();
         auto h = image.getHeight();
@@ -2164,42 +2164,7 @@ private:
         return dependencies;
     }
 
-    static void writeOldIconFormat (MemoryOutputStream& out, const Image& image, const char* type, const char* maskType)
-    {
-        auto w = image.getWidth();
-        auto h = image.getHeight();
-
-        out.write (type, 4);
-        out.writeIntBigEndian (8 + 4 * w * h);
-
-        Image::BitmapData bitmap (image, Image::BitmapData::readOnly);
-
-        for (int y = 0; y < h; ++y)
-        {
-            for (int x = 0; x < w; ++x)
-            {
-                auto pixel = bitmap.getPixelColour (x, y);
-                out.writeByte ((char) pixel.getAlpha());
-                out.writeByte ((char) pixel.getRed());
-                out.writeByte ((char) pixel.getGreen());
-                out.writeByte ((char) pixel.getBlue());
-            }
-        }
-
-        out.write (maskType, 4);
-        out.writeIntBigEndian (8 + w * h);
-
-        for (int y = 0; y < h; ++y)
-        {
-            for (int x = 0; x < w; ++x)
-            {
-                auto pixel = bitmap.getPixelColour (x, y);
-                out.writeByte ((char) pixel.getAlpha());
-            }
-        }
-    }
-
-    static void writeNewIconFormat (MemoryOutputStream& out, const Image& image, const char* type)
+    static void writeIconData (MemoryOutputStream& out, const Image& image, const char* type)
     {
         MemoryOutputStream pngData;
         PNGImageFormat pngFormat;
@@ -2213,12 +2178,12 @@ private:
     void writeIcnsFile (const OwnedArray<Drawable>& images, OutputStream& out) const
     {
         MemoryOutputStream data;
-        int smallest = 0x7fffffff;
+        auto smallest = std::numeric_limits<int>::max();
         Drawable* smallestImage = nullptr;
 
         for (int i = 0; i < images.size(); ++i)
         {
-            auto image = fixMacIconImageSize (*images.getUnchecked(i));
+            auto image = fixMacIconImageSize (*images.getUnchecked (i));
             jassert (image.getWidth() == image.getHeight());
 
             if (image.getWidth() < smallest)
@@ -2229,13 +2194,13 @@ private:
 
             switch (image.getWidth())
             {
-                case 16:   writeOldIconFormat (data, image, "is32", "s8mk"); break;
-                case 32:   writeOldIconFormat (data, image, "il32", "l8mk"); break;
-                case 48:   writeOldIconFormat (data, image, "ih32", "h8mk"); break;
-                case 128:  writeOldIconFormat (data, image, "it32", "t8mk"); break;
-                case 256:  writeNewIconFormat (data, image, "ic08"); break;
-                case 512:  writeNewIconFormat (data, image, "ic09"); break;
-                case 1024: writeNewIconFormat (data, image, "ic10"); break;
+                case 16:   writeIconData (data, image, "icp4"); break;
+                case 32:   writeIconData (data, image, "icp5"); break;
+                case 64:   writeIconData (data, image, "icp6"); break;
+                case 128:  writeIconData (data, image, "ic07"); break;
+                case 256:  writeIconData (data, image, "ic08"); break;
+                case 512:  writeIconData (data, image, "ic09"); break;
+                case 1024: writeIconData (data, image, "ic10"); break;
                 default:   break;
             }
         }
@@ -2245,7 +2210,7 @@ private:
         // If you only supply a 1024 image, the file doesn't work on 10.8, so we need
         // to force a smaller one in there too..
         if (smallest > 512 && smallestImage != nullptr)
-            writeNewIconFormat (data, rescaleImageForIcon (*smallestImage, 512), "ic09");
+            writeIconData (data, rescaleImageForIcon (*smallestImage, 512), "ic09");
 
         out.write ("icns", 4);
         out.writeIntBigEndian ((int) data.getDataSize() + 8);
