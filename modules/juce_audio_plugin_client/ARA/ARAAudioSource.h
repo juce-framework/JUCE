@@ -4,39 +4,41 @@
 
 namespace juce
 {
-    class ARAAudioSource : public ARA::PlugIn::AudioSource
-    {
-    public:
-        ARAAudioSource (ARA::PlugIn::Document*, ARA::ARAAudioSourceHostRef);
-        virtual ~ARAAudioSource();
 
-        AudioFormatReader* newReader();
+class ARAAudioSource : public ARA::PlugIn::AudioSource
+{
+public:
+    ARAAudioSource (ARA::PlugIn::Document*, ARA::ARAAudioSourceHostRef);
+    virtual ~ARAAudioSource();
 
-        // Needs to be called in the document controller's `willUpdateAudioSourceProperties` method.
-        void willUpdateProperties();
+    AudioFormatReader* newReader();
 
-        // Needs to be called in the document controller's `didUpdateAudioSourceProperties` method.
-        void didUpdateProperties();
+    // Needs to be called in the document controller's `willUpdateAudioSourceProperties` method.
+    void willUpdateProperties();
 
-        // Needs to be called in the document controller's `willEnableAudioSourceSamplesAccess` method.
-        void willEnableSamplesAccess (bool enable);
+    // Needs to be called in the document controller's `didUpdateAudioSourceProperties` method.
+    void didUpdateProperties();
 
-        // Needs to be called in the document controller's `didEnableAudioSourceSamplesAccess` method.
-        void didEnableSamplesAccess (bool enable);
+    // Needs to be called in the document controller's `willEnableAudioSourceSamplesAccess` method.
+    void willEnableSamplesAccess (bool enable);
 
-    private:
-        void invalidateReaders();
+    // Needs to be called in the document controller's `didEnableAudioSourceSamplesAccess` method.
+    void didEnableSamplesAccess (bool enable);
 
-        class Reader;
-        typedef SafeRef<ARAAudioSource> Ref;
+private:
+    void invalidateReaders();
 
-        Ref::Ptr ref_;
+    class Reader;
+    typedef SafeRef<ARAAudioSource> Ref;
 
-        // Active readers.
-        std::vector<Reader*> readers_;
+    Ref::Ptr ref_;
+
+    // Active readers.
+    std::vector<Reader*> readers_;
 
 #if JUCE_DEBUG
-        bool stateUpdateProperties = false, stateEnableSamplesAccess = false;
+    bool stateUpdateProperties = false, stateEnableSamplesAccess = false;
 #endif
-    };
-}
+};
+
+} // namespace juce
