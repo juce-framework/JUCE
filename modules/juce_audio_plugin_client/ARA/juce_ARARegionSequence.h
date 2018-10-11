@@ -29,12 +29,12 @@ private:
     class Reader;
     typedef SafeRef<ARARegionSequence> Ref;
 
-    Ref::Ptr ref_;
+    Ref::Ptr ref;
 
-    std::map<ARA::PlugIn::AudioSource*, int> sourceRefCount_;
+    std::map<ARA::PlugIn::AudioSource*, int> sourceRefCount;
 
     // Used to unlock old sequence for region in `didUpdatePlaybackRegionProperties`.
-    ARARegionSequence* prevSequenceForNewPlaybackRegion_;
+    ARARegionSequence* prevSequenceForNewPlaybackRegion;
 
 #if JUCE_DEBUG
     static bool stateUpdatePlaybackRegionProperties;

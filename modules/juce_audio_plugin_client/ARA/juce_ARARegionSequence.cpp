@@ -26,21 +26,21 @@ public:
         int numSamples) override;
 
 private:
-    Ref::Ptr ref_;
-    std::map<ARA::PlugIn::AudioSource*, AudioFormatReader*> sourceReaders_;
-    AudioSampleBuffer buf_;
+    Ref::Ptr ref;
+    std::map<ARA::PlugIn::AudioSource*, AudioFormatReader*> sourceReaders;
+    AudioSampleBuffer sampleBuffer;
 };
 
 ARARegionSequence::ARARegionSequence (ARA::PlugIn::Document* document, ARA::ARARegionSequenceHostRef hostRef)
     : ARA::PlugIn::RegionSequence (document, hostRef)
 {
-    ref_ = new Ref (this);
-    prevSequenceForNewPlaybackRegion_ = nullptr;
+    ref = new Ref (this);
+    prevSequenceForNewPlaybackRegion = nullptr;
 }
 
 ARARegionSequence::~ARARegionSequence()
 {
-    ref_->reset();
+    ref->reset();
 }
 
 AudioFormatReader* ARARegionSequence::newReader (double sampleRate)
@@ -60,18 +60,18 @@ AudioFormatReader* ARARegionSequence::newReader (double sampleRate)
     ARARegionSequence* oldSequence = static_cast<ARARegionSequence*> (region->getRegionSequence());
     ARARegionSequence* newSequence = static_cast<ARARegionSequence*> (ARA::PlugIn::fromRef (properties->regionSequenceRef));
     jassert (newSequence != nullptr);
-    jassert (newSequence->prevSequenceForNewPlaybackRegion_ == nullptr);
+    jassert (newSequence->prevSequenceForNewPlaybackRegion == nullptr);
 
-    newSequence->ref_->reset();
-    newSequence->prevSequenceForNewPlaybackRegion_ = oldSequence;
+    newSequence->ref->reset();
+    newSequence->prevSequenceForNewPlaybackRegion = oldSequence;
 
     if (oldSequence != nullptr && oldSequence != newSequence)
     {
-        oldSequence->ref_->reset();
-        auto it = oldSequence->sourceRefCount_.find (region->getAudioModification()->getAudioSource());
+        oldSequence->ref->reset();
+        auto it = oldSequence->sourceRefCount.find (region->getAudioModification()->getAudioSource());
         --it->second;
         if (it->second == 0)
-            oldSequence->sourceRefCount_.erase (it);
+            oldSequence->sourceRefCount.erase (it);
     }
 }
 
@@ -85,8 +85,8 @@ AudioFormatReader* ARARegionSequence::newReader (double sampleRate)
     ARARegionSequence* newSequence = static_cast<ARARegionSequence*> (region->getRegionSequence());
     jassert (newSequence != nullptr);
 
-    ARARegionSequence* oldSequence = newSequence->prevSequenceForNewPlaybackRegion_;
-    newSequence->prevSequenceForNewPlaybackRegion_ = nullptr;
+    ARARegionSequence* oldSequence = newSequence->prevSequenceForNewPlaybackRegion;
+    newSequence->prevSequenceForNewPlaybackRegion = nullptr;
 
     auto* source = region->getAudioModification()->getAudioSource();
     jassert (source != nullptr);
@@ -94,17 +94,17 @@ AudioFormatReader* ARARegionSequence::newReader (double sampleRate)
     if (newSequence != oldSequence)
     {
         if (oldSequence != nullptr)
-            oldSequence->ref_ = new Ref (oldSequence);
-        ++newSequence->sourceRefCount_[source];
+            oldSequence->ref = new Ref (oldSequence);
+        ++newSequence->sourceRefCount[source];
     }
 
-    newSequence->ref_ = new Ref (newSequence);
+    newSequence->ref = new Ref (newSequence);
 }
 
 bool ARARegionSequence::isSampleAccessEnabled() const
 {
-    Ref::ScopedAccess access (ref_);
-    for (auto& x : sourceRefCount_)
+    Ref::ScopedAccess access (ref);
+    for (auto& x : sourceRefCount)
         if (! x.first->isSampleAccessEnabled())
             return false;
     return true;
@@ -112,7 +112,7 @@ bool ARARegionSequence::isSampleAccessEnabled() const
 
 ARARegionSequence::Reader::Reader (ARARegionSequence* sequence, double sampleRate_)
     : AudioFormatReader (nullptr, "ARARegionSequenceReader")
-    , ref_ (sequence->ref_)
+    , ref (sequence->ref)
 {
     bitsPerSample = 32;
     usesFloatingPointData = true;
@@ -120,7 +120,7 @@ ARARegionSequence::Reader::Reader (ARARegionSequence* sequence, double sampleRat
     lengthInSamples = 0;
     sampleRate = sampleRate_;
 
-    Ref::ScopedAccess access (ref_);
+    Ref::ScopedAccess access (ref);
     jassert (access != nullptr);
     for (ARA::PlugIn::PlaybackRegion* region : sequence->getPlaybackRegions())
     {
@@ -138,10 +138,10 @@ ARARegionSequence::Reader::Reader (ARARegionSequence* sequence, double sampleRat
             continue;
         }
 
-        if (sourceReaders_.find (source) == sourceReaders_.end())
+        if (sourceReaders.find (source) == sourceReaders.end())
         {
             numChannels = std::max (numChannels, (unsigned int) source->getChannelCount());
-            sourceReaders_[source] = source->newReader();
+            sourceReaders[source] = source->newReader();
         }
 
         lengthInSamples = std::max (lengthInSamples, region->getEndInPlaybackSamples (sampleRate));
@@ -150,7 +150,7 @@ ARARegionSequence::Reader::Reader (ARARegionSequence* sequence, double sampleRat
 
 ARARegionSequence::Reader::~Reader()
 {
-    for (auto& x : sourceReaders_)
+    for (auto& x : sourceReaders)
         delete x.second;
 }
 
@@ -163,15 +163,15 @@ bool ARARegionSequence::Reader::readSamples (
 {
     // Clear buffers
     for (int i = 0; i < numDestChannels; ++i)
-        if (float* buf = (float*) destSamples[i])
-            FloatVectorOperations::clear (buf + startOffsetInDestBuffer, numSamples);
+        if (float* destBuf = (float*) destSamples[i])
+            FloatVectorOperations::clear (destBuf + startOffsetInDestBuffer, numSamples);
 
-    Ref::ScopedAccess sequence (ref_, true);
+    Ref::ScopedAccess sequence (ref, true);
     if (sequence == nullptr)
         return false;
 
-    if (buf_.getNumSamples() < numSamples || buf_.getNumChannels() < numDestChannels)
-        buf_.setSize (numDestChannels, numSamples, false, false, true);
+    if (sampleBuffer.getNumSamples() < numSamples || sampleBuffer.getNumChannels() < numDestChannels)
+        sampleBuffer.setSize (numDestChannels, numSamples, false, false, true);
 
     const double start = (double) startSampleInFile / sampleRate;
     const double stop = (double) (startSampleInFile + (int64) numSamples) / sampleRate;
@@ -184,7 +184,7 @@ bool ARARegionSequence::Reader::readSamples (
 
         const int64 regionStartSample = region->getStartInPlaybackSamples (sampleRate);
 
-        AudioFormatReader* sourceReader = sourceReaders_[region->getAudioModification()->getAudioSource()];
+        AudioFormatReader* sourceReader = sourceReaders[region->getAudioModification()->getAudioSource()];
         jassert (sourceReader != nullptr);
 
         const int64 startSampleInRegion = std::max ((int64) 0, startSampleInFile - regionStartSample);
@@ -193,17 +193,17 @@ bool ARARegionSequence::Reader::readSamples (
             (int) (region->getDurationInPlaybackSamples (sampleRate) - startSampleInRegion),
             numSamples - destOffest);
         if (! sourceReader->read (
-            (int**) buf_.getArrayOfWritePointers(),
+            (int**) sampleBuffer.getArrayOfWritePointers(),
             numDestChannels,
             region->getStartInAudioModificationSamples() + startSampleInRegion,
             numRegionSamples,
             false))
             return false;
         for (int chan_i = 0; chan_i < numDestChannels; ++chan_i)
-            if (float* buf = (float*) destSamples[chan_i])
+            if (float* destBuf = (float*) destSamples[chan_i])
                 FloatVectorOperations::add (
-                    buf + startOffsetInDestBuffer + destOffest,
-                    buf_.getReadPointer (chan_i), numRegionSamples);
+                    destBuf + startOffsetInDestBuffer + destOffest,
+                    sampleBuffer.getReadPointer (chan_i), numRegionSamples);
     }
 
     return true;

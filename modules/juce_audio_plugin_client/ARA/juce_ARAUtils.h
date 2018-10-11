@@ -13,7 +13,7 @@ public:
     typedef ReferenceCountedObjectPtr<SafeRef> Ptr;
 
     SafeRef (T* owner = nullptr)
-        : owner_ (owner)
+        : owner (owner)
     {
     }
 
@@ -21,13 +21,13 @@ public:
     {
         // If owner_ wasn't reset to nullptr then the user forgot to call reset()
         // in their destructor.
-        jassert (owner_ == nullptr);
+        jassert (owner == nullptr);
     }
 
-    void reset (T* owner = nullptr)
+    void reset (T* newOwner = nullptr)
     {
         ScopedWriteLock l (lock);
-        owner_ = owner;
+        owner = newOwner;
     }
 
     // A scoped read-only access to the reference.
@@ -35,55 +35,55 @@ public:
     class ScopedAccess
     {
     public:
-        ScopedAccess (const Ptr& ref, bool tryLock = false)
-            : ref_ (*ref)
+        ScopedAccess (const Ptr& otherRef, bool tryLock = false)
+            : ref (*otherRef)
         {
             if (tryLock)
-                didLock = ref_.lock.tryEnterRead();
+                didLock = ref.lock.tryEnterRead();
             else
             {
-                ref_.lock.enterRead();
+                ref.lock.enterRead();
                 didLock = true;
             }
-            owner_ = didLock ? ref_.owner_ : nullptr;
+            owner = didLock ? ref.owner : nullptr;
         }
 
         ~ScopedAccess()
         {
             if (didLock)
-                ref_.lock.exitRead();
+                ref.lock.exitRead();
         }
 
         T* operator*()
         {
-            return owner_;
+            return owner;
         }
 
         T* operator->()
         {
-            return owner_;
+            return owner;
         }
 
         bool operator==(T* other) const
         {
-            return owner_ == other;
+            return owner == other;
         }
         bool operator!=(T* other) const
         {
-            return owner_ != other;
+            return owner != other;
         }
 
     private:
-        SafeRef& ref_;
+        SafeRef& ref;
         bool didLock;
-        T* owner_;
+        T* owner;
     };
 
     // The lock is public, so owner can use `enterWrite` etc with it freely.
     ReadWriteLock lock;
 
 private:
-    T* owner_;
+    T* owner;
 };
 
 } // namespace juce

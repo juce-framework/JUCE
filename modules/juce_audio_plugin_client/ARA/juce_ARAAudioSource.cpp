@@ -23,18 +23,18 @@ public:
     std::unique_ptr<ARA::PlugIn::HostAudioReader> araHostReader;
 
 private:
-    Ref::Ptr ref_;
-    std::vector<void*> tmpPtrs_;
+    Ref::Ptr ref;
+    std::vector<void*> tmpPtrs;
 
     // When readSamples is not reading all channels,
     // we still need to provide pointers to all channels to the ARA read call.
     // So we'll read the other channels into this dummy buffer.
-    std::vector<float> dummyBuffer_;
+    std::vector<float> dummyBuffer;
 };
 
 ARAAudioSource::ARAAudioSource (ARA::PlugIn::Document* document, ARA::ARAAudioSourceHostRef hostRef)
     : ARA::PlugIn::AudioSource (document, hostRef)
-    , ref_ (new Ref (this))
+    , ref (new Ref (this))
 {
 }
 
@@ -45,11 +45,11 @@ ARAAudioSource::~ARAAudioSource()
 
 void ARAAudioSource::invalidateReaders()
 {
-    ScopedWriteLock l (ref_->lock);
-    for (auto& reader : readers_)
+    ScopedWriteLock l (ref->lock);
+    for (auto& reader : readers)
         reader->araHostReader.reset();
-    readers_.clear();
-    ref_->reset();
+    readers.clear();
+    ref->reset();
 }
 
 AudioFormatReader* ARAAudioSource::newReader()
@@ -74,7 +74,7 @@ void ARAAudioSource::didUpdateProperties()
     stateUpdateProperties = false;
 #endif
 
-    ref_ = new Ref (this);
+    ref = new Ref (this);
 }
 
 void ARAAudioSource::willEnableSamplesAccess (bool enable)
@@ -84,9 +84,9 @@ void ARAAudioSource::willEnableSamplesAccess (bool enable)
     stateEnableSamplesAccess = true;
 #endif
 
-    ref_->lock.enterWrite();
+    ref->lock.enterWrite();
     if (! enable)
-        for (auto& reader : readers_)
+        for (auto& reader : readers)
             reader->araHostReader.reset();
 }
 
@@ -98,14 +98,14 @@ void ARAAudioSource::didEnableSamplesAccess (bool enable)
 #endif
 
     if (enable)
-        for (auto& reader : readers_)
+        for (auto& reader : readers)
             reader->araHostReader.reset (new ARA::PlugIn::HostAudioReader (this));
-    ref_->lock.exitWrite();
+    ref->lock.exitWrite();
 }
 
 ARAAudioSource::Reader::Reader (ARAAudioSource* source)
     : AudioFormatReader (nullptr, "ARAAudioSourceReader")
-    , ref_ (source->ref_)
+    , ref (source->ref)
 {
     if (source->isSampleAccessEnabled())
         araHostReader.reset (new ARA::PlugIn::HostAudioReader (source));
@@ -114,18 +114,18 @@ ARAAudioSource::Reader::Reader (ARAAudioSource* source)
     sampleRate = source->getSampleRate();
     numChannels = source->getChannelCount();
     lengthInSamples = source->getSampleCount();
-    tmpPtrs_.resize (numChannels);
-    ScopedWriteLock l (ref_->lock);
-    source->readers_.push_back (this);
+    tmpPtrs.resize (numChannels);
+    ScopedWriteLock l (ref->lock);
+    source->readers.push_back (this);
 }
 
 ARAAudioSource::Reader::~Reader()
 {
-    Ref::ScopedAccess source(ref_);
+    Ref::ScopedAccess source(ref);
     if (source != nullptr)
     {
-        ScopedWriteLock l (ref_->lock);
-        source->readers_.erase (std::find (source->readers_.begin(), source->readers_.end(), this));
+        ScopedWriteLock l (ref->lock);
+        source->readers.erase (std::find (source->readers.begin(), source->readers.end(), this));
     }
 }
 
@@ -136,19 +136,19 @@ bool ARAAudioSource::Reader::readSamples (
     int64 startSampleInFile,
     int numSamples)
 {
-    Ref::ScopedAccess source (ref_, true);
+    Ref::ScopedAccess source (ref, true);
     if (source == nullptr || araHostReader == nullptr)
         return false;
-    for (int chan_i = 0; chan_i < tmpPtrs_.size(); ++chan_i)
+    for (int chan_i = 0; chan_i < tmpPtrs.size(); ++chan_i)
         if (chan_i < numDestChannels && destSamples[chan_i] != nullptr)
-            tmpPtrs_[chan_i] = (void*) (destSamples[chan_i] + startOffsetInDestBuffer);
+            tmpPtrs[chan_i] = (void*) (destSamples[chan_i] + startOffsetInDestBuffer);
         else
         {
-            if (numSamples > dummyBuffer_.size())
-                dummyBuffer_.resize (numSamples);
-            tmpPtrs_[chan_i] = (void*) dummyBuffer_.data();
+            if (numSamples > dummyBuffer.size())
+                dummyBuffer.resize (numSamples);
+            tmpPtrs[chan_i] = (void*) dummyBuffer.data();
         }
-    return araHostReader->readAudioSamples (startSampleInFile, numSamples, tmpPtrs_.data());
+    return araHostReader->readAudioSamples (startSampleInFile, numSamples, tmpPtrs.data());
 }
 
 } // namespace juce

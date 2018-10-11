@@ -31,10 +31,10 @@ private:
     class Reader;
     typedef SafeRef<ARAAudioSource> Ref;
 
-    Ref::Ptr ref_;
+    Ref::Ptr ref;
 
     // Active readers.
-    std::vector<Reader*> readers_;
+    std::vector<Reader*> readers;
 
 #if JUCE_DEBUG
     bool stateUpdateProperties = false, stateEnableSamplesAccess = false;
