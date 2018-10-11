@@ -1,5 +1,5 @@
 #include "AudioView.h"
-#include "juce_audio_plugin_client/ARA/ARARegionSequence.h"
+#include "juce_audio_plugin_client/ARA/juce_ARARegionSequence.h"
 
 void AudioView::paint (Graphics& g)
 {

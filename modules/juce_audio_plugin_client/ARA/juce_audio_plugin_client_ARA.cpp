@@ -5,9 +5,9 @@
 #include <ARA_Library/Dispatch/ARAPlugInDispatch.cpp>
 
 // Include these source files directly for now
-#include "ARADocumentController.cpp"
-#include "ARARegionSequence.cpp"
-#include "ARAAudioSource.cpp"
+#include "juce_ARADocumentController.cpp"
+#include "juce_ARARegionSequence.cpp"
+#include "juce_ARAAudioSource.cpp"
 
 #include "JuceHeader.h"
 

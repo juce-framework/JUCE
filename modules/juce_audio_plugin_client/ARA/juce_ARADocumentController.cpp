@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ARADocumentController.h"
-#include "ARAAudioSource.h"
-#include "ARARegionSequence.h"
+#include "juce_ARADocumentController.h"
+#include "juce_ARAAudioSource.h"
+#include "juce_ARARegionSequence.h"
 
 namespace juce
 {

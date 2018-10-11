@@ -2,7 +2,7 @@
 
 #include <ARA_Library/PlugIn/ARAPlug.h>
 #include "JuceHeader.h"
-#include "ARAUtils.h"
+#include "juce_ARAUtils.h"
 
 namespace juce
 {

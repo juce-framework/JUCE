@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ARARegionSequence.h"
-#include "ARAAudioSource.h"
+#include "juce_ARARegionSequence.h"
+#include "juce_ARAAudioSource.h"
 
 namespace juce
 {

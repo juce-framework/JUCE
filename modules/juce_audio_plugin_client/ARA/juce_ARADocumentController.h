@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ARAUtils.h"
+#include "juce_ARAUtils.h"
 
 namespace juce
 {

@@ -12,7 +12,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "ARA_Library/PlugIn/ARAPlug.h"
-#include "juce_audio_plugin_client/ARA/ARADocumentController.h"
+#include "juce_audio_plugin_client/ARA/juce_ARADocumentController.h"
 #include "AudioView.h"
 
 class ARASampleProjectDocumentController : public juce::ARADocumentController
