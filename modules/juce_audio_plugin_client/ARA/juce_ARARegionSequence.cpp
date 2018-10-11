@@ -57,8 +57,8 @@ AudioFormatReader* ARARegionSequence::newReader (double sampleRate)
     stateUpdatePlaybackRegionProperties = true;
 #endif
 
-    ARARegionSequence* oldSequence = dynamic_cast<ARARegionSequence*> (region->getRegionSequence());
-    ARARegionSequence* newSequence = dynamic_cast<ARARegionSequence*> (ARA::PlugIn::fromRef (properties->regionSequenceRef));
+    ARARegionSequence* oldSequence = static_cast<ARARegionSequence*> (region->getRegionSequence());
+    ARARegionSequence* newSequence = static_cast<ARARegionSequence*> (ARA::PlugIn::fromRef (properties->regionSequenceRef));
     jassert (newSequence != nullptr);
     jassert (newSequence->prevSequenceForNewPlaybackRegion_ == nullptr);
 
@@ -82,7 +82,7 @@ AudioFormatReader* ARARegionSequence::newReader (double sampleRate)
     stateUpdatePlaybackRegionProperties = false;
 #endif
 
-    ARARegionSequence* newSequence = dynamic_cast<ARARegionSequence*> (region->getRegionSequence());
+    ARARegionSequence* newSequence = static_cast<ARARegionSequence*> (region->getRegionSequence());
     jassert (newSequence != nullptr);
 
     ARARegionSequence* oldSequence = newSequence->prevSequenceForNewPlaybackRegion_;
@@ -126,7 +126,7 @@ ARARegionSequence::Reader::Reader (ARARegionSequence* sequence, double sampleRat
     {
         ARA::PlugIn::AudioModification* modification = region->getAudioModification();
         jassert (modification != nullptr);
-        ARAAudioSource* source = dynamic_cast<ARAAudioSource*> (modification->getAudioSource());
+        ARAAudioSource* source = static_cast<ARAAudioSource*> (modification->getAudioSource());
         jassert (source != nullptr);
 
         if (sampleRate == 0.0)
