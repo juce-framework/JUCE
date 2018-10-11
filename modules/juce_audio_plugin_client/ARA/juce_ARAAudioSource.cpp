@@ -60,7 +60,7 @@ AudioFormatReader* ARAAudioSource::newReader()
 void ARAAudioSource::willUpdateProperties()
 {
 #if JUCE_DEBUG
-    jassert (!stateUpdateProperties);
+    jassert (! stateUpdateProperties);
     stateUpdateProperties = true;
 #endif
 
@@ -80,12 +80,12 @@ void ARAAudioSource::didUpdateProperties()
 void ARAAudioSource::willEnableSamplesAccess (bool enable)
 {
 #if JUCE_DEBUG
-    jassert (!stateEnableSamplesAccess);
+    jassert (! stateEnableSamplesAccess);
     stateEnableSamplesAccess = true;
 #endif
 
     ref_->lock.enterWrite();
-    if (!enable)
+    if (! enable)
         for (auto& reader : readers_)
             reader->araHostReader.reset();
 }
@@ -136,7 +136,7 @@ bool ARAAudioSource::Reader::readSamples (
     int numSamples)
 {
     Ref::ScopedAccess source (ref_, true);
-    if (!source || !araHostReader)
+    if (!source || araHostReader == nullptr)
         return false;
     for (int chan_i = 0; chan_i < tmpPtrs_.size(); ++chan_i)
         if (chan_i < numDestChannels && destSamples[chan_i] != nullptr)

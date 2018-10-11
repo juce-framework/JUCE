@@ -53,7 +53,7 @@ AudioFormatReader* ARARegionSequence::newReader (double sampleRate)
     ARA::PlugIn::PropertiesPtr<ARA::ARAPlaybackRegionProperties> properties)
 {
 #if JUCE_DEBUG
-    jassert (!stateUpdatePlaybackRegionProperties);
+    jassert (! stateUpdatePlaybackRegionProperties);
     stateUpdatePlaybackRegionProperties = true;
 #endif
 
@@ -105,7 +105,7 @@ bool ARARegionSequence::isSampleAccessEnabled() const
 {
     Ref::ScopedAccess access (ref_);
     for (auto& x : sourceRefCount_)
-        if (!x.first->isSampleAccessEnabled())
+        if (! x.first->isSampleAccessEnabled())
             return false;
     return true;
 }
@@ -167,7 +167,7 @@ bool ARARegionSequence::Reader::readSamples (
             FloatVectorOperations::clear (buf + startOffsetInDestBuffer, numSamples);
 
     Ref::ScopedAccess sequence (ref_, true);
-    if (!sequence)
+    if (! sequence)
         return false;
 
     if (buf_.getNumSamples() < numSamples || buf_.getNumChannels() < numDestChannels)
@@ -192,7 +192,7 @@ bool ARARegionSequence::Reader::readSamples (
         const int numRegionSamples = std::min (
             (int) (region->getDurationInPlaybackSamples (sampleRate) - startSampleInRegion),
             numSamples - destOffest);
-        if (!sourceReader->read (
+        if (! sourceReader->read (
             (int**) buf_.getArrayOfWritePointers(),
             numDestChannels,
             region->getStartInAudioModificationSamples() + startSampleInRegion,

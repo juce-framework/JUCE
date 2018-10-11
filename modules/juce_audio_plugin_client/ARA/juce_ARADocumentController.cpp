@@ -9,7 +9,7 @@ const ARA::ARAFactory* ARA::PlugIn::DocumentController::getARAFactory ()
     using namespace ARA;
 
     static ARAFactory* factory = nullptr;
-    if (!factory)
+    if (factory == nullptr)
     {
         factory = new SizedStruct<ARA_MEMBER_PTR_ARGS (ARAFactory, supportedPlaybackTransformationFlags)>;
 
