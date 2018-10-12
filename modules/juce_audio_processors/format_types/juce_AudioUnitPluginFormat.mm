@@ -1329,7 +1329,7 @@ public:
 
     void refreshParameterList() override
     {
-        managedParameters.clear();
+        managedParameters.clear (false);
         paramIDToIndex.clear();
         AudioProcessorParameterGroup parameterGroups ({}, {}, {});
 
