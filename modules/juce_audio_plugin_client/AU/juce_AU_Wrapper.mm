@@ -85,6 +85,8 @@
 #include "../../juce_audio_processors/format_types/juce_AU_Shared.h"
 
 #if JucePlugin_Enable_ARA
+ // TODO is including via relative path the norm?
+ #include "../ARA/juce_ARA_interface.h"
  #include <ARA_API/ARAAudioUnit.h>
  #if ARA_SUPPORT_VERSION_1
   #error "Unsupported ARA version - ARA version 2 and onward are JUCE compatible"
