@@ -28,9 +28,9 @@ namespace juce
 {
 
 /**
-    This class contains a ValueTree which is used to manage an AudioProcessor's entire state.
+    This class contains a ValueTree that is used to manage an AudioProcessor's entire state.
 
-    It has its own internal class of parameter object which are linked to values
+    It has its own internal class of parameter object that is linked to values
     within its ValueTree, and which are each identified by a string ID.
 
     You can get access to the underlying ValueTree object via the state member variable,
@@ -39,127 +39,231 @@ namespace juce
     It also provides some utility child classes for connecting parameters directly to
     GUI controls like sliders.
 
-    To use:
+    The favoured constructor of this class takes a collection of RangedAudioParameters or
+    AudioProcessorParameterGroups of RangedAudioParameters and adds them to the attached
+    AudioProcessor directly.
+
+    The deprecated way of using this class is as follows:
+
     1) Create an AudioProcessorValueTreeState, and give it some parameters using createAndAddParameter().
     2) Initialise the state member variable with a type name.
 
+    The deprecated constructor will be removed from the API in a future version of JUCE!
+
     @tags{Audio}
 */
-class JUCE_API  AudioProcessorValueTreeState  : private Timer,
+class JUCE_API AudioProcessorValueTreeState   : private Timer,
                                                 private ValueTree::Listener
 {
 public:
-    /** Creates a state object for a given processor.
+    //==============================================================================
+    /** A class to contain a set of RangedAudioParameters and AudioProcessorParameterGroups
+        containing RangedAudioParameters.
 
-        The UndoManager is optional and can be a nullptr.
-        After creating your state object, you should add parameters with the
-        createAndAddParameter() method. Note that each AudioProcessorValueTreeState
-        should be attached to only one processor, and must have the same lifetime as the
-        processor, as they will have dependencies on each other.
+        This class is used in the AudioProcessorValueTreeState constructor to allow
+        arbitrarily grouped RangedAudioParameters to be passed to an AudioProcessor.
+    */
+    class JUCE_API ParameterLayout final
+    {
+    private:
+        //==============================================================================
+        template <typename It>
+        using ValidIfIterator = decltype (std::next (std::declval<It>()));
+
+    public:
+        //==============================================================================
+        template <typename... Items>
+        ParameterLayout (std::unique_ptr<Items>... items) { add (std::move (items)...); }
+
+        template <typename It, typename = ValidIfIterator<It>>
+        ParameterLayout (It begin, It end) { add (begin, end); }
+
+        template <typename... Items>
+        void add (std::unique_ptr<Items>... items)
+        {
+            parameters.reserve (parameters.size() + sizeof... (items));
+
+            // We can replace this with some nicer code once generic lambdas become available. A
+            // sequential context like an array initialiser is required to ensure we get the correct
+            // order from the parameter pack.
+            int unused[] { (parameters.emplace_back (MakeContents() (std::move (items))), 0)... };
+            ignoreUnused (unused);
+        }
+
+        template <typename It, typename = ValidIfIterator<It>>
+        void add (It begin, It end)
+        {
+            parameters.reserve (parameters.size() + std::size_t (std::distance (begin, end)));
+            std::transform (std::make_move_iterator (begin),
+                            std::make_move_iterator (end),
+                            std::back_inserter (parameters),
+                            MakeContents());
+        }
+
+        ParameterLayout (const ParameterLayout& other) = delete;
+        ParameterLayout (ParameterLayout&& other) noexcept { swap (other); }
+
+        ParameterLayout& operator= (const ParameterLayout& other) = delete;
+        ParameterLayout& operator= (ParameterLayout&& other) noexcept { swap (other); return *this; }
+
+        void swap (ParameterLayout& other) noexcept { std::swap (other.parameters, parameters); }
+
+    private:
+        //==============================================================================
+        struct Visitor
+        {
+            virtual ~Visitor() = default;
+
+            // If you have a compiler error telling you that there is no matching
+            // member function to call for 'visit', then you are probably attempting
+            // to add a parameter that is not derived from RangedAudioParameter to
+            // the AudioProcessorValueTreeState.
+            virtual void visit (std::unique_ptr<RangedAudioParameter>) const = 0;
+            virtual void visit (std::unique_ptr<AudioProcessorParameterGroup>) const = 0;
+        };
+
+        struct ParameterStorageBase
+        {
+            virtual ~ParameterStorageBase() = default;
+            virtual void accept (const Visitor& visitor) = 0;
+        };
+
+        template <typename Contents>
+        struct ParameterStorage : ParameterStorageBase
+        {
+            explicit ParameterStorage (std::unique_ptr<Contents> input) : contents (std::move (input)) {}
+
+            void accept (const Visitor& visitor) override   { visitor.visit (std::move (contents)); }
+
+            std::unique_ptr<Contents> contents;
+        };
+
+        struct MakeContents final
+        {
+            template <typename Item>
+            std::unique_ptr<ParameterStorageBase> operator() (std::unique_ptr<Item> item) const
+            {
+                return std::unique_ptr<ParameterStorageBase> (new ParameterStorage<Item> (std::move (item)));
+            }
+        };
+
+        void add() {}
+
+        friend class AudioProcessorValueTreeState;
+
+        std::vector<std::unique_ptr<ParameterStorageBase>> parameters;
+    };
+
+    //==============================================================================
+    /** Creates a state object for a given processor, and sets up all the parameters
+        that will control that processor.
+
+        You should *not* assign a new ValueTree to the state, or call
+        createAndAddParameter, after using this constructor.
+
+        Note that each AudioProcessorValueTreeState should be attached to only one
+        processor, and must have the same lifetime as the processor, as they will
+        have dependencies on each other.
+
+        The ParameterLayout parameter has a set of constructors that allow you to
+        add multiple RangedAudioParameters and AudioProcessorParameterGroups containing
+        RangedAudioParameters to the AudioProcessorValueTreeState inside this constructor.
+
+        @code
+        YourAudioProcessor()
+            : apvts (*this, &undoManager, "PARAMETERS",
+                     { std::make_unique<AudioParameterFloat> ("a", "Parameter A", NormalisableRange<float> (-100.0f, 100.0f), 0),
+                       std::make_unique<AudioParameterInt> ("b", "Parameter B", 0, 5, 2) })
+        @endcode
+
+        @param processorToConnectTo     The Processor that will be managed by this object
+        @param undoManagerToUse         An optional UndoManager to use; pass nullptr if no UndoManager is required
+        @param valueTreeType            The identifier used to initialise the internal ValueTree
+        @param parameterLayout          An object that holds all parameters and parameter groups that the
+                                        AudioProcessor should use.
     */
     AudioProcessorValueTreeState (AudioProcessor& processorToConnectTo,
-                                  UndoManager* undoManagerToUse);
+                                  UndoManager* undoManagerToUse,
+                                  const juce::Identifier& valueTreeType,
+                                  ParameterLayout parameterLayout);
+
+    /** This constructor is discouraged and will be deprecated in a future version of JUCE!
+
+        Creates a state object for a given processor.
+
+        The UndoManager is optional and can be a nullptr. After creating your state object,
+        you should add parameters with the createAndAddParameter() method. Note that each
+        AudioProcessorValueTreeState should be attached to only one processor, and must have
+        the same lifetime as the processor, as they will have dependencies on each other.
+    */
+    AudioProcessorValueTreeState (AudioProcessor& processorToConnectTo, UndoManager* undoManagerToUse);
 
     /** Destructor. */
     ~AudioProcessorValueTreeState();
 
-    /** Creates a new parameter object for controlling a parameter with the given ID.
+    //==============================================================================
+    /** This function is deprecated and will be removed in a future version of JUCE!
 
-        The parameter returned by this function should be added to the AudioProcessor
-        managed by this AudioProcessorValueTreeState via AudioProcessor::addParameter
-        or AudioProcessor::addParameterGroup.
+        Previous calls to
+        @code
+        createAndAddParameter (paramID1, paramName1, ...);
+        @endcode
+        can be replaced with
+        @code
+        using Parameter = AudioProcessorValueTreeState::Parameter;
+        createAndAddParameter (std::make_unique<Parameter> (paramID1, paramName1, ...));
+        @endcode
 
-        @param parameterID              A unique string ID for the new parameter
-        @param parameterName            The name that the parameter will return from AudioProcessorParameter::getName()
-        @param labelText                The label that the parameter will return from AudioProcessorParameter::getLabel()
-        @param valueRange               A mapping that will be used to determine the value range which this parameter uses
-        @param defaultValue             A default value for the parameter (in non-normalised units)
-        @param valueToTextFunction      A function that will convert a non-normalised value to a string for the
-                                        AudioProcessorParameter::getText() method. This can be nullptr to use the
-                                        default implementation
-        @param textToValueFunction      The inverse of valueToTextFunction
-        @param isMetaParameter          Set this value to true if this should be a meta parameter
-        @param isAutomatableParameter   Set this value to false if this parameter should not be automatable
-        @param isDiscrete               Set this value to true to make this parameter take discrete values in a host.
-                                        @see AudioProcessorParameter::isDiscrete
-        @param category                 Which category the parameter should use.
-                                        @see AudioProcessorParameter::Category
-        @param isBoolean                Set this value to true to make this parameter appear as a boolean toggle in
-                                        a hosts view of your plug-ins parameters
-                                        @see AudioProcessorParameter::isBoolean
+        However, a much better approach is to use the AudioProcessorValueTreeState
+        constructor directly
+        @code
+        using Parameter = AudioProcessorValueTreeState::Parameter;
+        YourAudioProcessor()
+            : apvts (*this, &undoManager, "PARAMETERS", { std::make_unique<Parameter> (paramID1, paramName1, ...),
+                                                          std::make_unique<Parameter> (paramID2, paramName2, ...),
+                                                          ... })
+        @endcode
 
-        @returns the parameter object that was created
-    */
-    std::unique_ptr<AudioProcessorParameterWithID> createParameter (const String& parameterID,
-                                                                    const String& parameterName,
-                                                                    const String& labelText,
-                                                                    NormalisableRange<float> valueRange,
-                                                                    float defaultValue,
-                                                                    std::function<String (float)> valueToTextFunction,
-                                                                    std::function<float (const String&)> textToValueFunction,
-                                                                    bool isMetaParameter = false,
-                                                                    bool isAutomatableParameter = true,
-                                                                    bool isDiscrete = false,
-                                                                    AudioProcessorParameter::Category category
-                                                                       = AudioProcessorParameter::genericParameter,
-                                                                    bool isBoolean = false);
-
-    /** Creates and returns a new parameter object for controlling a parameter
-        with the given ID.
+        This function creates and returns a new parameter object for controlling a
+        parameter with the given ID.
 
         Calling this will create and add a special type of AudioProcessorParameter to the
         AudioProcessor to which this state is attached.
-
-        @param parameterID              A unique string ID for the new parameter
-        @param parameterName            The name that the parameter will return from AudioProcessorParameter::getName()
-        @param labelText                The label that the parameter will return from AudioProcessorParameter::getLabel()
-        @param valueRange               A mapping that will be used to determine the value range which this parameter uses
-        @param defaultValue             A default value for the parameter (in non-normalised units)
-        @param valueToTextFunction      A function that will convert a non-normalised value to a string for the
-                                        AudioProcessorParameter::getText() method. This can be nullptr to use the
-                                        default implementation
-        @param textToValueFunction      The inverse of valueToTextFunction
-        @param isMetaParameter          Set this value to true if this should be a meta parameter
-        @param isAutomatableParameter   Set this value to false if this parameter should not be automatable
-        @param isDiscrete               Set this value to true to make this parameter take discrete values in a host.
-                                        @see AudioProcessorParameter::isDiscrete
-        @param category                 Which category the parameter should use.
-                                        @see AudioProcessorParameter::Category
-        @param isBoolean                Set this value to true to make this parameter appear as a boolean toggle in
-                                        a hosts view of your plug-ins parameters
-                                        @see AudioProcessorParameter::isBoolean
-
-        @returns the parameter object that was created
     */
-    AudioProcessorParameterWithID* createAndAddParameter (const String& parameterID,
-                                                          const String& parameterName,
-                                                          const String& labelText,
-                                                          NormalisableRange<float> valueRange,
-                                                          float defaultValue,
-                                                          std::function<String (float)> valueToTextFunction,
-                                                          std::function<float (const String&)> textToValueFunction,
-                                                          bool isMetaParameter = false,
-                                                          bool isAutomatableParameter = true,
-                                                          bool isDiscrete = false,
-                                                          AudioProcessorParameter::Category category
-                                                             = AudioProcessorParameter::genericParameter,
-                                                          bool isBoolean = false);
+    JUCE_DEPRECATED (RangedAudioParameter* createAndAddParameter (const String& parameterID,
+                                                                  const String& parameterName,
+                                                                  const String& labelText,
+                                                                  NormalisableRange<float> valueRange,
+                                                                  float defaultValue,
+                                                                  std::function<String (float)> valueToTextFunction,
+                                                                  std::function<float (const String&)> textToValueFunction,
+                                                                  bool isMetaParameter = false,
+                                                                  bool isAutomatableParameter = true,
+                                                                  bool isDiscrete = false,
+                                                                  AudioProcessorParameter::Category category = AudioProcessorParameter::genericParameter,
+                                                                  bool isBoolean = false));
 
+    /** This function adds a parameter to the attached AudioProcessor and that parameter will
+        be managed by this AudioProcessorValueTreeState object.
+    */
+    RangedAudioParameter* createAndAddParameter (std::unique_ptr<RangedAudioParameter> parameter);
+
+    //==============================================================================
     /** Returns a parameter by its ID string. */
-    AudioProcessorParameterWithID* getParameter (StringRef parameterID) const noexcept;
+    RangedAudioParameter* getParameter (StringRef parameterID) const noexcept;
 
     /** Returns a pointer to a floating point representation of a particular
         parameter which a realtime process can read to find out its current value.
     */
     float* getRawParameterValue (StringRef parameterID) const noexcept;
 
+    //==============================================================================
     /** A listener class that can be attached to an AudioProcessorValueTreeState.
         Use AudioProcessorValueTreeState::addParameterListener() to register a callback.
     */
     struct JUCE_API  Listener
     {
-        Listener();
-        virtual ~Listener();
+        virtual ~Listener() = default;
 
         /** This callback method is called by the AudioProcessorValueTreeState when a parameter changes. */
         virtual void parameterChanged (const String& parameterID, float newValue) = 0;
@@ -171,12 +275,14 @@ public:
     /** Removes a callback that was previously added with addParameterCallback(). */
     void removeParameterListener (StringRef parameterID, Listener* listener);
 
+    //==============================================================================
     /** Returns a Value object that can be used to control a particular parameter. */
     Value getParameterAsValue (StringRef parameterID) const;
 
     /** Returns the range that was set when the given parameter was created. */
     NormalisableRange<float> getParameterRange (StringRef parameterID) const noexcept;
 
+    //==============================================================================
     /** Returns a copy of the state value tree.
 
         The AudioProcessorValueTreeState's ValueTree is updated internally on the
@@ -204,6 +310,7 @@ public:
     */
     void replaceState (const ValueTree& newState);
 
+    //==============================================================================
     /** A reference to the processor with which this state is associated. */
     AudioProcessor& processor;
 
@@ -218,6 +325,57 @@ public:
 
     /** Provides access to the undo manager that this object is using. */
     UndoManager* const undoManager;
+
+    //==============================================================================
+    /** A parameter class that maintains backwards compatibility with deprecated
+        AudioProcessorValueTreeState functionality.
+
+        Previous calls to
+        @code
+        createAndAddParameter (paramID1, paramName1, ...);
+        @endcode
+        can be replaced with
+        @code
+        using Parameter = AudioProcessorValueTreeState::Parameter;
+        createAndAddParameter (std::make_unique<Parameter> (paramID1, paramName1, ...));
+        @endcode
+
+        However, a much better approach is to use the AudioProcessorValueTreeState
+        constructor directly
+        @code
+        using Parameter = AudioProcessorValueTreeState::Parameter;
+        YourAudioProcessor()
+            : apvts (*this, &undoManager, "PARAMETERS", { std::make_unique<Parameter> (paramID1, paramName1, ...),
+                                                          std::make_unique<Parameter> (paramID2, paramName2, ...),
+                                                          ... })
+        @endcode
+    */
+    class Parameter final  : public AudioParameterFloat
+    {
+    public:
+        Parameter (const String& parameterID,
+                   const String& parameterName,
+                   const String& labelText,
+                   NormalisableRange<float> valueRange,
+                   float defaultValue,
+                   std::function<String(float)> valueToTextFunction,
+                   std::function<float(const String&)> textToValueFunction,
+                   bool isMetaParameter = false,
+                   bool isAutomatableParameter = true,
+                   bool isDiscrete = false,
+                   AudioProcessorParameter::Category category = AudioProcessorParameter::genericParameter,
+                   bool isBoolean = false);
+
+        int getNumSteps() const override;
+
+        bool isMetaParameter() const override;
+        bool isAutomatable() const override;
+        bool isDiscrete() const override;
+        bool isBoolean() const override;
+
+    private:
+        const bool metaParameter, automatable, discrete, boolean;
+    };
 
     //==============================================================================
     /** An object of this class maintains a connection between a Slider and a parameter
@@ -295,11 +453,44 @@ public:
 
 private:
     //==============================================================================
-    struct Parameter;
-    friend struct Parameter;
+    /** This method was introduced to allow you to use AudioProcessorValueTreeState parameters in
+        an AudioProcessorParameterGroup, but there is now a much nicer way to achieve this.
 
+        Code that looks like this
+        @code
+        auto paramA = apvts.createParameter ("a", "Parameter A", {}, { -100, 100 }, ...);
+        auto paramB = apvts.createParameter ("b", "Parameter B", {}, { 0, 5 }, ...);
+        addParameterGroup (std::make_unique<AudioProcessorParameterGroup> ("g1", "Group 1", " | ", std::move (paramA), std::move (paramB)));
+        apvts.state = ValueTree (Identifier ("PARAMETERS"));
+        @endcode
+        can instead create the APVTS like this, avoiding the two-step initialization process and leveraging one of JUCE's
+        pre-built parameter types (or your own custom type derived from RangedAudioParameter)
+        @code
+        using Parameter = AudioProcessorValueTreeState::Parameter;
+        YourAudioProcessor()
+            : apvts (*this, &undoManager, "PARAMETERS",
+                     { std::make_unique<AudioProcessorParameterGroup> ("g1", "Group 1", " | ",
+                           std::make_unique<Parameter> ("a", "Parameter A", "", NormalisableRange<float> (-100, 100), ...),
+                           std::make_unique<Parameter> ("b", "Parameter B", "", NormalisableRange<float> (0, 5), ...)) })
+        @endcode
+    */
+    JUCE_DEPRECATED (std::unique_ptr<RangedAudioParameter> createParameter (const String&, const String&, const String&, NormalisableRange<float>,
+                                                                            float, std::function<String (float)>, std::function<float (const String&)>,
+                                                                            bool, bool, bool, AudioProcessorParameter::Category, bool));
+
+    //==============================================================================
+    class ParameterAdapter;
+
+   #if JUCE_UNIT_TESTS
+    friend struct ParameterAdapterTests;
+   #endif
+
+    ParameterAdapter* getParameterAdapter (StringRef) const;
+
+    ValueTree getChildValueTree (const String&) const;
     ValueTree getOrCreateChildValueTree (const String&);
     bool flushParameterValuesToValueTree();
+    void setNewState (ParameterAdapter&);
     void timerCallback() override;
 
     void valueTreePropertyChanged (ValueTree&, const Identifier&) override;
@@ -310,9 +501,9 @@ private:
     void valueTreeRedirected (ValueTree&) override;
     void updateParameterConnectionsToChildTrees();
 
-    Identifier valueType { "PARAM" },
-               valuePropertyID { "value" },
-               idPropertyID { "id" };
+    const Identifier valueType { "PARAM" }, valuePropertyID { "value" }, idPropertyID { "id" };
+
+    std::vector<std::unique_ptr<ParameterAdapter>> parameters;
 
     CriticalSection valueTreeChanging;
 

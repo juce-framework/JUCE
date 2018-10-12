@@ -34,7 +34,7 @@ namespace juce
 
     @tags{Audio}
 */
-class JUCE_API AudioParameterBool  : public AudioProcessorParameterWithID
+class JUCE_API AudioParameterBool  : public RangedAudioParameter
 {
 public:
     /** Creates a AudioParameterBool with the specified parameters.
@@ -60,11 +60,15 @@ public:
 
     /** Returns the parameter's current boolean value. */
     bool get() const noexcept          { return value >= 0.5f; }
+
     /** Returns the parameter's current boolean value. */
     operator bool() const noexcept     { return get(); }
 
     /** Changes the parameter's current value to a new boolean. */
     AudioParameterBool& operator= (bool newValue);
+
+    /** Returns the range of values that the parameter can take. */
+    const NormalisableRange<float>& getNormalisableRange() const override   { return range; }
 
 protected:
     /** Override this method if you are interested in receiving callbacks
@@ -83,6 +87,7 @@ private:
     String getText (float, int) const override;
     float getValueForText (const String&) const override;
 
+    const NormalisableRange<float> range { 0.0f, 1.0f, 1.0f };
     float value;
     const float defaultValue;
     std::function<String (bool, int)> stringFromBoolFunction;

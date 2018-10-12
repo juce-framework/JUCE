@@ -127,6 +127,7 @@
 #include "scanning/juce_PluginDirectoryScanner.h"
 #include "scanning/juce_PluginListComponent.h"
 #include "utilities/juce_AudioProcessorParameterWithID.h"
+#include "utilities/juce_RangedAudioParameter.h"
 #include "utilities/juce_AudioParameterFloat.h"
 #include "utilities/juce_AudioParameterInt.h"
 #include "utilities/juce_AudioParameterBool.h"
