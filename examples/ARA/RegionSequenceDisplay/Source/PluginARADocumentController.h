@@ -10,8 +10,6 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
-#include "ARA_Library/PlugIn/ARAPlug.h"
 #include "juce_audio_plugin_client/ARA/juce_ARADocumentController.h"
 #include "AudioView.h"
 
