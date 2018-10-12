@@ -1,7 +1,6 @@
 #pragma once
 
 #include "JuceHeader.h"
-#include <ARA_Library/PlugIn/ARAPlug.h>
 
 namespace juce
 {

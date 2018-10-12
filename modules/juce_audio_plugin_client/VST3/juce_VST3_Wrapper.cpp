@@ -73,7 +73,9 @@ namespace Vst2
 
 //==============================================================================
 #if JucePlugin_Enable_ARA
-
+ 
+ // TODO is including via relative path the norm?
+ #include "../ARA/juce_ARA_interface.h"
  #include <ARA_API/ARAVST3.h>
  
  #if ARA_SUPPORT_VERSION_1
