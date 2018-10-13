@@ -131,8 +131,14 @@ Point<ValueType> Displays::logicalToPhysical (Point<ValueType> point, const Disp
 const Displays::Display& Displays::getMainDisplay() const noexcept
 {
     ASSERT_MESSAGE_MANAGER_IS_LOCKED
-    jassert (displays.getReference(0).isMain);
-    return displays.getReference(0);
+
+    for (auto& d : displays)
+        if (d.isMain)
+            return d;
+
+    // no main display!
+    jassertfalse;
+    return displays.getReference (0);
 }
 
 RectangleList<int> Displays::getRectangleList (bool userAreasOnly) const
@@ -160,7 +166,7 @@ void Displays::refresh()
 
     if (oldDisplays != displays)
     {
-        for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
+        for (auto i = ComponentPeer::getNumPeers(); --i >= 0;)
             if (auto* peer = ComponentPeer::getPeer (i))
                 peer->handleScreenSizeChange();
     }
@@ -184,8 +190,8 @@ bool operator!= (const Displays::Display& d1, const Displays::Display& d2) noexc
 const Displays::Display& Displays::getDisplayContaining (Point<int> position) const noexcept
 {
     ASSERT_MESSAGE_MANAGER_IS_LOCKED
-    auto* best = &displays.getReference(0);
-    double bestDistance = 1.0e10;
+    auto* best = &displays.getReference (0);
+    auto bestDistance = std::numeric_limits<int>::max();
 
     for (auto& d : displays)
     {
