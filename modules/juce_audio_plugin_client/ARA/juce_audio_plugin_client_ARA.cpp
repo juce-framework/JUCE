@@ -22,8 +22,12 @@
   #endif
   
           juce::logAssertion (file, line);
-  
-          jassertfalse;
+
+  #if (JUCE_DEBUG && ! JUCE_DISABLE_ASSERTIONS)
+          if (juce::juce_isRunningUnderDebugger())
+              JUCE_BREAK_IN_DEBUGGER;
+          JUCE_ANALYZER_NORETURN
+  #endif
       }
  #endif
  
