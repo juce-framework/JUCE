@@ -121,7 +121,7 @@ ARARegionSequence::Reader::Reader (ARARegionSequence* sequence, double sampleRat
     sampleRate = sampleRate_;
 
     Ref::ScopedAccess access (ref);
-    jassert (access != nullptr);
+    jassert (access);
     for (ARA::PlugIn::PlaybackRegion* region : sequence->getPlaybackRegions())
     {
         ARA::PlugIn::AudioModification* modification = region->getAudioModification();
@@ -167,7 +167,7 @@ bool ARARegionSequence::Reader::readSamples (
             FloatVectorOperations::clear (destBuf + startOffsetInDestBuffer, numSamples);
 
     Ref::ScopedAccess sequence (ref, true);
-    if (sequence == nullptr)
+    if (! sequence)
         return false;
 
     if (sampleBuffer.getNumSamples() < numSamples || sampleBuffer.getNumChannels() < numDestChannels)
