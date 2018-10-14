@@ -11,8 +11,8 @@ public:
     Reader (ARAAudioSource*);
     ~Reader();
 
-    void setAudioSource(ARA::PlugIn::AudioSource* audioSource);
-    const ARA::PlugIn::HostAudioReader* getHostAudioReader() const;
+    void createHostAudioReaderForSource(ARA::PlugIn::AudioSource* audioSource);
+    void invalidate();
 
     bool readSamples (
         int** destSamples,
@@ -48,7 +48,7 @@ void ARAAudioSource::invalidateReaders()
 {
     ScopedWriteLock l (ref->lock);
     for (auto& reader : readers)
-        reader->setAudioSource(nullptr);
+        reader->invalidate();
     readers.clear();
     ref->reset();
 }
@@ -88,7 +88,7 @@ void ARAAudioSource::willEnableSamplesAccess (bool enable)
     ref->lock.enterWrite();
     if (! enable)
         for (auto& reader : readers)
-            reader->setAudioSource(nullptr);
+            reader->invalidate();
 }
 
 void ARAAudioSource::didEnableSamplesAccess (bool enable)
@@ -100,7 +100,7 @@ void ARAAudioSource::didEnableSamplesAccess (bool enable)
 
     if (enable)
         for (auto& reader : readers)
-            reader->setAudioSource(this);
+            reader->createHostAudioReaderForSource(this);
     ref->lock.exitWrite();
 }
 
@@ -130,17 +130,18 @@ ARAAudioSource::Reader::~Reader()
     }
 }
 
-void ARAAudioSource::Reader::setAudioSource(ARA::PlugIn::AudioSource* audioSource)
+void ARAAudioSource::Reader::createHostAudioReaderForSource(ARA::PlugIn::AudioSource* audioSource)
 {
+    // TODO should we assert these conditions instead of treating them as a case for invalidation?
     if (audioSource == nullptr || audioSource->isSampleAccessEnabled() == false)
-        araHostReader.reset();
+        invalidate();
     else
         araHostReader.reset(new ARA::PlugIn::HostAudioReader(audioSource));
 }
 
-const ARA::PlugIn::HostAudioReader* ARAAudioSource::Reader::getHostAudioReader() const
+void ARAAudioSource::Reader::invalidate()
 {
-    return araHostReader.get();
+    araHostReader.reset();
 }
 
 bool ARAAudioSource::Reader::readSamples (
