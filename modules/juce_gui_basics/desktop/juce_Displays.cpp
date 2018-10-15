@@ -93,7 +93,9 @@ Rectangle<int> Displays::physicalToLogical (Rectangle<int> rect, const Display* 
     auto& display = useScaleFactorOfDisplay != nullptr ? *useScaleFactorOfDisplay
                                                        : findDisplayForRect (rect, true);
 
-    return ((rect.toFloat() - display.topLeftPhysical.toFloat()) / display.scale).toNearestInt() + display.totalArea.getTopLeft();
+    auto globalScale = Desktop::getInstance().getGlobalScaleFactor();
+
+    return ((rect.toFloat() - display.topLeftPhysical.toFloat()) / (display.scale / globalScale)).toNearestInt() + (display.totalArea.getTopLeft() * globalScale);
 }
 
 Rectangle<int> Displays::logicalToPhysical (Rectangle<int> rect, const Display* useScaleFactorOfDisplay) const noexcept
@@ -101,7 +103,9 @@ Rectangle<int> Displays::logicalToPhysical (Rectangle<int> rect, const Display* 
     auto& display = useScaleFactorOfDisplay != nullptr ? *useScaleFactorOfDisplay
                                                        : findDisplayForRect (rect, false);
 
-    return ((rect.toFloat() - display.totalArea.getTopLeft().toFloat()) * display.scale).toNearestInt() + display.topLeftPhysical;
+    auto globalScale = Desktop::getInstance().getGlobalScaleFactor();
+
+    return ((rect.toFloat() - (display.totalArea.getTopLeft().toFloat() * globalScale)) * (display.scale / globalScale)).toNearestInt() + display.topLeftPhysical;
 }
 
 template <typename ValueType>
@@ -110,10 +114,12 @@ Point<ValueType> Displays::physicalToLogical (Point<ValueType> point, const Disp
     auto& display = useScaleFactorOfDisplay != nullptr ? *useScaleFactorOfDisplay
                                                        : findDisplayForPoint (point.roundToInt(), true);
 
+    auto globalScale = Desktop::getInstance().getGlobalScaleFactor();
+
     Point<ValueType> logicalTopLeft  (display.totalArea.getX(),       display.totalArea.getY());
     Point<ValueType> physicalTopLeft (display.topLeftPhysical.getX(), display.topLeftPhysical.getY());
 
-    return ((point - physicalTopLeft) / display.scale) + logicalTopLeft;
+    return ((point - physicalTopLeft) / (display.scale / globalScale)) + (logicalTopLeft * globalScale);
 }
 
 template <typename ValueType>
@@ -122,10 +128,12 @@ Point<ValueType> Displays::logicalToPhysical (Point<ValueType> point, const Disp
     auto& display = useScaleFactorOfDisplay != nullptr ? *useScaleFactorOfDisplay
                                                        : findDisplayForPoint (point.roundToInt(), false);
 
+    auto globalScale = Desktop::getInstance().getGlobalScaleFactor();
+
     Point<ValueType> logicalTopLeft  (display.totalArea.getX(),       display.totalArea.getY());
     Point<ValueType> physicalTopLeft (display.topLeftPhysical.getX(), display.topLeftPhysical.getY());
 
-    return ((point - logicalTopLeft) * display.scale) + physicalTopLeft;
+    return ((point - (logicalTopLeft * globalScale)) * (display.scale / globalScale)) + physicalTopLeft;
 }
 
 const Displays::Display& Displays::getMainDisplay() const noexcept
@@ -252,8 +260,8 @@ static void processDisplay (DisplayNode* currentNode, const Array<DisplayNode>& 
         const auto logicalHeight = physicalArea.getHeight() / scale;
 
         const auto physicalParentArea = currentNode->parent->display->totalArea.toDouble();
-        const auto logicalParentArea = currentNode->parent->logicalArea; // logical area of parent has already been calculated
-        const auto parentScale = currentNode->parent->display->scale;
+        const auto logicalParentArea  = currentNode->parent->logicalArea; // logical area of parent has already been calculated
+        const auto parentScale        = currentNode->parent->display->scale;
 
         Rectangle<double> logicalArea (0.0, 0.0, logicalWidth, logicalHeight);
 
@@ -304,8 +312,9 @@ void Displays::updateToLogical()
     if (displays.size() == 1)
     {
         auto& display = displays.getReference (0);
+
         display.totalArea = (display.totalArea.toDouble() / display.scale).toNearestInt();
-        display.userArea = (display.userArea.toDouble() / display.scale).toNearestInt();
+        display.userArea  = (display.userArea.toDouble()  / display.scale).toNearestInt();
 
         return;
     }
@@ -346,8 +355,8 @@ void Displays::updateToLogical()
 
         // Now set Display::totalArea and ::userArea using the logical area that we have calculated
         node.display->topLeftPhysical = node.display->totalArea.getTopLeft();
-        node.display->totalArea = node.logicalArea.toNearestInt();
-        node.display->userArea = (relativeUserArea + node.logicalArea.getTopLeft()).toNearestInt();
+        node.display->totalArea       = node.logicalArea.toNearestInt();
+        node.display->userArea        = (relativeUserArea + node.logicalArea.getTopLeft()).toNearestInt();
     }
 }
 
