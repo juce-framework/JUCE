@@ -1643,16 +1643,6 @@ struct PhysicalTopologySource::Internal
             return nullptr;
         }
 
-        bool isControlBlock() const
-        {
-            auto type = getType();
-
-            return type == Block::Type::liveBlock
-                || type == Block::Type::loopBlock
-                || type == Block::Type::touchBlock
-                || type == Block::Type::developerControlBlock;
-        }
-
         //==============================================================================
         std::function<void(const String&)> logger;
 
