@@ -1020,7 +1020,7 @@ String ValueTree::toXmlString() const
     std::unique_ptr<XmlElement> xml (createXml());
 
     if (xml != nullptr)
-        return xml->createDocument ({});
+        return xml->createDocument ({}, false, false);
 
     return {};
 }
