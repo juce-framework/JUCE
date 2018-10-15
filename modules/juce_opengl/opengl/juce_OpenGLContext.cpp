@@ -280,15 +280,14 @@ public:
     {
         if (auto* peer = component.getPeer())
         {
-            lastScreenBounds = component.getTopLevelComponent()->getScreenBounds();
-
-            auto newScale = Desktop::getInstance().getDisplays().findDisplayForRect (lastScreenBounds).scale;
+           #if JUCE_WINDOWS
+            auto newScale = nativeContext->getWindowScaleFactor (component.getTopLevelComponent()->getScreenBounds());
+           #else
+            auto newScale = Desktop::getInstance().getDisplays().findDisplayForRect (component.getTopLevelComponent()->getScreenBounds()).scale;
+           #endif
 
             auto localBounds = component.getLocalBounds();
-
-            auto newArea = peer->getComponent().getLocalArea (&component, localBounds)
-                                               .withZeroOrigin()
-                             * newScale;
+            auto newArea = peer->getComponent().getLocalArea (&component, localBounds).withZeroOrigin() * newScale;
 
             if (scale != newScale || viewportArea != newArea)
             {

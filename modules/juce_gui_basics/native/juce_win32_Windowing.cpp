@@ -4020,6 +4020,11 @@ JUCE_API ComponentPeer* createNonRepaintingEmbeddedWindowsPeer (Component& compo
                                   (HWND) parentHWND, true);
 }
 
+JUCE_API bool shouldScaleGLWindow (void* hwnd)
+{
+    return isPerMonitorDPIAwareWindow ((HWND) hwnd);
+}
+
 JUCE_IMPLEMENT_SINGLETON (HWNDComponentPeer::WindowClassHolder)
 
 //==============================================================================
