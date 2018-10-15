@@ -520,14 +520,6 @@ static Point<int> convertPhysicalScreenPointToLogical (const Point<int>& p, HWND
     return p;
 }
 
-static Point<int> convertLogicalScreenPointToPhysical (const Point<int>& p, HWND h) noexcept
-{
-    if (isPerMonitorDPIAwareWindow (h))
-        return Desktop::getInstance().getDisplays().logicalToPhysical (p, getCurrentDisplayFromScaleFactor (h));
-
-    return p;
-}
-
 static double getScaleFactorForWindow (HWND h)
 {
     if (isPerMonitorDPIAwareWindow (h) && getDPIForWindow != nullptr)
@@ -1473,10 +1465,14 @@ public:
         if (! r.withZeroOrigin().contains (localPos))
             return false;
 
-        auto w = WindowFromPoint (POINTFromPoint (convertLogicalScreenPointToPhysical ({ localPos.x + r.getX() + windowBorder.getLeft(),
-                                                                                         localPos.y + r.getY() + windowBorder.getTop() }, hwnd)));
+        auto globalPos = localPos + getScreenPosition();
 
-        return w == hwnd || (trueIfInAChildWindow && (IsChild (hwnd, w) != 0));
+        if (isPerMonitorDPIAwareThread() || isPerMonitorDPIAwareWindow (hwnd))
+            globalPos = Desktop::getInstance().getDisplays().logicalToPhysical (globalPos);
+
+        auto w = WindowFromPoint (POINTFromPoint (globalPos));
+
+        return  w == hwnd || (trueIfInAChildWindow && (IsChild (hwnd, w) != 0));
     }
 
     BorderSize<int> getFrameSize() const override
