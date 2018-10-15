@@ -39,8 +39,10 @@ struct LogoComponent  : public Component
 {
     LogoComponent()
     {
-        std::unique_ptr<XmlElement> svg (XmlDocument::parse (BinaryData::background_logo_svg));
-        logo.reset (Drawable::createFromSVG (*svg));
+        if (auto svg = parseXML (BinaryData::background_logo_svg))
+            logo.reset (Drawable::createFromSVG (*svg));
+        else
+            jassertfalse;
     }
 
     void paint (Graphics& g) override

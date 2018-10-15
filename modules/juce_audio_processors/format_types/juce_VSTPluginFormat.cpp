@@ -661,11 +661,11 @@ struct ModuleHandle    : public ReferenceCountedObject
 
         if (moduleMain != nullptr)
         {
-            vstXml.reset (XmlDocument::parse (file.withFileExtension ("vstxml")));
+            vstXml = parseXML (file.withFileExtension ("vstxml"));
 
            #if JUCE_WINDOWS
             if (vstXml == nullptr)
-                vstXml.reset (XmlDocument::parse (getDLLResource (file, "VSTXML", 1)));
+                vstXml = parseXML (getDLLResource (file, "VSTXML", 1));
            #endif
         }
 
@@ -772,7 +772,7 @@ struct ModuleHandle    : public ReferenceCountedObject
                                                     .findChildFiles (File::findFiles, false, "*.vstxml");
 
                             if (! vstXmlFiles.isEmpty())
-                                vstXml.reset (XmlDocument::parse (vstXmlFiles.getReference(0)));
+                                vstXml = parseXML (vstXmlFiles.getReference(0));
                         }
                     }
 

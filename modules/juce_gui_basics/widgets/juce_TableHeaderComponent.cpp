@@ -436,40 +436,42 @@ String TableHeaderComponent::toString() const
 
 void TableHeaderComponent::restoreFromString (const String& storedVersion)
 {
-    std::unique_ptr<XmlElement> storedXml (XmlDocument::parse (storedVersion));
-    int index = 0;
-
-    if (storedXml != nullptr && storedXml->hasTagName ("TABLELAYOUT"))
+    if (auto storedXML = parseXML (storedVersion))
     {
-        forEachXmlChildElement (*storedXml, col)
+        if (storedXML->hasTagName ("TABLELAYOUT"))
         {
-            auto tabId = col->getIntAttribute ("id");
+            int index = 0;
 
-            if (auto* ci = getInfoForId (tabId))
+            forEachXmlChildElement (*storedXML, col)
             {
-                columns.move (columns.indexOf (ci), index);
-                ci->width = col->getIntAttribute ("width");
-                setColumnVisible (tabId, col->getBoolAttribute ("visible"));
+                auto tabId = col->getIntAttribute ("id");
+
+                if (auto* ci = getInfoForId (tabId))
+                {
+                    columns.move (columns.indexOf (ci), index);
+                    ci->width = col->getIntAttribute ("width");
+                    setColumnVisible (tabId, col->getBoolAttribute ("visible"));
+                }
+
+                ++index;
             }
 
-            ++index;
+            columnsResized = true;
+            sendColumnsChanged();
+
+            setSortColumnId (storedXML->getIntAttribute ("sortedCol"),
+                             storedXML->getBoolAttribute ("sortForwards", true));
         }
-
-        columnsResized = true;
-        sendColumnsChanged();
-
-        setSortColumnId (storedXml->getIntAttribute ("sortedCol"),
-                         storedXml->getBoolAttribute ("sortForwards", true));
     }
 }
 
 //==============================================================================
-void TableHeaderComponent::addListener (Listener* const newListener)
+void TableHeaderComponent::addListener (Listener* newListener)
 {
     listeners.addIfNotAlreadyThere (newListener);
 }
 
-void TableHeaderComponent::removeListener (Listener* const listenerToRemove)
+void TableHeaderComponent::removeListener (Listener* listenerToRemove)
 {
     listeners.removeFirstMatchingValue (listenerToRemove);
 }

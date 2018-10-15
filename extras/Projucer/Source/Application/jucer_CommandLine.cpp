@@ -713,7 +713,7 @@ namespace
        #endif
 
         auto settingsFile = userAppData.getChildFile ("Projucer").getChildFile ("Projucer.settings");
-        std::unique_ptr<XmlElement> xml (XmlDocument::parse (settingsFile));
+        auto xml = parseXML (settingsFile);
 
         if (xml == nullptr)
             ConsoleApplication::fail ("Settings file not valid!");

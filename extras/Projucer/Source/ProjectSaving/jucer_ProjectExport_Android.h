@@ -1404,12 +1404,17 @@ private:
             customStringsXmlContent << cfg.getCustomStringsXml();
             customStringsXmlContent << "\n</resources>";
 
-            std::unique_ptr<XmlElement> strings (XmlDocument::parse (customStringsXmlContent));
+            if (auto strings = parseXML (customStringsXmlContent))
+            {
+                String dir     = cfg.isDebug() ? "debug" : "release";
+                String subPath = "app/src/" + dir + "/res/values/string.xml";
 
-            String dir     = cfg.isDebug() ? "debug" : "release";
-            String subPath = "app/src/" + dir + "/res/values/string.xml";
-
-            writeXmlOrThrow (*strings, folder.getChildFile (subPath), "utf-8", 100, true);
+                writeXmlOrThrow (*strings, folder.getChildFile (subPath), "utf-8", 100, true);
+            }
+            else
+            {
+                jassertfalse; // needs handling?
+            }
         }
     }
 

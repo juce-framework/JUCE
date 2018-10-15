@@ -552,7 +552,7 @@ static void forgetRecentFile (const File& file)
 //==============================================================================
 Result Project::loadDocument (const File& file)
 {
-    std::unique_ptr<XmlElement> xml (XmlDocument::parse (file));
+    auto xml = parseXML (file);
 
     if (xml == nullptr || ! xml->hasTagName (Ids::JUCERPROJECT.toString()))
         return Result::fail ("Not a valid Jucer project!");

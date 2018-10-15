@@ -1345,7 +1345,7 @@ public:
             if (! shouldCreatePList())
                 return;
 
-            std::unique_ptr<XmlElement> plist (XmlDocument::parse (owner.getPListToMergeString()));
+            auto plist = parseXML (owner.getPListToMergeString());
 
             if (plist == nullptr || ! plist->hasTagName ("plist"))
                 plist.reset (new XmlElement ("plist"));
@@ -3195,9 +3195,7 @@ private:
 
     bool xcschemeManagementPlistMatchesTargets (const File& plist) const
     {
-        std::unique_ptr<XmlElement> xml (XmlDocument::parse (plist));
-
-        if (xml != nullptr)
+        if (auto xml = parseXML (plist))
             if (auto* dict = xml->getChildByName ("dict"))
                 return parseNamesOfTargetsFromPlist (*dict) == getNamesOfTargets();
 
