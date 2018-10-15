@@ -3985,12 +3985,6 @@ void MouseCursor::showInWindow (ComponentPeer* peer) const
         lp->showMouseCursor ((Cursor) getHandle());
 }
 
-void MouseCursor::showInAllWindows() const
-{
-    for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
-        showInWindow (ComponentPeer::getPeer (i));
-}
-
 //=================================== X11 - DND ================================
 static LinuxComponentPeer* getPeerForDragEvent (Component* sourceComp)
 {

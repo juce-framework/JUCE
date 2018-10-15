@@ -1212,7 +1212,7 @@ public:
     };
 
     //==============================================================================
-    HWNDComponentPeer (Component& comp, const int windowStyleFlags, HWND parent, bool nonRepainting)
+    HWNDComponentPeer (Component& comp, int windowStyleFlags, HWND parent, bool nonRepainting)
         : ComponentPeer (comp, windowStyleFlags),
           dontRepaint (nonRepainting),
           parentToAddTo (parent),
@@ -1661,6 +1661,7 @@ public:
         JUCE_COMRESULT DragEnter (IDataObject* pDataObject, DWORD grfKeyState, POINTL mousePos, DWORD* pdwEffect) override
         {
             auto hr = updateFileList (pDataObject);
+
             if (FAILED (hr))
                 return hr;
 
@@ -1689,7 +1690,8 @@ public:
 
         JUCE_COMRESULT Drop (IDataObject* pDataObject, DWORD /*grfKeyState*/, POINTL mousePos, DWORD* pdwEffect) override
         {
-            HRESULT hr = updateFileList (pDataObject);
+            auto hr = updateFileList (pDataObject);
+
             if (FAILED (hr))
                 return hr;
 
@@ -1717,7 +1719,8 @@ public:
             for (unsigned int i = 0;;)
             {
                 unsigned int len = 0;
-                while (i + len < totalLen && names [i + len] != 0)
+
+                while (i + len < totalLen && names[i + len] != 0)
                     ++len;
 
                 if (len == 0)
@@ -1767,7 +1770,7 @@ public:
 
                 if (SUCCEEDED (fileData.error))
                 {
-                    const LPDROPFILES dropFiles = static_cast<const LPDROPFILES> (fileData.data);
+                    auto dropFiles = static_cast<const LPDROPFILES> (fileData.data);
                     const void* const names = addBytesToPointer (dropFiles, sizeof (DROPFILES));
 
                     if (dropFiles->fWide)
@@ -1804,7 +1807,6 @@ public:
 
         return false;
     }
-
 
     double getPlatformScaleFactor() const noexcept override
     {
@@ -2222,7 +2224,7 @@ private:
         {
             auto& info = *(ChildWindowClippingInfo*) context;
 
-            HWND parent = GetParent (hwnd);
+            auto parent = GetParent (hwnd);
 
             if (parent == info.peer->hwnd)
             {
@@ -2276,6 +2278,7 @@ private:
             // if something in a paint handler calls, e.g. a message box, this can become reentrant and
             // corrupt the image it's using to paint into, so do a check here.
             static bool reentrant = false;
+
             if (! reentrant)
             {
                 const ScopedValueSetter<bool> setter (reentrant, true, false);
@@ -2518,8 +2521,8 @@ private:
         }
 
         static uint32 lastMouseTime = 0;
-        static int minTimeBetweenMouses = getMinTimeBetweenMouseMoves();
-        const uint32 now = Time::getMillisecondCounter();
+        static auto minTimeBetweenMouses = getMinTimeBetweenMouseMoves();
+        auto now = Time::getMillisecondCounter();
 
         if (! Desktop::getInstance().getMainMouseSource().isDragging())
             modsToSend = modsToSend.withoutMouseButtons();
@@ -2653,6 +2656,7 @@ private:
         wheel.isInertial = false;
 
         Point<float> localPos;
+
         if (auto* peer = findPeerUnderMouse (localPos))
             peer->handleMouseWheel (getPointerType (wParam), localPos, getMouseEventTime(), wheel);
     }
@@ -2791,6 +2795,7 @@ private:
         if (pointerType == MouseInputSource::InputSourceType::touch)
         {
             POINTER_TOUCH_INFO touchInfo;
+
             if (! getPointerTouchInfo (GET_POINTERID_WPARAM (wParam), &touchInfo))
                 return false;
 
@@ -2806,6 +2811,7 @@ private:
         else if (pointerType == MouseInputSource::InputSourceType::pen)
         {
             POINTER_PEN_INFO penInfo;
+
             if (! getPointerPenInfo (GET_POINTERID_WPARAM (wParam), &penInfo))
                 return false;
 
@@ -2825,7 +2831,8 @@ private:
 
     TOUCHINPUT emulateTouchEventFromPointer (LPARAM lParam, WPARAM wParam)
     {
-        Point<int> p (GET_X_LPARAM (lParam), GET_Y_LPARAM (lParam));
+        Point<int> p (GET_X_LPARAM (lParam),
+                      GET_Y_LPARAM (lParam));
 
        #if JUCE_WIN_PER_MONITOR_DPI_AWARE
         if (! isPerMonitorDPIAwareThread())
@@ -3931,7 +3938,7 @@ private:
                             break;
 
                     for (selectionEnd = selectionStart; selectionEnd < attributeSizeBytes; ++selectionEnd)
-                        if (attributes [selectionEnd] != ATTR_TARGET_CONVERTED && attributes[selectionEnd] != ATTR_TARGET_NOTCONVERTED)
+                        if (attributes[selectionEnd] != ATTR_TARGET_CONVERTED && attributes[selectionEnd] != ATTR_TARGET_NOTCONVERTED)
                             break;
                 }
             }
@@ -3968,7 +3975,7 @@ private:
 
                     if (ImmGetCompositionString (hImc, GCS_COMPCLAUSE, clauseData, (DWORD) clauseDataSizeBytes) > 0)
                         for (size_t i = 0; i + 1 < numItems; ++i)
-                            result.add (Range<int> ((int) clauseData [i], (int) clauseData [i + 1]) + compositionRange.getStart());
+                            result.add (Range<int> ((int) clauseData[i], (int) clauseData[i + 1]) + compositionRange.getStart());
                 }
             }
 
@@ -4040,8 +4047,8 @@ bool KeyPress::isKeyCurrentlyDown (const int keyCode)
                                            (SHORT) ']', VK_OEM_6 };
 
         for (int i = 0; i < numElementsInArray (translatedValues); i += 2)
-            if (k == translatedValues [i])
-                k = translatedValues [i + 1];
+            if (k == translatedValues[i])
+                k = translatedValues[i + 1];
     }
 
     return HWNDComponentPeer::isKeyDown (k);
@@ -4428,7 +4435,7 @@ static const Displays::Display* getCurrentDisplayFromScaleFactor (HWND hwnd)
 //==============================================================================
 struct MonitorInfo
 {
-    MonitorInfo (bool main, const RECT& rect, double d) noexcept
+    MonitorInfo (bool main, RECT rect, double d) noexcept
         : isMain (main), bounds (rect), dpi (d) {}
 
     bool isMain;
@@ -4454,7 +4461,6 @@ static BOOL CALLBACK enumMonitorsProc (HMONITOR hm, HDC, LPRECT r, LPARAM userIn
     }
 
     ((Array<MonitorInfo>*) userInfo)->add ({ isMain, *r, dpi });
-
     return TRUE;
 }
 
@@ -4538,7 +4544,7 @@ void Displays::findDisplays (float masterScale)
 static HICON extractFileHICON (const File& file)
 {
     WORD iconNum = 0;
-    WCHAR name [MAX_PATH * 2];
+    WCHAR name[MAX_PATH * 2];
     file.getFullPathName().copyToUTF16 (name, sizeof (name));
 
     return ExtractAssociatedIcon ((HINSTANCE) Process::getCurrentModuleInstanceHandle(),
@@ -4659,12 +4665,10 @@ void* MouseCursor::createStandardMouseCursor (const MouseCursor::StandardCursorT
             jassertfalse; break;
     }
 
-    HCURSOR cursorH = LoadCursor (0, cursorName);
+    if (auto cursorH = LoadCursor (0, cursorName))
+        return cursorH;
 
-    if (cursorH == 0)
-        cursorH = LoadCursor (0, IDC_ARROW);
-
-    return cursorH;
+    return LoadCursor (0, IDC_ARROW);
 }
 
 //==============================================================================
@@ -4678,11 +4682,6 @@ void MouseCursor::showInWindow (ComponentPeer*) const
         c = 0;
 
     SetCursor (c);
-}
-
-void MouseCursor::showInAllWindows() const
-{
-    showInWindow (nullptr);
 }
 
 } // namespace juce

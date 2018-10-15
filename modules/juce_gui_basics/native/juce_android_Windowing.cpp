@@ -1073,7 +1073,6 @@ void MouseCursor::deleteMouseCursor (void* const /*cursorHandle*/, const bool /*
 
 //==============================================================================
 void MouseCursor::showInWindow (ComponentPeer*) const   {}
-void MouseCursor::showInAllWindows() const  {}
 
 //==============================================================================
 bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& /*files*/, const bool /*canMove*/,
