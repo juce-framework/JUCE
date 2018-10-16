@@ -199,7 +199,7 @@ void AudioPluginFormat::createPluginInstanceOnMessageThread (const PluginDescrip
                                                              AudioPluginFormat::InstantiationCompletionCallback* callback)
 {
     jassert (callback != nullptr);
-    jassert (MessageManager::getInstance()->isThisTheMessageThread());
+    JUCE_ASSERT_MESSAGE_THREAD
 
     //==============================================================================
 

@@ -138,7 +138,7 @@ Point<ValueType> Displays::logicalToPhysical (Point<ValueType> point, const Disp
 
 const Displays::Display& Displays::getMainDisplay() const noexcept
 {
-    ASSERT_MESSAGE_MANAGER_IS_LOCKED
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
     for (auto& d : displays)
         if (d.isMain)
@@ -151,7 +151,7 @@ const Displays::Display& Displays::getMainDisplay() const noexcept
 
 RectangleList<int> Displays::getRectangleList (bool userAreasOnly) const
 {
-    ASSERT_MESSAGE_MANAGER_IS_LOCKED
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
     RectangleList<int> rl;
 
     for (auto& d : displays)
@@ -197,7 +197,7 @@ bool operator!= (const Displays::Display& d1, const Displays::Display& d2) noexc
 // Deprecated method
 const Displays::Display& Displays::getDisplayContaining (Point<int> position) const noexcept
 {
-    ASSERT_MESSAGE_MANAGER_IS_LOCKED
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
     auto* best = &displays.getReference (0);
     auto bestDistance = std::numeric_limits<int>::max();
 

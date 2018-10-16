@@ -1275,7 +1275,7 @@ public:
     void setTitle (const String& title) override
     {
         // Unfortunately some ancient bits of win32 mean you can only perform this operation from the message thread.
-        jassert (MessageManager::getInstance()->isThisTheMessageThread());
+        JUCE_ASSERT_MESSAGE_THREAD
 
         SetWindowText (hwnd, title.toWideCharPointer());
     }

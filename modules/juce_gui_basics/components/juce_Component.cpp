@@ -456,7 +456,7 @@ void Component::setName (const String& name)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    ASSERT_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN
 
     if (componentName != name)
     {
@@ -482,7 +482,7 @@ void Component::setVisible (bool shouldBeVisible)
     {
         // if component methods are being called from threads other than the message
         // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-        ASSERT_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN
+        JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN
 
         const WeakReference<Component> safePointer (this);
         flags.visibleFlag = shouldBeVisible;
@@ -562,7 +562,7 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    ASSERT_MESSAGE_MANAGER_IS_LOCKED
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
     if (isOpaque())
         styleWanted &= ~ComponentPeer::windowIsSemiTransparent;
@@ -663,7 +663,7 @@ void Component::removeFromDesktop()
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    ASSERT_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN
 
     if (flags.hasHeavyweightPeerFlag)
     {
@@ -839,7 +839,7 @@ void Component::toFront (bool setAsForeground)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    ASSERT_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN
 
     if (flags.hasHeavyweightPeerFlag)
     {
@@ -1030,7 +1030,7 @@ void Component::setBounds (int x, int y, int w, int h)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    ASSERT_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN
 
     if (w < 0) w = 0;
     if (h < 0) h = 0;
@@ -1344,7 +1344,7 @@ void Component::addChildComponent (Component& child, int zOrder)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    ASSERT_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN
 
     jassert (this != &child); // adding a component to itself!?
 
@@ -1422,7 +1422,7 @@ Component* Component::removeChildComponent (int index, bool sendParentEvents, bo
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    ASSERT_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN
 
     auto* child = childComponentList [index];
 
@@ -1609,7 +1609,7 @@ void Component::enterModalState (bool shouldTakeKeyboardFocus,
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    ASSERT_MESSAGE_MANAGER_IS_LOCKED
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
     if (! isCurrentlyModal (false))
     {
@@ -1786,7 +1786,7 @@ void Component::internalRepaintUnchecked (Rectangle<int> area, bool isEntireComp
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    ASSERT_MESSAGE_MANAGER_IS_LOCKED
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
     if (flags.visibleFlag)
     {
@@ -2166,10 +2166,12 @@ void Component::addComponentListener (ComponentListener* newListener)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    #if JUCE_DEBUG || JUCE_LOG_ASSERTIONS
+   #if JUCE_DEBUG || JUCE_LOG_ASSERTIONS
     if (getParentComponent() != nullptr)
-        ASSERT_MESSAGE_MANAGER_IS_LOCKED;
-    #endif
+    {
+        JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
+    }
+   #endif
 
     componentListeners.add (newListener);
 }
@@ -2220,7 +2222,7 @@ void Component::addMouseListener (MouseListener* newListener,
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    ASSERT_MESSAGE_MANAGER_IS_LOCKED
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
     // If you register a component as a mouselistener for itself, it'll receive all the events
     // twice - once via the direct callback that all components get anyway, and then again as a listener!
@@ -2236,7 +2238,7 @@ void Component::removeMouseListener (MouseListener* listenerToRemove)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    ASSERT_MESSAGE_MANAGER_IS_LOCKED
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
     if (mouseListeners != nullptr)
         mouseListeners->removeListener (listenerToRemove);
@@ -2736,7 +2738,7 @@ void Component::grabKeyboardFocus()
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    ASSERT_MESSAGE_MANAGER_IS_LOCKED
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
     grabFocusInternal (focusChangedDirectly, true);
 
@@ -2751,7 +2753,7 @@ void Component::moveKeyboardFocusToSibling (bool moveToNext)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    ASSERT_MESSAGE_MANAGER_IS_LOCKED
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
     if (parentComponent != nullptr)
     {

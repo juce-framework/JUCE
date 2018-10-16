@@ -1210,7 +1210,7 @@ struct VSTPluginInstance     : public AudioPluginInstance,
         // because many plugins need a chance to create HWNDs that will get their
         // messages delivered by the main message thread, and that's not possible from
         // a background thread.
-        jassert (MessageManager::getInstance()->isThisTheMessageThread());
+        JUCE_ASSERT_MESSAGE_THREAD
        #endif
 
         JUCE_VST_LOG ("Initialising VST: " + vstModule->pluginName + " (" + getVersion() + ")");
@@ -3216,7 +3216,7 @@ private:
         {
             // You shouldn't end up hitting this assertion unless the host is trying to do GUI
             // cleanup on a non-GUI thread.. If it does that, bad things could happen in here..
-            jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
+            JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
             JUCE_VST_LOG ("Closing VST UI: " + plugin.getName());
             isOpen = false;

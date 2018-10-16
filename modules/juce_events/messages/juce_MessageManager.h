@@ -147,6 +147,16 @@ public:
     */
     bool currentThreadHasLockedMessageManager() const noexcept;
 
+    /** Returns true if there's an instance of the MessageManager, and if the current thread
+        has the lock on it.
+    */
+    static bool existsAndIsLockedByCurrentThread() noexcept;
+
+    /** Returns true if there's an instance of the MessageManager, and if the current thread
+        is running it.
+    */
+    static bool existsAndIsCurrentThread() noexcept;
+
     //==============================================================================
     /** Sends a message to all other JUCE applications that are running.
 
@@ -461,5 +471,29 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (MessageManagerLock)
 };
+
+//==============================================================================
+/** This macro is used to catch unsafe use of functions which expect to only be called
+    on the message thread, or when a MessageManagerLock is in place.
+    It will also fail if you try to use the function before the message manager has been
+    created, which could happen if you accidentally invoke it during a static constructor.
+*/
+#define JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED \
+    jassert (juce::MessageManager::existsAndIsLockedByCurrentThread());
+
+/** This macro is used to catch unsafe use of functions which expect to only be called
+    on the message thread.
+    It will also fail if you try to use the function before the message manager has been
+    created, which could happen if you accidentally invoke it during a static constructor.
+*/
+#define JUCE_ASSERT_MESSAGE_THREAD \
+    jassert (juce::MessageManager::existsAndIsCurrentThread());
+
+/** This macro is used to catch unsafe use of functions which expect to not be called
+    outside the lifetime of the MessageManager.
+*/
+#define JUCE_ASSERT_MESSAGE_MANAGER_EXISTS \
+    jassert (juce::MessageManager::getInstanceWithoutCreating() != nullptr);
+
 
 } // namespace juce
