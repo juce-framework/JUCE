@@ -28,13 +28,13 @@ XmlDocument::XmlDocument (const File& file)  : inputSource (new FileInputSource 
 
 XmlDocument::~XmlDocument() {}
 
-XmlElement* XmlDocument::parse (const File& file)
+std::unique_ptr<XmlElement> XmlDocument::parse (const File& file)
 {
     XmlDocument doc (file);
     return doc.getDocumentElement();
 }
 
-XmlElement* XmlDocument::parse (const String& xmlData)
+std::unique_ptr<XmlElement> XmlDocument::parse (const String& xmlData)
 {
     XmlDocument doc (xmlData);
     return doc.getDocumentElement();
@@ -99,7 +99,7 @@ namespace XmlIdentifierChars
     }
 }
 
-XmlElement* XmlDocument::getDocumentElement (const bool onlyReadOuterDocumentElement)
+std::unique_ptr<XmlElement> XmlDocument::getDocumentElement (const bool onlyReadOuterDocumentElement)
 {
     if (originalText.isEmpty() && inputSource != nullptr)
     {
@@ -176,8 +176,8 @@ juce_wchar XmlDocument::readNextChar() noexcept
     return c;
 }
 
-XmlElement* XmlDocument::parseDocumentElement (String::CharPointerType textToParse,
-                                               const bool onlyReadOuterDocumentElement)
+std::unique_ptr<XmlElement> XmlDocument::parseDocumentElement (String::CharPointerType textToParse,
+                                                               bool onlyReadOuterDocumentElement)
 {
     input = textToParse;
     errorOccurred = false;
@@ -202,10 +202,10 @@ XmlElement* XmlDocument::parseDocumentElement (String::CharPointerType textToPar
         std::unique_ptr<XmlElement> result (readNextElement (! onlyReadOuterDocumentElement));
 
         if (! errorOccurred)
-            return result.release();
+            return result;
     }
 
-    return nullptr;
+    return {};
 }
 
 bool XmlDocument::parseHeader()

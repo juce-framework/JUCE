@@ -109,7 +109,7 @@ public:
 
     void updateList()
     {
-        std::unique_ptr<XmlElement> state (propsPanel->getOpennessState());
+        auto state = propsPanel->getOpennessState();
 
         clear();
 

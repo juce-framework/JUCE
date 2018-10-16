@@ -243,7 +243,7 @@ private:
             xml->addChildElement (xmlEvent);
         }
 
-        xml->writeToFile (savedEventsFile, {});
+        xml->writeTo (savedEventsFile, {});
     }
 
     void restoreUnloggedEvents (std::deque<AnalyticsEvent>& restoredEventQueue) override

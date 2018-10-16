@@ -242,7 +242,7 @@ Result FilterGraph::saveDocument (const File& file)
 {
     std::unique_ptr<XmlElement> xml (createXml());
 
-    if (! xml->writeToFile (file, {}))
+    if (! xml->writeTo (file, {}))
         return Result::fail ("Couldn't write to the file");
 
     return Result::ok();

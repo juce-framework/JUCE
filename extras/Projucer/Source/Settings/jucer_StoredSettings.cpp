@@ -136,14 +136,10 @@ void StoredSettings::reload()
     propertyFiles.clear();
     propertyFiles.add (createPropsFile ("Projucer", false));
 
-    std::unique_ptr<XmlElement> projectDefaultsXml (propertyFiles.getFirst()->getXmlValue ("PROJECT_DEFAULT_SETTINGS"));
-
-    if (projectDefaultsXml != nullptr)
+    if (auto projectDefaultsXml = propertyFiles.getFirst()->getXmlValue ("PROJECT_DEFAULT_SETTINGS"))
         projectDefaults = ValueTree::fromXml (*projectDefaultsXml);
 
-    std::unique_ptr<XmlElement> fallbackPathsXml (propertyFiles.getFirst()->getXmlValue ("FALLBACK_PATHS"));
-
-    if (fallbackPathsXml != nullptr)
+    if (auto fallbackPathsXml = propertyFiles.getFirst()->getXmlValue ("FALLBACK_PATHS"))
         fallbackPaths = ValueTree::fromXml (*fallbackPathsXml);
 
     // recent files...

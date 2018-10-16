@@ -315,9 +315,7 @@ void ProjectContentComponent::reloadLastOpenDocuments()
 {
     if (project != nullptr)
     {
-        std::unique_ptr<XmlElement> xml (project->getStoredProperties().getXmlValue ("lastDocs"));
-
-        if (xml != nullptr)
+        if (auto xml = project->getStoredProperties().getXmlValue ("lastDocs"))
         {
             recentDocumentList.restoreFromXML (*project, *xml);
             showDocument (recentDocumentList.getCurrentDocument(), true);

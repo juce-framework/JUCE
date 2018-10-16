@@ -1477,11 +1477,9 @@ public:
                                  juce::MemoryBlock& destData);
 
     /** Retrieves an XML element that was stored as binary with the copyXmlToBinary() method.
-
-        This might return nullptr if the data's unsuitable or corrupted. Otherwise it will return
-        an XmlElement object that the caller must delete when no longer needed.
+        This might return nullptr if the data's unsuitable or corrupted.
     */
-    static XmlElement* getXmlFromBinary (const void* data, int sizeInBytes);
+    static std::unique_ptr<XmlElement> getXmlFromBinary (const void* data, int sizeInBytes);
 
     /** @internal */
     static void JUCE_CALLTYPE setTypeOfNextNewPlugin (WrapperType);

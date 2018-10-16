@@ -431,7 +431,7 @@ String TableHeaderComponent::toString() const
         e->setAttribute ("width", ci->width);
     }
 
-    return doc.createDocument ({}, true, false);
+    return doc.toString (XmlElement::TextFormat().singleLine().withoutHeader());
 }
 
 void TableHeaderComponent::restoreFromString (const String& storedVersion)

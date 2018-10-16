@@ -285,9 +285,7 @@ public:
     void getStateInformation (MemoryBlock& destData) override
     {
         // Store an xml representation of our state.
-        std::unique_ptr<XmlElement> xmlState (state.copyState().createXml());
-
-        if (xmlState.get() != nullptr)
+        if (auto xmlState = state.copyState().createXml())
             copyXmlToBinary (*xmlState, destData);
     }
 

@@ -610,7 +610,7 @@ static void addAllSelectedItemIds (TreeViewItem* item, XmlElement& parent)
         addAllSelectedItemIds (item->getSubItem(i), parent);
 }
 
-XmlElement* TreeView::getOpennessState (const bool alsoIncludeScrollPosition) const
+std::unique_ptr<XmlElement> TreeView::getOpennessState (const bool alsoIncludeScrollPosition) const
 {
     XmlElement* e = nullptr;
 
@@ -627,7 +627,7 @@ XmlElement* TreeView::getOpennessState (const bool alsoIncludeScrollPosition) co
         }
     }
 
-    return e;
+    return std::unique_ptr<XmlElement> (e);
 }
 
 void TreeView::restoreOpennessState (const XmlElement& newState, const bool restoreStoredSelection)
@@ -1858,9 +1858,9 @@ void TreeViewItem::restoreOpennessState (const XmlElement& e)
     }
 }
 
-XmlElement* TreeViewItem::getOpennessState() const
+std::unique_ptr<XmlElement> TreeViewItem::getOpennessState() const
 {
-    return getOpennessState (true);
+    return std::unique_ptr<XmlElement> (getOpennessState (true));
 }
 
 XmlElement* TreeViewItem::getOpennessState (const bool canReturnNull) const

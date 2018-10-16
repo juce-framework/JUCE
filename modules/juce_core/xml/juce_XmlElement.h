@@ -126,8 +126,8 @@ namespace juce
         animalsList.addChildElement (giraffe);
     }
 
-    // now we can turn the whole thing into a text document..
-    String myXmlDoc = animalsList.createDocument (String());
+    // now we can turn the whole thing into textual XML
+    auto xmlString = animalsList.toString();
     @endcode
 
     @see XmlDocument
@@ -184,74 +184,37 @@ public:
                          bool ignoreOrderOfAttributes) const noexcept;
 
     //==============================================================================
-    /** Returns an XML text document that represents this element.
+    struct TextFormat
+    {
+        TextFormat();
 
-        The string returned can be parsed to recreate the same XmlElement that
-        was used to create it.
+        String dtd;                        /**< If supplied, this DTD will be added to the document. */
+        String customHeader;               /**< If supplied, this header will be used (and customEncoding & addDefaultHeader will be ignored). */
+        String customEncoding;             /**< If not empty and addDefaultHeader is true, this will be set as the encoding. Otherwise, a default of "UTF-8" will be used */
+        bool addDefaultHeader = true;      /**< If true, a default header will be generated; otherwise just bare XML will be emitted. */
+        int lineWrapLength = 60;           /**< A maximum line length before wrapping is done. (If allOnOneLine is true, this is ignored) */
+        const char* newLineChars = "\r\n"; /**< Allows the newline characters to be set. If you set this to nullptr, then the whole XML document will be placed on a single line. */
 
-        @param dtdToUse         the DTD to add to the document
-        @param allOnOneLine     if true, this means that the document will not contain any
-                                linefeeds, so it'll be smaller but not very easy to read.
-        @param includeXmlHeader whether to add the "<?xml version..etc" line at the start of the
-                                document
-        @param encodingType     the character encoding format string to put into the xml
-                                header
-        @param lineWrapLength   the line length that will be used before items get placed on
-                                a new line. This isn't an absolute maximum length, it just
-                                determines how lists of attributes get broken up
-        @see writeToStream, writeToFile
+        TextFormat singleLine() const;     /**< returns a copy of this format with newLineChars set to nullptr. */
+        TextFormat withoutHeader() const;  /**< returns a copy of this format with the addDefaultHeader flag set to false. */
+    };
+
+    /** Returns a text version of this XML element.
+        If your intention is to write the XML to a file or stream, it's probably more efficient to
+        use writeTo() instead of creating an intermediate string.
+        @see writeTo
     */
-    String createDocument (StringRef dtdToUse,
-                           bool allOnOneLine = false,
-                           bool includeXmlHeader = true,
-                           StringRef encodingType = "UTF-8",
-                           int lineWrapLength = 60) const;
+    String toString (const TextFormat& format = {}) const;
 
     /** Writes the document to a stream as UTF-8.
-
-        @param output           the stream to write to
-        @param dtdToUse         the DTD to add to the document
-        @param allOnOneLine     if true, this means that the document will not contain any
-                                linefeeds, so it'll be smaller but not very easy to read.
-        @param includeXmlHeader whether to add the "<?xml version..etc" line at the start of the
-                                document
-        @param encodingType     the character encoding format string to put into the xml
-                                header
-        @param lineWrapLength   the line length that will be used before items get placed on
-                                a new line. This isn't an absolute maximum length, it just
-                                determines how lists of attributes get broken up
-        @see writeToFile, createDocument
+        @see writeTo, toString
     */
-    void writeToStream (OutputStream& output,
-                        StringRef dtdToUse,
-                        bool allOnOneLine = false,
-                        bool includeXmlHeader = true,
-                        StringRef encodingType = "UTF-8",
-                        int lineWrapLength = 60) const;
+    void writeTo (OutputStream& output, const TextFormat& format = {}) const;
 
-    /** Writes the element to a file as an XML document.
-
-        To improve safety in case something goes wrong while writing the file, this
-        will actually write the document to a new temporary file in the same
-        directory as the destination file, and if this succeeds, it will rename this
-        new file as the destination file (overwriting any existing file that was there).
-
-        @param destinationFile  the file to write to. If this already exists, it will be
-                                overwritten.
-        @param dtdToUse         the DTD to add to the document
-        @param encodingType     the character encoding format string to put into the xml
-                                header
-        @param lineWrapLength   the line length that will be used before items get placed on
-                                a new line. This isn't an absolute maximum length, it just
-                                determines how lists of attributes get broken up
-        @returns    true if the file is written successfully; false if something goes wrong
-                    in the process
-        @see createDocument
+    /** Writes the document to a file as UTF-8.
+        @see writeTo, toString
     */
-    bool writeToFile (const File& destinationFile,
-                      StringRef dtdToUse,
-                      StringRef encodingType = "UTF-8",
-                      int lineWrapLength = 60) const;
+    bool writeTo (const File& destinationFile, const TextFormat& format = {}) const;
 
     //==============================================================================
     /** Returns this element's tag type name.
@@ -729,6 +692,28 @@ public:
     static bool isValidXmlName (StringRef possibleName) noexcept;
 
     //==============================================================================
+    /** This has been deprecated in favour of the toString() method. */
+    JUCE_DEPRECATED (String createDocument (StringRef dtdToUse,
+                                            bool allOnOneLine = false,
+                                            bool includeXmlHeader = true,
+                                            StringRef encodingType = "UTF-8",
+                                            int lineWrapLength = 60) const);
+
+    /** This has been deprecated in favour of the writeTo() method. */
+    JUCE_DEPRECATED (void writeToStream (OutputStream& output,
+                                         StringRef dtdToUse,
+                                         bool allOnOneLine = false,
+                                         bool includeXmlHeader = true,
+                                         StringRef encodingType = "UTF-8",
+                                         int lineWrapLength = 60) const);
+
+    /** This has been deprecated in favour of the writeTo() method. */
+    JUCE_DEPRECATED (bool writeToFile (const File& destinationFile,
+                                       StringRef dtdToUse,
+                                       StringRef encodingType = "UTF-8",
+                                       int lineWrapLength = 60) const);
+
+    //==============================================================================
 private:
     struct XmlAttributeNode
     {
@@ -750,14 +735,13 @@ private:
     friend class LinkedListPointer<XmlElement>::Appender;
     friend class NamedValueSet;
 
-    LinkedListPointer<XmlElement> nextListItem;
-    LinkedListPointer<XmlElement> firstChildElement;
+    LinkedListPointer<XmlElement> nextListItem, firstChildElement;
     LinkedListPointer<XmlAttributeNode> attributes;
     String tagName;
 
     XmlElement (int) noexcept;
     void copyChildrenAndAttributesFrom (const XmlElement&);
-    void writeElementAsText (OutputStream&, int indentationLevel, int lineWrapLength) const;
+    void writeElementAsText (OutputStream&, int, int, const char*) const;
     void getChildElementsAsArray (XmlElement**) const noexcept;
     void reorderChildElements (XmlElement**, int) noexcept;
     XmlAttributeNode* getAttribute (StringRef) const noexcept;

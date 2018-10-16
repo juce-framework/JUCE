@@ -293,9 +293,7 @@ LicenseState LicenseController::licenseStateFromOldSettings (XmlElement* license
 
 LicenseState LicenseController::licenseStateFromSettings (PropertiesFile& props)
 {
-    std::unique_ptr<XmlElement> licenseXml (props.getXmlValue ("license"));
-
-    if (licenseXml != nullptr)
+    if (auto licenseXml = props.getXmlValue ("license"))
     {
         // this is here for backwards compatibility with old-style settings files using XML text elements
         if (licenseXml->getChildElementAllSubText ("type", {}) != String())

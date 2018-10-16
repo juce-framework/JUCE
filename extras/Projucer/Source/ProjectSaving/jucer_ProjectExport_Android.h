@@ -1510,9 +1510,9 @@ private:
     }
 
     //==============================================================================
-    XmlElement* createManifestXML() const
+    std::unique_ptr<XmlElement> createManifestXML() const
     {
-        auto* manifest = createManifestElement();
+        auto manifest = createManifestElement();
 
         createSupportsScreensElement (*manifest);
         createPermissionElements     (*manifest);
@@ -1532,12 +1532,12 @@ private:
         return manifest;
     }
 
-    XmlElement* createManifestElement() const
+    std::unique_ptr<XmlElement> createManifestElement() const
     {
-        auto* manifest = XmlDocument::parse (androidManifestCustomXmlElements.get());
+        auto manifest = XmlDocument::parse (androidManifestCustomXmlElements.get());
 
         if (manifest == nullptr)
-            manifest = new XmlElement ("manifest");
+            manifest = std::make_unique<XmlElement> ("manifest");
 
         setAttributeIfNotPresent (*manifest, "xmlns:android", "http://schemas.android.com/apk/res/android");
         setAttributeIfNotPresent (*manifest, "android:versionCode", androidVersionCode.get());
