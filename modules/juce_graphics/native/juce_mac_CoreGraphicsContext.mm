@@ -66,7 +66,7 @@ public:
         auto cutoffTime = Time::getApproximateMillisecondCounter() - timeDelta;
 
         auto it = std::find_if (queue.begin(), queue.end(),
-                                [cutoffTime](const std::pair<int32, HeapBlock<uint8>>& x) { return x.first > cutoffTime; });
+                                [cutoffTime](const std::pair<uint32, HeapBlock<uint8>>& x) { return x.first > cutoffTime; });
         queue.erase (queue.begin(), it);
 
         queue.empty() ? stopTimer() : startTimer (timeDelta);
@@ -74,8 +74,8 @@ public:
 
 private:
     CriticalSection queueLock;
-    std::vector<std::pair<int32, HeapBlock<uint8>>> queue;
-    static constexpr int timeDelta = 50;
+    std::vector<std::pair<uint32, HeapBlock<uint8>>> queue;
+    static constexpr uint32 timeDelta = 50;
 };
 
 JUCE_IMPLEMENT_SINGLETON (CoreGraphicsImageGarbageCollector)
