@@ -1164,9 +1164,6 @@ public:
 
                 if (sdkRoot.isNotEmpty())
                     s.set ("SDKROOT", sdkRoot);
-
-                s.set ("MACOSX_DEPLOYMENT_TARGET_ppc", "10.4");
-                s.set ("SDKROOT_ppc", "macosx10.5");
             }
 
             s.set ("GCC_VERSION", gccVersion);
