@@ -584,7 +584,7 @@ struct AudioProcessorValueTreeState::ComboBoxAttachment::Pimpl  : private Attach
         if (! ignoreCallbacks)
         {
             beginParameterChange();
-            setNewUnnormalisedValue ((float) comboBox->getSelectedId() - 1.0f);
+            setNewUnnormalisedValue ((float) comboBox->getSelectedItemIndex());
             endParameterChange();
         }
     }
