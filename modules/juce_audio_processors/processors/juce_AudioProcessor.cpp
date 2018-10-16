@@ -1621,6 +1621,6 @@ ARA::PlugIn::EditorView* AudioProcessor::getARAEditorView () const
     return araPlugInExtension ? araPlugInExtension->getEditorView () : nullptr;
 }
 
-#endif // JucePlugin_Enable_ARA
+#endif
 
 } // namespace juce

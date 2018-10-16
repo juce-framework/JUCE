@@ -33,4 +33,4 @@
  
  } // namespace juce
 
-#endif JucePlugin_Enable_ARA
+#endif

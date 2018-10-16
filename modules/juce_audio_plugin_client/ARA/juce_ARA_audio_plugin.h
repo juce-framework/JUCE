@@ -5,7 +5,7 @@
 
 #if JucePlugin_Enable_ARA
 
- // Configure ARA debug support prior to including ARA headerse
+ // Configure ARA debug support prior to including ARA headers
  #if (JUCE_DEBUG && ! JUCE_DISABLE_ASSERTIONS) || JUCE_LOG_ASSERTIONS
   // define a juce assert and define the ARA_INTERNAL_ASSERT macro to use the function below
   namespace juce
@@ -27,4 +27,4 @@
  // Include ARA headers
  #include <ARA_Library/PlugIn/ARAPlug.h>
 
-#endif // JucePlugin_Enable_ARA
+#endif
