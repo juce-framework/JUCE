@@ -135,7 +135,7 @@ static void addAllModulesInSubfoldersRecursively (const File& path, int depth, M
                 if (job->shouldExit())
                     return;
 
-            auto childPath = iter.getFile().getLinkedTarget();
+            auto childPath = iter.getFile();
 
             if (! tryToAddModuleFromFolder (childPath, list))
                 addAllModulesInSubfoldersRecursively (childPath, depth - 1, list);
