@@ -5390,7 +5390,7 @@ static const unsigned char temp_binary_data_25[] =
 "private:\r\n"
 "    //==============================================================================\r\n"
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%aradocumentcontroller_class_name%%)\r\n"
-"};;\r\n";
+"};\r\n";
 
 const char* jucer_AudioPluginARADocumentControllerTemplate_h = (const char*) temp_binary_data_25;
 
@@ -7887,7 +7887,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0x58e2ae48:  numBytes = 4551; return wizard_OpenGL_svg;
         case 0xb1da6f9e:  numBytes = 7488; return wizard_StaticLibrary_svg;
         case 0x744d44d6:  numBytes = 899; return jucer_AudioPluginARADocumentControllerTemplate_cpp;
-        case 0x3eb8f45b:  numBytes = 1020; return jucer_AudioPluginARADocumentControllerTemplate_h;
+        case 0x3eb8f45b:  numBytes = 1019; return jucer_AudioPluginARADocumentControllerTemplate_h;
         case 0xd11e6d35:  numBytes = 2085; return jucer_AnimatedComponentSimpleTemplate_h;
         case 0x6cf2645e:  numBytes = 1563; return jucer_AnimatedComponentTemplate_cpp;
         case 0x97b055e3:  numBytes = 1201; return jucer_AnimatedComponentTemplate_h;
