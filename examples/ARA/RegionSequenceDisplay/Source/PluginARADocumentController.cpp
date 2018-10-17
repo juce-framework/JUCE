@@ -66,7 +66,7 @@ void ARASampleProjectEditor::resized()
         double normalizedStartPos = v->getStartInSecs() / maxRegionSequenceLength;
         double normalizedLength = v->getLengthInSecs() / maxRegionSequenceLength;
         jassert(normalizedStartPos+normalizedLength <= 1.0);
-        v->setBounds (width * normalizedStartPos, height * i, width * normalizedLength, height);
+        v->setBounds ((int)(width * normalizedStartPos), height * i, (int)(width * normalizedLength), height);
         i++;
     }
     setBounds (0, 0, width, height * i);
