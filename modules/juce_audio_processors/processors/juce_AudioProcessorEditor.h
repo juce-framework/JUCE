@@ -25,7 +25,7 @@
 */
 
 #if JucePlugin_Enable_ARA
- #include <ARA_Library/PlugIn/ARAPlug.h>
+ #include "../../juce_audio_plugin_client/ARA/juce_ARA_audio_plugin.h"
 #endif
 
 namespace juce
