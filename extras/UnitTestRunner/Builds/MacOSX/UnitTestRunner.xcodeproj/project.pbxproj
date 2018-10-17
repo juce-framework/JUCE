@@ -703,11 +703,9 @@
 				);
 				INSTALL_PATH = "/usr/bin";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
-				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				OTHER_CPLUSPLUSFLAGS = "-Wall -Wno-missing-field-initializers -Wshadow-all -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Wconditional-uninitialized -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion  -Wunused-private-field -Wbool-conversion -Wextra-semi -Wno-ignored-qualifiers -Wunreachable-code";
 				PRODUCT_BUNDLE_IDENTIFIER = com.roli.UnitTestRunner;
 				PRODUCT_NAME = "UnitTestRunner";
-				SDKROOT_ppc = macosx10.5;
 				USE_HEADERMAP = NO;
 			};
 			name = Debug;
@@ -749,11 +747,9 @@
 				INSTALL_PATH = "/usr/bin";
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
-				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				OTHER_CPLUSPLUSFLAGS = "-Wall -Wno-missing-field-initializers -Wshadow-all -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Wconditional-uninitialized -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion  -Wunused-private-field -Wbool-conversion -Wextra-semi -Wno-ignored-qualifiers -Wunreachable-code";
 				PRODUCT_BUNDLE_IDENTIFIER = com.roli.UnitTestRunner;
 				PRODUCT_NAME = "UnitTestRunner";
-				SDKROOT_ppc = macosx10.5;
 				USE_HEADERMAP = NO;
 			};
 			name = Release;
