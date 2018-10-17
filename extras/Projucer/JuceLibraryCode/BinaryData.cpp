@@ -6538,9 +6538,14 @@ static const unsigned char temp_binary_data_42[] =
 "        {\r\n"
 "            setUsingNativeTitleBar (true);\r\n"
 "            setContentOwned (new %%content_component_class%%(), true);\r\n"
-"            setResizable (true, true);\r\n"
 "\r\n"
+"           #if JUCE_IOS || JUCE_ANDROID\r\n"
+"            setFullScreen (true);\r\n"
+"           #else\r\n"
+"            setResizable (true, true);\r\n"
 "            centreWithSize (getWidth(), getHeight());\r\n"
+"           #endif\r\n"
+"\r\n"
 "            setVisible (true);\r\n"
 "        }\r\n"
 "\r\n"
@@ -6644,7 +6649,13 @@ static const unsigned char temp_binary_data_43[] =
 "            setUsingNativeTitleBar (true);\r\n"
 "            setContentOwned (new %%content_component_class%%(), true);\r\n"
 "\r\n"
+"           #if JUCE_IOS || JUCE_ANDROID\r\n"
+"            setFullScreen (true);\r\n"
+"           #else\r\n"
+"            setResizable (true, true);\r\n"
 "            centreWithSize (getWidth(), getHeight());\r\n"
+"           #endif\r\n"
+"\r\n"
 "            setVisible (true);\r\n"
 "        }\r\n"
 "\r\n"
@@ -7822,8 +7833,8 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0x28d496ad:  numBytes = 1233; return jucer_InlineComponentTemplate_h;
         case 0x8905395b:  numBytes = 473; return jucer_MainConsoleAppTemplate_cpp;
         case 0x5e5ea047:  numBytes = 2021; return jucer_MainTemplate_NoWindow_cpp;
-        case 0xda2391f8:  numBytes = 4012; return jucer_MainTemplate_SimpleWindow_cpp;
-        case 0x400bc026:  numBytes = 3972; return jucer_MainTemplate_Window_cpp;
+        case 0xda2391f8:  numBytes = 4127; return jucer_MainTemplate_SimpleWindow_cpp;
+        case 0x400bc026:  numBytes = 4127; return jucer_MainTemplate_Window_cpp;
         case 0xf4842835:  numBytes = 1491; return jucer_NewComponentTemplate_cpp;
         case 0xe7bf237a:  numBytes = 646; return jucer_NewComponentTemplate_h;
         case 0x02a2a077:  numBytes = 278; return jucer_NewCppFileTemplate_cpp;
