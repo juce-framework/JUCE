@@ -50,7 +50,7 @@ AudioView::~AudioView()
     audioThumb.removeChangeListener (this);
 }
 
-void AudioView::changeListenerCallback (juce::ChangeBroadcaster* broadcaster)
+void AudioView::changeListenerCallback (juce::ChangeBroadcaster* /*broadcaster*/)
 {
     repaint();
 }

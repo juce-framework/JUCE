@@ -79,21 +79,21 @@ int ArasampleProjectAudioProcessor::getCurrentProgram()
     return 0;
 }
 
-void ArasampleProjectAudioProcessor::setCurrentProgram (int index)
+void ArasampleProjectAudioProcessor::setCurrentProgram (int /*index*/)
 {
 }
 
-const String ArasampleProjectAudioProcessor::getProgramName (int index)
+const String ArasampleProjectAudioProcessor::getProgramName (int /*index*/)
 {
     return {};
 }
 
-void ArasampleProjectAudioProcessor::changeProgramName (int index, const String& newName)
+void ArasampleProjectAudioProcessor::changeProgramName (int /*index*/, const String& /*newName*/)
 {
 }
 
 //==============================================================================
-void ArasampleProjectAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
+void ArasampleProjectAudioProcessor::prepareToPlay (double /*sampleRate*/, int /*samplesPerBlock*/)
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
@@ -129,7 +129,7 @@ bool ArasampleProjectAudioProcessor::isBusesLayoutSupported (const BusesLayout& 
 }
 #endif
 
-void ArasampleProjectAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages)
+void ArasampleProjectAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer& /*midiMessages*/)
 {
     ScopedNoDenormals noDenormals;
     auto totalNumInputChannels  = getTotalNumInputChannels();
@@ -159,14 +159,14 @@ AudioProcessorEditor* ArasampleProjectAudioProcessor::createEditor()
 }
 
 //==============================================================================
-void ArasampleProjectAudioProcessor::getStateInformation (MemoryBlock& destData)
+void ArasampleProjectAudioProcessor::getStateInformation (MemoryBlock& /*destData*/)
 {
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
 }
 
-void ArasampleProjectAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
+void ArasampleProjectAudioProcessor::setStateInformation (const void* /*data*/, int /*sizeInBytes*/)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.

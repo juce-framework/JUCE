@@ -840,7 +840,7 @@ private:
             component.reset (new ContentWrapperComponent (*this, p));
         }
 
-        tresult PLUGIN_API queryInterface (const TUID targetIID, void** obj) override
+        tresult PLUGIN_API queryInterface (const TUID /*targetIID*/, void** /*obj*/) override
         {
             return kResultFalse;
             //TEST_FOR_AND_RETURN_IF_VALID (targetIID, Steinberg::IPlugViewContentScaleSupport)
@@ -2580,7 +2580,7 @@ private:
         return ARA::PlugIn::DocumentController::getARAFactory();
     }
 
-    const ARA::ARAPlugInExtensionInstance* PLUGIN_API bindToDocumentController (ARA::ARADocumentControllerRef controllerRef) SMTG_OVERRIDE
+    const ARA::ARAPlugInExtensionInstance* PLUGIN_API bindToDocumentController (ARA::ARADocumentControllerRef /*controllerRef*/) SMTG_OVERRIDE
     {
         ARA_VALIDATE_API_STATE (false && "call is deprecated in ARA 2, host must not call this");
         return nullptr;
@@ -2770,7 +2770,7 @@ static FUnknown* createControllerInstance (Vst::IHostApplication* host)
 }
 
 #if JucePlugin_Enable_ARA
-static FUnknown* createARAFactoryInstance (Vst::IHostApplication* host)
+static FUnknown* createARAFactoryInstance (Vst::IHostApplication* /*host*/)
 {
     return static_cast<ARA::IMainFactory*> (new JuceARAFactory ());
 }
