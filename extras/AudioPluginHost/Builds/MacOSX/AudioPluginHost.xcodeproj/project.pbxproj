@@ -801,11 +801,9 @@
 				INFOPLIST_PREPROCESS = NO;
 				INSTALL_PATH = "$(HOME)/Applications";
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				OTHER_CPLUSPLUSFLAGS = "-Wall -Wshadow -Wstrict-aliasing -Wconversion -Wsign-compare -Woverloaded-virtual -Wextra-semi";
 				PRODUCT_BUNDLE_IDENTIFIER = com.roli.juce.pluginhost;
 				PRODUCT_NAME = "AudioPluginHost";
-				SDKROOT_ppc = macosx10.5;
 				USE_HEADERMAP = NO;
 			};
 			name = Debug;
@@ -849,11 +847,9 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				OTHER_CPLUSPLUSFLAGS = "-Wall -Wshadow -Wstrict-aliasing -Wconversion -Wsign-compare -Woverloaded-virtual -Wextra-semi";
 				PRODUCT_BUNDLE_IDENTIFIER = com.roli.juce.pluginhost;
 				PRODUCT_NAME = "AudioPluginHost";
-				SDKROOT_ppc = macosx10.5;
 				USE_HEADERMAP = NO;
 			};
 			name = Release;

@@ -110,6 +110,9 @@ void ProjucerApplication::initialise (const String& commandLine)
             return;
         }
 
+        rescanJUCEPathModules();
+        rescanUserPathModules();
+
         openDocumentManager.registerType (new ProjucerAppClasses::LiveBuildCodeEditorDocument::Type(), 2);
 
         childProcessCache.reset (new ChildProcessCache());
@@ -161,9 +164,6 @@ void ProjucerApplication::handleAsyncUpdate()
 {
     if (licenseController != nullptr)
         licenseController->startWebviewIfNeeded();
-
-    rescanJUCEPathModules();
-    rescanUserPathModules();
 
    #if JUCE_MAC
     PopupMenu extraAppleMenuItems;

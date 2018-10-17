@@ -180,7 +180,9 @@ public:
 
         inputs.clear();
         outputs.clear();
-        managedParameters.clear();
+        managedParameters.clear (false);
+        AudioProcessorParameterGroup group ({}, {}, {});
+        parameterTree.swapWith (group);
 
         for (unsigned int i = 0; i < plugin->PortCount; ++i)
         {

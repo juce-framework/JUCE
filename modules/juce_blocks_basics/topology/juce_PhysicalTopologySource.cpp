@@ -23,9 +23,6 @@
 namespace juce
 {
 
-#define JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED \
-    jassert (juce::MessageManager::getInstance()->currentThreadHasLockedMessageManager());
-
 #if DUMP_BANDWIDTH_STATS
 namespace
 {
@@ -1644,16 +1641,6 @@ struct PhysicalTopologySource::Internal
 
             jassertfalse;
             return nullptr;
-        }
-
-        bool isControlBlock() const
-        {
-            auto type = getType();
-
-            return type == Block::Type::liveBlock
-                || type == Block::Type::loopBlock
-                || type == Block::Type::touchBlock
-                || type == Block::Type::developerControlBlock;
         }
 
         //==============================================================================

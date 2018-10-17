@@ -61,6 +61,19 @@ Block::Block (const juce::String& serial, const juce::String& version, const juc
 
 Block::~Block() {}
 
+bool Block::isControlBlock() const
+{
+    return isControlBlock (getType());
+}
+
+constexpr bool Block::isControlBlock (Block::Type type)
+{
+    return type == Block::Type::liveBlock
+        || type == Block::Type::loopBlock
+        || type == Block::Type::touchBlock
+        || type == Block::Type::developerControlBlock;
+}
+
 void Block::addDataInputPortListener (DataInputPortListener* listener)      { dataInputPortListeners.add (listener); }
 void Block::removeDataInputPortListener (DataInputPortListener* listener)   { dataInputPortListeners.remove (listener); }
 

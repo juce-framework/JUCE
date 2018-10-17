@@ -280,6 +280,8 @@ namespace juce
 #include "containers/juce_NamedValueSet.h"
 #include "containers/juce_DynamicObject.h"
 #include "containers/juce_HashMap.h"
+#include "system/juce_SystemStats.h"
+#include "memory/juce_HeavyweightLeakedObjectDetector.h"
 #include "time/juce_RelativeTime.h"
 #include "time/juce_Time.h"
 #include "streams/juce_InputStream.h"
@@ -328,7 +330,6 @@ namespace juce
 #include "network/juce_URL.h"
 #include "network/juce_WebInputStream.h"
 #include "streams/juce_URLInputSource.h"
-#include "system/juce_SystemStats.h"
 #include "time/juce_PerformanceCounter.h"
 #include "unit_tests/juce_UnitTest.h"
 #include "xml/juce_XmlDocument.h"
@@ -338,7 +339,6 @@ namespace juce
 #include "zip/juce_ZipFile.h"
 #include "containers/juce_PropertySet.h"
 #include "memory/juce_SharedResourcePointer.h"
-#include "memory/juce_HeavyweightLeakedObjectDetector.h"
 
 #if JUCE_CORE_INCLUDE_OBJC_HELPERS && (JUCE_MAC || JUCE_IOS)
  #include "native/juce_osx_ObjCHelpers.h"

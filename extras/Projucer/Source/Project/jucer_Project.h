@@ -104,10 +104,11 @@ public:
     void setProjectVersion (const String& newVersion)    { versionValue = newVersion; }
 
     String getBundleIdentifierString() const             { return bundleIdentifierValue.get(); }
-    String getDefaultBundleIdentifierString()            { return "com.yourcompany." + CodeHelpers::makeValidIdentifier (getProjectNameString(), false, true, false); }
-    String getDefaultAAXIdentifierString()               { return getDefaultBundleIdentifierString(); }
-	String getDefaultARAFactoryIDString()                { return "com.yourcompany." + CodeHelpers::makeValidIdentifier (getProjectNameString(), false, true, false) + ".factory"; }
-	String getDefaultARADocumentArchiveID()              { return "com.yourcompany." + CodeHelpers::makeValidIdentifier (getProjectNameString(), false, true, false) + ".aradocumentarchive." + getVersionString(); }
+    String getDefaultBundleIdentifierString() const;
+    String getDefaultAAXIdentifierString() const         { return getDefaultBundleIdentifierString(); }
+    String getDefaultPluginManufacturerString() const;
+    String getDefaultARAFactoryIDString() const;
+    String getDefaultARADocumentArchiveID() const;
 
     String getCompanyNameString() const                  { return companyNameValue.get(); }
     String getCompanyCopyrightString() const             { return companyCopyrightValue.get(); }
@@ -479,7 +480,8 @@ private:
     void createAudioPluginPropertyEditors (PropertyListBuilder& props);
 
     //==============================================================================
-    void updateTitle();
+    void updateTitleDependencies();
+    void updateCompanyNameDependencies();
     void updateProjectSettings();
     ValueTree getConfigurations() const;
     ValueTree getConfigNode();

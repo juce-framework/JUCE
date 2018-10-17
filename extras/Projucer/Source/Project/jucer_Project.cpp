@@ -88,27 +88,34 @@ void Project::setTitle (const String& newTitle)
 {
     projectNameValue = newTitle;
 
-    updateTitle();
+    updateTitleDependencies();
 }
 
-void Project::updateTitle()
+void Project::updateTitleDependencies()
 {
     auto projectName = getProjectNameString();
 
     getMainGroup().getNameValue() = projectName;
 
-    pluginNameValue.setDefault (projectName);
-    pluginDescriptionValue.setDefault (projectName);
-    bundleIdentifierValue.setDefault (getDefaultBundleIdentifierString());
+    pluginNameValue.          setDefault (projectName);
+    pluginDescriptionValue.   setDefault (projectName);
+    bundleIdentifierValue.    setDefault (getDefaultBundleIdentifierString());
     pluginAUExportPrefixValue.setDefault (CodeHelpers::makeValidIdentifier (projectName, false, true, false) + "AU");
-    pluginAAXIdentifierValue.setDefault (getDefaultAAXIdentifierString());
-    pluginARAFactoryIDValue.setDefault(getDefaultARAFactoryIDString());
-    pluginARAArchiveIDValue.setDefault(getDefaultARADocumentArchiveID());
+    pluginAAXIdentifierValue. setDefault (getDefaultAAXIdentifierString());
+    pluginARAFactoryIDValue.  setDefault (getDefaultARAFactoryIDString());
+    pluginARAArchiveIDValue.  setDefault (getDefaultARADocumentArchiveID());
 }
 
 String Project::getDocumentTitle()
 {
     return getProjectNameString();
+}
+
+void Project::updateCompanyNameDependencies()
+{
+    bundleIdentifierValue.setDefault    (getDefaultBundleIdentifierString());
+    pluginAAXIdentifierValue.setDefault (getDefaultAAXIdentifierString());
+    pluginManufacturerValue.setDefault  (getDefaultPluginManufacturerString());
 }
 
 void Project::updateProjectSettings()
@@ -195,14 +202,14 @@ void Project::initialiseProjectValues()
     if (projectUIDValue.isUsingDefault())
         projectUIDValue = projectUIDValue.getDefault();
 
-    projectTypeValue.referTo         (projectRoot, Ids::projectType,      getUndoManager(), ProjectType_GUIApp::getTypeName());
-    versionValue.referTo             (projectRoot, Ids::version,          getUndoManager(), "1.0.0");
-    bundleIdentifierValue.referTo    (projectRoot, Ids::bundleIdentifier, getUndoManager(), getDefaultBundleIdentifierString());
-
     companyNameValue.referTo         (projectRoot, Ids::companyName,      getUndoManager());
     companyCopyrightValue.referTo    (projectRoot, Ids::companyCopyright, getUndoManager());
     companyWebsiteValue.referTo      (projectRoot, Ids::companyWebsite,   getUndoManager());
     companyEmailValue.referTo        (projectRoot, Ids::companyEmail,     getUndoManager());
+
+    projectTypeValue.referTo         (projectRoot, Ids::projectType,      getUndoManager(), ProjectType_GUIApp::getTypeName());
+    versionValue.referTo             (projectRoot, Ids::version,          getUndoManager(), "1.0.0");
+    bundleIdentifierValue.referTo    (projectRoot, Ids::bundleIdentifier, getUndoManager(), getDefaultBundleIdentifierString());
 
     displaySplashScreenValue.referTo (projectRoot, Ids::displaySplashScreen, getUndoManager(), ! ProjucerApplication::getApp().isPaidOrGPL());
     splashScreenColourValue.referTo  (projectRoot, Ids::splashScreenColour,  getUndoManager(), "Dark");
@@ -243,7 +250,7 @@ void Project::initialiseAudioPluginValues()
 
     pluginNameValue.referTo                  (projectRoot, Ids::pluginName,                 getUndoManager(), getProjectNameString());
     pluginDescriptionValue.referTo           (projectRoot, Ids::pluginDesc,                 getUndoManager(), getProjectNameString());
-    pluginManufacturerValue.referTo          (projectRoot, Ids::pluginManufacturer,         getUndoManager(), "yourcompany");
+    pluginManufacturerValue.referTo          (projectRoot, Ids::pluginManufacturer,         getUndoManager(), getDefaultPluginManufacturerString());
     pluginManufacturerCodeValue.referTo      (projectRoot, Ids::pluginManufacturerCode,     getUndoManager(), "Manu");
     pluginCodeValue.referTo                  (projectRoot, Ids::pluginCode,                 getUndoManager(), makeValid4CC (getProjectUIDString() + getProjectUIDString()));
     pluginChannelConfigsValue.referTo        (projectRoot, Ids::pluginChannelConfigs,       getUndoManager());
@@ -577,7 +584,7 @@ static void forgetRecentFile (const File& file)
 //==============================================================================
 Result Project::loadDocument (const File& file)
 {
-    std::unique_ptr<XmlElement> xml (XmlDocument::parse (file));
+    auto xml = parseXML (file);
 
     if (xml == nullptr || ! xml->hasTagName (Ids::JUCERPROJECT.toString()))
         return Result::fail ("Not a valid Jucer project!");
@@ -734,7 +741,11 @@ void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& prope
         }
         else if (property == Ids::name)
         {
-            updateTitle();
+            updateTitleDependencies();
+        }
+        else if (property == Ids::companyName)
+        {
+            updateCompanyNameDependencies();
         }
         else if (property == Ids::defines)
         {
@@ -1669,6 +1680,34 @@ bool Project::isConfigFlagEnabled (const String& name, bool defaultIsEnabled) co
 }
 
 //==============================================================================
+static String getCompanyNameOrDefault (StringRef str)
+{
+    if (str.isEmpty())
+        return "yourcompany";
+
+    return str;
+}
+
+String Project::getDefaultBundleIdentifierString() const
+{
+    return "com." + getCompanyNameOrDefault (getCompanyNameString()) + "." + CodeHelpers::makeValidIdentifier (getProjectNameString(), false, true, false);
+}
+
+String Project::getDefaultPluginManufacturerString() const
+{
+    return getCompanyNameOrDefault (getCompanyNameString());
+}
+
+String Project::getDefaultARAFactoryIDString() const
+{ 
+    return "com.yourcompany." + CodeHelpers::makeValidIdentifier (getProjectNameString(), false, true, false) + ".factory"; 
+}
+
+String Project::getDefaultARADocumentArchiveID() const
+{ 
+    return "com.yourcompany." + CodeHelpers::makeValidIdentifier (getProjectNameString(), false, true, false) + ".aradocumentarchive." + getVersionString(); 
+}
+
 String Project::getAUMainTypeString() const noexcept
 {
     auto v = pluginAUMainTypeValue.get();

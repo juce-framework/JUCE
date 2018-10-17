@@ -1740,15 +1740,13 @@ public:
     JuceAUViewController (AUViewController<AUAudioUnitFactory>* p)
         : myself (p)
     {
-        jassert (MessageManager::getInstance()->isThisTheMessageThread());
-
         PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_AudioUnitv3;
         initialiseJuce_GUI();
     }
 
     ~JuceAUViewController()
     {
-        jassert (MessageManager::getInstance()->isThisTheMessageThread());
+        JUCE_ASSERT_MESSAGE_THREAD
 
         if (processorHolder != nullptr)
             JuceAudioUnitv3::removeEditor (getAudioProcessor());
@@ -1757,7 +1755,7 @@ public:
     //==============================================================================
     void loadView()
     {
-        jassert (MessageManager::getInstance()->isThisTheMessageThread());
+        JUCE_ASSERT_MESSAGE_THREAD
 
         if (AudioProcessor* p = createPluginFilterOfType (AudioProcessor::wrapperType_AudioUnitv3))
         {
@@ -1894,7 +1892,7 @@ private:
     //==============================================================================
     AUAudioUnit* createAudioUnitOnMessageThread (const AudioComponentDescription& descr, NSError** error)
     {
-        jassert (MessageManager::getInstance()->isThisTheMessageThread());
+        JUCE_ASSERT_MESSAGE_THREAD
 
         [myself view];  // this will call [view load] and ensure that the AudioProcessor has been instantiated
 

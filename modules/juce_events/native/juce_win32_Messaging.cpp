@@ -46,7 +46,7 @@ namespace WindowsMessageHelpers
 
     void dispatchMessageFromLParam (LPARAM lParam)
     {
-        if (MessageManager::MessageBase* message = reinterpret_cast<MessageManager::MessageBase*> (lParam))
+        if (auto message = reinterpret_cast<MessageManager::MessageBase*> (lParam))
         {
             JUCE_TRY
             {
@@ -154,7 +154,7 @@ bool MessageManager::dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMes
             {
                 // if it's someone else's window being clicked on, and the focus is
                 // currently on a juce window, pass the kb focus over..
-                HWND currentFocus = GetFocus();
+                auto currentFocus = GetFocus();
 
                 if (currentFocus == 0 || JuceWindowIdentifier::isJUCEWindow (currentFocus))
                     SetFocus (m.hwnd);
@@ -175,14 +175,14 @@ bool MessageManager::postMessageToSystemQueue (MessageManager::MessageBase* cons
    #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client && JucePlugin_Build_Unity
     if (juce_isRunningInUnity())
         return SendNotifyMessage (juce_messageWindowHandle, WindowsMessageHelpers::customMessageID, 0, (LPARAM) message) != 0;
-    else
    #endif
+
     return PostMessage (juce_messageWindowHandle, WindowsMessageHelpers::customMessageID, 0, (LPARAM) message) != 0;
 }
 
 void MessageManager::broadcastMessage (const String& value)
 {
-    const String localCopy (value);
+    auto localCopy = value;
 
     Array<HWND> windows;
     EnumWindows (&WindowsMessageHelpers::broadcastEnumWindowProc, (LPARAM) &windows);

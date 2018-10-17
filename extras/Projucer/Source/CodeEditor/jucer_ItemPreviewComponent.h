@@ -108,12 +108,8 @@ private:
         }
 
         if (drawable == nullptr)
-        {
-            std::unique_ptr<XmlElement> svg (XmlDocument::parse (file));
-
-            if (svg != nullptr)
+            if (auto svg = parseXML (file))
                 drawable.reset (Drawable::createFromSVG (*svg));
-        }
 
         facts.removeEmptyStrings (true);
     }

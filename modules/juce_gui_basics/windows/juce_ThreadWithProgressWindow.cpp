@@ -59,7 +59,7 @@ ThreadWithProgressWindow::~ThreadWithProgressWindow()
 
 void ThreadWithProgressWindow::launchThread (int priority)
 {
-    jassert (MessageManager::getInstance()->isThisTheMessageThread());
+    JUCE_ASSERT_MESSAGE_THREAD
 
     startThread (priority);
     startTimer (100);

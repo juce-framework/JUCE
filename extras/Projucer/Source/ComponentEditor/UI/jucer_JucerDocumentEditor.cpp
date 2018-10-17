@@ -938,9 +938,7 @@ void JucerDocumentEditor::getCommandInfo (const CommandID commandID, Application
 
             bool canPaste = false;
 
-            std::unique_ptr<XmlElement> doc (XmlDocument::parse (SystemClipboard::getTextFromClipboard()));
-
-            if (doc != nullptr)
+            if (auto doc = parseXML (SystemClipboard::getTextFromClipboard()))
             {
                 if (doc->hasTagName (ComponentLayout::clipboardXmlTag))
                     canPaste = (currentLayout != nullptr);
@@ -1156,9 +1154,7 @@ bool JucerDocumentEditor::perform (const InvocationInfo& info)
 
         case StandardApplicationCommandIDs::paste:
             {
-                std::unique_ptr<XmlElement> doc (XmlDocument::parse (SystemClipboard::getTextFromClipboard()));
-
-                if (doc != nullptr)
+                if (auto doc = parseXML (SystemClipboard::getTextFromClipboard()))
                 {
                     if (doc->hasTagName (ComponentLayout::clipboardXmlTag))
                     {

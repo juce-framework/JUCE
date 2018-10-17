@@ -1536,7 +1536,7 @@ struct VST3ComponentHolder
         // On Windows it's highly advisable to create your plugins using the message thread,
         // because many plugins need a chance to create HWNDs that will get their messages
         // delivered by the main message thread, and that's not possible from a background thread.
-        jassert (MessageManager::getInstance()->isThisTheMessageThread());
+        JUCE_ASSERT_MESSAGE_THREAD
        #endif
 
         factory = ComSmartPtr<IPluginFactory> (module->getPluginFactory());
@@ -1749,7 +1749,7 @@ public:
         // On Windows it's highly advisable to create your plugins using the message thread,
         // because many plugins need a chance to create HWNDs that will get their messages
         // delivered by the main message thread, and that's not possible from a background thread.
-        jassert (MessageManager::getInstance()->isThisTheMessageThread());
+        JUCE_ASSERT_MESSAGE_THREAD
        #endif
 
         if (! holder->initialise())
@@ -2560,12 +2560,13 @@ private:
                 bypassParam = param;
 
             std::function<AudioProcessorParameterGroup*(Vst::UnitID)> findOrCreateGroup;
+
             findOrCreateGroup = [&groupMap, &infoMap, &findOrCreateGroup](Vst::UnitID groupID)
             {
-                auto existingGoup = groupMap.find (groupID);
+                auto existingGroup = groupMap.find (groupID);
 
-                if (existingGoup != groupMap.end())
-                    return existingGoup->second;
+                if (existingGroup != groupMap.end())
+                    return existingGroup->second;
 
                 auto groupInfo = infoMap.find (groupID);
 

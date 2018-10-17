@@ -1030,7 +1030,7 @@ private:
     // this loads the embedded database XML file into memory
     void loadData()
     {
-        demoData.reset (XmlDocument::parse (loadEntireAssetIntoString ("demo table data.xml")));
+        demoData = parseXML (loadEntireAssetIntoString ("demo table data.xml"));
 
         dataList   = demoData->getChildByName ("DATA");
         columnList = demoData->getChildByName ("COLUMNS");

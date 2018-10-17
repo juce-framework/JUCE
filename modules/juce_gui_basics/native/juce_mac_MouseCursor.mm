@@ -164,11 +164,6 @@ void MouseCursor::deleteMouseCursor (void* const cursorHandle, const bool /*isSt
     [((NSCursor*) cursorHandle) release];
 }
 
-void MouseCursor::showInAllWindows() const
-{
-    showInWindow (nullptr);
-}
-
 void MouseCursor::showInWindow (ComponentPeer*) const
 {
     auto c = (NSCursor*) getHandle();
@@ -184,7 +179,6 @@ void MouseCursor::showInWindow (ComponentPeer*) const
 void* CustomMouseCursorInfo::create() const                                              { return nullptr; }
 void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType)           { return nullptr; }
 void MouseCursor::deleteMouseCursor (void*, bool)                                        {}
-void MouseCursor::showInAllWindows() const                                               {}
 void MouseCursor::showInWindow (ComponentPeer*) const                                    {}
 
 #endif

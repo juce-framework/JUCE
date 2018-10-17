@@ -198,10 +198,8 @@
 				);
 				INSTALL_PATH = "/usr/bin";
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.roli.binarybuilder;
 				PRODUCT_NAME = "BinaryBuilder";
-				SDKROOT_ppc = macosx10.5;
 				USE_HEADERMAP = NO;
 			};
 			name = Debug;
@@ -242,10 +240,8 @@
 				INSTALL_PATH = "/usr/bin";
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.roli.binarybuilder;
 				PRODUCT_NAME = "BinaryBuilder";
-				SDKROOT_ppc = macosx10.5;
 				USE_HEADERMAP = NO;
 			};
 			name = Release;

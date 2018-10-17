@@ -119,19 +119,20 @@ public:
                 writeReadmeFile();
                 deleteUnwantedFilesIn (generatedCodeFolder);
             }
-        }
-        else
-        {
-            project.setFile (oldFile);
-            return Result::fail (errors[0]);
+
+            if (errors.size() == 0)
+            {
+                // Workaround for a bug where Xcode thinks the project is invalid if opened immedietely
+                // after writing
+                if (waitAfterSaving)
+                    Thread::sleep (2000);
+
+                return Result::ok();
+            }
         }
 
-        // Workaround for a bug where Xcode thinks the project is invalid if opened immedietely
-        // after writing
-        if (waitAfterSaving)
-            Thread::sleep (2000);
-
-        return Result::ok();
+        project.setFile (oldFile);
+        return Result::fail (errors[0]);
     }
 
     Result saveResourcesOnly()

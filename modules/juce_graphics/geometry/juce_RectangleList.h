@@ -194,7 +194,7 @@ public:
     void add (const RectangleList& other)
     {
         for (auto& r : other)
-            add (*r);
+            add (r);
     }
 
     /** Removes a rectangular region from the list.

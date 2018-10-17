@@ -254,7 +254,7 @@ bool ModalComponentManager::cancelAllModalComponents()
 int ModalComponentManager::runEventLoopForCurrentComponent()
 {
     // This can only be run from the message thread!
-    jassert (MessageManager::getInstance()->isThisTheMessageThread());
+    JUCE_ASSERT_MESSAGE_THREAD
 
     int returnValue = 0;
 

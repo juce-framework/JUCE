@@ -422,7 +422,7 @@ private:
     {
         auto liveModules = project.getProjectRoot().getChildWithName (Ids::MODULES);
 
-        std::unique_ptr<XmlElement> xml (XmlDocument::parse (project.getFile()));
+        auto xml = parseXML (project.getFile());
 
         if (xml == nullptr || ! xml->hasTagName (Ids::JUCERPROJECT.toString()))
             return false;

@@ -143,11 +143,11 @@ struct NativeFunction
         The format of nameAndArgumentTypes is "name/[return type][arg1][arg2..]"
         So for example "int foobar (float, bool)" would be "foobar/ifb"
     */
-    NativeFunction (const char* nameAndArgumentTypes, ImplementationFunction fn) noexcept
+    NativeFunction (const char* nameAndArgumentTypes, ImplementationFunction fn)
         : nameAndArguments (nameAndArgumentTypes), function (fn),
           functionID (createID (nameAndArgumentTypes)), returnType(), numArgs()
     {
-        const int slash = indexOfSlash (nameAndArgumentTypes);
+        auto slash = indexOfSlash (nameAndArgumentTypes);
 
         if (slash > 0)
         {
@@ -165,11 +165,9 @@ struct NativeFunction
     uint8 numArgs;                      /**< The number of arguments that the function takes. */
 
     /** Converts a function signature to its hashed ID. */
-    static FunctionID createID (const char* nameAndArgTypes) noexcept
+    static FunctionID createID (const char* nameAndArgTypes)
     {
-        jassert (nameAndArgTypes != nullptr && nameAndArgTypes[0] != 0); // the name cannot be an empty string!
-        int hash = 0, i = 0;
-        const int slash = indexOfSlash (nameAndArgTypes);
+        auto slash = indexOfSlash (nameAndArgTypes);
 
         jassert (slash > 0); // The slash can't be the first character in this string!
         jassert (nameAndArgTypes[slash + 1] != 0);  // The slash must be followed by a return type character
@@ -178,9 +176,11 @@ struct NativeFunction
         jassert (juce::String (nameAndArgTypes).substring (slash + 1).containsOnly ("vifb"));
         jassert (juce::String (nameAndArgTypes).substring (slash + 2).containsOnly ("ifb")); // arguments must only be of these types
 
+        uint32 hash = 0, i = 0;
+
         for (; nameAndArgTypes[i] != 0; ++i)
-            if (i != slash + 1)
-                hash = hash * 31 + nameAndArgTypes[i];
+            if (i != (uint32) (slash + 1))
+                hash = hash * 31u + (uint32) nameAndArgTypes[i];
 
         return static_cast<FunctionID> (hash + i);
     }
@@ -188,6 +188,8 @@ struct NativeFunction
 private:
     static int indexOfSlash (const char* nameAndArgs) noexcept
     {
+        jassert (nameAndArgs != nullptr && nameAndArgs[0] != 0); // the name cannot be an empty string!
+
         for (int i = 0; nameAndArgs[i] != 0; ++i)
             if (nameAndArgs[i] == '/')
                 return i;
