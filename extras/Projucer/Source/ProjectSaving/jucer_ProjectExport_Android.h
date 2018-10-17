@@ -149,10 +149,10 @@ public:
     //==============================================================================
     void createToolchainExporterProperties (PropertyListBuilder& props)
     {
-        props.add (new TextPropertyComponent (gradleVersion, "gradle version", 32, false),
+        props.add (new TextPropertyComponent (gradleVersion, "Gradle Version", 32, false),
                    "The version of gradle that is used to build this app (4.4 is fine for JUCE)");
 
-        props.add (new TextPropertyComponent (androidPluginVersion, "android plug-in version", 32, false),
+        props.add (new TextPropertyComponent (androidPluginVersion, "Android Plug-in Version", 32, false),
                    "The version of the android build plugin for gradle that is used to build this app");
 
         props.add (new ChoicePropertyComponent (gradleToolchain, "NDK Toolchain",
@@ -160,16 +160,16 @@ public:
                                                 { "clang", "gcc" }),
                    "The toolchain that gradle should invoke for NDK compilation (variable model.android.ndk.tooclhain in app/build.gradle)");
 
-        props.add (new TextPropertyComponent (buildToolsVersion, "Android build tools version", 32, false),
+        props.add (new TextPropertyComponent (buildToolsVersion, "Android Build Tools Version", 32, false),
                    "The Android build tools version that should use to build this app");
     }
 
     void createLibraryModuleExporterProperties (PropertyListBuilder& props)
     {
-        props.add (new TextPropertyComponent (androidStaticLibraries, "Import static library modules", 8192, true),
+        props.add (new TextPropertyComponent (androidStaticLibraries, "Import Static Library Modules", 8192, true),
                    "Comma or whitespace delimited list of static libraries (.a) defined in NDK_MODULE_PATH.");
 
-        props.add (new TextPropertyComponent (androidSharedLibraries, "Import shared library modules", 8192, true),
+        props.add (new TextPropertyComponent (androidSharedLibraries, "Import Shared Library Modules", 8192, true),
                    "Comma or whitespace delimited list of shared libraries (.so) defined in NDK_MODULE_PATH.");
     }
 
@@ -299,7 +299,7 @@ protected:
             addGCCOptimisationProperty (props);
 
             props.add (new TextPropertyComponent (androidArchitectures, "Architectures", 256, false),
-                       "A list of the ARM architectures to build (for a fat binary). Leave empty to build for all possible android archiftectures.");
+                       "A list of the ARM architectures to build (for a fat binary). Leave empty to build for all possible android architectures.");
 
             props.add (new TextPropertyComponent (androidBuildConfigRemoteNotifsConfigFile.getPropertyAsValue(), "Remote Notifications Config File", 2048, false),
                        "Path to google-services.json file. This will be the file provided by Firebase when creating a new app in Firebase console. "
@@ -320,7 +320,7 @@ protected:
                        "Paths to additional \"raw resource\" files that should be included in the app (one per line). "
                        "Resource file names must contain only lowercase a-z, 0-9 or underscore.");
 
-            props.add (new TextPropertyComponent (androidCustomStringXmlElements, "Custom string resources", 8192, true),
+            props.add (new TextPropertyComponent (androidCustomStringXmlElements, "Custom String Resources", 8192, true),
                        "Custom XML resources that will be added to string.xml as children of <resources> element. "
                        "Example: \n<string name=\"value\">text</string>\n"
                        "<string name2=\"value2\">text2</string>\n");
@@ -835,32 +835,32 @@ private:
     //==============================================================================
     void createBaseExporterProperties (PropertyListBuilder& props)
     {
-        props.add (new TextPropertyComponent (androidJavaLibs, "Java libraries to include", 32768, true),
+        props.add (new TextPropertyComponent (androidJavaLibs, "Java Libraries to Include", 32768, true),
                    "Java libs (JAR files) (one per line). These will be copied to app/libs folder and \"implementation files\" "
                    "dependency will be automatically added to module \"dependencies\" section for each library, so do "
                    "not add the dependency yourself.");
 
-        props.add (new TextPropertyComponent (androidRepositories, "Module repositories", 32768, true),
+        props.add (new TextPropertyComponent (androidRepositories, "Module Repositories", 32768, true),
                    "Module repositories (one per line). These will be added to module-level gradle file repositories section. ");
 
-        props.add (new TextPropertyComponent (androidDependencies, "Module dependencies", 32768, true),
+        props.add (new TextPropertyComponent (androidDependencies, "Module Dependencies", 32768, true),
                    "Module dependencies (one per line). These will be added to module-level gradle file \"dependencies\" section. "
                    "If adding any java libs in \"Java libraries to include\" setting, do not add them here as "
                    "they will be added automatically.");
 
-        props.add (new ChoicePropertyComponent (androidScreenOrientation, "Screen orientation",
+        props.add (new ChoicePropertyComponent (androidScreenOrientation, "Screen Orientation",
                                                 { "Portrait and Landscape", "Portrait", "Landscape" },
                                                 { "unspecified",            "portrait", "landscape" }),
                    "The screen orientations that this app should support");
 
-        props.add (new TextPropertyComponent (androidActivityClass, "Android Activity class name", 256, false),
+        props.add (new TextPropertyComponent (androidActivityClass, "Android Activity Class Name", 256, false),
                    "The full java class name to use for the app's Activity class.");
 
-        props.add (new TextPropertyComponent (androidActivitySubClassName, "Android Activity sub-class name", 256, false),
+        props.add (new TextPropertyComponent (androidActivitySubClassName, "Android Activity Sub-Class Name", 256, false),
                    "If not empty, specifies the Android Activity class name stored in the app's manifest. "
                    "Use this if you would like to use your own Android Activity sub-class.");
 
-        props.add (new TextPropertyComponent (androidActivityBaseClassName, "Android Activity base class", 256, false),
+        props.add (new TextPropertyComponent (androidActivityBaseClassName, "Android Activity Base Class", 256, false),
                    "If not empty, specifies the base class to use for your activity. If custom base class is "
                    "specified, that base class should be a sub-class of android.app.Activity. When empty, Activity "
                    "(android.app.Activity) will be used as the base class. "
@@ -869,7 +869,7 @@ private:
         props.add (new TextPropertyComponent (androidVersionCode, "Android Version Code", 32, false),
                    "An integer value that represents the version of the application code, relative to other versions.");
 
-        props.add (new TextPropertyComponent (androidMinimumSDK, "Minimum SDK version", 32, false),
+        props.add (new TextPropertyComponent (androidMinimumSDK, "Minimum SDK Version", 32, false),
                    "The number of the minimum version of the Android SDK that the app requires");
 
         props.add (new TextPropertyComponent (androidExtraAssetsFolder, "Extra Android Assets", 256, false),
@@ -879,7 +879,7 @@ private:
     //==============================================================================
     void createManifestExporterProperties (PropertyListBuilder& props)
     {
-        props.add (new TextPropertyComponent (androidOboeRepositoryPath, "Oboe repository path", 2048, false),
+        props.add (new TextPropertyComponent (androidOboeRepositoryPath, "Oboe Repository Path", 2048, false),
                    "Path to the root of Oboe repository. Make sure to point Oboe repository to "
                    "commit with SHA 44c6b6ea9c8fa9b5b74cbd60f355068b57b50b37 before building.");
 
@@ -892,13 +892,13 @@ private:
         props.add (new ChoicePropertyComponent (androidCameraNeeded, "Camera Required"),
                    "If enabled, this will set the android.permission.CAMERA flag in the manifest.");
 
-        props.add (new ChoicePropertyComponent (androidBluetoothNeeded, "Bluetooth permissions Required"),
+        props.add (new ChoicePropertyComponent (androidBluetoothNeeded, "Bluetooth Permissions Required"),
                    "If enabled, this will set the android.permission.BLUETOOTH and  android.permission.BLUETOOTH_ADMIN flag in the manifest. This is required for Bluetooth MIDI on Android.");
 
-        props.add (new ChoicePropertyComponent (androidExternalReadPermission, "Read from external storage"),
+        props.add (new ChoicePropertyComponent (androidExternalReadPermission, "Read From External Storage"),
                    "If enabled, this will set the android.permission.READ_EXTERNAL_STORAGE flag in the manifest.");
 
-        props.add (new ChoicePropertyComponent (androidExternalWritePermission, "Write to external storage"),
+        props.add (new ChoicePropertyComponent (androidExternalWritePermission, "Write to External Storage"),
                    "If enabled, this will set the android.permission.WRITE_EXTERNAL_STORAGE flag in the manifest.");
 
         props.add (new ChoicePropertyComponent (androidInAppBillingPermission, "In-App Billing"),
@@ -910,7 +910,7 @@ private:
         props.add (new ChoicePropertyComponent (androidEnableContentSharing, "Content Sharing"),
                    "If enabled, your app will be able to share content with other apps.");
 
-        props.add (new TextPropertyComponent (androidOtherPermissions, "Custom permissions", 2048, false),
+        props.add (new TextPropertyComponent (androidOtherPermissions, "Custom Permissions", 2048, false),
                    "A space-separated list of other permission flags that should be added to the manifest.");
 
         props.add (new ChoicePropertyComponent (androidEnableRemoteNotifications, "Remote Notifications"),
@@ -920,7 +920,7 @@ private:
         props.add (new TextPropertyComponent (androidRemoteNotificationsConfigFile.getPropertyAsValue(), "Remote Notifications Config File", 2048, false),
                    "Path to google-services.json file. This will be the file provided by Firebase when creating a new app in Firebase console.");
 
-        props.add (new TextPropertyComponent (androidManifestCustomXmlElements, "Custom manifest XML content", 8192, true),
+        props.add (new TextPropertyComponent (androidManifestCustomXmlElements, "Custom Manifest XML Content", 8192, true),
                    "You can specify custom AndroidManifest.xml content overriding the default one generated by Projucer. "
                    "Projucer will automatically create any missing and required XML elements and attributes "
                    "and merge them into your custom content.");
