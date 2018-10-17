@@ -75,7 +75,16 @@ namespace Vst2
 #if JucePlugin_Enable_ARA
  
  #include "../ARA/juce_ARA_audio_plugin.h"
+
+ #if JUCE_MSVC
+  // Disable MSVC warning C4310: cast truncates constant value
+  #pragma warning(push)
+  #pragma warning(disable:4310)
+ #endif
  #include <ARA_API/ARAVST3.h>
+ #if JUCE_MSVC
+  #pragma warning(pop)
+ #endif
  
  #if ARA_SUPPORT_VERSION_1
   #error "Unsupported ARA version - ARA version 2 and onward are JUCE compatible"
