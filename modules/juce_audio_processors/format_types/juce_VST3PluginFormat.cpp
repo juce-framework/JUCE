@@ -2560,12 +2560,13 @@ private:
                 bypassParam = param;
 
             std::function<AudioProcessorParameterGroup*(Vst::UnitID)> findOrCreateGroup;
+
             findOrCreateGroup = [&groupMap, &infoMap, &findOrCreateGroup](Vst::UnitID groupID)
             {
-                auto existingGoup = groupMap.find (groupID);
+                auto existingGroup = groupMap.find (groupID);
 
-                if (existingGoup != groupMap.end())
-                    return existingGoup->second;
+                if (existingGroup != groupMap.end())
+                    return existingGroup->second;
 
                 auto groupInfo = infoMap.find (groupID);
 
