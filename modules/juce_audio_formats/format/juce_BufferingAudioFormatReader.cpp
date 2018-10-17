@@ -135,7 +135,7 @@ int BufferingAudioReader::useTimeSlice()
 
 bool BufferingAudioReader::readNextBufferChunk()
 {
-    auto pos = nextReadPosition.get();
+    auto pos = nextReadPosition.load();
     auto startPos = ((pos - 1024) / samplesPerBlock) * samplesPerBlock;
     auto endPos = startPos + numBlocks * samplesPerBlock;
 
