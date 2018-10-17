@@ -214,6 +214,7 @@ public:
     /** Returns the current number of elements in the array. */
     inline int size() const noexcept
     {
+        const ScopedLockType lock (getLock());
         return values.size();
     }
 
