@@ -80,10 +80,15 @@ namespace Vst2
   // Disable MSVC warning C4310: cast truncates constant value
   #pragma warning(push)
   #pragma warning(disable:4310)
+ #elif __clang__
+  #pragma clang diagnostic push
+  #pragma clang diagnostic ignored "-Wnon-virtual-dtor"
  #endif
  #include <ARA_API/ARAVST3.h>
  #if JUCE_MSVC
   #pragma warning(pop)
+ #elif __clang__
+  #pragma clang diagnostic pop
  #endif
  
  #if ARA_SUPPORT_VERSION_1
