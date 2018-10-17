@@ -200,14 +200,14 @@ void Project::initialiseProjectValues()
     if (projectUIDValue.isUsingDefault())
         projectUIDValue = projectUIDValue.getDefault();
 
-    projectTypeValue.referTo         (projectRoot, Ids::projectType,      getUndoManager(), ProjectType_GUIApp::getTypeName());
-    versionValue.referTo             (projectRoot, Ids::version,          getUndoManager(), "1.0.0");
-    bundleIdentifierValue.referTo    (projectRoot, Ids::bundleIdentifier, getUndoManager(), getDefaultBundleIdentifierString());
-
     companyNameValue.referTo         (projectRoot, Ids::companyName,      getUndoManager());
     companyCopyrightValue.referTo    (projectRoot, Ids::companyCopyright, getUndoManager());
     companyWebsiteValue.referTo      (projectRoot, Ids::companyWebsite,   getUndoManager());
     companyEmailValue.referTo        (projectRoot, Ids::companyEmail,     getUndoManager());
+
+    projectTypeValue.referTo         (projectRoot, Ids::projectType,      getUndoManager(), ProjectType_GUIApp::getTypeName());
+    versionValue.referTo             (projectRoot, Ids::version,          getUndoManager(), "1.0.0");
+    bundleIdentifierValue.referTo    (projectRoot, Ids::bundleIdentifier, getUndoManager(), getDefaultBundleIdentifierString());
 
     displaySplashScreenValue.referTo (projectRoot, Ids::displaySplashScreen, getUndoManager(), ! ProjucerApplication::getApp().isPaidOrGPL());
     splashScreenColourValue.referTo  (projectRoot, Ids::splashScreenColour,  getUndoManager(), "Dark");
