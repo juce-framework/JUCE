@@ -92,7 +92,7 @@ public:
     bool isControlBlock() const;
 
     /** Returns true if Block::Type is a control block. */
-    constexpr static bool isControlBlock (Block::Type);
+    static bool isControlBlock (Block::Type);
 
     /** Returns a human-readable description of this device type. */
     virtual juce::String getDeviceDescription() const = 0;

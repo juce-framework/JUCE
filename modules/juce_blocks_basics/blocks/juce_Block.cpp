@@ -66,7 +66,7 @@ bool Block::isControlBlock() const
     return isControlBlock (getType());
 }
 
-constexpr bool Block::isControlBlock (Block::Type type)
+bool Block::isControlBlock (Block::Type type)
 {
     return type == Block::Type::liveBlock
         || type == Block::Type::loopBlock
