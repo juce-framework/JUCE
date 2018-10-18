@@ -421,7 +421,7 @@ static String parseMetadataItem (const StringArray& lines, int& index)
             || continuationLine.startsWith ("END_JUCE_"))
             break;
 
-        result += continuationLine;
+        result += " " + continuationLine;
         ++index;
     }
 
@@ -433,6 +433,7 @@ var parseJUCEHeaderMetadata (const File& file)
     StringArray lines;
     file.readLines (lines);
 
+    DBG (file.getFileName());
     for (int i = 0; i < lines.size(); ++i)
     {
         auto trimmedLine = trimCommentCharsFromStartOfLine (lines[i]);
