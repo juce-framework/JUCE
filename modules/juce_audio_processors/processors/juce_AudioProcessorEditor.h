@@ -183,7 +183,7 @@ public:
 
     std::unique_ptr<ResizableCornerComponent> resizableCorner;
 
-	//==============================================================================
+    //==============================================================================
 #if JucePlugin_Enable_ARA
     ARA::PlugIn::EditorView* getARAEditorView() const;
 
