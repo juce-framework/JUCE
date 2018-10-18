@@ -102,7 +102,7 @@ PIPGenerator::PIPGenerator (const File& pip, const File& output, const File& juc
     : pipFile (pip),
       juceModulesPath (jucePath),
       userModulesPaths (userPaths),
-      metadata (parsePIPMetadata())
+      metadata (parseJUCEHeaderMetadata (pipFile))
 {
     if (output != File())
     {
@@ -165,75 +165,6 @@ Result PIPGenerator::createMainCpp()
     outputFile.replaceWithText (getMainFileTextForType());
 
     return Result::ok();
-}
-
-//==============================================================================
-var PIPGenerator::parsePIPMetadata (const StringArray& lines)
-{
-    auto* o = new DynamicObject();
-    var result (o);
-
-    for (auto& line : lines)
-    {
-        line = trimCommentCharsFromStartOfLine (line);
-
-        auto colon = line.indexOfChar (':');
-
-        if (colon >= 0)
-        {
-            auto key = line.substring (0, colon).trim();
-            auto value = line.substring (colon + 1).trim();
-
-            o->setProperty (key, value);
-        }
-    }
-
-    return result;
-}
-
-static String parseMetadataItem (const StringArray& lines, int& index)
-{
-    String result = lines[index++];
-
-    while (index < lines.size())
-    {
-        auto continuationLine = trimCommentCharsFromStartOfLine (lines[index]);
-
-        if (continuationLine.indexOfChar (':') != -1 || continuationLine.startsWith ("END_JUCE_PIP_METADATA"))
-            break;
-
-        result += continuationLine;
-        ++index;
-    }
-
-    return result;
-}
-
-var PIPGenerator::parsePIPMetadata()
-{
-    StringArray lines;
-    pipFile.readLines (lines);
-
-    for (int i = 0; i < lines.size(); ++i)
-    {
-        auto trimmedLine = trimCommentCharsFromStartOfLine (lines[i]);
-
-        if (trimmedLine.startsWith ("BEGIN_JUCE_PIP_METADATA"))
-        {
-            StringArray desc;
-            auto j = i + 1;
-
-            while (j < lines.size())
-            {
-                if (trimCommentCharsFromStartOfLine (lines[j]).startsWith ("END_JUCE_PIP_METADATA"))
-                    return parsePIPMetadata (desc);
-
-                desc.add (parseMetadataItem (lines, j));
-            }
-        }
-    }
-
-    return {};
 }
 
 //==============================================================================
