@@ -151,7 +151,7 @@ public:
         neither delete it or use it after the lifetime of this Block object has finished.
         If there are no LEDs, then this method will return nullptr.
     */
-    virtual LEDRow* getLEDRow() const = 0;
+    virtual LEDRow* getLEDRow() = 0;
 
     /** If this block has any status LEDs, this will return an array of objects to control them.
         Note that the objects in the array belong to this Block object, and the caller must
