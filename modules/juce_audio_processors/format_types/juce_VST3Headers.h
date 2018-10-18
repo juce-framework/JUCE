@@ -26,8 +26,8 @@
 
 // Wow, those Steinberg guys really don't worry too much about compiler warnings.
 #if _MSC_VER
- #pragma warning (disable: 4505)
  #pragma warning (push, 0)
+ #pragma warning (disable: 4505)
  #pragma warning (disable: 4702)
 #elif __clang__
  #pragma clang diagnostic push
