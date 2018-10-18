@@ -7,7 +7,7 @@ void AudioView::paint (Graphics& g)
     g.setColour (isSelected ? juce::Colours::yellow : juce::Colours::black);
     g.drawRect (getLocalBounds());
     g.setColour (trackColour.contrasting (0.7f));
-    if (audioThumb.getTotalLength())
+    if (audioThumb.getTotalLength() != 0.0)
     {
         audioThumb.drawChannels (g, getLocalBounds(), startInSecs, audioThumb.getTotalLength(), 1.0);
     }
