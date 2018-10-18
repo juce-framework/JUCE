@@ -607,12 +607,16 @@ public:
        #endif
 
         setSize (600, 400);
+
+        topologyChanged();
     }
 
     ~BlocksSynthDemo()
     {
         if (activeBlock != nullptr)
             detachActiveBlock();
+
+        topologySource.removeListener (this);
     }
 
     void paint (Graphics& g) override

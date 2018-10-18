@@ -605,6 +605,13 @@ public:
        #endif
 
         setSize (600, 600);
+
+        topologyChanged();
+    }
+
+    ~BlocksMonitorDemo()
+    {
+        topologySource.removeListener (this);
     }
 
     void paint (Graphics&) override {}
