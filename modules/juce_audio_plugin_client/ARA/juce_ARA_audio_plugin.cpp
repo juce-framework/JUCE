@@ -1,21 +1,16 @@
 #if JucePlugin_Enable_ARA
 
  #include "juce_ARA_audio_plugin.h"
-
- // Disable unreferenced parameter warnings from ARA SDK
- ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
-
-  #include <ARA_Library/PlugIn/ARAPlug.cpp>
-  #include <ARA_Library/Debug/ARADebug.c>
-  #include <ARA_Library/Dispatch/ARAPlugInDispatch.cpp>
-  
-  // Include these source files directly for now
-  #include "juce_ARADocumentController.cpp"
-  #include "juce_ARARegionSequence.cpp"
-  #include "juce_ARAAudioSource.cpp"
-
- ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
-
+ 
+ #include <ARA_Library/PlugIn/ARAPlug.cpp>
+ #include <ARA_Library/Debug/ARADebug.c>
+ #include <ARA_Library/Dispatch/ARAPlugInDispatch.cpp>
+ 
+ // Include these source files directly for now
+ #include "juce_ARADocumentController.cpp"
+ #include "juce_ARARegionSequence.cpp"
+ #include "juce_ARAAudioSource.cpp"
+ 
  namespace juce
  {
  
