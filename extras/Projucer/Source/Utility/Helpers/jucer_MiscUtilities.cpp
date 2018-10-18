@@ -433,7 +433,6 @@ var parseJUCEHeaderMetadata (const File& file)
     StringArray lines;
     file.readLines (lines);
 
-    DBG (file.getFileName());
     for (int i = 0; i < lines.size(); ++i)
     {
         auto trimmedLine = trimCommentCharsFromStartOfLine (lines[i]);
