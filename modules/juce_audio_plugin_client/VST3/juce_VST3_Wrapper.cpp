@@ -77,16 +77,17 @@ namespace Vst2
  #include "../ARA/juce_ARA_audio_plugin.h"
 
  #if JUCE_MSVC
-  // Disable MSVC warning C4310: cast truncates constant value
-  #pragma warning(push)
-  #pragma warning(disable:4310)
+  #pragma warning (push)
+  #pragma warning (disable: 4310)
  #elif __clang__
   #pragma clang diagnostic push
   #pragma clang diagnostic ignored "-Wnon-virtual-dtor"
  #endif
+
  #include <ARA_API/ARAVST3.h>
+
  #if JUCE_MSVC
-  #pragma warning(pop)
+  #pragma warning (pop)
  #elif __clang__
   #pragma clang diagnostic pop
  #endif
@@ -2646,11 +2647,8 @@ const char* JuceVST3Component::kJucePrivateDataIdentifier = "JUCEPrivateData";
 
 //==============================================================================
 #if JUCE_MSVC
- #pragma warning (push, 0)
+ #pragma warning (push)
  #pragma warning (disable: 4310)
-#elif JUCE_CLANG
- #pragma clang diagnostic push
- #pragma clang diagnostic ignored "-Wall"
 #endif
 
 DECLARE_CLASS_IID (JuceAudioProcessor, 0x0101ABAB, 0xABCDEF01, JucePlugin_ManufacturerCode, JucePlugin_PluginCode)
@@ -2681,8 +2679,6 @@ DEF_CLASS_IID (JuceAudioProcessor)
 
 #if JUCE_MSVC
  #pragma warning (pop)
-#elif JUCE_CLANG
- #pragma clang diagnostic pop
 #endif
 
 //==============================================================================
