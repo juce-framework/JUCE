@@ -1288,6 +1288,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_events\interprocess\juce_InterprocessConnectionServer.cpp">
       <Filter>JUCE Modules\juce_events\interprocess</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_events\interprocess\juce_NetworkServiceDiscovery.cpp">
+      <Filter>JUCE Modules\juce_events\interprocess</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_events\messages\juce_ApplicationBase.cpp">
       <Filter>JUCE Modules\juce_events\messages</Filter>
     </ClCompile>
@@ -3436,6 +3439,9 @@
       <Filter>JUCE Modules\juce_events\interprocess</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_events\interprocess\juce_InterprocessConnectionServer.h">
+      <Filter>JUCE Modules\juce_events\interprocess</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_events\interprocess\juce_NetworkServiceDiscovery.h">
       <Filter>JUCE Modules\juce_events\interprocess</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_ApplicationBase.h">

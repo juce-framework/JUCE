@@ -366,6 +366,7 @@ public:
                    AudioProcessorParameter::Category category = AudioProcessorParameter::genericParameter,
                    bool isBoolean = false);
 
+        float getDefaultValue() const override;
         int getNumSteps() const override;
 
         bool isMetaParameter() const override;
@@ -374,6 +375,7 @@ public:
         bool isBoolean() const override;
 
     private:
+        const float unsnappedDefault;
         const bool metaParameter, automatable, discrete, boolean;
     };
 

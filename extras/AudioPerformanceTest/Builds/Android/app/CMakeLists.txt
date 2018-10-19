@@ -747,6 +747,8 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_events/interprocess/juce_InterprocessConnection.h"
     "../../../../../modules/juce_events/interprocess/juce_InterprocessConnectionServer.cpp"
     "../../../../../modules/juce_events/interprocess/juce_InterprocessConnectionServer.h"
+    "../../../../../modules/juce_events/interprocess/juce_NetworkServiceDiscovery.cpp"
+    "../../../../../modules/juce_events/interprocess/juce_NetworkServiceDiscovery.h"
     "../../../../../modules/juce_events/messages/juce_ApplicationBase.cpp"
     "../../../../../modules/juce_events/messages/juce_ApplicationBase.h"
     "../../../../../modules/juce_events/messages/juce_CallbackMessage.h"
@@ -2018,6 +2020,8 @@ set_source_files_properties("../../../../../modules/juce_events/interprocess/juc
 set_source_files_properties("../../../../../modules/juce_events/interprocess/juce_InterprocessConnection.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_events/interprocess/juce_InterprocessConnectionServer.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_events/interprocess/juce_InterprocessConnectionServer.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_events/interprocess/juce_NetworkServiceDiscovery.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_events/interprocess/juce_NetworkServiceDiscovery.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_events/messages/juce_ApplicationBase.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_events/messages/juce_ApplicationBase.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_events/messages/juce_CallbackMessage.h" PROPERTIES HEADER_FILE_ONLY TRUE)

@@ -50,10 +50,6 @@ public:
 
 private:
     //==============================================================================
-    var parsePIPMetadata (const StringArray& lines);
-    var parsePIPMetadata();
-
-    //==============================================================================
     void addFileToTree (ValueTree& groupTree, const String& name, bool compile, const String& path);
     void createFiles (ValueTree& jucerTree);
 

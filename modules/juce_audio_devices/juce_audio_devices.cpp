@@ -70,12 +70,12 @@
   #include <mmreg.h>
  #endif
 
- #if JUCE_USE_WINRT_MIDI
+ #if JUCE_USE_WINRT_MIDI && JUCE_MSVC
   /* If you cannot find any of the header files below then you are probably
      attempting to use the Windows 10 Bluetooth Low Energy API. For this to work you
-     need to install version 10.0.14393.0 of the Windows Standalone SDK and add the
-     path to the WinRT headers to your build system. This path should have the form
-     "C:\Program Files (x86)\Windows Kits\10\Include\10.0.14393.0\winrt".
+     need to install version 10.0.14393.0 of the Windows Standalone SDK and you may
+     need to add the path to the WinRT headers to your build system. This path should
+     have the form "C:\Program Files (x86)\Windows Kits\10\Include\10.0.14393.0\winrt".
 
      Also please note that Microsoft's Bluetooth MIDI stack has multiple issues, so
      this API is EXPERIMENTAL - use at your own risk!
@@ -83,15 +83,16 @@
   #include <windows.devices.h>
   #include <windows.devices.midi.h>
   #include <windows.devices.enumeration.h>
+
+  #pragma warning (push)
+  #pragma warning (disable: 4265)
   #include <wrl/event.h>
-  #if JUCE_MSVC
-   #pragma warning (push)
-   #pragma warning (disable: 4467)
-  #endif
+  #pragma warning (pop)
+
+  #pragma warning (push)
+  #pragma warning (disable: 4467)
   #include <robuffer.h>
-  #if JUCE_MSVC
-   #pragma warning (pop)
-  #endif
+  #pragma warning (pop)
  #endif
 
  #if JUCE_ASIO

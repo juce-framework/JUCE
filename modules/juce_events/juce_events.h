@@ -81,6 +81,7 @@
 #include "interprocess/juce_InterprocessConnection.h"
 #include "interprocess/juce_InterprocessConnectionServer.h"
 #include "interprocess/juce_ConnectedChildProcess.h"
+#include "interprocess/juce_NetworkServiceDiscovery.h"
 
 #if JUCE_LINUX
  #include "native/juce_linux_EventLoop.h"
