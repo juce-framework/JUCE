@@ -712,7 +712,7 @@ void MidiKeyboardComponent::updateNoteUnderMouse (Point<float> pos, bool isDown,
     auto newNote = xyToNote (pos, mousePositionVelocity);
     auto oldNote = mouseOverNotes.getUnchecked (fingerNum);
     auto oldNoteDown = mouseDownNotes.getUnchecked (fingerNum);
-    auto eventVelocity = useMousePositionForVelocity ? mousePositionVelocity * velocity : 1.0f;
+    auto eventVelocity = useMousePositionForVelocity ? mousePositionVelocity * velocity : velocity;
 
     if (oldNote != newNote)
     {
