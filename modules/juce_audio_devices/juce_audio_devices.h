@@ -59,6 +59,22 @@
 #endif
 
 //==============================================================================
+/** Config: JUCE_USE_WINRT_MIDI
+    Enables the use of the Windows Runtime API for MIDI, allowing connections
+    to Bluetooth Low Energy devices on Windows 10 version 1809 (October 2018
+    Update) and later. If you enable this flag then older, unsupported,
+    versions of Windows will automatically fall back to using the regualar
+    Win32 MIDI API.
+
+    You will need version 10.0.14393.0 of the Windows Standalone SDK to compile
+    and you may need to add the path to the WinRT headers. The path to the
+    headers will be something similar to
+    "C:\Program Files (x86)\Windows Kits\10\Include\10.0.14393.0\winrt".
+*/
+#ifndef JUCE_USE_WINRT_MIDI
+ #define JUCE_USE_WINRT_MIDI 0
+#endif
+
 /** Config: JUCE_ASIO
     Enables ASIO audio devices (MS Windows only).
     Turning this on means that you'll need to have the Steinberg ASIO SDK installed
@@ -144,25 +160,6 @@
  #else
   #define JUCE_USE_ANDROID_OPENSLES 0
  #endif
-#endif
-
-/** Config: JUCE_USE_WINRT_MIDI
-    ***
-    EXPERIMENTAL - Microsoft's Bluetooth MIDI stack has multiple issues,
-    use at your own risk!
-    ***
-
-    Enables the use of the Windows Runtime API for MIDI, which supports
-    Bluetooth Low Energy connections on computers with the Anniversary Update
-    of Windows 10.
-
-    To compile with this flag requires version 10.0.14393.0 of the Windows
-    Standalone SDK and you must add the path to the WinRT headers. This path
-    should be something similar to
-    "C:\Program Files (x86)\Windows Kits\10\Include\10.0.14393.0\winrt".
-*/
-#ifndef JUCE_USE_WINRT_MIDI
- #define JUCE_USE_WINRT_MIDI 0
 #endif
 
 /** Config: JUCE_DISABLE_AUDIO_MIXING_WITH_OTHER_APPS

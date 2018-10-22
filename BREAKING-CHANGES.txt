@@ -6,6 +6,29 @@ Develop
 
 Change
 ------
+The use of WinRT MIDI functions has been disabled by default for any version
+of Windows 10 before 1809 (October 2018 Update).
+
+Possible Issues
+---------------
+If you were previously using WinRT MIDI functions on older versions of Windows
+then the new behaviour is to revert to the old Win32 MIDI API.
+
+Workaround
+----------
+Set the preprocessor macro JUCE_FORCE_WINRT_MIDI=1 (in addition to the
+previously selected JUCE_USE_WINRT_MIDI=1) to allow the use of the WinRT API on
+older versions of Windows.
+
+Rationale
+---------
+Until now JUCE's support for the Windows 10 WinRT MIDI API was experimental,
+due to longstanding issues within the API itself. These issues have been
+addressed in the Windows 10 1809 (October 2018 Update) release.
+
+
+Change
+------
 The VST2 SDK embedded within JUCE has been removed.
 
 Possible Issues
