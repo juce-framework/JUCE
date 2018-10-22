@@ -122,7 +122,7 @@ public:
     }
 
     File modulesFolder;
-    bool isUsingGlobalPaths;
+    bool isUsingGlobalPaths = true;
 
 private:
     ComboBox currentPathBox;
