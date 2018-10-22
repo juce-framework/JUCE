@@ -28,6 +28,7 @@
 
 #include "../Filters/FilterGraph.h"
 #include "GraphEditorPanel.h"
+class Forte;
 
 
 //==============================================================================
@@ -93,6 +94,8 @@ public:
     void updatePrecisionMenuItem (ApplicationCommandInfo& info);
 
     std::unique_ptr<GraphDocumentComponent> graphHolder;
+    Forte* m_forte;
+    
 
 private:
     //==============================================================================

@@ -89,7 +89,7 @@ private:
     std::unique_ptr<ComboBox> comboBox3;
     std::unique_ptr<Label> label6;
     std::unique_ptr<Label> label10;
-    std::unique_ptr<unknown> component;
+    std::unique_ptr<MidiKeyboardComponent> component;
 
 
     //==============================================================================

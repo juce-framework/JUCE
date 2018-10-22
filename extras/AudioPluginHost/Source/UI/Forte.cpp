@@ -30,6 +30,7 @@
 Forte::Forte ()
 {
     //[Constructor_pre] You can add your own custom stuff here..
+    auto midiKeyboardState = new MidiKeyboardState();
     //[/Constructor_pre]
 
     groupComponent.reset (new GroupComponent ("new group",
@@ -267,7 +268,7 @@ Forte::Forte ()
 
     label10->setBounds (512, 0, 71, 24);
 
-    component.reset (new unknown());
+    component.reset (new MidiKeyboardComponent (*midiKeyboardState, MidiKeyboardComponent::Orientation::horizontalKeyboard));
     addAndMakeVisible (component.get());
     component->setName ("new component");
 
@@ -524,8 +525,8 @@ BEGIN_JUCER_METADATA
          focusDiscardsChanges="0" fontname="Default font" fontsize="15.00000000000000000000"
          kerning="0.00000000000000000000" bold="0" italic="0" justification="33"/>
   <GENERICCOMPONENT name="new component" id="3a433662794e0409" memberName="component"
-                    virtualName="unknown" explicitFocusOrder="0" pos="400 64 608 24"
-                    class="MidiKeyboardComponent" params=""/>
+                    virtualName="MidiKeyboardComponent" explicitFocusOrder="0" pos="400 64 608 24"
+                    class="unknown" params="*midiKeyboardState, MidiKeyboardComponent::Orientation::horizontalKeyboard"/>
 </JUCER_COMPONENT>
 
 END_JUCER_METADATA

@@ -27,7 +27,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "MainHostWindow.h"
 #include "../Filters/InternalFilters.h"
-
+#include "Forte.h"
 
 //==============================================================================
 class MainHostWindow::PluginListWindow  : public DocumentWindow
@@ -98,9 +98,11 @@ MainHostWindow::MainHostWindow()
     centreWithSize (800, 600);
    #endif
 
-    graphHolder.reset (new GraphDocumentComponent (formatManager, deviceManager, knownPluginList));
+    m_forte = new Forte();
+    setContentNonOwned(m_forte, false);
 
-    setContentNonOwned (graphHolder.get(), false);
+    //graphHolder.reset (new GraphDocumentComponent (formatManager, deviceManager, knownPluginList));
+    //setContentNonOwned (graphHolder.get(), false);
 
     restoreWindowStateFromString (getAppProperties().getUserSettings()->getValue ("mainWindowPos"));
 
@@ -122,8 +124,8 @@ MainHostWindow::MainHostWindow()
 
     knownPluginList.addChangeListener (this);
 
-    if (auto* filterGraph = graphHolder->graph.get())
-        filterGraph->addChangeListener (this);
+    //if (auto* filterGraph = graphHolder->graph.get())
+    //    filterGraph->addChangeListener (this);
 
     addKeyListener (getCommandManager().getKeyMappings());
 
@@ -185,7 +187,7 @@ struct AsyncQuitRetrier  : private Timer
 
 void MainHostWindow::tryToQuitApplication()
 {
-    if (graphHolder->closeAnyOpenPluginWindows())
+    if (graphHolder && graphHolder->closeAnyOpenPluginWindows())
     {
         // Really important thing to note here: if the last call just deleted any plugin windows,
         // we won't exit immediately - instead we'll use our AsyncQuitRetrier to let the message
