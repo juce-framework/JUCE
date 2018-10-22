@@ -388,6 +388,9 @@
     <ClCompile Include="..\..\Source\Filters\InternalFilters.cpp">
       <Filter>AudioPluginHost\Source\Filters</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\UI\Forte.cpp">
+      <Filter>AudioPluginHost\Source\UI</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\UI\GraphEditorPanel.cpp">
       <Filter>AudioPluginHost\Source\UI</Filter>
     </ClCompile>
@@ -2219,6 +2222,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Filters\InternalFilters.h">
       <Filter>AudioPluginHost\Source\Filters</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\UI\Forte.h">
+      <Filter>AudioPluginHost\Source\UI</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\UI\GraphEditorPanel.h">
       <Filter>AudioPluginHost\Source\UI</Filter>

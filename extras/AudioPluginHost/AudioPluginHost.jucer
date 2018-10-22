@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="NTe0XB0ij" name="AudioPluginHost" projectType="guiapp" version="1.0.0"
               juceFolder="../../../juce" vstFolderMac="~/SDKs/vstsdk2.4" vstFolderPC="c:\SDKs\vstsdk2.4"
-              bundleIdentifier="com.roli.juce.pluginhost" jucerVersion="5.3.1"
+              bundleIdentifier="com.roli.juce.pluginhost" jucerVersion="5.3.2"
               companyName="ROLI Ltd." displaySplashScreen="0" reportAppUsage="0"
               companyCopyright="ROLI Ltd.">
   <EXPORTFORMATS>
@@ -103,10 +103,10 @@
       </MODULEPATHS>
     </VS2015>
     <VS2017 targetFolder="Builds/VisualStudio2017" vst3Folder="" smallIcon="c97aUr"
-            bigIcon="c97aUr">
+            bigIcon="c97aUr" extraLinkerFlags="/NXCOMPAT:NO">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" targetName="AudioPluginHost"/>
-        <CONFIGURATION name="Release" isDebug="0" targetName="AudioPluginHost" debugInformationFormat="ProgramDatabase"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="AudioPluginHost" winArchitecture="Win32"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="AudioPluginHost" debugInformationFormat="ProgramDatabase" winArchitecture="Win32"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_video" path="../../modules"/>
@@ -194,6 +194,8 @@
               file="Source/Filters/InternalFilters.h"/>
       </GROUP>
       <GROUP id="{D892BFB2-FE85-B70F-10D3-450F407E2B3D}" name="UI">
+        <FILE id="gwNcpD" name="Forte.cpp" compile="1" resource="0" file="Source/UI/Forte.cpp"/>
+        <FILE id="NzRMXg" name="Forte.h" compile="0" resource="0" file="Source/UI/Forte.h"/>
         <FILE id="wPgLS9" name="GraphEditorPanel.cpp" compile="1" resource="0"
               file="Source/UI/GraphEditorPanel.cpp"/>
         <FILE id="BDMvfT" name="GraphEditorPanel.h" compile="0" resource="0"
@@ -231,5 +233,6 @@
   </MODULES>
   <LIVE_SETTINGS>
     <OSX/>
+    <WINDOWS/>
   </LIVE_SETTINGS>
 </JUCERPROJECT>
