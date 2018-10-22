@@ -255,9 +255,9 @@ ValueTree PIPGenerator::createExporterChild (const String& exporterName)
 
     if (isMobileExporter (exporterName) || (metadata[Ids::name] == "AUv3SynthPlugin" && exporterName == "XCODE_MAC"))
     {
-        auto juceDir = getAppSettings().getStoredPath (Ids::jucePath).toString();
+        auto juceDir = getAppSettings().getStoredPath (Ids::jucePath, TargetOS::getThisOS()).get().toString();
 
-        if (juceDir.isNotEmpty() && isValidJUCEExamplesDirectory (File (juceDir).getChildFile ("examples")))
+        if (isValidJUCEExamplesDirectory (File (juceDir).getChildFile ("examples")))
         {
             auto assetsDirectoryPath = File (juceDir).getChildFile ("examples").getChildFile ("Assets").getFullPathName();
 
@@ -358,9 +358,9 @@ Result PIPGenerator::setProjectSettings (ValueTree& jucerTree)
 
     if (useLocalCopy && isJUCEExample (pipFile))
     {
-        auto juceDir = getAppSettings().getStoredPath (Ids::jucePath).toString();
+        auto juceDir = getAppSettings().getStoredPath (Ids::jucePath, TargetOS::getThisOS()).get().toString();
 
-        if (juceDir.isNotEmpty() && isValidJUCEExamplesDirectory (File (juceDir).getChildFile ("examples")))
+        if (isValidJUCEExamplesDirectory (File (juceDir).getChildFile ("examples")))
         {
              defines += ((defines.isEmpty() ? "" : " ") + String ("PIP_JUCE_EXAMPLES_DIRECTORY=")
                          + Base64::toBase64 (File (juceDir).getChildFile ("examples").getFullPathName()));

@@ -27,7 +27,6 @@
 #pragma once
 
 #include "../Project/jucer_Project.h"
-#include "../Utility/UI/PropertyComponents/jucer_DependencyPathPropertyComponent.h"
 #include "../Utility/UI/PropertyComponents/jucer_PropertyComponentsWithEnablement.h"
 
 class ProjectSaver;
@@ -152,15 +151,15 @@ public:
 
     String getExternalLibrariesString() const             { return getSearchPathsFromString (externalLibrariesValue.get().toString()).joinIntoString (";"); }
 
-    bool shouldUseGNUExtensions() const                   { return gnuExtensionsValue.get();}
+    bool shouldUseGNUExtensions() const                   { return gnuExtensionsValue.get(); }
 
-    Value getVST3PathValue() const                        { return vst3Path; }
-    Value getRTASPathValue() const                        { return rtasPath; }
-    Value getAAXPathValue() const                         { return aaxPath; }
+    String getVST3PathString() const                      { return vst3PathValueWrapper.wrappedValue.get(); }
+    String getAAXPathString() const                       { return aaxPathValueWrapper.wrappedValue.get(); }
+    String getRTASPathString() const                      { return rtasPathValueWrapper.wrappedValue.get(); }
 
     // NB: this is the path to the parent "modules" folder that contains the named module, not the
     // module folder itself.
-    Value getPathForModuleValue (const String& moduleID);
+    ValueWithDefault getPathForModuleValue (const String& moduleID);
     String getPathForModuleString (const String& moduleID) const;
     void removePathForModule (const String& moduleID);
 
@@ -370,7 +369,37 @@ protected:
     const String projectName;
     const File projectFolder;
 
-    Value vst3Path, rtasPath, aaxPath; // these must be initialised in the specific exporter c'tors!
+    //==============================================================================
+    // Wraps a ValueWithDefault object that has a default which depends on a global value.
+    // Used for the VST3, RTAS and AAX project-specific path options.
+    struct ValueWithDefaultWrapper  : public Value::Listener
+    {
+        void init (const Identifier& identifierToUse, TargetOS::OS targetOS)
+        {
+            identifier = identifierToUse;
+            os = targetOS;
+
+            globalValue = getAppSettings().getStoredPath (identifier, os).getPropertyAsValue();
+            globalValue.addListener (this);
+
+            wrappedValue.referTo (tree, identifier, nullptr, getAppSettings().getStoredPath (identifier, os).get());
+        }
+
+        void valueChanged (Value&) override
+        {
+            wrappedValue.setDefault (getAppSettings().getStoredPath (identifier, os).get());
+        }
+
+        ValueWithDefault wrappedValue;
+
+        Identifier identifier;
+        TargetOS::OS os;
+
+        ValueTree tree { "tree" };
+        Value globalValue;
+    };
+
+    ValueWithDefaultWrapper vst3PathValueWrapper, rtasPathValueWrapper, aaxPathValueWrapper;
 
     ValueWithDefault targetLocationValue, extraCompilerFlagsValue, extraLinkerFlagsValue, externalLibrariesValue,
                      userNotesValue, gnuExtensionsValue, bigIconValue, smallIconValue, extraPPDefsValue;
