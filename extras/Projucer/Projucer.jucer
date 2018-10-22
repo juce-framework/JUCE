@@ -655,10 +655,6 @@
         <GROUP id="{FE8C76CF-7C05-EC86-8997-C9941B88670B}" name="PropertyComponents">
           <FILE id="eleFsw" name="jucer_ColourPropertyComponent.h" compile="0"
                 resource="0" file="Source/Utility/UI/PropertyComponents/jucer_ColourPropertyComponent.h"/>
-          <FILE id="D0OfLg" name="jucer_DependencyPathPropertyComponent.cpp"
-                compile="1" resource="0" file="Source/Utility/UI/PropertyComponents/jucer_DependencyPathPropertyComponent.cpp"/>
-          <FILE id="gcbJOL" name="jucer_DependencyPathPropertyComponent.h" compile="0"
-                resource="0" file="Source/Utility/UI/PropertyComponents/jucer_DependencyPathPropertyComponent.h"/>
           <FILE id="sfUzaf" name="jucer_FilePathPropertyComponent.h" compile="0"
                 resource="0" file="Source/Utility/UI/PropertyComponents/jucer_FilePathPropertyComponent.h"/>
           <FILE id="DkLOIQ" name="jucer_PropertyComponentsWithEnablement.h" compile="0"
