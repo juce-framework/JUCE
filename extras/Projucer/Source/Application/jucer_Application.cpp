@@ -725,10 +725,10 @@ static String getPlatformSpecificFileExtension()
     return ".exe";
    #elif JUCE_LINUX
     return {};
-   #endif
-
+   #else
     jassertfalse;
     return {};
+   #endif
 }
 
 static File getPlatformSpecificProjectFolder()
@@ -744,10 +744,10 @@ static File getPlatformSpecificProjectFolder()
     return buildsFolder.getChildFile ("VisualStudio2017");
    #elif JUCE_LINUX
     return buildsFolder.getChildFile ("LinuxMakefile");
-   #endif
-
+   #else
     jassertfalse;
     return {};
+   #endif
 }
 
 static File tryToFindDemoRunnerExecutableInBuilds()

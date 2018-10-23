@@ -445,10 +445,10 @@ public:
     //==============================================================================
     void initialiseDependencyPathValues() override
     {
-        vst3PathValueWrapper.init (Ids::vst3Path, TargetOS::osx);
-        aaxPathValueWrapper .init (Ids::aaxPath,  TargetOS::osx);
-        rtasPathValueWrapper.init (Ids::rtasPath, TargetOS::osx);
-        araPathValueWrapper.init (Ids::araPath, TargetOS::osx);
+        vst3PathValueWrapper.init ({ settings, Ids::vst3Folder, nullptr }, getAppSettings().getStoredPath (Ids::vst3Path, TargetOS::osx), TargetOS::osx);
+        aaxPathValueWrapper .init ({ settings, Ids::aaxFolder, nullptr },  getAppSettings().getStoredPath (Ids::aaxPath,  TargetOS::osx), TargetOS::osx);
+        rtasPathValueWrapper.init ({ settings, Ids::rtasFolder, nullptr }, getAppSettings().getStoredPath (Ids::rtasPath, TargetOS::osx), TargetOS::osx);
+        araPathValueWrapper. init ({ settings, Ids::araPath, nullptr },    getAppSettings().getStoredPath (Ids::araPath,  TargetOS::osx), TargetOS::osx);
     }
 
 protected:

@@ -57,7 +57,7 @@ public:
 
     void tryNextRead()
     {
-        while (true)
+        for (;;)
         {
             size_t len = (receivingLength ? sizeof (size_t) : bufferLength.len);
 

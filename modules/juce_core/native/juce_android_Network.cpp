@@ -342,15 +342,22 @@ URL::DownloadTask* URL::downloadToFile (const File& targetLocation, String extra
 }
 
 //==============================================================================
-static void addAddress (const sockaddr_in* addr_in, Array<IPAddress>& result)
-{
-    in_addr_t addr = addr_in->sin_addr.s_addr;
+#if __ANDROID_API__ < 24   // Android support for getifadds was added in Android 7.0 (API 24) so the posix implementation does not apply
 
-    if (addr != INADDR_NONE)
-        result.addIfNotAlreadyThere (IPAddress (ntohl (addr)));
+static IPAddress makeAddress (const sockaddr_in *addr_in)
+{
+    if (addr_in->sin_addr.s_addr == INADDR_NONE)
+        return {};
+
+    return IPAddress (ntohl (addr_in->sin_addr.s_addr));
 }
 
-static void findIPAddresses (int sock, Array<IPAddress>& result)
+struct InterfaceInfo
+{
+    IPAddress interfaceAddress, broadcastAddress;
+};
+
+static Array<InterfaceInfo> findIPAddresses (int dummySocket)
 {
     ifconf cfg;
     HeapBlock<char> buffer;
@@ -364,46 +371,66 @@ static void findIPAddresses (int sock, Array<IPAddress>& result)
         cfg.ifc_len = bufferSize;
         cfg.ifc_buf = buffer;
 
-        if (ioctl (sock, SIOCGIFCONF, &cfg) < 0 && errno != EINVAL)
-            return;
+        if (ioctl (dummySocket, SIOCGIFCONF, &cfg) < 0 && errno != EINVAL)
+            return {};
 
     } while (bufferSize < cfg.ifc_len + 2 * (int) (IFNAMSIZ + sizeof (struct sockaddr_in6)));
 
-   #if JUCE_MAC || JUCE_IOS
-    while (cfg.ifc_len >= (int) (IFNAMSIZ + sizeof (struct sockaddr_in)))
-    {
-        if (cfg.ifc_req->ifr_addr.sa_family == AF_INET) // Skip non-internet addresses
-            addAddress ((const sockaddr_in*) &cfg.ifc_req->ifr_addr, result);
+    Array<InterfaceInfo> result;
 
-        cfg.ifc_len -= IFNAMSIZ + cfg.ifc_req->ifr_addr.sa_len;
-        cfg.ifc_buf += IFNAMSIZ + cfg.ifc_req->ifr_addr.sa_len;
-    }
-   #else
     for (size_t i = 0; i < (size_t) cfg.ifc_len / (size_t) sizeof (struct ifreq); ++i)
     {
-        const ifreq& item = cfg.ifc_req[i];
+        auto& item = cfg.ifc_req[i];
 
         if (item.ifr_addr.sa_family == AF_INET)
-            addAddress ((const sockaddr_in*) &item.ifr_addr, result);
+        {
+            InterfaceInfo info;
+            info.interfaceAddress = makeAddress ((const sockaddr_in*) &item.ifr_addr);
+
+            if (! info.interfaceAddress.isNull())
+            {
+                if (ioctl (dummySocket, SIOCGIFBRDADDR, &item) == 0)
+                    info.broadcastAddress = makeAddress ((const sockaddr_in*) &item.ifr_broadaddr);
+
+                result.add (info);
+            }
+        }
+        else if (item.ifr_addr.sa_family == AF_INET6)
+        {
+            // TODO: IPv6
+        }
     }
-   #endif
+
+    return result;
+}
+
+static Array<InterfaceInfo> findIPAddresses()
+{
+    auto dummySocket = socket (AF_INET, SOCK_DGRAM, 0); // a dummy socket to execute the IO control
+
+    if (dummySocket < 0)
+        return {};
+
+    auto result = findIPAddresses (dummySocket);
+    ::close (dummySocket);
+    return result;
 }
 
 void IPAddress::findAllAddresses (Array<IPAddress>& result, bool /*includeIPv6*/)
 {
-    const int sock = socket (AF_INET, SOCK_DGRAM, 0); // a dummy socket to execute the IO control
-
-    if (sock >= 0)
-    {
-        findIPAddresses (sock, result);
-        ::close (sock);
-    }
+    for (auto& a : findIPAddresses())
+        result.add (a.interfaceAddress);
 }
 
-IPAddress IPAddress::getInterfaceBroadcastAddress (const IPAddress&)
+IPAddress IPAddress::getInterfaceBroadcastAddress (const IPAddress& address)
 {
-    return {}; // TODO
+    for (auto& a : findIPAddresses())
+        if (a.interfaceAddress == address)
+            return a.broadcastAddress;
+
+    return {};
 }
 
+#endif
 
 } // namespace juce
