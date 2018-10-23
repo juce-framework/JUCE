@@ -16,8 +16,8 @@
 class ARASampleProjectDocumentController : public juce::ARADocumentController
 {
 public:
-    ARASampleProjectDocumentController() : juce::ARADocumentController() {}
-    ARA::PlugIn::EditorView* doCreateEditorView() override;
+    ARASampleProjectDocumentController() ARA_NOEXCEPT : juce::ARADocumentController() {}
+    ARA::PlugIn::EditorView* doCreateEditorView() ARA_NOEXCEPT override;
 
 private:
     //==============================================================================
@@ -28,8 +28,8 @@ private:
 class ARASampleProjectEditor : public juce::Component, public ARA::PlugIn::EditorView
 {
 public:
-    ARASampleProjectEditor (ARA::PlugIn::DocumentController*);
-    void doNotifySelection (const ARA::PlugIn::ViewSelection*) override;
+    ARASampleProjectEditor (ARA::PlugIn::DocumentController*) ARA_NOEXCEPT;
+    void doNotifySelection (const ARA::PlugIn::ViewSelection*) ARA_NOEXCEPT override;
     void resized () override;
 
 private:
