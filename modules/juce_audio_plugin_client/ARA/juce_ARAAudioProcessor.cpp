@@ -18,24 +18,24 @@ const ARA::ARAPlugInExtensionInstance* ARAAudioProcessor::createARAPlugInExtensi
     return araPlugInExtension->getInstance ();
 }
 
-ARA::PlugIn::PlaybackRenderer* ARAAudioProcessor::getARAPlaybackRenderer () const
+ARA::PlugIn::PlaybackRenderer* ARAAudioProcessor::getARAPlaybackRenderer() const noexcept
 {
-    return araPlugInExtension ? araPlugInExtension->getPlaybackRenderer () : nullptr;
+    return araPlugInExtension ? araPlugInExtension->getPlaybackRenderer() : nullptr;
 }
 
-ARA::PlugIn::EditorRenderer* ARAAudioProcessor::getARAEditorRenderer () const
+ARA::PlugIn::EditorRenderer* ARAAudioProcessor::getARAEditorRenderer() const noexcept
 {
-    return araPlugInExtension ? araPlugInExtension->getEditorRenderer () : nullptr;
+    return araPlugInExtension ? araPlugInExtension->getEditorRenderer() : nullptr;
 }
 
-ARA::PlugIn::EditorView* ARAAudioProcessor::getARAEditorView () const
+ARA::PlugIn::EditorView* ARAAudioProcessor::getARAEditorView() const noexcept
 {
-    return araPlugInExtension ? araPlugInExtension->getEditorView () : nullptr;
+    return araPlugInExtension ? araPlugInExtension->getEditorView() : nullptr;
 }
 
 //==============================================================================
 
-ARA::PlugIn::EditorView* ARAAudioProcessorEditor::getARAEditorView() const
+ARA::PlugIn::EditorView* ARAAudioProcessorEditor::getARAEditorView() const noexcept
 {
     return static_cast<ARAAudioProcessor*> (&processor)->getARAEditorView();
 }

@@ -16,13 +16,13 @@ namespace juce
 
         const ARA::ARAPlugInExtensionInstance* createARAPlugInExtension(ARA::ARADocumentControllerRef documentControllerRef, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles);
 
-        ARA::PlugIn::PlaybackRenderer* getARAPlaybackRenderer() const;
-        ARA::PlugIn::EditorRenderer* getARAEditorRenderer() const;
-        ARA::PlugIn::EditorView* getARAEditorView() const;
+        ARA::PlugIn::PlaybackRenderer* getARAPlaybackRenderer() const noexcept;
+        ARA::PlugIn::EditorRenderer* getARAEditorRenderer() const noexcept;
+        ARA::PlugIn::EditorView* getARAEditorView() const noexcept;
 
-        bool isARAPlaybackRenderer() const { return getARAPlaybackRenderer() != nullptr; }
-        bool isARAEditorRenderer() const { return getARAEditorRenderer() != nullptr; }
-        bool isARAEditorView() const { return getARAEditorView() != nullptr; }
+        bool isARAPlaybackRenderer() const noexcept { return getARAPlaybackRenderer() != nullptr; }
+        bool isARAEditorRenderer() const noexcept { return getARAEditorRenderer() != nullptr; }
+        bool isARAEditorView() const noexcept { return getARAEditorView() != nullptr; }
 
     private:
         std::unique_ptr<const ARA::PlugIn::PlugInExtension> araPlugInExtension;
@@ -39,8 +39,8 @@ namespace juce
         /** Creates an editor for the specified processor. */
         ARAAudioProcessorEditor  (AudioProcessor* processor) noexcept : AudioProcessorEditor(processor) {}
 
-        ARA::PlugIn::EditorView* getARAEditorView() const;
+        ARA::PlugIn::EditorView* getARAEditorView() const noexcept;
 
-        bool isARAEditorView() const { return getARAEditorView() != nullptr; }
+        bool isARAEditorView() const noexcept { return getARAEditorView() != nullptr; }
     };
 }
