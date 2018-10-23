@@ -37,5 +37,5 @@ ARA::PlugIn::EditorView* ARAAudioProcessor::getARAEditorView () const
 
 ARA::PlugIn::EditorView* ARAAudioProcessorEditor::getARAEditorView() const
 {
-    return static_cast<ARAAudioProcessor*>(&processor)->getARAEditorView();
+    return static_cast<ARAAudioProcessor*> (&processor)->getARAEditorView();
 }

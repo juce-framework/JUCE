@@ -539,8 +539,8 @@ public:
                     ARA::PlugIn::DocumentController* documentController = reinterpret_cast<ARA::PlugIn::DocumentController*> (binding->inDocumentControllerRef);
                     ARA_VALIDATE_API_ARGUMENT(documentController, ARA::PlugIn::DocumentController::isValidDocumentController (documentController));
 
-                    ARAAudioProcessor* araAudioProcessor = static_cast<ARAAudioProcessor*>(juceFilter.get());
-                    binding->outPlugInExtension = araAudioProcessor->createARAPlugInExtension(binding->inDocumentControllerRef, binding->knownRoles, binding->assignedRoles);
+                    ARAAudioProcessor* araAudioProcessor = static_cast<ARAAudioProcessor*> (juceFilter.get());
+                    binding->outPlugInExtension = araAudioProcessor->createARAPlugInExtension (binding->inDocumentControllerRef, binding->knownRoles, binding->assignedRoles);
                     if (binding->outPlugInExtension == NULL)
                         return kAudioUnitErr_CannotDoInCurrentContext;  // _createARAPlugInExtension() returns null if binding is already established
 
