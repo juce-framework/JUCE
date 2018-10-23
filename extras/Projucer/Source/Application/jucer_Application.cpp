@@ -725,10 +725,10 @@ static String getPlatformSpecificFileExtension()
     return ".exe";
    #elif JUCE_LINUX
     return {};
-   #endif
-
+   #else
     jassertfalse;
     return {};
+   #endif
 }
 
 static File getPlatformSpecificProjectFolder()
@@ -738,19 +738,16 @@ static File getPlatformSpecificProjectFolder()
     if (! buildsFolder.exists())
         return {};
 
-    String subDirectoryString;
-
    #if JUCE_MAC
-    subDirectoryString = "MacOSX";
+    return buildsFolder.getChildFile ("MacOSX");
    #elif JUCE_WINDOWS
-    subDirectoryString = "VisualStudio2017";
+    return buildsFolder.getChildFile ("VisualStudio2017");
    #elif JUCE_LINUX
-    subDirectoryString = "LinuxMakefile";
+    return buildsFolder.getChildFile ("LinuxMakefile");
+   #else
+    jassertfalse;
+    return {};
    #endif
-
-    jassert (subDirectoryString != String());
-
-    return buildsFolder.getChildFile (subDirectoryString);
 }
 
 static File tryToFindDemoRunnerExecutableInBuilds()
