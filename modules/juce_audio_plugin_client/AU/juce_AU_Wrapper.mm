@@ -85,7 +85,7 @@
 #include "../../juce_audio_processors/format_types/juce_AU_Shared.h"
 
 #if JucePlugin_Enable_ARA
- #include "../ARA/juce_ARA_audio_plugin.h"
+ #include "../ARA/juce_ARAAudioProcessor.h"
  #include <ARA_API/ARAAudioUnit.h>
  #if ARA_SUPPORT_VERSION_1
   #error "Unsupported ARA version - ARA version 2 and onward are JUCE compatible"
@@ -539,7 +539,8 @@ public:
                     ARA::PlugIn::DocumentController* documentController = reinterpret_cast<ARA::PlugIn::DocumentController*> (binding->inDocumentControllerRef);
                     ARA_VALIDATE_API_ARGUMENT(documentController, ARA::PlugIn::DocumentController::isValidDocumentController (documentController));
 
-                    binding->outPlugInExtension = juceFilter->createARAPlugInExtension (binding->inDocumentControllerRef, binding->knownRoles, binding->assignedRoles);
+                    ARAAudioProcessor* araAudioProcessor = static_cast<ARAAudioProcessor*>(juceFilter.get());
+                    binding->outPlugInExtension = araAudioProcessor->createARAPlugInExtension(binding->inDocumentControllerRef, binding->knownRoles, binding->assignedRoles);
                     if (binding->outPlugInExtension == NULL)
                         return kAudioUnitErr_CannotDoInCurrentContext;  // _createARAPlugInExtension() returns null if binding is already established
 
