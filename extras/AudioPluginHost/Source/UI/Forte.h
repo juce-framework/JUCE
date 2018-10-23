@@ -45,6 +45,7 @@ public:
 
     //==============================================================================
     //[UserMethods]     -- You can add your own custom methods in this section.
+    void UpdateKeyboard();
     //[/UserMethods]
 
     void paint (Graphics& g) override;
@@ -52,18 +53,18 @@ public:
     void buttonClicked (Button* buttonThatWasClicked) override;
     void sliderValueChanged (Slider* sliderThatWasMoved) override;
     void comboBoxChanged (ComboBox* comboBoxThatHasChanged) override;
+    void mouseDown (const MouseEvent& e) override;
+    void mouseDrag (const MouseEvent& e) override;
+    void mouseUp (const MouseEvent& e) override;
 
     // Binary resources:
-    static const char* keys_png;
-    static const int keys_pngSize;
     static const char* truePianos_png;
     static const int truePianos_pngSize;
-    static const char* piano_png;
-    static const int piano_pngSize;
 
 
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.
+    MidiKeyboardState *m_keyboardState;
     //[/UserVariables]
 
     //==============================================================================
@@ -77,9 +78,9 @@ private:
     std::unique_ptr<Label> label2;
     std::unique_ptr<TextEditor> textEditor;
     std::unique_ptr<Label> label5;
-    std::unique_ptr<Label> label8;
-    std::unique_ptr<TextEditor> textEditor2;
-    std::unique_ptr<TextEditor> textEditor3;
+    std::unique_ptr<Label> m_to;
+    std::unique_ptr<TextEditor> m_lowKey;
+    std::unique_ptr<TextEditor> m_highKey;
     std::unique_ptr<ImageButton> imageButton;
     std::unique_ptr<Label> label;
     std::unique_ptr<Label> label7;
@@ -89,7 +90,7 @@ private:
     std::unique_ptr<ComboBox> comboBox3;
     std::unique_ptr<Label> label6;
     std::unique_ptr<Label> label10;
-    std::unique_ptr<MidiKeyboardComponent> component;
+    std::unique_ptr<MidiKeyboardComponent> m_keyboard;
 
 
     //==============================================================================

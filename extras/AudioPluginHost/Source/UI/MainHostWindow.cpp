@@ -208,7 +208,8 @@ void MainHostWindow::tryToQuitApplication()
     {
         // Some plug-ins do not want [NSApp stop] to be called
         // before the plug-ins are not deallocated.
-        graphHolder->releaseGraph();
+        if (graphHolder)
+            graphHolder->releaseGraph();
 
         JUCEApplication::quit();
     }
