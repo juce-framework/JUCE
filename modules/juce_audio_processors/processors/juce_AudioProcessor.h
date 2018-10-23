@@ -24,10 +24,6 @@
   ==============================================================================
 */
 
-#if JucePlugin_Enable_ARA
- #include "../../juce_audio_plugin_client/ARA/juce_ARA_audio_plugin.h"
-#endif
-
 namespace juce
 {
 
@@ -900,8 +896,6 @@ public:
 
     //==============================================================================
     /** Returns the parameter that controls the AudioProcessor's bypass state.
-
-        If this method returns a nullptr then you can still control the bypass by
         calling processBlockBypassed instead of processBlock. On the other hand,
         if this method returns a non-null value, you should never call
         processBlockBypassed but use the returned parameter to conrol the bypass
@@ -1599,25 +1593,6 @@ protected:
 
     /** @internal */
     void sendParamChangeMessageToListeners (int parameterIndex, float newValue);
-
-    //==============================================================================
-#if JucePlugin_Enable_ARA
-
-public:
-    const ARA::ARAPlugInExtensionInstance* createARAPlugInExtension (ARA::ARADocumentControllerRef documentControllerRef, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles);
-
-    ARA::PlugIn::PlaybackRenderer* getARAPlaybackRenderer() const;
-    ARA::PlugIn::EditorRenderer* getARAEditorRenderer() const;
-    ARA::PlugIn::EditorView* getARAEditorView() const;
-
-    bool isARAPlaybackRenderer() const     { return getARAPlaybackRenderer() != nullptr; }
-    bool isARAEditorRenderer() const       { return getARAEditorRenderer() != nullptr; }
-    bool isARAEditorView() const           { return getARAEditorView() != nullptr; }
-
-private:
-    std::unique_ptr<const ARA::PlugIn::PlugInExtension> araPlugInExtension;
-
-#endif
 
 private:
     //==============================================================================

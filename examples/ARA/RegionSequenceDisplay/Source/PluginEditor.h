@@ -13,13 +13,15 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginProcessor.h"
 
+#include "juce_audio_plugin_client/ARA/juce_ARAAudioProcessor.h"
+
 #include "AudioView.h"
 #include "PluginARADocumentController.h"
 
 //==============================================================================
 /**
 */
-class ArasampleProjectAudioProcessorEditor  : public AudioProcessorEditor
+class ArasampleProjectAudioProcessorEditor  : public ARAAudioProcessorEditor
 {
 public:
     ArasampleProjectAudioProcessorEditor (ArasampleProjectAudioProcessor&);

@@ -1587,40 +1587,4 @@ void AudioPlayHead::CurrentPositionInfo::resetToDefault()
     bpm = 120;
 }
 
-//==============================================================================
-#if JucePlugin_Enable_ARA
-
-const ARA::ARAPlugInExtensionInstance* AudioProcessor::createARAPlugInExtension (ARA::ARADocumentControllerRef documentControllerRef, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles)
-{
-    ARA::PlugIn::DocumentController* documentController = reinterpret_cast<ARA::PlugIn::DocumentController*> (documentControllerRef);
-    ARA_VALIDATE_API_ARGUMENT (documentControllerRef, ARA::PlugIn::DocumentController::isValidDocumentController (documentController));
-
-    // verify this is only called once
-    if (araPlugInExtension != nullptr)
-    {
-        ARA_VALIDATE_API_STATE (false && "binding already established");
-        return nullptr;
-    }
-
-    araPlugInExtension.reset(documentController->createPlugInExtensionWithRoles (knownRoles, assignedRoles));
-    return araPlugInExtension->getInstance ();
-}
-
-ARA::PlugIn::PlaybackRenderer* AudioProcessor::getARAPlaybackRenderer () const
-{
-    return araPlugInExtension ? araPlugInExtension->getPlaybackRenderer () : nullptr;
-}
-
-ARA::PlugIn::EditorRenderer* AudioProcessor::getARAEditorRenderer () const
-{
-    return araPlugInExtension ? araPlugInExtension->getEditorRenderer () : nullptr;
-}
-
-ARA::PlugIn::EditorView* AudioProcessor::getARAEditorView () const
-{
-    return araPlugInExtension ? araPlugInExtension->getEditorView () : nullptr;
-}
-
-#endif
-
 } // namespace juce

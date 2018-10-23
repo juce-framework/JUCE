@@ -2,6 +2,7 @@
 #pragma once
 
 #include "JuceHeader.h"
+#include <juce_audio_plugin_client/ARA/juce_ARA_audio_plugin.h>
 
 class AudioView
 : public Component, public juce::ChangeListener

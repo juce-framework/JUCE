@@ -16,7 +16,7 @@ static const int kHeight = 400;
 
 //==============================================================================
 ArasampleProjectAudioProcessorEditor::ArasampleProjectAudioProcessorEditor (ArasampleProjectAudioProcessor& p)
-    : AudioProcessorEditor (&p), processor (p)
+    : ARAAudioProcessorEditor (&p), processor (p)
 {
     tracksViewport.setScrollBarsShown(true, true);
     if (auto e = getARAEditorView())
