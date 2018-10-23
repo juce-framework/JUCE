@@ -94,7 +94,7 @@ private:
 
     void run() override
     {
-        while (true)
+        for (;;)
         {
             MessageManager::MessageBase::Ptr message (queue.removeAndReturn (0));
 

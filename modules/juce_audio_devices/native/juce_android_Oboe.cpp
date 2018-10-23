@@ -391,9 +391,9 @@ private:
         // Setting nullptr callback is allowed only when playback is stopped.
         jassert (callbackToUse != nullptr);
 
-        while (true)
+        for (;;)
         {
-            AudioIODeviceCallback* old = callback.get();
+            auto old = callback.get();
 
             if (old == callbackToUse)
                 break;
@@ -409,7 +409,7 @@ private:
     void process (const float** inputChannelData, int numInputChannels,
                   float** outputChannelData, int numOutputChannels, int32_t numFrames)
     {
-        if (AudioIODeviceCallback* cb = callback.exchange (nullptr))
+        if (auto* cb = callback.exchange (nullptr))
         {
             cb->audioDeviceIOCallback (inputChannelData, numInputChannels,
                                        outputChannelData, numOutputChannels, numFrames);
