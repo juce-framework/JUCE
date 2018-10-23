@@ -114,7 +114,6 @@ OBJECTS_APP := \
   $(JUCE_OBJDIR)/jucer_FileHelpers_54f12f83.o \
   $(JUCE_OBJDIR)/jucer_MiscUtilities_31fc8dd8.o \
   $(JUCE_OBJDIR)/jucer_PIPGenerator_fd3402c7.o \
-  $(JUCE_OBJDIR)/jucer_DependencyPathPropertyComponent_5d68c773.o \
   $(JUCE_OBJDIR)/jucer_Icons_d02d18f1.o \
   $(JUCE_OBJDIR)/jucer_JucerTreeViewBase_9b9f2ff0.o \
   $(JUCE_OBJDIR)/jucer_ProjucerLookAndFeel_3b20291d.o \
@@ -370,11 +369,6 @@ $(JUCE_OBJDIR)/jucer_MiscUtilities_31fc8dd8.o: ../../Source/Utility/Helpers/juce
 $(JUCE_OBJDIR)/jucer_PIPGenerator_fd3402c7.o: ../../Source/Utility/PIPs/jucer_PIPGenerator.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling jucer_PIPGenerator.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/jucer_DependencyPathPropertyComponent_5d68c773.o: ../../Source/Utility/UI/PropertyComponents/jucer_DependencyPathPropertyComponent.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling jucer_DependencyPathPropertyComponent.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/jucer_Icons_d02d18f1.o: ../../Source/Utility/UI/jucer_Icons.cpp

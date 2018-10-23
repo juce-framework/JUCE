@@ -139,7 +139,7 @@ public:
           gradleToolchain                      (settings, Ids::gradleToolchain,                      getUndoManager(), "clang"),
           androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "3.1.3"),
           buildToolsVersion                    (settings, Ids::buildToolsVersion,                    getUndoManager(), "28.0.0"),
-          AndroidExecutable                    (getAppSettings().getStoredPath (Ids::androidStudioExePath).toString())
+          AndroidExecutable                    (getAppSettings().getStoredPath (Ids::androidStudioExePath, TargetOS::getThisOS()).get().toString())
     {
         name = getName();
 
@@ -816,8 +816,8 @@ private:
     {
         String props;
 
-        props << "ndk.dir=" << sanitisePath (getAppSettings().getStoredPath (Ids::androidNDKPath).toString()) << newLine
-              << "sdk.dir=" << sanitisePath (getAppSettings().getStoredPath (Ids::androidSDKPath).toString()) << newLine;
+        props << "ndk.dir=" << sanitisePath (getAppSettings().getStoredPath (Ids::androidNDKPath, TargetOS::getThisOS()).get().toString()) << newLine
+              << "sdk.dir=" << sanitisePath (getAppSettings().getStoredPath (Ids::androidSDKPath, TargetOS::getThisOS()).get().toString()) << newLine;
 
         return props;
     }

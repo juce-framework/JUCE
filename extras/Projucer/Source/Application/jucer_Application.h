@@ -169,58 +169,49 @@ public:
     std::unique_ptr<LicenseController> licenseController;
 
 private:
-    void* server = nullptr;
-
-    std::unique_ptr<LatestVersionChecker> versionChecker;
-    TooltipWindow tooltipWindow;
-
-    void loginOrLogout();
-
-    bool checkEULA();
-    bool currentEULAHasBeenAcceptedPreviously() const;
-    String getEULAChecksumProperty() const;
-    void setCurrentEULAAccepted (bool hasBeenAccepted) const;
-
+    //==============================================================================
     void handleAsyncUpdate() override;
     void initCommandManager();
-
-    void deleteTemporaryFiles() const noexcept;
 
     void createExamplesPopupMenu (PopupMenu&) noexcept;
     Array<File> getSortedExampleDirectories() noexcept;
     Array<File> getSortedExampleFilesInDirectory (const File&) const noexcept;
-
     bool findWindowAndOpenPIP (const File&);
-
-    File getJUCEExamplesDirectoryPathFromGlobal() noexcept;
     void findAndLaunchExample (int);
-    File findDemoRunnerExecutable() noexcept;
-    File findDemoRunnerProject() noexcept;
+
+    void checkIfGlobalJUCEPathHasChanged();
+    File tryToFindDemoRunnerExecutable();
+    File tryToFindDemoRunnerProject();
     void launchDemoRunner();
-
-    int numExamples = 0;
-    std::unique_ptr<AlertWindow> demoRunnerAlert;
-
-   #if JUCE_LINUX
-    ChildProcess makeProcess;
-   #endif
 
     void resetAnalytics() noexcept;
     void setupAnalytics();
 
     void showSetJUCEPathAlert();
-    std::unique_ptr<AlertWindow> pathAlert;
 
-    AvailableModuleList jucePathModuleList, userPathsModuleList;
-
-    //==============================================================================
     void setColourScheme (int index, bool saveSetting);
-
     void setEditorColourScheme (int index, bool saveSetting);
     void updateEditorColourSchemeIfNeeded();
 
-    int selectedColourSchemeIndex = 0;
+    //==============================================================================
+    void* server = nullptr;
 
-    int selectedEditorColourSchemeIndex = 0;
-    int numEditorColourSchemes = 0;
+    std::unique_ptr<LatestVersionChecker> versionChecker;
+    TooltipWindow tooltipWindow;
+
+    AvailableModuleList jucePathModuleList, userPathsModuleList;
+
+    int numExamples = 0;
+    std::unique_ptr<AlertWindow> demoRunnerAlert;
+    std::unique_ptr<AlertWindow> pathAlert;
+    bool hasScannedForDemoRunnerExecutable = false, hasScannedForDemoRunnerProject = false;
+    File lastJUCEPath, lastDemoRunnerExectuableFile, lastDemoRunnerProjectFile;
+   #if JUCE_LINUX
+    ChildProcess makeProcess;
+   #endif
+
+    int selectedColourSchemeIndex = 0, selectedEditorColourSchemeIndex = 0, numEditorColourSchemes = 0;
+
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjucerApplication)
 };

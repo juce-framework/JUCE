@@ -462,7 +462,7 @@ private:
                        && (project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3")
                              || project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST"));
 
-        auto customVst3Path = getAppSettings().getStoredPath (Ids::vst3Path).toString();
+        auto customVst3Path = getAppSettings().getStoredPath (Ids::vst3Path, TargetOS::getThisOS()).get().toString();
 
         if (customVst3Path.isNotEmpty() && (project.getProjectType().isAudioPlugin() || isVSTHost))
             paths.add (customVst3Path);

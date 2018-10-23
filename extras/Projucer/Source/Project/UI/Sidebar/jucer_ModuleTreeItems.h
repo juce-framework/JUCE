@@ -133,7 +133,8 @@ private:
 
     //==============================================================================
     class ModuleSettingsPanel  : public Component,
-                                 private Value::Listener
+                                 private Value::Listener,
+                                 private Timer
     {
     public:
         ModuleSettingsPanel (Project& p, const String& modID, TreeView* tree)
@@ -163,21 +164,21 @@ private:
             if (modules.doesModuleHaveHigherCppStandardThanProject (moduleID))
                 props.add (new CppStandardWarningComponent());
 
-            modulePathValueSources.clear();
+            exporterModulePathValues.clear();
 
             for (Project::ExporterIterator exporter (project); exporter.next();)
             {
                 if (exporter->isCLion())
                     continue;
 
-                auto key = isJUCEModule (moduleID) ? Ids::defaultJuceModulePath
-                                                   : Ids::defaultUserModulePath;
+                exporterModulePathValues.add (exporter->getPathForModuleValue (moduleID));
 
-                Value src (modulePathValueSources.add (new DependencyPathValueSource (exporter->getPathForModuleValue (moduleID),
-                                                                                      key, exporter->getTargetOSForExporter())));
+                auto& value = exporterModulePathValues.getReference (exporterModulePathValues.size() - 1);
+                value.onDefaultChange = [this] { startTimer (50); };
 
-                auto* pathComponent = new DependencyFilePathPropertyComponent (src, "Path for " + exporter->getName().quoted(),
-                                                                               true, "*", project.getProjectFolder());
+                auto* pathComponent = new FilePathPropertyComponent (value, "Path for " + exporter->getName().quoted(), true,
+                                                                     exporter->getTargetOSForExporter() == TargetOS::getThisOS(),
+                                                                     "*", project.getProjectFolder());
 
                 props.add (pathComponent,
                            "A path to the folder that contains the " + moduleID + " module when compiling the "
@@ -187,10 +188,11 @@ private:
                            "is empty then the global path will be used.");
 
                 pathComponent->setEnabled (! modules.shouldUseGlobalPath (moduleID));
-                pathComponent->getValue().addListener (this);
             }
 
+            globalPathValue.removeListener (this);
             globalPathValue.referTo (modules.getShouldUseGlobalPathValue (moduleID));
+            globalPathValue.addListener (this);
 
             auto menuItemString = (TargetOS::getThisOS() == TargetOS::osx ? "\"Projucer->Global Paths...\""
                                                                           : "\"File->Global Paths...\"");
@@ -200,7 +202,6 @@ private:
                        String ("If this is enabled, then the locally-stored global path (set in the ") + menuItemString + " menu item) "
                        "will be used as the path to this module. "
                        "This means that if this Projucer project is opened on another machine it will use that machine's global path as the path to this module.");
-            globalPathValue.addListener (this);
 
             props.add (new BooleanPropertyComponent (modules.shouldCopyModuleFilesLocally (moduleID),
                                                      "Create local copy", "Copy the module into the project folder"),
@@ -239,33 +240,19 @@ private:
         String getModuleID() const noexcept    { return moduleID; }
 
     private:
+        void valueChanged (Value&) override    { startTimer (50); }
+        void timerCallback() override          { stopTimer(); refresh(); }
+
+        //==============================================================================
         PropertyGroupComponent group;
         Project& project;
         SafePointer<TreeView> modulesTree;
         String moduleID;
-        Value globalPathValue;
-        Value defaultJuceModulePathValue, defaultUserModulePathValue;
+
         OwnedArray <Project::ConfigFlag> configFlags;
 
-        ReferenceCountedArray<Value::ValueSource> modulePathValueSources;
-
-        //==============================================================================
-        void valueChanged (Value& v) override
-        {
-            if (v == globalPathValue)
-            {
-                auto useGlobalPath =  globalPathValue.getValue();
-
-                for (auto prop : group.properties)
-                {
-                    if (auto* pathPropertyComponent = dynamic_cast<DependencyFilePathPropertyComponent*> (prop))
-                        pathPropertyComponent->setEnabled (! useGlobalPath);
-                }
-            }
-
-            if (auto* infoComponent = dynamic_cast<ModuleInfoComponent*> (group.properties.getUnchecked (0)))
-                infoComponent->refresh();
-        }
+        Array<ValueWithDefault> exporterModulePathValues;
+        Value globalPathValue;
 
         //==============================================================================
         class ModuleInfoComponent  : public PropertyComponent,
@@ -276,8 +263,7 @@ private:
                 : PropertyComponent ("Module", 150), project (p), moduleID (modID)
             {
                 for (Project::ExporterIterator exporter (project); exporter.next();)
-                    listeningValues.add (new Value (exporter->getPathForModuleValue (moduleID)))
-                        ->addListener (this);
+                    listeningValues.add (new Value (exporter->getPathForModuleValue (moduleID).getPropertyAsValue()))->addListener (this);
 
                 refresh();
             }
