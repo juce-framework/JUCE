@@ -445,9 +445,9 @@ public:
     //==============================================================================
     void initialiseDependencyPathValues() override
     {
-        vst3PathValueWrapper.init (Ids::vst3Path, TargetOS::osx);
-        aaxPathValueWrapper .init (Ids::aaxPath,  TargetOS::osx);
-        rtasPathValueWrapper.init (Ids::rtasPath, TargetOS::osx);
+        vst3PathValueWrapper.init (settings, Ids::vst3Path, TargetOS::osx);
+        aaxPathValueWrapper .init (settings, Ids::aaxPath,  TargetOS::osx);
+        rtasPathValueWrapper.init (settings, Ids::rtasPath, TargetOS::osx);
     }
 
 protected:

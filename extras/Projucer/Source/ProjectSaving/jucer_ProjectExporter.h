@@ -374,7 +374,7 @@ protected:
     // Used for the VST3, RTAS and AAX project-specific path options.
     struct ValueWithDefaultWrapper  : public Value::Listener
     {
-        void init (const Identifier& identifierToUse, TargetOS::OS targetOS)
+        void init (ValueTree tree, const Identifier& identifierToUse, TargetOS::OS targetOS)
         {
             identifier = identifierToUse;
             os = targetOS;
@@ -391,12 +391,10 @@ protected:
         }
 
         ValueWithDefault wrappedValue;
+        Value globalValue;
 
         Identifier identifier;
         TargetOS::OS os;
-
-        ValueTree tree { "tree" };
-        Value globalValue;
     };
 
     ValueWithDefaultWrapper vst3PathValueWrapper, rtasPathValueWrapper, aaxPathValueWrapper;
