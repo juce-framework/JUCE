@@ -4,7 +4,7 @@
 #include "juce_ARAAudioSource.h"
 #include "juce_ARARegionSequence.h"
 
-const ARA::ARAFactory* ARA::PlugIn::DocumentController::getARAFactory () ARA_NOEXCEPT
+const ARA::ARAFactory* ARA::PlugIn::DocumentController::getARAFactory () noexcept
 {
     using namespace ARA;
 
@@ -77,23 +77,23 @@ const ARA::ARAFactory* ARA::PlugIn::DocumentController::getARAFactory () ARA_NOE
 namespace juce
 {
 
-ARA::PlugIn::AudioSource* ARADocumentController::doCreateAudioSource (ARA::PlugIn::Document *document, ARA::ARAAudioSourceHostRef hostRef) ARA_NOEXCEPT
+ARA::PlugIn::AudioSource* ARADocumentController::doCreateAudioSource (ARA::PlugIn::Document *document, ARA::ARAAudioSourceHostRef hostRef) noexcept
 {
     return new ARAAudioSource (document, hostRef);
 }
 
-ARA::PlugIn::RegionSequence* ARADocumentController::doCreateRegionSequence (ARA::PlugIn::Document *document, ARA::ARARegionSequenceHostRef hostRef) ARA_NOEXCEPT
+ARA::PlugIn::RegionSequence* ARADocumentController::doCreateRegionSequence (ARA::PlugIn::Document *document, ARA::ARARegionSequenceHostRef hostRef) noexcept
 {
     return new ARARegionSequence (document, hostRef);
 }
 
-void ARADocumentController::willEnableAudioSourceSamplesAccess (ARA::PlugIn::AudioSource* audioSource, bool enable) ARA_NOEXCEPT
+void ARADocumentController::willEnableAudioSourceSamplesAccess (ARA::PlugIn::AudioSource* audioSource, bool enable) noexcept
 {
     auto source = static_cast<ARAAudioSource*> (audioSource);
     source->willEnableSamplesAccess (enable);
 }
 
-void ARADocumentController::didEnableAudioSourceSamplesAccess (ARA::PlugIn::AudioSource* audioSource, bool enable) ARA_NOEXCEPT
+void ARADocumentController::didEnableAudioSourceSamplesAccess (ARA::PlugIn::AudioSource* audioSource, bool enable) noexcept
 {
     auto source = static_cast<ARAAudioSource*> (audioSource);
     source->didEnableSamplesAccess (enable);
@@ -101,22 +101,22 @@ void ARADocumentController::didEnableAudioSourceSamplesAccess (ARA::PlugIn::Audi
 
 void ARADocumentController::willUpdateAudioSourceProperties (
     ARA::PlugIn::AudioSource* audioSource,
-    ARA::PlugIn::PropertiesPtr<ARA::ARAAudioSourceProperties>) ARA_NOEXCEPT
+    ARA::PlugIn::PropertiesPtr<ARA::ARAAudioSourceProperties>) noexcept
 {
     static_cast<ARAAudioSource*> (audioSource)->willUpdateProperties();
 }
 
-void ARADocumentController::didUpdateAudioSourceProperties (ARA::PlugIn::AudioSource* audioSource) ARA_NOEXCEPT
+void ARADocumentController::didUpdateAudioSourceProperties (ARA::PlugIn::AudioSource* audioSource) noexcept
 {
     static_cast<ARAAudioSource*> (audioSource)->didUpdateProperties();
 }
 
-void ARADocumentController::willUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion, ARA::PlugIn::PropertiesPtr<ARA::ARAPlaybackRegionProperties> newProperties) ARA_NOEXCEPT
+void ARADocumentController::willUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion, ARA::PlugIn::PropertiesPtr<ARA::ARAPlaybackRegionProperties> newProperties) noexcept
 {
     ARARegionSequence::willUpdatePlaybackRegionProperties (playbackRegion, newProperties);
 }
 
-void ARADocumentController::didUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion) ARA_NOEXCEPT
+void ARADocumentController::didUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept
 {
     ARARegionSequence::didUpdatePlaybackRegionProperties (playbackRegion);
 }

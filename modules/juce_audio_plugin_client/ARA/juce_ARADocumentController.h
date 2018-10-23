@@ -8,22 +8,22 @@ namespace juce
 class ARADocumentController : public ARA::PlugIn::DocumentController
 {
 public:
-    ARADocumentController() ARA_NOEXCEPT {}
-    virtual ~ARADocumentController() ARA_NOEXCEPT {}
+    ARADocumentController() noexcept {}
+    virtual ~ARADocumentController() noexcept {}
 
     //==============================================================================
     // Override document controller methods here
 protected:
     // needed for ARA AudioFormatReaders to be thread-safe and work properly!
-    ARA::PlugIn::AudioSource* doCreateAudioSource       (ARA::PlugIn::Document*, ARA::ARAAudioSourceHostRef) ARA_NOEXCEPT override;
-    ARA::PlugIn::RegionSequence* doCreateRegionSequence (ARA::PlugIn::Document*, ARA::ARARegionSequenceHostRef) ARA_NOEXCEPT override;
-    void willEnableAudioSourceSamplesAccess (ARA::PlugIn::AudioSource* audioSource, bool enable) ARA_NOEXCEPT override;
-    void didEnableAudioSourceSamplesAccess  (ARA::PlugIn::AudioSource* audioSource, bool enable) ARA_NOEXCEPT override;
+    ARA::PlugIn::AudioSource* doCreateAudioSource       (ARA::PlugIn::Document*, ARA::ARAAudioSourceHostRef) noexcept override;
+    ARA::PlugIn::RegionSequence* doCreateRegionSequence (ARA::PlugIn::Document*, ARA::ARARegionSequenceHostRef) noexcept override;
+    void willEnableAudioSourceSamplesAccess (ARA::PlugIn::AudioSource* audioSource, bool enable) noexcept override;
+    void didEnableAudioSourceSamplesAccess  (ARA::PlugIn::AudioSource* audioSource, bool enable) noexcept override;
     void willUpdateAudioSourceProperties (
-        ARA::PlugIn::AudioSource*, ARA::PlugIn::PropertiesPtr<ARA::ARAAudioSourceProperties>) ARA_NOEXCEPT override;
-    void didUpdateAudioSourceProperties     (ARA::PlugIn::AudioSource *audioSource) ARA_NOEXCEPT override;
-    void willUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion, ARA::PlugIn::PropertiesPtr<ARA::ARAPlaybackRegionProperties> newProperties) ARA_NOEXCEPT override;
-    void didUpdatePlaybackRegionProperties  (ARA::PlugIn::PlaybackRegion* playbackRegion) ARA_NOEXCEPT override;
+        ARA::PlugIn::AudioSource*, ARA::PlugIn::PropertiesPtr<ARA::ARAAudioSourceProperties>) noexcept override;
+    void didUpdateAudioSourceProperties     (ARA::PlugIn::AudioSource *audioSource) noexcept override;
+    void willUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion, ARA::PlugIn::PropertiesPtr<ARA::ARAPlaybackRegionProperties> newProperties) noexcept override;
+    void didUpdatePlaybackRegionProperties  (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept override;
 
 private:
     //==============================================================================

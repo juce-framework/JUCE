@@ -12,25 +12,25 @@
 
 //==============================================================================
 
-ARA::PlugIn::EditorView *ARASampleProjectDocumentController::doCreateEditorView() ARA_NOEXCEPT
+ARA::PlugIn::EditorView *ARASampleProjectDocumentController::doCreateEditorView() noexcept
 {
     return new ARASampleProjectEditor (this);
 }
 
 //==============================================================================
 // This creates new instances of the document controller..
-ARA::PlugIn::DocumentController* ARA::PlugIn::DocumentController::doCreateDocumentController () ARA_NOEXCEPT
+ARA::PlugIn::DocumentController* ARA::PlugIn::DocumentController::doCreateDocumentController () noexcept
 {
     return new ARASampleProjectDocumentController();
 };
 
 
-ARASampleProjectEditor::ARASampleProjectEditor (ARA::PlugIn::DocumentController* ctrl) ARA_NOEXCEPT
+ARASampleProjectEditor::ARASampleProjectEditor (ARA::PlugIn::DocumentController* ctrl) noexcept
 : ARA::PlugIn::EditorView (ctrl)
 {
 }
 
-void ARASampleProjectEditor::doNotifySelection (const ARA::PlugIn::ViewSelection* currentSelection) ARA_NOEXCEPT
+void ARASampleProjectEditor::doNotifySelection (const ARA::PlugIn::ViewSelection* currentSelection) noexcept
 {
     const ScopedLock lock (selectionLock);
 
