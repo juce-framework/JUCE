@@ -833,7 +833,7 @@ public:
 
     Array<double> getAvailableSampleRates() override
     {
-        //see https://developer.android.com/ndk/guides/audio/opensl-for-android.html
+        // see https://developer.android.com/ndk/guides/audio/opensl-for-android.html
 
         static const double rates[] = { 8000.0, 11025.0, 12000.0, 16000.0,
                                         22050.0, 24000.0, 32000.0, 44100.0, 48000.0 };
@@ -841,6 +841,7 @@ public:
 
         // make sure the native sample rate is pafrt of the list
         double native = getNativeSampleRate();
+
         if (native != 0.0 && ! retval.contains (native))
             retval.add (native);
 
@@ -870,7 +871,11 @@ public:
         close();
 
         lastError.clear();
-        sampleRate = (int) requestedSampleRate;
+
+        if (requestedSampleRate > 0)
+            sampleRate = (int) requestedSampleRate;
+        else
+            sampleRate = getNativeSampleRate();
 
         auto totalPreferredBufferSize    = (bufferSize <= 0) ? getDefaultBufferSize() : bufferSize;
         auto nativeBufferSize            = getNativeBufferSize();
@@ -882,11 +887,11 @@ public:
 
         activeOutputChans = outputChannels;
         activeOutputChans.setRange (2, activeOutputChans.getHighestBit(), false);
-        int numOutputChannels = activeOutputChans.countNumberOfSetBits();
+        auto numOutputChannels = activeOutputChans.countNumberOfSetBits();
 
         activeInputChans = inputChannels;
         activeInputChans.setRange (1, activeInputChans.getHighestBit(), false);
-        int numInputChannels = activeInputChans.countNumberOfSetBits();
+        auto numInputChannels = activeInputChans.countNumberOfSetBits();
 
         if (numInputChannels > 0 && (! RuntimePermissions::isGranted (RuntimePermissions::recordAudio)))
         {
