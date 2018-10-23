@@ -8,11 +8,7 @@ namespace juce
     class ARAAudioProcessor : public juce::AudioProcessor
     {
     public:
-        ARAAudioProcessor() : AudioProcessor() {}
-        ARAAudioProcessor (const BusesProperties& ioLayouts) : AudioProcessor(ioLayouts) {}
-        ARAAudioProcessor (const std::initializer_list<const short[2]>& channelLayoutList) : AudioProcessor(channelLayoutList) {}
-
-        virtual ~ARAAudioProcessor() {}
+        using AudioProcessor::AudioProcessor;
 
         const ARA::ARAPlugInExtensionInstance* createARAPlugInExtension(ARA::ARADocumentControllerRef documentControllerRef, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles);
 
@@ -33,11 +29,7 @@ namespace juce
     class ARAAudioProcessorEditor : public AudioProcessorEditor
     {
     public:
-        /** Creates an editor for the specified processor. */
-        ARAAudioProcessorEditor  (AudioProcessor& processor) noexcept : AudioProcessorEditor(processor) {}
-
-        /** Creates an editor for the specified processor. */
-        ARAAudioProcessorEditor  (AudioProcessor* processor) noexcept : AudioProcessorEditor(processor) {}
+        using AudioProcessorEditor::AudioProcessorEditor;
 
         ARA::PlugIn::EditorView* getARAEditorView() const noexcept;
 
