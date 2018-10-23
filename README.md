@@ -1,6 +1,6 @@
 # JUCE and the ARA API
 
-This repository is a fork of the [JUCE 5 master branch](https://github.com/WeAreROLI/JUCE) with additions that enable it to generate [ARA plugins](http://www.celemony.com/en/service1/about-celemony/technologies) in the VST3 format (AU coming soon.)
+This repository is a fork of the [JUCE 5 develop branch](https://github.com/WeAreROLI/JUCE) with additions that enable it to generate [ARA plugins](http://www.celemony.com/en/service1/about-celemony/technologies) in the VST3 format (AU coming soon.)
 
 In order to use this branch you'll need access to the [ARA SDK](http://www.celemony.com/en/service1/about-celemony/technologies) - if you're a developer and would like access to the latest ARA SDK release, send an email to [ara@celemony.com](mailto:ara@celemony.com?Subject=JUCE%20ARA%20integration). 
 
