@@ -2582,7 +2582,6 @@ private:
 
     const ARA::ARAFactory* PLUGIN_API getFactory() SMTG_OVERRIDE
     {
-        // TODO there should be some per-project customization here
         return ARA::PlugIn::DocumentController::getARAFactory();
     }
 

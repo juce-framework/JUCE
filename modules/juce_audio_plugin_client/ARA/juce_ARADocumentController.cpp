@@ -24,7 +24,7 @@ const ARA::ARAFactory* ARA::PlugIn::DocumentController::getARAFactory () ARA_NOE
                                                         // DocumentController factory function
                                                         ARACreateDocumentControllerWithDocumentInstance,
                                                         // Document archive IDs
-                                                        // TODO add a way to update compatible archive IDs and count if needed!
+                                                        // TODO JUCE_ARA add a way to update compatible archive IDs and count if needed!
                                                         JucePlugin_ARADocumentArchiveID, 0U, nullptr,
                                                         // Analyzeable content types - will be updated below
                                                         0U, nullptr,
@@ -66,6 +66,9 @@ const ARA::ARAFactory* ARA::PlugIn::DocumentController::getARAFactory () ARA_NOE
             if (JucePlugin_ARATransformationFlags & (1 << i))
                 factory->supportedPlaybackTransformationFlags |= araPlaybackTransformations[i];
         }
+
+        // TODO JUCE_ARA
+        // Any other factory fields? Algorithm selection?
     }
 
     return factory;
