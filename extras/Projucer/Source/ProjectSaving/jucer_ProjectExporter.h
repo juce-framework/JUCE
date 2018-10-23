@@ -374,26 +374,26 @@ protected:
     // Used for the VST3, RTAS and AAX project-specific path options.
     struct ValueWithDefaultWrapper  : public Value::Listener
     {
-        void init (ValueTree tree, const Identifier& identifierToUse, TargetOS::OS targetOS)
+        void init (const ValueWithDefault& vwd, ValueWithDefault global, TargetOS::OS targetOS)
         {
-            identifier = identifierToUse;
+            wrappedValue = vwd;
+            globalValue = global.getPropertyAsValue();
+            globalIdentifier = global.getPropertyID();
             os = targetOS;
 
-            globalValue = getAppSettings().getStoredPath (identifier, os).getPropertyAsValue();
             globalValue.addListener (this);
-
-            wrappedValue.referTo (tree, identifier, nullptr, getAppSettings().getStoredPath (identifier, os).get());
+            valueChanged (globalValue);
         }
 
         void valueChanged (Value&) override
         {
-            wrappedValue.setDefault (getAppSettings().getStoredPath (identifier, os).get());
+            wrappedValue.setDefault (getAppSettings().getStoredPath (globalIdentifier, os).get());
         }
 
         ValueWithDefault wrappedValue;
         Value globalValue;
 
-        Identifier identifier;
+        Identifier globalIdentifier;
         TargetOS::OS os;
     };
 
