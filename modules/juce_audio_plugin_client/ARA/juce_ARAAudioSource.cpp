@@ -131,7 +131,7 @@ ARAAudioSource::Reader::~Reader()
 
 void ARAAudioSource::Reader::createHostAudioReaderForSource(ARA::PlugIn::AudioSource* audioSource)
 {
-    // TODO should we assert these conditions instead of treating them as a case for invalidation?
+    // TODO JUCE_ARA should we assert these conditions instead of treating them as a case for invalidation?
     if (audioSource == nullptr || audioSource->isSampleAccessEnabled() == false)
         invalidate();
     else
