@@ -342,6 +342,8 @@ URL::DownloadTask* URL::downloadToFile (const File& targetLocation, String extra
 }
 
 //==============================================================================
+#if __ANDROID_API__ < 24   // Android support for getifadds was added in Android 7.0 (API 24) so the posix implementation does not apply
+
 static IPAddress makeAddress (const sockaddr_in *addr_in)
 {
     if (addr_in->sin_addr.s_addr == INADDR_NONE)
@@ -382,15 +384,15 @@ static Array<InterfaceInfo> findIPAddresses (int dummySocket)
 
         if (item.ifr_addr.sa_family == AF_INET)
         {
-            InterfaceInfo i;
-            i.interfaceAddress = makeAddress ((const sockaddr_in*) &item.ifr_addr);
+            InterfaceInfo info;
+            info.interfaceAddress = makeAddress ((const sockaddr_in*) &item.ifr_addr);
 
-            if (! i.interfaceAddress.isNull())
+            if (! info.interfaceAddress.isNull())
             {
                 if (ioctl (dummySocket, SIOCGIFBRDADDR, &item) == 0)
-                    i.broadcastAddress = makeAddress ((const sockaddr_in*) &item.ifr_broadaddr);
+                    info.broadcastAddress = makeAddress ((const sockaddr_in*) &item.ifr_broadaddr);
 
-                result.add (i);
+                result.add (info);
             }
         }
         else if (item.ifr_addr.sa_family == AF_INET6)
@@ -429,5 +431,6 @@ IPAddress IPAddress::getInterfaceBroadcastAddress (const IPAddress& address)
     return {};
 }
 
+#endif
 
 } // namespace juce
