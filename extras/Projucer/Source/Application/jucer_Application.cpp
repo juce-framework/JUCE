@@ -738,16 +738,19 @@ static File getPlatformSpecificProjectFolder()
     if (! buildsFolder.exists())
         return {};
 
+    String subDirectoryString;
+
    #if JUCE_MAC
-    return buildsFolder.getChildFile ("MacOSX");
+    subDirectoryString = "MacOSX";
    #elif JUCE_WINDOWS
-    return buildsFolder.getChildFile ("VisualStudio2017");
+    subDirectoryString = "VisualStudio2017";
    #elif JUCE_LINUX
-    return buildsFolder.getChildFile ("LinuxMakefile");
+    subDirectoryString = "LinuxMakefile";
    #endif
 
-    jassertfalse;
-    return {};
+    jassert (subDirectoryString != String());
+
+    return buildsFolder.getChildFile (subDirectoryString);
 }
 
 static File tryToFindDemoRunnerExecutableInBuilds()
