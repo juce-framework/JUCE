@@ -1,0 +1,19 @@
+Create classes
+Read Queen.rcf into classes
+Load/Save of classes
+Generate rack based of classes and setup number
+Link all GUI up properly
+Read in banks from files
+See if program can be extracted? If not read in from files
+- DirectWave no
+- Truepianos no
+- Streamer yes but one element bug which I can fix
+- Wavestation yes
+- M1 yes but only combi mode (Should I split to multiple M1's in prog mode?)
+- FM7 yes
+- B3 yes
+- JP8 yes
+- OBX yes
+Create plugins to reflect rack
+Bring in router (changed to new classes)
+Setlist manager
