@@ -1165,7 +1165,7 @@ private:
                    #if JUCE_WINDOWS
                     setSize (w, h);
                    #else
-                    if (owner.macHostWindow != nullptr && ! (host.isWavelab() || host.isReaper() || host.isBitwigStudio()))
+                    if (owner.macHostWindow != nullptr && ! (host.isWavelab() || host.isReaper() || host.isBitwigStudio() || host.isFruityLoops()))
                         juce::setNativeHostWindowSizeVST (owner.macHostWindow, this, w, h, owner.isNSView);
                    #endif
 
