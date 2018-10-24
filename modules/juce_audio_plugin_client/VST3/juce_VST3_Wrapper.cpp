@@ -52,7 +52,7 @@
 #if JUCE_VST3_CAN_REPLACE_VST2
 namespace Vst2
 {
-#include "../../pluginterfaces/vst2.x/vstfxstore.h"
+#include "pluginterfaces/vst2.x/vstfxstore.h"
 }
 #endif
 
