@@ -227,7 +227,7 @@ private:
             else
             {
                 auto* openPanel = (NSOpenPanel*) panel;
-                auto* urls = [openPanel URLs];
+                auto urls = [openPanel URLs];
 
                 for (unsigned int i = 0; i < [urls count]; ++i)
                     addURLResult ([urls objectAtIndex: i]);

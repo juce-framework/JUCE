@@ -59,7 +59,7 @@ static inline NSURL* createNSURLFromFile (const File& f)
 
 static inline NSArray* createNSArrayFromStringArray (const StringArray& strings)
 {
-    auto* array = [[NSMutableArray alloc] init];
+    auto array = [[NSMutableArray alloc] init];
 
     for (auto string: strings)
         [array addObject:juceStringToNS (string)];
@@ -71,7 +71,7 @@ static NSArray* varArrayToNSArray (const var& varToParse);
 
 static NSDictionary* varObjectToNSDictionary (const var& varToParse)
 {
-    auto* dictionary = [NSMutableDictionary dictionary];
+    auto dictionary = [NSMutableDictionary dictionary];
 
     if (varToParse.isObject())
     {
@@ -118,7 +118,7 @@ static NSArray* varArrayToNSArray (const var& varToParse)
 
     const auto* varArray = varToParse.getArray();
 
-    auto* array = [NSMutableArray arrayWithCapacity: (NSUInteger) varArray->size()];
+    auto array = [NSMutableArray arrayWithCapacity: (NSUInteger) varArray->size()];
 
     for (const auto& aVar : *varArray)
     {

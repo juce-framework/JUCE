@@ -260,7 +260,7 @@ bool DragAndDropContainer::performExternalDragDropOfText (const String& text, Co
     {
         JUCE_AUTORELEASEPOOL
         {
-            if (auto* event = [[view window] currentEvent])
+            if (auto event = [[view window] currentEvent])
             {
                 id helper = [draggingSourceHelper.createInstance() init];
                 NSDraggingSourceHelper::setText (helper, text);
@@ -269,18 +269,18 @@ bool DragAndDropContainer::performExternalDragDropOfText (const String& text, Co
                 if (callback != nullptr)
                     NSDraggingSourceHelper::setCompletionCallback (helper, callback);
 
-                auto* pasteboardItem = [[NSPasteboardItem new] autorelease];
+                auto pasteboardItem = [[NSPasteboardItem new] autorelease];
                 [pasteboardItem setDataProvider: helper
                                        forTypes: [NSArray arrayWithObjects: NSPasteboardTypeString, nil]];
 
-                auto* dragItem = [[[NSDraggingItem alloc] initWithPasteboardWriter: pasteboardItem] autorelease];
+                auto dragItem = [[[NSDraggingItem alloc] initWithPasteboardWriter: pasteboardItem] autorelease];
 
                 NSImage* image = [[NSWorkspace sharedWorkspace] iconForFile: nsEmptyString()];
                 [dragItem setDraggingFrame: getDragRect (view, event) contents: image];
 
-                if (auto* session = [view beginDraggingSessionWithItems: [NSArray arrayWithObject: dragItem]
-                                                                  event: event
-                                                                 source: helper])
+                if (auto session = [view beginDraggingSessionWithItems: [NSArray arrayWithObject: dragItem]
+                                                                 event: event
+                                                                source: helper])
                 {
                     session.animatesToStartingPositionsOnCancelOrFail = YES;
                     session.draggingFormation = NSDraggingFormationNone;
@@ -304,20 +304,20 @@ bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& fi
     {
         JUCE_AUTORELEASEPOOL
         {
-            if (auto* event = [[view window] currentEvent])
+            if (auto event = [[view window] currentEvent])
             {
-                auto* dragItems = [[[NSMutableArray alloc] init] autorelease];
+                auto dragItems = [[[NSMutableArray alloc] init] autorelease];
 
                 for (auto& filename : files)
                 {
                     auto* nsFilename = juceStringToNS (filename);
-                    auto* fileURL = [NSURL fileURLWithPath: nsFilename];
-                    auto* dragItem = [[NSDraggingItem alloc] initWithPasteboardWriter: fileURL];
+                    auto fileURL = [NSURL fileURLWithPath: nsFilename];
+                    auto dragItem = [[NSDraggingItem alloc] initWithPasteboardWriter: fileURL];
 
                     auto eventPos = [event locationInWindow];
                     auto dragRect = [view convertRect: NSMakeRect (eventPos.x - 16.0f, eventPos.y - 16.0f, 32.0f, 32.0f)
                                              fromView: nil];
-                    auto* dragImage = [[NSWorkspace sharedWorkspace] iconForFile: nsFilename];
+                    auto dragImage = [[NSWorkspace sharedWorkspace] iconForFile: nsFilename];
                     [dragItem setDraggingFrame: dragRect
                                       contents: dragImage];
 
@@ -325,7 +325,7 @@ bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& fi
                     [dragItem release];
                 }
 
-                auto* helper = [draggingSourceHelper.createInstance() autorelease];
+                auto helper = [draggingSourceHelper.createInstance() autorelease];
 
                 if (callback != nullptr)
                     NSDraggingSourceHelper::setCompletionCallback (helper, callback);
