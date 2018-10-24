@@ -124,26 +124,26 @@ private:
 class TextPropertyComponent::RemapperValueSourceWithDefault    : public Value::ValueSource
 {
 public:
-    RemapperValueSourceWithDefault (const ValueWithDefault& vwd)
+    RemapperValueSourceWithDefault (ValueWithDefault* vwd)
         : valueWithDefault (vwd)
     {
     }
 
     var getValue() const override
     {
-        return valueWithDefault.isUsingDefault() ? var() : valueWithDefault.get();
+        return valueWithDefault->isUsingDefault() ? var() : valueWithDefault->get();
     }
 
     void setValue (const var& newValue) override
     {
         if (newValue.toString().isEmpty())
-            valueWithDefault.resetToDefault();
+            valueWithDefault->resetToDefault();
         else
-            valueWithDefault = newValue;
+            *valueWithDefault = newValue;
     }
 
 private:
-    ValueWithDefault valueWithDefault;
+    ValueWithDefault* valueWithDefault;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RemapperValueSourceWithDefault)
@@ -171,18 +171,22 @@ TextPropertyComponent::TextPropertyComponent (ValueWithDefault& valueToControl, 
                                               int maxNumChars, bool multiLine, bool isEditable)
     : TextPropertyComponent (name, maxNumChars, multiLine, isEditable)
 {
-    textEditor->getTextValue().referTo (Value (new RemapperValueSourceWithDefault (valueToControl)));
-    textEditor->setTextToDisplayWhenEmpty (valueToControl.getDefault(), 0.5f);
+    valueWithDefault = &valueToControl;
 
-    valueToControl.onDefaultChange = [this, &valueToControl]
+    textEditor->getTextValue().referTo (Value (new RemapperValueSourceWithDefault (valueWithDefault)));
+    textEditor->setTextToDisplayWhenEmpty (valueWithDefault->getDefault(), 0.5f);
+
+    valueWithDefault->onDefaultChange = [this]
     {
-        textEditor->setTextToDisplayWhenEmpty (valueToControl.getDefault(), 0.5f);
+        textEditor->setTextToDisplayWhenEmpty (valueWithDefault->getDefault(), 0.5f);
         repaint();
     };
 }
 
 TextPropertyComponent::~TextPropertyComponent()
 {
+    if (valueWithDefault != nullptr)
+        valueWithDefault->onDefaultChange = nullptr;
 }
 
 void TextPropertyComponent::setText (const String& newText)
