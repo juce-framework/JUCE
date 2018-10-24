@@ -307,13 +307,6 @@ private:
     }
 
     //==============================================================================
-    std::unique_ptr<LookAndFeel> lf;
-
-    Viewport propertyViewport;
-    PropertyGroupComponent propertyGroup  { "PIP Creator", { getIcons().juceLogo, Colours::transparentBlack } };
-
-    TextButton createButton  { "Create PIP" };
-
     ValueTree pipTree  { "PIPSettings" };
     ValueWithDefault nameValue          { pipTree, Ids::name,          nullptr, "MyComponentPIP" },
                      versionValue       { pipTree, Ids::version,       nullptr },
@@ -328,6 +321,13 @@ private:
                      typeValue          { pipTree, Ids::type,          nullptr, "Component" },
                      mainClassValue     { pipTree, Ids::mainClass,     nullptr, "MyComponent" },
                      useLocalCopyValue  { pipTree, Ids::useLocalCopy,  nullptr, false };
+
+    std::unique_ptr<LookAndFeel> lf;
+
+    Viewport propertyViewport;
+    PropertyGroupComponent propertyGroup  { "PIP Creator", { getIcons().juceLogo, Colours::transparentBlack } };
+
+    TextButton createButton  { "Create PIP" };
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PIPCreatorWindowComponent)

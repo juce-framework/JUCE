@@ -244,15 +244,15 @@ private:
         void timerCallback() override          { stopTimer(); refresh(); }
 
         //==============================================================================
+        Array<ValueWithDefault> exporterModulePathValues;
+        Value globalPathValue;
+
         PropertyGroupComponent group;
         Project& project;
         SafePointer<TreeView> modulesTree;
         String moduleID;
 
         OwnedArray <Project::ConfigFlag> configFlags;
-
-        Array<ValueWithDefault> exporterModulePathValues;
-        Value globalPathValue;
 
         //==============================================================================
         class ModuleInfoComponent  : public PropertyComponent,

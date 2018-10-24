@@ -144,6 +144,9 @@ public:
     }
 
 private:
+    ValueWithDefault jucePathValue, juceModulePathValue, userModulePathValue, vst3PathValue, rtasPathValue, aaxPathValue,
+                     androidSDKPathValue, androidNDKPathValue, clionExePathValue, androidStudioExePathValue;
+
     OwnedArray<Label> pathPropertyLabels;
     OwnedArray<PropertyComponent> pathPropertyComponents;
     TextButton rescanJUCEPathButton { "Re-scan" },
@@ -155,9 +158,6 @@ private:
     Rectangle<int> boundsToHighlight;
     float flashAlpha = 0.0f;
     bool hasFlashed = false;
-
-    ValueWithDefault jucePathValue, juceModulePathValue, userModulePathValue, vst3PathValue, rtasPathValue, aaxPathValue,
-                     androidSDKPathValue, androidNDKPathValue, clionExePathValue, androidStudioExePathValue;
 
     //==============================================================================
     void timerCallback() override
