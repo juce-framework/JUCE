@@ -387,21 +387,19 @@ public:
             // Got a format that is supported by the device so we can ask what sample rates are supported (in whatever format)
         }
 
-        static const int ratesToTest[] = { 44100, 48000, 88200, 96000, 176400, 192000, 352800, 384000 };
-
-        for (int i = 0; i < numElementsInArray (ratesToTest); ++i)
-        {
-            if (rates.contains (ratesToTest[i]))
+       for (auto rate : { 44100, 48000, 88200, 96000, 176400, 192000, 352800, 384000, 705600, 768000 })
+       {
+            if (rates.contains (rate))
                 continue;
 
-            format.Format.nSamplesPerSec  = (DWORD) ratesToTest[i];
+            format.Format.nSamplesPerSec  = (DWORD) rate;
             format.Format.nAvgBytesPerSec = (DWORD) (format.Format.nSamplesPerSec * format.Format.nChannels * format.Format.wBitsPerSample / 8);
 
             if (SUCCEEDED (tempClient->IsFormatSupported (useExclusiveMode ? AUDCLNT_SHAREMODE_EXCLUSIVE
                                                                            : AUDCLNT_SHAREMODE_SHARED,
                                                           (WAVEFORMATEX*) &format, 0)))
-                if (! rates.contains (ratesToTest[i]))
-                    rates.addUsingDefaultSort (ratesToTest[i]);
+                if (! rates.contains (rate))
+                    rates.addUsingDefaultSort (rate);
         }
     }
 
