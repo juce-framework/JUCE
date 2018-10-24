@@ -86,7 +86,6 @@ using namespace Steinberg;
 
   extern JUCE_API void* attachComponentToWindowRefVST (Component*, void* parentWindowOrView, bool isNSView);
   extern JUCE_API void detachComponentFromWindowRefVST (Component*, void* nsWindow, bool isNSView);
-  extern JUCE_API void setNativeHostWindowSizeVST (void* window, Component*, int newWidth, int newHeight, bool isNSView);
 #endif
 
 //==============================================================================
@@ -1164,9 +1163,6 @@ private:
 
                    #if JUCE_WINDOWS
                     setSize (w, h);
-                   #else
-                    if (owner.macHostWindow != nullptr && ! (host.isWavelab() || host.isReaper() || host.isBitwigStudio() || host.isFruityLoops()))
-                        juce::setNativeHostWindowSizeVST (owner.macHostWindow, this, w, h, owner.isNSView);
                    #endif
 
                     if (owner.plugFrame != nullptr)
