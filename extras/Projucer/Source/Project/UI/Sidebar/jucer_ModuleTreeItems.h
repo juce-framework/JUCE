@@ -234,12 +234,12 @@ private:
         Array<ValueWithDefault> exporterModulePathValues;
         Value globalPathValue;
 
+        OwnedArray <Project::ConfigFlag> configFlags;
+
         PropertyGroupComponent group;
         Project& project;
         SafePointer<TreeView> modulesTree;
         String moduleID;
-
-        OwnedArray <Project::ConfigFlag> configFlags;
 
         //==============================================================================
         class ModuleInfoComponent  : public PropertyComponent,
