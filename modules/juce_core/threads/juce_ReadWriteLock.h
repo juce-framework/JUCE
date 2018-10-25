@@ -127,8 +127,8 @@ private:
     //==============================================================================
     SpinLock accessLock;
     WaitableEvent waitEvent;
-    mutable int numWaitingWriters, numWriters;
-    mutable Thread::ThreadID writerThreadId;
+    mutable int numWaitingWriters = 0, numWriters = 0;
+    mutable Thread::ThreadID writerThreadId = {};
 
     struct ThreadRecursionCount
     {

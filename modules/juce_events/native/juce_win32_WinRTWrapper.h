@@ -26,29 +26,14 @@ namespace juce
 class WinRTWrapper :   public DeletedAtShutdown
 {
 public:
-    JUCE_DECLARE_SINGLETON (WinRTWrapper, true)
-
     class ScopedHString
     {
     public:
-        ScopedHString (String str)
-        {
-            if (WinRTWrapper::getInstance()->isInitialised())
-                WinRTWrapper::getInstance()->createHString (str.toWideCharPointer(),
-                                                            static_cast<uint32_t> (str.length()),
-                                                            &hstr);
-        }
+        ScopedHString (String);
 
-        ~ScopedHString()
-        {
-            if (WinRTWrapper::getInstance()->isInitialised() && hstr != nullptr)
-                WinRTWrapper::getInstance()->deleteHString (hstr);
-        }
+        ~ScopedHString();
 
-        HSTRING get() const noexcept
-        {
-            return hstr;
-        }
+        HSTRING get() const noexcept          { return hstr; }
 
     private:
         HSTRING hstr = nullptr;
@@ -56,36 +41,81 @@ public:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedHString)
     };
 
-    ~WinRTWrapper()
+    template <class ComClass>
+    class ComPtr
     {
-        if (winRTHandle != nullptr)
-            ::FreeLibrary (winRTHandle);
+    public:
+        ComPtr() noexcept {}
+        ComPtr (ComClass* obj) : p (obj) { if (p) p->AddRef(); }
+        ComPtr (const ComPtr& other) : p (other.p) { if (p) p->AddRef(); }
+        ~ComPtr() { release(); }
 
-        clearSingletonInstance();
-    }
+        operator ComClass*()   const noexcept { return p; }
+        ComClass& operator*()  const noexcept { return *p; }
+        ComClass* operator->() const noexcept { return p; }
 
-    String hStringToString (HSTRING hstr)
+        ComPtr& operator= (ComClass* const newP)
+        {
+            if (newP != nullptr)
+                newP->AddRef();
+
+            release();
+            p = newP;
+            return *this;
+        }
+
+        ComPtr& operator= (const ComPtr& newP) { return operator= (newP.p); }
+
+        ComClass** resetAndGetPointerAddress()
+        {
+            release();
+            p = nullptr;
+            return &p;
+        }
+
+    private:
+        ComClass* p = nullptr;
+
+        void release() { if (p != nullptr) p->Release(); }
+
+        ComClass** operator&() noexcept; // private to avoid it being used accidentally
+    };
+
+    JUCE_DECLARE_SINGLETON (WinRTWrapper, true)
+
+    ~WinRTWrapper();
+
+    String hStringToString (HSTRING);
+
+    bool isInitialised() const noexcept       { return initialised; }
+
+    template <class ComClass>
+    ComPtr<ComClass> activateInstance (const wchar_t* runtimeClassID, REFCLSID classUUID)
     {
+        ComPtr<ComClass> result;
+
         if (isInitialised())
-            if (const wchar_t* str = getHStringRawBuffer (hstr, nullptr))
-                return String (str);
+        {
+            ComPtr<IInspectable> inspectable;
+            ScopedHString runtimeClass (runtimeClassID);
+            auto hr = roActivateInstance (runtimeClass.get(), inspectable.resetAndGetPointerAddress());
 
-        return {};
-    }
+            if (SUCCEEDED (hr))
+                inspectable->QueryInterface (classUUID, (void**) result.resetAndGetPointerAddress());
+        }
 
-    bool isInitialised() const noexcept
-    {
-        return initialised;
+        return result;
     }
 
     template <class ComClass>
-    ComSmartPtr<ComClass> getWRLFactory (const wchar_t* runtimeClassID)
+    ComPtr<ComClass> getWRLFactory (const wchar_t* runtimeClassID)
     {
-        ComSmartPtr<ComClass> comPtr;
+        ComPtr<ComClass> comPtr;
 
         if (isInitialised())
         {
             ScopedHString classID (runtimeClassID);
+
             if (classID.get() != nullptr)
                 roGetActivationFactory (classID.get(), __uuidof (ComClass), (void**) comPtr.resetAndGetPointerAddress());
         }
@@ -94,25 +124,7 @@ public:
     }
 
 private:
-    WinRTWrapper()
-    {
-        winRTHandle = ::LoadLibraryA ("api-ms-win-core-winrt-l1-1-0");
-        if (winRTHandle == nullptr)
-            return;
-
-        roInitialize           = (RoInitializeFuncPtr)              ::GetProcAddress (winRTHandle, "RoInitialize");
-        createHString          = (WindowsCreateStringFuncPtr)       ::GetProcAddress (winRTHandle, "WindowsCreateString");
-        deleteHString          = (WindowsDeleteStringFuncPtr)       ::GetProcAddress (winRTHandle, "WindowsDeleteString");
-        getHStringRawBuffer    = (WindowsGetStringRawBufferFuncPtr) ::GetProcAddress (winRTHandle, "WindowsGetStringRawBuffer");
-        roGetActivationFactory = (RoGetActivationFactoryFuncPtr)    ::GetProcAddress (winRTHandle, "RoGetActivationFactory");
-
-        if (roInitialize == nullptr || createHString == nullptr || deleteHString == nullptr
-         || getHStringRawBuffer == nullptr || roGetActivationFactory == nullptr)
-            return;
-
-        HRESULT status = roInitialize (1);
-        initialised = ! (status != S_OK && status != S_FALSE && status != 0x80010106L);
-    }
+    WinRTWrapper();
 
     HMODULE winRTHandle = nullptr;
     bool initialised = false;
@@ -121,12 +133,14 @@ private:
     typedef HRESULT (WINAPI* WindowsCreateStringFuncPtr) (LPCWSTR, UINT32, HSTRING*);
     typedef HRESULT (WINAPI* WindowsDeleteStringFuncPtr) (HSTRING);
     typedef PCWSTR  (WINAPI* WindowsGetStringRawBufferFuncPtr) (HSTRING, UINT32*);
+    typedef HRESULT (WINAPI* RoActivateInstanceFuncPtr) (HSTRING, IInspectable**);
     typedef HRESULT (WINAPI* RoGetActivationFactoryFuncPtr) (HSTRING, REFIID, void**);
 
     RoInitializeFuncPtr roInitialize = nullptr;
     WindowsCreateStringFuncPtr createHString = nullptr;
     WindowsDeleteStringFuncPtr deleteHString = nullptr;
     WindowsGetStringRawBufferFuncPtr getHStringRawBuffer = nullptr;
+    RoActivateInstanceFuncPtr roActivateInstance = nullptr;
     RoGetActivationFactoryFuncPtr roGetActivationFactory = nullptr;
 };
 

@@ -88,25 +88,32 @@ void Project::setTitle (const String& newTitle)
 {
     projectNameValue = newTitle;
 
-    updateTitle();
+    updateTitleDependencies();
 }
 
-void Project::updateTitle()
+void Project::updateTitleDependencies()
 {
     auto projectName = getProjectNameString();
 
     getMainGroup().getNameValue() = projectName;
 
-    pluginNameValue.setDefault (projectName);
-    pluginDescriptionValue.setDefault (projectName);
-    bundleIdentifierValue.setDefault (getDefaultBundleIdentifierString());
+    pluginNameValue.          setDefault (projectName);
+    pluginDescriptionValue.   setDefault (projectName);
+    bundleIdentifierValue.    setDefault (getDefaultBundleIdentifierString());
     pluginAUExportPrefixValue.setDefault (CodeHelpers::makeValidIdentifier (projectName, false, true, false) + "AU");
-    pluginAAXIdentifierValue.setDefault (getDefaultAAXIdentifierString());
+    pluginAAXIdentifierValue. setDefault (getDefaultAAXIdentifierString());
 }
 
 String Project::getDocumentTitle()
 {
     return getProjectNameString();
+}
+
+void Project::updateCompanyNameDependencies()
+{
+    bundleIdentifierValue.setDefault    (getDefaultBundleIdentifierString());
+    pluginAAXIdentifierValue.setDefault (getDefaultAAXIdentifierString());
+    pluginManufacturerValue.setDefault  (getDefaultPluginManufacturerString());
 }
 
 void Project::updateProjectSettings()
@@ -179,7 +186,7 @@ void Project::initialiseMainGroup()
     if (! projectRoot.getChildWithName (Ids::MAINGROUP).isValid())
     {
         Item mainGroup (*this, ValueTree (Ids::MAINGROUP), false);
-        projectRoot.addChild (mainGroup.state, 0, 0);
+        projectRoot.addChild (mainGroup.state, 0, nullptr);
     }
 
     getMainGroup().initialiseMissingProperties();
@@ -193,14 +200,14 @@ void Project::initialiseProjectValues()
     if (projectUIDValue.isUsingDefault())
         projectUIDValue = projectUIDValue.getDefault();
 
-    projectTypeValue.referTo         (projectRoot, Ids::projectType,      getUndoManager(), ProjectType_GUIApp::getTypeName());
-    versionValue.referTo             (projectRoot, Ids::version,          getUndoManager(), "1.0.0");
-    bundleIdentifierValue.referTo    (projectRoot, Ids::bundleIdentifier, getUndoManager(), getDefaultBundleIdentifierString());
-
     companyNameValue.referTo         (projectRoot, Ids::companyName,      getUndoManager());
     companyCopyrightValue.referTo    (projectRoot, Ids::companyCopyright, getUndoManager());
     companyWebsiteValue.referTo      (projectRoot, Ids::companyWebsite,   getUndoManager());
     companyEmailValue.referTo        (projectRoot, Ids::companyEmail,     getUndoManager());
+
+    projectTypeValue.referTo         (projectRoot, Ids::projectType,      getUndoManager(), ProjectType_GUIApp::getTypeName());
+    versionValue.referTo             (projectRoot, Ids::version,          getUndoManager(), "1.0.0");
+    bundleIdentifierValue.referTo    (projectRoot, Ids::bundleIdentifier, getUndoManager(), getDefaultBundleIdentifierString());
 
     displaySplashScreenValue.referTo (projectRoot, Ids::displaySplashScreen, getUndoManager(), ! ProjucerApplication::getApp().isPaidOrGPL());
     splashScreenColourValue.referTo  (projectRoot, Ids::splashScreenColour,  getUndoManager(), "Dark");
@@ -241,7 +248,7 @@ void Project::initialiseAudioPluginValues()
 
     pluginNameValue.referTo                  (projectRoot, Ids::pluginName,                 getUndoManager(), getProjectNameString());
     pluginDescriptionValue.referTo           (projectRoot, Ids::pluginDesc,                 getUndoManager(), getProjectNameString());
-    pluginManufacturerValue.referTo          (projectRoot, Ids::pluginManufacturer,         getUndoManager(), "yourcompany");
+    pluginManufacturerValue.referTo          (projectRoot, Ids::pluginManufacturer,         getUndoManager(), getDefaultPluginManufacturerString());
     pluginManufacturerCodeValue.referTo      (projectRoot, Ids::pluginManufacturerCode,     getUndoManager(), "Manu");
     pluginCodeValue.referTo                  (projectRoot, Ids::pluginCode,                 getUndoManager(), makeValid4CC (getProjectUIDString() + getProjectUIDString()));
     pluginChannelConfigsValue.referTo        (projectRoot, Ids::pluginChannelConfigs,       getUndoManager());
@@ -552,7 +559,7 @@ static void forgetRecentFile (const File& file)
 //==============================================================================
 Result Project::loadDocument (const File& file)
 {
-    std::unique_ptr<XmlElement> xml (XmlDocument::parse (file));
+    auto xml = parseXML (file);
 
     if (xml == nullptr || ! xml->hasTagName (Ids::JUCERPROJECT.toString()))
         return Result::fail ("Not a valid Jucer project!");
@@ -709,7 +716,11 @@ void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& prope
         }
         else if (property == Ids::name)
         {
-            updateTitle();
+            updateTitleDependencies();
+        }
+        else if (property == Ids::companyName)
+        {
+            updateCompanyNameDependencies();
         }
         else if (property == Ids::defines)
         {
@@ -1035,7 +1046,9 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
                                                  { Ids::buildVST3.toString(), Ids::buildAU.toString(), Ids::buildAUv3.toString(),
                                                    Ids::buildRTAS.toString(), Ids::buildAAX.toString(), Ids::buildStandalone.toString(), Ids::buildUnity.toString(),
                                                    Ids::enableIAA.toString(), Ids::buildVST.toString() }),
-               "Plugin formats to build.");
+               "Plugin formats to build. If you have selected \"VST (legacy)\" then you will need to ensure that you have a VST2 SDK "
+               "in your header search paths. The VST2 SDK can be obtained from the vstsdk3610_11_06_2018_build_37 (or older) VST3 SDK "
+               "or JUCE version 5.3.2. You also need a VST2 license from Steinberg to distribute VST2 plug-ins.");
     props.add (new MultiChoicePropertyComponent (pluginCharacteristicsValue, "Plugin Characteristics",
                                                  { "Plugin is a Synth", "Plugin MIDI Input", "Plugin MIDI Output", "MIDI Effect Plugin", "Plugin Editor Requires Keyboard Focus",
                                                    "Disable RTAS Bypass", "Disable AAX Bypass", "Disable RTAS Multi-Mono", "Disable AAX Multi-Mono" },
@@ -1070,6 +1083,7 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
 
     {
         Array<var> vst3CategoryVars;
+
         for (auto s : getAllVST3CategoryStrings())
             vst3CategoryVars.add (s);
 
@@ -1622,6 +1636,24 @@ bool Project::isConfigFlagEnabled (const String& name, bool defaultIsEnabled) co
 }
 
 //==============================================================================
+static String getCompanyNameOrDefault (StringRef str)
+{
+    if (str.isEmpty())
+        return "yourcompany";
+
+    return str;
+}
+
+String Project::getDefaultBundleIdentifierString() const
+{
+    return "com." + getCompanyNameOrDefault (getCompanyNameString()) + "." + CodeHelpers::makeValidIdentifier (getProjectNameString(), false, true, false);
+}
+
+String Project::getDefaultPluginManufacturerString() const
+{
+    return getCompanyNameOrDefault (getCompanyNameString());
+}
+
 String Project::getAUMainTypeString() const noexcept
 {
     auto v = pluginAUMainTypeValue.get();

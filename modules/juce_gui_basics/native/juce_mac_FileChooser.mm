@@ -202,13 +202,22 @@ private:
 
         exitModalState (0);
 
-        if (panel != nil && result == NSFileHandlingPanelOKButton)
+        if (panel != nil && result ==
+                             #if defined (MAC_OS_X_VERSION_10_9) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_9
+                               NSModalResponseOK)
+                             #else
+                               NSFileHandlingPanelOKButton)
+                             #endif
         {
             auto addURLResult = [&chooserResults] (NSURL* urlToAdd)
             {
                 auto scheme = nsStringToJuce ([urlToAdd scheme]);
-                auto path = nsStringToJuce ([urlToAdd path]);
-                chooserResults.add (URL (scheme + "://" + path));
+                auto pathComponents = StringArray::fromTokens (nsStringToJuce ([urlToAdd path]), "/", {});
+
+                for (auto& component : pathComponents)
+                    component = URL::addEscapeChars (component, false);
+
+                chooserResults.add (URL (scheme + "://" + pathComponents.joinIntoString ("/")));
             };
 
             if (isSave)
@@ -218,7 +227,7 @@ private:
             else
             {
                 auto* openPanel = (NSOpenPanel*) panel;
-                auto* urls = [openPanel URLs];
+                auto urls = [openPanel URLs];
 
                 for (unsigned int i = 0; i < [urls count]; ++i)
                     addURLResult ([urls objectAtIndex: i]);

@@ -29,11 +29,6 @@ namespace juce
 namespace dsp
 {
 
-#ifndef DOXYGEN
-template <typename NumericType>
-class OversamplingEngine;
-#endif
-
 //===============================================================================
 /**
     A processing class performing multi-channel oversampling.
@@ -91,6 +86,11 @@ public:
                   FilterType type,
                   bool isMaxQuality = true);
 
+    /** Default constructor of the oversampling class, which can be used to create an
+        empty object and then add the appropriate stages.
+    */
+    Oversampling();
+
     /** Destructor. */
     ~Oversampling();
 
@@ -133,17 +133,27 @@ public:
     */
     void processSamplesDown (dsp::AudioBlock<SampleType>& outputBlock) noexcept;
 
+    //===============================================================================
+    void addOversamplingStage (FilterType,
+                               float normalizedTransitionWidthUp, float stopbandAttenuationdBUp,
+                               float normalizedTransitionWidthDown, float stopbandAttenuationdBDown);
+
+    void addDummyOversamplingStage();
+
+    void clearOversamplingStages();
+
+    //===============================================================================
+    size_t factorOversampling = 1;
+    size_t numChannels = 1;
+
+   #ifndef DOXYGEN
+    struct OversamplingStage;
+   #endif
+
 private:
     //===============================================================================
-    bool isMaximumQuality;
-    size_t factorOversampling, numStages;
-    FilterType type;
-    size_t numChannels;
-
-    //===============================================================================
+    OwnedArray<OversamplingStage> stages;
     bool isReady = false;
-
-    OwnedArray<OversamplingEngine<SampleType>> engines;
 
     //===============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Oversampling)

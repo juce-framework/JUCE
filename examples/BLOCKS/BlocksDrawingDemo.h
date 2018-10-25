@@ -313,6 +313,8 @@ public:
        #endif
 
         setSize (600, 600);
+
+        topologyChanged();
     }
 
     ~BlocksDrawingDemo()
@@ -321,6 +323,7 @@ public:
             detachActiveBlock();
 
         lightpadComponent.removeListener (this);
+        topologySource.removeListener (this);
     }
 
     void resized() override

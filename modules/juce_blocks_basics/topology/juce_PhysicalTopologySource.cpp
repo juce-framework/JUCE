@@ -23,9 +23,6 @@
 namespace juce
 {
 
-#define JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED \
-    jassert (juce::MessageManager::getInstance()->currentThreadHasLockedMessageManager());
-
 #if DUMP_BANDWIDTH_STATS
 namespace
 {
@@ -1473,9 +1470,6 @@ struct PhysicalTopologySource::Internal
             for (auto&& s : modelData.statusLEDs)
                 statusLights.add (new StatusLightImplementation (*this, s));
 
-            if (modelData.numLEDRowLEDs > 0)
-                ledRow.reset (new LEDRowImplementation (*this));
-
             updateMidiConnectionListener();
         }
 
@@ -1549,7 +1543,14 @@ struct PhysicalTopologySource::Internal
 
         TouchSurface* getTouchSurface() const override                  { return touchSurface.get(); }
         LEDGrid* getLEDGrid() const override                            { return ledGrid.get(); }
-        LEDRow* getLEDRow() const override                              { return ledRow.get(); }
+
+        LEDRow* getLEDRow() override
+        {
+            if (ledRow == nullptr && modelData.numLEDRowLEDs > 0)
+                ledRow.reset (new LEDRowImplementation (*this));
+
+            return ledRow.get();
+        }
 
         juce::Array<ControlButton*> getButtons() const override
         {
@@ -1646,16 +1647,6 @@ struct PhysicalTopologySource::Internal
             return nullptr;
         }
 
-        bool isControlBlock() const
-        {
-            auto type = getType();
-
-            return type == Block::Type::liveBlock
-                || type == Block::Type::loopBlock
-                || type == Block::Type::touchBlock
-                || type == Block::Type::developerControlBlock;
-        }
-
         //==============================================================================
         std::function<void(const String&)> logger;
 
@@ -1689,6 +1680,7 @@ struct PhysicalTopologySource::Internal
 
                 stopTimer();
                 programSize = 0;
+                isProgramLoaded = shouldSaveProgramAsDefault = false;
 
                 if (program != nullptr)
                 {
@@ -1721,6 +1713,8 @@ struct PhysicalTopologySource::Internal
 
                     if (auto changeCallback = this->configChangedCallback)
                         changeCallback (*this, {}, this->getMaxConfigIndex());
+
+                    startTimer (20);
                 }
                 else
                 {
@@ -1768,8 +1762,14 @@ struct PhysicalTopologySource::Internal
         {
             if (remoteHeap.isFullySynced() && remoteHeap.isProgramLoaded())
             {
+                isProgramLoaded = true;
                 stopTimer();
-                sendCommandMessage (BlocksProtocol::saveProgramAsDefault);
+
+                if (shouldSaveProgramAsDefault)
+                    doSaveProgramAsDefault();
+
+                if (programLoadedCallback != nullptr)
+                    programLoadedCallback (*this);
             }
             else
             {
@@ -1779,7 +1779,10 @@ struct PhysicalTopologySource::Internal
 
         void saveProgramAsDefault() override
         {
-            startTimer (10);
+            shouldSaveProgramAsDefault = true;
+
+            if (! isTimerRunning() && isProgramLoaded)
+                doSaveProgramAsDefault();
         }
 
         uint32 getMemorySize() override
@@ -1970,7 +1973,12 @@ struct PhysicalTopologySource::Internal
 
         void setConfigChangedCallback (std::function<void(Block&, const ConfigMetaData&, uint32)> configChanged) override
         {
-            configChangedCallback = configChanged;
+            configChangedCallback = std::move (configChanged);
+        }
+
+        void setProgramLoadedCallback (std::function<void(Block&)> programLoaded) override
+        {
+            programLoadedCallback = std::move (programLoaded);
         }
 
         void factoryReset() override
@@ -2062,6 +2070,8 @@ struct PhysicalTopologySource::Internal
         BlockConfigManager config;
         std::function<void(Block&, const ConfigMetaData&, uint32)> configChangedCallback;
 
+        std::function<void(Block&)> programLoadedCallback;
+
     private:
         std::unique_ptr<Program> program;
         uint32 programSize = 0;
@@ -2076,6 +2086,9 @@ struct PhysicalTopologySource::Internal
         Point<int> position;
         int rotation = 0;
         friend BlocksTraverser;
+
+        bool isProgramLoaded = false;
+        bool shouldSaveProgramAsDefault = false;
 
         void initialiseDeviceIndexAndConnection()
         {
@@ -2126,6 +2139,11 @@ struct PhysicalTopologySource::Internal
             listenerToMidiConnection->removeListener (this);
             listenerToMidiConnection = nullptr;
             config.setDeviceComms (nullptr);
+        }
+
+        void doSaveProgramAsDefault()
+        {
+            sendCommandMessage (BlocksProtocol::saveProgramAsDefault);
         }
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BlockImplementation)

@@ -188,7 +188,7 @@ public:
         if (getViewportContentType (vp) == 1)
         {
             JucerDocument* doc = findParentDocument (vp);
-            TestComponent* tc = new TestComponent (doc, 0, false);
+            auto tc = new TestComponent (doc, nullptr, false);
 
             tc->setFilename (getViewportJucerComponentFile (vp));
             tc->setToInitialSize();

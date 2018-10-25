@@ -214,6 +214,7 @@ public:
     /** Returns the current number of elements in the array. */
     inline int size() const noexcept
     {
+        const ScopedLockType lock (getLock());
         return values.size();
     }
 
@@ -871,10 +872,11 @@ public:
 
         auto endIndex = jlimit (0, values.size(), startIndex + numberToRemove);
         startIndex    = jlimit (0, values.size(), startIndex);
+        numberToRemove = endIndex - startIndex;
 
-        if (endIndex > startIndex)
+        if (numberToRemove > 0)
         {
-            values.removeElements (startIndex, endIndex - startIndex);
+            values.removeElements (startIndex, numberToRemove);
             minimiseStorageAfterRemoval();
         }
     }

@@ -41,6 +41,10 @@ namespace juce
 */
 class MultiChoicePropertyComponent    : public PropertyComponent
 {
+private:
+    /** Delegating constructor. */
+    MultiChoicePropertyComponent (const String&, const StringArray&, const Array<var>&);
+
 public:
     /** Creates the component. Note that the underlying var object that the Value refers to must be an array.
 
@@ -62,7 +66,8 @@ public:
 
     /** Creates the component using a ValueWithDefault object. This will select the default options.
 
-        @param valueToControl       the ValueWithDefault object that contains the Value object that the ToggleButtons will read and control
+        @param valueToControl       the ValueWithDefault object that contains the Value object that the ToggleButtons will read and control.
+                                    NB: This object must outlive the MultiChoicePropertyComponent.
         @param propertyName         the name of the property
         @param choices              the list of possible values that will be represented
         @param correspondingValues  a list of values corresponding to each item in the 'choices' StringArray.
@@ -77,6 +82,8 @@ public:
                                   const StringArray& choices,
                                   const Array<var>& correspondingValues,
                                   int maxChoices = -1);
+
+    ~MultiChoicePropertyComponent();
 
     //==============================================================================
     /** Returns true if the list of options is expanded. */
@@ -104,8 +111,7 @@ public:
     void refresh() override {}
 
 private:
-    MultiChoicePropertyComponent (const String&, const StringArray&, const Array<var>&);
-
+    //==============================================================================
     class MultiChoiceRemapperSource;
     class MultiChoiceRemapperSourceWithDefault;
 
@@ -113,6 +119,8 @@ private:
     void lookAndFeelChanged() override;
 
     //==============================================================================
+    ValueWithDefault* valueWithDefault;
+
     int maxHeight = 0;
     int numHidden = 0;
     bool expanded = false;

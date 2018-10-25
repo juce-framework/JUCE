@@ -30,58 +30,9 @@
 #include "../Application/jucer_Application.h"
 
 //==============================================================================
-static var parseModuleDesc (const StringArray& lines)
-{
-    DynamicObject* o = new DynamicObject();
-    var result (o);
-
-    for (auto line : lines)
-    {
-        line = trimCommentCharsFromStartOfLine (line);
-
-        auto colon = line.indexOfChar (':');
-
-        if (colon >= 0)
-        {
-            auto key = line.substring (0, colon).trim();
-            auto value = line.substring (colon + 1).trim();
-
-            o->setProperty (key, value);
-        }
-    }
-
-    return result;
-}
-
-static var parseModuleDesc (const File& header)
-{
-    StringArray lines;
-    header.readLines (lines);
-
-    for (int i = 0; i < lines.size(); ++i)
-    {
-        if (trimCommentCharsFromStartOfLine (lines[i]).startsWith ("BEGIN_JUCE_MODULE_DECLARATION"))
-        {
-            StringArray desc;
-
-            for (int j = i + 1; j < lines.size(); ++j)
-            {
-                if (trimCommentCharsFromStartOfLine (lines[j]).startsWith ("END_JUCE_MODULE_DECLARATION"))
-                    return parseModuleDesc (desc);
-
-                desc.add (lines[j]);
-            }
-
-            break;
-        }
-    }
-
-    return {};
-}
-
 ModuleDescription::ModuleDescription (const File& folder)
    : moduleFolder (folder),
-     moduleInfo (parseModuleDesc (getHeader()))
+     moduleInfo (parseJUCEHeaderMetadata (getHeader()))
 {
 }
 
@@ -135,7 +86,7 @@ static void addAllModulesInSubfoldersRecursively (const File& path, int depth, M
                 if (job->shouldExit())
                     return;
 
-            auto childPath = iter.getFile().getLinkedTarget();
+            auto childPath = iter.getFile();
 
             if (! tryToAddModuleFromFolder (childPath, list))
                 addAllModulesInSubfoldersRecursively (childPath, depth - 1, list);
@@ -796,9 +747,9 @@ void EnabledModuleList::setLocalCopyModeForAllModules (bool copyLocally)
 
 File EnabledModuleList::findDefaultModulesFolder (Project& project)
 {
-    File globalPath (getAppSettings().getStoredPath (Ids::defaultJuceModulePath).toString());
+    File globalPath (getAppSettings().getStoredPath (Ids::defaultJuceModulePath, TargetOS::getThisOS()).get().toString());
 
-    if (globalPath != File())
+    if (globalPath.exists())
         return globalPath;
 
     for (auto& exporterPathModule : project.getExporterPathsModuleList().getAllModules())

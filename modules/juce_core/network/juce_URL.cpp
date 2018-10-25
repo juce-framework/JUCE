@@ -118,9 +118,7 @@ URL::DownloadTask* URL::DownloadTask::createFallbackDownloader (const URL& urlTo
     const size_t bufferSize = 0x8000;
     targetFileToUse.deleteFile();
 
-    std::unique_ptr<FileOutputStream> outputStream (targetFileToUse.createOutputStream (bufferSize));
-
-    if (outputStream != nullptr)
+    if (auto outputStream = std::unique_ptr<FileOutputStream> (targetFileToUse.createOutputStream (bufferSize)))
     {
         std::unique_ptr<WebInputStream> stream (new WebInputStream (urlToUse, usePostRequest));
         stream->withExtraHeaders (extraHeadersToUse);
@@ -576,11 +574,11 @@ public:
             BOOL isBookmarkStale = false;
             NSError* error = nil;
 
-            auto* nsURL = [NSURL URLByResolvingBookmarkData: bookmark
-                                                    options: 0
-                                              relativeToURL: nil
-                                        bookmarkDataIsStale: &isBookmarkStale
-                                                      error: &error];
+            auto nsURL = [NSURL URLByResolvingBookmarkData: bookmark
+                                                   options: 0
+                                             relativeToURL: nil
+                                       bookmarkDataIsStale: &isBookmarkStale
+                                                     error: &error];
 
             if (error == nil)
             {
@@ -591,7 +589,7 @@ public:
             }
             else
             {
-                auto* desc = [error localizedDescription];
+                auto desc = [error localizedDescription];
                 ignoreUnused (desc);
                 jassertfalse;
             }
@@ -609,10 +607,10 @@ private:
             BOOL isBookmarkStale = false;
             NSError* error = nil;
 
-            auto* nsURL = [NSURL URLByResolvingBookmarkData: bookmark
-                                                    options: 0
-                                              relativeToURL: nil
-                                        bookmarkDataIsStale: &isBookmarkStale
+            auto nsURL = [NSURL URLByResolvingBookmarkData: bookmark
+                                                   options: 0
+                                             relativeToURL: nil
+                                       bookmarkDataIsStale: &isBookmarkStale
                                                       error: &error];
 
             if (error == nil)
@@ -626,7 +624,7 @@ private:
             }
             else
             {
-                auto* desc = [error localizedDescription];
+                auto desc = [error localizedDescription];
                 ignoreUnused (desc);
                 jassertfalse;
             }

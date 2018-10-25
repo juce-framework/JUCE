@@ -70,7 +70,7 @@ Component* Desktop::getComponent (int index) const noexcept
 
 Component* Desktop::findComponentAt (Point<int> screenPosition) const
 {
-    ASSERT_MESSAGE_MANAGER_IS_LOCKED
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
     for (int i = desktopComponents.size(); --i >= 0;)
     {
@@ -105,7 +105,7 @@ LookAndFeel& Desktop::getDefaultLookAndFeel() noexcept
 
 void Desktop::setDefaultLookAndFeel (LookAndFeel* newDefaultLookAndFeel)
 {
-    ASSERT_MESSAGE_MANAGER_IS_LOCKED
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
     currentLookAndFeel = newDefaultLookAndFeel;
 
     for (int i = getNumComponents(); --i >= 0;)
@@ -216,14 +216,14 @@ ListenerList<MouseListener>& Desktop::getMouseListeners()
 
 void Desktop::addGlobalMouseListener (MouseListener* listener)
 {
-    ASSERT_MESSAGE_MANAGER_IS_LOCKED
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
     mouseListeners.add (listener);
     resetTimer();
 }
 
 void Desktop::removeGlobalMouseListener (MouseListener* listener)
 {
-    ASSERT_MESSAGE_MANAGER_IS_LOCKED
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
     mouseListeners.remove (listener);
     resetTimer();
 }
@@ -323,7 +323,7 @@ bool Desktop::isOrientationEnabled (DisplayOrientation orientation) const noexce
 
 void Desktop::setGlobalScaleFactor (float newScaleFactor) noexcept
 {
-    ASSERT_MESSAGE_MANAGER_IS_LOCKED
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
     if (masterScaleFactor != newScaleFactor)
     {

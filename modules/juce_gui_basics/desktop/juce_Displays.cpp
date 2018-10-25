@@ -93,7 +93,9 @@ Rectangle<int> Displays::physicalToLogical (Rectangle<int> rect, const Display* 
     auto& display = useScaleFactorOfDisplay != nullptr ? *useScaleFactorOfDisplay
                                                        : findDisplayForRect (rect, true);
 
-    return ((rect.toFloat() - display.topLeftPhysical.toFloat()) / display.scale).toNearestInt() + display.totalArea.getTopLeft();
+    auto globalScale = Desktop::getInstance().getGlobalScaleFactor();
+
+    return ((rect.toFloat() - display.topLeftPhysical.toFloat()) / (display.scale / globalScale)).toNearestInt() + (display.totalArea.getTopLeft() * globalScale);
 }
 
 Rectangle<int> Displays::logicalToPhysical (Rectangle<int> rect, const Display* useScaleFactorOfDisplay) const noexcept
@@ -101,7 +103,9 @@ Rectangle<int> Displays::logicalToPhysical (Rectangle<int> rect, const Display* 
     auto& display = useScaleFactorOfDisplay != nullptr ? *useScaleFactorOfDisplay
                                                        : findDisplayForRect (rect, false);
 
-    return ((rect.toFloat() - display.totalArea.getTopLeft().toFloat()) * display.scale).toNearestInt() + display.topLeftPhysical;
+    auto globalScale = Desktop::getInstance().getGlobalScaleFactor();
+
+    return ((rect.toFloat() - (display.totalArea.getTopLeft().toFloat() * globalScale)) * (display.scale / globalScale)).toNearestInt() + display.topLeftPhysical;
 }
 
 template <typename ValueType>
@@ -110,10 +114,12 @@ Point<ValueType> Displays::physicalToLogical (Point<ValueType> point, const Disp
     auto& display = useScaleFactorOfDisplay != nullptr ? *useScaleFactorOfDisplay
                                                        : findDisplayForPoint (point.roundToInt(), true);
 
+    auto globalScale = Desktop::getInstance().getGlobalScaleFactor();
+
     Point<ValueType> logicalTopLeft  (display.totalArea.getX(),       display.totalArea.getY());
     Point<ValueType> physicalTopLeft (display.topLeftPhysical.getX(), display.topLeftPhysical.getY());
 
-    return ((point - physicalTopLeft) / display.scale) + logicalTopLeft;
+    return ((point - physicalTopLeft) / (display.scale / globalScale)) + (logicalTopLeft * globalScale);
 }
 
 template <typename ValueType>
@@ -122,22 +128,30 @@ Point<ValueType> Displays::logicalToPhysical (Point<ValueType> point, const Disp
     auto& display = useScaleFactorOfDisplay != nullptr ? *useScaleFactorOfDisplay
                                                        : findDisplayForPoint (point.roundToInt(), false);
 
+    auto globalScale = Desktop::getInstance().getGlobalScaleFactor();
+
     Point<ValueType> logicalTopLeft  (display.totalArea.getX(),       display.totalArea.getY());
     Point<ValueType> physicalTopLeft (display.topLeftPhysical.getX(), display.topLeftPhysical.getY());
 
-    return ((point - logicalTopLeft) * display.scale) + physicalTopLeft;
+    return ((point - (logicalTopLeft * globalScale)) * (display.scale / globalScale)) + physicalTopLeft;
 }
 
 const Displays::Display& Displays::getMainDisplay() const noexcept
 {
-    ASSERT_MESSAGE_MANAGER_IS_LOCKED
-    jassert (displays.getReference(0).isMain);
-    return displays.getReference(0);
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
+
+    for (auto& d : displays)
+        if (d.isMain)
+            return d;
+
+    // no main display!
+    jassertfalse;
+    return displays.getReference (0);
 }
 
 RectangleList<int> Displays::getRectangleList (bool userAreasOnly) const
 {
-    ASSERT_MESSAGE_MANAGER_IS_LOCKED
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
     RectangleList<int> rl;
 
     for (auto& d : displays)
@@ -160,7 +174,7 @@ void Displays::refresh()
 
     if (oldDisplays != displays)
     {
-        for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
+        for (auto i = ComponentPeer::getNumPeers(); --i >= 0;)
             if (auto* peer = ComponentPeer::getPeer (i))
                 peer->handleScreenSizeChange();
     }
@@ -183,9 +197,9 @@ bool operator!= (const Displays::Display& d1, const Displays::Display& d2) noexc
 // Deprecated method
 const Displays::Display& Displays::getDisplayContaining (Point<int> position) const noexcept
 {
-    ASSERT_MESSAGE_MANAGER_IS_LOCKED
-    auto* best = &displays.getReference(0);
-    double bestDistance = 1.0e10;
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
+    auto* best = &displays.getReference (0);
+    auto bestDistance = std::numeric_limits<int>::max();
 
     for (auto& d : displays)
     {
@@ -246,8 +260,8 @@ static void processDisplay (DisplayNode* currentNode, const Array<DisplayNode>& 
         const auto logicalHeight = physicalArea.getHeight() / scale;
 
         const auto physicalParentArea = currentNode->parent->display->totalArea.toDouble();
-        const auto logicalParentArea = currentNode->parent->logicalArea; // logical area of parent has already been calculated
-        const auto parentScale = currentNode->parent->display->scale;
+        const auto logicalParentArea  = currentNode->parent->logicalArea; // logical area of parent has already been calculated
+        const auto parentScale        = currentNode->parent->display->scale;
 
         Rectangle<double> logicalArea (0.0, 0.0, logicalWidth, logicalHeight);
 
@@ -298,8 +312,9 @@ void Displays::updateToLogical()
     if (displays.size() == 1)
     {
         auto& display = displays.getReference (0);
+
         display.totalArea = (display.totalArea.toDouble() / display.scale).toNearestInt();
-        display.userArea = (display.userArea.toDouble() / display.scale).toNearestInt();
+        display.userArea  = (display.userArea.toDouble()  / display.scale).toNearestInt();
 
         return;
     }
@@ -340,8 +355,8 @@ void Displays::updateToLogical()
 
         // Now set Display::totalArea and ::userArea using the logical area that we have calculated
         node.display->topLeftPhysical = node.display->totalArea.getTopLeft();
-        node.display->totalArea = node.logicalArea.toNearestInt();
-        node.display->userArea = (relativeUserArea + node.logicalArea.getTopLeft()).toNearestInt();
+        node.display->totalArea       = node.logicalArea.toNearestInt();
+        node.display->userArea        = (relativeUserArea + node.logicalArea.getTopLeft()).toNearestInt();
     }
 }
 

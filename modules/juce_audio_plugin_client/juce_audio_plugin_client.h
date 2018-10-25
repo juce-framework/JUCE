@@ -54,6 +54,17 @@
 #include <juce_audio_basics/juce_audio_basics.h>
 #include <juce_audio_processors/juce_audio_processors.h>
 
+/** Config: JUCE_VST3_CAN_REPLACE_VST2
+
+    Enable this if you want your VST3 plug-in to load and save VST2 compatible
+    state. This allows hosts to replace VST2 plug-ins with VST3 plug-ins. If
+    you change this option then your VST3 plug-in will be incompatible with
+    previous versions.
+*/
+#ifndef JUCE_VST3_CAN_REPLACE_VST2
+ #define JUCE_VST3_CAN_REPLACE_VST2 1
+#endif
+
 /** Config: JUCE_FORCE_USE_LEGACY_PARAM_IDS
 
     Enable this if you want to force JUCE to use a continuous parameter

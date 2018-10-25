@@ -292,7 +292,7 @@ private:
 
             void loadAsync (URL url)
             {
-                auto* nsUrl = [NSURL URLWithString: juceStringToNS (url.toString (true))];
+                auto nsUrl = [NSURL URLWithString: juceStringToNS (url.toString (true))];
                 asset.reset ([[AVURLAsset alloc] initWithURL: nsUrl options: nil]);
 
                 [asset.get() loadValuesAsynchronouslyForKeys: assetKeys.get()
@@ -612,7 +612,7 @@ private:
 
         Result load (NSURL* url)
         {
-            if (auto* player = [AVPlayer playerWithURL: url])
+            if (auto player = [AVPlayer playerWithURL: url])
             {
                 setPlayer (player);
                 return Result::ok();

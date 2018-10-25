@@ -48,7 +48,8 @@ namespace juce
 }
 
 @property (strong, nonatomic) UIWindow *window;
-- (id)init;
+- (id) init;
+- (void) dealloc;
 - (void) applicationDidFinishLaunching: (UIApplication*) application;
 - (void) applicationWillTerminate: (UIApplication*) application;
 - (void) applicationDidEnterBackground: (UIApplication*) application;
@@ -88,7 +89,7 @@ namespace juce
 
     NSObject* _pushNotificationsDelegate;
 
-- (id)init
+- (id) init
 {
     self = [super init];
     appSuspendTask = UIBackgroundTaskInvalid;
@@ -98,6 +99,11 @@ namespace juce
    #endif
 
     return self;
+}
+
+- (void) dealloc
+{
+    [super dealloc];
 }
 
 - (void) applicationDidFinishLaunching: (UIApplication*) application

@@ -25,7 +25,7 @@ namespace juce
 
 String String::fromCFString (CFStringRef cfString)
 {
-    if (cfString == 0)
+    if (cfString == nullptr)
         return {};
 
     CFRange range = { 0, CFStringGetLength (cfString) };
@@ -72,7 +72,7 @@ String String::convertToPrecomposedUnicode() const
 
     map.mappingVersion = kUnicodeUseLatestMapping;
 
-    UnicodeToTextInfo conversionInfo = 0;
+    UnicodeToTextInfo conversionInfo = {};
     String result;
 
     if (CreateUnicodeToTextInfo (&map, &conversionInfo) == noErr)
@@ -88,7 +88,7 @@ String String::convertToPrecomposedUnicode() const
         if (ConvertFromUnicodeToText (conversionInfo,
                                       bytesNeeded, (ConstUniCharArrayPtr) toUTF16().getAddress(),
                                       kUnicodeDefaultDirectionMask,
-                                      0, 0, 0, 0,
+                                      0, {}, {}, {},
                                       bytesNeeded, &bytesRead,
                                       &outputBufferSize, tempOut) == noErr)
         {

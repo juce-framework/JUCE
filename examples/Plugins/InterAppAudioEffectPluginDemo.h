@@ -152,17 +152,9 @@ public:
          : AudioProcessor (BusesProperties()
                            .withInput  ("Input",  AudioChannelSet::stereo(), true)
                            .withOutput ("Output", AudioChannelSet::stereo(), true)),
-           parameters (*this, nullptr)
+           parameters (*this, nullptr, "InterAppAudioEffect",
+                       { std::make_unique<AudioParameterFloat> ("gain", "Gain", NormalisableRange<float> (0.0f, 1.0f), 1.0f / 3.14f) })
     {
-        parameters.createAndAddParameter ("gain",
-                                          "Gain",
-                                          {},
-                                          NormalisableRange<float> (0.0f, 1.0f),
-                                          (float) (1.0 / 3.14),
-                                          nullptr,
-                                          nullptr);
-
-        parameters.state = ValueTree (Identifier ("InterAppAudioEffect"));
     }
 
     ~IAAEffectProcessor() {}

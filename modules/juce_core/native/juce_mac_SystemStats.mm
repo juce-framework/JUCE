@@ -86,7 +86,17 @@ void CPUInformation::initialise() noexcept
     hasAVX   = (c & (1u << 28)) != 0;
 
     SystemStatsHelpers::doCPUID (a, b, c, d, 7);
-    hasAVX2  = (b & (1u <<  5)) != 0;
+    hasAVX2            = (b & (1u <<  5)) != 0;
+    hasAVX512F         = (b & (1u << 16)) != 0;
+    hasAVX512DQ        = (b & (1u << 17)) != 0;
+    hasAVX512IFMA      = (b & (1u << 21)) != 0;
+    hasAVX512PF        = (b & (1u << 26)) != 0;
+    hasAVX512ER        = (b & (1u << 27)) != 0;
+    hasAVX512CD        = (b & (1u << 28)) != 0;
+    hasAVX512BW        = (b & (1u << 30)) != 0;
+    hasAVX512VL        = (b & (1u << 31)) != 0;
+    hasAVX512VBMI      = (c & (1u <<  1)) != 0;
+    hasAVX512VPOPCNTDQ = (c & (1u << 14)) != 0;
    #endif
 
     numLogicalCPUs = (int) [[NSProcessInfo processInfo] activeProcessorCount];
@@ -180,7 +190,7 @@ int SystemStats::getMemorySizeInMegabytes()
     uint64 mem = 0;
     size_t memSize = sizeof (mem);
     int mib[] = { CTL_HW, HW_MEMSIZE };
-    sysctl (mib, 2, &mem, &memSize, 0, 0);
+    sysctl (mib, 2, &mem, &memSize, nullptr, 0);
     return (int) (mem / (1024 * 1024));
 }
 
@@ -214,7 +224,7 @@ int SystemStats::getCpuSpeedInMegahertz()
     uint64 speedHz = 0;
     size_t speedSize = sizeof (speedHz);
     int mib[] = { CTL_HW, HW_CPU_FREQ };
-    sysctl (mib, 2, &speedHz, &speedSize, 0, 0);
+    sysctl (mib, 2, &speedHz, &speedSize, nullptr, 0);
 
    #if JUCE_BIG_ENDIAN
     if (speedSize == 4)

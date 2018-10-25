@@ -65,12 +65,12 @@ public:
         @param bytes The array containing the bytes to read.
         @param IPv6 if true indicates that 16 bytes should be read instead of 4.
     */
-    explicit IPAddress (const uint8 bytes[], bool IPv6 = false) noexcept;
+    explicit IPAddress (const uint8* bytes, bool IPv6 = false) noexcept;
 
     /** Creates an IPv6 address from an array of 8 16-bit integers
         @param bytes The array containing the bytes to read.
     */
-    explicit IPAddress (const uint16 bytes[8]) noexcept;
+    explicit IPAddress (const uint16* bytes) noexcept;
 
     /** Creates an IPv4 address from 4 bytes. */
     IPAddress (uint8 address1, uint8 address2, uint8 address3, uint8 address4) noexcept;
@@ -99,14 +99,14 @@ public:
         @returns 0 if the two addresses are identical, negative if this address is smaller than
                  the other one, or positive if is greater.
     */
-    int compare (const IPAddress& other) const noexcept;
+    int compare (const IPAddress&) const noexcept;
 
-    bool operator== (const IPAddress& other) const noexcept;
-    bool operator!= (const IPAddress& other) const noexcept;
-    bool operator<  (const IPAddress& other) const noexcept;
-    bool operator>  (const IPAddress& other) const noexcept;
-    bool operator<= (const IPAddress& other) const noexcept;
-    bool operator>= (const IPAddress& other) const noexcept;
+    bool operator== (const IPAddress&) const noexcept;
+    bool operator!= (const IPAddress&) const noexcept;
+    bool operator<  (const IPAddress&) const noexcept;
+    bool operator>  (const IPAddress&) const noexcept;
+    bool operator<= (const IPAddress&) const noexcept;
+    bool operator>= (const IPAddress&) const noexcept;
 
     //==============================================================================
     /** The elements of the IP address. */
@@ -135,23 +135,8 @@ public:
 
     /** If the IPAdress is the address of an interface on the machine, returns the associated broadcast address.
         If the address is not an interface, it will return a null address.
-     */
+    */
     static IPAddress getInterfaceBroadcastAddress (const IPAddress& interfaceAddress);
-
-private:
-    /** Union used to split a 16-bit unsigned integer into 2 8-bit unsigned integers or vice-versa */
-    union ByteUnion
-    {
-        uint16 combined;
-        uint8 split[2];
-    };
-
-    /** Method used to zero the remaining bytes of the address array when creating IPv4 addresses */
-    void zeroUnusedBytes() noexcept
-    {
-        for (int i = 4; i < 16; ++i)
-            address[i] = 0;
-    }
 };
 
 } // namespace juce

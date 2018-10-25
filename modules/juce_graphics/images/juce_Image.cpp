@@ -252,13 +252,13 @@ Image& Image::operator= (const Image& other)
 }
 
 Image::Image (Image&& other) noexcept
-    : image (static_cast<ImagePixelData::Ptr&&> (other.image))
+    : image (std::move (other.image))
 {
 }
 
 Image& Image::operator= (Image&& other) noexcept
 {
-    image = static_cast<ImagePixelData::Ptr&&> (other.image);
+    image = std::move (other.image);
     return *this;
 }
 

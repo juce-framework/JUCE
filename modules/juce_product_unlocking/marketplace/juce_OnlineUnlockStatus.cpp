@@ -120,10 +120,10 @@ struct KeyFileUtils
         {
             key.applyToValue (val);
 
-            const MemoryBlock mb (val.toMemoryBlock());
+            auto mb = val.toMemoryBlock();
 
             if (CharPointer_UTF8::isValidString (static_cast<const char*> (mb.getData()), (int) mb.getSize()))
-                xml.reset (XmlDocument::parse (mb.toString()));
+                xml = parseXML (mb.toString());
         }
 
         return xml != nullptr ? *xml : XmlElement("key");
@@ -465,9 +465,7 @@ OnlineUnlockStatus::UnlockResult OnlineUnlockStatus::attemptWebserverUnlock (con
 
     DBG ("Reply from server: " << reply);
 
-    std::unique_ptr<XmlElement> xml (XmlDocument::parse (reply));
-
-    if (xml != nullptr)
+    if (auto xml = parseXML (reply))
         return handleXmlReply (*xml);
 
     return handleFailedConnection();

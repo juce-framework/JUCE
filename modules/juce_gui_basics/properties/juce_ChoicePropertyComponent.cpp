@@ -73,9 +73,9 @@ class ChoicePropertyComponent::RemapperValueSourceWithDefault    : public Value:
                                                                    private Value::Listener
 {
 public:
-    RemapperValueSourceWithDefault (ValueWithDefault& vwd, const Array<var>& map)
+    RemapperValueSourceWithDefault (ValueWithDefault* vwd, const Array<var>& map)
         : valueWithDefault (vwd),
-          sourceValue (valueWithDefault.getPropertyAsValue()),
+          sourceValue (valueWithDefault->getPropertyAsValue()),
           mappings (map)
     {
         sourceValue.addListener (this);
@@ -83,7 +83,7 @@ public:
 
     var getValue() const override
     {
-        if (valueWithDefault.isUsingDefault())
+        if (valueWithDefault->isUsingDefault())
             return -1;
 
         auto targetValue = sourceValue.getValue();
@@ -101,23 +101,23 @@ public:
 
         if (newValueInt == -1)
         {
-            valueWithDefault.resetToDefault();
+            valueWithDefault->resetToDefault();
         }
         else
         {
             auto remappedVal = mappings [newValueInt - 1];
 
             if (! remappedVal.equalsWithSameType (sourceValue))
-                valueWithDefault = remappedVal;
+                *valueWithDefault = remappedVal;
         }
     }
 
 private:
-    ValueWithDefault& valueWithDefault;
+    void valueChanged (Value&) override { sendChangeMessage (true); }
+
+    ValueWithDefault* valueWithDefault;
     Value sourceValue;
     Array<var> mappings;
-
-    void valueChanged (Value&) override    { sendChangeMessage (true); }
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RemapperValueSourceWithDefault)
@@ -161,17 +161,19 @@ ChoicePropertyComponent::ChoicePropertyComponent (ValueWithDefault& valueToContr
                                                   const Array<var>& correspondingValues)
     : ChoicePropertyComponent (name, choiceList, correspondingValues)
 {
-    createComboBoxWithDefault (choiceList [correspondingValues.indexOf (valueToControl.getDefault())]);
+    valueWithDefault = &valueToControl;
 
-    comboBox.getSelectedIdAsValue().referTo (Value (new RemapperValueSourceWithDefault (valueToControl,
+    createComboBoxWithDefault (choiceList [correspondingValues.indexOf (valueWithDefault->getDefault())]);
+
+    comboBox.getSelectedIdAsValue().referTo (Value (new RemapperValueSourceWithDefault (valueWithDefault,
                                                                                         correspondingValues)));
 
-    valueToControl.onDefaultChange = [this, &valueToControl, choiceList, correspondingValues]
+    valueWithDefault->onDefaultChange = [this, choiceList, correspondingValues]
     {
         auto selectedId = comboBox.getSelectedId();
 
         comboBox.clear();
-        createComboBoxWithDefault (choiceList [correspondingValues.indexOf (valueToControl.getDefault())]);
+        createComboBoxWithDefault (choiceList [correspondingValues.indexOf (valueWithDefault->getDefault())]);
 
         comboBox.setSelectedId (selectedId);
     };
@@ -182,17 +184,19 @@ ChoicePropertyComponent::ChoicePropertyComponent (ValueWithDefault& valueToContr
     : PropertyComponent (name),
       choices ({ "Enabled", "Disabled" })
 {
-    createComboBoxWithDefault (valueToControl.getDefault() ? "Enabled" : "Disabled");
+    valueWithDefault = &valueToControl;
 
-    comboBox.getSelectedIdAsValue().referTo (Value (new RemapperValueSourceWithDefault (valueToControl,
+    createComboBoxWithDefault (valueWithDefault->getDefault() ? "Enabled" : "Disabled");
+
+    comboBox.getSelectedIdAsValue().referTo (Value (new RemapperValueSourceWithDefault (valueWithDefault,
                                                                                        { true, false })));
 
-    valueToControl.onDefaultChange = [this, &valueToControl]
+    valueWithDefault->onDefaultChange = [this]
     {
         auto selectedId = comboBox.getSelectedId();
 
         comboBox.clear();
-        createComboBoxWithDefault (valueToControl.getDefault() ? "Enabled" : "Disabled");
+        createComboBoxWithDefault (valueWithDefault->getDefault() ? "Enabled" : "Disabled");
 
         comboBox.setSelectedId (selectedId);
     };
@@ -200,6 +204,8 @@ ChoicePropertyComponent::ChoicePropertyComponent (ValueWithDefault& valueToContr
 
 ChoicePropertyComponent::~ChoicePropertyComponent()
 {
+    if (valueWithDefault != nullptr)
+        valueWithDefault->onDefaultChange = nullptr;
 }
 
 //==============================================================================

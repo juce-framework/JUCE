@@ -116,7 +116,14 @@ public:
            #else
             [window setDelegate: window];
            #endif
+
             [window setOpaque: component.isOpaque()];
+
+           #if defined (MAC_OS_X_VERSION_10_14)
+            if (! [window isOpaque])
+                [window setBackgroundColor: [NSColor clearColor]];
+           #endif
+
             [window setHasShadow: ((windowStyleFlags & windowHasDropShadow) != 0)];
 
             if (component.isAlwaysOnTop())
@@ -1049,7 +1056,7 @@ public:
     {
         if (isSharedWindow)
         {
-            auto* newWindow = [view window];
+            auto newWindow = [view window];
             bool shouldSetVisible = (window == nullptr && newWindow != nullptr);
 
             window = newWindow;

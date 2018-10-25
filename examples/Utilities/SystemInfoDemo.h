@@ -144,21 +144,31 @@ static String getAllSystemInfo()
     systemInfo
       << "Number of logical CPUs:  " << SystemStats::getNumCpus() << newLine
       << "Number of physical CPUs: " << SystemStats::getNumPhysicalCpus() << newLine
-      << "Memory size:     " << SystemStats::getMemorySizeInMegabytes() << " MB" << newLine
-      << "CPU vendor:      " << SystemStats::getCpuVendor() << newLine
-      << "CPU model:       " << SystemStats::getCpuModel()  << newLine
-      << "CPU speed:       " << SystemStats::getCpuSpeedInMegahertz() << " MHz" << newLine
-      << "CPU has MMX:     " << (SystemStats::hasMMX()    ? "yes" : "no") << newLine
-      << "CPU has SSE:     " << (SystemStats::hasSSE()    ? "yes" : "no") << newLine
-      << "CPU has SSE2:    " << (SystemStats::hasSSE2()   ? "yes" : "no") << newLine
-      << "CPU has SSE3:    " << (SystemStats::hasSSE3()   ? "yes" : "no") << newLine
-      << "CPU has SSSE3:   " << (SystemStats::hasSSSE3()  ? "yes" : "no") << newLine
-      << "CPU has SSE4.1:  " << (SystemStats::hasSSE41()  ? "yes" : "no") << newLine
-      << "CPU has SSE4.2:  " << (SystemStats::hasSSE42()  ? "yes" : "no") << newLine
-      << "CPU has 3DNOW:   " << (SystemStats::has3DNow()  ? "yes" : "no") << newLine
-      << "CPU has AVX:     " << (SystemStats::hasAVX()    ? "yes" : "no") << newLine
-      << "CPU has AVX2:    " << (SystemStats::hasAVX2()   ? "yes" : "no") << newLine
-      << "CPU has Neon:    " << (SystemStats::hasNeon()   ? "yes" : "no") << newLine
+      << "Memory size:             " << SystemStats::getMemorySizeInMegabytes() << " MB" << newLine
+      << "CPU vendor:              " << SystemStats::getCpuVendor() << newLine
+      << "CPU model:               " << SystemStats::getCpuModel()  << newLine
+      << "CPU speed:               " << SystemStats::getCpuSpeedInMegahertz() << " MHz" << newLine
+      << "CPU has MMX:             " << (SystemStats::hasMMX()             ? "yes" : "no") << newLine
+      << "CPU has SSE:             " << (SystemStats::hasSSE()             ? "yes" : "no") << newLine
+      << "CPU has SSE2:            " << (SystemStats::hasSSE2()            ? "yes" : "no") << newLine
+      << "CPU has SSE3:            " << (SystemStats::hasSSE3()            ? "yes" : "no") << newLine
+      << "CPU has SSSE3:           " << (SystemStats::hasSSSE3()           ? "yes" : "no") << newLine
+      << "CPU has SSE4.1:          " << (SystemStats::hasSSE41()           ? "yes" : "no") << newLine
+      << "CPU has SSE4.2:          " << (SystemStats::hasSSE42()           ? "yes" : "no") << newLine
+      << "CPU has 3DNOW:           " << (SystemStats::has3DNow()           ? "yes" : "no") << newLine
+      << "CPU has AVX:             " << (SystemStats::hasAVX()             ? "yes" : "no") << newLine
+      << "CPU has AVX2:            " << (SystemStats::hasAVX2()            ? "yes" : "no") << newLine
+      << "CPU has AVX512F:         " << (SystemStats::hasAVX512F()         ? "yes" : "no") << newLine
+      << "CPU has AVX512BW:        " << (SystemStats::hasAVX512BW()        ? "yes" : "no") << newLine
+      << "CPU has AVX512CD:        " << (SystemStats::hasAVX512CD()        ? "yes" : "no") << newLine
+      << "CPU has AVX512DQ:        " << (SystemStats::hasAVX512DQ()        ? "yes" : "no") << newLine
+      << "CPU has AVX512ER:        " << (SystemStats::hasAVX512ER()        ? "yes" : "no") << newLine
+      << "CPU has AVX512IFMA:      " << (SystemStats::hasAVX512IFMA()      ? "yes" : "no") << newLine
+      << "CPU has AVX512PF:        " << (SystemStats::hasAVX512PF()        ? "yes" : "no") << newLine
+      << "CPU has AVX512VBMI:      " << (SystemStats::hasAVX512VBMI()      ? "yes" : "no") << newLine
+      << "CPU has AVX512VL:        " << (SystemStats::hasAVX512VL()        ? "yes" : "no") << newLine
+      << "CPU has AVX512VPOPCNTDQ: " << (SystemStats::hasAVX512VPOPCNTDQ() ? "yes" : "no") << newLine
+      << "CPU has Neon:            " << (SystemStats::hasNeon()            ? "yes" : "no") << newLine
       << newLine;
 
     systemInfo

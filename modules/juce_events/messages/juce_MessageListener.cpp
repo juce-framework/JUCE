@@ -35,7 +35,7 @@ void Message::messageCallback()
 MessageListener::MessageListener() noexcept
 {
     // Are you trying to create a messagelistener before or after juce has been intialised??
-    jassert (MessageManager::getInstanceWithoutCreating() != nullptr);
+    JUCE_ASSERT_MESSAGE_MANAGER_EXISTS
 }
 
 MessageListener::~MessageListener()

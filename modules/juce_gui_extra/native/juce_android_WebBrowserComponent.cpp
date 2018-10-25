@@ -339,13 +339,13 @@ private:
         {
             MemoryOutputStream ostream;
 
-            while (true)
+            for (;;)
             {
                 if (threadShouldExit())
                     return;
 
                 char buffer [8192];
-                const int num = webInputStream->read (buffer, sizeof (buffer));
+                auto num = webInputStream->read (buffer, sizeof (buffer));
 
                 if (num <= 0)
                     break;

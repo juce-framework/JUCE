@@ -41,6 +41,10 @@
 
 namespace Vst2
 {
+// If the following files cannot be found then you are probably trying to host
+// VST2 plug-ins. To do this you must have a VST2 SDK in your header search
+// path. The VST2 SDK can be obtained from the vstsdk3610_11_06_2018_build_37
+// (or older) VST3 SDK or JUCE version 5.3.2.
 #include <pluginterfaces/vst2.x/aeffect.h>
 #include <pluginterfaces/vst2.x/aeffectx.h>
 }
@@ -661,11 +665,11 @@ struct ModuleHandle    : public ReferenceCountedObject
 
         if (moduleMain != nullptr)
         {
-            vstXml.reset (XmlDocument::parse (file.withFileExtension ("vstxml")));
+            vstXml = parseXML (file.withFileExtension ("vstxml"));
 
            #if JUCE_WINDOWS
             if (vstXml == nullptr)
-                vstXml.reset (XmlDocument::parse (getDLLResource (file, "VSTXML", 1)));
+                vstXml = parseXML (getDLLResource (file, "VSTXML", 1));
            #endif
         }
 
@@ -772,7 +776,7 @@ struct ModuleHandle    : public ReferenceCountedObject
                                                     .findChildFiles (File::findFiles, false, "*.vstxml");
 
                             if (! vstXmlFiles.isEmpty())
-                                vstXml.reset (XmlDocument::parse (vstXmlFiles.getReference(0)));
+                                vstXml = parseXML (vstXmlFiles.getReference(0));
                         }
                     }
 
@@ -1210,7 +1214,7 @@ struct VSTPluginInstance     : public AudioPluginInstance,
         // because many plugins need a chance to create HWNDs that will get their
         // messages delivered by the main message thread, and that's not possible from
         // a background thread.
-        jassert (MessageManager::getInstance()->isThisTheMessageThread());
+        JUCE_ASSERT_MESSAGE_THREAD
        #endif
 
         JUCE_VST_LOG ("Initialising VST: " + vstModule->pluginName + " (" + getVersion() + ")");
@@ -3216,7 +3220,7 @@ private:
         {
             // You shouldn't end up hitting this assertion unless the host is trying to do GUI
             // cleanup on a non-GUI thread.. If it does that, bad things could happen in here..
-            jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
+            JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
             JUCE_VST_LOG ("Closing VST UI: " + plugin.getName());
             isOpen = false;

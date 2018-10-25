@@ -679,7 +679,7 @@ public:
             bool isDefault = false;
         };
 
-        MidiIODeviceWatcher (ComSmartPtr<COMFactoryType>& comFactory)  : factory (comFactory)
+        MidiIODeviceWatcher (WinRTWrapper::ComPtr<COMFactoryType>& comFactory)  : factory (comFactory)
         {
         }
 
@@ -894,12 +894,12 @@ public:
             return {};
         }
 
-        ComSmartPtr<COMFactoryType>& factory;
+        WinRTWrapper::ComPtr<COMFactoryType>& factory;
 
         EventRegistrationToken deviceAddedToken   { 0 },
                                deviceRemovedToken { 0 };
 
-        ComSmartPtr<IDeviceWatcher> watcher;
+        WinRTWrapper::ComPtr<IDeviceWatcher> watcher;
 
         Array<DeviceInfo> connectedDevices;
         CriticalSection deviceChanges;
@@ -913,8 +913,8 @@ public:
     struct OpenMidiPortThread  : public Thread
     {
         OpenMidiPortThread (String threadName, String midiDeviceID,
-                            ComSmartPtr<COMFactoryType>& comFactory,
-                            ComSmartPtr<COMInterfaceType>& comPort)
+                            WinRTWrapper::ComPtr<COMFactoryType>& comFactory,
+                            WinRTWrapper::ComPtr<COMInterfaceType>& comPort)
             : Thread (threadName),
               deviceID (midiDeviceID),
               factory (comFactory),
@@ -930,7 +930,7 @@ public:
         void run() override
         {
             WinRTWrapper::ScopedHString hDeviceId (deviceID);
-            ComSmartPtr<IAsyncOperation<COMType*>> asyncOp;
+            WinRTWrapper::ComPtr<IAsyncOperation<COMType*>> asyncOp;
             auto hr = factory->FromIdAsync (hDeviceId.get(), asyncOp.resetAndGetPointerAddress());
 
             if (FAILED (hr))
@@ -959,8 +959,8 @@ public:
         }
 
         const String deviceID;
-        ComSmartPtr<COMFactoryType>& factory;
-        ComSmartPtr<COMInterfaceType>& port;
+        WinRTWrapper::ComPtr<COMFactoryType>& factory;
+        WinRTWrapper::ComPtr<COMInterfaceType>& port;
         WaitableEvent portOpened { true };
     };
 
@@ -1038,19 +1038,19 @@ public:
             if (! isStarted)
                 return S_OK;
 
-            ComSmartPtr<IMidiMessage> message;
+            WinRTWrapper::ComPtr<IMidiMessage> message;
             auto hr = args->get_Message (message.resetAndGetPointerAddress());
 
             if (FAILED (hr))
                 return hr;
 
-            ComSmartPtr<IBuffer> buffer;
+            WinRTWrapper::ComPtr<IBuffer> buffer;
             hr = message->get_RawData (buffer.resetAndGetPointerAddress());
 
             if (FAILED (hr))
                 return hr;
 
-            ComSmartPtr<Windows::Storage::Streams::IBufferByteAccess> bufferByteAccess;
+            WinRTWrapper::ComPtr<Windows::Storage::Streams::IBufferByteAccess> bufferByteAccess;
             hr = buffer->QueryInterface (bufferByteAccess.resetAndGetPointerAddress());
 
             if (FAILED (hr))
@@ -1101,7 +1101,7 @@ public:
         MidiInputCallback& callback;
         String deviceName;
         MidiDataConcatenator concatenator { 4096 };
-        ComSmartPtr<IMidiInPort> midiInPort;
+        WinRTWrapper::ComPtr<IMidiInPort> midiInPort;
         EventRegistrationToken midiInMessageToken { 0 };
 
         double startTime = 0;
@@ -1175,16 +1175,16 @@ public:
         String getDeviceName() override    { return deviceName; }
 
         String deviceName;
-        ComSmartPtr<IMidiOutPort> midiOutPort;
-        ComSmartPtr<IBuffer> buffer;
-        ComSmartPtr<Windows::Storage::Streams::IBufferByteAccess> bufferByteAccess;
+        WinRTWrapper::ComPtr<IMidiOutPort> midiOutPort;
+        WinRTWrapper::ComPtr<IBuffer> buffer;
+        WinRTWrapper::ComPtr<Windows::Storage::Streams::IBufferByteAccess> bufferByteAccess;
         uint8_t* bufferData = nullptr;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WinRTOutputWrapper);
     };
 
-    ComSmartPtr<IMidiInPortStatics>  midiInFactory;
-    ComSmartPtr<IMidiOutPortStatics> midiOutFactory;
+    WinRTWrapper::ComPtr<IMidiInPortStatics>  midiInFactory;
+    WinRTWrapper::ComPtr<IMidiOutPortStatics> midiOutFactory;
 
     std::unique_ptr<MidiIODeviceWatcher<IMidiInPortStatics>>  inputDeviceWatcher;
     std::unique_ptr<MidiIODeviceWatcher<IMidiOutPortStatics>> outputDeviceWatcher;

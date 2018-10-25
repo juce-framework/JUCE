@@ -122,7 +122,7 @@ private:
           parentWidth = 50.0f, parentHeight = 50.0f;
 
     Colour colour;
-    Thread::ThreadID threadId = 0;
+    Thread::ThreadID threadId = {};
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BouncingBallComp)
 };
