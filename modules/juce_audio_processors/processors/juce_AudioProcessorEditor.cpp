@@ -88,18 +88,13 @@ void AudioProcessorEditor::setResizable (const bool shouldBeResizable, const boo
     {
         resizable = shouldBeResizable;
 
-        if (! resizable)
+        if (! resizable && constrainer == &defaultConstrainer)
         {
-            setConstrainer (&defaultConstrainer);
+            auto width = getWidth();
+            auto height = getHeight();
 
-            if (auto w = getWidth())
-            {
-                if (auto h = getHeight())
-                {
-                    defaultConstrainer.setSizeLimits (w, h, w, h);
-                    resized();
-                }
-            }
+            if (width > 0 && height > 0)
+                defaultConstrainer.setSizeLimits (width, height, width, height);
         }
     }
 
@@ -146,7 +141,10 @@ void AudioProcessorEditor::setConstrainer (ComponentBoundsConstrainer* newConstr
 {
     if (constrainer != newConstrainer)
     {
-        resizable = true;
+        if (newConstrainer != nullptr)
+            resizable = (newConstrainer->getMinimumWidth()  != newConstrainer->getMaximumWidth()
+                      || newConstrainer->getMinimumHeight() != newConstrainer->getMaximumHeight());
+
         attachConstrainer (newConstrainer);
     }
 }
