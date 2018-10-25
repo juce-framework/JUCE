@@ -1481,9 +1481,6 @@ void ProjucerApplication::rescanJUCEPathModules()
 {
     File jucePath (getAppSettings().getStoredPath (Ids::defaultJuceModulePath, TargetOS::getThisOS()).get().toString());
 
-    if (! jucePath.exists())
-        return;
-
     if (isRunningCommandLine)
         jucePathModuleList.scanPaths ({ jucePath });
     else
