@@ -852,7 +852,7 @@ File ProjucerApplication::tryToFindDemoRunnerProject()
 
     if (projectFolder == File())
     {
-        lastDemoRunnerProjectFile = {};
+        lastDemoRunnerProjectFile = File();
         return {};
     }
 
