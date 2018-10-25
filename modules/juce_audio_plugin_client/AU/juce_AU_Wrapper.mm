@@ -536,13 +536,10 @@ public:
                     if (binding->inOutMagicNumber != ARA::kARAAudioUnitMagic)
                         return kAudioUnitErr_InvalidProperty;   // if the magic value isn't found, the property ID is re-used outside the ARA context with different, unsupported sematics
 
-                    ARA::PlugIn::DocumentController* documentController = reinterpret_cast<ARA::PlugIn::DocumentController*> (binding->inDocumentControllerRef);
-                    ARA_VALIDATE_API_ARGUMENT(documentController, ARA::PlugIn::DocumentController::isValidDocumentController (documentController));
-
                     ARAAudioProcessor* araAudioProcessor = static_cast<ARAAudioProcessor*> (juceFilter.get());
                     binding->outPlugInExtension = araAudioProcessor->createARAPlugInExtension (binding->inDocumentControllerRef, binding->knownRoles, binding->assignedRoles);
                     if (binding->outPlugInExtension == NULL)
-                        return kAudioUnitErr_CannotDoInCurrentContext;  // _createARAPlugInExtension() returns null if binding is already established
+                        return kAudioUnitErr_CannotDoInCurrentContext;  // createARAPlugInExtension() returns null if binding is already established
 
                     return noErr;
                 }
