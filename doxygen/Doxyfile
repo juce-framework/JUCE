@@ -228,7 +228,8 @@ TAB_SIZE               = 4
 # "Side Effects:". You can put \n's in the value part of an alias to insert
 # newlines.
 
-ALIASES                = "topictag{1}=\1" \
+ALIASES                = "tags{1}=" \
+                         "topictag{1}=\1" \
                          "box{1}=<dl class=\"section attention\"><dt>\1</dt><dd>" \
                          "endbox=</dd></dl>" \
                          "c_void=@s_code{void}" \

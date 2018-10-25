@@ -53,6 +53,7 @@ public:
             stream.setPosition (0);
             stream.truncate();
             ...
+        }
         @endcode
 
 
