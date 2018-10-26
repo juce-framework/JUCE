@@ -130,6 +130,8 @@ enum class Type  : uint8
     float_  = 'f'
 };
 
+const int numBytesInType = 4;
+
 //==============================================================================
 /** Defines a native function that the program can call.
 

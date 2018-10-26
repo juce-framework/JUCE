@@ -98,6 +98,7 @@ private:
 
     struct Statement;
     struct Expression;
+    struct Variable;
     struct BlockStatement;
     struct Function;
     struct AllocatedObject  { virtual ~AllocatedObject() noexcept {} };
@@ -375,6 +376,7 @@ private:
         {
             blockBeingParsed = allocate<BlockStatement> (location, nullptr, nullptr, false);
             parseCode();
+            heapSizeRequired += arrayHeapSize;
         }
 
         void parseCode()
@@ -449,6 +451,7 @@ private:
         Array<int64> includedSourceCode;
         const Array<NativeFunction>& nativeFunctions;
         uint32 heapSizeRequired;
+        uint32 arrayHeapSize = 0;
 
         template <typename Type, typename... Args>
         Type* allocate (Args... args)   { auto o = new Type (args...); allAllocatedObjects.add (o); return o; }
@@ -542,21 +545,21 @@ private:
             location.throwError ("File not found: " + include);
         }
 
+        //TODO:   should there be a max array size?
         void parseGlobalVariableDeclaraion (bool isConst, Type type, String name)
         {
             for (;;)
             {
-                int arraySize = matchIf (Token::openBracket) ? parseIntegerLiteral() : 0;
-
-                if (arraySize > 0)
-                    location.throwError ("Arrays not yet implemented!");
-
-                var constantInitialiser;
-
-                if (isConst)
-                    constantInitialiser = parseConstantExpressionInitialiser (type);
-
-                blockBeingParsed->addVariable ({ name, type, true, isConst, constantInitialiser }, location);
+                if (matchIf (Token::openBracket))
+                {
+                    int arraySize = 0;
+                    parseGlobalArray (arraySize, type, name, nullptr);
+                    arrayHeapSize += uint32 (arraySize * 4);
+                }
+                else
+                {
+                    parseGlobalVariable (isConst, type, name);
+                }
 
                 if (matchIf (Token::comma))
                 {
@@ -567,6 +570,40 @@ private:
                 match (Token::semicolon);
                 break;
             }
+        }
+
+        void parseGlobalArray (int& arraySize, Type type, const String& name, Variable* parent)
+        {
+            const auto value = parseIntegerLiteral();
+            match (Token::closeBracket);
+
+            blockBeingParsed->addVariable ({ {}, type, true, false, {}, value, parent }, location);
+
+            auto& newArray = blockBeingParsed->arrays.getReference (blockBeingParsed->arrays.size() - 1);
+
+            if (parent != nullptr)
+                parent->nextArray = &newArray;
+
+            if (matchIf (Token::openBracket))
+            {
+                parseGlobalArray (arraySize, type, name, &newArray);
+                arraySize *= value;
+            }
+            else
+            {
+                newArray.name = name;
+                arraySize = value;
+            }
+        }
+
+        void parseGlobalVariable (bool isConst, Type type, String name)
+        {
+            var constantInitialiser;
+
+            if (isConst)
+                constantInitialiser = parseConstantExpressionInitialiser (type);
+
+            blockBeingParsed->addVariable ({ name, type, true, isConst, constantInitialiser, 0 }, location);
         }
 
         var parseConstantExpressionInitialiser (Type expectedType)
@@ -701,7 +738,7 @@ private:
             if (matchIf (Token::assign))
             {
                 auto loc = location;
-                return allocate<Assignment> (loc, blockBeingParsed, getIdentifierFromExpression (lhs), parseExpression(), false);
+                return allocate<Assignment> (loc, blockBeingParsed, lhs, parseExpression(), false);
             }
 
             return lhs;
@@ -831,26 +868,31 @@ private:
                 return {};
             }
 
-            if (matchIf (Token::openBracket))
-            {
-                auto s = allocate<ArraySubscript> (location, blockBeingParsed);
-                s->object = input;
-                s->index = parseExpression();
-                match (Token::closeBracket);
-                return parseSuffixes (s);
-            }
-
-            if (matchIf (Token::plusplus))   return parsePostIncDec (input, Token::plus);
-            if (matchIf (Token::minusminus)) return parsePostIncDec (input, Token::minus);
+            if (matchIf (Token::openBracket)) return parseArraySubscript (input);
+            if (matchIf (Token::plusplus))    return parsePostIncDec (input, Token::plus);
+            if (matchIf (Token::minusminus))  return parsePostIncDec (input, Token::minus);
 
             return input;
+        }
+
+        ExpPtr parseArraySubscript (ExpPtr input)
+        {
+            auto s = allocate<ArraySubscript> (location, blockBeingParsed);
+            s->object = input;
+            s->index = parseExpression();
+            match (Token::closeBracket);
+
+            if (matchIf (Token::openBracket))
+                return parseArraySubscript (s);
+
+            return s;
         }
 
         ExpPtr parseInPlaceOpExpression (ExpPtr lhs, TokenType opType)
         {
             auto loc = location;
             auto rhs = parseExpression();
-            return allocate<Assignment> (loc, blockBeingParsed, getIdentifierFromExpression (lhs),
+            return allocate<Assignment> (loc, blockBeingParsed, lhs,
                                          allocate<BinaryOperator> (location, blockBeingParsed, lhs, rhs, opType), false);
         }
 
@@ -858,14 +900,14 @@ private:
         {
             auto lhs = parseFactor();
             auto one = allocate<LiteralValue> (location, blockBeingParsed, (int) 1);
-            return allocate<Assignment> (location, blockBeingParsed, getIdentifierFromExpression (lhs),
+            return allocate<Assignment> (location, blockBeingParsed, lhs,
                                          allocate<BinaryOperator> (location, blockBeingParsed, lhs, one, opType), false);
         }
 
         ExpPtr parsePostIncDec (ExpPtr lhs, TokenType opType)
         {
             auto one = allocate<LiteralValue> (location, blockBeingParsed, (int) 1);
-            return allocate<Assignment> (location, blockBeingParsed, getIdentifierFromExpression (lhs),
+            return allocate<Assignment> (location, blockBeingParsed, lhs,
                                          allocate<BinaryOperator> (location, blockBeingParsed, lhs, one, opType), true);
         }
 
@@ -896,17 +938,17 @@ private:
 
             for (StatementPtr result = nullptr;;)
             {
-                auto name = parseIdentifier();
+                auto identifier = allocate<Identifier> (location, blockBeingParsed, parseIdentifier());
                 auto loc = location;
 
                 if (isConst)
                 {
                     auto constantValue = parseConstantExpressionInitialiser (type);
-                    blockBeingParsed->addVariable ({ name, type, false, true, constantValue }, loc);
+                    blockBeingParsed->addVariable ({ identifier->getIdentifier(), type, false, true, constantValue }, loc);
                 }
                 else
                 {
-                    blockBeingParsed->addVariable ({ name, type, false, false, {} }, loc);
+                    blockBeingParsed->addVariable ({ identifier->getIdentifier(), type, false, false, {} }, loc);
 
                     auto assignedValue = matchIf (Token::assign) ? parseExpression() : nullptr;
 
@@ -919,7 +961,7 @@ private:
                         if (assignedValue == nullptr)
                             assignedValue = allocate<LiteralValue> (loc, blockBeingParsed, (int) 0);
 
-                        auto assignment = allocate<Assignment> (loc, blockBeingParsed, name, assignedValue, false);
+                        auto assignment = allocate<Assignment> (loc, blockBeingParsed, identifier, assignedValue, false);
 
                         if (result == nullptr)
                         {
@@ -996,15 +1038,6 @@ private:
             return name;
         }
 
-        String getIdentifierFromExpression (ExpPtr e)
-        {
-            if (auto i = dynamic_cast<Identifier*> (e))
-                return i->name;
-
-            location.throwError ("This operator requires an assignable variable");
-            return {};
-        }
-
         ExpPtr parseFunctionCall (const String& name)
         {
             auto call = allocate<FunctionCall> (location, blockBeingParsed);
@@ -1034,7 +1067,7 @@ private:
     //==============================================================================
     struct CodeGenerator
     {
-        CodeGenerator (Array<uint8>& output, const SyntaxTreeBuilder& stb)
+        CodeGenerator (Array<uint8>& output, SyntaxTreeBuilder& stb)
             : outputCode (output), syntaxTree (stb) {}
 
         void generateCode (BlockPtr outerBlock, uint32 heapSizeBytesRequired)
@@ -1070,7 +1103,7 @@ private:
 
         //==============================================================================
         Array<uint8>& outputCode;
-        const SyntaxTreeBuilder& syntaxTree;
+        SyntaxTreeBuilder& syntaxTree;
 
         struct Marker  { int index = 0; };
         struct MarkerAndAddress  { Marker marker; int address; };
@@ -1221,6 +1254,44 @@ private:
 
             emitCast (sourceType, requiredType, location);
         }
+
+        void emitArrayElementIndex (const Expression* target, BlockPtr parentBlock,
+                                    int stackDepth, const CodeLocation& errorLocation)
+        {
+            if (auto currentSubscript = dynamic_cast<const ArraySubscript*> (target))
+            {
+                const auto identifier = currentSubscript->getIdentifier();
+                auto array = parentBlock->getArray (identifier, errorLocation);
+
+                ExpPtr elementIndent = nullptr;
+                auto currentArray = &array;
+
+                while (currentSubscript != nullptr && currentArray != nullptr)
+                {
+                    auto lhs = syntaxTree.allocate<LiteralValue> (errorLocation, parentBlock, parentBlock->getArrayElementSizeInBytes (*currentArray));
+                    ExpPtr subscriptIndent = syntaxTree.allocate<BinaryOperator> (errorLocation, parentBlock, lhs, currentSubscript->index, Token::times);
+
+                    if (elementIndent == nullptr)
+                        elementIndent = subscriptIndent;
+                    else
+                        elementIndent = syntaxTree.allocate<BinaryOperator> (errorLocation, parentBlock, elementIndent, subscriptIndent, Token::plus);
+
+                    currentSubscript = dynamic_cast<ArraySubscript*> (currentSubscript->object);
+                    currentArray = currentArray->previousArray;
+                }
+
+                auto arrayStart = (int) (syntaxTree.heapSizeRequired - syntaxTree.arrayHeapSize) + parentBlock->getArrayStart (identifier, errorLocation);
+                auto lhs = syntaxTree.allocate<LiteralValue> (errorLocation, parentBlock, arrayStart);
+                elementIndent = syntaxTree.allocate<BinaryOperator> (errorLocation, parentBlock, lhs, elementIndent, Token::plus);
+
+                elementIndent = elementIndent->simplify (syntaxTree);
+                elementIndent->emit (*this, Type::int_, stackDepth);
+            }
+            else
+            {
+                errorLocation.throwError ("Cannot cast Expression to ArraySubscript");
+            }
+        }
     };
 
     //==============================================================================
@@ -1248,6 +1319,7 @@ private:
         Expression (const CodeLocation& l, BlockPtr parent) noexcept : Statement (l, parent) {}
         virtual Type getType (CodeGenerator&) const = 0;
         virtual ExpPtr simplify (SyntaxTreeBuilder&) override    { return this; }
+        virtual String getIdentifier() const { location.throwError ("This operator requires an assignable variable"); return {}; }
     };
 
     struct Variable
@@ -1256,6 +1328,9 @@ private:
         Type type;
         bool isGlobal, isConst;
         var constantValue;
+        int numElements = 0;
+        Variable* previousArray = nullptr;
+        Variable* nextArray = nullptr;
     };
 
     //==============================================================================
@@ -1387,7 +1462,8 @@ private:
         // returns -ve values for globals
         int getVariableDepth (const String& name, const CodeLocation& locationForError) const
         {
-            int index = indexOf (variables, name);
+            auto index = indexOf (variables, name);
+
             if (index >= 0)
                 return getNumVariablesInParentBlocks() + index;
 
@@ -1400,11 +1476,49 @@ private:
                         return i + 1 + function->getNumLocals();
 
             index = indexOf (getGlobalVariables(), name);
+
             if (index >= 0)
                 return -(index + 1);
 
             locationForError.throwError ("Unknown variable '" + name + "'");
-            return 0;
+        }
+
+        Variable getArray (const String& name, const CodeLocation& locationForError) const
+        {
+            for (const auto& array : getGlobalArrays())
+                if (array.name == name)
+                    return array;
+
+            locationForError.throwError ("Unknown array '" + name + "'");
+        }
+
+        int getArraySizeInBytes (const Variable& array) const
+        {
+            return array.numElements * getArrayElementSizeInBytes (array);
+        }
+
+        int getArrayElementSizeInBytes (const Variable& array) const
+        {
+            if (array.nextArray != nullptr)
+                return getArraySizeInBytes (*array.nextArray);
+
+            return numBytesInType;
+        }
+
+        int getArrayStart (const String& name, const CodeLocation& locationForError) const
+        {
+            int start = 0;
+
+            for (const auto& array : getGlobalArrays())
+            {
+                if (array.name == name)
+                    return start;
+
+                if (array.name.isNotEmpty())
+                    start += getArraySizeInBytes (array);
+            }
+
+            locationForError.throwError ("Unknown array '" + name + "'");
         }
 
         int getNumVariablesInParentBlocks() const noexcept
@@ -1415,6 +1529,7 @@ private:
 
         const Array<Variable>& getGlobalVariables() const noexcept  { return parentBlock != nullptr ? parentBlock->getGlobalVariables() : variables; }
         const Array<Variable>& getGlobalConstants() const noexcept  { return parentBlock != nullptr ? parentBlock->getGlobalConstants() : constants; }
+        const Array<Variable>& getGlobalArrays() const noexcept     { return parentBlock != nullptr ? parentBlock->getGlobalArrays() : arrays; }
 
         const Variable& getVariable (const String& name, const CodeLocation& locationForError) const
         {
@@ -1442,15 +1557,19 @@ private:
                 if (v.name == name)
                     return v;
 
+            for (auto& v : getGlobalArrays())
+                if (v.name == name)
+                    return v;
+
             locationForError.throwError ("Unknown variable '" + name + "'");
         }
 
         void addVariable (Variable v, const CodeLocation& locationForError)
         {
-            if (indexOf (variables, v.name) >= 0 || indexOf (constants, v.name) >= 0)
+            if (v.name.isNotEmpty() && (indexOf (variables, v.name) >= 0 || indexOf (constants, v.name) >= 0 || indexOf (arrays, v.name) >= 0))
                 locationForError.throwError ("Variable '" + v.name + "' already exists");
 
-            (v.isConst ? constants : variables).add (v);
+            (v.numElements == 0 ? (v.isConst ? constants : variables) : arrays).add (v);
         }
 
         static int indexOf (const Array<Variable>& vars, const String& name) noexcept
@@ -1464,7 +1583,7 @@ private:
 
         Function* function;
         Array<StatementPtr> statements;
-        Array<Variable> variables, constants;
+        Array<Variable> variables, constants, arrays;
         bool isMainBlockOfFunction;
     };
 
@@ -1752,6 +1871,11 @@ private:
             return this;
         }
 
+        String getIdentifier() const override
+        {
+            return name;
+        }
+
         String name;
     };
 
@@ -1994,7 +2118,7 @@ private:
 
     struct Assignment  : public Expression
     {
-        Assignment (const CodeLocation& l, BlockPtr parent, const String& dest, ExpPtr source, bool isPost) noexcept
+        Assignment (const CodeLocation& l, BlockPtr parent, ExpPtr dest, ExpPtr source, bool isPost) noexcept
             : Expression (l, parent), target (dest), newValue (source), isPostAssignment (isPost) {}
 
         void emit (CodeGenerator& cg, Type requiredType, int stackDepth) const override
@@ -2003,42 +2127,50 @@ private:
 
             if (isPostAssignment && requiredType != Type::void_)
             {
-                cg.emitVariableRead (variableType, requiredType, stackDepth,
-                                     parentBlock->getVariableDepth (target, location), location);
+                target->emit (cg, requiredType, stackDepth);
                 ++stackDepth;
                 requiredType = Type::void_;
             }
 
             newValue->emit (cg, variableType, stackDepth);
-            auto index = parentBlock->getVariableDepth (target, location);
 
-            if (requiredType != Type::void_)
+            if (auto a = dynamic_cast<ArraySubscript*> (target))
             {
-                cg.emit (OpCode::dup);
-                ++stackDepth;
-            }
-
-            if (index < 0)
-            {
-                cg.emit (OpCode::dropToGlobal, (int16) ((-index) - 1));
+                cg.emitArrayElementIndex (a, parentBlock, stackDepth, location);
+                cg.emit (OpCode::setHeapInt);
             }
             else
             {
-                index += stackDepth;
+                auto index = parentBlock->getVariableDepth (target->getIdentifier(), location);
 
-                if (index >= 128)
-                    cg.emit (OpCode::dropToStack16, (int16) index);
+                if (requiredType != Type::void_)
+                {
+                    cg.emit (OpCode::dup);
+                    ++stackDepth;
+                }
+
+                if (index < 0)
+                {
+                    cg.emit (OpCode::dropToGlobal, (int16) ((-index) - 1));
+                }
                 else
-                    cg.emit (OpCode::dropToStack, (int8) index);
-            }
+                {
+                    index += stackDepth;
 
-            if (requiredType != Type::void_)
-                cg.emitCast (variableType, requiredType, location);
+                    if (index >= 128)
+                        cg.emit (OpCode::dropToStack16, (int16) index);
+                    else
+                        cg.emit (OpCode::dropToStack, (int8) index);
+                }
+
+                if (requiredType != Type::void_)
+                    cg.emitCast (variableType, requiredType, location);
+            }
         }
 
         Type getType (CodeGenerator&) const override
         {
-            return parentBlock->getVariable (target, location).type;
+            return parentBlock->getVariable (target->getIdentifier(), location).type;
         }
 
         void visitSubStatements (Statement::Visitor& visit) const override
@@ -2052,8 +2184,7 @@ private:
             return this;
         }
 
-        String target;
-        ExpPtr newValue;
+        ExpPtr target, newValue;
         bool isPostAssignment;
     };
 
@@ -2214,9 +2345,10 @@ private:
     {
         ArraySubscript (const CodeLocation& l, BlockPtr parent) noexcept  : Expression (l, parent) {}
 
-        void emit (CodeGenerator&, Type /*requiredType*/, int /*stackDepth*/) const override
+        void emit (CodeGenerator& cg, Type /*requiredType*/, int stackDepth) const override
         {
-            location.throwError ("Arrays are not implemented yet!");
+            cg.emitArrayElementIndex (this, parentBlock, stackDepth, location);
+            cg.emit (OpCode::getHeapInt);
         }
 
         void visitSubStatements (Statement::Visitor& visit) const override
@@ -2234,6 +2366,18 @@ private:
         Type getType (CodeGenerator& cg) const override
         {
             return object->getType (cg);
+        }
+
+        String getIdentifier() const override
+        {
+            if (auto i = dynamic_cast<Identifier*> (object))
+                return i->name;
+
+            if (auto s = dynamic_cast<ArraySubscript*> (object))
+                return s->getIdentifier();
+
+            location.throwError ("This operator requires an assignable variable");
+            return {};
         }
 
         ExpPtr object, index;
