@@ -156,9 +156,6 @@ public:
     */
     double getSampleRate() const noexcept                 { return currentSampleRate; }
 
-    /** Returns true if this voice started playing its current note before the other voice did. */
-    bool wasStartedBefore (const MPESynthesiserVoice& other) const noexcept;
-
 protected:
     //==============================================================================
     /** Resets the state of this voice after a sound has finished playing.
@@ -182,7 +179,8 @@ protected:
 private:
     //==============================================================================
     friend class MPESynthesiser;
-    uint32 noteStartTime = 0;
+
+    uint32 noteOnTime = 0;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MPESynthesiserVoice)
 };

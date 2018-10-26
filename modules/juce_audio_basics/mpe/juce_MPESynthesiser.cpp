@@ -42,13 +42,16 @@ MPESynthesiser::~MPESynthesiser()
 void MPESynthesiser::startVoice (MPESynthesiserVoice* voice, MPENote noteToStart)
 {
     jassert (voice != nullptr);
+
     voice->currentlyPlayingNote = noteToStart;
+    voice->noteOnTime = lastNoteOnCounter++;
     voice->noteStarted();
 }
 
 void MPESynthesiser::stopVoice (MPESynthesiserVoice* voice, MPENote noteToStop, bool allowTailOff)
 {
     jassert (voice != nullptr);
+
     voice->currentlyPlayingNote = noteToStop;
     voice->noteStopped (allowTailOff);
 }
@@ -197,7 +200,7 @@ MPESynthesiserVoice* MPESynthesiser::findVoiceToSteal (MPENote noteToStealVoiceF
         // compilers generating code containing heap allocations..
         struct Sorter
         {
-            bool operator() (const MPESynthesiserVoice* a, const MPESynthesiserVoice* b) const noexcept { return a->wasStartedBefore (*b); }
+            bool operator() (const MPESynthesiserVoice* a, const MPESynthesiserVoice* b) const noexcept { return a->noteOnTime < b->noteOnTime; }
         };
 
         std::sort (usableVoices.begin(), usableVoices.end(), Sorter());
