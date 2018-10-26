@@ -20,7 +20,7 @@
 //[Headers] You can add your own extra header files here...
 //[/Headers]
 
-#include "Forte.h"
+#include "RackRow.h"
 
 
 //[MiscUserDefs] You can add your own user definitions and misc code here...
@@ -190,7 +190,7 @@ Forte::Forte ()
     label->setColour (TextEditor::textColourId, Colours::black);
     label->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
-    label->setBounds (17, 112, 150, 24);
+    label->setBounds (136, 128, 150, 24);
 
     label7.reset (new Label ("new label",
                              TRANS("SetLists")));
@@ -204,7 +204,7 @@ Forte::Forte ()
     label7->setBounds (136, 112, 150, 24);
 
     label9.reset (new Label ("new label",
-                             TRANS("Setup")));
+                             TRANS("Performances")));
     addAndMakeVisible (label9.get());
     label9->setFont (Font (15.00f, Font::plain).withTypefaceStyle ("Regular"));
     label9->setJustificationType (Justification::centredLeft);
@@ -212,7 +212,7 @@ Forte::Forte ()
     label9->setColour (TextEditor::textColourId, Colours::black);
     label9->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
-    label9->setBounds (256, 112, 150, 24);
+    label9->setBounds (136, 144, 150, 24);
 
     textEditor7.reset (new TextEditor ("new text editor"));
     addAndMakeVisible (textEditor7.get());
@@ -249,7 +249,7 @@ Forte::Forte ()
     comboBox3->setBounds (400, 32, 112, 24);
 
     label6.reset (new Label ("new label",
-                             TRANS("Midi filter\n")));
+                             TRANS("Zone\n")));
     addAndMakeVisible (label6.get());
     label6->setFont (Font (15.00f, Font::plain).withTypefaceStyle ("Regular"));
     label6->setJustificationType (Justification::centredLeft);
@@ -257,7 +257,7 @@ Forte::Forte ()
     label6->setColour (TextEditor::textColourId, Colours::black);
     label6->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
-    label6->setBounds (416, 0, 80, 24);
+    label6->setBounds (432, 0, 80, 24);
 
     label10.reset (new Label ("new label",
                               TRANS("Channel")));
@@ -566,7 +566,7 @@ BEGIN_JUCER_METADATA
                colourOver="0" resourceDown="" opacityDown="1.00000000000000000000"
                colourDown="0"/>
   <LABEL name="new label" id="35b886c1bcdf396b" memberName="label" virtualName=""
-         explicitFocusOrder="0" pos="17 112 150 24" edTextCol="ff000000"
+         explicitFocusOrder="0" pos="136 128 150 24" edTextCol="ff000000"
          edBkgCol="0" labelText="Songs" editableSingleClick="0" editableDoubleClick="0"
          focusDiscardsChanges="0" fontname="Default font" fontsize="15.00000000000000000000"
          kerning="0.00000000000000000000" bold="0" italic="0" justification="33"/>
@@ -576,10 +576,11 @@ BEGIN_JUCER_METADATA
          focusDiscardsChanges="0" fontname="Default font" fontsize="15.00000000000000000000"
          kerning="0.00000000000000000000" bold="0" italic="0" justification="33"/>
   <LABEL name="new label" id="71e88b4332596fb1" memberName="label9" virtualName=""
-         explicitFocusOrder="0" pos="256 112 150 24" edTextCol="ff000000"
-         edBkgCol="0" labelText="Setup" editableSingleClick="0" editableDoubleClick="0"
-         focusDiscardsChanges="0" fontname="Default font" fontsize="15.00000000000000000000"
-         kerning="0.00000000000000000000" bold="0" italic="0" justification="33"/>
+         explicitFocusOrder="0" pos="136 144 150 24" edTextCol="ff000000"
+         edBkgCol="0" labelText="Performances" editableSingleClick="0"
+         editableDoubleClick="0" focusDiscardsChanges="0" fontname="Default font"
+         fontsize="15.00000000000000000000" kerning="0.00000000000000000000"
+         bold="0" italic="0" justification="33"/>
   <TEXTEDITOR name="new text editor" id="f3d531f3e40ed46d" memberName="textEditor7"
               virtualName="" explicitFocusOrder="0" pos="528 32 31 24" initialText=""
               multiline="0" retKeyStartsLine="0" readonly="0" scrollbars="1"
@@ -593,11 +594,10 @@ BEGIN_JUCER_METADATA
             virtualName="" explicitFocusOrder="0" pos="400 32 112 24" editable="0"
             layout="33" items="Add" textWhenNonSelected="Add" textWhenNoItems="(no choices)"/>
   <LABEL name="new label" id="307b264685dc8511" memberName="label6" virtualName=""
-         explicitFocusOrder="0" pos="416 0 80 24" edTextCol="ff000000"
-         edBkgCol="0" labelText="Midi filter&#10;" editableSingleClick="0"
-         editableDoubleClick="0" focusDiscardsChanges="0" fontname="Default font"
-         fontsize="15.00000000000000000000" kerning="0.00000000000000000000"
-         bold="0" italic="0" justification="33"/>
+         explicitFocusOrder="0" pos="432 0 80 24" edTextCol="ff000000"
+         edBkgCol="0" labelText="Zone&#10;" editableSingleClick="0" editableDoubleClick="0"
+         focusDiscardsChanges="0" fontname="Default font" fontsize="15.00000000000000000000"
+         kerning="0.00000000000000000000" bold="0" italic="0" justification="33"/>
   <LABEL name="new label" id="302e1b8845a37a80" memberName="label10" virtualName=""
          explicitFocusOrder="0" pos="512 0 71 24" edTextCol="ff000000"
          edBkgCol="0" labelText="Channel" editableSingleClick="0" editableDoubleClick="0"

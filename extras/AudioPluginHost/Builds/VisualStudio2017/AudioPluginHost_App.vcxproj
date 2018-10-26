@@ -153,7 +153,7 @@
     <ClCompile Include="..\..\Source\Filters\FilterGraph.cpp"/>
     <ClCompile Include="..\..\Source\Filters\FilterIOConfiguration.cpp"/>
     <ClCompile Include="..\..\Source\Filters\InternalFilters.cpp"/>
-    <ClCompile Include="..\..\Source\UI\Forte.cpp"/>
+    <ClCompile Include="..\..\Source\UI\RackRow.cpp"/>
     <ClCompile Include="..\..\Source\UI\GraphEditorPanel.cpp"/>
     <ClCompile Include="..\..\Source\UI\MainHostWindow.cpp"/>
     <ClCompile Include="..\..\Source\HostStartup.cpp"/>
@@ -1824,10 +1824,11 @@
     <ClInclude Include="..\..\Source\Filters\FilterGraph.h"/>
     <ClInclude Include="..\..\Source\Filters\FilterIOConfiguration.h"/>
     <ClInclude Include="..\..\Source\Filters\InternalFilters.h"/>
-    <ClInclude Include="..\..\Source\UI\Forte.h"/>
+    <ClInclude Include="..\..\Source\UI\RackRow.h"/>
     <ClInclude Include="..\..\Source\UI\GraphEditorPanel.h"/>
     <ClInclude Include="..\..\Source\UI\MainHostWindow.h"/>
     <ClInclude Include="..\..\Source\UI\PluginWindow.h"/>
+    <ClInclude Include="..\..\Source\Performer.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\audio_play_head\juce_AudioPlayHead.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioChannelSet.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioDataConverters.h"/>

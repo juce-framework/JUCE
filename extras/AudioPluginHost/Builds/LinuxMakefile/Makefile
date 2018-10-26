@@ -71,7 +71,7 @@ OBJECTS_APP := \
   $(JUCE_OBJDIR)/FilterGraph_769715e3.o \
   $(JUCE_OBJDIR)/FilterIOConfiguration_d1cf3d25.o \
   $(JUCE_OBJDIR)/InternalFilters_eceadbab.o \
-  $(JUCE_OBJDIR)/Forte_4aef2c88.o \
+  $(JUCE_OBJDIR)/RackRow_166d9451.o \
   $(JUCE_OBJDIR)/GraphEditorPanel_2223d925.o \
   $(JUCE_OBJDIR)/MainHostWindow_b3494acd.o \
   $(JUCE_OBJDIR)/HostStartup_5ce96f96.o \
@@ -117,9 +117,9 @@ $(JUCE_OBJDIR)/InternalFilters_eceadbab.o: ../../Source/Filters/InternalFilters.
 	@echo "Compiling InternalFilters.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
-$(JUCE_OBJDIR)/Forte_4aef2c88.o: ../../Source/UI/Forte.cpp
+$(JUCE_OBJDIR)/RackRow_166d9451.o: ../../Source/UI/RackRow.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling Forte.cpp"
+	@echo "Compiling RackRow.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/GraphEditorPanel_2223d925.o: ../../Source/UI/GraphEditorPanel.cpp

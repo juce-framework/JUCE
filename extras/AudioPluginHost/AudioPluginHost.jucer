@@ -94,8 +94,8 @@
               file="Source/Filters/InternalFilters.h"/>
       </GROUP>
       <GROUP id="{D892BFB2-FE85-B70F-10D3-450F407E2B3D}" name="UI">
-        <FILE id="gwNcpD" name="Forte.cpp" compile="1" resource="0" file="Source/UI/Forte.cpp"/>
-        <FILE id="NzRMXg" name="Forte.h" compile="0" resource="0" file="Source/UI/Forte.h"/>
+        <FILE id="gwNcpD" name="RackRow.cpp" compile="1" resource="0" file="Source/UI/RackRow.cpp"/>
+        <FILE id="NzRMXg" name="RackRow.h" compile="0" resource="0" file="Source/UI/RackRow.h"/>
         <FILE id="wPgLS9" name="GraphEditorPanel.cpp" compile="1" resource="0"
               file="Source/UI/GraphEditorPanel.cpp"/>
         <FILE id="BDMvfT" name="GraphEditorPanel.h" compile="0" resource="0"
@@ -108,6 +108,7 @@
       </GROUP>
       <FILE id="OmIhwQ" name="HostStartup.cpp" compile="1" resource="0" file="Source/HostStartup.cpp"/>
       <FILE id="c97aUr" name="JUCEAppIcon.png" compile="0" resource="1" file="Source/JUCEAppIcon.png"/>
+      <FILE id="HPKay8" name="Performer.h" compile="0" resource="0" file="Source/Performer.h"/>
     </GROUP>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_WASAPI="1" JUCE_DIRECTSOUND="1" JUCE_ALSA="1" JUCE_QUICKTIME="disabled"
