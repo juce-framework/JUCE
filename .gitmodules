@@ -1,0 +1,3 @@
+[submodule "extras/AudioPluginHost/Source/ForteEmulator"]
+	path = extras/AudioPluginHost/Source/ForteEmulator
+	url = git@gitlab.com:bencrossman/ForteEmulator.git

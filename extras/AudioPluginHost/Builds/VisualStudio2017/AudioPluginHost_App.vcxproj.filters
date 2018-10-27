@@ -2,6 +2,15 @@
 
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="AudioPluginHost\Source\ForteEmulator\ForteSDK\tinyxml">
+      <UniqueIdentifier>{A06A6DA7-93DE-7B21-5026-CCCF41402183}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AudioPluginHost\Source\ForteEmulator\ForteSDK">
+      <UniqueIdentifier>{038B4CF6-7BB0-91B8-2E60-9E6515C20147}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AudioPluginHost\Source\ForteEmulator">
+      <UniqueIdentifier>{EFB891B5-0D63-68DC-9270-4CE1482C0D58}</UniqueIdentifier>
+    </Filter>
     <Filter Include="AudioPluginHost\Source\Filters">
       <UniqueIdentifier>{01436C03-42F4-5952-30EF-7F9E81D997C6}</UniqueIdentifier>
     </Filter>
@@ -379,6 +388,18 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\ForteEmulator\ForteSDK\tinyxml\tinystr.cpp">
+      <Filter>AudioPluginHost\Source\ForteEmulator\ForteSDK\tinyxml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ForteEmulator\ForteSDK\tinyxml\tinyxml.cpp">
+      <Filter>AudioPluginHost\Source\ForteEmulator\ForteSDK\tinyxml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ForteEmulator\ForteSDK\tinyxml\tinyxmlerror.cpp">
+      <Filter>AudioPluginHost\Source\ForteEmulator\ForteSDK\tinyxml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ForteEmulator\ForteSDK\tinyxml\tinyxmlparser.cpp">
+      <Filter>AudioPluginHost\Source\ForteEmulator\ForteSDK\tinyxml</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Filters\FilterGraph.cpp">
       <Filter>AudioPluginHost\Source\Filters</Filter>
     </ClCompile>
@@ -2214,6 +2235,18 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\ForteEmulator\ForteSDK\tinyxml\tinystr.h">
+      <Filter>AudioPluginHost\Source\ForteEmulator\ForteSDK\tinyxml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ForteEmulator\ForteSDK\tinyxml\tinyxml.h">
+      <Filter>AudioPluginHost\Source\ForteEmulator\ForteSDK\tinyxml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ForteEmulator\ForteSDK\ForteTypes.h">
+      <Filter>AudioPluginHost\Source\ForteEmulator\ForteSDK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ForteEmulator\ForteSDK\XmlArchive.h">
+      <Filter>AudioPluginHost\Source\ForteEmulator\ForteSDK</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Filters\FilterGraph.h">
       <Filter>AudioPluginHost\Source\Filters</Filter>
     </ClInclude>

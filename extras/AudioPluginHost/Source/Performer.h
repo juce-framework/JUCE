@@ -22,7 +22,7 @@ class Zone
     float Volume;
     bool Solo;
     bool Mute;
-    int Channel;
+    bool DoubleOctave;
     int Transpose;
     int LowKey;
     int HighKey;

@@ -85,12 +85,9 @@ private:
     std::unique_ptr<Label> label;
     std::unique_ptr<Label> label7;
     std::unique_ptr<Label> label9;
-    std::unique_ptr<TextEditor> textEditor7;
     std::unique_ptr<Label> label3;
-    std::unique_ptr<ComboBox> comboBox3;
-    std::unique_ptr<Label> label6;
-    std::unique_ptr<Label> label10;
     std::unique_ptr<MidiKeyboardComponent> m_keyboard;
+    std::unique_ptr<ToggleButton> toggleButton3;
 
 
     //==============================================================================

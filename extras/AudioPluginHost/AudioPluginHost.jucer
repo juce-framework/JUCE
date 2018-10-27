@@ -81,6 +81,22 @@
   </EXPORTFORMATS>
   <MAINGROUP id="YdWL7hi7p" name="AudioPluginHost">
     <GROUP id="{CFED5B3D-D1D8-0F3F-4D67-B2A810D057EF}" name="Source">
+      <GROUP id="{F273BBDC-080B-3D0E-E7A7-72C6B840830E}" name="ForteEmulator">
+        <GROUP id="{FF89E7B6-F0E5-18FE-A181-6290786638A4}" name="ForteSDK">
+          <GROUP id="{8C2741D1-654D-29D4-9D86-B2F5C4C5903B}" name="tinyxml">
+            <FILE id="J23WyQ" name="tinystr.cpp" compile="1" resource="0" file="Source/ForteEmulator/ForteSDK/tinyxml/tinystr.cpp"/>
+            <FILE id="F2RB8Y" name="tinystr.h" compile="0" resource="0" file="Source/ForteEmulator/ForteSDK/tinyxml/tinystr.h"/>
+            <FILE id="GaPToS" name="tinyxml.cpp" compile="1" resource="0" file="Source/ForteEmulator/ForteSDK/tinyxml/tinyxml.cpp"/>
+            <FILE id="O0x0Ga" name="tinyxml.h" compile="0" resource="0" file="Source/ForteEmulator/ForteSDK/tinyxml/tinyxml.h"/>
+            <FILE id="C44rFx" name="tinyxmlerror.cpp" compile="1" resource="0"
+                  file="Source/ForteEmulator/ForteSDK/tinyxml/tinyxmlerror.cpp"/>
+            <FILE id="iJ9L4J" name="tinyxmlparser.cpp" compile="1" resource="0"
+                  file="Source/ForteEmulator/ForteSDK/tinyxml/tinyxmlparser.cpp"/>
+          </GROUP>
+          <FILE id="HqVfQS" name="ForteTypes.h" compile="0" resource="0" file="Source/ForteEmulator/ForteSDK/ForteTypes.h"/>
+          <FILE id="MF1U3E" name="XmlArchive.h" compile="0" resource="0" file="Source/ForteEmulator/ForteSDK/XmlArchive.h"/>
+        </GROUP>
+      </GROUP>
       <GROUP id="{AE20356E-1F78-F99D-7D44-08529665AEDA}" name="Filters">
         <FILE id="CogQ5Q" name="FilterGraph.cpp" compile="1" resource="0" file="Source/Filters/FilterGraph.cpp"/>
         <FILE id="pfZWFw" name="FilterGraph.h" compile="0" resource="0" file="Source/Filters/FilterGraph.h"/>

@@ -150,6 +150,10 @@
     <Lib/>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\ForteEmulator\ForteSDK\tinyxml\tinystr.cpp"/>
+    <ClCompile Include="..\..\Source\ForteEmulator\ForteSDK\tinyxml\tinyxml.cpp"/>
+    <ClCompile Include="..\..\Source\ForteEmulator\ForteSDK\tinyxml\tinyxmlerror.cpp"/>
+    <ClCompile Include="..\..\Source\ForteEmulator\ForteSDK\tinyxml\tinyxmlparser.cpp"/>
     <ClCompile Include="..\..\Source\Filters\FilterGraph.cpp"/>
     <ClCompile Include="..\..\Source\Filters\FilterIOConfiguration.cpp"/>
     <ClCompile Include="..\..\Source\Filters\InternalFilters.cpp"/>
@@ -1821,6 +1825,10 @@
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_video.cpp"/>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\ForteEmulator\ForteSDK\tinyxml\tinystr.h"/>
+    <ClInclude Include="..\..\Source\ForteEmulator\ForteSDK\tinyxml\tinyxml.h"/>
+    <ClInclude Include="..\..\Source\ForteEmulator\ForteSDK\ForteTypes.h"/>
+    <ClInclude Include="..\..\Source\ForteEmulator\ForteSDK\XmlArchive.h"/>
     <ClInclude Include="..\..\Source\Filters\FilterGraph.h"/>
     <ClInclude Include="..\..\Source\Filters\FilterIOConfiguration.h"/>
     <ClInclude Include="..\..\Source\Filters\InternalFilters.h"/>

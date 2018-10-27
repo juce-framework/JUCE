@@ -50,7 +50,7 @@ Forte::Forte ()
     label4->setColour (TextEditor::textColourId, Colours::black);
     label4->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
-    label4->setBounds (584, 0, 80, 24);
+    label4->setBounds (536, 0, 80, 24);
 
     toggleButton.reset (new ToggleButton (String()));
     addAndMakeVisible (toggleButton.get());
@@ -123,7 +123,7 @@ Forte::Forte ()
     textEditor->setPopupMenuEnabled (true);
     textEditor->setText (String());
 
-    textEditor->setBounds (600, 32, 32, 24);
+    textEditor->setBounds (552, 32, 32, 24);
 
     label5.reset (new Label ("new label",
                              TRANS("Range")));
@@ -134,7 +134,7 @@ Forte::Forte ()
     label5->setColour (TextEditor::textColourId, Colours::black);
     label5->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
-    label5->setBounds (696, 0, 56, 24);
+    label5->setBounds (640, 0, 56, 24);
 
     m_to.reset (new Label (String(),
                            TRANS("to")));
@@ -145,7 +145,7 @@ Forte::Forte ()
     m_to->setColour (TextEditor::textColourId, Colours::black);
     m_to->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
-    m_to->setBounds (712, 32, 24, 24);
+    m_to->setBounds (656, 32, 24, 24);
 
     m_lowKey.reset (new TextEditor (String()));
     addAndMakeVisible (m_lowKey.get());
@@ -157,7 +157,7 @@ Forte::Forte ()
     m_lowKey->setPopupMenuEnabled (true);
     m_lowKey->setText (TRANS("C -2"));
 
-    m_lowKey->setBounds (672, 32, 32, 24);
+    m_lowKey->setBounds (624, 32, 32, 24);
 
     m_highKey.reset (new TextEditor (String()));
     addAndMakeVisible (m_highKey.get());
@@ -169,7 +169,7 @@ Forte::Forte ()
     m_highKey->setPopupMenuEnabled (true);
     m_highKey->setText (TRANS("G 8"));
 
-    m_highKey->setBounds (744, 32, 32, 24);
+    m_highKey->setBounds (680, 32, 32, 24);
 
     imageButton.reset (new ImageButton ("new button"));
     addAndMakeVisible (imageButton.get());
@@ -214,18 +214,6 @@ Forte::Forte ()
 
     label9->setBounds (136, 144, 150, 24);
 
-    textEditor7.reset (new TextEditor ("new text editor"));
-    addAndMakeVisible (textEditor7.get());
-    textEditor7->setMultiLine (false);
-    textEditor7->setReturnKeyStartsNewLine (false);
-    textEditor7->setReadOnly (false);
-    textEditor7->setScrollbarsShown (true);
-    textEditor7->setCaretVisible (true);
-    textEditor7->setPopupMenuEnabled (true);
-    textEditor7->setText (String());
-
-    textEditor7->setBounds (528, 32, 31, 24);
-
     label3.reset (new Label ("new label",
                              TRANS("Volume")));
     addAndMakeVisible (label3.get());
@@ -237,43 +225,17 @@ Forte::Forte ()
 
     label3->setBounds (144, 0, 64, 24);
 
-    comboBox3.reset (new ComboBox ("new combo box"));
-    addAndMakeVisible (comboBox3.get());
-    comboBox3->setEditableText (false);
-    comboBox3->setJustificationType (Justification::centredLeft);
-    comboBox3->setTextWhenNothingSelected (TRANS("Add"));
-    comboBox3->setTextWhenNoChoicesAvailable (TRANS("(no choices)"));
-    comboBox3->addItem (TRANS("Add"), 1);
-    comboBox3->addListener (this);
-
-    comboBox3->setBounds (400, 32, 112, 24);
-
-    label6.reset (new Label ("new label",
-                             TRANS("Zone\n")));
-    addAndMakeVisible (label6.get());
-    label6->setFont (Font (15.00f, Font::plain).withTypefaceStyle ("Regular"));
-    label6->setJustificationType (Justification::centredLeft);
-    label6->setEditable (false, false, false);
-    label6->setColour (TextEditor::textColourId, Colours::black);
-    label6->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
-
-    label6->setBounds (432, 0, 80, 24);
-
-    label10.reset (new Label ("new label",
-                              TRANS("Channel")));
-    addAndMakeVisible (label10.get());
-    label10->setFont (Font (15.00f, Font::plain).withTypefaceStyle ("Regular"));
-    label10->setJustificationType (Justification::centredLeft);
-    label10->setEditable (false, false, false);
-    label10->setColour (TextEditor::textColourId, Colours::black);
-    label10->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
-
-    label10->setBounds (512, 0, 71, 24);
-
     m_keyboard.reset (new MidiKeyboardComponent (*m_keyboardState, MidiKeyboardComponent::Orientation::horizontalKeyboard));
     addAndMakeVisible (m_keyboard.get());
 
     m_keyboard->setBounds (400, 64, 600, 24);
+
+    toggleButton3.reset (new ToggleButton ("new toggle button"));
+    addAndMakeVisible (toggleButton3.get());
+    toggleButton3->setButtonText (TRANS("Double octave"));
+    toggleButton3->addListener (this);
+
+    toggleButton3->setBounds (400, 32, 123, 24);
 
 
     //[UserPreSize]
@@ -311,12 +273,9 @@ Forte::~Forte()
     label = nullptr;
     label7 = nullptr;
     label9 = nullptr;
-    textEditor7 = nullptr;
     label3 = nullptr;
-    comboBox3 = nullptr;
-    label6 = nullptr;
-    label10 = nullptr;
     m_keyboard = nullptr;
+    toggleButton3 = nullptr;
 
 
     //[Destructor]. You can add your own custom destruction code here..
@@ -364,6 +323,11 @@ void Forte::buttonClicked (Button* buttonThatWasClicked)
         //[UserButtonCode_imageButton] -- add your button handler code here..
         //[/UserButtonCode_imageButton]
     }
+    else if (buttonThatWasClicked == toggleButton3.get())
+    {
+        //[UserButtonCode_toggleButton3] -- add your button handler code here..
+        //[/UserButtonCode_toggleButton3]
+    }
 
     //[UserbuttonClicked_Post]
     //[/UserbuttonClicked_Post]
@@ -398,11 +362,6 @@ void Forte::comboBoxChanged (ComboBox* comboBoxThatHasChanged)
     {
         //[UserComboBoxCode_comboBox2] -- add your combo box handling code here..
         //[/UserComboBoxCode_comboBox2]
-    }
-    else if (comboBoxThatHasChanged == comboBox3.get())
-    {
-        //[UserComboBoxCode_comboBox3] -- add your combo box handling code here..
-        //[/UserComboBoxCode_comboBox3]
     }
 
     //[UsercomboBoxChanged_Post]
@@ -508,7 +467,7 @@ BEGIN_JUCER_METADATA
   <GROUPCOMPONENT name="new group" id="85efcbef1342dec0" memberName="groupComponent"
                   virtualName="" explicitFocusOrder="0" pos="8 16 1000 80" title="Korg M1"/>
   <LABEL name="new label" id="1b2a0908338bf229" memberName="label4" virtualName=""
-         explicitFocusOrder="0" pos="584 0 80 24" edTextCol="ff000000"
+         explicitFocusOrder="0" pos="536 0 80 24" edTextCol="ff000000"
          edBkgCol="0" labelText="Transpose" editableSingleClick="0" editableDoubleClick="0"
          focusDiscardsChanges="0" fontname="Default font" fontsize="15.00000000000000000000"
          kerning="0.00000000000000000000" bold="0" italic="0" justification="33"/>
@@ -538,25 +497,25 @@ BEGIN_JUCER_METADATA
          fontsize="15.00000000000000000000" kerning="0.00000000000000000000"
          bold="0" italic="0" justification="33"/>
   <TEXTEDITOR name="new text editor" id="b6e30577b79a003a" memberName="textEditor"
-              virtualName="" explicitFocusOrder="0" pos="600 32 32 24" initialText=""
+              virtualName="" explicitFocusOrder="0" pos="552 32 32 24" initialText=""
               multiline="0" retKeyStartsLine="0" readonly="0" scrollbars="0"
               caret="1" popupmenu="1"/>
   <LABEL name="new label" id="c3e6077209440ad9" memberName="label5" virtualName=""
-         explicitFocusOrder="0" pos="696 0 56 24" edTextCol="ff000000"
+         explicitFocusOrder="0" pos="640 0 56 24" edTextCol="ff000000"
          edBkgCol="0" labelText="Range" editableSingleClick="0" editableDoubleClick="0"
          focusDiscardsChanges="0" fontname="Default font" fontsize="15.00000000000000000000"
          kerning="0.00000000000000000000" bold="0" italic="0" justification="33"/>
   <LABEL name="" id="72d9777463cc6a85" memberName="m_to" virtualName=""
-         explicitFocusOrder="0" pos="712 32 24 24" edTextCol="ff000000"
+         explicitFocusOrder="0" pos="656 32 24 24" edTextCol="ff000000"
          edBkgCol="0" labelText="to" editableSingleClick="0" editableDoubleClick="0"
          focusDiscardsChanges="0" fontname="Default font" fontsize="15.00000000000000000000"
          kerning="0.00000000000000000000" bold="0" italic="0" justification="33"/>
   <TEXTEDITOR name="" id="3d470180923a3d6f" memberName="m_lowKey" virtualName=""
-              explicitFocusOrder="0" pos="672 32 32 24" initialText="C -2"
+              explicitFocusOrder="0" pos="624 32 32 24" initialText="C -2"
               multiline="0" retKeyStartsLine="0" readonly="0" scrollbars="0"
               caret="1" popupmenu="1"/>
   <TEXTEDITOR name="" id="5f3abd7bbb50678c" memberName="m_highKey" virtualName=""
-              explicitFocusOrder="0" pos="744 32 32 24" initialText="G 8" multiline="0"
+              explicitFocusOrder="0" pos="680 32 32 24" initialText="G 8" multiline="0"
               retKeyStartsLine="0" readonly="0" scrollbars="0" caret="1" popupmenu="1"/>
   <IMAGEBUTTON name="new button" id="31b2ae44720b5f47" memberName="imageButton"
                virtualName="" explicitFocusOrder="0" pos="16 32 76 57" buttonText="new button"
@@ -581,30 +540,16 @@ BEGIN_JUCER_METADATA
          editableDoubleClick="0" focusDiscardsChanges="0" fontname="Default font"
          fontsize="15.00000000000000000000" kerning="0.00000000000000000000"
          bold="0" italic="0" justification="33"/>
-  <TEXTEDITOR name="new text editor" id="f3d531f3e40ed46d" memberName="textEditor7"
-              virtualName="" explicitFocusOrder="0" pos="528 32 31 24" initialText=""
-              multiline="0" retKeyStartsLine="0" readonly="0" scrollbars="1"
-              caret="1" popupmenu="1"/>
   <LABEL name="new label" id="f934b675a0c74566" memberName="label3" virtualName=""
          explicitFocusOrder="0" pos="144 0 64 24" edTextCol="ff000000"
          edBkgCol="0" labelText="Volume" editableSingleClick="0" editableDoubleClick="0"
          focusDiscardsChanges="0" fontname="Default font" fontsize="15.00000000000000000000"
          kerning="0.00000000000000000000" bold="0" italic="0" justification="33"/>
-  <COMBOBOX name="new combo box" id="6661e21a21deb08e" memberName="comboBox3"
-            virtualName="" explicitFocusOrder="0" pos="400 32 112 24" editable="0"
-            layout="33" items="Add" textWhenNonSelected="Add" textWhenNoItems="(no choices)"/>
-  <LABEL name="new label" id="307b264685dc8511" memberName="label6" virtualName=""
-         explicitFocusOrder="0" pos="432 0 80 24" edTextCol="ff000000"
-         edBkgCol="0" labelText="Zone&#10;" editableSingleClick="0" editableDoubleClick="0"
-         focusDiscardsChanges="0" fontname="Default font" fontsize="15.00000000000000000000"
-         kerning="0.00000000000000000000" bold="0" italic="0" justification="33"/>
-  <LABEL name="new label" id="302e1b8845a37a80" memberName="label10" virtualName=""
-         explicitFocusOrder="0" pos="512 0 71 24" edTextCol="ff000000"
-         edBkgCol="0" labelText="Channel" editableSingleClick="0" editableDoubleClick="0"
-         focusDiscardsChanges="0" fontname="Default font" fontsize="15.00000000000000000000"
-         kerning="0.00000000000000000000" bold="0" italic="0" justification="33"/>
   <GENERICCOMPONENT name="" id="3a433662794e0409" memberName="m_keyboard" virtualName="MidiKeyboardComponent"
                     explicitFocusOrder="0" pos="400 64 600 24" class="unknown" params="*m_keyboardState, MidiKeyboardComponent::Orientation::horizontalKeyboard"/>
+  <TOGGLEBUTTON name="new toggle button" id="7a9e84b485ffe060" memberName="toggleButton3"
+                virtualName="" explicitFocusOrder="0" pos="400 32 123 24" buttonText="Double octave"
+                connectedEdges="0" needsCallback="1" radioGroupId="0" state="0"/>
 </JUCER_COMPONENT>
 
 END_JUCER_METADATA
