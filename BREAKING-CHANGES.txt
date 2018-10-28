@@ -6,6 +6,36 @@ Develop
 
 Change
 ------
+The VST2 SDK embedded within JUCE has been removed.
+
+Possible Issues
+---------------
+1. Building or hosting VST2 plug-ins requires header files from the VST2 SDK,
+   which is no longer part of JUCE.
+2. Building a VST2-compatible VST3 plug-in (the previous default behaviour in
+   JUCE) requires header files from the VST2 SDK, which is no longer part of
+   JUCE. When a new JUCE plug-in project is created the option
+   JUCE_VST3_CAN_REPLACE_VST2 will be set to zero.
+
+Workaround
+----------
+1. The VST2 SDK can be obtained from the vstsdk3610_11_06_2018_build_37 (or
+   older) VST3 SDK or JUCE version 5.3.2. You should put the VST2 SDK in your
+   header search paths.
+2. For new plug-in projects where you will be releasing both a VST2 and VST3
+   version, and you want the VST3 plug-in to replace the VST2 plug-in in
+   hosts that support it, then you should enable the JUCE_VST3_CAN_REPLACE_VST2
+   option.
+
+Rationale
+---------
+Distributing VST2 plug-ins requires a VST2 license from Steinberg. Following
+Steinberg's removal of the VST2 SDK from their public SDKs we are also removing
+the VST2 SDK from the JUCE codebase.
+
+
+Change
+------
 The AudioProcessorValueTreeState::createAndAddParameter function has been
 deprecated.
 

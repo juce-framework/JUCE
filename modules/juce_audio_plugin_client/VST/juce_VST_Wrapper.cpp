@@ -86,8 +86,13 @@
 
 namespace Vst2
 {
-#include "../../juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst2.x/aeffect.h"
-#include "../../juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst2.x/aeffectx.h"
+// If the following files cannot be found then you are probably trying to build
+// a VST2 plug-in or a VST2-compatible VST3 plug-in. To do this you must have a
+// VST2 SDK in your header search path. The VST2 SDK can be obtained from the
+// vstsdk3610_11_06_2018_build_37 (or older) VST3 SDK or JUCE version 5.3.2.
+// You also need a VST2 license from Steinberg to distribute VST2 plug-ins.
+#include "pluginterfaces/vst2.x/aeffect.h"
+#include "pluginterfaces/vst2.x/aeffectx.h"
 }
 
 using namespace juce;

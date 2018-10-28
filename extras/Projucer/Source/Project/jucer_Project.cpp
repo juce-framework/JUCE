@@ -1046,7 +1046,9 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
                                                  { Ids::buildVST3.toString(), Ids::buildAU.toString(), Ids::buildAUv3.toString(),
                                                    Ids::buildRTAS.toString(), Ids::buildAAX.toString(), Ids::buildStandalone.toString(), Ids::buildUnity.toString(),
                                                    Ids::enableIAA.toString(), Ids::buildVST.toString() }),
-               "Plugin formats to build.");
+               "Plugin formats to build. If you have selected \"VST (legacy)\" then you will need to ensure that you have a VST2 SDK "
+               "in your header search paths. The VST2 SDK can be obtained from the vstsdk3610_11_06_2018_build_37 (or older) VST3 SDK "
+               "or JUCE version 5.3.2. You also need a VST2 license from Steinberg to distribute VST2 plug-ins.");
     props.add (new MultiChoicePropertyComponent (pluginCharacteristicsValue, "Plugin Characteristics",
                                                  { "Plugin is a Synth", "Plugin MIDI Input", "Plugin MIDI Output", "MIDI Effect Plugin", "Plugin Editor Requires Keyboard Focus",
                                                    "Disable RTAS Bypass", "Disable AAX Bypass", "Disable RTAS Multi-Mono", "Disable AAX Multi-Mono" },
@@ -1081,6 +1083,7 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
 
     {
         Array<var> vst3CategoryVars;
+
         for (auto s : getAllVST3CategoryStrings())
             vst3CategoryVars.add (s);
 
