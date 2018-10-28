@@ -145,7 +145,7 @@ struct Expression::Helpers
 
         Type getType() const noexcept       { return operatorType; }
         int getNumInputs() const            { return 2; }
-        Term* getInput (int index) const    { return index == 0 ? left.get() : (index == 1 ? right.get() : 0); }
+        Term* getInput (int index) const    { return index == 0 ? left.get() : (index == 1 ? right.get() : nullptr); }
 
         virtual double performFunction (double left, double right) const = 0;
         virtual void writeOperator (String& dest) const = 0;

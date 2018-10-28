@@ -30,15 +30,9 @@ namespace
         if (addr_in == nullptr)
             return {};
 
-        in6_addr addr = addr_in->sin6_addr;
+        auto addr = addr_in->sin6_addr;
 
-        union ByteUnion
-        {
-            uint16 combined;
-            uint8 split[2];
-        };
-
-        ByteUnion temp;
+        IPAddressByteUnion temp;
         uint16 arr[8];
 
         for (int i = 0; i < 8; ++i) // Swap bytes from network to host order
@@ -62,8 +56,7 @@ namespace
 
     struct InterfaceInfo
     {
-        IPAddress interfaceAddress;
-        IPAddress broadcastAddress;
+        IPAddress interfaceAddress, broadcastAddress;
     };
 
     bool operator== (const InterfaceInfo& lhs, const InterfaceInfo& rhs)
@@ -78,8 +71,8 @@ namespace
         {
             if (ifa->ifa_addr->sa_family == AF_INET)
             {
-                auto* interfaceAddressInfo = (sockaddr_in*) ifa->ifa_addr;
-                auto* broadcastAddressInfo = (sockaddr_in*) ifa->ifa_dstaddr;
+                auto interfaceAddressInfo = (sockaddr_in*) ifa->ifa_addr;
+                auto broadcastAddressInfo = (sockaddr_in*) ifa->ifa_dstaddr;
 
                 if (interfaceAddressInfo->sin_addr.s_addr != INADDR_NONE)
                 {

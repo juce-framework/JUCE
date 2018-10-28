@@ -78,7 +78,7 @@ struct AndroidMessageQueue     : private Android::Runnable
 
     ~AndroidMessageQueue()
     {
-        jassert (MessageManager::getInstance()->isThisTheMessageThread());
+        JUCE_ASSERT_MESSAGE_THREAD
         clearSingletonInstance();
     }
 

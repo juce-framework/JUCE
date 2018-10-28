@@ -1725,9 +1725,9 @@ struct ClipRegions
                     auto imageY = ((ty + 128) >> 8);
 
                     if (image.getFormat() == Image::ARGB)
-                        straightClipImage (srcData, imageX, imageY, (PixelARGB*) 0);
+                        straightClipImage (srcData, imageX, imageY, (PixelARGB*) nullptr);
                     else
-                        straightClipImage (srcData, imageX, imageY, (PixelAlpha*) 0);
+                        straightClipImage (srcData, imageX, imageY, (PixelAlpha*) nullptr);
 
                     return edgeTable.isEmpty() ? Ptr() : Ptr (*this);
                 }
@@ -1746,9 +1746,9 @@ struct ClipRegions
             if (! edgeTable.isEmpty())
             {
                 if (image.getFormat() == Image::ARGB)
-                    transformedClipImage (srcData, transform, quality, (PixelARGB*) 0);
+                    transformedClipImage (srcData, transform, quality, (PixelARGB*) nullptr);
                 else
-                    transformedClipImage (srcData, transform, quality, (PixelAlpha*) 0);
+                    transformedClipImage (srcData, transform, quality, (PixelAlpha*) nullptr);
             }
 
             return edgeTable.isEmpty() ? Ptr() : Ptr (*this);
@@ -2640,9 +2640,9 @@ public:
 
         switch (destData.pixelFormat)
         {
-            case Image::ARGB:   EdgeTableFillers::renderSolidFill (iter, destData, colour, replaceContents, (PixelARGB*) 0); break;
-            case Image::RGB:    EdgeTableFillers::renderSolidFill (iter, destData, colour, replaceContents, (PixelRGB*) 0); break;
-            default:            EdgeTableFillers::renderSolidFill (iter, destData, colour, replaceContents, (PixelAlpha*) 0); break;
+            case Image::ARGB:   EdgeTableFillers::renderSolidFill (iter, destData, colour, replaceContents, (PixelARGB*) nullptr); break;
+            case Image::RGB:    EdgeTableFillers::renderSolidFill (iter, destData, colour, replaceContents, (PixelRGB*) nullptr); break;
+            default:            EdgeTableFillers::renderSolidFill (iter, destData, colour, replaceContents, (PixelAlpha*) nullptr); break;
         }
     }
 
@@ -2657,9 +2657,9 @@ public:
 
         switch (destData.pixelFormat)
         {
-            case Image::ARGB:   EdgeTableFillers::renderGradient (iter, destData, gradient, trans, lookupTable, numLookupEntries, isIdentity, (PixelARGB*) 0); break;
-            case Image::RGB:    EdgeTableFillers::renderGradient (iter, destData, gradient, trans, lookupTable, numLookupEntries, isIdentity, (PixelRGB*) 0); break;
-            default:            EdgeTableFillers::renderGradient (iter, destData, gradient, trans, lookupTable, numLookupEntries, isIdentity, (PixelAlpha*) 0); break;
+            case Image::ARGB:   EdgeTableFillers::renderGradient (iter, destData, gradient, trans, lookupTable, numLookupEntries, isIdentity, (PixelARGB*) nullptr); break;
+            case Image::RGB:    EdgeTableFillers::renderGradient (iter, destData, gradient, trans, lookupTable, numLookupEntries, isIdentity, (PixelRGB*) nullptr); break;
+            default:            EdgeTableFillers::renderGradient (iter, destData, gradient, trans, lookupTable, numLookupEntries, isIdentity, (PixelAlpha*) nullptr); break;
         }
     }
 

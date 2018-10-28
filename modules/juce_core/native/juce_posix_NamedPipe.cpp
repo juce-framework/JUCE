@@ -180,7 +180,7 @@ private:
         FD_ZERO (&rset);
         FD_SET (handle, &rset);
 
-        select (handle + 1, &rset, nullptr, 0, &timeout);
+        select (handle + 1, &rset, nullptr, nullptr, &timeout);
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)

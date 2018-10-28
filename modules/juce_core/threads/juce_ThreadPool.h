@@ -134,7 +134,7 @@ private:
     friend class ThreadPool;
     String jobName;
     ThreadPool* pool = nullptr;
-    bool shouldStop = false, isActive = false, shouldBeDeleted = false;
+    std::atomic<bool> shouldStop { false }, isActive { false }, shouldBeDeleted { false };
     ListenerList<Thread::Listener, Array<Thread::Listener*, CriticalSection>> listeners;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThreadPoolJob)

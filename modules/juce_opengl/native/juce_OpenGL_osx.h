@@ -247,7 +247,7 @@ public:
 //==============================================================================
 bool OpenGLHelpers::isContextActive()
 {
-    return CGLGetCurrentContext() != 0;
+    return CGLGetCurrentContext() != CGLContextObj();
 }
 
 } // namespace juce

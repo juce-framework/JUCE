@@ -38,18 +38,14 @@ class JUCE_API  Time
 public:
     //==============================================================================
     /** Creates a Time object.
-
         This default constructor creates a time of midnight Jan 1st 1970 UTC, (which is
         represented internally as 0ms).
-
         To create a time object representing the current time, use getCurrentTime().
-
         @see getCurrentTime
     */
-    Time() noexcept;
+    Time() = default;
 
     /** Creates a time based on a number of milliseconds.
-
         To create a time object set to the current time, use getCurrentTime().
 
         @param millisecondsSinceEpoch   the number of milliseconds since the unix
@@ -79,14 +75,10 @@ public:
           int milliseconds = 0,
           bool useLocalTime = true) noexcept;
 
-    /** Creates a copy of another Time object. */
-    Time (const Time& other) noexcept;
+    Time (const Time&) = default;
+    ~Time() = default;
 
-    /** Destructor. */
-    ~Time() noexcept;
-
-    /** Copies this time from another one. */
-    Time& operator= (const Time& other) noexcept;
+    Time& operator= (const Time&) = default;
 
     //==============================================================================
     /** Returns a Time object that is set to the current system time.
@@ -183,7 +175,7 @@ public:
 
     //==============================================================================
     /** Returns a 3-character string to indicate the local timezone. */
-    String getTimeZone() const noexcept;
+    String getTimeZone() const;
 
     /** Returns the local timezone offset from UTC in seconds. */
     int getUTCOffsetSeconds() const noexcept;
@@ -210,7 +202,7 @@ public:
     String toString (bool includeDate,
                      bool includeTime,
                      bool includeSeconds = true,
-                     bool use24HourClock = false) const noexcept;
+                     bool use24HourClock = false) const;
 
     /** Converts this date/time to a string with a user-defined format.
 
@@ -255,7 +247,7 @@ public:
     String toISO8601 (bool includeDividerCharacters) const;
 
     /** Parses an ISO-8601 string and returns it as a Time. */
-    static Time fromISO8601 (StringRef iso8601) noexcept;
+    static Time fromISO8601 (StringRef iso8601);
 
     //==============================================================================
     /** Adds a RelativeTime to this time. */
@@ -379,7 +371,7 @@ public:
 
 private:
     //==============================================================================
-    int64 millisSinceEpoch;
+    int64 millisSinceEpoch = 0;
 };
 
 //==============================================================================

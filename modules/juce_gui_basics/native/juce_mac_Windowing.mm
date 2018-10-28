@@ -465,12 +465,12 @@ struct DisplaySettingsChangeCallback  : private DeletedAtShutdown
 {
     DisplaySettingsChangeCallback()
     {
-        CGDisplayRegisterReconfigurationCallback (displayReconfigurationCallBack, 0);
+        CGDisplayRegisterReconfigurationCallback (displayReconfigurationCallBack, nullptr);
     }
 
     ~DisplaySettingsChangeCallback()
     {
-        CGDisplayRemoveReconfigurationCallback (displayReconfigurationCallBack, 0);
+        CGDisplayRemoveReconfigurationCallback (displayReconfigurationCallBack, nullptr);
         clearSingletonInstance();
     }
 

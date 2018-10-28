@@ -743,7 +743,7 @@ void ProjectExporter::addNewConfigurationFromExisting (const BuildConfiguration&
     ValueTree newConfig (Ids::CONFIGURATION);
     newConfig = configToCopy.config.createCopy();
 
-    newConfig.setProperty (Ids::name, configToCopy.getName(), 0);
+    newConfig.setProperty (Ids::name, configToCopy.getName(), nullptr);
 
     configs.appendChild (newConfig, project.getUndoManagerFor (configs));
 }
@@ -830,7 +830,7 @@ Image ProjectExporter::rescaleImageForIcon (Drawable& d, const int size)
     {
         auto im = SoftwareImageType().convert (drawableImage->getImage());
 
-        if (size == im.getWidth() && size == im.getHeight())
+        if (im.getWidth() == size && im.getHeight() == size)
             return im;
 
         // (scale it down in stages for better resampling)

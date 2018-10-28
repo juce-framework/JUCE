@@ -240,7 +240,7 @@ public:
     */
     void updateFromComponent (const Component& comp) noexcept
     {
-        if (comp.getParentComponent() == 0 && ! comp.isOnDesktop())
+        if (comp.getParentComponent() == nullptr && ! comp.isOnDesktop())
             updateFrom (comp.getBounds(), Rectangle<int>());
         else
             updateFrom (comp.getBounds(), Rectangle<int> (comp.getParentWidth(), comp.getParentHeight()));
@@ -627,12 +627,12 @@ struct RelativePositionedRectangle
                                   int& x, int& xw, int& y, int& yh,
                                   int& w, int& h) const
     {
-        Component* rx = 0;
-        Component* ry = 0;
-        Component* rw = 0;
-        Component* rh = 0;
+        Component* rx = {};
+        Component* ry = {};
+        Component* rw = {};
+        Component* rh = {};
 
-        if (layout != 0)
+        if (layout != nullptr)
         {
             rx = layout->findComponentWithId (relativeToX);
             ry = layout->findComponentWithId (relativeToY);
@@ -640,12 +640,12 @@ struct RelativePositionedRectangle
             rh = layout->findComponentWithId (relativeToH);
         }
 
-        x = parentArea.getX() + (rx != 0 ? rx->getX() : 0);
-        y = parentArea.getY() + (ry != 0 ? ry->getY() : 0);
-        w = rw != 0 ? rw->getWidth() : parentArea.getWidth();
-        h = rh != 0 ? rh->getHeight() : parentArea.getHeight();
-        xw = rx != 0 ? rx->getWidth() : parentArea.getWidth();
-        yh = ry != 0 ? ry->getHeight() : parentArea.getHeight();
+        x = parentArea.getX() + (rx != nullptr ? rx->getX() : 0);
+        y = parentArea.getY() + (ry != nullptr ? ry->getY() : 0);
+        w = rw != nullptr ? rw->getWidth() : parentArea.getWidth();
+        h = rh != nullptr ? rh->getHeight() : parentArea.getHeight();
+        xw = rx != nullptr ? rx->getWidth() : parentArea.getWidth();
+        yh = ry != nullptr ? ry->getHeight() : parentArea.getHeight();
     }
 
     Rectangle<int> getRectangle (const Rectangle<int>& parentArea,

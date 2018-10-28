@@ -65,7 +65,7 @@ namespace MacFileHelpers
         {
             const String type (buf.f_fstypename);
 
-            while (*types != 0)
+            while (*types != nullptr)
                 if (type.equalsIgnoreCase (*types++))
                     return true;
         }
@@ -105,14 +105,14 @@ namespace MacFileHelpers
    #else
     static bool launchExecutable (const String& pathAndArguments)
     {
-        const int cpid = fork();
+        auto cpid = fork();
 
         if (cpid == 0)
         {
-            const char* const argv[4] = { "/bin/sh", "-c", pathAndArguments.toUTF8(), 0 };
+            const char* const argv[4] = { "/bin/sh", "-c", pathAndArguments.toUTF8(), nullptr };
 
             // Child process
-            if (execve (argv[0], (char**) argv, 0) < 0)
+            if (execve (argv[0], (char**) argv, nullptr) < 0)
                 exit (0);
         }
         else

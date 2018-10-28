@@ -28,6 +28,7 @@ namespace juce
 {
 
 extern ComponentPeer* createNonRepaintingEmbeddedWindowsPeer (Component&, void* parent);
+extern bool shouldScaleGLWindow (void* hwnd);
 
 //==============================================================================
 class OpenGLContext::NativeContext
@@ -159,6 +160,14 @@ public:
                 updateWindowPosition (peer->getAreaCoveredBy (*safeComponent));
     }
    #endif
+
+    double getWindowScaleFactor (const Rectangle<int>& screenBounds)
+    {
+        if (nativeWindow != nullptr && shouldScaleGLWindow (nativeWindow->getNativeHandle()))
+            return Desktop::getInstance().getDisplays().findDisplayForRect (screenBounds).scale;
+
+        return 1.0;
+    }
 
 private:
     struct DummyComponent  : public Component

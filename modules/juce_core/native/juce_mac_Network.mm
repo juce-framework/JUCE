@@ -809,7 +809,8 @@ public:
     {
         DBG (nsStringToJuce ([error description])); ignoreUnused (error);
         nsUrlErrorCode = [error code];
-        hasFailed = initialised = true;
+        hasFailed = true;
+        initialised = true;
         signalThreadShouldExit();
     }
 
@@ -827,7 +828,8 @@ public:
 
     void finishedLoading()
     {
-        hasFinished = initialised = true;
+        hasFinished = true;
+        initialised = true;
         signalThreadShouldExit();
     }
 
@@ -861,7 +863,7 @@ public:
     NSDictionary* headers = nil;
     NSInteger nsUrlErrorCode = 0;
     int statusCode = 0;
-    bool initialised = false, hasFailed = false, hasFinished = false;
+    std::atomic<bool> initialised { false }, hasFailed { false }, hasFinished { false };
     const int numRedirectsToFollow;
     int numRedirects = 0;
     int latestTotalBytes = 0;

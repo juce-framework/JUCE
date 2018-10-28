@@ -357,6 +357,7 @@ private:
     friend class MouseInputSourceInternal;
     friend class DeletedAtShutdown;
     friend class TopLevelWindowManager;
+    friend class Displays;
 
     std::unique_ptr<MouseInputSource::SourceList> mouseSources;
 

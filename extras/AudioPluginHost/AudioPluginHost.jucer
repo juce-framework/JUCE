@@ -8,7 +8,7 @@
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="" rtasFolder="~/SDKs/PT_80_SDK"
                objCExtraSuffix="M73TRi" vst3Folder="" extraCompilerFlags="-Wall -Wshadow -Wstrict-aliasing -Wconversion -Wsign-compare -Woverloaded-virtual -Wextra-semi"
-               smallIcon="c97aUr" bigIcon="c97aUr">
+               smallIcon="c97aUr" bigIcon="c97aUr" microphonePermissionNeeded="1">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="AudioPluginHost"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="AudioPluginHost"/>

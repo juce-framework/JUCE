@@ -6,6 +6,39 @@ Develop
 
 Change
 ------
+The AudioProcessorValueTreeState::createAndAddParameter function has been
+deprecated.
+
+Possible Issues
+---------------
+Deprecation warnings will be seen when compiling code which uses this function
+and eventually builds will fail when it is later removed from the API.
+
+Workaround
+----------
+Previous calls to
+
+createAndAddParameter (paramID, paramName, ...);
+
+can be directly replaced with
+
+using Parameter = AudioProcessorValueTreeState::Parameter;
+createAndAddParameter (std::make_unique<Parameter> (paramID, paramName, ...));
+
+but an even better approach is to use the new AudioProcessorValueTreeState
+constructor where you can pass both RangedAudioParameters and
+AudioProcessorParameterGroups of RangedAudioParameters to the
+AudioProcessorValueTreeState and initialise the ValueTree simultaneously.
+
+Rationale
+---------
+The new createAndAddParameter method is much more flexible and enables any
+parameter types derived from RangedAudioParameter to be managed by the
+AudioProcessorValueTreeState.
+
+
+Change
+------
 The Projucer's per-exporter Android SDK/NDK path options have been removed.
 
 Possible Issues
@@ -15,7 +48,7 @@ Projects that previously used these fields may no longer build.
 Workaround
 ----------
 Use the Projucer's global paths settings to point to these directories, either
-by opening the "Projucer/File->Global Paths..." menu item or using the 
+by opening the "Projucer/File->Global Paths..." menu item or using the
 "--set-global-search-path" command-line option.
 
 Rationale

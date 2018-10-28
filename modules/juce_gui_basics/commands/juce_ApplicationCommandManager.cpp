@@ -185,7 +185,7 @@ bool ApplicationCommandManager::invoke (const ApplicationCommandTarget::Invocati
 {
     // This call isn't thread-safe for use from a non-UI thread without locking the message
     // manager first..
-    jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
     bool ok = false;
     ApplicationCommandInfo commandInfo (0);

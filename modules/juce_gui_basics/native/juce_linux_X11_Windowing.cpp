@@ -1051,7 +1051,7 @@ public:
           isAlwaysOnTop (comp.isAlwaysOnTop())
     {
         // it's dangerous to create a window on a thread other than the message thread..
-        jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
+        JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
         display = XWindowSystem::getInstance()->displayRef();
 
@@ -1097,7 +1097,7 @@ public:
     ~LinuxComponentPeer()
     {
         // it's dangerous to delete a window on a thread other than the message thread..
-        jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
+        JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
        #if JUCE_X11_SUPPORTS_XEMBED
         juce_handleXEmbedEvent (this, nullptr);
@@ -3986,12 +3986,6 @@ void MouseCursor::showInWindow (ComponentPeer* peer) const
 {
     if (auto* lp = dynamic_cast<LinuxComponentPeer*> (peer))
         lp->showMouseCursor ((Cursor) getHandle());
-}
-
-void MouseCursor::showInAllWindows() const
-{
-    for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
-        showInWindow (ComponentPeer::getPeer (i));
 }
 
 //=================================== X11 - DND ================================

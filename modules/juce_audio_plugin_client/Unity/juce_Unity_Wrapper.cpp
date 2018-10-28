@@ -505,9 +505,6 @@ namespace UnityCallbacks
 {
     int UNITY_INTERFACE_API createCallback (UnityAudioEffectState* state)
     {
-        if (getWrapperMap().size() == 0)
-            initialiseJuce_GUI();
-
         auto* pluginInstance = new AudioProcessorUnityWrapper (false);
         pluginInstance->create (state);
 
@@ -671,14 +668,16 @@ static void declareEffect (UnityAudioEffectDefinition& definition)
 
 UNITY_INTERFACE_EXPORT int UnityGetAudioEffectDefinitions (UnityAudioEffectDefinition*** definitionsPtr)
 {
-    static bool hasSetWrapperType = false;
+    static bool hasInitialised = false;
 
-    if (! hasSetWrapperType)
+    if (! hasInitialised)
     {
+        juce::initialiseJuce_GUI();
+
         juce::PluginHostType::jucePlugInClientCurrentWrapperType = juce::AudioProcessor::wrapperType_Unity;
         juce::juce_createUnityPeerFn = juce::createUnityPeer;
 
-        hasSetWrapperType = true;
+        hasInitialised = true;
     }
 
     auto* definition = new UnityAudioEffectDefinition();

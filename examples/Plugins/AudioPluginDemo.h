@@ -175,19 +175,14 @@ public:
     //==============================================================================
     JuceDemoPluginAudioProcessor()
         : AudioProcessor (getBusesProperties()),
-          state (*this, nullptr)
+    state (*this, nullptr, "state",
+           { std::make_unique<AudioParameterFloat> ("gain", "Gain", NormalisableRange<float> (0.0f, 1.0f), 0.9f),
+             std::make_unique<AudioParameterFloat> ("delay", "Delay Feedback", NormalisableRange<float> (0.0f, 1.0f), 0.5f) })
     {
         lastPosInfo.resetToDefault();
 
-        // This creates our parameters
-        state.createAndAddParameter ("gain",  "Gain",           {}, {}, 0.9f, {}, {});
-        state.createAndAddParameter ("delay", "Delay Feedback", {}, {}, 0.5f, {}, {});
-
-        state.state = ValueTree ("state", {},
-                                 {
-                                     // add a sub-tree to store the state of our UI
-                                     {"uiState", {{"width",  400}, {"height", 200}}, {}}
-                                 });
+        // Add a sub-tree to store the state of our UI
+        state.state.addChild ({ "uiState", { { "width",  400 }, { "height", 200 } }, {} }, -1, nullptr);
 
         initialiseSynth();
     }
@@ -547,9 +542,10 @@ private:
         synth.renderNextBlock (buffer, midiMessages, 0, numSamples);
 
         // Apply our delay effect to the new output..
-        applyDelay (buffer, delayBuffer, gainParamValue);
+        applyDelay (buffer, delayBuffer, delayParamValue);
 
-        applyGain (buffer, delayBuffer, delayParamValue); // apply our gain-change to the outgoing data..
+        // Apply our gain change to the outgoing data..
+        applyGain (buffer, delayBuffer, gainParamValue);
 
         // Now ask the host for the current time so we can store it to be displayed later...
         updateCurrentTimeInfoFromHost();
