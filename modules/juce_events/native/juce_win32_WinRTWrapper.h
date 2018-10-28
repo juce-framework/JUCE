@@ -31,24 +31,11 @@ public:
     class ScopedHString
     {
     public:
-        ScopedHString (String str)
-        {
-            if (WinRTWrapper::getInstance()->isInitialised())
-                WinRTWrapper::getInstance()->createHString (str.toWideCharPointer(),
-                                                            static_cast<uint32_t> (str.length()),
-                                                            &hstr);
-        }
+        ScopedHString (String);
 
-        ~ScopedHString()
-        {
-            if (WinRTWrapper::getInstance()->isInitialised() && hstr != nullptr)
-                WinRTWrapper::getInstance()->deleteHString (hstr);
-        }
+        ~ScopedHString();
 
-        HSTRING get() const noexcept
-        {
-            return hstr;
-        }
+        HSTRING get() const noexcept          { return hstr; }
 
     private:
         HSTRING hstr = nullptr;
@@ -56,27 +43,11 @@ public:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedHString)
     };
 
-    ~WinRTWrapper()
-    {
-        if (winRTHandle != nullptr)
-            ::FreeLibrary (winRTHandle);
+    ~WinRTWrapper();
 
-        clearSingletonInstance();
-    }
+    String hStringToString (HSTRING);
 
-    String hStringToString (HSTRING hstr)
-    {
-        if (isInitialised())
-            if (const wchar_t* str = getHStringRawBuffer (hstr, nullptr))
-                return String (str);
-
-        return {};
-    }
-
-    bool isInitialised() const noexcept
-    {
-        return initialised;
-    }
+    bool isInitialised() const noexcept       { return initialised; }
 
     template <class ComClass>
     ComSmartPtr<ComClass> getWRLFactory (const wchar_t* runtimeClassID)
@@ -86,6 +57,7 @@ public:
         if (isInitialised())
         {
             ScopedHString classID (runtimeClassID);
+
             if (classID.get() != nullptr)
                 roGetActivationFactory (classID.get(), __uuidof (ComClass), (void**) comPtr.resetAndGetPointerAddress());
         }
@@ -94,25 +66,7 @@ public:
     }
 
 private:
-    WinRTWrapper()
-    {
-        winRTHandle = ::LoadLibraryA ("api-ms-win-core-winrt-l1-1-0");
-        if (winRTHandle == nullptr)
-            return;
-
-        roInitialize           = (RoInitializeFuncPtr)              ::GetProcAddress (winRTHandle, "RoInitialize");
-        createHString          = (WindowsCreateStringFuncPtr)       ::GetProcAddress (winRTHandle, "WindowsCreateString");
-        deleteHString          = (WindowsDeleteStringFuncPtr)       ::GetProcAddress (winRTHandle, "WindowsDeleteString");
-        getHStringRawBuffer    = (WindowsGetStringRawBufferFuncPtr) ::GetProcAddress (winRTHandle, "WindowsGetStringRawBuffer");
-        roGetActivationFactory = (RoGetActivationFactoryFuncPtr)    ::GetProcAddress (winRTHandle, "RoGetActivationFactory");
-
-        if (roInitialize == nullptr || createHString == nullptr || deleteHString == nullptr
-         || getHStringRawBuffer == nullptr || roGetActivationFactory == nullptr)
-            return;
-
-        HRESULT status = roInitialize (1);
-        initialised = ! (status != S_OK && status != S_FALSE && status != 0x80010106L);
-    }
+    WinRTWrapper();
 
     HMODULE winRTHandle = nullptr;
     bool initialised = false;

@@ -1470,9 +1470,6 @@ struct PhysicalTopologySource::Internal
             for (auto&& s : modelData.statusLEDs)
                 statusLights.add (new StatusLightImplementation (*this, s));
 
-            if (modelData.numLEDRowLEDs > 0)
-                ledRow.reset (new LEDRowImplementation (*this));
-
             updateMidiConnectionListener();
         }
 
@@ -1546,7 +1543,14 @@ struct PhysicalTopologySource::Internal
 
         TouchSurface* getTouchSurface() const override                  { return touchSurface.get(); }
         LEDGrid* getLEDGrid() const override                            { return ledGrid.get(); }
-        LEDRow* getLEDRow() const override                              { return ledRow.get(); }
+
+        LEDRow* getLEDRow() override
+        {
+            if (ledRow == nullptr && modelData.numLEDRowLEDs > 0)
+                ledRow.reset (new LEDRowImplementation (*this));
+
+            return ledRow.get();
+        }
 
         juce::Array<ControlButton*> getButtons() const override
         {

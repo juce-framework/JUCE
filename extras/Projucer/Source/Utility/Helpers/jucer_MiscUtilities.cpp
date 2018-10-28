@@ -421,7 +421,7 @@ static String parseMetadataItem (const StringArray& lines, int& index)
             || continuationLine.startsWith ("END_JUCE_"))
             break;
 
-        result += continuationLine;
+        result += " " + continuationLine;
         ++index;
     }
 
