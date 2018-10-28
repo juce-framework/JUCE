@@ -177,7 +177,7 @@ static bool checkPeerIsValid (OpenGLContext* context)
                #if JUCE_MAC || JUCE_IOS
                 if (auto* nsView = (JUCE_IOS_MAC_VIEW*) peer->getNativeHandle())
                 {
-                    if (auto* nsWindow = [nsView window])
+                    if (auto nsWindow = [nsView window])
                     {
                        #if JUCE_MAC
                         return ([nsWindow isVisible]

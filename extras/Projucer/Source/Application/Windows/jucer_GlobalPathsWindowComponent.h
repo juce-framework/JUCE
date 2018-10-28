@@ -66,6 +66,9 @@ public:
         addChildComponent (rescanUserPathButton);
         rescanUserPathButton.onClick = [] { ProjucerApplication::getApp().rescanUserPathModules(); };
 
+        addAndMakeVisible (resetToDefaultsButton);
+        resetToDefaultsButton.onClick = [this] { resetCurrentOSPathsToDefaults(); };
+
         updateValues();
         updateFilePathPropertyComponents();
     }
@@ -127,6 +130,8 @@ public:
 
             isFirst = false;
         }
+
+        resetToDefaultsButton.setBounds (b.removeFromBottom (35).reduced (150, 0));
     }
 
     void highlightJUCEPath()
@@ -144,10 +149,14 @@ public:
     }
 
 private:
+    ValueWithDefault jucePathValue, juceModulePathValue, userModulePathValue, vst3PathValue, rtasPathValue, aaxPathValue,
+                     androidSDKPathValue, androidNDKPathValue, clionExePathValue, androidStudioExePathValue;
+
     OwnedArray<Label> pathPropertyLabels;
     OwnedArray<PropertyComponent> pathPropertyComponents;
-    TextButton rescanJUCEPathButton { "Re-scan" },
-               rescanUserPathButton { "Re-scan" };
+    TextButton rescanJUCEPathButton  { "Re-scan" },
+               rescanUserPathButton  { "Re-scan" },
+               resetToDefaultsButton { "Reset to Defaults" };
 
     ComboBox osSelector;
     InfoButton info;
@@ -155,9 +164,6 @@ private:
     Rectangle<int> boundsToHighlight;
     float flashAlpha = 0.0f;
     bool hasFlashed = false;
-
-    ValueWithDefault jucePathValue, juceModulePathValue, userModulePathValue, vst3PathValue, rtasPathValue, aaxPathValue,
-                     androidSDKPathValue, androidNDKPathValue, clionExePathValue, androidStudioExePathValue;
 
     //==============================================================================
     void timerCallback() override
@@ -289,6 +295,22 @@ private:
             l->setFont (Font (18.0f, Font::FontStyleFlags::bold));
             l->setJustificationType (Justification::centredLeft);
         }
+    }
+
+    void resetCurrentOSPathsToDefaults()
+    {
+        jucePathValue            .resetToDefault();
+        juceModulePathValue      .resetToDefault();
+        userModulePathValue      .resetToDefault();
+        vst3PathValue            .resetToDefault();
+        rtasPathValue            .resetToDefault();
+        aaxPathValue             .resetToDefault();
+        androidSDKPathValue      .resetToDefault();
+        androidNDKPathValue      .resetToDefault();
+        clionExePathValue        .resetToDefault();
+        androidStudioExePathValue.resetToDefault();
+
+        repaint();
     }
 
     //==============================================================================

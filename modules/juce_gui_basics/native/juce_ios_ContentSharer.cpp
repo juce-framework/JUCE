@@ -45,7 +45,7 @@ public:
 
     void shareFiles (const Array<URL>& files) override
     {
-        auto* urls = [NSMutableArray arrayWithCapacity: (NSUInteger) files.size()];
+        auto urls = [NSMutableArray arrayWithCapacity: (NSUInteger) files.size()];
 
         for (const auto& f : files)
         {
@@ -86,7 +86,7 @@ public:
 
     void shareText (const String& text) override
     {
-        auto* array = [NSArray arrayWithObject: juceStringToNS (text)];
+        auto array = [NSArray arrayWithObject: juceStringToNS (text)];
         share (array);
     }
 

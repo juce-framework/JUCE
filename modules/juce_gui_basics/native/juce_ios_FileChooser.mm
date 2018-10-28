@@ -222,7 +222,7 @@ private:
 
         NSArray<NSFileAccessIntent*>* intents = @[fileAccessIntent];
 
-        auto* fileCoordinator = [[NSFileCoordinator alloc] initWithFilePresenter: nil];
+        auto fileCoordinator = [[NSFileCoordinator alloc] initWithFilePresenter: nil];
 
         [fileCoordinator coordinateAccessWithIntents: intents queue: [NSOperationQueue mainQueue] byAccessor: ^(NSError* err)
         {
@@ -251,7 +251,7 @@ private:
                 }
                 else
                 {
-                    auto* desc = [error localizedDescription];
+                    auto desc = [error localizedDescription];
                     ignoreUnused (desc);
                     jassertfalse;
                 }
@@ -260,7 +260,7 @@ private:
             }
             else
             {
-                auto* desc = [err localizedDescription];
+                auto desc = [err localizedDescription];
                 ignoreUnused (desc);
                 jassertfalse;
             }

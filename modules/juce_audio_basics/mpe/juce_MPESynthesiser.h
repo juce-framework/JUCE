@@ -304,6 +304,7 @@ protected:
 private:
     //==============================================================================
     bool shouldStealVoices = false;
+    uint32 lastNoteOnCounter = 0;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MPESynthesiser)
 };

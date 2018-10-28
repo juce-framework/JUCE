@@ -109,20 +109,6 @@ public:
         return false;
     }
 
-    void refreshModuleInfoIfCurrentlyShowing (bool juceModulePathChanged)
-    {
-        auto isJuceModule = isJUCEModule (moduleID);
-        auto shouldRefresh = (juceModulePathChanged && isJuceModule) || (! juceModulePathChanged && ! isJuceModule);
-
-        if (! shouldRefresh)
-            return;
-
-        if (auto* pcc = getProjectContentComponent())
-            if (auto* settingsPanel = dynamic_cast<ModuleSettingsPanel*> (pcc->getEditorComponentContent()))
-                if (settingsPanel->getModuleID() == moduleID)
-                    showDocument();
-    }
-
     Project& project;
     String moduleID;
 
@@ -164,6 +150,7 @@ private:
             if (modules.doesModuleHaveHigherCppStandardThanProject (moduleID))
                 props.add (new CppStandardWarningComponent());
 
+            group.properties.clear();
             exporterModulePathValues.clear();
 
             for (Project::ExporterIterator exporter (project); exporter.next();)
@@ -244,15 +231,15 @@ private:
         void timerCallback() override          { stopTimer(); refresh(); }
 
         //==============================================================================
+        Array<ValueWithDefault> exporterModulePathValues;
+        Value globalPathValue;
+
+        OwnedArray <Project::ConfigFlag> configFlags;
+
         PropertyGroupComponent group;
         Project& project;
         SafePointer<TreeView> modulesTree;
         String moduleID;
-
-        OwnedArray <Project::ConfigFlag> configFlags;
-
-        Array<ValueWithDefault> exporterModulePathValues;
-        Value globalPathValue;
 
         //==============================================================================
         class ModuleInfoComponent  : public PropertyComponent,
@@ -524,9 +511,9 @@ public:
 
         for (int i = 0; i < modules.size(); ++i)
             project.getEnabledModules().addModule (modules.getReference(i).moduleFolder,
-                                            project.getEnabledModules().areMostModulesCopiedLocally(),
-                                            project.getEnabledModules().areMostModulesUsingGlobalPath(),
-                                            true);
+                                                   project.getEnabledModules().areMostModulesCopiedLocally(),
+                                                   project.getEnabledModules().areMostModulesUsingGlobalPath(),
+                                                   true);
     }
 
     void addSubItems() override

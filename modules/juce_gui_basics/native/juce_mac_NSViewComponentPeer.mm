@@ -1044,7 +1044,7 @@ public:
     {
         if (isSharedWindow)
         {
-            auto* newWindow = [view window];
+            auto newWindow = [view window];
             bool shouldSetVisible = (window == nullptr && newWindow != nullptr);
 
             window = newWindow;

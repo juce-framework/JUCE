@@ -346,11 +346,9 @@ public:
 
         if (asioObject != nullptr)
         {
-            const int possibleSampleRates[] = { 32000, 44100, 48000, 88200, 96000, 176400, 192000, 352800, 384000 };
-
-            for (int index = 0; index < numElementsInArray (possibleSampleRates); ++index)
-                if (asioObject->canSampleRate ((double) possibleSampleRates[index]) == 0)
-                    newRates.add ((double) possibleSampleRates[index]);
+            for (auto rate : { 32000, 44100, 48000, 88200, 96000, 176400, 192000, 352800, 384000, 705600, 768000 })
+                if (asioObject->canSampleRate ((double) rate) == 0)
+                    newRates.add ((double) rate);
         }
 
         if (newRates.isEmpty())

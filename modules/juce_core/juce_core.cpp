@@ -105,6 +105,7 @@
 #endif
 
 #if JUCE_ANDROID
+ #include <ifaddrs.h>
  #include <android/log.h>
 #endif
 
@@ -186,12 +187,14 @@
 #if ! JUCE_WINDOWS
 #include "native/juce_posix_SharedCode.h"
 #include "native/juce_posix_NamedPipe.cpp"
+#if ! JUCE_ANDROID || __ANDROID_API__ >= 24
+ #include "native/juce_posix_IPAddress.h"
+#endif
 #endif
 
 //==============================================================================
 #if JUCE_MAC || JUCE_IOS
 #include "native/juce_mac_Files.mm"
-#include "native/juce_mac_linux_IPAddress.h"
 #include "native/juce_mac_Network.mm"
 #include "native/juce_mac_Strings.mm"
 #include "native/juce_mac_SystemStats.mm"
@@ -209,7 +212,6 @@
 #elif JUCE_LINUX
 #include "native/juce_linux_CommonFile.cpp"
 #include "native/juce_linux_Files.cpp"
-#include "native/juce_mac_linux_IPAddress.h"
 #include "native/juce_linux_Network.cpp"
 #if JUCE_USE_CURL
  #include "native/juce_curl_Network.cpp"

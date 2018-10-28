@@ -289,15 +289,16 @@ public:
 
             if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, nullptr, &size, ranges)))
             {
-                static const double possibleRates[] = { 44100.0, 48000.0, 88200.0, 96000.0, 176400.0, 192000.0, 352800.0, 384000.0 };
-
-                for (int i = 0; i < numElementsInArray (possibleRates); ++i)
+                for (auto r : { 44100, 48000, 88200, 96000, 176400,
+                                192000, 352800, 384000, 705600, 768000 })
                 {
+                    auto rate = (double) r;
+
                     for (int j = size / (int) sizeof (AudioValueRange); --j >= 0;)
                     {
-                        if (possibleRates[i] >= ranges[j].mMinimum - 2 && possibleRates[i] <= ranges[j].mMaximum + 2)
+                        if (rate >= ranges[j].mMinimum - 2 && rate <= ranges[j].mMaximum + 2)
                         {
-                            newSampleRates.add (possibleRates[i]);
+                            newSampleRates.add (rate);
                             break;
                         }
                     }

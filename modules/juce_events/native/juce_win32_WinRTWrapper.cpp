@@ -57,6 +57,7 @@ String WinRTWrapper::hStringToString (HSTRING hstr)
 WinRTWrapper::WinRTWrapper()
 {
     winRTHandle = ::LoadLibraryA ("api-ms-win-core-winrt-l1-1-0");
+
     if (winRTHandle == nullptr)
         return;
 
@@ -64,10 +65,11 @@ WinRTWrapper::WinRTWrapper()
     createHString          = (WindowsCreateStringFuncPtr)       ::GetProcAddress (winRTHandle, "WindowsCreateString");
     deleteHString          = (WindowsDeleteStringFuncPtr)       ::GetProcAddress (winRTHandle, "WindowsDeleteString");
     getHStringRawBuffer    = (WindowsGetStringRawBufferFuncPtr) ::GetProcAddress (winRTHandle, "WindowsGetStringRawBuffer");
+    roActivateInstance     = (RoActivateInstanceFuncPtr)        ::GetProcAddress (winRTHandle, "RoActivateInstance");
     roGetActivationFactory = (RoGetActivationFactoryFuncPtr)    ::GetProcAddress (winRTHandle, "RoGetActivationFactory");
 
     if (roInitialize == nullptr || createHString == nullptr || deleteHString == nullptr
-        || getHStringRawBuffer == nullptr || roGetActivationFactory == nullptr)
+        || getHStringRawBuffer == nullptr || roActivateInstance == nullptr || roGetActivationFactory == nullptr)
         return;
 
     HRESULT status = roInitialize (1);
