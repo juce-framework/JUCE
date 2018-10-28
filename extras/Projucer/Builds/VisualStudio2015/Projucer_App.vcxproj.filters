@@ -496,9 +496,6 @@
     <ClCompile Include="..\..\Source\Utility\PIPs\jucer_PIPGenerator.cpp">
       <Filter>Projucer\Utility\PIPs</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Utility\UI\PropertyComponents\jucer_DependencyPathPropertyComponent.cpp">
-      <Filter>Projucer\Utility\UI\PropertyComponents</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Utility\UI\jucer_Icons.cpp">
       <Filter>Projucer\Utility\UI</Filter>
     </ClCompile>
@@ -2323,9 +2320,6 @@
       <Filter>Projucer\Utility\PIPs</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Utility\UI\PropertyComponents\jucer_ColourPropertyComponent.h">
-      <Filter>Projucer\Utility\UI\PropertyComponents</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\UI\PropertyComponents\jucer_DependencyPathPropertyComponent.h">
       <Filter>Projucer\Utility\UI\PropertyComponents</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Utility\UI\PropertyComponents\jucer_FilePathPropertyComponent.h">

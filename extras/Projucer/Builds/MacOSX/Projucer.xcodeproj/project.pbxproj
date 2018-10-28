@@ -261,10 +261,6 @@
 			isa = PBXBuildFile;
 			fileRef = 191330B20DAC08B890656EA0;
 		};
-		2BEC1197D981951D8A897F01 = {
-			isa = PBXBuildFile;
-			fileRef = D859E9EA11A71BD6E85DC649;
-		};
 		D0E26EB54B0087C8BE3D541E = {
 			isa = PBXBuildFile;
 			fileRef = 846B2A670C5A19DE0039E11A;
@@ -2271,13 +2267,6 @@
 			path = "../../JuceLibraryCode/include_juce_cryptography.mm";
 			sourceTree = "SOURCE_ROOT";
 		};
-		D859E9EA11A71BD6E85DC649 = {
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.cpp;
-			name = "jucer_DependencyPathPropertyComponent.cpp";
-			path = "../../Source/Utility/UI/PropertyComponents/jucer_DependencyPathPropertyComponent.cpp";
-			sourceTree = "SOURCE_ROOT";
-		};
 		D91E7F8FEF9290195D56782C = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.h;
@@ -2549,13 +2538,6 @@
 			lastKnownFileType = file.svg;
 			name = "wizard_Highlight.svg";
 			path = "../../Source/BinaryData/Icons/wizard_Highlight.svg";
-			sourceTree = "SOURCE_ROOT";
-		};
-		F8F94093A0963D86BD27A95D = {
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			name = "jucer_DependencyPathPropertyComponent.h";
-			path = "../../Source/Utility/UI/PropertyComponents/jucer_DependencyPathPropertyComponent.h";
 			sourceTree = "SOURCE_ROOT";
 		};
 		F9111E150CFF155329D44853 = {
@@ -3039,8 +3021,6 @@
 			isa = PBXGroup;
 			children = (
 				9EB33734D0DBD0370AB1247B,
-				D859E9EA11A71BD6E85DC649,
-				F8F94093A0963D86BD27A95D,
 				E367FC2BDAF5EBA48D767FBB,
 				59F8A47C0020D62C8836A1E7,
 			);
@@ -3463,7 +3443,6 @@
 				BF913199032B4CE970E82AA3,
 				25EF9B3FECB4C9F0F522DCAA,
 				638C7247B6DBA67EFE46E124,
-				2BEC1197D981951D8A897F01,
 				D0E26EB54B0087C8BE3D541E,
 				468548FB21D264DC12321327,
 				6ECB2F11D2F593FACCCF99DB,

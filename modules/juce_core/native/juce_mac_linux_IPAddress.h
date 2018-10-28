@@ -46,7 +46,7 @@ namespace
         return IPAddress (arr);
     }
 
-    static IPAddress makeAddress (const sockaddr_in *addr_in)
+    static IPAddress makeAddress (const sockaddr_in* addr_in)
     {
         if (addr_in->sin_addr.s_addr == INADDR_NONE)
             return {};

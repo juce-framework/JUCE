@@ -332,7 +332,7 @@ private:
         auto buffer = LocalRef<jbyteArray> (env->NewByteArray (1024));
         int bytesRead = 0;
 
-        while (true)
+        for (;;)
         {
             if (threadShouldExit())
                 return {};

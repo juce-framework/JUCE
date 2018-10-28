@@ -50,6 +50,7 @@ public:
         osSelector.onChange = [this]
         {
             addLabelsAndSetProperties();
+            updateValues();
             updateFilePathPropertyComponents();
         };
 
@@ -65,6 +66,7 @@ public:
         addChildComponent (rescanUserPathButton);
         rescanUserPathButton.onClick = [] { ProjucerApplication::getApp().rescanUserPathModules(); };
 
+        updateValues();
         updateFilePathPropertyComponents();
     }
 
@@ -154,6 +156,9 @@ private:
     float flashAlpha = 0.0f;
     bool hasFlashed = false;
 
+    ValueWithDefault jucePathValue, juceModulePathValue, userModulePathValue, vst3PathValue, rtasPathValue, aaxPathValue,
+                     androidSDKPathValue, androidNDKPathValue, clionExePathValue, androidStudioExePathValue;
+
     //==============================================================================
     void timerCallback() override
     {
@@ -196,46 +201,38 @@ private:
     {
         pathPropertyComponents.clear();
 
-        auto& settings = getAppSettings();
+        auto isThisOS = isSelectedOSThisOS();
 
-        if (isSelectedOSThisOS())
+        addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (jucePathValue, "Path to JUCE", true, isThisOS)));
+
+        pathPropertyComponents.add (nullptr);
+
+        addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (juceModulePathValue, "JUCE Modules", true, isThisOS)));
+        addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (userModulePathValue, "User Modules", true, isThisOS, {}, {}, true)));
+
+        pathPropertyComponents.add (nullptr);
+
+        addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (vst3PathValue, "Custom VST3 SDK", true, isThisOS)));
+
+        if (getSelectedOS() == TargetOS::linux)
         {
-            addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (settings.getStoredPath (Ids::jucePath),
-                                                                                          "Path to JUCE", true)));
+            addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (Value(), "AAX SDK", true, isThisOS)));
+            pathPropertyComponents.getLast()->setEnabled (false);
 
-            pathPropertyComponents.add (nullptr);
+            addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (Value(), "RTAS SDK", true, isThisOS)));
+            pathPropertyComponents.getLast()->setEnabled (false);
+        }
+        else
+        {
+            addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (aaxPathValue,  "AAX SDK", true, isThisOS)));
+            addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (rtasPathValue, "RTAS SDK", true, isThisOS)));
+        }
 
-            addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (settings.getStoredPath (Ids::defaultJuceModulePath),
-                                                                                          "JUCE Modules", true)));
-            addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (settings.getStoredPath (Ids::defaultUserModulePath),
-                                                                                          "User Modules", true, {}, {}, true)));
+        addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (androidSDKPathValue, "Android SDK", true, isThisOS)));
+        addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (androidNDKPathValue, "Android NDK", true, isThisOS)));
 
-            pathPropertyComponents.add (nullptr);
-
-            if (getSelectedOS() == TargetOS::linux)
-            {
-                addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent ({}, "RTAS SDK", true)));
-                pathPropertyComponents.getLast()->setEnabled (false);
-
-                addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent ({}, "AAX SDK", true)));
-                pathPropertyComponents.getLast()->setEnabled (false);
-            }
-            else
-            {
-                addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (settings.getStoredPath (Ids::rtasPath),
-                                                                                              "RTAS SDK", true)));
-                addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (settings.getStoredPath (Ids::aaxPath),
-                                                                                              "AAX SDK", true)));
-            }
-
-            addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (settings.getStoredPath (Ids::androidSDKPath),
-                                                                                          "Android SDK", true)));
-            addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (settings.getStoredPath (Ids::androidNDKPath),
-                                                                                          "Android NDK", true)));
-
-            addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (settings.getStoredPath (Ids::vst3Path),
-                                                                                          "Custom VST3 SDK", true)));
-
+        if (isThisOS)
+        {
             pathPropertyComponents.add (nullptr);
 
            #if JUCE_MAC
@@ -245,59 +242,37 @@ private:
            #else
             String exeLabel ("startup script");
            #endif
-            addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (settings.getStoredPath (Ids::clionExePath),
-                                                                                          "CLion " + exeLabel, false)));
 
-            addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (settings.getStoredPath (Ids::androidStudioExePath),
-                                                           "Android Studio " + exeLabel, false)));
+            addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (clionExePathValue,         "CLion " + exeLabel,          false, isThisOS)));
+            addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (androidStudioExePathValue, "Android Studio " + exeLabel, false, isThisOS)));
 
             rescanJUCEPathButton.setVisible (true);
             rescanUserPathButton.setVisible (true);
         }
         else
         {
-            auto selectedOS = getSelectedOS();
-            auto maxChars = 1024;
-
-            pathPropertyComponents.add (nullptr);
-
-            addAndMakeVisible (pathPropertyComponents.add (new TextPropertyComponent (settings.getFallbackPathForOS (Ids::defaultJuceModulePath, selectedOS),
-                                                                                      "JUCE Modules", maxChars, false)));
-            addAndMakeVisible (pathPropertyComponents.add (new TextPropertyComponent (settings.getFallbackPathForOS (Ids::defaultUserModulePath, selectedOS),
-                                                                                      "User Modules", maxChars, false)));
-
-            pathPropertyComponents.add (nullptr);
-
-            if (selectedOS == TargetOS::linux)
-            {
-                addAndMakeVisible (pathPropertyComponents.add (new TextPropertyComponent (Value(), "RTAS SDK", maxChars, false)));
-                pathPropertyComponents.getLast()->setEnabled (false);
-
-                addAndMakeVisible (pathPropertyComponents.add (new TextPropertyComponent (Value(), "AAX SDK", maxChars, false)));
-                pathPropertyComponents.getLast()->setEnabled (false);
-            }
-            else
-            {
-                addAndMakeVisible (pathPropertyComponents.add (new TextPropertyComponent (settings.getFallbackPathForOS (Ids::rtasPath, selectedOS),
-                                                                                          "RTAS SDK", maxChars, false)));
-                addAndMakeVisible (pathPropertyComponents.add (new TextPropertyComponent (settings.getFallbackPathForOS (Ids::aaxPath, selectedOS),
-                                                                                          "AAX SDK", maxChars, false)));
-            }
-
-
-            addAndMakeVisible (pathPropertyComponents.add (new TextPropertyComponent (settings.getFallbackPathForOS (Ids::androidSDKPath, selectedOS),
-                                                                                      "Android SDK", maxChars, false)));
-            addAndMakeVisible (pathPropertyComponents.add (new TextPropertyComponent (settings.getFallbackPathForOS (Ids::androidNDKPath, selectedOS),
-                                                                                      "Android NDK", maxChars, false)));
-
-            addAndMakeVisible (pathPropertyComponents.add (new TextPropertyComponent (settings.getFallbackPathForOS (Ids::vst3Path, selectedOS),
-                                                                                      "Custom VST3 SDK", maxChars, false)));
-
             rescanJUCEPathButton.setVisible (false);
             rescanUserPathButton.setVisible (false);
         }
 
         resized();
+    }
+
+    void updateValues()
+    {
+        auto& settings = getAppSettings();
+        auto os = getSelectedOS();
+
+        jucePathValue             = settings.getStoredPath (Ids::jucePath, os);
+        juceModulePathValue       = settings.getStoredPath (Ids::defaultJuceModulePath, os);
+        userModulePathValue       = settings.getStoredPath (Ids::defaultUserModulePath, os);
+        vst3PathValue             = settings.getStoredPath (Ids::vst3Path, os);
+        rtasPathValue             = settings.getStoredPath (Ids::rtasPath, os);
+        aaxPathValue              = settings.getStoredPath (Ids::aaxPath, os);
+        androidSDKPathValue       = settings.getStoredPath (Ids::androidSDKPath, os);
+        androidNDKPathValue       = settings.getStoredPath (Ids::androidNDKPath, os);
+        clionExePathValue         = settings.getStoredPath (Ids::clionExePath, os);
+        androidStudioExePathValue = settings.getStoredPath (Ids::androidStudioExePath, os);
     }
 
     void addLabelsAndSetProperties()
@@ -316,5 +291,6 @@ private:
         }
     }
 
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GlobalPathsWindowComponent)
 };

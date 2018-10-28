@@ -292,7 +292,7 @@ private:
                         auto modID = moduleList.getModuleID (i);
 
                         if (modID != moduleToCopy)
-                            exporter->getPathForModuleValue (modID) = exporter->getPathForModuleValue (moduleToCopy).getValue();
+                            exporter->getPathForModuleValue (modID) = exporter->getPathForModuleValue (moduleToCopy).get();
                     }
                 }
             }
@@ -301,7 +301,7 @@ private:
                  modulePathClipboard.clear();
 
                  for (Project::ExporterIterator exporter (project); exporter.next();)
-                     modulePathClipboard[exporter->getName()] = exporter->getPathForModuleValue (moduleToCopy).getValue();
+                     modulePathClipboard[exporter->getName()] = exporter->getPathForModuleValue (moduleToCopy).get();
             }
             else if (res == pastePathsID)
             {

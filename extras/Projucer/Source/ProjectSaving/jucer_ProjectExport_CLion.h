@@ -231,7 +231,7 @@ private:
     static File getCLionExecutableOrApp()
     {
         File clionExeOrApp (getAppSettings()
-                            .getStoredPath (Ids::clionExePath)
+                            .getStoredPath (Ids::clionExePath, TargetOS::getThisOS()).get()
                             .toString()
                             .replace ("${user.home}", File::getSpecialLocation (File::userHomeDirectory).getFullPathName()));
 

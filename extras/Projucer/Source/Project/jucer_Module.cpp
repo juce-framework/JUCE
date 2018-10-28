@@ -747,9 +747,9 @@ void EnabledModuleList::setLocalCopyModeForAllModules (bool copyLocally)
 
 File EnabledModuleList::findDefaultModulesFolder (Project& project)
 {
-    File globalPath (getAppSettings().getStoredPath (Ids::defaultJuceModulePath).toString());
+    File globalPath (getAppSettings().getStoredPath (Ids::defaultJuceModulePath, TargetOS::getThisOS()).get().toString());
 
-    if (globalPath != File())
+    if (globalPath.exists())
         return globalPath;
 
     for (auto& exporterPathModule : project.getExporterPathsModuleList().getAllModules())
