@@ -10,6 +10,13 @@ class Device
 public:
     int ID;
     string Name;
+
+	template<class A>
+	void Serialize(A& ar)
+	{
+		AR(ID);
+		AR(Name);
+	}
 };
 
 class Zone
@@ -24,9 +31,27 @@ public:
     bool Solo;
     bool Mute;
     bool DoubleOctave;
+	bool Arpeggiator;
     int Transpose;
     int LowKey;
     int HighKey;
+
+	template<class A>
+	void Serialize(A& ar)
+	{
+		AR(DeviceID);
+		AR(Bank);
+		AR(Program);
+		AR(Data);
+		AR(Volume);
+		AR(Solo);
+		AR(Mute);
+		AR(DoubleOctave);
+		AR(Arpeggiator);
+		AR(Transpose);
+		AR(LowKey);
+		AR(HighKey);
+	}
 };
 
 class Performance
@@ -36,6 +61,15 @@ public:
     string Name;
     float Tempo;
     vector<Zone> Zones;
+
+	template<class A>
+	void Serialize(A& ar)
+	{
+		AR(ID);
+		AR(Name);
+		AR(Tempo);
+		AR(Zones);
+	}
 };
 
 class Song
@@ -45,14 +79,31 @@ public:
     string Name;
     vector<int> PerformanceIDs;
     vector<Performance*> Performances;
+
+	template<class A>
+	void Serialize(A& ar)
+	{
+		AR(ID);
+		AR(Name);
+		AR(PerformanceIDs);
+	}
 };
 
 class SetList
 {
 public:
+	int ID;
     string Name;
     vector<Song*> Songs;
     vector<int> SongIDs;
+
+	template<class A>
+	void Serialize(A& ar)
+	{
+		AR(ID);
+		AR(Name);
+		AR(SongIDs);
+	}
 };
 
 class PerformerFile
@@ -62,6 +113,17 @@ public:
     vector<Device> Rack;
     vector<Song> Songs;
     vector<Performance> Performances;
+	int CurrentSetListID;
+
+	template<class A>
+	void Serialize(A& ar)
+	{
+		AR(CurrentSetListID);
+		AR(SetLists);
+		AR(Rack);
+		AR(Songs);
+		AR(Performances);
+	}
 };
 
 class Performer
