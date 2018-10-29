@@ -14,7 +14,7 @@
 //==============================================================================
 ArasampleProjectAudioProcessor::ArasampleProjectAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
-     : ARAAudioProcessor (BusesProperties()
+     : AudioProcessor (BusesProperties()
                      #if ! JucePlugin_IsMidiEffect
                       #if ! JucePlugin_IsSynth
                        .withInput  ("Input",  AudioChannelSet::stereo(), true)

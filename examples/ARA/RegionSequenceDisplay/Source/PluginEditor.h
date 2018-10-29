@@ -18,7 +18,10 @@
 //==============================================================================
 /**
 */
-class ArasampleProjectAudioProcessorEditor  : public ARAAudioProcessorEditor
+class ArasampleProjectAudioProcessorEditor  : public AudioProcessorEditor
+#if JucePlugin_Enable_ARA
+     , public ARAPlugInEditor
+#endif
 {
 public:
     ArasampleProjectAudioProcessorEditor (ArasampleProjectAudioProcessor&);

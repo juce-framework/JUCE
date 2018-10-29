@@ -10,7 +10,7 @@
  #include "juce_ARADocumentController.cpp"
  #include "juce_ARARegionSequence.cpp"
  #include "juce_ARAAudioSource.cpp"
- #include "juce_ARAAudioProcessor.cpp"
+ #include "juce_ARAPlugInInstance.cpp"
  
  namespace juce
  {

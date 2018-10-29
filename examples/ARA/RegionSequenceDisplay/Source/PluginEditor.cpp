@@ -16,7 +16,10 @@ static const int kHeight = 400;
 
 //==============================================================================
 ArasampleProjectAudioProcessorEditor::ArasampleProjectAudioProcessorEditor (ArasampleProjectAudioProcessor& p)
-    : ARAAudioProcessorEditor (&p), processor (p)
+    : AudioProcessorEditor (&p), processor (p)
+#if JucePlugin_Enable_ARA
+     , ARAPlugInEditor(dynamic_cast<ARAPlugInInstance*>(&p))
+#endif
 {
     tracksViewport.setScrollBarsShown(true, true);
     if (auto e = getARAEditorView())
