@@ -222,7 +222,10 @@ public:
     {
         if (isSharedWindow)
         {
-            [view setHidden: ! shouldBeVisible];
+            if (shouldBeVisible)
+                [view setHidden: false];
+            else if ([window firstResponder] != view || ([window firstResponder] == view && [window makeFirstResponder: nil]))
+                [view setHidden: true];
         }
         else
         {
