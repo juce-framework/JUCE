@@ -464,6 +464,9 @@ public:
             inputChannelInfo.swapWith (newInChans);
             outputChannelInfo.swapWith (newOutChans);
 
+            numInputChans  = inputChannelInfo.size();
+            numOutputChans = outputChannelInfo.size();
+
             allocateTempBuffers();
         }
 
@@ -778,7 +781,7 @@ public:
 
             for (int i = numOutputChans; --i >= 0;)
             {
-                auto& info = outputChannelInfo.getReference(i);
+                auto& info = outputChannelInfo.getReference (i);
                 auto src = tempOutputBuffers[i];
                 auto dest = ((float*) outOutputData->mBuffers[info.streamNum].mData) + info.dataOffsetSamples;
                 auto stride = info.dataStrideSamples;
