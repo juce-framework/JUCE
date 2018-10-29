@@ -346,7 +346,9 @@ public:
 
         if (asioObject != nullptr)
         {
-            for (auto rate : { 32000, 44100, 48000, 88200, 96000, 176400, 192000, 352800, 384000, 705600, 768000 })
+            for (auto rate : { 8000, 11025, 16000, 22050, 32000,
+                               44100, 48000, 88200, 96000, 176400,
+                               192000, 352800, 384000, 705600, 768000 })
                 if (asioObject->canSampleRate ((double) rate) == 0)
                     newRates.add ((double) rate);
         }
