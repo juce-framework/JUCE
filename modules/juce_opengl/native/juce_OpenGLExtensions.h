@@ -84,9 +84,7 @@
     USE_FUNCTION (glGetFramebufferAttachmentParameteriv, void, (GLenum p1, GLenum p2, GLenum p3, GLint* p4), (p1, p2, p3, p4))\
     USE_FUNCTION (glBlendEquation,          void, (GLenum p1), (p1))\
     USE_FUNCTION (glBlendEquationSeparate,  void, (GLenum p1, GLenum p2), (p1, p2))\
-    USE_FUNCTION (glBlendEquationSeparatei, void, (GLuint p1, GLenum p2, GLenum p3), (p1, p2, p3))\
-    USE_FUNCTION (glBlendFuncSeparate,      void, (GLenum p1, GLenum p2, GLenum p3, GLenum p4), (p1, p2, p3, p4))\
-    USE_FUNCTION (glBlendFuncSeparatei,     void, (GLuint p1, GLenum p2, GLenum p3, GLenum p4, GLenum p5), (p1, p2, p3, p4, p5))
+    USE_FUNCTION (glBlendFuncSeparate,      void, (GLenum p1, GLenum p2, GLenum p3, GLenum p4), (p1, p2, p3, p4))
 
 
 /** @internal This macro contains a list of GL extension functions that need to be dynamically loaded on Windows/Linux.
