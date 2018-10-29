@@ -100,7 +100,7 @@ Performer::Performer()
             {
 				auto &onSetScene = group.PluginChain.PlugIn[0].OnSetScene;
 
-				for (int pass = 0; pass < 2; ++pass)
+				for (auto pass = 0U; pass < 2; ++pass)
 				{
 					if (pass == 1 && onSetScene.ProgramChange.size() <= 1)
 						continue; 
@@ -147,7 +147,7 @@ Performer::Performer()
 					if (group.Name == "Arpeggiator")
 					{
 						// copy parameters to other plugin
-						for (int z = 0; z<performance.Zones.size(); ++z)
+						for (auto z = 0U; z<performance.Zones.size(); ++z)
 							if (performance.Zones[z].Arpeggiator)
 							{
 								performance.Zones[z].LowKey = zone.LowKey;
