@@ -10,7 +10,6 @@
 
 #pragma once
 
-#include "juce_audio_plugin_client/ARA/juce_ARADocumentController.h"
 #include "AudioView.h"
 
 class ARASampleProjectDocumentController : public juce::ARADocumentController
