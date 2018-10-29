@@ -27,7 +27,8 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "MainHostWindow.h"
 #include "../Filters/InternalFilters.h"
-#include "Forte.h"
+#include "RackRow.h"
+#include "../Performer.h"
 
 //==============================================================================
 class MainHostWindow::PluginListWindow  : public DocumentWindow
@@ -47,7 +48,7 @@ public:
                                                   deadMansPedalFile,
                                                   getAppProperties().getUserSettings(), true), true);
 
-        setResizable (true, false);
+        setResizable (false, false);
         setResizeLimits (300, 400, 800, 1500);
         setTopLeftPosition (60, 60);
 
@@ -78,6 +79,8 @@ MainHostWindow::MainHostWindow()
                       LookAndFeel::getDefaultLookAndFeel().findColour (ResizableWindow::backgroundColourId),
                       DocumentWindow::allButtons)
 {
+    new Performer();
+
     formatManager.addDefaultFormats();
     formatManager.addFormat (new InternalPluginFormat());
 
@@ -93,9 +96,9 @@ MainHostWindow::MainHostWindow()
    #if JUCE_IOS || JUCE_ANDROID
     setFullScreen (true);
    #else
-    setResizable (true, false);
+    setResizable (false, false);
     setResizeLimits (500, 400, 10000, 10000);
-    centreWithSize (800, 600);
+    centreWithSize (1024, 720);
    #endif
 
     m_forte = new Forte();
@@ -149,8 +152,13 @@ MainHostWindow::~MainHostWindow()
     pluginListWindow = nullptr;
     knownPluginList.removeChangeListener (this);
 
-    if (auto* filterGraph = graphHolder->graph.get())
-        filterGraph->removeChangeListener (this);
+    if (graphHolder != NULL)
+    {
+        if (auto* filterGraph = graphHolder->graph.get())
+            filterGraph->removeChangeListener(this);
+    }
+
+    delete m_forte;
 
     getAppProperties().getUserSettings()->setValue ("mainWindowPos", getWindowStateAsString());
     clearContentComponent();

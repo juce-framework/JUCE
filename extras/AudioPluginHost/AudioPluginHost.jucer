@@ -124,6 +124,7 @@
       </GROUP>
       <FILE id="OmIhwQ" name="HostStartup.cpp" compile="1" resource="0" file="Source/HostStartup.cpp"/>
       <FILE id="c97aUr" name="JUCEAppIcon.png" compile="0" resource="1" file="Source/JUCEAppIcon.png"/>
+      <FILE id="TuhBFg" name="Performer.cpp" compile="1" resource="0" file="Source/Performer.cpp"/>
       <FILE id="HPKay8" name="Performer.h" compile="0" resource="0" file="Source/Performer.h"/>
     </GROUP>
   </MAINGROUP>

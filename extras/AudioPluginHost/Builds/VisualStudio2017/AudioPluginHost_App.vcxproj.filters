@@ -421,6 +421,9 @@
     <ClCompile Include="..\..\Source\HostStartup.cpp">
       <Filter>AudioPluginHost\Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Performer.cpp">
+      <Filter>AudioPluginHost\Source</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioChannelSet.cpp">
       <Filter>JUCE Modules\juce_audio_basics\buffers</Filter>
     </ClCompile>

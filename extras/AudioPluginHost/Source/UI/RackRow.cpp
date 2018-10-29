@@ -39,7 +39,7 @@ Forte::Forte ()
                                               TRANS("Korg M1")));
     addAndMakeVisible (groupComponent.get());
 
-    groupComponent->setBounds (8, 16, 1000, 80);
+    groupComponent->setBounds (8, 16, 816, 80);
 
     label4.reset (new Label ("new label",
                              TRANS("Transpose")));
@@ -50,7 +50,7 @@ Forte::Forte ()
     label4->setColour (TextEditor::textColourId, Colours::black);
     label4->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
-    label4->setBounds (536, 0, 80, 24);
+    label4->setBounds (632, 0, 80, 24);
 
     toggleButton.reset (new ToggleButton (String()));
     addAndMakeVisible (toggleButton.get());
@@ -123,7 +123,7 @@ Forte::Forte ()
     textEditor->setPopupMenuEnabled (true);
     textEditor->setText (String());
 
-    textEditor->setBounds (552, 32, 32, 24);
+    textEditor->setBounds (656, 32, 32, 24);
 
     label5.reset (new Label ("new label",
                              TRANS("Range")));
@@ -134,7 +134,7 @@ Forte::Forte ()
     label5->setColour (TextEditor::textColourId, Colours::black);
     label5->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
-    label5->setBounds (640, 0, 56, 24);
+    label5->setBounds (736, 0, 56, 24);
 
     m_to.reset (new Label (String(),
                            TRANS("to")));
@@ -145,7 +145,7 @@ Forte::Forte ()
     m_to->setColour (TextEditor::textColourId, Colours::black);
     m_to->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
-    m_to->setBounds (656, 32, 24, 24);
+    m_to->setBounds (752, 32, 24, 24);
 
     m_lowKey.reset (new TextEditor (String()));
     addAndMakeVisible (m_lowKey.get());
@@ -157,7 +157,7 @@ Forte::Forte ()
     m_lowKey->setPopupMenuEnabled (true);
     m_lowKey->setText (TRANS("C -2"));
 
-    m_lowKey->setBounds (624, 32, 32, 24);
+    m_lowKey->setBounds (720, 32, 32, 24);
 
     m_highKey.reset (new TextEditor (String()));
     addAndMakeVisible (m_highKey.get());
@@ -169,7 +169,7 @@ Forte::Forte ()
     m_highKey->setPopupMenuEnabled (true);
     m_highKey->setText (TRANS("G 8"));
 
-    m_highKey->setBounds (680, 32, 32, 24);
+    m_highKey->setBounds (776, 32, 32, 24);
 
     imageButton.reset (new ImageButton ("new button"));
     addAndMakeVisible (imageButton.get());
@@ -228,7 +228,7 @@ Forte::Forte ()
     m_keyboard.reset (new MidiKeyboardComponent (*m_keyboardState, MidiKeyboardComponent::Orientation::horizontalKeyboard));
     addAndMakeVisible (m_keyboard.get());
 
-    m_keyboard->setBounds (400, 64, 600, 24);
+    m_keyboard->setBounds (400, 64, 416, 24);
 
     toggleButton3.reset (new ToggleButton ("new toggle button"));
     addAndMakeVisible (toggleButton3.get());
@@ -237,23 +237,32 @@ Forte::Forte ()
 
     toggleButton3->setBounds (400, 32, 123, 24);
 
+    toggleButton4.reset (new ToggleButton ("new toggle button"));
+    addAndMakeVisible (toggleButton4.get());
+    toggleButton4->setButtonText (TRANS("Arpeggiator"));
+    toggleButton4->addListener (this);
+
+    toggleButton4->setBounds (520, 32, 112, 24);
+
 
     //[UserPreSize]
     m_keyboard->setKeyWidth(8.f);
     //[/UserPreSize]
 
-    setSize (1024, 768);
+    setSize (1280, 768);
 
 
     //[Constructor] You can add your own custom stuff here..
     m_keyboard->addMouseListener(this, false);
-                UpdateKeyboard();
+    m_keyboard->setAvailableRange(21, 21+88-1);
+    UpdateKeyboard();
     //[/Constructor]
 }
 
 Forte::~Forte()
 {
     //[Destructor_pre]. You can add your own custom destruction code here..
+    delete m_keyboardState;
     //[/Destructor_pre]
 
     groupComponent = nullptr;
@@ -276,6 +285,7 @@ Forte::~Forte()
     label3 = nullptr;
     m_keyboard = nullptr;
     toggleButton3 = nullptr;
+    toggleButton4 = nullptr;
 
 
     //[Destructor]. You can add your own custom destruction code here..
@@ -327,6 +337,11 @@ void Forte::buttonClicked (Button* buttonThatWasClicked)
     {
         //[UserButtonCode_toggleButton3] -- add your button handler code here..
         //[/UserButtonCode_toggleButton3]
+    }
+    else if (buttonThatWasClicked == toggleButton4.get())
+    {
+        //[UserButtonCode_toggleButton4] -- add your button handler code here..
+        //[/UserButtonCode_toggleButton4]
     }
 
     //[UserbuttonClicked_Post]
@@ -456,7 +471,7 @@ BEGIN_JUCER_METADATA
 
 <JUCER_COMPONENT documentType="Component" className="Forte" componentName="" parentClasses="public Component"
                  constructorParams="" variableInitialisers="" snapPixels="8" snapActive="1"
-                 snapShown="1" overlayOpacity="0.330" fixedSize="1" initialWidth="1024"
+                 snapShown="1" overlayOpacity="0.330" fixedSize="1" initialWidth="1280"
                  initialHeight="768">
   <METHODS>
     <METHOD name="mouseDown (const MouseEvent&amp; e)"/>
@@ -465,9 +480,9 @@ BEGIN_JUCER_METADATA
   </METHODS>
   <BACKGROUND backgroundColour="ff323e44"/>
   <GROUPCOMPONENT name="new group" id="85efcbef1342dec0" memberName="groupComponent"
-                  virtualName="" explicitFocusOrder="0" pos="8 16 1000 80" title="Korg M1"/>
+                  virtualName="" explicitFocusOrder="0" pos="8 16 816 80" title="Korg M1"/>
   <LABEL name="new label" id="1b2a0908338bf229" memberName="label4" virtualName=""
-         explicitFocusOrder="0" pos="536 0 80 24" edTextCol="ff000000"
+         explicitFocusOrder="0" pos="632 0 80 24" edTextCol="ff000000"
          edBkgCol="0" labelText="Transpose" editableSingleClick="0" editableDoubleClick="0"
          focusDiscardsChanges="0" fontname="Default font" fontsize="15.00000000000000000000"
          kerning="0.00000000000000000000" bold="0" italic="0" justification="33"/>
@@ -497,25 +512,25 @@ BEGIN_JUCER_METADATA
          fontsize="15.00000000000000000000" kerning="0.00000000000000000000"
          bold="0" italic="0" justification="33"/>
   <TEXTEDITOR name="new text editor" id="b6e30577b79a003a" memberName="textEditor"
-              virtualName="" explicitFocusOrder="0" pos="552 32 32 24" initialText=""
+              virtualName="" explicitFocusOrder="0" pos="656 32 32 24" initialText=""
               multiline="0" retKeyStartsLine="0" readonly="0" scrollbars="0"
               caret="1" popupmenu="1"/>
   <LABEL name="new label" id="c3e6077209440ad9" memberName="label5" virtualName=""
-         explicitFocusOrder="0" pos="640 0 56 24" edTextCol="ff000000"
+         explicitFocusOrder="0" pos="736 0 56 24" edTextCol="ff000000"
          edBkgCol="0" labelText="Range" editableSingleClick="0" editableDoubleClick="0"
          focusDiscardsChanges="0" fontname="Default font" fontsize="15.00000000000000000000"
          kerning="0.00000000000000000000" bold="0" italic="0" justification="33"/>
   <LABEL name="" id="72d9777463cc6a85" memberName="m_to" virtualName=""
-         explicitFocusOrder="0" pos="656 32 24 24" edTextCol="ff000000"
+         explicitFocusOrder="0" pos="752 32 24 24" edTextCol="ff000000"
          edBkgCol="0" labelText="to" editableSingleClick="0" editableDoubleClick="0"
          focusDiscardsChanges="0" fontname="Default font" fontsize="15.00000000000000000000"
          kerning="0.00000000000000000000" bold="0" italic="0" justification="33"/>
   <TEXTEDITOR name="" id="3d470180923a3d6f" memberName="m_lowKey" virtualName=""
-              explicitFocusOrder="0" pos="624 32 32 24" initialText="C -2"
+              explicitFocusOrder="0" pos="720 32 32 24" initialText="C -2"
               multiline="0" retKeyStartsLine="0" readonly="0" scrollbars="0"
               caret="1" popupmenu="1"/>
   <TEXTEDITOR name="" id="5f3abd7bbb50678c" memberName="m_highKey" virtualName=""
-              explicitFocusOrder="0" pos="680 32 32 24" initialText="G 8" multiline="0"
+              explicitFocusOrder="0" pos="776 32 32 24" initialText="G 8" multiline="0"
               retKeyStartsLine="0" readonly="0" scrollbars="0" caret="1" popupmenu="1"/>
   <IMAGEBUTTON name="new button" id="31b2ae44720b5f47" memberName="imageButton"
                virtualName="" explicitFocusOrder="0" pos="16 32 76 57" buttonText="new button"
@@ -546,9 +561,12 @@ BEGIN_JUCER_METADATA
          focusDiscardsChanges="0" fontname="Default font" fontsize="15.00000000000000000000"
          kerning="0.00000000000000000000" bold="0" italic="0" justification="33"/>
   <GENERICCOMPONENT name="" id="3a433662794e0409" memberName="m_keyboard" virtualName="MidiKeyboardComponent"
-                    explicitFocusOrder="0" pos="400 64 600 24" class="unknown" params="*m_keyboardState, MidiKeyboardComponent::Orientation::horizontalKeyboard"/>
+                    explicitFocusOrder="0" pos="400 64 416 24" class="unknown" params="*m_keyboardState, MidiKeyboardComponent::Orientation::horizontalKeyboard"/>
   <TOGGLEBUTTON name="new toggle button" id="7a9e84b485ffe060" memberName="toggleButton3"
                 virtualName="" explicitFocusOrder="0" pos="400 32 123 24" buttonText="Double octave"
+                connectedEdges="0" needsCallback="1" radioGroupId="0" state="0"/>
+  <TOGGLEBUTTON name="new toggle button" id="82787edffe0c1be4" memberName="toggleButton4"
+                virtualName="" explicitFocusOrder="0" pos="520 32 112 24" buttonText="Arpeggiator"
                 connectedEdges="0" needsCallback="1" radioGroupId="0" state="0"/>
 </JUCER_COMPONENT>
 

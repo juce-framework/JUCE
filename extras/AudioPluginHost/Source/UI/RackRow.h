@@ -88,6 +88,7 @@ private:
     std::unique_ptr<Label> label3;
     std::unique_ptr<MidiKeyboardComponent> m_keyboard;
     std::unique_ptr<ToggleButton> toggleButton3;
+    std::unique_ptr<ToggleButton> toggleButton4;
 
 
     //==============================================================================

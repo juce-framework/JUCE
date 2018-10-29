@@ -161,6 +161,7 @@
     <ClCompile Include="..\..\Source\UI\GraphEditorPanel.cpp"/>
     <ClCompile Include="..\..\Source\UI\MainHostWindow.cpp"/>
     <ClCompile Include="..\..\Source\HostStartup.cpp"/>
+    <ClCompile Include="..\..\Source\Performer.cpp"/>
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioChannelSet.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>

@@ -1,13 +1,11 @@
-Octave mode
-Split M1 into two
-Query programs from plugin
-Read Queen.rcf into new classes
+Auto detect octave mode and split up M1
 Load/Save of classes
-Generate rack based of classes and setup number
+Generate rack based of classes
 Link all GUI up properly
-Read in banks from files
-
 Create plugins to reflect rack
 Bring in router (changed to new classes)
+Add octave mode
 Change midi in/outs from RtMidi to JUCE plugins
+Read in banks from files
+Query programs from plugin
 Setlist manager
