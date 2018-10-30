@@ -28,17 +28,17 @@
 
 #include "../Filters/FilterGraph.h"
 #include "GraphEditorPanel.h"
-class Forte;
 
 
 //==============================================================================
 namespace CommandIDs
 {
    #if ! (JUCE_IOS || JUCE_ANDROID)
-    static const int open                   = 0x30000;
-    static const int save                   = 0x30001;
-    static const int saveAs                 = 0x30002;
-    static const int newFile                = 0x30003;
+	static const int open					= 0x30000;
+	static const int import					= 0x30001;
+	static const int save                   = 0x30002;
+    static const int saveAs                 = 0x30003;
+    static const int newFile                = 0x30004;
    #endif
     static const int showPluginListEditor   = 0x30100;
     static const int showAudioSettings      = 0x30200;
@@ -94,8 +94,6 @@ public:
     void updatePrecisionMenuItem (ApplicationCommandInfo& info);
 
     std::unique_ptr<GraphDocumentComponent> graphHolder;
-    Forte* m_forte;
-    
 
 private:
     //==============================================================================

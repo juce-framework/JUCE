@@ -1,5 +1,4 @@
-Auto detect octave mode and split up M1
-Load/Save of classes
+Menu's - Load/Save of classes
 Generate rack based of classes
 Link all GUI up properly
 Create plugins to reflect rack

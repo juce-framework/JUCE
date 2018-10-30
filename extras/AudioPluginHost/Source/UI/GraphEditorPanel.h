@@ -54,17 +54,9 @@ public:
     void changeListenerCallback (ChangeBroadcaster*) override;
 
     //==============================================================================
-    void updateComponents();
-
-    //==============================================================================
     void showPopupMenu (Point<int> position);
 
-    //==============================================================================
-    void beginConnectorDrag (AudioProcessorGraph::NodeAndChannel source,
-                             AudioProcessorGraph::NodeAndChannel dest,
-                             const MouseEvent&);
-    void dragConnector (const MouseEvent&);
-    void endDraggingConnector (const MouseEvent&);
+
 
     //==============================================================================
     FilterGraph& graph;
@@ -74,14 +66,7 @@ private:
     struct ConnectorComponent;
     struct PinComponent;
 
-    OwnedArray<FilterComponent> nodes;
-    OwnedArray<ConnectorComponent> connectors;
-    std::unique_ptr<ConnectorComponent> draggingConnector;
     std::unique_ptr<PopupMenu> menu;
-
-    FilterComponent* getComponentForFilter (AudioProcessorGraph::NodeID) const;
-    ConnectorComponent* getComponentForConnection (const AudioProcessorGraph::Connection&) const;
-    PinComponent* findPinAt (Point<float>) const;
 
     //==============================================================================
     Point<int> originalTouchPos;
@@ -116,6 +101,11 @@ public:
 
     //==============================================================================
     std::unique_ptr<FilterGraph> graph;
+    std::unique_ptr<TabbedComponent> m_tabs;
+    std::unique_ptr<Label> m_transposeColumn;
+    std::unique_ptr<Label> m_bankProgramColumn;
+    std::unique_ptr<Label> m_rangeColumn;
+    std::unique_ptr<Label> m_volumeColumn;
 
     void resized() override;
     void unfocusKeyboardComponent();

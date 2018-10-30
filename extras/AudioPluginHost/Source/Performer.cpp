@@ -31,7 +31,10 @@ void TrimRight(std::string& str, const char* chars2remove = " ")
 
 Performer::Performer()
 {
-    const char *fileToLoad = "C:\\Users\\ben.crossman\\Desktop\\JUCE-ben\\extras\\AudioPluginHost\\Queen.rcf";
+    //const char *fileToLoad = "C:\\Users\\ben.crossman\\Desktop\\JUCE-ben\\extras\\AudioPluginHost\\Queen.rcf";
+
+    const char *fileToLoad = "D:\\Data\\Audio\\Synth Backups\\Software\\Performance\\Queen.rcf";
+
     ForteFile file;
     memset(&file, 0, sizeof(ForteFile));
     XmlArchive::Load(fileToLoad, file);
@@ -115,6 +118,37 @@ Performer::Performer()
 					zone.DeviceID = group.ID + pass;
 
 					auto &filter = group.PluginChain.PlugIn[0].MIDIFilterSet.MIDIFilter[0];
+
+					int t = 0;
+					if (filter.MapChannel.size())
+					{
+						auto &cc = filter.MapChannel[0].CC;
+						for (int c = 0; c<(int)cc.size(); ++c)
+						{
+							if (cc[c].MapCC.To != 0)
+							{
+								int t = 0;
+							}
+
+
+							if (cc[c].From == "All" && cc[c].To == "Disabled")
+							{
+								t = 0;
+							}
+							else if (cc[c].To == "Disabled")
+								t = atoi(cc[c].From.c_str());
+							else
+								t = atoi(cc[c].From.c_str()); // assume remap parameter, we disable CC#3 by default
+
+							if (t != 80 && t != 81 && t != 91 && t != 93)
+							{
+								t = 0;
+							}
+						}
+					}
+
+
+
 					if (onSetScene.ProgramChange.size() <= 1 && filter.MapChannel.size() == 2 && abs(filter.MapChannel[0].Key.Transpose - filter.MapChannel[0].Key.Transpose) == 12) // see if this is a transpose
 					{
 						zone.DoubleOctave = true;

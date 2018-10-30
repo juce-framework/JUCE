@@ -509,10 +509,6 @@ void FilterIOConfigurationWindow::update()
     if (auto* graph = getGraph())
         if (nodeID != 0)
             graph->disconnectNode (nodeID);
-
-    if (auto* graphEditor = getGraphEditor())
-        if (auto* panel = graphEditor->graphPanel.get())
-            panel->updateComponents();
 }
 
 AudioProcessorGraph::NodeID FilterIOConfigurationWindow::getNodeID() const

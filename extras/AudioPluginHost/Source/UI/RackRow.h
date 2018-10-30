@@ -33,15 +33,15 @@
     Describe your class and how it works here!
                                                                     //[/Comments]
 */
-class Forte  : public Component,
-               public Button::Listener,
-               public Slider::Listener,
-               public ComboBox::Listener
+class RackRow  : public Component,
+                 public Button::Listener,
+                 public Slider::Listener,
+                 public ComboBox::Listener
 {
 public:
     //==============================================================================
-    Forte ();
-    ~Forte();
+    RackRow ();
+    ~RackRow();
 
     //==============================================================================
     //[UserMethods]     -- You can add your own custom methods in this section.
@@ -69,30 +69,23 @@ private:
 
     //==============================================================================
     std::unique_ptr<GroupComponent> groupComponent;
-    std::unique_ptr<Label> label4;
     std::unique_ptr<ToggleButton> toggleButton;
     std::unique_ptr<ToggleButton> toggleButton2;
     std::unique_ptr<Slider> slider;
     std::unique_ptr<ComboBox> comboBox;
     std::unique_ptr<ComboBox> comboBox2;
-    std::unique_ptr<Label> label2;
     std::unique_ptr<TextEditor> textEditor;
-    std::unique_ptr<Label> label5;
     std::unique_ptr<Label> m_to;
     std::unique_ptr<TextEditor> m_lowKey;
     std::unique_ptr<TextEditor> m_highKey;
     std::unique_ptr<ImageButton> imageButton;
-    std::unique_ptr<Label> label;
-    std::unique_ptr<Label> label7;
-    std::unique_ptr<Label> label9;
-    std::unique_ptr<Label> label3;
     std::unique_ptr<MidiKeyboardComponent> m_keyboard;
     std::unique_ptr<ToggleButton> toggleButton3;
     std::unique_ptr<ToggleButton> toggleButton4;
 
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Forte)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RackRow)
 };
 
 //[EndFile] You can add extra defines here...

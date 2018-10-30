@@ -77,6 +77,7 @@ class Song
 public:
     int ID;
     string Name;
+	// see if we can change OPX to use #3
     vector<int> PerformanceIDs;
     vector<Performance*> Performances;
 
