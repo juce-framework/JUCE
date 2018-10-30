@@ -535,6 +535,13 @@ struct AudioProcessorValueTreeState::SliderAttachment::Pimpl  : private Attached
     {
         NormalisableRange<float> range (state.getParameterRange (paramID));
 
+        if (auto* param = state.getParameterAdapter (paramID))
+        {
+            slider.valueFromTextFunction = [param](const String& text) { return (double) param->getDenormalisedValueForText (text); };
+            slider.textFromValueFunction = [param](double value) { return param->getTextForDenormalisedValue ((float) value); };
+            slider.setDoubleClickReturnValue (true, range.convertFrom0to1 (param->getParameter().getDefaultValue()));
+        }
+
         if (range.interval != 0.0f || range.skew != 1.0f)
         {
             slider.setRange (range.start, range.end, range.interval);
@@ -574,13 +581,6 @@ struct AudioProcessorValueTreeState::SliderAttachment::Pimpl  : private Attached
                                            convertFrom0To1Function,
                                            convertTo0To1Function,
                                            snapToLegalValueFunction });
-        }
-
-        if (auto* param = state.getParameterAdapter (paramID))
-        {
-            slider.valueFromTextFunction = [param](const String& text) { return (double) param->getDenormalisedValueForText (text); };
-            slider.textFromValueFunction = [param](double value) { return param->getTextForDenormalisedValue ((float) value); };
-            slider.setDoubleClickReturnValue (true, range.convertFrom0to1 (param->getParameter().getDefaultValue()));
         }
 
         sendInitialUpdate();
