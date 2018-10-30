@@ -59,30 +59,30 @@ AudioFormatReader* ARAAudioSource::newReader()
 
 void ARAAudioSource::willUpdateProperties()
 {
-#if JUCE_DEBUG
-     jassert (! stateUpdateProperties);
-     stateUpdateProperties = true;
-#endif
+   #if JUCE_DEBUG
+    jassert (! stateUpdateProperties);
+    stateUpdateProperties = true;
+   #endif
 
     invalidateReaders();
 }
 
 void ARAAudioSource::didUpdateProperties()
 {
-#if JUCE_DEBUG
-     jassert (stateUpdateProperties);
-     stateUpdateProperties = false;
-#endif
+   #if JUCE_DEBUG
+    jassert (stateUpdateProperties);
+    stateUpdateProperties = false;
+   #endif
 
     ref = new Ref (this);
 }
 
 void ARAAudioSource::willEnableSamplesAccess (bool enable)
 {
-#if JUCE_DEBUG
-     jassert (! stateEnableSamplesAccess);
-     stateEnableSamplesAccess = true;
-#endif
+   #if JUCE_DEBUG
+    jassert (! stateEnableSamplesAccess);
+    stateEnableSamplesAccess = true;
+   #endif
 
     ref->lock.enterWrite();
     if (! enable)
@@ -92,10 +92,10 @@ void ARAAudioSource::willEnableSamplesAccess (bool enable)
 
 void ARAAudioSource::didEnableSamplesAccess (bool enable)
 {
-#if JUCE_DEBUG
-     jassert (stateEnableSamplesAccess);
-     stateEnableSamplesAccess = false;
-#endif
+   #if JUCE_DEBUG
+    jassert (stateEnableSamplesAccess);
+    stateEnableSamplesAccess = false;
+   #endif
 
     if (enable)
         for (auto& reader : readers)

@@ -52,10 +52,10 @@ AudioFormatReader* ARARegionSequence::newReader (double sampleRate)
     ARA::PlugIn::PlaybackRegion* region,
     ARA::PlugIn::PropertiesPtr<ARA::ARAPlaybackRegionProperties> properties)
 {
-#if JUCE_DEBUG
-     jassert (! stateUpdatePlaybackRegionProperties);
-     stateUpdatePlaybackRegionProperties = true;
-#endif
+   #if JUCE_DEBUG
+    jassert (! stateUpdatePlaybackRegionProperties);
+    stateUpdatePlaybackRegionProperties = true;
+   #endif
 
     ARARegionSequence* oldSequence = static_cast<ARARegionSequence*> (region->getRegionSequence());
     ARARegionSequence* newSequence = static_cast<ARARegionSequence*> (ARA::PlugIn::fromRef (properties->regionSequenceRef));
@@ -76,10 +76,10 @@ AudioFormatReader* ARARegionSequence::newReader (double sampleRate)
 
 /*static*/ void ARARegionSequence::didUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* region)
 {
-#if JUCE_DEBUG
-     jassert (stateUpdatePlaybackRegionProperties);
-     stateUpdatePlaybackRegionProperties = false;
-#endif
+   #if JUCE_DEBUG
+    jassert (stateUpdatePlaybackRegionProperties);
+    stateUpdatePlaybackRegionProperties = false;
+   #endif
 
     ARARegionSequence* newSequence = static_cast<ARARegionSequence*> (region->getRegionSequence());
     ARARegionSequence* oldSequence = newSequence->prevSequenceForNewPlaybackRegion;
