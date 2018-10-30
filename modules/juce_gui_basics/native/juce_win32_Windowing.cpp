@@ -1467,8 +1467,10 @@ public:
 
         auto globalPos = localPos + getScreenPosition();
 
+       #if JUCE_WIN_PER_MONITOR_DPI_AWARE
         if (isPerMonitorDPIAwareThread() || isPerMonitorDPIAwareWindow (hwnd))
             globalPos = Desktop::getInstance().getDisplays().logicalToPhysical (globalPos);
+       #endif
 
         auto w = WindowFromPoint (POINTFromPoint (globalPos));
 
