@@ -214,8 +214,6 @@ void RackRow::paint (Graphics& g)
     //[UserPrePaint] Add your own custom painting code here..
     //[/UserPrePaint]
 
-    g.fillAll (Colour (0xff323e44));
-
     //[UserPaint] Add your own custom painting code here..
     //[/UserPaint]
 }
@@ -394,7 +392,7 @@ BEGIN_JUCER_METADATA
     <METHOD name="mouseDrag (const MouseEvent&amp; e)"/>
     <METHOD name="mouseUp (const MouseEvent&amp; e)"/>
   </METHODS>
-  <BACKGROUND backgroundColour="ff323e44"/>
+  <BACKGROUND backgroundColour="0"/>
   <GROUPCOMPONENT name="new group" id="85efcbef1342dec0" memberName="groupComponent"
                   virtualName="" explicitFocusOrder="0" pos="0 -2 816 80" title="Korg M1"/>
   <TOGGLEBUTTON name="" id="2b62ef4a67b701f3" memberName="toggleButton" virtualName=""

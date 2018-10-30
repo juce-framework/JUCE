@@ -408,108 +408,80 @@ void GraphDocumentComponent::init()
     addAndMakeVisible (graphPanel.get());
     graphPlayer.setProcessor (&graph->graph);
 
-    auto m_rackUI = new Component();
-    auto rackTopUI = new Component();
-
-    m_volumeColumn.reset(new Label(String(),
-        TRANS("Volume")));
-    rackTopUI->addAndMakeVisible(m_volumeColumn.get());
+    m_volumeColumn.reset(new Label(String(),TRANS("Volume")));
     m_volumeColumn->setFont(Font(15.00f, Font::plain).withTypefaceStyle("Regular"));
     m_volumeColumn->setJustificationType(Justification::centredLeft);
     m_volumeColumn->setEditable(false, false, false);
     m_volumeColumn->setColour(TextEditor::textColourId, Colours::black);
     m_volumeColumn->setColour(TextEditor::backgroundColourId, Colour(0x00000000));
-
     m_volumeColumn->setBounds(144, 0, 64, 24);
 
-
-    m_rangeColumn.reset(new Label(String(),
-        TRANS("Range")));
-    rackTopUI->addAndMakeVisible(m_rangeColumn.get());
+    m_rangeColumn.reset(new Label(String(),TRANS("Range")));
     m_rangeColumn->setFont(Font(15.00f, Font::plain).withTypefaceStyle("Regular"));
     m_rangeColumn->setJustificationType(Justification::centredLeft);
     m_rangeColumn->setEditable(false, false, false);
     m_rangeColumn->setColour(TextEditor::textColourId, Colours::black);
     m_rangeColumn->setColour(TextEditor::backgroundColourId, Colour(0x00000000));
-
     m_rangeColumn->setBounds(736, 0, 56, 24);
 
-
-    m_bankProgramColumn.reset(new Label(String(),
-        TRANS("Bank/Program\n")));
-    rackTopUI->addAndMakeVisible(m_bankProgramColumn.get());
+    m_bankProgramColumn.reset(new Label(String(),TRANS("Bank/Program\n")));
     m_bankProgramColumn->setFont(Font(15.00f, Font::plain).withTypefaceStyle("Regular"));
     m_bankProgramColumn->setJustificationType(Justification::centredLeft);
     m_bankProgramColumn->setEditable(false, false, false);
     m_bankProgramColumn->setColour(TextEditor::textColourId, Colours::black);
     m_bankProgramColumn->setColour(TextEditor::backgroundColourId, Colour(0x00000000));
-
     m_bankProgramColumn->setBounds(264, 0, 104, 24);
 
-
-    m_transposeColumn.reset(new Label(String(),
-        TRANS("Transpose")));
-    rackTopUI->addAndMakeVisible(m_transposeColumn.get());
+    m_transposeColumn.reset(new Label(String(),TRANS("Transpose")));
     m_transposeColumn->setFont(Font(15.00f, Font::plain).withTypefaceStyle("Regular"));
     m_transposeColumn->setJustificationType(Justification::centredLeft);
     m_transposeColumn->setEditable(false, false, false);
     m_transposeColumn->setColour(TextEditor::textColourId, Colours::black);
     m_transposeColumn->setColour(TextEditor::backgroundColourId, Colour(0x00000000));
-
     m_transposeColumn->setBounds(632, 0, 80, 24);
 
+    auto rackTopUI = new Component();
+    rackTopUI->addAndMakeVisible(m_bankProgramColumn.get());
+    rackTopUI->addAndMakeVisible(m_transposeColumn.get());
+    rackTopUI->addAndMakeVisible(m_rangeColumn.get());
+    rackTopUI->addAndMakeVisible(m_volumeColumn.get());
 
+    auto m_rackUI = new Component();
+    m_rackUI->addAndMakeVisible(rackTopUI);
 
-
-    auto layoutManager = new StretchableLayoutManager();
-
-    int devices = 4;
+    int devicesOnScreen = 4;
     int deviceWidth = 100;
     int deviceHeight = 20;
-    int devicesOnScreen = 9;
-    int titleHeight = m_volumeColumn->getHeight();
-    auto rows = new Component*[devices+1];
-    for (int i = 0; i < devices+1; ++i)
+    int titleHeight = m_volumeColumn->getHeight() - 4;
+    for (int i = 0; i < devicesOnScreen; ++i)
     {
-        if (i == 0)
-        {
-            rows[i] = rackTopUI;
-            deviceWidth = 0;
-            deviceHeight = titleHeight;
-        }
-        else
-        {
-            rows[i] = new RackRow();
-            deviceWidth = rows[i]->getWidth() + 2;
-            deviceHeight = rows[i]->getHeight();
-        }
-        layoutManager->setItemLayout(i, deviceHeight, deviceHeight, deviceHeight);
-        m_rackUI->addAndMakeVisible(rows[i]);
+        auto newRackRow = new RackRow();
+        deviceWidth = newRackRow->getWidth() + 2;
+        deviceHeight = newRackRow->getHeight();
+        m_rackUI->addAndMakeVisible(newRackRow);
+        newRackRow->setBounds(0, i*deviceHeight + titleHeight, deviceWidth, deviceHeight);
+
     }
-    
     rackTopUI->setBounds(0, 0, deviceWidth, titleHeight);
 
-    layoutManager->layOutComponents(rows, devices+1, 0, 0, deviceWidth, deviceHeight * devicesOnScreen+ titleHeight, true, false);
-
-    delete layoutManager;
 
     m_tabs.reset(new TabbedComponent(TabbedButtonBar::TabsAtTop));
-    addAndMakeVisible(m_tabs.get());
     m_tabs->setTabBarDepth(30);
-    m_tabs->addTab(TRANS("SetLists"), Colours::lightgrey, 0, false);
-    m_tabs->addTab(TRANS("Songs"), Colours::lightgrey, 0, false);
-    m_tabs->addTab(TRANS("Performances"), Colours::lightgrey, 0, false);
-    m_tabs->addTab(TRANS("Rack"), Colours::lightgrey, m_rackUI, false);
+    m_tabs->addTab(TRANS("SetLists"), Colours::darkblue, 0, false);
+    m_tabs->addTab(TRANS("Songs"), Colours::darkgreen, 0, false);
+    m_tabs->addTab(TRANS("Performances"), Colours::darkkhaki, 0, false);
+    m_tabs->addTab(TRANS("Rack"), Colours::darkgrey, m_rackUI, false);
     m_tabs->setCurrentTabIndex(3);
+    m_tabs->setBounds(10,10, deviceWidth, deviceHeight * devicesOnScreen + titleHeight + 40); // include tab bar
 
-    m_tabs->setBounds(0, 20, deviceWidth, deviceHeight * devicesOnScreen + titleHeight);
-    
-
+    addAndMakeVisible(m_tabs.get());
 
 
     keyState.addListener (&graphPlayer.getMidiMessageCollector());
 
     keyboardComp.reset (new MidiKeyboardComponent (keyState, MidiKeyboardComponent::horizontalKeyboard));
+    keyboardComp->setAvailableRange(21, 21 + 88 - 1);
+
     addAndMakeVisible (keyboardComp.get());
     statusBar.reset (new TooltipBar());
     addAndMakeVisible (statusBar.get());
