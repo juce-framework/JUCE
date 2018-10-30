@@ -34,10 +34,9 @@ private:
 };
 
 ARAAudioSource::ARAAudioSource (ARA::PlugIn::Document* document, ARA::ARAAudioSourceHostRef hostRef)
-    : ARA::PlugIn::AudioSource (document, hostRef)
-    , ref (new Ref (this))
-{
-}
+: ARA::PlugIn::AudioSource (document, hostRef),
+  ref (new Ref (this))
+{}
 
 ARAAudioSource::~ARAAudioSource()
 {
@@ -61,8 +60,8 @@ AudioFormatReader* ARAAudioSource::newReader()
 void ARAAudioSource::willUpdateProperties()
 {
 #if JUCE_DEBUG
-    jassert (! stateUpdateProperties);
-    stateUpdateProperties = true;
+     jassert (! stateUpdateProperties);
+     stateUpdateProperties = true;
 #endif
 
     invalidateReaders();
@@ -71,8 +70,8 @@ void ARAAudioSource::willUpdateProperties()
 void ARAAudioSource::didUpdateProperties()
 {
 #if JUCE_DEBUG
-    jassert (stateUpdateProperties);
-    stateUpdateProperties = false;
+     jassert (stateUpdateProperties);
+     stateUpdateProperties = false;
 #endif
 
     ref = new Ref (this);
@@ -81,8 +80,8 @@ void ARAAudioSource::didUpdateProperties()
 void ARAAudioSource::willEnableSamplesAccess (bool enable)
 {
 #if JUCE_DEBUG
-    jassert (! stateEnableSamplesAccess);
-    stateEnableSamplesAccess = true;
+     jassert (! stateEnableSamplesAccess);
+     stateEnableSamplesAccess = true;
 #endif
 
     ref->lock.enterWrite();
@@ -94,8 +93,8 @@ void ARAAudioSource::willEnableSamplesAccess (bool enable)
 void ARAAudioSource::didEnableSamplesAccess (bool enable)
 {
 #if JUCE_DEBUG
-    jassert (stateEnableSamplesAccess);
-    stateEnableSamplesAccess = false;
+     jassert (stateEnableSamplesAccess);
+     stateEnableSamplesAccess = false;
 #endif
 
     if (enable)
@@ -105,8 +104,8 @@ void ARAAudioSource::didEnableSamplesAccess (bool enable)
 }
 
 ARAAudioSource::Reader::Reader (ARAAudioSource* source)
-    : AudioFormatReader (nullptr, "ARAAudioSourceReader")
-    , ref (source->ref)
+: AudioFormatReader (nullptr, "ARAAudioSourceReader"),
+  ref (source->ref)
 {
     if (source->isSampleAccessEnabled())
         araHostReader.reset (new ARA::PlugIn::HostAudioReader (source));

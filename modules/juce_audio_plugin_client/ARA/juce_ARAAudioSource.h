@@ -38,7 +38,7 @@ private:
     std::vector<Reader*> readers;
 
 #if JUCE_DEBUG
-    bool stateUpdateProperties = false, stateEnableSamplesAccess = false;
+     bool stateUpdateProperties = false, stateEnableSamplesAccess = false;
 #endif
 };
 

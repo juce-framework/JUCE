@@ -7,7 +7,7 @@ namespace juce
 {
 
 #if JUCE_DEBUG
-bool ARARegionSequence::stateUpdatePlaybackRegionProperties = false;
+ bool ARARegionSequence::stateUpdatePlaybackRegionProperties = false;
 #endif
 
 class ARARegionSequence::Reader : public AudioFormatReader
@@ -53,8 +53,8 @@ AudioFormatReader* ARARegionSequence::newReader (double sampleRate)
     ARA::PlugIn::PropertiesPtr<ARA::ARAPlaybackRegionProperties> properties)
 {
 #if JUCE_DEBUG
-    jassert (! stateUpdatePlaybackRegionProperties);
-    stateUpdatePlaybackRegionProperties = true;
+     jassert (! stateUpdatePlaybackRegionProperties);
+     stateUpdatePlaybackRegionProperties = true;
 #endif
 
     ARARegionSequence* oldSequence = static_cast<ARARegionSequence*> (region->getRegionSequence());
@@ -77,8 +77,8 @@ AudioFormatReader* ARARegionSequence::newReader (double sampleRate)
 /*static*/ void ARARegionSequence::didUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* region)
 {
 #if JUCE_DEBUG
-    jassert (stateUpdatePlaybackRegionProperties);
-    stateUpdatePlaybackRegionProperties = false;
+     jassert (stateUpdatePlaybackRegionProperties);
+     stateUpdatePlaybackRegionProperties = false;
 #endif
 
     ARARegionSequence* newSequence = static_cast<ARARegionSequence*> (region->getRegionSequence());

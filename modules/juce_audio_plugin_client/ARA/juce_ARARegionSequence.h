@@ -38,7 +38,7 @@ private:
     ARARegionSequence* prevSequenceForNewPlaybackRegion;
 
 #if JUCE_DEBUG
-    static bool stateUpdatePlaybackRegionProperties;
+     static bool stateUpdatePlaybackRegionProperties;
 #endif
 };
 
