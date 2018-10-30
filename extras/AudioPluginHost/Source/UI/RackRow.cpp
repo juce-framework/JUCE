@@ -39,21 +39,21 @@ RackRow::RackRow ()
                                               TRANS("Korg M1")));
     addAndMakeVisible (groupComponent.get());
 
-    groupComponent->setBounds (0, 0, 816, 80);
+    groupComponent->setBounds (0, -2, 816, 80);
 
     toggleButton.reset (new ToggleButton (String()));
     addAndMakeVisible (toggleButton.get());
     toggleButton->setButtonText (TRANS("Solo"));
     toggleButton->addListener (this);
 
-    toggleButton->setBounds (96, 16, 72, 24);
+    toggleButton->setBounds (96, 14, 72, 24);
 
     toggleButton2.reset (new ToggleButton ("new toggle button"));
     addAndMakeVisible (toggleButton2.get());
     toggleButton2->setButtonText (TRANS("Mute"));
     toggleButton2->addListener (this);
 
-    toggleButton2->setBounds (160, 16, 72, 24);
+    toggleButton2->setBounds (160, 14, 72, 24);
 
     slider.reset (new Slider ("new slider"));
     addAndMakeVisible (slider.get());
@@ -62,7 +62,7 @@ RackRow::RackRow ()
     slider->setTextBoxStyle (Slider::TextBoxBelow, false, 80, 20);
     slider->addListener (this);
 
-    slider->setBounds (96, 48, 128, 24);
+    slider->setBounds (96, 46, 128, 24);
 
     comboBox.reset (new ComboBox ("new combo box"));
     addAndMakeVisible (comboBox.get());
@@ -76,7 +76,7 @@ RackRow::RackRow ()
     comboBox->addSeparator();
     comboBox->addListener (this);
 
-    comboBox->setBounds (232, 16, 150, 24);
+    comboBox->setBounds (232, 14, 150, 24);
 
     comboBox2.reset (new ComboBox ("new combo box"));
     addAndMakeVisible (comboBox2.get());
@@ -89,7 +89,7 @@ RackRow::RackRow ()
     comboBox2->addSeparator();
     comboBox2->addListener (this);
 
-    comboBox2->setBounds (232, 48, 150, 24);
+    comboBox2->setBounds (232, 46, 150, 24);
 
     textEditor.reset (new TextEditor ("new text editor"));
     addAndMakeVisible (textEditor.get());
@@ -101,7 +101,7 @@ RackRow::RackRow ()
     textEditor->setPopupMenuEnabled (true);
     textEditor->setText (String());
 
-    textEditor->setBounds (648, 16, 32, 24);
+    textEditor->setBounds (648, 14, 32, 24);
 
     m_to.reset (new Label (String(),
                            TRANS("to")));
@@ -112,7 +112,7 @@ RackRow::RackRow ()
     m_to->setColour (TextEditor::textColourId, Colours::black);
     m_to->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
-    m_to->setBounds (744, 16, 24, 24);
+    m_to->setBounds (744, 14, 24, 24);
 
     m_lowKey.reset (new TextEditor (String()));
     addAndMakeVisible (m_lowKey.get());
@@ -124,7 +124,7 @@ RackRow::RackRow ()
     m_lowKey->setPopupMenuEnabled (true);
     m_lowKey->setText (TRANS("C -2"));
 
-    m_lowKey->setBounds (712, 16, 32, 24);
+    m_lowKey->setBounds (712, 14, 32, 24);
 
     m_highKey.reset (new TextEditor (String()));
     addAndMakeVisible (m_highKey.get());
@@ -136,7 +136,7 @@ RackRow::RackRow ()
     m_highKey->setPopupMenuEnabled (true);
     m_highKey->setText (TRANS("G 8"));
 
-    m_highKey->setBounds (768, 16, 32, 24);
+    m_highKey->setBounds (768, 14, 32, 24);
 
     imageButton.reset (new ImageButton ("new button"));
     addAndMakeVisible (imageButton.get());
@@ -146,33 +146,33 @@ RackRow::RackRow ()
                             ImageCache::getFromMemory (truePianos_png, truePianos_pngSize), 1.000f, Colour (0x00000000),
                             Image(), 1.000f, Colour (0x00000000),
                             Image(), 1.000f, Colour (0x00000000));
-    imageButton->setBounds (8, 16, 76, 57);
+    imageButton->setBounds (8, 14, 76, 57);
 
     m_keyboard.reset (new MidiKeyboardComponent (*m_keyboardState, MidiKeyboardComponent::Orientation::horizontalKeyboard));
     addAndMakeVisible (m_keyboard.get());
 
-    m_keyboard->setBounds (392, 48, 416, 24);
+    m_keyboard->setBounds (392, 46, 416, 24);
 
     toggleButton3.reset (new ToggleButton ("new toggle button"));
     addAndMakeVisible (toggleButton3.get());
     toggleButton3->setButtonText (TRANS("Double octave"));
     toggleButton3->addListener (this);
 
-    toggleButton3->setBounds (392, 16, 123, 24);
+    toggleButton3->setBounds (392, 14, 123, 24);
 
     toggleButton4.reset (new ToggleButton ("new toggle button"));
     addAndMakeVisible (toggleButton4.get());
     toggleButton4->setButtonText (TRANS("Arpeggiator"));
     toggleButton4->addListener (this);
 
-    toggleButton4->setBounds (512, 16, 112, 24);
+    toggleButton4->setBounds (512, 14, 112, 24);
 
 
     //[UserPreSize]
     m_keyboard->setKeyWidth(8.f);
     //[/UserPreSize]
 
-    setSize (816, 80);
+    setSize (816, 76);
 
 
     //[Constructor] You can add your own custom stuff here..
@@ -388,7 +388,7 @@ BEGIN_JUCER_METADATA
 <JUCER_COMPONENT documentType="Component" className="RackRow" componentName=""
                  parentClasses="public Component" constructorParams="" variableInitialisers=""
                  snapPixels="8" snapActive="1" snapShown="1" overlayOpacity="0.330"
-                 fixedSize="1" initialWidth="816" initialHeight="80">
+                 fixedSize="1" initialWidth="816" initialHeight="76">
   <METHODS>
     <METHOD name="mouseDown (const MouseEvent&amp; e)"/>
     <METHOD name="mouseDrag (const MouseEvent&amp; e)"/>
@@ -396,56 +396,56 @@ BEGIN_JUCER_METADATA
   </METHODS>
   <BACKGROUND backgroundColour="ff323e44"/>
   <GROUPCOMPONENT name="new group" id="85efcbef1342dec0" memberName="groupComponent"
-                  virtualName="" explicitFocusOrder="0" pos="0 0 816 80" title="Korg M1"/>
+                  virtualName="" explicitFocusOrder="0" pos="0 -2 816 80" title="Korg M1"/>
   <TOGGLEBUTTON name="" id="2b62ef4a67b701f3" memberName="toggleButton" virtualName=""
-                explicitFocusOrder="0" pos="96 16 72 24" buttonText="Solo" connectedEdges="0"
+                explicitFocusOrder="0" pos="96 14 72 24" buttonText="Solo" connectedEdges="0"
                 needsCallback="1" radioGroupId="0" state="0"/>
   <TOGGLEBUTTON name="new toggle button" id="6ad6011b41b23475" memberName="toggleButton2"
-                virtualName="" explicitFocusOrder="0" pos="160 16 72 24" buttonText="Mute"
+                virtualName="" explicitFocusOrder="0" pos="160 14 72 24" buttonText="Mute"
                 connectedEdges="0" needsCallback="1" radioGroupId="0" state="0"/>
   <SLIDER name="new slider" id="a0e2bc5a61933c6d" memberName="slider" virtualName=""
-          explicitFocusOrder="0" pos="96 48 128 24" min="-110.00000000000000000000"
+          explicitFocusOrder="0" pos="96 46 128 24" min="-110.00000000000000000000"
           max="12.00000000000000000000" int="0.50000000000000000000" style="LinearBar"
           textBoxPos="TextBoxBelow" textBoxEditable="1" textBoxWidth="80"
           textBoxHeight="20" skewFactor="1.00000000000000000000" needsCallback="1"/>
   <COMBOBOX name="new combo box" id="90d63ca95a92a112" memberName="comboBox"
-            virtualName="" explicitFocusOrder="0" pos="232 16 150 24" editable="0"
+            virtualName="" explicitFocusOrder="0" pos="232 14 150 24" editable="0"
             layout="33" items="None&#10;Usercard 1&#10;Usercard 2&#10;" textWhenNonSelected="None"
             textWhenNoItems="(no choices)"/>
   <COMBOBOX name="new combo box" id="9de3cb5469378fa1" memberName="comboBox2"
-            virtualName="" explicitFocusOrder="0" pos="232 48 150 24" editable="0"
+            virtualName="" explicitFocusOrder="0" pos="232 46 150 24" editable="0"
             layout="33" items="Piano&#10;Strings&#10;" textWhenNonSelected="Piano"
             textWhenNoItems="(no choices)"/>
   <TEXTEDITOR name="new text editor" id="b6e30577b79a003a" memberName="textEditor"
-              virtualName="" explicitFocusOrder="0" pos="648 16 32 24" initialText=""
+              virtualName="" explicitFocusOrder="0" pos="648 14 32 24" initialText=""
               multiline="0" retKeyStartsLine="0" readonly="0" scrollbars="0"
               caret="1" popupmenu="1"/>
   <LABEL name="" id="72d9777463cc6a85" memberName="m_to" virtualName=""
-         explicitFocusOrder="0" pos="744 16 24 24" edTextCol="ff000000"
+         explicitFocusOrder="0" pos="744 14 24 24" edTextCol="ff000000"
          edBkgCol="0" labelText="to" editableSingleClick="0" editableDoubleClick="0"
          focusDiscardsChanges="0" fontname="Default font" fontsize="15.00000000000000000000"
          kerning="0.00000000000000000000" bold="0" italic="0" justification="33"/>
   <TEXTEDITOR name="" id="3d470180923a3d6f" memberName="m_lowKey" virtualName=""
-              explicitFocusOrder="0" pos="712 16 32 24" initialText="C -2"
+              explicitFocusOrder="0" pos="712 14 32 24" initialText="C -2"
               multiline="0" retKeyStartsLine="0" readonly="0" scrollbars="0"
               caret="1" popupmenu="1"/>
   <TEXTEDITOR name="" id="5f3abd7bbb50678c" memberName="m_highKey" virtualName=""
-              explicitFocusOrder="0" pos="768 16 32 24" initialText="G 8" multiline="0"
+              explicitFocusOrder="0" pos="768 14 32 24" initialText="G 8" multiline="0"
               retKeyStartsLine="0" readonly="0" scrollbars="0" caret="1" popupmenu="1"/>
   <IMAGEBUTTON name="new button" id="31b2ae44720b5f47" memberName="imageButton"
-               virtualName="" explicitFocusOrder="0" pos="8 16 76 57" buttonText="new button"
+               virtualName="" explicitFocusOrder="0" pos="8 14 76 57" buttonText="new button"
                connectedEdges="0" needsCallback="1" radioGroupId="0" keepProportions="1"
                resourceNormal="truePianos_png" opacityNormal="1.00000000000000000000"
                colourNormal="0" resourceOver="" opacityOver="1.00000000000000000000"
                colourOver="0" resourceDown="" opacityDown="1.00000000000000000000"
                colourDown="0"/>
   <GENERICCOMPONENT name="" id="3a433662794e0409" memberName="m_keyboard" virtualName="MidiKeyboardComponent"
-                    explicitFocusOrder="0" pos="392 48 416 24" class="unknown" params="*m_keyboardState, MidiKeyboardComponent::Orientation::horizontalKeyboard"/>
+                    explicitFocusOrder="0" pos="392 46 416 24" class="unknown" params="*m_keyboardState, MidiKeyboardComponent::Orientation::horizontalKeyboard"/>
   <TOGGLEBUTTON name="new toggle button" id="7a9e84b485ffe060" memberName="toggleButton3"
-                virtualName="" explicitFocusOrder="0" pos="392 16 123 24" buttonText="Double octave"
+                virtualName="" explicitFocusOrder="0" pos="392 14 123 24" buttonText="Double octave"
                 connectedEdges="0" needsCallback="1" radioGroupId="0" state="0"/>
   <TOGGLEBUTTON name="new toggle button" id="82787edffe0c1be4" memberName="toggleButton4"
-                virtualName="" explicitFocusOrder="0" pos="512 16 112 24" buttonText="Arpeggiator"
+                virtualName="" explicitFocusOrder="0" pos="512 14 112 24" buttonText="Arpeggiator"
                 connectedEdges="0" needsCallback="1" radioGroupId="0" state="0"/>
 </JUCER_COMPONENT>
 

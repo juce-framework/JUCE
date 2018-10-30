@@ -409,32 +409,11 @@ void GraphDocumentComponent::init()
     graphPlayer.setProcessor (&graph->graph);
 
     auto m_rackUI = new Component();
-    auto layoutManager = new StretchableLayoutManager();
-    auto rows = new Component*[2];
-    rows[0] = new RackRow();
-    rows[1] = new RackRow();
-
-    m_rackUI->addAndMakeVisible(rows[0]);
-    m_rackUI->addAndMakeVisible(rows[1]);
-
-
-    layoutManager->layOutComponents(rows, 2, 0, 0, 640, 480, true, false);
-    m_tabs.reset(new TabbedComponent(TabbedButtonBar::TabsAtTop));
-    addAndMakeVisible(m_tabs.get());
-    m_tabs->setTabBarDepth(30);
-    m_tabs->addTab(TRANS("SetLists"), Colours::lightgrey, 0, false);
-    m_tabs->addTab(TRANS("Songs"), Colours::lightgrey, 0, false);
-    m_tabs->addTab(TRANS("Performances"), Colours::lightgrey, 0, false);
-    m_tabs->addTab(TRANS("Rack"), Colours::lightgrey, m_rackUI, false);
-    m_tabs->setCurrentTabIndex(0);
-
-    m_tabs->setBounds(16, 104, 1000, 368);
-    
-
+    auto rackTopUI = new Component();
 
     m_volumeColumn.reset(new Label(String(),
         TRANS("Volume")));
-    addAndMakeVisible(m_volumeColumn.get());
+    rackTopUI->addAndMakeVisible(m_volumeColumn.get());
     m_volumeColumn->setFont(Font(15.00f, Font::plain).withTypefaceStyle("Regular"));
     m_volumeColumn->setJustificationType(Justification::centredLeft);
     m_volumeColumn->setEditable(false, false, false);
@@ -446,7 +425,7 @@ void GraphDocumentComponent::init()
 
     m_rangeColumn.reset(new Label(String(),
         TRANS("Range")));
-    addAndMakeVisible(m_rangeColumn.get());
+    rackTopUI->addAndMakeVisible(m_rangeColumn.get());
     m_rangeColumn->setFont(Font(15.00f, Font::plain).withTypefaceStyle("Regular"));
     m_rangeColumn->setJustificationType(Justification::centredLeft);
     m_rangeColumn->setEditable(false, false, false);
@@ -458,7 +437,7 @@ void GraphDocumentComponent::init()
 
     m_bankProgramColumn.reset(new Label(String(),
         TRANS("Bank/Program\n")));
-    addAndMakeVisible(m_bankProgramColumn.get());
+    rackTopUI->addAndMakeVisible(m_bankProgramColumn.get());
     m_bankProgramColumn->setFont(Font(15.00f, Font::plain).withTypefaceStyle("Regular"));
     m_bankProgramColumn->setJustificationType(Justification::centredLeft);
     m_bankProgramColumn->setEditable(false, false, false);
@@ -470,7 +449,7 @@ void GraphDocumentComponent::init()
 
     m_transposeColumn.reset(new Label(String(),
         TRANS("Transpose")));
-    addAndMakeVisible(m_transposeColumn.get());
+    rackTopUI->addAndMakeVisible(m_transposeColumn.get());
     m_transposeColumn->setFont(Font(15.00f, Font::plain).withTypefaceStyle("Regular"));
     m_transposeColumn->setJustificationType(Justification::centredLeft);
     m_transposeColumn->setEditable(false, false, false);
@@ -478,6 +457,54 @@ void GraphDocumentComponent::init()
     m_transposeColumn->setColour(TextEditor::backgroundColourId, Colour(0x00000000));
 
     m_transposeColumn->setBounds(632, 0, 80, 24);
+
+
+
+
+    auto layoutManager = new StretchableLayoutManager();
+
+    int devices = 4;
+    int deviceWidth = 100;
+    int deviceHeight = 20;
+    int devicesOnScreen = 9;
+    int titleHeight = m_volumeColumn->getHeight();
+    auto rows = new Component*[devices+1];
+    for (int i = 0; i < devices+1; ++i)
+    {
+        if (i == 0)
+        {
+            rows[i] = rackTopUI;
+            deviceWidth = 0;
+            deviceHeight = titleHeight;
+        }
+        else
+        {
+            rows[i] = new RackRow();
+            deviceWidth = rows[i]->getWidth() + 2;
+            deviceHeight = rows[i]->getHeight();
+        }
+        layoutManager->setItemLayout(i, deviceHeight, deviceHeight, deviceHeight);
+        m_rackUI->addAndMakeVisible(rows[i]);
+    }
+    
+    rackTopUI->setBounds(0, 0, deviceWidth, titleHeight);
+
+    layoutManager->layOutComponents(rows, devices+1, 0, 0, deviceWidth, deviceHeight * devicesOnScreen+ titleHeight, true, false);
+
+    delete layoutManager;
+
+    m_tabs.reset(new TabbedComponent(TabbedButtonBar::TabsAtTop));
+    addAndMakeVisible(m_tabs.get());
+    m_tabs->setTabBarDepth(30);
+    m_tabs->addTab(TRANS("SetLists"), Colours::lightgrey, 0, false);
+    m_tabs->addTab(TRANS("Songs"), Colours::lightgrey, 0, false);
+    m_tabs->addTab(TRANS("Performances"), Colours::lightgrey, 0, false);
+    m_tabs->addTab(TRANS("Rack"), Colours::lightgrey, m_rackUI, false);
+    m_tabs->setCurrentTabIndex(3);
+
+    m_tabs->setBounds(0, 20, deviceWidth, deviceHeight * devicesOnScreen + titleHeight);
+    
+
 
 
     keyState.addListener (&graphPlayer.getMidiMessageCollector());
