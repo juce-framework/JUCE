@@ -488,7 +488,10 @@ private:
 
         int getXRunCount() const
         {
-            return stream != nullptr ? stream->getXRunCount() : 0;
+            if (auto xruns = stream->getXRunCount())
+                return xruns.value();
+
+            return 0;
         }
 
     private:
@@ -511,7 +514,7 @@ private:
             builder.setChannelCount (channelCount);
             builder.setFormat (format);
             builder.setSampleRate (sampleRate);
-            builder.setDefaultFramesPerBurst ((int32) defaultFramesPerBurst);
+            builder.setFramesPerCallback ((int32) defaultFramesPerBurst);
             builder.setPerformanceMode (oboe::PerformanceMode::LowLatency);
             builder.setCallback (callback);
 
