@@ -536,7 +536,7 @@ public:
                     if (binding->inOutMagicNumber != ARA::kARAAudioUnitMagic)
                         return kAudioUnitErr_InvalidProperty;   // if the magic value isn't found, the property ID is re-used outside the ARA context with different, unsupported sematics
 
-					ARAPlugInInstance* araPlugInInstance = dynamic_cast<ARAPlugInInstance*>(juceFilter.get());
+                    ARAPlugInInstance* araPlugInInstance = dynamic_cast<ARAPlugInInstance*>(juceFilter.get());
                     binding->outPlugInExtension = araPlugInInstance->createARAPlugInExtension (binding->inDocumentControllerRef, binding->knownRoles, binding->assignedRoles);
                     if (binding->outPlugInExtension == NULL)
                         return kAudioUnitErr_CannotDoInCurrentContext;  // createARAPlugInExtension() returns null if binding is already established
