@@ -68,20 +68,20 @@ private:
     //[/UserVariables]
 
     //==============================================================================
-    std::unique_ptr<GroupComponent> groupComponent;
-    std::unique_ptr<ToggleButton> toggleButton;
-    std::unique_ptr<ToggleButton> toggleButton2;
-    std::unique_ptr<Slider> slider;
-    std::unique_ptr<ComboBox> comboBox;
-    std::unique_ptr<ComboBox> comboBox2;
-    std::unique_ptr<TextEditor> textEditor;
+    std::unique_ptr<GroupComponent> m_deviceName;
+    std::unique_ptr<ToggleButton> m_solo;
+    std::unique_ptr<ToggleButton> m_mute;
+    std::unique_ptr<Slider> m_volume;
+    std::unique_ptr<ComboBox> m_bank;
+    std::unique_ptr<ComboBox> m_program;
+    std::unique_ptr<TextEditor> m_transpose;
     std::unique_ptr<Label> m_to;
     std::unique_ptr<TextEditor> m_lowKey;
     std::unique_ptr<TextEditor> m_highKey;
-    std::unique_ptr<ImageButton> imageButton;
+    std::unique_ptr<ImageButton> m_deviceSettings;
     std::unique_ptr<MidiKeyboardComponent> m_keyboard;
-    std::unique_ptr<ToggleButton> toggleButton3;
-    std::unique_ptr<ToggleButton> toggleButton4;
+    std::unique_ptr<ToggleButton> m_doubleOctave;
+    std::unique_ptr<ToggleButton> m_arperggiator;
 
 
     //==============================================================================

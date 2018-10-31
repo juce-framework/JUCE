@@ -106,6 +106,10 @@ public:
     std::unique_ptr<Label> m_bankProgramColumn;
     std::unique_ptr<Label> m_rangeColumn;
     std::unique_ptr<Label> m_volumeColumn;
+    std::unique_ptr<Component> m_rackTopUI;
+    std::unique_ptr<Component> m_rackUI;
+    std::vector<std::unique_ptr<Component>> m_rackDevice;
+    
 
     void resized() override;
     void unfocusKeyboardComponent();

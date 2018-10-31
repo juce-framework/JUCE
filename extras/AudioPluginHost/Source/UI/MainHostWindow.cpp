@@ -28,7 +28,6 @@
 #include "MainHostWindow.h"
 #include "../Filters/InternalFilters.h"
 #include "RackRow.h"
-#include "../Performer.h"
 
 //==============================================================================
 class MainHostWindow::PluginListWindow  : public DocumentWindow
@@ -79,8 +78,6 @@ MainHostWindow::MainHostWindow()
                       LookAndFeel::getDefaultLookAndFeel().findColour (ResizableWindow::backgroundColourId),
                       DocumentWindow::allButtons)
 {
-    new Performer();
-
     formatManager.addDefaultFormats();
     formatManager.addFormat (new InternalPluginFormat());
 

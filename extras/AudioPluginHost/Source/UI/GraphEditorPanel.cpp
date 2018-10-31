@@ -29,6 +29,7 @@
 #include "../Filters/InternalFilters.h"
 #include "MainHostWindow.h"
 #include "RackRow.h"
+#include "../Performer.h"
 
 //==============================================================================
 #if JUCE_IOS
@@ -440,29 +441,34 @@ void GraphDocumentComponent::init()
     m_transposeColumn->setColour(TextEditor::backgroundColourId, Colour(0x00000000));
     m_transposeColumn->setBounds(632, 0, 80, 24);
 
-    auto rackTopUI = new Component();
-    rackTopUI->addAndMakeVisible(m_bankProgramColumn.get());
-    rackTopUI->addAndMakeVisible(m_transposeColumn.get());
-    rackTopUI->addAndMakeVisible(m_rangeColumn.get());
-    rackTopUI->addAndMakeVisible(m_volumeColumn.get());
 
-    auto m_rackUI = new Component();
-    m_rackUI->addAndMakeVisible(rackTopUI);
+    m_rackTopUI.reset(new Component());
+    m_rackTopUI->addAndMakeVisible(m_bankProgramColumn.get());
+    m_rackTopUI->addAndMakeVisible(m_transposeColumn.get());
+    m_rackTopUI->addAndMakeVisible(m_rangeColumn.get());
+    m_rackTopUI->addAndMakeVisible(m_volumeColumn.get());
 
-    int devicesOnScreen = 4;
+    m_rackUI.reset(new Component());
+    m_rackUI->addAndMakeVisible(m_rackTopUI.get());
+
+    auto m_performer = new Performer();
+
+    int devicesOnScreen = m_performer->m_current.Rack.size();
     int deviceWidth = 100;
     int deviceHeight = 20;
     int titleHeight = m_volumeColumn->getHeight() - 4;
     for (int i = 0; i < devicesOnScreen; ++i)
     {
-        auto newRackRow = new RackRow();
+        m_rackDevice.push_back(std::make_unique<RackRow>());
+        auto newRackRow = m_rackDevice.back().get();
+
         deviceWidth = newRackRow->getWidth() + 2;
         deviceHeight = newRackRow->getHeight();
         m_rackUI->addAndMakeVisible(newRackRow);
         newRackRow->setBounds(0, i*deviceHeight + titleHeight, deviceWidth, deviceHeight);
 
     }
-    rackTopUI->setBounds(0, 0, deviceWidth, titleHeight);
+    m_rackTopUI->setBounds(0, 0, deviceWidth, titleHeight);
 
 
     m_tabs.reset(new TabbedComponent(TabbedButtonBar::TabsAtTop));
@@ -470,7 +476,7 @@ void GraphDocumentComponent::init()
     m_tabs->addTab(TRANS("SetLists"), Colours::darkblue, 0, false);
     m_tabs->addTab(TRANS("Songs"), Colours::darkgreen, 0, false);
     m_tabs->addTab(TRANS("Performances"), Colours::darkkhaki, 0, false);
-    m_tabs->addTab(TRANS("Rack"), Colours::darkgrey, m_rackUI, false);
+    m_tabs->addTab(TRANS("Rack"), Colours::darkgrey, m_rackUI.get(), false);
     m_tabs->setCurrentTabIndex(3);
     m_tabs->setBounds(10,10, deviceWidth, deviceHeight * devicesOnScreen + titleHeight + 40); // include tab bar
 

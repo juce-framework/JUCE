@@ -35,73 +35,73 @@ RackRow::RackRow ()
     m_keyboardState = new MidiKeyboardState();
     //[/Constructor_pre]
 
-    groupComponent.reset (new GroupComponent ("new group",
-                                              TRANS("Korg M1")));
-    addAndMakeVisible (groupComponent.get());
+    m_deviceName.reset (new GroupComponent (String(),
+                                            TRANS("Korg M1")));
+    addAndMakeVisible (m_deviceName.get());
 
-    groupComponent->setBounds (0, -2, 816, 80);
+    m_deviceName->setBounds (0, -2, 816, 80);
 
-    toggleButton.reset (new ToggleButton (String()));
-    addAndMakeVisible (toggleButton.get());
-    toggleButton->setButtonText (TRANS("Solo"));
-    toggleButton->addListener (this);
+    m_solo.reset (new ToggleButton (String()));
+    addAndMakeVisible (m_solo.get());
+    m_solo->setButtonText (TRANS("Solo"));
+    m_solo->addListener (this);
 
-    toggleButton->setBounds (96, 14, 72, 24);
+    m_solo->setBounds (96, 14, 72, 24);
 
-    toggleButton2.reset (new ToggleButton ("new toggle button"));
-    addAndMakeVisible (toggleButton2.get());
-    toggleButton2->setButtonText (TRANS("Mute"));
-    toggleButton2->addListener (this);
+    m_mute.reset (new ToggleButton (String()));
+    addAndMakeVisible (m_mute.get());
+    m_mute->setButtonText (TRANS("Mute"));
+    m_mute->addListener (this);
 
-    toggleButton2->setBounds (160, 14, 72, 24);
+    m_mute->setBounds (160, 14, 72, 24);
 
-    slider.reset (new Slider ("new slider"));
-    addAndMakeVisible (slider.get());
-    slider->setRange (-110, 12, 0.5);
-    slider->setSliderStyle (Slider::LinearBar);
-    slider->setTextBoxStyle (Slider::TextBoxBelow, false, 80, 20);
-    slider->addListener (this);
+    m_volume.reset (new Slider (String()));
+    addAndMakeVisible (m_volume.get());
+    m_volume->setRange (-110, 12, 0.5);
+    m_volume->setSliderStyle (Slider::LinearBar);
+    m_volume->setTextBoxStyle (Slider::TextBoxBelow, false, 80, 20);
+    m_volume->addListener (this);
 
-    slider->setBounds (96, 46, 128, 24);
+    m_volume->setBounds (96, 46, 128, 24);
 
-    comboBox.reset (new ComboBox ("new combo box"));
-    addAndMakeVisible (comboBox.get());
-    comboBox->setEditableText (false);
-    comboBox->setJustificationType (Justification::centredLeft);
-    comboBox->setTextWhenNothingSelected (TRANS("None"));
-    comboBox->setTextWhenNoChoicesAvailable (TRANS("(no choices)"));
-    comboBox->addItem (TRANS("None"), 1);
-    comboBox->addItem (TRANS("Usercard 1"), 2);
-    comboBox->addItem (TRANS("Usercard 2"), 3);
-    comboBox->addSeparator();
-    comboBox->addListener (this);
+    m_bank.reset (new ComboBox (String()));
+    addAndMakeVisible (m_bank.get());
+    m_bank->setEditableText (false);
+    m_bank->setJustificationType (Justification::centredLeft);
+    m_bank->setTextWhenNothingSelected (TRANS("None"));
+    m_bank->setTextWhenNoChoicesAvailable (TRANS("(no choices)"));
+    m_bank->addItem (TRANS("None"), 1);
+    m_bank->addItem (TRANS("Usercard 1"), 2);
+    m_bank->addItem (TRANS("Usercard 2"), 3);
+    m_bank->addSeparator();
+    m_bank->addListener (this);
 
-    comboBox->setBounds (232, 14, 150, 24);
+    m_bank->setBounds (232, 14, 150, 24);
 
-    comboBox2.reset (new ComboBox ("new combo box"));
-    addAndMakeVisible (comboBox2.get());
-    comboBox2->setEditableText (false);
-    comboBox2->setJustificationType (Justification::centredLeft);
-    comboBox2->setTextWhenNothingSelected (TRANS("Piano"));
-    comboBox2->setTextWhenNoChoicesAvailable (TRANS("(no choices)"));
-    comboBox2->addItem (TRANS("Piano"), 1);
-    comboBox2->addItem (TRANS("Strings"), 2);
-    comboBox2->addSeparator();
-    comboBox2->addListener (this);
+    m_program.reset (new ComboBox (String()));
+    addAndMakeVisible (m_program.get());
+    m_program->setEditableText (false);
+    m_program->setJustificationType (Justification::centredLeft);
+    m_program->setTextWhenNothingSelected (TRANS("Piano"));
+    m_program->setTextWhenNoChoicesAvailable (TRANS("(no choices)"));
+    m_program->addItem (TRANS("Piano"), 1);
+    m_program->addItem (TRANS("Strings"), 2);
+    m_program->addSeparator();
+    m_program->addListener (this);
 
-    comboBox2->setBounds (232, 46, 150, 24);
+    m_program->setBounds (232, 46, 150, 24);
 
-    textEditor.reset (new TextEditor ("new text editor"));
-    addAndMakeVisible (textEditor.get());
-    textEditor->setMultiLine (false);
-    textEditor->setReturnKeyStartsNewLine (false);
-    textEditor->setReadOnly (false);
-    textEditor->setScrollbarsShown (false);
-    textEditor->setCaretVisible (true);
-    textEditor->setPopupMenuEnabled (true);
-    textEditor->setText (String());
+    m_transpose.reset (new TextEditor (String()));
+    addAndMakeVisible (m_transpose.get());
+    m_transpose->setMultiLine (false);
+    m_transpose->setReturnKeyStartsNewLine (false);
+    m_transpose->setReadOnly (false);
+    m_transpose->setScrollbarsShown (false);
+    m_transpose->setCaretVisible (true);
+    m_transpose->setPopupMenuEnabled (true);
+    m_transpose->setText (String());
 
-    textEditor->setBounds (648, 14, 32, 24);
+    m_transpose->setBounds (648, 14, 32, 24);
 
     m_to.reset (new Label (String(),
                            TRANS("to")));
@@ -138,34 +138,35 @@ RackRow::RackRow ()
 
     m_highKey->setBounds (768, 14, 32, 24);
 
-    imageButton.reset (new ImageButton ("new button"));
-    addAndMakeVisible (imageButton.get());
-    imageButton->addListener (this);
+    m_deviceSettings.reset (new ImageButton (String()));
+    addAndMakeVisible (m_deviceSettings.get());
+    m_deviceSettings->setButtonText (TRANS("new button"));
+    m_deviceSettings->addListener (this);
 
-    imageButton->setImages (false, true, true,
-                            ImageCache::getFromMemory (truePianos_png, truePianos_pngSize), 1.000f, Colour (0x00000000),
-                            Image(), 1.000f, Colour (0x00000000),
-                            Image(), 1.000f, Colour (0x00000000));
-    imageButton->setBounds (8, 14, 76, 57);
+    m_deviceSettings->setImages (false, true, true,
+                                 ImageCache::getFromMemory (truePianos_png, truePianos_pngSize), 1.000f, Colour (0x00000000),
+                                 Image(), 1.000f, Colour (0x00000000),
+                                 Image(), 1.000f, Colour (0x00000000));
+    m_deviceSettings->setBounds (8, 14, 76, 57);
 
     m_keyboard.reset (new MidiKeyboardComponent (*m_keyboardState, MidiKeyboardComponent::Orientation::horizontalKeyboard));
     addAndMakeVisible (m_keyboard.get());
 
     m_keyboard->setBounds (392, 46, 416, 24);
 
-    toggleButton3.reset (new ToggleButton ("new toggle button"));
-    addAndMakeVisible (toggleButton3.get());
-    toggleButton3->setButtonText (TRANS("Double octave"));
-    toggleButton3->addListener (this);
+    m_doubleOctave.reset (new ToggleButton (String()));
+    addAndMakeVisible (m_doubleOctave.get());
+    m_doubleOctave->setButtonText (TRANS("Double octave"));
+    m_doubleOctave->addListener (this);
 
-    toggleButton3->setBounds (392, 14, 123, 24);
+    m_doubleOctave->setBounds (392, 14, 123, 24);
 
-    toggleButton4.reset (new ToggleButton ("new toggle button"));
-    addAndMakeVisible (toggleButton4.get());
-    toggleButton4->setButtonText (TRANS("Arpeggiator"));
-    toggleButton4->addListener (this);
+    m_arperggiator.reset (new ToggleButton (String()));
+    addAndMakeVisible (m_arperggiator.get());
+    m_arperggiator->setButtonText (TRANS("Arpeggiator"));
+    m_arperggiator->addListener (this);
 
-    toggleButton4->setBounds (512, 14, 112, 24);
+    m_arperggiator->setBounds (512, 14, 112, 24);
 
 
     //[UserPreSize]
@@ -188,20 +189,20 @@ RackRow::~RackRow()
     delete m_keyboardState;
     //[/Destructor_pre]
 
-    groupComponent = nullptr;
-    toggleButton = nullptr;
-    toggleButton2 = nullptr;
-    slider = nullptr;
-    comboBox = nullptr;
-    comboBox2 = nullptr;
-    textEditor = nullptr;
+    m_deviceName = nullptr;
+    m_solo = nullptr;
+    m_mute = nullptr;
+    m_volume = nullptr;
+    m_bank = nullptr;
+    m_program = nullptr;
+    m_transpose = nullptr;
     m_to = nullptr;
     m_lowKey = nullptr;
     m_highKey = nullptr;
-    imageButton = nullptr;
+    m_deviceSettings = nullptr;
     m_keyboard = nullptr;
-    toggleButton3 = nullptr;
-    toggleButton4 = nullptr;
+    m_doubleOctave = nullptr;
+    m_arperggiator = nullptr;
 
 
     //[Destructor]. You can add your own custom destruction code here..
@@ -232,30 +233,30 @@ void RackRow::buttonClicked (Button* buttonThatWasClicked)
     //[UserbuttonClicked_Pre]
     //[/UserbuttonClicked_Pre]
 
-    if (buttonThatWasClicked == toggleButton.get())
+    if (buttonThatWasClicked == m_solo.get())
     {
-        //[UserButtonCode_toggleButton] -- add your button handler code here..
-        //[/UserButtonCode_toggleButton]
+        //[UserButtonCode_m_solo] -- add your button handler code here..
+        //[/UserButtonCode_m_solo]
     }
-    else if (buttonThatWasClicked == toggleButton2.get())
+    else if (buttonThatWasClicked == m_mute.get())
     {
-        //[UserButtonCode_toggleButton2] -- add your button handler code here..
-        //[/UserButtonCode_toggleButton2]
+        //[UserButtonCode_m_mute] -- add your button handler code here..
+        //[/UserButtonCode_m_mute]
     }
-    else if (buttonThatWasClicked == imageButton.get())
+    else if (buttonThatWasClicked == m_deviceSettings.get())
     {
-        //[UserButtonCode_imageButton] -- add your button handler code here..
-        //[/UserButtonCode_imageButton]
+        //[UserButtonCode_m_deviceSettings] -- add your button handler code here..
+        //[/UserButtonCode_m_deviceSettings]
     }
-    else if (buttonThatWasClicked == toggleButton3.get())
+    else if (buttonThatWasClicked == m_doubleOctave.get())
     {
-        //[UserButtonCode_toggleButton3] -- add your button handler code here..
-        //[/UserButtonCode_toggleButton3]
+        //[UserButtonCode_m_doubleOctave] -- add your button handler code here..
+        //[/UserButtonCode_m_doubleOctave]
     }
-    else if (buttonThatWasClicked == toggleButton4.get())
+    else if (buttonThatWasClicked == m_arperggiator.get())
     {
-        //[UserButtonCode_toggleButton4] -- add your button handler code here..
-        //[/UserButtonCode_toggleButton4]
+        //[UserButtonCode_m_arperggiator] -- add your button handler code here..
+        //[/UserButtonCode_m_arperggiator]
     }
 
     //[UserbuttonClicked_Post]
@@ -267,10 +268,10 @@ void RackRow::sliderValueChanged (Slider* sliderThatWasMoved)
     //[UsersliderValueChanged_Pre]
     //[/UsersliderValueChanged_Pre]
 
-    if (sliderThatWasMoved == slider.get())
+    if (sliderThatWasMoved == m_volume.get())
     {
-        //[UserSliderCode_slider] -- add your slider handling code here..
-        //[/UserSliderCode_slider]
+        //[UserSliderCode_m_volume] -- add your slider handling code here..
+        //[/UserSliderCode_m_volume]
     }
 
     //[UsersliderValueChanged_Post]
@@ -282,15 +283,15 @@ void RackRow::comboBoxChanged (ComboBox* comboBoxThatHasChanged)
     //[UsercomboBoxChanged_Pre]
     //[/UsercomboBoxChanged_Pre]
 
-    if (comboBoxThatHasChanged == comboBox.get())
+    if (comboBoxThatHasChanged == m_bank.get())
     {
-        //[UserComboBoxCode_comboBox] -- add your combo box handling code here..
-        //[/UserComboBoxCode_comboBox]
+        //[UserComboBoxCode_m_bank] -- add your combo box handling code here..
+        //[/UserComboBoxCode_m_bank]
     }
-    else if (comboBoxThatHasChanged == comboBox2.get())
+    else if (comboBoxThatHasChanged == m_program.get())
     {
-        //[UserComboBoxCode_comboBox2] -- add your combo box handling code here..
-        //[/UserComboBoxCode_comboBox2]
+        //[UserComboBoxCode_m_program] -- add your combo box handling code here..
+        //[/UserComboBoxCode_m_program]
     }
 
     //[UsercomboBoxChanged_Post]
@@ -393,31 +394,29 @@ BEGIN_JUCER_METADATA
     <METHOD name="mouseUp (const MouseEvent&amp; e)"/>
   </METHODS>
   <BACKGROUND backgroundColour="0"/>
-  <GROUPCOMPONENT name="new group" id="85efcbef1342dec0" memberName="groupComponent"
-                  virtualName="" explicitFocusOrder="0" pos="0 -2 816 80" title="Korg M1"/>
-  <TOGGLEBUTTON name="" id="2b62ef4a67b701f3" memberName="toggleButton" virtualName=""
+  <GROUPCOMPONENT name="" id="85efcbef1342dec0" memberName="m_deviceName" virtualName=""
+                  explicitFocusOrder="0" pos="0 -2 816 80" title="Korg M1"/>
+  <TOGGLEBUTTON name="" id="2b62ef4a67b701f3" memberName="m_solo" virtualName=""
                 explicitFocusOrder="0" pos="96 14 72 24" buttonText="Solo" connectedEdges="0"
                 needsCallback="1" radioGroupId="0" state="0"/>
-  <TOGGLEBUTTON name="new toggle button" id="6ad6011b41b23475" memberName="toggleButton2"
-                virtualName="" explicitFocusOrder="0" pos="160 14 72 24" buttonText="Mute"
-                connectedEdges="0" needsCallback="1" radioGroupId="0" state="0"/>
-  <SLIDER name="new slider" id="a0e2bc5a61933c6d" memberName="slider" virtualName=""
+  <TOGGLEBUTTON name="" id="6ad6011b41b23475" memberName="m_mute" virtualName=""
+                explicitFocusOrder="0" pos="160 14 72 24" buttonText="Mute" connectedEdges="0"
+                needsCallback="1" radioGroupId="0" state="0"/>
+  <SLIDER name="" id="a0e2bc5a61933c6d" memberName="m_volume" virtualName=""
           explicitFocusOrder="0" pos="96 46 128 24" min="-110.00000000000000000000"
           max="12.00000000000000000000" int="0.50000000000000000000" style="LinearBar"
           textBoxPos="TextBoxBelow" textBoxEditable="1" textBoxWidth="80"
           textBoxHeight="20" skewFactor="1.00000000000000000000" needsCallback="1"/>
-  <COMBOBOX name="new combo box" id="90d63ca95a92a112" memberName="comboBox"
-            virtualName="" explicitFocusOrder="0" pos="232 14 150 24" editable="0"
-            layout="33" items="None&#10;Usercard 1&#10;Usercard 2&#10;" textWhenNonSelected="None"
+  <COMBOBOX name="" id="90d63ca95a92a112" memberName="m_bank" virtualName=""
+            explicitFocusOrder="0" pos="232 14 150 24" editable="0" layout="33"
+            items="None&#10;Usercard 1&#10;Usercard 2&#10;" textWhenNonSelected="None"
             textWhenNoItems="(no choices)"/>
-  <COMBOBOX name="new combo box" id="9de3cb5469378fa1" memberName="comboBox2"
-            virtualName="" explicitFocusOrder="0" pos="232 46 150 24" editable="0"
-            layout="33" items="Piano&#10;Strings&#10;" textWhenNonSelected="Piano"
-            textWhenNoItems="(no choices)"/>
-  <TEXTEDITOR name="new text editor" id="b6e30577b79a003a" memberName="textEditor"
-              virtualName="" explicitFocusOrder="0" pos="648 14 32 24" initialText=""
-              multiline="0" retKeyStartsLine="0" readonly="0" scrollbars="0"
-              caret="1" popupmenu="1"/>
+  <COMBOBOX name="" id="9de3cb5469378fa1" memberName="m_program" virtualName=""
+            explicitFocusOrder="0" pos="232 46 150 24" editable="0" layout="33"
+            items="Piano&#10;Strings&#10;" textWhenNonSelected="Piano" textWhenNoItems="(no choices)"/>
+  <TEXTEDITOR name="" id="b6e30577b79a003a" memberName="m_transpose" virtualName=""
+              explicitFocusOrder="0" pos="648 14 32 24" initialText="" multiline="0"
+              retKeyStartsLine="0" readonly="0" scrollbars="0" caret="1" popupmenu="1"/>
   <LABEL name="" id="72d9777463cc6a85" memberName="m_to" virtualName=""
          explicitFocusOrder="0" pos="744 14 24 24" edTextCol="ff000000"
          edBkgCol="0" labelText="to" editableSingleClick="0" editableDoubleClick="0"
@@ -430,8 +429,8 @@ BEGIN_JUCER_METADATA
   <TEXTEDITOR name="" id="5f3abd7bbb50678c" memberName="m_highKey" virtualName=""
               explicitFocusOrder="0" pos="768 14 32 24" initialText="G 8" multiline="0"
               retKeyStartsLine="0" readonly="0" scrollbars="0" caret="1" popupmenu="1"/>
-  <IMAGEBUTTON name="new button" id="31b2ae44720b5f47" memberName="imageButton"
-               virtualName="" explicitFocusOrder="0" pos="8 14 76 57" buttonText="new button"
+  <IMAGEBUTTON name="" id="31b2ae44720b5f47" memberName="m_deviceSettings" virtualName=""
+               explicitFocusOrder="0" pos="8 14 76 57" buttonText="new button"
                connectedEdges="0" needsCallback="1" radioGroupId="0" keepProportions="1"
                resourceNormal="truePianos_png" opacityNormal="1.00000000000000000000"
                colourNormal="0" resourceOver="" opacityOver="1.00000000000000000000"
@@ -439,11 +438,11 @@ BEGIN_JUCER_METADATA
                colourDown="0"/>
   <GENERICCOMPONENT name="" id="3a433662794e0409" memberName="m_keyboard" virtualName="MidiKeyboardComponent"
                     explicitFocusOrder="0" pos="392 46 416 24" class="unknown" params="*m_keyboardState, MidiKeyboardComponent::Orientation::horizontalKeyboard"/>
-  <TOGGLEBUTTON name="new toggle button" id="7a9e84b485ffe060" memberName="toggleButton3"
-                virtualName="" explicitFocusOrder="0" pos="392 14 123 24" buttonText="Double octave"
+  <TOGGLEBUTTON name="" id="7a9e84b485ffe060" memberName="m_doubleOctave" virtualName=""
+                explicitFocusOrder="0" pos="392 14 123 24" buttonText="Double octave"
                 connectedEdges="0" needsCallback="1" radioGroupId="0" state="0"/>
-  <TOGGLEBUTTON name="new toggle button" id="82787edffe0c1be4" memberName="toggleButton4"
-                virtualName="" explicitFocusOrder="0" pos="512 14 112 24" buttonText="Arpeggiator"
+  <TOGGLEBUTTON name="" id="82787edffe0c1be4" memberName="m_arperggiator" virtualName=""
+                explicitFocusOrder="0" pos="512 14 112 24" buttonText="Arpeggiator"
                 connectedEdges="0" needsCallback="1" radioGroupId="0" state="0"/>
 </JUCER_COMPONENT>
 
