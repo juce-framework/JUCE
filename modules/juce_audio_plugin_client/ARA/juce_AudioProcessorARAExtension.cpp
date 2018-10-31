@@ -35,11 +35,16 @@ ARA::PlugIn::EditorView* AudioProcessorARAExtension::getARAEditorView() const no
 
 //==============================================================================
 
-AudioProcessorEditorARAExtension::AudioProcessorEditorARAExtension(AudioProcessorARAExtension* araAudioProcessorExtension)
-: processorExtension(araAudioProcessorExtension)
+AudioProcessorEditorARAExtension::AudioProcessorEditorARAExtension(AudioProcessor* audioProcessor)
+: araProcessorExtension(dynamic_cast<AudioProcessorARAExtension*>(audioProcessor))
 {}
 
 ARA::PlugIn::EditorView* AudioProcessorEditorARAExtension::getARAEditorView() const noexcept
 {
-    return processorExtension->getARAEditorView();
+    return araProcessorExtension ? araProcessorExtension->getARAEditorView() : nullptr;
+}
+
+bool AudioProcessorEditorARAExtension::isARAEditorView() const noexcept 
+{ 
+    return getARAEditorView() != nullptr; 
 }

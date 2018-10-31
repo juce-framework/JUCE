@@ -4,6 +4,8 @@
 
 namespace juce
 {
+    class AudioProcessor;
+
     class AudioProcessorARAExtension
     {
     public:
@@ -26,13 +28,13 @@ namespace juce
     class AudioProcessorEditorARAExtension
     {
     public:
-        AudioProcessorEditorARAExtension(AudioProcessorARAExtension * araProcessor);
+        AudioProcessorEditorARAExtension(AudioProcessor* audioProcessor);
 
         ARA::PlugIn::EditorView* getARAEditorView() const noexcept;
 
-        bool isARAEditorView() const noexcept { return getARAEditorView() != nullptr; }
+        bool isARAEditorView() const noexcept;
     
     private:
-        AudioProcessorARAExtension* processorExtension;
+        AudioProcessorARAExtension* araProcessorExtension;
     };
 }
