@@ -881,7 +881,7 @@ private:
     {
         props.add (new TextPropertyComponent (androidOboeRepositoryPath, "Oboe Repository Path", 2048, false),
                    "Path to the root of Oboe repository. Make sure to point Oboe repository to "
-                   "commit with SHA 44c6b6ea9c8fa9b5b74cbd60f355068b57b50b37 before building.");
+                   "commit with SHA c5c3cc17f78974bf005bf33a2de1a093ac55cc07 before building.");
 
         props.add (new ChoicePropertyComponent (androidInternetNeeded, "Internet Access"),
                    "If enabled, this will set the android.permission.INTERNET flag in the manifest.");
