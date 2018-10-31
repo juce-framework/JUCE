@@ -11,6 +11,7 @@
 #include "juce_ARARegionSequence.cpp"
 #include "juce_ARAAudioSource.cpp"
 #include "juce_AudioProcessorARAExtension.cpp"
+#include "juce_AudioProcessorEditorARAExtension.cpp"
  
 namespace juce
 {
