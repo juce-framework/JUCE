@@ -247,7 +247,7 @@ struct PhysicalTopologySource::Internal
 
         bool isLockedFromOutside() const override
         {
-            return lockedFromOutside;
+            return lockedFromOutside && ! findDevices().isEmpty();
         }
 
         static bool isBlocksMidiDeviceName (const juce::String& name)
