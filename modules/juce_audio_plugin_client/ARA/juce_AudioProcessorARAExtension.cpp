@@ -1,8 +1,8 @@
 #pragma once
 
-#include "juce_ARAPlugInInstance.h"
+#include "juce_AudioProcessorARAExtension.h"
 
-const ARA::ARAPlugInExtensionInstance* ARAPlugInInstance::createARAPlugInExtension (ARA::ARADocumentControllerRef documentControllerRef, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles)
+const ARA::ARAPlugInExtensionInstance* AudioProcessorARAExtension::createARAPlugInExtension (ARA::ARADocumentControllerRef documentControllerRef, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles)
 {
     ARA::PlugIn::DocumentController* documentController = reinterpret_cast<ARA::PlugIn::DocumentController*> (documentControllerRef);
     ARA_VALIDATE_API_ARGUMENT (documentControllerRef, ARA::PlugIn::DocumentController::isValidDocumentController (documentController));
@@ -18,28 +18,28 @@ const ARA::ARAPlugInExtensionInstance* ARAPlugInInstance::createARAPlugInExtensi
     return araPlugInExtension->getInstance ();
 }
 
-ARA::PlugIn::PlaybackRenderer* ARAPlugInInstance::getARAPlaybackRenderer() const noexcept
+ARA::PlugIn::PlaybackRenderer* AudioProcessorARAExtension::getARAPlaybackRenderer() const noexcept
 {
     return araPlugInExtension ? araPlugInExtension->getPlaybackRenderer() : nullptr;
 }
 
-ARA::PlugIn::EditorRenderer* ARAPlugInInstance::getARAEditorRenderer() const noexcept
+ARA::PlugIn::EditorRenderer* AudioProcessorARAExtension::getARAEditorRenderer() const noexcept
 {
     return araPlugInExtension ? araPlugInExtension->getEditorRenderer() : nullptr;
 }
 
-ARA::PlugIn::EditorView* ARAPlugInInstance::getARAEditorView() const noexcept
+ARA::PlugIn::EditorView* AudioProcessorARAExtension::getARAEditorView() const noexcept
 {
     return araPlugInExtension ? araPlugInExtension->getEditorView() : nullptr;
 }
 
 //==============================================================================
 
-ARAPlugInEditor::ARAPlugInEditor(ARAPlugInInstance* araAudioProcessor)
-: processor(araAudioProcessor)
+AudioProcessorEditorARAExtension::AudioProcessorEditorARAExtension(AudioProcessorARAExtension* araAudioProcessorExtension)
+: processorExtension(araAudioProcessorExtension)
 {}
 
-ARA::PlugIn::EditorView* ARAPlugInEditor::getARAEditorView() const noexcept
+ARA::PlugIn::EditorView* AudioProcessorEditorARAExtension::getARAEditorView() const noexcept
 {
-    return processor->getARAEditorView();
+    return processorExtension->getARAEditorView();
 }

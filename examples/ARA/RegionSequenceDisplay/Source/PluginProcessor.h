@@ -17,7 +17,7 @@
 */
 class ArasampleProjectAudioProcessor  : public AudioProcessor
 #if JucePlugin_Enable_ARA
-     , public ARAPlugInInstance
+     , public AudioProcessorARAExtension
 #endif
 {
 public:

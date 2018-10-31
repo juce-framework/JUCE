@@ -74,7 +74,7 @@ namespace Vst2
 //==============================================================================
 #if JucePlugin_Enable_ARA
  
- #include "../ARA/juce_ARAPlugInInstance.h"
+ #include "../ARA/juce_AudioProcessorARAExtension.h"
 
  #if JUCE_MSVC
   #pragma warning (push)
@@ -2594,7 +2594,7 @@ private:
     const ARA::ARAPlugInExtensionInstance* PLUGIN_API bindToDocumentControllerWithRoles (ARA::ARADocumentControllerRef documentControllerRef,
                                                                                          ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles) SMTG_OVERRIDE
     {
-        ARAPlugInInstance* araPlugInInstance = dynamic_cast<ARAPlugInInstance*>(pluginInstance);
+        AudioProcessorARAExtension* araPlugInInstance = dynamic_cast<AudioProcessorARAExtension*>(pluginInstance);
         return araPlugInInstance->createARAPlugInExtension (documentControllerRef, knownRoles, assignedRoles);
     }
 

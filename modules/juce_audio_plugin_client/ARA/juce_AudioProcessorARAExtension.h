@@ -4,7 +4,7 @@
 
 namespace juce
 {
-    class ARAPlugInInstance
+    class AudioProcessorARAExtension
     {
     public:
         const ARA::ARAPlugInExtensionInstance* createARAPlugInExtension(ARA::ARADocumentControllerRef documentControllerRef, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles);
@@ -23,16 +23,16 @@ namespace juce
     
     //==============================================================================
 
-    class ARAPlugInEditor
+    class AudioProcessorEditorARAExtension
     {
     public:
-        ARAPlugInEditor(ARAPlugInInstance* araProcessor);
+        AudioProcessorEditorARAExtension(AudioProcessorARAExtension * araProcessor);
 
         ARA::PlugIn::EditorView* getARAEditorView() const noexcept;
 
         bool isARAEditorView() const noexcept { return getARAEditorView() != nullptr; }
     
     private:
-        ARAPlugInInstance* processor;
+        AudioProcessorARAExtension* processorExtension;
     };
 }

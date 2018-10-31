@@ -177,7 +177,7 @@ AudioProcessor* JUCE_API JUCE_CALLTYPE createPluginFilterOfType (AudioProcessor:
     jassert (pluginInstance != nullptr && pluginInstance->wrapperType == type);
 
 #if JucePlugin_Enable_ARA
-    jassert (dynamic_cast<ARAPlugInInstance*> (pluginInstance) != nullptr);
+    jassert (dynamic_cast<AudioProcessorARAExtension*> (pluginInstance) != nullptr);
 #endif
 
     return pluginInstance;

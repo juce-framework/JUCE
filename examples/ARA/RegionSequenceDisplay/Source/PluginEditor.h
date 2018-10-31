@@ -20,7 +20,7 @@
 */
 class ArasampleProjectAudioProcessorEditor  : public AudioProcessorEditor
 #if JucePlugin_Enable_ARA
-     , public ARAPlugInEditor
+     , public AudioProcessorEditorARAExtension
 #endif
 {
 public:

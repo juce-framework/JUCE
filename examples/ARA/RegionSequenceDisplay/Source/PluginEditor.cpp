@@ -18,7 +18,7 @@ static const int kHeight = 400;
 ArasampleProjectAudioProcessorEditor::ArasampleProjectAudioProcessorEditor (ArasampleProjectAudioProcessor& p)
     : AudioProcessorEditor (&p)
 #if JucePlugin_Enable_ARA
-     , ARAPlugInEditor(dynamic_cast<ARAPlugInInstance*>(&p))
+     , AudioProcessorEditorARAExtension(dynamic_cast<AudioProcessorARAExtension*>(&p))
 #endif
      , processor (p)
 {

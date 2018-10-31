@@ -119,5 +119,5 @@
  #include "ARA/juce_ARAAudioSource.h"
  #include "ARA/juce_ARADocumentController.h"
  #include "ARA/juce_ARARegionSequence.h"
- #include "ARA/juce_ARAPlugInInstance.h"
+ #include "ARA/juce_AudioProcessorARAExtension.h"
 #endif
