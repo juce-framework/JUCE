@@ -93,7 +93,7 @@ MainHostWindow::MainHostWindow()
    #if JUCE_IOS || JUCE_ANDROID
     setFullScreen (true);
    #else
-    setResizable (false, false);
+    setResizable (true, false);
     setResizeLimits (500, 400, 10000, 10000);
     centreWithSize (1024, 720);
    #endif

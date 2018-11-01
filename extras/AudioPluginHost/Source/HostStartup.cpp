@@ -132,7 +132,7 @@ public:
             mainWindow->graphHolder->hideLastSidePanel();
     }
 
-    const String getApplicationName() override       { return "Juce Plug-In Host"; }
+    const String getApplicationName() override       { return "Performer"; }
     const String getApplicationVersion() override    { return ProjectInfo::versionString; }
     bool moreThanOneInstanceAllowed() override       { return true; }
 

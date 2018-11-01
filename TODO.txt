@@ -1,5 +1,4 @@
 Menu's - Load/Save of classes
-Generate rack based of classes
 Link all GUI up properly
 Create plugins to reflect rack
 Bring in router (changed to new classes)

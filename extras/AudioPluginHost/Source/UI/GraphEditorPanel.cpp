@@ -441,17 +441,11 @@ void GraphDocumentComponent::init()
     m_transposeColumn->setColour(TextEditor::backgroundColourId, Colour(0x00000000));
     m_transposeColumn->setBounds(632, 0, 80, 24);
 
-
-    m_rackTopUI.reset(new Component());
-    m_rackTopUI->addAndMakeVisible(m_bankProgramColumn.get());
-    m_rackTopUI->addAndMakeVisible(m_transposeColumn.get());
-    m_rackTopUI->addAndMakeVisible(m_rangeColumn.get());
-    m_rackTopUI->addAndMakeVisible(m_volumeColumn.get());
-
-    m_rackUI.reset(new Component());
-    m_rackUI->addAndMakeVisible(m_rackTopUI.get());
-
     auto m_performer = new Performer();
+
+    m_rackUIViewport.reset(new Viewport());
+    m_rackUI.reset(new Component());
+    m_rackTopUI.reset(new Component());
 
     int devicesOnScreen = m_performer->m_current.Rack.size();
     int deviceWidth = 100;
@@ -460,29 +454,37 @@ void GraphDocumentComponent::init()
     for (int i = 0; i < devicesOnScreen; ++i)
     {
         m_rackDevice.push_back(std::make_unique<RackRow>());
-        auto newRackRow = m_rackDevice.back().get();
-
+        auto newRackRow = (RackRow*)m_rackDevice.back().get();
+        newRackRow->Setup(m_performer->m_current.Rack[i]);
         deviceWidth = newRackRow->getWidth() + 2;
         deviceHeight = newRackRow->getHeight();
         m_rackUI->addAndMakeVisible(newRackRow);
         newRackRow->setBounds(0, i*deviceHeight + titleHeight, deviceWidth, deviceHeight);
-
     }
-    m_rackTopUI->setBounds(0, 0, deviceWidth, titleHeight);
-
 
     m_tabs.reset(new TabbedComponent(TabbedButtonBar::TabsAtTop));
     m_tabs->setTabBarDepth(30);
     m_tabs->addTab(TRANS("SetLists"), Colours::darkblue, 0, false);
     m_tabs->addTab(TRANS("Songs"), Colours::darkgreen, 0, false);
     m_tabs->addTab(TRANS("Performances"), Colours::darkkhaki, 0, false);
-    m_tabs->addTab(TRANS("Rack"), Colours::darkgrey, m_rackUI.get(), false);
+    m_tabs->addTab(TRANS("Rack"), Colours::darkgrey, m_rackUIViewport.get(), false);
     m_tabs->setCurrentTabIndex(3);
-    m_tabs->setBounds(10,10, deviceWidth, deviceHeight * devicesOnScreen + titleHeight + 40); // include tab bar
-
+    m_tabs->setBounds(10,10, deviceWidth, 700); // include tab bar
     addAndMakeVisible(m_tabs.get());
 
+    m_rackTopUI->addAndMakeVisible(m_bankProgramColumn.get());
+    m_rackTopUI->addAndMakeVisible(m_transposeColumn.get());
+    m_rackTopUI->addAndMakeVisible(m_rangeColumn.get());
+    m_rackTopUI->addAndMakeVisible(m_volumeColumn.get());
+    m_rackTopUI->setBounds(0, 0, deviceWidth, titleHeight);
 
+    m_rackUI->setBounds(0, 0, deviceWidth, deviceHeight * devicesOnScreen + titleHeight);
+    m_rackUI->addAndMakeVisible(m_rackTopUI.get());
+
+    m_rackUIViewport->setScrollBarsShown(true, false);
+    m_rackUIViewport->setBounds(0, 30, deviceWidth, m_tabs->getBounds().getHeight() - 30);
+    m_rackUIViewport->setViewedComponent(m_rackUI.get());
+    
     keyState.addListener (&graphPlayer.getMidiMessageCollector());
 
     keyboardComp.reset (new MidiKeyboardComponent (keyState, MidiKeyboardComponent::horizontalKeyboard));

@@ -21,6 +21,7 @@
 //[/Headers]
 
 #include "RackRow.h"
+#include "../Performer.h"
 
 
 //[MiscUserDefs] You can add your own user definitions and misc code here...
@@ -214,8 +215,12 @@ void RackRow::paint (Graphics& g)
 {
     //[UserPrePaint] Add your own custom painting code here..
     //[/UserPrePaint]
-
+    
     //[UserPaint] Add your own custom painting code here..
+    g.setColour(Colours::black);
+    auto rect = m_deviceSettings->getBounds();
+    rect.expand(1, 1);
+    g.drawRect(rect);
     //[/UserPaint]
 }
 
@@ -372,6 +377,12 @@ void RackRow::UpdateKeyboard()
         m_keyboardState->noteOn(1, i, 1.0f);
 }
 
+void RackRow::Setup(Device &device)
+{
+    m_deviceName->setText(device.Name);
+    auto image = ImageFileFormat::loadFrom(File::getCurrentWorkingDirectory().getFullPathName() + File::separator + String(device.Name + ".png"));
+    m_deviceSettings->setImages(false, false, false, image, 1.0f, Colours::transparentBlack, image, 1.0f, Colours::transparentBlack, image, 1.0f, Colours::transparentBlack);
+}
 //[/MiscUserCode]
 
 
