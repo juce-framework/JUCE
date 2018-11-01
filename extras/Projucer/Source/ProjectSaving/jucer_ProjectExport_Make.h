@@ -281,9 +281,22 @@ public:
                 << "\t-$(V_AT)mkdir -p $(JUCE_LIBDIR)" << newLine
                 << "\t-$(V_AT)mkdir -p $(JUCE_OUTDIR)" << newLine;
 
+            if (type == UnityPlugIn)
+            {
+                auto scriptName = owner.getProject().getUnityScriptName();
+
+                RelativePath scriptPath (owner.getProject().getGeneratedCodeFolder().getChildFile (scriptName),
+                                         owner.getTargetFolder(),
+                                         RelativePath::projectFolder);
+
+                out << "\t-$(V_AT)cp " + scriptPath.toUnixStyle() + " $(JUCE_OUTDIR)/" + scriptName << newLine;
+            }
+
             if (owner.projectType.isStaticLibrary() || type == SharedCodeTarget)
+            {
                 out << "\t$(V_AT)$(AR) -rcs " << getBuildProduct()
                     << " $(OBJECTS_" << getTargetVarName() << ")" << newLine;
+            }
             else
             {
                 out << "\t$(V_AT)$(CXX) -o " << getBuildProduct()
