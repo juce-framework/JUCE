@@ -135,7 +135,7 @@ public:
             bool operator== (const Connection&) const noexcept;
         };
 
-        const std::unique_ptr<AudioProcessor> processor;
+        std::unique_ptr<AudioProcessor> processor;
         Array<Connection> inputs, outputs;
         bool isPrepared = false;
         std::atomic<bool> bypassed { false };
@@ -231,12 +231,12 @@ public:
     /** Deletes a node within the graph which has the specified ID.
         This will also delete any connections that are attached to this node.
     */
-    bool removeNode (NodeID);
+    std::unique_ptr<AudioProcessor> removeNode (NodeID);
 
     /** Deletes a node within the graph.
         This will also delete any connections that are attached to this node.
     */
-    bool removeNode (Node*);
+    std::unique_ptr<AudioProcessor> removeNode (Node*);
 
     /** Returns the list of connections in the graph. */
     std::vector<Connection> getConnections() const;
