@@ -81,42 +81,6 @@ public:
                                      : "The default value for this exporter is " + getDefaultWindowsTargetPlatformVersion()));
     }
 
-    void addPlatformToolsetToPropertyGroup (XmlElement& p) const
-    {
-        forEachXmlChildElementWithTagName (p, e, "PropertyGroup")
-        e->createNewChildElement ("PlatformToolset")->addTextElement (getPlatformToolset());
-    }
-
-    void addWindowsTargetPlatformVersionToPropertyGroup (XmlElement& p) const
-    {
-        auto target = getWindowsTargetPlatformVersion();
-
-        if (target == "Latest")
-        {
-            forEachXmlChildElementWithTagName (p, e, "PropertyGroup")
-            {
-                auto* child = e->createNewChildElement ("WindowsTargetPlatformVersion");
-
-                child->setAttribute ("Condition", "'$(WindowsTargetPlatformVersion)' == ''");
-                child->addTextElement ("$([Microsoft.Build.Utilities.ToolLocationHelper]::GetLatestSDKTargetPlatformVersion('Windows', '10.0'))");
-            }
-        }
-        else
-        {
-            forEachXmlChildElementWithTagName (p, e, "PropertyGroup")
-            e->createNewChildElement ("WindowsTargetPlatformVersion")->addTextElement (target);
-        }
-    }
-
-    void addIPPSettingToPropertyGroup (XmlElement& p) const
-    {
-        auto ippLibrary = getIPPLibrary();
-
-        if (ippLibrary.isNotEmpty())
-            forEachXmlChildElementWithTagName (p, e, "PropertyGroup")
-            e->createNewChildElement ("UseIntelIPP")->addTextElement (ippLibrary);
-    }
-
     void create (const OwnedArray<LibraryModule>&) const override
     {
         createResourcesAndIcon();
@@ -451,6 +415,15 @@ public:
 
                 if (config.shouldLinkIncremental())
                     e->createNewChildElement ("LinkIncremental")->addTextElement ("true");
+
+                e->createNewChildElement ("PlatformToolset")->addTextElement (owner.getPlatformToolset());
+
+                addWindowsTargetPlatformToConfig (*e);
+
+                auto ippLibrary = owner.getIPPLibrary();
+
+                if (ippLibrary.isNotEmpty())
+                    e->createNewChildElement ("UseIntelIPP")->addTextElement (ippLibrary);
             }
 
             {
@@ -470,11 +443,6 @@ public:
                 p->setAttribute ("Project", "$(UserRootDir)\\Microsoft.Cpp.$(Platform).user.props");
                 p->setAttribute ("Condition", "exists('$(UserRootDir)\\Microsoft.Cpp.$(Platform).user.props')");
                 p->setAttribute ("Label", "LocalAppDataPlatform");
-            }
-
-            {
-                auto* e = projectXml.createNewChildElement ("PropertyGroup");
-                e->setAttribute ("Label", "UserMacros");
             }
 
             {
@@ -747,10 +715,6 @@ public:
                 auto* e = projectXml.createNewChildElement ("ImportGroup");
                 e->setAttribute ("Label", "ExtensionTargets");
             }
-
-            getOwner().addPlatformToolsetToPropertyGroup (projectXml);
-            getOwner().addWindowsTargetPlatformVersionToPropertyGroup (projectXml);
-            getOwner().addIPPSettingToPropertyGroup (projectXml);
         }
 
         String getProjectType() const
@@ -1315,6 +1279,23 @@ public:
         File getVCProjFiltersFile() const                            { return getOwner().getProjectFile (getFiltersFileSuffix(), getName()); }
 
         String createRebasedPath (const RelativePath& path) const    {  return getOwner().createRebasedPath (path); }
+
+        void addWindowsTargetPlatformToConfig (XmlElement& e) const
+        {
+            auto target = owner.getWindowsTargetPlatformVersion();
+
+            if (target == "Latest")
+            {
+                auto* child = e.createNewChildElement ("WindowsTargetPlatformVersion");
+
+                child->setAttribute ("Condition", "'$(WindowsTargetPlatformVersion)' == ''");
+                child->addTextElement ("$([Microsoft.Build.Utilities.ToolLocationHelper]::GetLatestSDKTargetPlatformVersion('Windows', '10.0'))");
+            }
+            else
+            {
+                e.createNewChildElement ("WindowsTargetPlatformVersion")->addTextElement (target);
+            }
+        }
 
     protected:
         const MSVCProjectExporterBase& owner;
