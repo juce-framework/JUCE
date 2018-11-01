@@ -103,6 +103,11 @@ void ARAAudioSource::didEnableSamplesAccess (bool enable)
     ref->lock.exitWrite();
 }
 
+std::unique_ptr<BufferingAudioSource> ARAAudioSource::createBufferingAudioSource(TimeSliceThread& thread, int bufferSize)
+{
+    return std::unique_ptr<BufferingAudioSource>(new BufferingAudioSource(new AudioFormatReaderSource(newReader(), true), thread, true, bufferSize));
+}
+
 ARAAudioSource::Reader::Reader (ARAAudioSource* source)
 : AudioFormatReader (nullptr, "ARAAudioSourceReader"),
   ref (source->ref)
