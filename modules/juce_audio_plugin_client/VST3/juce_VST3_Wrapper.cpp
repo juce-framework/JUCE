@@ -2594,8 +2594,8 @@ private:
     const ARA::ARAPlugInExtensionInstance* PLUGIN_API bindToDocumentControllerWithRoles (ARA::ARADocumentControllerRef documentControllerRef,
                                                                                          ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles) SMTG_OVERRIDE
     {
-        AudioProcessorARAExtension* araPlugInInstance = dynamic_cast<AudioProcessorARAExtension*>(pluginInstance);
-        return araPlugInInstance->createARAPlugInExtension (documentControllerRef, knownRoles, assignedRoles);
+        AudioProcessorARAExtension* araAudioProcessorExtension = dynamic_cast<AudioProcessorARAExtension*>(pluginInstance);
+        return araAudioProcessorExtension->createARAPlugInExtension (documentControllerRef, knownRoles, assignedRoles);
     }
 
 #endif

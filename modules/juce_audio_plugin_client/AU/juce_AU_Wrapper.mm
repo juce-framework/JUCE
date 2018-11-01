@@ -85,7 +85,7 @@
 #include "../../juce_audio_processors/format_types/juce_AU_Shared.h"
 
 #if JucePlugin_Enable_ARA
- #include "../ARA/juce_ARAPlugInInstance.h"
+ #include "../ARA/juce_AudioProcessorARAExtension.h"
  #include <ARA_API/ARAAudioUnit.h>
  #if ARA_SUPPORT_VERSION_1
   #error "Unsupported ARA version - ARA version 2 and onward are JUCE compatible"
@@ -536,8 +536,8 @@ public:
                     if (binding->inOutMagicNumber != ARA::kARAAudioUnitMagic)
                         return kAudioUnitErr_InvalidProperty;   // if the magic value isn't found, the property ID is re-used outside the ARA context with different, unsupported sematics
 
-                    ARAPlugInInstance* araPlugInInstance = dynamic_cast<ARAPlugInInstance*>(juceFilter.get());
-                    binding->outPlugInExtension = araPlugInInstance->createARAPlugInExtension (binding->inDocumentControllerRef, binding->knownRoles, binding->assignedRoles);
+                    AudioProcessorARAExtension* araAudioProcessorExtension = dynamic_cast<AudioProcessorARAExtension*>(pluginInstance);
+                    binding->outPlugInExtension = araAudioProcessorExtension->createARAPlugInExtension (binding->inDocumentControllerRef, binding->knownRoles, binding->assignedRoles);
                     if (binding->outPlugInExtension == NULL)
                         return kAudioUnitErr_CannotDoInCurrentContext;  // createARAPlugInExtension() returns null if binding is already established
 
