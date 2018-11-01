@@ -15,8 +15,6 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{882FE2E3-F4EF-9825-1908-F6FEE5366B5C}</ProjectGuid>
-    <PlatformToolset>v120</PlatformToolset>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props"/>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"
@@ -42,10 +40,6 @@
             Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')"
             Label="LocalAppDataPlatform"/>
   </ImportGroup>
-  <PropertyGroup Label="UserMacros">
-    <PlatformToolset>v120</PlatformToolset>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
-  </PropertyGroup>
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
     <TargetExt>.exe</TargetExt>
@@ -57,8 +51,6 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\App\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">DemoRunner</TargetName>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
-    <PlatformToolset>v120</PlatformToolset>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Midl>
