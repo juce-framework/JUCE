@@ -30,7 +30,7 @@ AudioView::AudioView (ARA::PlugIn::RegionSequence& sequence)
 {
     name = String (sequence.getName());
     order = String (sequence.getOrderIndex());
-    audioThumb.setReader ((dynamic_cast<ARARegionSequence&>(sequence)).newReader(), 1);
+    audioThumb.setReader ((dynamic_cast<ARARegionSequence&> (sequence)).newReader(), 1);
     startInSecs = audioThumb.getTotalLength();
     for (auto region : sequence.getPlaybackRegions())
     {
@@ -65,7 +65,7 @@ double AudioView::getLengthInSecs()
     return audioThumb.getTotalLength() - startInSecs;
 }
 
-void AudioView::setIsSelected(bool value)
+void AudioView::setIsSelected (bool value)
 {
     isSelected = value;
 }

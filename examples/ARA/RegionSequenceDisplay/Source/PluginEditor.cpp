@@ -22,11 +22,11 @@ ArasampleProjectAudioProcessorEditor::ArasampleProjectAudioProcessorEditor (Aras
 #endif
      , processor (p)
 {
-    tracksViewport.setScrollBarsShown(true, true);
+    tracksViewport.setScrollBarsShown (true, true);
     if (auto e = getARAEditorView())
     {
-        editor = static_cast<ARASampleProjectEditorView*>(e);
-        editor->setBounds(0, 0, kWidth - tracksViewport.getScrollBarThickness(), kHeight);
+        editor = static_cast<ARASampleProjectEditorView*> (e);
+        editor->setBounds (0, 0, kWidth - tracksViewport.getScrollBarThickness(), kHeight);
         tracksViewport.setViewedComponent (editor, false);
     }
     addAndMakeVisible (tracksViewport);

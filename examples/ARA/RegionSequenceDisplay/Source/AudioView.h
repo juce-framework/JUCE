@@ -7,16 +7,16 @@ class AudioView
 : public Component, public juce::ChangeListener
 {
 public:
-    AudioView ();
-    ~AudioView ();
+    AudioView();
+    ~AudioView();
     AudioView (ARA::PlugIn::RegionSequence&);
 
     void paint (Graphics&) override;
     void changeListenerCallback (ChangeBroadcaster*) override;
 
     void setIsSelected (bool value);
-    double getStartInSecs ();
-    double getLengthInSecs ();
+    double getStartInSecs();
+    double getLengthInSecs();
 
 private:
     String name, order;

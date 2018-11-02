@@ -8,7 +8,7 @@ namespace juce
 class AudioProcessorARAExtension
 {
 public:
-    const ARA::ARAPlugInExtensionInstance* createARAPlugInExtension(ARA::ARADocumentControllerRef documentControllerRef, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles);
+    const ARA::ARAPlugInExtensionInstance* createARAPlugInExtension (ARA::ARADocumentControllerRef documentControllerRef, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles);
 
     ARA::PlugIn::PlaybackRenderer* getARAPlaybackRenderer() const noexcept;
     ARA::PlugIn::EditorRenderer* getARAEditorRenderer() const noexcept;

@@ -18,7 +18,7 @@ class ARASampleProjectEditorView : public juce::Component, public ARA::PlugIn::E
 public:
     ARASampleProjectEditorView (ARA::PlugIn::DocumentController*) noexcept;
     void doNotifySelection (const ARA::PlugIn::ViewSelection*) noexcept override;
-    void resized () override;
+    void resized() override;
 
 private:
     double maxRegionSequenceLength;

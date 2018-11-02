@@ -1258,13 +1258,13 @@ private:
 class JuceARAFactory : public ARA::IMainFactory
 {
 public:
-    JuceARAFactory ()    FUNKNOWN_CTOR;
-    virtual ~JuceARAFactory () {}
+    JuceARAFactory()    FUNKNOWN_CTOR;
+    virtual ~JuceARAFactory() {}
 
     DECLARE_FUNKNOWN_METHODS
 
     //---from ARA::IMainFactory-------
-    const ARA::ARAFactory* PLUGIN_API getFactory () SMTG_OVERRIDE
+    const ARA::ARAFactory* PLUGIN_API getFactory() SMTG_OVERRIDE
     {
         return ARA::PlugIn::DocumentController::getARAFactory();
     }
@@ -1281,7 +1281,7 @@ IMPLEMENT_REFCOUNT(JuceARAFactory);
 
     if (doUIDsMatch (targetIID, JuceARAFactory::iid))
     {
-        addRef ();
+        addRef();
         *obj = this;
         return kResultOk;
     }
@@ -2759,7 +2759,7 @@ static FUnknown* createControllerInstance (Vst::IHostApplication* host)
 #if JucePlugin_Enable_ARA
 static FUnknown* createARAFactoryInstance (Vst::IHostApplication* /*host*/)
 {
-    return static_cast<ARA::IMainFactory*> (new JuceARAFactory ());
+    return static_cast<ARA::IMainFactory*> (new JuceARAFactory());
 }
 #endif
 

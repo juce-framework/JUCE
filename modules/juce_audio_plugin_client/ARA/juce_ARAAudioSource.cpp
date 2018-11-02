@@ -11,7 +11,7 @@ public:
     Reader (ARAAudioSource*);
     ~Reader();
 
-    void createHostAudioReaderForSource(ARA::PlugIn::AudioSource* audioSource);
+    void createHostAudioReaderForSource (ARA::PlugIn::AudioSource* audioSource);
     void invalidate();
 
     bool readSamples (
@@ -99,13 +99,13 @@ void ARAAudioSource::didEnableSamplesAccess (bool enable)
 
     if (enable)
         for (auto& reader : readers)
-            reader->createHostAudioReaderForSource(this);
+            reader->createHostAudioReaderForSource (this);
     ref->lock.exitWrite();
 }
 
-std::unique_ptr<BufferingAudioSource> ARAAudioSource::createBufferingAudioSource(TimeSliceThread& thread, int bufferSize)
+std::unique_ptr<BufferingAudioSource> ARAAudioSource::createBufferingAudioSource (TimeSliceThread& thread, int bufferSize)
 {
-    return std::unique_ptr<BufferingAudioSource>(new BufferingAudioSource(new AudioFormatReaderSource(newReader(), true), thread, true, bufferSize));
+    return std::unique_ptr<BufferingAudioSource> (new BufferingAudioSource (new AudioFormatReaderSource (newReader(), true), thread, true, bufferSize));
 }
 
 ARAAudioSource::Reader::Reader (ARAAudioSource* source)
@@ -133,13 +133,13 @@ ARAAudioSource::Reader::~Reader()
     }
 }
 
-void ARAAudioSource::Reader::createHostAudioReaderForSource(ARA::PlugIn::AudioSource* audioSource)
+void ARAAudioSource::Reader::createHostAudioReaderForSource (ARA::PlugIn::AudioSource* audioSource)
 {
     // TODO JUCE_ARA should we assert these conditions instead of treating them as a case for invalidation?
     if (audioSource == nullptr || audioSource->isSampleAccessEnabled() == false)
         invalidate();
     else
-        araHostReader.reset(new ARA::PlugIn::HostAudioReader(audioSource));
+        araHostReader.reset (new ARA::PlugIn::HostAudioReader (audioSource));
 }
 
 void ARAAudioSource::Reader::invalidate()

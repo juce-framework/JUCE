@@ -10,7 +10,7 @@ class AudioProcessor;
 class AudioProcessorEditorARAExtension
 {
 public:
-    AudioProcessorEditorARAExtension(AudioProcessor* audioProcessor);
+    AudioProcessorEditorARAExtension (AudioProcessor* audioProcessor);
 
     ARA::PlugIn::EditorView* getARAEditorView() const noexcept;
 

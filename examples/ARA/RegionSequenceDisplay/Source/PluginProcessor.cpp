@@ -146,11 +146,11 @@ void ArasampleProjectAudioProcessor::processBlock (AudioBuffer<float>& buffer, M
         buffer.clear (i, 0, buffer.getNumSamples());
 
     AudioPlayHead::CurrentPositionInfo ci{ 0 };
-    if (getPlayHead() == nullptr || !(getPlayHead()->getCurrentPosition(ci)))
+    if (getPlayHead() == nullptr || !(getPlayHead()->getCurrentPosition (ci)))
         return;
 
-    ARASampleProjectPlaybackRenderer* playbackRenderer = static_cast<ARASampleProjectPlaybackRenderer*>(getARAPlaybackRenderer());
-    playbackRenderer->renderPlaybackRegions(buffer, getSampleRate(), ci.timeInSamples, ci.isPlaying);
+    ARASampleProjectPlaybackRenderer* playbackRenderer = static_cast<ARASampleProjectPlaybackRenderer*> (getARAPlaybackRenderer());
+    playbackRenderer->renderPlaybackRegions (buffer, getSampleRate(), ci.timeInSamples, ci.isPlaying);
 }
 
 //==============================================================================

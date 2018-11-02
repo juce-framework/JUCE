@@ -15,7 +15,7 @@ namespace juce
     #define ARA_ENABLE_INTERNAL_ASSERTS 1
 
     extern JUCE_API void JUCE_CALLTYPE handleARAAssertion (const char* file, const int line, const char* diagnosis) noexcept;
-    #define ARA_HANDLE_ASSERT(file, line, diagnosis)    juce::handleARAAssertion(file, line, diagnosis)
+    #define ARA_HANDLE_ASSERT(file, line, diagnosis)    juce::handleARAAssertion (file, line, diagnosis)
 
    #if JUCE_LOG_ASSERTIONS
     #define ARA_ENABLE_DEBUG_OUTPUT 1

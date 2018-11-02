@@ -26,7 +26,7 @@ public:
     // Needs to be called in the document controller's `didEnableAudioSourceSamplesAccess` method.
     void didEnableSamplesAccess (bool enable);
 
-    std::unique_ptr<BufferingAudioSource> createBufferingAudioSource(TimeSliceThread& thread, int bufferSize);
+    std::unique_ptr<BufferingAudioSource> createBufferingAudioSource (TimeSliceThread& thread, int bufferSize);
 
 private:
     void invalidateReaders();

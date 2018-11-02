@@ -15,9 +15,9 @@
 class ARASampleProjectDocumentController : public juce::ARADocumentController
 {
 public:
-    ARASampleProjectDocumentController () noexcept;
-    ARA::PlugIn::EditorView* doCreateEditorView () noexcept override;
-    ARA::PlugIn::PlaybackRenderer* doCreatePlaybackRenderer () noexcept override;
+    ARASampleProjectDocumentController() noexcept;
+    ARA::PlugIn::EditorView* doCreateEditorView() noexcept override;
+    ARA::PlugIn::PlaybackRenderer* doCreatePlaybackRenderer() noexcept override;
 
 private:
     // Thread used by buffering audio sources to read samples from the host
