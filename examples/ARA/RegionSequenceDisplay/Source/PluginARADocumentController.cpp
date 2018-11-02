@@ -72,7 +72,7 @@ void ARASampleProjectPlaybackRenderer::renderPlaybackRegions (AudioBuffer<float>
             startSongSample = std::max (startSongSample, startAvailableSourceSamples - offsetToPlaybackRegion);
             endSongSample = std::min (endSongSample, endAvailableSourceSamples - offsetToPlaybackRegion);
 
-            AudioSourceChannelInfo channelInfo (&buffer, startSongSample - samplePosition, endSongSample - startSongSample);
+            AudioSourceChannelInfo channelInfo (&buffer, (int) (startSongSample - samplePosition), (int) (endSongSample - startSongSample));
             _audioSourceMap[audioSource]->setNextReadPosition(startSongSample + offsetToPlaybackRegion);
             _audioSourceMap[audioSource]->getNextAudioBlock(channelInfo);
         }
