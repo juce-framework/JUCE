@@ -529,19 +529,22 @@ private:
 
 //===============================================================================
 template <typename SampleType>
-Oversampling<SampleType>::Oversampling()
+Oversampling<SampleType>::Oversampling (size_t newNumChannels)
+    : numChannels (newNumChannels)
 {
+    jassert (numChannels > 0);
+
     addDummyOversamplingStage();
 }
 
 template <typename SampleType>
 Oversampling<SampleType>::Oversampling (size_t newNumChannels, size_t newFactor,
                                         FilterType newType, bool isMaximumQuality)
+    : numChannels (newNumChannels)
 {
-    jassert (newFactor >= 0 && newFactor <= 4 && newNumChannels > 0);
+    jassert (isPositiveAndBelow (newFactor, 5) && numChannels > 0);
 
     factorOversampling = static_cast<size_t> (1) << newFactor;
-    numChannels = newNumChannels;
 
     if (newFactor == 0)
     {
@@ -615,12 +618,15 @@ void Oversampling<SampleType>::addOversamplingStage (FilterType type,
                                                                      normalizedTransitionWidthUp, stopbandAttenuationdBUp,
                                                                      normalizedTransitionWidthDown, stopbandAttenuationdBDown));
     }
+
+    factorOversampling *= 2;
 }
 
 template <typename SampleType>
 void Oversampling<SampleType>::clearOversamplingStages()
 {
     stages.clear();
+    factorOversampling = 1u;
 }
 
 //===============================================================================

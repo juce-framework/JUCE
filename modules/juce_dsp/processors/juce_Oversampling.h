@@ -89,7 +89,7 @@ public:
     /** Default constructor of the oversampling class, which can be used to create an
         empty object and then add the appropriate stages.
     */
-    Oversampling();
+    explicit Oversampling (size_t numChannels = 1);
 
     /** Destructor. */
     ~Oversampling();
