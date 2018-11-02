@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "AudioView.h"
+#include "JuceHeader.h"
 
 class ARASampleProjectDocumentController : public juce::ARADocumentController
 {
@@ -25,3 +25,4 @@ private:
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARASampleProjectDocumentController)
+};

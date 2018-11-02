@@ -10,7 +10,6 @@
 
 #pragma once
 
-#include "JuceHeader.h"
 #include "AudioView.h"
 
 /** Naive Editor class that visualize current ARA Document RegionSequences state */
