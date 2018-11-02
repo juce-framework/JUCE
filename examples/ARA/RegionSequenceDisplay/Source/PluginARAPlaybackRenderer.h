@@ -16,7 +16,7 @@
 class ARASampleProjectPlaybackRenderer : public ARA::PlugIn::PlaybackRenderer
 {
 public:
-    ARASampleProjectPlaybackRenderer(ARADocumentController* documentController, TimeSliceThread& timeSliceThread, int bufferingSize);
+    ARASampleProjectPlaybackRenderer (ARADocumentController* documentController, TimeSliceThread& timeSliceThread, int bufferingSize);
 
     void renderPlaybackRegions (AudioBuffer<float>& buffer, ARA::ARASampleRate sampleRate, ARA::ARASamplePosition samplePosition, bool isPlayingBack);
 

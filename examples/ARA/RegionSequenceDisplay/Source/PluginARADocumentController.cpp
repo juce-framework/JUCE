@@ -12,28 +12,28 @@
 #include "PluginARAPlaybackRenderer.h"
 #include "PluginARAEditorView.h"
 
-ARASampleProjectDocumentController::ARASampleProjectDocumentController() noexcept
+ARASampleProjectDocumentController::ARASampleProjectDocumentController () noexcept
 : juce::ARADocumentController ()
 {
     araAudioSourceReadingThread.reset (new TimeSliceThread (String (JucePlugin_Name) + " ARA Sample Reading Thread"));
-    araAudioSourceReadingThread->startThread();
+    araAudioSourceReadingThread->startThread ();
 }
 
-ARA::PlugIn::EditorView* ARASampleProjectDocumentController::doCreateEditorView() noexcept
+ARA::PlugIn::EditorView* ARASampleProjectDocumentController::doCreateEditorView () noexcept
 {
     return new ARASampleProjectEditorView (this);
 }
 
-ARA::PlugIn::PlaybackRenderer* ARASampleProjectDocumentController::doCreatePlaybackRenderer() noexcept
+ARA::PlugIn::PlaybackRenderer* ARASampleProjectDocumentController::doCreatePlaybackRenderer () noexcept
 {
     return new ARASampleProjectPlaybackRenderer (this, *araAudioSourceReadingThread.get (), (1 << 16));
 }
 
 //==============================================================================
 // This creates new instances of the document controller..
-ARA::PlugIn::DocumentController* ARA::PlugIn::DocumentController::doCreateDocumentController() noexcept
+ARA::PlugIn::DocumentController* ARA::PlugIn::DocumentController::doCreateDocumentController () noexcept
 {
-    return new ARASampleProjectDocumentController();
+    return new ARASampleProjectDocumentController ();
 };
 
 
