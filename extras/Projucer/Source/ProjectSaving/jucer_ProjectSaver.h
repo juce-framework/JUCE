@@ -491,25 +491,24 @@ private:
             }
         }
 
+        if (extraAppConfigContent.isNotEmpty())
+            out << newLine << extraAppConfigContent.trimEnd() << newLine;
+
         {
-            int isStandaloneApplication = 1;
             auto& type = project.getProjectType();
 
-            if (type.isAudioPlugin() || type.isDynamicLibrary())
-                isStandaloneApplication = 0;
+            auto isStandaloneApplication = (! type.isAudioPlugin() && ! type.isDynamicLibrary());
 
-            out << "//==============================================================================" << newLine
+            out << newLine
+                << "//==============================================================================" << newLine
                 << "#ifndef    JUCE_STANDALONE_APPLICATION" << newLine
                 << " #if defined(JucePlugin_Name) && defined(JucePlugin_Build_Standalone)" << newLine
                 << "  #define  JUCE_STANDALONE_APPLICATION JucePlugin_Build_Standalone" << newLine
                 << " #else" << newLine
-                << "  #define  JUCE_STANDALONE_APPLICATION " << isStandaloneApplication << newLine
+                << "  #define  JUCE_STANDALONE_APPLICATION " << (isStandaloneApplication ? "1" : "0") << newLine
                 << " #endif" << newLine
                 << "#endif" << newLine;
         }
-
-        if (extraAppConfigContent.isNotEmpty())
-            out << newLine << extraAppConfigContent.trimEnd() << newLine;
     }
 
     void writeAppConfigFile (const OwnedArray<LibraryModule>& modules, const String& userContent)
