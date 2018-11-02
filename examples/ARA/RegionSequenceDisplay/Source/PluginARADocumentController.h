@@ -12,27 +12,17 @@
 
 #include "AudioView.h"
 
-class ARASampleProjectPlaybackRenderer: public ARA::PlugIn::PlaybackRenderer
-{
-    std::map<ARAAudioSource*, std::unique_ptr<BufferingAudioSource>> _audioSourceMap;
-    std::unique_ptr<TimeSliceThread> _audioReadingThread;
-protected:
-    virtual void didAddPlaybackRegion (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept override;
-
-public:
-    using PlaybackRenderer::PlaybackRenderer;
-
-    void renderPlaybackRegions (AudioBuffer<float>& buffer, ARA::ARASampleRate sampleRate, ARA::ARASamplePosition samplePosition, bool isPlayingBack);
-};
-
 class ARASampleProjectDocumentController : public juce::ARADocumentController
 {
 public:
-    ARASampleProjectDocumentController() noexcept : juce::ARADocumentController() {}
+    ARASampleProjectDocumentController() noexcept;
     ARA::PlugIn::EditorView* doCreateEditorView() noexcept override;
     ARA::PlugIn::PlaybackRenderer* doCreatePlaybackRenderer() noexcept override;
 
 private:
+    // Thread used by buffering audio sources to read samples from the host
+    std::unique_ptr<TimeSliceThread> araAudioSourceReadingThread;
+
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARASampleProjectDocumentController)
 };
