@@ -14,6 +14,7 @@
 #include "PluginProcessor.h"
 #include "AudioView.h"
 #include "PluginARADocumentController.h"
+#include "PluginARAEditorView.h"
 
 //==============================================================================
 /**
@@ -35,7 +36,7 @@ private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     ArasampleProjectAudioProcessor& processor;
-    ARASampleProjectEditor* editor {nullptr};
+    ARASampleProjectEditorView* editor {nullptr};
 
     std::vector <AudioView*> dummyView;
     Viewport tracksViewport;

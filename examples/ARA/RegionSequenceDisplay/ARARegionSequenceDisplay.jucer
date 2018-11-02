@@ -9,6 +9,10 @@
               companyEmail="ara@celemony.com">
   <MAINGROUP id="aCHzDP" name="ARARegionSequenceDisplay">
     <GROUP id="{38BAE513-FAF5-0AD7-A598-7A51E0C50CB5}" name="Source">
+      <FILE id="bYz81y" name="PluginARAEditorView.cpp" compile="1" resource="0"
+            file="Source/PluginARAEditorView.cpp"/>
+      <FILE id="StCm6F" name="PluginARAEditorView.h" compile="0" resource="0"
+            file="Source/PluginARAEditorView.h"/>
       <FILE id="euv9Vd" name="PluginARAPlaybackRenderer.h" compile="0" resource="0"
             file="Source/PluginARAPlaybackRenderer.h"/>
       <FILE id="bBCffP" name="PluginARAPlaybackRenderer.cpp" compile="1"

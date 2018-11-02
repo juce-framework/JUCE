@@ -25,18 +25,3 @@ private:
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARASampleProjectDocumentController)
-};
-
-/** Naive Editor class that visualize current ARA Document RegionSequences state */
-class ARASampleProjectEditor : public juce::Component, public ARA::PlugIn::EditorView
-{
-public:
-    ARASampleProjectEditor (ARA::PlugIn::DocumentController*) noexcept;
-    void doNotifySelection (const ARA::PlugIn::ViewSelection*) noexcept override;
-    void resized () override;
-
-private:
-    double maxRegionSequenceLength;
-    juce::CriticalSection selectionLock;
-    juce::OwnedArray <AudioView> regionSequenceViews;
-};
