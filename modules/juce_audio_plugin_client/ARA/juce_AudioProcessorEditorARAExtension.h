@@ -14,7 +14,7 @@ public:
 
     ARA::PlugIn::EditorView* getARAEditorView() const noexcept;
 
-    bool isARAEditorView() const noexcept;
+    bool isARAEditorView() const noexcept { return getARAEditorView() != nullptr; }
 
 private:
     AudioProcessorARAExtension* araProcessorExtension;

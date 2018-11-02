@@ -8,8 +8,3 @@ ARA::PlugIn::EditorView* AudioProcessorEditorARAExtension::getARAEditorView() co
 {
     return araProcessorExtension ? araProcessorExtension->getARAEditorView() : nullptr;
 }
-
-bool AudioProcessorEditorARAExtension::isARAEditorView() const noexcept
-{
-    return getARAEditorView() != nullptr;
-}
