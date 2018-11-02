@@ -76,22 +76,8 @@ namespace Vst2
  
  #include "../ARA/juce_AudioProcessorARAExtension.h"
 
- #if JUCE_MSVC
-  #pragma warning (push)
-  #pragma warning (disable: 4310)
- #elif __clang__
-  #pragma clang diagnostic push
-  #pragma clang diagnostic ignored "-Wnon-virtual-dtor"
- #endif
-
  #include <ARA_API/ARAVST3.h>
 
- #if JUCE_MSVC
-  #pragma warning (pop)
- #elif __clang__
-  #pragma clang diagnostic pop
- #endif
- 
  #if ARA_SUPPORT_VERSION_1
   #error "Unsupported ARA version - ARA version 2 and onward are JUCE compatible"
  #endif
