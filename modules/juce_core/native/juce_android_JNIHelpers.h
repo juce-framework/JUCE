@@ -348,6 +348,32 @@ DECLARE_JNI_CLASS (AndroidBitmapFactory, "android/graphics/BitmapFactory");
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+  METHOD (constructor,        "<init>",             "()V") \
+  METHOD (containsKey,        "containsKey",        "(Ljava/lang/String;)Z") \
+  METHOD (get,                "get",                "(Ljava/lang/String;)Ljava/lang/Object;") \
+  METHOD (getBoolean,         "getBoolean",         "(Ljava/lang/String;)Z") \
+  METHOD (getBundle,          "getBundle",          "(Ljava/lang/String;)Landroid/os/Bundle;") \
+  METHOD (getCharSequence,    "getCharSequence",    "(Ljava/lang/String;)Ljava/lang/CharSequence;") \
+  METHOD (getInt,             "getInt",             "(Ljava/lang/String;)I") \
+  METHOD (getLong,            "getLong",            "(Ljava/lang/String;)J") \
+  METHOD (getLongArray,       "getLongArray",       "(Ljava/lang/String;)[J") \
+  METHOD (getParcelable,      "getParcelable",      "(Ljava/lang/String;)Landroid/os/Parcelable;") \
+  METHOD (getString,          "getString",          "(Ljava/lang/String;)Ljava/lang/String;") \
+  METHOD (getStringArrayList, "getStringArrayList", "(Ljava/lang/String;)Ljava/util/ArrayList;") \
+  METHOD (keySet,             "keySet",             "()Ljava/util/Set;") \
+  METHOD (putBoolean,         "putBoolean",         "(Ljava/lang/String;Z)V") \
+  METHOD (putBundle,          "putBundle",          "(Ljava/lang/String;Landroid/os/Bundle;)V") \
+  METHOD (putFloat,           "putFloat",           "(Ljava/lang/String;F)V") \
+  METHOD (putInt,             "putInt",             "(Ljava/lang/String;I)V") \
+  METHOD (putLong,            "putLong",            "(Ljava/lang/String;J)V") \
+  METHOD (putLongArray,       "putLongArray",       "(Ljava/lang/String;[J)V") \
+  METHOD (putString,          "putString",          "(Ljava/lang/String;Ljava/lang/String;)V") \
+  METHOD (putStringArrayList, "putStringArrayList", "(Ljava/lang/String;Ljava/util/ArrayList;)V")
+
+DECLARE_JNI_CLASS (AndroidBundle, "android/os/Bundle");
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
   STATICMETHOD (dumpReferenceTables, "dumpReferenceTables", "()V")
 
   DECLARE_JNI_CLASS (AndroidDebug, "android/os/Debug");
@@ -528,31 +554,6 @@ DECLARE_JNI_CLASS (JavaArrayList, "java/util/ArrayList");
   METHOD (booleanValue, "booleanValue", "()Z")
 
 DECLARE_JNI_CLASS (JavaBoolean, "java/lang/Boolean");
-#undef JNI_CLASS_MEMBERS
-
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
-  METHOD (constructor,        "<init>",             "()V") \
-  METHOD (containsKey,        "containsKey",        "(Ljava/lang/String;)Z") \
-  METHOD (get,                "get",                "(Ljava/lang/String;)Ljava/lang/Object;") \
-  METHOD (getBoolean,         "getBoolean",         "(Ljava/lang/String;)Z") \
-  METHOD (getBundle,          "getBundle",          "(Ljava/lang/String;)Landroid/os/Bundle;") \
-  METHOD (getCharSequence,    "getCharSequence",    "(Ljava/lang/String;)Ljava/lang/CharSequence;") \
-  METHOD (getInt,             "getInt",             "(Ljava/lang/String;)I") \
-  METHOD (getLong,            "getLong",            "(Ljava/lang/String;)J") \
-  METHOD (getLongArray,       "getLongArray",       "(Ljava/lang/String;)[J") \
-  METHOD (getParcelable,      "getParcelable",      "(Ljava/lang/String;)Landroid/os/Parcelable;") \
-  METHOD (getString,          "getString",          "(Ljava/lang/String;)Ljava/lang/String;") \
-  METHOD (getStringArrayList, "getStringArrayList", "(Ljava/lang/String;)Ljava/util/ArrayList;") \
-  METHOD (keySet,             "keySet",             "()Ljava/util/Set;") \
-  METHOD (putBoolean,         "putBoolean",         "(Ljava/lang/String;Z)V") \
-  METHOD (putBundle,          "putBundle",          "(Ljava/lang/String;Landroid/os/Bundle;)V") \
-  METHOD (putInt,             "putInt",             "(Ljava/lang/String;I)V") \
-  METHOD (putLong,            "putLong",            "(Ljava/lang/String;J)V") \
-  METHOD (putLongArray,       "putLongArray",       "(Ljava/lang/String;[J)V") \
-  METHOD (putString,          "putString",          "(Ljava/lang/String;Ljava/lang/String;)V") \
-  METHOD (putStringArrayList, "putStringArrayList", "(Ljava/lang/String;Ljava/util/ArrayList;)V")
-
-DECLARE_JNI_CLASS (JavaBundle, "android/os/Bundle");
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
