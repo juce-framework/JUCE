@@ -25,6 +25,7 @@
 		4DB15177DDC357F4503F88CF = {isa = PBXBuildFile; fileRef = B457EE687507BF1DEEA7581F; };
 		D92C7BF86C9CCF6B4D14F809 = {isa = PBXBuildFile; fileRef = 7DA35787B5F6F7440D667CC8; };
 		443244451A0F2064D4767337 = {isa = PBXBuildFile; fileRef = 2A6983F82B13F9E8B10299AE; };
+		D66DD874C95EE030D0375ABF = {isa = PBXBuildFile; fileRef = F7708634AA695684613890C9; };
 		A1EF3307CFB5940608618CC9 = {isa = PBXBuildFile; fileRef = 7A79D151C4DB2C5E1371A49C; };
 		8BD65ECEF479A070A9D094D6 = {isa = PBXBuildFile; fileRef = 203540DB55D16D0E9F959106; };
 		BD8601B0C542AAAEBAF3DCE8 = {isa = PBXBuildFile; fileRef = 65F343ADF0790E3083BDA69D; };
@@ -55,6 +56,7 @@
 		04AABCD3491318FB32E844B4 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = MainHostWindow.cpp; path = ../../Source/UI/MainHostWindow.cpp; sourceTree = "SOURCE_ROOT"; };
 		04DB9A49969ECC740CC25665 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GraphEditorPanel.h; path = ../../Source/UI/GraphEditorPanel.h; sourceTree = "SOURCE_ROOT"; };
 		05863BDFC582C9552A86DF49 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = FilterGraph.cpp; path = ../../Source/Filters/FilterGraph.cpp; sourceTree = "SOURCE_ROOT"; };
+		1A1AE62587C654AB7B958147 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MIDIRouter.h; path = ../../Source/MIDIRouter.h; sourceTree = "SOURCE_ROOT"; };
 		1DADAD8E34AAF4AFF1C69DC4 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = BinaryData.h; path = ../../JuceLibraryCode/BinaryData.h; sourceTree = "SOURCE_ROOT"; };
 		203540DB55D16D0E9F959106 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxml.cpp; path = ../../Source/ForteEmulator/ForteSDK/tinyxml/tinyxml.cpp; sourceTree = "SOURCE_ROOT"; };
 		29D746FC68F69751796671A2 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_video.mm"; path = "../../JuceLibraryCode/include_juce_video.mm"; sourceTree = "SOURCE_ROOT"; };
@@ -125,6 +127,7 @@
 		E50B5942799878FB2DD28CB7 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxmlparser.cpp; path = ../../Source/ForteEmulator/ForteSDK/tinyxml/tinyxmlparser.cpp; sourceTree = "SOURCE_ROOT"; };
 		E68018DE199135B7F738FB17 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudioKit.framework; path = System/Library/Frameworks/CoreAudioKit.framework; sourceTree = SDKROOT; };
 		F299BECFB2AEA6105F014848 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_gui_extra"; path = "../../../../modules/juce_gui_extra"; sourceTree = "SOURCE_ROOT"; };
+		F7708634AA695684613890C9 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = MIDIRouter.cpp; path = ../../Source/MIDIRouter.cpp; sourceTree = "SOURCE_ROOT"; };
 		F78307CABC2AC94A3ACA52BC = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Performer.cpp; path = ../../Source/Performer.cpp; sourceTree = "SOURCE_ROOT"; };
 		F9AC862E9A3583B6C1488EE0 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_audio_formats"; path = "../../../../modules/juce_audio_formats"; sourceTree = "SOURCE_ROOT"; };
 		FA21631C5536EA3DF55C7FA6 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_cryptography"; path = "../../../../modules/juce_cryptography"; sourceTree = "SOURCE_ROOT"; };
@@ -158,6 +161,8 @@
 					A5DFC13E4F09134B0D226A3E,
 					97918AB43AD460AFA8FA2FFE, ); name = UI; sourceTree = "<group>"; };
 		B225B7F2CAABD28A41E7C339 = {isa = PBXGroup; children = (
+					F7708634AA695684613890C9,
+					1A1AE62587C654AB7B958147,
 					FF7989BDFBA7E45C761F9106,
 					AA37F82D57C9BB4BE78FCCB9,
 					DE7B77306553B1204071B39A,
@@ -384,6 +389,7 @@
 					D92C7BF86C9CCF6B4D14F809,
 					443244451A0F2064D4767337, ); runOnlyForDeploymentPostprocessing = 0; };
 		E8E94B3C187DA578BFCBDA98 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (
+					D66DD874C95EE030D0375ABF,
 					A1EF3307CFB5940608618CC9,
 					8BD65ECEF479A070A9D094D6,
 					BD8601B0C542AAAEBAF3DCE8,

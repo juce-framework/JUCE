@@ -150,6 +150,7 @@
     <Lib/>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\MIDIRouter.cpp"/>
     <ClCompile Include="..\..\Source\ForteEmulator\ForteSDK\tinyxml\tinystr.cpp"/>
     <ClCompile Include="..\..\Source\ForteEmulator\ForteSDK\tinyxml\tinyxml.cpp"/>
     <ClCompile Include="..\..\Source\ForteEmulator\ForteSDK\tinyxml\tinyxmlerror.cpp"/>
@@ -1826,6 +1827,7 @@
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_video.cpp"/>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\MIDIRouter.h"/>
     <ClInclude Include="..\..\Source\ForteEmulator\ForteSDK\tinyxml\tinystr.h"/>
     <ClInclude Include="..\..\Source\ForteEmulator\ForteSDK\tinyxml\tinyxml.h"/>
     <ClInclude Include="..\..\Source\ForteEmulator\ForteSDK\ForteTypes.h"/>

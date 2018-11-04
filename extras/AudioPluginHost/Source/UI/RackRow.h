@@ -21,7 +21,16 @@
 
 //[Headers]     -- You can add your own extra header files here --
 #include "../../JuceLibraryCode/JuceHeader.h"
+
+class Parameter
+{
+public:
+    Parameter(Component *component, int offset) : m_component(component), m_offset(offset) {}
+    Component *m_component;
+    int m_offset;
+};
 class Device;
+class Zone;
 //[/Headers]
 
 
@@ -35,6 +44,7 @@ class Device;
                                                                     //[/Comments]
 */
 class RackRow  : public Component,
+                 public TextEditor::Listener,
                  public Button::Listener,
                  public Slider::Listener,
                  public ComboBox::Listener
@@ -48,6 +58,9 @@ public:
     //[UserMethods]     -- You can add your own custom methods in this section.
     void UpdateKeyboard();
     void Setup(Device &device);
+    void Assign(Zone *zone);
+    int ID() { return m_id; }
+    void textEditorTextChanged(TextEditor&) override;
     //[/UserMethods]
 
     void paint (Graphics& g) override;
@@ -59,14 +72,14 @@ public:
     void mouseDrag (const MouseEvent& e) override;
     void mouseUp (const MouseEvent& e) override;
 
-    // Binary resources:
-    static const char* truePianos_png;
-    static const int truePianos_pngSize;
 
 
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.
     MidiKeyboardState *m_keyboardState;
+    //std::vector<Parameter> m_parameters;
+    Zone *m_current;
+    int m_id;
     //[/UserVariables]
 
     //==============================================================================
@@ -83,7 +96,7 @@ private:
     std::unique_ptr<ImageButton> m_deviceSettings;
     std::unique_ptr<MidiKeyboardComponent> m_keyboard;
     std::unique_ptr<ToggleButton> m_doubleOctave;
-    std::unique_ptr<ToggleButton> m_arperggiator;
+    std::unique_ptr<ToggleButton> m_arpeggiator;
 
 
     //==============================================================================

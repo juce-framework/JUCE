@@ -1,9 +1,9 @@
-Menu's - Load/Save of classes
-Link all GUI up properly
 Create plugins to reflect rack
 Bring in router (changed to new classes)
-Add octave mode
 Change midi in/outs from RtMidi to JUCE plugins
+Add octave mode
 Read in banks from files
 Query programs from plugin
+Change songs
+Menu's - Load/Save of classes
 Setlist manager

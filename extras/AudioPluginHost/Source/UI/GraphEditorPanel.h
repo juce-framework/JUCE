@@ -29,6 +29,7 @@
 #include "../Filters/FilterGraph.h"
 
 class MainHostWindow;
+class Performer;
 
 //==============================================================================
 /**
@@ -62,9 +63,6 @@ public:
     FilterGraph& graph;
 
 private:
-    struct FilterComponent;
-    struct ConnectorComponent;
-    struct PinComponent;
 
     std::unique_ptr<PopupMenu> menu;
 
@@ -131,6 +129,8 @@ public:
     BurgerMenuComponent burgerMenu;
 
 private:
+    Performer * m_performer;
+
     //==============================================================================
     AudioDeviceManager& deviceManager;
     KnownPluginList& pluginList;

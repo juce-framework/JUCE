@@ -388,6 +388,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\MIDIRouter.cpp">
+      <Filter>AudioPluginHost\Source</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\ForteEmulator\ForteSDK\tinyxml\tinystr.cpp">
       <Filter>AudioPluginHost\Source\ForteEmulator\ForteSDK\tinyxml</Filter>
     </ClCompile>
@@ -2238,6 +2241,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\MIDIRouter.h">
+      <Filter>AudioPluginHost\Source</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\ForteEmulator\ForteSDK\tinyxml\tinystr.h">
       <Filter>AudioPluginHost\Source\ForteEmulator\ForteSDK\tinyxml</Filter>
     </ClInclude>

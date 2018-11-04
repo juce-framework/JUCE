@@ -81,6 +81,8 @@
   </EXPORTFORMATS>
   <MAINGROUP id="YdWL7hi7p" name="AudioPluginHost">
     <GROUP id="{CFED5B3D-D1D8-0F3F-4D67-B2A810D057EF}" name="Source">
+      <FILE id="cGw6tk" name="MIDIRouter.cpp" compile="1" resource="0" file="Source/MIDIRouter.cpp"/>
+      <FILE id="QZfmHE" name="MIDIRouter.h" compile="0" resource="0" file="Source/MIDIRouter.h"/>
       <GROUP id="{F273BBDC-080B-3D0E-E7A7-72C6B840830E}" name="ForteEmulator">
         <GROUP id="{FF89E7B6-F0E5-18FE-A181-6290786638A4}" name="ForteSDK">
           <GROUP id="{8C2741D1-654D-29D4-9D86-B2F5C4C5903B}" name="tinyxml">

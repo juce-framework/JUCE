@@ -441,7 +441,7 @@ void GraphDocumentComponent::init()
     m_transposeColumn->setColour(TextEditor::backgroundColourId, Colour(0x00000000));
     m_transposeColumn->setBounds(632, 0, 80, 24);
 
-    auto m_performer = new Performer();
+    m_performer = new Performer();
 
     m_rackUIViewport.reset(new Viewport());
     m_rackUI.reset(new Component());
@@ -456,6 +456,8 @@ void GraphDocumentComponent::init()
         m_rackDevice.push_back(std::make_unique<RackRow>());
         auto newRackRow = (RackRow*)m_rackDevice.back().get();
         newRackRow->Setup(m_performer->m_current.Rack[i]);
+        PluginDescription pluginDesc();
+        graph->addPlugin(pluginDesc);
         deviceWidth = newRackRow->getWidth() + 2;
         deviceHeight = newRackRow->getHeight();
         m_rackUI->addAndMakeVisible(newRackRow);
@@ -484,7 +486,43 @@ void GraphDocumentComponent::init()
     m_rackUIViewport->setScrollBarsShown(true, false);
     m_rackUIViewport->setBounds(0, 30, deviceWidth, m_tabs->getBounds().getHeight() - 30);
     m_rackUIViewport->setViewedComponent(m_rackUI.get());
-    
+
+    auto &zones = m_performer->m_current.Performances[2].Zones;
+
+    for (auto d = 0U; d < m_rackDevice.size(); d++)
+    {
+        auto rackDevice = ((RackRow*)m_rackDevice[d].get());
+        bool found = false;
+        for (auto i = 0U; i < zones.size(); ++i)
+        {
+            if (rackDevice->ID() == zones[i].DeviceID)
+            {
+                found = true;
+            }
+        }
+        if (!found)
+        {
+            Zone mutedZone;
+            memset(&mutedZone, 0, sizeof(Zone));
+            mutedZone.DeviceID = rackDevice->ID();
+            mutedZone.Mute = true;
+            zones.push_back(mutedZone);
+        }
+    }
+
+    for (auto i = 0U; i < zones.size(); ++i)
+    {
+        for (auto d = 0U; d < m_rackDevice.size(); d++)
+        {
+            auto rackDevice = ((RackRow*)m_rackDevice[d].get());
+            if (rackDevice->ID() == zones[i].DeviceID)
+            {
+                rackDevice->Assign(&(zones[i]));
+                break ;
+            }
+        }
+    }
+
     keyState.addListener (&graphPlayer.getMidiMessageCollector());
 
     keyboardComp.reset (new MidiKeyboardComponent (keyState, MidiKeyboardComponent::horizontalKeyboard));
