@@ -210,13 +210,12 @@ public:
     {
         double gainReduction = 1.0;
         bool hasGRMeter = false;
-        for (int i = 0; i < metersParamIDs.size(); ++i)
+        for (int id : metersParamIDs)
         {
             // sum gain reduction meters only
-            auto category = getPluginInstance()->getParameterCategory(i);
-            if (category == AudioProcessorParameter::Category::compressorLimiterGainReductionMeter || category == AudioProcessorParameter::Category::expanderGateGainReductionMeter)
+            if (((getPluginInstance()->getParameterCategory(id) & 0xffff0000) >> 16) == 2)
             {
-                gainReduction *= getPluginInstance()->getParameter(metersParamIDs[i]);
+                gainReduction *= getPluginInstance()->getParameter(id);
                 hasGRMeter = true;
             }
         }
