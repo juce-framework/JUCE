@@ -73,6 +73,10 @@
 //==============================================================================
 // juce_audio_devices flags:
 
+#ifndef    JUCE_USE_WINRT_MIDI
+ //#define JUCE_USE_WINRT_MIDI 0
+#endif
+
 #ifndef    JUCE_ASIO
  //#define JUCE_ASIO 0
 #endif
@@ -107,10 +111,6 @@
 
 #ifndef    JUCE_USE_ANDROID_OPENSLES
  //#define JUCE_USE_ANDROID_OPENSLES 0
-#endif
-
-#ifndef    JUCE_USE_WINRT_MIDI
- //#define JUCE_USE_WINRT_MIDI 0
 #endif
 
 #ifndef    JUCE_DISABLE_AUDIO_MIXING_WITH_OTHER_APPS
