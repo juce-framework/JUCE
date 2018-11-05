@@ -68,8 +68,9 @@ public:
     {
         auto bounds = getLocalBounds();
 
-        browseButton.setBounds (bounds.removeFromRight (50).reduced (5, 0));
-        text.setBounds (bounds);
+        text.setBounds (bounds.removeFromLeft (jmax (400, bounds.getWidth() - 55)));
+        bounds.removeFromLeft (5);
+        browseButton.setBounds (bounds);
     }
 
     void paintOverChildren (Graphics& g) override
@@ -77,7 +78,7 @@ public:
         if (highlightForDragAndDrop)
         {
             g.setColour (findColour (defaultHighlightColourId).withAlpha (0.5f));
-            g.fillRect (text.getBounds().withTrimmedRight (50));
+            g.fillRect (getLookAndFeel().getPropertyComponentContentPosition (text));
         }
     }
 
@@ -136,7 +137,10 @@ private:
 
     void browse()
     {
-        auto currentFile = root.getChildFile (text.getText());
+        File currentFile = {};
+
+        if (text.getText().isNotEmpty())
+            currentFile = root.getChildFile (text.getText());
 
         if (isDirectory)
         {
