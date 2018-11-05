@@ -1091,7 +1091,9 @@ namespace AAXClasses
                 }
             }
             else
+            {
                 isSuspended = true;
+            }
 
             if (isSuspended)
             {
