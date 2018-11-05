@@ -381,6 +381,9 @@ protected:
             globalIdentifier = global.getPropertyID();
             os = targetOS;
 
+            if (wrappedValue.get() == var())
+                wrappedValue.resetToDefault();
+
             globalValue.addListener (this);
             valueChanged (globalValue);
         }
