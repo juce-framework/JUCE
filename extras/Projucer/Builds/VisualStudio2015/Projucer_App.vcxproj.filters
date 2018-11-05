@@ -2325,6 +2325,9 @@
     <ClInclude Include="..\..\Source\Utility\UI\PropertyComponents\jucer_FilePathPropertyComponent.h">
       <Filter>Projucer\Utility\UI\PropertyComponents</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\UI\PropertyComponents\jucer_LabelPropertyComponent.h">
+      <Filter>Projucer\Utility\UI\PropertyComponents</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Utility\UI\PropertyComponents\jucer_PropertyComponentsWithEnablement.h">
       <Filter>Projucer\Utility\UI\PropertyComponents</Filter>
     </ClInclude>

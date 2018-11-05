@@ -26,51 +26,63 @@
 
 #pragma once
 
+#include "../../Utility/UI/PropertyComponents/jucer_LabelPropertyComponent.h"
 
 //==============================================================================
 class GlobalPathsWindowComponent    : public Component,
-                                      private Timer
+                                      private Timer,
+                                      private Value::Listener
 {
 public:
     GlobalPathsWindowComponent()
     {
-        addLabelsAndSetProperties();
-
-        addAndMakeVisible (info);
-        info.setInfoToDisplay ("Use this dropdown to set the global paths for different OSes. "
-                               "\nN.B. These paths are stored locally and will only be used when "
-                               "saving a project on this machine. Other machines will have their own "
-                               "locally stored paths.");
-
-        addAndMakeVisible (osSelector);
-        osSelector.addItem ("OSX", 1);
-        osSelector.addItem ("Windows", 2);
-        osSelector.addItem ("Linux", 3);
-
-        osSelector.onChange = [this]
+        addChildComponent (rescanJUCEPathButton);
+        rescanJUCEPathButton.onClick = [this]
         {
-            addLabelsAndSetProperties();
-            updateValues();
-            updateFilePathPropertyComponents();
+            ProjucerApplication::getApp().rescanJUCEPathModules();
+            lastJUCEModulePath = getAppSettings().getStoredPath (Ids::defaultJuceModulePath, TargetOS::getThisOS()).get();
         };
 
-        auto os = TargetOS::getThisOS();
-
-        if      (os == TargetOS::osx)     osSelector.setSelectedId (1);
-        else if (os == TargetOS::windows) osSelector.setSelectedId (2);
-        else if (os == TargetOS::linux)   osSelector.setSelectedId (3);
-
-        addChildComponent (rescanJUCEPathButton);
-        rescanJUCEPathButton.onClick = [] { ProjucerApplication::getApp().rescanJUCEPathModules(); };
-
         addChildComponent (rescanUserPathButton);
-        rescanUserPathButton.onClick = [] { ProjucerApplication::getApp().rescanUserPathModules(); };
+        rescanUserPathButton.onClick = [this]
+        {
+            ProjucerApplication::getApp().rescanUserPathModules();
+            lastUserModulePath = getAppSettings().getStoredPath (Ids::defaultUserModulePath, TargetOS::getThisOS()).get();
+        };
 
         addAndMakeVisible (resetToDefaultsButton);
         resetToDefaultsButton.onClick = [this] { resetCurrentOSPathsToDefaults(); };
 
-        updateValues();
-        updateFilePathPropertyComponents();
+        addAndMakeVisible (propertyViewport);
+        propertyViewport.setViewedComponent (&propertyGroup, false);
+
+        auto os = TargetOS::getThisOS();
+
+        if      (os == TargetOS::osx)     selectedOSValue = "osx";
+        else if (os == TargetOS::windows) selectedOSValue = "windows";
+        else if (os == TargetOS::linux)   selectedOSValue = "linux";
+
+        selectedOSValue.addListener (this);
+
+        buildProps();
+
+        lastJUCEModulePath = getAppSettings().getStoredPath (Ids::defaultJuceModulePath, TargetOS::getThisOS()).get();
+        lastUserModulePath = getAppSettings().getStoredPath (Ids::defaultUserModulePath, TargetOS::getThisOS()).get();
+    }
+
+    ~GlobalPathsWindowComponent()
+    {
+        auto juceValue = getAppSettings().getStoredPath (Ids::defaultJuceModulePath, TargetOS::getThisOS());
+        auto userValue = getAppSettings().getStoredPath (Ids::defaultUserModulePath, TargetOS::getThisOS());
+
+        auto jucePathNeedsScanning = (! juceValue.isUsingDefault() && juceValue.get() != lastJUCEModulePath);
+        auto userPathNeedsScanning = (! userValue.isUsingDefault() && userValue.get() != lastUserModulePath);
+
+        if (jucePathNeedsScanning)
+            ProjucerApplication::getApp().rescanJUCEPathModules();
+
+        if (userPathNeedsScanning)
+            ProjucerApplication::getApp().rescanUserPathModules();
     }
 
     void paint (Graphics& g) override
@@ -88,59 +100,31 @@ public:
     {
         auto b = getLocalBounds().reduced (10);
 
-        auto topSlice = b.removeFromTop (25);
-        osSelector.setSize (200, 25);
-        osSelector.setCentrePosition (topSlice.getCentre());
+        auto buttonBounds = b.removeFromBottom (50);
 
-        info.setBounds (osSelector.getBounds().withWidth (osSelector.getHeight()).translated ((osSelector.getWidth() + 5), 0).reduced (2));
+        rescanJUCEPathButton.setBounds (buttonBounds.removeFromLeft (150).reduced (5, 10));
+        rescanUserPathButton.setBounds (buttonBounds.removeFromLeft (150).reduced (5, 10));
 
-        int labelIndex = 0;
-        bool isFirst = true;
-        bool showRescanButtons = (rescanJUCEPathButton.isVisible() && rescanUserPathButton.isVisible());
+        resetToDefaultsButton.setBounds (buttonBounds.removeFromRight (150).reduced (5, 10));
 
-        for (auto* pathComp : pathPropertyComponents)
-        {
-            if (pathComp == nullptr)
-            {
-                b.removeFromTop (15);
-                pathPropertyLabels.getUnchecked (labelIndex++)->setBounds (b.removeFromTop (20));
-                b.removeFromTop (20);
-            }
-            else
-            {
-                if (isFirst)
-                    b.removeFromTop (20);
-
-                auto compBounds = b.removeFromTop (pathComp->getPreferredHeight());
-
-                if (showRescanButtons)
-                {
-                    auto propName = pathComp->getName();
-
-                    if (propName == "JUCE Modules")
-                        rescanJUCEPathButton.setBounds (compBounds.removeFromRight (75).reduced (5, 0));
-                    else if (propName == "User Modules")
-                        rescanUserPathButton.setBounds (compBounds.removeFromRight (75).reduced (5, 0));
-                }
-
-
-                pathComp->setBounds (compBounds);
-                b.removeFromTop (5);
-            }
-
-            isFirst = false;
-        }
-
-        resetToDefaultsButton.setBounds (b.removeFromBottom (35).reduced (150, 0));
+        propertyGroup.updateSize (0, 0, getWidth() - 20 - propertyViewport.getScrollBarThickness());
+        propertyViewport.setBounds (b);
     }
 
     void highlightJUCEPath()
     {
-        if (! isTimerRunning() && isSelectedOSThisOS())
-        {
-            if (auto* jucePathComp = pathPropertyComponents.getFirst())
-                boundsToHighlight = jucePathComp->getBounds();
+        if (isTimerRunning() || ! isSelectedOSThisOS())
+            return;
 
+        PropertyComponent* jucePathPropertyComponent = nullptr;
+
+        for (auto* prop : propertyGroup.properties)
+            if (prop->getName() == "Path to JUCE")
+                jucePathPropertyComponent = prop;
+
+        if (jucePathPropertyComponent != nullptr)
+        {
+            boundsToHighlight = getLocalArea (&propertyGroup, jucePathPropertyComponent->getBounds());
             flashAlpha = 0.0f;
             hasFlashed = false;
 
@@ -149,22 +133,6 @@ public:
     }
 
 private:
-    ValueWithDefault jucePathValue, juceModulePathValue, userModulePathValue, vst3PathValue, rtasPathValue, aaxPathValue,
-                     androidSDKPathValue, androidNDKPathValue, clionExePathValue, androidStudioExePathValue;
-
-    OwnedArray<Label> pathPropertyLabels;
-    OwnedArray<PropertyComponent> pathPropertyComponents;
-    TextButton rescanJUCEPathButton  { "Re-scan" },
-               rescanUserPathButton  { "Re-scan" },
-               resetToDefaultsButton { "Reset to Defaults" };
-
-    ComboBox osSelector;
-    InfoButton info;
-
-    Rectangle<int> boundsToHighlight;
-    float flashAlpha = 0.0f;
-    bool hasFlashed = false;
-
     //==============================================================================
     void timerCallback() override
     {
@@ -185,61 +153,79 @@ private:
         repaint();
     }
 
+    void valueChanged (Value&) override
+    {
+        buildProps();
+        resized();
+    }
+
     //==============================================================================
     bool isSelectedOSThisOS()    { return TargetOS::getThisOS() == getSelectedOS(); }
 
     TargetOS::OS getSelectedOS() const
     {
-        auto selectedOS = TargetOS::unknown;
+        auto val = selectedOSValue.getValue();
 
-        switch (osSelector.getSelectedId())
-        {
-            case 1: selectedOS = TargetOS::osx;     break;
-            case 2: selectedOS = TargetOS::windows; break;
-            case 3: selectedOS = TargetOS::linux;   break;
-            default:                                break;
-        }
+        if      (val == "osx")      return TargetOS::osx;
+        else if (val == "windows")  return TargetOS::windows;
+        else if (val == "linux")    return TargetOS::linux;
 
-        return selectedOS;
+        jassertfalse;
+        return TargetOS::unknown;
     }
 
-    void updateFilePathPropertyComponents()
+    //==============================================================================
+    void buildProps()
     {
-        pathPropertyComponents.clear();
+        updateValues();
 
+        PropertyListBuilder builder;
         auto isThisOS = isSelectedOSThisOS();
 
-        addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (jucePathValue, "Path to JUCE", true, isThisOS)));
+        builder.add (new ChoicePropertyComponent (selectedOSValue, "OS", { "OSX", "Windows", "Linux" }, { "osx", "windows", "linux" }),
+                     "Use this dropdown to set the global paths for different OSes. "
+                     "\nN.B. These paths are stored locally and will only be used when "
+                     "saving a project on this machine. Other machines will have their own "
+                     "locally stored paths.");
 
-        pathPropertyComponents.add (nullptr);
+        builder.add (new LabelPropertyComponent ("JUCE"), {});
 
-        addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (juceModulePathValue, "JUCE Modules", true, isThisOS)));
-        addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (userModulePathValue, "User Modules", true, isThisOS, {}, {}, true)));
+        builder.add (new FilePathPropertyComponent (jucePathValue, "Path to JUCE", true, isThisOS),
+                     "This should be the path to the top-level directory of your JUCE folder. "
+                     "This path will be used when searching for the JUCE examples and DemoRunner application.");
 
-        pathPropertyComponents.add (nullptr);
+        builder.add (new FilePathPropertyComponent (juceModulePathValue, "JUCE Modules", true, isThisOS),
+                     String ("This should be the path to the folder containing the JUCE modules that you wish to use, typically the \"modules\" directory of your JUCE folder.")
+                     + (isThisOS ? " Use the button below to re-scan a new path." : ""));
+        builder.add (new FilePathPropertyComponent (userModulePathValue, "User Modules", true, isThisOS, {}, {}, true),
+                     String ("A semicolon-separated list of user module paths. These paths will be used to display any non-JUCE modules that are available.")
+                     + (isThisOS ? " Use the button below to re-scan new paths." : ""));
 
-        addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (vst3PathValue, "Custom VST3 SDK", true, isThisOS)));
+        builder.add (new LabelPropertyComponent ("SDKs"), {});
 
-        if (getSelectedOS() == TargetOS::linux)
+        builder.add (new FilePathPropertyComponent (vstPathValue,  "VST (Legacy) SDK", true, isThisOS),
+                     "If you are building a legacy VST plug-in then this path should point to a VST2 SDK. "
+                     "The VST2 SDK can be obtained from the vstsdk3610_11_06_2018_build_37 (or older) VST3 SDK or JUCE version 5.3.2. "
+                     "You also need a VST2 license from Steinberg to distribute VST2 plug-ins.");
+        builder.add (new FilePathPropertyComponent (vst3PathValue, "VST3 SDK", true, isThisOS),
+                     "This path can be set to use a custom VST3 SDK instead of the one which is embedded in JUCE.");
+
+        if (getSelectedOS() != TargetOS::linux)
         {
-            addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (Value(), "AAX SDK", true, isThisOS)));
-            pathPropertyComponents.getLast()->setEnabled (false);
-
-            addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (Value(), "RTAS SDK", true, isThisOS)));
-            pathPropertyComponents.getLast()->setEnabled (false);
-        }
-        else
-        {
-            addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (aaxPathValue,  "AAX SDK", true, isThisOS)));
-            addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (rtasPathValue, "RTAS SDK", true, isThisOS)));
+            builder.add (new FilePathPropertyComponent (aaxPathValue, "AAX SDK", true, isThisOS),
+                         "If you are building AAX plug-ins, this should be the path to the AAX SDK folder.");
+            builder.add (new FilePathPropertyComponent (rtasPathValue, "RTAS SDK", true, isThisOS),
+                         "If you are building RTAS plug-ins, this should be the path to the RTAS SDK folder.");
         }
 
-        addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (androidSDKPathValue, "Android SDK", true, isThisOS)));
-        addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (androidNDKPathValue, "Android NDK", true, isThisOS)));
+        builder.add (new FilePathPropertyComponent (androidSDKPathValue, "Android SDK", true, isThisOS),
+                     "This path will be used when writing the local.properties file of an Android project and should point to the Android SDK folder.");
+        builder.add (new FilePathPropertyComponent (androidNDKPathValue, "Android NDK", true, isThisOS),
+                     "This path will be used when writing the local.properties file of an Android project and should point to the Android NDK folder.");
 
         if (isThisOS)
         {
-            pathPropertyComponents.add (nullptr);
+            builder.add (new LabelPropertyComponent ("Other"), {});
 
            #if JUCE_MAC
             String exeLabel ("app");
@@ -249,8 +235,10 @@ private:
             String exeLabel ("startup script");
            #endif
 
-            addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (clionExePathValue,         "CLion " + exeLabel,          false, isThisOS)));
-            addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (androidStudioExePathValue, "Android Studio " + exeLabel, false, isThisOS)));
+            builder.add (new FilePathPropertyComponent (clionExePathValue, "CLion " + exeLabel,          false, isThisOS),
+                         "This path will be used for the \"Save Project and Open in IDE...\" option of the CLion exporter.");
+            builder.add (new FilePathPropertyComponent (androidStudioExePathValue, "Android Studio " + exeLabel, false, isThisOS),
+                         "This path will be used for the \"Save Project and Open in IDE...\" option of the Android Studio exporter.");
 
             rescanJUCEPathButton.setVisible (true);
             rescanUserPathButton.setVisible (true);
@@ -261,7 +249,7 @@ private:
             rescanUserPathButton.setVisible (false);
         }
 
-        resized();
+        propertyGroup.setProperties (builder);
     }
 
     void updateValues()
@@ -272,6 +260,7 @@ private:
         jucePathValue             = settings.getStoredPath (Ids::jucePath, os);
         juceModulePathValue       = settings.getStoredPath (Ids::defaultJuceModulePath, os);
         userModulePathValue       = settings.getStoredPath (Ids::defaultUserModulePath, os);
+        vstPathValue              = settings.getStoredPath (Ids::vstLegacyPath, os);
         vst3PathValue             = settings.getStoredPath (Ids::vst3Path, os);
         rtasPathValue             = settings.getStoredPath (Ids::rtasPath, os);
         aaxPathValue              = settings.getStoredPath (Ids::aaxPath, os);
@@ -281,27 +270,12 @@ private:
         androidStudioExePathValue = settings.getStoredPath (Ids::androidStudioExePath, os);
     }
 
-    void addLabelsAndSetProperties()
-    {
-        pathPropertyLabels.clear();
-
-        pathPropertyLabels.add (new Label ("modulesLabel", "Modules"));
-        pathPropertyLabels.add (new Label ("sdksLabel", "SDKs"));
-        pathPropertyLabels.add (new Label ("otherLabel", "Other"));
-
-        for (auto* l : pathPropertyLabels)
-        {
-            addAndMakeVisible (l);
-            l->setFont (Font (18.0f, Font::FontStyleFlags::bold));
-            l->setJustificationType (Justification::centredLeft);
-        }
-    }
-
     void resetCurrentOSPathsToDefaults()
     {
         jucePathValue            .resetToDefault();
         juceModulePathValue      .resetToDefault();
         userModulePathValue      .resetToDefault();
+        vstPathValue             .resetToDefault();
         vst3PathValue            .resetToDefault();
         rtasPathValue            .resetToDefault();
         aaxPathValue             .resetToDefault();
@@ -312,6 +286,27 @@ private:
 
         repaint();
     }
+
+    //==============================================================================
+    Value selectedOSValue;
+
+    ValueWithDefault jucePathValue, juceModulePathValue, userModulePathValue,
+                     vst3PathValue, vstPathValue, rtasPathValue, aaxPathValue,
+                     androidSDKPathValue, androidNDKPathValue,
+                     clionExePathValue, androidStudioExePathValue;
+
+    Viewport propertyViewport;
+    PropertyGroupComponent propertyGroup  { "Global Paths", { getIcons().openFolder, Colours::transparentBlack } };
+
+    TextButton rescanJUCEPathButton  { "Re-scan JUCE Modules" },
+               rescanUserPathButton  { "Re-scan User Modules" },
+               resetToDefaultsButton { "Reset to Defaults" };
+
+    Rectangle<int> boundsToHighlight;
+    float flashAlpha = 0.0f;
+    bool hasFlashed = false;
+
+    var lastJUCEModulePath, lastUserModulePath;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GlobalPathsWindowComponent)

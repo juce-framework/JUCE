@@ -298,6 +298,13 @@ void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
                    "The location of the folder in which the " + name + " project will be created. "
                    "This path can be absolute, but it's much more sensible to make it relative to the jucer project directory.");
 
+        if (shouldBuildTargetType (ProjectType::Target::VSTPlugIn) && project.shouldBuildVST())
+        {
+            props.add (new FilePathPropertyComponent (vstLegacyPathValueWrapper.wrappedValue, "VST (Legacy) SDK Folder", true, getTargetOSForExporter() == TargetOS::getThisOS()),
+                       "If you're building a VST plug-in, you can use this field to override the global VST (Legacy) SDK path with a project-specific path. "
+                       "This can be an absolute path, or a path relative to the Projucer project file.");
+        }
+
         if (shouldBuildTargetType (ProjectType::Target::VST3PlugIn) && project.shouldBuildVST3())
         {
             props.add (new FilePathPropertyComponent (vst3PathValueWrapper.wrappedValue, "VST3 SDK Folder", true, getTargetOSForExporter() == TargetOS::getThisOS()),
@@ -385,7 +392,10 @@ void ProjectExporter::addVSTPathsIfPluginOrHost()
 {
     if (shouldBuildTargetType (ProjectType::Target::VST3PlugIn) || project.isVST3PluginHost()
          || shouldBuildTargetType (ProjectType::Target::VSTPlugIn) || project.isVSTPluginHost())
+    {
+        addLegacyVSTFolderToPathIfSpecified();
         addVST3FolderToPath();
+    }
 }
 
 void ProjectExporter::addCommonAudioPluginSettings()
@@ -395,6 +405,14 @@ void ProjectExporter::addCommonAudioPluginSettings()
 
     // Note: RTAS paths are platform-dependent, impl -> addPlatformSpecificSettingsForProjectType
  }
+
+void ProjectExporter::addLegacyVSTFolderToPathIfSpecified()
+{
+    auto vstFolder = getVSTLegacyPathString();
+
+    if (vstFolder.isNotEmpty())
+        addToExtraSearchPaths (RelativePath (vstFolder, RelativePath::projectFolder), 0);
+}
 
 RelativePath ProjectExporter::getInternalVST3SDKPath()
 {

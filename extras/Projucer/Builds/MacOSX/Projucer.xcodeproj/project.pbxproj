@@ -818,6 +818,13 @@
 			path = "../../Source/Wizards/jucer_ProjectWizard_Animated.h";
 			sourceTree = "SOURCE_ROOT";
 		};
+		3D36F0CEB84B27BD02FC461A = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			name = "jucer_LabelPropertyComponent.h";
+			path = "../../Source/Utility/UI/PropertyComponents/jucer_LabelPropertyComponent.h";
+			sourceTree = "SOURCE_ROOT";
+		};
 		3D6FD9C0065BF16568EC0AB7 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.h;
@@ -3022,6 +3029,7 @@
 			children = (
 				9EB33734D0DBD0370AB1247B,
 				E367FC2BDAF5EBA48D767FBB,
+				3D36F0CEB84B27BD02FC461A,
 				59F8A47C0020D62C8836A1E7,
 			);
 			name = PropertyComponents;

@@ -1297,7 +1297,7 @@ void ProjucerApplication::showPathsWindow (bool highlightJUCEPath)
     else
         new FloatingToolWindow ("Global Paths", "pathsWindowPos",
                                 new GlobalPathsWindowComponent(), pathsWindow, false,
-                                600, 650, 600, 650, 600, 650);
+                                600, 700, 600, 700, 600, 700);
 
     if (highlightJUCEPath)
         if (auto* pathsComp = dynamic_cast<GlobalPathsWindowComponent*> (pathsWindow->getChildComponent (0)))

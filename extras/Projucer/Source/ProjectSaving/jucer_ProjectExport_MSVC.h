@@ -100,9 +100,17 @@ public:
     //==============================================================================
     void initialiseDependencyPathValues() override
     {
-        vst3PathValueWrapper.init ({ settings, Ids::vst3Folder, nullptr }, getAppSettings().getStoredPath (Ids::vst3Path, TargetOS::windows), TargetOS::windows);
-        aaxPathValueWrapper .init ({ settings, Ids::aaxFolder, nullptr },  getAppSettings().getStoredPath (Ids::aaxPath,  TargetOS::windows), TargetOS::windows);
-        rtasPathValueWrapper.init ({ settings, Ids::rtasFolder, nullptr }, getAppSettings().getStoredPath (Ids::rtasPath, TargetOS::windows), TargetOS::windows);
+        vstLegacyPathValueWrapper.init ({ settings, Ids::vstLegacyFolder, nullptr },
+                                        getAppSettings().getStoredPath (Ids::vstLegacyPath, TargetOS::windows), TargetOS::windows);
+
+        vst3PathValueWrapper.init ({ settings, Ids::vst3Folder, nullptr },
+                                   getAppSettings().getStoredPath (Ids::vst3Path, TargetOS::windows), TargetOS::windows);
+
+        aaxPathValueWrapper.init ({ settings, Ids::aaxFolder, nullptr },
+                                  getAppSettings().getStoredPath (Ids::aaxPath,  TargetOS::windows), TargetOS::windows);
+
+        rtasPathValueWrapper.init ({ settings, Ids::rtasFolder, nullptr },
+                                   getAppSettings().getStoredPath (Ids::rtasPath, TargetOS::windows), TargetOS::windows);
     }
 
     //==============================================================================
@@ -322,7 +330,7 @@ public:
                            "The folder in which the compiled Unity plugin binary and associated C# GUI script should be placed.");
 
             if (project.shouldBuildVST())
-                props.add (new TextPropertyComponentWithEnablement (vstBinaryLocation, pluginBinaryCopyStepValue, "VST (legacy) Binary Location",
+                props.add (new TextPropertyComponentWithEnablement (vstBinaryLocation, pluginBinaryCopyStepValue, "VST (Legacy) Binary Location",
                                                                     1024, false),
                            "The folder in which the compiled lehacy VST binary should be placed.");
 

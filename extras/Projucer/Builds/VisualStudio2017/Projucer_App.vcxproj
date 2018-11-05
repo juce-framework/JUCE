@@ -1621,6 +1621,7 @@
     <ClInclude Include="..\..\Source\Utility\PIPs\jucer_PIPGenerator.h"/>
     <ClInclude Include="..\..\Source\Utility\UI\PropertyComponents\jucer_ColourPropertyComponent.h"/>
     <ClInclude Include="..\..\Source\Utility\UI\PropertyComponents\jucer_FilePathPropertyComponent.h"/>
+    <ClInclude Include="..\..\Source\Utility\UI\PropertyComponents\jucer_LabelPropertyComponent.h"/>
     <ClInclude Include="..\..\Source\Utility\UI\PropertyComponents\jucer_PropertyComponentsWithEnablement.h"/>
     <ClInclude Include="..\..\Source\Utility\UI\jucer_IconButton.h"/>
     <ClInclude Include="..\..\Source\Utility\UI\jucer_Icons.h"/>

@@ -153,6 +153,7 @@ public:
 
     bool shouldUseGNUExtensions() const                   { return gnuExtensionsValue.get(); }
 
+    String getVSTLegacyPathString() const                 { return vstLegacyPathValueWrapper.wrappedValue.get(); }
     String getVST3PathString() const                      { return vst3PathValueWrapper.wrappedValue.get(); }
     String getAAXPathString() const                       { return aaxPathValueWrapper.wrappedValue.get(); }
     String getRTASPathString() const                      { return rtasPathValueWrapper.wrappedValue.get(); }
@@ -400,7 +401,7 @@ protected:
         TargetOS::OS os;
     };
 
-    ValueWithDefaultWrapper vst3PathValueWrapper, rtasPathValueWrapper, aaxPathValueWrapper;
+    ValueWithDefaultWrapper vstLegacyPathValueWrapper, vst3PathValueWrapper, rtasPathValueWrapper, aaxPathValueWrapper;
 
     ValueWithDefault targetLocationValue, extraCompilerFlagsValue, extraLinkerFlagsValue, externalLibrariesValue,
                      userNotesValue, gnuExtensionsValue, bigIconValue, smallIconValue, extraPPDefsValue;
@@ -476,6 +477,7 @@ private:
     void createIconProperties (PropertyListBuilder&);
     void addVSTPathsIfPluginOrHost();
     void addCommonAudioPluginSettings();
+    void addLegacyVSTFolderToPathIfSpecified();
     RelativePath getInternalVST3SDKPath();
     void addVST3FolderToPath();
     void addAAXFoldersToPath();

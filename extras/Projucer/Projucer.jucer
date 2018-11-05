@@ -657,6 +657,8 @@
                 resource="0" file="Source/Utility/UI/PropertyComponents/jucer_ColourPropertyComponent.h"/>
           <FILE id="sfUzaf" name="jucer_FilePathPropertyComponent.h" compile="0"
                 resource="0" file="Source/Utility/UI/PropertyComponents/jucer_FilePathPropertyComponent.h"/>
+          <FILE id="c5PWPd" name="jucer_LabelPropertyComponent.h" compile="0"
+                resource="0" file="Source/Utility/UI/PropertyComponents/jucer_LabelPropertyComponent.h"/>
           <FILE id="DkLOIQ" name="jucer_PropertyComponentsWithEnablement.h" compile="0"
                 resource="0" file="Source/Utility/UI/PropertyComponents/jucer_PropertyComponentsWithEnablement.h"/>
         </GROUP>
