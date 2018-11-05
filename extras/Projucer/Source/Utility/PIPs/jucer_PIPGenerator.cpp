@@ -138,12 +138,10 @@ Result PIPGenerator::createJucerFile()
     if (result != Result::ok())
         return result;
 
-    addModules   (root);
-    addExporters (root);
-    createFiles  (root);
-
-    if (! metadata[Ids::moduleFlags].toString().isEmpty())
-        setModuleFlags (root);
+    addModules     (root);
+    addExporters   (root);
+    createFiles    (root);
+    setModuleFlags (root);
 
     auto outputFile = outputDirectory.getChildFile (metadata[Ids::name].toString() + ".jucer");
 
