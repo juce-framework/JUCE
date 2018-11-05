@@ -625,6 +625,25 @@ Version 5.1.0
 
 Change
 ------
+The JUCE_COMPILER_SUPPORTS_LAMBDAS preprocessor macro has been removed.
+
+Possible Issues
+---------------
+If your project is using JUCE_COMPILER_SUPPORTS_LAMBDAS in your source code
+then it will likely evaluate to "false" and you could end up unnecessarily
+using code paths which avoid lambda functions.
+
+Workaround
+----------
+Remove the usage of JUCE_COMPILER_SUPPORTS_LAMBDAS from your code.
+
+Rationale
+---------
+Lambda functions are now available on all platforms that JUCE supports.
+
+
+Change
+------
 The option to set the C++ language standard is now located in the project
 settings instead of the build configuration settings.
 
