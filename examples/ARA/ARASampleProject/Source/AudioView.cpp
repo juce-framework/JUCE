@@ -1,5 +1,5 @@
 #include "AudioView.h"
-#include "juce_audio_plugin_client/ARA/juce_ARARegionSequence.h"
+#include "PluginARARegionSequence.h"
 
 void AudioView::paint (Graphics& g)
 {
@@ -30,7 +30,7 @@ AudioView::AudioView (ARA::PlugIn::RegionSequence& sequence)
 {
     name = String (sequence.getName());
     order = String (sequence.getOrderIndex());
-    audioThumb.setReader ((dynamic_cast<ARARegionSequence&> (sequence)).newReader(), 1);
+    audioThumb.setReader ((dynamic_cast<ARASampleProjectRegionSequence&> (sequence)).newReader(), 1);
     startInSecs = audioThumb.getTotalLength();
     for (auto region : sequence.getPlaybackRegions())
     {

@@ -11,6 +11,7 @@
 #include "PluginARADocumentController.h"
 #include "PluginARAPlaybackRenderer.h"
 #include "PluginARAEditorView.h"
+#include "PluginARARegionSequence.h"
 
 ARASampleProjectDocumentController::ARASampleProjectDocumentController() noexcept
 : juce::ARADocumentController()
@@ -27,6 +28,21 @@ ARA::PlugIn::EditorView* ARASampleProjectDocumentController::doCreateEditorView(
 ARA::PlugIn::PlaybackRenderer* ARASampleProjectDocumentController::doCreatePlaybackRenderer() noexcept
 {
     return new ARASampleProjectPlaybackRenderer (this, *araAudioSourceReadingThread.get(), (1 << 16));
+}
+
+ARA::PlugIn::RegionSequence* ARASampleProjectDocumentController::doCreateRegionSequence (ARA::PlugIn::Document* document, ARA::ARARegionSequenceHostRef hostRef) noexcept
+{
+    return new ARASampleProjectRegionSequence (document, hostRef);
+}
+
+void ARASampleProjectDocumentController::willUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion, ARA::PlugIn::PropertiesPtr<ARA::ARAPlaybackRegionProperties> newProperties) noexcept
+{
+    ARASampleProjectRegionSequence::willUpdatePlaybackRegionProperties (playbackRegion, newProperties);
+}
+
+void ARASampleProjectDocumentController::didUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept
+{
+    ARASampleProjectRegionSequence::didUpdatePlaybackRegionProperties (playbackRegion);
 }
 
 //==============================================================================

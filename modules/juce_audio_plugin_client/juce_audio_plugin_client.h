@@ -118,7 +118,6 @@
 #if JucePlugin_Enable_ARA
  #include "ARA/juce_ARAAudioSource.h"
  #include "ARA/juce_ARADocumentController.h"
- #include "ARA/juce_ARARegionSequence.h"
  #include "ARA/juce_AudioProcessorARAExtension.h"
  #include "ARA/juce_AudioProcessorEditorARAExtension.h"
 #endif
