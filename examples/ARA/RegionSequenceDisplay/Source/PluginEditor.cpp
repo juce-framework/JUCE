@@ -20,7 +20,6 @@ ArasampleProjectAudioProcessorEditor::ArasampleProjectAudioProcessorEditor (Aras
 #if JucePlugin_Enable_ARA
      , AudioProcessorEditorARAExtension(&p)
 #endif
-     , processor (p)
 {
     tracksViewport.setScrollBarsShown (true, true);
     if (auto e = getARAEditorView())
