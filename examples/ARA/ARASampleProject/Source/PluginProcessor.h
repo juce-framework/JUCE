@@ -15,15 +15,15 @@
 //==============================================================================
 /**
 */
-class ArasampleProjectAudioProcessor  : public AudioProcessor
+class ARASampleProjectAudioProcessor  : public AudioProcessor
 #if JucePlugin_Enable_ARA
      , public AudioProcessorARAExtension
 #endif
 {
 public:
     //==============================================================================
-    ArasampleProjectAudioProcessor();
-    ~ArasampleProjectAudioProcessor();
+    ARASampleProjectAudioProcessor();
+    ~ARASampleProjectAudioProcessor();
 
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
@@ -60,5 +60,5 @@ public:
 
 private:
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ArasampleProjectAudioProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARASampleProjectAudioProcessor)
 };
