@@ -166,6 +166,10 @@
  #endif
 
  #if JUCE_USE_ANDROID_OBOE
+  #if JUCE_USE_ANDROID_OPENSLES
+   #error "Oboe cannot be enabled at the same time as openSL! Please disable JUCE_USE_ANDROID_OPENSLES"
+  #endif
+
   #include <oboe/Oboe.h>
  #endif
 
