@@ -4,6 +4,10 @@ JUCE breaking changes
 Develop
 =======
 
+
+Version 5.4.0
+=============
+
 Change
 ------
 The use of WinRT MIDI functions has been disabled by default for any version

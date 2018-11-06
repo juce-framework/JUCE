@@ -1,8 +1,19 @@
-
 == Major JUCE features and updates ==
 
 This file just lists the more notable headline features. For more detailed info
 about minor changes and bugfixes, please see the git log!
+
+Version 5.4.0
+  - macOS Mojave and iOS 12 support
+  - Windows hiDPI support
+  - Unity native plug-in support
+  - Microsoft BLE MIDI support
+  - Plug-in parameter groups
+  - Support for production-ready Android OBOE
+  - Video playback support on Android and iOS
+  - AudioProcessorValueTreeState improvements
+  - Support for Android Studio 3.2
+  - Various bug-fixes, improvements and documentation updates
 
 Version 5.3.2
   - Removed the OSX 10.5 and 10.6 deployment target options from the Projucer and enabled more C++11 features across all platforms
@@ -95,7 +106,6 @@ Version 5.2.0
   - Added support for multi-touch drag and drop
   - Improved the performance of 3D rendering when multiple OpenGL contexts are used at the same time
   - Tweaked the rate at which EdgeTable grows its internal storage, to improve performance rendering large and complex paths
-
 
 Version 5.1.2
   - Fixed multiple plugin-resizing bugs
@@ -334,4 +344,3 @@ Version 3.2.0
     and valueTreeChildOrderChanged() methods to include more info about
     exactly what changed
   - Over 400 minor changes, bug-fixes, documentation improvements, etc.
-
