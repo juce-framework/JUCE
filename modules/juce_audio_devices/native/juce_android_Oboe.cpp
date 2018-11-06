@@ -672,12 +672,12 @@ private:
                 ignoreUnused (deviceId, numChannels, sampleRate, bufferSize);
                 ignoreUnused (streamFormat, bitDepth);
 
-                jassert (numChannels = nativeStream->getChannelCount());
-                jassert (sampleRate == nativeStream->getSampleRate());
+                jassert (numChannels == nativeStream->getChannelCount());
+                jassert (sampleRate == 0 || sampleRate == nativeStream->getSampleRate());
                 jassert (format == nativeStream->getFormat());
 
                 if (nativeStream->usesAAudio())
-                    jassert (bufferSize == nativeStream->getBufferSizeInFrames());
+                    jassert (bufferSize == 0 || bufferSize == nativeStream->getBufferSizeInFrames());
             }
         }
 
