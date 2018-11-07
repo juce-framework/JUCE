@@ -173,7 +173,7 @@ infinite tail time.
 
 Workaround
 ----------
-Re-write your code to not use the result of getTailLengthSeconds directly to
+Rewrite your code to not use the result of getTailLengthSeconds directly to
 allocate a buffer.
 
 Rationale
