@@ -84,7 +84,6 @@ namespace juce
 {
  #include "littlefoot/juce_LittleFootRunner.h"
  #include "littlefoot/juce_LittleFootCompiler.h"
- #include "littlefoot/juce_LittleFootRemoteHeap.h"
 }
 
 #endif
