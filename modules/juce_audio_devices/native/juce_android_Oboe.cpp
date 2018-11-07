@@ -278,7 +278,7 @@ public:
         // by default. We need to be more conservative on other devices
         // as they may be low-latency, but still have a crappy CPU.
         return (isProAudioDevice() ? 1 : 6)
-                 * defaultBufferSizeIsMultipleOfNative * getNativeBufferSize();
+                 * getNativeBufferSize();
     }
 
     double getCurrentSampleRate() override
@@ -539,16 +539,17 @@ private:
                  + "\nChannelCount = " + String (channelCount)
                  + "\nFormat = " + getOboeString (format)
                  + "\nSampleRate = " + String (sampleRate)
-                 + "\nBufferSizeInFrames = " + String (bufferSize)
-                 + "\nFramesPerBurst = " + String (oboe::DefaultStreamValues::FramesPerBurst)
                  + "\nPerformanceMode = " + getOboeString (oboe::PerformanceMode::LowLatency));
 
             openResult = builder.openStream (&stream);
             JUCE_OBOE_LOG ("Building Oboe stream with result: " + getOboeString (openResult)
                  + "\nStream state = " + (stream != nullptr ? getOboeString (stream->getState()) : String ("?")));
 
-            if (stream != nullptr)
+            if (stream != nullptr && bufferSize != 0)
+            {
+                JUCE_OBOE_LOG ("Setting the bufferSizeInFrames to " + String (bufferSize));
                 stream->setBufferSizeInFrames (bufferSize);
+            }
 
             JUCE_OBOE_LOG (String ("Stream details:")
                  + "\nUses AAudio = " + (stream != nullptr ? String ((int) stream->usesAAudio()) : String ("?"))
@@ -675,9 +676,6 @@ private:
                 jassert (numChannels == nativeStream->getChannelCount());
                 jassert (sampleRate == 0 || sampleRate == nativeStream->getSampleRate());
                 jassert (format == nativeStream->getFormat());
-
-                if (nativeStream->usesAAudio())
-                    jassert (bufferSize == 0 || bufferSize == nativeStream->getBufferSizeInFrames());
             }
         }
 
@@ -987,14 +985,6 @@ private:
     std::unique_ptr<OboeSessionBase> session;
 
     bool running = false;
-
-    enum
-    {
-        // These at the moment correspond to OpenSL settings.
-        bufferSizeMultForLowLatency = 4,
-        bufferSizeMultForSlowAudio = 8,
-        defaultBufferSizeIsMultipleOfNative = 1
-    };
 
     //==============================================================================
     static String audioManagerGetProperty (const String& property)
