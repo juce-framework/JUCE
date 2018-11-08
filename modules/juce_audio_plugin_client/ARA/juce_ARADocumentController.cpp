@@ -105,4 +105,69 @@ void ARADocumentController::didUpdateAudioSourceProperties (ARA::PlugIn::AudioSo
     static_cast<ARAAudioSource*> (audioSource)->didUpdateProperties();
 }
 
+void ARADocumentController::willUpdateRegionSequenceProperties (ARA::PlugIn::RegionSequence* regionSequence, ARA::PlugIn::PropertiesPtr<ARA::ARARegionSequenceProperties> newProperties) noexcept
+{
+    for (ARARegionSequenceUpdateListener* updateListener : regionSequenceUpdateListeners)
+        updateListener->willUpdateRegionSequenceProperties (regionSequence, newProperties);
+}
+
+void ARADocumentController::didUpdateRegionSequenceProperties (ARA::PlugIn::RegionSequence* regionSequence) noexcept
+{
+    for (ARARegionSequenceUpdateListener* updateListener : regionSequenceUpdateListeners)
+        updateListener->didUpdateRegionSequenceProperties (regionSequence);
+}
+
+void ARADocumentController::willDestroyRegionSequence (ARA::PlugIn::RegionSequence* regionSequence) noexcept
+{
+    for (ARARegionSequenceUpdateListener* updateListener : regionSequenceUpdateListeners)
+        updateListener->willDestroyRegionSequence (regionSequence);
+}
+
+void ARADocumentController::willReorderRegionSequencesInMusicalContext (const ARA::PlugIn::MusicalContext* musicalContext) noexcept
+{
+    for (ARARegionSequenceUpdateListener* updateListener : regionSequenceUpdateListeners)
+        updateListener->willReorderRegionSequencesInMusicalContext (musicalContext);
+}
+
+void ARADocumentController::didReorderRegionSequencesInMusicalContext (const ARA::PlugIn::MusicalContext* musicalContext) noexcept
+{
+    for (ARARegionSequenceUpdateListener* updateListener : regionSequenceUpdateListeners)
+        updateListener->didReorderRegionSequencesInMusicalContext (musicalContext);
+}
+
+void ARADocumentController::willReorderRegionSequences () noexcept
+{
+    for (ARARegionSequenceUpdateListener* updateListener : regionSequenceUpdateListeners)
+        updateListener->willReorderRegionSequences ();
+}
+
+void ARADocumentController::didReorderRegionSequences () noexcept
+{
+    for (ARARegionSequenceUpdateListener* updateListener : regionSequenceUpdateListeners)
+        updateListener->didReorderRegionSequences ();
+}
+
+void ARADocumentController::addRegionSequenceUpdateListener (ARARegionSequenceUpdateListener* updateListener)
+{
+    regionSequenceUpdateListeners.push_back (updateListener);
+}
+
+void ARADocumentController::removeRegionSequenceUpdateListener (ARARegionSequenceUpdateListener* updateListener)
+{
+    find_erase (regionSequenceUpdateListeners, updateListener);
+}
+
+ARARegionSequenceUpdateListener::ARARegionSequenceUpdateListener (ARA::PlugIn::DocumentController *documentController)
+: araDocumentController (static_cast<ARADocumentController*> (documentController))
+{
+    if (araDocumentController)
+        araDocumentController->addRegionSequenceUpdateListener (this);
+}
+
+ARARegionSequenceUpdateListener::~ARARegionSequenceUpdateListener ()
+{
+    if (araDocumentController)
+        araDocumentController->removeRegionSequenceUpdateListener (this);
+}
+
 } // namespace juce
