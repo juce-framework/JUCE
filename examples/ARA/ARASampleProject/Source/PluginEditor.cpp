@@ -21,6 +21,7 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
 #if JucePlugin_Enable_ARA
     , AudioProcessorEditorARAExtension (&p)
     , ARASampleProjectEditorView::SelectionListener (getARAEditorView ())
+    , ARARegionSequenceUpdateListener (isARAEditorView () ? getARAEditorView ()->getDocumentController () : nullptr)
 #endif
 {
     setBounds (0, 0, kWidth, kHeight);
@@ -84,6 +85,11 @@ void ARASampleProjectAudioProcessorEditor::onNewSelection (const ARA::PlugIn::Vi
             // reconstruct the region sequence view if the sequence order has changed
             regionSequenceViews.set (i, new RegionSequenceView (*regionSequence ), true);
         }
+        else if (regionSequencesWithPropertyChanges.count(regionSequence ) > 0)
+        {
+            // reconstruct the region sequence view if its properties have updated
+            regionSequenceViews.set (i, new RegionSequenceView (*regionSequence ), true);
+        }
 
         // flag the region as selected if it's a part of the current selection, 
         // or not selected if we have no selection
@@ -99,5 +105,13 @@ void ARASampleProjectAudioProcessorEditor::onNewSelection (const ARA::PlugIn::Vi
     // remove any views for region sequences no longer in the document
     regionSequenceViews.removeLast (regionSequenceViews.size () - (int) regionSequences.size ());
 
+    // Clear property change state and resize view
+    regionSequencesWithPropertyChanges.clear ();
     resized ();
+}
+
+void ARASampleProjectAudioProcessorEditor::didUpdateRegionSequenceProperties (ARA::PlugIn::RegionSequence* regionSequence) ARA_NOEXCEPT
+{
+    regionSequencesWithPropertyChanges.insert (regionSequence);
+    onNewSelection (getMostRecentSelection ());
 }
