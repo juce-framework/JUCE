@@ -680,7 +680,8 @@ private:
 
         auto projectName = Project::addUnityPluginPrefixIfNecessary (project.getProjectNameString());
 
-        unityScriptContents = unityScriptContents.replace ("%%plugin_name%%",        projectName)
+        unityScriptContents = unityScriptContents.replace ("%%plugin_class_name%%",  projectName.replace (" ", "_"))
+                                                 .replace ("%%plugin_name%%",        projectName)
                                                  .replace ("%%plugin_vendor%%",      project.getPluginManufacturerString())
                                                  .replace ("%%plugin_description%%", project.getPluginDescriptionString());
 
