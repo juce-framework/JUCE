@@ -31,8 +31,10 @@
             resource="0" file="Source/PluginARADocumentController.cpp"/>
       <FILE id="fmxPsc" name="PluginARADocumentController.h" compile="0"
             resource="0" file="Source/PluginARADocumentController.h"/>
-      <FILE id="bsc68x" name="AudioView.h" compile="0" resource="0" file="Source/AudioView.h"/>
-      <FILE id="EQ23gh" name="AudioView.cpp" compile="1" resource="0" file="Source/AudioView.cpp"/>
+      <FILE id="bsc68x" name="RegionSequenceView.h" compile="0" resource="0"
+            file="Source/RegionSequenceView.h"/>
+      <FILE id="EQ23gh" name="RegionSequenceView.cpp" compile="1" resource="0"
+            file="Source/RegionSequenceView.cpp"/>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>

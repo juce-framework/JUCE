@@ -3,13 +3,12 @@
 
 #include "JuceHeader.h"
 
-class AudioView
+class RegionSequenceView
 : public Component, public juce::ChangeListener
 {
 public:
-    AudioView();
-    ~AudioView();
-    AudioView (ARA::PlugIn::RegionSequence&);
+    ~RegionSequenceView();
+    RegionSequenceView (ARA::PlugIn::RegionSequence&);
 
     void paint (Graphics&) override;
     void changeListenerCallback (ChangeBroadcaster*) override;
@@ -33,5 +32,5 @@ private:
     juce::AudioThumbnailCache audioThumbCache;
     juce::AudioThumbnail audioThumb;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioView)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RegionSequenceView)
 };

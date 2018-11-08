@@ -13,7 +13,6 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginProcessor.h"
-#include "AudioView.h"
 #include "PluginARADocumentController.h"
 #include "PluginARAEditorView.h"
 

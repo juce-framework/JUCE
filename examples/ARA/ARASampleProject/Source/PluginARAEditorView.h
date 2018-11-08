@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "AudioView.h"
+#include "RegionSequenceView.h"
 
 /** Naive Editor class that visualize current ARA Document RegionSequences state */
 class ARASampleProjectEditorView : public juce::Component, public ARA::PlugIn::EditorView
@@ -23,5 +23,5 @@ public:
 private:
     double maxRegionSequenceLength;
     juce::CriticalSection selectionLock;
-    juce::OwnedArray <AudioView> regionSequenceViews;
+    juce::OwnedArray <RegionSequenceView> regionSequenceViews;
 };

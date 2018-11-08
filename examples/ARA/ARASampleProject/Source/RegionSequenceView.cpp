@@ -1,7 +1,7 @@
-#include "AudioView.h"
+#include "RegionSequenceView.h"
 #include "PluginARARegionSequence.h"
 
-void AudioView::paint (Graphics& g)
+void RegionSequenceView::paint (Graphics& g)
 {
     g.fillAll (trackColour);
     g.setColour (isSelected ? juce::Colours::yellow : juce::Colours::black);
@@ -16,21 +16,17 @@ void AudioView::paint (Graphics& g)
     g.drawText ("Track #" + order + ": " + name, 0, 0, getWidth(), getHeight(), juce::Justification::bottomLeft);
 }
 
-AudioView::AudioView() :
- isSelected (false)
-,startInSecs (0.0)
-,audioThumbCache (1)
-,audioThumb (128, audioFormatManger, audioThumbCache)
-,regionSequence (nullptr)
-{
-    trackColour = Colours::beige;
-}
 
-AudioView::AudioView (ARA::PlugIn::RegionSequence& sequence)
-: AudioView()
+RegionSequenceView::RegionSequenceView (ARA::PlugIn::RegionSequence& sequence)
+: isSelected (false)
+, startInSecs (0.0)
+, audioThumbCache (1)
+, audioThumb (128, audioFormatManger, audioThumbCache)
+, regionSequence (nullptr)
 {
     name = String (sequence.getName());
     order = String (sequence.getOrderIndex());
+    audioThumb.addChangeListener (this);
     audioThumb.setReader ((dynamic_cast<ARASampleProjectRegionSequence&> (sequence)).newReader(), 1);
     startInSecs = audioThumb.getTotalLength();
     
@@ -39,7 +35,6 @@ AudioView::AudioView (ARA::PlugIn::RegionSequence& sequence)
     {
         startInSecs = std::min (startInSecs, region->getStartInPlaybackTime());
     }
-    audioThumb.addChangeListener (this);
 
     if (const ARA::ARAColor* colour = sequence.getColor())
     {
@@ -47,28 +42,36 @@ AudioView::AudioView (ARA::PlugIn::RegionSequence& sequence)
     }
 }
 
-AudioView::~AudioView()
+RegionSequenceView::~RegionSequenceView()
 {
     audioThumb.clear();
     audioThumb.removeChangeListener (this);
 }
 
-void AudioView::changeListenerCallback (juce::ChangeBroadcaster* /*broadcaster*/)
+void RegionSequenceView::changeListenerCallback (juce::ChangeBroadcaster* /*broadcaster*/)
 {
     repaint();
 }
 
-double AudioView::getStartInSecs()
+double RegionSequenceView::getStartInSecs()
 {
     return startInSecs;
 }
 
-double AudioView::getLengthInSecs()
+double RegionSequenceView::getLengthInSecs()
 {
     return audioThumb.getTotalLength() - startInSecs;
 }
 
-void AudioView::setIsSelected (bool value)
+void RegionSequenceView::setIsSelected (bool value)
 {
+    bool needsRepaint = (value != isSelected);
     isSelected = value;
+    if (needsRepaint)
+        repaint ();
+}
+
+bool RegionSequenceView::getIsSelected () const
+{
+    return isSelected;
 }
