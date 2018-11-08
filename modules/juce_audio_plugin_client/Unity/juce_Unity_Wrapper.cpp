@@ -668,12 +668,13 @@ static void declareEffect (UnityAudioEffectDefinition& definition)
 
 UNITY_INTERFACE_EXPORT int UnityGetAudioEffectDefinitions (UnityAudioEffectDefinition*** definitionsPtr)
 {
+    if (juce::getWrapperMap().size() == 0)
+        juce::initialiseJuce_GUI();
+
     static bool hasInitialised = false;
 
     if (! hasInitialised)
     {
-        juce::initialiseJuce_GUI();
-
         juce::PluginHostType::jucePlugInClientCurrentWrapperType = juce::AudioProcessor::wrapperType_Unity;
         juce::juce_createUnityPeerFn = juce::createUnityPeer;
 
