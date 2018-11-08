@@ -13,15 +13,34 @@
 #include "RegionSequenceView.h"
 
 /** Naive Editor class that visualize current ARA Document RegionSequences state */
-class ARASampleProjectEditorView : public juce::Component, public ARA::PlugIn::EditorView
+class ARASampleProjectEditorView : public ARA::PlugIn::EditorView
 {
 public:
+
+    //==============================================================================
+    class SelectionListener
+    {
+        ARASampleProjectEditorView* araEditorView;
+    public:
+        SelectionListener (ARA::PlugIn::EditorView* editorView);
+        ~SelectionListener ();
+        const ARA::PlugIn::ViewSelection* getMostRecentSelection () const;
+
+        virtual void onNewSelection (const ARA::PlugIn::ViewSelection* currentSelection) = 0;
+    };
+
+    //==============================================================================
+
     ARASampleProjectEditorView (ARA::PlugIn::DocumentController*) noexcept;
     void doNotifySelection (const ARA::PlugIn::ViewSelection*) noexcept override;
-    void resized() override;
+
+    const ARA::PlugIn::ViewSelection* getMostRecentSelection () const;
+
+    void addSelectionListener (SelectionListener* l);
+    void removeSelectionListener (SelectionListener* l);
 
 private:
-    double maxRegionSequenceLength;
-    juce::CriticalSection selectionLock;
-    juce::OwnedArray <RegionSequenceView> regionSequenceViews;
+
+    ARA::PlugIn::ViewSelection mostRecentSelection;
+    std::vector<SelectionListener*> selectionChangeListeners;
 };

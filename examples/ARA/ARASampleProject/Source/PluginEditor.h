@@ -22,6 +22,7 @@
 class ARASampleProjectAudioProcessorEditor  : public AudioProcessorEditor
 #if JucePlugin_Enable_ARA
      , public AudioProcessorEditorARAExtension
+     , public ARASampleProjectEditorView::SelectionListener
 #endif
 {
 public:
@@ -32,12 +33,15 @@ public:
     void paint (Graphics&) override;
     void resized() override;
 
-private:
-    // This reference is provided as a quick way for your editor to
-    // access the processor object that created it.
-    ARASampleProjectEditorView* editor {nullptr};
+    void onNewSelection (const ARA::PlugIn::ViewSelection* currentSelection) override;
 
-    Viewport tracksViewport;
+    void didUpdateRegionSequenceProperties (ARA::PlugIn::RegionSequence* regionSequence) ARA_NOEXCEPT override;
+
+private:
+    double maxRegionSequenceLength;
+    juce::CriticalSection selectionLock;
+    juce::OwnedArray <RegionSequenceView> regionSequenceViews;
+
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARASampleProjectAudioProcessorEditor)
 };
