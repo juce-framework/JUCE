@@ -21,6 +21,7 @@ AudioView::AudioView() :
 ,startInSecs (0.0)
 ,audioThumbCache (1)
 ,audioThumb (128, audioFormatManger, audioThumbCache)
+,regionSequence (nullptr)
 {
     trackColour = Colours::beige;
 }
@@ -32,6 +33,8 @@ AudioView::AudioView (ARA::PlugIn::RegionSequence& sequence)
     order = String (sequence.getOrderIndex());
     audioThumb.setReader ((dynamic_cast<ARASampleProjectRegionSequence&> (sequence)).newReader(), 1);
     startInSecs = audioThumb.getTotalLength();
+    
+    regionSequence = &sequence;
     for (auto region : sequence.getPlaybackRegions())
     {
         startInSecs = std::min (startInSecs, region->getStartInPlaybackTime());

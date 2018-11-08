@@ -15,14 +15,19 @@ public:
     void changeListenerCallback (ChangeBroadcaster*) override;
 
     void setIsSelected (bool value);
+    bool getIsSelected () const;
     double getStartInSecs();
     double getLengthInSecs();
+
+    ARA::PlugIn::RegionSequence* getRegionSequence () const { return regionSequence; }
 
 private:
     String name, order;
     Colour trackColour;
     bool isSelected;
     double startInSecs;
+
+    ARA::PlugIn::RegionSequence* regionSequence;
 
     juce::AudioFormatManager audioFormatManger;
     juce::AudioThumbnailCache audioThumbCache;
