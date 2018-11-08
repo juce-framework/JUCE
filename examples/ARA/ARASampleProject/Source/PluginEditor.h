@@ -39,6 +39,11 @@ public:
     void didUpdateRegionSequenceProperties (ARA::PlugIn::RegionSequence* regionSequence) ARA_NOEXCEPT override;
 
 private:
+
+    // we'll be displaying all region sequences in the document in a scrollable view
+    Viewport regionSequenceViewPort;
+    Component regionSequenceListView;
+
     double maxRegionSequenceLength;
     juce::CriticalSection selectionLock;
     juce::OwnedArray <RegionSequenceView> regionSequenceViews;
