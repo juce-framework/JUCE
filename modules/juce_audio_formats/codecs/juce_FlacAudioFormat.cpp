@@ -248,7 +248,7 @@ public:
             }
             else
             {
-                if (startSampleInFile >= (int) lengthInSamples)
+                if (startSampleInFile >= lengthInSamples)
                 {
                     samplesInReservoir = 0;
                 }

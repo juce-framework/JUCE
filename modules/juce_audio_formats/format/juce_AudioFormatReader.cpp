@@ -279,7 +279,7 @@ int64 AudioFormatReader::searchForLevel (int64 startSample,
         if (numSamplesToSearch < 0)
             bufferStart -= numThisTime;
 
-        if (bufferStart >= (int) lengthInSamples)
+        if (bufferStart >= lengthInSamples)
             break;
 
         read (tempBuffer, 2, bufferStart, numThisTime, false);
