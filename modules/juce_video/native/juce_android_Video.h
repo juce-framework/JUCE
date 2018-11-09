@@ -31,13 +31,13 @@
  METHOD (setVolumeTo,          "setVolumeTo",          "(II)V") \
  METHOD (unregisterCallback,   "unregisterCallback",   "(Landroid/media/session/MediaController$Callback;)V")
 
-DECLARE_JNI_CLASS (AndroidMediaController, "android/media/session/MediaController");
+DECLARE_JNI_CLASS (AndroidMediaController, "android/media/session/MediaController")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  METHOD (constructor, "<init>", "(L" JUCE_ANDROID_ACTIVITY_CLASSPATH ";J)V") \
 
-DECLARE_JNI_CLASS (AndroidMediaControllerCallback, JUCE_ANDROID_ACTIVITY_CLASSPATH "$MediaControllerCallback");
+DECLARE_JNI_CLASS (AndroidMediaControllerCallback, JUCE_ANDROID_ACTIVITY_CLASSPATH "$MediaControllerCallback")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -45,7 +45,7 @@ DECLARE_JNI_CLASS (AndroidMediaControllerCallback, JUCE_ANDROID_ACTIVITY_CLASSPA
  METHOD (getCurrentVolume,   "getCurrentVolume",   "()I") \
  METHOD (getMaxVolume,       "getMaxVolume",       "()I")
 
-DECLARE_JNI_CLASS (AndroidMediaControllerPlaybackInfo, "android/media/session/MediaController$PlaybackInfo");
+DECLARE_JNI_CLASS (AndroidMediaControllerPlaybackInfo, "android/media/session/MediaController$PlaybackInfo")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -55,7 +55,7 @@ DECLARE_JNI_CLASS (AndroidMediaControllerPlaybackInfo, "android/media/session/Me
  METHOD (seekTo,          "seekTo",          "(J)V") \
  METHOD (stop,            "stop",            "()V")
 
-DECLARE_JNI_CLASS (AndroidMediaControllerTransportControls, "android/media/session/MediaController$TransportControls");
+DECLARE_JNI_CLASS (AndroidMediaControllerTransportControls, "android/media/session/MediaController$TransportControls")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -84,7 +84,7 @@ DECLARE_JNI_CLASS (AndroidMediaControllerTransportControls, "android/media/sessi
  METHOD (start,                        "start",                        "()V") \
  METHOD (stop,                         "stop",                         "()V")
 
-DECLARE_JNI_CLASS (AndroidMediaPlayer, "android/media/MediaPlayer");
+DECLARE_JNI_CLASS (AndroidMediaPlayer, "android/media/MediaPlayer")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -99,13 +99,13 @@ DECLARE_JNI_CLASS (AndroidMediaPlayer, "android/media/MediaPlayer");
  METHOD (setPlaybackState,       "setPlaybackState",       "(Landroid/media/session/PlaybackState;)V") \
  METHOD (setPlaybackToLocal,     "setPlaybackToLocal",     "(Landroid/media/AudioAttributes;)V")
 
-DECLARE_JNI_CLASS (AndroidMediaSession, "android/media/session/MediaSession");
+DECLARE_JNI_CLASS (AndroidMediaSession, "android/media/session/MediaSession")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  METHOD (constructor, "<init>", "(L" JUCE_ANDROID_ACTIVITY_CLASSPATH ";J)V") \
 
-DECLARE_JNI_CLASS (AndroidMediaSessionCallback, JUCE_ANDROID_ACTIVITY_CLASSPATH "$MediaSessionCallback");
+DECLARE_JNI_CLASS (AndroidMediaSessionCallback, JUCE_ANDROID_ACTIVITY_CLASSPATH "$MediaSessionCallback")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -113,14 +113,14 @@ DECLARE_JNI_CLASS (AndroidMediaSessionCallback, JUCE_ANDROID_ACTIVITY_CLASSPATH 
  METHOD (constructor, "<init>",  "()V") \
  METHOD (putLong,     "putLong", "(Ljava/lang/String;J)Landroid/media/MediaMetadata$Builder;")
 
-DECLARE_JNI_CLASS (AndroidMediaMetadataBuilder, "android/media/MediaMetadata$Builder");
+DECLARE_JNI_CLASS (AndroidMediaMetadataBuilder, "android/media/MediaMetadata$Builder")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  METHOD (getSpeed, "getSpeed", "()F") \
  METHOD (setSpeed, "setSpeed", "(F)Landroid/media/PlaybackParams;")
 
-DECLARE_JNI_CLASS (AndroidPlaybackParams, "android/media/PlaybackParams");
+DECLARE_JNI_CLASS (AndroidPlaybackParams, "android/media/PlaybackParams")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -130,7 +130,7 @@ DECLARE_JNI_CLASS (AndroidPlaybackParams, "android/media/PlaybackParams");
  METHOD (getPosition,      "getPosition",      "()J") \
  METHOD (getState,         "getState",         "()I")
 
-DECLARE_JNI_CLASS (AndroidPlaybackState, "android/media/session/PlaybackState");
+DECLARE_JNI_CLASS (AndroidPlaybackState, "android/media/session/PlaybackState")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -140,14 +140,14 @@ DECLARE_JNI_CLASS (AndroidPlaybackState, "android/media/session/PlaybackState");
  METHOD (setErrorMessage, "setErrorMessage", "(Ljava/lang/CharSequence;)Landroid/media/session/PlaybackState$Builder;") \
  METHOD (setState,        "setState",        "(IJF)Landroid/media/session/PlaybackState$Builder;")
 
-DECLARE_JNI_CLASS (AndroidPlaybackStateBuilder, "android/media/session/PlaybackState$Builder");
+DECLARE_JNI_CLASS (AndroidPlaybackStateBuilder, "android/media/session/PlaybackState$Builder")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  METHOD (constructor, "<init>",     "(L" JUCE_ANDROID_ACTIVITY_CLASSPATH ";Landroid/app/Activity;J)V") \
  METHOD (setEnabled,  "setEnabled", "(Z)V")
 
-DECLARE_JNI_CLASS (SystemVolumeObserver, JUCE_ANDROID_ACTIVITY_CLASSPATH "$SystemVolumeObserver");
+DECLARE_JNI_CLASS (SystemVolumeObserver, JUCE_ANDROID_ACTIVITY_CLASSPATH "$SystemVolumeObserver")
 #undef JNI_CLASS_MEMBERS
 
 #endif
@@ -575,9 +575,9 @@ private:
         class Controller
         {
         public:
-            Controller (MediaSession& ownerToUse, jobject nativeController)
+            Controller (MediaSession& ownerToUse, jobject nativeControllerToUse)
                 : owner (ownerToUse),
-                  nativeController (GlobalRef (nativeController)),
+                  nativeController (GlobalRef (nativeControllerToUse)),
                   controllerTransportControls (LocalRef<jobject> (getEnv()->CallObjectMethod (nativeController,
                                                                                               AndroidMediaController.getTransportControls))),
                   controllerCallback (LocalRef<jobject> (getEnv()->NewObject (AndroidMediaControllerCallback,
@@ -1302,7 +1302,7 @@ private:
 
             auto playPos = player.getPlayPosition();
             auto durationMs = player.getVideoDuration();
-            int playPosPercent = 100 * playPos / static_cast<double> (durationMs);
+            auto playPosPercent = (int) (100 * playPos / static_cast<double> (durationMs));
 
             // NB: assuming the playback will start roughly when there is 5% of content loaded...
             return ! bufferedRegions.containsRange (Range<int> (playPosPercent, jmin (101, playPosPercent + 5)));
@@ -1353,7 +1353,7 @@ private:
 
             auto playPos = player.getPlayPosition();
             auto durationMs = player.getVideoDuration();
-            int playPosPercent = 100 * playPos / static_cast<double> (durationMs);
+            auto playPosPercent = (int) (100 * playPos / static_cast<double> (durationMs));
 
             bufferedRegions.addRange (Range<int> (playPosPercent, progress + 1));
 
@@ -1675,7 +1675,7 @@ private:
         mediaSession.setDisplay (surfaceHolder);
     }
 
-    void videoSurfaceDestroyed (jobject surfaceHolder)
+    void videoSurfaceDestroyed (jobject /*surfaceHolder*/)
     {
         mediaSession.setDisplay (nullptr);
     }

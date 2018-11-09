@@ -41,6 +41,7 @@ namespace GraphicsHelpers
         return getEnv()->NewObject (AndroidPaint, AndroidPaint.constructor, constructorFlags);
     }
 
+    //
     const jobject createMatrix (JNIEnv* env, const AffineTransform& t)
     {
         jobject m = env->NewObject (AndroidMatrix, AndroidMatrix.constructor);

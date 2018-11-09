@@ -42,13 +42,13 @@ namespace juce
   METHOD (setSound,                "setSound",                "(Landroid/net/Uri;Landroid/media/AudioAttributes;)V") \
   METHOD (setVibrationPattern,     "setVibrationPattern",     "([J)V")
 
-DECLARE_JNI_CLASS (NotificationChannel, "android/app/NotificationChannel");
+DECLARE_JNI_CLASS (NotificationChannel, "android/app/NotificationChannel")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
   METHOD (constructor, "<init>", "(Ljava/lang/String;Ljava/lang/CharSequence;)V")
 
-DECLARE_JNI_CLASS (NotificationChannelGroup, "android/app/NotificationChannelGroup");
+DECLARE_JNI_CLASS (NotificationChannelGroup, "android/app/NotificationChannelGroup")
 #undef JNI_CLASS_MEMBERS
 #endif
 
@@ -56,7 +56,7 @@ DECLARE_JNI_CLASS (NotificationChannelGroup, "android/app/NotificationChannelGro
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
   FIELD (extras, "extras", "Landroid/os/Bundle;")
 
-DECLARE_JNI_CLASS (AndroidNotification, "android/app/Notification");
+DECLARE_JNI_CLASS (AndroidNotification, "android/app/Notification")
 #undef JNI_CLASS_MEMBERS
 #endif
 
@@ -67,7 +67,7 @@ DECLARE_JNI_CLASS (AndroidNotification, "android/app/Notification");
   METHOD (constructor,    "<init>",         "(ILjava/lang/CharSequence;Landroid/app/PendingIntent;)V") \
   METHOD (build,          "build",          "()Landroid/app/Notification$Action;")
 
-DECLARE_JNI_CLASS (NotificationActionBuilder, "android/app/Notification$Action$Builder");
+DECLARE_JNI_CLASS (NotificationActionBuilder, "android/app/Notification$Action$Builder")
 #undef JNI_CLASS_MEMBERS
 #endif
 
@@ -92,7 +92,7 @@ DECLARE_JNI_CLASS (NotificationActionBuilder, "android/app/Notification$Action$B
   METHOD (setVibrate,       "setVibrate",       "([J)Landroid/app/Notification$Builder;") \
   METHOD (setWhen,          "setWhen",          "(J)Landroid/app/Notification$Builder;")
 
-DECLARE_JNI_CLASS (NotificationBuilderBase, "android/app/Notification$Builder");
+DECLARE_JNI_CLASS (NotificationBuilderBase, "android/app/Notification$Builder")
 #undef JNI_CLASS_MEMBERS
 
 #if __ANDROID_API__ >= 16
@@ -103,7 +103,7 @@ DECLARE_JNI_CLASS (NotificationBuilderBase, "android/app/Notification$Builder");
    METHOD (setSubText,         "setSubText",         "(Ljava/lang/CharSequence;)Landroid/app/Notification$Builder;") \
    METHOD (setUsesChronometer, "setUsesChronometer", "(Z)Landroid/app/Notification$Builder;")
 
-DECLARE_JNI_CLASS (NotificationBuilderApi16, "android/app/Notification$Builder");
+DECLARE_JNI_CLASS (NotificationBuilderApi16, "android/app/Notification$Builder")
 #undef JNI_CLASS_MEMBERS
 #endif
 
@@ -111,7 +111,7 @@ DECLARE_JNI_CLASS (NotificationBuilderApi16, "android/app/Notification$Builder")
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
     METHOD (setShowWhen, "setShowWhen", "(Z)Landroid/app/Notification$Builder;")
 
-DECLARE_JNI_CLASS (NotificationBuilderApi17, "android/app/Notification$Builder");
+DECLARE_JNI_CLASS (NotificationBuilderApi17, "android/app/Notification$Builder")
 #undef JNI_CLASS_MEMBERS
 #endif
 
@@ -124,7 +124,7 @@ DECLARE_JNI_CLASS (NotificationBuilderApi17, "android/app/Notification$Builder")
   METHOD (setGroupSummary, "setGroupSummary", "(Z)Landroid/app/Notification$Builder;") \
   METHOD (setSortKey,      "setSortKey",      "(Ljava/lang/String;)Landroid/app/Notification$Builder;")
 
-DECLARE_JNI_CLASS (NotificationBuilderApi20, "android/app/Notification$Builder");
+DECLARE_JNI_CLASS (NotificationBuilderApi20, "android/app/Notification$Builder")
 #undef JNI_CLASS_MEMBERS
 #endif
 
@@ -136,7 +136,7 @@ DECLARE_JNI_CLASS (NotificationBuilderApi20, "android/app/Notification$Builder")
   METHOD (setPublicVersion, "setPublicVersion", "(Landroid/app/Notification;)Landroid/app/Notification$Builder;") \
   METHOD (setVisibility,    "setVisibility",    "(I)Landroid/app/Notification$Builder;")
 
-DECLARE_JNI_CLASS (NotificationBuilderApi21, "android/app/Notification$Builder");
+DECLARE_JNI_CLASS (NotificationBuilderApi21, "android/app/Notification$Builder")
 #undef JNI_CLASS_MEMBERS
 #endif
 
@@ -144,7 +144,7 @@ DECLARE_JNI_CLASS (NotificationBuilderApi21, "android/app/Notification$Builder")
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
   METHOD (setChronometerCountDown, "setChronometerCountDown", "(Z)Landroid/app/Notification$Builder;")
 
-DECLARE_JNI_CLASS (NotificationBuilderApi24, "android/app/Notification$Builder");
+DECLARE_JNI_CLASS (NotificationBuilderApi24, "android/app/Notification$Builder")
 #undef JNI_CLASS_MEMBERS
 #endif
 
@@ -154,7 +154,7 @@ DECLARE_JNI_CLASS (NotificationBuilderApi24, "android/app/Notification$Builder")
   METHOD (setGroupAlertBehavior, "setGroupAlertBehavior", "(I)Landroid/app/Notification$Builder;") \
   METHOD (setTimeoutAfter,       "setTimeoutAfter",       "(J)Landroid/app/Notification$Builder;")
 
-DECLARE_JNI_CLASS (NotificationBuilderApi26, "android/app/Notification$Builder");
+DECLARE_JNI_CLASS (NotificationBuilderApi26, "android/app/Notification$Builder")
 #undef JNI_CLASS_MEMBERS
 #endif
 
@@ -163,14 +163,14 @@ DECLARE_JNI_CLASS (NotificationBuilderApi26, "android/app/Notification$Builder")
   METHOD (cancelAll, "cancelAll", "()V") \
   METHOD (notify,    "notify",    "(Ljava/lang/String;ILandroid/app/Notification;)V")
 
-DECLARE_JNI_CLASS (NotificationManagerBase, "android/app/NotificationManager");
+DECLARE_JNI_CLASS (NotificationManagerBase, "android/app/NotificationManager")
 #undef JNI_CLASS_MEMBERS
 
 #if __ANDROID_API__ >= 23
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
   METHOD (getActiveNotifications, "getActiveNotifications", "()[Landroid/service/notification/StatusBarNotification;")
 
-DECLARE_JNI_CLASS (NotificationManagerApi23, "android/app/NotificationManager");
+DECLARE_JNI_CLASS (NotificationManagerApi23, "android/app/NotificationManager")
 #undef JNI_CLASS_MEMBERS
 #endif
 
@@ -178,7 +178,7 @@ DECLARE_JNI_CLASS (NotificationManagerApi23, "android/app/NotificationManager");
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
   METHOD (areNotificationsEnabled, "areNotificationsEnabled", "()Z")
 
-DECLARE_JNI_CLASS (NotificationManagerApi24, "android/app/NotificationManager");
+DECLARE_JNI_CLASS (NotificationManagerApi24, "android/app/NotificationManager")
 #undef JNI_CLASS_MEMBERS
 #endif
 
@@ -187,7 +187,7 @@ DECLARE_JNI_CLASS (NotificationManagerApi24, "android/app/NotificationManager");
   METHOD (createNotificationChannel,      "createNotificationChannel",      "(Landroid/app/NotificationChannel;)V") \
   METHOD (createNotificationChannelGroup, "createNotificationChannelGroup", "(Landroid/app/NotificationChannelGroup;)V")
 
-DECLARE_JNI_CLASS (NotificationManagerApi26, "android/app/NotificationManager");
+DECLARE_JNI_CLASS (NotificationManagerApi26, "android/app/NotificationManager")
 #undef JNI_CLASS_MEMBERS
 #endif
 
@@ -195,7 +195,7 @@ DECLARE_JNI_CLASS (NotificationManagerApi26, "android/app/NotificationManager");
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
   STATICMETHOD (getResultsFromIntent, "getResultsFromIntent", "(Landroid/content/Intent;)Landroid/os/Bundle;")
 
-DECLARE_JNI_CLASS (RemoteInput, "android/app/RemoteInput");
+DECLARE_JNI_CLASS (RemoteInput, "android/app/RemoteInput")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -205,7 +205,7 @@ DECLARE_JNI_CLASS (RemoteInput, "android/app/RemoteInput");
   METHOD (setChoices,            "setChoices",            "([Ljava/lang/CharSequence;)Landroid/app/RemoteInput$Builder;") \
   METHOD (setLabel,              "setLabel",              "(Ljava/lang/CharSequence;)Landroid/app/RemoteInput$Builder;")
 
-DECLARE_JNI_CLASS (RemoteInputBuilder, "android/app/RemoteInput$Builder");
+DECLARE_JNI_CLASS (RemoteInputBuilder, "android/app/RemoteInput$Builder")
 #undef JNI_CLASS_MEMBERS
 #endif
 
@@ -213,7 +213,7 @@ DECLARE_JNI_CLASS (RemoteInputBuilder, "android/app/RemoteInput$Builder");
  #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
    METHOD (getNotification, "getNotification", "()Landroid/app/Notification;")
 
- DECLARE_JNI_CLASS (StatusBarNotification, "android/service/notification/StatusBarNotification");
+ DECLARE_JNI_CLASS (StatusBarNotification, "android/service/notification/StatusBarNotification")
  #undef JNI_CLASS_MEMBERS
 #endif
 
@@ -223,7 +223,7 @@ DECLARE_JNI_CLASS (RemoteInputBuilder, "android/app/RemoteInput$Builder");
    STATICMETHOD (getInstance, "getInstance", "()Lcom/google/firebase/iid/FirebaseInstanceId;") \
    METHOD (getToken, "getToken", "()Ljava/lang/String;")
 
- DECLARE_JNI_CLASS (FirebaseInstanceId, "com/google/firebase/iid/FirebaseInstanceId");
+ DECLARE_JNI_CLASS (FirebaseInstanceId, "com/google/firebase/iid/FirebaseInstanceId")
  #undef JNI_CLASS_MEMBERS
 #endif
 
@@ -234,7 +234,7 @@ DECLARE_JNI_CLASS (RemoteInputBuilder, "android/app/RemoteInput$Builder");
    METHOD (subscribeToTopic,     "subscribeToTopic",     "(Ljava/lang/String;)V") \
    METHOD (unsubscribeFromTopic, "unsubscribeFromTopic", "(Ljava/lang/String;)V") \
 
- DECLARE_JNI_CLASS (FirebaseMessaging, "com/google/firebase/messaging/FirebaseMessaging");
+ DECLARE_JNI_CLASS (FirebaseMessaging, "com/google/firebase/messaging/FirebaseMessaging")
  #undef JNI_CLASS_MEMBERS
 
  #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -248,7 +248,7 @@ DECLARE_JNI_CLASS (RemoteInputBuilder, "android/app/RemoteInput$Builder");
    METHOD (getTo,           "getTo",           "()Ljava/lang/String;") \
    METHOD (getTtl,          "getTtl",          "()I")
 
- DECLARE_JNI_CLASS (RemoteMessage, "com/google/firebase/messaging/RemoteMessage");
+ DECLARE_JNI_CLASS (RemoteMessage, "com/google/firebase/messaging/RemoteMessage")
  #undef JNI_CLASS_MEMBERS
 
   #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -260,7 +260,7 @@ DECLARE_JNI_CLASS (RemoteInputBuilder, "android/app/RemoteInput$Builder");
    METHOD (setMessageType, "setMessageType", "(Ljava/lang/String;)Lcom/google/firebase/messaging/RemoteMessage$Builder;") \
    METHOD (setTtl,         "setTtl",         "(I)Lcom/google/firebase/messaging/RemoteMessage$Builder;")
 
- DECLARE_JNI_CLASS (RemoteMessageBuilder, "com/google/firebase/messaging/RemoteMessage$Builder");
+ DECLARE_JNI_CLASS (RemoteMessageBuilder, "com/google/firebase/messaging/RemoteMessage$Builder")
  #undef JNI_CLASS_MEMBERS
 
  #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -277,7 +277,7 @@ DECLARE_JNI_CLASS (RemoteInputBuilder, "android/app/RemoteInput$Builder");
    METHOD (getTitleLocalizationArgs, "getTitleLocalizationArgs", "()[Ljava/lang/String;") \
    METHOD (getTitleLocalizationKey,  "getTitleLocalizationKey",  "()Ljava/lang/String;")
 
- DECLARE_JNI_CLASS (RemoteMessageNotification, "com/google/firebase/messaging/RemoteMessage$Notification");
+ DECLARE_JNI_CLASS (RemoteMessageNotification, "com/google/firebase/messaging/RemoteMessage$Notification")
  #undef JNI_CLASS_MEMBERS
 #endif
 

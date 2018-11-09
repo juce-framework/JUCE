@@ -27,7 +27,7 @@ namespace juce
  METHOD (constructor, "<init>", "()V") \
  METHOD (toString, "toString", "()Ljava/lang/String;") \
 
-DECLARE_JNI_CLASS (StringBuffer, "java/lang/StringBuffer");
+DECLARE_JNI_CLASS (StringBuffer, "java/lang/StringBuffer")
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================
@@ -40,7 +40,7 @@ DECLARE_JNI_CLASS (StringBuffer, "java/lang/StringBuffer");
  METHOD (isExhausted, "isExhausted", "()Z") \
  METHOD (setPosition, "setPosition", "(J)Z") \
 
-DECLARE_JNI_CLASS (HTTPStream, JUCE_ANDROID_ACTIVITY_CLASSPATH "$HTTPStream");
+DECLARE_JNI_CLASS (HTTPStream, JUCE_ANDROID_ACTIVITY_CLASSPATH "$HTTPStream")
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================
@@ -48,7 +48,7 @@ DECLARE_JNI_CLASS (HTTPStream, JUCE_ANDROID_ACTIVITY_CLASSPATH "$HTTPStream");
  METHOD (close,     "close",     "()V") \
  METHOD (read,      "read",      "([BII)I") \
 
-DECLARE_JNI_CLASS (AndroidInputStream, "java/io/InputStream");
+DECLARE_JNI_CLASS (AndroidInputStream, "java/io/InputStream")
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================

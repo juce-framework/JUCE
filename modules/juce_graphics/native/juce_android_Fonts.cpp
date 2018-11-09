@@ -98,7 +98,7 @@ bool TextLayout::createNativeLayout (const AttributedString&)
  STATICMETHOD (create,          "create",           "(Ljava/lang/String;I)Landroid/graphics/Typeface;") \
  STATICMETHOD (createFromFile,  "createFromFile",   "(Ljava/lang/String;)Landroid/graphics/Typeface;") \
 
-DECLARE_JNI_CLASS (TypefaceClass, "android/graphics/Typeface");
+DECLARE_JNI_CLASS (TypefaceClass, "android/graphics/Typeface")
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================
@@ -199,8 +199,8 @@ public:
     float getStringWidth (const String& text) override
     {
         JNIEnv* env = getEnv();
-        const int numChars = CharPointer_UTF16::getBytesRequiredFor (text.getCharPointer());
-        jfloatArray widths = env->NewFloatArray (numChars);
+        auto numChars = CharPointer_UTF16::getBytesRequiredFor (text.getCharPointer());
+        jfloatArray widths = env->NewFloatArray ((int) numChars);
 
         const int numDone = paint.callIntMethod (AndroidPaint.getTextWidths, javaString (text).get(), widths);
 
@@ -209,6 +209,7 @@ public:
         env->DeleteLocalRef (widths);
 
         float x = 0;
+
         for (int i = 0; i < numDone; ++i)
             x += localWidths[i];
 
@@ -218,8 +219,8 @@ public:
     void getGlyphPositions (const String& text, Array<int>& glyphs, Array<float>& xOffsets) override
     {
         JNIEnv* env = getEnv();
-        const int numChars = CharPointer_UTF16::getBytesRequiredFor (text.getCharPointer());
-        jfloatArray widths = env->NewFloatArray (numChars);
+        auto numChars = CharPointer_UTF16::getBytesRequiredFor (text.getCharPointer());
+        jfloatArray widths = env->NewFloatArray ((int) numChars);
 
         const int numDone = paint.callIntMethod (AndroidPaint.getTextWidths, javaString (text).get(), widths);
 
@@ -230,8 +231,8 @@ public:
         auto s = text.getCharPointer();
 
         xOffsets.add (0);
-
         float x = 0;
+
         for (int i = 0; i < numDone; ++i)
         {
             const float local = localWidths[i];

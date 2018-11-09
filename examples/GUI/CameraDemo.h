@@ -245,7 +245,7 @@ private:
         {
            #if JUCE_ANDROID
             SafePointer<CameraDemo> safeThis (this);
-            cameraDevice->onErrorOccurred = [safeThis] (const String& error) mutable { if (safeThis) safeThis->errorOccurred (error); };
+            cameraDevice->onErrorOccurred = [safeThis] (const String& cameraError) mutable { if (safeThis) safeThis->errorOccurred (cameraError); };
            #endif
             cameraPreviewComp.reset (cameraDevice->createViewerComponent());
             addAndMakeVisible (cameraPreviewComp.get());

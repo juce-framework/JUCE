@@ -872,10 +872,7 @@ public:
 
         lastError.clear();
 
-        if (requestedSampleRate > 0)
-            sampleRate = (int) requestedSampleRate;
-        else
-            sampleRate = getNativeSampleRate();
+        sampleRate = (int) (requestedSampleRate > 0 ? requestedSampleRate : getNativeSampleRate());
 
         auto totalPreferredBufferSize    = (bufferSize <= 0) ? getDefaultBufferSize() : bufferSize;
         auto nativeBufferSize            = getNativeBufferSize();
