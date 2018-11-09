@@ -60,7 +60,7 @@ bool AffineTransform::isIdentity() const noexcept
         && mat11 == 1.0f;
 }
 
-JUCE_DECLARE_DEPRECATED_STATIC (const AffineTransform AffineTransform::identity;)
+JUCE_DECLARE_DEPRECATED_STATIC (const AffineTransform AffineTransform::identity (1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);)
 
 //==============================================================================
 AffineTransform AffineTransform::followedBy (const AffineTransform& other) const noexcept
