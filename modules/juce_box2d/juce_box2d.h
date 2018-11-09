@@ -35,7 +35,7 @@
 
   ID:               juce_box2d
   vendor:           juce
-  version:          5.3.2
+  version:          5.4.0
   name:             JUCE wrapper for the Box2D physics engine
   description:      The Box2D physics engine and some utility classes.
   website:          http://www.juce.com/juce

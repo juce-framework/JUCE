@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="M70qfTRRk" name="Projucer" projectType="guiapp" juceFolder="../../juce"
-              jucerVersion="5.3.2" version="5.3.2" bundleIdentifier="com.juce.theprojucer"
+              jucerVersion="5.4.0" version="5.4.0" bundleIdentifier="com.juce.theprojucer"
               defines="" splashScreenColour="Dark" displaySplashScreen="0"
               reportAppUsage="0" companyName="ROLI Ltd." companyCopyright="ROLI Ltd."
               cppLanguageStandard="11">
@@ -663,6 +663,8 @@
                 resource="0" file="Source/Utility/UI/PropertyComponents/jucer_ColourPropertyComponent.h"/>
           <FILE id="sfUzaf" name="jucer_FilePathPropertyComponent.h" compile="0"
                 resource="0" file="Source/Utility/UI/PropertyComponents/jucer_FilePathPropertyComponent.h"/>
+          <FILE id="c5PWPd" name="jucer_LabelPropertyComponent.h" compile="0"
+                resource="0" file="Source/Utility/UI/PropertyComponents/jucer_LabelPropertyComponent.h"/>
           <FILE id="DkLOIQ" name="jucer_PropertyComponentsWithEnablement.h" compile="0"
                 resource="0" file="Source/Utility/UI/PropertyComponents/jucer_PropertyComponentsWithEnablement.h"/>
         </GROUP>

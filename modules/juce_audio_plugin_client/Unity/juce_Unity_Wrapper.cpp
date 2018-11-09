@@ -311,7 +311,17 @@ public:
         if (state->structSize >= sizeof (UnityAudioEffectState))
             samplesPerBlock = static_cast<int> (state->dspBufferSize);
 
+       #ifdef JucePlugin_PreferredChannelConfigurations
+        short configs[][2] = { JucePlugin_PreferredChannelConfigurations };
+        const int numConfigs = sizeof (configs) / sizeof (short[2]);
+
+        jassert (numConfigs > 0 && (configs[0][0] > 0 || configs[0][1] > 0));
+
+        pluginInstance->setPlayConfigDetails (configs[0][0], configs[0][1], state->sampleRate, samplesPerBlock);
+       #else
         pluginInstance->setRateAndBufferSizeDetails (state->sampleRate, samplesPerBlock);
+       #endif
+
         pluginInstance->prepareToPlay (state->sampleRate, samplesPerBlock);
 
         scratchBuffer.setSize (jmax (pluginInstance->getTotalNumInputChannels(), pluginInstance->getTotalNumOutputChannels()), samplesPerBlock);
@@ -399,7 +409,7 @@ public:
         definition.parameterDefintions = parametersPtr.get();
     }
 
-    void setParameter (int index, float value)       { juceParameters.getParamForIndex (index)->setValue (value); }
+    void setParameter (int index, float value)       { juceParameters.getParamForIndex (index)->setValueNotifyingHost (value); }
     float getParameter (int index) const noexcept    { return juceParameters.getParamForIndex (index)->getValue(); }
 
     String getParameterString (int index) const noexcept
@@ -650,7 +660,8 @@ static void declareEffect (UnityAudioEffectDefinition& definition)
     definition.pluginVersion = JucePlugin_VersionCode;
 
     // effects must set this to 0, generators > 0
-    definition.channels = (wrapper->getNumInputChannels() != 0 ? 0 : static_cast<uint32> (wrapper->getNumOutputChannels()));
+    definition.channels = (wrapper->getNumInputChannels() != 0 ? 0
+                                                               : static_cast<uint32> (wrapper->getNumOutputChannels()));
 
     wrapper->declareParameters (definition);
 
@@ -668,12 +679,13 @@ static void declareEffect (UnityAudioEffectDefinition& definition)
 
 UNITY_INTERFACE_EXPORT int UnityGetAudioEffectDefinitions (UnityAudioEffectDefinition*** definitionsPtr)
 {
+    if (juce::getWrapperMap().size() == 0)
+        juce::initialiseJuce_GUI();
+
     static bool hasInitialised = false;
 
     if (! hasInitialised)
     {
-        juce::initialiseJuce_GUI();
-
         juce::PluginHostType::jucePlugInClientCurrentWrapperType = juce::AudioProcessor::wrapperType_Unity;
         juce::juce_createUnityPeerFn = juce::createUnityPeer;
 

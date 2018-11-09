@@ -7,7 +7,7 @@
 #include <windows.h>
 
 VS_VERSION_INFO VERSIONINFO
-FILEVERSION  5,3,2,0
+FILEVERSION  5,4,0,0
 BEGIN
   BLOCK "StringFileInfo"
   BEGIN
@@ -16,9 +16,9 @@ BEGIN
       VALUE "CompanyName",  "ROLI Ltd.\0"
       VALUE "LegalCopyright",  "ROLI Ltd.\0"
       VALUE "FileDescription",  "Projucer\0"
-      VALUE "FileVersion",  "5.3.2\0"
+      VALUE "FileVersion",  "5.4.0\0"
       VALUE "ProductName",  "Projucer\0"
-      VALUE "ProductVersion",  "5.3.2\0"
+      VALUE "ProductVersion",  "5.4.0\0"
     END
   END
 

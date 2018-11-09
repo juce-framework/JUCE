@@ -31,7 +31,7 @@
 
   ID:               juce_blocks_basics
   vendor:           juce
-  version:          5.3.2
+  version:          5.4.0
   name:             Provides low-level control over ROLI BLOCKS devices
   description:      JUCE wrapper for low-level control over ROLI BLOCKS devices.
   website:          http://developer.roli.com
@@ -84,7 +84,6 @@ namespace juce
 {
  #include "littlefoot/juce_LittleFootRunner.h"
  #include "littlefoot/juce_LittleFootCompiler.h"
- #include "littlefoot/juce_LittleFootRemoteHeap.h"
 }
 
 #endif

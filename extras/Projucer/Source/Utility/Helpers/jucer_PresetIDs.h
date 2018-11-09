@@ -68,9 +68,11 @@ namespace Ids
     DECLARE_ID (jucePath);
     DECLARE_ID (defaultJuceModulePath);
     DECLARE_ID (defaultUserModulePath);
+    DECLARE_ID (vstLegacyFolder);
     DECLARE_ID (vst3Folder);
     DECLARE_ID (rtasFolder);
     DECLARE_ID (auFolder);
+    DECLARE_ID (vstLegacyPath);
     DECLARE_ID (vst3Path);
     DECLARE_ID (rtasPath);
     DECLARE_ID (aaxPath);

@@ -890,7 +890,7 @@ public:
 
             for (auto i = 0u; i < n; ++i)
             {
-                if (auto* viewConfiguration = [configs objectAtIndex:i])
+                if (auto viewConfiguration = [configs objectAtIndex: i])
                 {
                     if (editor->supportsHostMIDIControllerPresence ([viewConfiguration hostHasController] == YES))
                     {

@@ -31,7 +31,7 @@
 
   ID:               juce_audio_basics
   vendor:           juce
-  version:          5.3.2
+  version:          5.4.0
   name:             JUCE audio and MIDI data classes
   description:      Classes for audio buffer manipulation, midi message handling, synthesis, etc.
   website:          http://www.juce.com/juce

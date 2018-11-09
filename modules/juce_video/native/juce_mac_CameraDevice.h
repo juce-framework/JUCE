@@ -71,7 +71,7 @@ struct CameraDevice::Pimpl
         if (imageOutput == nil)
         {
             imageOutput = [[AVCaptureStillImageOutput alloc] init];
-            auto* imageSettings = [[NSDictionary alloc] initWithObjectsAndKeys: AVVideoCodecJPEG, AVVideoCodecKey, nil];
+            auto imageSettings = [[NSDictionary alloc] initWithObjectsAndKeys: AVVideoCodecJPEG, AVVideoCodecKey, nil];
             [imageOutput setOutputSettings: imageSettings];
             [imageSettings release];
             [session addOutput: imageOutput];

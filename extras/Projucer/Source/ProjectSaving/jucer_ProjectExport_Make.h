@@ -265,25 +265,50 @@ public:
             return String (getName()).upToFirstOccurrenceOf (" ", false, false);
         }
 
-        void writeTargetLine (OutputStream& out, const bool useLinuxPackages)
+        void writeTargetLine (OutputStream& out, const StringArray& packages)
         {
             jassert (type != AggregateTarget);
 
             out << getBuildProduct() << " : "
-                << ((useLinuxPackages) ? "check-pkg-config " : "")
                 << "$(OBJECTS_" << getTargetVarName() << ") $(RESOURCES)";
 
             if (type != SharedCodeTarget && owner.shouldBuildTargetType (SharedCodeTarget))
                 out << " $(JUCE_OUTDIR)/$(JUCE_TARGET_SHARED_CODE)";
 
-            out << newLine << "\t@echo Linking \"" << owner.projectName << " - " << getName() << "\"" << newLine
+            out << newLine;
+
+            if (! packages.isEmpty())
+            {
+                out << "\t@command -v pkg-config >/dev/null 2>&1 || { echo >&2 \"pkg-config not installed. Please, install it.\"; exit 1; }" << newLine
+                    << "\t@pkg-config --print-errors";
+
+                for (auto& pkg : packages)
+                    out << " " << pkg;
+
+                out << newLine;
+            }
+
+            out << "\t@echo Linking \"" << owner.projectName << " - " << getName() << "\"" << newLine
                 << "\t-$(V_AT)mkdir -p $(JUCE_BINDIR)" << newLine
                 << "\t-$(V_AT)mkdir -p $(JUCE_LIBDIR)" << newLine
                 << "\t-$(V_AT)mkdir -p $(JUCE_OUTDIR)" << newLine;
 
+            if (type == UnityPlugIn)
+            {
+                auto scriptName = owner.getProject().getUnityScriptName();
+
+                RelativePath scriptPath (owner.getProject().getGeneratedCodeFolder().getChildFile (scriptName),
+                                         owner.getTargetFolder(),
+                                         RelativePath::projectFolder);
+
+                out << "\t-$(V_AT)cp " + scriptPath.toUnixStyle() + " $(JUCE_OUTDIR)/" + scriptName << newLine;
+            }
+
             if (owner.projectType.isStaticLibrary() || type == SharedCodeTarget)
+            {
                 out << "\t$(V_AT)$(AR) -rcs " << getBuildProduct()
                     << " $(OBJECTS_" << getTargetVarName() << ")" << newLine;
+            }
             else
             {
                 out << "\t$(V_AT)$(CXX) -o " << getBuildProduct()
@@ -673,7 +698,7 @@ private:
         out << " $(LDFLAGS)" << newLine;
     }
 
-    void writeTargetLines (OutputStream& out, const bool useLinuxPackages) const
+    void writeTargetLines (OutputStream& out, const StringArray& packages) const
     {
         auto n = targets.size();
 
@@ -710,7 +735,7 @@ private:
                     if (! getProject().getProjectType().isAudioPlugin())
                         out << "all : " << target->getBuildProduct() << newLine << newLine;
 
-                    target->writeTargetLine (out, useLinuxPackages);
+                    target->writeTargetLine (out, packages);
                 }
             }
         }
@@ -839,28 +864,10 @@ private:
 
         out << getPhonyTargetLine() << newLine << newLine;
 
-        auto packages = getPackages();
-
-        writeTargetLines (out, ! packages.isEmpty());
+        writeTargetLines (out, getPackages());
 
         for (auto target : targets)
-            target->addFiles (out);
-
-        if (! packages.isEmpty())
-        {
-            out << "check-pkg-config:" << newLine
-                << "\t@command -v pkg-config >/dev/null 2>&1 || "
-                "{ echo >&2 \"pkg-config not installed. Please, install it.\"; "
-                "exit 1; }" << newLine
-                << "\t@pkg-config --print-errors";
-
-            for (auto& pkg : packages)
-                out << " " << pkg;
-
-            out << newLine << newLine;
-        }
-
-        out << "clean:" << newLine
+            target->addFiles (out);out << "clean:" << newLine
             << "\t@echo Cleaning " << projectName << newLine
             << "\t$(V_AT)$(CLEANCMD)" << newLine
             << newLine;
@@ -891,7 +898,7 @@ private:
     {
         MemoryOutputStream phonyTargetLine;
 
-        phonyTargetLine << ".PHONY: clean all";
+        phonyTargetLine << ".PHONY: clean all strip";
 
         if (! getProject().getProjectType().isAudioPlugin())
             return phonyTargetLine.toString();

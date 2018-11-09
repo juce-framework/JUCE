@@ -30,13 +30,13 @@ namespace juce
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  FIELD (providers, "providers", "[Landroid/content/pm/ProviderInfo;")
 
-DECLARE_JNI_CLASS (AndroidPackageInfo, "android/content/pm/PackageInfo");
+DECLARE_JNI_CLASS (AndroidPackageInfo, "android/content/pm/PackageInfo")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  FIELD (authority, "authority", "Ljava/lang/String;")
 
-DECLARE_JNI_CLASS (AndroidProviderInfo, "android/content/pm/ProviderInfo");
+DECLARE_JNI_CLASS (AndroidProviderInfo, "android/content/pm/ProviderInfo")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -44,13 +44,13 @@ DECLARE_JNI_CLASS (AndroidProviderInfo, "android/content/pm/ProviderInfo");
  METHOD (createInputStream, "createInputStream", "()Ljava/io/FileInputStream;") \
  METHOD (getLength,         "getLength",         "()J")
 
-DECLARE_JNI_CLASS (AssetFileDescriptor, "android/content/res/AssetFileDescriptor");
+DECLARE_JNI_CLASS (AssetFileDescriptor, "android/content/res/AssetFileDescriptor")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  METHOD (close, "close", "()V")
 
-DECLARE_JNI_CLASS (JavaCloseable, "java/io/Closeable");
+DECLARE_JNI_CLASS (JavaCloseable, "java/io/Closeable")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -58,20 +58,20 @@ DECLARE_JNI_CLASS (JavaCloseable, "java/io/Closeable");
  METHOD (startWatching, "startWatching", "()V") \
  METHOD (stopWatching,  "stopWatching",  "()V")
 
-DECLARE_JNI_CLASS (JuceContentProviderFileObserver, JUCE_ANDROID_SHARING_CONTENT_PROVIDER_CLASSPATH "$ProviderFileObserver");
+DECLARE_JNI_CLASS (JuceContentProviderFileObserver, JUCE_ANDROID_SHARING_CONTENT_PROVIDER_CLASSPATH "$ProviderFileObserver")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  METHOD (addRow,      "addRow", "([Ljava/lang/Object;)V") \
  METHOD (constructor, "<init>", "(L" JUCE_ANDROID_SHARING_CONTENT_PROVIDER_CLASSPATH ";J[Ljava/lang/String;)V")
 
-DECLARE_JNI_CLASS (JuceContentProviderFileObserverCursor, JUCE_ANDROID_SHARING_CONTENT_PROVIDER_CLASSPATH "$ProviderCursor");
+DECLARE_JNI_CLASS (JuceContentProviderFileObserverCursor, JUCE_ANDROID_SHARING_CONTENT_PROVIDER_CLASSPATH "$ProviderCursor")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  STATICMETHOD (open, "open", "(Ljava/io/File;I)Landroid/os/ParcelFileDescriptor;")
 
-DECLARE_JNI_CLASS (ParcelFileDescriptor, "android/os/ParcelFileDescriptor");
+DECLARE_JNI_CLASS (ParcelFileDescriptor, "android/os/ParcelFileDescriptor")
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================

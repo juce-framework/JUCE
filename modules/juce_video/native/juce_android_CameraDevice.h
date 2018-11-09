@@ -28,7 +28,7 @@
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  STATICMETHOD (valueOf, "valueOf", "(Ljava/lang/String;)Landroid/graphics/Bitmap$CompressFormat;")
 
-DECLARE_JNI_CLASS (AndroidBitmapCompressFormat, "android/graphics/Bitmap$CompressFormat");
+DECLARE_JNI_CLASS (AndroidBitmapCompressFormat, "android/graphics/Bitmap$CompressFormat")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -36,20 +36,20 @@ DECLARE_JNI_CLASS (AndroidBitmapCompressFormat, "android/graphics/Bitmap$Compres
  METHOD (createCaptureRequest, "createCaptureRequest", "(I)Landroid/hardware/camera2/CaptureRequest$Builder;") \
  METHOD (createCaptureSession, "createCaptureSession", "(Ljava/util/List;Landroid/hardware/camera2/CameraCaptureSession$StateCallback;Landroid/os/Handler;)V")
 
-DECLARE_JNI_CLASS (AndroidCameraDevice, "android/hardware/camera2/CameraDevice");
+DECLARE_JNI_CLASS (AndroidCameraDevice, "android/hardware/camera2/CameraDevice")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  METHOD (close,     "close",     "()V") \
  METHOD (getPlanes, "getPlanes", "()[Landroid/media/Image$Plane;")
 
-DECLARE_JNI_CLASS (AndroidImage, "android/media/Image");
+DECLARE_JNI_CLASS (AndroidImage, "android/media/Image")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  METHOD (getBuffer, "getBuffer", "()Ljava/nio/ByteBuffer;")
 
-DECLARE_JNI_CLASS (AndroidImagePlane, "android/media/Image$Plane");
+DECLARE_JNI_CLASS (AndroidImagePlane, "android/media/Image$Plane")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -59,7 +59,7 @@ DECLARE_JNI_CLASS (AndroidImagePlane, "android/media/Image$Plane");
  METHOD (setOnImageAvailableListener, "setOnImageAvailableListener", "(Landroid/media/ImageReader$OnImageAvailableListener;Landroid/os/Handler;)V") \
  STATICMETHOD (newInstance, "newInstance", "(IIII)Landroid/media/ImageReader;")
 
-DECLARE_JNI_CLASS (AndroidImageReader, "android/media/ImageReader");
+DECLARE_JNI_CLASS (AndroidImageReader, "android/media/ImageReader")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -82,7 +82,7 @@ DECLARE_JNI_CLASS (AndroidImageReader, "android/media/ImageReader");
  METHOD (start,                   "start",                   "()V") \
  METHOD (stop,                    "stop",                    "()V")
 
-DECLARE_JNI_CLASS (AndroidMediaRecorder, "android/media/MediaRecorder");
+DECLARE_JNI_CLASS (AndroidMediaRecorder, "android/media/MediaRecorder")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -92,19 +92,19 @@ DECLARE_JNI_CLASS (AndroidMediaRecorder, "android/media/MediaRecorder");
  METHOD (setSurfaceTextureListener, "setSurfaceTextureListener", "(Landroid/view/TextureView$SurfaceTextureListener;)V") \
  METHOD (setTransform,              "setTransform",              "(Landroid/graphics/Matrix;)V")
 
-DECLARE_JNI_CLASS (AndroidTextureView, "android/view/TextureView");
+DECLARE_JNI_CLASS (AndroidTextureView, "android/view/TextureView")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  METHOD (constructor, "<init>", "(Landroid/graphics/SurfaceTexture;)V")
 
-DECLARE_JNI_CLASS (AndroidSurface, "android/view/Surface");
+DECLARE_JNI_CLASS (AndroidSurface, "android/view/Surface")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  METHOD (setDefaultBufferSize, "setDefaultBufferSize", "(II)V")
 
-DECLARE_JNI_CLASS (AndroidSurfaceTexture, "android/graphics/SurfaceTexture");
+DECLARE_JNI_CLASS (AndroidSurfaceTexture, "android/graphics/SurfaceTexture")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -113,7 +113,7 @@ DECLARE_JNI_CLASS (AndroidSurfaceTexture, "android/graphics/SurfaceTexture");
  METHOD (isOutputSupportedFor,        "isOutputSupportedFor", "(I)Z") \
  METHOD (isOutputSupportedForSurface, "isOutputSupportedFor", "(Landroid/view/Surface;)Z")
 
-DECLARE_JNI_CLASS (AndroidStreamConfigurationMap, "android/hardware/camera2/params/StreamConfigurationMap");
+DECLARE_JNI_CLASS (AndroidStreamConfigurationMap, "android/hardware/camera2/params/StreamConfigurationMap")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -121,7 +121,7 @@ DECLARE_JNI_CLASS (AndroidStreamConfigurationMap, "android/hardware/camera2/para
  METHOD (toByteArray, "toByteArray", "()[B") \
  METHOD (size,        "size",        "()I")
 
-DECLARE_JNI_CLASS (ByteArrayOutputStream, "java/io/ByteArrayOutputStream");
+DECLARE_JNI_CLASS (ByteArrayOutputStream, "java/io/ByteArrayOutputStream")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -137,13 +137,13 @@ DECLARE_JNI_CLASS (CameraCaptureSession, "android/hardware/camera2/CameraCapture
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  METHOD (constructor, "<init>", "(L" JUCE_ANDROID_ACTIVITY_CLASSPATH ";JZ)V")
 
-DECLARE_JNI_CLASS (CameraCaptureSessionCaptureCallback, JUCE_ANDROID_ACTIVITY_CLASSPATH "$CameraCaptureSessionCaptureCallback");
+DECLARE_JNI_CLASS (CameraCaptureSessionCaptureCallback, JUCE_ANDROID_ACTIVITY_CLASSPATH "$CameraCaptureSessionCaptureCallback")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  METHOD (constructor, "<init>", "(L" JUCE_ANDROID_ACTIVITY_CLASSPATH ";J)V")
 
-DECLARE_JNI_CLASS (CameraCaptureSessionStateCallback, JUCE_ANDROID_ACTIVITY_CLASSPATH "$CameraCaptureSessionStateCallback");
+DECLARE_JNI_CLASS (CameraCaptureSessionStateCallback, JUCE_ANDROID_ACTIVITY_CLASSPATH "$CameraCaptureSessionStateCallback")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -154,19 +154,19 @@ DECLARE_JNI_CLASS (CameraCaptureSessionStateCallback, JUCE_ANDROID_ACTIVITY_CLAS
  STATICFIELD (SCALER_STREAM_CONFIGURATION_MAP, "SCALER_STREAM_CONFIGURATION_MAP", "Landroid/hardware/camera2/CameraCharacteristics$Key;") \
  STATICFIELD (SENSOR_ORIENTATION,              "SENSOR_ORIENTATION",              "Landroid/hardware/camera2/CameraCharacteristics$Key;")
 
-DECLARE_JNI_CLASS (CameraCharacteristics, "android/hardware/camera2/CameraCharacteristics");
+DECLARE_JNI_CLASS (CameraCharacteristics, "android/hardware/camera2/CameraCharacteristics")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  METHOD (getName, "getName", "()Ljava/lang/String;")
 
-DECLARE_JNI_CLASS (CameraCharacteristicsKey, "android/hardware/camera2/CameraCharacteristics$Key");
+DECLARE_JNI_CLASS (CameraCharacteristicsKey, "android/hardware/camera2/CameraCharacteristics$Key")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  METHOD (constructor, "<init>", "(L" JUCE_ANDROID_ACTIVITY_CLASSPATH ";J)V")
 
-DECLARE_JNI_CLASS (CameraDeviceStateCallback, JUCE_ANDROID_ACTIVITY_CLASSPATH "$CameraDeviceStateCallback");
+DECLARE_JNI_CLASS (CameraDeviceStateCallback, JUCE_ANDROID_ACTIVITY_CLASSPATH "$CameraDeviceStateCallback")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -174,7 +174,7 @@ DECLARE_JNI_CLASS (CameraDeviceStateCallback, JUCE_ANDROID_ACTIVITY_CLASSPATH "$
  METHOD (getCameraIdList,          "getCameraIdList",          "()[Ljava/lang/String;") \
  METHOD (openCamera,               "openCamera",               "(Ljava/lang/String;Landroid/hardware/camera2/CameraDevice$StateCallback;Landroid/os/Handler;)V")
 
-DECLARE_JNI_CLASS (CameraManager, "android/hardware/camera2/CameraManager");
+DECLARE_JNI_CLASS (CameraManager, "android/hardware/camera2/CameraManager")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -183,7 +183,7 @@ DECLARE_JNI_CLASS (CameraManager, "android/hardware/camera2/CameraManager");
  STATICFIELD (CONTROL_AF_TRIGGER,            "CONTROL_AF_TRIGGER",            "Landroid/hardware/camera2/CaptureRequest$Key;") \
  STATICFIELD (CONTROL_MODE,                  "CONTROL_MODE",                  "Landroid/hardware/camera2/CaptureRequest$Key;")
 
-DECLARE_JNI_CLASS (CaptureRequest, "android/hardware/camera2/CaptureRequest");
+DECLARE_JNI_CLASS (CaptureRequest, "android/hardware/camera2/CaptureRequest")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -191,7 +191,7 @@ DECLARE_JNI_CLASS (CaptureRequest, "android/hardware/camera2/CaptureRequest");
  METHOD (build,     "build",     "()Landroid/hardware/camera2/CaptureRequest;") \
  METHOD (set,       "set",       "(Landroid/hardware/camera2/CaptureRequest$Key;Ljava/lang/Object;)V")
 
-DECLARE_JNI_CLASS (CaptureRequestBuilder, "android/hardware/camera2/CaptureRequest$Builder");
+DECLARE_JNI_CLASS (CaptureRequestBuilder, "android/hardware/camera2/CaptureRequest$Builder")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -199,7 +199,7 @@ DECLARE_JNI_CLASS (CaptureRequestBuilder, "android/hardware/camera2/CaptureReque
  STATICFIELD (CONTROL_AE_STATE, "CONTROL_AE_STATE", "Landroid/hardware/camera2/CaptureResult$Key;") \
  STATICFIELD (CONTROL_AF_STATE, "CONTROL_AF_STATE", "Landroid/hardware/camera2/CaptureResult$Key;")
 
-DECLARE_JNI_CLASS (CaptureResult, "android/hardware/camera2/CaptureResult");
+DECLARE_JNI_CLASS (CaptureResult, "android/hardware/camera2/CaptureResult")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -208,7 +208,7 @@ DECLARE_JNI_CLASS (CaptureResult, "android/hardware/camera2/CaptureResult");
  METHOD (disable,              "disable",              "()V") \
  METHOD (enable,               "enable",               "()V")
 
-DECLARE_JNI_CLASS (OrientationEventListener, JUCE_ANDROID_ACTIVITY_CLASSPATH "$JuceOrientationEventListener");
+DECLARE_JNI_CLASS (OrientationEventListener, JUCE_ANDROID_ACTIVITY_CLASSPATH "$JuceOrientationEventListener")
 #undef JNI_CLASS_MEMBERS
 #endif
 
@@ -692,9 +692,9 @@ private:
 
         JUCE_CAMERA_LOG ("Camera id: " + cameraId + ", characteristics keys num: " + String (size));
 
-        for (int i = 0; i < size; ++i)
+        for (int ikey = 0; ikey < size; ++ikey)
         {
-            auto key = LocalRef<jobject> (env->CallObjectMethod (keysList, JavaList.get, i));
+            auto key = LocalRef<jobject> (env->CallObjectMethod (keysList, JavaList.get, ikey));
             auto jKeyName = LocalRef<jstring> ((jstring) env->CallObjectMethod (key, CameraCharacteristicsKey.getName));
             auto keyName = juceString (jKeyName);
 
@@ -710,7 +710,7 @@ private:
             }
             else if (kvs.startsWith ("[Landroid.util.Range"))
             {
-                printRangeArrayElements (keyValue, keyName);
+                printRangeArrayElements (keyValue);
             }
             else
             {
@@ -771,7 +771,7 @@ private:
         JUCE_CAMERA_LOG ("Key: " + keyName + ", value: " + result);
     }
 
-    static void printRangeArrayElements (const LocalRef<jobject>& rangeArray, const String& keyName)
+    static void printRangeArrayElements (const LocalRef<jobject>& rangeArray)
     {
         auto* env = getEnv();
 
@@ -797,8 +797,8 @@ private:
     class StreamConfigurationMap
     {
     public:
-        StreamConfigurationMap (const GlobalRef& cameraCharacteristics)
-            : scalerStreamConfigurationMap (getStreamConfigurationMap (cameraCharacteristics)),
+        StreamConfigurationMap (const GlobalRef& characteristics)
+            : scalerStreamConfigurationMap (getStreamConfigurationMap (characteristics)),
               supportedPreviewOutputSizes (retrieveOutputSizes (scalerStreamConfigurationMap,
                                                                 getClassForName ("android.graphics.SurfaceTexture"),
                                                                 -1)),
@@ -838,14 +838,14 @@ private:
         Array<Rectangle<int>> supportedVideoRecordingOutputSizes;
         Rectangle<int> defaultPreviewSize, previewBufferSize;
 
-        GlobalRef getStreamConfigurationMap (const GlobalRef& cameraCharacteristics)
+        GlobalRef getStreamConfigurationMap (const GlobalRef& characteristics)
         {
             auto* env = getEnv();
 
             auto scalerStreamConfigurationMapKey = LocalRef<jobject> (env->GetStaticObjectField (CameraCharacteristics,
                                                                                                  CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP));
 
-            return GlobalRef (LocalRef<jobject> (env->CallObjectMethod (cameraCharacteristics,
+            return GlobalRef (LocalRef<jobject> (env->CallObjectMethod (characteristics,
                                                                         CameraCharacteristics.get,
                                                                         scalerStreamConfigurationMapKey.get())));
         }
@@ -1222,8 +1222,6 @@ private:
             auto byteArray = LocalRef<jbyteArray> (env->NewByteArray (bufferSize));
             env->CallObjectMethod (imagePlaneBuffer, JavaByteBuffer.get, byteArray.get());
 
-            auto orientationsEnabled = Desktop::getInstance().getOrientationsEnabled() & ~Desktop::upsideDown;
-
             auto rotationAngle = getRotationAngle (deviceOrientationFromAccelerometerSensor, targetOrientation,
                                                   cameraLensFrontFacing, cameraSensorOrientation);
 
@@ -1268,8 +1266,6 @@ private:
                                      bool cameraLensFrontFacing,
                                      int cameraSensorOrientation)
         {
-            auto orientationsEnabled = Desktop::getInstance().getOrientationsEnabled() & ~Desktop::upsideDown;
-
             auto isSensorOrientationHorizontal = deviceOrientationFromAccelerometerSensor == Desktop::rotatedAntiClockwise
                                               || deviceOrientationFromAccelerometerSensor == Desktop::rotatedClockwise;
 
@@ -1311,8 +1307,6 @@ private:
 
             auto origBitmapWidth  = env->CallIntMethod (origBitmap, AndroidBitmap.getWidth);
             auto origBitmapHeight = env->CallIntMethod (origBitmap, AndroidBitmap.getHeight);
-
-            auto orientationsEnabled = Desktop::getInstance().getOrientationsEnabled() & ~Desktop::upsideDown;
 
             auto matrix = LocalRef<jobject> (env->NewObject (AndroidMatrix, AndroidMatrix.constructor));
             env->CallBooleanMethod (matrix, AndroidMatrix.postRotate, (jfloat) rotationAngle, (jfloat) 0, (jfloat) 0);
@@ -1747,8 +1741,6 @@ private:
                     // get relevant callback yet, so check for this and bailout when needed.
                     if (jniCheckHasExceptionOccurredAndClear())
                         return;
-
-                    auto* env = getEnv();
 
                     switch (currentState)
                     {

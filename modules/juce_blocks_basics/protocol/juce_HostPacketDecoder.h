@@ -49,8 +49,6 @@ struct HostPacketDecoder
             auto packetTimestamp = reader.read<PacketTimestamp>();
             deviceIndex &= 63; // top bit is used as a direction indicator
 
-            bool topologyChanged = false;
-
             for (;;)
             {
                 auto nextMessageType = getMessageType (reader);
@@ -58,14 +56,9 @@ struct HostPacketDecoder
                 if (nextMessageType == 0)
                     break;
 
-                topologyChanged |= messageIncludesTopologyChange (nextMessageType);
-
                 if (! processNextMessage (handler, reader, (MessageFromDevice) nextMessageType, deviceIndex, packetTimestamp))
                     break;
             }
-
-            if (topologyChanged)
-                handler.notifyDetectorTopologyChanged();
         }
     }
 
@@ -75,22 +68,6 @@ struct HostPacketDecoder
             return 0;
 
         return reader.read<MessageType>().get();
-    }
-
-    static bool messageIncludesTopologyChange (uint32 messageType)
-    {
-        switch ((MessageFromDevice) messageType)
-        {
-            case MessageFromDevice::deviceTopology:
-            case MessageFromDevice::deviceTopologyExtend:
-            case MessageFromDevice::deviceTopologyEnd:
-            case MessageFromDevice::deviceVersion:
-            case MessageFromDevice::deviceName:
-                return true;
-
-            default:
-                return false;
-        }
     }
 
     static bool processNextMessage (Handler& handler, Packed7BitArrayReader& reader,

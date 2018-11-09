@@ -733,10 +733,12 @@ static String getPlatformSpecificFileExtension()
 
 static File getPlatformSpecificProjectFolder()
 {
-    auto buildsFolder = getJUCEExamplesDirectoryPathFromGlobal().getChildFile ("DemoRunner").getChildFile ("Builds");
+    auto examplesDir = getJUCEExamplesDirectoryPathFromGlobal();
 
-    if (! buildsFolder.exists())
+    if (examplesDir == File())
         return {};
+
+    auto buildsFolder = examplesDir.getChildFile ("DemoRunner").getChildFile ("Builds");
 
    #if JUCE_MAC
     return buildsFolder.getChildFile ("MacOSX");
@@ -753,6 +755,9 @@ static File getPlatformSpecificProjectFolder()
 static File tryToFindDemoRunnerExecutableInBuilds()
 {
     auto projectFolder = getPlatformSpecificProjectFolder();
+
+    if (projectFolder == File())
+        return {};
 
    #if JUCE_MAC
     projectFolder = projectFolder.getChildFile ("build");
@@ -822,12 +827,13 @@ File ProjucerApplication::tryToFindDemoRunnerExecutable()
     if (hasScannedForDemoRunnerExecutable)
         return lastDemoRunnerExectuableFile;
 
+    hasScannedForDemoRunnerExecutable = true;
+
     auto demoRunnerExecutable = tryToFindDemoRunnerExecutableInBuilds();
 
     if (demoRunnerExecutable == File())
         demoRunnerExecutable = tryToFindPrebuiltDemoRunnerExecutable();
 
-    hasScannedForDemoRunnerExecutable = true;
     lastDemoRunnerExectuableFile = demoRunnerExecutable;
 
     return demoRunnerExecutable;
@@ -840,7 +846,15 @@ File ProjucerApplication::tryToFindDemoRunnerProject()
     if (hasScannedForDemoRunnerProject)
         return lastDemoRunnerProjectFile;
 
+    hasScannedForDemoRunnerProject = true;
+
     auto projectFolder = getPlatformSpecificProjectFolder();
+
+    if (projectFolder == File())
+    {
+        lastDemoRunnerProjectFile = File();
+        return {};
+    }
 
    #if JUCE_MAC
     auto demoRunnerProjectFile = projectFolder.getChildFile ("DemoRunner.xcodeproj");
@@ -857,7 +871,6 @@ File ProjucerApplication::tryToFindDemoRunnerProject()
    #endif
         demoRunnerProjectFile = File();
 
-    hasScannedForDemoRunnerProject = true;
     lastDemoRunnerProjectFile = demoRunnerProjectFile;
 
     return demoRunnerProjectFile;
@@ -1284,7 +1297,7 @@ void ProjucerApplication::showPathsWindow (bool highlightJUCEPath)
     else
         new FloatingToolWindow ("Global Paths", "pathsWindowPos",
                                 new GlobalPathsWindowComponent(), pathsWindow, false,
-                                600, 650, 600, 650, 600, 650);
+                                600, 700, 600, 700, 600, 700);
 
     if (highlightJUCEPath)
         if (auto* pathsComp = dynamic_cast<GlobalPathsWindowComponent*> (pathsWindow->getChildComponent (0)))
@@ -1480,9 +1493,6 @@ void ProjucerApplication::showSetJUCEPathAlert()
 void ProjucerApplication::rescanJUCEPathModules()
 {
     File jucePath (getAppSettings().getStoredPath (Ids::defaultJuceModulePath, TargetOS::getThisOS()).get().toString());
-
-    if (! jucePath.exists())
-        return;
 
     if (isRunningCommandLine)
         jucePathModuleList.scanPaths ({ jucePath });

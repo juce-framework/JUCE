@@ -29,7 +29,7 @@ namespace juce
   METHOD (disconnect,  "disconnect", "()V") \
   METHOD (scanFile,    "scanFile",   "(Ljava/lang/String;Ljava/lang/String;)V") \
 
-DECLARE_JNI_CLASS (MediaScannerConnection, "android/media/MediaScannerConnection");
+DECLARE_JNI_CLASS (MediaScannerConnection, "android/media/MediaScannerConnection")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -37,7 +37,7 @@ DECLARE_JNI_CLASS (MediaScannerConnection, "android/media/MediaScannerConnection
  METHOD (openInputStream,  "openInputStream",  "(Landroid/net/Uri;)Ljava/io/InputStream;") \
  METHOD (openOutputStream, "openOutputStream", "(Landroid/net/Uri;)Ljava/io/OutputStream;")
 
-DECLARE_JNI_CLASS (ContentResolver, "android/content/ContentResolver");
+DECLARE_JNI_CLASS (ContentResolver, "android/content/ContentResolver")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -46,14 +46,14 @@ DECLARE_JNI_CLASS (ContentResolver, "android/content/ContentResolver");
  METHOD (getString,       "getString",       "(I)Ljava/lang/String;") \
  METHOD (close,           "close",           "()V") \
 
-DECLARE_JNI_CLASS (AndroidCursor, "android/database/Cursor");
+DECLARE_JNI_CLASS (AndroidCursor, "android/database/Cursor")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  STATICMETHOD (getExternalStorageDirectory, "getExternalStorageDirectory", "()Ljava/io/File;") \
  STATICMETHOD (getExternalStoragePublicDirectory, "getExternalStoragePublicDirectory", "(Ljava/lang/String;)Ljava/io/File;") \
 
-DECLARE_JNI_CLASS (AndroidEnvironment, "android/os/Environment");
+DECLARE_JNI_CLASS (AndroidEnvironment, "android/os/Environment")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -61,7 +61,7 @@ DECLARE_JNI_CLASS (AndroidEnvironment, "android/os/Environment");
  METHOD (flush, "flush", "()V") \
  METHOD (write, "write", "([BII)V")
 
-DECLARE_JNI_CLASS (AndroidOutputStream, "java/io/OutputStream");
+DECLARE_JNI_CLASS (AndroidOutputStream, "java/io/OutputStream")
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================

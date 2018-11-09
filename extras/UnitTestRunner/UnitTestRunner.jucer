@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="Z2Xzcp" name="UnitTestRunner" projectType="consoleapp" bundleIdentifier="com.roli.UnitTestRunner"
-              jucerVersion="5.3.2" defines="JUCE_UNIT_TESTS=1" displaySplashScreen="0"
+              jucerVersion="5.4.0" defines="JUCE_UNIT_TESTS=1" displaySplashScreen="0"
               reportAppUsage="0" companyName="ROLI Ltd." companyCopyright="ROLI Ltd.">
   <MAINGROUP id="GZdWCU" name="UnitTestRunner">
     <GROUP id="{22894462-E1A9-036F-ED94-B51A50C87552}" name="Source">

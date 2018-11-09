@@ -46,32 +46,32 @@ DECLARE_JNI_CLASS (AndroidWebView, "android/webkit/WebView")
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
   METHOD (constructor, "<init>", "()V")
 
-DECLARE_JNI_CLASS (AndroidWebChromeClient, "android/webkit/WebChromeClient");
+DECLARE_JNI_CLASS (AndroidWebChromeClient, "android/webkit/WebChromeClient")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
   METHOD (constructor, "<init>", "()V")
 
-DECLARE_JNI_CLASS (AndroidWebViewClient, "android/webkit/WebViewClient");
+DECLARE_JNI_CLASS (AndroidWebViewClient, "android/webkit/WebViewClient")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
   STATICMETHOD (getInstance, "getInstance", "()Landroid/webkit/CookieManager;")
 
-DECLARE_JNI_CLASS (AndroidCookieManager, "android/webkit/CookieManager");
+DECLARE_JNI_CLASS (AndroidCookieManager, "android/webkit/CookieManager")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
   METHOD (constructor, "<init>",      "(L" JUCE_ANDROID_ACTIVITY_CLASSPATH ";J)V")
 
-DECLARE_JNI_CLASS (JuceWebChromeClient, JUCE_ANDROID_ACTIVITY_CLASSPATH "$JuceWebChromeClient");
+DECLARE_JNI_CLASS (JuceWebChromeClient, JUCE_ANDROID_ACTIVITY_CLASSPATH "$JuceWebChromeClient")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
   METHOD (constructor, "<init>",      "(L" JUCE_ANDROID_ACTIVITY_CLASSPATH ";J)V") \
   METHOD (hostDeleted, "hostDeleted", "()V")
 
-DECLARE_JNI_CLASS (JuceWebViewClient, JUCE_ANDROID_ACTIVITY_CLASSPATH "$JuceWebViewClient");
+DECLARE_JNI_CLASS (JuceWebViewClient, JUCE_ANDROID_ACTIVITY_CLASSPATH "$JuceWebViewClient")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -80,7 +80,7 @@ DECLARE_JNI_CLASS (JuceWebViewClient, JUCE_ANDROID_ACTIVITY_CLASSPATH "$JuceWebV
   METHOD (setJavaScriptEnabled,      "setJavaScriptEnabled",      "(Z)V") \
   METHOD (setSupportMultipleWindows, "setSupportMultipleWindows", "(Z)V")
 
-DECLARE_JNI_CLASS (WebSettings, "android/webkit/WebSettings");
+DECLARE_JNI_CLASS (WebSettings, "android/webkit/WebSettings")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \

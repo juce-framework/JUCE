@@ -6,7 +6,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-public class %%plugin_name%%GUI : IAudioEffectPluginGUI
+public class %%plugin_class_name%%GUI : IAudioEffectPluginGUI
 {
     public override string Name           { get { return "%%plugin_name%%"; } }
     public override string Description    { get { return "%%plugin_description%%"; } }

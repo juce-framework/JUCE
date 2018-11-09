@@ -25,11 +25,6 @@ namespace juce
 
 #if JUCE_ALSA
 
-// You can define these strings in your app if you want to override the default names:
-#ifndef JUCE_ALSA_MIDI_NAME
- #define JUCE_ALSA_MIDI_NAME  JUCEApplicationBase::getInstance()->getApplicationName().toUTF8()
-#endif
-
 //==============================================================================
 namespace
 {
@@ -47,7 +42,7 @@ public:
         if (handle != nullptr)
         {
             snd_seq_nonblock (handle, SND_SEQ_NONBLOCK);
-            snd_seq_set_client_name (handle, JUCE_ALSA_MIDI_NAME);
+            snd_seq_set_client_name (handle, getAlsaMidiName().toRawUTF8());
             clientId = snd_seq_client_id (handle);
 
             // It's good idea to pre-allocate a good number of elements
@@ -67,6 +62,18 @@ public:
 
         if (inputThread)
             inputThread->stopThread (3000);
+    }
+
+    static String getAlsaMidiName()
+    {
+        #ifdef JUCE_ALSA_MIDI_NAME
+            return JUCE_ALSA_MIDI_NAME;
+        #else
+            if (auto* app = JUCEApplicationBase::getInstance())
+                return app->getApplicationName();
+
+            return "JUCE";
+        #endif
     }
 
     using Ptr = ReferenceCountedObjectPtr<AlsaClient>;

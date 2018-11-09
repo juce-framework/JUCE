@@ -648,6 +648,7 @@ public:
             output.setPosition (0);
             output.truncate();
             ...
+        }
         @endcode
 
         @returns    a stream that will write to this file (initially positioned at the

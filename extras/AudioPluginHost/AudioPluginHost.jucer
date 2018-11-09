@@ -2,12 +2,12 @@
 
 <JUCERPROJECT id="NTe0XB0ij" name="AudioPluginHost" projectType="guiapp" version="1.0.0"
               juceFolder="../../../juce" vstFolderMac="~/SDKs/vstsdk2.4" vstFolderPC="c:\SDKs\vstsdk2.4"
-              bundleIdentifier="com.roli.juce.pluginhost" jucerVersion="5.3.2"
+              bundleIdentifier="com.roli.juce.pluginhost" jucerVersion="5.4.0"
               companyName="ROLI Ltd." displaySplashScreen="0" reportAppUsage="0"
               companyCopyright="ROLI Ltd.">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="" rtasFolder="~/SDKs/PT_80_SDK"
-               objCExtraSuffix="M73TRi" vst3Folder="" extraCompilerFlags="-Wall -Wshadow -Wstrict-aliasing -Wconversion -Wsign-compare -Woverloaded-virtual -Wextra-semi"
+               objCExtraSuffix="M73TRi" extraCompilerFlags="-Wall -Wshadow -Wstrict-aliasing -Wconversion -Wsign-compare -Woverloaded-virtual -Wextra-semi"
                smallIcon="c97aUr" bigIcon="c97aUr" microphonePermissionNeeded="1">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="AudioPluginHost"/>
@@ -54,8 +54,8 @@
         <MODULEPATH id="juce_audio_basics" path="../../modules"/>
       </MODULEPATHS>
     </LINUX_MAKE>
-    <VS2013 targetFolder="Builds/VisualStudio2013" vstFolder="" vst3Folder=""
-            smallIcon="c97aUr" bigIcon="c97aUr">
+    <VS2013 targetFolder="Builds/VisualStudio2013" vstFolder="" smallIcon="c97aUr"
+            bigIcon="c97aUr">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winArchitecture="32-bit" isDebug="1" optimisation="1"
                        targetName="AudioPluginHost"/>
@@ -79,8 +79,8 @@
         <MODULEPATH id="juce_audio_basics" path="../../modules"/>
       </MODULEPATHS>
     </VS2013>
-    <VS2015 targetFolder="Builds/VisualStudio2015" vstFolder="" vst3Folder=""
-            smallIcon="c97aUr" bigIcon="c97aUr">
+    <VS2015 targetFolder="Builds/VisualStudio2015" vstFolder="" smallIcon="c97aUr"
+            bigIcon="c97aUr">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="AudioPluginHost"/>
         <CONFIGURATION name="Release" isDebug="0" targetName="AudioPluginHost" debugInformationFormat="ProgramDatabase"/>
@@ -102,8 +102,8 @@
         <MODULEPATH id="juce_audio_basics" path="../../modules"/>
       </MODULEPATHS>
     </VS2015>
-    <VS2017 targetFolder="Builds/VisualStudio2017" vst3Folder="" smallIcon="c97aUr"
-            bigIcon="c97aUr" extraCompilerFlags="/w44265 /w45038 /w44062">
+    <VS2017 targetFolder="Builds/VisualStudio2017" smallIcon="c97aUr" bigIcon="c97aUr"
+            extraCompilerFlags="/w44265 /w45038 /w44062">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="AudioPluginHost"/>
         <CONFIGURATION name="Release" isDebug="0" targetName="AudioPluginHost" debugInformationFormat="ProgramDatabase"/>
@@ -127,8 +127,8 @@
     </VS2017>
     <XCODE_IPHONE targetFolder="Builds/iOS" iosScreenOrientation="portraitlandscape"
                   iPadScreenOrientation="portraitlandscape" iosDeviceFamily="1,2"
-                  vst3Folder="" microphonePermissionNeeded="1" iosBackgroundAudio="1"
-                  iosBackgroundBle="1" smallIcon="c97aUr" bigIcon="c97aUr">
+                  microphonePermissionNeeded="1" iosBackgroundAudio="1" iosBackgroundBle="1"
+                  smallIcon="c97aUr" bigIcon="c97aUr">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" enablePluginBinaryCopyStep="1" isDebug="1" optimisation="1"
                        linkTimeOptimisation="0" targetName="Plugin Host"/>
