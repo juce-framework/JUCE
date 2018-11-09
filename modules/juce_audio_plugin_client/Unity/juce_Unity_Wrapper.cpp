@@ -409,7 +409,7 @@ public:
         definition.parameterDefintions = parametersPtr.get();
     }
 
-    void setParameter (int index, float value)       { juceParameters.getParamForIndex (index)->setValue (value); }
+    void setParameter (int index, float value)       { juceParameters.getParamForIndex (index)->setValueNotifyingHost (value); }
     float getParameter (int index) const noexcept    { return juceParameters.getParamForIndex (index)->getValue(); }
 
     String getParameterString (int index) const noexcept
