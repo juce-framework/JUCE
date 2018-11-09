@@ -532,6 +532,8 @@ void Project::warnAboutOldProjucerVersion()
                                                   "\n\n"
                                                   "Always make sure that you're running the very latest version, "
                                                   "preferably compiled directly from the JUCE repository that you're working with!");
+
+            return;
         }
     }
 }
