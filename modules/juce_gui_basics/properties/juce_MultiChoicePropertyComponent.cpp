@@ -191,7 +191,7 @@ private:
     }
 
     //==============================================================================
-    ValueWithDefault* valueWithDefault;
+    ValueWithDefault* valueWithDefault = nullptr;
     var varToControl;
     Value sourceValue;
 
