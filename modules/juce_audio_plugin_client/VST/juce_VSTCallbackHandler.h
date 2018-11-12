@@ -56,12 +56,13 @@ struct VSTCallbackHandler
                                                              void* ptr,
                                                              float opt) = 0;
 
+    // Note: VS2013 prevents a "using" declaration here
     /** The host callback function type. */
-    using VstHostCallbackType = pointer_sized_int (int32 opcode,
-                                                   int32 index,
-                                                   pointer_sized_int value,
-                                                   void* ptr,
-                                                   float opt);
+    typedef pointer_sized_int (VstHostCallbackType) (int32 opcode,
+                                                     int32 index,
+                                                     pointer_sized_int value,
+                                                     void* ptr,
+                                                     float opt);
 
     /** This is called once by the VST plug-in wrapper after its constructor.
         You can use the supplied function to query the VST host.
