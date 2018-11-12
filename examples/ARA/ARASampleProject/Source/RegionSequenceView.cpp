@@ -13,7 +13,7 @@ void RegionSequenceView::paint (Graphics& g)
     }
     g.setColour (trackColour.contrasting (1.0f));
     g.setFont (Font (12.0));
-    g.drawText ("Track #" + order + ": " + name, 0, 0, getWidth(), getHeight(), juce::Justification::bottomLeft);
+    g.drawText ("Track #" + orderIndex + ": " + name, 0, 0, getWidth(), getHeight(), juce::Justification::bottomLeft);
 }
 
 
@@ -25,7 +25,7 @@ RegionSequenceView::RegionSequenceView (ARA::PlugIn::RegionSequence& sequence)
 , regionSequence (nullptr)
 {
     name = String (sequence.getName());
-    order = String (sequence.getOrderIndex());
+    orderIndex = String (sequence.getOrderIndex());
     audioThumb.addChangeListener (this);
     audioThumb.setReader ((dynamic_cast<ARASampleProjectRegionSequence&> (sequence)).newReader(), 1);
     startInSecs = audioThumb.getTotalLength();

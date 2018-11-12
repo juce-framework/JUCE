@@ -10,14 +10,14 @@
 
 #pragma once
 
-#include "RegionSequenceView.h"
+#include "JuceHeader.h"
 
 /** Naive Editor class that visualize current ARA Document RegionSequences state */
 class ARASampleProjectEditorView : public ARA::PlugIn::EditorView
 {
 public:
 
-    //==============================================================================
+    /** Listener class that can be used to get selection notification updates */
     class SelectionListener
     {
         ARASampleProjectEditorView* araEditorView;
@@ -26,6 +26,7 @@ public:
         ~SelectionListener ();
         const ARA::PlugIn::ViewSelection* getMostRecentSelection () const;
 
+        // will be called from ARASampleProjectEditorView::doNotifySelection
         virtual void onNewSelection (const ARA::PlugIn::ViewSelection* currentSelection) = 0;
     };
 

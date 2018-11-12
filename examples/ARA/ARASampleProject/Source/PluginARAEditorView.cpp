@@ -11,7 +11,7 @@
 #include "PluginARAEditorView.h"
 
 ARASampleProjectEditorView::SelectionListener::SelectionListener (ARA::PlugIn::EditorView * editorView)
-    : araEditorView (static_cast<ARASampleProjectEditorView*> (editorView))
+: araEditorView (static_cast<ARASampleProjectEditorView*> (editorView))
 {
     if (araEditorView)
         araEditorView->addSelectionListener (this);

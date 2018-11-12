@@ -1,23 +1,17 @@
-/*
-  ==============================================================================
-
-    This file was auto-generated!
-
-    It contains the basic framework code for a JUCE plugin processor.
-
-  ==============================================================================
-*/
-
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
+
 //==============================================================================
-/**
+/** 
+    Processor class for ARA sample project
+    This class delegates to an ARASampleProjectPlaybackRenderer instance
+    which fulfills the PlaybackRenderer role of our ARA enabled plug-in
 */
-class ARASampleProjectAudioProcessor  : public AudioProcessor
+class ARASampleProjectAudioProcessor: public AudioProcessor
 #if JucePlugin_Enable_ARA
-     , public AudioProcessorARAExtension
+     , public AudioProcessorARAExtension  // Provides access to the ARA PlaybackRenderer instance
 #endif
 {
 public:

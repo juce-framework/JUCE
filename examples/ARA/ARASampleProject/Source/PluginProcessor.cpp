@@ -136,19 +136,16 @@ void ARASampleProjectAudioProcessor::processBlock (AudioBuffer<float>& buffer, M
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
-    // In case we have more outputs than inputs, this code clears any output
-    // channels that didn't contain input data, (because these aren't
-    // guaranteed to be empty - they may contain garbage).
-    // This is here to avoid people getting screaming feedback
-    // when they first compile a plugin, but obviously you don't need to keep
-    // this code if your algorithm always overwrites all the output channels.
+    // clear unused input channeds
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
+    // make sure we can get the play head
     AudioPlayHead::CurrentPositionInfo ci{ 0 };
     if (getPlayHead() == nullptr || !(getPlayHead()->getCurrentPosition (ci)))
         return;
 
+    // render our ARA playback regions for this time duration using the ARA playback renderer instance
     ARASampleProjectPlaybackRenderer* playbackRenderer = static_cast<ARASampleProjectPlaybackRenderer*> (getARAPlaybackRenderer());
     playbackRenderer->renderPlaybackRegions (buffer, getSampleRate(), ci.timeInSamples, ci.isPlaying);
 }

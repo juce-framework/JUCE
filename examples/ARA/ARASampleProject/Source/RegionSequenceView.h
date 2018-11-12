@@ -1,10 +1,15 @@
-// a juce::Component to show audio Thumbnail and some info from relevant ARA data..
 #pragma once
 
 #include "JuceHeader.h"
 
-class RegionSequenceView
-: public Component, public juce::ChangeListener
+//==============================================================================
+/** 
+    RegionSequenceView
+    JUCE component used to display ARA region sequences in a host document
+    along with their name, order index, color, and selection state
+*/
+class RegionSequenceView: public Component, 
+                          public juce::ChangeListener
 {
 public:
     ~RegionSequenceView();
@@ -21,7 +26,8 @@ public:
     ARA::PlugIn::RegionSequence* getRegionSequence () const { return regionSequence; }
 
 private:
-    String name, order;
+    String name;
+    String orderIndex;
     Colour trackColour;
     bool isSelected;
     double startInSecs;

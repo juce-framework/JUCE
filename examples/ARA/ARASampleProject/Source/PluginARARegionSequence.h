@@ -4,7 +4,14 @@
 
 namespace juce
 {
-
+    
+//==============================================================================
+/** 
+    ARA RegionSequence class for ARA sample project
+     Our plug-in will be used to draw waveforms representing an entire region sequence, 
+     so this class provides a special AudioFormatReader subclass that can be used to read 
+     all samples of a given region sequence's playback regions using ARA
+*/
 class ARASampleProjectRegionSequence : public ARA::PlugIn::RegionSequence
 {
 public:

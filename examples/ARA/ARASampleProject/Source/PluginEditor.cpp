@@ -73,37 +73,35 @@ void ARASampleProjectAudioProcessorEditor::resized ()
     regionSequenceViewPort.setBounds (0, 0, getWidth (), getHeight ());
 }
 
-// shows all RegionSequences, highlight ones in current selection.
+// rebuild our region sequence views and display selection state
 void ARASampleProjectAudioProcessorEditor::onNewSelection (const ARA::PlugIn::ViewSelection* currentSelection)
 {
+    // this is called from the constructor as well as our ARA host's
+    // model update thread when the host selection changes
     const ScopedLock lock (selectionLock);
 
+    // determine the length in seconds of the longest ARA region sequence
     maxRegionSequenceLength = 0.0;
 
     auto& regionSequences = getARAEditorView ()->getDocumentController ()->getDocument ()->getRegionSequences ();
     for (int i = 0; i < regionSequences.size (); i++)
     {
-        ARA::PlugIn::RegionSequence* regionSequence = regionSequences[i];
+        // construct the region sequence view if we don't yet have one
         if (regionSequenceViews.size () <= i)
         {
-            // construct the region sequence view if we don't yet have one
-            regionSequenceViews.add (new RegionSequenceView (*regionSequence ));
+            regionSequenceViews.add (new RegionSequenceView (*regionSequences[i]));
         }
-        else if (regionSequenceViews[i]->getRegionSequence () != regionSequence )
+        // reconstruct the region sequence view if the sequence order or properties have changed
+        else if (( regionSequenceViews[i]->getRegionSequence () != regionSequences[i]) ||
+                 ( regionSequencesWithPropertyChanges.count (regionSequences[i]) > 0 ))
         {
-            // reconstruct the region sequence view if the sequence order has changed
-            regionSequenceViews.set (i, new RegionSequenceView (*regionSequence ), true);
-        }
-        else if (regionSequencesWithPropertyChanges.count(regionSequence ) > 0)
-        {
-            // reconstruct the region sequence view if its properties have updated
-            regionSequenceViews.set (i, new RegionSequenceView (*regionSequence ), true);
+            regionSequenceViews.set (i, new RegionSequenceView (*regionSequences[i]), true);
         }
 
         // flag the region as selected if it's a part of the current selection, 
         // or not selected if we have no selection
         auto& selectedRegionSequences = currentSelection->getRegionSequences ();
-        bool selectionState = selectedRegionSequences.end () != std::find (selectedRegionSequences.begin (), selectedRegionSequences.end (), regionSequence);
+        bool selectionState = selectedRegionSequences.end () != std::find (selectedRegionSequences.begin (), selectedRegionSequences.end (), regionSequences[i]);
         regionSequenceViews[i]->setIsSelected (selectionState);
 
         // make the region sequence view visible and keep track of the longest region sequence
