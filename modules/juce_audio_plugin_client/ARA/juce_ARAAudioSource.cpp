@@ -35,6 +35,7 @@ private:
 
 ARAAudioSource::ARAAudioSource (ARA::PlugIn::Document* document, ARA::ARAAudioSourceHostRef hostRef)
 : ARA::PlugIn::AudioSource (document, hostRef),
+  ARAAudioSourceUpdateListener (document->getDocumentController ()),
   ref (new Ref (this))
 {}
 
@@ -57,18 +58,24 @@ AudioFormatReader* ARAAudioSource::newReader()
     return new Reader (this);
 }
 
-void ARAAudioSource::willUpdateProperties()
+void ARAAudioSource::willUpdateAudioSourceProperties (ARA::PlugIn::AudioSource* audioSource, ARA::PlugIn::PropertiesPtr<ARA::ARAAudioSourceProperties> newProperties) noexcept
 {
+    if (audioSource != this)
+        return;
+
    #if JUCE_DEBUG
-    jassert (! stateUpdateProperties);
+    jassert (!stateUpdateProperties);
     stateUpdateProperties = true;
    #endif
 
-    invalidateReaders();
+    invalidateReaders ();
 }
 
-void ARAAudioSource::didUpdateProperties()
+void ARAAudioSource::didUpdateAudioSourceProperties (ARA::PlugIn::AudioSource* audioSource) noexcept
 {
+    if (audioSource != this)
+        return;
+
    #if JUCE_DEBUG
     jassert (stateUpdateProperties);
     stateUpdateProperties = false;
@@ -77,10 +84,13 @@ void ARAAudioSource::didUpdateProperties()
     ref = new Ref (this);
 }
 
-void ARAAudioSource::willEnableSamplesAccess (bool enable)
+void ARAAudioSource::willEnableAudioSourceSamplesAccess (ARA::PlugIn::AudioSource* audioSource, bool enable) noexcept
 {
+    if (audioSource != this)
+        return;
+
    #if JUCE_DEBUG
-    jassert (! stateEnableSamplesAccess);
+    jassert (!stateEnableSamplesAccess);
     stateEnableSamplesAccess = true;
    #endif
 
@@ -90,8 +100,11 @@ void ARAAudioSource::willEnableSamplesAccess (bool enable)
             reader->invalidate();
 }
 
-void ARAAudioSource::didEnableSamplesAccess (bool enable)
+void ARAAudioSource::didEnableAudioSourceSamplesAccess (ARA::PlugIn::AudioSource* audioSource, bool enable) noexcept
 {
+    if (audioSource != this)
+        return;
+
    #if JUCE_DEBUG
     jassert (stateEnableSamplesAccess);
     stateEnableSamplesAccess = false;

@@ -1,12 +1,14 @@
 #pragma once
 
 #include "juce_ARA_audio_plugin.h"
+#include "juce_ARADocumentController.h"
 #include "juce_SafeRef.h"
 
 namespace juce
 {
 
-class ARAAudioSource : public ARA::PlugIn::AudioSource
+class ARAAudioSource : public ARA::PlugIn::AudioSource,
+                       ARAAudioSourceUpdateListener
 {
 public:
     ARAAudioSource (ARA::PlugIn::Document*, ARA::ARAAudioSourceHostRef);
@@ -14,17 +16,13 @@ public:
 
     AudioFormatReader* newReader();
 
-    // Needs to be called in the document controller's `willUpdateAudioSourceProperties` method.
-    void willUpdateProperties();
+    void willUpdateAudioSourceProperties(ARA::PlugIn::AudioSource* audioSource, ARA::PlugIn::PropertiesPtr<ARA::ARAAudioSourceProperties> newProperties) noexcept override;
 
-    // Needs to be called in the document controller's `didUpdateAudioSourceProperties` method.
-    void didUpdateProperties();
+    void didUpdateAudioSourceProperties (ARA::PlugIn::AudioSource* audioSource) noexcept override;
 
-    // Needs to be called in the document controller's `willEnableAudioSourceSamplesAccess` method.
-    void willEnableSamplesAccess (bool enable);
+    void willEnableAudioSourceSamplesAccess (ARA::PlugIn::AudioSource* audioSource, bool enable) noexcept override;
 
-    // Needs to be called in the document controller's `didEnableAudioSourceSamplesAccess` method.
-    void didEnableSamplesAccess (bool enable);
+    void didEnableAudioSourceSamplesAccess (ARA::PlugIn::AudioSource* audioSource, bool enable) noexcept override;
 
     std::unique_ptr<BufferingAudioSource> createBufferingAudioSource (TimeSliceThread& thread, int bufferSize);
 

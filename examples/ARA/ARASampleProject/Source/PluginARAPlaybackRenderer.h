@@ -11,13 +11,16 @@
     demo we're using a buffered ARA sample reader to pull audio samples from the host 
     and render them back, effectively making this ARA enabled pass-through renderer
 */
-class ARASampleProjectPlaybackRenderer : public ARA::PlugIn::PlaybackRenderer
+class ARASampleProjectPlaybackRenderer : public ARA::PlugIn::PlaybackRenderer,
+                                         ARAAudioSourceUpdateListener
 {
 public:
     ARASampleProjectPlaybackRenderer (ARADocumentController* documentController, TimeSliceThread& timeSliceThread, int bufferingSize);
 
     // render playback regions added to this render if they fall within the range of samples being rendered
     void renderPlaybackRegions (AudioBuffer<float>& buffer, ARA::ARASampleRate sampleRate, ARA::ARASamplePosition samplePosition, bool isPlayingBack);
+
+    void willDestroyAudioSource (ARA::PlugIn::AudioSource* audioSource) noexcept override;
 
 protected:
 
