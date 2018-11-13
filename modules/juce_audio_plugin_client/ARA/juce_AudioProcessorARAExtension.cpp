@@ -1,5 +1,3 @@
-#pragma once
-
 #include "juce_AudioProcessorARAExtension.h"
 
 const ARA::ARAPlugInExtensionInstance* AudioProcessorARAExtension::createARAPlugInExtension (ARA::ARADocumentControllerRef documentControllerRef, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles)

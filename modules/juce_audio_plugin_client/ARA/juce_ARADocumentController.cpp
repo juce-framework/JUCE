@@ -1,5 +1,3 @@
-#pragma once
-
 #include "juce_ARADocumentController.h"
 #include "juce_ARAAudioSource.h"
 

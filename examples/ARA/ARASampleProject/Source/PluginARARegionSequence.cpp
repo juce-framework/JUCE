@@ -1,5 +1,3 @@
-#pragma once
-
 #include "PluginARARegionSequence.h"
 
 namespace juce
