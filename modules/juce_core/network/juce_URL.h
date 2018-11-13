@@ -526,6 +526,7 @@ private:
     StringArray parameterNames, parameterValues;
 
     static File fileFromFileSchemeURL (const URL&);
+    String getDomainInternal (bool) const;
 
     struct Upload  : public ReferenceCountedObject
     {
