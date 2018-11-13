@@ -9,13 +9,17 @@ ARASampleProjectPlaybackRenderer::ARASampleProjectPlaybackRenderer (ARADocumentC
 
 // every time we add a playback region, make sure we have a buffered audio source reader for it
 // we'll use this reader to pull samples from our ARA host and render them back in the audio thread
-void ARASampleProjectPlaybackRenderer::didAddPlaybackRegion (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept
+void ARASampleProjectPlaybackRenderer::ensureReadersForAllPlaybackRegions () 
 {
-    ARAAudioSource* audioSource = static_cast<ARAAudioSource*> (playbackRegion->getAudioModification()->getAudioSource());
-    if (audioSourceReaders.count (audioSource) == 0)
+    for (ARA::PlugIn::PlaybackRegion* playbackRegion : getPlaybackRegions ())
     {
-        audioSourceReaders.emplace (audioSource, audioSource->createBufferingAudioSource (sampleReadingThread, sampleBufferSize));
-        audioSourceReaders[audioSource]->prepareToPlay (128, audioSource->getSampleRate());
+        ARAAudioSource* audioSource = static_cast<ARAAudioSource*> (playbackRegion->getAudioModification ()->getAudioSource ());
+        auto itAudioSource = audioSourceReaders.find (audioSource);
+        if (itAudioSource == audioSourceReaders.end () || itAudioSource->second == nullptr)
+        {
+            audioSourceReaders.emplace (audioSource, audioSource->createBufferingAudioSource (sampleReadingThread, sampleBufferSize));
+            audioSourceReaders[audioSource]->prepareToPlay (128, audioSource->getSampleRate ());
+        }
     }
 }
 
@@ -81,7 +85,33 @@ void ARASampleProjectPlaybackRenderer::renderPlaybackRegions (AudioBuffer<float>
     }
 }
 
+void ARASampleProjectPlaybackRenderer::willUpdateAudioSourceProperties (ARA::PlugIn::AudioSource* audioSource, ARA::PlugIn::PropertiesPtr<ARA::ARAAudioSourceProperties> /*newProperties*/) noexcept
+{
+    audioSourceReaders.erase (static_cast<ARAAudioSource*>(audioSource));
+}
+
+void ARASampleProjectPlaybackRenderer::willEnableAudioSourceSamplesAccess (ARA::PlugIn::AudioSource* audioSource, bool enable) noexcept
+{
+    ARAAudioSource* araAudioSource = static_cast<ARAAudioSource*>(audioSource);
+    auto it = audioSourceReaders.find (araAudioSource);
+    if (it != audioSourceReaders.end () && enable == false)
+        it->second.reset ();
+}
+
+void ARASampleProjectPlaybackRenderer::doUpdateAudioSourceContent (ARA::PlugIn::AudioSource* audioSource, const ARA::ARAContentTimeRange* /*range*/, ARA::ARAContentUpdateFlags /*flags*/) noexcept
+{
+    ARAAudioSource* araAudioSource = static_cast<ARAAudioSource*>(audioSource);
+    auto it = audioSourceReaders.find (araAudioSource);
+    if (it != audioSourceReaders.end ())
+        it->second.reset ();
+}
+
 void ARASampleProjectPlaybackRenderer::willDestroyAudioSource (ARA::PlugIn::AudioSource* audioSource) noexcept
 {
     audioSourceReaders.erase (static_cast<ARAAudioSource*>(audioSource));
+}
+
+void ARASampleProjectPlaybackRenderer::didAddPlaybackRegion (ARA::PlugIn::PlaybackRegion* /*playbackRegion*/) noexcept
+{
+    ensureReadersForAllPlaybackRegions ();
 }

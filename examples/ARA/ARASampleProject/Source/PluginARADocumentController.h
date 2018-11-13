@@ -18,6 +18,9 @@ public:
     ARA::PlugIn::PlaybackRenderer* doCreatePlaybackRenderer() noexcept override;
     ARA::PlugIn::RegionSequence* doCreateRegionSequence (ARA::PlugIn::Document* document, ARA::ARARegionSequenceHostRef hostRef) noexcept override;
 
+    // called when the ARA host stops editing the document
+    virtual void doEndEditing () noexcept;
+
     // property update notifications - our plug-in displays region sequences, so
     // we only need to subscribe to region sequence related notifications
     void willUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion, ARA::PlugIn::PropertiesPtr<ARA::ARAPlaybackRegionProperties> newProperties) noexcept override;

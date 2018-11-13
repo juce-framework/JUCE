@@ -126,7 +126,7 @@ void ARAAudioSource::didEnableAudioSourceSamplesAccess (ARA::PlugIn::AudioSource
     ref->lock.exitWrite();
 }
 
-void ARAAudioSource::doUpdateAudioSourceContent (ARA::PlugIn::AudioSource* audioSource, const ARA::ARAContentTimeRange* range, ARA::ARAContentUpdateFlags flags) noexcept
+void ARAAudioSource::doUpdateAudioSourceContent (ARA::PlugIn::AudioSource* audioSource, const ARA::ARAContentTimeRange* /*range*/, ARA::ARAContentUpdateFlags /*flags*/) noexcept
 {
     if (audioSource != this)
         return;
