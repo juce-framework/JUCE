@@ -96,11 +96,11 @@ public:
     //==============================================================================
     ValueWithDefault androidJavaLibs, androidAdditionalJavaFolders, androidAdditionalResourceFolders, androidRepositories, androidDependencies, androidScreenOrientation,
                      androidCustomActivityClass, androidCustomApplicationClass, androidManifestCustomXmlElements, androidVersionCode,
-                     androidMinimumSDK, androidTheme, androidSharedLibraries, androidStaticLibraries, androidExtraAssetsFolder,
+                     androidMinimumSDK, androidTargetSDK, androidTheme, androidSharedLibraries, androidStaticLibraries, androidExtraAssetsFolder,
                      androidOboeRepositoryPath, androidInternetNeeded, androidMicNeeded, androidCameraNeeded, androidBluetoothNeeded, androidExternalReadPermission,
                      androidExternalWritePermission, androidInAppBillingPermission, androidVibratePermission,androidOtherPermissions,
                      androidEnableRemoteNotifications, androidRemoteNotificationsConfigFile, androidEnableContentSharing, androidKeyStore,
-                     androidKeyStorePass, androidKeyAlias, androidKeyAliasPass, gradleVersion, gradleToolchain, androidPluginVersion, buildToolsVersion;
+                     androidKeyStorePass, androidKeyAlias, androidKeyAliasPass, gradleVersion, gradleToolchain, androidPluginVersion;
 
     //==============================================================================
     AndroidProjectExporter (Project& p, const ValueTree& t)
@@ -116,6 +116,7 @@ public:
           androidManifestCustomXmlElements     (settings, Ids::androidManifestCustomXmlElements,     getUndoManager()),
           androidVersionCode                   (settings, Ids::androidVersionCode,                   getUndoManager(), "1"),
           androidMinimumSDK                    (settings, Ids::androidMinimumSDK,                    getUndoManager(), "16"),
+          androidTargetSDK                     (settings, Ids::androidTargetSDK,                     getUndoManager(), "28"),
           androidTheme                         (settings, Ids::androidTheme,                         getUndoManager()),
           androidSharedLibraries               (settings, Ids::androidSharedLibraries,               getUndoManager()),
           androidStaticLibraries               (settings, Ids::androidStaticLibraries,               getUndoManager()),
@@ -137,10 +138,9 @@ public:
           androidKeyStorePass                  (settings, Ids::androidKeyStorePass,                  getUndoManager(), "android"),
           androidKeyAlias                      (settings, Ids::androidKeyAlias,                      getUndoManager(), "androiddebugkey"),
           androidKeyAliasPass                  (settings, Ids::androidKeyAliasPass,                  getUndoManager(), "android"),
-          gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "4.4"),
+          gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "4.10"),
           gradleToolchain                      (settings, Ids::gradleToolchain,                      getUndoManager(), "clang"),
           androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "3.2.1"),
-          buildToolsVersion                    (settings, Ids::buildToolsVersion,                    getUndoManager(), "28.0.0"),
           AndroidExecutable                    (getAppSettings().getStoredPath (Ids::androidStudioExePath, TargetOS::getThisOS()).get().toString())
     {
         name = getName();
@@ -152,7 +152,7 @@ public:
     void createToolchainExporterProperties (PropertyListBuilder& props)
     {
         props.add (new TextPropertyComponent (gradleVersion, "Gradle Version", 32, false),
-                   "The version of gradle that is used to build this app (4.4 is fine for JUCE)");
+                   "The version of gradle that is used to build this app (4.10 is fine for JUCE)");
 
         props.add (new TextPropertyComponent (androidPluginVersion, "Android Plug-in Version", 32, false),
                    "The version of the android build plugin for gradle that is used to build this app");
@@ -161,9 +161,6 @@ public:
                                                 { "clang", "gcc" },
                                                 { "clang", "gcc" }),
                    "The toolchain that gradle should invoke for NDK compilation (variable model.android.ndk.tooclhain in app/build.gradle)");
-
-        props.add (new TextPropertyComponent (buildToolsVersion, "Android Build Tools Version", 32, false),
-                   "The Android build tools version that should use to build this app");
     }
 
     void createLibraryModuleExporterProperties (PropertyListBuilder& props)
@@ -587,8 +584,7 @@ private:
         mo << "apply plugin: 'com.android." << (isLibrary() ? "library" : "application") << "'" << newLine << newLine;
 
         mo << "android {"                                                                    << newLine;
-        mo << "    compileSdkVersion " << static_cast<int> (androidMinimumSDK.get())         << newLine;
-        mo << "    buildToolsVersion \"" << buildToolsVersion.get().toString() << "\""       << newLine;
+        mo << "    compileSdkVersion " << static_cast<int> (androidTargetSDK.get())          << newLine;
         mo << "    externalNativeBuild {"                                                    << newLine;
         mo << "        cmake {"                                                              << newLine;
         mo << "            path \"CMakeLists.txt\""                                          << newLine;
@@ -681,6 +677,7 @@ private:
         auto cFlags            = getProjectCompilerFlags();
         auto cxxFlags          = getProjectCxxCompilerFlags();
         auto minSdkVersion     = static_cast<int> (androidMinimumSDK.get());
+        auto targetSdkVersion  = static_cast<int> (androidTargetSDK.get());
 
         MemoryOutputStream mo;
 
@@ -690,7 +687,7 @@ private:
             mo << "        applicationId \"" << bundleIdentifier << "\""          << newLine;
 
         mo << "        minSdkVersion    " << minSdkVersion                        << newLine;
-        mo << "        targetSdkVersion " << minSdkVersion                        << newLine;
+        mo << "        targetSdkVersion " << targetSdkVersion                     << newLine;
 
         mo << "        externalNativeBuild {"                                     << newLine;
         mo << "            cmake {"                                               << newLine;
@@ -960,6 +957,9 @@ private:
 
         props.add (new TextPropertyComponent (androidMinimumSDK, "Minimum SDK Version", 32, false),
                    "The number of the minimum version of the Android SDK that the app requires (must be 16 or higher).");
+
+        props.add (new TextPropertyComponent (androidTargetSDK, "Target SDK Version", 32, false),
+                   "The number of the version of the Android SDK that the app is targeting.");
 
         props.add (new TextPropertyComponent (androidExtraAssetsFolder, "Extra Android Assets", 256, false),
                    "A path to a folder (relative to the project folder) which contains extra android assets.");
