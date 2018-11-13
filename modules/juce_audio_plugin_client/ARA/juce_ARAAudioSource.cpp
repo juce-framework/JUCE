@@ -68,7 +68,16 @@ void ARAAudioSource::willUpdateAudioSourceProperties (ARA::PlugIn::AudioSource* 
     stateUpdateProperties = true;
    #endif
 
-    invalidateReaders ();
+    // TODO JUCE_ARA
+    // We can check individual values to see if we need to invalidate, 
+    // but according to ARAInterface.h line 2607 isn't it up to the 
+    // ARA host to disable audio source sample access when appropriate?
+    if (getSampleCount () != newProperties->sampleCount ||
+        getSampleRate () != newProperties->sampleRate ||
+        getChannelCount () != newProperties->channelCount)
+    {
+        invalidateReaders ();
+    }
 }
 
 void ARAAudioSource::didUpdateAudioSourceProperties (ARA::PlugIn::AudioSource* audioSource) noexcept
@@ -81,7 +90,8 @@ void ARAAudioSource::didUpdateAudioSourceProperties (ARA::PlugIn::AudioSource* a
     stateUpdateProperties = false;
    #endif
 
-    ref = new Ref (this);
+    if (ref->get () == nullptr)
+        ref = new Ref (this);
 }
 
 void ARAAudioSource::willEnableAudioSourceSamplesAccess (ARA::PlugIn::AudioSource* audioSource, bool enable) noexcept

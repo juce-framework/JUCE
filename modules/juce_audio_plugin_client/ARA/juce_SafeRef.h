@@ -29,6 +29,11 @@ public:
         owner = newOwner;
     }
 
+    T* get () const
+    {
+        return owner;
+    }
+
     // A scoped read-only access to the reference.
     // For additional write access one may use additional ScopedWriteLock on the reference's `lock`.
     class ScopedAccess
