@@ -149,6 +149,9 @@ ARAAudioSource::Reader::Reader (ARAAudioSource* source)
 
 ARAAudioSource::Reader::~Reader()
 {
+    // TODO JUCE_ARA
+    // this braced initializer does invoke the base ScopedAccess constructor, 
+    // which enters a read lock. But why can't we just use the write lock?
     if (Ref::ScopedAccess source{ ref })
     {
         ScopedWriteLock l (ref->lock);
