@@ -139,7 +139,7 @@ public:
           androidKeyAliasPass                  (settings, Ids::androidKeyAliasPass,                  getUndoManager(), "android"),
           gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "4.4"),
           gradleToolchain                      (settings, Ids::gradleToolchain,                      getUndoManager(), "clang"),
-          androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "3.1.3"),
+          androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "3.2.1"),
           buildToolsVersion                    (settings, Ids::buildToolsVersion,                    getUndoManager(), "28.0.0"),
           AndroidExecutable                    (getAppSettings().getStoredPath (Ids::androidStudioExePath, TargetOS::getThisOS()).get().toString())
     {
