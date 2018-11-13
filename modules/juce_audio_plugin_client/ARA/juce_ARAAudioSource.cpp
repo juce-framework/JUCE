@@ -126,6 +126,14 @@ void ARAAudioSource::didEnableAudioSourceSamplesAccess (ARA::PlugIn::AudioSource
     ref->lock.exitWrite();
 }
 
+void ARAAudioSource::doUpdateAudioSourceContent (ARA::PlugIn::AudioSource* audioSource, const ARA::ARAContentTimeRange* range, ARA::ARAContentUpdateFlags flags) noexcept
+{
+    if (audioSource != this)
+        return;
+
+    invalidateReaders ();
+}
+
 std::unique_ptr<BufferingAudioSource> ARAAudioSource::createBufferingAudioSource (TimeSliceThread& thread, int bufferSize)
 {
     return std::unique_ptr<BufferingAudioSource> (new BufferingAudioSource (new AudioFormatReaderSource (newReader(), true), thread, true, bufferSize));
