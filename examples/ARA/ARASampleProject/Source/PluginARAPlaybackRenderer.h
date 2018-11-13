@@ -17,16 +17,9 @@ class ARASampleProjectPlaybackRenderer : public ARA::PlugIn::PlaybackRenderer,
 public:
     ARASampleProjectPlaybackRenderer (ARADocumentController* documentController, TimeSliceThread& timeSliceThread, int bufferingSize);
 
-    // called from doEndEditing to ensure that all of our playback regions have audio source readers
-    void ensureReadersForAllPlaybackRegions ();
-
     // render playback regions added to this render if they fall within the range of samples being rendered
     void renderPlaybackRegions (AudioBuffer<float>& buffer, ARA::ARASampleRate sampleRate, ARA::ARASamplePosition samplePosition, bool isPlayingBack);
 
-    // hooks we use to invalidate our audio sources
-    void willUpdateAudioSourceProperties (ARA::PlugIn::AudioSource* audioSource, ARA::PlugIn::PropertiesPtr<ARA::ARAAudioSourceProperties> newProperties) noexcept override;
-    void willEnableAudioSourceSamplesAccess (ARA::PlugIn::AudioSource* audioSource, bool enable) noexcept override;
-    void doUpdateAudioSourceContent (ARA::PlugIn::AudioSource* audioSource, const ARA::ARAContentTimeRange* range, ARA::ARAContentUpdateFlags flags) noexcept override;
     void willDestroyAudioSource (ARA::PlugIn::AudioSource* audioSource) noexcept override;
 
 protected:

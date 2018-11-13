@@ -38,12 +38,6 @@ ARA::PlugIn::RegionSequence* ARASampleProjectDocumentController::doCreateRegionS
     return new ARASampleProjectRegionSequence (document, hostRef);
 }
 
-void ARASampleProjectDocumentController::doEndEditing () noexcept
-{
-    for (ARA::PlugIn::PlaybackRenderer* playbackRenderer : getPlaybackRenderers ())
-        static_cast<ARASampleProjectPlaybackRenderer*>(playbackRenderer)->ensureReadersForAllPlaybackRegions ();
-}
-
 void ARASampleProjectDocumentController::willUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion, ARA::PlugIn::PropertiesPtr<ARA::ARAPlaybackRegionProperties> newProperties) noexcept
 {
     ARASampleProjectRegionSequence::willUpdatePlaybackRegionProperties (playbackRegion, newProperties);
