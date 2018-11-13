@@ -189,15 +189,18 @@ namespace Ids
     DECLARE_ID (cameraPermissionNeeded);
     DECLARE_ID (cameraPermissionText);
     DECLARE_ID (androidJavaLibs);
+    DECLARE_ID (androidAdditionalJavaFolders);
+    DECLARE_ID (androidAdditionalResourceFolders);
     DECLARE_ID (androidRepositories);
     DECLARE_ID (androidDependencies);
     DECLARE_ID (androidBuildConfigRemoteNotifsConfigFile);
     DECLARE_ID (androidAdditionalXmlValueResources);
     DECLARE_ID (androidAdditionalDrawableResources);
     DECLARE_ID (androidAdditionalRawValueResources);
-    DECLARE_ID (androidActivityClass);
-    DECLARE_ID (androidActivitySubClassName);
-    DECLARE_ID (androidActivityBaseClassName);
+//    DECLARE_ID (androidActivityClass);  // DEPRECATED!
+    const Identifier androidCustomActivityClass ("androidActivitySubClassName"); // old name is very confusing, but we need to remain backward compatible
+//    DECLARE_ID (androidActivityBaseClassName); // DEPRECATED!
+    DECLARE_ID (androidCustomApplicationClass);
     DECLARE_ID (androidVersionCode);
     DECLARE_ID (androidSDKPath);
     DECLARE_ID (androidNDKPath);

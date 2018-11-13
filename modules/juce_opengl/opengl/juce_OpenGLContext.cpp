@@ -1218,7 +1218,7 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
 EGLDisplay OpenGLContext::NativeContext::display = EGL_NO_DISPLAY;
 EGLDisplay OpenGLContext::NativeContext::config;
 
-void OpenGLContext::NativeContext::surfaceCreated (jobject holder)
+void OpenGLContext::NativeContext::surfaceCreated (LocalRef<jobject> holder)
 {
     ignoreUnused (holder);
 
@@ -1235,7 +1235,7 @@ void OpenGLContext::NativeContext::surfaceCreated (jobject holder)
     }
 }
 
-void OpenGLContext::NativeContext::surfaceDestroyed (jobject holder)
+void OpenGLContext::NativeContext::surfaceDestroyed (LocalRef<jobject> holder)
 {
     ignoreUnused (holder);
 

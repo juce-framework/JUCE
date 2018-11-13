@@ -83,11 +83,21 @@ android {
         }
     }
 
-repositories {
-}
+    sourceSets {
+        main.java.srcDirs +=
+            ["../../../../../modules/juce_audio_devices/native/java",
+             "../../../../../modules/juce_core/native/java",
+             "../../../../../modules/juce_gui_basics/native/java",
+             "../../../../../modules/juce_gui_extra/native/java",
+             "../../../../../modules/juce_opengl/native/java",
+             "../../../../../modules/juce_video/native/java"]
+    }
 
-dependencies {
-}
+    repositories {
+    }
+
+    dependencies {
+    }
 
 
 }

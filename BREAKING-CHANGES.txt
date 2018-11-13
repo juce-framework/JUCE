@@ -4,6 +4,41 @@ JUCE breaking changes
 Develop
 =======
 
+Change
+-----
+Multiple changes to low-level, non-public JNI and Android APIs.
+
+Possible Issues
+---------------
+If you were using any non-public, low-level JNI macros, calling java code or recieving JNI callbacks, then your code will probably no longer work. See the forum for further details.
+
+Workaround
+----------
+See the forum for further details.
+
+Rationale
+---------
+See the forum for further details.
+
+
+Change
+-----
+The minimum Android version for a JUCE app is now Android 4.1
+
+Possible Issues
+---------------
+Your app may not run on very old versions of Android  (less than 5% of the devices).
+
+Workaround
+----------
+There is no workaround.
+
+Rationale
+---------
+Less than 5% of all devices in the world run versions of Android older than Android
+4.1. In the interest of keeping JUCE code clean and lean, we must depricate support
+for very old Android versions from time to time.
+
 
 Version 5.4.0
 =============
@@ -94,7 +129,6 @@ The new createAndAddParameter method is much more flexible and enables any
 parameter types derived from RangedAudioParameter to be managed by the
 AudioProcessorValueTreeState.
 
-
 Change
 ------
 The Projucer's per-exporter Android SDK/NDK path options have been removed.
@@ -113,7 +147,6 @@ Rationale
 ---------
 Having multiple places where the paths could be set was confusing and could
 cause unexpected mismatches.
-
 
 Change
 ------

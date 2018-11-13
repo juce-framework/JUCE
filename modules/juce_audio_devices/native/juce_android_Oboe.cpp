@@ -760,8 +760,6 @@ private:
 
         oboe::DataCallbackResult onAudioReady (oboe::AudioStream* stream, void* audioData, int32_t numFrames) override
         {
-            attachAndroidJNI();
-
             if (audioCallbackGuard.compareAndSetBool (1, 0))
             {
                 if (stream == nullptr)
@@ -905,8 +903,6 @@ private:
 
         void onErrorBeforeClose (oboe::AudioStream* stream, oboe::Result error) override
         {
-            attachAndroidJNI();
-
             // only output stream should be the master stream receiving callbacks
             jassert (stream->getDirection() == oboe::Direction::Output);
 
@@ -916,8 +912,6 @@ private:
 
         void onErrorAfterClose (oboe::AudioStream* stream, oboe::Result error) override
         {
-            attachAndroidJNI();
-
             // only output stream should be the master stream receiving callbacks
             jassert (stream->getDirection() == oboe::Direction::Output);
 
@@ -987,23 +981,6 @@ private:
     bool running = false;
 
     //==============================================================================
-    static String audioManagerGetProperty (const String& property)
-    {
-        const LocalRef<jstring> jProperty (javaString (property));
-        const LocalRef<jstring> text ((jstring) android.activity.callObjectMethod (JuceAppActivity.audioManagerGetProperty,
-                                                                                   jProperty.get()));
-        if (text.get() != 0)
-            return juceString (text);
-
-        return {};
-    }
-
-    static bool androidHasSystemFeature (const String& property)
-    {
-        const LocalRef<jstring> jProperty (javaString (property));
-        return android.activity.callBooleanMethod (JuceAppActivity.hasSystemFeature, jProperty.get());
-    }
-
     static double getNativeSampleRate()
     {
         return audioManagerGetProperty ("android.media.property.OUTPUT_SAMPLE_RATE").getDoubleValue();
@@ -1023,18 +1000,9 @@ private:
     static int getDefaultFramesPerBurst()
     {
         // NB: this function only works for inbuilt speakers and headphones
-        auto* env = getEnv();
+        auto framesPerBurstString = javaString (audioManagerGetProperty ("android.media.property.OUTPUT_FRAMES_PER_BUFFER"));
 
-        auto audioManager = LocalRef<jobject> (env->CallObjectMethod (android.activity,
-                                                                      JuceAppActivity.getSystemService,
-                                                                      javaString ("audio").get()));
-
-        auto propertyJavaString = javaString ("android.media.property.OUTPUT_FRAMES_PER_BUFFER");
-
-        auto framesPerBurstString = LocalRef<jstring> ((jstring) android.activity.callObjectMethod (JuceAppActivity.audioManagerGetProperty,
-                                                                                                    propertyJavaString.get()));
-
-        return framesPerBurstString != 0 ? env->CallStaticIntMethod (JavaInteger, JavaInteger.parseInt, framesPerBurstString.get(), 10) : 192;
+        return framesPerBurstString != 0 ? getEnv()->CallStaticIntMethod (JavaInteger, JavaInteger.parseInt, framesPerBurstString.get(), 10) : 192;
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OboeAudioIODevice)
@@ -1051,7 +1019,7 @@ OboeAudioIODevice::OboeSessionBase* OboeAudioIODevice::OboeSessionBase::create (
 {
 
     std::unique_ptr<OboeSessionBase> session;
-    auto sdkVersion = getEnv()->GetStaticIntField (AndroidBuildVersion, AndroidBuildVersion.SDK_INT);
+    auto sdkVersion = getAndroidSDKVersion();
 
     // SDK versions 21 and higher should natively support floating point...
     if (sdkVersion >= 21)
@@ -1119,7 +1087,7 @@ public:
                                forInput ? oboe::Direction::Input : oboe::Direction::Output,
                                oboe::SharingMode::Shared,
                                forInput ? 1 : 2,
-                               getSDKVersion() >= 21 ? oboe::AudioFormat::Float : oboe::AudioFormat::I16,
+                               getAndroidSDKVersion() >= 21 ? oboe::AudioFormat::Float : oboe::AudioFormat::I16,
                                (int) OboeAudioIODevice::getNativeSampleRate(),
                                OboeAudioIODevice::getNativeBufferSize(),
                                nullptr);
@@ -1210,8 +1178,8 @@ public:
         if (audioManagerClass == 0)
             return;
 
-        auto audioManager = LocalRef<jobject> (env->CallObjectMethod (android.activity,
-                                                                      JuceAppActivity.getSystemService,
+        auto audioManager = LocalRef<jobject> (env->CallObjectMethod (getAppContext().get(),
+                                                                      AndroidContext.getSystemService,
                                                                       javaString ("audio").get()));
 
         static jmethodID getDevicesMethod = env->GetMethodID (audioManagerClass, "getDevices",
@@ -1253,14 +1221,8 @@ public:
 
     bool supportsDevicesInfo() const
     {
-        static auto result = getSDKVersion() >= 23;
+        static auto result = getAndroidSDKVersion() >= 23;
         return result;
-    }
-
-    int getSDKVersion() const
-    {
-        static auto sdkVersion = getEnv()->GetStaticIntField (AndroidBuildVersion, AndroidBuildVersion.SDK_INT);
-        return sdkVersion;
     }
 
     void addDevice (const LocalRef<jobject>& device, JNIEnv* env)

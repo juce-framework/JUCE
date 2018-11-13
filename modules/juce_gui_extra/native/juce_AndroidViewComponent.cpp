@@ -30,11 +30,10 @@ namespace juce
 class AndroidViewComponent::Pimpl  : public ComponentMovementWatcher
 {
 public:
-    Pimpl (jobject v, Component& comp, bool makeSiblingRatherThanChild = false)
+    Pimpl (const LocalRef<jobject>& v, Component& comp)
         : ComponentMovementWatcher (&comp),
           view (v),
-          owner (comp),
-          embedAsSiblingRatherThanChild (makeSiblingRatherThanChild)
+          owner (comp)
     {
         if (owner.isShowing())
             componentPeerChanged();
@@ -68,7 +67,6 @@ public:
         if (currentPeer != peer)
         {
             removeFromParent();
-
             currentPeer = peer;
 
             addToParent();
@@ -91,10 +89,6 @@ public:
     void componentBroughtToFront (Component& comp) override
     {
         ComponentMovementWatcher::componentBroughtToFront (comp);
-
-        // Ensure that the native component doesn't get obscured.
-        if (embedAsSiblingRatherThanChild)
-            getEnv()->CallVoidMethod (view, AndroidView.bringToFront);
     }
 
     Rectangle<int> getViewBounds() const
@@ -119,20 +113,7 @@ private:
             // NB: Assuming a parent is always of ViewGroup type
             auto* env = getEnv();
 
-            if (embedAsSiblingRatherThanChild)
-            {
-                // This is a workaround for a bug in a web browser component where
-                // scrolling would be very slow and occasionally would scroll in
-                // opposite direction to dragging direction. In normal circumstances,
-                // the native view should be a child of peerView instead.
-                auto parentView = LocalRef<jobject> (env->CallObjectMethod (peerView, AndroidView.getParent));
-                env->CallVoidMethod (parentView, AndroidViewGroup.addView, view.get());
-            }
-            else
-            {
-                env->CallVoidMethod (peerView, AndroidViewGroup.addView, view.get());
-            }
-
+            env->CallVoidMethod (peerView, AndroidViewGroup.addView, view.get());
             componentMovedOrResized (false, false);
         }
     }
@@ -150,15 +131,13 @@ private:
     }
 
     Component& owner;
-    bool embedAsSiblingRatherThanChild;
     ComponentPeer* currentPeer = nullptr;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
 };
 
 //==============================================================================
-AndroidViewComponent::AndroidViewComponent (bool makeSiblingRatherThanChild)
-    : embedAsSiblingRatherThanChild (makeSiblingRatherThanChild)
+AndroidViewComponent::AndroidViewComponent()
 {
 }
 
@@ -171,7 +150,14 @@ void AndroidViewComponent::setView (void* view)
         pimpl.reset();
 
         if (view != nullptr)
-            pimpl.reset (new Pimpl ((jobject) view, *this, embedAsSiblingRatherThanChild));
+        {
+            // explicitly create a new local ref here so that we don't
+            // delete the users pointer
+            auto* env = getEnv();
+            auto localref = LocalRef<jobject>(env->NewLocalRef((jobject) view));
+
+            pimpl.reset (new Pimpl (localref, *this));
+        }
     }
 }
 

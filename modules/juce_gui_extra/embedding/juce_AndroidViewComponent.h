@@ -46,12 +46,8 @@ class JUCE_API  AndroidViewComponent   : public Component
 {
 public:
     //==============================================================================
-    /** Create an initially-empty container. The optional flag should be left as
-        false in most of the cases. Currently it is only set to true as a workaround
-        for a web browser bug, where scrolling would be very slow and it would
-        randomly scroll in an opposite direction of scrolling.
-     */
-    AndroidViewComponent (bool embedAsSiblingRatherThanChild = false);
+    /** Create an initially-empty container */
+    AndroidViewComponent();
 
     /** Destructor. */
     ~AndroidViewComponent();
@@ -76,8 +72,6 @@ public:
 private:
     class Pimpl;
     std::unique_ptr<Pimpl> pimpl;
-
-    bool embedAsSiblingRatherThanChild;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AndroidViewComponent)
 };

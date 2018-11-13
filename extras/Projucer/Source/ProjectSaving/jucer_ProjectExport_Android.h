@@ -55,6 +55,7 @@ public:
         {
             case ProjectType::Target::GUIApp:
             case ProjectType::Target::StaticLibrary:
+            case ProjectType::Target::DynamicLibrary:
             case ProjectType::Target::StandalonePlugIn:
                 return true;
             default:
@@ -93,8 +94,8 @@ public:
     }
 
     //==============================================================================
-    ValueWithDefault androidJavaLibs, androidRepositories, androidDependencies, androidScreenOrientation, androidActivityClass,
-                     androidActivitySubClassName, androidActivityBaseClassName, androidManifestCustomXmlElements, androidVersionCode,
+    ValueWithDefault androidJavaLibs, androidAdditionalJavaFolders, androidAdditionalResourceFolders, androidRepositories, androidDependencies, androidScreenOrientation,
+                     androidCustomActivityClass, androidCustomApplicationClass, androidManifestCustomXmlElements, androidVersionCode,
                      androidMinimumSDK, androidTheme, androidSharedLibraries, androidStaticLibraries, androidExtraAssetsFolder,
                      androidOboeRepositoryPath, androidInternetNeeded, androidMicNeeded, androidCameraNeeded, androidBluetoothNeeded, androidExternalReadPermission,
                      androidExternalWritePermission, androidInAppBillingPermission, androidVibratePermission,androidOtherPermissions,
@@ -105,15 +106,16 @@ public:
     AndroidProjectExporter (Project& p, const ValueTree& t)
         : ProjectExporter (p, t),
           androidJavaLibs                      (settings, Ids::androidJavaLibs,                      getUndoManager()),
+          androidAdditionalJavaFolders         (settings, Ids::androidAdditionalJavaFolders,         getUndoManager()),
+          androidAdditionalResourceFolders     (settings, Ids::androidAdditionalResourceFolders,     getUndoManager()),
           androidRepositories                  (settings, Ids::androidRepositories,                  getUndoManager()),
           androidDependencies                  (settings, Ids::androidDependencies,                  getUndoManager()),
           androidScreenOrientation             (settings, Ids::androidScreenOrientation,             getUndoManager(), "unspecified"),
-          androidActivityClass                 (settings, Ids::androidActivityClass,                 getUndoManager(), createDefaultClassName()),
-          androidActivitySubClassName          (settings, Ids::androidActivitySubClassName,          getUndoManager()),
-          androidActivityBaseClassName         (settings, Ids::androidActivityBaseClassName,         getUndoManager(), "Activity"),
+          androidCustomActivityClass           (settings, Ids::androidCustomActivityClass,           getUndoManager()),
+          androidCustomApplicationClass        (settings, Ids::androidCustomApplicationClass,        getUndoManager(), "com.roli.juce.JuceApp"),
           androidManifestCustomXmlElements     (settings, Ids::androidManifestCustomXmlElements,     getUndoManager()),
           androidVersionCode                   (settings, Ids::androidVersionCode,                   getUndoManager(), "1"),
-          androidMinimumSDK                    (settings, Ids::androidMinimumSDK,                    getUndoManager(), "10"),
+          androidMinimumSDK                    (settings, Ids::androidMinimumSDK,                    getUndoManager(), "16"),
           androidTheme                         (settings, Ids::androidTheme,                         getUndoManager()),
           androidSharedLibraries               (settings, Ids::androidSharedLibraries,               getUndoManager()),
           androidStaticLibraries               (settings, Ids::androidStaticLibraries,               getUndoManager()),
@@ -201,15 +203,11 @@ public:
         auto appFolder = targetFolder.getChildFile (isLibrary() ? "lib" : "app");
 
         removeOldFiles (targetFolder);
-
-        if (! isLibrary())
-            copyJavaFiles (modules);
-
         copyExtraResourceFiles();
 
         writeFile (targetFolder, "settings.gradle",                          isLibrary() ? "include ':lib'" : "include ':app'");
         writeFile (targetFolder, "build.gradle",                             getProjectBuildGradleFileContent());
-        writeFile (appFolder,    "build.gradle",                             getAppBuildGradleFileContent());
+        writeFile (appFolder,    "build.gradle",                             getAppBuildGradleFileContent (modules));
         writeFile (targetFolder, "local.properties",                         getLocalPropertiesFileContent());
         writeFile (targetFolder, "gradle/wrapper/gradle-wrapper.properties", getGradleWrapperPropertiesFileContent());
 
@@ -583,7 +581,7 @@ private:
     }
 
     //==============================================================================
-    String getAppBuildGradleFileContent() const
+    String getAppBuildGradleFileContent (const OwnedArray<LibraryModule>& modules) const
     {
         MemoryOutputStream mo;
         mo << "apply plugin: 'com.android." << (isLibrary() ? "library" : "application") << "'" << newLine << newLine;
@@ -603,6 +601,7 @@ private:
         mo << getAndroidProductFlavours()                                                    << newLine;
         mo << getAndroidVariantFilter()                                                      << newLine;
 
+        mo << getAndroidJavaSourceSets (modules)                                             << newLine;
         mo << getAndroidRepositories()                                                       << newLine;
         mo << getAndroidDependencies()                                                       << newLine;
         mo << getApplyPlugins()                                                              << newLine;
@@ -769,12 +768,12 @@ private:
 
         auto repositories = StringArray::fromLines (androidRepositories.get().toString());
 
-        mo << "repositories {"                << newLine;
+        mo << "    repositories {"                << newLine;
 
         for (auto& r : repositories)
-            mo << "    " << r << newLine;
+            mo << "        " << r << newLine;
 
-        mo << "}"                             << newLine;
+        mo << "    }"                             << newLine;
 
         return mo.toString();
     }
@@ -782,21 +781,21 @@ private:
     String getAndroidDependencies() const
     {
         MemoryOutputStream mo;
-        mo << "dependencies {" << newLine;
+        mo << "    dependencies {" << newLine;
 
         for (auto& d : StringArray::fromLines (androidDependencies.get().toString()))
-            mo << "    " << d << newLine;
+            mo << "        " << d << newLine;
 
         for (auto& d : StringArray::fromLines (androidJavaLibs.get().toString()))
-            mo << "    implementation files('libs/" << File (d).getFileName() << "')" << newLine;
+            mo << "        implementation files('libs/" << File (d).getFileName() << "')" << newLine;
 
         if (androidEnableRemoteNotifications.get())
         {
-            mo << "    'com.google.firebase:firebase-core:11.4.0'" << newLine;
-            mo << "    compile 'com.google.firebase:firebase-messaging:11.4.0'" << newLine;
+            mo << "        'com.google.firebase:firebase-core:11.4.0'" << newLine;
+            mo << "        compile 'com.google.firebase:firebase-messaging:11.4.0'" << newLine;
         }
 
-        mo << "}" << newLine;
+        mo << "    }" << newLine;
 
         return mo.toString();
     }
@@ -809,6 +808,90 @@ private:
             mo << "apply plugin: 'com.google.gms.google-services'" << newLine;
 
         return mo.toString();
+    }
+
+    void addModuleJavaFolderToSourceSet(StringArray& javaSourceSets, const File& javacore) const
+    {
+        if (javacore.isDirectory())
+        {
+            auto appFolder = getTargetFolder().getChildFile ("app");
+
+            RelativePath relativePath (javacore, appFolder, RelativePath::buildTargetFolder);
+            javaSourceSets.add (relativePath.toUnixStyle());
+        }
+    }
+
+    String getAndroidJavaSourceSets (const OwnedArray<LibraryModule>& modules) const
+    {
+        auto javaSourceSets = getSourceSetArrayFor (androidAdditionalJavaFolders.get().toString());
+        auto resourceSets   = getSourceSetArrayFor (androidAdditionalResourceFolders.get().toString());
+
+        for (auto* module : modules)
+        {
+            auto javaFolder = module->getFolder().getChildFile ("native").getChildFile ("javacore");
+
+            addModuleJavaFolderToSourceSet (javaSourceSets, javaFolder.getChildFile("init"));
+
+            if (! isLibrary())
+                addModuleJavaFolderToSourceSet (javaSourceSets, javaFolder.getChildFile("app"));
+        }
+
+        MemoryOutputStream mo;
+        mo << "    sourceSets {" << newLine;
+        mo << getSourceSetStringFor ("main.java.srcDirs", javaSourceSets);
+        mo << newLine;
+        mo << getSourceSetStringFor ("main.res.srcDirs", resourceSets);
+        mo << "    }" << newLine;
+
+        return mo.toString();
+    }
+
+    StringArray getSourceSetArrayFor (const String& srcDirs) const
+    {
+        StringArray sourceSets;
+
+        for (auto folder : StringArray::fromLines (srcDirs))
+        {
+            if (File::isAbsolutePath (folder))
+            {
+                sourceSets.add (folder);
+            }
+            else
+            {
+                auto appFolder = getTargetFolder().getChildFile ("app");
+
+                auto relativePath = RelativePath (folder, RelativePath::projectFolder)
+                                        .rebased (getProject().getProjectFolder(), appFolder,
+                                                  RelativePath::buildTargetFolder);
+
+                sourceSets.add (relativePath.toUnixStyle());
+            }
+        }
+
+        return sourceSets;
+    }
+
+    static String getSourceSetStringFor (const String& type, const StringArray& srcDirs)
+    {
+        String s;
+
+        s << "        " << type << " +=" << newLine;
+        s << "            [";
+
+        bool isFirst = true;
+
+        for (auto sourceSet : srcDirs)
+        {
+            if (! isFirst)
+                s << "," << newLine << "             ";
+
+            isFirst = false;
+            s << "\"" << sourceSet << "\"";
+        }
+
+        s << "]"     << newLine;
+
+        return s;
     }
 
     //==============================================================================
@@ -835,7 +918,17 @@ private:
     //==============================================================================
     void createBaseExporterProperties (PropertyListBuilder& props)
     {
-        props.add (new TextPropertyComponent (androidJavaLibs, "Java Libraries to Include", 32768, true),
+        props.add (new TextPropertyComponent (androidAdditionalJavaFolders, "Java Source code folders", 32768, true),
+                   "Folders inside which additional java source files can be found (one per line). For example, if you "
+                   "are using your own Activity you should place the java files for this into a folder and add the folder "
+                   "path to this field.");
+
+        props.add (new TextPropertyComponent (androidAdditionalResourceFolders, "Resource folders", 32768, true),
+                   "Folders inside which additional resource files can be found (one per line). For example, if you "
+                   "want to add your own layout xml files then you should place a layout xml file inside a folder and add "
+                   "the folder path to this field.");
+
+        props.add (new TextPropertyComponent (androidJavaLibs, "Java libraries to include", 32768, true),
                    "Java libs (JAR files) (one per line). These will be copied to app/libs folder and \"implementation files\" "
                    "dependency will be automatically added to module \"dependencies\" section for each library, so do "
                    "not add the dependency yourself.");
@@ -853,24 +946,20 @@ private:
                                                 { "unspecified",            "portrait", "landscape" }),
                    "The screen orientations that this app should support");
 
-        props.add (new TextPropertyComponent (androidActivityClass, "Android Activity Class Name", 256, false),
-                   "The full java class name to use for the app's Activity class.");
+        props.add (new TextPropertyComponent (androidCustomActivityClass, "Custom Android Activity", 256, false),
+                   "If not empty, specifies the Android Activity class name stored in the app's manifest which "
+                   "should be used instead of Android's default Activity.");
 
-        props.add (new TextPropertyComponent (androidActivitySubClassName, "Android Activity Sub-Class Name", 256, false),
-                   "If not empty, specifies the Android Activity class name stored in the app's manifest. "
-                   "Use this if you would like to use your own Android Activity sub-class.");
-
-        props.add (new TextPropertyComponent (androidActivityBaseClassName, "Android Activity Base Class", 256, false),
-                   "If not empty, specifies the base class to use for your activity. If custom base class is "
-                   "specified, that base class should be a sub-class of android.app.Activity. When empty, Activity "
-                   "(android.app.Activity) will be used as the base class. "
-                   "Use this if you would like to use your own Android Activity base class.");
+        props.add (new TextPropertyComponent (androidCustomApplicationClass, "Custom Android Application", 256, false),
+                   "If not empty, specifies the Android Application class name stored in the app's manifest which "
+                   "should be used instead of JUCE's default JuceApp class. If you specify a custom App then you must "
+                   "call com.roli.juce.Java.initialiseJUCE somewhere in your code before calling any JUCE functions.");
 
         props.add (new TextPropertyComponent (androidVersionCode, "Android Version Code", 32, false),
                    "An integer value that represents the version of the application code, relative to other versions.");
 
         props.add (new TextPropertyComponent (androidMinimumSDK, "Minimum SDK Version", 32, false),
-                   "The number of the minimum version of the Android SDK that the app requires");
+                   "The number of the minimum version of the Android SDK that the app requires (must be 16 or higher).");
 
         props.add (new TextPropertyComponent (androidExtraAssetsFolder, "Extra Android Assets", 256, false),
                    "A path to a folder (relative to the project folder) which contains extra android assets.");
@@ -950,286 +1039,6 @@ private:
     }
 
     //==============================================================================
-    String createDefaultClassName() const
-    {
-        auto s = project.getBundleIdentifierString().toLowerCase();
-
-        if (s.length() > 5
-            && s.containsChar ('.')
-            && s.containsOnly ("abcdefghijklmnopqrstuvwxyz_.")
-            && ! s.startsWithChar ('.'))
-        {
-            if (! s.endsWithChar ('.'))
-                s << ".";
-        }
-        else
-        {
-            s = "com.yourcompany.";
-        }
-
-        return s + CodeHelpers::makeValidIdentifier (project.getProjectFilenameRootString(), false, true, false);
-    }
-
-    //==============================================================================
-    void copyJavaFiles (const OwnedArray<LibraryModule>& modules) const
-    {
-        if (auto* coreModule = getCoreModule (modules))
-        {
-            auto package = getActivityClassPackage();
-            auto targetFolder = getTargetFolder();
-
-            auto inAppBillingPath = String ("com.android.vending.billing").replaceCharacter ('.', File::getSeparatorChar());
-            auto javaSourceFolder = coreModule->getFolder().getChildFile ("native").getChildFile ("java");
-            auto javaInAppBillingTarget = targetFolder.getChildFile ("app/src/main/java").getChildFile (inAppBillingPath);
-            auto javaTarget = targetFolder.getChildFile ("app/src/main/java")
-                                          .getChildFile (package.replaceCharacter ('.', File::getSeparatorChar()));
-            auto libTarget = targetFolder.getChildFile ("app/libs");
-            libTarget.createDirectory();
-
-            copyActivityJavaFiles (javaSourceFolder, javaTarget, package);
-            copyServicesJavaFiles (javaSourceFolder, javaTarget, package);
-            copyProviderJavaFile  (javaSourceFolder, javaTarget, package);
-            copyAdditionalJavaFiles (javaSourceFolder, javaInAppBillingTarget);
-            copyAdditionalJavaLibs (libTarget);
-        }
-    }
-
-    void copyActivityJavaFiles (const File& javaSourceFolder, const File& targetFolder, const String& package) const
-    {
-        if (androidActivityClass.get().toString().contains ("_"))
-            throw SaveError ("Your Android activity class name or path may not contain any underscores! Try a project name without underscores.");
-
-        auto className = getActivityName();
-
-        if (className.isEmpty())
-            throw SaveError ("Invalid Android Activity class name: " + androidActivityClass.get().toString());
-
-        createDirectoryOrThrow (targetFolder);
-
-        auto activityCode = getActivityCode (javaSourceFolder, className, package);
-
-        auto javaDestFile = targetFolder.getChildFile (className + ".java");
-        overwriteFileIfDifferentOrThrow (javaDestFile, activityCode);
-    }
-
-    String getActivityCode (const File& javaSourceFolder, const String& className, const String& package) const
-    {
-        auto runtimePermissionsCode = getRuntimePermissionsCode (javaSourceFolder, className);
-        auto midiCode = getMidiCode (javaSourceFolder, className);
-        auto webViewCode = getWebViewCode (javaSourceFolder);
-        auto cameraCode = getCameraCode (javaSourceFolder);
-        auto videoCode = getVideoCode (javaSourceFolder);
-
-        auto javaSourceFile = javaSourceFolder.getChildFile ("JuceAppActivity.java");
-        auto javaSourceLines = StringArray::fromLines (javaSourceFile.loadFileAsString());
-
-        {
-            MemoryOutputStream newFile;
-
-            for (auto& line : javaSourceLines)
-            {
-                if (line.contains ("$$JuceAndroidMidiImports$$"))
-                    newFile << midiCode.imports;
-                else if (line.contains ("$$JuceAndroidMidiCode$$"))
-                    newFile << midiCode.main;
-                else if (line.contains ("$$JuceAndroidRuntimePermissionsCode$$"))
-                    newFile << runtimePermissionsCode;
-                else if (line.contains ("$$JuceAndroidWebViewImports$$"))
-                    newFile << webViewCode.imports;
-                else if (line.contains ("$$JuceAndroidWebViewNativeCode$$"))
-                    newFile << webViewCode.native;
-                else if (line.contains ("$$JuceAndroidWebViewCode$$"))
-                    newFile << webViewCode.main;
-                else if (line.contains ("$$JuceAndroidCameraImports$$"))
-                    newFile << cameraCode.imports;
-                else if (line.contains ("$$JuceAndroidCameraCode$$"))
-                    newFile << cameraCode.main;
-                else if (line.contains ("$$JuceAndroidVideoImports$$"))
-                    newFile << videoCode.imports;
-                else if (line.contains ("$$JuceAndroidVideoCode$$"))
-                    newFile << videoCode.main;
-                else
-                    newFile << line.replace ("$$JuceAppActivityBaseClass$$", androidActivityBaseClassName.get().toString())
-                                   .replace ("JuceAppActivity", className)
-                                   .replace ("package com.juce;", "package " + package + ";") << newLine;
-            }
-
-            javaSourceLines = StringArray::fromLines (newFile.toString());
-        }
-
-        while (javaSourceLines.size() > 2
-                && javaSourceLines[javaSourceLines.size() - 1].trim().isEmpty()
-                && javaSourceLines[javaSourceLines.size() - 2].trim().isEmpty())
-            javaSourceLines.remove (javaSourceLines.size() - 1);
-
-        return javaSourceLines.joinIntoString (newLine);
-    }
-
-    String getRuntimePermissionsCode (const File& javaSourceFolder, const String& className) const
-    {
-        if (static_cast<int> (androidMinimumSDK.get()) >= 23)
-        {
-            auto javaRuntimePermissions = javaSourceFolder.getChildFile ("AndroidRuntimePermissions.java");
-            return javaRuntimePermissions.loadFileAsString().replace ("JuceAppActivity", className);
-        }
-
-        return {};
-    }
-
-    struct MidiCode
-    {
-        String imports;
-        String main;
-    };
-
-    MidiCode getMidiCode (const File& javaSourceFolder, const String& className) const
-    {
-        String juceMidiCode, juceMidiImports;
-
-        juceMidiImports << newLine;
-
-        if (static_cast<int> (androidMinimumSDK.get()) >= 23)
-        {
-            auto javaAndroidMidi = javaSourceFolder.getChildFile ("AndroidMidi.java");
-
-            juceMidiImports << "import android.media.midi.*;" << newLine
-                            << "import android.bluetooth.*;" << newLine
-                            << "import android.bluetooth.le.*;" << newLine;
-
-            juceMidiCode = javaAndroidMidi.loadFileAsString().replace ("JuceAppActivity", className);
-        }
-        else
-        {
-            juceMidiCode = javaSourceFolder.getChildFile ("AndroidMidiFallback.java")
-                                           .loadFileAsString()
-                                           .replace ("JuceAppActivity", className);
-        }
-
-        return { juceMidiImports, juceMidiCode };
-    }
-
-    struct WebViewCode
-    {
-        String imports;
-        String native;
-        String main;
-    };
-
-    WebViewCode getWebViewCode (const File& javaSourceFolder) const
-    {
-        String juceWebViewImports, juceWebViewCodeNative, juceWebViewCode;
-
-        if (static_cast<int> (androidMinimumSDK.get()) >= 23)
-            juceWebViewImports << "import android.webkit.WebResourceError;" << newLine;
-
-        if (static_cast<int> (androidMinimumSDK.get()) >= 21)
-            juceWebViewImports << "import android.webkit.WebResourceRequest;" << newLine;
-
-        if (static_cast<int> (androidMinimumSDK.get()) >= 11)
-            juceWebViewImports << "import android.webkit.WebResourceResponse;" << newLine;
-
-        auto javaWebViewFile = javaSourceFolder.getChildFile ("AndroidWebView.java");
-        auto juceWebViewCodeAll = javaWebViewFile.loadFileAsString();
-
-        if (static_cast<int> (androidMinimumSDK.get()) <= 10)
-        {
-            juceWebViewCode << juceWebViewCodeAll.fromFirstOccurrenceOf ("$$WebViewApi1_10", false, false)
-                                                 .upToFirstOccurrenceOf ("WebViewApi1_10$$", false, false);
-        }
-        else
-        {
-            if (static_cast<int> (androidMinimumSDK.get()) >= 23)
-            {
-                juceWebViewCodeNative << juceWebViewCodeAll.fromFirstOccurrenceOf ("$$WebViewNativeApi23", false, false)
-                                                           .upToFirstOccurrenceOf ("WebViewNativeApi23$$", false, false);
-
-                juceWebViewCode << juceWebViewCodeAll.fromFirstOccurrenceOf ("$$WebViewApi23", false, false)
-                                                     .upToFirstOccurrenceOf ("WebViewApi23$$", false, false);
-            }
-
-            if (static_cast<int> (androidMinimumSDK.get()) >= 21)
-            {
-                juceWebViewCodeNative << juceWebViewCodeAll.fromFirstOccurrenceOf ("$$WebViewNativeApi21", false, false)
-                                                           .upToFirstOccurrenceOf ("WebViewNativeApi21$$", false, false);
-
-                juceWebViewCode << juceWebViewCodeAll.fromFirstOccurrenceOf ("$$WebViewApi21", false, false)
-                                                     .upToFirstOccurrenceOf ("WebViewApi21$$", false, false);
-            }
-            else
-            {
-                juceWebViewCode << juceWebViewCodeAll.fromFirstOccurrenceOf ("$$WebViewApi11_20", false, false)
-                                                     .upToFirstOccurrenceOf ("WebViewApi11_20$$", false, false);
-            }
-        }
-
-        return { juceWebViewImports, juceWebViewCodeNative, juceWebViewCode };
-    }
-
-    struct CameraCode
-    {
-        String imports;
-        String main;
-    };
-
-    CameraCode getCameraCode (const File& javaSourceFolder) const
-    {
-        String juceCameraImports, juceCameraCode;
-
-        if (static_cast<int> (androidMinimumSDK.get()) >= 21)
-        {
-            juceCameraImports << "import android.hardware.camera2.*;" << newLine;
-
-            auto javaCameraFile = javaSourceFolder.getChildFile ("AndroidCamera.java");
-            auto juceCameraCodeAll = javaCameraFile.loadFileAsString();
-
-            juceCameraCode << juceCameraCodeAll.fromFirstOccurrenceOf ("$$CameraApi21", false, false)
-                                               .upToFirstOccurrenceOf ("CameraApi21$$", false, false);
-        }
-
-        return { juceCameraImports, juceCameraCode };
-    }
-
-    struct VideoCode
-    {
-        String imports;
-        String main;
-    };
-
-    VideoCode getVideoCode (const File& javaSourceFolder) const
-    {
-        String juceVideoImports, juceVideoCode;
-
-        if (static_cast<int> (androidMinimumSDK.get()) >= 21)
-        {
-            juceVideoImports << "import android.database.ContentObserver;" << newLine;
-            juceVideoImports << "import android.media.session.*;" << newLine;
-            juceVideoImports << "import android.media.MediaMetadata;" << newLine;
-
-            auto javaVideoFile = javaSourceFolder.getChildFile ("AndroidVideo.java");
-            auto juceVideoCodeAll = javaVideoFile.loadFileAsString();
-
-            juceVideoCode << juceVideoCodeAll.fromFirstOccurrenceOf ("$$VideoApi21", false, false)
-                                             .upToFirstOccurrenceOf ("VideoApi21$$", false, false);
-        }
-
-        return { juceVideoImports, juceVideoCode };
-    }
-
-    void copyAdditionalJavaFiles (const File& sourceFolder, const File& targetFolder) const
-    {
-        auto inAppBillingJavaFileName = String ("IInAppBillingService.java");
-
-        auto inAppBillingJavaSrcFile  = sourceFolder.getChildFile (inAppBillingJavaFileName);
-        auto inAppBillingJavaDestFile = targetFolder.getChildFile (inAppBillingJavaFileName);
-
-        createDirectoryOrThrow (targetFolder);
-
-        jassert (inAppBillingJavaSrcFile.existsAsFile());
-
-        if (inAppBillingJavaSrcFile.existsAsFile())
-            inAppBillingJavaSrcFile.copyFileTo (inAppBillingJavaDestFile);
-    }
-
     void copyAdditionalJavaLibs (const File& targetFolder) const
     {
         auto libPaths = StringArray::fromLines (androidJavaLibs.get().toString());
@@ -1243,58 +1052,6 @@ private:
 
             f.copyFileTo (targetFolder.getChildFile (f.getFileName()));
         }
-    }
-
-    void copyServicesJavaFiles (const File& javaSourceFolder, const File& targetFolder, const String& package) const
-    {
-        if (androidEnableRemoteNotifications.get())
-        {
-            String instanceIdFileName ("JuceFirebaseInstanceIdService.java");
-            String messagingFileName  ("JuceFirebaseMessagingService.java");
-
-            File instanceIdFile (javaSourceFolder.getChildFile (instanceIdFileName));
-            File messagingFile  (javaSourceFolder.getChildFile (messagingFileName));
-
-            jassert (instanceIdFile.existsAsFile());
-            jassert (messagingFile .existsAsFile());
-
-            Array<File> files;
-            files.add (instanceIdFile);
-            files.add (messagingFile);
-
-            for (auto& file : files)
-            {
-                auto newContent = file.loadFileAsString()
-                                      .replace ("package com.juce;", "package " + package + ";");
-                auto targetFile = targetFolder.getChildFile (file.getFileName());
-                overwriteFileIfDifferentOrThrow (targetFile, newContent);
-            }
-        }
-    }
-
-    void copyProviderJavaFile (const File& javaSourceFolder, const File& targetFolder, const String& package) const
-    {
-        auto providerFile = javaSourceFolder.getChildFile ("AndroidSharingContentProvider.java");
-
-        jassert (providerFile.existsAsFile());
-
-        auto targetFile = targetFolder.getChildFile ("SharingContentProvider.java");
-
-        auto fileContent = providerFile.loadFileAsString()
-                                       .replace ("package com.juce;", "package " + package + ";");
-
-        auto commonStart = fileContent.upToFirstOccurrenceOf ("$$ContentProviderApi11", false, false);
-        auto commonEnd   = fileContent.fromFirstOccurrenceOf ("ContentProviderApi11$$", false, false);
-
-        auto middleContent = static_cast<int> (androidMinimumSDK.get()) >= 11
-                                ? fileContent.fromFirstOccurrenceOf ("$$ContentProviderApi11", false, false)
-                                             .upToFirstOccurrenceOf ("ContentProviderApi11$$", false, false)
-                                : String();
-
-        auto newContent = commonStart;
-        newContent << middleContent << commonEnd;
-
-        overwriteFileIfDifferentOrThrow (targetFile, newContent);
     }
 
     void copyExtraResourceFiles() const
@@ -1346,26 +1103,23 @@ private:
         }
     }
 
-    String getActivityName() const
+    String getActivityClass() const
     {
-        return androidActivityClass.get().toString().fromLastOccurrenceOf (".", false, false);
+        auto customActivityClass = androidCustomActivityClass.get().toString();
+
+        return (customActivityClass.isEmpty()) ? "android.app.Activity" : customActivityClass;
     }
 
-    String getActivitySubClassName() const
+    String getApplicationClass() const
     {
-        auto activityPath = androidActivitySubClassName.get().toString();
+        auto customApplicationClass = androidCustomApplicationClass.get().toString();
 
-        return (activityPath.isEmpty()) ? getActivityName() : activityPath.fromLastOccurrenceOf (".", false, false);
-    }
-
-    String getActivityClassPackage() const
-    {
-        return androidActivityClass.get().toString().upToLastOccurrenceOf (".", false, false);
+        return (customApplicationClass.isEmpty()) ? "com.roli.juce.JuceApp" : customApplicationClass;
     }
 
     String getJNIActivityClassName() const
     {
-        return androidActivityClass.get().toString().replaceCharacter ('.', '/');
+        return getActivityClass().replaceCharacter ('.', '/');
     }
 
     static LibraryModule* getCoreModule (const OwnedArray<LibraryModule>& modules)
@@ -1572,32 +1326,15 @@ private:
 
         defines.set ("JUCE_ANDROID", "1");
         defines.set ("JUCE_ANDROID_API_VERSION", androidMinimumSDK.get());
-        defines.set ("JUCE_ANDROID_ACTIVITY_CLASSNAME", getJNIActivityClassName().replaceCharacter ('/', '_'));
-        defines.set ("JUCE_ANDROID_ACTIVITY_CLASSPATH", "\"" + getJNIActivityClassName() + "\"");
-        defines.set ("JUCE_ANDROID_SHARING_CONTENT_PROVIDER_CLASSNAME", getSharingContentProviderClassName().replaceCharacter('.', '_'));
-        defines.set ("JUCE_ANDROID_SHARING_CONTENT_PROVIDER_CLASSPATH", "\"" + getSharingContentProviderClassName().replaceCharacter('.', '/') + "\"");
         defines.set ("JUCE_PUSH_NOTIFICATIONS", "1");
 
         if (androidInAppBillingPermission.get())
             defines.set ("JUCE_IN_APP_PURCHASES", "1");
 
-        if (androidEnableRemoteNotifications.get())
-        {
-            auto instanceIdClassName = getActivityClassPackage() + ".JuceFirebaseInstanceIdService";
-            auto messagingClassName  = getActivityClassPackage() + ".JuceFirebaseMessagingService";
-            defines.set ("JUCE_FIREBASE_INSTANCE_ID_SERVICE_CLASSNAME", instanceIdClassName.replaceCharacter ('.', '_'));
-            defines.set ("JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME", messagingClassName.replaceCharacter ('.', '_'));
-        }
-
         if (supportsGLv3())
             defines.set ("JUCE_ANDROID_GL_ES_VERSION_3_0", "1");
 
         return defines;
-    }
-
-    String getSharingContentProviderClassName() const
-    {
-        return getActivityClassPackage() + ".SharingContentProvider";
     }
 
     StringPairArray getProjectPreprocessorDefs() const
@@ -1737,7 +1474,7 @@ private:
         setAttributeIfNotPresent (*manifest, "xmlns:android", "http://schemas.android.com/apk/res/android");
         setAttributeIfNotPresent (*manifest, "android:versionCode", androidVersionCode.get());
         setAttributeIfNotPresent (*manifest, "android:versionName",  project.getVersionString());
-        setAttributeIfNotPresent (*manifest, "package", getActivityClassPackage());
+        setAttributeIfNotPresent (*manifest, "package", project.getBundleIdentifierString());
 
         return manifest;
     }
@@ -1797,6 +1534,7 @@ private:
     {
         auto* app = getOrCreateChildWithName (manifest, "application");
         setAttributeIfNotPresent (*app, "android:label", "@string/app_name");
+        setAttributeIfNotPresent (*app, "android:name", getApplicationClass());
 
         if (androidTheme.get().toString().isNotEmpty())
             setAttributeIfNotPresent (*app, "android:theme", androidTheme.get());
@@ -1826,7 +1564,7 @@ private:
     {
         auto* act = getOrCreateChildWithName (application, "activity");
 
-        setAttributeIfNotPresent (*act, "android:name", getActivitySubClassName());
+        setAttributeIfNotPresent (*act, "android:name", getActivityClass());
         setAttributeIfNotPresent (*act, "android:label", "@string/app_name");
 
         if (! act->hasAttribute ("android:configChanges"))
@@ -1918,8 +1656,9 @@ private:
         if (androidEnableContentSharing.get())
         {
             auto* provider = application.createNewChildElement ("provider");
-            provider->setAttribute ("android:name", getSharingContentProviderClassName());
-            provider->setAttribute ("android:authorities", getSharingContentProviderClassName().toLowerCase());
+
+            provider->setAttribute ("android:name", "com.roli.juce.JuceSharingContentProvider");
+            provider->setAttribute ("android:authorities", project.getBundleIdentifierString().toLowerCase() + ".sharingcontentprovider");
             provider->setAttribute ("android:grantUriPermissions", "true");
             provider->setAttribute ("android:exported", "false");
         }
