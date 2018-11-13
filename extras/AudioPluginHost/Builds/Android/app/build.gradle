@@ -83,11 +83,21 @@ android {
         }
     }
 
-repositories {
-}
+    sourceSets {
+        main.java.srcDirs +=
+            ["../../../../../modules/juce_core/native/javacore/init",
+             "../../../../../modules/juce_core/native/javacore/app",
+             "../../../../../modules/juce_gui_basics/native/javacore/app"]
 
-dependencies {
-}
+        main.res.srcDirs +=
+            []
+    }
+
+    repositories {
+    }
+
+    dependencies {
+    }
 
 
 }

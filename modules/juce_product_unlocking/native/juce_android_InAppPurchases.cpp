@@ -36,13 +36,13 @@ namespace juce
     METHOD (consumePurchase,         "consumePurchase",         "(ILjava/lang/String;Ljava/lang/String;)I") \
     METHOD (getPurchaseHistory,      "getPurchaseHistory",      "(ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Landroid/os/Bundle;)Landroid/os/Bundle;")
 
-DECLARE_JNI_CLASS (IInAppBillingService, "com/android/vending/billing/IInAppBillingService");
+DECLARE_JNI_CLASS (IInAppBillingService, "com/android/vending/billing/IInAppBillingService")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
     STATICMETHOD (asInterface,      "asInterface",      "(Landroid/os/IBinder;)Lcom/android/vending/billing/IInAppBillingService;") \
 
-DECLARE_JNI_CLASS (IInAppBillingServiceStub, "com/android/vending/billing/IInAppBillingService$Stub");
+DECLARE_JNI_CLASS (IInAppBillingServiceStub, "com/android/vending/billing/IInAppBillingService$Stub")
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================

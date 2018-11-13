@@ -119,7 +119,7 @@ private:
     void lookAndFeelChanged() override;
 
     //==============================================================================
-    ValueWithDefault* valueWithDefault;
+    ValueWithDefault* valueWithDefault = nullptr;
 
     int maxHeight = 0;
     int numHidden = 0;

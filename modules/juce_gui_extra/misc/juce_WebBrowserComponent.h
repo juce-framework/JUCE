@@ -134,10 +134,10 @@ public:
     void visibilityChanged() override;
     /** @internal */
     void focusGained (FocusChangeType) override;
-
+    /** @internal */
+    class Pimpl;
 private:
     //==============================================================================
-    class Pimpl;
     std::unique_ptr<Pimpl> browser;
     bool blankPageShown = false, unloadPageWhenBrowserIsHidden;
     String lastURL;
@@ -146,10 +146,6 @@ private:
 
     void reloadLastURL();
     void checkWindowAssociation();
-
-  #if JUCE_ANDROID
-    friend bool juce_webViewPageLoadStarted (WebBrowserComponent*, const String&);
-  #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebBrowserComponent)
 };

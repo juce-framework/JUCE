@@ -1324,6 +1324,14 @@ private:
 
     struct Variable
     {
+        // VS2015 requires a constructor to avoid aggregate initialization
+        Variable (const String& n, Type t, bool isGlobalVar, bool isConstVar, const var& cv,
+                  int nElements = 0, Variable* pArray = nullptr, Variable* nArray = nullptr)
+           : name (n), type (t), isGlobal (isGlobalVar), isConst (isConstVar), constantValue (cv),
+             numElements (nElements), previousArray (pArray), nextArray (nArray)
+        {
+        }
+
         String name;
         Type type;
         bool isGlobal, isConst;

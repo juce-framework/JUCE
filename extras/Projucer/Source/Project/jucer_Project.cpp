@@ -532,6 +532,8 @@ void Project::warnAboutOldProjucerVersion()
                                                   "\n\n"
                                                   "Always make sure that you're running the very latest version, "
                                                   "preferably compiled directly from the JUCE repository that you're working with!");
+
+            return;
         }
     }
 }
@@ -1646,7 +1648,8 @@ static String getCompanyNameOrDefault (StringRef str)
 
 String Project::getDefaultBundleIdentifierString() const
 {
-    return "com." + getCompanyNameOrDefault (getCompanyNameString()) + "." + CodeHelpers::makeValidIdentifier (getProjectNameString(), false, true, false);
+    return "com." + CodeHelpers::makeValidIdentifier (getCompanyNameOrDefault (getCompanyNameString()), false, true, false)
+            + "." + CodeHelpers::makeValidIdentifier (getProjectNameString(), false, true, false);
 }
 
 String Project::getDefaultPluginManufacturerString() const
@@ -1918,12 +1921,15 @@ EnabledModuleList& Project::getEnabledModules()
     return *enabledModuleList;
 }
 
-static Array<File> getAllPossibleModulePathsFromExporters (Project& project)
+static StringArray getModulePathsFromExporters (Project& project, bool onlyThisOS)
 {
     StringArray paths;
 
     for (Project::ExporterIterator exporter (project); exporter.next();)
     {
+        if (onlyThisOS && ! exporter->mayCompileOnCurrentOS())
+            continue;
+
         auto& modules = project.getEnabledModules();
         auto n = modules.getNumModules();
 
@@ -1946,9 +1952,19 @@ static Array<File> getAllPossibleModulePathsFromExporters (Project& project)
             paths.addIfNotAlreadyThere (oldPath);
     }
 
+    return paths;
+}
+
+static Array<File> getExporterModulePathsToScan (Project& project)
+{
+    auto exporterPaths = getModulePathsFromExporters (project, true);
+
+    if (exporterPaths.isEmpty())
+        exporterPaths = getModulePathsFromExporters (project, false);
+
     Array<File> files;
 
-    for (auto& path : paths)
+    for (auto& path : exporterPaths)
     {
         auto f = project.resolveFilename (path);
 
@@ -1972,9 +1988,9 @@ AvailableModuleList& Project::getExporterPathsModuleList()
 void Project::rescanExporterPathModules (bool async)
 {
     if (async)
-        exporterPathsModuleList->scanPathsAsync (getAllPossibleModulePathsFromExporters (*this));
+        exporterPathsModuleList->scanPathsAsync (getExporterModulePathsToScan (*this));
     else
-        exporterPathsModuleList->scanPaths (getAllPossibleModulePathsFromExporters (*this));
+        exporterPathsModuleList->scanPaths (getExporterModulePathsToScan (*this));
 }
 
 ModuleIDAndFolder Project::getModuleWithID (const String& id)

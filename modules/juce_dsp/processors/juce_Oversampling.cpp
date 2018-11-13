@@ -544,8 +544,6 @@ Oversampling<SampleType>::Oversampling (size_t newNumChannels, size_t newFactor,
 {
     jassert (isPositiveAndBelow (newFactor, 5) && numChannels > 0);
 
-    factorOversampling = static_cast<size_t> (1) << newFactor;
-
     if (newFactor == 0)
     {
         addDummyOversamplingStage();

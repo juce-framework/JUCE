@@ -115,7 +115,7 @@ public:
 private:
     void valueChanged (Value&) override { sendChangeMessage (true); }
 
-    ValueWithDefault* valueWithDefault;
+    ValueWithDefault* valueWithDefault = nullptr;
     Value sourceValue;
     Array<var> mappings;
 

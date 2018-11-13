@@ -324,6 +324,47 @@ public:
     */
     static void JUCE_CALLTYPE setCurrentThreadName (const String& newThreadName);
 
+   #if JUCE_ANDROID || defined (DOXYGEN)
+    //==============================================================================
+    /** Initialises the JUCE subsystem for projects not created by the Projucer
+
+        On Android, JUCE needs to be initialised once before it is used. The Projucer
+        will automatically generate the necessary java code to do this. However, if
+        you are using JUCE without the Projucer or are creating a library made with
+        JUCE intended for use in non-JUCE apks, then you must call this method
+        manually once on apk startup.
+
+        You can call this method from C++ or directly from java by calling the
+        following java method:
+
+        @code
+        com.roli.juce.Java.initialiseJUCE (myContext);
+        @endcode
+
+        Note that the above java method is only available in Android Studio projects
+        created by the Projucer. If you need to call this from another type of project
+        then you need to add the following java file to
+        your project:
+
+        @code
+        package com.roli.juce;
+
+        public class Java
+        {
+            static { System.loadLibrary ("juce_jni"); }
+            public native static void initialiseJUCE (Context context);
+        }
+        @endcode
+
+        @param jniEnv   this is a pointer to JNI's JNIEnv variable. Any callback
+                        from Java into C++ will have this passed in as it's first
+                        parameter.
+        @param jContext this is a jobject referring to your app/service/receiver/
+                        provider's Context. JUCE needs this for many of it's internal
+                        functions.
+    */
+    static void initialiseJUCE (void* jniEnv, void* jContext);
+   #endif
 
 private:
     //==============================================================================
