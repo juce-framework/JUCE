@@ -187,8 +187,13 @@ bool ARAAudioSource::Reader::readSamples (
     int numSamples)
 {
     Ref::ScopedAccess source (ref, true);
-    if (! source || araHostReader == nullptr)
+    if (!source || araHostReader == nullptr)
+    {
+        for (int chan_i = 0; chan_i < (int) tmpPtrs.size (); ++chan_i)
+            FloatVectorOperations::clear ((float *) destSamples[chan_i], numSamples);
         return false;
+    }
+
     for (int chan_i = 0; chan_i < (int) tmpPtrs.size(); ++chan_i)
         if (chan_i < numDestChannels && destSamples[chan_i] != nullptr)
             tmpPtrs[chan_i] = (void*) (destSamples[chan_i] + startOffsetInDestBuffer);
