@@ -271,7 +271,7 @@ protected:
     public:
         AndroidBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
             : BuildConfiguration (p, settings, e),
-              androidArchitectures               (config, Ids::androidArchitectures,               getUndoManager(), isDebug() ? "armeabi-v7a x86" : ""),
+              androidArchitectures               (config, Ids::androidArchitectures,               getUndoManager(), isDebug() ? "armeabi-v7a x86 arm64-v8a x86_64" : ""),
               androidBuildConfigRemoteNotifsConfigFile (config, Ids::androidBuildConfigRemoteNotifsConfigFile, getUndoManager()),
               androidAdditionalXmlValueResources (config, Ids::androidAdditionalXmlValueResources, getUndoManager()),
               androidAdditionalDrawableResources (config, Ids::androidAdditionalDrawableResources, getUndoManager()),
@@ -294,7 +294,7 @@ protected:
             addGCCOptimisationProperty (props);
 
             props.add (new TextPropertyComponent (androidArchitectures, "Architectures", 256, false),
-                       "A list of the ARM architectures to build (for a fat binary). Leave empty to build for all possible android architectures.");
+                       "A list of the architectures to build (for a fat binary). Leave empty to build for all possible android architectures.");
 
             props.add (new TextPropertyComponent (androidBuildConfigRemoteNotifsConfigFile.getPropertyAsValue(), "Remote Notifications Config File", 2048, false),
                        "Path to google-services.json file. This will be the file provided by Firebase when creating a new app in Firebase console. "
