@@ -13,6 +13,7 @@ class ARASampleProjectDocumentController : public juce::ARADocumentController
 public:
     ARASampleProjectDocumentController() noexcept;
     
+protected:
     // ARA class creation overrides
     ARA::PlugIn::EditorView* doCreateEditorView() noexcept override;
     ARA::PlugIn::PlaybackRenderer* doCreatePlaybackRenderer() noexcept override;
