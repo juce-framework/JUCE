@@ -1648,7 +1648,8 @@ static String getCompanyNameOrDefault (StringRef str)
 
 String Project::getDefaultBundleIdentifierString() const
 {
-    return "com." + getCompanyNameOrDefault (getCompanyNameString()) + "." + CodeHelpers::makeValidIdentifier (getProjectNameString(), false, true, false);
+    return "com." + CodeHelpers::makeValidIdentifier (getCompanyNameOrDefault (getCompanyNameString()), false, true, false)
+            + "." + CodeHelpers::makeValidIdentifier (getProjectNameString(), false, true, false);
 }
 
 String Project::getDefaultPluginManufacturerString() const
