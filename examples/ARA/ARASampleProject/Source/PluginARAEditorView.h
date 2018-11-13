@@ -23,7 +23,7 @@ public:
         ARASampleProjectEditorView* araEditorView;
     public:
         SelectionListener (ARA::PlugIn::EditorView* editorView);
-        ~SelectionListener ();
+        virtual ~SelectionListener ();
         const ARA::PlugIn::ViewSelection* getMostRecentSelection () const;
 
         // will be called from ARASampleProjectEditorView::doNotifySelection

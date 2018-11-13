@@ -20,9 +20,9 @@ void RegionSequenceView::paint (Graphics& g)
 RegionSequenceView::RegionSequenceView (ARA::PlugIn::RegionSequence& sequence)
 : isSelected (false)
 , startInSecs (0.0)
+, regionSequence (nullptr)
 , audioThumbCache (1)
 , audioThumb (128, audioFormatManger, audioThumbCache)
-, regionSequence (nullptr)
 {
     name = String (sequence.getName());
     orderIndex = String (sequence.getOrderIndex());

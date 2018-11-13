@@ -19,7 +19,7 @@ public:
     ARA::PlugIn::RegionSequence* doCreateRegionSequence (ARA::PlugIn::Document* document, ARA::ARARegionSequenceHostRef hostRef) noexcept override;
 
     // called when the ARA host stops editing the document
-    virtual void doEndEditing () noexcept;
+    virtual void doEndEditing () noexcept override;
 
     // property update notifications - our plug-in displays region sequences, so
     // we only need to subscribe to region sequence related notifications

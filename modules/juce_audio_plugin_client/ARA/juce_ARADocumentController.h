@@ -62,7 +62,7 @@ class ARARegionSequenceUpdateListener
 public:
     // listener lifetime takes care of adding and removing us from the document controller
     ARARegionSequenceUpdateListener (ARA::PlugIn::DocumentController* documentController);
-    ~ARARegionSequenceUpdateListener ();
+    virtual ~ARARegionSequenceUpdateListener ();
 
     ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
 
@@ -87,7 +87,7 @@ class ARAAudioSourceUpdateListener
 {
 public:
     ARAAudioSourceUpdateListener (ARA::PlugIn::DocumentController* documentController);
-    ~ARAAudioSourceUpdateListener ();
+    virtual ~ARAAudioSourceUpdateListener ();
 
     ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
 
