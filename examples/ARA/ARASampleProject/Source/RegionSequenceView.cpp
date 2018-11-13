@@ -1,5 +1,6 @@
 #include "RegionSequenceView.h"
-#include "PluginARARegionSequence.h"
+#include "PluginARAPlaybackRenderer.h"
+#include "PluginARADocumentController.h"
 
 void RegionSequenceView::paint (Graphics& g)
 {
@@ -24,10 +25,11 @@ RegionSequenceView::RegionSequenceView (ARA::PlugIn::RegionSequence& sequence)
 , audioThumbCache (1)
 , audioThumb (128, audioFormatManger, audioThumbCache)
 {
+    ARASampleProjectDocumentController* documentController = static_cast<ARASampleProjectDocumentController*> (sequence.getDocument ()->getDocumentController ());
     name = String (sequence.getName());
     orderIndex = String (sequence.getOrderIndex());
     audioThumb.addChangeListener (this);
-    audioThumb.setReader ((dynamic_cast<ARASampleProjectRegionSequence&> (sequence)).newReader(), 1);
+    audioThumb.setReader (documentController->createRegionSequenceReader (&sequence), 1);
     startInSecs = audioThumb.getTotalLength();
     
     regionSequence = &sequence;
