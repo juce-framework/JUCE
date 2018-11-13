@@ -1,5 +1,6 @@
 #include "juce_ARADocumentController.h"
 #include "juce_ARAAudioSource.h"
+#include "juce_ARARegionSequence.h"
 
 const ARA::ARAFactory* ARA::PlugIn::DocumentController::getARAFactory() noexcept
 {
@@ -74,6 +75,20 @@ const ARA::ARAFactory* ARA::PlugIn::DocumentController::getARAFactory() noexcept
 namespace juce
 {
 
+void ARADocumentController::willUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion, ARA::PlugIn::PropertiesPtr<ARA::ARAPlaybackRegionProperties> newProperties) noexcept
+{
+    // TODO JUCE_ARA
+    // replace these with listener callbacks
+    ARARegionSequence::willUpdatePlaybackRegionProperties (playbackRegion, newProperties);
+}
+
+void ARADocumentController::didUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept
+{
+    // TODO JUCE_ARA
+    // replace these with listener callbacks
+    ARARegionSequence::didUpdatePlaybackRegionProperties(playbackRegion);
+}
+
 ARA::PlugIn::AudioSource* ARADocumentController::doCreateAudioSource (ARA::PlugIn::Document *document, ARA::ARAAudioSourceHostRef hostRef) noexcept
 {
     return new ARAAudioSource (document, hostRef);
@@ -135,6 +150,15 @@ void ARADocumentController::removeAudioSourceUpdateListener (ARAAudioSourceUpdat
 
 //==============================================================================
 
+ARA::PlugIn::RegionSequence* ARADocumentController::doCreateRegionSequence (ARA::PlugIn::Document* document, ARA::ARARegionSequenceHostRef hostRef) noexcept
+{
+    return new ARARegionSequence (document, hostRef);
+}
+
+static void willUpdatePlaybackRegionProperties (
+    ARA::PlugIn::PlaybackRegion*,
+    ARA::PlugIn::PropertiesPtr<ARA::ARAPlaybackRegionProperties>);
+static void didUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion*);
 void ARADocumentController::willUpdateRegionSequenceProperties (ARA::PlugIn::RegionSequence* regionSequence, ARA::PlugIn::PropertiesPtr<ARA::ARARegionSequenceProperties> newProperties) noexcept
 {
     for (ARARegionSequenceUpdateListener* updateListener : regionSequenceUpdateListeners)

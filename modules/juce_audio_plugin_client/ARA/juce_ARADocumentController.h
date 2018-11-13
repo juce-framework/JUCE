@@ -23,6 +23,10 @@ public:
     //==============================================================================
     // Override document controller methods here
 protected:
+
+    void willUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion, ARA::PlugIn::PropertiesPtr<ARA::ARAPlaybackRegionProperties> newProperties) noexcept override;
+    void didUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept override;
+
     // needed for ARA AudioFormatReaders to be thread-safe and work properly!
     ARA::PlugIn::AudioSource* doCreateAudioSource (ARA::PlugIn::Document* document, ARA::ARAAudioSourceHostRef hostRef) noexcept override;
     void willUpdateAudioSourceProperties (ARA::PlugIn::AudioSource* audioSource, ARA::PlugIn::PropertiesPtr<ARA::ARAAudioSourceProperties> newProperties) noexcept override;
@@ -36,6 +40,7 @@ protected:
     // region sequence update overrides
     // TODO JUCE_ARA we do this so we can notify ARARegionSequenceUpdateListeners, but subclasses of
     // juce::ARADocumentController will have to manually call these functions to get the listener behaviour to work
+    ARA::PlugIn::RegionSequence* doCreateRegionSequence (ARA::PlugIn::Document* document, ARA::ARARegionSequenceHostRef hostRef) noexcept override;
     void willUpdateRegionSequenceProperties (ARA::PlugIn::RegionSequence* regionSequence, ARA::PlugIn::PropertiesPtr<ARA::ARARegionSequenceProperties> newProperties) noexcept override;
     void didUpdateRegionSequenceProperties (ARA::PlugIn::RegionSequence* regionSequence) noexcept override;
     void willDestroyRegionSequence (ARA::PlugIn::RegionSequence* regionSequence) noexcept override;

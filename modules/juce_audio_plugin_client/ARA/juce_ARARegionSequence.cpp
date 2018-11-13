@@ -1,18 +1,18 @@
-#include "PluginARARegionSequence.h"
+#include "juce_ARARegionSequence.h"
 
 namespace juce
 {
 
 #if JUCE_DEBUG
- bool ARASampleProjectRegionSequence::stateUpdatePlaybackRegionProperties = false;
+ bool ARARegionSequence::stateUpdatePlaybackRegionProperties = false;
 #endif
 
-class ARASampleProjectRegionSequence::Reader : public AudioFormatReader
+class ARARegionSequence::Reader : public AudioFormatReader
 {
-    friend class ARASampleProjectRegionSequence;
+    friend class ARARegionSequence;
 
 public:
-    Reader (ARASampleProjectRegionSequence*, double sampleRate);
+    Reader (ARARegionSequence*, double sampleRate);
     virtual ~Reader();
 
     bool readSamples (
@@ -28,24 +28,24 @@ private:
     AudioSampleBuffer sampleBuffer;
 };
 
-ARASampleProjectRegionSequence::ARASampleProjectRegionSequence (ARA::PlugIn::Document* document, ARA::ARARegionSequenceHostRef hostRef)
+ARARegionSequence::ARARegionSequence (ARA::PlugIn::Document* document, ARA::ARARegionSequenceHostRef hostRef)
     : ARA::PlugIn::RegionSequence (document, hostRef)
 {
     ref = new Ref (this);
     prevSequenceForNewPlaybackRegion = nullptr;
 }
 
-ARASampleProjectRegionSequence::~ARASampleProjectRegionSequence()
+ARARegionSequence::~ARARegionSequence()
 {
     ref->reset();
 }
 
-AudioFormatReader* ARASampleProjectRegionSequence::newReader (double sampleRate)
+AudioFormatReader* ARARegionSequence::newReader (double sampleRate)
 {
     return new Reader (this, sampleRate);
 }
 
-/*static*/ void ARASampleProjectRegionSequence::willUpdatePlaybackRegionProperties (
+/*static*/ void ARARegionSequence::willUpdatePlaybackRegionProperties (
     ARA::PlugIn::PlaybackRegion* region,
     ARA::PlugIn::PropertiesPtr<ARA::ARAPlaybackRegionProperties> properties)
 {
@@ -54,8 +54,8 @@ AudioFormatReader* ARASampleProjectRegionSequence::newReader (double sampleRate)
     stateUpdatePlaybackRegionProperties = true;
    #endif
 
-    ARASampleProjectRegionSequence* oldSequence = static_cast<ARASampleProjectRegionSequence*> (region->getRegionSequence());
-    ARASampleProjectRegionSequence* newSequence = static_cast<ARASampleProjectRegionSequence*> (ARA::PlugIn::fromRef (properties->regionSequenceRef));
+    ARARegionSequence* oldSequence = static_cast<ARARegionSequence*> (region->getRegionSequence());
+    ARARegionSequence* newSequence = static_cast<ARARegionSequence*> (ARA::PlugIn::fromRef (properties->regionSequenceRef));
     jassert (newSequence->prevSequenceForNewPlaybackRegion == nullptr);
 
     newSequence->ref->reset();
@@ -71,15 +71,15 @@ AudioFormatReader* ARASampleProjectRegionSequence::newReader (double sampleRate)
     }
 }
 
-/*static*/ void ARASampleProjectRegionSequence::didUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* region)
+/*static*/ void ARARegionSequence::didUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* region)
 {
    #if JUCE_DEBUG
     jassert (stateUpdatePlaybackRegionProperties);
     stateUpdatePlaybackRegionProperties = false;
    #endif
 
-    ARASampleProjectRegionSequence* newSequence = static_cast<ARASampleProjectRegionSequence*> (region->getRegionSequence());
-    ARASampleProjectRegionSequence* oldSequence = newSequence->prevSequenceForNewPlaybackRegion;
+    ARARegionSequence* newSequence = static_cast<ARARegionSequence*> (region->getRegionSequence());
+    ARARegionSequence* oldSequence = newSequence->prevSequenceForNewPlaybackRegion;
     newSequence->prevSequenceForNewPlaybackRegion = nullptr;
 
     auto* source = region->getAudioModification()->getAudioSource();
@@ -95,7 +95,7 @@ AudioFormatReader* ARASampleProjectRegionSequence::newReader (double sampleRate)
     newSequence->ref = new Ref (newSequence);
 }
 
-bool ARASampleProjectRegionSequence::isSampleAccessEnabled() const
+bool ARARegionSequence::isSampleAccessEnabled() const
 {
     Ref::ScopedAccess access (ref);
     for (auto& x : sourceRefCount)
@@ -104,8 +104,8 @@ bool ARASampleProjectRegionSequence::isSampleAccessEnabled() const
     return true;
 }
 
-ARASampleProjectRegionSequence::Reader::Reader (ARASampleProjectRegionSequence* sequence, double sampleRate_)
-    : AudioFormatReader (nullptr, "ARASampleProjectRegionSequenceReader")
+ARARegionSequence::Reader::Reader (ARARegionSequence* sequence, double sampleRate_)
+    : AudioFormatReader (nullptr, "ARARegionSequenceReader")
     , ref (sequence->ref)
 {
     bitsPerSample = 32;
@@ -140,13 +140,13 @@ ARASampleProjectRegionSequence::Reader::Reader (ARASampleProjectRegionSequence* 
     }
 }
 
-ARASampleProjectRegionSequence::Reader::~Reader()
+ARARegionSequence::Reader::~Reader()
 {
     for (auto& x : sourceReaders)
         delete x.second;
 }
 
-bool ARASampleProjectRegionSequence::Reader::readSamples (
+bool ARARegionSequence::Reader::readSamples (
     int** destSamples,
     int numDestChannels,
     int startOffsetInDestBuffer,

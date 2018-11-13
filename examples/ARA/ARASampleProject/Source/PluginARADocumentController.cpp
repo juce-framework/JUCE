@@ -11,7 +11,6 @@
 #include "PluginARADocumentController.h"
 #include "PluginARAPlaybackRenderer.h"
 #include "PluginARAEditorView.h"
-#include "PluginARARegionSequence.h"
 
 ARASampleProjectDocumentController::ARASampleProjectDocumentController() noexcept
 : juce::ARADocumentController()
@@ -32,29 +31,12 @@ ARA::PlugIn::PlaybackRenderer* ARASampleProjectDocumentController::doCreatePlayb
     return new ARASampleProjectPlaybackRenderer (this, *araAudioSourceReadingThread.get (), (1 << 16));
 }
 
-// return an instance of our region sequence class, which ties in with a special region sequence audio reader
-ARA::PlugIn::RegionSequence* ARASampleProjectDocumentController::doCreateRegionSequence (ARA::PlugIn::Document* document, ARA::ARARegionSequenceHostRef hostRef) noexcept
-{
-    return new ARASampleProjectRegionSequence (document, hostRef);
-}
-
-void ARASampleProjectDocumentController::willUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion, ARA::PlugIn::PropertiesPtr<ARA::ARAPlaybackRegionProperties> newProperties) noexcept
-{
-    ARASampleProjectRegionSequence::willUpdatePlaybackRegionProperties (playbackRegion, newProperties);
-}
-
-void ARASampleProjectDocumentController::didUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept
-{
-    ARASampleProjectRegionSequence::didUpdatePlaybackRegionProperties (playbackRegion);
-}
-
 //==============================================================================
 // This creates new instances of the document controller..
 ARA::PlugIn::DocumentController* ARA::PlugIn::DocumentController::doCreateDocumentController() noexcept
 {
     return new ARASampleProjectDocumentController();
 };
-
 
 //==============================================================================
 

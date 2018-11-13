@@ -20,12 +20,6 @@ protected:
     // ARA class creation overrides
     ARA::PlugIn::EditorView* doCreateEditorView() noexcept override;
     ARA::PlugIn::PlaybackRenderer* doCreatePlaybackRenderer() noexcept override;
-    ARA::PlugIn::RegionSequence* doCreateRegionSequence (ARA::PlugIn::Document* document, ARA::ARARegionSequenceHostRef hostRef) noexcept override;
-
-    // property update notifications - our plug-in displays region sequences, so
-    // we only need to subscribe to region sequence related notifications
-    void willUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion, ARA::PlugIn::PropertiesPtr<ARA::ARAPlaybackRegionProperties> newProperties) noexcept override;
-    void didUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept override;
 
 private:
     // Thread used by buffering audio sources to read samples from the host
