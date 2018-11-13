@@ -143,7 +143,7 @@ public:
     }
 
 private:
-    ValueWithDefault* valueWithDefault;
+    ValueWithDefault* valueWithDefault = nullptr;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RemapperValueSourceWithDefault)

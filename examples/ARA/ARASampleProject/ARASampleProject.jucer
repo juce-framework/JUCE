@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="v5FTSA" name="ARASampleProject" projectType="audioplug" jucerVersion="5.4.0"
+<JUCERPROJECT id="v5FTSA" name="ARASampleProject" projectType="audioplug" jucerVersion="5.4.1"
               pluginCode="AraT" pluginVST3Category="Analyzer" pluginVSTCategory="kPlugCategAnalysis"
               pluginFormats="buildAU,buildVST3,enableARA" userNotes="Special thanks to SoundRadix for coming up with this example!"
               companyName="Celemony" companyWebsite="https://www.celemony.com"

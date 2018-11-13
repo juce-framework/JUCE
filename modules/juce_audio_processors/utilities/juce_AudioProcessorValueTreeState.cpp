@@ -429,14 +429,14 @@ bool AudioProcessorValueTreeState::flushParameterValuesToValueTree()
 {
     ScopedLock lock (valueTreeChanging);
 
-    return std::accumulate (std::begin (parameters), std::end (parameters),
-                            false,
-                            [this](bool anyUpdated, std::unique_ptr<ParameterAdapter>& ap) {
-                                return ap->flushToTree (getChildValueTree (ap->getParameter().paramID),
-                                                        valuePropertyID,
-                                                        undoManager)
-                                       || anyUpdated;
-                            });
+    bool anyUpdated = false;
+
+    for (auto& p : parameters)
+        anyUpdated |= p->flushToTree (getChildValueTree (p->getParameter().paramID),
+                                      valuePropertyID,
+                                      undoManager);
+
+    return anyUpdated;
 }
 
 void AudioProcessorValueTreeState::timerCallback()

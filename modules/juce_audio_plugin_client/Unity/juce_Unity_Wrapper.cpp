@@ -355,15 +355,7 @@ public:
 
         if (parametersPtr == nullptr)
         {
-            auto paramsCopy = juceParameters.params;
-            for (auto* parameter : paramsCopy)
-            {
-                // Unity only displays parameters using a slider so remove any choice parameters
-                if (! parameter->getAllValueStrings().isEmpty())
-                    paramsCopy.remove (paramsCopy.indexOf (parameter));
-            }
-
-            numParams = paramsCopy.size();
+            numParams = juceParameters.params.size();
 
             parametersPtr.reset (static_cast<UnityAudioParameterDefinition*> (std::calloc (static_cast<size_t> (numParams),
                                                                               sizeof (UnityAudioParameterDefinition))));
@@ -372,7 +364,7 @@ public:
 
             for (int i = 0; i < numParams; ++i)
             {
-                auto* parameter = paramsCopy[i];
+                auto* parameter = juceParameters.params[i];
                 auto& paramDef = parametersPtr.get()[i];
 
                 strncpy (paramDef.name, parameter->getName (15).toRawUTF8(), 15);
@@ -386,22 +378,8 @@ public:
                 paramDef.defaultVal = parameter->getDefaultValue();
                 paramDef.min = 0.0f;
                 paramDef.max = 1.0f;
-
-                float scale = 1.0f;
-                float exp = 1.0f;
-
-                if (auto* floatParam = dynamic_cast<AudioParameterFloat*> (parameter))
-                {
-                    scale = floatParam->range.end;
-                    exp = floatParam->range.skew;
-                }
-                else if (auto* intParam = dynamic_cast<AudioParameterInt*> (parameter))
-                {
-                    scale = (float) intParam->getRange().getEnd();
-                }
-
-                paramDef.displayScale = scale;
-                paramDef.displayExponent = exp;
+                paramDef.displayScale = 1.0f;
+                paramDef.displayExponent = 1.0f;
             }
         }
 

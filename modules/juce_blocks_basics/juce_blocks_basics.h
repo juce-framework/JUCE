@@ -31,7 +31,7 @@
 
   ID:               juce_blocks_basics
   vendor:           juce
-  version:          5.4.0
+  version:          5.4.1
   name:             Provides low-level control over ROLI BLOCKS devices
   description:      JUCE wrapper for low-level control over ROLI BLOCKS devices.
   website:          http://developer.roli.com

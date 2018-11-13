@@ -3,6 +3,14 @@
 This file just lists the more notable headline features. For more detailed info
 about minor changes and bugfixes, please see the git log!
 
+Version 5.4.1
+  - Fixed a VST2 compilation error in VS2013
+  - Projucer:  Fixed some live-build compilation errors
+  - Fixed a bug in the Oversampling class
+  - MPE:  Made MPESynthesiserVoice::noteOnTime public
+  - Fixed some bugs in the Unity plug-in wrapper
+  - Fixed some VS2015 compiler errors
+
 Version 5.4.0
   - macOS Mojave and iOS 12 support
   - Windows hiDPI support

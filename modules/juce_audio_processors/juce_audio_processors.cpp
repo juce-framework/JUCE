@@ -39,8 +39,6 @@
 #include "juce_audio_processors.h"
 #include <juce_gui_extra/juce_gui_extra.h>
 
-#include <numeric>
-
 //==============================================================================
 #if JUCE_MAC
  #if JUCE_SUPPORT_CARBON \
