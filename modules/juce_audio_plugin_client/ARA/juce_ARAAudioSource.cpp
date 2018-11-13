@@ -129,6 +129,10 @@ void ARAAudioSource::doUpdateAudioSourceContent (ARA::PlugIn::AudioSource* audio
     if (audioSource != this)
         return;
 
+    // don't invalidate if the audio signal is unchanged
+    if (flags & ARA::kARAContentUpdateSignalScopeRemainsUnchanged)
+        return;
+
     invalidateReaders ();
 }
 
