@@ -85,12 +85,12 @@ android {
 
     sourceSets {
         main.java.srcDirs +=
-            ["../../../../../modules/juce_audio_devices/native/java",
-             "../../../../../modules/juce_core/native/java",
-             "../../../../../modules/juce_gui_basics/native/java",
-             "../../../../../modules/juce_gui_extra/native/java",
-             "../../../../../modules/juce_opengl/native/java",
-             "../../../../../modules/juce_video/native/java"]
+            ["../../../../../modules/juce_core/native/javacore/init",
+             "../../../../../modules/juce_core/native/javacore/app",
+             "../../../../../modules/juce_gui_basics/native/javacore/app"]
+
+        main.res.srcDirs +=
+            []
     }
 
     repositories {

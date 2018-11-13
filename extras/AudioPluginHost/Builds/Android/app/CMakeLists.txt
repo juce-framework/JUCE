@@ -574,6 +574,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_core/misc/juce_Uuid.cpp"
     "../../../../../modules/juce_core/misc/juce_Uuid.h"
     "../../../../../modules/juce_core/misc/juce_WindowsRegistry.h"
+    "../../../../../modules/juce_core/native/java/README.txt"
     "../../../../../modules/juce_core/native/juce_android_Files.cpp"
     "../../../../../modules/juce_core/native/juce_android_JNIHelpers.cpp"
     "../../../../../modules/juce_core/native/juce_android_JNIHelpers.h"
@@ -1918,6 +1919,7 @@ set_source_files_properties("../../../../../modules/juce_core/misc/juce_StdFunct
 set_source_files_properties("../../../../../modules/juce_core/misc/juce_Uuid.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/misc/juce_Uuid.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/misc/juce_WindowsRegistry.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_core/native/java/README.txt" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/native/juce_android_Files.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/native/juce_android_JNIHelpers.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/native/juce_android_JNIHelpers.h" PROPERTIES HEADER_FILE_ONLY TRUE)
