@@ -26,6 +26,7 @@ protected:
 
     // use this hook to verify that we have audio source readers for this playback region
     virtual void didAddPlaybackRegion (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept override;
+    virtual void willRemovePlaybackRegion (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept override;
 
 private:
     // time slice thread reference used for reading audio source samples and the size of its buffer
