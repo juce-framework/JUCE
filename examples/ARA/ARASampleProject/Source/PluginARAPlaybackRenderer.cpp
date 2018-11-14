@@ -69,11 +69,6 @@ void ARASampleProjectPlaybackRenderer::renderPlaybackRegions (AudioBuffer<float>
     }
 }
 
-void ARASampleProjectPlaybackRenderer::willDestroyAudioSource (ARA::PlugIn::AudioSource* audioSource) noexcept
-{
-    audioSourceReaders.erase (static_cast<ARAAudioSource*>(audioSource));
-}
-
 // every time we add a playback region, make sure we have a buffered audio source reader for it
 // we'll use this reader to pull samples from our ARA host and render them back in the audio thread
 void ARASampleProjectPlaybackRenderer::didAddPlaybackRegion (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept

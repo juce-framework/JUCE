@@ -20,8 +20,6 @@ public:
     // render playback regions added to this render if they fall within the range of samples being rendered
     void renderPlaybackRegions (AudioBuffer<float>& buffer, ARA::ARASampleRate sampleRate, ARA::ARASamplePosition samplePosition, bool isPlayingBack);
 
-    void willDestroyAudioSource (ARA::PlugIn::AudioSource* audioSource) noexcept override;
-
 protected:
 
     // use this hook to verify that we have audio source readers for this playback region
