@@ -1,53 +1,41 @@
 #pragma once
 
 #include "juce_ARA_audio_plugin.h"
-#include "juce_SafeRef.h"
-#include <map>
 
 namespace juce
 {
-    
-//==============================================================================
-/** 
-    ARA RegionSequence class for ARA sample project
-     Our plug-in will be used to draw waveforms representing an entire region sequence, 
-     so this class provides a special AudioFormatReader subclass that can be used to read 
-     all samples of a given region sequence's playback regions using ARA
-*/
+
 class ARARegionSequence : public ARA::PlugIn::RegionSequence
 {
 public:
-    ARARegionSequence (ARA::PlugIn::Document*, ARA::ARARegionSequenceHostRef);
-    ~ARARegionSequence();
-
-    // If not given a `sampleRate` will figure it out from the first playback region within.
-    // Playback regions with differing sample rates will be ignored.
-    // Future alternative could be to perform resampling.
-    AudioFormatReader* newReader (double sampleRate = 0.0);
-
-    // These methods need to be called by the document controller in its corresponding methods:
-    static void willUpdatePlaybackRegionProperties (
-        ARA::PlugIn::PlaybackRegion*,
-        ARA::PlugIn::PropertiesPtr<ARA::ARAPlaybackRegionProperties>);
-    static void didUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion*);
+    ARARegionSequence (ARA::PlugIn::Document* document, ARA::ARARegionSequenceHostRef hostRef);
 
     // Is sample access enabled in all audio sources in sequence?
     bool isSampleAccessEnabled() const;
+    
+    void willUpdateRegionSequenceProperties (ARA::PlugIn::PropertiesPtr<ARA::ARARegionSequenceProperties> newProperties) noexcept;
+    void didUpdateRegionSequenceProperties () noexcept;
+    void willDestroyRegionSequence () noexcept;
+
+    class Listener
+    {
+    public:
+        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
+
+        virtual ~Listener () {}
+
+        virtual void willUpdateRegionSequenceProperties (ARARegionSequence* regionSequence, ARA::PlugIn::PropertiesPtr<ARA::ARARegionSequenceProperties> newProperties) noexcept {}
+        virtual void didUpdateRegionSequenceProperties (ARARegionSequence* regionSequence) noexcept {}
+        virtual void willDestroyRegionSequence (ARARegionSequence* regionSequence) noexcept {}
+
+        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
+    };
+
+    void addListener (Listener* l);
+    void removeListener (Listener* l);
 
 private:
-    class Reader;
-    typedef SafeRef<ARARegionSequence> Ref;
-
-    Ref::Ptr ref;
-
-    std::map<ARA::PlugIn::AudioSource*, int> sourceRefCount;
-
-    // Used to unlock old sequence for region in `didUpdatePlaybackRegionProperties`.
-    ARARegionSequence* prevSequenceForNewPlaybackRegion;
-
-   #if JUCE_DEBUG
-    static bool stateUpdatePlaybackRegionProperties;
-   #endif
+    ListenerList<Listener> listeners;
 };
 
 } // namespace juce

@@ -2,6 +2,7 @@
 #include "juce_ARARegionSequence.h"
 #include "juce_ARAAudioSource.h"
 #include "juce_ARAPlaybackRegion.h"
+#include "juce_ARAAudioReaders.h"
 
 const ARA::ARAFactory* ARA::PlugIn::DocumentController::getARAFactory() noexcept
 {
@@ -85,7 +86,6 @@ void ARADocumentController::willUpdatePlaybackRegionProperties (ARA::PlugIn::Pla
 {
     // TODO JUCE_ARA
     // replace these static functions with listener callbacks
-    ARARegionSequence::willUpdatePlaybackRegionProperties (playbackRegion, newProperties);
     static_cast<ARAPlaybackRegion*> (playbackRegion)->willUpdatePlaybackRegionProperties (newProperties);
 }
 
@@ -93,7 +93,6 @@ void ARADocumentController::didUpdatePlaybackRegionProperties (ARA::PlugIn::Play
 {
     // TODO JUCE_ARA
     // replace these static functions with listener callbacks
-    ARARegionSequence::didUpdatePlaybackRegionProperties (playbackRegion);
     static_cast<ARAPlaybackRegion*> (playbackRegion)->didUpdatePlaybackRegionProperties();
 }
 
@@ -110,56 +109,49 @@ ARA::PlugIn::AudioSource* ARADocumentController::doCreateAudioSource (ARA::PlugI
 
 void ARADocumentController::willUpdateAudioSourceProperties (
     ARA::PlugIn::AudioSource* audioSource,
-    ARA::PlugIn::PropertiesPtr<ARA::ARAAudioSourceProperties> properties) noexcept
+    ARA::PlugIn::PropertiesPtr<ARA::ARAAudioSourceProperties> newProperties) noexcept
 {
-    for (ARAAudioSourceUpdateListener* updateListener : audioSourceUpdateListeners)
-        updateListener->willUpdateAudioSourceProperties (audioSource, properties);
+    static_cast<ARAAudioSource*> (audioSource)->willUpdateAudioSourceProperties (newProperties);
 }
 
 void ARADocumentController::didUpdateAudioSourceProperties (ARA::PlugIn::AudioSource* audioSource) noexcept
 {
-    for (ARAAudioSourceUpdateListener* updateListener : audioSourceUpdateListeners)
-        updateListener->didUpdateAudioSourceProperties (audioSource);
+    static_cast<ARAAudioSource*> (audioSource)->didUpdateAudioSourceProperties ();
 }
 
 void ARADocumentController::doUpdateAudioSourceContent (ARA::PlugIn::AudioSource* audioSource, const ARA::ARAContentTimeRange* range, ARA::ARAContentUpdateFlags flags) noexcept
 {
-    for (ARAAudioSourceUpdateListener* updateListener : audioSourceUpdateListeners)
-        updateListener->doUpdateAudioSourceContent (audioSource, range, flags);
+    static_cast<ARAAudioSource*> (audioSource)->doUpdateAudioSourceContent (range, flags);
 }
 
 void ARADocumentController::willEnableAudioSourceSamplesAccess (ARA::PlugIn::AudioSource* audioSource, bool enable) noexcept
 {
-    for (ARAAudioSourceUpdateListener* updateListener : audioSourceUpdateListeners)
-        updateListener->willEnableAudioSourceSamplesAccess (audioSource, enable);
+    static_cast<ARAAudioSource*> (audioSource)->willEnableAudioSourceSamplesAccess (enable);
 }
 
 void ARADocumentController::didEnableAudioSourceSamplesAccess (ARA::PlugIn::AudioSource* audioSource, bool enable) noexcept
 {
-    for (ARAAudioSourceUpdateListener* updateListener : audioSourceUpdateListeners)
-        updateListener->didEnableAudioSourceSamplesAccess (audioSource, enable);
+    static_cast<ARAAudioSource*> (audioSource)->didEnableAudioSourceSamplesAccess (enable);
 }
 
 void ARADocumentController::doDeactivateAudioSourceForUndoHistory (ARA::PlugIn::AudioSource* audioSource, bool deactivate) noexcept
 {
-    for (ARAAudioSourceUpdateListener* updateListener : audioSourceUpdateListeners)
-        updateListener->doDeactivateAudioSourceForUndoHistory (audioSource, deactivate);
+    static_cast<ARAAudioSource*> (audioSource)->doDeactivateAudioSourceForUndoHistory (deactivate);
 }
 
 void ARADocumentController::willDestroyAudioSource (ARA::PlugIn::AudioSource* audioSource) noexcept
 {
-    for (ARAAudioSourceUpdateListener* updateListener : audioSourceUpdateListeners)
-        updateListener->willDestroyAudioSource (audioSource);
+    static_cast<ARAAudioSource*> (audioSource)->willDestroyAudioSource ();
 }
 
-void ARADocumentController::addAudioSourceUpdateListener (ARAAudioSourceUpdateListener* updateListener)
+AudioFormatReader* ARADocumentController::createAudioSourceReader (ARAAudioSource* audioSource)
 {
-    audioSourceUpdateListeners.push_back (updateListener);
+    return new ARAAudioSourceReader (audioSource);
 }
 
-void ARADocumentController::removeAudioSourceUpdateListener (ARAAudioSourceUpdateListener* updateListener)
+BufferingAudioSource* ARADocumentController::createBufferingAudioSourceReader (ARAAudioSource* audioSource, TimeSliceThread& thread, int bufferSize)
 {
-    find_erase (audioSourceUpdateListeners, updateListener);
+    return new BufferingAudioSource (new AudioFormatReaderSource (createAudioSourceReader (audioSource), true), thread, true, bufferSize, audioSource->getChannelCount ());
 }
 
 //==============================================================================
@@ -171,80 +163,17 @@ ARA::PlugIn::RegionSequence* ARADocumentController::doCreateRegionSequence (ARA:
 
 void ARADocumentController::willUpdateRegionSequenceProperties (ARA::PlugIn::RegionSequence* regionSequence, ARA::PlugIn::PropertiesPtr<ARA::ARARegionSequenceProperties> newProperties) noexcept
 {
-    for (ARARegionSequenceUpdateListener* updateListener : regionSequenceUpdateListeners)
-        updateListener->willUpdateRegionSequenceProperties (regionSequence, newProperties);
+    static_cast<ARARegionSequence*> (regionSequence)->willUpdateRegionSequenceProperties (newProperties);
 }
 
 void ARADocumentController::didUpdateRegionSequenceProperties (ARA::PlugIn::RegionSequence* regionSequence) noexcept
 {
-    for (ARARegionSequenceUpdateListener* updateListener : regionSequenceUpdateListeners)
-        updateListener->didUpdateRegionSequenceProperties (regionSequence);
+    static_cast<ARARegionSequence*> (regionSequence)->didUpdateRegionSequenceProperties ();
 }
 
 void ARADocumentController::willDestroyRegionSequence (ARA::PlugIn::RegionSequence* regionSequence) noexcept
 {
-    for (ARARegionSequenceUpdateListener* updateListener : regionSequenceUpdateListeners)
-        updateListener->willDestroyRegionSequence (regionSequence);
-}
-
-void ARADocumentController::willReorderRegionSequencesInMusicalContext (const ARA::PlugIn::MusicalContext* musicalContext) noexcept
-{
-    for (ARARegionSequenceUpdateListener* updateListener : regionSequenceUpdateListeners)
-        updateListener->willReorderRegionSequencesInMusicalContext (musicalContext);
-}
-
-void ARADocumentController::didReorderRegionSequencesInMusicalContext (const ARA::PlugIn::MusicalContext* musicalContext) noexcept
-{
-    for (ARARegionSequenceUpdateListener* updateListener : regionSequenceUpdateListeners)
-        updateListener->didReorderRegionSequencesInMusicalContext (musicalContext);
-}
-
-void ARADocumentController::willReorderRegionSequences() noexcept
-{
-    for (ARARegionSequenceUpdateListener* updateListener : regionSequenceUpdateListeners)
-        updateListener->willReorderRegionSequences();
-}
-
-void ARADocumentController::didReorderRegionSequences() noexcept
-{
-    for (ARARegionSequenceUpdateListener* updateListener : regionSequenceUpdateListeners)
-        updateListener->didReorderRegionSequences();
-}
-
-void ARADocumentController::addRegionSequenceUpdateListener (ARARegionSequenceUpdateListener* updateListener)
-{
-    regionSequenceUpdateListeners.push_back (updateListener);
-}
-
-void ARADocumentController::removeRegionSequenceUpdateListener (ARARegionSequenceUpdateListener* updateListener)
-{
-    find_erase (regionSequenceUpdateListeners, updateListener);
-}
-
-ARARegionSequenceUpdateListener::ARARegionSequenceUpdateListener (ARA::PlugIn::DocumentController *documentController)
-: araDocumentController (static_cast<ARADocumentController*> (documentController))
-{
-    if (araDocumentController)
-        araDocumentController->addRegionSequenceUpdateListener (this);
-}
-
-ARARegionSequenceUpdateListener::~ARARegionSequenceUpdateListener()
-{
-    if (araDocumentController)
-        araDocumentController->removeRegionSequenceUpdateListener (this);
-}
-
-ARAAudioSourceUpdateListener::ARAAudioSourceUpdateListener (ARA::PlugIn::DocumentController *documentController)
-    : araDocumentController (static_cast<ARADocumentController*> (documentController))
-{
-    if (araDocumentController)
-        araDocumentController->addAudioSourceUpdateListener (this);
-}
-
-ARAAudioSourceUpdateListener::~ARAAudioSourceUpdateListener()
-{
-    if (araDocumentController)
-        araDocumentController->removeAudioSourceUpdateListener (this);
+    static_cast<ARARegionSequence*> (regionSequence)->willDestroyRegionSequence ();
 }
 
 } // namespace juce

@@ -1,81 +1,46 @@
 #pragma once
 
 #include "juce_ARA_audio_plugin.h"
-#include "juce_ARADocumentController.h"
-#include "juce_SafeRef.h"
 
 namespace juce
 {
 
-class ARAAudioSource : public ARA::PlugIn::AudioSource,
-                       ARAAudioSourceUpdateListener
+class ARAAudioSource : public ARA::PlugIn::AudioSource
 {
 public:
-    ARAAudioSource (ARA::PlugIn::Document*, ARA::ARAAudioSourceHostRef);
-    virtual ~ARAAudioSource();
+    ARAAudioSource (ARA::PlugIn::Document* document, ARA::ARAAudioSourceHostRef hostRef);
 
-    AudioFormatReader* newReader();
+    void willUpdateAudioSourceProperties (ARA::PlugIn::PropertiesPtr<ARA::ARAAudioSourceProperties> newProperties) noexcept;
+    void didUpdateAudioSourceProperties () noexcept;
+    void doUpdateAudioSourceContent (const ARA::ARAContentTimeRange* range, ARA::ARAContentUpdateFlags flags) noexcept;
+    void willEnableAudioSourceSamplesAccess (bool enable) noexcept;
+    void didEnableAudioSourceSamplesAccess (bool enable) noexcept;
+    void doDeactivateAudioSourceForUndoHistory (bool deactivate) noexcept;
+    void willDestroyAudioSource () noexcept;
+    
+    class Listener
+    {
+    public:
+        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
 
-    void willUpdateAudioSourceProperties(ARA::PlugIn::AudioSource* audioSource, ARA::PlugIn::PropertiesPtr<ARA::ARAAudioSourceProperties> newProperties) noexcept override;
-    void didUpdateAudioSourceProperties (ARA::PlugIn::AudioSource* audioSource) noexcept override;
-    void willEnableAudioSourceSamplesAccess (ARA::PlugIn::AudioSource* audioSource, bool enable) noexcept override;
-    void didEnableAudioSourceSamplesAccess (ARA::PlugIn::AudioSource* audioSource, bool enable) noexcept override;
-    void doUpdateAudioSourceContent (ARA::PlugIn::AudioSource* audioSource, const ARA::ARAContentTimeRange* range, ARA::ARAContentUpdateFlags flags) noexcept override;
+        virtual ~Listener()  {}
 
-    std::unique_ptr<BufferingAudioSource> createBufferingAudioSource (TimeSliceThread& thread, int bufferSize);
+        virtual void willUpdateAudioSourceProperties (ARAAudioSource* audioSource, ARA::PlugIn::PropertiesPtr<ARA::ARAAudioSourceProperties> newProperties) noexcept {}
+        virtual void didUpdateAudioSourceProperties (ARAAudioSource* audioSource) noexcept {}
+        virtual void doUpdateAudioSourceContent (ARAAudioSource* audioSource, const ARA::ARAContentTimeRange* range, ARA::ARAContentUpdateFlags flags) noexcept {}
+        virtual void willEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) noexcept {}
+        virtual void didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) noexcept {}
+        virtual void doDeactivateAudioSourceForUndoHistory (ARAAudioSource* audioSource, bool deactivate) noexcept {}
+        virtual void willDestroyAudioSource (ARAAudioSource* audioSource) noexcept {}
 
-private:
-    void invalidateReaders();
+        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
+    };
 
-    class Reader;
-    typedef SafeRef<ARAAudioSource> Ref;
-
-    Ref::Ptr ref;
-
-    // Active readers.
-    std::vector<Reader*> readers;
-
-   #if JUCE_DEBUG
-    bool stateUpdateProperties = false, stateEnableSamplesAccess = false;
-   #endif
-};
-
-class ARAAudioSourceReader : public AudioFormatReader,
-                             ARAAudioSourceUpdateListener
-{
-public:
-    ARAAudioSourceReader (ARA::PlugIn::AudioSource* audioSource, bool use64BitSamples = false);
-    ~ARAAudioSourceReader();
-
-    void recreate();
-    void invalidate();
-
-    bool readSamples (
-        int** destSamples,
-        int numDestChannels,
-        int startOffsetInDestBuffer,
-        int64 startSampleInFile,
-        int numSamples) override;
-
-    // TODO JUCE_ARA
-    // do we need to handle property updates?
-    // any other invalidation hooks? 
-    void willEnableAudioSourceSamplesAccess (ARA::PlugIn::AudioSource* audioSource, bool enable) noexcept override;
-    void didEnableAudioSourceSamplesAccess (ARA::PlugIn::AudioSource* audioSource, bool enable) noexcept override;
-    void willDestroyAudioSource (ARA::PlugIn::AudioSource* audioSource) noexcept override;
-    void doUpdateAudioSourceContent (ARA::PlugIn::AudioSource* audioSource, const ARA::ARAContentTimeRange* range, ARA::ARAContentUpdateFlags flags) noexcept override;
+    void addListener (Listener* l);
+    void removeListener (Listener* l);
 
 private:
-    std::vector<void*> tmpPtrs;
-
-    // per reader locks means we can create readers while others are reading
-    ReadWriteLock lock;
-
-    // When readSamples is not reading all channels,
-    // we still need to provide pointers to all channels to the ARA read call.
-    // So we'll read the other channels into this dummy buffer.
-    std::vector<float> dummyBuffer;
-    ARA::PlugIn::AudioSource* audioSourceBeingRead; // TODO JUCE_ARA make this const
-    std::unique_ptr<ARA::PlugIn::HostAudioReader> araHostReader;
+    ListenerList<Listener> listeners;
 };
-} // namespace juce
+
+}

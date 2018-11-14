@@ -1,8 +1,8 @@
 #include "PluginARAPlaybackRenderer.h"
+#include "PluginARADocumentController.h"
 
 ARASampleProjectPlaybackRenderer::ARASampleProjectPlaybackRenderer (ARADocumentController* documentController, TimeSliceThread& timeSliceThread, int bufferSize)
-: ARA::PlugIn::PlaybackRenderer (documentController), 
-  ARAAudioSourceUpdateListener(documentController),
+: ARA::PlugIn::PlaybackRenderer (documentController),
   sampleReadingThread (timeSliceThread),
   sampleBufferSize (bufferSize)
 {}
@@ -74,9 +74,10 @@ void ARASampleProjectPlaybackRenderer::renderSamples (AudioBuffer<float>& buffer
 void ARASampleProjectPlaybackRenderer::didAddPlaybackRegion (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept
 {
     ARAAudioSource* audioSource = static_cast<ARAAudioSource*> (playbackRegion->getAudioModification()->getAudioSource());
+    ARASampleProjectDocumentController* documentController = static_cast<ARASampleProjectDocumentController*> (audioSource->getDocument ()->getDocumentController ());
     if (audioSourceReaders.count (audioSource) == 0)
     {
-        audioSourceReaders.emplace (audioSource, audioSource->createBufferingAudioSource (sampleReadingThread, sampleBufferSize));
+        audioSourceReaders.emplace (audioSource, documentController->createBufferingAudioSourceReader (audioSource, sampleReadingThread, sampleBufferSize));
         audioSourceReaders[audioSource]->prepareToPlay (128, audioSource->getSampleRate());
     }
 }

@@ -27,7 +27,7 @@ class ARASampleProjectAudioProcessorEditor: public AudioProcessorEditor
 #if JucePlugin_Enable_ARA
      , public AudioProcessorEditorARAExtension               // Provides access to the ARA EditorView instance
      , public ARASampleProjectEditorView::SelectionListener  // Receives ARA selection notifications
-     , public ARARegionSequenceUpdateListener                // Receives ARA region sequence update notifications
+     , public ARARegionSequence::Listener                    // Receives ARA region sequence update notifications
 #endif
 {
 public:
@@ -42,7 +42,7 @@ public:
     void onNewSelection (const ARA::PlugIn::ViewSelection* currentSelection) override;
 
     // ARARegionSequenceUpdateListener overrides
-    void didUpdateRegionSequenceProperties (ARA::PlugIn::RegionSequence* regionSequence) ARA_NOEXCEPT override;
+    void didUpdateRegionSequenceProperties (ARARegionSequence* regionSequence) noexcept override;
 
 private:
 

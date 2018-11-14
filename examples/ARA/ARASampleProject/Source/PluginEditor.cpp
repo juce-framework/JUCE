@@ -21,7 +21,6 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
 #if JucePlugin_Enable_ARA
     , AudioProcessorEditorARAExtension (&p)
     , ARASampleProjectEditorView::SelectionListener (getARAEditorView())
-    , ARARegionSequenceUpdateListener (isARAEditorView() ? getARAEditorView()->getDocumentController() : nullptr)
 #endif
 {
     // init viewport and region sequence list view
@@ -117,7 +116,7 @@ void ARASampleProjectAudioProcessorEditor::onNewSelection (const ARA::PlugIn::Vi
     resized();
 }
 
-void ARASampleProjectAudioProcessorEditor::didUpdateRegionSequenceProperties (ARA::PlugIn::RegionSequence* regionSequence) ARA_NOEXCEPT
+void ARASampleProjectAudioProcessorEditor::didUpdateRegionSequenceProperties (ARARegionSequence* regionSequence) noexcept
 {
     // manually invoke onNewSelection here to redraw the region sequence views
     regionSequencesWithPropertyChanges.insert (regionSequence);
