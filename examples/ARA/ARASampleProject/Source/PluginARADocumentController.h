@@ -37,7 +37,8 @@ private:
 // and we'll have to handle region destruction notifications as well.
 // in terms of audio source invalidations - those should be handled by
 // the underlying audio source reader, I think
-class ARARegionSequenceReader : public AudioFormatReader
+class ARARegionSequenceReader : public AudioFormatReader, 
+                                ARAPlaybackRegion::Listener
 {
 public:
     ARARegionSequenceReader (ARA::PlugIn::RegionSequence* regionSequence, ARA::PlugIn::PlaybackRenderer* playbackRenderer);
@@ -50,6 +51,11 @@ public:
         int64 startSampleInFile,
         int numSamples) override;
 
+    void willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARA::PlugIn::PropertiesPtr<ARA::ARAPlaybackRegionProperties> newProperties) noexcept override;
+    void willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept override;
+
 private:
+    ARA::PlugIn::RegionSequence* _regionSequence;
     ARA::PlugIn::PlaybackRenderer* _playbackRenderer;
+    ReadWriteLock lock;
 };

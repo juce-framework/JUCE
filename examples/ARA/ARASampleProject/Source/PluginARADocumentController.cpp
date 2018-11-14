@@ -47,6 +47,7 @@ AudioFormatReader* ARASampleProjectDocumentController::createRegionSequenceReade
 
 ARARegionSequenceReader::ARARegionSequenceReader (ARA::PlugIn::RegionSequence* regionSequence, ARA::PlugIn::PlaybackRenderer* playbackRenderer)
 : AudioFormatReader (nullptr, "ARAAudioSourceReader"),
+  _regionSequence (regionSequence),
   _playbackRenderer (playbackRenderer)
 {
     // TODO JUCE_ARA
@@ -75,13 +76,15 @@ ARARegionSequenceReader::ARARegionSequenceReader (ARA::PlugIn::RegionSequence* r
         lengthInSamples = std::max (lengthInSamples, region->getEndInPlaybackSamples (sampleRate));
 
         _playbackRenderer->addPlaybackRegion (ARA::PlugIn::toRef (region));
+        static_cast<ARAPlaybackRegion*>(region)->addListener (this);
     }
 }
 
 ARARegionSequenceReader::~ARARegionSequenceReader ()
 {
-    // TODO JUCE_ARA
-    // do we have to remove all playback before destroying the renderer?
+    ScopedWriteLock scopedWrite (lock);
+    for (ARA::PlugIn::PlaybackRegion* region : _regionSequence->getPlaybackRegions ())
+        static_cast<ARAPlaybackRegion*>(region)->removeListener (this);
     delete _playbackRenderer;
 }
 
@@ -93,7 +96,45 @@ bool ARARegionSequenceReader::readSamples (
     int numSamples)
 {
     // render our ARA playback regions for this time duration using the ARA playback renderer instance
+    if (!lock.tryEnterRead ())
+    {
+        for (int chan_i = 0; chan_i < numDestChannels; ++chan_i)
+            FloatVectorOperations::clear ((float *) destSamples[chan_i], numSamples);
+        return false;
+    }
+
     AudioBuffer<float> buffer ((float **) destSamples, numDestChannels, startOffsetInDestBuffer, numSamples);
     static_cast<ARASampleProjectPlaybackRenderer*>(_playbackRenderer)->renderPlaybackRegions (buffer, sampleRate, startSampleInFile, true);
+    lock.exitRead ();
     return true;
+}
+
+
+void ARARegionSequenceReader::willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARA::PlugIn::PropertiesPtr<ARA::ARAPlaybackRegionProperties> newProperties) noexcept
+{
+    if (contains (_playbackRenderer->getPlaybackRegions (), static_cast<ARA::PlugIn::PlaybackRegion*> (playbackRegion)))
+    {
+        if (newProperties->regionSequenceRef != ARA::PlugIn::toRef (_regionSequence))
+        {
+            ScopedWriteLock scopedWrite (lock);
+            playbackRegion->removeListener (this);
+            _playbackRenderer->removePlaybackRegion (ARA::PlugIn::toRef (playbackRegion));
+        }
+    }
+    else if (newProperties->regionSequenceRef == ARA::PlugIn::toRef (_regionSequence))
+    {
+        ScopedWriteLock scopedWrite (lock);
+        playbackRegion->addListener (this);
+        _playbackRenderer->addPlaybackRegion (ARA::PlugIn::toRef (playbackRegion));
+    }
+}
+
+void ARARegionSequenceReader::willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept
+{
+    if (contains (_playbackRenderer->getPlaybackRegions (), static_cast<ARA::PlugIn::PlaybackRegion*> (playbackRegion)))
+    {
+        ScopedWriteLock scopedWrite (lock);
+        playbackRegion->removeListener (this);
+        _playbackRenderer->removePlaybackRegion (ARA::PlugIn::toRef (playbackRegion));
+    }
 }

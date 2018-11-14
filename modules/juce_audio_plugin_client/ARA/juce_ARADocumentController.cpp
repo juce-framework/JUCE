@@ -1,6 +1,7 @@
 #include "juce_ARADocumentController.h"
-#include "juce_ARAAudioSource.h"
 #include "juce_ARARegionSequence.h"
+#include "juce_ARAAudioSource.h"
+#include "juce_ARAPlaybackRegion.h"
 
 const ARA::ARAFactory* ARA::PlugIn::DocumentController::getARAFactory() noexcept
 {
@@ -75,19 +76,32 @@ const ARA::ARAFactory* ARA::PlugIn::DocumentController::getARAFactory() noexcept
 namespace juce
 {
 
+ARA::PlugIn::PlaybackRegion* ARADocumentController::doCreatePlaybackRegion (ARA::PlugIn::AudioModification* modification, ARA::ARAPlaybackRegionHostRef hostRef) noexcept 
+{
+    return new ARAPlaybackRegion (modification, hostRef);
+}
+
 void ARADocumentController::willUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion, ARA::PlugIn::PropertiesPtr<ARA::ARAPlaybackRegionProperties> newProperties) noexcept
 {
     // TODO JUCE_ARA
-    // replace these with listener callbacks
+    // replace these static functions with listener callbacks
     ARARegionSequence::willUpdatePlaybackRegionProperties (playbackRegion, newProperties);
+    static_cast<ARAPlaybackRegion*> (playbackRegion)->willUpdatePlaybackRegionProperties (newProperties);
 }
 
 void ARADocumentController::didUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept
 {
     // TODO JUCE_ARA
-    // replace these with listener callbacks
-    ARARegionSequence::didUpdatePlaybackRegionProperties(playbackRegion);
+    // replace these static functions with listener callbacks
+    ARARegionSequence::didUpdatePlaybackRegionProperties (playbackRegion);
+    static_cast<ARAPlaybackRegion*> (playbackRegion)->didUpdatePlaybackRegionProperties ();
 }
+
+void ARADocumentController::willDestroyPlaybackRegion (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept
+{
+    static_cast<ARAPlaybackRegion*> (playbackRegion)->willDestroyPlaybackRegion ();
+}
+//==============================================================================
 
 ARA::PlugIn::AudioSource* ARADocumentController::doCreateAudioSource (ARA::PlugIn::Document *document, ARA::ARAAudioSourceHostRef hostRef) noexcept
 {

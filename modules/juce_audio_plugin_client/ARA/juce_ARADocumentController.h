@@ -20,12 +20,14 @@ public:
 
     void addAudioSourceUpdateListener (ARAAudioSourceUpdateListener* updateListener);
     void removeAudioSourceUpdateListener (ARAAudioSourceUpdateListener* updateListener);
+
     //==============================================================================
     // Override document controller methods here
 protected:
-
+    ARA::PlugIn::PlaybackRegion* doCreatePlaybackRegion (ARA::PlugIn::AudioModification* modification, ARA::ARAPlaybackRegionHostRef hostRef) noexcept override;
     void willUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion, ARA::PlugIn::PropertiesPtr<ARA::ARAPlaybackRegionProperties> newProperties) noexcept override;
     void didUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept override;
+    void willDestroyPlaybackRegion (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept override;
 
     // needed for ARA AudioFormatReaders to be thread-safe and work properly!
     ARA::PlugIn::AudioSource* doCreateAudioSource (ARA::PlugIn::Document* document, ARA::ARAAudioSourceHostRef hostRef) noexcept override;
