@@ -130,7 +130,7 @@ void ARAAudioSource::doUpdateAudioSourceContent (ARA::PlugIn::AudioSource* audio
         return;
 
     // don't invalidate if the audio signal is unchanged
-    if (flags & ARA::kARAContentUpdateSignalScopeRemainsUnchanged)
+    if ((flags & ARA::kARAContentUpdateSignalScopeRemainsUnchanged) != 0)
         return;
 
     invalidateReaders ();
@@ -280,7 +280,7 @@ void ARAAudioSourceReader::doUpdateAudioSourceContent (ARA::PlugIn::AudioSource*
         return;
 
     // don't invalidate if the audio signal is unchanged
-    if (flags & ARA::kARAContentUpdateSignalScopeRemainsUnchanged)
+    if ((flags & ARA::kARAContentUpdateSignalScopeRemainsUnchanged) != 0)
         return;
 
     ScopedWriteLock scopedLock (lock);
