@@ -135,7 +135,11 @@ public:
             if (envelopeVal >= 1.0f)
             {
                 envelopeVal = 1.0f;
-                currentState = State::decay;
+
+                if (decayRate > 0.0f)
+                    currentState = State::decay;
+                else
+                    currentState = State::sustain;
             }
         }
         else if (currentState == State::decay)
