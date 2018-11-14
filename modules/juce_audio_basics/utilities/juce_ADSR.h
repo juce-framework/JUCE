@@ -163,7 +163,7 @@ public:
         return envelopeVal;
     }
 
-    /** This method will conviniently apply the next numSamples number of envelope values
+    /** This method will conveniently apply the next numSamples number of envelope values
         to an AudioBuffer.
 
         @see getNextSample
