@@ -124,7 +124,7 @@ void ARAAudioSource::didEnableAudioSourceSamplesAccess (ARA::PlugIn::AudioSource
     ref->lock.exitWrite();
 }
 
-void ARAAudioSource::doUpdateAudioSourceContent (ARA::PlugIn::AudioSource* audioSource, const ARA::ARAContentTimeRange* range, ARA::ARAContentUpdateFlags flags) noexcept
+void ARAAudioSource::doUpdateAudioSourceContent (ARA::PlugIn::AudioSource* audioSource, const ARA::ARAContentTimeRange* /*range*/, ARA::ARAContentUpdateFlags flags) noexcept
 {
     if (audioSource != this)
         return;
@@ -274,7 +274,7 @@ void ARAAudioSourceReader::willDestroyAudioSource (ARA::PlugIn::AudioSource* aud
     audioSourceBeingRead = nullptr;
 }
 
-void ARAAudioSourceReader::doUpdateAudioSourceContent (ARA::PlugIn::AudioSource* audioSource, const ARA::ARAContentTimeRange* range, ARA::ARAContentUpdateFlags flags) noexcept
+void ARAAudioSourceReader::doUpdateAudioSourceContent (ARA::PlugIn::AudioSource* audioSource, const ARA::ARAContentTimeRange* /*range*/, ARA::ARAContentUpdateFlags flags) noexcept
 {
     if (audioSource != audioSourceBeingRead)
         return;
@@ -311,7 +311,7 @@ bool ARAAudioSourceReader::readSamples (
     // If we can't enter the lock or we don't have a reader, zero samples and return false
     if (!lock.tryEnterRead () || araHostReader == nullptr)
     {
-        for (int chan_i = 0; chan_i < (int) tmpPtrs.size (); ++chan_i)
+        for (int chan_i = 0; chan_i < numDestChannels; ++chan_i)
             FloatVectorOperations::clear ((float *) destSamples[chan_i], numSamples);
         return false;
     }
