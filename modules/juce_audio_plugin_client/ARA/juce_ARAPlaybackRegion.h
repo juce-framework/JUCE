@@ -2,7 +2,6 @@
 
 #include "juce_ARA_audio_plugin.h"
 #include "juce_ARADocumentController.h"
-#include "juce_SafeRef.h"
 
 namespace juce
 {
@@ -20,6 +19,8 @@ public:
     {
     public:
         ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
+
+        virtual ~Listener()  {}
 
         virtual void willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARA::PlugIn::PropertiesPtr<ARA::ARAPlaybackRegionProperties> newProperties) noexcept {}
         virtual void didUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion) noexcept {}

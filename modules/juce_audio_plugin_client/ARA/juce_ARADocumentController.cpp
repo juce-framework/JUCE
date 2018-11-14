@@ -169,10 +169,6 @@ ARA::PlugIn::RegionSequence* ARADocumentController::doCreateRegionSequence (ARA:
     return new ARARegionSequence (document, hostRef);
 }
 
-static void willUpdatePlaybackRegionProperties (
-    ARA::PlugIn::PlaybackRegion*,
-    ARA::PlugIn::PropertiesPtr<ARA::ARAPlaybackRegionProperties>);
-static void didUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion*);
 void ARADocumentController::willUpdateRegionSequenceProperties (ARA::PlugIn::RegionSequence* regionSequence, ARA::PlugIn::PropertiesPtr<ARA::ARARegionSequenceProperties> newProperties) noexcept
 {
     for (ARARegionSequenceUpdateListener* updateListener : regionSequenceUpdateListeners)
