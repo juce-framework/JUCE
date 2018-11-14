@@ -27,6 +27,7 @@
 #pragma once
 
 #include "../UI/PluginWindow.h"
+#include "../Performer.h"
 
 
 //==============================================================================
@@ -56,7 +57,7 @@ public:
     void clear();
 
     PluginWindow* getOrCreateWindowFor (AudioProcessorGraph::Node*, PluginWindow::Type);
-    void closeCurrentlyOpenWindowsFor (AudioProcessorGraph::NodeID);
+    //void closeCurrentlyOpenWindowsFor (AudioProcessorGraph::NodeID);
     bool closeAnyOpenPluginWindows();
 
     //==============================================================================
@@ -64,11 +65,9 @@ public:
     void audioProcessorChanged (AudioProcessor*) override { changed(); }
 
     //==============================================================================
-    XmlElement* createXml() const;
-    void restoreFromXml (const XmlElement& xml);
 
-    static const char* getFilenameSuffix()      { return ".filtergraph"; }
-    static const char* getFilenameWildcard()    { return "*.filtergraph"; }
+    static const char* getFilenameSuffix()      { return ".performer"; }
+    static const char* getFilenameWildcard()    { return "*.performer"; }
 
     //==============================================================================
     void newDocument();
@@ -88,10 +87,12 @@ private:
     AudioPluginFormatManager& formatManager;
     OwnedArray<PluginWindow> activePluginWindows;
 
+    Performer m_performer;
+
     NodeID lastUID = 0;
     NodeID getNextUID() noexcept;
 
-    void createNodeFromXml (const XmlElement& xml);
+    //void createNodeFromXml (const XmlElement& xml);
     void addFilterCallback (AudioPluginInstance*, const String& error, Point<double>);
     void changeListenerCallback (ChangeBroadcaster*) override;
 

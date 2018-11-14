@@ -97,6 +97,10 @@ public:
     void setDoublePrecision (bool doublePrecision);
     bool closeAnyOpenPluginWindows();
 
+    void Load();
+    void SetPerformance(int performanceIndex);
+
+
     //==============================================================================
     std::unique_ptr<FilterGraph> graph;
     std::unique_ptr<TabbedComponent> m_tabs;

@@ -27,7 +27,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "MainHostWindow.h"
 #include "../Filters/InternalFilters.h"
-#include "RackRow.h"
+
 
 //==============================================================================
 class MainHostWindow::PluginListWindow  : public DocumentWindow
@@ -98,10 +98,6 @@ MainHostWindow::MainHostWindow()
     centreWithSize (1024, 720);
    #endif
 
-    graphHolder.reset (new GraphDocumentComponent (formatManager, deviceManager, knownPluginList));
-
-    setContentNonOwned (graphHolder.get(), false);
-
     restoreWindowStateFromString (getAppProperties().getUserSettings()->getValue ("mainWindowPos"));
 
     setVisible (true);
@@ -121,6 +117,10 @@ MainHostWindow::MainHostWindow()
                             ->getIntValue ("pluginSortMethod", KnownPluginList::sortByManufacturer);
 
     knownPluginList.addChangeListener (this);
+
+    // move this here so we have plugins
+    graphHolder.reset(new GraphDocumentComponent(formatManager, deviceManager, knownPluginList));
+    setContentNonOwned(graphHolder.get(), false);
 
     if (auto* filterGraph = graphHolder->graph.get())
         filterGraph->addChangeListener (this);

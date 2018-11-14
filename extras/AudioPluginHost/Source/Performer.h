@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include "ForteEmulator/ForteSDK/XmlArchive.h"
 
 using namespace std;
 
@@ -10,13 +11,17 @@ class Device
 public:
     int ID;
     string Name;
+    string PluginName;
+    string PluginFile;
 
 	template<class A>
 	void Serialize(A& ar)
 	{
-		AR(ID);
-		AR(Name);
-	}
+		AR(ID, XmlAttribute);
+        AR(Name, XmlAttribute);
+        AR(PluginName, XmlAttribute);
+        AR(PluginFile, XmlAttribute);
+    }
 };
 
 class Zone
@@ -39,37 +44,51 @@ public:
 	template<class A>
 	void Serialize(A& ar)
 	{
-		AR(DeviceID);
-		AR(Bank);
-		AR(Program);
+		AR(DeviceID, XmlAttribute);
+		AR(Bank, XmlAttribute);
+		AR(Program, XmlAttribute);
 		AR(Data);
-		AR(Volume);
-		AR(Solo);
-		AR(Mute);
-		AR(DoubleOctave);
-		AR(Arpeggiator);
-		AR(Transpose);
-		AR(LowKey);
-		AR(HighKey);
+		AR(Volume, XmlAttribute);
+		AR(Solo, XmlAttribute);
+		AR(Mute, XmlAttribute);
+		AR(DoubleOctave, XmlAttribute);
+		AR(Arpeggiator, XmlAttribute);
+		AR(Transpose, XmlAttribute);
+		AR(LowKey, XmlAttribute);
+		AR(HighKey, XmlAttribute);
 	}
 };
 
-class Performance
+class PerformanceType
 {
 public:
     int ID;
     string Name;
     float Tempo;
-    vector<Zone> Zones;
+    vector<Zone> Zone;
 
 	template<class A>
 	void Serialize(A& ar)
 	{
-		AR(ID);
-		AR(Name);
-		AR(Tempo);
-		AR(Zones);
+		AR(ID, XmlAttribute);
+		AR(Name, XmlAttribute);
+		AR(Tempo, XmlAttribute);
+		AR(Zone);
 	}
+};
+
+class Integer
+{
+public:
+    Integer(int id = 0) : ID(id) {}
+
+    int ID;
+
+    template<class A>
+    void Serialize(A& ar)
+    {
+        AR(ID, XmlAttribute);
+    }
 };
 
 class Song
@@ -78,15 +97,15 @@ public:
     int ID;
     string Name;
 	// see if we can change OPX to use #3
-    vector<int> PerformanceIDs;
-    vector<Performance*> Performances;
+    vector<Integer> Performance;
+    vector<PerformanceType*> PerformancePtr;
 
 	template<class A>
 	void Serialize(A& ar)
 	{
-		AR(ID);
-		AR(Name);
-		AR(PerformanceIDs);
+		AR(ID, XmlAttribute);
+		AR(Name, XmlAttribute);
+		AR(Performance);
 	}
 };
 
@@ -95,33 +114,77 @@ class SetList
 public:
 	int ID;
     string Name;
-    vector<Song*> Songs;
-    vector<int> SongIDs;
+    vector<Song*> SongPtr;
+    vector<Integer> Song;
 
 	template<class A>
 	void Serialize(A& ar)
 	{
-		AR(ID);
-		AR(Name);
-		AR(SongIDs);
+		AR(ID, XmlAttribute);
+		AR(Name, XmlAttribute);
+		AR(Song);
 	}
+};
+
+class RacksType
+{
+public:
+    vector<Device> Rack;
+    template<class A>
+    void Serialize(A& ar)
+    {
+        AR(Rack);
+    }
+};
+
+class SetListsType
+{
+public:
+    vector<SetList> SetList;
+    template<class A>
+    void Serialize(A& ar)
+    {
+        AR(SetList);
+    }
+};
+
+class SongsType
+{
+public:
+    vector<Song> Song;
+    template<class A>
+    void Serialize(A& ar)
+    {
+        AR(Song);
+    }
+};
+
+class PerformancesType
+{
+public:
+    vector<PerformanceType> Performance;
+    template<class A>
+    void Serialize(A& ar)
+    {
+        AR(Performance);
+    }
 };
 
 class PerformerFile
 {
 public:
-    vector<SetList> SetLists;
-    vector<Device> Rack;
-    vector<Song> Songs;
-    vector<Performance> Performances;
+    SetListsType SetLists;
+    RacksType Racks;
+    SongsType Songs;
+    PerformancesType Performances;
 	int CurrentSetListID;
 
 	template<class A>
 	void Serialize(A& ar)
 	{
-		AR(CurrentSetListID);
+		AR(CurrentSetListID, XmlAttribute);
 		AR(SetLists);
-		AR(Rack);
+		AR(Racks);
 		AR(Songs);
 		AR(Performances);
 	}
@@ -133,5 +196,11 @@ public:
     Performer();
     void ResolveIDs();
 
-    PerformerFile m_current;
+    template<class A>
+    void Serialize(A& ar)
+    {
+        AR(Root);
+    }
+
+    PerformerFile Root;
 };

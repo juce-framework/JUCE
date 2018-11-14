@@ -1,3 +1,5 @@
+Need to save dll path and maybe outs?
+
 Create plugins to reflect rack
 Bring in router (changed to new classes)
 Change midi in/outs from RtMidi to JUCE plugins

@@ -31,6 +31,7 @@ void TrimRight(std::string& str, const char* chars2remove = " ")
 
 Performer::Performer()
 {
+    return;
     //const char *fileToLoad = "C:\\Users\\ben.crossman\\Desktop\\JUCE-ben\\extras\\AudioPluginHost\\Queen.rcf";
 
     const char *fileToLoad = "D:\\Data\\Audio\\Synth Backups\\Software\\Performance\\Queen.rcf";
@@ -46,14 +47,15 @@ Performer::Performer()
 		Device newDevice;
 		newDevice.ID = group.ID;
 		newDevice.Name = group.Name;
+        newDevice.PluginName = group.PluginChain.PlugIn[0].Name;
 		if (newDevice.Name == "Arpeggiator")
 			continue;
 
-		m_current.Rack.push_back(newDevice);
+		Root.Racks.Rack.push_back(newDevice);
 		if (newDevice.Name == "Korg M1")
 		{
 			newDevice.ID++;
-			m_current.Rack.push_back(newDevice);
+            Root.Racks.Rack.push_back(newDevice);
 		}
 	}
 
@@ -65,11 +67,11 @@ Performer::Performer()
 		newSetList.ID = setlist.ID;
         newSetList.Name = setlist.Name;
         for (unsigned int sr = 0; sr < setlist.SongRef.size(); ++sr)
-            newSetList.SongIDs.push_back(setlist.SongRef[sr].ID);
-        m_current.SetLists.push_back(newSetList);
+            newSetList.Song.push_back(Integer(setlist.SongRef[sr].ID));
+        Root.SetLists.SetList.push_back(newSetList);
     }
 
-	m_current.CurrentSetListID = m_current.SetLists[file.Rack.Setlists.Active].ID;
+    Root.CurrentSetListID = Root.SetLists.SetList[file.Rack.Setlists.Active].ID;
 
     // Songs
     for (unsigned int si = 0; si < file.Rack.Setlists.Song.size(); ++si)
@@ -79,8 +81,8 @@ Performer::Performer()
         newSong.ID = song.ID;
         newSong.Name = song.Name;
         for (unsigned int mr = 0; mr < song.MixerSceneRef.size(); ++mr)
-            newSong.PerformanceIDs.push_back(song.MixerSceneRef[mr].ID);
-        m_current.Songs.push_back(newSong);
+            newSong.Performance.push_back(song.MixerSceneRef[mr].ID);
+        Root.Songs.Song.push_back(newSong);
     }
 
     // Performances
@@ -92,7 +94,7 @@ Performer::Performer()
         Replace(songName, "|", " ");
         TrimRight(songName);
 
-        Performance performance;
+        PerformanceType performance;
         performance.ID = mixer.ID;
         performance.Name = songName;
         performance.Tempo = mixer.Mixer.Tempo.BPM;
@@ -150,54 +152,56 @@ Performer::Performer()
 					if (group.Name == "Arpeggiator")
 					{
 						// copy parameters to other plugin
-						for (auto z = 0U; z<performance.Zones.size(); ++z)
-							if (performance.Zones[z].Arpeggiator)
+						for (auto z = 0U; z<performance.Zone.size(); ++z)
+							if (performance.Zone[z].Arpeggiator)
 							{
-								performance.Zones[z].LowKey = zone.LowKey;
-								performance.Zones[z].HighKey = zone.HighKey;
-								performance.Zones[z].Transpose = zone.Transpose;
+								performance.Zone[z].LowKey = zone.LowKey;
+								performance.Zone[z].HighKey = zone.HighKey;
+								performance.Zone[z].Transpose = zone.Transpose;
 							}
 						continue;
 					}
 
-					performance.Zones.push_back(zone);
+					performance.Zone.push_back(zone);
 
 				}
             }
         }
-        m_current.Performances.push_back(performance);
+        Root.Performances.Performance.push_back(performance);
     }
 
     ResolveIDs();
+
+    XmlArchive::Save("Test.performer", *this);
 }
 
 void Performer::ResolveIDs()
 {
     // Resolve songs in setlists
-    for (auto sl = 0U; sl < m_current.SetLists.size(); ++sl)
-        for (auto sg = 0U; sg < m_current.SetLists[sl].SongIDs.size(); ++sg)
-            for (auto i = 0U; i < m_current.Songs.size(); ++i)
-                if (m_current.Songs[i].ID == m_current.SetLists[sl].SongIDs[sg])
-                    m_current.SetLists[sl].Songs.push_back(&m_current.Songs[i]);
+    for (auto sl = 0U; sl < Root.SetLists.SetList.size(); ++sl)
+        for (auto sg = 0U; sg < Root.SetLists.SetList[sl].Song.size(); ++sg)
+            for (auto i = 0U; i < Root.Songs.Song.size(); ++i)
+                if (Root.Songs.Song[i].ID == Root.SetLists.SetList[sl].Song[sg].ID)
+                    Root.SetLists.SetList[sl].SongPtr.push_back(&Root.Songs.Song[i]);
 
     // Resolve performances in songs
-    for (auto sg = 0U; sg < m_current.Songs.size(); ++sg)
-        for (auto p = 0U; p < m_current.Songs[sg].PerformanceIDs.size(); ++p)
-            for (auto i = 0U; i < m_current.Performances.size(); ++i)
-                if (m_current.Performances[i].ID == m_current.Songs[sg].PerformanceIDs[p])
-                    m_current.Songs[sg].Performances.push_back(&m_current.Performances[i]);
+    for (auto sg = 0U; sg < Root.Songs.Song.size(); ++sg)
+        for (auto p = 0U; p < Root.Songs.Song[sg].Performance.size(); ++p)
+            for (auto i = 0U; i < Root.Performances.Performance.size(); ++i)
+                if (Root.Performances.Performance[i].ID == Root.Songs.Song[sg].Performance[p].ID)
+                    Root.Songs.Song[sg].PerformancePtr.push_back(&Root.Performances.Performance[i]);
 
     // Resolve devices in performances
-    for (auto p = 0U; p < m_current.Performances.size(); ++p)
-		for (auto z = 0U; z < m_current.Performances[p].Zones.size(); ++z)
+    for (auto p = 0U; p < Root.Performances.Performance.size(); ++p)
+		for (auto z = 0U; z < Root.Performances.Performance[p].Zone.size(); ++z)
 		{
-			for (auto d = 0U; d < m_current.Rack.size(); ++d)
-				if (m_current.Performances[p].Zones[z].DeviceID == m_current.Rack[d].ID)
-					m_current.Performances[p].Zones[z].Device = &m_current.Rack[d];
-			if (m_current.Performances[p].Zones[z].Device == NULL)
+			for (auto d = 0U; d < Root.Racks.Rack.size(); ++d)
+				if (Root.Performances.Performance[p].Zone[z].DeviceID == Root.Racks.Rack[d].ID)
+                    Root.Performances.Performance[p].Zone[z].Device = &Root.Racks.Rack[d];
+			if (Root.Performances.Performance[p].Zone[z].Device == NULL)
 			{
-				swap(m_current.Performances[p].Zones[z], m_current.Performances[p].Zones.back());
-				m_current.Performances[p].Zones.pop_back();
+				swap(Root.Performances.Performance[p].Zone[z], Root.Performances.Performance[p].Zone.back());
+                Root.Performances.Performance[p].Zone.pop_back();
 				z--;
 			}
 		}

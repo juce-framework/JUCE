@@ -441,28 +441,9 @@ void GraphDocumentComponent::init()
     m_transposeColumn->setColour(TextEditor::backgroundColourId, Colour(0x00000000));
     m_transposeColumn->setBounds(632, 0, 80, 24);
 
-    m_performer = new Performer();
-
     m_rackUIViewport.reset(new Viewport());
     m_rackUI.reset(new Component());
     m_rackTopUI.reset(new Component());
-
-    int devicesOnScreen = m_performer->m_current.Rack.size();
-    int deviceWidth = 100;
-    int deviceHeight = 20;
-    int titleHeight = m_volumeColumn->getHeight() - 4;
-    for (int i = 0; i < devicesOnScreen; ++i)
-    {
-        m_rackDevice.push_back(std::make_unique<RackRow>());
-        auto newRackRow = (RackRow*)m_rackDevice.back().get();
-        newRackRow->Setup(m_performer->m_current.Rack[i]);
-        PluginDescription pluginDesc();
-        graph->addPlugin(pluginDesc);
-        deviceWidth = newRackRow->getWidth() + 2;
-        deviceHeight = newRackRow->getHeight();
-        m_rackUI->addAndMakeVisible(newRackRow);
-        newRackRow->setBounds(0, i*deviceHeight + titleHeight, deviceWidth, deviceHeight);
-    }
 
     m_tabs.reset(new TabbedComponent(TabbedButtonBar::TabsAtTop));
     m_tabs->setTabBarDepth(30);
@@ -471,57 +452,17 @@ void GraphDocumentComponent::init()
     m_tabs->addTab(TRANS("Performances"), Colours::darkkhaki, 0, false);
     m_tabs->addTab(TRANS("Rack"), Colours::darkgrey, m_rackUIViewport.get(), false);
     m_tabs->setCurrentTabIndex(3);
-    m_tabs->setBounds(10,10, deviceWidth, 700); // include tab bar
     addAndMakeVisible(m_tabs.get());
 
     m_rackTopUI->addAndMakeVisible(m_bankProgramColumn.get());
     m_rackTopUI->addAndMakeVisible(m_transposeColumn.get());
     m_rackTopUI->addAndMakeVisible(m_rangeColumn.get());
     m_rackTopUI->addAndMakeVisible(m_volumeColumn.get());
-    m_rackTopUI->setBounds(0, 0, deviceWidth, titleHeight);
 
-    m_rackUI->setBounds(0, 0, deviceWidth, deviceHeight * devicesOnScreen + titleHeight);
     m_rackUI->addAndMakeVisible(m_rackTopUI.get());
 
     m_rackUIViewport->setScrollBarsShown(true, false);
-    m_rackUIViewport->setBounds(0, 30, deviceWidth, m_tabs->getBounds().getHeight() - 30);
     m_rackUIViewport->setViewedComponent(m_rackUI.get());
-
-    auto &zones = m_performer->m_current.Performances[2].Zones;
-
-    for (auto d = 0U; d < m_rackDevice.size(); d++)
-    {
-        auto rackDevice = ((RackRow*)m_rackDevice[d].get());
-        bool found = false;
-        for (auto i = 0U; i < zones.size(); ++i)
-        {
-            if (rackDevice->ID() == zones[i].DeviceID)
-            {
-                found = true;
-            }
-        }
-        if (!found)
-        {
-            Zone mutedZone;
-            memset(&mutedZone, 0, sizeof(Zone));
-            mutedZone.DeviceID = rackDevice->ID();
-            mutedZone.Mute = true;
-            zones.push_back(mutedZone);
-        }
-    }
-
-    for (auto i = 0U; i < zones.size(); ++i)
-    {
-        for (auto d = 0U; d < m_rackDevice.size(); d++)
-        {
-            auto rackDevice = ((RackRow*)m_rackDevice[d].get());
-            if (rackDevice->ID() == zones[i].DeviceID)
-            {
-                rackDevice->Assign(&(zones[i]));
-                break ;
-            }
-        }
-    }
 
     keyState.addListener (&graphPlayer.getMidiMessageCollector());
 
@@ -557,6 +498,78 @@ void GraphDocumentComponent::init()
             addAndMakeVisible (mobileSettingsSidePanel);
         }
     }
+}
+
+void GraphDocumentComponent::Load()
+{
+    m_performer = new Performer();
+
+    int devicesOnScreen = m_performer->Root.Racks.Rack.size();
+    int deviceWidth = 100;
+    int deviceHeight = 20;
+    int titleHeight = m_volumeColumn->getHeight() - 4;
+    for (int i = 0; i < devicesOnScreen; ++i)
+    {
+        m_rackDevice.push_back(std::make_unique<RackRow>());
+        auto newRackRow = (RackRow*)m_rackDevice.back().get();
+        newRackRow->Setup(m_performer->Root.Racks.Rack[i]);
+        for (int p = 0; p < pluginList.getNumTypes(); ++p)
+        {
+            auto plugin = pluginList.getType(p);
+            if (plugin->name == m_performer->Root.Racks.Rack[i].PluginName.c_str())
+                createNewPlugin(*plugin, Point<int>(0, 0));
+        }
+
+        deviceWidth = newRackRow->getWidth() + 2;
+        deviceHeight = newRackRow->getHeight();
+        m_rackUI->addAndMakeVisible(newRackRow);
+        newRackRow->setBounds(0, i*deviceHeight + titleHeight, deviceWidth, deviceHeight);
+    }
+    m_tabs->setBounds(10, 10, deviceWidth, 700); // include tab bar
+    m_rackTopUI->setBounds(0, 0, deviceWidth, titleHeight);
+    m_rackUI->setBounds(0, 0, deviceWidth, deviceHeight * devicesOnScreen + titleHeight);
+    m_rackUIViewport->setBounds(0, 30, deviceWidth, m_tabs->getBounds().getHeight() - 30);
+
+}
+
+void GraphDocumentComponent::SetPerformance(int performanceIndex = 2)
+{
+    auto &zones = m_performer->Root.Performances.Performance[performanceIndex].Zone;
+
+    for (auto d = 0U; d < m_rackDevice.size(); d++)
+    {
+        auto rackDevice = ((RackRow*)m_rackDevice[d].get());
+        bool found = false;
+        for (auto i = 0U; i < zones.size(); ++i)
+        {
+            if (rackDevice->ID() == zones[i].DeviceID)
+            {
+                found = true;
+            }
+        }
+        if (!found)
+        {
+            Zone mutedZone;
+            memset(&mutedZone, 0, sizeof(Zone));
+            mutedZone.DeviceID = rackDevice->ID();
+            mutedZone.Mute = true;
+            zones.push_back(mutedZone);
+        }
+    }
+
+    for (auto i = 0U; i < zones.size(); ++i)
+    {
+        for (auto d = 0U; d < m_rackDevice.size(); d++)
+        {
+            auto rackDevice = ((RackRow*)m_rackDevice[d].get());
+            if (rackDevice->ID() == zones[i].DeviceID)
+            {
+                rackDevice->Assign(&(zones[i]));
+                break;
+            }
+        }
+    }
+
 }
 
 GraphDocumentComponent::~GraphDocumentComponent()

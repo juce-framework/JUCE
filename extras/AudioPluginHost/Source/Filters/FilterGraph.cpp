@@ -211,23 +211,64 @@ void FilterGraph::newDocument()
 
 Result FilterGraph::loadDocument (const File& file)
 {
-    XmlDocument doc (file);
-    std::unique_ptr<XmlElement> xml (doc.getDocumentElement());
+    clear();
 
-    if (xml == nullptr || ! xml->hasTagName ("FILTERGRAPH"))
-        return Result::fail ("Not a valid filter graph file");
+    InternalPluginFormat internalFormat;
+    addPlugin(internalFormat.midiInDesc, { 0,0 });
+    addPlugin(internalFormat.audioOutDesc, { 0,0 });
 
-    restoreFromXml (*xml);
+    XmlArchive::Load(file.getFullPathName().getCharPointer(), m_performer);
+    for (int i = 0; i < 1/*m_performer.Root.Racks.Rack.size()*/; ++i)
+    {
+        auto &rack = m_performer.Root.Racks.Rack[i];
+
+        PluginDescription pd;
+        pd.name = rack.PluginName;
+        pd.pluginFormatName = "VST";
+        pd.isInstrument = true;
+        pd.fileOrIdentifier = rack.PluginFile;
+
+        String errorMessage;
+
+        if (auto* instance = formatManager.createPluginInstance(pd, graph.getSampleRate(), graph.getBlockSize(), errorMessage))
+        {
+            // not sure about this stuff, dont need the addBus for VST
+            //auto layout = instance->getBusesLayout();
+            //layout.inputBuses.add(instance->getChannelLayoutOfBus(true, 0));
+            //layout.outputBuses.add(instance->getChannelLayoutOfBus(false, 0));
+            //layout.outputBuses.add(instance->getChannelLayoutOfBus(false, 1));
+            //instance->setBusesLayout(layout);
+
+            auto node = graph.addNode(instance, (NodeID)rack.ID);
+
+            // State stuff for later
+            //MemoryBlock m;
+            //m.fromBase64Encoding(char*);
+            //node->getProcessor()->setStateInformation(m.getData(), (int)m.getSize());
+
+            //node->properties.set("x", 0);
+            //node->properties.set("y", 0);
+
+            if (auto w = getOrCreateWindowFor(node, PluginWindow::Type::normal))
+                w->toFront(true);
+        }
+    }
+
+
+
+    changed();
+
+    auto test = graph.addConnection({ { (NodeID)m_performer.Root.Racks.Rack[0].ID, 0 }, { 0, 0 } });
+
+
+    //graph.addConnection({ { (NodeID)e->getIntAttribute("srcFilter"), e->getIntAttribute("srcChannel") }, { (NodeID)e->getIntAttribute("dstFilter"), e->getIntAttribute("dstChannel") } });
+
     return Result::ok();
 }
 
 Result FilterGraph::saveDocument (const File& file)
 {
-    std::unique_ptr<XmlElement> xml (createXml());
-
-    if (! xml->writeToFile (file, {}))
-        return Result::fail ("Couldn't write to the file");
-
+    XmlArchive::Save(file.getFullPathName().getCharPointer(), m_performer);
     return Result::ok();
 }
 
@@ -252,212 +293,6 @@ void FilterGraph::setLastDocumentOpened (const File& file)
         ->setValue ("recentFilterGraphFiles", recentFiles.toString());
 }
 
-//==============================================================================
-static void readBusLayoutFromXml (AudioProcessor::BusesLayout& busesLayout, AudioProcessor* plugin,
-                                  const XmlElement& xml, const bool isInput)
-{
-    auto& targetBuses = (isInput ? busesLayout.inputBuses
-                                 : busesLayout.outputBuses);
-    int maxNumBuses = 0;
-
-    if (auto* buses = xml.getChildByName (isInput ? "INPUTS" : "OUTPUTS"))
-    {
-        forEachXmlChildElementWithTagName (*buses, e, "BUS")
-        {
-            const int busIdx = e->getIntAttribute ("index");
-            maxNumBuses = jmax (maxNumBuses, busIdx + 1);
-
-            // the number of buses on busesLayout may not be in sync with the plugin after adding buses
-            // because adding an input bus could also add an output bus
-            for (int actualIdx = plugin->getBusCount (isInput) - 1; actualIdx < busIdx; ++actualIdx)
-                if (! plugin->addBus (isInput))
-                    return;
-
-            for (int actualIdx = targetBuses.size() - 1; actualIdx < busIdx; ++actualIdx)
-                targetBuses.add (plugin->getChannelLayoutOfBus (isInput, busIdx));
-
-            auto layout = e->getStringAttribute ("layout");
-
-            if (layout.isNotEmpty())
-                targetBuses.getReference (busIdx) = AudioChannelSet::fromAbbreviatedString (layout);
-        }
-    }
-
-    // if the plugin has more buses than specified in the xml, then try to remove them!
-    while (maxNumBuses < targetBuses.size())
-    {
-        if (! plugin->removeBus (isInput))
-            return;
-
-        targetBuses.removeLast();
-    }
-}
-
-//==============================================================================
-static XmlElement* createBusLayoutXml (const AudioProcessor::BusesLayout& layout, const bool isInput)
-{
-    auto& buses = isInput ? layout.inputBuses
-                          : layout.outputBuses;
-
-    auto* xml = new XmlElement (isInput ? "INPUTS" : "OUTPUTS");
-
-    for (int busIdx = 0; busIdx < buses.size(); ++busIdx)
-    {
-        auto& set = buses.getReference (busIdx);
-
-        auto* bus = xml->createNewChildElement ("BUS");
-        bus->setAttribute ("index", busIdx);
-        bus->setAttribute ("layout", set.isDisabled() ? "disabled" : set.getSpeakerArrangementAsString());
-    }
-
-    return xml;
-}
-
-static XmlElement* createNodeXml (AudioProcessorGraph::Node* const node) noexcept
-{
-    if (auto* plugin = dynamic_cast<AudioPluginInstance*> (node->getProcessor()))
-    {
-        auto e = new XmlElement ("FILTER");
-        e->setAttribute ("uid", (int) node->nodeID);
-        e->setAttribute ("x", node->properties ["x"].toString());
-        e->setAttribute ("y", node->properties ["y"].toString());
-
-        for (int i = 0; i < (int) PluginWindow::Type::numTypes; ++i)
-        {
-            auto type = (PluginWindow::Type) i;
-
-            if (node->properties.contains (PluginWindow::getOpenProp (type)))
-            {
-                e->setAttribute (PluginWindow::getLastXProp (type), node->properties[PluginWindow::getLastXProp (type)].toString());
-                e->setAttribute (PluginWindow::getLastYProp (type), node->properties[PluginWindow::getLastYProp (type)].toString());
-                e->setAttribute (PluginWindow::getOpenProp (type),  node->properties[PluginWindow::getOpenProp (type)].toString());
-            }
-        }
-
-        {
-            PluginDescription pd;
-            plugin->fillInPluginDescription (pd);
-            e->addChildElement (pd.createXml());
-        }
-
-        {
-            MemoryBlock m;
-            node->getProcessor()->getStateInformation (m);
-            e->createNewChildElement ("STATE")->addTextElement (m.toBase64Encoding());
-        }
-
-        auto layout = plugin->getBusesLayout();
-
-        auto layouts = e->createNewChildElement ("LAYOUT");
-        layouts->addChildElement (createBusLayoutXml (layout, true));
-        layouts->addChildElement (createBusLayoutXml (layout, false));
-
-        return e;
-    }
-
-    jassertfalse;
-    return nullptr;
-}
-
-void FilterGraph::createNodeFromXml (const XmlElement& xml)
-{
-    PluginDescription pd;
-
-    forEachXmlChildElement (xml, e)
-    {
-        if (pd.loadFromXml (*e))
-            break;
-    }
-
-    String errorMessage;
-
-    if (auto* instance = formatManager.createPluginInstance (pd, graph.getSampleRate(),
-                                                             graph.getBlockSize(), errorMessage))
-    {
-        if (auto* layoutEntity = xml.getChildByName ("LAYOUT"))
-        {
-            auto layout = instance->getBusesLayout();
-
-            readBusLayoutFromXml (layout, instance, *layoutEntity, true);
-            readBusLayoutFromXml (layout, instance, *layoutEntity, false);
-
-            instance->setBusesLayout (layout);
-        }
-
-        if (auto node = graph.addNode (instance, (NodeID) xml.getIntAttribute ("uid")))
-        {
-            if (auto* state = xml.getChildByName ("STATE"))
-            {
-                MemoryBlock m;
-                m.fromBase64Encoding (state->getAllSubText());
-
-                node->getProcessor()->setStateInformation (m.getData(), (int) m.getSize());
-            }
-
-            node->properties.set ("x", xml.getDoubleAttribute ("x"));
-            node->properties.set ("y", xml.getDoubleAttribute ("y"));
-
-            for (int i = 0; i < (int) PluginWindow::Type::numTypes; ++i)
-            {
-                auto type = (PluginWindow::Type) i;
-
-                if (xml.hasAttribute (PluginWindow::getOpenProp (type)))
-                {
-                    node->properties.set (PluginWindow::getLastXProp (type), xml.getIntAttribute (PluginWindow::getLastXProp (type)));
-                    node->properties.set (PluginWindow::getLastYProp (type), xml.getIntAttribute (PluginWindow::getLastYProp (type)));
-                    node->properties.set (PluginWindow::getOpenProp  (type), xml.getIntAttribute (PluginWindow::getOpenProp (type)));
-
-                    if (node->properties[PluginWindow::getOpenProp (type)])
-                    {
-                        jassert (node->getProcessor() != nullptr);
-
-                        if (auto w = getOrCreateWindowFor (node, type))
-                            w->toFront (true);
-                    }
-                }
-            }
-        }
-    }
-}
-
-XmlElement* FilterGraph::createXml() const
-{
-    auto* xml = new XmlElement ("FILTERGRAPH");
-
-    for (auto* node : graph.getNodes())
-        xml->addChildElement (createNodeXml (node));
-
-    for (auto& connection : graph.getConnections())
-    {
-        auto e = xml->createNewChildElement ("CONNECTION");
-
-        e->setAttribute ("srcFilter", (int) connection.source.nodeID);
-        e->setAttribute ("srcChannel", connection.source.channelIndex);
-        e->setAttribute ("dstFilter", (int) connection.destination.nodeID);
-        e->setAttribute ("dstChannel", connection.destination.channelIndex);
-    }
-
-    return xml;
-}
-
-void FilterGraph::restoreFromXml (const XmlElement& xml)
-{
-    clear();
-
-    forEachXmlChildElementWithTagName (xml, e, "FILTER")
-    {
-        createNodeFromXml (*e);
-        changed();
-    }
-
-    forEachXmlChildElementWithTagName (xml, e, "CONNECTION")
-    {
-        graph.addConnection ({ { (NodeID) e->getIntAttribute ("srcFilter"), e->getIntAttribute ("srcChannel") },
-                               { (NodeID) e->getIntAttribute ("dstFilter"), e->getIntAttribute ("dstChannel") } });
-    }
-
-    graph.removeIllegalConnections();
-}
 
 File FilterGraph::getDefaultGraphDocumentOnMobile()
 {
