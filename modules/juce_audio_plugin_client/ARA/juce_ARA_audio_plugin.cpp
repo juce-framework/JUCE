@@ -8,8 +8,10 @@
 
 // Include these source files directly for now
 #include "juce_ARADocumentController.cpp"
+#include "juce_ARAMusicalContext.cpp"
 #include "juce_ARARegionSequence.cpp"
 #include "juce_ARAAudioSource.cpp"
+#include "juce_ARAAudioModification.cpp"
 #include "juce_ARAPlaybackRegion.cpp"
 #include "juce_ARAAudioReaders.cpp"
 #include "juce_AudioProcessorARAExtension.cpp"

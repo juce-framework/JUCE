@@ -176,4 +176,58 @@ void ARADocumentController::willDestroyRegionSequence (ARA::PlugIn::RegionSequen
     static_cast<ARARegionSequence*> (regionSequence)->willDestroyRegionSequence ();
 }
 
+//==============================================================================
+
+ARA::PlugIn::AudioModification* ARADocumentController::doCreateAudioModification (ARA::PlugIn::AudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef) noexcept
+{
+    return new ARAAudioModification (audioSource, hostRef);
+}
+
+void ARADocumentController::willUpdateAudioModificationProperties (ARA::PlugIn::AudioModification* audioModification, ARA::PlugIn::PropertiesPtr<ARA::ARAAudioModificationProperties> newProperties) noexcept
+{
+    static_cast<ARAAudioModification*> (audioModification)->willUpdateAudioModificationProperties (newProperties);
+}
+
+void ARADocumentController::didUpdateAudioModificationProperties (ARA::PlugIn::AudioModification* audioModification) noexcept
+{
+    static_cast<ARAAudioModification*> (audioModification)->didUpdateAudioModificationProperties ();
+}
+
+void ARADocumentController::doDeactivateAudioModificationForUndoHistory (ARA::PlugIn::AudioModification* audioModification, bool deactivate) noexcept
+{
+    static_cast<ARAAudioModification*> (audioModification)->doDeactivateAudioModificationForUndoHistory (deactivate);
+}
+
+void ARADocumentController::willDestroyAudioModification (ARA::PlugIn::AudioModification* audioModification) noexcept
+{
+    static_cast<ARAAudioModification*> (audioModification)->willDestroyAudioModification ();
+}
+
+//==============================================================================
+
+ARA::PlugIn::MusicalContext* ARADocumentController::doCreateMusicalContext (ARA::PlugIn::Document* document, ARA::ARAMusicalContextHostRef hostRef) noexcept
+{
+    return new ARAMusicalContext (document, hostRef);
+}
+
+void ARADocumentController::willUpdateMusicalContextProperties (ARA::PlugIn::MusicalContext* musicalContext, ARA::PlugIn::PropertiesPtr<ARA::ARAMusicalContextProperties> newProperties) noexcept
+{
+    static_cast<ARAMusicalContext*> (musicalContext)->willUpdateMusicalContextProperties (newProperties);
+}
+
+void ARADocumentController::didUpdateMusicalContextProperties (ARA::PlugIn::MusicalContext* musicalContext) noexcept
+{
+    static_cast<ARAMusicalContext*> (musicalContext)->didUpdateMusicalContextProperties ();
+}
+
+void ARADocumentController::doUpdateMusicalContextContent (ARA::PlugIn::MusicalContext* musicalContext, const ARA::ARAContentTimeRange* range, ARA::ARAContentUpdateFlags flags) noexcept
+{
+    static_cast<ARAMusicalContext*> (musicalContext)->doUpdateMusicalContextContent (range, flags);
+}
+
+void ARADocumentController::willDestroyMusicalContext (ARA::PlugIn::MusicalContext* musicalContext) noexcept
+{
+    static_cast<ARAMusicalContext*> (musicalContext)->willDestroyMusicalContext ();
+}
+
 } // namespace juce
