@@ -91,6 +91,7 @@
 #include "utilities/juce_CatmullRomInterpolator.h"
 #include "utilities/juce_LinearSmoothedValue.h"
 #include "utilities/juce_Reverb.h"
+#include "utilities/juce_ADSR.h"
 #include "midi/juce_MidiMessage.h"
 #include "midi/juce_MidiBuffer.h"
 #include "midi/juce_MidiMessageSequence.h"
