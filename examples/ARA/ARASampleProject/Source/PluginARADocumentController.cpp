@@ -96,7 +96,7 @@ bool ARARegionSequenceReader::readSamples (
     int numSamples)
 {
     // render our ARA playback regions for this time duration using the ARA playback renderer instance
-    if (!lock.tryEnterRead ())
+    if (! lock.tryEnterRead ())
     {
         for (int chan_i = 0; chan_i < numDestChannels; ++chan_i)
             FloatVectorOperations::clear ((float *) destSamples[chan_i], numSamples);

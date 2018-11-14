@@ -62,7 +62,7 @@ void ARAAudioSource::willUpdateAudioSourceProperties (ARA::PlugIn::AudioSource* 
         return;
 
    #if JUCE_DEBUG
-    jassert (!stateUpdateProperties);
+    jassert (! stateUpdateProperties);
     stateUpdateProperties = true;
    #endif
 
@@ -98,7 +98,7 @@ void ARAAudioSource::willEnableAudioSourceSamplesAccess (ARA::PlugIn::AudioSourc
         return;
 
    #if JUCE_DEBUG
-    jassert (!stateEnableSamplesAccess);
+    jassert (! stateEnableSamplesAccess);
     stateEnableSamplesAccess = true;
    #endif
 
@@ -191,7 +191,7 @@ bool ARAAudioSource::Reader::readSamples (
     int numSamples)
 {
     Ref::ScopedAccess source (ref, true);
-    if (!source || araHostReader == nullptr)
+    if (! source || araHostReader == nullptr)
     {
         for (int chan_i = 0; chan_i < (int) tmpPtrs.size (); ++chan_i)
             FloatVectorOperations::clear ((float *) destSamples[chan_i], numSamples);
@@ -309,7 +309,7 @@ bool ARAAudioSourceReader::readSamples (
     int numSamples)
 {
     // If we can't enter the lock or we don't have a reader, zero samples and return false
-    if (!lock.tryEnterRead () || araHostReader == nullptr)
+    if (! lock.tryEnterRead () || araHostReader == nullptr)
     {
         for (int chan_i = 0; chan_i < numDestChannels; ++chan_i)
             FloatVectorOperations::clear ((float *) destSamples[chan_i], numSamples);

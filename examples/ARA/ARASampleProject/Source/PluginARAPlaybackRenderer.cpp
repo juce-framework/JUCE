@@ -32,7 +32,7 @@ void ARASampleProjectPlaybackRenderer::renderPlaybackRegions (AudioBuffer<float>
             continue;
 
         // render silence if access is currently disabled
-        if (!audioSource->isSampleAccessEnabled ())
+        if (! audioSource->isSampleAccessEnabled ())
             continue;
 
         // this simplified test code "rendering" only produces audio if sample rate and channel count match
