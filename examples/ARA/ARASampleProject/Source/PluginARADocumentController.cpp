@@ -47,8 +47,8 @@ AudioFormatReader* ARASampleProjectDocumentController::createRegionSequenceReade
 
 ARARegionSequenceReader::ARARegionSequenceReader (ARA::PlugIn::RegionSequence* regionSequence, ARA::PlugIn::PlaybackRenderer* playbackRenderer)
 : AudioFormatReader (nullptr, "ARAAudioSourceReader"),
-  _regionSequence (regionSequence),
-  _playbackRenderer (playbackRenderer)
+  regionSequence (regionSequence),
+  playbackRenderer (playbackRenderer)
 {
     // TODO JUCE_ARA
     // deal with single and double precision floats
@@ -75,7 +75,7 @@ ARARegionSequenceReader::ARARegionSequenceReader (ARA::PlugIn::RegionSequence* r
         numChannels = std::max (numChannels, (unsigned int) source->getChannelCount());
         lengthInSamples = std::max (lengthInSamples, region->getEndInPlaybackSamples (sampleRate));
 
-        _playbackRenderer->addPlaybackRegion (ARA::PlugIn::toRef (region));
+        playbackRenderer->addPlaybackRegion (ARA::PlugIn::toRef (region));
         static_cast<ARAPlaybackRegion*>(region)->addListener (this);
     }
 }
@@ -83,9 +83,9 @@ ARARegionSequenceReader::ARARegionSequenceReader (ARA::PlugIn::RegionSequence* r
 ARARegionSequenceReader::~ARARegionSequenceReader()
 {
     ScopedWriteLock scopedWrite (lock);
-    for (ARA::PlugIn::PlaybackRegion* region : _regionSequence->getPlaybackRegions())
+    for (ARA::PlugIn::PlaybackRegion* region : regionSequence->getPlaybackRegions())
         static_cast<ARAPlaybackRegion*>(region)->removeListener (this);
-    delete _playbackRenderer;
+    delete playbackRenderer;
 }
 
 bool ARARegionSequenceReader::readSamples (
@@ -104,7 +104,7 @@ bool ARARegionSequenceReader::readSamples (
     }
 
     AudioBuffer<float> buffer ((float **) destSamples, numDestChannels, startOffsetInDestBuffer, numSamples);
-    static_cast<ARASampleProjectPlaybackRenderer*>(_playbackRenderer)->renderPlaybackRegions (buffer, sampleRate, startSampleInFile, true);
+    static_cast<ARASampleProjectPlaybackRenderer*>(playbackRenderer)->renderPlaybackRegions (buffer, sampleRate, startSampleInFile, true);
     lock.exitRead();
     return true;
 }
@@ -112,29 +112,29 @@ bool ARARegionSequenceReader::readSamples (
 
 void ARARegionSequenceReader::willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARA::PlugIn::PropertiesPtr<ARA::ARAPlaybackRegionProperties> newProperties) noexcept
 {
-    if (contains (_playbackRenderer->getPlaybackRegions(), static_cast<ARA::PlugIn::PlaybackRegion*> (playbackRegion)))
+    if (contains (playbackRenderer->getPlaybackRegions(), static_cast<ARA::PlugIn::PlaybackRegion*> (playbackRegion)))
     {
-        if (newProperties->regionSequenceRef != ARA::PlugIn::toRef (_regionSequence))
+        if (newProperties->regionSequenceRef != ARA::PlugIn::toRef (regionSequence))
         {
             ScopedWriteLock scopedWrite (lock);
             playbackRegion->removeListener (this);
-            _playbackRenderer->removePlaybackRegion (ARA::PlugIn::toRef (playbackRegion));
+            playbackRenderer->removePlaybackRegion (ARA::PlugIn::toRef (playbackRegion));
         }
     }
-    else if (newProperties->regionSequenceRef == ARA::PlugIn::toRef (_regionSequence))
+    else if (newProperties->regionSequenceRef == ARA::PlugIn::toRef (regionSequence))
     {
         ScopedWriteLock scopedWrite (lock);
         playbackRegion->addListener (this);
-        _playbackRenderer->addPlaybackRegion (ARA::PlugIn::toRef (playbackRegion));
+        playbackRenderer->addPlaybackRegion (ARA::PlugIn::toRef (playbackRegion));
     }
 }
 
 void ARARegionSequenceReader::willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept
 {
-    if (contains (_playbackRenderer->getPlaybackRegions(), static_cast<ARA::PlugIn::PlaybackRegion*> (playbackRegion)))
+    if (contains (playbackRenderer->getPlaybackRegions(), static_cast<ARA::PlugIn::PlaybackRegion*> (playbackRegion)))
     {
         ScopedWriteLock scopedWrite (lock);
         playbackRegion->removeListener (this);
-        _playbackRenderer->removePlaybackRegion (ARA::PlugIn::toRef (playbackRegion));
+        playbackRenderer->removePlaybackRegion (ARA::PlugIn::toRef (playbackRegion));
     }
 }

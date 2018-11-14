@@ -55,7 +55,7 @@ public:
     void willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept override;
 
 private:
-    ARA::PlugIn::RegionSequence* _regionSequence;
-    ARA::PlugIn::PlaybackRenderer* _playbackRenderer;
+    ARA::PlugIn::RegionSequence* regionSequence;
+    ARA::PlugIn::PlaybackRenderer* playbackRenderer;
     ReadWriteLock lock;
 };
