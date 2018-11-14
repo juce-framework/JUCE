@@ -147,7 +147,7 @@ void ARASampleProjectAudioProcessor::processBlock (AudioBuffer<float>& buffer, M
 
     // render our ARA playback regions for this time duration using the ARA playback renderer instance
     ARASampleProjectPlaybackRenderer* playbackRenderer = static_cast<ARASampleProjectPlaybackRenderer*> (getARAPlaybackRenderer());
-    playbackRenderer->renderPlaybackRegions (buffer, getSampleRate(), ci.timeInSamples, ci.isPlaying);
+    playbackRenderer->renderSamples (buffer, getSampleRate(), ci.timeInSamples, ci.isPlaying);
 }
 
 //==============================================================================

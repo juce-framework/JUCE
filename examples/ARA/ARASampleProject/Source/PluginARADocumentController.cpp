@@ -104,7 +104,7 @@ bool ARARegionSequenceReader::readSamples (
     }
 
     AudioBuffer<float> buffer ((float **) destSamples, numDestChannels, startOffsetInDestBuffer, numSamples);
-    static_cast<ARASampleProjectPlaybackRenderer*>(playbackRenderer)->renderPlaybackRegions (buffer, sampleRate, startSampleInFile, true);
+    static_cast<ARASampleProjectPlaybackRenderer*>(playbackRenderer)->renderSamples (buffer, sampleRate, startSampleInFile, true);
     lock.exitRead();
     return true;
 }

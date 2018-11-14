@@ -18,7 +18,7 @@ public:
     ARASampleProjectPlaybackRenderer (ARADocumentController* documentController, TimeSliceThread& timeSliceThread, int bufferingSize);
 
     // render playback regions added to this render if they fall within the range of samples being rendered
-    void renderPlaybackRegions (AudioBuffer<float>& buffer, ARA::ARASampleRate sampleRate, ARA::ARASamplePosition samplePosition, bool isPlayingBack);
+    void renderSamples (AudioBuffer<float>& buffer, ARA::ARASampleRate sampleRate, ARA::ARASamplePosition samplePosition, bool isPlayingBack);
 
 protected:
 
@@ -35,4 +35,3 @@ private:
     // we'll use them to pull ARA samples from the host as we render
     std::map<ARAAudioSource*, std::unique_ptr<BufferingAudioSource>> audioSourceReaders;
 };
-
