@@ -10,7 +10,9 @@ Multiple changes to low-level, non-public JNI and Android APIs.
 
 Possible Issues
 ---------------
-If you were using any non-public, low-level JNI macros, calling java code or recieving JNI callbacks, then your code will probably no longer work. See the forum for further details.
+If you were using any non-public, low-level JNI macros, calling java code or
+recieving JNI callbacks, then your code will probably no longer work. See the
+forum for further details.
 
 Workaround
 ----------
@@ -27,7 +29,8 @@ The minimum Android version for a JUCE app is now Android 4.1
 
 Possible Issues
 ---------------
-Your app may not run on very old versions of Android  (less than 5% of the devices).
+Your app may not run on very old versions of Android  (less than 0.5% of the
+devices).
 
 Workaround
 ----------
@@ -35,9 +38,9 @@ There is no workaround.
 
 Rationale
 ---------
-Less than 5% of all devices in the world run versions of Android older than Android
-4.1. In the interest of keeping JUCE code clean and lean, we must depricate support
-for very old Android versions from time to time.
+Less than 0.5% of all devices in the world run versions of Android older than
+Android 4.1. In the interest of keeping JUCE code clean and lean, we must
+depricate support for very old Android versions from time to time.
 
 
 Version 5.4.0
