@@ -33,7 +33,7 @@ public:
     void removeListener (Listener* l);
 
 private:
-    std::vector<Listener*> listeners;
+    ListenerList<Listener> listeners;
 };
 
 } // namespace juce
