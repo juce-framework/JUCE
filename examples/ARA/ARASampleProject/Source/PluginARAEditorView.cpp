@@ -17,7 +17,7 @@ ARASampleProjectEditorView::SelectionListener::SelectionListener (ARA::PlugIn::E
         araEditorView->addSelectionListener (this);
 }
 
-ARASampleProjectEditorView::SelectionListener::~SelectionListener ()
+ARASampleProjectEditorView::SelectionListener::~SelectionListener()
 {
     if (araEditorView)
         araEditorView->removeSelectionListener (this);
@@ -34,7 +34,7 @@ void ARASampleProjectEditorView::doNotifySelection (const ARA::PlugIn::ViewSelec
         listener->onNewSelection (currentSelection);
 }
 
-const ARA::PlugIn::ViewSelection * ARASampleProjectEditorView::getMostRecentSelection () const 
+const ARA::PlugIn::ViewSelection * ARASampleProjectEditorView::getMostRecentSelection() const 
 { 
     return &mostRecentSelection; 
 }

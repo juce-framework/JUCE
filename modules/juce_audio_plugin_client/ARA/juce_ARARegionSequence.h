@@ -18,7 +18,7 @@ class ARARegionSequence : public ARA::PlugIn::RegionSequence
 {
 public:
     ARARegionSequence (ARA::PlugIn::Document*, ARA::ARARegionSequenceHostRef);
-    ~ARARegionSequence ();
+    ~ARARegionSequence();
 
     // If not given a `sampleRate` will figure it out from the first playback region within.
     // Playback regions with differing sample rates will be ignored.

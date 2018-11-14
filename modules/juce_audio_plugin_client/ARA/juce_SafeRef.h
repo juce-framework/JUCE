@@ -29,7 +29,7 @@ public:
         owner = newOwner;
     }
 
-    T* get () const
+    T* get() const
     {
         return owner;
     }

@@ -19,11 +19,11 @@ public:
     void changeListenerCallback (ChangeBroadcaster*) override;
 
     void setIsSelected (bool value);
-    bool getIsSelected () const;
+    bool getIsSelected() const;
     double getStartInSecs();
     double getLengthInSecs();
 
-    ARA::PlugIn::RegionSequence* getRegionSequence () const { return regionSequence; }
+    ARA::PlugIn::RegionSequence* getRegionSequence() const { return regionSequence; }
 
 private:
     String name;

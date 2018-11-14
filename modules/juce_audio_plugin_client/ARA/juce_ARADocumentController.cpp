@@ -94,12 +94,12 @@ void ARADocumentController::didUpdatePlaybackRegionProperties (ARA::PlugIn::Play
     // TODO JUCE_ARA
     // replace these static functions with listener callbacks
     ARARegionSequence::didUpdatePlaybackRegionProperties (playbackRegion);
-    static_cast<ARAPlaybackRegion*> (playbackRegion)->didUpdatePlaybackRegionProperties ();
+    static_cast<ARAPlaybackRegion*> (playbackRegion)->didUpdatePlaybackRegionProperties();
 }
 
 void ARADocumentController::willDestroyPlaybackRegion (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept
 {
-    static_cast<ARAPlaybackRegion*> (playbackRegion)->willDestroyPlaybackRegion ();
+    static_cast<ARAPlaybackRegion*> (playbackRegion)->willDestroyPlaybackRegion();
 }
 //==============================================================================
 
@@ -199,16 +199,16 @@ void ARADocumentController::didReorderRegionSequencesInMusicalContext (const ARA
         updateListener->didReorderRegionSequencesInMusicalContext (musicalContext);
 }
 
-void ARADocumentController::willReorderRegionSequences () noexcept
+void ARADocumentController::willReorderRegionSequences() noexcept
 {
     for (ARARegionSequenceUpdateListener* updateListener : regionSequenceUpdateListeners)
-        updateListener->willReorderRegionSequences ();
+        updateListener->willReorderRegionSequences();
 }
 
-void ARADocumentController::didReorderRegionSequences () noexcept
+void ARADocumentController::didReorderRegionSequences() noexcept
 {
     for (ARARegionSequenceUpdateListener* updateListener : regionSequenceUpdateListeners)
-        updateListener->didReorderRegionSequences ();
+        updateListener->didReorderRegionSequences();
 }
 
 void ARADocumentController::addRegionSequenceUpdateListener (ARARegionSequenceUpdateListener* updateListener)
@@ -228,7 +228,7 @@ ARARegionSequenceUpdateListener::ARARegionSequenceUpdateListener (ARA::PlugIn::D
         araDocumentController->addRegionSequenceUpdateListener (this);
 }
 
-ARARegionSequenceUpdateListener::~ARARegionSequenceUpdateListener ()
+ARARegionSequenceUpdateListener::~ARARegionSequenceUpdateListener()
 {
     if (araDocumentController)
         araDocumentController->removeRegionSequenceUpdateListener (this);
@@ -241,7 +241,7 @@ ARAAudioSourceUpdateListener::ARAAudioSourceUpdateListener (ARA::PlugIn::Documen
         araDocumentController->addAudioSourceUpdateListener (this);
 }
 
-ARAAudioSourceUpdateListener::~ARAAudioSourceUpdateListener ()
+ARAAudioSourceUpdateListener::~ARAAudioSourceUpdateListener()
 {
     if (araDocumentController)
         araDocumentController->removeAudioSourceUpdateListener (this);

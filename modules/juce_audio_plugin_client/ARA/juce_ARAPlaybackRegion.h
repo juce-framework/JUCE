@@ -12,8 +12,8 @@ public:
     ARAPlaybackRegion (ARA::PlugIn::AudioModification* audioModification, ARA::ARAPlaybackRegionHostRef hostRef);
 
     void willUpdatePlaybackRegionProperties (ARA::PlugIn::PropertiesPtr<ARA::ARAPlaybackRegionProperties> newProperties) noexcept;
-    void didUpdatePlaybackRegionProperties () noexcept;
-    void willDestroyPlaybackRegion () noexcept;
+    void didUpdatePlaybackRegionProperties() noexcept;
+    void willDestroyPlaybackRegion() noexcept;
 
     class Listener
     {

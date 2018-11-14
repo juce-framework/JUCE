@@ -33,7 +33,7 @@ private:
 
 ARAAudioSource::ARAAudioSource (ARA::PlugIn::Document* document, ARA::ARAAudioSourceHostRef hostRef)
 : ARA::PlugIn::AudioSource (document, hostRef),
-  ARAAudioSourceUpdateListener (document->getDocumentController ()),
+  ARAAudioSourceUpdateListener (document->getDocumentController()),
   ref (new Ref (this))
 {}
 
@@ -70,11 +70,11 @@ void ARAAudioSource::willUpdateAudioSourceProperties (ARA::PlugIn::AudioSource* 
     // We can check individual values to see if we need to invalidate, 
     // but according to ARAInterface.h line 2607 isn't it up to the 
     // ARA host to disable audio source sample access when appropriate?
-    if (getSampleCount () != newProperties->sampleCount ||
-        getSampleRate () != newProperties->sampleRate ||
-        getChannelCount () != newProperties->channelCount)
+    if (getSampleCount() != newProperties->sampleCount ||
+        getSampleRate() != newProperties->sampleRate ||
+        getChannelCount() != newProperties->channelCount)
     {
-        invalidateReaders ();
+        invalidateReaders();
     }
 }
 
@@ -88,7 +88,7 @@ void ARAAudioSource::didUpdateAudioSourceProperties (ARA::PlugIn::AudioSource* a
     stateUpdateProperties = false;
    #endif
 
-    if (ref->get () == nullptr)
+    if (ref->get() == nullptr)
         ref = new Ref (this);
 }
 
@@ -133,7 +133,7 @@ void ARAAudioSource::doUpdateAudioSourceContent (ARA::PlugIn::AudioSource* audio
     if ((flags & ARA::kARAContentUpdateSignalScopeRemainsUnchanged) != 0)
         return;
 
-    invalidateReaders ();
+    invalidateReaders();
 }
 
 std::unique_ptr<BufferingAudioSource> ARAAudioSource::createBufferingAudioSource (TimeSliceThread& thread, int bufferSize)
@@ -193,7 +193,7 @@ bool ARAAudioSource::Reader::readSamples (
     Ref::ScopedAccess source (ref, true);
     if (! source || araHostReader == nullptr)
     {
-        for (int chan_i = 0; chan_i < (int) tmpPtrs.size (); ++chan_i)
+        for (int chan_i = 0; chan_i < (int) tmpPtrs.size(); ++chan_i)
             FloatVectorOperations::clear ((float *) destSamples[chan_i], numSamples);
         return false;
     }
@@ -214,24 +214,24 @@ bool ARAAudioSource::Reader::readSamples (
 
 ARAAudioSourceReader::ARAAudioSourceReader (ARA::PlugIn::AudioSource* source, bool use64BitSamples)
 : AudioFormatReader (nullptr, "ARAAudioSourceReader"),
-  ARAAudioSourceUpdateListener (source->getDocument ()->getDocumentController ())
+  ARAAudioSourceUpdateListener (source->getDocument()->getDocumentController())
 {
     bitsPerSample = use64BitSamples ? 64 : 32;
     usesFloatingPointData = true;
-    sampleRate = source->getSampleRate ();
-    numChannels = source->getChannelCount ();
-    lengthInSamples = source->getSampleCount ();
+    sampleRate = source->getSampleRate();
+    numChannels = source->getChannelCount();
+    lengthInSamples = source->getSampleCount();
     tmpPtrs.resize (numChannels);
     audioSourceBeingRead = source;
 
-    if (audioSourceBeingRead->isSampleAccessEnabled ())
-        recreate ();
+    if (audioSourceBeingRead->isSampleAccessEnabled())
+        recreate();
 }
 
-ARAAudioSourceReader::~ARAAudioSourceReader ()
+ARAAudioSourceReader::~ARAAudioSourceReader()
 {
     ScopedWriteLock l (lock);
-    invalidate ();
+    invalidate();
 }
 
 void ARAAudioSourceReader::willEnableAudioSourceSamplesAccess (ARA::PlugIn::AudioSource* audioSource, bool enable) noexcept
@@ -240,11 +240,11 @@ void ARAAudioSourceReader::willEnableAudioSourceSamplesAccess (ARA::PlugIn::Audi
         return;
 
     // unlocked in didEnableAudioSourceSamplesAccess
-    lock.enterWrite ();
+    lock.enterWrite();
 
     // invalidate our reader if sample access is disabled
     if (enable == false)
-        invalidate ();
+        invalidate();
 }
 
 void ARAAudioSourceReader::didEnableAudioSourceSamplesAccess (ARA::PlugIn::AudioSource* audioSource, bool enable) noexcept
@@ -256,9 +256,9 @@ void ARAAudioSourceReader::didEnableAudioSourceSamplesAccess (ARA::PlugIn::Audio
 
     // recreate our reader if sample access is enabled
     if (enable)
-        recreate ();
+        recreate();
 
-    lock.exitWrite ();
+    lock.exitWrite();
 }
 
 void ARAAudioSourceReader::willDestroyAudioSource (ARA::PlugIn::AudioSource* audioSource) noexcept
@@ -270,7 +270,7 @@ void ARAAudioSourceReader::willDestroyAudioSource (ARA::PlugIn::AudioSource* aud
     // should this ever happen? ideally someone delete us instead...
     // jassertfalse;
     ScopedWriteLock scopedLock (lock);
-    invalidate ();
+    invalidate();
     audioSourceBeingRead = nullptr;
 }
 
@@ -284,21 +284,21 @@ void ARAAudioSourceReader::doUpdateAudioSourceContent (ARA::PlugIn::AudioSource*
         return;
 
     ScopedWriteLock scopedLock (lock);
-    invalidate ();
+    invalidate();
 }
 
-void ARAAudioSourceReader::recreate ()
+void ARAAudioSourceReader::recreate()
 {
     // TODO JUCE_ARA
     // it shouldnt' be possible for araHostReader to contain data at this point, 
     // but should we assert that?
-    jassert (audioSourceBeingRead->isSampleAccessEnabled ());
+    jassert (audioSourceBeingRead->isSampleAccessEnabled());
     araHostReader.reset (new ARA::PlugIn::HostAudioReader (audioSourceBeingRead));
 }
 
-void ARAAudioSourceReader::invalidate ()
+void ARAAudioSourceReader::invalidate()
 {
-    araHostReader.reset ();
+    araHostReader.reset();
 }
 
 bool ARAAudioSourceReader::readSamples (
@@ -309,7 +309,7 @@ bool ARAAudioSourceReader::readSamples (
     int numSamples)
 {
     // If we can't enter the lock or we don't have a reader, zero samples and return false
-    if (! lock.tryEnterRead () || araHostReader == nullptr)
+    if (! lock.tryEnterRead() || araHostReader == nullptr)
     {
         for (int chan_i = 0; chan_i < numDestChannels; ++chan_i)
             FloatVectorOperations::clear ((float *) destSamples[chan_i], numSamples);
@@ -318,18 +318,18 @@ bool ARAAudioSourceReader::readSamples (
 
     jassert (audioSourceBeingRead != nullptr);
 
-    for (int chan_i = 0; chan_i < (int) tmpPtrs.size (); ++chan_i)
+    for (int chan_i = 0; chan_i < (int) tmpPtrs.size(); ++chan_i)
         if (chan_i < numDestChannels && destSamples[chan_i] != nullptr)
             tmpPtrs[chan_i] = (void*) (destSamples[chan_i] + startOffsetInDestBuffer);
         else
         {
-            if (numSamples > (int) dummyBuffer.size ())
+            if (numSamples > (int) dummyBuffer.size())
                 dummyBuffer.resize (numSamples);
-            tmpPtrs[chan_i] = (void*) dummyBuffer.data ();
+            tmpPtrs[chan_i] = (void*) dummyBuffer.data();
         }
 
-    bool success = araHostReader->readAudioSamples (startSampleInFile, numSamples, tmpPtrs.data ());
-    lock.exitRead ();
+    bool success = araHostReader->readAudioSamples (startSampleInFile, numSamples, tmpPtrs.data());
+    lock.exitRead();
     return success;
 }
 } // namespace juce

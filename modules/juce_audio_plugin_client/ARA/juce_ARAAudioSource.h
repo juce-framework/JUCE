@@ -45,10 +45,10 @@ class ARAAudioSourceReader : public AudioFormatReader,
 {
 public:
     ARAAudioSourceReader (ARA::PlugIn::AudioSource* audioSource, bool use64BitSamples = false);
-    ~ARAAudioSourceReader ();
+    ~ARAAudioSourceReader();
 
-    void recreate ();
-    void invalidate ();
+    void recreate();
+    void invalidate();
 
     bool readSamples (
         int** destSamples,

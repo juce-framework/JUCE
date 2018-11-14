@@ -23,7 +23,7 @@ public:
         ARASampleProjectEditorView* araEditorView;
     public:
         SelectionListener (ARA::PlugIn::EditorView* editorView);
-        virtual ~SelectionListener ();
+        virtual ~SelectionListener();
 
         // will be called from ARASampleProjectEditorView::doNotifySelection
         virtual void onNewSelection (const ARA::PlugIn::ViewSelection* currentSelection) = 0;
@@ -34,7 +34,7 @@ public:
     ARASampleProjectEditorView (ARA::PlugIn::DocumentController*) noexcept;
     void doNotifySelection (const ARA::PlugIn::ViewSelection*) noexcept override;
 
-    const ARA::PlugIn::ViewSelection* getMostRecentSelection () const;
+    const ARA::PlugIn::ViewSelection* getMostRecentSelection() const;
 
     void addSelectionListener (SelectionListener* l);
     void removeSelectionListener (SelectionListener* l);

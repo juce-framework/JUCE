@@ -25,7 +25,7 @@ RegionSequenceView::RegionSequenceView (ARA::PlugIn::RegionSequence& sequence)
 , audioThumbCache (1)
 , audioThumb (128, audioFormatManger, audioThumbCache)
 {
-    ARASampleProjectDocumentController* documentController = static_cast<ARASampleProjectDocumentController*> (sequence.getDocument ()->getDocumentController ());
+    ARASampleProjectDocumentController* documentController = static_cast<ARASampleProjectDocumentController*> (sequence.getDocument()->getDocumentController());
     name = String (sequence.getName());
     orderIndex = String (sequence.getOrderIndex());
     audioThumb.addChangeListener (this);
@@ -70,10 +70,10 @@ void RegionSequenceView::setIsSelected (bool value)
     bool needsRepaint = (value != isSelected);
     isSelected = value;
     if (needsRepaint)
-        repaint ();
+        repaint();
 }
 
-bool RegionSequenceView::getIsSelected () const
+bool RegionSequenceView::getIsSelected() const
 {
     return isSelected;
 }

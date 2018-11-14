@@ -42,7 +42,7 @@ class ARARegionSequenceReader : public AudioFormatReader,
 {
 public:
     ARARegionSequenceReader (ARA::PlugIn::RegionSequence* regionSequence, ARA::PlugIn::PlaybackRenderer* playbackRenderer);
-    ~ARARegionSequenceReader ();
+    ~ARARegionSequenceReader();
 
     bool readSamples (
         int** destSamples,

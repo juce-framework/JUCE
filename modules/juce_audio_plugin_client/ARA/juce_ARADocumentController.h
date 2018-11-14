@@ -12,8 +12,8 @@ class ARAAudioSourceUpdateListener;
 class ARADocumentController: public ARA::PlugIn::DocumentController
 {
 public:
-    ARADocumentController () noexcept {}
-    virtual ~ARADocumentController () noexcept {}
+    ARADocumentController() noexcept {}
+    virtual ~ARADocumentController() noexcept {}
 
     void addRegionSequenceUpdateListener (ARARegionSequenceUpdateListener* updateListener);
     void removeRegionSequenceUpdateListener (ARARegionSequenceUpdateListener* updateListener);
@@ -48,8 +48,8 @@ protected:
     void willDestroyRegionSequence (ARA::PlugIn::RegionSequence* regionSequence) noexcept override;
     void willReorderRegionSequencesInMusicalContext (const ARA::PlugIn::MusicalContext* musicalContext) noexcept override;
     void didReorderRegionSequencesInMusicalContext (const ARA::PlugIn::MusicalContext* musicalContext) noexcept override;
-    void willReorderRegionSequences () noexcept override;
-    void didReorderRegionSequences () noexcept override;
+    void willReorderRegionSequences() noexcept override;
+    void didReorderRegionSequences() noexcept override;
 
 private:
     std::vector<ARARegionSequenceUpdateListener*> regionSequenceUpdateListeners;
@@ -69,7 +69,7 @@ class ARARegionSequenceUpdateListener
 public:
     // listener lifetime takes care of adding and removing us from the document controller
     ARARegionSequenceUpdateListener (ARA::PlugIn::DocumentController* documentController);
-    virtual ~ARARegionSequenceUpdateListener ();
+    virtual ~ARARegionSequenceUpdateListener();
 
     ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
 
@@ -79,8 +79,8 @@ public:
     virtual void willDestroyRegionSequence (ARA::PlugIn::RegionSequence* regionSequence) noexcept {}
     virtual void willReorderRegionSequencesInMusicalContext (const ARA::PlugIn::MusicalContext* musicalContext) noexcept {}
     virtual void didReorderRegionSequencesInMusicalContext (const ARA::PlugIn::MusicalContext* musicalContext) noexcept {}
-    virtual void willReorderRegionSequences () noexcept {}
-    virtual void didReorderRegionSequences () noexcept {}
+    virtual void willReorderRegionSequences() noexcept {}
+    virtual void didReorderRegionSequences() noexcept {}
 
     ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
 
@@ -94,7 +94,7 @@ class ARAAudioSourceUpdateListener
 {
 public:
     ARAAudioSourceUpdateListener (ARA::PlugIn::DocumentController* documentController);
-    virtual ~ARAAudioSourceUpdateListener ();
+    virtual ~ARAAudioSourceUpdateListener();
 
     ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
 
