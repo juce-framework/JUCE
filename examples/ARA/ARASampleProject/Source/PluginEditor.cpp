@@ -33,7 +33,7 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
     setSize (kWidth, kHeight);
 
     // manually invoke the onNewSelection callback to refresh our UI with the current selection
-    // TODO should we rename the function that recreates the view?
+    // TODO JUCE_ARA should we rename the function that recreates the view?
     onNewSelection (static_cast<ARASampleProjectEditorView*> (getARAEditorView())->getMostRecentSelection());
 }
 

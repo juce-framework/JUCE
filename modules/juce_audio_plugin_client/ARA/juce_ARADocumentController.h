@@ -61,7 +61,7 @@ private:
 };
 
 // Region Sequence update listener
-// TODO if we decide to continue with this type of pattern, 
+// TODO JUCE_ARA if we decide to continue with this type of pattern,
 // perhaps we should override all creation functions in ARADocumentController
 // so we can forward the creation notifications to our listeners
 class ARARegionSequenceUpdateListener
