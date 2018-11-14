@@ -62,6 +62,9 @@ protected:
     void willDestroyPlaybackRegion (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept override;
 
 private:
+    
+    std::map<ARAPlaybackRegion*, ARARegionSequence*> previousSequencesForUpdatingRegions;
+
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARADocumentController)
 };
