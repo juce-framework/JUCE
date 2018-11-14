@@ -174,7 +174,7 @@ namespace BinaryData
     const int            jucer_PIPTemplate_hSize = 517;
 
     extern const char*   jucer_UnityPluginGUIScript_cs;
-    const int            jucer_UnityPluginGUIScript_csSize = 6426;
+    const int            jucer_UnityPluginGUIScript_csSize = 6433;
 
     extern const char*   colourscheme_dark_xml;
     const int            colourscheme_dark_xmlSize = 1050;

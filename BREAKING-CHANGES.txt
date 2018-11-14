@@ -5,6 +5,68 @@ Develop
 =======
 
 Change
+-----
+Multiple changes to low-level, non-public JNI and Android APIs.
+
+Possible Issues
+---------------
+If you were using any non-public, low-level JNI macros, calling java code or recieving JNI callbacks, then your code will probably no longer work. See the forum for further details.
+
+Workaround
+----------
+See the forum for further details.
+
+Rationale
+---------
+See the forum for further details.
+
+
+Change
+-----
+The minimum Android version for a JUCE app is now Android 4.1
+
+Possible Issues
+---------------
+Your app may not run on very old versions of Android  (less than 5% of the devices).
+
+Workaround
+----------
+There is no workaround.
+
+Rationale
+---------
+Less than 5% of all devices in the world run versions of Android older than Android
+4.1. In the interest of keeping JUCE code clean and lean, we must depricate support
+for very old Android versions from time to time.
+
+
+Version 5.4.0
+=============
+
+Change
+------
+The use of WinRT MIDI functions has been disabled by default for any version
+of Windows 10 before 1809 (October 2018 Update).
+
+Possible Issues
+---------------
+If you were previously using WinRT MIDI functions on older versions of Windows
+then the new behaviour is to revert to the old Win32 MIDI API.
+
+Workaround
+----------
+Set the preprocessor macro JUCE_FORCE_WINRT_MIDI=1 (in addition to the
+previously selected JUCE_USE_WINRT_MIDI=1) to allow the use of the WinRT API on
+older versions of Windows.
+
+Rationale
+---------
+Until now JUCE's support for the Windows 10 WinRT MIDI API was experimental,
+due to longstanding issues within the API itself. These issues have been
+addressed in the Windows 10 1809 (October 2018 Update) release.
+
+
+Change
 ------
 The VST2 SDK embedded within JUCE has been removed.
 
@@ -21,7 +83,8 @@ Workaround
 ----------
 1. The VST2 SDK can be obtained from the vstsdk3610_11_06_2018_build_37 (or
    older) VST3 SDK or JUCE version 5.3.2. You should put the VST2 SDK in your
-   header search paths.
+   header search paths or use the "VST (Legacy) SDK Folder" fields in the
+   Projucer.
 2. For new plug-in projects where you will be releasing both a VST2 and VST3
    version, and you want the VST3 plug-in to replace the VST2 plug-in in
    hosts that support it, then you should enable the JUCE_VST3_CAN_REPLACE_VST2
@@ -66,7 +129,6 @@ The new createAndAddParameter method is much more flexible and enables any
 parameter types derived from RangedAudioParameter to be managed by the
 AudioProcessorValueTreeState.
 
-
 Change
 ------
 The Projucer's per-exporter Android SDK/NDK path options have been removed.
@@ -85,7 +147,6 @@ Rationale
 ---------
 Having multiple places where the paths could be set was confusing and could
 cause unexpected mismatches.
-
 
 Change
 ------
@@ -145,7 +206,7 @@ infinite tail time.
 
 Workaround
 ----------
-Re-write your code to not use the result of getTailLengthSeconds directly to
+Rewrite your code to not use the result of getTailLengthSeconds directly to
 allocate a buffer.
 
 Rationale
@@ -599,6 +660,25 @@ truncating those numbers.
 
 Version 5.1.0
 =============
+
+Change
+------
+The JUCE_COMPILER_SUPPORTS_LAMBDAS preprocessor macro has been removed.
+
+Possible Issues
+---------------
+If your project is using JUCE_COMPILER_SUPPORTS_LAMBDAS in your source code
+then it will likely evaluate to "false" and you could end up unnecessarily
+using code paths which avoid lambda functions.
+
+Workaround
+----------
+Remove the usage of JUCE_COMPILER_SUPPORTS_LAMBDAS from your code.
+
+Rationale
+---------
+Lambda functions are now available on all platforms that JUCE supports.
+
 
 Change
 ------

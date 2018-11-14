@@ -281,6 +281,10 @@ static bool isGlobalPathValid (const File& relativeTo, const Identifier& key, co
 {
     String fileToCheckFor;
 
+    if (key == Ids::vstLegacyPath)
+    {
+        fileToCheckFor = "pluginterfaces/vst2.x/aeffect.h";
+    }
     if (key == Ids::vst3Path)
     {
         fileToCheckFor = "base/source/baseiids.cpp";
@@ -391,7 +395,7 @@ static String getFallbackPathForOS (const Identifier& key, DependencyPathOS os)
     {
         return (os == TargetOS::windows ? "C:\\modules" : "~/modules");
     }
-    else if (key == Ids::vst3Path)
+    else if (key == Ids::vstLegacyPath || key == Ids::vst3Path)
     {
         return {};
     }

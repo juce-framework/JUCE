@@ -267,50 +267,22 @@ struct BlockConfigManager
     // Set Block Configuration
     void setBlockConfig (ConfigItemId item, int32 value)
     {
-        HostPacketBuilder<32> packet;
-
-        packet.writePacketSysexHeaderBytes (deviceIndex);
-        packet.addConfigSetMessage (item, value);
-        packet.writePacketSysexFooter();
-
-        if (deviceConnection != nullptr)
-            deviceConnection->sendMessageToDevice (packet.getData(), (size_t) packet.size());
+        buildAndSendPacket ([item, value] (HostPacketBuilder<32>& p) { p.addConfigSetMessage (item, value); });
     }
 
     void requestBlockConfig (ConfigItemId item)
     {
-        HostPacketBuilder<32> packet;
-
-        packet.writePacketSysexHeaderBytes (deviceIndex);
-        packet.addRequestMessage (item);
-        packet.writePacketSysexFooter();
-
-        if (deviceConnection != nullptr)
-            deviceConnection->sendMessageToDevice(packet.getData(), (size_t) packet.size());
+        buildAndSendPacket ([item] (HostPacketBuilder<32>& p) { p.addRequestMessage (item); });
     }
 
     void requestFactoryConfigSync()
     {
-        HostPacketBuilder<32> packet;
-
-        packet.writePacketSysexHeaderBytes(deviceIndex);
-        packet.addRequestFactorySyncMessage();
-        packet.writePacketSysexFooter();
-
-        if (deviceConnection != nullptr)
-            deviceConnection->sendMessageToDevice(packet.getData(), (size_t) packet.size());
+        buildAndSendPacket ([] (HostPacketBuilder<32>& p) { p.addRequestFactorySyncMessage(); });
     }
 
     void requestUserConfigSync()
     {
-        HostPacketBuilder<32> packet;
-
-        packet.writePacketSysexHeaderBytes(deviceIndex);
-        packet.addRequestUserSyncMessage();
-        packet.writePacketSysexFooter();
-
-        if (deviceConnection != nullptr)
-            deviceConnection->sendMessageToDevice(packet.getData(), (size_t) packet.size());
+        buildAndSendPacket ([] (HostPacketBuilder<32>& p) { p.addRequestUserSyncMessage(); });
     }
 
     void handleConfigUpdateMessage (int32 item, int32 value, int32 min, int32 max)
@@ -349,8 +321,21 @@ private:
         return false;
     }
 
-    TopologyIndex deviceIndex;
-    PhysicalTopologySource::DeviceConnection* deviceConnection;
+    template<typename PacketBuildFn>
+    void buildAndSendPacket (PacketBuildFn buildFn)
+    {
+        if (deviceConnection == nullptr)
+            return;
+
+        HostPacketBuilder<32> packet;
+        packet.writePacketSysexHeaderBytes (deviceIndex);
+        buildFn (packet);
+        packet.writePacketSysexFooter();
+        deviceConnection->sendMessageToDevice (packet.getData(), (size_t) packet.size());
+    }
+
+    TopologyIndex deviceIndex {};
+    PhysicalTopologySource::DeviceConnection* deviceConnection {};
 };
 
 } // namespace juce

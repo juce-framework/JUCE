@@ -176,6 +176,26 @@ public:
                        std::make_unique<AudioParameterInt> ("b", "Parameter B", 0, 5, 2) })
         @endcode
 
+        To add parameters programatically you can use the iterator-based ParameterLayout
+        constructor:
+
+        @code
+        AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
+        {
+            std::vector<std::unique_ptr<AudioParameterInt>> params;
+
+            for (int i = 1; i < 9; ++i)
+                params.push_back (std::make_unique<AudioParameterInt> (String (i), String (i), 0, i, 0));
+
+            return { params.begin(), params.end() };
+        }
+
+        YourAudioProcessor()
+            : apvts (*this, &undoManager, "PARAMETERS", createParameterLayout())
+        {
+        }
+        @endcode
+
         @param processorToConnectTo     The Processor that will be managed by this object
         @param undoManagerToUse         An optional UndoManager to use; pass nullptr if no UndoManager is required
         @param valueTreeType            The identifier used to initialise the internal ValueTree
@@ -188,6 +208,7 @@ public:
                                   ParameterLayout parameterLayout);
 
     /** This constructor is discouraged and will be deprecated in a future version of JUCE!
+        Use the other constructor instead.
 
         Creates a state object for a given processor.
 
@@ -205,10 +226,13 @@ public:
     /** This function is deprecated and will be removed in a future version of JUCE!
 
         Previous calls to
+
         @code
         createAndAddParameter (paramID1, paramName1, ...);
         @endcode
+
         can be replaced with
+
         @code
         using Parameter = AudioProcessorValueTreeState::Parameter;
         createAndAddParameter (std::make_unique<Parameter> (paramID1, paramName1, ...));
@@ -216,6 +240,7 @@ public:
 
         However, a much better approach is to use the AudioProcessorValueTreeState
         constructor directly
+
         @code
         using Parameter = AudioProcessorValueTreeState::Parameter;
         YourAudioProcessor()
@@ -223,6 +248,8 @@ public:
                                                           std::make_unique<Parameter> (paramID2, paramName2, ...),
                                                           ... })
         @endcode
+
+        @see AudioProcessorValueTreeState::AudioProcessorValueTreeState
 
         This function creates and returns a new parameter object for controlling a
         parameter with the given ID.
@@ -331,10 +358,13 @@ public:
         AudioProcessorValueTreeState functionality.
 
         Previous calls to
+
         @code
         createAndAddParameter (paramID1, paramName1, ...);
         @endcode
+
         can be replaced with
+
         @code
         using Parameter = AudioProcessorValueTreeState::Parameter;
         createAndAddParameter (std::make_unique<Parameter> (paramID1, paramName1, ...));
@@ -342,6 +372,7 @@ public:
 
         However, a much better approach is to use the AudioProcessorValueTreeState
         constructor directly
+
         @code
         using Parameter = AudioProcessorValueTreeState::Parameter;
         YourAudioProcessor()

@@ -95,7 +95,7 @@ struct UnityAudioSpatializerData
     float                          reverbZoneMix;
     float                          spread;
     float                          stereoPan;
-    distanceAttenuationCallback    distanceAttenuationCallback;
+    distanceAttenuationCallback    attenuationCallback;
     float                          minDistance;
     float                          maxDistance;
 };
@@ -108,7 +108,7 @@ struct UnityAudioAmbisonicData
     float                          reverbZoneMix;
     float                          spread;
     float                          stereoPan;
-    distanceAttenuationCallback    distanceAttenuationCallback;
+    distanceAttenuationCallback    attenuationCallback;
     int                            ambisonicOutChannels;
     float                          volume;
 };

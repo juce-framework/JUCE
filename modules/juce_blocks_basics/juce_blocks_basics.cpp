@@ -28,6 +28,11 @@
  #endif
 #else
 
+namespace juce
+{
+ #include "littlefoot/juce_LittleFootRemoteHeap.h"
+}
+
 #include "protocol/juce_BitPackingUtilities.h"
 #include "protocol/juce_BlocksProtocolDefinitions.h"
 #include "protocol/juce_HostPacketDecoder.h"
