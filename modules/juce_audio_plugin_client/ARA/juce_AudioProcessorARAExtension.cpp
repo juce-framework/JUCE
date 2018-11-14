@@ -1,5 +1,8 @@
 #include "juce_AudioProcessorARAExtension.h"
 
+namespace juce
+{
+
 const ARA::ARAPlugInExtensionInstance* AudioProcessorARAExtension::createARAPlugInExtension (ARA::ARADocumentControllerRef documentControllerRef, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles)
 {
     ARA::PlugIn::DocumentController* documentController = reinterpret_cast<ARA::PlugIn::DocumentController*> (documentControllerRef);
@@ -30,3 +33,5 @@ ARA::PlugIn::EditorView* AudioProcessorARAExtension::getARAEditorView() const no
 {
     return araPlugInExtension ? araPlugInExtension->getEditorView() : nullptr;
 }
+
+} // namespace juce
