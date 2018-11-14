@@ -24,7 +24,6 @@ public:
     public:
         SelectionListener (ARA::PlugIn::EditorView* editorView);
         virtual ~SelectionListener ();
-        const ARA::PlugIn::ViewSelection* getMostRecentSelection () const;
 
         // will be called from ARASampleProjectEditorView::doNotifySelection
         virtual void onNewSelection (const ARA::PlugIn::ViewSelection* currentSelection) = 0;

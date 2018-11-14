@@ -34,7 +34,7 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
 
     // manually invoke the onNewSelection callback to refresh our UI with the current selection
     // TODO should we rename the function that recreates the view?
-    onNewSelection (getMostRecentSelection ());
+    onNewSelection (static_cast<ARASampleProjectEditorView*> (getARAEditorView())->getMostRecentSelection ());
 }
 
 ARASampleProjectAudioProcessorEditor::~ARASampleProjectAudioProcessorEditor()
@@ -121,5 +121,5 @@ void ARASampleProjectAudioProcessorEditor::didUpdateRegionSequenceProperties (AR
 {
     // manually invoke onNewSelection here to redraw the region sequence views
     regionSequencesWithPropertyChanges.insert (regionSequence);
-    onNewSelection (getMostRecentSelection ());
+    onNewSelection (static_cast<ARASampleProjectEditorView*> (getARAEditorView())->getMostRecentSelection ());
 }

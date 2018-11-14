@@ -12,6 +12,8 @@ class AudioProcessorEditorARAExtension
 public:
     AudioProcessorEditorARAExtension (AudioProcessor* audioProcessor);
 
+    // TODO return proper JUCE class here once we've added it to the framework to handle selection -
+    // see static_cast<ARASampleProjectEditorView*> in ARASampleProjectAudioProcessorEditor
     ARA::PlugIn::EditorView* getARAEditorView() const noexcept;
 
     bool isARAEditorView() const noexcept { return getARAEditorView() != nullptr; }

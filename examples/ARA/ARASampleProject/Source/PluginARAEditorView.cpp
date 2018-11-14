@@ -23,11 +23,6 @@ ARASampleProjectEditorView::SelectionListener::~SelectionListener ()
         araEditorView->removeSelectionListener (this);
 }
 
-const ARA::PlugIn::ViewSelection * ARASampleProjectEditorView::SelectionListener::getMostRecentSelection () const
-{ 
-    return araEditorView ? araEditorView->getMostRecentSelection () : nullptr; 
-}
-
 ARASampleProjectEditorView::ARASampleProjectEditorView (ARA::PlugIn::DocumentController* ctrl) noexcept
 : ARA::PlugIn::EditorView (ctrl)
 {}
