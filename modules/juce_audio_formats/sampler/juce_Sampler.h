@@ -83,11 +83,13 @@ public:
     */
     AudioBuffer<float>* getAudioData() const noexcept       { return data.get(); }
 
+    //==============================================================================
+    /** Changes the parameters of the ADSR envelope which will be applied to the sample. */
+    void setEnvelopeParameters (ADSR::Parameters parametersToUse)    { params = parametersToUse; }
 
     //==============================================================================
     bool appliesToNote (int midiNoteNumber) override;
     bool appliesToChannel (int midiChannel) override;
-
 
 private:
     //==============================================================================
@@ -97,8 +99,9 @@ private:
     std::unique_ptr<AudioBuffer<float>> data;
     double sourceSampleRate;
     BigInteger midiNotes;
-    int length = 0, attackSamples = 0, releaseSamples = 0;
-    int midiRootNote = 0;
+    int length = 0, midiRootNote = 0;
+
+    ADSR::Parameters params;
 
     JUCE_LEAK_DETECTOR (SamplerSound)
 };
@@ -136,13 +139,13 @@ public:
 
     void renderNextBlock (AudioBuffer<float>&, int startSample, int numSamples) override;
 
-
 private:
     //==============================================================================
     double pitchRatio = 0;
     double sourceSamplePosition = 0;
-    float lgain = 0, rgain = 0, attackReleaseLevel = 0, attackDelta = 0, releaseDelta = 0;
-    bool isInAttack = false, isInRelease = false;
+    float lgain = 0, rgain = 0;
+
+    ADSR adsr;
 
     JUCE_LEAK_DETECTOR (SamplerVoice)
 };
