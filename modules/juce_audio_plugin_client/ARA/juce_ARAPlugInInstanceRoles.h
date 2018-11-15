@@ -52,8 +52,6 @@ public:
     public:
         virtual ~Listener () {}
 
-        // TODO JUCE_ARA
-        // should these be pure virtual?
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
         virtual void onNewSelection (const ARA::PlugIn::ViewSelection* currentSelection) {}
         virtual void onHideRegionSequences (std::vector<ARARegionSequence*> const& regionSequences) {}
