@@ -1,13 +1,3 @@
-/*
-  ==============================================================================
-
-    This file was auto-generated!
-
-    It contains the basic framework code for an ARA document controller implementation. 
-
-  ==============================================================================
-*/
-
 #include "PluginARADocumentController.h"
 #include "PluginARAPlaybackRenderer.h"
 
