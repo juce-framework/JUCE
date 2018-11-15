@@ -10,7 +10,6 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-#include "PluginARAEditorView.h"
 
 static const int kWidth = 1000;
 static const int kHeight = 400;
@@ -20,7 +19,6 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
     : AudioProcessorEditor (&p)
 #if JucePlugin_Enable_ARA
     , AudioProcessorEditorARAExtension (&p)
-    , ARASampleProjectEditorView::SelectionListener (getARAEditorView())
 #endif
 {
     // init viewport and region sequence list view
@@ -33,11 +31,13 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
 
     // manually invoke the onNewSelection callback to refresh our UI with the current selection
     // TODO JUCE_ARA should we rename the function that recreates the view?
-    onNewSelection (static_cast<ARASampleProjectEditorView*> (getARAEditorView())->getMostRecentSelection());
+    getARAEditorView ()->addSelectionListener (this);
+    onNewSelection (getARAEditorView ()->getMostRecentSelection());
 }
 
 ARASampleProjectAudioProcessorEditor::~ARASampleProjectAudioProcessorEditor()
 {
+    getARAEditorView ()->removeSelectionListener (this);
 }
 
 //==============================================================================
@@ -120,5 +120,5 @@ void ARASampleProjectAudioProcessorEditor::didUpdateRegionSequenceProperties (AR
 {
     // manually invoke onNewSelection here to redraw the region sequence views
     regionSequencesWithPropertyChanges.insert (regionSequence);
-    onNewSelection (static_cast<ARASampleProjectEditorView*> (getARAEditorView())->getMostRecentSelection());
+    onNewSelection (getARAEditorView ()->getMostRecentSelection());
 }

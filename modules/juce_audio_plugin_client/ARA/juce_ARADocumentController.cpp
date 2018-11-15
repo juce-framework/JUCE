@@ -3,6 +3,7 @@
 #include "juce_ARAAudioSource.h"
 #include "juce_ARAPlaybackRegion.h"
 #include "juce_ARAAudioReaders.h"
+#include "juce_ARAPlugInInstanceRoles.h"
 
 const ARA::ARAFactory* ARA::PlugIn::DocumentController::getARAFactory() noexcept
 {
@@ -257,6 +258,23 @@ void ARADocumentController::didUpdatePlaybackRegionProperties (ARA::PlugIn::Play
 void ARADocumentController::willDestroyPlaybackRegion (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept
 {
     static_cast<ARAPlaybackRegion*> (playbackRegion)->willDestroyPlaybackRegion ();
+}
+
+//==============================================================================
+
+ARA::PlugIn::PlaybackRenderer* ARADocumentController::doCreatePlaybackRenderer () noexcept
+{
+    return new ARAPlaybackRenderer (this);
+}
+
+ARA::PlugIn::EditorRenderer* ARADocumentController::doCreateEditorRenderer () noexcept
+{
+    return new ARAEditorRenderer (this);
+}
+
+ARA::PlugIn::EditorView* ARADocumentController::doCreateEditorView () noexcept
+{
+    return new ARAEditorView (this);
 }
 
 } // namespace juce

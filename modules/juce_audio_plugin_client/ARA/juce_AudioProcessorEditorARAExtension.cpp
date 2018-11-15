@@ -7,9 +7,9 @@ AudioProcessorEditorARAExtension::AudioProcessorEditorARAExtension (AudioProcess
 : araProcessorExtension (dynamic_cast<AudioProcessorARAExtension*> (audioProcessor))
 {}
 
-ARA::PlugIn::EditorView* AudioProcessorEditorARAExtension::getARAEditorView() const noexcept
+ARAEditorView* AudioProcessorEditorARAExtension::getARAEditorView() const noexcept
 {
-    return araProcessorExtension ? araProcessorExtension->getARAEditorView() : nullptr;
+    return araProcessorExtension ? static_cast<ARAEditorView*>(araProcessorExtension->getARAEditorView ()) : nullptr;
 }
 
 } // namespace juce

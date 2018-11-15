@@ -10,19 +10,12 @@
 
 #include "PluginARADocumentController.h"
 #include "PluginARAPlaybackRenderer.h"
-#include "PluginARAEditorView.h"
 
 ARASampleProjectDocumentController::ARASampleProjectDocumentController() noexcept
 : juce::ARADocumentController()
 {
     araAudioSourceReadingThread.reset (new TimeSliceThread (String (JucePlugin_Name) + " ARA Sample Reading Thread"));
     araAudioSourceReadingThread->startThread();
-}
-
-// return an instance of our editor view implementation
-ARA::PlugIn::EditorView* ARASampleProjectDocumentController::doCreateEditorView() noexcept
-{
-    return new ARASampleProjectEditorView (this);
 }
 
 // return an instance of our playback renderer implementation

@@ -4,15 +4,19 @@
 
 namespace juce
 {
+    
+class ARAPlaybackRenderer;
+class ARAEditorRenderer;
+class ARAEditorView;
 
 class AudioProcessorARAExtension
 {
 public:
     const ARA::ARAPlugInExtensionInstance* createARAPlugInExtension (ARA::ARADocumentControllerRef documentControllerRef, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles);
 
-    ARA::PlugIn::PlaybackRenderer* getARAPlaybackRenderer() const noexcept;
-    ARA::PlugIn::EditorRenderer* getARAEditorRenderer() const noexcept;
-    ARA::PlugIn::EditorView* getARAEditorView() const noexcept;
+    ARAPlaybackRenderer* getARAPlaybackRenderer() const noexcept;
+    ARAEditorRenderer* getARAEditorRenderer() const noexcept;
+    ARAEditorView* getARAEditorView() const noexcept;
 
     bool isARAPlaybackRenderer() const noexcept { return getARAPlaybackRenderer() != nullptr; }
     bool isARAEditorRenderer() const noexcept { return getARAEditorRenderer() != nullptr; }

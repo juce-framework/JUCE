@@ -18,7 +18,6 @@ public:
 
 protected:
     // ARA class creation overrides
-    ARA::PlugIn::EditorView* doCreateEditorView() noexcept override;
     ARA::PlugIn::PlaybackRenderer* doCreatePlaybackRenderer() noexcept override;
 
 private:

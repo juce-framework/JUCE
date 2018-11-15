@@ -14,7 +14,6 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginProcessor.h"
 #include "PluginARADocumentController.h"
-#include "PluginARAEditorView.h"
 #include "RegionSequenceView.h"
 
 //==============================================================================
@@ -26,7 +25,7 @@
 class ARASampleProjectAudioProcessorEditor: public AudioProcessorEditor
 #if JucePlugin_Enable_ARA
      , public AudioProcessorEditorARAExtension               // Provides access to the ARA EditorView instance
-     , public ARASampleProjectEditorView::SelectionListener  // Receives ARA selection notifications
+     , public ARAEditorView::Listener                        // Receives ARA selection notifications
      , public ARARegionSequence::Listener                    // Receives ARA region sequence update notifications
 #endif
 {

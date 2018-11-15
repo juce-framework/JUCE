@@ -19,19 +19,19 @@ const ARA::ARAPlugInExtensionInstance* AudioProcessorARAExtension::createARAPlug
     return araPlugInExtension->getInstance();
 }
 
-ARA::PlugIn::PlaybackRenderer* AudioProcessorARAExtension::getARAPlaybackRenderer() const noexcept
+ARAPlaybackRenderer* AudioProcessorARAExtension::getARAPlaybackRenderer() const noexcept
 {
-    return araPlugInExtension ? araPlugInExtension->getPlaybackRenderer() : nullptr;
+    return araPlugInExtension ? static_cast<ARAPlaybackRenderer*>(araPlugInExtension->getPlaybackRenderer ()) : nullptr;
 }
 
-ARA::PlugIn::EditorRenderer* AudioProcessorARAExtension::getARAEditorRenderer() const noexcept
+ARAEditorRenderer* AudioProcessorARAExtension::getARAEditorRenderer() const noexcept
 {
-    return araPlugInExtension ? araPlugInExtension->getEditorRenderer() : nullptr;
+    return araPlugInExtension ? static_cast<ARAEditorRenderer*>(araPlugInExtension->getEditorRenderer ()) : nullptr;
 }
 
-ARA::PlugIn::EditorView* AudioProcessorARAExtension::getARAEditorView() const noexcept
+ARAEditorView* AudioProcessorARAExtension::getARAEditorView() const noexcept
 {
-    return araPlugInExtension ? araPlugInExtension->getEditorView() : nullptr;
+    return araPlugInExtension ? static_cast<ARAEditorView*>(araPlugInExtension->getEditorView ()) : nullptr;
 }
 
 } // namespace juce

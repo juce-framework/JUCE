@@ -2,7 +2,7 @@
 #include "PluginARADocumentController.h"
 
 ARASampleProjectPlaybackRenderer::ARASampleProjectPlaybackRenderer (ARADocumentController* documentController, TimeSliceThread& timeSliceThread, int bufferSize)
-: ARA::PlugIn::PlaybackRenderer (documentController),
+: ARAPlaybackRenderer (documentController),
   sampleReadingThread (timeSliceThread),
   sampleBufferSize (bufferSize)
 {}
