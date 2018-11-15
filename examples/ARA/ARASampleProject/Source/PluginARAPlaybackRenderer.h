@@ -14,20 +14,17 @@
 class ARASampleProjectPlaybackRenderer : public ARAPlaybackRenderer
 {
 public:
-    ARASampleProjectPlaybackRenderer (ARADocumentController* documentController, TimeSliceThread& timeSliceThread, int bufferingSize);
+    ARASampleProjectPlaybackRenderer (ARADocumentController* documentController, int bufferingSize);
 
     // render playback regions added to this render if they fall within the range of samples being rendered
     void renderSamples (AudioBuffer<float>& buffer, ARA::ARASampleRate sampleRate, ARA::ARASamplePosition samplePosition, bool isPlayingBack) override;
 
 protected:
-
     // use this hook to verify that we have audio source readers for this playback region
     void didAddPlaybackRegion (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept override;
     void willRemovePlaybackRegion (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept override;
 
 private:
-    // time slice thread reference used for reading audio source samples and the size of its buffer
-    TimeSliceThread& sampleReadingThread;
     int sampleBufferSize;
 
     // map of audio sources to buffering audio source readers

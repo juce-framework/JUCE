@@ -12,7 +12,9 @@ class ARASampleProjectDocumentController : public juce::ARADocumentController
 {
 public:
     ARASampleProjectDocumentController() noexcept;
-    
+
+    TimeSliceThread& getAudioSourceReadingThread() { return *araAudioSourceReadingThread; }
+
 protected:
     // ARA class creation overrides
     ARA::PlugIn::PlaybackRenderer* doCreatePlaybackRenderer() noexcept override;
