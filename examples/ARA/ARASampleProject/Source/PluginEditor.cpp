@@ -3,6 +3,8 @@
 
 static const int kWidth = 1000;
 static const int kHeight = 400;
+static const int kRegionSequenceHeight = 80;
+static const int kVisibleSeconds = 10;
 
 //==============================================================================
 ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARASampleProjectAudioProcessor& p)
@@ -47,18 +49,20 @@ void ARASampleProjectAudioProcessorEditor::resized()
 {
     int i = 0;
     const int width = getWidth();
-    const int height = 80;
+
+    // compute region sequence view bounds in terms of kVisibleSeconds and kRegionSequenceHeight
     for (auto v : regionSequenceViews)
     {
-        double normalizedStartPos = v->getStartInSecs() / maxRegionSequenceLength;
-        double normalizedLength = v->getLengthInSecs() / maxRegionSequenceLength;
-        jassert (normalizedStartPos + normalizedLength <= 1.0);
-        v->setBounds ((int) (width * normalizedStartPos), height * i, (int) (width * normalizedLength), height);
+        double normalizedStartPos = v->getStartInSecs () / kVisibleSeconds;
+        double normalizedLength = v->getLengthInSecs () / kVisibleSeconds;
+        v->setBounds ((int) (width * normalizedStartPos), kRegionSequenceHeight * i, (int) (width * normalizedLength), kRegionSequenceHeight);
         i++;
     }
 
-    // size list view to match region sequence dimensions and viewport for entire window
-    regionSequenceListView.setBounds (0, 0, width, height * i);
+    // normalized width = view width in terms of kVisibleSeconds
+    // size this to ensure we can see one second beyond the longest region sequnce
+    const double normalizedWidth = (maxRegionSequenceLength + 1) / kVisibleSeconds;
+    regionSequenceListView.setBounds (0, 0, normalizedWidth * width, kRegionSequenceHeight * i);
     regionSequenceViewPort.setBounds (0, 0, getWidth(), getHeight());
 }
 
