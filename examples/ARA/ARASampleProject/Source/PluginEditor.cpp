@@ -85,16 +85,18 @@ void ARASampleProjectAudioProcessorEditor::onNewSelection (const ARA::PlugIn::Vi
     auto& regionSequences = getARAEditorView()->getDocumentController()->getDocument()->getRegionSequences();
     for (int i = 0; i < regionSequences.size(); i++)
     {
+        ARARegionSequence* regionSequence = static_cast<ARARegionSequence*>(regionSequences[i]);
+
         // construct the region sequence view if we don't yet have one
         if (regionSequenceViews.size() <= i)
         {
-            regionSequenceViews.add (new RegionSequenceView (*regionSequences[i]));
+            regionSequenceViews.add (new RegionSequenceView (regionSequence));
         }
         // reconstruct the region sequence view if the sequence order or properties have changed
         else if (( regionSequenceViews[i]->getRegionSequence() != regionSequences[i]) ||
                  ( regionSequencesWithPropertyChanges.count (regionSequences[i]) > 0 ))
         {
-            regionSequenceViews.set (i, new RegionSequenceView (*regionSequences[i]), true);
+            regionSequenceViews.set (i, new RegionSequenceView (regionSequence), true);
         }
 
         // flag the region as selected if it's a part of the current selection, 

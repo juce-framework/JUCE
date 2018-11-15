@@ -129,4 +129,139 @@ bool ARAAudioSourceReader::readSamples (
     return success;
 }
 
+//==============================================================================
+
+ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARAPlaybackRenderer* playbackRenderer, std::vector<ARAPlaybackRegion*> playbackRegions)
+: AudioFormatReader (nullptr, "ARAAudioSourceReader"),
+  playbackRenderer (playbackRenderer)
+{
+    // TODO JUCE_ARA
+    // deal with single and double precision floats
+    bitsPerSample = 32;
+    usesFloatingPointData = true;
+    numChannels = 0;
+    lengthInSamples = 0;
+    sampleRate = 0;
+
+    for (ARAPlaybackRegion* playbackRegion : playbackRegions)
+    {
+        ARA::PlugIn::AudioModification* modification = playbackRegion->getAudioModification();
+        ARA::PlugIn::AudioSource* source = modification->getAudioSource ();
+
+        if (sampleRate == 0.0)
+            sampleRate = source->getSampleRate();
+
+        if (sampleRate != source->getSampleRate())
+        {
+            // Skip regions with mis-matching sample-rates!
+            continue;
+        }
+
+        numChannels = std::max (numChannels, (unsigned int) source->getChannelCount());
+        lengthInSamples = std::max (lengthInSamples, playbackRegion->getEndInPlaybackSamples (sampleRate));
+
+        playbackRenderer->addPlaybackRegion (playbackRegion);
+    }
+}
+
+ARAPlaybackRegionReader::~ARAPlaybackRegionReader()
+{
+    ScopedWriteLock scopedWrite (lock);
+    delete playbackRenderer;
+}
+
+bool ARAPlaybackRegionReader::readSamples (
+    int** destSamples,
+    int numDestChannels,
+    int startOffsetInDestBuffer,
+    int64 startSampleInFile,
+    int numSamples)
+{
+    // render our ARA playback regions for this time duration using the ARA playback renderer instance
+    if (! lock.tryEnterRead())
+    {
+        for (int chan_i = 0; chan_i < numDestChannels; ++chan_i)
+            FloatVectorOperations::clear ((float *) destSamples[chan_i], numSamples);
+        return false;
+    }
+
+    AudioBuffer<float> buffer ((float **) destSamples, numDestChannels, startOffsetInDestBuffer, numSamples);
+    playbackRenderer->renderSamples (buffer, sampleRate, startSampleInFile, true);
+    lock.exitRead();
+    return true;
+}
+
+//==============================================================================
+
+ARARegionSequenceReader::ARARegionSequenceReader (ARAPlaybackRenderer* playbackRenderer, ARARegionSequence* regionSequence)
+    : ARAPlaybackRegionReader (playbackRenderer, {}),
+    sequence (regionSequence)
+{
+    // TODO JUCE_ARA
+     // deal with single and double precision floats
+    bitsPerSample = 32;
+    usesFloatingPointData = true;
+    numChannels = 0;
+    lengthInSamples = 0;
+    sampleRate = 0;
+
+    for (ARA::PlugIn::PlaybackRegion* playbackRegion : sequence->getPlaybackRegions ())
+    {
+        ARAPlaybackRegion* araPlaybackRegion = static_cast<ARAPlaybackRegion*> (playbackRegion);
+        ARA::PlugIn::AudioModification* modification = playbackRegion->getAudioModification ();
+        ARA::PlugIn::AudioSource* source = modification->getAudioSource ();
+
+        if (sampleRate == 0.0)
+            sampleRate = source->getSampleRate ();
+
+        if (sampleRate != source->getSampleRate ())
+        {
+            // Skip regions with mis-matching sample-rates!
+            continue;
+        }
+
+        numChannels = std::max (numChannels, (unsigned int) source->getChannelCount ());
+        lengthInSamples = std::max (lengthInSamples, playbackRegion->getEndInPlaybackSamples (sampleRate));
+
+        playbackRenderer->addPlaybackRegion (araPlaybackRegion);
+        araPlaybackRegion->addListener (this);
+    }
+}
+
+ARARegionSequenceReader::~ARARegionSequenceReader ()
+{
+    ScopedWriteLock scopedWrite (lock);
+    for (ARA::PlugIn::PlaybackRegion* playbackRegion : playbackRenderer->getPlaybackRegions ())
+        static_cast<ARAPlaybackRegion*> (playbackRegion)->removeListener (this);
+}
+
+void ARARegionSequenceReader::willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARA::PlugIn::PropertiesPtr<ARA::ARAPlaybackRegionProperties> newProperties) noexcept
+{
+    if (contains (playbackRenderer->getPlaybackRegions(), static_cast<ARA::PlugIn::PlaybackRegion*> (playbackRegion)))
+    {
+        if (newProperties->regionSequenceRef != ARA::PlugIn::toRef (sequence))
+        {
+            ScopedWriteLock scopedWrite (lock);
+            playbackRegion->removeListener (this);
+            playbackRenderer->removePlaybackRegion (playbackRegion);
+        }
+    }
+    else if (newProperties->regionSequenceRef == ARA::PlugIn::toRef (sequence))
+    {
+        ScopedWriteLock scopedWrite (lock);
+        playbackRegion->addListener (this);
+        playbackRenderer->addPlaybackRegion (playbackRegion);
+    }
+}
+
+void ARARegionSequenceReader::willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept
+{
+    if (contains (playbackRenderer->getPlaybackRegions(), static_cast<ARA::PlugIn::PlaybackRegion*> (playbackRegion)))
+    {
+        ScopedWriteLock scopedWrite (lock);
+        playbackRegion->removeListener (this);
+        playbackRenderer->removePlaybackRegion (playbackRegion);
+    }
+}
+
 }

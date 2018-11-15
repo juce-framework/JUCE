@@ -13,7 +13,7 @@ class RegionSequenceView: public Component,
 {
 public:
     ~RegionSequenceView();
-    RegionSequenceView (ARA::PlugIn::RegionSequence&);
+    RegionSequenceView (ARARegionSequence* sequence);
 
     void paint (Graphics&) override;
     void changeListenerCallback (ChangeBroadcaster*) override;
@@ -32,7 +32,7 @@ private:
     bool isSelected;
     double startInSecs;
 
-    ARA::PlugIn::RegionSequence* regionSequence;
+    ARARegionSequence* regionSequence;
 
     juce::AudioFormatManager audioFormatManger;
     juce::AudioThumbnailCache audioThumbCache;

@@ -10,7 +10,7 @@ class ARAAudioSourceReader : public AudioFormatReader,
 {
 public:
     ARAAudioSourceReader (ARA::PlugIn::AudioSource* audioSource, bool use64BitSamples = false);
-    ~ARAAudioSourceReader ();
+    virtual ~ARAAudioSourceReader ();
 
     void recreate ();
     void invalidate ();
@@ -42,6 +42,42 @@ private:
     std::vector<float> dummyBuffer;
     ARAAudioSource* audioSourceBeingRead; // TODO JUCE_ARA make this const
     std::unique_ptr<ARA::PlugIn::HostAudioReader> araHostReader;
+};
+
+//==============================================================================
+
+class ARAPlaybackRegionReader : public AudioFormatReader
+{
+public:
+    ARAPlaybackRegionReader (ARAPlaybackRenderer* playbackRenderer, std::vector<ARAPlaybackRegion*> playbackRegions);
+    virtual ~ARAPlaybackRegionReader ();
+
+    bool readSamples (
+        int** destSamples,
+        int numDestChannels,
+        int startOffsetInDestBuffer,
+        int64 startSampleInFile,
+        int numSamples) override;
+
+protected:
+    ARAPlaybackRenderer* playbackRenderer;
+    ReadWriteLock lock;
+};
+
+//==============================================================================
+
+class ARARegionSequenceReader : public ARAPlaybackRegionReader,
+                                ARAPlaybackRegion::Listener
+{
+public:
+    ARARegionSequenceReader (ARAPlaybackRenderer* playbackRenderer, ARARegionSequence* regionSequence);
+    virtual ~ARARegionSequenceReader ();
+
+    void willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARA::PlugIn::PropertiesPtr<ARA::ARAPlaybackRegionProperties> newProperties) noexcept override;
+    void willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept override;
+
+private:
+    ARARegionSequence* sequence;
 };
 
 } // namespace juce

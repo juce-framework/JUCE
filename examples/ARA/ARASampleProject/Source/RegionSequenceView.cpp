@@ -18,27 +18,26 @@ void RegionSequenceView::paint (Graphics& g)
 }
 
 
-RegionSequenceView::RegionSequenceView (ARA::PlugIn::RegionSequence& sequence)
+RegionSequenceView::RegionSequenceView (ARARegionSequence* sequence)
 : isSelected (false)
 , startInSecs (0.0)
-, regionSequence (nullptr)
+, regionSequence (sequence)
 , audioThumbCache (1)
 , audioThumb (128, audioFormatManger, audioThumbCache)
 {
-    ARASampleProjectDocumentController* documentController = static_cast<ARASampleProjectDocumentController*> (sequence.getDocument()->getDocumentController());
-    name = String (sequence.getName());
-    orderIndex = String (sequence.getOrderIndex());
+    ARASampleProjectDocumentController* documentController = static_cast<ARASampleProjectDocumentController*> (sequence->getDocument()->getDocumentController());
+    name = String (sequence->getName());
+    orderIndex = String (sequence->getOrderIndex());
     audioThumb.addChangeListener (this);
-    audioThumb.setReader (documentController->createRegionSequenceReader (&sequence), 1);
+    audioThumb.setReader (documentController->createRegionSequenceReader (regionSequence), 1);
     startInSecs = audioThumb.getTotalLength();
     
-    regionSequence = &sequence;
-    for (auto region : sequence.getPlaybackRegions())
+    for (auto region : sequence->getPlaybackRegions())
     {
         startInSecs = std::min (startInSecs, region->getStartInPlaybackTime());
     }
 
-    if (const ARA::ARAColor* colour = sequence.getColor())
+    if (const ARA::ARAColor* colour = sequence->getColor())
     {
         trackColour = Colour ((uint8)jmap (colour->r, 0.0f, 255.0f), (uint8)jmap (colour->g, 0.0f, 255.0f), (uint8)jmap (colour->b, 0.0f, 255.0f));
     }
