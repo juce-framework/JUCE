@@ -3,26 +3,28 @@
 namespace juce
 {
 
-ARAAudioSourceReader::ARAAudioSourceReader (ARA::PlugIn::AudioSource* source, bool use64BitSamples)
-    : AudioFormatReader (nullptr, "ARAAudioSourceReader")
+ARAAudioSourceReader::ARAAudioSourceReader (ARA::PlugIn::AudioSource* audioSource, bool use64BitSamples)
+: AudioFormatReader (nullptr, "ARAAudioSourceReader"),
+  audioSourceBeingRead (static_cast<ARAAudioSource*> (audioSource))
 {
+    jassert (audioSourceBeingRead != nullptr);
+
     bitsPerSample = use64BitSamples ? 64 : 32;
     usesFloatingPointData = true;
-    sampleRate = source->getSampleRate ();
-    numChannels = source->getChannelCount ();
-    lengthInSamples = source->getSampleCount ();
+    sampleRate = audioSourceBeingRead->getSampleRate();
+    numChannels = audioSourceBeingRead->getChannelCount();
+    lengthInSamples = audioSourceBeingRead->getSampleCount();
     tmpPtrs.resize (numChannels);
-    audioSourceBeingRead = static_cast<ARAAudioSource*> (source);
 
     audioSourceBeingRead->addListener (this);
-
-    if (audioSourceBeingRead->isSampleAccessEnabled ())
-        recreate ();
+    if (audioSourceBeingRead->isSampleAccessEnabled())
+        recreate();
 }
 
-ARAAudioSourceReader::~ARAAudioSourceReader ()
+ARAAudioSourceReader::~ARAAudioSourceReader()
 {
-    audioSourceBeingRead->removeListener (this);
+    if (audioSourceBeingRead)
+        audioSourceBeingRead->removeListener (this);
 
     ScopedWriteLock l (lock);
     invalidate ();
@@ -30,48 +32,45 @@ ARAAudioSourceReader::~ARAAudioSourceReader ()
 
 void ARAAudioSourceReader::willEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) noexcept
 {
-    if (audioSource != audioSourceBeingRead)
-        return;
+    jassert (audioSourceBeingRead == audioSource);
 
     // unlocked in didEnableAudioSourceSamplesAccess
-    lock.enterWrite ();
+    lock.enterWrite();
 
     // invalidate our reader if sample access is disabled
     if (enable == false)
-        invalidate ();
+        invalidate();
 }
 
 void ARAAudioSourceReader::didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) noexcept
 {
+    jassert (audioSourceBeingRead == audioSource);
+
     // following the invalidation above we can recreate any readers
     // we had before access was disabled
-    if (audioSource != audioSourceBeingRead)
-        return;
 
     // recreate our reader if sample access is enabled
     if (enable)
-        recreate ();
+        recreate();
 
-    lock.exitWrite ();
+    lock.exitWrite();
 }
 
 void ARAAudioSourceReader::willDestroyAudioSource (ARAAudioSource* audioSource) noexcept
 {
-    if (audioSource != audioSourceBeingRead)
-        return;
+    jassert (audioSourceBeingRead == audioSource);
 
-    // TODO JUCE_ARA
-    // should this ever happen? ideally someone delete us instead...
-    // jassertfalse;
+    audioSourceBeingRead->removeListener (this);
+
     ScopedWriteLock scopedLock (lock);
     invalidate ();
+
     audioSourceBeingRead = nullptr;
 }
 
 void ARAAudioSourceReader::doUpdateAudioSourceContent (ARAAudioSource* audioSource, const ARA::ARAContentTimeRange* /*range*/, ARA::ARAContentUpdateFlags flags) noexcept
 {
-    if (audioSource != audioSourceBeingRead)
-        return;
+    jassert (audioSourceBeingRead == audioSource);
 
     // don't invalidate if the audio signal is unchanged
     if ((flags & ARA::kARAContentUpdateSignalScopeRemainsUnchanged) != 0)
@@ -81,18 +80,21 @@ void ARAAudioSourceReader::doUpdateAudioSourceContent (ARAAudioSource* audioSour
     invalidate ();
 }
 
-void ARAAudioSourceReader::recreate ()
+void ARAAudioSourceReader::recreate()
 {
-    // TODO JUCE_ARA
-    // it shouldnt' be possible for araHostReader to contain data at this point, 
-    // but should we assert that?
-    jassert (audioSourceBeingRead->isSampleAccessEnabled ());
+    jassert (araHostReader == nullptr);
+
+    if (audioSourceBeingRead == nullptr)
+        return;
+
+    jassert (audioSourceBeingRead->isSampleAccessEnabled());
     araHostReader.reset (new ARA::PlugIn::HostAudioReader (audioSourceBeingRead));
 }
 
-void ARAAudioSourceReader::invalidate ()
+void ARAAudioSourceReader::invalidate()
 {
-    araHostReader.reset ();
+//  jassert (lock.isLocked());
+    araHostReader.reset();
 }
 
 bool ARAAudioSourceReader::readSamples (
@@ -109,8 +111,6 @@ bool ARAAudioSourceReader::readSamples (
             FloatVectorOperations::clear ((float *) destSamples[chan_i], numSamples);
         return false;
     }
-
-    jassert (audioSourceBeingRead != nullptr);
 
     for (int chan_i = 0; chan_i < (int) tmpPtrs.size (); ++chan_i)
         if (chan_i < numDestChannels && destSamples[chan_i] != nullptr)
