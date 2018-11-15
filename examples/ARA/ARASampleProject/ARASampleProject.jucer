@@ -3,9 +3,7 @@
 <JUCERPROJECT id="v5FTSA" name="ARASampleProject" projectType="audioplug" jucerVersion="5.4.1"
               pluginCode="AraT" pluginVST3Category="Analyzer" pluginVSTCategory="kPlugCategAnalysis"
               pluginFormats="buildAU,buildVST3,enableARA" userNotes="Special thanks to SoundRadix for coming up with this example!"
-              companyName="Celemony" companyWebsite="https://www.celemony.com"
-              companyCopyright="Copyright (c) 2012-2018, Celemony Software GmbH, All Rights Reserved."
-              companyEmail="ara@celemony.com">
+              companyName="YourCompany">
   <MAINGROUP id="aCHzDP" name="ARASampleProject">
     <GROUP id="{38BAE513-FAF5-0AD7-A598-7A51E0C50CB5}" name="Source">
       <FILE id="euv9Vd" name="PluginARAPlaybackRenderer.h" compile="0" resource="0"
