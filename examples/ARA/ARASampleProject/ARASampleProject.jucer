@@ -6,21 +6,22 @@
               companyName="YourCompany">
   <MAINGROUP id="aCHzDP" name="ARASampleProject">
     <GROUP id="{38BAE513-FAF5-0AD7-A598-7A51E0C50CB5}" name="Source">
-      <FILE id="euv9Vd" name="PluginARAPlaybackRenderer.h" compile="0" resource="0"
-            file="Source/PluginARAPlaybackRenderer.h"/>
-      <FILE id="bBCffP" name="PluginARAPlaybackRenderer.cpp" compile="1"
-            resource="0" file="Source/PluginARAPlaybackRenderer.cpp"/>
-      <FILE id="IE9maq" name="PluginProcessor.cpp" compile="1" resource="0"
-            file="Source/PluginProcessor.cpp"/>
-      <FILE id="EmX660" name="PluginProcessor.h" compile="0" resource="0"
-            file="Source/PluginProcessor.h"/>
-      <FILE id="j4IW2r" name="PluginEditor.cpp" compile="1" resource="0"
-            file="Source/PluginEditor.cpp"/>
-      <FILE id="EVHkkx" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
-      <FILE id="JLZl5I" name="PluginARADocumentController.cpp" compile="1"
-            resource="0" file="Source/PluginARADocumentController.cpp"/>
-      <FILE id="fmxPsc" name="PluginARADocumentController.h" compile="0"
-            resource="0" file="Source/PluginARADocumentController.h"/>
+      <FILE id="EmX660" name="ARASampleProjectAudioProcessor.h" compile="0"
+            resource="0" file="Source/ARASampleProjectAudioProcessor.h"/>
+      <FILE id="IE9maq" name="ARASampleProjectAudioProcessor.cpp" compile="1"
+            resource="0" file="Source/ARASampleProjectAudioProcessor.cpp"/>
+      <FILE id="EVHkkx" name="ARASampleProjectAudioProcessorEditor.h" compile="0"
+            resource="0" file="Source/ARASampleProjectAudioProcessorEditor.h"/>
+      <FILE id="j4IW2r" name="ARASampleProjectAudioProcessorEditor.cpp" compile="1"
+            resource="0" file="Source/ARASampleProjectAudioProcessorEditor.cpp"/>
+      <FILE id="fmxPsc" name="ARASampleProjectDocumentController.h" compile="0"
+            resource="0" file="Source/ARASampleProjectDocumentController.h"/>
+      <FILE id="JLZl5I" name="ARASampleProjectDocumentController.cpp" compile="1"
+            resource="0" file="Source/ARASampleProjectDocumentController.cpp"/>
+      <FILE id="euv9Vd" name="ARASampleProjectPlaybackRenderer.h" compile="0"
+            resource="0" file="Source/ARASampleProjectPlaybackRenderer.h"/>
+      <FILE id="bBCffP" name="ARASampleProjectPlaybackRenderer.cpp" compile="1"
+            resource="0" file="Source/ARASampleProjectPlaybackRenderer.cpp"/>
       <FILE id="bsc68x" name="RegionSequenceView.h" compile="0" resource="0"
             file="Source/RegionSequenceView.h"/>
       <FILE id="EQ23gh" name="RegionSequenceView.cpp" compile="1" resource="0"

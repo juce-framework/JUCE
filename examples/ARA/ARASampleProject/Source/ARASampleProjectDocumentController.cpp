@@ -1,5 +1,5 @@
-#include "PluginARADocumentController.h"
-#include "PluginARAPlaybackRenderer.h"
+#include "ARASampleProjectDocumentController.h"
+#include "ARASampleProjectPlaybackRenderer.h"
 
 ARASampleProjectDocumentController::ARASampleProjectDocumentController() noexcept
 : juce::ARADocumentController()

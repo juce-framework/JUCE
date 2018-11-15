@@ -1,5 +1,5 @@
-#include "PluginARAPlaybackRenderer.h"
-#include "PluginARADocumentController.h"
+#include "ARASampleProjectDocumentController.h"
+#include "ARASampleProjectPlaybackRenderer.h"
 
 ARASampleProjectPlaybackRenderer::ARASampleProjectPlaybackRenderer (ARADocumentController* documentController, int bufferSize)
 : ARAPlaybackRenderer (documentController),

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "PluginProcessor.h"
-#include "PluginARADocumentController.h"
+#include "ARASampleProjectAudioProcessor.h"
+#include "ARASampleProjectDocumentController.h"
 #include "RegionSequenceView.h"
 
 //==============================================================================
@@ -29,8 +29,9 @@ public:
     // ARASampleProjectEditorView overrides
     void onNewSelection (const ARA::PlugIn::ViewSelection& currentSelection) override;
 
-    // ARARegionSequenceUpdateListener overrides
+    // ARAPlaybackRegion::Listener overrides
     void didUpdateRegionSequenceProperties (ARARegionSequence* regionSequence) noexcept override;
+    void willDestroyRegionSequence (ARARegionSequence* regionSequence) noexcept override;
 
 private:
 

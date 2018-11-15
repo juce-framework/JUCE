@@ -1,5 +1,5 @@
-#include "PluginProcessor.h"
-#include "PluginEditor.h"
+#include "ARASampleProjectAudioProcessor.h"
+#include "ARASampleProjectAudioProcessorEditor.h"
 
 static const int kWidth = 1000;
 static const int kHeight = 400;
@@ -111,5 +111,10 @@ void ARASampleProjectAudioProcessorEditor::didUpdateRegionSequenceProperties (AR
 {
     // manually invoke onNewSelection here to redraw the region sequence views
     regionSequencesWithPropertyChanges.insert (regionSequence);
+    onNewSelection (getARAEditorView ()->getViewSelection ());
+}
+
+void ARASampleProjectAudioProcessorEditor::willDestroyRegionSequence (ARARegionSequence* /*regionSequence*/) noexcept
+{
     onNewSelection (getARAEditorView ()->getViewSelection ());
 }

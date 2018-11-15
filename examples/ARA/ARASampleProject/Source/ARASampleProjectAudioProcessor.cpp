@@ -1,6 +1,6 @@
-#include "PluginProcessor.h"
-#include "PluginEditor.h"
-#include "PluginARAPlaybackRenderer.h"
+#include "ARASampleProjectAudioProcessor.h"
+#include "ARASampleProjectAudioProcessorEditor.h"
+#include "ARASampleProjectPlaybackRenderer.h"
 
 //==============================================================================
 ARASampleProjectAudioProcessor::ARASampleProjectAudioProcessor()
