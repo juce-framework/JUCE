@@ -50,7 +50,6 @@ private:
     Component regionSequenceListView;
 
     double maxRegionSequenceLength;
-    juce::CriticalSection selectionLock;
     juce::OwnedArray <RegionSequenceView> regionSequenceViews;
 
     std::set<ARA::PlugIn::RegionSequence*> regionSequencesWithPropertyChanges;

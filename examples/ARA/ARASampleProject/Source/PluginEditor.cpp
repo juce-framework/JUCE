@@ -75,10 +75,6 @@ void ARASampleProjectAudioProcessorEditor::resized()
 // rebuild our region sequence views and display selection state
 void ARASampleProjectAudioProcessorEditor::onNewSelection (const ARA::PlugIn::ViewSelection* currentSelection)
 {
-    // this is called from the constructor as well as our ARA host's
-    // model update thread when the host selection changes
-    const ScopedLock lock (selectionLock);
-
     // determine the length in seconds of the longest ARA region sequence
     maxRegionSequenceLength = 0.0;
 
