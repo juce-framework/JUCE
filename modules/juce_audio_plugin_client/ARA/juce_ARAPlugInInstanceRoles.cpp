@@ -86,7 +86,7 @@ void ARAEditorView::addSelectionListener (Listener* l)
 
 void ARAEditorView::removeSelectionListener (Listener* l) 
 { 
-    find_erase (listeners, l); 
+    ARA::find_erase (listeners, l); 
 }
 
 } // namespace juce

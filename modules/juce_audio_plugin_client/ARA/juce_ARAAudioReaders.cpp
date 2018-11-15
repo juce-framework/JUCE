@@ -237,7 +237,7 @@ ARARegionSequenceReader::~ARARegionSequenceReader ()
 
 void ARARegionSequenceReader::willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARA::PlugIn::PropertiesPtr<ARA::ARAPlaybackRegionProperties> newProperties) noexcept
 {
-    if (contains (playbackRenderer->getPlaybackRegions(), static_cast<ARA::PlugIn::PlaybackRegion*> (playbackRegion)))
+    if (ARA::contains (playbackRenderer->getPlaybackRegions(), static_cast<ARA::PlugIn::PlaybackRegion*> (playbackRegion)))
     {
         if (newProperties->regionSequenceRef != ARA::PlugIn::toRef (sequence))
         {
@@ -256,7 +256,7 @@ void ARARegionSequenceReader::willUpdatePlaybackRegionProperties (ARAPlaybackReg
 
 void ARARegionSequenceReader::willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept
 {
-    if (contains (playbackRenderer->getPlaybackRegions(), static_cast<ARA::PlugIn::PlaybackRegion*> (playbackRegion)))
+    if (ARA::contains (playbackRenderer->getPlaybackRegions(), static_cast<ARA::PlugIn::PlaybackRegion*> (playbackRegion)))
     {
         ScopedWriteLock scopedWrite (lock);
         playbackRegion->removeListener (this);
