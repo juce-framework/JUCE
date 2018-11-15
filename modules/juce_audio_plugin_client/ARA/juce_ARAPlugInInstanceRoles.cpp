@@ -54,13 +54,16 @@ ARAEditorView::ARAEditorView (ARA::PlugIn::DocumentController* documentControlle
 
 void ARAEditorView::doNotifySelection (const ARA::PlugIn::ViewSelection* currentSelection) noexcept
 {
-    mostRecentSelection = *currentSelection;
+    ARA::PlugIn::EditorView::doNotifySelection (currentSelection);
+
     for (Listener* l : listeners)
-        l->onNewSelection (getMostRecentSelection ());
+        l->onNewSelection (getViewSelection ());
 }
 
 void ARAEditorView::doNotifyHideRegionSequences (std::vector<ARA::PlugIn::RegionSequence*> const& regionSequences) noexcept 
 {
+    ARA::PlugIn::EditorView::doNotifyHideRegionSequences (regionSequences);
+
     if (listeners.empty ())
         return;
 
@@ -72,11 +75,6 @@ void ARAEditorView::doNotifyHideRegionSequences (std::vector<ARA::PlugIn::Region
     
     for (Listener* l : listeners)
         l->onHideRegionSequences (regionSequencesToHide);
-}
-
-const ARA::PlugIn::ViewSelection* ARAEditorView::getMostRecentSelection () const 
-{ 
-    return &mostRecentSelection; 
 }
 
 void ARAEditorView::addSelectionListener (Listener* l) 

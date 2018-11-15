@@ -42,10 +42,6 @@ public:
     void doNotifySelection (const ARA::PlugIn::ViewSelection* currentSelection) noexcept override;
     void doNotifyHideRegionSequences (std::vector<ARA::PlugIn::RegionSequence*> const& regionSequences) noexcept override;
 
-    // TODO JUCE_ARA
-    // this may be old / contain playback regions and region sequences that have been destroyed
-    const ARA::PlugIn::ViewSelection* getMostRecentSelection () const;
-
     /** Listener class that can be used to get selection notification updates */
     class Listener
     {
@@ -53,7 +49,7 @@ public:
         virtual ~Listener () {}
 
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
-        virtual void onNewSelection (const ARA::PlugIn::ViewSelection* currentSelection) {}
+        virtual void onNewSelection (const ARA::PlugIn::ViewSelection& currentSelection) {}
         virtual void onHideRegionSequences (std::vector<ARARegionSequence*> const& regionSequences) {}
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
     };
@@ -63,7 +59,6 @@ public:
 
 private:
 
-    ARA::PlugIn::ViewSelection mostRecentSelection;
     std::vector<Listener*> listeners;
 };
 

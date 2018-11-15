@@ -27,7 +27,7 @@ public:
     void resized() override;
 
     // ARASampleProjectEditorView overrides
-    void onNewSelection (const ARA::PlugIn::ViewSelection* currentSelection) override;
+    void onNewSelection (const ARA::PlugIn::ViewSelection& currentSelection) override;
 
     // ARARegionSequenceUpdateListener overrides
     void didUpdateRegionSequenceProperties (ARARegionSequence* regionSequence) noexcept override;
