@@ -86,19 +86,10 @@ void ARASampleProjectPlaybackRenderer::didAddPlaybackRegion (ARA::PlugIn::Playba
 void ARASampleProjectPlaybackRenderer::willRemovePlaybackRegion (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept
 {
     auto audioSource = playbackRegion->getAudioModification()->getAudioSource();
-    bool removeAudioSourceFromMap = true;
     for (auto otherPlaybackRegion : getPlaybackRegions())
-    {
         if (playbackRegion != otherPlaybackRegion)
-        {
             if (otherPlaybackRegion->getAudioModification()->getAudioSource() == audioSource)
-            {
-                removeAudioSourceFromMap = false;
-                break;
-            }
-        }
-    }
+                return;
 
-    if (removeAudioSourceFromMap)
-        audioSourceReaders.erase (static_cast<ARAAudioSource*> (audioSource));
+    audioSourceReaders.erase (static_cast<ARAAudioSource*> (audioSource));
 }
