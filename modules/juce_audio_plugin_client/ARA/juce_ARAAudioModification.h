@@ -9,11 +9,6 @@ class ARAAudioModification : public ARA::PlugIn::AudioModification
 {
 public:
     ARAAudioModification (ARA::PlugIn::AudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef);
-    
-    void willUpdateAudioModificationProperties (ARA::PlugIn::PropertiesPtr<ARA::ARAAudioModificationProperties> newProperties) noexcept;
-    void didUpdateAudioModificationProperties () noexcept;
-    void doDeactivateAudioModificationForUndoHistory (bool deactivate) noexcept;
-    void willDestroyAudioModification () noexcept;
 
     class Listener
     {
@@ -32,6 +27,12 @@ public:
 
     void addListener (Listener* l);
     void removeListener (Listener* l);
+
+public:         // to be called by ARADocumentController only
+    void willUpdateAudioModificationProperties (ARA::PlugIn::PropertiesPtr<ARA::ARAAudioModificationProperties> newProperties) noexcept;
+    void didUpdateAudioModificationProperties () noexcept;
+    void doDeactivateAudioModificationForUndoHistory (bool deactivate) noexcept;
+    void willDestroyAudioModification () noexcept;
 
 private:
     ListenerList<Listener> listeners;
