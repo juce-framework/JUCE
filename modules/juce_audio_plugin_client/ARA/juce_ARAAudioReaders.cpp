@@ -118,7 +118,7 @@ bool ARAAudioSourceReader::readSamples (
         else
         {
             if (numSamples > (int) dummyBuffer.size ())
-                dummyBuffer.resize (numSamples);
+                dummyBuffer.resize ((bitsPerSample / 8) * numSamples);
             tmpPtrs[chan_i] = (void*) dummyBuffer.data ();
         }
 
