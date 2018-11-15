@@ -97,9 +97,8 @@ void ARASampleProjectAudioProcessorEditor::onNewSelection (const ARA::PlugIn::Vi
 
         // flag the region as selected if it's a part of the current selection, 
         // or not selected if we have no selection
-        auto& selectedRegionSequences = currentSelection->getRegionSequences();
-        bool selectionState = selectedRegionSequences.end() != std::find (selectedRegionSequences.begin(), selectedRegionSequences.end(), regionSequences[i]);
-        regionSequenceViews[i]->setIsSelected (selectionState);
+        bool isSelected = ARA::contains (currentSelection->getRegionSequences (), regionSequences[i]);
+        regionSequenceViews[i]->setIsSelected (isSelected);
 
         // make the region sequence view visible and keep track of the longest region sequence
         regionSequenceListView.addAndMakeVisible (regionSequenceViews[i]);
