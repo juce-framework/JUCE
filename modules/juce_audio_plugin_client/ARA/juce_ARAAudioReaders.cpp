@@ -22,8 +22,6 @@ ARAAudioSourceReader::ARAAudioSourceReader (ARA::PlugIn::AudioSource* source, bo
 
 ARAAudioSourceReader::~ARAAudioSourceReader ()
 {
-    // TODO JUCE_ARA
-    // should we do this before the lock? after unlock?
     audioSourceBeingRead->removeListener (this);
 
     ScopedWriteLock l (lock);
