@@ -129,7 +129,7 @@ bool ARAAudioSourceReader::readSamples (
 
 //==============================================================================
 
-ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARAPlaybackRenderer* playbackRenderer, std::vector<ARAPlaybackRegion*> playbackRegions)
+ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARAPlaybackRenderer* playbackRenderer, std::vector<ARAPlaybackRegion*> const& playbackRegions)
 : AudioFormatReader (nullptr, "ARAAudioSourceReader"),
   playbackRenderer (playbackRenderer)
 {
@@ -141,7 +141,7 @@ ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARAPlaybackRenderer* playbackR
     lengthInSamples = 0;
     sampleRate = 0;
 
-    for (ARAPlaybackRegion* playbackRegion : playbackRegions)
+    for (auto playbackRegion : playbackRegions)
     {
         ARA::PlugIn::AudioModification* modification = playbackRegion->getAudioModification();
         ARA::PlugIn::AudioSource* source = modification->getAudioSource ();
@@ -192,44 +192,16 @@ bool ARAPlaybackRegionReader::readSamples (
 //==============================================================================
 
 ARARegionSequenceReader::ARARegionSequenceReader (ARAPlaybackRenderer* playbackRenderer, ARARegionSequence* regionSequence)
-    : ARAPlaybackRegionReader (playbackRenderer, {}),
-    sequence (regionSequence)
+: ARAPlaybackRegionReader (playbackRenderer, reinterpret_cast<std::vector<ARAPlaybackRegion*> const&> (regionSequence->getPlaybackRegions())),
+  sequence (regionSequence)
 {
-    // TODO JUCE_ARA
-     // deal with single and double precision floats
-    bitsPerSample = 32;
-    usesFloatingPointData = true;
-    numChannels = 0;
-    lengthInSamples = 0;
-    sampleRate = 0;
-
-    for (ARA::PlugIn::PlaybackRegion* playbackRegion : sequence->getPlaybackRegions ())
-    {
-        ARAPlaybackRegion* araPlaybackRegion = static_cast<ARAPlaybackRegion*> (playbackRegion);
-        ARA::PlugIn::AudioModification* modification = playbackRegion->getAudioModification ();
-        ARA::PlugIn::AudioSource* source = modification->getAudioSource ();
-
-        if (sampleRate == 0.0)
-            sampleRate = source->getSampleRate ();
-
-        if (sampleRate != source->getSampleRate ())
-        {
-            // Skip regions with mis-matching sample-rates!
-            continue;
-        }
-
-        numChannels = std::max (numChannels, (unsigned int) source->getChannelCount ());
-        lengthInSamples = std::max (lengthInSamples, playbackRegion->getEndInPlaybackSamples (sampleRate));
-
-        playbackRenderer->addPlaybackRegion (araPlaybackRegion);
-        araPlaybackRegion->addListener (this);
-    }
+    for (auto playbackRegion : sequence->getPlaybackRegions ())
+        static_cast<ARAPlaybackRegion*> (playbackRegion)->addListener (this);
 }
 
 ARARegionSequenceReader::~ARARegionSequenceReader ()
 {
-    ScopedWriteLock scopedWrite (lock);
-    for (ARA::PlugIn::PlaybackRegion* playbackRegion : playbackRenderer->getPlaybackRegions ())
+    for (auto playbackRegion : playbackRenderer->getPlaybackRegions ())
         static_cast<ARAPlaybackRegion*> (playbackRegion)->removeListener (this);
 }
 
@@ -262,4 +234,4 @@ void ARARegionSequenceReader::willDestroyPlaybackRegion (ARAPlaybackRegion* play
     }
 }
 
-}
+} // namespace juce

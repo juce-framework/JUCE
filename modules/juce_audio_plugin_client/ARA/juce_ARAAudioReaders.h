@@ -51,7 +51,7 @@ private:
 class ARAPlaybackRegionReader : public AudioFormatReader
 {
 public:
-    ARAPlaybackRegionReader (ARAPlaybackRenderer* playbackRenderer, std::vector<ARAPlaybackRegion*> playbackRegions);
+    ARAPlaybackRegionReader (ARAPlaybackRenderer* playbackRenderer, std::vector<ARAPlaybackRegion*> const& playbackRegions);
     virtual ~ARAPlaybackRegionReader();
 
     bool readSamples (
