@@ -10,7 +10,7 @@ class ARAAudioSource : public ARA::PlugIn::AudioSource
 public:
     ARAAudioSource (ARA::PlugIn::Document* document, ARA::ARAAudioSourceHostRef hostRef);
 
-    void willUpdateAudioSourceProperties (ARA::PlugIn::PropertiesPtr<ARA::ARAAudioSourceProperties> newProperties) noexcept;
+    void willUpdateAudioSourceProperties (PropertiesPtr newProperties) noexcept;
     void didUpdateAudioSourceProperties () noexcept;
     void doUpdateAudioSourceContent (const ARA::ARAContentTimeRange* range, ARA::ARAContentUpdateFlags flags) noexcept;
     void willEnableAudioSourceSamplesAccess (bool enable) noexcept;
@@ -25,7 +25,7 @@ public:
 
         virtual ~Listener()  {}
 
-        virtual void willUpdateAudioSourceProperties (ARAAudioSource* audioSource, ARA::PlugIn::PropertiesPtr<ARA::ARAAudioSourceProperties> newProperties) noexcept {}
+        virtual void willUpdateAudioSourceProperties (ARAAudioSource* audioSource, PropertiesPtr newProperties) noexcept {}
         virtual void didUpdateAudioSourceProperties (ARAAudioSource* audioSource) noexcept {}
         virtual void doUpdateAudioSourceContent (ARAAudioSource* audioSource, const ARA::ARAContentTimeRange* range, ARA::ARAContentUpdateFlags flags) noexcept {}
         virtual void willEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) noexcept {}

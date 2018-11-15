@@ -15,7 +15,7 @@ bool ARARegionSequence::isSampleAccessEnabled() const
     return true;
 }
 
-void ARARegionSequence::willUpdateRegionSequenceProperties (ARA::PlugIn::PropertiesPtr<ARA::ARARegionSequenceProperties> newProperties) noexcept
+void ARARegionSequence::willUpdateRegionSequenceProperties (ARARegionSequence::PropertiesPtr newProperties) noexcept
 {
     listeners.call ([this, &newProperties] (Listener& l) { l.willUpdateRegionSequenceProperties (this, newProperties); });
 }

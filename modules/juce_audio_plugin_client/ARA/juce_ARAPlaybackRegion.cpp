@@ -7,7 +7,7 @@ ARAPlaybackRegion::ARAPlaybackRegion (ARA::PlugIn::AudioModification* audioModif
 : ARA::PlugIn::PlaybackRegion (audioModification, hostRef)
 {}
 
-void ARAPlaybackRegion::willUpdatePlaybackRegionProperties (ARA::PlugIn::PropertiesPtr<ARA::ARAPlaybackRegionProperties> newProperties) noexcept
+void ARAPlaybackRegion::willUpdatePlaybackRegionProperties (ARAPlaybackRegion::PropertiesPtr newProperties) noexcept
 {
     // TODO JUCE_ARA same potential issues as in willDestroyPlaybackRegion(), but it's very unlikely that
     // listeners are going to add/remove themselves from this call.

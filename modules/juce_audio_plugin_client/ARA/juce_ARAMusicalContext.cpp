@@ -7,7 +7,7 @@ ARAMusicalContext::ARAMusicalContext (ARA::PlugIn::Document* document, ARA::ARAM
 : ARA::PlugIn::MusicalContext (document, hostRef)
 {}
 
-void ARAMusicalContext::willUpdateMusicalContextProperties (ARA::PlugIn::PropertiesPtr<ARA::ARAMusicalContextProperties> newProperties) noexcept
+void ARAMusicalContext::willUpdateMusicalContextProperties (ARAMusicalContext::PropertiesPtr newProperties) noexcept
 {
     listeners.call ([this, &newProperties] (Listener& l) { l.willUpdateMusicalContextProperties (this, newProperties); });
 }

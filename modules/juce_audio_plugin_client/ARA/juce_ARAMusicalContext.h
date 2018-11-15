@@ -10,7 +10,7 @@ class ARAMusicalContext : public ARA::PlugIn::MusicalContext
 public:
     ARAMusicalContext (ARA::PlugIn::Document* document, ARA::ARAMusicalContextHostRef hostRef);
     
-    void willUpdateMusicalContextProperties (ARA::PlugIn::PropertiesPtr<ARA::ARAMusicalContextProperties> newProperties) noexcept;
+    void willUpdateMusicalContextProperties (ARAMusicalContext::PropertiesPtr newProperties) noexcept;
     void didUpdateMusicalContextProperties () noexcept;
     void doUpdateMusicalContextContent (const ARA::ARAContentTimeRange* range, ARA::ARAContentUpdateFlags flags) noexcept;
     void willDestroyMusicalContext () noexcept;
@@ -22,7 +22,7 @@ public:
 
         virtual ~Listener () {}
 
-        void willUpdateMusicalContextProperties (ARAMusicalContext* musicalContext, ARA::PlugIn::PropertiesPtr<ARA::ARAMusicalContextProperties> newProperties) noexcept {}
+        void willUpdateMusicalContextProperties (ARAMusicalContext* musicalContext, ARAMusicalContext::PropertiesPtr newProperties) noexcept {}
         void didUpdateMusicalContextProperties (ARAMusicalContext* musicalContext) noexcept {}
         void doUpdateMusicalContextContent (ARAMusicalContext* musicalContext, const ARA::ARAContentTimeRange* range, ARA::ARAContentUpdateFlags flags) noexcept {}
         void willDestroyMusicalContext (ARAMusicalContext* musicalContext) noexcept {}

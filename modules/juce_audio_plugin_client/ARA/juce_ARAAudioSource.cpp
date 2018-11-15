@@ -7,7 +7,7 @@ ARAAudioSource::ARAAudioSource (ARA::PlugIn::Document* document, ARA::ARAAudioSo
 : ARA::PlugIn::AudioSource(document, hostRef)
 {}
 
-void ARAAudioSource::willUpdateAudioSourceProperties (ARA::PlugIn::PropertiesPtr<ARA::ARAAudioSourceProperties> newProperties) noexcept
+void ARAAudioSource::willUpdateAudioSourceProperties (PropertiesPtr newProperties) noexcept
 {
     listeners.call ([this, &newProperties] (Listener& l) { l.willUpdateAudioSourceProperties (this, newProperties); });
 }

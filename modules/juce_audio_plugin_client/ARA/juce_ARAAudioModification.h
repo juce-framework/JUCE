@@ -17,7 +17,7 @@ public:
 
         virtual ~Listener () {}
 
-        virtual void willUpdateAudioModificationProperties (ARAAudioModification* audioModification, ARA::PlugIn::PropertiesPtr<ARA::ARAAudioModificationProperties> newProperties) noexcept {}
+        virtual void willUpdateAudioModificationProperties (ARAAudioModification* audioModification, PropertiesPtr newProperties) noexcept {}
         virtual void didUpdateAudioModificationProperties (ARAAudioModification* audioModification) noexcept {}
         virtual void doDeactivateAudioModificationForUndoHistory (ARAAudioModification* audioModification, bool deactivate) noexcept {}
         virtual void willDestroyAudioModification (ARAAudioModification* audioModification) noexcept {}
@@ -29,7 +29,7 @@ public:
     void removeListener (Listener* l);
 
 public:         // to be called by ARADocumentController only
-    void willUpdateAudioModificationProperties (ARA::PlugIn::PropertiesPtr<ARA::ARAAudioModificationProperties> newProperties) noexcept;
+    void willUpdateAudioModificationProperties (PropertiesPtr newProperties) noexcept;
     void didUpdateAudioModificationProperties () noexcept;
     void doDeactivateAudioModificationForUndoHistory (bool deactivate) noexcept;
     void willDestroyAudioModification () noexcept;

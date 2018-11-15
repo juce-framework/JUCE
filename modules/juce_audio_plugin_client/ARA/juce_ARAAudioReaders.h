@@ -75,7 +75,7 @@ public:
     ARARegionSequenceReader (ARAPlaybackRenderer* playbackRenderer, ARARegionSequence* regionSequence);
     virtual ~ARARegionSequenceReader();
 
-    void willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARA::PlugIn::PropertiesPtr<ARA::ARAPlaybackRegionProperties> newProperties) noexcept override;
+    void willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties) noexcept override;
     void willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept override;
 
 private:

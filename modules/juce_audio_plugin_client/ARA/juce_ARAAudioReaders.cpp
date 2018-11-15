@@ -205,7 +205,7 @@ ARARegionSequenceReader::~ARARegionSequenceReader ()
         static_cast<ARAPlaybackRegion*> (playbackRegion)->removeListener (this);
 }
 
-void ARARegionSequenceReader::willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARA::PlugIn::PropertiesPtr<ARA::ARAPlaybackRegionProperties> newProperties) noexcept
+void ARARegionSequenceReader::willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties) noexcept
 {
     if (ARA::contains (playbackRenderer->getPlaybackRegions(), static_cast<ARA::PlugIn::PlaybackRegion*> (playbackRegion)))
     {

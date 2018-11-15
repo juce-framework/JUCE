@@ -15,7 +15,7 @@ public:
     // Is sample access enabled in all audio sources in sequence?
     bool isSampleAccessEnabled() const;
     
-    void willUpdateRegionSequenceProperties (ARA::PlugIn::PropertiesPtr<ARA::ARARegionSequenceProperties> newProperties) noexcept;
+    void willUpdateRegionSequenceProperties (ARARegionSequence::PropertiesPtr newProperties) noexcept;
     void didUpdateRegionSequenceProperties () noexcept;
     void willAddPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept;
     void didAddPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept;
@@ -30,7 +30,7 @@ public:
 
         virtual ~Listener () {}
 
-        virtual void willUpdateRegionSequenceProperties (ARARegionSequence* regionSequence, ARA::PlugIn::PropertiesPtr<ARA::ARARegionSequenceProperties> newProperties) noexcept {}
+        virtual void willUpdateRegionSequenceProperties (ARARegionSequence* regionSequence, ARARegionSequence::PropertiesPtr newProperties) noexcept {}
         virtual void didUpdateRegionSequenceProperties (ARARegionSequence* regionSequence) noexcept {}
         virtual void willDestroyRegionSequence (ARARegionSequence* regionSequence) noexcept {}
         virtual void willAddPlaybackRegion (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion) noexcept {}
