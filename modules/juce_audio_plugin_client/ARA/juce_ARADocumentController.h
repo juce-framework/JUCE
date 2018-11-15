@@ -34,6 +34,8 @@ protected:
     void willUpdateRegionSequenceProperties (ARA::PlugIn::RegionSequence* regionSequence, ARA::PlugIn::RegionSequence::PropertiesPtr newProperties) noexcept override;
     void didUpdateRegionSequenceProperties (ARA::PlugIn::RegionSequence* regionSequence) noexcept override;
     void willDestroyRegionSequence (ARA::PlugIn::RegionSequence* regionSequence) noexcept override;
+    void willRemovePlaybackRegionFromRegionSequence (ARA::PlugIn::RegionSequence* regionSequence, ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept override;
+    void didAddPlaybackRegionToRegionSequence (ARA::PlugIn::RegionSequence* regionSequence, ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept override;
 
     // AudioSource callbacks
     ARA::PlugIn::AudioSource* doCreateAudioSource (ARA::PlugIn::Document* document, ARA::ARAAudioSourceHostRef hostRef) noexcept override;
@@ -69,10 +71,6 @@ protected:
     ARA::PlugIn::PlaybackRenderer* doCreatePlaybackRenderer () noexcept override;
     ARA::PlugIn::EditorRenderer* doCreateEditorRenderer () noexcept override;
     ARA::PlugIn::EditorView* doCreateEditorView () noexcept override;
-
-private:
-    
-    std::map<ARAPlaybackRegion*, ARARegionSequence*> previousSequencesForUpdatingRegions;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARADocumentController)

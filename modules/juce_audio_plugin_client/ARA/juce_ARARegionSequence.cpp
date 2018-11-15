@@ -25,26 +25,6 @@ void ARARegionSequence::didUpdateRegionSequenceProperties () noexcept
     listeners.call ([this] (Listener& l) { l.didUpdateRegionSequenceProperties (this); });
 }
 
-void ARARegionSequence::willAddPlaybackRegion (ARAPlaybackRegion* playbackRegion)noexcept
-{
-    listeners.call ([this, playbackRegion] (Listener& l) { l.willAddPlaybackRegion (this, playbackRegion); });
-}
-
-void ARARegionSequence::didAddPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept
-{
-    listeners.call ([this, playbackRegion] (Listener& l) { l.didAddPlaybackRegion (this, playbackRegion); });
-}
-
-void ARARegionSequence::willRemovePlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept
-{
-    listeners.call ([this, playbackRegion] (Listener& l) { l.willRemovePlaybackRegion (this, playbackRegion); });
-}
-
-void ARARegionSequence::didRemovePlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept
-{
-    listeners.call ([this, playbackRegion] (Listener& l) { l.didRemovePlaybackRegion (this, playbackRegion); });
-}
-
 void ARARegionSequence::willDestroyRegionSequence () noexcept
 {
     // TODO JUCE_ARA 
@@ -55,6 +35,16 @@ void ARARegionSequence::willDestroyRegionSequence () noexcept
         if (listeners.contains (listener))
             listener->willDestroyRegionSequence (this);
     }
+}
+
+void ARARegionSequence::willRemovePlaybackRegionFromRegionSequence (ARAPlaybackRegion* playbackRegion) noexcept
+{
+    listeners.call ([this, playbackRegion] (Listener& l) { l.willRemovePlaybackRegionFromRegionSequence (this, playbackRegion); });
+}
+
+void ARARegionSequence::didAddPlaybackRegionToRegionSequence (ARAPlaybackRegion* playbackRegion) noexcept
+{
+    listeners.call ([this, playbackRegion] (Listener& l) { l.didAddPlaybackRegionToRegionSequence (this, playbackRegion); });
 }
 
 void ARARegionSequence::addListener (Listener * l)

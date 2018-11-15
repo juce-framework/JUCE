@@ -127,6 +127,18 @@ void ARADocumentController::willDestroyRegionSequence (ARA::PlugIn::RegionSequen
     static_cast<ARARegionSequence*> (regionSequence)->willDestroyRegionSequence ();
 }
 
+void ARADocumentController::willRemovePlaybackRegionFromRegionSequence (ARA::PlugIn::RegionSequence* regionSequence, ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept
+{
+    static_cast<ARARegionSequence*> (regionSequence)->
+        willRemovePlaybackRegionFromRegionSequence (static_cast<ARAPlaybackRegion*>(playbackRegion));
+}
+
+void ARADocumentController::didAddPlaybackRegionToRegionSequence (ARA::PlugIn::RegionSequence* regionSequence, ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept
+{
+    static_cast<ARARegionSequence*> (regionSequence)->
+        didAddPlaybackRegionToRegionSequence (static_cast<ARAPlaybackRegion*>(playbackRegion));
+}
+
 //==============================================================================
 
 ARA::PlugIn::AudioSource* ARADocumentController::doCreateAudioSource (ARA::PlugIn::Document *document, ARA::ARAAudioSourceHostRef hostRef) noexcept
@@ -227,42 +239,12 @@ ARA::PlugIn::PlaybackRegion* ARADocumentController::doCreatePlaybackRegion (ARA:
 
 void ARADocumentController::willUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion, ARA::PlugIn::PlaybackRegion::PropertiesPtr newProperties) noexcept
 {
-    auto araPlaybackRegion = static_cast<ARAPlaybackRegion*> (playbackRegion);
-    araPlaybackRegion->willUpdatePlaybackRegionProperties (newProperties);
-
-    // if the region sequence is changing, call the corresponding ARARegionSequence function
-    auto curSequence = static_cast<ARARegionSequence*> (araPlaybackRegion->getRegionSequence ());
-    auto newSequence = static_cast<ARARegionSequence*> (ARA::PlugIn::fromRef (newProperties->regionSequenceRef));
-    if (curSequence != newSequence)
-    {
-        if (curSequence)
-            curSequence->willRemovePlaybackRegion (araPlaybackRegion);
-        if (newSequence)
-            newSequence->willAddPlaybackRegion (araPlaybackRegion);
-
-        jassert (previousSequencesForUpdatingRegions.count (araPlaybackRegion) == 0);
-        previousSequencesForUpdatingRegions[araPlaybackRegion] = curSequence;
-    }
+    static_cast<ARAPlaybackRegion*> (playbackRegion)->willUpdatePlaybackRegionProperties (newProperties);
 }
 
 void ARADocumentController::didUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept
 {
-    auto araPlaybackRegion = static_cast<ARAPlaybackRegion*> (playbackRegion);
-    araPlaybackRegion->didUpdatePlaybackRegionProperties ();
-
-    // if the region sequence is changing, call the corresponding ARARegionSequence function
-    auto curSequence = static_cast<ARARegionSequence*> (araPlaybackRegion->getRegionSequence ());
-    auto itPrevSequence = previousSequencesForUpdatingRegions.find (araPlaybackRegion);
-    if (itPrevSequence != previousSequencesForUpdatingRegions.end ())
-    {
-        auto prevSequence = itPrevSequence->second;
-        if (curSequence)
-            curSequence->didAddPlaybackRegion (araPlaybackRegion);
-        if (prevSequence)
-            prevSequence->didRemovePlaybackRegion (araPlaybackRegion);
-
-        previousSequencesForUpdatingRegions.erase (itPrevSequence);
-    }
+    static_cast<ARAPlaybackRegion*> (playbackRegion)->didUpdatePlaybackRegionProperties ();
 }
 
 void ARADocumentController::willDestroyPlaybackRegion (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept

@@ -17,11 +17,9 @@ public:
     
     void willUpdateRegionSequenceProperties (ARARegionSequence::PropertiesPtr newProperties) noexcept;
     void didUpdateRegionSequenceProperties () noexcept;
-    void willAddPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept;
-    void didAddPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept;
-    void willRemovePlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept;
-    void didRemovePlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept;
     void willDestroyRegionSequence () noexcept;
+    void willRemovePlaybackRegionFromRegionSequence (ARAPlaybackRegion* playbackRegion) noexcept;
+    void didAddPlaybackRegionToRegionSequence (ARAPlaybackRegion* playbackRegion) noexcept;
 
     class Listener
     {
@@ -33,10 +31,8 @@ public:
         virtual void willUpdateRegionSequenceProperties (ARARegionSequence* regionSequence, ARARegionSequence::PropertiesPtr newProperties) noexcept {}
         virtual void didUpdateRegionSequenceProperties (ARARegionSequence* regionSequence) noexcept {}
         virtual void willDestroyRegionSequence (ARARegionSequence* regionSequence) noexcept {}
-        virtual void willAddPlaybackRegion (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion) noexcept {}
-        virtual void didAddPlaybackRegion (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion) noexcept {}
-        virtual void willRemovePlaybackRegion (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion) noexcept {}
-        virtual void didRemovePlaybackRegion (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion) noexcept {}
+        virtual void willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion) noexcept {}
+        virtual void didAddPlaybackRegionToRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion) noexcept {}
 
         ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
     };
