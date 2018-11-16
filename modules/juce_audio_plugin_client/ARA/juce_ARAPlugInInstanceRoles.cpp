@@ -54,27 +54,14 @@ ARAEditorView::ARAEditorView (ARA::PlugIn::DocumentController* documentControlle
 
 void ARAEditorView::doNotifySelection (const ARA::PlugIn::ViewSelection* currentSelection) noexcept
 {
-    ARA::PlugIn::EditorView::doNotifySelection (currentSelection);
-
     for (Listener* l : listeners)
         l->onNewSelection (getViewSelection ());
 }
 
 void ARAEditorView::doNotifyHideRegionSequences (std::vector<ARA::PlugIn::RegionSequence*> const& regionSequences) noexcept 
 {
-    ARA::PlugIn::EditorView::doNotifyHideRegionSequences (regionSequences);
-
-    if (listeners.empty ())
-        return;
-
-    // TODO JUCE_ARA
-    // is there a cleaner way of presenting the casted pointers to listeners?
-    std::vector<ARARegionSequence*> regionSequencesToHide;
-    for (ARA::PlugIn::RegionSequence* regionSequence : regionSequences)
-        regionSequencesToHide.push_back (static_cast<ARARegionSequence*>(regionSequence));
-    
     for (Listener* l : listeners)
-        l->onHideRegionSequences (regionSequencesToHide);
+        l->onHideRegionSequences (reinterpret_cast<std::vector<ARARegionSequence*> const&> (regionSequences));
 }
 
 void ARAEditorView::addSelectionListener (Listener* l) 
