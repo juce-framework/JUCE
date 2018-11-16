@@ -11,6 +11,7 @@ ARASampleProjectPlaybackRenderer::ARASampleProjectPlaybackRenderer (ARADocumentC
 // effectively making this plug-in a pass-through renderer
 void ARASampleProjectPlaybackRenderer::processBlock (AudioBuffer<float>& buffer, int64 timeInSamples, bool isPlayingBack)
 {
+    jassert (isPreparedToPlay);
     jassert (buffer.getNumSamples() <= getMaxSamplesPerBlock());
 
     // zero the samples and get out if we the host is not playing back

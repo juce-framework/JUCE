@@ -13,7 +13,7 @@ public:
 
     virtual void prepareToPlay (double sampleRate, int maxSamplesPerBlock);
     virtual void processBlock (AudioBuffer<float>& buffer, int64 timeInSamples, bool isPlayingBack);
-    virtual void releaseResources() {}
+    virtual void releaseResources();
 
     double getSampleRate() const noexcept       { return sampleRate; }
     int getMaxSamplesPerBlock() const noexcept  { return maxSamplesPerBlock; }
@@ -24,6 +24,11 @@ public:
 private:
     double sampleRate;
     int maxSamplesPerBlock;
+
+public:
+   #if ! JUCE_DISABLE_ASSERTIONS
+    bool isPreparedToPlay;
+   #endif
 };
 
 //==============================================================================
