@@ -9,8 +9,8 @@ ARAPlaybackRenderer::ARAPlaybackRenderer (ARADocumentController* documentControl
 
 void ARAPlaybackRenderer::renderSamples (AudioBuffer<float>& buffer, ARA::ARASampleRate /*sampleRate*/, ARA::ARASamplePosition /*samplePosition*/, bool /*isPlayingBack*/)
 {
-    for (int c = 0; c < buffer.getNumChannels (); c++)
-        FloatVectorOperations::clear (buffer.getArrayOfWritePointers ()[c], buffer.getNumSamples ());
+    for (int c = 0; c < buffer.getNumChannels(); c++)
+        FloatVectorOperations::clear (buffer.getArrayOfWritePointers()[c], buffer.getNumSamples());
 }
 
 void ARAPlaybackRenderer::addPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept
@@ -55,7 +55,7 @@ ARAEditorView::ARAEditorView (ARA::PlugIn::DocumentController* documentControlle
 void ARAEditorView::doNotifySelection (const ARA::PlugIn::ViewSelection* currentSelection) noexcept
 {
     for (Listener* l : listeners)
-        l->onNewSelection (getViewSelection ());
+        l->onNewSelection (getViewSelection());
 }
 
 void ARAEditorView::doNotifyHideRegionSequences (std::vector<ARA::PlugIn::RegionSequence*> const& regionSequences) noexcept 

@@ -12,16 +12,16 @@ void ARARegionSequence::willUpdateRegionSequenceProperties (ARARegionSequence::P
     listeners.call ([this, &newProperties] (Listener& l) { l.willUpdateRegionSequenceProperties (this, newProperties); });
 }
 
-void ARARegionSequence::didUpdateRegionSequenceProperties () noexcept
+void ARARegionSequence::didUpdateRegionSequenceProperties() noexcept
 {
     listeners.call ([this] (Listener& l) { l.didUpdateRegionSequenceProperties (this); });
 }
 
-void ARARegionSequence::willDestroyRegionSequence () noexcept
+void ARARegionSequence::willDestroyRegionSequence() noexcept
 {
     // TODO JUCE_ARA 
     // same concerns involving removal as with other listeners
-    auto listenersCopy (listeners.getListeners ());
+    auto listenersCopy (listeners.getListeners());
     for (auto listener : listenersCopy)
     {
         if (listeners.contains (listener))

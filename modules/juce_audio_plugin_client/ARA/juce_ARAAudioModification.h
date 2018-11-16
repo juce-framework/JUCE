@@ -13,7 +13,7 @@ public:
     class Listener
     {
     public:
-        virtual ~Listener () {}
+        virtual ~Listener() {}
 
         ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
         virtual void willUpdateAudioModificationProperties (ARAAudioModification* audioModification, PropertiesPtr newProperties) noexcept {}
@@ -28,9 +28,9 @@ public:
 
 public:         // to be called by ARADocumentController only
     void willUpdateAudioModificationProperties (PropertiesPtr newProperties) noexcept;
-    void didUpdateAudioModificationProperties () noexcept;
+    void didUpdateAudioModificationProperties() noexcept;
     void doDeactivateAudioModificationForUndoHistory (bool deactivate) noexcept;
-    void willDestroyAudioModification () noexcept;
+    void willDestroyAudioModification() noexcept;
 
 private:
     ListenerList<Listener> listeners;

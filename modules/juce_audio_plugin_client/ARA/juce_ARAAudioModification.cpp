@@ -12,7 +12,7 @@ void ARAAudioModification::willUpdateAudioModificationProperties (PropertiesPtr 
     listeners.call ([this, &newProperties] (Listener& l) { l.willUpdateAudioModificationProperties (this, newProperties); });
 }
 
-void ARAAudioModification::didUpdateAudioModificationProperties () noexcept
+void ARAAudioModification::didUpdateAudioModificationProperties() noexcept
 {
     listeners.call ([this] (Listener& l) { l.didUpdateAudioModificationProperties (this); });
 }
@@ -22,11 +22,11 @@ void ARAAudioModification::doDeactivateAudioModificationForUndoHistory (bool dea
     listeners.call ([this, deactivate] (Listener& l) { l.doDeactivateAudioModificationForUndoHistory (this, deactivate); });
 }
 
-void ARAAudioModification::willDestroyAudioModification () noexcept
+void ARAAudioModification::willDestroyAudioModification() noexcept
 {
     // TODO JUCE_ARA 
     // same concerns involving removal as with other listeners
-    auto listenersCopy (listeners.getListeners ());
+    auto listenersCopy (listeners.getListeners());
     for (auto listener : listenersCopy)
     {
         if (listeners.contains (listener))

@@ -31,12 +31,12 @@ public:
 
 public:         // to be called by ARADocumentController only
     void willUpdateAudioSourceProperties (PropertiesPtr newProperties) noexcept;
-    void didUpdateAudioSourceProperties () noexcept;
+    void didUpdateAudioSourceProperties() noexcept;
     void doUpdateAudioSourceContent (const ARA::ARAContentTimeRange* range, ARA::ARAContentUpdateFlags flags) noexcept;
     void willEnableAudioSourceSamplesAccess (bool enable) noexcept;
     void didEnableAudioSourceSamplesAccess (bool enable) noexcept;
     void doDeactivateAudioSourceForUndoHistory (bool deactivate) noexcept;
-    void willDestroyAudioSource () noexcept;
+    void willDestroyAudioSource() noexcept;
 
 private:
     ListenerList<Listener> listeners;

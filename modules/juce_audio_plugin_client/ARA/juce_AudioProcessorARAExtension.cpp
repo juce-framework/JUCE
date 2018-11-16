@@ -21,17 +21,17 @@ const ARA::ARAPlugInExtensionInstance* AudioProcessorARAExtension::createARAPlug
 
 ARAPlaybackRenderer* AudioProcessorARAExtension::getARAPlaybackRenderer() const noexcept
 {
-    return araPlugInExtension ? static_cast<ARAPlaybackRenderer*>(araPlugInExtension->getPlaybackRenderer ()) : nullptr;
+    return araPlugInExtension ? static_cast<ARAPlaybackRenderer*>(araPlugInExtension->getPlaybackRenderer()) : nullptr;
 }
 
 ARAEditorRenderer* AudioProcessorARAExtension::getARAEditorRenderer() const noexcept
 {
-    return araPlugInExtension ? static_cast<ARAEditorRenderer*>(araPlugInExtension->getEditorRenderer ()) : nullptr;
+    return araPlugInExtension ? static_cast<ARAEditorRenderer*>(araPlugInExtension->getEditorRenderer()) : nullptr;
 }
 
 ARAEditorView* AudioProcessorARAExtension::getARAEditorView() const noexcept
 {
-    return araPlugInExtension ? static_cast<ARAEditorView*>(araPlugInExtension->getEditorView ()) : nullptr;
+    return araPlugInExtension ? static_cast<ARAEditorView*>(araPlugInExtension->getEditorView()) : nullptr;
 }
 
 } // namespace juce

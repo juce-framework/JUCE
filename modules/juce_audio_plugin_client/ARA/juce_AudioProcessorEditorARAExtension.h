@@ -12,7 +12,7 @@ class AudioProcessorEditorARAExtension
 {
 public:
     AudioProcessorEditorARAExtension (AudioProcessor* audioProcessor);
-    virtual ~AudioProcessorEditorARAExtension ();
+    virtual ~AudioProcessorEditorARAExtension();
 
     // TODO JUCE_ARA return proper JUCE class here once we've added it to the framework to handle selection -
     // see static_cast<ARASampleProjectEditorView*> in ARASampleProjectAudioProcessorEditor

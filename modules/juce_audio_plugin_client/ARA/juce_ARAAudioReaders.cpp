@@ -27,7 +27,7 @@ ARAAudioSourceReader::~ARAAudioSourceReader()
         audioSourceBeingRead->removeListener (this);
 
     ScopedWriteLock l (lock);
-    invalidate ();
+    invalidate();
 }
 
 void ARAAudioSourceReader::willEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) noexcept
@@ -63,7 +63,7 @@ void ARAAudioSourceReader::willDestroyAudioSource (ARAAudioSource* audioSource) 
     audioSourceBeingRead->removeListener (this);
 
     ScopedWriteLock scopedLock (lock);
-    invalidate ();
+    invalidate();
 
     audioSourceBeingRead = nullptr;
 }
@@ -77,7 +77,7 @@ void ARAAudioSourceReader::doUpdateAudioSourceContent (ARAAudioSource* audioSour
         return;
 
     ScopedWriteLock scopedLock (lock);
-    invalidate ();
+    invalidate();
 }
 
 void ARAAudioSourceReader::recreate()
@@ -97,15 +97,11 @@ void ARAAudioSourceReader::invalidate()
     araHostReader.reset();
 }
 
-bool ARAAudioSourceReader::readSamples (
-    int** destSamples,
-    int numDestChannels,
-    int startOffsetInDestBuffer,
-    int64 startSampleInFile,
-    int numSamples)
+bool ARAAudioSourceReader::readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+                                        int64 startSampleInFile, int numSamples)
 {
     // If we can't enter the lock or we don't have a reader, zero samples and return false
-    if (!lock.tryEnterRead () || araHostReader == nullptr)
+    if (! lock.tryEnterRead() || (araHostReader == nullptr))
     {
         for (int chan_i = 0; chan_i < numDestChannels; ++chan_i)
             FloatVectorOperations::clear ((float *) destSamples[chan_i], numSamples);
@@ -122,8 +118,8 @@ bool ARAAudioSourceReader::readSamples (
             tmpPtrs[chan_i] = (void*) dummyBuffer.data ();
         }
 
-    bool success = araHostReader->readAudioSamples (startSampleInFile, numSamples, tmpPtrs.data ());
-    lock.exitRead ();
+    bool success = araHostReader->readAudioSamples (startSampleInFile, numSamples, tmpPtrs.data());
+    lock.exitRead();
     return success;
 }
 
@@ -144,7 +140,7 @@ ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARAPlaybackRenderer* playbackR
     for (auto playbackRegion : playbackRegions)
     {
         ARA::PlugIn::AudioModification* modification = playbackRegion->getAudioModification();
-        ARA::PlugIn::AudioSource* source = modification->getAudioSource ();
+        ARA::PlugIn::AudioSource* source = modification->getAudioSource();
 
         if (sampleRate == 0.0)
             sampleRate = source->getSampleRate();
@@ -168,12 +164,8 @@ ARAPlaybackRegionReader::~ARAPlaybackRegionReader()
     delete playbackRenderer;
 }
 
-bool ARAPlaybackRegionReader::readSamples (
-    int** destSamples,
-    int numDestChannels,
-    int startOffsetInDestBuffer,
-    int64 startSampleInFile,
-    int numSamples)
+bool ARAPlaybackRegionReader::readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+                                           int64 startSampleInFile, int numSamples)
 {
     // render our ARA playback regions for this time duration using the ARA playback renderer instance
     if (! lock.tryEnterRead())
@@ -195,13 +187,13 @@ ARARegionSequenceReader::ARARegionSequenceReader (ARAPlaybackRenderer* playbackR
 : ARAPlaybackRegionReader (playbackRenderer, reinterpret_cast<std::vector<ARAPlaybackRegion*> const&> (regionSequence->getPlaybackRegions())),
   sequence (regionSequence)
 {
-    for (auto playbackRegion : sequence->getPlaybackRegions ())
+    for (auto playbackRegion : sequence->getPlaybackRegions())
         static_cast<ARAPlaybackRegion*> (playbackRegion)->addListener (this);
 }
 
-ARARegionSequenceReader::~ARARegionSequenceReader ()
+ARARegionSequenceReader::~ARARegionSequenceReader()
 {
-    for (auto playbackRegion : playbackRenderer->getPlaybackRegions ())
+    for (auto playbackRegion : playbackRenderer->getPlaybackRegions())
         static_cast<ARAPlaybackRegion*> (playbackRegion)->removeListener (this);
 }
 

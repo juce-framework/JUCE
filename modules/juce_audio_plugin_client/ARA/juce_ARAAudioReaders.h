@@ -12,12 +12,8 @@ public:
     ARAAudioSourceReader (ARA::PlugIn::AudioSource* audioSource, bool use64BitSamples = false);
     virtual ~ARAAudioSourceReader();
 
-    bool readSamples (
-        int** destSamples,
-        int numDestChannels,
-        int startOffsetInDestBuffer,
-        int64 startSampleInFile,
-        int numSamples) override;
+    bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+                      int64 startSampleInFile, int numSamples) override;
 
     // TODO JUCE_ARA
     // do we need to handle property updates?
@@ -54,12 +50,8 @@ public:
     ARAPlaybackRegionReader (ARAPlaybackRenderer* playbackRenderer, std::vector<ARAPlaybackRegion*> const& playbackRegions);
     virtual ~ARAPlaybackRegionReader();
 
-    bool readSamples (
-        int** destSamples,
-        int numDestChannels,
-        int startOffsetInDestBuffer,
-        int64 startSampleInFile,
-        int numSamples) override;
+    bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+                      int64 startSampleInFile, int numSamples) override;
 
 protected:
     ARAPlaybackRenderer* playbackRenderer;

@@ -73,7 +73,7 @@ void ARASampleProjectPlaybackRenderer::renderSamples (AudioBuffer<float>& buffer
 void ARASampleProjectPlaybackRenderer::didAddPlaybackRegion (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept
 {
     ARAAudioSource* audioSource = static_cast<ARAAudioSource*> (playbackRegion->getAudioModification()->getAudioSource());
-    ARASampleProjectDocumentController* documentController = static_cast<ARASampleProjectDocumentController*> (audioSource->getDocument ()->getDocumentController ());
+    ARASampleProjectDocumentController* documentController = static_cast<ARASampleProjectDocumentController*> (audioSource->getDocument()->getDocumentController());
     if (audioSourceReaders.count (audioSource) == 0)
     {
         audioSourceReaders.emplace (audioSource, documentController->createBufferingAudioSourceReader (audioSource, documentController->getAudioSourceReadingThread(), sampleBufferSize));

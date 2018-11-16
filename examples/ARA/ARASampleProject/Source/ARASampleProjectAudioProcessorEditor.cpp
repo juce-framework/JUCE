@@ -23,13 +23,13 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
 
     // manually invoke the onNewSelection callback to refresh our UI with the current selection
     // TODO JUCE_ARA should we rename the function that recreates the view?
-    getARAEditorView ()->addSelectionListener (this);
-    onNewSelection (getARAEditorView ()->getViewSelection ());
+    getARAEditorView()->addSelectionListener (this);
+    onNewSelection (getARAEditorView()->getViewSelection());
 }
 
 ARASampleProjectAudioProcessorEditor::~ARASampleProjectAudioProcessorEditor()
 {
-    getARAEditorView ()->removeSelectionListener (this);
+    getARAEditorView()->removeSelectionListener (this);
 }
 
 //==============================================================================
@@ -53,8 +53,8 @@ void ARASampleProjectAudioProcessorEditor::resized()
     // compute region sequence view bounds in terms of kVisibleSeconds and kRegionSequenceHeight
     for (auto v : regionSequenceViews)
     {
-        double normalizedStartPos = v->getStartInSecs () / kVisibleSeconds;
-        double normalizedLength = v->getLengthInSecs () / kVisibleSeconds;
+        double normalizedStartPos = v->getStartInSecs() / kVisibleSeconds;
+        double normalizedLength = v->getLengthInSecs() / kVisibleSeconds;
         v->setBounds ((int) (width * normalizedStartPos), kRegionSequenceHeight * i, (int) (width * normalizedLength), kRegionSequenceHeight);
         i++;
     }
@@ -91,7 +91,7 @@ void ARASampleProjectAudioProcessorEditor::onNewSelection (const ARA::PlugIn::Vi
 
         // flag the region as selected if it's a part of the current selection, 
         // or not selected if we have no selection
-        bool isSelected = ARA::contains (currentSelection.getRegionSequences (), regionSequences[i]);
+        bool isSelected = ARA::contains (currentSelection.getRegionSequences(), regionSequences[i]);
         regionSequenceViews[i]->setIsSelected (isSelected);
 
         // make the region sequence view visible and keep track of the longest region sequence
@@ -111,10 +111,10 @@ void ARASampleProjectAudioProcessorEditor::didUpdateRegionSequenceProperties (AR
 {
     // manually invoke onNewSelection here to redraw the region sequence views
     regionSequencesWithPropertyChanges.insert (regionSequence);
-    onNewSelection (getARAEditorView ()->getViewSelection ());
+    onNewSelection (getARAEditorView()->getViewSelection());
 }
 
 void ARASampleProjectAudioProcessorEditor::willDestroyRegionSequence (ARARegionSequence* /*regionSequence*/) noexcept
 {
-    onNewSelection (getARAEditorView ()->getViewSelection ());
+    onNewSelection (getARAEditorView()->getViewSelection());
 }

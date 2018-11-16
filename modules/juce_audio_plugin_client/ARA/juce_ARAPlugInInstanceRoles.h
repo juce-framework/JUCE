@@ -46,7 +46,7 @@ public:
     class Listener
     {
     public:
-        virtual ~Listener () {}
+        virtual ~Listener() {}
 
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
         virtual void onNewSelection (const ARA::PlugIn::ViewSelection& currentSelection) {}

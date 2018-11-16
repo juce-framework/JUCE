@@ -6,19 +6,19 @@ namespace juce
 AudioProcessorEditorARAExtension::AudioProcessorEditorARAExtension (AudioProcessor* audioProcessor)
 : araProcessorExtension (dynamic_cast<AudioProcessorARAExtension*> (audioProcessor))
 {
-    if (isARAEditorView ())
-        getARAEditorView ()->setEditorIsOpen (true);
+    if (isARAEditorView())
+        getARAEditorView()->setEditorIsOpen (true);
 }
 
-AudioProcessorEditorARAExtension::~AudioProcessorEditorARAExtension ()
+AudioProcessorEditorARAExtension::~AudioProcessorEditorARAExtension()
 {
-    if (isARAEditorView ())
-        getARAEditorView ()->setEditorIsOpen (false);
+    if (isARAEditorView())
+        getARAEditorView()->setEditorIsOpen (false);
 }
 
 ARAEditorView* AudioProcessorEditorARAExtension::getARAEditorView() const noexcept
 {
-    return araProcessorExtension ? static_cast<ARAEditorView*>(araProcessorExtension->getARAEditorView ()) : nullptr;
+    return araProcessorExtension ? static_cast<ARAEditorView*>(araProcessorExtension->getARAEditorView()) : nullptr;
 }
 
 } // namespace juce

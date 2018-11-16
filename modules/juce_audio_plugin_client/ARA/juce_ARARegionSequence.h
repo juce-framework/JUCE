@@ -15,7 +15,7 @@ public:
     class Listener
     {
     public:
-        virtual ~Listener () {}
+        virtual ~Listener() {}
 
         ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
         virtual void willUpdateRegionSequenceProperties (ARARegionSequence* regionSequence, ARARegionSequence::PropertiesPtr newProperties) noexcept {}
@@ -31,10 +31,10 @@ public:
 
 public:         // to be called by ARADocumentController only
     void willUpdateRegionSequenceProperties (ARARegionSequence::PropertiesPtr newProperties) noexcept;
-    void didUpdateRegionSequenceProperties () noexcept;
+    void didUpdateRegionSequenceProperties() noexcept;
     void didAddPlaybackRegionToRegionSequence (ARAPlaybackRegion* playbackRegion) noexcept;
     void willRemovePlaybackRegionFromRegionSequence (ARAPlaybackRegion* playbackRegion) noexcept;
-    void willDestroyRegionSequence () noexcept;
+    void willDestroyRegionSequence() noexcept;
 
 private:
     ListenerList<Listener> listeners;
