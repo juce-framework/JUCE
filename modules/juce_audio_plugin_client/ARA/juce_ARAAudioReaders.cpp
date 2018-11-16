@@ -100,23 +100,38 @@ void ARAAudioSourceReader::invalidate()
 bool ARAAudioSourceReader::readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
                                         int64 startSampleInFile, int numSamples)
 {
+    int destSize = (bitsPerSample / 8) * numSamples;
+    int bufferOffset = (bitsPerSample / 8) * startOffsetInDestBuffer;
+
     // If we can't enter the lock or we don't have a reader, zero samples and return false
     if (! lock.tryEnterRead() || (araHostReader == nullptr))
     {
         for (int chan_i = 0; chan_i < numDestChannels; ++chan_i)
-            FloatVectorOperations::clear ((float *) destSamples[chan_i], numSamples);
+        {
+            if (destSamples[chan_i] != nullptr)
+                zeromem (((uint8_t*) destSamples[chan_i]) + bufferOffset, destSize);
+        }
         return false;
     }
 
-    for (int chan_i = 0; chan_i < (int) tmpPtrs.size (); ++chan_i)
-        if (chan_i < numDestChannels && destSamples[chan_i] != nullptr)
-            tmpPtrs[chan_i] = (void*) (destSamples[chan_i] + startOffsetInDestBuffer);
+    for (int chan_i = 0; chan_i < (int) tmpPtrs.size(); ++chan_i)
+    {
+        if ((chan_i < numDestChannels) && (destSamples[chan_i] != nullptr))
+        {
+            tmpPtrs[chan_i] = ((uint8_t*) destSamples[chan_i]) + bufferOffset;
+        }
         else
         {
-            if (numSamples > (int) dummyBuffer.size ())
-                dummyBuffer.resize ((bitsPerSample / 8) * numSamples);
-            tmpPtrs[chan_i] = (void*) dummyBuffer.data ();
+            // When readSamples is not reading all channels,
+            // we still need to provide pointers to all channels to the ARA read call.
+            // So we'll read the other channels into this dummy buffer.
+            static ThreadLocalValue<std::vector<uint8_t>> dummyBuffer;
+            if (destSize > (int) dummyBuffer.get().size())
+                dummyBuffer.get().resize (destSize);
+
+            tmpPtrs[chan_i] = dummyBuffer.get().data();
         }
+    }
 
     bool success = araHostReader->readAudioSamples (startSampleInFile, numSamples, tmpPtrs.data());
     lock.exitRead();

@@ -35,11 +35,6 @@ private:
     ReadWriteLock lock;
 
     std::vector<void*> tmpPtrs;
-
-    // When readSamples is not reading all channels,
-    // we still need to provide pointers to all channels to the ARA read call.
-    // So we'll read the other channels into this dummy buffer.
-    std::vector<uint8_t> dummyBuffer;
 };
 
 //==============================================================================
