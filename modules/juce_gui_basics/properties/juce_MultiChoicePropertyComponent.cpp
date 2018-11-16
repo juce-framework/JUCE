@@ -118,6 +118,9 @@ public:
 
     var getValue() const override
     {
+        if (valueWithDefault == nullptr)
+            return {};
+
         auto v = valueWithDefault->get();
 
         if (auto* arr = v.getArray())
@@ -134,6 +137,9 @@ public:
 
     void setValue (const var& newValue) override
     {
+        if (valueWithDefault == nullptr)
+            return;
+
         auto v = valueWithDefault->get();
 
         OptionalScopedPointer<Array<var>> arrayToControl;
@@ -191,7 +197,7 @@ private:
     }
 
     //==============================================================================
-    ValueWithDefault* valueWithDefault = nullptr;
+    WeakReference<ValueWithDefault> valueWithDefault;
     var varToControl;
     Value sourceValue;
 
