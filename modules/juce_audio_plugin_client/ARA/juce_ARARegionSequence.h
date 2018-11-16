@@ -12,9 +12,6 @@ class ARARegionSequence : public ARA::PlugIn::RegionSequence
 public:
     ARARegionSequence (ARA::PlugIn::Document* document, ARA::ARARegionSequenceHostRef hostRef);
 
-    // Is sample access enabled in all audio sources in sequence?
-    bool isSampleAccessEnabled() const;
-    
     class Listener
     {
     public:
