@@ -160,12 +160,6 @@ ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARAPlaybackRenderer* playbackR
         if (sampleRate == 0.0)
             sampleRate = source->getSampleRate();
 
-        if (sampleRate != source->getSampleRate())
-        {
-            // Skip regions with mis-matching sample-rates!
-            continue;
-        }
-
         numChannels = std::max (numChannels, (unsigned int) source->getChannelCount());
         lengthInSamples = std::max (lengthInSamples, playbackRegion->getEndInPlaybackSamples (sampleRate));
 
