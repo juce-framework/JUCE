@@ -16,11 +16,11 @@ public:
     public:
         virtual ~Listener()  {}
 
-        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
+       ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
         virtual void willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties) noexcept {}
         virtual void didUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion) noexcept {}
         virtual void willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept {}
-        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
+       ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
     };
 
     void addListener (Listener* l);

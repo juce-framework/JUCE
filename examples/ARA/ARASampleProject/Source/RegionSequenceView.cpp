@@ -9,9 +9,7 @@ void RegionSequenceView::paint (Graphics& g)
     g.drawRect (getLocalBounds());
     g.setColour (trackColour.contrasting (0.7f));
     if (audioThumb.getTotalLength() != 0.0)
-    {
         audioThumb.drawChannels (g, getLocalBounds(), startInSecs, audioThumb.getTotalLength(), 1.0);
-    }
     g.setColour (trackColour.contrasting (1.0f));
     g.setFont (Font (12.0));
     g.drawText ("Track #" + orderIndex + ": " + name, 0, 0, getWidth(), getHeight(), juce::Justification::bottomLeft);
@@ -33,14 +31,10 @@ RegionSequenceView::RegionSequenceView (ARARegionSequence* sequence)
     startInSecs = audioThumb.getTotalLength();
     
     for (auto region : sequence->getPlaybackRegions())
-    {
         startInSecs = std::min (startInSecs, region->getStartInPlaybackTime());
-    }
 
     if (const ARA::ARAColor* colour = sequence->getColor())
-    {
         trackColour = Colour ((uint8)jmap (colour->r, 0.0f, 255.0f), (uint8)jmap (colour->g, 0.0f, 255.0f), (uint8)jmap (colour->b, 0.0f, 255.0f));
-    }
 }
 
 RegionSequenceView::~RegionSequenceView()

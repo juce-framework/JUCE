@@ -15,12 +15,12 @@ public:
     public:
         virtual ~Listener() {}
 
-        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
+       ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
         void willUpdateMusicalContextProperties (ARAMusicalContext* musicalContext, ARAMusicalContext::PropertiesPtr newProperties) noexcept {}
         void didUpdateMusicalContextProperties (ARAMusicalContext* musicalContext) noexcept {}
         void doUpdateMusicalContextContent (ARAMusicalContext* musicalContext, const ARA::ARAContentTimeRange* range, ARA::ARAContentUpdateFlags flags) noexcept {}
         void willDestroyMusicalContext (ARAMusicalContext* musicalContext) noexcept {}
-        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
+       ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
     };
 
     void addListener (Listener* l);

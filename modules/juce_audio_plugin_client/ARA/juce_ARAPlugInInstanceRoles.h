@@ -56,7 +56,6 @@ public:
     void doNotifySelection (const ARA::PlugIn::ViewSelection* currentSelection) noexcept override;
     void doNotifyHideRegionSequences (std::vector<ARA::PlugIn::RegionSequence*> const& regionSequences) noexcept override;
 
-    /** Listener class that can be used to get selection notification updates */
     class Listener
     {
     public:

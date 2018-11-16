@@ -17,13 +17,13 @@ public:
     public:
         virtual ~Listener() {}
 
-        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
+       ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
         virtual void willUpdateRegionSequenceProperties (ARARegionSequence* regionSequence, ARARegionSequence::PropertiesPtr newProperties) noexcept {}
         virtual void didUpdateRegionSequenceProperties (ARARegionSequence* regionSequence) noexcept {}
         virtual void willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion) noexcept {}
         virtual void didAddPlaybackRegionToRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion) noexcept {}
         virtual void willDestroyRegionSequence (ARARegionSequence* regionSequence) noexcept {}
-        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
+       ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
     };
 
     void addListener (Listener* l);
