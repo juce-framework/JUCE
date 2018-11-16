@@ -84,7 +84,6 @@ public:
         default value with an ID of -1.
 
         @param valueToControl       the ValueWithDefault object that contains the Value object that the combo box will read and control.
-                                    NB: this object must outlive the ChoicePropertyComponent.
         @param propertyName         the name of the property
         @param choices              the list of possible values that the drop-down list will contain
         @param correspondingValues  a list of values corresponding to each item in the 'choices' StringArray.
@@ -154,7 +153,7 @@ private:
     ComboBox comboBox;
     bool isCustomClass = false;
 
-    ValueWithDefault* valueWithDefault = nullptr;
+    WeakReference<ValueWithDefault> valueWithDefault;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChoicePropertyComponent)
