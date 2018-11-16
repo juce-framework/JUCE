@@ -11,7 +11,7 @@ ARASampleProjectDocumentController::ARASampleProjectDocumentController() noexcep
 // return an instance of our playback renderer implementation
 ARA::PlugIn::PlaybackRenderer* ARASampleProjectDocumentController::doCreatePlaybackRenderer() noexcept
 {
-    return new ARASampleProjectPlaybackRenderer (this, 1 << 16);
+    return new ARASampleProjectPlaybackRenderer (this);
 }
 
 //==============================================================================

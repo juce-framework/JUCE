@@ -11,10 +11,19 @@ class ARAPlaybackRenderer : public ARA::PlugIn::PlaybackRenderer
 public:
     ARAPlaybackRenderer (ARADocumentController* documentController);
 
-    virtual void renderSamples (AudioBuffer<float>& buffer, ARA::ARASampleRate sampleRate, ARA::ARASamplePosition samplePosition, bool isPlayingBack);
-    
+    virtual void prepareToPlay (double sampleRate, int maxSamplesPerBlock);
+    virtual void processBlock (AudioBuffer<float>& buffer, int64 timeInSamples, bool isPlayingBack);
+    virtual void releaseResources() {}
+
+    double getSampleRate() const noexcept       { return sampleRate; }
+    int getMaxSamplesPerBlock() const noexcept  { return maxSamplesPerBlock; }
+
     void addPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept;
     void removePlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept;
+
+private:
+    double sampleRate;
+    int maxSamplesPerBlock;
 };
 
 //==============================================================================

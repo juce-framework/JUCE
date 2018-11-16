@@ -84,16 +84,16 @@ void ARASampleProjectAudioProcessor::changeProgramName (int /*index*/, const Str
 }
 
 //==============================================================================
-void ARASampleProjectAudioProcessor::prepareToPlay (double /*sampleRate*/, int /*samplesPerBlock*/)
+void ARASampleProjectAudioProcessor::prepareToPlay (double newSampleRate, int samplesPerBlock)
 {
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
+    if (ARASampleProjectPlaybackRenderer* playbackRenderer = static_cast<ARASampleProjectPlaybackRenderer*> (getARAPlaybackRenderer()))
+        playbackRenderer->prepareToPlay (newSampleRate, samplesPerBlock);
 }
 
 void ARASampleProjectAudioProcessor::releaseResources()
 {
-    // When playback stops, you can use this as an opportunity to free up any
-    // spare memory, etc.
+    if (ARASampleProjectPlaybackRenderer* playbackRenderer = static_cast<ARASampleProjectPlaybackRenderer*> (getARAPlaybackRenderer()))
+        playbackRenderer->releaseResources();
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -136,8 +136,8 @@ void ARASampleProjectAudioProcessor::processBlock (AudioBuffer<float>& buffer, M
         return;
 
     // render our ARA playback regions for this time duration using the ARA playback renderer instance
-    ARASampleProjectPlaybackRenderer* playbackRenderer = static_cast<ARASampleProjectPlaybackRenderer*> (getARAPlaybackRenderer());
-    playbackRenderer->renderSamples (buffer, getSampleRate(), ci.timeInSamples, ci.isPlaying);
+    if (ARASampleProjectPlaybackRenderer* playbackRenderer = static_cast<ARASampleProjectPlaybackRenderer*> (getARAPlaybackRenderer()))
+        playbackRenderer->processBlock (buffer, ci.timeInSamples, ci.isPlaying);
 }
 
 //==============================================================================

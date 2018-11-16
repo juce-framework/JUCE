@@ -14,10 +14,10 @@
 class ARASampleProjectPlaybackRenderer : public ARAPlaybackRenderer
 {
 public:
-    ARASampleProjectPlaybackRenderer (ARADocumentController* documentController, int bufferingSize);
+    ARASampleProjectPlaybackRenderer (ARADocumentController* documentController);
 
     // render playback regions added to this render if they fall within the range of samples being rendered
-    void renderSamples (AudioBuffer<float>& buffer, ARA::ARASampleRate sampleRate, ARA::ARASamplePosition samplePosition, bool isPlayingBack) override;
+    void processBlock (AudioBuffer<float>& buffer, int64 timeInSamples, bool isPlayingBack) override;
 
 protected:
     // use this hook to verify that we have audio source readers for this playback region
@@ -25,8 +25,6 @@ protected:
     void willRemovePlaybackRegion (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept override;
 
 private:
-    int sampleBufferSize;
-
     // map of audio sources to buffering audio source readers
     // we'll use them to pull ARA samples from the host as we render
     std::map<ARAAudioSource*, std::unique_ptr<BufferingAudioSource>> audioSourceReaders;

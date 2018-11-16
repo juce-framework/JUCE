@@ -171,6 +171,8 @@ ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARAPlaybackRenderer* playbackR
 
         playbackRenderer->addPlaybackRegion (playbackRegion);
     }
+
+    playbackRenderer->prepareToPlay(sampleRate, 16*1024);
 }
 
 ARAPlaybackRegionReader::~ARAPlaybackRegionReader()
@@ -190,8 +192,16 @@ bool ARAPlaybackRegionReader::readSamples (int** destSamples, int numDestChannel
         return false;
     }
 
-    AudioBuffer<float> buffer ((float **) destSamples, numDestChannels, startOffsetInDestBuffer, numSamples);
-    playbackRenderer->renderSamples (buffer, sampleRate, startSampleInFile, true);
+    while (numSamples > 0)
+    {
+        int numSliceSamples = std::min(numSamples, playbackRenderer->getMaxSamplesPerBlock());
+        AudioBuffer<float> buffer ((float **) destSamples, numDestChannels, startOffsetInDestBuffer, numSliceSamples);
+        playbackRenderer->processBlock (buffer, startSampleInFile, true);
+        numSamples -= numSliceSamples;
+        startOffsetInDestBuffer += numSliceSamples;
+        startSampleInFile += numSliceSamples;
+    }
+
     lock.exitRead();
     return true;
 }

@@ -1,17 +1,18 @@
 #include "ARASampleProjectDocumentController.h"
 #include "ARASampleProjectPlaybackRenderer.h"
 
-ARASampleProjectPlaybackRenderer::ARASampleProjectPlaybackRenderer (ARADocumentController* documentController, int bufferSize)
-: ARAPlaybackRenderer (documentController),
-  sampleBufferSize (bufferSize)
+ARASampleProjectPlaybackRenderer::ARASampleProjectPlaybackRenderer (ARADocumentController* documentController)
+: ARAPlaybackRenderer (documentController)
 {}
 
 // this function renders playback regions in the ARA document that have been
 // a) added to this playback renderer instance and
 // b) lie within the time range of samples being renderered (in project time)
 // effectively making this plug-in a pass-through renderer
-void ARASampleProjectPlaybackRenderer::renderSamples (AudioBuffer<float>& buffer, ARA::ARASampleRate sampleRate, ARA::ARASamplePosition samplePosition, bool isPlayingBack)
+void ARASampleProjectPlaybackRenderer::processBlock (AudioBuffer<float>& buffer, int64 timeInSamples, bool isPlayingBack)
 {
+    jassert (buffer.getNumSamples() <= getMaxSamplesPerBlock());
+
     // zero the samples and get out if we the host is not playing back
     if (isPlayingBack == false)
     {
@@ -22,7 +23,8 @@ void ARASampleProjectPlaybackRenderer::renderSamples (AudioBuffer<float>& buffer
 
     // render back playback regions that lie within this range using our buffered ARA samples
     using namespace ARA;
-    ARASamplePosition sampleEnd = samplePosition + buffer.getNumSamples();
+    ARASamplePosition sampleStart = timeInSamples;
+    ARASamplePosition sampleEnd = timeInSamples + buffer.getNumSamples();
     for (PlugIn::PlaybackRegion* playbackRegion : getPlaybackRegions())
     {
         // get the audio source for this region and make sure we have an audio source reader for it
@@ -35,19 +37,19 @@ void ARASampleProjectPlaybackRenderer::renderSamples (AudioBuffer<float>& buffer
             continue;
 
         // this simplified test code "rendering" only produces audio if sample rate and channel count match
-        if ((audioSource->getChannelCount() != buffer.getNumChannels()) || (audioSource->getSampleRate() != sampleRate))
+        if ((audioSource->getChannelCount() != buffer.getNumChannels()) || (audioSource->getSampleRate() != getSampleRate()))
             continue;
 
         // evaluate region borders in song time, calculate sample range to copy in song time
-        ARASamplePosition regionStartSample = playbackRegion->getStartInPlaybackSamples (sampleRate);
+        ARASamplePosition regionStartSample = playbackRegion->getStartInPlaybackSamples (getSampleRate());
         if (sampleEnd <= regionStartSample)
             continue;
 
-        ARASamplePosition regionEndSample = playbackRegion->getEndInPlaybackSamples (sampleRate);
-        if (regionEndSample <= samplePosition)
+        ARASamplePosition regionEndSample = playbackRegion->getEndInPlaybackSamples (getSampleRate());
+        if (regionEndSample <= sampleStart)
             continue;
 
-        ARASamplePosition startSongSample = std::max (regionStartSample, samplePosition);
+        ARASamplePosition startSongSample = std::max (regionStartSample, sampleStart);
         ARASamplePosition endSongSample = std::min (regionEndSample, sampleEnd);
 
         // calculate offset between song and audio source samples, clip at region borders in audio source samples
@@ -62,7 +64,7 @@ void ARASampleProjectPlaybackRenderer::renderSamples (AudioBuffer<float>& buffer
         endSongSample = std::min (endSongSample, endAvailableSourceSamples - offsetToPlaybackRegion);
 
         // use the buffered audio source reader to read samples into the audio block
-        AudioSourceChannelInfo channelInfo (&buffer, (int) (startSongSample - samplePosition), (int) (endSongSample - startSongSample));
+        AudioSourceChannelInfo channelInfo (&buffer, (int) (startSongSample - sampleStart), (int) (endSongSample - startSongSample));
         audioSourceReaders[audioSource]->setNextReadPosition (startSongSample + offsetToPlaybackRegion);
         audioSourceReaders[audioSource]->getNextAudioBlock (channelInfo);
     }
@@ -76,8 +78,8 @@ void ARASampleProjectPlaybackRenderer::didAddPlaybackRegion (ARA::PlugIn::Playba
     ARASampleProjectDocumentController* documentController = static_cast<ARASampleProjectDocumentController*> (audioSource->getDocument()->getDocumentController());
     if (audioSourceReaders.count (audioSource) == 0)
     {
-        audioSourceReaders.emplace (audioSource, documentController->createBufferingAudioSourceReader (audioSource, documentController->getAudioSourceReadingThread(), sampleBufferSize));
-        audioSourceReaders[audioSource]->prepareToPlay (128, audioSource->getSampleRate());
+        audioSourceReaders.emplace (audioSource, documentController->createBufferingAudioSourceReader (audioSource, documentController->getAudioSourceReadingThread(), getMaxSamplesPerBlock()));
+        audioSourceReaders[audioSource]->prepareToPlay (getMaxSamplesPerBlock(), audioSource->getSampleRate());
     }
 }
 
