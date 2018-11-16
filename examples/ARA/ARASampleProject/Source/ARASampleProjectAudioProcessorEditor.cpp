@@ -62,7 +62,7 @@ void ARASampleProjectAudioProcessorEditor::resized()
     // normalized width = view width in terms of kVisibleSeconds
     // size this to ensure we can see one second beyond the longest region sequnce
     const double normalizedWidth = (maxRegionSequenceLength + 1) / kVisibleSeconds;
-    regionSequenceListView.setBounds (0, 0, normalizedWidth * width, kRegionSequenceHeight * i);
+    regionSequenceListView.setBounds (0, 0, (int) (normalizedWidth * width), kRegionSequenceHeight * i);
     regionSequenceViewPort.setBounds (0, 0, getWidth(), getHeight());
 }
 
