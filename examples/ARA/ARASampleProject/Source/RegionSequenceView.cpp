@@ -1,6 +1,6 @@
 #include "RegionSequenceView.h"
-#include "PluginARAPlaybackRenderer.h"
-#include "PluginARADocumentController.h"
+#include "ARASampleProjectPlaybackRenderer.h"
+#include "ARASampleProjectDocumentController.h"
 
 void RegionSequenceView::paint (Graphics& g)
 {
