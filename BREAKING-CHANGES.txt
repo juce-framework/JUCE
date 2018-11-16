@@ -79,8 +79,7 @@ Possible Issues
    which is no longer part of JUCE.
 2. Building a VST2-compatible VST3 plug-in (the previous default behaviour in
    JUCE) requires header files from the VST2 SDK, which is no longer part of
-   JUCE. When a new JUCE plug-in project is created the option
-   JUCE_VST3_CAN_REPLACE_VST2 will be set to zero.
+   JUCE.
 
 Workaround
 ----------
@@ -92,6 +91,8 @@ Workaround
    version, and you want the VST3 plug-in to replace the VST2 plug-in in
    hosts that support it, then you should enable the JUCE_VST3_CAN_REPLACE_VST2
    option.
+3. When a new JUCE plug-in project is created the value of
+   JUCE_VST3_CAN_REPLACE_VST2 will be set to zero.
 
 Rationale
 ---------
@@ -132,6 +133,7 @@ The new createAndAddParameter method is much more flexible and enables any
 parameter types derived from RangedAudioParameter to be managed by the
 AudioProcessorValueTreeState.
 
+
 Change
 ------
 The Projucer's per-exporter Android SDK/NDK path options have been removed.
@@ -150,6 +152,7 @@ Rationale
 ---------
 Having multiple places where the paths could be set was confusing and could
 cause unexpected mismatches.
+
 
 Change
 ------
