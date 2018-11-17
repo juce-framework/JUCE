@@ -5,6 +5,38 @@ ARASampleProjectPlaybackRenderer::ARASampleProjectPlaybackRenderer (ARADocumentC
 : ARAPlaybackRenderer (documentController)
 {}
 
+int ARASampleProjectPlaybackRenderer::getReadAheadSize() const
+{
+    int readAheadSizeBySampleRate = (int) (2.0 * getSampleRate() + 0.5);
+    int readAheadSizeByBlockSize = 8 * getMaxSamplesPerBlock();
+    return jmax (readAheadSizeBySampleRate, readAheadSizeByBlockSize);
+}
+
+std::unique_ptr<BufferingAudioSource> ARASampleProjectPlaybackRenderer::createBufferingAudioSourceReader (ARAAudioSource* audioSource)
+{
+    auto documentController = static_cast<ARASampleProjectDocumentController*> (audioSource->getDocument()->getDocumentController());
+    auto newSourceReader = documentController->createBufferingAudioSourceReader (audioSource, documentController->getAudioSourceReadingThread(), getReadAheadSize());
+    newSourceReader->prepareToPlay (getMaxSamplesPerBlock(), audioSource->getSampleRate());
+    return std::unique_ptr<BufferingAudioSource> (newSourceReader);
+}
+
+void ARASampleProjectPlaybackRenderer::prepareToPlay (double newSampleRate, int newMaxSamplesPerBlock)
+{
+    auto oldSampleRate = getSampleRate();
+    auto oldMaxSamplesPerBlock = getMaxSamplesPerBlock();
+    auto oldReadAheadSize = getReadAheadSize();
+
+    ARAPlaybackRenderer::prepareToPlay(newSampleRate, newMaxSamplesPerBlock);
+
+    if ((oldSampleRate != getSampleRate()) ||
+        (oldMaxSamplesPerBlock != getMaxSamplesPerBlock()) ||
+        (oldReadAheadSize != getReadAheadSize()))
+    {
+        for (auto& readerPair : audioSourceReaders)
+            readerPair.second = createBufferingAudioSourceReader (readerPair.first);
+    }
+}
+
 // this function renders playback regions in the ARA document that have been
 // a) added to this playback renderer instance and
 // b) lie within the time range of samples being renderered (in project time)
@@ -76,12 +108,8 @@ void ARASampleProjectPlaybackRenderer::processBlock (AudioBuffer<float>& buffer,
 void ARASampleProjectPlaybackRenderer::didAddPlaybackRegion (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept
 {
     ARAAudioSource* audioSource = static_cast<ARAAudioSource*> (playbackRegion->getAudioModification()->getAudioSource());
-    ARASampleProjectDocumentController* documentController = static_cast<ARASampleProjectDocumentController*> (audioSource->getDocument()->getDocumentController());
     if (audioSourceReaders.count (audioSource) == 0)
-    {
-        audioSourceReaders.emplace (audioSource, documentController->createBufferingAudioSourceReader (audioSource, documentController->getAudioSourceReadingThread(), getMaxSamplesPerBlock()));
-        audioSourceReaders[audioSource]->prepareToPlay (getMaxSamplesPerBlock(), audioSource->getSampleRate());
-    }
+        audioSourceReaders.emplace (audioSource, createBufferingAudioSourceReader (audioSource));
 }
 
 // we can delete the reader associated with this playback region's audio source
