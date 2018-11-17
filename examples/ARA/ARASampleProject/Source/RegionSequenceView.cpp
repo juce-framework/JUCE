@@ -31,7 +31,7 @@ RegionSequenceView::RegionSequenceView (ARARegionSequence* sequence)
     startInSecs = audioThumb.getTotalLength();
     
     for (auto region : sequence->getPlaybackRegions())
-        startInSecs = std::min (startInSecs, region->getStartInPlaybackTime());
+        startInSecs = jmin (startInSecs, region->getStartInPlaybackTime());
 
     if (const ARA::ARAColor* colour = sequence->getColor())
         trackColour = Colour ((uint8)jmap (colour->r, 0.0f, 255.0f), (uint8)jmap (colour->g, 0.0f, 255.0f), (uint8)jmap (colour->b, 0.0f, 255.0f));

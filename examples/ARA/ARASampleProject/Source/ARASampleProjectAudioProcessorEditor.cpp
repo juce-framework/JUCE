@@ -97,7 +97,7 @@ void ARASampleProjectAudioProcessorEditor::onNewSelection (const ARA::PlugIn::Vi
 
         // make the region sequence view visible and keep track of the longest region sequence
         regionSequenceListView.addAndMakeVisible (regionSequenceViews[i]);
-        maxRegionSequenceLength = std::max (maxRegionSequenceLength, regionSequenceViews[i]->getStartInSecs() + regionSequenceViews[i]->getLengthInSecs());
+        maxRegionSequenceLength = jmax (maxRegionSequenceLength, regionSequenceViews[i]->getStartInSecs() + regionSequenceViews[i]->getLengthInSecs());
     }
 
     // remove any views for region sequences no longer in the document

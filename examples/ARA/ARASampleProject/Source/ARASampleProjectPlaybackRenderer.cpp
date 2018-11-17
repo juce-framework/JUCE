@@ -50,19 +50,19 @@ void ARASampleProjectPlaybackRenderer::processBlock (AudioBuffer<float>& buffer,
         if (regionEndSample <= sampleStart)
             continue;
 
-        ARASamplePosition startSongSample = std::max (regionStartSample, sampleStart);
-        ARASamplePosition endSongSample = std::min (regionEndSample, sampleEnd);
+        ARASamplePosition startSongSample = jmax (regionStartSample, sampleStart);
+        ARASamplePosition endSongSample = jmin (regionEndSample, sampleEnd);
 
         // calculate offset between song and audio source samples, clip at region borders in audio source samples
         // (if a plug-in supports time stretching, it will also need to reflect the stretch factor here)
         ARASamplePosition offsetToPlaybackRegion = playbackRegion->getStartInAudioModificationSamples() - regionStartSample;
 
         // clamp sample ranges within the range we're rendering
-        ARASamplePosition startAvailableSourceSamples = std::max<ARASamplePosition> (0, playbackRegion->getStartInAudioModificationSamples());
-        ARASamplePosition endAvailableSourceSamples = std::min (audioSource->getSampleCount(), playbackRegion->getEndInAudioModificationSamples());
+        ARASamplePosition startAvailableSourceSamples = jmax<ARASamplePosition> (0, playbackRegion->getStartInAudioModificationSamples());
+        ARASamplePosition endAvailableSourceSamples = jmin (audioSource->getSampleCount(), playbackRegion->getEndInAudioModificationSamples());
 
-        startSongSample = std::max (startSongSample, startAvailableSourceSamples - offsetToPlaybackRegion);
-        endSongSample = std::min (endSongSample, endAvailableSourceSamples - offsetToPlaybackRegion);
+        startSongSample = jmax (startSongSample, startAvailableSourceSamples - offsetToPlaybackRegion);
+        endSongSample = jmin (endSongSample, endAvailableSourceSamples - offsetToPlaybackRegion);
 
         // use the buffered audio source reader to read samples into the audio block
         AudioSourceChannelInfo channelInfo (&buffer, (int) (startSongSample - sampleStart), (int) (endSongSample - startSongSample));
