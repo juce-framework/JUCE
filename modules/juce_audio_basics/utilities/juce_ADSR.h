@@ -135,7 +135,11 @@ public:
             if (envelopeVal >= 1.0f)
             {
                 envelopeVal = 1.0f;
-                currentState = State::decay;
+
+                if (decayRate > 0.0f)
+                    currentState = State::decay;
+                else
+                    currentState = State::sustain;
             }
         }
         else if (currentState == State::decay)
@@ -163,7 +167,7 @@ public:
         return envelopeVal;
     }
 
-    /** This method will conviniently apply the next numSamples number of envelope values
+    /** This method will conveniently apply the next numSamples number of envelope values
         to an AudioBuffer.
 
         @see getNextSample
