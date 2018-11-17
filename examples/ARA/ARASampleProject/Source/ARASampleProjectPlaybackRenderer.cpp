@@ -15,7 +15,7 @@ void ARASampleProjectPlaybackRenderer::processBlock (AudioBuffer<float>& buffer,
     jassert (buffer.getNumSamples() <= getMaxSamplesPerBlock());
 
     // zero the samples and get out if we the host is not playing back
-    if (isPlayingBack == false)
+    if (! isPlayingBack)
     {
         for (int c = 0; c < buffer.getNumChannels(); c++)
             FloatVectorOperations::clear (buffer.getArrayOfWritePointers()[c], buffer.getNumSamples());

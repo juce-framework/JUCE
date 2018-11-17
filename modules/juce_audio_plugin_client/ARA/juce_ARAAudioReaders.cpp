@@ -38,7 +38,7 @@ void ARAAudioSourceReader::willEnableAudioSourceSamplesAccess (ARAAudioSource* a
     lock.enterWrite();
 
     // invalidate our reader if sample access is disabled
-    if (enable == false)
+    if (! enable)
         invalidate();
 }
 
