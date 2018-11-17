@@ -5,18 +5,20 @@
 #include "ARASampleProjectDocumentController.h"
 #include "RegionSequenceView.h"
 
+#if ! JucePlugin_Enable_ARA
+    #error "bad project configuration, JucePlugin_Enable_ARA is required for compiling this class"
+#endif
+
 //==============================================================================
 /** 
     Editor class for ARA sample project
     This class manages the UI we use to display region sequences in the 
     ARA document as well as their current selection state
 */
-class ARASampleProjectAudioProcessorEditor: public AudioProcessorEditor
-#if JucePlugin_Enable_ARA
-     , public AudioProcessorEditorARAExtension               // Provides access to the ARA EditorView instance
-     , public ARAEditorView::Listener                        // Receives ARA selection notifications
-     , public ARARegionSequence::Listener                    // Receives ARA region sequence update notifications
-#endif
+class ARASampleProjectAudioProcessorEditor: public AudioProcessorEditor,
+                                            public AudioProcessorEditorARAExtension,    // Provides access to the ARA EditorView instance
+                                            public ARAEditorView::Listener,             // Receives ARA selection notifications
+                                            public ARARegionSequence::Listener          // Receives ARA region sequence update notifications
 {
 public:
     ARASampleProjectAudioProcessorEditor (ARASampleProjectAudioProcessor&);

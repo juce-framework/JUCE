@@ -8,10 +8,8 @@ static const int kVisibleSeconds = 10;
 
 //==============================================================================
 ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARASampleProjectAudioProcessor& p)
-    : AudioProcessorEditor (&p)
-#if JucePlugin_Enable_ARA
-    , AudioProcessorEditorARAExtension (&p)
-#endif
+: AudioProcessorEditor (&p),
+  AudioProcessorEditorARAExtension (&p)
 {
     // init viewport and region sequence list view
     regionSequenceViewPort.setScrollBarsShown (true, true);
@@ -23,13 +21,17 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
 
     // manually invoke the onNewSelection callback to refresh our UI with the current selection
     // TODO JUCE_ARA should we rename the function that recreates the view?
-    getARAEditorView()->addSelectionListener (this);
-    onNewSelection (getARAEditorView()->getViewSelection());
+    if (isARAEditorView())
+    {
+        getARAEditorView()->addSelectionListener (this);
+        onNewSelection (getARAEditorView()->getViewSelection());
+    }
 }
 
 ARASampleProjectAudioProcessorEditor::~ARASampleProjectAudioProcessorEditor()
 {
-    getARAEditorView()->removeSelectionListener (this);
+    if (isARAEditorView())
+        getARAEditorView()->removeSelectionListener (this);
 }
 
 //==============================================================================
