@@ -14,7 +14,6 @@ ARAPlaybackRenderer::ARAPlaybackRenderer (ARADocumentController* documentControl
 
 void ARAPlaybackRenderer::prepareToPlay (double newSampleRate, int newMaxSamplesPerBlock)
 {
-    jassert (! isPreparedToPlay);
     sampleRate = newSampleRate;
     maxSamplesPerBlock = newMaxSamplesPerBlock;
 #if ! JUCE_DISABLE_ASSERTIONS
@@ -24,7 +23,6 @@ void ARAPlaybackRenderer::prepareToPlay (double newSampleRate, int newMaxSamples
 
 void ARAPlaybackRenderer::releaseResources()
 {
-    jassert (isPreparedToPlay);
 #if ! JUCE_DISABLE_ASSERTIONS
     isPreparedToPlay = false;
 #endif
