@@ -53,24 +53,6 @@ ARAEditorRenderer::ARAEditorRenderer (ARADocumentController* documentController)
 : ARA::PlugIn::EditorRenderer (documentController)
 {}
 
-void ARAEditorRenderer::addPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept
-{
-    ARA::PlugIn::EditorRenderer::addPlaybackRegion (ARA::PlugIn::toRef (playbackRegion));
-}
-void ARAEditorRenderer::removePlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept
-{
-    ARA::PlugIn::EditorRenderer::removePlaybackRegion (ARA::PlugIn::toRef (playbackRegion));
-}
-
-void ARAEditorRenderer::addRegionSequence (ARARegionSequence* regionSequence) noexcept
-{
-    ARA::PlugIn::EditorRenderer::addRegionSequence (ARA::PlugIn::toRef (regionSequence));
-}
-void ARAEditorRenderer::removeRegionSequence (ARARegionSequence* regionSequence) noexcept
-{
-    ARA::PlugIn::EditorRenderer::removeRegionSequence (ARA::PlugIn::toRef (regionSequence));
-}
-
 //==============================================================================
 
 ARAEditorView::ARAEditorView (ARA::PlugIn::DocumentController* documentController) noexcept

@@ -18,6 +18,7 @@ public:
     double getSampleRate() const noexcept       { return sampleRate; }
     int getMaxSamplesPerBlock() const noexcept  { return maxSamplesPerBlock; }
 
+    // only to be called if using a playback renderer created internally, i.e. not by the host.
     void addPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept;
     void removePlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept;
 
@@ -37,14 +38,9 @@ class ARAEditorRenderer: public ARA::PlugIn::EditorRenderer
 public:
     ARAEditorRenderer (ARADocumentController* documentController);
 
-    void addPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept;
-    void removePlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept;
-    void addRegionSequence (ARARegionSequence* regionSequence) noexcept;
-    void removeRegionSequence (ARARegionSequence* regionSequence) noexcept;
-
-    // TODO JUCE_ARA 
+    // TODO JUCE_ARA
     // what should this look like?
-    // virtual void renderSamples (AudioBuffer<float>& buffer, ARA::ARASampleRate sampleRate);
+    // virtual void processBlock (AudioBuffer<float>& buffer, int64 timeInSamples, bool isPlayingBack);
 };
 
 //==============================================================================
