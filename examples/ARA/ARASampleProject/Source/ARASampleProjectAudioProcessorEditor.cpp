@@ -23,7 +23,9 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
     // TODO JUCE_ARA should we rename the function that recreates the view?
     if (isARAEditorView())
     {
+        getARADocumentController ()->addListener (this);
         getARAEditorView()->addSelectionListener (this);
+
         rebuildView();
         onNewSelection (getARAEditorView()->getViewSelection());
     }
@@ -31,8 +33,20 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
 
 ARASampleProjectAudioProcessorEditor::~ARASampleProjectAudioProcessorEditor()
 {
-    if (isARAEditorView())
-        getARAEditorView()->removeSelectionListener (this);
+    if (isARAEditorView ())
+    {
+        getARADocumentController ()->removeListener (this);
+        getARAEditorView ()->removeSelectionListener (this);
+
+        for (auto regionSequence : getARAEditorView ()->getDocumentController ()->getDocument ()->getRegionSequences ())
+        {
+            static_cast<ARARegionSequence*>(regionSequence)->removeListener (this);
+            for (auto playbackRegion : regionSequence->getPlaybackRegions ())
+            {
+                static_cast<ARAPlaybackRegion*>(playbackRegion)->removeListener (this);
+            }
+        }
+    }
 }
 
 //==============================================================================
@@ -112,17 +126,59 @@ void ARASampleProjectAudioProcessorEditor::rebuildView()
     regionSequenceViews.removeLast (regionSequenceViews.size() - (int) regionSequences.size());
 
     // Clear property change state and resize view
-    regionSequencesWithPropertyChanges.clear();
     resized();
+}
+
+void ARASampleProjectAudioProcessorEditor::willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties) noexcept
+{
+    if ((playbackRegion->getStartInPlaybackTime () != newProperties->startInPlaybackTime) ||
+        (playbackRegion->getDurationInPlaybackTime () != newProperties->durationInPlaybackTime))
+    {
+        regionSequencesWithPropertyChanges.insert (playbackRegion->getRegionSequence ());
+    }
+}
+
+void ARASampleProjectAudioProcessorEditor::willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept
+{
+    playbackRegion->removeListener (this);
+    regionSequencesWithPropertyChanges.insert (playbackRegion->getRegionSequence ());
 }
 
 void ARASampleProjectAudioProcessorEditor::didUpdateRegionSequenceProperties (ARARegionSequence* regionSequence) noexcept
 {
     regionSequencesWithPropertyChanges.insert (regionSequence);
-    rebuildView();
 }
 
-void ARASampleProjectAudioProcessorEditor::willDestroyRegionSequence (ARARegionSequence* /*regionSequence*/) noexcept
+void ARASampleProjectAudioProcessorEditor::willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* /*playbackRegion*/) noexcept
 {
-    rebuildView();
+    regionSequencesWithPropertyChanges.insert (regionSequence);
+}
+
+void ARASampleProjectAudioProcessorEditor::didAddPlaybackRegionToRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* /*playbackRegion*/) noexcept
+{
+    regionSequencesWithPropertyChanges.insert (regionSequence);
+}
+
+void ARASampleProjectAudioProcessorEditor::willDestroyRegionSequence (ARARegionSequence* regionSequence) noexcept
+{
+    regionSequence->removeListener (this);
+    regionSequencesWithPropertyChanges.insert (nullptr);
+}
+
+void ARASampleProjectAudioProcessorEditor::doEndEditing (ARADocumentController* /*documentController*/) noexcept
+{
+    for (auto regionSequence : getARAEditorView ()->getDocumentController ()->getDocument ()->getRegionSequences ())
+    {
+        static_cast<ARARegionSequence*>(regionSequence)->addListener (this);
+        for (auto playbackRegion : regionSequence->getPlaybackRegions ())
+        {
+            static_cast<ARAPlaybackRegion*>(playbackRegion)->addListener (this);
+        }
+    }
+
+    if (! regionSequencesWithPropertyChanges.empty ())
+    {
+        rebuildView ();
+        regionSequencesWithPropertyChanges.clear ();
+    }
 }
