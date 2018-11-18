@@ -86,14 +86,14 @@ void ARASampleProjectAudioProcessor::changeProgramName (int /*index*/, const Str
 //==============================================================================
 void ARASampleProjectAudioProcessor::prepareToPlay (double newSampleRate, int samplesPerBlock)
 {
-    if (ARASampleProjectPlaybackRenderer* playbackRenderer = static_cast<ARASampleProjectPlaybackRenderer*> (getARAPlaybackRenderer()))
-        playbackRenderer->prepareToPlay (newSampleRate, samplesPerBlock);
+    if (isARAPlaybackRenderer())
+        getARAPlaybackRenderer()->prepareToPlay (newSampleRate, samplesPerBlock);
 }
 
 void ARASampleProjectAudioProcessor::releaseResources()
 {
-    if (ARASampleProjectPlaybackRenderer* playbackRenderer = static_cast<ARASampleProjectPlaybackRenderer*> (getARAPlaybackRenderer()))
-        playbackRenderer->releaseResources();
+    if (isARAPlaybackRenderer())
+        getARAPlaybackRenderer()->releaseResources();
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -136,8 +136,8 @@ void ARASampleProjectAudioProcessor::processBlock (AudioBuffer<float>& buffer, M
         return;
 
     // render our ARA playback regions for this time duration using the ARA playback renderer instance
-    if (ARASampleProjectPlaybackRenderer* playbackRenderer = static_cast<ARASampleProjectPlaybackRenderer*> (getARAPlaybackRenderer()))
-        playbackRenderer->processBlock (buffer, ci.timeInSamples, ci.isPlaying);
+    if (isARAPlaybackRenderer())
+        getARAPlaybackRenderer()->processBlock (buffer, ci.timeInSamples, ci.isPlaying);
 }
 
 //==============================================================================
