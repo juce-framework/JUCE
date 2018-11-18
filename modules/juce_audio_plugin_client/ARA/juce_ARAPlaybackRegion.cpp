@@ -7,21 +7,21 @@ ARAPlaybackRegion::ARAPlaybackRegion (ARA::PlugIn::AudioModification* audioModif
 : ARA::PlugIn::PlaybackRegion (audioModification, hostRef)
 {}
 
-void ARAPlaybackRegion::willUpdatePlaybackRegionProperties (ARAPlaybackRegion::PropertiesPtr newProperties) noexcept
+void ARAPlaybackRegion::willUpdatePlaybackRegionProperties (ARAPlaybackRegion::PropertiesPtr newProperties)
 {
     // TODO JUCE_ARA same potential issues as in willDestroyPlaybackRegion(), but it's very unlikely that
     // listeners are going to add/remove themselves from this call.
     listeners.call ([this, &newProperties] (Listener& l) { l.willUpdatePlaybackRegionProperties (this, newProperties); });
 }
 
-void ARAPlaybackRegion::didUpdatePlaybackRegionProperties() noexcept
+void ARAPlaybackRegion::didUpdatePlaybackRegionProperties()
 {
     // TODO JUCE_ARA same potential issues as in willDestroyPlaybackRegion(), but it's very unlikely that
     // listeners are going to add/remove themselves from this call.
     listeners.call ([this] (Listener& l) { l.didUpdatePlaybackRegionProperties (this); });
 }
 
-void ARAPlaybackRegion::willDestroyPlaybackRegion() noexcept
+void ARAPlaybackRegion::willDestroyPlaybackRegion()
 {
 // TODO JUCE_ARA listeners will typically remove themself from this call. In that case, ListenerList may not
 // notify some listeners, or call some twice, which seems not acceptable for this use case.

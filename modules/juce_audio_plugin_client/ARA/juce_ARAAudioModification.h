@@ -16,10 +16,10 @@ public:
         virtual ~Listener() {}
 
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
-        virtual void willUpdateAudioModificationProperties (ARAAudioModification* audioModification, PropertiesPtr newProperties) noexcept {}
-        virtual void didUpdateAudioModificationProperties (ARAAudioModification* audioModification) noexcept {}
-        virtual void doDeactivateAudioModificationForUndoHistory (ARAAudioModification* audioModification, bool deactivate) noexcept {}
-        virtual void willDestroyAudioModification (ARAAudioModification* audioModification) noexcept {}
+        virtual void willUpdateAudioModificationProperties (ARAAudioModification* audioModification, PropertiesPtr newProperties) {}
+        virtual void didUpdateAudioModificationProperties (ARAAudioModification* audioModification) {}
+        virtual void doDeactivateAudioModificationForUndoHistory (ARAAudioModification* audioModification, bool deactivate) {}
+        virtual void willDestroyAudioModification (ARAAudioModification* audioModification) {}
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
     };
 
@@ -27,10 +27,10 @@ public:
     void removeListener (Listener* l);
 
 public:         // to be called by ARADocumentController only
-    void willUpdateAudioModificationProperties (PropertiesPtr newProperties) noexcept;
-    void didUpdateAudioModificationProperties() noexcept;
-    void doDeactivateAudioModificationForUndoHistory (bool deactivate) noexcept;
-    void willDestroyAudioModification() noexcept;
+    void willUpdateAudioModificationProperties (PropertiesPtr newProperties);
+    void didUpdateAudioModificationProperties();
+    void doDeactivateAudioModificationForUndoHistory (bool deactivate);
+    void willDestroyAudioModification();
 
 private:
     ListenerList<Listener> listeners;

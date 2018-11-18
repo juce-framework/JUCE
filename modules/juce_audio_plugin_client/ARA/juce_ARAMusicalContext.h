@@ -16,10 +16,10 @@ public:
         virtual ~Listener() {}
 
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
-        void willUpdateMusicalContextProperties (ARAMusicalContext* musicalContext, ARAMusicalContext::PropertiesPtr newProperties) noexcept {}
-        void didUpdateMusicalContextProperties (ARAMusicalContext* musicalContext) noexcept {}
-        void doUpdateMusicalContextContent (ARAMusicalContext* musicalContext, const ARA::ARAContentTimeRange* range, ARA::ARAContentUpdateFlags flags) noexcept {}
-        void willDestroyMusicalContext (ARAMusicalContext* musicalContext) noexcept {}
+        void willUpdateMusicalContextProperties (ARAMusicalContext* musicalContext, ARAMusicalContext::PropertiesPtr newProperties) {}
+        void didUpdateMusicalContextProperties (ARAMusicalContext* musicalContext) {}
+        void doUpdateMusicalContextContent (ARAMusicalContext* musicalContext, const ARA::ARAContentTimeRange* range, ARA::ARAContentUpdateFlags flags) {}
+        void willDestroyMusicalContext (ARAMusicalContext* musicalContext) {}
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
     };
 
@@ -27,10 +27,10 @@ public:
     void removeListener (Listener* l);
 
 public:         // to be called by ARADocumentController only
-    void willUpdateMusicalContextProperties (ARAMusicalContext::PropertiesPtr newProperties) noexcept;
-    void didUpdateMusicalContextProperties() noexcept;
-    void doUpdateMusicalContextContent (const ARA::ARAContentTimeRange* range, ARA::ARAContentUpdateFlags flags) noexcept;
-    void willDestroyMusicalContext() noexcept;
+    void willUpdateMusicalContextProperties (ARAMusicalContext::PropertiesPtr newProperties);
+    void didUpdateMusicalContextProperties();
+    void doUpdateMusicalContextContent (const ARA::ARAContentTimeRange* range, ARA::ARAContentUpdateFlags flags);
+    void willDestroyMusicalContext();
 
 private:
     ListenerList<Listener> listeners;

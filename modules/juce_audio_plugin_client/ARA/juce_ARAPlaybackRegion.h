@@ -17,9 +17,9 @@ public:
         virtual ~Listener()  {}
 
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
-        virtual void willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties) noexcept {}
-        virtual void didUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion) noexcept {}
-        virtual void willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept {}
+        virtual void willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties) {}
+        virtual void didUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion) {}
+        virtual void willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion) {}
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
     };
 
@@ -27,9 +27,9 @@ public:
     void removeListener (Listener* l);
 
 public:         // to be called by ARADocumentController only
-    void willUpdatePlaybackRegionProperties (ARAPlaybackRegion::PropertiesPtr newProperties) noexcept;
-    void didUpdatePlaybackRegionProperties() noexcept;
-    void willDestroyPlaybackRegion() noexcept;
+    void willUpdatePlaybackRegionProperties (ARAPlaybackRegion::PropertiesPtr newProperties);
+    void didUpdatePlaybackRegionProperties();
+    void willDestroyPlaybackRegion();
 
 private:
     ListenerList<Listener> listeners;

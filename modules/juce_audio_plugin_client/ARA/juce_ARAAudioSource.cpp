@@ -7,37 +7,37 @@ ARAAudioSource::ARAAudioSource (ARA::PlugIn::Document* document, ARA::ARAAudioSo
 : ARA::PlugIn::AudioSource(document, hostRef)
 {}
 
-void ARAAudioSource::willUpdateAudioSourceProperties (PropertiesPtr newProperties) noexcept
+void ARAAudioSource::willUpdateAudioSourceProperties (PropertiesPtr newProperties)
 {
     listeners.call ([this, &newProperties] (Listener& l) { l.willUpdateAudioSourceProperties (this, newProperties); });
 }
 
-void ARAAudioSource::didUpdateAudioSourceProperties() noexcept
+void ARAAudioSource::didUpdateAudioSourceProperties()
 {
     listeners.call ([this] (Listener& l) { l.didUpdateAudioSourceProperties (this); });
 }
 
-void ARAAudioSource::doUpdateAudioSourceContent (const ARA::ARAContentTimeRange* range, ARA::ARAContentUpdateFlags flags) noexcept
+void ARAAudioSource::doUpdateAudioSourceContent (const ARA::ARAContentTimeRange* range, ARA::ARAContentUpdateFlags flags)
 {
     listeners.call ([this, range, flags] (Listener& l) { l.doUpdateAudioSourceContent (this, range, flags); });
 }
 
-void ARAAudioSource::willEnableAudioSourceSamplesAccess (bool enable) noexcept
+void ARAAudioSource::willEnableAudioSourceSamplesAccess (bool enable)
 {
     listeners.call ([this, enable] (Listener& l) { l.willEnableAudioSourceSamplesAccess (this, enable); });
 }
 
-void ARAAudioSource::didEnableAudioSourceSamplesAccess (bool enable) noexcept
+void ARAAudioSource::didEnableAudioSourceSamplesAccess (bool enable)
 {
     listeners.call ([this, enable] (Listener& l) { l.didEnableAudioSourceSamplesAccess (this, enable); });
 }
 
-void ARAAudioSource::doDeactivateAudioSourceForUndoHistory (bool deactivate) noexcept
+void ARAAudioSource::doDeactivateAudioSourceForUndoHistory (bool deactivate)
 {
     listeners.call ([this, deactivate] (Listener& l) { l.doDeactivateAudioSourceForUndoHistory (this, deactivate); });
 }
 
-void ARAAudioSource::willDestroyAudioSource() noexcept
+void ARAAudioSource::willDestroyAudioSource()
 {
     // TODO JUCE_ARA
     // like in ARAPlaybackRegion, we have to avoid listeners removing themselves while

@@ -7,22 +7,22 @@ ARAAudioModification::ARAAudioModification (ARA::PlugIn::AudioSource* audioSourc
 : ARA::PlugIn::AudioModification (audioSource, hostRef)
 {}
 
-void ARAAudioModification::willUpdateAudioModificationProperties (PropertiesPtr newProperties) noexcept
+void ARAAudioModification::willUpdateAudioModificationProperties (PropertiesPtr newProperties)
 {
     listeners.call ([this, &newProperties] (Listener& l) { l.willUpdateAudioModificationProperties (this, newProperties); });
 }
 
-void ARAAudioModification::didUpdateAudioModificationProperties() noexcept
+void ARAAudioModification::didUpdateAudioModificationProperties()
 {
     listeners.call ([this] (Listener& l) { l.didUpdateAudioModificationProperties (this); });
 }
 
-void ARAAudioModification::doDeactivateAudioModificationForUndoHistory (bool deactivate) noexcept
+void ARAAudioModification::doDeactivateAudioModificationForUndoHistory (bool deactivate)
 {
     listeners.call ([this, deactivate] (Listener& l) { l.doDeactivateAudioModificationForUndoHistory (this, deactivate); });
 }
 
-void ARAAudioModification::willDestroyAudioModification() noexcept
+void ARAAudioModification::willDestroyAudioModification()
 {
     // TODO JUCE_ARA 
     // same concerns involving removal as with other listeners

@@ -7,22 +7,22 @@ ARAMusicalContext::ARAMusicalContext (ARA::PlugIn::Document* document, ARA::ARAM
 : ARA::PlugIn::MusicalContext (document, hostRef)
 {}
 
-void ARAMusicalContext::willUpdateMusicalContextProperties (ARAMusicalContext::PropertiesPtr newProperties) noexcept
+void ARAMusicalContext::willUpdateMusicalContextProperties (ARAMusicalContext::PropertiesPtr newProperties)
 {
     listeners.call ([this, &newProperties] (Listener& l) { l.willUpdateMusicalContextProperties (this, newProperties); });
 }
 
-void ARAMusicalContext::didUpdateMusicalContextProperties() noexcept
+void ARAMusicalContext::didUpdateMusicalContextProperties()
 {
     listeners.call ([this] (Listener& l) { l.didUpdateMusicalContextProperties (this); });
 }
 
-void ARAMusicalContext::doUpdateMusicalContextContent (const ARA::ARAContentTimeRange* range, ARA::ARAContentUpdateFlags flags) noexcept
+void ARAMusicalContext::doUpdateMusicalContextContent (const ARA::ARAContentTimeRange* range, ARA::ARAContentUpdateFlags flags)
 {
     listeners.call ([this, range, flags] (Listener& l) { l.doUpdateMusicalContextContent (this, range, flags); });
 }
 
-void ARAMusicalContext::willDestroyMusicalContext() noexcept
+void ARAMusicalContext::willDestroyMusicalContext()
 {
     // TODO JUCE_ARA 
     // same concerns involving removal as with other listeners

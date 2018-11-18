@@ -18,11 +18,11 @@ public:
         virtual ~Listener() {}
 
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
-        virtual void willUpdateRegionSequenceProperties (ARARegionSequence* regionSequence, ARARegionSequence::PropertiesPtr newProperties) noexcept {}
-        virtual void didUpdateRegionSequenceProperties (ARARegionSequence* regionSequence) noexcept {}
-        virtual void willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion) noexcept {}
-        virtual void didAddPlaybackRegionToRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion) noexcept {}
-        virtual void willDestroyRegionSequence (ARARegionSequence* regionSequence) noexcept {}
+        virtual void willUpdateRegionSequenceProperties (ARARegionSequence* regionSequence, ARARegionSequence::PropertiesPtr newProperties) {}
+        virtual void didUpdateRegionSequenceProperties (ARARegionSequence* regionSequence) {}
+        virtual void willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion) {}
+        virtual void didAddPlaybackRegionToRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion) {}
+        virtual void willDestroyRegionSequence (ARARegionSequence* regionSequence) {}
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
     };
 
@@ -30,11 +30,11 @@ public:
     void removeListener (Listener* l);
 
 public:         // to be called by ARADocumentController only
-    void willUpdateRegionSequenceProperties (ARARegionSequence::PropertiesPtr newProperties) noexcept;
-    void didUpdateRegionSequenceProperties() noexcept;
-    void didAddPlaybackRegionToRegionSequence (ARAPlaybackRegion* playbackRegion) noexcept;
-    void willRemovePlaybackRegionFromRegionSequence (ARAPlaybackRegion* playbackRegion) noexcept;
-    void willDestroyRegionSequence() noexcept;
+    void willUpdateRegionSequenceProperties (ARARegionSequence::PropertiesPtr newProperties);
+    void didUpdateRegionSequenceProperties();
+    void didAddPlaybackRegionToRegionSequence (ARAPlaybackRegion* playbackRegion);
+    void willRemovePlaybackRegionFromRegionSequence (ARAPlaybackRegion* playbackRegion);
+    void willDestroyRegionSequence();
 
 private:
     ListenerList<Listener> listeners;

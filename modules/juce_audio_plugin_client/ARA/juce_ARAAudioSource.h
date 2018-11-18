@@ -16,13 +16,13 @@ public:
         virtual ~Listener()  {}
 
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
-        virtual void willUpdateAudioSourceProperties (ARAAudioSource* audioSource, PropertiesPtr newProperties) noexcept {}
-        virtual void didUpdateAudioSourceProperties (ARAAudioSource* audioSource) noexcept {}
-        virtual void doUpdateAudioSourceContent (ARAAudioSource* audioSource, const ARA::ARAContentTimeRange* range, ARA::ARAContentUpdateFlags flags) noexcept {}
-        virtual void willEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) noexcept {}
-        virtual void didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) noexcept {}
-        virtual void doDeactivateAudioSourceForUndoHistory (ARAAudioSource* audioSource, bool deactivate) noexcept {}
-        virtual void willDestroyAudioSource (ARAAudioSource* audioSource) noexcept {}
+        virtual void willUpdateAudioSourceProperties (ARAAudioSource* audioSource, PropertiesPtr newProperties) {}
+        virtual void didUpdateAudioSourceProperties (ARAAudioSource* audioSource) {}
+        virtual void doUpdateAudioSourceContent (ARAAudioSource* audioSource, const ARA::ARAContentTimeRange* range, ARA::ARAContentUpdateFlags flags) {}
+        virtual void willEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) {}
+        virtual void didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) {}
+        virtual void doDeactivateAudioSourceForUndoHistory (ARAAudioSource* audioSource, bool deactivate) {}
+        virtual void willDestroyAudioSource (ARAAudioSource* audioSource) {}
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
     };
 
@@ -30,13 +30,13 @@ public:
     void removeListener (Listener* l);
 
 public:         // to be called by ARADocumentController only
-    void willUpdateAudioSourceProperties (PropertiesPtr newProperties) noexcept;
-    void didUpdateAudioSourceProperties() noexcept;
-    void doUpdateAudioSourceContent (const ARA::ARAContentTimeRange* range, ARA::ARAContentUpdateFlags flags) noexcept;
-    void willEnableAudioSourceSamplesAccess (bool enable) noexcept;
-    void didEnableAudioSourceSamplesAccess (bool enable) noexcept;
-    void doDeactivateAudioSourceForUndoHistory (bool deactivate) noexcept;
-    void willDestroyAudioSource() noexcept;
+    void willUpdateAudioSourceProperties (PropertiesPtr newProperties);
+    void didUpdateAudioSourceProperties();
+    void doUpdateAudioSourceContent (const ARA::ARAContentTimeRange* range, ARA::ARAContentUpdateFlags flags);
+    void willEnableAudioSourceSamplesAccess (bool enable);
+    void didEnableAudioSourceSamplesAccess (bool enable);
+    void doDeactivateAudioSourceForUndoHistory (bool deactivate);
+    void willDestroyAudioSource();
 
 private:
     ListenerList<Listener> listeners;
