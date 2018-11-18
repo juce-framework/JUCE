@@ -43,9 +43,7 @@ ARASampleProjectAudioProcessorEditor::~ARASampleProjectAudioProcessorEditor()
         {
             static_cast<ARARegionSequence*>(regionSequence)->removeListener (this);
             for (auto playbackRegion : regionSequence->getPlaybackRegions ())
-            {
                 static_cast<ARAPlaybackRegion*>(playbackRegion)->removeListener (this);
-            }
         }
     }
 }
@@ -177,9 +175,7 @@ void ARASampleProjectAudioProcessorEditor::doEndEditing (ARADocumentController* 
     {
         static_cast<ARARegionSequence*>(regionSequence)->addListener (this);
         for (auto playbackRegion : regionSequence->getPlaybackRegions ())
-        {
             static_cast<ARAPlaybackRegion*>(playbackRegion)->addListener (this);
-        }
     }
 
     if (isViewDirty)
