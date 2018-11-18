@@ -25,11 +25,6 @@ public:
 private:
     double sampleRate;
     int maxSamplesPerBlock;
-
-public:
-   #if ! JUCE_DISABLE_ASSERTIONS
-    bool isPreparedToPlay;
-   #endif
 };
 
 //==============================================================================
