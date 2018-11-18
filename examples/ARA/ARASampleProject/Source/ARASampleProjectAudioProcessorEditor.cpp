@@ -9,7 +9,8 @@ static const int kVisibleSeconds = 10;
 //==============================================================================
 ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARASampleProjectAudioProcessor& p)
 : AudioProcessorEditor (&p),
-  AudioProcessorEditorARAExtension (&p)
+  AudioProcessorEditorARAExtension (&p),
+  isViewDirty (false)
 {
     // init viewport and region sequence list view
     regionSequenceViewPort.setScrollBarsShown (true, true);
@@ -135,6 +136,7 @@ void ARASampleProjectAudioProcessorEditor::willUpdatePlaybackRegionProperties (A
         (playbackRegion->getDurationInPlaybackTime () != newProperties->durationInPlaybackTime))
     {
         regionSequencesWithPropertyChanges.insert (playbackRegion->getRegionSequence ());
+        isViewDirty = true;
     }
 }
 
@@ -142,27 +144,31 @@ void ARASampleProjectAudioProcessorEditor::willDestroyPlaybackRegion (ARAPlaybac
 {
     playbackRegion->removeListener (this);
     regionSequencesWithPropertyChanges.insert (playbackRegion->getRegionSequence ());
+    isViewDirty = true;
 }
 
 void ARASampleProjectAudioProcessorEditor::didUpdateRegionSequenceProperties (ARARegionSequence* regionSequence) noexcept
 {
     regionSequencesWithPropertyChanges.insert (regionSequence);
+    isViewDirty = true;
 }
 
 void ARASampleProjectAudioProcessorEditor::willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* /*playbackRegion*/) noexcept
 {
     regionSequencesWithPropertyChanges.insert (regionSequence);
+    isViewDirty = true;
 }
 
 void ARASampleProjectAudioProcessorEditor::didAddPlaybackRegionToRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* /*playbackRegion*/) noexcept
 {
     regionSequencesWithPropertyChanges.insert (regionSequence);
+    isViewDirty = true;
 }
 
 void ARASampleProjectAudioProcessorEditor::willDestroyRegionSequence (ARARegionSequence* regionSequence) noexcept
 {
     regionSequence->removeListener (this);
-    regionSequencesWithPropertyChanges.insert (nullptr);
+    isViewDirty = true;
 }
 
 void ARASampleProjectAudioProcessorEditor::doEndEditing (ARADocumentController* /*documentController*/) noexcept
@@ -176,9 +182,10 @@ void ARASampleProjectAudioProcessorEditor::doEndEditing (ARADocumentController* 
         }
     }
 
-    if (! regionSequencesWithPropertyChanges.empty ())
+    if (isViewDirty)
     {
         rebuildView ();
         regionSequencesWithPropertyChanges.clear ();
+        isViewDirty = false;
     }
 }

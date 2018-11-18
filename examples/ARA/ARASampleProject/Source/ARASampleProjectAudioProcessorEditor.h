@@ -58,6 +58,7 @@ private:
     double maxRegionSequenceLength;
     juce::OwnedArray <RegionSequenceView> regionSequenceViews;
 
+    bool isViewDirty;
     std::set<ARA::PlugIn::RegionSequence*> regionSequencesWithPropertyChanges;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARASampleProjectAudioProcessorEditor)
