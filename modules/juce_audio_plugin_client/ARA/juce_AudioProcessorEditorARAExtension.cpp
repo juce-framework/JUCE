@@ -21,4 +21,9 @@ ARAEditorView* AudioProcessorEditorARAExtension::getARAEditorView() const noexce
     return araProcessorExtension ? static_cast<ARAEditorView*>(araProcessorExtension->getARAEditorView()) : nullptr;
 }
 
+ARADocumentController* AudioProcessorEditorARAExtension::getARADocumentController() const noexcept
+{
+    return isARAEditorView() ? static_cast<ARADocumentController*>(getARAEditorView()->getDocumentController()) : nullptr;
+}
+
 } // namespace juce

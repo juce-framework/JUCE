@@ -34,4 +34,16 @@ ARAEditorView* AudioProcessorARAExtension::getARAEditorView() const noexcept
     return araPlugInExtension ? static_cast<ARAEditorView*>(araPlugInExtension->getEditorView()) : nullptr;
 }
 
+ARADocumentController* AudioProcessorARAExtension::getARADocumentController() const noexcept
+{
+    ARA::PlugIn::DocumentController* documentController = nullptr;
+    if (isARAPlaybackRenderer())
+        documentController = getARAPlaybackRenderer()->getDocumentController();
+    else if (isARAEditorRenderer())
+        documentController = getARAEditorRenderer()->getDocumentController();
+    else if (isARAEditorView())
+        documentController = getARAEditorView()->getDocumentController();
+    return static_cast<ARADocumentController*>(documentController);
+}
+
 } // namespace juce

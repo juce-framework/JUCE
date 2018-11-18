@@ -8,6 +8,7 @@ namespace juce
 class ARAPlaybackRenderer;
 class ARAEditorRenderer;
 class ARAEditorView;
+class ARADocumentController;
 
 class AudioProcessorARAExtension
 {
@@ -21,6 +22,8 @@ public:
     bool isARAPlaybackRenderer() const noexcept { return getARAPlaybackRenderer() != nullptr; }
     bool isARAEditorRenderer() const noexcept { return getARAEditorRenderer() != nullptr; }
     bool isARAEditorView() const noexcept { return getARAEditorView() != nullptr; }
+
+    ARADocumentController* getARADocumentController() const noexcept;
 
 private:
     std::unique_ptr<const ARA::PlugIn::PlugInExtension> araPlugInExtension;

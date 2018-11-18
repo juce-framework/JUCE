@@ -7,6 +7,7 @@ namespace juce
 
 class AudioProcessor;
 class ARAEditorView;
+class ARADocumentController;
 
 class AudioProcessorEditorARAExtension
 {
@@ -19,6 +20,8 @@ public:
     ARAEditorView* getARAEditorView() const noexcept;
 
     bool isARAEditorView() const noexcept { return getARAEditorView() != nullptr; }
+
+    ARADocumentController* getARADocumentController() const noexcept;
 
 private:
     AudioProcessorARAExtension* araProcessorExtension;
