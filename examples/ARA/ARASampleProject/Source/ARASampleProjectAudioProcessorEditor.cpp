@@ -24,6 +24,7 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
     if (isARAEditorView())
     {
         getARAEditorView()->addSelectionListener (this);
+        rebuildView();
         onNewSelection (getARAEditorView()->getViewSelection());
     }
 }
@@ -72,6 +73,16 @@ void ARASampleProjectAudioProcessorEditor::resized()
 // rebuild our region sequence views and display selection state
 void ARASampleProjectAudioProcessorEditor::onNewSelection (const ARA::PlugIn::ViewSelection& currentSelection)
 {
+    // flag the region as selected if it's a part of the current selection
+    for (RegionSequenceView* regionSequenceView : regionSequenceViews)
+    {
+        bool isSelected = ARA::contains (currentSelection.getRegionSequences(), regionSequenceView->getRegionSequence());
+        regionSequenceView->setIsSelected (isSelected);
+    }
+}
+
+void ARASampleProjectAudioProcessorEditor::rebuildView()
+{
     // determine the length in seconds of the longest ARA region sequence
     maxRegionSequenceLength = 0.0;
 
@@ -92,11 +103,6 @@ void ARASampleProjectAudioProcessorEditor::onNewSelection (const ARA::PlugIn::Vi
             regionSequenceViews.set (i, new RegionSequenceView (regionSequence), true);
         }
 
-        // flag the region as selected if it's a part of the current selection, 
-        // or not selected if we have no selection
-        bool isSelected = ARA::contains (currentSelection.getRegionSequences(), regionSequences[i]);
-        regionSequenceViews[i]->setIsSelected (isSelected);
-
         // make the region sequence view visible and keep track of the longest region sequence
         regionSequenceListView.addAndMakeVisible (regionSequenceViews[i]);
         maxRegionSequenceLength = jmax (maxRegionSequenceLength, regionSequenceViews[i]->getStartInSecs() + regionSequenceViews[i]->getLengthInSecs());
@@ -112,12 +118,11 @@ void ARASampleProjectAudioProcessorEditor::onNewSelection (const ARA::PlugIn::Vi
 
 void ARASampleProjectAudioProcessorEditor::didUpdateRegionSequenceProperties (ARARegionSequence* regionSequence) noexcept
 {
-    // manually invoke onNewSelection here to redraw the region sequence views
     regionSequencesWithPropertyChanges.insert (regionSequence);
-    onNewSelection (getARAEditorView()->getViewSelection());
+    rebuildView();
 }
 
 void ARASampleProjectAudioProcessorEditor::willDestroyRegionSequence (ARARegionSequence* /*regionSequence*/) noexcept
 {
-    onNewSelection (getARAEditorView()->getViewSelection());
+    rebuildView();
 }

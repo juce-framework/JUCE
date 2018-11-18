@@ -36,6 +36,9 @@ public:
     void willDestroyRegionSequence (ARARegionSequence* regionSequence) noexcept override;
 
 private:
+    void rebuildView ();
+
+private:
 
     // we'll be displaying all region sequences in the document in a scrollable view
     Viewport regionSequenceViewPort;
