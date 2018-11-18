@@ -43,6 +43,9 @@ protected:
     void doBeginEditing() noexcept override;
     void doEndEditing() noexcept override;
 
+    // TODO JUCE_ARA
+    // Should we have a juce::ARADocument type?
+
     // MusicalContext callbacks
     ARA::PlugIn::MusicalContext* doCreateMusicalContext (ARA::PlugIn::Document* document, ARA::ARAMusicalContextHostRef hostRef) noexcept override;
     void willUpdateMusicalContextProperties (ARA::PlugIn::MusicalContext* musicalContext, ARA::PlugIn::MusicalContext::PropertiesPtr newProperties) noexcept override;
