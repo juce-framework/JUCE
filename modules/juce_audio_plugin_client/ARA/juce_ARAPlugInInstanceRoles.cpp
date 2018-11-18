@@ -57,7 +57,7 @@ ARAEditorView::ARAEditorView (ARA::PlugIn::DocumentController* documentControlle
 : ARA::PlugIn::EditorView (documentController)
 {}
 
-void ARAEditorView::doNotifySelection (const ARA::PlugIn::ViewSelection* currentSelection) noexcept
+void ARAEditorView::doNotifySelection (const ARA::PlugIn::ViewSelection* /*currentSelection*/) noexcept
 {
     for (Listener* l : listeners)
         l->onNewSelection (getViewSelection());
