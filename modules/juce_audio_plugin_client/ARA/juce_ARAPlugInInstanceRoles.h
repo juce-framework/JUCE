@@ -4,13 +4,15 @@
 
 namespace juce
 {
-    
+
 //==============================================================================
 class ARAPlaybackRenderer : public ARA::PlugIn::PlaybackRenderer
 {
 public:
     ARAPlaybackRenderer (ARADocumentController* documentController);
 
+    // If you are subclassing ARAPlaybackRenderer, make sure to call the base class
+    // implementations of any overridden function, except for processBlock().
     virtual void prepareToPlay (double sampleRate, int maxSamplesPerBlock);
     virtual void processBlock (AudioBuffer<float>& buffer, int64 timeInSamples, bool isPlayingBack);
     virtual void releaseResources();
@@ -44,6 +46,8 @@ class ARAEditorView : public ARA::PlugIn::EditorView
 public:
     ARAEditorView (ARA::PlugIn::DocumentController* documentController) noexcept;
 
+    // If you are subclassing ARAEditorView, make sure to call the base class
+    // implementations of all overridden functions.
     void doNotifySelection (const ARA::PlugIn::ViewSelection* currentSelection) noexcept override;
     void doNotifyHideRegionSequences (std::vector<ARA::PlugIn::RegionSequence*> const& regionSequences) noexcept override;
 

@@ -38,6 +38,8 @@ public:
 
     //==============================================================================
     // Override document controller methods here
+    // If you are subclassing ARADocumentController, make sure to call the base class
+    // implementations of any overridden function, except for any doCreate...().
 protected:
     // Edit Cycle callbacks
     void doBeginEditing() noexcept override;
