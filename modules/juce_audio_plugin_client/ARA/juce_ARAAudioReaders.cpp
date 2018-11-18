@@ -3,9 +3,9 @@
 namespace juce
 {
 
-ARAAudioSourceReader::ARAAudioSourceReader (ARA::PlugIn::AudioSource* audioSource, bool use64BitSamples)
+ARAAudioSourceReader::ARAAudioSourceReader (ARAAudioSource* audioSource, bool use64BitSamples)
 : AudioFormatReader (nullptr, "ARAAudioSourceReader"),
-  audioSourceBeingRead (static_cast<ARAAudioSource*> (audioSource))
+  audioSourceBeingRead (audioSource)
 {
     jassert (audioSourceBeingRead != nullptr);
 

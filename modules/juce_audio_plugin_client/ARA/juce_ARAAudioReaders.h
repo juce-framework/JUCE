@@ -9,7 +9,7 @@ class ARAAudioSourceReader : public AudioFormatReader,
                              ARAAudioSource::Listener
 {
 public:
-    ARAAudioSourceReader (ARA::PlugIn::AudioSource* audioSource, bool use64BitSamples = false);
+    ARAAudioSourceReader (ARAAudioSource* audioSource, bool use64BitSamples = false);
     virtual ~ARAAudioSourceReader();
 
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
