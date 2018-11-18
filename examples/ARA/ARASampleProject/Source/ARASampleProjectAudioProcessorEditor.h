@@ -55,7 +55,6 @@ private:
     Viewport regionSequenceViewPort;
     Component regionSequenceListView;
 
-    double maxRegionSequenceLength;
     juce::OwnedArray <RegionSequenceView> regionSequenceViews;
 
     bool isViewDirty;

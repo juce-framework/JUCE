@@ -66,12 +66,16 @@ void ARASampleProjectAudioProcessorEditor::paint (Graphics& g)
 
 void ARASampleProjectAudioProcessorEditor::resized()
 {
+    double maxRegionSequenceLength = 0.0;
     int i = 0;
     const int width = getWidth();
 
     // compute region sequence view bounds in terms of kVisibleSeconds and kRegionSequenceHeight
+    // and determine the length in seconds of the longest ARA region sequence
     for (auto v : regionSequenceViews)
     {
+        maxRegionSequenceLength = jmax (maxRegionSequenceLength, v->getStartInSecs() + v->getLengthInSecs());
+
         double normalizedStartPos = v->getStartInSecs() / kVisibleSeconds;
         double normalizedLength = v->getLengthInSecs() / kVisibleSeconds;
         v->setBounds ((int) (width * normalizedStartPos), kRegionSequenceHeight * i, (int) (width * normalizedLength), kRegionSequenceHeight);
@@ -98,9 +102,6 @@ void ARASampleProjectAudioProcessorEditor::onNewSelection (const ARA::PlugIn::Vi
 
 void ARASampleProjectAudioProcessorEditor::rebuildView()
 {
-    // determine the length in seconds of the longest ARA region sequence
-    maxRegionSequenceLength = 0.0;
-
     auto& regionSequences = getARAEditorView()->getDocumentController()->getDocument()->getRegionSequences();
     for (int i = 0; i < regionSequences.size(); i++)
     {
@@ -112,15 +113,14 @@ void ARASampleProjectAudioProcessorEditor::rebuildView()
             regionSequenceViews.add (new RegionSequenceView (regionSequence));
         }
         // reconstruct the region sequence view if the sequence order or properties have changed
-        else if (( regionSequenceViews[i]->getRegionSequence() != regionSequences[i]) ||
-                 ( regionSequencesWithPropertyChanges.count (regionSequences[i]) > 0 ))
+        else if ((regionSequenceViews[i]->getRegionSequence() != regionSequences[i]) ||
+                 (regionSequencesWithPropertyChanges.count (regionSequences[i]) > 0))
         {
             regionSequenceViews.set (i, new RegionSequenceView (regionSequence), true);
         }
 
         // make the region sequence view visible and keep track of the longest region sequence
         regionSequenceListView.addAndMakeVisible (regionSequenceViews[i]);
-        maxRegionSequenceLength = jmax (maxRegionSequenceLength, regionSequenceViews[i]->getStartInSecs() + regionSequenceViews[i]->getLengthInSecs());
     }
 
     // remove any views for region sequences no longer in the document
