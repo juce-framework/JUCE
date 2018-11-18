@@ -7,13 +7,13 @@ AudioProcessorEditorARAExtension::AudioProcessorEditorARAExtension (AudioProcess
 : araProcessorExtension (dynamic_cast<AudioProcessorARAExtension*> (audioProcessor))
 {
     if (isARAEditorView())
-        getARAEditorView()->setEditorIsOpen (true);
+        getARAEditorView()->setEditorOpen (true);
 }
 
 AudioProcessorEditorARAExtension::~AudioProcessorEditorARAExtension()
 {
     if (isARAEditorView())
-        getARAEditorView()->setEditorIsOpen (false);
+        getARAEditorView()->setEditorOpen (false);
 }
 
 ARAEditorView* AudioProcessorEditorARAExtension::getARAEditorView() const noexcept
