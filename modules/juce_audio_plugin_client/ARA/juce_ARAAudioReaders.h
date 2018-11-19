@@ -39,7 +39,8 @@ private:
 
 //==============================================================================
 
-class ARAPlaybackRegionReader : public AudioFormatReader
+class ARAPlaybackRegionReader : public AudioFormatReader,
+                                public ARAPlaybackRegion::Listener
 {
 public:
     ARAPlaybackRegionReader (ARAPlaybackRenderer* playbackRenderer, std::vector<ARAPlaybackRegion*> const& playbackRegions);
@@ -47,6 +48,8 @@ public:
 
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples) override;
+    
+    void willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept override;
 
 protected:
     ARAPlaybackRenderer* playbackRenderer;
@@ -56,14 +59,15 @@ protected:
 //==============================================================================
 
 class ARARegionSequenceReader : public ARAPlaybackRegionReader,
-                                ARAPlaybackRegion::Listener
+                                ARARegionSequence::Listener
 {
 public:
     ARARegionSequenceReader (ARAPlaybackRenderer* playbackRenderer, ARARegionSequence* regionSequence);
     virtual ~ARARegionSequenceReader();
 
-    void willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties) noexcept override;
-    void willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept override;
+    void willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion) override;
+    void didAddPlaybackRegionToRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion) override;
+    void willDestroyRegionSequence (ARARegionSequence* regionSequence) override;
 
 private:
     ARARegionSequence* sequence;

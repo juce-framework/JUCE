@@ -166,6 +166,7 @@ ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARAPlaybackRenderer* playbackR
         lengthInSamples = jmax (lengthInSamples, playbackRegion->getEndInPlaybackSamples (sampleRate));
 
         playbackRenderer->addPlaybackRegion (playbackRegion);
+        playbackRegion->addListener (this);
     }
 
 	if (sampleRate == 0.0)
@@ -176,6 +177,9 @@ ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARAPlaybackRenderer* playbackR
 ARAPlaybackRegionReader::~ARAPlaybackRegionReader()
 {
     ScopedWriteLock scopedWrite (lock);
+    for (auto playbackRegion : playbackRenderer->getPlaybackRegions ())
+        static_cast<ARAPlaybackRegion*>(playbackRegion)->removeListener (this);
+
     delete playbackRenderer;
 }
 
@@ -204,49 +208,64 @@ bool ARAPlaybackRegionReader::readSamples (int** destSamples, int numDestChannel
     return true;
 }
 
+void ARAPlaybackRegionReader::willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept
+{
+    if (ARA::contains (playbackRenderer->getPlaybackRegions (), playbackRegion))
+    {
+        ScopedWriteLock scopedWrite (lock);
+        playbackRegion->removeListener (this);
+        playbackRenderer->releaseResources ();
+        playbackRenderer->removePlaybackRegion (playbackRegion);
+    }
+}
+
 //==============================================================================
 
 ARARegionSequenceReader::ARARegionSequenceReader (ARAPlaybackRenderer* playbackRenderer, ARARegionSequence* regionSequence)
 : ARAPlaybackRegionReader (playbackRenderer, reinterpret_cast<std::vector<ARAPlaybackRegion*> const&> (regionSequence->getPlaybackRegions())),
   sequence (regionSequence)
 {
-    for (auto playbackRegion : sequence->getPlaybackRegions())
-        static_cast<ARAPlaybackRegion*> (playbackRegion)->addListener (this);
+    sequence->addListener (this);
 }
 
 ARARegionSequenceReader::~ARARegionSequenceReader()
 {
-    for (auto playbackRegion : playbackRenderer->getPlaybackRegions())
-        static_cast<ARAPlaybackRegion*> (playbackRegion)->removeListener (this);
+    if (sequence)
+        sequence->removeListener (this);
 }
 
-void ARARegionSequenceReader::willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties) noexcept
+void ARARegionSequenceReader::willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion)
 {
-    if (ARA::contains (playbackRenderer->getPlaybackRegions(), playbackRegion))
+    jassert (sequence == regionSequence);
+
+    if (ARA::contains (sequence->getPlaybackRegions (), playbackRegion))
     {
-        if (newProperties->regionSequenceRef != ARA::PlugIn::toRef (sequence))
-        {
-            ScopedWriteLock scopedWrite (lock);
-            playbackRegion->removeListener (this);
-            playbackRenderer->removePlaybackRegion (playbackRegion);
-        }
+        ScopedWriteLock scopedWrite (lock);
+        playbackRegion->removeListener (this);
+        playbackRenderer->releaseResources ();
+        playbackRenderer->removePlaybackRegion (playbackRegion);
     }
-    else if (newProperties->regionSequenceRef == ARA::PlugIn::toRef (sequence))
+}
+
+void ARARegionSequenceReader::didAddPlaybackRegionToRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion)
+{
+    jassert (sequence == regionSequence);
+
+    if (ARA::contains (sequence->getPlaybackRegions (), playbackRegion))
     {
         ScopedWriteLock scopedWrite (lock);
         playbackRegion->addListener (this);
+        playbackRenderer->releaseResources ();
         playbackRenderer->addPlaybackRegion (playbackRegion);
     }
 }
 
-void ARARegionSequenceReader::willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept
+void ARARegionSequenceReader::willDestroyRegionSequence (ARARegionSequence* regionSequence)
 {
-    if (ARA::contains (playbackRenderer->getPlaybackRegions(), playbackRegion))
-    {
-        ScopedWriteLock scopedWrite (lock);
-        playbackRegion->removeListener (this);
-        playbackRenderer->removePlaybackRegion (playbackRegion);
-    }
+    jassert (sequence == regionSequence);
+
+    sequence->removeListener (this);
+    sequence = nullptr;
 }
 
 } // namespace juce
