@@ -3,7 +3,7 @@
 namespace juce
 {
 
-ARAMusicalContext::ARAMusicalContext (ARA::PlugIn::Document* document, ARA::ARAMusicalContextHostRef hostRef)
+ARAMusicalContext::ARAMusicalContext (ARADocument* document, ARA::ARAMusicalContextHostRef hostRef)
 : ARA::PlugIn::MusicalContext (document, hostRef)
 {}
 

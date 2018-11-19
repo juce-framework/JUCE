@@ -16,34 +16,18 @@ public:
     AudioFormatReader* createPlaybackRegionReader (std::vector<ARAPlaybackRegion*> playbackRegions);
     AudioFormatReader* createRegionSequenceReader (ARARegionSequence* regionSequence);
 
-//==============================================================================
-// DocumentController listener class
-public:
-    class Listener
-    {
-    public:
-        virtual ~Listener() {}
-
-       ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
-        virtual void doEndEditing (ARADocumentController* documentController) noexcept {}
-        virtual void doBeginEditing (ARADocumentController* documentController) noexcept {}
-       ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
-    };
-
-    void addListener (Listener* l);
-    void removeListener (Listener* l);
-
     //==============================================================================
     // Override document controller methods here
     // If you are subclassing ARADocumentController, make sure to call the base class
     // implementations of any overridden function, except for any doCreate...().
 protected:
-    // Edit Cycle callbacks
+    // Document callbacks
+    ARA::PlugIn::Document* doCreateDocument (ARA::PlugIn::DocumentController* documentController) noexcept override;
     void doBeginEditing() noexcept override;
     void doEndEditing() noexcept override;
-
-    // TODO JUCE_ARA
-    // Should we have a juce::ARADocument type?
+    void willUpdateDocumentProperties (ARA::PlugIn::Document* document, ARA::PlugIn::Document::PropertiesPtr newProperties) noexcept override;
+    void didUpdateDocumentProperties (ARA::PlugIn::Document* document) noexcept override;
+    void willDestroyDocument (ARA::PlugIn::Document* document) noexcept override;
 
     // MusicalContext callbacks
     ARA::PlugIn::MusicalContext* doCreateMusicalContext (ARA::PlugIn::Document* document, ARA::ARAMusicalContextHostRef hostRef) noexcept override;
@@ -96,7 +80,6 @@ protected:
     ARA::PlugIn::EditorView* doCreateEditorView() noexcept override;
 
 private:
-    ListenerList<Listener> listeners;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARADocumentController)
 };

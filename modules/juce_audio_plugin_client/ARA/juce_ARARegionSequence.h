@@ -10,7 +10,7 @@ class ARAPlaybackRegion;
 class ARARegionSequence : public ARA::PlugIn::RegionSequence
 {
 public:
-    ARARegionSequence (ARA::PlugIn::Document* document, ARA::ARARegionSequenceHostRef hostRef);
+    ARARegionSequence (ARADocument* document, ARA::ARARegionSequenceHostRef hostRef);
 
     // If all audio sources used by the playback regions in this region sequence have the
     // same sample rate, this rate is returned here, otherwise 0.0 is returned.

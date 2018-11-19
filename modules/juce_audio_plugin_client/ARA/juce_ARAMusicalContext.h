@@ -8,7 +8,7 @@ namespace juce
 class ARAMusicalContext : public ARA::PlugIn::MusicalContext
 {
 public:
-    ARAMusicalContext (ARA::PlugIn::Document* document, ARA::ARAMusicalContextHostRef hostRef);
+    ARAMusicalContext (ARADocument* document, ARA::ARAMusicalContextHostRef hostRef);
 
     class Listener
     {

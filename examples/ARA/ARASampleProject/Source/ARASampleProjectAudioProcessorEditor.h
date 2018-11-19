@@ -20,7 +20,7 @@ class ARASampleProjectAudioProcessorEditor: public AudioProcessorEditor,
                                             public ARAEditorView::Listener,             // Receives ARA selection notifications
                                             public ARARegionSequence::Listener,         // Receives ARA region sequence update notifications
                                             public ARAPlaybackRegion::Listener,         // Receives ARA playback region update notifications
-                                            public ARADocumentController::Listener      // Receives ARA document controller update notifications
+                                            public ARADocument::Listener                // Receives ARA document controller update notifications
 {
 public:
     ARASampleProjectAudioProcessorEditor (ARASampleProjectAudioProcessor&);
@@ -44,7 +44,7 @@ public:
     void willDestroyRegionSequence (ARARegionSequence* regionSequence) noexcept override;
 
     // ARADocumentController::Listener overrides
-    void doEndEditing (ARADocumentController* documentController) noexcept override;
+    void doEndEditing (ARADocument* document) noexcept override;
 
 private:
     void rebuildView ();

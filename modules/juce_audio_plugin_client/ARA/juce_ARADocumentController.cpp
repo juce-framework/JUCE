@@ -77,12 +77,44 @@ const ARA::ARAFactory* ARA::PlugIn::DocumentController::getARAFactory() noexcept
 
 namespace juce
 {
+    
+//==============================================================================
+    
+ARA::PlugIn::Document* ARADocumentController::doCreateDocument (ARA::PlugIn::DocumentController* documentController) noexcept
+{
+    return new ARADocument (static_cast<ARADocumentController*> (documentController));
+}
+
+void ARADocumentController::doBeginEditing() noexcept
+{
+    static_cast<ARADocument*>(getDocument ())->doBeginEditing ();
+}
+
+void ARADocumentController::doEndEditing() noexcept
+{
+    static_cast<ARADocument*>(getDocument ())->doEndEditing ();
+}
+
+void ARADocumentController::willUpdateDocumentProperties (ARA::PlugIn::Document* document, ARA::PlugIn::Document::PropertiesPtr newProperties) noexcept
+{
+    static_cast<ARADocument*>(document)->willUpdateDocumentProperties (newProperties);
+}
+
+void ARADocumentController::didUpdateDocumentProperties (ARA::PlugIn::Document* document) noexcept
+{
+    static_cast<ARADocument*>(document)->didUpdateDocumentProperties ();
+}
+
+void ARADocumentController::willDestroyDocument (ARA::PlugIn::Document* document) noexcept
+{
+    static_cast<ARADocument*>(document)->willDestroyDocument ();
+}
 
 //==============================================================================
 
 ARA::PlugIn::MusicalContext* ARADocumentController::doCreateMusicalContext (ARA::PlugIn::Document* document, ARA::ARAMusicalContextHostRef hostRef) noexcept
 {
-    return new ARAMusicalContext (document, hostRef);
+    return new ARAMusicalContext (static_cast<ARADocument*> (document), hostRef);
 }
 
 void ARADocumentController::willUpdateMusicalContextProperties (ARA::PlugIn::MusicalContext* musicalContext, ARAMusicalContext::PropertiesPtr newProperties) noexcept
@@ -109,7 +141,7 @@ void ARADocumentController::willDestroyMusicalContext (ARA::PlugIn::MusicalConte
 
 ARA::PlugIn::RegionSequence* ARADocumentController::doCreateRegionSequence (ARA::PlugIn::Document* document, ARA::ARARegionSequenceHostRef hostRef) noexcept
 {
-    return new ARARegionSequence (document, hostRef);
+    return new ARARegionSequence (static_cast<ARADocument*> (document), hostRef);
 }
 
 void ARADocumentController::willUpdateRegionSequenceProperties (ARA::PlugIn::RegionSequence* regionSequence, ARARegionSequence::PropertiesPtr newProperties) noexcept
@@ -199,28 +231,6 @@ AudioFormatReader* ARADocumentController::createRegionSequenceReader (ARARegionS
 }
 
 //==============================================================================
-
-void ARADocumentController::addListener (Listener* l)
-{
-    listeners.add (l);
-}
-
-void ARADocumentController::removeListener (Listener* l)
-{
-    listeners.remove (l);
-}
-
-//==============================================================================
-
-void ARADocumentController::doBeginEditing() noexcept
-{
-    listeners.call ([this] (Listener& l) { l.doBeginEditing (this); });
-}
-
-void ARADocumentController::doEndEditing() noexcept
-{
-    listeners.call ([this] (Listener& l) { l.doEndEditing (this); });
-}
 
 ARA::PlugIn::AudioModification* ARADocumentController::doCreateAudioModification (ARA::PlugIn::AudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef) noexcept
 {
