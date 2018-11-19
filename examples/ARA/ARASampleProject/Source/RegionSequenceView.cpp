@@ -23,7 +23,7 @@ RegionSequenceView::RegionSequenceView (ARARegionSequence* sequence)
 , audioThumbCache (1)
 , audioThumb (128, audioFormatManger, audioThumbCache)
 {
-    ARASampleProjectDocumentController* documentController = static_cast<ARASampleProjectDocumentController*> (sequence->getDocument()->getDocumentController());
+    auto documentController = static_cast<ARASampleProjectDocumentController*> (sequence->getDocument()->getDocumentController());
     name = String (sequence->getName());
     orderIndex = String (sequence->getOrderIndex());
     audioThumb.addChangeListener (this);

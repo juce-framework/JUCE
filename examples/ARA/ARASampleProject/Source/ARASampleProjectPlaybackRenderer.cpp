@@ -60,7 +60,7 @@ void ARASampleProjectPlaybackRenderer::processBlock (AudioBuffer<float>& buffer,
     for (PlugIn::PlaybackRegion* playbackRegion : getPlaybackRegions())
     {
         // get the audio source for this region and make sure we have an audio source reader for it
-        ARAAudioSource* audioSource = static_cast<ARAAudioSource*> (playbackRegion->getAudioModification()->getAudioSource());
+        auto audioSource = static_cast<ARAAudioSource*> (playbackRegion->getAudioModification()->getAudioSource());
         if (audioSourceReaders.count (audioSource) == 0)
             continue;
 
@@ -106,7 +106,7 @@ void ARASampleProjectPlaybackRenderer::processBlock (AudioBuffer<float>& buffer,
 // we'll use this reader to pull samples from our ARA host and render them back in the audio thread
 void ARASampleProjectPlaybackRenderer::didAddPlaybackRegion (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept
 {
-    ARAAudioSource* audioSource = static_cast<ARAAudioSource*> (playbackRegion->getAudioModification()->getAudioSource());
+    auto audioSource = static_cast<ARAAudioSource*> (playbackRegion->getAudioModification()->getAudioSource());
     if (audioSourceReaders.count (audioSource) == 0)
         audioSourceReaders.emplace (audioSource, createBufferingAudioSourceReader (audioSource));
 }

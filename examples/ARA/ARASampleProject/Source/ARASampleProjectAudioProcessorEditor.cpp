@@ -103,7 +103,7 @@ void ARASampleProjectAudioProcessorEditor::rebuildView()
     auto& regionSequences = getARAEditorView()->getDocumentController()->getDocument()->getRegionSequences();
     for (int i = 0; i < regionSequences.size(); i++)
     {
-        ARARegionSequence* regionSequence = static_cast<ARARegionSequence*>(regionSequences[i]);
+        auto regionSequence = static_cast<ARARegionSequence*>(regionSequences[i]);
 
         // construct the region sequence view if we don't yet have one
         if (regionSequenceViews.size() <= i)

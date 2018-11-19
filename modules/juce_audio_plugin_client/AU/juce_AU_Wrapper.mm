@@ -522,7 +522,7 @@ public:
 #if JucePlugin_Enable_ARA
                 case ARA::kAudioUnitProperty_ARAFactory:
                 {
-                    ARA::ARAAudioUnitFactory* auFactory = static_cast<ARA::ARAAudioUnitFactory*> (outData);
+                    auto auFactory = static_cast<ARA::ARAAudioUnitFactory*> (outData);
                     if (auFactory->inOutMagicNumber != ARA::kARAAudioUnitMagic)
                         return kAudioUnitErr_InvalidProperty;   // if the magic value isn't found, the property ID is re-used outside the ARA context with different, unsupported sematics
 
@@ -532,7 +532,7 @@ public:
 
                 case ARA::kAudioUnitProperty_ARAPlugInExtensionBindingWithRoles:
                 {
-                    ARA::ARAAudioUnitPlugInExtensionBinding* binding = static_cast<ARA::ARAAudioUnitPlugInExtensionBinding*> (outData);
+                    auto binding = static_cast<ARA::ARAAudioUnitPlugInExtensionBinding*> (outData);
                     if (binding->inOutMagicNumber != ARA::kARAAudioUnitMagic)
                         return kAudioUnitErr_InvalidProperty;   // if the magic value isn't found, the property ID is re-used outside the ARA context with different, unsupported sematics
 
