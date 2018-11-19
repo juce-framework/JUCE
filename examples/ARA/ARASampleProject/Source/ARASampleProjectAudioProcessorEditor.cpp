@@ -24,8 +24,16 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
     // TODO JUCE_ARA should we rename the function that recreates the view?
     if (isARAEditorView())
     {
-        static_cast<ARADocument*> (getARADocumentController()->getDocument())->addListener (this);
+        auto document = static_cast<ARADocument*> (getARADocumentController ()->getDocument ());
+        document->addListener (this);
         getARAEditorView()->addSelectionListener (this);
+
+        for (auto regionSequence : document->getRegionSequences ())
+        {
+            static_cast<ARARegionSequence*>(regionSequence)->addListener (this);
+            for (auto playbackRegion : regionSequence->getPlaybackRegions ())
+                static_cast<ARAPlaybackRegion*>(playbackRegion)->addListener (this);
+        }
 
         rebuildView();
         onNewSelection (getARAEditorView()->getViewSelection());
