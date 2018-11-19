@@ -12,10 +12,7 @@ public:
     ARADocumentController() noexcept {}
     virtual ~ARADocumentController() noexcept {}
 
-    // TODO JUCE_ARA
-    // should the time slice thread be a part of this document controller class?
     AudioFormatReader* createAudioSourceReader (ARAAudioSource* audioSource);
-    BufferingAudioSource* createBufferingAudioSourceReader (ARAAudioSource* audioSource, TimeSliceThread& thread, int bufferSize);
     AudioFormatReader* createPlaybackRegionReader (std::vector<ARAPlaybackRegion*> playbackRegions);
     AudioFormatReader* createRegionSequenceReader (ARARegionSequence* regionSequence);
 

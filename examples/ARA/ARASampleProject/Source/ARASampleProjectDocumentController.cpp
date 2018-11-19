@@ -8,6 +8,11 @@ ARASampleProjectDocumentController::ARASampleProjectDocumentController() noexcep
     araAudioSourceReadingThread->startThread();
 }
 
+BufferingAudioSource* ARASampleProjectDocumentController::createBufferingAudioSourceReader (ARAAudioSource* audioSource, int bufferSize)
+{
+    return new BufferingAudioSource (new AudioFormatReaderSource (createAudioSourceReader (audioSource), true), *araAudioSourceReadingThread.get(), true, bufferSize, audioSource->getChannelCount());
+}
+
 // return an instance of our playback renderer implementation
 ARA::PlugIn::PlaybackRenderer* ARASampleProjectDocumentController::doCreatePlaybackRenderer() noexcept
 {

@@ -15,7 +15,7 @@ int ARASampleProjectPlaybackRenderer::getReadAheadSize() const
 std::unique_ptr<BufferingAudioSource> ARASampleProjectPlaybackRenderer::createBufferingAudioSourceReader (ARAAudioSource* audioSource)
 {
     auto documentController = static_cast<ARASampleProjectDocumentController*> (audioSource->getDocument()->getDocumentController());
-    auto newSourceReader = documentController->createBufferingAudioSourceReader (audioSource, documentController->getAudioSourceReadingThread(), getReadAheadSize());
+    auto newSourceReader = documentController->createBufferingAudioSourceReader (audioSource, getReadAheadSize());
     newSourceReader->prepareToPlay (getMaxSamplesPerBlock(), audioSource->getSampleRate());
     return std::unique_ptr<BufferingAudioSource> (newSourceReader);
 }

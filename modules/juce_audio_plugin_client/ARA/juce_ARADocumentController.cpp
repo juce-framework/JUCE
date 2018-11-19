@@ -188,11 +188,6 @@ AudioFormatReader* ARADocumentController::createAudioSourceReader (ARAAudioSourc
     return new ARAAudioSourceReader (audioSource);
 }
 
-BufferingAudioSource* ARADocumentController::createBufferingAudioSourceReader (ARAAudioSource* audioSource, TimeSliceThread& thread, int bufferSize)
-{
-    return new BufferingAudioSource (new AudioFormatReaderSource (createAudioSourceReader (audioSource), true), thread, true, bufferSize, audioSource->getChannelCount());
-}
-
 AudioFormatReader* ARADocumentController::createPlaybackRegionReader (std::vector<ARAPlaybackRegion*> playbackRegions)
 {
     return new ARAPlaybackRegionReader (static_cast<ARAPlaybackRenderer*>(doCreatePlaybackRenderer()), playbackRegions);

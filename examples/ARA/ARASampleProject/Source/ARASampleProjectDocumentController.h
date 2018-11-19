@@ -13,7 +13,7 @@ class ARASampleProjectDocumentController : public juce::ARADocumentController
 public:
     ARASampleProjectDocumentController() noexcept;
 
-    TimeSliceThread& getAudioSourceReadingThread() { return *araAudioSourceReadingThread; }
+    BufferingAudioSource* createBufferingAudioSourceReader (ARAAudioSource* audioSource, int bufferSize);
 
 protected:
     // ARA class creation overrides
