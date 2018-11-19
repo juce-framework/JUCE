@@ -32,7 +32,7 @@ void ARAPlaybackRegion::willDestroyPlaybackRegion()
 //     callExpectingUnregistration () variant which we use in all the willDestroy... ()
 //     Unsure about the other calls, I tend to keeping call () there for performance reasons...?
 
-    if (listeners.isEmpty() == 0)
+    if (listeners.isEmpty())
         return;
 
     auto& listenersArray = listeners.getListeners();
