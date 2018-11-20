@@ -43,7 +43,7 @@ class ARAPlaybackRegionReader : public AudioFormatReader,
                                 public ARAPlaybackRegion::Listener
 {
 public:
-    ARAPlaybackRegionReader (ARAPlaybackRenderer* playbackRenderer, std::vector<ARAPlaybackRegion*> const& playbackRegions);
+    ARAPlaybackRegionReader (ARAPlaybackRenderer* renderer, std::vector<ARAPlaybackRegion*> const& playbackRegions);
     virtual ~ARAPlaybackRegionReader();
 
     // TODO JUCE_ARA temporary api - do we want to keep that? If so, shouldn't we return some proper range type?
@@ -60,7 +60,7 @@ public:
     void willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept override;
 
 private:
-    ARAPlaybackRenderer* playbackRenderer;
+    std::unique_ptr<ARAPlaybackRenderer> playbackRenderer;
     ReadWriteLock lock;
     double regionsStartTime;
     double regionsEndTime;
