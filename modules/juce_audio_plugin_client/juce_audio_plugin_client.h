@@ -125,5 +125,6 @@
  #include "ARA/juce_ARADocumentController.h"
  #include "ARA/juce_AudioProcessorARAExtension.h"
  #include "ARA/juce_AudioProcessorEditorARAExtension.h"
+ #include "ARA/juce_ARAAudioReaders.h"
  #include "ARA/juce_ARAPlugInInstanceRoles.h"
 #endif

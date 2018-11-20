@@ -141,7 +141,7 @@ bool ARAAudioSourceReader::readSamples (int** destSamples, int numDestChannels, 
 //==============================================================================
 
 ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARAPlaybackRenderer* playbackRenderer, std::vector<ARAPlaybackRegion*> const& playbackRegions)
-: AudioFormatReader (nullptr, "ARAAudioSourceReader"),
+: AudioFormatReader (nullptr, "ARAPlaybackRegionReader"),
   playbackRenderer (playbackRenderer)
 {
     // TODO JUCE_ARA
@@ -152,7 +152,7 @@ ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARAPlaybackRenderer* playbackR
     usesFloatingPointData = true;
     numChannels = 1;
     lengthInSamples = 0;
-    sampleRate = 0;
+    sampleRate = 0.0;
 
     for (auto playbackRegion : playbackRegions)
     {
@@ -169,60 +169,86 @@ ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARAPlaybackRenderer* playbackR
         playbackRegion->addListener (this);
     }
 
-	if (sampleRate == 0.0)
-		sampleRate = 44100;
-    playbackRenderer->prepareToPlay(sampleRate, 16*1024);
+    if (sampleRate == 0.0)
+        sampleRate = 44100;
+    playbackRenderer->prepareToPlay (sampleRate, 16*1024);
 }
 
 ARAPlaybackRegionReader::~ARAPlaybackRegionReader()
 {
-    ScopedWriteLock scopedWrite (lock);
-    for (auto playbackRegion : playbackRenderer->getPlaybackRegions ())
-        static_cast<ARAPlaybackRegion*>(playbackRegion)->removeListener (this);
+    invalidate();
+}
 
-    delete playbackRenderer;
+void ARAPlaybackRegionReader::invalidate()
+{
+    if (isValid())
+    {
+        ScopedWriteLock scopedWrite (lock);
+        for (auto playbackRegion : playbackRenderer->getPlaybackRegions ())
+            static_cast<ARAPlaybackRegion*>(playbackRegion)->removeListener (this);
+
+        delete playbackRenderer;
+        playbackRenderer = nullptr;
+    }
 }
 
 bool ARAPlaybackRegionReader::readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
                                            int64 startSampleInFile, int numSamples)
 {
-    // render our ARA playback regions for this time duration using the ARA playback renderer instance
-    if (! lock.tryEnterRead())
+    bool success = false;
+    if (isValid())
+    {
+        if (lock.tryEnterRead())
+        {
+            while (numSamples > 0)
+            {
+                int numSliceSamples = jmin(numSamples, playbackRenderer->getMaxSamplesPerBlock());
+                AudioBuffer<float> buffer ((float **) destSamples, numDestChannels, startOffsetInDestBuffer, numSliceSamples);
+                playbackRenderer->processBlock (buffer, startSampleInFile, true);
+                numSamples -= numSliceSamples;
+                startOffsetInDestBuffer += numSliceSamples;
+                startSampleInFile += numSliceSamples;
+            }
+
+            success = true;
+            lock.exitRead();
+        }
+    }
+
+    if (! success)
     {
         for (int chan_i = 0; chan_i < numDestChannels; ++chan_i)
             FloatVectorOperations::clear ((float *) destSamples[chan_i], numSamples);
-        return false;
     }
+    return success;
+}
 
-    while (numSamples > 0)
+void ARAPlaybackRegionReader::willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties)
+{
+    if ((playbackRegion->getStartInAudioModificationTime () != newProperties->startInModificationTime) ||
+        (playbackRegion->getDurationInAudioModificationTime () != newProperties->durationInModificationTime) ||
+        (playbackRegion->getStartInPlaybackTime () != newProperties->startInPlaybackTime) ||
+        (playbackRegion->getDurationInPlaybackTime () != newProperties->durationInPlaybackTime) ||
+
+        (playbackRegion->isTimestretchEnabled () != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationTimestretch) != 0)) ||
+        (playbackRegion->isTimeStretchReflectingTempo () != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationTimestretchReflectingTempo) != 0)) ||
+        (playbackRegion->hasContentBasedFadeAtHead () != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationContentBasedFadeAtHead) != 0)) ||
+        (playbackRegion->hasContentBasedFadeAtTail () != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationContentBasedFadeAtTail) != 0)))
     {
-        int numSliceSamples = jmin(numSamples, playbackRenderer->getMaxSamplesPerBlock());
-        AudioBuffer<float> buffer ((float **) destSamples, numDestChannels, startOffsetInDestBuffer, numSliceSamples);
-        playbackRenderer->processBlock (buffer, startSampleInFile, true);
-        numSamples -= numSliceSamples;
-        startOffsetInDestBuffer += numSliceSamples;
-        startSampleInFile += numSliceSamples;
+        invalidate();
     }
-
-    lock.exitRead();
-    return true;
 }
 
 void ARAPlaybackRegionReader::willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept
 {
-    if (ARA::contains (playbackRenderer->getPlaybackRegions (), playbackRegion))
-    {
-        ScopedWriteLock scopedWrite (lock);
-        playbackRegion->removeListener (this);
-        playbackRenderer->releaseResources ();
-        playbackRenderer->removePlaybackRegion (playbackRegion);
-    }
+    invalidate();
 }
 
 //==============================================================================
 
 ARARegionSequenceReader::ARARegionSequenceReader (ARAPlaybackRenderer* playbackRenderer, ARARegionSequence* regionSequence)
-: ARAPlaybackRegionReader (playbackRenderer, reinterpret_cast<std::vector<ARAPlaybackRegion*> const&> (regionSequence->getPlaybackRegions())),
+: AudioFormatReader (nullptr, "ARARegionSequenceReader"),
+  playbackRegionReader (new ARAPlaybackRegionReader (playbackRenderer, reinterpret_cast<std::vector<ARAPlaybackRegion*> const&> (regionSequence->getPlaybackRegions()))),
   sequence (regionSequence)
 {
     sequence->addListener (this);
@@ -230,39 +256,45 @@ ARARegionSequenceReader::ARARegionSequenceReader (ARAPlaybackRenderer* playbackR
 
 ARARegionSequenceReader::~ARARegionSequenceReader()
 {
-    if (sequence)
+    if (sequence != nullptr)
         sequence->removeListener (this);
+
+    invalidate();
+}
+
+void ARARegionSequenceReader::invalidate()
+{
+    if (playbackRegionReader->isValid())
+        playbackRegionReader->invalidate();
+}
+
+bool ARARegionSequenceReader::readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+                                           int64 startSampleInFile, int numSamples)
+{
+    return playbackRegionReader->readSamples(destSamples, numDestChannels, startOffsetInDestBuffer, startSampleInFile, numSamples);
 }
 
 void ARARegionSequenceReader::willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion)
 {
     jassert (sequence == regionSequence);
+    jassert (ARA::contains (sequence->getPlaybackRegions (), playbackRegion));
 
-    if (ARA::contains (sequence->getPlaybackRegions (), playbackRegion))
-    {
-        ScopedWriteLock scopedWrite (lock);
-        playbackRegion->removeListener (this);
-        playbackRenderer->releaseResources ();
-        playbackRenderer->removePlaybackRegion (playbackRegion);
-    }
+    invalidate();
 }
 
 void ARARegionSequenceReader::didAddPlaybackRegionToRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion)
 {
     jassert (sequence == regionSequence);
+    jassert (ARA::contains (sequence->getPlaybackRegions (), playbackRegion));
 
-    if (ARA::contains (sequence->getPlaybackRegions (), playbackRegion))
-    {
-        ScopedWriteLock scopedWrite (lock);
-        playbackRegion->addListener (this);
-        playbackRenderer->releaseResources ();
-        playbackRenderer->addPlaybackRegion (playbackRegion);
-    }
+    invalidate();
 }
 
 void ARARegionSequenceReader::willDestroyRegionSequence (ARARegionSequence* regionSequence)
 {
     jassert (sequence == regionSequence);
+
+    invalidate();
 
     sequence->removeListener (this);
     sequence = nullptr;

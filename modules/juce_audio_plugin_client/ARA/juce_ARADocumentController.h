@@ -5,6 +5,9 @@
 namespace juce
 {
 
+class ARAPlaybackRegionReader;
+class ARARegionSequenceReader;
+
 // juce ARA document controller implementation
 class ARADocumentController: public ARA::PlugIn::DocumentController
 {
@@ -13,8 +16,8 @@ public:
     virtual ~ARADocumentController() noexcept {}
 
     AudioFormatReader* createAudioSourceReader (ARAAudioSource* audioSource);
-    AudioFormatReader* createPlaybackRegionReader (std::vector<ARAPlaybackRegion*> playbackRegions);
-    AudioFormatReader* createRegionSequenceReader (ARARegionSequence* regionSequence);
+    ARAPlaybackRegionReader* createPlaybackRegionReader (std::vector<ARAPlaybackRegion*> playbackRegions);
+    ARARegionSequenceReader* createRegionSequenceReader (ARARegionSequence* regionSequence);
 
     //==============================================================================
     // Override document controller methods here

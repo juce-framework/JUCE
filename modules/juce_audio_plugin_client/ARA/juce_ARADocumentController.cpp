@@ -1,9 +1,4 @@
 #include "juce_ARADocumentController.h"
-#include "juce_ARARegionSequence.h"
-#include "juce_ARAAudioSource.h"
-#include "juce_ARAPlaybackRegion.h"
-#include "juce_ARAAudioReaders.h"
-#include "juce_ARAPlugInInstanceRoles.h"
 
 const ARA::ARAFactory* ARA::PlugIn::DocumentController::getARAFactory() noexcept
 {
@@ -220,12 +215,12 @@ AudioFormatReader* ARADocumentController::createAudioSourceReader (ARAAudioSourc
     return new ARAAudioSourceReader (audioSource);
 }
 
-AudioFormatReader* ARADocumentController::createPlaybackRegionReader (std::vector<ARAPlaybackRegion*> playbackRegions)
+ARAPlaybackRegionReader* ARADocumentController::createPlaybackRegionReader (std::vector<ARAPlaybackRegion*> playbackRegions)
 {
     return new ARAPlaybackRegionReader (static_cast<ARAPlaybackRenderer*>(doCreatePlaybackRenderer()), playbackRegions);
 }
 
-AudioFormatReader* ARADocumentController::createRegionSequenceReader (ARARegionSequence* regionSequence)
+ARARegionSequenceReader* ARADocumentController::createRegionSequenceReader (ARARegionSequence* regionSequence)
 {
     return new ARARegionSequenceReader (static_cast<ARAPlaybackRenderer*>(doCreatePlaybackRenderer()), regionSequence);
 }
