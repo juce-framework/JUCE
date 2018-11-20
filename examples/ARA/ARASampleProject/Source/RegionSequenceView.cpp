@@ -28,7 +28,7 @@ RegionSequenceView::RegionSequenceView (ARASampleProjectAudioProcessorEditor* ed
 , audioThumbCache (1)
 , audioThumb (128, audioFormatManger, audioThumbCache)
 {
-    recreateRegionSequneceReader();
+    recreateRegionSequenceReader();
 
     audioThumb.addChangeListener (this);
 
@@ -76,12 +76,11 @@ bool RegionSequenceView::getIsSelected() const
     return isSelected;
 }
 
-void RegionSequenceView::recreateRegionSequneceReader()
+void RegionSequenceView::recreateRegionSequenceReader()
 {
     auto documentController = static_cast<ARASampleProjectDocumentController*> (regionSequence->getDocument()->getDocumentController());
     regionSequenceReader = documentController->createRegionSequenceReader (regionSequence);
     audioThumb.setReader (regionSequenceReader, kAudioThumbHashCode);
-    audioThumbCache.loadThumb(audioThumb, kAudioThumbHashCode);
 
     startInSecs = audioThumb.getTotalLength();
 
@@ -94,8 +93,8 @@ void RegionSequenceView::doEndEditing (ARADocument* document)
 {
     if (!regionSequenceReader || ! regionSequenceReader->isValid())
     {
-        recreateRegionSequneceReader();
-
+        recreateRegionSequenceReader();
+        editorComponent->setDirty ();
         audioThumbCache.clear ();
    }
 }

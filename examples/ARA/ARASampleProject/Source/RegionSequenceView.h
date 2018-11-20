@@ -32,9 +32,9 @@ public:
     void doEndEditing (ARADocument* document) override;
 
     void didUpdateRegionSequenceProperties (ARARegionSequence* regionSequence) override;
-
+    
 private:
-    void recreateRegionSequneceReader();
+    void recreateRegionSequenceReader();
 
 private:
     bool isSelected;
