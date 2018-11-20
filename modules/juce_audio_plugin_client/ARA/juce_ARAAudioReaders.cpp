@@ -250,13 +250,6 @@ ARARegionSequenceReader::ARARegionSequenceReader (ARAPlaybackRenderer* playbackR
 : ARAPlaybackRegionReader (playbackRenderer, reinterpret_cast<std::vector<ARAPlaybackRegion*> const&> (regionSequence->getPlaybackRegions ())),
   sequence (regionSequence)
 {
-    // TODO JUCE_ARA see c'tor of ARARegionSequenceReader
-    bitsPerSample = playbackRegionReader->bitsPerSample;
-    usesFloatingPointData = playbackRegionReader->usesFloatingPointData;
-    numChannels = playbackRegionReader->numChannels;
-    lengthInSamples = playbackRegionReader->lengthInSamples;
-    sampleRate = playbackRegionReader->sampleRate;
-
     sequence->addListener (this);
 }
 
