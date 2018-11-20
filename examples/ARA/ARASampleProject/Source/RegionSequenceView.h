@@ -2,6 +2,8 @@
 
 #include "JuceHeader.h"
 
+class ARASampleProjectAudioProcessorEditor;
+
 //==============================================================================
 /** 
     RegionSequenceView
@@ -9,11 +11,14 @@
     along with their name, order index, color, and selection state
 */
 class RegionSequenceView: public Component, 
-                          public juce::ChangeListener
+                          public juce::ChangeListener,
+                          public ARADocument::Listener,               // Receives ARA region sequence update notifications
+                          public ARARegionSequence::Listener,         // Receives ARA region sequence update notifications
+                          public ARAPlaybackRegion::Listener         // Receives ARA playback region update notifications
 {
 public:
     ~RegionSequenceView();
-    RegionSequenceView (ARARegionSequence* sequence);
+    RegionSequenceView (ARASampleProjectAudioProcessorEditor* editor, ARARegionSequence* sequence);
 
     void paint (Graphics&) override;
     void changeListenerCallback (ChangeBroadcaster*) override;
@@ -23,7 +28,17 @@ public:
     double getStartInSecs();
     double getLengthInSecs();
 
-    ARA::PlugIn::RegionSequence* getRegionSequence() const { return regionSequence; }
+    ARARegionSequence* getRegionSequence() const { return regionSequence; }
+
+    void doEndEditing (ARADocument* document) override;
+
+    void didUpdateRegionSequenceProperties (ARARegionSequence* regionSequence) override;
+    void willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion) override;
+    void didAddPlaybackRegionToRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion) override;
+
+    // ARAPlaybackRegion::Listener overrides
+    virtual void willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties) override;
+    virtual void willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion) override;
 
 private:
     String name;
@@ -32,8 +47,10 @@ private:
     bool isSelected;
     double startInSecs;
 
+    ARASampleProjectAudioProcessorEditor* editorComponent;
     ARARegionSequence* regionSequence;
 
+    enum { kAudioThumbHashCode = 1 };
     juce::AudioFormatManager audioFormatManger;
     juce::AudioThumbnailCache audioThumbCache;
     juce::AudioThumbnail audioThumb;

@@ -31,8 +31,8 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
         for (auto regionSequence : document->getRegionSequences ())
         {
             static_cast<ARARegionSequence*>(regionSequence)->addListener (this);
-            for (auto playbackRegion : regionSequence->getPlaybackRegions ())
-                static_cast<ARAPlaybackRegion*>(playbackRegion)->addListener (this);
+            regionSequenceViews.add (new RegionSequenceView (this, static_cast<ARARegionSequence*>(regionSequence)));
+            regionSequenceListView.addAndMakeVisible (regionSequenceViews.getLast ());
         }
 
         rebuildView();
@@ -49,11 +49,7 @@ ARASampleProjectAudioProcessorEditor::~ARASampleProjectAudioProcessorEditor()
         getARAEditorView()->removeSelectionListener (this);
 
         for (auto regionSequence : document->getRegionSequences())
-        {
             static_cast<ARARegionSequence*>(regionSequence)->removeListener (this);
-            for (auto playbackRegion : regionSequence->getPlaybackRegions())
-                static_cast<ARAPlaybackRegion*>(playbackRegion)->removeListener (this);
-        }
     }
 }
 
@@ -109,88 +105,59 @@ void ARASampleProjectAudioProcessorEditor::onNewSelection (const ARA::PlugIn::Vi
 
 void ARASampleProjectAudioProcessorEditor::rebuildView()
 {
-    auto& regionSequences = getARAEditorView()->getDocumentController()->getDocument()->getRegionSequences();
-    for (int i = 0; i < regionSequences.size(); i++)
+    std::sort(regionSequenceViews.begin(), regionSequenceViews.end(),[] (RegionSequenceView* a, RegionSequenceView* b)
     {
-        auto regionSequence = static_cast<ARARegionSequence*>(regionSequences[i]);
-
-        // construct the region sequence view if we don't yet have one
-        if (regionSequenceViews.size() <= i)
-        {
-            regionSequenceViews.add (new RegionSequenceView (regionSequence));
-        }
-        // reconstruct the region sequence view if the sequence order or properties have changed
-        else if ((regionSequenceViews[i]->getRegionSequence() != regionSequences[i]) ||
-                 (regionSequencesWithPropertyChanges.count (regionSequences[i]) > 0))
-        {
-            regionSequenceViews.set (i, new RegionSequenceView (regionSequence), true);
-        }
-
-        // make the region sequence view visible and keep track of the longest region sequence
-        regionSequenceListView.addAndMakeVisible (regionSequenceViews[i]);
-    }
-
-    // remove any views for region sequences no longer in the document
-    regionSequenceViews.removeLast (regionSequenceViews.size() - (int) regionSequences.size());
-
-    // Clear property change state and resize view
+        int orderA = a->getRegionSequence ()->getOrderIndex ();
+        int orderB = b->getRegionSequence ()->getOrderIndex ();
+        return std::less<int>() (orderA, orderB);
+    });
+    
     resized();
 }
 
-void ARASampleProjectAudioProcessorEditor::willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties) noexcept
-{
-    if ((playbackRegion->getStartInPlaybackTime () != newProperties->startInPlaybackTime) ||
-        (playbackRegion->getDurationInPlaybackTime () != newProperties->durationInPlaybackTime))
-    {
-        regionSequencesWithPropertyChanges.insert (playbackRegion->getRegionSequence ());
-        isViewDirty = true;
-    }
-}
-
-void ARASampleProjectAudioProcessorEditor::willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept
-{
-    playbackRegion->removeListener (this);
-    regionSequencesWithPropertyChanges.insert (playbackRegion->getRegionSequence ());
-    isViewDirty = true;
-}
-
-void ARASampleProjectAudioProcessorEditor::didUpdateRegionSequenceProperties (ARARegionSequence* regionSequence) noexcept
-{
-    regionSequencesWithPropertyChanges.insert (regionSequence);
-    isViewDirty = true;
-}
-
-void ARASampleProjectAudioProcessorEditor::willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* /*playbackRegion*/) noexcept
-{
-    regionSequencesWithPropertyChanges.insert (regionSequence);
-    isViewDirty = true;
-}
-
-void ARASampleProjectAudioProcessorEditor::didAddPlaybackRegionToRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* /*playbackRegion*/) noexcept
-{
-    regionSequencesWithPropertyChanges.insert (regionSequence);
-    isViewDirty = true;
-}
-
-void ARASampleProjectAudioProcessorEditor::willDestroyRegionSequence (ARARegionSequence* regionSequence) noexcept
-{
-    regionSequence->removeListener (this);
-    isViewDirty = true;
-}
-
-void ARASampleProjectAudioProcessorEditor::doEndEditing (ARADocument* document) noexcept
+void ARASampleProjectAudioProcessorEditor::doEndEditing (ARADocument* document)
 {
     for (auto regionSequence : document->getRegionSequences ())
     {
+        // TODO JUCE_ARA
+        // we need a proper callback for when a region sequence is created
+        // so we know when to make new views / subscribe to callbacks
         static_cast<ARARegionSequence*>(regionSequence)->addListener (this);
-        for (auto playbackRegion : regionSequence->getPlaybackRegions ())
-            static_cast<ARAPlaybackRegion*>(playbackRegion)->addListener (this);
+
+        // See if we need to make a new view - ideally we'd know when a new
+        // region sequence is created and use that hook to make the view
+        bool makeNewView = true;
+        for (int i = 0; i < regionSequenceViews.size () && makeNewView; i++)
+            if (regionSequenceViews[i]->getRegionSequence() == regionSequence)
+                makeNewView = false;
+        if (makeNewView)
+        {
+            regionSequenceViews.add (new RegionSequenceView (this, static_cast<ARARegionSequence*>(regionSequence)));
+            regionSequenceListView.addAndMakeVisible (regionSequenceViews.getLast ());
+            setDirty ();
+        }
     }
 
     if (isViewDirty)
     {
         rebuildView ();
-        regionSequencesWithPropertyChanges.clear ();
         isViewDirty = false;
+    }
+}
+
+void ARASampleProjectAudioProcessorEditor::didUpdateRegionSequenceProperties (ARARegionSequence* /*regionSequence*/)
+{
+    setDirty ();
+}
+
+void ARASampleProjectAudioProcessorEditor::willDestroyRegionSequence (ARARegionSequence* regionSequence)
+{
+    for (int i = 0; i < regionSequenceViews.size (); i++)
+    {
+        if (regionSequenceViews[i]->getRegionSequence () == regionSequence)
+        {
+            regionSequenceViews.remove (i, true);
+            return;
+        }
     }
 }

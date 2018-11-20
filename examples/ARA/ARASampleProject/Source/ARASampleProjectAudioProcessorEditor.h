@@ -19,7 +19,6 @@ class ARASampleProjectAudioProcessorEditor: public AudioProcessorEditor,
                                             public AudioProcessorEditorARAExtension,    // Provides access to the ARA EditorView instance
                                             public ARAEditorView::Listener,             // Receives ARA selection notifications
                                             public ARARegionSequence::Listener,         // Receives ARA region sequence update notifications
-                                            public ARAPlaybackRegion::Listener,         // Receives ARA playback region update notifications
                                             public ARADocument::Listener                // Receives ARA document controller update notifications
 {
 public:
@@ -33,18 +32,15 @@ public:
     // ARASampleProjectEditorView overrides
     void onNewSelection (const ARA::PlugIn::ViewSelection& currentSelection) override;
 
-    // ARARegionSequence::Listener overrides
-    virtual void willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties) noexcept override;
-    virtual void willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept override;
-
-    // ARARegionSequence::Listener overrides
-    void didUpdateRegionSequenceProperties (ARARegionSequence* regionSequence) noexcept override;
-    void willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion) noexcept override;
-    void didAddPlaybackRegionToRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion) noexcept override;
-    void willDestroyRegionSequence (ARARegionSequence* regionSequence) noexcept override;
-
     // ARADocumentController::Listener overrides
-    void doEndEditing (ARADocument* document) noexcept override;
+    void doEndEditing (ARADocument* document) override;
+
+    // ARARegionSequence::Listener overrides
+    void didUpdateRegionSequenceProperties (ARARegionSequence* regionSequence) override;
+    void willDestroyRegionSequence (ARARegionSequence* regionSequence) override;
+
+    // function to flag that our view needs to be rebuilt
+    void setDirty () { isViewDirty = true; }
 
 private:
     void rebuildView ();
@@ -58,7 +54,6 @@ private:
     juce::OwnedArray <RegionSequenceView> regionSequenceViews;
 
     bool isViewDirty;
-    std::set<ARA::PlugIn::RegionSequence*> regionSequencesWithPropertyChanges;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARASampleProjectAudioProcessorEditor)
 };
