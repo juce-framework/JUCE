@@ -13,20 +13,19 @@ void RegionSequenceView::paint (Graphics& g)
     g.setColour (isSelected ? juce::Colours::yellow : juce::Colours::black);
     g.drawRect (getLocalBounds());
     g.setColour (trackColour.contrasting (0.7f));
-    if (audioThumb.getTotalLength() != 0.0)
-        audioThumb.drawChannels (g, getLocalBounds(), startInSecs, audioThumb.getTotalLength(), 1.0);
+    if (getLengthInSecs() != 0.0)
+        audioThumb.drawChannels (g, getLocalBounds(), getStartInSecs(), getLengthInSecs(), 1.0);
     g.setColour (trackColour.contrasting (1.0f));
     g.setFont (Font (12.0));
     g.drawText ("Track #" + String (regionSequence->getOrderIndex()) + ": " + regionSequence->getName(), 0, 0, getWidth(), getHeight(), juce::Justification::bottomLeft);
 }
 
 RegionSequenceView::RegionSequenceView (ARASampleProjectAudioProcessorEditor* editor, ARARegionSequence* sequence)
-: isSelected (false)
-, startInSecs (0.0)
-, editorComponent (editor)
-, regionSequence (sequence)
-, audioThumbCache (1)
-, audioThumb (128, audioFormatManger, audioThumbCache)
+: isSelected (false),
+  editorComponent (editor),
+  regionSequence (sequence),
+  audioThumbCache (1),
+  audioThumb (128, audioFormatManger, audioThumbCache)
 {
     recreateRegionSequenceReader();
 
@@ -78,11 +77,11 @@ bool RegionSequenceView::getIsSelected() const
 
 void RegionSequenceView::recreateRegionSequenceReader()
 {
+    audioThumbCache.clear();
+
     auto documentController = static_cast<ARASampleProjectDocumentController*> (regionSequence->getDocument()->getDocumentController());
     regionSequenceReader = documentController->createRegionSequenceReader (regionSequence);
     audioThumb.setReader (regionSequenceReader, kAudioThumbHashCode);
-
-    startInSecs = audioThumb.getTotalLength();
 }
 
 void RegionSequenceView::doEndEditing (ARADocument* document)
@@ -90,8 +89,7 @@ void RegionSequenceView::doEndEditing (ARADocument* document)
     if (!regionSequenceReader || ! regionSequenceReader->isValid())
     {
         recreateRegionSequenceReader();
-        editorComponent->setDirty ();
-        audioThumbCache.clear ();
+        editorComponent->setDirty();
    }
 }
 

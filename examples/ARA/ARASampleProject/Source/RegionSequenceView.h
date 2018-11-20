@@ -38,11 +38,10 @@ private:
 
 private:
     bool isSelected;
-    double startInSecs;
 
     ARASampleProjectAudioProcessorEditor* editorComponent;
     ARARegionSequence* regionSequence;
-    ARARegionSequenceReader* regionSequenceReader;
+    ARARegionSequenceReader* regionSequenceReader;  // careful: "weak" pointer, actual pointer is owned by our audioThumb
 
     enum { kAudioThumbHashCode = 1 };
     juce::AudioFormatManager audioFormatManger;
