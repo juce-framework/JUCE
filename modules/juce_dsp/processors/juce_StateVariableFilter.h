@@ -44,7 +44,7 @@ namespace StateVariableFilter
         structures for more information). Its behaviour is based on the analog
         state variable filter circuit.
 
-        Note: The bandpass here is not the one in the RBJ CookBook, its gain can be
+        Note : the bandpass here is not the one in the RBJ CookBook, its gain can be
         higher than 0 dB. For the classic 0 dB bandpass, we need to multiply the
         result with R2
 
@@ -60,14 +60,11 @@ namespace StateVariableFilter
         */
         using NumericType = typename SampleTypeHelpers::ElementType<SampleType>::Type;
 
-        /** A typedef for a ref-counted pointer to the coefficients object */
-        using ParametersPtr = typename Parameters<NumericType>::Ptr;
-
         //==============================================================================
         /** Creates a filter with default parameters. */
-        Filter()                               : parameters (new Parameters<NumericType>) { reset(); }
+        Filter()                            : parameters (new Parameters<NumericType>) { reset(); }
 
-        Filter (ParametersPtr parametersToUse) : parameters (static_cast<ParametersPtr&&> (parametersToUse)) { reset(); }
+        Filter (Parameters<NumericType>* paramtersToUse) : parameters (paramtersToUse) { reset(); }
 
         /** Creates a copy of another filter. */
         Filter (const Filter&) = default;
@@ -89,7 +86,7 @@ namespace StateVariableFilter
         void snapToZero() noexcept                     { util::snapToZero (s1); util::snapToZero (s2); }
 
         //==============================================================================
-        /** The parameters of the state variable filter. It's up to the caller to ensure
+        /** The parameters of the state variable filter. It's up to the called to ensure
             that these parameters are modified in a thread-safe way. */
         typename Parameters<NumericType>::Ptr parameters;
 
@@ -203,8 +200,7 @@ namespace StateVariableFilter
         Type type = Type::lowPass;
 
         /** Sets the cutoff frequency and resonance of the IIR filter.
-
-            Note: The bandwidth of the resonance increases with the value of the
+            Note : the bandwidth of the resonance increases with the value of the
             parameter. To have a standard 12 dB/octave filter, the value must be set
             at 1 / sqrt(2).
         */

@@ -220,16 +220,16 @@ void ComponentLayoutEditor::refreshAllComponents()
 
     for (int i = layout.getNumComponents(); --i >= 0;)
     {
-        auto c = layout.getComponent (i);
+        Component* const c = layout.getComponent (i);
         jassert (c != nullptr);
 
-        auto overlay = getOverlayCompFor (c);
+        ComponentOverlayComponent* overlay = getOverlayCompFor (c);
 
         bool isNewOverlay = false;
 
-        if (overlay == nullptr)
+        if (overlay == 0)
         {
-            auto handler = ComponentTypeHandler::getHandlerFor (*c);
+            ComponentTypeHandler* const handler = ComponentTypeHandler::getHandlerFor (*c);
             jassert (handler != nullptr);
 
             overlay = handler->createOverlayComponent (c, layout);
@@ -272,7 +272,7 @@ void ComponentLayoutEditor::mouseDown (const MouseEvent& e)
 {
     if (e.mods.isPopupMenu())
     {
-        auto commandManager = &ProjucerApplication::getCommandManager();
+        ApplicationCommandManager* commandManager = &ProjucerApplication::getCommandManager();
 
         PopupMenu m;
 

@@ -115,14 +115,12 @@ public:
     Font getTextButtonFont (TextButton&, int buttonHeight) override;
 
     void drawButtonBackground (Graphics&, Button&, const Colour& backgroundColour,
-                               bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override;
+                               bool isMouseOverButton, bool isButtonDown) override;
 
-    void drawToggleButton (Graphics&, ToggleButton&,
-                           bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override;
+    void drawToggleButton (Graphics&, ToggleButton&, bool isMouseOverButton, bool isButtonDown) override;
     void drawTickBox (Graphics&, Component&,
                       float x, float y, float w, float h,
-                      bool ticked, bool isEnabled,
-                      bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override;
+                      bool ticked, bool isEnabled, bool isMouseOverButton, bool isButtonDown) override;
 
     void changeToggleButtonWidthToFitText (ToggleButton&) override;
 

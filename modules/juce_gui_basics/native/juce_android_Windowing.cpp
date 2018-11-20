@@ -74,7 +74,7 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, launchApp, void, (JNIEnv* en
         jassertfalse; // you must supply an application object for an android app!
     }
 
-    JUCE_ASSERT_MESSAGE_THREAD
+    jassert (MessageManager::getInstance()->isThisTheMessageThread());
 }
 
 JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, suspendApp, void, (JNIEnv* env, jobject))
@@ -200,7 +200,7 @@ JUCE_JNI_CALLBACK (JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME, firebaseRemoteMess
  METHOD (drawBitmap,       "drawBitmap",    "([IIIFFIIZLandroid/graphics/Paint;)V") \
  METHOD (getClipBounds,    "getClipBounds", "()Landroid/graphics/Rect;")
 
-DECLARE_JNI_CLASS (CanvasMinimal, "android/graphics/Canvas")
+DECLARE_JNI_CLASS (CanvasMinimal, "android/graphics/Canvas");
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================
@@ -212,7 +212,7 @@ DECLARE_JNI_CLASS (CanvasMinimal, "android/graphics/Canvas")
  METHOD (showKeyboard,                "showKeyboard",                "(Ljava/lang/String;)V") \
  METHOD (setSystemUiVisibilityCompat, "setSystemUiVisibilityCompat", "(I)V") \
 
-DECLARE_JNI_CLASS (ComponentPeerView, JUCE_ANDROID_ACTIVITY_CLASSPATH "$ComponentPeerView")
+DECLARE_JNI_CLASS (ComponentPeerView, JUCE_ANDROID_ACTIVITY_CLASSPATH "$ComponentPeerView");
 #undef JNI_CLASS_MEMBERS
 
 
@@ -1034,7 +1034,7 @@ bool juce_areThereAnyAlwaysOnTopWindows()
 }
 
 //==============================================================================
-void Displays::findDisplays (float masterScale)
+void Desktop::Displays::findDisplays (float masterScale)
 {
     Display d;
 
@@ -1057,7 +1057,7 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, setScreenSize, void, (JNIEnv
     android.screenHeight = screenHeight;
     android.dpi = dpi;
 
-    const_cast<Displays&> (Desktop::getInstance().getDisplays()).refresh();
+    const_cast<Desktop::Displays&> (Desktop::getInstance().getDisplays()).refresh();
 }
 
 //==============================================================================
@@ -1073,19 +1073,17 @@ void MouseCursor::deleteMouseCursor (void* const /*cursorHandle*/, const bool /*
 
 //==============================================================================
 void MouseCursor::showInWindow (ComponentPeer*) const   {}
+void MouseCursor::showInAllWindows() const  {}
 
 //==============================================================================
 bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& /*files*/, const bool /*canMove*/,
-                                                           Component* /*srcComp*/, std::function<void()> /*callback*/)
+                                                           Component* /*srcComp*/)
 {
-    jassertfalse;    // no such thing on Android!
     return false;
 }
 
-bool DragAndDropContainer::performExternalDragDropOfText (const String& /*text*/, Component* /*srcComp*/,
-                                                          std::function<void()> /*callback*/)
+bool DragAndDropContainer::performExternalDragDropOfText (const String& /*text*/, Component* /*srcComp*/)
 {
-    jassertfalse;    // no such thing on Android!
     return false;
 }
 

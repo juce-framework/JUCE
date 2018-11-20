@@ -106,18 +106,10 @@ public:
         server = createClangServer (command);
        #endif
 
-        for (int i = 0; i < 20; ++i)
-        {
-            if (connectToPipe (pipeName, 10000))
-            {
-                MessageTypes::sendPing (*this);
-                break;
-            }
-
-            Thread::sleep (50);
-        }
-
-        jassert (isConnected());
+        if (connectToPipe (pipeName, 10000))
+            MessageTypes::sendPing (*this);
+        else
+            jassertfalse;
 
         startTimer (serverKeepAliveTimeout);
     }
@@ -378,13 +370,13 @@ private:
         scanProjectItem (proj.getMainGroup(), compileUnits, userFiles);
 
         {
-            auto isVSTHost = project.getEnabledModules().isModuleEnabled ("juce_audio_processors")
-                   && (project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3") || project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST"));
+            auto isVST3Host = project.getModules().isModuleEnabled ("juce_audio_processors")
+                           && project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3");
 
             auto isPluginProject = proj.getProjectType().isAudioPlugin();
 
             OwnedArray<LibraryModule> modules;
-            proj.getEnabledModules().createRequiredModules (modules);
+            proj.getModules().createRequiredModules (modules);
 
             for (Project::ExporterIterator exporter (proj); exporter.next();)
             {
@@ -392,16 +384,16 @@ private:
                 {
                     for (auto* m : modules)
                     {
-                        auto localModuleFolder = proj.getEnabledModules().shouldCopyModuleFilesLocally (m->moduleInfo.getID()).getValue()
+                        auto localModuleFolder = proj.getModules().shouldCopyModuleFilesLocally (m->moduleInfo.getID()).getValue()
                                                         ? proj.getLocalModuleFolder (m->moduleInfo.getID())
                                                         : m->moduleInfo.getFolder();
 
 
                         m->findAndAddCompiledUnits (*exporter, nullptr, compileUnits,
-                                                    isPluginProject || isVSTHost ? ProjectType::Target::SharedCodeTarget
-                                                                                 : ProjectType::Target::unspecified);
+                                                    isPluginProject || isVST3Host ? ProjectType::Target::SharedCodeTarget
+                                                                                  : ProjectType::Target::unspecified);
 
-                        if (isPluginProject || isVSTHost)
+                        if (isPluginProject || isVST3Host)
                             m->findAndAddCompiledUnits (*exporter, nullptr, compileUnits, ProjectType::Target::StandalonePlugIn);
                     }
 
@@ -430,7 +422,7 @@ private:
     {
         auto liveModules = project.getProjectRoot().getChildWithName (Ids::MODULES);
 
-        auto xml = parseXML (project.getFile());
+        std::unique_ptr<XmlElement> xml (XmlDocument::parse (project.getFile()));
 
         if (xml == nullptr || ! xml->hasTagName (Ids::JUCERPROJECT.toString()))
             return false;
@@ -443,7 +435,7 @@ private:
     static bool areAnyModulesMissing (Project& project)
     {
         OwnedArray<LibraryModule> modules;
-        project.getEnabledModules().createRequiredModules (modules);
+        project.getModules().createRequiredModules (modules);
 
         for (auto* module : modules)
             if (! module->getFolder().isDirectory())
@@ -466,26 +458,17 @@ private:
         StringArray paths;
         paths.addArray (getSearchPathsFromString (project.getCompileEngineSettings().getSystemHeaderPathString()));
 
-        auto isVSTHost = project.getEnabledModules().isModuleEnabled ("juce_audio_processors")
-                       && (project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3")
-                             || project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST"));
+        auto isVST3Host = project.getModules().isModuleEnabled ("juce_audio_processors")
+                       && project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3");
 
-        auto customVst3Path = getAppSettings().getStoredPath (Ids::vst3Path, TargetOS::getThisOS()).get().toString();
-
-        if (customVst3Path.isNotEmpty() && (project.getProjectType().isAudioPlugin() || isVSTHost))
-            paths.add (customVst3Path);
+        if (project.getProjectType().isAudioPlugin() || isVST3Host)
+            paths.add (getAppSettings().getStoredPath (Ids::vst3Path).toString());
 
         OwnedArray<LibraryModule> modules;
-        project.getEnabledModules().createRequiredModules (modules);
+        project.getModules().createRequiredModules (modules);
 
         for (auto* module : modules)
-        {
             paths.addIfNotAlreadyThere (module->getFolder().getParentDirectory().getFullPathName());
-
-            if (customVst3Path.isEmpty() && (project.getProjectType().isAudioPlugin() || isVSTHost))
-                if (module->getID() == "juce_audio_processors")
-                    paths.addIfNotAlreadyThere (module->getFolder().getChildFile ("format_types").getChildFile ("VST3_SDK").getFullPathName());
-        }
 
         return convertSearchPathsToAbsolute (paths);
     }

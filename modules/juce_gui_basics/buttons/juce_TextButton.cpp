@@ -44,15 +44,15 @@ TextButton::~TextButton()
 {
 }
 
-void TextButton::paintButton (Graphics& g, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown)
+void TextButton::paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown)
 {
-    auto& lf = getLookAndFeel();
+    LookAndFeel& lf = getLookAndFeel();
 
     lf.drawButtonBackground (g, *this,
                              findColour (getToggleState() ? buttonOnColourId : buttonColourId),
-                             shouldDrawButtonAsHighlighted, shouldDrawButtonAsDown);
+                             isMouseOverButton, isButtonDown);
 
-    lf.drawButtonText (g, *this, shouldDrawButtonAsHighlighted, shouldDrawButtonAsDown);
+    lf.drawButtonText (g, *this, isMouseOverButton, isButtonDown);
 }
 
 void TextButton::colourChanged()

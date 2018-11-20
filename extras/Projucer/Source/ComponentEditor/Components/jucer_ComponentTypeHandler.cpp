@@ -200,7 +200,7 @@ bool ComponentTypeHandler::restoreFromXml (const XmlElement& xml,
     RelativePositionedRectangle rpr;
     rpr.restoreFromXml (xml, currentPos);
 
-    jassert (layout != nullptr);
+    jassert (layout != 0);
     setComponentPosition (comp, rpr, layout);
 
     if (SettableTooltipClient* const ttc = dynamic_cast<SettableTooltipClient*> (comp))

@@ -654,10 +654,10 @@ namespace PathStrokeHelpers
 }
 
 void PathStrokeType::createStrokedPath (Path& destPath, const Path& sourcePath,
-                                        const AffineTransform& transform, float extraAccuracy) const
+                                        const AffineTransform& transform, const float extraAccuracy) const
 {
     PathStrokeHelpers::createStroke (thickness, jointStyle, endStyle, destPath, sourcePath,
-                                     transform, extraAccuracy, nullptr);
+                                     transform, extraAccuracy, 0);
 }
 
 void PathStrokeType::createDashedStroke (Path& destPath,
@@ -665,7 +665,7 @@ void PathStrokeType::createDashedStroke (Path& destPath,
                                          const float* dashLengths,
                                          int numDashLengths,
                                          const AffineTransform& transform,
-                                         float extraAccuracy) const
+                                         const float extraAccuracy) const
 {
     jassert (extraAccuracy > 0);
 

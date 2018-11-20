@@ -43,7 +43,7 @@ class JUCE_API  ModifierKeys
 public:
     //==============================================================================
     /** Creates a ModifierKeys object with no flags set. */
-    ModifierKeys() = default;
+    ModifierKeys() noexcept;
 
     /** Creates a ModifierKeys object from a raw set of flags.
 
@@ -54,10 +54,10 @@ public:
     ModifierKeys (int flags) noexcept;
 
     /** Creates a copy of another object. */
-    ModifierKeys (const ModifierKeys&) = default;
+    ModifierKeys (const ModifierKeys& other) noexcept;
 
     /** Copies this object from another one. */
-    ModifierKeys& operator= (const ModifierKeys&) = default;
+    ModifierKeys& operator= (const ModifierKeys other) noexcept;
 
     //==============================================================================
     /** Checks whether the 'command' key flag is set (or 'ctrl' on Windows/Linux).
@@ -206,7 +206,7 @@ public:
     static ModifierKeys getCurrentModifiersRealtime() noexcept;
 
 private:
-    int flags = 0;
+    int flags;
 };
 
 } // namespace juce

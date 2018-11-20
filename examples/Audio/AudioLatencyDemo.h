@@ -35,8 +35,6 @@
                    juce_gui_basics, juce_gui_extra
  exporters:        xcode_mac, vs2017, linux_make, androidstudio, xcode_iphone
 
- moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
-
  type:             Component
  mainClass:        AudioLatencyDemo
 
@@ -153,7 +151,7 @@ public:
                     auto inputSamp = 0.0f;
 
                     for (auto j = numInputChannels; --j >= 0;)
-                        if (inputChannelData[j] != nullptr)
+                        if (inputChannelData[j] != 0)
                             inputSamp += inputChannelData[j][i];
 
                     recordingBuffer[recordedSampleNum] = inputSamp;
@@ -164,7 +162,7 @@ public:
                 auto outputSamp = (playingSampleNum < testSound.getNumSamples()) ? playBuffer[playingSampleNum] : 0.0f;
 
                 for (auto j = numOutputChannels; --j >= 0;)
-                    if (outputChannelData[j] != nullptr)
+                    if (outputChannelData[j] != 0)
                         outputChannelData[j][i] = outputSamp;
 
                 ++playingSampleNum;
@@ -174,7 +172,7 @@ public:
         {
             // We need to clear the output buffers, in case they're full of junk..
             for (int i = 0; i < numOutputChannels; ++i)
-                if (outputChannelData[i] != nullptr)
+                if (outputChannelData[i] != 0)
                     zeromem (outputChannelData[i], sizeof (float) * (size_t) numSamples);
         }
     }

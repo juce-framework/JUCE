@@ -41,10 +41,12 @@ namespace juce
         TemporaryFile temp (myTargetFile);
 
         // create a stream to the temporary file, and write some data to it...
-        if (auto out = std::unique_ptr<FileOutputStream> (temp.getFile().createOutputStream()))
+        std::unique_ptr<FileOutputStream> out (temp.getFile().createOutputStream());
+
+        if (out != nullptr)
         {
             out->write ( ...etc )
-            out.reset(); // (deletes the stream)
+            out = nullptr; // (deletes the stream)
 
             // ..now we've finished writing, this will rename the temp file to
             // make it replace the target file we specified above.

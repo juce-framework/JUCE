@@ -170,11 +170,11 @@ public:
     }
 
     //==============================================================================
-    class ImageButtonResourceProperty    : public ImageResourceProperty<ImageButton>
+    class ImageButtonResourceProperty    : public ImageResourceProperty <ImageButton>
     {
     public:
         ImageButtonResourceProperty (ComponentLayout& layout_, ImageButton* const owner_, const ImageRole role_, const String& name)
-            : ImageResourceProperty<ImageButton> (*layout_.getDocument(), owner_, name, true),
+            : ImageResourceProperty <ImageButton> (*layout_.getDocument(), owner_, name, true),
               role (role_),
               layout (layout_)
         {
@@ -195,28 +195,29 @@ public:
         ComponentLayout& layout;
     };
 
-    class SetImageResourceAction   : public ComponentUndoableAction<ImageButton>
+    class SetImageResourceAction   : public ComponentUndoableAction <ImageButton>
     {
     public:
         SetImageResourceAction (ImageButton* const button,
                                 ComponentLayout& layout_,
                                 const ImageRole role_,
                                 const String& newResource_)
-            : ComponentUndoableAction<ImageButton> (button, layout_),
+            : ComponentUndoableAction <ImageButton> (button, layout_),
               newResource (newResource_),
-              role (role_)
+              role (role_),
+              layout (layout_)
         {
             oldResource = ImageButtonHandler::getImageResource (button, role_);
         }
 
-        bool perform() override
+        bool perform()
         {
             showCorrectTab();
             ImageButtonHandler::setImageResource (layout, getComponent(), role, newResource, false);
             return true;
         }
 
-        bool undo() override
+        bool undo()
         {
             showCorrectTab();
             ImageButtonHandler::setImageResource (layout, getComponent(), role, oldResource, false);
@@ -226,6 +227,7 @@ public:
     private:
         String newResource, oldResource;
         const ImageRole role;
+        ComponentLayout& layout;
     };
 
     //==============================================================================
@@ -256,26 +258,27 @@ public:
     }
 
     //==============================================================================
-    class SetImageKeepsPropAction   : public ComponentUndoableAction<ImageButton>
+    class SetImageKeepsPropAction   : public ComponentUndoableAction <ImageButton>
     {
     public:
         SetImageKeepsPropAction (ImageButton* const button,
                                  ComponentLayout& layout_,
                                  const bool newState_)
-            : ComponentUndoableAction<ImageButton> (button, layout_),
-              newState (newState_)
+            : ComponentUndoableAction <ImageButton> (button, layout_),
+              newState (newState_),
+              layout (layout_)
         {
             oldState = ImageButtonHandler::doesImageKeepProportions (button);
         }
 
-        bool perform() override
+        bool perform()
         {
             showCorrectTab();
             ImageButtonHandler::setImageKeepProportions (layout, getComponent(), newState, false);
             return true;
         }
 
-        bool undo() override
+        bool undo()
         {
             showCorrectTab();
             ImageButtonHandler::setImageKeepProportions (layout, getComponent(), oldState, false);
@@ -284,6 +287,7 @@ public:
 
     private:
         bool newState, oldState;
+        ComponentLayout& layout;
     };
 
     static bool doesImageKeepProportions (ImageButton* button)
@@ -305,12 +309,12 @@ public:
         }
     }
 
-    class ImageButtonProportionProperty    : public ComponentBooleanProperty<ImageButton>
+    class ImageButtonProportionProperty    : public ComponentBooleanProperty <ImageButton>
     {
     public:
         ImageButtonProportionProperty (ComponentLayout& layout_, ImageButton* const owner_)
-            : ComponentBooleanProperty<ImageButton> ("proportional", "maintain image proportions", "scale to fit",
-                                                     owner_, *layout_.getDocument()),
+            : ComponentBooleanProperty <ImageButton> ("proportional", "maintain image proportions", "scale to fit",
+                                                      owner_, *layout_.getDocument()),
               layout (layout_)
         {
         }
@@ -330,28 +334,29 @@ public:
     };
 
     //==============================================================================
-    class SetImageOpacityAction   : public ComponentUndoableAction<ImageButton>
+    class SetImageOpacityAction   : public ComponentUndoableAction <ImageButton>
     {
     public:
         SetImageOpacityAction (ImageButton* const button,
                                ComponentLayout& layout_,
                                const ImageRole role_,
                                const float newState_)
-            : ComponentUndoableAction<ImageButton> (button, layout_),
+            : ComponentUndoableAction <ImageButton> (button, layout_),
               role (role_),
-              newState (newState_)
+              newState (newState_),
+              layout (layout_)
         {
             oldState = ImageButtonHandler::getImageOpacity (button, role_);
         }
 
-        bool perform() override
+        bool perform()
         {
             showCorrectTab();
             ImageButtonHandler::setImageOpacity (layout, getComponent(), role, newState, false);
             return true;
         }
 
-        bool undo() override
+        bool undo()
         {
             showCorrectTab();
             ImageButtonHandler::setImageOpacity (layout, getComponent(), role, oldState, false);
@@ -361,6 +366,7 @@ public:
     private:
         const ImageRole role;
         float newState, oldState;
+        ComponentLayout& layout;
     };
 
     static float getImageOpacity (ImageButton* button, const ImageRole role)
@@ -394,12 +400,12 @@ public:
         {
         }
 
-        void setValue (double newValue) override
+        void setValue (double newValue)
         {
             setImageOpacity (layout, owner, role, (float) newValue, true);
         }
 
-        double getValue() const override
+        double getValue() const
         {
             return getImageOpacity (owner, role);
         }
@@ -411,7 +417,7 @@ public:
     };
 
     //==============================================================================
-    class SetImageColourAction   : public ComponentUndoableAction<ImageButton>
+    class SetImageColourAction   : public ComponentUndoableAction <ImageButton>
     {
     public:
         SetImageColourAction (ImageButton* const button,
@@ -420,19 +426,20 @@ public:
                               Colour newState_)
             : ComponentUndoableAction<ImageButton> (button, layout_),
               role (role_),
-              newState (newState_)
+              newState (newState_),
+              layout (layout_)
         {
             oldState = ImageButtonHandler::getImageColour (button, role_);
         }
 
-        bool perform() override
+        bool perform()
         {
             showCorrectTab();
             ImageButtonHandler::setImageColour (layout, getComponent(), role, newState, false);
             return true;
         }
 
-        bool undo() override
+        bool undo()
         {
             showCorrectTab();
             ImageButtonHandler::setImageColour (layout, getComponent(), role, oldState, false);
@@ -442,6 +449,7 @@ public:
     private:
         const ImageRole role;
         Colour newState, oldState;
+        ComponentLayout& layout;
     };
 
     static Colour getImageColour (ImageButton* button, const ImageRole role)

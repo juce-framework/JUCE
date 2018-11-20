@@ -36,7 +36,9 @@ namespace DirectWriteTypeLayout
         CustomDirectWriteTextRenderer (IDWriteFontCollection& fonts, const AttributedString& as)
             : ComBaseClassHelper<IDWriteTextRenderer> (0),
               attributedString (as),
-              fontCollection (fonts)
+              fontCollection (fonts),
+              currentLine (-1),
+              lastOriginY (-10000.0f)
         {
         }
 
@@ -87,7 +89,7 @@ namespace DirectWriteTypeLayout
                                      DWRITE_GLYPH_RUN const* glyphRun, DWRITE_GLYPH_RUN_DESCRIPTION const* runDescription,
                                      IUnknown* clientDrawingEffect) override
         {
-            auto layout = static_cast<TextLayout*> (clientDrawingContext);
+            TextLayout* const layout = static_cast<TextLayout*> (clientDrawingContext);
 
             if (! (baselineOriginY >= -1.0e10f && baselineOriginY <= 1.0e10f))
                 baselineOriginY = 0; // DirectWrite sometimes sends NaNs in this parameter
@@ -100,14 +102,14 @@ namespace DirectWriteTypeLayout
                 if (currentLine >= layout->getNumLines())
                 {
                     jassert (currentLine == layout->getNumLines());
-                    auto line = new TextLayout::Line();
+                    TextLayout::Line* const line = new TextLayout::Line();
                     layout->addLine (line);
 
                     line->lineOrigin = Point<float> (baselineOriginX, baselineOriginY);
                 }
             }
 
-            auto& glyphLine = layout->getLine (currentLine);
+            TextLayout::Line& glyphLine = layout->getLine (currentLine);
 
             DWRITE_FONT_METRICS dwFontMetrics;
             glyphRun->fontFace->GetMetrics (&dwFontMetrics);
@@ -115,27 +117,27 @@ namespace DirectWriteTypeLayout
             glyphLine.ascent  = jmax (glyphLine.ascent,  scaledFontSize (dwFontMetrics.ascent,  dwFontMetrics, *glyphRun));
             glyphLine.descent = jmax (glyphLine.descent, scaledFontSize (dwFontMetrics.descent, dwFontMetrics, *glyphRun));
 
-            auto glyphRunLayout = new TextLayout::Run (Range<int> (runDescription->textPosition,
-                                                                   runDescription->textPosition + runDescription->stringLength),
-                                                       glyphRun->glyphCount);
+            TextLayout::Run* const glyphRunLayout = new TextLayout::Run (Range<int> (runDescription->textPosition,
+                                                                                     runDescription->textPosition + runDescription->stringLength),
+                                                                         glyphRun->glyphCount);
             glyphLine.runs.add (glyphRunLayout);
 
             glyphRun->fontFace->GetMetrics (&dwFontMetrics);
-            auto totalHeight = std::abs ((float) dwFontMetrics.ascent) + std::abs ((float) dwFontMetrics.descent);
-            auto fontHeightToEmSizeFactor = (float) dwFontMetrics.designUnitsPerEm / totalHeight;
+            const float totalHeight = std::abs ((float) dwFontMetrics.ascent) + std::abs ((float) dwFontMetrics.descent);
+            const float fontHeightToEmSizeFactor = (float) dwFontMetrics.designUnitsPerEm / totalHeight;
 
             glyphRunLayout->font = getFontForRun (*glyphRun, glyphRun->fontEmSize / fontHeightToEmSizeFactor);
             glyphRunLayout->colour = getColourOf (static_cast<ID2D1SolidColorBrush*> (clientDrawingEffect));
 
-            auto lineOrigin = layout->getLine (currentLine).lineOrigin;
-            auto x = baselineOriginX - lineOrigin.x;
+            const Point<float> lineOrigin (layout->getLine (currentLine).lineOrigin);
+            float x = baselineOriginX - lineOrigin.x;
 
-            auto extraKerning = glyphRunLayout->font.getExtraKerningFactor()
-                                   * glyphRunLayout->font.getHeight();
+            const float extraKerning = glyphRunLayout->font.getExtraKerningFactor()
+                                          * glyphRunLayout->font.getHeight();
 
             for (UINT32 i = 0; i < glyphRun->glyphCount; ++i)
             {
-                auto advance = glyphRun->glyphAdvances[i];
+                const float advance = glyphRun->glyphAdvances[i];
 
                 if ((glyphRun->bidiLevel & 1) != 0)
                     x -= advance + extraKerning;  // RTL text
@@ -154,8 +156,8 @@ namespace DirectWriteTypeLayout
     private:
         const AttributedString& attributedString;
         IDWriteFontCollection& fontCollection;
-        int currentLine = -1;
-        float lastOriginY = -10000.0f;
+        int currentLine;
+        float lastOriginY;
 
         static float scaledFontSize (int n, const DWRITE_FONT_METRICS& metrics, const DWRITE_GLYPH_RUN& glyphRun) noexcept
         {
@@ -175,15 +177,15 @@ namespace DirectWriteTypeLayout
         {
             for (int i = 0; i < attributedString.getNumAttributes(); ++i)
             {
-                auto& font = attributedString.getAttribute(i).font;
+                const Font& font = attributedString.getAttribute(i).font;
 
-                if (auto* wt = dynamic_cast<WindowsDirectWriteTypeface*> (font.getTypeface()))
+                if (WindowsDirectWriteTypeface* wt = dynamic_cast<WindowsDirectWriteTypeface*> (font.getTypeface()))
                     if (wt->getIDWriteFontFace() == glyphRun.fontFace)
                         return font.withHeight (fontHeight);
             }
 
             ComSmartPtr<IDWriteFont> dwFont;
-            auto hr = fontCollection.GetFontFromFontFace (glyphRun.fontFace, dwFont.resetAndGetPointerAddress());
+            HRESULT hr = fontCollection.GetFontFromFontFace (glyphRun.fontFace, dwFont.resetAndGetPointerAddress());
             jassert (dwFont != nullptr);
 
             ComSmartPtr<IDWriteFontFamily> dwFontFamily;
@@ -259,7 +261,7 @@ namespace DirectWriteTypeLayout
         range.length = jmin (attr.range.getLength(), textLen - attr.range.getStart());
 
         {
-            auto familyName = FontStyleHelpers::getConcreteFamilyName (attr.font);
+            const String familyName (FontStyleHelpers::getConcreteFamilyName (attr.font));
 
             BOOL fontFound = false;
             uint32 fontIndex;
@@ -269,7 +271,7 @@ namespace DirectWriteTypeLayout
                 fontIndex = 0;
 
             ComSmartPtr<IDWriteFontFamily> fontFamily;
-            auto hr = fontCollection.GetFontFamily (fontIndex, fontFamily.resetAndGetPointerAddress());
+            HRESULT hr = fontCollection.GetFontFamily (fontIndex, fontFamily.resetAndGetPointerAddress());
 
             ComSmartPtr<IDWriteFont> dwFont;
             uint32 fontFacesCount = 0;
@@ -288,12 +290,12 @@ namespace DirectWriteTypeLayout
             textLayout.SetFontStretch (dwFont->GetStretch(), range);
             textLayout.SetFontStyle (dwFont->GetStyle(), range);
 
-            auto fontHeightToEmSizeFactor = getFontHeightToEmSizeFactor (*dwFont);
+            const float fontHeightToEmSizeFactor = getFontHeightToEmSizeFactor (*dwFont);
             textLayout.SetFontSize (attr.font.getHeight() * fontHeightToEmSizeFactor, range);
         }
 
         {
-            auto col = attr.colour;
+            const Colour col (attr.colour);
             ComSmartPtr<ID2D1SolidColorBrush> d2dBrush;
             renderTarget.CreateSolidColorBrush (D2D1::ColorF (col.getFloatRed(),
                                                               col.getFloatGreen(),
@@ -306,7 +308,7 @@ namespace DirectWriteTypeLayout
         }
     }
 
-    bool setupLayout (const AttributedString& text, float maxWidth, float maxHeight,
+    bool setupLayout (const AttributedString& text, const float maxWidth, const float maxHeight,
                       ID2D1RenderTarget& renderTarget, IDWriteFactory& directWriteFactory,
                       IDWriteFontCollection& fontCollection, ComSmartPtr<IDWriteTextLayout>& textLayout)
     {
@@ -322,14 +324,14 @@ namespace DirectWriteTypeLayout
             fontIndex = 0;
 
         ComSmartPtr<IDWriteFontFamily> dwFontFamily;
-        auto hr = fontCollection.GetFontFamily (fontIndex, dwFontFamily.resetAndGetPointerAddress());
+        HRESULT hr = fontCollection.GetFontFamily (fontIndex, dwFontFamily.resetAndGetPointerAddress());
 
         ComSmartPtr<IDWriteFont> dwFont;
         hr = dwFontFamily->GetFirstMatchingFont (DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STRETCH_NORMAL, DWRITE_FONT_STYLE_NORMAL,
                                                  dwFont.resetAndGetPointerAddress());
         jassert (dwFont != nullptr);
 
-        auto defaultFontHeightToEmSizeFactor = getFontHeightToEmSizeFactor (*dwFont);
+        const float defaultFontHeightToEmSizeFactor = getFontHeightToEmSizeFactor (*dwFont);
 
         ComSmartPtr<IDWriteTextFormat> dwTextFormat;
         hr = directWriteFactory.CreateTextFormat (defaultFont.getTypefaceName().toWideCharPointer(), &fontCollection,
@@ -346,7 +348,7 @@ namespace DirectWriteTypeLayout
             hr = dwTextFormat->SetTrimming (&trimming, trimmingSign);
         }
 
-        auto textLen = text.getText().length();
+        const int textLen = text.getText().length();
 
         hr = directWriteFactory.CreateTextLayout (text.getText().toWideCharPointer(), textLen, dwTextFormat,
                                                   maxWidth, maxHeight, textLayout.resetAndGetPointerAddress());
@@ -354,7 +356,7 @@ namespace DirectWriteTypeLayout
         if (FAILED (hr) || textLayout == nullptr)
             return false;
 
-        auto numAttributes = text.getNumAttributes();
+        const int numAttributes = text.getNumAttributes();
 
         for (int i = 0; i < numAttributes; ++i)
             addAttributedRange (text.getAttribute (i), *textLayout, textLen, renderTarget, fontCollection);
@@ -374,7 +376,7 @@ namespace DirectWriteTypeLayout
             return;
 
         UINT32 actualLineCount = 0;
-        auto hr = dwTextLayout->GetLineMetrics (nullptr, 0, &actualLineCount);
+        HRESULT hr = dwTextLayout->GetLineMetrics (nullptr, 0, &actualLineCount);
 
         layout.ensureStorageAllocated (actualLineCount);
 
@@ -386,13 +388,13 @@ namespace DirectWriteTypeLayout
         HeapBlock<DWRITE_LINE_METRICS> dwLineMetrics (actualLineCount);
         hr = dwTextLayout->GetLineMetrics (dwLineMetrics, actualLineCount, &actualLineCount);
         int lastLocation = 0;
-        auto numLines = jmin ((int) actualLineCount, layout.getNumLines());
+        const int numLines = jmin ((int) actualLineCount, layout.getNumLines());
         float yAdjustment = 0;
-        auto extraLineSpacing = text.getLineSpacing();
+        const float extraLineSpacing = text.getLineSpacing();
 
         for (int i = 0; i < numLines; ++i)
         {
-            auto& line = layout.getLine (i);
+            TextLayout::Line& line = layout.getLine (i);
             line.stringRange = Range<int> (lastLocation, (int) lastLocation + dwLineMetrics[i].length);
             line.lineOrigin.y += yAdjustment;
             yAdjustment += extraLineSpacing;
@@ -420,7 +422,7 @@ namespace DirectWriteTypeLayout
 
 static bool canAllTypefacesBeUsedInLayout (const AttributedString& text)
 {
-    auto numCharacterAttributes = text.getNumAttributes();
+    const int numCharacterAttributes = text.getNumAttributes();
 
     for (int i = 0; i < numCharacterAttributes; ++i)
         if (dynamic_cast<WindowsDirectWriteTypeface*> (text.getAttribute(i).font.getTypeface()) == nullptr)

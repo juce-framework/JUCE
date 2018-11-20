@@ -66,9 +66,6 @@ namespace pnglibNamespace
   #if JUCE_CLANG
    #pragma clang diagnostic push
    #pragma clang diagnostic ignored "-Wsign-conversion"
-   #if __has_warning("-Wzero-as-null-pointer-constant")
-    #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
-   #endif
    #if __has_warning("-Wcomma")
     #pragma clang diagnostic ignored "-Wcomma"
    #endif
@@ -523,23 +520,23 @@ Image PNGImageFormat::decodeImage (InputStream& in)
 bool PNGImageFormat::writeImageToStream (const Image& image, OutputStream& out)
 {
     using namespace pnglibNamespace;
-    auto width = image.getWidth();
-    auto height = image.getHeight();
+    const int width = image.getWidth();
+    const int height = image.getHeight();
 
-    auto pngWriteStruct = png_create_write_struct (PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
+    png_structp pngWriteStruct = png_create_write_struct (PNG_LIBPNG_VER_STRING, 0, 0, 0);
 
     if (pngWriteStruct == nullptr)
         return false;
 
-    auto pngInfoStruct = png_create_info_struct (pngWriteStruct);
+    png_infop pngInfoStruct = png_create_info_struct (pngWriteStruct);
 
     if (pngInfoStruct == nullptr)
     {
-        png_destroy_write_struct (&pngWriteStruct, nullptr);
+        png_destroy_write_struct (&pngWriteStruct, (png_infopp) nullptr);
         return false;
     }
 
-    png_set_write_fn (pngWriteStruct, &out, PNGHelpers::writeDataCallback, nullptr);
+    png_set_write_fn (pngWriteStruct, &out, PNGHelpers::writeDataCallback, 0);
 
     png_set_IHDR (pngWriteStruct, pngInfoStruct, (png_uint_32) width, (png_uint_32) height, 8,
                   image.hasAlphaChannel() ? PNG_COLOR_TYPE_RGB_ALPHA

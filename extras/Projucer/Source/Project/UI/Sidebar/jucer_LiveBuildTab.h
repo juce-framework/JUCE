@@ -67,7 +67,7 @@ class LiveBuildTab    : public Component,
                         private ChangeListener
 {
 public:
-    LiveBuildTab (const CompileEngineChildProcess::Ptr& child, String lastErrorMessage)
+    LiveBuildTab (CompileEngineChildProcess* child, String lastErrorMessage)
     {
         settingsButton.reset (new IconButton ("Settings", &getIcons().settings));
         addAndMakeVisible (settingsButton.get());
@@ -80,11 +80,13 @@ public:
         if (child != nullptr)
         {
             addAndMakeVisible (concertinaPanel);
-            buildConcertina (*child);
+            buildConcertina (child);
             isEnabled = true;
         }
         else
         {
+            isEnabled = false;
+
             errorMessage = getErrorMessage();
             errorMessageLabel.reset (new Label ("Error", errorMessage));
             errorMessageLabel->setJustificationType (Justification::centred);
@@ -156,7 +158,7 @@ public:
         }
     }
 
-    bool isEnabled = false;
+    bool isEnabled;
     String errorMessage;
     Component::SafePointer<ProjucerAppClasses::ErrorListComp> errorListComp;
 
@@ -230,16 +232,16 @@ private:
         }
     }
 
-    void buildConcertina (CompileEngineChildProcess& child)
+    void buildConcertina (CompileEngineChildProcess* child)
     {
         for (auto i = concertinaPanel.getNumPanels() - 1; i >= 0 ; --i)
             concertinaPanel.removePanel (concertinaPanel.getPanel (i));
 
         headers.clear();
 
-        errorListComp = new ProjucerAppClasses::ErrorListComp (child.errorList);
-        auto* activities = new CurrentActivitiesComp (child.activityList);
-        auto* comps = new ComponentListComp (child);
+        errorListComp = new ProjucerAppClasses::ErrorListComp (child->errorList);
+        auto* activities = new CurrentActivitiesComp (child->activityList);
+        auto* comps = new ComponentListComp (*child);
 
         concertinaPanel.addPanel (-1, errorListComp, true);
         concertinaPanel.addPanel (-1, comps, true);

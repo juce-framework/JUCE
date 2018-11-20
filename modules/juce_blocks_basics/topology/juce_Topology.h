@@ -48,24 +48,6 @@ struct BlockTopology
 
     bool operator== (const BlockTopology&) const noexcept;
     bool operator!= (const BlockTopology&) const noexcept;
-
-    Block::Ptr getBlockWithUID (Block::UID deviceID)
-    {
-        for (auto&& block : blocks)
-            if (block->uid == deviceID)
-                return block;
-
-        return {};
-    }
-
-    const Block::Ptr getBlockWithUID (Block::UID deviceID) const
-    {
-        for (auto&& block : blocks)
-            if (block->uid == deviceID)
-                return block;
-
-        return {};
-    }
 };
 
 } // namespace juce

@@ -38,12 +38,12 @@ ImagePreviewComponent::~ImagePreviewComponent()
 //==============================================================================
 void ImagePreviewComponent::getThumbSize (int& w, int& h) const
 {
-    auto availableW = proportionOfWidth (0.97f);
-    auto availableH = getHeight() - 13 * 4;
+    const int availableW = proportionOfWidth (0.97f);
+    const int availableH = getHeight() - 13 * 4;
 
-    auto scale = jmin (1.0,
-                       availableW / (double) w,
-                       availableH / (double) h);
+    const double scale = jmin (1.0,
+                               availableW / (double) w,
+                               availableH / (double) h);
 
     w = roundToInt (scale * w);
     h = roundToInt (scale * h);
@@ -66,18 +66,18 @@ void ImagePreviewComponent::timerCallback()
     currentDetails.clear();
     repaint();
 
-    FileInputStream in (fileToLoad);
+    std::unique_ptr<FileInputStream> in (fileToLoad.createInputStream());
 
-    if (in.openedOk() && fileToLoad.existsAsFile())
+    if (in != nullptr && in->getFile().existsAsFile())
     {
-        if (auto format = ImageFileFormat::findImageFormatForStream (in))
+        if (ImageFileFormat* const format = ImageFileFormat::findImageFormatForStream (*in))
         {
-            currentThumbnail = format->decodeImage (in);
+            currentThumbnail = format->decodeImage (*in);
 
             if (currentThumbnail.isValid())
             {
-                auto w = currentThumbnail.getWidth();
-                auto h = currentThumbnail.getHeight();
+                int w = currentThumbnail.getWidth();
+                int h = currentThumbnail.getHeight();
 
                 currentDetails
                     << fileToLoad.getFileName() << "\n"
@@ -99,13 +99,13 @@ void ImagePreviewComponent::paint (Graphics& g)
     {
         g.setFont (13.0f);
 
-        auto w = currentThumbnail.getWidth();
-        auto h = currentThumbnail.getHeight();
+        int w = currentThumbnail.getWidth();
+        int h = currentThumbnail.getHeight();
         getThumbSize (w, h);
 
         const int numLines = 4;
-        auto totalH = 13 * numLines + h + 4;
-        auto y = (getHeight() - totalH) / 2;
+        const int totalH = 13 * numLines + h + 4;
+        const int y = (getHeight() - totalH) / 2;
 
         g.drawImageWithin (currentThumbnail,
                            (getWidth() - w) / 2, y, w, h,

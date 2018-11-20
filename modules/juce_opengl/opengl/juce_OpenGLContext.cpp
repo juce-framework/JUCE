@@ -280,14 +280,16 @@ public:
     {
         if (auto* peer = component.getPeer())
         {
-           #if JUCE_WINDOWS
-            auto newScale = nativeContext->getWindowScaleFactor (component.getTopLevelComponent()->getScreenBounds());
-           #else
-            auto newScale = Desktop::getInstance().getDisplays().findDisplayForRect (component.getTopLevelComponent()->getScreenBounds()).scale;
-           #endif
+            lastScreenBounds = component.getTopLevelComponent()->getScreenBounds();
+
+            auto newScale = Desktop::getInstance().getDisplays()
+                              .getDisplayContaining (lastScreenBounds.getCentre()).scale;
 
             auto localBounds = component.getLocalBounds();
-            auto newArea = peer->getComponent().getLocalArea (&component, localBounds).withZeroOrigin() * newScale;
+
+            auto newArea = peer->getComponent().getLocalArea (&component, localBounds)
+                                               .withZeroOrigin()
+                             * newScale;
 
             if (scale != newScale || viewportArea != newArea)
             {
@@ -588,24 +590,15 @@ public:
     {
         if (calledFromDestructor || destroying.get() == 0)
         {
-            if (shouldBlock)
-            {
-                auto blocker = new BlockingWorker (static_cast<OpenGLContext::AsyncWorker::Ptr&&> (workerToUse));
-                OpenGLContext::AsyncWorker::Ptr worker (*blocker);
-                workQueue.add (worker);
+            BlockingWorker* blocker = (shouldBlock ? new BlockingWorker (static_cast<OpenGLContext::AsyncWorker::Ptr&&> (workerToUse)) : nullptr);
+            OpenGLContext::AsyncWorker::Ptr worker = (blocker != nullptr ? blocker : static_cast<OpenGLContext::AsyncWorker::Ptr&&> (workerToUse));
+            workQueue.add (worker);
 
-                messageManagerLock.abort();
-                context.triggerRepaint();
+            messageManagerLock.abort();
+            context.triggerRepaint();
 
+            if (blocker != nullptr)
                 blocker->block();
-            }
-            else
-            {
-                workQueue.add (static_cast<OpenGLContext::AsyncWorker::Ptr&&> (workerToUse));
-
-                messageManagerLock.abort();
-                context.triggerRepaint();
-            }
         }
         else
         {
@@ -1015,8 +1008,8 @@ ReferenceCountedObject* OpenGLContext::getAssociatedObject (const char* name) co
     jassert (c != nullptr && nativeContext != nullptr);
     jassert (getCurrentContext() != nullptr);
 
-    auto index = c->associatedObjectNames.indexOf (name);
-    return index >= 0 ? c->associatedObjects.getUnchecked (index).get() : nullptr;
+    const int index = c->associatedObjectNames.indexOf (name);
+    return index >= 0 ? c->associatedObjects.getUnchecked (index) : nullptr;
 }
 
 void OpenGLContext::setAssociatedObject (const char* name, ReferenceCountedObject* newObject)
@@ -1060,6 +1053,17 @@ void OpenGLContext::execute (OpenGLContext::AsyncWorker::Ptr workerToUse, bool s
         c->execute (static_cast<OpenGLContext::AsyncWorker::Ptr&&> (workerToUse), shouldBlock);
     else
         jassertfalse; // You must have attached the context to a component
+}
+
+void OpenGLContext::overrideCanBeAttached (bool newCanAttach)
+{
+    if (overrideCanAttach != newCanAttach)
+    {
+        overrideCanAttach = newCanAttach;
+
+        if (auto* a = attachment.get())
+            a->update();
+    }
 }
 
 //==============================================================================
@@ -1195,7 +1199,7 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
         extensions.glBufferData (GL_ARRAY_BUFFER, sizeof (vertices), vertices, GL_STATIC_DRAW);
 
         auto index = (GLuint) program.params.positionAttribute.attributeID;
-        extensions.glVertexAttribPointer (index, 2, GL_SHORT, GL_FALSE, 4, nullptr);
+        extensions.glVertexAttribPointer (index, 2, GL_SHORT, GL_FALSE, 4, 0);
         extensions.glEnableVertexAttribArray (index);
         JUCE_CHECK_OPENGL_ERROR
 

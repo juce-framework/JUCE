@@ -27,6 +27,17 @@
 namespace juce
 {
 
+RectanglePlacement::RectanglePlacement (const RectanglePlacement& other) noexcept
+    : flags (other.flags)
+{
+}
+
+RectanglePlacement& RectanglePlacement::operator= (const RectanglePlacement& other) noexcept
+{
+    flags = other.flags;
+    return *this;
+}
+
 bool RectanglePlacement::operator== (const RectanglePlacement& other) const noexcept
 {
     return flags == other.flags;

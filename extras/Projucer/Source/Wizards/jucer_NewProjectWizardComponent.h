@@ -31,14 +31,14 @@
 class ModulesFolderPathBox  : public Component
 {
 public:
-    ModulesFolderPathBox (String initialFileOrDirectory)
+    ModulesFolderPathBox (File initialFileOrDirectory)
         : currentPathBox ("currentPathBox"),
           openFolderButton (TRANS("...")),
           modulesLabel (String(), TRANS("Modules Folder") + ":"),
           useGlobalPathsToggle ("Use global module path")
     {
-        if (initialFileOrDirectory.isEmpty())
-            initialFileOrDirectory = getAppSettings().getStoredPath (Ids::defaultJuceModulePath, TargetOS::getThisOS()).get().toString();
+        if (initialFileOrDirectory == File())
+            initialFileOrDirectory = EnabledModuleList::findGlobalModulesFolder();
 
         setModulesFolder (initialFileOrDirectory);
 
@@ -85,7 +85,7 @@ public:
         for (;;)
         {
             FileChooser fc ("Select your JUCE modules folder...",
-                            { getAppSettings().getStoredPath (Ids::defaultJuceModulePath, TargetOS::getThisOS()).get().toString() },
+                            EnabledModuleList::findGlobalModulesFolder(),
                             "*");
 
             if (! fc.browseForDirectory())
@@ -122,7 +122,7 @@ public:
     }
 
     File modulesFolder;
-    bool isUsingGlobalPaths = true;
+    bool isUsingGlobalPaths;
 
 private:
     ComboBox currentPathBox;
@@ -286,7 +286,7 @@ public:
     WizardComp()
         : platformTargets(),
           projectName (TRANS("Project name")),
-          modulesPathBox (getAppSettings().getStoredPath (Ids::defaultJuceModulePath, TargetOS::getThisOS()).get().toString())
+          modulesPathBox (EnabledModuleList::findGlobalModulesFolder())
     {
         setOpaque (false);
 
@@ -405,7 +405,7 @@ public:
             }
 
 
-            wizard->modulesFolder = modulesPathBox.isUsingGlobalPaths ? File (getAppSettings().getStoredPath (Ids::defaultJuceModulePath, TargetOS::getThisOS()).get().toString())
+            wizard->modulesFolder = modulesPathBox.isUsingGlobalPaths ? File (getAppSettings().getStoredPath (Ids::defaultJuceModulePath).toString())
                                                                       : modulesPathBox.modulesFolder;
 
             if (! isJUCEModulesFolder (wizard->modulesFolder))
@@ -419,7 +419,7 @@ public:
                     return;
 
                 if (modulesPathBox.isUsingGlobalPaths)
-                    getAppSettings().getStoredPath (Ids::defaultJuceModulePath, TargetOS::getThisOS()).setValue (wizard->modulesFolder.getFullPathName(), nullptr);
+                    getAppSettings().getStoredPath (Ids::defaultJuceModulePath).setValue (wizard->modulesFolder.getFullPathName());
             }
 
             auto projectDir = fileBrowser.getSelectedFile (0);

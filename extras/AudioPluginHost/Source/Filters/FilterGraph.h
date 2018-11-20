@@ -43,7 +43,7 @@ public:
     ~FilterGraph();
 
     //==============================================================================
-    using NodeID = AudioProcessorGraph::NodeID;
+    typedef AudioProcessorGraph::NodeID NodeID;
 
     void addPlugin (const PluginDescription&, Point<double>);
 
@@ -88,7 +88,7 @@ private:
     AudioPluginFormatManager& formatManager;
     OwnedArray<PluginWindow> activePluginWindows;
 
-    NodeID lastUID;
+    NodeID lastUID = 0;
     NodeID getNextUID() noexcept;
 
     void createNodeFromXml (const XmlElement& xml);

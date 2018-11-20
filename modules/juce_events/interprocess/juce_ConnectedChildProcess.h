@@ -104,6 +104,8 @@ public:
 
 private:
     struct Connection;
+    friend struct Connection;
+    friend struct ContainerDeletePolicy<Connection>;
     std::unique_ptr<Connection> connection;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChildProcessSlave)
@@ -192,6 +194,8 @@ private:
     std::unique_ptr<ChildProcess> childProcess;
 
     struct Connection;
+    friend struct Connection;
+    friend struct ContainerDeletePolicy<Connection>;
     std::unique_ptr<Connection> connection;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChildProcessMaster)

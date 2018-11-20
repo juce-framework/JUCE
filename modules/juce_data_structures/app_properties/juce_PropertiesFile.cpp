@@ -58,13 +58,10 @@ File PropertiesFile::Options::getDefaultFile() const
     File dir (commonToAllUsers ?  "/Library/"
                                : "~/Library/");
 
-    if (osxLibrarySubFolder != "Preferences"
-        && ! osxLibrarySubFolder.startsWith ("Application Support")
-        && ! osxLibrarySubFolder.startsWith ("Containers"))
+    if (osxLibrarySubFolder != "Preferences" && ! osxLibrarySubFolder.startsWith ("Application Support"))
     {
         /* The PropertiesFile class always used to put its settings files in "Library/Preferences", but Apple
-           have changed their advice, and now stipulate that settings should go in "Library/Application Support",
-           or Library/Containers/[app_bundle_id] for a sandboxed app.
+           have changed their advice, and now stipulate that settings should go in "Library/Application Support".
 
            Because older apps would be broken by a silent change in this class's behaviour, you must now
            explicitly set the osxLibrarySubFolder value to indicate which path you want to use.

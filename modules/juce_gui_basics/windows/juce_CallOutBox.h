@@ -82,7 +82,7 @@ public:
     ~CallOutBox();
 
     //==============================================================================
-    /** Changes the base width of the arrow. */
+    /** Changes the length of the arrow. */
     void setArrowSize (float newSize);
 
     /** Updates the position and size of the box.

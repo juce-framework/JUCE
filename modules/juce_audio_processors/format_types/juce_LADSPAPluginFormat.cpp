@@ -180,9 +180,7 @@ public:
 
         inputs.clear();
         outputs.clear();
-        managedParameters.clear (false);
-        AudioProcessorParameterGroup group ({}, {}, {});
-        parameterTree.swapWith (group);
+        managedParameters.clear();
 
         for (unsigned int i = 0; i < plugin->PortCount; ++i)
         {
@@ -518,7 +516,7 @@ private:
             if (useLog && low > 0 && high > 0)
                 return expf (logf (low) * (1.0f - alpha) + logf (high) * alpha);
 
-            return low + (high - low) * alpha;
+                return low + (high - low) * alpha;
         }
 
         static float toIntIfNecessary (const LADSPA_PortRangeHintDescriptor& desc, float value)
@@ -610,9 +608,8 @@ void LADSPAPluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& res
     }
 }
 
-void LADSPAPluginFormat::createPluginInstance (const PluginDescription& desc,
-                                               double sampleRate, int blockSize,
-                                               void* userData, PluginCreationCallback callback)
+void LADSPAPluginFormat::createPluginInstance (const PluginDescription& desc, double sampleRate, int blockSize,
+                                               void* userData, void (*callback) (void*, AudioPluginInstance*, const String&))
 {
     std::unique_ptr<LADSPAPluginInstance> result;
 

@@ -57,16 +57,9 @@ namespace MidiBufferHelpers
         }
         else if (byte == 0xff)
         {
-            if (maxBytes == 1)
-            {
-                size = 1;
-            }
-            else
-            {
-                int n;
-                const int bytesLeft = MidiMessage::readVariableLengthVal (data + 1, n);
-                size = jmin (maxBytes, n + 2 + bytesLeft);
-            }
+            int n;
+            const int bytesLeft = MidiMessage::readVariableLengthVal (data + 1, n);
+            size = jmin (maxBytes, n + 2 + bytesLeft);
         }
         else if (byte >= 0x80)
         {

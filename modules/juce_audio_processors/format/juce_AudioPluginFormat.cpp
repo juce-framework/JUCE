@@ -39,10 +39,10 @@ namespace AudioPluginFormatHelpers
                 : instance (inInstance), error (inError), compCallback (inCompletion), owner (invoker)
             {}
 
-            void messageCallback() override     { compCallback->completionCallback (instance.release(), error); }
+            void messageCallback() override     { compCallback->completionCallback (instance, error); }
 
             //==============================================================================
-            std::unique_ptr<AudioPluginInstance> instance;
+            AudioPluginInstance* instance;
             String error;
             std::unique_ptr<AudioPluginFormat::InstantiationCompletionCallback> compCallback;
             std::unique_ptr<CallbackInvoker> owner;
@@ -199,7 +199,7 @@ void AudioPluginFormat::createPluginInstanceOnMessageThread (const PluginDescrip
                                                              AudioPluginFormat::InstantiationCompletionCallback* callback)
 {
     jassert (callback != nullptr);
-    JUCE_ASSERT_MESSAGE_THREAD
+    jassert (MessageManager::getInstance()->isThisTheMessageThread());
 
     //==============================================================================
 

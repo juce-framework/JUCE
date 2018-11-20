@@ -108,7 +108,7 @@ namespace ActiveXHelpers
 
         JUCE_COMRESULT GetWindowContext (LPOLEINPLACEFRAME* lplpFrame, LPOLEINPLACEUIWINDOW* lplpDoc, LPRECT, LPRECT, LPOLEINPLACEFRAMEINFO lpFrameInfo)
         {
-            /* Note: If you call AddRef on the frame here, then some types of object (e.g. web browser control) cause leaks..
+            /* Note: if you call AddRef on the frame here, then some types of object (e.g. web browser control) cause leaks..
                If you don't call AddRef then others crash (e.g. QuickTime).. Bit of a catch-22, so letting it leak is probably preferable.
             */
             if (lplpFrame != nullptr) { frame->AddRef(); *lplpFrame = frame; }
@@ -231,9 +231,6 @@ namespace ActiveXHelpers
 
 //==============================================================================
 class ActiveXControlComponent::Pimpl  : public ComponentMovementWatcher
-                                     #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-                                      , public ComponentPeer::ScaleFactorListener
-                                     #endif
 {
 public:
     Pimpl (HWND hwnd, ActiveXControlComponent& activeXComp)
@@ -254,26 +251,12 @@ public:
 
         clientSite->Release();
         storage->Release();
-
-       #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-        for (int i = 0; i < ComponentPeer::getNumPeers(); ++i)
-            if (auto* peer = ComponentPeer::getPeer (i))
-                peer->removeScaleFactorListener (this);
-        #endif
     }
 
     void setControlBounds (Rectangle<int> newBounds) const
     {
         if (controlHWND != 0)
-        {
-           #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-            if (auto* peer = owner.getTopLevelComponent()->getPeer())
-                newBounds = (newBounds.toDouble() * peer->getPlatformScaleFactor()).toNearestInt();
-           #endif
-
             MoveWindow (controlHWND, newBounds.getX(), newBounds.getY(), newBounds.getWidth(), newBounds.getHeight(), TRUE);
-        }
-
     }
 
     void setControlVisible (bool shouldBeVisible) const
@@ -286,17 +269,12 @@ public:
     void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/) override
     {
         if (auto* peer = owner.getTopLevelComponent()->getPeer())
-            setControlBounds (peer->getAreaCoveredBy (owner));
+            setControlBounds (peer->getAreaCoveredBy(owner));
     }
 
     void componentPeerChanged() override
     {
         componentMovedOrResized (true, true);
-
-       #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-        if (auto* peer = owner.getTopLevelComponent()->getPeer())
-            peer->addScaleFactorListener (this);
-       #endif
     }
 
     void componentVisibilityChanged() override
@@ -304,13 +282,6 @@ public:
         setControlVisible (owner.isShowing());
         componentPeerChanged();
     }
-
-   #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-    void nativeScaleFactorChanged (double /*newScaleFactor*/) override
-    {
-        componentMovedOrResized (true, true);
-    }
-   #endif
 
     // intercepts events going to an activeX control, so we can sneakily use the mouse events
     static LRESULT CALLBACK activeXHookWndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)

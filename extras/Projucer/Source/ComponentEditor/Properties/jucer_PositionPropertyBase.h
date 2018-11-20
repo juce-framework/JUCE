@@ -343,9 +343,9 @@ public:
 
         Rectangle<int> parentArea;
 
-        if (component->findParentComponentOfClass<ComponentLayoutEditor>() != nullptr)
+        if (component->findParentComponentOfClass<ComponentLayoutEditor>() != 0)
             parentArea.setSize (component->getParentWidth(), component->getParentHeight());
-        else if (auto pre = dynamic_cast<PaintRoutineEditor*> (component->getParentComponent()))
+        else if (PaintRoutineEditor* pre = dynamic_cast<PaintRoutineEditor*> (component->getParentComponent()))
             parentArea = pre->getComponentArea();
         else
             jassertfalse;

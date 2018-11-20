@@ -114,7 +114,7 @@ private:
 
     static void checkThread()
     {
-        JUCE_ASSERT_MESSAGE_THREAD
+        jassert (MessageManager::getInstance()->isThisTheMessageThread());
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ErrorList)

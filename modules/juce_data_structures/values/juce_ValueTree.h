@@ -128,22 +128,17 @@ public:
         @endverbatim
     */
     ValueTree (const Identifier& type,
-               std::initializer_list<NamedValueSet::NamedValue> properties,
+               std::initializer_list<std::pair<Identifier, var>> properties,
                std::initializer_list<ValueTree> subTrees = {});
 
     /** Creates a reference to another ValueTree. */
     ValueTree (const ValueTree&) noexcept;
 
+    /** Changes this object to be a reference to the given tree. */
+    ValueTree& operator= (const ValueTree&);
+
     /** Move constructor */
     ValueTree (ValueTree&&) noexcept;
-
-    /** Changes this object to be a reference to the given tree.
-        Note that calling this just points this at the new object and invokes the
-        Listener::valueTreeRedirected callback, but it's not an undoable operation. If
-        you're trying to replace an entire tree in an undoable way, you probably want
-        to use copyPropertiesAndChildrenFrom() instead.
-    */
-    ValueTree& operator= (const ValueTree&);
 
     /** Destructor. */
     ~ValueTree();
@@ -176,19 +171,6 @@ public:
 
     /** Returns a deep copy of this tree and all its sub-trees. */
     ValueTree createCopy() const;
-
-    /** Overwrites all the properties in this tree with the properties of the source tree.
-        Any properties that already exist will be updated; and new ones will be added, and
-        any that are not present in the source tree will be removed.
-        @see copyPropertiesAndChildrenFrom
-    */
-    void copyPropertiesFrom (const ValueTree& source, UndoManager* undoManager);
-
-    /** Replaces all children and properties of this object with copies of those from
-        the source object.
-        @see copyPropertiesFrom
-    */
-    void copyPropertiesAndChildrenFrom (const ValueTree& source, UndoManager* undoManager);
 
     //==============================================================================
     /** Returns the type of this tree.
@@ -278,6 +260,12 @@ public:
     */
     Value getPropertyAsValue (const Identifier& name, UndoManager* undoManager,
                               bool shouldUpdateSynchronously = false);
+
+    /** Overwrites all the properties in this tree with the properties of the source tree.
+        Any properties that already exist will be updated; and new ones will be added, and
+        any that are not present in the source tree will be removed.
+    */
+    void copyPropertiesFrom (const ValueTree& source, UndoManager* undoManager);
 
     //==============================================================================
     /** Returns the number of child trees inside this one.
@@ -400,11 +388,10 @@ public:
     */
     struct Iterator
     {
-        Iterator (const ValueTree&, bool isEnd);
-        Iterator& operator++();
+        Iterator (const ValueTree&, bool isEnd) noexcept;
+        Iterator& operator++() noexcept;
 
-        bool operator== (const Iterator&) const;
-        bool operator!= (const Iterator&) const;
+        bool operator!= (const Iterator&) const noexcept;
         ValueTree operator*() const;
 
         using difference_type    = std::ptrdiff_t;
@@ -633,8 +620,7 @@ private:
     void createListOfChildren (OwnedArray<ValueTree>&) const;
     void reorderChildren (const OwnedArray<ValueTree>&, UndoManager*);
 
-    explicit ValueTree (ReferenceCountedObjectPtr<SharedObject>) noexcept;
-    explicit ValueTree (SharedObject&) noexcept;
+    explicit ValueTree (SharedObject*) noexcept;
 };
 
 } // namespace juce

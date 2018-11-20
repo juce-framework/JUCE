@@ -162,7 +162,7 @@ public:
     /** Returns the current component that's filling the panel.
         This will return nullptr if there isn't one.
     */
-    Component* getCurrentContentComponent() const noexcept          { return panelComponent.get(); }
+    Component* getCurrentContentComponent() const noexcept          { return panelComponent; }
 
     //==============================================================================
     /** Callback method to indicate the selected tab has been changed.

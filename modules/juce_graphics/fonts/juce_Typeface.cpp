@@ -118,7 +118,7 @@ Typeface::~Typeface()
 Typeface::Ptr Typeface::getFallbackTypeface()
 {
     const Font fallbackFont (Font::getFallbackFontName(), Font::getFallbackFontStyle(), 10.0f);
-    return Typeface::Ptr (fallbackFont.getTypeface());
+    return fallbackFont.getTypeface();
 }
 
 EdgeTable* Typeface::getEdgeTableForGlyph (int glyphNumber, const AffineTransform& transform, float fontHeight)
@@ -140,8 +140,9 @@ EdgeTable* Typeface::getEdgeTableForGlyph (int glyphNumber, const AffineTransfor
 struct Typeface::HintingParams
 {
     HintingParams (Typeface& t)
+        : cachedSize (0), top (0), middle (0), bottom (0)
     {
-        Font font (t);
+        Font font (&t);
         font = font.withHeight ((float) standardHeight);
 
         top = getAverageY (font, "BDEFPRTZOQ", true);
@@ -208,7 +209,7 @@ private:
         float middle, upperScale, upperOffset, lowerScale, lowerOffset;
     };
 
-    float cachedSize = 0;
+    float cachedSize;
     Scaling cachedScale;
 
     static float getAverageY (const Font& font, const char* chars, bool getTop)
@@ -247,7 +248,7 @@ private:
     }
 
     enum { standardHeight = 100 };
-    float top = 0, middle = 0, bottom = 0;
+    float top, middle, bottom;
 };
 
 void Typeface::applyVerticalHintingTransform (float fontSize, Path& path)

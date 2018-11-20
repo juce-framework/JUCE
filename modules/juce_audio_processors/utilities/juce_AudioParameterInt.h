@@ -35,7 +35,7 @@ namespace juce
 
     @tags{Audio}
 */
-class JUCE_API  AudioParameterInt  : public RangedAudioParameter
+class JUCE_API  AudioParameterInt  : public AudioProcessorParameterWithID
 {
 public:
     /** Creates a AudioParameterInt with the specified parameters.
@@ -65,7 +65,6 @@ public:
 
     /** Returns the parameter's current value as an integer. */
     int get() const noexcept                    { return roundToInt (value); }
-
     /** Returns the parameter's current value as an integer. */
     operator int() const noexcept               { return get(); }
 
@@ -75,10 +74,7 @@ public:
     AudioParameterInt& operator= (int newValue);
 
     /** Returns the parameter's range. */
-    Range<int> getRange() const noexcept        { return { (int) getNormalisableRange().start, (int) getNormalisableRange().end }; }
-
-    /** Returns the range of values that the parameter can take. */
-    const NormalisableRange<float>& getNormalisableRange() const override   { return range; }
+    Range<int> getRange() const noexcept        { return Range<int> (minValue, maxValue); }
 
 protected:
     /** Override this method if you are interested in receiving callbacks
@@ -95,7 +91,11 @@ private:
     String getText (float, int) const override;
     float getValueForText (const String&) const override;
 
-    const NormalisableRange<float> range;
+    int limitRange (int) const noexcept;
+    float convertTo0to1 (int) const noexcept;
+    int convertFrom0to1 (float) const noexcept;
+
+    const int minValue, maxValue, rangeOfValues;
     float value;
     const float defaultValue;
     std::function<String (int, int)> stringFromIntFunction;

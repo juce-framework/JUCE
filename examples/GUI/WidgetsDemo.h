@@ -33,8 +33,6 @@
                    juce_gui_basics, juce_gui_extra
  exporters:        xcode_mac, vs2017, linux_make, androidstudio, xcode_iphone
 
- moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
-
  type:             Component
  mainClass:        WidgetsDemo
 
@@ -292,7 +290,7 @@ struct ButtonsPage   : public Component
             over.setStrokeThickness (4.0f);
 
             auto* db = addToList (new DrawableButton (String (i + 5) + " points", DrawableButton::ImageAboveTextLabel));
-            db->setImages (&normal, &over, nullptr);
+            db->setImages (&normal, &over, 0);
             db->setClickingTogglesState (true);
             db->setRadioGroupId (23456);
 
@@ -391,7 +389,7 @@ struct ButtonsPage   : public Component
         {
             // create an image-on-button-shape button from the same drawables..
             auto db = addToList (new DrawableButton ("Button 3", DrawableButton::ImageOnButtonBackground));
-            db->setImages (&normal, nullptr, nullptr);
+            db->setImages (&normal, 0, 0);
             db->setBounds (260, 160, 110, 25);
             db->setTooltip ("This is a DrawableButton on a standard button background");
             db->onClick = popupMessageCallback;
@@ -636,7 +634,7 @@ private:
                 {
                     auto* drawable = new DrawableImage();
                     drawable->setImage (getImageFromAssets ("juce_icon.png"));
-                    return new ToolbarButton (itemId, "juce!", drawable, nullptr);
+                    return new ToolbarButton (itemId, "juce!", drawable, 0);
                 }
                 case customComboBox:    return new CustomToolbarComboBox (itemId);
                 default:                break;
@@ -671,7 +669,7 @@ private:
             }
 
             auto* image = iconsFromZipFile[iconNames.indexOf (filename)]->createCopy();
-            return new ToolbarButton (itemId, text, image, nullptr);
+            return new ToolbarButton (itemId, text, image, 0);
         }
 
         // Demonstrates how to put a custom component into a toolbar - this one contains
@@ -1030,7 +1028,7 @@ private:
     // this loads the embedded database XML file into memory
     void loadData()
     {
-        demoData = parseXML (loadEntireAssetIntoString ("demo table data.xml"));
+        demoData.reset (XmlDocument::parse (loadEntireAssetIntoString ("demo table data.xml")));
 
         dataList   = demoData->getChildByName ("DATA");
         columnList = demoData->getChildByName ("COLUMNS");

@@ -642,7 +642,7 @@ void AudioThumbnail::saveTo (OutputStream& output) const
 //==============================================================================
 bool AudioThumbnail::setDataSource (LevelDataSource* newSource)
 {
-    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
+    jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
 
     numSamplesFinished = 0;
 

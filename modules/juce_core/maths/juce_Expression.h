@@ -243,6 +243,10 @@ private:
     //==============================================================================
     class Term;
     struct Helpers;
+    friend class Term;
+    friend struct Helpers;
+    friend struct ContainerDeletePolicy<Term>;
+    friend class ReferenceCountedObjectPtr<Term>;
     ReferenceCountedObjectPtr<Term> term;
 
     explicit Expression (Term*);

@@ -28,182 +28,190 @@
 
 
 //==============================================================================
-/** A PropertyComponent for selecting files or folders.
-
-    The user may drag files over the property box, enter the path manually and/or click
-    the '...' button to open a file selection dialog box.
-*/
-class FilePathPropertyComponent    : public PropertyComponent,
-                                     public FileDragAndDropTarget,
-                                     private Value::Listener
+class FilePathPropertyComponent  : public PropertyComponent
 {
 public:
-    FilePathPropertyComponent (Value valueToControl, const String& propertyName, bool isDir, bool thisOS = true,
-                               const String& wildcardsToUse = "*", const File& relativeRoot = File(), bool multiPath = false)
-        : PropertyComponent (propertyName),
-          text (valueToControl, propertyName, 1024, false),
-          isDirectory (isDir), isThisOS (thisOS), supportsMultiplePaths (multiPath), wildcards (wildcardsToUse), root (relativeRoot)
-    {
-        textValue.referTo (valueToControl);
+    /** A Property Component for selecting files or folders.
 
-        init();
+        The user may drag files over the property box, enter the path
+        manually and/or click the '...' button to open a file selection
+        dialog box
+    */
+    FilePathPropertyComponent (Value valueToControl,
+                               const String& propertyDescription,
+                               bool isDirectory,
+                               const String& wildcards = "*",
+                               const File& rootToUseForRelativePaths = File(),
+                               const bool supportsMultiplePaths = false)
+        : PropertyComponent (propertyDescription),
+          innerComp (valueToControl, isDirectory, wildcards, rootToUseForRelativePaths, supportsMultiplePaths)
+    {
+        addAndMakeVisible (innerComp);
     }
 
-    /** Displays a default value when no value is specified by the user. */
-    FilePathPropertyComponent (ValueWithDefault& valueToControl, const String& propertyName, bool isDir, bool thisOS = true,
-                               const String& wildcardsToUse = "*", const File& relativeRoot = File(), bool multiPath = false)
-       : PropertyComponent (propertyName),
-         text (valueToControl, propertyName, 1024, false),
-         isDirectory (isDir), isThisOS (thisOS), supportsMultiplePaths (multiPath), wildcards (wildcardsToUse), root (relativeRoot)
-    {
-        textValue = valueToControl.getPropertyAsValue();
-
-        init();
-    }
-
-    //==============================================================================
-    void refresh() override {}
-
-    void resized() override
-    {
-        auto bounds = getLocalBounds();
-
-        text.setBounds (bounds.removeFromLeft (jmax (400, bounds.getWidth() - 55)));
-        bounds.removeFromLeft (5);
-        browseButton.setBounds (bounds);
-    }
-
-    void paintOverChildren (Graphics& g) override
-    {
-        if (highlightForDragAndDrop)
-        {
-            g.setColour (findColour (defaultHighlightColourId).withAlpha (0.5f));
-            g.fillRect (getLookAndFeel().getPropertyComponentContentPosition (text));
-        }
-    }
-
-    //==============================================================================
-    bool isInterestedInFileDrag (const StringArray&) override     { return true; }
-    void fileDragEnter (const StringArray&, int, int) override    { highlightForDragAndDrop = true;  repaint(); }
-    void fileDragExit (const StringArray&) override               { highlightForDragAndDrop = false; repaint(); }
-
-    void filesDropped (const StringArray& selectedFiles, int, int) override
-    {
-        if (supportsMultiplePaths)
-        {
-            for (auto& f : selectedFiles)
-                setTo (f);
-        }
-        else
-        {
-            setTo (selectedFiles[0]);
-        }
-
-        highlightForDragAndDrop = false;
-        repaint();
-    }
+    void refresh() override {} // N/A
 
 private:
-    //==============================================================================
-    void init()
+    struct InnerComponent   : public Component,
+                              public FileDragAndDropTarget
     {
-        textValue.addListener (this);
-
-        text.setInterestedInFileDrag (false);
-        addAndMakeVisible (text);
-
-        browseButton.onClick = [this] { browse(); };
-        addAndMakeVisible (browseButton);
-
-        lookAndFeelChanged();
-    }
-
-    void setTo (File f)
-    {
-        if (isDirectory && ! f.isDirectory())
-            f = f.getParentDirectory();
-
-        auto pathName = (root == File()) ? f.getFullPathName()
-                                         : f.getRelativePathFrom (root);
-
-        auto currentPath = text.getText();
-
-        if (supportsMultiplePaths && currentPath.isNotEmpty())
-            pathName = currentPath.trimCharactersAtEnd (" ;") + "; " + pathName;
-
-        text.setText (pathName);
-        updateEditorColour();
-    }
-
-    void browse()
-    {
-        File currentFile = {};
-
-        if (text.getText().isNotEmpty())
-            currentFile = root.getChildFile (text.getText());
-
-        if (isDirectory)
+        InnerComponent (Value v, bool isDir, const String& wc, const File& rt, const bool multiplePaths)
+            : value (v),
+              isDirectory (isDir),
+              highlightForDragAndDrop (false),
+              wildcards (wc),
+              root (rt),
+              button ("..."),
+              supportsMultiplePaths (multiplePaths)
         {
-            FileChooser chooser ("Select directory", currentFile);
+            addAndMakeVisible (textbox);
+            textbox.getTextValue().referTo (value);
+            textbox.onReturnKey  = [this] { updateEditorColour (textbox); };
+            textbox.onFocusLost  = [this] { updateEditorColour (textbox); };
 
-            if (chooser.browseForDirectory())
-                setTo (chooser.getResult());
+            addAndMakeVisible (button);
+            button.onClick = [this] { browse(); };
+
+            lookAndFeelChanged();
         }
-        else
+
+        void paintOverChildren (Graphics& g) override
         {
-            FileChooser chooser ("Select file", currentFile, wildcards);
-
-            if (chooser.browseForFileToOpen())
-                setTo (chooser.getResult());
+            if (highlightForDragAndDrop)
+            {
+                g.setColour (findColour (defaultHighlightColourId).withAlpha (0.5f));
+                g.fillRect (textbox.getBounds());
+            }
         }
-    }
 
-    void updateEditorColour()
-    {
-        if (supportsMultiplePaths || ! isThisOS)
-            return;
-
-        text.setColour (TextPropertyComponent::textColourId, findColour (widgetTextColourId));
-
-        auto pathToCheck = text.getText();
-
-        if (pathToCheck.isNotEmpty())
+        void resized() override
         {
-            pathToCheck.replace ("${user.home}", "~");
+            juce::Rectangle<int> r (getLocalBounds());
 
-           #if JUCE_WINDOWS
-            if (pathToCheck.startsWith ("~"))
-                pathToCheck = pathToCheck.replace ("~", File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
-           #endif
-
-            if (! root.getChildFile (pathToCheck).exists())
-                text.setColour (TextPropertyComponent::textColourId, Colours::red);
+            button.setBounds (r.removeFromRight (30));
+            textbox.setBounds (r);
         }
-    }
 
-    void valueChanged (Value&) override
-    {
-        updateEditorColour();
-    }
+        bool isInterestedInFileDrag (const StringArray&) override   { return true; }
+        void fileDragEnter (const StringArray&, int, int) override  { highlightForDragAndDrop = true;  repaint(); }
+        void fileDragExit (const StringArray&) override             { highlightForDragAndDrop = false; repaint(); }
 
-    void lookAndFeelChanged() override
-    {
-        browseButton.setColour (TextButton::buttonColourId, findColour (secondaryButtonBackgroundColourId));
-        browseButton.setColour (TextButton::textColourOffId, Colours::white);
+        void filesDropped (const StringArray& files, int, int) override
+        {
+            const File firstFile (files[0]);
 
-        updateEditorColour();
-    }
+            if (isDirectory)
+                setTo (firstFile.isDirectory() ? firstFile
+                                               : firstFile.getParentDirectory());
+            else
+                setTo (firstFile);
 
-    //==============================================================================
-    Value textValue;
+            highlightForDragAndDrop = false;
+            repaint();
+        }
 
-    TextPropertyComponent text;
-    TextButton browseButton { "..." };
+        void browse()
+        {
+            auto currentFile = root.getChildFile (value.toString());
 
-    bool isDirectory, isThisOS, supportsMultiplePaths, highlightForDragAndDrop = false;
-    String wildcards;
-    File root;
+            if (isDirectory)
+            {
+                FileChooser chooser ("Select directory", currentFile);
 
-    //==============================================================================
+                if (chooser.browseForDirectory())
+                    setTo (chooser.getResult());
+            }
+            else
+            {
+                FileChooser chooser ("Select file", currentFile, wildcards);
+
+                if (chooser.browseForFileToOpen())
+                    setTo (chooser.getResult());
+            }
+        }
+
+        void updateEditorColour (TextEditor& editor)
+        {
+            if (supportsMultiplePaths)
+            {
+                auto paths = StringArray::fromTokens (editor.getTextValue().toString(), ";", {});
+
+                editor.clear();
+
+                AttributedString str;
+                for (auto p : paths)
+                {
+                    if (root.getChildFile (p.trim()).exists())    editor.setColour (TextEditor::textColourId, findColour (widgetTextColourId));
+                    else                                          editor.setColour (TextEditor::textColourId, Colours::red);
+
+                    editor.insertTextAtCaret (p);
+
+                    if (paths.indexOf (p) < paths.size() - 1)
+                    {
+                        editor.setColour (TextEditor::textColourId, findColour (widgetTextColourId));
+                        editor.insertTextAtCaret (";");
+                    }
+                }
+
+                editor.setColour (TextEditor::textColourId, findColour (widgetTextColourId));
+            }
+            else
+            {
+                auto pathToCheck = editor.getTextValue().toString();
+
+                //android SDK/NDK paths
+                if (pathToCheck.contains ("${user.home}"))
+                    pathToCheck = pathToCheck.replace ("${user.home}", File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
+
+               #if JUCE_WINDOWS
+                if (pathToCheck.startsWith ("~"))
+                    pathToCheck = pathToCheck.replace ("~", File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
+               #endif
+
+                const auto currentFile = root.getChildFile (pathToCheck);
+
+                if (currentFile.exists())
+                    editor.applyColourToAllText (findColour (widgetTextColourId));
+                else
+                    editor.applyColourToAllText (Colours::red);
+            }
+        }
+
+        void setTo (const File& f)
+        {
+            auto pathName = (root == File()) ? f.getFullPathName()
+                                             : f.getRelativePathFrom (root);
+
+            if (supportsMultiplePaths && value.toString().isNotEmpty())
+                value = value.toString().trimCharactersAtEnd (" ;") + "; " + pathName;
+            else
+                value = pathName;
+
+            updateEditorColour (textbox);
+        }
+
+        void lookAndFeelChanged() override
+        {
+            textbox.setColour (TextEditor::backgroundColourId, findColour (widgetBackgroundColourId));
+            textbox.setColour (TextEditor::outlineColourId, Colours::transparentBlack);
+            updateEditorColour (textbox);
+
+            button.setColour (TextButton::buttonColourId, findColour (secondaryButtonBackgroundColourId));
+            button.setColour (TextButton::textColourOffId, Colours::white);
+        }
+
+        Value value;
+        bool isDirectory, highlightForDragAndDrop;
+        String wildcards;
+        File root;
+        TextEditor textbox;
+        TextButton button;
+        bool supportsMultiplePaths;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InnerComponent)
+    };
+
+    InnerComponent innerComp;  // Used so that the PropertyComponent auto first-child positioning works
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FilePathPropertyComponent)
 };

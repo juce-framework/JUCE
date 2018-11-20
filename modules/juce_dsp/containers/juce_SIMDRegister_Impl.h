@@ -54,7 +54,7 @@ private:
 template <typename Scalar>
 struct CmplxSIMDOps
 {
-    using vSIMDType = typename SIMDNativeOps<Scalar>::vSIMDType;
+    typedef typename SIMDNativeOps<Scalar>::vSIMDType vSIMDType;
 
     static inline vSIMDType JUCE_VECTOR_CALLTYPE load (const Scalar* a) noexcept
     {
@@ -101,7 +101,7 @@ struct CmplxSIMDOps
 template <typename Scalar>
 struct CmplxSIMDOps<std::complex<Scalar>>
 {
-    using vSIMDType = typename SIMDNativeOps<Scalar>::vSIMDType;
+    typedef typename SIMDNativeOps<Scalar>::vSIMDType vSIMDType;
 
     static inline vSIMDType JUCE_VECTOR_CALLTYPE load (const std::complex<Scalar>* a) noexcept
     {

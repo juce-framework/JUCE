@@ -68,7 +68,7 @@ struct LuaTokeniserFunctions
                 break;
         }
 
-        for (int i = 0; k[i] != nullptr; ++i)
+        for (int i = 0; k[i] != 0; ++i)
             if (token.compare (CharPointer_ASCII (k[i])) == 0)
                 return true;
 

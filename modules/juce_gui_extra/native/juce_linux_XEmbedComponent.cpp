@@ -73,21 +73,9 @@ public:
     };
 
     //==============================================================================
-    struct SharedKeyWindow : public ReferenceCountedObject
+    class SharedKeyWindow : public ReferenceCountedObject
     {
-        SharedKeyWindow (ComponentPeer* peerToUse)
-            : keyPeer (peerToUse),
-              keyProxy (juce_createKeyProxyWindow (keyPeer))
-        {}
-
-        ~SharedKeyWindow()
-        {
-            juce_deleteKeyProxyWindow (keyPeer);
-
-            auto& keyWindows = getKeyWindows();
-            keyWindows.remove (keyPeer);
-        }
-
+    public:
         using Ptr = ReferenceCountedObjectPtr<SharedKeyWindow>;
 
         //==============================================================================
@@ -122,6 +110,21 @@ public:
 
     private:
         //==============================================================================
+        friend struct ContainerDeletePolicy<SharedKeyWindow>;
+
+        SharedKeyWindow (ComponentPeer* peerToUse)
+            : keyPeer (peerToUse),
+              keyProxy (juce_createKeyProxyWindow (keyPeer))
+        {}
+
+        ~SharedKeyWindow()
+        {
+            juce_deleteKeyProxyWindow (keyPeer);
+
+            auto& keyWindows = getKeyWindows();
+            keyWindows.remove (keyPeer);
+        }
+
         ComponentPeer* keyPeer;
         Window keyProxy;
 
@@ -421,8 +424,8 @@ private:
             // on which screen it might appear to get a scaling factor :-(
             auto& displays = Desktop::getInstance().getDisplays();
             auto* peer = owner.getPeer();
-            const double scale = (peer != nullptr ? peer->getPlatformScaleFactor()
-                                                  : displays.getMainDisplay().scale);
+            const double scale = (peer != nullptr ? displays.getDisplayContaining (peer->getBounds().getCentre())
+                                  : displays.getMainDisplay()).scale;
 
             Point<int> topLeftInPeer
                 = (peer != nullptr ? peer->getComponent().getLocalPoint (&owner, Point<int> (0, 0))
@@ -591,7 +594,9 @@ private:
         if (auto* peer = owner.getPeer())
         {
             auto r = peer->getComponent().getLocalArea (&owner, owner.getLocalBounds());
-            return r * peer->getPlatformScaleFactor();
+            auto scale = Desktop::getInstance().getDisplays().getDisplayContaining (peer->localToGlobal (r.getCentre())).scale;
+
+            return r * scale;
         }
 
         return owner.getLocalBounds();

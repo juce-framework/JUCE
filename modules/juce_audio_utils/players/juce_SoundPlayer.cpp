@@ -30,9 +30,9 @@ namespace juce
 // This is an AudioTransportSource which will own it's assigned source
 struct AudioSourceOwningTransportSource  : public AudioTransportSource
 {
-    AudioSourceOwningTransportSource (PositionableAudioSource* s, double sr)  : source (s)
+    AudioSourceOwningTransportSource (PositionableAudioSource* s, double sampleRate)  : source (s)
     {
-        AudioTransportSource::setSource (s, 0, nullptr, sr);
+        AudioTransportSource::setSource (s, 0, nullptr, sampleRate);
     }
 
     ~AudioSourceOwningTransportSource()

@@ -306,6 +306,7 @@ MainComponent::MainComponent()
 MainComponent::~MainComponent()
 {
     contentComponent->clearCurrentDemo();
+    sharedAudioDeviceManager.reset();
 }
 
 //==============================================================================

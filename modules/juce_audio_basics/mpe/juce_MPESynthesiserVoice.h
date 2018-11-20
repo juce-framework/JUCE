@@ -156,10 +156,8 @@ public:
     */
     double getSampleRate() const noexcept                 { return currentSampleRate; }
 
-    /** This will be set to an incrementing counter value in MPESynthesiser::startVoice()
-        and can be used to determine the order in which voices started.
-    */
-    uint32 noteOnTime = 0;
+    /** Returns true if this voice started playing its current note before the other voice did. */
+    bool wasStartedBefore (const MPESynthesiserVoice& other) const noexcept;
 
 protected:
     //==============================================================================
@@ -184,6 +182,7 @@ protected:
 private:
     //==============================================================================
     friend class MPESynthesiser;
+    uint32 noteStartTime = 0;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MPESynthesiserVoice)
 };

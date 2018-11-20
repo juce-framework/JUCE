@@ -25,15 +25,11 @@ namespace juce
 
 extern HWND juce_messageWindowHandle;
 
-using CheckEventBlockedByModalComps = bool (*)(const MSG&);
+typedef bool (*CheckEventBlockedByModalComps) (const MSG&);
 CheckEventBlockedByModalComps isEventBlockedByModalComps = nullptr;
 
-using SettingChangeCallbackFunc = void (*)(void);
+typedef void (*SettingChangeCallbackFunc) (void);
 SettingChangeCallbackFunc settingChangeCallback = nullptr;
-
-#if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client && JucePlugin_Build_Unity
- bool juce_isRunningInUnity();
-#endif
 
 //==============================================================================
 namespace WindowsMessageHelpers
@@ -46,7 +42,7 @@ namespace WindowsMessageHelpers
 
     void dispatchMessageFromLParam (LPARAM lParam)
     {
-        if (auto message = reinterpret_cast<MessageManager::MessageBase*> (lParam))
+        if (MessageManager::MessageBase* message = reinterpret_cast<MessageManager::MessageBase*> (lParam))
         {
             JUCE_TRY
             {
@@ -72,7 +68,7 @@ namespace WindowsMessageHelpers
         return TRUE;
     }
 
-    void handleBroadcastMessage (const COPYDATASTRUCT* data)
+    void handleBroadcastMessage (const COPYDATASTRUCT* const data)
     {
         if (data != nullptr && data->dwData == broadcastMessageMagicNumber)
         {
@@ -91,7 +87,7 @@ namespace WindowsMessageHelpers
     }
 
     //==============================================================================
-    LRESULT CALLBACK messageWndProc (HWND h, UINT message, WPARAM wParam, LPARAM lParam) noexcept
+    LRESULT CALLBACK messageWndProc (HWND h, const UINT message, const WPARAM wParam, const LPARAM lParam) noexcept
     {
         if (h == juce_messageWindowHandle)
         {
@@ -108,10 +104,11 @@ namespace WindowsMessageHelpers
                 handleBroadcastMessage (reinterpret_cast<const COPYDATASTRUCT*> (lParam));
                 return 0;
             }
-
-            if (message == WM_SETTINGCHANGE)
+            else if (message == WM_SETTINGCHANGE)
+            {
                 if (settingChangeCallback != nullptr)
                     settingChangeCallback();
+            }
         }
 
         return DefWindowProc (h, message, wParam, lParam);
@@ -123,7 +120,7 @@ LRESULT juce_offerEventToActiveXControl (::MSG&);
 #endif
 
 //==============================================================================
-bool MessageManager::dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages)
+bool MessageManager::dispatchNextMessageOnSystemQueue (const bool returnIfNoPendingMessages)
 {
     using namespace WindowsMessageHelpers;
     MSG m;
@@ -133,10 +130,10 @@ bool MessageManager::dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMes
 
     if (GetMessage (&m, (HWND) 0, 0, 0) >= 0)
     {
-       #if JUCE_MODULE_AVAILABLE_juce_gui_extra
+      #if JUCE_MODULE_AVAILABLE_juce_gui_extra
         if (juce_offerEventToActiveXControl (m) != S_FALSE)
             return true;
-       #endif
+      #endif
 
         if (m.message == customMessageID && m.hwnd == juce_messageWindowHandle)
         {
@@ -154,7 +151,7 @@ bool MessageManager::dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMes
             {
                 // if it's someone else's window being clicked on, and the focus is
                 // currently on a juce window, pass the kb focus over..
-                auto currentFocus = GetFocus();
+                HWND currentFocus = GetFocus();
 
                 if (currentFocus == 0 || JuceWindowIdentifier::isJUCEWindow (currentFocus))
                     SetFocus (m.hwnd);
@@ -171,18 +168,12 @@ bool MessageManager::dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMes
 bool MessageManager::postMessageToSystemQueue (MessageManager::MessageBase* const message)
 {
     message->incReferenceCount();
-
-   #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client && JucePlugin_Build_Unity
-    if (juce_isRunningInUnity())
-        return SendNotifyMessage (juce_messageWindowHandle, WindowsMessageHelpers::customMessageID, 0, (LPARAM) message) != 0;
-   #endif
-
     return PostMessage (juce_messageWindowHandle, WindowsMessageHelpers::customMessageID, 0, (LPARAM) message) != 0;
 }
 
 void MessageManager::broadcastMessage (const String& value)
 {
-    auto localCopy = value;
+    const String localCopy (value);
 
     Array<HWND> windows;
     EnumWindows (&WindowsMessageHelpers::broadcastEnumWindowProc, (LPARAM) &windows);

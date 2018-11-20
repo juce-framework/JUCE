@@ -30,9 +30,9 @@
 //==============================================================================
 namespace FileHelpers
 {
-    static uint64 calculateMemoryHashCode (const void* data, size_t numBytes)
+    static int64 calculateMemoryHashCode (const void* data, const size_t numBytes)
     {
-        uint64 t = 0;
+        int64 t = 0;
 
         for (size_t i = 0; i < numBytes; ++i)
             t = t * 65599 + static_cast<const uint8*> (data)[i];
@@ -40,9 +40,9 @@ namespace FileHelpers
         return t;
     }
 
-    uint64 calculateStreamHashCode (InputStream& in)
+    int64 calculateStreamHashCode (InputStream& in)
     {
-        uint64 t = 0;
+        int64 t = 0;
 
         const int bufferSize = 4096;
         HeapBlock<uint8> buffer;
@@ -50,7 +50,7 @@ namespace FileHelpers
 
         for (;;)
         {
-            auto num = in.read (buffer, bufferSize);
+            const int num = in.read (buffer, bufferSize);
 
             if (num <= 0)
                 break;
@@ -62,7 +62,7 @@ namespace FileHelpers
         return t;
     }
 
-    uint64 calculateFileHashCode (const File& file)
+    int64 calculateFileHashCode (const File& file)
     {
         std::unique_ptr<FileInputStream> stream (file.createInputStream());
         return stream != nullptr ? calculateStreamHashCode (*stream) : 0;

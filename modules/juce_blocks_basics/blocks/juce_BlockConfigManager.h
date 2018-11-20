@@ -36,8 +36,6 @@ namespace juce
 
 using namespace BlocksProtocol;
 
-using ConfigType = Block::ConfigMetaData::ConfigType;
-
 /** Manages the configuration of blocks
 
     @tags{Blocks}
@@ -47,7 +45,16 @@ struct BlockConfigManager
     void setDeviceIndex (TopologyIndex newDeviceIndex)                       { deviceIndex = newDeviceIndex; }
     void setDeviceComms (PhysicalTopologySource::DeviceConnection* newConn)  { deviceConnection = newConn; }
 
-    static constexpr uint32 numConfigItems = 64;
+    enum ConfigType
+    {
+        integer,
+        floating,
+        boolean,
+        colour,
+        options
+    };
+
+    static constexpr uint32 numConfigItems = 61;
 
     /** Structure describing a configuration */
     struct ConfigDescription
@@ -66,7 +73,7 @@ struct BlockConfigManager
 
         Block::ConfigMetaData toConfigMetaData() const
         {
-            return Block::ConfigMetaData ((uint32) item, value, { min, max }, isActive, name, type, (const char**) optionNames, group);
+            return Block::ConfigMetaData ((uint32) item, value, { min, max }, isActive, name, (uint32) type, (const char**) optionNames, group);
         }
     };
 
@@ -74,13 +81,8 @@ struct BlockConfigManager
     {
         { midiStartChannel,     2,      1,      16,     false,  "MIDI Start Channel",   ConfigType::integer,    {},               "MIDI Settings" },
         { midiEndChannel,       16,     1,      16,     false,  "MIDI End Channel",     ConfigType::integer,    {},               "MIDI Settings" },
-        { midiUseMPE,           1,      0,      2,      false,  "MIDI Mode",            ConfigType::options,    { "Multi Channel",
-                                                                                                                  "MPE",
-                                                                                                                  "Single Channel" }, "MIDI Settings" },
+        { midiUseMPE,           1,      0,      1,      false,  "Use MPE",              ConfigType::boolean,    {},               "MIDI Settings" },
         { pitchBendRange,       48,     1,      96,     false,  "Pitch Bend Range",     ConfigType::integer,    {},               "MIDI Settings" },
-        { midiChannelRange,     15,     1,      15,     false,  "No. MIDI Channels",    ConfigType::integer,    {},               "MIDI Settings" },
-        { MPEZone,              0,      0,      1,      false,  "MPE Zone",             ConfigType::options,    { "Lower Zone",
-                                                                                                                  "Upper Zone"},  "MIDI Settings" },
         { octave,               0,      -4,     6,      false,  "Octave",               ConfigType::integer,    {},               "Pitch" },
         { transpose,            0,      -11,    11,     false,  "Transpose",            ConfigType::integer,    {},               "Pitch" },
         { slideCC,              74,     0,      127,    false,  "Slide CC",             ConfigType::integer,    {},               "Play mode" },
@@ -104,12 +106,12 @@ struct BlockConfigManager
         { chord,                0,      0,      127,    false,  "Chord",                ConfigType::integer,    {},               "Play mode" }, // NOTE: Should be options
         { arpPattern,           0,      0,      127,    false,  "Arp Pattern",          ConfigType::integer,    {},               "Play mode" },
         { tempo,                120,    1,      300,    false,  "Tempo",                ConfigType::integer,    {},               "Rhythm" },
-        { xTrackingMode,        1,      1,      4,      false,  "Glide Tracking Mode",  ConfigType::options,    { "Multi-Channel",
+        { xTrackingMode,        1,      0,      4,      false,  "Glide Tracking Mode",  ConfigType::options,    { "Multi-Channel",
                                                                                                                   "Last Played",
                                                                                                                   "Highest",
                                                                                                                   "Lowest",
                                                                                                                   "Disabled" },   "Play mode" },
-        { yTrackingMode,        1,      1,      4,      false,  "Slide Tracking Mode",  ConfigType::options,    { "Multi-Channel",
+        { yTrackingMode,        1,      0,      4,      false,  "Slide Tracking Mode",  ConfigType::options,    { "Multi-Channel",
                                                                                                                   "Last Played",
                                                                                                                   "Highest",
                                                                                                                   "Lowest",
@@ -267,22 +269,50 @@ struct BlockConfigManager
     // Set Block Configuration
     void setBlockConfig (ConfigItemId item, int32 value)
     {
-        buildAndSendPacket ([item, value] (HostPacketBuilder<32>& p) { p.addConfigSetMessage (item, value); });
+        HostPacketBuilder<32> packet;
+
+        packet.writePacketSysexHeaderBytes (deviceIndex);
+        packet.addConfigSetMessage (item, value);
+        packet.writePacketSysexFooter();
+
+        if (deviceConnection != nullptr)
+            deviceConnection->sendMessageToDevice (packet.getData(), (size_t) packet.size());
     }
 
     void requestBlockConfig (ConfigItemId item)
     {
-        buildAndSendPacket ([item] (HostPacketBuilder<32>& p) { p.addRequestMessage (item); });
+        HostPacketBuilder<32> packet;
+
+        packet.writePacketSysexHeaderBytes (deviceIndex);
+        packet.addRequestMessage (item);
+        packet.writePacketSysexFooter();
+
+        if (deviceConnection != nullptr)
+            deviceConnection->sendMessageToDevice(packet.getData(), (size_t) packet.size());
     }
 
     void requestFactoryConfigSync()
     {
-        buildAndSendPacket ([] (HostPacketBuilder<32>& p) { p.addRequestFactorySyncMessage(); });
+        HostPacketBuilder<32> packet;
+
+        packet.writePacketSysexHeaderBytes(deviceIndex);
+        packet.addRequestFactorySyncMessage();
+        packet.writePacketSysexFooter();
+
+        if (deviceConnection != nullptr)
+            deviceConnection->sendMessageToDevice(packet.getData(), (size_t) packet.size());
     }
 
     void requestUserConfigSync()
     {
-        buildAndSendPacket ([] (HostPacketBuilder<32>& p) { p.addRequestUserSyncMessage(); });
+        HostPacketBuilder<32> packet;
+
+        packet.writePacketSysexHeaderBytes(deviceIndex);
+        packet.addRequestUserSyncMessage();
+        packet.writePacketSysexFooter();
+
+        if (deviceConnection != nullptr)
+            deviceConnection->sendMessageToDevice(packet.getData(), (size_t) packet.size());
     }
 
     void handleConfigUpdateMessage (int32 item, int32 value, int32 min, int32 max)
@@ -321,21 +351,8 @@ private:
         return false;
     }
 
-    template<typename PacketBuildFn>
-    void buildAndSendPacket (PacketBuildFn buildFn)
-    {
-        if (deviceConnection == nullptr)
-            return;
-
-        HostPacketBuilder<32> packet;
-        packet.writePacketSysexHeaderBytes (deviceIndex);
-        buildFn (packet);
-        packet.writePacketSysexFooter();
-        deviceConnection->sendMessageToDevice (packet.getData(), (size_t) packet.size());
-    }
-
-    TopologyIndex deviceIndex {};
-    PhysicalTopologySource::DeviceConnection* deviceConnection {};
+    TopologyIndex deviceIndex;
+    PhysicalTopologySource::DeviceConnection* deviceConnection;
 };
 
 } // namespace juce

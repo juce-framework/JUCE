@@ -139,10 +139,11 @@
 #include <set>
 
 //==============================================================================
-#define JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN \
-    jassert ((MessageManager::getInstanceWithoutCreating() != nullptr \
-               && MessageManager::getInstanceWithoutCreating()->currentThreadHasLockedMessageManager()) \
-              || getPeer() == nullptr);
+#define ASSERT_MESSAGE_MANAGER_IS_LOCKED \
+    jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
+
+#define ASSERT_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN \
+    jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager() || getPeer() == nullptr);
 
 namespace juce
 {
@@ -152,8 +153,7 @@ namespace juce
 #include "components/juce_Component.cpp"
 #include "components/juce_ComponentListener.cpp"
 #include "mouse/juce_MouseInputSource.cpp"
-#include "desktop/juce_Displays.cpp"
-#include "desktop/juce_Desktop.cpp"
+#include "components/juce_Desktop.cpp"
 #include "components/juce_ModalComponentManager.cpp"
 #include "mouse/juce_ComponentDragger.cpp"
 #include "mouse/juce_DragAndDropContainer.cpp"

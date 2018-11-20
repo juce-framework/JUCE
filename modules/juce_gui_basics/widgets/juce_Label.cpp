@@ -131,17 +131,16 @@ void Label::setBorderSize (BorderSize<int> newBorder)
 //==============================================================================
 Component* Label::getAttachedComponent() const
 {
-    return ownerComponent.get();
+    return static_cast<Component*> (ownerComponent);
 }
 
 void Label::attachToComponent (Component* owner, bool onLeft)
 {
-    jassert (owner != this); // Not a great idea to try to attach it to itself!
-
     if (ownerComponent != nullptr)
         ownerComponent->removeComponentListener (this);
 
     ownerComponent = owner;
+
     leftOfOwnerComp = onLeft;
 
     if (ownerComponent != nullptr)
@@ -155,21 +154,19 @@ void Label::attachToComponent (Component* owner, bool onLeft)
 
 void Label::componentMovedOrResized (Component& component, bool /*wasMoved*/, bool /*wasResized*/)
 {
-    auto& lf = getLookAndFeel();
-    auto f = lf.getLabelFont (*this);
-    auto borderSize = lf.getLabelBorderSize (*this);
+    auto f = getLookAndFeel().getLabelFont (*this);
 
     if (leftOfOwnerComp)
     {
         auto width = jmin (roundToInt (f.getStringWidthFloat (textValue.toString()) + 0.5f)
-                             + borderSize.getLeftAndRight(),
+                             + getBorderSize().getLeftAndRight(),
                            component.getX());
 
         setBounds (component.getX() - width, component.getY(), width, component.getHeight());
     }
     else
     {
-        auto height = borderSize.getTopAndBottom() + 6 + roundToInt (f.getHeight() + 0.5f);
+        auto height = getBorderSize().getTopAndBottom() + 6 + roundToInt (f.getHeight() + 0.5f);
 
         setBounds (component.getX(), component.getY() - height, component.getWidth(), height);
     }

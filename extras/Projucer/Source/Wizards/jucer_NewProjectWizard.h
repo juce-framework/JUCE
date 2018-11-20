@@ -139,8 +139,6 @@ struct NewProjectWizard
             if (! initialiseProject (*project))
                 return nullptr;
 
-            project->getConfigFlag ("JUCE_STRICT_REFCOUNTEDPOINTER") = true;
-
             addExporters (*project, wc);
             addDefaultModules (*project, useGlobalPath);
 
@@ -182,14 +180,14 @@ struct NewProjectWizard
 
     void addDefaultModules (Project& project, bool useGlobalPath)
     {
-        auto defaultModules = getDefaultModules();
+        StringArray mods (getDefaultModules());
 
-        AvailableModuleList list;
-        list.scanPaths ({ modulesFolder });
+        ModuleList list;
+        list.addAllModulesInFolder (modulesFolder);
 
-        for (auto& mod : list.getAllModules())
-            if (defaultModules.contains (mod.first))
-                project.getEnabledModules().addModule (mod.second, false, useGlobalPath, false);
+        for (int i = 0; i < mods.size(); ++i)
+            if (const ModuleDescription* info = list.getModuleWithID (mods[i]))
+                project.getModules().addModule (info->moduleFolder, false, useGlobalPath, false);
     }
 
     void addExporters (Project& project, WizardComp& wizardComp)

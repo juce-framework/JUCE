@@ -79,10 +79,6 @@
  //#define JUCE_USE_CURL 0
 #endif
 
-#ifndef    JUCE_LOAD_CURL_SYMBOLS_LAZILY
- //#define JUCE_LOAD_CURL_SYMBOLS_LAZILY 0
-#endif
-
 #ifndef    JUCE_CATCH_UNHANDLED_EXCEPTIONS
  //#define JUCE_CATCH_UNHANDLED_EXCEPTIONS 1
 #endif
@@ -90,11 +86,6 @@
 #ifndef    JUCE_ALLOW_STATIC_NULL_VARIABLES
  //#define JUCE_ALLOW_STATIC_NULL_VARIABLES 1
 #endif
-
-#ifndef    JUCE_STRICT_REFCOUNTEDPOINTER
- //#define JUCE_STRICT_REFCOUNTEDPOINTER 0
-#endif
-
 //==============================================================================
 #ifndef    JUCE_STANDALONE_APPLICATION
  #if defined(JucePlugin_Name) && defined(JucePlugin_Build_Standalone)

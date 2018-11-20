@@ -51,7 +51,7 @@ namespace std
         /** Creates an empty function. */
         function (decltype (nullptr)) noexcept {}
 
-        /** Creates a function targeting the provided Functor. */
+        /** Creates a function targetting the provided Functor. */
         template <typename Functor>
         function (Functor f)
         {
@@ -192,7 +192,11 @@ namespace std
         {
             if (functorHolderHelper != nullptr)
             {
-                functorHolderHelper->~FunctorHolderBase<Result, Arguments...>();
+                if (functorHolderHelper->getSize() > functorHolderStackSize)
+                    delete[] reinterpret_cast<char*> (functorHolderHelper);
+                else
+                    functorHolderHelper->~FunctorHolderBase<Result, Arguments...>();
+
                 functorHolderHelper = nullptr;
             }
         }

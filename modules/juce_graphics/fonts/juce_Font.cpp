@@ -40,7 +40,7 @@ namespace FontValues
     String fallbackFontStyle;
 }
 
-using GetTypefaceForFont = Typeface::Ptr (*)(const Font&);
+typedef Typeface::Ptr (*GetTypefaceForFont) (const Font&);
 GetTypefaceForFont juce_getTypefaceForFont = nullptr;
 
 float Font::getDefaultMinimumHorizontalScaleFactor() noexcept                { return FontValues::minimumHorizontalScale; }
@@ -308,7 +308,7 @@ bool Font::operator!= (const Font& other) const noexcept
 void Font::dupeInternalIfShared()
 {
     if (font->getReferenceCount() > 1)
-        font = *new SharedFontInternal (*font);
+        font = new SharedFontInternal (*font);
 }
 
 void Font::checkTypefaceSuitability()
@@ -392,7 +392,7 @@ Typeface* Font::getTypeface() const
         jassert (font->typeface != nullptr);
     }
 
-    return font->typeface.get();
+    return font->typeface;
 }
 
 //==============================================================================

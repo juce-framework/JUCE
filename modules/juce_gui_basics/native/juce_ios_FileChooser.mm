@@ -85,34 +85,11 @@ public:
 
         setOpaque (false);
 
-        if (SystemStats::isRunningInAppExtensionSandbox())
-        {
-            if (fileChooser.parent != nullptr)
-            {
-                [controller.get() setModalPresentationStyle:UIModalPresentationFullScreen];
+        auto chooserBounds = Desktop::getInstance().getDisplays().getMainDisplay().userArea;
+        setBounds (chooserBounds);
 
-                auto chooserBounds = fileChooser.parent->getBounds();
-                setBounds (chooserBounds);
-
-                setAlwaysOnTop (true);
-                fileChooser.parent->addAndMakeVisible (this);
-            }
-            else
-            {
-                // Opening a native top-level window in an AUv3 is not allowed (sandboxing). You need to specify a
-                // parent component (for example your editor) to parent the native file chooser window. To do this
-                // specify a parent component in the FileChooser's constructor!
-                jassert (fileChooser.parent != nullptr);
-            }
-        }
-        else
-        {
-            auto chooserBounds = Desktop::getInstance().getDisplays().getMainDisplay().userArea;
-            setBounds (chooserBounds);
-
-            setAlwaysOnTop (true);
-            addToDesktop (0);
-        }
+        setAlwaysOnTop (true);
+        addToDesktop (0);
     }
 
     ~Native()
@@ -222,7 +199,7 @@ private:
 
         NSArray<NSFileAccessIntent*>* intents = @[fileAccessIntent];
 
-        auto fileCoordinator = [[NSFileCoordinator alloc] initWithFilePresenter: nil];
+        auto* fileCoordinator = [[NSFileCoordinator alloc] initWithFilePresenter: nil];
 
         [fileCoordinator coordinateAccessWithIntents: intents queue: [NSOperationQueue mainQueue] byAccessor: ^(NSError* err)
         {
@@ -251,7 +228,7 @@ private:
                 }
                 else
                 {
-                    auto desc = [error localizedDescription];
+                    auto* desc = [error localizedDescription];
                     ignoreUnused (desc);
                     jassertfalse;
                 }
@@ -260,7 +237,7 @@ private:
             }
             else
             {
-                auto desc = [err localizedDescription];
+                auto* desc = [err localizedDescription];
                 ignoreUnused (desc);
                 jassertfalse;
             }
@@ -331,7 +308,7 @@ bool FileChooser::isPlatformDialogAvailable()
    #if JUCE_DISABLE_NATIVE_FILECHOOSERS
     return false;
    #else
-    return true;
+    return [[NSFileManager defaultManager] ubiquityIdentityToken] != nil;
    #endif
 }
 

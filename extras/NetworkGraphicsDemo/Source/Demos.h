@@ -84,7 +84,8 @@ struct BackgroundLogo  : public AnimatedContent
             </svg>
             )blahblah";
 
-        logo.reset (Drawable::createFromSVG (*parseXML (logoData)));
+        std::unique_ptr<XmlElement> svg (XmlDocument::parse (logoData));
+        logo.reset (Drawable::createFromSVG (*svg));
     }
 
     String getName() const override      { return "Background Image"; }

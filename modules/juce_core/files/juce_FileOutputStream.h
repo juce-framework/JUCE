@@ -42,20 +42,9 @@ public:
         does not exist), the failedToOpen() method will return true.
 
         If the file already exists when opened, the stream's write-position will
-        be set to the end of the file. To overwrite an existing file, you can truncate
-        it like this:
-
-        @code
-        FileOutputStream stream (file);
-
-        if (stream.openedOk())
-        {
-            stream.setPosition (0);
-            stream.truncate();
-            ...
-        }
-        @endcode
-
+        be set to the end of the file. To overwrite an existing file,
+        use File::deleteFile() before opening the stream, or use setPosition(0)
+        after it's opened (although this won't truncate the file).
 
         Destroying a FileOutputStream object does not force the operating system
         to write the buffered data to disk immediately. If this is required you

@@ -204,13 +204,17 @@ namespace LiveConstantEditor
         LiveValue<Type>& getValue (const char* file, int line, const Type& initialValue)
         {
             const ScopedLock sl (lock);
-            using ValueType = LiveValue<Type>;
+            typedef LiveValue<Type> ValueType;
 
-            for (auto* v : values)
+            for (int i = 0; i < values.size(); ++i)
+            {
+                LiveValueBase* v = values.getUnchecked(i);
+
                 if (v->sourceLine == line && v->sourceFile == file)
                     return *static_cast<ValueType*> (v);
+            }
 
-            auto v = new ValueType (file, line, initialValue);
+            ValueType* v = new ValueType (file, line, initialValue);
             addValue (v);
             return *v;
         }
@@ -220,6 +224,8 @@ namespace LiveConstantEditor
         OwnedArray<CodeDocument> documents;
         Array<File> documentFiles;
         class EditorWindow;
+        friend class EditorWindow;
+        friend struct ContainerDeletePolicy<EditorWindow>;
         Component::SafePointer<EditorWindow> editorWindow;
         CriticalSection lock;
 

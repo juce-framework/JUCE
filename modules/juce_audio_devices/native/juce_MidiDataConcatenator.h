@@ -33,68 +33,79 @@ namespace juce
 class MidiDataConcatenator
 {
 public:
+    //==============================================================================
     MidiDataConcatenator (int initialBufferSize)
-        : pendingSysexData ((size_t) initialBufferSize)
+        : pendingData ((size_t) initialBufferSize)
     {
     }
 
     void reset()
     {
-        currentMessageLen = 0;
-        pendingSysexSize = 0;
-        pendingSysexTime = 0;
+        pendingBytes = 0;
+        runningStatus = 0;
+        pendingDataTime = 0;
     }
 
     template <typename UserDataType, typename CallbackType>
     void pushMidiData (const void* inputData, int numBytes, double time,
                        UserDataType* input, CallbackType& callback)
     {
-        auto d = static_cast<const uint8*> (inputData);
+        const uint8* d = static_cast<const uint8*> (inputData);
 
         while (numBytes > 0)
         {
-            auto nextByte = *d;
-
-            if (pendingSysexSize != 0 || nextByte == 0xf0)
+            if (pendingBytes > 0 || d[0] == 0xf0)
             {
                 processSysex (d, numBytes, time, input, callback);
-                currentMessageLen = 0;
-                continue;
-            }
-
-            ++d;
-            --numBytes;
-
-            if (isRealtimeMessage (nextByte))
-            {
-                callback.handleIncomingMidiMessage (input, MidiMessage (nextByte, time));
-                // These can be embedded in the middle of a normal message, so we won't
-                // reset the currentMessageLen here.
-                continue;
-            }
-
-            if (isInitialByte (nextByte))
-            {
-                currentMessage[0] = nextByte;
-                currentMessageLen = 1;
-            }
-            else if (currentMessageLen > 0 && currentMessageLen < 3)
-            {
-                currentMessage[currentMessageLen++] = nextByte;
+                runningStatus = 0;
             }
             else
             {
-                // message is too long or invalid MIDI - abandon it and start again with the next byte
-                currentMessageLen = 0;
-                continue;
-            }
+                int len = 0;
+                uint8 data[3];
 
-            auto expectedLength = MidiMessage::getMessageLengthFromFirstByte (currentMessage[0]);
+                while (numBytes > 0)
+                {
+                    // If there's a realtime message embedded in the middle of
+                    // the normal message, handle it now..
+                    if (*d >= 0xf8 && *d <= 0xfe)
+                    {
+                        callback.handleIncomingMidiMessage (input, MidiMessage (*d++, time));
+                        --numBytes;
+                    }
+                    else
+                    {
+                        if (len == 0 && *d < 0x80 && runningStatus >= 0x80)
+                            data[len++] = runningStatus;
 
-            if (expectedLength == currentMessageLen)
-            {
-                callback.handleIncomingMidiMessage (input, MidiMessage (currentMessage, expectedLength, time));
-                currentMessageLen = 1; // reset, but leave the first byte to use as the running status byte
+                        data[len++] = *d++;
+                        --numBytes;
+
+                        const uint8 firstByte = data[0];
+
+                        if (firstByte < 0x80 || firstByte == 0xf7)
+                        {
+                            len = 0;
+                            break;   // ignore this malformed MIDI message..
+                        }
+
+                        if (len >= MidiMessage::getMessageLengthFromFirstByte (firstByte))
+                            break;
+                    }
+                }
+
+                if (len > 0)
+                {
+                    int used = 0;
+                    const MidiMessage m (data, len, used, 0, time);
+
+                    if (used <= 0)
+                        break; // malformed message..
+
+                    jassert (used == len);
+                    callback.handleIncomingMidiMessage (input, m);
+                    runningStatus = data[0];
+                }
             }
         }
     }
@@ -106,22 +117,22 @@ private:
     {
         if (*d == 0xf0)
         {
-            pendingSysexSize = 0;
-            pendingSysexTime = time;
+            pendingBytes = 0;
+            pendingDataTime = time;
         }
 
-        pendingSysexData.ensureSize ((size_t) (pendingSysexSize + numBytes), false);
-        auto totalMessage = static_cast<uint8*> (pendingSysexData.getData());
-        auto dest = totalMessage + pendingSysexSize;
+        pendingData.ensureSize ((size_t) (pendingBytes + numBytes), false);
+        uint8* totalMessage = static_cast<uint8*> (pendingData.getData());
+        uint8* dest = totalMessage + pendingBytes;
 
         do
         {
-            if (pendingSysexSize > 0 && isInitialByte (*d))
+            if (pendingBytes > 0 && *d >= 0x80)
             {
                 if (*d == 0xf7)
                 {
                     *dest++ = *d++;
-                    ++pendingSysexSize;
+                    ++pendingBytes;
                     --numBytes;
                     break;
                 }
@@ -134,7 +145,7 @@ private:
                 }
                 else
                 {
-                    pendingSysexSize = 0;
+                    pendingBytes = 0;
                     int used = 0;
                     const MidiMessage m (d, numBytes, used, 0, time);
 
@@ -151,35 +162,30 @@ private:
             else
             {
                 *dest++ = *d++;
-                ++pendingSysexSize;
+                ++pendingBytes;
                 --numBytes;
             }
         }
         while (numBytes > 0);
 
-        if (pendingSysexSize > 0)
+        if (pendingBytes > 0)
         {
-            if (totalMessage [pendingSysexSize - 1] == 0xf7)
+            if (totalMessage [pendingBytes - 1] == 0xf7)
             {
-                callback.handleIncomingMidiMessage (input, MidiMessage (totalMessage, pendingSysexSize, pendingSysexTime));
-                pendingSysexSize = 0;
+                callback.handleIncomingMidiMessage (input, MidiMessage (totalMessage, pendingBytes, pendingDataTime));
+                pendingBytes = 0;
             }
             else
             {
-                callback.handlePartialSysexMessage (input, totalMessage, pendingSysexSize, pendingSysexTime);
+                callback.handlePartialSysexMessage (input, totalMessage, pendingBytes, pendingDataTime);
             }
         }
     }
 
-    static bool isRealtimeMessage (uint8 byte)  { return byte >= 0xf8 && byte <= 0xfe; }
-    static bool isInitialByte (uint8 byte)      { return byte >= 0x80; }
-
-    uint8 currentMessage[3];
-    int currentMessageLen = 0;
-
-    MemoryBlock pendingSysexData;
-    double pendingSysexTime = 0;
-    int pendingSysexSize = 0;
+    MemoryBlock pendingData;
+    double pendingDataTime = 0;
+    int pendingBytes = 0;
+    uint8 runningStatus = 0;
 
     JUCE_DECLARE_NON_COPYABLE (MidiDataConcatenator)
 };

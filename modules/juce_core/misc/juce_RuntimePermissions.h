@@ -91,7 +91,7 @@ public:
 
     //==============================================================================
     /** Function type of runtime permission request callbacks. */
-    using Callback = std::function<void (bool)>;
+    typedef std::function<void (bool)> Callback;
 
     //==============================================================================
     /** Call this method to request a runtime permission.

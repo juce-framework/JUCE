@@ -78,7 +78,7 @@ struct AndroidMessageQueue     : private Android::Runnable
 
     ~AndroidMessageQueue()
     {
-        JUCE_ASSERT_MESSAGE_THREAD
+        jassert (MessageManager::getInstance()->isThisTheMessageThread());
         clearSingletonInstance();
     }
 
@@ -94,7 +94,7 @@ private:
 
     void run() override
     {
-        for (;;)
+        while (true)
         {
             MessageManager::MessageBase::Ptr message (queue.removeAndReturn (0));
 

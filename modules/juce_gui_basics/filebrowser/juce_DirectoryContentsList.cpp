@@ -29,7 +29,8 @@ namespace juce
 
 DirectoryContentsList::DirectoryContentsList (const FileFilter* f, TimeSliceThread& t)
    : fileFilter (f), thread (t),
-     fileTypeFlags (File::ignoreHiddenFiles | File::findFiles)
+     fileTypeFlags (File::ignoreHiddenFiles | File::findFiles),
+     shouldStop (true)
 {
 }
 
@@ -102,8 +103,7 @@ void DirectoryContentsList::clear()
 
 void DirectoryContentsList::refresh()
 {
-    stopSearching();
-    files.clear();
+    clear();
 
     if (root.isDirectory())
     {

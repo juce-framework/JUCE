@@ -43,9 +43,9 @@ ToggleButton::~ToggleButton()
 {
 }
 
-void ToggleButton::paintButton (Graphics& g, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown)
+void ToggleButton::paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown)
 {
-    getLookAndFeel().drawToggleButton (g, *this, shouldDrawButtonAsHighlighted, shouldDrawButtonAsDown);
+    getLookAndFeel().drawToggleButton (g, *this, isMouseOverButton, isButtonDown);
 }
 
 void ToggleButton::changeWidthToFitText()

@@ -176,8 +176,8 @@ void DrawableButton::colourChanged()
 }
 
 void DrawableButton::paintButton (Graphics& g,
-                                  const bool shouldDrawButtonAsHighlighted,
-                                  const bool shouldDrawButtonAsDown)
+                                  const bool isMouseOverButton,
+                                  const bool isButtonDown)
 {
     auto& lf = getLookAndFeel();
 
@@ -185,9 +185,9 @@ void DrawableButton::paintButton (Graphics& g,
         lf.drawButtonBackground (g, *this,
                                  findColour (getToggleState() ? TextButton::buttonOnColourId
                                                               : TextButton::buttonColourId),
-                                 shouldDrawButtonAsHighlighted, shouldDrawButtonAsDown);
+                                 isMouseOverButton, isButtonDown);
     else
-        lf.drawDrawableButton (g, *this, shouldDrawButtonAsHighlighted, shouldDrawButtonAsDown);
+        lf.drawDrawableButton (g, *this, isMouseOverButton, isButtonDown);
 }
 
 //==============================================================================

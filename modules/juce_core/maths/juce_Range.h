@@ -41,7 +41,9 @@ class Range
 public:
     //==============================================================================
     /** Constructs an empty range. */
-    Range() = default;
+    Range() noexcept  : start(), end()
+    {
+    }
 
     /** Constructs a range with given start and end values. */
     Range (const ValueType startValue, const ValueType endValue) noexcept
@@ -50,10 +52,18 @@ public:
     }
 
     /** Constructs a copy of another range. */
-    Range (const Range&) = default;
+    Range (const Range& other) noexcept
+        : start (other.start), end (other.end)
+    {
+    }
 
     /** Copies another range object. */
-    Range& operator= (const Range&) = default;
+    Range& operator= (Range other) noexcept
+    {
+        start = other.start;
+        end = other.end;
+        return *this;
+    }
 
     /** Returns the range that lies between two positions (in either order). */
     static Range between (const ValueType position1, const ValueType position2) noexcept
@@ -291,7 +301,7 @@ public:
 
 private:
     //==============================================================================
-    ValueType start{}, end{};
+    ValueType start, end;
 };
 
 } // namespace juce

@@ -39,13 +39,15 @@ public:
        : DrawableButton (buttonName, buttonStyle)
     {
         // svg for thumbnail icon
-        auto svg = parseXML (thumbSvg);
+        std::unique_ptr<XmlElement> svg (XmlDocument::parse (thumbSvg));
         jassert (svg != nullptr);
+
         thumb.reset (Drawable::createFromSVG (*svg));
 
         // svg for thumbnail background highlight
-        auto backSvg = parseXML (BinaryData::wizard_Highlight_svg);
+        std::unique_ptr<XmlElement> backSvg (XmlDocument::parse (BinaryData::wizard_Highlight_svg));
         jassert (backSvg != nullptr);
+
         hoverBackground.reset (Drawable::createFromSVG (*backSvg));
 
         name = buttonName;

@@ -33,8 +33,6 @@
                    juce_graphics, juce_gui_basics
  exporters:        xcode_mac, vs2017, linux_make, androidstudio, xcode_iphone
 
- moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
-
  type:             Component
  mainClass:        Box2DDemo
 

@@ -33,8 +33,6 @@
                    juce_gui_basics, juce_osc
  exporters:        xcode_mac, vs2017, linux_make
 
- moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
-
  type:             Component
  mainClass:        OSCDemo
 
@@ -414,7 +412,7 @@ private:
     {
         AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
                                           "Unknown error",
-                                          "An unknown error occurred while trying to disconnect from UDP port.",
+                                          "An unknown error occured while trying to disconnect from UDP port.",
                                           "OK");
     }
 

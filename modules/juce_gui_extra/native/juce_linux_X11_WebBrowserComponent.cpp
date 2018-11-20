@@ -57,7 +57,7 @@ public:
 
     void tryNextRead()
     {
-        for (;;)
+        while (true)
         {
             size_t len = (receivingLength ? sizeof (size_t) : bufferLength.len);
 
@@ -102,7 +102,7 @@ public:
         if (! params.isVoid())
             obj->setProperty (getParamIdentifier(), params);
 
-        String json (JSON::toString (var (obj.get())));
+        String json (JSON::toString (var (obj)));
 
         size_t jsonLength = static_cast<size_t> (json.length());
         size_t len        = sizeof (size_t) + jsonLength;
@@ -290,7 +290,7 @@ public:
 
             params->setProperty ("url", String (webkit_uri_request_get_uri (webkit_navigation_action_get_request (action))));
             params->setProperty ("decision_id", (int64) decision);
-            CommandReceiver::sendCommand (outChannel, "pageAboutToLoad", var (params.get()));
+            CommandReceiver::sendCommand (outChannel, "pageAboutToLoad", var (params));
 
             return true;
         }
@@ -307,7 +307,7 @@ public:
             DynamicObject::Ptr params = new DynamicObject;
 
             params->setProperty ("url", String (webkit_uri_request_get_uri (webkit_navigation_action_get_request (action))));
-            CommandReceiver::sendCommand (outChannel, "newWindowAttemptingToLoad", var (params.get()));
+            CommandReceiver::sendCommand (outChannel, "newWindowAttemptingToLoad", var (params));
 
             // never allow new windows
             webkit_policy_decision_ignore (decision);
@@ -325,7 +325,7 @@ public:
             DynamicObject::Ptr params = new DynamicObject;
 
             params->setProperty ("url", String (webkit_web_view_get_uri (webview)));
-            CommandReceiver::sendCommand (outChannel, "pageFinishedLoading", var (params.get()));
+            CommandReceiver::sendCommand (outChannel, "pageFinishedLoading", var (params));
         }
     }
 
@@ -376,7 +376,7 @@ public:
         DynamicObject::Ptr params = new DynamicObject;
 
         params->setProperty ("error", String (error != nullptr ? error->message : "unknown error"));
-        CommandReceiver::sendCommand (outChannel, "pageLoadHadNetworkError", var (params.get()));
+        CommandReceiver::sendCommand (outChannel, "pageLoadHadNetworkError", var (params));
     }
 
 private:
@@ -501,7 +501,7 @@ public:
         if (postData != nullptr)
             params->setProperty ("postData", var (*postData));
 
-        CommandReceiver::sendCommand (outChannel, "goToURL", var (params.get()));
+        CommandReceiver::sendCommand (outChannel, "goToURL", var (params));
     }
 
     void goBack()      { CommandReceiver::sendCommand (outChannel, "goBack",    var()); }
@@ -652,7 +652,7 @@ private:
             params->setProperty ("decision_id", decision_id);
             params->setProperty ("allow", owner.pageAboutToLoad (url));
 
-            CommandReceiver::sendCommand (outChannel, "decision", var (params.get()));
+            CommandReceiver::sendCommand (outChannel, "decision", var (params));
         }
     }
 

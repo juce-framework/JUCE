@@ -240,6 +240,7 @@ public:
 
     private:
         class Buffer;
+        friend struct ContainerDeletePolicy<Buffer>;
         std::unique_ptr<Buffer> buffer;
     };
 

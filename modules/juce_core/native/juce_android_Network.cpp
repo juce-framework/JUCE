@@ -27,7 +27,7 @@ namespace juce
  METHOD (constructor, "<init>", "()V") \
  METHOD (toString, "toString", "()Ljava/lang/String;") \
 
-DECLARE_JNI_CLASS (StringBuffer, "java/lang/StringBuffer")
+DECLARE_JNI_CLASS (StringBuffer, "java/lang/StringBuffer");
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================
@@ -40,7 +40,7 @@ DECLARE_JNI_CLASS (StringBuffer, "java/lang/StringBuffer")
  METHOD (isExhausted, "isExhausted", "()Z") \
  METHOD (setPosition, "setPosition", "(J)Z") \
 
-DECLARE_JNI_CLASS (HTTPStream, JUCE_ANDROID_ACTIVITY_CLASSPATH "$HTTPStream")
+DECLARE_JNI_CLASS (HTTPStream, JUCE_ANDROID_ACTIVITY_CLASSPATH "$HTTPStream");
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================
@@ -48,7 +48,7 @@ DECLARE_JNI_CLASS (HTTPStream, JUCE_ANDROID_ACTIVITY_CLASSPATH "$HTTPStream")
  METHOD (close,     "close",     "()V") \
  METHOD (read,      "read",      "([BII)I") \
 
-DECLARE_JNI_CLASS (AndroidInputStream, "java/io/InputStream")
+DECLARE_JNI_CLASS (AndroidInputStream, "java/io/InputStream");
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================
@@ -342,22 +342,15 @@ URL::DownloadTask* URL::downloadToFile (const File& targetLocation, String extra
 }
 
 //==============================================================================
-#if __ANDROID_API__ < 24   // Android support for getifadds was added in Android 7.0 (API 24) so the posix implementation does not apply
-
-static IPAddress makeAddress (const sockaddr_in *addr_in)
+static void addAddress (const sockaddr_in* addr_in, Array<IPAddress>& result)
 {
-    if (addr_in->sin_addr.s_addr == INADDR_NONE)
-        return {};
+    in_addr_t addr = addr_in->sin_addr.s_addr;
 
-    return IPAddress (ntohl (addr_in->sin_addr.s_addr));
+    if (addr != INADDR_NONE)
+        result.addIfNotAlreadyThere (IPAddress (ntohl (addr)));
 }
 
-struct InterfaceInfo
-{
-    IPAddress interfaceAddress, broadcastAddress;
-};
-
-static Array<InterfaceInfo> findIPAddresses (int dummySocket)
+static void findIPAddresses (int sock, Array<IPAddress>& result)
 {
     ifconf cfg;
     HeapBlock<char> buffer;
@@ -371,66 +364,40 @@ static Array<InterfaceInfo> findIPAddresses (int dummySocket)
         cfg.ifc_len = bufferSize;
         cfg.ifc_buf = buffer;
 
-        if (ioctl (dummySocket, SIOCGIFCONF, &cfg) < 0 && errno != EINVAL)
-            return {};
+        if (ioctl (sock, SIOCGIFCONF, &cfg) < 0 && errno != EINVAL)
+            return;
 
     } while (bufferSize < cfg.ifc_len + 2 * (int) (IFNAMSIZ + sizeof (struct sockaddr_in6)));
 
-    Array<InterfaceInfo> result;
+   #if JUCE_MAC || JUCE_IOS
+    while (cfg.ifc_len >= (int) (IFNAMSIZ + sizeof (struct sockaddr_in)))
+    {
+        if (cfg.ifc_req->ifr_addr.sa_family == AF_INET) // Skip non-internet addresses
+            addAddress ((const sockaddr_in*) &cfg.ifc_req->ifr_addr, result);
 
+        cfg.ifc_len -= IFNAMSIZ + cfg.ifc_req->ifr_addr.sa_len;
+        cfg.ifc_buf += IFNAMSIZ + cfg.ifc_req->ifr_addr.sa_len;
+    }
+   #else
     for (size_t i = 0; i < (size_t) cfg.ifc_len / (size_t) sizeof (struct ifreq); ++i)
     {
-        auto& item = cfg.ifc_req[i];
+        const ifreq& item = cfg.ifc_req[i];
 
         if (item.ifr_addr.sa_family == AF_INET)
-        {
-            InterfaceInfo info;
-            info.interfaceAddress = makeAddress ((const sockaddr_in*) &item.ifr_addr);
-
-            if (! info.interfaceAddress.isNull())
-            {
-                if (ioctl (dummySocket, SIOCGIFBRDADDR, &item) == 0)
-                    info.broadcastAddress = makeAddress ((const sockaddr_in*) &item.ifr_broadaddr);
-
-                result.add (info);
-            }
-        }
-        else if (item.ifr_addr.sa_family == AF_INET6)
-        {
-            // TODO: IPv6
-        }
+            addAddress ((const sockaddr_in*) &item.ifr_addr, result);
     }
-
-    return result;
-}
-
-static Array<InterfaceInfo> findIPAddresses()
-{
-    auto dummySocket = socket (AF_INET, SOCK_DGRAM, 0); // a dummy socket to execute the IO control
-
-    if (dummySocket < 0)
-        return {};
-
-    auto result = findIPAddresses (dummySocket);
-    ::close (dummySocket);
-    return result;
+   #endif
 }
 
 void IPAddress::findAllAddresses (Array<IPAddress>& result, bool /*includeIPv6*/)
 {
-    for (auto& a : findIPAddresses())
-        result.add (a.interfaceAddress);
+    const int sock = socket (AF_INET, SOCK_DGRAM, 0); // a dummy socket to execute the IO control
+
+    if (sock >= 0)
+    {
+        findIPAddresses (sock, result);
+        ::close (sock);
+    }
 }
-
-IPAddress IPAddress::getInterfaceBroadcastAddress (const IPAddress& address)
-{
-    for (auto& a : findIPAddresses())
-        if (a.interfaceAddress == address)
-            return a.broadcastAddress;
-
-    return {};
-}
-
-#endif
 
 } // namespace juce

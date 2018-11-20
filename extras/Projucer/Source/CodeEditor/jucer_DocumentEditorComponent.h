@@ -43,7 +43,6 @@ public:
 
 protected:
     OpenDocumentManager::Document* document;
-    bool lastEditedState = false;
 
     void setEditedState (bool hasBeenEdited);
 

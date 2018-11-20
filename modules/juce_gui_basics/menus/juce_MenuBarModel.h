@@ -69,7 +69,7 @@ public:
         This will also allow it to flash a menu name when a command from that menu
         is invoked using a keystroke.
     */
-    void setApplicationCommandManagerToWatch (ApplicationCommandManager* manager);
+    void setApplicationCommandManagerToWatch (ApplicationCommandManager* manager) noexcept;
 
     //==============================================================================
     /** A class to receive callbacks when a MenuBarModel changes.
@@ -104,12 +104,12 @@ public:
 
         @see removeListener
     */
-    void addListener (Listener* listenerToAdd);
+    void addListener (Listener* listenerToAdd) noexcept;
 
     /** Removes a listener.
         @see addListener
     */
-    void removeListener (Listener* listenerToRemove);
+    void removeListener (Listener* listenerToRemove) noexcept;
 
     //==============================================================================
     /** This method must return a list of the names of the menus. */

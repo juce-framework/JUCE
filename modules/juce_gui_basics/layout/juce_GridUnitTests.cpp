@@ -27,15 +27,16 @@
 namespace juce
 {
 
-struct GridTests  : public UnitTest
+struct GridTests  : public juce::UnitTest
 {
-    GridTests() : UnitTest ("Grid class") {}
+    GridTests() : juce::UnitTest ("Grid class") {}
 
     void runTest() override
     {
-        using Fr = Grid::Fr;
-        using Tr = Grid::TrackInfo;
-        using Rect = Rectangle<float>;
+        using Fr = juce::Grid::Fr;
+        using Tr = juce::Grid::TrackInfo;
+        using Rect = juce::Rectangle<float>;
+        using Grid = juce::Grid;
 
         {
             Grid grid;
@@ -46,7 +47,7 @@ struct GridTests  : public UnitTest
             grid.items.addArray ({ GridItem().withArea (1, 1),
                                    GridItem().withArea (2, 1) });
 
-            grid.performLayout (Rectangle<int> (200, 400));
+            grid.performLayout (juce::Rectangle<int> (200, 400));
 
             beginTest ("Layout calculation test: 1 column x 2 rows: no gap");
             expect (grid.items[0].currentBounds == Rect (0.0f, 0.0f,  200.f, 20.0f));
@@ -60,7 +61,7 @@ struct GridTests  : public UnitTest
                                     GridItem().withArea (3, 1),
                                     GridItem().withArea (3, 2) });
 
-            grid.performLayout (Rectangle<int> (150, 170));
+            grid.performLayout (juce::Rectangle<int> (150, 170));
 
             beginTest ("Layout calculation test: 2 columns x 3 rows: no gap");
             expect (grid.items[0].currentBounds == Rect (0.0f,   0.0f,  100.0f, 20.0f));
@@ -73,7 +74,7 @@ struct GridTests  : public UnitTest
             grid.columnGap = 20_px;
             grid.rowGap    = 10_px;
 
-            grid.performLayout (Rectangle<int> (200, 310));
+            grid.performLayout (juce::Rectangle<int> (200, 310));
 
             beginTest ("Layout calculation test: 2 columns x 3 rows: rowGap of 10 and columnGap of 20");
             expect (grid.items[0].currentBounds == Rect (0.0f, 0.0f, 130.0f, 20.0f));

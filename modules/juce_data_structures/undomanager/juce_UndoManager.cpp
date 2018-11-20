@@ -29,7 +29,9 @@ namespace juce
 
 struct UndoManager::ActionSet
 {
-    ActionSet (const String& transactionName)  : name (transactionName)
+    ActionSet (const String& transactionName)
+        : name (transactionName),
+          time (Time::getCurrentTime())
     {}
 
     bool perform() const
@@ -62,7 +64,7 @@ struct UndoManager::ActionSet
 
     OwnedArray<UndoableAction> actions;
     String name;
-    Time time { Time::getCurrentTime() };
+    Time time;
 };
 
 //==============================================================================
@@ -115,9 +117,9 @@ bool UndoManager::perform (UndoableAction* newAction)
     {
         std::unique_ptr<UndoableAction> action (newAction);
 
-        if (isPerformingUndoRedo())
+        if (reentrancyCheck)
         {
-            jassertfalse;  // Don't call perform() recursively from the UndoableAction::perform()
+            jassertfalse;  // don't call perform() recursively from the UndoableAction::perform()
                            // or undo() methods, or else these actions will be discarded!
             return false;
         }
@@ -207,18 +209,18 @@ void UndoManager::dropOldTransactionsIfTooLarge()
     }
 }
 
-void UndoManager::beginNewTransaction()
+void UndoManager::beginNewTransaction() noexcept
 {
     beginNewTransaction ({});
 }
 
-void UndoManager::beginNewTransaction (const String& actionName)
+void UndoManager::beginNewTransaction (const String& actionName) noexcept
 {
     newTransaction = true;
     newTransactionName = actionName;
 }
 
-void UndoManager::setCurrentTransactionName (const String& newName)
+void UndoManager::setCurrentTransactionName (const String& newName) noexcept
 {
     if (newTransaction)
         newTransactionName = newName;
@@ -226,7 +228,7 @@ void UndoManager::setCurrentTransactionName (const String& newName)
         action->name = newName;
 }
 
-String UndoManager::getCurrentTransactionName() const
+String UndoManager::getCurrentTransactionName() const noexcept
 {
     if (auto* action = getCurrentSet())
         return action->name;
@@ -235,19 +237,17 @@ String UndoManager::getCurrentTransactionName() const
 }
 
 //==============================================================================
-UndoManager::ActionSet* UndoManager::getCurrentSet() const     { return transactions[nextIndex - 1]; }
-UndoManager::ActionSet* UndoManager::getNextSet() const        { return transactions[nextIndex]; }
+UndoManager::ActionSet* UndoManager::getCurrentSet() const noexcept     { return transactions[nextIndex - 1]; }
+UndoManager::ActionSet* UndoManager::getNextSet() const noexcept        { return transactions[nextIndex]; }
 
-bool UndoManager::isPerformingUndoRedo() const  { return isInsideUndoRedoCall; }
-
-bool UndoManager::canUndo() const      { return getCurrentSet() != nullptr; }
-bool UndoManager::canRedo() const      { return getNextSet()    != nullptr; }
+bool UndoManager::canUndo() const noexcept   { return getCurrentSet() != nullptr; }
+bool UndoManager::canRedo() const noexcept   { return getNextSet()    != nullptr; }
 
 bool UndoManager::undo()
 {
     if (auto* s = getCurrentSet())
     {
-        const ScopedValueSetter<bool> setter (isInsideUndoRedoCall, true);
+        const ScopedValueSetter<bool> setter (reentrancyCheck, true);
 
         if (s->undo())
             --nextIndex;
@@ -266,7 +266,7 @@ bool UndoManager::redo()
 {
     if (auto* s = getNextSet())
     {
-        const ScopedValueSetter<bool> setter (isInsideUndoRedoCall, true);
+        const ScopedValueSetter<bool> setter (reentrancyCheck, true);
 
         if (s->perform())
             ++nextIndex;

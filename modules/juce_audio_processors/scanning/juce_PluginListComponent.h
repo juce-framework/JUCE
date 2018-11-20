@@ -113,6 +113,8 @@ private:
     std::unique_ptr<TableListBoxModel> tableModel;
 
     class Scanner;
+    friend class Scanner;
+    friend struct ContainerDeletePolicy<Scanner>;
     std::unique_ptr<Scanner> currentScanner;
 
     void scanFinished (const StringArray&);

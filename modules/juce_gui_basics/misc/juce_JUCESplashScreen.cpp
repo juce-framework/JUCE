@@ -294,8 +294,7 @@ std::unique_ptr<Drawable> JUCESplashScreen::getSplashScreenLogo()
     </svg>
     )JUCESPLASHSCREEN";
 
-    auto svgXml = parseXML (svgData);
-    jassert (svgXml != nullptr);
+    std::unique_ptr<XmlElement> svgXml (XmlDocument::parse (svgData));
     return std::unique_ptr<Drawable> (Drawable::createFromSVG (*svgXml));
 }
 

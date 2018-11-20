@@ -346,11 +346,11 @@ public:
 
         if (asioObject != nullptr)
         {
-            for (auto rate : { 8000, 11025, 16000, 22050, 32000,
-                               44100, 48000, 88200, 96000, 176400,
-                               192000, 352800, 384000, 705600, 768000 })
-                if (asioObject->canSampleRate ((double) rate) == 0)
-                    newRates.add ((double) rate);
+            const int possibleSampleRates[] = { 32000, 44100, 48000, 88200, 96000, 176400, 192000, 352800, 384000 };
+
+            for (int index = 0; index < numElementsInArray (possibleSampleRates); ++index)
+                if (asioObject->canSampleRate ((double) possibleSampleRates[index]) == 0)
+                    newRates.add ((double) possibleSampleRates[index]);
         }
 
         if (newRates.isEmpty())
@@ -787,14 +787,9 @@ private:
 
     void reloadChannelNames()
     {
-        long totalInChannels = 0, totalOutChannels = 0;
-
         if (asioObject != nullptr
-             && asioObject->getChannels (&totalInChannels, &totalOutChannels) == ASE_OK)
+             && asioObject->getChannels (&totalNumInputChans, &totalNumOutputChans) == ASE_OK)
         {
-            totalNumInputChans  = totalInChannels;
-            totalNumOutputChans = totalOutChannels;
-
             inputChannelNames.clear();
             outputChannelNames.clear();
 

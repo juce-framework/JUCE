@@ -39,9 +39,9 @@ int TabBarButton::getIndex() const                      { return owner.indexOfTa
 Colour TabBarButton::getTabBackgroundColour() const     { return owner.getTabBackgroundColour (getIndex()); }
 bool TabBarButton::isFrontTab() const                   { return getToggleState(); }
 
-void TabBarButton::paintButton (Graphics& g, const bool shouldDrawButtonAsHighlighted, const bool shouldDrawButtonAsDown)
+void TabBarButton::paintButton (Graphics& g, const bool isMouseOverButton, const bool isButtonDown)
 {
-    getLookAndFeel().drawTabButton (*this, g, shouldDrawButtonAsHighlighted, shouldDrawButtonAsDown);
+    getLookAndFeel().drawTabButton (*this, g, isMouseOverButton, isButtonDown);
 }
 
 void TabBarButton::clicked (const ModifierKeys& mods)

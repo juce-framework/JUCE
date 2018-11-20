@@ -180,6 +180,9 @@ public:
         jassert (targets.size() > 0);
     }
 
+    //==============================================================================
+    void initialiseDependencyPathValues() override  {}
+
 private:
     ValueWithDefault targetPlatformValue;
 
@@ -232,7 +235,7 @@ private:
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& tree) const override
     {
-        return *new CodeBlocksBuildConfiguration (project, tree, *this);
+        return new CodeBlocksBuildConfiguration (project, tree, *this);
     }
 
     //==============================================================================
@@ -309,7 +312,7 @@ private:
 
         static String guiExtrasModule ("juce_gui_extra");
 
-        if (project.getEnabledModules().isModuleEnabled (guiExtrasModule)
+        if (project.getModules().isModuleEnabled (guiExtrasModule)
             && project.isConfigFlagEnabled ("JUCE_WEB_BROWSER", true))
         {
             result.add ("webkit2gtk-4.0");

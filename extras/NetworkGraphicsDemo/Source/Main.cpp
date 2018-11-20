@@ -28,9 +28,16 @@
 
 namespace
 {
+    String getIPAddress()
+    {
+        Array<IPAddress> addresses;
+        IPAddress::findAllAddresses (addresses);
+        return addresses[1].toString();
+    }
+
     String getBroadcastIPAddress()
     {
-        return IPAddress::getLocalAddress().toString().upToLastOccurrenceOf (".", false, false) + ".255";
+        return getIPAddress().upToLastOccurrenceOf (".", false, false) + ".255";
     }
 
     static const int masterPortNumber = 9001;  // the UDP port the master sends on / the clients receive.

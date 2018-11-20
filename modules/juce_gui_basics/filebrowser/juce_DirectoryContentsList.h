@@ -209,7 +209,7 @@ private:
     OwnedArray<FileInfo> files;
 
     std::unique_ptr<DirectoryIterator> fileFindHandle;
-    std::atomic<bool> shouldStop { true };
+    bool volatile shouldStop;
 
     int useTimeSlice() override;
     void stopSearching();

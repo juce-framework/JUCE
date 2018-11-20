@@ -242,10 +242,6 @@ namespace
         }
 
         subSamplePos = pos;
-
-        if (wrap == 0)
-            return (int) (in - originalIn);
-
         return ((int) (in - originalIn) + wrap) % wrap;
     }
 
@@ -357,10 +353,6 @@ namespace
         }
 
         subSamplePos = pos;
-
-        if (wrap == 0)
-            return (int) (in - originalIn);
-
         return ((int) (in - originalIn) + wrap) % wrap;
     }
 

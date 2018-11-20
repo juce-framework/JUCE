@@ -118,6 +118,7 @@ public:
 
 private:
     class Pimpl;
+    friend struct ContainerDeletePolicy<Pimpl>;
     std::unique_ptr<Pimpl> control;
     bool mouseEventsAllowed = true;
 

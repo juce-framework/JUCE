@@ -82,7 +82,7 @@ void ShapeButton::setShape (const Path& newShape,
 
     if (resizeNowToFitThisShape)
     {
-        auto newBounds = shape.getBounds();
+        Rectangle<float> newBounds (shape.getBounds());
 
         if (hasShadow)
             newBounds = newBounds.expanded (4.0f);
@@ -97,22 +97,20 @@ void ShapeButton::setShape (const Path& newShape,
     repaint();
 }
 
-void ShapeButton::paintButton (Graphics& g, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown)
+void ShapeButton::paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown)
 {
     if (! isEnabled())
     {
-        shouldDrawButtonAsHighlighted = false;
-        shouldDrawButtonAsDown = false;
+        isMouseOverButton = false;
+        isButtonDown = false;
     }
 
-    auto r = border.subtractedFrom (getLocalBounds())
-                   .toFloat()
-                   .reduced (outlineWidth * 0.5f);
+    Rectangle<float> r (border.subtractedFrom (getLocalBounds()).toFloat().reduced (outlineWidth * 0.5f));
 
     if (getComponentEffect() != nullptr)
         r = r.reduced (2.0f);
 
-    if (shouldDrawButtonAsDown)
+    if (isButtonDown)
     {
         const float sizeReductionWhenPressed = 0.04f;
 
@@ -120,11 +118,11 @@ void ShapeButton::paintButton (Graphics& g, bool shouldDrawButtonAsHighlighted, 
                        sizeReductionWhenPressed * r.getHeight());
     }
 
-    auto trans = shape.getTransformToScaleToFit (r, maintainShapeProportions);
+    const AffineTransform trans (shape.getTransformToScaleToFit (r, maintainShapeProportions));
 
-    if      (shouldDrawButtonAsDown)        g.setColour (getToggleState() && useOnColours ? downColourOn   : downColour);
-    else if (shouldDrawButtonAsHighlighted) g.setColour (getToggleState() && useOnColours ? overColourOn   : overColour);
-    else                                    g.setColour (getToggleState() && useOnColours ? normalColourOn : normalColour);
+    if      (isButtonDown)      g.setColour (getToggleState() && useOnColours ? downColourOn   : downColour);
+    else if (isMouseOverButton) g.setColour (getToggleState() && useOnColours ? overColourOn   : overColour);
+    else                        g.setColour (getToggleState() && useOnColours ? normalColourOn : normalColour);
 
     g.fillPath (shape, trans);
 

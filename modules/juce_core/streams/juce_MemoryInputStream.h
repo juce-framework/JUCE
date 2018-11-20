@@ -77,7 +77,6 @@ public:
     int64 getTotalLength() override;
     bool isExhausted() override;
     int read (void* destBuffer, int maxBytesToRead) override;
-    void skipNextBytes (int64 numBytesToSkip) override;
 
 private:
     //==============================================================================

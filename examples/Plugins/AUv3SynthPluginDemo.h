@@ -35,8 +35,6 @@
                    juce_events, juce_graphics, juce_gui_basics, juce_gui_extra
  exporters:        xcode_mac, xcode_iphone
 
- moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
-
  type:             AudioProcessor
  mainClass:        AUv3SynthProcessor
 

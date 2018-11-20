@@ -40,10 +40,10 @@ class JUCE_API  Colour  final
 public:
     //==============================================================================
     /** Creates a transparent black colour. */
-    Colour() = default;
+    Colour() noexcept;
 
     /** Creates a copy of another Colour object. */
-    Colour (const Colour&) = default;
+    Colour (const Colour& other) noexcept;
 
     /** Creates a colour from a 32-bit ARGB value.
 
@@ -143,10 +143,10 @@ public:
                            float alpha) noexcept;
 
     /** Destructor. */
-    ~Colour() = default;
+    ~Colour() noexcept;
 
     /** Copies another Colour object. */
-    Colour& operator= (const Colour&) = default;
+    Colour& operator= (const Colour& other) noexcept;
 
     /** Compares two colours. */
     bool operator== (const Colour& other) const noexcept;
@@ -191,7 +191,7 @@ public:
     /** Returns a 32-bit integer that represents this colour.
 
         The format of this number is:
-            ((alpha << 24) | (red << 16) | (green << 8) | blue).
+            ((alpha << 24) | (red << 16) | (green << 16) | blue).
     */
     uint32 getARGB() const noexcept;
 
@@ -363,7 +363,7 @@ public:
 
 private:
     //==============================================================================
-    PixelARGB argb { 0, 0, 0, 0 };
+    PixelARGB argb;
 };
 
 } // namespace juce

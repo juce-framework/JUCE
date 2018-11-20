@@ -507,7 +507,7 @@ void FilterIOConfigurationWindow::update()
     auto nodeID = getNodeID();
 
     if (auto* graph = getGraph())
-        if (nodeID != AudioProcessorGraph::NodeID())
+        if (nodeID != 0)
             graph->disconnectNode (nodeID);
 
     if (auto* graphEditor = getGraphEditor())
@@ -522,7 +522,7 @@ AudioProcessorGraph::NodeID FilterIOConfigurationWindow::getNodeID() const
             if (node->getProcessor() == getAudioProcessor())
                 return node->nodeID;
 
-    return {};
+    return 0;
 }
 
 MainHostWindow* FilterIOConfigurationWindow::getMainWindow() const

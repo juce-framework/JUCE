@@ -86,7 +86,7 @@ bool AudioFormatWriter::writeFromAudioReader (AudioFormatReader& reader,
     const int bufferSize = 16384;
     AudioBuffer<float> tempBuffer ((int) numChannels, bufferSize);
 
-    int* buffers[128] = { nullptr };
+    int* buffers[128] = { 0 };
 
     for (int i = tempBuffer.getNumChannels(); --i >= 0;)
         buffers[i] = reinterpret_cast<int*> (tempBuffer.getWritePointer (i, 0));

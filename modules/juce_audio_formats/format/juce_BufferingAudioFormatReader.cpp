@@ -32,7 +32,9 @@ BufferingAudioReader::BufferingAudioReader (AudioFormatReader* sourceReader,
                                             int samplesToBuffer)
     : AudioFormatReader (nullptr, sourceReader->getFormatName()),
       source (sourceReader), thread (timeSliceThread),
-      numBlocks (1 + (samplesToBuffer / samplesPerBlock))
+      nextReadPosition (0),
+      numBlocks (1 + (samplesToBuffer / samplesPerBlock)),
+      timeoutMs (0)
 {
     sampleRate            = source->sampleRate;
     lengthInSamples       = source->lengthInSamples;
@@ -60,7 +62,7 @@ void BufferingAudioReader::setReadTimeout (int timeoutMilliseconds) noexcept
 bool BufferingAudioReader::readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
                                         int64 startSampleInFile, int numSamples)
 {
-    auto startTime = Time::getMillisecondCounter();
+    const uint32 startTime = Time::getMillisecondCounter();
     clearSamplesBeyondAvailableLength (destSamples, numDestChannels, startOffsetInDestBuffer,
                                        startSampleInFile, numSamples, lengthInSamples);
 
@@ -69,14 +71,14 @@ bool BufferingAudioReader::readSamples (int** destSamples, int numDestChannels, 
 
     while (numSamples > 0)
     {
-        if (auto block = getBlockContaining (startSampleInFile))
+        if (const BufferedBlock* const block = getBlockContaining (startSampleInFile))
         {
-            auto offset = (int) (startSampleInFile - block->range.getStart());
-            auto numToDo = jmin (numSamples, (int) (block->range.getEnd() - startSampleInFile));
+            const int offset = (int) (startSampleInFile - block->range.getStart());
+            const int numToDo = jmin (numSamples, (int) (block->range.getEnd() - startSampleInFile));
 
             for (int j = 0; j < numDestChannels; ++j)
             {
-                if (auto dest = (float*) destSamples[j])
+                if (float* dest = (float*) destSamples[j])
                 {
                     dest += startOffsetInDestBuffer;
 
@@ -96,7 +98,7 @@ bool BufferingAudioReader::readSamples (int** destSamples, int numDestChannels, 
             if (timeoutMs >= 0 && Time::getMillisecondCounter() >= startTime + (uint32) timeoutMs)
             {
                 for (int j = 0; j < numDestChannels; ++j)
-                    if (auto dest = (float*) destSamples[j])
+                    if (float* dest = (float*) destSamples[j])
                         FloatVectorOperations::clear (dest + startOffsetInDestBuffer, numSamples);
 
                 break;
@@ -121,9 +123,13 @@ BufferingAudioReader::BufferedBlock::BufferedBlock (AudioFormatReader& reader, i
 
 BufferingAudioReader::BufferedBlock* BufferingAudioReader::getBlockContaining (int64 pos) const noexcept
 {
-    for (auto* b : blocks)
+    for (int i = blocks.size(); --i >= 0;)
+    {
+        BufferedBlock* const b = blocks.getUnchecked(i);
+
         if (b->range.contains (pos))
             return b;
+    }
 
     return nullptr;
 }
@@ -135,9 +141,9 @@ int BufferingAudioReader::useTimeSlice()
 
 bool BufferingAudioReader::readNextBufferChunk()
 {
-    auto pos = nextReadPosition.load();
-    auto startPos = ((pos - 1024) / samplesPerBlock) * samplesPerBlock;
-    auto endPos = startPos + numBlocks * samplesPerBlock;
+    const int64 pos = nextReadPosition;
+    const int64 startPos = ((pos - 1024) / samplesPerBlock) * samplesPerBlock;
+    const int64 endPos = startPos + numBlocks * samplesPerBlock;
 
     OwnedArray<BufferedBlock> newBlocks;
 
@@ -151,7 +157,7 @@ bool BufferingAudioReader::readNextBufferChunk()
         return false;
     }
 
-    for (auto p = startPos; p < endPos; p += samplesPerBlock)
+    for (int64 p = startPos; p < endPos; p += samplesPerBlock)
     {
         if (getBlockContaining (p) == nullptr)
         {

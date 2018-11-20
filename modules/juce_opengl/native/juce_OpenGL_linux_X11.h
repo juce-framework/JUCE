@@ -154,7 +154,6 @@ public:
 
     void shutdownOnRenderThread()
     {
-        ScopedXLock xlock (display);
         context = nullptr;
         deactivateCurrentContext();
         glXDestroyContext (display, renderContext);
@@ -163,27 +162,23 @@ public:
 
     bool makeActive() const noexcept
     {
-        ScopedXLock xlock (display);
         return renderContext != 0
                  && glXMakeCurrent (display, embeddedWindow, renderContext);
     }
 
     bool isActive() const noexcept
     {
-        ScopedXLock xlock (display);
         return glXGetCurrentContext() == renderContext && renderContext != 0;
     }
 
     static void deactivateCurrentContext()
     {
         ScopedXDisplay xDisplay;
-        ScopedXLock xlock (xDisplay.display);
         glXMakeCurrent (xDisplay.display, None, 0);
     }
 
     void swapBuffers()
     {
-        ScopedXLock xlock (display);
         glXSwapBuffers (display, embeddedWindow);
     }
 
@@ -207,7 +202,6 @@ public:
         if (auto GLXSwapIntervalSGI
               = (PFNGLXSWAPINTERVALSGIPROC) OpenGLHelpers::getExtensionFunction ("glXSwapIntervalSGI"))
         {
-            ScopedXLock xlock (display);
             swapFrames = numFramesPerSwap;
             GLXSwapIntervalSGI (numFramesPerSwap);
             return true;

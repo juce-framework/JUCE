@@ -231,22 +231,6 @@ bool MessageManager::currentThreadHasLockedMessageManager() const noexcept
     return thisThread == messageThreadId || thisThread == threadWithLock.get();
 }
 
-bool MessageManager::existsAndIsLockedByCurrentThread() noexcept
-{
-    if (auto i = getInstanceWithoutCreating())
-        return i->currentThreadHasLockedMessageManager();
-
-    return false;
-}
-
-bool MessageManager::existsAndIsCurrentThread() noexcept
-{
-    if (auto i = getInstanceWithoutCreating())
-        return i->isThisTheMessageThread();
-
-    return false;
-}
-
 //==============================================================================
 //==============================================================================
 /*  The only safe way to lock the message thread while another thread does
@@ -310,7 +294,7 @@ bool MessageManager::Lock::tryAcquire (bool lockIsMandatory) const noexcept
 
     try
     {
-        blockingMessage = *new BlockingMessage (this);
+        blockingMessage = new BlockingMessage (this);
     }
     catch (...)
     {
@@ -365,7 +349,7 @@ void MessageManager::Lock::exit() const noexcept
         lockGained.set (0);
 
         if (mm != nullptr)
-            mm->threadWithLock = {};
+            mm->threadWithLock = 0;
 
         if (blockingMessage != nullptr)
         {

@@ -286,6 +286,7 @@ private:
     MenuBarModel* menuBarModel = nullptr;
 
     class ButtonListenerProxy;
+    friend struct ContainerDeletePolicy<ButtonListenerProxy>;
     std::unique_ptr<ButtonListenerProxy> buttonListener;
 
     void repaintTitleBar();

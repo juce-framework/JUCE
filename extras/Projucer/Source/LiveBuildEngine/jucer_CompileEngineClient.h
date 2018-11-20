@@ -117,31 +117,34 @@ struct ChildProcessCache
 
     CompileEngineChildProcess::Ptr getExisting (Project& project) const noexcept
     {
-        for (auto& p : processes)
+        for (CompileEngineChildProcess* p : processes)
             if (&(p->project) == &project)
-                return *p;
+                return p;
 
-        return {};
+        return nullptr;
     }
 
     CompileEngineChildProcess::Ptr getOrCreate (Project& project)
     {
-        if (auto p = getExisting (project))
-            return p;
+        CompileEngineChildProcess::Ptr p (getExisting (project));
 
-        auto p = new CompileEngineChildProcess (project);
-        tellNewProcessAboutExistingEditors (*p);
-        processes.add (p);
-        return *p;
+        if (p == nullptr)
+        {
+            p = new CompileEngineChildProcess (project);
+            tellNewProcessAboutExistingEditors (p);
+            processes.add (p);
+        }
+
+        return p;
     }
 
-    static void tellNewProcessAboutExistingEditors (CompileEngineChildProcess& process)
+    static void tellNewProcessAboutExistingEditors (CompileEngineChildProcess* process)
     {
-        auto& odm = ProjucerApplication::getApp().openDocumentManager;
+        OpenDocumentManager& odm = ProjucerApplication::getApp().openDocumentManager;
 
         for (int i = odm.getNumOpenDocuments(); --i >= 0;)
-            if (auto d = dynamic_cast<SourceCodeDocument*> (odm.getOpenDocument (i)))
-                process.editorOpened (d->getFile(), d->getCodeDocument());
+            if (SourceCodeDocument* d = dynamic_cast<SourceCodeDocument*> (odm.getOpenDocument (i)))
+                process->editorOpened (d->getFile(), d->getCodeDocument());
     }
 
     void removeOrphans()

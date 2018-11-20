@@ -35,8 +35,6 @@
                    juce_events, juce_graphics, juce_gui_basics, juce_gui_extra
  exporters:        xcode_mac, vs2017
 
- moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
-
  type:             AudioProcessor
  mainClass:        SamplerAudioProcessor
 
@@ -165,14 +163,16 @@ public:
         source.read (&data, 0, length + 4, 0, true, true);
     }
 
-    double getSampleRate() const                    { return sourceSampleRate; }
-    int getLength() const                           { return length; }
-    const AudioBuffer<float>& getBuffer() const     { return data; }
+    double getSampleRate() const { return sourceSampleRate; }
+
+    int getLength() const { return length; }
+
+    const AudioSampleBuffer& getBuffer() const { return data; }
 
 private:
     double sourceSampleRate;
     int length;
-    AudioBuffer<float> data;
+    AudioSampleBuffer data;
 };
 
 //==============================================================================

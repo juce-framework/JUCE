@@ -43,7 +43,7 @@ template <typename ValueType>
 class RectangleList  final
 {
 public:
-    using RectangleType = Rectangle<ValueType>;
+    typedef Rectangle<ValueType> RectangleType;
 
     //==============================================================================
     /** Creates an empty RectangleList */
@@ -194,7 +194,7 @@ public:
     void add (const RectangleList& other)
     {
         for (auto& r : other)
-            add (r);
+            add (*r);
     }
 
     /** Removes a rectangular region from the list.

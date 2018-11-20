@@ -257,9 +257,10 @@ int64 AudioFormatReader::searchForLevel (int64 startSample,
     const int bufferSize = 4096;
     HeapBlock<int> tempSpace (bufferSize * 2 + 64);
 
-    int* tempBuffer[3] = { tempSpace.get(),
-                           tempSpace.get() + bufferSize,
-                           nullptr };
+    int* tempBuffer[3];
+    tempBuffer[0] = tempSpace.get();
+    tempBuffer[1] = tempSpace.get() + bufferSize;
+    tempBuffer[2] = 0;
 
     int consecutive = 0;
     int64 firstMatchPos = -1;
@@ -279,7 +280,7 @@ int64 AudioFormatReader::searchForLevel (int64 startSample,
         if (numSamplesToSearch < 0)
             bufferStart -= numThisTime;
 
-        if (bufferStart >= lengthInSamples)
+        if (bufferStart >= (int) lengthInSamples)
             break;
 
         read (tempBuffer, 2, bufferStart, numThisTime, false);

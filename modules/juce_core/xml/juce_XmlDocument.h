@@ -47,15 +47,14 @@ namespace juce
 
     @endcode
 
-    Or you can use the helper functions for much less verbose parsing..
+    Or you can use the static helper methods for quick parsing..
 
     @code
-    if (auto xml = parseXML (myXmlFile))
+    std::unique_ptr<XmlElement> xml (XmlDocument::parse (myXmlFile));
+
+    if (xml != nullptr && xml->hasTagName ("foobar"))
     {
-        if (xml->hasTagName ("foobar"))
-        {
-            ...etc
-        }
+        ...etc
     }
     @endcode
 
@@ -133,14 +132,12 @@ public:
     //==============================================================================
     /** A handy static method that parses a file.
         This is a shortcut for creating an XmlDocument object and calling getDocumentElement() on it.
-        An even better shortcut is the juce::parseXML() function, which returns a std::unique_ptr<XmlElement>!
         @returns    a new XmlElement which the caller will need to delete, or null if there was an error.
     */
     static XmlElement* parse (const File& file);
 
     /** A handy static method that parses some XML data.
         This is a shortcut for creating an XmlDocument object and calling getDocumentElement() on it.
-        An even better shortcut is the juce::parseXML() function, which returns a std::unique_ptr<XmlElement>!
         @returns    a new XmlElement which the caller will need to delete, or null if there was an error.
     */
     static XmlElement* parse (const String& xmlData);
@@ -174,22 +171,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (XmlDocument)
 };
-
-//==============================================================================
-/** Attempts to parse some XML text, returning a new XmlElement if it was valid.
-    If the parse fails, this will return a nullptr - if you need more information about
-    errors or more parsing options, see the XmlDocument instead.
-    @see XmlDocument
-*/
-std::unique_ptr<XmlElement> parseXML (const String& textToParse);
-
-/** Attempts to parse some XML text, returning a new XmlElement if it was valid.
-    If the parse fails, this will return a nullptr - if you need more information about
-    errors or more parsing options, see the XmlDocument instead.
-    @see XmlDocument
-*/
-std::unique_ptr<XmlElement> parseXML (const File& fileToParse);
-
-
 
 } // namespace juce

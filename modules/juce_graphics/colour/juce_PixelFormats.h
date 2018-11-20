@@ -60,8 +60,8 @@ class JUCE_API  PixelARGB
 {
 public:
     /** Creates a pixel without defining its colour. */
-    PixelARGB() = default;
-    ~PixelARGB() = default;
+    PixelARGB() noexcept {}
+    ~PixelARGB() noexcept {}
 
     PixelARGB (const uint8 a, const uint8 r, const uint8 g, const uint8 b) noexcept
     {
@@ -367,8 +367,8 @@ class JUCE_API  PixelRGB
 {
 public:
     /** Creates a pixel without defining its colour. */
-    PixelRGB() = default;
-    ~PixelRGB() = default;
+    PixelRGB() noexcept {}
+    ~PixelRGB() noexcept {}
 
     //==============================================================================
     /** Returns a uint32 which represents the pixel in a platform dependent format which is compatible
@@ -618,8 +618,8 @@ class JUCE_API  PixelAlpha
 {
 public:
     /** Creates a pixel without defining its colour. */
-    PixelAlpha() = default;
-    ~PixelAlpha() = default;
+    PixelAlpha() noexcept {}
+    ~PixelAlpha() noexcept {}
 
     //==============================================================================
     /** Returns a uint32 which represents the pixel in a platform dependent format which is compatible

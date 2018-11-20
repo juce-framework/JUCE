@@ -64,6 +64,10 @@ static NSRect flippedScreenRect (NSRect r) noexcept
     return r;
 }
 
+#if JUCE_MODULE_AVAILABLE_juce_opengl
+void componentPeerAboutToChange (Component&, bool);
+#endif
+
 //==============================================================================
 class NSViewComponentPeer  : public ComponentPeer,
                              private Timer
@@ -71,7 +75,6 @@ class NSViewComponentPeer  : public ComponentPeer,
 public:
     NSViewComponentPeer (Component& comp, const int windowStyleFlags, NSView* viewToAttachTo)
         : ComponentPeer (comp, windowStyleFlags),
-          safeComponent (&comp),
           isSharedWindow (viewToAttachTo != nil),
           lastRepaintTime (Time::getMillisecondCounter())
     {
@@ -91,6 +94,24 @@ public:
                                 selector: @selector (frameChanged:)
                                     name: NSViewFrameDidChangeNotification
                                   object: view];
+
+        if (! isSharedWindow)
+        {
+            [notificationCenter  addObserver: view
+                                    selector: @selector (frameChanged:)
+                                        name: NSWindowDidMoveNotification
+                                      object: window];
+
+            [notificationCenter  addObserver: view
+                                    selector: @selector (frameChanged:)
+                                        name: NSWindowDidMiniaturizeNotification
+                                      object: window];
+
+            [notificationCenter  addObserver: view
+                                    selector: @selector (frameChanged:)
+                                        name: NSWindowDidDeminiaturizeNotification
+                                      object: window];
+        }
 
         [view setPostsFrameChangedNotifications: YES];
 
@@ -116,14 +137,7 @@ public:
            #else
             [window setDelegate: window];
            #endif
-
             [window setOpaque: component.isOpaque()];
-
-           #if defined (MAC_OS_X_VERSION_10_14)
-            if (! [window isOpaque])
-                [window setBackgroundColor: [NSColor clearColor]];
-           #endif
-
             [window setHasShadow: ((windowStyleFlags & windowHasDropShadow) != 0)];
 
             if (component.isAlwaysOnTop())
@@ -153,26 +167,6 @@ public:
             if ([window respondsToSelector: @selector (setTabbingMode:)])
                 [window setTabbingMode:NSWindowTabbingModeDisallowed];
            #endif
-
-            [notificationCenter  addObserver: view
-                                    selector: @selector (frameChanged:)
-                                        name: NSWindowDidMoveNotification
-                                      object: window];
-
-            [notificationCenter  addObserver: view
-                                    selector: @selector (frameChanged:)
-                                        name: NSWindowDidMiniaturizeNotification
-                                      object: window];
-
-            [notificationCenter  addObserver: view
-                                    selector: @selector (windowWillMiniaturize:)
-                                        name: NSWindowWillMiniaturizeNotification
-                                      object: window];
-
-            [notificationCenter  addObserver: view
-                                    selector: @selector (windowDidDeminiaturize:)
-                                        name: NSWindowDidDeminiaturizeNotification
-                                      object: window];
         }
 
         auto alpha = component.getAlpha();
@@ -222,10 +216,7 @@ public:
     {
         if (isSharedWindow)
         {
-            if (shouldBeVisible)
-                [view setHidden: false];
-            else if ([window firstResponder] != view || ([window firstResponder] == view && [window makeFirstResponder: nil]))
-                [view setHidden: true];
+            [view setHidden: ! shouldBeVisible];
         }
         else
         {
@@ -487,13 +478,9 @@ public:
     bool setAlwaysOnTop (bool alwaysOnTop) override
     {
         if (! isSharedWindow)
-        {
             [window setLevel: alwaysOnTop ? ((getStyleFlags() & windowIsTemporary) != 0 ? NSPopUpMenuWindowLevel
                                                                                         : NSFloatingWindowLevel)
                                           : NSNormalWindowLevel];
-
-            isAlwaysOnTop = alwaysOnTop;
-        }
 
         return true;
     }
@@ -718,11 +705,12 @@ public:
 
     void redirectWillMoveToWindow (NSWindow* newWindow)
     {
-        if (isSharedWindow && [view window] == window && newWindow == nullptr)
-        {
-            if (auto* comp = safeComponent.get())
-                comp->setVisible (false);
-        }
+       #if JUCE_MODULE_AVAILABLE_juce_opengl
+        if ([view window] == window)
+            componentPeerAboutToChange (getComponent(), newWindow == nullptr);
+       #else
+        ignoreUnused (newWindow);
+       #endif
     }
 
     void sendMouseEvent (NSEvent* ev)
@@ -792,7 +780,7 @@ public:
     {
         // (need to retain this in case a modal loop runs in handleKeyEvent and
         // our event object gets lost)
-        const std::unique_ptr<NSEvent, NSObjectDeleter> r ([ev retain]);
+        const NSObjectRetainer<NSEvent> r (ev);
 
         updateKeysDown (ev, true);
         bool used = handleKeyEvent (ev, true);
@@ -822,7 +810,7 @@ public:
     void redirectModKeyChange (NSEvent* ev)
     {
         // (need to retain this in case a modal loop runs and our event object gets lost)
-        const std::unique_ptr<NSEvent, NSObjectDeleter> r ([ev retain]);
+        const NSObjectRetainer<NSEvent> r (ev);
 
         keysCurrentlyDown.clear();
         handleKeyUpOrDown (true);
@@ -1058,15 +1046,7 @@ public:
     void viewMovedToWindow()
     {
         if (isSharedWindow)
-        {
-            auto newWindow = [view window];
-            bool shouldSetVisible = (window == nullptr && newWindow != nullptr);
-
-            window = newWindow;
-
-            if (shouldSetVisible)
-                getComponent().setVisible (true);
-        }
+            window = [view window];
     }
 
     void liveResizingStart()
@@ -1402,7 +1382,6 @@ public:
     //==============================================================================
     NSWindow* window = nil;
     NSView* view = nil;
-    WeakReference<Component> safeComponent;
     bool isSharedWindow = false, fullScreen = false;
     bool isWindowInKioskMode = false;
    #if USE_COREGRAPHICS_RENDERING
@@ -1413,7 +1392,6 @@ public:
     bool isZooming = false, isFirstLiveResize = false, textWasInserted = false;
     bool isStretchingTop = false, isStretchingLeft = false, isStretchingBottom = false, isStretchingRight = false;
     bool windowRepresentsFile = false;
-    bool isAlwaysOnTop = false, wasAlwaysOnTop = false;
     String stringBeingComposed;
     NSNotificationCenter* notificationCenter = nil;
 
@@ -1583,8 +1561,6 @@ struct JuceNSViewClass   : public ObjCClass<NSView>
         addMethod (@selector (magnifyWithEvent:),             magnify,                    "v@:@");
         addMethod (@selector (acceptsFirstMouse:),            acceptsFirstMouse,          "c@:@");
         addMethod (@selector (frameChanged:),                 frameChanged,               "v@:@");
-        addMethod (@selector (windowWillMiniaturize:),        windowWillMiniaturize,      "v@:@");
-        addMethod (@selector (windowDidDeminiaturize:),       windowDidDeminiaturize,     "v@:@");
         addMethod (@selector (wantsDefaultClipping:),         wantsDefaultClipping,       "c@:");
         addMethod (@selector (worksWhenModal),                worksWhenModal,             "c@:");
         addMethod (@selector (viewDidMoveToWindow),           viewDidMoveToWindow,        "v@:");
@@ -1679,32 +1655,6 @@ private:
     static void drawRect (id self, SEL, NSRect r)              { if (auto* p = getOwner (self)) p->drawRect (r); }
     static void frameChanged (id self, SEL, NSNotification*)   { if (auto* p = getOwner (self)) p->redirectMovedOrResized(); }
     static void viewDidMoveToWindow (id self, SEL)             { if (auto* p = getOwner (self)) p->viewMovedToWindow(); }
-
-    static void windowWillMiniaturize (id self, SEL, NSNotification*)
-    {
-        if (auto* p = getOwner (self))
-        {
-            if (p->isAlwaysOnTop)
-            {
-                // there is a bug when restoring minimised always on top windows so we need
-                // to remove this behaviour before minimising and restore it afterwards
-                p->setAlwaysOnTop (false);
-                p->wasAlwaysOnTop = true;
-            }
-        }
-    }
-
-    static void windowDidDeminiaturize (id self, SEL, NSNotification*)
-    {
-        if (auto* p = getOwner (self))
-        {
-            if (p->wasAlwaysOnTop)
-            {
-                p->setAlwaysOnTop (true);
-                p->redirectMovedOrResized();
-            }
-        }
-    }
 
     static BOOL isOpaque (id self, SEL)
     {

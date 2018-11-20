@@ -42,7 +42,7 @@ public:
 
     //==============================================================================
     void drawButtonBackground (Graphics&, Button&, const Colour& backgroundColour,
-                               bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override;
+                               bool isMouseOverButton, bool isButtonDown) override;
 
     void drawTableHeaderBackground (Graphics&, TableHeaderComponent&) override;
 

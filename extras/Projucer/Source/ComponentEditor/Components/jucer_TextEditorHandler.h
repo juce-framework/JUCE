@@ -115,8 +115,8 @@ public:
     {
         ComponentTypeHandler::fillInCreationCode (code, component, memberVariableName);
 
-        auto te = dynamic_cast<TextEditor*> (component);
-        jassert (te != nullptr);
+        TextEditor* const te = dynamic_cast<TextEditor*> (component);
+        jassert (te != 0);
 
         String s;
         s << memberVariableName << "->setMultiLine (" << CodeHelpers::boolLiteral (te->isMultiLine()) << ");\n"

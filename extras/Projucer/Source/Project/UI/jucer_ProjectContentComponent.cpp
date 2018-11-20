@@ -39,10 +39,8 @@ struct LogoComponent  : public Component
 {
     LogoComponent()
     {
-        if (auto svg = parseXML (BinaryData::background_logo_svg))
-            logo.reset (Drawable::createFromSVG (*svg));
-        else
-            jassertfalse;
+        std::unique_ptr<XmlElement> svg (XmlDocument::parse (BinaryData::background_logo_svg));
+        logo.reset (Drawable::createFromSVG (*svg));
     }
 
     void paint (Graphics& g) override
@@ -336,13 +334,6 @@ void ProjectContentComponent::changeListenerCallback (ChangeBroadcaster*)
     updateMissingFileStatuses();
 }
 
-void ProjectContentComponent::refreshProjectTreeFileStatuses()
-{
-    if (auto* projectTab = getProjectTab())
-        if (auto* fileTree = projectTab->getFileTreePanel())
-            fileTree->repaint();
-}
-
 void ProjectContentComponent::updateMissingFileStatuses()
 {
     if (auto* pTab = getProjectTab())
@@ -491,8 +482,6 @@ void ProjectContentComponent::saveDocument()
     {
         if (! currentDocument->save())
             showSaveWarning (currentDocument);
-
-        refreshProjectTreeFileStatuses();
     }
     else
     {
@@ -502,13 +491,8 @@ void ProjectContentComponent::saveDocument()
 
 void ProjectContentComponent::saveAs()
 {
-    if (currentDocument != nullptr)
-    {
-        if (! currentDocument->saveAs())
-            showSaveWarning (currentDocument);
-
-        refreshProjectTreeFileStatuses();
-    }
+    if (currentDocument != nullptr && ! currentDocument->saveAs())
+        showSaveWarning (currentDocument);
 }
 
 bool ProjectContentComponent::goToPreviousFile()
@@ -847,7 +831,6 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
                         "Saves the current project",
                         CommandCategories::general, 0);
         result.setActive (project != nullptr && ! project->isCurrentlySaving());
-        result.defaultKeypresses.add ({ 'p', ModifierKeys::commandModifier, 0 });
         break;
 
     case CommandIDs::closeProject:

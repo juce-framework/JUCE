@@ -31,14 +31,14 @@ namespace TabbedComponentHelpers
 {
     const Identifier deleteComponentId ("deleteByTabComp_");
 
-    static void deleteIfNecessary (Component* comp)
+    static void deleteIfNecessary (Component* const comp)
     {
         if (comp != nullptr && (bool) comp->getProperties() [deleteComponentId])
             delete comp;
     }
 
     static Rectangle<int> getTabArea (Rectangle<int>& content, BorderSize<int>& outline,
-                                      TabbedButtonBar::Orientation orientation, int tabDepth)
+                                      const TabbedButtonBar::Orientation orientation, const int tabDepth)
     {
         switch (orientation)
         {
@@ -71,7 +71,7 @@ struct TabbedComponent::ButtonBar  : public TabbedButtonBar
         owner.popupMenuClickOnTab (tabIndex, tabName);
     }
 
-    Colour getTabBackgroundColour (int tabIndex)
+    Colour getTabBackgroundColour (const int tabIndex)
     {
         return owner.tabs->getTabBackgroundColour (tabIndex);
     }
@@ -88,7 +88,7 @@ struct TabbedComponent::ButtonBar  : public TabbedButtonBar
 
 
 //==============================================================================
-TabbedComponent::TabbedComponent (TabbedButtonBar::Orientation orientation)
+TabbedComponent::TabbedComponent (const TabbedButtonBar::Orientation orientation)
 {
     tabs.reset (new ButtonBar (*this, orientation));
     addAndMakeVisible (tabs.get());
@@ -101,7 +101,7 @@ TabbedComponent::~TabbedComponent()
 }
 
 //==============================================================================
-void TabbedComponent::setOrientation (TabbedButtonBar::Orientation orientation)
+void TabbedComponent::setOrientation (const TabbedButtonBar::Orientation orientation)
 {
     tabs->setOrientation (orientation);
     resized();
@@ -112,7 +112,7 @@ TabbedButtonBar::Orientation TabbedComponent::getOrientation() const noexcept
     return tabs->getOrientation();
 }
 
-void TabbedComponent::setTabBarDepth (int newDepth)
+void TabbedComponent::setTabBarDepth (const int newDepth)
 {
     if (tabDepth != newDepth)
     {
@@ -121,7 +121,7 @@ void TabbedComponent::setTabBarDepth (int newDepth)
     }
 }
 
-TabBarButton* TabbedComponent::createTabButton (const String& tabName, int /*tabIndex*/)
+TabBarButton* TabbedComponent::createTabButton (const String& tabName, const int /*tabIndex*/)
 {
     return new TabBarButton (tabName, *tabs);
 }
@@ -132,7 +132,7 @@ void TabbedComponent::clearTabs()
     if (panelComponent != nullptr)
     {
         panelComponent->setVisible (false);
-        removeChildComponent (panelComponent.get());
+        removeChildComponent (panelComponent);
         panelComponent = nullptr;
     }
 
@@ -146,9 +146,9 @@ void TabbedComponent::clearTabs()
 
 void TabbedComponent::addTab (const String& tabName,
                               Colour tabBackgroundColour,
-                              Component* contentComponent,
-                              bool deleteComponentWhenNotNeeded,
-                              int insertIndex)
+                              Component* const contentComponent,
+                              const bool deleteComponentWhenNotNeeded,
+                              const int insertIndex)
 {
     contentComponents.insert (insertIndex, WeakReference<Component> (contentComponent));
 
@@ -159,22 +159,22 @@ void TabbedComponent::addTab (const String& tabName,
     resized();
 }
 
-void TabbedComponent::setTabName (int tabIndex, const String& newName)
+void TabbedComponent::setTabName (const int tabIndex, const String& newName)
 {
     tabs->setTabName (tabIndex, newName);
 }
 
-void TabbedComponent::removeTab (int tabIndex)
+void TabbedComponent::removeTab (const int tabIndex)
 {
     if (isPositiveAndBelow (tabIndex, contentComponents.size()))
     {
-        TabbedComponentHelpers::deleteIfNecessary (contentComponents.getReference (tabIndex).get());
+        TabbedComponentHelpers::deleteIfNecessary (contentComponents.getReference (tabIndex));
         contentComponents.remove (tabIndex);
         tabs->removeTab (tabIndex);
     }
 }
 
-void TabbedComponent::moveTab (int currentIndex, int newIndex, bool animate)
+void TabbedComponent::moveTab (const int currentIndex, const int newIndex, const bool animate)
 {
     contentComponents.move (currentIndex, newIndex);
     tabs->moveTab (currentIndex, newIndex, animate);
@@ -190,17 +190,17 @@ StringArray TabbedComponent::getTabNames() const
     return tabs->getTabNames();
 }
 
-Component* TabbedComponent::getTabContentComponent (int tabIndex) const noexcept
+Component* TabbedComponent::getTabContentComponent (const int tabIndex) const noexcept
 {
-    return contentComponents[tabIndex].get();
+    return contentComponents [tabIndex];
 }
 
-Colour TabbedComponent::getTabBackgroundColour (int tabIndex) const noexcept
+Colour TabbedComponent::getTabBackgroundColour (const int tabIndex) const noexcept
 {
     return tabs->getTabBackgroundColour (tabIndex);
 }
 
-void TabbedComponent::setTabBackgroundColour (int tabIndex, Colour newColour)
+void TabbedComponent::setTabBackgroundColour (const int tabIndex, Colour newColour)
 {
     tabs->setTabBackgroundColour (tabIndex, newColour);
 
@@ -208,7 +208,7 @@ void TabbedComponent::setTabBackgroundColour (int tabIndex, Colour newColour)
         repaint();
 }
 
-void TabbedComponent::setCurrentTabIndex (int newTabIndex, bool sendChangeMessage)
+void TabbedComponent::setCurrentTabIndex (const int newTabIndex, const bool sendChangeMessage)
 {
     tabs->setCurrentTabIndex (newTabIndex, sendChangeMessage);
 }
@@ -223,14 +223,14 @@ String TabbedComponent::getCurrentTabName() const
     return tabs->getCurrentTabName();
 }
 
-void TabbedComponent::setOutline (int thickness)
+void TabbedComponent::setOutline (const int thickness)
 {
     outlineThickness = thickness;
     resized();
     repaint();
 }
 
-void TabbedComponent::setIndent (int indentThickness)
+void TabbedComponent::setIndent (const int indentThickness)
 {
     edgeIndent = indentThickness;
     resized();
@@ -266,19 +266,19 @@ void TabbedComponent::resized()
     tabs->setBounds (TabbedComponentHelpers::getTabArea (content, outline, getOrientation(), tabDepth));
     content = BorderSize<int> (edgeIndent).subtractedFrom (outline.subtractedFrom (content));
 
-    for (auto& c : contentComponents)
-        if (auto comp = c.get())
-            comp->setBounds (content);
+    for (int i = contentComponents.size(); --i >= 0;)
+        if (Component* c = contentComponents.getReference(i))
+            c->setBounds (content);
 }
 
 void TabbedComponent::lookAndFeelChanged()
 {
-    for (auto& c : contentComponents)
-        if (auto comp = c.get())
-          comp->lookAndFeelChanged();
+    for (int i = contentComponents.size(); --i >= 0;)
+        if (Component* c = contentComponents.getReference(i))
+            c->lookAndFeelChanged();
 }
 
-void TabbedComponent::changeCallback (int newCurrentTabIndex, const String& newTabName)
+void TabbedComponent::changeCallback (const int newCurrentTabIndex, const String& newTabName)
 {
     auto* newPanelComp = getTabContentComponent (getCurrentTabIndex());
 

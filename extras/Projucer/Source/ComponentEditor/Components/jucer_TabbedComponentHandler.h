@@ -264,15 +264,15 @@ public:
     //==============================================================================
     static bool isTabUsingJucerComp (TabbedComponent* tc, int tabIndex)
     {
-        auto tdc = dynamic_cast<TabDemoContentComp*> (tc->getTabContentComponent (tabIndex));
+        TabDemoContentComp* const tdc = dynamic_cast<TabDemoContentComp*> (tc->getTabContentComponent (tabIndex));
         jassert (tdc != nullptr);
 
-        return tdc != nullptr && tdc->isUsingJucerComp;
+        return tdc != 0 && tdc->isUsingJucerComp;
     }
 
     static void setTabUsingJucerComp (TabbedComponent* tc, int tabIndex, const bool b)
     {
-        auto tdc = dynamic_cast<TabDemoContentComp*> (tc->getTabContentComponent (tabIndex));
+        TabDemoContentComp* const tdc = dynamic_cast<TabDemoContentComp*> (tc->getTabContentComponent (tabIndex));
         jassert (tdc != nullptr);
 
         if (tdc != nullptr)
@@ -284,10 +284,10 @@ public:
 
     static String getTabClassName (TabbedComponent* tc, int tabIndex)
     {
-        auto tdc = dynamic_cast<TabDemoContentComp*> (tc->getTabContentComponent (tabIndex));
+        TabDemoContentComp* const tdc = dynamic_cast<TabDemoContentComp*> (tc->getTabContentComponent (tabIndex));
         jassert (tdc != nullptr);
 
-        return tdc != nullptr ? tdc->contentClassName : String();
+        return tdc != 0 ? tdc->contentClassName : String();
     }
 
     static void setTabClassName (TabbedComponent* tc, int tabIndex, const String& newName)
@@ -304,15 +304,15 @@ public:
 
     static String getTabConstructorParams (TabbedComponent* tc, int tabIndex)
     {
-        auto tdc = dynamic_cast<TabDemoContentComp*> (tc->getTabContentComponent (tabIndex));
+        TabDemoContentComp* const tdc = dynamic_cast<TabDemoContentComp*> (tc->getTabContentComponent (tabIndex));
         jassert (tdc != nullptr);
 
-        return tdc != nullptr ? tdc->constructorParams : String();
+        return tdc != 0 ? tdc->constructorParams : String();
     }
 
     static void setTabConstructorParams (TabbedComponent* tc, int tabIndex, const String& newParams)
     {
-        auto tdc = dynamic_cast<TabDemoContentComp*> (tc->getTabContentComponent (tabIndex));
+        TabDemoContentComp* const tdc = dynamic_cast<TabDemoContentComp*> (tc->getTabContentComponent (tabIndex));
         jassert (tdc != nullptr);
 
         if (tdc != nullptr)
@@ -324,15 +324,15 @@ public:
 
     static String getTabJucerFile (TabbedComponent* tc, int tabIndex)
     {
-        auto tdc = dynamic_cast<TabDemoContentComp*> (tc->getTabContentComponent (tabIndex));
+        TabDemoContentComp* const tdc = dynamic_cast<TabDemoContentComp*> (tc->getTabContentComponent (tabIndex));
         jassert (tdc != nullptr);
 
-        return tdc != nullptr ? tdc->jucerComponentFile : String();
+        return tdc != 0 ? tdc->jucerComponentFile : String();
     }
 
     static void setTabJucerFile (TabbedComponent* tc, int tabIndex, const String& newFile)
     {
-        auto tdc = dynamic_cast<TabDemoContentComp*> (tc->getTabContentComponent (tabIndex));
+        TabDemoContentComp* const tdc = dynamic_cast<TabDemoContentComp*> (tc->getTabContentComponent (tabIndex));
         jassert (tdc != nullptr);
 
         if (tdc != nullptr)
@@ -380,7 +380,7 @@ private:
                 {
                     jucerComp.reset();
 
-                    jucerComp.reset (new TestComponent (ComponentTypeHandler::findParentDocument (this), nullptr, false));
+                    jucerComp.reset (new TestComponent (ComponentTypeHandler::findParentDocument (this), 0, false));
                     jucerComp->setFilename (jucerComponentFile);
                     jucerComp->setToInitialSize();
 

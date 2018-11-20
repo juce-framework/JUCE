@@ -348,12 +348,7 @@ struct JSONFormatter
         }
         else if (v.isDouble())
         {
-            auto d = static_cast<double> (v);
-
-            if (juce_isfinite (d))
-                out << String (d, maximumDecimalPlaces);
-            else
-                out << "null";
+            out << String (static_cast<double> (v), maximumDecimalPlaces);
         }
         else if (v.isArray())
         {

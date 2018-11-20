@@ -152,9 +152,10 @@ public:
 
                 if (doc != nullptr)
                 {
-                    code.includeFilesCPP.add (File::createFileWithoutCheckingPath (doc->getHeaderFile()
-                                                                                       .getRelativePathFrom (code.document->getCppFile().getParentDirectory())
-                                                                                       .replaceCharacter ('\\', '/')));
+                    code.includeFilesCPP.add (doc->getHeaderFile()
+                                                .getRelativePathFrom (code.document->getCppFile().getParentDirectory())
+                                                .replaceCharacter ('\\', '/'));
+
                     classNm = doc->getClassName();
                 }
                 else
@@ -188,7 +189,7 @@ public:
         if (getViewportContentType (vp) == 1)
         {
             JucerDocument* doc = findParentDocument (vp);
-            auto tc = new TestComponent (doc, nullptr, false);
+            TestComponent* tc = new TestComponent (doc, 0, false);
 
             tc->setFilename (getViewportJucerComponentFile (vp));
             tc->setToInitialSize();

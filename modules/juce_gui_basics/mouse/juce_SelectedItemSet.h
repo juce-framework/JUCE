@@ -47,13 +47,15 @@ class SelectedItemSet   : public ChangeBroadcaster
 {
 public:
     //==============================================================================
-    using ItemType = SelectableItemType;
-    using ItemArray = Array<SelectableItemType>;
-    using ParameterType = typename TypeHelpers::ParameterType<SelectableItemType>::type;
+    typedef SelectableItemType ItemType;
+    typedef Array<SelectableItemType> ItemArray;
+    typedef typename TypeHelpers::ParameterType<SelectableItemType>::type ParameterType;
 
     //==============================================================================
     /** Creates an empty set. */
-    SelectedItemSet() = default;
+    SelectedItemSet()
+    {
+    }
 
     /** Creates a set based on an array of items. */
     explicit SelectedItemSet (const ItemArray& items)
@@ -63,7 +65,7 @@ public:
 
     /** Creates a copy of another set. */
     SelectedItemSet (const SelectedItemSet& other)
-        : ChangeBroadcaster(), selectedItems (other.selectedItems)
+        : selectedItems (other.selectedItems)
     {
     }
 

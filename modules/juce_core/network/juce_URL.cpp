@@ -61,10 +61,10 @@ struct FallbackDownloadTask  : public URL::DownloadTask,
             if (listener != nullptr)
                 listener->progress (this, downloaded, contentLength);
 
-            auto max = jmin ((int) bufferSize, contentLength < 0 ? std::numeric_limits<int>::max()
-                                                                 : static_cast<int> (contentLength - downloaded));
+            const int max = jmin ((int) bufferSize, contentLength < 0 ? std::numeric_limits<int>::max()
+                                                                      : static_cast<int> (contentLength - downloaded));
 
-            auto actual = stream->read (buffer.get(), max);
+            const int actual = stream->read (buffer.get(), max);
 
             if (actual < 0 || threadShouldExit() || stream->isError())
                 break;
@@ -118,7 +118,9 @@ URL::DownloadTask* URL::DownloadTask::createFallbackDownloader (const URL& urlTo
     const size_t bufferSize = 0x8000;
     targetFileToUse.deleteFile();
 
-    if (auto outputStream = std::unique_ptr<FileOutputStream> (targetFileToUse.createOutputStream (bufferSize)))
+    std::unique_ptr<FileOutputStream> outputStream (targetFileToUse.createOutputStream (bufferSize));
+
+    if (outputStream != nullptr)
     {
         std::unique_ptr<WebInputStream> stream (new WebInputStream (urlToUse, usePostRequest));
         stream->withExtraHeaders (extraHeadersToUse);
@@ -184,8 +186,8 @@ void URL::init()
     {
         do
         {
-            auto nextAmp   = url.indexOfChar (i + 1, '&');
-            auto equalsPos = url.indexOfChar (i + 1, '=');
+            const int nextAmp   = url.indexOfChar (i + 1, '&');
+            const int equalsPos = url.indexOfChar (i + 1, '=');
 
             if (nextAmp < 0)
             {
@@ -322,7 +324,7 @@ void URL::addParameter (const String& name, const String& value)
     parameterValues.add (value);
 }
 
-String URL::toString (bool includeGetParameters) const
+String URL::toString (const bool includeGetParameters) const
 {
     if (includeGetParameters && parameterNames.size() > 0)
         return url + "?" + URLHelpers::getMangledParameters (*this);
@@ -574,11 +576,11 @@ public:
             BOOL isBookmarkStale = false;
             NSError* error = nil;
 
-            auto nsURL = [NSURL URLByResolvingBookmarkData: bookmark
-                                                   options: 0
-                                             relativeToURL: nil
-                                       bookmarkDataIsStale: &isBookmarkStale
-                                                     error: &error];
+            auto* nsURL = [NSURL URLByResolvingBookmarkData: bookmark
+                                                    options: 0
+                                              relativeToURL: nil
+                                        bookmarkDataIsStale: &isBookmarkStale
+                                                      error: &error];
 
             if (error == nil)
             {
@@ -589,7 +591,7 @@ public:
             }
             else
             {
-                auto desc = [error localizedDescription];
+                auto* desc = [error localizedDescription];
                 ignoreUnused (desc);
                 jassertfalse;
             }
@@ -607,10 +609,10 @@ private:
             BOOL isBookmarkStale = false;
             NSError* error = nil;
 
-            auto nsURL = [NSURL URLByResolvingBookmarkData: bookmark
-                                                   options: 0
-                                             relativeToURL: nil
-                                       bookmarkDataIsStale: &isBookmarkStale
+            auto* nsURL = [NSURL URLByResolvingBookmarkData: bookmark
+                                                    options: 0
+                                              relativeToURL: nil
+                                        bookmarkDataIsStale: &isBookmarkStale
                                                       error: &error];
 
             if (error == nil)
@@ -624,7 +626,7 @@ private:
             }
             else
             {
-                auto desc = [error localizedDescription];
+                auto* desc = [error localizedDescription];
                 ignoreUnused (desc);
                 jassertfalse;
             }
@@ -651,14 +653,14 @@ private:
 #endif
 
 //==============================================================================
-InputStream* URL::createInputStream (bool usePostCommand,
-                                     OpenStreamProgressCallback* progressCallback,
-                                     void* progressCallbackContext,
+InputStream* URL::createInputStream (const bool usePostCommand,
+                                     OpenStreamProgressCallback* const progressCallback,
+                                     void* const progressCallbackContext,
                                      String headers,
-                                     int timeOutMs,
-                                     StringPairArray* responseHeaders,
+                                     const int timeOutMs,
+                                     StringPairArray* const responseHeaders,
                                      int* statusCode,
-                                     int numRedirectsToFollow,
+                                     const int numRedirectsToFollow,
                                      String httpRequestCmd) const
 {
     if (isLocalFile())
@@ -682,10 +684,10 @@ InputStream* URL::createInputStream (bool usePostCommand,
 
         bool postDataSendProgress (WebInputStream&, int bytesSent, int totalBytes) override
         {
-            return callback (data, bytesSent, totalBytes);
+            return callback(data, bytesSent, totalBytes);
         }
 
-        OpenStreamProgressCallback* callback;
+        OpenStreamProgressCallback* const callback;
         void* const data;
 
         // workaround a MSVC 2013 compiler warning
@@ -856,8 +858,8 @@ String URL::removeEscapeChars (const String& s)
     {
         if (utf8.getUnchecked(i) == '%')
         {
-            auto hexDigit1 = CharacterFunctions::getHexDigitValue ((juce_wchar) (uint8) utf8 [i + 1]);
-            auto hexDigit2 = CharacterFunctions::getHexDigitValue ((juce_wchar) (uint8) utf8 [i + 2]);
+            const int hexDigit1 = CharacterFunctions::getHexDigitValue ((juce_wchar) (uint8) utf8 [i + 1]);
+            const int hexDigit2 = CharacterFunctions::getHexDigitValue ((juce_wchar) (uint8) utf8 [i + 2]);
 
             if (hexDigit1 >= 0 && hexDigit2 >= 0)
             {

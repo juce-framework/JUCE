@@ -132,7 +132,7 @@ struct JUCE_API  MPENote
     */
     MPEValue pressure        { MPEValue::centreValue() };
 
-    /** Initial value of timbre when the note was triggered.
+    /** Inital value of timbre when the note was triggered.
         This should never change during the lifetime of an MPENote object.
     */
     MPEValue initialTimbre   { MPEValue::centreValue() };

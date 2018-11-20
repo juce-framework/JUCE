@@ -48,8 +48,7 @@ namespace juce
 }
 
 @property (strong, nonatomic) UIWindow *window;
-- (id) init;
-- (void) dealloc;
+- (id)init;
 - (void) applicationDidFinishLaunching: (UIApplication*) application;
 - (void) applicationWillTerminate: (UIApplication*) application;
 - (void) applicationDidEnterBackground: (UIApplication*) application;
@@ -89,7 +88,7 @@ namespace juce
 
     NSObject* _pushNotificationsDelegate;
 
-- (id) init
+- (id)init
 {
     self = [super init];
     appSuspendTask = UIBackgroundTaskInvalid;
@@ -99,11 +98,6 @@ namespace juce
    #endif
 
     return self;
-}
-
-- (void) dealloc
-{
-    [super dealloc];
 }
 
 - (void) applicationDidFinishLaunching: (UIApplication*) application
@@ -646,13 +640,13 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoBox (AlertWindow::AlertIconType /*i
 }
 
 //==============================================================================
-bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray&, bool, Component*, std::function<void()>)
+bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray&, bool, Component*)
 {
     jassertfalse;    // no such thing on iOS!
     return false;
 }
 
-bool DragAndDropContainer::performExternalDragDropOfText (const String&, Component*, std::function<void()>)
+bool DragAndDropContainer::performExternalDragDropOfText (const String&, Component*)
 {
     jassertfalse;    // no such thing on iOS!
     return false;
@@ -736,7 +730,7 @@ Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
     return Orientations::convertToJuce (orientation);
 }
 
-void Displays::findDisplays (float masterScale)
+void Desktop::Displays::findDisplays (float masterScale)
 {
     JUCE_AUTORELEASEPOOL
     {

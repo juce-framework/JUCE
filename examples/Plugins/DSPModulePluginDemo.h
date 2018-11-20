@@ -35,8 +35,6 @@
                    juce_events, juce_graphics, juce_gui_basics, juce_gui_extra
  exporters:        xcode_mac, vs2017
 
- moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
-
  type:             AudioProcessor
  mainClass:        DspModulePluginDemoAudioProcessor
 

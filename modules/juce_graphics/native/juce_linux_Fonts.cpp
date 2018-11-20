@@ -27,16 +27,16 @@
 namespace juce
 {
 
-static std::unique_ptr<XmlElement> findFontsConfFile()
+static XmlElement* findFontsConfFile()
 {
     static const char* pathsToSearch[] = { "/etc/fonts/fonts.conf",
                                            "/usr/share/fonts/fonts.conf" };
 
     for (auto* path : pathsToSearch)
-        if (auto xml = parseXML (File (path)))
+        if (auto* xml = XmlDocument::parse (File (path)))
             return xml;
 
-    return {};
+    return nullptr;
 }
 
 StringArray FTTypefaceList::getDefaultFontDirectories()
@@ -48,7 +48,9 @@ StringArray FTTypefaceList::getDefaultFontDirectories()
 
     if (fontDirs.isEmpty())
     {
-        if (auto fontsInfo = findFontsConfFile())
+        std::unique_ptr<XmlElement> fontsInfo (findFontsConfFile());
+
+        if (fontsInfo != nullptr)
         {
             forEachXmlChildElementWithTagName (*fontsInfo, e, "dir")
             {

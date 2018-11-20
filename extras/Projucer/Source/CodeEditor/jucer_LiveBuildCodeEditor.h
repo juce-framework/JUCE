@@ -450,7 +450,7 @@ private:
     {
     public:
         ControlsComponent (CodeDocument& doc, const Range<int>& selection,
-                           CompileEngineChildProcess::Ptr cp, bool showColourSelector)
+                           CompileEngineChildProcess* cp, bool showColourSelector)
             : document (doc),
               start (doc, selection.getStart()),
               end (doc, selection.getEnd()),
@@ -629,7 +629,7 @@ private:
 
         ~LiteralHighlightOverlay()
         {
-            if (auto* p = getParentComponent())
+            if (Component* p = getParentComponent())
             {
                 p->removeChildComponent (this);
 

@@ -69,9 +69,9 @@ public:
 private:
     std::unique_ptr<AudioFormatReader> source;
     TimeSliceThread& thread;
-    std::atomic<int64> nextReadPosition { 0 };
+    int64 nextReadPosition;
     const int numBlocks;
-    int timeoutMs = 0;
+    int timeoutMs;
 
     enum { samplesPerBlock = 32768 };
 

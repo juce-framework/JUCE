@@ -288,7 +288,7 @@ public:
     /** A value type used for thread IDs.
         @see getCurrentThreadId(), getThreadId()
     */
-    using ThreadID = void*;
+    typedef void* ThreadID;
 
     /** Returns an id that identifies the caller thread.
 

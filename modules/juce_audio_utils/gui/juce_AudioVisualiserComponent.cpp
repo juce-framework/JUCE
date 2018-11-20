@@ -29,7 +29,8 @@ namespace juce
 
 struct AudioVisualiserComponent::ChannelInfo
 {
-    ChannelInfo (AudioVisualiserComponent& o, int bufferSize) : owner (o)
+    ChannelInfo (AudioVisualiserComponent& o, int bufferSize)
+       : owner (o), nextSample (0), subSample (0)
     {
         setBufferSize (bufferSize);
         clear();
@@ -37,21 +38,20 @@ struct AudioVisualiserComponent::ChannelInfo
 
     void clear() noexcept
     {
-        // VS2013 doesn't like {} here...
-        for (auto& l : levels)
-            l = Range<float>();
+        for (int i = 0; i < levels.size(); ++i)
+            levels.getReference(i) = Range<float>();
 
-        value = {};
+        value = Range<float>();
         subSample = 0;
     }
 
-    void pushSamples (const float* inputSamples, int num) noexcept
+    void pushSamples (const float* inputSamples, const int num) noexcept
     {
         for (int i = 0; i < num; ++i)
             pushSample (inputSamples[i]);
     }
 
-    void pushSample (float newSample) noexcept
+    void pushSample (const float newSample) noexcept
     {
         if (--subSample <= 0)
         {
@@ -69,7 +69,7 @@ struct AudioVisualiserComponent::ChannelInfo
     void setBufferSize (int newSize)
     {
         levels.removeRange (newSize, levels.size());
-        levels.insertMultiple (-1, {}, newSize - levels.size());
+        levels.insertMultiple (-1, Range<float>(), newSize - levels.size());
 
         if (nextSample >= newSize)
             nextSample = 0;
@@ -78,13 +78,13 @@ struct AudioVisualiserComponent::ChannelInfo
     AudioVisualiserComponent& owner;
     Array<Range<float>> levels;
     Range<float> value;
-    int nextSample = 0, subSample = 0;
+    int nextSample, subSample;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChannelInfo)
 };
 
 //==============================================================================
-AudioVisualiserComponent::AudioVisualiserComponent (int initialNumChannels)
+AudioVisualiserComponent::AudioVisualiserComponent (const int initialNumChannels)
   : numSamples (1024),
     inputSamplesPerBlock (256),
     backgroundColour (Colours::black),
@@ -99,7 +99,7 @@ AudioVisualiserComponent::~AudioVisualiserComponent()
 {
 }
 
-void AudioVisualiserComponent::setNumChannels (int numChannels)
+void AudioVisualiserComponent::setNumChannels (const int numChannels)
 {
     channels.clear();
 
@@ -111,14 +111,14 @@ void AudioVisualiserComponent::setBufferSize (int newNumSamples)
 {
     numSamples = newNumSamples;
 
-    for (auto* c : channels)
-        c->setBufferSize (newNumSamples);
+    for (int i = 0; i < channels.size(); ++i)
+        channels.getUnchecked(i)->setBufferSize (newNumSamples);
 }
 
 void AudioVisualiserComponent::clear()
 {
-    for (auto* c : channels)
-        c->clear();
+    for (int i = 0; i < channels.size(); ++i)
+        channels.getUnchecked(i)->clear();
 }
 
 void AudioVisualiserComponent::pushBuffer (const float** d, int numChannels, int num)
@@ -138,7 +138,7 @@ void AudioVisualiserComponent::pushBuffer (const AudioBuffer<float>& buffer)
 
 void AudioVisualiserComponent::pushBuffer (const AudioSourceChannelInfo& buffer)
 {
-    auto numChannels = jmin (buffer.buffer->getNumChannels(), channels.size());
+    const int numChannels = jmin (buffer.buffer->getNumChannels(), channels.size());
 
     for (int i = 0; i < numChannels; ++i)
         channels.getUnchecked(i)->pushSamples (buffer.buffer->getReadPointer (i, buffer.startSample),
@@ -179,24 +179,27 @@ void AudioVisualiserComponent::paint (Graphics& g)
 {
     g.fillAll (backgroundColour);
 
-    auto r = getLocalBounds().toFloat();
-    auto channelHeight = r.getHeight() / channels.size();
+    Rectangle<float> r (getLocalBounds().toFloat());
+    const float channelHeight = r.getHeight() / channels.size();
 
     g.setColour (waveformColour);
 
-    for (auto* c : channels)
+    for (int i = 0; i < channels.size(); ++i)
+    {
+        const ChannelInfo& c = *channels.getUnchecked(i);
+
         paintChannel (g, r.removeFromTop (channelHeight),
-                      c->levels.begin(), c->levels.size(), c->nextSample);
+                      c.levels.begin(), c.levels.size(), c.nextSample);
+    }
 }
 
-void AudioVisualiserComponent::getChannelAsPath (Path& path, const Range<float>* levels,
-                                                 int numLevels, int nextSample)
+void AudioVisualiserComponent::getChannelAsPath (Path& path, const Range<float>* levels, int numLevels, int nextSample)
 {
     path.preallocateSpace (4 * numLevels + 8);
 
     for (int i = 0; i < numLevels; ++i)
     {
-        auto level = -(levels[(nextSample + i) % numLevels].getEnd());
+        const float level = -(levels[(nextSample + i) % numLevels].getEnd());
 
         if (i == 0)
             path.startNewSubPath (0.0f, level);

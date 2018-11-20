@@ -59,7 +59,7 @@ ThreadWithProgressWindow::~ThreadWithProgressWindow()
 
 void ThreadWithProgressWindow::launchThread (int priority)
 {
-    JUCE_ASSERT_MESSAGE_THREAD
+    jassert (MessageManager::getInstance()->isThisTheMessageThread());
 
     startThread (priority);
     startTimer (100);
@@ -87,7 +87,7 @@ void ThreadWithProgressWindow::timerCallback()
 {
     bool threadStillRunning = isThreadRunning();
 
-    if (! (threadStillRunning && alertWindow->isCurrentlyModal (false)))
+    if (! (threadStillRunning && alertWindow->isCurrentlyModal()))
     {
         stopTimer();
         stopThread (timeOutMsWhenCancelling);

@@ -99,7 +99,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paintButton (Graphics&, bool, bool) override;
+    void paintButton (Graphics&, bool isMouseOverButton, bool isButtonDown) override;
     /** @internal */
     void colourChanged() override;
 

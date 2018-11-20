@@ -57,14 +57,14 @@ public:
         The view will be retained and released by this component for as long as
         it is needed. To remove the current view, just call setView (nullptr).
 
-        Note: A void* is used here to avoid including the cocoa headers as
+        Note: a void* is used here to avoid including the cocoa headers as
         part of the juce.h, but the method expects an UIView*.
     */
     void setView (void* uiView);
 
     /** Returns the current UIView.
 
-        Note: A void* is returned here to avoid the needing to include the cocoa
+        Note: a void* is returned here to avoid the needing to include the cocoa
         headers, so you should just cast the return value to an UIView*.
     */
     void* getView() const;
@@ -80,6 +80,7 @@ public:
 
 private:
     class Pimpl;
+    friend class Pimpl;
     std::unique_ptr<Pimpl> pimpl;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UIViewComponent)

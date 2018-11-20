@@ -45,10 +45,7 @@ public:
 
         @see isValid
     */
-    KeyPress() = default;
-
-    /** Destructor. */
-    ~KeyPress() = default;
+    KeyPress() noexcept;
 
     /** Creates a KeyPress for a key and some modifiers.
 
@@ -77,10 +74,10 @@ public:
     explicit KeyPress (int keyCode) noexcept;
 
     /** Creates a copy of another KeyPress. */
-    KeyPress (const KeyPress&) = default;
+    KeyPress (const KeyPress& other) noexcept;
 
     /** Copies this KeyPress from another one. */
-    KeyPress& operator= (const KeyPress&) = default;
+    KeyPress& operator= (const KeyPress& other) noexcept;
 
     /** Compares two KeyPress objects. */
     bool operator== (const KeyPress& other) const noexcept;

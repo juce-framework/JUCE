@@ -70,10 +70,10 @@ public:
 
     //==============================================================================
     /** Provides the type of scoped lock to use for locking a SpinLock. */
-    using ScopedLockType = GenericScopedLock<SpinLock>;
+    typedef GenericScopedLock <SpinLock>       ScopedLockType;
 
     /** Provides the type of scoped unlocker to use with a SpinLock. */
-    using ScopedUnlockType = GenericScopedUnlock<SpinLock>;
+    typedef GenericScopedUnlock <SpinLock>     ScopedUnlockType;
 
 private:
     //==============================================================================

@@ -27,11 +27,25 @@
 namespace juce
 {
 
-OSCArgument::OSCArgument (int32 v)              : type (OSCTypes::int32),   intValue (v) {}
-OSCArgument::OSCArgument (float v)              : type (OSCTypes::float32), floatValue (v) {}
-OSCArgument::OSCArgument (const String& s)      : type (OSCTypes::string),  stringValue (s) {}
-OSCArgument::OSCArgument (MemoryBlock b)        : type (OSCTypes::blob),    blob (static_cast<MemoryBlock&&> (b)) {}
-OSCArgument::OSCArgument (OSCColour c)          : type (OSCTypes::colour),  intValue ((int32) c.toInt32()) {}
+OSCArgument::OSCArgument (int32 value) noexcept
+    : type (OSCTypes::int32), intValue (value)
+{
+}
+
+OSCArgument::OSCArgument (float value) noexcept
+    : type (OSCTypes::float32), floatValue (value)
+{
+}
+
+OSCArgument::OSCArgument (const String& value) noexcept
+    : type (OSCTypes::string), stringValue (value)
+{
+}
+
+OSCArgument::OSCArgument (const MemoryBlock& b)
+    : type (OSCTypes::blob), blob (b)
+{
+}
 
 //==============================================================================
 String OSCArgument::getString() const noexcept
@@ -69,14 +83,6 @@ const MemoryBlock& OSCArgument::getBlob() const noexcept
     return blob;
 }
 
-OSCColour OSCArgument::getColour() const noexcept
-{
-    if (isColour())
-        return OSCColour::fromInt32 ((uint32) intValue);
-
-    jassertfalse; // you must check the type of an argument before attempting to get its value!
-    return { 0, 0, 0, 0 };
-}
 
 //==============================================================================
 //==============================================================================
@@ -114,11 +120,11 @@ public:
             OSCArgument arg (value);
 
             expect (arg.getType() == OSCTypes::int32);
+
             expect (arg.isInt32());
             expect (! arg.isFloat32());
             expect (! arg.isString());
             expect (! arg.isBlob());
-            expect (! arg.isColour());
 
             expect (arg.getInt32() == value);
         }
@@ -130,13 +136,15 @@ public:
             OSCArgument arg (value);
 
             expect (arg.getType() == OSCTypes::float32);
+
             expect (! arg.isInt32());
             expect (arg.isFloat32());
             expect (! arg.isString());
             expect (! arg.isBlob());
-            expect (! arg.isColour());
 
             expect (arg.getFloat32() == value);
+
+
         }
 
         beginTest ("String");
@@ -145,11 +153,11 @@ public:
             OSCArgument arg (value);
 
             expect (arg.getType() == OSCTypes::string);
+
             expect (! arg.isInt32());
             expect (! arg.isFloat32());
             expect (arg.isString());
             expect (! arg.isBlob());
-            expect (! arg.isColour());
 
             expect (arg.getString() == value);
         }
@@ -159,52 +167,30 @@ public:
             OSCArgument arg ("Hello, World!");
 
             expect (arg.getType() == OSCTypes::string);
+
             expect (! arg.isInt32());
             expect (! arg.isFloat32());
             expect (arg.isString());
             expect (! arg.isBlob());
-            expect (! arg.isColour());
 
-            expect (arg.getString() == "Hello, World!");
+            expect (arg.getString() == String ("Hello, World!"));
         }
 
         beginTest ("Blob");
         {
-            auto blob = getMemoryBlockWithRandomData (413);
+            const size_t numBytes = 412;
+            MemoryBlock blob = getMemoryBlockWithRandomData (numBytes);
+
             OSCArgument arg (blob);
 
             expect (arg.getType() == OSCTypes::blob);
+
             expect (! arg.isInt32());
             expect (! arg.isFloat32());
             expect (! arg.isString());
             expect (arg.isBlob());
-            expect (! arg.isColour());
 
             expect (arg.getBlob() == blob);
-        }
-
-        beginTest ("Colour");
-        {
-            Random rng = getRandom();
-
-            for (int i = 100; --i >= 0;)
-            {
-                OSCColour col = { (uint8) rng.nextInt (256),
-                                  (uint8) rng.nextInt (256),
-                                  (uint8) rng.nextInt (256),
-                                  (uint8) rng.nextInt (256) };
-
-                OSCArgument arg (col);
-
-                expect (arg.getType() == OSCTypes::colour);
-                expect (! arg.isInt32());
-                expect (! arg.isFloat32());
-                expect (! arg.isString());
-                expect (! arg.isBlob());
-                expect (arg.isColour());
-
-                expect (arg.getColour().toInt32() == col.toInt32());
-            }
         }
 
         beginTest ("Copy, move and assignment");

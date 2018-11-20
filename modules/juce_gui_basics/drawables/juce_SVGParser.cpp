@@ -937,7 +937,8 @@ private:
 
         FillType type (gradient);
 
-        auto gradientTransform = parseTransform (fillXml->getStringAttribute ("gradientTransform"));
+        auto gradientTransform = parseTransform (fillXml->getStringAttribute ("gradientTransform"))
+                                   .followedBy (transform);
 
         if (gradient.isRadial)
         {
@@ -1201,18 +1202,12 @@ private:
                 auto* di = new DrawableImage();
 
                 setCommonAttributes (*di, xml);
-
-                Rectangle<float> imageBounds ((float) xml->getDoubleAttribute ("x", 0.0),                  (float) xml->getDoubleAttribute ("y", 0.0),
-                                              (float) xml->getDoubleAttribute ("width", image.getWidth()), (float) xml->getDoubleAttribute ("height", image.getHeight()));
-
-                di->setImage (image.rescaled ((int) imageBounds.getWidth(), (int) imageBounds.getHeight()));
-
-                di->setTransformToFit (imageBounds, RectanglePlacement (parsePlacementFlags (xml->getStringAttribute ("preserveAspectRatio").trim())));
+                di->setImage (image);
 
                 if (additionalTransform != nullptr)
-                    di->setTransform (di->getTransform().followedBy (transform).followedBy (*additionalTransform));
+                    di->setTransform (transform.followedBy (*additionalTransform));
                 else
-                    di->setTransform (di->getTransform().followedBy (transform));
+                    di->setTransform (transform);
 
                 return di;
             }

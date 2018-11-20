@@ -35,8 +35,6 @@
                    juce_gui_basics, juce_gui_extra
  exporters:        xcode_mac, vs2017, linux_make
 
- moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
-
  type:             Component
  mainClass:        BouncingBallWavetableDemo
 

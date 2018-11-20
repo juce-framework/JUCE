@@ -96,7 +96,6 @@ public:
     void createNewPIP();
     void askUserToOpenFile();
     bool openFile (const File&);
-    void saveAllDocuments();
     bool closeAllDocuments (bool askUserToSave);
     bool closeAllMainWindows();
     void closeAllMainWindowsAndQuitIfNeeded();
@@ -140,13 +139,6 @@ public:
     void setAnalyticsEnabled (bool);
 
     //==============================================================================
-    void rescanJUCEPathModules();
-    void rescanUserPathModules();
-
-    AvailableModuleList& getJUCEPathModuleList()     { return jucePathModuleList; }
-    AvailableModuleList& getUserPathsModuleList()    { return userPathsModuleList; }
-
-    //==============================================================================
     ProjucerLookAndFeel lookAndFeel;
 
     std::unique_ptr<StoredSettings> settings;
@@ -160,7 +152,7 @@ public:
     std::unique_ptr<ApplicationCommandManager> commandManager;
 
     std::unique_ptr<Component> utf8Window, svgPathWindow, aboutWindow, applicationUsageDataWindow,
-                               pathsWindow, editorColourSchemeWindow, pipCreatorWindow;
+                             pathsWindow, editorColourSchemeWindow, pipCreatorWindow;
 
     std::unique_ptr<FileLogger> logger;
 
@@ -169,49 +161,56 @@ public:
     std::unique_ptr<LicenseController> licenseController;
 
 private:
-    //==============================================================================
-    void handleAsyncUpdate() override;
-    void initCommandManager();
-
-    void createExamplesPopupMenu (PopupMenu&) noexcept;
-    Array<File> getSortedExampleDirectories() noexcept;
-    Array<File> getSortedExampleFilesInDirectory (const File&) const noexcept;
-    bool findWindowAndOpenPIP (const File&);
-    void findAndLaunchExample (int);
-
-    void checkIfGlobalJUCEPathHasChanged();
-    File tryToFindDemoRunnerExecutable();
-    File tryToFindDemoRunnerProject();
-    void launchDemoRunner();
-
-    void resetAnalytics() noexcept;
-    void setupAnalytics();
-
-    void showSetJUCEPathAlert();
-
-    void setColourScheme (int index, bool saveSetting);
-    void setEditorColourScheme (int index, bool saveSetting);
-    void updateEditorColourSchemeIfNeeded();
-
-    //==============================================================================
     void* server = nullptr;
 
     std::unique_ptr<LatestVersionChecker> versionChecker;
     TooltipWindow tooltipWindow;
 
-    AvailableModuleList jucePathModuleList, userPathsModuleList;
+    void loginOrLogout();
+
+    bool checkEULA();
+    bool currentEULAHasBeenAcceptedPreviously() const;
+    String getEULAChecksumProperty() const;
+    void setCurrentEULAAccepted (bool hasBeenAccepted) const;
+
+    void handleAsyncUpdate() override;
+    void initCommandManager();
+
+    void deleteTemporaryFiles() const noexcept;
+
+    void createExamplesPopupMenu (PopupMenu&) noexcept;
+    Array<File> getSortedExampleDirectories() noexcept;
+    Array<File> getSortedExampleFilesInDirectory (const File&) const noexcept;
+
+    bool findWindowAndOpenPIP (const File&);
+
+    File getJUCEExamplesDirectoryPathFromGlobal() noexcept;
+    void findAndLaunchExample (int);
+    File findDemoRunnerExecutable() noexcept;
+    File findDemoRunnerProject() noexcept;
+    void launchDemoRunner();
 
     int numExamples = 0;
     std::unique_ptr<AlertWindow> demoRunnerAlert;
-    std::unique_ptr<AlertWindow> pathAlert;
-    bool hasScannedForDemoRunnerExecutable = false, hasScannedForDemoRunnerProject = false;
-    File lastJUCEPath, lastDemoRunnerExectuableFile, lastDemoRunnerProjectFile;
+
    #if JUCE_LINUX
     ChildProcess makeProcess;
    #endif
 
-    int selectedColourSchemeIndex = 0, selectedEditorColourSchemeIndex = 0, numEditorColourSchemes = 0;
+    void resetAnalytics() noexcept;
+    void setupAnalytics();
+
+    void showSetJUCEPathAlert();
+    std::unique_ptr<AlertWindow> pathAlert;
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjucerApplication)
+    void setColourScheme (int index, bool saveSetting);
+
+    void setEditorColourScheme (int index, bool saveSetting);
+    void updateEditorColourSchemeIfNeeded();
+
+    int selectedColourSchemeIndex = 0;
+
+    int selectedEditorColourSchemeIndex = 0;
+    int numEditorColourSchemes = 0;
 };

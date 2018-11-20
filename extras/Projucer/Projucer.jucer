@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="M70qfTRRk" name="Projucer" projectType="guiapp" juceFolder="../../juce"
-              jucerVersion="5.4.1" version="5.4.1" bundleIdentifier="com.juce.theprojucer"
+              jucerVersion="5.3.2" version="5.3.2" bundleIdentifier="com.juce.theprojucer"
               defines="" splashScreenColour="Dark" displaySplashScreen="0"
               reportAppUsage="0" companyName="ROLI Ltd." companyCopyright="ROLI Ltd."
               cppLanguageStandard="11">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
                documentExtensions=".jucer" objCExtraSuffix="zkVtji" bigIcon="rv1F4h"
-               extraLinkerFlags="" extraCompilerFlags="-Wall -Wno-missing-field-initializers -Wshadow-all -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Wconditional-uninitialized -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion  -Wunused-private-field -Wbool-conversion -Wextra-semi -Wno-ignored-qualifiers -Wunreachable-code -Wzero-as-null-pointer-constant"
+               extraLinkerFlags="" extraCompilerFlags="-Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Wconditional-uninitialized -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion  -Wunused-private-field -Wbool-conversion -Wextra-semi -Wno-ignored-qualifiers -Wunreachable-code"
                customPList="&lt;plist&gt;&#10;&lt;dict&gt;&#10;&#9;&lt;key&gt;NSAppTransportSecurity&lt;/key&gt;&#10;&#9;&lt;dict&gt;&#10;&#9;&#9;&lt;key&gt;NSAllowsArbitraryLoads&lt;/key&gt;&#10;&#9;&#9;&lt;true/&gt;&#10;&#9;&#9;&lt;key&gt;NSExceptionDomains&lt;/key&gt;&#10;&#9;&#9;&lt;dict&gt;&#10;&#9;&#9;&#9;&lt;key&gt;amazonaws.com&lt;/key&gt;&#10;&#9;&#9;&#9;&lt;dict&gt;&#10;&#9;&#9;&#9;&#9;&lt;key&gt;NSExceptionAllowsInsecureHTTPLoads&lt;/key&gt;&#10;&#9;&#9;&#9;&#9;&lt;true/&gt;&#10;&#9;&#9;&#9;&#9;&lt;key&gt;NSIncludesSubdomains&lt;/key&gt;&#10;&#9;&#9;&#9;&#9;&lt;true/&gt;&#10;&#9;&#9;&#9;&lt;/dict&gt;&#10;&#9;&#9;&lt;/dict&gt;&#10;&#9;&lt;/dict&gt;&#10;&lt;/dict&gt;&#10;&lt;/plist&gt;"
                extraFrameworks="AudioUnit; Accelerate; AVFoundation; CoreAudio; CoreAudioKit; CoreMIDI; DiscRecording; QuartzCore; AudioToolbox; OpenGL; QTKit; QuickTime">
       <CONFIGURATIONS>
@@ -67,7 +67,7 @@
         <MODULEPATH id="juce_analytics" path="../../modules"/>
       </MODULEPATHS>
     </VS2015>
-    <VS2017 targetFolder="Builds/VisualStudio2017" bigIcon="rv1F4h" extraCompilerFlags="/w44265 /w45038 /w44062">
+    <VS2017 targetFolder="Builds/VisualStudio2017" bigIcon="rv1F4h">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="Projucer" useRuntimeLibDLL="0"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Projucer"
@@ -263,8 +263,6 @@
               file="Source/BinaryData/Templates/jucer_PIPMain.cpp"/>
         <FILE id="WqDCf0" name="jucer_PIPTemplate.h" compile="0" resource="1"
               file="Source/BinaryData/Templates/jucer_PIPTemplate.h"/>
-        <FILE id="wrkU1v" name="jucer_UnityPluginGUIScript.cs" compile="0"
-              resource="1" file="Source/BinaryData/Templates/jucer_UnityPluginGUIScript.cs"/>
       </GROUP>
       <FILE id="oXM3fR" name="colourscheme_dark.xml" compile="0" resource="1"
             file="Source/BinaryData/colourscheme_dark.xml"/>
@@ -608,8 +606,6 @@
             file="Source/ProjectSaving/jucer_ResourceFile.cpp"/>
       <FILE id="d4INvx" name="jucer_ResourceFile.h" compile="0" resource="0"
             file="Source/ProjectSaving/jucer_ResourceFile.h"/>
-      <FILE id="kw0nyx" name="jucer_XcodeProjectParser.h" compile="0" resource="0"
-            file="Source/ProjectSaving/jucer_XcodeProjectParser.h"/>
     </GROUP>
     <GROUP id="{DC7C1395-DD88-0C6C-2D8A-EC48A63D31E8}" name="Settings">
       <FILE id="DsopUB" name="jucer_AppearanceSettings.cpp" compile="1" resource="0"
@@ -655,10 +651,12 @@
         <GROUP id="{FE8C76CF-7C05-EC86-8997-C9941B88670B}" name="PropertyComponents">
           <FILE id="eleFsw" name="jucer_ColourPropertyComponent.h" compile="0"
                 resource="0" file="Source/Utility/UI/PropertyComponents/jucer_ColourPropertyComponent.h"/>
+          <FILE id="D0OfLg" name="jucer_DependencyPathPropertyComponent.cpp"
+                compile="1" resource="0" file="Source/Utility/UI/PropertyComponents/jucer_DependencyPathPropertyComponent.cpp"/>
+          <FILE id="gcbJOL" name="jucer_DependencyPathPropertyComponent.h" compile="0"
+                resource="0" file="Source/Utility/UI/PropertyComponents/jucer_DependencyPathPropertyComponent.h"/>
           <FILE id="sfUzaf" name="jucer_FilePathPropertyComponent.h" compile="0"
                 resource="0" file="Source/Utility/UI/PropertyComponents/jucer_FilePathPropertyComponent.h"/>
-          <FILE id="c5PWPd" name="jucer_LabelPropertyComponent.h" compile="0"
-                resource="0" file="Source/Utility/UI/PropertyComponents/jucer_LabelPropertyComponent.h"/>
           <FILE id="DkLOIQ" name="jucer_PropertyComponentsWithEnablement.h" compile="0"
                 resource="0" file="Source/Utility/UI/PropertyComponents/jucer_PropertyComponentsWithEnablement.h"/>
         </GROUP>
@@ -719,8 +717,7 @@
             resource="0" file="Source/Wizards/jucer_TemplateThumbnailsComponent.h"/>
     </GROUP>
   </MAINGROUP>
-  <JUCEOPTIONS JUCE_LOG_ASSERTIONS="1" JUCE_USE_CURL="1" JUCE_ALLOW_STATIC_NULL_VARIABLES="0"
-               JUCE_STRICT_REFCOUNTEDPOINTER="1"/>
+  <JUCEOPTIONS JUCE_LOG_ASSERTIONS="1" JUCE_USE_CURL="1" JUCE_ALLOW_STATIC_NULL_VARIABLES="0"/>
   <MODULES>
     <MODULE id="juce_analytics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_core" showAllCode="1"/>

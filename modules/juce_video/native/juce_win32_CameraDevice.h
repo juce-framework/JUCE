@@ -52,7 +52,14 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
     Pimpl (CameraDevice& ownerToUse, const String&, int index,
            int minWidth, int minHeight, int maxWidth, int maxHeight,
            bool /*highQuality*/)
-       : owner (ownerToUse)
+       : owner (ownerToUse),
+         isRecording (false),
+         openedSuccessfully (false),
+         imageNeedsFlipping (false),
+         width (0), height (0),
+         activeUsers (0),
+         recordNextFrameTime (false),
+         previewMaxFPS (60)
     {
         HRESULT hr = captureGraphBuilder.CoCreateInstance (CLSID_CaptureGraphBuilder2);
         if (FAILED (hr))
@@ -561,8 +568,8 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
     CriticalSection pictureTakenCallbackLock;
     std::function<void (const Image&)> pictureTakenCallback;
 
-    bool isRecording = false, openedSuccessfully = false;
-    int width = 0, height = 0;
+    bool isRecording, openedSuccessfully;
+    int width, height;
     Time firstRecordedTime;
 
     Array<ViewerComponent*> viewerComps;
@@ -573,16 +580,16 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
     ComSmartPtr<ISampleGrabber> sampleGrabber;
     ComSmartPtr<IMediaControl> mediaControl;
     ComSmartPtr<IPin> smartTeePreviewOutputPin, smartTeeCaptureOutputPin;
-    int activeUsers = 0;
+    int activeUsers;
     Array<int> widths, heights;
     DWORD graphRegistrationID;
 
     CriticalSection imageSwapLock;
-    bool imageNeedsFlipping = false;
+    bool imageNeedsFlipping;
     Image loadingImage, activeImage;
 
-    bool recordNextFrameTime = false;
-    int previewMaxFPS = 60;
+    bool recordNextFrameTime;
+    int previewMaxFPS;
 
     JUCE_DECLARE_WEAK_REFERENCEABLE (Pimpl)
 
@@ -622,6 +629,7 @@ private:
 
                     if (! duplicate)
                     {
+                        DBG ("Camera capture size: " + String (w) + ", " + String (h));
                         widths.add (w);
                         heights.add (h);
                     }

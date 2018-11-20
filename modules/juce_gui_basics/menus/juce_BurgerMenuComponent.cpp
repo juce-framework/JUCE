@@ -43,10 +43,10 @@ struct CustomMenuBarItemHolder    : public Component
         if (newComponent != custom)
         {
             if (custom != nullptr)
-                removeChildComponent (custom.get());
+                removeChildComponent (custom);
 
             custom = newComponent;
-            addAndMakeVisible (*custom);
+            addAndMakeVisible (custom);
             resized();
         }
     }

@@ -40,7 +40,7 @@ struct PopupMenu::HelperClasses
 {
 
 class MouseSourceState;
-struct MenuWindow;
+class MenuWindow;
 
 static bool canBeTriggered (const PopupMenu::Item& item) noexcept        { return item.isEnabled && item.itemID != 0 && ! item.isSectionHeader; }
 static bool hasActiveSubMenu (const PopupMenu::Item& item) noexcept      { return item.isEnabled && item.subMenu != nullptr && item.subMenu->items.size() > 0; }
@@ -77,10 +77,9 @@ struct ItemComponent  : public Component
       : item (i), customComp (i.customComponent)
     {
         if (item.isSectionHeader)
-            customComp = *new HeaderItemComponent (item.text);
+            customComp = new HeaderItemComponent (item.text);
 
-        if (customComp != nullptr)
-            addAndMakeVisible (*customComp);
+        addAndMakeVisible (customComp);
 
         parent.addAndMakeVisible (this);
 
@@ -96,7 +95,7 @@ struct ItemComponent  : public Component
 
     ~ItemComponent()
     {
-        removeChildComponent (customComp.get());
+        removeChildComponent (customComp);
     }
 
     void getIdealSize (int& idealWidth, int& idealHeight, const int standardItemHeight)
@@ -189,8 +188,9 @@ private:
 };
 
 //==============================================================================
-struct MenuWindow  : public Component
+class MenuWindow  : public Component
 {
+public:
     MenuWindow (const PopupMenu& menu, MenuWindow* parentWindow,
                 const Options& opts, bool alignToRectangle, bool shouldDismissOnMouseUp,
                 ApplicationCommandManager** manager, float parentScaleFactor = 1.0f)
@@ -211,10 +211,10 @@ struct MenuWindow  : public Component
 
         setLookAndFeel (parent != nullptr ? &(parent->getLookAndFeel())
                                           : menu.lookAndFeel.get());
+
         auto& lf = getLookAndFeel();
 
         parentComponent = lf.getParentComponentForMenuOptions (options);
-        const_cast<Options&>(options) = options.withParentComponent (parentComponent);
 
         if (parentComponent == nullptr && parentWindow == nullptr && lf.shouldPopupMenuScaleWithTargetComponent (options))
             if (auto* targetComponent = options.getTargetComponent())
@@ -592,12 +592,9 @@ struct MenuWindow  : public Component
     }
 
     //==============================================================================
-    Rectangle<int> getParentArea (Point<int> targetPoint, Component* relativeTo = nullptr)
+    Rectangle<int> getParentArea (Point<int> targetPoint)
     {
-        if (relativeTo != nullptr)
-            targetPoint = relativeTo->localPointToGlobal (targetPoint);
-
-        auto parentArea = Desktop::getInstance().getDisplays().findDisplayForPoint (targetPoint)
+        auto parentArea = Desktop::getInstance().getDisplays().getDisplayContaining (targetPoint)
                               #if JUCE_MAC
                                .userArea;
                               #else
@@ -792,7 +789,7 @@ struct MenuWindow  : public Component
                                                     windowPos.getHeight() - (PopupMenuSettings::scrollZone + m->getHeight())),
                                               currentY);
 
-                        auto parentArea = getParentArea (windowPos.getPosition(), parentComponent) / scaleFactor;
+                        auto parentArea = getParentArea (windowPos.getPosition()) / scaleFactor;
                         auto deltaY = wantedY - currentY;
 
                         windowPos.setSize (jmin (windowPos.getWidth(), parentArea.getWidth()),
@@ -912,8 +909,7 @@ struct MenuWindow  : public Component
             activeSubMenu.reset (new HelperClasses::MenuWindow (*(childComp->item.subMenu), this,
                                                                 options.withTargetScreenArea (childComp->getScreenBounds())
                                                                        .withMinimumWidth (0)
-                                                                       .withTargetComponent (nullptr)
-                                                                       .withParentComponent (parentComponent),
+                                                                       .withTargetComponent (nullptr),
                                                                 false, dismissOnMouseUp, managerOfChosenCommand, scaleFactor));
 
             activeSubMenu->setVisible (true); // (must be called before enterModalState on Windows to avoid DropShadower confusion)
@@ -1089,7 +1085,7 @@ private:
             {
                 PopupMenuSettings::menuWasHiddenBecauseOfAppChange = true;
                 window.dismissMenu (nullptr);
-                // Note: This object may have been deleted by the previous call.
+                // Note: this object may have been deleted by the previous call..
             }
         }
         else if (wasDown && timeNow > window.windowCreationTime + 250
@@ -1100,7 +1096,7 @@ private:
             else if ((window.hasBeenOver || ! window.dismissOnMouseUp) && ! isOverAny)
                 window.dismissMenu (nullptr);
 
-            // Note: This object may have been deleted by the previous call.
+            // Note: this object may have been deleted by the previous call..
         }
         else
         {
@@ -1742,13 +1738,8 @@ bool JUCE_CALLTYPE PopupMenu::dismissAllActiveMenus()
     auto numWindows = windows.size();
 
     for (int i = numWindows; --i >= 0;)
-    {
         if (auto* pmw = windows[i])
-        {
-            pmw->setLookAndFeel (nullptr);
             pmw->dismissMenu (nullptr);
-        }
-    }
 
     return numWindows > 0;
 }
@@ -1862,9 +1853,7 @@ bool PopupMenu::MenuItemIterator::next()
         menus.add (currentItem->subMenu.get());
     }
     else
-    {
         index.setUnchecked (index.size() - 1, index.getLast() + 1);
-    }
 
     while (index.size() > 0 && index.getLast() >= menus.getLast()->items.size())
     {

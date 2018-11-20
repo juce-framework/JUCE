@@ -32,7 +32,7 @@ static Typeface::Ptr getTypefaceForFontFromLookAndFeel (const Font& font)
     return LookAndFeel::getDefaultLookAndFeel().getTypefaceForFont (font);
 }
 
-using GetTypefaceForFont = Typeface::Ptr (*)(const Font&);
+typedef Typeface::Ptr (*GetTypefaceForFont) (const Font&);
 extern GetTypefaceForFont juce_getTypefaceForFont;
 
 //==============================================================================
@@ -147,7 +147,7 @@ void LookAndFeel::setDefaultSansSerifTypefaceName (const String& newName)
 {
     if (defaultSans != newName)
     {
-        defaultTypeface.reset();
+        defaultTypeface = {};
         Typeface::clearTypefaceCache();
         defaultSans = newName;
     }

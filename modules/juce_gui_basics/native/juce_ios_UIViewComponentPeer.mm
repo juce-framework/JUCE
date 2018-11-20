@@ -163,17 +163,8 @@ using namespace juce;
 namespace juce
 {
 
-struct UIViewPeerControllerReceiver
-{
-    virtual ~UIViewPeerControllerReceiver();
-    virtual void setViewController (UIViewController*) = 0;
-};
-
-UIViewPeerControllerReceiver::~UIViewPeerControllerReceiver() {}
-
 class UIViewComponentPeer  : public ComponentPeer,
-                             public FocusChangeListener,
-                             public UIViewPeerControllerReceiver
+                             public FocusChangeListener
 {
 public:
     UIViewComponentPeer (Component&, int windowStyleFlags, UIView* viewToAttachTo);
@@ -184,12 +175,6 @@ public:
     void setVisible (bool shouldBeVisible) override;
     void setTitle (const String& title) override;
     void setBounds (const Rectangle<int>&, bool isNowFullScreen) override;
-
-    void setViewController (UIViewController* newController) override
-    {
-        jassert (controller == nullptr);
-        controller = [newController retain];
-    }
 
     Rectangle<int> getBounds() const override               { return getBounds (! isSharedWindow); }
     Rectangle<int> getBounds (bool global) const;
@@ -233,7 +218,7 @@ public:
     //==============================================================================
     UIWindow* window;
     JuceUIView* view;
-    UIViewController* controller;
+    JuceUIViewController* controller;
     bool isSharedWindow, fullScreen, insideDrawRect, isAppex;
 
     static int64 getMouseTime (UIEvent* e) noexcept
@@ -717,7 +702,7 @@ void UIViewComponentPeer::updateTransformAndScreenBounds()
     const Rectangle<int> oldArea (component.getBounds());
     const Rectangle<int> oldDesktop (desktop.getDisplays().getMainDisplay().userArea);
 
-    const_cast<Displays&> (desktop.getDisplays()).refresh();
+    const_cast<Desktop::Displays&> (desktop.getDisplays()).refresh();
 
     window.transform = Orientations::getCGTransformFor (desktop.getCurrentOrientation());
     view.transform = CGAffineTransformIdentity;

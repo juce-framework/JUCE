@@ -85,11 +85,6 @@ namespace
             return output.writeRepeatedByte (0, numPaddingZeros);
         }
 
-        bool writeColour (OSCColour colour)
-        {
-            return output.writeIntBigEndian ((int32) colour.toInt32());
-        }
-
         bool writeTimeTag (OSCTimeTag timeTag)
         {
             return output.writeInt64BigEndian (int64 (timeTag.getRawTimeTag()));
@@ -128,7 +123,6 @@ namespace
                 case OSCTypes::float32:     return writeFloat32 (arg.getFloat32());
                 case OSCTypes::string:      return writeString (arg.getString());
                 case OSCTypes::blob:        return writeBlob (arg.getBlob());
-                case OSCTypes::colour:      return writeColour (arg.getColour());
 
                 default:
                     // In this very unlikely case you supplied an invalid OSCType!

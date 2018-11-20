@@ -195,7 +195,7 @@ bool Thread::currentThreadShouldExit()
 bool Thread::waitForThreadToExit (const int timeOutMilliseconds) const
 {
     // Doh! So how exactly do you expect this thread to wait for itself to stop??
-    jassert (getThreadId() != getCurrentThreadId() || getCurrentThreadId() == ThreadID());
+    jassert (getThreadId() != getCurrentThreadId() || getCurrentThreadId() == 0);
 
     auto timeoutEnd = Time::getMillisecondCounter() + (uint32) timeOutMilliseconds;
 
@@ -236,7 +236,7 @@ bool Thread::stopThread (const int timeOutMilliseconds)
             killThread();
 
             threadHandle = nullptr;
-            threadId = {};
+            threadId = 0;
             return false;
         }
     }
@@ -288,7 +288,7 @@ bool Thread::setPriority (int newPriority)
 
 bool Thread::setCurrentThreadPriority (const int newPriority)
 {
-    return setThreadPriority ({}, newPriority);
+    return setThreadPriority (0, newPriority);
 }
 
 void Thread::setAffinityMask (const uint32 newAffinityMask)

@@ -209,7 +209,6 @@ private:
         jassert (delimiter.isNotEmpty());
 
         StringArray elements;
-
         for (auto& v : input)
             elements.add (v.toString());
 

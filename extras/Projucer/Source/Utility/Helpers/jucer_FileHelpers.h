@@ -30,8 +30,8 @@
 //==============================================================================
 namespace FileHelpers
 {
-    uint64 calculateStreamHashCode (InputStream&);
-    uint64 calculateFileHashCode (const File&);
+    int64 calculateStreamHashCode (InputStream& stream);
+    int64 calculateFileHashCode (const File& file);
 
     bool overwriteFileWithNewDataIfDifferent (const File& file, const void* data, size_t numBytes);
     bool overwriteFileWithNewDataIfDifferent (const File& file, const MemoryOutputStream& newData);
@@ -90,6 +90,5 @@ struct FileModificationDetector
 private:
     File file;
     Time fileModificationTime;
-    uint64 fileHashCode = 0;
-    int64 fileSize = -1;
+    int64 fileHashCode, fileSize;
 };

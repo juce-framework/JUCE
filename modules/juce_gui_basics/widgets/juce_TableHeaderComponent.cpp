@@ -156,7 +156,7 @@ void TableHeaderComponent::moveColumn (const int columnId, int newIndex)
     auto currentIndex = getIndexOfColumnId (columnId, false);
     newIndex = visibleIndexToTotalIndex (newIndex);
 
-    if (columns[currentIndex] != nullptr && currentIndex != newIndex)
+    if (columns [currentIndex] != 0 && currentIndex != newIndex)
     {
         columns.move (currentIndex, newIndex);
         sendColumnsChanged();
@@ -436,42 +436,40 @@ String TableHeaderComponent::toString() const
 
 void TableHeaderComponent::restoreFromString (const String& storedVersion)
 {
-    if (auto storedXML = parseXML (storedVersion))
+    std::unique_ptr<XmlElement> storedXml (XmlDocument::parse (storedVersion));
+    int index = 0;
+
+    if (storedXml != nullptr && storedXml->hasTagName ("TABLELAYOUT"))
     {
-        if (storedXML->hasTagName ("TABLELAYOUT"))
+        forEachXmlChildElement (*storedXml, col)
         {
-            int index = 0;
+            auto tabId = col->getIntAttribute ("id");
 
-            forEachXmlChildElement (*storedXML, col)
+            if (auto* ci = getInfoForId (tabId))
             {
-                auto tabId = col->getIntAttribute ("id");
-
-                if (auto* ci = getInfoForId (tabId))
-                {
-                    columns.move (columns.indexOf (ci), index);
-                    ci->width = col->getIntAttribute ("width");
-                    setColumnVisible (tabId, col->getBoolAttribute ("visible"));
-                }
-
-                ++index;
+                columns.move (columns.indexOf (ci), index);
+                ci->width = col->getIntAttribute ("width");
+                setColumnVisible (tabId, col->getBoolAttribute ("visible"));
             }
 
-            columnsResized = true;
-            sendColumnsChanged();
-
-            setSortColumnId (storedXML->getIntAttribute ("sortedCol"),
-                             storedXML->getBoolAttribute ("sortForwards", true));
+            ++index;
         }
+
+        columnsResized = true;
+        sendColumnsChanged();
+
+        setSortColumnId (storedXml->getIntAttribute ("sortedCol"),
+                         storedXml->getBoolAttribute ("sortForwards", true));
     }
 }
 
 //==============================================================================
-void TableHeaderComponent::addListener (Listener* newListener)
+void TableHeaderComponent::addListener (Listener* const newListener)
 {
     listeners.addIfNotAlreadyThere (newListener);
 }
 
-void TableHeaderComponent::removeListener (Listener* listenerToRemove)
+void TableHeaderComponent::removeListener (Listener* const listenerToRemove)
 {
     listeners.removeFirstMatchingValue (listenerToRemove);
 }
@@ -501,11 +499,11 @@ void TableHeaderComponent::reactToMenuItem (const int menuReturnId, const int /*
 
 void TableHeaderComponent::paint (Graphics& g)
 {
-    auto& lf = getLookAndFeel();
+    LookAndFeel& lf = getLookAndFeel();
 
     lf.drawTableHeaderBackground (g, *this);
 
-    auto clip = g.getClipBounds();
+    const Rectangle<int> clip (g.getClipBounds());
 
     int x = 0;
 

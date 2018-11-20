@@ -125,6 +125,11 @@ private:
 
     class PanelHolder;
     struct PanelSizes;
+    friend class PanelHolder;
+    friend struct PanelSizes;
+    friend struct ContainerDeletePolicy<PanelSizes>;
+    friend struct ContainerDeletePolicy<PanelHolder>;
+
     std::unique_ptr<PanelSizes> currentSizes;
     OwnedArray<PanelHolder> holders;
     ComponentAnimator animator;

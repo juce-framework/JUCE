@@ -141,9 +141,10 @@ protected:
 
 private:
     //==============================================================================
-    friend class Component;
-
     struct ModalItem;
+
+    friend class Component;
+    friend struct ContainerDeletePolicy<ModalItem>;
     OwnedArray<ModalItem> stack;
 
     void startModal (Component*, bool autoDelete);
@@ -160,7 +161,7 @@ private:
 
     @tags{GUI}
 */
-class JUCE_API ModalCallbackFunction
+class ModalCallbackFunction
 {
 public:
     /** This is a utility function to create a ModalComponentManager::Callback that will

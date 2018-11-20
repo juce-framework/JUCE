@@ -32,10 +32,10 @@ void MACAddress::findAllAddresses (Array<MACAddress>& result)
         for (const ifaddrs* cursor = addrs; cursor != nullptr; cursor = cursor->ifa_next)
         {
             // Required to avoid misaligned pointer access
-            sockaddr sto;
-            std::memcpy (&sto, cursor->ifa_addr, sizeof (sockaddr));
+            sockaddr_storage sto;
+            std::memcpy (&sto, cursor->ifa_addr, sizeof (sockaddr_storage));
 
-            if (sto.sa_family == AF_LINK)
+            if (sto.ss_family == AF_LINK)
             {
                 auto sadd = (const sockaddr_dl*) cursor->ifa_addr;
 
@@ -331,8 +331,7 @@ public:
     NSMutableData* data = nil;
     NSDictionary* headers = nil;
     int statusCode = 0;
-    std::atomic<bool> initialised { false };
-    bool hasFailed = false, hasFinished = false, isBeingDeleted = false;
+    bool initialised = false, hasFailed = false, hasFinished = false, isBeingDeleted = false;
     const int numRedirectsToFollow;
     int numRedirects = 0;
     int64 latestTotalBytes = 0;
@@ -809,8 +808,7 @@ public:
     {
         DBG (nsStringToJuce ([error description])); ignoreUnused (error);
         nsUrlErrorCode = [error code];
-        hasFailed = true;
-        initialised = true;
+        hasFailed = initialised = true;
         signalThreadShouldExit();
     }
 
@@ -828,8 +826,7 @@ public:
 
     void finishedLoading()
     {
-        hasFinished = true;
-        initialised = true;
+        hasFinished = initialised = true;
         signalThreadShouldExit();
     }
 
@@ -863,7 +860,7 @@ public:
     NSDictionary* headers = nil;
     NSInteger nsUrlErrorCode = 0;
     int statusCode = 0;
-    std::atomic<bool> initialised { false }, hasFailed { false }, hasFinished { false };
+    bool initialised = false, hasFailed = false, hasFinished = false;
     const int numRedirectsToFollow;
     int numRedirects = 0;
     int latestTotalBytes = 0;

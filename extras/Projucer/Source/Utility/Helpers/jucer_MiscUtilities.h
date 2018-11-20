@@ -31,8 +31,6 @@
 const char* getPreferredLinefeed();
 String joinLinesIntoSourceFile (StringArray& lines);
 
-var parseJUCEHeaderMetadata (const File&);
-
 String trimCommentCharsFromStartOfLine (const String& line);
 
 String hexString8Digits (int value);

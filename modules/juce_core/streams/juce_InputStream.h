@@ -243,10 +243,9 @@ public:
 
     /** Reads and discards a number of bytes from the stream.
 
-        Some input streams might implement this more efficiently, but the base
+        Some input streams might implement this efficiently, but the base
         class will just keep reading data until the requisite number of bytes
-        have been done. For large skips it may be quicker to call setPosition()
-        with the required position.
+        have been done.
     */
     virtual void skipNextBytes (int64 numBytesToSkip);
 

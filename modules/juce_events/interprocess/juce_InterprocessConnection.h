@@ -197,8 +197,9 @@ private:
     int readData (void*, int);
 
     struct ConnectionThread;
+    friend struct ConnectionThread;
+    friend struct ContainerDeletePolicy<ConnectionThread>;
     std::unique_ptr<ConnectionThread> thread;
-
     void runThread();
     int writeData (void*, int);
 

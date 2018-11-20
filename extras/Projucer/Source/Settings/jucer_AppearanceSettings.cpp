@@ -64,11 +64,13 @@ File AppearanceSettings::getSchemesFolder()
 
 void AppearanceSettings::writeDefaultSchemeFile (const String& xmlString, const String& name)
 {
-    auto file = getSchemesFolder().getChildFile (name).withFileExtension (getSchemeFileSuffix());
+    const File file (getSchemesFolder().getChildFile (name).withFileExtension (getSchemeFileSuffix()));
 
     AppearanceSettings settings (false);
 
-    if (auto xml = parseXML (xmlString))
+    std::unique_ptr<XmlElement> xml (XmlDocument::parse (xmlString));
+
+    if (xml != nullptr)
         settings.readFromXML (*xml);
 
     settings.writeToFile (file);
@@ -130,10 +132,8 @@ bool AppearanceSettings::readFromXML (const XmlElement& xml)
 
 bool AppearanceSettings::readFromFile (const File& file)
 {
-    if (auto xml = parseXML (file))
-        return readFromXML (*xml);
-
-    return false;
+    const std::unique_ptr<XmlElement> xml (XmlDocument::parse (file));
+    return xml != nullptr && readFromXML (*xml);
 }
 
 bool AppearanceSettings::writeToFile (const File& file) const

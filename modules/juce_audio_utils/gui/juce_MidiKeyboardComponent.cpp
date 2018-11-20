@@ -50,10 +50,10 @@ struct MidiKeyboardComponent::UpDownButton  : public Button
         owner.setLowestVisibleKey (note * 12);
     }
 
-    void paintButton (Graphics& g, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override
+    void paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown) override
     {
         owner.drawUpDownButton (g, getWidth(), getHeight(),
-                                shouldDrawButtonAsHighlighted, shouldDrawButtonAsDown,
+                                isMouseOverButton, isButtonDown,
                                 delta > 0);
     }
 
@@ -712,7 +712,7 @@ void MidiKeyboardComponent::updateNoteUnderMouse (Point<float> pos, bool isDown,
     auto newNote = xyToNote (pos, mousePositionVelocity);
     auto oldNote = mouseOverNotes.getUnchecked (fingerNum);
     auto oldNoteDown = mouseDownNotes.getUnchecked (fingerNum);
-    auto eventVelocity = useMousePositionForVelocity ? mousePositionVelocity * velocity : velocity;
+    auto eventVelocity = useMousePositionForVelocity ? mousePositionVelocity * velocity : 1.0f;
 
     if (oldNote != newNote)
     {

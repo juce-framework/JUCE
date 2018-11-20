@@ -255,8 +255,9 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
 
         setAudioSessionActive (true);
         updateHardwareInfo();
-        channelData.reconfigure ({}, {});
         setAudioSessionActive (false);
+
+        channelData.reconfigure ({}, {});
 
         sessionHolder->activeDevices.add (this);
     }
@@ -450,11 +451,10 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
                             << ", targetSampleRate: " << targetSampleRate
                             << ", targetBufferSize: " << targetBufferSize);
 
-        setAudioSessionActive (true);
-
         channelData.reconfigure (requestedInputChannels, requestedOutputChannels);
 
         setAudioSessionCategory (channelData.areInputChannelsAvailable() ? AVAudioSessionCategoryPlayAndRecord : AVAudioSessionCategoryPlayback);
+        setAudioSessionActive (true);
 
         setTargetSampleRateAndBufferSize();
 

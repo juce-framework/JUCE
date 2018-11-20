@@ -81,19 +81,19 @@ public:
 
         pendingOpen.device->pimpl->open ([this](const String& deviceId, const String& error)
                                          {
-                                             int cIndex = getCameraIndex (deviceId);
+                                             int index = getCameraIndex (deviceId);
 
-                                             if (cIndex == -1)
+                                             if (index == -1)
                                                  return;
 
-                                             auto& cameraPendingOpen = camerasToOpen.getReference (cIndex);
+                                             auto& pendingOpen = camerasToOpen.getReference (index);
 
                                              if (error.isEmpty())
-                                                 cameraPendingOpen.resultCallback (cameraPendingOpen.device.release(), error);
+                                                 pendingOpen.resultCallback (pendingOpen.device.release(), error);
                                              else
-                                                 cameraPendingOpen.resultCallback (nullptr, error);
+                                                 pendingOpen.resultCallback (nullptr, error);
 
-                                             int id = cameraPendingOpen.requestId;
+                                             int id = pendingOpen.requestId;
 
                                              MessageManager::callAsync ([this, id]() { removeRequestWithId (id); });
                                          });

@@ -62,7 +62,6 @@
 
 #if JUCE_PLUGINHOST_AU && (JUCE_MAC || JUCE_IOS)
  #include <AudioUnit/AudioUnit.h>
- #include <map>
 #endif
 
 //==============================================================================
@@ -93,6 +92,8 @@ static inline bool arrayContainsPlugin (const OwnedArray<PluginDescription>& lis
 struct AutoResizingNSViewComponent  : public ViewComponentBaseClass,
                                       private AsyncUpdater
 {
+    AutoResizingNSViewComponent() : recursive (false) {}
+
     void childBoundsChanged (Component*) override
     {
         if (recursive)
@@ -103,13 +104,13 @@ struct AutoResizingNSViewComponent  : public ViewComponentBaseClass,
         {
             recursive = true;
             resizeToFitView();
-            recursive = false;
+            recursive = true;
         }
     }
 
-    void handleAsyncUpdate() override  { resizeToFitView(); }
+    void handleAsyncUpdate() override               { resizeToFitView(); }
 
-    bool recursive = false;
+    bool recursive;
 };
 
 //==============================================================================
@@ -168,5 +169,4 @@ struct AutoResizingNSViewComponentWithParent  : public AutoResizingNSViewCompone
 #include "scanning/juce_PluginDirectoryScanner.cpp"
 #include "scanning/juce_PluginListComponent.cpp"
 #include "utilities/juce_AudioProcessorParameters.cpp"
-#include "processors/juce_AudioProcessorParameterGroup.cpp"
 #include "utilities/juce_AudioProcessorValueTreeState.cpp"

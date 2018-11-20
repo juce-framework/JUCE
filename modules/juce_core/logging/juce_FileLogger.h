@@ -114,7 +114,7 @@ public:
     static File getSystemLogFileFolder();
 
     // (implementation of the Logger virtual method)
-    void logMessage (const String&) override;
+    void logMessage (const String&);
 
     //==============================================================================
     /** This is a utility function which removes lines from the start of a text
