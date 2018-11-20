@@ -12,12 +12,12 @@ int ARASampleProjectPlaybackRenderer::getReadAheadSize() const
     return jmax (readAheadSizeBySampleRate, readAheadSizeByBlockSize);
 }
 
-std::unique_ptr<BufferingAudioSource> ARASampleProjectPlaybackRenderer::createBufferingAudioSourceReader (ARAAudioSource* audioSource)
+std::unique_ptr<BufferingAudioReader> ARASampleProjectPlaybackRenderer::createBufferingAudioSourceReader (ARAAudioSource* audioSource)
 {
     auto documentController = static_cast<ARASampleProjectDocumentController*> (audioSource->getDocument()->getDocumentController());
     auto newSourceReader = documentController->createBufferingAudioSourceReader (audioSource, getReadAheadSize());
-    newSourceReader->prepareToPlay (getMaxSamplesPerBlock(), audioSource->getSampleRate());
-    return std::unique_ptr<BufferingAudioSource> (newSourceReader);
+    newSourceReader->setReadTimeout (2000); // TODO JUCE_ARA I set at a high value arbitrarily, but we should pick a better volume
+    return std::unique_ptr<BufferingAudioReader> (newSourceReader);
 }
 
 void ARASampleProjectPlaybackRenderer::prepareToPlay (double sampleRate, int numChannels, int maxSamplesPerBlock)
@@ -96,11 +96,7 @@ void ARASampleProjectPlaybackRenderer::processBlock (AudioBuffer<float>& buffer,
         startSongSample = jmax (startSongSample, startAvailableSourceSamples - offsetToPlaybackRegion);
         endSongSample = jmin (endSongSample, endAvailableSourceSamples - offsetToPlaybackRegion);
 
-        // use the buffered audio source reader to read samples into the audio block
-        AudioSourceChannelInfo channelInfo (&buffer, (int) (startSongSample - sampleStart), (int) (endSongSample - startSongSample));
-        audioSourceReaders[audioSource]->setNextReadPosition (startSongSample + offsetToPlaybackRegion);
-        audioSourceReaders[audioSource]->getNextAudioBlock (channelInfo);
-
+        // use the buffered audio source reader to read samples into the audio block        
         // TODO JUCE_ARA bug here:
         // If regions overlap, the later region will overwrite the output of the earlier one!
         // (this is visible in our region sequence view, but not audible in most hosts since
@@ -108,6 +104,11 @@ void ARASampleProjectPlaybackRenderer::processBlock (AudioBuffer<float>& buffer,
         // Only the first region that is actually read may read directly into the buffer,
         // all later regions must read to a temporary buffer and add from there to the output.
         // prepareToPlay must create that buffer if there's more than one region.
+        int startInDestBuffer = (int) (startSongSample - sampleStart);
+        int startInSource = (int) (startSongSample + offsetToPlaybackRegion);
+        int numSamplesToRead = (int) (endSongSample - startSongSample);
+        audioSourceReaders[audioSource]->
+            readSamples ((int**) buffer.getArrayOfWritePointers (), buffer.getNumChannels (), startInDestBuffer, startInSource, numSamplesToRead);
     }
 }
 

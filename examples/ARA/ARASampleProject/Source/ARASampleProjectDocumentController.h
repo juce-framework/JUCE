@@ -13,7 +13,7 @@ class ARASampleProjectDocumentController : public juce::ARADocumentController
 public:
     ARASampleProjectDocumentController() noexcept;
 
-    BufferingAudioSource* createBufferingAudioSourceReader (ARAAudioSource* audioSource, int bufferSize);
+    BufferingAudioReader* createBufferingAudioSourceReader (ARAAudioSource* audioSource, int bufferSize);
 
 protected:
     // ARA class creation overrides

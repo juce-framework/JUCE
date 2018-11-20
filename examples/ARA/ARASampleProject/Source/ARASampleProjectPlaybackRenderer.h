@@ -27,10 +27,10 @@ protected:
 private:
     // calculate how big our read-ahead-buffer needs to be
     int getReadAheadSize() const;
-    std::unique_ptr<BufferingAudioSource> createBufferingAudioSourceReader (ARAAudioSource* audioSource);
+    std::unique_ptr<BufferingAudioReader> createBufferingAudioSourceReader (ARAAudioSource* audioSource);
 
 private:
     // map of audio sources to buffering audio source readers
     // we'll use them to pull ARA samples from the host as we render
-    std::map<ARAAudioSource*, std::unique_ptr<BufferingAudioSource>> audioSourceReaders;
+    std::map<ARAAudioSource*, std::unique_ptr<BufferingAudioReader>> audioSourceReaders;
 };
