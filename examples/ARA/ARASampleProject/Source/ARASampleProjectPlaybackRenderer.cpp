@@ -45,13 +45,12 @@ void ARASampleProjectPlaybackRenderer::processBlock (AudioBuffer<float>& buffer,
 {
     jassert (buffer.getNumSamples() <= getMaxSamplesPerBlock());
 
-    // zero the samples and get out if we the host is not playing back
+    // zero out samples first, then add region output on top
+    for (int c = 0; c < buffer.getNumChannels(); c++)
+        FloatVectorOperations::clear (buffer.getArrayOfWritePointers()[c], buffer.getNumSamples());
+
     if (! isPlayingBack)
-    {
-        for (int c = 0; c < buffer.getNumChannels(); c++)
-            FloatVectorOperations::clear (buffer.getArrayOfWritePointers()[c], buffer.getNumSamples());
         return;
-    }
 
     // render back playback regions that lie within this range using our buffered ARA samples
     using namespace ARA;
