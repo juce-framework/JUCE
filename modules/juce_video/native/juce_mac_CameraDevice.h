@@ -71,7 +71,7 @@ struct CameraDevice::Pimpl
         if (imageOutput == nil)
         {
             imageOutput = [[AVCaptureStillImageOutput alloc] init];
-            auto* imageSettings = [[NSDictionary alloc] initWithObjectsAndKeys: AVVideoCodecJPEG, AVVideoCodecKey, nil];
+            auto imageSettings = [[NSDictionary alloc] initWithObjectsAndKeys: AVVideoCodecJPEG, AVVideoCodecKey, nil];
             [imageOutput setOutputSettings: imageSettings];
             [imageSettings release];
             [session addOutput: imageOutput];
@@ -177,6 +177,9 @@ struct CameraDevice::Pimpl
     {
         const ScopedLock sl (listenerLock);
         listeners.call ([=] (Listener& l) { l.imageReceived (image); });
+
+        if (! listeners.isEmpty())
+            triggerImageCapture();
     }
 
     void triggerImageCapture()

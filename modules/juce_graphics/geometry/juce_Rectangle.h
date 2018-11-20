@@ -43,16 +43,10 @@ public:
     /** Creates a rectangle of zero size.
         The default coordinates will be (0, 0, 0, 0).
     */
-    Rectangle() noexcept
-      : w(), h()
-    {
-    }
+    Rectangle() = default;
 
     /** Creates a copy of another rectangle. */
-    Rectangle (const Rectangle& other) noexcept
-      : pos (other.pos), w (other.w), h (other.h)
-    {
-    }
+    Rectangle (const Rectangle&) = default;
 
     /** Creates a rectangle with a given position and size. */
     Rectangle (ValueType initialX, ValueType initialY,
@@ -89,15 +83,11 @@ public:
         return { left, top, right - left, bottom - top };
     }
 
-    Rectangle& operator= (const Rectangle& other) noexcept
-    {
-        pos = other.pos;
-        w = other.w; h = other.h;
-        return *this;
-    }
+    /** Creates a copy of another rectangle. */
+    Rectangle& operator= (const Rectangle&) = default;
 
     /** Destructor. */
-    ~Rectangle() noexcept {}
+    ~Rectangle() = default;
 
     //==============================================================================
     /** Returns true if the rectangle's width or height are zero or less */
@@ -974,7 +964,7 @@ private:
     template <typename OtherType> friend class Rectangle;
 
     Point<ValueType> pos;
-    ValueType w, h;
+    ValueType w{}, h{};
 
     static ValueType parseIntAfterSpace (StringRef s) noexcept
         { return static_cast<ValueType> (s.text.findEndOfWhitespace().getIntValue32()); }

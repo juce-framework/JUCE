@@ -29,11 +29,12 @@
  website:          http://juce.com
  description:      Showcases camera features.
 
- dependencies:     juce_core, juce_cryptography, juce_data_structures, juce_events,
-                   juce_graphics, juce_gui_basics, juce_gui_extra, juce_video
+ dependencies:     juce_audio_basics, juce_audio_devices, juce_core, juce_cryptography,
+                   juce_data_structures, juce_events, juce_graphics, juce_gui_basics,
+                   juce_gui_extra, juce_video
  exporters:        xcode_mac, vs2017, androidstudio, xcode_iphone
 
- moduleFlags:      JUCE_USE_CAMERA=1
+ moduleFlags:      JUCE_USE_CAMERA=1, JUCE_STRICT_REFCOUNTEDPOINTER=1
 
  type:             Component
  mainClass:        CameraDemo
@@ -244,7 +245,7 @@ private:
         {
            #if JUCE_ANDROID
             SafePointer<CameraDemo> safeThis (this);
-            cameraDevice->onErrorOccurred = [safeThis] (const String& error) mutable { if (safeThis) safeThis->errorOccurred (error); };
+            cameraDevice->onErrorOccurred = [safeThis] (const String& cameraError) mutable { if (safeThis) safeThis->errorOccurred (cameraError); };
            #endif
             cameraPreviewComp.reset (cameraDevice->createViewerComponent());
             addAndMakeVisible (cameraPreviewComp.get());
@@ -339,25 +340,25 @@ private:
        #if JUCE_ANDROID || JUCE_IOS
         auto imageFile = File::getSpecialLocation (File::tempDirectory).getNonexistentChildFile ("JuceCameraPhotoDemo", ".jpg");
 
-        if (auto stream = std::unique_ptr<OutputStream> (imageFile.createOutputStream()))
+        FileOutputStream stream (imageFile);
+
+        if (stream.openedOk()
+             && JPEGImageFormat().writeImageToStream (image, stream))
         {
-            if (JPEGImageFormat().writeImageToStream (image, *stream))
-            {
-                URL url (imageFile);
+            URL url (imageFile);
 
-                snapshotButton   .setEnabled (false);
-                recordMovieButton.setEnabled (false);
-                contentSharingPending = true;
+            snapshotButton   .setEnabled (false);
+            recordMovieButton.setEnabled (false);
+            contentSharingPending = true;
 
-                SafePointer<CameraDemo> safeThis (this);
+            SafePointer<CameraDemo> safeThis (this);
 
-                juce::ContentSharer::getInstance()->shareFiles ({url},
-                                                                [safeThis] (bool success, const String&) mutable
-                                                                {
-                                                                    if (safeThis)
-                                                                        safeThis->sharingFinished (success, true);
-                                                                });
-            }
+            juce::ContentSharer::getInstance()->shareFiles ({url},
+                                                            [safeThis] (bool success, const String&) mutable
+                                                            {
+                                                                if (safeThis)
+                                                                    safeThis->sharingFinished (success, true);
+                                                            });
         }
        #endif
     }

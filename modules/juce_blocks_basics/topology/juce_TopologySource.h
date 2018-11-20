@@ -37,6 +37,12 @@ public:
     /** Returns the current topology that this object manages. */
     virtual BlockTopology getCurrentTopology() const = 0;
 
+    /** Sets the TopologySource as active, occupying the midi port and trying to connect to the block devices */
+    virtual void setActive (bool shouldBeActive) = 0;
+
+    /** Returns true, if the TopologySource is currently trying to connect the block devices */
+    virtual bool isActive() const = 0;
+
     //==========================================================================
     /** Used to receive callbacks for topology changes */
     struct Listener

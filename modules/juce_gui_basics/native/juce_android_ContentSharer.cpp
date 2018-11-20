@@ -30,13 +30,13 @@ namespace juce
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  FIELD (providers, "providers", "[Landroid/content/pm/ProviderInfo;")
 
-DECLARE_JNI_CLASS (AndroidPackageInfo, "android/content/pm/PackageInfo");
+DECLARE_JNI_CLASS (AndroidPackageInfo, "android/content/pm/PackageInfo")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  FIELD (authority, "authority", "Ljava/lang/String;")
 
-DECLARE_JNI_CLASS (AndroidProviderInfo, "android/content/pm/ProviderInfo");
+DECLARE_JNI_CLASS (AndroidProviderInfo, "android/content/pm/ProviderInfo")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -44,13 +44,13 @@ DECLARE_JNI_CLASS (AndroidProviderInfo, "android/content/pm/ProviderInfo");
  METHOD (createInputStream, "createInputStream", "()Ljava/io/FileInputStream;") \
  METHOD (getLength,         "getLength",         "()J")
 
-DECLARE_JNI_CLASS (AssetFileDescriptor, "android/content/res/AssetFileDescriptor");
+DECLARE_JNI_CLASS (AssetFileDescriptor, "android/content/res/AssetFileDescriptor")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  METHOD (close, "close", "()V")
 
-DECLARE_JNI_CLASS (JavaCloseable, "java/io/Closeable");
+DECLARE_JNI_CLASS (JavaCloseable, "java/io/Closeable")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -58,20 +58,20 @@ DECLARE_JNI_CLASS (JavaCloseable, "java/io/Closeable");
  METHOD (startWatching, "startWatching", "()V") \
  METHOD (stopWatching,  "stopWatching",  "()V")
 
-DECLARE_JNI_CLASS (JuceContentProviderFileObserver, JUCE_ANDROID_SHARING_CONTENT_PROVIDER_CLASSPATH "$ProviderFileObserver");
+DECLARE_JNI_CLASS (JuceContentProviderFileObserver, JUCE_ANDROID_SHARING_CONTENT_PROVIDER_CLASSPATH "$ProviderFileObserver")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  METHOD (addRow,      "addRow", "([Ljava/lang/Object;)V") \
  METHOD (constructor, "<init>", "(L" JUCE_ANDROID_SHARING_CONTENT_PROVIDER_CLASSPATH ";J[Ljava/lang/String;)V")
 
-DECLARE_JNI_CLASS (JuceContentProviderFileObserverCursor, JUCE_ANDROID_SHARING_CONTENT_PROVIDER_CLASSPATH "$ProviderCursor");
+DECLARE_JNI_CLASS (JuceContentProviderFileObserverCursor, JUCE_ANDROID_SHARING_CONTENT_PROVIDER_CLASSPATH "$ProviderCursor")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  STATICMETHOD (open, "open", "(Ljava/io/File;I)Landroid/os/ParcelFileDescriptor;")
 
-DECLARE_JNI_CLASS (ParcelFileDescriptor, "android/os/ParcelFileDescriptor");
+DECLARE_JNI_CLASS (ParcelFileDescriptor, "android/os/ParcelFileDescriptor")
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================
@@ -294,7 +294,7 @@ private:
                                          javaString ("raw").get(), javaString (packageName).get());
 
         // Raw resource not found. Please make sure that you include your file as a raw resource
-        // and that you specify just the file name, without an extention.
+        // and that you specify just the file name, without an extension.
         jassert (fileId != 0);
 
         if (fileId == 0)
@@ -307,14 +307,10 @@ private:
         auto inputStream = StreamCloser (LocalRef<jobject> (env->CallObjectMethod (assetFd,
                                                                                    AssetFileDescriptor.createInputStream)));
 
-        auto exception = LocalRef<jobject> (env->ExceptionOccurred());
-
-        if (exception != 0)
+        if (jniCheckHasExceptionOccurredAndClear())
         {
             // Failed to open file stream for resource
             jassertfalse;
-
-            env->ExceptionClear();
             return {};
         }
 
@@ -326,35 +322,27 @@ private:
                                                                              JavaFileOutputStream.constructor,
                                                                              javaString (tempFile.getFullPathName()).get())));
 
-        exception = LocalRef<jobject> (env->ExceptionOccurred());
-
-        if (exception != 0)
+        if (jniCheckHasExceptionOccurredAndClear())
         {
             // Failed to open file stream for temporary file
             jassertfalse;
-
-            env->ExceptionClear();
             return {};
         }
 
         auto buffer = LocalRef<jbyteArray> (env->NewByteArray (1024));
         int bytesRead = 0;
 
-        while (true)
+        for (;;)
         {
             if (threadShouldExit())
                 return {};
 
             bytesRead = env->CallIntMethod (inputStream.stream, JavaFileInputStream.read, buffer.get());
 
-            exception = LocalRef<jobject> (env->ExceptionOccurred());
-
-            if (exception != 0)
+            if (jniCheckHasExceptionOccurredAndClear())
             {
                 // Failed to read from resource file.
                 jassertfalse;
-
-                env->ExceptionClear();
                 return {};
             }
 
@@ -363,12 +351,10 @@ private:
 
             env->CallVoidMethod (outputStream.stream, JavaFileOutputStream.write, buffer.get(), 0, bytesRead);
 
-            if (exception != 0)
+            if (jniCheckHasExceptionOccurredAndClear())
             {
                 // Failed to write to temporary file.
                 jassertfalse;
-
-                env->ExceptionClear();
                 return {};
             }
         }
@@ -714,14 +700,10 @@ private:
                                                                                     ParcelFileDescriptor.open,
                                                                                     javaFile.get(), modeReadOnly));
 
-        auto exception = LocalRef<jobject> (env->ExceptionOccurred());
-
-        if (exception != 0)
+        if (jniCheckHasExceptionOccurredAndClear())
         {
             // Failed to create file descriptor. Have you provided a valid file path/resource name?
             jassertfalse;
-
-            env->ExceptionClear();
             return nullptr;
         }
 

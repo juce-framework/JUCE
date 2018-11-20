@@ -78,7 +78,7 @@ protected:
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& tree) const override
     {
-        return new MakeBuildConfiguration (project, tree, *this);
+        return *new MakeBuildConfiguration (project, tree, *this);
     }
 
 public:
@@ -179,6 +179,7 @@ public:
             switch (type)
             {
                 case VSTPlugIn:
+                case UnityPlugIn:
                 case DynamicLibrary:        return ".so";
                 case SharedCodeTarget:
                 case StaticLibrary:         return ".a";
@@ -264,25 +265,50 @@ public:
             return String (getName()).upToFirstOccurrenceOf (" ", false, false);
         }
 
-        void writeTargetLine (OutputStream& out, const bool useLinuxPackages)
+        void writeTargetLine (OutputStream& out, const StringArray& packages)
         {
             jassert (type != AggregateTarget);
 
             out << getBuildProduct() << " : "
-                << ((useLinuxPackages) ? "check-pkg-config " : "")
                 << "$(OBJECTS_" << getTargetVarName() << ") $(RESOURCES)";
 
             if (type != SharedCodeTarget && owner.shouldBuildTargetType (SharedCodeTarget))
                 out << " $(JUCE_OUTDIR)/$(JUCE_TARGET_SHARED_CODE)";
 
-            out << newLine << "\t@echo Linking \"" << owner.projectName << " - " << getName() << "\"" << newLine
+            out << newLine;
+
+            if (! packages.isEmpty())
+            {
+                out << "\t@command -v pkg-config >/dev/null 2>&1 || { echo >&2 \"pkg-config not installed. Please, install it.\"; exit 1; }" << newLine
+                    << "\t@pkg-config --print-errors";
+
+                for (auto& pkg : packages)
+                    out << " " << pkg;
+
+                out << newLine;
+            }
+
+            out << "\t@echo Linking \"" << owner.projectName << " - " << getName() << "\"" << newLine
                 << "\t-$(V_AT)mkdir -p $(JUCE_BINDIR)" << newLine
                 << "\t-$(V_AT)mkdir -p $(JUCE_LIBDIR)" << newLine
                 << "\t-$(V_AT)mkdir -p $(JUCE_OUTDIR)" << newLine;
 
+            if (type == UnityPlugIn)
+            {
+                auto scriptName = owner.getProject().getUnityScriptName();
+
+                RelativePath scriptPath (owner.getProject().getGeneratedCodeFolder().getChildFile (scriptName),
+                                         owner.getTargetFolder(),
+                                         RelativePath::projectFolder);
+
+                out << "\t-$(V_AT)cp " + scriptPath.toUnixStyle() + " $(JUCE_OUTDIR)/" + scriptName << newLine;
+            }
+
             if (owner.projectType.isStaticLibrary() || type == SharedCodeTarget)
+            {
                 out << "\t$(V_AT)$(AR) -rcs " << getBuildProduct()
                     << " $(OBJECTS_" << getTargetVarName() << ")" << newLine;
+            }
             else
             {
                 out << "\t$(V_AT)$(CXX) -o " << getBuildProduct()
@@ -362,6 +388,7 @@ public:
             case ProjectType::Target::VSTPlugIn:
             case ProjectType::Target::StandalonePlugIn:
             case ProjectType::Target::DynamicLibrary:
+            case ProjectType::Target::UnityPlugIn:
                 return true;
             default:
                 break;
@@ -419,9 +446,6 @@ public:
         jassert (targets.size() > 0);
     }
 
-    //==============================================================================
-    void initialiseDependencyPathValues() override  {}
-
 private:
     ValueWithDefault extraPkgConfigValue;
 
@@ -460,6 +484,10 @@ private:
             packages.add ("webkit2gtk-4.0");
             packages.add ("gtk+-x11-3.0");
         }
+
+        // don't add libcurl if curl symbols are loaded at runtime
+        if (! isLoadCurlSymbolsLazilyEnabled())
+            packages.add ("libcurl");
 
         packages.removeDuplicates (false);
 
@@ -597,8 +625,16 @@ private:
     {
         static String guiExtrasModule ("juce_gui_extra");
 
-        return (project.getModules().isModuleEnabled (guiExtrasModule)
+        return (project.getEnabledModules().isModuleEnabled (guiExtrasModule)
                 && project.isConfigFlagEnabled ("JUCE_WEB_BROWSER", true));
+    }
+
+    bool isLoadCurlSymbolsLazilyEnabled() const
+    {
+        static String juceCoreModule ("juce_core");
+
+        return (project.getEnabledModules().isModuleEnabled (juceCoreModule)
+                && project.isConfigFlagEnabled ("JUCE_LOAD_CURL_SYMBOLS_LAZILY", false));
     }
 
     //==============================================================================
@@ -662,7 +698,7 @@ private:
         out << " $(LDFLAGS)" << newLine;
     }
 
-    void writeTargetLines (OutputStream& out, const bool useLinuxPackages) const
+    void writeTargetLines (OutputStream& out, const StringArray& packages) const
     {
         auto n = targets.size();
 
@@ -699,7 +735,7 @@ private:
                     if (! getProject().getProjectType().isAudioPlugin())
                         out << "all : " << target->getBuildProduct() << newLine << newLine;
 
-                    target->writeTargetLine (out, useLinuxPackages);
+                    target->writeTargetLine (out, packages);
                 }
             }
         }
@@ -828,28 +864,10 @@ private:
 
         out << getPhonyTargetLine() << newLine << newLine;
 
-        auto packages = getPackages();
-
-        writeTargetLines (out, ! packages.isEmpty());
+        writeTargetLines (out, getPackages());
 
         for (auto target : targets)
-            target->addFiles (out);
-
-        if (! packages.isEmpty())
-        {
-            out << "check-pkg-config:" << newLine
-                << "\t@command -v pkg-config >/dev/null 2>&1 || "
-                "{ echo >&2 \"pkg-config not installed. Please, install it.\"; "
-                "exit 1; }" << newLine
-                << "\t@pkg-config --print-errors";
-
-            for (auto& pkg : packages)
-                out << " " << pkg;
-
-            out << newLine << newLine;
-        }
-
-        out << "clean:" << newLine
+            target->addFiles (out);out << "clean:" << newLine
             << "\t@echo Cleaning " << projectName << newLine
             << "\t$(V_AT)$(CLEANCMD)" << newLine
             << newLine;
@@ -880,7 +898,7 @@ private:
     {
         MemoryOutputStream phonyTargetLine;
 
-        phonyTargetLine << ".PHONY: clean all";
+        phonyTargetLine << ".PHONY: clean all strip";
 
         if (! getProject().getProjectType().isAudioPlugin())
             return phonyTargetLine.toString();

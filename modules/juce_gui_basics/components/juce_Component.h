@@ -2123,7 +2123,7 @@ public:
         and you can test whether it's null before using it to see if something has deleted
         it.
 
-        The ComponentType typedef must be Component, or some subclass of Component.
+        The ComponentType template parameter must be Component, or some subclass of Component.
 
         You may also want to use a WeakReference<Component> object for the same purpose.
     */
@@ -2280,8 +2280,6 @@ private:
     std::unique_ptr<CachedComponentImage> cachedImage;
 
     class MouseListenerList;
-    friend class MouseListenerList;
-    friend struct ContainerDeletePolicy<MouseListenerList>;
     std::unique_ptr<MouseListenerList> mouseListeners;
     std::unique_ptr<Array<KeyListener*>> keyListeners;
     ListenerList<ComponentListener> componentListeners;

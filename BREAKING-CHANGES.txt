@@ -5,6 +5,183 @@ Develop
 =======
 
 
+Version 5.4.0
+=============
+
+Change
+------
+The use of WinRT MIDI functions has been disabled by default for any version
+of Windows 10 before 1809 (October 2018 Update).
+
+Possible Issues
+---------------
+If you were previously using WinRT MIDI functions on older versions of Windows
+then the new behaviour is to revert to the old Win32 MIDI API.
+
+Workaround
+----------
+Set the preprocessor macro JUCE_FORCE_WINRT_MIDI=1 (in addition to the
+previously selected JUCE_USE_WINRT_MIDI=1) to allow the use of the WinRT API on
+older versions of Windows.
+
+Rationale
+---------
+Until now JUCE's support for the Windows 10 WinRT MIDI API was experimental,
+due to longstanding issues within the API itself. These issues have been
+addressed in the Windows 10 1809 (October 2018 Update) release.
+
+
+Change
+------
+The VST2 SDK embedded within JUCE has been removed.
+
+Possible Issues
+---------------
+1. Building or hosting VST2 plug-ins requires header files from the VST2 SDK,
+   which is no longer part of JUCE.
+2. Building a VST2-compatible VST3 plug-in (the previous default behaviour in
+   JUCE) requires header files from the VST2 SDK, which is no longer part of
+   JUCE. When a new JUCE plug-in project is created the option
+   JUCE_VST3_CAN_REPLACE_VST2 will be set to zero.
+
+Workaround
+----------
+1. The VST2 SDK can be obtained from the vstsdk3610_11_06_2018_build_37 (or
+   older) VST3 SDK or JUCE version 5.3.2. You should put the VST2 SDK in your
+   header search paths or use the "VST (Legacy) SDK Folder" fields in the
+   Projucer.
+2. For new plug-in projects where you will be releasing both a VST2 and VST3
+   version, and you want the VST3 plug-in to replace the VST2 plug-in in
+   hosts that support it, then you should enable the JUCE_VST3_CAN_REPLACE_VST2
+   option.
+
+Rationale
+---------
+Distributing VST2 plug-ins requires a VST2 license from Steinberg. Following
+Steinberg's removal of the VST2 SDK from their public SDKs we are also removing
+the VST2 SDK from the JUCE codebase.
+
+
+Change
+------
+The AudioProcessorValueTreeState::createAndAddParameter function has been
+deprecated.
+
+Possible Issues
+---------------
+Deprecation warnings will be seen when compiling code which uses this function
+and eventually builds will fail when it is later removed from the API.
+
+Workaround
+----------
+Previous calls to
+
+createAndAddParameter (paramID, paramName, ...);
+
+can be directly replaced with
+
+using Parameter = AudioProcessorValueTreeState::Parameter;
+createAndAddParameter (std::make_unique<Parameter> (paramID, paramName, ...));
+
+but an even better approach is to use the new AudioProcessorValueTreeState
+constructor where you can pass both RangedAudioParameters and
+AudioProcessorParameterGroups of RangedAudioParameters to the
+AudioProcessorValueTreeState and initialise the ValueTree simultaneously.
+
+Rationale
+---------
+The new createAndAddParameter method is much more flexible and enables any
+parameter types derived from RangedAudioParameter to be managed by the
+AudioProcessorValueTreeState.
+
+
+Change
+------
+The Projucer's per-exporter Android SDK/NDK path options have been removed.
+
+Possible Issues
+---------------
+Projects that previously used these fields may no longer build.
+
+Workaround
+----------
+Use the Projucer's global paths settings to point to these directories, either
+by opening the "Projucer/File->Global Paths..." menu item or using the
+"--set-global-search-path" command-line option.
+
+Rationale
+---------
+Having multiple places where the paths could be set was confusing and could
+cause unexpected mismatches.
+
+
+Change
+------
+SystemStats::getDeviceDescription() will now return the device code on iOS e.g.
+"iPhone7, 2" for an iPhone 6 instead of just "iPhone".
+
+Possible Issues
+---------------
+Code that previously relied on this method returning either explicitly "iPhone"
+or "iPad" may no longer work.
+
+Workaround
+----------
+Modify this code to handle the new device code string e.g. by changing:
+SystemStats::getDeviceDescription() == "iPhone";
+to
+SystemStats::getDeviceDescription().contains ("iPhone");.
+
+Rationale
+---------
+The exact device model can now be deduced from this information instead of just
+the device family.
+
+
+Change
+------
+DragAndDropContainer::performExternalDragDropOfFiles() and
+::performExternalDragDropOfText() are now asynchronous on Windows.
+
+Possible Issues
+---------------
+Code that previously relied on these operations being synchronous and blocking
+until completion will no longer work as the methods will return immediately and
+run asynchronously.
+
+Workaround
+----------
+Use the callback argument that has been added to these methods to register a
+lambda that will be called when the operation has been completed.
+
+Rationale
+---------
+The behaviour of these methods is now consistent across all platforms and the
+method no longer blocks the message thread on Windows.
+
+
+Change
+------
+AudioProcessor::getTailLengthSeconds can now return infinity for
+VST/VST3/AU/AUv3.
+
+Possible Issues
+---------------
+If you are using the result of getTailLengthSeconds to allocate a buffer in
+your host, then your host will now likely crash when loading a plug-in with an
+infinite tail time.
+
+Workaround
+----------
+Rewrite your code to not use the result of getTailLengthSeconds directly to
+allocate a buffer.
+
+Rationale
+---------
+Before this change there was no way for a JUCE plug-in to report an infinite
+tail time.
+
+
 Version 5.3.2
 =============
 
@@ -62,7 +239,7 @@ the Network Graphics Demo have been moved into the extras directory.
 
 Possible Issues
 ---------------
-1. Due to the large number of changes that have occured in the JUCE Git
+1. Due to the large number of changes that have occurred in the JUCE Git
    repository, pulling this version may result in a messy folder structure with
    empty directories that have been removed.
 2. The JUCE Demo project is no longer in the JUCE repository.
@@ -453,12 +630,31 @@ Version 5.1.0
 
 Change
 ------
+The JUCE_COMPILER_SUPPORTS_LAMBDAS preprocessor macro has been removed.
+
+Possible Issues
+---------------
+If your project is using JUCE_COMPILER_SUPPORTS_LAMBDAS in your source code
+then it will likely evaluate to "false" and you could end up unnecessarily
+using code paths which avoid lambda functions.
+
+Workaround
+----------
+Remove the usage of JUCE_COMPILER_SUPPORTS_LAMBDAS from your code.
+
+Rationale
+---------
+Lambda functions are now available on all platforms that JUCE supports.
+
+
+Change
+------
 The option to set the C++ language standard is now located in the project
 settings instead of the build configuration settings.
 
 Possible Issues
 ---------------
-Projects that had a specific verison of the C++ language standard set for
+Projects that had a specific version of the C++ language standard set for
 exporter build configurations will instead use the default (C++11) when
 re-saving with the new Projucer.
 

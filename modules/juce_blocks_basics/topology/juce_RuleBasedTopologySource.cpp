@@ -79,6 +79,16 @@ struct RuleBasedTopologySource::Internal  : public TopologySource::Listener,
         }
     }
 
+    void setActive (bool shouldBeActive)
+    {
+        detector.setActive (shouldBeActive);
+    }
+
+    bool isActive() const
+    {
+        return detector.isActive();
+    }
+
     RuleBasedTopologySource& owner;
     TopologySource& detector;
 
@@ -102,5 +112,15 @@ BlockTopology RuleBasedTopologySource::getCurrentTopology() const             { 
 
 void RuleBasedTopologySource::clearRules()                                    { internal->clearRules(); }
 void RuleBasedTopologySource::addRule (Rule* r)                               { internal->addRule (r); }
+
+void RuleBasedTopologySource::setActive (bool shouldBeActive)
+{
+    internal->setActive (shouldBeActive);
+}
+
+bool RuleBasedTopologySource::isActive() const
+{
+    return internal->isActive();
+}
 
 } // namespace juce

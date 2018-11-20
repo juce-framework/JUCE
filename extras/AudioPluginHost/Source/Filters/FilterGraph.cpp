@@ -40,11 +40,7 @@ FilterGraph::FilterGraph (AudioPluginFormatManager& fm)
       formatManager (fm)
 {
     newDocument();
-
     graph.addListener (this);
-    graph.addChangeListener (this);
-
-    setChangedFlag (false);
 }
 
 FilterGraph::~FilterGraph()
@@ -56,7 +52,7 @@ FilterGraph::~FilterGraph()
 
 FilterGraph::NodeID FilterGraph::getNextUID() noexcept
 {
-    return ++lastUID;
+    return FilterGraph::NodeID (++(lastUID.uid));
 }
 
 //==============================================================================
@@ -156,7 +152,7 @@ PluginWindow* FilterGraph::getOrCreateWindowFor (AudioProcessorGraph::Node* node
     closeAnyOpenPluginWindows();
    #else
     for (auto* w : activePluginWindows)
-        if (w->node == node && w->type == type)
+        if (w->node.get() == node && w->type == type)
             return w;
    #endif
 
@@ -172,6 +168,15 @@ PluginWindow* FilterGraph::getOrCreateWindowFor (AudioProcessorGraph::Node* node
                 return nullptr;
             }
         }
+
+       #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+        if (! node->properties["DPIAware"]
+            && ! node->getProcessor()->getName().contains ("Kontakt")) // Kontakt doesn't behave correctly in DPI unaware mode...
+        {
+            ScopedDPIAwarenessDisabler disableDPIAwareness;
+            return activePluginWindows.add (new PluginWindow (node, type, activePluginWindows));
+        }
+       #endif
 
         return activePluginWindows.add (new PluginWindow (node, type, activePluginWindows));
     }
@@ -200,13 +205,18 @@ void FilterGraph::newDocument()
     clear();
     setFile ({});
 
+    graph.removeChangeListener (this);
+
     InternalPluginFormat internalFormat;
 
     addPlugin (internalFormat.audioInDesc,  { 0.5,  0.1 });
     addPlugin (internalFormat.midiInDesc,   { 0.25, 0.1 });
     addPlugin (internalFormat.audioOutDesc, { 0.5,  0.9 });
 
-    setChangedFlag (false);
+    MessageManager::callAsync ([this] () {
+        setChangedFlag (false);
+        graph.addChangeListener (this);
+    } );
 }
 
 Result FilterGraph::loadDocument (const File& file)
@@ -217,7 +227,14 @@ Result FilterGraph::loadDocument (const File& file)
     if (xml == nullptr || ! xml->hasTagName ("FILTERGRAPH"))
         return Result::fail ("Not a valid filter graph file");
 
+    graph.removeChangeListener (this);
     restoreFromXml (*xml);
+
+    MessageManager::callAsync ([this] () {
+        setChangedFlag (false);
+        graph.addChangeListener (this);
+    } );
+
     return Result::ok();
 }
 
@@ -318,7 +335,7 @@ static XmlElement* createNodeXml (AudioProcessorGraph::Node* const node) noexcep
     if (auto* plugin = dynamic_cast<AudioPluginInstance*> (node->getProcessor()))
     {
         auto e = new XmlElement ("FILTER");
-        e->setAttribute ("uid", (int) node->nodeID);
+        e->setAttribute ("uid", (int) node->nodeID.uid);
         e->setAttribute ("x", node->properties ["x"].toString());
         e->setAttribute ("y", node->properties ["y"].toString());
 
@@ -384,7 +401,7 @@ void FilterGraph::createNodeFromXml (const XmlElement& xml)
             instance->setBusesLayout (layout);
         }
 
-        if (auto node = graph.addNode (instance, (NodeID) xml.getIntAttribute ("uid")))
+        if (auto node = graph.addNode (instance, NodeID ((uint32) xml.getIntAttribute ("uid"))))
         {
             if (auto* state = xml.getChildByName ("STATE"))
             {
@@ -431,9 +448,9 @@ XmlElement* FilterGraph::createXml() const
     {
         auto e = xml->createNewChildElement ("CONNECTION");
 
-        e->setAttribute ("srcFilter", (int) connection.source.nodeID);
+        e->setAttribute ("srcFilter", (int) connection.source.nodeID.uid);
         e->setAttribute ("srcChannel", connection.source.channelIndex);
-        e->setAttribute ("dstFilter", (int) connection.destination.nodeID);
+        e->setAttribute ("dstFilter", (int) connection.destination.nodeID.uid);
         e->setAttribute ("dstChannel", connection.destination.channelIndex);
     }
 
@@ -452,8 +469,8 @@ void FilterGraph::restoreFromXml (const XmlElement& xml)
 
     forEachXmlChildElementWithTagName (xml, e, "CONNECTION")
     {
-        graph.addConnection ({ { (NodeID) e->getIntAttribute ("srcFilter"), e->getIntAttribute ("srcChannel") },
-                               { (NodeID) e->getIntAttribute ("dstFilter"), e->getIntAttribute ("dstChannel") } });
+        graph.addConnection ({ { NodeID ((uint32) e->getIntAttribute ("srcFilter")), e->getIntAttribute ("srcChannel") },
+                               { NodeID ((uint32) e->getIntAttribute ("dstFilter")), e->getIntAttribute ("dstChannel") } });
     }
 
     graph.removeIllegalConnections();

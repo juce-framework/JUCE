@@ -44,7 +44,7 @@ public:
 
         @param linkText     the text that will be displayed in the button - this is
                             also set as the Component's name, but the text can be
-                            changed later with the Button::getButtonText() method
+                            changed later with the Button::setButtonText() method
         @param linkURL      the URL to launch when the user clicks the button
     */
     HyperlinkButton (const String& linkText,
@@ -109,7 +109,7 @@ protected:
     /** @internal */
     void colourChanged() override;
     /** @internal */
-    void paintButton (Graphics&, bool isMouseOver, bool isButtonDown) override;
+    void paintButton (Graphics&, bool, bool) override;
 
 private:
     //==============================================================================

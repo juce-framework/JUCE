@@ -55,7 +55,7 @@ struct FilterDesign
 
         It generates linear phase filters coefficients.
 
-        Note : the flatTop WindowingMethod generates an impulse response with a
+        Note: The flatTop WindowingMethod generates an impulse response with a
         maximum amplitude higher than one, and might be normalized if necessary
         depending on the applications.
 
@@ -158,10 +158,10 @@ struct FilterDesign
         @param stopbandAttenuationdB        the attenuation in dB expected in the stop band
     */
 
-    static Array<IIRCoefficients> designIIRLowpassHighOrderButterworthMethod (FloatType frequency, double sampleRate,
-                                                                              FloatType normalizedTransitionWidth,
-                                                                              FloatType passbandAttenuationdB,
-                                                                              FloatType stopbandAttenuationdB);
+    static ReferenceCountedArray<IIRCoefficients> designIIRLowpassHighOrderButterworthMethod (FloatType frequency, double sampleRate,
+                                                                                              FloatType normalizedTransitionWidth,
+                                                                                              FloatType passbandAttenuationdB,
+                                                                                              FloatType stopbandAttenuationdB);
 
     //==============================================================================
     /** This method returns an array of IIR::Coefficients, made to be used in
@@ -174,8 +174,8 @@ struct FilterDesign
                                             an attenuation of -6 dB times order / octave
     */
 
-    static Array<IIRCoefficients> designIIRLowpassHighOrderButterworthMethod (FloatType frequency, double sampleRate,
-                                                                              int order);
+    static ReferenceCountedArray<IIRCoefficients> designIIRLowpassHighOrderButterworthMethod (FloatType frequency, double sampleRate,
+                                                                                              int order);
 
     /** This method returns an array of IIR::Coefficients, made to be used in
         cascaded IIRFilters, providing a minimum phase high-pass filter without any
@@ -187,8 +187,8 @@ struct FilterDesign
                                             an attenuation of -6 dB times order / octave
     */
 
-    static Array<IIRCoefficients> designIIRHighpassHighOrderButterworthMethod (FloatType frequency, double sampleRate,
-                                                                               int order);
+    static ReferenceCountedArray<IIRCoefficients> designIIRHighpassHighOrderButterworthMethod (FloatType frequency, double sampleRate,
+                                                                                               int order);
 
     /** This method returns an array of IIR::Coefficients, made to be used in
         cascaded IIRFilters, providing a minimum phase low-pass filter without any
@@ -204,10 +204,10 @@ struct FilterDesign
         @param passbandAttenuationdB        the lowest attenuation in dB expected in the pass band
         @param stopbandAttenuationdB        the attenuation in dB expected in the stop band
     */
-    static Array<IIRCoefficients> designIIRLowpassHighOrderChebyshev1Method (FloatType frequency, double sampleRate,
-                                                                             FloatType normalizedTransitionWidth,
-                                                                             FloatType passbandAttenuationdB,
-                                                                             FloatType stopbandAttenuationdB);
+    static ReferenceCountedArray<IIRCoefficients> designIIRLowpassHighOrderChebyshev1Method (FloatType frequency, double sampleRate,
+                                                                                             FloatType normalizedTransitionWidth,
+                                                                                             FloatType passbandAttenuationdB,
+                                                                                             FloatType stopbandAttenuationdB);
 
     /** This method returns an array of IIR::Coefficients, made to be used in
         cascaded IIRFilters, providing a minimum phase low-pass filter without any
@@ -223,10 +223,10 @@ struct FilterDesign
         @param passbandAttenuationdB        the lowest attenuation in dB expected in the pass band
         @param stopbandAttenuationdB        the attenuation in dB expected in the stop band
     */
-    static Array<IIRCoefficients> designIIRLowpassHighOrderChebyshev2Method (FloatType frequency, double sampleRate,
-                                                                             FloatType normalizedTransitionWidth,
-                                                                             FloatType passbandAttenuationdB,
-                                                                             FloatType stopbandAttenuationdB);
+    static ReferenceCountedArray<IIRCoefficients> designIIRLowpassHighOrderChebyshev2Method (FloatType frequency, double sampleRate,
+                                                                                             FloatType normalizedTransitionWidth,
+                                                                                             FloatType passbandAttenuationdB,
+                                                                                             FloatType stopbandAttenuationdB);
 
     /** This method returns an array of IIR::Coefficients, made to be used in
         cascaded IIR::Filters, providing a minimum phase low-pass filter with ripples
@@ -242,20 +242,25 @@ struct FilterDesign
         @param passbandAttenuationdB        the lowest attenuation in dB expected in the pass band
         @param stopbandAttenuationdB        the attenuation in dB expected in the stop band
     */
-    static Array<IIRCoefficients> designIIRLowpassHighOrderEllipticMethod (FloatType frequency, double sampleRate,
-                                                                           FloatType normalizedTransitionWidth,
-                                                                           FloatType passbandAttenuationdB,
-                                                                           FloatType stopbandAttenuationdB);
+    static ReferenceCountedArray<IIRCoefficients> designIIRLowpassHighOrderEllipticMethod (FloatType frequency, double sampleRate,
+                                                                                           FloatType normalizedTransitionWidth,
+                                                                                           FloatType passbandAttenuationdB,
+                                                                                           FloatType stopbandAttenuationdB);
 
     /** The structure returned by the function designIIRLowpassHalfBandPolyphaseAllpassMethod.
 
-        The two members of this structure directPath and delayedPath are arrays of
+        The two first members of this structure directPath and delayedPath are arrays of
         IIR::Coefficients, made of polyphase second order allpass filters and an additional
         delay in the second array, that can be used in cascaded filters processed in two
         parallel paths, which must be summed at the end to get the high order efficient
-        low-pass filtering.
+        low-pass filtering. The last member is an array with the useful parameters for
+        simulating the structure using any custom processing function.
     */
-    struct IIRPolyphaseAllpassStructure { Array<IIRCoefficients> directPath, delayedPath; };
+    struct IIRPolyphaseAllpassStructure
+    {
+        ReferenceCountedArray<IIRCoefficients> directPath, delayedPath;
+        Array<double> alpha;
+    };
 
     /** This method generates arrays of IIR::Coefficients for a low-pass filter, with
         a cutoff frequency at half band, using an algorithm described in the article
@@ -284,10 +289,10 @@ private:
     //==============================================================================
     static Array<double> getPartialImpulseResponseHn (int n, double kp);
 
-    static Array<IIRCoefficients> designIIRLowpassHighOrderGeneralMethod (int type, FloatType frequency, double sampleRate,
-                                                                          FloatType normalizedTransitionWidth,
-                                                                          FloatType passbandAttenuationdB,
-                                                                          FloatType stopbandAttenuationdB);
+    static ReferenceCountedArray<IIRCoefficients> designIIRLowpassHighOrderGeneralMethod (int type, FloatType frequency, double sampleRate,
+                                                                                          FloatType normalizedTransitionWidth,
+                                                                                          FloatType passbandAttenuationdB,
+                                                                                          FloatType stopbandAttenuationdB);
     FilterDesign() = delete;
 };
 

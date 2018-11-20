@@ -206,7 +206,7 @@ void HeaderComponent::sidebarTabsWidthChanged (int newWidth) noexcept
 void HeaderComponent::showUserSettings() noexcept
 {
    #if JUCER_ENABLE_GPL_MODE
-    auto settingsPopupHeight = 40;
+    auto settingsPopupHeight = 100;
     auto settingsPopupWidth = 200;
    #else
     auto settingsPopupHeight = 150;
@@ -289,7 +289,7 @@ void HeaderComponent::initialiseButtons() noexcept
     {
         sendProjectButtonAnalyticsEvent ("User Settings");
 
-        if (auto* pcc = findParentComponentOfClass<ProjectContentComponent>())
+        if (findParentComponentOfClass<ProjectContentComponent>() != nullptr)
             showUserSettings();
     };
 

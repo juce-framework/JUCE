@@ -178,7 +178,7 @@ class FIRFilterTest : public UnitTest
             AudioBlock<NumericType> fir (firBlock, 1, static_cast<size_t> (size));
             fillRandom (random, fir.getChannelPointer (0), static_cast<size_t> (size));
 
-            FIR::Filter<SampleType> filter (new FIR::Coefficients<NumericType> (fir.getChannelPointer (0), static_cast<size_t> (size)));
+            FIR::Filter<SampleType> filter (*new FIR::Coefficients<NumericType> (fir.getChannelPointer (0), static_cast<size_t> (size)));
             ProcessSpec spec {0.0, n, 1};
             filter.prepare (spec);
 

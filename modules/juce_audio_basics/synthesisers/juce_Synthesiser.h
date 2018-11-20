@@ -352,7 +352,7 @@ public:
     int getNumSounds() const noexcept                               { return sounds.size(); }
 
     /** Returns one of the sounds. */
-    SynthesiserSound* getSound (int index) const noexcept           { return sounds [index]; }
+    SynthesiserSound::Ptr getSound (int index) const noexcept       { return sounds[index]; }
 
     /** Adds a new sound to the synthesiser.
 

@@ -354,7 +354,7 @@ public:
     inline const TypeOfCriticalSectionToUse& getLock() const noexcept      { return lock; }
 
     /** Returns the type of scoped lock to use for locking this array */
-    typedef typename TypeOfCriticalSectionToUse::ScopedLockType ScopedLockType;
+    using ScopedLockType = typename TypeOfCriticalSectionToUse::ScopedLockType;
 
 private:
     //==============================================================================
@@ -388,7 +388,7 @@ public:
         }
         @endcode
 
-        The order in which items are iterated bears no resemblence to the order in which
+        The order in which items are iterated bears no resemblance to the order in which
         they were originally added!
 
         Obviously as soon as you call any non-const methods on the original hash-map, any

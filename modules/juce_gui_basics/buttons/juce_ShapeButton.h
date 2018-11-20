@@ -108,7 +108,7 @@ public:
     void setBorderSize (BorderSize<int> border);
 
     /** @internal */
-    void paintButton (Graphics&, bool isMouseOverButton, bool isButtonDown) override;
+    void paintButton (Graphics&, bool, bool) override;
 
 private:
     //==============================================================================

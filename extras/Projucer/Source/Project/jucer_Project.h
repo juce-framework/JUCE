@@ -31,6 +31,7 @@
 class ProjectExporter;
 class LibraryModule;
 class EnabledModuleList;
+class AvailableModuleList;
 class ProjectContentComponent;
 class CompileEngineSettings;
 
@@ -103,8 +104,9 @@ public:
     void setProjectVersion (const String& newVersion)    { versionValue = newVersion; }
 
     String getBundleIdentifierString() const             { return bundleIdentifierValue.get(); }
-    String getDefaultBundleIdentifierString()            { return "com.yourcompany." + CodeHelpers::makeValidIdentifier (getProjectNameString(), false, true, false); }
-    String getDefaultAAXIdentifierString()               { return getDefaultBundleIdentifierString(); }
+    String getDefaultBundleIdentifierString() const;
+    String getDefaultAAXIdentifierString() const         { return getDefaultBundleIdentifierString(); }
+    String getDefaultPluginManufacturerString() const;
 
     String getCompanyNameString() const                  { return companyNameValue.get(); }
     String getCompanyCopyrightString() const             { return companyCopyrightValue.get(); }
@@ -158,6 +160,7 @@ public:
     bool shouldBuildRTAS() const                      { return checkMultiChoiceVar (pluginFormatsValue, Ids::buildRTAS); }
     bool shouldBuildAAX() const                       { return checkMultiChoiceVar (pluginFormatsValue, Ids::buildAAX); }
     bool shouldBuildStandalonePlugin() const          { return checkMultiChoiceVar (pluginFormatsValue, Ids::buildStandalone); }
+    bool shouldBuildUnityPlugin() const               { return checkMultiChoiceVar (pluginFormatsValue, Ids::buildUnity); }
     bool shouldEnableIAA() const                      { return checkMultiChoiceVar (pluginFormatsValue, Ids::enableIAA); }
 
     //==============================================================================
@@ -191,6 +194,7 @@ public:
     Array<var> getDefaultRTASCategories() const noexcept;
 
     String getAUMainTypeString() const noexcept;
+    bool isAUSandBoxSafe() const noexcept;
     String getVSTCategoryString() const noexcept;
     String getVST3CategoryString() const noexcept;
     int getAAXCategory() const noexcept;
@@ -198,6 +202,15 @@ public:
 
     String getIAATypeCode();
     String getIAAPluginName();
+
+    String getUnityScriptName() const    { return addUnityPluginPrefixIfNecessary (getProjectNameString()) + "_UnityScript.cs"; }
+    static String addUnityPluginPrefixIfNecessary (const String& name)
+    {
+        if (! name.startsWithIgnoreCase ("audioplugin"))
+            return "audioplugin_" + name;
+
+        return name;
+    }
 
     //==============================================================================
     bool isAUPluginHost();
@@ -290,6 +303,8 @@ public:
         Icon getIcon (bool isOpen = false) const;
         bool isIconCrossedOut() const;
 
+        bool needsSaving() const noexcept;
+
         Project& project;
         ValueTree state;
 
@@ -338,7 +353,12 @@ public:
     bool isConfigFlagEnabled (const String& name, bool defaultIsEnabled = false) const;
 
     //==============================================================================
-    EnabledModuleList& getModules();
+    EnabledModuleList& getEnabledModules();
+
+    AvailableModuleList& getExporterPathsModuleList();
+    void rescanExporterPathModules (bool async = false);
+
+    std::pair<String, File> getModuleWithID (const String&);
 
     //==============================================================================
     String getFileTemplate (const String& templateName);
@@ -395,10 +415,12 @@ private:
 
     ValueWithDefault pluginFormatsValue, pluginNameValue, pluginDescriptionValue, pluginManufacturerValue, pluginManufacturerCodeValue,
                      pluginCodeValue, pluginChannelConfigsValue, pluginCharacteristicsValue, pluginAUExportPrefixValue, pluginAAXIdentifierValue,
-                     pluginAUMainTypeValue, pluginRTASCategoryValue, pluginVSTCategoryValue, pluginVST3CategoryValue, pluginAAXCategoryValue;
+                     pluginAUMainTypeValue, pluginAUSandboxSafeValue, pluginRTASCategoryValue, pluginVSTCategoryValue, pluginVST3CategoryValue, pluginAAXCategoryValue;
 
     //==============================================================================
     std::unique_ptr<CompileEngineSettings> compileEngineSettings;
+    std::unique_ptr<EnabledModuleList> enabledModuleList;
+    std::unique_ptr<AvailableModuleList> exporterPathsModuleList;
 
     //==============================================================================
     bool shouldWriteLegacyPluginFormatSettings = false;
@@ -427,7 +449,6 @@ private:
 
     //==============================================================================
     friend class Item;
-    std::unique_ptr<EnabledModuleList> enabledModulesList;
     bool isSaving = false;
     Time modificationTime;
     StringPairArray parsedPreprocessorDefs;
@@ -442,7 +463,8 @@ private:
     void createAudioPluginPropertyEditors (PropertyListBuilder& props);
 
     //==============================================================================
-    void updateTitle();
+    void updateTitleDependencies();
+    void updateCompanyNameDependencies();
     void updateProjectSettings();
     ValueTree getConfigurations() const;
     ValueTree getConfigNode();

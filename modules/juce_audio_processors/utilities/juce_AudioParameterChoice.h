@@ -35,7 +35,7 @@ namespace juce
 
     @tags{Audio}
 */
-class JUCE_API  AudioParameterChoice  : public AudioProcessorParameterWithID
+class JUCE_API  AudioParameterChoice  : public RangedAudioParameter
 {
 public:
     /** Creates a AudioParameterChoice with the specified parameters.
@@ -64,16 +64,21 @@ public:
 
     /** Returns the current index of the selected item. */
     int getIndex() const noexcept                   { return roundToInt (value); }
+
     /** Returns the current index of the selected item. */
     operator int() const noexcept                   { return getIndex(); }
 
     /** Returns the name of the currently selected item. */
     String getCurrentChoiceName() const noexcept    { return choices[getIndex()]; }
+
     /** Returns the name of the currently selected item. */
     operator String() const noexcept                { return getCurrentChoiceName(); }
 
     /** Changes the selected item to a new index. */
     AudioParameterChoice& operator= (int newValue);
+
+    /** Returns the range of values that the parameter can take. */
+    const NormalisableRange<float>& getNormalisableRange() const override   { return range; }
 
     /** Provides access to the list of choices that this parameter is working with. */
     const StringArray choices;
@@ -94,12 +99,8 @@ private:
     String getText (float, int) const override;
     float getValueForText (const String&) const override;
 
-    int limitRange (int) const noexcept;
-    float convertTo0to1 (int) const noexcept;
-    int convertFrom0to1 (float) const noexcept;
-
+    const NormalisableRange<float> range;
     float value;
-    const int maxIndex;
     const float defaultValue;
     std::function<String (int, int)> stringFromIndexFunction;
     std::function<int (const String&)> indexFromStringFunction;

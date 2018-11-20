@@ -153,7 +153,6 @@ protected:
 
 private:
     struct HintingParams;
-    friend struct ContainerDeletePolicy<HintingParams>;
     std::unique_ptr<HintingParams> hintingParams;
     CriticalSection hintingLock;
 

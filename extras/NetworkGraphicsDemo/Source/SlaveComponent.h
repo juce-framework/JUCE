@@ -126,8 +126,8 @@ private:
     //==============================================================================
     String getMachineInfoToDisplay() const
     {
-        //auto display = Desktop::getInstance().getDisplays().getDisplayContaining (getScreenBounds().getCentre());
-        return getOSName();//     + "   " + String (display.dpi) + "   "  + String (display.scale);
+        auto display = Desktop::getInstance().getDisplays().findDisplayForPoint (getScreenBounds().getCentre());
+        return getOSName() + "   " + String (display.dpi) + "   "  + String (display.scale);
     }
 
     static String getOSName()
@@ -181,7 +181,7 @@ private:
         if (auto client = canvas.findClient (clientName))
         {
             auto screenBounds = getScreenBounds();
-            auto display = Desktop::getInstance().getDisplays().getDisplayContaining (screenBounds.getCentre());
+            auto display = Desktop::getInstance().getDisplays().findDisplayForPoint (screenBounds.getCentre());
             return ((screenBounds - display.userArea.getCentre()).toFloat() / (client->scaleFactor * display.dpi / display.scale)) + client->centre;
         }
 
@@ -192,7 +192,7 @@ private:
     {
         if (auto client = canvas.findClient (clientName))
         {
-            auto display = Desktop::getInstance().getDisplays().getDisplayContaining (getScreenBounds().getCentre());
+            auto display = Desktop::getInstance().getDisplays().findDisplayForPoint (getScreenBounds().getCentre());
             return (display.userArea.toFloat() / (client->scaleFactor * display.dpi / display.scale)).withCentre (client->centre);
         }
 
@@ -201,7 +201,7 @@ private:
 
     void timerCallback() override
     {
-        send (newClientOSCAddress, clientName + ":" + getIPAddress()
+        send (newClientOSCAddress, clientName + ":" + IPAddress::getLocalAddress().toString()
                                               + ":" + getScreenAreaInGlobalSpace().toString());
     }
 

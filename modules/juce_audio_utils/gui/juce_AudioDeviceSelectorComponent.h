@@ -105,7 +105,6 @@ private:
     const bool hideAdvancedOptionsWithButton;
 
     class MidiInputSelectorComponentListBox;
-    friend struct ContainerDeletePolicy<MidiInputSelectorComponentListBox>;
     std::unique_ptr<MidiInputSelectorComponentListBox> midiInputsList;
     std::unique_ptr<ComboBox> midiOutputSelector;
     std::unique_ptr<Label> midiInputsLabel, midiOutputLabel;

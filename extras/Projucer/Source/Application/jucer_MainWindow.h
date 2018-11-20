@@ -125,5 +125,7 @@ public:
     OwnedArray<MainWindow> windows;
 
 private:
+    bool isInReopenLastProjects = false;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindowList)
 };

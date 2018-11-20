@@ -82,42 +82,34 @@ private:
         facts.add (file.getFullPathName());
         drawable.reset();
 
+        if (auto input = std::unique_ptr<FileInputStream> (file.createInputStream()))
         {
-            std::unique_ptr<InputStream> input (file.createInputStream());
+            auto totalSize = input->getTotalLength();
+            String formatName;
 
-            if (input != nullptr)
+            if (auto* format = ImageFileFormat::findImageFormatForStream (*input))
+                formatName = " " + format->getFormatName();
+
+            input.reset();
+
+            auto image = ImageCache::getFromFile (file);
+
+            if (image.isValid())
             {
-                auto totalSize = input->getTotalLength();
-                String formatName;
+                auto* d = new DrawableImage();
+                d->setImage (image);
+                drawable.reset (d);
 
-                if (auto* format = ImageFileFormat::findImageFormatForStream (*input))
-                    formatName = " " + format->getFormatName();
-
-                input.reset();
-
-                auto image = ImageCache::getFromFile (file);
-
-                if (image.isValid())
-                {
-                    auto* d = new DrawableImage();
-                    d->setImage (image);
-                    drawable.reset (d);
-
-                    facts.add (String (image.getWidth()) + " x " + String (image.getHeight()) + formatName);
-                }
-
-                if (totalSize > 0)
-                    facts.add (File::descriptionOfSizeInBytes (totalSize));
+                facts.add (String (image.getWidth()) + " x " + String (image.getHeight()) + formatName);
             }
+
+            if (totalSize > 0)
+                facts.add (File::descriptionOfSizeInBytes (totalSize));
         }
 
         if (drawable == nullptr)
-        {
-            std::unique_ptr<XmlElement> svg (XmlDocument::parse (file));
-
-            if (svg != nullptr)
+            if (auto svg = parseXML (file))
                 drawable.reset (Drawable::createFromSVG (*svg));
-        }
 
         facts.removeEmptyStrings (true);
     }

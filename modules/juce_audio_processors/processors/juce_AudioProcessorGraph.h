@@ -58,7 +58,17 @@ public:
     ~AudioProcessorGraph();
 
     /** Each node in the graph has a UID of this type. */
-    using NodeID = uint32;
+    struct NodeID
+    {
+        NodeID() {}
+        explicit NodeID (uint32 i) : uid (i) {}
+
+        uint32 uid = 0;
+
+        bool operator== (const NodeID& other) const noexcept    { return uid == other.uid; }
+        bool operator!= (const NodeID& other) const noexcept    { return uid != other.uid; }
+        bool operator<  (const NodeID& other) const noexcept    { return uid <  other.uid; }
+    };
 
     //==============================================================================
     /** A special index that represents the midi channel of a node.
@@ -185,7 +195,7 @@ public:
         This will return nullptr if the index is out of range.
         @see getNodeForId
     */
-    Node* getNode (int index) const noexcept                        { return nodes [index]; }
+    Node::Ptr getNode (int index) const noexcept                    { return nodes[index]; }
 
     /** Searches the graph for a node with the given ID number and returns it.
         If no such node was found, this returns nullptr.

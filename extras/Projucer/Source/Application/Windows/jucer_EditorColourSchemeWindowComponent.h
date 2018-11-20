@@ -35,11 +35,9 @@ public:
     EditorColourSchemeWindowComponent()
     {
         if (getAppSettings().monospacedFontNames.size() == 0)
-            content.reset (new AppearanceEditor::FontScanPanel());
+            changeContent (new AppearanceEditor::FontScanPanel());
         else
-            content.reset (new AppearanceEditor::EditorPanel());
-
-        changeContent (content.get());
+            changeContent (new AppearanceEditor::EditorPanel());
     }
 
     void paint (Graphics& g) override
@@ -115,9 +113,9 @@ private:
                 const auto width = font.getStringWidth ("....");
 
                 return width == font.getStringWidth ("WWWW")
-                && width == font.getStringWidth ("0000")
-                && width == font.getStringWidth ("1111")
-                && width == font.getStringWidth ("iiii");
+                    && width == font.getStringWidth ("0000")
+                    && width == font.getStringWidth ("1111")
+                    && width == font.getStringWidth ("iiii");
             }
 
             StringArray fontsToScan, fontsFound;

@@ -105,6 +105,7 @@
 #endif
 
 #if JUCE_ANDROID
+ #include <ifaddrs.h>
  #include <android/log.h>
 #endif
 
@@ -118,8 +119,11 @@
 
 //==============================================================================
 #include "containers/juce_AbstractFifo.cpp"
+#include "containers/juce_ArrayBase.cpp"
 #include "containers/juce_NamedValueSet.cpp"
+#include "containers/juce_OwnedArray.cpp"
 #include "containers/juce_PropertySet.cpp"
+#include "containers/juce_ReferenceCountedArray.cpp"
 #include "containers/juce_SparseSet.cpp"
 #include "containers/juce_Variant.cpp"
 #include "files/juce_DirectoryIterator.cpp"
@@ -141,6 +145,7 @@
 #include "misc/juce_Result.cpp"
 #include "misc/juce_Uuid.cpp"
 #include "misc/juce_StdFunctionCompat.cpp"
+#include "misc/juce_ConsoleApplication.cpp"
 #include "network/juce_MACAddress.cpp"
 #include "network/juce_NamedPipe.cpp"
 #include "network/juce_Socket.cpp"
@@ -182,6 +187,9 @@
 #if ! JUCE_WINDOWS
 #include "native/juce_posix_SharedCode.h"
 #include "native/juce_posix_NamedPipe.cpp"
+#if ! JUCE_ANDROID || __ANDROID_API__ >= 24
+ #include "native/juce_posix_IPAddress.h"
+#endif
 #endif
 
 //==============================================================================

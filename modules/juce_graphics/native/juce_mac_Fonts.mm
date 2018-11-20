@@ -239,7 +239,7 @@ namespace CoreTextTypeLayout
                 {
                     extraKerning *= attr.font.getHeight();
 
-                    auto numberRef = CFNumberCreate (0, kCFNumberFloatType, &extraKerning);
+                    auto numberRef = CFNumberCreate (nullptr, kCFNumberFloatType, &extraKerning);
                     CFAttributedStringSetAttribute (attribString, range, kCTKernAttributeName, numberRef);
                     CFRelease (numberRef);
                 }
@@ -540,7 +540,7 @@ public:
         fontHeightToPointsFactor = referenceFontSize / ctTotalHeight;
 
         const short zero = 0;
-        auto numberRef = CFNumberCreate (0, kCFNumberShortType, &zero);
+        auto numberRef = CFNumberCreate (nullptr, kCFNumberShortType, &zero);
 
         CFStringRef keys[] = { kCTFontAttributeName, kCTLigatureAttributeName };
         CFTypeRef values[] = { ctFontRef, numberRef };
@@ -788,8 +788,8 @@ StringArray Font::findAllTypefaceStyles (const String& family)
 
 
 //==============================================================================
-Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)                  { return new OSXTypeface (font); }
-Typeface::Ptr Typeface::createSystemTypefaceFor (const void* data, size_t size)     { return new OSXTypeface (data, size); }
+Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)                  { return *new OSXTypeface (font); }
+Typeface::Ptr Typeface::createSystemTypefaceFor (const void* data, size_t size)     { return *new OSXTypeface (data, size); }
 
 void Typeface::scanFolderForFonts (const File&)
 {

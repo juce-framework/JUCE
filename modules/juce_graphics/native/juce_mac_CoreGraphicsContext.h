@@ -80,7 +80,7 @@ private:
     float targetScale;
     CGColorSpaceRef rgbColourSpace, greyColourSpace;
     mutable Rectangle<int> lastClipRect;
-    mutable bool lastClipRectIsValid;
+    mutable bool lastClipRectIsValid = false;
 
     struct SavedState
     {
@@ -92,9 +92,9 @@ private:
 
         FillType fillType;
         Font font;
-        CGFontRef fontRef;
+        CGFontRef fontRef = {};
         CGAffineTransform fontTransform;
-        CGGradientRef gradient;
+        CGGradientRef gradient = {};
     };
 
     std::unique_ptr<SavedState> state;

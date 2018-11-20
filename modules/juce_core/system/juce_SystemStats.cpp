@@ -73,13 +73,11 @@ StringArray SystemStats::getDeviceIdentifiers()
     }
     else
     {
-        Array<MACAddress> addresses;
-        MACAddress::findAllAddresses (addresses);
-        for (auto& address : addresses)
+        for (auto& address : MACAddress::getAllAddresses())
             ids.add (address.toString());
     }
 
-    jassert (ids.size() > 0); // Failed to create any IDs!
+    jassert (! ids.isEmpty()); // Failed to create any IDs!
     return ids;
 }
 
@@ -92,9 +90,14 @@ struct CPUInformation
 
     int numLogicalCPUs = 0, numPhysicalCPUs = 0;
 
-    bool hasMMX = false, hasSSE = false, hasSSE2 = false, hasSSE3 = false,
-         has3DNow = false, hasSSSE3 = false, hasSSE41 = false,
-         hasSSE42 = false, hasAVX = false, hasAVX2 = false, hasNeon = false;
+    bool hasMMX      = false, hasSSE        = false, hasSSE2       = false, hasSSE3 = false,
+         has3DNow    = false, hasSSSE3      = false, hasSSE41      = false,
+         hasSSE42    = false, hasAVX        = false, hasAVX2       = false,
+         hasAVX512F  = false, hasAVX512BW   = false, hasAVX512CD   = false,
+         hasAVX512DQ = false, hasAVX512ER   = false, hasAVX512IFMA = false,
+         hasAVX512PF = false, hasAVX512VBMI = false, hasAVX512VL   = false,
+         hasAVX512VPOPCNTDQ = false,
+         hasNeon = false;
 };
 
 static const CPUInformation& getCPUInformation() noexcept
@@ -115,6 +118,16 @@ bool SystemStats::hasSSE41() noexcept           { return getCPUInformation().has
 bool SystemStats::hasSSE42() noexcept           { return getCPUInformation().hasSSE42; }
 bool SystemStats::hasAVX() noexcept             { return getCPUInformation().hasAVX; }
 bool SystemStats::hasAVX2() noexcept            { return getCPUInformation().hasAVX2; }
+bool SystemStats::hasAVX512F() noexcept         { return getCPUInformation().hasAVX512F; }
+bool SystemStats::hasAVX512BW() noexcept        { return getCPUInformation().hasAVX512BW; }
+bool SystemStats::hasAVX512CD() noexcept        { return getCPUInformation().hasAVX512CD; }
+bool SystemStats::hasAVX512DQ() noexcept        { return getCPUInformation().hasAVX512DQ; }
+bool SystemStats::hasAVX512ER() noexcept        { return getCPUInformation().hasAVX512ER; }
+bool SystemStats::hasAVX512IFMA() noexcept      { return getCPUInformation().hasAVX512IFMA; }
+bool SystemStats::hasAVX512PF() noexcept        { return getCPUInformation().hasAVX512PF; }
+bool SystemStats::hasAVX512VBMI() noexcept      { return getCPUInformation().hasAVX512VBMI; }
+bool SystemStats::hasAVX512VL() noexcept        { return getCPUInformation().hasAVX512VL; }
+bool SystemStats::hasAVX512VPOPCNTDQ() noexcept { return getCPUInformation().hasAVX512VPOPCNTDQ; }
 bool SystemStats::hasNeon() noexcept            { return getCPUInformation().hasNeon; }
 
 

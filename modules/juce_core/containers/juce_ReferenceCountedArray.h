@@ -56,17 +56,13 @@ public:
     /** Creates an empty array.
         @see ReferenceCountedObject, Array, OwnedArray
     */
-    ReferenceCountedArray() noexcept
-    {
-    }
+    ReferenceCountedArray() = default;
 
     /** Creates a copy of another array */
     ReferenceCountedArray (const ReferenceCountedArray& other) noexcept
     {
         const ScopedLockType lock (other.getLock());
-        numUsed = other.numUsed;
-        data.setAllocatedSize (numUsed);
-        memcpy (data.elements, other.getRawDataPointer(), (size_t) numUsed * sizeof (ObjectClass*));
+        values.addArray (other.begin(), other.size());
 
         for (auto* o : *this)
             if (o != nullptr)
@@ -75,10 +71,8 @@ public:
 
     /** Moves from another array */
     ReferenceCountedArray (ReferenceCountedArray&& other) noexcept
-        : data (static_cast<ArrayAllocationBase<ObjectClass*, TypeOfCriticalSectionToUse>&&> (other.data)),
-          numUsed (other.numUsed)
+        : values (std::move (other.values))
     {
-        other.numUsed = 0;
     }
 
     /** Creates a copy of another array */
@@ -86,9 +80,7 @@ public:
     ReferenceCountedArray (const ReferenceCountedArray<OtherObjectClass, OtherCriticalSection>& other) noexcept
     {
         const typename ReferenceCountedArray<OtherObjectClass, OtherCriticalSection>::ScopedLockType lock (other.getLock());
-        numUsed = other.size();
-        data.setAllocatedSize (numUsed);
-        memcpy (data.elements, other.getRawDataPointer(), (size_t) numUsed * sizeof (ObjectClass*));
+        values.addArray (other.begin(), other.size());
 
         for (auto* o : *this)
             if (o != nullptr)
@@ -121,9 +113,7 @@ public:
     ReferenceCountedArray& operator= (ReferenceCountedArray&& other) noexcept
     {
         releaseAllObjects();
-        data = static_cast<ArrayAllocationBase<ObjectClass*, TypeOfCriticalSectionToUse>&&> (other.data);
-        numUsed = other.numUsed;
-        other.numUsed = 0;
+        values = std::move (other.values);
         return *this;
     }
 
@@ -137,13 +127,13 @@ public:
 
     //==============================================================================
     /** Removes all objects from the array.
-        Any objects in the array that whose reference counts drop to zero will be deleted.
+        Any objects in the array whose reference counts drop to zero will be deleted.
     */
     void clear()
     {
         const ScopedLockType lock (getLock());
-        releaseAllObjects();
-        data.setAllocatedSize (0);
+        clearQuick();
+        values.setAllocatedSize (0);
     }
 
     /** Removes all objects from the array without freeing the array's allocated storage.
@@ -159,13 +149,13 @@ public:
     /** Returns the current number of objects in the array. */
     inline int size() const noexcept
     {
-        return numUsed;
+        return values.size();
     }
 
     /** Returns true if the array is empty, false otherwise. */
     inline bool isEmpty() const noexcept
     {
-        return numUsed == 0;
+        return size() == 0;
     }
 
     /** Returns a pointer to the object at this index in the array.
@@ -178,7 +168,7 @@ public:
     */
     inline ObjectClassPtr operator[] (int index) const noexcept
     {
-        return getObjectPointer (index);
+        return ObjectClassPtr (getObjectPointer (index));
     }
 
     /** Returns a pointer to the object at this index in the array, without checking
@@ -189,7 +179,7 @@ public:
     */
     inline ObjectClassPtr getUnchecked (int index) const noexcept
     {
-        return getObjectPointerUnchecked (index);
+        return ObjectClassPtr (getObjectPointerUnchecked (index));
     }
 
     /** Returns a raw pointer to the object at this index in the array.
@@ -203,24 +193,16 @@ public:
     inline ObjectClass* getObjectPointer (int index) const noexcept
     {
         const ScopedLockType lock (getLock());
-
-        if (isPositiveAndBelow (index, numUsed))
-        {
-            jassert (data.elements != nullptr);
-            return data.elements[index];
-        }
-
-        return {};
+        return values.getValueWithDefault (index);
     }
 
     /** Returns a raw pointer to the object at this index in the array, without checking
         whether the index is in-range.
     */
-    inline ObjectClass* getObjectPointerUnchecked (const int index) const noexcept
+    inline ObjectClass* getObjectPointerUnchecked (int index) const noexcept
     {
         const ScopedLockType lock (getLock());
-        jassert (isPositiveAndBelow (index, numUsed) && data.elements != nullptr);
-        return data.elements[index];
+        return values[index];
     }
 
     /** Returns a pointer to the first object in the array.
@@ -231,14 +213,7 @@ public:
     inline ObjectClassPtr getFirst() const noexcept
     {
         const ScopedLockType lock (getLock());
-
-        if (numUsed > 0)
-        {
-            jassert (data.elements != nullptr);
-            return data.elements[0];
-        }
-
-        return {};
+        return values.getFirst();
     }
 
     /** Returns a pointer to the last object in the array.
@@ -249,14 +224,7 @@ public:
     inline ObjectClassPtr getLast() const noexcept
     {
         const ScopedLockType lock (getLock());
-
-        if (numUsed > 0)
-        {
-            jassert (data.elements != nullptr);
-            return data.elements[numUsed - 1];
-        }
-
-        return {};
+        return values.getLast();
     }
 
     /** Returns a pointer to the actual array data.
@@ -265,7 +233,7 @@ public:
     */
     inline ObjectClass** getRawDataPointer() const noexcept
     {
-        return data.elements;
+        return values.begin();
     }
 
     //==============================================================================
@@ -274,7 +242,7 @@ public:
     */
     inline ObjectClass** begin() const noexcept
     {
-        return data.elements;
+        return values.begin();
     }
 
     /** Returns a pointer to the element which follows the last element in the array.
@@ -282,7 +250,15 @@ public:
     */
     inline ObjectClass** end() const noexcept
     {
-        return data.elements + numUsed;
+        return values.end();
+    }
+
+    /** Returns a pointer to the first element in the array.
+        This method is provided for compatibility with the standard C++ containers.
+    */
+    inline ObjectClass** data() const noexcept
+    {
+        return begin();
     }
 
     //==============================================================================
@@ -294,19 +270,26 @@ public:
     int indexOf (const ObjectClass* objectToLookFor) const noexcept
     {
         const ScopedLockType lock (getLock());
-        auto** e = data.elements.get();
-        auto** endPointer = e + numUsed;
+        auto** e = values.begin();
+        auto** endPointer = values.end();
 
         while (e != endPointer)
         {
             if (objectToLookFor == *e)
-                return static_cast<int> (e - data.elements.get());
+                return static_cast<int> (e - values.begin());
 
             ++e;
         }
 
         return -1;
     }
+
+    /** Finds the index of the first occurrence of an object in the array.
+
+        @param objectToLookFor    the object to look for
+        @returns                  the index at which the object was found, or -1 if it's not found
+    */
+    int indexOf (const ObjectClassPtr& objectToLookFor) const noexcept      { return indexOf (objectToLookFor.get()); }
 
     /** Returns true if the array contains a specified object.
 
@@ -316,8 +299,8 @@ public:
     bool contains (const ObjectClass* objectToLookFor) const noexcept
     {
         const ScopedLockType lock (getLock());
-        auto** e = data.elements.get();
-        auto** endPointer = e + numUsed;
+        auto** e = values.begin();
+        auto** endPointer = values.end();
 
         while (e != endPointer)
         {
@@ -330,6 +313,13 @@ public:
         return false;
     }
 
+    /** Returns true if the array contains a specified object.
+
+        @param objectToLookFor      the object to look for
+        @returns                    true if the object is in the array
+    */
+    bool contains (const ObjectClassPtr& objectToLookFor) const noexcept    { return contains (objectToLookFor.get()); }
+
     /** Appends a new object to the end of the array.
 
         This will increase the new object's reference count.
@@ -337,12 +327,42 @@ public:
         @param newObject       the new object to add to the array
         @see set, insert, addIfNotAlreadyThere, addSorted, addArray
     */
-    ObjectClass* add (ObjectClass* newObject) noexcept
+    ObjectClass* add (ObjectClass* newObject)
     {
         const ScopedLockType lock (getLock());
-        data.ensureAllocatedSize (numUsed + 1);
-        jassert (data.elements != nullptr);
-        data.elements[numUsed++] = newObject;
+        values.add (newObject);
+
+        if (newObject != nullptr)
+            newObject->incReferenceCount();
+
+        return newObject;
+    }
+
+    /** Appends a new object to the end of the array.
+
+        This will increase the new object's reference count.
+
+        @param newObject       the new object to add to the array
+        @see set, insert, addIfNotAlreadyThere, addSorted, addArray
+    */
+    ObjectClass* add (const ObjectClassPtr& newObject)          { return add (newObject.get()); }
+
+    /** Inserts a new object into the array at the given index.
+
+        If the index is less than 0 or greater than the size of the array, the
+        element will be added to the end of the array.
+        Otherwise, it will be inserted into the array, moving all the later elements
+        along to make room.
+
+        This will increase the new object's reference count.
+
+        @param indexToInsertAt      the index at which the new element should be inserted
+        @param newObject            the new object to add to the array
+        @see add, addSorted, addIfNotAlreadyThere, set
+    */
+    ObjectClass* insert (int indexToInsertAt, ObjectClass* newObject)
+    {
+        values.insert (indexToInsertAt, newObject, 1);
 
         if (newObject != nullptr)
             newObject->incReferenceCount();
@@ -363,32 +383,25 @@ public:
         @param newObject            the new object to add to the array
         @see add, addSorted, addIfNotAlreadyThere, set
     */
-    ObjectClass* insert (int indexToInsertAt, ObjectClass* newObject) noexcept
-    {
-        if (indexToInsertAt < 0)
-            return add (newObject);
+    ObjectClass* insert (int indexToInsertAt, const ObjectClassPtr& newObject)      { return insert (indexToInsertAt, newObject.get()); }
 
+    /** Appends a new object at the end of the array as long as the array doesn't
+        already contain it.
+
+        If the array already contains a matching object, nothing will be done.
+
+        @param newObject   the new object to add to the array
+        @returns           true if the object has been added, false otherwise
+    */
+    bool addIfNotAlreadyThere (ObjectClass* newObject)
+    {
         const ScopedLockType lock (getLock());
 
-        if (indexToInsertAt > numUsed)
-            indexToInsertAt = numUsed;
+        if (contains (newObject))
+            return false;
 
-        data.ensureAllocatedSize (numUsed + 1);
-        jassert (data.elements != nullptr);
-
-        auto** e = data.elements + indexToInsertAt;
-        auto numToMove = numUsed - indexToInsertAt;
-
-        if (numToMove > 0)
-            memmove (e + 1, e, sizeof (ObjectClass*) * (size_t) numToMove);
-
-        *e = newObject;
-
-        if (newObject != nullptr)
-            newObject->incReferenceCount();
-
-        ++numUsed;
-        return newObject;
+        add (newObject);
+        return true;
     }
 
     /** Appends a new object at the end of the array as long as the array doesn't
@@ -399,16 +412,7 @@ public:
         @param newObject   the new object to add to the array
         @returns           true if the object has been added, false otherwise
     */
-    bool addIfNotAlreadyThere (ObjectClass* newObject) noexcept
-    {
-        const ScopedLockType lock (getLock());
-
-        if (contains (newObject))
-            return false;
-
-        add (newObject);
-        return true;
-    }
+    bool addIfNotAlreadyThere (const ObjectClassPtr& newObject)         { return addIfNotAlreadyThere (newObject.get()); }
 
     /** Replaces an object in the array with a different one.
 
@@ -431,16 +435,14 @@ public:
             if (newObject != nullptr)
                 newObject->incReferenceCount();
 
-            if (indexToChange < numUsed)
+            if (indexToChange < values.size())
             {
-                releaseObject (data.elements[indexToChange]);
-                data.elements[indexToChange] = newObject;
+                releaseObject (values[indexToChange]);
+                values[indexToChange] = newObject;
             }
             else
             {
-                data.ensureAllocatedSize (numUsed + 1);
-                jassert (data.elements != nullptr);
-                data.elements[numUsed++] = newObject;
+                values.add (newObject);
             }
         }
     }
@@ -463,22 +465,11 @@ public:
         {
             const ScopedLockType lock2 (getLock());
 
-            if (startIndex < 0)
-            {
-                jassertfalse;
-                startIndex = 0;
-            }
+            auto numElementsAdded = values.addArray (arrayToAddFrom.values, startIndex, numElementsToAdd);
+            auto** e = values.end();
 
-            if (numElementsToAdd < 0 || startIndex + numElementsToAdd > arrayToAddFrom.size())
-                numElementsToAdd = arrayToAddFrom.size() - startIndex;
-
-            if (numElementsToAdd > 0)
-            {
-                data.ensureAllocatedSize (numUsed + numElementsToAdd);
-
-                while (--numElementsToAdd >= 0)
-                    add (arrayToAddFrom.getUnchecked (startIndex++));
-            }
+            for (int i = 0; i < numElementsAdded; ++i)
+                (*(--e))->incReferenceCount();
         }
     }
 
@@ -498,7 +489,7 @@ public:
     int addSorted (ElementComparator& comparator, ObjectClass* newObject) noexcept
     {
         const ScopedLockType lock (getLock());
-        auto index = findInsertIndexInSortedArray (comparator, data.elements.get(), newObject, 0, numUsed);
+        auto index = findInsertIndexInSortedArray (comparator, values.begin(), newObject, 0, values.size());
         insert (index, newObject);
         return index;
     }
@@ -512,9 +503,9 @@ public:
     void addOrReplaceSorted (ElementComparator& comparator, ObjectClass* newObject) noexcept
     {
         const ScopedLockType lock (getLock());
-        auto index = findInsertIndexInSortedArray (comparator, data.elements.get(), newObject, 0, numUsed);
+        auto index = findInsertIndexInSortedArray (comparator, values.begin(), newObject, 0, values.size());
 
-        if (index > 0 && comparator.compareElements (newObject, data.elements[index - 1]) == 0)
+        if (index > 0 && comparator.compareElements (newObject, values[index - 1]) == 0)
             set (index - 1, newObject); // replace an existing object that matches
         else
             insert (index, newObject);  // no match, so insert the new one
@@ -538,11 +529,11 @@ public:
     {
         ignoreUnused (comparator);
         const ScopedLockType lock (getLock());
-        int s = 0, e = numUsed;
+        int s = 0, e = values.size();
 
         while (s < e)
         {
-            if (comparator.compareElements (objectToLookFor, data.elements[s]) == 0)
+            if (comparator.compareElements (objectToLookFor, values[s]) == 0)
                 return s;
 
             auto halfway = (s + e) / 2;
@@ -550,7 +541,7 @@ public:
             if (halfway == s)
                 break;
 
-            if (comparator.compareElements (objectToLookFor, data.elements[halfway]) >= 0)
+            if (comparator.compareElements (objectToLookFor, values[halfway]) >= 0)
                 s = halfway;
             else
                 e = halfway;
@@ -577,17 +568,13 @@ public:
     {
         const ScopedLockType lock (getLock());
 
-        if (isPositiveAndBelow (indexToRemove, numUsed))
+        if (isPositiveAndBelow (indexToRemove, values.size()))
         {
-            auto** e = data.elements + indexToRemove;
+            auto** e = values.begin() + indexToRemove;
             releaseObject (*e);
-            --numUsed;
-            auto numberToShift = numUsed - indexToRemove;
+            values.removeElements (indexToRemove, 1);
 
-            if (numberToShift > 0)
-                memmove (e, e + 1, sizeof (ObjectClass*) * (size_t) numberToShift);
-
-            if ((numUsed << 1) < data.numAllocated)
+            if ((values.size() << 1) < values.capacity())
                 minimiseStorageOverheads();
         }
     }
@@ -606,18 +593,14 @@ public:
         ObjectClassPtr removedItem;
         const ScopedLockType lock (getLock());
 
-        if (isPositiveAndBelow (indexToRemove, numUsed))
+        if (isPositiveAndBelow (indexToRemove, values.size()))
         {
-            auto** e = data.elements + indexToRemove;
+            auto** e = values.begin() + indexToRemove;
             removedItem = *e;
             releaseObject (*e);
-            --numUsed;
-            auto numberToShift = numUsed - indexToRemove;
+            values.removeElements (indexToRemove, 1);
 
-            if (numberToShift > 0)
-                memmove (e, e + 1, sizeof (ObjectClass*) * (size_t) numberToShift);
-
-            if ((numUsed << 1) < data.numAllocated)
+            if ((values.size() << 1) < values.capacity())
                 minimiseStorageOverheads();
         }
 
@@ -638,6 +621,16 @@ public:
         remove (indexOf (objectToRemove));
     }
 
+    /** Removes the first occurrence of a specified object from the array.
+
+        If the item isn't found, no action is taken. If it is found, it is
+        removed and has its reference count decreased.
+
+        @param objectToRemove   the object to try to remove
+        @see remove, removeRange
+    */
+    void removeObject (const ObjectClassPtr& objectToRemove)    { removeObject (objectToRemove.get()); }
+
     /** Removes a range of objects from the array.
 
         This will remove a set of objects, starting from the given index,
@@ -657,30 +650,21 @@ public:
                       int numberToRemove)
     {
         const ScopedLockType lock (getLock());
+        startIndex    = jlimit (0, values.size(), startIndex);
+        auto endIndex = jlimit (0, values.size(), startIndex + numberToRemove);
+        numberToRemove = endIndex - startIndex;
 
-        auto start    = jlimit (0, numUsed, startIndex);
-        auto endIndex = jlimit (0, numUsed, startIndex + numberToRemove);
-
-        if (endIndex > start)
+        if (numberToRemove > 0)
         {
-            for (int i = start; i < endIndex; ++i)
+            for (int i = startIndex; i < endIndex; ++i)
             {
-                releaseObject (data.elements[i]);
-                data.elements[i] = nullptr; // (in case one of the destructors accesses this array and hits a dangling pointer)
+                releaseObject (values[i]);
+                values[i] = nullptr; // (in case one of the destructors accesses this array and hits a dangling pointer)
             }
 
-            auto rangeSize = endIndex - start;
-            auto** e = data.elements + start;
-            int i = numUsed - endIndex;
-            numUsed -= rangeSize;
+            values.removeElements (startIndex, numberToRemove);
 
-            while (--i >= 0)
-            {
-                *e = e[rangeSize];
-                ++e;
-            }
-
-            if ((numUsed << 1) < data.numAllocated)
+            if ((values.size() << 1) < values.capacity())
                 minimiseStorageOverheads();
         }
     }
@@ -697,11 +681,11 @@ public:
     {
         const ScopedLockType lock (getLock());
 
-        if (howManyToRemove > numUsed)
-            howManyToRemove = numUsed;
+        if (howManyToRemove > values.size())
+            howManyToRemove = values.size();
 
         while (--howManyToRemove >= 0)
-            remove (numUsed - 1);
+            remove (values.size() - 1);
     }
 
     /** Swaps a pair of objects in the array.
@@ -713,11 +697,10 @@ public:
     {
         const ScopedLockType lock (getLock());
 
-        if (isPositiveAndBelow (index1, numUsed)
-             && isPositiveAndBelow (index2, numUsed))
+        if (isPositiveAndBelow (index1, values.size())
+         && isPositiveAndBelow (index2, values.size()))
         {
-            std::swap (data.elements[index1],
-                       data.elements[index2]);
+            std::swap (values[index1], values[index2]);
         }
     }
 
@@ -739,29 +722,7 @@ public:
         if (currentIndex != newIndex)
         {
             const ScopedLockType lock (getLock());
-
-            if (isPositiveAndBelow (currentIndex, numUsed))
-            {
-                if (! isPositiveAndBelow (newIndex, numUsed))
-                    newIndex = numUsed - 1;
-
-                auto* value = data.elements[currentIndex];
-
-                if (newIndex > currentIndex)
-                {
-                    memmove (data.elements + currentIndex,
-                             data.elements + currentIndex + 1,
-                             sizeof (ObjectClass*) * (size_t) (newIndex - currentIndex));
-                }
-                else
-                {
-                    memmove (data.elements + newIndex + 1,
-                             data.elements + newIndex,
-                             sizeof (ObjectClass*) * (size_t) (currentIndex - newIndex));
-                }
-
-                data.elements[newIndex] = value;
-            }
+            values.move (currentIndex, newIndex);
         }
     }
 
@@ -776,8 +737,7 @@ public:
     {
         const ScopedLockType lock1 (getLock());
         const typename OtherArrayType::ScopedLockType lock2 (otherArray.getLock());
-        data.swapWith (otherArray.data);
-        std::swap (numUsed, otherArray.numUsed);
+        values.swapWith (otherArray.values);
     }
 
     //==============================================================================
@@ -789,15 +749,7 @@ public:
     {
         const ScopedLockType lock2 (other.getLock());
         const ScopedLockType lock1 (getLock());
-
-        if (numUsed != other.numUsed)
-            return false;
-
-        for (int i = numUsed; --i >= 0;)
-            if (data.elements[i] != other.data.elements[i])
-                return false;
-
-        return true;
+        return values == other.values;
     }
 
     /** Compares this array to another one.
@@ -840,11 +792,12 @@ public:
     void sort (ElementComparator& comparator,
                bool retainOrderOfEquivalentItems = false) const noexcept
     {
-        ignoreUnused (comparator); // if you pass in an object with a static compareElements() method, this
-                                   // avoids getting warning messages about the parameter being unused
+        // If you pass in an object with a static compareElements() method, this
+        // avoids getting warning messages about the parameter being unused
+        ignoreUnused (comparator);
 
         const ScopedLockType lock (getLock());
-        sortArray (comparator, data.elements.get(), 0, size() - 1, retainOrderOfEquivalentItems);
+        sortArray (comparator, values.begin(), 0, values.size() - 1, retainOrderOfEquivalentItems);
     }
 
     //==============================================================================
@@ -857,7 +810,7 @@ public:
     void minimiseStorageOverheads() noexcept
     {
         const ScopedLockType lock (getLock());
-        data.shrinkToNoMoreThan (numUsed);
+        values.shrinkToNoMoreThan (values.size());
     }
 
     /** Increases the array's internal storage to hold a minimum number of elements.
@@ -869,7 +822,7 @@ public:
     void ensureStorageAllocated (const int minNumElements)
     {
         const ScopedLockType lock (getLock());
-        data.ensureAllocatedSize (minNumElements);
+        values.ensureAllocatedSize (minNumElements);
     }
 
     //==============================================================================
@@ -877,11 +830,10 @@ public:
         To lock, you can call getLock().enter() and getLock().exit(), or preferably use
         an object of ScopedLockType as an RAII lock for it.
     */
-    inline const TypeOfCriticalSectionToUse& getLock() const noexcept      { return data; }
+    inline const TypeOfCriticalSectionToUse& getLock() const noexcept      { return values; }
 
     /** Returns the type of scoped lock to use for locking this array */
     using ScopedLockType = typename TypeOfCriticalSectionToUse::ScopedLockType;
-
 
     //==============================================================================
    #ifndef DOXYGEN
@@ -892,15 +844,14 @@ public:
 
 private:
     //==============================================================================
-    ArrayAllocationBase<ObjectClass*, TypeOfCriticalSectionToUse> data;
-    int numUsed = 0;
+    ArrayBase<ObjectClass*, TypeOfCriticalSectionToUse> values;
 
     void releaseAllObjects()
     {
-        while (numUsed > 0)
-            releaseObject (data.elements[--numUsed]);
+        for (auto& v : values)
+            releaseObject (v);
 
-        jassert (numUsed == 0);
+        values.clear();
     }
 
     static void releaseObject (ObjectClass* o)

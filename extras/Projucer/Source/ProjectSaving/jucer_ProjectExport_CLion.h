@@ -49,7 +49,7 @@ protected:
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& tree) const override
     {
-        return new CLionBuildConfiguration (project, tree, *this);
+        return *new CLionBuildConfiguration (project, tree, *this);
     }
 
 public:
@@ -101,7 +101,6 @@ public:
     bool supportsTargetType (ProjectType::Target::Type) const override   { return true; }
 
     void addPlatformSpecificSettingsForProjectType (const ProjectType&) override {}
-    void initialiseDependencyPathValues() override {}
 
     //==============================================================================
     bool canLaunchProject() override
@@ -117,14 +116,14 @@ public:
        #endif
 
         if (getProject().getExporters().getChildWithName (exporterName).isValid())
-            return getCLionExecutable().existsAsFile();
+            return getCLionExecutableOrApp().exists();
 
         return false;
     }
 
     bool launchProject() override
     {
-        return getCLionExecutable().startAsProcess (getTargetFolder().getFullPathName().quoted());
+        return getCLionExecutableOrApp().startAsProcess (getTargetFolder().getFullPathName().quoted());
     }
 
     String getDescription() override
@@ -185,6 +184,11 @@ public:
 
         // We'll append to this later.
         overwriteFileIfDifferentOrThrow (getTargetFolder().getChildFile ("CMakeLists.txt"), out);
+
+        // CMake has stopped adding PkgInfo files to bundles, so we need to do it manually
+        MemoryOutputStream pkgInfoOut;
+        pkgInfoOut << "BNDL????";
+        overwriteFileIfDifferentOrThrow (getTargetFolder().getChildFile ("PkgInfo"), out);
     }
 
     void writeCMakeListsExporterSection (ProjectExporter* exporter) const
@@ -224,19 +228,21 @@ public:
 
 private:
     //==============================================================================
-    static File getCLionExecutable()
+    static File getCLionExecutableOrApp()
     {
-        File clionExe (getAppSettings()
-                       .getStoredPath (Ids::clionExePath)
-                       .toString()
-                       .replace ("${user.home}", File::getSpecialLocation (File::userHomeDirectory).getFullPathName()));
+        File clionExeOrApp (getAppSettings()
+                            .getStoredPath (Ids::clionExePath, TargetOS::getThisOS()).get()
+                            .toString()
+                            .replace ("${user.home}", File::getSpecialLocation (File::userHomeDirectory).getFullPathName()));
 
        #if JUCE_MAC
-        if (clionExe.getFileName().endsWith (".app"))
-            clionExe = clionExe.getChildFile ("Contents/MacOS/clion");
+        if (clionExeOrApp.getFullPathName().endsWith ("/Contents/MacOS/clion"))
+            clionExeOrApp = clionExeOrApp.getParentDirectory()
+                                         .getParentDirectory()
+                                         .getParentDirectory();
        #endif
 
-        return clionExe;
+        return clionExeOrApp;
     }
 
     //==============================================================================
@@ -362,7 +368,16 @@ private:
             for (auto& fileInfo : fileInfoList)
                 out << "    " << fileInfo.first.quoted() << newLine;
 
+            auto isCMakeBundle = exporter.isXcode() && target->getTargetFileType() == ProjectType::Target::TargetFileType::pluginBundle;
+            String pkgInfoPath  = File (getTargetFolder().getChildFile ("PkgInfo")).getFullPathName().quoted();
+
+            if (isCMakeBundle)
+                out << "    " << pkgInfoPath << newLine;
+
             out << ")" << newLine << newLine;
+
+            if (isCMakeBundle)
+                out << "set_source_files_properties (" << pkgInfoPath << " PROPERTIES MACOSX_PACKAGE_LOCATION .)" << newLine;
 
             for (auto& fileInfo : fileInfoList)
                 if (! fileInfo.second)

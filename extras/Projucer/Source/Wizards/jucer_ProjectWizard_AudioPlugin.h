@@ -104,6 +104,8 @@ struct AudioPluginAppWizard   : public NewProjectWizard
         sourceGroup.addFileAtIndex (editorCppFile, -1, true);
         sourceGroup.addFileAtIndex (editorHFile,   -1, false);
 
+        project.getConfigFlag ("JUCE_VST3_CAN_REPLACE_VST2") = 0;
+
         return true;
     }
 

@@ -50,7 +50,7 @@ public:
     /** Connects to a datagram socket and prepares the socket for sending OSC
         packets to the specified target.
 
-        Note: the operating system will choose which specific network adapter(s)
+        Note: The operating system will choose which specific network adapter(s)
         to bind your socket to, and which local port to use for the sender.
 
         @param  targetHostName   The remote host to which messages will be send.
@@ -141,8 +141,6 @@ public:
 private:
     //==============================================================================
     struct Pimpl;
-    friend struct Pimpl;
-    friend struct ContainerDeletePolicy<Pimpl>;
     std::unique_ptr<Pimpl> pimpl;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OSCSender)

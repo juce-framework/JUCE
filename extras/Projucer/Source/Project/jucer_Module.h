@@ -65,28 +65,6 @@ struct ModuleDescription
 };
 
 //==============================================================================
-struct ModuleList
-{
-    ModuleList();
-    ModuleList (const ModuleList&);
-    ModuleList& operator= (const ModuleList&);
-
-    const ModuleDescription* getModuleWithID (const String& moduleID) const;
-    StringArray getIDs() const;
-    void sort();
-
-    Result tryToAddModuleFromFolder (const File&);
-
-    Result addAllModulesInFolder (const File&);
-    Result addAllModulesInSubfoldersRecursively (const File&, int depth);
-    Result scanProjectExporterModulePaths (Project&);
-    void scanGlobalJuceModulePath();
-    void scanGlobalUserModulePath();
-
-    OwnedArray<ModuleDescription> modules;
-};
-
-//==============================================================================
 class LibraryModule
 {
 public:
@@ -133,12 +111,52 @@ private:
 };
 
 //==============================================================================
+using ModuleIDAndFolder     = std::pair<String, File>;
+using ModuleIDAndFolderList = std::vector<ModuleIDAndFolder>;
+
+class AvailableModuleList
+{
+public:
+    AvailableModuleList();
+
+    void scanPaths      (const Array<File>&);
+    void scanPathsAsync (const Array<File>&);
+
+    ModuleIDAndFolderList getAllModules() const;
+    ModuleIDAndFolder getModuleWithID (const String&) const;
+
+    void removeDuplicates (const ModuleIDAndFolderList& other);
+
+    //==============================================================================
+    struct Listener
+    {
+        virtual ~Listener() {}
+
+        virtual void availableModulesChanged() = 0;
+    };
+
+    void addListener (Listener* listenerToAdd)          { listeners.add (listenerToAdd); }
+    void removeListener (Listener* listenerToRemove)    { listeners.remove (listenerToRemove); }
+
+private:
+    ThreadPoolJob* createScannerJob (const Array<File>&);
+    void removePendingAndAddJob (ThreadPoolJob*);
+
+    ThreadPool scanPool { 1 };
+
+    ModuleIDAndFolderList moduleList;
+    ListenerList<Listener> listeners;
+    CriticalSection lock;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AvailableModuleList)
+};
+
+//==============================================================================
 class EnabledModuleList
 {
 public:
     EnabledModuleList (Project&, const ValueTree&);
 
-    static File findGlobalModulesFolder();
     static File findDefaultModulesFolder (Project&);
 
     bool isModuleEnabled (const String& moduleID) const;
@@ -153,7 +171,6 @@ public:
     bool isAudioPluginModuleMissing() const;
 
     ModuleDescription getModuleInfo (const String& moduleID);
-    File getModuleFolder (const String& moduleID);
 
     void addModule (const File& moduleManifestFile, bool copyLocally, bool useGlobalPath, bool sendAnalyticsEvent);
     void addModuleInteractive (const String& moduleID);
@@ -180,8 +197,6 @@ public:
 
 private:
     UndoManager* getUndoManager() const     { return project.getUndoManagerFor (state); }
-
-    File findUserModuleFolder (const String& possiblePaths, const String& moduleID);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EnabledModuleList)
 };

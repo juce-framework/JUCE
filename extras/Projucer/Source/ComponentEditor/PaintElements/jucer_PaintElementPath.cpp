@@ -328,7 +328,7 @@ void PaintElementPath::mouseDrag (const MouseEvent& e)
 
 void PaintElementPath::mouseUp (const MouseEvent& e)
 {
-    if (points [mouseDownOnSegment] == 0)
+    if (points[mouseDownOnSegment] == nullptr)
         ColouredElement::mouseUp (e);
     else
         owner->getSelectedPoints().addToSelectionOnMouseUp (points [mouseDownOnSegment],

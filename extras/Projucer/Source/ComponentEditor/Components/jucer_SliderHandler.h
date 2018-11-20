@@ -614,8 +614,8 @@ private:
 
         String getText() const override
         {
-            Slider* s = dynamic_cast<Slider*> (component);
-            jassert (s != 0);
+            auto s = dynamic_cast<Slider*> (component);
+            jassert (s != nullptr);
 
             return String (s->getSkewFactor());
         }

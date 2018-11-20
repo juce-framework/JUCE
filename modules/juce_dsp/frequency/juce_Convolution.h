@@ -85,7 +85,7 @@ public:
         formats registered in JUCE, and performs some resampling and pre-processing
         as well if needed.
 
-        Note : obviously, don't try to use this function on float samples, since the
+        Note: Obviously, don't try to use this function on float samples, since the
         data is supposed to be an audio file in its binary format, and be sure that
         the original data is not going to move at all its memory location during the
         process !!

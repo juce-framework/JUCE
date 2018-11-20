@@ -35,7 +35,7 @@ class OpenGLContext;
 
 //==============================================================================
 /** See MessageManager::callFunctionOnMessageThread() for use of this function type. */
-typedef void* (MessageCallbackFunction) (void* userData);
+using MessageCallbackFunction = void* (void* userData);
 
 
 //==============================================================================
@@ -146,6 +146,16 @@ public:
         gains a lock while a message is being dispatched.
     */
     bool currentThreadHasLockedMessageManager() const noexcept;
+
+    /** Returns true if there's an instance of the MessageManager, and if the current thread
+        has the lock on it.
+    */
+    static bool existsAndIsLockedByCurrentThread() noexcept;
+
+    /** Returns true if there's an instance of the MessageManager, and if the current thread
+        is running it.
+    */
+    static bool existsAndIsCurrentThread() noexcept;
 
     //==============================================================================
     /** Sends a message to all other JUCE applications that are running.
@@ -280,13 +290,13 @@ public:
 
         //==============================================================================
         /** Provides the type of scoped lock to use with a CriticalSection. */
-        typedef GenericScopedLock<Lock>       ScopedLockType;
+        using ScopedLockType = GenericScopedLock<Lock>;
 
         /** Provides the type of scoped unlocker to use with a CriticalSection. */
-        typedef GenericScopedUnlock<Lock>     ScopedUnlockType;
+        using ScopedUnlockType = GenericScopedUnlock<Lock>;
 
         /** Provides the type of scoped try-locker to use with a CriticalSection. */
-        typedef GenericScopedTryLock<Lock>    ScopedTryLockType;
+        using ScopedTryLockType = GenericScopedTryLock<Lock>;
 
     private:
         struct BlockingMessage;
@@ -461,5 +471,29 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (MessageManagerLock)
 };
+
+//==============================================================================
+/** This macro is used to catch unsafe use of functions which expect to only be called
+    on the message thread, or when a MessageManagerLock is in place.
+    It will also fail if you try to use the function before the message manager has been
+    created, which could happen if you accidentally invoke it during a static constructor.
+*/
+#define JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED \
+    jassert (juce::MessageManager::existsAndIsLockedByCurrentThread());
+
+/** This macro is used to catch unsafe use of functions which expect to only be called
+    on the message thread.
+    It will also fail if you try to use the function before the message manager has been
+    created, which could happen if you accidentally invoke it during a static constructor.
+*/
+#define JUCE_ASSERT_MESSAGE_THREAD \
+    jassert (juce::MessageManager::existsAndIsCurrentThread());
+
+/** This macro is used to catch unsafe use of functions which expect to not be called
+    outside the lifetime of the MessageManager.
+*/
+#define JUCE_ASSERT_MESSAGE_MANAGER_EXISTS \
+    jassert (juce::MessageManager::getInstanceWithoutCreating() != nullptr);
+
 
 } // namespace juce

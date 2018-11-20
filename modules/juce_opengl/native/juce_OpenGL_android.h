@@ -45,10 +45,9 @@ public:
                    bool /*useMultisampling*/,
                    OpenGLVersion)
         : component (comp),
-          hasInitialised (false),
-          juceContext (nullptr), surface (EGL_NO_SURFACE), context (EGL_NO_CONTEXT)
+          surface (EGL_NO_SURFACE), context (EGL_NO_CONTEXT)
     {
-        JNIEnv* env = getEnv();
+        auto env = getEnv();
 
         // Do we have a native peer that we can attach to?
         if (component.getPeer()->getNativeHandle() == nullptr)
@@ -61,7 +60,8 @@ public:
         // create a native surface view
         surfaceView = GlobalRef (env->CallObjectMethod (android.activity.get(),
                                                         JuceAppActivity.createNativeSurfaceView,
-                                                        reinterpret_cast<jlong> (this)));
+                                                        reinterpret_cast<jlong> (this),
+                                                        false));
         if (surfaceView.get() == nullptr)
             return;
 
@@ -71,8 +71,7 @@ public:
                              AndroidViewGroup.addView, surfaceView.get());
 
         // initialise the geometry of the view
-        Rectangle<int> bounds = component.getTopLevelComponent()
-            ->getLocalArea (&component, component.getLocalBounds());
+        auto bounds = component.getTopLevelComponent()->getLocalArea (&component, component.getLocalBounds());
         bounds *= component.getDesktopScaleFactor();
 
         updateWindowPosition (bounds);
@@ -81,7 +80,7 @@ public:
 
     ~NativeContext()
     {
-        JNIEnv* env = getEnv();
+        auto env = getEnv();
 
         if (jobject viewParent = env->CallObjectMethod (surfaceView.get(), NativeSurfaceView.getParent))
             env->CallVoidMethod (viewParent, AndroidViewGroup.removeView, surfaceView.get());
@@ -95,44 +94,41 @@ public:
         // has the context already attached?
         jassert (surface == EGL_NO_SURFACE && context == EGL_NO_CONTEXT);
 
-        JNIEnv* env = getEnv();
+        auto env = getEnv();
 
-        // get a pointer to the native window
         ANativeWindow* window = nullptr;
+
         if (jobject jSurface = env->CallObjectMethod (surfaceView.get(), NativeSurfaceView.getNativeSurface))
         {
-            window = ANativeWindow_fromSurface(env, jSurface);
+            window = ANativeWindow_fromSurface (env, jSurface);
 
-            // if we didn't succeed the first time, wait 25ms and try again
+            // if we didn't succeed the first time, wait briefly and try again..
             if (window == nullptr)
             {
-                Thread::sleep (25);
+                Thread::sleep (200);
                 window = ANativeWindow_fromSurface (env, jSurface);
             }
         }
 
         if (window == nullptr)
         {
-            // failed to get a pointer to the native window after second try so
-            // bail out
+            // failed to get a pointer to the native window after second try so bail out
             jassertfalse;
-
             return false;
         }
 
         // create the surface
-        surface = eglCreateWindowSurface(display, config, window, 0);
+        surface = eglCreateWindowSurface (display, config, window, 0);
         jassert (surface != EGL_NO_SURFACE);
 
         ANativeWindow_release (window);
 
         // create the OpenGL context
-        EGLint contextAttribs[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
-        context = eglCreateContext(display, config, EGL_NO_CONTEXT, contextAttribs);
+        EGLint contextAttribs[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
+        context = eglCreateContext (display, config, EGL_NO_CONTEXT, contextAttribs);
         jassert (context != EGL_NO_CONTEXT);
 
         juceContext = &aContext;
-
         return true;
     }
 
@@ -187,10 +183,10 @@ public:
     {
         if (lastBounds != bounds)
         {
-            JNIEnv* env = getEnv();
+            auto env = getEnv();
 
             lastBounds = bounds;
-            Rectangle<int> r = bounds * Desktop::getInstance().getDisplays().getMainDisplay().scale;
+            auto r = bounds * Desktop::getInstance().getDisplays().getMainDisplay().scale;
 
             env->CallVoidMethod (surfaceView.get(), NativeSurfaceView.layout,
                                  (jint) r.getX(), (jint) r.getY(), (jint) r.getRight(), (jint) r.getBottom());
@@ -266,12 +262,12 @@ private:
     }
 
     //==============================================================================
-    bool hasInitialised;
+    bool hasInitialised = false;
 
     GlobalRef surfaceView;
     Rectangle<int> lastBounds;
 
-    OpenGLContext* juceContext;
+    OpenGLContext* juceContext = nullptr;
     EGLSurface surface;
     EGLContext context;
 

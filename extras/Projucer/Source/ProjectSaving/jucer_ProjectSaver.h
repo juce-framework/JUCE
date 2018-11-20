@@ -82,7 +82,7 @@ public:
         project.setFile (projectFile);
 
         OwnedArray<LibraryModule> modules;
-        project.getModules().createRequiredModules (modules);
+        project.getEnabledModules().createRequiredModules (modules);
 
         checkModuleValidity (modules);
 
@@ -94,7 +94,12 @@ public:
             auto projectRootHash = project.getProjectRoot().toXmlString().hashCode();
 
             if (project.getProjectType().isAudioPlugin())
+            {
                 writePluginCharacteristicsFile();
+
+                if (project.shouldBuildUnityPlugin())
+                    writeUnityScriptFile();
+            }
 
             writeAppConfigFile (modules, appConfigUserContent);
             writeBinaryDataFiles();
@@ -110,24 +115,24 @@ public:
             }
 
             if (generatedCodeFolder.exists())
+            {
                 writeReadmeFile();
+                deleteUnwantedFilesIn (generatedCodeFolder);
+            }
+
+            if (errors.size() == 0)
+            {
+                // Workaround for a bug where Xcode thinks the project is invalid if opened immedietely
+                // after writing
+                if (waitAfterSaving)
+                    Thread::sleep (2000);
+
+                return Result::ok();
+            }
         }
 
-        if (generatedCodeFolder.exists())
-            deleteUnwantedFilesIn (generatedCodeFolder);
-
-        if (errors.size() > 0)
-        {
-            project.setFile (oldFile);
-            return Result::fail (errors[0]);
-        }
-
-        // Workaround for a bug where Xcode thinks the project is invalid if opened immedietely
-        // after writing
-        if (waitAfterSaving)
-            Thread::sleep (2000);
-
-        return Result::ok();
+        project.setFile (oldFile);
+        return Result::fail (errors[0]);
     }
 
     Result saveResourcesOnly()
@@ -143,7 +148,7 @@ public:
     Result saveContentNeededForLiveBuild()
     {
         OwnedArray<LibraryModule> modules;
-        project.getModules().createRequiredModules (modules);
+        project.getEnabledModules().createRequiredModules (modules);
 
         checkModuleValidity (modules);
 
@@ -385,7 +390,7 @@ private:
                     return;
                 }
 
-                if (project.getModules().getExtraDependenciesNeeded (module->getID()).size() > 0)
+                if (project.getEnabledModules().getExtraDependenciesNeeded (module->getID()).size() > 0)
                 {
                     addError ("At least one of your modules has missing dependencies!\n"
                               "Please go to the settings page of the highlighted modules and add the required dependencies.");
@@ -486,25 +491,24 @@ private:
             }
         }
 
+        if (extraAppConfigContent.isNotEmpty())
+            out << newLine << extraAppConfigContent.trimEnd() << newLine;
+
         {
-            int isStandaloneApplication = 1;
             auto& type = project.getProjectType();
 
-            if (type.isAudioPlugin() || type.isDynamicLibrary())
-                isStandaloneApplication = 0;
+            auto isStandaloneApplication = (! type.isAudioPlugin() && ! type.isDynamicLibrary());
 
-            out << "//==============================================================================" << newLine
+            out << newLine
+                << "//==============================================================================" << newLine
                 << "#ifndef    JUCE_STANDALONE_APPLICATION" << newLine
                 << " #if defined(JucePlugin_Name) && defined(JucePlugin_Build_Standalone)" << newLine
                 << "  #define  JUCE_STANDALONE_APPLICATION JucePlugin_Build_Standalone" << newLine
                 << " #else" << newLine
-                << "  #define  JUCE_STANDALONE_APPLICATION " << isStandaloneApplication << newLine
+                << "  #define  JUCE_STANDALONE_APPLICATION " << (isStandaloneApplication ? "1" : "0") << newLine
                 << " #endif" << newLine
                 << "#endif" << newLine;
         }
-
-        if (extraAppConfigContent.isNotEmpty())
-            out << newLine << extraAppConfigContent.trimEnd() << newLine;
     }
 
     void writeAppConfigFile (const OwnedArray<LibraryModule>& modules, const String& userContent)
@@ -556,6 +560,7 @@ private:
             << "namespace ProjectInfo" << newLine
             << "{" << newLine
             << "    const char* const  projectName    = " << CppTokeniserFunctions::addEscapeChars (project.getProjectNameString()).quoted() << ";" << newLine
+            << "    const char* const  companyName    = " << CppTokeniserFunctions::addEscapeChars (project.getCompanyNameString()).quoted() << ";" << newLine
             << "    const char* const  versionString  = " << CppTokeniserFunctions::addEscapeChars (project.getVersionString()).quoted() << ";" << newLine
             << "    const int          versionNumber  = " << project.getVersionAsHex() << ";" << newLine
             << "}" << newLine
@@ -668,6 +673,25 @@ private:
     }
 
     void writePluginCharacteristicsFile();
+
+    void writeUnityScriptFile()
+    {
+        String unityScriptContents (BinaryData::jucer_UnityPluginGUIScript_cs);
+
+        auto projectName = Project::addUnityPluginPrefixIfNecessary (project.getProjectNameString());
+
+        unityScriptContents = unityScriptContents.replace ("%%plugin_class_name%%",  projectName.replace (" ", "_"))
+                                                 .replace ("%%plugin_name%%",        projectName)
+                                                 .replace ("%%plugin_vendor%%",      project.getPluginManufacturerString())
+                                                 .replace ("%%plugin_description%%", project.getPluginDescriptionString());
+
+        auto f = getGeneratedCodeFolder().getChildFile (project.getUnityScriptName());
+
+        MemoryOutputStream out;
+        out << unityScriptContents;
+
+        replaceFileIfDifferent (f, out);
+    }
 
     void writeProjects (const OwnedArray<LibraryModule>&, const String&, bool);
 

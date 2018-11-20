@@ -46,7 +46,11 @@ StoredSettings::StoredSettings()
       fallbackPaths ("FALLBACK_PATHS")
 {
     updateOldProjectSettingsFiles();
+
     reload();
+    changed (true);
+    flush();
+
     checkJUCEPaths();
 
     projectDefaults.addListener (this);
@@ -192,39 +196,19 @@ void StoredSettings::updateOldProjectSettingsFiles()
             auto newFileName = oldFileName.replace ("Introjucer", "Projucer");
 
             if (oldFileName.contains ("_Project"))
+            {
                 f.moveFileTo (f.getSiblingFile (newProjectSettingsDir.getFileName()).getChildFile (newFileName));
+            }
             else
-                f.moveFileTo (f.getSiblingFile (newFileName));
+            {
+                auto newFile = f.getSiblingFile (newFileName);
+
+                // don't overwrite newer settings file
+                if (! newFile.existsAsFile())
+                    f.moveFileTo (f.getSiblingFile (newFileName));
+            }
         }
     }
-}
-
-void StoredSettings::checkJUCEPaths()
-{
-    auto moduleFolder = projectDefaults.getProperty (Ids::defaultJuceModulePath).toString();
-    auto juceFolder = projectDefaults.getProperty (Ids::jucePath).toString();
-
-    auto validModuleFolder = moduleFolder.isNotEmpty() && isGlobalPathValid ({}, Ids::defaultJuceModulePath, moduleFolder);
-    auto validJuceFolder = juceFolder.isNotEmpty() && isGlobalPathValid ({}, Ids::jucePath, juceFolder);
-
-    if (validModuleFolder && ! validJuceFolder)
-        projectDefaults.getPropertyAsValue (Ids::jucePath, nullptr) = File (moduleFolder).getParentDirectory().getFullPathName();
-    else if (! validModuleFolder && validJuceFolder)
-        projectDefaults.getPropertyAsValue (Ids::defaultJuceModulePath, nullptr) = File (juceFolder).getChildFile ("modules").getFullPathName();
-}
-
-bool StoredSettings::shouldAskUserToSetJUCEPath() noexcept
-{
-    if (! isGlobalPathValid ({}, Ids::jucePath, projectDefaults.getProperty (Ids::jucePath).toString())
-        && getGlobalProperties().getValue ("dontAskAboutJUCEPath", {}).isEmpty())
-        return true;
-
-    return false;
-}
-
-void StoredSettings::setDontAskAboutJUCEPathAgain() noexcept
-{
-    getGlobalProperties().setValue ("dontAskAboutJUCEPath", 1);
 }
 
 //==============================================================================
@@ -277,110 +261,30 @@ void StoredSettings::ColourSelectorWithSwatches::setSwatchColour (int index, con
 }
 
 //==============================================================================
-Value StoredSettings::getStoredPath (const Identifier& key)
+void StoredSettings::changed (bool isProjectDefaults)
 {
-    auto v = projectDefaults.getPropertyAsValue (key, nullptr);
+    std::unique_ptr<XmlElement> data (isProjectDefaults ? projectDefaults.createXml()
+                                                        : fallbackPaths.createXml());
 
-    if (v.toString().isEmpty())
-        v = getFallbackPathForOS (key, TargetOS::getThisOS()).toString();
-
-    return v;
+    propertyFiles.getUnchecked (0)->setValue (isProjectDefaults ? "PROJECT_DEFAULT_SETTINGS" : "FALLBACK_PATHS",
+                                              data.get());
 }
 
-Value StoredSettings::getFallbackPathForOS (const Identifier& key, DependencyPathOS os)
-{
-    auto id = Identifier();
-
-    if      (os == TargetOS::osx)     id = Ids::osxFallback;
-    else if (os == TargetOS::windows) id = Ids::windowsFallback;
-    else if (os == TargetOS::linux)   id = Ids::linuxFallback;
-
-    if (id == Identifier())
-        jassertfalse;
-
-    auto v = fallbackPaths.getOrCreateChildWithName (id, nullptr)
-                          .getPropertyAsValue (key, nullptr);
-
-    if (v.toString().isEmpty())
-    {
-        if (key == Ids::jucePath)
-        {
-            v = (os == TargetOS::windows ? "C:\\JUCE"
-                                         : "~/JUCE");
-        }
-        else if (key == Ids::defaultJuceModulePath)
-        {
-            v = (os == TargetOS::windows ? "C:\\JUCE\\modules"
-                                         : "~/JUCE/modules");
-        }
-        else if (key == Ids::defaultUserModulePath)
-        {
-            v = (os == TargetOS::windows ? "C:\\modules"
-                                         : "~/modules");
-        }
-        else if (key == Ids::vst3Path)
-        {
-            v = (os == TargetOS::windows ? "C:\\SDKs\\VST_SDK\\VST3_SDK"
-                                         : "~/SDKs/VST_SDK/VST3_SDK");
-        }
-        else if (key == Ids::rtasPath)
-        {
-            if      (os == TargetOS::windows)  v = "C:\\SDKs\\PT_90_SDK";
-            else if (os == TargetOS::osx)      v = "~/SDKs/PT_90_SDK";
-            else                               jassertfalse; // no RTAS on this OS!
-        }
-        else if (key == Ids::aaxPath)
-        {
-            if      (os == TargetOS::windows)  v = "C:\\SDKs\\AAX";
-            else if (os == TargetOS::osx)      v = "~/SDKs/AAX";
-            else                               jassertfalse; // no AAX on this OS!
-        }
-        else if (key == Ids::androidSDKPath)
-        {
-            v = "${user.home}/Library/Android/sdk";
-        }
-        else if (key == Ids::androidNDKPath)
-        {
-            v = "${user.home}/Library/Android/sdk/ndk-bundle";
-        }
-        else if (key == Ids::clionExePath)
-        {
-            if (os == TargetOS::windows)
-            {
-              #if JUCE_WINDOWS
-                auto regValue = WindowsRegistry::getValue ("HKEY_LOCAL_MACHINE\\SOFTWARE\\Classes\\Applications\\clion64.exe\\shell\\open\\command\\", {}, {});
-                auto openCmd = StringArray::fromTokens (regValue, true);
-
-                if (! openCmd.isEmpty())
-                    return Value (openCmd[0].unquoted());
-              #endif
-
-                v = "C:\\Program Files\\JetBrains\\CLion YYYY.MM.DD\\bin\\clion64.exe";
-            }
-            else if (os == TargetOS::osx)
-            {
-                v = "/Applications/CLion.app";
-            }
-            else
-            {
-                v = "${user.home}/clion/bin/clion.sh";
-            }
-        }
-    }
-
-    return v;
-}
-
+//==============================================================================
 static bool doesSDKPathContainFile (const File& relativeTo, const String& path, const String& fileToCheckFor) noexcept
 {
     auto actualPath = path.replace ("${user.home}", File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
     return relativeTo.getChildFile (actualPath + "/" + fileToCheckFor).exists();
 }
 
-bool StoredSettings::isGlobalPathValid (const File& relativeTo, const Identifier& key, const String& path) const noexcept
+static bool isGlobalPathValid (const File& relativeTo, const Identifier& key, const String& path)
 {
     String fileToCheckFor;
 
+    if (key == Ids::vstLegacyPath)
+    {
+        fileToCheckFor = "pluginterfaces/vst2.x/aeffect.h";
+    }
     if (key == Ids::vst3Path)
     {
         fileToCheckFor = "base/source/baseiids.cpp";
@@ -427,6 +331,14 @@ bool StoredSettings::isGlobalPathValid (const File& relativeTo, const Identifier
         fileToCheckFor = "../clion.sh";
        #endif
     }
+    else if (key == Ids::androidStudioExePath)
+    {
+       #if JUCE_MAC
+        fileToCheckFor = "Android Studio.app";
+       #elif JUCE_WINDOWS
+        fileToCheckFor = "studio64.exe";
+       #endif
+    }
     else if (key == Ids::jucePath)
     {
         fileToCheckFor = "ChangeList.txt";
@@ -439,4 +351,139 @@ bool StoredSettings::isGlobalPathValid (const File& relativeTo, const Identifier
     }
 
     return doesSDKPathContainFile (relativeTo, path, fileToCheckFor);
+}
+
+void StoredSettings::checkJUCEPaths()
+{
+    auto moduleFolder = getStoredPath (Ids::defaultJuceModulePath, TargetOS::getThisOS()).get().toString();
+    auto juceFolder   = getStoredPath (Ids::jucePath, TargetOS::getThisOS()).get().toString();
+
+    auto validModuleFolder = isGlobalPathValid ({}, Ids::defaultJuceModulePath, moduleFolder);
+    auto validJuceFolder   = isGlobalPathValid ({}, Ids::jucePath, juceFolder);
+
+    if (validModuleFolder && ! validJuceFolder)
+        projectDefaults.getPropertyAsValue (Ids::jucePath, nullptr) = File (moduleFolder).getParentDirectory().getFullPathName();
+    else if (! validModuleFolder && validJuceFolder)
+        projectDefaults.getPropertyAsValue (Ids::defaultJuceModulePath, nullptr) = File (juceFolder).getChildFile ("modules").getFullPathName();
+}
+
+bool StoredSettings::shouldAskUserToSetJUCEPath() noexcept
+{
+    if (! isGlobalPathValid ({}, Ids::jucePath, getStoredPath (Ids::jucePath, TargetOS::getThisOS()).get().toString())
+        && getGlobalProperties().getValue ("dontAskAboutJUCEPath", {}).isEmpty())
+        return true;
+
+    return false;
+}
+
+void StoredSettings::setDontAskAboutJUCEPathAgain() noexcept
+{
+    getGlobalProperties().setValue ("dontAskAboutJUCEPath", 1);
+}
+
+static String getFallbackPathForOS (const Identifier& key, DependencyPathOS os)
+{
+    if (key == Ids::jucePath)
+    {
+        return (os == TargetOS::windows ? "C:\\JUCE" : "~/JUCE");
+    }
+    else if (key == Ids::defaultJuceModulePath)
+    {
+        return (os == TargetOS::windows ? "C:\\JUCE\\modules" : "~/JUCE/modules");
+    }
+    else if (key == Ids::defaultUserModulePath)
+    {
+        return (os == TargetOS::windows ? "C:\\modules" : "~/modules");
+    }
+    else if (key == Ids::vstLegacyPath || key == Ids::vst3Path)
+    {
+        return {};
+    }
+    else if (key == Ids::rtasPath)
+    {
+        if      (os == TargetOS::windows)  return "C:\\SDKs\\PT_90_SDK";
+        else if (os == TargetOS::osx)      return "~/SDKs/PT_90_SDK";
+        else                               return {}; // no RTAS on this OS!
+    }
+    else if (key == Ids::aaxPath)
+    {
+        if      (os == TargetOS::windows)  return "C:\\SDKs\\AAX";
+        else if (os == TargetOS::osx)      return "~/SDKs/AAX";
+        else                               return {}; // no AAX on this OS!
+    }
+    else if (key == Ids::androidSDKPath)
+    {
+        return "${user.home}/Library/Android/sdk";
+    }
+    else if (key == Ids::androidNDKPath)
+    {
+        return "${user.home}/Library/Android/sdk/ndk-bundle";
+    }
+    else if (key == Ids::clionExePath)
+    {
+        if (os == TargetOS::windows)
+        {
+          #if JUCE_WINDOWS
+            auto regValue = WindowsRegistry::getValue ("HKEY_LOCAL_MACHINE\\SOFTWARE\\Classes\\Applications\\clion64.exe\\shell\\open\\command\\", {}, {});
+            auto openCmd = StringArray::fromTokens (regValue, true);
+
+            if (! openCmd.isEmpty())
+                return openCmd[0].unquoted();
+          #endif
+
+            return "C:\\Program Files\\JetBrains\\CLion YYYY.MM.DD\\bin\\clion64.exe";
+        }
+        else if (os == TargetOS::osx)
+        {
+            return "/Applications/CLion.app";
+        }
+        else
+        {
+            return "${user.home}/clion/bin/clion.sh";
+        }
+    }
+    else if (key == Ids::androidStudioExePath)
+    {
+        if (os == TargetOS::windows)
+        {
+           #if JUCE_WINDOWS
+            auto path = WindowsRegistry::getValue ("HKEY_LOCAL_MACHINE\\SOFTWARE\\Android Studio\\Path", {}, {});
+
+            if (! path.isEmpty())
+                return path.unquoted() + "\\bin\\studio64.exe";
+           #endif
+
+            return "C:\\Program Files\\Android\\Android Studio\\bin\\studio64.exe";
+        }
+        else if (os == TargetOS::osx)
+        {
+            return "/Applications/Android Studio.app";
+        }
+        else
+        {
+            return {}; // no Android Studio on this OS!
+        }
+    }
+
+    // unknown key!
+    jassertfalse;
+    return {};
+}
+
+static Identifier identifierForOS (DependencyPathOS os) noexcept
+{
+    if      (os == TargetOS::osx)     return Ids::osxFallback;
+    else if (os == TargetOS::windows) return Ids::windowsFallback;
+    else if (os == TargetOS::linux)   return Ids::linuxFallback;
+
+    jassertfalse;
+    return {};
+}
+
+ValueWithDefault StoredSettings::getStoredPath (const Identifier& key, DependencyPathOS os)
+{
+    auto tree = (os == TargetOS::getThisOS() ? projectDefaults
+                                             : fallbackPaths.getOrCreateChildWithName (identifierForOS (os), nullptr));
+
+    return { tree, key, nullptr, getFallbackPathForOS (key, os) };
 }

@@ -27,7 +27,6 @@
 #pragma once
 
 #include "../Project/jucer_Project.h"
-#include "../Utility/UI/PropertyComponents/jucer_DependencyPathPropertyComponent.h"
 #include "../Utility/UI/PropertyComponents/jucer_PropertyComponentsWithEnablement.h"
 
 class ProjectSaver;
@@ -152,15 +151,16 @@ public:
 
     String getExternalLibrariesString() const             { return getSearchPathsFromString (externalLibrariesValue.get().toString()).joinIntoString (";"); }
 
-    bool shouldUseGNUExtensions() const                   { return gnuExtensionsValue.get();}
+    bool shouldUseGNUExtensions() const                   { return gnuExtensionsValue.get(); }
 
-    Value getVST3PathValue() const                        { return vst3Path; }
-    Value getRTASPathValue() const                        { return rtasPath; }
-    Value getAAXPathValue() const                         { return aaxPath; }
+    String getVSTLegacyPathString() const                 { return vstLegacyPathValueWrapper.wrappedValue.get(); }
+    String getVST3PathString() const                      { return vst3PathValueWrapper.wrappedValue.get(); }
+    String getAAXPathString() const                       { return aaxPathValueWrapper.wrappedValue.get(); }
+    String getRTASPathString() const                      { return rtasPathValueWrapper.wrappedValue.get(); }
 
     // NB: this is the path to the parent "modules" folder that contains the named module, not the
     // module folder itself.
-    Value getPathForModuleValue (const String& moduleID);
+    ValueWithDefault getPathForModuleValue (const String& moduleID);
     String getPathForModuleString (const String& moduleID) const;
     void removePathForModule (const String& moduleID);
 
@@ -244,8 +244,12 @@ public:
         String getName() const                                 { return configNameValue.get(); }
         bool isDebug() const                                   { return isDebugValue.get(); }
 
-        String getTargetBinaryNameString() const               { return targetNameValue.get(); }
         String getTargetBinaryRelativePathString() const       { return targetBinaryPathValue.get(); }
+        String getTargetBinaryNameString (bool isUnityPlugin = false) const
+        {
+            return (isUnityPlugin ? Project::addUnityPluginPrefixIfNecessary (targetNameValue.get().toString())
+                                  : targetNameValue.get().toString());
+        }
 
         int getOptimisationLevelInt() const                    { return optimisationLevelValue.get(); }
         String getGCCOptimisationFlag() const;
@@ -299,7 +303,7 @@ public:
         bool next();
 
         BuildConfiguration& operator*() const       { return *config; }
-        BuildConfiguration* operator->() const      { return config; }
+        BuildConfiguration* operator->() const      { return config.get(); }
 
         BuildConfiguration::Ptr config;
         int index;
@@ -316,7 +320,7 @@ public:
         bool next();
 
         const BuildConfiguration& operator*() const       { return *config; }
-        const BuildConfiguration* operator->() const      { return config; }
+        const BuildConfiguration* operator->() const      { return config.get(); }
 
         BuildConfiguration::Ptr config;
         int index;
@@ -365,7 +369,39 @@ protected:
     const ProjectType& projectType;
     const String projectName;
     const File projectFolder;
-    Value vst3Path, rtasPath, aaxPath; // these must be initialised in the specific exporter c'tors!
+
+    //==============================================================================
+    // Wraps a ValueWithDefault object that has a default which depends on a global value.
+    // Used for the VST3, RTAS and AAX project-specific path options.
+    struct ValueWithDefaultWrapper  : public Value::Listener
+    {
+        void init (const ValueWithDefault& vwd, ValueWithDefault global, TargetOS::OS targetOS)
+        {
+            wrappedValue = vwd;
+            globalValue = global.getPropertyAsValue();
+            globalIdentifier = global.getPropertyID();
+            os = targetOS;
+
+            if (wrappedValue.get() == var())
+                wrappedValue.resetToDefault();
+
+            globalValue.addListener (this);
+            valueChanged (globalValue);
+        }
+
+        void valueChanged (Value&) override
+        {
+            wrappedValue.setDefault (getAppSettings().getStoredPath (globalIdentifier, os).get());
+        }
+
+        ValueWithDefault wrappedValue;
+        Value globalValue;
+
+        Identifier globalIdentifier;
+        TargetOS::OS os;
+    };
+
+    ValueWithDefaultWrapper vstLegacyPathValueWrapper, vst3PathValueWrapper, rtasPathValueWrapper, aaxPathValueWrapper;
 
     ValueWithDefault targetLocationValue, extraCompilerFlagsValue, extraLinkerFlagsValue, externalLibrariesValue,
                      userNotesValue, gnuExtensionsValue, bigIconValue, smallIconValue, extraPPDefsValue;
@@ -441,6 +477,8 @@ private:
     void createIconProperties (PropertyListBuilder&);
     void addVSTPathsIfPluginOrHost();
     void addCommonAudioPluginSettings();
+    void addLegacyVSTFolderToPathIfSpecified();
+    RelativePath getInternalVST3SDKPath();
     void addVST3FolderToPath();
     void addAAXFoldersToPath();
 

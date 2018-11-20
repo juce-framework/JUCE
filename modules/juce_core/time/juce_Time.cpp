@@ -94,11 +94,11 @@ namespace TimeHelpers
     static inline String formatString (const String& format, const std::tm* const tm)
     {
        #if JUCE_ANDROID
-        typedef CharPointer_UTF8  StringType;
+        using StringType = CharPointer_UTF8;
        #elif JUCE_WINDOWS
-        typedef CharPointer_UTF16 StringType;
+        using StringType = CharPointer_UTF16;
        #else
-        typedef CharPointer_UTF32 StringType;
+        using StringType = CharPointer_UTF32;
        #endif
 
        #ifdef JUCE_MSVC
@@ -159,7 +159,7 @@ namespace TimeHelpers
         }
         else if (month < 0)
         {
-            const int numYears = (11 - month) / 12;
+            auto numYears = (11 - month) / 12;
             year -= numYears;
             month += 12 * numYears;
         }
@@ -181,16 +181,9 @@ namespace TimeHelpers
 }
 
 //==============================================================================
-Time::Time() noexcept  : millisSinceEpoch (0)
-{
-}
-
-Time::Time (const Time& other) noexcept  : millisSinceEpoch (other.millisSinceEpoch)
-{
-}
-
 Time::Time (int64 ms) noexcept  : millisSinceEpoch (ms)
 {
+    static_assert (std::is_trivially_copyable<Time>::value, "Time is not trivially copyable");
 }
 
 Time::Time (int year, int month, int day,
@@ -209,16 +202,6 @@ Time::Time (int year, int month, int day,
     millisSinceEpoch = 1000 * (useLocalTime ? (int64) mktime (&t)
                                             : TimeHelpers::mktime_utc (t))
                          + milliseconds;
-}
-
-Time::~Time() noexcept
-{
-}
-
-Time& Time::operator= (const Time& other) noexcept
-{
-    millisSinceEpoch = other.millisSinceEpoch;
-    return *this;
 }
 
 //==============================================================================
@@ -306,10 +289,10 @@ int64 Time::secondsToHighResolutionTicks (const double seconds) noexcept
 }
 
 //==============================================================================
-String Time::toString (const bool includeDate,
-                       const bool includeTime,
-                       const bool includeSeconds,
-                       const bool use24HourClock) const noexcept
+String Time::toString (bool includeDate,
+                       bool includeTime,
+                       bool includeSeconds,
+                       bool use24HourClock) const
 {
     String result;
 
@@ -380,7 +363,7 @@ bool Time::isDaylightSavingTime() const noexcept
     return TimeHelpers::millisToLocal (millisSinceEpoch).tm_isdst != 0;
 }
 
-String Time::getTimeZone() const noexcept
+String Time::getTimeZone() const
 {
     String zone[2];
 
@@ -392,7 +375,7 @@ String Time::getTimeZone() const noexcept
     {
         char name[128] = { 0 };
         size_t length;
-        _get_tzname (&length, name, 127, i);
+        _get_tzname (&length, name, sizeof (name) - 1, i);
         zone[i] = name;
     }
    #else
@@ -426,9 +409,9 @@ int Time::getUTCOffsetSeconds() const noexcept
 
 String Time::getUTCOffsetString (bool includeSemiColon) const
 {
-    if (int seconds = getUTCOffsetSeconds())
+    if (auto seconds = getUTCOffsetSeconds())
     {
-        const int minutes = seconds / 60;
+        auto minutes = seconds / 60;
 
         return String::formatted (includeSemiColon ? "%+03d:%02d"
                                                    : "%+03d%02d",
@@ -458,7 +441,7 @@ static int parseFixedSizeIntAndSkip (String::CharPointerType& t, int numChars, c
 
     for (int i = numChars; --i >= 0;)
     {
-        const int digit = (int) (*t - '0');
+        auto digit = (int) (*t - '0');
 
         if (! isPositiveAndBelow (digit, 10))
             return -1;
@@ -473,7 +456,7 @@ static int parseFixedSizeIntAndSkip (String::CharPointerType& t, int numChars, c
     return n;
 }
 
-Time Time::fromISO8601 (StringRef iso) noexcept
+Time Time::fromISO8601 (StringRef iso)
 {
     auto t = iso.text;
     auto year = parseFixedSizeIntAndSkip (t, 4, '-');
@@ -596,7 +579,7 @@ bool operator>  (Time time1, Time time2) noexcept      { return time1.toMillisec
 bool operator<= (Time time1, Time time2) noexcept      { return time1.toMilliseconds() <= time2.toMilliseconds(); }
 bool operator>= (Time time1, Time time2) noexcept      { return time1.toMilliseconds() >= time2.toMilliseconds(); }
 
-static int getMonthNumberForCompileDate (const String& m) noexcept
+static int getMonthNumberForCompileDate (const String& m)
 {
     for (int i = 0; i < 12; ++i)
         if (m.equalsIgnoreCase (shortMonthNames[i]))

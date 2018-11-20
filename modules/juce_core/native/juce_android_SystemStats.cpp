@@ -26,7 +26,7 @@ namespace juce
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  STATICMETHOD (newProxyInstance, "newProxyInstance", "(Ljava/lang/ClassLoader;[Ljava/lang/Class;Ljava/lang/reflect/InvocationHandler;)Ljava/lang/Object;") \
 
- DECLARE_JNI_CLASS (JavaProxy, "java/lang/reflect/Proxy");
+ DECLARE_JNI_CLASS (JavaProxy, "java/lang/reflect/Proxy")
 #undef JNI_CLASS_MEMBERS
 
 JNIClassBase::JNIClassBase (const char* cp)   : classPath (cp), classRef (0)
@@ -201,6 +201,35 @@ JUCE_JNI_CALLBACK (JUCE_JOIN_MACRO (JUCE_ANDROID_ACTIVITY_CLASSNAME, _00024Nativ
 }
 
 //==============================================================================
+AppPausedResumedListener::AppPausedResumedListener (Owner& ownerToUse)
+    : owner (ownerToUse)
+{
+}
+
+jobject AppPausedResumedListener::invoke (jobject proxy, jobject method, jobjectArray args)
+{
+    auto* env = getEnv();
+
+    auto methodName = juceString ((jstring) env->CallObjectMethod (method, JavaMethod.getName));
+
+    int numArgs = args != nullptr ? env->GetArrayLength (args) : 0;
+
+    if (methodName == "appPaused" && numArgs == 0)
+    {
+        owner.appPaused();
+        return nullptr;
+    }
+
+    if (methodName == "appResumed" && numArgs == 0)
+    {
+        owner.appResumed();
+        return nullptr;
+    }
+
+    return AndroidInterfaceImplementer::invoke (proxy, method, args);
+}
+
+//==============================================================================
 JavaVM* androidJNIJavaVM = nullptr;
 
 class JniEnvThreadHolder
@@ -335,7 +364,7 @@ namespace AndroidStatsHelpers
     #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
      STATICMETHOD (getProperty, "getProperty", "(Ljava/lang/String;)Ljava/lang/String;")
 
-    DECLARE_JNI_CLASS (SystemClass, "java/lang/System");
+    DECLARE_JNI_CLASS (SystemClass, "java/lang/System")
     #undef JNI_CLASS_MEMBERS
 
     static inline String getSystemProperty (const String& name)
@@ -353,7 +382,7 @@ namespace AndroidStatsHelpers
     }
 
     #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD)
-    DECLARE_JNI_CLASS (BuildClass, "android/os/Build");
+    DECLARE_JNI_CLASS (BuildClass, "android/os/Build")
     #undef JNI_CLASS_MEMBERS
 
     static inline String getAndroidOsBuildValue (const char* fieldName)
@@ -404,7 +433,7 @@ String SystemStats::getCpuModel()
     return readPosixConfigFileValue ("/proc/cpuinfo", "Hardware");
 }
 
-int SystemStats::getCpuSpeedInMegaherz()
+int SystemStats::getCpuSpeedInMegahertz()
 {
     int maxFreqKHz = 0;
 

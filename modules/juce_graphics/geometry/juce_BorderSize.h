@@ -46,16 +46,10 @@ public:
     /** Creates a null border.
         All sizes are left as 0.
     */
-    BorderSize() noexcept
-        : top(), left(), bottom(), right()
-    {
-    }
+    BorderSize() = default;
 
     /** Creates a copy of another border. */
-    BorderSize (const BorderSize& other) noexcept
-        : top (other.top), left (other.left), bottom (other.bottom), right (other.right)
-    {
-    }
+    BorderSize (const BorderSize&) = default;
 
     /** Creates a border with the given gaps. */
     BorderSize (ValueType topGap, ValueType leftGap, ValueType bottomGap, ValueType rightGap) noexcept
@@ -73,13 +67,13 @@ public:
     /** Returns the gap that should be left at the top of the region. */
     ValueType getTop() const noexcept                   { return top; }
 
-    /** Returns the gap that should be left at the top of the region. */
+    /** Returns the gap that should be left at the left of the region. */
     ValueType getLeft() const noexcept                  { return left; }
 
-    /** Returns the gap that should be left at the top of the region. */
+    /** Returns the gap that should be left at the bottom of the region. */
     ValueType getBottom() const noexcept                { return bottom; }
 
-    /** Returns the gap that should be left at the top of the region. */
+    /** Returns the gap that should be left at the right of the region. */
     ValueType getRight() const noexcept                 { return right; }
 
     /** Returns the sum of the top and bottom gaps. */
@@ -149,7 +143,7 @@ public:
 
 private:
     //==============================================================================
-    ValueType top, left, bottom, right;
+    ValueType top{}, left{}, bottom{}, right{};
 };
 
 } // namespace juce

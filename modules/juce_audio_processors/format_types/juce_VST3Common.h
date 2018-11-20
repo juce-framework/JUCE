@@ -151,34 +151,32 @@ static inline Steinberg::Vst::SpeakerArrangement getArrangementForNumChannels (i
 
 static inline Steinberg::Vst::Speaker getSpeakerType (const AudioChannelSet& set, AudioChannelSet::ChannelType type) noexcept
 {
-    using namespace Steinberg::Vst;
-
     switch (type)
     {
-        case AudioChannelSet::left:              return kSpeakerL;
-        case AudioChannelSet::right:             return kSpeakerR;
-        case AudioChannelSet::centre:            return (set == AudioChannelSet::mono() ? kSpeakerM : kSpeakerC);
+        case AudioChannelSet::left:              return Steinberg::Vst::kSpeakerL;
+        case AudioChannelSet::right:             return Steinberg::Vst::kSpeakerR;
+        case AudioChannelSet::centre:            return (set == AudioChannelSet::mono() ? Steinberg::Vst::kSpeakerM : Steinberg::Vst::kSpeakerC);
 
-        case AudioChannelSet::LFE:               return kSpeakerLfe;
-        case AudioChannelSet::leftSurround:      return kSpeakerLs;
-        case AudioChannelSet::rightSurround:     return kSpeakerRs;
-        case AudioChannelSet::leftCentre:        return kSpeakerLc;
-        case AudioChannelSet::rightCentre:       return kSpeakerRc;
-        case AudioChannelSet::centreSurround:    return kSpeakerCs;
+        case AudioChannelSet::LFE:               return Steinberg::Vst::kSpeakerLfe;
+        case AudioChannelSet::leftSurround:      return Steinberg::Vst::kSpeakerLs;
+        case AudioChannelSet::rightSurround:     return Steinberg::Vst::kSpeakerRs;
+        case AudioChannelSet::leftCentre:        return Steinberg::Vst::kSpeakerLc;
+        case AudioChannelSet::rightCentre:       return Steinberg::Vst::kSpeakerRc;
+        case AudioChannelSet::centreSurround:    return Steinberg::Vst::kSpeakerCs;
         case AudioChannelSet::leftSurroundSide:  return (1ull << 26); /* kSpeakerLcs */
         case AudioChannelSet::rightSurroundSide: return (1ull << 27); /* kSpeakerRcs */
         case AudioChannelSet::topMiddle:         return (1ull << 11); /* kSpeakerTm */
-        case AudioChannelSet::topFrontLeft:      return kSpeakerTfl;
-        case AudioChannelSet::topFrontCentre:    return kSpeakerTfc;
-        case AudioChannelSet::topFrontRight:     return kSpeakerTfr;
-        case AudioChannelSet::topRearLeft:       return kSpeakerTrl;
-        case AudioChannelSet::topRearCentre:     return kSpeakerTrc;
-        case AudioChannelSet::topRearRight:      return kSpeakerTrr;
-        case AudioChannelSet::LFE2:              return kSpeakerLfe2;
-        case AudioChannelSet::leftSurroundRear:  return kSpeakerSl;
-        case AudioChannelSet::rightSurroundRear: return kSpeakerSr;
-        case AudioChannelSet::wideLeft:          return kSpeakerPl;
-        case AudioChannelSet::wideRight:         return kSpeakerPr;
+        case AudioChannelSet::topFrontLeft:      return Steinberg::Vst::kSpeakerTfl;
+        case AudioChannelSet::topFrontCentre:    return Steinberg::Vst::kSpeakerTfc;
+        case AudioChannelSet::topFrontRight:     return Steinberg::Vst::kSpeakerTfr;
+        case AudioChannelSet::topRearLeft:       return Steinberg::Vst::kSpeakerTrl;
+        case AudioChannelSet::topRearCentre:     return Steinberg::Vst::kSpeakerTrc;
+        case AudioChannelSet::topRearRight:      return Steinberg::Vst::kSpeakerTrr;
+        case AudioChannelSet::LFE2:              return Steinberg::Vst::kSpeakerLfe2;
+        case AudioChannelSet::leftSurroundRear:  return Steinberg::Vst::kSpeakerSl;
+        case AudioChannelSet::rightSurroundRear: return Steinberg::Vst::kSpeakerSr;
+        case AudioChannelSet::wideLeft:          return Steinberg::Vst::kSpeakerPl;
+        case AudioChannelSet::wideRight:         return Steinberg::Vst::kSpeakerPr;
         case AudioChannelSet::ambisonicACN0:     return (1ull << 20); /* kSpeakerACN0 */
         case AudioChannelSet::ambisonicACN1:     return (1ull << 21); /* kSpeakerACN1 */
         case AudioChannelSet::ambisonicACN2:     return (1ull << 22); /* kSpeakerACN2 */
@@ -198,7 +196,7 @@ static inline Steinberg::Vst::Speaker getSpeakerType (const AudioChannelSet& set
         case AudioChannelSet::topSideLeft:       return (1ull << 24); /* kSpeakerTsl */
         case AudioChannelSet::topSideRight:      return (1ull << 25); /* kSpeakerTsr */
 
-        case AudioChannelSet::discreteChannel0:  return kSpeakerM;
+        case AudioChannelSet::discreteChannel0:  return Steinberg::Vst::kSpeakerM;
         default:
             break;
     }
@@ -219,55 +217,53 @@ static inline Steinberg::Vst::Speaker getSpeakerType (const AudioChannelSet& set
 
 static inline AudioChannelSet::ChannelType getChannelType (Steinberg::Vst::SpeakerArrangement arr, Steinberg::Vst::Speaker type) noexcept
 {
-    using namespace Steinberg::Vst;
-
     switch (type)
     {
-        case kSpeakerL:     return AudioChannelSet::left;
-        case kSpeakerR:     return AudioChannelSet::right;
-        case kSpeakerC:     return AudioChannelSet::centre;
-        case kSpeakerLfe:   return AudioChannelSet::LFE;
-        case kSpeakerLs:    return AudioChannelSet::leftSurround;
-        case kSpeakerRs:    return AudioChannelSet::rightSurround;
-        case kSpeakerLc:    return AudioChannelSet::leftCentre;
-        case kSpeakerRc:    return AudioChannelSet::rightCentre;
-        case kSpeakerCs:    return AudioChannelSet::centreSurround;
-        case kSpeakerSl:    return AudioChannelSet::leftSurroundRear;
-        case kSpeakerSr:    return AudioChannelSet::rightSurroundRear;
+        case Steinberg::Vst::kSpeakerL:     return AudioChannelSet::left;
+        case Steinberg::Vst::kSpeakerR:     return AudioChannelSet::right;
+        case Steinberg::Vst::kSpeakerC:     return AudioChannelSet::centre;
+        case Steinberg::Vst::kSpeakerLfe:   return AudioChannelSet::LFE;
+        case Steinberg::Vst::kSpeakerLs:    return AudioChannelSet::leftSurround;
+        case Steinberg::Vst::kSpeakerRs:    return AudioChannelSet::rightSurround;
+        case Steinberg::Vst::kSpeakerLc:    return AudioChannelSet::leftCentre;
+        case Steinberg::Vst::kSpeakerRc:    return AudioChannelSet::rightCentre;
+        case Steinberg::Vst::kSpeakerCs:    return AudioChannelSet::centreSurround;
+        case Steinberg::Vst::kSpeakerSl:    return AudioChannelSet::leftSurroundRear;
+        case Steinberg::Vst::kSpeakerSr:    return AudioChannelSet::rightSurroundRear;
         case (1ull << 11):  return AudioChannelSet::topMiddle;  /* kSpeakerTm */
-        case kSpeakerTfl:   return AudioChannelSet::topFrontLeft;
-        case kSpeakerTfc:   return AudioChannelSet::topFrontCentre;
-        case kSpeakerTfr:   return AudioChannelSet::topFrontRight;
-        case kSpeakerTrl:   return AudioChannelSet::topRearLeft;
-        case kSpeakerTrc:   return AudioChannelSet::topRearCentre;
-        case kSpeakerTrr:   return AudioChannelSet::topRearRight;
-        case kSpeakerLfe2:  return AudioChannelSet::LFE2;
-        case (1ull << 19):  return ((arr & kSpeakerC) != 0 ? AudioChannelSet::discreteChannel0 : AudioChannelSet::centre);
-        case (1ull << 20):  return AudioChannelSet::ambisonicACN0;  /* kSpeakerACN0 */
-        case (1ull << 21):  return AudioChannelSet::ambisonicACN1;  /* kSpeakerACN1 */
-        case (1ull << 22):  return AudioChannelSet::ambisonicACN2;  /* kSpeakerACN2 */
-        case (1ull << 23):  return AudioChannelSet::ambisonicACN3;  /* kSpeakerACN3 */
-        case (1ull << 38):  return AudioChannelSet::ambisonicACN4;  /* kSpeakerACN4 */
-        case (1ull << 39):  return AudioChannelSet::ambisonicACN5;  /* kSpeakerACN5 */
-        case (1ull << 40):  return AudioChannelSet::ambisonicACN6;  /* kSpeakerACN6 */
-        case (1ull << 41):  return AudioChannelSet::ambisonicACN7;  /* kSpeakerACN7 */
-        case (1ull << 42):  return AudioChannelSet::ambisonicACN8;  /* kSpeakerACN8 */
-        case (1ull << 43):  return AudioChannelSet::ambisonicACN9;  /* kSpeakerACN9 */
-        case (1ull << 44):  return AudioChannelSet::ambisonicACN10; /* kSpeakerACN10 */
-        case (1ull << 45):  return AudioChannelSet::ambisonicACN11; /* kSpeakerACN11 */
-        case (1ull << 46):  return AudioChannelSet::ambisonicACN12; /* kSpeakerACN12 */
-        case (1ull << 47):  return AudioChannelSet::ambisonicACN13; /* kSpeakerACN13 */
-        case (1ull << 48):  return AudioChannelSet::ambisonicACN14; /* kSpeakerACN14 */
-        case (1ull << 49):  return AudioChannelSet::ambisonicACN15; /* kSpeakerACN15 */
-        case (1ull << 24):  return AudioChannelSet::topSideLeft;  /* kSpeakerTsl */
-        case (1ull << 25):  return AudioChannelSet::topSideRight; /* kSpeakerTsr */
-        case (1ull << 26):  return AudioChannelSet::leftSurroundSide;  /* kSpeakerLcs */
-        case (1ull << 27):  return AudioChannelSet::rightSurroundSide; /* kSpeakerRcs */
-        case (1ull << 28):  return static_cast<AudioChannelSet::ChannelType> ((int)AudioChannelSet::discreteChannel0 + 3); /* kSpeakerBfl */
-        case (1ull << 29):  return static_cast<AudioChannelSet::ChannelType> ((int)AudioChannelSet::discreteChannel0 + 4); /* kSpeakerBfc */
-        case (1ull << 30):  return static_cast<AudioChannelSet::ChannelType> ((int)AudioChannelSet::discreteChannel0 + 5); /* kSpeakerBfr */
-        case kSpeakerPl:    return AudioChannelSet::wideLeft;
-        case kSpeakerPr:    return AudioChannelSet::wideRight;
+        case Steinberg::Vst::kSpeakerTfl:   return AudioChannelSet::topFrontLeft;
+        case Steinberg::Vst::kSpeakerTfc:   return AudioChannelSet::topFrontCentre;
+        case Steinberg::Vst::kSpeakerTfr:   return AudioChannelSet::topFrontRight;
+        case Steinberg::Vst::kSpeakerTrl:   return AudioChannelSet::topRearLeft;
+        case Steinberg::Vst::kSpeakerTrc:   return AudioChannelSet::topRearCentre;
+        case Steinberg::Vst::kSpeakerTrr:   return AudioChannelSet::topRearRight;
+        case Steinberg::Vst::kSpeakerLfe2:  return AudioChannelSet::LFE2;
+        case (1ull << 19):                  return ((arr & Steinberg::Vst::kSpeakerC) != 0 ? AudioChannelSet::discreteChannel0 : AudioChannelSet::centre);
+        case (1ull << 20):                  return AudioChannelSet::ambisonicACN0;  /* kSpeakerACN0 */
+        case (1ull << 21):                  return AudioChannelSet::ambisonicACN1;  /* kSpeakerACN1 */
+        case (1ull << 22):                  return AudioChannelSet::ambisonicACN2;  /* kSpeakerACN2 */
+        case (1ull << 23):                  return AudioChannelSet::ambisonicACN3;  /* kSpeakerACN3 */
+        case (1ull << 38):                  return AudioChannelSet::ambisonicACN4;  /* kSpeakerACN4 */
+        case (1ull << 39):                  return AudioChannelSet::ambisonicACN5;  /* kSpeakerACN5 */
+        case (1ull << 40):                  return AudioChannelSet::ambisonicACN6;  /* kSpeakerACN6 */
+        case (1ull << 41):                  return AudioChannelSet::ambisonicACN7;  /* kSpeakerACN7 */
+        case (1ull << 42):                  return AudioChannelSet::ambisonicACN8;  /* kSpeakerACN8 */
+        case (1ull << 43):                  return AudioChannelSet::ambisonicACN9;  /* kSpeakerACN9 */
+        case (1ull << 44):                  return AudioChannelSet::ambisonicACN10; /* kSpeakerACN10 */
+        case (1ull << 45):                  return AudioChannelSet::ambisonicACN11; /* kSpeakerACN11 */
+        case (1ull << 46):                  return AudioChannelSet::ambisonicACN12; /* kSpeakerACN12 */
+        case (1ull << 47):                  return AudioChannelSet::ambisonicACN13; /* kSpeakerACN13 */
+        case (1ull << 48):                  return AudioChannelSet::ambisonicACN14; /* kSpeakerACN14 */
+        case (1ull << 49):                  return AudioChannelSet::ambisonicACN15; /* kSpeakerACN15 */
+        case (1ull << 24):                  return AudioChannelSet::topSideLeft;  /* kSpeakerTsl */
+        case (1ull << 25):                  return AudioChannelSet::topSideRight; /* kSpeakerTsr */
+        case (1ull << 26):                  return AudioChannelSet::leftSurroundSide;  /* kSpeakerLcs */
+        case (1ull << 27):                  return AudioChannelSet::rightSurroundSide; /* kSpeakerRcs */
+        case (1ull << 28):                  return static_cast<AudioChannelSet::ChannelType> ((int)AudioChannelSet::discreteChannel0 + 3); /* kSpeakerBfl */
+        case (1ull << 29):                  return static_cast<AudioChannelSet::ChannelType> ((int)AudioChannelSet::discreteChannel0 + 4); /* kSpeakerBfc */
+        case (1ull << 30):                  return static_cast<AudioChannelSet::ChannelType> ((int)AudioChannelSet::discreteChannel0 + 5); /* kSpeakerBfr */
+        case Steinberg::Vst::kSpeakerPl:    return AudioChannelSet::wideLeft;
+        case Steinberg::Vst::kSpeakerPr:    return AudioChannelSet::wideRight;
         default: break;
     }
 
@@ -496,19 +492,46 @@ public:
         }
     }
 
-    static void toEventList (Steinberg::Vst::IEventList& result, MidiBuffer& midiBuffer)
+    static void toEventList (Steinberg::Vst::IEventList& result, MidiBuffer& midiBuffer,
+                             Steinberg::Vst::IParameterChanges* parameterChanges = nullptr,
+                             Steinberg::Vst::IMidiMapping* midiMapping = nullptr)
     {
         MidiBuffer::Iterator iterator (midiBuffer);
-        MidiMessage msg;
+        const uint8* midiEventData = nullptr;
+        int midiEventSize = 0;
         int midiEventPosition = 0;
 
         enum { maxNumEvents = 2048 }; // Steinberg's Host Checker states that no more than 2048 events are allowed at once
         int numEvents = 0;
 
-        while (iterator.getNextEvent (msg, midiEventPosition))
+        while (iterator.getNextEvent (midiEventData, midiEventSize, midiEventPosition))
         {
             if (++numEvents > maxNumEvents)
                 break;
+
+            MidiMessage msg (midiEventData, midiEventSize);
+
+            if (midiMapping != nullptr && parameterChanges != nullptr)
+            {
+                Vst3MidiControlEvent controlEvent;
+
+                if (toVst3ControlEvent (msg, controlEvent))
+                {
+                    Steinberg::Vst::ParamID controlParamID;
+
+                    if (midiMapping->getMidiControllerAssignment (0, createSafeChannel (msg.getChannel()),
+                                                                  controlEvent.controllerNumber,
+                                                                  controlParamID) == Steinberg::kResultOk)
+                    {
+                        Steinberg::int32 ignore;
+
+                        if (auto* queue = parameterChanges->addParameterData (controlParamID, ignore))
+                            queue->addPoint (midiEventPosition, controlEvent.paramValue, ignore);
+                    }
+
+                    continue;
+                }
+            }
 
             Steinberg::Vst::Event e = { 0 };
 
@@ -534,16 +557,16 @@ public:
             else if (msg.isSysEx())
             {
                 e.type          = Steinberg::Vst::Event::kDataEvent;
-                e.data.bytes    = msg.getSysExData();
+                e.data.bytes    = midiEventData + 1;
                 e.data.size     = (uint32) msg.getSysExDataSize();
                 e.data.type     = Steinberg::Vst::DataEvent::kMidiSysEx;
             }
-            else if (msg.isAftertouch())
+            else if (msg.isChannelPressure())
             {
                 e.type                   = Steinberg::Vst::Event::kPolyPressureEvent;
                 e.polyPressure.channel   = createSafeChannel (msg.getChannel());
                 e.polyPressure.pitch     = createSafeNote (msg.getNoteNumber());
-                e.polyPressure.pressure  = normaliseMidiValue (msg.getAfterTouchValue());
+                e.polyPressure.pressure  = normaliseMidiValue (msg.getChannelPressureValue());
             }
             else
             {
@@ -569,6 +592,24 @@ private:
 
     static float normaliseMidiValue (int value) noexcept              { return jlimit (0.0f, 1.0f, (float) value / 127.0f); }
     static int denormaliseToMidiValue (float value) noexcept          { return roundToInt (jlimit (0.0f, 127.0f, value * 127.0f)); }
+
+    //==============================================================================
+    struct Vst3MidiControlEvent
+    {
+        Steinberg::Vst::CtrlNumber controllerNumber;
+        Steinberg::Vst::ParamValue paramValue;
+    };
+
+    static bool toVst3ControlEvent (const MidiMessage& msg, Vst3MidiControlEvent& result)
+    {
+        result.controllerNumber = -1;
+
+        if      (msg.isController())        result = { (Steinberg::Vst::CtrlNumber) msg.getControllerNumber(), msg.getControllerValue() / 127.0};
+        else if (msg.isPitchWheel())        result = { Steinberg::Vst::kPitchBend, msg.getPitchWheelValue() / 16383.0};
+        else if (msg.isAftertouch())        result = { Steinberg::Vst::kAfterTouch, msg.getAfterTouchValue() / 127.0};
+
+        return (result.controllerNumber != -1);
+    }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiEventList)
 };

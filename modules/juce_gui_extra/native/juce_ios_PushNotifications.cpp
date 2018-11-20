@@ -37,7 +37,7 @@ namespace PushNotificationsDelegateDetails
     {
         if (iOSEarlierThan10)
         {
-            auto* action = [[UIMutableUserNotificationAction alloc] init];
+            auto action = [[UIMutableUserNotificationAction alloc] init];
 
             action.identifier     = juceStringToNS (a.identifier);
             action.title          = juceStringToNS (a.title);
@@ -77,10 +77,10 @@ namespace PushNotificationsDelegateDetails
     {
         if (iOSEarlierThan10)
         {
-            auto* category = [[UIMutableUserNotificationCategory alloc] init];
+            auto category = [[UIMutableUserNotificationCategory alloc] init];
             category.identifier = juceStringToNS (c.identifier);
 
-            auto* actions = [NSMutableArray arrayWithCapacity: (NSUInteger) c.actions.size()];
+            auto actions = [NSMutableArray arrayWithCapacity: (NSUInteger) c.actions.size()];
 
             for (const auto& a : c.actions)
             {
@@ -98,7 +98,7 @@ namespace PushNotificationsDelegateDetails
         else
         {
            #if defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
-            auto* actions = [NSMutableArray arrayWithCapacity: (NSUInteger) c.actions.size()];
+            auto actions = [NSMutableArray arrayWithCapacity: (NSUInteger) c.actions.size()];
 
             for (const auto& a : c.actions)
             {
@@ -119,7 +119,7 @@ namespace PushNotificationsDelegateDetails
     //==============================================================================
     UILocalNotification* juceNotificationToUILocalNotification (const PushNotifications::Notification& n)
     {
-        auto* notification = [[UILocalNotification alloc] init];
+        auto notification = [[UILocalNotification alloc] init];
 
         notification.alertTitle = juceStringToNS (n.title);
         notification.alertBody  = juceStringToNS (n.body);
@@ -144,7 +144,7 @@ namespace PushNotificationsDelegateDetails
     UNNotificationRequest* juceNotificationToUNNotificationRequest (const PushNotifications::Notification& n)
     {
         // content
-        auto* content = [[UNMutableNotificationContent alloc] init];
+        auto content = [[UNMutableNotificationContent alloc] init];
 
         content.title              = juceStringToNS (n.title);
         content.subtitle           = juceStringToNS (n.subtitle);
@@ -229,7 +229,7 @@ namespace PushNotificationsDelegateDetails
             propsVarObject->setProperty (propertyName, properties.getValueAt (i));
         }
 
-        return var (propsVarObject);
+        return var (propsVarObject.get());
     }
 
     //==============================================================================
@@ -585,7 +585,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
     {
         settings = settingsToUse;
 
-        auto* categories = [NSMutableSet setWithCapacity: (NSUInteger) settings.categories.size()];
+        auto categories = [NSMutableSet setWithCapacity: (NSUInteger) settings.categories.size()];
 
         if (iOSEarlierThan10)
         {

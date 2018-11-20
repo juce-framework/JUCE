@@ -33,6 +33,8 @@
                    juce_gui_basics
  exporters:        xcode_mac, vs2017, linux_make, androidstudio, xcode_iphone
 
+ moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
+
  type:             Component
  mainClass:        FontsDemo
 
@@ -106,7 +108,7 @@ public:
         verticalDividerBar.reset (new StretchableLayoutResizerBar (&verticalLayout, 1, true));
         addAndMakeVisible (verticalDividerBar.get());
 
-        // ..and pick a random font to select intially
+        // ..and pick a random font to select initially
         listBox.selectRow (Random::getSystemRandom().nextInt (fonts.size()));
 
         demoTextBox.setMultiLine (true);

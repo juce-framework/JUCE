@@ -35,18 +35,26 @@ namespace juce
 namespace jpeglibNamespace
 {
 #if JUCE_INCLUDE_JPEGLIB_CODE || ! defined (JUCE_INCLUDE_JPEGLIB_CODE)
-   #if JUCE_MINGW
-    typedef unsigned char boolean;
-   #endif
-
-   #if JUCE_CLANG
-    #pragma clang diagnostic push
-    #pragma clang diagnostic ignored "-Wconversion"
-    #pragma clang diagnostic ignored "-Wdeprecated-register"
-    #if __has_warning("-Wcomma")
-     #pragma clang diagnostic ignored "-Wcomma"
+    #if JUCE_MINGW
+     typedef unsigned char boolean;
     #endif
-   #endif
+
+    #if JUCE_CLANG
+     #pragma clang diagnostic push
+     #pragma clang diagnostic ignored "-Wconversion"
+     #pragma clang diagnostic ignored "-Wdeprecated-register"
+     #if __has_warning("-Wzero-as-null-pointer-constant")
+      #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
+     #endif
+     #if __has_warning("-Wcomma")
+      #pragma clang diagnostic ignored "-Wcomma"
+     #endif
+    #endif
+
+    #if JUCE_GCC && __GNUC__ > 5
+     #pragma GCC diagnostic push
+     #pragma GCC diagnostic ignored "-Wshift-negative-value"
+    #endif
 
     #define JPEG_INTERNALS
     #undef FAR
@@ -121,9 +129,13 @@ namespace jpeglibNamespace
     #include "jpglib/jutils.c"
     #include "jpglib/transupp.c"
 
-   #if JUCE_CLANG
-    #pragma clang diagnostic pop
-   #endif
+    #if JUCE_CLANG
+     #pragma clang diagnostic pop
+    #endif
+
+    #if JUCE_GCC && __GNUC__ > 5
+     #pragma GCC diagnostic pop
+    #endif
 #else
     #define JPEG_INTERNALS
     #undef FAR

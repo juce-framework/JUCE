@@ -90,7 +90,7 @@ static LicenseState::ApplicationUsageData getApplicationUsageDataTypeFromValue (
     return LicenseState::ApplicationUsageData::notChosenYet;
 }
 
-#if !JUCER_ENABLE_GPL_MODE
+#if ! JUCER_ENABLE_GPL_MODE
 struct LicenseController::ModalCompletionCallback : ModalComponentManager::Callback
 {
     ModalCompletionCallback (LicenseController& controller) : owner (controller) {}
@@ -153,7 +153,7 @@ void LicenseController::startWebviewIfNeeded()
 
 void LicenseController::logout()
 {
-    jassert (MessageManager::getInstance()->isThisTheMessageThread());
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
    #if ! JUCER_ENABLE_GPL_MODE
     thread.reset();
@@ -169,7 +169,7 @@ void LicenseController::logout()
 
 void LicenseController::chooseNewLicense()
 {
-    jassert (MessageManager::getInstance()->isThisTheMessageThread());
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
    #if ! JUCER_ENABLE_GPL_MODE
     thread.reset();

@@ -39,7 +39,8 @@ public:
 
           filter (selectsFiles ? owner.filters : String(), selectsDirectories ? "*" : String(), {}),
           browserComponent (flags, owner.startingFile, &filter, preview),
-          dialogBox (owner.title, {}, browserComponent, warnAboutOverwrite, browserComponent.findColour (AlertWindow::backgroundColourId))
+          dialogBox (owner.title, {}, browserComponent, warnAboutOverwrite,
+                     browserComponent.findColour (AlertWindow::backgroundColourId), owner.parent)
     {}
 
     ~NonNative()
@@ -92,10 +93,12 @@ FileChooser::FileChooser (const String& chooserBoxTitle,
                           const File& currentFileOrDirectory,
                           const String& fileFilters,
                           const bool useNativeBox,
-                          const bool treatFilePackagesAsDirectories)
+                          const bool treatFilePackagesAsDirectories,
+                          Component* parentComponentToUse)
     : title (chooserBoxTitle),
       filters (fileFilters),
       startingFile (currentFileOrDirectory),
+      parent (parentComponentToUse),
       useNativeDialogBox (useNativeBox && isPlatformDialogAvailable()),
       treatFilePackagesAsDirs (treatFilePackagesAsDirectories)
 {

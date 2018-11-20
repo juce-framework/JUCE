@@ -61,7 +61,7 @@
  #include "../../../GUI/OpenGLDemo2D.h"
 #endif
 #include "../../../GUI/PropertiesDemo.h"
-#if JUCE_MAC || JUCE_WINDOWS
+#if ! JUCE_LINUX
  #include "../../../GUI/VideoDemo.h"
 #endif
 #include "../../../GUI/WebBrowserDemo.h"
@@ -100,7 +100,7 @@ void registerDemos_Two() noexcept
     REGISTER_DEMO_WITH_FILENAME (OpenGLDemoClasses::OpenGLDemo, GUI, OpenGLDemo, true)
    #endif
     REGISTER_DEMO (PropertiesDemo,            GUI,       false)
-   #if JUCE_MAC || JUCE_WINDOWS
+   #if ! JUCE_LINUX
     REGISTER_DEMO (VideoDemo,                 GUI,       true)
    #endif
     REGISTER_DEMO (WebBrowserDemo,            GUI,       true)

@@ -70,7 +70,7 @@ Component* Desktop::getComponent (int index) const noexcept
 
 Component* Desktop::findComponentAt (Point<int> screenPosition) const
 {
-    ASSERT_MESSAGE_MANAGER_IS_LOCKED
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
     for (int i = desktopComponents.size(); --i >= 0;)
     {
@@ -91,20 +91,21 @@ Component* Desktop::findComponentAt (Point<int> screenPosition) const
 //==============================================================================
 LookAndFeel& Desktop::getDefaultLookAndFeel() noexcept
 {
-    if (currentLookAndFeel == nullptr)
-    {
-        if (defaultLookAndFeel == nullptr)
-            defaultLookAndFeel.reset (new LookAndFeel_V4());
+    if (auto lf = currentLookAndFeel.get())
+        return *lf;
 
-        currentLookAndFeel = defaultLookAndFeel.get();
-    }
+    if (defaultLookAndFeel == nullptr)
+        defaultLookAndFeel.reset (new LookAndFeel_V4());
 
-    return *currentLookAndFeel;
+    auto lf = defaultLookAndFeel.get();
+    jassert (lf != nullptr);
+    currentLookAndFeel = lf;
+    return *lf;
 }
 
 void Desktop::setDefaultLookAndFeel (LookAndFeel* newDefaultLookAndFeel)
 {
-    ASSERT_MESSAGE_MANAGER_IS_LOCKED
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
     currentLookAndFeel = newDefaultLookAndFeel;
 
     for (int i = getNumComponents(); --i >= 0;)
@@ -193,7 +194,7 @@ void Desktop::handleAsyncUpdate()
     // The component may be deleted during this operation, but we'll use a SafePointer rather than a
     // BailOutChecker so that any remaining listeners will still get a callback (with a null pointer).
     WeakReference<Component> currentFocus (Component::getCurrentlyFocusedComponent());
-    focusListeners.call ([&] (FocusChangeListener& l) { l.globalFocusChanged (currentFocus); });
+    focusListeners.call ([&] (FocusChangeListener& l) { l.globalFocusChanged (currentFocus.get()); });
 }
 
 //==============================================================================
@@ -215,14 +216,14 @@ ListenerList<MouseListener>& Desktop::getMouseListeners()
 
 void Desktop::addGlobalMouseListener (MouseListener* listener)
 {
-    ASSERT_MESSAGE_MANAGER_IS_LOCKED
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
     mouseListeners.add (listener);
     resetTimer();
 }
 
 void Desktop::removeGlobalMouseListener (MouseListener* listener)
 {
-    ASSERT_MESSAGE_MANAGER_IS_LOCKED
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
     mouseListeners.remove (listener);
     resetTimer();
 }
@@ -257,95 +258,6 @@ void Desktop::sendMouseMove()
             else
                 mouseListeners.callChecked (checker, [&] (MouseListener& l) { l.mouseMove (me); });
         }
-    }
-}
-
-
-//==============================================================================
-Desktop::Displays::Displays (Desktop& desktop)   { init (desktop); }
-Desktop::Displays::~Displays()  {}
-
-const Desktop::Displays::Display& Desktop::Displays::getMainDisplay() const noexcept
-{
-    ASSERT_MESSAGE_MANAGER_IS_LOCKED
-    jassert (displays.getReference(0).isMain);
-    return displays.getReference(0);
-}
-
-const Desktop::Displays::Display& Desktop::Displays::getDisplayContaining (Point<int> position) const noexcept
-{
-    ASSERT_MESSAGE_MANAGER_IS_LOCKED
-    auto* best = &displays.getReference(0);
-    double bestDistance = 1.0e10;
-
-    for (auto& d : displays)
-    {
-        if (d.totalArea.contains (position))
-        {
-            best = &d;
-            break;
-        }
-
-        auto distance = d.totalArea.getCentre().getDistanceFrom (position);
-
-        if (distance < bestDistance)
-        {
-            bestDistance = distance;
-            best = &d;
-        }
-    }
-
-    return *best;
-}
-
-RectangleList<int> Desktop::Displays::getRectangleList (bool userAreasOnly) const
-{
-    ASSERT_MESSAGE_MANAGER_IS_LOCKED
-    RectangleList<int> rl;
-
-    for (auto& d : displays)
-        rl.addWithoutMerging (userAreasOnly ? d.userArea : d.totalArea);
-
-    return rl;
-}
-
-Rectangle<int> Desktop::Displays::getTotalBounds (bool userAreasOnly) const
-{
-    return getRectangleList (userAreasOnly).getBounds();
-}
-
-bool operator== (const Desktop::Displays::Display& d1, const Desktop::Displays::Display& d2) noexcept;
-bool operator== (const Desktop::Displays::Display& d1, const Desktop::Displays::Display& d2) noexcept
-{
-    return d1.userArea == d2.userArea
-        && d1.totalArea == d2.totalArea
-        && d1.scale == d2.scale
-        && d1.isMain == d2.isMain;
-}
-
-bool operator!= (const Desktop::Displays::Display& d1, const Desktop::Displays::Display& d2) noexcept;
-bool operator!= (const Desktop::Displays::Display& d1, const Desktop::Displays::Display& d2) noexcept
-{
-    return ! (d1 == d2);
-}
-
-void Desktop::Displays::init (Desktop& desktop)
-{
-    findDisplays (desktop.getGlobalScaleFactor());
-}
-
-void Desktop::Displays::refresh()
-{
-    Array<Display> oldDisplays;
-    oldDisplays.swapWith (displays);
-
-    init (Desktop::getInstance());
-
-    if (oldDisplays != displays)
-    {
-        for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
-            if (auto* peer = ComponentPeer::getPeer (i))
-                peer->handleScreenSizeChange();
     }
 }
 
@@ -411,7 +323,7 @@ bool Desktop::isOrientationEnabled (DisplayOrientation orientation) const noexce
 
 void Desktop::setGlobalScaleFactor (float newScaleFactor) noexcept
 {
-    ASSERT_MESSAGE_MANAGER_IS_LOCKED
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
     if (masterScaleFactor != newScaleFactor)
     {

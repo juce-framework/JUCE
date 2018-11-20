@@ -80,7 +80,7 @@ String SystemStats::getCpuModel()
     return getCpuInfo ("model name");
 }
 
-int SystemStats::getCpuSpeedInMegaherz()
+int SystemStats::getCpuSpeedInMegahertz()
 {
     return roundToInt (getCpuInfo ("cpu MHz").getFloatValue());
 }
@@ -142,16 +142,26 @@ String SystemStats::getDisplayLanguage() { return getUserLanguage() + "-" + getU
 void CPUInformation::initialise() noexcept
 {
     auto flags = getCpuInfo ("flags");
-    hasMMX   = flags.contains ("mmx");
-    hasSSE   = flags.contains ("sse");
-    hasSSE2  = flags.contains ("sse2");
-    hasSSE3  = flags.contains ("sse3");
-    has3DNow = flags.contains ("3dnow");
-    hasSSSE3 = flags.contains ("ssse3");
-    hasSSE41 = flags.contains ("sse4_1");
-    hasSSE42 = flags.contains ("sse4_2");
-    hasAVX   = flags.contains ("avx");
-    hasAVX2  = flags.contains ("avx2");
+    hasMMX             = flags.contains ("mmx");
+    hasSSE             = flags.contains ("sse");
+    hasSSE2            = flags.contains ("sse2");
+    hasSSE3            = flags.contains ("sse3");
+    has3DNow           = flags.contains ("3dnow");
+    hasSSSE3           = flags.contains ("ssse3");
+    hasSSE41           = flags.contains ("sse4_1");
+    hasSSE42           = flags.contains ("sse4_2");
+    hasAVX             = flags.contains ("avx");
+    hasAVX2            = flags.contains ("avx2");
+    hasAVX512F         = flags.contains ("avx512f");
+    hasAVX512BW        = flags.contains ("avx512bw");
+    hasAVX512CD        = flags.contains ("avx512cd");
+    hasAVX512DQ        = flags.contains ("avx512dq");
+    hasAVX512ER        = flags.contains ("avx512er");
+    hasAVX512IFMA      = flags.contains ("avx512ifma");
+    hasAVX512PF        = flags.contains ("avx512pf");
+    hasAVX512VBMI      = flags.contains ("avx512vbmi");
+    hasAVX512VL        = flags.contains ("avx512vl");
+    hasAVX512VPOPCNTDQ = flags.contains ("avx512_vpopcntdq");
 
     numLogicalCPUs  = getCpuInfo ("processor").getIntValue() + 1;
 

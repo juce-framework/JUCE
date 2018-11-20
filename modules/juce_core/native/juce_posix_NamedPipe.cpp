@@ -47,18 +47,14 @@ public:
         }
     }
 
+    bool connect (int timeOutMilliseconds)
+    {
+        return openPipe (true, getTimeoutEnd (timeOutMilliseconds));
+    }
+
     int read (char* destBuffer, int maxBytesToRead, int timeOutMilliseconds)
     {
         auto timeoutEnd = getTimeoutEnd (timeOutMilliseconds);
-
-        if (pipeIn == -1)
-        {
-            pipeIn = openPipe (createdPipe ? pipeInName : pipeOutName, O_RDWR | O_NONBLOCK, timeoutEnd);
-
-            if (pipeIn == -1)
-                return -1;
-        }
-
         int bytesRead = 0;
 
         while (bytesRead < maxBytesToRead)
@@ -89,13 +85,8 @@ public:
     {
         auto timeoutEnd = getTimeoutEnd (timeOutMilliseconds);
 
-        if (pipeOut == -1)
-        {
-            pipeOut = openPipe (createdPipe ? pipeOutName : pipeInName, O_WRONLY, timeoutEnd);
-
-            if (pipeOut == -1)
-                return -1;
-        }
+        if (! openPipe (false, timeoutEnd))
+            return -1;
 
         int bytesWritten = 0;
 
@@ -160,6 +151,25 @@ private:
         }
     }
 
+    bool openPipe (bool isInput, uint32 timeoutEnd)
+    {
+        auto& pipe = isInput ? pipeIn : pipeOut;
+        int flags = isInput ? O_RDWR | O_NONBLOCK : O_WRONLY;
+
+        const String& pipeName = isInput ? (createdPipe ? pipeInName : pipeOutName)
+                                         : (createdPipe ? pipeOutName : pipeInName);
+
+        if (pipe == -1)
+        {
+            pipe = openPipe (pipeName, flags, timeoutEnd);
+
+            if (pipe == -1)
+                return false;
+        }
+
+        return true;
+    }
+
     static void waitForInput (int handle, int timeoutMsecs) noexcept
     {
         struct timeval timeout;
@@ -170,7 +180,7 @@ private:
         FD_ZERO (&rset);
         FD_SET (handle, &rset);
 
-        select (handle + 1, &rset, nullptr, 0, &timeout);
+        select (handle + 1, &rset, nullptr, nullptr, &timeout);
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
@@ -206,6 +216,12 @@ bool NamedPipe::openInternal (const String& pipeName, bool createPipe, bool must
    #endif
 
     if (createPipe && ! pimpl->createFifos (mustNotExist))
+    {
+        pimpl.reset();
+        return false;
+    }
+
+    if (! pimpl->connect (200))
     {
         pimpl.reset();
         return false;

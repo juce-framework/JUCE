@@ -281,7 +281,7 @@ struct HostPacketBuilder
         if (! data.hasCapacity (MessageType::bits))
             return false;
 
-        writeMessageType(MessageFromHost::factoryReset);
+        writeMessageType (MessageFromHost::factoryReset);
         return true;
     }
 
@@ -290,7 +290,7 @@ struct HostPacketBuilder
         if (! data.hasCapacity (MessageType::bits))
             return false;
 
-        writeMessageType(MessageFromHost::blockReset);
+        writeMessageType (MessageFromHost::blockReset);
         return true;
     }
 

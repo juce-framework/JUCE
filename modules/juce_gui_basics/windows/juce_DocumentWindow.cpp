@@ -212,7 +212,7 @@ void DocumentWindow::paint (Graphics& g)
                                                  titleBarArea.getHeight(),
                                                  titleSpaceX1,
                                                  jmax (1, titleSpaceX2 - titleSpaceX1),
-                                                 titleBarIcon.isValid() ? &titleBarIcon : 0,
+                                                 titleBarIcon.isValid() ? &titleBarIcon : nullptr,
                                                  ! drawTitleTextCentred);
 }
 

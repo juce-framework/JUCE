@@ -86,7 +86,7 @@ JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger() noexcept
     struct kinfo_proc info;
     int m[] = { CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid() };
     size_t sz = sizeof (info);
-    sysctl (m, 4, &info, &sz, 0, 0);
+    sysctl (m, 4, &info, &sz, nullptr, 0);
     return (info.kp_proc.p_flag & P_TRACED) != 0;
 }
 

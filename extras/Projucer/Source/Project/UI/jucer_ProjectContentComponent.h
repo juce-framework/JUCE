@@ -97,6 +97,7 @@ public:
 
     void deleteSelectedTreeItems();
 
+    void refreshProjectTreeFileStatuses();
     void updateMissingFileStatuses();
     void createProjectTabs();
     void deleteProjectTabs();

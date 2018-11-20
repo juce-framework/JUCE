@@ -36,14 +36,14 @@ ArrowButton::ArrowButton (const String& name, float arrowDirectionInRadians, Col
 
 ArrowButton::~ArrowButton() {}
 
-void ArrowButton::paintButton (Graphics& g, bool /*isMouseOverButton*/, bool isButtonDown)
+void ArrowButton::paintButton (Graphics& g, bool /*shouldDrawButtonAsHighlighted*/, bool shouldDrawButtonAsDown)
 {
     Path p (path);
 
-    const float offset = isButtonDown ? 1.0f : 0.0f;
+    const float offset = shouldDrawButtonAsDown ? 1.0f : 0.0f;
     p.applyTransform (path.getTransformToScaleToFit (offset, offset, getWidth() - 3.0f, getHeight() - 3.0f, false));
 
-    DropShadow (Colours::black.withAlpha (0.3f), isButtonDown ? 2 : 4, Point<int>()).drawForPath (g, p);
+    DropShadow (Colours::black.withAlpha (0.3f), shouldDrawButtonAsDown ? 2 : 4, Point<int>()).drawForPath (g, p);
 
     g.setColour (colour);
     g.fillPath (p);

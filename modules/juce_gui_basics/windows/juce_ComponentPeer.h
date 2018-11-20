@@ -377,6 +377,36 @@ public:
     */
     static ModifierKeys getCurrentModifiersRealtime() noexcept;
 
+    //==============================================================================
+    /**  Used to receive callbacks when the OS scale factor of this ComponentPeer changes.
+
+         This is used internally by some native JUCE windows on Windows and Linux and you
+         shouldn't need to worry about it in your own code unless you are dealing directly
+         with native windows.
+    */
+    struct JUCE_API  ScaleFactorListener
+    {
+        /** Destructor. */
+        virtual ~ScaleFactorListener() {}
+
+        /** Called when the scale factor changes. */
+        virtual void nativeScaleFactorChanged (double newScaleFactor) = 0;
+    };
+
+    /** Adds a scale factor listener. */
+    void addScaleFactorListener (ScaleFactorListener* listenerToAdd)          { scaleFactorListeners.add (listenerToAdd); }
+
+    /** Removes a scale factor listener. */
+    void removeScaleFactorListener (ScaleFactorListener* listenerToRemove)    { scaleFactorListeners.remove (listenerToRemove);  }
+
+    //==============================================================================
+    /** On Windows and Linux this will return the OS scaling factor currently being applied
+        to the native window. This is used to convert between physical and logical pixels
+        at the OS API level and you shouldn't need to use it in your own code unless you
+        are dealing directly with the native window.
+    */
+    virtual double getPlatformScaleFactor() const noexcept    { return 1.0; }
+
 protected:
     //==============================================================================
     Component& component;
@@ -384,6 +414,7 @@ protected:
     Rectangle<int> lastNonFullscreenBounds;
     ComponentBoundsConstrainer* constrainer = nullptr;
     static std::function<ModifierKeys()> getNativeRealtimeModifiers;
+    ListenerList<ScaleFactorListener> scaleFactorListeners;
 
 private:
     //==============================================================================

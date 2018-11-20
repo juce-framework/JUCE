@@ -34,7 +34,7 @@ namespace juce
  METHOD (flush,         "flush",    "()V") \
  METHOD (write,         "write",    "([SII)I") \
 
-DECLARE_JNI_CLASS (AudioTrack, "android/media/AudioTrack");
+DECLARE_JNI_CLASS (AudioTrack, "android/media/AudioTrack")
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================
@@ -47,14 +47,14 @@ DECLARE_JNI_CLASS (AudioTrack, "android/media/AudioTrack");
  METHOD (read,              "read",             "([SII)I") \
  METHOD (release,           "release",          "()V") \
 
-DECLARE_JNI_CLASS (AudioRecord, "android/media/AudioRecord");
+DECLARE_JNI_CLASS (AudioRecord, "android/media/AudioRecord")
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  STATICFIELD (SDK_INT, "SDK_INT", "I") \
 
- DECLARE_JNI_CLASS (AndroidBuildVersion, "android/os/Build$VERSION");
+ DECLARE_JNI_CLASS (AndroidBuildVersion, "android/os/Build$VERSION")
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================

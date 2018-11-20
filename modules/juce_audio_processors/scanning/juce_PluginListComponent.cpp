@@ -195,7 +195,7 @@ void PluginListComponent::setNumberOfThreadsForScanning (int num)
 
 void PluginListComponent::resized()
 {
-    Rectangle<int> r (getLocalBounds().reduced (2));
+    auto r = getLocalBounds().reduced (2);
 
     optionsButton.setBounds (r.removeFromBottom (24));
     optionsButton.changeWidthToFitText (24);

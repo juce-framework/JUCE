@@ -110,7 +110,7 @@ float abs (float arg);
     @param value        the value within the source range to map
     @param sourceMin    the minimum value of the source range
     @param sourceMax    the maximum value of the source range
-    @param destMin      the minumum value of the destination range
+    @param destMin      the minimum value of the destination range
     @param destMax      the maximum value of the destination range
     @returns            the original value mapped to the destination range
 */
@@ -272,21 +272,25 @@ void handleButtonDown (int index);
 */
 void handleButtonUp (int index);
 
-/** Called when a control block button is pressed.
+/** Call this when a control block button is pressed to trigger the buttons default behaviour.
 
     @param buttonIndex    the index of the button
 
     @note Requires >= 0.2.5 firmware
     @note Only valid with a control block
+
+    @see initControl onControlRelease
 */
 void onControlPress (int buttonIndex);
 
-/** Called when a control block button is released.
+/** Call this when a control block button is released to trigger the buttons default behaviour.
 
     @param buttonIndex    the index of the button
 
     @note Requires >= 0.2.5 firmware
     @note Only valid with a control block
+
+    @see initControl onControlPress
 */
 void onControlRelease (int buttonIndex);
 

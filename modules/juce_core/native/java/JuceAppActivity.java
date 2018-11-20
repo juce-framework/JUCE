@@ -31,6 +31,7 @@ import android.content.res.Configuration;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 $$JuceAndroidCameraImports$$       // If you get an error here, you need to re-save your project with the Projucer!
+$$JuceAndroidVideoImports$$        // If you get an error here, you need to re-save your project with the Projucer!
 import android.net.http.SslError;
 import android.net.Uri;
 import android.os.Bundle;
@@ -89,8 +90,11 @@ public class JuceAppActivity   extends $$JuceAppActivityBaseClass$$
     //==============================================================================
     public boolean isPermissionDeclaredInManifest (int permissionID)
     {
-        String permissionToCheck = getAndroidPermissionName(permissionID);
+        return isPermissionDeclaredInManifest (getAndroidPermissionName (permissionID));
+    }
 
+    public boolean isPermissionDeclaredInManifest (String permissionToCheck)
+    {
         try
         {
             PackageInfo info = getPackageManager().getPackageInfo(getApplicationContext().getPackageName(), PackageManager.GET_PERMISSIONS);
@@ -474,7 +478,9 @@ public class JuceAppActivity   extends $$JuceAppActivityBaseClass$$
     public final String getClipboardContent()
     {
         ClipboardManager clipboard = (ClipboardManager) getSystemService (CLIPBOARD_SERVICE);
-        return clipboard.getText().toString();
+
+        CharSequence content = clipboard.getText();
+        return content != null ? content.toString() : new String();
     }
 
     public final void setClipboardContent (String newText)
@@ -983,11 +989,13 @@ public class JuceAppActivity   extends $$JuceAppActivityBaseClass$$
                                           implements SurfaceHolder.Callback
     {
         private long nativeContext = 0;
+        private boolean forVideo;
 
-        NativeSurfaceView (Context context, long nativeContextPtr)
+        NativeSurfaceView (Context context, long nativeContextPtr, boolean createdForVideo)
         {
             super (context);
             nativeContext = nativeContextPtr;
+            forVideo = createdForVideo;
         }
 
         public Surface getNativeSurface()
@@ -1005,38 +1013,51 @@ public class JuceAppActivity   extends $$JuceAppActivityBaseClass$$
         @Override
         public void surfaceChanged (SurfaceHolder holder, int format, int width, int height)
         {
-            surfaceChangedNative (nativeContext, holder, format, width, height);
+            if (forVideo)
+                surfaceChangedNativeVideo (nativeContext, holder, format, width, height);
+            else
+                surfaceChangedNative (nativeContext, holder, format, width, height);
         }
 
         @Override
         public void surfaceCreated (SurfaceHolder holder)
         {
-            surfaceCreatedNative (nativeContext, holder);
+            if (forVideo)
+                surfaceCreatedNativeVideo (nativeContext, holder);
+            else
+                surfaceCreatedNative (nativeContext, holder);
         }
 
         @Override
         public void surfaceDestroyed (SurfaceHolder holder)
         {
-            surfaceDestroyedNative (nativeContext, holder);
+            if (forVideo)
+                surfaceDestroyedNativeVideo (nativeContext, holder);
+            else
+                surfaceDestroyedNative (nativeContext, holder);
         }
 
         @Override
         protected void dispatchDraw (Canvas canvas)
         {
             super.dispatchDraw (canvas);
-            dispatchDrawNative (nativeContext, canvas);
+
+            if (forVideo)
+                dispatchDrawNativeVideo (nativeContext, canvas);
+            else
+                dispatchDrawNative (nativeContext, canvas);
         }
 
         //==============================================================================
         @Override
-        protected void onAttachedToWindow ()
+        protected void onAttachedToWindow()
         {
             super.onAttachedToWindow();
             getHolder().addCallback (this);
         }
 
         @Override
-        protected void onDetachedFromWindow ()
+        protected void onDetachedFromWindow()
         {
             super.onDetachedFromWindow();
             getHolder().removeCallback (this);
@@ -1048,11 +1069,17 @@ public class JuceAppActivity   extends $$JuceAppActivityBaseClass$$
         private native void surfaceDestroyedNative (long nativeContextptr, SurfaceHolder holder);
         private native void surfaceChangedNative (long nativeContextptr, SurfaceHolder holder,
                                                   int format, int width, int height);
+
+        private native void dispatchDrawNativeVideo (long nativeContextPtr, Canvas canvas);
+        private native void surfaceCreatedNativeVideo (long nativeContextptr, SurfaceHolder holder);
+        private native void surfaceDestroyedNativeVideo (long nativeContextptr, SurfaceHolder holder);
+        private native void surfaceChangedNativeVideo (long nativeContextptr, SurfaceHolder holder,
+                                                       int format, int width, int height);
     }
 
-    public NativeSurfaceView createNativeSurfaceView (long nativeSurfacePtr)
+    public NativeSurfaceView createNativeSurfaceView (long nativeSurfacePtr, boolean forVideo)
     {
-        return new NativeSurfaceView (this, nativeSurfacePtr);
+        return new NativeSurfaceView (this, nativeSurfacePtr, forVideo);
     }
 
     //==============================================================================
@@ -1611,6 +1638,7 @@ $$JuceAndroidWebViewNativeCode$$ // If you get an error here, you need to re-sav
     }
 
     $$JuceAndroidCameraCode$$ // If you get an error here, you need to re-save your project with the Projucer!
+    $$JuceAndroidVideoCode$$ // If you get an error here, you need to re-save your project with the Projucer!
 
     //==============================================================================
     public static final String getLocaleValue (boolean isRegion)

@@ -178,7 +178,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
 
     void getProductsInformation (const StringArray& productIdentifiers)
     {
-        auto* productsRequest = [[SKProductsRequest alloc] initWithProductIdentifiers: [NSSet setWithArray: createNSArrayFromStringArray (productIdentifiers)]];
+        auto productsRequest = [[SKProductsRequest alloc] initWithProductIdentifiers: [NSSet setWithArray: createNSArrayFromStringArray (productIdentifiers)]];
 
         pendingProductInfoRequests.add (new PendingProductInfoRequest { PendingProductInfoRequest::Type::query,
                                                                         std::unique_ptr<SKProductsRequest, NSObjectDeleter> (productsRequest) });
@@ -195,8 +195,8 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
             return;
         }
 
-        auto* productIdentifiers = [NSArray arrayWithObject: juceStringToNS (productIdentifier)];
-        auto* productsRequest    = [[SKProductsRequest alloc] initWithProductIdentifiers:[NSSet setWithArray:productIdentifiers]];
+        auto productIdentifiers = [NSArray arrayWithObject: juceStringToNS (productIdentifier)];
+        auto productsRequest    = [[SKProductsRequest alloc] initWithProductIdentifiers:[NSSet setWithArray:productIdentifiers]];
 
         pendingProductInfoRequests.add (new PendingProductInfoRequest { PendingProductInfoRequest::Type::purchase,
                                                                         std::unique_ptr<SKProductsRequest, NSObjectDeleter> (productsRequest) });
@@ -213,7 +213,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
         }
         else
         {
-            auto* receiptRequest = [[SKReceiptRefreshRequest alloc] init];
+            auto receiptRequest = [[SKReceiptRefreshRequest alloc] init];
 
             pendingReceiptRefreshRequests.add (new PendingReceiptRefreshRequest { subscriptionsSharedSecret,
                                                                                   std::unique_ptr<SKReceiptRefreshRequest, NSObjectDeleter> ([receiptRequest retain]) });
@@ -377,7 +377,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
             jassert ([products count] == 1);
 
             auto* product = products[0];
-            auto* payment = [SKPayment paymentWithProduct: product];
+            auto payment = [SKPayment paymentWithProduct: product];
             [[SKPaymentQueue defaultQueue] addPayment: payment];
         }
         else
@@ -525,9 +525,9 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
     //==============================================================================
     void processReceiptRefreshResponseWithSubscriptionsSharedSecret (const String& secret)
     {
-        auto* receiptURL = [[NSBundle mainBundle] appStoreReceiptURL];
+        auto receiptURL = [[NSBundle mainBundle] appStoreReceiptURL];
 
-        if (auto* receiptData = [NSData dataWithContentsOfURL: receiptURL])
+        if (auto receiptData = [NSData dataWithContentsOfURL: receiptURL])
             fetchReceiptDetailsFromAppStore (receiptData, secret);
         else
             owner.listeners.call ([&] (Listener& l) { l.purchasesListRestored ({}, false, NEEDS_TRANS ("Receipt fetch failed")); });
@@ -535,16 +535,16 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
 
     void fetchReceiptDetailsFromAppStore (NSData* receiptData, const String& secret)
     {
-        auto* requestContents = [NSMutableDictionary dictionaryWithCapacity: (NSUInteger) (secret.isNotEmpty() ? 2 : 1)];
+        auto requestContents = [NSMutableDictionary dictionaryWithCapacity: (NSUInteger) (secret.isNotEmpty() ? 2 : 1)];
         [requestContents setObject: [receiptData base64EncodedStringWithOptions:0] forKey: nsStringLiteral ("receipt-data")];
 
         if (secret.isNotEmpty())
             [requestContents setObject: juceStringToNS (secret) forKey: nsStringLiteral ("password")];
 
         NSError* error;
-        auto* requestData = [NSJSONSerialization dataWithJSONObject: requestContents
-                                                            options: 0
-                                                              error: &error];
+        auto requestData = [NSJSONSerialization dataWithJSONObject: requestContents
+                                                           options: 0
+                                                             error: &error];
         if (requestData == nil)
         {
             sendReceiptFetchFail();
@@ -558,28 +558,28 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
        #endif
 
         // TODO: use juce URL here
-        auto* storeRequest = [NSMutableURLRequest requestWithURL: [NSURL URLWithString: nsStringLiteral (storeURL)]];
+        auto storeRequest = [NSMutableURLRequest requestWithURL: [NSURL URLWithString: nsStringLiteral (storeURL)]];
         [storeRequest setHTTPMethod: nsStringLiteral ("POST")];
         [storeRequest setHTTPBody: requestData];
 
-        auto* task = [[NSURLSession sharedSession] dataTaskWithRequest: storeRequest
-                                                     completionHandler:
-                                                        ^(NSData* data, NSURLResponse*, NSError* connectionError)
-                                                        {
-                                                            if (connectionError != nil)
-                                                            {
-                                                                sendReceiptFetchFail();
-                                                            }
-                                                            else
-                                                            {
-                                                                NSError* err;
+        auto task = [[NSURLSession sharedSession] dataTaskWithRequest: storeRequest
+                                                    completionHandler:
+                                                       ^(NSData* data, NSURLResponse*, NSError* connectionError)
+                                                       {
+                                                           if (connectionError != nil)
+                                                           {
+                                                               sendReceiptFetchFail();
+                                                           }
+                                                           else
+                                                           {
+                                                               NSError* err;
 
-                                                                if (NSDictionary* receiptDetails = [NSJSONSerialization JSONObjectWithData: data options: 0 error: &err])
-                                                                    processReceiptDetails (receiptDetails);
-                                                                else
-                                                                    sendReceiptFetchFail();
-                                                            }
-                                                        }];
+                                                               if (NSDictionary* receiptDetails = [NSJSONSerialization JSONObjectWithData: data options: 0 error: &err])
+                                                                   processReceiptDetails (receiptDetails);
+                                                               else
+                                                                   sendReceiptFetchFail();
+                                                           }
+                                                       }];
 
         [task resume];
     }
@@ -656,7 +656,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
         }
         else if (auto dateAsString = getAs<NSString> (date))
         {
-            auto* formatter = [[NSNumberFormatter alloc] init];
+            auto formatter = [[NSNumberFormatter alloc] init];
             [formatter setNumberStyle: NSNumberFormatterDecimalStyle];
             dateAsNumber = [formatter numberFromString: dateAsString];
             [formatter release];

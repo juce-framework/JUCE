@@ -104,6 +104,7 @@ struct ConvolutionEngine
 
         buffersInputSegments.clear();
         buffersImpulseSegments.clear();
+        bufferOutput.clear();
 
         for (size_t i = 0; i < numInputSegments; ++i)
         {
@@ -375,6 +376,16 @@ struct Convolution::Pimpl  : private Thread
     ~Pimpl()
     {
         stopThread (10000);
+    }
+
+    //==============================================================================
+    /** Inits the size of the interpolation buffer. */
+    void initProcessing (int maximumBufferSize)
+    {
+        stopThread (1000);
+
+        interpolationBuffer.setSize (1, maximumBufferSize, false, false, true);
+        mustInterpolate = false;
     }
 
     //==============================================================================
@@ -659,8 +670,6 @@ struct Convolution::Pimpl  : private Thread
         // action depending on the change level
         if (changeLevel == 3)
         {
-            interpolationBuffer.setSize (2, static_cast<int> (currentInfo.maximumBufferSize), false, false, true);
-
             loadImpulseResponse();
             processImpulseResponse();
             initializeConvolutionEngines();
@@ -717,16 +726,16 @@ struct Convolution::Pimpl  : private Thread
             {
                 auto&& buffer = output.getSingleChannelBlock (channel);
 
-                interpolationBuffer.copyFrom ((int) channel, 0, input.getChannelPointer (channel), (int) numSamples);
+                interpolationBuffer.copyFrom (0, 0, input.getChannelPointer (channel), (int) numSamples);
 
                 engines[(int) channel]->processSamples (input.getChannelPointer (channel), buffer.getChannelPointer (0), numSamples);
                 changeVolumes[channel].applyGain (buffer.getChannelPointer (0), (int) numSamples);
 
-                auto* interPtr = interpolationBuffer.getWritePointer ((int) channel);
+                auto* interPtr = interpolationBuffer.getWritePointer (0);
                 engines[(int) channel + 2]->processSamples (interPtr, interPtr, numSamples);
                 changeVolumes[channel + 2].applyGain (interPtr, (int) numSamples);
 
-                buffer += interpolated.getSingleChannelBlock (channel);
+                buffer += interpolated;
             }
 
             if (input.getNumChannels() > 1 && currentInfo.wantsStereo == false)
@@ -1154,6 +1163,7 @@ void Convolution::prepare (const ProcessSpec& spec)
                                juce::var (static_cast<int> (spec.maximumBlockSize)) };
 
     pimpl->addToFifo (types, parameters, 2);
+    pimpl->initProcessing (static_cast<int> (spec.maximumBlockSize));
 
     for (size_t channel = 0; channel < spec.numChannels; ++channel)
     {

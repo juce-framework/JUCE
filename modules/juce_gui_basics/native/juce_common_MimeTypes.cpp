@@ -477,7 +477,7 @@ MimeTypeTableEntry MimeTypeTableEntry::table[640] =
     {"pvu",      "paleovu/x-pv"},
     {"pwz",      "application/vnd.ms-powerpoint"},
     {"py",       "text/x-script.phyton"},
-    {"pyc",      "applicaiton/x-bytecode.python"},
+    {"pyc",      "application/x-bytecode.python"},
     {"qcp",      "audio/vnd.qcelp"},
     {"qd3",      "x-world/x-3dmf"},
     {"qd3d",     "x-world/x-3dmf"},

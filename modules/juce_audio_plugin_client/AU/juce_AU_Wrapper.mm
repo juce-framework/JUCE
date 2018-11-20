@@ -474,6 +474,31 @@ public:
         {
             switch (inID)
             {
+                case kAudioUnitProperty_ParameterClumpName:
+
+                    if (auto* clumpNameInfo = (AudioUnitParameterNameInfo*) outData)
+                    {
+                        if (juceFilter != nullptr)
+                        {
+                            auto clumpIndex = clumpNameInfo->inID - 1;
+                            const auto* group = parameterGroups[(int) clumpIndex];
+                            auto name = group->getName();
+
+                            while (group->getParent() != &juceFilter->getParameterTree())
+                            {
+                                group = group->getParent();
+                                name = group->getName() + group->getSeparator() + name;
+                            }
+
+                            clumpNameInfo->outName = name.toCFString();
+                            return noErr;
+                        }
+                    }
+
+                    // Failed to find a group corresponding to the clump ID.
+                    jassertfalse;
+                    break;
+
                 case juceFilterObjectPropertyID:
                     ((void**) outData)[0] = (void*) static_cast<AudioProcessor*> (juceFilter.get());
                     ((void**) outData)[1] = (void*) this;
@@ -878,6 +903,14 @@ public:
 
                 if (param->isMetaParameter())
                     outParameterInfo.flags |= kAudioUnitParameterFlag_IsGlobalMeta;
+
+                auto parameterGroupHierarchy = juceFilter->getParameterTree().getGroupsForParameter (param);
+
+                if (! parameterGroupHierarchy.isEmpty())
+                {
+                    outParameterInfo.flags |= kAudioUnitParameterFlag_HasClump;
+                    outParameterInfo.clumpID = (UInt32) parameterGroups.indexOf (parameterGroupHierarchy.getLast()) + 1;
+                }
 
                 // Is this a meter?
                 if (((param->getCategory() & 0xffff0000) >> 16) == 2)
@@ -1687,6 +1720,7 @@ private:
     LegacyAudioParametersWrapper juceParameters;
     HashMap<int32, AudioProcessorParameter*> paramMap;
     Array<AudioUnitParameterID> auParamIDs;
+    Array<const AudioProcessorParameterGroup*> parameterGroups;
 
     //==============================================================================
     AudioUnitEvent auEvent;
@@ -1839,6 +1873,8 @@ private:
     //==============================================================================
     void addParameters()
     {
+        parameterGroups = juceFilter->getParameterTree().getSubgroups (true);
+
         juceParameters.update (*juceFilter, forceUseLegacyParamIDs);
         const int numParams = juceParameters.getNumParameters();
 
@@ -1877,6 +1913,7 @@ private:
             OwnedArray<const __CFString>* stringValues = nullptr;
 
             auto initialValue = param->getValue();
+            bool paramIsLegacy = dynamic_cast<LegacyAudioParameter*> (param) != nullptr;
 
             if (param->isDiscrete() && (! forceUseLegacyParamIDs))
             {
@@ -1886,17 +1923,26 @@ private:
 
                 const auto maxValue = getMaximumParameterValue (param);
 
+                auto getTextValue = [param, paramIsLegacy] (float value)
+                {
+                    if (paramIsLegacy)
+                    {
+                        param->setValue (value);
+                        return param->getCurrentValueAsText();
+                    }
+
+                    return param->getText (value, 256);
+                };
+
                 for (int i = 0; i < numSteps; ++i)
                 {
                     auto value = (float) i / maxValue;
-
-                    // Once legacy parameters are deprecated this can be replaced by getText
-                    param->setValue (value);
-                    stringValues->add (CFStringCreateCopy (nullptr, (param->getCurrentValueAsText().toCFString())));
+                    stringValues->add (CFStringCreateCopy (nullptr, (getTextValue (value).toCFString())));
                 }
             }
 
-            param->setValue (initialValue);
+            if (paramIsLegacy)
+                param->setValue (initialValue);
 
             parameterValueStringArrays.add (stringValues);
         }
@@ -1928,7 +1974,9 @@ private:
 
     AudioProcessorParameter* getParameterForAUParameterID (AudioUnitParameterID address) const noexcept
     {
-        return paramMap[static_cast<int32> (address)];
+        auto index = static_cast<int32> (address);
+        return forceUseLegacyParamIDs ? juceParameters.getParamForIndex (index)
+                                      : paramMap[index];
     }
 
     //==============================================================================

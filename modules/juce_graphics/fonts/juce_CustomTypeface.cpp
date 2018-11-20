@@ -313,7 +313,7 @@ float CustomTypeface::getStringWidth (const String& text)
         else
         {
             if (auto fallbackTypeface = Typeface::getFallbackTypeface())
-                if (fallbackTypeface != this)
+                if (fallbackTypeface.get() != this)
                     x += fallbackTypeface->getStringWidth (String::charToString (c));
         }
     }
@@ -342,7 +342,7 @@ void CustomTypeface::getGlyphPositions (const String& text, Array<int>& resultGl
         {
             auto fallbackTypeface = getFallbackTypeface();
 
-            if (fallbackTypeface != nullptr && fallbackTypeface != this)
+            if (fallbackTypeface != nullptr && fallbackTypeface.get() != this)
             {
                 Array<int> subGlyphs;
                 Array<float> subOffsets;
@@ -371,7 +371,7 @@ bool CustomTypeface::getOutlineForGlyph (int glyphNumber, Path& path)
     }
 
     if (auto fallbackTypeface = getFallbackTypeface())
-        if (fallbackTypeface != this)
+        if (fallbackTypeface.get() != this)
             return fallbackTypeface->getOutlineForGlyph (glyphNumber, path);
 
     return false;
@@ -389,7 +389,7 @@ EdgeTable* CustomTypeface::getEdgeTableForGlyph (int glyphNumber, const AffineTr
     else
     {
         if (auto fallbackTypeface = getFallbackTypeface())
-            if (fallbackTypeface != this)
+            if (fallbackTypeface.get() != this)
                 return fallbackTypeface->getEdgeTableForGlyph (glyphNumber, transform, fontHeight);
     }
 

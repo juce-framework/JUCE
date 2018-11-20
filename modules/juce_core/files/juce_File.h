@@ -114,7 +114,7 @@ public:
     bool isDirectory() const;
 
     /** Checks whether the path of this file represents the root of a file system,
-        irrespective of its existance.
+        irrespective of its existence.
 
         This will return true for "C:", "D:", etc on Windows and "/" on other
         platforms.
@@ -457,6 +457,9 @@ public:
         If this file is actually a directory, it may not be deleted correctly if it
         contains files. See deleteRecursively() as a better way of deleting directories.
 
+        If this file is a symlink, then the symlink will be deleted and not the target
+        of the symlink.
+
         @returns    true if the file has been successfully deleted (or if it didn't exist to
                     begin with).
         @see deleteRecursively
@@ -468,11 +471,14 @@ public:
         If this file is a directory, this will try to delete it and all its subfolders. If
         it's just a file, it will just try to delete the file.
 
-        @returns    true if the file and all its subfolders have been successfully deleted
-                    (or if it didn't exist to begin with).
+
+        @param followSymlinks If true, then any symlink pointing to a directory will also
+                              recursively delete the contents of that directory
+        @returns              true if the file and all its subfolders have been successfully
+                              deleted (or if it didn't exist to begin with).
         @see deleteFile
     */
-    bool deleteRecursively() const;
+    bool deleteRecursively (bool followSymlinks = false) const;
 
     /** Moves this file or folder to the trash.
 
@@ -601,6 +607,17 @@ public:
     //==============================================================================
     /** Creates a stream to read from this file.
 
+        Note that this is an old method, and actually it's usually best to avoid it and
+        instead use an RAII pattern with an FileInputStream directly, e.g.
+        @code
+        FileInputStream input (fileToOpen);
+
+        if (input.openedOk())
+        {
+            input.read (etc...
+        }
+        @endcode
+
         @returns    a stream that will read from this file (initially positioned at the
                     start of the file), or nullptr if the file can't be opened for some reason
         @see createOutputStream, loadFileAsData
@@ -609,9 +626,30 @@ public:
 
     /** Creates a stream to write to this file.
 
+        Note that this is an old method, and actually it's usually best to avoid it and
+        instead use an RAII pattern with an FileOutputStream directly, e.g.
+        @code
+        FileOutputStream output (fileToOpen);
+
+        if (output.openedOk())
+        {
+            output.read etc...
+        }
+        @endcode
+
         If the file exists, the stream that is returned will be positioned ready for
-        writing at the end of the file, so you might want to use deleteFile() first
-        to write to an empty file.
+        writing at the end of the file. If you want to write to the start of the file,
+        replacing the existing content, then you can do the following:
+        @code
+        FileOutputStream output (fileToOverwrite);
+
+        if (output.openedOk())
+        {
+            output.setPosition (0);
+            output.truncate();
+            ...
+        }
+        @endcode
 
         @returns    a stream that will write to this file (initially positioned at the
                     end of the file), or nullptr if the file can't be opened for some reason
@@ -1053,9 +1091,9 @@ public:
        Use File::getSeparatorChar() and File::getSeparatorString(), and instead of File::nonexistent,
        just use File() or {}.
     */
-    JUCE_DEPRECATED_STATIC (static const juce_wchar separator);
-    JUCE_DEPRECATED_STATIC (static const StringRef separatorString);
-    JUCE_DEPRECATED_STATIC (static const File nonexistent);
+    JUCE_DEPRECATED_STATIC (static const juce_wchar separator;)
+    JUCE_DEPRECATED_STATIC (static const StringRef separatorString;)
+    JUCE_DEPRECATED_STATIC (static const File nonexistent;)
 
 private:
     //==============================================================================

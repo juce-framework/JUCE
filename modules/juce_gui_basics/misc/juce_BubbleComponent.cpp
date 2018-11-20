@@ -64,7 +64,7 @@ void BubbleComponent::setPosition (Component* componentToPointTo, int distanceFr
     if (Component* p = getParentComponent())
         target = p->getLocalArea (componentToPointTo, componentToPointTo->getLocalBounds());
     else
-        target = componentToPointTo->getScreenBounds();
+        target = componentToPointTo->getScreenBounds().transformedBy (getTransform().inverted());
 
     setPosition (target, distanceFromTarget, arrowLength);
 }
@@ -86,8 +86,8 @@ void BubbleComponent::setPosition (Rectangle<int> rectangleToPointTo,
     const int totalW = content.getWidth()  + distanceFromTarget * 2;
     const int totalH = content.getHeight() + distanceFromTarget * 2;
 
-    const Rectangle<int> availableSpace (getParentComponent() != nullptr ? getParentComponent()->getLocalBounds()
-                                                                         : getParentMonitorArea());
+    auto availableSpace = (getParentComponent() != nullptr ? getParentComponent()->getLocalBounds()
+                                                           : getParentMonitorArea().transformedBy (getTransform().inverted()));
 
     int spaceAbove = ((allowablePlacements & above) != 0) ? jmax (0, rectangleToPointTo.getY()  - availableSpace.getY()) : -1;
     int spaceBelow = ((allowablePlacements & below) != 0) ? jmax (0, availableSpace.getBottom() - rectangleToPointTo.getBottom()) : -1;

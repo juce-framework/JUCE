@@ -46,14 +46,10 @@ public:
     Justification (int justificationFlags) noexcept   : flags (justificationFlags) {}
 
     /** Creates a copy of another Justification object. */
-    Justification (const Justification& other) noexcept   : flags (other.flags) {}
+    Justification (const Justification&) = default;
 
     /** Copies another Justification object. */
-    Justification& operator= (const Justification& other) noexcept
-    {
-        flags = other.flags;
-        return *this;
-    }
+    Justification& operator= (const Justification&) = default;
 
     bool operator== (const Justification& other) const noexcept     { return flags == other.flags; }
     bool operator!= (const Justification& other) const noexcept     { return flags != other.flags; }
