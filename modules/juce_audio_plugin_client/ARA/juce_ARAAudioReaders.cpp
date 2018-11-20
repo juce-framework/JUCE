@@ -254,7 +254,7 @@ void ARAPlaybackRegionReader::willUpdatePlaybackRegionProperties (ARAPlaybackReg
     }
 }
 
-void ARAPlaybackRegionReader::willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept
+void ARAPlaybackRegionReader::willDestroyPlaybackRegion (ARAPlaybackRegion* /*playbackRegion*/) noexcept
 {
     invalidate();
 }
