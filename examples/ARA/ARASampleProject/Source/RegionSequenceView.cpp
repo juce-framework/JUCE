@@ -37,11 +37,8 @@ RegionSequenceView::RegionSequenceView (ARASampleProjectAudioProcessorEditor* ed
 
 RegionSequenceView::~RegionSequenceView()
 {
-    if (regionSequence)
-    {
-        regionSequence->removeListener(this);
-        static_cast<ARADocument*>(regionSequence->getDocument ())->removeListener (this);
-    }
+    regionSequence->removeListener(this);
+    static_cast<ARADocument*>(regionSequence->getDocument ())->removeListener (this);
 
     audioThumb.clear();
     audioThumb.removeChangeListener (this);
@@ -86,7 +83,7 @@ void RegionSequenceView::recreateRegionSequenceReader()
 
 void RegionSequenceView::doEndEditing (ARADocument* document)
 {
-    if (!regionSequenceReader || ! regionSequenceReader->isValid())
+    if (! regionSequenceReader || ! regionSequenceReader->isValid())
     {
         recreateRegionSequenceReader();
         editorComponent->setDirty();

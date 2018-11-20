@@ -24,15 +24,15 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
     // TODO JUCE_ARA should we rename the function that recreates the view?
     if (isARAEditorView())
     {
-        auto document = static_cast<ARADocument*> (getARADocumentController ()->getDocument ());
+        auto document = static_cast<ARADocument*> (getARADocumentController()->getDocument());
         document->addListener (this);
         getARAEditorView()->addSelectionListener (this);
 
-        for (auto regionSequence : document->getRegionSequences ())
+        for (auto regionSequence : document->getRegionSequences())
         {
             static_cast<ARARegionSequence*>(regionSequence)->addListener (this);
             regionSequenceViews.add (new RegionSequenceView (this, static_cast<ARARegionSequence*>(regionSequence)));
-            regionSequenceListView.addAndMakeVisible (regionSequenceViews.getLast ());
+            regionSequenceListView.addAndMakeVisible (regionSequenceViews.getLast());
         }
 
         rebuildView();
@@ -42,7 +42,7 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
 
 ARASampleProjectAudioProcessorEditor::~ARASampleProjectAudioProcessorEditor()
 {
-    if (isARAEditorView ())
+    if (isARAEditorView())
     {
         auto document = static_cast<ARADocument*> (getARADocumentController()->getDocument());
         document->removeListener (this);
@@ -107,8 +107,8 @@ void ARASampleProjectAudioProcessorEditor::rebuildView()
 {
     std::sort(regionSequenceViews.begin(), regionSequenceViews.end(),[] (RegionSequenceView* a, RegionSequenceView* b)
     {
-        int orderA = a->getRegionSequence ()->getOrderIndex ();
-        int orderB = b->getRegionSequence ()->getOrderIndex ();
+        int orderA = a->getRegionSequence()->getOrderIndex();
+        int orderB = b->getRegionSequence()->getOrderIndex();
         return std::less<int>() (orderA, orderB);
     });
     
@@ -117,7 +117,7 @@ void ARASampleProjectAudioProcessorEditor::rebuildView()
 
 void ARASampleProjectAudioProcessorEditor::doEndEditing (ARADocument* document)
 {
-    for (auto regionSequence : document->getRegionSequences ())
+    for (auto regionSequence : document->getRegionSequences())
     {
         // TODO JUCE_ARA
         // we need a proper callback for when a region sequence is created
@@ -127,34 +127,34 @@ void ARASampleProjectAudioProcessorEditor::doEndEditing (ARADocument* document)
         // See if we need to make a new view - ideally we'd know when a new
         // region sequence is created and use that hook to make the view
         bool makeNewView = true;
-        for (int i = 0; i < regionSequenceViews.size () && makeNewView; i++)
+        for (int i = 0; i < regionSequenceViews.size() && makeNewView; i++)
             if (regionSequenceViews[i]->getRegionSequence() == regionSequence)
                 makeNewView = false;
         if (makeNewView)
         {
             regionSequenceViews.add (new RegionSequenceView (this, static_cast<ARARegionSequence*>(regionSequence)));
-            regionSequenceListView.addAndMakeVisible (regionSequenceViews.getLast ());
-            setDirty ();
+            regionSequenceListView.addAndMakeVisible (regionSequenceViews.getLast());
+            setDirty();
         }
     }
 
     if (isViewDirty)
     {
-        rebuildView ();
+        rebuildView();
         isViewDirty = false;
     }
 }
 
 void ARASampleProjectAudioProcessorEditor::didUpdateRegionSequenceProperties (ARARegionSequence* /*regionSequence*/)
 {
-    setDirty ();
+    setDirty();
 }
 
 void ARASampleProjectAudioProcessorEditor::willDestroyRegionSequence (ARARegionSequence* regionSequence)
 {
-    for (int i = 0; i < regionSequenceViews.size (); i++)
+    for (int i = 0; i < regionSequenceViews.size(); i++)
     {
-        if (regionSequenceViews[i]->getRegionSequence () == regionSequence)
+        if (regionSequenceViews[i]->getRegionSequence() == regionSequence)
         {
             regionSequenceViews.remove (i, true);
             return;

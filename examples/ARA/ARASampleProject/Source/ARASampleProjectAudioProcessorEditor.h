@@ -40,10 +40,10 @@ public:
     void willDestroyRegionSequence (ARARegionSequence* regionSequence) override;
 
     // function to flag that our view needs to be rebuilt
-    void setDirty () { isViewDirty = true; }
+    void setDirty() { isViewDirty = true; }
 
 private:
-    void rebuildView ();
+    void rebuildView();
 
 private:
 
