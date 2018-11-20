@@ -151,26 +151,40 @@ ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARAPlaybackRenderer* playbackR
     bitsPerSample = 32;
     usesFloatingPointData = true;
     numChannels = 1;
-    lengthInSamples = 0;
-    sampleRate = 0.0;
 
-    for (auto playbackRegion : playbackRegions)
+    if (playbackRegions.size() == 0)
     {
-        ARA::PlugIn::AudioModification* modification = playbackRegion->getAudioModification();
-        ARA::PlugIn::AudioSource* source = modification->getAudioSource();
+        lengthInSamples = 0;
+        sampleRate = 44100.0;
+        regionsStartTime = 0.0;
+        regionsEndTime = 0.0;
+    }
+    else
+    {
+        sampleRate = 0.0;
+        regionsStartTime = std::numeric_limits<double>::max();
+        regionsEndTime = std::numeric_limits<double>::min();
 
-        if (sampleRate == 0.0)
-            sampleRate = source->getSampleRate();
+        for (auto playbackRegion : playbackRegions)
+        {
+            ARA::PlugIn::AudioModification* modification = playbackRegion->getAudioModification();
+            ARA::PlugIn::AudioSource* source = modification->getAudioSource();
 
-        numChannels = jmax (numChannels, (unsigned int) source->getChannelCount());
-        lengthInSamples = jmax (lengthInSamples, playbackRegion->getEndInPlaybackSamples (sampleRate));
+            if (sampleRate == 0.0)
+                sampleRate = source->getSampleRate();
 
-        playbackRenderer->addPlaybackRegion (playbackRegion);
-        playbackRegion->addListener (this);
+            numChannels = jmax (numChannels, (unsigned int) source->getChannelCount());
+
+            regionsStartTime = jmin (regionsStartTime, playbackRegion->getStartInPlaybackTime());
+            regionsEndTime = jmax (regionsEndTime, playbackRegion->getEndInPlaybackTime());
+
+            playbackRenderer->addPlaybackRegion (playbackRegion);
+            playbackRegion->addListener (this);
+        }
+
+        lengthInSamples = (int64)((regionsEndTime - regionsStartTime) * sampleRate + 0.5);
     }
 
-    if (sampleRate == 0.0)
-        sampleRate = 44100;
     playbackRenderer->prepareToPlay (sampleRate, 16*1024);
 }
 

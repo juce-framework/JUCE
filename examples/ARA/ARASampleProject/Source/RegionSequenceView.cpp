@@ -55,12 +55,12 @@ void RegionSequenceView::changeListenerCallback (juce::ChangeBroadcaster* /*broa
 
 double RegionSequenceView::getStartInSecs()
 {
-    return startInSecs;
+    return regionSequenceReader->getRegionsStartTime();
 }
 
 double RegionSequenceView::getLengthInSecs()
 {
-    return audioThumb.getTotalLength() - startInSecs;
+    return regionSequenceReader->getRegionsEndTime() - regionSequenceReader->getRegionsStartTime();
 }
 
 void RegionSequenceView::setIsSelected (bool value)
@@ -83,10 +83,6 @@ void RegionSequenceView::recreateRegionSequenceReader()
     audioThumb.setReader (regionSequenceReader, kAudioThumbHashCode);
 
     startInSecs = audioThumb.getTotalLength();
-
-// TODO JUCE_ARA do we need this?
-//  audioThumbCache.loadThumb(audioThumb, kAudioThumbHashCode);
-//  editorComponent->setDirty ();
 }
 
 void RegionSequenceView::doEndEditing (ARADocument* document)

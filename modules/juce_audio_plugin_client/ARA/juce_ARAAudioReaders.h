@@ -46,6 +46,10 @@ public:
     ARAPlaybackRegionReader (ARAPlaybackRenderer* playbackRenderer, std::vector<ARAPlaybackRegion*> const& playbackRegions);
     virtual ~ARAPlaybackRegionReader();
 
+    // TODO JUCE_ARA temporary api - do we want to keep that? If so, shouldn't we return some proper range type?
+    double getRegionsStartTime() const { return regionsStartTime; }
+    double getRegionsEndTime() const  { return regionsEndTime; }
+
     bool isValid() const { return (playbackRenderer != nullptr); }
     void invalidate();
 
@@ -58,6 +62,8 @@ public:
 private:
     ARAPlaybackRenderer* playbackRenderer;
     ReadWriteLock lock;
+    double regionsStartTime;
+    double regionsEndTime;
 };
 
 //==============================================================================
