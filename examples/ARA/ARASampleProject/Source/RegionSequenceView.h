@@ -12,9 +12,8 @@ class ARASampleProjectAudioProcessorEditor;
 */
 class RegionSequenceView: public Component, 
                           public juce::ChangeListener,
-                          public ARADocument::Listener,               // Receives ARA region sequence update notifications
-                          public ARARegionSequence::Listener,         // Receives ARA region sequence update notifications
-                          public ARAPlaybackRegion::Listener         // Receives ARA playback region update notifications
+                          public ARADocument::Listener,
+                          public ARARegionSequence::Listener
 {
 public:
     ~RegionSequenceView();
@@ -33,22 +32,17 @@ public:
     void doEndEditing (ARADocument* document) override;
 
     void didUpdateRegionSequenceProperties (ARARegionSequence* regionSequence) override;
-    void willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion) override;
-    void didAddPlaybackRegionToRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion) override;
-
-    // ARAPlaybackRegion::Listener overrides
-    virtual void willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties) override;
-    virtual void willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion) override;
 
 private:
-    String name;
-    String orderIndex;
-    Colour trackColour;
+    void recreateRegionSequneceReader();
+
+private:
     bool isSelected;
     double startInSecs;
 
     ARASampleProjectAudioProcessorEditor* editorComponent;
     ARARegionSequence* regionSequence;
+    ARARegionSequenceReader* regionSequenceReader;
 
     enum { kAudioThumbHashCode = 1 };
     juce::AudioFormatManager audioFormatManger;

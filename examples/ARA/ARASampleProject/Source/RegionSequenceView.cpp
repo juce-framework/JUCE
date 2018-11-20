@@ -5,6 +5,10 @@
 
 void RegionSequenceView::paint (Graphics& g)
 {
+    Colour trackColour;
+    if (const ARA::ARAColor* colour = regionSequence->getColor ())
+        trackColour = Colour ((uint8) jmap (colour->r, 0.0f, 255.0f), (uint8) jmap (colour->g, 0.0f, 255.0f), (uint8) jmap (colour->b, 0.0f, 255.0f));
+
     g.fillAll (trackColour);
     g.setColour (isSelected ? juce::Colours::yellow : juce::Colours::black);
     g.drawRect (getLocalBounds());
@@ -13,7 +17,7 @@ void RegionSequenceView::paint (Graphics& g)
         audioThumb.drawChannels (g, getLocalBounds(), startInSecs, audioThumb.getTotalLength(), 1.0);
     g.setColour (trackColour.contrasting (1.0f));
     g.setFont (Font (12.0));
-    g.drawText ("Track #" + orderIndex + ": " + name, 0, 0, getWidth(), getHeight(), juce::Justification::bottomLeft);
+    g.drawText ("Track #" + String (regionSequence->getOrderIndex()) + ": " + regionSequence->getName(), 0, 0, getWidth(), getHeight(), juce::Justification::bottomLeft);
 }
 
 RegionSequenceView::RegionSequenceView (ARASampleProjectAudioProcessorEditor* editor, ARARegionSequence* sequence)
@@ -24,33 +28,18 @@ RegionSequenceView::RegionSequenceView (ARASampleProjectAudioProcessorEditor* ed
 , audioThumbCache (1)
 , audioThumb (128, audioFormatManger, audioThumbCache)
 {
-    auto documentController = static_cast<ARASampleProjectDocumentController*> (regionSequence->getDocument()->getDocumentController());
-    name = String (regionSequence->getName());
-    orderIndex = String (regionSequence->getOrderIndex());
+    recreateRegionSequneceReader();
+
     audioThumb.addChangeListener (this);
-    audioThumb.setReader (documentController->createRegionSequenceReader (regionSequence), kAudioThumbHashCode);
-    startInSecs = audioThumb.getTotalLength();
 
     regionSequence->addListener (this);
     static_cast<ARADocument*>(regionSequence->getDocument ())->addListener (this);
-
-    for (auto region : regionSequence->getPlaybackRegions ())
-    {
-        startInSecs = jmin (startInSecs, region->getStartInPlaybackTime ());
-        static_cast<ARAPlaybackRegion*> (region)->addListener (this);
-    }
-
-    if (const ARA::ARAColor* colour = regionSequence->getColor())
-        trackColour = Colour ((uint8)jmap (colour->r, 0.0f, 255.0f), (uint8)jmap (colour->g, 0.0f, 255.0f), (uint8)jmap (colour->b, 0.0f, 255.0f));
 }
 
 RegionSequenceView::~RegionSequenceView()
 {
     if (regionSequence)
     {
-        for (auto region : regionSequence->getPlaybackRegions ())
-            static_cast<ARAPlaybackRegion*> (region)->removeListener (this);
-        
         regionSequence->removeListener(this);
         static_cast<ARADocument*>(regionSequence->getDocument ())->removeListener (this);
     }
@@ -80,7 +69,6 @@ void RegionSequenceView::setIsSelected (bool value)
     isSelected = value;
     if (needsRepaint)
         repaint();
-    
 }
 
 bool RegionSequenceView::getIsSelected() const
@@ -88,51 +76,33 @@ bool RegionSequenceView::getIsSelected() const
     return isSelected;
 }
 
+void RegionSequenceView::recreateRegionSequneceReader()
+{
+    auto documentController = static_cast<ARASampleProjectDocumentController*> (regionSequence->getDocument()->getDocumentController());
+    regionSequenceReader = documentController->createRegionSequenceReader (regionSequence);
+    audioThumb.setReader (regionSequenceReader, kAudioThumbHashCode);
+    audioThumbCache.loadThumb(audioThumb, kAudioThumbHashCode);
+
+    startInSecs = audioThumb.getTotalLength();
+
+// TODO JUCE_ARA do we need this?
+//  audioThumbCache.loadThumb(audioThumb, kAudioThumbHashCode);
+//  editorComponent->setDirty ();
+}
+
 void RegionSequenceView::doEndEditing (ARADocument* document)
 {
-    if (audioThumbCache.loadThumb(audioThumb, kAudioThumbHashCode) == false)
+    if (!regionSequenceReader || ! regionSequenceReader->isValid())
     {
-        auto documentController = static_cast<ARASampleProjectDocumentController*> (document->getDocumentController ());
-        audioThumb.setReader (documentController->createRegionSequenceReader (regionSequence), kAudioThumbHashCode);
-    }
-}
+        recreateRegionSequneceReader();
 
-void RegionSequenceView::willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties)
-{
-    if ((playbackRegion->getStartInPlaybackTime () != newProperties->startInPlaybackTime) ||
-        (playbackRegion->getDurationInPlaybackTime () != newProperties->durationInPlaybackTime))
-    {
-        editorComponent->setDirty ();
         audioThumbCache.clear ();
-
-        // TODO JUCE_ARA
-        // put this in a function to avoid repetition
-        startInSecs = std::numeric_limits<double>::max ();
-        for (auto region : regionSequence->getPlaybackRegions ())
-            startInSecs = jmin (startInSecs, newProperties->startInPlaybackTime);
-    }
+   }
 }
 
-void RegionSequenceView::willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion)
+void RegionSequenceView::didUpdateRegionSequenceProperties (ARARegionSequence* sequence)
 {
-    editorComponent->setDirty ();
-    audioThumbCache.clear ();
-    playbackRegion->removeListener (this);
-}
+    jassert (sequence == regionSequence);
 
-void RegionSequenceView::didUpdateRegionSequenceProperties (ARARegionSequence* /*sequence*/)
-{
-    if (const ARA::ARAColor* colour = regionSequence->getColor ())
-        trackColour = Colour ((uint8) jmap (colour->r, 0.0f, 255.0f), (uint8) jmap (colour->g, 0.0f, 255.0f), (uint8) jmap (colour->b, 0.0f, 255.0f));
     repaint();
-}
-
-void RegionSequenceView::willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* /*sequence*/, ARAPlaybackRegion* playbackRegion)
-{
-    playbackRegion->removeListener (this);
-}
-
-void RegionSequenceView::didAddPlaybackRegionToRegionSequence (ARARegionSequence* /*sequence*/, ARAPlaybackRegion* playbackRegion)
-{
-    playbackRegion->addListener (this);
 }
