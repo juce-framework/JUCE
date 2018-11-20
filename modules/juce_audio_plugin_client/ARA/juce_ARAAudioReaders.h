@@ -62,25 +62,18 @@ private:
 
 //==============================================================================
 
-class ARARegionSequenceReader : public AudioFormatReader,
+class ARARegionSequenceReader : public ARAPlaybackRegionReader,
                                 ARARegionSequence::Listener
 {
 public:
     ARARegionSequenceReader (ARAPlaybackRenderer* playbackRenderer, ARARegionSequence* regionSequence);
     virtual ~ARARegionSequenceReader();
 
-    bool isValid() const { return playbackRegionReader->isValid(); }
-    void invalidate();
-
-    bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
-                      int64 startSampleInFile, int numSamples) override;
-
     void willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion) override;
     void didAddPlaybackRegionToRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion) override;
     void willDestroyRegionSequence (ARARegionSequence* regionSequence) override;
 
 private:
-    ARAPlaybackRegionReader* playbackRegionReader;
     ARARegionSequence* sequence;
 };
 

@@ -2,7 +2,7 @@
 
 namespace juce
 {
-
+    
 ARAAudioSourceReader::ARAAudioSourceReader (ARAAudioSource* audioSource, bool use64BitSamples)
 : AudioFormatReader (nullptr, "ARAAudioSourceReader"),
   audioSourceBeingRead (audioSource)
@@ -247,8 +247,7 @@ void ARAPlaybackRegionReader::willDestroyPlaybackRegion (ARAPlaybackRegion* play
 //==============================================================================
 
 ARARegionSequenceReader::ARARegionSequenceReader (ARAPlaybackRenderer* playbackRenderer, ARARegionSequence* regionSequence)
-: AudioFormatReader (nullptr, "ARARegionSequenceReader"),
-  playbackRegionReader (new ARAPlaybackRegionReader (playbackRenderer, reinterpret_cast<std::vector<ARAPlaybackRegion*> const&> (regionSequence->getPlaybackRegions()))),
+: ARAPlaybackRegionReader (playbackRenderer, reinterpret_cast<std::vector<ARAPlaybackRegion*> const&> (regionSequence->getPlaybackRegions ())),
   sequence (regionSequence)
 {
     // TODO JUCE_ARA see c'tor of ARARegionSequenceReader
@@ -267,18 +266,6 @@ ARARegionSequenceReader::~ARARegionSequenceReader()
         sequence->removeListener (this);
 
     invalidate();
-}
-
-void ARARegionSequenceReader::invalidate()
-{
-    if (playbackRegionReader->isValid())
-        playbackRegionReader->invalidate();
-}
-
-bool ARARegionSequenceReader::readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
-                                           int64 startSampleInFile, int numSamples)
-{
-    return playbackRegionReader->readSamples(destSamples, numDestChannels, startOffsetInDestBuffer, startSampleInFile, numSamples);
 }
 
 void ARARegionSequenceReader::willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion)
