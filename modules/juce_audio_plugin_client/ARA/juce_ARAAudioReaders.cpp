@@ -210,9 +210,9 @@ bool ARAPlaybackRegionReader::readSamples (int** destSamples, int numDestChannel
                                            int64 startSampleInFile, int numSamples)
 {
     bool success = false;
-    if (isValid())
+    if (lock.tryEnterRead())
     {
-        if (lock.tryEnterRead())
+        if (isValid())
         {
             while (numSamples > 0)
             {
@@ -225,8 +225,9 @@ bool ARAPlaybackRegionReader::readSamples (int** destSamples, int numDestChannel
             }
 
             success = true;
-            lock.exitRead();
         }
+
+        lock.exitRead();
     }
 
     if (! success)
