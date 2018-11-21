@@ -5,6 +5,7 @@ namespace juce
     
 ARAAudioSourceReader::ARAAudioSourceReader (ARAAudioSource* audioSource, bool use64BitSamples)
 : AudioFormatReader (nullptr, "ARAAudioSourceReader"),
+  isValid (true),
   audioSourceBeingRead (audioSource)
 {
     jassert (audioSourceBeingRead != nullptr);
@@ -18,7 +19,7 @@ ARAAudioSourceReader::ARAAudioSourceReader (ARAAudioSource* audioSource, bool us
 
     audioSourceBeingRead->addListener (this);
     if (audioSourceBeingRead->isSampleAccessEnabled())
-        recreate();
+        araHostReader.reset (new ARA::PlugIn::HostAudioReader (audioSourceBeingRead));
 }
 
 ARAAudioSourceReader::~ARAAudioSourceReader()
@@ -27,7 +28,19 @@ ARAAudioSourceReader::~ARAAudioSourceReader()
         audioSourceBeingRead->removeListener (this);
 
     ScopedWriteLock l (lock);
-    invalidate();
+    araHostReader.reset ();
+}
+
+void ARAAudioSourceReader::willUpdateAudioSourceProperties (ARAAudioSource* audioSource, ARAAudioSource::PropertiesPtr newProperties) noexcept
+{
+    if (audioSource->getSampleCount() != newProperties->sampleCount ||
+        audioSource->getSampleRate() != newProperties->sampleRate ||
+        audioSource->getChannelCount() != newProperties->channelCount)
+    {
+        ScopedWriteLock scopedLock (lock);
+        isValid = false;
+        araHostReader.reset ();
+    }
 }
 
 void ARAAudioSourceReader::willEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) noexcept
@@ -39,7 +52,7 @@ void ARAAudioSourceReader::willEnableAudioSourceSamplesAccess (ARAAudioSource* a
 
     // invalidate our reader if sample access is disabled
     if (! enable)
-        invalidate();
+        araHostReader.reset ();
 }
 
 void ARAAudioSourceReader::didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) noexcept
@@ -51,7 +64,7 @@ void ARAAudioSourceReader::didEnableAudioSourceSamplesAccess (ARAAudioSource* au
 
     // recreate our reader if sample access is enabled
     if (enable)
-        recreate();
+        araHostReader.reset (new ARA::PlugIn::HostAudioReader (audioSourceBeingRead));
 
     lock.exitWrite();
 }
@@ -63,7 +76,8 @@ void ARAAudioSourceReader::willDestroyAudioSource (ARAAudioSource* audioSource) 
     audioSourceBeingRead->removeListener (this);
 
     ScopedWriteLock scopedLock (lock);
-    invalidate();
+    isValid = false;
+    araHostReader.reset ();
 
     audioSourceBeingRead = nullptr;
 }
@@ -77,24 +91,8 @@ void ARAAudioSourceReader::doUpdateAudioSourceContent (ARAAudioSource* audioSour
         return;
 
     ScopedWriteLock scopedLock (lock);
-    invalidate();
-}
-
-void ARAAudioSourceReader::recreate()
-{
-    jassert (araHostReader == nullptr);
-
-    if (audioSourceBeingRead == nullptr)
-        return;
-
-    jassert (audioSourceBeingRead->isSampleAccessEnabled());
-    araHostReader.reset (new ARA::PlugIn::HostAudioReader (audioSourceBeingRead));
-}
-
-void ARAAudioSourceReader::invalidate()
-{
-//  jassert (lock.isLocked());
-    araHostReader.reset();
+    isValid = false;
+    araHostReader.reset ();
 }
 
 bool ARAAudioSourceReader::readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
@@ -104,18 +102,11 @@ bool ARAAudioSourceReader::readSamples (int** destSamples, int numDestChannels, 
     int bufferOffset = (bitsPerSample / 8) * startOffsetInDestBuffer;
 
     // If we can't enter the lock or we don't have a reader, zero samples and return false
-    bool gotReadlock = lock.tryEnterRead();
-    if (! gotReadlock || (araHostReader == nullptr))
+    bool gotReadlock = isValid ? lock.tryEnterRead () : false;
+    if (! isValid || ! gotReadlock || (araHostReader == nullptr))
     {
         if (gotReadlock)
-        {
-            // TODO JUCE_ARA
-            // Shouldn't we invalidate if we couldn't claim the lock?
-            // But we have to claim the lock in order to invalidate...
             lock.exitRead ();
-            ScopedWriteLock scopedLock (lock);
-            invalidate ();
-        }
 
         for (int chan_i = 0; chan_i < numDestChannels; ++chan_i)
         {
@@ -146,12 +137,6 @@ bool ARAAudioSourceReader::readSamples (int** destSamples, int numDestChannels, 
 
     bool success = araHostReader->readAudioSamples (startSampleInFile, numSamples, tmpPtrs.data());
     lock.exitRead();
-
-    if (!success)
-    {
-        ScopedWriteLock scopedLock (lock);
-        invalidate();
-    }
 
     return success;
 }

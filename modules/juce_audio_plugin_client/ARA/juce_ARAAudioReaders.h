@@ -38,19 +38,19 @@ public:
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples) override;
 
+    bool getIsValid() const { return isValid; }
+
     // TODO JUCE_ARA
     // do we need to handle property updates?
     // any other invalidation hooks? 
+    void willUpdateAudioSourceProperties (ARAAudioSource* audioSource, ARAAudioSource::PropertiesPtr newProperties) noexcept override;
     void willEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) noexcept override;
     void didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) noexcept override;
     void willDestroyAudioSource (ARAAudioSource* audioSource) noexcept override;
     void doUpdateAudioSourceContent (ARAAudioSource* audioSource, const ARA::ARAContentTimeRange* range, ARAContentUpdateScopes scopeFlags) noexcept override;
 
 private:
-    void recreate();
-    void invalidate();
-
-private:
+    bool isValid;
     ARAAudioSource* audioSourceBeingRead;
     std::unique_ptr<ARA::PlugIn::HostAudioReader> araHostReader;
 
