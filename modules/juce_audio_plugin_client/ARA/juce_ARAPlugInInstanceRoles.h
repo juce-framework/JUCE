@@ -13,7 +13,7 @@ public:
 
     // If you are subclassing ARAPlaybackRenderer, make sure to call the base class
     // implementations of any overridden function, except for processBlock().
-    virtual void prepareToPlay (double sampleRate, int numChannels, int maxSamplesPerBlock);
+    virtual void prepareToPlay (double newSampleRate, int newNumChannels, int newMaxSamplesPerBlock);
     virtual bool processBlock (AudioBuffer<float>& buffer, int64 timeInSamples, bool isPlayingBack);
     virtual void releaseResources();
 

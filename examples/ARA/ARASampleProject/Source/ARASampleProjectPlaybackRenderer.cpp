@@ -20,14 +20,14 @@ std::unique_ptr<BufferingAudioReader> ARASampleProjectPlaybackRenderer::createBu
     return std::unique_ptr<BufferingAudioReader> (newSourceReader);
 }
 
-void ARASampleProjectPlaybackRenderer::prepareToPlay (double sampleRate, int numChannels, int maxSamplesPerBlock)
+void ARASampleProjectPlaybackRenderer::prepareToPlay (double newSampleRate, int newNumChannels, int newMaxSamplesPerBlock)
 {
     auto oldSampleRate = getSampleRate();
     auto oldNumChannels = getNumChannels();
     auto oldMaxSamplesPerBlock = getMaxSamplesPerBlock();
     auto oldReadAheadSize = getReadAheadSize();
 
-    ARAPlaybackRenderer::prepareToPlay(sampleRate, numChannels, maxSamplesPerBlock);
+    ARAPlaybackRenderer::prepareToPlay(newSampleRate, newNumChannels, newMaxSamplesPerBlock);
 
     if ((oldSampleRate != getSampleRate()) ||
         (oldNumChannels != getNumChannels()) ||
