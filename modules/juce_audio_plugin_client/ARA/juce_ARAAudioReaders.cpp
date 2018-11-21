@@ -73,7 +73,7 @@ void ARAAudioSourceReader::doUpdateAudioSourceContent (ARAAudioSource* audioSour
     jassert (audioSourceBeingRead == audioSource);
 
     // don't invalidate if the audio signal is unchanged
-    if (! scopeFlags.affectsSamples())
+    if (! scopeFlags.affectSamples())
         return;
 
     ScopedWriteLock scopedLock (lock);
