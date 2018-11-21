@@ -100,6 +100,14 @@ void ARASampleProjectPlaybackRenderer::processBlock (AudioBuffer<float>& buffer,
         AudioSourceChannelInfo channelInfo (&buffer, (int) (startSongSample - sampleStart), (int) (endSongSample - startSongSample));
         audioSourceReaders[audioSource]->setNextReadPosition (startSongSample + offsetToPlaybackRegion);
         audioSourceReaders[audioSource]->getNextAudioBlock (channelInfo);
+
+        // TODO JUCE_ARA bug here:
+        // If regions overlap, the later region will overwrite the output of the earlier one!
+        // (this is visible in our region sequence view, but not audible in most hosts since
+        // they typically use a single region per renderer...)
+        // Only the first region that is actually read may read directly into the buffer,
+        // all later regions must read to a temporary buffer and add from there to the output.
+        // prepareToPlay must create that buffer if there's more than one region.
     }
 }
 
