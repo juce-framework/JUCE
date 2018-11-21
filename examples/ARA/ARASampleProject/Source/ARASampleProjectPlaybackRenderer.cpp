@@ -5,21 +5,6 @@ ARASampleProjectPlaybackRenderer::ARASampleProjectPlaybackRenderer (ARADocumentC
 : ARAPlaybackRenderer (documentController)
 {}
 
-int ARASampleProjectPlaybackRenderer::getReadAheadSize() const
-{
-    int readAheadSizeBySampleRate = (int) (2.0 * getSampleRate() + 0.5);
-    int readAheadSizeByBlockSize = 8 * getMaxSamplesPerBlock();
-    return jmax (readAheadSizeBySampleRate, readAheadSizeByBlockSize);
-}
-
-std::unique_ptr<BufferingAudioReader> ARASampleProjectPlaybackRenderer::createBufferingAudioSourceReader (ARAAudioSource* audioSource)
-{
-    auto documentController = static_cast<ARASampleProjectDocumentController*> (audioSource->getDocument()->getDocumentController());
-    auto newSourceReader = documentController->createBufferingAudioSourceReader (audioSource, getReadAheadSize());
-    newSourceReader->setReadTimeout (2000); // TODO JUCE_ARA I set at a high value arbitrarily, but we should pick a better volume
-    return std::unique_ptr<BufferingAudioReader> (newSourceReader);
-}
-
 void ARASampleProjectPlaybackRenderer::prepareToPlay (double newSampleRate, int newNumChannels, int newMaxSamplesPerBlock)
 {
     bool needAllocate = ! isPrepared() ||
@@ -31,14 +16,38 @@ void ARASampleProjectPlaybackRenderer::prepareToPlay (double newSampleRate, int 
 
     if (needAllocate)
     {
+        audioSourceReaders.clear();
+
+        const int readAheadSizeBySampleRate = (int) (2.0 * getSampleRate() + 0.5);
+        const int readAheadSizeByBlockSize = 8 * getMaxSamplesPerBlock();
+        const int readAheadSize = jmax (readAheadSizeBySampleRate, readAheadSizeByBlockSize);
+
+        const auto documentController = static_cast<ARASampleProjectDocumentController*> (getDocumentController());
+
+        for (auto playbackRegion : getPlaybackRegions())
+        {
+            auto audioSource = static_cast<ARAAudioSource*> (playbackRegion->getAudioModification()->getAudioSource());
+            if (audioSourceReaders.count (audioSource) == 0)
+            {
+                auto sourceReader = documentController->createBufferingAudioSourceReader (audioSource, readAheadSize);
+                sourceReader->setReadTimeout (2000); // TODO JUCE_ARA I set at a high value arbitrarily, but we should pick a better volume
+                audioSourceReaders.emplace (audioSource, sourceReader);
+            }
+        }
+
         localReadBuffer.resize (newNumChannels * newMaxSamplesPerBlock);
         localReadBufferPointers.resize (newNumChannels);
         for (int c = 0; c < newNumChannels; c++)
             localReadBufferPointers[c] = (int *) &localReadBuffer[c * newMaxSamplesPerBlock];
 
-        for (auto& readerPair : audioSourceReaders)
-            readerPair.second = createBufferingAudioSourceReader (readerPair.first);
     }
+}
+
+void ARASampleProjectPlaybackRenderer::releaseResources()
+{
+    audioSourceReaders.clear();
+
+    ARAPlaybackRenderer::releaseResources();
 }
 
 // this function renders playback regions in the ARA document that have been
@@ -114,26 +123,4 @@ bool ARASampleProjectPlaybackRenderer::processBlock (AudioBuffer<float>& buffer,
     }
 
     return success;
-}
-
-// every time we add a playback region, make sure we have a buffered audio source reader for it
-// we'll use this reader to pull samples from our ARA host and render them back in the audio thread
-void ARASampleProjectPlaybackRenderer::didAddPlaybackRegion (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept
-{
-    auto audioSource = static_cast<ARAAudioSource*> (playbackRegion->getAudioModification()->getAudioSource());
-    if (audioSourceReaders.count (audioSource) == 0)
-        audioSourceReaders.emplace (audioSource, createBufferingAudioSourceReader (audioSource));
-}
-
-// we can delete the reader associated with this playback region's audio source
-// if no other playback regions in the playback renderer share the same audio source
-void ARASampleProjectPlaybackRenderer::willRemovePlaybackRegion (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept
-{
-    auto audioSource = playbackRegion->getAudioModification()->getAudioSource();
-    for (auto otherPlaybackRegion : getPlaybackRegions())
-        if (playbackRegion != otherPlaybackRegion)
-            if (otherPlaybackRegion->getAudioModification()->getAudioSource() == audioSource)
-                return;
-
-    audioSourceReaders.erase (static_cast<ARAAudioSource*> (audioSource));
 }

@@ -18,16 +18,7 @@ public:
 
     void prepareToPlay (double sampleRate, int numChannels, int maxSamplesPerBlock) override;
     bool processBlock (AudioBuffer<float>& buffer, int64 timeInSamples, bool isPlayingBack) override;
-
-protected:
-    // this hook is used to make sure we have an audio source reader for this playback region
-    void didAddPlaybackRegion (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept override;
-    void willRemovePlaybackRegion (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept override;
-
-private:
-    // calculate how big our read-ahead-buffer needs to be
-    int getReadAheadSize() const;
-    std::unique_ptr<BufferingAudioReader> createBufferingAudioSourceReader (ARAAudioSource* audioSource);
+    void releaseResources() override;
 
 private:
     // map of audio sources to buffering audio source readers
