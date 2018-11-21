@@ -135,6 +135,13 @@ bool ARAAudioSourceReader::readSamples (int** destSamples, int numDestChannels, 
 
     bool success = araHostReader->readAudioSamples (startSampleInFile, numSamples, tmpPtrs.data());
     lock.exitRead();
+
+    if (!success)
+    {
+        ScopedWriteLock scopedLock (lock);
+        invalidate();
+    }
+
     return success;
 }
 
@@ -233,6 +240,8 @@ bool ARAPlaybackRegionReader::readSamples (int** destSamples, int numDestChannel
     {
         for (int chan_i = 0; chan_i < numDestChannels; ++chan_i)
             FloatVectorOperations::clear ((float *) destSamples[chan_i], numSamples);
+
+        invalidate();
     }
     return success;
 }
