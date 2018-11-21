@@ -104,8 +104,12 @@ bool ARAAudioSourceReader::readSamples (int** destSamples, int numDestChannels, 
     int bufferOffset = (bitsPerSample / 8) * startOffsetInDestBuffer;
 
     // If we can't enter the lock or we don't have a reader, zero samples and return false
-    if (! lock.tryEnterRead() || (araHostReader == nullptr))
+    bool gotReadlock = lock.tryEnterRead();
+    if (! gotReadlock || (araHostReader == nullptr))
     {
+        if (gotReadlock)
+            lock.exitRead ();
+
         for (int chan_i = 0; chan_i < numDestChannels; ++chan_i)
         {
             if (destSamples[chan_i] != nullptr)
