@@ -199,9 +199,9 @@ ARAPlaybackRegionReader::~ARAPlaybackRegionReader()
 
 void ARAPlaybackRegionReader::invalidate()
 {
-    ScopedWriteLock scopedWrite (lock);
     if (isValid())
     {
+        ScopedWriteLock scopedWrite (lock);
         for (auto playbackRegion : playbackRenderer->getPlaybackRegions ())
             static_cast<ARAPlaybackRegion*>(playbackRegion)->removeListener (this);
 
@@ -236,8 +236,6 @@ bool ARAPlaybackRegionReader::readSamples (int** destSamples, int numDestChannel
     {
         for (int chan_i = 0; chan_i < numDestChannels; ++chan_i)
             FloatVectorOperations::clear ((float *) destSamples[chan_i], numSamples);
-
-        invalidate();
     }
     return success;
 }
