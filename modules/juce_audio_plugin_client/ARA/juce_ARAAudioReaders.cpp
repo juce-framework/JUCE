@@ -214,9 +214,9 @@ ARAPlaybackRegionReader::~ARAPlaybackRegionReader()
 
 void ARAPlaybackRegionReader::invalidate()
 {
+    ScopedWriteLock scopedWrite (lock);
     if (isValid())
     {
-        ScopedWriteLock scopedWrite (lock);
         for (auto playbackRegion : playbackRenderer->getPlaybackRegions ())
             static_cast<ARAPlaybackRegion*>(playbackRegion)->removeListener (this);
 
