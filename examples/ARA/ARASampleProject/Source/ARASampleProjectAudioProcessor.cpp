@@ -87,7 +87,7 @@ void ARASampleProjectAudioProcessor::changeProgramName (int /*index*/, const Str
 void ARASampleProjectAudioProcessor::prepareToPlay (double newSampleRate, int samplesPerBlock)
 {
     if (isARAPlaybackRenderer())
-        getARAPlaybackRenderer()->prepareToPlay (newSampleRate, samplesPerBlock);
+        getARAPlaybackRenderer()->prepareToPlay (newSampleRate, getTotalNumOutputChannels(), samplesPerBlock);
 }
 
 void ARASampleProjectAudioProcessor::releaseResources()
@@ -123,16 +123,10 @@ bool ARASampleProjectAudioProcessor::isBusesLayoutSupported (const BusesLayout& 
 void ARASampleProjectAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer& /*midiMessages*/)
 {
     ScopedNoDenormals noDenormals;
-    auto totalNumInputChannels  = getTotalNumInputChannels();
-    auto totalNumOutputChannels = getTotalNumOutputChannels();
-
-    // clear unused input channeds
-    for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
-        buffer.clear (i, 0, buffer.getNumSamples());
 
     // make sure we can get the play head
-    AudioPlayHead::CurrentPositionInfo ci{ 0 };
-    if (getPlayHead() == nullptr || !(getPlayHead()->getCurrentPosition (ci)))
+    AudioPlayHead::CurrentPositionInfo ci;
+    if ((getPlayHead() == nullptr) || ! (getPlayHead()->getCurrentPosition (ci)))
         return;
 
     // render our ARA playback regions for this time duration using the ARA playback renderer instance

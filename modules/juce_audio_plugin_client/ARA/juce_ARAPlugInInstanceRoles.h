@@ -13,11 +13,12 @@ public:
 
     // If you are subclassing ARAPlaybackRenderer, make sure to call the base class
     // implementations of any overridden function, except for processBlock().
-    virtual void prepareToPlay (double sampleRate, int maxSamplesPerBlock);
+    virtual void prepareToPlay (double sampleRate, int numChannels, int maxSamplesPerBlock);
     virtual void processBlock (AudioBuffer<float>& buffer, int64 timeInSamples, bool isPlayingBack);
     virtual void releaseResources();
 
     double getSampleRate() const noexcept       { return sampleRate; }
+    int getNumChannels() const noexcept  { return numChannels; }
     int getMaxSamplesPerBlock() const noexcept  { return maxSamplesPerBlock; }
 
     // only to be called if using a playback renderer created internally, i.e. not by the host.
@@ -26,6 +27,7 @@ public:
 
 private:
     double sampleRate;
+    int numChannels;
     int maxSamplesPerBlock;
 };
 

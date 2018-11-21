@@ -185,7 +185,7 @@ ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARAPlaybackRenderer* playbackR
         lengthInSamples = (int64)((regionsEndTime - regionsStartTime) * sampleRate + 0.5);
     }
 
-    playbackRenderer->prepareToPlay (sampleRate, 16*1024);
+    playbackRenderer->prepareToPlay (sampleRate, numChannels, 16*1024);
 }
 
 ARAPlaybackRegionReader::~ARAPlaybackRegionReader()

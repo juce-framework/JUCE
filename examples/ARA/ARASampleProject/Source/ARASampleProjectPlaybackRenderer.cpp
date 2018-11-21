@@ -20,15 +20,17 @@ std::unique_ptr<BufferingAudioSource> ARASampleProjectPlaybackRenderer::createBu
     return std::unique_ptr<BufferingAudioSource> (newSourceReader);
 }
 
-void ARASampleProjectPlaybackRenderer::prepareToPlay (double newSampleRate, int newMaxSamplesPerBlock)
+void ARASampleProjectPlaybackRenderer::prepareToPlay (double sampleRate, int numChannels, int maxSamplesPerBlock)
 {
     auto oldSampleRate = getSampleRate();
+    auto oldNumChannels = getNumChannels();
     auto oldMaxSamplesPerBlock = getMaxSamplesPerBlock();
     auto oldReadAheadSize = getReadAheadSize();
 
-    ARAPlaybackRenderer::prepareToPlay(newSampleRate, newMaxSamplesPerBlock);
+    ARAPlaybackRenderer::prepareToPlay(sampleRate, numChannels, maxSamplesPerBlock);
 
     if ((oldSampleRate != getSampleRate()) ||
+        (oldNumChannels != getNumChannels()) ||
         (oldMaxSamplesPerBlock != getMaxSamplesPerBlock()) ||
         (oldReadAheadSize != getReadAheadSize()))
     {
@@ -68,7 +70,7 @@ void ARASampleProjectPlaybackRenderer::processBlock (AudioBuffer<float>& buffer,
             continue;
 
         // this simplified test code "rendering" only produces audio if sample rate and channel count match
-        if ((audioSource->getChannelCount() != buffer.getNumChannels()) || (audioSource->getSampleRate() != getSampleRate()))
+        if ((audioSource->getChannelCount() != getNumChannels()) || (audioSource->getSampleRate() != getSampleRate()))
             continue;
 
         // evaluate region borders in song time, calculate sample range to copy in song time

@@ -6,12 +6,14 @@ namespace juce
 ARAPlaybackRenderer::ARAPlaybackRenderer (ARADocumentController* documentController)
 : ARA::PlugIn::PlaybackRenderer (documentController),
   sampleRate (44100),
+  numChannels (1),
   maxSamplesPerBlock (1024)
 {}
 
-void ARAPlaybackRenderer::prepareToPlay (double newSampleRate, int newMaxSamplesPerBlock)
+void ARAPlaybackRenderer::prepareToPlay (double newSampleRate, int newNumChannels, int newMaxSamplesPerBlock)
 {
     sampleRate = newSampleRate;
+    numChannels = newNumChannels;
     maxSamplesPerBlock = newMaxSamplesPerBlock;
 
     setRendering(true);
