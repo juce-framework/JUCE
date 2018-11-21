@@ -28,10 +28,10 @@ private:
     void recreatePlaybackRegionReader ();
 
 private:
-    bool isSelected;
     ARASampleProjectAudioProcessorEditor* editorComponent;
     ARAPlaybackRegion* playbackRegion;
     ARAPlaybackRegionReader* playbackRegionReader;  // careful: "weak" pointer, actual pointer is owned by our audioThumb
+    bool isSelected;
 
     enum { kAudioThumbHashCode = 1 };
     juce::AudioFormatManager audioFormatManger;
