@@ -159,10 +159,9 @@ bool ARAAudioSourceReader::readSamples (int** destSamples, int numDestChannels, 
 //==============================================================================
 
 ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARAPlaybackRenderer* renderer, std::vector<ARAPlaybackRegion*> const& playbackRegions)
-: AudioFormatReader (nullptr, "ARAPlaybackRegionReader")
+: AudioFormatReader (nullptr, "ARAPlaybackRegionReader"),
+  playbackRenderer (renderer)
 {
-    playbackRenderer.reset (renderer);
-
     // TODO JUCE_ARA
     // Make sampleRate, numChannels and use64BitSamples available as c'tor parameters instead
     // of deducing it here. Since regions can start anywhere on the timeline, maybe also define
