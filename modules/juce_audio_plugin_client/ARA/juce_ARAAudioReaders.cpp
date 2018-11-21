@@ -214,17 +214,16 @@ bool ARAPlaybackRegionReader::readSamples (int** destSamples, int numDestChannel
     {
         if (isValid())
         {
-            while (numSamples > 0)
+            success = true;
+            while (numSamples > 0 && success) // TODO JUCE_ARA should we check success here?
             {
                 int numSliceSamples = jmin(numSamples, playbackRenderer->getMaxSamplesPerBlock());
                 AudioBuffer<float> buffer ((float **) destSamples, numDestChannels, startOffsetInDestBuffer, numSliceSamples);
-                playbackRenderer->processBlock (buffer, startSampleInFile, true);
+                success = playbackRenderer->processBlock (buffer, startSampleInFile, true);
                 numSamples -= numSliceSamples;
                 startOffsetInDestBuffer += numSliceSamples;
                 startSampleInFile += numSliceSamples;
             }
-
-            success = true;
         }
 
         lock.exitRead();

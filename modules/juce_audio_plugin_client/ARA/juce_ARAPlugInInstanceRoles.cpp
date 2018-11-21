@@ -24,11 +24,12 @@ void ARAPlaybackRenderer::releaseResources()
     setRendering(false);
 }
 
-void ARAPlaybackRenderer::processBlock (AudioBuffer<float>& buffer, int64 /*timeInSamples*/, bool /*isPlayingBack*/)
+bool ARAPlaybackRenderer::processBlock (AudioBuffer<float>& buffer, int64 /*timeInSamples*/, bool /*isPlayingBack*/)
 {
     jassert (buffer.getNumSamples() <= getMaxSamplesPerBlock());
     for (int c = 0; c < buffer.getNumChannels(); c++)
         FloatVectorOperations::clear (buffer.getArrayOfWritePointers()[c], buffer.getNumSamples());
+    return true;
 }
 
 void ARAPlaybackRenderer::addPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept

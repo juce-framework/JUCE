@@ -67,7 +67,9 @@ bool BufferingAudioReader::readSamples (int** destSamples, int numDestChannels, 
     const ScopedLock sl (lock);
     nextReadPosition = startSampleInFile;
 
-    while (numSamples > 0)
+    bool success = true;
+
+    while (numSamples > 0 && success) // TODO JUCE_ARA should we check success here?
     {
         if (auto block = getBlockContaining (startSampleInFile))
         {
@@ -90,6 +92,7 @@ bool BufferingAudioReader::readSamples (int** destSamples, int numDestChannels, 
             startOffsetInDestBuffer += numToDo;
             startSampleInFile += numToDo;
             numSamples -= numToDo;
+            success = block->success;
         }
         else
         {
@@ -109,14 +112,14 @@ bool BufferingAudioReader::readSamples (int** destSamples, int numDestChannels, 
         }
     }
 
-    return true;
+    return success;
 }
 
 BufferingAudioReader::BufferedBlock::BufferedBlock (AudioFormatReader& reader, int64 pos, int numSamples)
     : range (pos, pos + numSamples),
       buffer ((int) reader.numChannels, numSamples)
 {
-    reader.read (&buffer, 0, numSamples, pos, true, true);
+    success = reader.read (&buffer, 0, numSamples, pos, true, true);
 }
 
 BufferingAudioReader::BufferedBlock* BufferingAudioReader::getBlockContaining (int64 pos) const noexcept

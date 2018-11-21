@@ -17,7 +17,7 @@ public:
     ARASampleProjectPlaybackRenderer (ARADocumentController* documentController);
 
     void prepareToPlay (double sampleRate, int numChannels, int maxSamplesPerBlock) override;
-    void processBlock (AudioBuffer<float>& buffer, int64 timeInSamples, bool isPlayingBack) override;
+    bool processBlock (AudioBuffer<float>& buffer, int64 timeInSamples, bool isPlayingBack) override;
 
 protected:
     // this hook is used to make sure we have an audio source reader for this playback region

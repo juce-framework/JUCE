@@ -43,7 +43,7 @@ void ARASampleProjectPlaybackRenderer::prepareToPlay (double sampleRate, int num
 // a) added to this playback renderer instance and
 // b) lie within the time range of samples being renderered (in project time)
 // effectively making this plug-in a pass-through renderer
-void ARASampleProjectPlaybackRenderer::processBlock (AudioBuffer<float>& buffer, int64 timeInSamples, bool isPlayingBack)
+bool ARASampleProjectPlaybackRenderer::processBlock (AudioBuffer<float>& buffer, int64 timeInSamples, bool isPlayingBack)
 {
     jassert (buffer.getNumSamples() <= getMaxSamplesPerBlock());
 
@@ -52,7 +52,7 @@ void ARASampleProjectPlaybackRenderer::processBlock (AudioBuffer<float>& buffer,
         FloatVectorOperations::clear (buffer.getArrayOfWritePointers()[c], buffer.getNumSamples());
 
     if (! isPlayingBack)
-        return;
+        return true; // TODO JUCE_ARA Is this fair?
 
     // render back playback regions that lie within this range using our buffered ARA samples
     using namespace ARA;
@@ -107,9 +107,14 @@ void ARASampleProjectPlaybackRenderer::processBlock (AudioBuffer<float>& buffer,
         int startInDestBuffer = (int) (startSongSample - sampleStart);
         int startInSource = (int) (startSongSample + offsetToPlaybackRegion);
         int numSamplesToRead = (int) (endSongSample - startSongSample);
-        audioSourceReaders[audioSource]->
+        bool success = audioSourceReaders[audioSource]->
             readSamples ((int**) buffer.getArrayOfWritePointers (), buffer.getNumChannels (), startInDestBuffer, startInSource, numSamplesToRead);
+
+        if (!success)
+            return false;
     }
+
+    return true;
 }
 
 // every time we add a playback region, make sure we have a buffered audio source reader for it

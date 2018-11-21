@@ -100,17 +100,17 @@ bool AudioFormatReader::read (int* const* destSamples,
     return true;
 }
 
-static void readChannels (AudioFormatReader& reader, int** chans, AudioBuffer<float>* buffer,
+static bool readChannels (AudioFormatReader& reader, int** chans, AudioBuffer<float>* buffer,
                           int startSample, int numSamples, int64 readerStartSample, int numTargetChannels)
 {
     for (int j = 0; j < numTargetChannels; ++j)
         chans[j] = reinterpret_cast<int*> (buffer->getWritePointer (j, startSample));
 
     chans[numTargetChannels] = nullptr;
-    reader.read (chans, numTargetChannels, readerStartSample, numSamples, true);
+    return reader.read (chans, numTargetChannels, readerStartSample, numSamples, true);
 }
 
-void AudioFormatReader::read (AudioBuffer<float>* buffer,
+bool AudioFormatReader::read (AudioBuffer<float>* buffer,
                               int startSample,
                               int numSamples,
                               int64 readerStartSample,
@@ -120,6 +120,7 @@ void AudioFormatReader::read (AudioBuffer<float>* buffer,
     jassert (buffer != nullptr);
     jassert (startSample >= 0 && startSample + numSamples <= buffer->getNumSamples());
 
+    bool success = true;
     if (numSamples > 0)
     {
         const int numTargetChannels = buffer->getNumChannels();
@@ -147,7 +148,7 @@ void AudioFormatReader::read (AudioBuffer<float>* buffer,
             }
 
             chans[2] = nullptr;
-            read (chans, 2, readerStartSample, numSamples, true);
+            success = read (chans, 2, readerStartSample, numSamples, true);
 
             // if the target's stereo and the source is mono, dupe the first channel..
             if (numTargetChannels > 1 && (chans[0] == nullptr || chans[1] == nullptr))
@@ -156,12 +157,12 @@ void AudioFormatReader::read (AudioBuffer<float>* buffer,
         else if (numTargetChannels <= 64)
         {
             int* chans[65];
-            readChannels (*this, chans, buffer, startSample, numSamples, readerStartSample, numTargetChannels);
+            success = readChannels (*this, chans, buffer, startSample, numSamples, readerStartSample, numTargetChannels);
         }
         else
         {
             HeapBlock<int*> chans (numTargetChannels + 1);
-            readChannels (*this, chans, buffer, startSample, numSamples, readerStartSample, numTargetChannels);
+            success = readChannels (*this, chans, buffer, startSample, numSamples, readerStartSample, numTargetChannels);
         }
 
         if (! usesFloatingPointData)
@@ -169,6 +170,8 @@ void AudioFormatReader::read (AudioBuffer<float>* buffer,
                 if (float* const d = buffer->getWritePointer (j, startSample))
                     FloatVectorOperations::convertFixedToFloat (d, reinterpret_cast<const int*> (d), 1.0f / 0x7fffffff, numSamples);
     }
+
+    return success;
 }
 
 void AudioFormatReader::readMaxLevels (int64 startSampleInFile, int64 numSamples,
