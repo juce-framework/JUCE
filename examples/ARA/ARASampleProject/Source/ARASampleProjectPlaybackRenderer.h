@@ -16,7 +16,7 @@ class ARASampleProjectPlaybackRenderer : public ARAPlaybackRenderer
 public:
     ARASampleProjectPlaybackRenderer (ARADocumentController* documentController);
 
-    void prepareToPlay (double newSampleRate, int newNumChannels, int newMaxSamplesPerBlock) override;
+    void prepareToPlay (double sampleRate, int numChannels, int maxSamplesPerBlock) override;
     bool processBlock (AudioBuffer<float>& buffer, int64 timeInSamples, bool isPlayingBack) override;
 
 protected:

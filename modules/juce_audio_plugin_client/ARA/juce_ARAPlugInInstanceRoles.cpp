@@ -7,7 +7,8 @@ ARAPlaybackRenderer::ARAPlaybackRenderer (ARADocumentController* documentControl
 : ARA::PlugIn::PlaybackRenderer (documentController),
   sampleRate (44100),
   numChannels (1),
-  maxSamplesPerBlock (1024)
+  maxSamplesPerBlock (1024),
+  prepared (false)
 {}
 
 void ARAPlaybackRenderer::prepareToPlay (double newSampleRate, int newNumChannels, int newMaxSamplesPerBlock)
@@ -17,10 +18,12 @@ void ARAPlaybackRenderer::prepareToPlay (double newSampleRate, int newNumChannel
     maxSamplesPerBlock = newMaxSamplesPerBlock;
 
     setRendering(true);
+    prepared = true;
 }
 
 void ARAPlaybackRenderer::releaseResources()
 {
+    prepared = false;
     setRendering(false);
 }
 

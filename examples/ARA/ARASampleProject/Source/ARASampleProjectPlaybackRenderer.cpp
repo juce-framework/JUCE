@@ -22,23 +22,20 @@ std::unique_ptr<BufferingAudioReader> ARASampleProjectPlaybackRenderer::createBu
 
 void ARASampleProjectPlaybackRenderer::prepareToPlay (double newSampleRate, int newNumChannels, int newMaxSamplesPerBlock)
 {
-    auto oldSampleRate = getSampleRate();
-    auto oldNumChannels = getNumChannels();
-    auto oldMaxSamplesPerBlock = getMaxSamplesPerBlock();
-    auto oldReadAheadSize = getReadAheadSize();
+    bool needAllocate = ! isPrepared() ||
+                        (newSampleRate != getSampleRate()) ||
+                        (newNumChannels != getNumChannels()) ||
+                        (newMaxSamplesPerBlock != getMaxSamplesPerBlock());
 
-    ARAPlaybackRenderer::prepareToPlay(newSampleRate, newNumChannels, newMaxSamplesPerBlock);
+    ARAPlaybackRenderer::prepareToPlay (newSampleRate, newNumChannels, newMaxSamplesPerBlock);
 
-    localReadBuffer.resize (newNumChannels * newMaxSamplesPerBlock);
-    localReadBufferPointers.resize (newNumChannels);
-    for (int c = 0; c < newNumChannels; c++)
-        localReadBufferPointers[c] = (int *) &localReadBuffer[c * newMaxSamplesPerBlock];
-
-    if ((oldSampleRate != getSampleRate()) ||
-        (oldNumChannels != getNumChannels()) ||
-        (oldMaxSamplesPerBlock != getMaxSamplesPerBlock()) ||
-        (oldReadAheadSize != getReadAheadSize()))
+    if (needAllocate)
     {
+        localReadBuffer.resize (newNumChannels * newMaxSamplesPerBlock);
+        localReadBufferPointers.resize (newNumChannels);
+        for (int c = 0; c < newNumChannels; c++)
+            localReadBufferPointers[c] = (int *) &localReadBuffer[c * newMaxSamplesPerBlock];
+
         for (auto& readerPair : audioSourceReaders)
             readerPair.second = createBufferingAudioSourceReader (readerPair.first);
     }
