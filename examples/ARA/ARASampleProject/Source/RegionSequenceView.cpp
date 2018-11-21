@@ -81,7 +81,7 @@ void RegionSequenceView::recreateRegionSequenceReader()
     audioThumb.setReader (regionSequenceReader, kAudioThumbHashCode);
 }
 
-void RegionSequenceView::doEndEditing (ARADocument* document)
+void RegionSequenceView::doEndEditing (ARADocument* /*document*/)
 {
     if (! regionSequenceReader || ! regionSequenceReader->isValid())
     {
