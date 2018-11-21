@@ -131,7 +131,7 @@ void ARASampleProjectAudioProcessor::processBlock (AudioBuffer<float>& buffer, M
 
     // render our ARA playback regions for this time duration using the ARA playback renderer instance
     if (isARAPlaybackRenderer())
-        getARAPlaybackRenderer()->processBlock (buffer, ci.timeInSamples, ci.isPlaying);
+        getARAPlaybackRenderer()->processBlock (buffer, ci.timeInSamples, ci.isPlaying, isNonRealtime());
 }
 
 //==============================================================================

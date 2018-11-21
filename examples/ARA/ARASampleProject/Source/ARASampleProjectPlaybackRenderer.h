@@ -17,7 +17,7 @@ public:
     ARASampleProjectPlaybackRenderer (ARADocumentController* documentController);
 
     void prepareToPlay (double sampleRate, int numChannels, int maxSamplesPerBlock) override;
-    bool processBlock (AudioBuffer<float>& buffer, int64 timeInSamples, bool isPlayingBack) override;
+    bool processBlock (AudioBuffer<float>& buffer, int64 timeInSamples, bool isPlayingBack, bool isNonRealtime) override;
     void releaseResources() override;
 
 private:

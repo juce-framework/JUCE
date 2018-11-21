@@ -30,7 +30,6 @@ void ARASampleProjectPlaybackRenderer::prepareToPlay (double newSampleRate, int 
             if (audioSourceReaders.count (audioSource) == 0)
             {
                 auto sourceReader = documentController->createBufferingAudioSourceReader (audioSource, readAheadSize);
-                sourceReader->setReadTimeout (2000); // TODO JUCE_ARA I set at a high value arbitrarily, but we should pick a better volume
                 audioSourceReaders.emplace (audioSource, sourceReader);
             }
         }
@@ -51,7 +50,7 @@ void ARASampleProjectPlaybackRenderer::releaseResources()
 // a) added to this playback renderer instance and
 // b) lie within the time range of samples being renderered (in project time)
 // effectively making this plug-in a pass-through renderer
-bool ARASampleProjectPlaybackRenderer::processBlock (AudioBuffer<float>& buffer, int64 timeInSamples, bool isPlayingBack)
+bool ARASampleProjectPlaybackRenderer::processBlock (AudioBuffer<float>& buffer, int64 timeInSamples, bool isPlayingBack, bool isNonRealtime)
 {
     jassert (buffer.getNumSamples() <= getMaxSamplesPerBlock());
 
@@ -110,6 +109,12 @@ bool ARASampleProjectPlaybackRenderer::processBlock (AudioBuffer<float>& buffer,
         int startInDestBuffer = (int) (startSongSample - sampleStart);
         int startInSource = (int) (startSongSample + offsetToPlaybackRegion);
         int numSamplesToRead = (int) (endSongSample - startSongSample);
+        
+        // set reader timeout depending on real time playback
+        if (isNonRealtime)
+            audioSourceReaders[audioSource]->setReadTimeout (2000); // TODO JUCE_ARA I set at a high value arbitrarily, but we should pick a better timeout
+        else
+            audioSourceReaders[audioSource]->setReadTimeout (-1);
 
         success &= audioSourceReaders[audioSource]->
             read ((int* const*) tempBuffer->getArrayOfWritePointers(), tempBuffer->getNumChannels(), startInSource, numSamplesToRead, true);

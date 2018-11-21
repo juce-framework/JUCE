@@ -81,8 +81,9 @@ void PlaybackRegionView::recreatePlaybackRegionReader ()
 {
     audioThumbCache.clear ();
 
+    // create a non-realtime playback region reader for our audio thumb
     auto documentController = static_cast<ARASampleProjectDocumentController*> (playbackRegion->getRegionSequence()->getDocument ()->getDocumentController ());
-    playbackRegionReader = documentController->createPlaybackRegionReader ({ playbackRegion });
+    playbackRegionReader = documentController->createPlaybackRegionReader ({ playbackRegion }, true);
     audioThumb.setReader (playbackRegionReader, kAudioThumbHashCode);
 }
 

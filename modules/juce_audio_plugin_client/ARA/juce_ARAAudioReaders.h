@@ -66,7 +66,7 @@ class ARAPlaybackRegionReader : public AudioFormatReader,
                                 public ARAPlaybackRegion::Listener
 {
 public:
-    ARAPlaybackRegionReader (ARAPlaybackRenderer* renderer, std::vector<ARAPlaybackRegion*> const& playbackRegions);
+    ARAPlaybackRegionReader (ARAPlaybackRenderer* renderer, std::vector<ARAPlaybackRegion*> const& playbackRegions, bool nonRealtime);
     virtual ~ARAPlaybackRegionReader();
 
     // TODO JUCE_ARA temporary api - do we want to keep that? If so, shouldn't we return some proper range type?
@@ -87,6 +87,7 @@ private:
     ReadWriteLock lock;
     double regionsStartTime;
     double regionsEndTime;
+    bool isNonRealtime;
 };
 
 //==============================================================================
@@ -95,7 +96,7 @@ class ARARegionSequenceReader : public ARAPlaybackRegionReader,
                                 ARARegionSequence::Listener
 {
 public:
-    ARARegionSequenceReader (ARAPlaybackRenderer* playbackRenderer, ARARegionSequence* regionSequence);
+    ARARegionSequenceReader (ARAPlaybackRenderer* playbackRenderer, ARARegionSequence* regionSequence, bool nonRealtime);
     virtual ~ARARegionSequenceReader();
 
     void willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion) override;

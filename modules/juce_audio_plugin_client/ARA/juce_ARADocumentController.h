@@ -16,8 +16,8 @@ public:
     virtual ~ARADocumentController() noexcept {}
 
     AudioFormatReader* createAudioSourceReader (ARAAudioSource* audioSource);
-    ARAPlaybackRegionReader* createPlaybackRegionReader (std::vector<ARAPlaybackRegion*> playbackRegions);
-    ARARegionSequenceReader* createRegionSequenceReader (ARARegionSequence* regionSequence);
+    ARAPlaybackRegionReader* createPlaybackRegionReader (std::vector<ARAPlaybackRegion*> playbackRegions, bool nonRealtime);
+    ARARegionSequenceReader* createRegionSequenceReader (ARARegionSequence* regionSequence, bool nonRealtime);
 
 /*
     TODO JUCE_ARA We need the functions outlined below. We'll be ignoring time range for now,
