@@ -29,6 +29,11 @@ void ARASampleProjectPlaybackRenderer::prepareToPlay (double newSampleRate, int 
 
     ARAPlaybackRenderer::prepareToPlay(newSampleRate, newNumChannels, newMaxSamplesPerBlock);
 
+    localReadBuffer.resize (newNumChannels * newMaxSamplesPerBlock);
+    localReadBufferPointers.resize (newNumChannels);
+    for (int c = 0; c < newNumChannels; c++)
+        localReadBufferPointers[c] = (int *) &localReadBuffer[c * newMaxSamplesPerBlock];
+
     if ((oldSampleRate != getSampleRate()) ||
         (oldNumChannels != getNumChannels()) ||
         (oldMaxSamplesPerBlock != getMaxSamplesPerBlock()) ||
@@ -96,19 +101,17 @@ bool ARASampleProjectPlaybackRenderer::processBlock (AudioBuffer<float>& buffer,
         startSongSample = jmax (startSongSample, startAvailableSourceSamples - offsetToPlaybackRegion);
         endSongSample = jmin (endSongSample, endAvailableSourceSamples - offsetToPlaybackRegion);
 
-        // use the buffered audio source reader to read samples into the audio block        
-        // TODO JUCE_ARA bug here:
-        // If regions overlap, the later region will overwrite the output of the earlier one!
-        // (this is visible in our region sequence view, but not audible in most hosts since
-        // they typically use a single region per renderer...)
-        // Only the first region that is actually read may read directly into the buffer,
-        // all later regions must read to a temporary buffer and add from there to the output.
-        // prepareToPlay must create that buffer if there's more than one region.
+        // use the buffered audio source reader to read samples into our local read buffer
         int startInDestBuffer = (int) (startSongSample - sampleStart);
         int startInSource = (int) (startSongSample + offsetToPlaybackRegion);
         int numSamplesToRead = (int) (endSongSample - startSongSample);
+
         bool success = audioSourceReaders[audioSource]->
-            readSamples ((int**) buffer.getArrayOfWritePointers (), buffer.getNumChannels (), startInDestBuffer, startInSource, numSamplesToRead);
+            readSamples (localReadBufferPointers.data(), buffer.getNumChannels (), startInDestBuffer, startInSource, numSamplesToRead);
+        
+        // mix this region's samples into the output buffer
+        for (int c = 0; c < getNumChannels (); c++)
+            FloatVectorOperations::add (buffer.getArrayOfWritePointers()[c], (float*) localReadBufferPointers[c], numSamplesToRead);
 
         if (!success)
             return false;

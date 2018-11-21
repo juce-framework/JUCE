@@ -33,4 +33,7 @@ private:
     // map of audio sources to buffering audio source readers
     // we'll use them to pull ARA samples from the host as we render
     std::map<ARAAudioSource*, std::unique_ptr<BufferingAudioReader>> audioSourceReaders;
+
+    std::vector<float> localReadBuffer;
+    std::vector<int*> localReadBufferPointers;
 };
