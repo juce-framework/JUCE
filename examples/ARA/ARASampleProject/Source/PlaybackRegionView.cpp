@@ -4,8 +4,8 @@
 
 PlaybackRegionView::PlaybackRegionView (ARASampleProjectAudioProcessorEditor* editor, ARAPlaybackRegion* region)
 : editorComponent (editor),
-  isSelected (false),
   playbackRegion (region),
+  isSelected (false),
   audioThumbCache (1),
   audioThumb (128, audioFormatManger, audioThumbCache)
 {
