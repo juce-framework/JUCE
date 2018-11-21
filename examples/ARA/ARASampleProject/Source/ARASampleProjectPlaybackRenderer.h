@@ -25,6 +25,6 @@ private:
     // we'll use them to pull ARA samples from the host as we render
     std::map<ARAAudioSource*, std::unique_ptr<BufferingAudioReader>> audioSourceReaders;
 
-    std::vector<float> localReadBuffer;
-    std::vector<int*> localReadBufferPointers;
+    // temp buffers to use for summing signals if rendering multiple regions
+    std::unique_ptr<AudioBuffer<float>> tempBuffer;
 };

@@ -35,17 +35,14 @@ void ARASampleProjectPlaybackRenderer::prepareToPlay (double newSampleRate, int 
             }
         }
 
-        localReadBuffer.resize (newNumChannels * newMaxSamplesPerBlock);
-        localReadBufferPointers.resize (newNumChannels);
-        for (int c = 0; c < newNumChannels; c++)
-            localReadBufferPointers[c] = (int *) &localReadBuffer[c * newMaxSamplesPerBlock];
-
+        tempBuffer.reset (new AudioBuffer<float> (getNumChannels(), getMaxSamplesPerBlock()));
     }
 }
 
 void ARASampleProjectPlaybackRenderer::releaseResources()
 {
     audioSourceReaders.clear();
+    tempBuffer = nullptr;
 
     ARAPlaybackRenderer::releaseResources();
 }
@@ -115,11 +112,11 @@ bool ARASampleProjectPlaybackRenderer::processBlock (AudioBuffer<float>& buffer,
         int numSamplesToRead = (int) (endSongSample - startSongSample);
 
         success &= audioSourceReaders[audioSource]->
-            readSamples (localReadBufferPointers.data(), buffer.getNumChannels (), startInDestBuffer, startInSource, numSamplesToRead);
+            read ((int* const*) tempBuffer->getArrayOfWritePointers(), tempBuffer->getNumChannels(), startInSource, numSamplesToRead, true);
         
         // mix this region's samples into the output buffer
         for (int c = 0; c < getNumChannels(); c++)
-            FloatVectorOperations::add (buffer.getArrayOfWritePointers()[c], (float*) localReadBufferPointers[c], numSamplesToRead);
+            FloatVectorOperations::add (buffer.getWritePointer(c) + startInDestBuffer, tempBuffer->getReadPointer(c), numSamplesToRead);
     }
 
     return success;
