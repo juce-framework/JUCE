@@ -108,7 +108,14 @@ bool ARAAudioSourceReader::readSamples (int** destSamples, int numDestChannels, 
     if (! gotReadlock || (araHostReader == nullptr))
     {
         if (gotReadlock)
+        {
+            // TODO JUCE_ARA
+            // Shouldn't we invalidate if we couldn't claim the lock?
+            // But we have to claim the lock in order to invalidate...
             lock.exitRead ();
+            ScopedWriteLock scopedLock (lock);
+            invalidate ();
+        }
 
         for (int chan_i = 0; chan_i < numDestChannels; ++chan_i)
         {
