@@ -49,12 +49,14 @@ bool ARASampleProjectPlaybackRenderer::processBlock (AudioBuffer<float>& buffer,
 {
     jassert (buffer.getNumSamples() <= getMaxSamplesPerBlock());
 
+    bool success = true;
+
     // zero out samples first, then add region output on top
     for (int c = 0; c < buffer.getNumChannels(); c++)
         FloatVectorOperations::clear (buffer.getArrayOfWritePointers()[c], buffer.getNumSamples());
 
     if (! isPlayingBack)
-        return true; // TODO JUCE_ARA Is this fair?
+        return success;
 
     // render back playback regions that lie within this range using our buffered ARA samples
     using namespace ARA;
@@ -103,18 +105,15 @@ bool ARASampleProjectPlaybackRenderer::processBlock (AudioBuffer<float>& buffer,
         int startInSource = (int) (startSongSample + offsetToPlaybackRegion);
         int numSamplesToRead = (int) (endSongSample - startSongSample);
 
-        bool success = audioSourceReaders[audioSource]->
+        success &= audioSourceReaders[audioSource]->
             readSamples (localReadBufferPointers.data(), buffer.getNumChannels (), startInDestBuffer, startInSource, numSamplesToRead);
         
         // mix this region's samples into the output buffer
-        for (int c = 0; c < getNumChannels (); c++)
+        for (int c = 0; c < getNumChannels(); c++)
             FloatVectorOperations::add (buffer.getArrayOfWritePointers()[c], (float*) localReadBufferPointers[c], numSamplesToRead);
-
-        if (!success)
-            return false;
     }
 
-    return true;
+    return success;
 }
 
 // every time we add a playback region, make sure we have a buffered audio source reader for it
