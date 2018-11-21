@@ -32,4 +32,9 @@ namespace juce
 // Include ARA headers
 #include <ARA_Library/PlugIn/ARAPlug.h>
 
+namespace juce
+{
+    using ARAContentUpdateScopes = ARA::ContentUpdateScopes;
+}
+
 #endif

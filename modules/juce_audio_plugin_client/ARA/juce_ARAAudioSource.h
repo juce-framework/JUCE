@@ -18,7 +18,7 @@ public:
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
         virtual void willUpdateAudioSourceProperties (ARAAudioSource* audioSource, PropertiesPtr newProperties) {}
         virtual void didUpdateAudioSourceProperties (ARAAudioSource* audioSource) {}
-        virtual void doUpdateAudioSourceContent (ARAAudioSource* audioSource, const ARA::ARAContentTimeRange* range, ARA::ARAContentUpdateFlags flags) {}
+        virtual void doUpdateAudioSourceContent (ARAAudioSource* audioSource, const ARA::ARAContentTimeRange* range, ARAContentUpdateScopes scopeFlags) {}
         virtual void willEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) {}
         virtual void didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) {}
         virtual void doDeactivateAudioSourceForUndoHistory (ARAAudioSource* audioSource, bool deactivate) {}
@@ -32,7 +32,7 @@ public:
 public:         // to be called by ARADocumentController only
     void willUpdateAudioSourceProperties (PropertiesPtr newProperties);
     void didUpdateAudioSourceProperties();
-    void doUpdateAudioSourceContent (const ARA::ARAContentTimeRange* range, ARA::ARAContentUpdateFlags flags);
+    void doUpdateAudioSourceContent (const ARA::ARAContentTimeRange* range, ARAContentUpdateScopes scopeFlags);
     void willEnableAudioSourceSamplesAccess (bool enable);
     void didEnableAudioSourceSamplesAccess (bool enable);
     void doDeactivateAudioSourceForUndoHistory (bool deactivate);

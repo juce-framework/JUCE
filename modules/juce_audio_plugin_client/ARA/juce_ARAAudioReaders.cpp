@@ -68,12 +68,12 @@ void ARAAudioSourceReader::willDestroyAudioSource (ARAAudioSource* audioSource) 
     audioSourceBeingRead = nullptr;
 }
 
-void ARAAudioSourceReader::doUpdateAudioSourceContent (ARAAudioSource* audioSource, const ARA::ARAContentTimeRange* /*range*/, ARA::ARAContentUpdateFlags flags) noexcept
+void ARAAudioSourceReader::doUpdateAudioSourceContent (ARAAudioSource* audioSource, const ARA::ARAContentTimeRange* /*range*/, ARAContentUpdateScopes scopeFlags) noexcept
 {
     jassert (audioSourceBeingRead == audioSource);
 
     // don't invalidate if the audio signal is unchanged
-    if ((flags & ARA::kARAContentUpdateSignalScopeRemainsUnchanged) != 0)
+    if (! scopeFlags.affectsSamples())
         return;
 
     ScopedWriteLock scopedLock (lock);
@@ -262,7 +262,6 @@ void ARAPlaybackRegionReader::willUpdatePlaybackRegionProperties (ARAPlaybackReg
         (playbackRegion->getDurationInAudioModificationTime () != newProperties->durationInModificationTime) ||
         (playbackRegion->getStartInPlaybackTime () != newProperties->startInPlaybackTime) ||
         (playbackRegion->getDurationInPlaybackTime () != newProperties->durationInPlaybackTime) ||
-
         (playbackRegion->isTimestretchEnabled () != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationTimestretch) != 0)) ||
         (playbackRegion->isTimeStretchReflectingTempo () != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationTimestretchReflectingTempo) != 0)) ||
         (playbackRegion->hasContentBasedFadeAtHead () != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationContentBasedFadeAtHead) != 0)) ||

@@ -17,9 +17,9 @@ void ARAAudioSource::didUpdateAudioSourceProperties()
     listeners.call ([this] (Listener& l) { l.didUpdateAudioSourceProperties (this); });
 }
 
-void ARAAudioSource::doUpdateAudioSourceContent (const ARA::ARAContentTimeRange* range, ARA::ARAContentUpdateFlags flags)
+void ARAAudioSource::doUpdateAudioSourceContent (const ARA::ARAContentTimeRange* range, ARAContentUpdateScopes scopeFlags)
 {
-    listeners.call ([this, range, flags] (Listener& l) { l.doUpdateAudioSourceContent (this, range, flags); });
+    listeners.call ([this, range, scopeFlags] (Listener& l) { l.doUpdateAudioSourceContent (this, range, scopeFlags); });
 }
 
 void ARAAudioSource::willEnableAudioSourceSamplesAccess (bool enable)

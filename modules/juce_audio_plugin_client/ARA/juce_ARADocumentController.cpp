@@ -122,9 +122,9 @@ void ARADocumentController::didUpdateMusicalContextProperties (ARA::PlugIn::Musi
     static_cast<ARAMusicalContext*> (musicalContext)->didUpdateMusicalContextProperties();
 }
 
-void ARADocumentController::doUpdateMusicalContextContent (ARA::PlugIn::MusicalContext* musicalContext, const ARA::ARAContentTimeRange* range, ARA::ARAContentUpdateFlags flags) noexcept
+void ARADocumentController::doUpdateMusicalContextContent (ARA::PlugIn::MusicalContext* musicalContext, const ARA::ARAContentTimeRange* range, ARA::ContentUpdateScopes scopeFlags) noexcept
 {
-    static_cast<ARAMusicalContext*> (musicalContext)->doUpdateMusicalContextContent (range, flags);
+    static_cast<ARAMusicalContext*> (musicalContext)->doUpdateMusicalContextContent (range, scopeFlags);
 }
 
 void ARADocumentController::willDestroyMusicalContext (ARA::PlugIn::MusicalContext* musicalContext) noexcept
@@ -185,9 +185,9 @@ void ARADocumentController::didUpdateAudioSourceProperties (ARA::PlugIn::AudioSo
     static_cast<ARAAudioSource*> (audioSource)->didUpdateAudioSourceProperties();
 }
 
-void ARADocumentController::doUpdateAudioSourceContent (ARA::PlugIn::AudioSource* audioSource, const ARA::ARAContentTimeRange* range, ARA::ARAContentUpdateFlags flags) noexcept
+void ARADocumentController::doUpdateAudioSourceContent (ARA::PlugIn::AudioSource* audioSource, const ARA::ARAContentTimeRange* range, ARA::ContentUpdateScopes scopeFlags) noexcept
 {
-    static_cast<ARAAudioSource*> (audioSource)->doUpdateAudioSourceContent (range, flags);
+    static_cast<ARAAudioSource*> (audioSource)->doUpdateAudioSourceContent (range, scopeFlags);
 }
 
 void ARADocumentController::willEnableAudioSourceSamplesAccess (ARA::PlugIn::AudioSource* audioSource, bool enable) noexcept
