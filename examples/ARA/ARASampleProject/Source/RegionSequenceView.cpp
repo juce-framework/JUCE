@@ -1,7 +1,27 @@
 #include "RegionSequenceView.h"
+#include "PlaybackRegionView.h"
 #include "ARASampleProjectPlaybackRenderer.h"
 #include "ARASampleProjectDocumentController.h"
 #include "ARASampleProjectAudioProcessorEditor.h"
+
+RegionSequenceView::RegionSequenceView (ARASampleProjectAudioProcessorEditor* editor, ARARegionSequence* sequence)
+: isSelected (false),
+  editorComponent (editor),
+  regionSequence (sequence)
+{
+    regionSequence->addListener (this);
+
+    for (auto* playbackRegion : regionSequence->getPlaybackRegions ())
+    {
+        playbackRegionViews.add (new PlaybackRegionView (editorComponent, static_cast<ARAPlaybackRegion*> (playbackRegion)));
+        addAndMakeVisible (playbackRegionViews.getLast ());
+    }
+}
+
+RegionSequenceView::~RegionSequenceView()
+{
+    regionSequence->removeListener(this);
+}
 
 void RegionSequenceView::paint (Graphics& g)
 {
@@ -12,51 +32,26 @@ void RegionSequenceView::paint (Graphics& g)
     g.fillAll (trackColour);
     g.setColour (isSelected ? juce::Colours::yellow : juce::Colours::black);
     g.drawRect (getLocalBounds());
-    g.setColour (trackColour.contrasting (0.7f));
-    if (getLengthInSecs() != 0.0)
-        audioThumb.drawChannels (g, getLocalBounds(), getStartInSecs(), getLengthInSecs(), 1.0);
     g.setColour (trackColour.contrasting (1.0f));
     g.setFont (Font (12.0));
     g.drawText ("Track #" + String (regionSequence->getOrderIndex()) + ": " + regionSequence->getName(), 0, 0, getWidth(), getHeight(), juce::Justification::bottomLeft);
 }
 
-RegionSequenceView::RegionSequenceView (ARASampleProjectAudioProcessorEditor* editor, ARARegionSequence* sequence)
-: isSelected (false),
-  editorComponent (editor),
-  regionSequence (sequence),
-  audioThumbCache (1),
-  audioThumb (128, audioFormatManger, audioThumbCache)
+void RegionSequenceView::resized ()
 {
-    recreateRegionSequenceReader();
+    double startInSeconds (0), lengthInSeconds (0);
+    getTimeRange (startInSeconds, lengthInSeconds);
 
-    audioThumb.addChangeListener (this);
-
-    regionSequence->addListener (this);
-    static_cast<ARADocument*>(regionSequence->getDocument ())->addListener (this);
-}
-
-RegionSequenceView::~RegionSequenceView()
-{
-    regionSequence->removeListener(this);
-    static_cast<ARADocument*>(regionSequence->getDocument ())->removeListener (this);
-
-    audioThumb.clear();
-    audioThumb.removeChangeListener (this);
-}
-
-void RegionSequenceView::changeListenerCallback (juce::ChangeBroadcaster* /*broadcaster*/)
-{
-    repaint();
-}
-
-double RegionSequenceView::getStartInSecs()
-{
-    return regionSequenceReader->getRegionsStartTime();
-}
-
-double RegionSequenceView::getLengthInSecs()
-{
-    return regionSequenceReader->getRegionsEndTime() - regionSequenceReader->getRegionsStartTime();
+    // use this to set size of playback region views
+    for (auto v : playbackRegionViews)
+    {
+        double normalizedStartPos = (v->getStartInSeconds () - startInSeconds) / lengthInSeconds;
+        double normalizedLength = (v->getLengthInSeconds ()) / lengthInSeconds;
+        auto ourBounds = getLocalBounds ();
+        ourBounds.setX ((int) (ourBounds.getWidth () * normalizedStartPos));
+        ourBounds.setWidth ((int) (ourBounds.getWidth () * normalizedLength));
+        v->setBounds (ourBounds);
+    }
 }
 
 void RegionSequenceView::setIsSelected (bool value)
@@ -72,27 +67,49 @@ bool RegionSequenceView::getIsSelected() const
     return isSelected;
 }
 
-void RegionSequenceView::recreateRegionSequenceReader()
+void RegionSequenceView::getTimeRange (double& startTimeInSeconds, double& endTimeInSeconds) const
 {
-    audioThumbCache.clear();
+    if (playbackRegionViews.isEmpty ())
+        return;
 
-    auto documentController = static_cast<ARASampleProjectDocumentController*> (regionSequence->getDocument()->getDocumentController());
-    regionSequenceReader = documentController->createRegionSequenceReader (regionSequence);
-    audioThumb.setReader (regionSequenceReader, kAudioThumbHashCode);
-}
-
-void RegionSequenceView::doEndEditing (ARADocument* /*document*/)
-{
-    if (! regionSequenceReader || ! regionSequenceReader->isValid())
+    startTimeInSeconds = std::numeric_limits<double>::max ();
+    endTimeInSeconds = 0;
+    for (int i = 0; i < playbackRegionViews.size (); i++)
     {
-        recreateRegionSequenceReader();
-        editorComponent->setDirty();
-   }
+        startTimeInSeconds = jmin (startTimeInSeconds, playbackRegionViews[i]->getStartInSeconds ());
+        endTimeInSeconds = jmax (endTimeInSeconds, playbackRegionViews[i]->getEndInSeconds ());
+    }
 }
 
 void RegionSequenceView::didUpdateRegionSequenceProperties (ARARegionSequence* sequence)
 {
-    jassert (sequence == regionSequence);
+    jassert (regionSequence == sequence);
 
     repaint();
+}
+
+void RegionSequenceView::willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* sequence, ARAPlaybackRegion* playbackRegion)
+{
+    jassert (regionSequence == sequence);
+
+    for (int i = 0; i < playbackRegionViews.size (); i++)
+    {
+        if (playbackRegionViews[i]->getPlaybackRegion () == playbackRegion)
+        {
+            playbackRegionViews.remove (i);
+            break;
+        }
+    }
+
+    editorComponent->setDirty ();
+}
+
+void RegionSequenceView::didAddPlaybackRegionToRegionSequence (ARARegionSequence* sequence, ARAPlaybackRegion* playbackRegion)
+{
+    jassert (regionSequence == sequence);
+
+    playbackRegionViews.add (new PlaybackRegionView (editorComponent, playbackRegion));
+    addAndMakeVisible (playbackRegionViews.getLast ());
+
+    editorComponent->setDirty ();
 }

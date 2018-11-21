@@ -77,10 +77,14 @@ void ARASampleProjectAudioProcessorEditor::resized()
     // and determine the length in seconds of the longest ARA region sequence
     for (auto v : regionSequenceViews)
     {
-        maxRegionSequenceLength = jmax (maxRegionSequenceLength, v->getStartInSecs() + v->getLengthInSecs());
+        double startInSeconds (0), endInSeconds (0);
+        v->getTimeRange (startInSeconds, endInSeconds);
+        double lengthInSeconds = endInSeconds - startInSeconds;
 
-        double normalizedStartPos = v->getStartInSecs() / kVisibleSeconds;
-        double normalizedLength = v->getLengthInSecs() / kVisibleSeconds;
+        maxRegionSequenceLength = jmax (maxRegionSequenceLength, startInSeconds + lengthInSeconds);
+
+        double normalizedStartPos = startInSeconds / kVisibleSeconds;
+        double normalizedLength = lengthInSeconds / kVisibleSeconds;
         v->setBounds ((int) (width * normalizedStartPos), kRegionSequenceHeight * i, (int) (width * normalizedLength), kRegionSequenceHeight);
         i++;
     }

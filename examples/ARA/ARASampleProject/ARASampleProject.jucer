@@ -28,6 +28,10 @@
             file="Source/RegionSequenceView.h"/>
       <FILE id="EQ23gh" name="RegionSequenceView.cpp" compile="1" resource="0"
             file="Source/RegionSequenceView.cpp"/>
+      <FILE id="KZJTR6" name="PlaybackRegionView.cpp" compile="1" resource="0"
+            file="Source/PlaybackRegionView.cpp"/>
+      <FILE id="YRS0ck" name="PlaybackRegionView.h" compile="0" resource="0"
+            file="Source/PlaybackRegionView.h"/>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>

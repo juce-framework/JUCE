@@ -3,6 +3,7 @@
 #include "JuceHeader.h"
 
 class ARASampleProjectAudioProcessorEditor;
+class PlaybackRegionView;
 
 //==============================================================================
 /** 
@@ -11,42 +12,30 @@ class ARASampleProjectAudioProcessorEditor;
     along with their name, order index, color, and selection state
 */
 class RegionSequenceView: public Component, 
-                          public juce::ChangeListener,
-                          public ARADocument::Listener,
                           public ARARegionSequence::Listener
 {
 public:
-    ~RegionSequenceView();
     RegionSequenceView (ARASampleProjectAudioProcessorEditor* editor, ARARegionSequence* sequence);
+    ~RegionSequenceView();
 
     void paint (Graphics&) override;
-    void changeListenerCallback (ChangeBroadcaster*) override;
+    void resized() override;
 
     void setIsSelected (bool value);
     bool getIsSelected() const;
-    double getStartInSecs();
-    double getLengthInSecs();
-
     ARARegionSequence* getRegionSequence() const { return regionSequence; }
-
-    void doEndEditing (ARADocument* document) override;
-
-    void didUpdateRegionSequenceProperties (ARARegionSequence* regionSequence) override;
     
-private:
-    void recreateRegionSequenceReader();
+    void didUpdateRegionSequenceProperties (ARARegionSequence* sequence) override;
+    void willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* sequence, ARAPlaybackRegion* playbackRegion) override;
+    void didAddPlaybackRegionToRegionSequence (ARARegionSequence* sequence, ARAPlaybackRegion* playbackRegion) override;
+
+    void getTimeRange (double& startTimeInSeconds, double& endTimeInSeconds) const;
 
 private:
     bool isSelected;
-
     ARASampleProjectAudioProcessorEditor* editorComponent;
     ARARegionSequence* regionSequence;
-    ARARegionSequenceReader* regionSequenceReader;  // careful: "weak" pointer, actual pointer is owned by our audioThumb
-
-    enum { kAudioThumbHashCode = 1 };
-    juce::AudioFormatManager audioFormatManger;
-    juce::AudioThumbnailCache audioThumbCache;
-    juce::AudioThumbnail audioThumb;
+    OwnedArray<PlaybackRegionView> playbackRegionViews;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RegionSequenceView)
 };
