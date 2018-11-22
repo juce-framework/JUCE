@@ -16,10 +16,10 @@
     ARA document as well as their current selection state
 */
 class ARASampleProjectAudioProcessorEditor: public AudioProcessorEditor,
-                                            public AudioProcessorEditorARAExtension,    // Provides access to the ARA EditorView instance
-                                            public ARAEditorView::Listener,             // Receives ARA selection notifications
-                                            public ARARegionSequence::Listener,         // Receives ARA region sequence update notifications
-                                            public ARADocument::Listener                // Receives ARA document controller update notifications
+                                            public AudioProcessorEditorARAExtension,
+                                            public ARAEditorView::Listener,
+                                            public ARADocument::Listener,
+                                            public ARARegionSequence::Listener
 {
 public:
     ARASampleProjectAudioProcessorEditor (ARASampleProjectAudioProcessor&);

@@ -9,10 +9,10 @@
     This class delegates to an ARASampleProjectPlaybackRenderer instance
     which fulfills the PlaybackRenderer role of our ARA enabled plug-in
 */
-class ARASampleProjectAudioProcessor: public AudioProcessor
-#if JucePlugin_Enable_ARA
-     , public AudioProcessorARAExtension  // Provides access to the ARA PlaybackRenderer instance
-#endif
+class ARASampleProjectAudioProcessor   : public AudioProcessor
+                                       #if JucePlugin_Enable_ARA
+                                       , public AudioProcessorARAExtension
+                                       #endif
 {
 public:
     //==============================================================================
