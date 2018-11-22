@@ -6,42 +6,75 @@ namespace juce
 {
 
 //==============================================================================
-class ARAPlaybackRenderer : public ARA::PlugIn::PlaybackRenderer
+// shared base class for ARAPlaybackRenderer and ARAEditorRenderer, not to be used directly
+template <typename ARARendererType, void (ARARendererType::*setRenderingFunc) (bool)>
+class ARARendererBase : public ARARendererType
 {
 public:
-    ARAPlaybackRenderer (ARADocumentController* documentController);
+    using ARARendererType::ARARendererType;
 
-    // If you are subclassing ARAPlaybackRenderer, make sure to call the base class
-    // implementations of any overridden function, except for processBlock().
-    virtual void prepareToPlay (double newSampleRate, int newNumChannels, int newMaxSamplesPerBlock);
-    virtual bool processBlock (AudioBuffer<float>& buffer, int64 timeInSamples, bool isPlayingBack, bool isNonRealtime);
-    virtual void releaseResources();
-    bool isPrepared() const noexcept  { return prepared; }
+    virtual void prepareToPlay (double newSampleRate, int newNumChannels, int newMaxSamplesPerBlock)
+    {
+        sampleRate = newSampleRate;
+        numChannels = newNumChannels;
+        maxSamplesPerBlock = newMaxSamplesPerBlock;
+
+        if (setRenderingFunc)
+            (this->*setRenderingFunc)(true);
+        prepared = true;
+    }
+
+    virtual bool processBlock (AudioBuffer<float>& buffer, int64 timeInSamples, bool isPlayingBack, bool isNonRealtime)
+    {
+        jassert (buffer.getNumSamples() <= getMaxSamplesPerBlock());
+        buffer.clear();
+        return true;
+    }
+
+    virtual void releaseResources()
+    {
+        prepared = false;
+        if (setRenderingFunc)
+            (this->*setRenderingFunc)(false);
+    }
+
+    bool isPrepared() const noexcept            { return prepared; }
 
     double getSampleRate() const noexcept       { return sampleRate; }
     int getNumChannels() const noexcept         { return numChannels; }
     int getMaxSamplesPerBlock() const noexcept  { return maxSamplesPerBlock; }
 
-    // only to be called if using a playback renderer created internally, i.e. not by the host.
-    void addPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept;
-    void removePlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept;
-
 private:
-    double sampleRate;
-    int numChannels;
-    int maxSamplesPerBlock;
-    bool prepared;
+    double sampleRate = 44100.0;
+    int numChannels = 1;
+    int maxSamplesPerBlock = 1024;
+    bool prepared = false;
 };
 
 //==============================================================================
-class ARAEditorRenderer: public ARA::PlugIn::EditorRenderer
+class ARAPlaybackRenderer : public ARARendererBase<ARA::PlugIn::PlaybackRenderer, &ARA::PlugIn::PlaybackRenderer::setRendering>
 {
+    using BaseType = ARARendererBase<ARA::PlugIn::PlaybackRenderer, &ARA::PlugIn::PlaybackRenderer::setRendering>;
 public:
-    ARAEditorRenderer (ARADocumentController* documentController);
+    using BaseType::BaseType;
 
-    // TODO JUCE_ARA
-    // what should this look like?
-    // virtual void processBlock (AudioBuffer<float>& buffer, int64 timeInSamples, bool isPlayingBack);
+    // If you are subclassing ARAPlaybackRenderer, make sure to call the base class
+    // implementations of any overridden function, except for processBlock().
+
+    // only to be called if using a playback renderer created internally, i.e. not by the host.
+    void addPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept;
+    void removePlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept;
+};
+
+//==============================================================================
+class ARAEditorRenderer : public ARARendererBase<ARA::PlugIn::EditorRenderer, nullptr>
+{
+    using BaseType = ARARendererBase<ARA::PlugIn::EditorRenderer, nullptr>;
+public:
+    using BaseType::BaseType;
+
+    // If you are subclassing ARAPlaybackRenderer, make sure to call the base class
+    // implementations of any overridden function, except for processBlock().
 };
 
 //==============================================================================
