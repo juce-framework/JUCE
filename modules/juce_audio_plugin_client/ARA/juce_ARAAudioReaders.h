@@ -4,7 +4,30 @@
 
 namespace juce
 {
-    
+
+// All these readers follow a common pattern of "invalidation":
+//
+// Whenever the samples they are reading are altered, the readers become invalid and will stop
+// accessing the model graph. These alterations are model edits such as property changes,
+// content changes (if affecting sample scope), or the deletion of some model object involved
+// in the read process.
+// Since these edits are performed on the document controller thread, reader validity can immediately
+// be checked after the edit has conluded, and any reader that has become invalid can be recreated.
+//
+// Note that encountering a failure in any individual read call does not invalidate the reader,
+// so that the entity using the reader can decide whether to retry or to back out.
+// This includes trying to read an audio source for which the host has currently disabled access:
+// the failure will be immediately visible, but the reader will remain valid.
+// This ensures that for example a realtime renderer can just keep go reading and will be seeing
+// proper samples again once sample access is reenabled.
+//
+// If desired, the code calling readSamples() can also implement proper signaling of any read error
+// to the document controller thread to trigger rebuilding the reader as needed.
+// This will typically be done when implementing audio source analysis: if there is an error upon
+// reading the samples that cannot be resolved within a reasonable timeout, then the anaylsis would
+// be aborted. The document controller code that monitors the analysis tasks can evaluate this and
+// re-launch a new analysis when appropriate (e.g. when access is re-enabled).
+
 class ARAAudioSourceReader : public AudioFormatReader,
                              ARAAudioSource::Listener
 {
