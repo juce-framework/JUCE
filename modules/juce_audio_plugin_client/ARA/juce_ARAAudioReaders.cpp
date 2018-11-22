@@ -101,7 +101,7 @@ bool ARAAudioSourceReader::readSamples (int** destSamples, int numDestChannels, 
     int destSize = (bitsPerSample / 8) * numSamples;
     int bufferOffset = (bitsPerSample / 8) * startOffsetInDestBuffer;
 
-    // If we can't enter the lock or we don't have a reader, zero samples and return false
+    // If we're invalid or can't enter the lock or audio source access is currently disabled, zero samples and return false
     bool gotReadlock = isValid ? lock.tryEnterRead () : false;
     if (! isValid || ! gotReadlock || (araHostReader == nullptr))
     {
@@ -136,6 +136,7 @@ bool ARAAudioSourceReader::readSamples (int** destSamples, int numDestChannels, 
     }
 
     bool success = araHostReader->readAudioSamples (startSampleInFile, numSamples, tmpPtrs.data());
+
     lock.exitRead();
 
     return success;
@@ -202,6 +203,7 @@ void ARAPlaybackRegionReader::invalidate()
     if (isValid())
     {
         ScopedWriteLock scopedWrite (lock);
+
         for (auto playbackRegion : playbackRenderer->getPlaybackRegions ())
             static_cast<ARAPlaybackRegion*>(playbackRegion)->removeListener (this);
 
@@ -213,16 +215,18 @@ bool ARAPlaybackRegionReader::readSamples (int** destSamples, int numDestChannel
                                            int64 startSampleInFile, int numSamples)
 {
     bool success = false;
+    bool needClearSamples = true;
     if (lock.tryEnterRead())
     {
         if (isValid())
         {
             success = true;
-            while (numSamples > 0 && success) // TODO JUCE_ARA should we check success here?
+            needClearSamples = false;
+            while (numSamples > 0)
             {
                 int numSliceSamples = jmin(numSamples, playbackRenderer->getMaxSamplesPerBlock());
                 AudioBuffer<float> buffer ((float **) destSamples, numDestChannels, startOffsetInDestBuffer, numSliceSamples);
-                success = playbackRenderer->processBlock (buffer, startSampleInFile, true, isNonRealtime); 
+                success &= playbackRenderer->processBlock (buffer, startSampleInFile, true, isNonRealtime);
                 numSamples -= numSliceSamples;
                 startOffsetInDestBuffer += numSliceSamples;
                 startSampleInFile += numSliceSamples;
@@ -232,11 +236,12 @@ bool ARAPlaybackRegionReader::readSamples (int** destSamples, int numDestChannel
         lock.exitRead();
     }
 
-    if (! success)
+    if (needClearSamples)
     {
         for (int chan_i = 0; chan_i < numDestChannels; ++chan_i)
             FloatVectorOperations::clear ((float *) destSamples[chan_i], numSamples);
     }
+
     return success;
 }
 
