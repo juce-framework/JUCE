@@ -9,29 +9,22 @@ ARAAudioModification::ARAAudioModification (ARA::PlugIn::AudioSource* audioSourc
 
 void ARAAudioModification::willUpdateAudioModificationProperties (PropertiesPtr newProperties)
 {
-    listeners.call ([this, &newProperties] (Listener& l) { l.willUpdateAudioModificationProperties (this, newProperties); });
+    listeners.callExpectingUnregistration ([this, &newProperties] (Listener& l) { l.willUpdateAudioModificationProperties (this, newProperties); });
 }
 
 void ARAAudioModification::didUpdateAudioModificationProperties()
 {
-    listeners.call ([this] (Listener& l) { l.didUpdateAudioModificationProperties (this); });
+    listeners.callExpectingUnregistration ([this] (Listener& l) { l.didUpdateAudioModificationProperties (this); });
 }
 
 void ARAAudioModification::doDeactivateAudioModificationForUndoHistory (bool deactivate)
 {
-    listeners.call ([this, deactivate] (Listener& l) { l.doDeactivateAudioModificationForUndoHistory (this, deactivate); });
+    listeners.callExpectingUnregistration ([this, deactivate] (Listener& l) { l.doDeactivateAudioModificationForUndoHistory (this, deactivate); });
 }
 
 void ARAAudioModification::willDestroyAudioModification()
 {
-    // TODO JUCE_ARA 
-    // same concerns involving removal as with other listeners
-    auto listenersCopy (listeners.getListeners());
-    for (auto listener : listenersCopy)
-    {
-        if (listeners.contains (listener))
-            listener->willDestroyAudioModification (this);
-    }
+    listeners.callExpectingUnregistration ([this] (Listener& l) { l.willDestroyAudioModification (this); });
 }
 
 void ARAAudioModification::addListener (Listener * l)

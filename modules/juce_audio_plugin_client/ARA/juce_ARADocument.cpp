@@ -9,22 +9,22 @@ ARADocument::ARADocument (ARADocumentController* documentController)
 
 void ARADocument::doBeginEditing()
 {
-    listeners.call ([this] (Listener& l) { l.doBeginEditing (this); });
+    listeners.callExpectingUnregistration ([this] (Listener& l) { l.doBeginEditing (this); });
 }
 
 void ARADocument::doEndEditing()
 {
-    listeners.call ([this] (Listener& l) { l.doEndEditing (this); });
+    listeners.callExpectingUnregistration ([this] (Listener& l) { l.doEndEditing (this); });
 }
 
 void ARADocument::willUpdateDocumentProperties (ARADocument::PropertiesPtr newProperties)
 {
-    listeners.call ([this, &newProperties] (Listener& l) { l.willUpdateDocumentProperties(this, newProperties); });
+    listeners.callExpectingUnregistration ([this, &newProperties] (Listener& l) { l.willUpdateDocumentProperties(this, newProperties); });
 }
 
 void ARADocument::didUpdateDocumentProperties()
 {
-    listeners.call ([this] (Listener& l) { l.didUpdateDocumentProperties (this); });
+    listeners.callExpectingUnregistration ([this] (Listener& l) { l.didUpdateDocumentProperties (this); });
 }
 
 void ARADocument::willDestroyDocument()

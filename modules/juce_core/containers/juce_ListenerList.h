@@ -173,6 +173,32 @@ public:
         }
     }
 
+    /** Same as the call function with the added feature of allowing listeners
+        to safely remove themselves from the listener list without bailing out
+    */
+    template <typename Callback>
+    void callExpectingUnregistration (Callback&& callback)
+    {
+        auto& listenersArray = getListeners ();
+
+        typename ArrayType::ScopedLockType lock (listeners.getLock ());
+        
+        if (listenersArray.size () == 1)
+        {
+            // if there's but one listener, we can skip copying the array
+            callback (*listenersArray.getFirst ());
+        }
+        else
+        {
+            auto listenersCopy (listenersArray);
+            for (auto listener : listenersCopy)
+            {
+                if (contains (listener))
+                    callback (*listener);
+            }
+        }
+    }
+    
     //==============================================================================
     /** A dummy bail-out checker that always returns false.
         See the ListenerList notes for more info about bail-out checkers.
