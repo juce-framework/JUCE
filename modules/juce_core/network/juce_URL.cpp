@@ -343,14 +343,7 @@ bool URL::isWellFormed() const
 
 String URL::getDomain() const
 {
-    auto start = URLHelpers::findStartOfNetLocation (url);
-    auto end1 = url.indexOfChar (start, '/');
-    auto end2 = url.indexOfChar (start, ':');
-
-    auto end = (end1 < 0 && end2 < 0) ? std::numeric_limits<int>::max()
-                                      : ((end1 < 0 || end2 < 0) ? jmax (end1, end2)
-                                                                : jmin (end1, end2));
-    return url.substring (start, end);
+    return getDomainInternal (false);
 }
 
 String URL::getSubPath() const
@@ -391,7 +384,7 @@ File URL::fileFromFileSchemeURL (const URL& fileURL)
         return {};
     }
 
-    auto path = removeEscapeChars (fileURL.getDomain()).replace ("+", "%2B");
+    auto path = removeEscapeChars (fileURL.getDomainInternal (true)).replace ("+", "%2B");
 
    #ifdef JUCE_WINDOWS
     bool isUncPath = (! fileURL.url.startsWith ("file:///"));
@@ -527,6 +520,18 @@ bool URL::isProbablyAnEmailAddress (const String& possibleEmailAddress)
     return atSign > 0
         && possibleEmailAddress.lastIndexOfChar ('.') > (atSign + 1)
         && ! possibleEmailAddress.endsWithChar ('.');
+}
+
+String URL::getDomainInternal (bool ignorePort) const
+{
+    auto start = URLHelpers::findStartOfNetLocation (url);
+    auto end1 = url.indexOfChar (start, '/');
+    auto end2 = ignorePort ? -1 : url.indexOfChar (start, ':');
+
+    auto end = (end1 < 0 && end2 < 0) ? std::numeric_limits<int>::max()
+                                      : ((end1 < 0 || end2 < 0) ? jmax (end1, end2)
+                                                                : jmin (end1, end2));
+    return url.substring (start, end);
 }
 
 #if JUCE_IOS

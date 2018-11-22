@@ -1,4 +1,4 @@
-package com.juce;
+package com.roli.juce;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
@@ -9,19 +9,15 @@ import android.database.MatrixCursor;
 import android.net.Uri;
 import android.os.FileObserver;
 import android.os.ParcelFileDescriptor;
+
 import java.lang.String;
 
-public final class SharingContentProvider extends ContentProvider
+public final class JuceSharingContentProvider extends ContentProvider
 {
-    private Object lock = new Object();
-
-    private native void contentSharerFileObserverEvent (long host, int event, String path);
+    private Object lock = new Object ();
 
     private native Cursor contentSharerQuery (Uri uri, String[] projection, String selection,
                                               String[] selectionArgs, String sortOrder);
-
-    private native void contentSharerCursorClosed (long host);
-
     private native AssetFileDescriptor contentSharerOpenFile (Uri uri, String mode);
     private native String[] contentSharerGetStreamTypes (Uri uri, String mimeTypeFilter);
 
@@ -40,6 +36,8 @@ public final class SharingContentProvider extends ContentProvider
         }
 
         private long host;
+
+        private native void contentSharerFileObserverEvent (long host, int event, String path);
     }
 
     public final class ProviderCursor extends MatrixCursor
@@ -52,18 +50,20 @@ public final class SharingContentProvider extends ContentProvider
         }
 
         @Override
-        public void close()
+        public void close ()
         {
-            super.close();
+            super.close ();
 
             contentSharerCursorClosed (host);
         }
+
+        private native void contentSharerCursorClosed (long host);
 
         private long host;
     }
 
     @Override
-    public boolean onCreate()
+    public boolean onCreate ()
     {
         return true;
     }
@@ -120,13 +120,12 @@ public final class SharingContentProvider extends ContentProvider
             AssetFileDescriptor result = contentSharerOpenFile (uri, mode);
 
             if (result != null)
-                return result.getParcelFileDescriptor();
+                return result.getParcelFileDescriptor ();
 
             return null;
         }
     }
-$$ContentProviderApi11
-    @Override
+
     public String[] getStreamTypes (Uri uri, String mimeTypeFilter)
     {
         synchronized (lock)
@@ -134,5 +133,4 @@ $$ContentProviderApi11
             return contentSharerGetStreamTypes (uri, mimeTypeFilter);
         }
     }
-ContentProviderApi11$$
 }

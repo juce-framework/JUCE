@@ -221,7 +221,9 @@
 
 //==============================================================================
 #elif JUCE_ANDROID
+
 #include "native/juce_linux_CommonFile.cpp"
+#include "native/juce_android_JNIHelpers.cpp"
 #include "native/juce_android_Files.cpp"
 #include "native/juce_android_Misc.cpp"
 #include "native/juce_android_Network.cpp"

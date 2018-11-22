@@ -177,24 +177,6 @@ private:
     void resized() override;
     void timerCallback() override;
 
-    #if JUCE_ANDROID
-    friend void juce_surfaceChangedNativeVideo (int64, void*);
-    friend void juce_surfaceDestroyedNativeVideo (int64, void*);
-
-    friend void juce_mediaSessionPause (int64);
-    friend void juce_mediaSessionPlay (int64);
-    friend void juce_mediaSessionPlayFromMediaId (int64, void*, void*);
-    friend void juce_mediaSessionSeekTo (int64, int64);
-    friend void juce_mediaSessionStop (int64);
-
-    friend void juce_mediaControllerAudioInfoChanged (int64, void*);
-    friend void juce_mediaControllerMetadataChanged (int64, void*);
-    friend void juce_mediaControllerPlaybackStateChanged (int64, void*);
-    friend void juce_mediaControllerSessionDestroyed (int64);
-
-    friend void juce_mediaSessionSystemVolumeChanged (int64);
-    #endif
-
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VideoComponent)
 };
 

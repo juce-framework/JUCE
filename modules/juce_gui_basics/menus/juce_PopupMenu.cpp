@@ -598,7 +598,7 @@ struct MenuWindow  : public Component
             targetPoint = relativeTo->localPointToGlobal (targetPoint);
 
         auto parentArea = Desktop::getInstance().getDisplays().findDisplayForPoint (targetPoint)
-                              #if JUCE_MAC
+                              #if JUCE_MAC || JUCE_ANDROID
                                .userArea;
                               #else
                                .totalArea; // on windows, don't stop the menu overlapping the taskbar

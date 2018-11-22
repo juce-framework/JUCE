@@ -181,6 +181,15 @@ public:
     /** Returns the property ID of the referenced property. */
     Identifier& getPropertyID() noexcept                    { return targetProperty; }
 
+    //==============================================================================
+    ValueWithDefault& operator= (const ValueWithDefault& other)
+    {
+        referToWithDefault (other.targetTree, other.targetProperty, other.undoManager,
+                            other.defaultValue, other.delimiter);
+
+        return *this;
+    }
+
 private:
     //==============================================================================
     ValueTree targetTree;
@@ -191,7 +200,7 @@ private:
     String delimiter;
 
     //==============================================================================
-    void referToWithDefault (ValueTree& v, const Identifier& i, UndoManager* um,
+    void referToWithDefault (const ValueTree& v, const Identifier& i, UndoManager* um,
                              const var& defaultVal, StringRef del)
     {
         targetTree = v;
@@ -225,6 +234,9 @@ private:
 
         return arr;
     }
+
+    //==============================================================================
+    JUCE_DECLARE_WEAK_REFERENCEABLE (ValueWithDefault)
 };
 
 } // namespace juce

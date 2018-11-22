@@ -179,6 +179,7 @@ public:
             case ProjectType::Target::StandalonePlugIn:
             case ProjectType::Target::GUIApp:
             case ProjectType::Target::StaticLibrary:
+            case ProjectType::Target::DynamicLibrary:
             case ProjectType::Target::SharedCodeTarget:
             case ProjectType::Target::AggregateTarget:
                 return true;
@@ -188,7 +189,6 @@ public:
             case ProjectType::Target::AAXPlugIn:
             case ProjectType::Target::RTASPlugIn:
             case ProjectType::Target::AudioUnitPlugIn:
-            case ProjectType::Target::DynamicLibrary:
             case ProjectType::Target::UnityPlugIn:
                 return ! iOS;
             default:
