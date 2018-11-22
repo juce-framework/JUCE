@@ -11,33 +11,30 @@ PlaybackRegionView::PlaybackRegionView (ARASampleProjectAudioProcessorEditor* ed
 {
     audioThumb.addChangeListener (this);
 
-    // TODO JUCE_ARA
-    // Getting the document / document controller as an ARADocument should be easier
-    static_cast<ARADocument*>(playbackRegion->getRegionSequence ()->getDocument ())->addListener (this);
+    static_cast<ARADocument*> (editorComponent->getARADocumentController()->getDocument())->addListener (this);
 
-    recreatePlaybackRegionReader ();
+    recreatePlaybackRegionReader();
 }
 
-PlaybackRegionView::~PlaybackRegionView ()
+PlaybackRegionView::~PlaybackRegionView()
 {
-    static_cast<ARADocument*>(playbackRegion->getRegionSequence ()->getDocument ())->removeListener (this);
+    static_cast<ARADocument*>(playbackRegion->getRegionSequence()->getDocument())->removeListener (this);
 
-    audioThumb.clear ();
+    audioThumb.clear();
     audioThumb.removeChangeListener (this);
 }
 
 void PlaybackRegionView::paint (Graphics& g)
 {
     Colour regionColour;
-    if (const ARA::ARAColor* colour = playbackRegion->getColor ())
-        regionColour = Colour ((uint8) jmap (colour->r, 0.0f, 255.0f), (uint8) jmap (colour->g, 0.0f, 255.0f), (uint8) jmap (colour->b, 0.0f, 255.0f));
+    // TODO JUCE_ARA Studio One uses black as the default color, which looks bad...
+    if (const ARA::ARAColor* colour = playbackRegion->getColor())
+        regionColour = Colour::fromFloatRGBA (colour->r, colour->g, colour->b, 1.0f);
 
-    // TODO JUCE_ARA
-    // Studio One uses black as the default color, which looks bad
-    //g.fillAll (regionColour);
+    g.fillAll (regionColour);
     g.setColour (isSelected ? juce::Colours::yellow : juce::Colours::black);
-    g.drawRect (getLocalBounds ());
-    if (getLengthInSeconds () != 0.0)
+    g.drawRect (getLocalBounds());
+    if (getLengthInSeconds() != 0.0)
     {
         g.setColour (regionColour.contrasting (0.7f));
         audioThumb.drawChannels (g, getLocalBounds (), getStartInSeconds (), getEndInSeconds(), 1.0);
@@ -46,22 +43,22 @@ void PlaybackRegionView::paint (Graphics& g)
 
 void PlaybackRegionView::changeListenerCallback (juce::ChangeBroadcaster* /*broadcaster*/)
 {
-    repaint ();
+    repaint();
 }
 
-double PlaybackRegionView::getStartInSeconds ()
+double PlaybackRegionView::getStartInSeconds() const
 {
-    return playbackRegion->getStartInPlaybackTime ();
+    return playbackRegion->getStartInPlaybackTime();
 }
 
-double PlaybackRegionView::getEndInSeconds ()
+double PlaybackRegionView::getLengthInSeconds() const
 {
-    return playbackRegion->getEndInPlaybackTime ();
+    return playbackRegion->getDurationInPlaybackTime();
 }
 
-double PlaybackRegionView::getLengthInSeconds ()
+double PlaybackRegionView::getEndInSeconds() const
 {
-    return getEndInSeconds () - getStartInSeconds ();
+    return playbackRegion->getEndInPlaybackTime();
 }
 
 void PlaybackRegionView::setIsSelected (bool value)
@@ -69,29 +66,24 @@ void PlaybackRegionView::setIsSelected (bool value)
     bool needsRepaint = (value != isSelected);
     isSelected = value;
     if (needsRepaint)
-        repaint ();
+        repaint();
 }
 
-bool PlaybackRegionView::getIsSelected () const
+void PlaybackRegionView::recreatePlaybackRegionReader()
 {
-    return isSelected;
-}
-
-void PlaybackRegionView::recreatePlaybackRegionReader ()
-{
-    audioThumbCache.clear ();
+    audioThumbCache.clear();
 
     // create a non-realtime playback region reader for our audio thumb
-    auto documentController = static_cast<ARASampleProjectDocumentController*> (playbackRegion->getRegionSequence()->getDocument ()->getDocumentController ());
+    auto documentController = static_cast<ARASampleProjectDocumentController*> (editorComponent->getARADocumentController());
     playbackRegionReader = documentController->createPlaybackRegionReader ({ playbackRegion }, true);
     audioThumb.setReader (playbackRegionReader, kAudioThumbHashCode);
 }
 
 void PlaybackRegionView::doEndEditing (ARADocument* /*document*/)
 {
-    if (!playbackRegionReader || !playbackRegionReader->isValid ())
+    if ((playbackRegionReader ==  nullptr) || ! playbackRegionReader->isValid())
     {
-        recreatePlaybackRegionReader ();
-        editorComponent->setDirty ();
+        recreatePlaybackRegionReader();
+        editorComponent->setDirty();
     }
 }

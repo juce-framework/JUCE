@@ -9,23 +9,24 @@ class PlaybackRegionView: public Component,
 {
 public:
     PlaybackRegionView (ARASampleProjectAudioProcessorEditor* editor, ARAPlaybackRegion* region);
-    ~PlaybackRegionView ();
+    ~PlaybackRegionView();
 
     void paint (Graphics&) override;
     void changeListenerCallback (ChangeBroadcaster*) override;
 
+    ARAPlaybackRegion* getPlaybackRegion() const { return playbackRegion; }
+
+    double getStartInSeconds() const;
+    double getLengthInSeconds() const;
+    double getEndInSeconds() const;
+
     void setIsSelected (bool value);
-    bool getIsSelected () const;
-    double getStartInSeconds ();
-    double getEndInSeconds ();
-    double getLengthInSeconds ();
-    ARAPlaybackRegion* getPlaybackRegion () const { return playbackRegion; }
 
     // use this to check if our reader's been invalidated
     void doEndEditing (ARADocument* document) override;
 
 private:
-    void recreatePlaybackRegionReader ();
+    void recreatePlaybackRegionReader();
 
 private:
     ARASampleProjectAudioProcessorEditor* editorComponent;
