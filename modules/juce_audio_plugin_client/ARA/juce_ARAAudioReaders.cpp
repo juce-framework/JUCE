@@ -222,6 +222,7 @@ bool ARAPlaybackRegionReader::readSamples (int** destSamples, int numDestChannel
         {
             success = true;
             needClearSamples = false;
+            startSampleInFile += (int64)(regionsStartTime * playbackRenderer->getSampleRate() + 0.5);
             while (numSamples > 0)
             {
                 int numSliceSamples = jmin(numSamples, playbackRenderer->getMaxSamplesPerBlock());

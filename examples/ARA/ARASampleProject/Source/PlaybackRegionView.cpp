@@ -37,7 +37,7 @@ void PlaybackRegionView::paint (Graphics& g)
     if (getLengthInSeconds() != 0.0)
     {
         g.setColour (regionColour.contrasting (0.7f));
-        audioThumb.drawChannels (g, getLocalBounds (), getStartInSeconds (), getEndInSeconds(), 1.0);
+        audioThumb.drawChannels (g, getLocalBounds(), 0.0, getLengthInSeconds(), 1.0);
     }
 }
 
