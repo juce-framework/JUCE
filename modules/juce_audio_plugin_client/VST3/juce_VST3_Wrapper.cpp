@@ -86,6 +86,35 @@ namespace Vst2
  DEF_CLASS_IID(ARA::IPlugInEntryPoint2)
  DEF_CLASS_IID(ARA::IMainFactory)
 
+
+// TODO JUCE_ARA this is copied from PreSonus ipslviewembedding.h for now,
+//               must discuss how to properly integrate their SDK with JUCE.
+ARA_DISABLE_VST3_WARNINGS_BEGIN
+namespace Presonus {
+
+//************************************************************************************************
+// IPlugInViewEmbedding
+/** Support for plug-in view embedding, to be implemented by the VST3 controller class. */
+//************************************************************************************************
+
+class IPlugInViewEmbedding: public Steinberg::FUnknown
+{
+public:
+    /** Check if view embedding is supported. */
+    virtual Steinberg::TBool PLUGIN_API isViewEmbeddingSupported () = 0;
+
+    /** Inform plug-in that its view will be embedded. */
+    virtual Steinberg::tresult PLUGIN_API setViewIsEmbedded (Steinberg::IPlugView* view, Steinberg::TBool embedded) = 0;
+
+    static const Steinberg::FUID iid;
+};
+
+DECLARE_CLASS_IID (IPlugInViewEmbedding, 0xda57e6d1, 0x1f3242d1, 0xad9c1a82, 0xfdb95695)
+
+} // namespace Presonus
+DEF_CLASS_IID(Presonus::IPlugInViewEmbedding)
+ARA_DISABLE_VST3_WARNINGS_END
+
 #endif
 
 
@@ -266,6 +295,9 @@ static ThreadLocalValue<bool> inParameterChangedCallback;
 class JuceVST3EditController : public Vst::EditController,
                                public Vst::IMidiMapping,
                                public Vst::ChannelContext::IInfoListener,
+                             #if JucePlugin_Enable_ARA
+                               public Presonus::IPlugInViewEmbedding,
+                             #endif
                                public AudioProcessorListener,
                                private AudioProcessorParameter::Listener
 {
@@ -300,6 +332,9 @@ public:
         TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::IConnectionPoint)
         TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::IMidiMapping)
         TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::ChannelContext::IInfoListener)
+       #if JucePlugin_Enable_ARA
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, Presonus::IPlugInViewEmbedding)
+       #endif
         TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (targetIID, IPluginBase, Vst::IEditController)
         TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (targetIID, IDependent, Vst::IEditController)
         TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (targetIID, FUnknown, Vst::IEditController)
@@ -558,6 +593,19 @@ public:
 
         return kResultOk;
     }
+
+    //==============================================================================
+   #if JucePlugin_Enable_ARA
+    Steinberg::TBool PLUGIN_API isViewEmbeddingSupported() override
+    {
+        return (Steinberg::TBool) true;
+    }
+
+    Steinberg::tresult PLUGIN_API setViewIsEmbedded (Steinberg::IPlugView* view, Steinberg::TBool embedded) override
+    {
+        return kResultOk;
+    }
+   #endif
 
     //==============================================================================
     tresult PLUGIN_API setComponentState (IBStream* stream) override
@@ -1068,6 +1116,11 @@ private:
 
                 // if hasEditor() returns true then createEditorIfNeeded has to return a valid editor
                 jassert (pluginEditor != nullptr);
+
+               #if JucePlugin_Enable_ARA
+                // for proper view embedding, ARA plug-ins must be resizable
+                jassert (pluginEditor->isResizable());
+               #endif
 
                 if (pluginEditor != nullptr)
                 {

@@ -1,10 +1,12 @@
 #include "ARASampleProjectAudioProcessor.h"
 #include "ARASampleProjectAudioProcessorEditor.h"
 
-static const int kWidth = 1000;
-static const int kHeight = 400;
-static const int kRegionSequenceHeight = 80;
 static const int kVisibleSeconds = 10;
+static const int kMinWidth = 500;
+static const int kWidth = 1000;
+static const int kRegionSequenceHeight = 80;
+static const int kMinHeight = 1 * kRegionSequenceHeight;
+static const int kHeight = 5 * kRegionSequenceHeight;
 
 //==============================================================================
 ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARASampleProjectAudioProcessor& p)
@@ -19,9 +21,9 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
     addAndMakeVisible (regionSequenceViewPort);
     
     setSize (kWidth, kHeight);
+    setResizeLimits (kMinWidth, kMinHeight, 32768, 32768);
+    setResizable (true, false);
 
-    // manually invoke the onNewSelection callback to refresh our UI with the current selection
-    // TODO JUCE_ARA should we rename the function that recreates the view?
     if (isARAEditorView())
     {
         auto document = static_cast<ARADocument*> (getARADocumentController()->getDocument());
@@ -36,6 +38,9 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
         }
 
         rebuildView();
+
+        // manually invoke the onNewSelection callback to refresh our UI with the current selection
+        // TODO JUCE_ARA should we rename the function that recreates the view?
         onNewSelection (getARAEditorView()->getViewSelection());
     }
 }

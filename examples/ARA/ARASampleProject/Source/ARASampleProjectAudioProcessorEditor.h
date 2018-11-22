@@ -29,10 +29,10 @@ public:
     void paint (Graphics&) override;
     void resized() override;
 
-    // ARASampleProjectEditorView overrides
+    // ARAEditorView::Listener overrides
     void onNewSelection (const ARA::PlugIn::ViewSelection& currentSelection) override;
 
-    // ARADocumentController::Listener overrides
+    // ARADocument::Listener overrides
     void doEndEditing (ARADocument* document) override;
 
     // ARARegionSequence::Listener overrides
