@@ -27,6 +27,12 @@ namespace juce
 // reading the samples that cannot be resolved within a reasonable timeout, then the anaylsis would
 // be aborted. The document controller code that monitors the analysis tasks can evaluate this and
 // re-launch a new analysis when appropriate (e.g. when access is re-enabled).
+//
+// When reading playback regions (directly or through a region sequnece reader), the reader will
+// represent the regions as a single source object that covers the union of all affected regions.
+// The first sample produced by the reader thus will be the first sample of the earliest region.
+// This means that the location of this region has to be taken into account by the calling code if
+// it wants to relate the samples to the model or any other reader output.
 
 class ARAAudioSourceReader : public AudioFormatReader,
                              ARAAudioSource::Listener
