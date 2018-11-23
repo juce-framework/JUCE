@@ -7,7 +7,7 @@ namespace juce
 
 //==============================================================================
 // shared base class for ARAPlaybackRenderer and ARAEditorRenderer, not to be used directly
-template <typename ARARendererType, void (ARARendererType::*setRenderingFunc) (bool)>
+template <typename ARARendererType, void (ARARendererType::*setRenderingFunc) (bool), bool clearProcessBuffer>
 class ARARendererBase : public ARARendererType
 {
 public:
@@ -27,7 +27,8 @@ public:
     virtual bool processBlock (AudioBuffer<float>& buffer, int64 timeInSamples, bool isPlayingBack, bool isNonRealtime)
     {
         jassert (buffer.getNumSamples() <= getMaxSamplesPerBlock());
-        buffer.clear();
+        if (clearProcessBuffer)
+            buffer.clear();
         return true;
     }
 
@@ -52,11 +53,12 @@ private:
 };
 
 //==============================================================================
-class ARAPlaybackRenderer : public ARARendererBase<ARA::PlugIn::PlaybackRenderer, &ARA::PlugIn::PlaybackRenderer::setRendering>
+using ARAPlaybackRendererBase = ARARendererBase<ARA::PlugIn::PlaybackRenderer, &ARA::PlugIn::PlaybackRenderer::setRendering, true>;
+
+class ARAPlaybackRenderer : public ARAPlaybackRendererBase
 {
-    using BaseType = ARARendererBase<ARA::PlugIn::PlaybackRenderer, &ARA::PlugIn::PlaybackRenderer::setRendering>;
 public:
-    using BaseType::BaseType;
+    using ARAPlaybackRendererBase::ARAPlaybackRendererBase;
 
     // If you are subclassing ARAPlaybackRenderer, make sure to call the base class
     // implementations of any overridden function, except for processBlock().
@@ -67,11 +69,11 @@ public:
 };
 
 //==============================================================================
-class ARAEditorRenderer : public ARARendererBase<ARA::PlugIn::EditorRenderer, nullptr>
+using ARAEditorRendererBase = ARARendererBase<ARA::PlugIn::EditorRenderer, nullptr, false>;
+class ARAEditorRenderer : public ARAEditorRendererBase
 {
-    using BaseType = ARARendererBase<ARA::PlugIn::EditorRenderer, nullptr>;
 public:
-    using BaseType::BaseType;
+    using ARAEditorRendererBase::ARAEditorRendererBase;
 
     // If you are subclassing ARAPlaybackRenderer, make sure to call the base class
     // implementations of any overridden function, except for processBlock().
