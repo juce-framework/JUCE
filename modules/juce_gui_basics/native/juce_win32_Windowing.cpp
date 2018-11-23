@@ -2804,7 +2804,7 @@ private:
             const auto orientation = touchInfo.touchMask & TOUCH_MASK_ORIENTATION ? degreesToRadians (static_cast<float> (touchInfo.orientation))
                                                                                   : MouseInputSource::invalidOrientation;
 
-            if (! handleTouchInput (emulateTouchEventFromPointer (lParam, wParam),
+            if (! handleTouchInput (emulateTouchEventFromPointer (touchInfo.pointerInfo.ptPixelLocationRaw, wParam),
                                     isDown, isUp, pressure, orientation))
                 return false;
         }
@@ -2829,16 +2829,8 @@ private:
         return true;
     }
 
-    TOUCHINPUT emulateTouchEventFromPointer (LPARAM lParam, WPARAM wParam)
+    TOUCHINPUT emulateTouchEventFromPointer (POINT p, WPARAM wParam)
     {
-        Point<int> p (GET_X_LPARAM (lParam),
-                      GET_Y_LPARAM (lParam));
-
-       #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-        if (! isPerMonitorDPIAwareThread())
-            p = Desktop::getInstance().getDisplays().physicalToLogical (p);
-       #endif
-
         TOUCHINPUT touchInput;
 
         touchInput.dwID = GET_POINTERID_WPARAM (wParam);
