@@ -13,7 +13,9 @@ class ARADocumentController;
 class AudioProcessorARAExtension
 {
 public:
-    const ARA::ARAPlugInExtensionInstance* createARAPlugInExtension (ARA::ARADocumentControllerRef documentControllerRef, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles);
+    const ARA::ARAPlugInExtensionInstance* bindToARA (ARA::ARADocumentControllerRef documentControllerRef, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles);
+
+    bool isBoundToARA() const noexcept { return araPlugInExtension != nullptr; }
 
     ARAPlaybackRenderer* getARAPlaybackRenderer() const noexcept;
     ARAEditorRenderer* getARAEditorRenderer() const noexcept;
