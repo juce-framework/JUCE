@@ -124,14 +124,34 @@ void ARASampleProjectAudioProcessor::processBlock (AudioBuffer<float>& buffer, M
 {
     ScopedNoDenormals noDenormals;
 
-    // make sure we can get the play head
-    AudioPlayHead::CurrentPositionInfo ci;
-    if ((getPlayHead() == nullptr) || ! (getPlayHead()->getCurrentPosition (ci)))
-        return;
+    // get playback position and state
+    int64 timeInSamples = 0;
+    bool isPlaying = false;
+    if (getPlayHead() != nullptr)
+    {
+        AudioPlayHead::CurrentPositionInfo positionInfo;
+        if (getPlayHead()->getCurrentPosition (positionInfo))
+        {
+            timeInSamples = positionInfo.timeInSamples;
+            isPlaying = positionInfo.isPlaying;
+        }
+    }
 
-    // render our ARA playback regions for this time duration using the ARA playback renderer instance
-    if (isARAPlaybackRenderer())
-        getARAPlaybackRenderer()->processBlock (buffer, ci.timeInSamples, ci.isPlaying, isNonRealtime());
+    if (isBoundToARA())
+    {
+        // render our ARA playback regions for this buffer
+        if (isARAPlaybackRenderer())
+            getARAPlaybackRenderer()->processBlock (buffer, timeInSamples, isPlaying, isNonRealtime());
+
+        // render our ARA editing preview
+        if (isARAEditorRenderer())
+            getARAEditorRenderer()->processBlock (buffer, timeInSamples, isPlaying, isNonRealtime());
+    }
+    else
+    {
+        // proper non-ARA rendering would be invoked here
+        buffer.clear();
+    }
 }
 
 //==============================================================================
