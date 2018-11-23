@@ -362,7 +362,7 @@ private:
 
         if (project.getConfigFlag ("JUCE_USE_ANDROID_OBOE").get())
         {
-            String oboePath (androidOboeRepositoryPath.get().toString().quoted());
+            String oboePath (androidOboeRepositoryPath.get().toString().trim().quoted());
 
             mo << "SET(OBOE_DIR " << oboePath << ")" << newLine << newLine;
             mo << "add_subdirectory (${OBOE_DIR} ./oboe)" << newLine << newLine;
