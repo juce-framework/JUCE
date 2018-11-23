@@ -101,7 +101,7 @@ public:
     /** Returns the number of registered listeners. */
     int size() const noexcept                                { return listeners.size(); }
 
-    /** Returns true if any listeners are registered. */
+    /** Returns true if no listeners are registered, false otherwise. */
     bool isEmpty() const noexcept                            { return listeners.isEmpty(); }
 
     /** Clears the list. */
