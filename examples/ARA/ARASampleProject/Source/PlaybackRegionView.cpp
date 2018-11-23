@@ -11,14 +11,14 @@ PlaybackRegionView::PlaybackRegionView (ARASampleProjectAudioProcessorEditor* ed
 {
     audioThumb.addChangeListener (this);
 
-    static_cast<ARADocument*> (editorComponent->getARADocumentController()->getDocument())->addListener (this);
+    static_cast<ARADocument*> (playbackRegion->getRegionSequence()->getDocument())->addListener (this);
 
     recreatePlaybackRegionReader();
 }
 
 PlaybackRegionView::~PlaybackRegionView()
 {
-    static_cast<ARADocument*>(playbackRegion->getRegionSequence()->getDocument())->removeListener (this);
+    static_cast<ARADocument*> (playbackRegion->getRegionSequence()->getDocument())->removeListener (this);
 
     audioThumb.clear();
     audioThumb.removeChangeListener (this);
@@ -82,7 +82,7 @@ void PlaybackRegionView::recreatePlaybackRegionReader()
     // create a non-realtime playback region reader for our audio thumb
     auto documentController = static_cast<ARASampleProjectDocumentController*> (editorComponent->getARADocumentController());
     playbackRegionReader = documentController->createPlaybackRegionReader ({ playbackRegion }, true);
-    audioThumb.setReader (playbackRegionReader, kAudioThumbHashCode);
+    audioThumb.setReader (playbackRegionReader, reinterpret_cast<intptr_t> (playbackRegion));   // TODO JUCE_ARA better hash?
 }
 
 void PlaybackRegionView::doEndEditing (ARADocument* /*document*/)
