@@ -93,7 +93,18 @@ void PlaybackRegionView::recreatePlaybackRegionReader()
     // create a non-realtime playback region reader for our audio thumb
     auto documentController = static_cast<ARASampleProjectDocumentController*> (editorComponent->getARADocumentController());
     playbackRegionReader = documentController->createPlaybackRegionReader ({ playbackRegion }, true);
-    audioThumb.setReader (playbackRegionReader, reinterpret_cast<intptr_t> (playbackRegion));   // TODO JUCE_ARA better hash?
+    
+    // TODO JUCE_ARA
+    // See juce_AudioThumbnail.cpp line 122
+    if (playbackRegionReader->lengthInSamples <= 0)
+    {
+        delete playbackRegionReader;
+        playbackRegionReader = nullptr;
+    }
+    else
+    {
+        audioThumb.setReader (playbackRegionReader, reinterpret_cast<intptr_t> (playbackRegion));   // TODO JUCE_ARA better hash?
+    }
 }
 
 // TODO JUCE_ARA what if this is called after ARASampleProjectAudioProcessorEditor::doEndEditing?
