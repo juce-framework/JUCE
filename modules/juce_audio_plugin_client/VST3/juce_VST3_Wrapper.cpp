@@ -601,7 +601,7 @@ public:
         return (Steinberg::TBool) true;
     }
 
-    Steinberg::tresult PLUGIN_API setViewIsEmbedded (Steinberg::IPlugView* view, Steinberg::TBool embedded) override
+    Steinberg::tresult PLUGIN_API setViewIsEmbedded (Steinberg::IPlugView* /*view*/, Steinberg::TBool /*embedded*/) override
     {
         return kResultOk;
     }
