@@ -5,7 +5,8 @@
 
 class PlaybackRegionView: public Component, 
                           public juce::ChangeListener,
-                          public ARADocument::Listener
+                          public ARADocument::Listener,
+                          public ARAPlaybackRegion::Listener
 {
 public:
     PlaybackRegionView (ARASampleProjectAudioProcessorEditor* editor, ARAPlaybackRegion* region);
@@ -13,6 +14,9 @@ public:
 
     void paint (Graphics&) override;
     void changeListenerCallback (ChangeBroadcaster*) override;
+    
+    // ARAPlaybackRegion::Listener overrides
+    void willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties) override;
 
     ARAPlaybackRegion* getPlaybackRegion() const { return playbackRegion; }
 

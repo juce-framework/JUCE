@@ -12,14 +12,14 @@ PlaybackRegionView::PlaybackRegionView (ARASampleProjectAudioProcessorEditor* ed
     audioThumb.addChangeListener (this);
 
     static_cast<ARADocument*> (playbackRegion->getRegionSequence()->getDocument())->addListener (this);
-
+    playbackRegion->addListener (this);
     recreatePlaybackRegionReader();
 }
 
 PlaybackRegionView::~PlaybackRegionView()
 {
     static_cast<ARADocument*> (playbackRegion->getRegionSequence()->getDocument())->removeListener (this);
-
+    playbackRegion->removeListener(this);
     audioThumb.clear();
     audioThumb.removeChangeListener (this);
 }
@@ -67,6 +67,17 @@ double PlaybackRegionView::getEndInSeconds() const
     return playbackRegion->getEndInPlaybackTime();
 }
 
+void PlaybackRegionView::willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties)
+{
+    if ((playbackRegion->getStartInAudioModificationTime () != newProperties->startInModificationTime) ||
+        (playbackRegion->getDurationInAudioModificationTime () != newProperties->durationInModificationTime) ||
+        (playbackRegion->getStartInPlaybackTime () != newProperties->startInPlaybackTime) ||
+        (playbackRegion->getDurationInPlaybackTime () != newProperties->durationInPlaybackTime))
+    {
+        editorComponent->setDirty ();
+    }
+}
+
 void PlaybackRegionView::setIsSelected (bool value)
 {
     bool needsRepaint = (value != isSelected);
@@ -85,11 +96,12 @@ void PlaybackRegionView::recreatePlaybackRegionReader()
     audioThumb.setReader (playbackRegionReader, reinterpret_cast<intptr_t> (playbackRegion));   // TODO JUCE_ARA better hash?
 }
 
+// TODO JUCE_ARA what if this is called after ARASampleProjectAudioProcessorEditor::doEndEditing?
 void PlaybackRegionView::doEndEditing (ARADocument* /*document*/)
 {
     if ((playbackRegionReader ==  nullptr) || ! playbackRegionReader->isValid())
     {
         recreatePlaybackRegionReader();
-        editorComponent->setDirty();
+        editorComponent->setDirty(); 
     }
 }
