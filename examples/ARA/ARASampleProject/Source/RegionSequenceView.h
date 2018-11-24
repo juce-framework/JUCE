@@ -21,13 +21,17 @@ public:
     void paint (Graphics&) override;
     void resized() override;
 
-    void setIsSelected (bool value);
-    bool getIsSelected() const;
-    ARARegionSequence* getRegionSequence() const { return regionSequence; }
-    
+    // ARARegionSequence::Listener overrides
     void didUpdateRegionSequenceProperties (ARARegionSequence* sequence) override;
     void willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* sequence, ARAPlaybackRegion* playbackRegion) override;
     void didAddPlaybackRegionToRegionSequence (ARARegionSequence* sequence, ARAPlaybackRegion* playbackRegion) override;
+
+    ARARegionSequence* getRegionSequence() const { return regionSequence; }
+    
+    OwnedArray<PlaybackRegionView>& getPlaybackRegionViews() { return playbackRegionViews; }
+
+    void setIsSelected (bool value);
+    bool getIsSelected () const { return isSelected; }
 
     void getTimeRange (double& startTimeInSeconds, double& endTimeInSeconds) const;
 

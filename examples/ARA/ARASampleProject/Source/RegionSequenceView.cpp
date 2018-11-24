@@ -62,11 +62,6 @@ void RegionSequenceView::setIsSelected (bool value)
         repaint();
 }
 
-bool RegionSequenceView::getIsSelected() const
-{
-    return isSelected;
-}
-
 void RegionSequenceView::getTimeRange (double& startTimeInSeconds, double& endTimeInSeconds) const
 {
     if (playbackRegionViews.isEmpty())

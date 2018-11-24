@@ -16,11 +16,12 @@ public:
 
     ARAPlaybackRegion* getPlaybackRegion() const { return playbackRegion; }
 
+    void setIsSelected (bool value);
+    bool getIsSelected () const { return isSelected; }
+
     double getStartInSeconds() const;
     double getLengthInSeconds() const;
     double getEndInSeconds() const;
-
-    void setIsSelected (bool value);
 
     // use this to check if our reader's been invalidated
     void doEndEditing (ARADocument* document) override;
