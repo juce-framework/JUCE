@@ -39,8 +39,9 @@ void RegionSequenceView::paint (Graphics& g)
 
 void RegionSequenceView::resized()
 {
-    double startInSeconds (0), lengthInSeconds (0);
-    getTimeRange (startInSeconds, lengthInSeconds);
+    double startInSeconds (0), endInSeconds (0);
+    getTimeRange (startInSeconds, endInSeconds);
+    double lengthInSeconds = endInSeconds - startInSeconds;
 
     // use this to set size of playback region views
     for (auto v : playbackRegionViews)
