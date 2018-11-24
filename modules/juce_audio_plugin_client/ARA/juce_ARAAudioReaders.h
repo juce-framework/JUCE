@@ -44,6 +44,8 @@ public:
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples) override;
 
+    // returns false if the audio source content has changed
+    // since the construction of the audio source reader
     bool getIsValid() const { return isValid; }
 
     // TODO JUCE_ARA
