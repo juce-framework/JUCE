@@ -29,9 +29,9 @@ void PlaybackRegionView::paint (Graphics& g)
     Colour regionColour;
     // TODO JUCE_ARA Studio One uses black as the default color, which looks bad...
     const ARA::ARAColor* colour = playbackRegion->getColor();
-    if (!colour)
+    if (! colour)
         colour = playbackRegion->getRegionSequence()->getColor();
-    if (colour)
+    if (colour != nullptr)
     {
         regionColour = Colour::fromFloatRGBA (colour->r, colour->g, colour->b, 1.0f);
         g.fillAll (regionColour);
