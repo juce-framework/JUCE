@@ -22,6 +22,11 @@ void ARAAudioSource::doUpdateAudioSourceContent (const ARA::ARAContentTimeRange*
     listeners.callExpectingUnregistration ([this, range, scopeFlags] (Listener& l) { l.doUpdateAudioSourceContent (this, range, scopeFlags); });
 }
 
+void ARAAudioSource::didUpdateAudioSourceContent (ARAContentUpdateScopes scopeFlags)
+{
+    listeners.callExpectingUnregistration ([this, scopeFlags] (Listener& l) { l.didUpdateAudioSourceContent (this, scopeFlags); });
+}
+
 void ARAAudioSource::willEnableAudioSourceSamplesAccess (bool enable)
 {
     listeners.callExpectingUnregistration ([this, enable] (Listener& l) { l.willEnableAudioSourceSamplesAccess (this, enable); });

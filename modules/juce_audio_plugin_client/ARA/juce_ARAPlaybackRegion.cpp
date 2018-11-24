@@ -21,6 +21,11 @@ void ARAPlaybackRegion::didUpdatePlaybackRegionProperties()
     listeners.callExpectingUnregistration ([this] (Listener& l) { l.didUpdatePlaybackRegionProperties (this); });
 }
 
+void ARAPlaybackRegion::didUpdatePlaybackRegionContent (ARAContentUpdateScopes scopeFlags)
+{
+    listeners.callExpectingUnregistration ([this, scopeFlags] (Listener& l) { l.didUpdatePlaybackRegionContent (this, scopeFlags); });
+}
+
 void ARAPlaybackRegion::willDestroyPlaybackRegion()
 {
     listeners.callExpectingUnregistration ([this] (Listener& l) { l.willDestroyPlaybackRegion (this); });

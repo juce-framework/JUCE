@@ -72,7 +72,23 @@ const ARA::ARAFactory* ARA::PlugIn::DocumentController::getARAFactory() noexcept
 
 namespace juce
 {
-    
+//==============================================================================
+
+void ARADocumentController::notifyAudioSourceContentChanged (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags /*= ARAContentUpdateScopes::everythingIsAffected ()*/)
+{
+    audioSource->didUpdateAudioSourceContent (scopeFlags);
+}
+
+void ARADocumentController::notifyAudioModificationContentChanged (ARAAudioModification* audioModification, ARAContentUpdateScopes scopeFlags /*= ARAContentUpdateScopes::everythingIsAffected ()*/)
+{
+    audioModification->didUpdateAudioModificationContent (scopeFlags);
+}
+
+void ARADocumentController::notifyPlaybackRegionContentChanged (ARAPlaybackRegion* playbackRegion, ARAContentUpdateScopes scopeFlags /*= ARAContentUpdateScopes::everythingIsAffected ()*/)
+{
+    playbackRegion->didUpdatePlaybackRegionContent (scopeFlags);
+}
+
 //==============================================================================
     
 ARA::PlugIn::Document* ARADocumentController::doCreateDocument (ARA::PlugIn::DocumentController* documentController) noexcept

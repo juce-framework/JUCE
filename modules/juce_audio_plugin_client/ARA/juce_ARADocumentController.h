@@ -38,10 +38,10 @@ public:
     // must be called by the plug-in model management code on the main thread
     // Note that while the ARA API allows for specifying update ranges, this feature is not yet
     // in our current plug-in implementation (many hosts do not evaluate it anyways)
+*/
     void notifyAudioSourceContentChanged (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags = ARAContentUpdateScopes::everythingIsAffected());
     void notifyAudioModificationContentChanged (ARAAudioModification* audioModification, ARAContentUpdateScopes scopeFlags = ARAContentUpdateScopes::everythingIsAffected());
     void notifyPlaybackRegionContentChanged (ARAPlaybackRegion* playbackRegion, ARAContentUpdateScopes scopeFlags = ARAContentUpdateScopes::everythingIsAffected());
-*/
 
     //==============================================================================
     // Override document controller methods here

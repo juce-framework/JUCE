@@ -19,6 +19,7 @@ public:
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
         virtual void willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties) {}
         virtual void didUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion) {}
+        virtual void didUpdatePlaybackRegionContent (ARAPlaybackRegion* playbackRegion, ARAContentUpdateScopes scopeFlags) {}
         virtual void willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion) {}
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
     };
@@ -29,6 +30,7 @@ public:
 public:         // to be called by ARADocumentController only
     void willUpdatePlaybackRegionProperties (ARAPlaybackRegion::PropertiesPtr newProperties);
     void didUpdatePlaybackRegionProperties();
+    void didUpdatePlaybackRegionContent (ARAContentUpdateScopes scopeFlags);
     void willDestroyPlaybackRegion();
 
 private:

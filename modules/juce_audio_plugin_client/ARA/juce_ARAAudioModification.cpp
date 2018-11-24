@@ -17,6 +17,11 @@ void ARAAudioModification::didUpdateAudioModificationProperties()
     listeners.callExpectingUnregistration ([this] (Listener& l) { l.didUpdateAudioModificationProperties (this); });
 }
 
+void ARAAudioModification::didUpdateAudioModificationContent (ARAContentUpdateScopes scopeFlags)
+{
+    listeners.callExpectingUnregistration ([this, scopeFlags] (Listener& l) { l.didUpdateAudioModificationContent (this, scopeFlags); });
+}
+
 void ARAAudioModification::doDeactivateAudioModificationForUndoHistory (bool deactivate)
 {
     listeners.callExpectingUnregistration ([this, deactivate] (Listener& l) { l.doDeactivateAudioModificationForUndoHistory (this, deactivate); });
