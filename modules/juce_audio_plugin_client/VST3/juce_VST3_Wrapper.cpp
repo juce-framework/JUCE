@@ -213,13 +213,13 @@ public:
         for (int id : metersParamIDs)
         {
             // sum gain reduction meters only
-            if (((getPluginInstance()->getParameterCategory(id) & 0xffff0000) >> 16) == 2)
+            if (((getPluginInstance()->getParameterCategory (id) & 0xffff0000) >> 16) == 2)
             {
-                gainReduction *= getPluginInstance()->getParameter(id);
+                gainReduction *= getPluginInstance()->getParameter (id);
                 hasGRMeter = true;
             }
         }
-        return hasGRMeter ? Decibels::gainToDecibels(1.0 - jmin(1.0,gainReduction)) : 0;
+        return hasGRMeter ? Decibels::gainToDecibels (1.0 - jmin (1.0, gainReduction)) : 0;
     }
 
     //==============================================================================
