@@ -337,18 +337,17 @@ public:
         double gainReduction = 1.0;
         bool hasGRMeter = false;
 
-        for (int i = 0; i < audioProcessor->metersParamIDs.size(); ++i)
+        for (int id : metersParamIDs)
         {
             // sum gain reduction meters only
-            const auto param = audioProcessor->getParamForVSTParamID(audioProcessor->metersParamIDs[i]);
-            const auto category = param->getCategory();
-            if (category == AudioProcessorParameter::Category::compressorLimiterGainReductionMeter || category == AudioProcessorParameter::Category::expanderGateGainReductionMeter)
+            const auto param = audioProcessor->getParamForVSTParamID (id);
+            if (((param->getCategory() & 0xffff0000) >> 16) == 2)
             {
                 gainReduction *= param->getValue();
                 hasGRMeter = true;
             }
         }
-        return hasGRMeter ? Decibels::gainToDecibels(1.0 - jmin(1.0,gainReduction)) : 0;
+        return hasGRMeter ? Decibels::gainToDecibels (1.0 - jmin (1.0, gainReduction)) : 0;
     }
 
     //==============================================================================
