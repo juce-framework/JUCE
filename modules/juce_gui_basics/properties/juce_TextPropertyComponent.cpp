@@ -131,11 +131,17 @@ public:
 
     var getValue() const override
     {
-        return valueWithDefault->isUsingDefault() ? var() : valueWithDefault->get();
+        if (valueWithDefault == nullptr || valueWithDefault->isUsingDefault())
+            return {};
+
+        return valueWithDefault->get();
     }
 
     void setValue (const var& newValue) override
     {
+        if (valueWithDefault == nullptr)
+            return;
+
         if (newValue.toString().isEmpty())
             valueWithDefault->resetToDefault();
         else
@@ -143,7 +149,7 @@ public:
     }
 
 private:
-    ValueWithDefault* valueWithDefault = nullptr;
+    WeakReference<ValueWithDefault> valueWithDefault;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RemapperValueSourceWithDefault)
