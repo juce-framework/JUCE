@@ -337,7 +337,7 @@ public:
         double gainReduction = 1.0;
         bool hasGRMeter = false;
 
-        for (int id : metersParamIDs)
+        for (int id : audioProcessor->metersParamIDs)
         {
             // sum gain reduction meters only
             const auto param = audioProcessor->getParamForVSTParamID (id);
