@@ -198,7 +198,7 @@ private:
             {
                 // we need to remain backward compatible with the old bypass id
                 if (vst3WrapperProvidedBypassParam)
-                    vstParamID = static_cast<Vst::ParamID> (isUsingManagedParameters() ? paramBypass : numParameters);
+                    vstParamID = static_cast<Vst::ParamID> ((isUsingManagedParameters() && ! forceLegacyParamIDs) ? paramBypass : numParameters);
 
                 bypassParamID = vstParamID;
             }
