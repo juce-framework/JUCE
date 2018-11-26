@@ -90,8 +90,10 @@ double PlaybackRegionView::getEndInSeconds() const
 void PlaybackRegionView::didEnableAudioSourceSamplesAccess (ARAAudioSource* /*audioSource*/, bool enable)
 {
     if (isSampleAccessEnabled != enable)
+    {
+        isSampleAccessEnabled = enable;
         repaint ();
-    isSampleAccessEnabled = enable;
+    }
 }
 
 void PlaybackRegionView::willUpdatePlaybackRegionProperties (ARAPlaybackRegion* /*region*/, ARAPlaybackRegion::PropertiesPtr newProperties)
@@ -107,10 +109,11 @@ void PlaybackRegionView::willUpdatePlaybackRegionProperties (ARAPlaybackRegion* 
 
 void PlaybackRegionView::setIsSelected (bool value)
 {
-    bool needsRepaint = (value != isSelected);
-    isSelected = value;
-    if (needsRepaint)
-        repaint();
+    if (isSelected != value)
+    {
+        isSelected = value;
+        repaint ();
+    }
 }
 
 void PlaybackRegionView::recreatePlaybackRegionReader()
