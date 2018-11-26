@@ -2,12 +2,6 @@
 #include "ARASampleProjectAudioProcessorEditor.h"
 #include "PlaybackRegionView.h"
 
-static const int kVisibleSeconds = 10;
-static const int kMinWidth = 500;
-static const int kWidth = 1000;
-static const int kRegionSequenceHeight = 80;
-static const int kMinHeight = 1 * kRegionSequenceHeight;
-static const int kHeight = 5 * kRegionSequenceHeight;
 
 //==============================================================================
 ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARASampleProjectAudioProcessor& p)
@@ -85,20 +79,18 @@ void ARASampleProjectAudioProcessorEditor::resized()
     {
         double startInSeconds (0), endInSeconds (0);
         v->getTimeRange (startInSeconds, endInSeconds);
-        double lengthInSeconds = endInSeconds - startInSeconds;
 
-        maxRegionSequenceLength = jmax (maxRegionSequenceLength, startInSeconds + lengthInSeconds);
-
-        double normalizedStartPos = startInSeconds / kVisibleSeconds;
-        double normalizedLength = lengthInSeconds / kVisibleSeconds;
-        v->setBounds ((int) (width * normalizedStartPos), kRegionSequenceHeight * i, (int) (width * normalizedLength), kRegionSequenceHeight);
+        double normalizedEnd = endInSeconds / kVisibleSeconds;
+        v->setBounds (0, kRegionSequenceHeight * i, kTrackHeaderWidth + (int) (width * normalizedEnd), kRegionSequenceHeight);
+        
+        maxRegionSequenceLength = jmax (maxRegionSequenceLength, endInSeconds);
         i++;
     }
 
     // normalized width = view width in terms of kVisibleSeconds
     // size this to ensure we can see one second beyond the longest region sequnce
     const double normalizedWidth = (maxRegionSequenceLength + 1) / kVisibleSeconds;
-    regionSequenceListView.setBounds (0, 0, (int) (normalizedWidth * width), kRegionSequenceHeight * i);
+    regionSequenceListView.setBounds (0, 0, kTrackHeaderWidth + (int) (normalizedWidth * width), kRegionSequenceHeight * i);
     regionSequenceViewPort.setBounds (0, 0, getWidth(), getHeight());
 }
 

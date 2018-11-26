@@ -42,6 +42,15 @@ public:
     // function to flag that our view needs to be rebuilt
     void setDirty() { isViewDirty = true; }
 
+public:
+    static const int kVisibleSeconds = 10;
+    static const int kMinWidth = 500;
+    static const int kWidth = 1000;
+    static const int kRegionSequenceHeight = 80;
+    static const int kMinHeight = 1 * kRegionSequenceHeight;
+    static const int kHeight = 5 * kRegionSequenceHeight;
+    static const int kTrackHeaderWidth = 20;
+
 private:
     void rebuildView();
 
