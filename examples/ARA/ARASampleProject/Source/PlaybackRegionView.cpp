@@ -38,9 +38,9 @@ void PlaybackRegionView::paint (Graphics& g)
 {
     Colour regionColour;
     // TODO JUCE_ARA Studio One uses black as the default color, which looks bad...
-    const ARA::ARAColor* colour = playbackRegion->getColor();
-    if (! colour)
-        colour = playbackRegion->getRegionSequence()->getColor();
+    const ARA::ARAColor* colour = playbackRegion->getColor ();
+    //if (! colour)
+    colour = playbackRegion->getRegionSequence ()->getColor ();
     if (colour != nullptr)
     {
         regionColour = Colour::fromFloatRGBA (colour->r, colour->g, colour->b, 1.0f);
@@ -87,14 +87,14 @@ double PlaybackRegionView::getEndInSeconds() const
     return playbackRegion->getEndInPlaybackTime();
 }
 
-void PlaybackRegionView::didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable)
+void PlaybackRegionView::didEnableAudioSourceSamplesAccess (ARAAudioSource* /*audioSource*/, bool enable)
 {
     if (isSampleAccessEnabled != enable)
         repaint ();
     isSampleAccessEnabled = enable;
 }
 
-void PlaybackRegionView::willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties)
+void PlaybackRegionView::willUpdatePlaybackRegionProperties (ARAPlaybackRegion* /*region*/, ARAPlaybackRegion::PropertiesPtr newProperties)
 {
     if ((playbackRegion->getStartInAudioModificationTime () != newProperties->startInModificationTime) ||
         (playbackRegion->getDurationInAudioModificationTime () != newProperties->durationInModificationTime) ||
