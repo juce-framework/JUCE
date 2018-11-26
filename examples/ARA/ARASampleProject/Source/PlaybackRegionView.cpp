@@ -11,15 +11,25 @@ PlaybackRegionView::PlaybackRegionView (ARASampleProjectAudioProcessorEditor* ed
 {
     audioThumb.addChangeListener (this);
 
-    static_cast<ARADocument*> (playbackRegion->getRegionSequence()->getDocument())->addListener (this);
+    auto document = static_cast<ARADocument*> (playbackRegion->getRegionSequence ()->getDocument ());
+    auto audioSource = static_cast<ARAAudioSource*>(playbackRegion->getAudioModification ()->getAudioSource ());
+    document->addListener (this);
+    audioSource->addListener (this);
     playbackRegion->addListener (this);
+
+    isSampleAccessEnabled = audioSource->isSampleAccessEnabled ();
+
     recreatePlaybackRegionReader();
 }
 
 PlaybackRegionView::~PlaybackRegionView()
 {
-    static_cast<ARADocument*> (playbackRegion->getRegionSequence()->getDocument())->removeListener (this);
-    playbackRegion->removeListener(this);
+    auto document = static_cast<ARADocument*> (playbackRegion->getRegionSequence ()->getDocument ());
+    auto audioSource = static_cast<ARAAudioSource*>(playbackRegion->getAudioModification ()->getAudioSource ());
+    playbackRegion->removeListener (this);
+    audioSource->removeListener (this);
+    document->removeListener (this);
+
     audioThumb.clear();
     audioThumb.removeChangeListener (this);
 }
@@ -38,12 +48,22 @@ void PlaybackRegionView::paint (Graphics& g)
     }
 
     g.setColour (isSelected ? juce::Colours::yellow : juce::Colours::black);
-    g.drawRect (getLocalBounds());
+    g.drawRect (getLocalBounds ());
 
-    if (getLengthInSeconds() != 0.0)
+    if (isSampleAccessEnabled)
     {
-        g.setColour (regionColour.contrasting (0.7f));
-        audioThumb.drawChannels (g, getLocalBounds(), 0.0, getLengthInSeconds(), 1.0);
+        if (getLengthInSeconds () != 0.0)
+        {
+            g.setColour (regionColour.contrasting (0.7f));
+            audioThumb.drawChannels (g, getLocalBounds (), 0.0, getLengthInSeconds (), 1.0);
+        }
+    }
+    else
+    {
+        // TODO JUCE_ARA should we draw this all over our visible area?
+        g.setColour (regionColour.contrasting (1.0f));
+        g.setFont (Font (12.0));
+        g.drawText ("Access Disabled", getBounds(), Justification::centred);
     }
 }
 
@@ -65,6 +85,13 @@ double PlaybackRegionView::getLengthInSeconds() const
 double PlaybackRegionView::getEndInSeconds() const
 {
     return playbackRegion->getEndInPlaybackTime();
+}
+
+void PlaybackRegionView::didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable)
+{
+    if (isSampleAccessEnabled != enable)
+        repaint ();
+    isSampleAccessEnabled = enable;
 }
 
 void PlaybackRegionView::willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties)

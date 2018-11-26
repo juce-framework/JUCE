@@ -6,6 +6,7 @@
 class PlaybackRegionView: public Component, 
                           public juce::ChangeListener,
                           public ARADocument::Listener,
+                          public ARAAudioSource::Listener,
                           public ARAPlaybackRegion::Listener
 {
 public:
@@ -14,7 +15,10 @@ public:
 
     void paint (Graphics&) override;
     void changeListenerCallback (ChangeBroadcaster*) override;
-    
+
+    // ARAAudioSource::Listener overrides
+    void didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) override;
+
     // ARAPlaybackRegion::Listener overrides
     void willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties) override;
 
@@ -38,6 +42,7 @@ private:
     ARAPlaybackRegion* playbackRegion;
     ARAPlaybackRegionReader* playbackRegionReader;  // careful: "weak" pointer, actual pointer is owned by our audioThumb
     bool isSelected;
+    bool isSampleAccessEnabled;
 
     juce::AudioFormatManager audioFormatManger;
     juce::AudioThumbnailCache audioThumbCache;
