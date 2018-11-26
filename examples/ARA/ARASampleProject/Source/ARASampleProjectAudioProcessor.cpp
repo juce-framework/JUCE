@@ -87,7 +87,7 @@ void ARASampleProjectAudioProcessor::changeProgramName (int /*index*/, const Str
 void ARASampleProjectAudioProcessor::prepareToPlay (double newSampleRate, int samplesPerBlock)
 {
     if (isARAPlaybackRenderer())
-        getARAPlaybackRenderer()->prepareToPlay (newSampleRate, getTotalNumOutputChannels(), samplesPerBlock);
+        getARAPlaybackRenderer()->prepareToPlay (newSampleRate, getTotalNumOutputChannels(), samplesPerBlock, true);
 }
 
 void ARASampleProjectAudioProcessor::releaseResources()

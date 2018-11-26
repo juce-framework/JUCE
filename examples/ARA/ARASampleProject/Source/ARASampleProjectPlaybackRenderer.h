@@ -16,14 +16,14 @@ class ARASampleProjectPlaybackRenderer : public ARAPlaybackRenderer
 public:
     ARASampleProjectPlaybackRenderer (ARADocumentController* documentController);
 
-    void prepareToPlay (double newSampleRate, int newNumChannels, int newMaxSamplesPerBlock) override;
+    void prepareToPlay (double newSampleRate, int newNumChannels, int newMaxSamplesPerBlock, bool mayBeNonRealtime) override;
     bool processBlock (AudioBuffer<float>& buffer, int64 timeInSamples, bool isPlayingBack, bool isNonRealtime) override;
     void releaseResources() override;
 
 private:
     // map of audio sources to buffering audio source readers
     // we'll use them to pull ARA samples from the host as we render
-    std::map<ARAAudioSource*, std::unique_ptr<BufferingAudioReader>> audioSourceReaders;
+    std::map<ARAAudioSource*, std::unique_ptr<AudioFormatReader>> audioSourceReaders;
 
     // temp buffers to use for summing signals if rendering multiple regions
     std::unique_ptr<AudioBuffer<float>> tempBuffer;

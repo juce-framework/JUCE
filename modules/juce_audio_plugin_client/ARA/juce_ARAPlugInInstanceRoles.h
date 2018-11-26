@@ -13,7 +13,8 @@ class ARARendererBase : public ARARendererType
 public:
     using ARARendererType::ARARendererType;
 
-    virtual void prepareToPlay (double newSampleRate, int newNumChannels, int newMaxSamplesPerBlock)
+   ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
+    virtual void prepareToPlay (double newSampleRate, int newNumChannels, int newMaxSamplesPerBlock, bool mayBeRealtime)
     {
         sampleRate = newSampleRate;
         numChannels = newNumChannels;
@@ -24,7 +25,6 @@ public:
         prepared = true;
     }
 
-   ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
     virtual bool processBlock (AudioBuffer<float>& buffer, int64 timeInSamples, bool isPlayingBack, bool isNonRealtime)
     {
         jassert (buffer.getNumSamples() <= getMaxSamplesPerBlock());

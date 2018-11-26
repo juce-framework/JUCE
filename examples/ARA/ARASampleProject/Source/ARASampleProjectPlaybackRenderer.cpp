@@ -5,22 +5,18 @@ ARASampleProjectPlaybackRenderer::ARASampleProjectPlaybackRenderer (ARADocumentC
 : ARAPlaybackRenderer (documentController)
 {}
 
-void ARASampleProjectPlaybackRenderer::prepareToPlay (double newSampleRate, int newNumChannels, int newMaxSamplesPerBlock)
+void ARASampleProjectPlaybackRenderer::prepareToPlay (double newSampleRate, int newNumChannels, int newMaxSamplesPerBlock, bool mayBeRealtime)
 {
     bool needAllocate = ! isPrepared() ||
                         (newSampleRate != getSampleRate()) ||
                         (newNumChannels != getNumChannels()) ||
                         (newMaxSamplesPerBlock != getMaxSamplesPerBlock());
 
-    ARAPlaybackRenderer::prepareToPlay (newSampleRate, newNumChannels, newMaxSamplesPerBlock);
+    ARAPlaybackRenderer::prepareToPlay (newSampleRate, newNumChannels, newMaxSamplesPerBlock, mayBeRealtime);
 
     if (needAllocate)
     {
         audioSourceReaders.clear();
-
-        const int readAheadSizeBySampleRate = (int) (2.0 * getSampleRate() + 0.5);
-        const int readAheadSizeByBlockSize = 8 * getMaxSamplesPerBlock();
-        const int readAheadSize = jmax (readAheadSizeBySampleRate, readAheadSizeByBlockSize);
 
         const auto documentController = static_cast<ARASampleProjectDocumentController*> (getDocumentController());
 
@@ -29,7 +25,24 @@ void ARASampleProjectPlaybackRenderer::prepareToPlay (double newSampleRate, int 
             auto audioSource = static_cast<ARAAudioSource*> (playbackRegion->getAudioModification()->getAudioSource());
             if (audioSourceReaders.count (audioSource) == 0)
             {
-                auto sourceReader = documentController->createBufferingAudioSourceReader (audioSource, readAheadSize);
+                AudioFormatReader* sourceReader = nullptr;
+
+                // if we're being used in real-time, create buffering audio source
+                // readers to avoid blocking while reading samples in processBlock
+                if (mayBeRealtime)
+                {
+                    const int readAheadSizeBySampleRate = (int) (2.0 * getSampleRate () + 0.5);
+                    const int readAheadSizeByBlockSize = 8 * getMaxSamplesPerBlock ();
+                    const int readAheadSize = jmax (readAheadSizeBySampleRate, readAheadSizeByBlockSize);
+
+                    sourceReader = documentController->createBufferingAudioSourceReader (audioSource, readAheadSize);
+                }
+                // otherwise create a reader that pulls samples directly from the host
+                else
+                {
+                    sourceReader = documentController->createAudioSourceReader (audioSource);
+                }
+
                 audioSourceReaders.emplace (audioSource, sourceReader);
             }
         }
@@ -90,11 +103,17 @@ bool ARASampleProjectPlaybackRenderer::processBlock (AudioBuffer<float>& buffer,
             if (regionEndSample <= sampleStart)
                 continue;
 
-            // set reader timeout depending on real time playback
-            if (isNonRealtime)
-                reader->setReadTimeout (2000); // TODO JUCE_ARA I set at a high value arbitrarily, but we should pick a better timeout
-            else
-                reader->setReadTimeout (0);
+            // if we're using a buffering reader then set the appropriate timeout
+            // TODO JUCE_ARA should we cache mayBeNonRealtime to avoid this dynamic cast?
+            BufferingAudioReader* bufferingReader = dynamic_cast<BufferingAudioReader*>(reader.get());
+            if (bufferingReader)
+            {
+                // set reader timeout depending on real time playback
+                if (isNonRealtime)
+                    bufferingReader->setReadTimeout (2000); // TODO JUCE_ARA I set at a high value arbitrarily, but we should pick a better timeout
+                else
+                    bufferingReader->setReadTimeout (0);
+            }
 
             // calculate offset between song and audio source samples, clip at region borders in audio source samples
             // (if a plug-in supports time stretching, it will also need to reflect the stretch factor here)
