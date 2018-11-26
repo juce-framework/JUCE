@@ -819,6 +819,9 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
             {
                 AudioOutputUnitStop (audioUnit);
                 setAudioSessionActive (false);
+
+                if (callback != nullptr)
+                    callback->audioDeviceStopped();
             }
         }
     }
