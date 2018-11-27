@@ -11,21 +11,21 @@ PlaybackRegionView::PlaybackRegionView (ARASampleProjectAudioProcessorEditor* ed
 {
     audioThumb.addChangeListener (this);
 
-    auto document = static_cast<ARADocument*> (playbackRegion->getRegionSequence ()->getDocument ());
-    auto audioSource = static_cast<ARAAudioSource*>(playbackRegion->getAudioModification ()->getAudioSource ());
+    auto document = static_cast<ARADocument*> (playbackRegion->getRegionSequence()->getDocument());
+    auto audioSource = static_cast<ARAAudioSource*> (playbackRegion->getAudioModification()->getAudioSource());
     document->addListener (this);
     audioSource->addListener (this);
     playbackRegion->addListener (this);
 
-    isSampleAccessEnabled = audioSource->isSampleAccessEnabled ();
+    isSampleAccessEnabled = audioSource->isSampleAccessEnabled();
 
     recreatePlaybackRegionReader();
 }
 
 PlaybackRegionView::~PlaybackRegionView()
 {
-    auto document = static_cast<ARADocument*> (playbackRegion->getRegionSequence ()->getDocument ());
-    auto audioSource = static_cast<ARAAudioSource*>(playbackRegion->getAudioModification ()->getAudioSource ());
+    auto document = static_cast<ARADocument*> (playbackRegion->getRegionSequence()->getDocument());
+    auto audioSource = static_cast<ARAAudioSource*>(playbackRegion->getAudioModification()->getAudioSource());
     playbackRegion->removeListener (this);
     audioSource->removeListener (this);
     document->removeListener (this);
@@ -37,9 +37,9 @@ PlaybackRegionView::~PlaybackRegionView()
 void PlaybackRegionView::paint (Graphics& g)
 {
     Colour regionColour;
-    const ARA::ARAColor* colour = playbackRegion->getColor ();
+    const ARA::ARAColor* colour = playbackRegion->getColor();
     if (colour == nullptr)
-        colour = playbackRegion->getRegionSequence ()->getColor ();
+        colour = playbackRegion->getRegionSequence()->getColor();
     if (colour != nullptr)
     {
         regionColour = Colour::fromFloatRGBA (colour->r, colour->g, colour->b, 1.0f);
@@ -47,14 +47,14 @@ void PlaybackRegionView::paint (Graphics& g)
     }
 
     g.setColour (isSelected ? juce::Colours::yellow : juce::Colours::black);
-    g.drawRect (getLocalBounds ());
+    g.drawRect (getLocalBounds());
 
     if (isSampleAccessEnabled)
     {
-        if (getLengthInSeconds () != 0.0)
+        if (getLengthInSeconds() != 0.0)
         {
             g.setColour (regionColour.contrasting (0.7f));
-            audioThumb.drawChannels (g, getLocalBounds (), 0.0, getLengthInSeconds (), 1.0);
+            audioThumb.drawChannels (g, getLocalBounds(), 0.0, getLengthInSeconds(), 1.0);
         }
     }
     else
@@ -90,18 +90,18 @@ void PlaybackRegionView::didEnableAudioSourceSamplesAccess (ARAAudioSource* /*au
     if (isSampleAccessEnabled != enable)
     {
         isSampleAccessEnabled = enable;
-        repaint ();
+        repaint();
     }
 }
 
 void PlaybackRegionView::willUpdatePlaybackRegionProperties (ARAPlaybackRegion* /*region*/, ARAPlaybackRegion::PropertiesPtr newProperties)
 {
-    if ((playbackRegion->getStartInAudioModificationTime () != newProperties->startInModificationTime) ||
-        (playbackRegion->getDurationInAudioModificationTime () != newProperties->durationInModificationTime) ||
-        (playbackRegion->getStartInPlaybackTime () != newProperties->startInPlaybackTime) ||
-        (playbackRegion->getDurationInPlaybackTime () != newProperties->durationInPlaybackTime))
+    if ((playbackRegion->getStartInAudioModificationTime() != newProperties->startInModificationTime) ||
+        (playbackRegion->getDurationInAudioModificationTime() != newProperties->durationInModificationTime) ||
+        (playbackRegion->getStartInPlaybackTime() != newProperties->startInPlaybackTime) ||
+        (playbackRegion->getDurationInPlaybackTime() != newProperties->durationInPlaybackTime))
     {
-        editorComponent->setDirty ();
+        editorComponent->setDirty();
     }
 }
 
@@ -110,7 +110,7 @@ void PlaybackRegionView::setIsSelected (bool value)
     if (isSelected != value)
     {
         isSelected = value;
-        repaint ();
+        repaint();
     }
 }
 
