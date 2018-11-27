@@ -98,6 +98,8 @@ public:
     String getProjectFilenameRootString()                { return File::createLegalFileName (getDocumentTitle()); }
     String getProjectUIDString() const                   { return projectUIDValue.get(); }
 
+    String getProjectLineFeed() const                    { return projectLineFeedValue.get(); }
+
     String getVersionString() const                      { return versionValue.get(); }
     String getVersionAsHex() const;
     int getVersionAsHexInteger() const;
@@ -409,8 +411,8 @@ public:
 private:
     ValueTree projectRoot  { Ids::JUCERPROJECT };
 
-    ValueWithDefault projectNameValue, projectUIDValue, projectTypeValue, versionValue, bundleIdentifierValue, companyNameValue, companyCopyrightValue,
-                     companyWebsiteValue, companyEmailValue, displaySplashScreenValue, reportAppUsageValue, splashScreenColourValue, cppStandardValue,
+    ValueWithDefault projectNameValue, projectUIDValue, projectLineFeedValue, projectTypeValue, versionValue, bundleIdentifierValue, companyNameValue,
+                     companyCopyrightValue, companyWebsiteValue, companyEmailValue, displaySplashScreenValue, reportAppUsageValue, splashScreenColourValue, cppStandardValue,
                      headerSearchPathsValue, preprocessorDefsValue, userNotesValue, maxBinaryFileSizeValue, includeBinaryDataInJuceHeaderValue, binaryDataNamespaceValue;
 
     ValueWithDefault pluginFormatsValue, pluginNameValue, pluginDescriptionValue, pluginManufacturerValue, pluginManufacturerCodeValue,

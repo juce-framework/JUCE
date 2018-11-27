@@ -28,7 +28,7 @@
 
 
 //==============================================================================
-const char* getPreferredLinefeed();
+const char* getPreferredLineFeed();
 String joinLinesIntoSourceFile (StringArray& lines);
 
 var parseJUCEHeaderMetadata (const File&);

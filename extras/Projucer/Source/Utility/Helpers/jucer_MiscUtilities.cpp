@@ -27,7 +27,7 @@
 #include "../../Application/jucer_Headers.h"
 
 #ifdef BUILDING_JUCE_COMPILEENGINE
- const char* getPreferredLinefeed() { return "\r\n"; }
+ const char* getPreferredLineFeed() { return "\r\n"; }
 #endif
 
 //==============================================================================
@@ -36,7 +36,7 @@ String joinLinesIntoSourceFile (StringArray& lines)
     while (lines.size() > 10 && lines [lines.size() - 1].isEmpty())
         lines.remove (lines.size() - 1);
 
-    return lines.joinIntoString (getPreferredLinefeed()) + getPreferredLinefeed();
+    return lines.joinIntoString (getPreferredLineFeed()) + getPreferredLineFeed();
 }
 
 String trimCommentCharsFromStartOfLine (const String& line)

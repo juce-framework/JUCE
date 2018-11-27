@@ -32,13 +32,22 @@ NewFileWizard::Type* createGUIComponentWizard();
 //==============================================================================
 namespace
 {
+    String addPreferredProjectLineFeed (const String& content, const String& lineFeed)
+    {
+        if (lineFeed != "\r\n")
+            return content.replace ("\r\n", lineFeed);
+
+        return content;
+    }
+
     static String fillInBasicTemplateFields (const File& file, const Project::Item& item, const char* templateName)
     {
-        return item.project.getFileTemplate (templateName)
-                      .replace ("%%filename%%", file.getFileName(), false)
-                      .replace ("%%date%%", Time::getCurrentTime().toString (true, true, true), false)
-                      .replace ("%%author%%", SystemStats::getFullUserName(), false)
-                      .replace ("%%include_corresponding_header%%", CodeHelpers::createIncludeStatement (file.withFileExtension (".h"), file));
+        return addPreferredProjectLineFeed (item.project.getFileTemplate (templateName)
+                                                   .replace ("%%filename%%", file.getFileName(), false)
+                                                   .replace ("%%date%%", Time::getCurrentTime().toString (true, true, true), false)
+                                                   .replace ("%%author%%", SystemStats::getFullUserName(), false)
+                                                   .replace ("%%include_corresponding_header%%", CodeHelpers::createIncludeStatement (file.withFileExtension (".h"), file)),
+                                            item.project.getProjectLineFeed());
     }
 
     static bool fillInNewCppFileTemplate (const File& file, const Project::Item& item, const char* templateName)
@@ -167,9 +176,11 @@ public:
     static bool create (const String& className, Project::Item parent,
                         const File& newFile, const char* templateName)
     {
-        String content = fillInBasicTemplateFields (newFile, parent, templateName)
-                            .replace ("%%component_class%%", className)
-                            .replace ("%%include_juce%%", CodeHelpers::createIncludeStatement (parent.project.getAppIncludeFile(), newFile));
+        auto content = fillInBasicTemplateFields (newFile, parent, templateName)
+                           .replace ("%%component_class%%", className)
+                           .replace ("%%include_juce%%", CodeHelpers::createIncludeStatement (parent.project.getAppIncludeFile(), newFile));
+
+        addPreferredProjectLineFeed (content, parent.project.getProjectLineFeed());
 
         if (FileHelpers::overwriteFileWithNewDataIfDifferent (newFile, content))
         {

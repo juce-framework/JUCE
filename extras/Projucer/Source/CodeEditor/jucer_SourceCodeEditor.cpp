@@ -63,7 +63,23 @@ void SourceCodeDocument::reloadInternal()
 {
     jassert (codeDoc != nullptr);
     modDetector.updateHash();
-    codeDoc->applyChanges (getFile().loadFileAsString());
+
+    auto fileContent = getFile().loadFileAsString();
+
+    auto lineFeed = [&]() -> const char*
+    {
+        if (fileContent.contains ("\r\n"))
+            return "\r\n";
+
+        if (fileContent.contains ("\n"))
+            return "\n";
+
+        return project->getProjectLineFeed().toRawUTF8();
+    }();
+
+    codeDoc->setNewLineCharacters (lineFeed);
+
+    codeDoc->applyChanges (fileContent);
     codeDoc->setSavePoint();
 }
 

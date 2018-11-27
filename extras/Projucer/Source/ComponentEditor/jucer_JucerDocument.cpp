@@ -513,7 +513,7 @@ bool JucerDocument::findTemplateFiles (String& headerContent, String& cppContent
     return true;
 }
 
-static String fixLineEndings (const String& s)
+static String fixLineEndings (const String& s, const char* lineFeed)
 {
     StringArray lines;
     lines.addLines (s);
@@ -526,7 +526,7 @@ static String fixLineEndings (const String& s)
 
     lines.add (String());
 
-    return lines.joinIntoString ("\r\n");
+    return lines.joinIntoString (lineFeed);
 }
 
 bool JucerDocument::flushChangesToDocuments (Project* project)
@@ -554,8 +554,10 @@ bool JucerDocument::flushChangesToDocuments (Project* project)
         generated.applyToCode (cppTemplate, headerFile.withFileExtension (".cpp"),
                                existingCpp, project);
 
-        headerTemplate = fixLineEndings (headerTemplate);
-        cppTemplate    = fixLineEndings (cppTemplate);
+        auto* lineFeed = project->getProjectLineFeed().toRawUTF8();
+
+        headerTemplate = fixLineEndings (headerTemplate, lineFeed);
+        cppTemplate    = fixLineEndings (cppTemplate,    lineFeed);
 
         if (header->getCodeDocument().getAllContent() != headerTemplate)
             header->getCodeDocument().replaceAllContent (headerTemplate);
@@ -768,9 +770,9 @@ struct NewGUIComponentWizard  : public NewFileWizard::Type
 
             auto& odm = ProjucerApplication::getApp().openDocumentManager;
 
-            if (auto* cpp = dynamic_cast<SourceCodeDocument*> (odm.openFile (nullptr, cppFile)))
+            if (auto* cpp = dynamic_cast<SourceCodeDocument*> (odm.openFile (&project, cppFile)))
             {
-                if (auto* header = dynamic_cast<SourceCodeDocument*> (odm.openFile (nullptr, headerFile)))
+                if (auto* header = dynamic_cast<SourceCodeDocument*> (odm.openFile (&project, headerFile)))
                 {
                     std::unique_ptr<JucerDocument> jucerDoc (new ComponentDocument (cpp));
 

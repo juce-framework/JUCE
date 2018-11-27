@@ -223,7 +223,7 @@ private:
             if (descriptionValue.get().toString().isNotEmpty())   section.add ("  description:      " + descriptionValue.get().toString());
 
             if (! section.isEmpty())
-                metadata.add (section.joinIntoString (getPreferredLinefeed()));
+                metadata.add (section.joinIntoString (getPreferredLineFeed()));
         }
 
         {
@@ -236,7 +236,7 @@ private:
             if (exportersString.isNotEmpty())                     section.add ("  exporters:        " + exportersString);
 
             if (! section.isEmpty())
-                metadata.add (section.joinIntoString (getPreferredLinefeed()));
+                metadata.add (section.joinIntoString (getPreferredLineFeed()));
         }
 
         {
@@ -246,7 +246,7 @@ private:
             if (definesValue.get().toString().isNotEmpty())       section.add ("  defines:          " + definesValue.get().toString());
 
             if (! section.isEmpty())
-                metadata.add (section.joinIntoString (getPreferredLinefeed()));
+                metadata.add (section.joinIntoString (getPreferredLineFeed()));
         }
 
         {
@@ -256,7 +256,7 @@ private:
             if (mainClassValue.get().toString().isNotEmpty())     section.add ("  mainClass:        " + mainClassValue.get().toString());
 
             if (! section.isEmpty())
-                metadata.add (section.joinIntoString (getPreferredLinefeed()));
+                metadata.add (section.joinIntoString (getPreferredLineFeed()));
         }
 
         {
@@ -265,10 +265,10 @@ private:
             if (useLocalCopyValue.get())                          section.add ("  useLocalCopy:     " + useLocalCopyValue.get().toString());
 
             if (! section.isEmpty())
-                metadata.add (section.joinIntoString (getPreferredLinefeed()));
+                metadata.add (section.joinIntoString (getPreferredLineFeed()));
         }
 
-        return metadata.joinIntoString (String (getPreferredLinefeed()) + getPreferredLinefeed());
+        return metadata.joinIntoString (String (getPreferredLineFeed()) + getPreferredLineFeed());
     }
 
     void createPIPFile (File fileToSave)
