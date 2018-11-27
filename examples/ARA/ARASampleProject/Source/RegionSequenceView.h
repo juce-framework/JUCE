@@ -19,6 +19,8 @@ public:
     RegionSequenceView (ARASampleProjectAudioProcessorEditor* editor, ARARegionSequence* sequence);
     ~RegionSequenceView();
 
+    void getTimeRange (double& startTimeInSeconds, double& endTimeInSeconds) const;
+
     void paint (Graphics&) override;
     void resized() override;
 
@@ -31,20 +33,14 @@ public:
     void didAddPlaybackRegionToRegionSequence (ARARegionSequence* sequence, ARAPlaybackRegion* playbackRegion) override;
     void willDestroyRegionSequence (ARARegionSequence* sequence) override;
 
-    ARARegionSequence* getRegionSequence() const { return regionSequence; }
-    
-    OwnedArray<PlaybackRegionView>& getPlaybackRegionViews() { return playbackRegionViews; }
-
-    void getTimeRange (double& startTimeInSeconds, double& endTimeInSeconds) const;
-
 private:
-    bool isSelected;
     void detachFromRegionSequence();
 
 private:
     ARASampleProjectAudioProcessorEditor* editorComponent;
     ARARegionSequence* regionSequence;
     OwnedArray<PlaybackRegionView> playbackRegionViews;
+    bool isSelected = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RegionSequenceView)
 };

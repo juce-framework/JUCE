@@ -4,9 +4,9 @@
 #include "ARASampleProjectDocumentController.h"
 #include "ARASampleProjectAudioProcessorEditor.h"
 
+//==============================================================================
 RegionSequenceView::RegionSequenceView (ARASampleProjectAudioProcessorEditor* editor, ARARegionSequence* sequence)
-: isSelected (false),
-  editorComponent (editor),
+: editorComponent (editor),
   regionSequence (sequence)
 {
     editorComponent->getARAEditorView ()->addListener (this);
@@ -39,6 +39,25 @@ void RegionSequenceView::detachFromRegionSequence()
     regionSequence = nullptr;
 }
 
+void RegionSequenceView::getTimeRange (double& startTimeInSeconds, double& endTimeInSeconds) const
+{
+    if (playbackRegionViews.isEmpty())
+    {
+        startTimeInSeconds = 0.0;
+        endTimeInSeconds = 0.0;
+        return;
+    }
+
+    startTimeInSeconds = std::numeric_limits<double>::max();
+    endTimeInSeconds = 0;
+    for (auto v : playbackRegionViews)
+    {
+        startTimeInSeconds = jmin (startTimeInSeconds, v->getPlaybackRegion()->getStartInPlaybackTime());
+        endTimeInSeconds = jmax (endTimeInSeconds, v->getPlaybackRegion()->getEndInPlaybackTime());
+    }
+}
+
+//==============================================================================
 void RegionSequenceView::paint (Graphics& g)
 {
     if (regionSequence == nullptr)
@@ -105,24 +124,6 @@ void RegionSequenceView::onNewSelection (const ARA::PlugIn::ViewSelection& curre
     {
         isSelected = isOurRegionSequenceSelected;
         repaint();
-    }
-}
-
-void RegionSequenceView::getTimeRange (double& startTimeInSeconds, double& endTimeInSeconds) const
-{
-    if (playbackRegionViews.isEmpty())
-    {
-        startTimeInSeconds = 0.0;
-        endTimeInSeconds = 0.0;
-        return;
-    }
-
-    startTimeInSeconds = std::numeric_limits<double>::max();
-    endTimeInSeconds = 0;
-    for (auto v : playbackRegionViews)
-    {
-        startTimeInSeconds = jmin (startTimeInSeconds, v->getPlaybackRegion()->getStartInPlaybackTime());
-        endTimeInSeconds = jmax (endTimeInSeconds, v->getPlaybackRegion()->getEndInPlaybackTime());
     }
 }
 
