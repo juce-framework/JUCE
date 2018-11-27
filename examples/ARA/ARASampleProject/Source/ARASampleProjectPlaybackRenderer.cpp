@@ -27,19 +27,19 @@ void ARASampleProjectPlaybackRenderer::prepareToPlay (double newSampleRate, int 
             {
                 AudioFormatReader* sourceReader = nullptr;
 
-                // if we're being used in real-time, create buffering audio source
-                // readers to avoid blocking while reading samples in processBlock
                 if (mayBeRealtime)
                 {
+                    // if we're being used in real-time, create buffering audio source
+                    // readers to avoid blocking while reading samples in processBlock
                     const int readAheadSizeBySampleRate = (int) (2.0 * getSampleRate () + 0.5);
                     const int readAheadSizeByBlockSize = 8 * getMaxSamplesPerBlock ();
                     const int readAheadSize = jmax (readAheadSizeBySampleRate, readAheadSizeByBlockSize);
 
                     sourceReader = documentController->createBufferingAudioSourceReader (audioSource, readAheadSize);
                 }
-                // otherwise create a reader that pulls samples directly from the host
                 else
                 {
+                    // otherwise create a reader that pulls samples directly from the host
                     sourceReader = documentController->createAudioSourceReader (audioSource);
                 }
 
@@ -104,13 +104,12 @@ bool ARASampleProjectPlaybackRenderer::processBlock (AudioBuffer<float>& buffer,
                 continue;
 
             // if we're using a buffering reader then set the appropriate timeout
-            // TODO JUCE_ARA should we cache mayBeNonRealtime to avoid this dynamic cast?
-            BufferingAudioReader* bufferingReader = dynamic_cast<BufferingAudioReader*>(reader.get());
-            if (bufferingReader)
+            BufferingAudioReader* bufferingReader = dynamic_cast<BufferingAudioReader*> (reader.get());
+            if (bufferingReader != nullptr)
             {
                 // set reader timeout depending on real time playback
                 if (isNonRealtime)
-                    bufferingReader->setReadTimeout (2000); // TODO JUCE_ARA I set at a high value arbitrarily, but we should pick a better timeout
+                    bufferingReader->setReadTimeout (100);
                 else
                     bufferingReader->setReadTimeout (0);
             }
