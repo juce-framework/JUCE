@@ -24,10 +24,6 @@ public:
     We should properly track the scopeFlags for each object (they can all just be added together).
     We need to store the affected objects and their flags similar to how the sample plug-in does,
     and implement doNotifyModelUpdates () accordingly.
-
-    The audio source reader merely needs to be updated for the new signature, and the
-    playback region reader can then invalidate itself properly as discussed, which will
-    implicitly work for the region sequence reader as well.
 */
 
     // notify the host and any potential internal reader about content changes

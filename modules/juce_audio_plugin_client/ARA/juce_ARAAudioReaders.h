@@ -48,9 +48,6 @@ public:
     // since the construction of the audio source reader
     bool getIsValid() const { return isValid; }
 
-    // TODO JUCE_ARA
-    // do we need to handle property updates?
-    // any other invalidation hooks? 
     void willUpdateAudioSourceProperties (ARAAudioSource* audioSource, ARAAudioSource::PropertiesPtr newProperties) override;
     void didUpdateAudioSourceContent (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags) override;
     void willEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) override;
