@@ -81,8 +81,7 @@ protected:
     void willDestroyAudioModification (ARA::PlugIn::AudioModification* audioModification) noexcept override;
 
     // TODO JUCE_ARA 
-    // Do we need to override this? The default ARPlug implementation may be sufficient, 
-    // but we may want to copy the listener list to the cloned modification
+    // Do we need to override this? The default ARPlug implementation is sufficient...
     //ARA::PlugIn::AudioModification* doCloneAudioModification (ARA::PlugIn::AudioModification* src, ARA::ARAAudioModificationHostRef hostRef) noexcept override;
 
     // PlaybackRegion callbacks
