@@ -44,6 +44,7 @@ protected:
     ARA::PlugIn::Document* doCreateDocument (ARA::PlugIn::DocumentController* documentController) noexcept override;
     void doBeginEditing() noexcept override;
     void doEndEditing() noexcept override;
+    void doNotifyModelUpdates() noexcept override;
     void willUpdateDocumentProperties (ARA::PlugIn::Document* document, ARA::PlugIn::Document::PropertiesPtr newProperties) noexcept override;
     void didUpdateDocumentProperties (ARA::PlugIn::Document* document) noexcept override;
     void willDestroyDocument (ARA::PlugIn::Document* document) noexcept override;
@@ -98,6 +99,10 @@ protected:
     ARA::PlugIn::EditorView* doCreateEditorView() noexcept override;
 
 private:
+    std::map<ARAAudioSource*, ARAContentUpdateScopes> audioSourceUpdates;
+    std::map<ARAAudioModification*, ARAContentUpdateScopes> audioModificationUpdates;
+    std::map<ARAPlaybackRegion*, ARAContentUpdateScopes> playbackRegionUpdates;
+
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARADocumentController)
 };

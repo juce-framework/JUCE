@@ -83,22 +83,28 @@ void ARADocumentController::notifyAudioSourceContentChanged (ARAAudioSource* aud
         for (auto audioModification : audioSource->getAudioModifications())
             notifyAudioModificationContentChanged (static_cast<ARAAudioModification*> (audioModification), scopeFlags, true);
     }
+
+    audioSourceUpdates[audioSource] += scopeFlags;
 }
 
 void ARADocumentController::notifyAudioModificationContentChanged (ARAAudioModification* audioModification, ARAContentUpdateScopes scopeFlags, bool notifyAllPlaybackRegions)
 {
     audioModification->didUpdateAudioModificationContent (scopeFlags);
-
+    
     if (notifyAllPlaybackRegions)
     {
         for (auto playbackRegion : audioModification->getPlaybackRegions())
             notifyPlaybackRegionContentChanged (static_cast<ARAPlaybackRegion*> (playbackRegion), scopeFlags);
     }
+
+    audioModificationUpdates[audioModification] += scopeFlags;
 }
 
 void ARADocumentController::notifyPlaybackRegionContentChanged (ARAPlaybackRegion* playbackRegion, ARAContentUpdateScopes scopeFlags)
 {
     playbackRegion->didUpdatePlaybackRegionContent (scopeFlags);
+
+    playbackRegionUpdates[playbackRegion] += scopeFlags;
 }
 
 //==============================================================================
@@ -116,6 +122,26 @@ void ARADocumentController::doBeginEditing() noexcept
 void ARADocumentController::doEndEditing() noexcept
 {
     static_cast<ARADocument*>(getDocument ())->doEndEditing ();
+}
+
+void ARADocumentController::doNotifyModelUpdates () noexcept
+{
+    auto modelUpdateController = getHostInstance ()->getModelUpdateController ();
+    if (modelUpdateController != nullptr)
+    {
+        for (auto& audioSourceUpdate : audioSourceUpdates)
+            modelUpdateController->notifyAudioSourceContentChanged (audioSourceUpdate.first->getHostRef (), nullptr, audioSourceUpdate.second);
+
+        for (auto& audioModificationUpdate : audioModificationUpdates)
+            modelUpdateController->notifyAudioModificationContentChanged (audioModificationUpdate.first->getHostRef (), nullptr, audioModificationUpdate.second);
+
+        for (auto& playbackRegionUpdate : playbackRegionUpdates)
+            modelUpdateController->notifyPlaybackRegionContentChanged (playbackRegionUpdate.first->getHostRef (), nullptr, playbackRegionUpdate.second);
+    }
+ 
+    audioSourceUpdates.clear ();
+    audioModificationUpdates.clear ();
+    playbackRegionUpdates.clear ();
 }
 
 void ARADocumentController::willUpdateDocumentProperties (ARA::PlugIn::Document* document, ARA::PlugIn::Document::PropertiesPtr newProperties) noexcept
