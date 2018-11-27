@@ -17,7 +17,6 @@
 */
 class ARASampleProjectAudioProcessorEditor: public AudioProcessorEditor,
                                             public AudioProcessorEditorARAExtension,
-                                            public ARAEditorView::Listener,
                                             public ARADocument::Listener,
                                             public ARARegionSequence::Listener
 {
@@ -28,9 +27,6 @@ public:
     //==============================================================================
     void paint (Graphics&) override;
     void resized() override;
-
-    // ARAEditorView::Listener overrides
-    void onNewSelection (const ARA::PlugIn::ViewSelection& currentSelection) override;
 
     // ARADocument::Listener overrides
     void doEndEditing (ARADocument* document) override;

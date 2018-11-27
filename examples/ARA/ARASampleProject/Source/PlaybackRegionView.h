@@ -5,6 +5,7 @@
 
 class PlaybackRegionView: public Component, 
                           public ChangeListener,
+                          public ARAEditorView::Listener,
                           public ARADocument::Listener,
                           public ARAAudioSource::Listener,
                           public ARAPlaybackRegion::Listener
@@ -17,6 +18,9 @@ public:
     void paint (Graphics&) override;
     void changeListenerCallback (ChangeBroadcaster*) override;
 
+    // ARAEditorView::Listener overrides: used to track selection
+    void onNewSelection (const ARA::PlugIn::ViewSelection& currentSelection) override;
+
     // ARADocument::Listener overrides: used to check if our reader has been invalidated
     void doEndEditing (ARADocument* document) override;
 
@@ -28,7 +32,6 @@ public:
 
     ARAPlaybackRegion* getPlaybackRegion() const { return playbackRegion; }
 
-    void setIsSelected (bool value);
     bool getIsSelected () const { return isSelected; }
 
 private:

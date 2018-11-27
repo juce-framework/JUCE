@@ -1,6 +1,5 @@
 #include "ARASampleProjectAudioProcessor.h"
 #include "ARASampleProjectAudioProcessorEditor.h"
-#include "PlaybackRegionView.h"
 
 
 //==============================================================================
@@ -23,7 +22,6 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
     {
         auto document = static_cast<ARADocument*> (getARADocumentController()->getDocument());
         document->addListener (this);
-        getARAEditorView()->addSelectionListener (this);
 
         for (auto regionSequence : document->getRegionSequences())
         {
@@ -33,9 +31,6 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
         }
 
         rebuildView();
-
-        // manually invoke the onNewSelection callback to refresh our UI with the current selection
-        onNewSelection (getARAEditorView()->getViewSelection());
     }
 }
 
@@ -45,7 +40,6 @@ ARASampleProjectAudioProcessorEditor::~ARASampleProjectAudioProcessorEditor()
     {
         auto document = static_cast<ARADocument*> (getARADocumentController()->getDocument());
         document->removeListener (this);
-        getARAEditorView()->removeSelectionListener (this);
 
         for (auto regionSequence : document->getRegionSequences())
             static_cast<ARARegionSequence*>(regionSequence)->removeListener (this);
@@ -91,21 +85,6 @@ void ARASampleProjectAudioProcessorEditor::resized()
     const double normalizedWidth = (maxRegionSequenceLength + 1) / kVisibleSeconds;
     regionSequenceListView.setBounds (0, 0, kTrackHeaderWidth + (int) (normalizedWidth * width), kRegionSequenceHeight * i);
     regionSequenceViewPort.setBounds (0, 0, getWidth(), getHeight());
-}
-
-void ARASampleProjectAudioProcessorEditor::onNewSelection (const ARA::PlugIn::ViewSelection& currentSelection)
-{
-    // flag the region as selected if it's a part of the current selection
-    for (RegionSequenceView* regionSequenceView : regionSequenceViews)
-    {
-        bool isRegionSequenceSelected = ARA::contains (currentSelection.getRegionSequences(), regionSequenceView->getRegionSequence());
-        regionSequenceView->setIsSelected (isRegionSequenceSelected);
-        for (PlaybackRegionView* playbackRegionView : regionSequenceView->getPlaybackRegionViews ())
-        {
-            bool isPlaybackRegionSelected = ARA::contains (currentSelection.getPlaybackRegions (), playbackRegionView->getPlaybackRegion());
-            playbackRegionView->setIsSelected (isPlaybackRegionSelected);
-        }
-    }
 }
 
 void ARASampleProjectAudioProcessorEditor::rebuildView()

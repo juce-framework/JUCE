@@ -16,11 +16,16 @@ RegionSequenceView::RegionSequenceView (ARASampleProjectAudioProcessorEditor* ed
         playbackRegionViews.add (new PlaybackRegionView (editorComponent, static_cast<ARAPlaybackRegion*> (playbackRegion)));
         addAndMakeVisible (playbackRegionViews.getLast());
     }
+
+    // listen to selection changes and invoke onNewSelection with the current selection
+    editorComponent->getARAEditorView ()->addSelectionListener (this);
+    onNewSelection (editorComponent->getARAEditorView ()->getViewSelection ());
 }
 
 RegionSequenceView::~RegionSequenceView()
 {
     regionSequence->removeListener(this);
+    editorComponent->getARAEditorView ()->removeSelectionListener (this);
 }
 
 void RegionSequenceView::paint (Graphics& g)
@@ -71,12 +76,14 @@ void RegionSequenceView::resized()
     }
 }
 
-void RegionSequenceView::setIsSelected (bool value)
+void RegionSequenceView::onNewSelection (const ARA::PlugIn::ViewSelection& currentSelection)
 {
-    bool needsRepaint = (value != isSelected);
-    isSelected = value;
-    if (needsRepaint)
+    bool isOurRegionSequenceSelected = ARA::contains (currentSelection.getRegionSequences(), regionSequence);
+    if (isOurRegionSequenceSelected != isSelected)
+    {
+        isSelected = isOurRegionSequenceSelected;
         repaint();
+    }
 }
 
 void RegionSequenceView::getTimeRange (double& startTimeInSeconds, double& endTimeInSeconds) const

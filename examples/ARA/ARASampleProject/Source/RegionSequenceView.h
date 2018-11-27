@@ -12,6 +12,7 @@ class PlaybackRegionView;
     along with their name, order index, color, and selection state
 */
 class RegionSequenceView: public Component, 
+                          public ARAEditorView::Listener,
                           public ARARegionSequence::Listener
 {
 public:
@@ -20,6 +21,9 @@ public:
 
     void paint (Graphics&) override;
     void resized() override;
+
+    // ARAEditorView::Listener overrides: used to track selection
+    void onNewSelection (const ARA::PlugIn::ViewSelection& currentSelection) override;
 
     // ARARegionSequence::Listener overrides
     void didUpdateRegionSequenceProperties (ARARegionSequence* sequence) override;
@@ -30,7 +34,6 @@ public:
     
     OwnedArray<PlaybackRegionView>& getPlaybackRegionViews() { return playbackRegionViews; }
 
-    void setIsSelected (bool value);
     bool getIsSelected () const { return isSelected; }
 
     void getTimeRange (double& startTimeInSeconds, double& endTimeInSeconds) const;
