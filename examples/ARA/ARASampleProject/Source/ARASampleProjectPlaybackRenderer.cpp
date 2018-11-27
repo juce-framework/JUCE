@@ -83,18 +83,25 @@ bool ARASampleProjectPlaybackRenderer::processBlock (AudioBuffer<float>& buffer,
             auto audioSource = static_cast<ARAAudioSource*> (playbackRegion->getAudioModification()->getAudioSource());
             auto readerIt = audioSourceReaders.find(audioSource);
             if (readerIt == audioSourceReaders.end())
+            {
+                success = false;
                 continue;
+            }
             auto& reader = readerIt->second;
 
             // render silence if access is currently disabled
+            // (the audio reader deals with this internally too, checking it here is merely an optimization)
             if (! audioSource->isSampleAccessEnabled())
+            {
+                success = false;
                 continue;
+            }
 
             // this simplified test code "rendering" only produces audio if sample rate and channel count match
             if ((audioSource->getChannelCount() != getNumChannels()) || (audioSource->getSampleRate() != getSampleRate()))
                 continue;
 
-            // evaluate region borders in song time
+            // evaluate region borders in song time, calculate sample range to copy in song time
             int64 regionStartSample = playbackRegion->getStartInPlaybackSamples (getSampleRate());
             if (sampleEnd <= regionStartSample)
                 continue;
@@ -103,41 +110,35 @@ bool ARASampleProjectPlaybackRenderer::processBlock (AudioBuffer<float>& buffer,
             if (regionEndSample <= sampleStart)
                 continue;
 
-            // if we're using a buffering reader then set the appropriate timeout
-            BufferingAudioReader* bufferingReader = dynamic_cast<BufferingAudioReader*> (reader.get());
-            if (bufferingReader != nullptr)
-            {
-                // set reader timeout depending on real time playback
-                if (isNonRealtime)
-                    bufferingReader->setReadTimeout (100);
-                else
-                    bufferingReader->setReadTimeout (0);
-            }
+            int64 startSongSample = jmax (regionStartSample, sampleStart);
+            int64 endSongSample = jmin (regionEndSample, sampleEnd);
 
             // calculate offset between song and audio source samples, clip at region borders in audio source samples
             // (if a plug-in supports time stretching, it will also need to reflect the stretch factor here)
             int64 offsetToPlaybackRegion = playbackRegion->getStartInAudioModificationSamples() - regionStartSample;
 
-            // optimized read and mix samples
+            int64 startAvailableSourceSamples = jmax (0LL, playbackRegion->getStartInAudioModificationSamples());
+            int64 endAvailableSourceSamples = jmin (audioSource->getSampleCount(), playbackRegion->getEndInAudioModificationSamples());
+
+            startSongSample = jmax (startSongSample, startAvailableSourceSamples - offsetToPlaybackRegion);
+            endSongSample = jmin (endSongSample, endAvailableSourceSamples - offsetToPlaybackRegion);
+
+            // calculate buffer offsets
+            int startInDestBuffer = (int) (startSongSample - sampleStart);
+            int64 startInSource = startSongSample + offsetToPlaybackRegion;
+            int numSamplesToRead = (int) (endSongSample - startSongSample);
+
+            // if we're using a buffering reader then set the appropriate timeout
+            BufferingAudioReader* bufferingReader = dynamic_cast<BufferingAudioReader*> (reader.get());
+            if (bufferingReader != nullptr)
+                bufferingReader->setReadTimeout ((isNonRealtime) ? 100 : 0);
+
+            // read samples
+            bool bufferSuccess;
             if (didRenderFirstRegion)
             {
-                // clamp song sample ranges within the range we're rendering
-                int64 startSongSample = jmax (regionStartSample, sampleStart);
-                int64 endSongSample = jmin (regionEndSample, sampleEnd);
-
-                // clamp source sample ranges within the modifiction range
-                int64 startAvailableSourceSamples = jmax<int64> (0, playbackRegion->getStartInAudioModificationSamples());
-                int64 endAvailableSourceSamples = jmin (audioSource->getSampleCount(), playbackRegion->getEndInAudioModificationSamples());
-
-                // intersect both clamped ranges - this is the range we need to mix into the buffer
-                startSongSample = jmax (startSongSample, startAvailableSourceSamples - offsetToPlaybackRegion);
-                endSongSample = jmin (endSongSample, endAvailableSourceSamples - offsetToPlaybackRegion);
-
                 // target buffer is initialized, so read region samples into local buffer
-                int startInDestBuffer = (int) (startSongSample - sampleStart);
-                int64 startInSource = startSongSample + offsetToPlaybackRegion;
-                int numSamplesToRead = (int) (endSongSample - startSongSample);
-                bool bufferSuccess = reader->read ((int* const*) tempBuffer->getArrayOfWritePointers(), tempBuffer->getNumChannels(), startInSource, numSamplesToRead, true);
+                bufferSuccess = reader->read (tempBuffer.get(), 0, numSamplesToRead, startInSource, true, true);
 
                 // if successful, mix local buffer into the output buffer
                 if (bufferSuccess)
@@ -145,19 +146,27 @@ bool ARASampleProjectPlaybackRenderer::processBlock (AudioBuffer<float>& buffer,
                     for (int c = 0; c < getNumChannels(); c++)
                         buffer.addFrom(c, startInDestBuffer, *tempBuffer, c, 0, numSamplesToRead);
                 }
-
-                success &= bufferSuccess;
             }
             else
             {
                 // this is the first region to hit the buffer, so initialize its samples
-                // We're reading an entire buffer from the reader - if the region starts or ends
-                // inside the buffer, the reader will zero out the excess samples, which is exactly
-                // what we need here.
-                success &= reader->read (&buffer, 0, buffer.getNumSamples(), sampleStart + offsetToPlaybackRegion, true, true);
+                bufferSuccess = reader->read (&buffer, startInDestBuffer, numSamplesToRead, startInSource, true, true);
 
-                didRenderFirstRegion = true;
+                // if successful, clear any excess at start or end of the region and mark successful buffer initialization
+                if (bufferSuccess)
+                {
+                    if (startInDestBuffer != 0)
+                        buffer.clear(0, startInDestBuffer);
+
+                    int samplesWritten = startInDestBuffer + numSamplesToRead;
+                    int remainingSamples = buffer.getNumSamples() - samplesWritten;
+                    if (remainingSamples != 0)
+                        buffer.clear(samplesWritten, remainingSamples);
+
+                    didRenderFirstRegion = true;
+                }
             }
+            success &= bufferSuccess;
         }
     }
 
