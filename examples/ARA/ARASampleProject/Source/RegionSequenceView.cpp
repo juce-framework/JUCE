@@ -9,6 +9,9 @@ RegionSequenceView::RegionSequenceView (ARASampleProjectAudioProcessorEditor* ed
   editorComponent (editor),
   regionSequence (sequence)
 {
+    editorComponent->getARAEditorView ()->addListener (this);
+    onNewSelection (editorComponent->getARAEditorView ()->getViewSelection ());
+
     regionSequence->addListener (this);
 
     for (auto* playbackRegion : regionSequence->getPlaybackRegions())
@@ -16,15 +19,12 @@ RegionSequenceView::RegionSequenceView (ARASampleProjectAudioProcessorEditor* ed
         playbackRegionViews.add (new PlaybackRegionView (editorComponent, static_cast<ARAPlaybackRegion*> (playbackRegion)));
         addAndMakeVisible (playbackRegionViews.getLast());
     }
-
-    // listen to selection changes and invoke onNewSelection with the current selection
-    editorComponent->getARAEditorView ()->addListener (this);
-    onNewSelection (editorComponent->getARAEditorView ()->getViewSelection ());
 }
 
 RegionSequenceView::~RegionSequenceView()
 {
     regionSequence->removeListener(this);
+
     editorComponent->getARAEditorView ()->removeListener (this);
 }
 

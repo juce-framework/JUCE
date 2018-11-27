@@ -10,26 +10,25 @@ PlaybackRegionView::PlaybackRegionView (ARASampleProjectAudioProcessorEditor* ed
 {
     audioThumb.addChangeListener (this);
 
+    editorComponent->getARAEditorView ()->addListener (this);
+    onNewSelection (editorComponent->getARAEditorView ()->getViewSelection ());
+
     static_cast<ARADocument*> (playbackRegion->getRegionSequence()->getDocument())->addListener (this);
     static_cast<ARAAudioSource*> (playbackRegion->getAudioModification()->getAudioSource())->addListener (this);
     playbackRegion->addListener (this);
-
     recreatePlaybackRegionReader();
-
-    // listen to selection changes and invoke onNewSelection with the current selection
-    editorComponent->getARAEditorView ()->addListener (this);
-    onNewSelection (editorComponent->getARAEditorView ()->getViewSelection ());
 }
 
 PlaybackRegionView::~PlaybackRegionView()
 {
+    editorComponent->getARAEditorView ()->removeListener (this);
+
     playbackRegion->removeListener (this);
     static_cast<ARAAudioSource*>(playbackRegion->getAudioModification()->getAudioSource())->removeListener (this);
     static_cast<ARADocument*> (playbackRegion->getRegionSequence()->getDocument())->removeListener (this);
-    editorComponent->getARAEditorView ()->removeListener (this);
 
-    audioThumb.clear();
     audioThumb.removeChangeListener (this);
+    audioThumb.clear();
 }
 
 void PlaybackRegionView::paint (Graphics& g)

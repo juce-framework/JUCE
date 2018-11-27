@@ -34,8 +34,6 @@ public:
     
     OwnedArray<PlaybackRegionView>& getPlaybackRegionViews() { return playbackRegionViews; }
 
-    bool getIsSelected () const { return isSelected; }
-
     void getTimeRange (double& startTimeInSeconds, double& endTimeInSeconds) const;
 
 private:

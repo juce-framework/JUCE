@@ -32,8 +32,6 @@ public:
 
     ARAPlaybackRegion* getPlaybackRegion() const { return playbackRegion; }
 
-    bool getIsSelected () const { return isSelected; }
-
 private:
     void recreatePlaybackRegionReader();
 
