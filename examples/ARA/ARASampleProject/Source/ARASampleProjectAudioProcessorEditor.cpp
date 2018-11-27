@@ -121,8 +121,5 @@ void ARASampleProjectAudioProcessorEditor::didReorderRegionSequencesInDocument (
 {
     jassert (document == getARADocumentController()->getDocument());
 
-    RegionSequenceView::OrderComparator comparator;
-    regionSequenceViews.sort(comparator);
-
-    resized();
+    setDirty();
 }
