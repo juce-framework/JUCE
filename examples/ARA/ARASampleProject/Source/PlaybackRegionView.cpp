@@ -24,7 +24,7 @@ PlaybackRegionView::~PlaybackRegionView()
     editorComponent->getARAEditorView ()->removeListener (this);
 
     playbackRegion->removeListener (this);
-    static_cast<ARAAudioSource*>(playbackRegion->getAudioModification()->getAudioSource())->removeListener (this);
+    static_cast<ARAAudioSource*> (playbackRegion->getAudioModification()->getAudioSource())->removeListener (this);
     static_cast<ARADocument*> (playbackRegion->getRegionSequence()->getDocument())->removeListener (this);
 
     audioThumb.removeChangeListener (this);

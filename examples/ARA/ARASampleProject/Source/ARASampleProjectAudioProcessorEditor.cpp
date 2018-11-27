@@ -29,8 +29,8 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
             if (ARA::contains (getARAEditorView()->getHiddenRegionSequences(), regionSequence))
                 continue;
 
-            static_cast<ARARegionSequence*>(regionSequence)->addListener (this);
-            regionSequenceViews.add (new RegionSequenceView (this, static_cast<ARARegionSequence*>(regionSequence)));
+            static_cast<ARARegionSequence*> (regionSequence)->addListener (this);
+            regionSequenceViews.add (new RegionSequenceView (this, static_cast<ARARegionSequence*> (regionSequence)));
             regionSequenceListView.addAndMakeVisible (regionSequenceViews.getLast());
         }
 
@@ -47,7 +47,7 @@ ARASampleProjectAudioProcessorEditor::~ARASampleProjectAudioProcessorEditor()
         getARAEditorView ()->removeListener (this);
 
         for (auto regionSequence : document->getRegionSequences())
-            static_cast<ARARegionSequence*>(regionSequence)->removeListener (this);
+            static_cast<ARARegionSequence*> (regionSequence)->removeListener (this);
     }
 }
 
@@ -130,7 +130,7 @@ void ARASampleProjectAudioProcessorEditor::doEndEditing (ARADocument* document)
         // TODO JUCE_ARA
         // we need a proper callback for when a region sequence is created
         // so we know when to make new views / subscribe to callbacks
-        static_cast<ARARegionSequence*>(regionSequence)->addListener (this);
+        static_cast<ARARegionSequence*> (regionSequence)->addListener (this);
 
         // See if we need to make a new view - ideally we'd know when a new
         // region sequence is created and use that hook to make the view
@@ -142,7 +142,7 @@ void ARASampleProjectAudioProcessorEditor::doEndEditing (ARADocument* document)
         }
         if (makeNewView)
         {
-            regionSequenceViews.add (new RegionSequenceView (this, static_cast<ARARegionSequence*>(regionSequence)));
+            regionSequenceViews.add (new RegionSequenceView (this, static_cast<ARARegionSequence*> (regionSequence)));
             regionSequenceListView.addAndMakeVisible (regionSequenceViews.getLast());
             setDirty();
         }

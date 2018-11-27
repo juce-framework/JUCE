@@ -116,12 +116,12 @@ ARA::PlugIn::Document* ARADocumentController::doCreateDocument (ARA::PlugIn::Doc
 
 void ARADocumentController::doBeginEditing() noexcept
 {
-    static_cast<ARADocument*>(getDocument ())->doBeginEditing ();
+    static_cast<ARADocument*> (getDocument ())->doBeginEditing ();
 }
 
 void ARADocumentController::doEndEditing() noexcept
 {
-    static_cast<ARADocument*>(getDocument ())->doEndEditing ();
+    static_cast<ARADocument*> (getDocument ())->doEndEditing ();
 }
 
 void ARADocumentController::doNotifyModelUpdates () noexcept
@@ -146,17 +146,17 @@ void ARADocumentController::doNotifyModelUpdates () noexcept
 
 void ARADocumentController::willUpdateDocumentProperties (ARA::PlugIn::Document* document, ARA::PlugIn::Document::PropertiesPtr newProperties) noexcept
 {
-    static_cast<ARADocument*>(document)->willUpdateDocumentProperties (newProperties);
+    static_cast<ARADocument*> (document)->willUpdateDocumentProperties (newProperties);
 }
 
 void ARADocumentController::didUpdateDocumentProperties (ARA::PlugIn::Document* document) noexcept
 {
-    static_cast<ARADocument*>(document)->didUpdateDocumentProperties ();
+    static_cast<ARADocument*> (document)->didUpdateDocumentProperties ();
 }
 
 void ARADocumentController::willDestroyDocument (ARA::PlugIn::Document* document) noexcept
 {
-    static_cast<ARADocument*>(document)->willDestroyDocument ();
+    static_cast<ARADocument*> (document)->willDestroyDocument ();
 }
 
 //==============================================================================
@@ -211,13 +211,13 @@ void ARADocumentController::willDestroyRegionSequence (ARA::PlugIn::RegionSequen
 void ARADocumentController::willRemovePlaybackRegionFromRegionSequence (ARA::PlugIn::RegionSequence* regionSequence, ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept
 {
     static_cast<ARARegionSequence*> (regionSequence)->
-        willRemovePlaybackRegionFromRegionSequence (static_cast<ARAPlaybackRegion*>(playbackRegion));
+        willRemovePlaybackRegionFromRegionSequence (static_cast<ARAPlaybackRegion*> (playbackRegion));
 }
 
 void ARADocumentController::didAddPlaybackRegionToRegionSequence (ARA::PlugIn::RegionSequence* regionSequence, ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept
 {
     static_cast<ARARegionSequence*> (regionSequence)->
-        didAddPlaybackRegionToRegionSequence (static_cast<ARAPlaybackRegion*>(playbackRegion));
+        didAddPlaybackRegionToRegionSequence (static_cast<ARAPlaybackRegion*> (playbackRegion));
 }
 
 //==============================================================================
@@ -271,12 +271,12 @@ AudioFormatReader* ARADocumentController::createAudioSourceReader (ARAAudioSourc
 
 ARAPlaybackRegionReader* ARADocumentController::createPlaybackRegionReader (std::vector<ARAPlaybackRegion*> playbackRegions, bool nonRealtime)
 {
-    return new ARAPlaybackRegionReader (static_cast<ARAPlaybackRenderer*>(doCreatePlaybackRenderer()), playbackRegions, nonRealtime);
+    return new ARAPlaybackRegionReader (static_cast<ARAPlaybackRenderer*> (doCreatePlaybackRenderer()), playbackRegions, nonRealtime);
 }
 
 ARARegionSequenceReader* ARADocumentController::createRegionSequenceReader (ARARegionSequence* regionSequence, bool nonRealtime)
 {
-    return new ARARegionSequenceReader (static_cast<ARAPlaybackRenderer*>(doCreatePlaybackRenderer()), regionSequence, nonRealtime);
+    return new ARARegionSequenceReader (static_cast<ARAPlaybackRenderer*> (doCreatePlaybackRenderer()), regionSequence, nonRealtime);
 }
 
 //==============================================================================

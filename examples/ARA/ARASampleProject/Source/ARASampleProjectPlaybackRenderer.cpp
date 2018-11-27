@@ -131,7 +131,7 @@ bool ARASampleProjectPlaybackRenderer::processBlock (AudioBuffer<float>& buffer,
             // if we're using a buffering reader then set the appropriate timeout
             BufferingAudioReader* bufferingReader = dynamic_cast<BufferingAudioReader*> (reader.get());
             if (bufferingReader != nullptr)
-                bufferingReader->setReadTimeout ((isNonRealtime) ? 100 : 0);
+                bufferingReader->setReadTimeout (isNonRealtime ? 100 : 0);
 
             // read samples
             bool bufferSuccess;

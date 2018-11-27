@@ -18,12 +18,12 @@ AudioProcessorEditorARAExtension::~AudioProcessorEditorARAExtension()
 
 ARAEditorView* AudioProcessorEditorARAExtension::getARAEditorView() const noexcept
 {
-    return araProcessorExtension ? static_cast<ARAEditorView*>(araProcessorExtension->getARAEditorView()) : nullptr;
+    return araProcessorExtension ? static_cast<ARAEditorView*> (araProcessorExtension->getARAEditorView()) : nullptr;
 }
 
 ARADocumentController* AudioProcessorEditorARAExtension::getARADocumentController() const noexcept
 {
-    return isARAEditorView() ? static_cast<ARADocumentController*>(getARAEditorView()->getDocumentController()) : nullptr;
+    return isARAEditorView() ? static_cast<ARADocumentController*> (getARAEditorView()->getDocumentController()) : nullptr;
 }
 
 } // namespace juce
