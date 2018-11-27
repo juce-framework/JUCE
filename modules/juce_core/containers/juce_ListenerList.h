@@ -179,14 +179,14 @@ public:
     template <typename Callback>
     void callExpectingUnregistration (Callback&& callback)
     {
-        auto& listenersArray = getListeners ();
+        auto& listenersArray = getListeners();
 
-        typename ArrayType::ScopedLockType lock (listeners.getLock ());
+        typename ArrayType::ScopedLockType lock (listeners.getLock());
         
-        if (listenersArray.size () == 1)
+        if (listenersArray.size() == 1)
         {
             // if there's but one listener, we can skip copying the array
-            callback (*listenersArray.getFirst ());
+            callback (*listenersArray.getFirst());
         }
         else
         {
