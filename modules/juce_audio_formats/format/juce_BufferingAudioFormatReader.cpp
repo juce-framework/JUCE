@@ -69,7 +69,7 @@ bool BufferingAudioReader::readSamples (int** destSamples, int numDestChannels, 
 
     bool success = true;
 
-    while (numSamples > 0 && success) // TODO JUCE_ARA should we check success here?
+    while (numSamples > 0)
     {
         if (auto block = getBlockContaining (startSampleInFile))
         {
