@@ -154,6 +154,11 @@ void ARADocumentController::didUpdateDocumentProperties (ARA::PlugIn::Document* 
     static_cast<ARADocument*> (document)->didUpdateDocumentProperties ();
 }
 
+void ARADocumentController::didReorderRegionSequencesInDocument (ARA::PlugIn::Document* document) noexcept
+{
+    static_cast<ARADocument*> (document)->didReorderRegionSequencesInDocument ();
+}
+
 void ARADocumentController::willDestroyDocument (ARA::PlugIn::Document* document) noexcept
 {
     static_cast<ARADocument*> (document)->willDestroyDocument ();

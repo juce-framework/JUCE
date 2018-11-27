@@ -19,9 +19,10 @@ public:
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
         virtual void doBeginEditing (ARADocument* document) {}
         virtual void doEndEditing (ARADocument* document) {}
-        virtual void willUpdateDocumentProperties (Document* document, Document::PropertiesPtr newProperties) {}
-        virtual void didUpdateDocumentProperties (Document* document) {}
-        virtual void willDestroyDocument (Document* document) {}
+        virtual void willUpdateDocumentProperties (ARADocument* document, ARADocument::PropertiesPtr newProperties) {}
+        virtual void didUpdateDocumentProperties (ARADocument* document) {}
+        virtual void didReorderRegionSequencesInDocument (ARADocument* document) {}
+        virtual void willDestroyDocument (ARADocument* document) {}
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
     };
 
@@ -31,8 +32,9 @@ public:
 public:         // to be called by ARADocumentController only
     void doBeginEditing();
     void doEndEditing();
-    void willUpdateDocumentProperties (Document::PropertiesPtr newProperties);
+    void willUpdateDocumentProperties (ARADocument::PropertiesPtr newProperties);
     void didUpdateDocumentProperties();
+    void didReorderRegionSequencesInDocument();
     void willDestroyDocument();
 
 private:

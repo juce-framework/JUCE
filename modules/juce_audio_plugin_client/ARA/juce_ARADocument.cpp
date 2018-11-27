@@ -27,6 +27,11 @@ void ARADocument::didUpdateDocumentProperties()
     listeners.callExpectingUnregistration ([this] (Listener& l) { l.didUpdateDocumentProperties (this); });
 }
 
+void ARADocument::didReorderRegionSequencesInDocument()
+{
+    listeners.callExpectingUnregistration ([this] (Listener& l) { l.didReorderRegionSequencesInDocument (this); });
+}
+
 void ARADocument::willDestroyDocument()
 {
     listeners.callExpectingUnregistration ([this] (Listener& l) { l.willDestroyDocument (this); });

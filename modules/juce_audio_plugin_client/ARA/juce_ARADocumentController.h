@@ -40,13 +40,16 @@ public:
     // If you are subclassing ARADocumentController, make sure to call the base class
     // implementations of any overridden function, except for any doCreate...().
 protected:
-    // Document callbacks
-    ARA::PlugIn::Document* doCreateDocument (ARA::PlugIn::DocumentController* documentController) noexcept override;
+    // Model Update Management
     void doBeginEditing() noexcept override;
     void doEndEditing() noexcept override;
     void doNotifyModelUpdates() noexcept override;
+
+    // Document callbacks
+    ARA::PlugIn::Document* doCreateDocument (ARA::PlugIn::DocumentController* documentController) noexcept override;
     void willUpdateDocumentProperties (ARA::PlugIn::Document* document, ARA::PlugIn::Document::PropertiesPtr newProperties) noexcept override;
     void didUpdateDocumentProperties (ARA::PlugIn::Document* document) noexcept override;
+    void didReorderRegionSequencesInDocument (ARA::PlugIn::Document* document) noexcept override;
     void willDestroyDocument (ARA::PlugIn::Document* document) noexcept override;
 
     // MusicalContext callbacks
