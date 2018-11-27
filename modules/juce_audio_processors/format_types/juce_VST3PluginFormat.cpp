@@ -1599,6 +1599,7 @@ struct VST3ComponentHolder
 class VST3PluginInstance : public AudioPluginInstance
 {
 public:
+    //==============================================================================
     struct VST3Parameter final  : public Parameter
     {
         VST3Parameter (VST3PluginInstance& parent,
@@ -1614,6 +1615,8 @@ public:
         {
             if (pluginInstance.editController != nullptr)
             {
+                const ScopedLock sl (pluginInstance.lock);
+
                 return (float) pluginInstance.editController->getParamNormalized (paramID);
             }
 
@@ -1624,6 +1627,8 @@ public:
         {
             if (pluginInstance.editController != nullptr)
             {
+                const ScopedLock sl (pluginInstance.lock);
+
                 pluginInstance.editController->setParamNormalized (paramID, (double) newValue);
 
                 Steinberg::int32 index;
@@ -1700,6 +1705,7 @@ public:
         const bool automatable;
     };
 
+    //==============================================================================
     VST3PluginInstance (VST3ComponentHolder* componentHolder)
         : AudioPluginInstance (getBusProperties (componentHolder->component)),
           holder (componentHolder),
@@ -1743,6 +1749,7 @@ public:
         editController = nullptr;
     }
 
+    //==============================================================================
     bool initialise()
     {
        #if JUCE_WINDOWS
@@ -2511,6 +2518,7 @@ private:
     Vst::ProcessContext timingInfo; //< Only use this in processBlock()!
     bool isControllerInitialised = false, isActive = false, lastProcessBlockCallWasBypass = false;
     VST3Parameter* bypassParam = nullptr;
+    CriticalSection lock;
 
     //==============================================================================
     /** Some plugins need to be "connected" to intercommunicate between their implemented classes */
