@@ -98,7 +98,6 @@ void ARASampleProjectAudioProcessorEditor::rebuildView()
 void ARASampleProjectAudioProcessorEditor::clearView()
 {
     regionSequenceViews.clear();
-    regionSequenceListView.removeAllChildren();
 }
 
 //==============================================================================
