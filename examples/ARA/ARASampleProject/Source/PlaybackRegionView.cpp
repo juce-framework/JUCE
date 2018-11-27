@@ -75,7 +75,7 @@ void PlaybackRegionView::doEndEditing (ARADocument* document)
     }
 }
 
-void PlaybackRegionView::didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable)
+void PlaybackRegionView::didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool /*enable*/)
 {
     jassert (audioSource == playbackRegion->getAudioModification()->getAudioSource());
 
