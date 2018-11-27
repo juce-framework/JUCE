@@ -37,10 +37,9 @@ PlaybackRegionView::~PlaybackRegionView()
 void PlaybackRegionView::paint (Graphics& g)
 {
     Colour regionColour;
-    // TODO JUCE_ARA Studio One uses black as the default color, which looks bad...
     const ARA::ARAColor* colour = playbackRegion->getColor ();
-    //if (! colour)
-    colour = playbackRegion->getRegionSequence ()->getColor ();
+    if (colour == nullptr)
+        colour = playbackRegion->getRegionSequence ()->getColor ();
     if (colour != nullptr)
     {
         regionColour = Colour::fromFloatRGBA (colour->r, colour->g, colour->b, 1.0f);
@@ -60,7 +59,6 @@ void PlaybackRegionView::paint (Graphics& g)
     }
     else
     {
-        // TODO JUCE_ARA should we draw this all over our visible area?
         g.setColour (regionColour.contrasting (1.0f));
         g.setFont (Font (12.0));
         g.drawText ("Access Disabled", getBounds(), Justification::centred);
