@@ -35,7 +35,7 @@ void RegionSequenceView::paint (Graphics& g)
     g.fillRect (headerRect);
 
     // draw selection state as a yellow border around the header
-    g.setColour (isSelected ? juce::Colours::yellow : juce::Colours::black);
+    g.setColour (isSelected ? Colours::yellow : Colours::black);
     g.drawRect (headerRect);
 
     // draw the track name (vertically) in the header by rotating

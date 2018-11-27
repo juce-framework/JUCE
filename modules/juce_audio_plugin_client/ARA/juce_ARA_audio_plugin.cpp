@@ -29,10 +29,10 @@ JUCE_API void JUCE_CALLTYPE handleARAAssertion (const char* file, const int line
     DBG (diagnosis);
    #endif
   
-    juce::logAssertion (file, line);
+    logAssertion (file, line);
 
    #if (JUCE_DEBUG && ! JUCE_DISABLE_ASSERTIONS)
-    if (juce::juce_isRunningUnderDebugger())
+    if (juce_isRunningUnderDebugger())
         JUCE_BREAK_IN_DEBUGGER;
     JUCE_ANALYZER_NORETURN
    #endif

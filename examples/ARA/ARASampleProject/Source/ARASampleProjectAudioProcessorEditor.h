@@ -60,7 +60,7 @@ private:
     Viewport regionSequenceViewPort;
     Component regionSequenceListView;
 
-    juce::OwnedArray <RegionSequenceView> regionSequenceViews;
+    OwnedArray <RegionSequenceView> regionSequenceViews;
 
     bool isViewDirty;
 

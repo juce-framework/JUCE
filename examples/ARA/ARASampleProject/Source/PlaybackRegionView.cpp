@@ -39,7 +39,7 @@ void PlaybackRegionView::paint (Graphics& g)
         g.fillAll (regionColour);
     }
 
-    g.setColour (isSelected ? juce::Colours::yellow : juce::Colours::black);
+    g.setColour (isSelected ? Colours::yellow : Colours::black);
     g.drawRect (getLocalBounds());
 
     if (playbackRegion->getAudioModification()->getAudioSource()->isSampleAccessEnabled())
@@ -58,7 +58,7 @@ void PlaybackRegionView::paint (Graphics& g)
     }
 }
 
-void PlaybackRegionView::changeListenerCallback (juce::ChangeBroadcaster* /*broadcaster*/)
+void PlaybackRegionView::changeListenerCallback (ChangeBroadcaster* /*broadcaster*/)
 {
     repaint();
 }

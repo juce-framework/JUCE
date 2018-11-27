@@ -2,7 +2,7 @@
 #include "ARASampleProjectPlaybackRenderer.h"
 
 ARASampleProjectDocumentController::ARASampleProjectDocumentController() noexcept
-: juce::ARADocumentController()
+: ARADocumentController()
 {
     araAudioSourceReadingThread.reset (new TimeSliceThread (String (JucePlugin_Name) + " ARA Sample Reading Thread"));
     araAudioSourceReadingThread->startThread();

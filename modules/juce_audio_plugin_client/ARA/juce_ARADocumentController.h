@@ -93,7 +93,7 @@ protected:
 
     // PlugIn instance role creation
     // these can be overridden with custom types so long as 
-    // they inherit from our juce::ARA instance role classes
+    // they inherit from our ARA instance role classes
     ARA::PlugIn::PlaybackRenderer* doCreatePlaybackRenderer() noexcept override;
     ARA::PlugIn::EditorRenderer* doCreateEditorRenderer() noexcept override;
     ARA::PlugIn::EditorView* doCreateEditorView() noexcept override;
