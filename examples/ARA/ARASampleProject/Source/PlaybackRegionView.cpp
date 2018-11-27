@@ -63,7 +63,6 @@ void PlaybackRegionView::changeListenerCallback (ChangeBroadcaster* /*broadcaste
     repaint();
 }
 
-// TODO JUCE_ARA what if this is called after ARASampleProjectAudioProcessorEditor::doEndEditing?
 void PlaybackRegionView::doEndEditing (ARADocument* document)
 {
     jassert (document == playbackRegion->getRegionSequence()->getDocument());

@@ -35,7 +35,6 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
         rebuildView();
 
         // manually invoke the onNewSelection callback to refresh our UI with the current selection
-        // TODO JUCE_ARA should we rename the function that recreates the view?
         onNewSelection (getARAEditorView()->getViewSelection());
     }
 }
@@ -94,7 +93,6 @@ void ARASampleProjectAudioProcessorEditor::resized()
     regionSequenceViewPort.setBounds (0, 0, getWidth(), getHeight());
 }
 
-// rebuild our region sequence views and display selection state
 void ARASampleProjectAudioProcessorEditor::onNewSelection (const ARA::PlugIn::ViewSelection& currentSelection)
 {
     // flag the region as selected if it's a part of the current selection
@@ -135,8 +133,10 @@ void ARASampleProjectAudioProcessorEditor::doEndEditing (ARADocument* document)
         // region sequence is created and use that hook to make the view
         bool makeNewView = true;
         for (int i = 0; i < regionSequenceViews.size() && makeNewView; i++)
+        {
             if (regionSequenceViews[i]->getRegionSequence() == regionSequence)
                 makeNewView = false;
+        }
         if (makeNewView)
         {
             regionSequenceViews.add (new RegionSequenceView (this, static_cast<ARARegionSequence*>(regionSequence)));
