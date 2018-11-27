@@ -146,8 +146,8 @@ bool ARAAudioSourceReader::readSamples (int** destSamples, int numDestChannels, 
 
 ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARAPlaybackRenderer* renderer, std::vector<ARAPlaybackRegion*> const& playbackRegions, bool nonRealtime)
 : AudioFormatReader (nullptr, "ARAPlaybackRegionReader"),
-  playbackRenderer (renderer),
-  isNonRealtime (nonRealtime)
+  isNonRealtime (nonRealtime),
+  playbackRenderer (renderer)
 {
     // TODO JUCE_ARA
     // Make sampleRate, numChannels and use64BitSamples available as c'tor parameters instead
