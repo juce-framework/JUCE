@@ -22,9 +22,13 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
     {
         auto document = static_cast<ARADocument*> (getARADocumentController()->getDocument());
         document->addListener (this);
+        getARAEditorView ()->addListener (this);
 
         for (auto regionSequence : document->getRegionSequences())
         {
+            if (ARA::contains (getARAEditorView()->getHiddenRegionSequences(), regionSequence))
+                continue;
+
             static_cast<ARARegionSequence*>(regionSequence)->addListener (this);
             regionSequenceViews.add (new RegionSequenceView (this, static_cast<ARARegionSequence*>(regionSequence)));
             regionSequenceListView.addAndMakeVisible (regionSequenceViews.getLast());
@@ -40,6 +44,7 @@ ARASampleProjectAudioProcessorEditor::~ARASampleProjectAudioProcessorEditor()
     {
         auto document = static_cast<ARADocument*> (getARADocumentController()->getDocument());
         document->removeListener (this);
+        getARAEditorView ()->removeListener (this);
 
         for (auto regionSequence : document->getRegionSequences())
             static_cast<ARARegionSequence*>(regionSequence)->removeListener (this);
@@ -99,10 +104,29 @@ void ARASampleProjectAudioProcessorEditor::rebuildView()
     resized();
 }
 
+void ARASampleProjectAudioProcessorEditor::onHideRegionSequences (std::vector<ARARegionSequence*> const& regionSequences)
+{
+    std::vector<RegionSequenceView*> viewsToRemove;
+    for (auto v : regionSequenceViews)
+        if (ARA::contains (regionSequences, v->getRegionSequence ()))
+            viewsToRemove.push_back (v);
+
+    if (viewsToRemove.empty ())
+        return;
+
+    for (auto v : viewsToRemove)
+        regionSequenceViews.removeObject (v, true);
+
+    repaint ();
+}
+
 void ARASampleProjectAudioProcessorEditor::doEndEditing (ARADocument* document)
 {
     for (auto regionSequence : document->getRegionSequences())
     {
+        if (ARA::contains (getARAEditorView()->getHiddenRegionSequences(), regionSequence))
+            continue;
+
         // TODO JUCE_ARA
         // we need a proper callback for when a region sequence is created
         // so we know when to make new views / subscribe to callbacks
