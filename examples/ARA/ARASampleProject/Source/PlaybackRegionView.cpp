@@ -11,12 +11,8 @@ PlaybackRegionView::PlaybackRegionView (ARASampleProjectAudioProcessorEditor* ed
 {
     audioThumb.addChangeListener (this);
 
-    auto document = static_cast<ARADocument*> (playbackRegion->getRegionSequence()->getDocument());
-    document->addListener (this);
-
-    auto audioSource = static_cast<ARAAudioSource*> (playbackRegion->getAudioModification()->getAudioSource());
-    audioSource->addListener (this);
-
+    static_cast<ARADocument*> (playbackRegion->getRegionSequence()->getDocument())->addListener (this);
+    static_cast<ARAAudioSource*> (playbackRegion->getAudioModification()->getAudioSource())->addListener (this);
     playbackRegion->addListener (this);
 
     recreatePlaybackRegionReader();
@@ -25,12 +21,8 @@ PlaybackRegionView::PlaybackRegionView (ARASampleProjectAudioProcessorEditor* ed
 PlaybackRegionView::~PlaybackRegionView()
 {
     playbackRegion->removeListener (this);
-
-    auto audioSource = static_cast<ARAAudioSource*>(playbackRegion->getAudioModification()->getAudioSource());
-    audioSource->removeListener (this);
-
-    auto document = static_cast<ARADocument*> (playbackRegion->getRegionSequence()->getDocument());
-    document->removeListener (this);
+    static_cast<ARAAudioSource*>(playbackRegion->getAudioModification()->getAudioSource())->removeListener (this);
+    static_cast<ARADocument*> (playbackRegion->getRegionSequence()->getDocument())->removeListener (this);
 
     audioThumb.clear();
     audioThumb.removeChangeListener (this);
@@ -73,8 +65,10 @@ void PlaybackRegionView::changeListenerCallback (juce::ChangeBroadcaster* /*broa
 }
 
 // TODO JUCE_ARA what if this is called after ARASampleProjectAudioProcessorEditor::doEndEditing?
-void PlaybackRegionView::doEndEditing (ARADocument* /*document*/)
+void PlaybackRegionView::doEndEditing (ARADocument* document)
 {
+    jassert (document == playbackRegion->getRegionSequence()->getDocument());
+
     if ((playbackRegionReader ==  nullptr) || ! playbackRegionReader->isValid())
     {
         recreatePlaybackRegionReader();
@@ -82,13 +76,17 @@ void PlaybackRegionView::doEndEditing (ARADocument* /*document*/)
     }
 }
 
-void PlaybackRegionView::didEnableAudioSourceSamplesAccess (ARAAudioSource* /*audioSource*/, bool enable)
+void PlaybackRegionView::didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable)
 {
+    jassert (audioSource == playbackRegion->getAudioModification()->getAudioSource());
+
     repaint();
 }
 
-void PlaybackRegionView::willUpdatePlaybackRegionProperties (ARAPlaybackRegion* /*region*/, ARAPlaybackRegion::PropertiesPtr newProperties)
+void PlaybackRegionView::willUpdatePlaybackRegionProperties (ARAPlaybackRegion* region, ARAPlaybackRegion::PropertiesPtr newProperties)
 {
+    jassert (playbackRegion == region);
+
     if ((playbackRegion->getStartInAudioModificationTime() != newProperties->startInModificationTime) ||
         (playbackRegion->getDurationInAudioModificationTime() != newProperties->durationInModificationTime) ||
         (playbackRegion->getStartInPlaybackTime() != newProperties->startInPlaybackTime) ||
