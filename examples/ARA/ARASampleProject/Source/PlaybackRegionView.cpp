@@ -87,9 +87,7 @@ void PlaybackRegionView::willUpdatePlaybackRegionProperties (ARAPlaybackRegion* 
 {
     jassert (playbackRegion == region);
 
-    if ((playbackRegion->getStartInAudioModificationTime() != newProperties->startInModificationTime) ||
-        (playbackRegion->getDurationInAudioModificationTime() != newProperties->durationInModificationTime) ||
-        (playbackRegion->getStartInPlaybackTime() != newProperties->startInPlaybackTime) ||
+    if ((playbackRegion->getStartInPlaybackTime() != newProperties->startInPlaybackTime) ||
         (playbackRegion->getDurationInPlaybackTime() != newProperties->durationInPlaybackTime))
     {
         editorComponent->setDirty();
