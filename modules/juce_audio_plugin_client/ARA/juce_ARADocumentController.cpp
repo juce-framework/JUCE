@@ -74,14 +74,26 @@ namespace juce
 {
 //==============================================================================
 
-void ARADocumentController::notifyAudioSourceContentChanged (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags)
+void ARADocumentController::notifyAudioSourceContentChanged (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags, bool notifyAllAudioModificationsAndPlaybackRegions)
 {
     audioSource->didUpdateAudioSourceContent (scopeFlags);
+
+    if (notifyAllAudioModificationsAndPlaybackRegions)
+    {
+        for (auto audioModification : audioSource->getAudioModifications())
+            notifyAudioModificationContentChanged (static_cast<ARAAudioModification*> (audioModification), scopeFlags, true);
+    }
 }
 
-void ARADocumentController::notifyAudioModificationContentChanged (ARAAudioModification* audioModification, ARAContentUpdateScopes scopeFlags)
+void ARADocumentController::notifyAudioModificationContentChanged (ARAAudioModification* audioModification, ARAContentUpdateScopes scopeFlags, bool notifyAllPlaybackRegions)
 {
     audioModification->didUpdateAudioModificationContent (scopeFlags);
+
+    if (notifyAllPlaybackRegions)
+    {
+        for (auto playbackRegion : audioModification->getPlaybackRegions())
+            notifyPlaybackRegionContentChanged (static_cast<ARAPlaybackRegion*> (playbackRegion), scopeFlags);
+    }
 }
 
 void ARADocumentController::notifyPlaybackRegionContentChanged (ARAPlaybackRegion* playbackRegion, ARAContentUpdateScopes scopeFlags)

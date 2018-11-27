@@ -23,16 +23,16 @@ public:
     TODO JUCE_ARA
     We should properly track the scopeFlags for each object (they can all just be added together).
     We need to store the affected objects and their flags similar to how the sample plug-in does,
-    and implement doNotifyModelUpdates () accordingly.
+    and implement doNotifyModelUpdates() accordingly.
 */
 
     // notify the host and any potential internal reader about content changes
     // must be called by the plug-in model management code on the main thread
-    // Listeners will be notified without begin/endEditing () if this occurs outside of a host edit.
+    // Listeners will be notified without begin/endEditing() if this occurs outside of a host edit.
     // Note that while the ARA API allows for specifying update ranges, this feature is not yet
     // in our current plug-in implementation (many hosts do not evaluate it anyways)
-    void notifyAudioSourceContentChanged (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags);
-    void notifyAudioModificationContentChanged (ARAAudioModification* audioModification, ARAContentUpdateScopes scopeFlags);
+    void notifyAudioSourceContentChanged (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags, bool notifyAllAudioModificationsAndPlaybackRegions = false);
+    void notifyAudioModificationContentChanged (ARAAudioModification* audioModification, ARAContentUpdateScopes scopeFlags, bool notifyAllPlaybackRegions = false);
     void notifyPlaybackRegionContentChanged (ARAPlaybackRegion* playbackRegion, ARAContentUpdateScopes scopeFlags);
 
     //==============================================================================
