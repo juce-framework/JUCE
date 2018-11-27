@@ -18,14 +18,14 @@ RegionSequenceView::RegionSequenceView (ARASampleProjectAudioProcessorEditor* ed
     }
 
     // listen to selection changes and invoke onNewSelection with the current selection
-    editorComponent->getARAEditorView ()->addSelectionListener (this);
+    editorComponent->getARAEditorView ()->addListener (this);
     onNewSelection (editorComponent->getARAEditorView ()->getViewSelection ());
 }
 
 RegionSequenceView::~RegionSequenceView()
 {
     regionSequence->removeListener(this);
-    editorComponent->getARAEditorView ()->removeSelectionListener (this);
+    editorComponent->getARAEditorView ()->removeListener (this);
 }
 
 void RegionSequenceView::paint (Graphics& g)

@@ -101,8 +101,8 @@ public:
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
     };
 
-    void addSelectionListener (Listener* l);
-    void removeSelectionListener (Listener* l);
+    void addListener (Listener* l);
+    void removeListener (Listener* l);
 
 private:
 

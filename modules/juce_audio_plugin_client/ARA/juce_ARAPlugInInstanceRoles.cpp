@@ -33,12 +33,12 @@ void ARAEditorView::doNotifyHideRegionSequences (std::vector<ARA::PlugIn::Region
         l->onHideRegionSequences (reinterpret_cast<std::vector<ARARegionSequence*> const&> (regionSequences));
 }
 
-void ARAEditorView::addSelectionListener (Listener* l) 
+void ARAEditorView::addListener (Listener* l) 
 { 
     listeners.push_back (l); 
 }
 
-void ARAEditorView::removeSelectionListener (Listener* l) 
+void ARAEditorView::removeListener (Listener* l) 
 { 
     ARA::find_erase (listeners, l); 
 }

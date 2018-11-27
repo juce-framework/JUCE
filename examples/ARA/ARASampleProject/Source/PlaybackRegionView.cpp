@@ -17,7 +17,7 @@ PlaybackRegionView::PlaybackRegionView (ARASampleProjectAudioProcessorEditor* ed
     recreatePlaybackRegionReader();
 
     // listen to selection changes and invoke onNewSelection with the current selection
-    editorComponent->getARAEditorView ()->addSelectionListener (this);
+    editorComponent->getARAEditorView ()->addListener (this);
     onNewSelection (editorComponent->getARAEditorView ()->getViewSelection ());
 }
 
@@ -26,7 +26,7 @@ PlaybackRegionView::~PlaybackRegionView()
     playbackRegion->removeListener (this);
     static_cast<ARAAudioSource*>(playbackRegion->getAudioModification()->getAudioSource())->removeListener (this);
     static_cast<ARADocument*> (playbackRegion->getRegionSequence()->getDocument())->removeListener (this);
-    editorComponent->getARAEditorView ()->removeSelectionListener (this);
+    editorComponent->getARAEditorView ()->removeListener (this);
 
     audioThumb.clear();
     audioThumb.removeChangeListener (this);
