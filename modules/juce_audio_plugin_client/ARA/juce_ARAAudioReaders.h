@@ -51,11 +51,11 @@ public:
     // TODO JUCE_ARA
     // do we need to handle property updates?
     // any other invalidation hooks? 
-    void willUpdateAudioSourceProperties (ARAAudioSource* audioSource, ARAAudioSource::PropertiesPtr newProperties) noexcept override;
-    void willEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) noexcept override;
-    void didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) noexcept override;
-    void willDestroyAudioSource (ARAAudioSource* audioSource) noexcept override;
-    void doUpdateAudioSourceContent (ARAAudioSource* audioSource, const ARA::ARAContentTimeRange* range, ARAContentUpdateScopes scopeFlags) noexcept override;
+    void willUpdateAudioSourceProperties (ARAAudioSource* audioSource, ARAAudioSource::PropertiesPtr newProperties) override;
+    void didUpdateAudioSourceContent (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags) override;
+    void willEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) override;
+    void didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) override;
+    void willDestroyAudioSource (ARAAudioSource* audioSource) override;
 
 private:
     bool isValid;
@@ -88,7 +88,8 @@ public:
                       int64 startSampleInFile, int numSamples) override;
 
     void willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties) override;
-    void willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept override;
+    void didUpdatePlaybackRegionContent (ARAPlaybackRegion* playbackRegion, ARAContentUpdateScopes scopeFlags) override;
+    void willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion) override;
 
 private:
     std::unique_ptr<ARAPlaybackRenderer> playbackRenderer;

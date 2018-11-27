@@ -17,11 +17,6 @@ void ARAAudioSource::didUpdateAudioSourceProperties()
     listeners.callExpectingUnregistration ([this] (Listener& l) { l.didUpdateAudioSourceProperties (this); });
 }
 
-void ARAAudioSource::doUpdateAudioSourceContent (const ARA::ARAContentTimeRange* range, ARAContentUpdateScopes scopeFlags)
-{
-    listeners.callExpectingUnregistration ([this, range, scopeFlags] (Listener& l) { l.doUpdateAudioSourceContent (this, range, scopeFlags); });
-}
-
 void ARAAudioSource::didUpdateAudioSourceContent (ARAContentUpdateScopes scopeFlags)
 {
     listeners.callExpectingUnregistration ([this, scopeFlags] (Listener& l) { l.didUpdateAudioSourceContent (this, scopeFlags); });

@@ -31,7 +31,7 @@ ARAAudioSourceReader::~ARAAudioSourceReader()
     araHostReader.reset ();
 }
 
-void ARAAudioSourceReader::willUpdateAudioSourceProperties (ARAAudioSource* audioSource, ARAAudioSource::PropertiesPtr newProperties) noexcept
+void ARAAudioSourceReader::willUpdateAudioSourceProperties (ARAAudioSource* audioSource, ARAAudioSource::PropertiesPtr newProperties)
 {
     if (audioSource->getSampleCount() != newProperties->sampleCount ||
         audioSource->getSampleRate() != newProperties->sampleRate ||
@@ -43,7 +43,20 @@ void ARAAudioSourceReader::willUpdateAudioSourceProperties (ARAAudioSource* audi
     }
 }
 
-void ARAAudioSourceReader::willEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) noexcept
+void ARAAudioSourceReader::didUpdateAudioSourceContent (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags)
+{
+    jassert (audioSourceBeingRead == audioSource);
+
+    // don't invalidate if the audio signal is unchanged
+    if (! scopeFlags.affectSamples())
+        return;
+
+    ScopedWriteLock scopedLock (lock);
+    isValid = false;
+    araHostReader.reset ();
+}
+
+void ARAAudioSourceReader::willEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable)
 {
     jassert (audioSourceBeingRead == audioSource);
 
@@ -55,7 +68,7 @@ void ARAAudioSourceReader::willEnableAudioSourceSamplesAccess (ARAAudioSource* a
         araHostReader.reset ();
 }
 
-void ARAAudioSourceReader::didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) noexcept
+void ARAAudioSourceReader::didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable)
 {
     jassert (audioSourceBeingRead == audioSource);
 
@@ -69,7 +82,7 @@ void ARAAudioSourceReader::didEnableAudioSourceSamplesAccess (ARAAudioSource* au
     lock.exitWrite();
 }
 
-void ARAAudioSourceReader::willDestroyAudioSource (ARAAudioSource* audioSource) noexcept
+void ARAAudioSourceReader::willDestroyAudioSource (ARAAudioSource* audioSource)
 {
     jassert (audioSourceBeingRead == audioSource);
 
@@ -80,19 +93,6 @@ void ARAAudioSourceReader::willDestroyAudioSource (ARAAudioSource* audioSource) 
     araHostReader.reset ();
 
     audioSourceBeingRead = nullptr;
-}
-
-void ARAAudioSourceReader::doUpdateAudioSourceContent (ARAAudioSource* audioSource, const ARA::ARAContentTimeRange* /*range*/, ARAContentUpdateScopes scopeFlags) noexcept
-{
-    jassert (audioSourceBeingRead == audioSource);
-
-    // don't invalidate if the audio signal is unchanged
-    if (! scopeFlags.affectSamples())
-        return;
-
-    ScopedWriteLock scopedLock (lock);
-    isValid = false;
-    araHostReader.reset ();
 }
 
 bool ARAAudioSourceReader::readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
@@ -248,6 +248,9 @@ bool ARAPlaybackRegionReader::readSamples (int** destSamples, int numDestChannel
 
 void ARAPlaybackRegionReader::willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties)
 {
+    jassert (ARA::contains (playbackRenderer->getPlaybackRegions(), playbackRegion));
+
+    // TODO JUCE_ARA most of these tests should be unnecessary now that we're listening to contentChanged...?
     if ((playbackRegion->getStartInAudioModificationTime () != newProperties->startInModificationTime) ||
         (playbackRegion->getDurationInAudioModificationTime () != newProperties->durationInModificationTime) ||
         (playbackRegion->getStartInPlaybackTime () != newProperties->startInPlaybackTime) ||
@@ -261,8 +264,21 @@ void ARAPlaybackRegionReader::willUpdatePlaybackRegionProperties (ARAPlaybackReg
     }
 }
 
-void ARAPlaybackRegionReader::willDestroyPlaybackRegion (ARAPlaybackRegion* /*playbackRegion*/) noexcept
+void ARAPlaybackRegionReader::didUpdatePlaybackRegionContent (ARAPlaybackRegion* playbackRegion, ARAContentUpdateScopes scopeFlags)
 {
+    jassert (ARA::contains (playbackRenderer->getPlaybackRegions(), playbackRegion));
+
+    // don't invalidate if the audio signal is unchanged
+    if (! scopeFlags.affectSamples())
+        return;
+
+    invalidate();
+}
+
+void ARAPlaybackRegionReader::willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion)
+{
+    jassert (ARA::contains (playbackRenderer->getPlaybackRegions(), playbackRegion));
+
     invalidate();
 }
 

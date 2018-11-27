@@ -17,9 +17,9 @@ void ARAMusicalContext::didUpdateMusicalContextProperties()
     listeners.callExpectingUnregistration ([this] (Listener& l) { l.didUpdateMusicalContextProperties (this); });
 }
 
-void ARAMusicalContext::doUpdateMusicalContextContent (const ARA::ARAContentTimeRange* range, ARAContentUpdateScopes scopeFlags)
+void ARAMusicalContext::didUpdateMusicalContextContent (ARAContentUpdateScopes scopeFlags)
 {
-    listeners.callExpectingUnregistration ([this, range, scopeFlags] (Listener& l) { l.doUpdateMusicalContextContent (this, range, scopeFlags); });
+    listeners.callExpectingUnregistration ([this, scopeFlags] (Listener& l) { l.didUpdateMusicalContextContent (this, scopeFlags); });
 }
 
 void ARAMusicalContext::willDestroyMusicalContext()

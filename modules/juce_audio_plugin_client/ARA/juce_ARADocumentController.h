@@ -20,28 +20,24 @@ public:
     ARARegionSequenceReader* createRegionSequenceReader (ARARegionSequence* regionSequence, bool nonRealtime);
 
 /*
-    TODO JUCE_ARA We need the functions outlined below. We'll be ignoring time range for now,
-    but we should properly track the scopeFlags for each object (they can all just be added together).
+    TODO JUCE_ARA
+    We should properly track the scopeFlags for each object (they can all just be added together).
     We need to store the affected objects and their flags similar to how the sample plug-in does,
     and implement doNotifyModelUpdates () accordingly.
-    In addition to that, each content update that comes in through these functions needs to
-    immediately propagated to all listeners for the affected object, just as done by updates sent
-    from the host.
-    The listner calls should have this signature (replacing the existing ones for audio source
-    and musical context:
-        virtual void didUpdateXYZContent (ARAXYZ* xyz, ARAContentUpdateScopes scopeFlags) {}
+
     The audio source reader merely needs to be updated for the new signature, and the
     playback region reader can then invalidate itself properly as discussed, which will
     implicitly work for the region sequence reader as well.
+*/
 
     // notify the host and any potential internal reader about content changes
     // must be called by the plug-in model management code on the main thread
+    // Listeners will be notified without begin/endEditing () if this occurs outside of a host edit.
     // Note that while the ARA API allows for specifying update ranges, this feature is not yet
     // in our current plug-in implementation (many hosts do not evaluate it anyways)
-*/
-    void notifyAudioSourceContentChanged (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags = ARAContentUpdateScopes::everythingIsAffected());
-    void notifyAudioModificationContentChanged (ARAAudioModification* audioModification, ARAContentUpdateScopes scopeFlags = ARAContentUpdateScopes::everythingIsAffected());
-    void notifyPlaybackRegionContentChanged (ARAPlaybackRegion* playbackRegion, ARAContentUpdateScopes scopeFlags = ARAContentUpdateScopes::everythingIsAffected());
+    void notifyAudioSourceContentChanged (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags);
+    void notifyAudioModificationContentChanged (ARAAudioModification* audioModification, ARAContentUpdateScopes scopeFlags);
+    void notifyPlaybackRegionContentChanged (ARAPlaybackRegion* playbackRegion, ARAContentUpdateScopes scopeFlags);
 
     //==============================================================================
     // Override document controller methods here

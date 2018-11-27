@@ -74,17 +74,17 @@ namespace juce
 {
 //==============================================================================
 
-void ARADocumentController::notifyAudioSourceContentChanged (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags /*= ARAContentUpdateScopes::everythingIsAffected ()*/)
+void ARADocumentController::notifyAudioSourceContentChanged (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags)
 {
     audioSource->didUpdateAudioSourceContent (scopeFlags);
 }
 
-void ARADocumentController::notifyAudioModificationContentChanged (ARAAudioModification* audioModification, ARAContentUpdateScopes scopeFlags /*= ARAContentUpdateScopes::everythingIsAffected ()*/)
+void ARADocumentController::notifyAudioModificationContentChanged (ARAAudioModification* audioModification, ARAContentUpdateScopes scopeFlags)
 {
     audioModification->didUpdateAudioModificationContent (scopeFlags);
 }
 
-void ARADocumentController::notifyPlaybackRegionContentChanged (ARAPlaybackRegion* playbackRegion, ARAContentUpdateScopes scopeFlags /*= ARAContentUpdateScopes::everythingIsAffected ()*/)
+void ARADocumentController::notifyPlaybackRegionContentChanged (ARAPlaybackRegion* playbackRegion, ARAContentUpdateScopes scopeFlags)
 {
     playbackRegion->didUpdatePlaybackRegionContent (scopeFlags);
 }
@@ -138,9 +138,9 @@ void ARADocumentController::didUpdateMusicalContextProperties (ARA::PlugIn::Musi
     static_cast<ARAMusicalContext*> (musicalContext)->didUpdateMusicalContextProperties();
 }
 
-void ARADocumentController::doUpdateMusicalContextContent (ARA::PlugIn::MusicalContext* musicalContext, const ARA::ARAContentTimeRange* range, ARA::ContentUpdateScopes scopeFlags) noexcept
+void ARADocumentController::doUpdateMusicalContextContent (ARA::PlugIn::MusicalContext* musicalContext, const ARA::ARAContentTimeRange* /*range*/, ARA::ContentUpdateScopes scopeFlags) noexcept
 {
-    static_cast<ARAMusicalContext*> (musicalContext)->doUpdateMusicalContextContent (range, scopeFlags);
+    static_cast<ARAMusicalContext*> (musicalContext)->didUpdateMusicalContextContent (scopeFlags);
 }
 
 void ARADocumentController::willDestroyMusicalContext (ARA::PlugIn::MusicalContext* musicalContext) noexcept
@@ -201,9 +201,9 @@ void ARADocumentController::didUpdateAudioSourceProperties (ARA::PlugIn::AudioSo
     static_cast<ARAAudioSource*> (audioSource)->didUpdateAudioSourceProperties();
 }
 
-void ARADocumentController::doUpdateAudioSourceContent (ARA::PlugIn::AudioSource* audioSource, const ARA::ARAContentTimeRange* range, ARA::ContentUpdateScopes scopeFlags) noexcept
+void ARADocumentController::doUpdateAudioSourceContent (ARA::PlugIn::AudioSource* audioSource, const ARA::ARAContentTimeRange* /*range*/, ARA::ContentUpdateScopes scopeFlags) noexcept
 {
-    static_cast<ARAAudioSource*> (audioSource)->doUpdateAudioSourceContent (range, scopeFlags);
+    static_cast<ARAAudioSource*> (audioSource)->didUpdateAudioSourceContent (scopeFlags);
 }
 
 void ARADocumentController::willEnableAudioSourceSamplesAccess (ARA::PlugIn::AudioSource* audioSource, bool enable) noexcept
