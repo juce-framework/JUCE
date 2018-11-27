@@ -29,6 +29,7 @@ public:
     void didUpdateRegionSequenceProperties (ARARegionSequence* sequence) override;
     void willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* sequence, ARAPlaybackRegion* playbackRegion) override;
     void didAddPlaybackRegionToRegionSequence (ARARegionSequence* sequence, ARAPlaybackRegion* playbackRegion) override;
+    void willDestroyRegionSequence (ARARegionSequence* sequence) override;
 
     ARARegionSequence* getRegionSequence() const { return regionSequence; }
     
@@ -38,6 +39,9 @@ public:
 
 private:
     bool isSelected;
+    void detachFromRegionSequence();
+
+private:
     ARASampleProjectAudioProcessorEditor* editorComponent;
     ARARegionSequence* regionSequence;
     OwnedArray<PlaybackRegionView> playbackRegionViews;

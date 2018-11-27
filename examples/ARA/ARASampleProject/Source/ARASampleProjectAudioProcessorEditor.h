@@ -17,8 +17,7 @@
 class ARASampleProjectAudioProcessorEditor: public AudioProcessorEditor,
                                             public AudioProcessorEditorARAExtension,
                                             public ARAEditorView::Listener,
-                                            public ARADocument::Listener,
-                                            public ARARegionSequence::Listener
+                                            public ARADocument::Listener
 {
 public:
     ARASampleProjectAudioProcessorEditor (ARASampleProjectAudioProcessor&);
@@ -34,9 +33,6 @@ public:
     // ARADocument::Listener overrides
     void doEndEditing (ARADocument* document) override;
     void didReorderRegionSequencesInDocument (ARADocument* document) override;
-
-    // ARARegionSequence::Listener overrides
-    void willDestroyRegionSequence (ARARegionSequence* regionSequence) override;
 
     // function to flag that our view needs to be rebuilt
     void setDirty() { isViewDirty = true; }

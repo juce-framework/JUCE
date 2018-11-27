@@ -88,7 +88,6 @@ void ARASampleProjectAudioProcessorEditor::rebuildView()
             continue;
 
         auto sequenceView = new RegionSequenceView (this, static_cast<ARARegionSequence*> (regionSequence));
-        sequenceView->getRegionSequence()->addListener (this);
         regionSequenceViews.add (sequenceView);
         regionSequenceListView.addAndMakeVisible (sequenceView);
     }
@@ -98,10 +97,8 @@ void ARASampleProjectAudioProcessorEditor::rebuildView()
 
 void ARASampleProjectAudioProcessorEditor::clearView()
 {
-    for (auto v : regionSequenceViews)
-        v->getRegionSequence()->removeListener (this);
-
     regionSequenceViews.clear();
+    regionSequenceListView.removeAllChildren();
 }
 
 //==============================================================================
@@ -126,16 +123,4 @@ void ARASampleProjectAudioProcessorEditor::didReorderRegionSequencesInDocument (
     jassert (document == getARADocumentController()->getDocument());
 
     setDirty();
-}
-
-void ARASampleProjectAudioProcessorEditor::willDestroyRegionSequence (ARARegionSequence* regionSequence)
-{
-    for (int i = 0; i < regionSequenceViews.size(); i++)
-    {
-        if (regionSequenceViews[i]->getRegionSequence() == regionSequence)
-        {
-            regionSequenceViews.remove (i, true);
-            return;
-        }
-    }
 }

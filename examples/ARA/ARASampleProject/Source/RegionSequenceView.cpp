@@ -23,13 +23,27 @@ RegionSequenceView::RegionSequenceView (ARASampleProjectAudioProcessorEditor* ed
 
 RegionSequenceView::~RegionSequenceView()
 {
+    detachFromRegionSequence();
+}
+
+//==============================================================================
+void RegionSequenceView::detachFromRegionSequence()
+{
+    if (regionSequence == nullptr)
+        return;
+
     regionSequence->removeListener(this);
 
     editorComponent->getARAEditorView ()->removeListener (this);
+
+    regionSequence = nullptr;
 }
 
 void RegionSequenceView::paint (Graphics& g)
 {
+    if (regionSequence == nullptr)
+        return;
+
     Colour trackColour;
     if (const ARA::ARAColor* colour = regionSequence->getColor())
         trackColour = Colour::fromFloatRGBA (colour->r, colour->g, colour->b, 1.0f);
@@ -59,6 +73,9 @@ void RegionSequenceView::paint (Graphics& g)
 
 void RegionSequenceView::resized()
 {
+    if (regionSequence == nullptr)
+        return;
+
     double startInSeconds, endInSeconds;
     getTimeRange (startInSeconds, endInSeconds);
 
@@ -78,8 +95,11 @@ void RegionSequenceView::resized()
     }
 }
 
+//==============================================================================
 void RegionSequenceView::onNewSelection (const ARA::PlugIn::ViewSelection& currentSelection)
 {
+    jassert (regionSequence != nullptr);
+
     bool isOurRegionSequenceSelected = ARA::contains (currentSelection.getRegionSequences(), regionSequence);
     if (isOurRegionSequenceSelected != isSelected)
     {
@@ -135,6 +155,15 @@ void RegionSequenceView::didAddPlaybackRegionToRegionSequence (ARARegionSequence
 
     playbackRegionViews.add (new PlaybackRegionView (editorComponent, playbackRegion));
     addAndMakeVisible (playbackRegionViews.getLast());
+
+    editorComponent->setDirty();
+}
+
+void RegionSequenceView::willDestroyRegionSequence (ARARegionSequence* sequence)
+{
+    jassert (regionSequence == sequence);
+
+    detachFromRegionSequence();
 
     editorComponent->setDirty();
 }
