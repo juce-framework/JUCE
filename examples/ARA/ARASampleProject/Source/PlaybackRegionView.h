@@ -31,10 +31,6 @@ public:
     void setIsSelected (bool value);
     bool getIsSelected () const { return isSelected; }
 
-    double getStartInSeconds() const { return playbackRegion->getStartInPlaybackTime(); }
-    double getLengthInSeconds() const { return playbackRegion->getDurationInPlaybackTime(); }
-    double getEndInSeconds() const { return playbackRegion->getEndInPlaybackTime(); }
-
 private:
     void recreatePlaybackRegionReader();
 

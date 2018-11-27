@@ -44,10 +44,11 @@ void PlaybackRegionView::paint (Graphics& g)
 
     if (playbackRegion->getAudioModification()->getAudioSource()->isSampleAccessEnabled())
     {
-        if (getLengthInSeconds() != 0.0)
+        double duration = playbackRegion->getDurationInPlaybackTime();
+        if (duration != 0.0)
         {
             g.setColour (regionColour.contrasting (0.7f));
-            audioThumb.drawChannels (g, getLocalBounds(), 0.0, getLengthInSeconds(), 1.0);
+            audioThumb.drawChannels (g, getLocalBounds(), 0.0, duration, 1.0);
         }
     }
     else

@@ -59,8 +59,8 @@ void RegionSequenceView::resized()
     for (auto v : playbackRegionViews)
     {
         // normalize region boundaries to our entire view length in seconds
-        double normalizedStartPos = (v->getStartInSeconds()) / endInSeconds;
-        double normalizedLength = (v->getLengthInSeconds()) / endInSeconds;
+        double normalizedStartPos = (v->getPlaybackRegion()->getStartInPlaybackTime()) / endInSeconds;
+        double normalizedLength = (v->getPlaybackRegion ()->getDurationInPlaybackTime()) / endInSeconds;
 
         // compute region view bounds and place the bounds just after the track header
         auto regionBounds = getLocalBounds();
@@ -88,8 +88,8 @@ void RegionSequenceView::getTimeRange (double& startTimeInSeconds, double& endTi
     endTimeInSeconds = 0;
     for (auto v : playbackRegionViews)
     {
-        startTimeInSeconds = jmin (startTimeInSeconds, v->getStartInSeconds());
-        endTimeInSeconds = jmax (endTimeInSeconds, v->getEndInSeconds());
+        startTimeInSeconds = jmin (startTimeInSeconds, v->getPlaybackRegion()->getStartInPlaybackTime());
+        endTimeInSeconds = jmax (endTimeInSeconds, v->getPlaybackRegion()->getEndInPlaybackTime());
     }
 }
 
