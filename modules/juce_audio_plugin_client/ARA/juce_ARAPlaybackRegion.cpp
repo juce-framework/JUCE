@@ -9,15 +9,11 @@ ARAPlaybackRegion::ARAPlaybackRegion (ARA::PlugIn::AudioModification* audioModif
 
 void ARAPlaybackRegion::willUpdatePlaybackRegionProperties (ARAPlaybackRegion::PropertiesPtr newProperties)
 {
-    // TODO JUCE_ARA same potential issues as in willDestroyPlaybackRegion(), but it's very unlikely that
-    // listeners are going to add/remove themselves from this call.
     listeners.callExpectingUnregistration ([this, &newProperties] (Listener& l) { l.willUpdatePlaybackRegionProperties (this, newProperties); });
 }
 
 void ARAPlaybackRegion::didUpdatePlaybackRegionProperties()
 {
-    // TODO JUCE_ARA same potential issues as in willDestroyPlaybackRegion(), but it's very unlikely that
-    // listeners are going to add/remove themselves from this call.
     listeners.callExpectingUnregistration ([this] (Listener& l) { l.didUpdatePlaybackRegionProperties (this); });
 }
 
