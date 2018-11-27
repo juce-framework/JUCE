@@ -41,10 +41,10 @@ private:
 private:
     ARASampleProjectAudioProcessorEditor* editorComponent;
     ARAPlaybackRegion* playbackRegion;
-    ARAPlaybackRegionReader* playbackRegionReader;  // careful: "weak" pointer, actual pointer is owned by our audioThumb
-    bool isSelected;
+    ARAPlaybackRegionReader* playbackRegionReader = nullptr;  // careful: "weak" pointer, actual pointer is owned by our audioThumb
+    bool isSelected = false;
 
-    juce::AudioFormatManager audioFormatManger;
-    juce::AudioThumbnailCache audioThumbCache;
-    juce::AudioThumbnail audioThumb;
+    AudioFormatManager audioFormatManger;
+    AudioThumbnailCache audioThumbCache;
+    AudioThumbnail audioThumb;
 };
