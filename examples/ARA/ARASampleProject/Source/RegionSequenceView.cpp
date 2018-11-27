@@ -59,7 +59,7 @@ void RegionSequenceView::paint (Graphics& g)
 
 void RegionSequenceView::resized()
 {
-    double startInSeconds (0), endInSeconds (0);
+    double startInSeconds, endInSeconds;
     getTimeRange (startInSeconds, endInSeconds);
 
     // use this to set size of playback region views
@@ -91,7 +91,11 @@ void RegionSequenceView::onNewSelection (const ARA::PlugIn::ViewSelection& curre
 void RegionSequenceView::getTimeRange (double& startTimeInSeconds, double& endTimeInSeconds) const
 {
     if (playbackRegionViews.isEmpty())
+    {
+        startTimeInSeconds = 0.0;
+        endTimeInSeconds = 0.0;
         return;
+    }
 
     startTimeInSeconds = std::numeric_limits<double>::max();
     endTimeInSeconds = 0;
