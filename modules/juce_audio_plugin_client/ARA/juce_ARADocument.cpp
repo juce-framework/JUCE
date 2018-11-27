@@ -29,14 +29,7 @@ void ARADocument::didUpdateDocumentProperties()
 
 void ARADocument::willDestroyDocument()
 {
-    // TODO JUCE_ARA 
-    // same concerns involving removal as with other listeners
-    auto listenersCopy (listeners.getListeners());
-    for (auto listener : listenersCopy)
-    {
-        if (listeners.contains (listener))
-            listener->willDestroyDocument (this);
-    }
+    listeners.callExpectingUnregistration ([this] (Listener& l) { l.willDestroyDocument (this); });
 }
 
 void ARADocument::addListener (Listener * l)
