@@ -4,7 +4,7 @@
 #include "RegionSequenceView.h"
 
 class PlaybackRegionView: public Component, 
-                          public juce::ChangeListener,
+                          public ChangeListener,
                           public ARADocument::Listener,
                           public ARAAudioSource::Listener,
                           public ARAPlaybackRegion::Listener
@@ -13,10 +13,14 @@ public:
     PlaybackRegionView (ARASampleProjectAudioProcessorEditor* editor, ARAPlaybackRegion* region);
     ~PlaybackRegionView();
 
+    // ChangeListener overrides
     void paint (Graphics&) override;
     void changeListenerCallback (ChangeBroadcaster*) override;
 
-    // ARAAudioSource::Listener overrides
+    // ARADocument::Listener overrides: used to check if our reader has been invalidated
+    void doEndEditing (ARADocument* document) override;
+
+    // ARAAudioSource::Listener overrides: used to update when access to the audio source is enabled/disabled
     void didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) override;
 
     // ARAPlaybackRegion::Listener overrides
@@ -27,12 +31,9 @@ public:
     void setIsSelected (bool value);
     bool getIsSelected () const { return isSelected; }
 
-    double getStartInSeconds() const;
-    double getLengthInSeconds() const;
-    double getEndInSeconds() const;
-
-    // use this to check if our reader's been invalidated
-    void doEndEditing (ARADocument* document) override;
+    double getStartInSeconds() const { return playbackRegion->getStartInPlaybackTime(); }
+    double getLengthInSeconds() const { return playbackRegion->getDurationInPlaybackTime(); }
+    double getEndInSeconds() const { return playbackRegion->getEndInPlaybackTime(); }
 
 private:
     void recreatePlaybackRegionReader();
@@ -42,7 +43,6 @@ private:
     ARAPlaybackRegion* playbackRegion;
     ARAPlaybackRegionReader* playbackRegionReader;  // careful: "weak" pointer, actual pointer is owned by our audioThumb
     bool isSelected;
-    bool isSampleAccessEnabled;
 
     juce::AudioFormatManager audioFormatManger;
     juce::AudioThumbnailCache audioThumbCache;
