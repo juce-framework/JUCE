@@ -1,6 +1,5 @@
-#include "ARASampleProjectAudioProcessor.h"
 #include "ARASampleProjectAudioProcessorEditor.h"
-
+#include "ARASampleProjectDocumentController.h"
 
 //==============================================================================
 ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARASampleProjectAudioProcessor& p)
@@ -8,7 +7,6 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
   AudioProcessorEditorARAExtension (&p),
   isViewDirty (false)
 {
-    // init viewport and region sequence list view
     regionSequenceViewPort.setScrollBarsShown (true, true);
     regionSequenceListView.setBounds (0, 0, kWidth - regionSequenceViewPort.getScrollBarThickness(), kHeight);
     regionSequenceViewPort.setViewedComponent (&regionSequenceListView, false);
@@ -20,19 +18,9 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
 
     if (isARAEditorView())
     {
-        auto document = static_cast<ARADocument*> (getARADocumentController()->getDocument());
-        document->addListener (this);
         getARAEditorView ()->addListener (this);
 
-        for (auto regionSequence : document->getRegionSequences())
-        {
-            if (ARA::contains (getARAEditorView()->getHiddenRegionSequences(), regionSequence))
-                continue;
-
-            static_cast<ARARegionSequence*> (regionSequence)->addListener (this);
-            regionSequenceViews.add (new RegionSequenceView (this, static_cast<ARARegionSequence*> (regionSequence)));
-            regionSequenceListView.addAndMakeVisible (regionSequenceViews.getLast());
-        }
+        static_cast<ARADocument*> (getARADocumentController()->getDocument())->addListener (this);
 
         rebuildView();
     }
@@ -42,19 +30,17 @@ ARASampleProjectAudioProcessorEditor::~ARASampleProjectAudioProcessorEditor()
 {
     if (isARAEditorView())
     {
-        auto document = static_cast<ARADocument*> (getARADocumentController()->getDocument());
-        document->removeListener (this);
-        getARAEditorView ()->removeListener (this);
+        clearView();
 
-        for (auto regionSequence : document->getRegionSequences())
-            static_cast<ARARegionSequence*> (regionSequence)->removeListener (this);
+        static_cast<ARADocument*> (getARADocumentController()->getDocument())->removeListener (this);
+
+        getARAEditorView ()->removeListener (this);
     }
 }
 
 //==============================================================================
 void ARASampleProjectAudioProcessorEditor::paint (Graphics& g)
 {
-    // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
 
     if (! isARAEditorView())
@@ -94,59 +80,39 @@ void ARASampleProjectAudioProcessorEditor::resized()
 
 void ARASampleProjectAudioProcessorEditor::rebuildView()
 {
-    std::sort(regionSequenceViews.begin(), regionSequenceViews.end(),[] (RegionSequenceView* a, RegionSequenceView* b)
-    {
-        int orderA = a->getRegionSequence()->getOrderIndex();
-        int orderB = b->getRegionSequence()->getOrderIndex();
-        return std::less<int>() (orderA, orderB);
-    });
-    
-    resized();
-}
+    clearView();
 
-void ARASampleProjectAudioProcessorEditor::onHideRegionSequences (std::vector<ARARegionSequence*> const& regionSequences)
-{
-    std::vector<RegionSequenceView*> viewsToRemove;
-    for (auto v : regionSequenceViews)
-        if (ARA::contains (regionSequences, v->getRegionSequence ()))
-            viewsToRemove.push_back (v);
-
-    if (viewsToRemove.empty ())
-        return;
-
-    for (auto v : viewsToRemove)
-        regionSequenceViews.removeObject (v, true);
-
-    repaint ();
-}
-
-void ARASampleProjectAudioProcessorEditor::doEndEditing (ARADocument* document)
-{
-    for (auto regionSequence : document->getRegionSequences())
+    for (auto regionSequence : getARADocumentController()->getDocument()->getRegionSequences())
     {
         if (ARA::contains (getARAEditorView()->getHiddenRegionSequences(), regionSequence))
             continue;
 
-        // TODO JUCE_ARA
-        // we need a proper callback for when a region sequence is created
-        // so we know when to make new views / subscribe to callbacks
-        static_cast<ARARegionSequence*> (regionSequence)->addListener (this);
-
-        // See if we need to make a new view - ideally we'd know when a new
-        // region sequence is created and use that hook to make the view
-        bool makeNewView = true;
-        for (int i = 0; i < regionSequenceViews.size() && makeNewView; i++)
-        {
-            if (regionSequenceViews[i]->getRegionSequence() == regionSequence)
-                makeNewView = false;
-        }
-        if (makeNewView)
-        {
-            regionSequenceViews.add (new RegionSequenceView (this, static_cast<ARARegionSequence*> (regionSequence)));
-            regionSequenceListView.addAndMakeVisible (regionSequenceViews.getLast());
-            setDirty();
-        }
+        auto sequenceView = new RegionSequenceView (this, static_cast<ARARegionSequence*> (regionSequence));
+        sequenceView->getRegionSequence()->addListener (this);
+        regionSequenceViews.add (sequenceView);
+        regionSequenceListView.addAndMakeVisible (sequenceView);
     }
+
+    resized();
+}
+
+void ARASampleProjectAudioProcessorEditor::clearView()
+{
+    for (auto v : regionSequenceViews)
+        v->getRegionSequence()->removeListener (this);
+
+    regionSequenceViews.clear();
+}
+
+//==============================================================================
+void ARASampleProjectAudioProcessorEditor::onHideRegionSequences (std::vector<ARARegionSequence*> const& regionSequences)
+{
+    rebuildView();
+}
+
+void ARASampleProjectAudioProcessorEditor::doEndEditing (ARADocument* document)
+{
+    jassert (document == getARADocumentController()->getDocument());
 
     if (isViewDirty)
     {
@@ -155,8 +121,10 @@ void ARASampleProjectAudioProcessorEditor::doEndEditing (ARADocument* document)
     }
 }
 
-void ARASampleProjectAudioProcessorEditor::didUpdateRegionSequenceProperties (ARARegionSequence* /*regionSequence*/)
+void ARASampleProjectAudioProcessorEditor::didReorderRegionSequencesInDocument (ARADocument* document)
 {
+    jassert (document == getARADocumentController()->getDocument());
+
     setDirty();
 }
 

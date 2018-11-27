@@ -2,7 +2,6 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "ARASampleProjectAudioProcessor.h"
-#include "ARASampleProjectDocumentController.h"
 #include "RegionSequenceView.h"
 
 #if ! JucePlugin_Enable_ARA
@@ -34,9 +33,9 @@ public:
 
     // ARADocument::Listener overrides
     void doEndEditing (ARADocument* document) override;
+    void didReorderRegionSequencesInDocument (ARADocument* document) override;
 
     // ARARegionSequence::Listener overrides
-    void didUpdateRegionSequenceProperties (ARARegionSequence* regionSequence) override;
     void willDestroyRegionSequence (ARARegionSequence* regionSequence) override;
 
     // function to flag that our view needs to be rebuilt
@@ -53,6 +52,7 @@ public:
 
 private:
     void rebuildView();
+    void clearView();
 
 private:
 
