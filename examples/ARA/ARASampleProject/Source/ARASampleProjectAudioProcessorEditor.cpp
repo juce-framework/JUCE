@@ -13,7 +13,7 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
     regionSequenceListView.setBounds (0, 0, kWidth - regionSequenceViewPort.getScrollBarThickness(), kHeight);
     regionSequenceViewPort.setViewedComponent (&regionSequenceListView, false);
     addAndMakeVisible (regionSequenceViewPort);
-    
+
     setSize (kWidth, kHeight);
     setResizeLimits (kMinWidth, kMinHeight, 32768, 32768);
     setResizable (true, false);
@@ -80,7 +80,7 @@ void ARASampleProjectAudioProcessorEditor::resized()
 
         double normalizedEnd = endInSeconds / kVisibleSeconds;
         v->setBounds (0, kRegionSequenceHeight * i, kTrackHeaderWidth + (int) (width * normalizedEnd), kRegionSequenceHeight);
-        
+
         maxRegionSequenceLength = jmax (maxRegionSequenceLength, endInSeconds);
         i++;
     }

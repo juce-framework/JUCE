@@ -4,7 +4,7 @@
 
 
 //==============================================================================
-/** 
+/**
     Processor class for ARA sample project
     This class delegates to an ARASampleProjectPlaybackRenderer instance
     which fulfills the PlaybackRenderer role of our ARA enabled plug-in

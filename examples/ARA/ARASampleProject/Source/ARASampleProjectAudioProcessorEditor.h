@@ -10,9 +10,9 @@
 #endif
 
 //==============================================================================
-/** 
+/**
     Editor class for ARA sample project
-    This class manages the UI we use to display region sequences in the 
+    This class manages the UI we use to display region sequences in the
     ARA document as well as their current selection state
 */
 class ARASampleProjectAudioProcessorEditor: public AudioProcessorEditor,

@@ -81,7 +81,7 @@ protected:
     void doDeactivateAudioModificationForUndoHistory (ARA::PlugIn::AudioModification* audioModification, bool deactivate) noexcept override;
     void willDestroyAudioModification (ARA::PlugIn::AudioModification* audioModification) noexcept override;
 
-    // TODO JUCE_ARA 
+    // TODO JUCE_ARA
     // Do we need to override this? The default ARPlug implementation is sufficient...
     //ARA::PlugIn::AudioModification* doCloneAudioModification (ARA::PlugIn::AudioModification* src, ARA::ARAAudioModificationHostRef hostRef) noexcept override;
 
@@ -92,7 +92,7 @@ protected:
     void willDestroyPlaybackRegion (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept override;
 
     // PlugIn instance role creation
-    // these can be overridden with custom types so long as 
+    // these can be overridden with custom types so long as
     // they inherit from our ARA instance role classes
     ARA::PlugIn::PlaybackRenderer* doCreatePlaybackRenderer() noexcept override;
     ARA::PlugIn::EditorRenderer* doCreateEditorRenderer() noexcept override;

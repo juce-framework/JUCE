@@ -26,7 +26,7 @@ namespace juce
     #define ARA_ENABLE_INTERNAL_ASSERTS 0
 
 #endif // (JUCE_DEBUG && ! JUCE_DISABLE_ASSERTIONS) || JUCE_LOG_ASSERTIONS
- 
+
 }
 
 // Include ARA headers

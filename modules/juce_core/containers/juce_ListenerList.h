@@ -182,7 +182,7 @@ public:
         auto& listenersArray = getListeners();
 
         typename ArrayType::ScopedLockType lock (listeners.getLock());
-        
+
         if (listenersArray.size() == 1)
         {
             // if there's but one listener, we can skip copying the array
@@ -198,7 +198,7 @@ public:
             }
         }
     }
-    
+
     //==============================================================================
     /** A dummy bail-out checker that always returns false.
         See the ListenerList notes for more info about bail-out checkers.

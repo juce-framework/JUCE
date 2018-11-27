@@ -4,11 +4,11 @@
 #include <map>
 
 //==============================================================================
-/** 
+/**
     PlaybackRenderer implementation of the ARA sample project
     This class fulfils the ARA PlaybackRenderer role of a plug-in instance, and
-    will be used to render audio samples for playback by the host. In this simple 
-    demo we're using a buffered ARA sample reader to pull audio samples from the host 
+    will be used to render audio samples for playback by the host. In this simple
+    demo we're using a buffered ARA sample reader to pull audio samples from the host
     and render them back, effectively making this ARA enabled pass-through renderer
 */
 class ARASampleProjectPlaybackRenderer : public ARAPlaybackRenderer
