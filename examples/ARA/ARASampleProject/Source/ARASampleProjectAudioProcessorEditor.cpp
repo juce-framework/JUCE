@@ -53,12 +53,12 @@ void ARASampleProjectAudioProcessorEditor::paint (Graphics& g)
 
 void ARASampleProjectAudioProcessorEditor::resized()
 {
-    double maxRegionSequenceLength = 0.0;
-    int i = 0;
     const int width = getWidth();
 
     // compute region sequence view bounds in terms of kVisibleSeconds and kRegionSequenceHeight
     // and determine the length in seconds of the longest ARA region sequence
+    double maxRegionSequenceLength = 0.0;
+    int i = 0;
     for (auto v : regionSequenceViews)
     {
         double startInSeconds, endInSeconds;
@@ -121,5 +121,8 @@ void ARASampleProjectAudioProcessorEditor::didReorderRegionSequencesInDocument (
 {
     jassert (document == getARADocumentController()->getDocument());
 
-    setDirty();
+    RegionSequenceView::OrderComparator comparator;
+    regionSequenceViews.sort(comparator);
+
+    resized();
 }

@@ -56,7 +56,7 @@ private:
     Viewport regionSequenceViewPort;
     Component regionSequenceListView;
 
-    OwnedArray <RegionSequenceView> regionSequenceViews;
+    OwnedArray<RegionSequenceView> regionSequenceViews;
 
     bool isViewDirty;
 
