@@ -159,16 +159,15 @@ ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARAPlaybackRenderer* renderer,
 
     if (playbackRegions.size() == 0)
     {
+        startInSamples = 0;
         lengthInSamples = 0;
         sampleRate = 44100.0;
-        regionsStartTime = 0.0;
-        regionsEndTime = 0.0;
     }
     else
     {
         sampleRate = 0.0;
-        regionsStartTime = std::numeric_limits<double>::max();
-        regionsEndTime = std::numeric_limits<double>::min();
+        double regionsStartTime = std::numeric_limits<double>::max();
+        double regionsEndTime = std::numeric_limits<double>::min();
 
         for (auto playbackRegion : playbackRegions)
         {
@@ -187,7 +186,8 @@ ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARAPlaybackRenderer* renderer,
             playbackRegion->addListener (this);
         }
 
-        lengthInSamples = (int64)((regionsEndTime - regionsStartTime) * sampleRate + 0.5);
+        startInSamples = (int64) (regionsStartTime * sampleRate + 0.5);
+        lengthInSamples = (int64) ((regionsEndTime - regionsStartTime) * sampleRate + 0.5);
     }
 
     playbackRenderer->prepareToPlay (sampleRate, numChannels, 16*1024, ! isNonRealtime);
@@ -222,7 +222,7 @@ bool ARAPlaybackRegionReader::readSamples (int** destSamples, int numDestChannel
         {
             success = true;
             needClearSamples = false;
-            startSampleInFile += (int64)(regionsStartTime * playbackRenderer->getSampleRate() + 0.5);
+            startSampleInFile += startInSamples;
             while (numSamples > 0)
             {
                 int numSliceSamples = jmin(numSamples, playbackRenderer->getMaxSamplesPerBlock());
