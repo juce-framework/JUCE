@@ -592,13 +592,8 @@ public:
             owner.addAndMakeVisible (incButton.get());
             owner.addAndMakeVisible (decButton.get());
 
-<<<<<<< HEAD
-            incButton->onClick = [this] { incrementOrDecrement (normRange.interval); };
-            decButton->onClick = [this] { incrementOrDecrement (-normRange.interval); };
-=======
             incButton->onClick = [this] { incrementOrDecrement (incDecInterval); };
             decButton->onClick = [this] { incrementOrDecrement (-incDecInterval); };
->>>>>>> adds setter for overriding number of decimal places to display in slider text. add separate explicit interval for the Inc/Dec buttons to adjust on Sliders
 
             if (incDecButtonMode != incDecButtonsNotDraggable)
             {
@@ -1249,7 +1244,7 @@ public:
     double valueWhenLastDragged = 0, valueOnMouseDown = 0, lastAngle = 0;
     double velocityModeSensitivity = 1.0, velocityModeOffset = 0, minMaxDiff = 0;
     int velocityModeThreshold = 1;
-    double incDecInterval = 0;
+    double incDecInterval = 1;
     RotaryParameters rotaryParams;
     Point<float> mouseDragStartPos, mousePosWhenLastDragged;
     int sliderRegionStart = 0, sliderRegionSize = 1;
@@ -1515,19 +1510,12 @@ void Slider::lookAndFeelChanged()   { pimpl->lookAndFeelChanged (getLookAndFeel(
 void Slider::enablementChanged()    { repaint(); pimpl->updateTextBoxEnablement(); }
 
 //==============================================================================
-<<<<<<< HEAD
 Range<double> Slider::getRange() const noexcept  { return { pimpl->normRange.start, pimpl->normRange.end }; }
 double Slider::getMaximum() const noexcept       { return pimpl->normRange.end; }
 double Slider::getMinimum() const noexcept       { return pimpl->normRange.start; }
 double Slider::getInterval() const noexcept      { return pimpl->normRange.interval; }
-=======
-Range<double> Slider::getRange() const noexcept  { return { pimpl->minimum, pimpl->maximum }; }
-double Slider::getMaximum() const noexcept       { return pimpl->maximum; }
-double Slider::getMinimum() const noexcept       { return pimpl->minimum; }
-double Slider::getInterval() const noexcept      { return pimpl->interval; }
 void Slider::setIncDecModeInterval(double ival)  {  pimpl->incDecInterval = ival; }
 double Slider::getIncDecModeInterval() const noexcept { return pimpl->incDecInterval; }
->>>>>>> adds setter for overriding number of decimal places to display in slider text. add separate explicit interval for the Inc/Dec buttons to adjust on Sliders
 
 void Slider::setRange (double newMin, double newMax, double newInt)      { pimpl->setRange (newMin, newMax, newInt); }
 void Slider::setRange (Range<double> newRange, double newInt)            { pimpl->setRange (newRange.getStart(), newRange.getEnd(), newInt); }
@@ -1636,30 +1624,12 @@ double Slider::snapValue (double attemptedValue, DragMode)
 
 int Slider::getNumDecimalPlacesToDisplay() const noexcept   { return pimpl->numDecimalPlaces; }
 
-<<<<<<< HEAD
 void Slider::setNumDecimalPlacesToDisplay (int decimalPlacesToDisplay)
 {
     pimpl->numDecimalPlaces = decimalPlacesToDisplay;
     updateText();
 }
 
-=======
-void Slider::setNumDecimalPlacesToDisplay(int num)
-{
-    if (num > 0) {
-        pimpl->numDecimalPlaces = num;
-        pimpl->overrideDecimalPlaces = true;
-    }
-    else {
-        // figure out the number of DPs needed to display all values at this
-        // interval setting.
-        pimpl->overrideDecimalPlaces = false;
-        pimpl->computeDecimalPlaces();
-    }
-}
-
-
->>>>>>> adds setter for overriding number of decimal places to display in slider text. add separate explicit interval for the Inc/Dec buttons to adjust on Sliders
 //==============================================================================
 int Slider::getThumbBeingDragged() const noexcept           { return pimpl->sliderBeingDragged; }
 void Slider::startedDragging() {}
