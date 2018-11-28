@@ -44,4 +44,7 @@ private:
     AudioFormatManager audioFormatManger;
     AudioThumbnailCache audioThumbCache;
     AudioThumbnail audioThumb;
+
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PlaybackRegionView)
 };

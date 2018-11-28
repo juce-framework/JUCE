@@ -50,6 +50,9 @@ private:
     int numChannels = 1;
     int maxSamplesPerBlock = 1024;
     bool prepared = false;
+
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARARendererBase)
 };
 
 //==============================================================================
@@ -66,6 +69,11 @@ public:
     // only to be called if using a playback renderer created internally, i.e. not by the host.
     void addPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept;
     void removePlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept;
+
+private:
+
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAPlaybackRenderer)
 };
 
 //==============================================================================
@@ -75,8 +83,13 @@ class ARAEditorRenderer : public ARAEditorRendererBase
 public:
     using ARAEditorRendererBase::ARAEditorRendererBase;
 
-    // If you are subclassing ARAPlaybackRenderer, make sure to call the base class
+    // If you are subclassing ARAEditorRenderer, make sure to call the base class
     // implementations of any overridden function, except for processBlock().
+
+private:
+
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAEditorRenderer)
 };
 
 //==============================================================================
@@ -105,8 +118,10 @@ public:
     void removeListener (Listener* l);
 
 private:
-
     std::vector<Listener*> listeners;
+
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAEditorView)
 };
 
 }

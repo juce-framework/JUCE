@@ -39,6 +39,9 @@ public:         // to be called by ARADocumentController only
 
 private:
     ListenerList<Listener> listeners;
+
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAAudioModification)
 };
 
 } // namespace juce

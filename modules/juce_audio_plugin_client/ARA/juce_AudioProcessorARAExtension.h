@@ -13,6 +13,8 @@ class ARADocumentController;
 class AudioProcessorARAExtension
 {
 public:
+    AudioProcessorARAExtension () = default;
+
     const ARA::ARAPlugInExtensionInstance* bindToARA (ARA::ARADocumentControllerRef documentControllerRef, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles);
 
     bool isBoundToARA() const noexcept { return araPlugInExtension != nullptr; }
@@ -29,6 +31,9 @@ public:
 
 private:
     std::unique_ptr<const ARA::PlugIn::PlugInExtension> araPlugInExtension;
+
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorARAExtension)
 };
 
 } // namespace juce
