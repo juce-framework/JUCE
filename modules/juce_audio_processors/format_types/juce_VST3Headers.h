@@ -93,6 +93,8 @@
  #include <public.sdk/source/common/memorystream.h>
  #include <public.sdk/source/vst/vsteditcontroller.h>
  #include <public.sdk/source/vst/vstpresetfile.h>
+
+ #include "pslextensions/ipslviewembedding.h"
 #else
  // needed for VST_VERSION
  #include <pluginterfaces/vst/vsttypes.h>
@@ -129,6 +131,8 @@
  #include <public.sdk/source/vst/vstpresetfile.cpp>
  #include <public.sdk/source/vst/hosting/hostclasses.cpp>
 
+ #include "pslextensions/ipslviewembedding.h"
+
 //==============================================================================
 namespace Steinberg
 {
@@ -143,6 +147,10 @@ namespace Steinberg
     DEF_CLASS_IID (IPluginFactory2)
     DEF_CLASS_IID (IPluginFactory3)
     DEF_CLASS_IID (IPlugViewContentScaleSupport)
+}
+namespace Presonus
+{
+    DEF_CLASS_IID (IPlugInViewEmbedding)
 }
 #endif //JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
 

@@ -86,35 +86,6 @@ namespace Vst2
  DEF_CLASS_IID(ARA::IPlugInEntryPoint2)
  DEF_CLASS_IID(ARA::IMainFactory)
 
-
-// TODO JUCE_ARA this is copied from PreSonus ipslviewembedding.h for now,
-//               must discuss how to properly integrate their SDK with JUCE.
-ARA_DISABLE_VST3_WARNINGS_BEGIN
-namespace Presonus {
-
-//************************************************************************************************
-// IPlugInViewEmbedding
-/** Support for plug-in view embedding, to be implemented by the VST3 controller class. */
-//************************************************************************************************
-
-class IPlugInViewEmbedding: public Steinberg::FUnknown
-{
-public:
-    /** Check if view embedding is supported. */
-    virtual Steinberg::TBool PLUGIN_API isViewEmbeddingSupported () = 0;
-
-    /** Inform plug-in that its view will be embedded. */
-    virtual Steinberg::tresult PLUGIN_API setViewIsEmbedded (Steinberg::IPlugView* view, Steinberg::TBool embedded) = 0;
-
-    static const Steinberg::FUID iid;
-};
-
-DECLARE_CLASS_IID (IPlugInViewEmbedding, 0xda57e6d1, 0x1f3242d1, 0xad9c1a82, 0xfdb95695)
-
-} // namespace Presonus
-DEF_CLASS_IID(Presonus::IPlugInViewEmbedding)
-ARA_DISABLE_VST3_WARNINGS_END
-
 #endif
 
 
@@ -598,7 +569,10 @@ public:
    #if JucePlugin_Enable_ARA
     Steinberg::TBool PLUGIN_API isViewEmbeddingSupported() override
     {
-        return (Steinberg::TBool) true;
+        if (auto* pluginInstance = getPluginInstance())
+            if (auto* araExtension = dynamic_cast<AudioProcessorARAExtension*> (pluginInstance))
+                return (Steinberg::TBool) araExtension->isARAEditorView();
+        return (Steinberg::TBool) false;
     }
 
     Steinberg::tresult PLUGIN_API setViewIsEmbedded (Steinberg::IPlugView* /*view*/, Steinberg::TBool /*embedded*/) override
