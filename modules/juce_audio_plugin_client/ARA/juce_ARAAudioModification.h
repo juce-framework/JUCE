@@ -8,7 +8,7 @@ namespace juce
 class ARAAudioModification : public ARA::PlugIn::AudioModification
 {
 public:
-    ARAAudioModification (ARA::PlugIn::AudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef);
+    ARAAudioModification (ARAAudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef);
 
     class Listener
     {

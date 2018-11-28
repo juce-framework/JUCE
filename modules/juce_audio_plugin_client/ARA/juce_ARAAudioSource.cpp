@@ -3,7 +3,7 @@
 namespace juce
 {
 
-ARAAudioSource::ARAAudioSource (ARA::PlugIn::Document* document, ARA::ARAAudioSourceHostRef hostRef)
+ARAAudioSource::ARAAudioSource (ARADocument* document, ARA::ARAAudioSourceHostRef hostRef)
 : ARA::PlugIn::AudioSource(document, hostRef)
 {}
 

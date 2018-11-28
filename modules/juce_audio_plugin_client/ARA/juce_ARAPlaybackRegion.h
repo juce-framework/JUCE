@@ -9,7 +9,7 @@ namespace juce
 class ARAPlaybackRegion : public ARA::PlugIn::PlaybackRegion
 {
 public:
-    ARAPlaybackRegion (ARA::PlugIn::AudioModification* audioModification, ARA::ARAPlaybackRegionHostRef hostRef);
+    ARAPlaybackRegion (ARAAudioModification* audioModification, ARA::ARAPlaybackRegionHostRef hostRef);
 
     class Listener
     {

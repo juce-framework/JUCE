@@ -8,7 +8,7 @@ namespace juce
 class ARAAudioSource : public ARA::PlugIn::AudioSource
 {
 public:
-    ARAAudioSource (ARA::PlugIn::Document* document, ARA::ARAAudioSourceHostRef hostRef);
+    ARAAudioSource (ARADocument* document, ARA::ARAAudioSourceHostRef hostRef);
 
     class Listener
     {

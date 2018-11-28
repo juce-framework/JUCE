@@ -3,7 +3,7 @@
 namespace juce
 {
 
-ARAPlaybackRegion::ARAPlaybackRegion (ARA::PlugIn::AudioModification* audioModification, ARA::ARAPlaybackRegionHostRef hostRef)
+ARAPlaybackRegion::ARAPlaybackRegion (ARAAudioModification* audioModification, ARA::ARAPlaybackRegionHostRef hostRef)
 : ARA::PlugIn::PlaybackRegion (audioModification, hostRef)
 {}
 
