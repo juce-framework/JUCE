@@ -422,7 +422,6 @@ private:
     float firstKey = 12 * 4.0f;
     bool canScroll = true, useMousePositionForVelocity = true, shouldCheckMousePos = false;
     std::unique_ptr<Button> scrollDown, scrollUp;
-    int scrollButtonWidth = 12;
 
     Array<KeyPress> keyPresses;
     Array<int> keyPressNotes;
