@@ -44,9 +44,10 @@ public:
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples) override;
 
-    // returns false if the audio source content has changed
+    // returns false if the audio source sample content has changed
     // since the construction of the audio source reader
-    bool getIsValid() const { return isValid; }
+    bool isValid() const { return audioSourceBeingRead != nullptr; }
+    void invalidate();
 
     void willUpdateAudioSourceProperties (ARAAudioSource* audioSource, ARAAudioSource::PropertiesPtr newProperties) override;
     void didUpdateAudioSourceContent (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags) override;
@@ -55,13 +56,9 @@ public:
     void willDestroyAudioSource (ARAAudioSource* audioSource) override;
 
 private:
-    bool isValid;
     ARAAudioSource* audioSourceBeingRead;
     std::unique_ptr<ARA::PlugIn::HostAudioReader> araHostReader;
-
-    // per reader locks means we can create readers while others are reading
     ReadWriteLock lock;
-
     std::vector<void*> tmpPtrs;
 };
 
