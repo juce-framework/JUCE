@@ -32,6 +32,21 @@ void ARADocument::didReorderRegionSequencesInDocument()
     listeners.callExpectingUnregistration ([this] (Listener& l) { l.didReorderRegionSequencesInDocument (this); });
 }
 
+void ARADocument::didAddMusicalContext (ARAMusicalContext* musicalContext)
+{
+    listeners.callExpectingUnregistration ([this, musicalContext] (Listener& l) { l.didAddMusicalContext (this, musicalContext); });
+}
+
+void ARADocument::didAddRegionSequence (ARARegionSequence* regionSequence)
+{
+    listeners.callExpectingUnregistration ([this, regionSequence] (Listener& l) { l.didAddRegionSequence (this, regionSequence); });
+}
+
+void ARADocument::didAddAudioSource (ARAAudioSource* audioSource)
+{
+    listeners.callExpectingUnregistration ([this, audioSource] (Listener& l) { l.didAddAudioSource (this, audioSource); });
+}
+
 void ARADocument::willDestroyDocument()
 {
     listeners.callExpectingUnregistration ([this] (Listener& l) { l.willDestroyDocument (this); });

@@ -168,7 +168,10 @@ void ARADocumentController::willDestroyDocument (ARA::PlugIn::Document* document
 
 ARA::PlugIn::MusicalContext* ARADocumentController::doCreateMusicalContext (ARA::PlugIn::Document* document, ARA::ARAMusicalContextHostRef hostRef) noexcept
 {
-    return new ARAMusicalContext (static_cast<ARADocument*> (document), hostRef);
+    auto araDocument = static_cast<ARADocument*> (document);
+    auto musicalContext = new ARAMusicalContext (araDocument, hostRef);
+    araDocument->didAddMusicalContext (musicalContext);
+    return musicalContext;
 }
 
 void ARADocumentController::willUpdateMusicalContextProperties (ARA::PlugIn::MusicalContext* musicalContext, ARAMusicalContext::PropertiesPtr newProperties) noexcept
@@ -195,7 +198,10 @@ void ARADocumentController::willDestroyMusicalContext (ARA::PlugIn::MusicalConte
 
 ARA::PlugIn::RegionSequence* ARADocumentController::doCreateRegionSequence (ARA::PlugIn::Document* document, ARA::ARARegionSequenceHostRef hostRef) noexcept
 {
-    return new ARARegionSequence (static_cast<ARADocument*> (document), hostRef);
+    auto araDocument = static_cast<ARADocument*> (document);
+    auto regionSequence = new ARARegionSequence (araDocument, hostRef);
+    araDocument->didAddRegionSequence (regionSequence);
+    return regionSequence;
 }
 
 void ARADocumentController::willUpdateRegionSequenceProperties (ARA::PlugIn::RegionSequence* regionSequence, ARARegionSequence::PropertiesPtr newProperties) noexcept
@@ -229,7 +235,10 @@ void ARADocumentController::didAddPlaybackRegionToRegionSequence (ARA::PlugIn::R
 
 ARA::PlugIn::AudioSource* ARADocumentController::doCreateAudioSource (ARA::PlugIn::Document *document, ARA::ARAAudioSourceHostRef hostRef) noexcept
 {
-    return new ARAAudioSource (document, hostRef);
+    auto araDocument = static_cast<ARADocument*> (document);
+    auto audioSource = new ARAAudioSource (araDocument, hostRef);
+    araDocument->didAddAudioSource (audioSource);
+    return audioSource;
 }
 
 void ARADocumentController::willUpdateAudioSourceProperties (
@@ -288,7 +297,10 @@ ARARegionSequenceReader* ARADocumentController::createRegionSequenceReader (ARAR
 
 ARA::PlugIn::AudioModification* ARADocumentController::doCreateAudioModification (ARA::PlugIn::AudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef) noexcept
 {
-    return new ARAAudioModification (audioSource, hostRef);
+    auto araAudioSource = static_cast<ARAAudioSource*>(audioSource);
+    auto audioModification = new ARAAudioModification (araAudioSource, hostRef);
+    araAudioSource->didAddAudioModification (audioModification);
+    return audioModification;
 }
 
 void ARADocumentController::willUpdateAudioModificationProperties (ARA::PlugIn::AudioModification* audioModification, ARA::PlugIn::AudioModification::PropertiesPtr newProperties) noexcept
@@ -315,7 +327,10 @@ void ARADocumentController::willDestroyAudioModification (ARA::PlugIn::AudioModi
 
 ARA::PlugIn::PlaybackRegion* ARADocumentController::doCreatePlaybackRegion (ARA::PlugIn::AudioModification* modification, ARA::ARAPlaybackRegionHostRef hostRef) noexcept
 {
-    return new ARAPlaybackRegion (modification, hostRef);
+    auto audioModification = static_cast<ARAAudioModification*>(modification);
+    auto playbackRegion = new ARAPlaybackRegion (audioModification, hostRef);
+    audioModification->didAddPlaybackRegion (playbackRegion);
+    return playbackRegion;
 }
 
 void ARADocumentController::willUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion, ARA::PlugIn::PlaybackRegion::PropertiesPtr newProperties) noexcept

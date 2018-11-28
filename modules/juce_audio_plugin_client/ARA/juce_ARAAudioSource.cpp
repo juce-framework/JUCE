@@ -37,6 +37,11 @@ void ARAAudioSource::doDeactivateAudioSourceForUndoHistory (bool deactivate)
     listeners.callExpectingUnregistration ([this, deactivate] (Listener& l) { l.doDeactivateAudioSourceForUndoHistory (this, deactivate); });
 }
 
+void ARAAudioSource::didAddAudioModification (ARAAudioModification* audioModification)
+{
+    listeners.callExpectingUnregistration ([this, audioModification] (Listener& l) { l.didAddAudioModification (this, audioModification); });
+}
+
 void ARAAudioSource::willDestroyAudioSource()
 {
     listeners.callExpectingUnregistration ([this] (Listener& l) { l.willDestroyAudioSource (this); });

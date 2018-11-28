@@ -4,6 +4,7 @@
 
 namespace juce
 {
+class ARAAudioModification;
 
 class ARAAudioSource : public ARA::PlugIn::AudioSource
 {
@@ -22,6 +23,7 @@ public:
         virtual void willEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) {}
         virtual void didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) {}
         virtual void doDeactivateAudioSourceForUndoHistory (ARAAudioSource* audioSource, bool deactivate) {}
+        virtual void didAddAudioModification (ARAAudioSource* audioSource, ARAAudioModification* audioModification) {}
         virtual void willDestroyAudioSource (ARAAudioSource* audioSource) {}
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
     };
@@ -36,6 +38,7 @@ public:         // to be called by ARADocumentController only
     void willEnableAudioSourceSamplesAccess (bool enable);
     void didEnableAudioSourceSamplesAccess (bool enable);
     void doDeactivateAudioSourceForUndoHistory (bool deactivate);
+    void didAddAudioModification (ARAAudioModification* audioModification);
     void willDestroyAudioSource();
 
 private:

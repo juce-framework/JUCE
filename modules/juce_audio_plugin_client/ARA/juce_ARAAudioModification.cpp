@@ -27,6 +27,11 @@ void ARAAudioModification::doDeactivateAudioModificationForUndoHistory (bool dea
     listeners.callExpectingUnregistration ([this, deactivate] (Listener& l) { l.doDeactivateAudioModificationForUndoHistory (this, deactivate); });
 }
 
+void ARAAudioModification::didAddPlaybackRegion (ARAPlaybackRegion* playbackRegion)
+{
+    listeners.callExpectingUnregistration ([this, playbackRegion] (Listener& l) { l.didAddPlaybackRegion(this, playbackRegion); });
+}
+
 void ARAAudioModification::willDestroyAudioModification()
 {
     listeners.callExpectingUnregistration ([this] (Listener& l) { l.willDestroyAudioModification (this); });
