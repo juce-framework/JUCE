@@ -8,24 +8,19 @@ namespace juce
 class ARAPlaybackRegionReader;
 class ARARegionSequenceReader;
 
-// juce ARA document controller implementation
 class ARADocumentController: public ARA::PlugIn::DocumentController
 {
 public:
     ARADocumentController() noexcept {}
     virtual ~ARADocumentController() noexcept {}
 
+    //==============================================================================
+    // create readers for the various model objects
     AudioFormatReader* createAudioSourceReader (ARAAudioSource* audioSource);
     ARAPlaybackRegionReader* createPlaybackRegionReader (std::vector<ARAPlaybackRegion*> playbackRegions, bool nonRealtime);
     ARARegionSequenceReader* createRegionSequenceReader (ARARegionSequence* regionSequence, bool nonRealtime);
 
-/*
-    TODO JUCE_ARA
-    We should properly track the scopeFlags for each object (they can all just be added together).
-    We need to store the affected objects and their flags similar to how the sample plug-in does,
-    and implement doNotifyModelUpdates() accordingly.
-*/
-
+    //==============================================================================
     // notify the host and any potential internal reader about content changes
     // must be called by the plug-in model management code on the main thread
     // Listeners will be notified without begin/endEditing() if this occurs outside of a host edit.

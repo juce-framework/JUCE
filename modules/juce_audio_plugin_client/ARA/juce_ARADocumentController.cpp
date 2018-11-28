@@ -76,6 +76,8 @@ namespace juce
 
 void ARADocumentController::notifyAudioSourceContentChanged (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags, bool notifyAllAudioModificationsAndPlaybackRegions)
 {
+    audioSourceUpdates[audioSource] += scopeFlags;
+
     audioSource->didUpdateAudioSourceContent (scopeFlags);
 
     if (notifyAllAudioModificationsAndPlaybackRegions)
@@ -83,12 +85,12 @@ void ARADocumentController::notifyAudioSourceContentChanged (ARAAudioSource* aud
         for (auto audioModification : audioSource->getAudioModifications())
             notifyAudioModificationContentChanged (static_cast<ARAAudioModification*> (audioModification), scopeFlags, true);
     }
-
-    audioSourceUpdates[audioSource] += scopeFlags;
 }
 
 void ARADocumentController::notifyAudioModificationContentChanged (ARAAudioModification* audioModification, ARAContentUpdateScopes scopeFlags, bool notifyAllPlaybackRegions)
 {
+    audioModificationUpdates[audioModification] += scopeFlags;
+
     audioModification->didUpdateAudioModificationContent (scopeFlags);
 
     if (notifyAllPlaybackRegions)
@@ -96,15 +98,13 @@ void ARADocumentController::notifyAudioModificationContentChanged (ARAAudioModif
         for (auto playbackRegion : audioModification->getPlaybackRegions())
             notifyPlaybackRegionContentChanged (static_cast<ARAPlaybackRegion*> (playbackRegion), scopeFlags);
     }
-
-    audioModificationUpdates[audioModification] += scopeFlags;
 }
 
 void ARADocumentController::notifyPlaybackRegionContentChanged (ARAPlaybackRegion* playbackRegion, ARAContentUpdateScopes scopeFlags)
 {
-    playbackRegion->didUpdatePlaybackRegionContent (scopeFlags);
-
     playbackRegionUpdates[playbackRegion] += scopeFlags;
+
+    playbackRegion->didUpdatePlaybackRegionContent (scopeFlags);
 }
 
 //==============================================================================
