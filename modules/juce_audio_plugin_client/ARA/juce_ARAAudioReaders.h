@@ -109,7 +109,7 @@ public:
     void willDestroyRegionSequence (ARARegionSequence* regionSequence) override;
 
 private:
-    ARARegionSequence* sequence;
+    ARARegionSequence* sequence = nullptr;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARARegionSequenceReader)

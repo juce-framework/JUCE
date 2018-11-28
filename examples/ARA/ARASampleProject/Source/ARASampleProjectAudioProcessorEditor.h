@@ -58,7 +58,7 @@ private:
 
     OwnedArray<RegionSequenceView> regionSequenceViews;
 
-    bool isViewDirty;
+    bool isViewDirty = false;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARASampleProjectAudioProcessorEditor)
