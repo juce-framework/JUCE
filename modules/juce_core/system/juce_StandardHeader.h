@@ -53,6 +53,7 @@
 #include <atomic>
 #include <sstream>
 #include <iomanip>
+#include <map>
 
 //==============================================================================
 #include "juce_CompilerSupport.h"
