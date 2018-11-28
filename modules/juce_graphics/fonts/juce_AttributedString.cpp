@@ -150,52 +150,12 @@ AttributedString::Attribute& AttributedString::Attribute::operator= (Attribute&&
     return *this;
 }
 
-AttributedString::Attribute::Attribute (const Attribute& other) noexcept
-    : range (other.range),
-      font (other.font),
-      colour (other.colour)
-{
-}
-
-AttributedString::Attribute& AttributedString::Attribute::operator= (const Attribute& other) noexcept
-{
-    range = other.range;
-    font = other.font;
-    colour = other.colour;
-    return *this;
-}
-
 AttributedString::Attribute::Attribute (Range<int> r, const Font& f, Colour c) noexcept
     : range (r), font (f), colour (c)
 {
 }
 
 //==============================================================================
-AttributedString::AttributedString (const AttributedString& other)
-    : text (other.text),
-      lineSpacing (other.lineSpacing),
-      justification (other.justification),
-      wordWrap (other.wordWrap),
-      readingDirection (other.readingDirection),
-      attributes (other.attributes)
-{
-}
-
-AttributedString& AttributedString::operator= (const AttributedString& other)
-{
-    if (this != &other)
-    {
-        text = other.text;
-        lineSpacing = other.lineSpacing;
-        justification = other.justification;
-        wordWrap = other.wordWrap;
-        readingDirection = other.readingDirection;
-        attributes = other.attributes;
-    }
-
-    return *this;
-}
-
 AttributedString::AttributedString (AttributedString&& other) noexcept
     : text (std::move (other.text)),
       lineSpacing (other.lineSpacing),

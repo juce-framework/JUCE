@@ -43,13 +43,15 @@ class JUCE_API  AttributedString
 {
 public:
     /** Creates an empty attributed string. */
-    AttributedString()  {}
+    AttributedString() = default;
 
     /** Creates an attributed string with the given text. */
     explicit AttributedString (const String& newString)  { setText (newString); }
 
-    AttributedString (const AttributedString&);
-    AttributedString& operator= (const AttributedString&);
+    AttributedString (const AttributedString&)            = default;
+    AttributedString& operator= (const AttributedString&) = default;
+
+    // VS2013 can't default move constructors and assignments
     AttributedString (AttributedString&&) noexcept;
     AttributedString& operator= (AttributedString&&) noexcept;
 
@@ -148,10 +150,12 @@ public:
     class JUCE_API  Attribute
     {
     public:
-        Attribute() noexcept {}
+        Attribute() = default;
 
-        Attribute (const Attribute&) noexcept;
-        Attribute& operator= (const Attribute&) noexcept;
+        Attribute (const Attribute&)            = default;
+        Attribute& operator= (const Attribute&) = default;
+
+        // VS2013 can't default move constructors and assignments
         Attribute (Attribute&&) noexcept;
         Attribute& operator= (Attribute&&) noexcept;
 
