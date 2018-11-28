@@ -10,8 +10,8 @@ PlaybackRegionView::PlaybackRegionView (ARASampleProjectAudioProcessorEditor* ed
 {
     audioThumb.addChangeListener (this);
 
-    editorComponent->getARAEditorView ()->addListener (this);
-    onNewSelection (editorComponent->getARAEditorView ()->getViewSelection ());
+    editorComponent->getARAEditorView()->addListener (this);
+    onNewSelection (editorComponent->getARAEditorView()->getViewSelection());
 
     static_cast<ARADocument*> (playbackRegion->getRegionSequence()->getDocument())->addListener (this);
     static_cast<ARAAudioSource*> (playbackRegion->getAudioModification()->getAudioSource())->addListener (this);
@@ -21,7 +21,7 @@ PlaybackRegionView::PlaybackRegionView (ARASampleProjectAudioProcessorEditor* ed
 
 PlaybackRegionView::~PlaybackRegionView()
 {
-    editorComponent->getARAEditorView ()->removeListener (this);
+    editorComponent->getARAEditorView()->removeListener (this);
 
     playbackRegion->removeListener (this);
     static_cast<ARAAudioSource*> (playbackRegion->getAudioModification()->getAudioSource())->removeListener (this);
@@ -120,7 +120,7 @@ void PlaybackRegionView::recreatePlaybackRegionReader()
     {
         delete playbackRegionReader;
         playbackRegionReader = nullptr;
-        audioThumb.clear ();
+        audioThumb.clear();
     }
     else
     {

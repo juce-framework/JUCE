@@ -9,8 +9,8 @@ RegionSequenceView::RegionSequenceView (ARASampleProjectAudioProcessorEditor* ed
 : editorComponent (editor),
   regionSequence (sequence)
 {
-    editorComponent->getARAEditorView ()->addListener (this);
-    onNewSelection (editorComponent->getARAEditorView ()->getViewSelection ());
+    editorComponent->getARAEditorView()->addListener (this);
+    onNewSelection (editorComponent->getARAEditorView()->getViewSelection());
 
     regionSequence->addListener (this);
 
@@ -34,7 +34,7 @@ void RegionSequenceView::detachFromRegionSequence()
 
     regionSequence->removeListener(this);
 
-    editorComponent->getARAEditorView ()->removeListener (this);
+    editorComponent->getARAEditorView()->removeListener (this);
 
     regionSequence = nullptr;
 }
@@ -68,7 +68,7 @@ void RegionSequenceView::paint (Graphics& g)
         trackColour = Colour::fromFloatRGBA (colour->r, colour->g, colour->b, 1.0f);
 
     // draw region sequence header
-    Rectangle<int> headerRect (0, 0, ARASampleProjectAudioProcessorEditor::kTrackHeaderWidth, getHeight ());
+    Rectangle<int> headerRect (0, 0, ARASampleProjectAudioProcessorEditor::kTrackHeaderWidth, getHeight());
     g.setColour (trackColour);
     g.fillRect (headerRect);
 
@@ -82,9 +82,9 @@ void RegionSequenceView::paint (Graphics& g)
     // there a cleaner way to draw vertical text inside headerRect?
     Graphics::ScopedSaveState state (g);
     g.addTransform (AffineTransform::rotation (-MathConstants<float>::halfPi, 
-                                               headerRect.getWidth () * 0.5f,
-                                               headerRect.getHeight () * 0.5f));
-    Rectangle<int> textRect ((int) (-.3 * headerRect.getHeight()), (int)(1.25 * headerRect.getWidth ()), (int)(0.85 * headerRect.getHeight ()), headerRect.getWidth ());
+                                               headerRect.getWidth() * 0.5f,
+                                               headerRect.getHeight() * 0.5f));
+    Rectangle<int> textRect ((int) (-.3 * headerRect.getHeight()), (int) (1.25 * headerRect.getWidth()), (int) (0.85 * headerRect.getHeight()), headerRect.getWidth());
     g.setColour (trackColour.contrasting (1.0f));
     g.setFont (Font (12.0));
     g.drawText (String (regionSequence->getName()), textRect, Justification::bottomLeft);
@@ -103,7 +103,7 @@ void RegionSequenceView::resized()
     {
         // normalize region boundaries to our entire view length in seconds
         double normalizedStartPos = (v->getPlaybackRegion()->getStartInPlaybackTime()) / endInSeconds;
-        double normalizedLength = (v->getPlaybackRegion ()->getDurationInPlaybackTime()) / endInSeconds;
+        double normalizedLength = (v->getPlaybackRegion()->getDurationInPlaybackTime()) / endInSeconds;
 
         // compute region view bounds and place the bounds just after the track header
         auto regionBounds = getLocalBounds();

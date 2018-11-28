@@ -116,32 +116,32 @@ ARA::PlugIn::Document* ARADocumentController::doCreateDocument (ARA::PlugIn::Doc
 
 void ARADocumentController::doBeginEditing() noexcept
 {
-    static_cast<ARADocument*> (getDocument ())->doBeginEditing ();
+    static_cast<ARADocument*> (getDocument())->doBeginEditing();
 }
 
 void ARADocumentController::doEndEditing() noexcept
 {
-    static_cast<ARADocument*> (getDocument ())->doEndEditing ();
+    static_cast<ARADocument*> (getDocument())->doEndEditing();
 }
 
-void ARADocumentController::doNotifyModelUpdates () noexcept
+void ARADocumentController::doNotifyModelUpdates() noexcept
 {
-    auto modelUpdateController = getHostInstance ()->getModelUpdateController ();
+    auto modelUpdateController = getHostInstance()->getModelUpdateController();
     if (modelUpdateController != nullptr)
     {
         for (auto& audioSourceUpdate : audioSourceUpdates)
-            modelUpdateController->notifyAudioSourceContentChanged (audioSourceUpdate.first->getHostRef (), nullptr, audioSourceUpdate.second);
+            modelUpdateController->notifyAudioSourceContentChanged (audioSourceUpdate.first->getHostRef(), nullptr, audioSourceUpdate.second);
 
         for (auto& audioModificationUpdate : audioModificationUpdates)
-            modelUpdateController->notifyAudioModificationContentChanged (audioModificationUpdate.first->getHostRef (), nullptr, audioModificationUpdate.second);
+            modelUpdateController->notifyAudioModificationContentChanged (audioModificationUpdate.first->getHostRef(), nullptr, audioModificationUpdate.second);
 
         for (auto& playbackRegionUpdate : playbackRegionUpdates)
-            modelUpdateController->notifyPlaybackRegionContentChanged (playbackRegionUpdate.first->getHostRef (), nullptr, playbackRegionUpdate.second);
+            modelUpdateController->notifyPlaybackRegionContentChanged (playbackRegionUpdate.first->getHostRef(), nullptr, playbackRegionUpdate.second);
     }
 
-    audioSourceUpdates.clear ();
-    audioModificationUpdates.clear ();
-    playbackRegionUpdates.clear ();
+    audioSourceUpdates.clear();
+    audioModificationUpdates.clear();
+    playbackRegionUpdates.clear();
 }
 
 void ARADocumentController::willUpdateDocumentProperties (ARA::PlugIn::Document* document, ARA::PlugIn::Document::PropertiesPtr newProperties) noexcept
@@ -151,17 +151,17 @@ void ARADocumentController::willUpdateDocumentProperties (ARA::PlugIn::Document*
 
 void ARADocumentController::didUpdateDocumentProperties (ARA::PlugIn::Document* document) noexcept
 {
-    static_cast<ARADocument*> (document)->didUpdateDocumentProperties ();
+    static_cast<ARADocument*> (document)->didUpdateDocumentProperties();
 }
 
 void ARADocumentController::didReorderRegionSequencesInDocument (ARA::PlugIn::Document* document) noexcept
 {
-    static_cast<ARADocument*> (document)->didReorderRegionSequencesInDocument ();
+    static_cast<ARADocument*> (document)->didReorderRegionSequencesInDocument();
 }
 
 void ARADocumentController::willDestroyDocument (ARA::PlugIn::Document* document) noexcept
 {
-    static_cast<ARADocument*> (document)->willDestroyDocument ();
+    static_cast<ARADocument*> (document)->willDestroyDocument();
 }
 
 //==============================================================================

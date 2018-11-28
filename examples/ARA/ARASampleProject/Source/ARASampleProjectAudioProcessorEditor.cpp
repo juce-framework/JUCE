@@ -18,7 +18,7 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
 
     if (isARAEditorView())
     {
-        getARAEditorView ()->addListener (this);
+        getARAEditorView()->addListener (this);
 
         static_cast<ARADocument*> (getARADocumentController()->getDocument())->addListener (this);
 
@@ -34,7 +34,7 @@ ARASampleProjectAudioProcessorEditor::~ARASampleProjectAudioProcessorEditor()
 
         static_cast<ARADocument*> (getARADocumentController()->getDocument())->removeListener (this);
 
-        getARAEditorView ()->removeListener (this);
+        getARAEditorView()->removeListener (this);
     }
 }
 

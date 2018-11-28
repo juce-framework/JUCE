@@ -20,7 +20,7 @@ public:
         maxSamplesPerBlock = newMaxSamplesPerBlock;
 
         if (setRenderingFunc)
-            (this->*setRenderingFunc)(true);
+            (this->*setRenderingFunc) (true);
         prepared = true;
     }
 
@@ -36,7 +36,7 @@ public:
     {
         prepared = false;
         if (setRenderingFunc)
-            (this->*setRenderingFunc)(false);
+            (this->*setRenderingFunc) (false);
     }
 
     bool isPrepared() const noexcept            { return prepared; }

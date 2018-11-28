@@ -10,7 +10,7 @@ ARASampleProjectDocumentController::ARASampleProjectDocumentController() noexcep
 
 BufferingAudioReader* ARASampleProjectDocumentController::createBufferingAudioSourceReader (ARAAudioSource* audioSource, int bufferSize)
 {
-    return new BufferingAudioReader (createAudioSourceReader (audioSource), *araAudioSourceReadingThread.get (), bufferSize);
+    return new BufferingAudioReader (createAudioSourceReader (audioSource), *araAudioSourceReadingThread.get(), bufferSize);
 }
 
 // return an instance of our playback renderer implementation
