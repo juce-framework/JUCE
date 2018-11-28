@@ -1699,10 +1699,9 @@ private:
         if (auto* p = getOwner (self))
         {
             if (p->wasAlwaysOnTop)
-            {
                 p->setAlwaysOnTop (true);
-                p->redirectMovedOrResized();
-            }
+
+            p->redirectMovedOrResized();
         }
     }
 
