@@ -176,6 +176,9 @@ public:
     /** Same as the call function with the added feature of allowing listeners
         to safely remove themselves from the listener list without bailing out
     */
+    // TODO JUCE_ARA
+    // @sgretscher discusses the need for something like this in JUCE here
+    // https://forum.juce.com/t/listenerlist-issue-need-reliable-notifications-if-adding-removing-listeners-from-within-a-callback/30361
     template <typename Callback>
     void callExpectingUnregistration (Callback&& callback)
     {

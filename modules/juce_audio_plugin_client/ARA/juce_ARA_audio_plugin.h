@@ -36,6 +36,9 @@ namespace juce
 {
     using ARAContentUpdateScopes = ARA::ContentUpdateScopes;
 
+// TODO JUCE_ARA
+// because this macro saves us so much code, should we 
+// put all model object classes in to a single file?
 #define JUCE_ARA_MODEL_OBJECT_LISTENERLIST \
 public: \
     inline void addListener (Listener* l) { listeners.add (l); } \

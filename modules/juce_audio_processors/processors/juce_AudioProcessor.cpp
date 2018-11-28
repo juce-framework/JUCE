@@ -193,6 +193,9 @@ bool AudioProcessor::setChannelLayoutOfBus (bool isInputBus, int busIndex, const
     {
         auto layouts = bus->getBusesLayoutForLayoutChangeOfBus (layout);
 
+        // TODO JUCE_ARA
+        // @mynameisjohn has made a forum post about the additional isDisabled check here
+        // https://forum.juce.com/t/possible-issue-with-audioprocessor-setchannellayoutofbus/29145
         if (layouts.getChannelSet (isInputBus, busIndex) == layout || layout.isDisabled())
             return applyBusLayouts (layouts);
 
