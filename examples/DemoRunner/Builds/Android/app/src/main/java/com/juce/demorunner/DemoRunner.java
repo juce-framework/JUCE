@@ -1261,10 +1261,14 @@ public class DemoRunner   extends Activity
     public void onConfigurationChanged (Configuration cfg)
     {
         super.onConfigurationChanged (cfg);
+        ViewGroup parent = (ViewGroup) viewHolder.getParent();
+        if (parent != null) {
+            parent.removeView(viewHolder);
+        }
         setContentView (viewHolder);
     }
 
-    private void callAppLauncher()
+    protected void callAppLauncher()
     {
         launchApp (getApplicationInfo().publicSourceDir,
                    getApplicationInfo().dataDir);
@@ -1371,7 +1375,7 @@ public class DemoRunner   extends Activity
     private native void appNewIntent (Intent intent);
 
     //==============================================================================
-    private ViewHolder viewHolder;
+    public ViewHolder viewHolder;
     private MidiDeviceManager midiDeviceManager = null;
     private BluetoothManager bluetoothManager = null;
     private boolean isScreenSaverEnabled;
@@ -1683,7 +1687,6 @@ public class DemoRunner   extends Activity
         {
             if (host == 0)
                 return;
-
             handlePaint (host, canvas, paint);
         }
 
