@@ -24,7 +24,7 @@ namespace juce
 {
 
 MidiMessageSequence::MidiEventHolder::MidiEventHolder (const MidiMessage& mm) : message (mm) {}
-MidiMessageSequence::MidiEventHolder::MidiEventHolder (MidiMessage&& mm) : message (static_cast<MidiMessage&&> (mm)) {}
+MidiMessageSequence::MidiEventHolder::MidiEventHolder (MidiMessage&& mm) : message (std::move (mm)) {}
 MidiMessageSequence::MidiEventHolder::~MidiEventHolder() {}
 
 //==============================================================================
@@ -53,13 +53,13 @@ MidiMessageSequence& MidiMessageSequence::operator= (const MidiMessageSequence& 
 }
 
 MidiMessageSequence::MidiMessageSequence (MidiMessageSequence&& other) noexcept
-    : list (static_cast<OwnedArray<MidiEventHolder>&&> (other.list))
+    : list (std::move (other.list))
 {
 }
 
 MidiMessageSequence& MidiMessageSequence::operator= (MidiMessageSequence&& other) noexcept
 {
-    list = static_cast<OwnedArray<MidiEventHolder>&&> (other.list);
+    list = std::move (other.list);
     return *this;
 }
 
@@ -174,7 +174,7 @@ MidiMessageSequence::MidiEventHolder* MidiMessageSequence::addEvent (const MidiM
 
 MidiMessageSequence::MidiEventHolder* MidiMessageSequence::addEvent (MidiMessage&& newMessage, double timeAdjustment)
 {
-    return addEvent (new MidiEventHolder (static_cast<MidiMessage&&> (newMessage)), timeAdjustment);
+    return addEvent (new MidiEventHolder (std::move (newMessage)), timeAdjustment);
 }
 
 void MidiMessageSequence::deleteEvent (int index, bool deleteMatchingNoteUp)

@@ -84,7 +84,7 @@ struct AndroidMessageQueue     : private Android::Runnable
 
     bool post (MessageManager::MessageBase::Ptr&& message)
     {
-        queue.add (static_cast<MessageManager::MessageBase::Ptr&& > (message));
+        queue.add (std::move (message));
 
         // this will call us on the message thread
         return handler.post (self.get());

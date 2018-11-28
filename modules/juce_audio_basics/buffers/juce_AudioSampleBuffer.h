@@ -179,7 +179,7 @@ public:
         : numChannels (other.numChannels),
           size (other.size),
           allocatedBytes (other.allocatedBytes),
-          allocatedData (static_cast<HeapBlock<char, true>&&> (other.allocatedData)),
+          allocatedData (std::move (other.allocatedData)),
           isClear (other.isClear)
     {
         if (numChannels < (int) numElementsInArray (preallocatedChannelSpace))
@@ -205,7 +205,7 @@ public:
         numChannels = other.numChannels;
         size = other.size;
         allocatedBytes = other.allocatedBytes;
-        allocatedData = static_cast<HeapBlock<char, true>&&> (other.allocatedData);
+        allocatedData = std::move (other.allocatedData);
         isClear = other.isClear;
 
         if (numChannels < (int) numElementsInArray (preallocatedChannelSpace))

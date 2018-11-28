@@ -73,13 +73,13 @@ RelativeCoordinate& RelativeCoordinate::operator= (const RelativeCoordinate& oth
 }
 
 RelativeCoordinate::RelativeCoordinate (RelativeCoordinate&& other) noexcept
-    : term (static_cast<Expression&&> (other.term))
+    : term (std::move (other.term))
 {
 }
 
 RelativeCoordinate& RelativeCoordinate::operator= (RelativeCoordinate&& other) noexcept
 {
-    term = static_cast<Expression&&> (other.term);
+    term = std::move (other.term);
     return *this;
 }
 

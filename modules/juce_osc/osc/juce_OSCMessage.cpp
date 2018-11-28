@@ -82,7 +82,7 @@ void OSCMessage::clear()
 void OSCMessage::addInt32 (int32 value)             { arguments.add (OSCArgument (value)); }
 void OSCMessage::addFloat32 (float value)           { arguments.add (OSCArgument (value)); }
 void OSCMessage::addString (const String& value)    { arguments.add (OSCArgument (value)); }
-void OSCMessage::addBlob (MemoryBlock blob)         { arguments.add (OSCArgument (static_cast<MemoryBlock&&> (blob))); }
+void OSCMessage::addBlob (MemoryBlock blob)         { arguments.add (OSCArgument (std::move (blob))); }
 void OSCMessage::addColour (OSCColour colour)       { arguments.add (OSCArgument (colour)); }
 void OSCMessage::addArgument (OSCArgument arg)      { arguments.add (arg); }
 

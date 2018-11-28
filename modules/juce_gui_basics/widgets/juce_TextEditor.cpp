@@ -77,9 +77,9 @@ public:
 
     // VS2013 can't default move constructors
     UniformTextSection (UniformTextSection&& other)
-        : font (static_cast<Font&&> (other.font)),
+        : font (std::move (other.font)),
           colour (other.colour),
-          atoms (static_cast<Array<TextAtom>&&> (other.atoms))
+          atoms (std::move (other.atoms))
     {
     }
 

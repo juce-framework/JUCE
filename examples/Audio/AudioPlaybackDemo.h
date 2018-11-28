@@ -423,7 +423,7 @@ private:
     void showAudioResource (URL resource)
     {
         if (loadURLIntoTransport (resource))
-            currentAudioFile = static_cast<URL&&> (resource);
+            currentAudioFile = std::move (resource);
 
         zoomSlider.setValue (0, dontSendNotification);
         thumbnail->setURL (currentAudioFile);
@@ -513,7 +513,7 @@ private:
                                               {
                                                   auto u = fc.getURLResult();
 
-                                                  safeThis->showAudioResource (static_cast<URL&&> (u));
+                                                  safeThis->showAudioResource (std::move (u));
                                               }
 
                                               safeThis->fileChooser = nullptr;

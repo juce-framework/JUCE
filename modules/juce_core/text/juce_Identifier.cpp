@@ -28,11 +28,11 @@ Identifier::~Identifier() noexcept {}
 
 Identifier::Identifier (const Identifier& other) noexcept  : name (other.name) {}
 
-Identifier::Identifier (Identifier&& other) noexcept : name (static_cast<String&&> (other.name)) {}
+Identifier::Identifier (Identifier&& other) noexcept : name (std::move (other.name)) {}
 
 Identifier& Identifier::operator= (Identifier&& other) noexcept
 {
-    name = static_cast<String&&> (other.name);
+    name = std::move (other.name);
     return *this;
 }
 

@@ -1136,7 +1136,7 @@ struct UWPUIViewSettings
                 return;
 
             // move dll into member var
-            comBaseDLL = static_cast<ComBaseModule&&> (dll);
+            comBaseDLL = std::move (dll);
         }
     }
 

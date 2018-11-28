@@ -87,7 +87,7 @@ public:
     WeakReference (const WeakReference& other) noexcept         : holder (other.holder) {}
 
     /** Move constructor */
-    WeakReference (WeakReference&& other) noexcept              : holder (static_cast<SharedRef&&> (other.holder)) {}
+    WeakReference (WeakReference&& other) noexcept              : holder (std::move (other.holder)) {}
 
     /** Copies another pointer to this one. */
     WeakReference& operator= (const WeakReference& other)       { holder = other.holder; return *this; }
@@ -96,7 +96,7 @@ public:
     WeakReference& operator= (ObjectType* newObject)            { holder = getRef (newObject); return *this; }
 
     /** Move assignment operator */
-    WeakReference& operator= (WeakReference&& other) noexcept   { holder = static_cast<SharedRef&&> (other.holder); return *this; }
+    WeakReference& operator= (WeakReference&& other) noexcept   { holder = std::move (other.holder); return *this; }
 
     /** Returns the object that this pointer refers to, or null if the object no longer exists. */
     ObjectType* get() const noexcept                            { return holder != nullptr ? holder->get() : nullptr; }
