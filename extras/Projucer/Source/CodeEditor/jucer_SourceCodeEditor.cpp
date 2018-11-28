@@ -66,16 +66,10 @@ void SourceCodeDocument::reloadInternal()
 
     auto fileContent = getFile().loadFileAsString();
 
-    auto lineFeed = [&]() -> const char*
-    {
-        if (fileContent.contains ("\r\n"))
-            return "\r\n";
+    auto lineFeed = getLineFeedForFile (fileContent);
 
-        if (fileContent.contains ("\n"))
-            return "\n";
-
-        return project->getProjectLineFeed().toRawUTF8();
-    }();
+    if (lineFeed.isEmpty())
+        lineFeed = project->getProjectLineFeed();
 
     codeDoc->setNewLineCharacters (lineFeed);
 

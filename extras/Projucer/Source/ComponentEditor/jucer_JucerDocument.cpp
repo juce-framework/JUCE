@@ -98,7 +98,7 @@ void JucerDocument::timerCallback()
         stopTimer();
         beginTransaction();
 
-        flushChangesToDocuments (nullptr);
+        flushChangesToDocuments (nullptr, false);
     }
 }
 
@@ -513,23 +513,7 @@ bool JucerDocument::findTemplateFiles (String& headerContent, String& cppContent
     return true;
 }
 
-static String fixLineEndings (const String& s, const char* lineFeed)
-{
-    StringArray lines;
-    lines.addLines (s);
-
-    for (int i = 0; i < lines.size(); ++i)
-        lines.set (i, lines[i].trimEnd());
-
-    while (lines.size() > 0 && lines [lines.size() - 1].trim().isEmpty())
-        lines.remove (lines.size() - 1);
-
-    lines.add (String());
-
-    return lines.joinIntoString (lineFeed);
-}
-
-bool JucerDocument::flushChangesToDocuments (Project* project)
+bool JucerDocument::flushChangesToDocuments (Project* project, bool isInitial)
 {
     String headerTemplate, cppTemplate;
     if (! findTemplateFiles (headerTemplate, cppTemplate))
@@ -554,10 +538,20 @@ bool JucerDocument::flushChangesToDocuments (Project* project)
         generated.applyToCode (cppTemplate, headerFile.withFileExtension (".cpp"),
                                existingCpp, project);
 
-        auto* lineFeed = project->getProjectLineFeed().toRawUTF8();
+        if (isInitial)
+        {
+            jassert (project != nullptr);
 
-        headerTemplate = fixLineEndings (headerTemplate, lineFeed);
-        cppTemplate    = fixLineEndings (cppTemplate,    lineFeed);
+            auto lineFeed = project->getProjectLineFeed();
+
+            headerTemplate = replaceLineFeeds (headerTemplate, lineFeed);
+            cppTemplate    = replaceLineFeeds (cppTemplate,    lineFeed);
+        }
+        else
+        {
+            headerTemplate = replaceLineFeeds (headerTemplate, getLineFeedForFile (existingHeader));
+            cppTemplate    = replaceLineFeeds (cppTemplate,    getLineFeedForFile (existingCpp));
+        }
 
         if (header->getCodeDocument().getAllContent() != headerTemplate)
             header->getCodeDocument().replaceAllContent (headerTemplate);
@@ -780,7 +774,7 @@ struct NewGUIComponentWizard  : public NewFileWizard::Type
                     {
                         jucerDoc->setClassName (newFile.getFileNameWithoutExtension());
 
-                        jucerDoc->flushChangesToDocuments (&project);
+                        jucerDoc->flushChangesToDocuments (&project, true);
                         jucerDoc.reset();
 
                         cpp->save();

@@ -150,7 +150,7 @@ public:
         XmlElement xml ("CodeBlocks_project_file");
         addVersion (xml);
         createProject (*xml.createNewChildElement ("Project"));
-        writeXmlOrThrow (xml, cbpFile, "UTF-8", 10);
+        writeXmlOrThrow (xml, cbpFile, "UTF-8", 10, true);
     }
 
     //==============================================================================

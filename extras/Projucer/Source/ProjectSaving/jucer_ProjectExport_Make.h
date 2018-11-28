@@ -422,6 +422,8 @@ public:
     void create (const OwnedArray<LibraryModule>&) const override
     {
         MemoryOutputStream mo;
+        mo.setNewLineString ("\n");
+
         writeMakefile (mo);
 
         overwriteFileIfDifferentOrThrow (getTargetFolder().getChildFile ("Makefile"), mo);

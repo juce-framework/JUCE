@@ -253,6 +253,8 @@ public:
     void writeFile (const File& gradleProjectFolder, const String& filePath, const String& fileContent) const
     {
         MemoryOutputStream outStream;
+        outStream.setNewLineString ("\n");
+
         outStream << fileContent;
         overwriteFileIfDifferentOrThrow (gradleProjectFolder.getChildFile (filePath), outStream);
     }
@@ -260,6 +262,8 @@ public:
     void writeBinaryFile (const File& gradleProjectFolder, const String& filePath, const char* binaryData, const int binarySize) const
     {
         MemoryOutputStream outStream;
+        outStream.setNewLineString ("\n");
+
         outStream.write (binaryData, static_cast<size_t> (binarySize));
         overwriteFileIfDifferentOrThrow (gradleProjectFolder.getChildFile (filePath), outStream);
     }
@@ -350,6 +354,7 @@ private:
     void writeCmakeFile (const File& file) const
     {
         MemoryOutputStream mo;
+        mo.setNewLineString ("\n");
 
         mo << "# Automatically generated makefile, created by the Projucer" << newLine
            << "# Don't edit this file! Your changes will be overwritten when you re-save the Projucer project!" << newLine
@@ -544,6 +549,7 @@ private:
     String getProjectBuildGradleFileContent() const
     {
         MemoryOutputStream mo;
+        mo.setNewLineString ("\n");
 
         mo << "buildscript {"                                                                              << newLine;
         mo << "   repositories {"                                                                          << newLine;
@@ -581,6 +587,8 @@ private:
     String getAppBuildGradleFileContent (const OwnedArray<LibraryModule>& modules) const
     {
         MemoryOutputStream mo;
+        mo.setNewLineString ("\n");
+
         mo << "apply plugin: 'com.android." << (isLibrary() ? "library" : "application") << "'" << newLine << newLine;
 
         mo << "android {"                                                                    << newLine;
@@ -610,6 +618,7 @@ private:
     String getAndroidProductFlavours() const
     {
         MemoryOutputStream mo;
+        mo.setNewLineString ("\n");
 
         mo << "    flavorDimensions \"default\"" << newLine;
         mo << "    productFlavors {" << newLine;
@@ -653,6 +662,7 @@ private:
     String getAndroidSigningConfig() const
     {
         MemoryOutputStream mo;
+        mo.setNewLineString ("\n");
 
         auto keyStoreFilePath = androidKeyStore.get().toString().replace ("${user.home}", "${System.properties['user.home']}")
                                                                 .replace ("/", "${File.separator}");
@@ -680,6 +690,7 @@ private:
         auto targetSdkVersion  = static_cast<int> (androidTargetSDK.get());
 
         MemoryOutputStream mo;
+        mo.setNewLineString ("\n");
 
         mo << "    defaultConfig {"                                               << newLine;
 
@@ -710,6 +721,7 @@ private:
     String getAndroidBuildTypes() const
     {
         MemoryOutputStream mo;
+        mo.setNewLineString ("\n");
 
         mo << "    buildTypes {"                                                  << newLine;
 
@@ -740,6 +752,7 @@ private:
     String getAndroidVariantFilter() const
     {
         MemoryOutputStream mo;
+        mo.setNewLineString ("\n");
 
         mo << "    variantFilter { variant ->"            << newLine;
         mo << "        def names = variant.flavors*.name" << newLine;
@@ -762,6 +775,7 @@ private:
     String getAndroidRepositories() const
     {
         MemoryOutputStream mo;
+        mo.setNewLineString ("\n");
 
         auto repositories = StringArray::fromLines (androidRepositories.get().toString());
 
@@ -778,6 +792,8 @@ private:
     String getAndroidDependencies() const
     {
         MemoryOutputStream mo;
+        mo.setNewLineString ("\n");
+
         mo << "    dependencies {" << newLine;
 
         for (auto& d : StringArray::fromLines (androidDependencies.get().toString()))
@@ -800,6 +816,7 @@ private:
     String getApplyPlugins() const
     {
         MemoryOutputStream mo;
+        mo.setNewLineString ("\n");
 
         if (androidEnableRemoteNotifications.get())
             mo << "apply plugin: 'com.google.gms.google-services'" << newLine;
@@ -834,6 +851,8 @@ private:
         }
 
         MemoryOutputStream mo;
+        mo.setNewLineString ("\n");
+
         mo << "    sourceSets {" << newLine;
         mo << getSourceSetStringFor ("main.java.srcDirs", javaSourceSets);
         mo << newLine;
@@ -888,7 +907,7 @@ private:
 
         s << "]"     << newLine;
 
-        return s;
+        return replaceLineFeeds (s, "\n");
     }
 
     //==============================================================================
@@ -899,7 +918,7 @@ private:
         props << "ndk.dir=" << sanitisePath (getAppSettings().getStoredPath (Ids::androidNDKPath, TargetOS::getThisOS()).get().toString()) << newLine
               << "sdk.dir=" << sanitisePath (getAppSettings().getStoredPath (Ids::androidSDKPath, TargetOS::getThisOS()).get().toString()) << newLine;
 
-        return props;
+        return replaceLineFeeds (props, "\n");
     }
 
     String getGradleWrapperPropertiesFileContent() const
@@ -1186,7 +1205,9 @@ private:
             createDirectoryOrThrow (file.getParentDirectory());
 
             PNGImageFormat png;
+
             MemoryOutputStream mo;
+            mo.setNewLineString ("\n");
 
             if (! png.writeImageToStream (im, mo))
                 throw SaveError ("Can't generate Android icon file");

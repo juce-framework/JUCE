@@ -443,18 +443,12 @@ protected:
     static void writeXmlOrThrow (const XmlElement& xml, const File& file, const String& encoding, int maxCharsPerLine, bool useUnixNewLines = false)
     {
         MemoryOutputStream mo;
-        xml.writeToStream (mo, String(), false, true, encoding, maxCharsPerLine);
 
         if (useUnixNewLines)
-        {
-            MemoryOutputStream mo2;
-            mo2 << mo.toString().replace ("\r\n", "\n");
-            overwriteFileIfDifferentOrThrow (file, mo2);
-        }
-        else
-        {
-            overwriteFileIfDifferentOrThrow (file, mo);
-        }
+            mo.setNewLineString ("\n");
+
+        xml.writeToStream (mo, String(), false, true, encoding, maxCharsPerLine);
+        overwriteFileIfDifferentOrThrow (file, mo);
     }
 
     static Image rescaleImageForIcon (Drawable&, int iconSize);

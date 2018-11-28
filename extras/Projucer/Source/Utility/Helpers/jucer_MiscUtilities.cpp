@@ -39,6 +39,32 @@ String joinLinesIntoSourceFile (StringArray& lines)
     return lines.joinIntoString (getPreferredLineFeed()) + getPreferredLineFeed();
 }
 
+String replaceLineFeeds (const String& content, const String& lineFeed)
+{
+    StringArray lines;
+    lines.addLines (content);
+
+    return lines.joinIntoString (lineFeed);
+}
+
+String getLineFeedForFile (const String& fileContent)
+{
+    auto t = fileContent.getCharPointer();
+
+    while (! t.isEmpty())
+    {
+        switch (t.getAndAdvance())
+        {
+            case 0:     break;
+            case '\n':  return "\n";
+            case '\r':  if (*t == '\n') return "\r\n";
+            default:    continue;
+        }
+    }
+
+    return {};
+}
+
 String trimCommentCharsFromStartOfLine (const String& line)
 {
     return line.trimStart().trimCharactersAtStart ("*/").trimStart();

@@ -136,6 +136,7 @@ void ProjectSaver::writePluginCharacteristicsFile()
     }
 
     MemoryOutputStream mem;
+    mem.setNewLineString (projectLineFeed);
 
     mem << "//==============================================================================" << newLine
         << "// Audio plugin settings.." << newLine
