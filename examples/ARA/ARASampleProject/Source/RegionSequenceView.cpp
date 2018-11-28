@@ -84,9 +84,9 @@ void RegionSequenceView::paint (Graphics& g)
     g.addTransform (AffineTransform::rotation (-MathConstants<float>::halfPi, 
                                                headerRect.getWidth() * 0.5f,
                                                headerRect.getHeight() * 0.5f));
-    Rectangle<int> textRect ((int) (-.3 * headerRect.getHeight()), (int) (1.25 * headerRect.getWidth()), (int) (0.85 * headerRect.getHeight()), headerRect.getWidth());
+    Rectangle<int> textRect ((int) (-0.3f * headerRect.getHeight()), (int) (1.25f * headerRect.getWidth()), (int) (0.85f * headerRect.getHeight()), headerRect.getWidth());
     g.setColour (trackColour.contrasting (1.0f));
-    g.setFont (Font (12.0));
+    g.setFont (Font (12.0f));
     g.drawText (String (regionSequence->getName()), textRect, Justification::bottomLeft);
 }
 

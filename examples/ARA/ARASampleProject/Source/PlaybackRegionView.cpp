@@ -52,13 +52,13 @@ void PlaybackRegionView::paint (Graphics& g)
         if (duration != 0.0)
         {
             g.setColour (regionColour.contrasting (0.7f));
-            audioThumb.drawChannels (g, getLocalBounds(), 0.0, duration, 1.0);
+            audioThumb.drawChannels (g, getLocalBounds(), 0.0, duration, 1.0f);
         }
     }
     else
     {
         g.setColour (regionColour.contrasting (1.0f));
-        g.setFont (Font (12.0));
+        g.setFont (Font (12.0f));
         g.drawText ("Access Disabled", getBounds(), Justification::centred);
     }
 }
