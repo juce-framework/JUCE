@@ -101,7 +101,7 @@ void ARASampleProjectAudioProcessorEditor::clearView()
 }
 
 //==============================================================================
-void ARASampleProjectAudioProcessorEditor::onHideRegionSequences (std::vector<ARARegionSequence*> const& regionSequences)
+void ARASampleProjectAudioProcessorEditor::onHideRegionSequences (std::vector<ARARegionSequence*> const& /*regionSequences*/)
 {
     rebuildView();
 }
