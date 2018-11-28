@@ -36,16 +36,16 @@ namespace
 
     void splitAttributeRanges (Array<AttributedString::Attribute>& atts, int position)
     {
-        for (auto i = atts.size(); --i >= 0;)
+        for (int i = atts.size(); --i >= 0;)
         {
-            auto att = atts.getUnchecked (i);
+            const auto& att = atts.getUnchecked (i);
             auto offset = position - att.range.getStart();
 
             if (offset >= 0)
             {
                 if (offset > 0 && position < att.range.getEnd())
                 {
-                    atts.insert (i + 1, std::move (att));
+                    atts.insert (i + 1, AttributedString::Attribute (att));
                     atts.getReference (i).range.setEnd (position);
                     atts.getReference (i + 1).range.setStart (position);
                 }
@@ -70,7 +70,7 @@ namespace
 
     void mergeAdjacentRanges (Array<AttributedString::Attribute>& atts)
     {
-        for (auto i = atts.size() - 1; --i >= 0;)
+        for (int i = atts.size() - 1; --i >= 0;)
         {
             auto& a1 = atts.getReference (i);
             auto& a2 = atts.getReference (i + 1);
@@ -128,7 +128,7 @@ namespace
     {
         splitAttributeRanges (atts, newLength);
 
-        for (auto i = atts.size(); --i >= 0;)
+        for (int i = atts.size(); --i >= 0;)
             if (atts.getReference (i).range.getStart() >= newLength)
                 atts.remove (i);
     }
