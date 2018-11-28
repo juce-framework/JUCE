@@ -196,15 +196,15 @@ ARAPlaybackRegionReader::~ARAPlaybackRegionReader()
 
 void ARAPlaybackRegionReader::invalidate()
 {
-    if (isValid())
-    {
-        ScopedWriteLock scopedWrite (lock);
+    ScopedWriteLock scopedWrite (lock);
 
-        for (auto playbackRegion : playbackRenderer->getPlaybackRegions())
-            static_cast<ARAPlaybackRegion*>(playbackRegion)->removeListener (this);
+    if (! isValid())
+        return;
 
-        playbackRenderer.reset();
-    }
+    for (auto playbackRegion : playbackRenderer->getPlaybackRegions())
+        static_cast<ARAPlaybackRegion*>(playbackRegion)->removeListener (this);
+
+    playbackRenderer.reset();
 }
 
 bool ARAPlaybackRegionReader::readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
@@ -265,10 +265,8 @@ void ARAPlaybackRegionReader::didUpdatePlaybackRegionContent (ARAPlaybackRegion*
     jassert (ARA::contains (playbackRenderer->getPlaybackRegions(), playbackRegion));
 
     // don't invalidate if the audio signal is unchanged
-    if (! scopeFlags.affectSamples())
-        return;
-
-    invalidate();
+    if (scopeFlags.affectSamples())
+        invalidate();
 }
 
 void ARAPlaybackRegionReader::willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion)
@@ -291,8 +289,6 @@ ARARegionSequenceReader::~ARARegionSequenceReader()
 {
     if (sequence != nullptr)
         sequence->removeListener (this);
-
-    invalidate();
 }
 
 void ARARegionSequenceReader::willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion)
