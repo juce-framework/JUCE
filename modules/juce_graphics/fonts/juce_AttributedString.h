@@ -43,22 +43,19 @@ class JUCE_API  AttributedString
 {
 public:
     /** Creates an empty attributed string. */
-    AttributedString();
+    AttributedString()  {}
 
     /** Creates an attributed string with the given text. */
-    explicit AttributedString (const String& text);
+    explicit AttributedString (const String& newString)  { setText (newString); }
 
     AttributedString (const AttributedString&);
     AttributedString& operator= (const AttributedString&);
     AttributedString (AttributedString&&) noexcept;
     AttributedString& operator= (AttributedString&&) noexcept;
 
-    /** Destructor. */
-    ~AttributedString() noexcept;
-
     //==============================================================================
     /** Returns the complete text of this attributed string. */
-    const String& getText() const noexcept                  { return text; }
+    const String& getText() const noexcept    { return text; }
 
     /** Replaces all the text.
         This will change the text, but won't affect any of the colour or font attributes
@@ -151,8 +148,8 @@ public:
     class JUCE_API  Attribute
     {
     public:
-        Attribute() noexcept;
-        ~Attribute() noexcept;
+        Attribute() noexcept {}
+
         Attribute (const Attribute&) noexcept;
         Attribute& operator= (const Attribute&) noexcept;
         Attribute (Attribute&&) noexcept;
@@ -168,7 +165,7 @@ public:
         Font font;
 
         /** The colour for this range of characters. */
-        Colour colour;
+        Colour colour { 0xff000000 };
 
     private:
         JUCE_LEAK_DETECTOR (Attribute)
@@ -197,10 +194,10 @@ public:
 
 private:
     String text;
-    float lineSpacing;
-    Justification justification;
-    WordWrap wordWrap;
-    ReadingDirection readingDirection;
+    float lineSpacing = 0.0f;
+    Justification justification = Justification::left;
+    WordWrap wordWrap = AttributedString::byWord;
+    ReadingDirection readingDirection = AttributedString::natural;
     Array<Attribute> attributes;
 
     JUCE_LEAK_DETECTOR (AttributedString)
