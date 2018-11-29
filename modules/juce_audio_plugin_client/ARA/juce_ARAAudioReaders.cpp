@@ -175,8 +175,8 @@ ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARAPlaybackRenderer* renderer,
 
             numChannels = jmax (numChannels, (unsigned int) source->getChannelCount());
 
-            regionsStartTime = jmin (regionsStartTime, playbackRegion->getStartInPlaybackTime());
-            regionsEndTime = jmax (regionsEndTime, playbackRegion->getEndInPlaybackTime());
+            regionsStartTime = jmin (regionsStartTime, playbackRegion->getStartInPlaybackTime() - playbackRegion->getHeadTime());
+            regionsEndTime = jmax (regionsEndTime, playbackRegion->getEndInPlaybackTime() + playbackRegion->getTailTime());
 
             playbackRenderer->addPlaybackRegion (playbackRegion);
             playbackRegion->addListener (this);

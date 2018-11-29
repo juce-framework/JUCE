@@ -52,6 +52,8 @@ void RegionSequenceView::getTimeRange (double& startTimeInSeconds, double& endTi
     endTimeInSeconds = 0;
     for (auto v : playbackRegionViews)
     {
+        // TODO JUCE_ARA should this include head and tail time? 
+        // should we add a new function to ARAPlaybackRegion?
         startTimeInSeconds = jmin (startTimeInSeconds, v->getPlaybackRegion()->getStartInPlaybackTime());
         endTimeInSeconds = jmax (endTimeInSeconds, v->getPlaybackRegion()->getEndInPlaybackTime());
     }
