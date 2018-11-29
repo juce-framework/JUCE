@@ -1422,7 +1422,7 @@ String String::replaceCharacter (const juce_wchar charToReplace, const juce_wcha
             break;
     }
 
-    return static_cast<String&&> (builder.result);
+    return std::move (builder.result);
 }
 
 String String::replaceCharacters (StringRef charactersToReplace, StringRef charactersToInsertInstead) const
@@ -1447,7 +1447,7 @@ String String::replaceCharacters (StringRef charactersToReplace, StringRef chara
             break;
     }
 
-    return static_cast<String&&> (builder.result);
+    return std::move (builder.result);
 }
 
 //==============================================================================
@@ -1529,7 +1529,7 @@ String String::toUpperCase() const
         ++(builder.source);
     }
 
-    return static_cast<String&&> (builder.result);
+    return std::move (builder.result);
 }
 
 String String::toLowerCase() const
@@ -1547,7 +1547,7 @@ String String::toLowerCase() const
         ++(builder.source);
     }
 
-    return static_cast<String&&> (builder.result);
+    return std::move (builder.result);
 }
 
 //==============================================================================
@@ -1812,7 +1812,7 @@ String String::retainCharacters (StringRef charactersToRetain) const
     }
 
     builder.write (0);
-    return static_cast<String&&> (builder.result);
+    return std::move (builder.result);
 }
 
 String String::removeCharacters (StringRef charactersToRemove) const
@@ -1833,7 +1833,7 @@ String String::removeCharacters (StringRef charactersToRemove) const
             break;
     }
 
-    return static_cast<String&&> (builder.result);
+    return std::move (builder.result);
 }
 
 String String::initialSectionContainingOnly (StringRef permittedCharacters) const
@@ -2049,7 +2049,7 @@ String String::createStringFromData (const void* const unknownData, int size)
         }
 
         builder.write (0);
-        return static_cast<String&&> (builder.result);
+        return std::move (builder.result);
     }
 
     auto* start = (const char*) data;

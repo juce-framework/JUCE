@@ -29,7 +29,7 @@ URLInputSource::URLInputSource (const URL& url)
 }
 
 URLInputSource::URLInputSource (URL&& url)
-    : u (static_cast<URL&&> (url))
+    : u (std::move (url))
 {
 }
 

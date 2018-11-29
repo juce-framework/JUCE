@@ -632,7 +632,7 @@ struct FFTWImpl  : public FFT::Instance
             if (! Symbols::symbol (lib, symbols.execute_c2r_fftw, "fftwf_execute_dft_c2r")) return nullptr;
            #endif
 
-            return new FFTWImpl (static_cast<size_t> (order), static_cast<DynamicLibrary&&> (lib), symbols);
+            return new FFTWImpl (std::move (lib), symbols);
         }
 
         return nullptr;

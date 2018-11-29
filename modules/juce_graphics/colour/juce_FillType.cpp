@@ -43,7 +43,7 @@ FillType::FillType (const ColourGradient& g)
 }
 
 FillType::FillType (ColourGradient&& g)
-    : colour (0xff000000), gradient (new ColourGradient (static_cast<ColourGradient&&> (g)))
+    : colour (0xff000000), gradient (new ColourGradient (std::move (g)))
 {
 }
 
@@ -75,8 +75,8 @@ FillType& FillType::operator= (const FillType& other)
 
 FillType::FillType (FillType&& other) noexcept
     : colour (other.colour),
-      gradient (static_cast<std::unique_ptr<ColourGradient>&&> (other.gradient)),
-      image (static_cast<Image&&> (other.image)),
+      gradient (std::move (other.gradient)),
+      image (std::move (other.image)),
       transform (other.transform)
 {
 }
@@ -86,8 +86,8 @@ FillType& FillType::operator= (FillType&& other) noexcept
     jassert (this != &other); // hopefully the compiler should make this situation impossible!
 
     colour = other.colour;
-    gradient = static_cast<std::unique_ptr<ColourGradient>&&> (other.gradient);
-    image = static_cast<Image&&> (other.image);
+    gradient = std::move (other.gradient);
+    image = std::move (other.image);
     transform = other.transform;
     return *this;
 }

@@ -191,13 +191,13 @@ private:
     {
         struct LambdaOp  : public RenderingOp
         {
-            LambdaOp (LambdaType&& f) : function (static_cast<LambdaType&&> (f)) {}
+            LambdaOp (LambdaType&& f) : function (std::move (f)) {}
             void perform (const Context& c) override    { function (c); }
 
             LambdaType function;
         };
 
-        renderOps.add (new LambdaOp (static_cast<LambdaType&&> (fn)));
+        renderOps.add (new LambdaOp (std::move (fn)));
     }
 
     //==============================================================================

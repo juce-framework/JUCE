@@ -484,7 +484,7 @@ OutputStream* juce_CreateContentURIOutputStream (const URL& url)
 {
     auto stream = AndroidContentUriResolver::getStreamForContentUri (url, false);
 
-    return (stream.get() != 0 ? new AndroidContentUriOutputStream (static_cast<LocalRef<jobject>&&> (stream)) : nullptr);
+    return (stream.get() != 0 ? new AndroidContentUriOutputStream (std::move (stream)) : nullptr);
 }
 
 //==============================================================================

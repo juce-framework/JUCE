@@ -433,7 +433,7 @@ namespace CodeHelpers
 
     String getLeadingWhitespace (String line)
     {
-        line = line.removeCharacters ("\r\n");
+        line = line.removeCharacters (line.endsWith ("\r\n") ? "\r\n" : "\n");
         auto endOfLeadingWS = line.getCharPointer().findEndOfWhitespace();
         return String (line.getCharPointer(), endOfLeadingWS);
     }

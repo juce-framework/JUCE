@@ -132,8 +132,8 @@ struct JavascriptEngine::RootObject   : public DynamicObject
     struct Scope
     {
         Scope (const Scope* p, ReferenceCountedObjectPtr<RootObject> rt, DynamicObject::Ptr scp) noexcept
-            : parent (p), root (static_cast<ReferenceCountedObjectPtr<RootObject>&&> (rt)),
-              scope (static_cast<DynamicObject::Ptr&&> (scp)) {}
+            : parent (p), root (std::move (rt)),
+              scope (std::move (scp)) {}
 
         const Scope* const parent;
         ReferenceCountedObjectPtr<RootObject> root;

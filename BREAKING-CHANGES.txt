@@ -10,7 +10,9 @@ Multiple changes to low-level, non-public JNI and Android APIs.
 
 Possible Issues
 ---------------
-If you were using any non-public, low-level JNI macros, calling java code or recieving JNI callbacks, then your code will probably no longer work. See the forum for further details.
+If you were using any non-public, low-level JNI macros, calling java code or
+recieving JNI callbacks, then your code will probably no longer work. See the
+forum for further details.
 
 Workaround
 ----------
@@ -27,7 +29,8 @@ The minimum Android version for a JUCE app is now Android 4.1
 
 Possible Issues
 ---------------
-Your app may not run on very old versions of Android  (less than 5% of the devices).
+Your app may not run on very old versions of Android  (less than 0.5% of the
+devices).
 
 Workaround
 ----------
@@ -35,9 +38,9 @@ There is no workaround.
 
 Rationale
 ---------
-Less than 5% of all devices in the world run versions of Android older than Android
-4.1. In the interest of keeping JUCE code clean and lean, we must depricate support
-for very old Android versions from time to time.
+Less than 0.5% of all devices in the world run versions of Android older than
+Android 4.1. In the interest of keeping JUCE code clean and lean, we must
+depricate support for very old Android versions from time to time.
 
 
 Version 5.4.0
@@ -76,8 +79,7 @@ Possible Issues
    which is no longer part of JUCE.
 2. Building a VST2-compatible VST3 plug-in (the previous default behaviour in
    JUCE) requires header files from the VST2 SDK, which is no longer part of
-   JUCE. When a new JUCE plug-in project is created the option
-   JUCE_VST3_CAN_REPLACE_VST2 will be set to zero.
+   JUCE.
 
 Workaround
 ----------
@@ -89,6 +91,8 @@ Workaround
    version, and you want the VST3 plug-in to replace the VST2 plug-in in
    hosts that support it, then you should enable the JUCE_VST3_CAN_REPLACE_VST2
    option.
+3. When a new JUCE plug-in project is created the value of
+   JUCE_VST3_CAN_REPLACE_VST2 will be set to zero.
 
 Rationale
 ---------
@@ -129,6 +133,7 @@ The new createAndAddParameter method is much more flexible and enables any
 parameter types derived from RangedAudioParameter to be managed by the
 AudioProcessorValueTreeState.
 
+
 Change
 ------
 The Projucer's per-exporter Android SDK/NDK path options have been removed.
@@ -147,6 +152,7 @@ Rationale
 ---------
 Having multiple places where the paths could be set was confusing and could
 cause unexpected mismatches.
+
 
 Change
 ------

@@ -31,8 +31,8 @@
 #include "jucer_CommandLine.h"
 
 //==============================================================================
-const char* preferredLinefeed = "\r\n";
-const char* getPreferredLinefeed()     { return preferredLinefeed; }
+const char* preferredLineFeed = "\r\n";
+const char* getPreferredLineFeed()     { return preferredLineFeed; }
 
 //==============================================================================
 namespace
@@ -87,6 +87,8 @@ namespace
                 project.reset();
                 ConsoleApplication::fail ("Failed to load the project file: " + projectFile.getFullPathName());
             }
+
+            preferredLineFeed = project->getProjectLineFeed().toRawUTF8();
         }
 
         void save (bool justSaveResources)
@@ -398,7 +400,7 @@ namespace
 
         auto newText = joinLinesIntoSourceFile (lines);
 
-        if (newText != content && newText != content + getPreferredLinefeed())
+        if (newText != content && newText != content + getPreferredLineFeed())
             replaceFile (file, newText, options.removeTabs ? "Removing tabs in: "
                                                            : "Cleaning file: ");
     }
@@ -494,7 +496,7 @@ namespace
         {
             auto newText = joinLinesIntoSourceFile (lines);
 
-            if (newText != content && newText != content + getPreferredLinefeed())
+            if (newText != content && newText != content + getPreferredLineFeed())
                 replaceFile (file, newText, "Fixing includes in: ");
         }
     }
@@ -542,7 +544,7 @@ namespace
                 for (int i = 0; i < text.length(); ++i)
                     out << " << '" << String::charToString (text[i]) << "'";
 
-                out << ";" << preferredLinefeed;
+                out << ";" << preferredLineFeed;
             }
         };
 
@@ -566,18 +568,18 @@ namespace
 
         MemoryOutputStream out;
 
-        out << "String createString()" << preferredLinefeed
-            << "{" << preferredLinefeed;
+        out << "String createString()" << preferredLineFeed
+            << "{" << preferredLineFeed;
 
         for (int i = 0; i < sections.size(); ++i)
             sections.getReference(i).writeGenerator (out);
 
-        out << preferredLinefeed
-            << "    String result = " << getStringConcatenationExpression (rng, 0, sections.size()) << ";" << preferredLinefeed
-            << preferredLinefeed
-            << "    jassert (result == " << originalText.quoted() << ");" << preferredLinefeed
-            << "    return result;" << preferredLinefeed
-            << "}" << preferredLinefeed;
+        out << preferredLineFeed
+            << "    String result = " << getStringConcatenationExpression (rng, 0, sections.size()) << ";" << preferredLineFeed
+            << preferredLineFeed
+            << "    jassert (result == " << originalText.quoted() << ");" << preferredLineFeed
+            << "    return result;" << preferredLineFeed
+            << "}" << preferredLineFeed;
 
         std::cout << out.toString() << std::endl;
     }
@@ -635,32 +637,32 @@ namespace
 
         MemoryOutputStream header, cpp;
 
-        header << "// Auto-generated binary data by the Projucer" << preferredLinefeed
-               << "// Source file: " << source.getRelativePathFrom (target.getParentDirectory()) << preferredLinefeed
-               << preferredLinefeed;
+        header << "// Auto-generated binary data by the Projucer" << preferredLineFeed
+               << "// Source file: " << source.getRelativePathFrom (target.getParentDirectory()) << preferredLineFeed
+               << preferredLineFeed;
 
         cpp << header.toString();
 
         if (target.hasFileExtension (headerFileExtensions))
         {
-            header << "static constexpr unsigned char " << variableName << "[] =" << preferredLinefeed
-                   << literal.toString() << preferredLinefeed
-                   << preferredLinefeed;
+            header << "static constexpr unsigned char " << variableName << "[] =" << preferredLineFeed
+                   << literal.toString() << preferredLineFeed
+                   << preferredLineFeed;
 
             replaceFile (target, header.toString(), "Writing: ");
         }
         else if (target.hasFileExtension (cppFileExtensions))
         {
-            header << "extern const char*  " << variableName << ";" << preferredLinefeed
-                   << "const unsigned int  " << variableName << "Size = " << (int) dataSize << ";" << preferredLinefeed
-                   << preferredLinefeed;
+            header << "extern const char*  " << variableName << ";" << preferredLineFeed
+                   << "const unsigned int  " << variableName << "Size = " << (int) dataSize << ";" << preferredLineFeed
+                   << preferredLineFeed;
 
-            cpp << CodeHelpers::createIncludeStatement (target.withFileExtension (".h").getFileName()) << preferredLinefeed
-                << preferredLinefeed
-                << "static constexpr unsigned char " << variableName << "_local[] =" << preferredLinefeed
-                << literal.toString() << preferredLinefeed
-                << preferredLinefeed
-                << "const char* " << variableName << " = (const char*) " << variableName << "_local;" << preferredLinefeed;
+            cpp << CodeHelpers::createIncludeStatement (target.withFileExtension (".h").getFileName()) << preferredLineFeed
+                << preferredLineFeed
+                << "static constexpr unsigned char " << variableName << "_local[] =" << preferredLineFeed
+                << literal.toString() << preferredLineFeed
+                << preferredLineFeed
+                << "const char* " << variableName << " = (const char*) " << variableName << "_local;" << preferredLineFeed;
 
             replaceFile (target, cpp.toString(), "Writing: ");
             replaceFile (target.withFileExtension (".h"), header.toString(), "Writing: ");
@@ -889,7 +891,7 @@ int performCommandLine (const ArgumentList& args)
     return ConsoleApplication::invokeCatchingFailures ([&] () -> int
     {
         if (args.containsOption ("--lf"))
-            preferredLinefeed = "\n";
+            preferredLineFeed = "\n";
 
         auto command = args[0];
 

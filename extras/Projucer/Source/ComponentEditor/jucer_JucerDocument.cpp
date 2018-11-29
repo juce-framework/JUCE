@@ -98,7 +98,7 @@ void JucerDocument::timerCallback()
         stopTimer();
         beginTransaction();
 
-        flushChangesToDocuments (nullptr);
+        flushChangesToDocuments (nullptr, false);
     }
 }
 
@@ -513,23 +513,7 @@ bool JucerDocument::findTemplateFiles (String& headerContent, String& cppContent
     return true;
 }
 
-static String fixLineEndings (const String& s)
-{
-    StringArray lines;
-    lines.addLines (s);
-
-    for (int i = 0; i < lines.size(); ++i)
-        lines.set (i, lines[i].trimEnd());
-
-    while (lines.size() > 0 && lines [lines.size() - 1].trim().isEmpty())
-        lines.remove (lines.size() - 1);
-
-    lines.add (String());
-
-    return lines.joinIntoString ("\r\n");
-}
-
-bool JucerDocument::flushChangesToDocuments (Project* project)
+bool JucerDocument::flushChangesToDocuments (Project* project, bool isInitial)
 {
     String headerTemplate, cppTemplate;
     if (! findTemplateFiles (headerTemplate, cppTemplate))
@@ -554,8 +538,20 @@ bool JucerDocument::flushChangesToDocuments (Project* project)
         generated.applyToCode (cppTemplate, headerFile.withFileExtension (".cpp"),
                                existingCpp, project);
 
-        headerTemplate = fixLineEndings (headerTemplate);
-        cppTemplate    = fixLineEndings (cppTemplate);
+        if (isInitial)
+        {
+            jassert (project != nullptr);
+
+            auto lineFeed = project->getProjectLineFeed();
+
+            headerTemplate = replaceLineFeeds (headerTemplate, lineFeed);
+            cppTemplate    = replaceLineFeeds (cppTemplate,    lineFeed);
+        }
+        else
+        {
+            headerTemplate = replaceLineFeeds (headerTemplate, getLineFeedForFile (existingHeader));
+            cppTemplate    = replaceLineFeeds (cppTemplate,    getLineFeedForFile (existingCpp));
+        }
 
         if (header->getCodeDocument().getAllContent() != headerTemplate)
             header->getCodeDocument().replaceAllContent (headerTemplate);
@@ -768,9 +764,9 @@ struct NewGUIComponentWizard  : public NewFileWizard::Type
 
             auto& odm = ProjucerApplication::getApp().openDocumentManager;
 
-            if (auto* cpp = dynamic_cast<SourceCodeDocument*> (odm.openFile (nullptr, cppFile)))
+            if (auto* cpp = dynamic_cast<SourceCodeDocument*> (odm.openFile (&project, cppFile)))
             {
-                if (auto* header = dynamic_cast<SourceCodeDocument*> (odm.openFile (nullptr, headerFile)))
+                if (auto* header = dynamic_cast<SourceCodeDocument*> (odm.openFile (&project, headerFile)))
                 {
                     std::unique_ptr<JucerDocument> jucerDoc (new ComponentDocument (cpp));
 
@@ -778,7 +774,7 @@ struct NewGUIComponentWizard  : public NewFileWizard::Type
                     {
                         jucerDoc->setClassName (newFile.getFileNameWithoutExtension());
 
-                        jucerDoc->flushChangesToDocuments (&project);
+                        jucerDoc->flushChangesToDocuments (&project, true);
                         jucerDoc.reset();
 
                         cpp->save();
