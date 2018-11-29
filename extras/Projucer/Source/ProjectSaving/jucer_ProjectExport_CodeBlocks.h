@@ -314,8 +314,8 @@ private:
             result.add ("gtk+-x11-3.0");
         }
 
-        if (! (project.getEnabledModules().isModuleEnabled ("juce_core")
-               && project.isConfigFlagEnabled ("JUCE_LOAD_CURL_SYMBOLS_LAZILY", false)))
+        if (project.getEnabledModules().isModuleEnabled ("juce_core")
+            && ! project.isConfigFlagEnabled ("JUCE_LOAD_CURL_SYMBOLS_LAZILY", false))
             result.add ("libcurl");
 
         result.removeDuplicates (false);
