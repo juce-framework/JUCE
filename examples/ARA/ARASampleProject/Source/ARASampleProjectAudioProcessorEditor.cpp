@@ -52,29 +52,41 @@ void ARASampleProjectAudioProcessorEditor::paint (Graphics& g)
 
 void ARASampleProjectAudioProcessorEditor::resized()
 {
-    const int width = getWidth();
-
     // compute region sequence view bounds in terms of kVisibleSeconds and kRegionSequenceHeight
-    // and determine the length in seconds of the longest ARA region sequence
-    double maxRegionSequenceLength = 0.0;
-    int i = 0;
+    // by finding the range of start and end times for all of our region sequence views
+    minRegionSequenceStartTime = std::numeric_limits<double>::max();
+    double maxRegionSequenceEndTime = std::numeric_limits<double>::min();
     for (auto v : regionSequenceViews)
     {
         double startInSeconds, endInSeconds;
         v->getTimeRange (startInSeconds, endInSeconds);
 
-        double normalizedEnd = endInSeconds / kVisibleSeconds;
-        v->setBounds (0, kRegionSequenceHeight * i, kTrackHeaderWidth + (int) (width * normalizedEnd), kRegionSequenceHeight);
+        maxRegionSequenceEndTime = jmax (maxRegionSequenceEndTime, endInSeconds);
+        minRegionSequenceStartTime = jmin (minRegionSequenceStartTime, startInSeconds);
+    }
 
-        maxRegionSequenceLength = jmax (maxRegionSequenceLength, endInSeconds);
+    // offset the start time by our "pad" value (converting pixels to seconds)
+    const double secondsPerPixel = double (kVisibleSeconds) / getWidth();
+    minRegionSequenceStartTime -= (secondsPerPixel * kRegionSequenceDurationPadPixels);
+    
+    // place each region sequence view such that all views start at minRegionSequenceStartTime
+    // and extend to cover their full duration (including room for the track header width)
+    int i = 0;
+    for (auto v : regionSequenceViews)
+    {
+        double startInSeconds, endInSeconds;
+        v->getTimeRange (startInSeconds, endInSeconds);
+        double normalizedDuration = (endInSeconds - minRegionSequenceStartTime) / kVisibleSeconds;
+        v->setBounds (0, kRegionSequenceHeight * i, kTrackHeaderWidth + (int) (getWidth() * normalizedDuration), kRegionSequenceHeight);
         i++;
     }
 
-    // normalized width = view width in terms of kVisibleSeconds
-    // size this to ensure we can see one second beyond the longest region sequnce
-    const double normalizedWidth = (maxRegionSequenceLength + 1) / kVisibleSeconds;
-    regionSequenceListView.setBounds (0, 0, kTrackHeaderWidth + (int) (normalizedWidth * width), kRegionSequenceHeight * i);
-    regionSequenceViewPort.setBounds (0, 0, getWidth(), getHeight());
+    // size our region sequence list view to fit all of our region sequences + our "pad" value
+    double totalRegionSequenceDuration = maxRegionSequenceEndTime - minRegionSequenceStartTime;
+    const double normalizedWidth = (totalRegionSequenceDuration) / kVisibleSeconds;
+    regionSequenceListView.setBounds (0, 0, (int) (normalizedWidth * getWidth()) + kTrackHeaderWidth + kRegionSequenceDurationPadPixels, kRegionSequenceHeight * i);
+
+    regionSequenceViewPort.setBounds (0, 0, getWidth (), getHeight ());
 }
 
 void ARASampleProjectAudioProcessorEditor::rebuildView()

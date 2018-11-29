@@ -30,6 +30,8 @@ public:
     void doEndEditing (ARADocument* document) override;
     void didReorderRegionSequencesInDocument (ARADocument* document) override;
 
+    double getMinRegionSequenceStartTime() const { return minRegionSequenceStartTime; }
+
     // function to flag that our view needs to be rebuilt
     void setDirty() { isViewDirty = true; }
 
@@ -41,6 +43,7 @@ public:
     static const int kMinHeight = 1 * kRegionSequenceHeight;
     static const int kHeight = 5 * kRegionSequenceHeight;
     static const int kTrackHeaderWidth = 20;
+    static const int kRegionSequenceDurationPadPixels = 0;
 
 private:
     void rebuildView();
@@ -55,6 +58,7 @@ private:
     OwnedArray<RegionSequenceView> regionSequenceViews;
 
     bool isViewDirty = false;
+    double minRegionSequenceStartTime = 0;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARASampleProjectAudioProcessorEditor)

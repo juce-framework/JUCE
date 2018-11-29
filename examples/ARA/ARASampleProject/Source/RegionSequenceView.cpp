@@ -100,12 +100,16 @@ void RegionSequenceView::resized()
     double startInSeconds, endInSeconds;
     getTimeRange (startInSeconds, endInSeconds);
 
-    // use this to set size of playback region views
+    // we should be sized to fit the range of time from the start 
+    // of the first region sequence to the end of our last playback region
+    double viewStartInSeconds = editorComponent->getMinRegionSequenceStartTime();
+    double viewWidthInSeconds = endInSeconds - viewStartInSeconds;
+
     for (auto v : playbackRegionViews)
     {
-        // normalize region boundaries to our entire view length in seconds
-        double normalizedStartPos = (v->getPlaybackRegion()->getStartInPlaybackTime()) / endInSeconds;
-        double normalizedLength = (v->getPlaybackRegion()->getDurationInPlaybackTime()) / endInSeconds;
+        // normalize region boundaries to our visible timeRange
+        double normalizedStartPos = (v->getPlaybackRegion()->getStartInPlaybackTime() - viewStartInSeconds) / viewWidthInSeconds;
+        double normalizedLength = (v->getPlaybackRegion()->getDurationInPlaybackTime()) / viewWidthInSeconds;
 
         // compute region view bounds and place the bounds just after the track header
         auto regionBounds = getLocalBounds();
