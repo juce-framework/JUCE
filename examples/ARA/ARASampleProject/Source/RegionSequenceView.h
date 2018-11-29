@@ -24,7 +24,7 @@ public:
     void paint (Graphics&) override;
     void resized() override;
 
-    // ARAEditorView::Listener overrides: used to track selection
+    // ARAEditorView::Listener overrides
     void onNewSelection (const ARA::PlugIn::ViewSelection& currentSelection) override;
 
     // ARARegionSequence::Listener overrides

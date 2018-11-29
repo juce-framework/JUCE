@@ -18,13 +18,13 @@ public:
     void paint (Graphics&) override;
     void changeListenerCallback (ChangeBroadcaster*) override;
 
-    // ARAEditorView::Listener overrides: used to track selection
+    // ARAEditorView::Listener overrides
     void onNewSelection (const ARA::PlugIn::ViewSelection& currentSelection) override;
 
     // ARADocument::Listener overrides: used to check if our reader has been invalidated
     void doEndEditing (ARADocument* document) override;
 
-    // ARAAudioSource::Listener overrides: used to update when access to the audio source is enabled/disabled
+    // ARAAudioSource::Listener overrides
     void didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) override;
 
     // ARAPlaybackRegion::Listener overrides

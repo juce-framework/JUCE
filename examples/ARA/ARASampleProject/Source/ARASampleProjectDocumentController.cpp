@@ -13,14 +13,13 @@ BufferingAudioReader* ARASampleProjectDocumentController::createBufferingAudioSo
     return new BufferingAudioReader (createAudioSourceReader (audioSource), *araAudioSourceReadingThread.get(), bufferSize);
 }
 
-// return an instance of our playback renderer implementation
 ARA::PlugIn::PlaybackRenderer* ARASampleProjectDocumentController::doCreatePlaybackRenderer() noexcept
 {
     return new ARASampleProjectPlaybackRenderer (this);
 }
 
 //==============================================================================
-// This creates new instances of the document controller..
+// Hook defined by the ARA SDK to create custom subclass
 ARA::PlugIn::DocumentController* ARA::PlugIn::DocumentController::doCreateDocumentController() noexcept
 {
     return new ARASampleProjectDocumentController();
