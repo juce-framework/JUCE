@@ -36,8 +36,8 @@ private:
     void recreatePlaybackRegionReader();
 
 private:
-    ARASampleProjectAudioProcessorEditor* editorComponent = nullptr;
-    ARAPlaybackRegion* playbackRegion = nullptr;
+    ARASampleProjectAudioProcessorEditor* editorComponent;
+    ARAPlaybackRegion* playbackRegion;
     ARAPlaybackRegionReader* playbackRegionReader = nullptr;  // careful: "weak" pointer, actual pointer is owned by our audioThumb
     bool isSelected = false;
 

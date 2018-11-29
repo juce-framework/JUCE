@@ -38,7 +38,7 @@ private:
 
 private:
     ARASampleProjectAudioProcessorEditor* editorComponent;
-    ARARegionSequence* regionSequence = nullptr;
+    ARARegionSequence* regionSequence;
     OwnedArray<PlaybackRegionView> playbackRegionViews;
     bool isSelected = false;
 

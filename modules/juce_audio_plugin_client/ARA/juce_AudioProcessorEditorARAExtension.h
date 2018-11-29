@@ -22,7 +22,7 @@ public:
     ARADocumentController* getARADocumentController() const noexcept;
 
 private:
-    AudioProcessorARAExtension* araProcessorExtension = nullptr;
+    AudioProcessorARAExtension* araProcessorExtension;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorEditorARAExtension)
