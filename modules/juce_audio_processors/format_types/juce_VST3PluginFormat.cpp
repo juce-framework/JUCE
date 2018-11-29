@@ -1843,12 +1843,16 @@ public:
         holder->initialise();
         editController->setComponentHandler (holder->host);
 
-
         Array<Vst::SpeakerArrangement> inputArrangements, outputArrangements;
         processorLayoutsToArrangements (inputArrangements, outputArrangements);
 
-        warnOnFailure (processor->setBusArrangements (inputArrangements.getRawDataPointer(), inputArrangements.size(),
-                                                      outputArrangements.getRawDataPointer(), outputArrangements.size()));
+        // Some plug-ins will crash if you pass a nullptr to setBusArrangements!
+        SpeakerArrangement nullArrangement = {};
+        auto* inputArrangementData  = inputArrangements.size()  == 0 ? &nullArrangement : inputArrangements.getRawDataPointer();
+        auto* outputArrangementData = outputArrangements.size() == 0 ? &nullArrangement : outputArrangements.getRawDataPointer();
+
+        warnOnFailure (processor->setBusArrangements (inputArrangementData,  inputArrangements.size(),
+                                                      outputArrangementData, outputArrangements.size()));
 
         Array<Vst::SpeakerArrangement> actualInArr, actualOutArr;
         repopulateArrangements (actualInArr, actualOutArr);
