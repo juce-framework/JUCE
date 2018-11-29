@@ -21,39 +21,4 @@ double ARARegionSequence::getCommonSampleRate()
     return commonSampleRate;
 }
 
-void ARARegionSequence::willUpdateRegionSequenceProperties (ARARegionSequence::PropertiesPtr newProperties)
-{
-    listeners.callExpectingUnregistration ([this, &newProperties] (Listener& l) { l.willUpdateRegionSequenceProperties (this, newProperties); });
-}
-
-void ARARegionSequence::didUpdateRegionSequenceProperties()
-{
-    listeners.callExpectingUnregistration ([this] (Listener& l) { l.didUpdateRegionSequenceProperties (this); });
-}
-
-void ARARegionSequence::willDestroyRegionSequence()
-{
-    listeners.callExpectingUnregistration ([this] (Listener& l) { l.willDestroyRegionSequence (this); });
-}
-
-void ARARegionSequence::didAddPlaybackRegionToRegionSequence (ARAPlaybackRegion* playbackRegion)
-{
-    listeners.callExpectingUnregistration ([this, playbackRegion] (Listener& l) { l.didAddPlaybackRegionToRegionSequence (this, playbackRegion); });
-}
-
-void ARARegionSequence::willRemovePlaybackRegionFromRegionSequence (ARAPlaybackRegion* playbackRegion)
-{
-    listeners.callExpectingUnregistration ([this, playbackRegion] (Listener& l) { l.willRemovePlaybackRegionFromRegionSequence (this, playbackRegion); });
-}
-
-void ARARegionSequence::addListener (Listener * l)
-{
-    listeners.add (l);
-}
-
-void ARARegionSequence::removeListener (Listener * l)
-{
-    listeners.remove (l);
-}
-
 } // namespace juce

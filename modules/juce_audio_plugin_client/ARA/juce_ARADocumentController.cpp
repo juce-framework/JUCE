@@ -78,7 +78,7 @@ void ARADocumentController::notifyAudioSourceContentChanged (ARAAudioSource* aud
 {
     audioSourceUpdates[audioSource] += scopeFlags;
 
-    audioSource->didUpdateAudioSourceContent (scopeFlags);
+    audioSource->notifyListeners ([audioSource, scopeFlags] (ARAAudioSource::Listener& l) { l.didUpdateAudioSourceContent (audioSource, scopeFlags); });
 
     if (notifyAllAudioModificationsAndPlaybackRegions)
     {
@@ -91,7 +91,7 @@ void ARADocumentController::notifyAudioModificationContentChanged (ARAAudioModif
 {
     audioModificationUpdates[audioModification] += scopeFlags;
 
-    audioModification->didUpdateAudioModificationContent (scopeFlags);
+    audioModification->notifyListeners ([audioModification, scopeFlags] (ARAAudioModification::Listener& l) { l.didUpdateAudioModificationContent (audioModification, scopeFlags); });
 
     if (notifyAllPlaybackRegions)
     {
@@ -104,7 +104,8 @@ void ARADocumentController::notifyPlaybackRegionContentChanged (ARAPlaybackRegio
 {
     playbackRegionUpdates[playbackRegion] += scopeFlags;
 
-    playbackRegion->didUpdatePlaybackRegionContent (scopeFlags);
+    auto araPlaybackRegion = static_cast<ARAPlaybackRegion*> (playbackRegion);
+    araPlaybackRegion->notifyListeners ([araPlaybackRegion, scopeFlags] (ARAPlaybackRegion::Listener& l) { l.didUpdatePlaybackRegionContent (araPlaybackRegion, scopeFlags); });
 }
 
 //==============================================================================
@@ -116,12 +117,14 @@ ARA::PlugIn::Document* ARADocumentController::doCreateDocument (ARA::PlugIn::Doc
 
 void ARADocumentController::doBeginEditing() noexcept
 {
-    static_cast<ARADocument*> (getDocument())->doBeginEditing();
+    auto document = static_cast<ARADocument*> (getDocument());
+    document->notifyListeners ([document] (ARADocument::Listener& l) { l.doBeginEditing (document); });
 }
 
 void ARADocumentController::doEndEditing() noexcept
 {
-    static_cast<ARADocument*> (getDocument())->doEndEditing();
+    auto document = static_cast<ARADocument*> (getDocument ());
+    document->notifyListeners ([document] (ARADocument::Listener& l) { l.doEndEditing (document); });
 }
 
 void ARADocumentController::doNotifyModelUpdates() noexcept
@@ -146,22 +149,26 @@ void ARADocumentController::doNotifyModelUpdates() noexcept
 
 void ARADocumentController::willUpdateDocumentProperties (ARA::PlugIn::Document* document, ARA::PlugIn::Document::PropertiesPtr newProperties) noexcept
 {
-    static_cast<ARADocument*> (document)->willUpdateDocumentProperties (newProperties);
+    auto araDocument = static_cast<ARADocument*> (document);
+    araDocument->notifyListeners ([araDocument, newProperties] (ARADocument::Listener& l) { l.willUpdateDocumentProperties (araDocument, newProperties); });
 }
 
 void ARADocumentController::didUpdateDocumentProperties (ARA::PlugIn::Document* document) noexcept
 {
-    static_cast<ARADocument*> (document)->didUpdateDocumentProperties();
+    auto araDocument = static_cast<ARADocument*> (document);
+    araDocument->notifyListeners ([araDocument] (ARADocument::Listener& l) { l.didUpdateDocumentProperties (araDocument); });
 }
 
 void ARADocumentController::didReorderRegionSequencesInDocument (ARA::PlugIn::Document* document) noexcept
 {
-    static_cast<ARADocument*> (document)->didReorderRegionSequencesInDocument();
+    auto araDocument = static_cast<ARADocument*> (document);
+    araDocument->notifyListeners ([araDocument] (ARADocument::Listener& l) { l.didReorderRegionSequencesInDocument (araDocument); });
 }
 
 void ARADocumentController::willDestroyDocument (ARA::PlugIn::Document* document) noexcept
 {
-    static_cast<ARADocument*> (document)->willDestroyDocument();
+    auto araDocument = static_cast<ARADocument*> (document);
+    araDocument->notifyListeners ([araDocument] (ARADocument::Listener& l) { l.willDestroyDocument (araDocument); });
 }
 
 //==============================================================================
@@ -170,28 +177,32 @@ ARA::PlugIn::MusicalContext* ARADocumentController::doCreateMusicalContext (ARA:
 {
     auto araDocument = static_cast<ARADocument*> (document);
     auto musicalContext = new ARAMusicalContext (araDocument, hostRef);
-    araDocument->didAddMusicalContext (musicalContext);
+    araDocument->notifyListeners ([araDocument, musicalContext] (ARADocument::Listener& l) { l.didAddMusicalContext (araDocument, musicalContext); });
     return musicalContext;
 }
 
 void ARADocumentController::willUpdateMusicalContextProperties (ARA::PlugIn::MusicalContext* musicalContext, ARAMusicalContext::PropertiesPtr newProperties) noexcept
 {
-    static_cast<ARAMusicalContext*> (musicalContext)->willUpdateMusicalContextProperties (newProperties);
+    auto araMusicalContext = static_cast<ARAMusicalContext*> (musicalContext);
+    araMusicalContext->notifyListeners ([araMusicalContext, newProperties] (ARAMusicalContext::Listener& l) { l.willUpdateMusicalContextProperties (araMusicalContext, newProperties); });
 }
 
 void ARADocumentController::didUpdateMusicalContextProperties (ARA::PlugIn::MusicalContext* musicalContext) noexcept
 {
-    static_cast<ARAMusicalContext*> (musicalContext)->didUpdateMusicalContextProperties();
+    auto araMusicalContext = static_cast<ARAMusicalContext*> (musicalContext);
+    araMusicalContext->notifyListeners ([araMusicalContext] (ARAMusicalContext::Listener& l) { l.didUpdateMusicalContextProperties (araMusicalContext); });
 }
 
 void ARADocumentController::doUpdateMusicalContextContent (ARA::PlugIn::MusicalContext* musicalContext, const ARA::ARAContentTimeRange* /*range*/, ARA::ContentUpdateScopes scopeFlags) noexcept
 {
-    static_cast<ARAMusicalContext*> (musicalContext)->didUpdateMusicalContextContent (scopeFlags);
+    auto araMusicalContext = static_cast<ARAMusicalContext*> (musicalContext);
+    araMusicalContext->notifyListeners ([araMusicalContext, scopeFlags] (ARAMusicalContext::Listener& l) { l.didUpdateMusicalContextContent (araMusicalContext, scopeFlags); });
 }
 
 void ARADocumentController::willDestroyMusicalContext (ARA::PlugIn::MusicalContext* musicalContext) noexcept
 {
-    static_cast<ARAMusicalContext*> (musicalContext)->willDestroyMusicalContext();
+    auto araMusicalContext = static_cast<ARAMusicalContext*> (musicalContext);
+    araMusicalContext->notifyListeners ([araMusicalContext] (ARAMusicalContext::Listener& l) { l.willDestroyMusicalContext (araMusicalContext); });
 }
 
 //==============================================================================
@@ -200,35 +211,40 @@ ARA::PlugIn::RegionSequence* ARADocumentController::doCreateRegionSequence (ARA:
 {
     auto araDocument = static_cast<ARADocument*> (document);
     auto regionSequence = new ARARegionSequence (araDocument, hostRef);
-    araDocument->didAddRegionSequence (regionSequence);
+    araDocument->notifyListeners ([araDocument, regionSequence] (ARADocument::Listener& l) { l.didAddRegionSequence (araDocument, regionSequence); });
     return regionSequence;
 }
 
 void ARADocumentController::willUpdateRegionSequenceProperties (ARA::PlugIn::RegionSequence* regionSequence, ARARegionSequence::PropertiesPtr newProperties) noexcept
 {
-    static_cast<ARARegionSequence*> (regionSequence)->willUpdateRegionSequenceProperties (newProperties);
+    auto araRegionSequence = static_cast<ARARegionSequence*> (regionSequence);
+    araRegionSequence->notifyListeners ([araRegionSequence, newProperties] (ARARegionSequence::Listener& l) { l.willUpdateRegionSequenceProperties (araRegionSequence, newProperties); });
 }
 
 void ARADocumentController::didUpdateRegionSequenceProperties (ARA::PlugIn::RegionSequence* regionSequence) noexcept
 {
-    static_cast<ARARegionSequence*> (regionSequence)->didUpdateRegionSequenceProperties();
+    auto araRegionSequence = static_cast<ARARegionSequence*> (regionSequence);
+    araRegionSequence->notifyListeners ([araRegionSequence] (ARARegionSequence::Listener& l) { l.didUpdateRegionSequenceProperties (araRegionSequence); });
 }
 
 void ARADocumentController::willDestroyRegionSequence (ARA::PlugIn::RegionSequence* regionSequence) noexcept
 {
-    static_cast<ARARegionSequence*> (regionSequence)->willDestroyRegionSequence();
+    auto araRegionSequence = static_cast<ARARegionSequence*> (regionSequence);
+    araRegionSequence->notifyListeners ([araRegionSequence] (ARARegionSequence::Listener& l) { l.willDestroyRegionSequence (araRegionSequence); });
 }
 
 void ARADocumentController::willRemovePlaybackRegionFromRegionSequence (ARA::PlugIn::RegionSequence* regionSequence, ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept
 {
-    static_cast<ARARegionSequence*> (regionSequence)->
-        willRemovePlaybackRegionFromRegionSequence (static_cast<ARAPlaybackRegion*> (playbackRegion));
+    auto araRegionSequence = static_cast<ARARegionSequence*> (regionSequence);
+    auto araPlaybackRegion = static_cast<ARAPlaybackRegion*> (playbackRegion);
+    araRegionSequence->notifyListeners ([araRegionSequence, araPlaybackRegion] (ARARegionSequence::Listener& l) { l.willRemovePlaybackRegionFromRegionSequence (araRegionSequence, araPlaybackRegion); });
 }
 
 void ARADocumentController::didAddPlaybackRegionToRegionSequence (ARA::PlugIn::RegionSequence* regionSequence, ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept
 {
-    static_cast<ARARegionSequence*> (regionSequence)->
-        didAddPlaybackRegionToRegionSequence (static_cast<ARAPlaybackRegion*> (playbackRegion));
+    auto araRegionSequence = static_cast<ARARegionSequence*> (regionSequence);
+    auto araPlaybackRegion = static_cast<ARAPlaybackRegion*> (playbackRegion);
+    araRegionSequence->notifyListeners ([araRegionSequence, araPlaybackRegion] (ARARegionSequence::Listener& l) { l.didAddPlaybackRegionToRegionSequence (araRegionSequence, araPlaybackRegion); });
 }
 
 //==============================================================================
@@ -237,7 +253,7 @@ ARA::PlugIn::AudioSource* ARADocumentController::doCreateAudioSource (ARA::PlugI
 {
     auto araDocument = static_cast<ARADocument*> (document);
     auto audioSource = new ARAAudioSource (araDocument, hostRef);
-    araDocument->didAddAudioSource (audioSource);
+    araDocument->notifyListeners ([araDocument, audioSource] (ARADocument::Listener& l) { l.didAddAudioSource (araDocument, audioSource); });
     return audioSource;
 }
 
@@ -245,37 +261,44 @@ void ARADocumentController::willUpdateAudioSourceProperties (
     ARA::PlugIn::AudioSource* audioSource,
     ARA::PlugIn::AudioSource::PropertiesPtr newProperties) noexcept
 {
-    static_cast<ARAAudioSource*> (audioSource)->willUpdateAudioSourceProperties (newProperties);
+    auto araAudioSource = static_cast<ARAAudioSource*> (audioSource);
+    araAudioSource->notifyListeners ([araAudioSource, newProperties] (ARAAudioSource::Listener& l) { l.willUpdateAudioSourceProperties(araAudioSource, newProperties); });
 }
 
 void ARADocumentController::didUpdateAudioSourceProperties (ARA::PlugIn::AudioSource* audioSource) noexcept
 {
-    static_cast<ARAAudioSource*> (audioSource)->didUpdateAudioSourceProperties();
+    auto araAudioSource = static_cast<ARAAudioSource*> (audioSource);
+    araAudioSource->notifyListeners ([araAudioSource] (ARAAudioSource::Listener& l) { l.didUpdateAudioSourceProperties (araAudioSource); });
 }
 
 void ARADocumentController::doUpdateAudioSourceContent (ARA::PlugIn::AudioSource* audioSource, const ARA::ARAContentTimeRange* /*range*/, ARA::ContentUpdateScopes scopeFlags) noexcept
 {
-    static_cast<ARAAudioSource*> (audioSource)->didUpdateAudioSourceContent (scopeFlags);
+    auto araAudioSource = static_cast<ARAAudioSource*> (audioSource);
+    araAudioSource->notifyListeners ([araAudioSource, scopeFlags] (ARAAudioSource::Listener& l) { l.didUpdateAudioSourceContent (araAudioSource, scopeFlags); });
 }
 
 void ARADocumentController::willEnableAudioSourceSamplesAccess (ARA::PlugIn::AudioSource* audioSource, bool enable) noexcept
 {
-    static_cast<ARAAudioSource*> (audioSource)->willEnableAudioSourceSamplesAccess (enable);
+    auto araAudioSource = static_cast<ARAAudioSource*> (audioSource);
+    araAudioSource->notifyListeners ([araAudioSource, enable] (ARAAudioSource::Listener& l) { l.willEnableAudioSourceSamplesAccess(araAudioSource, enable); });
 }
 
 void ARADocumentController::didEnableAudioSourceSamplesAccess (ARA::PlugIn::AudioSource* audioSource, bool enable) noexcept
 {
-    static_cast<ARAAudioSource*> (audioSource)->didEnableAudioSourceSamplesAccess (enable);
+    auto araAudioSource = static_cast<ARAAudioSource*> (audioSource);
+    araAudioSource->notifyListeners ([araAudioSource, enable] (ARAAudioSource::Listener& l) { l.didEnableAudioSourceSamplesAccess(araAudioSource, enable); });
 }
 
 void ARADocumentController::doDeactivateAudioSourceForUndoHistory (ARA::PlugIn::AudioSource* audioSource, bool deactivate) noexcept
 {
-    static_cast<ARAAudioSource*> (audioSource)->doDeactivateAudioSourceForUndoHistory (deactivate);
+    auto araAudioSource = static_cast<ARAAudioSource*> (audioSource);
+    araAudioSource->notifyListeners ([araAudioSource, deactivate] (ARAAudioSource::Listener& l) { l.doDeactivateAudioSourceForUndoHistory (araAudioSource, deactivate); });
 }
 
 void ARADocumentController::willDestroyAudioSource (ARA::PlugIn::AudioSource* audioSource) noexcept
 {
-    static_cast<ARAAudioSource*> (audioSource)->willDestroyAudioSource();
+    auto araAudioSource = static_cast<ARAAudioSource*> (audioSource);
+    araAudioSource->notifyListeners ([araAudioSource] (ARAAudioSource::Listener& l) { l.willDestroyAudioSource (araAudioSource); });
 }
 
 AudioFormatReader* ARADocumentController::createAudioSourceReader (ARAAudioSource* audioSource)
@@ -299,28 +322,32 @@ ARA::PlugIn::AudioModification* ARADocumentController::doCreateAudioModification
 {
     auto araAudioSource = static_cast<ARAAudioSource*>(audioSource);
     auto audioModification = new ARAAudioModification (araAudioSource, hostRef);
-    araAudioSource->didAddAudioModification (audioModification);
+    araAudioSource->notifyListeners ([araAudioSource, audioModification] (ARAAudioSource::Listener& l) { l.didAddAudioModification (araAudioSource, audioModification); });
     return audioModification;
 }
 
 void ARADocumentController::willUpdateAudioModificationProperties (ARA::PlugIn::AudioModification* audioModification, ARA::PlugIn::AudioModification::PropertiesPtr newProperties) noexcept
 {
-    static_cast<ARAAudioModification*> (audioModification)->willUpdateAudioModificationProperties (newProperties);
+    auto araAudioModification = static_cast<ARAAudioModification*> (audioModification);
+    araAudioModification->notifyListeners ([araAudioModification, newProperties] (ARAAudioModification::Listener& l) { l.willUpdateAudioModificationProperties (araAudioModification, newProperties); });
 }
 
 void ARADocumentController::didUpdateAudioModificationProperties (ARA::PlugIn::AudioModification* audioModification) noexcept
 {
-    static_cast<ARAAudioModification*> (audioModification)->didUpdateAudioModificationProperties();
+    auto araAudioModification = static_cast<ARAAudioModification*> (audioModification);
+    araAudioModification->notifyListeners ([araAudioModification] (ARAAudioModification::Listener& l) { l.didUpdateAudioModificationProperties (araAudioModification); });
 }
 
 void ARADocumentController::doDeactivateAudioModificationForUndoHistory (ARA::PlugIn::AudioModification* audioModification, bool deactivate) noexcept
 {
-    static_cast<ARAAudioModification*> (audioModification)->doDeactivateAudioModificationForUndoHistory (deactivate);
+    auto araAudioModification = static_cast<ARAAudioModification*> (audioModification);
+    araAudioModification->notifyListeners ([araAudioModification, deactivate] (ARAAudioModification::Listener& l) { l.doDeactivateAudioModificationForUndoHistory (araAudioModification, deactivate); });
 }
 
 void ARADocumentController::willDestroyAudioModification (ARA::PlugIn::AudioModification* audioModification) noexcept
 {
-    static_cast<ARAAudioModification*> (audioModification)->willDestroyAudioModification();
+    auto araAudioModification = static_cast<ARAAudioModification*> (audioModification);
+    araAudioModification->notifyListeners ([araAudioModification] (ARAAudioModification::Listener& l) { l.willDestroyAudioModification (araAudioModification); });
 }
 
 //==============================================================================
@@ -329,23 +356,26 @@ ARA::PlugIn::PlaybackRegion* ARADocumentController::doCreatePlaybackRegion (ARA:
 {
     auto audioModification = static_cast<ARAAudioModification*>(modification);
     auto playbackRegion = new ARAPlaybackRegion (audioModification, hostRef);
-    audioModification->didAddPlaybackRegion (playbackRegion);
+    audioModification->notifyListeners ([audioModification, playbackRegion] (ARAAudioModification::Listener& l) { l.didAddPlaybackRegion (audioModification, playbackRegion); });
     return playbackRegion;
 }
 
 void ARADocumentController::willUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion, ARA::PlugIn::PlaybackRegion::PropertiesPtr newProperties) noexcept
 {
-    static_cast<ARAPlaybackRegion*> (playbackRegion)->willUpdatePlaybackRegionProperties (newProperties);
+    auto araPlaybackRegion = static_cast<ARAPlaybackRegion*> (playbackRegion);
+    araPlaybackRegion->notifyListeners ([araPlaybackRegion, newProperties] (ARAPlaybackRegion::Listener& l) { l.willUpdatePlaybackRegionProperties (araPlaybackRegion, newProperties); });
 }
 
 void ARADocumentController::didUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept
 {
-    static_cast<ARAPlaybackRegion*> (playbackRegion)->didUpdatePlaybackRegionProperties();
+    auto araPlaybackRegion = static_cast<ARAPlaybackRegion*> (playbackRegion);
+    araPlaybackRegion->notifyListeners ([araPlaybackRegion] (ARAPlaybackRegion::Listener& l) { l.didUpdatePlaybackRegionProperties (araPlaybackRegion); });
 }
 
 void ARADocumentController::willDestroyPlaybackRegion (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept
 {
-    static_cast<ARAPlaybackRegion*> (playbackRegion)->willDestroyPlaybackRegion();
+    auto araPlaybackRegion = static_cast<ARAPlaybackRegion*> (playbackRegion);
+    araPlaybackRegion->notifyListeners ([araPlaybackRegion] (ARAPlaybackRegion::Listener& l) { l.willDestroyPlaybackRegion (araPlaybackRegion); });
 }
 
 //==============================================================================

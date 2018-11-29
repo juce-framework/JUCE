@@ -28,21 +28,8 @@ public:
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
     };
 
-    void addListener (Listener* l);
-    void removeListener (Listener* l);
-
-public:         // to be called by ARADocumentController only
-    void willUpdateAudioSourceProperties (PropertiesPtr newProperties);
-    void didUpdateAudioSourceProperties();
-    void didUpdateAudioSourceContent (ARAContentUpdateScopes scopeFlags);
-    void willEnableAudioSourceSamplesAccess (bool enable);
-    void didEnableAudioSourceSamplesAccess (bool enable);
-    void doDeactivateAudioSourceForUndoHistory (bool deactivate);
-    void didAddAudioModification (ARAAudioModification* audioModification);
-    void willDestroyAudioSource();
-
-private:
-    ListenerList<Listener> listeners;
+    //==============================================================================
+    JUCE_ARA_MODEL_OBJECT_LISTENERLIST
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAAudioSource)
