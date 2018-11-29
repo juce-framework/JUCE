@@ -408,3 +408,5 @@ ARA::PlugIn::EditorView* ARADocumentController::doCreateEditorView() noexcept
 }
 
 } // namespace juce
+
+#undef notify_listeners
