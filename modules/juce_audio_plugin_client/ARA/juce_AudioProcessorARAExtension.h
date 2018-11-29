@@ -13,7 +13,7 @@ class ARADocumentController;
 class AudioProcessorARAExtension
 {
 public:
-    AudioProcessorARAExtension () = default;
+    AudioProcessorARAExtension() = default;
 
     const ARA::ARAPlugInExtensionInstance* bindToARA (ARA::ARADocumentControllerRef documentControllerRef, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles);
 

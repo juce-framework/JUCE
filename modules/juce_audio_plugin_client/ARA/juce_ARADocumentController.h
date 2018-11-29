@@ -12,7 +12,6 @@ class ARADocumentController: public ARA::PlugIn::DocumentController
 {
 public:
     ARADocumentController() noexcept {}
-    virtual ~ARADocumentController() noexcept {}
 
     //==============================================================================
     // create readers for the various model objects

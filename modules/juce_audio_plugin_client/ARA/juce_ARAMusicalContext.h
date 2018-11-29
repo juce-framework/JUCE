@@ -13,7 +13,7 @@ public:
     class Listener
     {
     public:
-        virtual ~Listener() {}
+        virtual ~Listener() = default;
 
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
         virtual void willUpdateMusicalContextProperties (ARAMusicalContext* musicalContext, ARAMusicalContext::PropertiesPtr newProperties) {}
