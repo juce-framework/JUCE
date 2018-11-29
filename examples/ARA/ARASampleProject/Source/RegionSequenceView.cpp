@@ -14,7 +14,7 @@ RegionSequenceView::RegionSequenceView (ARASampleProjectAudioProcessorEditor* ed
 
     regionSequence->addListener (this);
 
-    for (auto* playbackRegion : regionSequence->getPlaybackRegions())
+    for (auto playbackRegion : regionSequence->getPlaybackRegions())
     {
         playbackRegionViews.add (new PlaybackRegionView (editorComponent, static_cast<ARAPlaybackRegion*> (playbackRegion)));
         addAndMakeVisible (playbackRegionViews.getLast());

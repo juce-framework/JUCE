@@ -86,7 +86,7 @@ void ARASampleProjectAudioProcessorEditor::resized()
     const double normalizedWidth = (totalRegionSequenceDuration) / kVisibleSeconds;
     regionSequenceListView.setBounds (0, 0, (int) (normalizedWidth * getWidth()) + kTrackHeaderWidth + kRegionSequenceDurationPadPixels, kRegionSequenceHeight * i);
 
-    regionSequenceViewPort.setBounds (0, 0, getWidth (), getHeight ());
+    regionSequenceViewPort.setBounds (0, 0, getWidth(), getHeight());
 }
 
 void ARASampleProjectAudioProcessorEditor::rebuildView()
