@@ -79,6 +79,9 @@ public:
     */
     const Parameters& getParameters() const    { return currentParameters; }
 
+    /** Returns true if the envelope is in its attack, decay, sustain or release stage. */
+    bool isActive() const noexcept             { return currentState != State::idle; }
+
     //==============================================================================
     /** Sets the sample rate that will be used for the envelope.
 
