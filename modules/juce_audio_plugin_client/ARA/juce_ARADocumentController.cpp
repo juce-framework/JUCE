@@ -372,6 +372,13 @@ void ARADocumentController::didUpdatePlaybackRegionProperties (ARA::PlugIn::Play
     araPlaybackRegion->notifyListeners ([araPlaybackRegion] (ARAPlaybackRegion::Listener& l) { l.didUpdatePlaybackRegionProperties (araPlaybackRegion); });
 }
 
+void ARADocumentController::doGetPlaybackRegionHeadAndTailTime (ARA::PlugIn::PlaybackRegion* playbackRegion, ARA::ARATimeDuration* headTime, ARA::ARATimeDuration* tailTime) noexcept
+{
+    auto araPlaybackRegion = static_cast<ARAPlaybackRegion*> (playbackRegion);
+    *headTime = araPlaybackRegion->getHeadTime();
+    *tailTime = araPlaybackRegion->getTailTime();
+}
+
 void ARADocumentController::willDestroyPlaybackRegion (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept
 {
     auto araPlaybackRegion = static_cast<ARAPlaybackRegion*> (playbackRegion);
