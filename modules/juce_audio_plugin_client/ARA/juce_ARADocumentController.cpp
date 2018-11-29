@@ -203,7 +203,7 @@ ARA::PlugIn::MusicalContext* ARADocumentController::doCreateMusicalContext (ARA:
     return new ARAMusicalContext (static_cast<ARADocument*>(document), hostRef);
 }
 
-void ARADocumentController::willUpdateMusicalContextProperties (ARA::PlugIn::MusicalContext* musicalContext, ARAMusicalContext::PropertiesPtr newProperties) noexcept
+void ARADocumentController::willUpdateMusicalContextProperties (ARA::PlugIn::MusicalContext* musicalContext, ARA::PlugIn::MusicalContext::PropertiesPtr newProperties) noexcept
 {
     notify_listeners (ARAMusicalContext, willUpdateMusicalContextProperties, musicalContext, newProperties);
 }
@@ -230,7 +230,7 @@ ARA::PlugIn::RegionSequence* ARADocumentController::doCreateRegionSequence (ARA:
     return new ARARegionSequence (static_cast<ARADocument*>(document), hostRef);
 }
 
-void ARADocumentController::willUpdateRegionSequenceProperties (ARA::PlugIn::RegionSequence* regionSequence, ARARegionSequence::PropertiesPtr newProperties) noexcept
+void ARADocumentController::willUpdateRegionSequenceProperties (ARA::PlugIn::RegionSequence* regionSequence, ARA::PlugIn::RegionSequence::PropertiesPtr newProperties) noexcept
 {
     notify_listeners (ARARegionSequence, willUpdateRegionSequenceProperties, regionSequence, newProperties);
 }
@@ -262,9 +262,7 @@ ARA::PlugIn::AudioSource* ARADocumentController::doCreateAudioSource (ARA::PlugI
     return new ARAAudioSource (static_cast<ARADocument*>(document), hostRef);\
 }
 
-void ARADocumentController::willUpdateAudioSourceProperties (
-    ARA::PlugIn::AudioSource* audioSource,
-    ARA::PlugIn::AudioSource::PropertiesPtr newProperties) noexcept
+void ARADocumentController::willUpdateAudioSourceProperties (ARA::PlugIn::AudioSource* audioSource, ARA::PlugIn::AudioSource::PropertiesPtr newProperties) noexcept
 {
     notify_listeners (ARAAudioSource, willUpdateAudioSourceProperties, audioSource, newProperties);
 }
