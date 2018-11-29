@@ -24,12 +24,17 @@ public:
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
     };
 
-    inline double getHeadTime() const { return headTime; }
-    inline double getTailTime() const { return tailTime; }
+    double getHeadTime() const { return headTime; }
+    double getTailTime() const { return tailTime; }
+    void setHeadTime (double newHeadTime);
+    void setTailTime (double newTailTime);
+    void setHeadAndTailTime (double newHeadTime, double newTailTime);
 
-protected:
-    double headTime = 0;
-    double tailTime = 0;
+    void notifyContentChanged (ARAContentUpdateScopes scopeFlags);
+
+private:
+    double headTime = 0.0;
+    double tailTime = 0.0;
 
     //==============================================================================
     JUCE_ARA_MODEL_OBJECT_LISTENERLIST

@@ -7,4 +7,10 @@ ARAAudioSource::ARAAudioSource (ARADocument* document, ARA::ARAAudioSourceHostRe
 : ARA::PlugIn::AudioSource(document, hostRef)
 {}
 
+void ARAAudioSource::notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyAllAudioModificationsAndPlaybackRegions)
+{
+    static_cast<ARADocumentController*> (getDocument()->getDocumentController())->
+                                notifyAudioSourceContentChanged (this, scopeFlags, notifyAllAudioModificationsAndPlaybackRegions);
+}
+
 } // namespace juce

@@ -29,6 +29,8 @@ public:
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
     };
 
+    void notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyAllAudioModificationsAndPlaybackRegions = false);
+
     //==============================================================================
     JUCE_ARA_MODEL_OBJECT_LISTENERLIST
 
