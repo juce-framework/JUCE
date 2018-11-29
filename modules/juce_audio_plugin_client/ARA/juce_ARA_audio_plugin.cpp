@@ -1,6 +1,6 @@
-#if JucePlugin_Enable_ARA
-
 #include "juce_ARA_audio_plugin.h"
+
+#if JucePlugin_Enable_ARA
 
 #include <ARA_Library/PlugIn/ARAPlug.cpp>
 #include <ARA_Library/Debug/ARADebug.c>

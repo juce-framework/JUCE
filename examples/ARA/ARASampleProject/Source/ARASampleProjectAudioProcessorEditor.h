@@ -4,10 +4,6 @@
 #include "ARASampleProjectAudioProcessor.h"
 #include "RegionSequenceView.h"
 
-#if ! JucePlugin_Enable_ARA
-    #error "bad project configuration, JucePlugin_Enable_ARA is required for compiling this class"
-#endif
-
 //==============================================================================
 /**
     Editor class for ARA sample project

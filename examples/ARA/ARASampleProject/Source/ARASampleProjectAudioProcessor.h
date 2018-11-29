@@ -2,6 +2,9 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
+#if ! JucePlugin_Enable_ARA
+    #error "bad project configuration, JucePlugin_Enable_ARA is required for compiling this class"
+#endif
 
 //==============================================================================
 /**
@@ -9,10 +12,8 @@
     This class delegates to an ARASampleProjectPlaybackRenderer instance
     which fulfills the PlaybackRenderer role of our ARA enabled plug-in
 */
-class ARASampleProjectAudioProcessor   : public AudioProcessor
-                                       #if JucePlugin_Enable_ARA
-                                       , public AudioProcessorARAExtension
-                                       #endif
+class ARASampleProjectAudioProcessor   : public AudioProcessor,
+                                         public AudioProcessorARAExtension
 {
 public:
     //==============================================================================

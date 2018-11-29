@@ -88,7 +88,7 @@
  #include "../ARA/juce_AudioProcessorARAExtension.h"
  #include <ARA_API/ARAAudioUnit.h>
  #if ARA_SUPPORT_VERSION_1
-  #error "Unsupported ARA version - ARA version 2 and onward are JUCE compatible"
+  #error "Unsupported ARA version - only ARA version 2 and onward are supported by the current JUCE ARA implementation"
  #endif
 #endif
 
