@@ -26,8 +26,11 @@ public:
         virtual void didUpdateDocumentProperties (ARADocument* document) {}
         virtual void didReorderRegionSequencesInDocument (ARADocument* document) {}
         virtual void didAddMusicalContext (ARADocument* document, ARAMusicalContext* musicalContext) {}
+        virtual void willRemoveMusicalContext (ARADocument* document, ARAMusicalContext* musicalContext) {}
         virtual void didAddRegionSequence (ARADocument* document, ARARegionSequence* regionSequence) {}
+        virtual void willRemoveRegionSequence (ARADocument* document, ARARegionSequence* regionSequence) {}
         virtual void didAddAudioSource (ARADocument* document, ARAAudioSource* audioSource) {}
+        virtual void willRemoveAudioSource (ARADocument* document, ARAAudioSource* audioSource) {}
         virtual void willDestroyDocument (ARADocument* document) {}
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
     };
