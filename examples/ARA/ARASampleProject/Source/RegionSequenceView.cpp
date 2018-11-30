@@ -147,7 +147,7 @@ void RegionSequenceView::willRemovePlaybackRegionFromRegionSequence (ARARegionSe
 {
     jassert (regionSequence == sequence);
 
-    for (int i = 0; i < playbackRegionViews.size(); i++)
+    for (int i = 0; i < playbackRegionViews.size(); ++i)
     {
         if (playbackRegionViews[i]->getPlaybackRegion() == playbackRegion)
         {

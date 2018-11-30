@@ -42,7 +42,7 @@ const ARA::ARAFactory* ARA::PlugIn::DocumentController::getARAFactory() noexcept
             kARAContentTypeKeySignatures,
             kARAContentTypeSheetChords
         };
-        for (size_t i = 0; i < sizeof (araContentVars) / sizeof (ARAContentType); i++)
+        for (size_t i = 0; i < sizeof (araContentVars) / sizeof (ARAContentType); ++i)
         {
             if (JucePlugin_ARAContentTypes & (1 << i))
                 contentTypes.push_back (araContentVars[i]);
@@ -60,7 +60,7 @@ const ARA::ARAFactory* ARA::PlugIn::DocumentController::getARAFactory() noexcept
         };
 
         factory->supportedPlaybackTransformationFlags = 0;
-        for (size_t i = 0; i < sizeof (araPlaybackTransformations) / sizeof (ARAPlaybackTransformationFlags); i++)
+        for (size_t i = 0; i < sizeof (araPlaybackTransformations) / sizeof (ARAPlaybackTransformationFlags); ++i)
         {
             if (JucePlugin_ARATransformationFlags & (1 << i))
                 factory->supportedPlaybackTransformationFlags |= araPlaybackTransformations[i];

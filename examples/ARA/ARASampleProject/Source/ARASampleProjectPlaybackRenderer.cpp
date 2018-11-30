@@ -143,7 +143,7 @@ bool ARASampleProjectPlaybackRenderer::processBlock (AudioBuffer<float>& buffer,
                 // if successful, mix local buffer into the output buffer
                 if (bufferSuccess)
                 {
-                    for (int c = 0; c < getNumChannels(); c++)
+                    for (int c = 0; c < getNumChannels(); ++c)
                         buffer.addFrom(c, startInDestBuffer, *tempBuffer, c, 0, numSamplesToRead);
                 }
             }
