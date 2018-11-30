@@ -138,6 +138,8 @@ void PlaybackRegionView::willUpdatePlaybackRegionProperties (ARAPlaybackRegion* 
     {
         editorComponent->setDirty();
     }
+
+    repaint();
 }
 
 void PlaybackRegionView::recreatePlaybackRegionReader()
