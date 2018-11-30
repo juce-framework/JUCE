@@ -1710,8 +1710,8 @@ public:
           holder (componentHolder),
           inputParameterChanges (new ParamValueQueueList()),
           outputParameterChanges (new ParamValueQueueList()),
-        midiInputs (new MidiEventList()),
-        midiOutputs (new MidiEventList())
+          midiInputs (new MidiEventList()),
+          midiOutputs (new MidiEventList())
     {
         holder->host->setPlugin (this);
     }
@@ -1848,8 +1848,8 @@ public:
 
         // Some plug-ins will crash if you pass a nullptr to setBusArrangements!
         SpeakerArrangement nullArrangement = {};
-        auto* inputArrangementData  = inputArrangements.size()  == 0 ? &nullArrangement : inputArrangements.getRawDataPointer();
-        auto* outputArrangementData = outputArrangements.size() == 0 ? &nullArrangement : outputArrangements.getRawDataPointer();
+        auto* inputArrangementData  = inputArrangements.isEmpty()  ? &nullArrangement : inputArrangements.getRawDataPointer();
+        auto* outputArrangementData = outputArrangements.isEmpty() ? &nullArrangement : outputArrangements.getRawDataPointer();
 
         warnOnFailure (processor->setBusArrangements (inputArrangementData,  inputArrangements.size(),
                                                       outputArrangementData, outputArrangements.size()));
