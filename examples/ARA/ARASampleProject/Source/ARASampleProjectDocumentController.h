@@ -13,7 +13,7 @@ class ARASampleProjectDocumentController : public ARADocumentController
 public:
     ARASampleProjectDocumentController() noexcept;
 
-    BufferingAudioReader* createBufferingAudioSourceReader (ARAAudioSource* audioSource, int bufferSize);
+    TimeSliceThread& getAudioSourceReadingThread() { return audioSourceReadingThread; }
 
 protected:
     // ARA class creation overrides
@@ -21,7 +21,7 @@ protected:
 
 private:
     // Thread used by buffering audio sources to read samples from the host
-    std::unique_ptr<TimeSliceThread> araAudioSourceReadingThread;
+    TimeSliceThread audioSourceReadingThread;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARASampleProjectDocumentController)

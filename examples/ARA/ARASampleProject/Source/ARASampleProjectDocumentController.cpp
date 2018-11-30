@@ -2,15 +2,10 @@
 #include "ARASampleProjectPlaybackRenderer.h"
 
 ARASampleProjectDocumentController::ARASampleProjectDocumentController() noexcept
-: ARADocumentController()
+: ARADocumentController(),
+  audioSourceReadingThread (String (JucePlugin_Name) + " ARA Sample Reading Thread")
 {
-    araAudioSourceReadingThread.reset (new TimeSliceThread (String (JucePlugin_Name) + " ARA Sample Reading Thread"));
-    araAudioSourceReadingThread->startThread();
-}
-
-BufferingAudioReader* ARASampleProjectDocumentController::createBufferingAudioSourceReader (ARAAudioSource* audioSource, int bufferSize)
-{
-    return new BufferingAudioReader (createAudioSourceReader (audioSource), *araAudioSourceReadingThread.get(), bufferSize);
+    audioSourceReadingThread.startThread();
 }
 
 ARA::PlugIn::PlaybackRenderer* ARASampleProjectDocumentController::doCreatePlaybackRenderer() noexcept
