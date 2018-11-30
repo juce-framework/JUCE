@@ -78,18 +78,21 @@ void RegionSequenceView::paint (Graphics& g)
     g.setColour (isSelected ? Colours::yellow : Colours::black);
     g.drawRect (headerRect);
 
-    // draw the track name (vertically) in the header by rotating
-    // the graphics transform about the center header rect
-    // TODO JUCE_ARA this was more of a trial-and-error process - is
-    // there a cleaner way to draw vertical text inside headerRect?
-    Graphics::ScopedSaveState state (g);
-    g.addTransform (AffineTransform::rotation (-MathConstants<float>::halfPi, 
-                                               headerRect.getWidth() * 0.5f,
-                                               headerRect.getHeight() * 0.5f));
-    Rectangle<int> textRect ((int) (-0.3f * headerRect.getHeight()), (int) (1.25f * headerRect.getWidth()), (int) (0.85f * headerRect.getHeight()), headerRect.getWidth());
-    g.setColour (trackColour.contrasting (1.0f));
-    g.setFont (Font (12.0f));
-    g.drawText (String (regionSequence->getName()), textRect, Justification::bottomLeft);
+    if (regionSequence->getName())
+    {
+        // draw the track name (vertically) in the header by rotating
+        // the graphics transform about the center header rect
+        // TODO JUCE_ARA this was more of a trial-and-error process - is
+        // there a cleaner way to draw vertical text inside headerRect?
+        Graphics::ScopedSaveState state (g);
+        g.addTransform (AffineTransform::rotation (-MathConstants<float>::halfPi,
+                                                   headerRect.getWidth() * 0.5f,
+                                                   headerRect.getHeight() * 0.5f));
+        Rectangle<int> textRect ((int) (-0.3f * headerRect.getHeight()), (int) (1.25f * headerRect.getWidth()), (int) (0.85f * headerRect.getHeight()), headerRect.getWidth());
+        g.setColour (trackColour.contrasting (1.0f));
+        g.setFont (Font (12.0f));
+        g.drawText (String (regionSequence->getName()), textRect, Justification::bottomLeft);
+    }
 }
 
 void RegionSequenceView::resized()

@@ -59,9 +59,10 @@ void PlaybackRegionView::paint (Graphics& g)
     rect.removeFromRight ((int) (totalWidth * tailTime / totalTime + 0.5));
     g.setColour (isSelected ? Colours::yellow : Colours::black);
     g.drawRect (rect, lineThickness);
+
+    rect.reduce (lineThickness, lineThickness);
     if (colour)
     {
-        rect.reduce (lineThickness, lineThickness);
         g.setColour (regionColour);
         g.fillRect (rect);
     }
@@ -79,6 +80,18 @@ void PlaybackRegionView::paint (Graphics& g)
         g.setColour (regionColour.contrasting (1.0f));
         g.setFont (Font (12.0f));
         g.drawText ("Access Disabled", getBounds(), Justification::centred);
+    }
+
+    ARA::ARAUtf8String name = playbackRegion->getName();
+    if (!name)
+        name = playbackRegion->getAudioModification()->getName();
+    if (!name)
+        name = playbackRegion->getAudioModification()->getAudioSource()->getName();
+    if (name)
+    {
+        g.setColour (regionColour.contrasting (1.0f));
+        g.setFont (Font (12.0f));
+        g.drawText (String (name), rect, Justification::topLeft);
     }
 }
 
