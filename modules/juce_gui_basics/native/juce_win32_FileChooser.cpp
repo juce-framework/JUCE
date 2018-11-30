@@ -401,6 +401,7 @@ private:
 
         getNativeDialogList().remove (hdlg);
         nativeDialogRef.set (nullptr);
+        customComponent = nullptr;
     }
 
     void selectionChanged (HWND hdlg)
