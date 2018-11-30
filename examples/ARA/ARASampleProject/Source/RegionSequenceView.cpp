@@ -49,7 +49,7 @@ void RegionSequenceView::getTimeRange (double& startTimeInSeconds, double& endTi
     }
 
     startTimeInSeconds = std::numeric_limits<double>::max();
-    endTimeInSeconds = 0;
+    endTimeInSeconds = std::numeric_limits<double>::lowest();
     for (auto v : playbackRegionViews)
     {
         // TODO JUCE_ARA should this include head and tail time? 

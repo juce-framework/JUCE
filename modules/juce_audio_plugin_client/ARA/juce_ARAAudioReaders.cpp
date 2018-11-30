@@ -163,7 +163,7 @@ ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARAPlaybackRenderer* renderer,
     {
         sampleRate = 0.0;
         double regionsStartTime = std::numeric_limits<double>::max();
-        double regionsEndTime = std::numeric_limits<double>::min();
+        double regionsEndTime = std::numeric_limits<double>::lowest();
 
         for (auto playbackRegion : playbackRegions)
         {

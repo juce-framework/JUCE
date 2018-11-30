@@ -55,7 +55,7 @@ void ARASampleProjectAudioProcessorEditor::resized()
     // compute region sequence view bounds in terms of kVisibleSeconds and kRegionSequenceHeight
     // by finding the range of start and end times for all of our region sequence views
     minRegionSequenceStartTime = std::numeric_limits<double>::max();
-    double maxRegionSequenceEndTime = std::numeric_limits<double>::min();
+    double maxRegionSequenceEndTime = std::numeric_limits<double>::lowest();
     for (auto v : regionSequenceViews)
     {
         double startInSeconds, endInSeconds;
