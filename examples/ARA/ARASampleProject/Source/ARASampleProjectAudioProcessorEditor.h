@@ -19,6 +19,12 @@ public:
     ARASampleProjectAudioProcessorEditor (ARASampleProjectAudioProcessor&);
     ~ARASampleProjectAudioProcessorEditor();
 
+    // total visible time range
+    void getTimeRange (double& start, double& end) const { start = startTime; end = endTime; }
+
+    // flag that our view needs to be rebuilt
+    void setDirty() { isViewDirty = true; }
+
     //==============================================================================
     void paint (Graphics&) override;
     void resized() override;
@@ -30,20 +36,13 @@ public:
     void doEndEditing (ARADocument* document) override;
     void didReorderRegionSequencesInDocument (ARADocument* document) override;
 
-    double getMinRegionSequenceStartTime() const { return minRegionSequenceStartTime; }
-
-    // function to flag that our view needs to be rebuilt
-    void setDirty() { isViewDirty = true; }
-
 public:
-    static const int kVisibleSeconds = 10;
-    static const int kMinWidth = 500;
-    static const int kWidth = 1000;
-    static const int kRegionSequenceHeight = 80;
-    static const int kMinHeight = 1 * kRegionSequenceHeight;
-    static const int kHeight = 5 * kRegionSequenceHeight;
-    static const int kTrackHeaderWidth = 20;
-    static const int kRegionSequenceDurationPadPixels = 0;
+    static constexpr double kPixelsPerSecond = 100.0;
+    static constexpr double kPadSeconds = 1.0;
+    static constexpr int kMinWidth = 500;
+    static constexpr int kWidth = 1000;
+    static constexpr int kMinHeight = 1 * RegionSequenceView::kHeight;
+    static constexpr int kHeight = 5 * RegionSequenceView::kHeight;
 
 private:
     void rebuildView();
@@ -58,7 +57,8 @@ private:
     OwnedArray<RegionSequenceView> regionSequenceViews;
 
     bool isViewDirty = false;
-    double minRegionSequenceStartTime = 0;
+    double startTime = 0.0;
+    double endTime = 0.0;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARASampleProjectAudioProcessorEditor)

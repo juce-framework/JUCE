@@ -36,6 +36,10 @@ public:
 private:
     void detachFromRegionSequence();
 
+public:
+    static constexpr int kHeight = 80;
+    static constexpr int kTrackHeaderWidth = 20;
+
 private:
     ARASampleProjectAudioProcessorEditor* editorComponent;
     ARARegionSequence* regionSequence;

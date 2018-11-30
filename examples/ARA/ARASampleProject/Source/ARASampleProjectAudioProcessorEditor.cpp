@@ -52,40 +52,39 @@ void ARASampleProjectAudioProcessorEditor::paint (Graphics& g)
 
 void ARASampleProjectAudioProcessorEditor::resized()
 {
-    // compute region sequence view bounds in terms of kVisibleSeconds and kRegionSequenceHeight
-    // by finding the range of start and end times for all of our region sequence views
-    minRegionSequenceStartTime = std::numeric_limits<double>::max();
-    double maxRegionSequenceEndTime = std::numeric_limits<double>::lowest();
-    for (auto v : regionSequenceViews)
+    // calculate visible time range
+    if (regionSequenceViews.isEmpty())
     {
-        double startTime, endTime;
-        v->getTimeRange (startTime, endTime);
+        startTime = 0.0;
+        endTime = 0.0;
+    }
+    else
+    {
+        startTime = std::numeric_limits<double>::max();
+        endTime = std::numeric_limits<double>::lowest();
+        for (auto v : regionSequenceViews)
+        {
+            double sequenceStartTime, sequenceEndTime;
+            v->getTimeRange (sequenceStartTime, sequenceEndTime);
 
-        minRegionSequenceStartTime = jmin (minRegionSequenceStartTime, startTime);
-        maxRegionSequenceEndTime = jmax (maxRegionSequenceEndTime, endTime);
+            startTime = jmin (startTime, sequenceStartTime);
+            endTime = jmax (endTime, sequenceEndTime);
+        }
     }
 
-    // offset the start time by our "pad" value (converting pixels to seconds)
-    const double secondsPerPixel = double (kVisibleSeconds) / getWidth();
-    minRegionSequenceStartTime -= (secondsPerPixel * kRegionSequenceDurationPadPixels);
-    
-    // place each region sequence view such that all views start at minRegionSequenceStartTime
-    // and extend to cover their full duration (including room for the track header width)
-    int i = 0;
+    startTime -= kPadSeconds;
+    endTime += kPadSeconds;
+
+    // set new bounds for all region sequence views
+    int width = (int) ((endTime - startTime) * kPixelsPerSecond + 0.5) + RegionSequenceView::kTrackHeaderWidth;
+    int y = 0;
     for (auto v : regionSequenceViews)
     {
-        double startTime, endTime;
-        v->getTimeRange (startTime, endTime);
-
-        double normalizedDuration = (endTime - minRegionSequenceStartTime) / kVisibleSeconds;
-        v->setBounds (0, kRegionSequenceHeight * i, kTrackHeaderWidth + (int) (getWidth() * normalizedDuration), kRegionSequenceHeight);
-        i++;
+        v->setBounds (0, y, width, RegionSequenceView::kHeight);
+        y += RegionSequenceView::kHeight;
     }
 
-    // size our region sequence list view to fit all of our region sequences + our "pad" value
-    double totalRegionSequenceDuration = maxRegionSequenceEndTime - minRegionSequenceStartTime;
-    const double normalizedWidth = totalRegionSequenceDuration / kVisibleSeconds;
-    regionSequenceListView.setBounds (0, 0, (int) (normalizedWidth * getWidth()) + kTrackHeaderWidth + kRegionSequenceDurationPadPixels, kRegionSequenceHeight * i);
+    regionSequenceListView.setBounds (0, 0, width, y);
 
     regionSequenceViewPort.setBounds (0, 0, getWidth(), getHeight());
 }

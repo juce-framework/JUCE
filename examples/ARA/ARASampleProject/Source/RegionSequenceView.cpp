@@ -53,7 +53,7 @@ void RegionSequenceView::getTimeRange (double& startTime, double& endTime) const
     for (auto regionView : playbackRegionViews)
     {
         double regionViewStartTime, regionViewEndTime;
-        regionView->getTimeRange(regionViewStartTime, regionViewEndTime);
+        regionView->getTimeRange (regionViewStartTime, regionViewEndTime);
         startTime = jmin (startTime, regionViewStartTime);
         endTime = jmax (endTime, regionViewEndTime);
     }
@@ -70,7 +70,7 @@ void RegionSequenceView::paint (Graphics& g)
         trackColour = Colour::fromFloatRGBA (colour->r, colour->g, colour->b, 1.0f);
 
     // draw region sequence header
-    Rectangle<int> headerRect (0, 0, ARASampleProjectAudioProcessorEditor::kTrackHeaderWidth, getHeight());
+    Rectangle<int> headerRect (0, 0, kTrackHeaderWidth, getHeight());
     g.setColour (trackColour);
     g.fillRect (headerRect);
 
@@ -97,28 +97,21 @@ void RegionSequenceView::resized()
     if (regionSequence == nullptr)
         return;
 
-    double startTime, endTime;
-    getTimeRange (startTime, endTime);
-
-    // we should be sized to fit the range of time from the start 
-    // of the first region sequence to the end of our last playback region
-    double viewStartTime = editorComponent->getMinRegionSequenceStartTime();
-    double viewWidthTime = endTime - viewStartTime;
+    double viewStartTime, viewEndTime;
+    editorComponent->getTimeRange (viewStartTime, viewEndTime);
+    double viewWidthTime = viewEndTime - viewStartTime;
 
     for (auto regionView : playbackRegionViews)
     {
         double regionViewStartTime, regionViewEndTime;
-        regionView->getTimeRange(regionViewStartTime, regionViewEndTime);
+        regionView->getTimeRange (regionViewStartTime, regionViewEndTime);
 
-        // normalize region boundaries to our visible timeRange
-        double normalizedStartPos = (regionViewStartTime - viewStartTime) / viewWidthTime;
-        double normalizedLength = (regionViewEndTime - regionViewStartTime) / viewWidthTime;
+        double normalizedStartTime = (regionViewStartTime - viewStartTime) / viewWidthTime;
+        double normalizedWidthTime = (regionViewEndTime - regionViewStartTime) / viewWidthTime;
 
-        // compute region view bounds and place the bounds just after the track header
         auto regionViewBounds = getLocalBounds();
-        regionViewBounds.setX ((int) (regionViewBounds.getWidth() * normalizedStartPos));
-        regionViewBounds.setWidth ((int) (regionViewBounds.getWidth() * normalizedLength));
-        regionViewBounds.translate (ARASampleProjectAudioProcessorEditor::kTrackHeaderWidth, 0);
+        regionViewBounds.setX (kTrackHeaderWidth + (int) (regionViewBounds.getWidth() * normalizedStartTime + 0.5));
+        regionViewBounds.setWidth ((int) (regionViewBounds.getWidth() * normalizedWidthTime + 0.5));
         regionView->setBounds (regionViewBounds);
     }
 }
