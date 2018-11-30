@@ -1,7 +1,6 @@
 #pragma once
 
 #include "juce_ARA_audio_plugin.h"
-#include "juce_ARADocumentController.h"
 
 namespace juce
 {
