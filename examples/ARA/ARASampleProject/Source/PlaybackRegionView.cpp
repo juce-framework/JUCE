@@ -111,7 +111,7 @@ void PlaybackRegionView::onNewSelection (const ARA::PlugIn::ViewSelection& curre
     }
 }
 
-void PlaybackRegionView::doEndEditing (ARADocument* document)
+void PlaybackRegionView::didEndEditing (ARADocument* document)
 {
     jassert (document == playbackRegion->getRegionSequence()->getDocument());
 

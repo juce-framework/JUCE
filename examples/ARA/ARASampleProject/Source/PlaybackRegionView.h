@@ -26,7 +26,7 @@ public:
     void onNewSelection (const ARA::PlugIn::ViewSelection& currentSelection) override;
 
     // ARADocument::Listener overrides: used to check if our reader has been invalidated
-    void doEndEditing (ARADocument* document) override;
+    void didEndEditing (ARADocument* document) override;
 
     // ARAAudioSource::Listener overrides
     void didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) override;

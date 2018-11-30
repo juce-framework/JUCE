@@ -20,8 +20,8 @@ public:
         virtual ~Listener() = default;
 
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
-        virtual void doBeginEditing (ARADocument* document) {}
-        virtual void doEndEditing (ARADocument* document) {}
+        virtual void willBeginEditing (ARADocument* document) {}
+        virtual void didEndEditing (ARADocument* document) {}
         virtual void willUpdateDocumentProperties (ARADocument* document, ARADocument::PropertiesPtr newProperties) {}
         virtual void didUpdateDocumentProperties (ARADocument* document) {}
         virtual void didReorderRegionSequencesInDocument (ARADocument* document) {}

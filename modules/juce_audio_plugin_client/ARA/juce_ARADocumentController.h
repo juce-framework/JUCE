@@ -35,8 +35,8 @@ public:
     // implementations of any overridden function, except for any doCreate...().
 protected:
     // Model Update Management
-    void doBeginEditing() noexcept override;
-    void doEndEditing() noexcept override;
+    void willBeginEditing() noexcept override;
+    void didEndEditing() noexcept override;
     void doNotifyModelUpdates() noexcept override;
 
     // Document callbacks

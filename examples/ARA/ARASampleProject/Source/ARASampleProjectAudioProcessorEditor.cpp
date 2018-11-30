@@ -117,7 +117,7 @@ void ARASampleProjectAudioProcessorEditor::onHideRegionSequences (std::vector<AR
     rebuildView();
 }
 
-void ARASampleProjectAudioProcessorEditor::doEndEditing (ARADocument* document)
+void ARASampleProjectAudioProcessorEditor::didEndEditing (ARADocument* document)
 {
     jassert (document == getARADocumentController()->getDocument());
 

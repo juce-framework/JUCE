@@ -33,7 +33,7 @@ public:
     void onHideRegionSequences (std::vector<ARARegionSequence*> const& regionSequences) override;
 
     // ARADocument::Listener overrides
-    void doEndEditing (ARADocument* document) override;
+    void didEndEditing (ARADocument* document) override;
     void didReorderRegionSequencesInDocument (ARADocument* document) override;
 
 public:

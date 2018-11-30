@@ -116,14 +116,14 @@ ARA::PlugIn::Document* ARADocumentController::doCreateDocument (ARA::PlugIn::Doc
     return new ARADocument (static_cast<ARADocumentController*> (documentController));
 }
 
-void ARADocumentController::doBeginEditing() noexcept
+void ARADocumentController::willBeginEditing() noexcept
 {
-    notify_listeners (ARADocument, doBeginEditing, getDocument());
+    notify_listeners (ARADocument, willBeginEditing, getDocument());
 }
 
-void ARADocumentController::doEndEditing() noexcept
+void ARADocumentController::didEndEditing() noexcept
 {
-    notify_listeners (ARADocument, doEndEditing, getDocument());
+    notify_listeners (ARADocument, didEndEditing, getDocument());
 }
 
 void ARADocumentController::doNotifyModelUpdates() noexcept
