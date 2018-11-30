@@ -83,11 +83,11 @@ void PlaybackRegionView::paint (Graphics& g)
     }
 
     ARA::ARAUtf8String name = playbackRegion->getName();
-    if (!name)
+    if (name == nullptr)
         name = playbackRegion->getAudioModification()->getName();
-    if (!name)
+    if (name == nullptr)
         name = playbackRegion->getAudioModification()->getAudioSource()->getName();
-    if (name)
+    if (name != nullptr)
     {
         g.setColour (regionColour.contrasting (1.0f));
         g.setFont (Font (12.0f));
