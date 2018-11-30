@@ -1774,10 +1774,21 @@ public:
         editController->setComponentHandler (holder->host);
         grabInformationObjects();
         interconnectComponentAndController();
-        addParameters();
-        synchroniseStates();
-        syncProgramNames();
+
+        auto configureParameters = [this]
+        {
+            addParameters();
+            synchroniseStates();
+            syncProgramNames();
+        };
+        configureParameters();
+
         setupIO();
+
+        // Some plug-ins don't present their parameters until after the IO has been
+        // configured, so we need to jump though all these hoops again
+        if (getParameters().isEmpty() && editController->getParameterCount() > 0)
+            configureParameters();
 
         return true;
     }
@@ -2799,6 +2810,7 @@ private:
 
         {
             int idx, num = editController->getParameterCount();
+
             for (idx = 0; idx < num; ++idx)
                 if (editController->getParameterInfo (idx, paramInfo) == kResultOk
                      && (paramInfo.flags & Steinberg::Vst::ParameterInfo::kIsProgramChange) != 0)
@@ -2845,8 +2857,7 @@ private:
             }
         }
 
-        if (editController != nullptr
-               && paramInfo.stepCount > 0)
+        if (editController != nullptr && paramInfo.stepCount > 0)
         {
             auto numPrograms = paramInfo.stepCount + 1;
 
