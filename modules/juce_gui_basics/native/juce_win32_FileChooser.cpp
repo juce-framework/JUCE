@@ -363,26 +363,30 @@ private:
                 GetWindowRect (hdlg, &r);
                 GetClientRect (hdlg, &cr);
 
+                auto scale = Desktop::getInstance().getDisplays()
+                                       .findDisplayForRect (Rectangle<int>::leftTopRightBottom (r.left, r.top, r.right, r.bottom), true).scale;
+
                 auto componentWidth = custom->getWidth();
 
-                SetWindowPos (hdlg, 0,
-                                r.left, r.top,
-                                componentWidth + jmax (150, (int) (r.right - r.left)),
-                                jmax (150, (int) (r.bottom - r.top)),
-                                SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER);
+                SetWindowPos (hdlg, 0, r.left, r.top,
+                              roundToInt (componentWidth * scale) + jmax (150, (int) (r.right - r.left)),
+                              jmax (150, (int) (r.bottom - r.top)),
+                              SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER);
 
                 if (MessageManager::getInstance()->isThisTheMessageThread())
                 {
-                    custom->setBounds (cr.right, cr.top, componentWidth, cr.bottom - cr.top);
+                    custom->setBounds (roundToInt (cr.right / scale), roundToInt (cr.top / scale),
+                                       componentWidth, roundToInt ((cr.bottom - cr.top) / scale));
                     custom->addToDesktop (0, hdlg);
                 }
                 else
                 {
-                    MessageManager::callAsync ([custom, cr, componentWidth, hdlg]() mutable
+                    MessageManager::callAsync ([custom, cr, componentWidth, scale, hdlg]() mutable
                     {
                         if (custom != nullptr)
                         {
-                            custom->setBounds (cr.right, cr.top, componentWidth, cr.bottom - cr.top);
+                            custom->setBounds (roundToInt (cr.right / scale), roundToInt (cr.top / scale),
+                                               componentWidth, roundToInt ((cr.bottom - cr.top) / scale));
                             custom->addToDesktop (0, hdlg);
                         }
                     });
