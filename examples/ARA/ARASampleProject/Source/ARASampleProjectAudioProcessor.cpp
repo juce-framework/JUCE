@@ -149,7 +149,8 @@ void ARASampleProjectAudioProcessor::processBlock (AudioBuffer<float>& buffer, M
     }
     else
     {
-        // proper non-ARA rendering would be invoked here
+        // this sample plug-in requires to be used with ARA.
+        // otherwise, proper non-ARA rendering would be invoked here
         buffer.clear();
     }
 }
@@ -166,17 +167,16 @@ AudioProcessorEditor* ARASampleProjectAudioProcessor::createEditor()
 }
 
 //==============================================================================
+// when using ARA, all model state is stored in the ARA archives,
+// and the state here in the plug-in instance is limited to view configuration data
+// or other editor settings, of which this sample plug-in has none.
+
 void ARASampleProjectAudioProcessor::getStateInformation (MemoryBlock& /*destData*/)
 {
-    // You should use this method to store your parameters in the memory block.
-    // You could do that either as raw data, or use the XML or ValueTree classes
-    // as intermediaries to make it easy to save and load complex data.
 }
 
 void ARASampleProjectAudioProcessor::setStateInformation (const void* /*data*/, int /*sizeInBytes*/)
 {
-    // You should use this method to restore your parameters from this memory block,
-    // whose contents will have been created by the getStateInformation() call.
 }
 
 //==============================================================================
