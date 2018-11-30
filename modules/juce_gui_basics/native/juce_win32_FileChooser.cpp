@@ -558,6 +558,14 @@ public:
         owner.finished (nativeFileChooser->results);
     }
 
+    bool canModalEventBeSentToComponent (const Component* targetComponent) override
+    {
+        if (targetComponent == nullptr)
+            return false;
+
+        return targetComponent->findParentComponentOfClass<FilePreviewComponent>() != nullptr;
+    }
+
 private:
     FileChooser& owner;
     Win32NativeFileChooser::Ptr nativeFileChooser;
