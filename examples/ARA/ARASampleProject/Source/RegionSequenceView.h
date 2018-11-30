@@ -19,7 +19,7 @@ public:
     RegionSequenceView (ARASampleProjectAudioProcessorEditor* editor, ARARegionSequence* sequence);
     ~RegionSequenceView();
 
-    void getTimeRange (double& startTimeInSeconds, double& endTimeInSeconds) const;
+    void getTimeRange (double& startTime, double& endTime) const;
 
     void paint (Graphics&) override;
     void resized() override;

@@ -39,23 +39,23 @@ void RegionSequenceView::detachFromRegionSequence()
     regionSequence = nullptr;
 }
 
-void RegionSequenceView::getTimeRange (double& startTimeInSeconds, double& endTimeInSeconds) const
+void RegionSequenceView::getTimeRange (double& startTime, double& endTime) const
 {
     if (playbackRegionViews.isEmpty())
     {
-        startTimeInSeconds = 0.0;
-        endTimeInSeconds = 0.0;
+        startTime = 0.0;
+        endTime = 0.0;
         return;
     }
 
-    startTimeInSeconds = std::numeric_limits<double>::max();
-    endTimeInSeconds = std::numeric_limits<double>::lowest();
-    for (auto v : playbackRegionViews)
+    startTime = std::numeric_limits<double>::max();
+    endTime = std::numeric_limits<double>::lowest();
+    for (auto regionView : playbackRegionViews)
     {
-        // TODO JUCE_ARA should this include head and tail time? 
-        // should we add a new function to ARAPlaybackRegion?
-        startTimeInSeconds = jmin (startTimeInSeconds, v->getPlaybackRegion()->getStartInPlaybackTime());
-        endTimeInSeconds = jmax (endTimeInSeconds, v->getPlaybackRegion()->getEndInPlaybackTime());
+        double regionViewStartTime, regionViewEndTime;
+        regionView->getTimeRange(regionViewStartTime, regionViewEndTime);
+        startTime = jmin (startTime, regionViewStartTime);
+        endTime = jmax (endTime, regionViewEndTime);
     }
 }
 
@@ -97,26 +97,29 @@ void RegionSequenceView::resized()
     if (regionSequence == nullptr)
         return;
 
-    double startInSeconds, endInSeconds;
-    getTimeRange (startInSeconds, endInSeconds);
+    double startTime, endTime;
+    getTimeRange (startTime, endTime);
 
     // we should be sized to fit the range of time from the start 
     // of the first region sequence to the end of our last playback region
-    double viewStartInSeconds = editorComponent->getMinRegionSequenceStartTime();
-    double viewWidthInSeconds = endInSeconds - viewStartInSeconds;
+    double viewStartTime = editorComponent->getMinRegionSequenceStartTime();
+    double viewWidthTime = endTime - viewStartTime;
 
-    for (auto v : playbackRegionViews)
+    for (auto regionView : playbackRegionViews)
     {
+        double regionViewStartTime, regionViewEndTime;
+        regionView->getTimeRange(regionViewStartTime, regionViewEndTime);
+
         // normalize region boundaries to our visible timeRange
-        double normalizedStartPos = (v->getPlaybackRegion()->getStartInPlaybackTime() - viewStartInSeconds) / viewWidthInSeconds;
-        double normalizedLength = (v->getPlaybackRegion()->getDurationInPlaybackTime()) / viewWidthInSeconds;
+        double normalizedStartPos = (regionViewStartTime - viewStartTime) / viewWidthTime;
+        double normalizedLength = (regionViewEndTime - regionViewStartTime) / viewWidthTime;
 
         // compute region view bounds and place the bounds just after the track header
-        auto regionBounds = getLocalBounds();
-        regionBounds.setX ((int) (regionBounds.getWidth() * normalizedStartPos));
-        regionBounds.setWidth ((int) (regionBounds.getWidth() * normalizedLength));
-        regionBounds.translate (ARASampleProjectAudioProcessorEditor::kTrackHeaderWidth, 0);
-        v->setBounds (regionBounds);
+        auto regionViewBounds = getLocalBounds();
+        regionViewBounds.setX ((int) (regionViewBounds.getWidth() * normalizedStartPos));
+        regionViewBounds.setWidth ((int) (regionViewBounds.getWidth() * normalizedLength));
+        regionViewBounds.translate (ARASampleProjectAudioProcessorEditor::kTrackHeaderWidth, 0);
+        regionView->setBounds (regionViewBounds);
     }
 }
 

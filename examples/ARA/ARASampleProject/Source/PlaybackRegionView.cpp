@@ -2,6 +2,7 @@
 #include "ARASampleProjectDocumentController.h"
 #include "ARASampleProjectAudioProcessorEditor.h"
 
+//==============================================================================
 PlaybackRegionView::PlaybackRegionView (ARASampleProjectAudioProcessorEditor* editor, ARAPlaybackRegion* region)
 : editorComponent (editor),
   playbackRegion (region),
@@ -31,28 +32,46 @@ PlaybackRegionView::~PlaybackRegionView()
     audioThumb.clear();
 }
 
+//==============================================================================
+void PlaybackRegionView::getTimeRange (double& startTime, double& endTime) const
+{
+    startTime = playbackRegion->getStartInPlaybackTime() - playbackRegion->getHeadTime();
+    endTime = playbackRegion->getEndInPlaybackTime() + playbackRegion->getTailTime();
+}
+
 void PlaybackRegionView::paint (Graphics& g)
 {
+    const int lineThickness = 1;
+
     Colour regionColour;
     const ARA::ARAColor* colour = playbackRegion->getColor();
     if (colour == nullptr)
         colour = playbackRegion->getRegionSequence()->getColor();
     if (colour != nullptr)
-    {
         regionColour = Colour::fromFloatRGBA (colour->r, colour->g, colour->b, 1.0f);
-        g.fillAll (regionColour);
-    }
 
+    auto rect = getLocalBounds();
+    double headTime = playbackRegion->getHeadTime();
+    double tailTime = playbackRegion->getTailTime();
+    double totalTime = playbackRegion->getDurationInPlaybackTime() + headTime + tailTime;
+    int totalWidth = rect.getWidth();
+    rect.removeFromLeft ((int) (totalWidth * headTime / totalTime + 0.5));
+    rect.removeFromRight ((int) (totalWidth * tailTime / totalTime + 0.5));
     g.setColour (isSelected ? Colours::yellow : Colours::black);
-    g.drawRect (getLocalBounds());
+    g.drawRect (rect, lineThickness);
+    if (colour)
+    {
+        rect.reduce (lineThickness, lineThickness);
+        g.setColour (regionColour);
+        g.fillRect (rect);
+    }
 
     if (playbackRegion->getAudioModification()->getAudioSource()->isSampleAccessEnabled())
     {
-        double duration = playbackRegion->getDurationInPlaybackTime();
-        if (duration != 0.0)
+        if (totalTime != 0.0)
         {
             g.setColour (regionColour.contrasting (0.7f));
-            audioThumb.drawChannels (g, getLocalBounds(), 0.0, duration, 1.0f);
+            audioThumb.drawChannels (g, getLocalBounds(), 0.0, totalTime, 1.0f);
         }
     }
     else
@@ -63,6 +82,7 @@ void PlaybackRegionView::paint (Graphics& g)
     }
 }
 
+//==============================================================================
 void PlaybackRegionView::changeListenerCallback (ChangeBroadcaster* /*broadcaster*/)
 {
     repaint();

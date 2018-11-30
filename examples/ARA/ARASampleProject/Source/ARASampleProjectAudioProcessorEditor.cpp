@@ -58,11 +58,11 @@ void ARASampleProjectAudioProcessorEditor::resized()
     double maxRegionSequenceEndTime = std::numeric_limits<double>::lowest();
     for (auto v : regionSequenceViews)
     {
-        double startInSeconds, endInSeconds;
-        v->getTimeRange (startInSeconds, endInSeconds);
+        double startTime, endTime;
+        v->getTimeRange (startTime, endTime);
 
-        maxRegionSequenceEndTime = jmax (maxRegionSequenceEndTime, endInSeconds);
-        minRegionSequenceStartTime = jmin (minRegionSequenceStartTime, startInSeconds);
+        minRegionSequenceStartTime = jmin (minRegionSequenceStartTime, startTime);
+        maxRegionSequenceEndTime = jmax (maxRegionSequenceEndTime, endTime);
     }
 
     // offset the start time by our "pad" value (converting pixels to seconds)
@@ -74,16 +74,17 @@ void ARASampleProjectAudioProcessorEditor::resized()
     int i = 0;
     for (auto v : regionSequenceViews)
     {
-        double startInSeconds, endInSeconds;
-        v->getTimeRange (startInSeconds, endInSeconds);
-        double normalizedDuration = (endInSeconds - minRegionSequenceStartTime) / kVisibleSeconds;
+        double startTime, endTime;
+        v->getTimeRange (startTime, endTime);
+
+        double normalizedDuration = (endTime - minRegionSequenceStartTime) / kVisibleSeconds;
         v->setBounds (0, kRegionSequenceHeight * i, kTrackHeaderWidth + (int) (getWidth() * normalizedDuration), kRegionSequenceHeight);
         i++;
     }
 
     // size our region sequence list view to fit all of our region sequences + our "pad" value
     double totalRegionSequenceDuration = maxRegionSequenceEndTime - minRegionSequenceStartTime;
-    const double normalizedWidth = (totalRegionSequenceDuration) / kVisibleSeconds;
+    const double normalizedWidth = totalRegionSequenceDuration / kVisibleSeconds;
     regionSequenceListView.setBounds (0, 0, (int) (normalizedWidth * getWidth()) + kTrackHeaderWidth + kRegionSequenceDurationPadPixels, kRegionSequenceHeight * i);
 
     regionSequenceViewPort.setBounds (0, 0, getWidth(), getHeight());

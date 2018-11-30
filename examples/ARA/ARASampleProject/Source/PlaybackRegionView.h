@@ -14,8 +14,12 @@ public:
     PlaybackRegionView (ARASampleProjectAudioProcessorEditor* editor, ARAPlaybackRegion* region);
     ~PlaybackRegionView();
 
-    // ChangeListener overrides
+    ARAPlaybackRegion* getPlaybackRegion() const { return playbackRegion; }
+    void getTimeRange (double& startTime, double& endTime) const;
+
     void paint (Graphics&) override;
+
+    // ChangeListener overrides
     void changeListenerCallback (ChangeBroadcaster*) override;
 
     // ARAEditorView::Listener overrides
@@ -29,8 +33,6 @@ public:
 
     // ARAPlaybackRegion::Listener overrides
     void willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties) override;
-
-    ARAPlaybackRegion* getPlaybackRegion() const { return playbackRegion; }
 
 private:
     void recreatePlaybackRegionReader();
