@@ -156,11 +156,6 @@ void ARADocumentController::didUpdateDocumentProperties (ARA::PlugIn::Document* 
     notify_listeners (ARADocument, didUpdateDocumentProperties, document);
 }
 
-void ARADocumentController::didReorderRegionSequencesInDocument (ARA::PlugIn::Document* document) noexcept
-{
-    notify_listeners (ARADocument, didReorderRegionSequencesInDocument, document);
-}
-
 void ARADocumentController::didAddMusicalContextToDocument (ARA::PlugIn::Document* document, ARA::PlugIn::MusicalContext* musicalContext) noexcept
 {
     notify_listeners (ARADocument, didAddMusicalContext, document, static_cast<ARAMusicalContext*> (musicalContext));
@@ -169,6 +164,11 @@ void ARADocumentController::didAddMusicalContextToDocument (ARA::PlugIn::Documen
 void ARADocumentController::willRemoveMusicalContextFromDocument (ARA::PlugIn::Document* document, ARA::PlugIn::MusicalContext* musicalContext) noexcept
 {
     notify_listeners (ARADocument, willRemoveMusicalContext, document, static_cast<ARAMusicalContext*> (musicalContext));
+}
+
+void ARADocumentController::didReorderRegionSequencesInDocument (ARA::PlugIn::Document* document) noexcept
+{
+    notify_listeners (ARADocument, didReorderRegionSequencesInDocument, document);
 }
 
 void ARADocumentController::didAddRegionSequenceToDocument (ARA::PlugIn::Document* document, ARA::PlugIn::RegionSequence* regionSequence) noexcept
@@ -287,11 +287,6 @@ void ARADocumentController::didEnableAudioSourceSamplesAccess (ARA::PlugIn::Audi
     notify_listeners (ARAAudioSource, didEnableAudioSourceSamplesAccess, audioSource, enable);
 }
 
-void ARADocumentController::doDeactivateAudioSourceForUndoHistory (ARA::PlugIn::AudioSource* audioSource, bool deactivate) noexcept
-{
-    notify_listeners (ARAAudioSource, doDeactivateAudioSourceForUndoHistory, audioSource, deactivate);
-}
-
 void ARADocumentController::didAddAudioModificationToAudioSource (ARA::PlugIn::AudioSource* audioSource, ARA::PlugIn::AudioModification* audioModification) noexcept
 {
     notify_listeners (ARAAudioSource, didAddAudioModification, audioSource, static_cast<ARAAudioModification*> (audioModification));
@@ -300,6 +295,11 @@ void ARADocumentController::didAddAudioModificationToAudioSource (ARA::PlugIn::A
 void ARADocumentController::willRemoveAudioModificationFromAudioSource (ARA::PlugIn::AudioSource* audioSource, ARA::PlugIn::AudioModification* audioModification) noexcept
 {
     notify_listeners (ARAAudioSource, willRemoveAudioModification, audioSource, static_cast<ARAAudioModification*> (audioModification));
+}
+
+void ARADocumentController::doDeactivateAudioSourceForUndoHistory (ARA::PlugIn::AudioSource* audioSource, bool deactivate) noexcept
+{
+    notify_listeners (ARAAudioSource, doDeactivateAudioSourceForUndoHistory, audioSource, deactivate);
 }
 
 void ARADocumentController::willDestroyAudioSource (ARA::PlugIn::AudioSource* audioSource) noexcept
@@ -339,11 +339,6 @@ void ARADocumentController::didUpdateAudioModificationProperties (ARA::PlugIn::A
     notify_listeners (ARAAudioModification, didUpdateAudioModificationProperties, audioModification);
 }
 
-void ARADocumentController::doDeactivateAudioModificationForUndoHistory (ARA::PlugIn::AudioModification* audioModification, bool deactivate) noexcept
-{
-    notify_listeners (ARAAudioModification, doDeactivateAudioModificationForUndoHistory, audioModification, deactivate);
-}
-
 void ARADocumentController::didAddPlaybackRegionToAudioModification (ARA::PlugIn::AudioModification* audioModification, ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept
 {
     notify_listeners (ARAAudioModification, didAddPlaybackRegion, audioModification, static_cast<ARAPlaybackRegion*> (playbackRegion));
@@ -352,6 +347,11 @@ void ARADocumentController::didAddPlaybackRegionToAudioModification (ARA::PlugIn
 void ARADocumentController::willRemovePlaybackRegionFromAudioModification (ARA::PlugIn::AudioModification* audioModification, ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept
 {
     notify_listeners (ARAAudioModification, willRemovePlaybackRegion, audioModification, static_cast<ARAPlaybackRegion*> (playbackRegion));
+}
+
+void ARADocumentController::doDeactivateAudioModificationForUndoHistory (ARA::PlugIn::AudioModification* audioModification, bool deactivate) noexcept
+{
+    notify_listeners (ARAAudioModification, doDeactivateAudioModificationForUndoHistory, audioModification, deactivate);
 }
 
 void ARADocumentController::willDestroyAudioModification (ARA::PlugIn::AudioModification* audioModification) noexcept

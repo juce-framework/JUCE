@@ -5,7 +5,7 @@ The fork is currently being maintained by [Celemony](https://www.celemony.com) a
 
 In order to use this branch you'll need access to the [ARA SDK](http://www.celemony.com/en/service1/about-celemony/technologies) - if you're a developer and would like access to the latest ARA SDK release, send an email to [ara@celemony.com](mailto:ara@celemony.com?Subject=JUCE%20ARA%20integration).
 
-Current ARA SDK compatibility version: 1.9.6.011
+Current ARA SDK compatibility version: 1.9.6.012
 
 For feedback and questions, please contact Celemony via [ara@celemony.com](mailto:ara@celemony.com?Subject=JUCE%20ARA%20integration).
 
