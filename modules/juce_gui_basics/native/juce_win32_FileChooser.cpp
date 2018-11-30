@@ -355,42 +355,42 @@ private:
         {
             nativeDialogRef.set (hdlg);
 
-            if (customComponent)
+            if (customComponent != nullptr)
             {
-                Component::SafePointer<Component> custom (customComponent.get());
+                Component::SafePointer<Component> safeCustomComponent (customComponent.get());
 
-                RECT r, cr;
-                GetWindowRect (hdlg, &r);
-                GetClientRect (hdlg, &cr);
+                RECT dialogScreenRect, dialogClientRect;
+                GetWindowRect (hdlg, &dialogScreenRect);
+                GetClientRect (hdlg, &dialogClientRect);
 
-                auto scale = Desktop::getInstance().getDisplays()
-                                       .findDisplayForRect (Rectangle<int>::leftTopRightBottom (r.left, r.top, r.right, r.bottom), true).scale;
+                auto screenRectangle = Rectangle<int>::leftTopRightBottom (dialogScreenRect.left,  dialogScreenRect.top,
+                                                                           dialogScreenRect.right, dialogScreenRect.bottom);
 
-                auto componentWidth = custom->getWidth();
+                auto scale = Desktop::getInstance().getDisplays().findDisplayForRect (screenRectangle, true).scale;
+                auto physicalComponentWidth = roundToInt (safeCustomComponent->getWidth() * scale);
 
-                SetWindowPos (hdlg, 0, r.left, r.top,
-                              roundToInt (componentWidth * scale) + jmax (150, (int) (r.right - r.left)),
-                              jmax (150, (int) (r.bottom - r.top)),
+                SetWindowPos (hdlg, 0, screenRectangle.getX(), screenRectangle.getY(),
+                              physicalComponentWidth + jmax (150, screenRectangle.getWidth()),
+                              jmax (150, screenRectangle.getHeight()),
                               SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER);
 
-                if (MessageManager::getInstance()->isThisTheMessageThread())
+                auto appendCustomComponent = [safeCustomComponent, dialogClientRect, scale, hdlg]() mutable
                 {
-                    custom->setBounds (roundToInt (cr.right / scale), roundToInt (cr.top / scale),
-                                       componentWidth, roundToInt ((cr.bottom - cr.top) / scale));
-                    custom->addToDesktop (0, hdlg);
-                }
-                else
-                {
-                    MessageManager::callAsync ([custom, cr, componentWidth, scale, hdlg]() mutable
+                    if (safeCustomComponent != nullptr)
                     {
-                        if (custom != nullptr)
-                        {
-                            custom->setBounds (roundToInt (cr.right / scale), roundToInt (cr.top / scale),
-                                               componentWidth, roundToInt ((cr.bottom - cr.top) / scale));
-                            custom->addToDesktop (0, hdlg);
-                        }
-                    });
-                }
+                        auto scaledClientRectangle = Rectangle<int>::leftTopRightBottom (dialogClientRect.left, dialogClientRect.top,
+                                                                                         dialogClientRect.right, dialogClientRect.bottom) / scale;
+
+                        safeCustomComponent->setBounds (scaledClientRectangle.getRight(), scaledClientRectangle.getY(),
+                                                        safeCustomComponent->getWidth(), scaledClientRectangle.getHeight());
+                        safeCustomComponent->addToDesktop (0, hdlg);
+                    }
+                };
+
+                if (MessageManager::getInstance()->isThisTheMessageThread())
+                    appendCustomComponent();
+                else
+                    MessageManager::callAsync (appendCustomComponent);
             }
         }
     }
@@ -401,7 +401,11 @@ private:
 
         getNativeDialogList().remove (hdlg);
         nativeDialogRef.set (nullptr);
-        customComponent = nullptr;
+
+        if (MessageManager::getInstance()->isThisTheMessageThread())
+            customComponent = nullptr;
+        else
+            MessageManager::callAsync ([this] { customComponent = nullptr; });
     }
 
     void selectionChanged (HWND hdlg)
