@@ -46,7 +46,7 @@ public: \
     template<typename Callback> \
     inline void notifyListeners (Callback&& callback) { listeners.callExpectingUnregistration (callback); } \
 private: \
-    juce::ListenerList<Listener> listeners; 
+    ListenerList<Listener> listeners; 
 }
 
 #endif
