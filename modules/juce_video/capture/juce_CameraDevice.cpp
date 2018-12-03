@@ -237,7 +237,7 @@ void CameraDevice::openDeviceAsync (int index, OpenCameraResultCallback resultCa
     }
 
    #if JUCE_ANDROID || JUCE_IOS
-    CameraFactory::getInstance().openCamera (index, static_cast<OpenCameraResultCallback&&> (resultCallback),
+    CameraFactory::getInstance().openCamera (index, std::move (resultCallback),
                                              minWidth, minHeight, maxWidth, maxHeight, useHighQuality);
    #else
     auto* device = openDevice (index, minWidth, minHeight, maxWidth, maxHeight, useHighQuality);

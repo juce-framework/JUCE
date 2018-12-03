@@ -58,7 +58,7 @@ public:
     File getCppFile() const     { return cpp->getFile(); }
     File getHeaderFile() const  { return getCppFile().withFileExtension (".h"); }
 
-    bool flushChangesToDocuments (Project*);
+    bool flushChangesToDocuments (Project*, bool);
     bool reloadFromDocument();
 
     //==============================================================================

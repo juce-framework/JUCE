@@ -188,6 +188,14 @@ public:
         finished (result);
     }
 
+    bool canModalEventBeSentToComponent (const Component* targetComponent) override
+    {
+        if (targetComponent == nullptr)
+            return false;
+
+        return targetComponent->findParentComponentOfClass<FilePreviewComponent>() != nullptr;
+    }
+
 private:
     //==============================================================================
    #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6

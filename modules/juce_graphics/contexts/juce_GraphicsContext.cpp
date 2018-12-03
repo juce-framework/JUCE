@@ -203,7 +203,7 @@ void Graphics::setGradientFill (const ColourGradient& gradient)
 
 void Graphics::setGradientFill (ColourGradient&& gradient)
 {
-    setFillType (static_cast<ColourGradient&&> (gradient));
+    setFillType (std::move (gradient));
 }
 
 void Graphics::setTiledImageFill (const Image& imageToUse, const int anchorX, const int anchorY, const float opacity)

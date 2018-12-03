@@ -228,7 +228,7 @@ ValueTree PIPGenerator::createModulePathChild (const String& moduleID)
     ValueTree modulePath (Ids::MODULEPATH);
 
     modulePath.setProperty (Ids::ID, moduleID, nullptr);
-    modulePath.setProperty (Ids::path, getPathForModule (moduleID).getFullPathName(), nullptr);
+    modulePath.setProperty (Ids::path, getPathForModule (moduleID), nullptr);
 
     return modulePath;
 }
@@ -300,7 +300,7 @@ ValueTree PIPGenerator::createModuleChild (const String& moduleID)
     module.setProperty (Ids::ID, moduleID, nullptr);
     module.setProperty (Ids::showAllCode, 1, nullptr);
     module.setProperty (Ids::useLocalCopy, 0, nullptr);
-    module.setProperty (Ids::useGlobalPath, (getPathForModule (moduleID) == File() ? 1 : 0), nullptr);
+    module.setProperty (Ids::useGlobalPath, (getPathForModule (moduleID).isEmpty() ? 1 : 0), nullptr);
 
     return module;
 }
@@ -426,7 +426,9 @@ String PIPGenerator::getMainFileTextForType()
     String mainTemplate (BinaryData::jucer_PIPMain_cpp);
 
     mainTemplate = mainTemplate.replace ("%%filename%%", useLocalCopy ? pipFile.getFileName()
-                                                                      : pipFile.getFullPathName());
+                                                                      : isTemp ? pipFile.getFullPathName()
+                                                                               : RelativePath (pipFile, outputDirectory.getChildFile ("Source"),
+                                                                                               RelativePath::unknown).toUnixStyle());
 
     auto type = metadata[Ids::type].toString();
 
@@ -529,16 +531,26 @@ StringArray PIPGenerator::getPluginCharacteristics() const
     return {};
 }
 
-File PIPGenerator::getPathForModule (const String& moduleID) const
+String PIPGenerator::getPathForModule (const String& moduleID) const
 {
     if (isJUCEModule (moduleID))
     {
         if (juceModulesPath != File())
-            return juceModulesPath;
+        {
+            if (isTemp)
+                return juceModulesPath.getFullPathName();
+
+            return RelativePath (juceModulesPath, outputDirectory, RelativePath::projectFolder).toUnixStyle();
+        }
     }
     else if (availableUserModules != nullptr)
     {
-        return availableUserModules->getModuleWithID (moduleID).second.getParentDirectory();
+        auto moduleRoot = availableUserModules->getModuleWithID (moduleID).second.getParentDirectory();
+
+        if (isTemp)
+            return moduleRoot.getFullPathName();
+
+        return RelativePath (moduleRoot , outputDirectory, RelativePath::projectFolder).toUnixStyle();
     }
 
     return {};

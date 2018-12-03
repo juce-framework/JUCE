@@ -88,12 +88,12 @@ public:
     //==============================================================================
     SlObjectRef() noexcept {}
     SlObjectRef (const SlObjectRef& obj) noexcept : cb (obj.cb) {}
-    SlObjectRef (SlObjectRef&& obj) noexcept : cb (static_cast<ReferenceCountedObjectPtr<ControlBlock>&&> (obj.cb)) { obj.cb = nullptr; }
+    SlObjectRef (SlObjectRef&& obj) noexcept : cb (std::move (obj.cb)) { obj.cb = nullptr; }
     explicit SlObjectRef (SLObjectItf o) : cb (new ControlBlock (o)) {}
 
     //==============================================================================
     SlObjectRef& operator= (const SlObjectRef& r) noexcept  { cb = r.cb; return *this; }
-    SlObjectRef& operator= (SlObjectRef&& r) noexcept       { cb = static_cast<ReferenceCountedObjectPtr<ControlBlock>&&> (r.cb); r.cb = nullptr; return *this; }
+    SlObjectRef& operator= (SlObjectRef&& r) noexcept       { cb = std::move (r.cb); r.cb = nullptr; return *this; }
     SlObjectRef& operator= (std::nullptr_t) noexcept        { cb = nullptr; return *this; }
 
     //==============================================================================
@@ -125,11 +125,11 @@ public:
     //==============================================================================
     SlRef() noexcept {}
     SlRef (const SlRef& r) noexcept : SlObjectRef (r), type (r.type) {}
-    SlRef (SlRef&& r) noexcept : SlObjectRef (static_cast<SlRef&&> (r)), type (r.type) { r.type = nullptr; }
+    SlRef (SlRef&& r) noexcept : SlObjectRef (std::move (r)), type (r.type) { r.type = nullptr; }
 
     //==============================================================================
     SlRef& operator= (const SlRef& r)  noexcept { SlObjectRef::operator= (r); type = r.type; return *this; }
-    SlRef& operator= (SlRef&& r) noexcept       { SlObjectRef::operator= (static_cast<SlObjectRef&&> (r)); type = r.type; r.type = nullptr; return *this; }
+    SlRef& operator= (SlRef&& r) noexcept       { SlObjectRef::operator= (std::move (r)); type = r.type; r.type = nullptr; return *this; }
     SlRef& operator= (std::nullptr_t) noexcept  { SlObjectRef::operator= (nullptr); type = nullptr; return *this; }
 
     //==============================================================================
@@ -139,7 +139,7 @@ public:
 
     //==============================================================================
     static SlRef cast (SlObjectRef&  base)      { return SlRef (base); }
-    static SlRef cast (SlObjectRef&& base)      { return SlRef (static_cast<SlObjectRef&&> (base)); }
+    static SlRef cast (SlObjectRef&& base)      { return SlRef (std::move (base)); }
 
 private:
     SlRef (SlObjectRef& base) : SlObjectRef (base)
@@ -155,7 +155,7 @@ private:
         *this = nullptr;
     }
 
-    SlRef (SlObjectRef&& base) : SlObjectRef (static_cast<SlObjectRef&&> (base))
+    SlRef (SlObjectRef&& base) : SlObjectRef (std::move (base))
     {
         if (auto obj = SlObjectRef::operator->())
         {

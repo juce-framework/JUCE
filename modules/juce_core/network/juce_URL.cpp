@@ -209,26 +209,26 @@ void URL::init()
 URL::URL (const String& u, int)  : url (u) {}
 
 URL::URL (URL&& other)
-    : url             (static_cast<String&&> (other.url)),
-      postData        (static_cast<MemoryBlock&&> (other.postData)),
-      parameterNames  (static_cast<StringArray&&> (other.parameterNames)),
-      parameterValues (static_cast<StringArray&&> (other.parameterValues)),
-      filesToUpload   (static_cast<ReferenceCountedArray<Upload>&&> (other.filesToUpload))
+    : url             (std::move (other.url)),
+      postData        (std::move (other.postData)),
+      parameterNames  (std::move (other.parameterNames)),
+      parameterValues (std::move (other.parameterValues)),
+      filesToUpload   (std::move (other.filesToUpload))
    #if JUCE_IOS
-    , bookmark        (static_cast<Bookmark::Ptr&&> (other.bookmark))
+    , bookmark        (std::move (other.bookmark))
    #endif
 {
 }
 
 URL& URL::operator= (URL&& other)
 {
-    url             = static_cast<String&&> (other.url);
-    postData        = static_cast<MemoryBlock&&> (other.postData);
-    parameterNames  = static_cast<StringArray&&> (other.parameterNames);
-    parameterValues = static_cast<StringArray&&> (other.parameterValues);
-    filesToUpload   = static_cast<ReferenceCountedArray<Upload>&&> (other.filesToUpload);
+    url             = std::move (other.url);
+    postData        = std::move (other.postData);
+    parameterNames  = std::move (other.parameterNames);
+    parameterValues = std::move (other.parameterValues);
+    filesToUpload   = std::move (other.filesToUpload);
    #if JUCE_IOS
-    bookmark        = static_cast<Bookmark::Ptr&&> (other.bookmark);
+    bookmark        = std::move (other.bookmark);
    #endif
 
     return *this;

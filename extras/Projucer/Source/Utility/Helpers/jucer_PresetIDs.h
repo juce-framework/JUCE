@@ -343,6 +343,7 @@ namespace Ids
     DECLARE_ID (buildEnabled);
     DECLARE_ID (continuousRebuildEnabled);
     DECLARE_ID (warningsEnabled);
+    DECLARE_ID (projectLineFeed);
 
     const Identifier ID ("id");
     const Identifier ID_uppercase ("ID");

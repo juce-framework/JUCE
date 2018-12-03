@@ -127,10 +127,10 @@ XmlElement& XmlElement::operator= (const XmlElement& other)
 }
 
 XmlElement::XmlElement (XmlElement&& other) noexcept
-    : nextListItem      (static_cast<LinkedListPointer<XmlElement>&&> (other.nextListItem)),
-      firstChildElement (static_cast<LinkedListPointer<XmlElement>&&> (other.firstChildElement)),
-      attributes        (static_cast<LinkedListPointer<XmlAttributeNode>&&> (other.attributes)),
-      tagName           (static_cast<String&&> (other.tagName))
+    : nextListItem      (std::move (other.nextListItem)),
+      firstChildElement (std::move (other.firstChildElement)),
+      attributes        (std::move (other.attributes)),
+      tagName           (std::move (other.tagName))
 {
 }
 
@@ -141,10 +141,10 @@ XmlElement& XmlElement::operator= (XmlElement&& other) noexcept
     removeAllAttributes();
     deleteAllChildElements();
 
-    nextListItem      = static_cast<LinkedListPointer<XmlElement>&&> (other.nextListItem);
-    firstChildElement = static_cast<LinkedListPointer<XmlElement>&&> (other.firstChildElement);
-    attributes        = static_cast<LinkedListPointer<XmlAttributeNode>&&> (other.attributes);
-    tagName           = static_cast<String&&> (other.tagName);
+    nextListItem      = std::move (other.nextListItem);
+    firstChildElement = std::move (other.firstChildElement);
+    attributes        = std::move (other.attributes);
+    tagName           = std::move (other.tagName);
 
     return *this;
 }

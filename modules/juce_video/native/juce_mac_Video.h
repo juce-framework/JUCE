@@ -220,7 +220,7 @@ private:
 
         private:
             static void valueChanged (id self, SEL, NSString* keyPath, id,
-                                      NSDictionary<NSKeyValueChangeKey, id>* change, void*)
+                                      NSDictionary<NSString*, id>* change, void*)
             {
                 auto& owner = getOwner (self);
 
@@ -321,7 +321,7 @@ private:
 
             private:
                 static void valueChanged (id self, SEL, NSString*, id object,
-                                          NSDictionary<NSKeyValueChangeKey, id>* change, void* context)
+                                          NSDictionary<NSString*, id>* change, void* context)
                 {
                     auto& owner = getOwner (self);
 

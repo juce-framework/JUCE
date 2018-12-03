@@ -131,7 +131,7 @@ struct CameraDevice::Pimpl
             return;
         }
 
-        pictureTakenCallback = static_cast<std::function<void (const Image&)>&&> (pictureTakenCallbackToUse);
+        pictureTakenCallback = std::move (pictureTakenCallbackToUse);
 
         triggerImageCapture();
     }
