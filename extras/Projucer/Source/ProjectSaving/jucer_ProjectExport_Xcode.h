@@ -2073,7 +2073,7 @@ private:
             resourceIDs.add (fileID);
             resourceFileRefs.add (refID);
 
-            unityTarget->addCopyFilesPhase ("Embed Unity Script", fileID, kWrapperFolder);
+            unityTarget->addCopyFilesPhase ("Embed Unity Script", fileID, kResourcesFolder);
         }
     }
 
