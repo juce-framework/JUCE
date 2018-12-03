@@ -306,6 +306,8 @@ private:
 
     struct TouchStart { float x, y; };
     TouchList<TouchStart> touchStartPositions;
+    
+    Block::UID masterBlock = 0;
 
     //==============================================================================
     juce::Time lastTopologyRequestTime, lastTopologyReceiveTime;
@@ -532,25 +534,28 @@ private:
     }
 
     //==============================================================================
-    static juce::Array<DeviceInfo> getArrayOfDeviceInfo (const juce::Array<BlocksProtocol::DeviceStatus>& devices)
+    juce::Array<DeviceInfo> getArrayOfDeviceInfo (const juce::Array<BlocksProtocol::DeviceStatus>& devices)
     {
         juce::Array<DeviceInfo> result;
-        bool isFirst = true; // TODO: First block not always master block! Assumption violated.
 
         for (auto& device : devices)
         {
             BlocksProtocol::VersionNumber version;
             BlocksProtocol::BlockName name;
+            
+            const auto uid = getBlockUIDFromSerialNumber (device.serialNumber);
+            
+            // For backwards compatibility we assume the first device we see in a group is the master and won't change
+            if (masterBlock == 0)
+                masterBlock = uid;
 
-            result.add ({ getBlockUIDFromSerialNumber (device.serialNumber),
-                device.index,
-                device.serialNumber,
-                version,
-                name,
-                isFirst });
-
-            isFirst = false;
-        }
+            result.add ({ uid,
+                          device.index,
+                          device.serialNumber,
+                          version,
+                          name,
+                          masterBlock == uid });
+       }
 
         return result;
     }
