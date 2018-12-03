@@ -120,6 +120,8 @@ public:
             EndDialog (hwnd, 0);
     }
 
+    Component* getCustomComponent()    { return customComponent.get(); }
+
     Array<URL> results;
 
 private:
@@ -566,6 +568,9 @@ public:
     {
         if (targetComponent == nullptr)
             return false;
+
+        if (targetComponent == nativeFileChooser->getCustomComponent())
+            return true;
 
         return targetComponent->findParentComponentOfClass<FilePreviewComponent>() != nullptr;
     }
