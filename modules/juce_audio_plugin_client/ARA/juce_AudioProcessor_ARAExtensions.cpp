@@ -1,4 +1,4 @@
-#include "juce_AudioProcessorARAExtension.h"
+#include "juce_AudioProcessor_ARAExtensions.h"
 
 namespace juce
 {

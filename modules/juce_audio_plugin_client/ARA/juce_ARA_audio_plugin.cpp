@@ -7,11 +7,11 @@
 #include <ARA_Library/Dispatch/ARAPlugInDispatch.cpp>
 
 // Include these source files directly for now
-#include "juce_ARADocumentController.cpp"
 #include "juce_ARAModelObjects.cpp"
+#include "juce_ARADocumentController.cpp"
 #include "juce_ARAAudioReaders.cpp"
-#include "juce_AudioProcessorARAExtension.cpp"
 #include "juce_ARAPlugInInstanceRoles.cpp"
+#include "juce_AudioProcessor_ARAExtensions.cpp"
 
 namespace juce
 {

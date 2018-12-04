@@ -74,7 +74,7 @@ namespace Vst2
 //==============================================================================
 #if JucePlugin_Enable_ARA
 
- #include "../ARA/juce_AudioProcessorARAExtension.h"
+ #include "../ARA/juce_AudioProcessor_ARAExtensions.h"
 
  #include <ARA_API/ARAVST3.h>
 
