@@ -182,23 +182,23 @@ public:
     template <typename Callback>
     void callExpectingUnregistration (Callback&& callback)
     {
-        auto& listenersArray = getListeners();
-
         typename ArrayType::ScopedLockType lock (listeners.getLock());
 
-        if (listenersArray.size() == 1)
+        if (listeners.isEmpty())
+            return;
+
+        if (listeners.size() == 1)
         {
             // if there's but one listener, we can skip copying the array
-            callback (*listenersArray.getFirst());
+            callback (*listeners.getFirst());
+            return;
         }
-        else
+
+        auto listenersCopy (listeners);
+        for (auto l : listenersCopy)
         {
-            auto listenersCopy (listenersArray);
-            for (auto listener : listenersCopy)
-            {
-                if (contains (listener))
-                    callback (*listener);
-            }
+            if (contains (l))
+                callback (*l);
         }
     }
 
