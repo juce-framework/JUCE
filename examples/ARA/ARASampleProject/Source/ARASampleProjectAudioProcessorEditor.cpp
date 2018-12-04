@@ -3,8 +3,8 @@
 
 //==============================================================================
 ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARASampleProjectAudioProcessor& p)
-: AudioProcessorEditor (&p),
-  AudioProcessorEditorARAExtension (&p)
+    : AudioProcessorEditor (&p),
+      AudioProcessorEditorARAExtension (&p)
 {
     regionSequenceViewPort.setScrollBarsShown (true, true);
     regionSequenceListView.setBounds (0, 0, kWidth - regionSequenceViewPort.getScrollBarThickness(), kHeight);

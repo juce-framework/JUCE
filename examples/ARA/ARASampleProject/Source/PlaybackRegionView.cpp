@@ -4,10 +4,10 @@
 
 //==============================================================================
 PlaybackRegionView::PlaybackRegionView (ARASampleProjectAudioProcessorEditor* editor, ARAPlaybackRegion* region)
-: editorComponent (editor),
-  playbackRegion (region),
-  audioThumbCache (1),
-  audioThumb (128, audioFormatManger, audioThumbCache)
+    : editorComponent (editor),
+      playbackRegion (region),
+      audioThumbCache (1),
+      audioThumb (128, audioFormatManger, audioThumbCache)
 {
     audioThumb.addChangeListener (this);
 

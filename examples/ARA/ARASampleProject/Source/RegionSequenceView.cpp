@@ -6,8 +6,8 @@
 
 //==============================================================================
 RegionSequenceView::RegionSequenceView (ARASampleProjectAudioProcessorEditor* editor, ARARegionSequence* sequence)
-: editorComponent (editor),
-  regionSequence (sequence)
+    : editorComponent (editor),
+      regionSequence (sequence)
 {
     editorComponent->getARAEditorView()->addListener (this);
     onNewSelection (editorComponent->getARAEditorView()->getViewSelection());

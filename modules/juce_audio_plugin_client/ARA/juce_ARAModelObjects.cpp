@@ -4,21 +4,21 @@ namespace juce
 {
 
 //==============================================================================
-	
+
 ARADocument::ARADocument (ARADocumentController* documentController)
-: ARA::PlugIn::Document (documentController)
+    : ARA::PlugIn::Document (documentController)
 {}
 
 //==============================================================================
 
 ARAMusicalContext::ARAMusicalContext (ARADocument* document, ARA::ARAMusicalContextHostRef hostRef)
-: ARA::PlugIn::MusicalContext (document, hostRef)
+    : ARA::PlugIn::MusicalContext (document, hostRef)
 {}
 
 //==============================================================================
 
 ARARegionSequence::ARARegionSequence (ARADocument* document, ARA::ARARegionSequenceHostRef hostRef)
-: ARA::PlugIn::RegionSequence (document, hostRef)
+    : ARA::PlugIn::RegionSequence (document, hostRef)
 {}
 
 double ARARegionSequence::getCommonSampleRate()
@@ -38,7 +38,7 @@ double ARARegionSequence::getCommonSampleRate()
 //==============================================================================
 
 ARAAudioSource::ARAAudioSource (ARADocument* document, ARA::ARAAudioSourceHostRef hostRef)
-: ARA::PlugIn::AudioSource(document, hostRef)
+    : ARA::PlugIn::AudioSource(document, hostRef)
 {}
 
 void ARAAudioSource::notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyAllAudioModificationsAndPlaybackRegions)
@@ -50,7 +50,7 @@ void ARAAudioSource::notifyContentChanged (ARAContentUpdateScopes scopeFlags, bo
 //==============================================================================
 
 ARAAudioModification::ARAAudioModification (ARAAudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef)
-: ARA::PlugIn::AudioModification (audioSource, hostRef)
+    : ARA::PlugIn::AudioModification (audioSource, hostRef)
 {}
 
 void ARAAudioModification::notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyAllPlaybackRegions)
@@ -62,7 +62,7 @@ void ARAAudioModification::notifyContentChanged (ARAContentUpdateScopes scopeFla
 //==============================================================================
 
 ARAPlaybackRegion::ARAPlaybackRegion (ARAAudioModification* audioModification, ARA::ARAPlaybackRegionHostRef hostRef)
-: ARA::PlugIn::PlaybackRegion (audioModification, hostRef)
+    : ARA::PlugIn::PlaybackRegion (audioModification, hostRef)
 {}
 
 void ARAPlaybackRegion::setHeadTime (double newHeadTime)

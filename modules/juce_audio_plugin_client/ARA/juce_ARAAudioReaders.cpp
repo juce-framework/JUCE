@@ -4,8 +4,8 @@ namespace juce
 {
     
 ARAAudioSourceReader::ARAAudioSourceReader (ARAAudioSource* audioSource, bool use64BitSamples)
-: AudioFormatReader (nullptr, "ARAAudioSourceReader"),
-  audioSourceBeingRead (audioSource)
+    : AudioFormatReader (nullptr, "ARAAudioSourceReader"),
+      audioSourceBeingRead (audioSource)
 {
     jassert (audioSourceBeingRead != nullptr);
 
@@ -141,9 +141,9 @@ bool ARAAudioSourceReader::readSamples (int** destSamples, int numDestChannels, 
 //==============================================================================
 
 ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARAPlaybackRenderer* renderer, std::vector<ARAPlaybackRegion*> const& playbackRegions, bool nonRealtime)
-: AudioFormatReader (nullptr, "ARAPlaybackRegionReader"),
-  isNonRealtime (nonRealtime),
-  playbackRenderer (renderer)
+    : AudioFormatReader (nullptr, "ARAPlaybackRegionReader"),
+      isNonRealtime (nonRealtime),
+      playbackRenderer (renderer)
 {
     // TODO JUCE_ARA
     // Make sampleRate, numChannels and use64BitSamples available as c'tor parameters instead
@@ -279,8 +279,8 @@ void ARAPlaybackRegionReader::willDestroyPlaybackRegion (ARAPlaybackRegion* play
 //==============================================================================
 
 ARARegionSequenceReader::ARARegionSequenceReader (ARAPlaybackRenderer* playbackRenderer, ARARegionSequence* regionSequence, bool nonRealtime)
-: ARAPlaybackRegionReader (playbackRenderer, reinterpret_cast<std::vector<ARAPlaybackRegion*> const&> (regionSequence->getPlaybackRegions()), nonRealtime),
-  sequence (regionSequence)
+    : ARAPlaybackRegionReader (playbackRenderer, reinterpret_cast<std::vector<ARAPlaybackRegion*> const&> (regionSequence->getPlaybackRegions()), nonRealtime),
+      sequence (regionSequence)
 {
     sequence->addListener (this);
 }
