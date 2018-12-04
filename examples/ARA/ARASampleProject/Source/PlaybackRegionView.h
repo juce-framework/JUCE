@@ -3,12 +3,18 @@
 #include "JuceHeader.h"
 #include "RegionSequenceView.h"
 
-class PlaybackRegionView: public Component, 
-                          public ChangeListener,
-                          public ARAEditorView::Listener,
-                          public ARADocument::Listener,
-                          public ARAAudioSource::Listener,
-                          public ARAPlaybackRegion::Listener
+//==============================================================================
+/**
+    RegionSequenceView
+    JUCE component used to display ARA playback regions in a host document
+    along with their name, color, and selection state
+*/
+class PlaybackRegionView    : public Component,
+                              private ChangeListener,
+                              private ARAEditorView::Listener,
+                              private ARADocument::Listener,
+                              private ARAAudioSource::Listener,
+                              private ARAPlaybackRegion::Listener
 {
 public:
     PlaybackRegionView (ARASampleProjectAudioProcessorEditor* editor, ARAPlaybackRegion* region);

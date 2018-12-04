@@ -11,7 +11,7 @@
     demo we're using a buffered ARA sample reader to pull audio samples from the host
     and render them back, effectively making this ARA enabled pass-through renderer
 */
-class ARASampleProjectPlaybackRenderer : public ARAPlaybackRenderer
+class ARASampleProjectPlaybackRenderer  : public ARAPlaybackRenderer
 {
 public:
     ARASampleProjectPlaybackRenderer (ARADocumentController* documentController);

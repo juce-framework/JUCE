@@ -12,8 +12,8 @@
     This class delegates to an ARASampleProjectPlaybackRenderer instance
     which fulfills the PlaybackRenderer role of our ARA enabled plug-in
 */
-class ARASampleProjectAudioProcessor   : public AudioProcessor,
-                                         public AudioProcessorARAExtension
+class ARASampleProjectAudioProcessor    : public AudioProcessor,
+                                          public AudioProcessorARAExtension
 {
 public:
     //==============================================================================

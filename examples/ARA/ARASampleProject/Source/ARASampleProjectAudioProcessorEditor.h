@@ -10,10 +10,10 @@
     This class manages the UI we use to display region sequences in the
     ARA document as well as their current selection state
 */
-class ARASampleProjectAudioProcessorEditor: public AudioProcessorEditor,
-                                            public AudioProcessorEditorARAExtension,
-                                            public ARAEditorView::Listener,
-                                            public ARADocument::Listener
+class ARASampleProjectAudioProcessorEditor  : public AudioProcessorEditor,
+                                              public AudioProcessorEditorARAExtension,
+                                              private ARAEditorView::Listener,
+                                              private ARADocument::Listener
 {
 public:
     ARASampleProjectAudioProcessorEditor (ARASampleProjectAudioProcessor&);

@@ -8,7 +8,7 @@ namespace juce
 class ARAPlaybackRegionReader;
 class ARARegionSequenceReader;
 
-class ARADocumentController: public ARA::PlugIn::DocumentController
+class ARADocumentController  : public ARA::PlugIn::DocumentController
 {
 public:
     ARADocumentController() noexcept {}

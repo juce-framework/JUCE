@@ -4,14 +4,16 @@
 
 namespace juce
 {
+
 class ARADocumentController;
+class ARADocument;
 class ARAMusicalContext;
 class ARARegionSequence;
 class ARAAudioSource;
 class ARAAudioModification;
 class ARAPlaybackRegion;
 
-class ARADocument : public ARA::PlugIn::Document
+class ARADocument  : public ARA::PlugIn::Document
 {
 public:
     ARADocument (ARADocumentController* documentController);
@@ -44,7 +46,7 @@ public:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARADocument)
 };
 
-class ARAMusicalContext : public ARA::PlugIn::MusicalContext
+class ARAMusicalContext  : public ARA::PlugIn::MusicalContext
 {
 public:
     ARAMusicalContext (ARADocument* document, ARA::ARAMusicalContextHostRef hostRef);
@@ -69,7 +71,7 @@ public:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAMusicalContext)
 };
 
-class ARARegionSequence : public ARA::PlugIn::RegionSequence
+class ARARegionSequence  : public ARA::PlugIn::RegionSequence
 {
 public:
     ARARegionSequence (ARADocument* document, ARA::ARARegionSequenceHostRef hostRef);
@@ -100,7 +102,7 @@ public:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARARegionSequence)
 };
 
-class ARAAudioSource : public ARA::PlugIn::AudioSource
+class ARAAudioSource  : public ARA::PlugIn::AudioSource
 {
 public:
     ARAAudioSource (ARADocument* document, ARA::ARAAudioSourceHostRef hostRef);
@@ -132,7 +134,7 @@ public:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAAudioSource)
 };
 
-class ARAAudioModification : public ARA::PlugIn::AudioModification
+class ARAAudioModification  : public ARA::PlugIn::AudioModification
 {
 public:
     ARAAudioModification (ARAAudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef);
@@ -162,7 +164,7 @@ public:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAAudioModification)
 };
 
-class ARAPlaybackRegion : public ARA::PlugIn::PlaybackRegion
+class ARAPlaybackRegion  : public ARA::PlugIn::PlaybackRegion
 {
 public:
     ARAPlaybackRegion (ARAAudioModification* audioModification, ARA::ARAPlaybackRegionHostRef hostRef);

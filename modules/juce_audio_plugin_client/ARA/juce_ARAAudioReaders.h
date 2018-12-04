@@ -34,8 +34,8 @@ namespace juce
 // This means that the location of this region has to be taken into account by the calling code if
 // it wants to relate the samples to the model or any other reader output.
 
-class ARAAudioSourceReader : public AudioFormatReader,
-                             ARAAudioSource::Listener
+class ARAAudioSourceReader  : public AudioFormatReader,
+                              private ARAAudioSource::Listener
 {
 public:
     ARAAudioSourceReader (ARAAudioSource* audioSource, bool use64BitSamples = false);
@@ -67,8 +67,8 @@ private:
 
 //==============================================================================
 
-class ARAPlaybackRegionReader : public AudioFormatReader,
-                                public ARAPlaybackRegion::Listener
+class ARAPlaybackRegionReader  : public AudioFormatReader,
+                                 private ARAPlaybackRegion::Listener
 {
 public:
     ARAPlaybackRegionReader (ARAPlaybackRenderer* renderer, std::vector<ARAPlaybackRegion*> const& playbackRegions, bool nonRealtime);
@@ -97,8 +97,8 @@ private:
 
 //==============================================================================
 
-class ARARegionSequenceReader : public ARAPlaybackRegionReader,
-                                ARARegionSequence::Listener
+class ARARegionSequenceReader  : public ARAPlaybackRegionReader,
+                                 private ARARegionSequence::Listener
 {
 public:
     ARARegionSequenceReader (ARAPlaybackRenderer* playbackRenderer, ARARegionSequence* regionSequence, bool nonRealtime);

@@ -8,7 +8,7 @@
     This is our plug-in's document controller implementation, which will
     be the central point of communication between the ARA host and our plug-in
 */
-class ARASampleProjectDocumentController : public ARADocumentController
+class ARASampleProjectDocumentController    : public ARADocumentController
 {
 public:
     ARASampleProjectDocumentController() noexcept;

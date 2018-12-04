@@ -8,7 +8,7 @@ namespace juce
 //==============================================================================
 // shared base class for ARAPlaybackRenderer and ARAEditorRenderer, not to be used directly
 template <typename ARARendererType, void (ARARendererType::*setRenderingFunc) (bool), bool clearProcessBuffer>
-class ARARendererBase : public ARARendererType
+class ARARendererBase  : public ARARendererType
 {
 public:
     using ARARendererType::ARARendererType;
@@ -57,8 +57,7 @@ private:
 
 //==============================================================================
 using ARAPlaybackRendererBase = ARARendererBase<ARA::PlugIn::PlaybackRenderer, &ARA::PlugIn::PlaybackRenderer::setRendering, true>;
-
-class ARAPlaybackRenderer : public ARAPlaybackRendererBase
+class ARAPlaybackRenderer  : public ARAPlaybackRendererBase
 {
 public:
     using ARAPlaybackRendererBase::ARAPlaybackRendererBase;
@@ -78,7 +77,7 @@ private:
 
 //==============================================================================
 using ARAEditorRendererBase = ARARendererBase<ARA::PlugIn::EditorRenderer, nullptr, false>;
-class ARAEditorRenderer : public ARAEditorRendererBase
+class ARAEditorRenderer  : public ARAEditorRendererBase
 {
 public:
     using ARAEditorRendererBase::ARAEditorRendererBase;
@@ -93,7 +92,7 @@ private:
 };
 
 //==============================================================================
-class ARAEditorView : public ARA::PlugIn::EditorView
+class ARAEditorView  : public ARA::PlugIn::EditorView
 {
 public:
     ARAEditorView (ARA::PlugIn::DocumentController* documentController) noexcept;
