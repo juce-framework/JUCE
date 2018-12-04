@@ -13,196 +13,214 @@ class ARAAudioSource;
 class ARAAudioModification;
 class ARAPlaybackRegion;
 
+template<typename Listener>
+class ARAModelClass
+{
+public:
+    ARAModelClass() = default;
+    virtual ~ARAModelClass() = default;
 
-//==============================================================================
-// helper macro to avoid repeating the Listener registration and notify code in each class
-// TODO JUCE_ARA a templated base class would be preferable, but we can't use the nested Listnerer
-//               type as paramter for a base class...
+	inline void addListener(Listener* l) { listeners.add (l); }
+	inline void removeListener(Listener* l) { listeners.remove (l); }
 
-#define JUCE_ARA_MODEL_OBJECT_LISTENERLIST \
-public: \
-    inline void addListener (Listener* l) { listeners.add (l); } \
-    inline void removeListener (Listener* l) { listeners.remove (l); } \
-    template<typename Callback> \
-    inline void notifyListeners (Callback&& callback) { listeners.callExpectingUnregistration (callback); } \
-private: \
-    ListenerList<Listener> listeners;
+	template<typename Callback>
+	inline void notifyListeners (Callback&& callback) { listeners.callExpectingUnregistration (callback); } \
 
+private:
+	ListenerList<Listener> listeners;
 
-//==============================================================================
-class ARADocument  : public ARA::PlugIn::Document
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAModelClass)
+};
+
+class _ARADocumentListener;
+class ARADocument: public ARA::PlugIn::Document,
+                   public ARAModelClass<_ARADocumentListener>
 {
 public:
     ARADocument (ARADocumentController* documentController);
     
-    class Listener
-    {
-    public:
-        virtual ~Listener() = default;
-
-       ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
-        virtual void willBeginEditing (ARADocument* document) {}
-        virtual void didEndEditing (ARADocument* document) {}
-        virtual void willUpdateDocumentProperties (ARADocument* document, ARADocument::PropertiesPtr newProperties) {}
-        virtual void didUpdateDocumentProperties (ARADocument* document) {}
-        virtual void didReorderRegionSequencesInDocument (ARADocument* document) {}
-        virtual void didAddMusicalContextToDocument (ARADocument* document, ARAMusicalContext* musicalContext) {}
-        virtual void willRemoveMusicalContextFromDocument (ARADocument* document, ARAMusicalContext* musicalContext) {}
-        virtual void didAddRegionSequenceToDocument (ARADocument* document, ARARegionSequence* regionSequence) {}
-        virtual void willRemoveRegionSequenceFromDocument (ARADocument* document, ARARegionSequence* regionSequence) {}
-        virtual void didAddAudioSourceToDocument (ARADocument* document, ARAAudioSource* audioSource) {}
-        virtual void willRemoveAudioSourceFromDocument (ARADocument* document, ARAAudioSource* audioSource) {}
-        virtual void willDestroyDocument (ARADocument* document) {}
-       ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
-    };
-
-    //==============================================================================
-    JUCE_ARA_MODEL_OBJECT_LISTENERLIST
+	using Listener = _ARADocumentListener;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARADocument)
 };
 
+class _ARADocumentListener
+{
+public:
+    _ARADocumentListener() = default;
+    virtual ~_ARADocumentListener() = default;
+
+   ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
+    virtual void willBeginEditing (ARADocument* document) {}
+    virtual void didEndEditing (ARADocument* document) {}
+    virtual void willUpdateDocumentProperties (ARADocument* document, ARADocument::PropertiesPtr newProperties) {}
+    virtual void didUpdateDocumentProperties (ARADocument* document) {}
+    virtual void didReorderRegionSequencesInDocument (ARADocument* document) {}
+    virtual void didAddMusicalContextToDocument (ARADocument* document, ARAMusicalContext* musicalContext) {}
+    virtual void willRemoveMusicalContextFromDocument (ARADocument* document, ARAMusicalContext* musicalContext) {}
+    virtual void didAddRegionSequenceToDocument (ARADocument* document, ARARegionSequence* regionSequence) {}
+    virtual void willRemoveRegionSequenceFromDocument (ARADocument* document, ARARegionSequence* regionSequence) {}
+    virtual void didAddAudioSourceToDocument (ARADocument* document, ARAAudioSource* audioSource) {}
+    virtual void willRemoveAudioSourceFromDocument (ARADocument* document, ARAAudioSource* audioSource) {}
+    virtual void willDestroyDocument (ARADocument* document) {}
+   ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
+       
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (_ARADocumentListener)
+};
+
 //==============================================================================
-class ARAMusicalContext  : public ARA::PlugIn::MusicalContext
+class _ARAMusicalContextListener;
+class ARAMusicalContext : public ARA::PlugIn::MusicalContext, 
+                          public ARAModelClass<_ARAMusicalContextListener>
 {
 public:
     ARAMusicalContext (ARADocument* document, ARA::ARAMusicalContextHostRef hostRef);
-
-    class Listener
-    {
-    public:
-        virtual ~Listener() = default;
-
-       ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
-        virtual void willUpdateMusicalContextProperties (ARAMusicalContext* musicalContext, ARAMusicalContext::PropertiesPtr newProperties) {}
-        virtual void didUpdateMusicalContextProperties (ARAMusicalContext* musicalContext) {}
-        virtual void doUpdateMusicalContextContent (ARAMusicalContext* musicalContext, ARAContentUpdateScopes scopeFlags) {}
-        virtual void willDestroyMusicalContext (ARAMusicalContext* musicalContext) {}
-       ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
-    };
-
-    //==============================================================================
-    JUCE_ARA_MODEL_OBJECT_LISTENERLIST
+    
+    using Listener = _ARAMusicalContextListener;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAMusicalContext)
 };
 
+class _ARAMusicalContextListener
+{
+public:
+    _ARAMusicalContextListener() = default;
+    virtual ~_ARAMusicalContextListener() = default;
+
+   ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
+    virtual void willUpdateMusicalContextProperties (ARAMusicalContext* musicalContext, ARAMusicalContext::PropertiesPtr newProperties) {}
+    virtual void didUpdateMusicalContextProperties (ARAMusicalContext* musicalContext) {}
+    virtual void doUpdateMusicalContextContent (ARAMusicalContext* musicalContext, ARAContentUpdateScopes scopeFlags) {}
+    virtual void willDestroyMusicalContext (ARAMusicalContext* musicalContext) {}
+   ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
+
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (_ARAMusicalContextListener)
+};
+
 //==============================================================================
-class ARARegionSequence  : public ARA::PlugIn::RegionSequence
+class _ARARegionSequenceListener;
+class ARARegionSequence : public ARA::PlugIn::RegionSequence,
+                          public ARAModelClass<_ARARegionSequenceListener>
 {
 public:
     ARARegionSequence (ARADocument* document, ARA::ARARegionSequenceHostRef hostRef);
+
+    using Listener = _ARARegionSequenceListener;
 
     // If all audio sources used by the playback regions in this region sequence have the
     // same sample rate, this rate is returned here, otherwise 0.0 is returned.
     // If the region sequence has no playback regions, this also returns 0.0.
     double getCommonSampleRate();
 
-    class Listener
-    {
-    public:
-        virtual ~Listener() = default;
-
-       ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
-        virtual void willUpdateRegionSequenceProperties (ARARegionSequence* regionSequence, ARARegionSequence::PropertiesPtr newProperties) {}
-        virtual void didUpdateRegionSequenceProperties (ARARegionSequence* regionSequence) {}
-        virtual void willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion) {}
-        virtual void didAddPlaybackRegionToRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion) {}
-        virtual void willDestroyRegionSequence (ARARegionSequence* regionSequence) {}
-       ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
-    };
-
-    //==============================================================================
-    JUCE_ARA_MODEL_OBJECT_LISTENERLIST
-
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARARegionSequence)
 };
 
-//==============================================================================
-class ARAAudioSource  : public ARA::PlugIn::AudioSource
+class _ARARegionSequenceListener
+{
+public:
+    _ARARegionSequenceListener() = default;
+    virtual ~_ARARegionSequenceListener() = default;
+
+   ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
+    virtual void willUpdateRegionSequenceProperties (ARARegionSequence* regionSequence, ARARegionSequence::PropertiesPtr newProperties) {}
+    virtual void didUpdateRegionSequenceProperties (ARARegionSequence* regionSequence) {}
+    virtual void willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion) {}
+    virtual void didAddPlaybackRegionToRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion) {}
+    virtual void willDestroyRegionSequence (ARARegionSequence* regionSequence) {}
+   ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
+       
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (_ARARegionSequenceListener)
+};
+
+class _ARAAudioSourceListener;
+class ARAAudioSource : public ARA::PlugIn::AudioSource,
+                       public ARAModelClass<_ARAAudioSourceListener>
 {
 public:
     ARAAudioSource (ARADocument* document, ARA::ARAAudioSourceHostRef hostRef);
 
-    class Listener
-    {
-    public:
-        virtual ~Listener() = default;
-
-       ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
-        virtual void willUpdateAudioSourceProperties (ARAAudioSource* audioSource, PropertiesPtr newProperties) {}
-        virtual void didUpdateAudioSourceProperties (ARAAudioSource* audioSource) {}
-        virtual void doUpdateAudioSourceContent (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags) {}
-        virtual void willEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) {}
-        virtual void didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) {}
-        virtual void doDeactivateAudioSourceForUndoHistory (ARAAudioSource* audioSource, bool deactivate) {}
-        virtual void didAddAudioModificationToAudioSource (ARAAudioSource* audioSource, ARAAudioModification* audioModification) {}
-        virtual void willRemoveAudioModificationFromAudioSource (ARAAudioSource* audioSource, ARAAudioModification* audioModification) {}
-        virtual void willDestroyAudioSource (ARAAudioSource* audioSource) {}
-       ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
-    };
+    using Listener = _ARAAudioSourceListener;
 
     void notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyAllAudioModificationsAndPlaybackRegions = false);
-
-    //==============================================================================
-    JUCE_ARA_MODEL_OBJECT_LISTENERLIST
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAAudioSource)
 };
 
+class _ARAAudioSourceListener
+{
+public:
+    _ARAAudioSourceListener() = default;
+    virtual ~_ARAAudioSourceListener() = default;
+
+   ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
+    virtual void willUpdateAudioSourceProperties (ARAAudioSource* audioSource, ARAAudioSource::PropertiesPtr newProperties) {}
+    virtual void didUpdateAudioSourceProperties (ARAAudioSource* audioSource) {}
+    virtual void doUpdateAudioSourceContent (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags) {}
+    virtual void willEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) {}
+    virtual void didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) {}
+    virtual void doDeactivateAudioSourceForUndoHistory (ARAAudioSource* audioSource, bool deactivate) {}
+    virtual void didAddAudioModificationToAudioSource (ARAAudioSource* audioSource, ARAAudioModification* audioModification) {}
+    virtual void willRemoveAudioModificationFromAudioSource (ARAAudioSource* audioSource, ARAAudioModification* audioModification) {}
+    virtual void willDestroyAudioSource (ARAAudioSource* audioSource) {}
+   ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
+       
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (_ARAAudioSourceListener)
+};
+
 //==============================================================================
-class ARAAudioModification  : public ARA::PlugIn::AudioModification
+class _ARAAudioModificationListener;
+class ARAAudioModification : public ARA::PlugIn::AudioModification,
+                             public ARAModelClass<_ARAAudioModificationListener>
 {
 public:
     ARAAudioModification (ARAAudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef);
-
-    class Listener
-    {
-    public:
-        virtual ~Listener() = default;
-
-       ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
-        virtual void willUpdateAudioModificationProperties (ARAAudioModification* audioModification, PropertiesPtr newProperties) {}
-        virtual void didUpdateAudioModificationProperties (ARAAudioModification* audioModification) {}
-        virtual void doUpdateAudioModificationContent (ARAAudioModification* audioModification, ARAContentUpdateScopes scopeFlags) {}
-        virtual void doDeactivateAudioModificationForUndoHistory (ARAAudioModification* audioModification, bool deactivate) {}
-        virtual void didAddPlaybackRegionToAudioModification (ARAAudioModification* audioModification, ARAPlaybackRegion* playbackRegion) {}
-        virtual void willRemovePlaybackRegionFromAudioModification (ARAAudioModification* audioModification, ARAPlaybackRegion* playbackRegion) {}
-        virtual void willDestroyAudioModification (ARAAudioModification* audioModification) {}
-       ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
-    };
+    
+    using Listener = _ARAAudioModificationListener;
 
     void notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyAllPlaybackRegions = false);
-
-    //==============================================================================
-    JUCE_ARA_MODEL_OBJECT_LISTENERLIST
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAAudioModification)
 };
 
+class _ARAAudioModificationListener
+{
+public:
+    _ARAAudioModificationListener() = default;
+    virtual ~_ARAAudioModificationListener() = default;
+
+   ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
+    virtual void willUpdateAudioModificationProperties (ARAAudioModification* audioModification, ARAAudioModification::PropertiesPtr newProperties) {}
+    virtual void didUpdateAudioModificationProperties (ARAAudioModification* audioModification) {}
+    virtual void doUpdateAudioModificationContent (ARAAudioModification* audioModification, ARAContentUpdateScopes scopeFlags) {}
+    virtual void doDeactivateAudioModificationForUndoHistory (ARAAudioModification* audioModification, bool deactivate) {}
+    virtual void didAddPlaybackRegionToAudioModification (ARAAudioModification* audioModification, ARAPlaybackRegion* playbackRegion) {}
+    virtual void willRemovePlaybackRegionFromAudioModification (ARAAudioModification* audioModification, ARAPlaybackRegion* playbackRegion) {}
+    virtual void willDestroyAudioModification (ARAAudioModification* audioModification) {}
+   ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
+       
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (_ARAAudioModificationListener)
+};
+
 //==============================================================================
-class ARAPlaybackRegion  : public ARA::PlugIn::PlaybackRegion
+class _ARAPlaybackRegionListener;
+class ARAPlaybackRegion: public ARA::PlugIn::PlaybackRegion,
+                         public ARAModelClass<_ARAPlaybackRegionListener>
 {
 public:
     ARAPlaybackRegion (ARAAudioModification* audioModification, ARA::ARAPlaybackRegionHostRef hostRef);
 
-    class Listener
-    {
-    public:
-        virtual ~Listener() = default;
-
-       ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
-        virtual void willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties) {}
-        virtual void didUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion) {}
-        virtual void didUpdatePlaybackRegionContent (ARAPlaybackRegion* playbackRegion, ARAContentUpdateScopes scopeFlags) {}
-        virtual void willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion) {}
-       ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
-    };
+    using Listener = _ARAPlaybackRegionListener;
 
     double getHeadTime() const { return headTime; }
     double getTailTime() const { return tailTime; }
@@ -217,13 +235,24 @@ private:
     double tailTime = 0.0;
 
     //==============================================================================
-    JUCE_ARA_MODEL_OBJECT_LISTENERLIST
-
-    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAPlaybackRegion)
 };
 
-//==============================================================================
-#undef JUCE_ARA_MODEL_OBJECT_LISTENERLIST
+class _ARAPlaybackRegionListener
+{
+public:
+    _ARAPlaybackRegionListener() = default;
+    virtual ~_ARAPlaybackRegionListener() = default;
+
+   ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
+    virtual void willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties) {}
+    virtual void didUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion) {}
+    virtual void didUpdatePlaybackRegionContent (ARAPlaybackRegion* playbackRegion, ARAContentUpdateScopes scopeFlags) {}
+    virtual void willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion) {}
+   ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
+       
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (_ARAPlaybackRegionListener)
+};
 
 } // namespace juce
