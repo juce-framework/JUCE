@@ -35,41 +35,45 @@ private:
 
 // TODO JUCE_ARA
 // Do we want to use this Listener pattern?
+// @jj yes please :-)
 template<class ModelClassType>
-class ARAModelClass_0
+class ARAListenableModelClass
 {
 public:
-    class Listener_0 
+    class Listener
     {
     public:
-        Listener_0() = default;
-        virtual ~Listener_0() = default;
+        Listener() = default;
+        virtual ~Listener() = default;
     };
 
-    ARAModelClass_0() = default;
-    virtual ~ARAModelClass_0() = default;
+    ARAListenableModelClass() = default;
+    virtual ~ARAListenableModelClass() = default;
 
-    inline void addListener (Listener_0* l) { listeners.add (l); }
-    inline void removeListener (Listener_0* l) { listeners.remove (l); }
+    inline void addListener (Listener* l) { listeners.add (l); }
+    inline void removeListener (Listener* l) { listeners.remove (l); }
 
     template<typename Callback>
     inline void notifyListeners (Callback&& callback)
-                    { reinterpret_cast<ListenerList<typename ModelClassType::Listener>*> (&listeners)->callExpectingUnregistration (callback); }
+    {
+        reinterpret_cast<ListenerList<typename ModelClassType::Listener>*> (&listeners)->callExpectingUnregistration (callback);
+    }
 
 private:
-    ListenerList<Listener_0> listeners;
+    ListenerList<Listener> listeners;
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAModelClass_0)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAListenableModelClass)
 };
 
+//==============================================================================
 class ARADocument: public ARA::PlugIn::Document,
-                   public ARAModelClass_0<ARADocument>
+                   public ARAListenableModelClass<ARADocument>
 {
 public:
     ARADocument (ARADocumentController* documentController);
 
-    class Listener  : public ARAModelClass_0<ARADocument>::Listener_0
+    class Listener  : public ARAListenableModelClass<ARADocument>::Listener
     {
     public:
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
