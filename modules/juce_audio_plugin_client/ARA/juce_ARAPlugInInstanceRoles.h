@@ -5,12 +5,6 @@
 namespace juce
 {
 
-// TODO JUCE_ARA
-// This file contains three different classes that can be 
-// used in the JUCE_ARA library - should these classes
-// be moved in to individual files, or is sharing files for
-// smaller classes preferred?
-
 //==============================================================================
 // shared base class for ARAPlaybackRenderer and ARAEditorRenderer, not to be used directly
 template <typename ARARendererType, void (ARARendererType::*setRenderingFunc) (bool), bool clearProcessBuffer>
