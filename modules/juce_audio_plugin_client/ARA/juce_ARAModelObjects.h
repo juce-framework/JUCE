@@ -13,6 +13,23 @@ class ARAAudioSource;
 class ARAAudioModification;
 class ARAPlaybackRegion;
 
+
+//==============================================================================
+// helper macro to avoid repeating the Listener registration and notify code in each class
+// TODO JUCE_ARA a templated base class would be preferable, but we can't use the nested Listnerer
+//               type as paramter for a base class...
+
+#define JUCE_ARA_MODEL_OBJECT_LISTENERLIST \
+public: \
+    inline void addListener (Listener* l) { listeners.add (l); } \
+    inline void removeListener (Listener* l) { listeners.remove (l); } \
+    template<typename Callback> \
+    inline void notifyListeners (Callback&& callback) { listeners.callExpectingUnregistration (callback); } \
+private: \
+    ListenerList<Listener> listeners;
+
+
+//==============================================================================
 class ARADocument  : public ARA::PlugIn::Document
 {
 public:
@@ -46,6 +63,7 @@ public:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARADocument)
 };
 
+//==============================================================================
 class ARAMusicalContext  : public ARA::PlugIn::MusicalContext
 {
 public:
@@ -71,6 +89,7 @@ public:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAMusicalContext)
 };
 
+//==============================================================================
 class ARARegionSequence  : public ARA::PlugIn::RegionSequence
 {
 public:
@@ -102,6 +121,7 @@ public:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARARegionSequence)
 };
 
+//==============================================================================
 class ARAAudioSource  : public ARA::PlugIn::AudioSource
 {
 public:
@@ -134,6 +154,7 @@ public:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAAudioSource)
 };
 
+//==============================================================================
 class ARAAudioModification  : public ARA::PlugIn::AudioModification
 {
 public:
@@ -164,6 +185,7 @@ public:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAAudioModification)
 };
 
+//==============================================================================
 class ARAPlaybackRegion  : public ARA::PlugIn::PlaybackRegion
 {
 public:
@@ -200,5 +222,8 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAPlaybackRegion)
 };
+
+//==============================================================================
+#undef JUCE_ARA_MODEL_OBJECT_LISTENERLIST
 
 } // namespace juce
