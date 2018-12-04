@@ -78,6 +78,11 @@ namespace juce
 #define notify_listeners(function, ModelObjectPtrType, modelObject,  ...) \
     static_cast<ModelObjectPtrType> (modelObject)->notifyListeners ([&] (std::remove_pointer<ModelObjectPtrType>::type::Listener& l) { l.function (static_cast<ModelObjectPtrType> (modelObject), ##__VA_ARGS__); })
 
+// TODO JUCE_ARA
+// Do we want to use this Listener pattern? This _0 macro cast to the appropriate listener type
+#define notify_listeners_0(function, ModelObjectPtrType, modelObject,  ...) \
+    static_cast<ModelObjectPtrType> (modelObject)->notifyListeners ([&] (std::remove_pointer<ModelObjectPtrType>::type::Listener_0& l) { ((std::remove_pointer<ModelObjectPtrType>::type::Listener&)l).function (static_cast<ModelObjectPtrType> (modelObject), ##__VA_ARGS__); })
+
 //==============================================================================
 
 AudioFormatReader* ARADocumentController::createAudioSourceReader (ARAAudioSource* audioSource)
@@ -139,12 +144,12 @@ ARA::PlugIn::Document* ARADocumentController::doCreateDocument (ARA::PlugIn::Doc
 
 void ARADocumentController::willBeginEditing() noexcept
 {
-    notify_listeners (willBeginEditing, ARADocument*, getDocument());
+    notify_listeners_0 (willBeginEditing, ARADocument*, getDocument());
 }
 
 void ARADocumentController::didEndEditing() noexcept
 {
-    notify_listeners (didEndEditing, ARADocument*, getDocument());
+    notify_listeners_0 (didEndEditing, ARADocument*, getDocument());
 }
 
 void ARADocumentController::doNotifyModelUpdates() noexcept

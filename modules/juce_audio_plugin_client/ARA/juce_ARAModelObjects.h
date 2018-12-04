@@ -33,42 +33,66 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAModelClass)
 };
 
-class _ARADocumentListener;
+// TODO JUCE_ARA
+// Do we want to use this Listener pattern?
+template<class ModelClassType>
+class ARAModelClass_0
+{
+public:
+    class Listener_0 
+    {
+    public:
+        Listener_0() = default;
+        virtual ~Listener_0 () = default;
+
+        //==============================================================================
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Listener_0)
+    };
+
+    ARAModelClass_0() = default;
+    virtual ~ARAModelClass_0() = default;
+
+    inline void addListener(Listener_0* l) { listeners.add (l); }
+    inline void removeListener(Listener_0* l) { listeners.remove (l); }
+
+    template<typename Callback>
+    inline void notifyListeners (Callback&& callback) { listeners.callExpectingUnregistration (callback); } \
+
+private:
+    ListenerList<Listener_0> listeners;
+
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAModelClass_0)
+};
+
 class ARADocument: public ARA::PlugIn::Document,
-                   public ARAModelClass<_ARADocumentListener>
+                   public ARAModelClass_0<ARADocument>
 {
 public:
     ARADocument (ARADocumentController* documentController);
-    
-	using Listener = _ARADocumentListener;
 
+    class Listener: public ARAModelClass_0<ARADocument>::Listener_0
+    {
+    public:
+
+       ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
+        virtual void willBeginEditing (ARADocument* document) {}
+        virtual void didEndEditing (ARADocument* document) {}
+        virtual void willUpdateDocumentProperties (ARADocument* document, ARADocument::PropertiesPtr newProperties) {}
+        virtual void didUpdateDocumentProperties (ARADocument* document) {}
+        virtual void didReorderRegionSequencesInDocument (ARADocument* document) {}
+        virtual void didAddMusicalContextToDocument (ARADocument* document, ARAMusicalContext* musicalContext) {}
+        virtual void willRemoveMusicalContextFromDocument (ARADocument* document, ARAMusicalContext* musicalContext) {}
+        virtual void didAddRegionSequenceToDocument (ARADocument* document, ARARegionSequence* regionSequence) {}
+        virtual void willRemoveRegionSequenceFromDocument (ARADocument* document, ARARegionSequence* regionSequence) {}
+        virtual void didAddAudioSourceToDocument (ARADocument* document, ARAAudioSource* audioSource) {}
+        virtual void willRemoveAudioSourceFromDocument (ARADocument* document, ARAAudioSource* audioSource) {}
+        virtual void willDestroyDocument (ARADocument* document) {}
+       ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
+    };
+    
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARADocument)
-};
-
-class _ARADocumentListener
-{
-public:
-    _ARADocumentListener() = default;
-    virtual ~_ARADocumentListener() = default;
-
-   ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
-    virtual void willBeginEditing (ARADocument* document) {}
-    virtual void didEndEditing (ARADocument* document) {}
-    virtual void willUpdateDocumentProperties (ARADocument* document, ARADocument::PropertiesPtr newProperties) {}
-    virtual void didUpdateDocumentProperties (ARADocument* document) {}
-    virtual void didReorderRegionSequencesInDocument (ARADocument* document) {}
-    virtual void didAddMusicalContextToDocument (ARADocument* document, ARAMusicalContext* musicalContext) {}
-    virtual void willRemoveMusicalContextFromDocument (ARADocument* document, ARAMusicalContext* musicalContext) {}
-    virtual void didAddRegionSequenceToDocument (ARADocument* document, ARARegionSequence* regionSequence) {}
-    virtual void willRemoveRegionSequenceFromDocument (ARADocument* document, ARARegionSequence* regionSequence) {}
-    virtual void didAddAudioSourceToDocument (ARADocument* document, ARAAudioSource* audioSource) {}
-    virtual void willRemoveAudioSourceFromDocument (ARADocument* document, ARAAudioSource* audioSource) {}
-    virtual void willDestroyDocument (ARADocument* document) {}
-   ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
-       
-    //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (_ARADocumentListener)
 };
 
 //==============================================================================
