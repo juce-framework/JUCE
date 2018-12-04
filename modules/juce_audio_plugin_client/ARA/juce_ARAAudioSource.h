@@ -19,7 +19,7 @@ public:
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
         virtual void willUpdateAudioSourceProperties (ARAAudioSource* audioSource, PropertiesPtr newProperties) {}
         virtual void didUpdateAudioSourceProperties (ARAAudioSource* audioSource) {}
-        virtual void didUpdateAudioSourceContent (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags) {}
+        virtual void doUpdateAudioSourceContent (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags) {}
         virtual void willEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) {}
         virtual void didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) {}
         virtual void doDeactivateAudioSourceForUndoHistory (ARAAudioSource* audioSource, bool deactivate) {}

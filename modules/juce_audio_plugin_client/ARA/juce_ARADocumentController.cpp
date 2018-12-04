@@ -81,7 +81,7 @@ void ARADocumentController::notifyAudioSourceContentChanged (ARAAudioSource* aud
 {
     audioSourceUpdates[audioSource] += scopeFlags;
 
-    audioSource->notifyListeners ([audioSource, scopeFlags] (ARAAudioSource::Listener& l) { l.didUpdateAudioSourceContent (audioSource, scopeFlags); });
+    audioSource->notifyListeners ([audioSource, scopeFlags] (ARAAudioSource::Listener& l) { l.doUpdateAudioSourceContent (audioSource, scopeFlags); });
 
     if (notifyAllAudioModificationsAndPlaybackRegions)
     {
@@ -94,7 +94,7 @@ void ARADocumentController::notifyAudioModificationContentChanged (ARAAudioModif
 {
     audioModificationUpdates[audioModification] += scopeFlags;
 
-    audioModification->notifyListeners ([audioModification, scopeFlags] (ARAAudioModification::Listener& l) { l.didUpdateAudioModificationContent (audioModification, scopeFlags); });
+    audioModification->notifyListeners ([audioModification, scopeFlags] (ARAAudioModification::Listener& l) { l.doUpdateAudioModificationContent (audioModification, scopeFlags); });
 
     if (notifyAllPlaybackRegions)
     {
@@ -153,11 +153,6 @@ ARA::PlugIn::MusicalContext* ARADocumentController::doCreateMusicalContext (ARA:
     return new ARAMusicalContext (static_cast<ARADocument*>(document), hostRef);
 }
 
-void ARADocumentController::doUpdateMusicalContextContent (ARA::PlugIn::MusicalContext* musicalContext, const ARA::ARAContentTimeRange* /*range*/, ARA::ContentUpdateScopes scopeFlags) noexcept
-{
-    notify_listeners (ARAMusicalContext, didUpdateMusicalContextContent, musicalContext, scopeFlags);
-}
-
 //==============================================================================
 
 ARA::PlugIn::RegionSequence* ARADocumentController::doCreateRegionSequence (ARA::PlugIn::Document* document, ARA::ARARegionSequenceHostRef hostRef) noexcept
@@ -170,26 +165,6 @@ ARA::PlugIn::RegionSequence* ARADocumentController::doCreateRegionSequence (ARA:
 ARA::PlugIn::AudioSource* ARADocumentController::doCreateAudioSource (ARA::PlugIn::Document *document, ARA::ARAAudioSourceHostRef hostRef) noexcept
 {
     return new ARAAudioSource (static_cast<ARADocument*>(document), hostRef);\
-}
-
-void ARADocumentController::doUpdateAudioSourceContent (ARA::PlugIn::AudioSource* audioSource, const ARA::ARAContentTimeRange* /*range*/, ARA::ContentUpdateScopes scopeFlags) noexcept
-{
-    notify_listeners (ARAAudioSource, didUpdateAudioSourceContent, audioSource, scopeFlags);
-}
-
-void ARADocumentController::willEnableAudioSourceSamplesAccess (ARA::PlugIn::AudioSource* audioSource, bool enable) noexcept
-{
-    notify_listeners (ARAAudioSource, willEnableAudioSourceSamplesAccess, audioSource, enable);
-}
-
-void ARADocumentController::didEnableAudioSourceSamplesAccess (ARA::PlugIn::AudioSource* audioSource, bool enable) noexcept
-{
-    notify_listeners (ARAAudioSource, didEnableAudioSourceSamplesAccess, audioSource, enable);
-}
-
-void ARADocumentController::doDeactivateAudioSourceForUndoHistory (ARA::PlugIn::AudioSource* audioSource, bool deactivate) noexcept
-{
-    notify_listeners (ARAAudioSource, doDeactivateAudioSourceForUndoHistory, audioSource, deactivate);
 }
 
 AudioFormatReader* ARADocumentController::createAudioSourceReader (ARAAudioSource* audioSource)
@@ -212,11 +187,6 @@ ARARegionSequenceReader* ARADocumentController::createRegionSequenceReader (ARAR
 ARA::PlugIn::AudioModification* ARADocumentController::doCreateAudioModification (ARA::PlugIn::AudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef) noexcept
 {
     return new ARAAudioModification (static_cast<ARAAudioSource*> (audioSource), hostRef);
-}
-
-void ARADocumentController::doDeactivateAudioModificationForUndoHistory (ARA::PlugIn::AudioModification* audioModification, bool deactivate) noexcept
-{
-    notify_listeners (ARAAudioModification, doDeactivateAudioModificationForUndoHistory, audioModification, deactivate);
 }
 
 //==============================================================================

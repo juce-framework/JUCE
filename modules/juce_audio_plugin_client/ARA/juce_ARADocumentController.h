@@ -16,6 +16,26 @@
         object->notifyListeners ([&] (std::remove_pointer<ARA##ModelObjectPtrType>::type::Listener& l) { l.function (object, static_cast<ARA##ArgumentType> (argument)); }); \
     } \
 
+// TODO JUCE_ARA I had to add these additional macros to handle different argument types
+
+// enable samples access, deactivate for undo history
+#define OVERRIDE_TO_NOTIFY_3(function, ModelObjectPtrType, modelObject, ArgumentType, argument) \
+    void function (ARA::PlugIn::ModelObjectPtrType modelObject, ArgumentType argument) noexcept override \
+    { \
+        auto object = static_cast<ARA##ModelObjectPtrType> (modelObject); \
+        object->notifyListeners ([&] (std::remove_pointer<ARA##ModelObjectPtrType>::type::Listener& l) { l.function (object, argument); }); \
+    } \
+
+// content updates
+#define OVERRIDE_TO_NOTIFY_4(function, ModelObjectPtrType, modelObject, ArgumentType1, argument1, ArgumentType2, argument2) \
+    void function (ARA::PlugIn::ModelObjectPtrType modelObject, const ARA::ARA##ArgumentType1 argument1, ARA::ArgumentType2 argument2) noexcept override \
+    { \
+ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN \
+        auto object = static_cast<ARA##ModelObjectPtrType> (modelObject); \
+        object->notifyListeners ([&] (std::remove_pointer<ARA##ModelObjectPtrType>::type::Listener& l) { l.function (object, argument2); }); \
+ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END \
+    } \
+
 namespace juce
 {
 
@@ -70,7 +90,7 @@ protected:
     ARA::PlugIn::MusicalContext* doCreateMusicalContext (ARA::PlugIn::Document* document, ARA::ARAMusicalContextHostRef hostRef) noexcept override;
     OVERRIDE_TO_NOTIFY_2(willUpdateMusicalContextProperties, MusicalContext*, musicalContext, MusicalContext::PropertiesPtr, newProperties);
     OVERRIDE_TO_NOTIFY_1(didUpdateMusicalContextProperties, MusicalContext*, musicalContext);
-    void doUpdateMusicalContextContent (ARA::PlugIn::MusicalContext* musicalContext, const ARA::ARAContentTimeRange* range, ARA::ContentUpdateScopes scopeFlags) noexcept override;
+    OVERRIDE_TO_NOTIFY_4(doUpdateMusicalContextContent, MusicalContext*, musicalContext, ContentTimeRange*, range, ContentUpdateScopes, scopeFlags);
     OVERRIDE_TO_NOTIFY_1(willDestroyMusicalContext, MusicalContext*, musicalContext);
 
     // RegionSequence callbacks
@@ -85,12 +105,12 @@ protected:
     ARA::PlugIn::AudioSource* doCreateAudioSource (ARA::PlugIn::Document* document, ARA::ARAAudioSourceHostRef hostRef) noexcept override;
     OVERRIDE_TO_NOTIFY_2 (willUpdateAudioSourceProperties, AudioSource*, audioSource, AudioSource::PropertiesPtr, newProperties);
     OVERRIDE_TO_NOTIFY_1 (didUpdateAudioSourceProperties, AudioSource*, audioSource);
-    void doUpdateAudioSourceContent (ARA::PlugIn::AudioSource* audioSource, const ARA::ARAContentTimeRange* range, ARA::ContentUpdateScopes scopeFlags) noexcept override;
-    void willEnableAudioSourceSamplesAccess (ARA::PlugIn::AudioSource* audioSource, bool enable) noexcept override;
-    void didEnableAudioSourceSamplesAccess (ARA::PlugIn::AudioSource* audioSource, bool enable) noexcept override;
+    OVERRIDE_TO_NOTIFY_4(doUpdateAudioSourceContent, AudioSource*, musicalContext, ContentTimeRange*, range, ContentUpdateScopes, scopeFlags);
+    OVERRIDE_TO_NOTIFY_3(willEnableAudioSourceSamplesAccess, AudioSource*, audioSource, bool, enable);
+    OVERRIDE_TO_NOTIFY_3(didEnableAudioSourceSamplesAccess, AudioSource*, audioSource, bool, enable);
     OVERRIDE_TO_NOTIFY_2 (didAddAudioModificationToAudioSource, AudioSource*, audioSource, AudioModification*, audioModification);
     OVERRIDE_TO_NOTIFY_2 (willRemoveAudioModificationFromAudioSource, AudioSource*, audioSource, AudioModification*, audioModification);
-    void doDeactivateAudioSourceForUndoHistory (ARA::PlugIn::AudioSource* audioSource, bool deactivate) noexcept override;
+    OVERRIDE_TO_NOTIFY_3(doDeactivateAudioSourceForUndoHistory, AudioSource*, audioSource, bool, deactivate);
     OVERRIDE_TO_NOTIFY_1 (willDestroyAudioSource, AudioSource*, audioSource);
 
     // AudioModification callbacks
@@ -99,7 +119,7 @@ protected:
     OVERRIDE_TO_NOTIFY_1(didUpdateAudioModificationProperties, AudioModification*, audioModification);
     OVERRIDE_TO_NOTIFY_2(didAddPlaybackRegionToAudioModification, AudioModification*, audioModification, PlaybackRegion*, playbackRegion);
     OVERRIDE_TO_NOTIFY_2(willRemovePlaybackRegionFromAudioModification, AudioModification*, audioModification, PlaybackRegion*, playbackRegion);
-    void doDeactivateAudioModificationForUndoHistory (ARA::PlugIn::AudioModification* audioModification, bool deactivate) noexcept override;
+    OVERRIDE_TO_NOTIFY_3(doDeactivateAudioModificationForUndoHistory, AudioModification*, audioModification, bool, deactivate);
     OVERRIDE_TO_NOTIFY_1(willDestroyAudioModification, AudioModification*, audioModification);
 
     // TODO JUCE_ARA
@@ -131,5 +151,7 @@ private:
 
 #undef OVERRIDE_TO_NOTIFY_1
 #undef OVERRIDE_TO_NOTIFY_2
+#undef OVERRIDE_TO_NOTIFY_3
+#undef OVERRIDE_TO_NOTIFY_4
 
 } // namespace juce

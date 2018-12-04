@@ -18,7 +18,7 @@ public:
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
         virtual void willUpdateMusicalContextProperties (ARAMusicalContext* musicalContext, ARAMusicalContext::PropertiesPtr newProperties) {}
         virtual void didUpdateMusicalContextProperties (ARAMusicalContext* musicalContext) {}
-        virtual void didUpdateMusicalContextContent (ARAMusicalContext* musicalContext, ARAContentUpdateScopes scopeFlags) {}
+        virtual void doUpdateMusicalContextContent (ARAMusicalContext* musicalContext, ARAContentUpdateScopes scopeFlags) {}
         virtual void willDestroyMusicalContext (ARAMusicalContext* musicalContext) {}
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
     };
