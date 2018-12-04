@@ -1,6 +1,6 @@
 #pragma once
 
-#include "juce_ARAAudioSource.h"
+#include "juce_ARAModelObjects.h"
 
 namespace juce
 {
