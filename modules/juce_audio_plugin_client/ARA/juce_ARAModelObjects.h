@@ -100,7 +100,7 @@ class ARAMusicalContext  : public ARA::PlugIn::MusicalContext,
 {
 public:
     ARAMusicalContext (ARADocument* document, ARA::ARAMusicalContextHostRef hostRef);
-    
+
     using Listener = _ARAMusicalContextListener;
 };
 
@@ -187,7 +187,7 @@ class ARAAudioModification  : public ARA::PlugIn::AudioModification,
 {
 public:
     ARAAudioModification (ARAAudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef);
-    
+
     using Listener = _ARAAudioModificationListener;
 
     void notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyAllPlaybackRegions = false);

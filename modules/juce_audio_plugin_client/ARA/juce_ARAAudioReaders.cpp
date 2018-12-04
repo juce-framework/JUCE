@@ -2,7 +2,7 @@
 
 namespace juce
 {
-    
+
 ARAAudioSourceReader::ARAAudioSourceReader (ARAAudioSource* audioSource, bool use64BitSamples)
     : AudioFormatReader (nullptr, "ARAAudioSourceReader"),
       audioSourceBeingRead (audioSource)

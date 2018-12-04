@@ -6,7 +6,7 @@ class ARASampleProjectAudioProcessorEditor;
 class PlaybackRegionView;
 
 //==============================================================================
-/** 
+/**
     RegionSequenceView
     JUCE component used to display ARA region sequences in a host document
     along with their name, color, and selection state
