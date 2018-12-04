@@ -87,9 +87,6 @@ public:
         virtual void willDestroyDocument (ARADocument* document) {}
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
     };
-
-    //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARADocument)
 };
 
 //==============================================================================
@@ -101,9 +98,6 @@ public:
     ARAMusicalContext (ARADocument* document, ARA::ARAMusicalContextHostRef hostRef);
     
     using Listener = _ARAMusicalContextListener;
-
-    //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAMusicalContext)
 };
 
 class _ARAMusicalContextListener
@@ -134,9 +128,6 @@ public:
     // same sample rate, this rate is returned here, otherwise 0.0 is returned.
     // If the region sequence has no playback regions, this also returns 0.0.
     double getCommonSampleRate();
-
-    //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARARegionSequence)
 };
 
 class _ARARegionSequenceListener
@@ -164,9 +155,6 @@ public:
     using Listener = _ARAAudioSourceListener;
 
     void notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyAllAudioModificationsAndPlaybackRegions = false);
-
-    //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAAudioSource)
 };
 
 class _ARAAudioSourceListener
@@ -199,9 +187,6 @@ public:
     using Listener = _ARAAudioModificationListener;
 
     void notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyAllPlaybackRegions = false);
-
-    //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAAudioModification)
 };
 
 class _ARAAudioModificationListener
@@ -242,9 +227,6 @@ public:
 private:
     double headTime = 0.0;
     double tailTime = 0.0;
-
-    //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAPlaybackRegion)
 };
 
 class _ARAPlaybackRegionListener
