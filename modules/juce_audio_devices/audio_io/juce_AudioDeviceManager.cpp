@@ -124,6 +124,25 @@ void AudioDeviceManager::audioDeviceListChanged()
 {
     if (currentAudioDevice != nullptr)
     {
+        auto isCurrentDeviceStillAvailable = [&]
+        {
+            for (auto* dt : availableDeviceTypes)
+                if (currentAudioDevice->getTypeName() == dt->getTypeName())
+                    for (auto& dn : dt->getDeviceNames())
+                        if (currentAudioDevice->getName() == dn)
+                            return true;
+
+            return false;
+        };
+
+        if (! isCurrentDeviceStillAvailable())
+        {
+            closeAudioDevice();
+
+            std::unique_ptr<XmlElement> e (createStateXml());
+            initialiseFromXML (*e, true, preferredDeviceName, &currentSetup);
+        }
+
         currentSetup.sampleRate     = currentAudioDevice->getCurrentSampleRate();
         currentSetup.bufferSize     = currentAudioDevice->getCurrentBufferSizeSamples();
         currentSetup.inputChannels  = currentAudioDevice->getActiveInputChannels();
@@ -189,12 +208,13 @@ String AudioDeviceManager::initialise (const int numInputChannelsNeeded,
 
     numInputChansNeeded = numInputChannelsNeeded;
     numOutputChansNeeded = numOutputChannelsNeeded;
+    preferredDeviceName = preferredDefaultDeviceName;
 
     if (xml != nullptr && xml->hasTagName ("DEVICESETUP"))
         return initialiseFromXML (*xml, selectDefaultDeviceOnFailure,
-                                  preferredDefaultDeviceName, preferredSetupOptions);
+                                  preferredDeviceName, preferredSetupOptions);
 
-    return initialiseDefault (preferredDefaultDeviceName, preferredSetupOptions);
+    return initialiseDefault (preferredDeviceName, preferredSetupOptions);
 }
 
 String AudioDeviceManager::initialiseDefault (const String& preferredDefaultDeviceName,
