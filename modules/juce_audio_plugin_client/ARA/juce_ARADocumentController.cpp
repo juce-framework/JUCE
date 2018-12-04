@@ -80,6 +80,23 @@ namespace juce
 
 //==============================================================================
 
+AudioFormatReader* ARADocumentController::createAudioSourceReader (ARAAudioSource* audioSource)
+{
+    return new ARAAudioSourceReader (audioSource);
+}
+
+ARAPlaybackRegionReader* ARADocumentController::createPlaybackRegionReader (std::vector<ARAPlaybackRegion*> playbackRegions, bool nonRealtime)
+{
+    return new ARAPlaybackRegionReader (static_cast<ARAPlaybackRenderer*> (doCreatePlaybackRenderer()), playbackRegions, nonRealtime);
+}
+
+ARARegionSequenceReader* ARADocumentController::createRegionSequenceReader (ARARegionSequence* regionSequence, bool nonRealtime)
+{
+    return new ARARegionSequenceReader (static_cast<ARAPlaybackRenderer*> (doCreatePlaybackRenderer()), regionSequence, nonRealtime);
+}
+
+//==============================================================================
+
 void ARADocumentController::notifyAudioSourceContentChanged (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags, bool notifyAllAudioModificationsAndPlaybackRegions)
 {
     audioSourceUpdates[audioSource] += scopeFlags;
@@ -169,21 +186,6 @@ ARA::PlugIn::RegionSequence* ARADocumentController::doCreateRegionSequence (ARA:
 ARA::PlugIn::AudioSource* ARADocumentController::doCreateAudioSource (ARA::PlugIn::Document *document, ARA::ARAAudioSourceHostRef hostRef) noexcept
 {
     return new ARAAudioSource (static_cast<ARADocument*>(document), hostRef);\
-}
-
-AudioFormatReader* ARADocumentController::createAudioSourceReader (ARAAudioSource* audioSource)
-{
-    return new ARAAudioSourceReader (audioSource);
-}
-
-ARAPlaybackRegionReader* ARADocumentController::createPlaybackRegionReader (std::vector<ARAPlaybackRegion*> playbackRegions, bool nonRealtime)
-{
-    return new ARAPlaybackRegionReader (static_cast<ARAPlaybackRenderer*> (doCreatePlaybackRenderer()), playbackRegions, nonRealtime);
-}
-
-ARARegionSequenceReader* ARADocumentController::createRegionSequenceReader (ARARegionSequence* regionSequence, bool nonRealtime)
-{
-    return new ARARegionSequenceReader (static_cast<ARAPlaybackRenderer*> (doCreatePlaybackRenderer()), regionSequence, nonRealtime);
 }
 
 //==============================================================================
