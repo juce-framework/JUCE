@@ -21,8 +21,8 @@ public:
         virtual void didUpdateAudioModificationProperties (ARAAudioModification* audioModification) {}
         virtual void didUpdateAudioModificationContent (ARAAudioModification* audioModification, ARAContentUpdateScopes scopeFlags) {}
         virtual void doDeactivateAudioModificationForUndoHistory (ARAAudioModification* audioModification, bool deactivate) {}
-        virtual void didAddPlaybackRegion (ARAAudioModification* audioModification, ARAPlaybackRegion* playbackRegion) {}
-        virtual void willRemovePlaybackRegion (ARAAudioModification* audioModification, ARAPlaybackRegion* playbackRegion) {}
+        virtual void didAddPlaybackRegionToAudioModification (ARAAudioModification* audioModification, ARAPlaybackRegion* playbackRegion) {}
+        virtual void willRemovePlaybackRegionFromAudioModification (ARAAudioModification* audioModification, ARAPlaybackRegion* playbackRegion) {}
         virtual void willDestroyAudioModification (ARAAudioModification* audioModification) {}
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
     };

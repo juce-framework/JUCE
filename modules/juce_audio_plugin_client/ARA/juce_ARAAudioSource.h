@@ -23,8 +23,8 @@ public:
         virtual void willEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) {}
         virtual void didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) {}
         virtual void doDeactivateAudioSourceForUndoHistory (ARAAudioSource* audioSource, bool deactivate) {}
-        virtual void didAddAudioModification (ARAAudioSource* audioSource, ARAAudioModification* audioModification) {}
-        virtual void willRemoveAudioModification (ARAAudioSource* audioSource, ARAAudioModification* audioModification) {}
+        virtual void didAddAudioModificationToAudioSource (ARAAudioSource* audioSource, ARAAudioModification* audioModification) {}
+        virtual void willRemoveAudioModificationFromAudioSource (ARAAudioSource* audioSource, ARAAudioModification* audioModification) {}
         virtual void willDestroyAudioSource (ARAAudioSource* audioSource) {}
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
     };
