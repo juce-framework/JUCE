@@ -4,7 +4,8 @@
 
 namespace juce
 {
-    
+
+class AudioProcessor;
 class ARAPlaybackRenderer;
 class ARAEditorRenderer;
 class ARAEditorView;
@@ -34,6 +35,25 @@ private:
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorARAExtension)
+};
+
+class AudioProcessorEditorARAExtension
+{
+public:
+	AudioProcessorEditorARAExtension (AudioProcessor* audioProcessor);
+	virtual ~AudioProcessorEditorARAExtension();
+
+	ARAEditorView* getARAEditorView() const noexcept;
+
+	bool isARAEditorView() const noexcept { return getARAEditorView() != nullptr; }
+
+	ARADocumentController* getARADocumentController() const noexcept;
+
+private:
+	AudioProcessorARAExtension* araProcessorExtension;
+
+	//==============================================================================
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorEditorARAExtension)
 };
 
 } // namespace juce

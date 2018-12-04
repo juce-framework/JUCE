@@ -16,7 +16,6 @@
 #include "juce_ARAPlaybackRegion.cpp"
 #include "juce_ARAAudioReaders.cpp"
 #include "juce_AudioProcessorARAExtension.cpp"
-#include "juce_AudioProcessorEditorARAExtension.cpp"
 #include "juce_ARAPlugInInstanceRoles.cpp"
 
 namespace juce
