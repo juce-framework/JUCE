@@ -69,32 +69,6 @@ private:
         object->notifyListeners ([&] (std::remove_pointer<ARA##ModelObjectPtrType>::type::Listener& l) { l.function (object, argument2); }); \
     } \
 
-// TODO JUCE_ARA
-// Do we want to use this Listener pattern? These _0 macros cast to the appropriate listener type
-    // no notification arguments
-#define OVERRIDE_TO_NOTIFY_1_0(function, ModelObjectPtrType, modelObject) \
-    void function (ARA::PlugIn::ModelObjectPtrType modelObject) noexcept override \
-    { \
-        auto object = static_cast<ARA##ModelObjectPtrType> (modelObject); \
-        object->notifyListeners ([&] (std::remove_pointer<ARA##ModelObjectPtrType>::type::Listener_0& l) { ((std::remove_pointer<ARA##ModelObjectPtrType>::type::Listener&)l).function (object); }); \
-    } \
-
-    // single notification argument, model object version
-#define OVERRIDE_TO_NOTIFY_2_0(function, ModelObjectPtrType, modelObject, ArgumentType, argument) \
-    void function (ARA::PlugIn::ModelObjectPtrType modelObject, ARA::PlugIn::ArgumentType argument) noexcept override \
-    { \
-        auto object = static_cast<ARA##ModelObjectPtrType> (modelObject); \
-        object->notifyListeners ([&] (std::remove_pointer<ARA##ModelObjectPtrType>::type::Listener_0& l) { ((std::remove_pointer<ARA##ModelObjectPtrType>::type::Listener&)l).function (object, static_cast<ARA##ArgumentType> (argument)); }); \
-    } \
-
-    // single notification argument, non-model object version
-#define OVERRIDE_TO_NOTIFY_3_0(function, ModelObjectPtrType, modelObject, ArgumentType, argument) \
-    void function (ARA::PlugIn::ModelObjectPtrType modelObject, ArgumentType argument) noexcept override \
-    { \
-        auto object = static_cast<ARA##ModelObjectPtrType> (modelObject); \
-        object->notifyListeners ([&] (std::remove_pointer<ARA##ModelObjectPtrType>::type::Listener_0& l) { ((std::remove_pointer<ARA##ModelObjectPtrType>::type::Listener&)l).function (object, argument); }); \
-    } \
-
 protected:
     // Model Update Management
     void willBeginEditing() noexcept override;
@@ -103,16 +77,16 @@ protected:
 
     // Document callbacks
     ARA::PlugIn::Document* doCreateDocument (ARA::PlugIn::DocumentController* documentController) noexcept override;
-    OVERRIDE_TO_NOTIFY_3_0 (willUpdateDocumentProperties, Document*, document, ARADocument::PropertiesPtr, newProperties);
-    OVERRIDE_TO_NOTIFY_1_0 (didUpdateDocumentProperties, Document*, document);
-    OVERRIDE_TO_NOTIFY_2_0 (didAddMusicalContextToDocument, Document*, document, MusicalContext*, musicalContext);
-    OVERRIDE_TO_NOTIFY_2_0 (willRemoveMusicalContextFromDocument, Document*, document, MusicalContext*, musicalContext);
-    OVERRIDE_TO_NOTIFY_1_0 (didReorderRegionSequencesInDocument, Document*, document);
-    OVERRIDE_TO_NOTIFY_2_0 (didAddRegionSequenceToDocument, Document*, document, RegionSequence*, regionSequence);
-    OVERRIDE_TO_NOTIFY_2_0 (willRemoveRegionSequenceFromDocument, Document*, document, RegionSequence*, regionSequence);
-    OVERRIDE_TO_NOTIFY_2_0 (didAddAudioSourceToDocument, Document*, document, AudioSource*, audioSource);
-    OVERRIDE_TO_NOTIFY_2_0 (willRemoveAudioSourceFromDocument, Document*, document, AudioSource*, audioSource);
-    OVERRIDE_TO_NOTIFY_1_0 (willDestroyDocument, Document*, document);
+    OVERRIDE_TO_NOTIFY_3 (willUpdateDocumentProperties, Document*, document, ARADocument::PropertiesPtr, newProperties);
+    OVERRIDE_TO_NOTIFY_1 (didUpdateDocumentProperties, Document*, document);
+    OVERRIDE_TO_NOTIFY_2 (didAddMusicalContextToDocument, Document*, document, MusicalContext*, musicalContext);
+    OVERRIDE_TO_NOTIFY_2 (willRemoveMusicalContextFromDocument, Document*, document, MusicalContext*, musicalContext);
+    OVERRIDE_TO_NOTIFY_1 (didReorderRegionSequencesInDocument, Document*, document);
+    OVERRIDE_TO_NOTIFY_2 (didAddRegionSequenceToDocument, Document*, document, RegionSequence*, regionSequence);
+    OVERRIDE_TO_NOTIFY_2 (willRemoveRegionSequenceFromDocument, Document*, document, RegionSequence*, regionSequence);
+    OVERRIDE_TO_NOTIFY_2 (didAddAudioSourceToDocument, Document*, document, AudioSource*, audioSource);
+    OVERRIDE_TO_NOTIFY_2 (willRemoveAudioSourceFromDocument, Document*, document, AudioSource*, audioSource);
+    OVERRIDE_TO_NOTIFY_1 (willDestroyDocument, Document*, document);
 
     // MusicalContext callbacks
     ARA::PlugIn::MusicalContext* doCreateMusicalContext (ARA::PlugIn::Document* document, ARA::ARAMusicalContextHostRef hostRef) noexcept override;

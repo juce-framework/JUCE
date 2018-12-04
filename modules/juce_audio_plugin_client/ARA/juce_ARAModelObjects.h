@@ -53,7 +53,8 @@ public:
     inline void removeListener (Listener_0* l) { listeners.remove (l); }
 
     template<typename Callback>
-    inline void notifyListeners (Callback&& callback) { listeners.callExpectingUnregistration (callback); }
+    inline void notifyListeners (Callback&& callback)
+                    { reinterpret_cast<ListenerList<typename ModelClassType::Listener>*> (&listeners)->callExpectingUnregistration (callback); }
 
 private:
     ListenerList<Listener_0> listeners;
