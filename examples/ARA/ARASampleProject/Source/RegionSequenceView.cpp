@@ -66,7 +66,7 @@ void RegionSequenceView::paint (Graphics& g)
         return;
 
     Colour trackColour;
-    if (const ARA::ARAColor* colour = regionSequence->getColor())
+    if (auto& colour = regionSequence->getColor())
         trackColour = Colour::fromFloatRGBA (colour->r, colour->g, colour->b, 1.0f);
 
     // draw region sequence header
@@ -78,7 +78,7 @@ void RegionSequenceView::paint (Graphics& g)
     g.setColour (isSelected ? Colours::yellow : Colours::black);
     g.drawRect (headerRect);
 
-    if (regionSequence->getName())
+    if (auto& name = regionSequence->getName())
     {
         // draw the track name (vertically) in the header by rotating
         // the graphics transform about the center header rect
@@ -91,7 +91,7 @@ void RegionSequenceView::paint (Graphics& g)
         Rectangle<int> textRect ((int) (-0.3f * headerRect.getHeight()), (int) (1.25f * headerRect.getWidth()), (int) (0.85f * headerRect.getHeight()), headerRect.getWidth());
         g.setColour (trackColour.contrasting (1.0f));
         g.setFont (Font (12.0f));
-        g.drawText (String (regionSequence->getName()), textRect, Justification::bottomLeft);
+        g.drawText (String (name), textRect, Justification::bottomLeft);
     }
 }
 
