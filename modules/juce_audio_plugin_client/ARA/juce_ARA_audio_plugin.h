@@ -42,11 +42,12 @@ namespace juce
 #define JUCE_ARA_MODEL_OBJECT_LISTENERLIST \
 public: \
     inline void addListener (Listener* l) { listeners.add (l); } \
-    inline void removeListener (Listener* l){ listeners.remove (l); } \
+    inline void removeListener (Listener* l) { listeners.remove (l); } \
     template<typename Callback> \
     inline void notifyListeners (Callback&& callback) { listeners.callExpectingUnregistration (callback); } \
 private: \
     ListenerList<Listener> listeners; 
+
 }
 
 #endif

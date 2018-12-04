@@ -76,51 +76,51 @@ protected:
     // Document callbacks
     ARA::PlugIn::Document* doCreateDocument (ARA::PlugIn::DocumentController* documentController) noexcept override;
     OVERRIDE_TO_NOTIFY_2(willUpdateDocumentProperties, Document*, document, Document::PropertiesPtr, newProperties);
-    OVERRIDE_TO_NOTIFY_1(didUpdateDocumentProperties, Document*, document);
-    OVERRIDE_TO_NOTIFY_2(didAddMusicalContextToDocument, Document*, document, MusicalContext*, musicalContext);
-    OVERRIDE_TO_NOTIFY_2(willRemoveMusicalContextFromDocument, Document*, document, MusicalContext*, musicalContext);
-    OVERRIDE_TO_NOTIFY_1(didReorderRegionSequencesInDocument, Document*, document);
-    OVERRIDE_TO_NOTIFY_2(didAddRegionSequenceToDocument, Document*, document, RegionSequence*, regionSequence);
-    OVERRIDE_TO_NOTIFY_2(willRemoveRegionSequenceFromDocument, Document*, document, RegionSequence*, regionSequence);
-    OVERRIDE_TO_NOTIFY_2(didAddAudioSourceToDocument, Document*, document, AudioSource*, audioSource);
-    OVERRIDE_TO_NOTIFY_2(willRemoveAudioSourceFromDocument, Document*, document, AudioSource*, audioSource);
-    OVERRIDE_TO_NOTIFY_1(willDestroyDocument, Document*, document);
+    OVERRIDE_TO_NOTIFY_1 (didUpdateDocumentProperties, Document*, document);
+    OVERRIDE_TO_NOTIFY_2 (didAddMusicalContextToDocument, Document*, document, MusicalContext*, musicalContext);
+    OVERRIDE_TO_NOTIFY_2 (willRemoveMusicalContextFromDocument, Document*, document, MusicalContext*, musicalContext);
+    OVERRIDE_TO_NOTIFY_1 (didReorderRegionSequencesInDocument, Document*, document);
+    OVERRIDE_TO_NOTIFY_2 (didAddRegionSequenceToDocument, Document*, document, RegionSequence*, regionSequence);
+    OVERRIDE_TO_NOTIFY_2 (willRemoveRegionSequenceFromDocument, Document*, document, RegionSequence*, regionSequence);
+    OVERRIDE_TO_NOTIFY_2 (didAddAudioSourceToDocument, Document*, document, AudioSource*, audioSource);
+    OVERRIDE_TO_NOTIFY_2 (willRemoveAudioSourceFromDocument, Document*, document, AudioSource*, audioSource);
+    OVERRIDE_TO_NOTIFY_1 (willDestroyDocument, Document*, document);
 
     // MusicalContext callbacks
     ARA::PlugIn::MusicalContext* doCreateMusicalContext (ARA::PlugIn::Document* document, ARA::ARAMusicalContextHostRef hostRef) noexcept override;
     OVERRIDE_TO_NOTIFY_2(willUpdateMusicalContextProperties, MusicalContext*, musicalContext, MusicalContext::PropertiesPtr, newProperties);
-    OVERRIDE_TO_NOTIFY_1(didUpdateMusicalContextProperties, MusicalContext*, musicalContext);
-    OVERRIDE_TO_NOTIFY_4(doUpdateMusicalContextContent, MusicalContext*, musicalContext, ContentTimeRange*, range, ContentUpdateScopes, scopeFlags);
-    OVERRIDE_TO_NOTIFY_1(willDestroyMusicalContext, MusicalContext*, musicalContext);
+    OVERRIDE_TO_NOTIFY_1 (didUpdateMusicalContextProperties, MusicalContext*, musicalContext);
+    OVERRIDE_TO_NOTIFY_4 (doUpdateMusicalContextContent, MusicalContext*, musicalContext, ContentTimeRange*, range, ContentUpdateScopes, scopeFlags);
+    OVERRIDE_TO_NOTIFY_1 (willDestroyMusicalContext, MusicalContext*, musicalContext);
 
     // RegionSequence callbacks
     ARA::PlugIn::RegionSequence* doCreateRegionSequence (ARA::PlugIn::Document* document, ARA::ARARegionSequenceHostRef hostRef) noexcept override;
     OVERRIDE_TO_NOTIFY_2(willUpdateRegionSequenceProperties, RegionSequence*, regionSequence, RegionSequence::PropertiesPtr, newProperties);
-    OVERRIDE_TO_NOTIFY_1(didUpdateRegionSequenceProperties, RegionSequence*, regionSequence);
-    OVERRIDE_TO_NOTIFY_2(didAddPlaybackRegionToRegionSequence, RegionSequence*, regionSequence, PlaybackRegion*, playbackRegion);
-    OVERRIDE_TO_NOTIFY_2(willRemovePlaybackRegionFromRegionSequence, RegionSequence*, regionSequence, PlaybackRegion*, playbackRegion);
-    OVERRIDE_TO_NOTIFY_1(willDestroyRegionSequence, RegionSequence*, regionSequence);
+    OVERRIDE_TO_NOTIFY_1 (didUpdateRegionSequenceProperties, RegionSequence*, regionSequence);
+    OVERRIDE_TO_NOTIFY_2 (didAddPlaybackRegionToRegionSequence, RegionSequence*, regionSequence, PlaybackRegion*, playbackRegion);
+    OVERRIDE_TO_NOTIFY_2 (willRemovePlaybackRegionFromRegionSequence, RegionSequence*, regionSequence, PlaybackRegion*, playbackRegion);
+    OVERRIDE_TO_NOTIFY_1 (willDestroyRegionSequence, RegionSequence*, regionSequence);
 
     // AudioSource callbacks
     ARA::PlugIn::AudioSource* doCreateAudioSource (ARA::PlugIn::Document* document, ARA::ARAAudioSourceHostRef hostRef) noexcept override;
     OVERRIDE_TO_NOTIFY_2 (willUpdateAudioSourceProperties, AudioSource*, audioSource, AudioSource::PropertiesPtr, newProperties);
     OVERRIDE_TO_NOTIFY_1 (didUpdateAudioSourceProperties, AudioSource*, audioSource);
-    OVERRIDE_TO_NOTIFY_4(doUpdateAudioSourceContent, AudioSource*, musicalContext, ContentTimeRange*, range, ContentUpdateScopes, scopeFlags);
-    OVERRIDE_TO_NOTIFY_3(willEnableAudioSourceSamplesAccess, AudioSource*, audioSource, bool, enable);
-    OVERRIDE_TO_NOTIFY_3(didEnableAudioSourceSamplesAccess, AudioSource*, audioSource, bool, enable);
+    OVERRIDE_TO_NOTIFY_4 (doUpdateAudioSourceContent, AudioSource*, musicalContext, ContentTimeRange*, range, ContentUpdateScopes, scopeFlags);
+    OVERRIDE_TO_NOTIFY_3 (willEnableAudioSourceSamplesAccess, AudioSource*, audioSource, bool, enable);
+    OVERRIDE_TO_NOTIFY_3 (didEnableAudioSourceSamplesAccess, AudioSource*, audioSource, bool, enable);
     OVERRIDE_TO_NOTIFY_2 (didAddAudioModificationToAudioSource, AudioSource*, audioSource, AudioModification*, audioModification);
     OVERRIDE_TO_NOTIFY_2 (willRemoveAudioModificationFromAudioSource, AudioSource*, audioSource, AudioModification*, audioModification);
-    OVERRIDE_TO_NOTIFY_3(doDeactivateAudioSourceForUndoHistory, AudioSource*, audioSource, bool, deactivate);
+    OVERRIDE_TO_NOTIFY_3 (doDeactivateAudioSourceForUndoHistory, AudioSource*, audioSource, bool, deactivate);
     OVERRIDE_TO_NOTIFY_1 (willDestroyAudioSource, AudioSource*, audioSource);
 
     // AudioModification callbacks
     ARA::PlugIn::AudioModification* doCreateAudioModification (ARA::PlugIn::AudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef) noexcept override;
     OVERRIDE_TO_NOTIFY_2(willUpdateAudioModificationProperties, AudioModification*, audioModification, AudioModification::PropertiesPtr, newProperties);
-    OVERRIDE_TO_NOTIFY_1(didUpdateAudioModificationProperties, AudioModification*, audioModification);
-    OVERRIDE_TO_NOTIFY_2(didAddPlaybackRegionToAudioModification, AudioModification*, audioModification, PlaybackRegion*, playbackRegion);
-    OVERRIDE_TO_NOTIFY_2(willRemovePlaybackRegionFromAudioModification, AudioModification*, audioModification, PlaybackRegion*, playbackRegion);
-    OVERRIDE_TO_NOTIFY_3(doDeactivateAudioModificationForUndoHistory, AudioModification*, audioModification, bool, deactivate);
-    OVERRIDE_TO_NOTIFY_1(willDestroyAudioModification, AudioModification*, audioModification);
+    OVERRIDE_TO_NOTIFY_1 (didUpdateAudioModificationProperties, AudioModification*, audioModification);
+    OVERRIDE_TO_NOTIFY_2 (didAddPlaybackRegionToAudioModification, AudioModification*, audioModification, PlaybackRegion*, playbackRegion);
+    OVERRIDE_TO_NOTIFY_2 (willRemovePlaybackRegionFromAudioModification, AudioModification*, audioModification, PlaybackRegion*, playbackRegion);
+    OVERRIDE_TO_NOTIFY_3 (doDeactivateAudioModificationForUndoHistory, AudioModification*, audioModification, bool, deactivate);
+    OVERRIDE_TO_NOTIFY_1 (willDestroyAudioModification, AudioModification*, audioModification);
 
     // TODO JUCE_ARA
     // Do we need to override this? The default ARPlug implementation is sufficient...
@@ -129,9 +129,9 @@ protected:
     // PlaybackRegion callbacks
     ARA::PlugIn::PlaybackRegion* doCreatePlaybackRegion (ARA::PlugIn::AudioModification* modification, ARA::ARAPlaybackRegionHostRef hostRef) noexcept override;
     OVERRIDE_TO_NOTIFY_2(willUpdatePlaybackRegionProperties, PlaybackRegion*, playbackRegion, PlaybackRegion::PropertiesPtr, newProperties);
-    OVERRIDE_TO_NOTIFY_1(didUpdatePlaybackRegionProperties, PlaybackRegion*, playbackRegion);
+    OVERRIDE_TO_NOTIFY_1 (didUpdatePlaybackRegionProperties, PlaybackRegion*, playbackRegion);
     void doGetPlaybackRegionHeadAndTailTime (ARA::PlugIn::PlaybackRegion* playbackRegion, ARA::ARATimeDuration* headTime, ARA::ARATimeDuration* tailTime) noexcept override;
-    OVERRIDE_TO_NOTIFY_1(willDestroyPlaybackRegion, PlaybackRegion*, playbackRegion);
+    OVERRIDE_TO_NOTIFY_1 (willDestroyPlaybackRegion, PlaybackRegion*, playbackRegion);
 
     // PlugIn instance role creation
     // these can be overridden with custom types so long as
