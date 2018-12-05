@@ -112,6 +112,11 @@ void ARASampleProjectAudioProcessorEditor::clearView()
 }
 
 //==============================================================================
+void ARASampleProjectAudioProcessorEditor::onNewSelection (const ARA::PlugIn::ViewSelection& /*currentSelection*/)
+{
+    rebuildView();
+}
+
 void ARASampleProjectAudioProcessorEditor::onHideRegionSequences (std::vector<ARARegionSequence*> const& /*regionSequences*/)
 {
     rebuildView();
