@@ -140,13 +140,20 @@ void AudioDeviceManager::audioDeviceListChanged()
             closeAudioDevice();
 
             std::unique_ptr<XmlElement> e (createStateXml());
-            initialiseFromXML (*e, true, preferredDeviceName, &currentSetup);
+
+            if (e == nullptr)
+                initialiseDefault (preferredDeviceName, &currentSetup);
+            else
+                initialiseFromXML (*e, true, preferredDeviceName, &currentSetup);
         }
 
-        currentSetup.sampleRate     = currentAudioDevice->getCurrentSampleRate();
-        currentSetup.bufferSize     = currentAudioDevice->getCurrentBufferSizeSamples();
-        currentSetup.inputChannels  = currentAudioDevice->getActiveInputChannels();
-        currentSetup.outputChannels = currentAudioDevice->getActiveOutputChannels();
+        if (currentAudioDevice != nullptr)
+        {
+            currentSetup.sampleRate     = currentAudioDevice->getCurrentSampleRate();
+            currentSetup.bufferSize     = currentAudioDevice->getCurrentBufferSizeSamples();
+            currentSetup.inputChannels  = currentAudioDevice->getActiveInputChannels();
+            currentSetup.outputChannels = currentAudioDevice->getActiveOutputChannels();
+        }
     }
 
     sendChangeMessage();
