@@ -38,7 +38,7 @@ private:
 
 public:
     static constexpr int kHeight = 80;
-    static constexpr int kTrackHeaderWidth = 20;
+    static constexpr int kTrackHeaderWidth = 80;
 
 private:
     ARASampleProjectAudioProcessorEditor* editorComponent;
