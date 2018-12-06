@@ -84,9 +84,11 @@ void ARASampleProjectAudioProcessorEditor::resized()
         y += RegionSequenceView::kHeight;
     }
 
+    // cache view pos and reset after resizing list view and viewport
+    auto currentViewPos = regionSequenceViewPort.getViewPosition ();
     regionSequenceListView.setBounds (0, 0, width, y);
-
     regionSequenceViewPort.setBounds (0, 0, getWidth(), getHeight());
+    regionSequenceViewPort.setViewPosition (currentViewPos);
 }
 
 void ARASampleProjectAudioProcessorEditor::rebuildView()
