@@ -82,7 +82,7 @@ void RegionSequenceView::paint (Graphics& g)
     {
         g.setColour (trackColour.contrasting (1.0f));
         g.setFont (Font (12.0f));
-        g.drawText (String (name), headerRect, Justification::bottomLeft);
+        g.drawText (String (name), headerRect, Justification::centredLeft);
     }
 }
 
