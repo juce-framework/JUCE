@@ -65,9 +65,42 @@ public:
         }
     }
 
-    template <typename ...Params>
+    // g++ 4.8 cannot deduce the parameter pack inside the function pointer when it has more than one element
+   #if defined(__GNUC__) && __GNUC__ < 5 && ! defined(__clang__)
+    template <typename... Params>
     static void sendMouseEvent (Component& comp, Component::BailOutChecker& checker,
-                                void (MouseListener::*eventMethod) (Params...), Params... params)
+                                void (MouseListener::*eventMethod) (const MouseEvent&),
+                                Params... params)
+    {
+        sendMouseEvent <decltype (eventMethod), Params...> (comp, checker, eventMethod, params...);
+    }
+
+    template <typename... Params>
+    static void sendMouseEvent (Component& comp, Component::BailOutChecker& checker,
+                                void (MouseListener::*eventMethod) (const MouseEvent&, const MouseWheelDetails&),
+                                Params... params)
+    {
+        sendMouseEvent <decltype (eventMethod), Params...> (comp, checker, eventMethod, params...);
+    }
+
+    template <typename... Params>
+    static void sendMouseEvent (Component& comp, Component::BailOutChecker& checker,
+                                void (MouseListener::*eventMethod) (const MouseEvent&, float),
+                                Params... params)
+    {
+        sendMouseEvent <decltype (eventMethod), Params...> (comp, checker, eventMethod, params...);
+    }
+
+    template <typename EventMethod, typename... Params>
+    static void sendMouseEvent (Component& comp, Component::BailOutChecker& checker,
+                                EventMethod eventMethod,
+                                Params... params)
+   #else
+    template <typename... Params>
+    static void sendMouseEvent (Component& comp, Component::BailOutChecker& checker,
+                                void (MouseListener::*eventMethod) (Params...),
+                                Params... params)
+   #endif
     {
         if (checker.shouldBailOut())
             return;

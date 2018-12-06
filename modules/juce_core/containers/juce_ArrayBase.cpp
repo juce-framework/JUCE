@@ -104,6 +104,13 @@ class ArrayBaseTests  : public UnitTest
     using CopyableType    = ArrayBaseTestsHelpers::TriviallyCopyableType;
     using NoncopyableType = ArrayBaseTestsHelpers::NonTriviallyCopyableType;
 
+   #if ! (defined(__GNUC__) && __GNUC__ < 5 && ! defined(__clang__))
+    static_assert (std::is_trivially_copyable<CopyableType>::value,
+                   "Test TriviallyCopyableType is not trivially copyable");
+    static_assert (! std::is_trivially_copyable<NoncopyableType>::value,
+                   "Test NonTriviallyCopyableType is trivially copyable");
+   #endif
+
 public:
     ArrayBaseTests()
         : UnitTest ("ArrayBase", "Containers")
@@ -111,11 +118,6 @@ public:
 
     void runTest() override
     {
-        static_assert (std::is_trivially_copyable<CopyableType>::value,
-                       "Test TriviallyCopyableType is not trivially copyable");
-        static_assert (! std::is_trivially_copyable<NoncopyableType>::value,
-                       "Test NonTriviallyCopyableType is trivially copyable");
-
         beginTest ("grow capacity");
         {
             std::vector<CopyableType> referenceContainer;
