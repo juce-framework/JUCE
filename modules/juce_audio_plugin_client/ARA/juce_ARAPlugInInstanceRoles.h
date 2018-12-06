@@ -117,7 +117,7 @@ public:
     void removeListener (Listener* l);
 
 private:
-    std::vector<Listener*> listeners;
+    ListenerList<Listener> listeners;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAEditorView)

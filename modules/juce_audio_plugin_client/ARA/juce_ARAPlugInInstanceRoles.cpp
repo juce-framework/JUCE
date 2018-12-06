@@ -23,24 +23,28 @@ ARAEditorView::ARAEditorView (ARA::PlugIn::DocumentController* documentControlle
 
 void ARAEditorView::doNotifySelection (const ARA::PlugIn::ViewSelection* currentSelection) noexcept
 {
-    for (Listener* l : listeners)
-        l->onNewSelection (*currentSelection);
+    listeners.callExpectingUnregistration ([&] (Listener& l)
+    {
+        l.onNewSelection (*currentSelection);
+    });
 }
 
 void ARAEditorView::doNotifyHideRegionSequences (std::vector<ARA::PlugIn::RegionSequence*> const& regionSequences) noexcept
 {
-    for (Listener* l : listeners)
-        l->onHideRegionSequences (reinterpret_cast<std::vector<ARARegionSequence*> const&> (regionSequences));
+    listeners.callExpectingUnregistration ([&] (Listener& l)
+    {
+        l.onHideRegionSequences (reinterpret_cast<std::vector<ARARegionSequence*> const&> (regionSequences));
+    });
 }
 
 void ARAEditorView::addListener (Listener* l)
 {
-    listeners.push_back (l);
+    listeners.add (l);
 }
 
 void ARAEditorView::removeListener (Listener* l)
 {
-    ARA::find_erase (listeners, l);
+    listeners.remove (l);
 }
 
 } // namespace juce
