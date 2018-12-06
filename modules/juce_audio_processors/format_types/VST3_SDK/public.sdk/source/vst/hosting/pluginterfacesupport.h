@@ -1,11 +1,10 @@
-//------------------------------------------------------------------------
-// Project     : SDK Base
-// Version     : 1.0
+//-----------------------------------------------------------------------------
+// Project     : VST SDK
 //
 // Category    : Helpers
-// Filename    : base/source/baseidds.cpp
-// Created by  : Steinberg, 01/2008
-// Description : Basic Interface
+// Filename    : public.sdk/source/vst/hosting/pluginterfacesupport.h
+// Created by  : Steinberg, 11/20018.
+// Description : VST 3 hostclasses, example implementations for IPlugInterfaceSupport
 //
 //-----------------------------------------------------------------------------
 // LICENSE
@@ -35,18 +34,41 @@
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#include "pluginterfaces/base/funknown.h"
-#include "pluginterfaces/base/istringresult.h"
-#include "pluginterfaces/base/ipersistent.h"
+#pragma once
 
+#include "pluginterfaces/vst/ivstpluginterfacesupport.h"
+
+#include <vector>
+#include "base/source/fobject.h"
 
 namespace Steinberg {
+namespace Vst {
 
-DEF_CLASS_IID (IString)
-DEF_CLASS_IID (IStringResult)
-
-DEF_CLASS_IID (IPersistent)
-DEF_CLASS_IID (IAttributes)
-DEF_CLASS_IID (IAttributes2)
 //------------------------------------------------------------------------
+/** Implementation's example of IPlugInterfaceSupport.
+\ingroup hostingBase
+*/
+class PlugInterfaceSupport : public FObject, public IPlugInterfaceSupport
+{
+public:
+	PlugInterfaceSupport ();
+
+	//--- IPlugInterfaceSupport ---------
+	tresult PLUGIN_API isPlugInterfaceSupported (const TUID _iid) SMTG_OVERRIDE;
+
+	void addPlugInterfaceSupported (const TUID _iid);
+	bool removePlugInterfaceSupported (const TUID _iid);
+
+	OBJ_METHODS (PlugInterfaceSupport, FObject)
+	REFCOUNT_METHODS (FObject)
+	DEFINE_INTERFACES
+		DEF_INTERFACE (IPlugInterfaceSupport)
+	END_DEFINE_INTERFACES (FObject)
+
+private:
+	std::vector<FUID> mFUIDArray;
+};
+
+//------------------------------------------------------------------------
+} // namespace Vst
 } // namespace Steinberg

@@ -9,7 +9,7 @@
 //-----------------------------------------------------------------------------
 // This file is part of a Steinberg SDK. It is subject to the license terms
 // in the LICENSE file found in the top-level directory of this distribution
-// and at www.steinberg.net/sdklicenses.
+// and at www.steinberg.net/sdklicenses. 
 // No part of the SDK, including this file, may be copied, modified, propagated,
 // or distributed except according to the terms contained in the LICENSE file.
 //-----------------------------------------------------------------------------
@@ -44,20 +44,20 @@ public:
 	\param numBytes : amount of bytes to be read
 	\param numBytesRead : result - how many bytes have been read from stream (set to 0 if this is of no interest) */
 	virtual tresult PLUGIN_API read (void* buffer, int32 numBytes, int32* numBytesRead = 0) = 0;
-
+	
 	/** Writes binary data to stream.
 	\param buffer : source buffer
 	\param numBytes : amount of bytes to write
 	\param numBytesWritten : result - how many bytes have been written to stream (set to 0 if this is of no interest) */
 	virtual tresult PLUGIN_API write (void* buffer, int32 numBytes, int32* numBytesWritten = 0) = 0;
-
-	/** Sets stream read-write position.
+	
+	/** Sets stream read-write position. 
 	\param pos : new stream position (dependent on mode)
 	\param mode : value of enum IStreamSeekMode
 	\param result : new seek position (set to 0 if this is of no interest) */
 	virtual tresult PLUGIN_API seek (int64 pos, int32 mode, int64* result = 0) = 0;
-
-	/** Gets current stream read-write position.
+	
+	/** Gets current stream read-write position. 
 	\param pos : is assigned the current position if function succeeds */
 	virtual tresult PLUGIN_API tell (int64* pos) = 0;
 //------------------------------------------------------------------------
@@ -67,7 +67,7 @@ public:
 DECLARE_CLASS_IID (IBStream, 0xC3BF6EA2, 0x30994752, 0x9B6BF990, 0x1EE33E9B)
 
 //------------------------------------------------------------------------
-/** Stream with a size.
+/** Stream with a size. 
 \ingroup pluginBase
 [extends IBStream] when stream type supports it (like file and memory stream) */
 //------------------------------------------------------------------------

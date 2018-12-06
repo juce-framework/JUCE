@@ -4,12 +4,12 @@
 // Category    : Interfaces
 // Filename    : pluginterfaces/vst/vsttypes.h
 // Created by  : Steinberg, 12/2005
-// Description : common defines
+// Description : Common Defines
 //
 //-----------------------------------------------------------------------------
 // This file is part of a Steinberg SDK. It is subject to the license terms
 // in the LICENSE file found in the top-level directory of this distribution
-// and at www.steinberg.net/sdklicenses.
+// and at www.steinberg.net/sdklicenses. 
 // No part of the SDK, including this file, may be copied, modified, propagated,
 // or distributed except according to the terms contained in the LICENSE file.
 //-----------------------------------------------------------------------------
@@ -23,31 +23,15 @@ namespace Steinberg {
 namespace Vst {
 //------------------------------------------------------------------------
 #ifndef kVstVersionString
-#define kVstVersionString	"VST 3.6.9"	///< SDK version for PClassInfo2
+#define kVstVersionString	"VST 3.6.12"	///< SDK version for PClassInfo2
 #endif
 
 #define kVstVersionMajor	3
 #define kVstVersionMinor	6
-#define kVstVersionSub		9
+#define kVstVersionSub		12
 
 // this allows to write things like: #if VST_VERSION >= 0x030500 // note that 3.10.0 is 0x030a00
 #define VST_VERSION ((kVstVersionMajor << 16) | (kVstVersionMinor << 8) | kVstVersionSub)
-
-//------------------------------------------------------------------------
-// struct alignment definitions
-//------------------------------------------------------------------------
-#if defined(__GNUC__) && ((__GNUC__ >= 4) || ((__GNUC__ == 3) && (__GNUC_MINOR__ >= 1)))
-	#define VST3_STRUCT	struct __attribute__((aligned(4)))
-#elif SMTG_OS_WINDOWS
-	#if SMTG_PLATFORM_64
-		#define VST3_PACKED_SIZE	8
-	#else
-		#define VST3_PACKED_SIZE	4
-	#endif
-	#define VST3_STRUCT	__declspec(align(VST3_PACKED_SIZE)) struct
-#else
-	#error "unsupported compiler"
-#endif
 
 //------------------------------------------------------------------------
 /** \defgroup vst3typedef VST 3 Data Types

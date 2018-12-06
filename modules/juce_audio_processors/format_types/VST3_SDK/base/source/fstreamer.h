@@ -13,24 +13,24 @@
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
-//
-//   * Redistributions of source code must retain the above copyright notice,
+// 
+//   * Redistributions of source code must retain the above copyright notice, 
 //     this list of conditions and the following disclaimer.
 //   * Redistributions in binary form must reproduce the above copyright notice,
-//     this list of conditions and the following disclaimer in the documentation
+//     this list of conditions and the following disclaimer in the documentation 
 //     and/or other materials provided with the distribution.
 //   * Neither the name of the Steinberg Media Technologies nor the names of its
-//     contributors may be used to endorse or promote products derived from this
+//     contributors may be used to endorse or promote products derived from this 
 //     software without specific prior written permission.
-//
+// 
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-// IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
-// INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-// LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+// IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+// INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
+// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF 
+// LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE 
 // OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE  OF THIS SOFTWARE, EVEN IF ADVISED
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
@@ -72,21 +72,21 @@ public:
 	/** @name Streams are byteOrder aware. */
 	///@{
 	inline void setByteOrder (int32 e) { byteOrder = (int16)e; }
-	inline int32 getByteOrder () { return byteOrder; }
+	inline int32 getByteOrder () const { return byteOrder; }
 	///@}
 
 	/** @name read and write int8 and char. */
 	///@{
-	bool writeChar8 (char8);
-	bool readChar8 (char8&);
-	bool writeUChar8 (unsigned char);
+	bool writeChar8 (char8); 
+	bool readChar8 (char8&);                         
+	bool writeUChar8 (unsigned char);   
 	bool readUChar8 (unsigned char&);
-	bool writeChar16 (char16 c);
-	bool readChar16 (char16& c);
+	bool writeChar16 (char16 c); 
+	bool readChar16 (char16& c); 
 
-	bool writeInt8 (int8 c){return writeChar8 (c);}
+	bool writeInt8 (int8 c){return writeChar8 (c);}   
 	bool readInt8 (int8& c){return readChar8 (c);}
-	bool writeInt8u (uint8 c){return writeUChar8 (c);}
+	bool writeInt8u (uint8 c){return writeUChar8 (c);}   
 	bool readInt8u (uint8& c){return readUChar8 (c);}
 	///@}
 
@@ -94,52 +94,52 @@ public:
 	///@{
 	bool writeInt16 (int16);
 	bool readInt16 (int16&);
-	bool writeInt16Array (const int16* array, int32 count);
-	bool readInt16Array (int16* array, int32 count);
+	bool writeInt16Array (const int16* array, int32 count);  
+	bool readInt16Array (int16* array, int32 count);  
 	bool writeInt16u (uint16);
 	bool readInt16u (uint16&);
-	bool writeInt16uArray (const uint16* array, int32 count);
-	bool readInt16uArray (uint16* array, int32 count);
+	bool writeInt16uArray (const uint16* array, int32 count);  
+	bool readInt16uArray (uint16* array, int32 count);  
 	///@}
 
 	/** @name read and write int32. */
 	///@{
-	bool writeInt32 (int32);
-	bool readInt32 (int32&);
-	bool writeInt32Array (const int32* array, int32 count);
-	bool readInt32Array (int32* array, int32 count);
+	bool writeInt32 (int32);  
+	bool readInt32 (int32&);  
+	bool writeInt32Array (const int32* array, int32 count);  
+	bool readInt32Array (int32* array, int32 count);  
 	bool writeInt32u (uint32);
-	bool readInt32u (uint32&);
-	bool writeInt32uArray (const uint32* array, int32 count);
-	bool readInt32uArray (uint32* array, int32 count);
+	bool readInt32u (uint32&); 
+	bool writeInt32uArray (const uint32* array, int32 count);  
+	bool readInt32uArray (uint32* array, int32 count);  
 	///@}
 
 	/** @name read and write int64. */
 	///@{
 	bool writeInt64 (int64);
 	bool readInt64 (int64&);
-	bool writeInt64Array (const int64* array, int32 count);
-	bool readInt64Array (int64* array, int32 count);
+	bool writeInt64Array (const int64* array, int32 count);  
+	bool readInt64Array (int64* array, int32 count);  
 	bool writeInt64u (uint64);
 	bool readInt64u (uint64&);
-	bool writeInt64uArray (const uint64* array, int32 count);
-	bool readInt64uArray (uint64* array, int32 count);
+	bool writeInt64uArray (const uint64* array, int32 count);  
+	bool readInt64uArray (uint64* array, int32 count);  
 	///@}
 
 	/** @name read and write float and float array. */
 	///@{
 	bool writeFloat (float);
 	bool readFloat (float&);
-	bool writeFloatArray (const float* array, int32 count);
-	bool readFloatArray (float* array, int32 count);
+	bool writeFloatArray (const float* array, int32 count);  
+	bool readFloatArray (float* array, int32 count);  
 	///@}
 
 	/** @name read and write double and double array. */
 	///@{
-	bool writeDouble (double);
-	bool readDouble (double&);
-	bool writeDoubleArray (const double* array, int32 count);
-	bool readDoubleArray (double* array, int32 count);
+	bool writeDouble (double);                         
+	bool readDouble (double&);                         
+	bool writeDoubleArray (const double* array, int32 count);  
+	bool readDoubleArray (double* array, int32 count);  
 	///@}
 
 	/** @name read and write Boolean. */
@@ -152,7 +152,7 @@ public:
 	///@{
 	TSize writeString8 (const char8* ptr, bool terminate = false); ///< a direct output function writing only one string (ascii 8bit)
 	TSize readString8 (char8* ptr, TSize size);				///< a direct input function reading only one string (ascii) (ended by a \n or \0 or eof)
-
+	
 	bool writeStr8 (const char8* ptr);				       ///< write a string length (strlen) and string itself
 	char8* readStr8 ();									   ///< read a string length and string text (The return string must be deleted when use is finished)
 
@@ -175,7 +175,7 @@ protected:
 //------------------------------------------------------------------------
 /** FStreamSizeHolder Declaration
 	remembers size of stream chunk for backward compatibility.
-
+	
 	<b>Example:</b>
 	@code
 	externalize (a)
@@ -216,7 +216,7 @@ class IBStream;
 //------------------------------------------------------------------------
 // IBStreamer
 //------------------------------------------------------------------------
-/** Wrapper class for typed reading/writing from or to IBStream.
+/** Wrapper class for typed reading/writing from or to IBStream. 
 	Can be used framework-independent in Plug-ins. */
 //------------------------------------------------------------------------
 class IBStreamer: public FStreamer
@@ -228,7 +228,7 @@ public:
 
 	IBStream* getStream () { return stream; }	///< Returns the associated IBStream.
 
-	// FStreamer overrides:
+	// FStreamer overrides:					
 	TSize readRaw (void*, TSize) SMTG_OVERRIDE;				///< Read one buffer of size.
 	TSize writeRaw (const void*, TSize) SMTG_OVERRIDE;		///< Write one buffer of size.
 	int64 seek (int64, FSeekMode) SMTG_OVERRIDE;			///< Set file position for stream.

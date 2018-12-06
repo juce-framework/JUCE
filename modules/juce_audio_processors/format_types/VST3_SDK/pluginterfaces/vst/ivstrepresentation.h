@@ -9,7 +9,7 @@
 //-----------------------------------------------------------------------------
 // This file is part of a Steinberg SDK. It is subject to the license terms
 // in the LICENSE file found in the top-level directory of this distribution
-// and at www.steinberg.net/sdklicenses.
+// and at www.steinberg.net/sdklicenses. 
 // No part of the SDK, including this file, may be copied, modified, propagated,
 // or distributed except according to the terms contained in the LICENSE file.
 //-----------------------------------------------------------------------------
@@ -32,7 +32,7 @@ namespace Vst {
 //------------------------------------------------------------------------
 /** RepresentationInfo is the structure describing a representation
 This structure is used in the function \see IXmlRepresentationController::getXmlRepresentationStream.
-\see IXmlRepresentationController
+\see IXmlRepresentationController 
 */
 struct RepresentationInfo
 {
@@ -41,9 +41,9 @@ struct RepresentationInfo
 		memset (vendor, 0, kNameSize);
 		memset (name, 0, kNameSize);
 		memset (version, 0, kNameSize);
-		memset (host, 0, kNameSize);
+		memset (host, 0, kNameSize); 
 	}
-
+	
 	RepresentationInfo (char8* _vendor, char8* _name = 0, char8* _version = 0, char8* _host = 0)
 	{
 		memset (vendor, 0, kNameSize);
@@ -73,7 +73,7 @@ struct RepresentationInfo
 
 //------------------------------------------------------------------------
 //------------------------------------------------------------------------
-/** Extended Plug-in interface IEditController for a component.
+/** Extended Plug-in interface IEditController for a component. 
 \ingroup vstIPlug vst350
 - [plug imp]
 - [extends IEditController]
@@ -90,7 +90,7 @@ It allows to describe more precisely each parameter (what is the best matching t
 - A Layer is associated to a Plug-in parameter using the ParameterID as identifier:
 	- it could be a knob with a display for Title and/or value, this display uses the same parameterId, but it could an another one.
 	- Switch
-	- link which allows to jump directly to a subpage (an another page)
+	- link which allows to jump directly to a subpage (an another page) 
 	- more... See Vst::LayerType
 .
 
@@ -107,7 +107,7 @@ Here an example of what should be passed in the stream of getXmlRepresentationSt
 	<plugin classID="341FC5898AAA46A7A506BC0799E882AE" name="Chorus" vendor="Steinberg Media Technologies" />
 	<originator>My name</originator>
 	<date>2010-12-31</date>
-	<comment>This is an example for 4 Cells per Page for the Remote named ProductRemote
+	<comment>This is an example for 4 Cells per Page for the Remote named ProductRemote 
 	         from company HardwareCompany.</comment>
 
 	<!-- ===================================== -->
@@ -253,11 +253,11 @@ DECLARE_CLASS_IID (IXmlRepresentationController, 0xA81A0471, 0x48C34DC4, 0xAC30C
 #define QUICK_CONTROL_8_CELLS	"Quick Controls 8 Cells"
 
 //------------------------------------------------------------------------
-/** Layer Types used in a VST XML Representation */
+/** Layer Types used in a VST XML Representation */ 
 //------------------------------------------------------------------------
 namespace LayerType
 {
-	enum
+	enum 
 	{
 		kKnob = 0, 		///< a knob (encoder or not)
 		kPressedKnob,  	///< a knob which is used by pressing and turning
@@ -285,7 +285,7 @@ namespace LayerType
 };
 
 //------------------------------------------------------------------------
-/** Curve Types used in a VST XML Representation */
+/** Curve Types used in a VST XML Representation */ 
 //------------------------------------------------------------------------
 namespace CurveType
 {
@@ -294,7 +294,7 @@ namespace CurveType
 };
 
 //------------------------------------------------------------------------
-/** Attributes used to defined a Layer in a VST XML Representation */
+/** Attributes used to defined a Layer in a VST XML Representation */ 
 //------------------------------------------------------------------------
 namespace Attributes
 {
@@ -307,7 +307,7 @@ namespace Attributes
 };
 
 //------------------------------------------------------------------------
-/** Attributes Function used to defined the function of a Layer in a VST XML Representation */
+/** Attributes Function used to defined the function of a Layer in a VST XML Representation */ 
 //------------------------------------------------------------------------
 namespace AttributesFunction
 {
@@ -329,7 +329,7 @@ namespace AttributesFunction
 };
 
 //------------------------------------------------------------------------
-/** Attributes Style associated a specific Layer Type in a VST XML Representation */
+/** Attributes Style associated a specific Layer Type in a VST XML Representation */ 
 //------------------------------------------------------------------------
 namespace AttributesStyle
 {
@@ -350,16 +350,16 @@ namespace AttributesStyle
 	const CString kSwitchPushDecLoopedStyle	= "pushDecLooped";	///< Push will decrement the value. When the min is reached it will restart with max.
 	const CString kSwitchPushIncStyle	= "pushInc";	///< Increment after each press (delta depends of the curve).
 	const CString kSwitchPushDecStyle	= "pushDec";	///< Decrement after each press (delta depends of the curve).
-	const CString kSwitchLatchStyle		= "latch";		///< Each push-release will change the value between min and max.
+	const CString kSwitchLatchStyle		= "latch";		///< Each push-release will change the value between min and max. 
 														///< A timeout between push and release could be used to simulate a push style (if timeout is reached).
 };
 
 //------------------------------------------------------------------------
-/** Attributes Flags defining a Layer in a VST XML Representation */
+/** Attributes Flags defining a Layer in a VST XML Representation */ 
 //------------------------------------------------------------------------
 namespace AttributesFlags
 {
-	const CString kHideableFlag			= "hideable";	///< the associated layer marked as hideable allows a remote to hide or make it not usable a parameter when the associated value is inactive
+	const CString kHideableFlag			= "hideable";	///< the associated layer marked as hideable allows a remote to hide or make it not usable a parameter when the associated value is inactive 
 };
 
 

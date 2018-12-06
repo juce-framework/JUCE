@@ -5,7 +5,7 @@
 // Category    : Helpers
 // Filename    : base/source/fbuffer.h
 // Created by  : Steinberg, 2008
-// Description :
+// Description : 
 //
 //-----------------------------------------------------------------------------
 // LICENSE
@@ -13,24 +13,24 @@
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
-//
-//   * Redistributions of source code must retain the above copyright notice,
+// 
+//   * Redistributions of source code must retain the above copyright notice, 
 //     this list of conditions and the following disclaimer.
 //   * Redistributions in binary form must reproduce the above copyright notice,
-//     this list of conditions and the following disclaimer in the documentation
+//     this list of conditions and the following disclaimer in the documentation 
 //     and/or other materials provided with the distribution.
 //   * Neither the name of the Steinberg Media Technologies nor the names of its
-//     contributors may be used to endorse or promote products derived from this
+//     contributors may be used to endorse or promote products derived from this 
 //     software without specific prior written permission.
-//
+// 
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-// IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
-// INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-// LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+// IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+// INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
+// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF 
+// LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE 
 // OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE  OF THIS SOFTWARE, EVEN IF ADVISED
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
@@ -38,7 +38,7 @@
 #pragma once
 
 #include "pluginterfaces/base/ftypes.h"
-#include <cstring>
+#include <cstring> 
 
 namespace Steinberg {
 class String;
@@ -56,7 +56,7 @@ class Buffer
 {
 public:
 //---------------------------------------------------------------------
-
+	
 	/**	Default constructor, allocates no memory at all.
 	*/
 	Buffer ();
@@ -86,12 +86,12 @@ public:
 	/**	Destructor - deallocates the internal memory.
 	*/
 	~Buffer ();
-
+	
 	/**	Assignment operator - copies contents from a given Buffer and increases the size if necessary.
 	\param[in] buff : the Buffer from which all memory will be copied
 	*/
 	void operator = (const Buffer& buff);
-
+	
 	/**	Comparison operator - copies contents from a given Buffer and increases the size if necessary.
 	\param[in] buff : the Buffer to be compared to
 	\return true, if the given Buffer's content is equal to this one, else false
@@ -131,7 +131,7 @@ public:
 
 	void setDelta (uint32 d) {delta = d;}				///< define the block size by which the Buffer grows, see \ref grow()
 
-	bool put (uint8);							///< append value at end, grows Buffer if necessary
+	bool put (uint8);							///< append value at end, grows Buffer if necessary 
 	bool put (char16 c);                        ///< append value at end, grows Buffer if necessary
 	bool put (char c);							///< append value at end, grows Buffer if necessary
 	bool put (const void* , uint32 size);		///< append bytes from a given buffer, grows Buffer if necessary
@@ -143,17 +143,17 @@ public:
 	bool put (const String&);					///< append String at end, grows Buffer if necessary
 
 	void set (uint8 value);		///< fills complete Buffer with given value
-
+	
 	// strings ----------------
 	bool appendString (const tchar* s);
 	bool appendString (tchar* s);
 	bool appendString (tchar c)                   { return put (c); }
 
-	bool appendString8 (const char8* s);
+	bool appendString8 (const char8* s);	
 	bool appendString16 (const char16* s);
 
 	bool appendString8 (char8* s)                 { return appendString8 ((const char8*)s); }
-	bool appendString8 (unsigned char* s)		  { return appendString8 ((const char8*)s); }
+	bool appendString8 (unsigned char* s)		  { return appendString8 ((const char8*)s); }         
 	bool appendString8 (const unsigned char* s)   { return appendString8 ((const char8*)s); }
 
 	bool appendString8 (char8 c)                  { return put ((uint8)c); }
@@ -161,18 +161,18 @@ public:
 	bool appendString16 (char16 c)                { return put (c); }
 	bool appendString16 (char16* s)               { return appendString16 ((const char16*)s); }
 
-	bool prependString (const tchar* s);
-	bool prependString (tchar* s);
-	bool prependString (tchar c);
+	bool prependString (const tchar* s);   
+	bool prependString (tchar* s);   
+	bool prependString (tchar c);                
 
-	bool prependString8 (const char8* s);
+	bool prependString8 (const char8* s);           
 	bool prependString16 (const char16* s);
 
 	bool prependString8 (char8 c);
 	bool prependString8 (unsigned char c)         { return prependString8 ((char8)c); }
 	bool prependString8 (char8* s)                { return prependString8 ((const char8*)s); }
-	bool prependString8 (unsigned char* s)        { return prependString8((const char8*)s); }
-	bool prependString8 (const unsigned char* s)  { return prependString8 ((const char8*)s); }
+	bool prependString8 (unsigned char* s)        { return prependString8((const char8*)s); }           
+	bool prependString8 (const unsigned char* s)  { return prependString8 ((const char8*)s); } 
 	bool prependString16 (char16 c);
 	bool prependString16 (char16* s)              { return prependString16 ((const char16*)s); }
 
@@ -209,10 +209,10 @@ public:
 	inline char16*  wcharPtr ()  const {return (char16*)buffer;}	///< conversion
 
 	int8* operator + (uint32 i);	///< \return the internal Buffer's address plus the given offset i, zero if offset is out of range
-
+	
 	int32 operator ! ()  { return buffer == 0; }
-
-	enum swapSize
+	
+	enum swapSize 
 	{
 		kSwap16 = 2,
 		kSwap32 = 4,
@@ -239,7 +239,7 @@ public:
 //------------------------------------------------------------------------
 protected:
 	static const uint32 defaultDelta = 0x1000; // 0x1000
-
+	
 	int8* buffer;
 	uint32 memSize;
 	uint32 fillSize;

@@ -9,7 +9,7 @@
 //-----------------------------------------------------------------------------
 // This file is part of a Steinberg SDK. It is subject to the license terms
 // in the LICENSE file found in the top-level directory of this distribution
-// and at www.steinberg.net/sdklicenses.
+// and at www.steinberg.net/sdklicenses. 
 // No part of the SDK, including this file, may be copied, modified, propagated,
 // or distributed except according to the terms contained in the LICENSE file.
 //-----------------------------------------------------------------------------
@@ -57,25 +57,27 @@
 #endif
 
 //------------------------------------------------------------------------
-#define DECLARE_UID(name, l1, l2, l3, l4) \
-	::Steinberg::TUID name = INLINE_UID (l1, l2, l3, l4);
+#define DECLARE_UID(name, l1, l2, l3, l4) ::Steinberg::TUID name = INLINE_UID (l1, l2, l3, l4);
 
 //------------------------------------------------------------------------
-#define EXTERN_UID(name) \
-	extern const ::Steinberg::TUID name;
-
+#define EXTERN_UID(name) extern const ::Steinberg::TUID name;
 
 #ifdef INIT_CLASS_IID
-#define DECLARE_CLASS_IID(ClassName, l1, l2, l3, l4) static const ::Steinberg::TUID ClassName##_iid = INLINE_UID (l1, l2, l3, l4); \
+#define DECLARE_CLASS_IID(ClassName, l1, l2, l3, l4)                              \
+	static const ::Steinberg::TUID ClassName##_iid = INLINE_UID (l1, l2, l3, l4); \
+	\
 const ::Steinberg::FUID ClassName::iid (ClassName##_iid);
 #else
-#define DECLARE_CLASS_IID(ClassName, l1, l2, l3, l4) static const ::Steinberg::TUID ClassName##_iid = INLINE_UID (l1, l2, l3, l4);
+#define DECLARE_CLASS_IID(ClassName, l1, l2, l3, l4) \
+	static const ::Steinberg::TUID ClassName##_iid = INLINE_UID (l1, l2, l3, l4);
 #endif
+
 #define DEF_CLASS_IID(ClassName) const ::Steinberg::FUID ClassName::iid (ClassName##_iid);
 
 #define INLINE_UID_OF(ClassName) ClassName##_iid
 
-#define INLINE_UID_FROM_FUID(x) INLINE_UID(x.getLong1 (), x.getLong2 (), x.getLong3 (), x.getLong4 ())
+#define INLINE_UID_FROM_FUID(x) \
+	INLINE_UID (x.getLong1 (), x.getLong2 (), x.getLong3 (), x.getLong4 ())
 
 //------------------------------------------------------------------------
 //  FUnknown implementation macros
@@ -84,8 +86,8 @@ const ::Steinberg::FUID ClassName::iid (ClassName##_iid);
 #define DECLARE_FUNKNOWN_METHODS                                                                      \
 public:	                                                                                              \
 	virtual ::Steinberg::tresult PLUGIN_API queryInterface (const ::Steinberg::TUID _iid, void** obj) SMTG_OVERRIDE; \
-	virtual ::Steinberg::uint32 PLUGIN_API addRef () SMTG_OVERRIDE;                                                 \
-	virtual ::Steinberg::uint32 PLUGIN_API release () SMTG_OVERRIDE;                                                \
+	virtual ::Steinberg::uint32 PLUGIN_API addRef () SMTG_OVERRIDE;                                   \
+	virtual ::Steinberg::uint32 PLUGIN_API release () SMTG_OVERRIDE;                                  \
 protected :                                                                                           \
 	::Steinberg::int32 __funknownRefCount;                                                            \
 public:
@@ -94,7 +96,7 @@ public:
 
 #define DELEGATE_REFCOUNT(ClassName)											        \
 public:																			        \
-	virtual ::Steinberg::uint32 PLUGIN_API addRef () SMTG_OVERRIDE { return ClassName::addRef ();  }	\
+	virtual ::Steinberg::uint32 PLUGIN_API addRef () SMTG_OVERRIDE { return ClassName::addRef ();  } \
 	virtual ::Steinberg::uint32 PLUGIN_API release () SMTG_OVERRIDE { return ClassName::release (); }
 
 //------------------------------------------------------------------------
@@ -128,11 +130,11 @@ if (::Steinberg::FUnknownPrivate::iidEqual (iid, InterfaceIID)) \
 
 //------------------------------------------------------------------------
 #define IMPLEMENT_QUERYINTERFACE(ClassName, InterfaceName, ClassIID)                                \
-::Steinberg::tresult PLUGIN_API ClassName::queryInterface (const ::Steinberg::TUID _iid, void** obj) \
+::Steinberg::tresult PLUGIN_API ClassName::queryInterface (const ::Steinberg::TUID _iid, void** obj)\
 {                                                                                                   \
-	QUERY_INTERFACE (_iid, obj, ::Steinberg::FUnknown::iid, InterfaceName)                           \
-	QUERY_INTERFACE (_iid, obj, ClassIID, InterfaceName)                                             \
-	*obj = nullptr;                                                                                       \
+	QUERY_INTERFACE (_iid, obj, ::Steinberg::FUnknown::iid, InterfaceName)                          \
+	QUERY_INTERFACE (_iid, obj, ClassIID, InterfaceName)                                            \
+	*obj = nullptr;                                                                                 \
 	return ::Steinberg::kNoInterface;                                                               \
 }
 
@@ -240,7 +242,7 @@ public:
 	bool generate ();
 
 	/** Checks if the UID data is valid.
-		The default constructor initializes the memory with zeros. */
+	    The default constructor initializes the memory with zeros. */
 	bool isValid () const;
 
 	FUID& operator = (const FUID& f);
@@ -248,21 +250,20 @@ public:
 	bool operator < (const FUID& f) const { return memcmp (data, f.data, sizeof (TUID)) < 0; }
 	bool operator != (const FUID& f) const   { return !::Steinberg::FUnknownPrivate::iidEqual (data, f.data); }
 
-
- 	uint32 getLong1 () const;
- 	uint32 getLong2 () const;
- 	uint32 getLong3 () const;
- 	uint32 getLong4 () const;
+	uint32 getLong1 () const;
+	uint32 getLong2 () const;
+	uint32 getLong3 () const;
+	uint32 getLong4 () const;
 
 	void from4Int (uint32 d1, uint32 d2, uint32 d3, uint32 d4);
 	void to4Int (uint32& d1, uint32& d2, uint32& d3, uint32& d4) const;
 
-	typedef char8 String [64];
+	typedef char8 String[64];
 
 	/** Converts UID to a string.
 		The string will be 32 characters long, representing the hexadecimal values
-		of each data byte (e.g. "9127BE30160E4BB69966670AA6087880").
-
+		of each data byte (e.g. "9127BE30160E4BB69966670AA6087880"). 
+		
 		Typical use-case is:
 		\code
 		char8[33] strUID = {0};
@@ -274,8 +275,8 @@ public:
 	void toString (char8* string) const;
 
 	/** Sets the UID data from a string.
-		The string has to be 32 characters long, where each character-pair is
-		the ASCII-encoded hexadecimal value of the corresponding data byte. */
+	    The string has to be 32 characters long, where each character-pair is
+	    the ASCII-encoded hexadecimal value of the corresponding data byte. */
 	bool fromString (const char8* string);
 
 	/** Converts UID to a string in Microsoft® OLE format.
@@ -293,11 +294,11 @@ public:
 		kCLASS_UID    ///< "DECLARE_CLASS_IID (Interface, 0x00000000, 0x00000000, 0x00000000, 0x00000000)"
 	};
 	/** Prints the UID to a string (or debug output if string is NULL).
-		\param string is the output string if not NULL.
-		\param style can be chosen from the FUID::UIDPrintStyle enumeration. */
+	    \param string is the output string if not NULL.
+	    \param style can be chosen from the FUID::UIDPrintStyle enumeration. */
 	void print (char8* string = 0, int32 style = kINLINE_UID) const;
 
-	template<size_t N>
+	template <size_t N>
 	inline explicit FUID (const int8 (&uid)[N])
 	{
 #if SMTG_CPP11_STDLIBSUPPORT
@@ -323,7 +324,7 @@ protected:
 };
 
 #if SMTG_CPP11_STDLIBSUPPORT
-template<typename T>
+template <typename T>
 inline bool operator== (const FUID& f1, T f2)
 {
 	static_assert (
@@ -352,6 +353,7 @@ The SDK provides a class called FUID for this purpose.
 class FUnknown
 {
 public:
+
 //------------------------------------------------------------------------
 	/** Query for a pointer to the specified interface.
 	Returns kResultOk on success or kNoInterface if the object does not implement the interface.
@@ -362,7 +364,7 @@ public:
 
 	/** Adds a reference and return the new reference count.
 	\par Remarks:
-		The initial reference count after creating an object is 1. */
+	    The initial reference count after creating an object is 1. */
 	virtual uint32 PLUGIN_API addRef () = 0;
 
 	/** Releases a reference and return the new reference count.
@@ -374,6 +376,7 @@ public:
 //------------------------------------------------------------------------
 };
 
+
 DECLARE_CLASS_IID (FUnknown, 0x00000000, 0x00000000, 0xC0000000, 0x00000046)
 
 //------------------------------------------------------------------------
@@ -381,12 +384,12 @@ DECLARE_CLASS_IID (FUnknown, 0x00000000, 0x00000000, 0xC0000000, 0x00000046)
 //------------------------------------------------------------------------
 /** FUnknownPtr - automatic interface conversion and smart pointer in one.
     This template class can be used for interface conversion like this:
-					\code
-	IPtr<IPath> path = owned (FHostCreate (IPath, hostClasses));
-	FUnknownPtr<IPath2> path2 (path); // does a query interface for IPath2
-	if (path2)
-		...
-					\endcode
+ \code
+    IPtr<IPath> path = owned (FHostCreate (IPath, hostClasses));
+    FUnknownPtr<IPath2> path2 (path); // does a query interface for IPath2
+    if (path2)
+        ...
+ \endcode
 */
 //------------------------------------------------------------------------
 template <class I>
@@ -398,8 +401,12 @@ public:
 	inline FUnknownPtr (const FUnknownPtr& p) : IPtr<I> (p) {}
 	inline FUnknownPtr () {}
 
-	inline FUnknownPtr& operator=(const FUnknownPtr& p) {IPtr<I>::operator=(p); return *this;}
-	inline I* operator=(FUnknown* unknown);
+	inline FUnknownPtr& operator= (const FUnknownPtr& p)
+	{
+		IPtr<I>::operator= (p);
+		return *this;
+	}
+	inline I* operator= (FUnknown* unknown);
 	inline I* getInterface () { return this->ptr; }
 };
 
@@ -413,18 +420,17 @@ inline FUnknownPtr<I>::FUnknownPtr (FUnknown* unknown)
 
 //------------------------------------------------------------------------
 template <class I>
-inline I* FUnknownPtr<I>::operator=(FUnknown* unknown)
+inline I* FUnknownPtr<I>::operator= (FUnknown* unknown)
 {
 	I* newPtr = 0;
 	if (unknown && unknown->queryInterface (I::iid, (void**)&newPtr) == kResultOk)
 	{
 		OPtr<I> rel (newPtr);
-		return IPtr<I>::operator=(newPtr);
+		return IPtr<I>::operator= (newPtr);
 	}
 
-	return IPtr<I>::operator=(0);
+	return IPtr<I>::operator= (0);
 }
-
 
 //------------------------------------------------------------------------
 // FReleaser (obsolete)
@@ -434,31 +440,34 @@ This class is obsolete and is only kept for compatibility.
 The replacement for FReleaser is OPtr.
 
 Usage example with FReleaser:
-										\code
-	void someFunction ()
-	{
-		IPath* path = pathCreateMethod ();
-		FReleaser releaser (path);
-		.... do something with path...
-		.... path not used anymore, releaser will destroy it when leaving function scope
-	}
-										\endcode
+ \code
+    void someFunction ()
+    {
+        IPath* path = pathCreateMethod ();
+        FReleaser releaser (path);
+        .... do something with path...
+        .... path not used anymore, releaser will destroy it when leaving function scope
+    }
+ \endcode
 Usage example with OPtr:
-										\code
-	void someFunction ()
-	{
-		OPtr<IPath> path = pathCreateMethod ();
-		.... do something with path...
-		.... path not used anymore, OPtr will destroy it when leaving function scope
-	}
-										\endcode
+ \code
+    void someFunction ()
+    {
+        OPtr<IPath> path = pathCreateMethod ();
+        .... do something with path...
+        .... path not used anymore, OPtr will destroy it when leaving function scope
+    }
+ \endcode
 */
 //------------------------------------------------------------------------
 struct FReleaser
 {
-	FReleaser (FUnknown* u): u (u) {}
-	~FReleaser () { if (u) u->release (); }
-
+	FReleaser (FUnknown* u) : u (u) {}
+	~FReleaser ()
+	{
+		if (u)
+			u->release ();
+	}
 	FUnknown* u;
 };
 
