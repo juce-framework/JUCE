@@ -469,30 +469,7 @@ namespace NumberToStringConverters
                 o << n;
             }
 
-            return findLengthWithoutTrailingZeros (pbase(), pptr());
-        }
-
-        static size_t findLengthWithoutTrailingZeros (const char* const start,
-                                                      const char* const end)
-        {
-            for (auto e = end; e > start + 1; --e)
-            {
-                auto lastChar = *(e - 1);
-
-                if (lastChar != '0')
-                {
-                    if (lastChar == '.')
-                        return (size_t) (e + 1 - start);
-
-                    for (auto s = start; s < e; ++s)
-                        if (*s == '.')
-                            return (size_t) (e - start);
-
-                    break;
-                }
-            }
-
-            return (size_t) (end - start);
+            return (size_t) (pptr() - pbase());
         }
     };
 
@@ -505,14 +482,7 @@ namespace NumberToStringConverters
             auto v = (int64) (std::pow (10.0, numDecPlaces) * std::abs (n) + 0.5);
             *--t = (char) 0;
 
-            // skip trailing zeros
-            while (numDecPlaces > 1 && (v % 10) == 0)
-            {
-                v /= 10;
-                --numDecPlaces;
-            }
-
-            while (v > 0 || numDecPlaces >= 0)
+            while (numDecPlaces >= 0 || v > 0)
             {
                 if (numDecPlaces == 0)
                     *--t = '.';
@@ -2523,14 +2493,7 @@ public:
             expect (String::toHexString (data, 8, 1).equalsIgnoreCase ("01 02 03 04 0a 0b 0c 0d"));
             expect (String::toHexString (data, 8, 2).equalsIgnoreCase ("0102 0304 0a0b 0c0d"));
 
-            expectEquals (String (2589410.5894, 7), String ("2589410.5894"));
-            expectEquals (String (2589410.5894, 4), String ("2589410.5894"));
-            expectEquals (String (100000.0, 1), String ("100000.0"));
-            expectEquals (String (100000.0, 10), String ("100000.0"));
-            expectEquals (String (100000.001, 8), String ("100000.001"));
-            expectEquals (String (100000.001, 4), String ("100000.001"));
-            expectEquals (String (100000.001, 3), String ("100000.001"));
-            expectEquals (String (100000.001, 2), String ("100000.0"));
+            expectEquals (String (2589410.5894, 7), String ("2589410.5894000"));
 
             beginTest ("Subsections");
             String s3;
