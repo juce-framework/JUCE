@@ -1246,7 +1246,7 @@ void AudioProcessorGraph::prepareToPlay (double sampleRate, int estimatedSamples
     setRateAndBufferSizeDetails (sampleRate, estimatedSamplesPerBlock);
     clearRenderingSequence();
 
-    if (isNonRealtime())
+    if (MessageManager::getInstance()->isThisTheMessageThread())
         handleAsyncUpdate();
     else
         triggerAsyncUpdate();
