@@ -3713,6 +3713,9 @@
     <None Include="..\..\Source\BinaryData\Templates\jucer_UnityPluginGUIScript.cs">
       <Filter>Projucer\BinaryData\Templates</Filter>
     </None>
+    <None Include="..\..\Source\BinaryData\Templates\jucer_WorkspaceSettings.xcsettings">
+      <Filter>Projucer\BinaryData\Templates</Filter>
+    </None>
     <None Include="..\..\Source\BinaryData\colourscheme_dark.xml">
       <Filter>Projucer\BinaryData</Filter>
     </None>

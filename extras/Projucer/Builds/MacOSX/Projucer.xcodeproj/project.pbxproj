@@ -1014,6 +1014,13 @@
 			path = "../../Source/ProjectSaving/jucer_ProjectSaver.cpp";
 			sourceTree = "SOURCE_ROOT";
 		};
+		50162D236BE27CDA5F896628 = {
+			isa = PBXFileReference;
+			lastKnownFileType = file.xcsettings;
+			name = "jucer_WorkspaceSettings.xcsettings";
+			path = "../../Source/BinaryData/Templates/jucer_WorkspaceSettings.xcsettings";
+			sourceTree = "SOURCE_ROOT";
+		};
 		50498FF6EA3901CBD58223B3 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.h;
@@ -2707,6 +2714,7 @@
 				3DC2ED15A9DFAAEF3D2ACDDF,
 				E67999BF57B139E00207A374,
 				763A63E75AC802F17D11FE8B,
+				50162D236BE27CDA5F896628,
 			);
 			name = Templates;
 			sourceTree = "<group>";
