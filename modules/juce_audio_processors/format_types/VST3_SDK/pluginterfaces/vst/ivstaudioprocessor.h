@@ -9,7 +9,7 @@
 //-----------------------------------------------------------------------------
 // This file is part of a Steinberg SDK. It is subject to the license terms
 // in the LICENSE file found in the top-level directory of this distribution
-// and at www.steinberg.net/sdklicenses.
+// and at www.steinberg.net/sdklicenses. 
 // No part of the SDK, including this file, may be copied, modified, propagated,
 // or distributed except according to the terms contained in the LICENSE file.
 //-----------------------------------------------------------------------------
@@ -80,7 +80,7 @@ const CString kOnlyOfflineProcess	= "OnlyOfflineProcess";	///< used for Plug-in 
 const CString kNoOfflineProcess		= "NoOfflineProcess";	///< will be NOT used for Plug-in offline processing (will work as normal insert Plug-in)
 const CString kUpDownMix			= "Up-Downmix";		///< used for Mixconverter/Up-Mixer/Down-Mixer
 const CString kAnalyzer			    = "Analyzer";	    ///< Meter, Scope, FFT-Display, not selectable as insert plugin
-const CString kAmbisonic			= "Ambisonic";		///< used for Ambisonic channel (FX or Panner/Mixconverter/Up-Mixer/Down-Mixer when combined with other category)
+const CString kAmbisonics			= "Ambisonics";		///< used for Ambisonics channel (FX or Panner/Mixconverter/Up-Mixer/Down-Mixer when combined with other category)
 
 const CString kMono					= "Mono";			///< used for Mono only Plug-in [optional]
 const CString kStereo				= "Stereo";			///< used for Stereo only Plug-in [optional]
@@ -246,7 +246,7 @@ class IAudioProcessor: public FUnknown
 public:
 //------------------------------------------------------------------------
 	/** Try to set (from host) a predefined arrangement for inputs and outputs.
-	    The host should always deliver the same number of input and output buses than the Plug-in needs
+	    The host should always deliver the same number of input and output buses than the Plug-in needs 
 		(see \ref IComponent::getBusCount).
 		The Plug-in returns kResultFalse if wanted arrangements are not supported.
 		If the Plug-in accepts these arrangements, it should modify its buses to match the new arrangements
@@ -257,7 +257,7 @@ public:
 												   SpeakerArrangement* outputs, int32 numOuts) = 0;
 
 	/** Gets the bus arrangement for a given direction (input/output) and index.
-		Note: IComponent::getInfo () and IAudioProcessor::getBusArrangement () should be always return the same
+		Note: IComponent::getInfo () and IAudioProcessor::getBusArrangement () should be always return the same 
 		information about the buses arrangements. */
 	virtual tresult PLUGIN_API getBusArrangement (BusDirection dir, int32 index, SpeakerArrangement& arr) = 0;
 
@@ -278,7 +278,7 @@ public:
 
 	/** Informs the Plug-in about the processing state. This will be called before any process calls start with true and after with false.
 		Note that setProcessing (false) may be called after setProcessing (true) without any process calls.
-		In this call the Plug-in should do only light operation (no memory allocation or big setup reconfiguration),
+		In this call the Plug-in should do only light operation (no memory allocation or big setup reconfiguration), 
 		this could be used to reset some buffers (like Delay line or Reverb). */
 	virtual tresult PLUGIN_API setProcessing (TBool state) = 0;
 
@@ -286,9 +286,9 @@ public:
 	virtual tresult PLUGIN_API process (ProcessData& data) = 0;
 
 	/** Gets tail size in samples. For example, if the Plug-in is a Reverb Plug-in and it knows that
-		the maximum length of the Reverb is 2sec, then it has to return in getTailSamples()
+		the maximum length of the Reverb is 2sec, then it has to return in getTailSamples() 
 		(in VST2 it was getGetTailSize ()): 2*sampleRate.
-		This information could be used by host for offline processing, process optimization and
+		This information could be used by host for offline processing, process optimization and 
 		downmix (avoiding signal cut (clicks)).
 		It should return:
 		 - kNoTail when no tail
@@ -308,6 +308,7 @@ DECLARE_CLASS_IID (IAudioProcessor, 0x42043F99, 0xB7DA453C, 0xA569E79D, 0x9AAEC3
 - [plug imp]
 - [extends IAudioProcessor]
 - [released: 3.1.0]
+- [optional]
 
 Inform the Plug-in about how long from the moment of generation/acquiring (from file or from Input)
 it will take for its input to arrive, and how long it will take for its output to be presented (to output or to Speaker).
@@ -321,8 +322,8 @@ latency of the Audio Device itself.
 
 A value of zero means either no latency or an unknown latency.
 
-Each Plug-in adding a latency (returning a none zero value for IAudioProcessor::getLatencySamples) will modify the input
-presentation latency of the next Plug-ins in the mixer routing graph and will modify the output presentation latency
+Each Plug-in adding a latency (returning a none zero value for IAudioProcessor::getLatencySamples) will modify the input 
+presentation latency of the next Plug-ins in the mixer routing graph and will modify the output presentation latency 
 of the previous Plug-ins.
 
 \n

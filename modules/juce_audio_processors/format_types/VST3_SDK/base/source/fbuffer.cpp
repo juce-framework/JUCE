@@ -5,7 +5,7 @@
 // Category    : Helpers
 // Filename    : base/source/fbuffer.cpp
 // Created by  : Steinberg, 2008
-// Description :
+// Description : 
 //
 //-----------------------------------------------------------------------------
 // LICENSE
@@ -13,24 +13,24 @@
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
-//
-//   * Redistributions of source code must retain the above copyright notice,
+// 
+//   * Redistributions of source code must retain the above copyright notice, 
 //     this list of conditions and the following disclaimer.
 //   * Redistributions in binary form must reproduce the above copyright notice,
-//     this list of conditions and the following disclaimer in the documentation
+//     this list of conditions and the following disclaimer in the documentation 
 //     and/or other materials provided with the distribution.
 //   * Neither the name of the Steinberg Media Technologies nor the names of its
-//     contributors may be used to endorse or promote products derived from this
+//     contributors may be used to endorse or promote products derived from this 
 //     software without specific prior written permission.
-//
+// 
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-// IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
-// INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-// LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+// IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+// INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
+// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF 
+// LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE 
 // OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE  OF THIS SOFTWARE, EVEN IF ADVISED
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
@@ -42,7 +42,7 @@
 namespace Steinberg {
 
 //-------------------------------------------------------------------------------------
-Buffer::Buffer ()
+Buffer::Buffer () 
 : buffer (0)
 , memSize (0)
 , fillSize (0)
@@ -57,7 +57,7 @@ Buffer::Buffer (uint32 s, uint8 initVal)
 , delta (defaultDelta)
 {
  	if (memSize == 0)
-		return;
+		return;		
 	buffer = (int8*)::malloc (memSize);
 	if (buffer)
 		memset (buffer, initVal, memSize);
@@ -73,14 +73,14 @@ Buffer::Buffer (uint32 s)
 , delta (defaultDelta)
 {
  	if (memSize == 0)
-		return;
+		return;		
  	buffer = (int8*)::malloc (memSize);
 	if (!buffer)
 		memSize = 0;
 }
 
 //-------------------------------------------------------------------------------------
-Buffer::Buffer (const void* b , uint32 s)
+Buffer::Buffer (const void* b , uint32 s) 
 : buffer (0)
 , memSize (s)
 , fillSize (s)
@@ -126,9 +126,9 @@ Buffer::~Buffer ()
 //-------------------------------------------------------------------------------------
 void Buffer::operator = (const Buffer& b2)
 {
- 	if (&b2 != this)
+ 	if (&b2 != this) 
 	{
-		setSize (b2.memSize);
+		setSize (b2.memSize);		
 		if (b2.memSize > 0 && buffer)
 			memcpy (buffer, b2.buffer, b2.memSize);
 		fillSize = b2.fillSize;
@@ -143,7 +143,7 @@ bool Buffer::operator == (const Buffer& b2)const
 		return true;
 	if (b2.getSize () != getSize ())
 		return false;
-	return memcmp (this->int8Ptr (), b2.int8Ptr (), getSize ()) == 0 ? true : false;
+	return memcmp (this->int8Ptr (), b2.int8Ptr (), getSize ()) == 0 ? true : false;		
 }
 
 //-------------------------------------------------------------------------------------
@@ -169,7 +169,7 @@ bool Buffer::put (uint8 byte)
 {
 	if (grow (fillSize + 1) == false)
 		return false;
-
+ 	
   	buffer [fillSize++] = byte;
   	return true;
 }
@@ -179,7 +179,7 @@ bool Buffer::put (char c)
 {
 	if (grow (fillSize + 1) == false)
 		return false;
-
+ 	
   	buffer [fillSize++] = c;
   	return true;
 }
@@ -200,8 +200,8 @@ bool Buffer::put (const void* toPut, uint32 s)
 
 //-------------------------------------------------------------------------------------
 bool Buffer::put (const String& str)
-{
-	return put ((const void*)str.text () , (str.length () + 1) * sizeof (tchar));
+{ 
+	return put ((const void*)str.text () , (str.length () + 1) * sizeof (tchar)); 
 }
 
 //-------------------------------------------------------------------------------------
@@ -231,7 +231,7 @@ bool Buffer::prependString8 (const char8* s)
 		return false;
 
 	uint32 len = (uint32) strlen (s);
-
+	
 	if (len > 0)
 	{
 		shiftStart (len);
@@ -249,7 +249,7 @@ bool Buffer::prependString16 (const char16* s)
 
 	ConstString str (s);
 	uint32 len = (uint32) str.length () * sizeof (char16);
-
+	
 	if (len > 0)
 	{
 		shiftStart (len);
@@ -282,16 +282,16 @@ bool Buffer::copy (uint32 from, uint32 to, uint32 bytes)
 {
 	if (from + bytes > memSize || bytes == 0)
 		return false;
-
+	
 	if (to + bytes > memSize)
 		setSize (to + bytes);
-
+	
 	if (from + bytes > to && from < to)
 	{              // overlap
 		Buffer tmp (buffer + from, bytes);
 		memcpy (buffer + to, tmp, bytes);
 	}
-	else
+	else	
 		memcpy (buffer + to, buffer + from, bytes);
 	return true;
 }
@@ -322,7 +322,7 @@ bool Buffer::makeHexString (String& result)
 			t2 += '0';
 		else
 			t2 = t2 - 10 + 'A';
-
+		
 		stringBuffer [count++] = t1;
 		stringBuffer [count++] = t2;
 		data++;
@@ -385,7 +385,7 @@ bool Buffer::setFillSize (uint32 c)
 	if (c <= memSize)
 	{
 		fillSize = c;
-		return true;
+		return true;	
 	}
 	return false;
 }
@@ -395,7 +395,7 @@ bool Buffer::truncateToFillSize ()
 {
 	if (fillSize < memSize)
 		setSize (fillSize);
-
+	
 	return true;
 }
 
@@ -421,14 +421,14 @@ void Buffer::shiftAt (uint32 position, int32 amount)
 		{
 			if (position < fillSize)
 				memmove (buffer + amount + position, buffer + position, fillSize - position);
-
+			
 			fillSize += amount;
 		}
-	}
+	}	
 	else if (amount < 0 && fillSize > 0)
 	{
 		uint32 toRemove = -amount;
-
+	
 		if (toRemove < fillSize)
 		{
 			if (position < fillSize)
@@ -455,15 +455,15 @@ void Buffer::move (int32 amount, uint8 initVal)
 			memset (buffer, initVal, memSize);
 	}
 	else
-	{
+	{	
 		uint32 toRemove = -amount;
 		if (toRemove < memSize)
 		{
 			memmove (buffer, buffer + toRemove, memSize - toRemove);
-			memset (buffer + memSize - toRemove, initVal, toRemove);
+			memset (buffer + memSize - toRemove, initVal, toRemove);	
 		}
 		else
-			memset (buffer, initVal, memSize);
+			memset (buffer, initVal, memSize);	
 	}
 }
 
@@ -549,7 +549,7 @@ bool Buffer::swap (void* buffer, uint32 bufferSize, int16 swapSize)
 {
 	if (swapSize != kSwap16 && swapSize != kSwap32 && swapSize != kSwap64)
 		return false;
-
+	
 	if (swapSize == kSwap16)
 	{
 		for (uint32 count = 0 ; count < bufferSize ; count += 2)
@@ -559,14 +559,14 @@ bool Buffer::swap (void* buffer, uint32 bufferSize, int16 swapSize)
 	}
 	else if (swapSize == kSwap32)
 	{
-		for (uint32 count = 0 ; count < bufferSize ; count += 4)
+		for (uint32 count = 0 ; count < bufferSize ; count += 4) 
 		{
 			SWAP_32 ( * (((int32*)buffer) + count) );
 		}
 	}
 	else if (swapSize == kSwap64)
 	{
-		for (uint32 count = 0 ; count < bufferSize ; count += 8)
+		for (uint32 count = 0 ; count < bufferSize ; count += 8) 
 		{
 			SWAP_64 ( * (((int64*)buffer) + count) );
 		}
@@ -580,7 +580,7 @@ void Buffer::take (Buffer& from)
 {
 	setSize (0);
 	memSize = from.memSize;
-	fillSize = from.fillSize;
+	fillSize = from.fillSize;	
 	buffer = from.buffer;
 	from.buffer = 0;
 	from.memSize = 0;

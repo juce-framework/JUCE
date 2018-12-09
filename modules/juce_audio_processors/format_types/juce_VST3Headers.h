@@ -128,6 +128,9 @@
  #include <public.sdk/source/vst/vstparameters.cpp>
  #include <public.sdk/source/vst/vstpresetfile.cpp>
  #include <public.sdk/source/vst/hosting/hostclasses.cpp>
+#if VST_VERSION >= 0x03060c   // 3.6.12
+ #include <public.sdk/source/vst/hosting/pluginterfacesupport.cpp>
+#endif
 
 //==============================================================================
 namespace Steinberg

@@ -166,7 +166,7 @@ public:
         if (nativeWindow != nullptr && shouldScaleGLWindow (nativeWindow->getNativeHandle()))
             return Desktop::getInstance().getDisplays().findDisplayForRect (screenBounds).scale;
 
-        return 1.0;
+        return Desktop::getInstance().getGlobalScaleFactor();
     }
 
 private:

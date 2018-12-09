@@ -92,9 +92,10 @@ static bool isValidExporterName (StringRef exporterName)
     return ProjectExporter::getExporterValueTreeNames().contains (exporterName, true);
 }
 
-static bool isMobileExporter (const String& exporterName)
+static bool exporterRequiresExampleAssets (const String& exporterName, const String& projectName)
 {
-    return exporterName == "XCODE_IPHONE" || exporterName == "ANDROIDSTUDIO";
+    return (exporterName == "XCODE_IPHONE" || exporterName == "ANDROIDSTUDIO")
+            || (exporterName == "XCODE_MAC" && projectName == "AUv3SynthPlugin");
 }
 
 //==============================================================================
@@ -251,7 +252,7 @@ ValueTree PIPGenerator::createExporterChild (const String& exporterName)
 
     exporter.setProperty (Ids::targetFolder, "Builds/" + ProjectExporter::getTargetFolderForExporter (exporterName), nullptr);
 
-    if (isMobileExporter (exporterName) || (metadata[Ids::name] == "AUv3SynthPlugin" && exporterName == "XCODE_MAC"))
+    if (isJUCEExample (pipFile) && exporterRequiresExampleAssets (exporterName, metadata[Ids::name]))
     {
         auto juceDir = getAppSettings().getStoredPath (Ids::jucePath, TargetOS::getThisOS()).get().toString();
 

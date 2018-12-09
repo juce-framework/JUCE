@@ -1,12 +1,12 @@
-# Welcome to VST SDK 3.6.9
+# Welcome to VST SDK 3.6.12
 
 ## Table Of Contents
 1. [The VST SDK package](#100)
 1. [System requirements](#200)
 1. [About VST Plug-ins in general](#300)
 1. [About VST 3](#400)
-1. [How to build VST 3](#How_to_build_VST_3)
-1. [License & Usage guidelines](#license_&_usage_guidelines)
+1. [How to build VST 3](#500)
+1. [License & Usage guidelines](#600)
 
 <div id='100'/>
 
@@ -16,7 +16,10 @@
 - AAX, AU and VST 2 wrappers
 - VST 3 Plug-ins Examples
 
-The full VST 3 SDK is available [here!](https://www.steinberg.net/en/company/developers.html). It contains a VST 3 Plug-in Test Host Application/Validator.
+The full VST 3 SDK is available [here!](https://www.steinberg.net/en/company/developers.html). It contains :
+- a VST 3 Plug-in Test Host Application/Validator,
+- the <b>Steinberg VST 3 Plug-In SDK Licensing Agreement</b> that you have to sign if you want to develop or host VST 3 Plug-Ins.
+
 
 <div id='200'/>
 
@@ -25,7 +28,7 @@ The full VST 3 SDK is available [here!](https://www.steinberg.net/en/company/dev
 Supported OS:
 
 - Microsoft Windows 7-10
-- Apple OSX 10.7-10.13
+- Apple OSX 10.9-10.13
 - Apple iOS 8-9
 - Linux (Beta version)
 
@@ -107,38 +110,81 @@ Some more features implemented specifically for developers include:
 ---
 <div id='500'/>
 
-## How to build
+## How to build VST3
 
 ### Get the source code from GitHub
 <pre>git clone --recursive https://github.com/steinbergmedia/vst3sdk.git
 </pre>
 
-### Build the examples on Linux
+### Adding VST2 version
+The VST2 SDK is not part anymore of the VST3 SDK, you have to use an older version of the SDK and copy the VST2_SDK folder into the VST_SDK folder.
+In order to build a VST2 version of the Plug-in and a VST3 at the same time, you need to copy the VST2 folder into the VST3 folder, simply run the following commands:
+- for macOS:
 <pre>
-mkdir build
-cd build
-cmake ../vst3sdk
-make  (or alternatively cmake --build .)
+cd TheFolderWhereYouDownloadTheSDK
+./copy_vst2_to_vst3_sdk.sh
+</pre>
+- for Windows:
+<pre>
+cd TheFolderWhereYouDownloadTheSDK
+copy_vst2_to_vst3_sdk.bat
+</pre>
+
+### Build the examples on Linux
+- Create a folder for the build and move to this folder (using cd):
+<pre>
+    mkdir build
+    cd build
+</pre>
+- Generate the Solution/Projects: provide the path of the Project where CMakeLists.txt is located:
+<pre>
+    cmake ../vst3sdk
+</pre>
+- Now you can build the Plug-in:
+<pre>
+    make 
+ (or alternatively for example for release)
+    cmake --build . --config Release
 </pre>
 
 ### Build the examples on macOS
+- Create a folder for the build and move to this folder (using cd):
 <pre>
-mkdir build
-cd build
-cmake -GXcode ../vst3sdk
-xcodebuild  (or alternatively cmake --build .)
+    mkdir build
+    cd build
+</pre>
+- Generate the Solution/Projects: provide the path of the Project where CMakeLists.txt is located:
+<pre>
+  For XCode:
+    cmake -GXcode ../vst3sdk
+  Without XCode (here debug variant):
+    cmake -DCMAKE_BUILD_TYPE=Debug ../
+</pre>
+- Now you can build the Plug-in (you can use XCode too):
+<pre>
+    xcodebuild 
+ (or alternatively for example for release)
+    cmake --build . --config Release
 </pre>
 
 ### Build the examples on Windows
+- Create a folder for the build and move to this folder (using cd):
 <pre>
-mkdir build
-cd build
-cmake.exe -G"Visual Studio 15 2017 Win64" ../vst3sdk
-msbuild.exe vstsdk.sln   (or alternatively cmake --build .)
+    mkdir build
+    cd build
+</pre>
+- Generate the Solution/Projects: provide the path of the Project where CMakeLists.txt is located:
+<pre>
+    cmake.exe -G"Visual Studio 15 2017 Win64" ../vst3sdk
+</pre>
+- Now you can build the Plug-in (you can use Visual Studio too):
+<pre>
+    msbuild.exe vstsdk.sln
+  (or alternatively for example for release)
+    cmake --build . --config Release
 </pre>
 
 ### Build using cmake-gui
-<pre>
 * start the cmake-gui Application
 * "Browse Source...": select the folder VST3_SDK
 * "Browse Build...": select a folder where the outputs (projects/...) will be created. Typically a folder named "build"
@@ -146,8 +192,8 @@ msbuild.exe vstsdk.sln   (or alternatively cmake --build .)
 * Press "Configure"
 * Press "Generate" and the project will be created
 
-</pre>
 ---
+<div id='600'/>
 
 ## License & Usage guidelines
 More details are found at [www.steinberg.net/sdklicenses_vst3](http://www.steinberg.net/sdklicenses_vst3)

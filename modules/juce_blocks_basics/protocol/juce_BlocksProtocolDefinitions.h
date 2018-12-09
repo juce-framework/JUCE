@@ -153,6 +153,7 @@ struct BlockSerialNumber
     bool hasPrefix (const char* prefix) const noexcept  { return memcmp (serial, prefix, 3) == 0; }
 };
 
+//==============================================================================
 /** Structure for the version number
 
     @tags{Blocks}
@@ -161,8 +162,15 @@ struct VersionNumber
 {
     uint8 version[21] = {};
     uint8 length = 0;
+
+    juce::String asString() const
+    {
+        return juce::String (reinterpret_cast<const char*> (version),
+                             std::min (sizeof (version), static_cast<size_t> (length)));
+    }
 };
 
+//==============================================================================
 /** Structure for the block name
 
     @tags{Blocks}
@@ -171,8 +179,17 @@ struct BlockName
 {
     uint8 name[33] = {};
     uint8 length = 0;
+
+    bool isValid() const { return length > 0; }
+
+    juce::String asString() const
+    {
+        return juce::String (reinterpret_cast<const char*> (name),
+                             std::min (sizeof (name), static_cast<size_t> (length)));
+    }
 };
 
+//==============================================================================
 /** Structure for the device status
 
     @tags{Blocks}
@@ -185,6 +202,7 @@ struct DeviceStatus
     BatteryCharging batteryCharging;
 };
 
+//==============================================================================
 /** Structure for the device connection
 
     @tags{Blocks}
@@ -195,6 +213,7 @@ struct DeviceConnection
     ConnectorPort port1, port2;
 };
 
+//==============================================================================
 /** Structure for the device version
 
     @tags{Blocks}
@@ -205,6 +224,7 @@ struct DeviceVersion
     VersionNumber version;
 };
 
+//==============================================================================
 /** Structure used for the device name
 
     @tags{Blocks}

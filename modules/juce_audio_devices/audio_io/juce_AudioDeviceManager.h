@@ -470,7 +470,7 @@ private:
     std::unique_ptr<AudioIODevice> currentAudioDevice;
     Array<AudioIODeviceCallback*> callbacks;
     int numInputChansNeeded = 0, numOutputChansNeeded = 2;
-    String currentDeviceType;
+    String preferredDeviceName, currentDeviceType;
     BigInteger inputChannels, outputChannels;
     std::unique_ptr<XmlElement> lastExplicitSettings;
     mutable bool listNeedsScanning = true;

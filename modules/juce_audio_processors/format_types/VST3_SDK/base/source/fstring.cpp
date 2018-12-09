@@ -13,24 +13,24 @@
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
-//
-//   * Redistributions of source code must retain the above copyright notice,
+// 
+//   * Redistributions of source code must retain the above copyright notice, 
 //     this list of conditions and the following disclaimer.
 //   * Redistributions in binary form must reproduce the above copyright notice,
-//     this list of conditions and the following disclaimer in the documentation
+//     this list of conditions and the following disclaimer in the documentation 
 //     and/or other materials provided with the distribution.
 //   * Neither the name of the Steinberg Media Technologies nor the names of its
-//     contributors may be used to endorse or promote products derived from this
+//     contributors may be used to endorse or promote products derived from this 
 //     software without specific prior written permission.
-//
+// 
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-// IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
-// INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-// LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+// IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+// INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
+// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF 
+// LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE 
 // OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE  OF THIS SOFTWARE, EVEN IF ADVISED
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
@@ -340,7 +340,7 @@ static inline Steinberg::int32 strnicmp16 (const Steinberg::char16* str1, const 
 	{
 		case kCFCompareEqualTo:	return 0;
 		case kCFCompareLessThan: return -1;
-		case kCFCompareGreaterThan:
+		case kCFCompareGreaterThan: 
 		default: return 1;
 	};
 }
@@ -357,7 +357,7 @@ static inline Steinberg::int32 stricmp16 (const Steinberg::char16* str1, CFIndex
 	{
 		case kCFCompareEqualTo:	return 0;
 		case kCFCompareLessThan: return -1;
-		case kCFCompareGreaterThan:
+		case kCFCompareGreaterThan: 
 		default: return 1;
 	};
 }
@@ -419,11 +419,11 @@ static inline Steinberg::int32 sprintf16 (Steinberg::char16* str, const Steinber
 #endif
 
 /*
-UTF-8                EF BB BF
-UTF-16 Big Endian    FE FF
-UTF-16 Little Endian FF FE
-UTF-32 Big Endian    00 00 FE FF
-UTF-32 Little Endian FF FE 00 00
+UTF-8                EF BB BF 
+UTF-16 Big Endian    FE FF 
+UTF-16 Little Endian FF FE 
+UTF-32 Big Endian    00 00 FE FF 
+UTF-32 Little Endian FF FE 00 00 
 */
 
 namespace Steinberg {
@@ -440,7 +440,7 @@ static inline bool isCaseSensitive (ConstString::CompareMode mode)
 ConstString::ConstString (const char8* str, int32 length)
 : buffer8 ((char8*)str)
 , len (length < 0 ? (str ? static_cast<uint32> (strlen (str)) : 0) : length)
-, isWide (0)
+, isWide (0) 
 {
 }
 
@@ -448,7 +448,7 @@ ConstString::ConstString (const char8* str, int32 length)
 ConstString::ConstString (const char16* str, int32 length)
 : buffer16 ((char16*)str)
 , len (length < 0 ? (str ? strlen16 (str) : 0) : length)
-, isWide (1)
+, isWide (1) 
 {
 }
 
@@ -471,7 +471,7 @@ ConstString::ConstString (const ConstString& str, int32 offset, int32 length)
 ConstString::ConstString (const FVariant& var)
 : buffer (0)
 , len (0)
-, isWide (0)
+, isWide (0) 
 {
 	switch (var.getType ())
 	{
@@ -493,7 +493,7 @@ ConstString::ConstString (const FVariant& var)
 ConstString::ConstString ()
 : buffer (0)
 , len (0)
-, isWide (0)
+, isWide (0) 
 {
 }
 
@@ -589,7 +589,7 @@ int32 ConstString::copyTo16 (char16* str, uint32 idx, int32 n) const
 			return 0;
 		return tmp.copyTo16 (str, idx, n);
 	}
-
+	
 	if (isEmpty () || idx >= len || !buffer16)
 	{
 		str[0] = 0;
@@ -598,7 +598,7 @@ int32 ConstString::copyTo16 (char16* str, uint32 idx, int32 n) const
 
 	if ((idx + n > len) || n < 0)
 		n = len - idx;
-
+	
 	memcpy (str, &(buffer16[idx]), n * sizeof (char16));
 	str[n] = 0;
 	return n;
@@ -619,7 +619,7 @@ void ConstString::copyTo (IStringResult* result) const
 {
 	if (isWideString () == false)
 	{
-		result->setText (text8 ());
+		result->setText (text8 ());	
 	}
 	else
 	{
@@ -1422,7 +1422,7 @@ bool ConstString::scanUInt32 (uint32& value, uint32 offset, bool scanToEnd) cons
 
 //-----------------------------------------------------------------------------
 bool ConstString::scanInt64_8 (const char8* text, int64& value, bool scanToEnd)
-{
+{	
 	while (text && text[0])
 	{
 		if (sscanf (text, "%" FORMAT_INT64A, &value) == 1)
@@ -2021,7 +2021,7 @@ bool ConstString::isNormalized (UnicodeNormalization n)
 	uint32 normCharCount = static_cast<uint32> (FoldString (MAP_PRECOMPOSED, buffer16, len, 0, 0));
 	return (normCharCount == len);
 #else
-	return false;
+	return false; 
 #endif
 
 #elif SMTG_OS_MACOS
@@ -2123,7 +2123,7 @@ String& String::operator= (String&& str)
 {
 	SMTG_ASSERT (buffer == 0 || buffer != str.buffer);
 	tryFreeBuffer ();
-
+	
 	isWide = str.isWide;
 	buffer = str.buffer;
 	len = str.len;
@@ -2196,7 +2196,7 @@ bool String::checkToMultiByte (uint32 destCodePage) const
 		if (buffer16[i] > 127)
 			++debugNonASCII;
 	}
-
+	
 	String* backUp = nullptr;
 	if (debugNonASCII > 0)
 		backUp = NEW String (*this);
@@ -2210,7 +2210,7 @@ bool String::checkToMultiByte (uint32 destCodePage) const
 	{
 		String temp (*this);
 		temp.toWideString (destCodePage);
-
+		
 		if (temp != *backUp)
 		{
 			backUp->toMultiByte (kCP_Utf8);
@@ -2387,7 +2387,7 @@ bool String::resize (uint32 newLength, bool wide, bool fill)
 		{
 			if (isWide)
 			{
-				char16 c = ' ';
+				char16 c = ' ';	
 				for (uint32 i = len; i < newLength; i++)
 					buffer16 [i] = c;
 			}
@@ -2422,7 +2422,7 @@ bool String::setChar8 (uint32 index, char8 c)
 			len = index + 1;
 		}
 	}
-
+	
 	if (index < len && buffer)
 	{
 		if (isWide)
@@ -3160,7 +3160,7 @@ bool String::trim (String::CharGroup group)
 			else
 				newLength = performTrim<char8> (buffer8, len, isalpha, false);
 			break;
-
+            
         default: // Undefined enum value
             return false;
 	}
@@ -3223,7 +3223,7 @@ void String::removeChars (CharGroup group)
 			else
 				newLength = performRemove<char8> (buffer8, len, isalpha, false);
 			break;
-
+            
         default: // Undefined enum value
             return;
 	}
@@ -3322,7 +3322,7 @@ String& String::printf (const char8* format, ...)
 
 	va_list marker;
 	va_start (marker, format);
-
+	
 	vsnprintf (string, kPrintfBufferSize-1, format, marker);
 	return assign (string);
 }
@@ -3335,7 +3335,7 @@ String& String::printf (const char16* format, ...)
 
 	va_list marker;
 	va_start (marker, format);
-
+	
 	vsnwprintf (string, kPrintfBufferSize-1, format, marker);
 	return assign (string);
 }
@@ -3958,7 +3958,7 @@ void PLUGIN_API StringObject::setText (const char8* text)
 
 //-----------------------------------------------------------------------------
 void PLUGIN_API StringObject::setText8 (const char8* text)
-{
+{	
 	assign (text);
 }
 

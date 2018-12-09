@@ -9,7 +9,7 @@
 //-----------------------------------------------------------------------------
 // This file is part of a Steinberg SDK. It is subject to the license terms
 // in the LICENSE file found in the top-level directory of this distribution
-// and at www.steinberg.net/sdklicenses.
+// and at www.steinberg.net/sdklicenses. 
 // No part of the SDK, including this file, may be copied, modified, propagated,
 // or distributed except according to the terms contained in the LICENSE file.
 //-----------------------------------------------------------------------------
@@ -31,6 +31,7 @@ namespace Vst {
 \ingroup vstIHost vst300
 - [host imp]
 - [released: 3.0.0]
+- [mandatory]
 
 An attribute list associates values with a key (id: some predefined keys could be found in \ref presetAttributes). */
 //------------------------------------------------------------------------
@@ -75,6 +76,7 @@ DECLARE_CLASS_IID (IAttributeList, 0x1E5F0AEB, 0xCC7F4533, 0xA2544011, 0x38AD5EE
 - [host imp]
 - [extends IBStream]
 - [released: 3.6.0]
+- [optional]
 
 \code
 ...
@@ -116,8 +118,8 @@ tresult PLUGIN_API MyPlugin::setState (IBStream* state)
 	return kResultTrue;
 }
 \endcode
-Interface to access preset meta information from stream, used for example in setState in order to inform the plug-in about
-the current context in which this preset loading occurs (Project context or Preset load (see \ref StateType))
+Interface to access preset meta information from stream, used for example in setState in order to inform the plug-in about 
+the current context in which this preset loading occurs (Project context or Preset load (see \ref StateType)) 
 or used to get the full file path of the loaded preset (if available). */
 //------------------------------------------------------------------------
 class IStreamAttributes: public FUnknown
