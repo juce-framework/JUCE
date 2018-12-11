@@ -7,7 +7,8 @@
 //==============================================================================
 RegionSequenceView::RegionSequenceView (ARASampleProjectAudioProcessorEditor* editor, ARARegionSequence* sequence)
     : editorComponent (editor),
-      regionSequence (sequence)
+      regionSequence (sequence),
+      trackHeaderView (*this)
 {
     editorComponent->getARAEditorView()->addListener (this);
     onNewSelection (editorComponent->getARAEditorView()->getViewSelection());
@@ -60,30 +61,9 @@ void RegionSequenceView::getTimeRange (double& startTime, double& endTime) const
 }
 
 //==============================================================================
-void RegionSequenceView::paint (Graphics& g)
+Component& RegionSequenceView::getTrackHeaderView()
 {
-    if (regionSequence == nullptr)
-        return;
-
-    Colour trackColour;
-    if (auto& colour = regionSequence->getColor())
-        trackColour = Colour::fromFloatRGBA (colour->r, colour->g, colour->b, 1.0f);
-
-    // draw region sequence header
-    Rectangle<int> headerRect (0, 0, kTrackHeaderWidth, getHeight());
-    g.setColour (trackColour);
-    g.fillRect (headerRect);
-
-    // draw selection state as a yellow border around the header
-    g.setColour (isSelected ? Colours::yellow : Colours::black);
-    g.drawRect (headerRect);
-
-    if (auto& name = regionSequence->getName())
-    {
-        g.setColour (trackColour.contrasting (1.0f));
-        g.setFont (Font (12.0f));
-        g.drawText (String (name), headerRect, Justification::centredLeft);
-    }
+    return trackHeaderView;
 }
 
 void RegionSequenceView::resized()
@@ -104,7 +84,7 @@ void RegionSequenceView::resized()
         double normalizedWidthTime = (regionViewEndTime - regionViewStartTime) / viewWidthTime;
 
         auto regionViewBounds = getLocalBounds();
-        regionViewBounds.setX (kTrackHeaderWidth + (int) (regionViewBounds.getWidth() * normalizedStartTime + 0.5));
+        regionViewBounds.setX ((int) (regionViewBounds.getWidth() * normalizedStartTime + 0.5));
         regionViewBounds.setWidth ((int) (regionViewBounds.getWidth() * normalizedWidthTime + 0.5));
         regionView->setBounds (regionViewBounds);
     }
@@ -163,4 +143,36 @@ void RegionSequenceView::willDestroyRegionSequence (ARARegionSequence* sequence)
     detachFromRegionSequence();
 
     editorComponent->setDirty();
+}
+
+//==============================================================================
+RegionSequenceView::TrackHeaderView::TrackHeaderView(RegionSequenceView& owner)
+: owner(owner)
+{
+}
+
+void RegionSequenceView::TrackHeaderView::paint(juce::Graphics& g)
+{
+    if (owner.regionSequence == nullptr)
+        return;
+
+    Colour trackColour;
+    if (auto& colour = owner.regionSequence->getColor())
+        trackColour = Colour::fromFloatRGBA (colour->r, colour->g, colour->b, 1.0f);
+
+    // draw region sequence header
+    Rectangle<int> headerRect (0, 0, kTrackHeaderWidth, getHeight());
+    g.setColour (trackColour);
+    g.fillRect (headerRect);
+
+    // draw selection state as a yellow border around the header
+    g.setColour (owner.isSelected ? Colours::yellow : Colours::black);
+    g.drawRect (headerRect);
+
+    if (auto& name = owner.regionSequence->getName())
+    {
+        g.setColour (trackColour.contrasting (1.0f));
+        g.setFont (Font (12.0f));
+        g.drawText (String (name), headerRect, Justification::centredLeft);
+    }
 }

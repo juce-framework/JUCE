@@ -13,7 +13,8 @@
 class ARASampleProjectAudioProcessorEditor  : public AudioProcessorEditor,
                                               public AudioProcessorEditorARAExtension,
                                               private ARAEditorView::Listener,
-                                              private ARADocument::Listener
+                                              private ARADocument::Listener,
+                                              private ScrollBar::Listener
 {
 public:
     ARASampleProjectAudioProcessorEditor (ARASampleProjectAudioProcessor&);
@@ -29,6 +30,9 @@ public:
     void paint (Graphics&) override;
     void resized() override;
 
+    // ScrollBar::Listener overrides
+    void scrollBarMoved (ScrollBar *scrollBarThatHasMoved, double newRangeStart) override;
+
     // ARAEditorView::Listener overrides
     void onNewSelection (const ARA::PlugIn::ViewSelection& currentSelection) override;
     void onHideRegionSequences (std::vector<ARARegionSequence*> const& regionSequences) override;
@@ -38,12 +42,11 @@ public:
     void didReorderRegionSequencesInDocument (ARADocument* document) override;
 
 public:
-    static constexpr double kPixelsPerSecond = 100.0;
-    static constexpr double kPadSeconds = 1.0;
     static constexpr int kMinWidth = 500;
     static constexpr int kWidth = 1000;
     static constexpr int kMinHeight = 1 * RegionSequenceView::kHeight;
     static constexpr int kHeight = 5 * RegionSequenceView::kHeight;
+    static constexpr int kStatusBarHeight = 20;
 
 private:
     void rebuildView();
@@ -52,14 +55,17 @@ private:
 private:
 
     // we'll be displaying all region sequences in the document in a scrollable view
-    Viewport regionSequenceViewPort;
-    Component regionSequenceListView;
+    Viewport regionSequencesViewPort, tracksViewPort;
+    Component regionSequenceListView, tracksView;
 
     OwnedArray<RegionSequenceView> regionSequenceViews;
+    // custom ScrollBar neededed to have ScrollBar for internal Viewport
+    ScrollBar horizontalScrollBar;
 
     bool isViewDirty = false;
     double startTime = 0.0;
     double endTime = 0.0;
+    double kPixelsPerSecond = 100;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARASampleProjectAudioProcessorEditor)

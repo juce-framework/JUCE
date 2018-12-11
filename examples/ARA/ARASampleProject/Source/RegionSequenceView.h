@@ -21,8 +21,9 @@ public:
 
     void getTimeRange (double& startTime, double& endTime) const;
 
-    void paint (Graphics&) override;
     void resized() override;
+
+    Component& getTrackHeaderView();
 
     // ARAEditorView::Listener overrides
     void onNewSelection (const ARA::PlugIn::ViewSelection& currentSelection) override;
@@ -43,6 +44,17 @@ public:
 private:
     ARASampleProjectAudioProcessorEditor* editorComponent;
     ARARegionSequence* regionSequence;
+
+    class TrackHeaderView : public Component
+    {
+    public:
+        TrackHeaderView (RegionSequenceView& owner);
+        void paint (Graphics&) override;
+    private:
+        RegionSequenceView& owner;
+    };
+
+    TrackHeaderView trackHeaderView;
     OwnedArray<PlaybackRegionView> playbackRegionViews;
     bool isSelected = false;
 

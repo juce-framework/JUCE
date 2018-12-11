@@ -4,12 +4,21 @@
 //==============================================================================
 ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARASampleProjectAudioProcessor& p)
     : AudioProcessorEditor (&p),
-      AudioProcessorEditorARAExtension (&p)
+      AudioProcessorEditorARAExtension (&p),
+      horizontalScrollBar (false)
 {
-    regionSequenceViewPort.setScrollBarsShown (true, true);
-    regionSequenceListView.setBounds (0, 0, kWidth - regionSequenceViewPort.getScrollBarThickness(), kHeight);
-    regionSequenceViewPort.setViewedComponent (&regionSequenceListView, false);
-    addAndMakeVisible (regionSequenceViewPort);
+    tracksViewPort.setScrollBarsShown (false, false, false, false);
+    regionSequencesViewPort.setScrollBarsShown (true, true, false, false);
+    regionSequenceListView.setBounds (0, 0, kWidth, kHeight);
+    tracksViewPort.setViewedComponent (&regionSequenceListView, false);
+    tracksView.setBounds (0, 0, kWidth, kHeight);
+    tracksView.addAndMakeVisible (tracksViewPort);
+
+    regionSequencesViewPort.setViewedComponent (&tracksView, false);
+    addAndMakeVisible (regionSequencesViewPort);
+    addAndMakeVisible (horizontalScrollBar);
+    horizontalScrollBar.setColour (ScrollBar::ColourIds::backgroundColourId, Colours::yellow);
+    horizontalScrollBar.addListener (this);
 
     setSize (kWidth, kHeight);
     setResizeLimits (kMinWidth, kMinHeight, 32768, 32768);
@@ -35,6 +44,7 @@ ARASampleProjectAudioProcessorEditor::~ARASampleProjectAudioProcessorEditor()
 
         getARAEditorView()->removeListener (this);
     }
+    horizontalScrollBar.removeListener (this);
 }
 
 //==============================================================================
@@ -47,6 +57,15 @@ void ARASampleProjectAudioProcessorEditor::paint (Graphics& g)
         g.setColour (Colours::white);
         g.setFont (20.0f);
         g.drawFittedText ("Non ARA Instance. Please re-open as ARA2!", getLocalBounds(), Justification::centred, 1);
+    }
+}
+
+void ARASampleProjectAudioProcessorEditor::scrollBarMoved (ScrollBar *scrollBarThatHasMoved, double newRangeStart)
+{
+    auto newRangeStartInt = roundToInt (newRangeStart);
+    if (scrollBarThatHasMoved == &horizontalScrollBar)
+    {
+        tracksViewPort.setViewPosition (newRangeStartInt, tracksViewPort.getViewPositionY());
     }
 }
 
@@ -72,23 +91,30 @@ void ARASampleProjectAudioProcessorEditor::resized()
         }
     }
 
-    startTime -= kPadSeconds;
-    endTime += kPadSeconds;
-
     // set new bounds for all region sequence views
-    int width = (int) ((endTime - startTime) * kPixelsPerSecond + 0.5) + RegionSequenceView::kTrackHeaderWidth;
+    int width = (int) ((endTime - startTime) * kPixelsPerSecond + 0.5);
     int y = 0;
     for (auto v : regionSequenceViews)
     {
-        v->setBounds (0, y, width, RegionSequenceView::kHeight);
+        // child of tracksView
+        v->getTrackHeaderView().setBounds (0, y, RegionSequenceView::kTrackHeaderWidth, RegionSequenceView::kHeight);
+        // child of regionSequenceListView
+        v->setBounds (0, y, width - regionSequencesViewPort.getScrollBarThickness(), RegionSequenceView::kHeight);
         y += RegionSequenceView::kHeight;
     }
 
-    // cache view pos and reset after resizing list view and viewport
-    auto currentViewPos = regionSequenceViewPort.getViewPosition ();
     regionSequenceListView.setBounds (0, 0, width, y);
-    regionSequenceViewPort.setBounds (0, 0, getWidth(), getHeight());
-    regionSequenceViewPort.setViewPosition (currentViewPos);
+    tracksView.setBounds (0, 0, getWidth() - tracksViewPort.getScrollBarThickness(), y);
+    tracksViewPort.setBounds (RegionSequenceView::kTrackHeaderWidth, 0, getWidth() - RegionSequenceView::kTrackHeaderWidth, y);
+    regionSequencesViewPort.setBounds (0, 0, getWidth(), getHeight() - tracksViewPort.getScrollBarThickness() - kStatusBarHeight);
+
+    // cache view pos and reset after resizing list view and viewport
+    regionSequencesViewPort.setViewPosition (regionSequencesViewPort.getViewPosition());
+    tracksViewPort.setViewPosition (tracksViewPort.getViewPosition());
+
+    horizontalScrollBar.setRangeLimits (tracksViewPort.getHorizontalScrollBar().getRangeLimit());
+    horizontalScrollBar.setBounds (RegionSequenceView::kTrackHeaderWidth, regionSequencesViewPort.getBottom(), tracksViewPort.getWidth() - regionSequencesViewPort.getScrollBarThickness(), regionSequencesViewPort.getScrollBarThickness());
+    horizontalScrollBar.setCurrentRange (tracksViewPort.getHorizontalScrollBar().getCurrentRange());
 }
 
 void ARASampleProjectAudioProcessorEditor::rebuildView()
@@ -103,6 +129,7 @@ void ARASampleProjectAudioProcessorEditor::rebuildView()
         auto sequenceView = new RegionSequenceView (this, static_cast<ARARegionSequence*> (regionSequence));
         regionSequenceViews.add (sequenceView);
         regionSequenceListView.addAndMakeVisible (sequenceView);
+        tracksView.addAndMakeVisible (sequenceView->getTrackHeaderView());
     }
 
     resized();
