@@ -61,11 +61,14 @@ private:
     OwnedArray<RegionSequenceView> regionSequenceViews;
     // custom ScrollBar neededed to have ScrollBar for internal Viewport
     ScrollBar horizontalScrollBar;
+    TextButton zoomInButton, zoomOutButton;
 
     bool isViewDirty = false;
     double startTime = 0.0;
     double endTime = 0.0;
-    double kPixelsPerSecond = 100;
+    double pixelsPerSecond = 100.0;
+    double minPixelsPerSecond = 1.0;
+    double maxPixelsPerSecond = 250.0;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARASampleProjectAudioProcessorEditor)

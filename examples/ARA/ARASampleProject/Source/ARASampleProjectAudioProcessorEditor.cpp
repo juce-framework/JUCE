@@ -20,6 +20,21 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
     horizontalScrollBar.setColour (ScrollBar::ColourIds::backgroundColourId, Colours::yellow);
     horizontalScrollBar.addListener (this);
 
+    zoomInButton.setButtonText("+");
+    zoomOutButton.setButtonText("-");
+    zoomInButton.onClick = [this]
+    {
+        pixelsPerSecond = pixelsPerSecond * 2.0;
+        resized();
+    };
+    zoomOutButton.onClick = [this]
+    {
+        pixelsPerSecond =  pixelsPerSecond * 0.5;
+        resized();
+    };
+    addAndMakeVisible (zoomInButton);
+    addAndMakeVisible (zoomOutButton);
+
     setSize (kWidth, kHeight);
     setResizeLimits (kMinWidth, kMinHeight, 32768, 32768);
     setResizable (true, false);
@@ -91,8 +106,14 @@ void ARASampleProjectAudioProcessorEditor::resized()
         }
     }
 
+    // enforce zoom in/out limits
+    minPixelsPerSecond = (tracksView.getWidth()  - RegionSequenceView::kTrackHeaderWidth + regionSequencesViewPort.getScrollBarThickness()) / (endTime - startTime);
+    pixelsPerSecond =  jmax (minPixelsPerSecond, jmin (pixelsPerSecond, maxPixelsPerSecond));
+    zoomOutButton.setEnabled (pixelsPerSecond > minPixelsPerSecond);
+    zoomInButton.setEnabled (pixelsPerSecond < maxPixelsPerSecond);
+
     // set new bounds for all region sequence views
-    int width = (int) ((endTime - startTime) * kPixelsPerSecond + 0.5);
+    int width = (int) ((endTime - startTime) * pixelsPerSecond + 0.5);
     int y = 0;
     for (auto v : regionSequenceViews)
     {
@@ -115,6 +136,9 @@ void ARASampleProjectAudioProcessorEditor::resized()
     horizontalScrollBar.setRangeLimits (tracksViewPort.getHorizontalScrollBar().getRangeLimit());
     horizontalScrollBar.setBounds (RegionSequenceView::kTrackHeaderWidth, regionSequencesViewPort.getBottom(), tracksViewPort.getWidth() - regionSequencesViewPort.getScrollBarThickness(), regionSequencesViewPort.getScrollBarThickness());
     horizontalScrollBar.setCurrentRange (tracksViewPort.getHorizontalScrollBar().getCurrentRange());
+
+    zoomInButton.setBounds (getWidth() - kStatusBarHeight, getHeight() - kStatusBarHeight, kStatusBarHeight, kStatusBarHeight);
+    zoomOutButton.setBounds (zoomInButton.getBounds().translated (-kStatusBarHeight, 0));
 }
 
 void ARASampleProjectAudioProcessorEditor::rebuildView()
