@@ -28,11 +28,13 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
     zoomOutButton.setButtonText("-");
     zoomInButton.onClick = [this]
     {
+        storeRelativePosition();
         pixelsPerSecond = pixelsPerSecond * 2.0;
         resized();
     };
     zoomOutButton.onClick = [this]
     {
+        storeRelativePosition();
         pixelsPerSecond =  pixelsPerSecond * 0.5;
         resized();
     };
@@ -65,6 +67,11 @@ ARASampleProjectAudioProcessorEditor::~ARASampleProjectAudioProcessorEditor()
         getARAEditorView()->removeListener (this);
     }
     horizontalScrollBar.removeListener (this);
+}
+
+void ARASampleProjectAudioProcessorEditor::storeRelativePosition()
+{
+    pixelsUntilPlayhead = roundToInt (pixelsPerSecond * playheadPositionInSeconds - tracksViewPort.getViewArea().getX());
 }
 
 //==============================================================================
@@ -138,9 +145,12 @@ void ARASampleProjectAudioProcessorEditor::resized()
     regionSequencesViewPort.setBounds (0, 0, getWidth(), getHeight() - tracksViewPort.getScrollBarThickness() - kStatusBarHeight);
     playheadView.setBounds (regionSequenceListView.getBounds());
 
-    // cache view pos and reset after resizing list view and viewport
+    // keeps viewport position relative to playhead
+    const auto newPixelBasedPositionInSeconds = pixelsUntilPlayhead / pixelsPerSecond;
     regionSequencesViewPort.setViewPosition (regionSequencesViewPort.getViewPosition());
-    tracksViewPort.setViewPosition (tracksViewPort.getViewPosition());
+    auto relativeViewportPosition = tracksViewPort.getViewPosition();
+    relativeViewportPosition.setX (roundToInt ((playheadPositionInSeconds - newPixelBasedPositionInSeconds) * pixelsPerSecond));
+    tracksViewPort.setViewPosition (relativeViewportPosition);
 
     horizontalScrollBar.setRangeLimits (tracksViewPort.getHorizontalScrollBar().getRangeLimit());
     horizontalScrollBar.setBounds (RegionSequenceView::kTrackHeaderWidth, regionSequencesViewPort.getBottom(), tracksViewPort.getWidth() - regionSequencesViewPort.getScrollBarThickness(), regionSequencesViewPort.getScrollBarThickness());

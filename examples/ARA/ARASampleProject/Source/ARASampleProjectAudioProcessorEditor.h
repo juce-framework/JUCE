@@ -61,6 +61,7 @@ public:
 private:
     void rebuildView();
     void clearView();
+    void storeRelativePosition();
 
 private:
     // simple utility class to show playhead position
@@ -91,6 +92,7 @@ private:
     double minPixelsPerSecond = 1.0;
     double maxPixelsPerSecond = 2000.0;
     double playheadPositionInSeconds = 0.0;
+    double pixelsUntilPlayhead = 0.0;
 
     ARASampleProjectAudioProcessor& araSampleProcessor;
     //==============================================================================
