@@ -41,6 +41,9 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
     addAndMakeVisible (zoomInButton);
     addAndMakeVisible (zoomOutButton);
 
+    followPlayheadToggleButton.setButtonText ("Viewport follows playhead");
+    addAndMakeVisible (followPlayheadToggleButton);
+
     setSize (kWidth, kHeight);
     setResizeLimits (kMinWidth, kMinHeight, 32768, 32768);
     setResizable (true, false);
@@ -158,6 +161,7 @@ void ARASampleProjectAudioProcessorEditor::resized()
 
     zoomInButton.setBounds (getWidth() - kStatusBarHeight, getHeight() - kStatusBarHeight, kStatusBarHeight, kStatusBarHeight);
     zoomOutButton.setBounds (zoomInButton.getBounds().translated (-kStatusBarHeight, 0));
+    followPlayheadToggleButton.setBounds (0, zoomInButton.getY(), 200, kStatusBarHeight);
 }
 
 void ARASampleProjectAudioProcessorEditor::rebuildView()
@@ -238,6 +242,13 @@ void ARASampleProjectAudioProcessorEditor::timerCallback()
     if (position.isPlaying)
     {
         playheadPositionInSeconds = position.timeInSeconds;
+        if (followPlayheadToggleButton.getToggleState())
+        {
+            double visibleStart, visibleEnd;
+            getVisibleTimeRange (visibleStart, visibleEnd);
+            if (playheadPositionInSeconds < visibleStart || playheadPositionInSeconds > visibleEnd)
+                tracksViewPort.setViewPosition(tracksViewPort.getViewPosition().withX (playheadPositionInSeconds * pixelsPerSecond));
+        };
         playheadView.repaint();
     }
 }

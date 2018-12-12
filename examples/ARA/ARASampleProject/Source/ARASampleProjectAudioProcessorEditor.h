@@ -48,7 +48,7 @@ public:
     void didEndEditing (ARADocument* document) override;
     void didReorderRegionSequencesInDocument (ARADocument* document) override;
 
-    const double getPlayheadPositionInSeconds() { return playheadPositionInSeconds; }
+    const double getPlayheadPositionInSeconds() { return jmax (0.0, playheadPositionInSeconds); }
     const double getPixelsPerSeconds() { return pixelsPerSecond; }
 
 public:
@@ -84,6 +84,7 @@ private:
     // custom ScrollBar neededed to have ScrollBar for internal Viewport
     ScrollBar horizontalScrollBar;
     TextButton zoomInButton, zoomOutButton;
+    ToggleButton followPlayheadToggleButton;
 
     bool isViewDirty = false;
     double startTime = 0.0;
