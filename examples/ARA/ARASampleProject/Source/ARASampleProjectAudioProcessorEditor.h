@@ -20,8 +20,11 @@ public:
     ARASampleProjectAudioProcessorEditor (ARASampleProjectAudioProcessor&);
     ~ARASampleProjectAudioProcessorEditor();
 
-    // total visible time range
+    // total time range
     void getTimeRange (double& start, double& end) const { start = startTime; end = endTime; }
+
+    // total visible time range
+    void getVisibleTimeRange (double& start, double& end);
 
     // flag that our view needs to be rebuilt
     void setDirty() { isViewDirty = true; }
@@ -68,7 +71,7 @@ private:
     double endTime = 0.0;
     double pixelsPerSecond = 100.0;
     double minPixelsPerSecond = 1.0;
-    double maxPixelsPerSecond = 250.0;
+    double maxPixelsPerSecond = 2000.0;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARASampleProjectAudioProcessorEditor)

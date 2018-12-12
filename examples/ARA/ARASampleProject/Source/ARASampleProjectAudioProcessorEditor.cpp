@@ -86,6 +86,9 @@ void ARASampleProjectAudioProcessorEditor::scrollBarMoved (ScrollBar *scrollBarT
 
 void ARASampleProjectAudioProcessorEditor::resized()
 {
+    // max zoom 1px : 1sample (this is naive assumption as audio can be in different samplerate)
+    maxPixelsPerSecond = jmax (processor.getSampleRate(), 300.0);
+
     // calculate visible time range
     if (regionSequenceViews.isEmpty())
     {
@@ -156,6 +159,9 @@ void ARASampleProjectAudioProcessorEditor::rebuildView()
         tracksView.addAndMakeVisible (sequenceView->getTrackHeaderView());
     }
 
+    // for demo purposes each rebuild resets zoom to show all document
+    pixelsPerSecond = (endTime - startTime) / getWidth();
+
     resized();
 }
 
@@ -191,4 +197,10 @@ void ARASampleProjectAudioProcessorEditor::didReorderRegionSequencesInDocument (
     jassert (document == getARADocumentController()->getDocument());
 
     setDirty();
+}
+
+void ARASampleProjectAudioProcessorEditor::getVisibleTimeRange(double &start, double &end)
+{
+    start = tracksViewPort.getViewArea().getX() / pixelsPerSecond;
+    end = tracksViewPort.getViewArea().getRight() / pixelsPerSecond;
 }
