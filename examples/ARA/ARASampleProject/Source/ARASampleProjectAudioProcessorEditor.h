@@ -48,7 +48,7 @@ public:
     void didEndEditing (ARADocument* document) override;
     void didReorderRegionSequencesInDocument (ARADocument* document) override;
 
-    const double getPlayheadPositionInSeconds() { return playheadPositionInSamples; }
+    const double getPlayheadPositionInSeconds() { return playheadPositionInSeconds; }
     const double getPixelsPerSeconds() { return pixelsPerSecond; }
 
 public:
@@ -90,7 +90,7 @@ private:
     double pixelsPerSecond = 100.0;
     double minPixelsPerSecond = 1.0;
     double maxPixelsPerSecond = 2000.0;
-    double playheadPositionInSamples = 0.0;
+    double playheadPositionInSeconds = 0.0;
 
     ARASampleProjectAudioProcessor& araSampleProcessor;
     //==============================================================================

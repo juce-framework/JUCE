@@ -227,7 +227,7 @@ void ARASampleProjectAudioProcessorEditor::timerCallback()
     auto position = araSampleProcessor.getLastKnownPositionInfo();
     if (position.isPlaying)
     {
-        playheadPositionInSamples = position.timeInSeconds;
+        playheadPositionInSeconds = position.timeInSeconds;
         playheadView.repaint();
     }
 }
