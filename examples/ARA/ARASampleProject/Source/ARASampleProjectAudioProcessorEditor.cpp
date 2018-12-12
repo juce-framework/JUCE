@@ -5,11 +5,14 @@
 ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARASampleProjectAudioProcessor& p)
     : AudioProcessorEditor (&p),
       AudioProcessorEditorARAExtension (&p),
-      horizontalScrollBar (false)
+      playheadView (*this),
+      horizontalScrollBar (false),
+      araSampleProcessor (p)
 {
     tracksViewPort.setScrollBarsShown (false, false, false, false);
     regionSequencesViewPort.setScrollBarsShown (true, true, false, false);
     regionSequenceListView.setBounds (0, 0, kWidth, kHeight);
+    regionSequenceListView.addAndMakeVisible (playheadView);
     tracksViewPort.setViewedComponent (&regionSequenceListView, false);
     tracksView.setBounds (0, 0, kWidth, kHeight);
     tracksView.addAndMakeVisible (tracksViewPort);
@@ -46,6 +49,7 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
         static_cast<ARADocument*> (getARADocumentController()->getDocument())->addListener (this);
 
         rebuildView();
+        startTimerHz (60);
     }
 }
 
@@ -131,6 +135,7 @@ void ARASampleProjectAudioProcessorEditor::resized()
     tracksView.setBounds (0, 0, getWidth() - tracksViewPort.getScrollBarThickness(), y);
     tracksViewPort.setBounds (RegionSequenceView::kTrackHeaderWidth, 0, getWidth() - RegionSequenceView::kTrackHeaderWidth, y);
     regionSequencesViewPort.setBounds (0, 0, getWidth(), getHeight() - tracksViewPort.getScrollBarThickness() - kStatusBarHeight);
+    playheadView.setBounds (regionSequenceListView.getBounds());
 
     // cache view pos and reset after resizing list view and viewport
     regionSequencesViewPort.setViewPosition (regionSequencesViewPort.getViewPosition());
@@ -203,4 +208,25 @@ void ARASampleProjectAudioProcessorEditor::getVisibleTimeRange(double &start, do
 {
     start = tracksViewPort.getViewArea().getX() / pixelsPerSecond;
     end = tracksViewPort.getViewArea().getRight() / pixelsPerSecond;
+}
+
+ARASampleProjectAudioProcessorEditor::PlayheadView::PlayheadView(ARASampleProjectAudioProcessorEditor &owner)
+    : owner(owner)
+{}
+
+void ARASampleProjectAudioProcessorEditor::PlayheadView::paint(juce::Graphics &g)
+{
+    int playheadX = roundToInt (owner.getPlayheadPositionInSeconds() * owner.getPixelsPerSeconds());
+    g.setColour (findColour (ScrollBar::ColourIds::thumbColourId));
+    g.fillRect(playheadX - kPlayheadWidth, 0, kPlayheadWidth, getHeight());
+}
+
+void ARASampleProjectAudioProcessorEditor::timerCallback()
+{
+    auto position = araSampleProcessor.getLastKnownPositionInfo();
+    if (position.isPlaying)
+    {
+        playheadPositionInSamples = position.timeInSeconds;
+        playheadView.repaint();
+    }
 }

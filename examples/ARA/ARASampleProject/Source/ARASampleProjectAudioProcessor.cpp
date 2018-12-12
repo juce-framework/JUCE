@@ -129,11 +129,10 @@ void ARASampleProjectAudioProcessor::processBlock (AudioBuffer<float>& buffer, M
     bool isPlaying = false;
     if (getPlayHead() != nullptr)
     {
-        AudioPlayHead::CurrentPositionInfo positionInfo;
-        if (getPlayHead()->getCurrentPosition (positionInfo))
+        if (getPlayHead()->getCurrentPosition (lastPositionInfo))
         {
-            timeInSamples = positionInfo.timeInSamples;
-            isPlaying = positionInfo.isPlaying;
+            timeInSamples = lastPositionInfo.timeInSamples;
+            isPlaying = lastPositionInfo.isPlaying;
         }
     }
 
