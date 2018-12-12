@@ -13,6 +13,7 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
     regionSequencesViewPort.setScrollBarsShown (true, true, false, false);
     regionSequenceListView.setBounds (0, 0, kWidth, kHeight);
     regionSequenceListView.addAndMakeVisible (playheadView);
+    playheadView.setAlwaysOnTop (true);
     tracksViewPort.setViewedComponent (&regionSequenceListView, false);
     tracksView.setBounds (0, 0, kWidth, kHeight);
     tracksView.addAndMakeVisible (tracksViewPort);
