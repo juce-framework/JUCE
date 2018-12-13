@@ -38,22 +38,14 @@ void RegionSequenceView::detachFromRegionSequence()
 //==============================================================================
 void RegionSequenceView::getTimeRange (double& startTime, double& endTime) const
 {
-    if (playbackRegionViews.isEmpty())
+    if (regionSequence == nullptr)
     {
         startTime = 0.0;
         endTime = 0.0;
         return;
     }
 
-    startTime = std::numeric_limits<double>::max();
-    endTime = std::numeric_limits<double>::lowest();
-    for (auto regionView : playbackRegionViews)
-    {
-        double regionViewStartTime, regionViewEndTime;
-        regionView->getTimeRange (regionViewStartTime, regionViewEndTime);
-        startTime = jmin (startTime, regionViewStartTime);
-        endTime = jmax (endTime, regionViewEndTime);
-    }
+    regionSequence->getTimeRange(startTime, endTime, false);
 }
 
 //==============================================================================
