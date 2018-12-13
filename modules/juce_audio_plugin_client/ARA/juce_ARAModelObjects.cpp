@@ -49,7 +49,7 @@ void ARARegionSequence::getTimeRange (double& startTime, double& endTime, bool i
     }
 }
 
-double ARARegionSequence::getCommonSampleRate()
+double ARARegionSequence::getCommonSampleRate() const
 {
     double commonSampleRate = 0.0;
     for (auto playbackRegion : getPlaybackRegions())
