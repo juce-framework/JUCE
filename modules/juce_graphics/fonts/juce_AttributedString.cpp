@@ -45,7 +45,7 @@ namespace
             {
                 if (offset > 0 && position < att.range.getEnd())
                 {
-                    atts.insert (i + 1, att);
+                    atts.insert (i + 1, AttributedString::Attribute(att));
                     atts.getReference (i).range.setEnd (position);
                     atts.getReference (i + 1).range.setStart (position);
                 }
