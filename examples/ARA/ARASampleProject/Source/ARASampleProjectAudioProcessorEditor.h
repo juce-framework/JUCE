@@ -2,7 +2,8 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "ARASampleProjectAudioProcessor.h"
-#include "RegionSequenceView.h"
+
+class RegionSequenceView;
 
 //==============================================================================
 /**
@@ -51,13 +52,6 @@ public:
     const double getPlayheadPositionInSeconds() { return jmax (0.0, playheadPositionInSeconds); }
     const double getPixelsPerSeconds() { return pixelsPerSecond; }
 
-public:
-    static constexpr int kMinWidth = 500;
-    static constexpr int kWidth = 1000;
-    static constexpr int kMinHeight = 1 * RegionSequenceView::kHeight;
-    static constexpr int kHeight = 5 * RegionSequenceView::kHeight;
-    static constexpr int kStatusBarHeight = 20;
-
 private:
     void rebuildView();
     void clearView();
@@ -81,6 +75,7 @@ private:
     PlayheadView playheadView;
 
     OwnedArray<RegionSequenceView> regionSequenceViews;
+
     // custom ScrollBar neededed to have ScrollBar for internal Viewport
     ScrollBar horizontalScrollBar;
     TextButton zoomInButton, zoomOutButton;

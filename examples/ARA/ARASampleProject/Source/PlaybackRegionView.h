@@ -6,8 +6,8 @@
 //==============================================================================
 /**
     RegionSequenceView
-    JUCE component used to display ARA playback regions in a host document
-    along with their name, color, and selection state
+    JUCE component used to display ARA playback regions
+    along with their output waveform, name, color, and selection state
 */
 class PlaybackRegionView    : public Component,
                               private ChangeListener,

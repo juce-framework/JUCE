@@ -1,5 +1,14 @@
 #include "ARASampleProjectAudioProcessorEditor.h"
 #include "ARASampleProjectDocumentController.h"
+#include "RegionSequenceView.h"
+
+constexpr int kTrackHeaderWidth = 120;
+constexpr int kTrackHeight = 80;
+constexpr int kStatusBarHeight = 20;
+constexpr int kMinWidth = 500;
+constexpr int kWidth = 1000;
+constexpr int kMinHeight = 1 * kTrackHeight;
+constexpr int kHeight = 5 * kTrackHeight + kStatusBarHeight;
 
 //==============================================================================
 ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARASampleProjectAudioProcessor& p)
@@ -94,9 +103,7 @@ void ARASampleProjectAudioProcessorEditor::scrollBarMoved (ScrollBar *scrollBarT
 {
     auto newRangeStartInt = roundToInt (newRangeStart);
     if (scrollBarThatHasMoved == &horizontalScrollBar)
-    {
         tracksViewPort.setViewPosition (newRangeStartInt, tracksViewPort.getViewPositionY());
-    }
 }
 
 void ARASampleProjectAudioProcessorEditor::resized()
@@ -125,7 +132,7 @@ void ARASampleProjectAudioProcessorEditor::resized()
     }
 
     // enforce zoom in/out limits
-    minPixelsPerSecond = (tracksView.getWidth()  - RegionSequenceView::kTrackHeaderWidth + regionSequencesViewPort.getScrollBarThickness()) / (endTime - startTime);
+    minPixelsPerSecond = (tracksView.getWidth()  - kTrackHeaderWidth + regionSequencesViewPort.getScrollBarThickness()) / (endTime - startTime);
     pixelsPerSecond =  jmax (minPixelsPerSecond, jmin (pixelsPerSecond, maxPixelsPerSecond));
     zoomOutButton.setEnabled (pixelsPerSecond > minPixelsPerSecond);
     zoomInButton.setEnabled (pixelsPerSecond < maxPixelsPerSecond);
@@ -136,15 +143,15 @@ void ARASampleProjectAudioProcessorEditor::resized()
     for (auto v : regionSequenceViews)
     {
         // child of tracksView
-        v->getTrackHeaderView().setBounds (0, y, RegionSequenceView::kTrackHeaderWidth, RegionSequenceView::kHeight);
+        v->getTrackHeaderView().setBounds (0, y, kTrackHeaderWidth, kTrackHeight);
         // child of regionSequenceListView
-        v->setBounds (0, y, width - regionSequencesViewPort.getScrollBarThickness(), RegionSequenceView::kHeight);
-        y += RegionSequenceView::kHeight;
+        v->setBounds (0, y, width - regionSequencesViewPort.getScrollBarThickness(), kTrackHeight);
+        y += kTrackHeight;
     }
 
     regionSequenceListView.setBounds (0, 0, width, y);
     tracksView.setBounds (0, 0, getWidth() - tracksViewPort.getScrollBarThickness(), y);
-    tracksViewPort.setBounds (RegionSequenceView::kTrackHeaderWidth, 0, getWidth() - RegionSequenceView::kTrackHeaderWidth, y);
+    tracksViewPort.setBounds (kTrackHeaderWidth, 0, getWidth() - kTrackHeaderWidth, y);
     regionSequencesViewPort.setBounds (0, 0, getWidth(), getHeight() - tracksViewPort.getScrollBarThickness() - kStatusBarHeight);
     playheadView.setBounds (regionSequenceListView.getBounds());
 
@@ -156,7 +163,7 @@ void ARASampleProjectAudioProcessorEditor::resized()
     tracksViewPort.setViewPosition (relativeViewportPosition);
 
     horizontalScrollBar.setRangeLimits (tracksViewPort.getHorizontalScrollBar().getRangeLimit());
-    horizontalScrollBar.setBounds (RegionSequenceView::kTrackHeaderWidth, regionSequencesViewPort.getBottom(), tracksViewPort.getWidth() - regionSequencesViewPort.getScrollBarThickness(), regionSequencesViewPort.getScrollBarThickness());
+    horizontalScrollBar.setBounds (kTrackHeaderWidth, regionSequencesViewPort.getBottom(), tracksViewPort.getWidth() - regionSequencesViewPort.getScrollBarThickness(), regionSequencesViewPort.getScrollBarThickness());
     horizontalScrollBar.setCurrentRange (tracksViewPort.getHorizontalScrollBar().getCurrentRange());
 
     zoomInButton.setBounds (getWidth() - kStatusBarHeight, getHeight() - kStatusBarHeight, kStatusBarHeight, kStatusBarHeight);

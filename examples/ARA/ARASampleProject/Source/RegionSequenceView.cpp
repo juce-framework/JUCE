@@ -1,4 +1,5 @@
 #include "RegionSequenceView.h"
+#include "TrackHeaderView.h"
 #include "PlaybackRegionView.h"
 #include "ARASampleProjectPlaybackRenderer.h"
 #include "ARASampleProjectDocumentController.h"
@@ -8,11 +9,8 @@
 RegionSequenceView::RegionSequenceView (ARASampleProjectAudioProcessorEditor* editor, ARARegionSequence* sequence)
     : editorComponent (editor),
       regionSequence (sequence),
-      trackHeaderView (*this)
+      trackHeaderView (new TrackHeaderView (editor->getARAEditorView(), static_cast<ARARegionSequence*> (regionSequence)))
 {
-    editorComponent->getARAEditorView()->addListener (this);
-    onNewSelection (editorComponent->getARAEditorView()->getViewSelection());
-
     regionSequence->addListener (this);
 
     for (auto playbackRegion : regionSequence->getPlaybackRegions())
@@ -27,7 +25,6 @@ RegionSequenceView::~RegionSequenceView()
     detachFromRegionSequence();
 }
 
-//==============================================================================
 void RegionSequenceView::detachFromRegionSequence()
 {
     if (regionSequence == nullptr)
@@ -35,11 +32,10 @@ void RegionSequenceView::detachFromRegionSequence()
 
     regionSequence->removeListener(this);
 
-    editorComponent->getARAEditorView()->removeListener (this);
-
     regionSequence = nullptr;
 }
 
+//==============================================================================
 void RegionSequenceView::getTimeRange (double& startTime, double& endTime) const
 {
     if (playbackRegionViews.isEmpty())
@@ -63,7 +59,7 @@ void RegionSequenceView::getTimeRange (double& startTime, double& endTime) const
 //==============================================================================
 Component& RegionSequenceView::getTrackHeaderView()
 {
-    return trackHeaderView;
+    return *trackHeaderView;
 }
 
 void RegionSequenceView::resized()
@@ -91,25 +87,6 @@ void RegionSequenceView::resized()
 }
 
 //==============================================================================
-void RegionSequenceView::onNewSelection (const ARA::PlugIn::ViewSelection& currentSelection)
-{
-    jassert (regionSequence != nullptr);
-
-    bool isOurRegionSequenceSelected = ARA::contains (currentSelection.getRegionSequences(), regionSequence);
-    if (isOurRegionSequenceSelected != isSelected)
-    {
-        isSelected = isOurRegionSequenceSelected;
-        repaint();
-    }
-}
-
-void RegionSequenceView::didUpdateRegionSequenceProperties (ARARegionSequence* sequence)
-{
-    jassert (regionSequence == sequence);
-
-    repaint();
-}
-
 void RegionSequenceView::willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* sequence, ARAPlaybackRegion* playbackRegion)
 {
     jassert (regionSequence == sequence);
@@ -143,36 +120,4 @@ void RegionSequenceView::willDestroyRegionSequence (ARARegionSequence* sequence)
     detachFromRegionSequence();
 
     editorComponent->setDirty();
-}
-
-//==============================================================================
-RegionSequenceView::TrackHeaderView::TrackHeaderView(RegionSequenceView& owner)
-: owner(owner)
-{
-}
-
-void RegionSequenceView::TrackHeaderView::paint(juce::Graphics& g)
-{
-    if (owner.regionSequence == nullptr)
-        return;
-
-    Colour trackColour;
-    if (auto& colour = owner.regionSequence->getColor())
-        trackColour = Colour::fromFloatRGBA (colour->r, colour->g, colour->b, 1.0f);
-
-    // draw region sequence header
-    Rectangle<int> headerRect (0, 0, kTrackHeaderWidth, getHeight());
-    g.setColour (trackColour);
-    g.fillRect (headerRect);
-
-    // draw selection state as a yellow border around the header
-    g.setColour (owner.isSelected ? Colours::yellow : Colours::black);
-    g.drawRect (headerRect);
-
-    if (auto& name = owner.regionSequence->getName())
-    {
-        g.setColour (trackColour.contrasting (1.0f));
-        g.setFont (Font (12.0f));
-        g.drawText (String (name), headerRect, Justification::centredLeft);
-    }
 }
