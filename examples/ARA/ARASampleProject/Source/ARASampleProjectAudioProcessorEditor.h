@@ -31,6 +31,9 @@ public:
     // flag that our view needs to be rebuilt
     void setDirty() { isViewDirty = true; }
 
+    Component& getRegionSequenceListView() { return regionSequenceListView; }
+    Component& getTracksView() { return tracksView; }
+
     //==============================================================================
     void paint (Graphics&) override;
     void resized() override;

@@ -11,8 +11,9 @@ class PlaybackRegionView;
     RegionSequenceView
     JUCE component used to display all ARA playback regions in a region sequences
 */
-class RegionSequenceView    : public Component,
-                              private ARARegionSequence::Listener
+// TODO JUCE_ARA this is no longer a view, but rather some container/controller for all views
+//               associated with a given region sequence - must rename accordingly.
+class RegionSequenceView  : private ARARegionSequence::Listener
 {
 public:
     RegionSequenceView (ARASampleProjectAudioProcessorEditor* editor, ARARegionSequence* sequence);
@@ -20,9 +21,7 @@ public:
 
     void getTimeRange (double& startTime, double& endTime) const;
 
-    Component& getTrackHeaderView();
-
-    void resized() override;
+    void setRegionsViewBounds (int x, int y, int width, int height);
 
     // ARARegionSequence::Listener overrides
     void willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* sequence, ARAPlaybackRegion* playbackRegion) override;
@@ -30,6 +29,7 @@ public:
     void willDestroyRegionSequence (ARARegionSequence* sequence) override;
 
 private:
+    void addRegionSequenceView (ARAPlaybackRegion* playbackRegion);
     void detachFromRegionSequence();
 
 private:

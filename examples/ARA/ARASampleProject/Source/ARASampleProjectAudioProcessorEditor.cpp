@@ -136,15 +136,12 @@ void ARASampleProjectAudioProcessorEditor::resized()
     zoomOutButton.setEnabled (pixelsPerSecond > minPixelsPerSecond);
     zoomInButton.setEnabled (pixelsPerSecond < maxPixelsPerSecond);
 
-    // set new bounds for all region sequence views
+    // set new bounds for all views associated with each region sequence
     int width = roundToInt ((endTime - startTime) * pixelsPerSecond);
     int y = 0;
     for (auto v : regionSequenceViews)
     {
-        // child of tracksView
-        v->getTrackHeaderView().setBounds (0, y, kTrackHeaderWidth, kTrackHeight);
-        // child of regionSequenceListView
-        v->setBounds (0, y, width - regionSequencesViewPort.getScrollBarThickness(), kTrackHeight);
+        v->setRegionsViewBounds(kTrackHeaderWidth, y, width - regionSequencesViewPort.getScrollBarThickness(), kTrackHeight);
         y += kTrackHeight;
     }
 
@@ -181,8 +178,6 @@ void ARASampleProjectAudioProcessorEditor::rebuildView()
 
         auto sequenceView = new RegionSequenceView (this, static_cast<ARARegionSequence*> (regionSequence));
         regionSequenceViews.add (sequenceView);
-        regionSequenceListView.addAndMakeVisible (sequenceView);
-        tracksView.addAndMakeVisible (sequenceView->getTrackHeaderView());
     }
 
     // for demo purposes each rebuild resets zoom to show all document

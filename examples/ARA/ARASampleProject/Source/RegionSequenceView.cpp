@@ -13,16 +13,22 @@ RegionSequenceView::RegionSequenceView (ARASampleProjectAudioProcessorEditor* ed
 {
     regionSequence->addListener (this);
 
+    editorComponent->getTracksView().addAndMakeVisible (*trackHeaderView);
+
     for (auto playbackRegion : regionSequence->getPlaybackRegions())
-    {
-        playbackRegionViews.add (new PlaybackRegionView (editorComponent, static_cast<ARAPlaybackRegion*> (playbackRegion)));
-        addAndMakeVisible (playbackRegionViews.getLast());
-    }
+        addRegionSequenceView (static_cast<ARAPlaybackRegion*> (playbackRegion));
 }
 
 RegionSequenceView::~RegionSequenceView()
 {
     detachFromRegionSequence();
+}
+
+void RegionSequenceView::addRegionSequenceView (ARAPlaybackRegion* playbackRegion)
+{
+    auto view = new PlaybackRegionView (editorComponent, playbackRegion);
+    playbackRegionViews.add (view);
+    editorComponent->getRegionSequenceListView().addAndMakeVisible (view);
 }
 
 void RegionSequenceView::detachFromRegionSequence()
@@ -48,16 +54,9 @@ void RegionSequenceView::getTimeRange (double& startTime, double& endTime) const
     regionSequence->getTimeRange (startTime, endTime, false);
 }
 
-//==============================================================================
-Component& RegionSequenceView::getTrackHeaderView()
+void RegionSequenceView::setRegionsViewBounds (int x, int y, int width, int height)
 {
-    return *trackHeaderView;
-}
-
-void RegionSequenceView::resized()
-{
-    if (regionSequence == nullptr)
-        return;
+    trackHeaderView->setBounds (0, y, x, height);
 
     double viewStartTime, viewEndTime;
     editorComponent->getTimeRange (viewStartTime, viewEndTime);
@@ -71,10 +70,7 @@ void RegionSequenceView::resized()
         double normalizedStartTime = (regionViewStartTime - viewStartTime) / viewWidthTime;
         double normalizedWidthTime = (regionViewEndTime - regionViewStartTime) / viewWidthTime;
 
-        auto regionViewBounds = getLocalBounds();
-        regionViewBounds.setX ((int) (regionViewBounds.getWidth() * normalizedStartTime + 0.5));
-        regionViewBounds.setWidth ((int) (regionViewBounds.getWidth() * normalizedWidthTime + 0.5));
-        regionView->setBounds (regionViewBounds);
+        regionView->setBounds (roundToInt (width * normalizedStartTime), y, roundToInt (width * normalizedWidthTime), height);
     }
 }
 
@@ -99,8 +95,7 @@ void RegionSequenceView::didAddPlaybackRegionToRegionSequence (ARARegionSequence
 {
     jassert (regionSequence == sequence);
 
-    playbackRegionViews.add (new PlaybackRegionView (editorComponent, playbackRegion));
-    addAndMakeVisible (playbackRegionViews.getLast());
+    addRegionSequenceView (playbackRegion);
 
     editorComponent->setDirty();
 }
