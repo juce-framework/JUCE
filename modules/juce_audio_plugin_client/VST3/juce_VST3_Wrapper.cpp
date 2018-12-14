@@ -874,7 +874,6 @@ private:
             if (component != nullptr)
             {
                #if JUCE_WINDOWS
-                component->setVisible (false);
                 component->removeFromDesktop();
                #else
                 if (macHostWindow != nullptr)
