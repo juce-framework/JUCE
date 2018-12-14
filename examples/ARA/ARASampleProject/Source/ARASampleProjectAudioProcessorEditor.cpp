@@ -26,6 +26,7 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
     playbackRegionsView.addAndMakeVisible (playheadView);
 
     playbackRegionsViewPort.setScrollBarsShown (true, true, false, false);
+    playbackRegionsViewPort.getHorizontalScrollBar().addListener (this);
     playbackRegionsViewPort.getVerticalScrollBar().addListener (this);
     playbackRegionsViewPort.setViewedComponent (&playbackRegionsView, false);
     addAndMakeVisible (playbackRegionsViewPort);
@@ -84,6 +85,7 @@ ARASampleProjectAudioProcessorEditor::~ARASampleProjectAudioProcessorEditor()
         getARAEditorView()->removeListener (this);
     }
 
+    playbackRegionsViewPort.getHorizontalScrollBar().removeListener (this);
     playbackRegionsViewPort.getVerticalScrollBar().removeListener (this);
 }
 
@@ -159,6 +161,7 @@ void ARASampleProjectAudioProcessorEditor::resized()
     auto relativeViewportPosition = playbackRegionsViewPort.getViewPosition();
     relativeViewportPosition.setX (roundToInt ((playheadPositionInSeconds - newPixelBasedPositionInSeconds) * pixelsPerSecond));
     playbackRegionsViewPort.setViewPosition (relativeViewportPosition);
+    rulersViewPort.setViewPosition (relativeViewportPosition.getX(), 0);
     trackHeadersViewPort.setViewPosition (0, relativeViewportPosition.getY());
 
     zoomInButton.setBounds (getWidth() - kStatusBarHeight, getHeight() - kStatusBarHeight, kStatusBarHeight, kStatusBarHeight);
@@ -168,8 +171,12 @@ void ARASampleProjectAudioProcessorEditor::resized()
 
 void ARASampleProjectAudioProcessorEditor::scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRangeStart)
 {
-    jassert (scrollBarThatHasMoved == &playbackRegionsViewPort.getVerticalScrollBar());
-    trackHeadersViewPort.setViewPosition (0, roundToInt (newRangeStart));
+    if (scrollBarThatHasMoved == &playbackRegionsViewPort.getHorizontalScrollBar())
+        rulersViewPort.setViewPosition (roundToInt (newRangeStart), 0);
+    else if (scrollBarThatHasMoved == &playbackRegionsViewPort.getVerticalScrollBar())
+        trackHeadersViewPort.setViewPosition (0, roundToInt (newRangeStart));
+    else
+        jassertfalse;
 }
 
 void ARASampleProjectAudioProcessorEditor::rebuildView()
