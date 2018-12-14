@@ -458,6 +458,7 @@ namespace AAXClasses
                     if (auto* modReceiver = dynamic_cast<ModifierKeyReceiver*> (component->getPeer()))
                         modReceiver->removeModifierKeyProvider();
 
+                    component->setVisible (false);
                     component->removeFromDesktop();
                     component = nullptr;
                 }
