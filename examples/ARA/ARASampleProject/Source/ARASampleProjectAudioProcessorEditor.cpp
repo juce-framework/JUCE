@@ -235,16 +235,18 @@ void ARASampleProjectAudioProcessorEditor::PlayheadView::paint(juce::Graphics &g
 void ARASampleProjectAudioProcessorEditor::timerCallback()
 {
     auto position = static_cast<ARASampleProjectAudioProcessor*> (getAudioProcessor())->getLastKnownPositionInfo();
-    if (position.isPlaying)
+    if (playheadPositionInSeconds != position.timeInSeconds)
     {
         playheadPositionInSeconds = position.timeInSeconds;
-        if (followPlayheadToggleButton.getToggleState())
+
+        if (position.isPlaying && followPlayheadToggleButton.getToggleState())
         {
             double visibleStart, visibleEnd;
             getVisibleTimeRange (visibleStart, visibleEnd);
             if (playheadPositionInSeconds < visibleStart || playheadPositionInSeconds > visibleEnd)
                 playbackRegionsViewPort.setViewPosition(playbackRegionsViewPort.getViewPosition().withX (playheadPositionInSeconds * pixelsPerSecond));
         };
+
         playheadView.repaint();
     }
 }
