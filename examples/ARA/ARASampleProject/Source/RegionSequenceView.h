@@ -29,7 +29,7 @@ public:
     void willDestroyRegionSequence (ARARegionSequence* sequence) override;
 
 private:
-    void addRegionSequenceView (ARAPlaybackRegion* playbackRegion);
+    void addRegionSequenceViewAndMakeVisible (ARAPlaybackRegion* playbackRegion);
     void detachFromRegionSequence();
 
 private:

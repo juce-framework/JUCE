@@ -16,7 +16,7 @@ RegionSequenceView::RegionSequenceView (ARASampleProjectAudioProcessorEditor* ed
     editorComponent->getTrackHeadersView().addAndMakeVisible (*trackHeaderView);
 
     for (auto playbackRegion : regionSequence->getPlaybackRegions())
-        addRegionSequenceView (static_cast<ARAPlaybackRegion*> (playbackRegion));
+        addRegionSequenceViewAndMakeVisible (static_cast<ARAPlaybackRegion*> (playbackRegion));
 }
 
 RegionSequenceView::~RegionSequenceView()
@@ -24,7 +24,7 @@ RegionSequenceView::~RegionSequenceView()
     detachFromRegionSequence();
 }
 
-void RegionSequenceView::addRegionSequenceView (ARAPlaybackRegion* playbackRegion)
+void RegionSequenceView::addRegionSequenceViewAndMakeVisible (ARAPlaybackRegion* playbackRegion)
 {
     auto view = new PlaybackRegionView (editorComponent, playbackRegion);
     playbackRegionViews.add (view);
@@ -95,7 +95,7 @@ void RegionSequenceView::didAddPlaybackRegionToRegionSequence (ARARegionSequence
 {
     jassert (regionSequence == sequence);
 
-    addRegionSequenceView (playbackRegion);
+    addRegionSequenceViewAndMakeVisible (playbackRegion);
 
     editorComponent->setDirty();
 }
