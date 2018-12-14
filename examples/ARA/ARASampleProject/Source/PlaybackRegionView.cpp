@@ -70,17 +70,19 @@ void PlaybackRegionView::paint (Graphics& g)
 
     if (playbackRegion->getAudioModification()->getAudioSource()->isSampleAccessEnabled())
     {
-        double viewStart, viewEnd, regionStart, regionEnd;
+        double viewStart, viewEnd;
         editorComponent->getVisibleTimeRange (viewStart, viewEnd);
+        double regionStart, regionEnd;
         getTimeRange (regionStart, regionEnd);
 
-        const auto startTime = jmax (viewStart - regionStart, 0.0);
-        const auto endTime = jmin (viewEnd - regionStart, totalTime);
+        const double startTime = jmax (viewStart, regionStart);
+        const double endTime = jmin (viewEnd, regionEnd);
+        const double duration = endTime - startTime;
 
-        if (endTime - startTime > 0.0)
+        if (duration > 0.0)
         {
             g.setColour (regionColour.contrasting (0.7f));
-            audioThumb.drawChannels (g, g.getClipBounds(), startTime, endTime, 1.0f);
+            audioThumb.drawChannels (g, g.getClipBounds(), startTime - regionStart, duration, 1.0f);
         }
     }
     else

@@ -77,11 +77,6 @@ ARASampleProjectAudioProcessorEditor::~ARASampleProjectAudioProcessorEditor()
     playbackRegionsViewPort.getVerticalScrollBar().removeListener (this);
 }
 
-void ARASampleProjectAudioProcessorEditor::storeRelativePosition()
-{
-    pixelsUntilPlayhead = roundToInt (pixelsPerSecond * playheadPositionInSeconds - playbackRegionsViewPort.getViewArea().getX());
-}
-
 //==============================================================================
 void ARASampleProjectAudioProcessorEditor::paint (Graphics& g)
 {
@@ -183,6 +178,11 @@ void ARASampleProjectAudioProcessorEditor::rebuildView()
 void ARASampleProjectAudioProcessorEditor::clearView()
 {
     regionSequenceViews.clear();
+}
+
+void ARASampleProjectAudioProcessorEditor::storeRelativePosition()
+{
+    pixelsUntilPlayhead = roundToInt (pixelsPerSecond * playheadPositionInSeconds - playbackRegionsViewPort.getViewArea().getX());
 }
 
 //==============================================================================
