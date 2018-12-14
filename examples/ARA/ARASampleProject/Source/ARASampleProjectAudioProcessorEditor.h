@@ -90,7 +90,6 @@ private:
     double playheadPositionInSeconds = 0.0;
     double pixelsUntilPlayhead = 0.0;
 
-    ARASampleProjectAudioProcessor& araSampleProcessor;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARASampleProjectAudioProcessorEditor)
 };

@@ -14,8 +14,7 @@ constexpr int kHeight = 5 * kTrackHeight + kStatusBarHeight;
 ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARASampleProjectAudioProcessor& p)
     : AudioProcessorEditor (&p),
       AudioProcessorEditorARAExtension (&p),
-      playheadView (*this),
-      araSampleProcessor (p)
+      playheadView (*this)
 {
     setSize (kWidth, kHeight);
     setResizeLimits (kMinWidth, kMinHeight, 32768, 32768);
@@ -235,7 +234,7 @@ void ARASampleProjectAudioProcessorEditor::PlayheadView::paint(juce::Graphics &g
 
 void ARASampleProjectAudioProcessorEditor::timerCallback()
 {
-    auto position = araSampleProcessor.getLastKnownPositionInfo();
+    auto position = static_cast<ARASampleProjectAudioProcessor*> (getAudioProcessor())->getLastKnownPositionInfo();
     if (position.isPlaying)
     {
         playheadPositionInSeconds = position.timeInSeconds;
