@@ -47,11 +47,11 @@ void RulersView::paint (juce::Graphics& g)
     }
 
     g.setColour (Colours::darkgrey);
-    g.drawRect (getBounds());
+    g.drawRect (getLocalBounds(), 3);
 
     g.setColour (Colours::white);
     g.setFont (Font (12.0f));
-    g.drawText ("Not implemented yet: showing seconds, bars with beat division, chords", getBounds(), Justification::centred);
+    g.drawText ("Not implemented yet: showing seconds, bars with beat division, chords", getLocalBounds(), Justification::centred);
 }
 
 //==============================================================================

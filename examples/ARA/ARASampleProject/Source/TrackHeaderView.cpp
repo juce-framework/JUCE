@@ -1,5 +1,6 @@
 #include "TrackHeaderView.h"
 
+//==============================================================================
 TrackHeaderView::TrackHeaderView (ARAEditorView* view, ARARegionSequence* sequence)
     : editorView (view),
       regionSequence (sequence)
@@ -28,7 +29,6 @@ void TrackHeaderView::detachFromRegionSequence()
 }
 
 //==============================================================================
-
 void TrackHeaderView::paint (juce::Graphics& g)
 {
     if (regionSequence == nullptr)
@@ -39,22 +39,22 @@ void TrackHeaderView::paint (juce::Graphics& g)
         trackColour = Colour::fromFloatRGBA (colour->r, colour->g, colour->b, 1.0f);
 
     // draw region sequence header
-    Rectangle<int> headerRect (0, 0, getWidth(), getHeight());
     g.setColour (trackColour);
-    g.fillRect (headerRect);
+    g.fillRect (getLocalBounds());
 
     // draw selection state as a yellow border around the header
     g.setColour (isSelected ? Colours::yellow : Colours::black);
-    g.drawRect (headerRect);
+    g.drawRect (getLocalBounds());
 
     if (auto& name = regionSequence->getName())
     {
         g.setColour (trackColour.contrasting (1.0f));
         g.setFont (Font (12.0f));
-        g.drawText (String (name), headerRect, Justification::centredLeft);
+        g.drawText (String (name), getLocalBounds(), Justification::centredLeft);
     }
 }
 
+//==============================================================================
 void TrackHeaderView::onNewSelection (const ARA::PlugIn::ViewSelection& currentSelection)
 {
     jassert (regionSequence != nullptr);
