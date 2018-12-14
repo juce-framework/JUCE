@@ -35,6 +35,9 @@ public:
     Component& getTrackHeadersView() { return trackHeadersView; }
     Component& getPlaybackRegionsView() { return playbackRegionsView; }
 
+    int getPlaybackRegionsViewsXForTime (double time) const;
+    double getPlaybackRegionsViewsTimeForX (int x) const;
+
     //==============================================================================
     void paint (Graphics&) override;
     void resized() override;
@@ -66,10 +69,10 @@ private:
     class PlayheadView : public Component
     {
     public:
-        PlayheadView (ARASampleProjectAudioProcessorEditor& owner);
+        PlayheadView (ARASampleProjectAudioProcessorEditor& editorComponent);
         void paint (Graphics&) override;
     private:
-        ARASampleProjectAudioProcessorEditor& owner;
+        ARASampleProjectAudioProcessorEditor& editorComponent;
         static constexpr int kPlayheadWidth = 3;
     };
 

@@ -21,7 +21,7 @@ public:
 
     void getTimeRange (double& startTime, double& endTime) const;
 
-    void setRegionsViewBounds (int x, int y, int width, int height);
+    void setRegionsViewBoundsByYRange (int y, int height);
 
     // ARARegionSequence::Listener overrides
     void willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* sequence, ARAPlaybackRegion* playbackRegion) override;

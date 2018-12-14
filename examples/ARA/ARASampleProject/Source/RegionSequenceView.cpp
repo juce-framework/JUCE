@@ -51,26 +51,20 @@ void RegionSequenceView::getTimeRange (double& startTime, double& endTime) const
         return;
     }
 
-    regionSequence->getTimeRange (startTime, endTime, false);
+    regionSequence->getTimeRange (startTime, endTime, true);
 }
 
-void RegionSequenceView::setRegionsViewBounds (int x, int y, int width, int height)
+void RegionSequenceView::setRegionsViewBoundsByYRange (int y, int height)
 {
-    trackHeaderView->setBounds (0, y, x, height);
-
-    double viewStartTime, viewEndTime;
-    editorComponent->getTimeRange (viewStartTime, viewEndTime);
-    double viewWidthTime = viewEndTime - viewStartTime;
+    trackHeaderView->setBounds (0, y, trackHeaderView->getParentWidth(), height);
 
     for (auto regionView : playbackRegionViews)
     {
         double regionViewStartTime, regionViewEndTime;
         regionView->getTimeRange (regionViewStartTime, regionViewEndTime);
-
-        double normalizedStartTime = (regionViewStartTime - viewStartTime) / viewWidthTime;
-        double normalizedWidthTime = (regionViewEndTime - regionViewStartTime) / viewWidthTime;
-
-        regionView->setBounds (roundToInt (width * normalizedStartTime), y, roundToInt (width * normalizedWidthTime), height);
+        int startX = editorComponent->getPlaybackRegionsViewsXForTime (regionViewStartTime);
+        int endX = editorComponent->getPlaybackRegionsViewsXForTime (regionViewEndTime);
+        regionView->setBounds (startX, y, endX - startX, height);
     }
 }
 
