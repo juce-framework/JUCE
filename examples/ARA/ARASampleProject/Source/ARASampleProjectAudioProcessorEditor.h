@@ -30,7 +30,7 @@ public:
     void getVisibleTimeRange (double& start, double& end);
 
     // flag that our view needs to be rebuilt
-    void setDirty() { isViewDirty = true; }
+    void invalidateRegionSequenceViews() { regionSequenceViewsAreInvalid = true; }
 
     Component& getTrackHeadersView() { return trackHeadersView; }
     Component& getPlaybackRegionsView() { return playbackRegionsView; }
@@ -60,8 +60,7 @@ public:
     const double getPixelsPerSeconds() { return pixelsPerSecond; }
 
 private:
-    void rebuildView();
-    void clearView();
+    void rebuildRegionSequenceViews();
     void storeRelativePosition();
 
 private:
@@ -86,7 +85,7 @@ private:
     TextButton zoomInButton, zoomOutButton;
     ToggleButton followPlayheadToggleButton;
 
-    bool isViewDirty = false;
+    bool regionSequenceViewsAreInvalid = true;
     double startTime = 0.0;
     double endTime = 0.0;
     double pixelsPerSecond = 100.0;

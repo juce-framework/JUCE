@@ -128,7 +128,7 @@ void PlaybackRegionView::didEndEditing (ARADocument* document)
     if ((playbackRegionReader ==  nullptr) || ! playbackRegionReader->isValid())
     {
         recreatePlaybackRegionReader();
-        editorComponent->setDirty();
+        editorComponent->invalidateRegionSequenceViews();
     }
 }
 
@@ -146,7 +146,7 @@ void PlaybackRegionView::willUpdatePlaybackRegionProperties (ARAPlaybackRegion* 
     if ((playbackRegion->getStartInPlaybackTime() != newProperties->startInPlaybackTime) ||
         (playbackRegion->getDurationInPlaybackTime() != newProperties->durationInPlaybackTime))
     {
-        editorComponent->setDirty();
+        editorComponent->invalidateRegionSequenceViews();
     }
 
     repaint();

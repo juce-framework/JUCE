@@ -70,7 +70,7 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
         addAndMakeVisible (rulersViewPort);
     }
 
-    rebuildView();
+    rebuildRegionSequenceViews();
     startTimerHz (60);
 }
 
@@ -78,8 +78,6 @@ ARASampleProjectAudioProcessorEditor::~ARASampleProjectAudioProcessorEditor()
 {
     if (isARAEditorView())
     {
-        clearView();
-
         static_cast<ARADocument*> (getARADocumentController()->getDocument())->removeListener (this);
 
         getARAEditorView()->removeListener (this);
@@ -205,28 +203,20 @@ void ARASampleProjectAudioProcessorEditor::scrollBarMoved (ScrollBar* scrollBarT
         jassertfalse;
 }
 
-void ARASampleProjectAudioProcessorEditor::rebuildView()
+void ARASampleProjectAudioProcessorEditor::rebuildRegionSequenceViews()
 {
-    clearView();
+    regionSequenceViews.clear();
 
     for (auto regionSequence : getARADocumentController()->getDocument()->getRegionSequences())
     {
-        if (ARA::contains (getARAEditorView()->getHiddenRegionSequences(), regionSequence))
-            continue;
-
-        auto sequenceView = new RegionSequenceView (this, static_cast<ARARegionSequence*> (regionSequence));
-        regionSequenceViews.add (sequenceView);
+        if (! ARA::contains (getARAEditorView()->getHiddenRegionSequences(), regionSequence))
+            regionSequenceViews.add (new RegionSequenceView (this, static_cast<ARARegionSequence*> (regionSequence)));
     }
 
     // for demo purposes each rebuild resets zoom to show all document
     pixelsPerSecond = (endTime - startTime) / getWidth();
 
     resized();
-}
-
-void ARASampleProjectAudioProcessorEditor::clearView()
-{
-    regionSequenceViews.clear();
 }
 
 void ARASampleProjectAudioProcessorEditor::storeRelativePosition()
@@ -239,22 +229,22 @@ void ARASampleProjectAudioProcessorEditor::onNewSelection (const ARA::PlugIn::Vi
 {
 // TODO JUCE_ARA the following was added as workaround for Logic, but it breaks navigating
 //               in other hosts while zoomed in - disabled for now.
-//    rebuildView();
+//    rebuildRegionSequenceViews();
 }
 
 void ARASampleProjectAudioProcessorEditor::onHideRegionSequences (std::vector<ARARegionSequence*> const& /*regionSequences*/)
 {
-    rebuildView();
+    rebuildRegionSequenceViews();
 }
 
 void ARASampleProjectAudioProcessorEditor::didEndEditing (ARADocument* document)
 {
     jassert (document == getARADocumentController()->getDocument());
 
-    if (isViewDirty)
+    if (regionSequenceViewsAreInvalid)
     {
-        rebuildView();
-        isViewDirty = false;
+        rebuildRegionSequenceViews();
+        regionSequenceViewsAreInvalid = false;
     }
 }
 
@@ -262,7 +252,7 @@ void ARASampleProjectAudioProcessorEditor::didReorderRegionSequencesInDocument (
 {
     jassert (document == getARADocumentController()->getDocument());
 
-    setDirty();
+    invalidateRegionSequenceViews();
 }
 
 void ARASampleProjectAudioProcessorEditor::getVisibleTimeRange(double &start, double &end)

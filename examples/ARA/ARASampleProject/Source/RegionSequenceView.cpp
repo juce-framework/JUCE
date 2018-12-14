@@ -82,7 +82,7 @@ void RegionSequenceView::willRemovePlaybackRegionFromRegionSequence (ARARegionSe
         }
     }
 
-    editorComponent->setDirty();
+    editorComponent->invalidateRegionSequenceViews();
 }
 
 void RegionSequenceView::didAddPlaybackRegionToRegionSequence (ARARegionSequence* sequence, ARAPlaybackRegion* playbackRegion)
@@ -91,7 +91,7 @@ void RegionSequenceView::didAddPlaybackRegionToRegionSequence (ARARegionSequence
 
     addRegionSequenceViewAndMakeVisible (playbackRegion);
 
-    editorComponent->setDirty();
+    editorComponent->invalidateRegionSequenceViews();
 }
 
 void RegionSequenceView::willDestroyRegionSequence (ARARegionSequence* sequence)
@@ -100,5 +100,5 @@ void RegionSequenceView::willDestroyRegionSequence (ARARegionSequence* sequence)
 
     detachFromRegionSequence();
 
-    editorComponent->setDirty();
+    editorComponent->invalidateRegionSequenceViews();
 }
