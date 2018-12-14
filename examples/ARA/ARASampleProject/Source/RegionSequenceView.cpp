@@ -13,7 +13,7 @@ RegionSequenceView::RegionSequenceView (ARASampleProjectAudioProcessorEditor* ed
 {
     regionSequence->addListener (this);
 
-    editorComponent->getTracksView().addAndMakeVisible (*trackHeaderView);
+    editorComponent->getTrackHeadersView().addAndMakeVisible (*trackHeaderView);
 
     for (auto playbackRegion : regionSequence->getPlaybackRegions())
         addRegionSequenceView (static_cast<ARAPlaybackRegion*> (playbackRegion));
@@ -28,7 +28,7 @@ void RegionSequenceView::addRegionSequenceView (ARAPlaybackRegion* playbackRegio
 {
     auto view = new PlaybackRegionView (editorComponent, playbackRegion);
     playbackRegionViews.add (view);
-    editorComponent->getRegionSequenceListView().addAndMakeVisible (view);
+    editorComponent->getPlaybackRegionsView().addAndMakeVisible (view);
 }
 
 void RegionSequenceView::detachFromRegionSequence()

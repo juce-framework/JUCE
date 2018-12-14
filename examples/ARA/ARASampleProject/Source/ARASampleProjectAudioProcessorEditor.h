@@ -31,8 +31,8 @@ public:
     // flag that our view needs to be rebuilt
     void setDirty() { isViewDirty = true; }
 
-    Component& getRegionSequenceListView() { return regionSequenceListView; }
-    Component& getTracksView() { return tracksView; }
+    Component& getTrackHeadersView() { return trackHeadersView; }
+    Component& getPlaybackRegionsView() { return playbackRegionsView; }
 
     //==============================================================================
     void paint (Graphics&) override;
@@ -72,15 +72,12 @@ private:
         static constexpr int kPlayheadWidth = 3;
     };
 
-    // we'll be displaying all region sequences in the document in a scrollable view
-    Viewport regionSequencesViewPort, tracksViewPort;
-    Component regionSequenceListView, tracksView;
-    PlayheadView playheadView;
-
     OwnedArray<RegionSequenceView> regionSequenceViews;
 
-    // custom ScrollBar neededed to have ScrollBar for internal Viewport
-    ScrollBar horizontalScrollBar;
+    Viewport trackHeadersViewPort, playbackRegionsViewPort;
+    Component trackHeadersView, playbackRegionsView;
+    PlayheadView playheadView;
+
     TextButton zoomInButton, zoomOutButton;
     ToggleButton followPlayheadToggleButton;
 

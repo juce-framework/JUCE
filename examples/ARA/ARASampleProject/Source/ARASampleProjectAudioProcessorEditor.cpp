@@ -15,23 +15,23 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
     : AudioProcessorEditor (&p),
       AudioProcessorEditorARAExtension (&p),
       playheadView (*this),
-      horizontalScrollBar (false),
       araSampleProcessor (p)
 {
-    tracksViewPort.setScrollBarsShown (false, false, false, false);
-    regionSequencesViewPort.setScrollBarsShown (true, true, false, false);
-    regionSequenceListView.setBounds (0, 0, kWidth, kHeight);
-    regionSequenceListView.addAndMakeVisible (playheadView);
-    playheadView.setAlwaysOnTop (true);
-    tracksViewPort.setViewedComponent (&regionSequenceListView, false);
-    tracksView.setBounds (0, 0, kWidth, kHeight);
-    tracksView.addAndMakeVisible (tracksViewPort);
+    setSize (kWidth, kHeight);
+    setResizeLimits (kMinWidth, kMinHeight, 32768, 32768);
+    setResizable (true, false);
 
-    regionSequencesViewPort.setViewedComponent (&tracksView, false);
-    addAndMakeVisible (regionSequencesViewPort);
-    addAndMakeVisible (horizontalScrollBar);
-    horizontalScrollBar.setColour (ScrollBar::ColourIds::backgroundColourId, Colours::yellow);
-    horizontalScrollBar.addListener (this);
+    playheadView.setAlwaysOnTop (true);
+    playbackRegionsView.addAndMakeVisible (playheadView);
+
+    playbackRegionsViewPort.setScrollBarsShown (true, true, false, false);
+    playbackRegionsViewPort.getVerticalScrollBar().addListener (this);
+    playbackRegionsViewPort.setViewedComponent (&playbackRegionsView, false);
+    addAndMakeVisible (playbackRegionsViewPort);
+
+    trackHeadersViewPort.setScrollBarsShown (false, false, false, false);
+    trackHeadersViewPort.setViewedComponent (&trackHeadersView, false);
+    addAndMakeVisible (trackHeadersViewPort);
 
     zoomInButton.setButtonText("+");
     zoomOutButton.setButtonText("-");
@@ -53,19 +53,15 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
     followPlayheadToggleButton.setButtonText ("Viewport follows playhead");
     addAndMakeVisible (followPlayheadToggleButton);
 
-    setSize (kWidth, kHeight);
-    setResizeLimits (kMinWidth, kMinHeight, 32768, 32768);
-    setResizable (true, false);
-
     if (isARAEditorView())
     {
         getARAEditorView()->addListener (this);
 
         static_cast<ARADocument*> (getARADocumentController()->getDocument())->addListener (this);
-
-        rebuildView();
-        startTimerHz (60);
     }
+
+    rebuildView();
+    startTimerHz (60);
 }
 
 ARASampleProjectAudioProcessorEditor::~ARASampleProjectAudioProcessorEditor()
@@ -78,12 +74,13 @@ ARASampleProjectAudioProcessorEditor::~ARASampleProjectAudioProcessorEditor()
 
         getARAEditorView()->removeListener (this);
     }
-    horizontalScrollBar.removeListener (this);
+
+    playbackRegionsViewPort.getVerticalScrollBar().removeListener (this);
 }
 
 void ARASampleProjectAudioProcessorEditor::storeRelativePosition()
 {
-    pixelsUntilPlayhead = roundToInt (pixelsPerSecond * playheadPositionInSeconds - tracksViewPort.getViewArea().getX());
+    pixelsUntilPlayhead = roundToInt (pixelsPerSecond * playheadPositionInSeconds - playbackRegionsViewPort.getViewArea().getX());
 }
 
 //==============================================================================
@@ -97,12 +94,6 @@ void ARASampleProjectAudioProcessorEditor::paint (Graphics& g)
         g.setFont (20.0f);
         g.drawFittedText ("Non ARA Instance. Please re-open as ARA2!", getLocalBounds(), Justification::centred, 1);
     }
-}
-
-void ARASampleProjectAudioProcessorEditor::scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRangeStart)
-{
-    if (scrollBarThatHasMoved == &horizontalScrollBar)
-        tracksViewPort.setViewPosition (roundToInt (newRangeStart), tracksViewPort.getViewPositionY());
 }
 
 void ARASampleProjectAudioProcessorEditor::resized()
@@ -131,7 +122,7 @@ void ARASampleProjectAudioProcessorEditor::resized()
     }
 
     // enforce zoom in/out limits
-    minPixelsPerSecond = (tracksView.getWidth()  - kTrackHeaderWidth + regionSequencesViewPort.getScrollBarThickness()) / (endTime - startTime);
+    minPixelsPerSecond = (playbackRegionsViewPort.getWidth() - playbackRegionsViewPort.getScrollBarThickness()) / (endTime - startTime);
     pixelsPerSecond =  jmax (minPixelsPerSecond, jmin (pixelsPerSecond, maxPixelsPerSecond));
     zoomOutButton.setEnabled (pixelsPerSecond > minPixelsPerSecond);
     zoomInButton.setEnabled (pixelsPerSecond < maxPixelsPerSecond);
@@ -141,30 +132,34 @@ void ARASampleProjectAudioProcessorEditor::resized()
     int y = 0;
     for (auto v : regionSequenceViews)
     {
-        v->setRegionsViewBounds(kTrackHeaderWidth, y, width - regionSequencesViewPort.getScrollBarThickness(), kTrackHeight);
+        v->setRegionsViewBounds(kTrackHeaderWidth, y, width - trackHeadersViewPort.getScrollBarThickness(), kTrackHeight);
         y += kTrackHeight;
     }
 
-    regionSequenceListView.setBounds (0, 0, width, y);
-    tracksView.setBounds (0, 0, getWidth() - tracksViewPort.getScrollBarThickness(), y);
-    tracksViewPort.setBounds (kTrackHeaderWidth, 0, getWidth() - kTrackHeaderWidth, y);
-    regionSequencesViewPort.setBounds (0, 0, getWidth(), getHeight() - tracksViewPort.getScrollBarThickness() - kStatusBarHeight);
-    playheadView.setBounds (regionSequenceListView.getBounds());
+    playbackRegionsView.setBounds (0, 0, width, y);
+    playbackRegionsViewPort.setBounds (kTrackHeaderWidth, 0, getWidth() - kTrackHeaderWidth, getHeight() - kStatusBarHeight);
+
+    playheadView.setBounds (playbackRegionsView.getBounds());
+
+    trackHeadersView.setBounds (0, 0, kTrackHeaderWidth, y);
+    trackHeadersViewPort.setBounds (0, 0, kTrackHeaderWidth, playbackRegionsViewPort.getHeight() - playbackRegionsViewPort.getScrollBarThickness());
 
     // keeps viewport position relative to playhead
     const auto newPixelBasedPositionInSeconds = pixelsUntilPlayhead / pixelsPerSecond;
-    regionSequencesViewPort.setViewPosition (regionSequencesViewPort.getViewPosition());
-    auto relativeViewportPosition = tracksViewPort.getViewPosition();
+    auto relativeViewportPosition = playbackRegionsViewPort.getViewPosition();
     relativeViewportPosition.setX (roundToInt ((playheadPositionInSeconds - newPixelBasedPositionInSeconds) * pixelsPerSecond));
-    tracksViewPort.setViewPosition (relativeViewportPosition);
-
-    horizontalScrollBar.setRangeLimits (tracksViewPort.getHorizontalScrollBar().getRangeLimit());
-    horizontalScrollBar.setBounds (kTrackHeaderWidth, regionSequencesViewPort.getBottom(), tracksViewPort.getWidth() - regionSequencesViewPort.getScrollBarThickness(), regionSequencesViewPort.getScrollBarThickness());
-    horizontalScrollBar.setCurrentRange (tracksViewPort.getHorizontalScrollBar().getCurrentRange());
+    playbackRegionsViewPort.setViewPosition (relativeViewportPosition);
+    trackHeadersViewPort.setViewPosition (0, relativeViewportPosition.getY());
 
     zoomInButton.setBounds (getWidth() - kStatusBarHeight, getHeight() - kStatusBarHeight, kStatusBarHeight, kStatusBarHeight);
     zoomOutButton.setBounds (zoomInButton.getBounds().translated (-kStatusBarHeight, 0));
     followPlayheadToggleButton.setBounds (0, zoomInButton.getY(), 200, kStatusBarHeight);
+}
+
+void ARASampleProjectAudioProcessorEditor::scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRangeStart)
+{
+    jassert (scrollBarThatHasMoved == &playbackRegionsViewPort.getVerticalScrollBar());
+    trackHeadersViewPort.setViewPosition (0, roundToInt (newRangeStart));
 }
 
 void ARASampleProjectAudioProcessorEditor::rebuildView()
@@ -222,8 +217,8 @@ void ARASampleProjectAudioProcessorEditor::didReorderRegionSequencesInDocument (
 
 void ARASampleProjectAudioProcessorEditor::getVisibleTimeRange(double &start, double &end)
 {
-    start = tracksViewPort.getViewArea().getX() / pixelsPerSecond;
-    end = tracksViewPort.getViewArea().getRight() / pixelsPerSecond;
+    start = playbackRegionsViewPort.getViewArea().getX() / pixelsPerSecond;
+    end = playbackRegionsViewPort.getViewArea().getRight() / pixelsPerSecond;
 }
 
 //==============================================================================
@@ -249,7 +244,7 @@ void ARASampleProjectAudioProcessorEditor::timerCallback()
             double visibleStart, visibleEnd;
             getVisibleTimeRange (visibleStart, visibleEnd);
             if (playheadPositionInSeconds < visibleStart || playheadPositionInSeconds > visibleEnd)
-                tracksViewPort.setViewPosition(tracksViewPort.getViewPosition().withX (playheadPositionInSeconds * pixelsPerSecond));
+                playbackRegionsViewPort.setViewPosition(playbackRegionsViewPort.getViewPosition().withX (playheadPositionInSeconds * pixelsPerSecond));
         };
         playheadView.repaint();
     }
