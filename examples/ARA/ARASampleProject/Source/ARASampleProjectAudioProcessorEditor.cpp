@@ -254,7 +254,7 @@ void ARASampleProjectAudioProcessorEditor::didReorderRegionSequencesInDocument (
     invalidateRegionSequenceViews();
 }
 
-void ARASampleProjectAudioProcessorEditor::getVisibleTimeRange(double &start, double &end)
+void ARASampleProjectAudioProcessorEditor::getVisibleTimeRange(double &start, double &end) const
 {
     start = getPlaybackRegionsViewsTimeForX (playbackRegionsViewPort.getViewArea().getX());
     end = getPlaybackRegionsViewsTimeForX (playbackRegionsViewPort.getViewArea().getRight());

@@ -27,7 +27,7 @@ public:
     void getTimeRange (double& start, double& end) const { start = startTime; end = endTime; }
 
     // total visible time range
-    void getVisibleTimeRange (double& start, double& end);
+    void getVisibleTimeRange (double& start, double& end) const;
 
     // flag that our view needs to be rebuilt
     void invalidateRegionSequenceViews() { regionSequenceViewsAreInvalid = true; }
