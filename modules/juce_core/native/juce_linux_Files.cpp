@@ -209,16 +209,18 @@ bool Process::openDocument (const String& fileName, const String& parameters)
 
     const char* const argv[4] = { "/bin/sh", "-c", cmdString.toUTF8(), 0 };
 
-    if (fork() == 0)
+    auto cpid = fork();
+
+    if (cpid == 0)
     {
         setsid();
+
+        // Child process
         execve (argv[0], (char**) argv, environ);
         exit (0);
-
-        return true;
     }
 
-    return false;
+    return cpid >= 0;
 }
 
 void File::revealToUser() const
