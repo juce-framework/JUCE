@@ -1,14 +1,16 @@
 #include "ARASampleProjectAudioProcessorEditor.h"
 #include "ARASampleProjectDocumentController.h"
 #include "RegionSequenceView.h"
+#include "RulersView.h"
 
+constexpr int kRulersViewHeight = 3*20;
 constexpr int kTrackHeaderWidth = 120;
 constexpr int kTrackHeight = 80;
 constexpr int kStatusBarHeight = 20;
 constexpr int kMinWidth = 3 * kTrackHeaderWidth;
 constexpr int kWidth = 1000;
-constexpr int kMinHeight = 1 * kTrackHeight;
-constexpr int kHeight = 5 * kTrackHeight + kStatusBarHeight;
+constexpr int kMinHeight = kRulersViewHeight + 1 * kTrackHeight + kStatusBarHeight;
+constexpr int kHeight = kMinHeight + 5 * kTrackHeight;
 
 //==============================================================================
 ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARASampleProjectAudioProcessor& p)
@@ -56,7 +58,15 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
     {
         getARAEditorView()->addListener (this);
 
-        static_cast<ARADocument*> (getARADocumentController()->getDocument())->addListener (this);
+        auto document = static_cast<ARADocument*> (getARADocumentController()->getDocument());
+
+        document->addListener (this);
+
+        rulersView.reset (new RulersView (document));
+
+        rulersViewPort.setScrollBarsShown (false, false, false, false);
+        rulersViewPort.setViewedComponent (rulersView.get(), false);
+        addAndMakeVisible (rulersViewPort);
     }
 
     rebuildView();
@@ -131,12 +141,18 @@ void ARASampleProjectAudioProcessorEditor::resized()
     }
 
     playbackRegionsView.setBounds (0, 0, width, y);
-    playbackRegionsViewPort.setBounds (kTrackHeaderWidth, 0, getWidth() - kTrackHeaderWidth, getHeight() - kStatusBarHeight);
+    playbackRegionsViewPort.setBounds (kTrackHeaderWidth, kRulersViewHeight, getWidth() - kTrackHeaderWidth, getHeight() - kRulersViewHeight - kStatusBarHeight);
 
     playheadView.setBounds (playbackRegionsView.getBounds());
 
+    if (rulersView != nullptr)
+    {
+        rulersView->setBounds (0, 0, width, kRulersViewHeight);
+        rulersViewPort.setBounds (kTrackHeaderWidth, 0, playbackRegionsViewPort.getWidth() - playbackRegionsViewPort.getScrollBarThickness(), kRulersViewHeight);
+    }
+
     trackHeadersView.setBounds (0, 0, kTrackHeaderWidth, y);
-    trackHeadersViewPort.setBounds (0, 0, kTrackHeaderWidth, playbackRegionsViewPort.getHeight() - playbackRegionsViewPort.getScrollBarThickness());
+    trackHeadersViewPort.setBounds (0, kRulersViewHeight, kTrackHeaderWidth, playbackRegionsViewPort.getHeight() - playbackRegionsViewPort.getScrollBarThickness());
 
     // keeps viewport position relative to playhead
     const auto newPixelBasedPositionInSeconds = pixelsUntilPlayhead / pixelsPerSecond;

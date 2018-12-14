@@ -4,6 +4,7 @@
 #include "ARASampleProjectAudioProcessor.h"
 
 class RegionSequenceView;
+class RulersView;
 
 //==============================================================================
 /**
@@ -74,8 +75,9 @@ private:
 
     OwnedArray<RegionSequenceView> regionSequenceViews;
 
-    Viewport trackHeadersViewPort, playbackRegionsViewPort;
+    Viewport trackHeadersViewPort, rulersViewPort, playbackRegionsViewPort;
     Component trackHeadersView, playbackRegionsView;
+    std::unique_ptr<RulersView> rulersView;
     PlayheadView playheadView;
 
     TextButton zoomInButton, zoomOutButton;

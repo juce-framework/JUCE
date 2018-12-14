@@ -81,9 +81,10 @@ protected:
     OVERRIDE_TO_NOTIFY_1 (didUpdateDocumentProperties, Document*, document);
     OVERRIDE_TO_NOTIFY_2 (didAddMusicalContextToDocument, Document*, document, MusicalContext*, musicalContext);
     OVERRIDE_TO_NOTIFY_2 (willRemoveMusicalContextFromDocument, Document*, document, MusicalContext*, musicalContext);
-    OVERRIDE_TO_NOTIFY_1 (didReorderRegionSequencesInDocument, Document*, document);
+    OVERRIDE_TO_NOTIFY_1 (didReorderMusicalContextsInDocument, Document*, document);
     OVERRIDE_TO_NOTIFY_2 (didAddRegionSequenceToDocument, Document*, document, RegionSequence*, regionSequence);
     OVERRIDE_TO_NOTIFY_2 (willRemoveRegionSequenceFromDocument, Document*, document, RegionSequence*, regionSequence);
+    OVERRIDE_TO_NOTIFY_1 (didReorderRegionSequencesInDocument, Document*, document);
     OVERRIDE_TO_NOTIFY_2 (didAddAudioSourceToDocument, Document*, document, AudioSource*, audioSource);
     OVERRIDE_TO_NOTIFY_2 (willRemoveAudioSourceFromDocument, Document*, document, AudioSource*, audioSource);
     OVERRIDE_TO_NOTIFY_1 (willDestroyDocument, Document*, document);

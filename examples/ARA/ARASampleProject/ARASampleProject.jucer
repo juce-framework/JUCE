@@ -32,6 +32,8 @@
             file="Source/PlaybackRegionView.cpp"/>
       <FILE id="YRS0ck" name="PlaybackRegionView.h" compile="0" resource="0"
             file="Source/PlaybackRegionView.h"/>
+      <FILE id="OwevFC" name="RulersView.cpp" compile="1" resource="0" file="Source/RulersView.cpp"/>
+      <FILE id="cTWsss" name="RulersView.h" compile="0" resource="0" file="Source/RulersView.h"/>
       <FILE id="AclhB6" name="TrackHeaderView.cpp" compile="1" resource="0"
             file="Source/TrackHeaderView.cpp"/>
       <FILE id="OC5DXa" name="TrackHeaderView.h" compile="0" resource="0"

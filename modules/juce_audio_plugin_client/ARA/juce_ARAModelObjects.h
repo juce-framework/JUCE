@@ -58,11 +58,12 @@ public:
         virtual void didEndEditing (ARADocument* document) {}
         virtual void willUpdateDocumentProperties (ARADocument* document, ARADocument::PropertiesPtr newProperties) {}
         virtual void didUpdateDocumentProperties (ARADocument* document) {}
-        virtual void didReorderRegionSequencesInDocument (ARADocument* document) {}
         virtual void didAddMusicalContextToDocument (ARADocument* document, ARAMusicalContext* musicalContext) {}
         virtual void willRemoveMusicalContextFromDocument (ARADocument* document, ARAMusicalContext* musicalContext) {}
+        virtual void didReorderMusicalContextsInDocument (ARADocument* document) {}
         virtual void didAddRegionSequenceToDocument (ARADocument* document, ARARegionSequence* regionSequence) {}
         virtual void willRemoveRegionSequenceFromDocument (ARADocument* document, ARARegionSequence* regionSequence) {}
+        virtual void didReorderRegionSequencesInDocument (ARADocument* document) {}
         virtual void didAddAudioSourceToDocument (ARADocument* document, ARAAudioSource* audioSource) {}
         virtual void willRemoveAudioSourceFromDocument (ARADocument* document, ARAAudioSource* audioSource) {}
         virtual void willDestroyDocument (ARADocument* document) {}
