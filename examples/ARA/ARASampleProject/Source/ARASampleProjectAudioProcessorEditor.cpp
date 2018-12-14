@@ -213,9 +213,6 @@ void ARASampleProjectAudioProcessorEditor::rebuildRegionSequenceViews()
             regionSequenceViews.add (new RegionSequenceView (this, static_cast<ARARegionSequence*> (regionSequence)));
     }
 
-    // for demo purposes each rebuild resets zoom to show all document
-    pixelsPerSecond = (endTime - startTime) / getWidth();
-
     resized();
 }
 
