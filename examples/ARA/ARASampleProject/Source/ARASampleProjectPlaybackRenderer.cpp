@@ -31,7 +31,7 @@ void ARASampleProjectPlaybackRenderer::prepareToPlay (double newSampleRate, int 
                 {
                     // if we're being used in real-time, wrap our source reader in buffering
                     // reader  to avoid blocking while reading samples in processBlock
-                    const int readAheadSizeBySampleRate = (int) (2.0 * getSampleRate() + 0.5);
+                    const int readAheadSizeBySampleRate = roundToInt (2.0 * getSampleRate());
                     const int readAheadSizeByBlockSize = 8 * getMaxSamplesPerBlock();
                     const int readAheadSize = jmax (readAheadSizeBySampleRate, readAheadSizeByBlockSize);
 

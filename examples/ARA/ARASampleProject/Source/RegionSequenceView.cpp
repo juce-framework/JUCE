@@ -30,7 +30,7 @@ void RegionSequenceView::detachFromRegionSequence()
     if (regionSequence == nullptr)
         return;
 
-    regionSequence->removeListener(this);
+    regionSequence->removeListener (this);
 
     regionSequence = nullptr;
 }
@@ -45,7 +45,7 @@ void RegionSequenceView::getTimeRange (double& startTime, double& endTime) const
         return;
     }
 
-    regionSequence->getTimeRange(startTime, endTime, false);
+    regionSequence->getTimeRange (startTime, endTime, false);
 }
 
 //==============================================================================

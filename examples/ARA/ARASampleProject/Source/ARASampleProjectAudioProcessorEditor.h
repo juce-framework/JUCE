@@ -36,7 +36,7 @@ public:
     void resized() override;
 
     // ScrollBar::Listener overrides
-    void scrollBarMoved (ScrollBar *scrollBarThatHasMoved, double newRangeStart) override;
+    void scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRangeStart) override;
 
     // juce::Timer overrides
     void timerCallback() override;

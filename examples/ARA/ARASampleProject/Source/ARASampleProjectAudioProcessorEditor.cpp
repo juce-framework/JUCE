@@ -5,7 +5,7 @@
 constexpr int kTrackHeaderWidth = 120;
 constexpr int kTrackHeight = 80;
 constexpr int kStatusBarHeight = 20;
-constexpr int kMinWidth = 500;
+constexpr int kMinWidth = 3 * kTrackHeaderWidth;
 constexpr int kWidth = 1000;
 constexpr int kMinHeight = 1 * kTrackHeight;
 constexpr int kHeight = 5 * kTrackHeight + kStatusBarHeight;
@@ -38,13 +38,13 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
     zoomInButton.onClick = [this]
     {
         storeRelativePosition();
-        pixelsPerSecond = pixelsPerSecond * 2.0;
+        pixelsPerSecond *= 2.0;
         resized();
     };
     zoomOutButton.onClick = [this]
     {
         storeRelativePosition();
-        pixelsPerSecond =  pixelsPerSecond * 0.5;
+        pixelsPerSecond *= 0.5;
         resized();
     };
     addAndMakeVisible (zoomInButton);
@@ -99,11 +99,10 @@ void ARASampleProjectAudioProcessorEditor::paint (Graphics& g)
     }
 }
 
-void ARASampleProjectAudioProcessorEditor::scrollBarMoved (ScrollBar *scrollBarThatHasMoved, double newRangeStart)
+void ARASampleProjectAudioProcessorEditor::scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRangeStart)
 {
-    auto newRangeStartInt = roundToInt (newRangeStart);
     if (scrollBarThatHasMoved == &horizontalScrollBar)
-        tracksViewPort.setViewPosition (newRangeStartInt, tracksViewPort.getViewPositionY());
+        tracksViewPort.setViewPosition (roundToInt (newRangeStart), tracksViewPort.getViewPositionY());
 }
 
 void ARASampleProjectAudioProcessorEditor::resized()
@@ -138,7 +137,7 @@ void ARASampleProjectAudioProcessorEditor::resized()
     zoomInButton.setEnabled (pixelsPerSecond < maxPixelsPerSecond);
 
     // set new bounds for all region sequence views
-    int width = (int) ((endTime - startTime) * pixelsPerSecond + 0.5);
+    int width = roundToInt ((endTime - startTime) * pixelsPerSecond);
     int y = 0;
     for (auto v : regionSequenceViews)
     {
@@ -232,6 +231,7 @@ void ARASampleProjectAudioProcessorEditor::getVisibleTimeRange(double &start, do
     end = tracksViewPort.getViewArea().getRight() / pixelsPerSecond;
 }
 
+//==============================================================================
 ARASampleProjectAudioProcessorEditor::PlayheadView::PlayheadView(ARASampleProjectAudioProcessorEditor &owner)
     : owner(owner)
 {}

@@ -20,7 +20,7 @@ void TrackHeaderView::detachFromRegionSequence()
     if (regionSequence == nullptr)
         return;
 
-    regionSequence->removeListener(this);
+    regionSequence->removeListener (this);
 
     editorView->removeListener (this);
 

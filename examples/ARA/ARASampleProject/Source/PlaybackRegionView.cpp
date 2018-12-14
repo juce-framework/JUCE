@@ -17,6 +17,7 @@ PlaybackRegionView::PlaybackRegionView (ARASampleProjectAudioProcessorEditor* ed
     static_cast<ARADocument*> (playbackRegion->getRegionSequence()->getDocument())->addListener (this);
     static_cast<ARAAudioSource*> (playbackRegion->getAudioModification()->getAudioSource())->addListener (this);
     playbackRegion->addListener (this);
+
     recreatePlaybackRegionReader();
 }
 
@@ -55,8 +56,8 @@ void PlaybackRegionView::paint (Graphics& g)
     double tailTime = playbackRegion->getTailTime();
     double totalTime = playbackRegion->getDurationInPlaybackTime() + headTime + tailTime;
     int totalWidth = rect.getWidth();
-    rect.removeFromLeft ((int) (totalWidth * headTime / totalTime + 0.5));
-    rect.removeFromRight ((int) (totalWidth * tailTime / totalTime + 0.5));
+    rect.removeFromLeft (roundToInt (totalWidth * headTime / totalTime));
+    rect.removeFromRight (roundToInt (totalWidth * tailTime / totalTime));
     g.setColour (isSelected ? Colours::yellow : Colours::black);
     g.drawRect (rect, lineThickness);
 
