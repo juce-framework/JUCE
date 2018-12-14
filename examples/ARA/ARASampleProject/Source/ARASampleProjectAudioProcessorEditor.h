@@ -38,6 +38,8 @@ public:
     int getPlaybackRegionsViewsXForTime (double time) const;
     double getPlaybackRegionsViewsTimeForX (int x) const;
 
+    double getPlayheadPositionInSeconds() const { return playheadPositionInSeconds; }
+
     //==============================================================================
     void paint (Graphics&) override;
     void resized() override;
@@ -55,9 +57,6 @@ public:
     // ARADocument::Listener overrides
     void didEndEditing (ARADocument* document) override;
     void didReorderRegionSequencesInDocument (ARADocument* document) override;
-
-    const double getPlayheadPositionInSeconds() { return jmax (0.0, playheadPositionInSeconds); }
-    const double getPixelsPerSeconds() { return pixelsPerSecond; }
 
 private:
     void rebuildRegionSequenceViews();

@@ -53,6 +53,7 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
     addAndMakeVisible (zoomOutButton);
 
     followPlayheadToggleButton.setButtonText ("Viewport follows playhead");
+    followPlayheadToggleButton.setToggleState (true, dontSendNotification);
     addAndMakeVisible (followPlayheadToggleButton);
 
     if (isARAEditorView())
@@ -265,7 +266,7 @@ void ARASampleProjectAudioProcessorEditor::timerCallback()
     {
         playheadPositionInSeconds = position.timeInSeconds;
 
-        if (position.isPlaying && followPlayheadToggleButton.getToggleState())
+        if (followPlayheadToggleButton.getToggleState())
         {
             double visibleStart, visibleEnd;
             getVisibleTimeRange (visibleStart, visibleEnd);
