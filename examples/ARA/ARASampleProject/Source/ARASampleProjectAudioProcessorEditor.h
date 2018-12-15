@@ -87,9 +87,7 @@ private:
     bool regionSequenceViewsAreInvalid = true;
     double startTime = 0.0;
     double endTime = 0.0;
-    double pixelsPerSecond = 100.0;
-    double minPixelsPerSecond = 1.0;
-    double maxPixelsPerSecond = 2000.0;
+    double pixelsPerSecond = 0.0;
     double playheadPositionInSeconds = 0.0;
     double pixelsUntilPlayhead = 0.0;
 

@@ -150,13 +150,13 @@ void ARASampleProjectAudioProcessorEditor::resized()
     endTime += borderTime;
 
     // max zoom 1px : 1sample (this is a naive assumption as audio can be in different sample rate)
-    maxPixelsPerSecond = jmax (processor.getSampleRate(), 300.0);
+    double maxPixelsPerSecond = jmax (processor.getSampleRate(), 300.0);
 
     // min zoom covers entire view range
-    minPixelsPerSecond = (getWidth() - kTrackHeaderWidth) / (endTime - startTime);
+    double minPixelsPerSecond = (getWidth() - kTrackHeaderWidth) / (endTime - startTime);
 
     // enforce zoom in/out limits, update zoom buttons
-    pixelsPerSecond =  jmax (minPixelsPerSecond, jmin (pixelsPerSecond, maxPixelsPerSecond));
+    pixelsPerSecond = jmax (minPixelsPerSecond, jmin (pixelsPerSecond, maxPixelsPerSecond));
     zoomOutButton.setEnabled (pixelsPerSecond > minPixelsPerSecond);
     zoomInButton.setEnabled (pixelsPerSecond < maxPixelsPerSecond);
 
