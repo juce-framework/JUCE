@@ -37,16 +37,17 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
 
     zoomInButton.setButtonText("+");
     zoomOutButton.setButtonText("-");
+    constexpr double zoomStepFactor = 1.5;
     zoomInButton.onClick = [this]
     {
         storeRelativePosition();
-        pixelsPerSecond *= 2.0;
+        pixelsPerSecond *= zoomStepFactor;
         resized();
     };
     zoomOutButton.onClick = [this]
     {
         storeRelativePosition();
-        pixelsPerSecond *= 0.5;
+        pixelsPerSecond /= zoomStepFactor;
         resized();
     };
     addAndMakeVisible (zoomInButton);
