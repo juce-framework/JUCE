@@ -77,12 +77,10 @@ void PlaybackRegionView::paint (Graphics& g)
 
         const double startTime = jmax (viewStart, regionStart);
         const double endTime = jmin (viewEnd, regionEnd);
-        const double duration = endTime - startTime;
-
-        if (duration > 0.0)
+        if (endTime - startTime > 0.0)
         {
             g.setColour (regionColour.contrasting (0.7f));
-            audioThumb.drawChannels (g, g.getClipBounds(), startTime - regionStart, duration, 1.0f);
+            audioThumb.drawChannels (g, g.getClipBounds(), startTime - regionStart, endTime - regionStart, 1.0f);
         }
     }
     else
