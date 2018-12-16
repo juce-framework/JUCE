@@ -37,6 +37,7 @@ public:
 
     int getPlaybackRegionsViewsXForTime (double time) const;
     double getPlaybackRegionsViewsTimeForX (int x) const;
+    double getPixelsPerSecond () const { return pixelsPerSecond; }
 
     double getPlayheadPositionInSeconds() const { return playheadPositionInSeconds; }
 

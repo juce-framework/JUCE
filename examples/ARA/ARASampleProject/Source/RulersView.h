@@ -2,6 +2,8 @@
 
 #include "JuceHeader.h"
 
+class ARASampleProjectAudioProcessorEditor;
+
 //==============================================================================
 /**
     RulersView
@@ -12,12 +14,13 @@ class RulersView  : public Component,
                     private ARAMusicalContext::Listener
 {
 public:
-    RulersView (ARADocument* document);
+    RulersView (ARASampleProjectAudioProcessorEditor& owner);
     ~RulersView();
 
     void paint (Graphics&) override;
 
     // ARADocument::Listener overrides
+    void didEndEditing (ARADocument* document) override;
     void willRemoveMusicalContextFromDocument (ARADocument* document, ARAMusicalContext* musicalContext) override;
     void didReorderMusicalContextsInDocument (ARADocument* document) override;
     void willDestroyDocument (ARADocument* document) override;
@@ -28,8 +31,10 @@ public:
 private:
     void detachFromDocument();
     void detachFromMusicalContext();
+    bool findMusicalContext ();
 
 private:
+    ARASampleProjectAudioProcessorEditor& owner;
     ARADocument* document;
     ARAMusicalContext* musicalContext;
 

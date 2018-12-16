@@ -65,7 +65,7 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
 
         document->addListener (this);
 
-        rulersView.reset (new RulersView (document));
+        rulersView.reset (new RulersView (*this));
 
         rulersViewPort.setScrollBarsShown (false, false, false, false);
         rulersViewPort.setViewedComponent (rulersView.get(), false);
