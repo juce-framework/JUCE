@@ -395,8 +395,6 @@ public:
             overwriteFileIfDifferentOrThrow (projectFile, mo);
         }
 
-        writeWorkspaceSettings();
-
         writeInfoPlistFiles();
 
         // Deleting the .rsrc files can be needed to force Xcode to update the version number.
@@ -2294,15 +2292,6 @@ private:
             iconFile = getTargetFolder().getChildFile ("Icon.icns");
             overwriteFileIfDifferentOrThrow (iconFile, mo);
         }
-    }
-
-    void writeWorkspaceSettings() const
-    {
-        File folder = getProjectBundle().getChildFile ("project.xcworkspace").getChildFile ("xcshareddata");
-        createDirectoryOrThrow (folder);
-        MemoryOutputStream mo;
-        mo.write (BinaryData::jucer_WorkspaceSettings_xcsettings, BinaryData::jucer_WorkspaceSettings_xcsettingsSize);
-        overwriteFileIfDifferentOrThrow (folder.getChildFile ("WorkspaceSettings.xcsettings"), mo);
     }
 
     void writeInfoPlistFiles() const

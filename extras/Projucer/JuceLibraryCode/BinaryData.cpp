@@ -7484,21 +7484,8 @@ static const unsigned char temp_binary_data_55[] =
 
 const char* jucer_UnityPluginGUIScript_cs = (const char*) temp_binary_data_55;
 
-//================== jucer_WorkspaceSettings.xcsettings ==================
-static const unsigned char temp_binary_data_56[] =
-"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-"<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
-"<plist version=\"1.0\">\n"
-"<dict>\n"
-"\t<key>BuildSystemType</key>\n"
-"\t<string>Original</string>\n"
-"</dict>\n"
-"</plist>\n";
-
-const char* jucer_WorkspaceSettings_xcsettings = (const char*) temp_binary_data_56;
-
 //================== colourscheme_dark.xml ==================
-static const unsigned char temp_binary_data_57[] =
+static const unsigned char temp_binary_data_56[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
 "\r\n"
 "<COLOUR_SCHEME font=\"&lt;Monospaced&gt;; 13.0\">\r\n"
@@ -7523,10 +7510,10 @@ static const unsigned char temp_binary_data_57[] =
 "  <COLOUR name=\"Error\" colour=\"FFE60000\"/>\r\n"
 "</COLOUR_SCHEME>\r\n";
 
-const char* colourscheme_dark_xml = (const char*) temp_binary_data_57;
+const char* colourscheme_dark_xml = (const char*) temp_binary_data_56;
 
 //================== colourscheme_light.xml ==================
-static const unsigned char temp_binary_data_58[] =
+static const unsigned char temp_binary_data_57[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
 "\r\n"
 "<COLOUR_SCHEME font=\"&lt;Monospaced&gt;; 13.0\">\r\n"
@@ -7551,16 +7538,16 @@ static const unsigned char temp_binary_data_58[] =
 "  <COLOUR name=\"Error\" colour=\"ffcc0000\"/>\r\n"
 "</COLOUR_SCHEME>\r\n";
 
-const char* colourscheme_light_xml = (const char*) temp_binary_data_58;
+const char* colourscheme_light_xml = (const char*) temp_binary_data_57;
 
 //================== nothingtoseehere.txt ==================
-static const unsigned char temp_binary_data_59[] =
+static const unsigned char temp_binary_data_58[] =
 "VUEtMTk3NTkzMTgtNA==";
 
-const char* nothingtoseehere_txt = (const char*) temp_binary_data_59;
+const char* nothingtoseehere_txt = (const char*) temp_binary_data_58;
 
 //================== offlinepage.html ==================
-static const unsigned char temp_binary_data_60[] =
+static const unsigned char temp_binary_data_59[] =
 "<html>\n"
 "  <head>\n"
 "    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=11\">\n"
@@ -7604,10 +7591,10 @@ static const unsigned char temp_binary_data_60[] =
 "  </body>\n"
 "</html>";
 
-const char* offlinepage_html = (const char*) temp_binary_data_60;
+const char* offlinepage_html = (const char*) temp_binary_data_59;
 
 //================== projucer_EULA.txt ==================
-static const unsigned char temp_binary_data_61[] =
+static const unsigned char temp_binary_data_60[] =
 "\r\n"
 "IMPORTANT NOTICE: PLEASE READ CAREFULLY BEFORE INSTALLING THE SOFTWARE:\r\n"
 "\r\n"
@@ -7771,10 +7758,10 @@ static const unsigned char temp_binary_data_61[] =
 "\r\n"
 "10.6. Please note that this License, its subject matter and its formation, are governed by English law. You and we both agree to that the courts of England and Wales will have exclusive jurisdiction.\r\n";
 
-const char* projucer_EULA_txt = (const char*) temp_binary_data_61;
+const char* projucer_EULA_txt = (const char*) temp_binary_data_60;
 
 //================== RecentFilesMenuTemplate.nib ==================
-static const unsigned char temp_binary_data_62[] =
+static const unsigned char temp_binary_data_61[] =
 { 98,112,108,105,115,116,48,48,212,0,1,0,2,0,3,0,4,0,5,0,6,1,53,1,54,88,36,118,101,114,115,105,111,110,88,36,111,98,106,101,99,116,115,89,36,97,114,99,104,105,118,101,114,84,36,116,111,112,18,0,1,134,160,175,16,74,0,7,0,8,0,31,0,35,0,36,0,42,0,46,0,50,
 0,53,0,57,0,74,0,77,0,78,0,86,0,87,0,97,0,112,0,113,0,114,0,119,0,120,0,121,0,124,0,128,0,129,0,132,0,143,0,144,0,145,0,149,0,153,0,162,0,163,0,164,0,169,0,173,0,180,0,181,0,182,0,185,0,192,0,193,0,200,0,201,0,208,0,209,0,216,0,217,0,224,0,225,0,226,
 0,229,0,230,0,232,0,249,1,11,1,29,1,30,1,31,1,32,1,33,1,34,1,35,1,36,1,37,1,38,1,39,1,40,1,41,1,42,1,43,1,44,1,47,1,50,85,36,110,117,108,108,219,0,9,0,10,0,11,0,12,0,13,0,14,0,15,0,16,0,17,0,18,0,19,0,20,0,21,0,22,0,23,0,24,0,25,0,26,0,27,0,28,0,29,0,
@@ -7811,7 +7798,7 @@ static const unsigned char temp_binary_data_62[] =
 7,157,7,159,7,161,7,163,7,165,7,167,7,169,7,171,7,173,7,175,7,177,7,179,7,181,7,190,7,192,7,225,7,227,7,229,7,231,7,233,7,235,7,237,7,239,7,241,7,243,7,245,7,247,7,249,7,251,7,253,7,255,8,2,8,5,8,8,8,11,8,14,8,17,8,20,8,23,8,26,8,29,8,32,8,35,8,38,8,
 41,8,44,8,53,8,55,8,56,8,65,8,67,8,68,8,77,8,92,8,97,8,115,8,120,8,134,0,0,0,0,0,0,2,2,0,0,0,0,0,0,1,57,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,136,0,0 };
 
-const char* RecentFilesMenuTemplate_nib = (const char*) temp_binary_data_62;
+const char* RecentFilesMenuTemplate_nib = (const char*) temp_binary_data_61;
 
 
 const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
@@ -7880,7 +7867,6 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0xf4ca9e9a:  numBytes = 2447; return jucer_PIPMain_cpp;
         case 0x0b16e320:  numBytes = 517; return jucer_PIPTemplate_h;
         case 0xcd472557:  numBytes = 6433; return jucer_UnityPluginGUIScript_cs;
-        case 0xc9f5a9cf:  numBytes = 243; return jucer_WorkspaceSettings_xcsettings;
         case 0x763d39dc:  numBytes = 1050; return colourscheme_dark_xml;
         case 0xe8b08520:  numBytes = 1050; return colourscheme_light_xml;
         case 0x938e96ec:  numBytes = 20; return nothingtoseehere_txt;
@@ -7952,7 +7938,6 @@ const char* namedResourceList[] =
     "jucer_PIPMain_cpp",
     "jucer_PIPTemplate_h",
     "jucer_UnityPluginGUIScript_cs",
-    "jucer_WorkspaceSettings_xcsettings",
     "colourscheme_dark_xml",
     "colourscheme_light_xml",
     "nothingtoseehere_txt",
@@ -8019,7 +8004,6 @@ const char* originalFilenames[] =
     "jucer_PIPMain.cpp",
     "jucer_PIPTemplate.h",
     "jucer_UnityPluginGUIScript.cs",
-    "jucer_WorkspaceSettings.xcsettings",
     "colourscheme_dark.xml",
     "colourscheme_light.xml",
     "nothingtoseehere.txt",

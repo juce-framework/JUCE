@@ -265,8 +265,6 @@
               file="Source/BinaryData/Templates/jucer_PIPTemplate.h"/>
         <FILE id="wrkU1v" name="jucer_UnityPluginGUIScript.cs" compile="0"
               resource="1" file="Source/BinaryData/Templates/jucer_UnityPluginGUIScript.cs"/>
-        <FILE id="nPFj0g" name="jucer_WorkspaceSettings.xcsettings" compile="0"
-              resource="1" file="Source/BinaryData/Templates/jucer_WorkspaceSettings.xcsettings"/>
       </GROUP>
       <FILE id="oXM3fR" name="colourscheme_dark.xml" compile="0" resource="1"
             file="Source/BinaryData/colourscheme_dark.xml"/>

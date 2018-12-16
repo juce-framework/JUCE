@@ -2086,7 +2086,6 @@
     <None Include="..\..\Source\BinaryData\Icons\wizard_OpenGL.svg"/>
     <None Include="..\..\Source\BinaryData\Icons\wizard_StaticLibrary.svg"/>
     <None Include="..\..\Source\BinaryData\Templates\jucer_UnityPluginGUIScript.cs"/>
-    <None Include="..\..\Source\BinaryData\Templates\jucer_WorkspaceSettings.xcsettings"/>
     <None Include="..\..\Source\BinaryData\colourscheme_dark.xml"/>
     <None Include="..\..\Source\BinaryData\colourscheme_light.xml"/>
     <None Include="..\..\Source\BinaryData\nothingtoseehere.txt"/>
