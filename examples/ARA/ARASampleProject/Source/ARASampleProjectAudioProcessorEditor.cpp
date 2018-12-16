@@ -153,7 +153,7 @@ void ARASampleProjectAudioProcessorEditor::resized()
     double maxPixelsPerSecond = jmax (processor.getSampleRate(), 300.0);
 
     // min zoom covers entire view range
-    double minPixelsPerSecond = (getWidth() - kTrackHeaderWidth) / (endTime - startTime);
+    double minPixelsPerSecond = (getWidth() - kTrackHeaderWidth - rulersViewPort.getScrollBarThickness()) / (endTime - startTime);
 
     // enforce zoom in/out limits, update zoom buttons
     pixelsPerSecond = jmax (minPixelsPerSecond, jmin (pixelsPerSecond, maxPixelsPerSecond));
