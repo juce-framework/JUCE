@@ -49,6 +49,8 @@ public:
 
     ARADocumentController* getARADocumentController() const noexcept;
 
+    AudioProcessorARAExtension* getAudioProcessorARAExtension() const noexcept;
+
 private:
     AudioProcessorARAExtension* araProcessorExtension;
 

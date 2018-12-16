@@ -71,4 +71,9 @@ ARADocumentController* AudioProcessorEditorARAExtension::getARADocumentControlle
     return isARAEditorView() ? static_cast<ARADocumentController*> (getARAEditorView()->getDocumentController()) : nullptr;
 }
 
+AudioProcessorARAExtension* AudioProcessorEditorARAExtension::getAudioProcessorARAExtension() const noexcept
+{
+    return araProcessorExtension;
+}
+
 } // namespace juce
