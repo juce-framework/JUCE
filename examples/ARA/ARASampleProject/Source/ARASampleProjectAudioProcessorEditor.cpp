@@ -187,9 +187,9 @@ void ARASampleProjectAudioProcessorEditor::resized()
     followPlayheadToggleButton.setBounds (0, zoomInButton.getY(), 200, kStatusBarHeight);
 
     // keep viewport position relative to playhead
-    const double newPixelBasedPositionInSeconds = pixelsUntilPlayhead / pixelsPerSecond;
+    const double secondsBeforePlayhead = pixelsUntilPlayhead / pixelsPerSecond;
     auto relativeViewportPosition = playbackRegionsViewPort.getViewPosition();
-    relativeViewportPosition.setX (roundToInt ((playheadPositionInSeconds - newPixelBasedPositionInSeconds) * pixelsPerSecond));
+    relativeViewportPosition.setX (getPlaybackRegionsViewsXForTime (playheadPositionInSeconds - secondsBeforePlayhead));
     playbackRegionsViewPort.setViewPosition (relativeViewportPosition);
     rulersViewPort.setViewPosition (relativeViewportPosition.getX(), 0);
     trackHeadersViewPort.setViewPosition (0, relativeViewportPosition.getY());
@@ -220,7 +220,7 @@ void ARASampleProjectAudioProcessorEditor::rebuildRegionSequenceViews()
 
 void ARASampleProjectAudioProcessorEditor::storeRelativePosition()
 {
-    pixelsUntilPlayhead = roundToInt (pixelsPerSecond * playheadPositionInSeconds - playbackRegionsViewPort.getViewPosition().getX());
+    pixelsUntilPlayhead = roundToInt (getPlaybackRegionsViewsXForTime (playheadPositionInSeconds) - playbackRegionsViewPort.getViewPosition().getX());
 }
 
 //==============================================================================
