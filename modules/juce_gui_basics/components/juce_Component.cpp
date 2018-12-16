@@ -700,6 +700,8 @@ void Component::removeFromDesktop()
 
     if (flags.hasHeavyweightPeerFlag)
     {
+        ComponentHelpers::releaseAllCachedImageResources (*this);
+
         auto* peer = ComponentPeer::getPeerFor (this);
         jassert (peer != nullptr);
 

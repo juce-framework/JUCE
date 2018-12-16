@@ -277,7 +277,9 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
        #endif
 
         if (category == AVAudioSessionCategoryPlayAndRecord)
-            options |= (AVAudioSessionCategoryOptionDefaultToSpeaker | AVAudioSessionCategoryOptionAllowBluetooth);
+            options |= (AVAudioSessionCategoryOptionDefaultToSpeaker
+                      | AVAudioSessionCategoryOptionAllowBluetooth
+                      | AVAudioSessionCategoryOptionAllowBluetoothA2DP);
 
         JUCE_NSERROR_CHECK ([[AVAudioSession sharedInstance] setCategory: category
                                                              withOptions: options
@@ -404,9 +406,9 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
         JUCE_IOS_AUDIO_LOG ("Sample rate after detecting available sample rates: " << sampleRate);
     }
 
-    void updateHardwareInfo()
+    void updateHardwareInfo (bool forceUpdate = false)
     {
-        if (! hardwareInfoNeedsUpdating.compareAndSetBool (false, true))
+        if (! forceUpdate && ! hardwareInfoNeedsUpdating.compareAndSetBool (false, true))
             return;
 
         JUCE_IOS_AUDIO_LOG ("Updating hardware info");
@@ -451,13 +453,11 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
                             << ", targetBufferSize: " << targetBufferSize);
 
         setAudioSessionActive (true);
-
+        setAudioSessionCategory (requestedInputChannels > 0 ? AVAudioSessionCategoryPlayAndRecord
+                                                            : AVAudioSessionCategoryPlayback);
         channelData.reconfigure (requestedInputChannels, requestedOutputChannels);
-
-        setAudioSessionCategory (channelData.areInputChannelsAvailable() ? AVAudioSessionCategoryPlayAndRecord : AVAudioSessionCategoryPlayback);
-
+        updateHardwareInfo (true);
         setTargetSampleRateAndBufferSize();
-
         fixAudioRouteIfSetToReceiver();
 
         isRunning = true;

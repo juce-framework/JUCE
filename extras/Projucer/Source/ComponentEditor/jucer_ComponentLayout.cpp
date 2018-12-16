@@ -554,6 +554,15 @@ bool ComponentLayout::dependsOnComponentForRelativePos (Component* comp, Compone
     return false;
 }
 
+bool ComponentLayout::isComponentPositionRelative (Component* comp) const
+{
+    for (int i = 0; i < getNumComponents(); ++i)
+        if (dependsOnComponentForRelativePos (comp, getComponent (i)))
+            return true;
+
+    return false;
+}
+
 const int menuIdBase = 0x63240000;
 
 PopupMenu ComponentLayout::getRelativeTargetMenu (Component* comp, int whichDimension) const

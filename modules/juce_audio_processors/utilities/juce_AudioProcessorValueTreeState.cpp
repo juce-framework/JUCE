@@ -395,6 +395,8 @@ void AudioProcessorValueTreeState::updateParameterConnectionsToChildTrees()
             state.appendChild (adapter.tree, nullptr);
         }
     }
+
+    flushParameterValuesToValueTree();
 }
 
 void AudioProcessorValueTreeState::valueTreePropertyChanged (ValueTree& tree, const Identifier&)
@@ -1110,12 +1112,15 @@ public:
         {
             TestAudioProcessor proc;
             const auto key = "id";
+            const auto initialValue = 0.2f;
             auto param = proc.state.createAndAddParameter (std::make_unique<Parameter> (key, String(), String(), NormalisableRange<float>(),
-                                                                                        0.0f, nullptr, nullptr));
+                                                                                        initialValue, nullptr, nullptr));
             proc.state.state = ValueTree { "state" };
 
-            const auto newValue = 0.75f;
             auto value = proc.state.getParameterAsValue (key);
+            expectEquals (float (value.getValue()), initialValue);
+
+            const auto newValue = 0.75f;
             value = newValue;
 
             expectEquals (param->getValue(), newValue);
