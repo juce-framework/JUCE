@@ -83,8 +83,10 @@ void PlaybackRegionView::paint (Graphics& g)
             double startTime = editorComponent->getPlaybackRegionsViewsTimeForX (convertedBounds.getX()) + viewTimeOffset;
             double endTime = editorComponent->getPlaybackRegionsViewsTimeForX (convertedBounds.getRight()) + viewTimeOffset;
 
+            auto drawBounds = getBounds() - getPosition();
+            drawBounds.setHorizontalRange (clipBounds.getHorizontalRange());
             g.setColour (regionColour.contrasting (0.7f));
-            audioThumb.drawChannels (g, clipBounds, startTime, endTime, 1.0f);
+            audioThumb.drawChannels (g, drawBounds, startTime, endTime, 1.0f);
         }
     }
     else
