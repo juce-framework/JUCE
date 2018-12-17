@@ -15,6 +15,7 @@ ARASampleProjectAudioProcessor::ARASampleProjectAudioProcessor()
                        )
 #endif
 {
+    lastPositionInfo.resetToDefault();
 }
 
 ARASampleProjectAudioProcessor::~ARASampleProjectAudioProcessor()
