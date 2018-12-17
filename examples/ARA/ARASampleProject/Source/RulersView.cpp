@@ -128,7 +128,7 @@ void RulersView::paint (juce::Graphics& g)
 
         g.setColour (Colours::white);
         g.setFont (Font (12.0f));
-        g.drawText ("Not implemented yet: showing seconds, bars with beat division, chords", bounds, Justification::centred);
+        g.drawText ("No musical context found in ARA document!", bounds, Justification::centred);
         
         return;
     }
