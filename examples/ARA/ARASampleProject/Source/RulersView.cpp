@@ -9,7 +9,7 @@ RulersView::RulersView (ARASampleProjectAudioProcessorEditor& owner)
 {
     if (owner.isARAEditorView())
     {
-        document = owner.getARADocumentController()->getDocument<ARADocument>();
+        document = static_cast<ARADocument*>(owner.getARADocumentController()->getDocument());
         document->addListener (this);
         if (findMusicalContext())
             musicalContext->addListener (this);
@@ -58,7 +58,7 @@ bool RulersView::findMusicalContext()
         auto viewSelection = editor.getARAEditorView()->getViewSelection();
         if (!viewSelection.getRegionSequences().empty())
         {
-            musicalContext = viewSelection.getRegionSequences()[0]->getMusicalContext<ARAMusicalContext>();
+            musicalContext = static_cast<ARAMusicalContext*>(viewSelection.getRegionSequences()[0]->getMusicalContext());
             if (musicalContext != nullptr)
                 return musicalContext;
         }
@@ -66,7 +66,7 @@ bool RulersView::findMusicalContext()
         // then try the first selected playback region's region sequence
         if (!viewSelection.getPlaybackRegions().empty())
         {
-            musicalContext = viewSelection.getPlaybackRegions()[0]->getRegionSequence()->getMusicalContext<ARAMusicalContext>();
+            musicalContext = static_cast<ARAMusicalContext*>(viewSelection.getPlaybackRegions()[0]->getRegionSequence()->getMusicalContext());
             if (musicalContext != nullptr)
                 return musicalContext;
         }
@@ -74,11 +74,11 @@ bool RulersView::findMusicalContext()
         // no selection? if we have an editor renderer try the first region sequence / playback region
         if (auto editorRenderer = editor.getAudioProcessorARAExtension()->getARAEditorRenderer())
         {
-            musicalContext = editorRenderer->getRegionSequences()[0]->getMusicalContext<ARAMusicalContext>();
+            musicalContext = static_cast<ARAMusicalContext*>(editorRenderer->getRegionSequences()[0]->getMusicalContext());
             if (musicalContext != nullptr)
                 return musicalContext;
 
-            musicalContext = editorRenderer->getPlaybackRegions()[0]->getRegionSequence()->getMusicalContext<ARAMusicalContext>();
+            musicalContext = static_cast<ARAMusicalContext*>(editorRenderer->getPlaybackRegions()[0]->getRegionSequence()->getMusicalContext());
             if (musicalContext != nullptr)
                 return musicalContext;
         }
@@ -86,13 +86,13 @@ bool RulersView::findMusicalContext()
         // otherwise if we're a playback renderer try the first playback region
         if (auto playbackRenderer = editor.getAudioProcessorARAExtension()->getARAPlaybackRenderer())
         {
-            musicalContext = playbackRenderer->getPlaybackRegions()[0]->getRegionSequence()->getMusicalContext<ARAMusicalContext>();
+            musicalContext = static_cast<ARAMusicalContext*>(playbackRenderer->getPlaybackRegions()[0]->getRegionSequence()->getMusicalContext());
             if (musicalContext != nullptr)
                 return musicalContext;
         }
 
         // still nothing? try the first musical context in the docment
-        musicalContext = editor.getARADocumentController()->getDocument()->getMusicalContexts<ARAMusicalContext>()[0];
+        musicalContext = static_cast<ARAMusicalContext*>(editor.getARADocumentController()->getDocument()->getMusicalContexts()[0]);
         if (musicalContext != nullptr)
             return musicalContext;
 
