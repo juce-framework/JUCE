@@ -578,26 +578,11 @@ void XmlElement::setAttribute (const Identifier& attributeName, const int number
     setAttribute (attributeName, String (number));
 }
 
-static String trimTrailingZeros (const String& input)
-{
-    auto pointPos = input.indexOfChar ('.');
-
-    if (pointPos == -1)
-        return input;
-
-    auto start = input.getCharPointer();
-    auto minPos = start + pointPos + 1;
-    auto ptr = start + input.length() - 1;
-
-    while (ptr != minPos && *ptr == '0')
-        --ptr;
-
-    return input.substring (0, (int) (ptr - start) + 1);
-}
-
 void XmlElement::setAttribute (const Identifier& attributeName, const double number)
 {
-    setAttribute (attributeName, trimTrailingZeros ({ number, 20 }));
+    String doubleString (number, 20);
+    setAttribute (attributeName,
+                  doubleString.substring (0, (int) CharacterFunctions::findLengthWithoutTrailingZeros (doubleString.getCharPointer())));
 }
 
 void XmlElement::removeAttribute (const Identifier& attributeName) noexcept
