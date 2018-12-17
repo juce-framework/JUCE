@@ -7,6 +7,14 @@ RulersView::RulersView (ARASampleProjectAudioProcessorEditor& owner)
       document (nullptr),
       musicalContext (nullptr)
 {
+    setColour (borderColourId, Colours::darkgrey);
+    setColour (musicalRulerBackgroundColourId, (Colours::green).withAlpha(0.2f));
+    setColour (timeRulerBackgroundColourId, (Colours::blue).withAlpha(0.2f));
+    setColour (chordsRulerBackgroundColourId, Colours::transparentBlack);
+    setColour (musicalGridColourId, Colours::slategrey);
+    setColour (timeGridColourId, Colours::slateblue);
+    setColour (chordsColourId, Colours::slategrey);
+
     if (owner.isARAEditorView())
     {
         document = static_cast<ARADocument*>(owner.getARADocumentController()->getDocument());
@@ -112,21 +120,21 @@ bool RulersView::findMusicalContext()
 //==============================================================================
 void RulersView::paint (juce::Graphics& g)
 {
+    const auto bounds = getLocalBounds();
     if (musicalContext == nullptr)
     {
         g.setColour (Colours::darkgrey);
-        g.drawRect (getLocalBounds(), 3);
+        g.drawRect (bounds, 3);
 
         g.setColour (Colours::white);
         g.setFont (Font (12.0f));
-        g.drawText ("Not implemented yet: showing seconds, bars with beat division, chords", getLocalBounds(), Justification::centred);
+        g.drawText ("Not implemented yet: showing seconds, bars with beat division, chords", bounds, Justification::centred);
         
         return;
     }
 
     // we'll draw three rulers: seconds, beats, and chords
-    int rulerHeight = getHeight() / 3;
-    g.setColour (Colours::slategrey);
+    int rulerHeight = bounds.getHeight() / 3;
 
     // tempo ruler
     // use our musical context to read tempo and bar signature data using content readers
@@ -154,12 +162,16 @@ void RulersView::paint (juce::Graphics& g)
     int pixelStartSeconds = (int) (secondsTillWholeSecond * owner.getPixelsPerSecond());
 
     // seconds ruler: one tick for each second
+    g.setColour (findColour (ColourIds::timeRulerBackgroundColourId));
+    g.fillRect (0, 0, bounds.getWidth(), rulerHeight);
+    RectangleList <int> timeSecondsRects;
     for (int s = nextWholeSecond; s < lastWholeSecond; s++)
     {
         int secondPixel = (int) (pixelStartSeconds + s * owner.getPixelsPerSecond());
-        Rectangle<int> lineRect (secondPixel, 0, 2, rulerHeight);
-        g.fillRect (lineRect);
+        timeSecondsRects.addWithoutMerging (Rectangle<int>(secondPixel, 0, 2, rulerHeight));
     }
+    g.setColour (findColour (ColourIds::timeGridColourId));
+    g.fillRectList (timeSecondsRects);
 
     // convert the time range to beats
     double secondsToBeats = (tempoBPM / 60);
@@ -175,23 +187,30 @@ void RulersView::paint (juce::Graphics& g)
 
     // tempo ruler: one tick for each beat
     // and thicker ticks for each downbeat
+    g.setColour (findColour (ColourIds::musicalRulerBackgroundColourId));
+    g.fillRect (0, rulerHeight, bounds.getWidth(), rulerHeight);
+    RectangleList <int> musicalRects;
     for (int b = nextWholeBeat; b < lastWholeBeat; b++)
     {
         int tickWidth = (b % barSigNumerator == 0) ? 2 : 1;
         int beatPixel = pixelStart + (int) (pixelsPerBeat * (b - nextWholeBeat));
-        Rectangle<int> lineRect (beatPixel, rulerHeight, tickWidth, rulerHeight);
-        g.fillRect (lineRect);
+        musicalRects.addWithoutMerging (Rectangle<int>(beatPixel, rulerHeight, tickWidth, rulerHeight));
     }
+    g.setColour (findColour (ColourIds::musicalGridColourId));
+    g.fillRectList (musicalRects);
 
     // TODO JUCE_ARA chord ruler
+    g.setColour (findColour (ColourIds::chordsRulerBackgroundColourId));
+    g.fillRect (0, rulerHeight * 2, bounds.getWidth(), rulerHeight);
+    g.setColour (findColour (ColourIds::chordsColourId));
 
-    g.setColour (Colours::black);
-    auto bounds = g.getClipBounds();
-    bounds.setHeight (rulerHeight);
+    g.setColour (findColour (ColourIds::borderColourId));
+    auto borderBounds = g.getClipBounds();
+    borderBounds.setHeight (rulerHeight);
     for (int i = 0; i < 3; i++)
     {
         g.drawRect (bounds);
-        bounds.translate (0, rulerHeight);
+        borderBounds.translate (0, rulerHeight);
     }
 }
 
