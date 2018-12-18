@@ -39,6 +39,7 @@ public:
 
     // ARAPlaybackRegion::Listener overrides
     void willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties) override;
+    void didUpdatePlaybackRegionContent (ARAPlaybackRegion* playbackRegion, ARAContentUpdateScopes scopeFlags) override;
 
 private:
     void recreatePlaybackRegionReader();

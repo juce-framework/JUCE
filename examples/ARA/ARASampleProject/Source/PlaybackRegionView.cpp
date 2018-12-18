@@ -107,6 +107,7 @@ void PlaybackRegionView::paint (Graphics& g)
 //==============================================================================
 void PlaybackRegionView::changeListenerCallback (ChangeBroadcaster* /*broadcaster*/)
 {
+    // our thumb nail has changed
     repaint();
 }
 
@@ -124,10 +125,12 @@ void PlaybackRegionView::didEndEditing (ARADocument* document)
 {
     jassert (document == playbackRegion->getRegionSequence()->getDocument());
 
+    // our reader will pick up any changes in samples or position
     if ((playbackRegionReader ==  nullptr) || ! playbackRegionReader->isValid())
     {
         recreatePlaybackRegionReader();
-        editorComponent->invalidateRegionSequenceViews();
+        editorComponent->resized();
+        repaint();
     }
 }
 
@@ -142,15 +145,29 @@ void PlaybackRegionView::willUpdatePlaybackRegionProperties (ARAPlaybackRegion* 
 {
     jassert (playbackRegion == region);
 
-    if ((playbackRegion->getStartInPlaybackTime() != newProperties->startInPlaybackTime) ||
-        (playbackRegion->getDurationInPlaybackTime() != newProperties->durationInPlaybackTime))
+    if ((playbackRegion->getName() != newProperties->name) ||
+        (playbackRegion->getColor() != newProperties->color))
     {
-        editorComponent->invalidateRegionSequenceViews();
+        repaint();
     }
-
-    repaint();
 }
 
+void PlaybackRegionView::didUpdatePlaybackRegionContent (ARAPlaybackRegion* region, ARAContentUpdateScopes scopeFlags)
+{
+    jassert (playbackRegion == region);
+
+    // our reader already catches this too, but we only check for its validity after host edits
+    // if the update is triggered inside the plug-in (e.g. when updating head/tail time)
+    // we need to update the view from this call, unless we're within a host edit already.
+    if (scopeFlags.affectSamples() &&
+        ! playbackRegion->getAudioModification()->getAudioSource()->getDocument()->getDocumentController()->isHostEditingDocument())
+    {
+        editorComponent->resized();
+        repaint();
+    }
+}
+
+//==============================================================================
 void PlaybackRegionView::recreatePlaybackRegionReader()
 {
     audioThumbCache.clear();
