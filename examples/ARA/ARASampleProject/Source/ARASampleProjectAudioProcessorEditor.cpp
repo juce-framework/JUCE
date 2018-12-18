@@ -195,6 +195,9 @@ void ARASampleProjectAudioProcessorEditor::resized()
 
 void ARASampleProjectAudioProcessorEditor::scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRangeStart)
 {
+    // TODO JUCE_ARA JUCE does not send scrollBarMoved if there's some scroll wheel or track pad event
+    //               that does trigger the scrolling. We'd need to fix this some way ot the other...
+    // see for example: https://forum.juce.com/t/viewport-scrollbarmoved-mousewheelmoved/20226
     if (scrollBarThatHasMoved == &playbackRegionsViewPort.getHorizontalScrollBar())
         rulersViewPort.setViewPosition (roundToInt (newRangeStart), 0);
     else if (scrollBarThatHasMoved == &playbackRegionsViewPort.getVerticalScrollBar())
