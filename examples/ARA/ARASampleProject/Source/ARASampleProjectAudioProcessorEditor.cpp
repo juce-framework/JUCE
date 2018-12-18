@@ -95,7 +95,7 @@ int ARASampleProjectAudioProcessorEditor::getPlaybackRegionsViewsXForTime (doubl
 
 double ARASampleProjectAudioProcessorEditor::getPlaybackRegionsViewsTimeForX (int x) const
 {
-    return ((double) x / (double) playbackRegionsView.getWidth()) * (endTime - startTime);
+    return startTime + ((double) x / (double) playbackRegionsView.getWidth()) * (endTime - startTime);
 }
 
 //==============================================================================
