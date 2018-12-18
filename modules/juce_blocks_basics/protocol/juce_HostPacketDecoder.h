@@ -194,7 +194,7 @@ struct HostPacketDecoder
         version.version.length = (uint8) reader.readBits (7);
 
         for (uint32 i = 0; i < version.version.length; ++i)
-            version.version.version[i] = (uint8) reader.readBits (7);
+            version.version.data[i] = (uint8) reader.readBits (7);
 
         handler.handleVersion (version);
         return true;
@@ -208,7 +208,7 @@ struct HostPacketDecoder
         name.name.length = (uint8) reader.readBits (7);
 
         for (uint32 i = 0; i < name.name.length; ++i)
-            name.name.name[i] = (uint8) reader.readBits (7);
+            name.name.data[i] = (uint8) reader.readBits (7);
 
         handler.handleName (name);
         return true;

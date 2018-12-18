@@ -76,7 +76,7 @@ struct MIDIDeviceConnection  : public PhysicalTopologySource::DeviceConnection,
         JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED // This method must only be called from the message thread!
 
         jassert (dataSize > sizeof (BlocksProtocol::roliSysexHeader) + 2);
-        jassert (memcmp (data, BlocksProtocol::roliSysexHeader, sizeof (BlocksProtocol::roliSysexHeader)) == 0);
+        jassert (memcmp (data, BlocksProtocol::roliSysexHeader, sizeof (BlocksProtocol::roliSysexHeader) - 1) == 0);
         jassert (static_cast<const uint8*> (data)[dataSize - 1] == 0xf7);
 
         if (midiOutput != nullptr)
