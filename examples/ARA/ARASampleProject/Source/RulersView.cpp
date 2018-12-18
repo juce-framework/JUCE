@@ -109,7 +109,9 @@ void RulersView::paint (juce::Graphics& g)
 
     // we should only be doing this on the visible time range
     double startTime, endTime;
-    owner.getVisibleTimeRange (startTime, endTime);
+//  TODO JUCE_ARA getVisibleTimeRange() does not work properly - for now, we're drawing the entire timeline...
+//  owner.getVisibleTimeRange (startTime, endTime);
+    owner.getTimeRange (startTime, endTime);
 
     // seconds ruler: one tick for each second
     {
