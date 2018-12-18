@@ -219,8 +219,9 @@ public:
 
         if (! isLibrary())
         {
-            writeStringsXML      (targetFolder);
-            writeAppIcons        (targetFolder);
+            copyAdditionalJavaLibs (appFolder);
+            writeStringsXML        (targetFolder);
+            writeAppIcons          (targetFolder);
         }
 
         writeCmakeFile (appFolder.getChildFile ("CMakeLists.txt"));
@@ -1060,16 +1061,19 @@ private:
     //==============================================================================
     void copyAdditionalJavaLibs (const File& targetFolder) const
     {
+        auto libFolder = targetFolder.getChildFile ("libs");
+        libFolder.createDirectory();
+
         auto libPaths = StringArray::fromLines (androidJavaLibs.get().toString());
 
         for (auto& p : libPaths)
         {
-            File f = getTargetFolder().getChildFile (p);
+            auto f = getTargetFolder().getChildFile (p);
 
             // Is the path to the java lib correct?
             jassert (f.existsAsFile());
 
-            f.copyFileTo (targetFolder.getChildFile (f.getFileName()));
+            f.copyFileTo (libFolder.getChildFile (f.getFileName()));
         }
     }
 
