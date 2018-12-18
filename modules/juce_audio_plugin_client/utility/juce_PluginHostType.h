@@ -63,6 +63,7 @@ public:
         BitwigStudio,               /**< Represents Bitwig Studio. */
         CakewalkSonar8,             /**< Represents Cakewalk Sonar 8. */
         CakewalkSonarGeneric,       /**< Represents Cakewalk Sonar. */
+        CakewalkByBandlab,          /**< Represents Cakewalk by Bandlab. */
         DaVinciResolve,             /**< Represents DaVinci Resolve. */
         DigitalPerformer,           /**< Represents Digital Performer. */
         FinalCut,                   /**< Represents Apple Final Cut Pro. */
@@ -158,7 +159,7 @@ public:
     /** Returns true if the host is Magix Sequoia. */
     bool isSequoia() const noexcept           { return type == MagixSequoia; }
     /** Returns true if the host is any version of Cakewalk Sonar. */
-    bool isSonar() const noexcept             { return type == CakewalkSonar8 || type == CakewalkSonarGeneric; }
+    bool isSonar() const noexcept             { return type == CakewalkSonar8 || type == CakewalkSonarGeneric || type == CakewalkByBandlab; }
     /** Returns true if the host is Steinberg's VST3 Test Host. */
     bool isSteinbergTestHost() const noexcept { return type == SteinbergTestHost; }
     /** Returns true if the host is any product from Steinberg. */
@@ -198,6 +199,7 @@ public:
             case BitwigStudio:             return "Bitwig Studio";
             case CakewalkSonar8:           return "Cakewalk Sonar 8";
             case CakewalkSonarGeneric:     return "Cakewalk Sonar";
+            case CakewalkByBandlab:        return "Cakewalk by Bandlab";
             case DaVinciResolve:           return "DaVinci Resolve";
             case DigitalPerformer:         return "DigitalPerformer";
             case FinalCut:                 return "Final Cut";
@@ -336,6 +338,7 @@ private:
         if (hostFilename.containsIgnoreCase   ("ProTools"))          return AvidProTools;
         if (hostPath.containsIgnoreCase       ("SONAR 8"))           return CakewalkSonar8;
         if (hostFilename.containsIgnoreCase   ("SONAR"))             return CakewalkSonarGeneric;
+        if (hostFilename.containsIgnoreCase   ("Cakewalk.exe"))      return CakewalkByBandlab;
         if (hostFilename.containsIgnoreCase   ("GarageBand"))        return AppleGarageBand;
         if (hostFilename.containsIgnoreCase   ("Logic"))             return AppleLogic;
         if (hostFilename.containsIgnoreCase   ("MainStage"))         return AppleMainStage;
