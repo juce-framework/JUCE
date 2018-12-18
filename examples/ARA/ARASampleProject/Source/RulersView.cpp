@@ -84,6 +84,7 @@ void RulersView::findMusicalContext()
 void RulersView::paint (juce::Graphics& g)
 {
     const auto bounds = getLocalBounds();
+
     if (musicalContext == nullptr)
     {
         g.setColour (Colours::darkgrey);
@@ -97,150 +98,154 @@ void RulersView::paint (juce::Graphics& g)
     }
 
     // we'll draw three rulers: seconds, beats, and chords
-    int rulerHeight = bounds.getHeight() / 3;
+    constexpr int lightLineWidth = 1;
+    constexpr int heavyLineWidth = 3;
+    const int chordRulerY = 0;
+    const int chordRulerHeight = bounds.getHeight() / 3;
+    const int beatsRulerY = chordRulerY + chordRulerHeight;
+    const int beatsRulerHeight = (bounds.getHeight() - chordRulerHeight) / 2;
+    const int secondsRulerY = beatsRulerY + beatsRulerHeight;
+    const int secondsRulerHeight = bounds.getHeight() - chordRulerHeight - beatsRulerHeight;
 
-    // TODO JUCE_ARA
     // we should only be doing this on the visible time range
-    double timeStart (0), timeEnd (0);
-    owner.getTimeRange (timeStart, timeEnd);
-
-    // find the next whole second after time start
-    int nextWholeSecond = (int) (timeStart + 0.5);
-    int lastWholeSecond = (int) (timeEnd + 0.5);
-    double secondsTillWholeSecond = (double) nextWholeSecond - timeStart;
-    double pixelsPerSecond = owner.getPixelsPerSecond();
-    int pixelStartSeconds = (int) (secondsTillWholeSecond * pixelsPerSecond);
+    double startTime, endTime;
+    owner.getVisibleTimeRange (startTime, endTime);
 
     // seconds ruler: one tick for each second
-    g.setColour (findColour (ColourIds::timeRulerBackgroundColourId));
-    g.fillRect (0, 0, bounds.getWidth(), rulerHeight);
-    RectangleList <int> timeSecondsRects;
-    for (int s = nextWholeSecond; s < lastWholeSecond; s++)
     {
-        int secondPixel = (int) (pixelStartSeconds + s * pixelsPerSecond);
-        timeSecondsRects.addWithoutMerging (Rectangle<int>(secondPixel, 0, 2, rulerHeight));
-    }
-    g.setColour (findColour (ColourIds::timeGridColourId));
-    g.fillRectList (timeSecondsRects);
+        g.setColour (findColour (ColourIds::timeRulerBackgroundColourId));
+        g.fillRect (bounds.getX(), secondsRulerY, bounds.getWidth(), secondsRulerHeight);
 
-    // beat ruler
-    // use our musical context to read tempo and bar signature data using content readers
-    ARA::PlugIn::HostContentReader<ARA::kARAContentTypeTempoEntries> tempoReader (musicalContext);
-    ARA::PlugIn::HostContentReader<ARA::kARAContentTypeBarSignatures> barSignatureReader (musicalContext);
-
-    // we must have at least two tempo entries and a bar signature in order to have a proper musical context
-    const int tempoEntryCount = tempoReader.getEventCount();
-    const int barSigEventCount = barSignatureReader.getEventCount();
-    jassert (tempoEntryCount >= 2 && barSigEventCount >= 1);
-
-    // tempo ruler: one tick for each beat
-    g.setColour (findColour (ColourIds::musicalRulerBackgroundColourId));
-    g.fillRect (0, rulerHeight, bounds.getWidth(), rulerHeight);
-    RectangleList <int> musicalRects;
-
-    // find the first tempo entry for our starting time
-    int ixT = 0;
-    for (; ixT < tempoEntryCount - 2 && tempoReader.getDataForEvent (ixT + 1)->timePosition < timeStart; ++ixT);
-
-    // use a lambda to update our tempo state while reading the host tempo map
-    double tempoBPM (120);
-    double secondsToBeats (0), pixelsPerBeat (0);
-    double beatEnd (0);
-    auto updateTempoState = [&, this] (bool advance)
-    {
-        if (advance)
-            ++ixT;
-        
-        double deltaT = (tempoReader.getDataForEvent (ixT + 1)->timePosition - tempoReader.getDataForEvent (ixT)->timePosition);
-        double deltaQ = (tempoReader.getDataForEvent (ixT + 1)->quarterPosition - tempoReader.getDataForEvent (ixT)->quarterPosition);
-        tempoBPM = 60 * deltaQ / deltaT;
-        secondsToBeats = (tempoBPM / 60);
-        pixelsPerBeat = pixelsPerSecond / secondsToBeats;
-        beatEnd = secondsToBeats * timeEnd;
-    };
-
-    // update our tempo state using the first two tempo entries
-    updateTempoState (false);
-
-    // convert the starting time to beats
-    double beatStart = secondsToBeats * timeStart;
-
-    // get the bar signature entry just before beat start (or the last bar signature in the reader)
-    int ixB = 0;
-    for (; ixB < barSigEventCount - 1 && barSignatureReader.getDataForEvent (ixB + 1)->position < beatStart; ++ixB);
-    int barSigNumerator = barSignatureReader.getDataForEvent (ixB)->numerator;
-
-    // find the next whole beat and see if it's in our range
-    int nextWholeBeat = roundToInt (ceil (beatStart));
-    if (nextWholeBeat < beatEnd)
-    {
-        // read the tempo map to find the starting beat position in pixels
-        double beatPixelPosX = 0;
-        double beatsTillWholeBeat = nextWholeBeat - beatStart;
-        for (; ixT < tempoEntryCount - 2 && tempoReader.getDataForEvent (ixT + 1)->quarterPosition < nextWholeBeat;)
+        RectangleList<int> rects;
+        const double lastSecond = floor (endTime);
+        for (double nextSecond = ceil (startTime); nextSecond <= lastSecond; nextSecond += 1.0)
         {
-            beatPixelPosX += pixelsPerBeat * (tempoReader.getDataForEvent (ixT + 1)->quarterPosition - tempoReader.getDataForEvent (ixT)->quarterPosition);
-            updateTempoState (true);
+            int lineWidth = (nextSecond == 0.0) ? heavyLineWidth : lightLineWidth;
+            rects.addWithoutMerging (Rectangle<int> (owner.getPlaybackRegionsViewsXForTime(nextSecond) - lineWidth / 2, secondsRulerY, lineWidth, secondsRulerHeight));
         }
+        g.setColour (findColour (ColourIds::timeGridColourId));
+        g.fillRectList (rects);
+    }
 
-        if (tempoReader.getDataForEvent (ixT)->quarterPosition < nextWholeBeat)
-            beatPixelPosX += pixelsPerBeat * (nextWholeBeat - tempoReader.getDataForEvent (ixT)->quarterPosition);
+    // beat ruler: evaluates tempo and bar signatures to draw a line for each beat
+    {
+        // use our musical context to read tempo and bar signature data using content readers
+        ARA::PlugIn::HostContentReader<ARA::kARAContentTypeTempoEntries> tempoReader (musicalContext);
+        ARA::PlugIn::HostContentReader<ARA::kARAContentTypeBarSignatures> barSignatureReader (musicalContext);
 
-        // use a lambda to draw beat markers 
-        auto drawBeatRects = [&] (int beatsToDraw)
+        // we must have at least two tempo entries and a bar signature in order to have a proper timing information
+        const int tempoEntryCount = tempoReader.getEventCount();
+        const int barSigEventCount = barSignatureReader.getEventCount();
+        jassert (tempoEntryCount >= 2 && barSigEventCount >= 1);
+
+        g.setColour (findColour (ColourIds::musicalRulerBackgroundColourId));
+        g.fillRect (bounds.getX(), beatsRulerY, bounds.getWidth(), beatsRulerHeight);
+        RectangleList <int> beatsRects;
+
+        // find the first tempo entry for our starting time
+        int ixT = 0;
+        for (; ixT < tempoEntryCount - 2 && tempoReader.getDataForEvent (ixT + 1)->timePosition < startTime; ++ixT);
+
+        // use a lambda to update our tempo state while reading the host tempo map
+        double tempoBPM (120);
+        double secondsToBeats (0), pixelsPerBeat (0);
+        double beatEnd (0);
+        auto updateTempoState = [&, this] (bool advance)
         {
-            // for each beat, advance beat pixel by the current pixelsPerBeat value
-            for (int b = 0; b < beatsToDraw; b++)
-            {
-                int curBeat = nextWholeBeat + b;
-                int tickWidth = 1;
-                if ((curBeat % barSigNumerator) == 0)
-                    tickWidth *= 2;
-                musicalRects.addWithoutMerging (Rectangle<int> (roundToInt(beatPixelPosX), rulerHeight, tickWidth, rulerHeight));
-                beatPixelPosX += pixelsPerBeat;
-            }
+            if (advance)
+                ++ixT;
+
+            double deltaT = (tempoReader.getDataForEvent (ixT + 1)->timePosition - tempoReader.getDataForEvent (ixT)->timePosition);
+            double deltaQ = (tempoReader.getDataForEvent (ixT + 1)->quarterPosition - tempoReader.getDataForEvent (ixT)->quarterPosition);
+            tempoBPM = 60 * deltaQ / deltaT;
+            secondsToBeats = (tempoBPM / 60);
+            pixelsPerBeat = owner.getPixelsPerSecond() / secondsToBeats;
+            beatEnd = secondsToBeats * endTime;
         };
 
-        // read tempo entries from the host tempo map until we run out of entries or reach timeEnd
-        while (ixT < tempoEntryCount - 2 && tempoReader.getDataForEvent (ixT + 1)->timePosition < timeEnd)
+        // update our tempo state using the first two tempo entries
+        updateTempoState (false);
+
+        // convert the starting time to beats
+        double beatStart = secondsToBeats * startTime;
+
+        // get the bar signature entry just before beat start (or the last bar signature in the reader)
+        int ixB = 0;
+        for (; ixB < barSigEventCount - 1 && barSignatureReader.getDataForEvent (ixB + 1)->position < beatStart; ++ixB);
+        int barSigNumerator = barSignatureReader.getDataForEvent (ixB)->numerator;
+
+        // find the next whole beat and see if it's in our range
+        int nextWholeBeat = roundToInt (ceil (beatStart));
+        if (nextWholeBeat < beatEnd)
         {
-            // draw rects for each whole beat from nextWholeBeat to the next tempo entry
-            // keep offsetting pixelStartBeats so we know where to draw the next one
+            // read the tempo map to find the starting beat position in pixels
+            double beatPixelPosX = 0;
+//            double beatsTillWholeBeat = nextWholeBeat - beatStart;
+            for (; ixT < tempoEntryCount - 2 && tempoReader.getDataForEvent (ixT + 1)->quarterPosition < nextWholeBeat;)
+            {
+                beatPixelPosX += pixelsPerBeat * (tempoReader.getDataForEvent (ixT + 1)->quarterPosition - tempoReader.getDataForEvent (ixT)->quarterPosition);
+                updateTempoState (true);
+            }
 
-            // draw a beat rect for each beat that's passed since we 
-            // drew a beat marker and advance to the next whole beat 
-            int beatsToNextTempoEntry = (int) (tempoReader.getDataForEvent (ixT)->quarterPosition - nextWholeBeat);
-            drawBeatRects (beatsToNextTempoEntry);
-            nextWholeBeat += beatsToNextTempoEntry;
+            if (tempoReader.getDataForEvent (ixT)->quarterPosition < nextWholeBeat)
+                beatPixelPosX += pixelsPerBeat * (nextWholeBeat - tempoReader.getDataForEvent (ixT)->quarterPosition);
 
-            // find the new tempo
-            updateTempoState (true);
+            // use a lambda to draw beat markers
+            auto drawBeatRects = [&] (int beatsToDraw)
+            {
+                // for each beat, advance beat pixel by the current pixelsPerBeat value
+                for (int b = 0; b < beatsToDraw; b++)
+                {
+                    int curBeat = nextWholeBeat + b;
+                    int tickWidth = ((curBeat % barSigNumerator) == 0) ? heavyLineWidth : lightLineWidth;
+                    beatsRects.addWithoutMerging (Rectangle<int> (roundToInt(beatPixelPosX), beatsRulerY, tickWidth, beatsRulerHeight));
+                    beatPixelPosX += pixelsPerBeat;
+                }
+            };
 
-            // advance bar signature numerator if our beat position passes the most recent entry
-            if (ixB < barSigEventCount - 1 && barSignatureReader.getDataForEvent(ixB)->position < nextWholeBeat)
-                barSigNumerator= barSignatureReader.getDataForEvent (++ixB)->numerator;
+            // read tempo entries from the host tempo map until we run out of entries or reach endTime
+            while (ixT < tempoEntryCount - 2 && tempoReader.getDataForEvent (ixT + 1)->timePosition < endTime)
+            {
+                // draw rects for each whole beat from nextWholeBeat to the next tempo entry
+                // keep offsetting pixelStartBeats so we know where to draw the next one
+
+                // draw a beat rect for each beat that's passed since we
+                // drew a beat marker and advance to the next whole beat
+                int beatsToNextTempoEntry = (int) (tempoReader.getDataForEvent (ixT)->quarterPosition - nextWholeBeat);
+                drawBeatRects (beatsToNextTempoEntry);
+                nextWholeBeat += beatsToNextTempoEntry;
+
+                // find the new tempo
+                updateTempoState (true);
+
+                // advance bar signature numerator if our beat position passes the most recent entry
+                if (ixB < barSigEventCount - 1 && barSignatureReader.getDataForEvent(ixB)->position < nextWholeBeat)
+                    barSigNumerator = barSignatureReader.getDataForEvent (++ixB)->numerator;
+            }
+
+            // draw the remaining rects until beat end
+            int remainingBeats = roundToInt (ceil (beatEnd) - nextWholeBeat);
+            drawBeatRects (remainingBeats);
         }
 
-        // draw the remaining rects until beat end
-        int remainingBeats = roundToInt (ceil (beatEnd) - nextWholeBeat);
-        drawBeatRects (remainingBeats);
+        g.setColour (findColour (ColourIds::musicalGridColourId));
+        g.fillRectList (beatsRects);
     }
 
-    g.setColour (findColour (ColourIds::musicalGridColourId));
-    g.fillRectList (musicalRects);
-
     // TODO JUCE_ARA chord ruler
-    g.setColour (findColour (ColourIds::chordsRulerBackgroundColourId));
-    g.fillRect (0, rulerHeight * 2, bounds.getWidth(), rulerHeight);
-    g.setColour (findColour (ColourIds::chordsColourId));
-
-    g.setColour (findColour (ColourIds::borderColourId));
-    auto borderBounds = g.getClipBounds();
-    borderBounds.setHeight (rulerHeight);
-    for (int i = 0; i < 3; i++)
     {
+        g.setColour (findColour (ColourIds::chordsRulerBackgroundColourId));
+        g.fillRect (bounds.getX(), chordRulerY, bounds.getWidth(), chordRulerHeight);
+
+        //g.setColour (findColour (ColourIds::chordsColourId));
+    }
+
+    // borders
+    {
+        g.setColour (findColour (ColourIds::borderColourId));
+        g.drawLine (bounds.getX(), beatsRulerY, bounds.getWidth(), beatsRulerY);
+        g.drawLine (bounds.getX(), secondsRulerY, bounds.getWidth(), secondsRulerY);
         g.drawRect (bounds);
-        borderBounds.translate (0, rulerHeight);
     }
 }
 
