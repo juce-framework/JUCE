@@ -83,7 +83,7 @@ void RulersView::findMusicalContext()
 //==============================================================================
 void RulersView::paint (juce::Graphics& g)
 {
-    const auto bounds = getLocalBounds();
+    const auto bounds = g.getClipBounds();
 
     if (musicalContext == nullptr)
     {
@@ -101,17 +101,15 @@ void RulersView::paint (juce::Graphics& g)
     constexpr int lightLineWidth = 1;
     constexpr int heavyLineWidth = 3;
     const int chordRulerY = 0;
-    const int chordRulerHeight = bounds.getHeight() / 3;
+    const int chordRulerHeight = getBounds().getHeight() / 3;
     const int beatsRulerY = chordRulerY + chordRulerHeight;
-    const int beatsRulerHeight = (bounds.getHeight() - chordRulerHeight) / 2;
+    const int beatsRulerHeight = (getBounds().getHeight() - chordRulerHeight) / 2;
     const int secondsRulerY = beatsRulerY + beatsRulerHeight;
-    const int secondsRulerHeight = bounds.getHeight() - chordRulerHeight - beatsRulerHeight;
+    const int secondsRulerHeight = getBounds().getHeight() - chordRulerHeight - beatsRulerHeight;
 
     // we should only be doing this on the visible time range
     double startTime, endTime;
-//  TODO JUCE_ARA getVisibleTimeRange() does not work properly - for now, we're drawing the entire timeline...
-//  owner.getVisibleTimeRange (startTime, endTime);
-    owner.getTimeRange (startTime, endTime);
+    owner.getVisibleTimeRange (startTime, endTime);
 
     // seconds ruler: one tick for each second
     {
