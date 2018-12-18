@@ -55,8 +55,6 @@ public:
     template<typename DocumentController_t = ARADocumentController>
     DocumentController_t* getARADocumentController() const noexcept { return araProcessorExtension ? araProcessorExtension->getARADocumentController<DocumentController_t>() : nullptr; }
 
-    AudioProcessorARAExtension* getAudioProcessorARAExtension() const noexcept { return araProcessorExtension; }
-
 private:
     AudioProcessorARAExtension* araProcessorExtension;
 

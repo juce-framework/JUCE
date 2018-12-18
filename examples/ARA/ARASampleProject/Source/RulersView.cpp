@@ -49,55 +49,34 @@ void RulersView::detachFromMusicalContext()
     musicalContext = nullptr;
 }
 
-// walk through our ARA document to find a suitable musical context
 void RulersView::findMusicalContext()
 {
     if (! owner.isARAEditorView())
         return;
 
-    auto findMusicalContextLambda = [this] ()
+    // evaluate selection
+    ARAMusicalContext* newMusicalContext = nullptr;
+    auto viewSelection = owner.getARAEditorView()->getViewSelection();
+    if (! viewSelection.getRegionSequences().empty())
+        newMusicalContext = viewSelection.getRegionSequences().front()->getMusicalContext<ARAMusicalContext>();
+    else if (! viewSelection.getPlaybackRegions().empty())
+        newMusicalContext = viewSelection.getPlaybackRegions().front()->getRegionSequence()->getMusicalContext<ARAMusicalContext>();
+
+    // if no context used yet and selection does not yield a new one, use the first musical context in the docment
+    if (musicalContext == nullptr && newMusicalContext == nullptr &&
+        ! owner.getARADocumentController()->getDocument()->getMusicalContexts().empty())
     {
-        // first try the first selected region sequence
-        auto viewSelection = owner.getARAEditorView()->getViewSelection();
-        if (! viewSelection.getRegionSequences().empty())
-            return viewSelection.getRegionSequences().front()->getMusicalContext<ARAMusicalContext>();
+        newMusicalContext = owner.getARADocumentController()->getDocument()->getMusicalContexts<ARAMusicalContext>().front();
+    }
 
-        // then try the first selected playback region's region sequence
-        if (! viewSelection.getPlaybackRegions().empty())
-            return viewSelection.getPlaybackRegions().front()->getRegionSequence()->getMusicalContext<ARAMusicalContext>();
-
-        // no selection? if we have an editor renderer try the first region sequence / playback region
-        if (auto editorRenderer = owner.getAudioProcessorARAExtension()->getARAEditorRenderer())
-        {
-            if (! editorRenderer->getRegionSequences().empty())
-                return editorRenderer->getRegionSequences().front()->getMusicalContext<ARAMusicalContext>();
-
-            if (! editorRenderer->getPlaybackRegions().empty())
-                return editorRenderer->getPlaybackRegions().front()->getRegionSequence()->getMusicalContext<ARAMusicalContext>();
-        }
-
-        // otherwise if we're a playback renderer try the first playback region
-        if (auto playbackRenderer = owner.getAudioProcessorARAExtension()->getARAPlaybackRenderer())
-        {
-            if (! playbackRenderer->getPlaybackRegions().empty())
-                return playbackRenderer->getPlaybackRegions().front()->getRegionSequence()->getMusicalContext<ARAMusicalContext>();
-        }
-
-        // still nothing? try the first musical context in the docment
-        if (! owner.getARADocumentController()->getDocument()->getMusicalContexts().empty())
-            return owner.getARADocumentController()->getDocument()->getMusicalContexts<ARAMusicalContext>().front();
-
-        return static_cast<ARAMusicalContext*>(nullptr);
-    };
-
-    if (auto newMusicalContext = findMusicalContextLambda ())
+    if (newMusicalContext != musicalContext)
     {
-        if (newMusicalContext != musicalContext)
-        {
-            detachFromMusicalContext();
-            musicalContext = newMusicalContext;
-            musicalContext->addListener (this);
-        }
+        detachFromMusicalContext();
+
+        musicalContext = newMusicalContext;
+        musicalContext->addListener (this);
+
+        repaint();
     }
 }
 
@@ -283,10 +262,7 @@ void RulersView::willRemoveMusicalContextFromDocument (ARADocument* doc, ARAMusi
     jassert (document == doc);
 
     if (musicalContext == context)
-    {
-        detachFromMusicalContext();
-        repaint();
-    }
+        detachFromMusicalContext();     // will restore in didEndEditing()
 }
 
 void RulersView::didReorderMusicalContextsInDocument (ARADocument* doc)
@@ -294,10 +270,7 @@ void RulersView::didReorderMusicalContextsInDocument (ARADocument* doc)
     jassert (document == doc);
 
     if (musicalContext != document->getMusicalContexts().front())
-    {
-        detachFromMusicalContext();
-        repaint();
-    }
+        detachFromMusicalContext();     // will restore in didEndEditing()
 }
 
 void RulersView::willDestroyDocument (ARADocument* doc)
