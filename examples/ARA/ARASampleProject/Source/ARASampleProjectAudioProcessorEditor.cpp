@@ -224,14 +224,6 @@ void ARASampleProjectAudioProcessorEditor::storeRelativePosition()
     pixelsUntilPlayhead = roundToInt (getPlaybackRegionsViewsXForTime (playheadPositionInSeconds) - playbackRegionsViewPort.getViewPosition().getX());
 }
 
-//==============================================================================
-void ARASampleProjectAudioProcessorEditor::onNewSelection (const ARA::PlugIn::ViewSelection& /*currentSelection*/)
-{
-// TODO JUCE_ARA the following was added as workaround for Logic, but it breaks navigating
-//               in other hosts while zoomed in - disabled for now.
-//    rebuildRegionSequenceViews();
-}
-
 void ARASampleProjectAudioProcessorEditor::onHideRegionSequences (std::vector<ARARegionSequence*> const& /*regionSequences*/)
 {
     rebuildRegionSequenceViews();

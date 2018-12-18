@@ -52,7 +52,6 @@ public:
     void timerCallback() override;
 
     // ARAEditorView::Listener overrides
-    void onNewSelection (const ARA::PlugIn::ViewSelection& currentSelection) override;
     void onHideRegionSequences (std::vector<ARARegionSequence*> const& regionSequences) override;
 
     // ARADocument::Listener overrides
