@@ -61,9 +61,7 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
     {
         getARAEditorView()->addListener (this);
 
-        auto document = static_cast<ARADocument*> (getARADocumentController()->getDocument());
-
-        document->addListener (this);
+        getARADocumentController()->getDocument<ARADocument>()->addListener (this);
 
         rulersView.reset (new RulersView (*this));
 
@@ -80,7 +78,7 @@ ARASampleProjectAudioProcessorEditor::~ARASampleProjectAudioProcessorEditor()
 {
     if (isARAEditorView())
     {
-        static_cast<ARADocument*> (getARADocumentController()->getDocument())->removeListener (this);
+        getARADocumentController()->getDocument<ARADocument>()->removeListener (this);
 
         getARAEditorView()->removeListener (this);
     }
@@ -209,10 +207,10 @@ void ARASampleProjectAudioProcessorEditor::rebuildRegionSequenceViews()
 {
     regionSequenceViews.clear();
 
-    for (auto regionSequence : getARADocumentController()->getDocument()->getRegionSequences())
+    for (auto regionSequence : getARADocumentController()->getDocument()->getRegionSequences<ARARegionSequence>())
     {
         if (! ARA::contains (getARAEditorView()->getHiddenRegionSequences(), regionSequence))
-            regionSequenceViews.add (new RegionSequenceView (this, static_cast<ARARegionSequence*> (regionSequence)));
+            regionSequenceViews.add (new RegionSequenceView (this, regionSequence));
     }
 
     resized();

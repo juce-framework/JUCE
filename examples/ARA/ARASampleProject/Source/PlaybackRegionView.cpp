@@ -14,8 +14,8 @@ PlaybackRegionView::PlaybackRegionView (ARASampleProjectAudioProcessorEditor* ed
     editorComponent->getARAEditorView()->addListener (this);
     onNewSelection (editorComponent->getARAEditorView()->getViewSelection());
 
-    static_cast<ARADocument*> (playbackRegion->getRegionSequence()->getDocument())->addListener (this);
-    static_cast<ARAAudioSource*> (playbackRegion->getAudioModification()->getAudioSource())->addListener (this);
+    playbackRegion->getRegionSequence()->getDocument<ARADocument>()->addListener (this);
+    playbackRegion->getAudioModification()->getAudioSource<ARAAudioSource>()->addListener (this);
     playbackRegion->addListener (this);
 
     recreatePlaybackRegionReader();
@@ -26,8 +26,8 @@ PlaybackRegionView::~PlaybackRegionView()
     editorComponent->getARAEditorView()->removeListener (this);
 
     playbackRegion->removeListener (this);
-    static_cast<ARAAudioSource*> (playbackRegion->getAudioModification()->getAudioSource())->removeListener (this);
-    static_cast<ARADocument*> (playbackRegion->getRegionSequence()->getDocument())->removeListener (this);
+    playbackRegion->getAudioModification()->getAudioSource<ARAAudioSource>()->removeListener (this);
+    playbackRegion->getRegionSequence()->getDocument<ARADocument>()->removeListener (this);
 
     audioThumb.removeChangeListener (this);
     audioThumb.clear();
@@ -161,7 +161,7 @@ void PlaybackRegionView::recreatePlaybackRegionReader()
     audioThumbCache.clear();
 
     // create a non-realtime playback region reader for our audio thumb
-    auto documentController = static_cast<ARASampleProjectDocumentController*> (editorComponent->getARADocumentController());
+    auto documentController = editorComponent->getARADocumentController<ARASampleProjectDocumentController>();
     playbackRegionReader = documentController->createPlaybackRegionReader ({ playbackRegion }, true);
 
     // see juce_AudioThumbnail.cpp line 122 - AudioThumbnail does not deal with zero length sources.

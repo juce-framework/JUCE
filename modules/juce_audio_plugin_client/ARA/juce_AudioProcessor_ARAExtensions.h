@@ -20,15 +20,19 @@ public:
 
     bool isBoundToARA() const noexcept { return araPlugInExtension != nullptr; }
 
-    ARAPlaybackRenderer* getARAPlaybackRenderer() const noexcept;
-    ARAEditorRenderer* getARAEditorRenderer() const noexcept;
-    ARAEditorView* getARAEditorView() const noexcept;
+    template<typename PlaybackRenderer_t = ARAPlaybackRenderer>
+    PlaybackRenderer_t* getARAPlaybackRenderer() const noexcept { return araPlugInExtension ? static_cast<PlaybackRenderer_t*> (araPlugInExtension->getPlaybackRenderer()) : nullptr; }
+    template<typename EditorRenderer_t = ARAEditorRenderer>
+    EditorRenderer_t* getARAEditorRenderer() const noexcept { return araPlugInExtension ? static_cast<EditorRenderer_t*> (araPlugInExtension->getEditorRenderer()) : nullptr; }
+    template<typename EditorView_t = ARAEditorView>
+    EditorView_t* getARAEditorView() const noexcept { return araPlugInExtension ? static_cast<EditorView_t*> (araPlugInExtension->getEditorView()) : nullptr; }
 
     bool isARAPlaybackRenderer() const noexcept { return getARAPlaybackRenderer() != nullptr; }
     bool isARAEditorRenderer() const noexcept { return getARAEditorRenderer() != nullptr; }
     bool isARAEditorView() const noexcept { return getARAEditorView() != nullptr; }
 
-    ARADocumentController* getARADocumentController() const noexcept;
+    template<typename DocumentController_t = ARADocumentController>
+    DocumentController_t* getARADocumentController() const noexcept { return araPlugInExtension ? static_cast<DocumentController_t*> (araPlugInExtension->getDocumentController()) : nullptr; }
 
 private:
     std::unique_ptr<const ARA::PlugIn::PlugInExtension> araPlugInExtension;
@@ -43,13 +47,15 @@ public:
     AudioProcessorEditorARAExtension (AudioProcessor* audioProcessor);
     virtual ~AudioProcessorEditorARAExtension();
 
-    ARAEditorView* getARAEditorView() const noexcept;
+    template<typename EditorView_t = ARAEditorView>
+    EditorView_t* getARAEditorView() const noexcept { return araProcessorExtension ? araProcessorExtension->getARAEditorView<EditorView_t>() : nullptr; }
 
     bool isARAEditorView() const noexcept { return getARAEditorView() != nullptr; }
 
-    ARADocumentController* getARADocumentController() const noexcept;
+    template<typename DocumentController_t = ARADocumentController>
+    DocumentController_t* getARADocumentController() const noexcept { return araProcessorExtension ? araProcessorExtension->getARADocumentController<DocumentController_t>() : nullptr; }
 
-    AudioProcessorARAExtension* getAudioProcessorARAExtension() const noexcept;
+    AudioProcessorARAExtension* getAudioProcessorARAExtension() const noexcept { return araProcessorExtension; }
 
 private:
     AudioProcessorARAExtension* araProcessorExtension;

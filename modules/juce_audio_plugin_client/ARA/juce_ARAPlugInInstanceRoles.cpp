@@ -33,7 +33,7 @@ void ARAEditorView::doNotifyHideRegionSequences (std::vector<ARA::PlugIn::Region
 {
     listeners.callExpectingUnregistration ([&] (Listener& l)
     {
-        l.onHideRegionSequences (reinterpret_cast<std::vector<ARARegionSequence*> const&> (regionSequences));
+        l.onHideRegionSequences (ARA::vector_cast<ARARegionSequence> (regionSequences));
     });
 }
 

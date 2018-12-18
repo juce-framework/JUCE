@@ -105,8 +105,8 @@ void ARADocumentController::notifyAudioSourceContentChanged (ARAAudioSource* aud
 
     if (notifyAllAudioModificationsAndPlaybackRegions)
     {
-        for (auto audioModification : audioSource->getAudioModifications())
-            notifyAudioModificationContentChanged (static_cast<ARAAudioModification*> (audioModification), scopeFlags, true);
+        for (auto audioModification : audioSource->getAudioModifications<ARAAudioModification>())
+            notifyAudioModificationContentChanged (audioModification, scopeFlags, true);
     }
 }
 
@@ -118,8 +118,8 @@ void ARADocumentController::notifyAudioModificationContentChanged (ARAAudioModif
 
     if (notifyAllPlaybackRegions)
     {
-        for (auto playbackRegion : audioModification->getPlaybackRegions())
-            notifyPlaybackRegionContentChanged (static_cast<ARAPlaybackRegion*> (playbackRegion), scopeFlags);
+        for (auto playbackRegion : audioModification->getPlaybackRegions<ARAPlaybackRegion>())
+            notifyPlaybackRegionContentChanged (playbackRegion, scopeFlags);
     }
 }
 
@@ -185,7 +185,7 @@ ARA::PlugIn::RegionSequence* ARADocumentController::doCreateRegionSequence (ARA:
 
 ARA::PlugIn::AudioSource* ARADocumentController::doCreateAudioSource (ARA::PlugIn::Document *document, ARA::ARAAudioSourceHostRef hostRef) noexcept
 {
-    return new ARAAudioSource (static_cast<ARADocument*>(document), hostRef);\
+    return new ARAAudioSource (static_cast<ARADocument*>(document), hostRef);
 }
 
 //==============================================================================

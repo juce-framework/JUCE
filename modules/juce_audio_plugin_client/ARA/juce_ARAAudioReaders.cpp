@@ -201,8 +201,8 @@ void ARAPlaybackRegionReader::invalidate()
     if (! isValid())
         return;
 
-    for (auto playbackRegion : playbackRenderer->getPlaybackRegions())
-        static_cast<ARAPlaybackRegion*>(playbackRegion)->removeListener (this);
+    for (auto playbackRegion : playbackRenderer->getPlaybackRegions<ARAPlaybackRegion>())
+        playbackRegion->removeListener (this);
 
     playbackRenderer.reset();
 }
@@ -279,7 +279,7 @@ void ARAPlaybackRegionReader::willDestroyPlaybackRegion (ARAPlaybackRegion* play
 //==============================================================================
 
 ARARegionSequenceReader::ARARegionSequenceReader (ARAPlaybackRenderer* playbackRenderer, ARARegionSequence* regionSequence, bool nonRealtime)
-    : ARAPlaybackRegionReader (playbackRenderer, reinterpret_cast<std::vector<ARAPlaybackRegion*> const&> (regionSequence->getPlaybackRegions()), nonRealtime),
+    : ARAPlaybackRegionReader (playbackRenderer, regionSequence->getPlaybackRegions<ARAPlaybackRegion>(), nonRealtime),
       sequence (regionSequence)
 {
     sequence->addListener (this);

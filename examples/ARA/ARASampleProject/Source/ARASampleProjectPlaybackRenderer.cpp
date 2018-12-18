@@ -18,11 +18,11 @@ void ARASampleProjectPlaybackRenderer::prepareToPlay (double newSampleRate, int 
     {
         audioSourceReaders.clear();
 
-        const auto documentController = static_cast<ARASampleProjectDocumentController*> (getDocumentController());
+        const auto documentController = getDocumentController<ARASampleProjectDocumentController>();
 
         for (auto playbackRegion : getPlaybackRegions())
         {
-            auto audioSource = static_cast<ARAAudioSource*> (playbackRegion->getAudioModification()->getAudioSource());
+            auto audioSource = playbackRegion->getAudioModification()->getAudioSource<ARAAudioSource>();
             if (audioSourceReaders.count (audioSource) == 0)
             {
                 auto sourceReader = documentController->createAudioSourceReader (audioSource);
@@ -75,7 +75,7 @@ bool ARASampleProjectPlaybackRenderer::processBlock (AudioBuffer<float>& buffer,
         for (auto playbackRegion : getPlaybackRegions())
         {
             // get the audio source for this region and make sure we have an audio source reader for it
-            auto audioSource = static_cast<ARAAudioSource*> (playbackRegion->getAudioModification()->getAudioSource());
+            auto audioSource = playbackRegion->getAudioModification()->getAudioSource<ARAAudioSource>();
             auto readerIt = audioSourceReaders.find(audioSource);
             if (readerIt == audioSourceReaders.end())
             {

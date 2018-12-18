@@ -19,33 +19,6 @@ const ARA::ARAPlugInExtensionInstance* AudioProcessorARAExtension::bindToARA (AR
     return araPlugInExtension->getInstance();
 }
 
-ARAPlaybackRenderer* AudioProcessorARAExtension::getARAPlaybackRenderer() const noexcept
-{
-    return araPlugInExtension ? static_cast<ARAPlaybackRenderer*> (araPlugInExtension->getPlaybackRenderer()) : nullptr;
-}
-
-ARAEditorRenderer* AudioProcessorARAExtension::getARAEditorRenderer() const noexcept
-{
-    return araPlugInExtension ? static_cast<ARAEditorRenderer*> (araPlugInExtension->getEditorRenderer()) : nullptr;
-}
-
-ARAEditorView* AudioProcessorARAExtension::getARAEditorView() const noexcept
-{
-    return araPlugInExtension ? static_cast<ARAEditorView*> (araPlugInExtension->getEditorView()) : nullptr;
-}
-
-ARADocumentController* AudioProcessorARAExtension::getARADocumentController() const noexcept
-{
-    ARA::PlugIn::DocumentController* documentController = nullptr;
-    if (isARAPlaybackRenderer())
-        documentController = getARAPlaybackRenderer()->getDocumentController();
-    else if (isARAEditorRenderer())
-        documentController = getARAEditorRenderer()->getDocumentController();
-    else if (isARAEditorView())
-        documentController = getARAEditorView()->getDocumentController();
-    return static_cast<ARADocumentController*> (documentController);
-}
-
 //==============================================================================
 
 AudioProcessorEditorARAExtension::AudioProcessorEditorARAExtension (AudioProcessor* audioProcessor)
@@ -59,21 +32,6 @@ AudioProcessorEditorARAExtension::~AudioProcessorEditorARAExtension()
 {
     if (isARAEditorView())
         getARAEditorView()->setEditorOpen (false);
-}
-
-ARAEditorView* AudioProcessorEditorARAExtension::getARAEditorView() const noexcept
-{
-    return araProcessorExtension ? static_cast<ARAEditorView*> (araProcessorExtension->getARAEditorView()) : nullptr;
-}
-
-ARADocumentController* AudioProcessorEditorARAExtension::getARADocumentController() const noexcept
-{
-    return isARAEditorView() ? static_cast<ARADocumentController*> (getARAEditorView()->getDocumentController()) : nullptr;
-}
-
-AudioProcessorARAExtension* AudioProcessorEditorARAExtension::getAudioProcessorARAExtension() const noexcept
-{
-    return araProcessorExtension;
 }
 
 } // namespace juce

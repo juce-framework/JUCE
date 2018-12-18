@@ -32,16 +32,15 @@ void ARARegionSequence::getTimeRange (double& startTime, double& endTime, bool i
 
     startTime = std::numeric_limits<double>::max();
     endTime = std::numeric_limits<double>::lowest();
-    for (auto playbackRegion : getPlaybackRegions())
+    for (auto playbackRegion : getPlaybackRegions<ARAPlaybackRegion>())
     {
         double regionStartTime = playbackRegion->getStartInPlaybackTime();
         double regionEndTime = playbackRegion->getEndInPlaybackTime();
 
         if (includeHeadAndTail)
         {
-            auto region = static_cast<ARAPlaybackRegion*> (playbackRegion);
-            regionStartTime -= region->getHeadTime();
-            regionEndTime += region->getTailTime();
+            regionStartTime -= playbackRegion->getHeadTime();
+            regionEndTime += playbackRegion->getTailTime();
         }
 
         startTime = jmin (startTime, regionStartTime);
@@ -71,7 +70,7 @@ ARAAudioSource::ARAAudioSource (ARADocument* document, ARA::ARAAudioSourceHostRe
 
 void ARAAudioSource::notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyAllAudioModificationsAndPlaybackRegions)
 {
-    static_cast<ARADocumentController*> (getDocument()->getDocumentController())->
+    getDocument()->getDocumentController<ARADocumentController>()->
                                 notifyAudioSourceContentChanged (this, scopeFlags, notifyAllAudioModificationsAndPlaybackRegions);
 }
 
@@ -83,7 +82,7 @@ ARAAudioModification::ARAAudioModification (ARAAudioSource* audioSource, ARA::AR
 
 void ARAAudioModification::notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyAllPlaybackRegions)
 {
-    static_cast<ARADocumentController*> (getAudioSource()->getDocument()->getDocumentController())->
+    getAudioSource()->getDocument()->getDocumentController<ARADocumentController>()->
                                 notifyAudioModificationContentChanged (this, scopeFlags, notifyAllPlaybackRegions);
 }
 
@@ -114,7 +113,7 @@ void ARAPlaybackRegion::setHeadAndTailTime (double newHeadTime, double newTailTi
 
 void ARAPlaybackRegion::notifyContentChanged (ARAContentUpdateScopes scopeFlags)
 {
-    static_cast<ARADocumentController*> (getAudioModification()->getAudioSource()->getDocument()->getDocumentController())->
+    getAudioModification()->getAudioSource()->getDocument()->getDocumentController<ARADocumentController>()->
                             notifyPlaybackRegionContentChanged (this, scopeFlags);
 }
 
