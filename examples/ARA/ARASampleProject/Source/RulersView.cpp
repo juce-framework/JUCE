@@ -234,13 +234,14 @@ void RulersView::paint (juce::Graphics& g)
         auto drawBeatRects = [&] (int beatsToDraw)
         {
             // for each beat, advance beat pixel by the current pixelsPerBeat value
-            for (int b = 0; b < beatsToDraw; b++, beatPixelPosX += pixelsPerBeat)
+            for (int b = 0; b < beatsToDraw; b++)
             {
                 int curBeat = nextWholeBeat + b;
                 int tickWidth = 1;
                 if ((curBeat % barSigNumerator) == 0)
                     tickWidth *= 2;
                 musicalRects.addWithoutMerging (Rectangle<int> (roundToInt(beatPixelPosX), rulerHeight, tickWidth, rulerHeight));
+                beatPixelPosX += pixelsPerBeat;
             }
         };
 
