@@ -124,10 +124,10 @@ public:
     /** Returns true if the property does not exist or is empty. */
     bool isUsingDefault() const
     {
-        return ! targetTree.hasProperty (targetProperty);
+        return ! targetTree.hasProperty (targetProperty) || targetTree.getProperty (targetProperty) == var();
     }
 
-    /** Resets the property to an empty var. */
+    /** Removes the property from the referenced ValueTree. */
     void resetToDefault() noexcept
     {
         targetTree.removeProperty (targetProperty, nullptr);
