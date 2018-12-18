@@ -509,7 +509,6 @@ private:
 
         JUCE_COMRESULT OnSessionDisconnected (AudioSessionDisconnectReason reason)
         {
-            Logger::writeToLog("OnSessionDisconnected");
             if (reason == DisconnectReasonFormatChanged)
                 owner.deviceSampleRateChanged();
 
