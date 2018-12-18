@@ -51,78 +51,6 @@ namespace
         jassert (deviceInfo.uid == block.uid);
         block.name = deviceInfo.name.asString();
     }
-
-    //==============================================================================
-#if DUMP_TOPOLOGY
-    static juce::String idToSerialNum (const BlockTopology& topology, Block::UID uid)
-    {
-        for (auto* b : topology.blocks)
-            if (b->uid == uid)
-                return b->serialNumber;
-
-        return "???";
-    }
-
-    static juce::String portEdgeToString (Block::ConnectionPort port)
-    {
-        switch (port.edge)
-        {
-            case Block::ConnectionPort::DeviceEdge::north: return "north";
-            case Block::ConnectionPort::DeviceEdge::south: return "south";
-            case Block::ConnectionPort::DeviceEdge::east:  return "east";
-            case Block::ConnectionPort::DeviceEdge::west:  return "west";
-        }
-
-        return {};
-    }
-
-    static juce::String portToString (Block::ConnectionPort port)
-    {
-        return portEdgeToString (port) + "_" + juce::String (port.index);
-    }
-
-    static void dumpTopology (const BlockTopology& topology)
-    {
-        MemoryOutputStream m;
-
-        m << "=============================================================================" << newLine
-        << "Topology:  " << topology.blocks.size() << " device(s)" << newLine
-        << newLine;
-
-        int index = 0;
-
-        for (auto block : topology.blocks)
-        {
-            m << "Device " << index++ << (block->isMasterBlock() ? ":  (MASTER)" : ":") << newLine;
-
-            m << "  Description: " << block->getDeviceDescription() << newLine
-            << "  Serial: " << block->serialNumber << newLine;
-
-            if (auto bi = BlockImpl<Detector>::getFrom (*block))
-                m << "  Short address: " << (int) bi->getDeviceIndex() << newLine;
-
-            m << "  Battery level: " + juce::String (juce::roundToInt (100.0f * block->getBatteryLevel())) + "%" << newLine
-            << "  Battery charging: " + juce::String (block->isBatteryCharging() ? "y" : "n") << newLine
-            << "  Width: " << block->getWidth() << newLine
-            << "  Height: " << block->getHeight() << newLine
-            << "  Millimeters per unit: " << block->getMillimetersPerUnit() << newLine
-            << newLine;
-        }
-
-        for (auto& connection : topology.connections)
-        {
-            m << idToSerialNum (topology, connection.device1)
-            << ":" << portToString (connection.connectionPortOnDevice1)
-            << "  <->  "
-            << idToSerialNum (topology, connection.device2)
-            << ":" << portToString (connection.connectionPortOnDevice2) << newLine;
-        }
-
-        m << "=============================================================================" << newLine;
-
-        Logger::outputDebugString (m.toString());
-    }
-#endif
 }
 
 //==============================================================================
@@ -673,6 +601,79 @@ private:
         }
     };
 
+    //==============================================================================
+   #if DUMP_TOPOLOGY
+    static juce::String idToSerialNum (const BlockTopology& topology, Block::UID uid)
+    {
+        for (auto* b : topology.blocks)
+            if (b->uid == uid)
+                return b->serialNumber;
+
+        return "???";
+    }
+
+    static juce::String portEdgeToString (Block::ConnectionPort port)
+    {
+        switch (port.edge)
+        {
+            case Block::ConnectionPort::DeviceEdge::north: return "north";
+            case Block::ConnectionPort::DeviceEdge::south: return "south";
+            case Block::ConnectionPort::DeviceEdge::east:  return "east";
+            case Block::ConnectionPort::DeviceEdge::west:  return "west";
+        }
+
+        return {};
+    }
+
+    static juce::String portToString (Block::ConnectionPort port)
+    {
+        return portEdgeToString (port) + "_" + juce::String (port.index);
+    }
+
+    static void dumpTopology (const BlockTopology& topology)
+    {
+        MemoryOutputStream m;
+
+        m << "=============================================================================" << newLine
+        << "Topology:  " << topology.blocks.size() << " device(s)" << newLine
+        << newLine;
+
+        int index = 0;
+
+        for (auto block : topology.blocks)
+        {
+            m << "Device " << index++ << (block->isMasterBlock() ? ":  (MASTER)" : ":") << newLine;
+
+            m << "  Description: " << block->getDeviceDescription() << newLine
+            << "  Serial: " << block->serialNumber << newLine;
+
+            if (auto bi = BlockImplementation<Detector>::getFrom (*block))
+                m << "  Short address: " << (int) bi->getDeviceIndex() << newLine;
+
+            m << "  Battery level: " + juce::String (juce::roundToInt (100.0f * block->getBatteryLevel())) + "%" << newLine
+            << "  Battery charging: " + juce::String (block->isBatteryCharging() ? "y" : "n") << newLine
+            << "  Width: " << block->getWidth() << newLine
+            << "  Height: " << block->getHeight() << newLine
+            << "  Millimeters per unit: " << block->getMillimetersPerUnit() << newLine
+            << newLine;
+        }
+
+        for (auto& connection : topology.connections)
+        {
+            m << idToSerialNum (topology, connection.device1)
+            << ":" << portToString (connection.connectionPortOnDevice1)
+            << "  <->  "
+            << idToSerialNum (topology, connection.device2)
+            << ":" << portToString (connection.connectionPortOnDevice2) << newLine;
+        }
+
+        m << "=============================================================================" << newLine;
+
+        Logger::outputDebugString (m.toString());
+    }
+   #endif
+
+    //==============================================================================
     void broadcastTopology()
     {
         if (currentTopology != lastTopology)
