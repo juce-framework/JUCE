@@ -88,13 +88,19 @@ struct ConnectedDeviceGroup  : private juce::AsyncUpdater,
     ConnectedDeviceGroup (Detector& d, const juce::String& name, PhysicalTopologySource::DeviceConnection* connection)
         : detector (d), deviceName (name), deviceConnection (connection)
     {
-        deviceConnection->handleMessageFromDevice = [this] (const void* data, size_t dataSize)
-        {
-            this->handleIncomingMessage (data, dataSize);
-        };
+
 
         if (auto midiDeviceConnection = static_cast<MIDIDeviceConnection*> (deviceConnection.get()))
+        {
             depreciatedVersionReader = std::make_unique<DepreciatedVersionReader> (*midiDeviceConnection);
+
+            juce::ScopedLock lock (midiDeviceConnection->criticalSecton);
+            setMidiMessageCallback();
+        }
+        else
+        {
+            setMidiMessageCallback();
+        }
 
         startTimer (200);
         sendTopologyRequest();
@@ -371,6 +377,15 @@ private:
     TouchList<TouchStart> touchStartPositions;
 
     Block::UID masterBlock = 0;
+
+    //==============================================================================
+    void setMidiMessageCallback()
+    {
+        deviceConnection->handleMessageFromDevice = [this] (const void* data, size_t dataSize)
+        {
+            this->handleIncomingMessage (data, dataSize);
+        };
+    }
 
     //==============================================================================
     juce::Time lastTopologyRequestTime, lastTopologyReceiveTime;

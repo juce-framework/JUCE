@@ -70,10 +70,10 @@ private:
     static constexpr size_t numFirmwareApps = 3;
     BlocksProtocol::VersionNumber result[numFirmwareApps];
     MIDIDeviceConnection& deviceConnection;
-    size_t currentRequest = 0;
+    juce::Atomic<size_t> currentRequest = 0;
 
     //==============================================================================
-    bool allRequestsComplete() const { return currentRequest >= numFirmwareApps; }
+    bool allRequestsComplete() const { return currentRequest.get() >= numFirmwareApps; }
 
     //==============================================================================
     void makeNextRequest()
@@ -83,17 +83,17 @@ private:
                                                           { 0xf0, 0x00, 0x21, 0x10, 0x47, 0x03, 0x01, 0xf7 },  // Stm32
                                                           { 0xf0, 0x00, 0x21, 0x10, 0x47, 0x03, 0x03, 0xf7 }}; // Bootloader
 
-        deviceConnection.sendMessageToDevice (&requests[currentRequest][0], requestSize);
+        deviceConnection.sendMessageToDevice (&requests[currentRequest.get()][0], requestSize);
     }
 
     //==============================================================================
     void processVersionMessage (const uint8* data, const size_t size)
     {
-        if (currentRequest >= numFirmwareApps || size < 1 || size - 1 > VersionNumber::maxLength)
+        if (currentRequest.get() >= numFirmwareApps || size < 1 || size - 1 > VersionNumber::maxLength)
             return;
 
-        result[currentRequest].length = uint8 (size - 1);
-        memcpy (result[currentRequest].data, data, result[currentRequest].length);
+        result[currentRequest.get()].length = uint8 (size - 1);
+        memcpy (result[currentRequest.get()].data, data, result[currentRequest.get()].length);
 
         ++currentRequest;
 
