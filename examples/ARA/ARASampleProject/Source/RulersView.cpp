@@ -117,11 +117,13 @@ void RulersView::paint (juce::Graphics& g)
         g.fillRect (bounds.getX(), secondsRulerY, bounds.getWidth(), secondsRulerHeight);
 
         RectangleList<int> rects;
-        const double lastSecond = floor (endTime);
-        for (double nextSecond = ceil (startTime); nextSecond <= lastSecond; nextSecond += 1.0)
+        const int lastSecond = roundToInt (floor (endTime));
+        for (int nextSecond = roundToInt (ceil (startTime)); nextSecond <= lastSecond; ++nextSecond)
         {
-            int lineWidth = (nextSecond == 0.0) ? heavyLineWidth : lightLineWidth;
-            rects.addWithoutMerging (Rectangle<int> (owner.getPlaybackRegionsViewsXForTime(nextSecond) - lineWidth / 2, secondsRulerY, lineWidth, secondsRulerHeight));
+            const int lineWidth = (nextSecond % 60 == 0) ? heavyLineWidth : lightLineWidth;
+            const int lineHeight = (nextSecond % 10 == 0) ? secondsRulerHeight : secondsRulerHeight / 2;
+            const int x = owner.getPlaybackRegionsViewsXForTime (nextSecond);
+            rects.addWithoutMerging (Rectangle<int> (x - lineWidth / 2, secondsRulerY + secondsRulerHeight - lineHeight, lineWidth, lineHeight));
         }
         g.setColour (findColour (ColourIds::timeGridColourId));
         g.fillRectList (rects);
