@@ -75,18 +75,13 @@ void PlaybackRegionView::paint (Graphics& g)
         {
             double regionStart, regionEnd;
             getTimeRange(regionStart, regionEnd);
-            double viewStart, viewEnd;
-            editorComponent->getTimeRange (viewStart, viewEnd);
-            const double viewTimeOffset = viewStart - regionStart;
 
             auto convertedBounds = clipBounds + getBoundsInParent().getPosition();
-            double startTime = editorComponent->getPlaybackRegionsViewsTimeForX (convertedBounds.getX()) + viewTimeOffset;
-            double endTime = editorComponent->getPlaybackRegionsViewsTimeForX (convertedBounds.getRight()) + viewTimeOffset;
+            double startTime = editorComponent->getPlaybackRegionsViewsTimeForX (convertedBounds.getX());
+            double endTime = editorComponent->getPlaybackRegionsViewsTimeForX (convertedBounds.getRight());
 
-            auto drawBounds = getBounds() - getPosition();
-            drawBounds.setHorizontalRange (clipBounds.getHorizontalRange());
             g.setColour (regionColour.contrasting (0.7f));
-            audioThumb.drawChannels (g, drawBounds, startTime, endTime, 1.0f);
+            audioThumb.drawChannels (g, clipBounds, startTime - regionStart, endTime - regionStart, 1.0f);
         }
     }
     else
