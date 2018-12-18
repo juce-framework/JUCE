@@ -10,6 +10,7 @@ class ARASampleProjectAudioProcessorEditor;
     JUCE component used to display rulers for song time (in seconds and musical beats) and chords
 */
 class RulersView  : public Component,
+                    private ARAEditorView::Listener,
                     private ARADocument::Listener,
                     private ARAMusicalContext::Listener
 {
@@ -31,6 +32,9 @@ public:
 
     void paint (Graphics&) override;
 
+    // ARAEditorView::Listener overrides
+    void onNewSelection (const ARA::PlugIn::ViewSelection& currentSelection) override;
+
     // ARADocument::Listener overrides
     void didEndEditing (ARADocument* document) override;
     void willRemoveMusicalContextFromDocument (ARADocument* document, ARAMusicalContext* musicalContext) override;
@@ -43,7 +47,7 @@ public:
 private:
     void detachFromDocument();
     void detachFromMusicalContext();
-    bool findMusicalContext ();
+    void findMusicalContext ();
 
 private:
     ARASampleProjectAudioProcessorEditor& owner;
