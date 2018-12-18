@@ -218,11 +218,19 @@ void RulersView::paint (juce::Graphics& g)
     int nextWholeBeat = roundToInt (ceil (beatStart));
     if (nextWholeBeat < beatEnd)
     {
-        // if so, start drawing tick marks at each whole (integer) beat
+        // read the tempo map to find the starting beat position in pixels
+        double beatPixelPosX = 0;
         double beatsTillWholeBeat = nextWholeBeat - beatStart;
+        for (; ixT < tempoEntryCount - 2 && tempoReader.getDataForEvent (ixT + 1)->quarterPosition < nextWholeBeat;)
+        {
+            beatPixelPosX += pixelsPerBeat * (tempoReader.getDataForEvent (ixT + 1)->quarterPosition - tempoReader.getDataForEvent (ixT)->quarterPosition);
+            updateTempoState (true);
+        }
+
+        if (tempoReader.getDataForEvent (ixT)->quarterPosition < nextWholeBeat)
+            beatPixelPosX += pixelsPerBeat * (nextWholeBeat - tempoReader.getDataForEvent (ixT)->quarterPosition);
 
         // use a lambda to draw beat markers 
-        double beatPixelPosX = pixelsPerBeat * beatsTillWholeBeat;
         auto drawBeatRects = [&] (int beatsToDraw)
         {
             // for each beat, advance beat pixel by the current pixelsPerBeat value
