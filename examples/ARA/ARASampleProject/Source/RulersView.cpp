@@ -243,8 +243,8 @@ void RulersView::paint (juce::Graphics& g)
     // borders
     {
         g.setColour (findColour (ColourIds::borderColourId));
-        g.drawLine (bounds.getX(), beatsRulerY, bounds.getWidth(), beatsRulerY);
-        g.drawLine (bounds.getX(), secondsRulerY, bounds.getWidth(), secondsRulerY);
+        g.drawLine (bounds.getX(), beatsRulerY, bounds.getRight(), beatsRulerY);
+        g.drawLine (bounds.getX(), secondsRulerY, bounds.getRight(), secondsRulerY);
         g.drawRect (bounds);
     }
 }
