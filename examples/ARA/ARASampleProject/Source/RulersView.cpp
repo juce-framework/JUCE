@@ -182,8 +182,11 @@ void RulersView::paint (juce::Graphics& g)
     g.fillRect (0, rulerHeight, bounds.getWidth(), rulerHeight);
     RectangleList <int> musicalRects;
 
-    // use a lambda to update our tempo state while reading the host tempo map
+    // find the first tempo entry for our starting time
     int ixT = 0;
+    for (; ixT < tempoEntryCount - 2 && tempoReader.getDataForEvent (ixT + 1)->timePosition < timeStart; ++ixT);
+
+    // use a lambda to update our tempo state while reading the host tempo map
     double tempoBPM (120);
     double secondsToBeats (0), pixelsPerBeat (0);
     double beatEnd (0);
