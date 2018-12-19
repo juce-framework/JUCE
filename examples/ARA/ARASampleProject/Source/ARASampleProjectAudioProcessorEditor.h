@@ -26,8 +26,14 @@ public:
     // total time range
     void getTimeRange (double& start, double& end) const { start = startTime; end = endTime; }
 
-    // total visible time range
+    // visible time range
     void getVisibleTimeRange (double& start, double& end) const;
+// TODO JUCE_ARA if we want to make this into a reusable view, then zooming should use this primitive:
+//  void setVisibleTimeRange (double start, double end);
+//  It would limit the new visibile range to getTimeRange(), trying to keep requested duration unchanged.
+//  Another method zoomBy(float factor) can be added on top of this, which deals with keeping the relative
+//  playhead positon unchanged if it is visible while zooming, otherwise keeps current view centered.
+//  This will be easy to do since it is all in linear time now.
 
     // flag that our view needs to be rebuilt
     void invalidateRegionSequenceViews() { regionSequenceViewsAreInvalid = true; }
@@ -39,7 +45,7 @@ public:
     double getPlaybackRegionsViewsTimeForX (int x) const;
     double getPixelsPerSecond () const { return pixelsPerSecond; }
 
-    double getPlayheadPositionInSeconds() const { return playheadPositionInSeconds; }
+    double getPlayheadTimePosition() const { return playheadTimePosition; }
 
     //==============================================================================
     void paint (Graphics&) override;
@@ -88,7 +94,7 @@ private:
     double startTime = 0.0;
     double endTime = 1.0;
     double pixelsPerSecond = 0.0;
-    double playheadPositionInSeconds = 0.0;
+    double playheadTimePosition = 0.0;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARASampleProjectAudioProcessorEditor)

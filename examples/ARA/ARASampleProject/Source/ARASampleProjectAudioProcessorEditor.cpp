@@ -111,8 +111,8 @@ void ARASampleProjectAudioProcessorEditor::paint (Graphics& g)
 
 void ARASampleProjectAudioProcessorEditor::resized()
 {
-    // store keep viewport position relative to playhead
-    double pixelsUntilPlayhead = roundToInt (getPlaybackRegionsViewsXForTime (playheadPositionInSeconds) - playbackRegionsViewPort.getViewPosition().getX());
+    // store visible playhead postion (in main view coordinates)
+    int previousPlayheadX = getPlaybackRegionsViewsXForTime (playheadTimePosition) - playbackRegionsViewPort.getViewPosition().getX();
 
     // calculate maximum visible time range
     if (regionSequenceViews.isEmpty())
@@ -186,9 +186,10 @@ void ARASampleProjectAudioProcessorEditor::resized()
     followPlayheadToggleButton.setBounds (0, zoomInButton.getY(), 200, kStatusBarHeight);
 
     // keep viewport position relative to playhead
-    const double secondsBeforePlayhead = pixelsUntilPlayhead / pixelsPerSecond;
+    // TODO JUCE_ARA if playhead is not visible in new position, we should rather keep the
+    //               left or right border stable, depending on which side the playhead is.
     auto relativeViewportPosition = playbackRegionsViewPort.getViewPosition();
-    relativeViewportPosition.setX (getPlaybackRegionsViewsXForTime (playheadPositionInSeconds - secondsBeforePlayhead));
+    relativeViewportPosition.setX (getPlaybackRegionsViewsXForTime (playheadTimePosition) - previousPlayheadX);
     playbackRegionsViewPort.setViewPosition (relativeViewportPosition);
     rulersViewPort.setViewPosition (relativeViewportPosition.getX(), 0);
 }
@@ -252,16 +253,16 @@ void ARASampleProjectAudioProcessorEditor::getVisibleTimeRange(double &start, do
 void ARASampleProjectAudioProcessorEditor::timerCallback()
 {
     auto position = static_cast<ARASampleProjectAudioProcessor*> (getAudioProcessor())->getLastKnownPositionInfo();
-    if (playheadPositionInSeconds != position.timeInSeconds)
+    if (playheadTimePosition != position.timeInSeconds)
     {
-        playheadPositionInSeconds = position.timeInSeconds;
+        playheadTimePosition = position.timeInSeconds;
 
         if (followPlayheadToggleButton.getToggleState())
         {
             double visibleStart, visibleEnd;
             getVisibleTimeRange (visibleStart, visibleEnd);
-            if (playheadPositionInSeconds < visibleStart || playheadPositionInSeconds > visibleEnd)
-                playbackRegionsViewPort.setViewPosition (playbackRegionsViewPort.getViewPosition().withX (getPlaybackRegionsViewsXForTime (playheadPositionInSeconds)));
+            if (playheadTimePosition < visibleStart || playheadTimePosition > visibleEnd)
+                playbackRegionsViewPort.setViewPosition (playbackRegionsViewPort.getViewPosition().withX (getPlaybackRegionsViewsXForTime (playheadTimePosition)));
         };
 
         playheadView.repaint();
@@ -275,7 +276,7 @@ ARASampleProjectAudioProcessorEditor::PlayheadView::PlayheadView (ARASampleProje
 
 void ARASampleProjectAudioProcessorEditor::PlayheadView::paint (juce::Graphics &g)
 {
-    int playheadX = editorComponent.getPlaybackRegionsViewsXForTime (editorComponent.getPlayheadPositionInSeconds());
+    int playheadX = editorComponent.getPlaybackRegionsViewsXForTime (editorComponent.getPlayheadTimePosition());
     g.setColour (findColour (ScrollBar::ColourIds::thumbColourId));
     g.fillRect (playheadX - kPlayheadWidth / 2, 0, kPlayheadWidth, getHeight());
 }
