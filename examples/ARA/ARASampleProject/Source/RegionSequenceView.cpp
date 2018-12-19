@@ -42,16 +42,12 @@ void RegionSequenceView::detachFromRegionSequence()
 }
 
 //==============================================================================
-void RegionSequenceView::getTimeRange (double& startTime, double& endTime) const
+Range<double> RegionSequenceView::getTimeRange() const
 {
     if (regionSequence == nullptr)
-    {
-        startTime = 0.0;
-        endTime = 0.0;
-        return;
-    }
+        return {};
 
-    regionSequence->getTimeRange (startTime, endTime, true);
+    return regionSequence->getTimeRange (true);
 }
 
 void RegionSequenceView::setRegionsViewBoundsByYRange (int y, int height)

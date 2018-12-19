@@ -126,11 +126,9 @@ void ARASampleProjectAudioProcessorEditor::resized()
         endTime = std::numeric_limits<double>::lowest();
         for (auto v : regionSequenceViews)
         {
-            double sequenceStartTime, sequenceEndTime;
-            v->getTimeRange (sequenceStartTime, sequenceEndTime);
-
-            startTime = jmin (startTime, sequenceStartTime);
-            endTime = jmax (endTime, sequenceEndTime);
+            auto sequenceTimeRange = v->getTimeRange();
+            startTime = jmin (startTime, sequenceTimeRange.getStart());
+            endTime = jmax (endTime, sequenceTimeRange.getEnd());
         }
     }
 
