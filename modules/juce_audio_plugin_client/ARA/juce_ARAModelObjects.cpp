@@ -30,19 +30,10 @@ Range<double> ARARegionSequence::getTimeRange (bool includeHeadAndTail) const
     double endTime = std::numeric_limits<double>::lowest();
     for (auto playbackRegion : getPlaybackRegions<ARAPlaybackRegion>())
     {
-        double regionStartTime = playbackRegion->getStartInPlaybackTime();
-        double regionEndTime = playbackRegion->getEndInPlaybackTime();
-
-        if (includeHeadAndTail)
-        {
-            regionStartTime -= playbackRegion->getHeadTime();
-            regionEndTime += playbackRegion->getTailTime();
-        }
-
-        startTime = jmin (startTime, regionStartTime);
-        endTime = jmax (endTime, regionEndTime);
+        auto regionTimeRange = playbackRegion->getTimeRange (includeHeadAndTail);
+        startTime = jmin (startTime, regionTimeRange.getStart());
+        endTime = jmax (endTime, regionTimeRange.getEnd());
     }
-
     return { startTime, endTime };
 }
 
