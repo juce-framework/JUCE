@@ -40,13 +40,11 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
     constexpr double zoomStepFactor = 1.5;
     zoomInButton.onClick = [this, zoomStepFactor]
     {
-        storeRelativePosition();
         pixelsPerSecond *= zoomStepFactor;
         resized();
     };
     zoomOutButton.onClick = [this, zoomStepFactor]
     {
-        storeRelativePosition();
         pixelsPerSecond /= zoomStepFactor;
         resized();
     };
@@ -113,7 +111,10 @@ void ARASampleProjectAudioProcessorEditor::paint (Graphics& g)
 
 void ARASampleProjectAudioProcessorEditor::resized()
 {
-    // calculate visible time range
+    // store keep viewport position relative to playhead
+    double pixelsUntilPlayhead = roundToInt (getPlaybackRegionsViewsXForTime (playheadPositionInSeconds) - playbackRegionsViewPort.getViewPosition().getX());
+
+    // calculate maximum visible time range
     if (regionSequenceViews.isEmpty())
     {
         startTime = 0.0;
@@ -190,7 +191,6 @@ void ARASampleProjectAudioProcessorEditor::resized()
     relativeViewportPosition.setX (getPlaybackRegionsViewsXForTime (playheadPositionInSeconds - secondsBeforePlayhead));
     playbackRegionsViewPort.setViewPosition (relativeViewportPosition);
     rulersViewPort.setViewPosition (relativeViewportPosition.getX(), 0);
-    trackHeadersViewPort.setViewPosition (0, relativeViewportPosition.getY());
 }
 
 void ARASampleProjectAudioProcessorEditor::scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRangeStart)
@@ -219,11 +219,7 @@ void ARASampleProjectAudioProcessorEditor::rebuildRegionSequenceViews()
     resized();
 }
 
-void ARASampleProjectAudioProcessorEditor::storeRelativePosition()
-{
-    pixelsUntilPlayhead = roundToInt (getPlaybackRegionsViewsXForTime (playheadPositionInSeconds) - playbackRegionsViewPort.getViewPosition().getX());
-}
-
+//==============================================================================
 void ARASampleProjectAudioProcessorEditor::onHideRegionSequences (std::vector<ARARegionSequence*> const& /*regionSequences*/)
 {
     rebuildRegionSequenceViews();

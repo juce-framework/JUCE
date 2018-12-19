@@ -60,7 +60,7 @@ public:
 
 private:
     void rebuildRegionSequenceViews();
-    void storeRelativePosition();
+    void updatePlayheadBounds();
 
 private:
     // simple utility class to show playhead position
@@ -86,10 +86,9 @@ private:
 
     bool regionSequenceViewsAreInvalid = true;
     double startTime = 0.0;
-    double endTime = 0.0;
+    double endTime = 1.0;
     double pixelsPerSecond = 0.0;
     double playheadPositionInSeconds = 0.0;
-    double pixelsUntilPlayhead = 0.0;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARASampleProjectAudioProcessorEditor)
