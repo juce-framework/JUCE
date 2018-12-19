@@ -7,81 +7,62 @@ namespace juce
 
 //==============================================================================
 // shared base class for ARAPlaybackRenderer and ARAEditorRenderer, not to be used directly
-template <typename ARARendererType, void (ARARendererType::*setRenderingFunc) (bool), bool clearProcessBuffer>
-class ARARendererBase  : public ARARendererType
+class ARARendererBase
 {
 public:
-    using ARARendererType::ARARendererType;
-
-    virtual void prepareToPlay (double newSampleRate, int newNumChannels, int newMaxSamplesPerBlock, bool /*mayBeRealtime*/)
-    {
-        sampleRate = newSampleRate;
-        numChannels = newNumChannels;
-        maxSamplesPerBlock = newMaxSamplesPerBlock;
-
-        if (setRenderingFunc)
-            (this->*setRenderingFunc) (true);
-        prepared = true;
-    }
-
-    virtual bool processBlock (AudioBuffer<float>& buffer, int64 /*timeInSamples*/, bool /*isPlayingBack*/, bool /*isNonRealtime*/)
-    {
-        jassert (buffer.getNumSamples() <= getMaxSamplesPerBlock());
-        if (clearProcessBuffer)
-            buffer.clear();
-        return true;
-    }
-
-    virtual void releaseResources()
-    {
-        prepared = false;
-        if (setRenderingFunc)
-            (this->*setRenderingFunc) (false);
-    }
-
     bool isPrepared() const noexcept            { return prepared; }
-
     double getSampleRate() const noexcept       { return sampleRate; }
     int getNumChannels() const noexcept         { return numChannels; }
     int getMaxSamplesPerBlock() const noexcept  { return maxSamplesPerBlock; }
+
+protected:
+    void prepareToPlay (double newSampleRate, int newNumChannels, int newMaxSamplesPerBlock);
+    void releaseResources();
 
 private:
     double sampleRate = 44100.0;
     int numChannels = 1;
     int maxSamplesPerBlock = 1024;
     bool prepared = false;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARARendererBase)
 };
 
 //==============================================================================
-using ARAPlaybackRendererBase = ARARendererBase<ARA::PlugIn::PlaybackRenderer, &ARA::PlugIn::PlaybackRenderer::setRendering, true>;
-class ARAPlaybackRenderer  : public ARAPlaybackRendererBase
+class ARAPlaybackRenderer     : public ARA::PlugIn::PlaybackRenderer,
+                                public ARARendererBase
 {
 public:
-    using ARAPlaybackRendererBase::ARAPlaybackRendererBase;
+    using ARA::PlugIn::PlaybackRenderer::PlaybackRenderer;
+
+    bool isPreparedForRealtime() const noexcept { return preparedForRealtime; }
 
     // If you are subclassing ARAPlaybackRenderer, make sure to call the base class
     // implementations of any overridden function, except for processBlock().
+    virtual void prepareToPlay (double newSampleRate, int newNumChannels, int newMaxSamplesPerBlock, bool mayBeRealtime);
+    virtual bool processBlock (AudioBuffer<float>& buffer, int64 timeInSamples, bool isPlayingBack, bool isNonRealtime);
+    virtual void releaseResources();
 
     // only to be called if using a playback renderer created internally, i.e. not by the host.
     void addPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept;
     void removePlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept;
 
 private:
+    bool preparedForRealtime;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAPlaybackRenderer)
 };
 
 //==============================================================================
-using ARAEditorRendererBase = ARARendererBase<ARA::PlugIn::EditorRenderer, nullptr, false>;
-class ARAEditorRenderer  : public ARAEditorRendererBase
+class ARAEditorRenderer   : public ARA::PlugIn::EditorRenderer,
+                            public ARARendererBase
 {
 public:
-    using ARAEditorRendererBase::ARAEditorRendererBase;
+    using ARA::PlugIn::EditorRenderer::EditorRenderer;
 
     // If you are subclassing ARAEditorRenderer, make sure to call the base class
     // implementations of any overridden function, except for processBlock().
+    virtual void prepareToPlay (double newSampleRate, int newNumChannels, int newMaxSamplesPerBlock);
+    virtual bool processBlock (AudioBuffer<float>& buffer, int64 timeInSamples, bool isPlayingBack);
+    virtual void releaseResources();
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAEditorRenderer)
@@ -91,7 +72,7 @@ private:
 class ARAEditorView  : public ARA::PlugIn::EditorView
 {
 public:
-    ARAEditorView (ARA::PlugIn::DocumentController* documentController) noexcept;
+    using ARA::PlugIn::EditorView::EditorView;
 
     // If you are subclassing ARAEditorView, make sure to call the base class
     // implementations of all overridden functions.

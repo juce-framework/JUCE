@@ -146,13 +146,13 @@ void ARASampleProjectAudioProcessor::processBlock (AudioBuffer<float>& buffer, M
 
     if (isBoundToARA())
     {
-        // render our ARA playback regions for this buffer
+        // render our ARA playback regions for this buffer, realtime or offline
         if (isARAPlaybackRenderer())
             getARAPlaybackRenderer()->processBlock (buffer, timeInSamples, isPlaying, isNonRealtime());
 
-        // render our ARA editing preview
-        if (isARAEditorRenderer())
-            getARAEditorRenderer()->processBlock (buffer, timeInSamples, isPlaying, isNonRealtime());
+        // render our ARA editing preview only if in real time
+        if (isARAEditorRenderer() && ! isNonRealtime())
+            getARAEditorRenderer()->processBlock (buffer, timeInSamples, isPlaying);
     }
     else
     {

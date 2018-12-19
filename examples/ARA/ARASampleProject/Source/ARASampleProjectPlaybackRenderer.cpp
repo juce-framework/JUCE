@@ -8,9 +8,10 @@ ARASampleProjectPlaybackRenderer::ARASampleProjectPlaybackRenderer (ARADocumentC
 void ARASampleProjectPlaybackRenderer::prepareToPlay (double newSampleRate, int newNumChannels, int newMaxSamplesPerBlock, bool mayBeRealtime)
 {
     bool needAllocate = ! isPrepared() ||
-                        (newSampleRate != getSampleRate()) ||
-                        (newNumChannels != getNumChannels()) ||
-                        (newMaxSamplesPerBlock != getMaxSamplesPerBlock());
+                        newSampleRate != getSampleRate() ||
+                        newNumChannels != getNumChannels() ||
+                        newMaxSamplesPerBlock != getMaxSamplesPerBlock() ||
+                        mayBeRealtime != isPreparedForRealtime();
 
     ARAPlaybackRenderer::prepareToPlay (newSampleRate, newNumChannels, newMaxSamplesPerBlock, mayBeRealtime);
 
@@ -64,6 +65,7 @@ void ARASampleProjectPlaybackRenderer::releaseResources()
 bool ARASampleProjectPlaybackRenderer::processBlock (AudioBuffer<float>& buffer, int64 timeInSamples, bool isPlayingBack, bool isNonRealtime)
 {
     jassert (buffer.getNumSamples() <= getMaxSamplesPerBlock());
+    jassert (isNonRealtime || isPreparedForRealtime());
 
     bool success = true;
     bool didRenderFirstRegion = false;
@@ -124,9 +126,12 @@ bool ARASampleProjectPlaybackRenderer::processBlock (AudioBuffer<float>& buffer,
             int numSamplesToRead = (int) (endSongSample - startSongSample);
 
             // if we're using a buffering reader then set the appropriate timeout
-            BufferingAudioReader* bufferingReader = dynamic_cast<BufferingAudioReader*> (reader.get());
-            if (bufferingReader != nullptr)
+            if (isPreparedForRealtime())
+            {
+                jassert (dynamic_cast<BufferingAudioReader*> (reader.get()) != nullptr);
+                auto bufferingReader = static_cast<BufferingAudioReader*> (reader.get());
                 bufferingReader->setReadTimeout (isNonRealtime ? 100 : 0);
+            }
 
             // read samples
             bool bufferSuccess;
