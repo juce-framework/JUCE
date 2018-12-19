@@ -109,6 +109,11 @@ void ARAPlaybackRegion::setHeadAndTailTime (double newHeadTime, double newTailTi
     notifyContentChanged (ARAContentUpdateScopes::samplesAreAffected());
 }
 
+Range<double> ARAPlaybackRegion::getTimeRange (bool includeHeadAndTail) const
+{
+    return { getStartInPlaybackTime() - (includeHeadAndTail ? headTime : 0.0), getEndInPlaybackTime() + (includeHeadAndTail ? tailTime : 0.0) };
+}
+
 void ARAPlaybackRegion::notifyContentChanged (ARAContentUpdateScopes scopeFlags)
 {
     getAudioModification()->getAudioSource()->getDocument()->getDocumentController<ARADocumentController>()->

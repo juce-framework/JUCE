@@ -34,12 +34,6 @@ PlaybackRegionView::~PlaybackRegionView()
 }
 
 //==============================================================================
-void PlaybackRegionView::getTimeRange (double& startTime, double& endTime) const
-{
-    startTime = playbackRegion->getStartInPlaybackTime() - playbackRegion->getHeadTime();
-    endTime = playbackRegion->getEndInPlaybackTime() + playbackRegion->getTailTime();
-}
-
 void PlaybackRegionView::paint (Graphics& g)
 {
     const int lineThickness = 1;
@@ -73,15 +67,14 @@ void PlaybackRegionView::paint (Graphics& g)
         auto clipBounds = g.getClipBounds();
         if (clipBounds.getWidth() > 0)
         {
-            double regionStart, regionEnd;
-            getTimeRange(regionStart, regionEnd);
-
             auto convertedBounds = clipBounds + getBoundsInParent().getPosition();
             double startTime = editorComponent->getPlaybackRegionsViewsTimeForX (convertedBounds.getX());
             double endTime = editorComponent->getPlaybackRegionsViewsTimeForX (convertedBounds.getRight());
 
+            Range<double> regionTimeRange = getTimeRange();
+
             g.setColour (regionColour.contrasting (0.7f));
-            audioThumb.drawChannels (g, clipBounds, startTime - regionStart, endTime - regionStart, 1.0f);
+            audioThumb.drawChannels (g, clipBounds, startTime - regionTimeRange.getStart(), endTime - regionTimeRange.getStart(), 1.0f);
         }
     }
     else

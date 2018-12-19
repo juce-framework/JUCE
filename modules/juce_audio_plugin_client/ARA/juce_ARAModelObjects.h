@@ -210,6 +210,9 @@ public:
     void setTailTime (double newTailTime);
     void setHeadAndTailTime (double newHeadTime, double newTailTime);
 
+    // Returns time range covered by the region
+    Range<double> getTimeRange (bool includeHeadAndTail = false) const;
+
     void notifyContentChanged (ARAContentUpdateScopes scopeFlags);
 
 private:

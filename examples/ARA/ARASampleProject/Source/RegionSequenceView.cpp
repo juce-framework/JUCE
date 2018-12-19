@@ -56,10 +56,9 @@ void RegionSequenceView::setRegionsViewBoundsByYRange (int y, int height)
 
     for (auto regionView : playbackRegionViews)
     {
-        double regionViewStartTime, regionViewEndTime;
-        regionView->getTimeRange (regionViewStartTime, regionViewEndTime);
-        int startX = editorComponent->getPlaybackRegionsViewsXForTime (regionViewStartTime);
-        int endX = editorComponent->getPlaybackRegionsViewsXForTime (regionViewEndTime);
+        Range<double> regionTimeRange = regionView->getTimeRange();
+        int startX = editorComponent->getPlaybackRegionsViewsXForTime (regionTimeRange.getStart());
+        int endX = editorComponent->getPlaybackRegionsViewsXForTime (regionTimeRange.getEnd());
         regionView->setBounds (startX, y, endX - startX, height);
     }
 }
