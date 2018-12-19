@@ -508,6 +508,9 @@ private:
         mo << newLine;
         addCompileUnits (mo, excludeFromBuild);
         mo << ")" << newLine << newLine;
+        
+        setCompileUnitFlags(mo);
+        mo << newLine;
 
         if (excludeFromBuild.size() > 0)
         {
@@ -1284,6 +1287,34 @@ private:
     {
         for (int i = 0; i < getAllGroups().size(); ++i)
             addCompileUnits (getAllGroups().getReference(i), mo, excludeFromBuild);
+    }
+    
+    void setCompileUnitFlags ( const Project::Item& projectItem, MemoryOutputStream& mo ) const
+    {
+        if (projectItem.isGroup())
+        {
+            for (int i = 0; i < projectItem.getNumChildren(); ++i)
+                setCompileUnitFlags (projectItem.getChild(i), mo);
+        }
+        else if (projectItem.shouldBeAddedToTargetProject())
+        {
+            RelativePath file (projectItem.getFile(), getTargetFolder().getChildFile ("app"), RelativePath::buildTargetFolder);
+            if( projectItem.shouldBeCompiled() ) {
+                const auto s = projectItem.getCompilerFlagsSetting();
+                if ( s != "default" ) {
+                    const auto compilerFlags = getCompilerFlagsConfigurationValues().at(s).get().toString();
+                    if ( compilerFlags.length()>0 ) {
+                        mo << "set_source_files_properties(\"" << file.toUnixStyle() << "\" PROPERTIES COMPILE_FLAGS " << compilerFlags << " )" << newLine;
+                    }
+                }
+            }
+        }
+    }
+    
+    void setCompileUnitFlags (MemoryOutputStream& mo ) const
+    {
+        for (int i = 0; i < getAllGroups().size(); ++i  )
+            setCompileUnitFlags ( getAllGroups().getReference(i), mo);
     }
 
     //==============================================================================

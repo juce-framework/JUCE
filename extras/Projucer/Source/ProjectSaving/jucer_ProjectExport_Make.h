@@ -26,6 +26,7 @@
 
 #pragma once
 
+#include <set>
 
 //==============================================================================
 class MakefileProjectExporter  : public ProjectExporter
@@ -196,19 +197,19 @@ public:
 
         void writeObjects (OutputStream& out) const
         {
-            Array<RelativePath> targetFiles;
+            Array<std::pair<RelativePath,String>> targetFiles;
             for (int i = 0; i < owner.getAllGroups().size(); ++i)
                 findAllFilesToCompile (owner.getAllGroups().getReference(i), targetFiles);
 
             out << "OBJECTS_" + getTargetVarName() + String (" := \\") << newLine;
 
             for (int i = 0; i < targetFiles.size(); ++i)
-                out << "  $(JUCE_OBJDIR)/" << escapeSpaces (owner.getObjectFileFor (targetFiles.getReference(i))) << " \\" << newLine;
+                out << "  $(JUCE_OBJDIR)/" << escapeSpaces (owner.getObjectFileFor (targetFiles.getReference(i).first)) << " \\" << newLine;
 
             out << newLine;
         }
 
-        void findAllFilesToCompile (const Project::Item& projectItem, Array<RelativePath>& results) const
+        void findAllFilesToCompile (const Project::Item& projectItem, Array<std::pair<RelativePath,String>>& results) const
         {
             if (projectItem.isGroup())
             {
@@ -225,14 +226,14 @@ public:
 
                     if (owner.shouldFileBeCompiledByDefault (relativePath)
                      && owner.getProject().getTargetTypeFromFilePath (f, true) == targetType)
-                        results.add (relativePath);
+                        results.add (std::make_pair(relativePath,projectItem.getCompilerFlagsSetting()));
                 }
             }
         }
 
         void addFiles (OutputStream& out)
         {
-            Array<RelativePath> targetFiles;
+            Array<std::pair<RelativePath,String>> targetFiles;
             for (int i = 0; i < owner.getAllGroups().size(); ++i)
                 findAllFilesToCompile (owner.getAllGroups().getReference(i), targetFiles);
 
@@ -241,15 +242,20 @@ public:
 
             for (int i = 0; i < targetFiles.size(); ++i)
             {
-                jassert (targetFiles.getReference(i).getRoot() == RelativePath::buildTargetFolder);
+                jassert (targetFiles.getReference(i).first.getRoot() == RelativePath::buildTargetFolder);
 
-                out << "$(JUCE_OBJDIR)/" << escapeSpaces (owner.getObjectFileFor (targetFiles.getReference(i)))
-                    << ": " << escapeSpaces (targetFiles.getReference(i).toUnixStyle())            << newLine
+                const String compilerFlagsSetting = targetFiles.getReference(i).second;
+                const String settingVariableNameInvocation = compilerFlagsSetting == "default" ? ""
+                                    : "$(" + owner.getSymbolNameForCompilerFlagsSetting(compilerFlagsSetting) + ")";
+                
+                out << "$(JUCE_OBJDIR)/" << escapeSpaces (owner.getObjectFileFor (targetFiles.getReference(i).first))
+                    << ": " << escapeSpaces (targetFiles.getReference(i).first.toUnixStyle())            << newLine
                     << "\t-$(V_AT)mkdir -p $(JUCE_OBJDIR)"                                         << newLine
-                    << "\t@echo \"Compiling " << targetFiles.getReference(i).getFileName() << "\"" << newLine
-                    << (targetFiles.getReference(i).hasFileExtension ("c;s;S") ? "\t$(V_AT)$(CC) $(JUCE_CFLAGS) "
-                                                                               : "\t$(V_AT)$(CXX) $(JUCE_CXXFLAGS) ")
-                    << "$(" << cppflagsVarName << ") $(" << cflagsVarName << ") -o \"$@\" -c \"$<\""
+                    << "\t@echo \"Compiling " << targetFiles.getReference(i).first.getFileName() << "\"" << newLine
+                    << (targetFiles.getReference(i).first.hasFileExtension ("c;s;S") ? "\t$(V_AT)$(CC) $(JUCE_CFLAGS) "
+                                                                                     : "\t$(V_AT)$(CXX) $(JUCE_CXXFLAGS) ")
+                    << "$(" << cppflagsVarName << ") $(" << cflagsVarName << ") " << settingVariableNameInvocation
+                    << " -o \"$@\" -c \"$<\""
                     << newLine
                     << newLine;
             }
@@ -354,6 +360,8 @@ public:
         name = getNameLinux();
 
         targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderForExporter (getValueTreeTypeName()));
+        
+        initSymbolNamesForCompilerFlagsSettings();
     }
 
     //==============================================================================
@@ -867,6 +875,13 @@ private:
         for (ConstConfigIterator config (*this); config.next();)
             writeConfig (out, dynamic_cast<const MakeBuildConfiguration&> (*config));
 
+        const auto compilerFlagsSettings = project.getCompilerFlagsSettings();
+        for ( const auto& s : compilerFlagsSettings )
+            if ( s != "default" )
+                out << getSymbolNameForCompilerFlagsSetting(s) << " := "
+                    << compilerFlagsConfigurationValues.at(s).get().toString() << newLine;
+        if ( compilerFlagsSettings.size()>1 ) out << newLine;
+        
         for (auto target : targets)
             target->writeObjects (out);
 
@@ -886,6 +901,32 @@ private:
             << newLine;
 
         writeIncludeLines (out);
+    }
+    
+    std::map<String,String> compilerFlagsSettingsSymbolNames;
+    
+    void initSymbolNamesForCompilerFlagsSettings()
+    {
+        compilerFlagsSettingsSymbolNames.clear();
+        std::set<String> uniqueSymbolNames;
+        const auto compilerFlagsSettings = project.getCompilerFlagsSettings();
+        for( const auto& s : compilerFlagsSettings ) {
+            if ( s != "default" ) {
+                const String shortSymbolName = "JUCE_CFLAGS_SETTING_" + s.toUpperCase();
+                String uniqueSymbolName = shortSymbolName;
+                unsigned n = 1;
+                while ( uniqueSymbolNames.count(uniqueSymbolName)>0 ) {
+                    uniqueSymbolName = shortSymbolName + "_" + String(n++);
+                }
+                compilerFlagsSettingsSymbolNames[s] = uniqueSymbolName;
+                uniqueSymbolNames.insert(uniqueSymbolName);
+            }
+        }
+    }
+    
+    String getSymbolNameForCompilerFlagsSetting( const String& s ) const
+    {
+        return compilerFlagsSettingsSymbolNames.at(s);
     }
 
     String getArchFlags (const BuildConfiguration& config) const

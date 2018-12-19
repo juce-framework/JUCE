@@ -240,6 +240,8 @@ void Project::initialiseProjectValues()
         includeBinaryDataInJuceHeaderValue.referTo (projectRoot, Ids::includeBinaryInJuceHeader, getUndoManager(), true);
 
     binaryDataNamespaceValue.referTo           (projectRoot, Ids::binaryDataNamespace,       getUndoManager(), "BinaryData");
+    
+    compilerFlagsSettingsValue.referTo          (projectRoot, Ids::compilerFlagsSettings, getUndoManager(), StringArray("default"),",");
 }
 
 void Project::initialiseAudioPluginValues()
@@ -1186,6 +1188,8 @@ void Project::findAllImageItems (OwnedArray<Project::Item>& items)
 Project::Item::Item (Project& p, const ValueTree& s, bool isModuleCode)
     : project (p), state (s), belongsToModule (isModuleCode)
 {
+    if ( isFile() && !state.hasProperty (Ids::compilerFlagsSetting))
+        setCompilerFlagsSetting("default");
 }
 
 Project::Item::Item (const Item& other)
@@ -1272,6 +1276,14 @@ bool Project::Item::shouldBeAddedToXcodeResources() const   { return state [Ids:
 
 Value Project::Item::getShouldInhibitWarningsValue()        { return state.getPropertyAsValue (Ids::noWarnings, getUndoManager()); }
 bool Project::Item::shouldInhibitWarnings() const           { return state [Ids::noWarnings]; }
+
+Value Project::Item::getCompilerFlagsSettingValue()         { return state.getPropertyAsValue (Ids::compilerFlagsSetting, getUndoManager()); }
+String Project::Item::getCompilerFlagsSetting() const       { return state[Ids::compilerFlagsSetting]; }
+
+void Project::Item::setCompilerFlagsSetting(const String& Setting)
+{
+    state.getPropertyAsValue(Ids::compilerFlagsSetting, getUndoManager()).setValue(Setting);
+}
 
 bool Project::Item::isModuleCode() const                    { return belongsToModule; }
 

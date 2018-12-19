@@ -769,6 +769,11 @@ public:
 
                         if (! projectItem.shouldBeCompiled())
                             e->createNewChildElement ("ExcludedFromBuild")->addTextElement ("true");
+                        
+                        const auto S = projectItem.getCompilerFlagsSetting();
+                        if ( S != "default" )
+                            e->createNewChildElement ("AdditionalOptions")
+                             ->addTextElement (owner.getCompilerFlagsConfigurationValues().at(S).get().toString() + " %(AdditionalOptions)" );
                     }
                 }
                 else if (path.hasFileExtension (headerFileExtensions))

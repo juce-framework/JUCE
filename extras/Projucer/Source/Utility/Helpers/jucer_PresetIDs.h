@@ -159,6 +159,9 @@ namespace Ids
     DECLARE_ID (aaxIdentifier);
     DECLARE_ID (aaxFolder);
     DECLARE_ID (compile);
+    DECLARE_ID (compilerFlagsSetting);
+    DECLARE_ID (compilerFlagsSettings);
+    DECLARE_ID (compilerFlagsConfigurations);
     DECLARE_ID (noWarnings);
     DECLARE_ID (resource);
     DECLARE_ID (xcodeResource);

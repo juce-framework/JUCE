@@ -2695,7 +2695,7 @@ private:
         output << "\t};\n\trootObject = " << createID ("__root") << ";\n}\n";
     }
 
-    String addBuildFile (const String& path, const String& fileRefID, bool addToSourceBuildPhase, bool inhibitWarnings, XcodeTarget* xcodeTarget = nullptr) const
+    String addBuildFile (const String& path, const String& fileRefID, bool addToSourceBuildPhase, bool inhibitWarnings, String compilerFlags = "", XcodeTarget* xcodeTarget = nullptr) const
     {
         auto fileID = createID (path + "buildref");
 
@@ -2712,15 +2712,18 @@ private:
         v->setProperty ("fileRef", fileRefID, nullptr);
 
         if (inhibitWarnings)
-            v->setProperty ("settings", "{ COMPILER_FLAGS = \"-w\"; }", nullptr);
+            compilerFlags += " -w";
+
+        if (compilerFlags.length()>0)
+            v->setProperty ("settings", "{ COMPILER_FLAGS = \"" + compilerFlags + "\"; }", nullptr);
 
         pbxBuildFiles.add (v);
         return fileID;
     }
 
-    String addBuildFile (const RelativePath& path, bool addToSourceBuildPhase, bool inhibitWarnings, XcodeTarget* xcodeTarget = nullptr) const
+    String addBuildFile (const RelativePath& path, bool addToSourceBuildPhase, bool inhibitWarnings, const String& compilerFlags = "", XcodeTarget* xcodeTarget = nullptr) const
     {
-        return addBuildFile (path.toUnixStyle(), createFileRefID (path), addToSourceBuildPhase, inhibitWarnings, xcodeTarget);
+        return addBuildFile (path.toUnixStyle(), createFileRefID (path), addToSourceBuildPhase, inhibitWarnings, compilerFlags, xcodeTarget);
     }
 
     String addFileReference (String pathString) const
@@ -2840,14 +2843,14 @@ private:
     }
 
     String addFile (const RelativePath& path, bool shouldBeCompiled, bool shouldBeAddedToBinaryResources,
-                    bool shouldBeAddedToXcodeResources, bool inhibitWarnings, XcodeTarget* xcodeTarget) const
+                    bool shouldBeAddedToXcodeResources, bool inhibitWarnings, const String& compilerFlags, XcodeTarget* xcodeTarget) const
     {
         auto pathAsString = path.toUnixStyle();
         auto refID = addFileReference (path.toUnixStyle());
 
         if (shouldBeCompiled)
         {
-            addBuildFile (pathAsString, refID, true, inhibitWarnings, xcodeTarget);
+            addBuildFile (pathAsString, refID, true, inhibitWarnings, compilerFlags, xcodeTarget);
         }
         else if (! shouldBeAddedToBinaryResources || shouldBeAddedToXcodeResources)
         {
@@ -2872,7 +2875,7 @@ private:
         {
             if (auto* xcodeTarget = getTargetOfType (getProject().getTargetTypeFromFilePath (projectItem.getFile(), false)))
             {
-                auto rezFileID = addBuildFile (pathAsString, refID, false, false, xcodeTarget);
+                auto rezFileID = addBuildFile (pathAsString, refID, false, false, "", xcodeTarget);
                 xcodeTarget->rezFileIDs.add (rezFileID);
 
                 return refID;
@@ -2966,7 +2969,7 @@ private:
         overwriteFileIfDifferentOrThrow (entitlementsFile, content);
 
         RelativePath plistPath (entitlementsFile, getTargetFolder(), RelativePath::buildTargetFolder);
-        return addFile (plistPath, false, false, false, false, nullptr);
+        return addFile (plistPath, false, false, false, false, "", nullptr);
     }
 
     String addProjectItem (const Project::Item& projectItem) const
@@ -3010,10 +3013,14 @@ private:
             if (projectItem.isModuleCode() && projectItem.shouldBeCompiled())
                 xcodeTarget = getTargetOfType (project.getTargetTypeFromFilePath (projectItem.getFile(), false));
 
+            const auto compilerFlagSetting = projectItem.getCompilerFlagsSetting();
+            const auto compilerFlags = compilerFlagSetting == "default" ? "" : compilerFlagsConfigurationValues.at(compilerFlagSetting).get().toString();
+            
             return addFile (path, projectItem.shouldBeCompiled(),
                             projectItem.shouldBeAddedToBinaryResources(),
                             projectItem.shouldBeAddedToXcodeResources(),
                             projectItem.shouldInhibitWarnings(),
+                            compilerFlags,
                             xcodeTarget);
         }
 

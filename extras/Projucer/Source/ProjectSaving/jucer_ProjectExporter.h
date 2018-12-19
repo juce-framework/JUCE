@@ -29,6 +29,8 @@
 #include "../Project/jucer_Project.h"
 #include "../Utility/UI/PropertyComponents/jucer_PropertyComponentsWithEnablement.h"
 
+#include <map>
+
 class ProjectSaver;
 
 //==============================================================================
@@ -362,6 +364,11 @@ public:
         gccOfast  = 6
     };
 
+    const std::map<String,ValueWithDefault>& getCompilerFlagsConfigurationValues() const
+    {
+        return compilerFlagsConfigurationValues;
+    }
+    
 protected:
     //==============================================================================
     String name;
@@ -406,6 +413,8 @@ protected:
     ValueWithDefault targetLocationValue, extraCompilerFlagsValue, extraLinkerFlagsValue, externalLibrariesValue,
                      userNotesValue, gnuExtensionsValue, bigIconValue, smallIconValue, extraPPDefsValue;
 
+    std::map<String, ValueWithDefault> compilerFlagsConfigurationValues;
+    
     mutable Array<Project::Item> itemGroups;
     void initItemGroups() const;
     Project::Item* modulesGroup = nullptr;
@@ -475,6 +484,9 @@ private:
     RelativePath getInternalVST3SDKPath();
     void addVST3FolderToPath();
     void addAAXFoldersToPath();
+    
+    void updateCompilerFlagsConfigurations();
+
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectExporter)
 };

@@ -173,6 +173,7 @@ void PIPGenerator::addFileToTree (ValueTree& groupTree, const String& name, bool
     file.setProperty (Ids::ID, createAlphaNumericUID(), nullptr);
     file.setProperty (Ids::name, name, nullptr);
     file.setProperty (Ids::compile, compile, nullptr);
+    file.setProperty (Ids::compilerFlagsSetting, "default", nullptr );
     file.setProperty (Ids::resource, 0, nullptr);
     file.setProperty (Ids::file, path, nullptr);
 

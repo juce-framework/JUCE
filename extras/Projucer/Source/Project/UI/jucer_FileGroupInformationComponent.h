@@ -37,8 +37,8 @@ public:
         : item (group),
           header (item.getName(), { getIcons().openFolder, Colours::transparentBlack })
     {
-        list.setHeaderComponent (new ListBoxHeader ( { "File", "Binary Resource", "Xcode Resource", "Compile" },
-                                                     { 0.4f, 0.2f, 0.2f, 0.2f } ));
+        list.setHeaderComponent (new ListBoxHeader ( { "File", "Binary Resource", "Xcode Resource", "Compile", "Compiler Flags Setting" },
+                                                     { 0.4f, 0.2f, 0.2f, 0.2f, 0.4f } ));
         list.setModel (this);
         list.setColour (ListBox::backgroundColourId, Colours::transparentBlack);
         addAndMakeVisible (list);
@@ -53,6 +53,18 @@ public:
     ~FileGroupInformationComponent()
     {
         item.state.removeListener (this);
+    }
+    
+    void lookAndFeelChanged() override
+    {
+        LookAndFeel& lookAndFeel = getLookAndFeel();
+        const auto C = findColour (widgetTextColourId);
+        lookAndFeel.setColour(ComboBox::textColourId, C);
+        lookAndFeel.setColour(ComboBox::arrowColourId, C);
+        lookAndFeel.setColour(ComboBox::outlineColourId, C);
+        lookAndFeel.setColour(ToggleButton::textColourId, C);
+        lookAndFeel.setColour(ToggleButton::tickColourId, C);
+        setLookAndFeel(&lookAndFeel);
     }
 
     //==============================================================================
@@ -82,8 +94,8 @@ public:
 
     void paintListBoxItem (int rowNumber, Graphics& g, int width, int height, bool /*rowIsSelected*/) override
     {
-        g.setColour (findColour (rowNumber % 2 == 0 ? widgetBackgroundColourId
-                                                    : secondaryWidgetBackgroundColourId));
+        const auto C = findColour (widgetBackgroundColourId);
+        g.setColour( rowNumber % 2 == 0 ? C : C.darker(0.1f) );
         g.fillRect (0, 0, width, height - 1);
     }
 
@@ -127,7 +139,10 @@ private:
     }
 
     //==============================================================================
-    class FileOptionComponent  : public Component
+    class FileOptionComponent  : public Component,
+                                 private ValueTree::Listener,
+                                 private Value::Listener,
+                                 private ComboBox::Listener
     {
     public:
         FileOptionComponent (const Project::Item& fileItem, ListBoxHeader* listBoxHeader)
@@ -144,7 +159,35 @@ private:
 
                 addAndMakeVisible (xcodeResourceButton);
                 xcodeResourceButton.getToggleStateValue().referTo (item.getShouldAddToXcodeResourcesValue());
+
+                addChildComponent(settingsNameEditor);
+                settingsNameEditor.setEditable(true);
+                settingsNameEditor.setEnabled(false);
+                
+                addAndMakeVisible (compilerFlagsComboBox);
+                const auto setComboBoxEnabled = [this]{
+                    const auto compileOn = compileButton.getToggleState();
+                    compilerFlagsComboBox.setVisible(compileOn);
+                    compilerFlagsComboBox.setEnabled(compileOn);
+                };
+                setComboBoxEnabled();
+                compileButton.onStateChange = setComboBoxEnabled;
+                
+                updateCompilerFlagsSettings();
+                
+                compilerFlagsComboBox.addListener(this);
+                
+                item.state.addListener(this);
+                
+                compilerFlagsSettingsValue = item.project.getProjectValue(Ids::compilerFlagsSettings);
+                compilerFlagsSettingsValue.addListener(this);
             }
+        }
+        
+        ~FileOptionComponent()
+        {
+            compilerFlagsSettingsValue.removeListener(this);
+            item.state.removeListener(this);
         }
 
         void paint (Graphics& g) override
@@ -175,18 +218,117 @@ private:
 
                 bounds.removeFromLeft (roundToInt (header->getProportionAtIndex (0) * width));
 
-                binaryResourceButton.setBounds (bounds.removeFromLeft (roundToInt (header->getProportionAtIndex (1) * width)));
-                xcodeResourceButton.setBounds  (bounds.removeFromLeft (roundToInt (header->getProportionAtIndex (2) * width)));
-                compileButton.setBounds        (bounds.removeFromLeft (roundToInt (header->getProportionAtIndex (3) * width)));
+                binaryResourceButton.setBounds  (bounds.removeFromLeft (roundToInt (header->getProportionAtIndex (1) * width)));
+                xcodeResourceButton.setBounds   (bounds.removeFromLeft (roundToInt (header->getProportionAtIndex (2) * width)));
+                compileButton.setBounds         (bounds.removeFromLeft (roundToInt (header->getProportionAtIndex (3) * width)));
+                compilerFlagsComboBox.setBounds ((bounds.removeFromLeft (roundToInt (header->getProportionAtIndex (4) * width))).reduced(3));
+                settingsNameEditor.setBounds    (compilerFlagsComboBox.getBounds());
             }
         }
+        
+        void valueTreePropertyChanged (ValueTree&, const Identifier&) override
+        {
+            updateCompilerFlagsSettings();
+        }
+
+        void valueTreeChildAdded (ValueTree&, ValueTree&) override
+        {
+            updateCompilerFlagsSettings();
+        }
+        
+        void valueTreeChildRemoved (ValueTree&, ValueTree&, int) override
+        {
+            updateCompilerFlagsSettings();
+        }
+        
+        void valueTreeChildOrderChanged (ValueTree&, int, int) override {}
+        void valueTreeParentChanged (ValueTree&) override               {}
+
+        void valueChanged (Value&) override
+        {
+            updateCompilerFlagsSettings();
+        }
+        
+        void comboBoxChanged( ComboBox* cb ) override
+        {
+            if ( cb != &compilerFlagsComboBox ) return;
+            auto selectedID = cb->getSelectedId();
+            if ( selectedID == 0 ) {
+                selectedID = 1;
+                cb->setSelectedId(selectedID);
+            }
+            if ( selectedID > 0 ) {
+                cb->setItemEnabled(-2, selectedID>1 );
+                const auto activeSetting = cb->getItemText(cb->indexOfItemId(selectedID));
+                item.setCompilerFlagsSetting(activeSetting);
+            } else if ( selectedID == -1 ) {
+                cb->setVisible(false);
+                cb->setEnabled(false);
+                settingsNameEditor.setVisible(true);
+                settingsNameEditor.setEnabled(true);
+                settingsNameEditor.setText("New setting", NotificationType::dontSendNotification );
+                settingsNameEditor.onEditorHide = [this] {
+                    settingsNameEditor.onEditorHide = nullptr;
+                    const auto newSettingName = sanitizeSymbol(settingsNameEditor.getText().trim());
+                    if( newSettingName.length() > 0 ) {
+                        item.project.addCompilerFlagsSetting(newSettingName);
+                        item.setCompilerFlagsSetting(newSettingName);
+                    }
+                    settingsNameEditor.setVisible(false);
+                    settingsNameEditor.setEnabled(false);
+                    compilerFlagsComboBox.setEnabled(true);
+                    compilerFlagsComboBox.setVisible(true);
+                };
+                settingsNameEditor.showEditor();
+            } else if ( selectedID == -2 ) {
+                const auto currentSetting = item.getCompilerFlagsSetting();
+                if ( currentSetting != "default" ) {
+                    item.setCompilerFlagsSetting(cb->getItemText(cb->indexOfItemId(1)));
+                    item.project.removeCompilerFlagsSetting(currentSetting);
+                }
+            }
+        }
+        
 
         Project::Item item;
 
     private:
+        
+        static String sanitizeSymbol( const String& s )
+        {
+            const auto s2 = s.replaceCharacters(" ,.;:-","______").toStdString();
+            String result;
+            for( const auto c : s2 ) {
+                if ( isalnum(c) || c == '_' ) result += c;
+            }
+            return result;
+        }
+        
+        void updateCompilerFlagsSettings()
+        {
+            auto& cb = compilerFlagsComboBox;
+            cb.clear();
+            cb.addItemList (item.project.getCompilerFlagsSettings(), 1);
+            cb.addSeparator();
+            cb.addItem ("Add new setting ...", -1 );
+            cb.addItem ("Remove selected setting ...", -2 );
+            cb.setTextWhenNothingSelected("setting unavailable");
+            const auto activeItemText = item.getCompilerFlagsSetting();
+            for ( int i = 0; i<cb.getNumItems(); ++i ) {
+                if ( cb.getItemText(i) == activeItemText ) {
+                    cb.setSelectedId(cb.getItemId(i));
+                    break;
+                }
+            }
+        }
+        
         ListBoxHeader* header;
 
         ToggleButton compileButton, binaryResourceButton, xcodeResourceButton;
+        ComboBox compilerFlagsComboBox;
+        Label settingsNameEditor;
+        
+        Value compilerFlagsSettingsValue;
     };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileGroupInformationComponent)

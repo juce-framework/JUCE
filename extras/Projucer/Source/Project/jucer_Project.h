@@ -123,6 +123,47 @@ public:
     bool shouldIncludeBinaryInJuceHeader() const         { return includeBinaryDataInJuceHeaderValue.get(); }
     String getBinaryDataNamespaceString() const          { return binaryDataNamespaceValue.get(); }
 
+    StringArray getCompilerFlagsSettings() const
+    {
+        const auto compilerFlagsSettings = compilerFlagsSettingsValue.get();
+        jassert(compilerFlagsSettings.isArray());
+        const Array<var>* settingsArray = compilerFlagsSettings.getArray();
+        StringArray result;
+        for ( auto& s : *settingsArray ) {
+            jassert(s.isString());
+            result.add(s.toString());
+        }
+        return result;
+    }
+    
+    void addCompilerFlagsSetting( const String& S )
+    {
+        const auto compilerFlagsSettings = compilerFlagsSettingsValue.get();
+        jassert(compilerFlagsSettings.isArray());
+        const Array<var>* settingsArray = compilerFlagsSettings.getArray();
+        StringArray newSettingsArray;
+        for( const auto& s : *settingsArray ) {
+            jassert(s.isString());
+            newSettingsArray.add(s.toString());
+        }
+        newSettingsArray.addIfNotAlreadyThere(S);
+        compilerFlagsSettingsValue.setValue(newSettingsArray, getUndoManagerFor(projectRoot));
+    }
+    
+    void removeCompilerFlagsSetting( const String& S )
+    {
+        const auto compilerFlagsSettings = compilerFlagsSettingsValue.get();
+        jassert(compilerFlagsSettings.isArray());
+        const Array<var>* settingsArray = compilerFlagsSettings.getArray();
+        StringArray newSettingsArray;
+        for( const auto& s : *settingsArray ) {
+            jassert(s.isString());
+            const auto T = s.toString();
+            if ( T != S ) newSettingsArray.add(T);
+        }
+        compilerFlagsSettingsValue.setValue(newSettingsArray, getUndoManagerFor(projectRoot));
+    }
+    
     bool shouldDisplaySplashScreen() const               { return displaySplashScreenValue.get(); }
     bool shouldReportAppUsage() const                    { return reportAppUsageValue.get(); }
     String getSplashScreenColourString() const           { return splashScreenColourValue.get(); }
@@ -277,6 +318,11 @@ public:
 
         Value getShouldInhibitWarningsValue();
         bool shouldInhibitWarnings() const;
+        
+        Value getCompilerFlagsSettingValue();
+        String getCompilerFlagsSetting() const;
+        
+        void setCompilerFlagsSetting( const String& Setting );
 
         bool isModuleCode() const;
 
@@ -413,7 +459,7 @@ private:
 
     ValueWithDefault projectNameValue, projectUIDValue, projectLineFeedValue, projectTypeValue, versionValue, bundleIdentifierValue, companyNameValue,
                      companyCopyrightValue, companyWebsiteValue, companyEmailValue, displaySplashScreenValue, reportAppUsageValue, splashScreenColourValue, cppStandardValue,
-                     headerSearchPathsValue, preprocessorDefsValue, userNotesValue, maxBinaryFileSizeValue, includeBinaryDataInJuceHeaderValue, binaryDataNamespaceValue;
+                     headerSearchPathsValue, preprocessorDefsValue, userNotesValue, maxBinaryFileSizeValue, includeBinaryDataInJuceHeaderValue, binaryDataNamespaceValue, compilerFlagsSettingsValue;
 
     ValueWithDefault pluginFormatsValue, pluginNameValue, pluginDescriptionValue, pluginManufacturerValue, pluginManufacturerCodeValue,
                      pluginCodeValue, pluginChannelConfigsValue, pluginCharacteristicsValue, pluginAUExportPrefixValue, pluginAAXIdentifierValue,

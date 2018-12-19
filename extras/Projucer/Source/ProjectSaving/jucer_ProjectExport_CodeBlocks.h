@@ -781,6 +781,17 @@ private:
             {
                 unit->createNewChildElement ("Option")->setAttribute ("compile", 0);
                 unit->createNewChildElement ("Option")->setAttribute ("link", 0);
+            } else {
+                const auto s = projectItem.getCompilerFlagsSetting();
+                if ( s != "default" ) {
+                    const auto compilerFlags = getCompilerFlagsConfigurationValues().at(s).get().toString();
+                    if( compilerFlags.length() > 0 ) {
+                        auto Option = unit->createNewChildElement ("Option");
+                        Option->setAttribute("compiler", "gcc");
+                        Option->setAttribute("use", 1 );
+                        Option->setAttribute("buildCommand", "$compiler $options " + compilerFlags + " $includes -c $file  -o $object" );
+                    }
+                }
             }
         }
     }

@@ -257,10 +257,22 @@ ProjectExporter::ProjectExporter (Project& p, const ValueTree& state)
       smallIconValue          (settings, Ids::smallIcon,           getUndoManager()),
       extraPPDefsValue        (settings, Ids::extraDefs,           getUndoManager())
 {
+    updateCompilerFlagsConfigurations();
 }
 
 ProjectExporter::~ProjectExporter()
 {
+}
+
+void ProjectExporter::updateCompilerFlagsConfigurations()
+{
+    compilerFlagsConfigurationValues.clear();
+    auto compilerFlagsConfigurationTree = settings.getOrCreateChildWithName (Ids::compilerFlagsConfigurations, getUndoManager());
+    const auto compilerFlagsSettings = project.getCompilerFlagsSettings();
+    for ( const auto& S : compilerFlagsSettings ) {
+        if ( S != "default" )
+            compilerFlagsConfigurationValues[S] = ValueWithDefault(compilerFlagsConfigurationTree, S, getUndoManager());
+    }
 }
 
 void ProjectExporter::updateDeprecatedProjectSettingsInteractively() {}
@@ -335,6 +347,12 @@ void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
         props.add (new TextPropertyComponent (extraCompilerFlagsValue, "Extra Compiler Flags", 8192, true),
                    "Extra command-line flags to be passed to the compiler. This string can contain references to preprocessor definitions in the "
                    "form ${NAME_OF_DEFINITION}, which will be replaced with their values.");
+        
+        updateCompilerFlagsConfigurations();
+        for ( auto& c : compilerFlagsConfigurationValues ) {
+            props.add (new TextPropertyComponent (c.second, String("Extra Compiler Flags for ") + c.first, 1024, false),
+                       String("Specific additional compiler flag configuration for the setting ") + c.first );
+        }
 
         props.add (new TextPropertyComponent (extraLinkerFlagsValue, "Extra Linker Flags", 8192, true),
                    "Extra command-line flags to be passed to the linker. You might want to use this for adding additional libraries. "
