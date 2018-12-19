@@ -54,11 +54,16 @@ AudioParameterFloat::AudioParameterFloat (const String& idToUse, const String& n
      valueFromStringFunction (valueFromString)
 {
     if (stringFromValueFunction == nullptr)
-        stringFromValueFunction = [] (float v, int length)
+    {
+        bool isContinuousInterval = (approximatelyEqual (range.interval, 0.0f)
+                                     || std::abs (range.interval - (int) range.interval) > 0.0f);
+
+        stringFromValueFunction = [isContinuousInterval] (float v, int length)
         {
-            String asText (v, 2);
+            String asText (v, isContinuousInterval ? 2 : 0);
             return length > 0 ? asText.substring (0, length) : asText;
         };
+    }
 
     if (valueFromStringFunction == nullptr)
         valueFromStringFunction = [] (const String& text) { return text.getFloatValue(); };
