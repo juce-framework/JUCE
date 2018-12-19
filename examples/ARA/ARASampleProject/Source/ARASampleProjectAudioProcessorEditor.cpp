@@ -161,6 +161,7 @@ void ARASampleProjectAudioProcessorEditor::resized()
 
     // update sizes and positions of all views
     playbackRegionsView.setBounds (0, 0, roundToInt ((endTime - startTime) * pixelsPerSecond), kTrackHeight * regionSequenceViews.size());
+    pixelsPerSecond = playbackRegionsView.getWidth() / (endTime - startTime);       // prevent potential rounding issues
     playbackRegionsViewPort.setBounds (kTrackHeaderWidth, kRulersViewHeight, getWidth() - kTrackHeaderWidth, getHeight() - kRulersViewHeight - kStatusBarHeight);
 
     trackHeadersView.setBounds (0, 0, kTrackHeaderWidth, playbackRegionsView.getHeight());
