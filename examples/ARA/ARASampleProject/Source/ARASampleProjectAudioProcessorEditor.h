@@ -16,7 +16,6 @@ class ARASampleProjectAudioProcessorEditor  : public AudioProcessorEditor,
                                               public AudioProcessorEditorARAExtension,
                                               private ARAEditorView::Listener,
                                               private ARADocument::Listener,
-                                              private ScrollBar::Listener,
                                               private juce::Timer
 {
 public:
@@ -38,8 +37,10 @@ public:
     // flag that our view needs to be rebuilt
     void invalidateRegionSequenceViews() { regionSequenceViewsAreInvalid = true; }
 
-    Component& getTrackHeadersView() { return trackHeadersView; }
     Component& getPlaybackRegionsView() { return playbackRegionsView; }
+    Component& getTrackHeadersView() { return trackHeadersView; }
+    Viewport& getTrackHeadersViewPort() { return trackHeadersViewPort; }
+    Viewport& getRulersViewPort() { return rulersViewPort; }
 
     int getPlaybackRegionsViewsXForTime (double time) const;
     double getPlaybackRegionsViewsTimeForX (int x) const;
@@ -50,9 +51,6 @@ public:
     //==============================================================================
     void paint (Graphics&) override;
     void resized() override;
-
-    // ScrollBar::Listener overrides
-    void scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRangeStart) override;
 
     // juce::Timer overrides
     void timerCallback() override;
@@ -80,12 +78,25 @@ private:
         static constexpr int kPlayheadWidth = 3;
     };
 
+    // simple utility class to partially sync scroll postions of our view ports
+    class ScrollMasterViewPort : public Viewport
+    {
+    public:
+        ScrollMasterViewPort (ARASampleProjectAudioProcessorEditor& editorComponent) : editorComponent (editorComponent) {};
+        void visibleAreaChanged (const Rectangle<int>& newVisibleArea) override;
+    private:
+        ARASampleProjectAudioProcessorEditor& editorComponent;
+    };
+
     OwnedArray<RegionSequenceView> regionSequenceViews;
 
-    Viewport trackHeadersViewPort, rulersViewPort, playbackRegionsViewPort;
-    Component trackHeadersView, playbackRegionsView;
-    std::unique_ptr<RulersView> rulersView;
+    ScrollMasterViewPort playbackRegionsViewPort;
+    Component playbackRegionsView;
     PlayheadView playheadView;
+    Viewport trackHeadersViewPort;
+    Component trackHeadersView;
+    Viewport rulersViewPort;
+    std::unique_ptr<RulersView> rulersView;
 
     TextButton zoomInButton, zoomOutButton;
     ToggleButton followPlayheadToggleButton;

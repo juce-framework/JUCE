@@ -16,6 +16,7 @@ constexpr int kHeight = kMinHeight + 5 * kTrackHeight;
 ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARASampleProjectAudioProcessor& p)
     : AudioProcessorEditor (&p),
       AudioProcessorEditorARAExtension (&p),
+      playbackRegionsViewPort (*this),
       playheadView (*this)
 {
     setSize (kWidth, kHeight);
@@ -26,8 +27,6 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
     playbackRegionsView.addAndMakeVisible (playheadView);
 
     playbackRegionsViewPort.setScrollBarsShown (true, true, false, false);
-    playbackRegionsViewPort.getHorizontalScrollBar().addListener (this);
-    playbackRegionsViewPort.getVerticalScrollBar().addListener (this);
     playbackRegionsViewPort.setViewedComponent (&playbackRegionsView, false);
     addAndMakeVisible (playbackRegionsViewPort);
 
@@ -80,9 +79,6 @@ ARASampleProjectAudioProcessorEditor::~ARASampleProjectAudioProcessorEditor()
 
         getARAEditorView()->removeListener (this);
     }
-
-    playbackRegionsViewPort.getHorizontalScrollBar().removeListener (this);
-    playbackRegionsViewPort.getVerticalScrollBar().removeListener (this);
 }
 
 //==============================================================================
@@ -193,19 +189,6 @@ void ARASampleProjectAudioProcessorEditor::resized()
     rulersViewPort.setViewPosition (relativeViewportPosition.getX(), 0);
 }
 
-void ARASampleProjectAudioProcessorEditor::scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRangeStart)
-{
-    // TODO JUCE_ARA JUCE does not send scrollBarMoved if there's some scroll wheel or track pad event
-    //               that does trigger the scrolling. We'd need to fix this some way ot the other...
-    // see for example: https://forum.juce.com/t/viewport-scrollbarmoved-mousewheelmoved/20226
-    if (scrollBarThatHasMoved == &playbackRegionsViewPort.getHorizontalScrollBar())
-        rulersViewPort.setViewPosition (roundToInt (newRangeStart), 0);
-    else if (scrollBarThatHasMoved == &playbackRegionsViewPort.getVerticalScrollBar())
-        trackHeadersViewPort.setViewPosition (0, roundToInt (newRangeStart));
-    else
-        jassertfalse;
-}
-
 void ARASampleProjectAudioProcessorEditor::rebuildRegionSequenceViews()
 {
     regionSequenceViews.clear();
@@ -278,4 +261,14 @@ void ARASampleProjectAudioProcessorEditor::PlayheadView::paint (juce::Graphics &
     int playheadX = editorComponent.getPlaybackRegionsViewsXForTime (editorComponent.getPlayheadTimePosition());
     g.setColour (findColour (ScrollBar::ColourIds::thumbColourId));
     g.fillRect (playheadX - kPlayheadWidth / 2, 0, kPlayheadWidth, getHeight());
+}
+
+//==============================================================================
+// see https://forum.juce.com/t/viewport-scrollbarmoved-mousewheelmoved/20226
+void ARASampleProjectAudioProcessorEditor::ScrollMasterViewPort::visibleAreaChanged (const Rectangle<int>& newVisibleArea)
+{
+    Viewport::visibleAreaChanged (newVisibleArea);
+
+    editorComponent.getRulersViewPort().setViewPosition (newVisibleArea.getX(), 0);
+    editorComponent.getTrackHeadersViewPort().setViewPosition (0, newVisibleArea.getY());
 }
