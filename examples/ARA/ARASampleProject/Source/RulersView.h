@@ -42,6 +42,5 @@ private:
     ARADocument* document;
     ARAMusicalContext* musicalContext;
 
-    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RulersView)
 };

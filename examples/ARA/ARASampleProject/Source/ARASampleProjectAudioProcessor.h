@@ -54,8 +54,9 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
     const AudioPlayHead::CurrentPositionInfo& getLastKnownPositionInfo() { return lastPositionInfo; }
+
 private:
     AudioPlayHead::CurrentPositionInfo lastPositionInfo;
-    //==============================================================================
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARASampleProjectAudioProcessor)
 };

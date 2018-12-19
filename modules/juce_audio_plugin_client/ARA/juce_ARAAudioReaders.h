@@ -61,7 +61,6 @@ private:
     ReadWriteLock lock;
     std::vector<void*> tmpPtrs;
 
-    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAAudioSourceReader)
 };
 
@@ -91,7 +90,6 @@ private:
     std::unique_ptr<ARAPlaybackRenderer> playbackRenderer;
     ReadWriteLock lock;
 
-    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAPlaybackRegionReader)
 };
 
@@ -111,7 +109,6 @@ public:
 private:
     ARARegionSequence* sequence;
 
-    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARARegionSequenceReader)
 };
 

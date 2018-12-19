@@ -37,7 +37,6 @@ public:
 private:
     std::unique_ptr<const ARA::PlugIn::PlugInExtension> araPlugInExtension;
 
-    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorARAExtension)
 };
 
@@ -58,7 +57,6 @@ public:
 private:
     AudioProcessorARAExtension* araProcessorExtension;
 
-    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorEditorARAExtension)
 };
 

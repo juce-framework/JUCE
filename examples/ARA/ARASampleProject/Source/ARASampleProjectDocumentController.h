@@ -23,6 +23,5 @@ private:
     // Thread used by buffering audio sources to read samples from the host
     TimeSliceThread audioSourceReadingThread;
 
-    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARASampleProjectDocumentController)
 };

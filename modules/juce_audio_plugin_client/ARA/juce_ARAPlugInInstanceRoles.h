@@ -51,7 +51,6 @@ private:
     int maxSamplesPerBlock = 1024;
     bool prepared = false;
 
-    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARARendererBase)
 };
 
@@ -71,7 +70,6 @@ public:
 
 private:
 
-    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAPlaybackRenderer)
 };
 
@@ -86,8 +84,6 @@ public:
     // implementations of any overridden function, except for processBlock().
 
 private:
-
-    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAEditorRenderer)
 };
 
@@ -119,7 +115,6 @@ public:
 private:
     ListenerList<Listener> listeners;
 
-    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAEditorView)
 };
 
