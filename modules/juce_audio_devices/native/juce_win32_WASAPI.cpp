@@ -981,6 +981,7 @@ public:
 
     ~WASAPIAudioIODevice()
     {
+        cancelPendingUpdate();
         close();
     }
 
