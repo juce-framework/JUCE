@@ -191,7 +191,7 @@ DECLARE_JNI_CLASS_WITH_MIN_SDK (RemoteInputBuilder, "android/app/RemoteInput$Bui
 
 //==========================================================================
 #if defined(JUCE_FIREBASE_INSTANCE_ID_SERVICE_CLASSNAME)
- #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
    STATICMETHOD (getInstance, "getInstance", "()Lcom/google/firebase/iid/FirebaseInstanceId;") \
    METHOD (getToken, "getToken", "()Ljava/lang/String;")
 
@@ -200,7 +200,7 @@ DECLARE_JNI_CLASS_WITH_MIN_SDK (RemoteInputBuilder, "android/app/RemoteInput$Bui
 #endif
 
 #if defined(JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
- #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
    STATICMETHOD (getInstance, "getInstance", "()Lcom/google/firebase/messaging/FirebaseMessaging;") \
    METHOD (send,                 "send",                 "(Lcom/google/firebase/messaging/RemoteMessage;)V") \
    METHOD (subscribeToTopic,     "subscribeToTopic",     "(Ljava/lang/String;)V") \
@@ -209,7 +209,7 @@ DECLARE_JNI_CLASS_WITH_MIN_SDK (RemoteInputBuilder, "android/app/RemoteInput$Bui
  DECLARE_JNI_CLASS (FirebaseMessaging, "com/google/firebase/messaging/FirebaseMessaging")
  #undef JNI_CLASS_MEMBERS
 
- #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
    METHOD (getCollapseKey,  "getCollapseKey",  "()Ljava/lang/String;") \
    METHOD (getData,         "getData",         "()Ljava/util/Map;") \
    METHOD (getFrom,         "getFrom",         "()Ljava/lang/String;") \
@@ -223,7 +223,7 @@ DECLARE_JNI_CLASS_WITH_MIN_SDK (RemoteInputBuilder, "android/app/RemoteInput$Bui
  DECLARE_JNI_CLASS (RemoteMessage, "com/google/firebase/messaging/RemoteMessage")
  #undef JNI_CLASS_MEMBERS
 
-  #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+  #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
    METHOD (addData,        "addData",        "(Ljava/lang/String;Ljava/lang/String;)Lcom/google/firebase/messaging/RemoteMessage$Builder;") \
    METHOD (build,          "build",          "()Lcom/google/firebase/messaging/RemoteMessage;") \
    METHOD (constructor,    "<init>",         "(Ljava/lang/String;)V") \
@@ -235,7 +235,7 @@ DECLARE_JNI_CLASS_WITH_MIN_SDK (RemoteInputBuilder, "android/app/RemoteInput$Bui
  DECLARE_JNI_CLASS (RemoteMessageBuilder, "com/google/firebase/messaging/RemoteMessage$Builder")
  #undef JNI_CLASS_MEMBERS
 
- #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
    METHOD (getBody,                  "getBody",                  "()Ljava/lang/String;") \
    METHOD (getBodyLocalizationArgs,  "getBodyLocalizationArgs",  "()[Ljava/lang/String;") \
    METHOD (getBodyLocalizationKey,   "getBodyLocalizationKey",   "()Ljava/lang/String;") \
