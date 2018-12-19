@@ -7,14 +7,6 @@ RulersView::RulersView (ARASampleProjectAudioProcessorEditor& owner)
       document (nullptr),
       musicalContext (nullptr)
 {
-    setColour (borderColourId, Colours::darkgrey);
-    setColour (musicalRulerBackgroundColourId, (Colours::green).withAlpha(0.2f));
-    setColour (timeRulerBackgroundColourId, (Colours::blue).withAlpha(0.2f));
-    setColour (chordsRulerBackgroundColourId, Colours::transparentBlack);
-    setColour (musicalGridColourId, Colours::slategrey);
-    setColour (timeGridColourId, Colours::slateblue);
-    setColour (chordsColourId, Colours::slategrey);
-
     if (owner.isARAEditorView())
     {
         document = owner.getARADocumentController()->getDocument<ARADocument>();
@@ -85,15 +77,12 @@ void RulersView::paint (juce::Graphics& g)
 {
     const auto bounds = g.getClipBounds();
 
+    g.setColour (Colours::lightslategrey);
+
     if (musicalContext == nullptr)
     {
-        g.setColour (Colours::darkgrey);
-        g.drawRect (bounds, 3);
-
-        g.setColour (Colours::white);
         g.setFont (Font (12.0f));
         g.drawText ("No musical context found in ARA document!", bounds, Justification::centred);
-        
         return;
     }
 
@@ -113,9 +102,6 @@ void RulersView::paint (juce::Graphics& g)
 
     // seconds ruler: one tick for each second
     {
-        g.setColour (findColour (ColourIds::timeRulerBackgroundColourId));
-        g.fillRect (bounds.getX(), secondsRulerY, bounds.getWidth(), secondsRulerHeight);
-
         RectangleList<int> rects;
         const int lastSecond = roundToInt (floor (endTime));
         for (int nextSecond = roundToInt (ceil (startTime)); nextSecond <= lastSecond; ++nextSecond)
@@ -125,7 +111,7 @@ void RulersView::paint (juce::Graphics& g)
             const int x = owner.getPlaybackRegionsViewsXForTime (nextSecond);
             rects.addWithoutMerging (Rectangle<int> (x - lineWidth / 2, secondsRulerY + secondsRulerHeight - lineHeight, lineWidth, lineHeight));
         }
-        g.setColour (findColour (ColourIds::timeGridColourId));
+        g.drawText ("seconds", bounds, Justification::bottomRight);
         g.fillRectList (rects);
     }
 
@@ -140,9 +126,7 @@ void RulersView::paint (juce::Graphics& g)
         const int barSigEventCount = barSignatureReader.getEventCount();
         jassert (tempoEntryCount >= 2 && barSigEventCount >= 1);
 
-        g.setColour (findColour (ColourIds::musicalRulerBackgroundColourId));
-        g.fillRect (bounds.getX(), beatsRulerY, bounds.getWidth(), beatsRulerHeight);
-        RectangleList <int> beatsRects;
+        RectangleList<int> beatsRects;
 
         // find the first tempo entry for our starting time
         int ixT = 0;
@@ -230,21 +214,18 @@ void RulersView::paint (juce::Graphics& g)
             drawBeatRects (remainingBeats);
         }
 
-        g.setColour (findColour (ColourIds::musicalGridColourId));
+        g.drawText ("beats", bounds, Justification::centredRight);
         g.fillRectList (beatsRects);
     }
 
     // TODO JUCE_ARA chord ruler
     {
-        g.setColour (findColour (ColourIds::chordsRulerBackgroundColourId));
-        g.fillRect (bounds.getX(), chordRulerY, bounds.getWidth(), chordRulerHeight);
-
-        //g.setColour (findColour (ColourIds::chordsColourId));
+        g.drawText ("chords", bounds, Justification::topRight);
     }
 
     // borders
     {
-        g.setColour (findColour (ColourIds::borderColourId));
+        g.setColour (Colours::darkgrey);
         g.drawLine (bounds.getX(), beatsRulerY, bounds.getRight(), beatsRulerY);
         g.drawLine (bounds.getX(), secondsRulerY, bounds.getRight(), secondsRulerY);
         g.drawRect (bounds);
