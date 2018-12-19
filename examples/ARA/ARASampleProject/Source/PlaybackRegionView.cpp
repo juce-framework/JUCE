@@ -73,8 +73,10 @@ void PlaybackRegionView::paint (Graphics& g)
 
             Range<double> regionTimeRange = getTimeRange();
 
+            auto drawBounds = getBounds() - getPosition();
+            drawBounds.setHorizontalRange (clipBounds.getHorizontalRange());
             g.setColour (regionColour.contrasting (0.7f));
-            audioThumb.drawChannels (g, clipBounds, startTime - regionTimeRange.getStart(), endTime - regionTimeRange.getStart(), 1.0f);
+            audioThumb.drawChannels (g, drawBounds, startTime - regionTimeRange.getStart(), endTime - regionTimeRange.getStart(), 1.0f);
         }
     }
     else
