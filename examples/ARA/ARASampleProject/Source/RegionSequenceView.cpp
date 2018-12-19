@@ -47,7 +47,7 @@ Range<double> RegionSequenceView::getTimeRange() const
     if (regionSequence == nullptr)
         return {};
 
-    return regionSequence->getTimeRange (true);
+    return regionSequence->getTimeRange();
 }
 
 void RegionSequenceView::setRegionsViewBoundsByYRange (int y, int height)

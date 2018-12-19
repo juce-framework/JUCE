@@ -46,12 +46,6 @@ void PlaybackRegionView::paint (Graphics& g)
         regionColour = Colour::fromFloatRGBA (colour->r, colour->g, colour->b, 1.0f);
 
     auto rect = getLocalBounds();
-    double headTime = playbackRegion->getHeadTime();
-    double tailTime = playbackRegion->getTailTime();
-    double totalTime = playbackRegion->getDurationInPlaybackTime() + headTime + tailTime;
-    int totalWidth = rect.getWidth();
-    rect.removeFromLeft (roundToInt (totalWidth * headTime / totalTime));
-    rect.removeFromRight (roundToInt (totalWidth * tailTime / totalTime));
     g.setColour (isSelected ? Colours::yellow : Colours::black);
     g.drawRect (rect, lineThickness);
 
@@ -151,9 +145,9 @@ void PlaybackRegionView::didUpdatePlaybackRegionContent (ARAPlaybackRegion* regi
 {
     jassert (playbackRegion == region);
 
-    // our reader already catches this too, but we only check for its validity after host edits
-    // if the update is triggered inside the plug-in (e.g. when updating head/tail time)
-    // we need to update the view from this call, unless we're within a host edit already.
+    // Our reader catches this too, but we only check for its validity after host edits.
+    // If the update is triggered inside the plug-in, we need to update the view from this call
+    // (unless we're within a host edit already).
     if (scopeFlags.affectSamples() &&
         ! playbackRegion->getAudioModification()->getAudioSource()->getDocument()->getDocumentController()->isHostEditingDocument())
     {

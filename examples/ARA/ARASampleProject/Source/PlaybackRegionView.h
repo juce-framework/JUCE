@@ -21,7 +21,7 @@ public:
     ~PlaybackRegionView();
 
     ARAPlaybackRegion* getPlaybackRegion() const { return playbackRegion; }
-    Range<double> getTimeRange() const { return playbackRegion->getTimeRange(true); }
+    Range<double> getTimeRange() const { return playbackRegion->getTimeRange(); }
 
     void paint (Graphics&) override;
 
