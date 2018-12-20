@@ -1462,6 +1462,11 @@ public:
                 int dh = 0;
                 const int frameThickness = GetSystemMetrics (SM_CYFIXEDFRAME);
 
+               #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+                newWidth  = roundToInt (newWidth  * wrapper.editorScaleFactor);
+                newHeight = roundToInt (newHeight * wrapper.editorScaleFactor);
+               #endif
+
                 HWND w = (HWND) getWindowHandle();
 
                 while (w != 0)
