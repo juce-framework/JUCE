@@ -1022,12 +1022,8 @@ private:
                #endif
 
                 component->resizeHostWindow();
-
-                if (getHostType().isBitwigStudio())
-                {
-                    component->setTopLeftPosition (0, 0);
-                    component->repaint();
-                }
+                component->setTopLeftPosition (0, 0);
+                component->repaint();
             }
 
             return kResultTrue;
