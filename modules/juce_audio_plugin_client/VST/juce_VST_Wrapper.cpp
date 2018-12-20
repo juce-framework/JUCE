@@ -1257,6 +1257,9 @@ public:
            #if JUCE_WINDOWS
             if (! getHostType().isReceptor())
                 addMouseListener (this, true);
+            #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+             wrapper.editorScaleFactor = Desktop::getInstance().getDisplays().getMainDisplay().scale;
+            #endif
            #endif
 
             ignoreUnused (fakeMouseGenerator);
