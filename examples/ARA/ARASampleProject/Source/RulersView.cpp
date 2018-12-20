@@ -226,15 +226,15 @@ void RulersView::paint (juce::Graphics& g)
     // borders
     {
         g.setColour (Colours::darkgrey);
-        g.drawLine (bounds.getX(), beatsRulerY, bounds.getRight(), beatsRulerY);
-        g.drawLine (bounds.getX(), secondsRulerY, bounds.getRight(), secondsRulerY);
+        g.drawLine ((float) bounds.getX(), (float) beatsRulerY, (float) bounds.getRight(), (float) beatsRulerY);
+        g.drawLine ((float) bounds.getX(), (float) secondsRulerY, (float) bounds.getRight(), (float) secondsRulerY);
         g.drawRect (bounds);
     }
 }
 
 //==============================================================================
 
-void RulersView::onNewSelection (const ARA::PlugIn::ViewSelection& currentSelection)
+void RulersView::onNewSelection (const ARA::PlugIn::ViewSelection& /*currentSelection*/)
 {
     findMusicalContext();
 }
