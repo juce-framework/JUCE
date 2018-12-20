@@ -399,7 +399,7 @@ private:
     String pluginBeingScanned;
     double progress;
     int numThreads;
-    bool allowAsync, finished;
+    bool allowAsync, finished, timerReentrancyCheck = false;
     std::unique_ptr<ThreadPool> pool;
 
     static void startScanCallback (int result, AlertWindow* alert, Scanner* scanner)
@@ -518,6 +518,11 @@ private:
 
     void timerCallback() override
     {
+        if (timerReentrancyCheck)
+            return;
+
+        const ScopedValueSetter<bool> setter (timerReentrancyCheck, true);
+
         if (pool == nullptr)
         {
             if (doNextScan())
