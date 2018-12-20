@@ -55,12 +55,30 @@ AudioParameterFloat::AudioParameterFloat (const String& idToUse, const String& n
 {
     if (stringFromValueFunction == nullptr)
     {
-        bool isContinuousInterval = (approximatelyEqual (range.interval, 0.0f)
-                                     || std::abs (range.interval - (int) range.interval) > 0.0f);
-
-        stringFromValueFunction = [isContinuousInterval] (float v, int length)
+        auto numDecimalPlacesToDisplay = [this]
         {
-            String asText (v, isContinuousInterval ? 2 : 0);
+            int numDecimalPlaces = 7;
+
+            if (range.interval != 0.0f)
+            {
+                if (approximatelyEqual (std::abs (range.interval - (int) range.interval), 0.0f))
+                    return 0;
+
+                auto v = std::abs (roundToInt (range.interval * pow (10, numDecimalPlaces)));
+
+                while ((v % 10) == 0 && numDecimalPlaces > 0)
+                {
+                    --numDecimalPlaces;
+                    v /= 10;
+                }
+            }
+
+            return numDecimalPlaces;
+        }();
+
+        stringFromValueFunction = [numDecimalPlacesToDisplay] (float v, int length)
+        {
+            String asText (v, numDecimalPlacesToDisplay);
             return length > 0 ? asText.substring (0, length) : asText;
         };
     }
