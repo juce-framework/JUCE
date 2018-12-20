@@ -1021,6 +1021,10 @@ private:
                     ed->setScaleFactor ((float) factor);
                #endif
 
+                // Cubase 10 doesn't support non-integer scale factors...
+                if (getHostType().type == PluginHostType::SteinbergCubase10)
+                    component->checkScaleFactorIsCorrect();
+
                 component->resizeHostWindow();
                 component->setTopLeftPosition (0, 0);
                 component->repaint();
