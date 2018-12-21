@@ -41,31 +41,18 @@ private:
     void detachFromMusicalContext();
     void findMusicalContext ();
 
+    // useful typedefse
     using HostTempoEntryReader = ARA::PlugIn::HostContentReader<ARA::kARAContentTypeTempoEntries>;
     using HostBarSignatureReader = ARA::PlugIn::HostContentReader<ARA::kARAContentTypeBarSignatures>;
     using HostChordReader = ARA::PlugIn::HostContentReader<ARA::kARAContentTypeSheetChords>;
 
-    double findTempoForTime (ARA::ARATimePosition timeInSeconds, ARA::ARAContentTempoEntry& leftEntry, ARA::ARAContentTempoEntry&rightEntry) const;
-    ARA::ARAContentBarSignature findBarSignatureForTime (ARA::ARATimePosition timeInSeconds) const;
-    double findTimeOfBeat (ARA::ARAContentBarSignature barSignature, double beat) const;
-    ARA::ARAContentBarSignature findBarSignatureForQuarter (ARA::ARAQuarterPosition quarterPos) const;
-
-    static inline double quartersToSeconds (ARA::ARAQuarterPosition position, double tempo)
-    {
-        return 60. * position / tempo;
-    }
-    static inline double secondsToQuarters (ARA::ARATimePosition seconds, double tempo)
-    {
-        return tempo * seconds / 60.;
-    }
-    static inline double quartersToBeats (ARA::ARAContentBarSignature barSignature, ARA::ARAQuarterPosition quarterPosition)
-    {
-        return (barSignature.denominator / 4.) * quarterPosition;
-    };
-    static inline double beatsToQuarters (ARA::ARAContentBarSignature barSignature, ARA::ARAQuarterPosition beatPosition)
-    {
-        return (4. / barSignature.denominator) * beatPosition;
-    };
+    // helper functions for finding data in the ARAMusicalContext
+    double getTempoForTime (ARA::ARATimePosition timeInSeconds, ARA::ARAContentTempoEntry& leftEntry, ARA::ARAContentTempoEntry&rightEntry) const;
+    ARA::ARAQuarterPosition getQuarterForTime (ARA::ARATimePosition timePosition) const;
+    ARA::ARAQuarterPosition getQuarterForBeat (double beatPosition) const;
+    double getBeatForQuarter (ARA::ARAQuarterPosition quarterPosition) const;
+    ARA::ARATimePosition getTimeForQuarter (ARA::ARAQuarterPosition quarterPosition) const;
+    ARA::ARAContentBarSignature getBarSignatureForQuarter (ARA::ARAQuarterPosition quarterPos) const;
 
 private:
     ARASampleProjectAudioProcessorEditor& owner;

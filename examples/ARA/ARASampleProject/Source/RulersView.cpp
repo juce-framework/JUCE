@@ -73,33 +73,60 @@ void RulersView::findMusicalContext()
     }
 }
 
-ARA::ARAContentBarSignature RulersView::findBarSignatureForQuarter (ARA::ARAQuarterPosition quarterPos) const
-{
-    const HostBarSignatureReader barSignatureReader (musicalContext);
+//==============================================================================
 
-    // search for the bar signature entry for this quarter using std::upper_bound
+// note that these simple helperse won't work in general cases because they 
+// aren't examining the entire musical context when performing conversions. 
+// Use the RulersView:: member functions below when moving between time spaces
+double quartersToSeconds (ARA::ARAQuarterPosition position, double tempo)
+{
+    return 60. * position / tempo;
+}
+
+double secondsToQuarters (ARA::ARATimePosition seconds, double tempo)
+{
+    return tempo * seconds / 60.;
+}
+
+double quartersToBeats (ARA::ARAContentBarSignature barSignature, ARA::ARAQuarterPosition quarterPosition)
+{
+    return (barSignature.denominator * quarterPosition) / 4.;
+}
+double beatsToQuarters (ARA::ARAContentBarSignature barSignature, ARA::ARAQuarterPosition beatPosition)
+{
+    return (4. * beatPosition) / barSignature.denominator;
+}
+
+//==============================================================================
+
+ARA::ARAContentBarSignature RulersView::getBarSignatureForQuarter (ARA::ARAQuarterPosition quarterPos) const
+{
+    // search for the bar signature entry just after this quarter using std::upper_bound
+    const HostBarSignatureReader barSignatureReader (musicalContext);
     auto itBarSig = std::upper_bound (barSignatureReader.begin (), barSignatureReader.end (), quarterPos,
                                       [] (ARA::ARAQuarterPosition quarterPosition, ARA::ARAContentBarSignature barSignature)
     {
         return quarterPosition < barSignature.position;
     });
+
+    // move one step back, if we can, to find the bar signature for quarterPos
     if (itBarSig != barSignatureReader.begin ())
         --itBarSig;
 
     return *itBarSig;
 }
 
-double RulersView::findTempoForTime (double timeInSeconds, ARA::ARAContentTempoEntry& leftEntry, ARA::ARAContentTempoEntry& rightEntry) const
+double RulersView::getTempoForTime (double timeInSeconds, ARA::ARAContentTempoEntry& leftEntry, ARA::ARAContentTempoEntry& rightEntry) const
 {
+    // user std::upper_bound to find the first tempo entry pair after timeInSeconds
     const HostTempoEntryReader tempoReader (musicalContext);
-
-    // user std::upper_bound to find the first tempo entry pair after startTime
-    // if it's not the first pair, move one step back to find the pair enclosing startTime
     auto itTempo = std::upper_bound (tempoReader.begin (), std::prev (tempoReader.end ()), timeInSeconds,
                                      [] (ARA::ARATimePosition timePosition, ARA::ARAContentTempoEntry tempoEntry)
     {
         return timePosition < tempoEntry.timePosition;
     });
+
+    // if it's not the first pair, move one step back to find the pair enclosing timeInSeconds
     if (itTempo != tempoReader.begin ())
         --itTempo;
 
@@ -110,35 +137,78 @@ double RulersView::findTempoForTime (double timeInSeconds, ARA::ARAContentTempoE
     return 60 * (rightEntry.quarterPosition - leftEntry.quarterPosition) / (rightEntry.timePosition - leftEntry.timePosition);
 }
 
-ARA::ARAContentBarSignature RulersView::findBarSignatureForTime (double timeInSeconds) const
+ARA::ARAQuarterPosition RulersView::getQuarterForTime (ARA::ARATimePosition timePosition) const
 {
+    // find the tempo entries closest to timePosition and use the tempo to find the quarter position
     ARA::ARAContentTempoEntry leftEntry, rightEntry;
-    double tempo = findTempoForTime (timeInSeconds, leftEntry, rightEntry);
+    double tempo = getTempoForTime (timePosition, leftEntry, rightEntry);
 
-    ARA::ARAContentBarSignature barSignature;
-    if (timeInSeconds < rightEntry.timePosition)
-    {
-        double secondsSinceLastTempoEntry = timeInSeconds - leftEntry.timePosition;
-        double quartersSinceLastTempoEntry = secondsToQuarters (secondsSinceLastTempoEntry, tempo);
-        barSignature = findBarSignatureForQuarter (leftEntry.quarterPosition + quartersSinceLastTempoEntry);
-    }
-    else
-    {
-        double secondsSinceLastTempoEntry = timeInSeconds - rightEntry.timePosition;
-        double quartersSinceLastTempoEntry = secondsToQuarters (secondsSinceLastTempoEntry, tempo);
-        barSignature = findBarSignatureForQuarter (rightEntry.quarterPosition + quartersSinceLastTempoEntry);
-    }
-
-    return barSignature;
+    double secondsSinceLastTempoEntry = timePosition - leftEntry.timePosition;
+    double quartersSinceLastTempoEntry = secondsToQuarters (secondsSinceLastTempoEntry, tempo);
+    return leftEntry.quarterPosition + quartersSinceLastTempoEntry;
 }
 
-double RulersView::findTimeOfBeat (ARA::ARAContentBarSignature barSignature, double beat) const
+// transform a beat position to a quarter position by examining the host bar signature entries
+ARA::ARAQuarterPosition RulersView::getQuarterForBeat (double beatPosition) const
+{
+    HostBarSignatureReader barSignatureReader (musicalContext);
+
+    auto itBarSig = barSignatureReader.begin ();
+    const double firstQuarter = itBarSig->position;
+    double currentBeat = 0;
+
+    if (0 < beatPosition)
+    {
+        // use each bar signature entry before beatPositon to count the # of beats
+        for (; std::next (itBarSig) != barSignatureReader.end (); ++itBarSig)
+        {
+            ARA::ARAQuarterDuration quartersForBarSig = std::next (itBarSig)->position - itBarSig->position;
+            double beatsForBarSig = quartersToBeats (*itBarSig, quartersForBarSig);
+
+            // if the starting beat of the next bar signature passes beatPosition exit this loop
+            double nextBeat = currentBeat + beatsForBarSig;
+            if (beatPosition < nextBeat)
+                break;
+            currentBeat = nextBeat;
+        }
+    }
+
+    // transform the change in beats to quarters using the time signature at beatPosition
+    double deltaBeats = beatPosition - currentBeat;
+    double quarterForBeat = itBarSig->position + beatsToQuarters (*itBarSig, deltaBeats);
+    return quarterForBeat;
+}
+
+double RulersView::getBeatForQuarter (ARA::ARAQuarterPosition quarterPosition) const
+{
+    HostBarSignatureReader barSignatureReader (musicalContext);
+    auto itBarSig = barSignatureReader.begin ();
+    double beatPosition = 0;
+
+    if (itBarSig->position < quarterPosition)
+    {
+        // use each bar signature entry before quarterPosition to count the # of beats
+        for (; std::next (itBarSig) != barSignatureReader.end (); ++itBarSig)
+        {
+            auto itNextBarSig = std::next (itBarSig);
+            if (quarterPosition < itNextBarSig->position)
+                break;
+            ARA::ARAQuarterDuration deltaQ = itNextBarSig->position - itBarSig->position;
+            beatPosition += quartersToBeats (*itBarSig, deltaQ);
+        }
+    }
+
+    // the last change in quarter position comes after the latest bar signature change
+    ARA::ARAQuarterDuration deltaQ = quarterPosition - itBarSig->position;
+    beatPosition += quartersToBeats (*itBarSig, deltaQ);
+    return beatPosition;
+}
+
+double RulersView::getTimeForQuarter (ARA::ARAQuarterPosition quarterPosition) const
 {
     const HostTempoEntryReader tempoReader (musicalContext);
 
-    // find the tempo map entry for the quarter for this beat
-    double quarterForBeat = beatsToQuarters (barSignature, beat);
-    auto itTempo = std::upper_bound (tempoReader.begin (), std::prev (tempoReader.end ()), quarterForBeat,
+    auto itTempo = std::upper_bound (tempoReader.begin (), std::prev (tempoReader.end ()), quarterPosition,
                                      [] (ARA::ARAQuarterPosition beatPosition, ARA::ARAContentTempoEntry tempoEntry)
     {
         return beatPosition < tempoEntry.quarterPosition;
@@ -150,21 +220,12 @@ double RulersView::findTimeOfBeat (ARA::ARAContentBarSignature barSignature, dou
     ARA::ARAContentTempoEntry leftTempoEntry = *itTempo;
     ARA::ARAContentTempoEntry rightTempoEntry = *std::next (itTempo);
     double tempo = 60 * (rightTempoEntry.quarterPosition - leftTempoEntry.quarterPosition) / (rightTempoEntry.timePosition - leftTempoEntry.timePosition);
-    
+
     // find difference in quarters from last known quarter position, convert to seconds
-    if (rightTempoEntry.quarterPosition < quarterForBeat)
-    {
-        double quartersFromRight = quarterForBeat - rightTempoEntry.quarterPosition;
-        double secondsFromRight = quartersToSeconds (quartersFromRight, tempo);
-        return rightTempoEntry.timePosition + secondsFromRight;
-    }
-    else
-    {
-        double quartersFromLeft = quarterForBeat - leftTempoEntry.quarterPosition;
-        double secondsFromLeft = quartersToSeconds (quartersFromLeft, tempo);
-        return leftTempoEntry.timePosition + secondsFromLeft;
-    }
-};
+    double quartersFromLeft = quarterPosition - leftTempoEntry.quarterPosition;
+    double secondsFromLeft = quartersToSeconds (quartersFromLeft, tempo);
+    return leftTempoEntry.timePosition + secondsFromLeft;
+}
 
 //==============================================================================
 void RulersView::paint (juce::Graphics& g)
@@ -210,66 +271,37 @@ void RulersView::paint (juce::Graphics& g)
 
     // beat ruler: evaluates tempo and bar signatures to draw a line for each beat
     {
-        // use our musical context to read tempo and bar signature data using content readers
-        HostTempoEntryReader tempoReader (musicalContext);
-        HostBarSignatureReader barSignatureReader (musicalContext);
-
-        // we must have at least two tempo entries and a bar signature in order to have a proper timing information
-        const int tempoEntryCount = tempoReader.getEventCount();
-        const int barSigEventCount = barSignatureReader.getEventCount();
-        jassert (tempoEntryCount >= 2 && barSigEventCount >= 1);
-
         RectangleList<int> rects;
 
-        // find the initial tempo from the first entry pair
-        ARA::ARAContentTempoEntry leftTempoEntry, rightTempoEntry;
-        double tempo = findTempoForTime (visibleRange.getStart(), leftTempoEntry, rightTempoEntry);
-        
-        // if we're starting before the first entry then use visibleRange.getStart() to find the starting quarter
-        double quarterStart = 0;
-        if (visibleRange.getStart() < leftTempoEntry.timePosition)
+        // find the time in beats from the first time signature entry to our starting position
+        ARA::ARAQuarterPosition quarterStart = getQuarterForTime (visibleRange.getStart ());
+        ARA::ARAQuarterPosition quarterEnd = getQuarterForTime (visibleRange.getEnd ());
+
+        // find the starting beat as well as the next visible whole beat
+        double beatStart = getBeatForQuarter (quarterStart);
+        int nextWholeBeat = roundToInt (ceil (beatStart));
+
+        // do the same with the last whole beat
+        double beatEnd = getBeatForQuarter (quarterEnd);
+        int lastWholeBeat = roundToInt (ceil (beatEnd));
+
+        for (int b = nextWholeBeat; b < lastWholeBeat; b++)
         {
-            quarterStart = visibleRange.getStart() * tempo / 60;
-        }
-        // otherwise use the most recent tempo entry's time in seconds to find where we are in beats
-        else
-        {
-            double secondsFromLeft = visibleRange.getStart() - leftTempoEntry.timePosition;
-            double quartersFromLeft = secondsFromLeft * tempo / 60;
-            quarterStart = leftTempoEntry.quarterPosition + quartersFromLeft;
-        }
+            // find the quarter and time position for this beat
+            ARA::ARAQuarterPosition quarterPos = getQuarterForBeat (b);
+            ARA::ARATimePosition timePos = getTimeForQuarter (quarterPos);
 
-        // find the starting bar signature and its first beat and use it to find the starting beat
-        ARA::ARAContentBarSignature barSignature = findBarSignatureForQuarter (quarterStart);
-        int currentBeat = (int) quartersToBeats (barSignature, quarterStart);
+            // update bar signature each beat so we can find downbeats
+            ARA::ARAContentBarSignature barSignature = getBarSignatureForQuarter (quarterPos);
+            int barSigBeatStart = roundToInt (ceil (getBeatForQuarter (barSignature.position)));
+            int beatsSinceBarSigStart = b - barSigBeatStart;
+            bool isDownBeat = ((beatsSinceBarSigStart % barSignature.numerator) == 0);
 
-        // find the second of the starting beat
-        double secondForBeat = findTimeOfBeat (barSignature, currentBeat);
-
-        // count the beats from the most recent bar signature change to find downbeats
-        int barSigStartingBeat = (int) (quartersToBeats (barSignature, barSignature.position) + 0.5);
-
-        while (secondForBeat < visibleRange.getEnd())
-        {
-            // draw a tick at each beat (thicker ticks for downbeats)
-            int beatsSinceBarSigChange = currentBeat - barSigStartingBeat;
-            int tickWidth = ((beatsSinceBarSigChange % barSignature.numerator) == 0) ? heavyLineWidth : lightLineWidth;
-            int x = owner.getPlaybackRegionsViewsXForTime (secondForBeat);
+            // add a tick rect, increasing the thickness for downbeats
+            int tickWidth = isDownBeat ? heavyLineWidth : lightLineWidth;
+            int x = owner.getPlaybackRegionsViewsXForTime (timePos);
             rects.addWithoutMerging (Rectangle<int> (x, beatsRulerY, tickWidth, beatsRulerHeight));
-
-            // Find the second for the next beat and see if we have a new bar signature
-            // If so update beat position to match this new signature and its starting beat
-            secondForBeat = findTimeOfBeat (barSignature, ++currentBeat);
-            ARA::ARAContentBarSignature newBarSignature = findBarSignatureForTime (secondForBeat);
-            if (newBarSignature.numerator != barSignature.numerator || 
-                newBarSignature.denominator != barSignature.denominator)
-            {
-                currentBeat = (int) (quartersToBeats (newBarSignature, newBarSignature.position) + 0.5);
-                barSigStartingBeat = currentBeat;
-                barSignature = newBarSignature;
-            }
         }
-
         g.drawText ("beats", bounds, Justification::centredRight);
         g.fillRectList (rects);
     }
@@ -295,7 +327,7 @@ void RulersView::paint (juce::Graphics& g)
             chordRect.setVerticalRange (Range<int> (chordRulerY, chordRulerY + chordRulerHeight));
             
             // find the starting position of the chord in pixels
-            ARA::ARATimePosition chordStartSecond = findTimeOfQuarter (itChord->position);
+            ARA::ARATimePosition chordStartSecond = getTimeForQuarter (itChord->position);
             int chordRectStart = owner.getPlaybackRegionsViewsXForTime (chordStartSecond);
             chordRect.setLeft (chordRectStart);
 
@@ -305,7 +337,7 @@ void RulersView::paint (juce::Graphics& g)
             // if we have a chord after this one, use its starting position to end our rect
             if (std::next(itChord) != chordReader.end ())
             {
-                ARA::ARATimePosition nextChordStartSecond = findTimeOfQuarter (std::next (itChord)->position);
+                ARA::ARATimePosition nextChordStartSecond = getTimeForQuarter (std::next (itChord)->position);
                 int chordRectEnd = owner.getPlaybackRegionsViewsXForTime (nextChordStartSecond);
                 chordRect.setRight (chordRectEnd);
             }
