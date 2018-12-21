@@ -5,6 +5,7 @@
 #include <ARA_Library/PlugIn/ARAPlug.cpp>
 #include <ARA_Library/Debug/ARADebug.c>
 #include <ARA_Library/Dispatch/ARAPlugInDispatch.cpp>
+#include <ARA_Library/Utilities/ARAChordAndScaleNames.cpp>
 
 // Include these source files directly for now
 #include "juce_ARAModelObjects.cpp"

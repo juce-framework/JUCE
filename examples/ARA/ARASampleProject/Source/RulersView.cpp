@@ -1,5 +1,6 @@
 #include "RulersView.h"
 #include "ARASampleProjectAudioProcessorEditor.h"
+#include "ARA_Library/Utilities/ARAChordAndScaleNames.h"
 
 //==============================================================================
 RulersView::RulersView (ARASampleProjectAudioProcessorEditor& owner)
@@ -275,6 +276,54 @@ void RulersView::paint (juce::Graphics& g)
 
     // TODO JUCE_ARA chord ruler
     {
+        RectangleList<int> rects;
+
+        // A chord is consiered "blank" if its intervals are all zero
+        auto isChordBlank = [] (ARA::ARAContentChord chord)
+        {
+            return std::all_of (chord.intervals, chord.intervals + sizeof (chord.intervals), [] (ARA::ARAChordIntervalUsage i) { return i == 0; });
+        };
+
+        HostChordReader chordReader (musicalContext);
+
+        for (auto itChord = chordReader.begin (); itChord != chordReader.end (); ++itChord)
+        {
+            if (isChordBlank (*itChord))
+                continue;
+
+            Rectangle<int> chordRect = bounds;
+            chordRect.setVerticalRange (Range<int> (chordRulerY, chordRulerY + chordRulerHeight));
+            
+            // find the starting position of the chord in pixels
+            ARA::ARATimePosition chordStartSecond = findTimeOfQuarter (itChord->position);
+            int chordRectStart = owner.getPlaybackRegionsViewsXForTime (chordStartSecond);
+            chordRect.setLeft (chordRectStart);
+
+            // get the chord name
+            String chordName = ARA::getNameForChord (*itChord);
+
+            // if we have a chord after this one, use its starting position to end our rect
+            if (std::next(itChord) != chordReader.end ())
+            {
+                ARA::ARATimePosition nextChordStartSecond = findTimeOfQuarter (std::next (itChord)->position);
+                int chordRectEnd = owner.getPlaybackRegionsViewsXForTime (nextChordStartSecond);
+                chordRect.setRight (chordRectEnd);
+            }
+
+            // use the chord name as a hash to pick a random color
+            auto& random = Random::getSystemRandom ();
+            random.setSeed (chordName.hash () + itChord->bass);
+            Colour chordColour ((uint8) random.nextInt (256), (uint8) random.nextInt (256), (uint8) random.nextInt (256));
+
+            // draw chord rect and name
+            g.setColour (chordColour);
+            g.fillRect (chordRect);
+
+            g.setColour (chordColour.contrasting (1.0f));
+            g.setFont (Font (12.0f));
+            g.drawText (chordName, chordRect, Justification::centred);
+        }
+
         g.drawText ("chords", bounds, Justification::topRight);
     }
 

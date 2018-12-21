@@ -39,6 +39,7 @@ private:
 
     using HostTempoEntryReader = ARA::PlugIn::HostContentReader<ARA::kARAContentTypeTempoEntries>;
     using HostBarSignatureReader = ARA::PlugIn::HostContentReader<ARA::kARAContentTypeBarSignatures>;
+    using HostChordReader = ARA::PlugIn::HostContentReader<ARA::kARAContentTypeSheetChords>;
 
     double findTempoForTime (ARA::ARATimePosition timeInSeconds, ARA::ARAContentTempoEntry& leftEntry, ARA::ARAContentTempoEntry&rightEntry) const;
     ARA::ARAContentBarSignature findBarSignatureForTime (ARA::ARATimePosition timeInSeconds) const;
