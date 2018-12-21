@@ -352,8 +352,8 @@ void copyWavFormat (WAVEFORMATEXTENSIBLE& dest, const WAVEFORMATEX* src) noexcep
 class WASAPIDeviceBase
 {
 public:
-    WASAPIDeviceBase (const ComSmartPtr<IMMDevice>& d, bool exclusiveMode)
-        : device (d), useExclusiveMode (exclusiveMode)
+    WASAPIDeviceBase (const ComSmartPtr<IMMDevice>& d, bool exclusiveMode, std::function<void()>&& cb)
+        : device (d), useExclusiveMode (exclusiveMode), reopenCallback (cb)
     {
         clientEvent = CreateEvent (nullptr, false, false, nullptr);
 
@@ -484,6 +484,7 @@ public:
     UINT32 actualBufferSize = 0;
     int bytesPerSample = 0, bytesPerFrame = 0;
     bool sampleRateHasChanged = false, shouldClose = false;
+    std::function<void()> reopenCallback;
 
     virtual void updateFormat (bool isFloat) = 0;
 
@@ -501,6 +502,9 @@ private:
 
         JUCE_COMRESULT OnStateChanged(AudioSessionState state)
         {
+            if (state == AudioSessionStateActive)
+                owner.reopenCallback();
+
             if (state == AudioSessionStateInactive || state == AudioSessionStateExpired)
                 owner.deviceBecameInactive();
 
@@ -684,8 +688,8 @@ private:
 class WASAPIInputDevice  : public WASAPIDeviceBase
 {
 public:
-    WASAPIInputDevice (const ComSmartPtr<IMMDevice>& d, bool exclusiveMode)
-        : WASAPIDeviceBase (d, exclusiveMode)
+    WASAPIInputDevice (const ComSmartPtr<IMMDevice>& d, bool exclusiveMode, std::function<void()>&& reopenCallback)
+        : WASAPIDeviceBase (d, exclusiveMode, std::move (reopenCallback))
     {
     }
 
@@ -845,8 +849,8 @@ private:
 class WASAPIOutputDevice  : public WASAPIDeviceBase
 {
 public:
-    WASAPIOutputDevice (const ComSmartPtr<IMMDevice>& d, bool exclusiveMode)
-        : WASAPIDeviceBase (d, exclusiveMode)
+    WASAPIOutputDevice (const ComSmartPtr<IMMDevice>& d, bool exclusiveMode, std::function<void()>&& reopenCallback)
+        : WASAPIDeviceBase (d, exclusiveMode, std::move (reopenCallback))
     {
     }
 
@@ -1278,7 +1282,7 @@ public:
                     outs.clear();
             }
 
-            if (outputDevice != nullptr && !deviceBecameInactive)
+            if (outputDevice != nullptr && ! deviceBecameInactive)
             {
                 // Note that this function is handed the input device so it can check for the event and make sure
                 // the input reservoir is filled up correctly even when bufferSize > device actualBufferSize
@@ -1358,14 +1362,36 @@ private:
 
             auto flow = getDataFlow (device);
 
+            auto deviceReopenCallback = [this]
+            {
+                if (deviceBecameInactive)
+                {
+                    deviceBecameInactive = false;
+                    MessageManager::callAsync ([this] { reopenDevices(); });
+                }
+            };
+
             if (deviceId == inputDeviceId && flow == eCapture)
-                inputDevice.reset (new WASAPIInputDevice (device, useExclusiveMode));
+                inputDevice.reset (new WASAPIInputDevice (device, useExclusiveMode, deviceReopenCallback));
             else if (deviceId == outputDeviceId && flow == eRender)
-                outputDevice.reset (new WASAPIOutputDevice (device, useExclusiveMode));
+                outputDevice.reset (new WASAPIOutputDevice (device, useExclusiveMode, deviceReopenCallback));
         }
 
         return (outputDeviceId.isEmpty() || (outputDevice != nullptr && outputDevice->isOk()))
              && (inputDeviceId.isEmpty() || (inputDevice != nullptr && inputDevice->isOk()));
+    }
+
+    void reopenDevices()
+    {
+        outputDevice = nullptr;
+        inputDevice = nullptr;
+
+        initialise();
+
+        open (lastKnownInputChannels, lastKnownOutputChannels,
+              getChangedSampleRate(), currentBufferSizeSamples);
+
+        start (callback);
     }
 
     //==============================================================================
@@ -1373,19 +1399,9 @@ private:
     {
         stop();
 
-        outputDevice = nullptr;
-        inputDevice = nullptr;
-
         // sample rate change
         if (! deviceBecameInactive)
-        {
-            initialise();
-
-            open (lastKnownInputChannels, lastKnownOutputChannels,
-                  getChangedSampleRate(), currentBufferSizeSamples);
-
-            start (callback);
-        }
+            reopenDevices();
     }
 
     double getChangedSampleRate() const
