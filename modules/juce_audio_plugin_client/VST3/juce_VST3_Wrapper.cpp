@@ -1006,6 +1006,14 @@ private:
         tresult PLUGIN_API setContentScaleFactor (Steinberg::IPlugViewContentScaleSupport::ScaleFactor factor) override
         {
            #if ! JUCE_MAC
+            // Cubase 10 doesn't support non-integer scale factors...
+            if (getHostType().type == PluginHostType::SteinbergCubase10)
+            {
+                if (component.get() != nullptr)
+                    if (auto* peer = component->getPeer())
+                        factor = static_cast<Steinberg::IPlugViewContentScaleSupport::ScaleFactor> (peer->getPlatformScaleFactor());
+            }
+
             if (! approximatelyEqual ((float) factor, editorScaleFactor))
             {
                 editorScaleFactor = (float) factor;
@@ -1020,10 +1028,6 @@ private:
                 if (auto* ed = component->pluginEditor.get())
                     ed->setScaleFactor ((float) factor);
                #endif
-
-                // Cubase 10 doesn't support non-integer scale factors...
-                if (getHostType().type == PluginHostType::SteinbergCubase10)
-                    component->checkScaleFactorIsCorrect();
 
                 component->resizeHostWindow();
                 component->setTopLeftPosition (0, 0);
