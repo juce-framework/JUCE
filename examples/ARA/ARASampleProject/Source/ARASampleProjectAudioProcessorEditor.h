@@ -23,10 +23,10 @@ public:
     ~ARASampleProjectAudioProcessorEditor();
 
     // total time range
-    void getTimeRange (double& start, double& end) const { start = startTime; end = endTime; }
+    Range<double> getTimeRange () const { return Range<double> (startTime, endTime); }
 
     // visible time range
-    void getVisibleTimeRange (double& start, double& end) const;
+    Range<double> getVisibleTimeRange () const;
 // TODO JUCE_ARA if we want to make this into a reusable view, then zooming should use this primitive:
 //  void setVisibleTimeRange (double start, double end);
 //  It would limit the new visibile range to getTimeRange(), trying to keep requested duration unchanged.

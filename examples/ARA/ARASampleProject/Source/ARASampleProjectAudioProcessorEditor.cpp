@@ -226,10 +226,11 @@ void ARASampleProjectAudioProcessorEditor::didReorderRegionSequencesInDocument (
     invalidateRegionSequenceViews();
 }
 
-void ARASampleProjectAudioProcessorEditor::getVisibleTimeRange(double &start, double &end) const
+Range<double> ARASampleProjectAudioProcessorEditor::getVisibleTimeRange() const
 {
-    start = getPlaybackRegionsViewsTimeForX (playbackRegionsViewPort.getViewArea().getX());
-    end = getPlaybackRegionsViewsTimeForX (playbackRegionsViewPort.getViewArea().getRight());
+    double start = getPlaybackRegionsViewsTimeForX (playbackRegionsViewPort.getViewArea().getX());
+    double end = getPlaybackRegionsViewsTimeForX (playbackRegionsViewPort.getViewArea().getRight());
+    return Range<double> (start, end);
 }
 
 void ARASampleProjectAudioProcessorEditor::timerCallback()
@@ -241,9 +242,8 @@ void ARASampleProjectAudioProcessorEditor::timerCallback()
 
         if (followPlayheadToggleButton.getToggleState())
         {
-            double visibleStart, visibleEnd;
-            getVisibleTimeRange (visibleStart, visibleEnd);
-            if (playheadTimePosition < visibleStart || playheadTimePosition > visibleEnd)
+            Range<double> visibleRange = getVisibleTimeRange ();
+            if (playheadTimePosition < visibleRange.getStart() || playheadTimePosition > visibleRange.getEnd())
                 playbackRegionsViewPort.setViewPosition (playbackRegionsViewPort.getViewPosition().withX (getPlaybackRegionsViewsXForTime (playheadTimePosition)));
         };
 

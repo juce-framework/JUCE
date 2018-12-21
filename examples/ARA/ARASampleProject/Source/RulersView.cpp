@@ -190,14 +190,13 @@ void RulersView::paint (juce::Graphics& g)
     const int secondsRulerHeight = getBounds().getHeight() - chordRulerHeight - beatsRulerHeight;
 
     // we should only be doing this on the visible time range
-    double startTime, endTime;
-    owner.getVisibleTimeRange (startTime, endTime);
+    Range<double> visibleRange = owner.getVisibleTimeRange ();
 
     // seconds ruler: one tick for each second
     {
         RectangleList<int> rects;
-        const int lastSecond = roundToInt (floor (endTime));
-        for (int nextSecond = roundToInt (ceil (startTime)); nextSecond <= lastSecond; ++nextSecond)
+        const int lastSecond = roundToInt (floor (visibleRange.getEnd()));
+        for (int nextSecond = roundToInt (ceil (visibleRange.getStart())); nextSecond <= lastSecond; ++nextSecond)
         {
             const int lineWidth = (nextSecond % 60 == 0) ? heavyLineWidth : lightLineWidth;
             const int lineHeight = (nextSecond % 10 == 0) ? secondsRulerHeight : secondsRulerHeight / 2;
@@ -223,18 +222,18 @@ void RulersView::paint (juce::Graphics& g)
 
         // find the initial tempo from the first entry pair
         ARA::ARAContentTempoEntry leftTempoEntry, rightTempoEntry;
-        double tempo = findTempoForTime (startTime, leftTempoEntry, rightTempoEntry);
+        double tempo = findTempoForTime (visibleRange.getStart(), leftTempoEntry, rightTempoEntry);
         
-        // if we're starting before the first entry then use startTime to find the starting quarter
+        // if we're starting before the first entry then use visibleRange.getStart() to find the starting quarter
         double quarterStart = 0;
-        if (startTime < leftTempoEntry.timePosition)
+        if (visibleRange.getStart() < leftTempoEntry.timePosition)
         {
-            quarterStart = startTime * tempo / 60;
+            quarterStart = visibleRange.getStart() * tempo / 60;
         }
         // otherwise use the most recent tempo entry's time in seconds to find where we are in beats
         else
         {
-            double secondsFromLeft = startTime - leftTempoEntry.timePosition;
+            double secondsFromLeft = visibleRange.getStart() - leftTempoEntry.timePosition;
             double quartersFromLeft = secondsFromLeft * tempo / 60;
             quarterStart = leftTempoEntry.quarterPosition + quartersFromLeft;
         }
@@ -249,7 +248,7 @@ void RulersView::paint (juce::Graphics& g)
         // count the beats from the most recent bar signature change to find downbeats
         int barSigStartingBeat = (int) (quartersToBeats (barSignature, barSignature.position) + 0.5);
 
-        while (secondForBeat < endTime)
+        while (secondForBeat < visibleRange.getEnd())
         {
             // draw a tick at each beat (thicker ticks for downbeats)
             int beatsSinceBarSigChange = currentBeat - barSigStartingBeat;
