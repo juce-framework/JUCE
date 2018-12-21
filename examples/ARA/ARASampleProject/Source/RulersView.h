@@ -32,6 +32,10 @@ public:
     // ARAMusicalContext::Listener overrides
     void doUpdateMusicalContextContent (ARAMusicalContext* context, ARAContentUpdateScopes scopeFlags) override;
 
+    // MouseListener overrides
+    void mouseDown (const MouseEvent& event) override;
+    void mouseDoubleClick (const MouseEvent& event) override;
+
 private:
     void detachFromDocument();
     void detachFromMusicalContext();

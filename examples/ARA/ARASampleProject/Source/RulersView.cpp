@@ -377,3 +377,25 @@ void RulersView::doUpdateMusicalContextContent (ARAMusicalContext* context, ARAC
 
     repaint();
 }
+
+void RulersView::mouseDown (const MouseEvent& event)
+{
+    // use mouse double click to set the playhead position in the host
+    // (if they provide a playback controller interface)
+    auto playbackController = musicalContext->getDocument ()->getDocumentController ()->getHostInstance ()->getPlaybackController ();
+    if (playbackController != nullptr)
+    {
+        playbackController->requestSetPlaybackPosition (owner.getPlaybackRegionsViewsTimeForX (roundToInt (event.position.x)));
+    }
+}
+
+void RulersView::mouseDoubleClick (const MouseEvent& /*event*/)
+{
+    // use mouse double click to set the playhead position in the host
+    // (if they provide a playback controller interface)
+    auto playbackController = musicalContext->getDocument ()->getDocumentController ()->getHostInstance ()->getPlaybackController ();
+    if (playbackController != nullptr)
+    {
+        playbackController->requestStartPlayback ();
+    }
+}
