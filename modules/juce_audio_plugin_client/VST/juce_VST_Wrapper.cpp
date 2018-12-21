@@ -1258,7 +1258,7 @@ public:
             if (! getHostType().isReceptor())
                 addMouseListener (this, true);
             #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-             wrapper.editorScaleFactor = Desktop::getInstance().getDisplays().getMainDisplay().scale;
+             wrapper.editorScaleFactor = static_cast<float> (Desktop::getInstance().getDisplays().getMainDisplay().scale);
             #endif
            #endif
 
@@ -1489,8 +1489,9 @@ public:
                     GetWindowRect (w, &windowPos);
                     GetWindowRect (parent, &parentPos);
 
-                    SetWindowPos (w, 0, 0, 0, newWidth + dw, newHeight + dh,
-                                  SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOOWNERZORDER);
+                    if (w != (HWND) getWindowHandle())
+                        SetWindowPos (w, 0, 0, 0, newWidth + dw, newHeight + dh,
+                                      SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOOWNERZORDER);
 
                     dw = (parentPos.right - parentPos.left) - (windowPos.right - windowPos.left);
                     dh = (parentPos.bottom - parentPos.top) - (windowPos.bottom - windowPos.top);
