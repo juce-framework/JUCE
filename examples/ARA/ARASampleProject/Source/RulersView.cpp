@@ -105,7 +105,7 @@ double RulersView::getTimeForQuarter (ARA::ARAQuarterPosition quarterPosition) c
     const HostTempoEntryReader tempoReader (musicalContext);
 
     // find the tempo entry after timePosition (or last entry)
-    auto itTempo = std::upper_bound (tempoReader.begin (), std::prev (tempoReader.end ()), quarterPosition,
+    auto itTempo = std::upper_bound (tempoReader.begin(), std::prev (tempoReader.end()), quarterPosition,
                                      [] (ARA::ARAQuarterPosition quarterPosition, ARA::ARAContentTempoEntry tempoEntry)
     {
         return quarterPosition < tempoEntry.quarterPosition;
@@ -125,7 +125,7 @@ ARA::ARAContentBarSignature RulersView::getBarSignatureForQuarter (ARA::ARAQuart
 {
     // search for the bar signature entry just after quarterPosition
     const HostBarSignatureReader barSignatureReader (musicalContext);
-    auto itBarSig = std::upper_bound (barSignatureReader.begin (), barSignatureReader.end (), quarterPosition,
+    auto itBarSig = std::upper_bound (barSignatureReader.begin(), barSignatureReader.end(), quarterPosition,
                                       [] (ARA::ARAQuarterPosition quarterPosition, ARA::ARAContentBarSignature barSignature)
     {
         return quarterPosition < barSignature.position;
@@ -211,7 +211,7 @@ void RulersView::paint (juce::Graphics& g)
         return;
     }
 
-    Range<double> visibleRange = owner.getVisibleTimeRange ();
+    Range<double> visibleRange = owner.getVisibleTimeRange();
 
     // we'll draw three rulers: seconds, beats, and chords
     constexpr int lightLineWidth = 1;
@@ -275,7 +275,7 @@ void RulersView::paint (juce::Graphics& g)
 
         HostChordReader chordReader (musicalContext);
 
-        for (auto itChord = chordReader.begin (); itChord != chordReader.end (); ++itChord)
+        for (auto itChord = chordReader.begin(); itChord != chordReader.end(); ++itChord)
         {
             if (isNoChord (*itChord))
                 continue;
@@ -302,8 +302,8 @@ void RulersView::paint (juce::Graphics& g)
             String chordName = ARA::getNameForChord (*itChord);
 
             // use the chord name as a hash to pick a random color
-            auto& random = Random::getSystemRandom ();
-            random.setSeed (chordName.hash () + itChord->bass);
+            auto& random = Random::getSystemRandom();
+            random.setSeed (chordName.hash() + itChord->bass);
             Colour chordColour ((uint8) random.nextInt (256), (uint8) random.nextInt (256), (uint8) random.nextInt (256));
 
             // draw chord rect and name
@@ -325,6 +325,24 @@ void RulersView::paint (juce::Graphics& g)
         g.drawLine ((float) bounds.getX(), (float) secondsRulerY, (float) bounds.getRight(), (float) secondsRulerY);
         g.drawRect (bounds);
     }
+}
+
+//==============================================================================
+
+void RulersView::mouseDown (const MouseEvent& event)
+{
+    // use mouse click to set the playhead position in the host (if they provide a playback controller interface)
+    auto playbackController = musicalContext->getDocument()->getDocumentController()->getHostInstance()->getPlaybackController();
+    if (playbackController != nullptr)
+        playbackController->requestSetPlaybackPosition (owner.getPlaybackRegionsViewsTimeForX (roundToInt (event.position.x)));
+}
+
+void RulersView::mouseDoubleClick (const MouseEvent& /*event*/)
+{
+    // use mouse double click to start host playback (if they provide a playback controller interface)
+    auto playbackController = musicalContext->getDocument()->getDocumentController()->getHostInstance()->getPlaybackController();
+    if (playbackController != nullptr)
+        playbackController->requestStartPlayback();
 }
 
 //==============================================================================
@@ -367,26 +385,4 @@ void RulersView::doUpdateMusicalContextContent (ARAMusicalContext* context, ARAC
     jassert (musicalContext == context);
 
     repaint();
-}
-
-void RulersView::mouseDown (const MouseEvent& event)
-{
-    // use mouse double click to set the playhead position in the host
-    // (if they provide a playback controller interface)
-    auto playbackController = musicalContext->getDocument ()->getDocumentController ()->getHostInstance ()->getPlaybackController ();
-    if (playbackController != nullptr)
-    {
-        playbackController->requestSetPlaybackPosition (owner.getPlaybackRegionsViewsTimeForX (roundToInt (event.position.x)));
-    }
-}
-
-void RulersView::mouseDoubleClick (const MouseEvent& /*event*/)
-{
-    // use mouse double click to set the playhead position in the host
-    // (if they provide a playback controller interface)
-    auto playbackController = musicalContext->getDocument ()->getDocumentController ()->getHostInstance ()->getPlaybackController ();
-    if (playbackController != nullptr)
-    {
-        playbackController->requestStartPlayback ();
-    }
 }

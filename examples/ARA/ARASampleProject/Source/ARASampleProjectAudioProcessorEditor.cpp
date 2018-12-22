@@ -242,7 +242,7 @@ void ARASampleProjectAudioProcessorEditor::timerCallback()
 
         if (followPlayheadToggleButton.getToggleState())
         {
-            Range<double> visibleRange = getVisibleTimeRange ();
+            Range<double> visibleRange = getVisibleTimeRange();
             if (playheadTimePosition < visibleRange.getStart() || playheadTimePosition > visibleRange.getEnd())
                 playbackRegionsViewPort.setViewPosition (playbackRegionsViewPort.getViewPosition().withX (getPlaybackRegionsViewsXForTime (playheadTimePosition)));
         };

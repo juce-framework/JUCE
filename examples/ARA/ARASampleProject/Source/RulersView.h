@@ -39,7 +39,7 @@ public:
 private:
     void detachFromDocument();
     void detachFromMusicalContext();
-    void findMusicalContext ();
+    void findMusicalContext();
 
     ARA::ARAQuarterPosition getQuarterForTime (ARA::ARATimePosition timePosition) const;
     ARA::ARATimePosition getTimeForQuarter (ARA::ARAQuarterPosition quarterPosition) const;
