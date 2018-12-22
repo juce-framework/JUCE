@@ -41,12 +41,6 @@ private:
     void detachFromMusicalContext();
     void findMusicalContext();
 
-    ARA::ARAQuarterPosition getQuarterForTime (ARA::ARATimePosition timePosition) const;
-    ARA::ARATimePosition getTimeForQuarter (ARA::ARAQuarterPosition quarterPosition) const;
-    ARA::ARAContentBarSignature getBarSignatureForQuarter (ARA::ARAQuarterPosition quarterPos) const;
-    double getBeatForQuarter (ARA::ARAQuarterPosition quarterPosition) const;
-    ARA::ARAQuarterPosition getQuarterForBeat (double beatPosition) const;
-
 private:
     ARASampleProjectAudioProcessorEditor& owner;
     ARADocument* document;
