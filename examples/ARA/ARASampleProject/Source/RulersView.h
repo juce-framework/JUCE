@@ -41,18 +41,11 @@ private:
     void detachFromMusicalContext();
     void findMusicalContext ();
 
-    // useful typedefse
-    using HostTempoEntryReader = ARA::PlugIn::HostContentReader<ARA::kARAContentTypeTempoEntries>;
-    using HostBarSignatureReader = ARA::PlugIn::HostContentReader<ARA::kARAContentTypeBarSignatures>;
-    using HostChordReader = ARA::PlugIn::HostContentReader<ARA::kARAContentTypeSheetChords>;
-
-    // helper functions for finding data in the ARAMusicalContext
-    double getTempoForTime (ARA::ARATimePosition timeInSeconds, ARA::ARAContentTempoEntry& leftEntry, ARA::ARAContentTempoEntry&rightEntry) const;
     ARA::ARAQuarterPosition getQuarterForTime (ARA::ARATimePosition timePosition) const;
-    ARA::ARAQuarterPosition getQuarterForBeat (double beatPosition) const;
-    double getBeatForQuarter (ARA::ARAQuarterPosition quarterPosition) const;
     ARA::ARATimePosition getTimeForQuarter (ARA::ARAQuarterPosition quarterPosition) const;
     ARA::ARAContentBarSignature getBarSignatureForQuarter (ARA::ARAQuarterPosition quarterPos) const;
+    double getBeatForQuarter (ARA::ARAQuarterPosition quarterPosition) const;
+    ARA::ARAQuarterPosition getQuarterForBeat (double beatPosition) const;
 
 private:
     ARASampleProjectAudioProcessorEditor& owner;
