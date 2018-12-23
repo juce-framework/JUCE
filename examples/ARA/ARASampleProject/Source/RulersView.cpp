@@ -78,54 +78,71 @@ void RulersView::findMusicalContext()
 // TODO JUCE_ARA these two classes should be moved down to the ARA SDK,
 // so that both hosts and plug-ins can use it when converting the ARA data to their internal formats.
 
+// TODO JUCE_ARA the caching may be improved by trying the next entry before searching with upper_bounds
+
 template <typename TempoContentReader>
 class TempoConverter
 {
 public:
-    TempoConverter (const TempoContentReader& reader) : contentReader (reader) {}
+    TempoConverter (const TempoContentReader& reader)
+    : contentReader (reader), leftEntryCache (reader.begin()), rightEntryCache (std::next (leftEntryCache)) {}
 
     ARA::ARAQuarterPosition getQuarterForTime (ARA::ARATimePosition timePosition) const
     {
-        // find the tempo entry after timePosition (or last entry)
-        auto itTempo = std::upper_bound (contentReader.begin(), std::prev (contentReader.end()), timePosition,
-                                         [] (ARA::ARATimePosition timePosition, ARA::ARAContentTempoEntry tempoEntry)
+        if ((timePosition < leftEntryCache->timePosition && ! isFirst (leftEntryCache)) ||
+            (timePosition >= rightEntryCache->timePosition && ! isLast (rightEntryCache)))
         {
-            return timePosition < tempoEntry.timePosition;
-        });
+            // find the tempo entry after timePosition (or last entry)
+            auto itTempo = std::upper_bound (contentReader.begin(), std::prev (contentReader.end()), timePosition,
+                                             [] (ARA::ARATimePosition timePosition, ARA::ARAContentTempoEntry tempoEntry)
+            {
+                return timePosition < tempoEntry.timePosition;
+            });
 
-        // pick left and right entry based on found position
-        bool isFirstEntry = (itTempo == contentReader.begin());
-        auto& leftEntry = isFirstEntry ? *itTempo : *std::prev (itTempo);
-        auto& rightEntry = isFirstEntry ? *std::next (itTempo) : *itTempo;
+            // pick left and right entry based on found position
+            bool isFirstEntry = (itTempo == contentReader.begin());
+            leftEntryCache = isFirstEntry ? itTempo : std::prev (itTempo);
+            rightEntryCache = isFirstEntry ? std::next (itTempo) : itTempo;
+        }
 
         // linear interpolation of result
-        double quartersPerSecond = (rightEntry.quarterPosition - leftEntry.quarterPosition) / (rightEntry.timePosition - leftEntry.timePosition);
-        return leftEntry.quarterPosition + (timePosition - leftEntry.timePosition) * quartersPerSecond;
+        double quartersPerSecond = (rightEntryCache->quarterPosition - leftEntryCache->quarterPosition) / (rightEntryCache->timePosition - leftEntryCache->timePosition);
+        return leftEntryCache->quarterPosition + (timePosition - leftEntryCache->timePosition) * quartersPerSecond;
     }
 
     double getTimeForQuarter (ARA::ARAQuarterPosition quarterPosition) const
     {
-        // find the tempo entry after timePosition (or last entry)
-        auto itTempo = std::upper_bound (contentReader.begin(), std::prev (contentReader.end()), quarterPosition,
-                                         [] (ARA::ARAQuarterPosition quarterPosition, ARA::ARAContentTempoEntry tempoEntry)
+        if ((quarterPosition < leftEntryCache->quarterPosition && ! isFirst (leftEntryCache)) ||
+            (quarterPosition >= rightEntryCache->quarterPosition && ! isLast (rightEntryCache)))
         {
-            return quarterPosition < tempoEntry.quarterPosition;
-        });
+            // find the tempo entry after timePosition (or last entry)
+            auto itTempo = std::upper_bound (contentReader.begin(), std::prev (contentReader.end()), quarterPosition,
+                                             [] (ARA::ARAQuarterPosition quarterPosition, ARA::ARAContentTempoEntry tempoEntry)
+            {
+                return quarterPosition < tempoEntry.quarterPosition;
+            });
 
-        // pick left and right entry based on found position
-        bool isFirstEntry = (itTempo == contentReader.begin());
-        auto& leftEntry = isFirstEntry ? *itTempo : *std::prev (itTempo);
-        auto& rightEntry = isFirstEntry ? *std::next (itTempo) : *itTempo;
+            // pick left and right entry based on found position
+            bool isFirstEntry = (itTempo == contentReader.begin());
+            leftEntryCache = isFirstEntry ? itTempo : std::prev (itTempo);
+            rightEntryCache = isFirstEntry ? std::next (itTempo) : itTempo;
+        }
 
         // linear interpolation of result
-        double secondsPerQuarter = (rightEntry.timePosition - leftEntry.timePosition) / (rightEntry.quarterPosition - leftEntry.quarterPosition);
-        return leftEntry.timePosition + (quarterPosition - leftEntry.quarterPosition) * secondsPerQuarter;
+        double secondsPerQuarter = (rightEntryCache->timePosition - leftEntryCache->timePosition) / (rightEntryCache->quarterPosition - leftEntryCache->quarterPosition);
+        return leftEntryCache->timePosition + (quarterPosition - leftEntryCache->quarterPosition) * secondsPerQuarter;
     }
 
 private:
+    bool isFirst (const typename TempoContentReader::const_iterator& it) const { return it != contentReader.begin(); }
+    bool isLast (const typename TempoContentReader::const_iterator& it) const { return std::next (it) != contentReader.end(); }
+
     const TempoContentReader& contentReader;
+    mutable typename TempoContentReader::const_iterator leftEntryCache, rightEntryCache;
 };
 
+// TODO JUCE_ARA add caching just as done in the TempoContentReader, but also cache beatAtSigStart.
+//               beatAtSigStart can set to -1 to indicate outdated cache.
 template <typename BarSignaturesContentReader>
 class BarSignaturesConverter
 {
