@@ -78,8 +78,6 @@ void RulersView::findMusicalContext()
 // TODO JUCE_ARA these two classes should be moved down to the ARA SDK,
 // so that both hosts and plug-ins can use it when converting the ARA data to their internal formats.
 
-// TODO JUCE_ARA the caching may be improved by trying the next entry before searching with upper_bounds
-
 template <typename TempoContentReader>
 class TempoConverter
 {
@@ -89,20 +87,58 @@ public:
 
     ARA::ARAQuarterPosition getQuarterForTime (ARA::ARATimePosition timePosition) const
     {
-        if ((timePosition < leftEntryCache->timePosition && ! isFirst (leftEntryCache)) ||
-            (timePosition >= rightEntryCache->timePosition && ! isLast (rightEntryCache)))
-        {
-            // find the tempo entry after timePosition (or last entry)
-            auto itTempo = std::upper_bound (contentReader.begin(), std::prev (contentReader.end()), timePosition,
-                                             [] (ARA::ARATimePosition timePosition, ARA::ARAContentTempoEntry tempoEntry)
-            {
-                return timePosition < tempoEntry.timePosition;
-            });
+        auto findByTimePosition = [] (ARA::ARATimePosition timePosition, ARA::ARAContentTempoEntry tempoEntry)
+                                    {
+                                        return timePosition < tempoEntry.timePosition;
+                                    };
 
-            // pick left and right entry based on found position
-            bool isFirstEntry = (itTempo == contentReader.begin());
-            leftEntryCache = isFirstEntry ? itTempo : std::prev (itTempo);
-            rightEntryCache = isFirstEntry ? std::next (itTempo) : itTempo;
+        if (timePosition < leftEntryCache->timePosition)
+        {
+            if (leftEntryCache != contentReader.begin())
+            {
+                auto prevLeft = std::prev (leftEntryCache);
+                // test if we're hitting the entries pair right before the current entries pair
+                if (prevLeft == contentReader.begin() || prevLeft->timePosition <= timePosition)
+                {
+                    rightEntryCache = leftEntryCache;
+                    leftEntryCache = prevLeft;
+                }
+                else
+                {
+                    // find the entry after timePosition, then pick left and right entry based on found position
+                    auto itTempo = std::upper_bound (contentReader.begin(), prevLeft, timePosition, findByTimePosition);
+                    if (itTempo == contentReader.begin())
+                    {
+                        leftEntryCache = itTempo;
+                        rightEntryCache = std::next (itTempo);
+                    }
+                    else
+                    {
+                        leftEntryCache = std::prev (itTempo);
+                        rightEntryCache = itTempo;
+                    }
+                }
+            }
+        }
+        else if (timePosition >= rightEntryCache->timePosition)
+        {
+            auto nextRight = std::next (rightEntryCache);
+            if (nextRight != contentReader.end())
+            {
+                // test if we're hitting the entries pair right after the current entries pair
+                auto last = std::prev (contentReader.end());
+                if ((nextRight == last) || (timePosition < nextRight->timePosition))
+                {
+                    leftEntryCache = rightEntryCache;
+                    rightEntryCache = nextRight;
+                }
+                else
+                {
+                    // find the entry after timePosition (or last entry)
+                    rightEntryCache = std::upper_bound (std::next (nextRight), last, timePosition, findByTimePosition);
+                    leftEntryCache = std::prev (rightEntryCache);
+                }
+            }
         }
 
         // linear interpolation of result
@@ -110,6 +146,7 @@ public:
         return leftEntryCache->quarterPosition + (timePosition - leftEntryCache->timePosition) * quartersPerSecond;
     }
 
+    // TODO JUCE_ARA optimize like getQuarterForTime(), factor out search into templated advanceToPosition<>()
     double getTimeForQuarter (ARA::ARAQuarterPosition quarterPosition) const
     {
         if ((quarterPosition < leftEntryCache->quarterPosition && ! isFirst (leftEntryCache)) ||
