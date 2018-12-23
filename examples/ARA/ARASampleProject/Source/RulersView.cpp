@@ -87,26 +87,51 @@ public:
 
     ARA::ARAQuarterPosition getQuarterForTime (ARA::ARATimePosition timePosition) const
     {
-        auto findByTimePosition = [] (ARA::ARATimePosition timePosition, ARA::ARAContentTempoEntry tempoEntry)
-                                    {
-                                        return timePosition < tempoEntry.timePosition;
-                                    };
+        updateCacheByPosition (timePosition, findByTimePosition);
 
-        if (timePosition < leftEntryCache->timePosition)
+        // linear interpolation of result
+        double quartersPerSecond = (rightEntryCache->quarterPosition - leftEntryCache->quarterPosition) / (rightEntryCache->timePosition - leftEntryCache->timePosition);
+        return leftEntryCache->quarterPosition + (timePosition - leftEntryCache->timePosition) * quartersPerSecond;
+    }
+
+    double getTimeForQuarter (ARA::ARAQuarterPosition quarterPosition) const
+    {
+        updateCacheByPosition (quarterPosition, findByQuarterPosition);
+
+        // linear interpolation of result
+        double secondsPerQuarter = (rightEntryCache->timePosition - leftEntryCache->timePosition) / (rightEntryCache->quarterPosition - leftEntryCache->quarterPosition);
+        return leftEntryCache->timePosition + (quarterPosition - leftEntryCache->quarterPosition) * secondsPerQuarter;
+    }
+
+private:
+    static bool findByTimePosition (ARA::ARATimePosition timePosition, const ARA::ARAContentTempoEntry& tempoEntry)
+    {
+        return timePosition < tempoEntry.timePosition;
+    };
+
+    static bool findByQuarterPosition (ARA::ARAQuarterPosition quarterPosition, const ARA::ARAContentTempoEntry& tempoEntry)
+    {
+        return quarterPosition < tempoEntry.quarterPosition;
+    };
+
+    template <typename T>
+    void updateCacheByPosition (T position, bool (*findByPosition) (T position, const ARA::ARAContentTempoEntry& tempoEntry)) const
+    {
+        if (findByPosition (position, *leftEntryCache))
         {
             if (leftEntryCache != contentReader.begin())
             {
                 auto prevLeft = std::prev (leftEntryCache);
                 // test if we're hitting the entries pair right before the current entries pair
-                if (prevLeft == contentReader.begin() || prevLeft->timePosition <= timePosition)
+                if (prevLeft == contentReader.begin() || ! findByPosition (position, *prevLeft))
                 {
                     rightEntryCache = leftEntryCache;
                     leftEntryCache = prevLeft;
                 }
                 else
                 {
-                    // find the entry after timePosition, then pick left and right entry based on found position
-                    auto itTempo = std::upper_bound (contentReader.begin(), prevLeft, timePosition, findByTimePosition);
+                    // find the entry after position, then pick left and right entry based on position being before first
+                    auto itTempo = std::upper_bound (contentReader.begin(), prevLeft, position, findByPosition);
                     if (itTempo == contentReader.begin())
                     {
                         leftEntryCache = itTempo;
@@ -120,60 +145,32 @@ public:
                 }
             }
         }
-        else if (timePosition >= rightEntryCache->timePosition)
+        else if (! findByPosition (position, *rightEntryCache))
         {
             auto nextRight = std::next (rightEntryCache);
             if (nextRight != contentReader.end())
             {
                 // test if we're hitting the entries pair right after the current entries pair
                 auto last = std::prev (contentReader.end());
-                if ((nextRight == last) || (timePosition < nextRight->timePosition))
+                if ((nextRight == last) || findByPosition (position, *nextRight))
                 {
                     leftEntryCache = rightEntryCache;
                     rightEntryCache = nextRight;
                 }
                 else
                 {
-                    // find the entry after timePosition (or last entry)
-                    rightEntryCache = std::upper_bound (std::next (nextRight), last, timePosition, findByTimePosition);
+                    // find the entry after position (or last entry)
+                    rightEntryCache = std::upper_bound (std::next (nextRight), last, position, findByPosition);
                     leftEntryCache = std::prev (rightEntryCache);
                 }
             }
         }
-
-        // linear interpolation of result
-        double quartersPerSecond = (rightEntryCache->quarterPosition - leftEntryCache->quarterPosition) / (rightEntryCache->timePosition - leftEntryCache->timePosition);
-        return leftEntryCache->quarterPosition + (timePosition - leftEntryCache->timePosition) * quartersPerSecond;
-    }
-
-    // TODO JUCE_ARA optimize like getQuarterForTime(), factor out search into templated advanceToPosition<>()
-    double getTimeForQuarter (ARA::ARAQuarterPosition quarterPosition) const
-    {
-        if ((quarterPosition < leftEntryCache->quarterPosition && ! isFirst (leftEntryCache)) ||
-            (quarterPosition >= rightEntryCache->quarterPosition && ! isLast (rightEntryCache)))
-        {
-            // find the tempo entry after timePosition (or last entry)
-            auto itTempo = std::upper_bound (contentReader.begin(), std::prev (contentReader.end()), quarterPosition,
-                                             [] (ARA::ARAQuarterPosition quarterPosition, ARA::ARAContentTempoEntry tempoEntry)
-            {
-                return quarterPosition < tempoEntry.quarterPosition;
-            });
-
-            // pick left and right entry based on found position
-            bool isFirstEntry = (itTempo == contentReader.begin());
-            leftEntryCache = isFirstEntry ? itTempo : std::prev (itTempo);
-            rightEntryCache = isFirstEntry ? std::next (itTempo) : itTempo;
-        }
-
-        // linear interpolation of result
-        double secondsPerQuarter = (rightEntryCache->timePosition - leftEntryCache->timePosition) / (rightEntryCache->quarterPosition - leftEntryCache->quarterPosition);
-        return leftEntryCache->timePosition + (quarterPosition - leftEntryCache->quarterPosition) * secondsPerQuarter;
+        jassert(! findByPosition (position, *leftEntryCache) || leftEntryCache == contentReader.begin());
+        jassert(findByPosition (position, *rightEntryCache) || std::next (rightEntryCache) == contentReader.end());
+        jassert(leftEntryCache == std::prev (rightEntryCache));
     }
 
 private:
-    bool isFirst (const typename TempoContentReader::const_iterator& it) const { return it == contentReader.begin(); }
-    bool isLast (const typename TempoContentReader::const_iterator& it) const { return std::next (it) == contentReader.end(); }
-
     const TempoContentReader& contentReader;
     mutable typename TempoContentReader::const_iterator leftEntryCache, rightEntryCache;
 };
