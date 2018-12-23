@@ -843,6 +843,11 @@ private:
             editorScaleFactor = ec.lastScaleFactorReceived;
 
             component.reset (new ContentWrapperComponent (*this, p));
+
+           #if JUCE_MAC
+            if (getHostType().type == PluginHostType::SteinbergCubase10)
+                cubase10Workaround.reset (new Cubase10WindowResizeWorkaround (*this));
+           #endif
         }
 
         tresult PLUGIN_API queryInterface (const TUID targetIID, void** obj) override
@@ -939,6 +944,11 @@ private:
 
                     component->setSize (w, h);
 
+                   #if JUCE_MAC
+                    if (cubase10Workaround != nullptr)
+                        cubase10Workaround->triggerAsyncUpdate();
+                    else
+                   #endif
                     if (auto* peer = component->getPeer())
                         peer->updateBounds();
                 }
@@ -1028,6 +1038,14 @@ private:
         tresult PLUGIN_API setContentScaleFactor (Steinberg::IPlugViewContentScaleSupport::ScaleFactor factor) override
         {
            #if ! JUCE_MAC
+            // Cubase 10 doesn't support non-integer scale factors...
+            if (getHostType().type == PluginHostType::SteinbergCubase10)
+            {
+                if (component.get() != nullptr)
+                    if (auto* peer = component->getPeer())
+                        factor = static_cast<Steinberg::IPlugViewContentScaleSupport::ScaleFactor> (peer->getPlatformScaleFactor());
+            }
+
             if (! approximatelyEqual ((float) factor, editorScaleFactor))
             {
                 editorScaleFactor = (float) factor;
@@ -1044,12 +1062,8 @@ private:
                #endif
 
                 component->resizeHostWindow();
-
-                if (getHostType().isBitwigStudio())
-                {
-                    component->setTopLeftPosition (0, 0);
-                    component->repaint();
-                }
+                component->setTopLeftPosition (0, 0);
+                component->repaint();
             }
 
             return kResultTrue;
@@ -1243,6 +1257,23 @@ private:
        #if JUCE_MAC
         void* macHostWindow = nullptr;
         bool isNSView = false;
+
+        // On macOS Cubase 10 resizes the host window after calling onSize() resulting in the peer
+        // bounds being a step behind the plug-in. Calling updateBounds() asynchronously seems to fix things...
+        struct Cubase10WindowResizeWorkaround  : public AsyncUpdater
+        {
+            Cubase10WindowResizeWorkaround (JuceVST3Editor& o)  : owner (o) {}
+
+            void handleAsyncUpdate() override
+            {
+                if (auto* peer = owner.component->getPeer())
+                    peer->updateBounds();
+            }
+
+            JuceVST3Editor& owner;
+        };
+
+        std::unique_ptr<Cubase10WindowResizeWorkaround> cubase10Workaround;
        #endif
 
         float editorScaleFactor = 1.0f;

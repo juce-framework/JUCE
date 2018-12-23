@@ -36,20 +36,20 @@ namespace
 
     static bool versionNumberChanged (const DeviceInfo& device, juce::String version) noexcept
     {
-        auto deviceVersion = device.version.asString();
+        auto deviceVersion = asString (device.version);
         return deviceVersion != version && deviceVersion.isNotEmpty();
     }
 
     static void setVersionNumberForBlock (const DeviceInfo& deviceInfo, Block& block) noexcept
     {
         jassert (deviceInfo.uid == block.uid);
-        block.versionNumber = deviceInfo.version.asString();
+        block.versionNumber = asString (deviceInfo.version);
     }
 
     static void setNameForBlock (const DeviceInfo& deviceInfo, Block& block)
     {
         jassert (deviceInfo.uid == block.uid);
-        block.name = deviceInfo.name.asString();
+        block.name = asString (deviceInfo.name);
     }
 }
 
@@ -465,7 +465,7 @@ private:
         if (versionNumberChanged (updatedInfo, blockToUpdate->versionNumber))
             setVersionNumberForBlock (updatedInfo, *blockToUpdate);
 
-        if (updatedInfo.name.isValid())
+        if (updatedInfo.name.isNotEmpty())
             setNameForBlock (updatedInfo, *blockToUpdate);
 
         if (updatedInfo.isMaster != blockToUpdate->isMasterBlock())
@@ -692,6 +692,7 @@ private:
         }
     }
 
+    //==============================================================================
     JUCE_DECLARE_WEAK_REFERENCEABLE (Detector)
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Detector)
 };

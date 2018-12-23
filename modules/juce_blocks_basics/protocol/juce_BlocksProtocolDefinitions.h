@@ -154,40 +154,43 @@ struct BlockSerialNumber
 };
 
 //==============================================================================
-/** Structure for the version number
+/** Structure for generic block data
 
     @tags{Blocks}
-*/
-struct VersionNumber
+ */
+template <size_t MaxSize>
+struct BlockStringData
 {
-    uint8 version[21] = {};
+    uint8 data[MaxSize] = {};
     uint8 length = 0;
 
-    juce::String asString() const
+    static const size_t maxLength { MaxSize };
+
+    bool isNotEmpty() const
     {
-        return juce::String (reinterpret_cast<const char*> (version),
-                             std::min (sizeof (version), static_cast<size_t> (length)));
+        return length > 0;
+    }
+
+    bool operator== (const BlockStringData& other) const
+    {
+        if (length != other.length)
+            return false;
+
+        for (int i = 0; i < length; ++i)
+            if (data[i] != other.data[i])
+                return false;
+
+        return true;
+    }
+
+    bool operator!= (const BlockStringData& other) const
+    {
+        return ! ( *this == other );
     }
 };
 
-//==============================================================================
-/** Structure for the block name
-
-    @tags{Blocks}
-*/
-struct BlockName
-{
-    uint8 name[33] = {};
-    uint8 length = 0;
-
-    bool isValid() const { return length > 0; }
-
-    juce::String asString() const
-    {
-        return juce::String (reinterpret_cast<const char*> (name),
-                             std::min (sizeof (name), static_cast<size_t> (length)));
-    }
-};
+using VersionNumber = BlockStringData<21>;
+using BlockName = BlockStringData<33>;
 
 //==============================================================================
 /** Structure for the device status

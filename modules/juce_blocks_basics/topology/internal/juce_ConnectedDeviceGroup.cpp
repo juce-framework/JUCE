@@ -29,6 +29,55 @@ namespace
     {
         return static_cast<Block::Timestamp> (timestamp);
     }
+
+    template <typename V>
+    static int removeUnusedBlocksFromMap (std::map<Block::UID, V>& mapToClean, const juce::Array<DeviceInfo>& currentDevices)
+    {
+        int numRemoved = 0;
+
+        for (auto iter = mapToClean.begin(); iter != mapToClean.end();)
+        {
+            bool found = false;
+
+            for (auto& info : currentDevices)
+            {
+                if (info.uid == iter->first)
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (found)
+            {
+                ++iter;
+            }
+            else
+            {
+                mapToClean.erase (iter++);
+                ++numRemoved;
+            }
+        }
+
+        return numRemoved;
+    }
+
+    /* Returns true new element added to map or value of existing key changed */
+    template <typename V>
+    static bool insertOrAssign (std::map<Block::UID, V>& map, const Block::UID& key, const V& value)
+    {
+        const auto result = map.emplace (std::make_pair (key, value));
+
+        if (! result.second)
+        {
+            if (result.first->second == value)
+                return false;
+
+            result.first->second = value;
+        }
+
+        return true;
+    }
 }
 
 template <typename Detector>
@@ -39,10 +88,19 @@ struct ConnectedDeviceGroup  : private juce::AsyncUpdater,
     ConnectedDeviceGroup (Detector& d, const juce::String& name, PhysicalTopologySource::DeviceConnection* connection)
         : detector (d), deviceName (name), deviceConnection (connection)
     {
-        deviceConnection->handleMessageFromDevice = [this] (const void* data, size_t dataSize)
+
+
+        if (auto midiDeviceConnection = static_cast<MIDIDeviceConnection*> (deviceConnection.get()))
         {
-            this->handleIncomingMessage (data, dataSize);
-        };
+            depreciatedVersionReader = std::make_unique<DepreciatedVersionReader> (*midiDeviceConnection);
+
+            juce::ScopedLock lock (midiDeviceConnection->criticalSecton);
+            setMidiMessageCallback();
+        }
+        else
+        {
+            setMidiMessageCallback();
+        }
 
         startTimer (200);
         sendTopologyRequest();
@@ -50,8 +108,7 @@ struct ConnectedDeviceGroup  : private juce::AsyncUpdater,
 
     bool isStillConnected (const juce::StringArray& detectedDevices) const noexcept
     {
-        return detectedDevices.contains (deviceName)
-        && ! failedToGetTopology();
+        return detectedDevices.contains (deviceName) && ! failedToGetTopology();
     }
 
     int getIndexFromDeviceID (Block::UID uid) const noexcept
@@ -61,15 +118,6 @@ struct ConnectedDeviceGroup  : private juce::AsyncUpdater,
                 return d.index;
 
         return -1;
-    }
-
-    const DeviceInfo* getDeviceInfoFromUID (Block::UID uid) const noexcept
-    {
-        for (auto& d : currentDeviceInfo)
-            if (d.uid == uid)
-                return &d;
-
-        return nullptr;
     }
 
     const BlocksProtocol::DeviceStatus* getLastStatus (Block::UID deviceID) const noexcept
@@ -114,37 +162,53 @@ struct ConnectedDeviceGroup  : private juce::AsyncUpdater,
 
     void endTopology()
     {
-        currentDeviceInfo = getArrayOfDeviceInfo (incomingTopologyDevices);
-        currentDeviceConnections = getArrayOfConnections (incomingTopologyConnections);
-        currentTopologyDevices = incomingTopologyDevices;
         lastTopologyReceiveTime = juce::Time::getCurrentTime();
 
-        const int numRemoved = blockPings.removeIf ([this] (auto& ping)
-                                                    {
-                                                        for (auto& info : currentDeviceInfo)
-                                                            if (info.uid == ping.blockUID)
-                                                                return false;
+        if (incomingTopologyDevices.isEmpty())
+        {
+            jassertfalse;
+            return;
+        }
 
-                                                        LOG_CONNECTIVITY ("API Disconnected by topology update " << ping.blockUID);
-                                                        return true;
-                                                    });
+        currentTopologyDevices.swapWith (incomingTopologyDevices);
+        currentTopologyConnections.swapWith (incomingTopologyConnections);
 
-        if (numRemoved > 0)
-            detector.handleTopologyChange();
+        incomingTopologyDevices.clearQuick();
+        incomingTopologyConnections.clearQuick();
+
+        refreshCurrentDeviceInfo();
+        refreshCurrentDeviceConnections();
+
+        removeUnusedBlocksFromMap (versionNumbers, currentDeviceInfo);
+        removeUnusedBlocksFromMap (blockNames, currentDeviceInfo);
+
+        removePingForDisconnectedBlocks();
+
+        detector.handleTopologyChange();
     }
 
     void handleVersion (BlocksProtocol::DeviceVersion version)
     {
-        for (auto& d : currentDeviceInfo)
-            if (d.index == version.index && version.version.length > 1)
-                d.version = version.version;
+        const auto uid = getDeviceIDFromIndex (version.index);
+
+        if (uid == Block::UID() || version.version.length <= 1)
+            return;
+
+        setVersion (uid, version.version);
     }
 
     void handleName (BlocksProtocol::DeviceName name)
     {
-        for (auto& d : currentDeviceInfo)
-            if (d.index == name.index && name.name.length > 1)
-                d.name = name.name;
+        const auto uid = getDeviceIDFromIndex (name.index);
+
+        if (uid == Block::UID() || name.name.length <= 1)
+            return;
+
+        if (insertOrAssign (blockNames, uid, name.name))
+        {
+            refreshCurrentDeviceInfo();
+            detector.handleTopologyChange();
+        }
     }
 
     void handleControlButtonUpDown (BlocksProtocol::TopologyIndex deviceIndex, uint32 timestamp,
@@ -299,13 +363,29 @@ private:
     std::unique_ptr<PhysicalTopologySource::DeviceConnection> deviceConnection;
 
     juce::Array<BlocksProtocol::DeviceStatus> incomingTopologyDevices, currentTopologyDevices;
-    juce::Array<BlocksProtocol::DeviceConnection> incomingTopologyConnections;
+    juce::Array<BlocksProtocol::DeviceConnection> incomingTopologyConnections, currentTopologyConnections;
 
     juce::CriticalSection incomingPacketLock;
     juce::Array<juce::MemoryBlock> incomingPackets;
 
+    std::map<Block::UID, BlocksProtocol::VersionNumber> versionNumbers;
+    std::map<Block::UID, BlocksProtocol::BlockName> blockNames;
+
+    std::unique_ptr<DepreciatedVersionReader> depreciatedVersionReader;
+
     struct TouchStart { float x, y; };
     TouchList<TouchStart> touchStartPositions;
+
+    Block::UID masterBlock = 0;
+
+    //==============================================================================
+    void setMidiMessageCallback()
+    {
+        deviceConnection->handleMessageFromDevice = [this] (const void* data, size_t dataSize)
+        {
+            this->handleIncomingMessage (data, dataSize);
+        };
+    }
 
     //==============================================================================
     juce::Time lastTopologyRequestTime, lastTopologyReceiveTime;
@@ -336,11 +416,12 @@ private:
 
         checkApiTimeouts (now);
         startApiModeOnConnectedBlocks();
+        requestMasterBlockVersionIfNeeded();
     }
 
     bool failedToGetTopology() const noexcept
     {
-        return numTopologyRequestsSent > 4 && lastTopologyReceiveTime == juce::Time();
+        return numTopologyRequestsSent >= 4 && lastTopologyReceiveTime == juce::Time();
     }
 
     bool sendCommandMessage (BlocksProtocol::TopologyIndex deviceIndex, uint32 commandID) const
@@ -353,10 +434,35 @@ private:
     }
 
     //==============================================================================
+    void requestMasterBlockVersionIfNeeded()
+    {
+        if (depreciatedVersionReader == nullptr)
+            return;
+
+        const auto masterVersion = depreciatedVersionReader->getVersionNumber();
+
+        if (masterVersion.isNotEmpty())
+            setVersion (masterBlock, masterVersion);
+    }
+
+    void setVersion (const Block::UID uid, const BlocksProtocol::VersionNumber versionNumber)
+    {
+        if (uid == masterBlock)
+            depreciatedVersionReader.reset();
+
+        if (insertOrAssign (versionNumbers, uid, versionNumber))
+        {
+            refreshCurrentDeviceInfo();
+            detector.handleTopologyChange();
+        }
+    }
+
+    //==============================================================================
     struct BlockPingTime
     {
         Block::UID blockUID;
         juce::Time lastPing;
+        juce::Time connected;
     };
 
     juce::Array<BlockPingTime> blockPings;
@@ -373,7 +479,7 @@ private:
         else
         {
             LOG_CONNECTIVITY ("API Connected " << uid);
-            blockPings.add ({ uid, now });
+            blockPings.add ({ uid, now, now });
             detector.handleTopologyChange();
         }
     }
@@ -406,6 +512,8 @@ private:
             LOG_CONNECTIVITY ("API Disconnected " << uid << ", re-probing topology");
             currentDeviceInfo.clearQuick();
             blockPings.clearQuick();
+            blockNames.clear();
+            versionNumbers.clear();
             detector.handleTopologyChange();
             scheduleNewTopologyRequest();
         }
@@ -430,6 +538,22 @@ private:
         }
     }
 
+    /* Returns true is ping was removed */
+    void removePingForDisconnectedBlocks()
+    {
+        const auto removed = [this] (auto& ping)
+        {
+            for (auto& info : currentDeviceInfo)
+                if (info.uid == ping.blockUID)
+                    return false;
+
+            LOG_CONNECTIVITY ("API Disconnected by topology update " << ping.blockUID);
+            return true;
+        };
+
+        blockPings.removeIf (removed);
+    }
+
     void startApiModeOnConnectedBlocks()
     {
         for (auto& info : currentDeviceInfo)
@@ -439,6 +563,21 @@ private:
                 LOG_CONNECTIVITY ("API Try " << info.uid);
                 sendCommandMessage (info.index, BlocksProtocol::endAPIMode);
                 sendCommandMessage (info.index, BlocksProtocol::beginAPIMode);
+            }
+        }
+    }
+
+    //==============================================================================
+    void checkVersionNumberTimeouts()
+    {
+        for (const auto& device : currentDeviceInfo)
+        {
+            const auto version = versionNumbers.find (device.uid);
+
+            if (version == versionNumbers.end())
+            {
+                auto* ping = getPing (device.uid);
+
             }
         }
     }
@@ -461,38 +600,7 @@ private:
         if (uid == Block::UID())
             scheduleNewTopologyRequest();
 
-            return uid;
-    }
-
-    juce::Array<BlockDeviceConnection> getArrayOfConnections (const juce::Array<BlocksProtocol::DeviceConnection>& connections)
-    {
-        juce::Array<BlockDeviceConnection> result;
-
-        for (auto&& c : connections)
-        {
-            BlockDeviceConnection dc;
-            dc.device1 = getDeviceIDFromIndex (c.device1);
-            dc.device2 = getDeviceIDFromIndex (c.device2);
-
-            if (dc.device1 <= 0 || dc.device2 <= 0)
-                continue;
-
-            dc.connectionPortOnDevice1 = convertConnectionPort (dc.device1, c.port1);
-            dc.connectionPortOnDevice2 = convertConnectionPort (dc.device2, c.port2);
-
-            result.add (dc);
-        }
-
-        return result;
-    }
-
-    Block::ConnectionPort convertConnectionPort (Block::UID uid, BlocksProtocol::ConnectorPort p) noexcept
-    {
-        if (auto* info = getDeviceInfoFromUID (uid))
-            return BlocksProtocol::BlockDataSheet (info->serial).convertPortIndexToConnectorPort (p);
-
-            jassertfalse;
-        return { Block::ConnectionPort::DeviceEdge::north, 0 };
+        return uid;
     }
 
     //==============================================================================
@@ -532,27 +640,79 @@ private:
     }
 
     //==============================================================================
-    static juce::Array<DeviceInfo> getArrayOfDeviceInfo (const juce::Array<BlocksProtocol::DeviceStatus>& devices)
+    BlocksProtocol::VersionNumber getVersionNumber (Block::UID uid)
     {
-        juce::Array<DeviceInfo> result;
-        bool isFirst = true; // TODO: First block not always master block! Assumption violated.
+        const auto version = versionNumbers.find (uid);
+        return version == versionNumbers.end() ? BlocksProtocol::VersionNumber() : version->second;
+    }
 
-        for (auto& device : devices)
+    BlocksProtocol::BlockName getName (Block::UID uid)
+    {
+        const auto name = blockNames.find (uid);
+        return name == blockNames.end() ? BlocksProtocol::BlockName() : name->second;
+    }
+
+    //==============================================================================
+    const DeviceInfo* getDeviceInfoFromUID (Block::UID uid) const noexcept
+    {
+        for (auto& d : currentDeviceInfo)
+            if (d.uid == uid)
+                return &d;
+
+        return nullptr;
+    }
+
+    Block::ConnectionPort convertConnectionPort (Block::UID uid, BlocksProtocol::ConnectorPort p) noexcept
+    {
+        if (auto* info = getDeviceInfoFromUID (uid))
+            return BlocksProtocol::BlockDataSheet (info->serial).convertPortIndexToConnectorPort (p);
+
+            jassertfalse;
+        return { Block::ConnectionPort::DeviceEdge::north, 0 };
+    }
+
+    //==============================================================================
+    void refreshCurrentDeviceInfo()
+    {
+        currentDeviceInfo.clearQuick();
+
+        for (auto& device : currentTopologyDevices)
         {
-            BlocksProtocol::VersionNumber version;
-            BlocksProtocol::BlockName name;
+            const auto uid = getBlockUIDFromSerialNumber (device.serialNumber);
+            const auto version = getVersionNumber (uid);
+            const auto name = getName (uid);
 
-            result.add ({ getBlockUIDFromSerialNumber (device.serialNumber),
-                device.index,
-                device.serialNumber,
-                version,
-                name,
-                isFirst });
+            // For backwards compatibility we assume the first device we see in a group is the master and won't change
+            if (masterBlock == 0)
+                masterBlock = uid;
 
-            isFirst = false;
+            currentDeviceInfo.add ({ uid,
+                                     device.index,
+                                     device.serialNumber,
+                                     version,
+                                     name,
+                                     masterBlock == uid });
+       }
+    }
+
+    void refreshCurrentDeviceConnections()
+    {
+        currentDeviceConnections.clearQuick();
+
+        for (auto&& c : currentTopologyConnections)
+        {
+            BlockDeviceConnection dc;
+            dc.device1 = getDeviceIDFromIndex (c.device1);
+            dc.device2 = getDeviceIDFromIndex (c.device2);
+
+            if (dc.device1 <= 0 || dc.device2 <= 0)
+                continue;
+
+            dc.connectionPortOnDevice1 = convertConnectionPort (dc.device1, c.port1);
+            dc.connectionPortOnDevice2 = convertConnectionPort (dc.device2, c.port2);
+
+            currentDeviceConnections.add (dc);
         }
-
-        return result;
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ConnectedDeviceGroup)

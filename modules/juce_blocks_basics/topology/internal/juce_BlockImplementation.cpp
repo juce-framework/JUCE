@@ -40,8 +40,8 @@ public:
                          BlocksProtocol::BlockName blockName,
                          bool isMasterBlock)
         : Block (juce::String ((const char*) serial.serial,   sizeof (serial.serial)),
-                 juce::String ((const char*) version.version, version.length),
-                 juce::String ((const char*) blockName.name,  blockName.length)),
+                 juce::String ((const char*) version.data, version.length),
+                 juce::String ((const char*) blockName.data,  blockName.length)),
           modelData (serial),
           remoteHeap (modelData.programAndHeapSize),
           detector (&detectorToUse),
@@ -81,8 +81,8 @@ public:
 
     void markReconnected (const DeviceInfo& deviceInfo)
     {
-        versionNumber = deviceInfo.version.asString();
-        name = deviceInfo.name.asString();
+        versionNumber = asString (deviceInfo.version);
+        name = asString (deviceInfo.name);
         isMaster = deviceInfo.isMaster;
 
         setProgram (nullptr);

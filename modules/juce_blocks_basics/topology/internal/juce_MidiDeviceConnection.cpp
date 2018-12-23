@@ -63,11 +63,13 @@ struct MIDIDeviceConnection  : public PhysicalTopologySource::DeviceConnection,
 
     void addListener (Listener* l)
     {
+        juce::ScopedLock scopedLock (criticalSecton);
         listeners.add (l);
     }
 
     void removeListener (Listener* l)
     {
+        juce::ScopedLock scopedLock (criticalSecton);
         listeners.remove (l);
     }
 
@@ -76,7 +78,7 @@ struct MIDIDeviceConnection  : public PhysicalTopologySource::DeviceConnection,
         JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED // This method must only be called from the message thread!
 
         jassert (dataSize > sizeof (BlocksProtocol::roliSysexHeader) + 2);
-        jassert (memcmp (data, BlocksProtocol::roliSysexHeader, sizeof (BlocksProtocol::roliSysexHeader)) == 0);
+        jassert (memcmp (data, BlocksProtocol::roliSysexHeader, sizeof (BlocksProtocol::roliSysexHeader) - 1) == 0);
         jassert (static_cast<const uint8*> (data)[dataSize - 1] == 0xf7);
 
         if (midiOutput != nullptr)
@@ -90,19 +92,26 @@ struct MIDIDeviceConnection  : public PhysicalTopologySource::DeviceConnection,
 
     void handleIncomingMidiMessage (juce::MidiInput*, const juce::MidiMessage& message) override
     {
-        const auto data = message.getRawData();
-        const int dataSize = message.getRawDataSize();
-        const int bodySize = dataSize - (int) (sizeof (BlocksProtocol::roliSysexHeader) + 1);
+        juce::ScopedTryLock lock (criticalSecton);
 
-        if (bodySize > 0 && memcmp (data, BlocksProtocol::roliSysexHeader, sizeof (BlocksProtocol::roliSysexHeader)) == 0)
-            if (handleMessageFromDevice != nullptr)
-                handleMessageFromDevice (data + sizeof (BlocksProtocol::roliSysexHeader), (size_t) bodySize);
+        if (lock.isLocked())
+        {
+            const auto data = message.getRawData();
+            const int dataSize = message.getRawDataSize();
+            const int bodySize = dataSize - (int) (sizeof (BlocksProtocol::roliSysexHeader) + 1);
 
-        listeners.call ([&] (Listener& l) { l.handleIncomingMidiMessage (message); });
+            if (bodySize > 0 && memcmp (data, BlocksProtocol::roliSysexHeader, sizeof (BlocksProtocol::roliSysexHeader)) == 0)
+                if (handleMessageFromDevice != nullptr)
+                    handleMessageFromDevice (data + sizeof (BlocksProtocol::roliSysexHeader), (size_t) bodySize);
+
+            listeners.call ([&] (Listener& l) { l.handleIncomingMidiMessage (message); });
+        }
     }
 
     std::unique_ptr<juce::MidiInput> midiInput;
     std::unique_ptr<juce::MidiOutput> midiOutput;
+
+    juce::CriticalSection criticalSecton;
 
 private:
     juce::ListenerList<Listener> listeners;

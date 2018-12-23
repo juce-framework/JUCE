@@ -799,10 +799,10 @@ static struct ParameterAdapterTests final   : public UnitTest
                 expectEquals (adapter.getTextForDenormalisedValue (value), expected);
             };
 
-            test ({ -100, 100 }, 0, "0.00");
-            test ({ -2.5, 12.5 }, 10, "10.00");
-            test ({ -20, -10 }, -15, "-15.00");
-            test ({ 0, 7.5 }, 2.5, "2.50");
+            test ({ -100, 100 }, 0, "0.0000000");
+            test ({ -2.5, 12.5 }, 10, "10.0000000");
+            test ({ -20, -10 }, -15, "-15.0000000");
+            test ({ 0, 7.5 }, 2.5, "2.5000000");
         }
 
         beginTest ("Text can be converted to floats");

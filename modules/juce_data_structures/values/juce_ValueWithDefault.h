@@ -41,7 +41,7 @@ class ValueWithDefault
 public:
     //==============================================================================
     /** Creates an unitialised ValueWithDefault. Initialise it using one of the referTo() methods. */
-    ValueWithDefault()    : undoManager (nullptr) {}
+    ValueWithDefault() {}
 
     /** Creates an ValueWithDefault object. The default value will be an empty var. */
     ValueWithDefault (ValueTree& tree, const Identifier& propertyID, UndoManager* um)
@@ -124,10 +124,10 @@ public:
     /** Returns true if the property does not exist or is empty. */
     bool isUsingDefault() const
     {
-        return ! targetTree.hasProperty (targetProperty);
+        return ! targetTree.hasProperty (targetProperty) || targetTree.getProperty (targetProperty) == var();
     }
 
-    /** Resets the property to an empty var. */
+    /** Removes the property from the referenced ValueTree. */
     void resetToDefault() noexcept
     {
         targetTree.removeProperty (targetProperty, nullptr);
@@ -181,6 +181,9 @@ public:
     /** Returns the property ID of the referenced property. */
     Identifier& getPropertyID() noexcept                    { return targetProperty; }
 
+    /** Returns the UndoManager that is being used. */
+    UndoManager* getUndoManager() noexcept                  { return undoManager; }
+
     //==============================================================================
     ValueWithDefault& operator= (const ValueWithDefault& other)
     {
@@ -194,7 +197,7 @@ private:
     //==============================================================================
     ValueTree targetTree;
     Identifier targetProperty;
-    UndoManager* undoManager;
+    UndoManager* undoManager = nullptr;
     var defaultValue;
 
     String delimiter;

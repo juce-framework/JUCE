@@ -25,6 +25,7 @@
 #define LOG_BLOCKS_CONNECTIVITY 0
 #define LOG_BLOCKS_PINGS 0
 #define DUMP_BANDWIDTH_STATS 0
+#define DUMP_TOPOLOGY 0
 
 #define TOPOLOGY_LOG(text) \
  JUCE_BLOCK_WITH_FORCED_SEMICOLON (juce::String buf ("Topology Src:   "); \
@@ -46,9 +47,21 @@
  #include "internal/juce_BandwidthStatsLogger.cpp"
 #endif
 
+namespace
+{
+    /** Helper function to create juce::String from BlockStringData */
+    template <size_t MaxSize>
+    juce::String asString (juce::BlocksProtocol::BlockStringData<MaxSize> blockString)
+    {
+        return { reinterpret_cast<const char*> (blockString.data),
+                 juce::jmin (sizeof (blockString.data), static_cast<size_t> (blockString.length))};
+    }
+}
+
 #include "internal/juce_MidiDeviceConnection.cpp"
 #include "internal/juce_MIDIDeviceDetector.cpp"
 #include "internal/juce_DeviceInfo.cpp"
+#include "internal/juce_DepreciatedVersionReader.cpp"
 #include "internal/juce_ConnectedDeviceGroup.cpp"
 #include "internal/juce_BlockImplementation.cpp"
 #include "internal/juce_Detector.cpp"
