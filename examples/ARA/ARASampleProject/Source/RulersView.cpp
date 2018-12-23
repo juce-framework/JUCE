@@ -114,6 +114,7 @@ private:
         return quarterPosition < tempoEntry.quarterPosition;
     };
 
+    // TODO JUCE_ARA maybe use a template argument instead of a function pointer for findByPosition?
     template <typename T>
     void updateCacheByPosition (T position, bool (*findByPosition) (T position, const ARA::ARAContentTempoEntry& tempoEntry)) const
     {
@@ -131,16 +132,16 @@ private:
                 else
                 {
                     // find the entry after position, then pick left and right entry based on position being before first
-                    auto itTempo = std::upper_bound (contentReader.begin(), prevLeft, position, findByPosition);
-                    if (itTempo == contentReader.begin())
+                    auto it = std::upper_bound (contentReader.begin(), prevLeft, position, findByPosition);
+                    if (it == contentReader.begin())
                     {
-                        leftEntryCache = itTempo;
-                        rightEntryCache = std::next (itTempo);
+                        leftEntryCache = it;
+                        rightEntryCache = std::next (it);
                     }
                     else
                     {
-                        leftEntryCache = std::prev (itTempo);
-                        rightEntryCache = itTempo;
+                        leftEntryCache = std::prev (it);
+                        rightEntryCache = it;
                     }
                 }
             }
@@ -186,67 +187,67 @@ public:
     const auto getBarSignatureIteratorForQuarter (ARA::ARAQuarterPosition quarterPosition) const
     {
         // search for the bar signature entry just after quarterPosition
-        auto itBarSig = std::upper_bound (contentReader.begin(), contentReader.end(), quarterPosition,
-                                          [] (ARA::ARAQuarterPosition quarterPosition, ARA::ARAContentBarSignature barSignature)
-        {
-            return quarterPosition < barSignature.position;
-        });
+        auto it = std::upper_bound (contentReader.begin(), contentReader.end(), quarterPosition, findByPosition);
 
         // move one step back, if we can, to find the bar signature for quarterPos
-        if (itBarSig != contentReader.begin())
-            --itBarSig;
+        if (it != contentReader.begin())
+            --it;
 
-        return itBarSig;
+        return it;
     }
 
     double getBeatForQuarter (ARA::ARAQuarterPosition quarterPosition) const
     {
-        auto itBarSig = contentReader.begin();
+        auto it = contentReader.begin();
         double beatPosition = 0.0;
 
-        if (itBarSig->position < quarterPosition)
+        if (it->position < quarterPosition)
         {
             // use each bar signature entry before quarterPosition to count the # of beats
-            auto itNextBarSig = std::next (itBarSig);
-            while (itNextBarSig != contentReader.end() &&
-                   itNextBarSig->position <= quarterPosition)
+            auto itNext = std::next (it);
+            while (itNext != contentReader.end() &&
+                   itNext->position <= quarterPosition)
             {
-                beatPosition += quartersToBeats (*itBarSig, itNextBarSig->position - itBarSig->position);
-                itBarSig = itNextBarSig++;
+                beatPosition += quartersToBeats (*it, itNext->position - it->position);
+                it = itNext++;
             }
         }
 
         // the last change in quarter position comes after the latest bar signature change
-        beatPosition += quartersToBeats (*itBarSig, quarterPosition - itBarSig->position);
+        beatPosition += quartersToBeats (*it, quarterPosition - it->position);
         return beatPosition;
     }
 
     ARA::ARAQuarterPosition getQuarterForBeat (double beatPosition) const
     {
-        auto itBarSig = contentReader.begin();
+        auto it = contentReader.begin();
         double currentSigBeat = 0.0;
 
         if (0.0 < beatPosition)
         {
             // use each bar signature entry before beatPositon to count the # of beats
-            auto itNextBarSig = std::next (itBarSig);
-            while (itNextBarSig != contentReader.end())
+            auto itNext = std::next (it);
+            while (itNext != contentReader.end())
             {
-                double beatsDuration = quartersToBeats (*itBarSig, itNextBarSig->position - itBarSig->position);
+                double beatsDuration = quartersToBeats (*it, itNext->position - it->position);
                 double nextSigBeat = currentSigBeat + beatsDuration;
                 if (beatPosition < nextSigBeat)
                     break;
                 currentSigBeat = nextSigBeat;
-                itBarSig = itNextBarSig++;
+                it = itNext++;
             }
         }
 
         // transform the change in beats to quarters using the time signature at beatPosition
-        double quarterForBeat = itBarSig->position + beatsToQuarters (*itBarSig, beatPosition - currentSigBeat);
-        return quarterForBeat;
+        return it->position + beatsToQuarters (*it, beatPosition - currentSigBeat);
     }
 
 private:
+    static bool findByPosition (ARA::ARAQuarterPosition position, const ARA::ARAContentBarSignature& barSignature)
+    {
+        return position < barSignature.position;
+    };
+
     static double quartersToBeats (const ARA::ARAContentBarSignature& barSignature, ARA::ARAQuarterDuration quarterDuration)
     {
         return barSignature.denominator * quarterDuration / 4.0;
