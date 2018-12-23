@@ -134,8 +134,8 @@ public:
     }
 
 private:
-    bool isFirst (const typename TempoContentReader::const_iterator& it) const { return it != contentReader.begin(); }
-    bool isLast (const typename TempoContentReader::const_iterator& it) const { return std::next (it) != contentReader.end(); }
+    bool isFirst (const typename TempoContentReader::const_iterator& it) const { return it == contentReader.begin(); }
+    bool isLast (const typename TempoContentReader::const_iterator& it) const { return std::next (it) == contentReader.end(); }
 
     const TempoContentReader& contentReader;
     mutable typename TempoContentReader::const_iterator leftEntryCache, rightEntryCache;
@@ -149,7 +149,7 @@ class BarSignaturesConverter
 public:
     BarSignaturesConverter (const BarSignaturesContentReader& reader) : contentReader (reader) {}
 
-    ARA::ARAContentBarSignature getBarSignatureForQuarter (ARA::ARAQuarterPosition quarterPosition) const
+    const auto getBarSignatureIteratorForQuarter (ARA::ARAQuarterPosition quarterPosition) const
     {
         // search for the bar signature entry just after quarterPosition
         auto itBarSig = std::upper_bound (contentReader.begin(), contentReader.end(), quarterPosition,
@@ -162,7 +162,7 @@ public:
         if (itBarSig != contentReader.begin())
             --itBarSig;
 
-        return *itBarSig;
+        return itBarSig;
     }
 
     double getBeatForQuarter (ARA::ARAQuarterPosition quarterPosition) const
@@ -288,10 +288,10 @@ void RulersView::paint (juce::Graphics& g)
         int endBeat = roundToInt (floor (beatEnd));
         for (int beat = roundToInt (ceil (beatStart)); beat <= endBeat; ++beat)
         {
-            const ARA::ARAQuarterPosition quarterPos = barSignaturesConverter.getQuarterForBeat (beat);
-            const ARA::ARATimePosition timePos = tempoConverter.getTimeForQuarter (quarterPos);
+            const auto quarterPos = barSignaturesConverter.getQuarterForBeat (beat);
+            const auto timePos = tempoConverter.getTimeForQuarter (quarterPos);
 
-            const ARA::ARAContentBarSignature barSignature = barSignaturesConverter.getBarSignatureForQuarter (quarterPos);
+            const auto barSignature = *barSignaturesConverter.getBarSignatureIteratorForQuarter (quarterPos);
             const int barSigBeatStart = roundToInt (barSignaturesConverter.getBeatForQuarter (barSignature.position));
             const int beatsSinceBarSigStart = beat - barSigBeatStart;
             const bool isDownBeat = ((beatsSinceBarSigStart % barSignature.numerator) == 0);
@@ -323,18 +323,18 @@ void RulersView::paint (juce::Graphics& g)
             chordRect.setVerticalRange (Range<int> (chordRulerY, chordRulerY + chordRulerHeight));
             
             // find the starting position of the chord in pixels
-            const ARA::ARATimePosition chordStartSecond = tempoConverter.getTimeForQuarter (itChord->position);
-            if (chordStartSecond >= visibleRange.getEnd())
+            const auto chordStartTime = tempoConverter.getTimeForQuarter (itChord->position);
+            if (chordStartTime >= visibleRange.getEnd())
                 break;
-            chordRect.setLeft (owner.getPlaybackRegionsViewsXForTime (chordStartSecond));
+            chordRect.setLeft (owner.getPlaybackRegionsViewsXForTime (chordStartTime));
 
             // if we have a chord after this one, use its starting position to end our rect
             if (std::next(itChord) != chordsReader.end())
             {
-                const ARA::ARATimePosition nextChordStartSecond = tempoConverter.getTimeForQuarter (std::next (itChord)->position);
-                if (nextChordStartSecond < visibleRange.getStart())
+                const auto nextChordStartTime = tempoConverter.getTimeForQuarter (std::next (itChord)->position);
+                if (nextChordStartTime < visibleRange.getStart())
                     continue;
-                chordRect.setRight (owner.getPlaybackRegionsViewsXForTime (nextChordStartSecond));
+                chordRect.setRight (owner.getPlaybackRegionsViewsXForTime (nextChordStartTime));
             }
 
             // get the chord name
