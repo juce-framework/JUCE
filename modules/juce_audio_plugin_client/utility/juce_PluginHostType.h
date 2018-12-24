@@ -352,11 +352,11 @@ private:
         if (hostFilename.containsIgnoreCase   ("Cubase7"))           return SteinbergCubase7;
         if (hostFilename.containsIgnoreCase   ("Cubase8.exe"))       return SteinbergCubase8;
         if (hostFilename.containsIgnoreCase   ("Cubase8.5.exe"))     return SteinbergCubase8_5;
-        // Cubase 9 scans plug-ins with a separate executable "vst2xscanner"
-        if (hostFilename.containsIgnoreCase   ("Cubase9.exe")
-            || hostPath.containsIgnoreCase    ("Cubase 9"))          return SteinbergCubase9;
+        // Later version of Cubase scan plug-ins with a separate executable "vst2xscanner"
         if (hostFilename.containsIgnoreCase   ("Cubase9.5.exe")
             || hostPath.containsIgnoreCase    ("Cubase 9.5"))        return SteinbergCubase9_5;
+        if (hostFilename.containsIgnoreCase   ("Cubase9.exe")
+            || hostPath.containsIgnoreCase    ("Cubase 9"))          return SteinbergCubase9;
         if (hostFilename.containsIgnoreCase   ("Cubase10.exe")
             || hostPath.containsIgnoreCase    ("Cubase 10"))         return SteinbergCubase10;
         if (hostFilename.containsIgnoreCase   ("Cubase"))            return SteinbergCubaseGeneric;
