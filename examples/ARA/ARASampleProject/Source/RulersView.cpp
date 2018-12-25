@@ -75,7 +75,7 @@ void RulersView::findMusicalContext()
 
 //==============================================================================
 
-// TODO JUCE_ARA these two classes should be moved down to the ARA SDK,
+// TODO JUCE_ARA this class has been highly optimized and will soon be moved down to the ARA SDK,
 // so that both hosts and plug-ins can use it when converting the ARA data to their internal formats.
 
 template <typename TempoContentReader>
@@ -174,90 +174,204 @@ private:
     mutable typename TempoContentReader::const_iterator leftEntryCache, rightEntryCache;
 };
 
-// TODO JUCE_ARA add caching just as done in the TempoContentReader, but also cache beatAtSigStart.
-//               beatAtSigStart can set to -1 to indicate outdated cache.
+//==============================================================================
+
+// TODO JUCE_ARA this class has been highly optimized and will soon be moved down to the ARA SDK,
+// so that both hosts and plug-ins can use it when converting the ARA data to their internal formats.
+
 template <typename BarSignaturesContentReader>
 class BarSignaturesConverter
 {
 public:
-    BarSignaturesConverter (const BarSignaturesContentReader& reader) : contentReader (reader) {}
+    BarSignaturesConverter (const BarSignaturesContentReader& reader)
+    : contentReader (reader) { setCacheToFirstEntry(); }
 
-    const auto getBarSignatureIteratorForQuarter (ARA::ARAQuarterPosition quarterPosition) const
+    const ARA::ARAContentBarSignature getBarSignatureForQuarter (ARA::ARAQuarterPosition quarterPosition) const
     {
-        // search for the bar signature entry just after quarterPosition
-        auto it = std::upper_bound (contentReader.begin(), contentReader.end(), quarterPosition, findByPosition);
+        updateCacheByQuarterPosition (quarterPosition);
+        return *entryCache;
+    }
 
-        // move one step back, if we can, to find the bar signature for quarterPos
-        if (it != contentReader.begin())
-            --it;
+    const ARA::ARAContentBarSignature getBarSignatureForBeat (double beatPosition) const
+    {
+        updateCacheByBeatPosition (beatPosition);
+        return *entryCache;
+    }
 
-        return it;
+    static double getBeatsPerQuarter (const ARA::ARAContentBarSignature& barSignature)
+    {
+        return ((double) barSignature.denominator) / 4.0;
+    }
+
+    static double getQuartersPerBar (const ARA::ARAContentBarSignature& barSignature)
+    {
+        return ((double) barSignature.numerator) / getBeatsPerQuarter (barSignature);
     }
 
     double getBeatForQuarter (ARA::ARAQuarterPosition quarterPosition) const
     {
-        auto it = contentReader.begin();
-        double beatPosition = 0.0;
-
-        if (it->position < quarterPosition)
-        {
-            // use each bar signature entry before quarterPosition to count the # of beats
-            auto itNext = std::next (it);
-            while (itNext != contentReader.end() &&
-                   itNext->position <= quarterPosition)
-            {
-                beatPosition += quartersToBeats (*it, itNext->position - it->position);
-                it = itNext++;
-            }
-        }
-
-        // the last change in quarter position comes after the latest bar signature change
-        beatPosition += quartersToBeats (*it, quarterPosition - it->position);
-        return beatPosition;
+        updateCacheByQuarterPosition (quarterPosition);
+        return entryStartBeatCache + getBeatDistanceFromQuarterPosition (entryCache, quarterPosition);
     }
 
     ARA::ARAQuarterPosition getQuarterForBeat (double beatPosition) const
     {
-        auto it = contentReader.begin();
-        double currentSigBeat = 0.0;
+        updateCacheByBeatPosition (beatPosition);
+        return entryCache->position + (beatPosition - entryStartBeatCache) / getBeatsPerQuarter (*entryCache);
+    }
 
-        if (0.0 < beatPosition)
+    int getBarIndexForQuarter (ARA::ARAQuarterPosition quarterPosition) const
+    {
+        updateCacheByQuarterPosition (quarterPosition);
+        double bars = floor ((quarterPosition - entryCache->postion) / getQuartersPerBar (*entryCache));
+        auto it = entryCache;
+        while (it != contentReader.begin())
         {
-            // use each bar signature entry before beatPositon to count the # of beats
-            auto itNext = std::next (it);
-            while (itNext != contentReader.end())
-            {
-                double beatsDuration = quartersToBeats (*it, itNext->position - it->position);
-                double nextSigBeat = currentSigBeat + beatsDuration;
-                if (beatPosition < nextSigBeat)
-                    break;
-                currentSigBeat = nextSigBeat;
-                it = itNext++;
-            }
+            ARA::ARAQuarterPosition prevEndQuarter = it->position;
+            --it;
+            bars += (prevEndQuarter - it->postion) / getQuartersPerBar (*it);
+        }
+        return roundToInt (bars);
+    }
+
+    ARA::ARAQuarterPosition getQuarterForBarIndex (int barIndex) const
+    {
+        setCacheToFirstEntry();
+        bool didUpdateEntryStartBeatCache = false;
+        int startBar = 0;
+
+        while (true)
+        {
+            auto next = std::next (entryCache);
+            if (next == contentReader.end())
+                break;
+
+            int nextStartBar = startBar + roundToInt ((next->position - entryCache->position) / getQuartersPerBar (*entryCache));
+            if (nextStartBar > barIndex)
+                break;
+
+            startBar = nextStartBar;
+            entryStartBeatCache = entryStartBeatCache + getBeatDistanceFromQuarterPosition(entryCache, next->position);
+            didUpdateEntryStartBeatCache = true;
+            entryCache = next;
         }
 
-        // transform the change in beats to quarters using the time signature at beatPosition
-        return it->position + beatsToQuarters (*it, beatPosition - currentSigBeat);
+        // to avoid errors adding up over time, we round the cache to an integer value after modification
+        if (didUpdateEntryStartBeatCache)
+            entryStartBeatCache = round (entryStartBeatCache);
+
+        return entryCache->position + (barIndex - startBar) * getQuartersPerBar (*entryCache);
+    }
+
+    double getBeatDistanceFromBarStartForQuarter (ARA::ARAQuarterPosition quarterPosition) const
+    {
+        updateCacheByQuarterPosition (quarterPosition);
+        const double beatDistance = getBeatDistanceFromQuarterPosition(entryCache, quarterPosition);
+        const double beatsPerBar = (double) entryCache->numerator;
+        const double remainder = fmod (beatDistance, beatsPerBar);
+        return (beatDistance >= 0) ? remainder : beatsPerBar + remainder;
     }
 
 private:
-    static bool findByPosition (ARA::ARAQuarterPosition position, const ARA::ARAContentBarSignature& barSignature)
+
+    void setCacheToFirstEntry() const
+    {
+        entryCache = contentReader.begin();
+        entryStartBeatCache = 0.0;
+    }
+
+    static double getBeatDistanceFromQuarterPosition (const typename BarSignaturesContentReader::const_iterator& it, ARA::ARAQuarterPosition quarterPosition)
+    {
+        return (quarterPosition - it->position) * getBeatsPerQuarter (*it);
+    }
+
+    static bool findByQuarterPosition (ARA::ARAQuarterPosition position, const ARA::ARAContentBarSignature& barSignature)
     {
         return position < barSignature.position;
     };
 
-    static double quartersToBeats (const ARA::ARAContentBarSignature& barSignature, ARA::ARAQuarterDuration quarterDuration)
+    void updateCacheByQuarterPosition (ARA::ARAQuarterPosition quarterPosition) const
     {
-        return barSignature.denominator * quarterDuration / 4.0;
+        bool didUpdateEntryStartBeatCache = false;
+
+        if (quarterPosition < entryCache->position)
+        {
+            // before our entry - go back until first entry or entry before quarter
+            while (entryCache != contentReader.begin())
+            {
+                ARA::ARAQuarterPosition prevEndQuarter = entryCache->position;
+                --entryCache;
+                entryStartBeatCache -= getBeatDistanceFromQuarterPosition (entryCache, prevEndQuarter);
+                didUpdateEntryStartBeatCache = true;
+                if (entryCache->position <= quarterPosition)
+                    break;
+            }
+        }
+        else
+        {
+            // at or after our entry - go forward until last entry or entry before quarter
+            while (true)
+            {
+                auto next = std::next (entryCache);
+                if ((next == contentReader.end()) || (next->position > quarterPosition))
+                    break;
+
+                entryStartBeatCache += getBeatDistanceFromQuarterPosition(entryCache, next->position);
+                didUpdateEntryStartBeatCache = true;
+                entryCache = next;
+            }
+        }
+
+        // to avoid errors adding up over time, we round the cache to an integer value after modification
+        if (didUpdateEntryStartBeatCache)
+            entryStartBeatCache = round (entryStartBeatCache);
     }
 
-    static double beatsToQuarters (ARA::ARAContentBarSignature barSignature, double beatDuration)
+    void updateCacheByBeatPosition (double beatPosition) const
     {
-        return 4.0 * beatDuration / barSignature.denominator;
+        bool didUpdateEntryStartBeatCache = false;
+
+        if (beatPosition < entryStartBeatCache)
+        {
+            // before our entry - go back until first entry or entry before beat
+            while (entryCache != contentReader.begin())
+            {
+                ARA::ARAQuarterPosition prevEndQuarter = entryCache->position;
+                --entryCache;
+                entryStartBeatCache -= getBeatDistanceFromQuarterPosition (entryCache, prevEndQuarter);
+                didUpdateEntryStartBeatCache = true;
+                if (entryStartBeatCache <= beatPosition)
+                    break;
+            }
+        }
+        else
+        {
+            // at or after our entry - go forward until last entry or entry before beat
+            while (true)
+            {
+                auto next = std::next (entryCache);
+                if (next == contentReader.end())
+                    break;
+
+                double nextStartBeat = entryStartBeatCache + getBeatDistanceFromQuarterPosition(entryCache, next->position);
+                if (nextStartBeat > beatPosition)
+                    break;
+
+                entryStartBeatCache = nextStartBeat;
+                didUpdateEntryStartBeatCache = true;
+                entryCache = next;
+            }
+        }
+
+        // to avoid errors adding up over time, we round the cache to an integer value after modification
+        if (didUpdateEntryStartBeatCache)
+            entryStartBeatCache = round (entryStartBeatCache);
     }
 
 private:
     const BarSignaturesContentReader& contentReader;
+    mutable typename BarSignaturesContentReader::const_iterator entryCache;
+    mutable double entryStartBeatCache;
 };
 
 //==============================================================================
