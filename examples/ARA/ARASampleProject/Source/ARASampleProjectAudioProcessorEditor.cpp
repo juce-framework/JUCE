@@ -57,11 +57,9 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
     if (isARAEditorView())
     {
         getARAEditorView()->addListener (this);
-
         getARADocumentController()->getDocument<ARADocument>()->addListener (this);
 
         rulersView.reset (new RulersView (*this));
-
         rulersViewPort.setScrollBarsShown (false, false, false, false);
         rulersViewPort.setViewedComponent (rulersView.get(), false);
         addAndMakeVisible (rulersViewPort);
@@ -76,7 +74,6 @@ ARASampleProjectAudioProcessorEditor::~ARASampleProjectAudioProcessorEditor()
     if (isARAEditorView())
     {
         getARADocumentController()->getDocument<ARADocument>()->removeListener (this);
-
         getARAEditorView()->removeListener (this);
     }
 }
@@ -154,17 +151,17 @@ void ARASampleProjectAudioProcessorEditor::resized()
     zoomInButton.setEnabled (pixelsPerSecond < maxPixelsPerSecond);
 
     // update sizes and positions of all views
-    playbackRegionsView.setBounds (0, 0, roundToInt ((endTime - startTime) * pixelsPerSecond), kTrackHeight * regionSequenceViews.size());
-    pixelsPerSecond = playbackRegionsView.getWidth() / (endTime - startTime);       // prevent potential rounding issues
     playbackRegionsViewPort.setBounds (kTrackHeaderWidth, kRulersViewHeight, getWidth() - kTrackHeaderWidth, getHeight() - kRulersViewHeight - kStatusBarHeight);
+    playbackRegionsView.setBounds (0, 0, roundToInt ((endTime - startTime) * pixelsPerSecond), jmax (kTrackHeight * regionSequenceViews.size(), playbackRegionsViewPort.getHeight() - playbackRegionsViewPort.getScrollBarThickness()));
+    pixelsPerSecond = playbackRegionsView.getWidth() / (endTime - startTime);       // prevent potential rounding issues
 
-    trackHeadersView.setBounds (0, 0, kTrackHeaderWidth, playbackRegionsView.getHeight());
     trackHeadersViewPort.setBounds (0, kRulersViewHeight, kTrackHeaderWidth, playbackRegionsViewPort.getMaximumVisibleHeight());
+    trackHeadersView.setBounds (0, 0, kTrackHeaderWidth, playbackRegionsView.getHeight());
 
     if (rulersView != nullptr)
     {
-        rulersView->setBounds (0, 0, playbackRegionsView.getWidth(), kRulersViewHeight);
         rulersViewPort.setBounds (kTrackHeaderWidth, 0, playbackRegionsViewPort.getMaximumVisibleWidth(), kRulersViewHeight);
+        rulersView->setBounds (0, 0, playbackRegionsView.getWidth(), kRulersViewHeight);
     }
 
     int y = 0;
