@@ -439,9 +439,9 @@ void RulersView::paint (juce::Graphics& g)
             const int x = owner.getPlaybackRegionsViewsXForTime (tempoConverter.getTimeForQuarter (quarterPos));
             const auto barSignature = barSignaturesConverter.getBarSignatureForQuarter (quarterPos);
             const int lineWidth = (quarterPos == barSignature.position) ? heavyLineWidth : lightLineWidth;
-            auto rect = Rectangle<int> (x - lineWidth / 2, beatsRulerY, lineWidth, beatsRulerHeight);
             const int beatsSinceBarStart = roundToInt( barSignaturesConverter.getBeatDistanceFromBarStartForQuarter (quarterPos));
-            rects.addWithoutMerging ((beatsSinceBarStart == 0) ? rect : rect.withTrimmedTop (rect.getHeight() / 2));
+            const int lineHeight = (beatsSinceBarStart == 0) ? beatsRulerHeight : beatsRulerHeight / 2;
+            rects.addWithoutMerging (Rectangle<int> (x - lineWidth / 2, beatsRulerY + beatsRulerHeight - lineHeight, lineWidth, lineHeight));
         }
         g.drawText ("beats", bounds, Justification::centredRight);
         g.fillRectList (rects);
@@ -486,7 +486,7 @@ void RulersView::paint (juce::Graphics& g)
             // draw chord rect and name
             g.drawRect (chordRect);
             g.setFont (Font (12.0f));
-            g.drawText (chordName, chordRect, Justification::centred);
+            g.drawText (chordName, chordRect, Justification::centredLeft);
         }
 
         g.drawText ("chords", bounds, Justification::topRight);
