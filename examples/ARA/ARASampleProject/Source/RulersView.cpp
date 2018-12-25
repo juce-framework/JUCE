@@ -83,23 +83,21 @@ class TempoConverter
 {
 public:
     TempoConverter (const TempoContentReader& reader)
-    : contentReader (reader), leftEntryCache (reader.begin()), rightEntryCache (std::next (leftEntryCache)) {}
+    : contentReader (reader), leftEntryCache (contentReader.begin()), rightEntryCache (std::next (leftEntryCache)) {}
 
     ARA::ARAQuarterPosition getQuarterForTime (ARA::ARATimePosition timePosition) const
     {
         updateCacheByPosition (timePosition, findByTimePosition);
 
-        // linear interpolation of result
-        double quartersPerSecond = (rightEntryCache->quarterPosition - leftEntryCache->quarterPosition) / (rightEntryCache->timePosition - leftEntryCache->timePosition);
+        const auto quartersPerSecond = (rightEntryCache->quarterPosition - leftEntryCache->quarterPosition) / (rightEntryCache->timePosition - leftEntryCache->timePosition);
         return leftEntryCache->quarterPosition + (timePosition - leftEntryCache->timePosition) * quartersPerSecond;
     }
 
-    double getTimeForQuarter (ARA::ARAQuarterPosition quarterPosition) const
+    ARA::ARATimePosition getTimeForQuarter (ARA::ARAQuarterPosition quarterPosition) const
     {
         updateCacheByPosition (quarterPosition, findByQuarterPosition);
 
-        // linear interpolation of result
-        double secondsPerQuarter = (rightEntryCache->timePosition - leftEntryCache->timePosition) / (rightEntryCache->quarterPosition - leftEntryCache->quarterPosition);
+        const auto secondsPerQuarter = (rightEntryCache->timePosition - leftEntryCache->timePosition) / (rightEntryCache->quarterPosition - leftEntryCache->quarterPosition);
         return leftEntryCache->timePosition + (quarterPosition - leftEntryCache->quarterPosition) * secondsPerQuarter;
     }
 
@@ -114,7 +112,7 @@ private:
         return quarterPosition < tempoEntry.quarterPosition;
     };
 
-    // TODO JUCE_ARA maybe use a template argument instead of a function pointer for findByPosition?
+    // TODO JUCE_ARA maybe use a template argument instead of a function pointer for findByPosition? Seems to require C++17 template auto...
     template <typename T>
     void updateCacheByPosition (T position, bool (*findByPosition) (T position, const ARA::ARAContentTempoEntry& tempoEntry)) const
     {
@@ -122,16 +120,16 @@ private:
         {
             if (leftEntryCache != contentReader.begin())
             {
-                auto prevLeft = std::prev (leftEntryCache);
                 // test if we're hitting the entries pair right before the current entries pair
-                if (prevLeft == contentReader.begin() || ! findByPosition (position, *prevLeft))
+                auto prevLeft = std::prev (leftEntryCache);
+                if ((prevLeft == contentReader.begin()) || ! findByPosition (position, *prevLeft))
                 {
                     rightEntryCache = leftEntryCache;
                     leftEntryCache = prevLeft;
                 }
                 else
                 {
-                    // find the entry after position, then pick left and right entry based on position being before first
+                    // find the entry after position, then pick left and right entry based on position being before or after first entry
                     auto it = std::upper_bound (contentReader.begin(), prevLeft, position, findByPosition);
                     if (it == contentReader.begin())
                     {
