@@ -74,7 +74,6 @@ private:
         void paint (Graphics&) override;
     private:
         ARASampleProjectAudioProcessorEditor& editorComponent;
-        static constexpr int kPlayheadWidth = 3;
     };
 
     // simple utility class to partially sync scroll postions of our view ports

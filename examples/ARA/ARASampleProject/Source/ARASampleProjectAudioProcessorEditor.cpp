@@ -255,7 +255,8 @@ ARASampleProjectAudioProcessorEditor::PlayheadView::PlayheadView (ARASampleProje
 
 void ARASampleProjectAudioProcessorEditor::PlayheadView::paint (juce::Graphics &g)
 {
-    int playheadX = editorComponent.getPlaybackRegionsViewsXForTime (editorComponent.getPlayheadTimePosition());
+    static constexpr int kPlayheadWidth = 1;
+    const int playheadX = editorComponent.getPlaybackRegionsViewsXForTime (editorComponent.getPlayheadTimePosition());
     g.setColour (findColour (ScrollBar::ColourIds::thumbColourId));
     g.fillRect (playheadX - kPlayheadWidth / 2, 0, kPlayheadWidth, getHeight());
 }
