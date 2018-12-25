@@ -375,20 +375,12 @@ void RulersView::paint (juce::Graphics& g)
             // get the chord name
             String chordName = ARA::getNameForChord (*itChord);
 
-            // use the chord name as a hash to pick a random color
-            auto& random = Random::getSystemRandom();
-            random.setSeed (chordName.hash() + itChord->bass);
-            Colour chordColour ((uint8) random.nextInt (256), (uint8) random.nextInt (256), (uint8) random.nextInt (256));
-
             // draw chord rect and name
-            g.setColour (chordColour);
-            g.fillRect (chordRect);
-            g.setColour (chordColour.contrasting (1.0f));
+            g.drawRect (chordRect);
             g.setFont (Font (12.0f));
             g.drawText (chordName, chordRect, Justification::centred);
         }
 
-        g.setColour (Colours::lightslategrey);
         g.drawText ("chords", bounds, Justification::topRight);
     }
 
