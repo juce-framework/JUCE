@@ -436,16 +436,12 @@ void RulersView::paint (juce::Graphics& g)
         for (int beat = roundToInt (ceil (beatStart)); beat <= endBeat; ++beat)
         {
             const auto quarterPos = barSignaturesConverter.getQuarterForBeat (beat);
-            const auto timePos = tempoConverter.getTimeForQuarter (quarterPos);
-
-            const auto barSignature = *barSignaturesConverter.getBarSignatureIteratorForQuarter (quarterPos);
-            const int barSigBeatStart = roundToInt (barSignaturesConverter.getBeatForQuarter (barSignature.position));
-            const int beatsSinceBarSigStart = beat - barSigBeatStart;
-            const bool isDownBeat = ((beatsSinceBarSigStart % barSignature.numerator) == 0);
-
-            const int lineWidth = isDownBeat ? heavyLineWidth : lightLineWidth;
-            const int x = owner.getPlaybackRegionsViewsXForTime (timePos);
-            rects.addWithoutMerging (Rectangle<int> (x, beatsRulerY, lineWidth, beatsRulerHeight));
+            const int x = owner.getPlaybackRegionsViewsXForTime (tempoConverter.getTimeForQuarter (quarterPos));
+            const auto barSignature = barSignaturesConverter.getBarSignatureForQuarter (quarterPos);
+            const int lineWidth = (quarterPos == barSignature.position) ? heavyLineWidth : lightLineWidth;
+            auto rect = Rectangle<int> (x - lineWidth / 2, beatsRulerY, lineWidth, beatsRulerHeight);
+            const int beatsSinceBarStart = roundToInt( barSignaturesConverter.getBeatDistanceFromBarStartForQuarter (quarterPos));
+            rects.addWithoutMerging ((beatsSinceBarStart == 0) ? rect : rect.withTrimmedTop (rect.getHeight() / 2));
         }
         g.drawText ("beats", bounds, Justification::centredRight);
         g.fillRectList (rects);
