@@ -580,7 +580,9 @@ void XmlElement::setAttribute (const Identifier& attributeName, const int number
 
 void XmlElement::setAttribute (const Identifier& attributeName, const double number)
 {
-    setAttribute (attributeName, String (number, 20));
+    String doubleString (number, 20);
+    setAttribute (attributeName,
+                  doubleString.substring (0, (int) CharacterFunctions::findLengthWithoutTrailingZeros (doubleString.getCharPointer())));
 }
 
 void XmlElement::removeAttribute (const Identifier& attributeName) noexcept
@@ -922,5 +924,31 @@ void XmlElement::deleteAllTextElements() noexcept
         child = next;
     }
 }
+
+//==============================================================================
+#if JUCE_UNIT_TESTS
+
+class XmlElementTests  : public UnitTest
+{
+public:
+    XmlElementTests() : UnitTest ("XmlElement", "XML") {}
+
+    void runTest() override
+    {
+        {
+            beginTest ("Trailing zeros");
+
+            auto element = std::make_unique<XmlElement> ("test");
+            Identifier d ("d");
+
+            element->setAttribute (d, 3.0);
+            expectEquals (element->getStringAttribute (d), String ("3.0"));
+        }
+    }
+};
+
+static XmlElementTests xmlElementTests;
+
+#endif
 
 } // namespace juce

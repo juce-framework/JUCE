@@ -135,3 +135,13 @@ private:
 };
 
 } // namespace juce
+
+#if ! DOXYGEN
+namespace std
+{
+    template <> struct hash<juce::Uuid>
+    {
+        size_t operator() (const juce::Uuid& u) const noexcept   { return (size_t) u.hash(); }
+    };
+}
+#endif

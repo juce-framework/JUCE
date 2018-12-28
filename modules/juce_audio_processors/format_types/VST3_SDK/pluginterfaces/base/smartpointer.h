@@ -9,7 +9,7 @@
 //-----------------------------------------------------------------------------
 // This file is part of a Steinberg SDK. It is subject to the license terms
 // in the LICENSE file found in the top-level directory of this distribution
-// and at www.steinberg.net/sdklicenses.
+// and at www.steinberg.net/sdklicenses. 
 // No part of the SDK, including this file, may be copied, modified, propagated,
 // or distributed except according to the terms contained in the LICENSE file.
 //-----------------------------------------------------------------------------
@@ -76,7 +76,7 @@ public:
 
 #if SMTG_CPP11_STDLIBSUPPORT
 	inline IPtr (IPtr<I>&& movePtr) SMTG_NOEXCEPT : ptr (movePtr.take ()) { }
-
+	
 	template <typename T>
 	inline IPtr (IPtr<T>&& movePtr) SMTG_NOEXCEPT : ptr (movePtr.take ()) {  }
 
@@ -89,19 +89,22 @@ public:
 		return *this;
 	}
 
-	inline void reset (I* obj = nullptr)
+	inline void reset (I* obj = nullptr) 
 	{
 		if (ptr)
 			ptr->release();
 		ptr = obj;
 	}
 
-	I* take () SMTG_NOEXCEPT
+	I* take () SMTG_NOEXCEPT 
 	{
-		I* out = ptr;
-		ptr = nullptr;
+		I* out = ptr; 
+		ptr = nullptr; 
 		return out;
 	}
+
+	template <typename T>
+	static IPtr<T> adopt (T* obj) SMTG_NOEXCEPT { return IPtr<T> (obj, false); }
 
 #endif
 //------------------------------------------------------------------------
@@ -135,8 +138,11 @@ inline IPtr<I>::IPtr () : ptr (0)
 template <class I>
 inline IPtr<I>::~IPtr ()
 {
-	if (ptr)
+	if (ptr) 
+	{
 		ptr->release ();
+		ptr = nullptr;  //TODO_CORE: how much does this cost? is this something hiding for us?
+	}
 }
 
 //------------------------------------------------------------------------
@@ -250,7 +256,7 @@ namespace Detail {
 struct Adopt;
 } // Detail
 
-/** Strong typedef for shared reference counted objects.
+/** Strong typedef for shared reference counted objects. 
   *	Use SKI::adopt to unwrap the provided object.
   * @tparam T Referenced counted type.
   */
@@ -261,8 +267,8 @@ class Shared
 	T* obj = nullptr;
 };
 
-/** Strong typedef for transferring the ownership of reference counted objects.
-  *	Use SKI::adopt to unwrap the provided object.
+/** Strong typedef for transferring the ownership of reference counted objects. 
+  *	Use SKI::adopt to unwrap the provided object. 
   * After calling adopt the reference in this object is null.
   * @tparam T Referenced counted type.
   */
@@ -273,8 +279,8 @@ class Owned
 	T* obj = nullptr;
 };
 
-/** Strong typedef for using reference counted objects.
-  *	Use SKI::adopt to unwrap the provided object.
+/** Strong typedef for using reference counted objects. 
+  *	Use SKI::adopt to unwrap the provided object. 
   * After calling adopt the reference in this object is null.
   * @tparam T Referenced counted type.
   */
@@ -284,21 +290,21 @@ class Used
 	friend struct Detail::Adopt;
 	T* obj = nullptr;
 };
-
+	
 namespace Detail {
 
-struct Adopt
+struct Adopt 
 {
 	template <typename T>
-	static IPtr<T> adopt (Shared<T>& ref)
-	{
+	static IPtr<T> adopt (Shared<T>& ref) 
+	{ 
 		using Steinberg::shared;
-		return shared (ref.obj);
+		return shared (ref.obj); 
 	}
 
 	template <typename T>
-	static IPtr<T> adopt (Owned<T>& ref)
-	{
+	static IPtr<T> adopt (Owned<T>& ref) 
+	{ 
 		using Steinberg::owned;
 		IPtr<T> out = owned (ref.obj);
 		ref.obj = nullptr;
@@ -312,17 +318,17 @@ struct Adopt
 	}
 
 	template <template <typename> class OwnerType, typename T>
-	static OwnerType<T> toOwnerType (T* obj)
-	{
+	static OwnerType<T> toOwnerType (T* obj) 
+	{ 
 		OwnerType<T> out;
 		out.obj = obj;
-		return out;
+		return out; 
 	}
 };
 
 } // Detail
 
-/** Common function to adopt referenced counted object.
+/** Common function to adopt referenced counted object. 
   *	@tparam T			Referenced counted type.
   * @param ref			The reference to be adopted in a smart pointer.
   */
@@ -332,7 +338,7 @@ IPtr<T> adopt (Shared<T>& ref) { return Detail::Adopt::adopt (ref); }
 template <typename T>
 IPtr<T> adopt (Shared<T>&& ref) { return Detail::Adopt::adopt (ref); }
 
-/** Common function to adopt referenced counted object.
+/** Common function to adopt referenced counted object. 
   *	@tparam T			Referenced counted type.
   * @param ref			The reference to be adopted in a smart pointer.
   */
@@ -342,7 +348,7 @@ IPtr<T> adopt (Owned<T>& ref) { return Detail::Adopt::adopt (ref); }
 template <typename T>
 IPtr<T> adopt (Owned<T>&& ref) { return Detail::Adopt::adopt (ref); }
 
-/** Common function to adopt referenced counted object.
+/** Common function to adopt referenced counted object. 
   *	@tparam T			Referenced counted type.
   * @param ref			The reference to be adopted in a smart pointer.
   */

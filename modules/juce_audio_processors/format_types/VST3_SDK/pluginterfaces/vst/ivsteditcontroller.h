@@ -9,7 +9,7 @@
 //-----------------------------------------------------------------------------
 // This file is part of a Steinberg SDK. It is subject to the license terms
 // in the LICENSE file found in the top-level directory of this distribution
-// and at www.steinberg.net/sdklicenses.
+// and at www.steinberg.net/sdklicenses. 
 // No part of the SDK, including this file, may be copied, modified, propagated,
 // or distributed except according to the terms contained in the LICENSE file.
 //-----------------------------------------------------------------------------
@@ -47,7 +47,7 @@ struct ParameterInfo
 	String128 title;		///< parameter title (e.g. "Volume")
 	String128 shortTitle;	///< parameter shortTitle (e.g. "Vol")
 	String128 units;		///< parameter unit (e.g. "dB")
-	int32 stepCount;		///< number of discrete steps (0: continuous, 1: toggle, discrete value otherwise
+	int32 stepCount;		///< number of discrete steps (0: continuous, 1: toggle, discrete value otherwise 
 							///< (corresponding to max - min, for example: 127 for a min = 0 and a max = 127) - see \ref vst3parameterIntro)
 	ParamValue defaultNormalizedValue;	///< default normalized value [0,1] (in case of discrete value: defaultNormalizedValue = defDiscreteValue / stepCount)
 	UnitID unitId;			///< id of unit this parameter belongs to (see \ref vst3UnitsIntro)
@@ -55,12 +55,13 @@ struct ParameterInfo
 	int32 flags;			///< ParameterFlags (see below)
 	enum ParameterFlags
 	{
+		kNoFlags		 = 0,		///< no flags wanted
 		kCanAutomate	 = 1 << 0,	///< parameter can be automated
 		kIsReadOnly		 = 1 << 1,	///< parameter cannot be changed from outside (implies that kCanAutomate is false)
 		kIsWrapAround	 = 1 << 2,	///< attempts to set the parameter value out of the limits will result in a wrap around [SDK 3.0.2]
 		kIsList			 = 1 << 3,	///< parameter should be displayed as list in generic editor or automation editing [SDK 3.1.0]
 
-		kIsProgramChange = 1 << 15,	///< parameter is a program change (unitId gives info about associated unit
+		kIsProgramChange = 1 << 15,	///< parameter is a program change (unitId gives info about associated unit 
 									///< - see \ref vst3UnitPrograms)
 		kIsBypass		 = 1 << 16	///< special bypass parameter (only one allowed): Plug-in can handle bypass
 									///< (highly recommended to export a bypass parameter for effect Plug-in)
@@ -82,12 +83,12 @@ enum RestartFlags
 {
 	kReloadComponent			= 1 << 0,	///< The Component should be reloaded             [SDK 3.0.0]
 	kIoChanged					= 1 << 1,	///< Input and/or Output Bus configuration has changed        [SDK 3.0.0]
-	kParamValuesChanged			= 1 << 2,	///< Multiple parameter values have changed
+	kParamValuesChanged			= 1 << 2,	///< Multiple parameter values have changed 
 											///< (as result of a program change for example)  [SDK 3.0.0]
 	kLatencyChanged				= 1 << 3,	///< Latency has changed (IAudioProcessor.getLatencySamples)  [SDK 3.0.0]
 	kParamTitlesChanged			= 1 << 4,	///< Parameter titles or default values or flags have changed [SDK 3.0.0]
 	kMidiCCAssignmentChanged	= 1 << 5,	///< MIDI Controller Assignments have changed     [SDK 3.0.1]
-	kNoteExpressionChanged		= 1 << 6,	///< Note Expression has changed (info, count...) [SDK 3.5.0]
+	kNoteExpressionChanged		= 1 << 6,	///< Note Expression has changed (info, count, PhysicalUIMapping, ...) [SDK 3.5.0]
 	kIoTitlesChanged			= 1 << 7,	///< Input and/or Output bus titles have changed  [SDK 3.5.0]
 	kPrefetchableSupportChanged = 1 << 8,	///< Prefetch support has changed (\see IPrefetchableSupport) [SDK 3.6.1]
 	kRoutingInfoChanged			= 1 << 9	///< RoutingInfo has changed (\see IComponent)    [SDK 3.6.6]
@@ -98,6 +99,7 @@ enum RestartFlags
 \ingroup vstIHost vst300
 - [host imp]
 - [released: 3.0.0]
+- [mandatory]
 
 Allow transfer of parameter editing to component (processor) via host and support automation.
 Cause the host to react on configuration changes (restartComponent)
@@ -133,6 +135,7 @@ DECLARE_CLASS_IID (IComponentHandler, 0x93A0BEA3, 0x0BD045DB, 0x8E890B0C, 0xC1E4
 - [host imp]
 - [extends IComponentHandler]
 - [released: 3.1.0]
+- [optional]
 
 One part handles:
 - Setting dirty state of Plug-in
@@ -216,9 +219,10 @@ DECLARE_CLASS_IID (IComponentHandler2, 0xF040B4B3, 0xA36045EC, 0xABCDC045, 0xB4D
 - [host imp]
 - [extends IComponentHandler]
 - [released: 3.6.8]
+- [optional]
 
-Allows the Plug-in to request the host to activate or deactivate a specific bus,
-if the host accepts it will call later on IComponent::activateBus (see \ref IComponent::activateBus).
+Allows the Plug-in to request the host to activate or deactivate a specific bus, 
+if the host accepts it will call later on IComponent::activateBus (see \ref IComponent::activateBus). 
 Useful especially for Instrument with more than 1 outputs, where the user could request
 from the Plug-in UI a given output bus activation.
 
@@ -243,6 +247,7 @@ DECLARE_CLASS_IID (IComponentHandlerBusActivation, 0x067D02C1, 0x5B4E274D, 0xA92
 \ingroup vstIPlug vst300
 - [plug imp]
 - [released: 3.0.0]
+- [mandatory]
 
 The Controller part of an effect or instrument with parameter handling (export, definition, conversion...).
 \see IComponent::getControllerClassId, IMidiMapping */
@@ -317,6 +322,7 @@ typedef int32 KnobMode;		///< Knob Mode
 - [plug imp]
 - [extends IEditController]
 - [released: 3.1.0]
+- [optional]
 
 Extension to inform the Plug-in about the host Knob Mode,
 and to open the Plug-in about box or help documentation.
@@ -330,12 +336,12 @@ public:
 	virtual tresult PLUGIN_API setKnobMode (KnobMode mode) = 0;
 
 	/** Host could ask to open the Plug-in help (could be: opening a PDF document or link to a web page).
-	    The host could call it with onlyCheck set to true for testing support of open Help.
+	    The host could call it with onlyCheck set to true for testing support of open Help. 
 		Return kResultFalse means not supported function. */
 	virtual tresult PLUGIN_API openHelp (TBool onlyCheck) = 0;
 
 	/** Host could ask to open the Plug-in about box.
-	    The host could call it with onlyCheck set to true for testing support of open AboutBox.
+	    The host could call it with onlyCheck set to true for testing support of open AboutBox. 
 		Return kResultFalse means not supported function. */
 	virtual tresult PLUGIN_API openAboutBox (TBool onlyCheck) = 0;
 
@@ -351,6 +357,7 @@ DECLARE_CLASS_IID (IEditController2, 0x7F4EFE59, 0xF3204967, 0xAC27A3AE, 0xAFB63
 - [plug imp]
 - [extends IEditController]
 - [released: 3.0.1]
+- [optional]
 
 MIDI controllers are not transmitted directly to a VST component. MIDI as hardware protocol has
 restrictions that can be avoided in software. Controller data in particular come along with unclear

@@ -372,10 +372,17 @@ public:
 private:
     //==============================================================================
     template <typename T>
-    using TriviallyCopyableVoid = typename std::enable_if<std::is_trivially_copyable<T>::value, void>::type;
+   #if defined(__GNUC__) && __GNUC__ < 5 && ! defined(__clang__)
+    using IsTriviallyCopyable = std::is_scalar<T>;
+   #else
+    using IsTriviallyCopyable = std::is_trivially_copyable<T>;
+   #endif
 
     template <typename T>
-    using NonTriviallyCopyableVoid = typename std::enable_if<! std::is_trivially_copyable<T>::value, void>::type;
+    using TriviallyCopyableVoid = typename std::enable_if<IsTriviallyCopyable<T>::value, void>::type;
+
+    template <typename T>
+    using NonTriviallyCopyableVoid = typename std::enable_if<! IsTriviallyCopyable<T>::value, void>::type;
 
     //==============================================================================
     template <typename T = ElementType>

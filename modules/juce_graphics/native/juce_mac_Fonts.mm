@@ -503,7 +503,8 @@ public:
         if (fontRef != nullptr)
         {
            #if JUCE_MAC && defined (MAC_OS_X_VERSION_10_8) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_8
-            canBeUsedForLayout = CTFontManagerRegisterGraphicsFont (fontRef, nullptr);
+            if (SystemStats::getOperatingSystemType() >= SystemStats::OperatingSystemType::MacOSX_10_11)
+                canBeUsedForLayout = CTFontManagerRegisterGraphicsFont (fontRef, nullptr);
            #endif
 
             ctFontRef = CTFontCreateWithGraphicsFont (fontRef, referenceFontSize, nullptr, nullptr);

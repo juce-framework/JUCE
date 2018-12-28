@@ -6,6 +6,26 @@ Develop
 
 Change
 -----
+Allow renaming and deletion of open file handles on Windows using the 
+FILE_SHARE_DELETE flag.
+
+Possible Issues
+---------------
+Previous code that relied on open files not being able to be renamed or
+deleted on Windows may fail.
+
+Workaround
+----------
+No workaround.
+
+Rationale
+---------
+This unifies the behaviour across OSes as POSIX systems already allow
+this.
+
+
+Change
+-----
 Multiple changes to low-level, non-public JNI and Android APIs.
 
 Possible Issues

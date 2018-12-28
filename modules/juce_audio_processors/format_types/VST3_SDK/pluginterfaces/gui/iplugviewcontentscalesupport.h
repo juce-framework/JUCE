@@ -9,7 +9,7 @@
 //-----------------------------------------------------------------------------
 // This file is part of a Steinberg SDK. It is subject to the license terms
 // in the LICENSE file found in the top-level directory of this distribution
-// and at www.steinberg.net/sdklicenses.
+// and at www.steinberg.net/sdklicenses. 
 // No part of the SDK, including this file, may be copied, modified, propagated,
 // or distributed except according to the terms contained in the LICENSE file.
 //-----------------------------------------------------------------------------
@@ -41,7 +41,9 @@ The host could call setContentScaleFactor in a different context, for example: s
 plug-in editor for better readability.
 When a plug-in handles this (by returning kResultTrue), it needs to scale the width and height of
 its view by the scale factor and inform the host via a IPlugFrame::resizeView(), the host will then
-call IPlugView::onSize()
+call IPlugView::onSize().
+
+Note that the host is allowed to call setContentScaleFactor() at any time the IPlugView is alive.
  */
 class IPlugViewContentScaleSupport : public FUnknown
 {

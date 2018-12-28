@@ -572,7 +572,7 @@ void ComponentTypeHandler::fillInResizeCode (GeneratedCode& code, Component* com
     r << memberVariableName << "->setBounds ("
       << x << ", " << y << ", " << w << ", " << h << ");\n";
 
-    if (pos.rect.isPositionAbsolute())
+    if (pos.rect.isPositionAbsolute() && ! code.document->getComponentLayout()->isComponentPositionRelative (component))
         code.constructorCode += r + "\n";
     else
         code.getCallbackCode (String(), "void", "resized()", false) += r;

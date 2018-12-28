@@ -395,6 +395,8 @@ void AudioProcessorValueTreeState::updateParameterConnectionsToChildTrees()
             state.appendChild (adapter.tree, nullptr);
         }
     }
+
+    flushParameterValuesToValueTree();
 }
 
 void AudioProcessorValueTreeState::valueTreePropertyChanged (ValueTree& tree, const Identifier&)
@@ -797,10 +799,10 @@ static struct ParameterAdapterTests final   : public UnitTest
                 expectEquals (adapter.getTextForDenormalisedValue (value), expected);
             };
 
-            test ({ -100, 100 }, 0, "0.0");
-            test ({ -2.5, 12.5 }, 10, "10.0");
-            test ({ -20, -10 }, -15, "-15.0");
-            test ({ 0, 7.5 }, 2.5, "2.5");
+            test ({ -100, 100 }, 0, "0.0000000");
+            test ({ -2.5, 12.5 }, 10, "10.0000000");
+            test ({ -20, -10 }, -15, "-15.0000000");
+            test ({ 0, 7.5 }, 2.5, "2.5000000");
         }
 
         beginTest ("Text can be converted to floats");
@@ -1110,12 +1112,15 @@ public:
         {
             TestAudioProcessor proc;
             const auto key = "id";
+            const auto initialValue = 0.2f;
             auto param = proc.state.createAndAddParameter (std::make_unique<Parameter> (key, String(), String(), NormalisableRange<float>(),
-                                                                                        0.0f, nullptr, nullptr));
+                                                                                        initialValue, nullptr, nullptr));
             proc.state.state = ValueTree { "state" };
 
-            const auto newValue = 0.75f;
             auto value = proc.state.getParameterAsValue (key);
+            expectEquals (float (value.getValue()), initialValue);
+
+            const auto newValue = 0.75f;
             value = newValue;
 
             expectEquals (param->getValue(), newValue);

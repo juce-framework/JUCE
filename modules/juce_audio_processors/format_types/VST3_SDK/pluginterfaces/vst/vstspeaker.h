@@ -3,13 +3,13 @@
 //
 // Category    : Interfaces
 // Filename    : pluginterfaces/vst/vstspeaker.h
-// Created by  : Steinberg, 01/2019
+// Created by  : Steinberg, 01/2018
 // Description : common defines
 //
 //-----------------------------------------------------------------------------
 // This file is part of a Steinberg SDK. It is subject to the license terms
 // in the LICENSE file found in the top-level directory of this distribution
-// and at www.steinberg.net/sdklicenses.
+// and at www.steinberg.net/sdklicenses. 
 // No part of the SDK, including this file, may be copied, modified, propagated,
 // or distributed except according to the terms contained in the LICENSE file.
 //-----------------------------------------------------------------------------
@@ -183,14 +183,14 @@ const SpeakerArrangement kAmbi3rdOrderACN = kAmbi2cdOrderACN | kSpeakerACN9 | kS
 /** L R Ls Rs Tfl Tfr Trl Trr */
 const SpeakerArrangement k80Cube		   = kSpeakerL | kSpeakerR | kSpeakerLs | kSpeakerRs  | kSpeakerTfl| kSpeakerTfr| kSpeakerTrl | kSpeakerTrr;
 /** L R C Lfe Ls Rs Cs Tc */
-const SpeakerArrangement k71CineTopCenter  = kSpeakerL | kSpeakerR | kSpeakerC  | kSpeakerLfe | kSpeakerLs | kSpeakerRs | kSpeakerCs  | kSpeakerTc;
+const SpeakerArrangement k71CineTopCenter  = kSpeakerL | kSpeakerR | kSpeakerC  | kSpeakerLfe | kSpeakerLs | kSpeakerRs | kSpeakerCs  | kSpeakerTc; 
 /** L R C Lfe Ls Rs Cs Tfc */
-const SpeakerArrangement k71CineCenterHigh = kSpeakerL | kSpeakerR | kSpeakerC  | kSpeakerLfe | kSpeakerLs | kSpeakerRs | kSpeakerCs  | kSpeakerTfc;
+const SpeakerArrangement k71CineCenterHigh = kSpeakerL | kSpeakerR | kSpeakerC  | kSpeakerLfe | kSpeakerLs | kSpeakerRs | kSpeakerCs  | kSpeakerTfc; 
 /** L R C Lfe Ls Rs Tfl Tfr */
-const SpeakerArrangement k71CineFrontHigh  = kSpeakerL | kSpeakerR | kSpeakerC  | kSpeakerLfe | kSpeakerLs | kSpeakerRs | kSpeakerTfl | kSpeakerTfr;
+const SpeakerArrangement k71CineFrontHigh  = kSpeakerL | kSpeakerR | kSpeakerC  | kSpeakerLfe | kSpeakerLs | kSpeakerRs | kSpeakerTfl | kSpeakerTfr; 
 const SpeakerArrangement k71MPEG3D		   = k71CineFrontHigh;
 /** L R C Lfe Ls Rs Tsl Tsr */
-const SpeakerArrangement k71CineSideHigh   = kSpeakerL | kSpeakerR | kSpeakerC  | kSpeakerLfe | kSpeakerLs | kSpeakerRs | kSpeakerTsl | kSpeakerTsr;
+const SpeakerArrangement k71CineSideHigh   = kSpeakerL | kSpeakerR | kSpeakerC  | kSpeakerLfe | kSpeakerLs | kSpeakerRs | kSpeakerTsl | kSpeakerTsr; 
 
 /** L R Lfe Ls Rs Tfl Tfc Tfr Bfc */
 const SpeakerArrangement k81MPEG3D		 = kSpeakerL | kSpeakerR | kSpeakerLfe | kSpeakerLs | kSpeakerRs |
@@ -211,10 +211,10 @@ const SpeakerArrangement k71_2			 = kSpeakerL  | kSpeakerR | kSpeakerC | kSpeake
 const SpeakerArrangement k91Atmos		 = k71_2;
 
 /** L R C Ls Rs Tc Tfl Tfr Trl Trr */
-const SpeakerArrangement k100			 = kSpeakerL  | kSpeakerR | kSpeakerC | kSpeakerLs  | kSpeakerRs |
+const SpeakerArrangement k100			 = kSpeakerL  | kSpeakerR | kSpeakerC | kSpeakerLs  | kSpeakerRs | 
 										   kSpeakerTc | kSpeakerTfl | kSpeakerTfr | kSpeakerTrl | kSpeakerTrr;
 /** L R C Lfe Ls Rs Tc Tfl Tfr Trl Trr */
-const SpeakerArrangement k101			 = kSpeakerL  | kSpeakerR | kSpeakerC | kSpeakerLfe | kSpeakerLs | kSpeakerRs  |
+const SpeakerArrangement k101			 = kSpeakerL  | kSpeakerR | kSpeakerC | kSpeakerLfe | kSpeakerLs | kSpeakerRs  | 
 										   kSpeakerTc | kSpeakerTfl | kSpeakerTfr | kSpeakerTrl | kSpeakerTrr;
 const SpeakerArrangement k101MPEG3D		 = k101;
 
@@ -226,7 +226,7 @@ const SpeakerArrangement k102			 = kSpeakerL  | kSpeakerR | kSpeakerC  | kSpeake
 const SpeakerArrangement k110			 = kSpeakerL  | kSpeakerR | kSpeakerC | kSpeakerLs  | kSpeakerRs |
 										   kSpeakerTc | kSpeakerTfl | kSpeakerTfc | kSpeakerTfr | kSpeakerTrl | kSpeakerTrr;
 /** L R C Lfe Ls Rs Tc Tfl Tfc Tfr Trl Trr */
-const SpeakerArrangement k111			 = kSpeakerL  | kSpeakerR | kSpeakerC | kSpeakerLfe | kSpeakerLs | kSpeakerRs |
+const SpeakerArrangement k111			 = kSpeakerL  | kSpeakerR | kSpeakerC | kSpeakerLfe | kSpeakerLs | kSpeakerRs | 
 										   kSpeakerTc | kSpeakerTfl | kSpeakerTfc | kSpeakerTfr | kSpeakerTrl | kSpeakerTrr;
 
 /** L R C Ls Rs Sl Sr Tfl Tfr Trl Trr */
@@ -254,8 +254,8 @@ const SpeakerArrangement k140			 = kSpeakerL | kSpeakerR | kSpeakerLs | kSpeaker
 										   kSpeakerBfl | kSpeakerBfr | kSpeakerBrl | kSpeakerBrr;
 
 /** L R C Lfe Ls Rs Lc Rc Cs Sl Sr Tc Tfl Tfc Tfr Trl Trc Trr Lfe2 Tsl Tsr Bfl Bfc Bfr */
-const SpeakerArrangement k222			 = kSpeakerL  | kSpeakerR | kSpeakerC  | kSpeakerLfe | kSpeakerLs | kSpeakerRs | kSpeakerLc | kSpeakerRc | kSpeakerCs | kSpeakerSl | kSpeakerSr |
-										   kSpeakerTc | kSpeakerTfl | kSpeakerTfc | kSpeakerTfr | kSpeakerTrl | kSpeakerTrc | kSpeakerTrr | kSpeakerLfe2 | kSpeakerTsl | kSpeakerTsr |
+const SpeakerArrangement k222			 = kSpeakerL  | kSpeakerR | kSpeakerC  | kSpeakerLfe | kSpeakerLs | kSpeakerRs | kSpeakerLc | kSpeakerRc | kSpeakerCs | kSpeakerSl | kSpeakerSr | 
+										   kSpeakerTc | kSpeakerTfl | kSpeakerTfc | kSpeakerTfr | kSpeakerTrl | kSpeakerTrc | kSpeakerTrr | kSpeakerLfe2 | kSpeakerTsl | kSpeakerTsr | 
 										   kSpeakerBfl| kSpeakerBfc | kSpeakerBfr;
 
 
@@ -305,9 +305,9 @@ const CString kString80Cube		= "8.0 Cube";
 const CString kString81Cine		= "8.1 Cine";
 const CString kString81Music	= "8.1 Music";
 const CString kString102		= "10.2 Experimental";
-const CString kString122		= "12.2";
-const CString kString50_4		= "5.0.4";
-const CString kString51_4		= "5.1.4";
+const CString kString122 = "12.2";
+const CString kString50_4 = "5.0.4";
+const CString kString51_4 = "5.1.4";
 const CString kString91Atmos	= "9.1 Dolby Atmos";
 const CString kString100		= "10.0 Auro-3D";
 const CString kString101		= "10.1 Auro-3D";
@@ -320,9 +320,9 @@ const CString kString70_4		= "7.0.4";
 const CString kString71_4		= "7.1.4";
 const CString kString140		= "14.0";
 const CString kString222		= "22.2";
-const CString kStringAmbi1stOrder = "Ambi 1st-Order";
-const CString kStringAmbi2cdOrder = "Ambi 2cd-Order";
-const CString kStringAmbi3rdOrder = "Ambi 3rd-Order";
+const CString kStringAmbi1stOrder = "1st Order Ambisonics";
+const CString kStringAmbi2cdOrder = "2nd Order Ambisonics";
+const CString kStringAmbi3rdOrder = "3rd Order Ambisonics";
 
 /*@}*/
 
@@ -370,7 +370,7 @@ const CString kString71CineSideHighS	= "L R C LFE Ls Rs Tsl Tsl";
 const CString kString71CineFullRearS	= "L R C LFE Ls Rs Lcs Rcs";
 const CString kString71ProximityS		= "L R C LFE Ls Rs Pl Pr";
 const CString kString50_4S		= "L R C Ls Rs Tfl Tfr Trl Trr";
-const CString kString51_4S		= "L R C LFE Ls Rs Tfl Tfr Trl Trr";
+const CString kString51_4S		= "L R C LFE Ls Rs Tfl Tfr Trl Trr"; 
 const CString kString91AtmosS	= "L R C LFE Ls Rs Sl Sr Tsl Tsr";
 const CString kString100S		= "L R C Ls Rs Tc Tfl Tfr Trl Trr";
 const CString kString101S		= "L R C LFE Ls Rs Tc Tfl Tfr Trl Trr";
@@ -408,7 +408,8 @@ inline int32 getChannelCount (SpeakerArrangement arr)
 }
 
 //------------------------------------------------------------------------
-/** Returns the index of a given speaker in a speaker arrangement (-1 if speaker is not part of the arrangement). */
+/** Returns the index of a given speaker in a speaker arrangement (-1 if speaker is not part of the
+ * arrangement). */
 inline int32 getSpeakerIndex (Speaker speaker, SpeakerArrangement arrangement)
 {
 	// check if speaker is present in arrangement
@@ -442,14 +443,15 @@ inline Speaker getSpeaker (const SpeakerArrangement& arr, int32 index)
 		pos++;
 		if (index2 == index)
 			return (Speaker)1 << pos;
-
+		
 		arrTmp = arrTmp >> 1;
 	}
 	return 0;
 }
 
 //------------------------------------------------------------------------
-/** Returns true if arrSubSet is a subset speaker of arr (means each speaker of arrSubSet is included in arr). */
+/** Returns true if arrSubSet is a subset speaker of arr (means each speaker of arrSubSet is
+ * included in arr). */
 inline bool isSubsetOf (const SpeakerArrangement& arrSubSet, const SpeakerArrangement& arr)
 {
 	return (arrSubSet == (arrSubSet & arr));
@@ -468,8 +470,19 @@ inline bool isAuro (const SpeakerArrangement& arr)
 }
 
 //------------------------------------------------------------------------
+/** Returns true if arrangement is a Auro configuration. */
+inline bool isAmbisonics (const SpeakerArrangement& arr)
+{
+	if (arr == kAmbi1stOrderACN || arr == kAmbi2cdOrderACN || arr == kAmbi3rdOrderACN)
+	{
+		return true;
+	}
+	return false;
+}
+
+//------------------------------------------------------------------------
 /** Returns the speaker arrangement associated to a string representation.
-	Returns kEmpty if no associated arrangement is known.
+    Returns kEmpty if no associated arrangement is known.
 */
 inline SpeakerArrangement getSpeakerArrangementFromString (CString arrStr)
 {
@@ -652,7 +665,7 @@ inline CString getSpeakerArrangementString (SpeakerArrangement arr, bool withSpe
 		case k51_4:				return withSpeakersName ? kString51_4S		: kString51_4;
 		case k70_4:				return withSpeakersName ? kStringk70_4S		: kString70_4;
 		case k71_4:				return withSpeakersName ? kStringk71_4S		: kString71_4;
-
+			
 		case k130:				return withSpeakersName ? kString130S		: kString130;
 		case k131:				return withSpeakersName ? kString131S		: kString131;
 		case k140:				return withSpeakersName ? kString140S		: kString140;
@@ -672,7 +685,7 @@ inline CString getSpeakerArrangementString (SpeakerArrangement arr, bool withSpe
 
 //------------------------------------------------------------------------
 /** Returns a CString representation of a given speaker in a given arrangement
-*/
+ */
 inline CString getSpeakerShortName (const SpeakerArrangement& arr, int32 index)
 {
 	SpeakerArrangement arrTmp = arr;

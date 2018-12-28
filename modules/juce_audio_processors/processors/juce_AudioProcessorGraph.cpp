@@ -1245,7 +1245,11 @@ void AudioProcessorGraph::prepareToPlay (double sampleRate, int estimatedSamples
 {
     setRateAndBufferSizeDetails (sampleRate, estimatedSamplesPerBlock);
     clearRenderingSequence();
-    triggerAsyncUpdate();
+
+    if (isNonRealtime() && MessageManager::getInstance()->isThisTheMessageThread())
+        handleAsyncUpdate();
+    else
+        triggerAsyncUpdate();
 }
 
 bool AudioProcessorGraph::supportsDoublePrecisionProcessing() const

@@ -40,4 +40,3 @@ public class CameraDeviceStateCallback extends CameraDevice.StateCallback
 
     private long host;
 }
-
