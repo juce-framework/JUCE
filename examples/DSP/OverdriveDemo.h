@@ -60,19 +60,19 @@ struct OverdriveDemoDSP
     {
         sampleRate = spec.sampleRate;
 
-        auto& gainUp = overdrive.get<0>();
+        auto& gainUp = overdrive.template get<0>();
         gainUp.setGainDecibels (24);
 
-        auto& bias = overdrive.get<1>();
+        auto& bias = overdrive.template get<1>();
         bias.setBias (0.4f);
 
-        auto& wavShaper = overdrive.get<2>();
+        auto& wavShaper = overdrive.template get<2>();
         wavShaper.functionToUse = std::tanh;
 
-        auto& dcFilter = overdrive.get<3>();
+        auto& dcFilter = overdrive.template get<3>();
         dcFilter.state = IIR::Coefficients<float>::makeHighPass (sampleRate, 5.0);
 
-        auto& gainDown = overdrive.get<4>();
+        auto& gainDown = overdrive.template get<4>();
         gainDown.setGainDecibels (-18.0f);
 
         overdrive.prepare (spec);
@@ -92,8 +92,8 @@ struct OverdriveDemoDSP
     {
         if (sampleRate != 0.0)
         {
-            overdrive.get<0>().setGainDecibels (static_cast<float> (inGainParam.getCurrentValue()));
-            overdrive.get<4>().setGainDecibels (static_cast<float> (outGainParam.getCurrentValue()));
+            overdrive.template get<0>().setGainDecibels (static_cast<float> (inGainParam.getCurrentValue()));
+            overdrive.template get<4>().setGainDecibels (static_cast<float> (outGainParam.getCurrentValue()));
         }
     }
 
