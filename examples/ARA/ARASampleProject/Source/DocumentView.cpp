@@ -95,7 +95,10 @@ void DocumentView::paint (Graphics& g)
     else
     {
         if (regionSequenceViewsAreInvalid)
+        {
             rebuildRegionSequenceViews();
+            regionSequenceViewsAreInvalid = false;
+        }
     }
 }
 
