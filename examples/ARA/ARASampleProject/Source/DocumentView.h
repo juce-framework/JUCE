@@ -137,7 +137,7 @@ private:
     Viewport rulersViewPort;
     std::unique_ptr<RulersView> rulersView;
 
-    TextButton zoomInButton, zoomOutButton;
+    TextButton horizontalZoomInButton, horizontalZoomOutButton;
     ToggleButton followPlayheadToggleButton;
 
     bool regionSequenceViewsAreInvalid = true;

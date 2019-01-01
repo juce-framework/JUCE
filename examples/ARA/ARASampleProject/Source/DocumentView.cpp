@@ -29,21 +29,21 @@ positionInfoPtr (nullptr)
     trackHeadersViewPort.setViewedComponent (&trackHeadersView, false);
     addAndMakeVisible (trackHeadersViewPort);
     
-    zoomInButton.setButtonText("+");
-    zoomOutButton.setButtonText("-");
+    horizontalZoomInButton.setButtonText("+");
+    horizontalZoomOutButton.setButtonText("-");
     constexpr double zoomStepFactor = 1.5;
-    zoomInButton.onClick = [this, zoomStepFactor]
+    horizontalZoomInButton.onClick = [this, zoomStepFactor]
     {
         pixelsPerSecond *= zoomStepFactor;
         resized();
     };
-    zoomOutButton.onClick = [this, zoomStepFactor]
+    horizontalZoomOutButton.onClick = [this, zoomStepFactor]
     {
         pixelsPerSecond /= zoomStepFactor;
         resized();
     };
-    addAndMakeVisible (zoomInButton);
-    addAndMakeVisible (zoomOutButton);
+    addAndMakeVisible (horizontalZoomInButton);
+    addAndMakeVisible (horizontalZoomOutButton);
     
     followPlayheadToggleButton.setButtonText ("Viewport follows playhead");
     followPlayheadToggleButton.setToggleState (true, dontSendNotification);
@@ -148,8 +148,8 @@ void DocumentView::resized()
     
     // enforce zoom in/out limits, update zoom buttons
     pixelsPerSecond = jmax (minPixelsPerSecond, jmin (pixelsPerSecond, maxPixelsPerSecond));
-    zoomOutButton.setEnabled (pixelsPerSecond > minPixelsPerSecond);
-    zoomInButton.setEnabled (pixelsPerSecond < maxPixelsPerSecond);
+    horizontalZoomOutButton.setEnabled (pixelsPerSecond > minPixelsPerSecond);
+    horizontalZoomInButton.setEnabled (pixelsPerSecond < maxPixelsPerSecond);
     
     // update sizes and positions of all views
     playbackRegionsViewPort.setBounds (kTrackHeaderWidth, kRulersViewHeight, getWidth() - kTrackHeaderWidth, getHeight() - kRulersViewHeight - kStatusBarHeight);
@@ -174,9 +174,9 @@ void DocumentView::resized()
     
     playheadView.setBounds (playbackRegionsView.getBounds());
     
-    zoomInButton.setBounds (getWidth() - kStatusBarHeight, getHeight() - kStatusBarHeight, kStatusBarHeight, kStatusBarHeight);
-    zoomOutButton.setBounds (zoomInButton.getBounds().translated (-kStatusBarHeight, 0));
-    followPlayheadToggleButton.setBounds (0, zoomInButton.getY(), 200, kStatusBarHeight);
+    horizontalZoomInButton.setBounds (getWidth() - kStatusBarHeight, getHeight() - kStatusBarHeight, kStatusBarHeight, kStatusBarHeight);
+    horizontalZoomOutButton.setBounds (horizontalZoomInButton.getBounds().translated (-kStatusBarHeight, 0));
+    followPlayheadToggleButton.setBounds (0, horizontalZoomInButton.getY(), 200, kStatusBarHeight);
     
     // keep viewport position relative to playhead
     // TODO JUCE_ARA if playhead is not visible in new position, we should rather keep the
