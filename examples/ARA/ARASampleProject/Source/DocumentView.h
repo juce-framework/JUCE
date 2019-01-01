@@ -31,10 +31,24 @@ private juce::Timer
 public:
     DocumentView (AudioProcessor&);
     ~DocumentView();
-    
+
+    /*
+     Creates a new PlaybackRegionView which will be owned.
+     This allows customizing PlaybackRegionView Component to desired behavior.
+     (for example: showing notes)
+     */
+    virtual PlaybackRegionView* getViewForPlaybackRegion (ARAPlaybackRegion*);
+
+    /*
+     Creates a new RegionSequenceView which will be owned.
+     This allows customizing RegionSequenceView Component to desired behavior.
+     (for example: allow showing cross-fades or interaction between regions)
+     */
+    virtual RegionSequenceView* getViewForRegionSequence (ARARegionSequence*);
+
     // total time range
     Range<double> getTimeRange() const { return Range<double> (startTime, endTime); }
-    
+
     // visible time range
     Range<double> getVisibleTimeRange() const;
     // TODO JUCE_ARA if we want to make this into a reusable view, then zooming should use this primitive:
@@ -43,7 +57,7 @@ public:
     //  Another method zoomBy(float factor) can be added on top of this, which deals with keeping the relative
     //  playhead positon unchanged if it is visible while zooming, otherwise keeps current view centered.
     //  This will be easy to do since it is all in linear time now.
-    
+
     // flag that our view needs to be rebuilt
     void invalidateRegionSequenceViews() { regionSequenceViewsAreInvalid = true; }
 

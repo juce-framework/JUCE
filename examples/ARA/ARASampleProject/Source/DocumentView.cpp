@@ -1,16 +1,13 @@
 #include "DocumentView.h"
 
 #include "RegionSequenceView.h"
+#include "PlaybackRegionView.h"
 #include "RulersView.h"
 
 constexpr int kRulersViewHeight = 3*20;
 constexpr int kTrackHeaderWidth = 120;
 constexpr int kTrackHeight = 80;
 constexpr int kStatusBarHeight = 20;
-constexpr int kMinWidth = 3 * kTrackHeaderWidth;
-constexpr int kWidth = 1000;
-constexpr int kMinHeight = kRulersViewHeight + 1 * kTrackHeight + kStatusBarHeight;
-constexpr int kHeight = kMinHeight + 5 * kTrackHeight;
 
 //==============================================================================
 DocumentView::DocumentView (AudioProcessor& p)
@@ -190,7 +187,7 @@ void DocumentView::rebuildRegionSequenceViews()
     for (auto regionSequence : getARADocumentController()->getDocument()->getRegionSequences<ARARegionSequence>())
     {
         if (! ARA::contains (getARAEditorView()->getHiddenRegionSequences(), regionSequence))
-            regionSequenceViews.add (new RegionSequenceView (*this, regionSequence));
+            regionSequenceViews.add (getViewForRegionSequence(regionSequence));
     }
     
     resized();
@@ -218,6 +215,16 @@ void DocumentView::didReorderRegionSequencesInDocument (ARADocument* document)
     jassert (document == getARADocumentController()->getDocument());
     
     invalidateRegionSequenceViews();
+}
+
+PlaybackRegionView* DocumentView::getViewForPlaybackRegion (ARAPlaybackRegion* playbackRegion)
+{
+    return new PlaybackRegionView (*this, playbackRegion);
+}
+
+RegionSequenceView* DocumentView::getViewForRegionSequence (ARARegionSequence* regionSequence)
+{
+    return new RegionSequenceView (*this, regionSequence);
 }
 
 Range<double> DocumentView::getVisibleTimeRange() const
