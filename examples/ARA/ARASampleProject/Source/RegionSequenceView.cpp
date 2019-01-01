@@ -7,7 +7,7 @@
 RegionSequenceView::RegionSequenceView (DocumentView& documentView, ARARegionSequence* sequence)
     : documentView (documentView),
       regionSequence (sequence),
-      trackHeaderView (new TrackHeaderView (documentView.getARAEditorView(), regionSequence))
+      trackHeaderView (documentView.getHeaderViewForRegionSequence (regionSequence))
 {
     regionSequence->addListener (this);
 

@@ -46,6 +46,12 @@ public:
      */
     virtual RegionSequenceView* getViewForRegionSequence (ARARegionSequence*);
 
+    /*
+     Creates a new TrackHeaderView which will be owned.
+     This allows customizing TrackHeaderView Component to desired behavior.
+     */
+    virtual TrackHeaderView* getHeaderViewForRegionSequence (ARARegionSequence*);
+
     // total time range
     Range<double> getTimeRange() const { return Range<double> (startTime, endTime); }
 

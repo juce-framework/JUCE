@@ -1,6 +1,7 @@
 #include "DocumentView.h"
 
 #include "RegionSequenceView.h"
+#include "TrackHeaderView.h"
 #include "PlaybackRegionView.h"
 #include "RulersView.h"
 
@@ -236,6 +237,11 @@ void DocumentView::didReorderRegionSequencesInDocument (ARADocument* document)
 PlaybackRegionView* DocumentView::getViewForPlaybackRegion (ARAPlaybackRegion* playbackRegion)
 {
     return new PlaybackRegionView (*this, playbackRegion);
+}
+
+TrackHeaderView* DocumentView::getHeaderViewForRegionSequence (ARARegionSequence* regionSequence)
+{
+    return new TrackHeaderView (getARAEditorView(), regionSequence);
 }
 
 RegionSequenceView* DocumentView::getViewForRegionSequence (ARARegionSequence* regionSequence)
