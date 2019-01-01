@@ -137,7 +137,9 @@ private:
     Viewport rulersViewPort;
     std::unique_ptr<RulersView> rulersView;
 
-    TextButton horizontalZoomInButton, horizontalZoomOutButton;
+    Label horizontalZoomLabel, verticalZoomLabel;
+    TextButton horizontalZoomInButton, horizontalZoomOutButton,
+               verticalZoomInButton, verticalZoomOutButton;
     ToggleButton followPlayheadToggleButton;
 
     bool regionSequenceViewsAreInvalid = true;
@@ -146,6 +148,7 @@ private:
     double endTime = 1.0;
     double pixelsPerSecond = 0.0;
     double playheadTimePosition = 0.0;
+    int trackHeight = 80;
     
     const juce::AudioPlayHead::CurrentPositionInfo* positionInfoPtr;
 
