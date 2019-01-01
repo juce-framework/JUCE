@@ -58,8 +58,6 @@ positionInfoPtr (nullptr)
         rulersViewPort.setViewedComponent (rulersView.get(), false);
         addAndMakeVisible (rulersViewPort);
     }
-    
-    rebuildRegionSequenceViews();
     startTimerHz (60);
 }
 
@@ -93,6 +91,11 @@ void DocumentView::paint (Graphics& g)
         g.setColour (Colours::white);
         g.setFont (20.0f);
         g.drawFittedText ("Non ARA Instance. Please re-open as ARA2!", getLocalBounds(), Justification::centred, 1);
+    }
+    else
+    {
+        if (regionSequenceViewsAreInvalid)
+            rebuildRegionSequenceViews();
     }
 }
 
@@ -254,7 +257,7 @@ void DocumentView::timerCallback()
     }
 }
 
-void DocumentView::setCurrentPositionInfo(const AudioPlayHead::CurrentPositionInfo* curPosInfoPtr)
+void DocumentView::setCurrentPositionInfo (const AudioPlayHead::CurrentPositionInfo* curPosInfoPtr)
 {
     positionInfoPtr = curPosInfoPtr;
 }
