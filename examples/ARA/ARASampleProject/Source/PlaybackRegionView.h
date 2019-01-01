@@ -49,6 +49,9 @@ private:
     ARAPlaybackRegionReader* playbackRegionReader = nullptr;  // careful: "weak" pointer, actual pointer is owned by our audioThumb
     bool isSelected = false;
 
+    // TODO JUCE_ARA AudioThumbnail should be moved to AudioModification?
+    // currently it is being rebuild each time but I guess it's actually
+    // persistant.
     AudioFormatManager audioFormatManger;
     AudioThumbnailCache audioThumbCache;
     AudioThumbnail audioThumb;
