@@ -1,6 +1,5 @@
 #pragma once
 
-#include "JuceHeader.h"
 #include "RegionSequenceView.h"
 
 //==============================================================================
@@ -17,7 +16,7 @@ class PlaybackRegionView    : public Component,
                               private ARAPlaybackRegion::Listener
 {
 public:
-    PlaybackRegionView (ARASampleProjectAudioProcessorEditor* editor, ARAPlaybackRegion* region);
+    PlaybackRegionView (DocumentView& documentView, ARAPlaybackRegion* region);
     ~PlaybackRegionView();
 
     ARAPlaybackRegion* getPlaybackRegion() const { return playbackRegion; }
@@ -45,7 +44,7 @@ private:
     void recreatePlaybackRegionReader();
 
 private:
-    ARASampleProjectAudioProcessorEditor* editorComponent;
+    DocumentView& documentView;
     ARAPlaybackRegion* playbackRegion;
     ARAPlaybackRegionReader* playbackRegionReader = nullptr;  // careful: "weak" pointer, actual pointer is owned by our audioThumb
     bool isSelected = false;

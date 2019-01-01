@@ -2,7 +2,7 @@
 
 #include "JuceHeader.h"
 
-class ARASampleProjectAudioProcessorEditor;
+class DocumentView;
 class TrackHeaderView;
 class PlaybackRegionView;
 
@@ -16,7 +16,7 @@ class PlaybackRegionView;
 class RegionSequenceView  : private ARARegionSequence::Listener
 {
 public:
-    RegionSequenceView (ARASampleProjectAudioProcessorEditor* editor, ARARegionSequence* sequence);
+    RegionSequenceView (DocumentView& documentView, ARARegionSequence* sequence);
     ~RegionSequenceView();
 
     Range<double> getTimeRange() const;
@@ -33,7 +33,7 @@ private:
     void detachFromRegionSequence();
 
 private:
-    ARASampleProjectAudioProcessorEditor* editorComponent;
+    DocumentView& documentView;
     ARARegionSequence* regionSequence;
 
     std::unique_ptr<TrackHeaderView> trackHeaderView;

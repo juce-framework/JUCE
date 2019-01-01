@@ -1,18 +1,17 @@
 #include "PlaybackRegionView.h"
-#include "ARASampleProjectDocumentController.h"
-#include "ARASampleProjectAudioProcessorEditor.h"
+#include "DocumentView.h"
 
 //==============================================================================
-PlaybackRegionView::PlaybackRegionView (ARASampleProjectAudioProcessorEditor* editor, ARAPlaybackRegion* region)
-    : editorComponent (editor),
+PlaybackRegionView::PlaybackRegionView (DocumentView& documentView, ARAPlaybackRegion* region)
+    : documentView (documentView),
       playbackRegion (region),
       audioThumbCache (1),
       audioThumb (128, audioFormatManger, audioThumbCache)
 {
     audioThumb.addChangeListener (this);
 
-    editorComponent->getARAEditorView()->addListener (this);
-    onNewSelection (editorComponent->getARAEditorView()->getViewSelection());
+    documentView.getARAEditorView()->addListener (this);
+    onNewSelection (documentView.getARAEditorView()->getViewSelection());
 
     playbackRegion->getRegionSequence()->getDocument<ARADocument>()->addListener (this);
     playbackRegion->getAudioModification()->getAudioSource<ARAAudioSource>()->addListener (this);
@@ -23,7 +22,7 @@ PlaybackRegionView::PlaybackRegionView (ARASampleProjectAudioProcessorEditor* ed
 
 PlaybackRegionView::~PlaybackRegionView()
 {
-    editorComponent->getARAEditorView()->removeListener (this);
+    documentView.getARAEditorView()->removeListener (this);
 
     playbackRegion->removeListener (this);
     playbackRegion->getAudioModification()->getAudioSource<ARAAudioSource>()->removeListener (this);
@@ -62,8 +61,8 @@ void PlaybackRegionView::paint (Graphics& g)
         if (clipBounds.getWidth() > 0)
         {
             auto convertedBounds = clipBounds + getBoundsInParent().getPosition();
-            double startTime = editorComponent->getPlaybackRegionsViewsTimeForX (convertedBounds.getX());
-            double endTime = editorComponent->getPlaybackRegionsViewsTimeForX (convertedBounds.getRight());
+            double startTime = documentView.getPlaybackRegionsViewsTimeForX (convertedBounds.getX());
+            double endTime = documentView.getPlaybackRegionsViewsTimeForX (convertedBounds.getRight());
 
             Range<double> regionTimeRange = getTimeRange();
 
@@ -118,7 +117,7 @@ void PlaybackRegionView::didEndEditing (ARADocument* document)
     if ((playbackRegionReader ==  nullptr) || ! playbackRegionReader->isValid())
     {
         recreatePlaybackRegionReader();
-        editorComponent->resized();
+        documentView.resized();
         repaint();
     }
 }
@@ -151,7 +150,7 @@ void PlaybackRegionView::didUpdatePlaybackRegionContent (ARAPlaybackRegion* regi
     if (scopeFlags.affectSamples() &&
         ! playbackRegion->getAudioModification()->getAudioSource()->getDocument()->getDocumentController()->isHostEditingDocument())
     {
-        editorComponent->resized();
+        documentView.resized();
         repaint();
     }
 }
@@ -162,9 +161,7 @@ void PlaybackRegionView::recreatePlaybackRegionReader()
     audioThumbCache.clear();
 
     // create a non-realtime playback region reader for our audio thumb
-    auto documentController = editorComponent->getARADocumentController<ARASampleProjectDocumentController>();
-    playbackRegionReader = documentController->createPlaybackRegionReader ({ playbackRegion }, true);
-
+    playbackRegionReader = documentView.getARADocumentController()->createPlaybackRegionReader({playbackRegion}, true);
     // see juce_AudioThumbnail.cpp line 122 - AudioThumbnail does not deal with zero length sources.
     if (playbackRegionReader->lengthInSamples <= 0)
     {
