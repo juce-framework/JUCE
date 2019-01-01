@@ -189,8 +189,18 @@ void DocumentView::rebuildRegionSequenceViews()
     
     for (auto regionSequence : getARADocumentController()->getDocument()->getRegionSequences<ARARegionSequence>())
     {
-        if (! ARA::contains (getARAEditorView()->getHiddenRegionSequences(), regionSequence))
+        if (!showOnlySelectedRegionSequence && ! ARA::contains (getARAEditorView()->getHiddenRegionSequences(), regionSequence))
+        {
             regionSequenceViews.add (getViewForRegionSequence(regionSequence));
+        }
+        else
+        {
+            auto selectedSequences = getARAEditorView()->getViewSelection().getRegionSequences();
+            if (ARA::contains (selectedSequences, regionSequence))
+            {
+                regionSequenceViews.add (getViewForRegionSequence(regionSequence));
+            }
+        }
     }
     
     resized();
