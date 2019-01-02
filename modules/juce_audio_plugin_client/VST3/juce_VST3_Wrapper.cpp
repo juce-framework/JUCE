@@ -908,6 +908,23 @@ private:
                    #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
                     w = roundToInt (w / editorScaleFactor);
                     h = roundToInt (h / editorScaleFactor);
+
+                    bool needToResizeHostWindow = false;
+
+                    if (getHostType().type == PluginHostType::SteinbergCubase10)
+                    {
+                        auto integerScaleFactor = (int) std::round (editorScaleFactor);
+
+                        // Workaround for Cubase 10 sending double-scaled bounds when opening editor
+                        if (isWithin ((int) w, component->getWidth() * integerScaleFactor, 2)
+                            && isWithin ((int) h, component->getHeight() * integerScaleFactor, 2))
+                        {
+                            w /= integerScaleFactor;
+                            h /= integerScaleFactor;
+
+                            needToResizeHostWindow = true;
+                        }
+                    }
                    #endif
 
                     component->setSize (w, h);
@@ -919,6 +936,11 @@ private:
                    #endif
                     if (auto* peer = component->getPeer())
                         peer->updateBounds();
+
+                   #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+                    if (needToResizeHostWindow)
+                        component->resizeHostWindow();
+                   #endif
                 }
 
                 return kResultTrue;
