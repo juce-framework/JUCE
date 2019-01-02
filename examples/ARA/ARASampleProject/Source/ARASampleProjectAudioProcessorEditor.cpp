@@ -195,6 +195,7 @@ void ARASampleProjectAudioProcessorEditor::rebuildRegionSequenceViews()
         if (! ARA::contains (getARAEditorView()->getHiddenRegionSequences(), regionSequence))
             regionSequenceViews.add (new RegionSequenceView (this, regionSequence));
     }
+    regionSequenceViewsAreInvalid = false;
 
     resized();
 }
@@ -210,10 +211,7 @@ void ARASampleProjectAudioProcessorEditor::didEndEditing (ARADocument* document)
     jassert (document == getARADocumentController()->getDocument());
 
     if (regionSequenceViewsAreInvalid)
-    {
         rebuildRegionSequenceViews();
-        regionSequenceViewsAreInvalid = false;
-    }
 }
 
 void ARASampleProjectAudioProcessorEditor::didReorderRegionSequencesInDocument (ARADocument* document)
