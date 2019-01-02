@@ -35,6 +35,8 @@ namespace juce
 namespace juce
 {
     using ARAContentUpdateScopes = ARA::ContentUpdateScopes;
+
+    inline String convertARAString (ARA::ARAUtf8String str) { return String (CharPointer_UTF8 (str)); }
 }
 
 #endif

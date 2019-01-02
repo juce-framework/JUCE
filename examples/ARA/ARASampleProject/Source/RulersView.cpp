@@ -466,13 +466,10 @@ void RulersView::paint (juce::Graphics& g)
                 chordRect.setRight (editorComponent.getPlaybackRegionsViewsXForTime (nextChordStartTime));
             }
 
-            // get the chord name
-            String chordName = ARA::getNameForChord (*itChord);
-
             // draw chord rect and name
             g.drawRect (chordRect);
             g.setFont (Font (12.0f));
-            g.drawText (chordName, chordRect, Justification::centredLeft);
+            g.drawText (convertARAString (ARA::getNameForChord (*itChord).c_str()), chordRect, Justification::centredLeft);
         }
 
         g.drawText ("chords", bounds, Justification::topRight);

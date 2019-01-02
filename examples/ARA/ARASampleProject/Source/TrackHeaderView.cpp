@@ -50,7 +50,7 @@ void TrackHeaderView::paint (juce::Graphics& g)
     {
         g.setColour (trackColour.contrasting (1.0f));
         g.setFont (Font (12.0f));
-        g.drawText (String (name), getLocalBounds(), Justification::centredLeft);
+        g.drawText (convertARAString (name), getLocalBounds(), Justification::centredLeft);
     }
 }
 

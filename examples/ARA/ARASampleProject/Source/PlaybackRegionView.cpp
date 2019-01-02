@@ -89,7 +89,7 @@ void PlaybackRegionView::paint (Graphics& g)
     {
         g.setColour (regionColour.contrasting (1.0f));
         g.setFont (Font (12.0f));
-        g.drawText (String (name), rect, Justification::topLeft);
+        g.drawText (convertARAString (name), rect, Justification::topLeft);
     }
 }
 
