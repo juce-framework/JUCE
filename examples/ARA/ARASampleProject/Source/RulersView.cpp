@@ -84,7 +84,10 @@ public:
 
     ARA::ARAQuarterPosition getQuarterForTime (ARA::ARATimePosition timePosition) const
     {
-        updateCacheByPosition (timePosition, findByTimePosition);
+        updateCacheByPosition (timePosition, [] (ARA::ARATimePosition timePosition, const ARA::ARAContentTempoEntry& tempoEntry)
+                                                {
+                                                    return timePosition < tempoEntry.timePosition;
+                                                });
 
         const auto quartersPerSecond = (rightEntryCache->quarterPosition - leftEntryCache->quarterPosition) / (rightEntryCache->timePosition - leftEntryCache->timePosition);
         return leftEntryCache->quarterPosition + (timePosition - leftEntryCache->timePosition) * quartersPerSecond;
@@ -92,26 +95,18 @@ public:
 
     ARA::ARATimePosition getTimeForQuarter (ARA::ARAQuarterPosition quarterPosition) const
     {
-        updateCacheByPosition (quarterPosition, findByQuarterPosition);
+        updateCacheByPosition (quarterPosition, [] (ARA::ARAQuarterPosition quarterPosition, const ARA::ARAContentTempoEntry& tempoEntry)
+                                                {
+                                                    return quarterPosition < tempoEntry.quarterPosition;
+                                                });
 
         const auto secondsPerQuarter = (rightEntryCache->timePosition - leftEntryCache->timePosition) / (rightEntryCache->quarterPosition - leftEntryCache->quarterPosition);
         return leftEntryCache->timePosition + (quarterPosition - leftEntryCache->quarterPosition) * secondsPerQuarter;
     }
 
 private:
-    static bool findByTimePosition (ARA::ARATimePosition timePosition, const ARA::ARAContentTempoEntry& tempoEntry)
-    {
-        return timePosition < tempoEntry.timePosition;
-    };
-
-    static bool findByQuarterPosition (ARA::ARAQuarterPosition quarterPosition, const ARA::ARAContentTempoEntry& tempoEntry)
-    {
-        return quarterPosition < tempoEntry.quarterPosition;
-    };
-
-    // TODO JUCE_ARA maybe use a template argument instead of a function pointer for findByPosition? Seems to require C++17 template auto...
-    template <typename T>
-    void updateCacheByPosition (T position, bool (*findByPosition) (T position, const ARA::ARAContentTempoEntry& tempoEntry)) const
+    template <typename T, typename Func>
+    void updateCacheByPosition (T position, Func findByPosition) const
     {
         if (findByPosition (position, *leftEntryCache))
         {
@@ -270,7 +265,6 @@ public:
     }
 
 private:
-
     void setCacheToFirstEntry() const
     {
         entryCache = contentReader.begin();
@@ -281,11 +275,6 @@ private:
     {
         return (quarterPosition - it->position) * getBeatsPerQuarter (*it);
     }
-
-    static bool findByQuarterPosition (ARA::ARAQuarterPosition position, const ARA::ARAContentBarSignature& barSignature)
-    {
-        return position < barSignature.position;
-    };
 
     void updateCacheByQuarterPosition (ARA::ARAQuarterPosition quarterPosition) const
     {
