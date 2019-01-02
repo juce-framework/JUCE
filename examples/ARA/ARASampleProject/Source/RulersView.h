@@ -15,7 +15,7 @@ class RulersView  : public Component,
                     private ARAMusicalContext::Listener
 {
 public:
-    RulersView (ARASampleProjectAudioProcessorEditor& owner);
+    RulersView (ARASampleProjectAudioProcessorEditor& editorComponent);
     ~RulersView();
 
     void paint (Graphics&) override;
@@ -42,7 +42,7 @@ private:
     void findMusicalContext();
 
 private:
-    ARASampleProjectAudioProcessorEditor& owner;
+    ARASampleProjectAudioProcessorEditor& editorComponent;
     ARADocument* document;
     ARAMusicalContext* musicalContext;
 
