@@ -254,10 +254,15 @@ void DocumentView::didEndEditing (ARADocument* document)
     }
 }
 
+void DocumentView::didAddRegionSequenceToDocument (ARADocument* document, ARARegionSequence* regionSequence)
+{
+    jassert (document == getARADocumentController()->getDocument());
+    invalidateRegionSequenceViews();
+}
+
 void DocumentView::didReorderRegionSequencesInDocument (ARADocument* document)
 {
     jassert (document == getARADocumentController()->getDocument());
-    
     invalidateRegionSequenceViews();
 }
 

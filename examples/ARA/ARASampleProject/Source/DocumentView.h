@@ -100,6 +100,7 @@ public:
 
     // ARADocument::Listener overrides
     void didEndEditing (ARADocument* document) override;
+    void didAddRegionSequenceToDocument (ARADocument* document, ARARegionSequence* regionSequence) override;
     void didReorderRegionSequencesInDocument (ARADocument* document) override;
 
 private:
