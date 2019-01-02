@@ -9,7 +9,7 @@
     along with their output waveform, name, color, and selection state
 */
 class PlaybackRegionView    : public Component,
-                              private ChangeListener,
+                              public ChangeListener,
                               private ARAEditorView::Listener,
                               private ARADocument::Listener,
                               private ARAAudioSource::Listener,
