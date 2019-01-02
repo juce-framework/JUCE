@@ -12,7 +12,7 @@ class TrackHeaderView   : public Component,
                           private ARARegionSequence::Listener
 {
 public:
-    TrackHeaderView (ARAEditorView* view, ARARegionSequence* sequence);
+    TrackHeaderView (ARAEditorView* editorView, ARARegionSequence* regionSequence);
     ~TrackHeaderView();
 
     void paint (Graphics&) override;

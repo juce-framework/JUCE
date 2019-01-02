@@ -56,11 +56,8 @@ void RulersView::findMusicalContext()
         newMusicalContext = viewSelection.getPlaybackRegions().front()->getRegionSequence()->getMusicalContext<ARAMusicalContext>();
 
     // if no context used yet and selection does not yield a new one, use the first musical context in the docment
-    if (musicalContext == nullptr && newMusicalContext == nullptr &&
-        ! owner.getARADocumentController()->getDocument()->getMusicalContexts().empty())
-    {
-        newMusicalContext = owner.getARADocumentController()->getDocument()->getMusicalContexts<ARAMusicalContext>().front();
-    }
+    if (musicalContext == nullptr && newMusicalContext == nullptr && ! document->getMusicalContexts().empty())
+        newMusicalContext = document->getMusicalContexts<ARAMusicalContext>().front();
 
     if (newMusicalContext != musicalContext)
     {
