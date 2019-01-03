@@ -163,7 +163,8 @@ void RulersView::paint (juce::Graphics& g)
             chordRect.setVerticalRange (Range<int> (chordRulerY, chordRulerY + chordRulerHeight));
             
             // find the starting position of the chord in pixels
-            const auto chordStartTime = tempoConverter.getTimeForQuarter (itChord->position);
+            const auto chordStartTime = (itChord == chordsReader.begin()) ?
+                                            editorComponent.getTimeRange().getStart() : tempoConverter.getTimeForQuarter (itChord->position);
             if (chordStartTime >= visibleRange.getEnd())
                 break;
             chordRect.setLeft (editorComponent.getPlaybackRegionsViewsXForTime (chordStartTime));
