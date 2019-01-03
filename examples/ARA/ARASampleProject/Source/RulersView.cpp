@@ -117,7 +117,7 @@ void RulersView::paint (juce::Graphics& g)
             const int x = editorComponent.getPlaybackRegionsViewsXForTime (time);
             rects.addWithoutMerging (Rectangle<int> (x - lineWidth / 2, secondsRulerY + secondsRulerHeight - lineHeight, lineWidth, lineHeight));
         }
-        g.drawText ("seconds", bounds, Justification::bottomRight);
+        g.drawText ("seconds", bounds.withTrimmedRight (2), Justification::bottomRight);
         g.fillRectList (rects);
     }
 
@@ -140,7 +140,7 @@ void RulersView::paint (juce::Graphics& g)
             const int lineHeight = (beatsSinceBarStart == 0) ? beatsRulerHeight : beatsRulerHeight / 2;
             rects.addWithoutMerging (Rectangle<int> (x - lineWidth / 2, beatsRulerY + beatsRulerHeight - lineHeight, lineWidth, lineHeight));
         }
-        g.drawText ("beats", bounds, Justification::centredRight);
+        g.drawText ("beats", bounds.withTrimmedRight (2).withTrimmedBottom (secondsRulerHeight), Justification::bottomRight);
         g.fillRectList (rects);
     }
 
@@ -179,11 +179,10 @@ void RulersView::paint (juce::Graphics& g)
 
             // draw chord rect and name
             g.drawRect (chordRect);
-            g.setFont (Font (12.0f));
-            g.drawText (convertARAString (ARA::getNameForChord (*itChord).c_str()), chordRect, Justification::centredLeft);
+            g.drawText (convertARAString (ARA::getNameForChord (*itChord).c_str()), chordRect.withTrimmedLeft (2), Justification::centredLeft);
         }
 
-        g.drawText ("chords", bounds, Justification::topRight);
+        g.drawText ("chords", bounds.withTrimmedRight (2).withTrimmedBottom (beatsRulerHeight + secondsRulerHeight), Justification::bottomRight);
     }
 
     // borders
