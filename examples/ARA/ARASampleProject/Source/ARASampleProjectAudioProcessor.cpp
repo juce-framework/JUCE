@@ -96,12 +96,14 @@ void ARASampleProjectAudioProcessor::prepareToPlay (double newSampleRate, int sa
 {
     if (isARAPlaybackRenderer())
         getARAPlaybackRenderer()->prepareToPlay (newSampleRate, getTotalNumOutputChannels(), samplesPerBlock, true);
-    if (isARAEditorRenderer() && ! isNonRealtime())
+    if (isARAEditorRenderer())
         getARAEditorRenderer()->prepareToPlay (newSampleRate, getTotalNumOutputChannels(), samplesPerBlock);
 }
 
 void ARASampleProjectAudioProcessor::releaseResources()
 {
+    if (isARAEditorRenderer())
+        getARAEditorRenderer()->releaseResources();
     if (isARAPlaybackRenderer())
         getARAPlaybackRenderer()->releaseResources();
 }
