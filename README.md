@@ -11,7 +11,7 @@ For feedback and questions, please contact Celemony via [ara@celemony.com](mailt
 
 ### Getting started:
 
-We've made modifications to the Projucer to enable it to work with the ARA 2.0 SDK. As of now the Projucer can be used to generate VST3 plugins that can be used as ARA plugins in a supporting host.
+We've made modifications to the Projucer to enable it to work with the ARA 2.0 SDK. These modifications allow building VST3 and AudioUnit plugins that can be loaded as ARA plugins by a compatible host. 
 
 To create an ARA plugin, clone the [ARA branch](https://github.com/Celemony/JUCE_ARA/tree/ARA) of this repository and build the [Projucer](https://github.com/Celemony/JUCE_ARA/tree/ARA/extras/Projucer)(projects for Visual Studio and Xcode exist within the repository.)
 
@@ -33,7 +33,7 @@ The generated plugin will have, in addition to the standard PluginProcessor and 
 
 <img src="https://i.imgur.com/JqNIe2b.png"/>
 
-This version of the Projucer only supports VST3, so make sure that format is checked in the settings
+This version of the Projucer supports VST3 and AudioUnit, so make sure at least one of these plugin formats is checked
 <img src="https://i.imgur.com/7wWWPuK.png"/>
 
 We can also edit other ARA plugin factory properties such as available content types and transformation flags as well as the plugin factory identifier.
