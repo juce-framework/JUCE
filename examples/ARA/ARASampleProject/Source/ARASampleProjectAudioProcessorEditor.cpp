@@ -108,18 +108,25 @@ void ARASampleProjectAudioProcessorEditor::resized()
     int previousPlayheadX = getPlaybackRegionsViewsXForTime (playheadTimePosition) - playbackRegionsViewPort.getViewPosition().getX();
 
     // calculate maximum visible time range
-    if (regionSequenceViews.isEmpty())
+    startTime = 0.0;
+    endTime = 0.0;
+    if (! regionSequenceViews.isEmpty())
     {
-        startTime = 0.0;
-        endTime = 0.0;
-    }
-    else
-    {
-        startTime = std::numeric_limits<double>::max();
-        endTime = std::numeric_limits<double>::lowest();
+        bool isFirst = true;
         for (auto v : regionSequenceViews)
         {
-            auto sequenceTimeRange = v->getTimeRange();
+            if (v->isEmpty())
+                continue;
+
+            const auto sequenceTimeRange = v->getTimeRange();
+            if (isFirst)
+            {
+                startTime = sequenceTimeRange.getStart();
+                endTime = sequenceTimeRange.getEnd();
+                isFirst = false;
+                continue;
+            }
+
             startTime = jmin (startTime, sequenceTimeRange.getStart());
             endTime = jmax (endTime, sequenceTimeRange.getEnd());
         }

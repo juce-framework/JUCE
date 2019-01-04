@@ -20,6 +20,7 @@ public:
     ~RegionSequenceView();
 
     Range<double> getTimeRange() const { return (regionSequence != nullptr) ? regionSequence->getTimeRange() : Range<double>(); }
+    bool isEmpty() const { return (regionSequence == nullptr) || regionSequence->getPlaybackRegions().empty(); }
 
     void setRegionsViewBoundsByYRange (int y, int height);
 
