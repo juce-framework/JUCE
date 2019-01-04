@@ -1,6 +1,6 @@
 #include "RulersView.h"
 #include "ARASampleProjectAudioProcessorEditor.h"
-#include "ARA_Library/Utilities/ARAChordAndScaleNames.h"
+#include "ARA_Library/Utilities/ARAPitchInterpretation.h"
 #include "ARA_Library/Utilities/ARATimelineConversion.h"
 
 //==============================================================================
@@ -147,16 +147,13 @@ void RulersView::paint (juce::Graphics& g)
     // chord ruler: one rect per chord, skipping empty "no chords"
     {
         RectangleList<int> rects;
-
-        // a chord is considered "no chord" if its intervals are all zero
-        auto isNoChord = [] (ARA::ARAContentChord chord)
-        {
-            return std::all_of (chord.intervals, chord.intervals + sizeof (chord.intervals), [] (ARA::ARAChordIntervalUsage i) { return i == 0; });
-        };
+        ARA::ChordInterpreter interpreter;
+        // TODO JUCE_ARA for some reason, converting the UTF-8 to JUCE strings does not work properly yet
+        interpreter.setUseASCIISymbols(true);
 
         for (auto itChord = chordsReader.begin(); itChord != chordsReader.end(); ++itChord)
         {
-            if (isNoChord (*itChord))
+            if (interpreter.isNoChord (*itChord))
                 continue;
 
             Rectangle<int> chordRect = bounds;
@@ -180,7 +177,7 @@ void RulersView::paint (juce::Graphics& g)
 
             // draw chord rect and name
             g.drawRect (chordRect);
-            g.drawText (convertARAString (ARA::getNameForChord (*itChord).c_str()), chordRect.withTrimmedLeft (2), Justification::centredLeft);
+            g.drawText (convertARAString (interpreter.getNameForChord (*itChord).c_str()), chordRect.withTrimmedLeft (2), Justification::centredLeft);
         }
 
         g.drawText ("chords", bounds.withTrimmedRight (2).withTrimmedBottom (beatsRulerHeight + secondsRulerHeight), Justification::bottomRight);
