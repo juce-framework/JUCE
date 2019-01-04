@@ -42,14 +42,6 @@ void RegionSequenceView::detachFromRegionSequence()
 }
 
 //==============================================================================
-Range<double> RegionSequenceView::getTimeRange() const
-{
-    if (regionSequence == nullptr)
-        return {};
-
-    return regionSequence->getTimeRange();
-}
-
 void RegionSequenceView::setRegionsViewBoundsByYRange (int y, int height)
 {
     trackHeaderView->setBounds (0, y, trackHeaderView->getParentWidth(), height);
