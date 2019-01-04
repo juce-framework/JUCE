@@ -44,7 +44,7 @@ public:
     Range() = default;
 
     /** Constructs a range with given start and end values. */
-    Range (const ValueType startValue, const ValueType endValue) noexcept
+    constexpr Range (const ValueType startValue, const ValueType endValue) noexcept
         : start (startValue), end (jmax (startValue, endValue))
     {
     }
