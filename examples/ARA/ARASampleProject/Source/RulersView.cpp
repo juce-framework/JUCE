@@ -85,7 +85,7 @@ void RulersView::paint (juce::Graphics& g)
         return;
     }
 
-    Range<double> visibleRange = editorComponent.getVisibleTimeRange();
+    const auto visibleRange = editorComponent.getVisibleTimeRange();
 
     using TempoContentReader = ARA::PlugIn::HostContentReader<ARA::kARAContentTypeTempoEntries>;
     using BarSignaturesContentReader = ARA::PlugIn::HostContentReader<ARA::kARAContentTypeBarSignatures>;
