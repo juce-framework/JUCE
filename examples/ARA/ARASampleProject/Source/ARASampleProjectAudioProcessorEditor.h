@@ -23,7 +23,7 @@ public:
     ~ARASampleProjectAudioProcessorEditor();
 
     // total time range
-    Range<double> getTimeRange() const { return Range<double> (startTime, endTime); }
+    Range<double> getTimeRange() const { return visibleRange; }
 
     // visible time range
     Range<double> getVisibleTimeRange() const;
@@ -100,8 +100,7 @@ private:
     ToggleButton followPlayheadToggleButton;
 
     bool regionSequenceViewsAreInvalid = true;
-    double startTime = 0.0;
-    double endTime = 1.0;
+    Range<double> visibleRange;
     double pixelsPerSecond = 0.0;
     double playheadTimePosition = 0.0;
 

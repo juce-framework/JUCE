@@ -11,13 +11,16 @@ constexpr int kMinWidth = 3 * kTrackHeaderWidth;
 constexpr int kWidth = 1000;
 constexpr int kMinHeight = kRulersViewHeight + 1 * kTrackHeight + kStatusBarHeight;
 constexpr int kHeight = kMinHeight + 5 * kTrackHeight;
+constexpr double kMinSecondDuration = 1.0;
+constexpr double kMinBorderSeconds = 1.0;
 
 //==============================================================================
 ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARASampleProjectAudioProcessor& p)
     : AudioProcessorEditor (&p),
       AudioProcessorEditorARAExtension (&p),
       playbackRegionsViewPort (*this),
-      playheadView (*this)
+      playheadView (*this),
+      visibleRange (-kMinBorderSeconds, kMinSecondDuration + kMinBorderSeconds)
 {
     // TODO JUCE_ARA hotfix for Unicode chord symbols, see https://forum.juce.com/t/embedding-unicode-string-literals-in-your-cpp-files/12600/7
     getLookAndFeel().setDefaultSansSerifTypefaceName("Arial Unicode MS");
@@ -84,12 +87,12 @@ ARASampleProjectAudioProcessorEditor::~ARASampleProjectAudioProcessorEditor()
 //==============================================================================
 int ARASampleProjectAudioProcessorEditor::getPlaybackRegionsViewsXForTime (double time) const
 {
-    return roundToInt ((time - startTime) / (endTime - startTime) * playbackRegionsView.getWidth());
+    return roundToInt ((time - visibleRange.getStart()) / visibleRange.getLength() * playbackRegionsView.getWidth());
 }
 
 double ARASampleProjectAudioProcessorEditor::getPlaybackRegionsViewsTimeForX (int x) const
 {
-    return startTime + ((double) x / (double) playbackRegionsView.getWidth()) * (endTime - startTime);
+    return visibleRange.getStart() + ((double) x / (double) playbackRegionsView.getWidth()) * visibleRange.getLength();
 }
 
 //==============================================================================
@@ -111,8 +114,7 @@ void ARASampleProjectAudioProcessorEditor::resized()
     int previousPlayheadX = getPlaybackRegionsViewsXForTime (playheadTimePosition) - playbackRegionsViewPort.getViewPosition().getX();
 
     // calculate maximum visible time range
-    startTime = 0.0;
-    endTime = 0.0;
+    visibleRange = { 0.0, 0.0 };
     if (! regionSequenceViews.isEmpty())
     {
         bool isFirst = true;
@@ -124,36 +126,32 @@ void ARASampleProjectAudioProcessorEditor::resized()
             const auto sequenceTimeRange = v->getTimeRange();
             if (isFirst)
             {
-                startTime = sequenceTimeRange.getStart();
-                endTime = sequenceTimeRange.getEnd();
+                visibleRange = sequenceTimeRange;
                 isFirst = false;
                 continue;
             }
 
-            startTime = jmin (startTime, sequenceTimeRange.getStart());
-            endTime = jmax (endTime, sequenceTimeRange.getEnd());
+            visibleRange = visibleRange.getUnionWith (sequenceTimeRange);
         }
     }
 
-    // make sure we can see at least 1 second
-    constexpr double minDuration = 1.0;
-    double duration = endTime - startTime;
-    if (duration < minDuration)
+    // ensure visible range covers kMinSecondDuration
+    if (visibleRange.getLength() < kMinSecondDuration)
     {
-        startTime -= (minDuration - duration) / 2.0;
-        endTime = startTime + minDuration;
+        double startAdjustment = (kMinSecondDuration - visibleRange.getLength()) / 2.0;
+        visibleRange.setStart (visibleRange.getStart() - startAdjustment);
+        visibleRange.setEnd (visibleRange.getStart() + kMinSecondDuration);
     }
 
-    // add a second left and right so that regions will not directly hit the end of the view
-    constexpr double borderTime = 1.0;
-    startTime -= borderTime;
-    endTime += borderTime;
+    // apply kMinBorderSeconds offset to start and end
+    visibleRange.setStart (visibleRange.getStart() - kMinBorderSeconds);
+    visibleRange.setEnd (visibleRange.getEnd() + kMinBorderSeconds);
 
     // max zoom 1px : 1sample (this is a naive assumption as audio can be in different sample rate)
     double maxPixelsPerSecond = jmax (processor.getSampleRate(), 300.0);
 
     // min zoom covers entire view range
-    double minPixelsPerSecond = (getWidth() - kTrackHeaderWidth - rulersViewPort.getScrollBarThickness()) / (endTime - startTime);
+    double minPixelsPerSecond = (getWidth() - kTrackHeaderWidth - rulersViewPort.getScrollBarThickness()) / visibleRange.getLength();
 
     // enforce zoom in/out limits, update zoom buttons
     pixelsPerSecond = jmax (minPixelsPerSecond, jmin (pixelsPerSecond, maxPixelsPerSecond));
@@ -162,8 +160,8 @@ void ARASampleProjectAudioProcessorEditor::resized()
 
     // update sizes and positions of all views
     playbackRegionsViewPort.setBounds (kTrackHeaderWidth, kRulersViewHeight, getWidth() - kTrackHeaderWidth, getHeight() - kRulersViewHeight - kStatusBarHeight);
-    playbackRegionsView.setBounds (0, 0, roundToInt ((endTime - startTime) * pixelsPerSecond), jmax (kTrackHeight * regionSequenceViews.size(), playbackRegionsViewPort.getHeight() - playbackRegionsViewPort.getScrollBarThickness()));
-    pixelsPerSecond = playbackRegionsView.getWidth() / (endTime - startTime);       // prevent potential rounding issues
+    playbackRegionsView.setBounds (0, 0, roundToInt (visibleRange.getLength() * pixelsPerSecond), jmax (kTrackHeight * regionSequenceViews.size(), playbackRegionsViewPort.getHeight() - playbackRegionsViewPort.getScrollBarThickness()));
+    pixelsPerSecond = playbackRegionsView.getWidth() / visibleRange.getLength();       // prevent potential rounding issues
 
     trackHeadersViewPort.setBounds (0, kRulersViewHeight, kTrackHeaderWidth, playbackRegionsViewPort.getMaximumVisibleHeight());
     trackHeadersView.setBounds (0, 0, kTrackHeaderWidth, playbackRegionsView.getHeight());
@@ -247,7 +245,6 @@ void ARASampleProjectAudioProcessorEditor::timerCallback()
 
         if (followPlayheadToggleButton.getToggleState())
         {
-            const auto visibleRange = getVisibleTimeRange();
             if (playheadTimePosition < visibleRange.getStart() || playheadTimePosition > visibleRange.getEnd())
                 playbackRegionsViewPort.setViewPosition (playbackRegionsViewPort.getViewPosition().withX (getPlaybackRegionsViewsXForTime (playheadTimePosition)));
         };
