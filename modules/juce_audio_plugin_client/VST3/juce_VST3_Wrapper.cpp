@@ -985,26 +985,29 @@ private:
             {
                 if (auto* editor = component->pluginEditor.get())
                 {
-                   #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-                    auto juceRect = editor->getLocalArea (component.get(),
-                                                          Rectangle<int>::leftTopRightBottom (rectToCheck->left, rectToCheck->top,
-                                                                                              rectToCheck->right, rectToCheck->bottom) / editorScaleFactor);
-                   #else
-                    auto juceRect = editor->getLocalArea (component.get(),
-                                                          { rectToCheck->left, rectToCheck->top, rectToCheck->right, rectToCheck->bottom });
-                   #endif
-
                     if (auto* constrainer = editor->getConstrainer())
                     {
+                       #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+                        auto juceRect = editor->getLocalArea (component.get(),
+                                                              Rectangle<int>::leftTopRightBottom (rectToCheck->left, rectToCheck->top,
+                                                                                                  rectToCheck->right, rectToCheck->bottom) / editorScaleFactor);
+                       #else
+                        auto juceRect = editor->getLocalArea (component.get(),
+                                                              { rectToCheck->left, rectToCheck->top, rectToCheck->right, rectToCheck->bottom });
+                       #endif
+
                         Rectangle<int> limits (0, 0, constrainer->getMaximumWidth(), constrainer->getMaximumHeight());
 
                         auto currentRect = editor->getBounds();
 
-                        constrainer->checkBounds (juceRect, currentRect, limits,
-                                                  juceRect.getY() != currentRect.getY() && juceRect.getBottom() == currentRect.getBottom(),
-                                                  juceRect.getX() != currentRect.getX() && juceRect.getRight()  == currentRect.getRight(),
-                                                  juceRect.getY() == currentRect.getY() && juceRect.getBottom() != currentRect.getBottom(),
-                                                  juceRect.getX() == currentRect.getX() && juceRect.getRight()  != currentRect.getRight());
+                        if (getHostType().isReaper() && constrainer->getFixedAspectRatio() != 0.0)
+                            constrainer->checkBounds (juceRect, currentRect, limits, false, false, true, true);
+                        else
+                            constrainer->checkBounds (juceRect, currentRect, limits,
+                                                      juceRect.getY() != currentRect.getY() && juceRect.getBottom() == currentRect.getBottom(),
+                                                      juceRect.getX() != currentRect.getX() && juceRect.getRight()  == currentRect.getRight(),
+                                                      juceRect.getY() == currentRect.getY() && juceRect.getBottom() != currentRect.getBottom(),
+                                                      juceRect.getX() == currentRect.getX() && juceRect.getRight()  != currentRect.getRight());
 
                         juceRect = component->getLocalArea (editor, juceRect);
 
