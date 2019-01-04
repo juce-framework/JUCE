@@ -148,8 +148,6 @@ void RulersView::paint (juce::Graphics& g)
     {
         RectangleList<int> rects;
         ARA::ChordInterpreter interpreter;
-        // TODO JUCE_ARA for some reason, converting the UTF-8 to JUCE strings does not work properly yet
-        interpreter.setUseASCIISymbols(true);
 
         for (auto itChord = chordsReader.begin(); itChord != chordsReader.end(); ++itChord)
         {

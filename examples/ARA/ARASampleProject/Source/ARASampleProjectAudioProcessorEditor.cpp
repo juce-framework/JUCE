@@ -19,6 +19,9 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
       playbackRegionsViewPort (*this),
       playheadView (*this)
 {
+    // TODO JUCE_ARA hotfix for Unicode chord symbols, see https://forum.juce.com/t/embedding-unicode-string-literals-in-your-cpp-files/12600/7
+    getLookAndFeel().setDefaultSansSerifTypefaceName("Arial Unicode MS");
+
     setSize (kWidth, kHeight);
     setResizeLimits (kMinWidth, kMinHeight, 32768, 32768);
     setResizable (true, false);
