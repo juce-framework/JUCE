@@ -373,17 +373,6 @@ void MainHostWindow::createPlugin (const PluginDescription& desc, Point<int> pos
 
 void MainHostWindow::addPluginsToMenu (PopupMenu& m) const
 {
-    if (graphHolder != nullptr)
-    {
-        int i = 0;
-
-        for (auto* t : internalTypes)
-            m.addItem (++i, t->name + " (" + t->pluginFormatName + ")",
-                       graphHolder->graph->getNodeForName (t->name) == nullptr);
-    }
-
-    m.addSeparator();
-
     knownPluginList.addToMenu (m, pluginSortMethod);
 }
 

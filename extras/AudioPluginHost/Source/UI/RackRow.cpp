@@ -25,6 +25,7 @@
 
 
 //[MiscUserDefs] You can add your own user definitions and misc code here...
+#include "../Filters/FilterGraph.h"
 String FormatKey(int note);
 int ParseNote(const char *str);
 //[/MiscUserDefs]
@@ -271,7 +272,8 @@ void RackRow::buttonClicked (Button* buttonThatWasClicked)
     {
         //[UserButtonCode_m_deviceSettings] -- add your button handler code here..
 
-        // Open plugin here
+        if (auto w = graph->getOrCreateWindowFor((AudioProcessorGraph::Node*)m_current->Device->m_node, PluginWindow::Type::normal))
+            w->toFront(true);
 
         //[/UserButtonCode_m_deviceSettings]
     }

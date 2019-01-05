@@ -32,75 +32,65 @@
 #include "../Performer.h"
 
 //==============================================================================
-#if JUCE_IOS
- class AUScanner
- {
- public:
-     AUScanner (KnownPluginList& list)
-         : knownPluginList (list), pool (5)
-     {
-         knownPluginList.clearBlacklistedFiles();
-         paths = formatToScan.getDefaultLocationsToSearch();
-
-         startScan();
-     }
-
- private:
-     KnownPluginList& knownPluginList;
-     AudioUnitPluginFormat formatToScan;
-
-     std::unique_ptr<PluginDirectoryScanner> scanner;
-     FileSearchPath paths;
-
-     ThreadPool pool;
-
-     void startScan()
-     {
-         auto deadMansPedalFile = getAppProperties().getUserSettings()
-                                     ->getFile().getSiblingFile ("RecentlyCrashedPluginsList");
-
-         scanner.reset (new PluginDirectoryScanner (knownPluginList, formatToScan, paths,
-                                                    true, deadMansPedalFile, true));
-
-         for (int i = 5; --i >= 0;)
-             pool.addJob (new ScanJob (*this), true);
-     }
-
-     bool doNextScan()
-     {
-         String pluginBeingScanned;
-         if (scanner->scanNextFile (true, pluginBeingScanned))
-             return true;
-
-         return false;
-     }
-
-     struct ScanJob  : public ThreadPoolJob
-     {
-         ScanJob (AUScanner& s)  : ThreadPoolJob ("pluginscan"), scanner (s) {}
-
-         JobStatus runJob()
-         {
-             while (scanner.doNextScan() && ! shouldExit())
-             {}
-
-             return jobHasFinished;
-         }
-
-         AUScanner& scanner;
-
-         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScanJob)
-     };
-
-     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AUScanner)
- };
-#endif
-
-//==============================================================================
 GraphEditorPanel::GraphEditorPanel (FilterGraph& g)  : graph (g)
 {
     graph.addChangeListener (this);
     setOpaque (true);
+
+    m_volumeColumn.reset(new Label(String(), TRANS("Volume")));
+    m_volumeColumn->setFont(Font(15.00f, Font::plain).withTypefaceStyle("Regular"));
+    m_volumeColumn->setJustificationType(Justification::centredLeft);
+    m_volumeColumn->setEditable(false, false, false);
+    m_volumeColumn->setColour(TextEditor::textColourId, Colours::black);
+    m_volumeColumn->setColour(TextEditor::backgroundColourId, Colour(0x00000000));
+    m_volumeColumn->setBounds(144, 0, 64, 24);
+
+    m_rangeColumn.reset(new Label(String(), TRANS("Range")));
+    m_rangeColumn->setFont(Font(15.00f, Font::plain).withTypefaceStyle("Regular"));
+    m_rangeColumn->setJustificationType(Justification::centredLeft);
+    m_rangeColumn->setEditable(false, false, false);
+    m_rangeColumn->setColour(TextEditor::textColourId, Colours::black);
+    m_rangeColumn->setColour(TextEditor::backgroundColourId, Colour(0x00000000));
+    m_rangeColumn->setBounds(736, 0, 56, 24);
+
+    m_bankProgramColumn.reset(new Label(String(), TRANS("Bank/Program\n")));
+    m_bankProgramColumn->setFont(Font(15.00f, Font::plain).withTypefaceStyle("Regular"));
+    m_bankProgramColumn->setJustificationType(Justification::centredLeft);
+    m_bankProgramColumn->setEditable(false, false, false);
+    m_bankProgramColumn->setColour(TextEditor::textColourId, Colours::black);
+    m_bankProgramColumn->setColour(TextEditor::backgroundColourId, Colour(0x00000000));
+    m_bankProgramColumn->setBounds(264, 0, 104, 24);
+
+    m_transposeColumn.reset(new Label(String(), TRANS("Transpose")));
+    m_transposeColumn->setFont(Font(15.00f, Font::plain).withTypefaceStyle("Regular"));
+    m_transposeColumn->setJustificationType(Justification::centredLeft);
+    m_transposeColumn->setEditable(false, false, false);
+    m_transposeColumn->setColour(TextEditor::textColourId, Colours::black);
+    m_transposeColumn->setColour(TextEditor::backgroundColourId, Colour(0x00000000));
+    m_transposeColumn->setBounds(632, 0, 80, 24);
+
+    m_rackUIViewport.reset(new Viewport());
+    m_rackUI.reset(new Component());
+    m_rackTopUI.reset(new Component());
+
+    m_tabs.reset(new TabbedComponent(TabbedButtonBar::TabsAtTop));
+    m_tabs->setTabBarDepth(30);
+    m_tabs->addTab(TRANS("SetLists"), Colours::darkblue, 0, false);
+    m_tabs->addTab(TRANS("Songs"), Colours::darkgreen, 0, false);
+    m_tabs->addTab(TRANS("Performances"), Colours::darkkhaki, 0, false);
+    m_tabs->addTab(TRANS("Rack"), Colours::darkgrey, m_rackUIViewport.get(), false);
+    m_tabs->setCurrentTabIndex(3);
+    addAndMakeVisible(m_tabs.get());
+
+    m_rackTopUI->addAndMakeVisible(m_bankProgramColumn.get());
+    m_rackTopUI->addAndMakeVisible(m_transposeColumn.get());
+    m_rackTopUI->addAndMakeVisible(m_rangeColumn.get());
+    m_rackTopUI->addAndMakeVisible(m_volumeColumn.get());
+
+    m_rackUI->addAndMakeVisible(m_rackTopUI.get());
+
+    m_rackUIViewport->setScrollBarsShown(true, false);
+    m_rackUIViewport->setViewedComponent(m_rackUI.get());
 }
 
 GraphEditorPanel::~GraphEditorPanel()
@@ -153,6 +143,76 @@ void GraphEditorPanel::resized()
 
 void GraphEditorPanel::changeListenerCallback (ChangeBroadcaster*)
 {
+    updateComponents();
+}
+
+void GraphEditorPanel::updateComponents()
+{
+    auto performer = graph.GetPerformer();
+    int devicesOnScreen = performer->Root.Racks.Rack.size();
+    int deviceWidth = 100;
+    int deviceHeight = 20;
+    int titleHeight = m_volumeColumn->getHeight() - 4;
+    for (int i = 0; i < devicesOnScreen; ++i)
+    {
+        m_rackDevice.push_back(std::make_unique<RackRow>());
+        auto newRackRow = (RackRow*)m_rackDevice.back().get();
+        newRackRow->Setup(performer->Root.Racks.Rack[i]);
+        newRackRow->graph = &graph;
+        deviceWidth = newRackRow->getWidth() + 2;
+        deviceHeight = newRackRow->getHeight();
+        m_rackUI->addAndMakeVisible(newRackRow);
+        newRackRow->setBounds(0, i*deviceHeight + titleHeight, deviceWidth, deviceHeight);
+    }
+    m_tabs->setBounds(10, 10, deviceWidth, 700); // include tab bar
+    m_rackTopUI->setBounds(0, 0, deviceWidth, titleHeight);
+    m_rackUI->setBounds(0, 0, deviceWidth, deviceHeight * devicesOnScreen + titleHeight);
+    m_rackUIViewport->setBounds(0, 30, deviceWidth, m_tabs->getBounds().getHeight() - 30);
+
+    SetPerformance(0);
+}
+
+
+void GraphEditorPanel::SetPerformance(int performanceIndex)
+{
+    auto performer = graph.GetPerformer();
+
+    auto &zones = performer->Root.Performances.Performance[performanceIndex].Zone;
+
+    for (auto d = 0U; d < m_rackDevice.size(); d++)
+    {
+        auto rackDevice = ((RackRow*)m_rackDevice[d].get());
+        bool found = false;
+        for (auto i = 0U; i < zones.size(); ++i)
+        {
+            if (rackDevice->ID() == zones[i].DeviceID)
+            {
+                found = true;
+            }
+        }
+        if (!found)
+        {
+            Zone mutedZone;
+            memset(&mutedZone, 0, sizeof(Zone));
+            mutedZone.DeviceID = rackDevice->ID();
+            mutedZone.Mute = true;
+            zones.push_back(mutedZone);
+        }
+    }
+
+    for (auto i = 0U; i < zones.size(); ++i)
+    {
+        for (auto d = 0U; d < m_rackDevice.size(); d++)
+        {
+            auto rackDevice = ((RackRow*)m_rackDevice[d].get());
+            if (rackDevice->ID() == zones[i].DeviceID)
+            {
+                rackDevice->Assign(&(zones[i]));
+                break;
+            }
+        }
+    }
+
 }
 
 
@@ -408,62 +468,6 @@ void GraphDocumentComponent::init()
     graphPanel.reset (new GraphEditorPanel (*graph));
     addAndMakeVisible (graphPanel.get());
     graphPlayer.setProcessor (&graph->graph);
-
-    m_volumeColumn.reset(new Label(String(),TRANS("Volume")));
-    m_volumeColumn->setFont(Font(15.00f, Font::plain).withTypefaceStyle("Regular"));
-    m_volumeColumn->setJustificationType(Justification::centredLeft);
-    m_volumeColumn->setEditable(false, false, false);
-    m_volumeColumn->setColour(TextEditor::textColourId, Colours::black);
-    m_volumeColumn->setColour(TextEditor::backgroundColourId, Colour(0x00000000));
-    m_volumeColumn->setBounds(144, 0, 64, 24);
-
-    m_rangeColumn.reset(new Label(String(),TRANS("Range")));
-    m_rangeColumn->setFont(Font(15.00f, Font::plain).withTypefaceStyle("Regular"));
-    m_rangeColumn->setJustificationType(Justification::centredLeft);
-    m_rangeColumn->setEditable(false, false, false);
-    m_rangeColumn->setColour(TextEditor::textColourId, Colours::black);
-    m_rangeColumn->setColour(TextEditor::backgroundColourId, Colour(0x00000000));
-    m_rangeColumn->setBounds(736, 0, 56, 24);
-
-    m_bankProgramColumn.reset(new Label(String(),TRANS("Bank/Program\n")));
-    m_bankProgramColumn->setFont(Font(15.00f, Font::plain).withTypefaceStyle("Regular"));
-    m_bankProgramColumn->setJustificationType(Justification::centredLeft);
-    m_bankProgramColumn->setEditable(false, false, false);
-    m_bankProgramColumn->setColour(TextEditor::textColourId, Colours::black);
-    m_bankProgramColumn->setColour(TextEditor::backgroundColourId, Colour(0x00000000));
-    m_bankProgramColumn->setBounds(264, 0, 104, 24);
-
-    m_transposeColumn.reset(new Label(String(),TRANS("Transpose")));
-    m_transposeColumn->setFont(Font(15.00f, Font::plain).withTypefaceStyle("Regular"));
-    m_transposeColumn->setJustificationType(Justification::centredLeft);
-    m_transposeColumn->setEditable(false, false, false);
-    m_transposeColumn->setColour(TextEditor::textColourId, Colours::black);
-    m_transposeColumn->setColour(TextEditor::backgroundColourId, Colour(0x00000000));
-    m_transposeColumn->setBounds(632, 0, 80, 24);
-
-    m_rackUIViewport.reset(new Viewport());
-    m_rackUI.reset(new Component());
-    m_rackTopUI.reset(new Component());
-
-    m_tabs.reset(new TabbedComponent(TabbedButtonBar::TabsAtTop));
-    m_tabs->setTabBarDepth(30);
-    m_tabs->addTab(TRANS("SetLists"), Colours::darkblue, 0, false);
-    m_tabs->addTab(TRANS("Songs"), Colours::darkgreen, 0, false);
-    m_tabs->addTab(TRANS("Performances"), Colours::darkkhaki, 0, false);
-    m_tabs->addTab(TRANS("Rack"), Colours::darkgrey, m_rackUIViewport.get(), false);
-    m_tabs->setCurrentTabIndex(3);
-    addAndMakeVisible(m_tabs.get());
-
-    m_rackTopUI->addAndMakeVisible(m_bankProgramColumn.get());
-    m_rackTopUI->addAndMakeVisible(m_transposeColumn.get());
-    m_rackTopUI->addAndMakeVisible(m_rangeColumn.get());
-    m_rackTopUI->addAndMakeVisible(m_volumeColumn.get());
-
-    m_rackUI->addAndMakeVisible(m_rackTopUI.get());
-
-    m_rackUIViewport->setScrollBarsShown(true, false);
-    m_rackUIViewport->setViewedComponent(m_rackUI.get());
-
     keyState.addListener (&graphPlayer.getMidiMessageCollector());
 
     keyboardComp.reset (new MidiKeyboardComponent (keyState, MidiKeyboardComponent::horizontalKeyboard));
@@ -500,77 +504,6 @@ void GraphDocumentComponent::init()
     }
 }
 
-void GraphDocumentComponent::Load()
-{
-    m_performer = new Performer();
-
-    int devicesOnScreen = m_performer->Root.Racks.Rack.size();
-    int deviceWidth = 100;
-    int deviceHeight = 20;
-    int titleHeight = m_volumeColumn->getHeight() - 4;
-    for (int i = 0; i < devicesOnScreen; ++i)
-    {
-        m_rackDevice.push_back(std::make_unique<RackRow>());
-        auto newRackRow = (RackRow*)m_rackDevice.back().get();
-        newRackRow->Setup(m_performer->Root.Racks.Rack[i]);
-        for (int p = 0; p < pluginList.getNumTypes(); ++p)
-        {
-            auto plugin = pluginList.getType(p);
-            if (plugin->name == m_performer->Root.Racks.Rack[i].PluginName.c_str())
-                createNewPlugin(*plugin, Point<int>(0, 0));
-        }
-
-        deviceWidth = newRackRow->getWidth() + 2;
-        deviceHeight = newRackRow->getHeight();
-        m_rackUI->addAndMakeVisible(newRackRow);
-        newRackRow->setBounds(0, i*deviceHeight + titleHeight, deviceWidth, deviceHeight);
-    }
-    m_tabs->setBounds(10, 10, deviceWidth, 700); // include tab bar
-    m_rackTopUI->setBounds(0, 0, deviceWidth, titleHeight);
-    m_rackUI->setBounds(0, 0, deviceWidth, deviceHeight * devicesOnScreen + titleHeight);
-    m_rackUIViewport->setBounds(0, 30, deviceWidth, m_tabs->getBounds().getHeight() - 30);
-
-}
-
-void GraphDocumentComponent::SetPerformance(int performanceIndex = 2)
-{
-    auto &zones = m_performer->Root.Performances.Performance[performanceIndex].Zone;
-
-    for (auto d = 0U; d < m_rackDevice.size(); d++)
-    {
-        auto rackDevice = ((RackRow*)m_rackDevice[d].get());
-        bool found = false;
-        for (auto i = 0U; i < zones.size(); ++i)
-        {
-            if (rackDevice->ID() == zones[i].DeviceID)
-            {
-                found = true;
-            }
-        }
-        if (!found)
-        {
-            Zone mutedZone;
-            memset(&mutedZone, 0, sizeof(Zone));
-            mutedZone.DeviceID = rackDevice->ID();
-            mutedZone.Mute = true;
-            zones.push_back(mutedZone);
-        }
-    }
-
-    for (auto i = 0U; i < zones.size(); ++i)
-    {
-        for (auto d = 0U; d < m_rackDevice.size(); d++)
-        {
-            auto rackDevice = ((RackRow*)m_rackDevice[d].get());
-            if (rackDevice->ID() == zones[i].DeviceID)
-            {
-                rackDevice->Assign(&(zones[i]));
-                break;
-            }
-        }
-    }
-
-}
 
 GraphDocumentComponent::~GraphDocumentComponent()
 {

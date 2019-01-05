@@ -298,114 +298,114 @@
     </Songs>
     <Performances>
         <Performance ID="1686806762" Name="SaveState" Tempo="202">
-            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
-            <Zone DeviceID="1024611825" Bank="0" Program="0" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
-            <Zone DeviceID="1555279137" Bank="22" Program="49" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
-            <Zone DeviceID="-1202024641" Bank="-1" Program="-1" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
-            <Zone DeviceID="522416168" Bank="0" Program="51" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
-            <Zone DeviceID="-841590045" Bank="0" Program="41" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
-            <Zone DeviceID="-1973686393" Bank="-1" Program="-1" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
-            <Zone DeviceID="-2048222834" Bank="0" Program="7" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
+            <Zone DeviceID="1024611825" Bank="0" Program="0" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
+            <Zone DeviceID="1555279137" Bank="22" Program="49" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
+            <Zone DeviceID="-1202024641" Bank="-1" Program="-1" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
+            <Zone DeviceID="522416168" Bank="0" Program="51" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
+            <Zone DeviceID="-841590045" Bank="0" Program="41" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
+            <Zone DeviceID="-1973686393" Bank="-1" Program="-1" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
+            <Zone DeviceID="-2048222834" Bank="0" Program="7" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
             <Zone DeviceID="546031377" Bank="0" Program="0" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="0" LowKey="0" HighKey="127"></Zone>
         </Performance>
         <Performance ID="-697867819" Name="Initial" Tempo="202">
-            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
-            <Zone DeviceID="1024611825" Bank="0" Program="0" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
-            <Zone DeviceID="1555279137" Bank="22" Program="49" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
-            <Zone DeviceID="-1202024641" Bank="-1" Program="-1" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
-            <Zone DeviceID="522416168" Bank="0" Program="51" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
-            <Zone DeviceID="-841590045" Bank="0" Program="41" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
-            <Zone DeviceID="-1973686393" Bank="-1" Program="-1" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
-            <Zone DeviceID="-2048222834" Bank="0" Program="7" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
+            <Zone DeviceID="1024611825" Bank="0" Program="0" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
+            <Zone DeviceID="1555279137" Bank="22" Program="49" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
+            <Zone DeviceID="-1202024641" Bank="-1" Program="-1" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
+            <Zone DeviceID="522416168" Bank="0" Program="51" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
+            <Zone DeviceID="-841590045" Bank="0" Program="41" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
+            <Zone DeviceID="-1973686393" Bank="-1" Program="-1" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
+            <Zone DeviceID="-2048222834" Bank="0" Program="7" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
             <Zone DeviceID="546031377" Bank="0" Program="0" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="0" LowKey="0" HighKey="127"></Zone>
         </Performance>
         <Performance ID="325567451" Name="Piano" Tempo="120">
-            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
         </Performance>
         <Performance ID="472862425" Name="Piano+2" Tempo="120">
-            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="2" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="2" ></Zone>
         </Performance>
         <Performance ID="279316009" Name="Piano &amp; Guitar" Tempo="120">
-            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="1" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="1" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
         </Performance>
         <Performance ID="1270865452" Name="Piano&amp;shortclaps" Tempo="120">
-            <Zone DeviceID="627145948" Bank="-1" Program="-1" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="23" HighKey="3"></Zone>
-            <Zone DeviceID="-2048222834" Bank="0" Program="0" Volume="-6" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="627145948" Bank="-1" Program="-1" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  LowKey="23" ></Zone>
+            <Zone DeviceID="-2048222834" Bank="0" Program="0" Volume="-6" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
         </Performance>
         <Performance ID="-1893591430" Name="Old Organ" Tempo="120">
-            <Zone DeviceID="1024611825" Bank="0" Program="0" Volume="-6" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="1024611825" Bank="0" Program="0" Volume="-6" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" ></Zone>
         </Performance>
         <Performance ID="1059916542" Name="New Organ" Tempo="120">
-            <Zone DeviceID="1555279137" Bank="12" Program="46" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="1555279137" Bank="12" Program="46" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
         </Performance>
         <Performance ID="-1066488609" Name="Strings" Tempo="120">
-            <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" LowKey="22" HighKey="3"></Zone>
+            <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" LowKey="22" ></Zone>
         </Performance>
         <Performance ID="-1494844207" Name="Brass" Tempo="120">
-            <Zone DeviceID="1555279137" Bank="0" Program="72" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="1555279137" Bank="0" Program="72" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
         </Performance>
         <Performance ID="-335610154" Name="Sax" Tempo="120">
-            <Zone DeviceID="1555279137" Bank="0" Program="22" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="1555279137" Bank="0" Program="22" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
         </Performance>
         <Performance ID="538273237" Name="Synth" Tempo="202">
-            <Zone DeviceID="-841590045" Bank="0" Program="41" Volume="-9" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="-841590045" Bank="0" Program="41" Volume="-9" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
         </Performance>
         <Performance ID="-456977170" Name="Harmonica" Tempo="120">
-            <Zone DeviceID="1555279137" Bank="1" Program="22" Volume="4" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="1555279137" Bank="1" Program="22" Volume="4" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
         </Performance>
         <Performance ID="-339584521" Name="Accordian" Tempo="120">
-            <Zone DeviceID="1555279137" Bank="1" Program="52" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="1555279137" Bank="1" Program="52" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
         </Performance>
         <Performance ID="411472449" Name="Living on a prayer" Tempo="120">
             <Zone DeviceID="1555279137" Bank="13" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" LowKey="56" HighKey="95"></Zone>
-            <Zone DeviceID="1555279138" Bank="1" Program="57" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="36" LowKey="3" HighKey="42"></Zone>
-            <Zone DeviceID="522416168" Bank="0" Program="30" Volume="-6" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="-12" LowKey="84" HighKey="3"></Zone>
+            <Zone DeviceID="1555279138" Bank="1" Program="57" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="36" HighKey="42"></Zone>
+            <Zone DeviceID="522416168" Bank="0" Program="30" Volume="-6" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="-12" LowKey="84" ></Zone>
             <Zone DeviceID="-1202024641" Bank="3" Program="16" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="24" LowKey="43" HighKey="55"></Zone>
         </Performance>
         <Performance ID="-820016231" Name="Crocodile rock" Tempo="120">
-            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" LowKey="3" HighKey="59"></Zone>
-            <Zone DeviceID="522416168" Bank="0" Program="23" Volume="2" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="60" HighKey="3"></Zone>
+            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" HighKey="59"></Zone>
+            <Zone DeviceID="522416168" Bank="0" Program="23" Volume="2" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  LowKey="60" ></Zone>
         </Performance>
         <Performance ID="981015116" Name="Runaway (old)" Tempo="120">
-            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" LowKey="3" HighKey="71"></Zone>
-            <Zone DeviceID="1555279137" Bank="10" Program="23" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="-12" LowKey="72" HighKey="3"></Zone>
+            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" HighKey="71"></Zone>
+            <Zone DeviceID="1555279137" Bank="10" Program="23" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="-12" LowKey="72" ></Zone>
         </Performance>
         <Performance ID="569138515" Name="Hotel California" Tempo="120">
-            <Zone DeviceID="1555279137" Bank="0" Program="24" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="10" LowKey="3" HighKey="72"></Zone>
-            <Zone DeviceID="1555279138" Bank="7" Program="0" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="-14" LowKey="73" HighKey="3"></Zone>
+            <Zone DeviceID="1555279137" Bank="0" Program="24" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="10" HighKey="72"></Zone>
+            <Zone DeviceID="1555279138" Bank="7" Program="0" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="-14" LowKey="73" ></Zone>
         </Performance>
         <Performance ID="-1236752695" Name="Superstition" Tempo="120">
-            <Zone DeviceID="1555279137" Bank="1" Program="41" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="13" LowKey="3" HighKey="59"></Zone>
-            <Zone DeviceID="1555279138" Bank="0" Program="72" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="-11" LowKey="60" HighKey="3"></Zone>
+            <Zone DeviceID="1555279137" Bank="1" Program="41" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="13" HighKey="59"></Zone>
+            <Zone DeviceID="1555279138" Bank="0" Program="72" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="-11" LowKey="60" ></Zone>
         </Performance>
         <Performance ID="-1707191617" Name="You got it" Tempo="120">
-            <Zone DeviceID="1555279137" Bank="1" Program="19" Volume="3" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="59"></Zone>
-            <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="-5" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="60" HighKey="3"></Zone>
+            <Zone DeviceID="1555279137" Bank="1" Program="19" Volume="3" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  HighKey="59"></Zone>
+            <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="-5" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  LowKey="60" ></Zone>
         </Performance>
         <Performance ID="1960457471" Name="Proud Mary" Tempo="120">
-            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="-2" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="-2" ></Zone>
         </Performance>
         <Performance ID="650096567" Name="I Feel Good" Tempo="120">
-            <Zone DeviceID="1555279137" Bank="0" Program="72" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="-2" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="1555279137" Bank="0" Program="72" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="-2" ></Zone>
         </Performance>
         <Performance ID="1002397367" Name="My Way" Tempo="120">
-            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="10" LowKey="3" HighKey="71"></Zone>
-            <Zone DeviceID="1555279137" Bank="0" Program="72" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="-14" LowKey="72" HighKey="3"></Zone>
+            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="10" HighKey="71"></Zone>
+            <Zone DeviceID="1555279137" Bank="0" Program="72" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="-14" LowKey="72" ></Zone>
         </Performance>
         <Performance ID="-1862712331" Name="Piano/Brass" Tempo="120">
-            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" LowKey="3" HighKey="61"></Zone>
-            <Zone DeviceID="1555279137" Bank="0" Program="72" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="62" HighKey="3"></Zone>
+            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" HighKey="61"></Zone>
+            <Zone DeviceID="1555279137" Bank="0" Program="72" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  LowKey="62" ></Zone>
         </Performance>
         <Performance ID="1957098501" Name="Piano/Strings" Tempo="120">
-            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" LowKey="3" HighKey="60"></Zone>
-            <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="60" HighKey="3"></Zone>
+            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" HighKey="60"></Zone>
+            <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  LowKey="60" ></Zone>
         </Performance>
         <Performance ID="53664735" Name="Piano/Tuba" Tempo="120">
-            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" LowKey="3" HighKey="61"></Zone>
-            <Zone DeviceID="1555279137" Bank="12" Program="5" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="62" HighKey="3"></Zone>
+            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" HighKey="61"></Zone>
+            <Zone DeviceID="1555279137" Bank="12" Program="5" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  LowKey="62" ></Zone>
         </Performance>
         <Performance ID="-632332553" Name="Organ / Piano" Tempo="120">
-            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="48" HighKey="3"></Zone>
+            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  LowKey="48" ></Zone>
             <Zone DeviceID="1024611825" Bank="0" Program="0" Volume="-6" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="36" LowKey="22" HighKey="47"></Zone>
         </Performance>
         <Performance ID="-1169284237" Name="Advanced Australia Queen" Tempo="120">
@@ -413,99 +413,99 @@
         </Performance>
         <Performance ID="-180724266" Name="Another one bites the dust" Tempo="120">
             <Zone DeviceID="1555279137" Bank="8" Program="37" Volume="4" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" LowKey="48" HighKey="59"></Zone>
-            <Zone DeviceID="1555279138" Bank="15" Program="11" Volume="4" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="60" HighKey="71"></Zone>
+            <Zone DeviceID="1555279138" Bank="15" Program="11" Volume="4" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  LowKey="60" HighKey="71"></Zone>
             <Zone DeviceID="522416168" Bank="0" Program="122" Volume="-5" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="36" LowKey="36" HighKey="47"></Zone>
-            <Zone DeviceID="-841590045" Bank="0" Program="59" Volume="-3" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="72" HighKey="83"></Zone>
-            <Zone DeviceID="-2048222834" Bank="0" Program="8" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="-841590045" Bank="0" Program="59" Volume="-3" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  LowKey="72" HighKey="83"></Zone>
+            <Zone DeviceID="-2048222834" Bank="0" Program="8" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
         </Performance>
         <Performance ID="631897520" Name="Bicycle Race" Tempo="120">
-            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="22" HighKey="3"></Zone>
-            <Zone DeviceID="-2048222834" Bank="0" Program="12" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  LowKey="22" ></Zone>
+            <Zone DeviceID="-2048222834" Bank="0" Program="12" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
         </Performance>
         <Performance ID="-34862330" Name="Bohemiam Rhapsody" Tempo="120">
-            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="22" HighKey="3"></Zone>
+            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  LowKey="22" ></Zone>
             <Zone DeviceID="546031377" Bank="0" Program="2" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="0" LowKey="0" HighKey="127"></Zone>
         </Performance>
         <Performance ID="-695590563" Name="Breakthru" Tempo="120">
-            <Zone DeviceID="1555279137" Bank="12" Program="46" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="60" HighKey="3"></Zone>
-            <Zone DeviceID="-1973686393" Bank="0" Program="62" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="59"></Zone>
+            <Zone DeviceID="1555279137" Bank="12" Program="46" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  LowKey="60" ></Zone>
+            <Zone DeviceID="-1973686393" Bank="0" Program="62" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  HighKey="59"></Zone>
         </Performance>
         <Performance ID="-216466103" Name="Death On Two Legs Intro" Tempo="120">
-            <Zone DeviceID="522416168" Bank="0" Program="101" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="60" HighKey="3"></Zone>
-            <Zone DeviceID="-1973686393" Bank="-1" Program="-1" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="59"></Zone>
+            <Zone DeviceID="522416168" Bank="0" Program="101" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  LowKey="60" ></Zone>
+            <Zone DeviceID="-1973686393" Bank="-1" Program="-1" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  HighKey="59"></Zone>
         </Performance>
         <Performance ID="1639720971" Name="Fat bottom girls" Tempo="120">
-            <Zone DeviceID="1555279137" Bank="22" Program="1" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="-12" LowKey="31" HighKey="3"></Zone>
-            <Zone DeviceID="-2048222834" Bank="0" Program="11" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="1555279137" Bank="22" Program="1" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="-12" LowKey="31" ></Zone>
+            <Zone DeviceID="-2048222834" Bank="0" Program="11" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
         </Performance>
         <Performance ID="-1224890310" Name="Flash Main Theme" Tempo="120">
-            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="29" HighKey="3"></Zone>
-            <Zone DeviceID="1555279137" Bank="0" Program="3" Volume="3" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="24" LowKey="29" HighKey="3"></Zone>
-            <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="-8" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="24" LowKey="29" HighKey="3"></Zone>
-            <Zone DeviceID="-2048222834" Bank="0" Program="9" Volume="-5" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  LowKey="29" ></Zone>
+            <Zone DeviceID="1555279137" Bank="0" Program="3" Volume="3" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="24" LowKey="29" ></Zone>
+            <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="-8" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="24" LowKey="29" ></Zone>
+            <Zone DeviceID="-2048222834" Bank="0" Program="9" Volume="-5" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
         </Performance>
         <Performance ID="-2015719346" Name="Friends will be friends" Tempo="120">
-            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="-14" LowKey="60" HighKey="3"></Zone>
-            <Zone DeviceID="522416168" Bank="0" Program="21" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="22" LowKey="3" HighKey="59"></Zone>
+            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="-14" LowKey="60" ></Zone>
+            <Zone DeviceID="522416168" Bank="0" Program="21" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="22" HighKey="59"></Zone>
         </Performance>
         <Performance ID="-252811566" Name="God save our Queen" Tempo="120">
-            <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="2" LowKey="22" HighKey="3"></Zone>
+            <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="2" LowKey="22" ></Zone>
             <Zone DeviceID="546031377" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="0" LowKey="0" HighKey="127"></Zone>
         </Performance>
         <Performance ID="-1747834684" Name="Hammer to fall" Tempo="120">
-            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" LowKey="3" HighKey="55"></Zone>
-            <Zone DeviceID="1555279137" Bank="0" Program="43" Volume="-2" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="71" HighKey="3"></Zone>
+            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" HighKey="55"></Zone>
+            <Zone DeviceID="1555279137" Bank="0" Program="43" Volume="-2" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  LowKey="71" ></Zone>
             <Zone DeviceID="1555279138" Bank="0" Program="71" Volume="-2" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="24" LowKey="56" HighKey="70"></Zone>
-            <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="-10" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" LowKey="71" HighKey="3"></Zone>
+            <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="-10" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" LowKey="71" ></Zone>
         </Performance>
         <Performance ID="-2078396232" Name="Its a beautiful day" Tempo="120">
             <Zone DeviceID="546031377" Bank="0" Program="5" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="0" LowKey="0" HighKey="127"></Zone>
         </Performance>
         <Performance ID="-2119177569" Name="Its A Hard life" Tempo="120">
-            <Zone DeviceID="1555279137" Bank="18" Program="3" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="1555279137" Bank="18" Program="3" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
             <Zone DeviceID="1555279138" Bank="11" Program="43" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="0" LowKey="0" HighKey="127"></Zone>
         </Performance>
         <Performance ID="-1419315577" Name="I want it all Verse &amp; Chorus" Tempo="202">
-            <Zone DeviceID="627145948" Bank="-1" Program="-1" Volume="-5" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="71"></Zone>
-            <Zone DeviceID="1555279137" Bank="0" Program="24" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" LowKey="3" HighKey="71"></Zone>
-            <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="-5" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="24" LowKey="3" HighKey="71"></Zone>
-            <Zone DeviceID="-841590045" Bank="0" Program="41" Volume="-9" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="-12" LowKey="72" HighKey="3"></Zone>
+            <Zone DeviceID="627145948" Bank="-1" Program="-1" Volume="-5" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  HighKey="71"></Zone>
+            <Zone DeviceID="1555279137" Bank="0" Program="24" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" HighKey="71"></Zone>
+            <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="-5" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="24" HighKey="71"></Zone>
+            <Zone DeviceID="-841590045" Bank="0" Program="41" Volume="-9" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="-12" LowKey="72" ></Zone>
         </Performance>
         <Performance ID="773092779" Name="I want it all Bridge" Tempo="202">
-            <Zone DeviceID="627145948" Bank="-1" Program="-1" Volume="-6" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="54" HighKey="71"></Zone>
+            <Zone DeviceID="627145948" Bank="-1" Program="-1" Volume="-6" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  LowKey="54" HighKey="71"></Zone>
             <Zone DeviceID="1555279137" Bank="3" Program="28" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="24" LowKey="37" HighKey="52"></Zone>
-            <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="-6" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="48" LowKey="3" HighKey="53"></Zone>
-            <Zone DeviceID="-841590045" Bank="0" Program="41" Volume="-15" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="-12" LowKey="72" HighKey="3"></Zone>
-            <Zone DeviceID="-1973686393" Bank="0" Program="91" Volume="-12" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="36" LowKey="3" HighKey="37"></Zone>
+            <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="-6" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="48" HighKey="53"></Zone>
+            <Zone DeviceID="-841590045" Bank="0" Program="41" Volume="-15" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="-12" LowKey="72" ></Zone>
+            <Zone DeviceID="-1973686393" Bank="0" Program="91" Volume="-12" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="36" HighKey="37"></Zone>
         </Performance>
         <Performance ID="-181299492" Name="I want to break free Strings" Tempo="120">
-            <Zone DeviceID="1555279137" Bank="1" Program="40" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" LowKey="3" HighKey="3"></Zone>
-            <Zone DeviceID="-1973686393" Bank="0" Program="34" Volume="-109" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="1555279137" Bank="1" Program="40" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" ></Zone>
+            <Zone DeviceID="-1973686393" Bank="0" Program="34" Volume="-109" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
         </Performance>
         <Performance ID="-1102562470" Name="I want to break free Sync" Tempo="120">
-            <Zone DeviceID="1555279137" Bank="7" Program="43" Volume="7" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
-            <Zone DeviceID="-1973686393" Bank="0" Program="35" Volume="-8" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="1555279137" Bank="7" Program="43" Volume="7" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
+            <Zone DeviceID="-1973686393" Bank="0" Program="35" Volume="-8" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
         </Performance>
         <Performance ID="-1194260117" Name="Its a kinda magic Verse &amp; Chorus" Tempo="120">
-            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="-5" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="60" HighKey="72"></Zone>
-            <Zone DeviceID="1555279137" Bank="6" Program="44" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="73" HighKey="92"></Zone>
+            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="-5" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  LowKey="60" HighKey="72"></Zone>
+            <Zone DeviceID="1555279137" Bank="6" Program="44" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  LowKey="73" HighKey="92"></Zone>
             <Zone DeviceID="1555279138" Bank="1" Program="76" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="-36" LowKey="93" HighKey="93"></Zone>
             <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="-1" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="24" LowKey="26" HighKey="59"></Zone>
             <Zone DeviceID="522416168" Bank="0" Program="33" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" LowKey="21" HighKey="21"></Zone>
-            <Zone DeviceID="-1973686393" Bank="0" Program="89" Volume="-15" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="22" HighKey="22"></Zone>
-            <Zone DeviceID="-2048222834" Bank="0" Program="4" Volume="-2" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="-1973686393" Bank="0" Program="89" Volume="-15" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  LowKey="22" HighKey="22"></Zone>
+            <Zone DeviceID="-2048222834" Bank="0" Program="4" Volume="-2" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
         </Performance>
         <Performance ID="1431119211" Name="Last Horizon" Tempo="120">
-            <Zone DeviceID="1555279137" Bank="19" Program="20" Volume="3" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="1555279137" Bank="19" Program="20" Volume="3" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
         </Performance>
         <Performance ID="1012516114" Name="Love of my life" Tempo="120">
-            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="-3" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="-3" ></Zone>
         </Performance>
         <Performance ID="-1642673523" Name="Killer Queen" Tempo="120">
-            <Zone DeviceID="627145948" Bank="-1" Program="-1" Volume="-6" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="22" HighKey="3"></Zone>
-            <Zone DeviceID="1555279137" Bank="7" Program="25" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="22" HighKey="3"></Zone>
+            <Zone DeviceID="627145948" Bank="-1" Program="-1" Volume="-6" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  LowKey="22" ></Zone>
+            <Zone DeviceID="1555279137" Bank="7" Program="25" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  LowKey="22" ></Zone>
             <Zone DeviceID="-1973686393" Bank="0" Program="38" Volume="-5" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="0" LowKey="0" HighKey="127"></Zone>
-            <Zone DeviceID="-2048222834" Bank="0" Program="7" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="-2048222834" Bank="0" Program="7" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
         </Performance>
         <Performance ID="2029587695" Name="One Vision Intro" Tempo="80">
             <Zone DeviceID="546031377" Bank="0" Program="5" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="0" LowKey="0" HighKey="127"></Zone>
@@ -513,98 +513,98 @@
         <Performance ID="1293133469" Name="One Vision" Tempo="120">
             <Zone DeviceID="627145948" Bank="0" Program="4" Volume="-3" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="-24" LowKey="67" HighKey="92"></Zone>
             <Zone DeviceID="1555279137" Bank="21" Program="17" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="24" LowKey="24" HighKey="27"></Zone>
-            <Zone DeviceID="522416168" Bank="0" Program="66" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="-36" LowKey="93" HighKey="3"></Zone>
+            <Zone DeviceID="522416168" Bank="0" Program="66" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="-36" LowKey="93" ></Zone>
             <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="24" LowKey="24" HighKey="66"></Zone>
-            <Zone DeviceID="-2048222834" Bank="0" Program="2" Volume="-12" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="-2048222834" Bank="0" Program="2" Volume="-12" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
         </Performance>
         <Performance ID="-1526903426" Name="Play the game" Tempo="120">
-            <Zone DeviceID="-2048222834" Bank="0" Program="1" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
-            <Zone DeviceID="627145948" Bank="-1" Program="-1" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="22" HighKey="3"></Zone>
+            <Zone DeviceID="-2048222834" Bank="0" Program="1" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
+            <Zone DeviceID="627145948" Bank="-1" Program="-1" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  LowKey="22" ></Zone>
         </Performance>
         <Performance ID="1200003438" Name="Radio Ga Ga Intro" Tempo="118">
             <Zone DeviceID="-1973686393" Bank="0" Program="38" Volume="-5" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="0" LowKey="0" HighKey="127"></Zone>
-            <Zone DeviceID="-2048222834" Bank="0" Program="6" Volume="-6" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="-2048222834" Bank="0" Program="6" Volume="-6" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
         </Performance>
         <Performance ID="-406176206" Name="Radio Ga Ga Verse &amp; Chorus" Tempo="118">
-            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="-5" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="51" HighKey="83"></Zone>
-            <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="-4" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" LowKey="3" HighKey="83"></Zone>
-            <Zone DeviceID="522416168" Bank="0" Program="33" Volume="-12" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" LowKey="3" HighKey="48"></Zone>
+            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="-5" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  LowKey="51" HighKey="83"></Zone>
+            <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="-4" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" HighKey="83"></Zone>
+            <Zone DeviceID="522416168" Bank="0" Program="33" Volume="-12" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" HighKey="48"></Zone>
             <Zone DeviceID="-1973686393" Bank="0" Program="38" Volume="-9" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="0" LowKey="0" HighKey="127"></Zone>
-            <Zone DeviceID="-2048222834" Bank="0" Program="6" Volume="-5" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="84" HighKey="3"></Zone>
+            <Zone DeviceID="-2048222834" Bank="0" Program="6" Volume="-5" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  LowKey="84" ></Zone>
         </Performance>
         <Performance ID="904347925" Name="Radio Ga Ga Solo" Tempo="118">
             <Zone DeviceID="-1973686393" Bank="0" Program="38" Volume="-5" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="0" LowKey="0" HighKey="127"></Zone>
         </Performance>
         <Performance ID="-1888306599" Name="RunawaySolo" Tempo="120">
-            <Zone DeviceID="-841590045" Bank="0" Program="6" Volume="-4" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="-841590045" Bank="0" Program="6" Volume="-4" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
         </Performance>
         <Performance ID="1713728040" Name="Save me" Tempo="120">
-            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" LowKey="3" HighKey="71"></Zone>
-            <Zone DeviceID="1555279137" Bank="12" Program="46" Volume="-4" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="-12" LowKey="72" HighKey="3"></Zone>
-            <Zone DeviceID="522416168" Bank="0" Program="51" Volume="-3" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="-12" LowKey="72" HighKey="3"></Zone>
+            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" HighKey="71"></Zone>
+            <Zone DeviceID="1555279137" Bank="12" Program="46" Volume="-4" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="-12" LowKey="72" ></Zone>
+            <Zone DeviceID="522416168" Bank="0" Program="51" Volume="-3" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="-12" LowKey="72" ></Zone>
         </Performance>
         <Performance ID="-1594132496" Name="Show must go on" Tempo="120">
-            <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="2" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="23" HighKey="3"></Zone>
-            <Zone DeviceID="-2048222834" Bank="0" Program="1" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="21" HighKey="22"></Zone>
+            <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="2" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  LowKey="23" ></Zone>
+            <Zone DeviceID="-2048222834" Bank="0" Program="1" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  LowKey="21" HighKey="22"></Zone>
         </Performance>
         <Performance ID="-507164114" Name="Show must go on Key change" Tempo="120">
-            <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="2" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="2" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="2" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="2" ></Zone>
         </Performance>
         <Performance ID="-837961205" Name="Space Capsule" Tempo="120">
-            <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="-10" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="24" LowKey="24" HighKey="3"></Zone>
-            <Zone DeviceID="522416168" Bank="0" Program="53" Volume="-6" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="24" HighKey="3"></Zone>
-            <Zone DeviceID="-1973686393" Bank="0" Program="110" Volume="-3" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="24" HighKey="3"></Zone>
-            <Zone DeviceID="-2048222834" Bank="0" Program="9" Volume="-5" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="-10" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="24" LowKey="24" ></Zone>
+            <Zone DeviceID="522416168" Bank="0" Program="53" Volume="-6" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  LowKey="24" ></Zone>
+            <Zone DeviceID="-1973686393" Bank="0" Program="110" Volume="-3" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  LowKey="24" ></Zone>
+            <Zone DeviceID="-2048222834" Bank="0" Program="9" Volume="-5" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
         </Performance>
         <Performance ID="-1285512008" Name="Spread your wings" Tempo="120">
-            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
         </Performance>
         <Performance ID="1454644447" Name="These are the days of our lives" Tempo="120">
-            <Zone DeviceID="1555279137" Bank="0" Program="51" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" LowKey="3" HighKey="3"></Zone>
-            <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="-9" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="1555279137" Bank="0" Program="51" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" ></Zone>
+            <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="-9" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" ></Zone>
         </Performance>
         <Performance ID="942179974" Name="The Great Pretender" Tempo="120">
-            <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" LowKey="22" HighKey="3"></Zone>
+            <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" LowKey="22" ></Zone>
             <Zone DeviceID="546031377" Bank="0" Program="5" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="0" LowKey="0" HighKey="127"></Zone>
         </Performance>
         <Performance ID="-1417973421" Name="Under Pressure Verse &amp; Chorus" Tempo="120">
-            <Zone DeviceID="627145948" Bank="-1" Program="-1" Volume="-2" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="-12" LowKey="53" HighKey="3"></Zone>
+            <Zone DeviceID="627145948" Bank="-1" Program="-1" Volume="-2" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="-12" LowKey="53" ></Zone>
             <Zone DeviceID="1555279137" Bank="22" Program="0" Volume="3" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="24" LowKey="23" HighKey="52"></Zone>
-            <Zone DeviceID="-2048222834" Bank="0" Program="5" Volume="-3" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="-2048222834" Bank="0" Program="5" Volume="-3" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
         </Performance>
         <Performance ID="633307714" Name="Under Pressure Bridge" Tempo="120">
-            <Zone DeviceID="627145948" Bank="-1" Program="-1" Volume="-5" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
-            <Zone DeviceID="-1202024641" Bank="0" Program="45" Volume="4" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="627145948" Bank="-1" Program="-1" Volume="-5" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
+            <Zone DeviceID="-1202024641" Bank="0" Program="45" Volume="4" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
         </Performance>
         <Performance ID="1887265414" Name="We will rock you" Tempo="120">
-            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="24" HighKey="3"></Zone>
-            <Zone DeviceID="-2048222834" Bank="0" Program="3" Volume="-3" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  LowKey="24" ></Zone>
+            <Zone DeviceID="-2048222834" Bank="0" Program="3" Volume="-3" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
         </Performance>
         <Performance ID="-116774935" Name="We will rock you fast" Tempo="120">
-            <Zone DeviceID="1024611825" Bank="0" Program="0" Volume="-3" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="1024611825" Bank="0" Program="0" Volume="-3" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" ></Zone>
         </Performance>
         <Performance ID="111361031" Name="Who wants to live forever" Tempo="120">
-            <Zone DeviceID="1555279137" Bank="1" Program="40" Volume="-2" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="22" LowKey="3" HighKey="57"></Zone>
-            <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="10" LowKey="58" HighKey="3"></Zone>
+            <Zone DeviceID="1555279137" Bank="1" Program="40" Volume="-2" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="22" HighKey="57"></Zone>
+            <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="10" LowKey="58" ></Zone>
         </Performance>
         <Performance ID="2039328788" Name="Your my best friend" Tempo="120">
-            <Zone DeviceID="1555279137" Bank="1" Program="41" Volume="-5" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" LowKey="3" HighKey="3"></Zone>
-            <Zone DeviceID="1555279138" Bank="0" Program="61" Volume="-5" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" LowKey="3" HighKey="3"></Zone>
-            <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="-7" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" LowKey="3" HighKey="3"></Zone>
-            <Zone DeviceID="522416168" Bank="0" Program="15" Volume="-3" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="1555279137" Bank="1" Program="41" Volume="-5" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" ></Zone>
+            <Zone DeviceID="1555279138" Bank="0" Program="61" Volume="-5" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" ></Zone>
+            <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="-7" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" ></Zone>
+            <Zone DeviceID="522416168" Bank="0" Program="15" Volume="-3" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" ></Zone>
         </Performance>
         <Performance ID="-1743114123" Name="Too much love will kill you" Tempo="120">
-            <Zone DeviceID="1555279137" Bank="0" Program="51" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="1555279137" Bank="0" Program="51" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" ></Zone>
         </Performance>
         <Performance ID="-1777169755" Name="Music" Tempo="120">
             <Zone DeviceID="546031377" Bank="0" Program="1" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="0" LowKey="0" HighKey="127"></Zone>
         </Performance>
         <Performance ID="-25553276" Name="John Blunt Intro" Tempo="120" />
         <Performance ID="1134564030" Name="Tom Crane Intro Low E" Tempo="120">
-            <Zone DeviceID="-1202024641" Bank="-1" Program="-1" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" LowKey="22" HighKey="3"></Zone>
-            <Zone DeviceID="522416168" Bank="0" Program="51" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" LowKey="3" HighKey="3"></Zone>
-            <Zone DeviceID="-1973686393" Bank="0" Program="92" Volume="-18" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" LowKey="3" HighKey="3"></Zone>
-            <Zone DeviceID="-2048222834" Bank="0" Program="1" Volume="-5" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="-1202024641" Bank="-1" Program="-1" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" LowKey="22" ></Zone>
+            <Zone DeviceID="522416168" Bank="0" Program="51" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" ></Zone>
+            <Zone DeviceID="-1973686393" Bank="0" Program="92" Volume="-18" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" ></Zone>
+            <Zone DeviceID="-2048222834" Bank="0" Program="1" Volume="-5" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
         </Performance>
         <Performance ID="-791094913" Name="Intermission" Tempo="120">
             <Zone DeviceID="546031377" Bank="0" Program="3" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="0" LowKey="0" HighKey="127"></Zone>
@@ -613,30 +613,30 @@
             <Zone DeviceID="546031377" Bank="0" Program="6" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="0" LowKey="0" HighKey="127"></Zone>
         </Performance>
         <Performance ID="-2016210536" Name="Piano solo" Tempo="120">
-            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
         </Performance>
         <Performance ID="176198027" Name="Piano &amp; Strings" Tempo="120">
-            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
-            <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="-5" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
+            <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="-5" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="12" ></Zone>
         </Performance>
         <Performance ID="122412330" Name="In the lap of the gods" Tempo="120">
-            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="-12" LowKey="39" HighKey="3"></Zone>
-            <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="24" LowKey="3" HighKey="38"></Zone>
+            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="-12" LowKey="39" ></Zone>
+            <Zone DeviceID="-1202024641" Bank="0" Program="17" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="24" HighKey="38"></Zone>
         </Performance>
         <Performance ID="1012738439" Name="Magic Organ" Tempo="120">
-            <Zone DeviceID="1555279137" Bank="0" Program="70" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="1555279137" Bank="0" Program="70" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
         </Performance>
         <Performance ID="-134883664" Name="Bohemiam Rhapsody Start" Tempo="120">
-            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="22" HighKey="3"></Zone>
+            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  LowKey="22" ></Zone>
             <Zone DeviceID="546031377" Bank="0" Program="6" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="0" LowKey="0" HighKey="127"></Zone>
         </Performance>
         <Performance ID="-387914417" Name="Bohemiam Rhapsody Middle" Tempo="120">
-            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="22" HighKey="3"></Zone>
+            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  LowKey="22" ></Zone>
             <Zone DeviceID="546031377" Bank="0" Program="7" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="0" LowKey="0" HighKey="127"></Zone>
         </Performance>
         <Performance ID="267872047" Name="We are the champions" Tempo="120">
-            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="26" HighKey="3"></Zone>
-            <Zone DeviceID="-2048222834" Bank="0" Program="13" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="3" LowKey="3" HighKey="3"></Zone>
+            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  LowKey="26" ></Zone>
+            <Zone DeviceID="-2048222834" Bank="0" Program="13" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
         </Performance>
         <Performance ID="1212709940" Name="Kind And Queen Intro" Tempo="120">
             <Zone DeviceID="546031377" Bank="0" Program="8" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="0" LowKey="0" HighKey="127"></Zone>

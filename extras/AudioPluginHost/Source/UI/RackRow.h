@@ -31,6 +31,7 @@ public:
 };
 class Device;
 class Zone;
+class FilterGraph;
 //[/Headers]
 
 
@@ -61,6 +62,8 @@ public:
     void Assign(Zone *zone);
     int ID() { return m_id; }
     void textEditorTextChanged(TextEditor&) override;
+
+    FilterGraph* graph;
     //[/UserMethods]
 
     void paint (Graphics& g) override;

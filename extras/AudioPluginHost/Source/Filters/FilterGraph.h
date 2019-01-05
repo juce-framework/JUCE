@@ -48,16 +48,10 @@ public:
 
     void addPlugin (const PluginDescription&, Point<double>);
 
-    AudioProcessorGraph::Node::Ptr getNodeForName (const String& name) const;
-
-    void setNodePosition (NodeID, Point<double>);
-    Point<double> getNodePosition (NodeID) const;
-
     //==============================================================================
     void clear();
 
     PluginWindow* getOrCreateWindowFor (AudioProcessorGraph::Node*, PluginWindow::Type);
-    //void closeCurrentlyOpenWindowsFor (AudioProcessorGraph::NodeID);
     bool closeAnyOpenPluginWindows();
 
     //==============================================================================
@@ -77,7 +71,7 @@ public:
     File getLastDocumentOpened() override;
     void setLastDocumentOpened (const File& file) override;
 
-    static File getDefaultGraphDocumentOnMobile();
+    Performer *GetPerformer() { return &m_performer; }
 
     //==============================================================================
     AudioProcessorGraph graph;
@@ -88,11 +82,12 @@ private:
     OwnedArray<PluginWindow> activePluginWindows;
 
     Performer m_performer;
+    AudioProcessorGraph::Node::Ptr m_midiInNode;
+    AudioProcessorGraph::Node::Ptr m_audioOutNode;
 
     NodeID lastUID = 0;
     NodeID getNextUID() noexcept;
 
-    //void createNodeFromXml (const XmlElement& xml);
     void addFilterCallback (AudioPluginInstance*, const String& error, Point<double>);
     void changeListenerCallback (ChangeBroadcaster*) override;
 

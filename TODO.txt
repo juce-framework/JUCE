@@ -1,4 +1,4 @@
-Need to save dll path and maybe outs?
+Need to save dll path
 
 Create plugins to reflect rack
 Bring in router (changed to new classes)
@@ -9,3 +9,5 @@ Query programs from plugin
 Change songs
 Menu's - Load/Save of classes
 Setlist manager
+Mono switch
+Scoops/Falls for disco strings

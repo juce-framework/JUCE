@@ -13,6 +13,7 @@ public:
     string Name;
     string PluginName;
     string PluginFile;
+    void *m_node;
 
 	template<class A>
 	void Serialize(A& ar)
@@ -55,7 +56,7 @@ public:
 		AR(Arpeggiator, XmlAttribute);
 		AR(Transpose, XmlAttribute);
 		AR(LowKey, XmlAttribute);
-		AR(HighKey, XmlAttribute);
+		AR(HighKey, XmlAttribute, 127);
 	}
 };
 

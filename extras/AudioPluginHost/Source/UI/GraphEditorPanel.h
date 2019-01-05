@@ -55,6 +55,9 @@ public:
     void changeListenerCallback (ChangeBroadcaster*) override;
 
     //==============================================================================
+    void updateComponents();
+
+    //==============================================================================
     void showPopupMenu (Point<int> position);
 
 
@@ -63,6 +66,18 @@ public:
     FilterGraph& graph;
 
 private:
+
+    std::unique_ptr<TabbedComponent> m_tabs;
+    std::unique_ptr<Label> m_transposeColumn;
+    std::unique_ptr<Label> m_bankProgramColumn;
+    std::unique_ptr<Label> m_rangeColumn;
+    std::unique_ptr<Label> m_volumeColumn;
+    std::unique_ptr<Component> m_rackTopUI;
+    std::unique_ptr<Viewport> m_rackUIViewport;
+    std::unique_ptr<Component> m_rackUI;
+    std::vector<std::unique_ptr<Component>> m_rackDevice;
+
+    void SetPerformance(int performanceIndex = 2);
 
     std::unique_ptr<PopupMenu> menu;
 
@@ -97,22 +112,8 @@ public:
     void setDoublePrecision (bool doublePrecision);
     bool closeAnyOpenPluginWindows();
 
-    void Load();
-    void SetPerformance(int performanceIndex);
-
-
     //==============================================================================
     std::unique_ptr<FilterGraph> graph;
-    std::unique_ptr<TabbedComponent> m_tabs;
-    std::unique_ptr<Label> m_transposeColumn;
-    std::unique_ptr<Label> m_bankProgramColumn;
-    std::unique_ptr<Label> m_rangeColumn;
-    std::unique_ptr<Label> m_volumeColumn;
-    std::unique_ptr<Component> m_rackTopUI;
-    std::unique_ptr<Viewport> m_rackUIViewport;
-    std::unique_ptr<Component> m_rackUI;
-    std::vector<std::unique_ptr<Component>> m_rackDevice;
-    
 
     void resized() override;
     void unfocusKeyboardComponent();
@@ -133,8 +134,6 @@ public:
     BurgerMenuComponent burgerMenu;
 
 private:
-    Performer * m_performer;
-
     //==============================================================================
     AudioDeviceManager& deviceManager;
     KnownPluginList& pluginList;
