@@ -145,7 +145,7 @@ struct SpeakerMappings  : private AudioChannelSet // (inheritance only to give e
         VstSpeakerConfigurationHolder (const Vst2::VstSpeakerArrangement& vstConfig)   { operator= (vstConfig); }
         VstSpeakerConfigurationHolder (const VstSpeakerConfigurationHolder& other) { operator= (other.get()); }
         VstSpeakerConfigurationHolder (VstSpeakerConfigurationHolder&& other)
-            : storage (static_cast<HeapBlock<Vst2::VstSpeakerArrangement>&&> (other.storage)) { other.clear(); }
+            : storage (std::move (other.storage)) { other.clear(); }
 
         VstSpeakerConfigurationHolder (const AudioChannelSet& channels)
         {
@@ -180,7 +180,7 @@ struct SpeakerMappings  : private AudioChannelSet // (inheritance only to give e
 
         VstSpeakerConfigurationHolder& operator= (VstSpeakerConfigurationHolder && vstConfig)
         {
-            storage = static_cast<HeapBlock<Vst2::VstSpeakerArrangement>&&> (vstConfig.storage);
+            storage = std::move (vstConfig.storage);
             vstConfig.clear();
 
             return *this;

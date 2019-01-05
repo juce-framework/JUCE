@@ -44,7 +44,7 @@ struct ProcessorDuplicator
 {
     ProcessorDuplicator() : state (new StateType()) {}
     ProcessorDuplicator (StateType* stateToUse) : state (stateToUse) {}
-    ProcessorDuplicator (typename StateType::Ptr stateToUse) : state (static_cast<typename StateType::Ptr&&> (stateToUse)) {}
+    ProcessorDuplicator (typename StateType::Ptr stateToUse) : state (std::move (stateToUse)) {}
     ProcessorDuplicator (const ProcessorDuplicator&) = default;
     ProcessorDuplicator (ProcessorDuplicator&&) = default;
 

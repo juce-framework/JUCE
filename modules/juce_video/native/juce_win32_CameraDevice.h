@@ -195,7 +195,7 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
             if (pictureTakenCallbackToUse == nullptr)
                 return;
 
-            pictureTakenCallback = static_cast<std::function<void (const Image&)>&&> (pictureTakenCallbackToUse);
+            pictureTakenCallback = std::move (pictureTakenCallbackToUse);
         }
 
         addUser();

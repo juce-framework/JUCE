@@ -68,7 +68,7 @@ namespace FIR
         Filter() : coefficients (new Coefficients<NumericType>)                                     { reset(); }
 
         /** Creates a filter with a given set of coefficients. */
-        Filter (CoefficientsPtr coefficientsToUse)  : coefficients (static_cast<CoefficientsPtr&&> (coefficientsToUse))   { reset(); }
+        Filter (CoefficientsPtr coefficientsToUse)  : coefficients (std::move (coefficientsToUse))   { reset(); }
 
         Filter (const Filter&) = default;
         Filter (Filter&&) = default;

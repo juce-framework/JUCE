@@ -122,11 +122,15 @@ public:
         auto centreY = getHeight() / 2.0f;
         auto radius = amplitude * 200.0f;
 
-        // Draw an ellipse based on the mouse position and audio volume
-        g.setColour (Colours::lightgreen);
-        g.fillEllipse  (jmax (0.0f, lastMousePosition.x) - radius / 2.0f,
-                        jmax (0.0f, lastMousePosition.y) - radius / 2.0f,
-                        radius, radius);
+        if (radius >= 0.0f)
+        {
+            // Draw an ellipse based on the mouse position and audio volume
+            g.setColour (Colours::lightgreen);
+
+            g.fillEllipse (jmax (0.0f, lastMousePosition.x) - radius / 2.0f,
+                           jmax (0.0f, lastMousePosition.y) - radius / 2.0f,
+                           radius, radius);
+        }
 
         // Draw a representative sine wave.
         Path wavePath;

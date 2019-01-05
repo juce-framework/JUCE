@@ -902,7 +902,24 @@ public:
                         AudioUnitGetProperty (audioUnit, kAudioUnitProperty_SampleRate, scope, static_cast<UInt32> (i), &sampleRate, &sampleRateSize);
 
                         if (sampleRate != sr)
-                            AudioUnitSetProperty (audioUnit, kAudioUnitProperty_SampleRate, scope, static_cast<UInt32> (i), &sr, sizeof (sr));
+                        {
+                            if (isAUv3) // setting kAudioUnitProperty_SampleRate fails on AUv3s
+                            {
+                                AudioStreamBasicDescription stream;
+                                UInt32 dataSize = sizeof (stream);
+                                auto err = AudioUnitGetProperty (audioUnit, kAudioUnitProperty_StreamFormat, scope, static_cast<UInt32> (i), &stream, &dataSize);
+
+                                if (err == noErr && dataSize == sizeof (stream))
+                                {
+                                    stream.mSampleRate = sr;
+                                    AudioUnitSetProperty (audioUnit, kAudioUnitProperty_StreamFormat, scope, static_cast<UInt32> (i), &stream, sizeof (stream));
+                                }
+                            }
+                            else
+                            {
+                                AudioUnitSetProperty (audioUnit, kAudioUnitProperty_SampleRate, scope, static_cast<UInt32> (i), &sr, sizeof (sr));
+                            }
+                        }
 
                         if (isInput)
                         {

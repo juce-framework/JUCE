@@ -277,7 +277,9 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
        #endif
 
         if (category == AVAudioSessionCategoryPlayAndRecord)
-            options |= (AVAudioSessionCategoryOptionDefaultToSpeaker | AVAudioSessionCategoryOptionAllowBluetooth);
+            options |= (AVAudioSessionCategoryOptionDefaultToSpeaker
+                      | AVAudioSessionCategoryOptionAllowBluetooth
+                      | AVAudioSessionCategoryOptionAllowBluetoothA2DP);
 
         JUCE_NSERROR_CHECK ([[AVAudioSession sharedInstance] setCategory: category
                                                              withOptions: options
@@ -404,9 +406,9 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
         JUCE_IOS_AUDIO_LOG ("Sample rate after detecting available sample rates: " << sampleRate);
     }
 
-    void updateHardwareInfo()
+    void updateHardwareInfo (bool forceUpdate = false)
     {
-        if (! hardwareInfoNeedsUpdating.compareAndSetBool (false, true))
+        if (! forceUpdate && ! hardwareInfoNeedsUpdating.compareAndSetBool (false, true))
             return;
 
         JUCE_IOS_AUDIO_LOG ("Updating hardware info");
@@ -451,13 +453,11 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
                             << ", targetBufferSize: " << targetBufferSize);
 
         setAudioSessionActive (true);
-
+        setAudioSessionCategory (requestedInputChannels > 0 ? AVAudioSessionCategoryPlayAndRecord
+                                                            : AVAudioSessionCategoryPlayback);
         channelData.reconfigure (requestedInputChannels, requestedOutputChannels);
-
-        setAudioSessionCategory (channelData.areInputChannelsAvailable() ? AVAudioSessionCategoryPlayAndRecord : AVAudioSessionCategoryPlayback);
-
+        updateHardwareInfo (true);
         setTargetSampleRateAndBufferSize();
-
         fixAudioRouteIfSetToReceiver();
 
         isRunning = true;
@@ -486,11 +486,11 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
         {
             isRunning = false;
 
-            if (audioUnit != 0)
+            if (audioUnit != nullptr)
             {
                 AudioOutputUnitStart (audioUnit);
                 AudioComponentInstanceDispose (audioUnit);
-                audioUnit = 0;
+                audioUnit = nullptr;
             }
 
             setAudioSessionActive (false);
@@ -819,6 +819,9 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
             {
                 AudioOutputUnitStop (audioUnit);
                 setAudioSessionActive (false);
+
+                if (callback != nullptr)
+                    callback->audioDeviceStopped();
             }
         }
     }
@@ -927,10 +930,10 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
     {
         JUCE_IOS_AUDIO_LOG ("Creating the audio unit");
 
-        if (audioUnit != 0)
+        if (audioUnit != nullptr)
         {
             AudioComponentInstanceDispose (audioUnit);
-            audioUnit = 0;
+            audioUnit = nullptr;
         }
 
         AudioComponentDescription desc;
@@ -940,10 +943,10 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
         desc.componentFlags = 0;
         desc.componentFlagsMask = 0;
 
-        AudioComponent comp = AudioComponentFindNext (0, &desc);
+        AudioComponent comp = AudioComponentFindNext (nullptr, &desc);
         AudioComponentInstanceNew (comp, &audioUnit);
 
-        if (audioUnit == 0)
+        if (audioUnit == nullptr)
             return false;
 
        #if JucePlugin_Enable_IAA
@@ -1082,10 +1085,10 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
 
         if (isRunning)
         {
-            if (audioUnit != 0)
+            if (audioUnit != nullptr)
             {
                 AudioComponentInstanceDispose (audioUnit);
-                audioUnit = 0;
+                audioUnit = nullptr;
 
                 if (callback != nullptr)
                     callback->audioDeviceStopped();
@@ -1095,7 +1098,7 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
 
             createAudioUnit();
 
-            if (audioUnit != 0)
+            if (audioUnit != nullptr)
             {
                 isRunning = true;
 

@@ -522,7 +522,7 @@ struct CameraDevice::Pimpl
 
     void open (InternalOpenCameraResultCallback cameraOpenCallbackToUse)
     {
-        cameraOpenCallback = static_cast<InternalOpenCameraResultCallback&&> (cameraOpenCallbackToUse);
+        cameraOpenCallback = std::move (cameraOpenCallbackToUse);
 
         // A valid camera open callback must be passed.
         jassert (cameraOpenCallback != nullptr);
@@ -578,7 +578,7 @@ struct CameraDevice::Pimpl
             return;
         }
 
-        pictureTakenCallback = static_cast<std::function<void (const Image&)>&&> (pictureTakenCallbackToUse);
+        pictureTakenCallback = std::move (pictureTakenCallbackToUse);
 
         triggerStillPictureCapture();
     }

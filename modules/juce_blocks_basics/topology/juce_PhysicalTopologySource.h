@@ -88,7 +88,7 @@ protected:
 private:
     //==========================================================================
     DeviceDetector* customDetector = nullptr;
-    struct Internal;
+    friend struct Detector;
     struct DetectorHolder;
     std::unique_ptr<DetectorHolder> detector;
 

@@ -132,7 +132,7 @@ Path& Path::operator= (const Path& other)
 }
 
 Path::Path (Path&& other) noexcept
-    : data (static_cast<Array<float>&&> (other.data)),
+    : data (std::move (other.data)),
       bounds (other.bounds),
       useNonZeroWinding (other.useNonZeroWinding)
 {
@@ -140,7 +140,7 @@ Path::Path (Path&& other) noexcept
 
 Path& Path::operator= (Path&& other) noexcept
 {
-    data = static_cast<Array<float>&&> (other.data);
+    data = std::move (other.data);
     bounds = other.bounds;
     useNonZeroWinding = other.useNonZeroWinding;
     return *this;

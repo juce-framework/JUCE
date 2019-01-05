@@ -9,7 +9,7 @@
 //-----------------------------------------------------------------------------
 // This file is part of a Steinberg SDK. It is subject to the license terms
 // in the LICENSE file found in the top-level directory of this distribution
-// and at www.steinberg.net/sdklicenses.
+// and at www.steinberg.net/sdklicenses. 
 // No part of the SDK, including this file, may be copied, modified, propagated,
 // or distributed except according to the terms contained in the LICENSE file.
 //-----------------------------------------------------------------------------
@@ -47,7 +47,10 @@ enum NoteExpressionTypeIDs
 	kTextTypeID,			///< TODO:
 	kPhonemeTypeID,			///< TODO:
 
-	kCustomStart = 100000	///< custom note change type ids must start from here
+	kCustomStart = 100000,	///< start of custom note expression type ids
+	kCustomEnd   = 200000,  ///< end of custom note expression type ids
+	
+	kInvalidTypeID = 0xFFFFFFFF		///< indicates an invalid note expression type
 };
 
 //------------------------------------------------------------------------
@@ -150,7 +153,7 @@ Note that there is only one NoteExpressionTypeID per given channel of an event b
 The method getNoteExpressionStringByValue allows conversion from a normalized value to a string representation
 and the getNoteExpressionValueByString method from a string to a normalized value.
 
-When the note expression state changes (per example when switching presets) the Plug-in needs
+When the note expression state changes (for example when switching presets) the Plug-in needs
 to inform the host about it via \ref IComponentHandler::restartComponent (kNoteExpressionChanged).
 */
 //------------------------------------------------------------------------

@@ -169,6 +169,7 @@ public:
     void create (const OwnedArray<LibraryModule>&) const override
     {
         MemoryOutputStream out;
+        out.setNewLineString ("\n");
 
         out << "# Automatically generated CMakeLists, created by the Projucer" << newLine
             << "# Don't edit this file! Your changes will be overwritten when you re-save the Projucer project!" << newLine
@@ -198,7 +199,9 @@ public:
 
         MemoryBlock existingContent;
         getTargetFolder().getChildFile ("CMakeLists.txt").loadFileAsData (existingContent);
+
         MemoryOutputStream out (existingContent, true);
+        out.setNewLineString ("\n");
 
         out << "###############################################################################" << newLine
             << "# " << exporter->getName() << newLine

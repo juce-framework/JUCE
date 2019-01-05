@@ -26,7 +26,6 @@
 
 #if JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WINDOWS)
 
-#include <map>
 #include "juce_VST3Headers.h"
 #include "juce_VST3Common.h"
 
@@ -1599,6 +1598,7 @@ struct VST3ComponentHolder
 class VST3PluginInstance : public AudioPluginInstance
 {
 public:
+    //==============================================================================
     struct VST3Parameter final  : public Parameter
     {
         VST3Parameter (VST3PluginInstance& parent,
@@ -1614,6 +1614,8 @@ public:
         {
             if (pluginInstance.editController != nullptr)
             {
+                const ScopedLock sl (pluginInstance.lock);
+
                 return (float) pluginInstance.editController->getParamNormalized (paramID);
             }
 
@@ -1624,6 +1626,8 @@ public:
         {
             if (pluginInstance.editController != nullptr)
             {
+                const ScopedLock sl (pluginInstance.lock);
+
                 pluginInstance.editController->setParamNormalized (paramID, (double) newValue);
 
                 Steinberg::int32 index;
@@ -1700,13 +1704,14 @@ public:
         const bool automatable;
     };
 
+    //==============================================================================
     VST3PluginInstance (VST3ComponentHolder* componentHolder)
         : AudioPluginInstance (getBusProperties (componentHolder->component)),
           holder (componentHolder),
           inputParameterChanges (new ParamValueQueueList()),
           outputParameterChanges (new ParamValueQueueList()),
-        midiInputs (new MidiEventList()),
-        midiOutputs (new MidiEventList())
+          midiInputs (new MidiEventList()),
+          midiOutputs (new MidiEventList())
     {
         holder->host->setPlugin (this);
     }
@@ -1743,6 +1748,7 @@ public:
         editController = nullptr;
     }
 
+    //==============================================================================
     bool initialise()
     {
        #if JUCE_WINDOWS
@@ -1768,10 +1774,21 @@ public:
         editController->setComponentHandler (holder->host);
         grabInformationObjects();
         interconnectComponentAndController();
-        addParameters();
-        synchroniseStates();
-        syncProgramNames();
+
+        auto configureParameters = [this]
+        {
+            addParameters();
+            synchroniseStates();
+            syncProgramNames();
+        };
+        configureParameters();
+
         setupIO();
+
+        // Some plug-ins don't present their parameters until after the IO has been
+        // configured, so we need to jump though all these hoops again
+        if (getParameters().isEmpty() && editController->getParameterCount() > 0)
+            configureParameters();
 
         return true;
     }
@@ -1837,12 +1854,16 @@ public:
         holder->initialise();
         editController->setComponentHandler (holder->host);
 
-
         Array<Vst::SpeakerArrangement> inputArrangements, outputArrangements;
         processorLayoutsToArrangements (inputArrangements, outputArrangements);
 
-        warnOnFailure (processor->setBusArrangements (inputArrangements.getRawDataPointer(), inputArrangements.size(),
-                                                      outputArrangements.getRawDataPointer(), outputArrangements.size()));
+        // Some plug-ins will crash if you pass a nullptr to setBusArrangements!
+        SpeakerArrangement nullArrangement = {};
+        auto* inputArrangementData  = inputArrangements.isEmpty()  ? &nullArrangement : inputArrangements.getRawDataPointer();
+        auto* outputArrangementData = outputArrangements.isEmpty() ? &nullArrangement : outputArrangements.getRawDataPointer();
+
+        warnOnFailure (processor->setBusArrangements (inputArrangementData,  inputArrangements.size(),
+                                                      outputArrangementData, outputArrangements.size()));
 
         Array<Vst::SpeakerArrangement> actualInArr, actualOutArr;
         repopulateArrangements (actualInArr, actualOutArr);
@@ -2514,6 +2535,7 @@ private:
     Vst::ProcessContext timingInfo; //< Only use this in processBlock()!
     bool isControllerInitialised = false, isActive = false, lastProcessBlockCallWasBypass = false;
     VST3Parameter* bypassParam = nullptr;
+    CriticalSection lock;
 
     //==============================================================================
     /** Some plugins need to be "connected" to intercommunicate between their implemented classes */
@@ -2791,6 +2813,7 @@ private:
 
         {
             int idx, num = editController->getParameterCount();
+
             for (idx = 0; idx < num; ++idx)
                 if (editController->getParameterInfo (idx, paramInfo) == kResultOk
                      && (paramInfo.flags & Steinberg::Vst::ParameterInfo::kIsProgramChange) != 0)
@@ -2837,8 +2860,7 @@ private:
             }
         }
 
-        if (editController != nullptr
-               && paramInfo.stepCount > 0)
+        if (editController != nullptr && paramInfo.stepCount > 0)
         {
             auto numPrograms = paramInfo.stepCount + 1;
 

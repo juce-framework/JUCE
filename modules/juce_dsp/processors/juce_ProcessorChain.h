@@ -39,6 +39,9 @@ namespace ProcessorHelpers  // Internal helper classes used in building the Proc
         static auto& get (ProcessorType& a) noexcept                 { return AccessHelper<arg - 1>::get (a.processors); }
 
         template <typename ProcessorType>
+        static const auto& get (const ProcessorType& a) noexcept     { return AccessHelper<arg - 1>::get (a.processors); }
+
+        template <typename ProcessorType>
         static void setBypassed (ProcessorType& a, bool bypassed)    { AccessHelper<arg - 1>::setBypassed (a.processors, bypassed); }
     };
 
@@ -47,6 +50,9 @@ namespace ProcessorHelpers  // Internal helper classes used in building the Proc
     {
         template <typename ProcessorType>
         static auto& get (ProcessorType& a) noexcept                 { return a.getProcessor(); }
+
+        template <typename ProcessorType>
+        static const auto& get (const ProcessorType& a) noexcept     { return a.getProcessor(); }
 
         template <typename ProcessorType>
         static void setBypassed (ProcessorType& a, bool bypassed)    { a.isBypassed = bypassed; }
@@ -89,10 +95,13 @@ namespace ProcessorHelpers  // Internal helper classes used in building the Proc
         bool isBypassed = false;
         Processor processor;
 
-        Processor& getProcessor() noexcept       { return processor; }
-        Subclass& getThis() noexcept             { return *static_cast<Subclass*> (this); }
+        Processor& getProcessor() noexcept             { return processor; }
+        const Processor& getProcessor() const noexcept { return processor; }
+        Subclass& getThis() noexcept                   { return *static_cast<Subclass*> (this); }
+        const Subclass& getThis() const noexcept       { return *static_cast<const Subclass*> (this); }
 
         template <int arg> auto& get() noexcept                      { return AccessHelper<arg>::get (getThis()); }
+        template <int arg> const auto& get() const noexcept          { return AccessHelper<arg>::get (getThis()); }
         template <int arg> void setBypassed (bool bypassed) noexcept { AccessHelper<arg>::setBypassed (getThis(), bypassed); }
     };
 

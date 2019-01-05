@@ -42,13 +42,13 @@ Result& Result::operator= (const Result& other)
 }
 
 Result::Result (Result&& other) noexcept
-    : errorMessage (static_cast<String&&> (other.errorMessage))
+    : errorMessage (std::move (other.errorMessage))
 {
 }
 
 Result& Result::operator= (Result&& other) noexcept
 {
-    errorMessage = static_cast<String&&> (other.errorMessage);
+    errorMessage = std::move (other.errorMessage);
     return *this;
 }
 

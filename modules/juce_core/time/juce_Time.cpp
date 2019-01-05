@@ -181,10 +181,7 @@ namespace TimeHelpers
 }
 
 //==============================================================================
-Time::Time (int64 ms) noexcept  : millisSinceEpoch (ms)
-{
-    static_assert (std::is_trivially_copyable<Time>::value, "Time is not trivially copyable");
-}
+Time::Time (int64 ms) noexcept  : millisSinceEpoch (ms) {}
 
 Time::Time (int year, int month, int day,
             int hours, int minutes, int seconds, int milliseconds,

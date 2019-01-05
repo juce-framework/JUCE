@@ -12,24 +12,24 @@
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
-//
-//   * Redistributions of source code must retain the above copyright notice,
+// 
+//   * Redistributions of source code must retain the above copyright notice, 
 //     this list of conditions and the following disclaimer.
 //   * Redistributions in binary form must reproduce the above copyright notice,
-//     this list of conditions and the following disclaimer in the documentation
+//     this list of conditions and the following disclaimer in the documentation 
 //     and/or other materials provided with the distribution.
 //   * Neither the name of the Steinberg Media Technologies nor the names of its
-//     contributors may be used to endorse or promote products derived from this
+//     contributors may be used to endorse or promote products derived from this 
 //     software without specific prior written permission.
-//
+// 
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-// IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
-// INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-// LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+// IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+// INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
+// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF 
+// LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE 
 // OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE  OF THIS SOFTWARE, EVEN IF ADVISED
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
@@ -243,9 +243,9 @@ public:
 	OBJ_METHODS (ProgramList, FObject)
 //------------------------------------------------------------------------
 protected:
-	typedef std::map<String, String> StringMap;
-	typedef std::vector<String> StringVector;
-	typedef std::vector<StringMap> ProgramInfoVector;
+	using StringMap = std::map<String, String>;
+	using StringVector = std::vector<String>;
+	using ProgramInfoVector = std::vector<StringMap>;
 	ProgramListInfo info;
 	UnitID unitId;
 	StringVector programNames;
@@ -277,8 +277,8 @@ public:
 
 	OBJ_METHODS (ProgramListWithPitchNames, ProgramList)
 protected:
-	typedef std::map<int16, String> PitchNameMap;
-	typedef std::vector<PitchNameMap> PitchNamesVector;
+	using PitchNameMap = std::map<int16, String>;
+	using PitchNamesVector = std::vector<PitchNameMap>;
 	PitchNamesVector pitchNames;
 };
 
@@ -360,9 +360,9 @@ public:
 	REFCOUNT_METHODS (EditController)
 
 protected:
-	typedef std::vector<IPtr<ProgramList>> ProgramListVector;
-	typedef std::map<ProgramListID, ProgramListVector::size_type> ProgramIndexMap;
-	typedef std::vector<IPtr<Unit>> UnitVector;
+	using ProgramListVector = std::vector<IPtr<ProgramList>>;
+	using ProgramIndexMap = std::map<ProgramListID, ProgramListVector::size_type>;
+	using UnitVector = std::vector<IPtr<Unit>>;
 	UnitVector units;
 	ProgramListVector programLists;
 	ProgramIndexMap programIndexMap;

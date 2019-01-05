@@ -150,7 +150,7 @@ public:
         XmlElement xml ("CodeBlocks_project_file");
         addVersion (xml);
         createProject (*xml.createNewChildElement ("Project"));
-        writeXmlOrThrow (xml, cbpFile, "UTF-8", 10);
+        writeXmlOrThrow (xml, cbpFile, "UTF-8", 10, true);
     }
 
     //==============================================================================
@@ -307,14 +307,16 @@ private:
     {
         auto result = linuxPackages;
 
-        static String guiExtrasModule ("juce_gui_extra");
-
-        if (project.getEnabledModules().isModuleEnabled (guiExtrasModule)
+        if (project.getEnabledModules().isModuleEnabled ("juce_gui_extra")
             && project.isConfigFlagEnabled ("JUCE_WEB_BROWSER", true))
         {
             result.add ("webkit2gtk-4.0");
             result.add ("gtk+-x11-3.0");
         }
+
+        if (project.getEnabledModules().isModuleEnabled ("juce_core")
+            && ! project.isConfigFlagEnabled ("JUCE_LOAD_CURL_SYMBOLS_LAZILY", false))
+            result.add ("libcurl");
 
         result.removeDuplicates (false);
 
@@ -479,7 +481,7 @@ private:
         auto librarySearchPaths = config.getLibrarySearchPaths();
 
         if (getProject().getProjectType().isAudioPlugin() && target.type != ProjectType::Target::SharedCodeTarget)
-            librarySearchPaths.add (RelativePath (getSharedCodePath (config), RelativePath::buildTargetFolder).getParentDirectory().toUnixStyle());
+            librarySearchPaths.add (RelativePath (getSharedCodePath (config), RelativePath::buildTargetFolder).getParentDirectory().toUnixStyle().quoted());
 
         return librarySearchPaths;
     }
@@ -619,7 +621,7 @@ private:
             auto* linker = xml.createNewChildElement ("Linker");
 
             if (getProject().getProjectType().isAudioPlugin() && target.type != ProjectType::Target::SharedCodeTarget)
-                setAddOption (*linker, "option", getSharedCodePath (config));
+                setAddOption (*linker, "option", getSharedCodePath (config).quoted());
 
             for (auto& flag : getLinkerFlags (config, target))
                 setAddOption (*linker, "option", flag);

@@ -123,7 +123,7 @@ For further help getting started, please refer to the JUCE
 #### Building JUCE Projects
 - __macOS__: macOS 10.11 and Xcode 7.3.1
 - __Windows__: Windows 8.1 and Visual Studio 2013 64-bit
-- __Linux__: GCC 5.0
+- __Linux__: GCC 4.8
 
 #### Minimum Deployment Targets
 - __macOS__: macOS 10.7

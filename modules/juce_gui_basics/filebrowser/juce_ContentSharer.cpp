@@ -183,7 +183,7 @@ void ContentSharer::startNewShare (std::function<void (bool, const String&)> cal
 
     // You need to pass a valid callback.
     jassert (callbackToUse);
-    callback = static_cast<std::function<void (bool, const String&)>&&> (callbackToUse);
+    callback = std::move (callbackToUse);
 
     pimpl.reset (createPimpl());
 }
