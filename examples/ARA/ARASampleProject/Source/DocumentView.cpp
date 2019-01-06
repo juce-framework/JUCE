@@ -74,16 +74,24 @@ positionInfoPtr (nullptr)
     followPlayheadToggleButton.setToggleState (true, dontSendNotification);
     addAndMakeVisible (followPlayheadToggleButton);
     
-    if (isARAEditorView())
+    if (! isARAEditorView())
+    {
+        // you shouldn't create a DocumentView if your instance can't support ARA.
+        // notify user on your AudioProcessorEditorView or provide your own capture
+        // alternative to ARA workflow.
+        jassertfalse;
+    }
+    else
     {
         getARAEditorView()->addListener (this);
         getARADocumentController()->getDocument<ARADocument>()->addListener (this);
-        
+
         rulersView.reset (new RulersView (*this));
         rulersViewPort.setScrollBarsShown (false, false, false, false);
         rulersViewPort.setViewedComponent (rulersView.get(), false);
         addAndMakeVisible (rulersViewPort);
     }
+
     startTimerHz (60);
 }
 
@@ -111,20 +119,10 @@ double DocumentView::getPlaybackRegionsViewsTimeForX (int x) const
 void DocumentView::paint (Graphics& g)
 {
     g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
-    
-    if (! isARAEditorView())
+    if (regionSequenceViewsAreInvalid)
     {
-        g.setColour (Colours::white);
-        g.setFont (20.0f);
-        g.drawFittedText ("Non ARA Instance. Please re-open as ARA2!", getLocalBounds(), Justification::centred, 1);
-    }
-    else
-    {
-        if (regionSequenceViewsAreInvalid)
-        {
-            rebuildRegionSequenceViews();
-            regionSequenceViewsAreInvalid = false;
-        }
+        rebuildRegionSequenceViews();
+        regionSequenceViewsAreInvalid = false;
     }
 }
 

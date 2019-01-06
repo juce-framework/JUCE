@@ -12,12 +12,16 @@ constexpr int kHeight = kMinHeight + 5 * kTrackHeight;
 //==============================================================================
 ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARASampleProjectAudioProcessor& p)
     : AudioProcessorEditor (&p),
-      documentView (p)
+      AudioProcessorEditorARAExtension (&p)
 {
-    // TODO JUCE_ARA hotfix for Unicode chord symbols, see https://forum.juce.com/t/embedding-unicode-string-literals-in-your-cpp-files/12600/7
-    documentView.getLookAndFeel().setDefaultSansSerifTypefaceName("Arial Unicode MS");
-    documentView.setCurrentPositionInfo (&p.getLastKnownPositionInfo());
-    addAndMakeVisible (documentView);
+    if (isARAEditorView())
+    {
+        documentView.reset (new DocumentView (p));
+        // TODO JUCE_ARA hotfix for Unicode chord symbols, see https://forum.juce.com/t/embedding-unicode-string-literals-in-your-cpp-files/12600/7
+        documentView->getLookAndFeel().setDefaultSansSerifTypefaceName("Arial Unicode MS");
+        documentView->setCurrentPositionInfo (&p.getLastKnownPositionInfo());
+        addAndMakeVisible (documentView.get());
+    }
 
     setSize (kWidth, kHeight);
     setResizeLimits (kMinWidth, kMinHeight, 32768, 32768);
@@ -28,9 +32,18 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
 void ARASampleProjectAudioProcessorEditor::paint (Graphics& g)
 {
     g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+    if (! isARAEditorView())
+    {
+        g.setColour (Colours::white);
+        g.setFont (20.0f);
+        g.drawFittedText ("Non ARA Instance. Please re-open as ARA2!", getLocalBounds(), Justification::centred, 1);
+    }
 }
 
 void ARASampleProjectAudioProcessorEditor::resized()
 {
-    documentView.setBounds (getBounds());
+    if (isARAEditorView())
+    {
+        documentView->setBounds (getBounds());
+    }
 }
