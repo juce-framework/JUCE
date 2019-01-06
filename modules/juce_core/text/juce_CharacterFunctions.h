@@ -378,6 +378,35 @@ public:
         return readDoubleValue (text);
     }
 
+    /** If the input is a string representation of a floating-point number, this will
+        find the length of the string without any trailing zeros.
+    */
+    template <typename CharPointerType>
+    static size_t findLengthWithoutTrailingZeros (CharPointerType text)
+    {
+        auto start = text;
+        auto end = text + ((int) text.length());
+
+        for (auto e = end; e > start + 1; --e)
+        {
+            auto lastChar = *(e - 1);
+
+            if (lastChar != '0')
+            {
+                if (lastChar == '.')
+                    return (size_t) (e + 1 - start);
+
+                for (auto s = start; s < e; ++s)
+                    if (*s == '.')
+                        return (size_t) (e - start);
+
+                break;
+            }
+        }
+
+        return (size_t) (end - start);
+    }
+
     //==============================================================================
     /** Parses a character string, to read an integer value. */
     template <typename IntType, typename CharPointerType>

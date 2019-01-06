@@ -484,7 +484,7 @@ OutputStream* juce_CreateContentURIOutputStream (const URL& url)
 {
     auto stream = AndroidContentUriResolver::getStreamForContentUri (url, false);
 
-    return (stream.get() != 0 ? new AndroidContentUriOutputStream (static_cast<LocalRef<jobject>&&> (stream)) : nullptr);
+    return (stream.get() != 0 ? new AndroidContentUriOutputStream (std::move (stream)) : nullptr);
 }
 
 //==============================================================================
@@ -629,7 +629,7 @@ bool File::moveToTrash() const
 
 JUCE_API bool JUCE_CALLTYPE Process::openDocument (const String& fileName, const String&)
 {
-    URL targetURL (File {fileName});
+    URL targetURL (File::createFileWithoutCheckingPath (fileName));
     auto* env = getEnv();
 
     const LocalRef<jstring> action (javaString ("android.intent.action.VIEW"));

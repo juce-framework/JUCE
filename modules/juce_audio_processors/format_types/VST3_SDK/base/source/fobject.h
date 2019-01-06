@@ -13,24 +13,24 @@
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
-//
-//   * Redistributions of source code must retain the above copyright notice,
+// 
+//   * Redistributions of source code must retain the above copyright notice, 
 //     this list of conditions and the following disclaimer.
 //   * Redistributions in binary form must reproduce the above copyright notice,
-//     this list of conditions and the following disclaimer in the documentation
+//     this list of conditions and the following disclaimer in the documentation 
 //     and/or other materials provided with the distribution.
 //   * Neither the name of the Steinberg Media Technologies nor the names of its
-//     contributors may be used to endorse or promote products derived from this
+//     contributors may be used to endorse or promote products derived from this 
 //     software without specific prior written permission.
-//
+// 
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-// IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
-// INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-// LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+// IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+// INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
+// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF 
+// LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE 
 // OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE  OF THIS SOFTWARE, EVEN IF ADVISED
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
@@ -59,7 +59,7 @@ typedef FIDString FClassID;
 /** Implements FUnknown and IDependent.
 
 FObject is a polymorphic class that implements IDependent (of SKI module)
-and therefore derived from FUnknown, which is the most abstract base class of all.
+and therefore derived from FUnknown, which is the most abstract base class of all. 
 
 All COM-like virtual methods of FUnknown such as queryInterface(), addRef(), release()
 are implemented here. On top of that, dependency-related methods are implemented too.
@@ -74,7 +74,7 @@ it is. To do this correctly, every class must override some methods. This
 is simplified by using the OBJ_METHODS macros
 
 
-@see
+@see 
 	- FUnknown
 	- IDependent
 	- IUpdateHandler
@@ -105,7 +105,7 @@ public:
 
 	// IDependent
 	virtual void PLUGIN_API update (FUnknown* /*changedUnknown*/, int32 /*message*/) SMTG_OVERRIDE {}
-																			///< empty virtual method that should be overridden by derived classes for data updates upon changes
+																			///< empty virtual method that should be overridden by derived classes for data updates upon changes	
 	// IDependency
 	virtual void addDependent (IDependent* dep);							///< adds dependency to the object
 	virtual void removeDependent (IDependent* dep);							///< removes dependency from the object
@@ -113,9 +113,9 @@ public:
 	virtual void deferUpdate (int32 msg = kChanged);						///< Similar to triggerUpdates, except only delivered in idle (usefull in collecting updates).
 	virtual void updateDone (int32 /* msg */) {}											///< empty virtual method that should be overridden by derived classes
 	virtual bool isEqualInstance (FUnknown* d) {return this == d;}
-
+	
 	static void setUpdateHandler (IUpdateHandler* handler) {gUpdateHandler = handler;}	///< set method for the local attribute
-	static IUpdateHandler* getUpdateHandler () {return gUpdateHandler;}					///< get method for the local attribute
+	static IUpdateHandler* getUpdateHandler () {return gUpdateHandler;}					///< get method for the local attribute 
 
 	// static helper functions
 	static inline bool classIDsEqual (FClassID ci1, FClassID ci2);			///< compares (evaluates) 2 class IDs
@@ -138,11 +138,11 @@ protected:
 inline FObject* FObject::unknownToObject (FUnknown* unknown)
 {
 	FObject* object = 0;
-	if (unknown)
+	if (unknown) 
 	{
 		unknown->queryInterface (FObject::iid, (void**)&object);
 		if (object)
-			object->release (); // queryInterface has added ref
+			object->release (); // queryInterface has added ref		
 	}
 	return object;
 }
@@ -193,7 +193,7 @@ inline C* FUCast (FUnknown* object)
 /** @name Convenience methods that call release or delete respectively
 	on a pointer if it is non-zero, and then set the pointer to zero.
 	Note: you should prefer using IPtr or OPtr instead of these methods
-	whenever possible.
+	whenever possible. 
 	<b>Examples:</b>
 	@code
 	~Foo ()
@@ -212,19 +212,19 @@ inline C* FUCast (FUnknown* object)
 ///@{
 //-----------------------------------------------------------------------
 template <class I>
-inline void SafeRelease (I *& ptr)
-{
-	if (ptr)
+inline void SafeRelease (I *& ptr) 
+{ 
+	if (ptr) 
 	{
-		ptr->release ();
+		ptr->release (); 
 		ptr = 0;
 	}
 }
 
 //-----------------------------------------------------------------------
 template <class I>
-inline void SafeRelease (IPtr<I> & ptr)
-{
+inline void SafeRelease (IPtr<I> & ptr) 
+{ 
 	ptr = 0;
 }
 
@@ -233,7 +233,7 @@ inline void SafeRelease (IPtr<I> & ptr)
 template <class T>
 inline void SafeDelete (T *& ptr)
 {
-	if (ptr)
+	if (ptr) 
 	{
 		delete ptr;
 		ptr = 0;
@@ -247,11 +247,11 @@ inline void AssignShared (T*& dest, T* newPtr)
 {
 	if (dest == newPtr)
 		return;
-
-	if (dest)
-		dest->release ();
-	dest = newPtr;
-	if (dest)
+	
+	if (dest) 
+		dest->release (); 
+	dest = newPtr; 
+	if (dest) 
 		dest->addRef ();
 }
 
@@ -282,7 +282,7 @@ inline void AssignSharedDependent (IDependent* _this, IPtr<T>& dest, T* newPtr)
 	if (dest)
 		dest->addDependent (_this);
 }
-
+	
 //-----------------------------------------------------------------------
 template <class T>
 inline void SafeReleaseDependent (IDependent* _this, T*& dest)
@@ -291,7 +291,7 @@ inline void SafeReleaseDependent (IDependent* _this, T*& dest)
 		dest->removeDependent (_this);
 	SafeRelease (dest);
 }
-
+	
 //-----------------------------------------------------------------------
 template <class T>
 inline void SafeReleaseDependent (IDependent* _this, IPtr<T>& dest)
@@ -343,11 +343,11 @@ namespace Singleton {
 	virtual Steinberg::FClassID isA () const SMTG_OVERRIDE {return className::getFClassID ();}	\
 	virtual bool isA (Steinberg::FClassID s) const SMTG_OVERRIDE {return isTypeOf (s, false);}	\
 	virtual bool isTypeOf (Steinberg::FClassID s, bool askBaseClass = true) const SMTG_OVERRIDE	\
-    {  return (classIDsEqual (s, #className) ? true : (askBaseClass ? baseClass::isTypeOf (s, true) : false)); }
+    {  return (classIDsEqual (s, #className) ? true : (askBaseClass ? baseClass::isTypeOf (s, true) : false)); } 
 
 //------------------------------------------------------------------------
 /** Delegate refcount functions to BaseClass.
-	BaseClase must implement ref counting.
+	BaseClase must implement ref counting. 
 */
 //------------------------------------------------------------------------
 #define REFCOUNT_METHODS(BaseClass) \
@@ -359,7 +359,7 @@ virtual Steinberg::uint32 PLUGIN_API release ()SMTG_OVERRIDE{ return BaseClass::
 
 	<b>Examples:</b>
 	@code
-	class Foo : public FObject, public IFoo2, public IFoo3
+	class Foo : public FObject, public IFoo2, public IFoo3 
 	{
 	    ...
 		DEFINE_INTERFACES
@@ -371,7 +371,7 @@ virtual Steinberg::uint32 PLUGIN_API release ()SMTG_OVERRIDE{ return BaseClass::
 	    // Implement IFoo3 interface ...
 	    ...
 	};
-	@endcode
+	@endcode	
 */
 ///@{
 //------------------------------------------------------------------------
@@ -399,7 +399,7 @@ Steinberg::tresult PLUGIN_API queryInterface (const Steinberg::TUID iid, void** 
 /** @name Convenient macros to implement Steinberg::FUnknown::queryInterface ().
 	<b>Examples:</b>
 	@code
-	class Foo : public FObject, public IFoo2, public IFoo3
+	class Foo : public FObject, public IFoo2, public IFoo3 
 	{
 	    ...
 	    DEF_INTERFACES_2(IFoo2,IFoo3,FObject)
@@ -444,7 +444,7 @@ END_DEFINE_INTERFACES (BaseClass)
 /** @name Convenient macros to implement Steinberg::FUnknown methods.
 	<b>Examples:</b>
 	@code
-	class Foo : public FObject, public IFoo2, public IFoo3
+	class Foo : public FObject, public IFoo2, public IFoo3 
 	{
 	    ...
 	    FUNKNOWN_METHODS2(IFoo2,IFoo3,FObject)

@@ -60,11 +60,11 @@ void PlaybackRegionView::paint (Graphics& g)
         auto clipBounds = g.getClipBounds();
         if (clipBounds.getWidth() > 0)
         {
-            auto convertedBounds = clipBounds + getBoundsInParent().getPosition();
-            double startTime = documentView.getPlaybackRegionsViewsTimeForX (convertedBounds.getX());
-            double endTime = documentView.getPlaybackRegionsViewsTimeForX (convertedBounds.getRight());
+            const auto convertedBounds = clipBounds + getBoundsInParent().getPosition();
+            const double startTime = documentView.getPlaybackRegionsViewsTimeForX (convertedBounds.getX());
+            const double endTime = documentView.getPlaybackRegionsViewsTimeForX (convertedBounds.getRight());
 
-            Range<double> regionTimeRange = getTimeRange();
+            const auto regionTimeRange = getTimeRange();
 
             auto drawBounds = getBounds() - getPosition();
             drawBounds.setHorizontalRange (clipBounds.getHorizontalRange());

@@ -96,23 +96,20 @@ int64 ResourceFile::getTotalDataSize() const
     return total;
 }
 
-static String getComment()
+static void writeComment (MemoryOutputStream& mo)
 {
-    String comment;
-    comment << newLine << newLine
-            << "   This is an auto-generated file: Any edits you make may be overwritten!" << newLine
-            << newLine
-            << "*/" << newLine
-            << newLine;
-
-    return comment;
+    mo << newLine << newLine
+       << "   This is an auto-generated file: Any edits you make may be overwritten!" << newLine
+       << newLine
+       << "*/" << newLine
+       << newLine;
 }
 
 Result ResourceFile::writeHeader (MemoryOutputStream& header)
 {
-    header << "/* ========================================================================================="
-           << getComment()
-           << "#pragma once" << newLine
+    header << "/* =========================================================================================";
+    writeComment (header);
+    header << "#pragma once" << newLine
            << newLine
            << "namespace " << className << newLine
            << "{" << newLine;
@@ -167,9 +164,9 @@ Result ResourceFile::writeCpp (MemoryOutputStream& cpp, const File& headerFile, 
 {
     bool isFirstFile = (i == 0);
 
-    cpp << "/* ==================================== " << resourceFileIdentifierString << " ===================================="
-        << getComment()
-        << "namespace " << className << newLine
+    cpp << "/* ==================================== " << resourceFileIdentifierString << " ====================================";
+    writeComment (cpp);
+    cpp << "namespace " << className << newLine
         << "{" << newLine;
 
     bool containsAnyImages = false;
@@ -275,10 +272,14 @@ Result ResourceFile::writeCpp (MemoryOutputStream& cpp, const File& headerFile, 
 
 Result ResourceFile::write (Array<File>& filesCreated, const int maxFileSize)
 {
+    auto projectLineFeed = project.getProjectLineFeed();
+
     auto headerFile = project.getBinaryDataHeaderFile();
 
     {
         MemoryOutputStream mo;
+        mo.setNewLineString (projectLineFeed);
+
         auto r = writeHeader (mo);
 
         if (r.failed())
@@ -298,6 +299,7 @@ Result ResourceFile::write (Array<File>& filesCreated, const int maxFileSize)
         auto cpp = project.getBinaryDataCppFile (fileIndex);
 
         MemoryOutputStream mo;
+        mo.setNewLineString (projectLineFeed);
 
         auto r = writeCpp (mo, headerFile, i, maxFileSize);
 

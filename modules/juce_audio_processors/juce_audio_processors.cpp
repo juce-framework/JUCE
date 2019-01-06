@@ -62,7 +62,6 @@
 
 #if JUCE_PLUGINHOST_AU && (JUCE_MAC || JUCE_IOS)
  #include <AudioUnit/AudioUnit.h>
- #include <map>
 #endif
 
 //==============================================================================
@@ -93,23 +92,8 @@ static inline bool arrayContainsPlugin (const OwnedArray<PluginDescription>& lis
 struct AutoResizingNSViewComponent  : public ViewComponentBaseClass,
                                       private AsyncUpdater
 {
-    void childBoundsChanged (Component*) override
-    {
-        if (recursive)
-        {
-            triggerAsyncUpdate();
-        }
-        else
-        {
-            recursive = true;
-            resizeToFitView();
-            recursive = false;
-        }
-    }
-
-    void handleAsyncUpdate() override  { resizeToFitView(); }
-
-    bool recursive = false;
+    void childBoundsChanged (Component*) override  { triggerAsyncUpdate(); }
+    void handleAsyncUpdate() override              { resizeToFitView(); }
 };
 
 //==============================================================================

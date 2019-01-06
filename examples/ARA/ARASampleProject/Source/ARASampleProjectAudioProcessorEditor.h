@@ -12,7 +12,6 @@ class ARASampleProjectAudioProcessorEditor  : public AudioProcessorEditor
 {
 public:
     ARASampleProjectAudioProcessorEditor (ARASampleProjectAudioProcessor&);
-    ~ARASampleProjectAudioProcessorEditor();
 
     //==============================================================================
     void paint (Graphics&) override;

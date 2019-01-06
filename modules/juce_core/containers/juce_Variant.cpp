@@ -363,7 +363,7 @@ public:
     struct RefCountedArray  : public ReferenceCountedObject
     {
         RefCountedArray (const Array<var>& a)  : array (a)  { incReferenceCount(); }
-        RefCountedArray (Array<var>&& a)  : array (static_cast<Array<var>&&> (a)) { incReferenceCount(); }
+        RefCountedArray (Array<var>&& a)  : array (std::move (a)) { incReferenceCount(); }
         Array<var> array;
     };
 };
@@ -543,24 +543,24 @@ var& var::operator= (var&& other) noexcept
 
 var::var (String&& v)  : type (&VariantType_String::instance)
 {
-    new (value.stringValue) String (static_cast<String&&> (v));
+    new (value.stringValue) String (std::move (v));
 }
 
 var::var (MemoryBlock&& v)  : type (&VariantType_Binary::instance)
 {
-    value.binaryValue = new MemoryBlock (static_cast<MemoryBlock&&> (v));
+    value.binaryValue = new MemoryBlock (std::move (v));
 }
 
 var::var (Array<var>&& v)  : type (&VariantType_Array::instance)
 {
-    value.objectValue = new VariantType_Array::RefCountedArray (static_cast<Array<var>&&> (v));
+    value.objectValue = new VariantType_Array::RefCountedArray (std::move (v));
 }
 
 var& var::operator= (String&& v)
 {
     type->cleanUp (value);
     type = &VariantType_String::instance;
-    new (value.stringValue) String (static_cast<String&&> (v));
+    new (value.stringValue) String (std::move (v));
     return *this;
 }
 

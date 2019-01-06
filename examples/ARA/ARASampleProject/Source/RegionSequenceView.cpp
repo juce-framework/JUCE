@@ -40,23 +40,15 @@ void RegionSequenceView::detachFromRegionSequence()
 }
 
 //==============================================================================
-Range<double> RegionSequenceView::getTimeRange() const
-{
-    if (regionSequence == nullptr)
-        return {};
-
-    return regionSequence->getTimeRange();
-}
-
 void RegionSequenceView::setRegionsViewBoundsByYRange (int y, int height)
 {
     trackHeaderView->setBounds (0, y, trackHeaderView->getParentWidth(), height);
 
     for (auto regionView : playbackRegionViews)
     {
-        Range<double> regionTimeRange = regionView->getTimeRange();
-        int startX = documentView.getPlaybackRegionsViewsXForTime (regionTimeRange.getStart());
-        int endX = documentView.getPlaybackRegionsViewsXForTime (regionTimeRange.getEnd());
+        const auto regionTimeRange = regionView->getTimeRange();
+        const int startX = documentView.getPlaybackRegionsViewsXForTime (regionTimeRange.getStart());
+        const int endX = documentView.getPlaybackRegionsViewsXForTime (regionTimeRange.getEnd());
         regionView->setBounds (startX, y, endX - startX, height);
     }
 }

@@ -178,7 +178,7 @@ void FileChooser::launchAsync (int flags, std::function<void (const FileChooser&
     // you cannot run two file chooser dialog boxes at the same time
     jassert (asyncCallback == nullptr);
 
-    asyncCallback = static_cast<std::function<void (const FileChooser&)>&&> (callback);
+    asyncCallback = std::move (callback);
 
     pimpl.reset (createPimpl (flags, previewComp));
     pimpl->launch();

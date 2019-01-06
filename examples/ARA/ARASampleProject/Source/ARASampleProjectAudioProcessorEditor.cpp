@@ -14,15 +14,14 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
     : AudioProcessorEditor (&p),
       documentView (p)
 {
+    // TODO JUCE_ARA hotfix for Unicode chord symbols, see https://forum.juce.com/t/embedding-unicode-string-literals-in-your-cpp-files/12600/7
+    documentView.getLookAndFeel().setDefaultSansSerifTypefaceName("Arial Unicode MS");
     documentView.setCurrentPositionInfo (&p.getLastKnownPositionInfo());
     addAndMakeVisible (documentView);
+
     setSize (kWidth, kHeight);
     setResizeLimits (kMinWidth, kMinHeight, 32768, 32768);
     setResizable (true, false);
-}
-
-ARASampleProjectAudioProcessorEditor::~ARASampleProjectAudioProcessorEditor()
-{
 }
 
 //==============================================================================

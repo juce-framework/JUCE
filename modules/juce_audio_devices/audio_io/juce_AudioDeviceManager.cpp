@@ -124,10 +124,36 @@ void AudioDeviceManager::audioDeviceListChanged()
 {
     if (currentAudioDevice != nullptr)
     {
-        currentSetup.sampleRate     = currentAudioDevice->getCurrentSampleRate();
-        currentSetup.bufferSize     = currentAudioDevice->getCurrentBufferSizeSamples();
-        currentSetup.inputChannels  = currentAudioDevice->getActiveInputChannels();
-        currentSetup.outputChannels = currentAudioDevice->getActiveOutputChannels();
+        auto isCurrentDeviceStillAvailable = [&]
+        {
+            for (auto* dt : availableDeviceTypes)
+                if (currentAudioDevice->getTypeName() == dt->getTypeName())
+                    for (auto& dn : dt->getDeviceNames())
+                        if (currentAudioDevice->getName() == dn)
+                            return true;
+
+            return false;
+        };
+
+        if (! isCurrentDeviceStillAvailable())
+        {
+            closeAudioDevice();
+
+            std::unique_ptr<XmlElement> e (createStateXml());
+
+            if (e == nullptr)
+                initialiseDefault (preferredDeviceName, &currentSetup);
+            else
+                initialiseFromXML (*e, true, preferredDeviceName, &currentSetup);
+        }
+
+        if (currentAudioDevice != nullptr)
+        {
+            currentSetup.sampleRate     = currentAudioDevice->getCurrentSampleRate();
+            currentSetup.bufferSize     = currentAudioDevice->getCurrentBufferSizeSamples();
+            currentSetup.inputChannels  = currentAudioDevice->getActiveInputChannels();
+            currentSetup.outputChannels = currentAudioDevice->getActiveOutputChannels();
+        }
     }
 
     sendChangeMessage();
@@ -189,12 +215,13 @@ String AudioDeviceManager::initialise (const int numInputChannelsNeeded,
 
     numInputChansNeeded = numInputChannelsNeeded;
     numOutputChansNeeded = numOutputChannelsNeeded;
+    preferredDeviceName = preferredDefaultDeviceName;
 
     if (xml != nullptr && xml->hasTagName ("DEVICESETUP"))
         return initialiseFromXML (*xml, selectDefaultDeviceOnFailure,
-                                  preferredDefaultDeviceName, preferredSetupOptions);
+                                  preferredDeviceName, preferredSetupOptions);
 
-    return initialiseDefault (preferredDefaultDeviceName, preferredSetupOptions);
+    return initialiseDefault (preferredDeviceName, preferredSetupOptions);
 }
 
 String AudioDeviceManager::initialiseDefault (const String& preferredDefaultDeviceName,
@@ -425,16 +452,15 @@ String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& newSetup
 
     stopDevice();
 
-    if (! newSetup.useDefaultInputChannels)    numInputChansNeeded  = newSetup.inputChannels.countNumberOfSetBits();
-    if (! newSetup.useDefaultOutputChannels)   numOutputChansNeeded = newSetup.outputChannels.countNumberOfSetBits();
+    if (! newSetup.useDefaultInputChannels)
+        numInputChansNeeded = newSetup.inputChannels.countNumberOfSetBits();
 
-    auto newInputDeviceName  (numInputChansNeeded  == 0 ? String() : newSetup.inputDeviceName);
-    auto newOutputDeviceName (numOutputChansNeeded == 0 ? String() : newSetup.outputDeviceName);
+    if (! newSetup.useDefaultOutputChannels)
+        numOutputChansNeeded = newSetup.outputChannels.countNumberOfSetBits();
 
-    String error;
     auto* type = getCurrentDeviceTypeObject();
 
-    if (type == nullptr || (newInputDeviceName.isEmpty() && newOutputDeviceName.isEmpty()))
+    if (type == nullptr)
     {
         deleteCurrentDevice();
 
@@ -444,20 +470,22 @@ String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& newSetup
         return {};
     }
 
-    if (currentSetup.inputDeviceName != newInputDeviceName
-         || currentSetup.outputDeviceName != newOutputDeviceName
-         || currentAudioDevice == nullptr)
+    String error;
+
+    if (currentSetup.inputDeviceName  != newSetup.inputDeviceName
+     || currentSetup.outputDeviceName != newSetup.outputDeviceName
+     || currentAudioDevice == nullptr)
     {
         deleteCurrentDevice();
         scanDevicesIfNeeded();
 
-        if (newOutputDeviceName.isNotEmpty() && ! deviceListContains (type, false, newOutputDeviceName))
-            return "No such device: " + newOutputDeviceName;
+        if (newSetup.outputDeviceName.isNotEmpty() && ! deviceListContains (type, false, newSetup.outputDeviceName))
+            return "No such device: " + newSetup.outputDeviceName;
 
-        if (newInputDeviceName.isNotEmpty() && ! deviceListContains (type, true, newInputDeviceName))
-            return "No such device: " + newInputDeviceName;
+        if (newSetup.inputDeviceName.isNotEmpty() && ! deviceListContains (type, true, newSetup.inputDeviceName))
+            return "No such device: " + newSetup.inputDeviceName;
 
-        currentAudioDevice.reset (type->createDevice (newOutputDeviceName, newInputDeviceName));
+        currentAudioDevice.reset (type->createDevice (newSetup.outputDeviceName, newSetup.inputDeviceName));
 
         if (currentAudioDevice == nullptr)
             error = "Can't open the audio device!\n\n"
@@ -484,12 +512,15 @@ String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& newSetup
             outputChannels.setRange (0, numOutputChansNeeded, true);
         }
 
-        if (newInputDeviceName.isEmpty())  inputChannels.clear();
-        if (newOutputDeviceName.isEmpty()) outputChannels.clear();
+        if (newSetup.inputDeviceName.isEmpty())  inputChannels.clear();
+        if (newSetup.outputDeviceName.isEmpty()) outputChannels.clear();
     }
 
-    if (! newSetup.useDefaultInputChannels)    inputChannels  = newSetup.inputChannels;
-    if (! newSetup.useDefaultOutputChannels)   outputChannels = newSetup.outputChannels;
+    if (! newSetup.useDefaultInputChannels)
+        inputChannels = newSetup.inputChannels;
+
+    if (! newSetup.useDefaultOutputChannels)
+        outputChannels = newSetup.outputChannels;
 
     currentSetup = newSetup;
 

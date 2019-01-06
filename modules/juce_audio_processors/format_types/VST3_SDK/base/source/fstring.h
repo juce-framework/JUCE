@@ -13,24 +13,24 @@
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
-//
-//   * Redistributions of source code must retain the above copyright notice,
+// 
+//   * Redistributions of source code must retain the above copyright notice, 
 //     this list of conditions and the following disclaimer.
 //   * Redistributions in binary form must reproduce the above copyright notice,
-//     this list of conditions and the following disclaimer in the documentation
+//     this list of conditions and the following disclaimer in the documentation 
 //     and/or other materials provided with the distribution.
 //   * Neither the name of the Steinberg Media Technologies nor the names of its
-//     contributors may be used to endorse or promote products derived from this
+//     contributors may be used to endorse or promote products derived from this 
 //     software without specific prior written permission.
-//
+// 
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-// IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
-// INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-// LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+// IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+// INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
+// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF 
+// LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE 
 // OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE  OF THIS SOFTWARE, EVEN IF ADVISED
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
@@ -78,10 +78,10 @@ enum MBCodePage
 
 enum UnicodeNormalization
 {
-	kUnicodeNormC,	///< Unicode normalization Form C, canonical composition.
-	kUnicodeNormD,	///< Unicode normalization Form D, canonical decomposition.
-	kUnicodeNormKC,	///< Unicode normalization form KC, compatibility composition.
-	kUnicodeNormKD 	///< Unicode normalization form KD, compatibility decomposition.
+	kUnicodeNormC,	///< Unicode normalization Form C, canonical composition. 
+	kUnicodeNormD,	///< Unicode normalization Form D, canonical decomposition. 
+	kUnicodeNormKC,	///< Unicode normalization form KC, compatibility composition. 
+	kUnicodeNormKD 	///< Unicode normalization form KD, compatibility decomposition. 
 };
 
 //------------------------------------------------------------------------
@@ -100,16 +100,16 @@ inline uint32 hashString (const tchar* s, uint32 m)
 
 
 //-----------------------------------------------------------------------------
-/** Invariant String.
+/** Invariant String. 
 @ingroup adt
 
 A base class which provides methods to work with its
-member string. Neither of the operations allows modifying the member string and
-that is why all operation are declared as const.
+member string. Neither of the operations allows modifying the member string and 
+that is why all operation are declared as const. 
 
 There are operations for access, comparison, find, numbers and conversion.
 
-Almost all operations exist in three versions for char8, char16 and the
+Almost all operations exist in three versions for char8, char16 and the 
 polymorphic type tchar. The type tchar can either be char8 or char16 depending
 on whether UNICODE is activated or not.*/
 //-----------------------------------------------------------------------------
@@ -159,9 +159,9 @@ public:
 	void copyTo (IStringResult* result) const;							///< Copies whole member string
 	void copyTo (IString& string) const;							    ///< Copies whole member string
 
-	inline uint32 hash (uint32 tsize) const
+	inline uint32 hash (uint32 tsize) const 
 	{
-		return isWide ? hashString16 (buffer16, tsize) : hashString8 (buffer8, tsize) ;
+		return isWide ? hashString16 (buffer16, tsize) : hashString8 (buffer8, tsize) ;  
 	}
 	//-------------------------------------------------------------------------
 
@@ -180,7 +180,7 @@ public:
 
 	bool startsWith (const ConstString& str, CompareMode m = kCaseSensitive) const;												///< Check if this starts with str
 	bool endsWith (const ConstString& str, CompareMode m = kCaseSensitive) const;												///< Check if this ends with str
-	bool contains (const ConstString& str, CompareMode m = kCaseSensitive) const;												///< Check if this contains str
+	bool contains (const ConstString& str, CompareMode m = kCaseSensitive) const;												///< Check if this contains str											
 
 	// static methods
 	static bool isCharSpace (char8 character);	   ///< Returns true if character is a space
@@ -217,7 +217,7 @@ public:
 	int32 findPrev (int32 startIndex, char8 c, CompareMode = kCaseSensitive) const;
 	int32 findPrev (int32 startIndex, char16 c, CompareMode = kCaseSensitive) const;
 	///@}
-
+	
 	inline int32 findLast (const ConstString& str, int32 n = -1, CompareMode m = kCaseSensitive) const {return findPrev (-1, str, n, m);}	///< Find last occurrence of n characters of str in this (n=-1: all)
 	inline int32 findLast (char8 c, CompareMode m = kCaseSensitive) const {return findPrev (-1, c, m);}
 	inline int32 findLast (char16 c, CompareMode m = kCaseSensitive) const {return findPrev (-1, c, m);}
@@ -286,7 +286,7 @@ public:
 //-----------------------------------------------------------------------------
 protected:
 
-	union
+	union 
 	{
 		void* buffer;
 		char8* buffer8;
@@ -300,7 +300,7 @@ protected:
 /** String.
 @ingroup adt
 
-Extends class ConstString by operations which allow modifications.
+Extends class ConstString by operations which allow modifications. 
 
 \see ConstString */
 //-----------------------------------------------------------------------------
@@ -361,7 +361,7 @@ public:
 	String& insertAt (uint32 idx, const ConstString& str, int32 n = -1);	///< Insert n characters of str at position idx (n=-1: all)
 	String& insertAt (uint32 idx, const char8* str, int32 n = -1);	///< Insert n characters of str at position idx (n=-1: all)
 	String& insertAt (uint32 idx, const char16* str, int32 n = -1);	///< Insert n characters of str at position idx (n=-1: all)
-	String& insertAt (uint32 idx, char8 c) {char8 str[] = {c, 0}; return insertAt (idx, str, 1);}
+	String& insertAt (uint32 idx, char8 c) {char8 str[] = {c, 0}; return insertAt (idx, str, 1);} 
 	String& insertAt (uint32 idx, char16 c) {char16 str[] = {c, 0}; return insertAt (idx, str, 1);}
 
 	String& operator+= (const String& str) {return append (str);}
@@ -397,8 +397,8 @@ public:
 	void removeChars (CharGroup mode = kSpace);				///< Removes all of group.
 	bool removeChars8 (const char8* which);					///< Remove all occurrences of each char in 'which'
 	bool removeChars16 (const char16* which);				///< Remove all occurrences of each char in 'which'
-	inline bool removeChars8 (const char8 which) {char8 str[] = {which, 0}; return removeChars8 (str); }
-	inline bool removeChars16 (const char16 which) {char16 str[] = {which, 0}; return removeChars16 (str); }
+	inline bool removeChars8 (const char8 which) {char8 str[] = {which, 0}; return removeChars8 (str); }     
+	inline bool removeChars16 (const char16 which) {char16 str[] = {which, 0}; return removeChars16 (str); }                
 	inline bool removeChars (const char8* which) {return removeChars8 (which);}
 	inline bool removeChars (const char16* which) {return removeChars16 (which);}
 	inline bool removeChars (const char8 which) {return removeChars8 (which);}
@@ -715,12 +715,12 @@ class StringObject : public FObject, public String, public IStringResult, public
 {
 public:
 //-----------------------------------------------------------------------------
-	StringObject () {}
+	StringObject () {}										
 	StringObject (const char16* str, int32 n = -1, bool isTerminated = true) : String (str, n, isTerminated) {}
 	StringObject (const char8* str, int32 n = -1, bool isTerminated = true) : String (str, n, isTerminated) {}
-	StringObject (const StringObject& str, int32 n = -1) : String (str, n) {}
-	StringObject (const String& str, int32 n = -1) : String (str, n) {}
-	StringObject (const FVariant& var) : String (var) {}
+	StringObject (const StringObject& str, int32 n = -1) : String (str, n) {}		
+	StringObject (const String& str, int32 n = -1) : String (str, n) {}		
+	StringObject (const FVariant& var) : String (var) {}		
 
 	using String::operator=;
 

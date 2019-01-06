@@ -50,9 +50,9 @@ public:
         : start (other.start), end (other.end),
           interval (other.interval), skew (other.skew),
           symmetricSkew (other.symmetricSkew),
-          convertFrom0To1Function  (static_cast<ConversionFunction&&> (other.convertFrom0To1Function)),
-          convertTo0To1Function    (static_cast<ConversionFunction&&> (other.convertTo0To1Function)),
-          snapToLegalValueFunction (static_cast<ConversionFunction&&> (other.snapToLegalValueFunction))
+          convertFrom0To1Function  (std::move (other.convertFrom0To1Function)),
+          convertTo0To1Function    (std::move (other.convertTo0To1Function)),
+          snapToLegalValueFunction (std::move (other.snapToLegalValueFunction))
     {
     }
 
@@ -64,9 +64,9 @@ public:
         interval = other.interval;
         skew = other.skew;
         symmetricSkew = other.symmetricSkew;
-        convertFrom0To1Function  = static_cast<ConversionFunction&&> (other.convertFrom0To1Function);
-        convertTo0To1Function    = static_cast<ConversionFunction&&> (other.convertTo0To1Function);
-        snapToLegalValueFunction = static_cast<ConversionFunction&&> (other.snapToLegalValueFunction);
+        convertFrom0To1Function  = std::move (other.convertFrom0To1Function);
+        convertTo0To1Function    = std::move (other.convertTo0To1Function);
+        snapToLegalValueFunction = std::move (other.snapToLegalValueFunction);
 
         return *this;
     }

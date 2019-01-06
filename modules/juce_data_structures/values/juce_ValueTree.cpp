@@ -414,7 +414,7 @@ public:
         SetPropertyAction (Ptr targetObject, const Identifier& propertyName,
                            const var& newVal, const var& oldVal, bool isAdding, bool isDeleting,
                            ValueTree::Listener* listenerToExclude = nullptr)
-            : target (static_cast<Ptr&&> (targetObject)),
+            : target (std::move (targetObject)),
               name (propertyName), newValue (newVal), oldValue (oldVal),
               isAddingNewProperty (isAdding), isDeletingProperty (isDeleting),
               excludeListener (listenerToExclude)
@@ -476,7 +476,7 @@ public:
     struct AddOrRemoveChildAction  : public UndoableAction
     {
         AddOrRemoveChildAction (Ptr parentObject, int index, SharedObject* newChild)
-            : target (static_cast<Ptr&&> (parentObject)),
+            : target (std::move (parentObject)),
               child (newChild != nullptr ? newChild : target->children.getObjectPointer (index)),
               childIndex (index),
               isDeleting (newChild == nullptr)
@@ -528,7 +528,7 @@ public:
     struct MoveChildAction  : public UndoableAction
     {
         MoveChildAction (Ptr parentObject, int fromIndex, int toIndex) noexcept
-            : parent (static_cast<Ptr&&> (parentObject)), startIndex (fromIndex), endIndex (toIndex)
+            : parent (std::move (parentObject)), startIndex (fromIndex), endIndex (toIndex)
         {
         }
 
@@ -598,7 +598,7 @@ ValueTree::ValueTree (const Identifier& type,
         addChild (tree, -1, nullptr);
 }
 
-ValueTree::ValueTree (SharedObject::Ptr so) noexcept  : object (static_cast<SharedObject::Ptr&&> (so)) {}
+ValueTree::ValueTree (SharedObject::Ptr so) noexcept  : object (std::move (so)) {}
 ValueTree::ValueTree (SharedObject& so) noexcept      : object (so) {}
 
 ValueTree::ValueTree (const ValueTree& other) noexcept  : object (other.object)
@@ -631,7 +631,7 @@ ValueTree& ValueTree::operator= (const ValueTree& other)
 }
 
 ValueTree::ValueTree (ValueTree&& other) noexcept
-    : object (static_cast<SharedObject::Ptr&&> (other.object))
+    : object (std::move (other.object))
 {
     if (object != nullptr)
         object->valueTreesWithListeners.removeValue (&other);

@@ -5,13 +5,13 @@ The fork is currently being maintained by [Celemony](https://www.celemony.com) a
 
 In order to use this branch you'll need access to the [ARA SDK](http://www.celemony.com/en/service1/about-celemony/technologies) - if you're a developer and would like access to the latest ARA SDK release, send an email to [ara@celemony.com](mailto:ara@celemony.com?Subject=JUCE%20ARA%20integration).
 
-Current ARA SDK compatibility version: 1.9.6.018
+Current ARA SDK compatibility version: 1.9.6.019
 
 For feedback and questions, please contact Celemony via [ara@celemony.com](mailto:ara@celemony.com?Subject=JUCE%20ARA%20integration).
 
 ### Getting started:
 
-We've made modifications to the Projucer to enable it to work with the ARA 2.0 SDK. As of now the Projucer can be used to generate VST3 plugins that can be used as ARA plugins in a supporting host.
+We've made modifications to the Projucer to enable it to work with the ARA 2.0 SDK. These modifications allow building VST3 and AudioUnit plugins that can be loaded as ARA plugins by a compatible host. 
 
 To create an ARA plugin, clone the [ARA branch](https://github.com/Celemony/JUCE_ARA/tree/ARA) of this repository and build the [Projucer](https://github.com/Celemony/JUCE_ARA/tree/ARA/extras/Projucer)(projects for Visual Studio and Xcode exist within the repository.)
 
@@ -33,7 +33,7 @@ The generated plugin will have, in addition to the standard PluginProcessor and 
 
 <img src="https://i.imgur.com/JqNIe2b.png"/>
 
-This version of the Projucer only supports VST3, so make sure that format is checked in the settings
+This version of the Projucer supports VST3 and AudioUnit, so make sure at least one of these plugin formats is checked
 <img src="https://i.imgur.com/7wWWPuK.png"/>
 
 We can also edit other ARA plugin factory properties such as available content types and transformation flags as well as the plugin factory identifier.
@@ -123,7 +123,7 @@ For further help getting started, please refer to the JUCE
 #### Building JUCE Projects
 - __macOS__: macOS 10.11 and Xcode 7.3.1
 - __Windows__: Windows 8.1 and Visual Studio 2013 64-bit
-- __Linux__: GCC 5.0
+- __Linux__: GCC 4.8
 
 #### Minimum Deployment Targets
 - __macOS__: macOS 10.7

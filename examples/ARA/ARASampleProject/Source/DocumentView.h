@@ -53,16 +53,16 @@ public:
     virtual TrackHeaderView* getHeaderViewForRegionSequence (ARARegionSequence*);
 
     // total time range
-    Range<double> getTimeRange() const { return Range<double> (startTime, endTime); }
+    Range<double> getTimeRange() const { return visibleRange; }
 
     // visible time range
     Range<double> getVisibleTimeRange() const;
-    // TODO JUCE_ARA if we want to make this into a reusable view, then zooming should use this primitive:
-    //  void setVisibleTimeRange (double start, double end);
-    //  It would limit the new visibile range to getTimeRange(), trying to keep requested duration unchanged.
-    //  Another method zoomBy(float factor) can be added on top of this, which deals with keeping the relative
-    //  playhead positon unchanged if it is visible while zooming, otherwise keeps current view centered.
-    //  This will be easy to do since it is all in linear time now.
+// TODO JUCE_ARA if we want to make this into a reusable view, then zooming should use this primitive:
+//  void setVisibleTimeRange (double start, double end);
+//  It would limit the new visibile range to getTimeRange(), trying to keep requested duration unchanged.
+//  Another method zoomBy(float factor) can be added on top of this, which deals with keeping the relative
+//  playhead positon unchanged if it is visible while zooming, otherwise keeps current view centered.
+//  This will be easy to do since it is all in linear time now.
 
     // flag that our view needs to be rebuilt
     void invalidateRegionSequenceViews() { regionSequenceViewsAreInvalid = true; }
@@ -145,8 +145,7 @@ private:
 
     bool regionSequenceViewsAreInvalid = true;
     bool showOnlySelectedRegionSequence = false;
-    double startTime = 0.0;
-    double endTime = 1.0;
+    Range<double> visibleRange;
     double pixelsPerSecond = 0.0;
     double playheadTimePosition = 0.0;
     int trackHeight = 80;

@@ -403,6 +403,12 @@ public:
                    "Extra pkg-config libraries for you application. Each package should be space separated.");
     }
 
+    void initialiseDependencyPathValues() override
+    {
+        vstLegacyPathValueWrapper.init ({ settings, Ids::vstLegacyFolder, nullptr },
+                                          getAppSettings().getStoredPath (Ids::vstLegacyPath, TargetOS::linux), TargetOS::linux);
+    }
+
     //==============================================================================
     bool anyTargetIsSharedLibrary() const
     {
@@ -422,6 +428,8 @@ public:
     void create (const OwnedArray<LibraryModule>&) const override
     {
         MemoryOutputStream mo;
+        mo.setNewLineString ("\n");
+
         writeMakefile (mo);
 
         overwriteFileIfDifferentOrThrow (getTargetFolder().getChildFile ("Makefile"), mo);

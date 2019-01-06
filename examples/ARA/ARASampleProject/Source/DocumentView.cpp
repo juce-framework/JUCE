@@ -8,6 +8,8 @@
 constexpr int kRulersViewHeight = 3*20;
 constexpr int kTrackHeaderWidth = 120;
 constexpr int kStatusBarHeight = 20;
+constexpr double kMinSecondDuration = 1.0;
+constexpr double kMinBorderSeconds = 1.0;
 
 //==============================================================================
 DocumentView::DocumentView (AudioProcessor& p)
@@ -15,6 +17,7 @@ DocumentView::DocumentView (AudioProcessor& p)
 AudioProcessorEditorARAExtension (&p),
 playbackRegionsViewPort (*this),
 playheadView (*this),
+visibleRange (-kMinBorderSeconds, kMinSecondDuration + kMinBorderSeconds),
 positionInfoPtr (nullptr)
 {
     playheadView.setAlwaysOnTop (true);
@@ -96,12 +99,12 @@ DocumentView::~DocumentView()
 //==============================================================================
 int DocumentView::getPlaybackRegionsViewsXForTime (double time) const
 {
-    return roundToInt ((time - startTime) / (endTime - startTime) * playbackRegionsView.getWidth());
+    return roundToInt ((time - visibleRange.getStart()) / visibleRange.getLength() * playbackRegionsView.getWidth());
 }
 
 double DocumentView::getPlaybackRegionsViewsTimeForX (int x) const
 {
-    return startTime + ((double) x / (double) playbackRegionsView.getWidth()) * (endTime - startTime);
+    return visibleRange.getStart() + ((double) x / (double) playbackRegionsView.getWidth()) * visibleRange.getLength();
 }
 
 //==============================================================================
@@ -129,74 +132,75 @@ void DocumentView::resized()
 {
     // store visible playhead postion (in main view coordinates)
     int previousPlayheadX = getPlaybackRegionsViewsXForTime (playheadTimePosition) - playbackRegionsViewPort.getViewPosition().getX();
-    
+
     // calculate maximum visible time range
-    if (regionSequenceViews.isEmpty())
+    visibleRange = { 0.0, 0.0 };
+    if (! regionSequenceViews.isEmpty())
     {
-        startTime = 0.0;
-        endTime = 0.0;
-    }
-    else
-    {
-        startTime = std::numeric_limits<double>::max();
-        endTime = std::numeric_limits<double>::lowest();
+        bool isFirst = true;
         for (auto v : regionSequenceViews)
         {
-            auto sequenceTimeRange = v->getTimeRange();
-            startTime = jmin (startTime, sequenceTimeRange.getStart());
-            endTime = jmax (endTime, sequenceTimeRange.getEnd());
+            if (v->isEmpty())
+                continue;
+
+            const auto sequenceTimeRange = v->getTimeRange();
+            if (isFirst)
+            {
+                visibleRange = sequenceTimeRange;
+                isFirst = false;
+                continue;
+            }
+
+            visibleRange = visibleRange.getUnionWith (sequenceTimeRange);
         }
     }
-    
-    // make sure we can see at least 1 second
-    constexpr double minDuration = 1.0;
-    double duration = endTime - startTime;
-    if (duration < minDuration)
+
+    // ensure visible range covers kMinSecondDuration
+    if (visibleRange.getLength() < kMinSecondDuration)
     {
-        startTime -= (minDuration - duration) / 2.0;
-        endTime = startTime + minDuration;
+        double startAdjustment = (kMinSecondDuration - visibleRange.getLength()) / 2.0;
+        visibleRange.setStart (visibleRange.getStart() - startAdjustment);
+        visibleRange.setEnd (visibleRange.getStart() + kMinSecondDuration);
     }
-    
-    // add a second left and right so that regions will not directly hit the end of the view
-    constexpr double borderTime = 1.0;
-    startTime -= borderTime;
-    endTime += borderTime;
-    
+
+    // apply kMinBorderSeconds offset to start and end
+    visibleRange.setStart (visibleRange.getStart() - kMinBorderSeconds);
+    visibleRange.setEnd (visibleRange.getEnd() + kMinBorderSeconds);
+
     // max zoom 1px : 1sample (this is a naive assumption as audio can be in different sample rate)
     double maxPixelsPerSecond = jmax (processor.getSampleRate(), 300.0);
-    
+
     // min zoom covers entire view range
-    double minPixelsPerSecond = (getWidth() - kTrackHeaderWidth - rulersViewPort.getScrollBarThickness()) / (endTime - startTime);
-    
+    double minPixelsPerSecond = (getWidth() - kTrackHeaderWidth - rulersViewPort.getScrollBarThickness()) / visibleRange.getLength();
+
     // enforce zoom in/out limits, update zoom buttons
     pixelsPerSecond = jmax (minPixelsPerSecond, jmin (pixelsPerSecond, maxPixelsPerSecond));
-    trackHeight = jlimit (10, getHeight(), trackHeight);
     horizontalZoomOutButton.setEnabled (pixelsPerSecond > minPixelsPerSecond);
     horizontalZoomInButton.setEnabled (pixelsPerSecond < maxPixelsPerSecond);
-    
+
     // update sizes and positions of all views
     playbackRegionsViewPort.setBounds (kTrackHeaderWidth, kRulersViewHeight, getWidth() - kTrackHeaderWidth, getHeight() - kRulersViewHeight - kStatusBarHeight);
-    playbackRegionsView.setBounds (0, 0, roundToInt ((endTime - startTime) * pixelsPerSecond), jmax (trackHeight * regionSequenceViews.size(), playbackRegionsViewPort.getHeight() - playbackRegionsViewPort.getScrollBarThickness()));
-    pixelsPerSecond = playbackRegionsView.getWidth() / (endTime - startTime);       // prevent potential rounding issues
-    
+    playbackRegionsView.setBounds (0, 0, roundToInt (visibleRange.getLength() * pixelsPerSecond), jmax (trackHeight * regionSequenceViews.size(), playbackRegionsViewPort.getHeight() - playbackRegionsViewPort.getScrollBarThickness()));
+    pixelsPerSecond = playbackRegionsView.getWidth() / visibleRange.getLength();       // prevent potential rounding issues
+
     trackHeadersViewPort.setBounds (0, kRulersViewHeight, kTrackHeaderWidth, playbackRegionsViewPort.getMaximumVisibleHeight());
     trackHeadersView.setBounds (0, 0, kTrackHeaderWidth, playbackRegionsView.getHeight());
-    
+
     if (rulersView != nullptr)
     {
         rulersViewPort.setBounds (kTrackHeaderWidth, 0, playbackRegionsViewPort.getMaximumVisibleWidth(), kRulersViewHeight);
         rulersView->setBounds (0, 0, playbackRegionsView.getWidth(), kRulersViewHeight);
     }
-    
+
     int y = 0;
     for (auto v : regionSequenceViews)
     {
         v->setRegionsViewBoundsByYRange (y, trackHeight);
         y += trackHeight;
     }
-    
+
     playheadView.setBounds (playbackRegionsView.getBounds());
-    
+
     horizontalZoomInButton.setBounds (getWidth() - kStatusBarHeight, getHeight() - kStatusBarHeight, kStatusBarHeight, kStatusBarHeight);
     horizontalZoomOutButton.setBounds (horizontalZoomInButton.getBounds().translated (-kStatusBarHeight, 0));
     horizontalZoomLabel.setBounds (horizontalZoomOutButton.getBounds().translated (-kStatusBarHeight, 0));
@@ -217,7 +221,7 @@ void DocumentView::resized()
 void DocumentView::rebuildRegionSequenceViews()
 {
     regionSequenceViews.clear();
-    
+
     for (auto regionSequence : getARADocumentController()->getDocument()->getRegionSequences<ARARegionSequence>())
     {
         if (!showOnlySelectedRegionSequence && ! ARA::contains (getARAEditorView()->getHiddenRegionSequences(), regionSequence))

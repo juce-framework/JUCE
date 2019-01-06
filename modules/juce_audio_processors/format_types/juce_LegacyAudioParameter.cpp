@@ -111,7 +111,7 @@ public:
     {
         if (auto* legacy = dynamic_cast<LegacyAudioParameter*> (param))
         {
-            return legacy->getParamID();
+            return forceLegacyParamIDs ? String (legacy->parameterIndex) : legacy->getParamID();
         }
         else if (auto* paramWithID = dynamic_cast<AudioProcessorParameterWithID*> (param))
         {
@@ -134,7 +134,7 @@ public:
         legacyParamIDs = forceLegacyParamIDs;
 
         auto numParameters = audioProcessor.getNumParameters();
-        usingManagedParameters = (audioProcessor.getParameters().size() == numParameters) && (! legacyParamIDs);
+        usingManagedParameters = audioProcessor.getParameters().size() == numParameters;
 
         for (int i = 0; i < numParameters; ++i)
         {
@@ -160,7 +160,10 @@ public:
 
     String getParamID (AudioProcessor& processor, int idx) const noexcept
     {
-        return usingManagedParameters ? processor.getParameterID (idx) : String (idx);
+        if (usingManagedParameters && ! legacyParamIDs)
+            processor.getParameterID (idx);
+
+        return String (idx);
     }
 
     bool isUsingManagedParameters() const noexcept    { return usingManagedParameters; }

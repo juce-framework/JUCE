@@ -13,24 +13,24 @@
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
-//
-//   * Redistributions of source code must retain the above copyright notice,
+// 
+//   * Redistributions of source code must retain the above copyright notice, 
 //     this list of conditions and the following disclaimer.
 //   * Redistributions in binary form must reproduce the above copyright notice,
-//     this list of conditions and the following disclaimer in the documentation
+//     this list of conditions and the following disclaimer in the documentation 
 //     and/or other materials provided with the distribution.
 //   * Neither the name of the Steinberg Media Technologies nor the names of its
-//     contributors may be used to endorse or promote products derived from this
+//     contributors may be used to endorse or promote products derived from this 
 //     software without specific prior written permission.
-//
+// 
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-// IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
-// INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-// LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+// IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+// INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
+// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF 
+// LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE 
 // OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE  OF THIS SOFTWARE, EVEN IF ADVISED
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
@@ -106,13 +106,13 @@ int32 FStreamSizeHolder::endWrite ()
 {
 	if (sizePos < 0)
 		return 0;
-
+	
 	int64 currentPos = stream.tell ();
 
 	stream.seek (sizePos, kSeekSet);
 	int32 size = int32 (currentPos - sizePos - sizeof (int32));
 	stream.writeInt32 (size);
-
+	
 	stream.seek (currentPos, kSeekSet);
 	return size;
 }
@@ -590,7 +590,7 @@ bool FStreamer::writeStringUtf8 (const tchar* ptr)
 	bool isUtf8 = false;
 
 	String str (ptr);
-	if (str.isAsciiString () == false)
+	if (str.isAsciiString () == false) 
 	{
 		str.toMultiByte (kCP_Utf8);
 		isUtf8 = true;
@@ -600,7 +600,7 @@ bool FStreamer::writeStringUtf8 (const tchar* ptr)
 		str.toMultiByte ();
 	}
 
-	if (isUtf8)
+	if (isUtf8) 
 		if (writeRaw (kBomUtf8, kBomUtf8Length) != kBomUtf8Length)
 			return false;
 
@@ -650,7 +650,7 @@ int32 FStreamer::readStringUtf8 (tchar* ptr, int32 nChars)
 		{
 			Buffer wideBuffer (tmp.getFillSize () * 3);
 			ConstString::multiByteToWideString (wideBuffer.wcharPtr (), source, wideBuffer.getSize () / 2, kCP_Utf8);
-			ConstString::wideStringToMultiByte (ptr, wideBuffer.wcharPtr (), nChars);
+			ConstString::wideStringToMultiByte (ptr, wideBuffer.wcharPtr (), nChars);		
 		}
 		else
 		{
@@ -677,7 +677,7 @@ bool FStreamer::writeStr8 (const char8* s)
 }
 
 //------------------------------------------------------------------------
-int32 FStreamer::getStr8Size (const char8* s)
+int32 FStreamer::getStr8Size (const char8* s) 
 {
 	return sizeof (int32) + (int32)strlen (s) + 1;
 }
@@ -688,7 +688,7 @@ char8* FStreamer::readStr8 ()
 	int32 length;
 	if (!readInt32 (length))
 		return 0;
-
+	
 	// check corruption
 	if (length > 262144)
 		return 0;
@@ -703,10 +703,10 @@ char8* FStreamer::readStr8 ()
 bool FStreamer::skip (uint32 bytes)
 {
     int8 tmp;
-	while (bytes-- > 0)
+	while (bytes-- > 0) 
 	{
 		if (readInt8 (tmp) == false)
-			return false;
+			return false;	
     }
 	return true;
 }
@@ -714,10 +714,10 @@ bool FStreamer::skip (uint32 bytes)
 //------------------------------------------------------------------------
 bool FStreamer::pad (uint32 bytes)
 {
-    while (bytes-- > 0)
+    while (bytes-- > 0) 
 	{
 		if (writeInt8 (0) == false)
-			return false;
+			return false;	
 	}
 	return true;
 }

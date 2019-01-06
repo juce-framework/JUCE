@@ -67,7 +67,7 @@ namespace StateVariableFilter
         /** Creates a filter with default parameters. */
         Filter()                               : parameters (new Parameters<NumericType>) { reset(); }
 
-        Filter (ParametersPtr parametersToUse) : parameters (static_cast<ParametersPtr&&> (parametersToUse)) { reset(); }
+        Filter (ParametersPtr parametersToUse) : parameters (std::move (parametersToUse)) { reset(); }
 
         /** Creates a copy of another filter. */
         Filter (const Filter&) = default;

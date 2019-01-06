@@ -9,7 +9,7 @@
 //-----------------------------------------------------------------------------
 // This file is part of a Steinberg SDK. It is subject to the license terms
 // in the LICENSE file found in the top-level directory of this distribution
-// and at www.steinberg.net/sdklicenses.
+// and at www.steinberg.net/sdklicenses. 
 // No part of the SDK, including this file, may be copied, modified, propagated,
 // or distributed except according to the terms contained in the LICENSE file.
 //-----------------------------------------------------------------------------
@@ -87,6 +87,12 @@ inline int32 FromNormalized (const T& norm, const int32 numSteps)
 {
 	return Min<int32> (numSteps, int32 (norm * (numSteps + 1)));
 }
+
+// Four character constant
+#ifndef CCONST
+#define CCONST(a, b, c, d) \
+	 ((((int32) (a)) << 24) | (((int32) (b)) << 16) | (((int32) (c)) << 8) | (((int32) (d)) << 0))
+#endif
 
 //------------------------------------------------------------------------
 } // namespace Steinberg

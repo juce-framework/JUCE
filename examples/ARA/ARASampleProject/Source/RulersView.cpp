@@ -1,5 +1,6 @@
 #include "RulersView.h"
-#include "ARA_Library/Utilities/ARAChordAndScaleNames.h"
+
+#include "ARA_Library/Utilities/ARAPitchInterpretation.h"
 #include "ARA_Library/Utilities/ARATimelineConversion.h"
 
 //==============================================================================
@@ -84,7 +85,7 @@ void RulersView::paint (juce::Graphics& g)
         return;
     }
 
-    Range<double> visibleRange = documentView.getVisibleTimeRange();
+    const auto visibleRange = documentView.getVisibleTimeRange();
 
     using TempoContentReader = ARA::PlugIn::HostContentReader<ARA::kARAContentTypeTempoEntries>;
     using BarSignaturesContentReader = ARA::PlugIn::HostContentReader<ARA::kARAContentTypeBarSignatures>;
@@ -116,7 +117,7 @@ void RulersView::paint (juce::Graphics& g)
             const int x = documentView.getPlaybackRegionsViewsXForTime (time);
             rects.addWithoutMerging (Rectangle<int> (x - lineWidth / 2, secondsRulerY + secondsRulerHeight - lineHeight, lineWidth, lineHeight));
         }
-        g.drawText ("seconds", bounds, Justification::bottomRight);
+        g.drawText ("seconds", bounds.withTrimmedRight (2), Justification::bottomRight);
         g.fillRectList (rects);
     }
 
@@ -139,30 +140,26 @@ void RulersView::paint (juce::Graphics& g)
             const int lineHeight = (beatsSinceBarStart == 0) ? beatsRulerHeight : beatsRulerHeight / 2;
             rects.addWithoutMerging (Rectangle<int> (x - lineWidth / 2, beatsRulerY + beatsRulerHeight - lineHeight, lineWidth, lineHeight));
         }
-        g.drawText ("beats", bounds, Justification::centredRight);
+        g.drawText ("beats", bounds.withTrimmedRight (2).withTrimmedBottom (secondsRulerHeight), Justification::bottomRight);
         g.fillRectList (rects);
     }
 
     // chord ruler: one rect per chord, skipping empty "no chords"
     {
         RectangleList<int> rects;
-
-        // a chord is considered "no chord" if its intervals are all zero
-        auto isNoChord = [] (ARA::ARAContentChord chord)
-        {
-            return std::all_of (chord.intervals, chord.intervals + sizeof (chord.intervals), [] (ARA::ARAChordIntervalUsage i) { return i == 0; });
-        };
+        ARA::ChordInterpreter interpreter;
 
         for (auto itChord = chordsReader.begin(); itChord != chordsReader.end(); ++itChord)
         {
-            if (isNoChord (*itChord))
+            if (interpreter.isNoChord (*itChord))
                 continue;
 
             Rectangle<int> chordRect = bounds;
             chordRect.setVerticalRange (Range<int> (chordRulerY, chordRulerY + chordRulerHeight));
             
             // find the starting position of the chord in pixels
-            const auto chordStartTime = tempoConverter.getTimeForQuarter (itChord->position);
+            const auto chordStartTime = (itChord == chordsReader.begin()) ?
+                                            documentView.getTimeRange().getStart() : tempoConverter.getTimeForQuarter (itChord->position);
             if (chordStartTime >= visibleRange.getEnd())
                 break;
             chordRect.setLeft (documentView.getPlaybackRegionsViewsXForTime (chordStartTime));
@@ -178,11 +175,10 @@ void RulersView::paint (juce::Graphics& g)
 
             // draw chord rect and name
             g.drawRect (chordRect);
-            g.setFont (Font (12.0f));
-            g.drawText (convertARAString (ARA::getNameForChord (*itChord).c_str()), chordRect, Justification::centredLeft);
+            g.drawText (convertARAString (interpreter.getNameForChord (*itChord).c_str()), chordRect.withTrimmedLeft (2), Justification::centredLeft);
         }
 
-        g.drawText ("chords", bounds, Justification::topRight);
+        g.drawText ("chords", bounds.withTrimmedRight (2).withTrimmedBottom (beatsRulerHeight + secondsRulerHeight), Justification::bottomRight);
     }
 
     // borders

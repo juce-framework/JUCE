@@ -95,6 +95,12 @@ public:
 
 private:
     //==============================================================================
+    void handleBluetoothButton();
+    void updateDeviceType();
+    void updateMidiOutput();
+    void changeListenerCallback (ChangeBroadcaster*) override;
+    void updateAllControls();
+
     std::unique_ptr<ComboBox> deviceTypeDropDown;
     std::unique_ptr<Label> deviceTypeDropDownLabel;
     std::unique_ptr<Component> audioDeviceSettingsComp;
@@ -109,12 +115,6 @@ private:
     std::unique_ptr<ComboBox> midiOutputSelector;
     std::unique_ptr<Label> midiInputsLabel, midiOutputLabel;
     std::unique_ptr<TextButton> bluetoothButton;
-
-    void handleBluetoothButton();
-    void updateDeviceType();
-    void updateMidiOutput();
-    void changeListenerCallback (ChangeBroadcaster*) override;
-    void updateAllControls();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioDeviceSelectorComponent)
 };

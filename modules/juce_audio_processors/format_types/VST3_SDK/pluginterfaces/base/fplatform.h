@@ -9,7 +9,7 @@
 //-----------------------------------------------------------------------------
 // This file is part of a Steinberg SDK. It is subject to the license terms
 // in the LICENSE file found in the top-level directory of this distribution
-// and at www.steinberg.net/sdklicenses.
+// and at www.steinberg.net/sdklicenses. 
 // No part of the SDK, including this file, may be copied, modified, propagated,
 // or distributed except according to the terms contained in the LICENSE file.
 //-----------------------------------------------------------------------------
@@ -43,7 +43,7 @@
 	#define SMTG_OS_OSX		0
 
 	#define BYTEORDER kLittleEndian
-
+	
 	#define COM_COMPATIBLE	1
 	#define PLUGIN_API __stdcall
 	#define SMTG_PTHREADS	0
@@ -73,7 +73,7 @@
 		#define SMTG_CPP11	__cplusplus >= 201103L || _MSC_VER > 1600 || SMTG_INTEL_CXX11_MODE
 		#define SMTG_CPP11_STDLIBSUPPORT SMTG_CPP11
 		#define SMTG_HAS_NOEXCEPT _MSC_VER >= 1900 || (SMTG_INTEL_CXX11_MODE && SMTG_INTEL_COMPILER >= 1300)
-	#endif
+	#endif		
 //-----------------------------------------------------------------------------
 // LINUX
 #elif __gnu_linux__

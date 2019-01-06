@@ -9,7 +9,7 @@
 //-----------------------------------------------------------------------------
 // This file is part of a Steinberg SDK. It is subject to the license terms
 // in the LICENSE file found in the top-level directory of this distribution
-// and at www.steinberg.net/sdklicenses.
+// and at www.steinberg.net/sdklicenses. 
 // No part of the SDK, including this file, may be copied, modified, propagated,
 // or distributed except according to the terms contained in the LICENSE file.
 //-----------------------------------------------------------------------------
@@ -30,11 +30,12 @@ namespace Vst {
 class IContextMenu;
 
 //------------------------------------------------------------------------
-/** Extended Host callback interface IComponentHandler3 for an edit controller.
+/** Extended Host callback interface IComponentHandler3 for an edit controller. 
 \ingroup vstIHost vst350
 - [host imp]
 - [extends IComponentHandler]
 - [released: 3.5.0]
+- [optional]
 
 A Plug-in can ask the host to create a context menu for a given exported Parameter ID or a generic context menu.\n
 
@@ -90,7 +91,7 @@ void popupContextMenu (IComponentHandler* componentHandler, IPlugView* view, con
 	{
 		// here you can add your entries (optional)
 		PluginContextMenuTarget* target = new PluginContextMenuTarget ();
-
+		
 		IContextMenu::Item item = {0};
 		UString128 ("My Item 1").copyTo (item.name, 128);
 		item.tag = 1;
@@ -101,7 +102,7 @@ void popupContextMenu (IComponentHandler* componentHandler, IPlugView* view, con
 		menu->addItem (item, target);
 		target->release ();
 		//--end of adding new entries
-
+		
 		// here the the context menu will be pop-up (and it waits a user interaction)
 		menu->popup (x, y);
 		menu->release ();
@@ -124,13 +125,14 @@ public:
 };
 
 DECLARE_CLASS_IID (IComponentHandler3, 0x69F11617, 0xD26B400D, 0xA4B6B964, 0x7B6EBBAB)
-
+	
 //------------------------------------------------------------------------
 /** Context Menu Item Target Interface.
 \ingroup vstIHost vstIPlug vst350
 - [host imp]
 - [plug imp]
 - [released: 3.5.0]
+- [optional]
 
 A receiver of a menu item should implement this interface, which will be called after the user has selected
 this menu item.
@@ -150,14 +152,31 @@ public:
 DECLARE_CLASS_IID (IContextMenuTarget, 0x3CDF2E75, 0x85D34144, 0xBF86D36B, 0xD7C4894D)
 
 //------------------------------------------------------------------------
+/** IContextMenuItem is an entry element of the context menu. */
+struct IContextMenuItem
+{
+	String128 name;									///< Name of the item
+	int32 tag;										///< Identifier tag of the item
+	int32 flags;									///< Flags of the item
+
+	enum Flags {
+		kIsSeparator	= 1 << 0,					///< Item is a separator
+		kIsDisabled		= 1 << 1,					///< Item is disabled
+		kIsChecked		= 1 << 2,					///< Item is checked
+		kIsGroupStart	= 1 << 3 | kIsDisabled,		///< Item is a group start (like sub folder)
+		kIsGroupEnd		= 1 << 4 | kIsSeparator,	///< Item is a group end
+	};
+};
+//------------------------------------------------------------------------
 /** Context Menu Interface.
 \ingroup vstIHost vst350
 - [host imp]
 - [create with IComponentHandler3::createContextMenu(..)]
 - [released: 3.5.0]
+- [optional]
 
 A context menu is composed of Item (entry). A Item is defined by a name, a tag, a flag
-and a associated target (called when this item will be selected/executed).
+and a associated target (called when this item will be selected/executed). 
 With IContextMenu the Plug-in can retrieve a Item, add a Item, remove a Item and pop-up the menu.
 
 See IComponentHandler3 for more.
@@ -166,22 +185,8 @@ See IComponentHandler3 for more.
 class IContextMenu : public FUnknown
 {
 public:
-	/** Item is a entry element of the context menu. */
-	struct Item
-	{
-		String128 name;									///< Name of the item
-		int32 tag;										///< Identifier tag of the item
-		int32 flags;									///< Flags of the item
-
-		enum Flags {
-			kIsSeparator	= 1 << 0,					///< Item is a separator
-			kIsDisabled		= 1 << 1,					///< Item is disabled
-			kIsChecked		= 1 << 2,					///< Item is checked
-			kIsGroupStart	= 1 << 3 | kIsDisabled,		///< Item is a group start (like sub folder)
-			kIsGroupEnd		= 1 << 4 | kIsSeparator,	///< Item is a group end
-		};
-	};
-
+	typedef IContextMenuItem Item;
+	
 	/** Gets the number of menu items. */
 	virtual int32 PLUGIN_API getItemCount () = 0;
 
