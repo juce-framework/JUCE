@@ -85,8 +85,8 @@ public:
 
     double getPlayheadTimePosition() const { return playheadTimePosition; }
 
-    void setShowOnlySelectedRegionSequence (bool newVal) { showOnlySelectedRegionSequence = newVal; }
-    bool isShowingOnlySelectedRegionSequence() { return showOnlySelectedRegionSequence; }
+    void setShowOnlySelectedRegionSequences (bool newVal) { showOnlySelectedRegionSequences = newVal; }
+    bool isShowingOnlySelectedRegionSequences() { return showOnlySelectedRegionSequences; }
 
     //==============================================================================
     void paint (Graphics&) override;
@@ -144,7 +144,7 @@ private:
     ToggleButton followPlayheadToggleButton;
 
     bool regionSequenceViewsAreInvalid = true;
-    bool showOnlySelectedRegionSequence = false;
+    bool showOnlySelectedRegionSequences = false;
     Range<double> visibleRange;
     double pixelsPerSecond = 0.0;
     double playheadTimePosition = 0.0;
