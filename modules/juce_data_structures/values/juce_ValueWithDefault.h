@@ -124,7 +124,7 @@ public:
     /** Returns true if the property does not exist or is empty. */
     bool isUsingDefault() const
     {
-        return ! targetTree.hasProperty (targetProperty) || targetTree.getProperty (targetProperty) == var();
+        return ! targetTree.hasProperty (targetProperty) || targetTree.getProperty (targetProperty).toString().isEmpty();
     }
 
     /** Removes the property from the referenced ValueTree. */
