@@ -88,6 +88,8 @@ public:
 
     void setShowOnlySelectedRegionSequences (bool newVal) { showOnlySelectedRegionSequences = newVal; }
     bool isShowingOnlySelectedRegionSequences() { return showOnlySelectedRegionSequences; }
+    void setIsRulersVisible (bool shouldBeVisible) { rulersViewPort.setVisible (shouldBeVisible); }
+    bool isRulersVisible() const { return rulersViewPort.isVisible(); }
 
     //==============================================================================
     void paint (Graphics&) override;

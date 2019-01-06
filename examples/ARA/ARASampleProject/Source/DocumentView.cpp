@@ -5,7 +5,6 @@
 #include "PlaybackRegionView.h"
 #include "RulersView.h"
 
-constexpr int kRulersViewHeight = 3*20;
 constexpr int kTrackHeaderWidth = 120;
 constexpr int kStatusBarHeight = 20;
 constexpr double kMinSecondDuration = 1.0;
@@ -139,19 +138,23 @@ void DocumentView::resized()
     // enforce zoom in/out limits, update zoom buttons
     const double validPixelsPerSecond = jlimit (minPixelsPerSecond, maxPixelsPerSecond, getPixelsPerSecond());
 
+    const int playbackRegionsWidth = roundToInt (visibleRange.getLength() * validPixelsPerSecond);
+    // rulers
+    if (rulersView != nullptr && rulersViewPort.isVisible())
+    {
+        constexpr int kRulersViewHeight = 3*20;
+        rulersViewPort.setBounds (kTrackHeaderWidth, 0, playbackRegionsViewPort.getMaximumVisibleWidth(), kRulersViewHeight);
+        rulersView->setBounds (0, 0, playbackRegionsWidth, kRulersViewHeight);
+    }
+    
     // update sizes and positions of all views
-    playbackRegionsViewPort.setBounds (kTrackHeaderWidth, kRulersViewHeight, getWidth() - kTrackHeaderWidth, getHeight() - kRulersViewHeight - kStatusBarHeight);
-    playbackRegionsView.setBounds (0, 0, roundToInt (visibleRange.getLength() * validPixelsPerSecond), jmax (getTrackHeight() * regionSequenceViews.size(), playbackRegionsViewPort.getHeight() - playbackRegionsViewPort.getScrollBarThickness()));
+    const int rulersViewHeight = rulersViewPort.isVisible() ? rulersViewPort.getHeight() : 0;
+    playbackRegionsViewPort.setBounds (kTrackHeaderWidth, rulersViewHeight, getWidth() - kTrackHeaderWidth, getHeight() - rulersViewHeight - kStatusBarHeight);
+    playbackRegionsView.setBounds (0, 0, playbackRegionsWidth, jmax (getTrackHeight() * regionSequenceViews.size(), playbackRegionsViewPort.getHeight() - playbackRegionsViewPort.getScrollBarThickness()));
     pixelsPerSecond.setValue (playbackRegionsView.getWidth() / visibleRange.getLength());       // prevent potential rounding issues
 
-    trackHeadersViewPort.setBounds (0, kRulersViewHeight, kTrackHeaderWidth, playbackRegionsViewPort.getMaximumVisibleHeight());
+    trackHeadersViewPort.setBounds (0, rulersViewHeight, kTrackHeaderWidth, playbackRegionsViewPort.getMaximumVisibleHeight());
     trackHeadersView.setBounds (0, 0, kTrackHeaderWidth, playbackRegionsView.getHeight());
-
-    if (rulersView != nullptr)
-    {
-        rulersViewPort.setBounds (kTrackHeaderWidth, 0, playbackRegionsViewPort.getMaximumVisibleWidth(), kRulersViewHeight);
-        rulersView->setBounds (0, 0, playbackRegionsView.getWidth(), kRulersViewHeight);
-    }
 
     int y = 0;
     const auto defaultTrackHeight = getTrackHeight();
