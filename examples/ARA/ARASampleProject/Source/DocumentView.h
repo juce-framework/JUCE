@@ -26,6 +26,7 @@ class DocumentView  : public AudioProcessorEditor,
 public AudioProcessorEditorARAExtension,
 private ARAEditorView::Listener,
 private ARADocument::Listener,
+private juce::Value::Listener,
 private juce::Timer
 {
 public:
@@ -103,10 +104,22 @@ public:
     void didAddRegionSequenceToDocument (ARADocument* document, ARARegionSequence* regionSequence) override;
     void didReorderRegionSequencesInDocument (ARADocument* document) override;
 
+    // Value::Listener
+    void valueChanged (juce::Value &value) override;
+
     // DocumentView States
     void setScrollFollowsPlaybackState (bool followPlayhead) { shouldFollowPlayhead.setValue (static_cast<bool>(followPlayhead)); }
     bool getScrollFollowPlaybackState() const { return shouldFollowPlayhead.getValue(); }
     juce::Value& getScrollFollowsPlaybackStateValue() { return shouldFollowPlayhead; }
+
+    double getPixelsPerSecond() const { return pixelsPerSecond.getValue(); }
+    void setPixelsPerSecond (double newValue) { pixelsPerSecond.setValue (newValue); }
+    juce::Value& getPixelsPerSecondValue() { return pixelsPerSecond; }
+    int getTrackHeight() const { return trackHeight.getValue(); }
+    juce::Value& getTrackHeightValue() { return trackHeight; }
+    void setTrackHeight (int newValue) { trackHeight.setValue (newValue); }
+    bool isMaximumPixelsPerSecond() const { return pixelsPerSecond > minPixelsPerSecond; }
+    bool isMinimumPixelsPerSecond() const { return pixelsPerSecond < maxPixelsPerSecond; }
 
 private:
     void rebuildRegionSequenceViews();
@@ -143,18 +156,16 @@ private:
     Viewport rulersViewPort;
     std::unique_ptr<RulersView> rulersView;
 
-    Label horizontalZoomLabel, verticalZoomLabel;
-    TextButton horizontalZoomInButton, horizontalZoomOutButton,
-               verticalZoomInButton, verticalZoomOutButton;
     // Component View States
     Value shouldFollowPlayhead;
+    Value pixelsPerSecond;
+    Value trackHeight;
+    double maxPixelsPerSecond, minPixelsPerSecond;
 
     bool regionSequenceViewsAreInvalid = true;
     bool showOnlySelectedRegionSequences = false;
     Range<double> visibleRange;
-    double pixelsPerSecond = 0.0;
     double playheadTimePosition = 0.0;
-    int trackHeight = 80;
     
     const juce::AudioPlayHead::CurrentPositionInfo* positionInfoPtr;
 

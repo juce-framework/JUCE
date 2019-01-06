@@ -25,11 +25,57 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
         followPlayheadToggleButton.setButtonText ("Viewport follows playhead");
         followPlayheadToggleButton.getToggleStateValue().referTo (documentView->getScrollFollowsPlaybackStateValue());
         addAndMakeVisible (followPlayheadToggleButton);
+
+        // sample zoom functionality
+        horizontalZoomLabel.setText ("H:", dontSendNotification);
+        verticalZoomLabel.setText ("V:", dontSendNotification);
+        verticalZoomInButton.setButtonText("+");
+        verticalZoomOutButton.setButtonText("-");
+        horizontalZoomInButton.setButtonText("+");
+        horizontalZoomOutButton.setButtonText("-");
+        constexpr double zoomStepFactor = 1.5;
+            horizontalZoomInButton.onClick = [this, zoomStepFactor]
+            {
+                 documentView->setPixelsPerSecond (documentView->getPixelsPerSecond() * zoomStepFactor);
+            };
+            horizontalZoomOutButton.onClick = [this, zoomStepFactor]
+            {
+                documentView->setPixelsPerSecond (documentView->getPixelsPerSecond() / zoomStepFactor);
+            };
+
+        verticalZoomInButton.onClick = [this, zoomStepFactor]
+        {
+            documentView->setTrackHeight (documentView->getTrackHeight() * zoomStepFactor);
+        };
+        verticalZoomOutButton.onClick = [this, zoomStepFactor]
+        {
+            documentView->setTrackHeight (documentView->getTrackHeight() / zoomStepFactor);
+        };
+
+        addAndMakeVisible (horizontalZoomLabel);
+        addAndMakeVisible (verticalZoomLabel);
+        addAndMakeVisible (verticalZoomInButton);
+        addAndMakeVisible (verticalZoomOutButton);
+        addAndMakeVisible (horizontalZoomInButton);
+        addAndMakeVisible (horizontalZoomOutButton);
+        documentView->getPixelsPerSecondValue().addListener (this);
+        documentView->getTrackHeightValue().addListener (this);
+        // force validating initial value
+        valueChanged (documentView->getPixelsPerSecondValue());
     }
 
     setSize (kWidth, kHeight);
     setResizeLimits (kMinWidth, kMinHeight, 32768, 32768);
     setResizable (true, false);
+}
+
+ARASampleProjectAudioProcessorEditor::~ARASampleProjectAudioProcessorEditor()
+{
+    if (isARAEditorView())
+    {
+        documentView->getTrackHeightValue().removeListener (this);
+        documentView->getPixelsPerSecondValue().removeListener (this);
+    }
 }
 
 //==============================================================================
@@ -50,5 +96,17 @@ void ARASampleProjectAudioProcessorEditor::resized()
     {
         documentView->setBounds (getBounds());
         followPlayheadToggleButton.setBounds (0, getHeight() - kStatusBarHeight, 200, kStatusBarHeight);
+        horizontalZoomInButton.setBounds (getWidth() - kStatusBarHeight, getHeight() - kStatusBarHeight, kStatusBarHeight, kStatusBarHeight);
+        horizontalZoomOutButton.setBounds (horizontalZoomInButton.getBounds().translated (-kStatusBarHeight, 0));
+        horizontalZoomLabel.setBounds (horizontalZoomOutButton.getBounds().translated (-kStatusBarHeight, 0));
+        verticalZoomInButton.setBounds (horizontalZoomLabel.getBounds().translated (-kStatusBarHeight, 0));
+        verticalZoomOutButton.setBounds (verticalZoomInButton.getBounds().translated (-kStatusBarHeight, 0));
+        verticalZoomLabel.setBounds (verticalZoomOutButton.getBounds().translated (-kStatusBarHeight, 0));
     }
+}
+
+void ARASampleProjectAudioProcessorEditor::valueChanged (juce::Value &value)
+{
+    horizontalZoomInButton.setEnabled (documentView->isMinimumPixelsPerSecond());
+    horizontalZoomOutButton.setEnabled (documentView->isMaximumPixelsPerSecond());
 }

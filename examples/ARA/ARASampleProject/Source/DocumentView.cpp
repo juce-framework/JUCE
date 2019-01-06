@@ -30,48 +30,12 @@ positionInfoPtr (nullptr)
     trackHeadersViewPort.setScrollBarsShown (false, false, false, false);
     trackHeadersViewPort.setViewedComponent (&trackHeadersView, false);
     addAndMakeVisible (trackHeadersViewPort);
-
-    // TODO: Zoom components should be decided later
-    //       I guess they should be customizable so we might
-    //       just provide methods so they could be called by methods
-    //       by developers own views.
-    horizontalZoomLabel.setText ("H:", dontSendNotification);
-    verticalZoomLabel.setText ("V:", dontSendNotification);
-    verticalZoomInButton.setButtonText("+");
-    verticalZoomOutButton.setButtonText("-");
-    horizontalZoomInButton.setButtonText("+");
-    horizontalZoomOutButton.setButtonText("-");
-    constexpr double zoomStepFactor = 1.5;
-    horizontalZoomInButton.onClick = [this, zoomStepFactor]
-    {
-        pixelsPerSecond *= zoomStepFactor;
-        resized();
-    };
-    horizontalZoomOutButton.onClick = [this, zoomStepFactor]
-    {
-        pixelsPerSecond /= zoomStepFactor;
-        resized();
-    };
-    verticalZoomInButton.onClick = [this, zoomStepFactor]
-    {
-        trackHeight *= zoomStepFactor;
-        resized();
-    };
-    verticalZoomOutButton.onClick = [this, zoomStepFactor]
-    {
-        trackHeight /= zoomStepFactor;
-        resized();
-    };
-
-    addAndMakeVisible (horizontalZoomLabel);
-    addAndMakeVisible (verticalZoomLabel);
-    addAndMakeVisible (verticalZoomInButton);
-    addAndMakeVisible (verticalZoomOutButton);
-    addAndMakeVisible (horizontalZoomInButton);
-    addAndMakeVisible (horizontalZoomOutButton);
     
     // init defaults
     shouldFollowPlayhead = true;
+    trackHeight = 80;
+    pixelsPerSecond.addListener (this);
+    trackHeight.addListener (this);
     
     if (! isARAEditorView())
     {
@@ -98,6 +62,8 @@ DocumentView::~DocumentView()
 {
     if (isARAEditorView())
     {
+        pixelsPerSecond.removeListener (this);
+        trackHeight.removeListener (this);
         getARADocumentController()->getDocument<ARADocument>()->removeListener (this);
         getARAEditorView()->removeListener (this);
     }
@@ -165,20 +131,18 @@ void DocumentView::resized()
     visibleRange.setEnd (visibleRange.getEnd() + kMinBorderSeconds);
 
     // max zoom 1px : 1sample (this is a naive assumption as audio can be in different sample rate)
-    double maxPixelsPerSecond = jmax (processor.getSampleRate(), 300.0);
+    maxPixelsPerSecond = jmax (processor.getSampleRate(), 300.0);
 
     // min zoom covers entire view range
-    double minPixelsPerSecond = (getWidth() - kTrackHeaderWidth - rulersViewPort.getScrollBarThickness()) / visibleRange.getLength();
+    minPixelsPerSecond = (getWidth() - kTrackHeaderWidth - rulersViewPort.getScrollBarThickness()) / visibleRange.getLength();
 
     // enforce zoom in/out limits, update zoom buttons
-    pixelsPerSecond = jmax (minPixelsPerSecond, jmin (pixelsPerSecond, maxPixelsPerSecond));
-    horizontalZoomOutButton.setEnabled (pixelsPerSecond > minPixelsPerSecond);
-    horizontalZoomInButton.setEnabled (pixelsPerSecond < maxPixelsPerSecond);
+    const double validPixelsPerSecond = jlimit (minPixelsPerSecond, maxPixelsPerSecond, getPixelsPerSecond());
 
     // update sizes and positions of all views
     playbackRegionsViewPort.setBounds (kTrackHeaderWidth, kRulersViewHeight, getWidth() - kTrackHeaderWidth, getHeight() - kRulersViewHeight - kStatusBarHeight);
-    playbackRegionsView.setBounds (0, 0, roundToInt (visibleRange.getLength() * pixelsPerSecond), jmax (trackHeight * regionSequenceViews.size(), playbackRegionsViewPort.getHeight() - playbackRegionsViewPort.getScrollBarThickness()));
-    pixelsPerSecond = playbackRegionsView.getWidth() / visibleRange.getLength();       // prevent potential rounding issues
+    playbackRegionsView.setBounds (0, 0, roundToInt (visibleRange.getLength() * validPixelsPerSecond), jmax (getTrackHeight() * regionSequenceViews.size(), playbackRegionsViewPort.getHeight() - playbackRegionsViewPort.getScrollBarThickness()));
+    pixelsPerSecond.setValue (playbackRegionsView.getWidth() / visibleRange.getLength());       // prevent potential rounding issues
 
     trackHeadersViewPort.setBounds (0, kRulersViewHeight, kTrackHeaderWidth, playbackRegionsViewPort.getMaximumVisibleHeight());
     trackHeadersView.setBounds (0, 0, kTrackHeaderWidth, playbackRegionsView.getHeight());
@@ -190,20 +154,14 @@ void DocumentView::resized()
     }
 
     int y = 0;
+    const auto defaultTrackHeight = getTrackHeight();
     for (auto v : regionSequenceViews)
     {
-        v->setRegionsViewBoundsByYRange (y, trackHeight);
-        y += trackHeight;
+        v->setRegionsViewBoundsByYRange (y, defaultTrackHeight);
+        y += defaultTrackHeight;
     }
 
     playheadView.setBounds (playbackRegionsView.getBounds());
-
-    horizontalZoomInButton.setBounds (getWidth() - kStatusBarHeight, getHeight() - kStatusBarHeight, kStatusBarHeight, kStatusBarHeight);
-    horizontalZoomOutButton.setBounds (horizontalZoomInButton.getBounds().translated (-kStatusBarHeight, 0));
-    horizontalZoomLabel.setBounds (horizontalZoomOutButton.getBounds().translated (-kStatusBarHeight, 0));
-    verticalZoomInButton.setBounds (horizontalZoomLabel.getBounds().translated (-kStatusBarHeight, 0));
-    verticalZoomOutButton.setBounds (verticalZoomInButton.getBounds().translated (-kStatusBarHeight, 0));
-    verticalZoomLabel.setBounds (verticalZoomOutButton.getBounds().translated (-kStatusBarHeight, 0));
 
     // keep viewport position relative to playhead
     // TODO JUCE_ARA if playhead is not visible in new position, we should rather keep the
@@ -312,6 +270,16 @@ void DocumentView::setCurrentPositionInfo (const AudioPlayHead::CurrentPositionI
 {
     positionInfoPtr = curPosInfoPtr;
 }
+
+void DocumentView::valueChanged (juce::Value& value)
+{
+    if (value.refersToSameSourceAs (pixelsPerSecond) || value.refersToSameSourceAs (trackHeight))
+    {
+        // zoom changed, invalidate DocumentView size
+        resized();
+    }
+}
+
 
 //==============================================================================
 DocumentView::PlayheadView::PlayheadView (DocumentView& documentView)
