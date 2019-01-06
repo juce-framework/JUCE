@@ -315,7 +315,7 @@ public:
 
     struct EnhancedAudioSuiteInterface
     {
-        virtual ~EnhancedAudioSuiteInterface() {};
+        virtual ~EnhancedAudioSuiteInterface() {}
         virtual void requestAnalysis() = 0;
         virtual void requestRender() = 0;
     };
