@@ -103,6 +103,11 @@ public:
     void didAddRegionSequenceToDocument (ARADocument* document, ARARegionSequence* regionSequence) override;
     void didReorderRegionSequencesInDocument (ARADocument* document) override;
 
+    // DocumentView States
+    void setScrollFollowsPlaybackState (bool followPlayhead) { shouldFollowPlayhead.setValue (static_cast<bool>(followPlayhead)); }
+    bool getScrollFollowPlaybackState() const { return shouldFollowPlayhead.getValue(); }
+    juce::Value& getScrollFollowsPlaybackStateValue() { return shouldFollowPlayhead; }
+
 private:
     void rebuildRegionSequenceViews();
     void updatePlayheadBounds();
@@ -141,7 +146,8 @@ private:
     Label horizontalZoomLabel, verticalZoomLabel;
     TextButton horizontalZoomInButton, horizontalZoomOutButton,
                verticalZoomInButton, verticalZoomOutButton;
-    ToggleButton followPlayheadToggleButton;
+    // Component View States
+    Value shouldFollowPlayhead;
 
     bool regionSequenceViewsAreInvalid = true;
     bool showOnlySelectedRegionSequences = false;

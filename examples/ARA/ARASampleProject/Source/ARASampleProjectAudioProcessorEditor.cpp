@@ -21,6 +21,10 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
         documentView->getLookAndFeel().setDefaultSansSerifTypefaceName("Arial Unicode MS");
         documentView->setCurrentPositionInfo (&p.getLastKnownPositionInfo());
         addAndMakeVisible (documentView.get());
+
+        followPlayheadToggleButton.setButtonText ("Viewport follows playhead");
+        followPlayheadToggleButton.getToggleStateValue().referTo (documentView->getScrollFollowsPlaybackStateValue());
+        addAndMakeVisible (followPlayheadToggleButton);
     }
 
     setSize (kWidth, kHeight);
@@ -45,5 +49,6 @@ void ARASampleProjectAudioProcessorEditor::resized()
     if (isARAEditorView())
     {
         documentView->setBounds (getBounds());
+        followPlayheadToggleButton.setBounds (0, getHeight() - kStatusBarHeight, 200, kStatusBarHeight);
     }
 }

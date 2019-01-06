@@ -70,9 +70,8 @@ positionInfoPtr (nullptr)
     addAndMakeVisible (horizontalZoomInButton);
     addAndMakeVisible (horizontalZoomOutButton);
     
-    followPlayheadToggleButton.setButtonText ("Viewport follows playhead");
-    followPlayheadToggleButton.setToggleState (true, dontSendNotification);
-    addAndMakeVisible (followPlayheadToggleButton);
+    // init defaults
+    shouldFollowPlayhead = true;
     
     if (! isARAEditorView())
     {
@@ -205,7 +204,6 @@ void DocumentView::resized()
     verticalZoomInButton.setBounds (horizontalZoomLabel.getBounds().translated (-kStatusBarHeight, 0));
     verticalZoomOutButton.setBounds (verticalZoomInButton.getBounds().translated (-kStatusBarHeight, 0));
     verticalZoomLabel.setBounds (verticalZoomOutButton.getBounds().translated (-kStatusBarHeight, 0));
-    followPlayheadToggleButton.setBounds (0, horizontalZoomInButton.getY(), 200, kStatusBarHeight);
 
     // keep viewport position relative to playhead
     // TODO JUCE_ARA if playhead is not visible in new position, we should rather keep the
@@ -299,7 +297,7 @@ void DocumentView::timerCallback()
     {
         playheadTimePosition = positionInfoPtr->timeInSeconds;
 
-        if (followPlayheadToggleButton.getToggleState())
+        if (shouldFollowPlayhead.getValue())
         {
             Range<double> visibleRange = getVisibleTimeRange();
             if (playheadTimePosition < visibleRange.getStart() || playheadTimePosition > visibleRange.getEnd())
