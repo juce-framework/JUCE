@@ -37,20 +37,20 @@ public:
      This allows customizing PlaybackRegionView Component to desired behavior.
      (for example: showing notes)
      */
-    virtual PlaybackRegionView* getViewForPlaybackRegion (ARAPlaybackRegion*);
+    virtual PlaybackRegionView* createViewForPlaybackRegion (ARAPlaybackRegion*);
 
     /*
      Creates a new RegionSequenceView which will be owned.
      This allows customizing RegionSequenceView Component to desired behavior.
      (for example: allow showing cross-fades or interaction between regions)
      */
-    virtual RegionSequenceView* getViewForRegionSequence (ARARegionSequence*);
+    virtual RegionSequenceView* createViewForRegionSequence (ARARegionSequence*);
 
     /*
      Creates a new TrackHeaderView which will be owned.
      This allows customizing TrackHeaderView Component to desired behavior.
      */
-    virtual TrackHeaderView* getHeaderViewForRegionSequence (ARARegionSequence*);
+    virtual TrackHeaderView* createHeaderViewForRegionSequence (ARARegionSequence*);
 
     // total time range
     Range<double> getTimeRange() const { return visibleRange; }

@@ -7,7 +7,7 @@
 RegionSequenceView::RegionSequenceView (DocumentView& documentView, ARARegionSequence* sequence)
     : documentView (documentView),
       regionSequence (sequence),
-      trackHeaderView (documentView.getHeaderViewForRegionSequence (regionSequence))
+      trackHeaderView (documentView.createHeaderViewForRegionSequence (regionSequence))
 {
     regionSequence->addListener (this);
 
@@ -24,7 +24,7 @@ RegionSequenceView::~RegionSequenceView()
 
 void RegionSequenceView::addRegionSequenceViewAndMakeVisible (ARAPlaybackRegion* playbackRegion)
 {
-    auto view = documentView.getViewForPlaybackRegion (playbackRegion);
+    auto view = documentView.createViewForPlaybackRegion (playbackRegion);
     playbackRegionViews.add (view);
     documentView.getPlaybackRegionsView().addAndMakeVisible (view);
 }

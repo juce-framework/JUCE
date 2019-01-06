@@ -226,14 +226,14 @@ void DocumentView::rebuildRegionSequenceViews()
     {
         if (!showOnlySelectedRegionSequence && ! ARA::contains (getARAEditorView()->getHiddenRegionSequences(), regionSequence))
         {
-            regionSequenceViews.add (getViewForRegionSequence(regionSequence));
+            regionSequenceViews.add (createViewForRegionSequence(regionSequence));
         }
         else
         {
             auto selectedSequences = getARAEditorView()->getViewSelection().getRegionSequences();
             if (ARA::contains (selectedSequences, regionSequence))
             {
-                regionSequenceViews.add (getViewForRegionSequence(regionSequence));
+                regionSequenceViews.add (createViewForRegionSequence(regionSequence));
             }
         }
     }
@@ -270,17 +270,17 @@ void DocumentView::didReorderRegionSequencesInDocument (ARADocument* document)
     invalidateRegionSequenceViews();
 }
 
-PlaybackRegionView* DocumentView::getViewForPlaybackRegion (ARAPlaybackRegion* playbackRegion)
+PlaybackRegionView* DocumentView::createViewForPlaybackRegion (ARAPlaybackRegion* playbackRegion)
 {
     return new PlaybackRegionView (*this, playbackRegion);
 }
 
-TrackHeaderView* DocumentView::getHeaderViewForRegionSequence (ARARegionSequence* regionSequence)
+TrackHeaderView* DocumentView::createHeaderViewForRegionSequence (ARARegionSequence* regionSequence)
 {
     return new TrackHeaderView (getARAEditorView(), regionSequence);
 }
 
-RegionSequenceView* DocumentView::getViewForRegionSequence (ARARegionSequence* regionSequence)
+RegionSequenceView* DocumentView::createViewForRegionSequence (ARARegionSequence* regionSequence)
 {
     return new RegionSequenceView (*this, regionSequence);
 }
