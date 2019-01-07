@@ -1,13 +1,10 @@
 #include "ARASampleProjectAudioProcessorEditor.h"
 
-constexpr int kRulersViewHeight = 3*20;
-constexpr int kTrackHeaderWidth = 120;
-constexpr int kTrackHeight = 80;
 constexpr int kStatusBarHeight = 20;
-constexpr int kMinWidth = 3 * kTrackHeaderWidth;
+constexpr int kMinWidth = 500;
 constexpr int kWidth = 1000;
-constexpr int kMinHeight = kRulersViewHeight + 1 * kTrackHeight + kStatusBarHeight;
-constexpr int kHeight = kMinHeight + 5 * kTrackHeight;
+constexpr int kMinHeight = 200;
+constexpr int kHeight = 600;
 
 //==============================================================================
 ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARASampleProjectAudioProcessor& p)
