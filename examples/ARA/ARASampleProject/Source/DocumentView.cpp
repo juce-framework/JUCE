@@ -222,12 +222,14 @@ void DocumentView::didEndEditing (ARADocument* document)
 void DocumentView::didAddRegionSequenceToDocument (ARADocument* document, ARARegionSequence* regionSequence)
 {
     jassert (document == getARADocumentController()->getDocument());
+
     invalidateRegionSequenceViews();
 }
 
 void DocumentView::didReorderRegionSequencesInDocument (ARADocument* document)
 {
     jassert (document == getARADocumentController()->getDocument());
+
     invalidateRegionSequenceViews();
 }
 
@@ -295,13 +297,10 @@ void DocumentView::setCurrentPositionInfo (const AudioPlayHead::CurrentPositionI
 
 void DocumentView::valueChanged (juce::Value& value)
 {
+    // if zoom changed, update all sizes
     if (value.refersToSameSourceAs (pixelsPerSecond) || value.refersToSameSourceAs (trackHeight))
-    {
-        // zoom changed, invalidate DocumentView size
         resized();
-    }
 }
-
 
 //==============================================================================
 DocumentView::PlayheadView::PlayheadView (DocumentView& documentView)
