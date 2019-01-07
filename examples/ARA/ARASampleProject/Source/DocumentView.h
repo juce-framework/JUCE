@@ -71,7 +71,7 @@ public:
 //  This will be easy to do since it is all in linear time now.
 
     // flag that our view needs to be rebuilt
-    void invalidateRegionSequenceViews() { regionSequenceViewsAreInvalid = true; }
+    void invalidateRegionSequenceViews();
 
     Component& getPlaybackRegionsView() { return playbackRegionsView; }
     Component& getTrackHeadersView() { return trackHeadersView; }
@@ -93,7 +93,7 @@ public:
 
     double getPlayheadTimePosition() const { return playheadTimePosition; }
 
-    void setShowOnlySelectedRegionSequences (bool newVal) { showOnlySelectedRegionSequences = newVal; }
+    void setShowOnlySelectedRegionSequences (bool newVal);
     bool isShowingOnlySelectedRegionSequences() { return showOnlySelectedRegionSequences; }
     void setIsRulersVisible (bool shouldBeVisible);
     bool isRulersVisible() const { return rulersViewPort.isVisible(); }

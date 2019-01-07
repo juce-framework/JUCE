@@ -77,8 +77,9 @@ double DocumentView::getPlaybackRegionsViewsTimeForX (int x) const
 
 void DocumentView::parentHierarchyChanged()
 {
-    // needed to be called after DocumentView is constructed.
-    rebuildRegionSequenceViews();
+    // trigger lazy initial update after construction if needed
+    if (regionSequenceViewsAreInvalid && ! getARADocumentController()->isHostEditingDocument())
+        rebuildRegionSequenceViews();
 }
 
 //==============================================================================
@@ -195,13 +196,15 @@ void DocumentView::rebuildRegionSequenceViews()
         }
     }
 
+    regionSequenceViewsAreInvalid = false;
+
     resized();
 }
 
 //==============================================================================
 void DocumentView::onHideRegionSequences (std::vector<ARARegionSequence*> const& /*regionSequences*/)
 {
-    rebuildRegionSequenceViews();
+    invalidateRegionSequenceViews();
 }
 
 void DocumentView::didEndEditing (ARADocument* document)
@@ -209,21 +212,20 @@ void DocumentView::didEndEditing (ARADocument* document)
     jassert (document == getARADocumentController()->getDocument());
     
     if (regionSequenceViewsAreInvalid)
-    {
         rebuildRegionSequenceViews();
-        regionSequenceViewsAreInvalid = false;
-    }
 }
 
 void DocumentView::didAddRegionSequenceToDocument (ARADocument* document, ARARegionSequence* regionSequence)
 {
     jassert (document == getARADocumentController()->getDocument());
+
     invalidateRegionSequenceViews();
 }
 
 void DocumentView::didReorderRegionSequencesInDocument (ARADocument* document)
 {
     jassert (document == getARADocumentController()->getDocument());
+
     invalidateRegionSequenceViews();
 }
 
@@ -244,9 +246,24 @@ RegionSequenceView* DocumentView::createViewForRegionSequence (ARARegionSequence
 
 Range<double> DocumentView::getVisibleTimeRange() const
 {
-    double start = getPlaybackRegionsViewsTimeForX (playbackRegionsViewPort.getViewArea().getX());
-    double end = getPlaybackRegionsViewsTimeForX (playbackRegionsViewPort.getViewArea().getRight());
-    return Range<double> (start, end);
+    const double start = getPlaybackRegionsViewsTimeForX (playbackRegionsViewPort.getViewArea().getX());
+    const double end = getPlaybackRegionsViewsTimeForX (playbackRegionsViewPort.getViewArea().getRight());
+    return { start, end };
+}
+
+void DocumentView::invalidateRegionSequenceViews()
+{
+    if (getARADocumentController()->isHostEditingDocument() || getParentComponent() == nullptr)
+        regionSequenceViewsAreInvalid = true;
+    else
+        rebuildRegionSequenceViews();
+}
+
+void DocumentView::setShowOnlySelectedRegionSequences (bool newVal)
+{
+    showOnlySelectedRegionSequences = newVal;
+
+    invalidateRegionSequenceViews();
 }
 
 void DocumentView::timerCallback()
@@ -260,7 +277,7 @@ void DocumentView::timerCallback()
 
         if (shouldFollowPlayhead.getValue())
         {
-            Range<double> visibleRange = getVisibleTimeRange();
+            const auto visibleRange = getVisibleTimeRange();
             if (playheadTimePosition < visibleRange.getStart() || playheadTimePosition > visibleRange.getEnd())
                 playbackRegionsViewPort.setViewPosition (playbackRegionsViewPort.getViewPosition().withX (getPlaybackRegionsViewsXForTime (playheadTimePosition)));
         };
