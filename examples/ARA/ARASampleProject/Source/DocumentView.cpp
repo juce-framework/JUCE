@@ -335,3 +335,8 @@ void DocumentView::setTrackHeight (int newHeight)
                                                l.trackHeightChanged (trackHeight);
                                            });
 }
+
+void DocumentView::setIsRulersVisible (bool shouldBeVisible)
+{
+    rulersViewPort.setVisible (shouldBeVisible);
+}

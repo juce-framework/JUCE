@@ -95,7 +95,7 @@ public:
 
     void setShowOnlySelectedRegionSequences (bool newVal) { showOnlySelectedRegionSequences = newVal; }
     bool isShowingOnlySelectedRegionSequences() { return showOnlySelectedRegionSequences; }
-    void setIsRulersVisible (bool shouldBeVisible) { rulersViewPort.setVisible (shouldBeVisible); }
+    void setIsRulersVisible (bool shouldBeVisible);
     bool isRulersVisible() const { return rulersViewPort.isVisible(); }
 
     //==============================================================================
