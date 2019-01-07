@@ -29,7 +29,8 @@ private:
     ToggleButton followPlayheadToggleButton;
     Label horizontalZoomLabel, verticalZoomLabel;
     TextButton horizontalZoomInButton, horizontalZoomOutButton,
-    verticalZoomInButton, verticalZoomOutButton;
+    verticalZoomInButton, verticalZoomOutButton,
+    showHideTrackHeaderButton;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARASampleProjectAudioProcessorEditor)
 };

@@ -99,6 +99,8 @@ public:
 
     void setIsRulersVisible (bool shouldBeVisible);
     bool isRulersVisible() const { return rulersViewPort.isVisible(); }
+    void setIsTrackHeadersVisible (bool shouldBeVisible);
+    bool isTrackHeadersVisible() const { return trackHeadersViewPort.isVisible(); }
 
     // DocumentView States
     void setScrollFollowsPlaybackState (bool followPlayhead) { shouldFollowPlayhead.setValue (followPlayhead); }

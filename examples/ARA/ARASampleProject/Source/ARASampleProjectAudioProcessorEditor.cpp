@@ -23,6 +23,16 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
         followPlayheadToggleButton.getToggleStateValue().referTo (documentView->getScrollFollowsPlaybackStateValue());
         addAndMakeVisible (followPlayheadToggleButton);
 
+        // sample show/hide track headers.
+        showHideTrackHeaderButton.setButtonText ("Show/Hide Track Headers");
+        showHideTrackHeaderButton.setClickingTogglesState (true);
+        showHideTrackHeaderButton.setToggleState(documentView->isTrackHeadersVisible(), dontSendNotification);
+        showHideTrackHeaderButton.onClick = [this]
+        {
+            documentView->setIsTrackHeadersVisible (showHideTrackHeaderButton.getToggleState());
+        };
+        addAndMakeVisible (showHideTrackHeaderButton);
+
         // sample zoom functionality
         horizontalZoomLabel.setText ("H:", dontSendNotification);
         verticalZoomLabel.setText ("V:", dontSendNotification);
@@ -88,6 +98,7 @@ void ARASampleProjectAudioProcessorEditor::resized()
     {
         documentView->setBounds (0, 0, getWidth(), getHeight() - kStatusBarHeight);
         followPlayheadToggleButton.setBounds (0, getHeight() - kStatusBarHeight, 200, kStatusBarHeight);
+        showHideTrackHeaderButton.setBounds(followPlayheadToggleButton.getRight(), getHeight() - kStatusBarHeight, 100, kStatusBarHeight);
         horizontalZoomInButton.setBounds (getWidth() - kStatusBarHeight, getHeight() - kStatusBarHeight, kStatusBarHeight, kStatusBarHeight);
         horizontalZoomOutButton.setBounds (horizontalZoomInButton.getBounds().translated (-kStatusBarHeight, 0));
         horizontalZoomLabel.setBounds (horizontalZoomOutButton.getBounds().translated (-kStatusBarHeight, 0));
