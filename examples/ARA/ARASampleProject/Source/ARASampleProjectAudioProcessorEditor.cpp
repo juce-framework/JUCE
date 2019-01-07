@@ -41,14 +41,14 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
         horizontalZoomInButton.setButtonText("+");
         horizontalZoomOutButton.setButtonText("-");
         constexpr double zoomStepFactor = 1.5;
-            horizontalZoomInButton.onClick = [this, zoomStepFactor]
-            {
-                 documentView->setPixelsPerSecond (documentView->getPixelsPerSecond() * zoomStepFactor);
-            };
-            horizontalZoomOutButton.onClick = [this, zoomStepFactor]
-            {
-                documentView->setPixelsPerSecond (documentView->getPixelsPerSecond() / zoomStepFactor);
-            };
+        horizontalZoomInButton.onClick = [this, zoomStepFactor]
+        {
+            documentView->setPixelsPerSecond (documentView->getPixelsPerSecond() * zoomStepFactor);
+        };
+        horizontalZoomOutButton.onClick = [this, zoomStepFactor]
+        {
+            documentView->setPixelsPerSecond (documentView->getPixelsPerSecond() / zoomStepFactor);
+        };
 
         verticalZoomInButton.onClick = [this, zoomStepFactor]
         {
