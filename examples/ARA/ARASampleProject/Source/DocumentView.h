@@ -88,8 +88,9 @@ public:
 
     double getPlayheadTimePosition() const { return playheadTimePosition; }
 
-    void setShowOnlySelectedRegionSequences (bool newVal) { showOnlySelectedRegionSequences = newVal; }
+    void setShowOnlySelectedRegionSequences (bool newVal);
     bool isShowingOnlySelectedRegionSequences() { return showOnlySelectedRegionSequences; }
+
     void setIsRulersVisible (bool shouldBeVisible) { rulersViewPort.setVisible (shouldBeVisible); }
     bool isRulersVisible() const { return rulersViewPort.isVisible(); }
 

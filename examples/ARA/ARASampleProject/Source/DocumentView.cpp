@@ -251,6 +251,18 @@ Range<double> DocumentView::getVisibleTimeRange() const
     const double end = getPlaybackRegionsViewsTimeForX (playbackRegionsViewPort.getViewArea().getRight());
     return { start, end };
 }
+
+void DocumentView::setShowOnlySelectedRegionSequences (bool newVal)
+{
+    showOnlySelectedRegionSequences = newVal;
+
+    if (! regionSequenceViewsAreInvalid)
+    {
+        if (getARADocumentController()->isHostEditingDocument())
+            regionSequenceViewsAreInvalid = true;
+        else
+            rebuildRegionSequenceViews();
+    }
 }
 
 void DocumentView::timerCallback()
