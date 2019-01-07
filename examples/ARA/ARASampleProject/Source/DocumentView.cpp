@@ -178,23 +178,21 @@ void DocumentView::resized()
 void DocumentView::rebuildRegionSequenceViews()
 {
     regionSequenceViews.clear();
+
     if (showOnlySelectedRegionSequences)
     {
-        for (auto selectedSequence : getARAEditorView()->getViewSelection().getRegionSequences())
-        {
-            regionSequenceViews.add (createViewForRegionSequence (static_cast<ARARegionSequence*>(selectedSequence)));
-        }
+        for (auto selectedSequence : getARAEditorView()->getViewSelection().getRegionSequences<ARARegionSequence>())
+            regionSequenceViews.add (createViewForRegionSequence (selectedSequence));
     }
     else    // show all RegionSequences of Document...
     {
         for (auto regionSequence : getARADocumentController()->getDocument()->getRegionSequences<ARARegionSequence>())
         {
             if (! ARA::contains (getARAEditorView()->getHiddenRegionSequences(), regionSequence))
-            {
                 regionSequenceViews.add (createViewForRegionSequence(regionSequence));
-            }
         }
     }
+
     resized();
 }
 
