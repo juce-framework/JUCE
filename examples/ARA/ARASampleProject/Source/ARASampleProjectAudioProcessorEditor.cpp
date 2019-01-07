@@ -1,13 +1,10 @@
 #include "ARASampleProjectAudioProcessorEditor.h"
 
-constexpr int kRulersViewHeight = 3*20;
-constexpr int kTrackHeaderWidth = 120;
-constexpr int kTrackHeight = 80;
 constexpr int kStatusBarHeight = 20;
-constexpr int kMinWidth = 3 * kTrackHeaderWidth;
+constexpr int kMinWidth = 500;
 constexpr int kWidth = 1000;
-constexpr int kMinHeight = kRulersViewHeight + 1 * kTrackHeight + kStatusBarHeight;
-constexpr int kHeight = kMinHeight + 5 * kTrackHeight;
+constexpr int kMinHeight = 200;
+constexpr int kHeight = 600;
 
 //==============================================================================
 ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARASampleProjectAudioProcessor& p)
@@ -58,11 +55,8 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
         addAndMakeVisible (verticalZoomOutButton);
         addAndMakeVisible (horizontalZoomInButton);
         addAndMakeVisible (horizontalZoomOutButton);
-        documentView->getPixelsPerSecondValue().addListener (this);
-        documentView->getTrackHeightValue().addListener (this);
-        // force validating initial value
-        valueChanged (documentView->getPixelsPerSecondValue());
         documentView->setIsRulersVisible (true);
+        documentView->addListener (this);
     }
 
     setSize (kWidth, kHeight);
@@ -73,10 +67,7 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
 ARASampleProjectAudioProcessorEditor::~ARASampleProjectAudioProcessorEditor()
 {
     if (isARAEditorView())
-    {
-        documentView->getTrackHeightValue().removeListener (this);
-        documentView->getPixelsPerSecondValue().removeListener (this);
-    }
+        documentView->removeListener (this);
 }
 
 //==============================================================================
@@ -95,7 +86,7 @@ void ARASampleProjectAudioProcessorEditor::resized()
 {
     if (isARAEditorView())
     {
-        documentView->setBounds (getBounds());
+        documentView->setBounds (0, 0, getWidth(), getHeight() - kStatusBarHeight);
         followPlayheadToggleButton.setBounds (0, getHeight() - kStatusBarHeight, 200, kStatusBarHeight);
         horizontalZoomInButton.setBounds (getWidth() - kStatusBarHeight, getHeight() - kStatusBarHeight, kStatusBarHeight, kStatusBarHeight);
         horizontalZoomOutButton.setBounds (horizontalZoomInButton.getBounds().translated (-kStatusBarHeight, 0));
@@ -106,7 +97,7 @@ void ARASampleProjectAudioProcessorEditor::resized()
     }
 }
 
-void ARASampleProjectAudioProcessorEditor::valueChanged (juce::Value &value)
+void ARASampleProjectAudioProcessorEditor::visibleTimeRangeChanged (Range<double> /*newVisibleTimeRange*/, double /*pixelsPerSecond*/)
 {
     horizontalZoomInButton.setEnabled (documentView->isMinimumPixelsPerSecond());
     horizontalZoomOutButton.setEnabled (documentView->isMaximumPixelsPerSecond());
