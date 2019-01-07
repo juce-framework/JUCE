@@ -65,6 +65,29 @@ DocumentView::~DocumentView()
 }
 
 //==============================================================================
+PlaybackRegionView* DocumentView::createViewForPlaybackRegion (ARAPlaybackRegion* playbackRegion)
+{
+    return new PlaybackRegionView (*this, playbackRegion);
+}
+
+TrackHeaderView* DocumentView::createHeaderViewForRegionSequence (ARARegionSequence* regionSequence)
+{
+    return new TrackHeaderView (getARAEditorView(), regionSequence);
+}
+
+RegionSequenceView* DocumentView::createViewForRegionSequence (ARARegionSequence* regionSequence)
+{
+    return new RegionSequenceView (*this, regionSequence);
+}
+
+//==============================================================================
+Range<double> DocumentView::getVisibleTimeRange() const
+{
+    const double start = getPlaybackRegionsViewsTimeForX (playbackRegionsViewPort.getViewArea().getX());
+    const double end = getPlaybackRegionsViewsTimeForX (playbackRegionsViewPort.getViewArea().getRight());
+    return { start, end };
+}
+
 int DocumentView::getPlaybackRegionsViewsXForTime (double time) const
 {
     return roundToInt ((time - visibleRange.getStart()) / visibleRange.getLength() * playbackRegionsView.getWidth());
@@ -75,6 +98,61 @@ double DocumentView::getPlaybackRegionsViewsTimeForX (int x) const
     return visibleRange.getStart() + ((double) x / (double) playbackRegionsView.getWidth()) * visibleRange.getLength();
 }
 
+void DocumentView::invalidateRegionSequenceViews()
+{
+    if (getARADocumentController()->isHostEditingDocument() || getParentComponent() == nullptr)
+        regionSequenceViewsAreInvalid = true;
+    else
+        rebuildRegionSequenceViews();
+}
+
+//==============================================================================
+void DocumentView::setCurrentPositionInfo (const AudioPlayHead::CurrentPositionInfo* curPosInfoPtr)
+{
+    positionInfoPtr = curPosInfoPtr;
+}
+
+void DocumentView::setShowOnlySelectedRegionSequences (bool newVal)
+{
+    showOnlySelectedRegionSequences = newVal;
+
+    invalidateRegionSequenceViews();
+}
+
+void DocumentView::setIsRulersVisible (bool shouldBeVisible)
+{
+    rulersViewPort.setVisible (shouldBeVisible);
+}
+
+void DocumentView::setPixelsPerSecond (double newValue)
+{
+    if (newValue == pixelsPerSecond)
+        return;
+
+    pixelsPerSecond = newValue;
+    resized();  // this will constrain pixelsPerSecond range, also it might call again after rounding.
+    const double newRangeStartInSeconds = getPlaybackRegionsViewsTimeForX (playbackRegionsViewPort.getViewArea().getX());
+    const double newRangeEndInSeconds = getPlaybackRegionsViewsTimeForX (playbackRegionsViewPort.getViewArea().getRight());
+
+    listeners.callExpectingUnregistration ([&] (Listener& l)
+                                           {
+                                               l.timelineSelectionChanged (newRangeStartInSeconds, newRangeEndInSeconds, pixelsPerSecond);
+                                           });
+}
+
+void DocumentView::setTrackHeight (int newHeight)
+{
+    if (newHeight == trackHeight)
+        return;
+
+    trackHeight = newHeight;
+    listeners.callExpectingUnregistration ([&] (Listener& l)
+                                           {
+                                               l.trackHeightChanged (trackHeight);
+                                           });
+}
+
+//==============================================================================
 void DocumentView::parentHierarchyChanged()
 {
     // trigger lazy initial update after construction if needed
@@ -82,7 +160,6 @@ void DocumentView::parentHierarchyChanged()
         rebuildRegionSequenceViews();
 }
 
-//==============================================================================
 void DocumentView::paint (Graphics& g)
 {
     g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
@@ -229,42 +306,6 @@ void DocumentView::didReorderRegionSequencesInDocument (ARADocument* document)
     invalidateRegionSequenceViews();
 }
 
-PlaybackRegionView* DocumentView::createViewForPlaybackRegion (ARAPlaybackRegion* playbackRegion)
-{
-    return new PlaybackRegionView (*this, playbackRegion);
-}
-
-TrackHeaderView* DocumentView::createHeaderViewForRegionSequence (ARARegionSequence* regionSequence)
-{
-    return new TrackHeaderView (getARAEditorView(), regionSequence);
-}
-
-RegionSequenceView* DocumentView::createViewForRegionSequence (ARARegionSequence* regionSequence)
-{
-    return new RegionSequenceView (*this, regionSequence);
-}
-
-Range<double> DocumentView::getVisibleTimeRange() const
-{
-    const double start = getPlaybackRegionsViewsTimeForX (playbackRegionsViewPort.getViewArea().getX());
-    const double end = getPlaybackRegionsViewsTimeForX (playbackRegionsViewPort.getViewArea().getRight());
-    return { start, end };
-}
-
-void DocumentView::invalidateRegionSequenceViews()
-{
-    if (getARADocumentController()->isHostEditingDocument() || getParentComponent() == nullptr)
-        regionSequenceViewsAreInvalid = true;
-    else
-        rebuildRegionSequenceViews();
-}
-
-void DocumentView::setShowOnlySelectedRegionSequences (bool newVal)
-{
-    showOnlySelectedRegionSequences = newVal;
-
-    invalidateRegionSequenceViews();
-}
 
 void DocumentView::timerCallback()
 {
@@ -286,9 +327,15 @@ void DocumentView::timerCallback()
     }
 }
 
-void DocumentView::setCurrentPositionInfo (const AudioPlayHead::CurrentPositionInfo* curPosInfoPtr)
+//==============================================================================
+void DocumentView::addListener (Listener* const listener)
 {
-    positionInfoPtr = curPosInfoPtr;
+    listeners.add (listener);
+}
+
+void DocumentView::removeListener (Listener* const listener)
+{
+    listeners.remove (listener);
 }
 
 //==============================================================================
@@ -312,48 +359,4 @@ void DocumentView::ScrollMasterViewPort::visibleAreaChanged (const Rectangle<int
     
     documentView.getRulersViewPort().setViewPosition (newVisibleArea.getX(), 0);
     documentView.getTrackHeadersViewPort().setViewPosition (0, newVisibleArea.getY());
-}
-
-//==============================================================================
-void DocumentView::addListener (Listener* const listener)
-{
-    listeners.add (listener);
-}
-
-void DocumentView::removeListener (Listener* const listener)
-{
-    listeners.remove (listener);
-}
-
-void DocumentView::setPixelsPerSecond (double newValue)
-{
-    if (newValue == pixelsPerSecond)
-        return;
-
-    pixelsPerSecond = newValue;
-    resized();  // this will constrain pixelsPerSecond range, also it might call again after rounding.
-    const double newRangeStartInSeconds = getPlaybackRegionsViewsTimeForX (playbackRegionsViewPort.getViewArea().getX());
-    const double newRangeEndInSeconds = getPlaybackRegionsViewsTimeForX (playbackRegionsViewPort.getViewArea().getRight());
-
-    listeners.callExpectingUnregistration ([&] (Listener& l)
-                                           {
-                                               l.timelineSelectionChanged (newRangeStartInSeconds, newRangeEndInSeconds, pixelsPerSecond);
-                                           });
-}
-
-void DocumentView::setTrackHeight (int newHeight)
-{
-    if (newHeight == trackHeight)
-        return;
-
-    trackHeight = newHeight;
-    listeners.callExpectingUnregistration ([&] (Listener& l)
-                                           {
-                                               l.trackHeightChanged (trackHeight);
-                                           });
-}
-
-void DocumentView::setIsRulersVisible (bool shouldBeVisible)
-{
-    rulersViewPort.setVisible (shouldBeVisible);
 }

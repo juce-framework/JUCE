@@ -61,7 +61,7 @@ public:
     // total time range
     Range<double> getTimeRange() const { return visibleRange; }
 
-    // visible time range
+    // currently visible time range
     Range<double> getVisibleTimeRange() const;
 // TODO JUCE_ARA if we want to make this into a reusable view, then zooming should use this primitive:
 //  void setVisibleTimeRange (double start, double end);
@@ -70,6 +70,10 @@ public:
 //  playhead positon unchanged if it is visible while zooming, otherwise keeps current view centered.
 //  This will be easy to do since it is all in linear time now.
 
+    // convert between time and x coordinate
+    int getPlaybackRegionsViewsXForTime (double time) const;
+    double getPlaybackRegionsViewsTimeForX (int x) const;
+
     // flag that our view needs to be rebuilt
     void invalidateRegionSequenceViews();
 
@@ -77,9 +81,6 @@ public:
     Component& getTrackHeadersView() { return trackHeadersView; }
     Viewport& getTrackHeadersViewPort() { return trackHeadersViewPort; }
     Viewport& getRulersViewPort() { return rulersViewPort; }
-
-    int getPlaybackRegionsViewsXForTime (double time) const;
-    double getPlaybackRegionsViewsTimeForX (int x) const;
 
     AudioFormatManager& getAudioFormatManger() { return audioFormatManger; }
 
@@ -95,8 +96,21 @@ public:
 
     void setShowOnlySelectedRegionSequences (bool newVal);
     bool isShowingOnlySelectedRegionSequences() { return showOnlySelectedRegionSequences; }
+
     void setIsRulersVisible (bool shouldBeVisible);
     bool isRulersVisible() const { return rulersViewPort.isVisible(); }
+
+    // DocumentView States
+    void setScrollFollowsPlaybackState (bool followPlayhead) { shouldFollowPlayhead.setValue (followPlayhead); }
+    bool getScrollFollowPlaybackState() const { return shouldFollowPlayhead.getValue(); }
+    juce::Value& getScrollFollowsPlaybackStateValue() { return shouldFollowPlayhead; }
+
+    double getPixelsPerSecond() const { return pixelsPerSecond; }
+    void setPixelsPerSecond (double newValue);
+    int getTrackHeight() const { return trackHeight; }
+    void setTrackHeight (int newHeight);
+    bool isMaximumPixelsPerSecond() const { return pixelsPerSecond > minPixelsPerSecond; }
+    bool isMinimumPixelsPerSecond() const { return pixelsPerSecond < maxPixelsPerSecond; }
 
     //==============================================================================
     void parentHierarchyChanged() override;
@@ -113,18 +127,6 @@ public:
     void didEndEditing (ARADocument* document) override;
     void didAddRegionSequenceToDocument (ARADocument* document, ARARegionSequence* regionSequence) override;
     void didReorderRegionSequencesInDocument (ARADocument* document) override;
-
-    // DocumentView States
-    void setScrollFollowsPlaybackState (bool followPlayhead) { shouldFollowPlayhead.setValue (static_cast<bool>(followPlayhead)); }
-    bool getScrollFollowPlaybackState() const { return shouldFollowPlayhead.getValue(); }
-    juce::Value& getScrollFollowsPlaybackStateValue() { return shouldFollowPlayhead; }
-
-    double getPixelsPerSecond() const { return pixelsPerSecond; }
-    void setPixelsPerSecond (double newValue);
-    int getTrackHeight() const { return trackHeight; }
-    void setTrackHeight (int newHeight);
-    bool isMaximumPixelsPerSecond() const { return pixelsPerSecond > minPixelsPerSecond; }
-    bool isMinimumPixelsPerSecond() const { return pixelsPerSecond < maxPixelsPerSecond; }
 
     //==============================================================================
     /**
