@@ -1,4 +1,4 @@
-# JUCE and the ARA API
+# JUCE_ARA
 
 This repository is a fork of the [JUCE 5 develop branch](https://github.com/WeAreROLI/JUCE) with additions that enable it to generate [ARA plugins](https://www.celemony.com/en/service1/about-celemony/technologies) in the VST3 or AudioUnit format.
 The fork is currently being maintained by [Celemony](https://www.celemony.com) and [SoundRadix](https://www.soundradix.com), with the goal of it being picked up eventually by [ROLI](https://www.juce.com) for main line JUCE.
@@ -13,7 +13,7 @@ For feedback and questions, please contact Celemony via [ara@celemony.com](mailt
 
 We've made modifications to the Projucer to enable it to work with the ARA 2.0 SDK. These modifications allow building VST3 and AudioUnit plugins that can be loaded as ARA plugins by a compatible host. 
 
-To create an ARA plugin, clone the [ARA branch](https://github.com/Celemony/JUCE_ARA/tree/ARA) of this repository and build the [Projucer](https://github.com/Celemony/JUCE_ARA/tree/ARA/extras/Projucer)(projects for Visual Studio and Xcode exist within the repository.)
+To create an ARA plugin, clone the develop branch of Celemony's [JUCE fork](https://github.com/Celemony/JUCE_ARA/tree/develop) build the [Projucer](https://github.com/Celemony/JUCE_ARA/tree/develop/extras/Projucer)(projects for Visual Studio and Xcode are checked in to the repository.)
 
 Once you have the ARA version of the Projucer built you can use it to specify your global ARA path like so:
 
@@ -43,9 +43,12 @@ This version of the Projucer supports VST3 and AudioUnit, so make sure at least 
 
 We can also edit other ARA plugin factory properties such as available content types and transformation flags as well as the plugin factory identifier.
 
+With ARA enabled we can edit various ARA factory properties plugin factory properties such as available content types and transformation flags as well as the plugin factory identifier.
+
 <img src="https://i.imgur.com/mJoXIxG.png"/>
 
-This should be enough to generate an empty ARA plugin. For a more complete example see the [.jucer file located here](https://github.com/Celemony/JUCE_ARA/tree/ARA/examples/ARA).
+This should be enough to generate an empty ARA plugin that will appear in an ARA host, such as Studio One or SONAR. For a more complete example of an ARA plugin see the [ARA Sample Project](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/ARA/ARASampleProject) checked in to this repository. 
+
 
 # The JUCE 5 Library
 
