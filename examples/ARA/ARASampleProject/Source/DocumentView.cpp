@@ -16,7 +16,7 @@ DocumentView::DocumentView (AudioProcessor& p)
       AudioProcessorEditorARAExtension (&p),
       playbackRegionsViewPort (*this),
       playheadView (*this),
-      visibleRange (-kMinBorderSeconds, kMinSecondDuration + kMinBorderSeconds),
+      timeRange (-kMinBorderSeconds, kMinSecondDuration + kMinBorderSeconds),
       positionInfoPtr (nullptr)
 {
     playheadView.setAlwaysOnTop (true);
@@ -71,12 +71,12 @@ DocumentView::~DocumentView()
 //==============================================================================
 int DocumentView::getPlaybackRegionsViewsXForTime (double time) const
 {
-    return roundToInt ((time - visibleRange.getStart()) / visibleRange.getLength() * playbackRegionsView.getWidth());
+    return roundToInt ((time - timeRange.getStart()) / timeRange.getLength() * playbackRegionsView.getWidth());
 }
 
 double DocumentView::getPlaybackRegionsViewsTimeForX (int x) const
 {
-    return visibleRange.getStart() + ((double) x / (double) playbackRegionsView.getWidth()) * visibleRange.getLength();
+    return timeRange.getStart() + ((double) x / (double) playbackRegionsView.getWidth()) * timeRange.getLength();
 }
 
 void DocumentView::parentHierarchyChanged()
@@ -98,7 +98,7 @@ void DocumentView::resized()
     int previousPlayheadX = getPlaybackRegionsViewsXForTime (playheadTimePosition) - playbackRegionsViewPort.getViewPosition().getX();
 
     // calculate maximum visible time range
-    visibleRange = { 0.0, 0.0 };
+    timeRange = { 0.0, 0.0 };
     if (! regionSequenceViews.isEmpty())
     {
         bool isFirst = true;
@@ -110,37 +110,37 @@ void DocumentView::resized()
             const auto sequenceTimeRange = v->getTimeRange();
             if (isFirst)
             {
-                visibleRange = sequenceTimeRange;
+                timeRange = sequenceTimeRange;
                 isFirst = false;
                 continue;
             }
 
-            visibleRange = visibleRange.getUnionWith (sequenceTimeRange);
+            timeRange = timeRange.getUnionWith (sequenceTimeRange);
         }
     }
 
     // ensure visible range covers kMinSecondDuration
-    if (visibleRange.getLength() < kMinSecondDuration)
+    if (timeRange.getLength() < kMinSecondDuration)
     {
-        double startAdjustment = (kMinSecondDuration - visibleRange.getLength()) / 2.0;
-        visibleRange.setStart (visibleRange.getStart() - startAdjustment);
-        visibleRange.setEnd (visibleRange.getStart() + kMinSecondDuration);
+        double startAdjustment = (kMinSecondDuration - timeRange.getLength()) / 2.0;
+        timeRange.setStart (timeRange.getStart() - startAdjustment);
+        timeRange.setEnd (timeRange.getStart() + kMinSecondDuration);
     }
 
     // apply kMinBorderSeconds offset to start and end
-    visibleRange.setStart (visibleRange.getStart() - kMinBorderSeconds);
-    visibleRange.setEnd (visibleRange.getEnd() + kMinBorderSeconds);
+    timeRange.setStart (timeRange.getStart() - kMinBorderSeconds);
+    timeRange.setEnd (timeRange.getEnd() + kMinBorderSeconds);
 
     // max zoom 1px : 1sample (this is a naive assumption as audio can be in different sample rate)
     maxPixelsPerSecond = jmax (processor.getSampleRate(), 300.0);
 
     // min zoom covers entire view range
-    minPixelsPerSecond = (getWidth() - kTrackHeaderWidth - rulersViewPort.getScrollBarThickness()) / visibleRange.getLength();
+    minPixelsPerSecond = (getWidth() - kTrackHeaderWidth - rulersViewPort.getScrollBarThickness()) / timeRange.getLength();
 
     // enforce zoom in/out limits, update zoom buttons
     const double validPixelsPerSecond = jlimit (minPixelsPerSecond, maxPixelsPerSecond, getPixelsPerSecond());
 
-    const int playbackRegionsWidth = roundToInt (visibleRange.getLength() * validPixelsPerSecond);
+    const int playbackRegionsWidth = roundToInt (timeRange.getLength() * validPixelsPerSecond);
     // rulers
     if (rulersView != nullptr && rulersViewPort.isVisible())
     {
@@ -153,7 +153,7 @@ void DocumentView::resized()
     const int rulersViewHeight = rulersViewPort.isVisible() ? rulersViewPort.getHeight() : 0;
     playbackRegionsViewPort.setBounds (kTrackHeaderWidth, rulersViewHeight, getWidth() - kTrackHeaderWidth, getHeight() - rulersViewHeight - kStatusBarHeight);
     playbackRegionsView.setBounds (0, 0, playbackRegionsWidth, jmax (getTrackHeight() * regionSequenceViews.size(), playbackRegionsViewPort.getHeight() - playbackRegionsViewPort.getScrollBarThickness()));
-    pixelsPerSecond.setValue (playbackRegionsView.getWidth() / visibleRange.getLength());       // prevent potential rounding issues
+    pixelsPerSecond.setValue (playbackRegionsView.getWidth() / timeRange.getLength());       // prevent potential rounding issues
 
     trackHeadersViewPort.setBounds (0, rulersViewHeight, kTrackHeaderWidth, playbackRegionsViewPort.getMaximumVisibleHeight());
     trackHeadersView.setBounds (0, 0, kTrackHeaderWidth, playbackRegionsView.getHeight());
