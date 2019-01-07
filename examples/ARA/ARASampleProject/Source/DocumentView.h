@@ -59,7 +59,7 @@ public:
     virtual TrackHeaderView* createHeaderViewForRegionSequence (ARARegionSequence*);
 
     // total time range
-    Range<double> getTimeRange() const { return visibleRange; }
+    Range<double> getTimeRange() const { return timeRange; }
 
     // currently visible time range
     Range<double> getVisibleTimeRange() const;
@@ -214,7 +214,7 @@ private:
 
     bool regionSequenceViewsAreInvalid = true;
     bool showOnlySelectedRegionSequences = false;
-    Range<double> visibleRange;
+    Range<double> timeRange;
     double playheadTimePosition = 0.0;
     
     const juce::AudioPlayHead::CurrentPositionInfo* positionInfoPtr;
