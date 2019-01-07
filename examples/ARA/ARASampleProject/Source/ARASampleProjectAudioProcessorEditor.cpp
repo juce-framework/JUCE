@@ -62,7 +62,7 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
         documentView->getTrackHeightValue().addListener (this);
         // force validating initial value
         valueChanged (documentView->getPixelsPerSecondValue());
-        documentView->setIsRulersVisible (false);
+        documentView->setIsRulersVisible (true);
     }
 
     setSize (kWidth, kHeight);
