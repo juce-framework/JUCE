@@ -81,8 +81,9 @@ double DocumentView::getPlaybackRegionsViewsTimeForX (int x) const
 
 void DocumentView::parentHierarchyChanged()
 {
-    // needed to be called after DocumentView is constructed.
-    rebuildRegionSequenceViews();
+    // trigger lazy initial update after construction if needed
+    if (regionSequenceViewsAreInvalid && ! getARADocumentController()->isHostEditingDocument())
+        rebuildRegionSequenceViews();
 }
 
 //==============================================================================
@@ -207,7 +208,7 @@ void DocumentView::rebuildRegionSequenceViews()
 //==============================================================================
 void DocumentView::onHideRegionSequences (std::vector<ARARegionSequence*> const& /*regionSequences*/)
 {
-    rebuildRegionSequenceViews();
+    invalidateRegionSequenceViews();
 }
 
 void DocumentView::didEndEditing (ARADocument* document)
@@ -252,17 +253,19 @@ Range<double> DocumentView::getVisibleTimeRange() const
     return { start, end };
 }
 
+void DocumentView::invalidateRegionSequenceViews()
+{
+    if (getARADocumentController()->isHostEditingDocument() || getParentComponent() == nullptr)
+        regionSequenceViewsAreInvalid = true;
+    else
+        rebuildRegionSequenceViews();
+}
+
 void DocumentView::setShowOnlySelectedRegionSequences (bool newVal)
 {
     showOnlySelectedRegionSequences = newVal;
 
-    if (! regionSequenceViewsAreInvalid)
-    {
-        if (getARADocumentController()->isHostEditingDocument())
-            regionSequenceViewsAreInvalid = true;
-        else
-            rebuildRegionSequenceViews();
-    }
+    invalidateRegionSequenceViews();
 }
 
 void DocumentView::timerCallback()

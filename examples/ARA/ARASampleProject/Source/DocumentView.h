@@ -66,7 +66,7 @@ public:
 //  This will be easy to do since it is all in linear time now.
 
     // flag that our view needs to be rebuilt
-    void invalidateRegionSequenceViews() { regionSequenceViewsAreInvalid = true; }
+    void invalidateRegionSequenceViews();
 
     Component& getPlaybackRegionsView() { return playbackRegionsView; }
     Component& getTrackHeadersView() { return trackHeadersView; }
