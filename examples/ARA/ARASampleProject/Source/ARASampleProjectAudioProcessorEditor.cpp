@@ -70,9 +70,7 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
 ARASampleProjectAudioProcessorEditor::~ARASampleProjectAudioProcessorEditor()
 {
     if (isARAEditorView())
-    {
         documentView->removeListener (this);
-    }
 }
 
 //==============================================================================

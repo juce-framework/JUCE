@@ -16,12 +16,12 @@ public:
     ARASampleProjectAudioProcessorEditor (ARASampleProjectAudioProcessor&);
     ~ARASampleProjectAudioProcessorEditor();
 
-    //==============================================================================
     void paint (Graphics&) override;
     void resized() override;
 
-    // Value::Listener
-    void timelineSelectionChanged (double newRangeStartInSeconds, double newRangeEndInSeconds, double pixelsPerSecond);
+    // DocumentView::Listener overrides
+    void timelineSelectionChanged (double newRangeStartInSeconds, double newRangeEndInSeconds, double pixelsPerSecond) override;
+
 private:
     std::unique_ptr<DocumentView> documentView;
 

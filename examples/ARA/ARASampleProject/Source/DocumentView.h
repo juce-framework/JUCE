@@ -130,12 +130,12 @@ public:
     /**
      A class for receiving events from a DocumentView.
 
-     You can register a DocumentView::Listener with a DocumentView using the ScrollBar::addListener()
+     You can register a DocumentView::Listener with a DocumentView using DocumentView::addListener()
      method, and it will be called on changes.
 
      @see DocumentView::addListener, DocumentView::removeListener
      */
-    class Listener : public ARAListenableModelClass<ARADocument>::Listener
+    class Listener
     {
     public:
         /** Destructor. */
