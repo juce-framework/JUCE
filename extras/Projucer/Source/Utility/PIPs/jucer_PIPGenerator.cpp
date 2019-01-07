@@ -254,11 +254,11 @@ ValueTree PIPGenerator::createExporterChild (const String& exporterName)
 
     if (isJUCEExample (pipFile) && exporterRequiresExampleAssets (exporterName, metadata[Ids::name]))
     {
-        auto juceDir = getAppSettings().getStoredPath (Ids::jucePath, TargetOS::getThisOS()).get().toString();
+        auto examplesDir = getExamplesDirectory();
 
-        if (isValidJUCEExamplesDirectory (File (juceDir).getChildFile ("examples")))
+        if (examplesDir != File())
         {
-            auto assetsDirectoryPath = File (juceDir).getChildFile ("examples").getChildFile ("Assets").getFullPathName();
+            auto assetsDirectoryPath = examplesDir.getChildFile ("Assets").getFullPathName();
 
             exporter.setProperty (exporterName == "ANDROIDSTUDIO" ? Ids::androidExtraAssetsFolder
                                                                   : Ids::customXcodeResourceFolders,
@@ -357,12 +357,12 @@ Result PIPGenerator::setProjectSettings (ValueTree& jucerTree)
 
     if (useLocalCopy && isJUCEExample (pipFile))
     {
-        auto juceDir = getAppSettings().getStoredPath (Ids::jucePath, TargetOS::getThisOS()).get().toString();
+        auto examplesDir = getExamplesDirectory();
 
-        if (isValidJUCEExamplesDirectory (File (juceDir).getChildFile ("examples")))
+        if (examplesDir != File())
         {
              defines += ((defines.isEmpty() ? "" : " ") + String ("PIP_JUCE_EXAMPLES_DIRECTORY=")
-                         + Base64::toBase64 (File (juceDir).getChildFile ("examples").getFullPathName()));
+                         + Base64::toBase64 (examplesDir.getFullPathName()));
         }
         else
         {
@@ -553,6 +553,24 @@ String PIPGenerator::getPathForModule (const String& moduleID) const
 
         return RelativePath (moduleRoot , outputDirectory, RelativePath::projectFolder).toUnixStyle();
     }
+
+    return {};
+}
+
+File PIPGenerator::getExamplesDirectory() const
+{
+    if (juceModulesPath != File())
+    {
+        auto examples = juceModulesPath.getSiblingFile ("examples");
+
+        if (isValidJUCEExamplesDirectory (examples))
+            return examples;
+    }
+
+    auto examples = File (getAppSettings().getStoredPath (Ids::jucePath, TargetOS::getThisOS()).get().toString()).getChildFile ("examples");
+
+    if (isValidJUCEExamplesDirectory (examples))
+        return examples;
 
     return {};
 }
