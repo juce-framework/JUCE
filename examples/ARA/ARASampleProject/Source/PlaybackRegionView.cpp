@@ -6,7 +6,7 @@ PlaybackRegionView::PlaybackRegionView (DocumentView& documentView, ARAPlaybackR
     : documentView (documentView),
       playbackRegion (region),
       audioThumbCache (1),
-      audioThumb (128, audioFormatManger, audioThumbCache)
+      audioThumb (128, documentView.getAudioFormatManger(), audioThumbCache)
 {
     audioThumb.addChangeListener (this);
 

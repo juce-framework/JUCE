@@ -76,6 +76,8 @@ public:
     int getPlaybackRegionsViewsXForTime (double time) const;
     double getPlaybackRegionsViewsTimeForX (int x) const;
 
+    AudioFormatManager& getAudioFormatManger() { return audioFormatManger; }
+
     /*
      Sets a juce::AudioPlayHead::CurrentPositionInfo pointer that
      should be used to show playhead.
@@ -157,6 +159,8 @@ private:
     Component trackHeadersView;
     Viewport rulersViewPort;
     std::unique_ptr<RulersView> rulersView;
+
+    AudioFormatManager audioFormatManger;
 
     // Component View States
     Value shouldFollowPlayhead;

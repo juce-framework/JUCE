@@ -179,7 +179,8 @@ void DocumentView::rebuildRegionSequenceViews()
 {
     // TODO JUCE_ARA always deleting the region sequence views and in turn their playback regions
     //               with their audio thumbs isn't particularly effective. we should optimized this
-    //               and preserve all views that can still be used...
+    //               and preserve all views that can still be used. We could also try to build some
+    //               sort of LRU cache for the audio thumbs if that is easier...
 
     regionSequenceViews.clear();
 
