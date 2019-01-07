@@ -20,6 +20,12 @@ class PlaybackRegionView;
     - become part of ARA or JUCE-ARA SDK
     - provide juce::LookAndFeel mechanism so it could be customized for developer needs.
     - become a baseclass to use as view component for most ARA-JUCE based products..
+ TODOs:
+    - configuration for all sizes: track height, ruler height, track header width etc.
+    - a setting to make track header width optionally be resizable by user
+    - refactor RulersViews to have RulersView::RulerBase and subclasses.
+    - option to show regions including their head and tail (for crossfades mostly, renderer will already provide proper samples but time ranges must be adjusted for this and updated if head/tail change)
+    - replace Viewport with better mechanism to avoid overflow with long documents and high zoom level.
  
  */
 class DocumentView  : public AudioProcessorEditor,
