@@ -100,7 +100,7 @@ void ARASampleProjectAudioProcessorEditor::resized()
     }
 }
 
-void ARASampleProjectAudioProcessorEditor::timelineSelectionChanged (double /*newRangeStartInSeconds*/, double /*newRangeEndInSeconds*/, double /*pixelsPerSecond*/)
+void ARASampleProjectAudioProcessorEditor::visibleTimeRangeChanged (Range<double> /*newVisibleTimeRange*/, double /*pixelsPerSecond*/)
 {
     horizontalZoomInButton.setEnabled (documentView->isMinimumPixelsPerSecond());
     horizontalZoomOutButton.setEnabled (documentView->isMaximumPixelsPerSecond());

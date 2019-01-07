@@ -132,11 +132,9 @@ void DocumentView::setPixelsPerSecond (double newValue)
     pixelsPerSecond = newValue;
     resized();  // this will constrain pixelsPerSecond range, also it might call again after rounding.
 
-    const double newRangeStartInSeconds = getPlaybackRegionsViewsTimeForX (playbackRegionsViewPort.getViewArea().getX());
-    const double newRangeEndInSeconds = getPlaybackRegionsViewsTimeForX (playbackRegionsViewPort.getViewArea().getRight());
     listeners.callExpectingUnregistration ([&] (Listener& l)
                                            {
-                                               l.timelineSelectionChanged (newRangeStartInSeconds, newRangeEndInSeconds, pixelsPerSecond);
+                                               l.visibleTimeRangeChanged (getVisibleTimeRange(), pixelsPerSecond);
                                            });
 }
 

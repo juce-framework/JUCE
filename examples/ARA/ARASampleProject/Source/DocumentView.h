@@ -150,12 +150,14 @@ public:
          @param newRangeEndInSeconds      the new range end of document's selection.
          @param pixelsPerSecond           current pixels per second.
          */
-        virtual void timelineSelectionChanged (double newRangeStartInSeconds, double newRangeEndInSeconds, double pixelsPerSecond) = 0;
+        virtual void visibleTimeRangeChanged (Range<double> newVisibleTimeRange, double pixelsPerSecond) = 0;
+
         /** Called when a trackHeight is changed.
 
          @param newTrackHeight           new trackHeight in pixels.
          */
         virtual void trackHeightChanged (int newTrackHeight) {};
+
         /** Called when a rulersHeight is changed.
 
          @param newRulersHeight           new rulersHeight in pixels.

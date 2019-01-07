@@ -20,7 +20,7 @@ public:
     void resized() override;
 
     // DocumentView::Listener overrides
-    void timelineSelectionChanged (double newRangeStartInSeconds, double newRangeEndInSeconds, double pixelsPerSecond) override;
+    void visibleTimeRangeChanged (Range<double> newVisibleTimeRange, double pixelsPerSecond) override;
 
 private:
     std::unique_ptr<DocumentView> documentView;
