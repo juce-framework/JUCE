@@ -1,17 +1,17 @@
 #include "RulersView.h"
-#include "ARASampleProjectAudioProcessorEditor.h"
+
 #include "ARA_Library/Utilities/ARAPitchInterpretation.h"
 #include "ARA_Library/Utilities/ARATimelineConversion.h"
 
 //==============================================================================
-RulersView::RulersView (ARASampleProjectAudioProcessorEditor& editor)
-    : editorComponent (editor),
+RulersView::RulersView (DocumentView& documentView)
+    : documentView (documentView),
       document (nullptr),
       musicalContext (nullptr)
 {
-    if (editorComponent.isARAEditorView())
+    if (documentView.isARAEditorView())
     {
-        document = editorComponent.getARADocumentController()->getDocument<ARADocument>();
+        document = documentView.getARADocumentController()->getDocument<ARADocument>();
         document->addListener (this);
         findMusicalContext();
     }
@@ -45,12 +45,12 @@ void RulersView::detachFromMusicalContext()
 
 void RulersView::findMusicalContext()
 {
-    if (! editorComponent.isARAEditorView())
+    if (! documentView.isARAEditorView())
         return;
 
     // evaluate selection
     ARAMusicalContext* newMusicalContext = nullptr;
-    auto viewSelection = editorComponent.getARAEditorView()->getViewSelection();
+    auto viewSelection = documentView.getARAEditorView()->getViewSelection();
     if (! viewSelection.getRegionSequences().empty())
         newMusicalContext = viewSelection.getRegionSequences().front()->getMusicalContext<ARAMusicalContext>();
     else if (! viewSelection.getPlaybackRegions().empty())
@@ -85,7 +85,7 @@ void RulersView::paint (juce::Graphics& g)
         return;
     }
 
-    const auto visibleRange = editorComponent.getVisibleTimeRange();
+    const auto visibleRange = documentView.getVisibleTimeRange();
 
     using TempoContentReader = ARA::PlugIn::HostContentReader<ARA::kARAContentTypeTempoEntries>;
     using BarSignaturesContentReader = ARA::PlugIn::HostContentReader<ARA::kARAContentTypeBarSignatures>;
@@ -114,7 +114,7 @@ void RulersView::paint (juce::Graphics& g)
         {
             const int lineWidth = (time % 60 == 0) ? heavyLineWidth : lightLineWidth;
             const int lineHeight = (time % 10 == 0) ? secondsRulerHeight : secondsRulerHeight / 2;
-            const int x = editorComponent.getPlaybackRegionsViewsXForTime (time);
+            const int x = documentView.getPlaybackRegionsViewsXForTime (time);
             rects.addWithoutMerging (Rectangle<int> (x - lineWidth / 2, secondsRulerY + secondsRulerHeight - lineHeight, lineWidth, lineHeight));
         }
         g.drawText ("seconds", bounds.withTrimmedRight (2), Justification::bottomRight);
@@ -133,7 +133,7 @@ void RulersView::paint (juce::Graphics& g)
         for (int beat = roundToInt (ceil (beatStart)); beat <= endBeat; ++beat)
         {
             const auto quarterPos = barSignaturesConverter.getQuarterForBeat (beat);
-            const int x = editorComponent.getPlaybackRegionsViewsXForTime (tempoConverter.getTimeForQuarter (quarterPos));
+            const int x = documentView.getPlaybackRegionsViewsXForTime (tempoConverter.getTimeForQuarter (quarterPos));
             const auto barSignature = barSignaturesConverter.getBarSignatureForQuarter (quarterPos);
             const int lineWidth = (quarterPos == barSignature.position) ? heavyLineWidth : lightLineWidth;
             const int beatsSinceBarStart = roundToInt( barSignaturesConverter.getBeatDistanceFromBarStartForQuarter (quarterPos));
@@ -159,10 +159,10 @@ void RulersView::paint (juce::Graphics& g)
             
             // find the starting position of the chord in pixels
             const auto chordStartTime = (itChord == chordsReader.begin()) ?
-                                            editorComponent.getTimeRange().getStart() : tempoConverter.getTimeForQuarter (itChord->position);
+                                            documentView.getTimeRange().getStart() : tempoConverter.getTimeForQuarter (itChord->position);
             if (chordStartTime >= visibleRange.getEnd())
                 break;
-            chordRect.setLeft (editorComponent.getPlaybackRegionsViewsXForTime (chordStartTime));
+            chordRect.setLeft (documentView.getPlaybackRegionsViewsXForTime (chordStartTime));
 
             // if we have a chord after this one, use its starting position to end our rect
             if (std::next(itChord) != chordsReader.end())
@@ -170,7 +170,7 @@ void RulersView::paint (juce::Graphics& g)
                 const auto nextChordStartTime = tempoConverter.getTimeForQuarter (std::next (itChord)->position);
                 if (nextChordStartTime < visibleRange.getStart())
                     continue;
-                chordRect.setRight (editorComponent.getPlaybackRegionsViewsXForTime (nextChordStartTime));
+                chordRect.setRight (documentView.getPlaybackRegionsViewsXForTime (nextChordStartTime));
             }
 
             // draw chord rect and name
@@ -197,7 +197,7 @@ void RulersView::mouseDown (const MouseEvent& event)
     // use mouse click to set the playhead position in the host (if they provide a playback controller interface)
     auto playbackController = musicalContext->getDocument()->getDocumentController()->getHostInstance()->getPlaybackController();
     if (playbackController != nullptr)
-        playbackController->requestSetPlaybackPosition (editorComponent.getPlaybackRegionsViewsTimeForX (roundToInt (event.position.x)));
+        playbackController->requestSetPlaybackPosition (documentView.getPlaybackRegionsViewsTimeForX (roundToInt (event.position.x)));
 }
 
 void RulersView::mouseDoubleClick (const MouseEvent& /*event*/)

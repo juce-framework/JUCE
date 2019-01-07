@@ -1,19 +1,17 @@
 #include "RegionSequenceView.h"
+#include "DocumentView.h"
 #include "TrackHeaderView.h"
 #include "PlaybackRegionView.h"
-#include "ARASampleProjectPlaybackRenderer.h"
-#include "ARASampleProjectDocumentController.h"
-#include "ARASampleProjectAudioProcessorEditor.h"
 
 //==============================================================================
-RegionSequenceView::RegionSequenceView (ARASampleProjectAudioProcessorEditor* editor, ARARegionSequence* sequence)
-    : editorComponent (editor),
+RegionSequenceView::RegionSequenceView (DocumentView& documentView, ARARegionSequence* sequence)
+    : documentView (documentView),
       regionSequence (sequence),
-      trackHeaderView (new TrackHeaderView (editor->getARAEditorView(), regionSequence))
+      trackHeaderView (documentView.createHeaderViewForRegionSequence (regionSequence))
 {
     regionSequence->addListener (this);
 
-    editorComponent->getTrackHeadersView().addAndMakeVisible (*trackHeaderView);
+    documentView.getTrackHeadersView().addAndMakeVisible (*trackHeaderView);
 
     for (auto playbackRegion : regionSequence->getPlaybackRegions<ARAPlaybackRegion>())
         addRegionSequenceViewAndMakeVisible (playbackRegion);
@@ -26,9 +24,9 @@ RegionSequenceView::~RegionSequenceView()
 
 void RegionSequenceView::addRegionSequenceViewAndMakeVisible (ARAPlaybackRegion* playbackRegion)
 {
-    auto view = new PlaybackRegionView (editorComponent, playbackRegion);
+    auto view = documentView.createViewForPlaybackRegion (playbackRegion);
     playbackRegionViews.add (view);
-    editorComponent->getPlaybackRegionsView().addAndMakeVisible (view);
+    documentView.getPlaybackRegionsView().addAndMakeVisible (view);
 }
 
 void RegionSequenceView::detachFromRegionSequence()
@@ -49,8 +47,8 @@ void RegionSequenceView::setRegionsViewBoundsByYRange (int y, int height)
     for (auto regionView : playbackRegionViews)
     {
         const auto regionTimeRange = regionView->getTimeRange();
-        const int startX = editorComponent->getPlaybackRegionsViewsXForTime (regionTimeRange.getStart());
-        const int endX = editorComponent->getPlaybackRegionsViewsXForTime (regionTimeRange.getEnd());
+        const int startX = documentView.getPlaybackRegionsViewsXForTime (regionTimeRange.getStart());
+        const int endX = documentView.getPlaybackRegionsViewsXForTime (regionTimeRange.getEnd());
         regionView->setBounds (startX, y, endX - startX, height);
     }
 }
@@ -69,7 +67,7 @@ void RegionSequenceView::willRemovePlaybackRegionFromRegionSequence (ARARegionSe
         }
     }
 
-    editorComponent->invalidateRegionSequenceViews();
+    documentView.invalidateRegionSequenceViews();
 }
 
 void RegionSequenceView::didAddPlaybackRegionToRegionSequence (ARARegionSequence* sequence, ARAPlaybackRegion* playbackRegion)
@@ -78,7 +76,7 @@ void RegionSequenceView::didAddPlaybackRegionToRegionSequence (ARARegionSequence
 
     addRegionSequenceViewAndMakeVisible (playbackRegion);
 
-    editorComponent->invalidateRegionSequenceViews();
+    documentView.invalidateRegionSequenceViews();
 }
 
 void RegionSequenceView::willDestroyRegionSequence (ARARegionSequence* sequence)
@@ -87,5 +85,5 @@ void RegionSequenceView::willDestroyRegionSequence (ARARegionSequence* sequence)
 
     detachFromRegionSequence();
 
-    editorComponent->invalidateRegionSequenceViews();
+    documentView.invalidateRegionSequenceViews();
 }

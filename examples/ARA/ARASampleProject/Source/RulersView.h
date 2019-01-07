@@ -2,7 +2,7 @@
 
 #include "JuceHeader.h"
 
-class ARASampleProjectAudioProcessorEditor;
+#include "DocumentView.h"
 
 //==============================================================================
 /**
@@ -15,7 +15,7 @@ class RulersView  : public Component,
                     private ARAMusicalContext::Listener
 {
 public:
-    RulersView (ARASampleProjectAudioProcessorEditor& editorComponent);
+    RulersView (DocumentView& documentView);
     ~RulersView();
 
     void paint (Graphics&) override;
@@ -42,7 +42,7 @@ private:
     void findMusicalContext();
 
 private:
-    ARASampleProjectAudioProcessorEditor& editorComponent;
+    DocumentView& documentView;
     ARADocument* document;
     ARAMusicalContext* musicalContext;
 
