@@ -199,6 +199,8 @@ void DocumentView::rebuildRegionSequenceViews()
         }
     }
 
+    regionSequenceViewsAreInvalid = false;
+
     resized();
 }
 
@@ -213,10 +215,7 @@ void DocumentView::didEndEditing (ARADocument* document)
     jassert (document == getARADocumentController()->getDocument());
     
     if (regionSequenceViewsAreInvalid)
-    {
         rebuildRegionSequenceViews();
-        regionSequenceViewsAreInvalid = false;
-    }
 }
 
 void DocumentView::didAddRegionSequenceToDocument (ARADocument* document, ARARegionSequence* regionSequence)
@@ -248,9 +247,10 @@ RegionSequenceView* DocumentView::createViewForRegionSequence (ARARegionSequence
 
 Range<double> DocumentView::getVisibleTimeRange() const
 {
-    double start = getPlaybackRegionsViewsTimeForX (playbackRegionsViewPort.getViewArea().getX());
-    double end = getPlaybackRegionsViewsTimeForX (playbackRegionsViewPort.getViewArea().getRight());
-    return Range<double> (start, end);
+    const double start = getPlaybackRegionsViewsTimeForX (playbackRegionsViewPort.getViewArea().getX());
+    const double end = getPlaybackRegionsViewsTimeForX (playbackRegionsViewPort.getViewArea().getRight());
+    return { start, end };
+}
 }
 
 void DocumentView::timerCallback()
@@ -264,7 +264,7 @@ void DocumentView::timerCallback()
 
         if (shouldFollowPlayhead.getValue())
         {
-            Range<double> visibleRange = getVisibleTimeRange();
+            const auto visibleRange = getVisibleTimeRange();
             if (playheadTimePosition < visibleRange.getStart() || playheadTimePosition > visibleRange.getEnd())
                 playbackRegionsViewPort.setViewPosition (playbackRegionsViewPort.getViewPosition().withX (getPlaybackRegionsViewsXForTime (playheadTimePosition)));
         };
