@@ -109,6 +109,8 @@ public:
     void setPixelsPerSecond (double newValue);
     int getTrackHeight() const { return trackHeight; }
     void setTrackHeight (int newHeight);
+    int getTrackHeaderWidth() const { return trackHeaderWidth; }
+    void setTrackHeaderWidth (int newWidth);
     bool isMaximumPixelsPerSecond() const { return pixelsPerSecond > minPixelsPerSecond; }
     bool isMinimumPixelsPerSecond() const { return pixelsPerSecond < maxPixelsPerSecond; }
 
@@ -211,7 +213,7 @@ private:
     // Component View States
     Value shouldFollowPlayhead;
     double pixelsPerSecond;
-    int trackHeight;
+    int trackHeight, trackHeaderWidth;
     double maxPixelsPerSecond, minPixelsPerSecond;
 
     bool regionSequenceViewsAreInvalid = true;
