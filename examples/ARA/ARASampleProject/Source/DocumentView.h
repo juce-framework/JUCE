@@ -32,7 +32,6 @@ class DocumentView  : public AudioProcessorEditor,
                       public AudioProcessorEditorARAExtension,
                       private ARAEditorView::Listener,
                       private ARADocument::Listener,
-                      private juce::Value::Listener,
                       private juce::Timer
 {
 public:
@@ -115,22 +114,58 @@ public:
     void didAddRegionSequenceToDocument (ARADocument* document, ARARegionSequence* regionSequence) override;
     void didReorderRegionSequencesInDocument (ARADocument* document) override;
 
-    // Value::Listener
-    void valueChanged (juce::Value &value) override;
-
     // DocumentView States
     void setScrollFollowsPlaybackState (bool followPlayhead) { shouldFollowPlayhead.setValue (static_cast<bool>(followPlayhead)); }
     bool getScrollFollowPlaybackState() const { return shouldFollowPlayhead.getValue(); }
     juce::Value& getScrollFollowsPlaybackStateValue() { return shouldFollowPlayhead; }
 
-    double getPixelsPerSecond() const { return pixelsPerSecond.getValue(); }
-    void setPixelsPerSecond (double newValue) { pixelsPerSecond.setValue (newValue); }
-    juce::Value& getPixelsPerSecondValue() { return pixelsPerSecond; }
-    int getTrackHeight() const { return trackHeight.getValue(); }
-    juce::Value& getTrackHeightValue() { return trackHeight; }
-    void setTrackHeight (int newValue) { trackHeight.setValue (newValue); }
+    double getPixelsPerSecond() const { return pixelsPerSecond; }
+    void setPixelsPerSecond (double newValue);
+    int getTrackHeight() const { return trackHeight; }
+    void setTrackHeight (int newHeight);
     bool isMaximumPixelsPerSecond() const { return pixelsPerSecond > minPixelsPerSecond; }
     bool isMinimumPixelsPerSecond() const { return pixelsPerSecond < maxPixelsPerSecond; }
+
+    //==============================================================================
+    /**
+     A class for receiving events from a DocumentView.
+
+     You can register a DocumentView::Listener with a DocumentView using the ScrollBar::addListener()
+     method, and it will be called on changes.
+
+     @see DocumentView::addListener, DocumentView::removeListener
+     */
+    class Listener : public ARAListenableModelClass<ARADocument>::Listener
+    {
+    public:
+        /** Destructor. */
+        virtual ~Listener() {}
+
+        /** Called when a DocumentView selection is changed.
+            This can happen when scrolled or zoomed/scaled on the horizontal axis.
+
+         @param newRangeStartInSeconds    the new range start of document's selection.
+         @param newRangeEndInSeconds      the new range end of document's selection.
+         @param pixelsPerSecond           current pixels per second.
+         */
+        virtual void timelineSelectionChanged (double newRangeStartInSeconds, double newRangeEndInSeconds, double pixelsPerSecond) = 0;
+        /** Called when a trackHeight is changed.
+
+         @param newTrackHeight           new trackHeight in pixels.
+         */
+        virtual void trackHeightChanged (int newTrackHeight) {};
+        /** Called when a rulersHeight is changed.
+
+         @param newRulersHeight           new rulersHeight in pixels.
+         */
+        virtual void rulersHeightChanged (int newRulersHeight) {};
+    };
+
+    /** Registers a listener that will be called for changes of the DocumentView. */
+    void addListener (Listener* listener);
+
+    /** Deregisters a previously-registered listener. */
+    void removeListener (Listener* listener);
 
 private:
     void rebuildRegionSequenceViews();
@@ -171,8 +206,8 @@ private:
 
     // Component View States
     Value shouldFollowPlayhead;
-    Value pixelsPerSecond;
-    Value trackHeight;
+    double pixelsPerSecond;
+    int trackHeight;
     double maxPixelsPerSecond, minPixelsPerSecond;
 
     bool regionSequenceViewsAreInvalid = true;
@@ -181,6 +216,6 @@ private:
     double playheadTimePosition = 0.0;
     
     const juce::AudioPlayHead::CurrentPositionInfo* positionInfoPtr;
-
+    ListenerList<Listener> listeners;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DocumentView)
 };

@@ -58,11 +58,8 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
         addAndMakeVisible (verticalZoomOutButton);
         addAndMakeVisible (horizontalZoomInButton);
         addAndMakeVisible (horizontalZoomOutButton);
-        documentView->getPixelsPerSecondValue().addListener (this);
-        documentView->getTrackHeightValue().addListener (this);
-        // force validating initial value
-        valueChanged (documentView->getPixelsPerSecondValue());
         documentView->setIsRulersVisible (true);
+        documentView->addListener (this);
     }
 
     setSize (kWidth, kHeight);
@@ -74,8 +71,7 @@ ARASampleProjectAudioProcessorEditor::~ARASampleProjectAudioProcessorEditor()
 {
     if (isARAEditorView())
     {
-        documentView->getTrackHeightValue().removeListener (this);
-        documentView->getPixelsPerSecondValue().removeListener (this);
+        documentView->removeListener (this);
     }
 }
 
@@ -106,7 +102,7 @@ void ARASampleProjectAudioProcessorEditor::resized()
     }
 }
 
-void ARASampleProjectAudioProcessorEditor::valueChanged (juce::Value &value)
+void ARASampleProjectAudioProcessorEditor::timelineSelectionChanged (double /*newRangeStartInSeconds*/, double /*newRangeEndInSeconds*/, double /*pixelsPerSecond*/)
 {
     horizontalZoomInButton.setEnabled (documentView->isMinimumPixelsPerSecond());
     horizontalZoomOutButton.setEnabled (documentView->isMaximumPixelsPerSecond());

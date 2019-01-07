@@ -33,8 +33,6 @@ DocumentView::DocumentView (AudioProcessor& p)
     // init defaults
     shouldFollowPlayhead = true;
     trackHeight = 80;
-    pixelsPerSecond.addListener (this);
-    trackHeight.addListener (this);
     
     if (! isARAEditorView())
     {
@@ -61,8 +59,6 @@ DocumentView::~DocumentView()
 {
     if (isARAEditorView())
     {
-        pixelsPerSecond.removeListener (this);
-        trackHeight.removeListener (this);
         getARADocumentController()->getDocument<ARADocument>()->removeListener (this);
         getARAEditorView()->removeListener (this);
     }
@@ -152,7 +148,7 @@ void DocumentView::resized()
     const int rulersViewHeight = rulersViewPort.isVisible() ? rulersViewPort.getHeight() : 0;
     playbackRegionsViewPort.setBounds (kTrackHeaderWidth, rulersViewHeight, getWidth() - kTrackHeaderWidth, getHeight() - rulersViewHeight - kStatusBarHeight);
     playbackRegionsView.setBounds (0, 0, playbackRegionsWidth, jmax (getTrackHeight() * regionSequenceViews.size(), playbackRegionsViewPort.getHeight() - playbackRegionsViewPort.getScrollBarThickness()));
-    pixelsPerSecond.setValue (playbackRegionsView.getWidth() / visibleRange.getLength());       // prevent potential rounding issues
+    setPixelsPerSecond (playbackRegionsView.getWidth() / visibleRange.getLength());       // prevent potential rounding issues
 
     trackHeadersViewPort.setBounds (0, rulersViewHeight, kTrackHeaderWidth, playbackRegionsViewPort.getMaximumVisibleHeight());
     trackHeadersView.setBounds (0, 0, kTrackHeaderWidth, playbackRegionsView.getHeight());
@@ -278,16 +274,6 @@ void DocumentView::setCurrentPositionInfo (const AudioPlayHead::CurrentPositionI
     positionInfoPtr = curPosInfoPtr;
 }
 
-void DocumentView::valueChanged (juce::Value& value)
-{
-    if (value.refersToSameSourceAs (pixelsPerSecond) || value.refersToSameSourceAs (trackHeight))
-    {
-        // zoom changed, invalidate DocumentView size
-        resized();
-    }
-}
-
-
 //==============================================================================
 DocumentView::PlayheadView::PlayheadView (DocumentView& documentView)
     : documentView (documentView)
@@ -309,4 +295,43 @@ void DocumentView::ScrollMasterViewPort::visibleAreaChanged (const Rectangle<int
     
     documentView.getRulersViewPort().setViewPosition (newVisibleArea.getX(), 0);
     documentView.getTrackHeadersViewPort().setViewPosition (0, newVisibleArea.getY());
+}
+
+//==============================================================================
+void DocumentView::addListener (Listener* const listener)
+{
+    listeners.add (listener);
+}
+
+void DocumentView::removeListener (Listener* const listener)
+{
+    listeners.remove (listener);
+}
+
+void DocumentView::setPixelsPerSecond (double newValue)
+{
+    if (newValue == pixelsPerSecond)
+        return;
+
+    pixelsPerSecond = newValue;
+    resized();  // this will constrain pixelsPerSecond range, also it might call again after rounding.
+    const double newRangeStartInSeconds = getPlaybackRegionsViewsTimeForX (playbackRegionsViewPort.getViewArea().getX());
+    const double newRangeEndInSeconds = getPlaybackRegionsViewsTimeForX (playbackRegionsViewPort.getViewArea().getRight());
+
+    listeners.callExpectingUnregistration ([&] (Listener& l)
+                                           {
+                                               l.timelineSelectionChanged (newRangeStartInSeconds, newRangeEndInSeconds, pixelsPerSecond);
+                                           });
+}
+
+void DocumentView::setTrackHeight (int newHeight)
+{
+    if (newHeight == trackHeight)
+        return;
+
+    trackHeight = newHeight;
+    listeners.callExpectingUnregistration ([&] (Listener& l)
+                                           {
+                                               l.trackHeightChanged (trackHeight);
+                                           });
 }

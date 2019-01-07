@@ -10,7 +10,7 @@
 */
 class ARASampleProjectAudioProcessorEditor  : public AudioProcessorEditor,
                                               public AudioProcessorEditorARAExtension,
-                                              private juce::Value::Listener
+                                              private DocumentView::Listener
 {
 public:
     ARASampleProjectAudioProcessorEditor (ARASampleProjectAudioProcessor&);
@@ -21,7 +21,7 @@ public:
     void resized() override;
 
     // Value::Listener
-    void valueChanged (juce::Value &value) override;
+    void timelineSelectionChanged (double newRangeStartInSeconds, double newRangeEndInSeconds, double pixelsPerSecond);
 private:
     std::unique_ptr<DocumentView> documentView;
 
