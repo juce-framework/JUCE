@@ -13,20 +13,20 @@ class PlaybackRegionView;
     This class provides basic foundation to show the ARA Document as well as
     their current selection state
 
-    currently, even though it is developed under Celemony's repository it's
-    a non-suprvised branch to be reviewed and decided what to do with later.
- 
- Goals (once finished):
-    - become part of ARA or JUCE-ARA SDK
+    It is currently work-in-progress, with the goal of making it a reusable base class
+    that is part of the JUCE_ARA framework module, not just example code.
+    Any JUCE-based ARA plug-in should be able to utilize this to ease its view implementation.
+
+ TODO JUCE_ARA:
     - provide juce::LookAndFeel mechanism so it could be customized for developer needs.
-    - become a baseclass to use as view component for most ARA-JUCE based products..
- TODOs:
     - configuration for all sizes: track height, ruler height, track header width etc.
     - a setting to make track header width optionally be resizable by user
     - refactor RulersViews to have RulersView::RulerBase and subclasses.
-    - option to show regions including their head and tail (for crossfades mostly, renderer will already provide proper samples but time ranges must be adjusted for this and updated if head/tail change)
-    - replace Viewport with better mechanism to avoid overflow with long documents and high zoom level.
- 
+      maybe we don't need a shared base class other than Component, that would be preferrable.
+    - option to show regions including their head and tail
+      (for crossfades mostly, renderer will already provide proper samples,
+       but time ranges must be adjusted for this and updated if head/tail change)
+    - replace Viewport with better mechanism to avoid integer overflow with long documents and high zoom level.
  */
 class DocumentView  : public AudioProcessorEditor,
                       public AudioProcessorEditorARAExtension,
