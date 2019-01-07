@@ -9,8 +9,8 @@
     Editor class for ARA sample project
 */
 class ARASampleProjectAudioProcessorEditor  : public AudioProcessorEditor,
-    public AudioProcessorEditorARAExtension,
-    private juce::Value::Listener
+                                              public AudioProcessorEditorARAExtension,
+                                              private juce::Value::Listener
 {
 public:
     ARASampleProjectAudioProcessorEditor (ARASampleProjectAudioProcessor&);

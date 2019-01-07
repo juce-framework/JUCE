@@ -12,12 +12,12 @@ constexpr double kMinBorderSeconds = 1.0;
 
 //==============================================================================
 DocumentView::DocumentView (AudioProcessor& p)
-: AudioProcessorEditor (&p),
-AudioProcessorEditorARAExtension (&p),
-playbackRegionsViewPort (*this),
-playheadView (*this),
-visibleRange (-kMinBorderSeconds, kMinSecondDuration + kMinBorderSeconds),
-positionInfoPtr (nullptr)
+    : AudioProcessorEditor (&p),
+      AudioProcessorEditorARAExtension (&p),
+      playbackRegionsViewPort (*this),
+      playheadView (*this),
+      visibleRange (-kMinBorderSeconds, kMinSecondDuration + kMinBorderSeconds),
+      positionInfoPtr (nullptr)
 {
     playheadView.setAlwaysOnTop (true);
     playbackRegionsView.addAndMakeVisible (playheadView);
@@ -284,7 +284,7 @@ void DocumentView::valueChanged (juce::Value& value)
 
 //==============================================================================
 DocumentView::PlayheadView::PlayheadView (DocumentView& documentView)
-: documentView (documentView)
+    : documentView (documentView)
 {}
 
 void DocumentView::PlayheadView::paint (juce::Graphics &g)

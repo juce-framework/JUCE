@@ -23,11 +23,11 @@ class PlaybackRegionView;
  
  */
 class DocumentView  : public AudioProcessorEditor,
-public AudioProcessorEditorARAExtension,
-private ARAEditorView::Listener,
-private ARADocument::Listener,
-private juce::Value::Listener,
-private juce::Timer
+                      public AudioProcessorEditorARAExtension,
+                      private ARAEditorView::Listener,
+                      private ARADocument::Listener,
+                      private juce::Value::Listener,
+                      private juce::Timer
 {
 public:
     DocumentView (AudioProcessor&);
