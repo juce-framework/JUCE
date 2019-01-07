@@ -6,7 +6,6 @@
 #include "RulersView.h"
 
 constexpr int kTrackHeaderWidth = 120;
-constexpr int kStatusBarHeight = 20;
 constexpr double kMinSecondDuration = 1.0;
 constexpr double kMinBorderSeconds = 1.0;
 
@@ -224,7 +223,7 @@ void DocumentView::resized()
     
     // update sizes and positions of all views
     const int rulersViewHeight = rulersViewPort.isVisible() ? rulersViewPort.getHeight() : 0;
-    playbackRegionsViewPort.setBounds (kTrackHeaderWidth, rulersViewHeight, getWidth() - kTrackHeaderWidth, getHeight() - rulersViewHeight - kStatusBarHeight);
+    playbackRegionsViewPort.setBounds (kTrackHeaderWidth, rulersViewHeight, getWidth() - kTrackHeaderWidth, getHeight() - rulersViewHeight);
     playbackRegionsView.setBounds (0, 0, playbackRegionsWidth, jmax (getTrackHeight() * regionSequenceViews.size(), playbackRegionsViewPort.getHeight() - playbackRegionsViewPort.getScrollBarThickness()));
     setPixelsPerSecond (playbackRegionsView.getWidth() / timeRange.getLength());       // prevent potential rounding issues
 

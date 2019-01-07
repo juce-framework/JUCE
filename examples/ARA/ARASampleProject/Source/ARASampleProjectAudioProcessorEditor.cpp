@@ -86,7 +86,7 @@ void ARASampleProjectAudioProcessorEditor::resized()
 {
     if (isARAEditorView())
     {
-        documentView->setBounds (getBounds());
+        documentView->setBounds (0, 0, getWidth(), getHeight() - kStatusBarHeight);
         followPlayheadToggleButton.setBounds (0, getHeight() - kStatusBarHeight, 200, kStatusBarHeight);
         horizontalZoomInButton.setBounds (getWidth() - kStatusBarHeight, getHeight() - kStatusBarHeight, kStatusBarHeight, kStatusBarHeight);
         horizontalZoomOutButton.setBounds (horizontalZoomInButton.getBounds().translated (-kStatusBarHeight, 0));
