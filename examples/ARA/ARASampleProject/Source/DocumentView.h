@@ -94,6 +94,7 @@ public:
     bool isRulersVisible() const { return rulersViewPort.isVisible(); }
 
     //==============================================================================
+    void parentHierarchyChanged() override;
     void paint (Graphics&) override;
     void resized() override;
 

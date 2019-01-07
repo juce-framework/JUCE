@@ -79,15 +79,16 @@ double DocumentView::getPlaybackRegionsViewsTimeForX (int x) const
     return visibleRange.getStart() + ((double) x / (double) playbackRegionsView.getWidth()) * visibleRange.getLength();
 }
 
+void DocumentView::parentHierarchyChanged()
+{
+    // needed to be called after DocumentView is constructed.
+    rebuildRegionSequenceViews();
+}
+
 //==============================================================================
 void DocumentView::paint (Graphics& g)
 {
     g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
-    if (regionSequenceViewsAreInvalid)
-    {
-        rebuildRegionSequenceViews();
-        regionSequenceViewsAreInvalid = false;
-    }
 }
 
 void DocumentView::resized()
