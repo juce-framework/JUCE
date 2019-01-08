@@ -18,49 +18,44 @@ DocumentView::DocumentView (AudioProcessor& p)
       timeRange (-kMinBorderSeconds, kMinSecondDuration + kMinBorderSeconds),
       positionInfoPtr (nullptr)
 {
-    playheadView.setAlwaysOnTop (true);
-    playbackRegionsView.addAndMakeVisible (playheadView);
-    
-    playbackRegionsViewPort.setScrollBarsShown (true, true, false, false);
-    playbackRegionsViewPort.setViewedComponent (&playbackRegionsView, false);
-    addAndMakeVisible (playbackRegionsViewPort);
-    
-    trackHeadersViewPort.setScrollBarsShown (false, false, false, false);
-    trackHeadersViewPort.setViewedComponent (&trackHeadersView, false);
-    addAndMakeVisible (trackHeadersViewPort);
-    
-    // init defaults
-    shouldFollowPlayhead = true;
-    trackHeight = 80;
-    
     if (! isARAEditorView())
     {
         // you shouldn't create a DocumentView if your instance can't support ARA.
         // notify user on your AudioProcessorEditorView or provide your own capture
         // alternative to ARA workflow.
         jassertfalse;
+        return;
     }
-    else
-    {
-        getARAEditorView()->addListener (this);
-        getARADocumentController()->getDocument<ARADocument>()->addListener (this);
 
-        rulersView.reset (new RulersView (*this));
-        rulersViewPort.setScrollBarsShown (false, false, false, false);
-        rulersViewPort.setViewedComponent (rulersView.get(), false);
-        addAndMakeVisible (rulersViewPort);
-    }
+    playheadView.setAlwaysOnTop (true);
+    playbackRegionsView.addAndMakeVisible (playheadView);
+
+    playbackRegionsViewPort.setScrollBarsShown (true, true, false, false);
+    playbackRegionsViewPort.setViewedComponent (&playbackRegionsView, false);
+    addAndMakeVisible (playbackRegionsViewPort);
+
+    trackHeadersViewPort.setScrollBarsShown (false, false, false, false);
+    trackHeadersViewPort.setViewedComponent (&trackHeadersView, false);
+    addAndMakeVisible (trackHeadersViewPort);
+
+    rulersView.reset (new RulersView (*this));
+    rulersViewPort.setScrollBarsShown (false, false, false, false);
+    rulersViewPort.setViewedComponent (rulersView.get(), false);
+    addAndMakeVisible (rulersViewPort);
+
+    getARAEditorView()->addListener (this);
+    getARADocumentController()->getDocument<ARADocument>()->addListener (this);
 
     startTimerHz (60);
 }
 
 DocumentView::~DocumentView()
 {
-    if (isARAEditorView())
-    {
-        getARADocumentController()->getDocument<ARADocument>()->removeListener (this);
-        getARAEditorView()->removeListener (this);
-    }
+    if (! isARAEditorView())
+        return;
+
+    getARADocumentController()->getDocument<ARADocument>()->removeListener (this);
+    getARAEditorView()->removeListener (this);
 }
 
 //==============================================================================

@@ -209,17 +209,20 @@ private:
     AudioFormatManager audioFormatManger;
 
     // Component View States
-    Value shouldFollowPlayhead;
+    Value shouldFollowPlayhead = Value(true);
+    bool showOnlySelectedRegionSequences = false;
+
     double pixelsPerSecond;
-    int trackHeight;
     double maxPixelsPerSecond, minPixelsPerSecond;
+    int trackHeight = 80;
 
     bool regionSequenceViewsAreInvalid = true;
-    bool showOnlySelectedRegionSequences = false;
     Range<double> timeRange;
+
     double playheadTimePosition = 0.0;
-    
     const juce::AudioPlayHead::CurrentPositionInfo* positionInfoPtr;
+
     ListenerList<Listener> listeners;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DocumentView)
 };
