@@ -26,16 +26,27 @@ class PlaybackRegionView;
     - option to show regions including their head and tail
       (for crossfades mostly, renderer will already provide proper samples,
        but time ranges must be adjusted for this and updated if head/tail change)
+    - optionally visualize ARA selected time range
+    - optionally visualize playback cycle state in rulers
     - replace Viewport with better mechanism to avoid integer overflow with long documents and high zoom level.
  */
-class DocumentView  : public AudioProcessorEditor,
-                      public AudioProcessorEditorARAExtension,
+class DocumentView  : public Component,
                       private ARAEditorView::Listener,
                       private ARADocument::Listener,
                       private juce::Timer
 {
 public:
-    DocumentView (AudioProcessor&);
+    /** Creation.
+
+     @param editorARAExtension  the editor extension used for viewing the document
+     @param positionInfo        the time info to be used for showing the playhead
+                                This needs to be updated from the processBlock() method of the
+                                audio processor showing the editor. The view code can deal with
+                                this struct being updated concurrently from the render thread.
+     */
+    DocumentView (const AudioProcessorEditorARAExtension& editorARAExtension, const AudioPlayHead::CurrentPositionInfo& positionInfo);
+
+    /** Destructor. */
     ~DocumentView();
 
     /*
@@ -57,6 +68,13 @@ public:
      This allows customizing TrackHeaderView Component to desired behavior.
      */
     virtual TrackHeaderView* createHeaderViewForRegionSequence (ARARegionSequence*);
+
+
+    template<typename EditorView_t = ARAEditorView>
+    EditorView_t* getARAEditorView() const noexcept { return araExtension.getARAEditorView<EditorView_t>(); }
+
+    template<typename DocumentController_t = ARADocumentController>
+    DocumentController_t* getARADocumentController() const noexcept { return araExtension.getARADocumentController<DocumentController_t>(); }
 
     // total time range
     Range<double> getTimeRange() const { return timeRange; }
@@ -83,14 +101,6 @@ public:
     Viewport& getRulersViewPort() { return rulersViewPort; }
 
     AudioFormatManager& getAudioFormatManger() { return audioFormatManger; }
-
-    /*
-     Sets a juce::AudioPlayHead::CurrentPositionInfo pointer that
-     should be used to show playhead.
-     Note: CurrentPositionInfo is only valid within processBlock calls,
-           The object should be updated only within audio thread.
-     */
-    void setCurrentPositionInfo (const AudioPlayHead::CurrentPositionInfo*);
 
     double getPlayheadTimePosition() const { return playheadTimePosition; }
 
@@ -147,11 +157,10 @@ public:
         /** Destructor. */
         virtual ~Listener() {}
 
-        /** Called when a DocumentView selection is changed.
-            This can happen when scrolled or zoomed/scaled on the horizontal axis.
+        /** Called when a DocumentView visible time range is changed.
+            This happens when being scrolled or zoomed/scaled on the horizontal axis.
 
-         @param newRangeStartInSeconds    the new range start of document's selection.
-         @param newRangeEndInSeconds      the new range end of document's selection.
+         @param newVisibleTimeRange       the new range of the document that's currently visible.
          @param pixelsPerSecond           current pixels per second.
          */
         virtual void visibleTimeRangeChanged (Range<double> newVisibleTimeRange, double pixelsPerSecond) = 0;
@@ -200,6 +209,8 @@ private:
         DocumentView& documentView;
     };
 
+    const AudioProcessorEditorARAExtension& araExtension;
+
     OwnedArray<RegionSequenceView> regionSequenceViews;
 
     ScrollMasterViewPort playbackRegionsViewPort;
@@ -213,17 +224,22 @@ private:
     AudioFormatManager audioFormatManger;
 
     // Component View States
-    Value shouldFollowPlayhead;
+    Value shouldFollowPlayhead = Value(true);
+    bool showOnlySelectedRegionSequences = false;
+
     double pixelsPerSecond;
-    int trackHeight, trackHeaderWidth;
     double maxPixelsPerSecond, minPixelsPerSecond;
 
+    int trackHeight = 80;
+    int trackHeaderWidth = 120;
+
     bool regionSequenceViewsAreInvalid = true;
-    bool showOnlySelectedRegionSequences = false;
     Range<double> timeRange;
+
     double playheadTimePosition = 0.0;
-    
-    const juce::AudioPlayHead::CurrentPositionInfo* positionInfoPtr;
+    const juce::AudioPlayHead::CurrentPositionInfo& positionInfo;
+
     ListenerList<Listener> listeners;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DocumentView)
 };

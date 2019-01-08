@@ -9,12 +9,9 @@ RulersView::RulersView (DocumentView& documentView)
       document (nullptr),
       musicalContext (nullptr)
 {
-    if (documentView.isARAEditorView())
-    {
-        document = documentView.getARADocumentController()->getDocument<ARADocument>();
-        document->addListener (this);
-        findMusicalContext();
-    }
+    document = documentView.getARADocumentController()->getDocument<ARADocument>();
+    document->addListener (this);
+    findMusicalContext();
 }
 
 RulersView::~RulersView()
@@ -45,9 +42,6 @@ void RulersView::detachFromMusicalContext()
 
 void RulersView::findMusicalContext()
 {
-    if (! documentView.isARAEditorView())
-        return;
-
     // evaluate selection
     ARAMusicalContext* newMusicalContext = nullptr;
     auto viewSelection = documentView.getARAEditorView()->getViewSelection();

@@ -9,58 +9,51 @@ constexpr double kMinSecondDuration = 1.0;
 constexpr double kMinBorderSeconds = 1.0;
 
 //==============================================================================
-DocumentView::DocumentView (AudioProcessor& p)
-    : AudioProcessorEditor (&p),
-      AudioProcessorEditorARAExtension (&p),
+DocumentView::DocumentView (const AudioProcessorEditorARAExtension& extension, const AudioPlayHead::CurrentPositionInfo& posInfo)
+    : araExtension (extension),
       playbackRegionsViewPort (*this),
       playheadView (*this),
       timeRange (-kMinBorderSeconds, kMinSecondDuration + kMinBorderSeconds),
-      positionInfoPtr (nullptr)
+      positionInfo (posInfo)
 {
-    playheadView.setAlwaysOnTop (true);
-    playbackRegionsView.addAndMakeVisible (playheadView);
-    
-    playbackRegionsViewPort.setScrollBarsShown (true, true, false, false);
-    playbackRegionsViewPort.setViewedComponent (&playbackRegionsView, false);
-    addAndMakeVisible (playbackRegionsViewPort);
-    
-    trackHeadersViewPort.setScrollBarsShown (false, false, false, false);
-    trackHeadersViewPort.setViewedComponent (&trackHeadersView, false);
-    addAndMakeVisible (trackHeadersViewPort);
-    
-    // init defaults
-    shouldFollowPlayhead = true;
-    trackHeight = 80;
-    trackHeaderWidth = 120;
-    
-    if (! isARAEditorView())
+    if (! araExtension.isARAEditorView())
     {
         // you shouldn't create a DocumentView if your instance can't support ARA.
         // notify user on your AudioProcessorEditorView or provide your own capture
         // alternative to ARA workflow.
         jassertfalse;
+        return;
     }
-    else
-    {
-        getARAEditorView()->addListener (this);
-        getARADocumentController()->getDocument<ARADocument>()->addListener (this);
 
-        rulersView.reset (new RulersView (*this));
-        rulersViewPort.setScrollBarsShown (false, false, false, false);
-        rulersViewPort.setViewedComponent (rulersView.get(), false);
-        addAndMakeVisible (rulersViewPort);
-    }
+    playheadView.setAlwaysOnTop (true);
+    playbackRegionsView.addAndMakeVisible (playheadView);
+
+    playbackRegionsViewPort.setScrollBarsShown (true, true, false, false);
+    playbackRegionsViewPort.setViewedComponent (&playbackRegionsView, false);
+    addAndMakeVisible (playbackRegionsViewPort);
+
+    trackHeadersViewPort.setScrollBarsShown (false, false, false, false);
+    trackHeadersViewPort.setViewedComponent (&trackHeadersView, false);
+    addAndMakeVisible (trackHeadersViewPort);
+
+    rulersView.reset (new RulersView (*this));
+    rulersViewPort.setScrollBarsShown (false, false, false, false);
+    rulersViewPort.setViewedComponent (rulersView.get(), false);
+    addAndMakeVisible (rulersViewPort);
+
+    getARAEditorView()->addListener (this);
+    getARADocumentController()->getDocument<ARADocument>()->addListener (this);
 
     startTimerHz (60);
 }
 
 DocumentView::~DocumentView()
 {
-    if (isARAEditorView())
-    {
-        getARADocumentController()->getDocument<ARADocument>()->removeListener (this);
-        getARAEditorView()->removeListener (this);
-    }
+    if (! araExtension.isARAEditorView())
+        return;
+
+    getARADocumentController()->getDocument<ARADocument>()->removeListener (this);
+    getARAEditorView()->removeListener (this);
 }
 
 //==============================================================================
@@ -106,11 +99,6 @@ void DocumentView::invalidateRegionSequenceViews()
 }
 
 //==============================================================================
-void DocumentView::setCurrentPositionInfo (const AudioPlayHead::CurrentPositionInfo* curPosInfoPtr)
-{
-    positionInfoPtr = curPosInfoPtr;
-}
-
 void DocumentView::setShowOnlySelectedRegionSequences (bool newVal)
 {
     showOnlySelectedRegionSequences = newVal;
@@ -218,7 +206,7 @@ void DocumentView::resized()
     const int trackHeaderWidth = trackHeadersViewPort.isVisible() ? DocumentView::trackHeaderWidth : 0;
 
     // max zoom 1px : 1sample (this is a naive assumption as audio can be in different sample rate)
-    maxPixelsPerSecond = jmax (processor.getSampleRate(), 300.0);
+    maxPixelsPerSecond = 192000.0; // TODO JUCE_ARA make configurabe from the outside, was: jmax (processor.getSampleRate(), 300.0);
 
     // min zoom covers entire view range
     minPixelsPerSecond = (getWidth() - trackHeaderWidth - rulersViewPort.getScrollBarThickness()) / timeRange.getLength();
@@ -320,15 +308,11 @@ void DocumentView::didReorderRegionSequencesInDocument (ARADocument* document)
     invalidateRegionSequenceViews();
 }
 
-
 void DocumentView::timerCallback()
 {
-    if (positionInfoPtr == nullptr)
-        return;
-        
-    if (playheadTimePosition != positionInfoPtr->timeInSeconds)
+    if (playheadTimePosition != positionInfo.timeInSeconds)
     {
-        playheadTimePosition = positionInfoPtr->timeInSeconds;
+        playheadTimePosition = positionInfo.timeInSeconds;
 
         if (shouldFollowPlayhead.getValue())
         {
