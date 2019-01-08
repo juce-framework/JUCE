@@ -109,6 +109,8 @@ public:
 
     void setIsRulersVisible (bool shouldBeVisible);
     bool isRulersVisible() const { return rulersViewPort.isVisible(); }
+    void setIsTrackHeadersVisible (bool shouldBeVisible);
+    bool isTrackHeadersVisible() const { return trackHeadersViewPort.isVisible(); }
 
     // DocumentView States
     void setScrollFollowsPlaybackState (bool followPlayhead) { shouldFollowPlayhead.setValue (followPlayhead); }
@@ -119,6 +121,8 @@ public:
     void setPixelsPerSecond (double newValue);
     int getTrackHeight() const { return trackHeight; }
     void setTrackHeight (int newHeight);
+    int getTrackHeaderWidth() const { return trackHeaderWidth; }
+    void setTrackHeaderWidth (int newWidth);
     bool isMaximumPixelsPerSecond() const { return pixelsPerSecond > minPixelsPerSecond; }
     bool isMinimumPixelsPerSecond() const { return pixelsPerSecond < maxPixelsPerSecond; }
 
@@ -225,7 +229,9 @@ private:
 
     double pixelsPerSecond;
     double maxPixelsPerSecond, minPixelsPerSecond;
+
     int trackHeight = 80;
+    int trackHeaderWidth = 120;
 
     bool regionSequenceViewsAreInvalid = true;
     Range<double> timeRange;
