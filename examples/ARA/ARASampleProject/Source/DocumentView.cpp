@@ -276,6 +276,12 @@ void DocumentView::rebuildRegionSequenceViews()
 }
 
 //==============================================================================
+void DocumentView::onNewSelection (const ARA::PlugIn::ViewSelection& /*currentSelection*/)
+{
+    if (showOnlySelectedRegionSequences)
+        invalidateRegionSequenceViews();
+}
+
 void DocumentView::onHideRegionSequences (std::vector<ARARegionSequence*> const& /*regionSequences*/)
 {
     invalidateRegionSequenceViews();
