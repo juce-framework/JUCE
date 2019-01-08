@@ -35,7 +35,7 @@ PlaybackRegionView::~PlaybackRegionView()
 //==============================================================================
 void PlaybackRegionView::paint (Graphics& g)
 {
-    const int lineThickness = 1;
+    constexpr int lineThickness = 1;
 
     Colour regionColour;
     const ARA::ARAColor* colour = playbackRegion->getColor();
