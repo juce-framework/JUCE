@@ -17,31 +17,43 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
         // TODO JUCE_ARA hotfix for Unicode chord symbols, see https://forum.juce.com/t/embedding-unicode-string-literals-in-your-cpp-files/12600/7
         documentView->getLookAndFeel().setDefaultSansSerifTypefaceName("Arial Unicode MS");
         documentView->setIsRulersVisible (true);
+        documentView->setIsTrackHeadersVisible (true);
+        documentView->setShowOnlySelectedRegionSequences (false);
         documentView->addListener (this);
         addAndMakeVisible (documentView.get());
 
-        followPlayheadToggleButton.setButtonText ("Viewport follows playhead");
-        followPlayheadToggleButton.getToggleStateValue().referTo (documentView->getScrollFollowsPlaybackStateValue());
-        addAndMakeVisible (followPlayheadToggleButton);
-
-        showHideTrackHeaderButton.setButtonText ("Show/Hide Track Headers");
-        showHideTrackHeaderButton.setClickingTogglesState (true);
-        showHideTrackHeaderButton.setToggleState(documentView->isTrackHeadersVisible(), dontSendNotification);
-        showHideTrackHeaderButton.onClick = [this]
+        hideTrackHeaderButton.setButtonText ("Hide Track Headers");
+        hideTrackHeaderButton.setClickingTogglesState (true);
+        hideTrackHeaderButton.setToggleState(! documentView->isTrackHeadersVisible(), dontSendNotification);
+        hideTrackHeaderButton.onClick = [this]
         {
-            documentView->setIsTrackHeadersVisible (showHideTrackHeaderButton.getToggleState());
+            documentView->setIsTrackHeadersVisible (! hideTrackHeaderButton.getToggleState());
         };
-        addAndMakeVisible (showHideTrackHeaderButton);
+        addAndMakeVisible (hideTrackHeaderButton);
+
+        onlySelectedTracksButton.setButtonText ("Selected Tracks Only");
+        onlySelectedTracksButton.setClickingTogglesState (true);
+        onlySelectedTracksButton.setToggleState(documentView->isShowingOnlySelectedRegionSequences(), dontSendNotification);
+        onlySelectedTracksButton.onClick = [this]
+        {
+            documentView->setShowOnlySelectedRegionSequences (onlySelectedTracksButton.getToggleState());
+        };
+        addAndMakeVisible (onlySelectedTracksButton);
+
+        followPlayheadButton.setButtonText ("Follow Playhead");
+        followPlayheadButton.setClickingTogglesState (true);
+        followPlayheadButton.getToggleStateValue().referTo (documentView->getScrollFollowsPlaybackStateValue());
+        addAndMakeVisible (followPlayheadButton);
 
         horizontalZoomLabel.setText ("H:", dontSendNotification);
         verticalZoomLabel.setText ("V:", dontSendNotification);
         addAndMakeVisible (horizontalZoomLabel);
         addAndMakeVisible (verticalZoomLabel);
 
-        verticalZoomInButton.setButtonText("+");
-        verticalZoomOutButton.setButtonText("-");
         horizontalZoomInButton.setButtonText("+");
         horizontalZoomOutButton.setButtonText("-");
+        verticalZoomInButton.setButtonText("+");
+        verticalZoomOutButton.setButtonText("-");
         constexpr double zoomStepFactor = 1.5;
         horizontalZoomInButton.onClick = [this, zoomStepFactor]
         {
@@ -51,7 +63,6 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
         {
             documentView->setPixelsPerSecond (documentView->getPixelsPerSecond() / zoomStepFactor);
         };
-
         verticalZoomInButton.onClick = [this, zoomStepFactor]
         {
             documentView->setTrackHeight (documentView->getTrackHeight() * zoomStepFactor);
@@ -60,10 +71,10 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
         {
             documentView->setTrackHeight (documentView->getTrackHeight() / zoomStepFactor);
         };
-        addAndMakeVisible (verticalZoomInButton);
-        addAndMakeVisible (verticalZoomOutButton);
         addAndMakeVisible (horizontalZoomInButton);
         addAndMakeVisible (horizontalZoomOutButton);
+        addAndMakeVisible (verticalZoomInButton);
+        addAndMakeVisible (verticalZoomOutButton);
     }
 
     setSize (kWidth, kHeight);
@@ -94,14 +105,15 @@ void ARASampleProjectAudioProcessorEditor::resized()
     if (isARAEditorView())
     {
         documentView->setBounds (0, 0, getWidth(), getHeight() - kStatusBarHeight);
-        followPlayheadToggleButton.setBounds (0, getHeight() - kStatusBarHeight, 200, kStatusBarHeight);
-        showHideTrackHeaderButton.setBounds(followPlayheadToggleButton.getRight(), getHeight() - kStatusBarHeight, 100, kStatusBarHeight);
-        horizontalZoomInButton.setBounds (getWidth() - kStatusBarHeight, getHeight() - kStatusBarHeight, kStatusBarHeight, kStatusBarHeight);
-        horizontalZoomOutButton.setBounds (horizontalZoomInButton.getBounds().translated (-kStatusBarHeight, 0));
-        horizontalZoomLabel.setBounds (horizontalZoomOutButton.getBounds().translated (-kStatusBarHeight, 0));
-        verticalZoomInButton.setBounds (horizontalZoomLabel.getBounds().translated (-kStatusBarHeight, 0));
+        hideTrackHeaderButton.setBounds(0, getHeight() - kStatusBarHeight, 120, kStatusBarHeight);
+        onlySelectedTracksButton.setBounds (hideTrackHeaderButton.getRight(), getHeight() - kStatusBarHeight, 120, kStatusBarHeight);
+        followPlayheadButton.setBounds (onlySelectedTracksButton.getRight(), getHeight() - kStatusBarHeight, 120, kStatusBarHeight);
+        verticalZoomInButton.setBounds (getWidth() - kStatusBarHeight, getHeight() - kStatusBarHeight, kStatusBarHeight, kStatusBarHeight);
         verticalZoomOutButton.setBounds (verticalZoomInButton.getBounds().translated (-kStatusBarHeight, 0));
         verticalZoomLabel.setBounds (verticalZoomOutButton.getBounds().translated (-kStatusBarHeight, 0));
+        horizontalZoomInButton.setBounds (verticalZoomLabel.getBounds().translated (-kStatusBarHeight, 0));
+        horizontalZoomOutButton.setBounds (horizontalZoomInButton.getBounds().translated (-kStatusBarHeight, 0));
+        horizontalZoomLabel.setBounds (horizontalZoomOutButton.getBounds().translated (-kStatusBarHeight, 0));
     }
 }
 
