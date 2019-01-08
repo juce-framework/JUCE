@@ -10,15 +10,14 @@ constexpr double kMinSecondDuration = 1.0;
 constexpr double kMinBorderSeconds = 1.0;
 
 //==============================================================================
-DocumentView::DocumentView (AudioProcessor& p)
-    : AudioProcessorEditor (&p),
-      AudioProcessorEditorARAExtension (&p),
+DocumentView::DocumentView (const AudioProcessorEditorARAExtension& extension)
+    : araExtension (extension),
       playbackRegionsViewPort (*this),
       playheadView (*this),
       timeRange (-kMinBorderSeconds, kMinSecondDuration + kMinBorderSeconds),
       positionInfoPtr (nullptr)
 {
-    if (! isARAEditorView())
+    if (! araExtension.isARAEditorView())
     {
         // you shouldn't create a DocumentView if your instance can't support ARA.
         // notify user on your AudioProcessorEditorView or provide your own capture
@@ -51,7 +50,7 @@ DocumentView::DocumentView (AudioProcessor& p)
 
 DocumentView::~DocumentView()
 {
-    if (! isARAEditorView())
+    if (! araExtension.isARAEditorView())
         return;
 
     getARADocumentController()->getDocument<ARADocument>()->removeListener (this);
@@ -199,7 +198,7 @@ void DocumentView::resized()
     timeRange.setEnd (timeRange.getEnd() + kMinBorderSeconds);
 
     // max zoom 1px : 1sample (this is a naive assumption as audio can be in different sample rate)
-    maxPixelsPerSecond = jmax (processor.getSampleRate(), 300.0);
+    maxPixelsPerSecond = 192000.0; // TODO JUCE_ARA make configurabe from the outside, was: jmax (processor.getSampleRate(), 300.0);
 
     // min zoom covers entire view range
     minPixelsPerSecond = (getWidth() - kTrackHeaderWidth - rulersViewPort.getScrollBarThickness()) / timeRange.getLength();

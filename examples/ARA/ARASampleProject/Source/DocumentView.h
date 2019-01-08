@@ -28,14 +28,13 @@ class PlaybackRegionView;
        but time ranges must be adjusted for this and updated if head/tail change)
     - replace Viewport with better mechanism to avoid integer overflow with long documents and high zoom level.
  */
-class DocumentView  : public AudioProcessorEditor,
-                      public AudioProcessorEditorARAExtension,
+class DocumentView  : public Component,
                       private ARAEditorView::Listener,
                       private ARADocument::Listener,
                       private juce::Timer
 {
 public:
-    DocumentView (AudioProcessor&);
+    DocumentView (const AudioProcessorEditorARAExtension&);
     ~DocumentView();
 
     /*
@@ -57,6 +56,13 @@ public:
      This allows customizing TrackHeaderView Component to desired behavior.
      */
     virtual TrackHeaderView* createHeaderViewForRegionSequence (ARARegionSequence*);
+
+
+    template<typename EditorView_t = ARAEditorView>
+    EditorView_t* getARAEditorView() const noexcept { return araExtension.getARAEditorView<EditorView_t>(); }
+
+    template<typename DocumentController_t = ARADocumentController>
+    DocumentController_t* getARADocumentController() const noexcept { return araExtension.getARADocumentController<DocumentController_t>(); }
 
     // total time range
     Range<double> getTimeRange() const { return timeRange; }
@@ -195,6 +201,8 @@ private:
     private:
         DocumentView& documentView;
     };
+
+    const AudioProcessorEditorARAExtension& araExtension;
 
     OwnedArray<RegionSequenceView> regionSequenceViews;
 

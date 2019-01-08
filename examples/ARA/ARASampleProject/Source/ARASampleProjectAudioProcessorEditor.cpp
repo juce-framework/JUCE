@@ -13,7 +13,7 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
 {
     if (isARAEditorView())
     {
-        documentView.reset (new DocumentView (p));
+        documentView.reset (new DocumentView (*this));
         // TODO JUCE_ARA hotfix for Unicode chord symbols, see https://forum.juce.com/t/embedding-unicode-string-literals-in-your-cpp-files/12600/7
         documentView->getLookAndFeel().setDefaultSansSerifTypefaceName("Arial Unicode MS");
         documentView->setCurrentPositionInfo (&p.getLastKnownPositionInfo());
