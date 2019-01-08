@@ -204,41 +204,36 @@ void DocumentView::resized()
     timeRange.setEnd (timeRange.getEnd() + kMinBorderSeconds);
 
     const int trackHeaderWidth = trackHeadersViewPort.isVisible() ? DocumentView::trackHeaderWidth : 0;
+    const int rulersViewHeight = rulersViewPort.isVisible() ? 3*20 : 0;
 
     // max zoom 1px : 1sample (this is a naive assumption as audio can be in different sample rate)
     maxPixelsPerSecond = 192000.0; // TODO JUCE_ARA make configurabe from the outside, was: jmax (processor.getSampleRate(), 300.0);
 
     // min zoom covers entire view range
-    minPixelsPerSecond = (getWidth() - trackHeaderWidth - rulersViewPort.getScrollBarThickness()) / timeRange.getLength();
+    // TODO JUCE_ARA getScrollBarThickness() should only be substracted if vertical scroll bar is actually visible
+    minPixelsPerSecond = (getWidth() - trackHeaderWidth - playbackRegionsViewPort.getScrollBarThickness()) / timeRange.getLength();
 
-    // enforce zoom in/out limits, update zoom buttons
+    // enforce zoom in/out limits
     const double validPixelsPerSecond = jlimit (minPixelsPerSecond, maxPixelsPerSecond, getPixelsPerSecond());
-
     const int playbackRegionsWidth = roundToInt (timeRange.getLength() * validPixelsPerSecond);
-    
-    // rulers
-    if (rulersView != nullptr && rulersViewPort.isVisible())
-    {
-        constexpr int kRulersViewHeight = 3*20;
-        rulersViewPort.setBounds (trackHeaderWidth, 0, playbackRegionsViewPort.getMaximumVisibleWidth(), kRulersViewHeight);
-        rulersView->setBounds (0, 0, playbackRegionsWidth, kRulersViewHeight);
-    }
-    
+    setPixelsPerSecond (playbackRegionsWidth / timeRange.getLength());       // prevent potential rounding issues
+
     // update sizes and positions of all views
-    const int rulersViewHeight = rulersViewPort.isVisible() ? rulersViewPort.getHeight() : 0;
     playbackRegionsViewPort.setBounds (trackHeaderWidth, rulersViewHeight, getWidth() - trackHeaderWidth, getHeight() - rulersViewHeight);
     playbackRegionsView.setBounds (0, 0, playbackRegionsWidth, jmax (getTrackHeight() * regionSequenceViews.size(), playbackRegionsViewPort.getHeight() - playbackRegionsViewPort.getScrollBarThickness()));
-    setPixelsPerSecond (playbackRegionsView.getWidth() / timeRange.getLength());       // prevent potential rounding issues
+
+    rulersViewPort.setBounds (trackHeaderWidth, 0, playbackRegionsViewPort.getMaximumVisibleWidth(), rulersViewHeight);
+    rulersView->setBounds (0, 0, playbackRegionsWidth, rulersViewHeight);
 
     trackHeadersViewPort.setBounds (0, rulersViewHeight, trackHeaderWidth, playbackRegionsViewPort.getMaximumVisibleHeight());
     trackHeadersView.setBounds (0, 0, trackHeaderWidth, playbackRegionsView.getHeight());
 
     int y = 0;
-    const auto defaultTrackHeight = getTrackHeight();
+    const int trackHeight = getTrackHeight();
     for (auto v : regionSequenceViews)
     {
-        v->setRegionsViewBoundsByYRange (y, defaultTrackHeight);
-        y += defaultTrackHeight;
+        v->setRegionsViewBoundsByYRange (y, trackHeight);
+        y += trackHeight;
     }
 
     playheadView.setBounds (playbackRegionsView.getBounds());
