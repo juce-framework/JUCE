@@ -36,7 +36,17 @@ class DocumentView  : public Component,
                       private juce::Timer
 {
 public:
-    DocumentView (const AudioProcessorEditorARAExtension&);
+    /** Creation.
+
+     @param editorARAExtension  the editor extension used for viewing the document
+     @param positionInfo        the time info to be used for showing the playhead
+                                This needs to be updated from the processBlock() method of the
+                                audio processor showing the editor. The view code can deal with
+                                this struct being updated concurrently from the render thread.
+     */
+    DocumentView (const AudioProcessorEditorARAExtension& editorARAExtension, const AudioPlayHead::CurrentPositionInfo& positionInfo);
+
+    /** Destructor. */
     ~DocumentView();
 
     /*
@@ -91,14 +101,6 @@ public:
     Viewport& getRulersViewPort() { return rulersViewPort; }
 
     AudioFormatManager& getAudioFormatManger() { return audioFormatManger; }
-
-    /*
-     Sets a juce::AudioPlayHead::CurrentPositionInfo pointer that
-     should be used to show playhead.
-     Note: CurrentPositionInfo is only valid within processBlock calls,
-           The object should be updated only within audio thread.
-     */
-    void setCurrentPositionInfo (const AudioPlayHead::CurrentPositionInfo*);
 
     double getPlayheadTimePosition() const { return playheadTimePosition; }
 
@@ -229,7 +231,7 @@ private:
     Range<double> timeRange;
 
     double playheadTimePosition = 0.0;
-    const juce::AudioPlayHead::CurrentPositionInfo* positionInfoPtr;
+    const juce::AudioPlayHead::CurrentPositionInfo& positionInfo;
 
     ListenerList<Listener> listeners;
 

@@ -10,12 +10,12 @@ constexpr double kMinSecondDuration = 1.0;
 constexpr double kMinBorderSeconds = 1.0;
 
 //==============================================================================
-DocumentView::DocumentView (const AudioProcessorEditorARAExtension& extension)
+DocumentView::DocumentView (const AudioProcessorEditorARAExtension& extension, const AudioPlayHead::CurrentPositionInfo& posInfo)
     : araExtension (extension),
       playbackRegionsViewPort (*this),
       playheadView (*this),
       timeRange (-kMinBorderSeconds, kMinSecondDuration + kMinBorderSeconds),
-      positionInfoPtr (nullptr)
+      positionInfo (posInfo)
 {
     if (! araExtension.isARAEditorView())
     {
@@ -100,11 +100,6 @@ void DocumentView::invalidateRegionSequenceViews()
 }
 
 //==============================================================================
-void DocumentView::setCurrentPositionInfo (const AudioPlayHead::CurrentPositionInfo* curPosInfoPtr)
-{
-    positionInfoPtr = curPosInfoPtr;
-}
-
 void DocumentView::setShowOnlySelectedRegionSequences (bool newVal)
 {
     showOnlySelectedRegionSequences = newVal;
@@ -299,15 +294,11 @@ void DocumentView::didReorderRegionSequencesInDocument (ARADocument* document)
     invalidateRegionSequenceViews();
 }
 
-
 void DocumentView::timerCallback()
 {
-    if (positionInfoPtr == nullptr)
-        return;
-        
-    if (playheadTimePosition != positionInfoPtr->timeInSeconds)
+    if (playheadTimePosition != positionInfo.timeInSeconds)
     {
-        playheadTimePosition = positionInfoPtr->timeInSeconds;
+        playheadTimePosition = positionInfo.timeInSeconds;
 
         if (shouldFollowPlayhead.getValue())
         {
