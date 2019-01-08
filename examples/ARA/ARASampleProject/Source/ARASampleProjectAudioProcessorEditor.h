@@ -25,9 +25,9 @@ public:
 private:
     std::unique_ptr<DocumentView> documentView;
 
-    // controls for DocumentView internal state.
-    ToggleButton followPlayheadToggleButton;
-    TextButton showHideTrackHeaderButton;
+    TextButton hideTrackHeaderButton;
+    TextButton followPlayheadButton;
+    TextButton onlySelectedTracksButton;
     Label horizontalZoomLabel, verticalZoomLabel;
     TextButton horizontalZoomInButton, horizontalZoomOutButton;
     TextButton verticalZoomInButton, verticalZoomOutButton;
