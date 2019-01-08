@@ -149,11 +149,10 @@ public:
         /** Destructor. */
         virtual ~Listener() {}
 
-        /** Called when a DocumentView selection is changed.
-            This can happen when scrolled or zoomed/scaled on the horizontal axis.
+        /** Called when a DocumentView visible time range is changed.
+            This happens when being scrolled or zoomed/scaled on the horizontal axis.
 
-         @param newRangeStartInSeconds    the new range start of document's selection.
-         @param newRangeEndInSeconds      the new range end of document's selection.
+         @param newVisibleTimeRange       the new range of the document that's currently visible.
          @param pixelsPerSecond           current pixels per second.
          */
         virtual void visibleTimeRangeChanged (Range<double> newVisibleTimeRange, double pixelsPerSecond) = 0;
