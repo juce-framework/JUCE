@@ -987,37 +987,65 @@ private:
                 {
                     if (auto* constrainer = editor->getConstrainer())
                     {
-                       #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-                        auto juceRect = editor->getLocalArea (component.get(),
-                                                              Rectangle<int>::leftTopRightBottom (rectToCheck->left, rectToCheck->top,
-                                                                                                  rectToCheck->right, rectToCheck->bottom) / editorScaleFactor);
-                       #else
-                        auto juceRect = editor->getLocalArea (component.get(),
-                                                              { rectToCheck->left, rectToCheck->top, rectToCheck->right, rectToCheck->bottom });
-                       #endif
+                        auto minW = (double) constrainer->getMinimumWidth();
+                        auto maxW = (double) constrainer->getMaximumWidth();
+                        auto minH = (double) constrainer->getMinimumHeight();
+                        auto maxH = (double) constrainer->getMaximumHeight();
 
-                        Rectangle<int> limits (0, 0, constrainer->getMaximumWidth(), constrainer->getMaximumHeight());
-
-                        auto currentRect = editor->getBounds();
-
-                        if (getHostType().isReaper() && constrainer->getFixedAspectRatio() != 0.0)
-                            constrainer->checkBounds (juceRect, currentRect, limits, false, false, true, true);
-                        else
-                            constrainer->checkBounds (juceRect, currentRect, limits,
-                                                      juceRect.getY() != currentRect.getY() && juceRect.getBottom() == currentRect.getBottom(),
-                                                      juceRect.getX() != currentRect.getX() && juceRect.getRight()  == currentRect.getRight(),
-                                                      juceRect.getY() == currentRect.getY() && juceRect.getBottom() != currentRect.getBottom(),
-                                                      juceRect.getX() == currentRect.getX() && juceRect.getRight()  != currentRect.getRight());
-
-                        juceRect = component->getLocalArea (editor, juceRect);
+                        auto width  = (double) (rectToCheck->right - rectToCheck->left);
+                        auto height = (double) (rectToCheck->bottom - rectToCheck->top);
 
                        #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-                        rectToCheck->right = rectToCheck->left + roundToInt (juceRect.getWidth() * editorScaleFactor);
-                        rectToCheck->bottom = rectToCheck->top + roundToInt (juceRect.getHeight() * editorScaleFactor);
-                       #else
-                        rectToCheck->right = rectToCheck->left + juceRect.getWidth();
-                        rectToCheck->bottom = rectToCheck->top + juceRect.getHeight();
+                        width  /= editorScaleFactor;
+                        height /= editorScaleFactor;
                        #endif
+
+                        width  = jlimit (minW, maxW, width);
+                        height = jlimit (minH, maxH, height);
+
+                        auto aspectRatio = constrainer->getFixedAspectRatio();
+
+                        if (aspectRatio != 0.0)
+                        {
+                            bool adjustWidth = (width / height > aspectRatio);
+
+                            if (getHostType().type == PluginHostType::SteinbergCubase9)
+                            {
+                                if (editor->getWidth() == width && editor->getHeight() != height)
+                                    adjustWidth = true;
+                                else if (editor->getHeight() == height && editor->getWidth() != width)
+                                    adjustWidth = false;
+                            }
+
+                            if (adjustWidth)
+                            {
+                                width = height * aspectRatio;
+
+                                if (width > maxW || width < minW)
+                                {
+                                    width = jlimit (minW, maxW, width);
+                                    height = width / aspectRatio;
+                                }
+                            }
+                            else
+                            {
+                                height = width / aspectRatio;
+
+                                if (height > maxH || height < minH)
+                                {
+                                    height = jlimit (minH, maxH, height);
+                                    width = height * aspectRatio;
+                                }
+                            }
+                        }
+
+                       #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+                        width  *= editorScaleFactor;
+                        height *= editorScaleFactor;
+                       #endif
+
+                        rectToCheck->right  = rectToCheck->left + roundToInt (width);
+                        rectToCheck->bottom = rectToCheck->top  + roundToInt (height);
                     }
                 }
 
