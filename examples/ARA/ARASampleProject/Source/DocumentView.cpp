@@ -102,13 +102,13 @@ void DocumentView::invalidateRegionSequenceViews()
 void DocumentView::setShowOnlySelectedRegionSequences (bool newVal)
 {
     showOnlySelectedRegionSequences = newVal;
-
     invalidateRegionSequenceViews();
 }
 
 void DocumentView::setIsRulersVisible (bool shouldBeVisible)
 {
     rulersViewPort.setVisible (shouldBeVisible);
+    resized();
 }
 
 void DocumentView::setIsTrackHeadersVisible (bool shouldBeVisible)

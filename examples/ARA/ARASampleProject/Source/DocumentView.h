@@ -104,27 +104,30 @@ public:
 
     double getPlayheadTimePosition() const { return playheadTimePosition; }
 
+    // DocumentView States
     void setShowOnlySelectedRegionSequences (bool newVal);
     bool isShowingOnlySelectedRegionSequences() { return showOnlySelectedRegionSequences; }
 
     void setIsRulersVisible (bool shouldBeVisible);
     bool isRulersVisible() const { return rulersViewPort.isVisible(); }
+
     void setIsTrackHeadersVisible (bool shouldBeVisible);
     bool isTrackHeadersVisible() const { return trackHeadersViewPort.isVisible(); }
 
-    // DocumentView States
+    void setTrackHeaderWidth (int newWidth);
+    int getTrackHeaderWidth() const { return trackHeaderWidth; }
+
     void setScrollFollowsPlaybackState (bool followPlayhead) { shouldFollowPlayhead.setValue (followPlayhead); }
     bool getScrollFollowPlaybackState() const { return shouldFollowPlayhead.getValue(); }
     juce::Value& getScrollFollowsPlaybackStateValue() { return shouldFollowPlayhead; }
 
-    double getPixelsPerSecond() const { return pixelsPerSecond; }
     void setPixelsPerSecond (double newValue);
-    int getTrackHeight() const { return trackHeight; }
-    void setTrackHeight (int newHeight);
-    int getTrackHeaderWidth() const { return trackHeaderWidth; }
-    void setTrackHeaderWidth (int newWidth);
+    double getPixelsPerSecond() const { return pixelsPerSecond; }
     bool isMaximumPixelsPerSecond() const { return pixelsPerSecond > minPixelsPerSecond; }
     bool isMinimumPixelsPerSecond() const { return pixelsPerSecond < maxPixelsPerSecond; }
+
+    void setTrackHeight (int newHeight);
+    int getTrackHeight() const { return trackHeight; }
 
     //==============================================================================
     void parentHierarchyChanged() override;

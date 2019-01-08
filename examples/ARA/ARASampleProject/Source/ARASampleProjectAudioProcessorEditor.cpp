@@ -16,13 +16,14 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
         documentView.reset (new DocumentView (*this, p.getLastKnownPositionInfo()));
         // TODO JUCE_ARA hotfix for Unicode chord symbols, see https://forum.juce.com/t/embedding-unicode-string-literals-in-your-cpp-files/12600/7
         documentView->getLookAndFeel().setDefaultSansSerifTypefaceName("Arial Unicode MS");
+        documentView->setIsRulersVisible (true);
+        documentView->addListener (this);
         addAndMakeVisible (documentView.get());
 
         followPlayheadToggleButton.setButtonText ("Viewport follows playhead");
         followPlayheadToggleButton.getToggleStateValue().referTo (documentView->getScrollFollowsPlaybackStateValue());
         addAndMakeVisible (followPlayheadToggleButton);
 
-        // sample show/hide track headers.
         showHideTrackHeaderButton.setButtonText ("Show/Hide Track Headers");
         showHideTrackHeaderButton.setClickingTogglesState (true);
         showHideTrackHeaderButton.setToggleState(documentView->isTrackHeadersVisible(), dontSendNotification);
@@ -32,9 +33,11 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
         };
         addAndMakeVisible (showHideTrackHeaderButton);
 
-        // sample zoom functionality
         horizontalZoomLabel.setText ("H:", dontSendNotification);
         verticalZoomLabel.setText ("V:", dontSendNotification);
+        addAndMakeVisible (horizontalZoomLabel);
+        addAndMakeVisible (verticalZoomLabel);
+
         verticalZoomInButton.setButtonText("+");
         verticalZoomOutButton.setButtonText("-");
         horizontalZoomInButton.setButtonText("+");
@@ -57,15 +60,10 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
         {
             documentView->setTrackHeight (documentView->getTrackHeight() / zoomStepFactor);
         };
-
-        addAndMakeVisible (horizontalZoomLabel);
-        addAndMakeVisible (verticalZoomLabel);
         addAndMakeVisible (verticalZoomInButton);
         addAndMakeVisible (verticalZoomOutButton);
         addAndMakeVisible (horizontalZoomInButton);
         addAndMakeVisible (horizontalZoomOutButton);
-        documentView->setIsRulersVisible (true);
-        documentView->addListener (this);
     }
 
     setSize (kWidth, kHeight);

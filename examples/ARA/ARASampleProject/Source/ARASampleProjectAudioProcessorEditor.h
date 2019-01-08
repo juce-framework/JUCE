@@ -27,10 +27,10 @@ private:
 
     // controls for DocumentView internal state.
     ToggleButton followPlayheadToggleButton;
+    TextButton showHideTrackHeaderButton;
     Label horizontalZoomLabel, verticalZoomLabel;
-    TextButton horizontalZoomInButton, horizontalZoomOutButton,
-    verticalZoomInButton, verticalZoomOutButton,
-    showHideTrackHeaderButton;
+    TextButton horizontalZoomInButton, horizontalZoomOutButton;
+    TextButton verticalZoomInButton, verticalZoomOutButton;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARASampleProjectAudioProcessorEditor)
 };
