@@ -1324,6 +1324,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_data_structures\values\juce_ValueTreeSynchroniser.cpp">
       <Filter>JUCE Modules\juce_data_structures\values</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_data_structures\values\juce_ValueWithDefault.cpp">
+      <Filter>JUCE Modules\juce_data_structures\values</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_data_structures\juce_data_structures.cpp">
       <Filter>JUCE Modules\juce_data_structures</Filter>
     </ClCompile>

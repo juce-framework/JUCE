@@ -767,6 +767,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_data_structures/values/juce_ValueTree.h"
     "../../../../../modules/juce_data_structures/values/juce_ValueTreeSynchroniser.cpp"
     "../../../../../modules/juce_data_structures/values/juce_ValueTreeSynchroniser.h"
+    "../../../../../modules/juce_data_structures/values/juce_ValueWithDefault.cpp"
     "../../../../../modules/juce_data_structures/values/juce_ValueWithDefault.h"
     "../../../../../modules/juce_data_structures/juce_data_structures.cpp"
     "../../../../../modules/juce_data_structures/juce_data_structures.mm"
@@ -2119,6 +2120,7 @@ set_source_files_properties("../../../../../modules/juce_data_structures/values/
 set_source_files_properties("../../../../../modules/juce_data_structures/values/juce_ValueTree.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_data_structures/values/juce_ValueTreeSynchroniser.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_data_structures/values/juce_ValueTreeSynchroniser.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_data_structures/values/juce_ValueWithDefault.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_data_structures/values/juce_ValueWithDefault.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_data_structures/juce_data_structures.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_data_structures/juce_data_structures.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
