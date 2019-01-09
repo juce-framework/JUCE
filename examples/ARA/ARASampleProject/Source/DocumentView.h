@@ -102,7 +102,8 @@ public:
 
     AudioFormatManager& getAudioFormatManger() { return audioFormatManger; }
 
-    double getPlayheadTimePosition() const { return playheadTimePosition; }
+    double getPlayheadTimePosition() const { return lastReportedPosition.timeInSeconds; }
+    const AudioPlayHead::CurrentPositionInfo& getPlayheadPositionInfo() const { return lastReportedPosition; }
 
     // DocumentView States
     void setShowOnlySelectedRegionSequences (bool newVal);
@@ -240,7 +241,7 @@ private:
     bool regionSequenceViewsAreInvalid = true;
     Range<double> timeRange;
 
-    double playheadTimePosition = 0.0;
+    juce::AudioPlayHead::CurrentPositionInfo lastReportedPosition;
     const juce::AudioPlayHead::CurrentPositionInfo& positionInfo;
 
     ListenerList<Listener> listeners;

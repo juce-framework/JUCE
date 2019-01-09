@@ -44,6 +44,8 @@ DocumentView::DocumentView (const AudioProcessorEditorARAExtension& extension, c
     getARAEditorView()->addListener (this);
     getARADocumentController()->getDocument<ARADocument>()->addListener (this);
 
+    lastReportedPosition.resetToDefault();
+
     startTimerHz (60);
 }
 
@@ -167,7 +169,7 @@ void DocumentView::paint (Graphics& g)
 void DocumentView::resized()
 {
     // store visible playhead postion (in main view coordinates)
-    int previousPlayheadX = getPlaybackRegionsViewsXForTime (playheadTimePosition) - playbackRegionsViewPort.getViewPosition().getX();
+    int previousPlayheadX = getPlaybackRegionsViewsXForTime (lastReportedPosition.timeInSeconds) - playbackRegionsViewPort.getViewPosition().getX();
 
     // calculate maximum visible time range
     timeRange = { 0.0, 0.0 };
@@ -242,7 +244,7 @@ void DocumentView::resized()
     // TODO JUCE_ARA if playhead is not visible in new position, we should rather keep the
     //               left or right border stable, depending on which side the playhead is.
     auto relativeViewportPosition = playbackRegionsViewPort.getViewPosition();
-    relativeViewportPosition.setX (getPlaybackRegionsViewsXForTime (playheadTimePosition) - previousPlayheadX);
+    relativeViewportPosition.setX (getPlaybackRegionsViewsXForTime (lastReportedPosition.timeInSeconds) - previousPlayheadX);
     playbackRegionsViewPort.setViewPosition (relativeViewportPosition);
     rulersViewPort.setViewPosition (relativeViewportPosition.getX(), 0);
 }
@@ -311,15 +313,24 @@ void DocumentView::didReorderRegionSequencesInDocument (ARADocument* document)
 
 void DocumentView::timerCallback()
 {
-    if (playheadTimePosition != positionInfo.timeInSeconds)
+    if (lastReportedPosition.ppqLoopStart != positionInfo.ppqLoopStart || lastReportedPosition.ppqLoopEnd != positionInfo.ppqLoopEnd     ||
+        lastReportedPosition.isLooping  != positionInfo.isLooping)
     {
-        playheadTimePosition = positionInfo.timeInSeconds;
+        lastReportedPosition.ppqLoopStart = positionInfo.ppqLoopStart;
+        lastReportedPosition.ppqLoopEnd = positionInfo.ppqLoopEnd;
+        lastReportedPosition.isLooping = positionInfo.isLooping;
+        rulersView->repaint();
+    }
+
+    if (lastReportedPosition.timeInSeconds != positionInfo.timeInSeconds)
+    {
+        lastReportedPosition.timeInSeconds = positionInfo.timeInSeconds;
 
         if (shouldFollowPlayhead.getValue())
         {
             const auto visibleRange = getVisibleTimeRange();
-            if (playheadTimePosition < visibleRange.getStart() || playheadTimePosition > visibleRange.getEnd())
-                playbackRegionsViewPort.setViewPosition (playbackRegionsViewPort.getViewPosition().withX (getPlaybackRegionsViewsXForTime (playheadTimePosition)));
+            if (lastReportedPosition.timeInSeconds < visibleRange.getStart() || lastReportedPosition.timeInSeconds > visibleRange.getEnd())
+                playbackRegionsViewPort.setViewPosition (playbackRegionsViewPort.getViewPosition().withX (getPlaybackRegionsViewsXForTime (lastReportedPosition.timeInSeconds)));
         };
 
         playheadView.repaint();
