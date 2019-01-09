@@ -14,7 +14,7 @@ public:
     ARASampleProjectDocumentController() noexcept;
 
     TimeSliceThread& getAudioSourceReadingThread() { return audioSourceReadingThread; }
-
+    ValueTree&       getGlobalEditorSettings() { return globalEditorSettings; }
 protected:
     // ARA class creation overrides
     ARA::PlugIn::PlaybackRenderer* doCreatePlaybackRenderer() noexcept override;
@@ -22,6 +22,9 @@ protected:
 private:
     // Thread used by buffering audio sources to read samples from the host
     TimeSliceThread audioSourceReadingThread;
+
+    // Keeps global settings that should be preserved across all EditorViews.
+    ValueTree globalEditorSettings;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARASampleProjectDocumentController)
 };
