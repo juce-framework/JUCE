@@ -94,7 +94,8 @@ public:
           iosDevelopmentTeamIDValue                    (settings, Ids::iosDevelopmentTeamID,                    getUndoManager()),
           iosAppGroupsIDValue                          (settings, Ids::iosAppGroupsId,                          getUndoManager()),
           keepCustomXcodeSchemesValue                  (settings, Ids::keepCustomXcodeSchemes,                  getUndoManager()),
-          useHeaderMapValue                            (settings, Ids::useHeaderMap,                            getUndoManager())
+          useHeaderMapValue                            (settings, Ids::useHeaderMap,                            getUndoManager()),
+          customLaunchStoryboardValue                  (settings, Ids::customLaunchStoryboard,                  getUndoManager())
     {
         name = iOS ? getNameiOS() : getNameMac();
 
@@ -133,6 +134,7 @@ public:
 
     String getCustomResourceFoldersString() const    { return customXcodeResourceFoldersValue.get().toString().replaceCharacters ("\r\n", "::"); }
     String getCustomXcassetsFolderString() const     { return customXcassetsFolderValue.get(); }
+    String getCustomLaunchStoryboardString() const   { return customLaunchStoryboardValue.get(); }
 
     bool isMicrophonePermissionEnabled() const         { return microphonePermissionNeededValue.get(); }
     String getMicrophonePermissionsTextString() const  { return microphonePermissionsTextValue.get(); }
@@ -152,6 +154,8 @@ public:
 
     String getIosDevelopmentTeamIDString() const     { return iosDevelopmentTeamIDValue.get(); }
     String getAppGroupIdString() const               { return iosAppGroupsIDValue.get(); }
+
+    String getDefaultLaunchStoryboardName() const    { jassert (iOS); return "LaunchScreen.storyboard"; }
 
     //==============================================================================
     bool usesMMFiles() const override                       { return true; }
@@ -204,7 +208,13 @@ public:
         {
             props.add (new TextPropertyComponent (customXcassetsFolderValue, "Custom Xcassets Folder", 128, false),
                        "If this field is not empty, your Xcode project will use the custom xcassets folder specified here "
-                       "for the app icons and launchimages, and will ignore the Icon files specified above.");
+                       "for the app icons and launchimages, and will ignore the Icon files specified above. This will also prevent "
+                       "a launch storyboard from being used.");
+
+            props.add (new TextPropertyComponent (customLaunchStoryboardValue, "Custom Launch Storyboard", 256, false),
+                       "If this field is not empty then the specified launch storyboard will be used for the app's launch screen, "
+                       "otherwise a default blank launch storyboard will be generated. This should just be the file name and the "
+                       "file should be added to the project's Xcode resources.");
         }
 
         props.add (new TextPropertyComponent (customXcodeResourceFoldersValue, "Custom Xcode Resource Folders", 8192, true),
@@ -1376,6 +1386,14 @@ public:
 
                 if (type != AudioUnitv3PlugIn)
                     addPlistDictionaryKeyBool (dict, "UIViewControllerBasedStatusBarAppearance", false);
+
+                if (owner.getCustomXcassetsFolderString().isEmpty())
+                {
+                    auto customStoryboard = owner.getCustomLaunchStoryboardString();
+
+                    addPlistDictionaryKey (dict, "UILaunchStoryboardName", customStoryboard.isNotEmpty() ? customStoryboard
+                                                                                                         : owner.getDefaultLaunchStoryboardName());
+                }
             }
 
             addPlistDictionaryKey (dict, "CFBundleExecutable",          "${EXECUTABLE_NAME}");
@@ -1804,7 +1822,7 @@ private:
                      microphonePermissionNeededValue, microphonePermissionsTextValue, cameraPermissionNeededValue, cameraPermissionTextValue,
                      uiFileSharingEnabledValue, uiSupportsDocumentBrowserValue, uiStatusBarHiddenValue, documentExtensionsValue, iosInAppPurchasesValue,
                      iosBackgroundAudioValue, iosBackgroundBleValue, iosPushNotificationsValue, iosAppGroupsValue, iCloudPermissionsValue,
-                     iosDevelopmentTeamIDValue, iosAppGroupsIDValue, keepCustomXcodeSchemesValue, useHeaderMapValue;
+                     iosDevelopmentTeamIDValue, iosAppGroupsIDValue, keepCustomXcodeSchemesValue, useHeaderMapValue, customLaunchStoryboardValue;
 
     static String sanitisePath (const String& path)
     {
@@ -1838,9 +1856,16 @@ private:
         addPlistFileReferences();
 
         if (iOS && ! projectType.isStaticLibrary())
+        {
             addXcassets();
+
+            if (getCustomXcassetsFolderString().isEmpty() && getCustomLaunchStoryboardString().isEmpty())
+                writeDefaultLaunchStoryboardFile();
+        }
         else
+        {
             addNibFiles();
+        }
 
         addIcons();
         addBuildConfigurations();
@@ -3394,6 +3419,42 @@ private:
         v->setProperty ("info", info);
 
         return JSON::toString (var (v.get()));
+    }
+
+    void writeDefaultLaunchStoryboardFile() const
+    {
+        auto storyboardFile = getTargetFolder().getChildFile (getDefaultLaunchStoryboardName());
+
+        MemoryOutputStream mo;
+        mo.setNewLineString ("\n");
+
+        mo << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"                                                                                                                  << newLine
+           << "<document type=\"com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB\" version=\"3.0\" toolsVersion=\"14460.31\" "
+           << "targetRuntime=\"iOS.CocoaTouch\" propertyAccessControl=\"none\" useAutolayout=\"YES\" launchScreen=\"YES\" useTraitCollections=\"YES\" "
+           << "useSafeAreas=\"YES\" colorMatched=\"YES\" initialViewController=\"01J-lp-oVM\">"                                                                             << newLine
+           << "    <scenes>"                                                                                                                                                << newLine
+           << "        <scene sceneID=\"EHf-IW-A2E\">"                                                                                                                      << newLine
+           << "            <objects>"                                                                                                                                       << newLine
+           << "                <placeholder placeholderIdentifier=\"IBFirstResponder\" id=\"iYj-Kq-Ea1\" userLabel=\"\" sceneMemberID=\"firstResponder\"/>"                 << newLine
+           << "                <viewController id=\"01J-lp-oVM\" sceneMemberID=\"viewController\">"                                                                         << newLine
+           << "                    <view key=\"view\" contentMode=\"scaleToFill\" id=\"Ze5-6b-2t3\">"                                                                       << newLine
+           << "                        <autoresizingMask key=\"autoresizingMask\"/>"                                                                                        << newLine
+           << "                        <color key=\"backgroundColor\" red=\"0\" green=\"0\" blue=\"0\" alpha=\"1\" colorSpace=\"custom\" customColorSpace=\"sRGB\"/>"       << newLine
+           << "                    </view>"                                                                                                                                 << newLine
+           << "                </viewController>"                                                                                                                           << newLine
+           << "            </objects>"                                                                                                                                      << newLine
+           << "        </scene>"                                                                                                                                            << newLine
+           << "    </scenes>"                                                                                                                                               << newLine
+           << "</document>"                                                                                                                                                 << newLine;
+
+        overwriteFileIfDifferentOrThrow (storyboardFile, mo);
+
+        auto path   = RelativePath (storyboardFile, getTargetFolder(), RelativePath::buildTargetFolder).toUnixStyle();
+        auto refID  = addFileReference (path);
+        auto fileID = addBuildFile (path, refID, false, false);
+
+        resourceIDs.add (fileID);
+        resourceFileRefs.add (refID);
     }
 
     void createXcassetsFolderFromIcons() const
