@@ -175,6 +175,15 @@ void RulersView::paint (juce::Graphics& g)
         g.drawText ("chords", bounds.withTrimmedRight (2).withTrimmedBottom (beatsRulerHeight + secondsRulerHeight), Justification::bottomRight);
     }
 
+    // locators
+    {
+        const auto position = documentView.getPlayheadPositionInfo();
+        const auto startInSeconds = tempoConverter.getTimeForQuarter (position.ppqLoopStart);
+        const auto endInSeconds = tempoConverter.getTimeForQuarter (position.ppqLoopEnd);
+        g.setColour (position.isLooping ? Colours::skyblue.withAlpha (0.3f) : Colours::white.withAlpha(0.3f));
+        g.fillRect (documentView.getPlaybackRegionsViewsXForTime (startInSeconds), 0, documentView.getPlaybackRegionsViewsXForTime (endInSeconds - startInSeconds), bounds.getHeight());
+    }
+
     // borders
     {
         g.setColour (Colours::darkgrey);
