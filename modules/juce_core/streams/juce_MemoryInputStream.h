@@ -63,7 +63,7 @@ public:
                        bool keepInternalCopyOfData);
 
     /** Destructor. */
-    ~MemoryInputStream();
+    ~MemoryInputStream() override;
 
     /** Returns a pointer to the source data block from which this stream is reading. */
     const void* getData() const noexcept        { return data; }

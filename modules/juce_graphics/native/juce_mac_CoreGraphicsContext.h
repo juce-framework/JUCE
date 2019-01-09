@@ -32,7 +32,7 @@ class CoreGraphicsContext   : public LowLevelGraphicsContext
 {
 public:
     CoreGraphicsContext (CGContextRef context, float flipHeight, float targetScale);
-    ~CoreGraphicsContext();
+    ~CoreGraphicsContext() override;
 
     //==============================================================================
     bool isVectorDevice() const override         { return false; }

@@ -107,7 +107,7 @@ public:
         JUCE code in there - put your startup/shutdown code in initialise() and
         shutdown() instead.
     */
-    ~JUCEApplication();
+    ~JUCEApplication() override;
 
     //==============================================================================
     /** Returns the global instance of the application object being run. */

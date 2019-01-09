@@ -408,7 +408,7 @@ private:
     static double getDefaultMasterScale();
 
     Desktop();
-    ~Desktop();
+    ~Desktop() override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Desktop)
 };

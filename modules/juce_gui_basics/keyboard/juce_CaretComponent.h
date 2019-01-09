@@ -44,7 +44,7 @@ public:
     CaretComponent (Component* keyFocusOwner);
 
     /** Destructor. */
-    ~CaretComponent();
+    ~CaretComponent() override;
 
     //==============================================================================
     /** Sets the caret's position to place it next to the given character.

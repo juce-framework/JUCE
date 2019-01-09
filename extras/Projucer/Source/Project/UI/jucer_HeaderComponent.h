@@ -40,7 +40,7 @@ class HeaderComponent    : public Component,
 {
 public:
     HeaderComponent();
-    ~HeaderComponent();
+    ~HeaderComponent() override;
 
     //==========================================================================
     void resized() override;

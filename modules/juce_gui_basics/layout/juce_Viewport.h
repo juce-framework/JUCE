@@ -56,7 +56,7 @@ public:
     explicit Viewport (const String& componentName = String());
 
     /** Destructor. */
-    ~Viewport();
+    ~Viewport() override;
 
     //==============================================================================
     /** Sets the component that this viewport will contain and scroll around.

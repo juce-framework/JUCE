@@ -59,7 +59,7 @@ public:
     ComponentAnimator();
 
     /** Destructor. */
-    ~ComponentAnimator();
+    ~ComponentAnimator() override;
 
     //==============================================================================
     /** Starts a component moving from its current position to a specified position.

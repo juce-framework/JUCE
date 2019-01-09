@@ -39,7 +39,7 @@ class JucerDocumentEditor   : public Component,
 public:
     //==============================================================================
     JucerDocumentEditor (JucerDocument* const document);
-    ~JucerDocumentEditor();
+    ~JucerDocumentEditor() override;
 
     JucerDocument* getDocument() const noexcept         { return document.get(); }
 

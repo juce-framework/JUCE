@@ -71,8 +71,8 @@ namespace
         {
             if (ifa->ifa_addr->sa_family == AF_INET)
             {
-                auto interfaceAddressInfo = (sockaddr_in*) ifa->ifa_addr;
-                auto broadcastAddressInfo = (sockaddr_in*) ifa->ifa_dstaddr;
+                auto interfaceAddressInfo = reinterpret_cast<sockaddr_in*> (ifa->ifa_addr);
+                auto broadcastAddressInfo = reinterpret_cast<sockaddr_in*> (ifa->ifa_dstaddr);
 
                 if (interfaceAddressInfo->sin_addr.s_addr != INADDR_NONE)
                 {
@@ -83,8 +83,8 @@ namespace
             }
             else if (ifa->ifa_addr->sa_family == AF_INET6)
             {
-                interfaceInfo.interfaceAddress = makeAddress ((sockaddr_in6*) ifa->ifa_addr);
-                interfaceInfo.broadcastAddress = makeAddress ((sockaddr_in6*) ifa->ifa_dstaddr);
+                interfaceInfo.interfaceAddress = makeAddress (reinterpret_cast<sockaddr_in6*> (ifa->ifa_addr));
+                interfaceInfo.broadcastAddress = makeAddress (reinterpret_cast<sockaddr_in6*> (ifa->ifa_dstaddr));
                 return true;
             }
         }

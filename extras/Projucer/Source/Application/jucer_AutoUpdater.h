@@ -58,7 +58,7 @@ public:
 
     //==============================================================================
     LatestVersionChecker();
-    ~LatestVersionChecker();
+    ~LatestVersionChecker() override;
 
     static String getOSString();
 

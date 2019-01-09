@@ -46,7 +46,7 @@ public:
         setLookAndFeel (&lf);
     }
 
-    ~LabelPropertyComponent()    { setLookAndFeel (nullptr); }
+    ~LabelPropertyComponent() override    { setLookAndFeel (nullptr); }
 
     //==============================================================================
     void refresh() override {}

@@ -56,7 +56,7 @@ public:
                 const int64 maxInitialFileSizeBytes = 128 * 1024);
 
     /** Destructor. */
-    ~FileLogger();
+    ~FileLogger() override;
 
     //==============================================================================
     /** Returns the file that this logger is writing to. */

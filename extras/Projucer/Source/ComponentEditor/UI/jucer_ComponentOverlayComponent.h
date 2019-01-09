@@ -39,7 +39,7 @@ public:
     ComponentOverlayComponent (Component* const targetComponent,
                                ComponentLayout& layout);
 
-    ~ComponentOverlayComponent();
+    ~ComponentOverlayComponent() override;
 
     //==============================================================================
     virtual void showPopupMenu();

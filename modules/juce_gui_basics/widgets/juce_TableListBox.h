@@ -225,7 +225,7 @@ public:
                   TableListBoxModel* model = nullptr);
 
     /** Destructor. */
-    ~TableListBox();
+    ~TableListBox() override;
 
     //==============================================================================
     /** Changes the TableListBoxModel that is being used for this table.

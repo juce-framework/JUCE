@@ -45,7 +45,7 @@ public:
         setEnabled (valueWithDefault.get());
     }
 
-    ~TextPropertyComponentWithEnablement()    { value.removeListener (this); }
+    ~TextPropertyComponentWithEnablement() override    { value.removeListener (this); }
 
 private:
     ValueWithDefault valueWithDefault;
@@ -72,7 +72,7 @@ public:
         setEnabled (valueWithDefault.get());
     }
 
-    ~ChoicePropertyComponentWithEnablement()    { value.removeListener (this); }
+    ~ChoicePropertyComponentWithEnablement() override    { value.removeListener (this); }
 
 private:
     ValueWithDefault valueWithDefault;

@@ -47,7 +47,7 @@ public:
         errorListChanged();
     }
 
-    ~ErrorListComp()
+    ~ErrorListComp() override
     {
         errorList.removeChangeListener (this);
     }
@@ -219,7 +219,7 @@ private:
             uniqueID << message.message << ':' << message.range.toString();
         }
 
-        ~ErrorMessageTreeItem()
+        ~ErrorMessageTreeItem() override
         {
             overlay.deleteAndZero();
         }

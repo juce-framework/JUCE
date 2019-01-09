@@ -174,7 +174,7 @@ public:
         layout (400);
     }
 
-    ~MissingItemsComponent()
+    ~MissingItemsComponent() override
     {
         if (owner != nullptr)
         {
@@ -656,7 +656,7 @@ public:
         positionNearBar();
     }
 
-    ~CustomisationDialog()
+    ~CustomisationDialog() override
     {
         toolbar.setEditingActive (false);
     }

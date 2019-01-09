@@ -70,7 +70,7 @@ public:
         lastUserModulePath = getAppSettings().getStoredPath (Ids::defaultUserModulePath, TargetOS::getThisOS()).get();
     }
 
-    ~GlobalPathsWindowComponent()
+    ~GlobalPathsWindowComponent() override
     {
         auto juceValue = getAppSettings().getStoredPath (Ids::defaultJuceModulePath, TargetOS::getThisOS());
         auto userValue = getAppSettings().getStoredPath (Ids::defaultUserModulePath, TargetOS::getThisOS());

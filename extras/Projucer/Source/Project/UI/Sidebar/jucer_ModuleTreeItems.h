@@ -456,7 +456,7 @@ public:
         project.getExporterPathsModuleList().addListener (this);
     }
 
-    ~EnabledModulesItem()
+    ~EnabledModulesItem() override
     {
         ProjucerApplication::getApp().getJUCEPathModuleList().removeListener (this);
         ProjucerApplication::getApp().getUserPathsModuleList().removeListener (this);

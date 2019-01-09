@@ -61,7 +61,7 @@ public:
         This may also delete the source stream, if that option was chosen when the
         buffered stream was created.
     */
-    ~BufferedInputStream();
+    ~BufferedInputStream() override;
 
 
     //==============================================================================

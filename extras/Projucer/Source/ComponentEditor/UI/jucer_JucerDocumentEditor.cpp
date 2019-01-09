@@ -54,7 +54,7 @@ public:
         document.addChangeListener (this);
     }
 
-    ~ExtraMethodsList()
+    ~ExtraMethodsList() override
     {
         document.removeChangeListener (this);
     }
@@ -165,7 +165,7 @@ public:
         doc.addChangeListener (this);
     }
 
-    ~ClassPropertiesPanel()
+    ~ClassPropertiesPanel() override
     {
         document.removeChangeListener (this);
     }

@@ -77,7 +77,7 @@ public:
                             int millisecondsBeforeTipAppears = 700);
 
     /** Destructor. */
-    ~TooltipWindow();
+    ~TooltipWindow() override;
 
     //==============================================================================
     /** Changes the time before the tip appears.

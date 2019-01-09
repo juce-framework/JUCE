@@ -59,7 +59,7 @@ public:
     ComponentBuilder();
 
     /** Destructor. */
-    ~ComponentBuilder();
+    ~ComponentBuilder() override;
 
     /** This is the ValueTree data object that the builder is working with. */
     ValueTree state;

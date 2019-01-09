@@ -551,7 +551,7 @@ public:
         CFRelease (numberRef);
     }
 
-    ~OSXTypeface()
+    ~OSXTypeface() override
     {
         if (attributedStringAtts != nullptr)
             CFRelease (attributedStringAtts);

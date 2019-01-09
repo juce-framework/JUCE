@@ -352,7 +352,7 @@ struct ListBoxMouseMoveSelector  : public MouseListener
         owner.addMouseListener (this, true);
     }
 
-    ~ListBoxMouseMoveSelector()
+    ~ListBoxMouseMoveSelector() override
     {
         owner.removeMouseListener (this);
     }

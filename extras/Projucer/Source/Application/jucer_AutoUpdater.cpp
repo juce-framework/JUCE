@@ -316,7 +316,7 @@ public:
         lookAndFeelChanged();
     }
 
-    ~UpdateUserDialog()
+    ~UpdateUserDialog() override
     {
         titleLabel.reset();
         contentLabel.reset();

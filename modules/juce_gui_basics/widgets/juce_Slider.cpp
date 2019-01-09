@@ -42,7 +42,7 @@ public:
         rotaryParams.stopAtEnd = true;
     }
 
-    ~Pimpl()
+    ~Pimpl() override
     {
         currentValue.removeListener (this);
         valueMin.removeListener (this);
@@ -1298,7 +1298,7 @@ public:
             setLookAndFeel (&s.getLookAndFeel());
         }
 
-        ~PopupDisplayComponent()
+        ~PopupDisplayComponent() override
         {
             if (owner.pimpl != nullptr)
                 owner.pimpl->lastPopupDismissal = Time::getMillisecondCounterHiRes();

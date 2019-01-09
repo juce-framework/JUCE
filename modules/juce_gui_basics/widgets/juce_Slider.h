@@ -125,7 +125,7 @@ public:
     Slider (SliderStyle style, TextEntryBoxPosition textBoxPosition);
 
     /** Destructor. */
-    ~Slider();
+    ~Slider() override;
 
     //==============================================================================
     /** Changes the type of slider interface being used.

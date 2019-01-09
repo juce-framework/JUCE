@@ -39,7 +39,7 @@ class JUCE_API  RelativeCoordinatePositionerBase  : public Component::Positioner
 {
 public:
     RelativeCoordinatePositionerBase (Component&);
-    ~RelativeCoordinatePositionerBase();
+    ~RelativeCoordinatePositionerBase() override;
 
     void componentMovedOrResized (Component&, bool, bool) override;
     void componentParentHierarchyChanged (Component&) override;
