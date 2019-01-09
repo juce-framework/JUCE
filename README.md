@@ -386,6 +386,7 @@ be worth getting in to in the README.
 -->
 
 <br>
+
 # The JUCE 5 Library
 
 **BY DOWNLOADING, INSTALLING OR USING ANY PART OF THE JUCE LIBRARY, YOU AGREE
