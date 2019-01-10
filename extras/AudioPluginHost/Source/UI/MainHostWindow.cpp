@@ -490,8 +490,13 @@ bool MainHostWindow::perform (const InvocationInfo& info)
         break;
 
 	case CommandIDs::import:
-		if (graphHolder != nullptr && graphHolder->graph != nullptr && graphHolder->graph->saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
-			graphHolder->graph->loadFromUserSpecifiedFile(true);
+        if (graphHolder != nullptr && graphHolder->graph != nullptr && graphHolder->graph->saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
+        {
+            graphHolder->graph->newDocument();
+            FileChooser fc("Select Forte RCF File to import",File(),"*.rcf");
+            if (fc.browseForFileToOpen())
+                graphHolder->graph->Import(fc.getResult().getFullPathName().getCharPointer());
+        }
 		break;
 
     case CommandIDs::save:

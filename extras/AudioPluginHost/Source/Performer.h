@@ -12,7 +12,6 @@ public:
     int ID;
     string Name;
     string PluginName;
-    string PluginFile;
     void *m_node;
 
 	template<class A>
@@ -21,7 +20,6 @@ public:
 		AR(ID, XmlAttribute);
         AR(Name, XmlAttribute);
         AR(PluginName, XmlAttribute);
-        AR(PluginFile, XmlAttribute);
     }
 };
 
@@ -194,7 +192,7 @@ public:
 class Performer
 {
 public:
-    Performer();
+    void Import(const char *file);
     void ResolveIDs();
 
     template<class A>

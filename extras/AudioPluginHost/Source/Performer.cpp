@@ -29,12 +29,9 @@ void TrimRight(std::string& str, const char* chars2remove = " ")
 }
 
 
-Performer::Performer()
+void Performer::Import(const char *fileToLoad)
 {
-    return;
-    //const char *fileToLoad = "C:\\Users\\ben.crossman\\Desktop\\JUCE-ben\\extras\\AudioPluginHost\\Queen.rcf";
-
-    const char *fileToLoad = "D:\\Data\\Audio\\Synth Backups\\Software\\Performance\\Queen.rcf";
+    //const char *fileToLoad = "D:\\Data\\Audio\\Synth Backups\\Software\\Performance\\Queen.rcf";
 
     ForteFile file;
     memset(&file, 0, sizeof(ForteFile));

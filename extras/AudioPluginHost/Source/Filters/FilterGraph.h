@@ -40,7 +40,7 @@ class FilterGraph   : public FileBasedDocument,
 {
 public:
     //==============================================================================
-    FilterGraph (AudioPluginFormatManager&);
+    FilterGraph (AudioPluginFormatManager&,KnownPluginList&);
     ~FilterGraph();
 
     //==============================================================================
@@ -71,6 +71,8 @@ public:
     File getLastDocumentOpened() override;
     void setLastDocumentOpened (const File& file) override;
 
+    void Import(const char *filename);
+
     Performer *GetPerformer() { return &m_performer; }
 
     //==============================================================================
@@ -79,6 +81,7 @@ public:
 private:
     //==============================================================================
     AudioPluginFormatManager& formatManager;
+    KnownPluginList& knownPluginList;
     OwnedArray<PluginWindow> activePluginWindows;
 
     Performer m_performer;

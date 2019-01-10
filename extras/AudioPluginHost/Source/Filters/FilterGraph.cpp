@@ -32,12 +32,12 @@
 
 
 //==============================================================================
-FilterGraph::FilterGraph (AudioPluginFormatManager& fm)
+FilterGraph::FilterGraph (AudioPluginFormatManager& fm, KnownPluginList& kpl)
     : FileBasedDocument (getFilenameSuffix(),
                          getFilenameWildcard(),
                          "Load a filter graph",
                          "Save a filter graph"),
-      formatManager (fm)
+      formatManager (fm), knownPluginList(kpl)
 {
     newDocument();
 
@@ -204,8 +204,14 @@ Result FilterGraph::loadDocument (const File& file)
         pd.name = rack.PluginName;
         pd.pluginFormatName = "VST";
         pd.isInstrument = true;
-        pd.fileOrIdentifier = rack.PluginFile;
-
+        for (auto j = 0U; j < (unsigned)knownPluginList.getNumTypes(); ++j)
+        {
+            auto name = knownPluginList.getType(j)->name;
+            if (name.compareIgnoreCase(pd.name)==0 || name.compareIgnoreCase(pd.name.removeCharacters(" "))==0 || name.compareIgnoreCase(pd.name + " VSTi") == 0)
+            {
+                pd.fileOrIdentifier = knownPluginList.getType(j)->fileOrIdentifier;
+            }
+        }
 
         if (auto* instance = formatManager.createPluginInstance(pd, graph.getSampleRate(), graph.getBlockSize(), errorMessage))
         {
@@ -256,3 +262,7 @@ void FilterGraph::setLastDocumentOpened (const File& file)
         ->setValue ("recentFilterGraphFiles", recentFiles.toString());
 }
 
+void FilterGraph::Import(const char *filename)
+{
+    m_performer.Import(filename);
+}

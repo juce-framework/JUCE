@@ -1,11 +1,17 @@
-Need to save dll path
-
-Create plugins to reflect rack
+Remove initial / savestate (maybe store chunks)
 Bring in router (changed to new classes)
-Change midi in/outs from RtMidi to JUCE plugins
+Implement volume
+Implement mute
+Implement solo (effectively mutes all else)
+Import hooked up
+Chunk saving (B3 needs sustain, M1 needs program mode, OPX Famous bank, DirectWave setup, Wavstreamer setup)
+Program/Bank setting when editing (song change should send this too, B3 requires)
+Change midi in/outs from RtMidi to JUCE plugins (can keep keylab sysex)
 Add octave mode
+Check sampler supports octave mode
 Read in banks from files
-Query programs from plugin
+Query programs from plugin (B3, M1, Wavestation, FM7, Superwave, Oberheim, wavestreamer)
+Manual patch lists for TruePianos,Sampler
 Change songs
 Menu's - Load/Save of classes
 Setlist manager

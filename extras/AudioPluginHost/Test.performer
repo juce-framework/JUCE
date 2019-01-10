@@ -140,7 +140,6 @@
             <Performance ID="1887265414" />
         </Song>
         <Song ID="800911578" Name="Generic">
-            <Performance ID="-697867819" />
             <Performance ID="325567451" />
         </Song>
         <Song ID="807221933" Name="Fat Bottom Girls">
@@ -297,28 +296,6 @@
         </Song>
     </Songs>
     <Performances>
-        <Performance ID="1686806762" Name="SaveState" Tempo="202">
-            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
-            <Zone DeviceID="1024611825" Bank="0" Program="0" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
-            <Zone DeviceID="1555279137" Bank="22" Program="49" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
-            <Zone DeviceID="-1202024641" Bank="-1" Program="-1" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
-            <Zone DeviceID="522416168" Bank="0" Program="51" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
-            <Zone DeviceID="-841590045" Bank="0" Program="41" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
-            <Zone DeviceID="-1973686393" Bank="-1" Program="-1" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
-            <Zone DeviceID="-2048222834" Bank="0" Program="7" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
-            <Zone DeviceID="546031377" Bank="0" Program="0" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="0" LowKey="0" HighKey="127"></Zone>
-        </Performance>
-        <Performance ID="-697867819" Name="Initial" Tempo="202">
-            <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
-            <Zone DeviceID="1024611825" Bank="0" Program="0" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
-            <Zone DeviceID="1555279137" Bank="22" Program="49" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
-            <Zone DeviceID="-1202024641" Bank="-1" Program="-1" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
-            <Zone DeviceID="522416168" Bank="0" Program="51" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
-            <Zone DeviceID="-841590045" Bank="0" Program="41" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
-            <Zone DeviceID="-1973686393" Bank="-1" Program="-1" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
-            <Zone DeviceID="-2048222834" Bank="0" Program="7" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
-            <Zone DeviceID="546031377" Bank="0" Program="0" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false" Transpose="0" LowKey="0" HighKey="127"></Zone>
-        </Performance>
         <Performance ID="325567451" Name="Piano" Tempo="120">
             <Zone DeviceID="627145948" Bank="0" Program="4" Volume="0" Solo="false" Mute="false" DoubleOctave="false" Arpeggiator="false"  ></Zone>
         </Performance>
