@@ -612,16 +612,19 @@ public:
     std::function<String (double)> textFromValueFunction;
 
     //==============================================================================
-    /** This lets you choose whether double-clicking moves the slider to a given position.
+    /** This lets you choose whether double-clicking or single-clicking with a specified
+        key modifier moves the slider to a given position.
 
-        By default this is turned off, but it's handy if you want a double-click to act
-        as a quick way of resetting a slider. Just pass in the value you want it to
-        go to when double-clicked.
+        By default this is turned off, but it's handy if you want either of these actions
+        to act as a quick way of resetting a slider. Just pass in the value you want it to
+        go to when double-clicked. By default the key modifier is the alt key but you can
+        pass in another key modifier, or none to disable this behaviour.
 
         @see getDoubleClickReturnValue
     */
     void setDoubleClickReturnValue (bool shouldDoubleClickBeEnabled,
-                                    double valueToSetOnDoubleClick);
+                                    double valueToSetOnDoubleClick,
+                                    ModifierKeys singleClickModifiers = ModifierKeys::altModifier);
 
     /** Returns the values last set by setDoubleClickReturnValue() method.
         @see setDoubleClickReturnValue
