@@ -12,7 +12,7 @@
     <key>UIViewControllerBasedStatusBarAppearance</key>
     <false/>
     <key>UILaunchStoryboardName</key>
-    <string>LaunchScreen.storyboard</string>
+    <string>LaunchScreen</string>
     <key>CFBundleExecutable</key>
     <string>${EXECUTABLE_NAME}</string>
     <key>CFBundleIdentifier</key>

@@ -155,7 +155,7 @@ public:
     String getIosDevelopmentTeamIDString() const     { return iosDevelopmentTeamIDValue.get(); }
     String getAppGroupIdString() const               { return iosAppGroupsIDValue.get(); }
 
-    String getDefaultLaunchStoryboardName() const    { jassert (iOS); return "LaunchScreen.storyboard"; }
+    String getDefaultLaunchStoryboardName() const    { jassert (iOS); return "LaunchScreen"; }
 
     //==============================================================================
     bool usesMMFiles() const override                       { return true; }
@@ -213,8 +213,8 @@ public:
 
             props.add (new TextPropertyComponent (customLaunchStoryboardValue, "Custom Launch Storyboard", 256, false),
                        "If this field is not empty then the specified launch storyboard will be used for the app's launch screen, "
-                       "otherwise a default blank launch storyboard will be generated. This should just be the file name and the "
-                       "file should be added to the project's Xcode resources.");
+                       "otherwise a default blank launch storyboard will be generated. This should be the filename without the "
+                       "\".storyboard\" extension and the file should be added to the project's Xcode resources.");
         }
 
         props.add (new TextPropertyComponent (customXcodeResourceFoldersValue, "Custom Xcode Resource Folders", 8192, true),
@@ -3423,7 +3423,7 @@ private:
 
     void writeDefaultLaunchStoryboardFile() const
     {
-        auto storyboardFile = getTargetFolder().getChildFile (getDefaultLaunchStoryboardName());
+        auto storyboardFile = getTargetFolder().getChildFile (getDefaultLaunchStoryboardName() + ".storyboard");
 
         MemoryOutputStream mo;
         mo.setNewLineString ("\n");
