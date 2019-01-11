@@ -13,7 +13,7 @@ For feedback and questions, please contact Celemony via [ara@celemony.com](mailt
 
 We've made modifications to the Projucer to enable it to work with the ARA 2.0 SDK. These modifications allow building VST3 and AudioUnit plugins that can be loaded as ARA plugins by a compatible host. 
 
-To create an ARA plugin, clone the develop branch of Celemony's [JUCE fork](https://github.com/Celemony/JUCE_ARA/tree/develop) build the [Projucer](https://github.com/Celemony/JUCE_ARA/tree/develop/extras/Projucer)(projects for Visual Studio and Xcode are checked in to the repository.)
+To create an ARA plugin, clone the develop branch of Celemony's [JUCE fork](https://github.com/Celemony/JUCE_ARA/tree/develop) build the [Projucer](https://github.com/Celemony/JUCE_ARA/tree/develop/extras/Projucer) (projects for Visual Studio and Xcode are checked in to the repository.)
 
 Once you have the ARA version of the Projucer built you can use it to specify your global ARA path like so:
 
@@ -49,9 +49,9 @@ With ARA enabled we can edit various ARA factory properties plugin factory prope
 
 This should be enough to generate an empty ARA plugin that will appear in an ARA host, such as Studio One or SONAR. For a more complete example of an ARA plugin see the [ARA Sample Project](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/ARA/ARASampleProject) checked in to this repository. 
 
+
 ### JUCE and the ARA API
 
-<br>
 #### ARADocumentController
 
 As is the case in the ARA C++ library, the `juce::ARADocumentController` class must be subclassed by your
@@ -63,7 +63,7 @@ In the
 we override `doCreatePlaybackRenderer` in order to return a custom `ARAPlaybackRenderer` instance 
 (see the section below on plugin instance roles for information regarding `ARAPlaybackRenderer`. )
 
-<br>
+
 #### ARA Model Objects
 
 To make ARA easier to integrate with existing JUCE code, we've subclassed the C++ classes provided 
@@ -93,7 +93,7 @@ class MyCustomDocumentController : public juce::ARADocumentController
 };
 ```
 
-<br>
+
 #### ARA PlugIn Instance Roles
 
 When an ARA plug-in is instantiated by the host it will take on one or more instance roles 
@@ -131,7 +131,8 @@ bool AudioProcessorARAExtension::getARAEditorView() const noexcept;
 bool AudioProcessorEditorARAExtension::isARAEditorView() const noexcept;
 bool AudioProcessorEditorARAExtension::getARAEditorView() const noexcept;
 ```
-<br>
+
+
 #### Listeners
 
 To make things feel more "JUCEy", we've given each JUCE model obect a `Listener` base class 
@@ -167,7 +168,7 @@ private:
 See the [ARA Sample Project PlaybackRegionView class](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/ARA/ARASampleProject/Source/PlaybackRegionView.h)
 for an example of several `Listener` implementations in action. 
 
-<br>
+
 #### Audio Readers
 
 Reading large buffers of audio samples at will is a key component of the ARA API. Because the
@@ -187,7 +188,7 @@ Once created, the our readers can be treated like any other `AudioFormatReader` 
 takes advantage of this by giving a `juce::AudioThubnail` instance an `ARAPlaybackRegionReader` to draw a
 visualization of playback region waveform. 
 
-<br>
+
 ### Further Additions
 
 Our goal with this fork is to make ARA plugin development as easy and accessible as possible. We'll 
