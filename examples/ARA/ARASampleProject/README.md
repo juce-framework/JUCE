@@ -1,6 +1,6 @@
 ## Understanding the ARA Sample Project
 
-<br>
+
 In addition to the sample plugin provided in the ARA SDK we've created a sample project showcasing the 
 ARA additions to the JUCE API. The sample project can be found at 
 [JUCE_ARA/examples/ARA/ARASampleProject](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/ARA/ARASampleProject). Below is an example
@@ -8,10 +8,10 @@ of the plugin being hosted by Studio One.
 
 <img src="https://i.imgur.com/gK7GZq8.png"/>
 
-<br>
+
 The sample can be broken into five important classes:
 
-<br>
+
 #### `ARASampleProjectDocumentController`
 
 This is the central point of communication between our plugin and the ARA host. A single instance of this 
@@ -46,7 +46,7 @@ ARASampleProjectDocumentController::ARASampleProjectDocumentController() noexcep
 }
 ```
 
-<br>
+
 #### `ARASampleProjectPlaybackRenderer`
 
 Our document controller gets used to construct an instance of our `ARASampleProjectPlaybackRenderer` class. 
@@ -85,7 +85,7 @@ within incoming audio buffers. Once this is determined we can use our `ARAAudioS
 read samples and render them into the supplied buffer. 
 - `ARASampleProjectPlaybackRenderer::releaseResources` \- this function cleans up all reader instance and temporary buffers used for reading audio source samples
 
-<br>
+
 #### `TrackHeaderView`
 
 This view displays the "tracks" (or `ARARegionSequences`) in our ARA host's document. The track color, as
@@ -123,7 +123,7 @@ void TrackHeaderView::onNewSelection (const ARA::PlugIn::ViewSelection& currentS
 
 <img src="https://i.imgur.com/mouUUXp.gif"/>
 
-<br>
+
 #### `PlaybackRegionView`
 
 The `PlaybackRegionView` class is responsible for visualizing the waveform of a playback region in our
@@ -159,7 +159,7 @@ The regions can also be zoomed horizontally and vertically:
 
 <img src="https://i.imgur.com/G30nSLA.gif"/>
 
-<br>
+
 #### `RulersView`
 
 The `RulersView` draws a representation of the musical grid in our ARA document. We use the first 
