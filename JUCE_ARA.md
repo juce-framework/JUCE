@@ -94,6 +94,44 @@ class MyCustomDocumentController : public juce::ARADocumentController
 ```
 
 
+#### Listeners
+
+To make things feel more "JUCEy", we've given each JUCE model object a `Listener` base class 
+with virtual callbacks that can be overridden to receive notifications related to the ARA model graph 
+and host rendering / UI state. These callbacks meant to replace the `will/did` functions that would 
+be overridden by an `ARA::PlugIn::DocumentController` implementation using the ARA C++ library. 
+
+We've also added this `Listener` pattern to other classes, such as the 
+`ARAEditorView` instance role which helps manage selection and UI state, see [below](#ara-plugin-instance-roles).
+
+Listener updates are subscribed to on a per-object basis. For example, if you need to 
+keep track of the properties of a particular `ARAPlaybackRegion`, you must subclass 
+`ARAPlaybackRegion::Listener` and and add/remove yourself as a listener of that playback region
+via `addListener` and `removeListener`.  
+
+```
+class PlaybackRegionManager  : public ARAPlaybackRegion::Listener
+{
+public:
+    PlaybackRegionManager(ARAPlaybackRegion* region)
+        : myRegion (region)
+    {
+        myRegion->addListener (this);
+    }
+    ~PlaybackRegionManager() 
+    {
+        myRegion->removeListener (this);
+    }
+
+private:
+    ARAPlaybackRegion* myRegion;
+};
+```
+
+See the [ARA Sample Project PlaybackRegionView class](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/ARA/ARASampleProject/Source/PlaybackRegionView.h)
+for an example of several `Listener` implementations in action. 
+
+
 #### ARA PlugIn Instance Roles
 
 When an ARA plug-in is instantiated by the host it will take on one or more instance roles 
@@ -131,42 +169,6 @@ bool AudioProcessorARAExtension::getARAEditorView() const noexcept;
 bool AudioProcessorEditorARAExtension::isARAEditorView() const noexcept;
 bool AudioProcessorEditorARAExtension::getARAEditorView() const noexcept;
 ```
-
-
-#### Listeners
-
-To make things feel more "JUCEy", we've given each JUCE model obect a `Listener` base class 
-with virtual callbacks that can be overridden to receive notifications related to the ARA model graph and
-host rendering / UI state. These callbacks meant to replace the `will/did` functions that would 
-be overridden by an `ARA::PlugIn::DocumentController` implementation using the ARA C++ library. 
-
-Listener updates are subscribed to on a per-object basis. For example, if you need to 
-keep track of the properties of a particular `ARAPlaybackRegion`, you must subclass 
-`ARAPlaybackRegion::Listener` and and add/remove yourself as a listener of that playback region
-via `addListener` and `removeListener`. We've also added this `Listener` pattern to the 
-`ARAEditorView` instance role to help manage selection and UI state. 
-
-```
-class PlaybackRegionManager  : public ARAPlaybackRegion::Listener
-{
-public:
-    PlaybackRegionManager(ARAPlaybackRegion* region)
-        : myRegion (region)
-    {
-        myRegion->addListener (this);
-    }
-    ~PlaybackRegionManager() 
-    {
-        myRegion->removeListener (this);
-    }
-
-private:
-    ARAPlaybackRegion* myRegion;
-};
-```
-
-See the [ARA Sample Project PlaybackRegionView class](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/ARA/ARASampleProject/Source/PlaybackRegionView.h)
-for an example of several `Listener` implementations in action. 
 
 
 #### Audio Readers
