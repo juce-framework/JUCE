@@ -714,8 +714,6 @@ void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& prope
     {
         if (property == Ids::projectType)
         {
-            sendChangeMessage();
-
             sendProjectSettingAnalyticsEvent ("Project Type = " + projectTypeValue.get().toString());
         }
         else if (property == Ids::name)
