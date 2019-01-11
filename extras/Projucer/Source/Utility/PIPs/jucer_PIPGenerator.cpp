@@ -527,7 +527,9 @@ StringArray PIPGenerator::getPluginCharacteristics() const
         return { Ids::pluginWantsMidiIn.toString(),
                  Ids::pluginIsSynth.toString() };
     else if (name == "ArpeggiatorPlugin")
-        return { Ids::pluginIsMidiEffectPlugin.toString() };
+        return { Ids::pluginWantsMidiIn.toString(),
+                 Ids::pluginProducesMidiOut.toString(),
+                 Ids::pluginIsMidiEffectPlugin.toString() };
 
     return {};
 }
