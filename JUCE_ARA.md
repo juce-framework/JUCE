@@ -38,7 +38,7 @@ The generated plugin will have, in addition to the standard PluginProcessor and 
 
 <img src="https://i.imgur.com/JqNIe2b.png"/>
 
-This version of the Projucer supports VST3 and AudioUnit, so make sure at least one of these plugin formats is checked
+This version of the Projucer supports ARA for VST3 and AudioUnit, so make sure at least one of these plugin formats is checked
 <img src="https://i.imgur.com/7wWWPuK.png"/>
 
 We can also edit other ARA plugin factory properties such as available content types and transformation flags as well as the plugin factory identifier.
@@ -61,7 +61,7 @@ your plugin - by default the `juce::ARADocumentController` will create the class
 In the 
 [ARA Sample Project DocumentController class](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/ARA/ARASampleProject/Source/ARASampleProjectDocumentController.h)
 we override `doCreatePlaybackRenderer` in order to return a custom `ARAPlaybackRenderer` instance 
-(see the section below on plugin instance roles for information regarding `ARAPlaybackRenderer`. )
+(see the section below on plugin instance roles for information regarding `ARAPlaybackRenderer`.)
 
 
 #### ARA Model Objects
