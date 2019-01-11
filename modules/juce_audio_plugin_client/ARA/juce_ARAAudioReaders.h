@@ -33,7 +33,17 @@ namespace juce
 // The first sample produced by the reader thus will be the first sample of the earliest region.
 // This means that the location of this region has to be taken into account by the calling code if
 // it wants to relate the samples to the model or any other reader output.
+//==============================================================================
+/**
+    Subclass of AudioFormatReader that reads samples from a single ARA audio source. 
 
+    The reader becomesi invalidated if 
+        - the audio source content is updted in a way that affects its samples
+        - the audio source sample access is disabled
+        - The audio source being read is destroyed
+
+    @tags{ARA}
+*/
 class ARAAudioSourceReader  : public AudioFormatReader,
                               private ARAAudioSource::Listener
 {
@@ -44,8 +54,6 @@ public:
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples) override;
 
-    // returns false if the audio source sample content has changed
-    // since the construction of the audio source reader
     bool isValid() const { return audioSourceBeingRead != nullptr; }
     void invalidate();
 
@@ -65,7 +73,20 @@ private:
 };
 
 //==============================================================================
+/**
+    Subclass of AudioFormatReader that reads samples from a group of playback regions. 
 
+    In order to read from playback regions, the reader requires a playback renderer. 
+    The reader instance will take care of adding all regions being read to the renderer
+    and invoke its processBlock function in order to read the region samples. 
+
+    The reader becomes invalid if 
+        - any region properties are updated in a way that would affect its samples
+        - any region content is updated in a way that would affect its samples
+        - any of its regions are destroyed
+
+    @tags{ARA}
+*/
 class ARAPlaybackRegionReader  : public AudioFormatReader,
                                  private ARAPlaybackRegion::Listener
 {
@@ -94,7 +115,19 @@ private:
 };
 
 //==============================================================================
+/**
+    Subclass of ARAPlaybackRegionReader that reads all playback regions in a region sequence. 
 
+    Like the ARAPlaybackRegionReader this class uses a playback renderer instance to read
+    playback region samples. 
+
+    In addition to the reasons that an ARAPlaybackRegionReader would become invalidated, 
+    this reader invalidates if 
+        - any playback regions are added or removed from the sequence
+        - the region sequence is destroyed
+
+    @tags{ARA}
+*/
 class ARARegionSequenceReader  : public ARAPlaybackRegionReader,
                                  private ARARegionSequence::Listener
 {
