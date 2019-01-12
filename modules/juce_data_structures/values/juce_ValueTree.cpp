@@ -815,7 +815,7 @@ struct ValueTreePropertyValueSource  : public Value::ValueSource,
         tree.addListener (this);
     }
 
-    ~ValueTreePropertyValueSource()
+    ~ValueTreePropertyValueSource() override
     {
         tree.removeListener (this);
     }

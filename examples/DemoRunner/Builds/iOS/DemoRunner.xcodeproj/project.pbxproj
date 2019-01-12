@@ -85,6 +85,10 @@
 			isa = PBXBuildFile;
 			fileRef = 8135645508EEFDBDCDF2ADC6;
 		};
+		1C9AA8660D0DE180064ACF7B = {
+			isa = PBXBuildFile;
+			fileRef = 7FBD555B32197FEACDFF5AFB;
+		};
 		75DB074DBAE04408A0A917B7 = {
 			isa = PBXBuildFile;
 			fileRef = E0A3F113BC27B7B4D6F1D693;
@@ -487,6 +491,13 @@
 			path = ../../Source/UI/SettingsContent.h;
 			sourceTree = "SOURCE_ROOT";
 		};
+		7FBD555B32197FEACDFF5AFB = {
+			isa = PBXFileReference;
+			lastKnownFileType = file.storyboard;
+			name = LaunchScreen.storyboard;
+			path = LaunchScreen.storyboard;
+			sourceTree = "SOURCE_ROOT";
+		};
 		8135645508EEFDBDCDF2ADC6 = {
 			isa = PBXFileReference;
 			lastKnownFileType = folder.assetcatalog;
@@ -837,6 +848,7 @@
 				685A261BE78585293F3EAD36,
 				4EC2782DE1779A130835B64D,
 				8135645508EEFDBDCDF2ADC6,
+				7FBD555B32197FEACDFF5AFB,
 				E0A3F113BC27B7B4D6F1D693,
 			);
 			name = Resources;
@@ -1110,6 +1122,7 @@
 			files = (
 				47ED2C78B05B8A6A00E36C46,
 				8E63755144E29269FD82C897,
+				1C9AA8660D0DE180064ACF7B,
 				75DB074DBAE04408A0A917B7,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

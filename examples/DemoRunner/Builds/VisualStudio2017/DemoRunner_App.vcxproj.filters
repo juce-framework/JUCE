@@ -1099,6 +1099,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\blocks\juce_Block.cpp">
       <Filter>JUCE Modules\juce_blocks_basics\blocks</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\blocks\juce_BlocksVersion.cpp">
+      <Filter>JUCE Modules\juce_blocks_basics\blocks</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\topology\internal\juce_BandwidthStatsLogger.cpp">
       <Filter>JUCE Modules\juce_blocks_basics\topology\internal</Filter>
     </ClCompile>
@@ -1106,6 +1109,9 @@
       <Filter>JUCE Modules\juce_blocks_basics\topology\internal</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\topology\internal\juce_ConnectedDeviceGroup.cpp">
+      <Filter>JUCE Modules\juce_blocks_basics\topology\internal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\topology\internal\juce_DepreciatedVersionReader.cpp">
       <Filter>JUCE Modules\juce_blocks_basics\topology\internal</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\topology\internal\juce_Detector.cpp">
@@ -1643,6 +1649,9 @@
       <Filter>JUCE Modules\juce_data_structures\values</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_data_structures\values\juce_ValueTreeSynchroniser.cpp">
+      <Filter>JUCE Modules\juce_data_structures\values</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_data_structures\values\juce_ValueWithDefault.cpp">
       <Filter>JUCE Modules\juce_data_structures\values</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_data_structures\juce_data_structures.cpp">
@@ -3583,6 +3592,9 @@
       <Filter>JUCE Modules\juce_blocks_basics\blocks</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\blocks\juce_BlockConfigManager.h">
+      <Filter>JUCE Modules\juce_blocks_basics\blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\blocks\juce_BlocksVersion.h">
       <Filter>JUCE Modules\juce_blocks_basics\blocks</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\blocks\juce_ControlButton.h">

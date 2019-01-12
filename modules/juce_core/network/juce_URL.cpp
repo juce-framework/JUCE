@@ -46,7 +46,7 @@ struct FallbackDownloadTask  : public URL::DownloadTask,
         startThread();
     }
 
-    ~FallbackDownloadTask()
+    ~FallbackDownloadTask() override
     {
         signalThreadShouldExit();
         stream->cancel();

@@ -200,9 +200,9 @@ private:
         // need to call setSampleRate() first!
         jassert (sr > 0.0);
 
-        attackRate  = (parameters.attack  > 0.0f ? static_cast<float> (1.0f / (parameters.attack * sr))  : -1.0f);
-        decayRate   = (parameters.decay   > 0.0f ? static_cast<float> (1.0f / (parameters.decay * sr))   : -1.0f);
-        releaseRate = (parameters.release > 0.0f ? static_cast<float> (1.0f / (parameters.release * sr)) : -1.0f);
+        attackRate  = (parameters.attack  > 0.0f ? static_cast<float> (1.0f                  / (parameters.attack * sr))  : -1.0f);
+        decayRate   = (parameters.decay   > 0.0f ? static_cast<float> ((1.0f - sustainLevel) / (parameters.decay * sr))   : -1.0f);
+        releaseRate = (parameters.release > 0.0f ? static_cast<float> (sustainLevel          / (parameters.release * sr)) : -1.0f);
     }
 
     //==============================================================================

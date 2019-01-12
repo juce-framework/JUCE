@@ -65,6 +65,10 @@
 			isa = PBXBuildFile;
 			fileRef = 8693552B5FA53C2003A66302;
 		};
+		3C0CA1E555411B8B5B8F8FF0 = {
+			isa = PBXBuildFile;
+			fileRef = C8D9488DE9A88E4FBF28D417;
+		};
 		07451DA87757F9EF80E31BE8 = {
 			isa = PBXBuildFile;
 			fileRef = 0564535EEA7E4462926EA0C9;
@@ -358,6 +362,13 @@
 			path = System/Library/Frameworks/AVFoundation.framework;
 			sourceTree = SDKROOT;
 		};
+		C8D9488DE9A88E4FBF28D417 = {
+			isa = PBXFileReference;
+			lastKnownFileType = file.storyboard;
+			name = LaunchScreen.storyboard;
+			path = LaunchScreen.storyboard;
+			sourceTree = "SOURCE_ROOT";
+		};
 		C8EE61FDD1F06817A014B881 = {
 			isa = PBXFileReference;
 			lastKnownFileType = file;
@@ -467,6 +478,7 @@
 			children = (
 				9516A19EE58DED8326DD0306,
 				8693552B5FA53C2003A66302,
+				C8D9488DE9A88E4FBF28D417,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -725,6 +737,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A783F6E198806332E7FB9744,
+				3C0CA1E555411B8B5B8F8FF0,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

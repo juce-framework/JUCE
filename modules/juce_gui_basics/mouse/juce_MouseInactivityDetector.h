@@ -52,7 +52,7 @@ public:
     MouseInactivityDetector (Component& target);
 
     /** Destructor. */
-    ~MouseInactivityDetector();
+    ~MouseInactivityDetector() override;
 
     /** Sets the time for which the mouse must be still before the callback
         is triggered.

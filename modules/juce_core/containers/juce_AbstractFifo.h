@@ -281,7 +281,7 @@ public:
         } // readHandle goes out of scope here, finishing the read operation
         @endcode
     */
-    ScopedRead read (int numToRead) noexcept      { return { *this, numToRead }; }
+    ScopedRead read (int numToRead) noexcept;
 
     /** Replaces prepareToWrite/finishedWrite with a single function.
         This function returns an object which contains the start indices and
@@ -303,7 +303,7 @@ public:
         } // writeHandle goes out of scope here, finishing the write operation
         @endcode
     */
-    ScopedWrite write (int numToWrite) noexcept    { return { *this, numToWrite }; }
+    ScopedWrite write (int numToWrite) noexcept;
 
 private:
     //==============================================================================

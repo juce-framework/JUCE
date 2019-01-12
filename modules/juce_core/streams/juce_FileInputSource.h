@@ -43,7 +43,7 @@ public:
     FileInputSource (const File& file, bool useFileTimeInHashGeneration = false);
 
     /** Destructor. */
-    ~FileInputSource();
+    ~FileInputSource() override;
 
     InputStream* createInputStream() override;
     InputStream* createInputStreamFor (const String& relatedItemPath) override;

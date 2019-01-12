@@ -90,7 +90,7 @@ public:
                            bool isEditable = true);
 
     /** Destructor. */
-    ~TextPropertyComponent();
+    ~TextPropertyComponent() override;
 
     //==============================================================================
     /** Called when the user edits the text.

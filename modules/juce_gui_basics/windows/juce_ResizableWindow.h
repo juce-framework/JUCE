@@ -79,7 +79,7 @@ public:
     /** Destructor.
         If a content component has been set with setContentOwned(), it will be deleted.
     */
-    ~ResizableWindow();
+    ~ResizableWindow() override;
 
     //==============================================================================
     /** Returns the colour currently being used for the window's background.

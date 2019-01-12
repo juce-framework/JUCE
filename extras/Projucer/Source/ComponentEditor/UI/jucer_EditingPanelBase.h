@@ -44,7 +44,7 @@ public:
                       Component* propsPanel,
                       Component* editorComp);
 
-    ~EditingPanelBase();
+    ~EditingPanelBase() override;
 
     //==============================================================================
     void resized() override;

@@ -48,7 +48,7 @@ public:
         owner.activityList.addListener (this);
     }
 
-    ~ComponentListComp()
+    ~ComponentListComp() override
     {
         saveOpenness();
         owner.activityList.removeListener (this);

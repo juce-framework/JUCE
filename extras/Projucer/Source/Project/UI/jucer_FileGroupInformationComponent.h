@@ -50,7 +50,7 @@ public:
         addAndMakeVisible (header);
     }
 
-    ~FileGroupInformationComponent()
+    ~FileGroupInformationComponent() override
     {
         item.state.removeListener (this);
     }

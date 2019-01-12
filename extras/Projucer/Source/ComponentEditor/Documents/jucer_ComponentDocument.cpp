@@ -112,7 +112,7 @@ public:
             addAndMakeVisible (layout->getComponent (i));
     }
 
-    ~NormalTestComponent()
+    ~NormalTestComponent() override
     {
         for (int i = getNumChildComponents(); --i >= 0;)
             removeChildComponent (i);

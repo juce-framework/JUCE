@@ -210,7 +210,7 @@ public:
         openedOk = true;
     }
 
-    ~ChildProcess()
+    ~ChildProcess() override
     {
         projectRoot.removeListener (this);
 
@@ -642,7 +642,7 @@ struct CompileEngineChildProcess::Editor  : private CodeDocument::Listener,
         document.addListener (this);
     }
 
-    ~Editor()
+    ~Editor() override
     {
         document.removeListener (this);
     }

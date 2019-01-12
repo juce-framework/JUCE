@@ -66,7 +66,7 @@ public:
                    Drawable* toggledOnImage);
 
     /** Destructor. */
-    ~ToolbarButton();
+    ~ToolbarButton() override;
 
 
     //==============================================================================

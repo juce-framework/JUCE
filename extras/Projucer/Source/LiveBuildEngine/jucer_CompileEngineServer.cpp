@@ -67,7 +67,7 @@ struct ZombiePatrol    : private Thread,
         startTimer (1000);
     }
 
-    ~ZombiePatrol()
+    ~ZombiePatrol() override
     {
         stopThread (1000);
     }
@@ -161,7 +161,7 @@ public:
         zombieKiller.reset (new ZombiePatrol (*this));
     }
 
-    ~ServerIPC()
+    ~ServerIPC() override
     {
         zombieKiller.reset();
 

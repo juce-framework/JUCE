@@ -76,7 +76,7 @@ public:
                  Component* associatedComponent = nullptr);
 
     /** Destroys the AlertWindow */
-    ~AlertWindow();
+    ~AlertWindow() override;
 
     //==============================================================================
     /** Returns the type of alert icon that was specified when the window

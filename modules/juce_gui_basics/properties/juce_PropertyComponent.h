@@ -64,7 +64,7 @@ public:
                        int preferredHeight = 25);
 
     /** Destructor. */
-    ~PropertyComponent();
+    ~PropertyComponent() override;
 
     //==============================================================================
     /** Returns this item's preferred height.

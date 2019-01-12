@@ -61,7 +61,7 @@ public:
     ScrollBar (bool isVertical);
 
     /** Destructor. */
-    ~ScrollBar();
+    ~ScrollBar() override;
 
     //==============================================================================
     /** Returns true if the scrollbar is vertical, false if it's horizontal. */

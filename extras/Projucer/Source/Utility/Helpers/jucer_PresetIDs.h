@@ -99,6 +99,7 @@ namespace Ids
     DECLARE_ID (libraryPath);
     DECLARE_ID (customXcodeFlags);
     DECLARE_ID (customXcassetsFolder);
+    DECLARE_ID (customLaunchStoryboard);
     DECLARE_ID (customXcodeResourceFolders);
     DECLARE_ID (plistPreprocessorDefinitions);
     DECLARE_ID (customPList);

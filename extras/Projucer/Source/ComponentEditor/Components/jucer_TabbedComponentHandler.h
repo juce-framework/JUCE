@@ -798,7 +798,7 @@ private:
             document.addChangeListener (this);
         }
 
-        ~TabColourProperty()
+        ~TabColourProperty() override
         {
             document.removeChangeListener (this);
         }

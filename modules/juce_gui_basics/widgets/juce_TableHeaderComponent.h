@@ -53,7 +53,7 @@ public:
     TableHeaderComponent();
 
     /** Destructor. */
-    ~TableHeaderComponent();
+    ~TableHeaderComponent() override;
 
     //==============================================================================
     /** A combination of these flags are passed into the addColumn() method to specify

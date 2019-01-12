@@ -63,7 +63,7 @@ public:
                    int triggeredEventType = 0);
 
     /** Destructor. */
-    ~ButtonTracker();
+    ~ButtonTracker() override;
 
 private:
     /** @internal */
