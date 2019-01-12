@@ -179,27 +179,6 @@ void GraphEditorPanel::SetPerformance(int performanceIndex)
 
     auto &zones = performer->Root.Performances.Performance[performanceIndex].Zone;
 
-    for (auto d = 0U; d < m_rackDevice.size(); d++)
-    {
-        auto rackDevice = ((RackRow*)m_rackDevice[d].get());
-        bool found = false;
-        for (auto i = 0U; i < zones.size(); ++i)
-        {
-            if (rackDevice->ID() == zones[i].DeviceID)
-            {
-                found = true;
-            }
-        }
-        if (!found)
-        {
-            Zone mutedZone;
-            memset(&mutedZone, 0, sizeof(Zone));
-            mutedZone.DeviceID = rackDevice->ID();
-            mutedZone.Mute = true;
-            zones.push_back(mutedZone);
-        }
-    }
-
     for (auto i = 0U; i < zones.size(); ++i)
     {
         for (auto d = 0U; d < m_rackDevice.size(); d++)

@@ -86,6 +86,8 @@ void Performer::Import(const char *fileToLoad)
     for (unsigned int mi = 0; mi<file.Rack.MixerScene.size(); ++mi)
     {
 		auto &mixer = file.Rack.MixerScene[mi];
+        if (mixer.Name == "SaveState" || mixer.Name == "Initial") // dont need these now
+            continue;
 
         string songName = mixer.Name;
         Replace(songName, "|", " ");
@@ -188,19 +190,44 @@ void Performer::ResolveIDs()
                 if (Root.Performances.Performance[i].ID == Root.Songs.Song[sg].Performance[p].ID)
                     Root.Songs.Song[sg].PerformancePtr.push_back(&Root.Performances.Performance[i]);
 
-    // Resolve devices in performances
     for (auto p = 0U; p < Root.Performances.Performance.size(); ++p)
-		for (auto z = 0U; z < Root.Performances.Performance[p].Zone.size(); ++z)
-		{
-			for (auto d = 0U; d < Root.Racks.Rack.size(); ++d)
-				if (Root.Performances.Performance[p].Zone[z].DeviceID == Root.Racks.Rack[d].ID)
+    {
+        // Add muted zones for other devices
+        for (auto d = 0U; d < Root.Racks.Rack.size(); ++d)
+        {
+            bool found = false;
+            for (auto z = 0U; z < Root.Performances.Performance[p].Zone.size(); ++z)
+                if (Root.Performances.Performance[p].Zone[z].DeviceID == Root.Racks.Rack[d].ID)
+                    found = true;
+
+            if (!found)
+            {
+                Zone mutedZone;
+                memset(&mutedZone, 0, sizeof(Zone));
+                mutedZone.DeviceID = Root.Racks.Rack[d].ID;
+                mutedZone.Mute = true;
+                Root.Performances.Performance[p].Zone.push_back(mutedZone);
+            }
+        }
+
+        // Resolve devices in performances
+        for (auto z = 0U; z < Root.Performances.Performance[p].Zone.size(); ++z)
+        {
+            for (auto d = 0U; d < Root.Racks.Rack.size(); ++d)
+                if (Root.Performances.Performance[p].Zone[z].DeviceID == Root.Racks.Rack[d].ID)
                     Root.Performances.Performance[p].Zone[z].Device = &Root.Racks.Rack[d];
-			if (Root.Performances.Performance[p].Zone[z].Device == NULL)
-			{
-				swap(Root.Performances.Performance[p].Zone[z], Root.Performances.Performance[p].Zone.back());
+            if (Root.Performances.Performance[p].Zone[z].Device == NULL)
+            {
+                swap(Root.Performances.Performance[p].Zone[z], Root.Performances.Performance[p].Zone.back());
                 Root.Performances.Performance[p].Zone.pop_back();
-				z--;
-			}
-		}
+                z--;
+            }
+        }
+
+
+
+
+    }
+
 
 }
