@@ -1,10 +1,4 @@
-Tidy
-
-Low/High keyboard entry
-
 Bring in router (changed to new classes)
-Implement volume
-
 
 Saving - Check muted zones dont save
 Import command hooked up
@@ -22,6 +16,7 @@ Setlist manager
 Mono switch
 Scoops/Falls for disco strings
 TruePianos crash
+Master volume
 
 
 MainHostWindow

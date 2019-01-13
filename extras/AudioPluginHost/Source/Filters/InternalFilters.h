@@ -28,7 +28,6 @@
 
 #include "FilterGraph.h"
 
-
 //==============================================================================
 /**
     Manages the internal plugin types.
@@ -41,7 +40,7 @@ public:
     ~InternalPluginFormat() {}
 
     //==============================================================================
-    PluginDescription audioInDesc, audioOutDesc, midiInDesc;
+    PluginDescription audioInDesc, audioOutDesc, midiInDesc, gainDesc;
 
     void getAllTypes (OwnedArray<PluginDescription>&);
 
@@ -55,6 +54,8 @@ public:
     String getNameOfPluginFromIdentifier (const String& fileOrIdentifier) override      { return fileOrIdentifier; }
     bool pluginNeedsRescanning (const PluginDescription&) override                      { return false; }
     StringArray searchPathsForPlugins (const FileSearchPath&, bool, bool) override      { return {}; }
+
+    static void SetGain(AudioProcessorGraph::Node *node, float gain);
 
 private:
     //==============================================================================

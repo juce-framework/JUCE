@@ -19,6 +19,7 @@
 
 //[Headers] You can add your own extra header files here...
 #include "../Performer.h"
+
 //[/Headers]
 
 #include "RackRow.h"
@@ -27,6 +28,7 @@
 //[MiscUserDefs] You can add your own user definitions and misc code here...
 #include "GraphEditorPanel.h"
 #include "../Filters/FilterGraph.h"
+#include "../Filters/InternalFilters.h"
 String FormatKey(int note);
 int ParseNote(const char *str);
 //[/MiscUserDefs]
@@ -126,7 +128,7 @@ RackRow::RackRow ()
     m_lowKey->setScrollbarsShown (false);
     m_lowKey->setCaretVisible (true);
     m_lowKey->setPopupMenuEnabled (true);
-    m_lowKey->setText (TRANS("C -2"));
+    m_lowKey->setText (String());
 
     m_lowKey->setBounds (712, 14, 32, 24);
 
@@ -138,7 +140,7 @@ RackRow::RackRow ()
     m_highKey->setScrollbarsShown (false);
     m_highKey->setCaretVisible (true);
     m_highKey->setPopupMenuEnabled (true);
-    m_highKey->setText (TRANS("G 8"));
+    m_highKey->setText (String());
 
     m_highKey->setBounds (768, 14, 32, 24);
 
@@ -185,6 +187,8 @@ RackRow::RackRow ()
     m_keyboard->setAvailableRange(21, 21+88-1);
     UpdateKeyboard();
     m_transpose->addListener(this);
+    m_lowKey->addListener(this);
+    m_highKey->addListener(this);
     //[/Constructor]
 }
 
@@ -294,10 +298,8 @@ void RackRow::sliderValueChanged (Slider* sliderThatWasMoved)
     if (sliderThatWasMoved == m_volume.get())
     {
         //[UserSliderCode_m_volume] -- add your slider handling code here..
-
         m_current->Volume = (float)sliderThatWasMoved->getValue();
-        // Change volume of plugin mixer here
-
+        InternalPluginFormat::SetGain((AudioProcessorGraph::Node *)m_current->Device->m_gainNode, m_current->Volume);
         //[/UserSliderCode_m_volume]
     }
 
@@ -315,7 +317,6 @@ void RackRow::comboBoxChanged (ComboBox* comboBoxThatHasChanged)
         //[UserComboBoxCode_m_bank] -- add your combo box handling code here..
         m_current->Bank = m_bank->getSelectedId() - 1;
 
-
         // send bank change here
         // update program dropdown
 
@@ -325,7 +326,6 @@ void RackRow::comboBoxChanged (ComboBox* comboBoxThatHasChanged)
     {
         //[UserComboBoxCode_m_program] -- add your combo box handling code here..
         m_current->Program = m_program->getSelectedId() - 1;
-
 
         // send program change here
 
@@ -354,9 +354,15 @@ void RackRow::mouseDrag (const MouseEvent& e)
             auto lowkey = ParseNote(m_lowKey->getTextValue().toString().getCharPointer());
             auto highkey = ParseNote(m_highKey->getTextValue().toString().getCharPointer());
             if (abs(key - lowkey) > abs(key - highkey))
+            {
                 m_highKey->setText(FormatKey(key));
+                m_current->HighKey = key;
+            }
             else
+            {
                 m_lowKey->setText(FormatKey(key));
+                m_current->LowKey = key;
+            }
             UpdateKeyboard();
         }
     }
@@ -383,10 +389,12 @@ void RackRow::textEditorTextChanged(TextEditor&te)
     else if (&te == m_lowKey.get())
     {
         m_current->LowKey = ParseNote(te.getText().getCharPointer());
+        UpdateKeyboard();
     }
     else if (&te == m_highKey.get())
     {
         m_current->HighKey = ParseNote(te.getText().getCharPointer());
+        UpdateKeyboard();
     }
 }
 
@@ -512,11 +520,10 @@ BEGIN_JUCER_METADATA
          focusDiscardsChanges="0" fontname="Default font" fontsize="15.00000000000000000000"
          kerning="0.00000000000000000000" bold="0" italic="0" justification="33"/>
   <TEXTEDITOR name="" id="3d470180923a3d6f" memberName="m_lowKey" virtualName=""
-              explicitFocusOrder="0" pos="712 14 32 24" initialText="C -2"
-              multiline="0" retKeyStartsLine="0" readonly="0" scrollbars="0"
-              caret="1" popupmenu="1"/>
+              explicitFocusOrder="0" pos="712 14 32 24" initialText="" multiline="0"
+              retKeyStartsLine="0" readonly="0" scrollbars="0" caret="1" popupmenu="1"/>
   <TEXTEDITOR name="" id="5f3abd7bbb50678c" memberName="m_highKey" virtualName=""
-              explicitFocusOrder="0" pos="768 14 32 24" initialText="G 8" multiline="0"
+              explicitFocusOrder="0" pos="768 14 32 24" initialText="" multiline="0"
               retKeyStartsLine="0" readonly="0" scrollbars="0" caret="1" popupmenu="1"/>
   <IMAGEBUTTON name="" id="31b2ae44720b5f47" memberName="m_deviceSettings" virtualName=""
                explicitFocusOrder="0" pos="8 14 76 57" buttonText="new button"

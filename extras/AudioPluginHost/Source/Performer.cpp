@@ -51,7 +51,7 @@ void Performer::Import(const char *fileToLoad)
 		Root.Racks.Rack.push_back(newDevice);
 		if (newDevice.Name == "Korg M1")
 		{
-			newDevice.ID++;
+			newDevice.ID+=2;
             Root.Racks.Rack.push_back(newDevice);
 		}
 	}
@@ -203,7 +203,8 @@ void Performer::ResolveIDs()
             if (!found)
             {
                 Zone mutedZone;
-                memset(&mutedZone, 0, sizeof(Zone));
+                XmlArchive ar(NULL);
+                mutedZone.Serialize(ar); // initialize to defaults
                 mutedZone.DeviceID = Root.Racks.Rack[d].ID;
                 mutedZone.Mute = true;
                 Root.Performances.Performance[p].Zone.push_back(mutedZone);

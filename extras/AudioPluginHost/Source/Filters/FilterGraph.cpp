@@ -217,16 +217,23 @@ Result FilterGraph::loadDocument (const File& file)
         {
             auto node = graph.addNode(instance, (NodeID)rack.ID);
 
+            auto gain = graph.addNode(formatManager.createPluginInstance(internalFormat.gainDesc, graph.getSampleRate(), graph.getBlockSize(), errorMessage));
+
             // State stuff for later
             //MemoryBlock m;
             //m.fromBase64Encoding(char*);
-            //node->getProcessor()->setStateInformation(m.getData(), (int)m.getSize());
+            //node->getProcessor()->setStateInformation(m.getData(), (int)m.getSize()); 
 
             rack.m_node = (void*)node.get();
+            rack.m_gainNode = (void*)gain.get();
 
-            graph.addConnection({ { m_midiInNode->nodeID, 4096 },{ (NodeID)rack.ID, 4096 } });
-            graph.addConnection({ { (NodeID)rack.ID, 0 },{ m_audioOutNode->nodeID, 0 } });
-            graph.addConnection({ { (NodeID)rack.ID, 1 },{ m_audioOutNode->nodeID, 1 } });
+            graph.addConnection({ { m_midiInNode->nodeID, 4096 },{ node->nodeID, 4096 } });
+
+            graph.addConnection({ { node->nodeID, 0 },{ gain->nodeID, 0 } });
+            graph.addConnection({ { node->nodeID, 1 },{ gain->nodeID, 1 } });
+
+            graph.addConnection({ { gain->nodeID, 0 },{ m_audioOutNode->nodeID, 0 } });
+            graph.addConnection({ { gain->nodeID, 1 },{ m_audioOutNode->nodeID, 1 } });
         }
     }
 
