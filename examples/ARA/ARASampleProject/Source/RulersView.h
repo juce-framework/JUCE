@@ -49,7 +49,7 @@ private:
     DocumentView& documentView;
     ARADocument* document;
     ARAMusicalContext* musicalContext;
-    AudioPlayHead::CurrentPositionInfo lastPosition;
+    AudioPlayHead::CurrentPositionInfo lastPaintedPosition;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RulersView)
 };

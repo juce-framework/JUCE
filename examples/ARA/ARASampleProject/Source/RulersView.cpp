@@ -12,7 +12,7 @@ RulersView::RulersView (DocumentView& documentView)
     document = documentView.getARADocumentController()->getDocument<ARADocument>();
     document->addListener (this);
     findMusicalContext();
-    lastPosition.resetToDefault();
+    lastPaintedPosition.resetToDefault();
     startTimerHz (10);
 }
 
@@ -70,12 +70,10 @@ void RulersView::findMusicalContext()
 void RulersView::timerCallback()
 {
     auto positionInfo = documentView.getPlayheadPositionInfo();
-    if (lastPosition.ppqLoopStart != positionInfo.ppqLoopStart || lastPosition.ppqLoopEnd != positionInfo.ppqLoopEnd     ||
-        lastPosition.isLooping  != positionInfo.isLooping)
+    if (lastPaintedPosition.ppqLoopStart != positionInfo.ppqLoopStart ||
+        lastPaintedPosition.ppqLoopEnd != positionInfo.ppqLoopEnd ||
+        lastPaintedPosition.isLooping  != positionInfo.isLooping)
     {
-        lastPosition.ppqLoopStart = positionInfo.ppqLoopStart;
-        lastPosition.ppqLoopEnd = positionInfo.ppqLoopEnd;
-        lastPosition.isLooping = positionInfo.isLooping;
         repaint();
     }
 }
@@ -192,13 +190,14 @@ void RulersView::paint (juce::Graphics& g)
 
     // locators
     {
-        const auto startInSeconds = tempoConverter.getTimeForQuarter (lastPosition.ppqLoopStart);
-        const auto endInSeconds = tempoConverter.getTimeForQuarter (lastPosition.ppqLoopEnd);
-        g.setColour (lastPosition.isLooping ? Colours::skyblue.withAlpha (0.3f) : Colours::white.withAlpha(0.3f));
-        g.fillRect (documentView.getPlaybackRegionsViewsXForTime (startInSeconds), 0,
-                    documentView.getPlaybackRegionsViewsXForTime (endInSeconds) -
-                    documentView.getPlaybackRegionsViewsXForTime (startInSeconds),
-                    bounds.getHeight());
+        lastPaintedPosition = documentView.getPlayheadPositionInfo();
+
+        const auto startInSeconds = tempoConverter.getTimeForQuarter (lastPaintedPosition.ppqLoopStart);
+        const auto endInSeconds = tempoConverter.getTimeForQuarter (lastPaintedPosition.ppqLoopEnd);
+        const int startX = documentView.getPlaybackRegionsViewsXForTime (startInSeconds);
+        const int endX = documentView.getPlaybackRegionsViewsXForTime (endInSeconds);
+        g.setColour (lastPaintedPosition.isLooping ? Colours::skyblue.withAlpha (0.3f) : Colours::white.withAlpha (0.3f));
+        g.fillRect (startX, bounds.getY(), endX - startX, bounds.getHeight());
     }
 
     // borders
